@@ -1,0 +1,14 @@
+{
+    "eqeqeq": true,
+    "browser": true,
+    "asi": true,
+    "multistr": true,
+    "undef": true,
+    "unused": true,
+    "trailing": true,
+    "sub": true,
+    "node": true,
+    "globals": {
+        "console": true
+    }
+}

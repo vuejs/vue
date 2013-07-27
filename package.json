@@ -1,0 +1,12 @@
+{
+  "name": "element",
+  "version": "0.0.1",
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-watch": "~0.4.4",
+    "grunt-component-build": "~0.3.0",
+    "grunt-contrib-jshint": "~0.6.0",
+    "grunt-mocha": "~0.4.0",
+    "chai": "~1.7.2"
+  }
+}
