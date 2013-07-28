@@ -1,7 +1,7 @@
-var Element = require('element')
+var Seed = require('seed')
 
-describe('Element', function () {
+describe('Seed', function () {
     it('should have a variable', function () {
-        assert.equal(Element, 123)
+        assert.equal(Seed, 123)
     })
 })

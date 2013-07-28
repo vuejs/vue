@@ -5,7 +5,7 @@ module.exports = function( grunt ) {
         component_build: {
             build: {
                 output: './dist/',
-                name: 'element',
+                name: 'seed',
                 styles: false,
                 scripts: true,
                 verbose: true
