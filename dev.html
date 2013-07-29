@@ -7,10 +7,12 @@
 	</head>
 	<body>
 		<div id="test" sd-on-click="changeMessage | .button">
-            <p sd-text="msg | capitalize"></p>
-            <p sd-show="something">YOYOYO</p>
-            <p class="button" sd-text="msg"></p>
+            <p sd-text="msg.wow | capitalize" sd-on-click="remove"></p>
+            <p sd-text="msg.wow" class="button"></p>
             <p sd-class-red="error" sd-text="hello"></p>
+            <div sd-repeat="todos">
+            	<span sd-text="text"></span>
+            </div>
         </div>
 		<script>
 			var Seed = require('seed')
@@ -18,10 +20,13 @@
 			    id: 'test',
 			    // template
 			    scope: {
-			        msg: 'hello',
-			        hello: 'WHWHWHW',
+			        'msg.wow': 'wow',
+			        hello: 'hello',
 			        changeMessage: function () {
-			            app.scope.msg = 'hola'
+			            app.scope['msg.wow'] = 'hola'
+			        },
+			        remove: function () {
+			            app.destroy()
 			        }
 			    }
 			})
