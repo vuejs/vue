@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>title</title>
+		<meta charset="utf-8">
+		<script src="dist/seed.js"></script>
+	</head>
+	<body>
+		<div id="test" sd-on-click="changeMessage | .button">
+            <p sd-text="msg | capitalize"></p>
+            <p sd-show="something">YOYOYO</p>
+            <p class="button" sd-text="msg"></p>
+            <p sd-class-red="error" sd-text="hello"></p>
+        </div>
+		<script>
+			var Seed = require('seed')
+			var app = Seed.create({
+			    id: 'test',
+			    // template
+			    scope: {
+			        msg: 'hello',
+			        hello: 'WHWHWHW',
+			        changeMessage: function () {
+			            app.scope.msg = 'hola'
+			        }
+			    }
+			})
+		</script>
+	</body>
+</html>

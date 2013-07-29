@@ -1,11 +1,13 @@
 {
-	"name": "seed",
-	"version": "0.0.1",
-	"dependencies": {
-		"component/emitter": "*"
-	},
-	"main": "src/main.js",
-	"scripts": [
-		"src/main.js"
-	]
+  "name": "seed",
+  "version": "0.0.1",
+  "dependencies": {
+    "component/emitter": "*"
+  },
+  "main": "src/main.js",
+  "scripts": [
+    "src/main.js",
+    "src/directives.js",
+    "src/filters.js"
+  ]
 }
