@@ -1,6 +1,6 @@
 - repeat directive by watching an array
 - make Seeds compositable
 - parse textNodes
-- formatter arguments
+- [OK] formatter arguments
 - Seed.extend()
 - options to pass in templates to Seed.create()
