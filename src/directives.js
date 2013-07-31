@@ -1,3 +1,6 @@
+var config     = require('./config'),
+    watchArray = require('./watchArray')
+
 module.exports = {
 
     text: function (value) {
@@ -38,10 +41,14 @@ module.exports = {
 
     each: {
         update: function (collection) {
-            augmentArray(collection, this)
+            watchArray(collection, this.mutate.bind(this))
+            // for each in array
+            //   - create a Seed element using the el's outerHTML and raw data object
+            //   - replace the raw object with new Seed's scope object
         },
         mutate: function (mutation) {
             console.log(mutation)
+            console.log(this)
         }
     }
 

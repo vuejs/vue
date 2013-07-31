@@ -7,8 +7,11 @@
   "main": "src/main.js",
   "scripts": [
     "src/main.js",
+    "src/config.js",
+    "src/seed.js",
     "src/directive.js",
     "src/directives.js",
-    "src/filters.js"
+    "src/filters.js",
+    "src/watchArray.js"
   ]
 }
