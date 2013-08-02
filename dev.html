@@ -8,6 +8,9 @@
 			.red {
 				color: red;
 			}
+            .todo.done {
+                text-decoration: line-through;
+            }
 		</style>
 	</head>
 	<body>
@@ -17,41 +20,50 @@
             <p sd-text="total | money"></p>
             <p sd-class-red="error" sd-text="hello"></p>
             <ul sd-show="todos">
-            	<li sd-each-todo="todos" sd-text="todo.text"></li>
+            	<li sd-each-todo="todos">
+                    <span class="todo" sd-text="todo.title" sd-class-done="todo.done"></span>   
+                </li>
             </ul>
         </div>
 		<script>
+
 			var Seed = require('seed')
 
 			Seed.filter('money', function (value) {
 			    return '$' + value.toFixed(2)
 			})
 
-			// define a seed
-			var Todos = Seed.extend({
-		        changeMessage: function () {
-		            this.scope['msg.wow'] = 'hola'
-		        },
-		        remove: function () {
-		            this.destroy()
-		        }
-		    })
+            var list = [
+                {
+                    title: 'make this shit kinda work',
+                    done: true
+                },
+                {
+                    title: 'make this shit work',
+                    done: false
+                },
+                {
+                    title: 'more features!!!',
+                    done: false
+                }
+            ]
 
-			var todos = new Todos('#test', {
-                total     : 1000,
+            var s = Date.now()
+
+			var todos = new Seed('#test', {
+                total     : Math.random() * 100000,
                 'msg.wow' : 'wow',
                 hello     : 'hello',
-                todos     : [
-                    {
-                        title: 'make this shit work',
-                        done: false
-                    },
-                    {
-                        title: 'make this shit kinda work',
-                        done: true
-                    }
-                ]
+                todos     : list,
+                changeMessage: function () {
+                    this.scope['msg.wow'] = 'hola'
+                },
+                remove: function () {
+                    this.destroy()
+                }
             })
+
+            console.log(Date.now() - s + 'ms')
 
 		</script>
 	</body>

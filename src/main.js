@@ -3,14 +3,7 @@ var config     = require('./config'),
     directives = require('./directives'),
     filters    = require('./filters')
 
-function buildSelector () {
-    config.selector = Object.keys(directives).map(function (directive) {
-        return '[' + config.prefix + '-' + directive + ']'
-    }).join()
-}
-
 Seed.config = config
-buildSelector()
 
 Seed.extend = function (opts) {
     var Spore = function () {
@@ -32,7 +25,6 @@ Seed.extend = function (opts) {
 
 Seed.directive = function (name, fn) {
     directives[name] = fn
-    buildSelector()
 }
 
 Seed.filter = function (name, fn) {

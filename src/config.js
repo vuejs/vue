@@ -1,4 +1,3 @@
 module.exports = {
-    prefix: 'sd',
-    selector: null
+    prefix: 'sd'
 }

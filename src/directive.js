@@ -2,8 +2,10 @@ var config     = require('./config'),
     Directives = require('./directives'),
     Filters    = require('./filters')
 
-var KEY_RE = /^[^\|]+/,
-    FILTERS_RE = /\|[^\|]+/g
+var KEY_RE          = /^[^\|]+/,
+    FILTERS_RE      = /\|[^\|]+/g,
+    FILTER_TOKEN_RE = /[^\s']+|'[^']+'/g,
+    QUOTE_RE        = /'/g
 
 function Directive (def, attr, arg, key) {
 
@@ -26,12 +28,17 @@ function Directive (def, attr, arg, key) {
     var filters = attr.value.match(FILTERS_RE)
     if (filters) {
         this.filters = filters.map(function (filter) {
-            // TODO test performance against regex
-            var tokens = filter.replace('|', '').trim().split(/\s+/)
+            var tokens = filter.slice(1)
+                .match(FILTER_TOKEN_RE)
+                .map(function (token) {
+                    return token.replace(QUOTE_RE, '').trim()
+                })
             return {
-                name: tokens[0],
-                apply: Filters[tokens[0]],
-                args: tokens.length > 1 ? tokens.slice(1) : null
+                name  : tokens[0],
+                apply : Filters[tokens[0]],
+                args  : tokens.length > 1
+                        ? tokens.slice(1)
+                        : null
             }
         })
     }

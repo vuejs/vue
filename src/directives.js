@@ -26,6 +26,7 @@ module.exports = {
                 this.el.removeEventListener(event, handlers[event])
             }
             if (handler) {
+                handler = handler.bind(this.seed)
                 this.el.addEventListener(event, handler)
                 handlers[event] = handler
             }
@@ -39,30 +40,41 @@ module.exports = {
     },
 
     each: {
+        bind: function () {
+            this.el['sd-block'] = true
+            this.prefixRE = new RegExp('^' + this.arg + '.')
+            var ctn = this.container = this.el.parentNode
+            this.marker = document.createComment('sd-each-' + this.arg + '-marker')
+            ctn.insertBefore(this.marker, this.el)
+            ctn.removeChild(this.el)
+            this.childSeeds = []
+        },
         update: function (collection) {
+            if (this.childSeeds.length) {
+                this.childSeeds.forEach(function (child) {
+                    child.destroy()
+                })
+                this.childSeeds = []
+            }
             watchArray(collection, this.mutate.bind(this))
-            // for each in array
-            //   - create a Seed element using the el's outerHTML and raw data object
-            //   - replace the raw object with new Seed's scope object
+            var self = this
+            collection.forEach(function (item, i) {
+                self.childSeeds.push(self.buildItem(item, i, collection))
+            })
         },
         mutate: function (mutation) {
             console.log(mutation)
-            console.log(this)
+        },
+        buildItem: function (data, index, collection) {
+            var node = this.el.cloneNode(true),
+                spore = new Seed(node, data, {
+                    eachPrefixRE: this.prefixRE,
+                    parentScope: this.seed.scope
+                })
+            this.container.insertBefore(node, this.marker)
+            collection[index] = spore.scope
+            return spore
         }
     }
 
-}
-
-var push = [].push,
-    slice = [].slice
-
-function augmentArray (collection, directive) {
-    collection.push = function (element) {
-        push.call(this, arguments)
-        directive.mutate({
-            event: 'push',
-            elements: slice.call(arguments),
-            collection: collection
-        })
-    }
 }

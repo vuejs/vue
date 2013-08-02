@@ -9,12 +9,12 @@ module.exports = {
         return value.toUpperCase()
     },
 
-    delegate: function (handler, selectors) {
+    delegate: function (handler, args) {
+        var selector = args[0]
         return function (e) {
-            var match = selectors.every(function (selector) {
-                return e.target.webkitMatchesSelector(selector)
-            })
-            if (match) handler.apply(this, arguments)
+            if (e.target.webkitMatchesSelector(selector)) {
+                handler.apply(this, arguments)
+            }
         }
     }
 
