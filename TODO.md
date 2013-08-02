@@ -1,4 +1,5 @@
-- ? separate scope data and prototype methods // think about this
-- repeat directive by watching an array
+- fix event delegation
+- improve arrayWatcher
 - make Seeds compositable
 - parse textNodes
+- computed properties

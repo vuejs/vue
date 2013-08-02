@@ -14,15 +14,20 @@
 		</style>
 	</head>
 	<body>
-		<div id="test" sd-on-click="changeMessage | delegate .button">
-            <p sd-text="msg.wow | capitalize" sd-on-click="remove"></p>
-            <p sd-text="msg.wow | uppercase" class="button"></p>
+		<div id="app" sd-controller="TodoList">
+            <p sd-text="msg | capitalize" sd-on="click:changeMessage"></p>
+            <p sd-text="msg | uppercase"></p>
+            <p sd-on="click:remove">bye</p>
             <p sd-text="total | money"></p>
-            <p sd-class-red="error" sd-text="hello"></p>
+            <p sd-class="red:error" sd-show="error">Error</p>
             <ul sd-show="todos">
-            	<li sd-each-todo="todos">
-                    <span class="todo" sd-text="todo.title" sd-class-done="todo.done"></span>   
-                </li>
+            	<li class="todo"
+                    sd-controller="Todo"
+                    sd-each="todo:todos"
+                    sd-class="done:todo.done"
+                    sd-on="click:todo.toggle"
+                    sd-text="todo.title"
+                ></li>
             </ul>
         </div>
 		<script>
@@ -30,36 +35,48 @@
 			var Seed = require('seed')
 
 			Seed.filter('money', function (value) {
-			    return '$' + value.toFixed(2)
+			    return value
+                    ? '$' + value.toFixed(2)
+                    : ''
 			})
 
-            var list = [
-                {
-                    title: 'make this shit kinda work',
-                    done: true
-                },
-                {
-                    title: 'make this shit work',
-                    done: false
-                },
-                {
-                    title: 'more features!!!',
-                    done: false
-                }
-            ]
-
-            var s = Date.now()
-
-			var todos = new Seed('#test', {
-                total     : Math.random() * 100000,
-                'msg.wow' : 'wow',
-                hello     : 'hello',
-                todos     : list,
+            Seed.controller('TodoList', {
                 changeMessage: function () {
-                    this.scope['msg.wow'] = 'hola'
+                    this.scope.msg = 'It works!'
                 },
                 remove: function () {
                     this.destroy()
+                }
+            })
+
+            Seed.controller('Todo', {
+                toggle: function () {
+                    this.scope.done = !scope.done
+                }
+            })
+
+            var s = Date.now()
+
+			var app = Seed.bootstrap({
+                el: '#app',
+                data: {
+                    msg: 'hello!',
+                    total: 9999,
+                    error: true,
+                    todos: [
+                        {
+                            title: 'hello!',
+                            done: true
+                        },
+                        {
+                            title: 'hello!!',
+                            done: false
+                        },
+                        {
+                            title: 'hello!!!',
+                            done: false
+                        }
+                    ]
                 }
             })
 

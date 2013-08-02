@@ -1,8 +1,8 @@
-var config      = require('./config'),
-    Directive   = require('./directive')
+var config = require('./config'),
+    bindingParser = require('./binding')
 
-var map  = Array.prototype.map,
-    each = Array.prototype.forEach
+var map    = Array.prototype.map,
+    each   = Array.prototype.forEach
 
 function Seed (el, data, options) {
 
@@ -11,22 +11,28 @@ function Seed (el, data, options) {
     }
 
     this.el         = el
-    this.scope      = {}
+    this.scope      = data
     this._bindings  = {}
     this._options   = options || {}
+
+    var key, dataCopy = {}
+    for (key in data) {
+        dataCopy[key] = data[key]
+    }
 
     // process nodes for directives
     this._compileNode(el)
 
     // initialize all variables by invoking setters
-    for (var key in this._bindings) {
-        this.scope[key] = data[key]
+    for (key in this._bindings) {
+        this.scope[key] = dataCopy[key]
     }
 
 }
 
 Seed.prototype._compileNode = function (node) {
-    var self = this
+    var self = this,
+        ctrl = config.prefix + '-controller'
 
     if (node.nodeType === 3) {
         // text node
@@ -36,14 +42,17 @@ Seed.prototype._compileNode = function (node) {
         var attrs = map.call(node.attributes, function (attr) {
             return {
                 name: attr.name,
-                value: attr.value
+                expressions: attr.value.split(',')
             }
         })
         attrs.forEach(function (attr) {
-            var directive = Directive.parse(attr)
-            if (directive) {
-                self._bind(node, directive)
-            }
+            if (attr.name === ctrl) return
+            attr.expressions.forEach(function (exp) {
+                var binding = bindingParser.parse(attr.name, exp)
+                if (binding) {
+                    self._bind(node, binding)
+                }
+            })
         })
     }
 
@@ -55,52 +64,56 @@ Seed.prototype._compileNode = function (node) {
 }
 
 Seed.prototype._compileTextNode = function (node) {
-    
+    return node
 }
 
-Seed.prototype._bind = function (node, directive) {
+Seed.prototype._bind = function (node, bindingInstance) {
 
-    directive.seed = this
-    directive.el = node
+    bindingInstance.seed = this
+    bindingInstance.el = node
 
-    node.removeAttribute(directive.attr.name)
+    node.removeAttribute(config.prefix + '-' + bindingInstance.directiveName)
 
-    var key = directive.key,
-        epr = this._options.eachPrefixRE
-    if (epr) {
+    var key = bindingInstance.key,
+        scope = this.scope,
+        epr = this._options.eachPrefixRE,
+        isEach = epr && epr.test(key)
+    // TODO make scope chain work on nested controllers
+    if (isEach) {
         key = key.replace(epr, '')
+        scope = this._options.parentScope
     }
 
-    var binding  = this._bindings[key] || this._createBinding(key)
+    var binding  = this._bindings[key] || this._createBinding(key, scope)
 
     // add directive to this binding
-    binding.directives.push(directive)
+    binding.instances.push(bindingInstance)
 
     // invoke bind hook if exists
-    if (directive.bind) {
-        directive.bind.call(directive, binding.value)
+    if (bindingInstance.bind) {
+        bindingInstance.bind(binding.value)
     }
 
 }
 
-Seed.prototype._createBinding = function (key) {
+Seed.prototype._createBinding = function (key, scope) {
 
     var binding = {
-        value: undefined,
-        directives: []
+        value: null,
+        instances: []
     }
 
     this._bindings[key] = binding
 
     // bind accessor triggers to scope
-    Object.defineProperty(this.scope, key, {
+    Object.defineProperty(scope, key, {
         get: function () {
             return binding.value
         },
         set: function (value) {
             binding.value = value
-            binding.directives.forEach(function (directive) {
-                directive.update(value)
+            binding.instances.forEach(function (instance) {
+                instance.update(value)
             })
         }
     })
@@ -118,13 +131,13 @@ Seed.prototype.dump = function () {
 
 Seed.prototype.destroy = function () {
     for (var key in this._bindings) {
-        this._bindings[key].directives.forEach(unbind)
-        delete this._bindings[key]
+        this._bindings[key].instances.forEach(unbind)
+        ;delete this._bindings[key]
     }
     this.el.parentNode.removeChild(this.el)
-    function unbind (directive) {
-        if (directive.unbind) {
-            directive.unbind()
+    function unbind (instance) {
+        if (instance.unbind) {
+            instance.unbind()
         }
     }
 }
