@@ -22,7 +22,6 @@ function Binding (directiveName, expression) {
             }
         }
     }
-    this.directiveName = directiveName
 
     var rawKey   = expression.match(KEY_RE)[0], // guarded in parse
         argMatch = rawKey.match(ARG_RE)

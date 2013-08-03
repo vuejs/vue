@@ -1,4 +1,3 @@
-- fix event delegation
 - improve arrayWatcher
 - make Seeds compositable
 - parse textNodes
