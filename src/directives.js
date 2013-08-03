@@ -56,7 +56,6 @@ module.exports = {
             collection.forEach(function (item, i) {
                 self.childSeeds.push(self.buildItem(item, i, collection))
             })
-            console.log('collection creation done.')
         },
         mutate: function (mutation) {
             console.log(mutation)

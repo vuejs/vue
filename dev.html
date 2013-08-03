@@ -26,7 +26,7 @@
                     sd-controller="Todo"
                     sd-each="todo:todos"
                     sd-class="done:todo.done"
-                    sd-on="click:changeMessage, click:todo.toggle"
+                    sd-on="click:todo.toggle"
                     sd-text="todo.title"
                 ></li>
             </ul>
@@ -42,7 +42,9 @@
 			})
 
             Seed.controller('TodoList', function (scope, seed) {
-                console.log('controller invoked')
+                seed.on('toggle', function (todo) {
+                    console.log(todo)
+                })
                 scope.changeMessage = function () {
                     scope.msg = (Math.random() * 100).toFixed(2) + '% awesomeness'
                 }
@@ -51,9 +53,10 @@
                 }
             })
 
-            Seed.controller('Todo', function (scope) {
+            Seed.controller('Todo', function (scope, seed) {
                 scope.toggle = function () {
                     scope.done = !scope.done
+                    seed.parentSeed.emit('toggle', seed)
                 }
             })
 

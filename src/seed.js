@@ -1,4 +1,5 @@
-var config        = require('./config'),
+var Emitter       = require('emitter'),
+    config        = require('./config'),
     controllers   = require('./controllers'),
     bindingParser = require('./binding')
 
@@ -22,7 +23,11 @@ function Seed (el, data, options) {
     this.el         = el
     this.scope      = data
     this._bindings  = {}
-    this._options   = options || {}
+
+    if (options) {
+        this.parentSeed = options.parentSeed
+        this.scopeNameRE = options.eachPrefixRE
+    }
 
     var key
     // keep a temporary copy for all the real data
@@ -58,6 +63,8 @@ function Seed (el, data, options) {
         controller.call(null, this.scope, this)
     }
 }
+
+Emitter(Seed.prototype)
 
 Seed.prototype._compileNode = function (node, root) {
     var self = this
@@ -127,14 +134,14 @@ Seed.prototype._bind = function (node, bindingInstance) {
     bindingInstance.el = node
 
     var key = bindingInstance.key,
-        epr = this._options.eachPrefixRE,
-        isEachKey = epr && epr.test(key),
+        snr = this.scopeNameRE,
+        isEachKey = snr && snr.test(key),
         scopeOwner = this
     // TODO make scope chain work on nested controllers
     if (isEachKey) {
-        key = key.replace(epr, '')
-    } else if (epr) {
-        scopeOwner = this._options.parentSeed
+        key = key.replace(snr, '')
+    } else if (snr) {
+        scopeOwner = this.parentSeed
     }
 
     var binding = scopeOwner._bindings[key] || scopeOwner._createBinding(key)
