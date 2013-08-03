@@ -1,3 +1,1 @@
-module.exports = {
-    prefix: 'sd'
-}
+module.exports = {}
