@@ -5,23 +5,6 @@ var config      = require('./config'),
     controllers = require('./controllers')
 
 Seed.config = config
-var prefix  = 'sd'
-Object.defineProperty(config, 'prefix', {
-    get: function () {
-        return prefix
-    },
-    set: function (value) {
-        prefix = value
-        updateSelector()
-    }
-})
-
-updateSelector()
-function updateSelector () {
-    config.selector = Object.keys(directives).map(function (key) {
-        return '[' + prefix + '-' + key + ']'
-    }).join()
-}
 
 // API
 
@@ -68,7 +51,6 @@ Seed.bootstrap = function (seeds) {
 
 Seed.directive = function (name, fn) {
     directives[name] = fn
-    updateSelector()
 }
 
 Seed.filter = function (name, fn) {

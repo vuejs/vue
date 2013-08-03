@@ -24,9 +24,13 @@ function Seed (el, data, options) {
     this._bindings  = {}
     this._options   = options || {}
 
-    var key, dataCopy = {}
+    var key
+    // keep a temporary copy for all the real data
+    // so we can overwrite the passed in data object
+    // with getter/setters.
+    this._dataCopy = {}
     for (key in data) {
-        dataCopy[key] = data[key]
+        this._dataCopy[key] = data[key]
     }
 
     // if has controller
@@ -44,34 +48,49 @@ function Seed (el, data, options) {
     this._compileNode(el, true)
 
     // initialize all variables by invoking setters
-    for (key in dataCopy) {
-        this.scope[key] = dataCopy[key]
+    for (key in this._dataCopy) {
+        this.scope[key] = this._dataCopy[key]
     }
+    delete this._dataCopy
 
     // copy in methods from controller
     if (controller) {
         controller.call(null, this.scope, this)
     }
-
 }
 
 Seed.prototype._compileNode = function (node, root) {
     var self = this
 
-    if (node.nodeType === 3) {
-        // text node
+    if (node.nodeType === 3) { // text node
+
         self._compileTextNode(node)
+
     } else if (node.attributes && node.attributes.length) {
+
         var eachExp = node.getAttribute(eachAttr),
             ctrlExp = node.getAttribute(ctrlAttr)
-        if (eachExp) {
-            // each block
+
+        if (eachExp) { // each block
+
             var binding = bindingParser.parse(eachAttr, eachExp)
             if (binding) {
                 self._bind(node, binding)
+                // need to set each block now so it can inherit
+                // parent scope. i.e. the childSeeds must have been
+                // initiated when parent scope setters are invoked
+                self.scope[binding.key] = self._dataCopy[binding.key]
+                delete self._dataCopy[binding.key]
             }
-        } else if (!ctrlExp || root) { // skip nested controllers
-            // normal node
+
+        } else if (!ctrlExp || root) { // normal node (non-controller)
+
+            if (node.childNodes.length) {
+                each.call(node.childNodes, function (child) {
+                    self._compileNode(child)
+                })
+            }
+
             // clone attributes because the list can change
             var attrs = map.call(node.attributes, function (attr) {
                 return {
@@ -90,14 +109,8 @@ Seed.prototype._compileNode = function (node, root) {
                 })
                 if (valid) node.removeAttribute(attr.name)
             })
-            if (node.childNodes.length) {
-                each.call(node.childNodes, function (child) {
-                    self._compileNode(child)
-                })
-            }
         }
     }
-
 }
 
 Seed.prototype._compileTextNode = function (node) {
