@@ -83,7 +83,11 @@ Seed.prototype._compileNode = function (node, root) {
                 delete self._dataCopy[binding.key]
             }
 
-        } else if (!ctrlExp || root) { // normal node (non-controller)
+        } else if (ctrlExp && !root) { // nested controllers
+
+            // TODO need to be clever here!
+
+        } else { // normal node (non-controller)
 
             if (node.childNodes.length) {
                 each.call(node.childNodes, function (child) {

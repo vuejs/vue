@@ -1,4 +1,4 @@
+- nested controllers - but how to inherit scope?
 - improve arrayWatcher
-- make Seeds compositable
 - parse textNodes
 - computed properties
