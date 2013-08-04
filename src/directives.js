@@ -13,7 +13,13 @@ module.exports = {
     },
 
     class: function (value) {
-        this.el.classList[value ? 'add' : 'remove'](this.arg)
+        if (this.arg) {
+            this.el.classList[value ? 'add' : 'remove'](this.arg)
+        } else {
+            this.el.classList.remove(this.lastVal)
+            this.el.classList.add(value)
+            this.lastVal = value
+        }
     },
 
     checked: {

@@ -29,7 +29,7 @@
 		</style>
 	</head>
 	<body>
-		<div id="app" class="all" sd-controller="TodoList">
+		<div id="app" sd-class="filter" sd-controller="TodoList">
             <div>
                 <input placeholder="What needs to be done?" sd-on="change:addTodo">
             </div>
@@ -42,9 +42,9 @@
             </ul>
             <div id="footer">
                 Remaining: <span sd-text="remaining"></span><br>
-                <a class="all" sd-on="click:filter">Show All</a> |
-                <a class="remaining" sd-on="click:filter">Show Remaining</a> |
-                <a class="completed" sd-on="click:filter">Show Completed</a>
+                <a class="all" sd-on="click:setFilter">Show All</a> |
+                <a class="remaining" sd-on="click:setFilter">Show Remaining</a> |
+                <a class="completed" sd-on="click:setFilter">Show Completed</a>
             </div>
         </div>
 		<script>
@@ -68,8 +68,9 @@
 
 			var Seed = require('seed')
 
-            Seed.plant('TodoList', function (scope, seed) {
+            Seed.controller('TodoList', function (scope, seed) {
 
+                scope.filter = 'all'
                 scope.remaining = scope.todos.reduce(function (count, todo) {
                     return count + (todo.done ? 0 : 1)
                 }, 0)
@@ -95,20 +96,15 @@
                     scope.remaining += e.seed.scope.done ? -1 : 1
                 }
 
-                scope.filter = function (e) {
-                    var filter = e.el.className
-                    seed.el.className = filter
+                scope.setFilter = function (e) {
+                    scope.filter = e.el.className
                 }
             })
 
-            var now = Date.now()
-
-			var app = Seed.sprout({
+			var app = Seed.bootstrap({
                 el: '#app',
                 data: data
             })
-
-            console.log(Date.now() - now)
 
 		</script>
 	</body>
