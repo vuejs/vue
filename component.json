@@ -9,11 +9,11 @@
     "src/main.js",
     "src/config.js",
     "src/seed.js",
-    "src/binding.js",
-    "src/textNodeParser.js",
+    "src/directive-parser.js",
+    "src/textnode-parser.js",
     "src/directives.js",
     "src/filters.js",
     "src/controllers.js",
-    "src/watchArray.js"
+    "src/watch-array.js"
   ]
 }

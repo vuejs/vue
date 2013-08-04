@@ -58,7 +58,7 @@ Seed.filter = function (name, fn) {
 }
 
 // alias for an alternative API
-Seed.evolve = Seed.controller
-Seed.plant  = Seed.bootstrap
+Seed.plant  = Seed.controller
+Seed.sprout = Seed.bootstrap
 
 module.exports = Seed

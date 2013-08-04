@@ -8,86 +8,107 @@
 			.red {
 				color: red;
 			}
-            .todo.done {
+            .done {
                 text-decoration: line-through;
+            }
+            #app.all .all {
+                font-weight: bold;
+            }
+            #app.remaining .todo.done {
+                display: none;
+            }
+            #app.remaining .remaining {
+                font-weight: bold;
+            }
+            #app.completed .todo:not(.done) {
+                display: none;
+            }
+            #app.completed .completed {
+                font-weight: bold;
             }
 		</style>
 	</head>
 	<body>
-		<div id="app" sd-controller="TodoList" sd-on="click:changeMessage | delegate .button">
-            <p sd-text="msg | capitalize"></p>
-            <p sd-text="msg | uppercase"></p>
-            <p sd-on="click:remove">bye</p>
-            <p sd-text="total | money"></p>
-            <p class="button">Change Message</p>
-            <p sd-class="red:error" sd-show="error">Error</p>
+		<div id="app" class="all" sd-controller="TodoList">
+            <div>
+                <input placeholder="What needs to be done?" sd-on="change:addTodo">
+            </div>
             <ul sd-show="todos">
-            	<li class="todo"
-                    sd-controller="Todo"
-                    sd-each="todo:todos"
-                    sd-class="done:todo.done"
-                    sd-on="click:todo.toggle"
-                    sd-text="todo.title"
-                ></li>
+            	<li class="todo" sd-each="todo:todos" sd-class="done:todo.done">
+                    <input type="checkbox" sd-checked="todo.done" sd-on="change:toggleTodo">
+                    <span sd-text="todo.text"></span>
+                    <a sd-on="click:removeTodo">X</a>
+                </li>
             </ul>
+            <div id="footer">
+                Remaining: <span sd-text="remaining"></span><br>
+                <a class="all" sd-on="click:filter">Show All</a> |
+                <a class="remaining" sd-on="click:filter">Show Remaining</a> |
+                <a class="completed" sd-on="click:filter">Show Completed</a>
+            </div>
         </div>
 		<script>
 
-			var Seed = require('seed')
-
-			Seed.filter('money', function (value) {
-			    return value
-                    ? '$' + value.toFixed(2)
-                    : ''
-			})
-
-            Seed.controller('TodoList', function (scope, seed) {
-                seed.on('toggle', function (todo) {
-                    console.log(todo)
-                })
-                scope.changeMessage = function () {
-                    scope.msg = (Math.random() * 100).toFixed(2) + '% awesomeness'
-                }
-                scope.remove = function () {
-                    seed.destroy()
-                }
-            })
-
-            Seed.controller('Todo', function (scope, seed) {
-                scope.toggle = function () {
-                    scope.done = !scope.done
-                    seed.parentSeed.emit('toggle', seed)
-                }
-            })
-
-            var s = Date.now()
-
             var data = {
-                msg: 'hello!',
-                total: 9999,
-                error: true,
                 todos: [
                     {
-                        title: 'hello!',
+                        text: '1!',
+                        done: false
+                    },
+                    {
+                        text: '2!',
+                        done: false
+                    },
+                    {
+                        text: '3!',
                         done: true
-                    },
-                    {
-                        title: 'hello!!',
-                        done: false
-                    },
-                    {
-                        title: 'hello!!!',
-                        done: false
                     }
                 ]
             }
 
-			var app = Seed.bootstrap({
+			var Seed = require('seed')
+
+            Seed.plant('TodoList', function (scope, seed) {
+
+                scope.remaining = scope.todos.reduce(function (count, todo) {
+                    return count + (todo.done ? 0 : 1)
+                }, 0)
+
+                scope.addTodo = function (e) {
+                    var text = e.el.value
+                    if (text) {
+                        e.el.value = ''
+                        scope.todos.push({
+                            text: text,
+                            done: false
+                        })
+                        scope.remaining++
+                    }
+                }
+
+                scope.removeTodo = function (e) {
+                    var i = e.seed.eachIndex
+                    scope.todos.splice(i, 1)
+                }
+
+                scope.toggleTodo = function (e) {
+                    scope.remaining += e.seed.scope.done ? -1 : 1
+                }
+
+                scope.filter = function (e) {
+                    var filter = e.el.className
+                    seed.el.className = filter
+                }
+            })
+
+            var now = Date.now()
+
+			var app = Seed.sprout({
                 el: '#app',
                 data: data
             })
 
-            console.log(Date.now() - s + 'ms')
+            console.log(Date.now() - now)
 
 		</script>
 	</body>
