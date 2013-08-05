@@ -9,8 +9,6 @@ var controllers = config.controllers = {},
 
 // API
 
-api.config = config
-
 api.extend = function (opts) {
     var Spore = function () {
         Seed.apply(this, arguments)
@@ -45,7 +43,10 @@ api.controller = function (id, extensions) {
     controllers[id] = extensions
 }
 
-api.bootstrap = function () {
+api.bootstrap = function (opts) {
+    if (opts) {
+        config.prefix = opts.prefix || config.prefix
+    }
     var app = {},
         n = 0,
         el, seed
