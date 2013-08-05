@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>title</title>
+		<title>Todo</title>
 		<meta charset="utf-8">
 		<script src="dist/seed.js"></script>
 		<style type="text/css">
@@ -90,6 +90,7 @@
                 scope.removeTodo = function (e) {
                     var i = e.seed.eachIndex
                     scope.todos.splice(i, 1)
+                    scope.remaining -= e.seed.scope.done ? 0 : 1
                 }
 
                 scope.toggleTodo = function (e) {
