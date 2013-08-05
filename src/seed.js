@@ -88,7 +88,7 @@ Seed.prototype._compileNode = function (node, root) {
                 // parent scope. i.e. the childSeeds must have been
                 // initiated when parent scope setters are invoked
                 self.scope[binding.key] = self._dataCopy[binding.key]
-                delete self._dataCopy[binding.key]
+                ;delete self._dataCopy[binding.key]
             }
 
         } else if (ctrlExp && !root) { // nested controllers
@@ -190,7 +190,7 @@ Seed.prototype.dump = function () {
 Seed.prototype.destroy = function () {
     for (var key in this._bindings) {
         this._bindings[key].instances.forEach(unbind)
-        delete this._bindings[key]
+        ;delete this._bindings[key]
     }
     this.el.parentNode.removeChild(this.el)
     function unbind (instance) {
