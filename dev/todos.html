@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<title>Todo</title>
-		<meta charset="utf-8">
-		<script src="dist/seed.js"></script>
-		<style type="text/css">
-			.red {
-				color: red;
-			}
+    <head>
+        <title>Todo</title>
+        <meta charset="utf-8">
+        <script src="../dist/seed.js"></script>
+        <style type="text/css">
+            .red {
+                color: red;
+            }
             .done {
                 text-decoration: line-through;
             }
@@ -26,55 +26,61 @@
             #app.completed .completed {
                 font-weight: bold;
             }
-		</style>
-	</head>
-	<body>
-		<div id="app" sd-class="filter" sd-controller="TodoList">
+        </style>
+    </head>
+    <body>
+        <div id="app" sd-controller="Todos" sd-class="filter">
             <div>
                 <input placeholder="What needs to be done?" sd-on="change:addTodo">
             </div>
             <ul sd-show="todos">
-            	<li class="todo" sd-each="todo:todos" sd-class="done:todo.done">
+                <li class="todo" sd-each="todo:todos" sd-class="done:todo.done">
                     <input type="checkbox" sd-checked="todo.done" sd-on="change:toggleTodo">
                     <span sd-text="todo.text"></span>
                     <a sd-on="click:removeTodo">X</a>
                 </li>
             </ul>
             <div id="footer">
-                Remaining: <span sd-text="remaining"></span><br>
+                Total: <span sd-text="total < todos"></span> |
+                Remaining: <span sd-text="remaining"></span> |
+                Completed: <span sd-text="completed < remaining total"></span>
+                <br>
                 <a class="all" sd-on="click:setFilter">Show All</a> |
                 <a class="remaining" sd-on="click:setFilter">Show Remaining</a> |
                 <a class="completed" sd-on="click:setFilter">Show Completed</a>
             </div>
+
         </div>
-		<script>
+        <script>
 
-            var data = {
-                todos: [
-                    {
-                        text: '1!',
-                        done: false
-                    },
-                    {
-                        text: '2!',
-                        done: false
-                    },
-                    {
-                        text: '3!',
-                        done: true
-                    }
-                ]
-            }
+            var Seed = require('seed')
 
-			var Seed = require('seed')
+            var todos = [
+                { text: 'make nesting controllers work', done: true },
+                { text: 'complete ArrayWatcher', done: false },
+                { text: 'computed properties', done: false },
+                { text: 'parse textnodes', done: false }
+            ]
 
-            Seed.controller('TodoList', function (scope, seed) {
+            Seed.controller('Todos', function (scope, seed) {
 
+                // regular properties
+                scope.todos = todos
                 scope.filter = 'all'
                 scope.remaining = scope.todos.reduce(function (count, todo) {
                     return count + (todo.done ? 0 : 1)
                 }, 0)
 
+                // computed properties
+                scope.total = function () {
+                    return scope.todos.length
+                }
+
+                scope.completed = function () {
+                    return scope.todos.length - scope.remaining
+                }
+
+                // event handlers
                 scope.addTodo = function (e) {
                     var text = e.el.value
                     if (text) {
@@ -88,8 +94,7 @@
                 }
 
                 scope.removeTodo = function (e) {
-                    var i = e.seed.eachIndex
-                    scope.todos.splice(i, 1)
+                    scope.todos.splice(e.seed.index, 1)
                     scope.remaining -= e.seed.scope.done ? 0 : 1
                 }
 
@@ -100,13 +105,11 @@
                 scope.setFilter = function (e) {
                     scope.filter = e.el.className
                 }
+
             })
 
-			var app = Seed.bootstrap({
-                el: '#app',
-                data: data
-            })
+            Seed.bootstrap()
 
-		</script>
-	</body>
+        </script>
+    </body>
 </html>

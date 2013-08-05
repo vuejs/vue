@@ -13,7 +13,6 @@
     "src/textnode-parser.js",
     "src/directives.js",
     "src/filters.js",
-    "src/controllers.js",
     "src/watch-array.js"
   ]
 }

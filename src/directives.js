@@ -83,6 +83,7 @@ module.exports = {
                 })
                 this.childSeeds = []
             }
+            if (!Array.isArray(collection)) return
             watchArray(collection, this.mutate.bind(this))
             var self = this
             collection.forEach(function (item, i) {
@@ -95,11 +96,12 @@ module.exports = {
         buildItem: function (data, index, collection) {
             var Seed = require('./seed'),
                 node = this.el.cloneNode(true)
-            var spore = new Seed(node, data, {
-                    eachPrefix: this.arg,
+            var spore = new Seed(node, {
+                    eachPrefixRE: new RegExp('^' + this.arg + '.'),
                     parentSeed: this.seed,
-                    eachIndex: index,
-                    eachCollection: collection
+                    index: index,
+                    eachCollection: collection,
+                    data: data
                 })
             this.container.insertBefore(node, this.marker)
             collection[index] = spore.scope
