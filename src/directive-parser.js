@@ -6,7 +6,8 @@ var KEY_RE          = /^[^\|<]+/,
     ARG_RE          = /([^:]+):(.+)$/,
     FILTERS_RE      = /\|[^\|<]+/g,
     FILTER_TOKEN_RE = /[^\s']+|'[^']+'/g,
-    DEPS_RE         = /<[^<\|]+/g
+    DEPS_RE         = /<[^<\|]+/g,
+    NESTING_RE      = /^\^+/
 
 // parse a key, extract argument and nesting/root info
 function parseKey (rawKey) {
@@ -22,12 +23,19 @@ function parseKey (rawKey) {
         ? argMatch[1].trim()
         : null
 
-    var nesting = res.key.match(/^\^+/)
+    var nesting = res.key.match(NESTING_RE)
     res.nesting = nesting
         ? nesting[0].length
         : false
 
     res.root = res.key.charAt(0) === '$'
+
+    if (res.nesting) {
+        res.key = res.key.replace(NESTING_RE, '')
+    } else if (res.root) {
+        res.key = res.key.slice(1)
+    }
+
     return res
 }
 
@@ -50,11 +58,11 @@ function parseFilter (filter) {
 
 function Directive (directiveName, expression) {
 
-    var directive = directives[directiveName]
+    var prop, directive = directives[directiveName]
     if (typeof directive === 'function') {
         this._update = directive
     } else {
-        for (var prop in directive) {
+        for (prop in directive) {
             if (prop === 'update') {
                 this['_update'] = directive.update
             } else {
@@ -69,7 +77,7 @@ function Directive (directiveName, expression) {
     var rawKey   = expression.match(KEY_RE)[0],
         keyInfo  = parseKey(rawKey)
 
-    for (var prop in keyInfo) {
+    for (prop in keyInfo) {
         this[prop] = keyInfo[prop]
     }
     
@@ -84,7 +92,19 @@ function Directive (directiveName, expression) {
         : null
 }
 
+// called when a dependency has changed
+Directive.prototype.refresh = function () {
+    if (this.value) {
+        this._update(this.value.call(this.seed.scope))
+    }
+    if (this.binding.refreshDependents) {
+        this.binding.refreshDependents()
+    }
+}
+
+// called when a new value is set
 Directive.prototype.update = function (value) {
+    this.value = value
     // computed property
     if (typeof value === 'function' && !this.fn) {
         value = value()
@@ -94,6 +114,7 @@ Directive.prototype.update = function (value) {
         value = this.applyFilters(value)
     }
     this._update(value)
+    if (this.deps) this.refresh()
 }
 
 Directive.prototype.applyFilters = function (value) {

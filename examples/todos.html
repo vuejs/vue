@@ -42,12 +42,14 @@
             </ul>
             <div id="footer">
                 Total: <span sd-text="total < todos"></span> |
-                Remaining: <span sd-text="remaining"></span> |
-                Completed: <span sd-text="completed < remaining total"></span>
+                Remaining: <span sd-text="remaining < completed"></span> |
+                Completed: <span sd-text="completed"></span>
                 <br>
                 <a class="all" sd-on="click:setFilter">Show All</a> |
                 <a class="remaining" sd-on="click:setFilter">Show Remaining</a> |
                 <a class="completed" sd-on="click:setFilter">Show Completed</a>
+                <br>
+                <a sd-on="click:removeCompleted">Remove Completed</a>
             </div>
 
         </div>
@@ -67,8 +69,8 @@
                 // regular properties
                 scope.todos = todos
                 scope.filter = 'all'
-                scope.remaining = todos.reduce(function (count, todo) {
-                    return count + (todo.done ? 0 : 1)
+                scope.completed = todos.reduce(function (count, todo) {
+                    return count + (todo.done ? 1 : 0)
                 }, 0)
 
                 // computed properties
@@ -76,8 +78,8 @@
                     return scope.todos.length
                 }
 
-                scope.completed = function () {
-                    return scope.todos.length - scope.remaining
+                scope.remaining = function () {
+                    return scope.todos.length - scope.completed
                 }
 
                 // event handlers
@@ -86,21 +88,26 @@
                     if (val) {
                         e.el.value = ''
                         scope.todos.unshift({ text: val, done: false })
-                        scope.remaining++
                     }
                 }
 
                 scope.removeTodo = function (e) {
-                    scope.todos.splice(e.scope.$index, 1)
-                    scope.remaining -= e.scope.done ? 0 : 1
+                    scope.todos.remove(e.scope)
+                    scope.completed -= e.scope.done ? 1 : 0
                 }
 
                 scope.toggleTodo = function (e) {
-                    scope.remaining += e.scope.done ? -1 : 1
+                    scope.completed += e.scope.done ? 1 : -1
                 }
 
                 scope.setFilter = function (e) {
                     scope.filter = e.el.className
+                }
+
+                scope.removeCompleted = function () {
+                    scope.todos = scope.todos.filter(function (todo) {
+                        return !todo.done
+                    })
                 }
 
             })

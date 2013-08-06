@@ -1,11 +1,25 @@
 var Emitter         = require('emitter'),
     config          = require('./config'),
-    DirectiveParser = require('./directive-parser')
+    DirectiveParser = require('./directive-parser'),
+    TextNodeParser  = require('./textnode-parser')
 
 var slice           = Array.prototype.slice,
-    ancestorKeyRE   = /\^/g,
     ctrlAttr        = config.prefix + '-controller',
     eachAttr        = config.prefix + '-each'
+
+function determinScope (key, scope) {
+    if (key.nesting) {
+        var levels = key.nesting
+        while (scope.parentSeed && levels--) {
+            scope = scope.parentSeed
+        }
+    } else if (key.root) {
+        while (scope.parentSeed) {
+            scope = scope.parentSeed
+        }
+    }
+    return scope
+}
 
 function Seed (el, options) {
 
@@ -114,7 +128,7 @@ Seed.prototype._compileNode = function (node, root) {
 }
 
 Seed.prototype._compileTextNode = function (node) {
-    return node
+    return TextNodeParser.parse(node)
 }
 
 Seed.prototype._bind = function (node, directive) {
@@ -123,47 +137,26 @@ Seed.prototype._bind = function (node, directive) {
     directive.seed = this
 
     var key = directive.key,
-        snr = this.eachPrefixRE,
-        isEachKey = snr && snr.test(key),
-        scopeOwner = this
+        epr = this.eachPrefixRE,
+        isEachKey = epr && epr.test(key),
+        scope = this
 
     if (isEachKey) {
-        key = key.replace(snr, '')
+        key = directive.key = key.replace(epr, '')
     }
 
-    // handle scope nesting
-    if (snr && !isEachKey) {
-        scopeOwner = this.parentSeed
-    } else {
-        var ancestors = key.match(ancestorKeyRE),
-            root      = key.charAt(0) === '$'
-        if (ancestors) {
-            key = key.replace(ancestorKeyRE, '')
-            var levels = ancestors.length
-            while (scopeOwner.parentSeed && levels--) {
-                scopeOwner = scopeOwner.parentSeed
-            }
-        } else if (root) {
-            key = key.slice(1)
-            while (scopeOwner.parentSeed) {
-                scopeOwner = scopeOwner.parentSeed
-            }
-        }
+    if (epr && !isEachKey) {
+        scope = this.parentSeed
     }
 
-    directive.key = key
-
-    // computed properties
-    if (directive.deps) {
-        directive.deps.forEach(function (dep) {
-            console.log(dep)
-        })
-    }
-
-    var binding = scopeOwner._bindings[key] || scopeOwner._createBinding(key)
+    var ownerScope = determinScope(directive, scope),
+        binding =
+            ownerScope._bindings[key] ||
+            ownerScope._createBinding(key)
 
     // add directive to this binding
     binding.instances.push(directive)
+    directive.binding = binding
 
     // invoke bind hook if exists
     if (directive.bind) {
@@ -173,6 +166,25 @@ Seed.prototype._bind = function (node, directive) {
     // set initial value
     if (binding.value) {
         directive.update(binding.value)
+    }
+
+    // computed properties
+    if (directive.deps) {
+        directive.deps.forEach(function (dep) {
+            var depScope = determinScope(dep, scope),
+                depBinding =
+                    depScope._bindings[dep.key] ||
+                    depScope._createBinding(dep.key)
+            if (!depBinding.dependents) {
+                depBinding.dependents = []
+                depBinding.refreshDependents = function () {
+                    depBinding.dependents.forEach(function (dept) {
+                        dept.refresh()
+                    })
+                }
+            }
+            depBinding.dependents.push(directive)
+        })
     }
 
 }
@@ -199,6 +211,9 @@ Seed.prototype._createBinding = function (key) {
             binding.instances.forEach(function (instance) {
                 instance.update(value)
             })
+            if (binding.refreshDependents) {
+                binding.refreshDependents()
+            }
         }
     })
 
