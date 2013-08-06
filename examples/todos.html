@@ -62,7 +62,7 @@
                 { text: 'parse textnodes', done: false }
             ]
 
-            Seed.controller('Todos', function (scope, seed) {
+            Seed.controller('Todos', function (scope) {
 
                 // regular properties
                 scope.todos = todos
@@ -82,13 +82,10 @@
 
                 // event handlers
                 scope.addTodo = function (e) {
-                    var text = e.el.value
-                    if (text) {
+                    var val = e.el.value
+                    if (val) {
                         e.el.value = ''
-                        scope.todos.push({
-                            text: text,
-                            done: false
-                        })
+                        scope.todos.unshift({ text: val, done: false })
                         scope.remaining++
                     }
                 }
