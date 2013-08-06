@@ -66,6 +66,8 @@ function watchArray (arr, callback) {
 
 module.exports = {
 
+    mutationHandlers: mutationHandlers,
+
     bind: function () {
         this.el.removeAttribute(config.prefix + '-each')
         var ctn = this.container = this.el.parentNode
@@ -80,7 +82,9 @@ module.exports = {
         this.collection = collection
         var self = this
         watchArray(collection, function (mutation) {
-            mutationHandlers[mutation.method].call(self, mutation)
+            if (self.mutationHandlers) {
+                self.mutationHandlers[mutation.method].call(self, mutation)
+            }
         })
         collection.forEach(function (data, i) {
             var seed = self.buildItem(data, i)
