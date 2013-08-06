@@ -14,6 +14,7 @@ function Seed (el, options) {
     }
 
     this.el         = el
+    el.seed         = this
     this._bindings  = {}
 
     // copy options
@@ -74,6 +75,7 @@ Seed.prototype._compileNode = function (node, root) {
 
             var id = node.id,
                 seed = new Seed(node, {
+                    child: true,
                     parentSeed: self
                 })
             if (id) {
@@ -206,6 +208,7 @@ Seed.prototype._unbind = function () {
 
 Seed.prototype._destroy = function () {
     this._unbind()
+    delete this.el.seed
     this.el.parentNode.removeChild(this.el)
     if (this.parentSeed && this.id) {
         delete this.parentSeed['$' + this.id]

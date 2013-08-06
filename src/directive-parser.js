@@ -24,6 +24,9 @@ function Directive (directiveName, expression) {
         }
     }
 
+    this.directiveName = directiveName
+    this.expression = expression
+
     var rawKey   = expression.match(KEY_RE)[0], // guarded in parse
         argMatch = rawKey.match(ARG_RE)
 
