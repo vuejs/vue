@@ -52,7 +52,7 @@ module.exports = {
                         el            : e.currentTarget,
                         originalEvent : e,
                         directive     : self,
-                        seed          : e.currentTarget.seed
+                        seed          : self.seed
                     })
                 }
                 this.el.addEventListener(event, proxy)

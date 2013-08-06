@@ -12,18 +12,18 @@ module.exports = {
     // TODO probably there's a better way.
     // Angular doesn't support delegation either
     // any real performance gain?
-    delegate: function (handler, args) {
-        var selector = args[0]
-        return function (e) {
-            var oe = e.originalEvent,
-                target = delegateCheck(oe.target, oe.currentTarget, selector)
-            if (target) {
-                e.el = target
-                e.seed = target.seed
-                handler.call(this, e)
-            }
-        }
-    }
+    // delegate: function (handler, args) {
+    //     var selector = args[0]
+    //     return function (e) {
+    //         var oe = e.originalEvent,
+    //             target = delegateCheck(oe.target, oe.currentTarget, selector)
+    //         if (target) {
+    //             e.el = target
+    //             e.seed = target.seed
+    //             handler.call(this, e)
+    //         }
+    //     }
+    // }
 
 }
 

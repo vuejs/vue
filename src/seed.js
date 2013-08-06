@@ -14,7 +14,6 @@ function Seed (el, options) {
         el = document.querySelector(el)
     }
 
-    el.seed         = this
     this.el         = el
     this._bindings  = {}
 
