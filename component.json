@@ -11,8 +11,9 @@
     "src/seed.js",
     "src/directive-parser.js",
     "src/textnode-parser.js",
-    "src/directives.js",
     "src/filters.js",
-    "src/watch-array.js"
+    "src/directives/index.js",
+    "src/directives/each.js",
+    "src/directives/on.js"
   ]
 }
