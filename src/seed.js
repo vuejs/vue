@@ -35,6 +35,7 @@ function Seed (el, options) {
     this.scope.$destroy = this._destroy.bind(this)
     this.scope.$dump    = this._dump.bind(this)
     this.scope.$index   = options.index
+    this.scope.$parent  = options.parentSeed && options.parentSeed.scope
 
     // revursively process nodes for directives
     this._compileNode(el, true)

@@ -94,12 +94,12 @@
                 }
 
                 scope.removeTodo = function (e) {
-                    scope.todos.splice(e.seed.index, 1)
-                    scope.remaining -= e.seed.scope.done ? 0 : 1
+                    scope.todos.splice(e.scope.$index, 1)
+                    scope.remaining -= e.scope.done ? 0 : 1
                 }
 
                 scope.toggleTodo = function (e) {
-                    scope.remaining += e.seed.scope.done ? -1 : 1
+                    scope.remaining += e.scope.done ? -1 : 1
                 }
 
                 scope.setFilter = function (e) {
