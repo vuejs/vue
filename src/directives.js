@@ -52,7 +52,7 @@ module.exports = {
                         el            : e.currentTarget,
                         originalEvent : e,
                         directive     : self,
-                        seed          : self.seed
+                        seed          : e.currentTarget.seed
                     })
                 }
                 this.el.addEventListener(event, proxy)
@@ -77,21 +77,14 @@ module.exports = {
             this.childSeeds = []
         },
         update: function (collection) {
-            if (this.childSeeds.length) {
-                this.childSeeds.forEach(function (child) {
-                    child.destroy()
-                })
-                this.childSeeds = []
-            }
+            this.unbind(true)
+            this.childSeeds = []
             if (!Array.isArray(collection)) return
             watchArray(collection, this.mutate.bind(this))
             var self = this
             collection.forEach(function (item, i) {
                 self.childSeeds.push(self.buildItem(item, i, collection))
             })
-        },
-        mutate: function (mutation) {
-            console.log(mutation)
         },
         buildItem: function (data, index, collection) {
             var Seed = require('./seed'),
@@ -100,12 +93,22 @@ module.exports = {
                     eachPrefixRE: new RegExp('^' + this.arg + '.'),
                     parentSeed: this.seed,
                     index: index,
-                    eachCollection: collection,
                     data: data
                 })
             this.container.insertBefore(node, this.marker)
             collection[index] = spore.scope
             return spore
+        },
+        mutate: function (mutation) {
+            console.log(mutation)
+        },
+        unbind: function (rm) {
+            if (this.childSeeds.length) {
+                var fn = rm ? 'destroy' : 'unbind'
+                this.childSeeds.forEach(function (child) {
+                    child[fn]()
+                })
+            }
         }
     }
 

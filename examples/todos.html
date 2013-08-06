@@ -29,7 +29,7 @@
         </style>
     </head>
     <body>
-        <div id="app" sd-controller="Todos" sd-data="test" sd-class="filter">
+        <div id="app" sd-controller="Todos" sd-class="filter">
             <div>
                 <input placeholder="What needs to be done?" sd-on="change:addTodo">
             </div>
@@ -62,12 +62,10 @@
                 { text: 'parse textnodes', done: false }
             ]
 
-            Seed.data('test', { todos: todos })
-
             Seed.controller('Todos', function (scope, seed) {
 
                 // regular properties
-                // scope.todos = todos
+                scope.todos = todos
                 scope.filter = 'all'
                 scope.remaining = todos.reduce(function (count, todo) {
                     return count + (todo.done ? 0 : 1)
@@ -110,7 +108,7 @@
 
             })
 
-            Seed.bootstrap()
+            var app = Seed.bootstrap()
 
         </script>
     </body>
