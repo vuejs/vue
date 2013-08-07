@@ -51,7 +51,6 @@ function Seed (el, options) {
     scope.$dump     = this._dump.bind(this)
     scope.$index    = options.index
     scope.$parent   = options.parentSeed && options.parentSeed.scope
-    scope.$refresh  = this._refreshBinding.bind(this)
 
     // add event listener to update corresponding binding
     // when a property is set
@@ -243,13 +242,6 @@ Seed.prototype._updateBinding = function (key, value) {
 
     // notify dependents to refresh themselves
     binding.emitChange()
-}
-
-Seed.prototype._refreshBinding = function (key) {
-    var binding = this._bindings[key]
-    binding.instances.forEach(function (instance) {
-        instance.refresh()
-    })
 }
 
 Seed.prototype._parseDeps = function (binding) {

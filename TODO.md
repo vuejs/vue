@@ -1,7 +1,7 @@
-- parse textNodes?
+- parse textNodes
 - more directives / filters
     - sd-if
     - sd-with
     - sd-visible
-    - sd-style="transform:transform < x y z rotate"
+    - sd-style="transform:transform"
 - nested properties in scope (kinda hard, maybe later)
