@@ -12,11 +12,7 @@ module.exports = {
     show: function (value) {
         this.el.style.display = value ? '' : 'none'
     },
-
-    hide: function (value) {
-        this.el.style.display = value ? 'none' : ''
-    },
-
+    
     focus: function (value) {
         this.el[value ? 'focus' : 'blur']()
     },

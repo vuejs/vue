@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Simple Example</title>
+        <meta charset="utf-8">
+        <script src="../dist/seed.js"></script>
+    </head>
+    <body sd-controller="hello">
+        <span sd-text="hello"></span>
+        <script>
+            var Seed = require('seed')
+            Seed.controller('hello', function (scope) {
+                scope.hello = 'Hello World!'
+            })
+            Seed.bootstrap()
+        </script>
+    </body>
+</html>

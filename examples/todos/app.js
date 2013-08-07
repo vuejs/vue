@@ -18,23 +18,17 @@ Seed.controller('Todos', function (scope) {
     scope.allDone = scope.remaining === 0
 
     // computed properties ----------------------------------------------------
-    scope.total = {
-        get: function () {
-            return scope.todos.length
-        }
-    }
+    scope.total = {get: function () {
+        return scope.todos.length
+    }}
 
-    scope.completed = {
-        get: function () {
-            return scope.total() - scope.remaining
-        }
-    }
+    scope.completed = {get: function () {
+        return scope.total() - scope.remaining
+    }}
 
-    scope.itemLabel = {
-        get: function () {
-            return scope.remaining > 1 ? 'items' : 'item'
-        }
-    }
+    scope.itemLabel = {get: function () {
+        return scope.remaining > 1 ? 'items' : 'item'
+    }}
 
     // event handlers ---------------------------------------------------------
     scope.addTodo = function (e) {

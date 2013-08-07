@@ -5,5 +5,7 @@
 - parse textNodes?
 - more directives / filters
     - sd-if
-    - sd-route
+    - sd-with
+    - sd-visible
+    - sd-style
 - nested properties in scope (kinda hard, maybe later)
