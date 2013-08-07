@@ -284,19 +284,20 @@ Seed.prototype._destroy = function () {
 }
 
 Seed.prototype._dump = function () {
-    var dump = {}, val,
+    var dump = {}, binding, val,
         subDump = function (scope) {
             return scope.$dump()
         }
-    for (var key in this.scope) {
-        if (key.charAt(0) !== '$') {
-            val = this._bindings[key]
-            if (!val) continue
-            if (Array.isArray(val)) {
-                dump[key] = val.map(subDump)
-            } else if (typeof val !== 'function') {
-                dump[key] = this._bindings[key].value
-            }
+    for (var key in this._bindings) {
+        binding = this._bindings[key]
+        val = binding.value
+        if (!val) continue
+        if (Array.isArray(val)) {
+            dump[key] = val.map(subDump)
+        } else if (typeof val !== 'function') {
+            dump[key] = val
+        } else if (binding.isComputed) {
+            dump[key] = val()
         }
     }
     return dump

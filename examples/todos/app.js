@@ -77,4 +77,4 @@ Seed.controller('Todos', function (scope) {
 
 })
 
-Seed.bootstrap()
+var app = Seed.bootstrap()
