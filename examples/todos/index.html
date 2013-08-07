@@ -21,10 +21,18 @@
             </header>
             
             <section id="main" sd-show="total < todos">
-                <input id="toggle-all" type="checkbox" sd-checked="allDone" sd-on="change:toggleAll">
+                <input 
+                    id="toggle-all"
+                    type="checkbox"
+                    sd-checked="allDone"
+                    sd-on="change:toggleAll"
+                >
                 <ul id="todo-list">
                     <!-- a single todo item -->
-                    <li sd-each="todo:todos" sd-class="completed:todo.done, editing:todo.editing">
+                    <li
+                        sd-each="todo:todos"
+                        sd-class="completed:todo.done, editing:todo.editing"
+                    >
                         <div class="view">
                             <input
                                 class="toggle"

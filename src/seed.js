@@ -1,4 +1,5 @@
 var config          = require('./config'),
+    Emitter         = require('emitter'),
     DirectiveParser = require('./directive-parser'),
     TextNodeParser  = require('./textnode-parser')
 
@@ -42,16 +43,19 @@ function Seed (el, options) {
     scope.$index    = options.index
     scope.$parent   = options.parentSeed && options.parentSeed.scope
 
-    // revursively process nodes for directives
+    // update bindings when a property is set
+    this.on('set', this._updateBinding.bind(this))
+
+    // revursively compile nodes for directives
     this._compileNode(el, true)
 
     // if has controller, apply it
     var ctrlID = el.getAttribute(ctrlAttr)
     if (ctrlID) {
         el.removeAttribute(ctrlAttr)
-        var controller = config.controllers[ctrlID]
-        if (controller) {
-            controller.call(this, this.scope)
+        var factory = config.controllers[ctrlID]
+        if (factory) {
+            factory.call(this, this.scope)
         } else {
             console.warn('controller ' + ctrlID + ' is not defined.')
         }
@@ -59,11 +63,11 @@ function Seed (el, options) {
 }
 
 Seed.prototype._compileNode = function (node, root) {
-    var self = this
+    var seed = this
 
     if (node.nodeType === 3) { // text node
 
-        self._compileTextNode(node)
+        seed._compileTextNode(node)
 
     } else if (node.nodeType === 1) {
 
@@ -74,7 +78,7 @@ Seed.prototype._compileNode = function (node, root) {
 
             var binding = DirectiveParser.parse(eachAttr, eachExp)
             if (binding) {
-                self._bind(node, binding)
+                seed._bind(node, binding)
             }
 
         } else if (ctrlExp && !root) { // nested controllers
@@ -82,10 +86,10 @@ Seed.prototype._compileNode = function (node, root) {
             var id = node.id,
                 seed = new Seed(node, {
                     child: true,
-                    parentSeed: self
+                    parentSeed: seed
                 })
             if (id) {
-                self['$' + id] = seed
+                seed['$' + id] = seed
             }
 
         } else { // normal node
@@ -96,10 +100,10 @@ Seed.prototype._compileNode = function (node, root) {
                     if (attr.name === ctrlAttr) return
                     var valid = false
                     attr.value.split(',').forEach(function (exp) {
-                        var binding = DirectiveParser.parse(attr.name, exp)
-                        if (binding) {
+                        var directive = DirectiveParser.parse(attr.name, exp)
+                        if (directive) {
                             valid = true
-                            self._bind(node, binding)
+                            seed._bind(node, directive)
                         }
                     })
                     if (valid) node.removeAttribute(attr.name)
@@ -109,7 +113,7 @@ Seed.prototype._compileNode = function (node, root) {
             // recursively compile childNodes
             if (node.childNodes.length) {
                 slice.call(node.childNodes).forEach(function (child) {
-                    self._compileNode(child)
+                    seed._compileNode(child)
                 })
             }
         }
@@ -187,24 +191,54 @@ Seed.prototype._createBinding = function (key) {
     this._bindings[key] = binding
 
     // bind accessor triggers to scope
+    var seed = this
     Object.defineProperty(this.scope, key, {
         get: function () {
+            seed.emit('get', key)
             return binding.value
         },
         set: function (value) {
             if (value === binding.value) return
-            binding.changed = true
-            binding.value = value
-            binding.instances.forEach(function (instance) {
-                instance.update(value)
-            })
-            if (binding.refreshDependents) {
-                binding.refreshDependents()
-            }
+            seed.emit('set', key, value)
         }
     })
 
     return binding
+}
+
+Seed.prototype._updateBinding = function (key, value) {
+
+    var binding = this._bindings[key],
+        type = typeOf(value)
+
+    if (type === 'Object') {
+        if (value.get) { // computed property
+            type = 'Computed'
+            value = value.get
+        }
+    } else if (type === 'Array') {
+        augmentArray(value)
+        value.on('mutate', function () {
+            if (binding.dependents) {
+                binding.refreshDependents()
+            }
+        })
+    }
+
+    binding.type = type
+    binding.value = value
+    binding.changed = true
+
+    // update all instances
+    binding.instances.forEach(function (instance) {
+        instance.update(value)
+    })
+
+    // notify dependents to refresh themselves
+    if (binding.dependents) {
+        binding.refreshDependents()
+    }
+
 }
 
 Seed.prototype._unbind = function () {
@@ -248,6 +282,8 @@ Seed.prototype._dump = function () {
 
 // Helpers --------------------------------------------------------------------
 
+// determine which scope a key belongs to
+// based on nesting symbols
 function determinScope (key, scope) {
     if (key.nesting) {
         var levels = key.nesting
@@ -261,5 +297,43 @@ function determinScope (key, scope) {
     }
     return scope
 }
+
+// get accurate type of an object
+var OtoString = Object.prototype.toString
+function typeOf (obj) {
+    return OtoString.call(obj).slice(8, -1)
+}
+
+// augment an Array so that it emit events when mutated
+var arrayMutators = ['push','pop','shift','unshift','splice','sort','reverse']
+var arrayAugmentations = {
+    remove: function (scope) {
+        this.splice(scope.$index, 1)
+    },
+    replace: function (index, data) {
+        if (typeof index !== 'number') {
+            index = index.$index
+        }
+        this.splice(index, 1, data)
+    }
+}
+function augmentArray (collection) {
+    Emitter(collection)
+    arrayMutators.forEach(function (method) {
+        collection[method] = function () {
+            var result = Array.prototype[method].apply(this, arguments)
+            collection.emit('mutate', {
+                method: method,
+                args: Array.prototype.slice.call(arguments),
+                result: result
+            })
+        }
+    })
+    for (var method in arrayAugmentations) {
+        collection[method] = arrayAugmentations[method]
+    }
+}
+
+Emitter(Seed.prototype)
 
 module.exports = Seed

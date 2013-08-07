@@ -2,8 +2,8 @@ var Seed = require('seed')
 
 var todos = [
     { text: 'make nesting controllers work', done: true },
-    { text: 'complete ArrayWatcher', done: false },
-    { text: 'computed properties', done: false },
+    { text: 'complete ArrayWatcher', done: true },
+    { text: 'computed properties', done: true },
     { text: 'parse textnodes', done: false }
 ]
 
@@ -11,23 +11,29 @@ Seed.controller('Todos', function (scope) {
 
     // regular properties -----------------------------------------------------
     scope.todos = todos
-    scope.filter = window.location.hash.slice(2)
-    scope.allDone = false
+    scope.filter = window.location.hash.slice(2) || 'all'
     scope.remaining = todos.reduce(function (count, todo) {
         return count + (todo.done ? 0 : 1)
     }, 0)
+    scope.allDone = scope.remaining === 0
 
     // computed properties ----------------------------------------------------
-    scope.total = function () {
-        return scope.todos.length
+    scope.total = {
+        get: function () {
+            return scope.todos.length
+        }
     }
 
-    scope.completed = function () {
-        return scope.total() - scope.remaining
+    scope.completed = {
+        get: function () {
+            return scope.total() - scope.remaining
+        }
     }
 
-    scope.itemLabel = function () {
-        return scope.remaining > 1 ? 'items' : 'item'
+    scope.itemLabel = {
+        get: function () {
+            return scope.remaining > 1 ? 'items' : 'item'
+        }
     }
 
     // event handlers ---------------------------------------------------------

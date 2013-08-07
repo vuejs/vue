@@ -12,5 +12,8 @@
     "src/directives/index.js",
     "src/directives/each.js",
     "src/directives/on.js"
-  ]
+  ],
+  "dependencies": {
+    "component/emitter": "*"
+  }
 }
