@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Todo</title>
+        <meta charset="utf-8">
+        <link rel="stylesheet" type="text/css" href="todomvc.css">
+        <link rel="stylesheet" type="text/css" href="custom.css">
+    </head>
+    <body>
+        <section id="todoapp" sd-controller="Todos" sd-class="filter">
+
+            <header id="header">
+                <h1>todos</h1>
+                <!-- main input box -->
+                <input
+                    id="new-todo"
+                    autofocus
+                    sd-on="keyup:addTodo | key enter"
+                    placeholder="What needs to be done?"
+                >
+            </header>
+            
+            <section id="main" sd-show="total < todos">
+                <input id="toggle-all" type="checkbox" sd-checked="allDone" sd-on="change:toggleAll">
+                <ul id="todo-list">
+                    <!-- a single todo item -->
+                    <li sd-each="todo:todos" sd-class="completed:todo.done, editing:todo.editing">
+                        <div class="view">
+                            <input
+                                class="toggle"
+                                type="checkbox"
+                                sd-checked="todo.done"
+                                sd-on="change:updateCount"
+                            >
+                            <label
+                                sd-text="todo.text"
+                                sd-on="dblclick:edit"
+                            ></label>
+                            <button class="destroy" sd-on="click:removeTodo"></button>
+                        </div>
+                        <input
+                            class="edit"
+                            type="text"
+                            sd-focus="todo.editing"
+                            sd-on="blur:stopEdit, keyup:stopEdit | key enter"
+                            sd-value="todo.text"
+                        >
+                    </li>
+                </ul>
+            </section>
+
+            <!-- footer controls -->
+            <footer id="footer" sd-show="total < todos">
+                <span id="todo-count">
+                    <strong sd-text="remaining"></strong>
+                    <span sd-text="itemLabel < remaining"></span>
+                    left
+                </span>
+                <ul id="filters">
+                    <li><a href="#/all" data-filter="all" sd-on="click:setFilter">All</a></li>
+                    <li><a href="#/active" data-filter="active" sd-on="click:setFilter">Active</a></li>
+                    <li><a href="#/completed" data-filter="completed" sd-on="click:setFilter">Completed</a></li>
+                </ul>
+                <button id="clear-completed" sd-on="click:removeCompleted">
+                    Remove Completed (<span sd-text="completed < total remaining"></span>)
+                </button>
+            </footer>
+
+        </section>
+
+        <!-- info -->
+        <footer id="info">
+            <p>Double-click to edit a todo</p>
+            <p>Powered by <a href="https://github.com/yyx990803/seed">Seed.js</a></p>
+            <p>Created by <a href="http://evanyou.me">Evan You</a></p>
+        </footer>
+
+        <!-- js -->
+        <script src="../../dist/seed.js"></script>
+        <script src="app.js"></script>
+    </body>
+</html>

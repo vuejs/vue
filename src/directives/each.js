@@ -26,8 +26,11 @@ var mutationHandlers = {
     unshift: function (m) {
         var self = this
         m.args.forEach(function (data, i) {
-            var seed = self.buildItem(data, i)
-            self.container.insertBefore(seed.el, self.collection[m.args.length].$seed.el)
+            var seed = self.buildItem(data, i),
+                ref  = self.collection.length > m.args.length
+                     ? self.collection[m.args.length].$seed.el
+                     : self.marker
+            self.container.insertBefore(seed.el, ref)
         })
         self.reorder()
     },
@@ -132,7 +135,6 @@ module.exports = {
     },
 
     reorder: function () {
-        console.log('reorder')
         this.collection.forEach(function (scope, i) {
             scope.$index = i
         })

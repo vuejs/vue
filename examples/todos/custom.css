@@ -1,0 +1,13 @@
+#todoapp.all [data-filter="all"],
+#todoapp.active [data-filter="active"],
+#todoapp.completed [data-filter="completed"] {
+    font-weight: bold;
+}
+
+#todoapp.active #todo-list li.completed {
+    display: none;
+}
+
+#todoapp.completed #todo-list li:not(.completed) {
+    display: none;
+}

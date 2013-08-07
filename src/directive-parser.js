@@ -95,7 +95,12 @@ function Directive (directiveName, expression) {
 // called when a dependency has changed
 Directive.prototype.refresh = function () {
     if (this.value) {
-        this._update(this.value.call(this.seed.scope))
+        var value = this.value.call(this.seed.scope)
+        this._update(
+            this.filters
+            ? this.applyFilters(value)
+            : value
+        )
     }
     if (this.binding.refreshDependents) {
         this.binding.refreshDependents()
@@ -104,16 +109,17 @@ Directive.prototype.refresh = function () {
 
 // called when a new value is set
 Directive.prototype.update = function (value) {
+    if (value && (value === this.value)) return
     this.value = value
     // computed property
     if (typeof value === 'function' && !this.fn) {
         value = value()
     }
-    // apply filters
-    if (this.filters) {
-        value = this.applyFilters(value)
-    }
-    this._update(value)
+    this._update(
+        this.filters
+        ? this.applyFilters(value)
+        : value
+    )
     if (this.deps) this.refresh()
 }
 

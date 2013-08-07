@@ -1,3 +1,6 @@
-- parse textNodes
+- parse textNodes?
+- method invoke with arguments
 - more directives / filters
+    - sd-if
+    - sd-route
 - nested properties in scope (kinda hard, maybe later)

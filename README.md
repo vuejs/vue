@@ -11,6 +11,8 @@ WIP, playing with data binding
 
 ### Data Binding
 
+### Event Handling
+
 ### Filters
 
 ### Computed Properties
