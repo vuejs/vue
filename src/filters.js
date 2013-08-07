@@ -19,6 +19,10 @@ module.exports = {
         return value.toString().toUpperCase()
     },
 
+    lowercase: function (value) {
+        return value.toString().toLowerCase()
+    },
+
     currency: function (value, args) {
         if (!value) return value
         var sign = (args && args[0]) || '$',

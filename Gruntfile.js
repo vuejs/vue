@@ -6,6 +6,8 @@ module.exports = function( grunt ) {
             build: {
                 output: './dist/',
                 name: 'seed',
+                dev: true,
+                sourceUrls: true,
                 styles: false,
                 scripts: true,
                 verbose: true
@@ -31,6 +33,18 @@ module.exports = function( grunt ) {
             }
         },
 
+        uglify: {
+            build: {
+                options: {
+                    compress: true,
+                    mangle: true
+                },
+                files: {
+                    'dist/seed.min.js': 'dist/seed.js'
+                }
+            }
+        },
+
         watch: {
             options: {
                 livereload: true
@@ -45,9 +59,10 @@ module.exports = function( grunt ) {
 
     grunt.loadNpmTasks( 'grunt-contrib-watch' )
     grunt.loadNpmTasks( 'grunt-contrib-jshint' )
+    grunt.loadNpmTasks( 'grunt-contrib-uglify' )
     grunt.loadNpmTasks( 'grunt-component-build' )
     grunt.loadNpmTasks( 'grunt-mocha' )
     grunt.registerTask( 'test', ['mocha'] )
-    grunt.registerTask( 'default', ['jshint', 'component_build', 'mocha'] )
+    grunt.registerTask( 'default', ['jshint', 'component_build', 'uglify'] )
     
 }

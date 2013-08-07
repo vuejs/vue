@@ -7,6 +7,7 @@
     "grunt-component-build": "~0.3.0",
     "grunt-contrib-jshint": "~0.6.0",
     "grunt-mocha": "~0.4.0",
-    "chai": "~1.7.2"
+    "chai": "~1.7.2",
+    "grunt-contrib-uglify": "~0.2.2"
   }
 }

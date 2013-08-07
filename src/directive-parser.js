@@ -7,6 +7,7 @@ var KEY_RE          = /^[^\|<]+/,
     FILTERS_RE      = /\|[^\|<]+/g,
     FILTER_TOKEN_RE = /[^\s']+|'[^']+'/g,
     DEPS_RE         = /<[^<\|]+/g,
+    INVERSE_RE      = /^!/
     NESTING_RE      = /^\^+/
 
 // parse a key, extract argument and nesting/root info
@@ -22,6 +23,11 @@ function parseKey (rawKey) {
     res.arg = argMatch
         ? argMatch[1].trim()
         : null
+
+    res.inverse = INVERSE_RE.test(res.key)
+    if (res.inverse) {
+        res.key = res.key.slice(1)
+    }
 
     var nesting = res.key.match(NESTING_RE)
     res.nesting = nesting
@@ -96,6 +102,7 @@ function Directive (directiveName, expression) {
 Directive.prototype.refresh = function () {
     if (this.value) {
         var value = this.value.call(this.seed.scope)
+        if (this.inverse) value = !value
         this._update(
             this.filters
             ? this.applyFilters(value)
@@ -115,6 +122,7 @@ Directive.prototype.update = function (value) {
     if (typeof value === 'function' && !this.fn) {
         value = value()
     }
+    if (this.inverse) value = !value
     this._update(
         this.filters
         ? this.applyFilters(value)

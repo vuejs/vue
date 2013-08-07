@@ -83,13 +83,12 @@ Seed.prototype._compileNode = function (node, root) {
 
         } else if (ctrlExp && !root) { // nested controllers
 
-            var id = node.id,
-                seed = new Seed(node, {
-                    child: true,
-                    parentSeed: seed
-                })
-            if (id) {
-                seed['$' + id] = seed
+            var child = new Seed(node, {
+                child: true,
+                parentSeed: seed
+            })
+            if (node.id) {
+                seed['$' + node.id] = child
             }
 
         } else { // normal node
