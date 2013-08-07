@@ -7,6 +7,13 @@ var slice           = Array.prototype.slice,
     ctrlAttr        = config.prefix + '-controller',
     eachAttr        = config.prefix + '-each'
 
+var depsObserver    = new Emitter(),
+    parsingDeps     = false
+
+/*
+ *  The main ViewModel class
+ *  scans a node and parse it to populate data bindings
+ */
 function Seed (el, options) {
 
     if (typeof el === 'string') {
@@ -16,6 +23,7 @@ function Seed (el, options) {
     this.el         = el
     el.seed         = this
     this._bindings  = {}
+    this._computed  = []
 
     // copy options
     options = options || {}
@@ -37,6 +45,7 @@ function Seed (el, options) {
         scope = this.scope = scope.$dump()
     }
 
+    // expose some useful stuff on the scope
     scope.$seed     = this
     scope.$destroy  = this._destroy.bind(this)
     scope.$dump     = this._dump.bind(this)
@@ -44,13 +53,14 @@ function Seed (el, options) {
     scope.$parent   = options.parentSeed && options.parentSeed.scope
     scope.$refresh  = this._refreshBinding.bind(this)
 
-    // update bindings when a property is set
+    // add event listener to update corresponding binding
+    // when a property is set
     this.on('set', this._updateBinding.bind(this))
 
-    // revursively compile nodes for directives
+    // now parse the DOM
     this._compileNode(el, true)
 
-    // if has controller, apply it
+    // if has controller function, apply it
     var ctrlID = el.getAttribute(ctrlAttr)
     if (ctrlID) {
         el.removeAttribute(ctrlAttr)
@@ -61,8 +71,17 @@ function Seed (el, options) {
             console.warn('controller ' + ctrlID + ' is not defined.')
         }
     }
+
+    // extract dependencies for computed properties
+    parsingDeps = true
+    this._computed.forEach(this._parseDeps.bind(this))
+    delete this._computed
+    parsingDeps = false
 }
 
+/*
+ *  Compile a node (recursive)
+ */
 Seed.prototype._compileNode = function (node, root) {
     var seed = this
 
@@ -77,9 +96,10 @@ Seed.prototype._compileNode = function (node, root) {
 
         if (eachExp) { // each block
 
-            var binding = DirectiveParser.parse(eachAttr, eachExp)
-            if (binding) {
-                seed._bind(node, binding)
+            var directive = DirectiveParser.parse(eachAttr, eachExp)
+            if (directive) {
+                directive.el = node
+                seed._bind(directive)
             }
 
         } else if (ctrlExp && !root) { // nested controllers
@@ -103,7 +123,8 @@ Seed.prototype._compileNode = function (node, root) {
                         var directive = DirectiveParser.parse(attr.name, exp)
                         if (directive) {
                             valid = true
-                            seed._bind(node, directive)
+                            directive.el = node
+                            seed._bind(directive)
                         }
                     })
                     if (valid) node.removeAttribute(attr.name)
@@ -120,13 +141,18 @@ Seed.prototype._compileNode = function (node, root) {
     }
 }
 
+/*
+ *  Compile a text node
+ */
 Seed.prototype._compileTextNode = function (node) {
     return TextNodeParser.parse(node)
 }
 
-Seed.prototype._bind = function (node, directive) {
+/*
+ *  Add a directive instance to the correct binding & scope
+ */
+Seed.prototype._bind = function (directive) {
 
-    directive.el   = node
     directive.seed = this
 
     var key = directive.key,
@@ -159,43 +185,24 @@ Seed.prototype._bind = function (node, directive) {
     // set initial value
     directive.update(binding.value)
 
-    // computed properties
-    if (directive.deps) {
-        directive.deps.forEach(function (dep) {
-            var depScope = determinScope(dep, scope),
-                depBinding =
-                    depScope._bindings[dep.key] ||
-                    depScope._createBinding(dep.key)
-            if (!depBinding.dependents) {
-                depBinding.dependents = []
-                depBinding.refreshDependents = function () {
-                    depBinding.dependents.forEach(function (dept) {
-                        dept.refresh()
-                    })
-                }
-            }
-            depBinding.dependents.push(directive)
-        })
-    }
-
 }
 
 Seed.prototype._createBinding = function (key) {
 
-    var binding = {
-        value: this.scope[key],
-        changed: false,
-        instances: []
-    }
-
+    var binding = new Binding(this.scope[key])
     this._bindings[key] = binding
 
     // bind accessor triggers to scope
     var seed = this
     Object.defineProperty(this.scope, key, {
         get: function () {
+            if (parsingDeps) {
+                depsObserver.emit('get', binding)
+            }
             seed.emit('get', key)
-            return binding.value
+            return binding.isComputed
+                ? binding.value()
+                : binding.value
         },
         set: function (value) {
             if (value === binding.value) return
@@ -209,11 +216,13 @@ Seed.prototype._createBinding = function (key) {
 Seed.prototype._updateBinding = function (key, value) {
 
     var binding = this._bindings[key],
-        type = typeOf(value)
+        type = binding.type = typeOf(value)
 
+    // preprocess the value depending on its type
     if (type === 'Object') {
         if (value.get) { // computed property
-            type = 'Computed'
+            this._computed.push(binding)
+            binding.isComputed = true
             value = value.get
         } else { // normal object
             // TODO watchObject
@@ -221,15 +230,11 @@ Seed.prototype._updateBinding = function (key, value) {
     } else if (type === 'Array') {
         watchArray(value)
         value.on('mutate', function () {
-            if (binding.dependents) {
-                binding.refreshDependents()
-            }
+            binding.emitChange()
         })
     }
 
-    binding.type = type
     binding.value = value
-    binding.changed = true
 
     // update all instances
     binding.instances.forEach(function (instance) {
@@ -237,10 +242,7 @@ Seed.prototype._updateBinding = function (key, value) {
     })
 
     // notify dependents to refresh themselves
-    if (binding.dependents) {
-        binding.refreshDependents()
-    }
-
+    binding.emitChange()
 }
 
 Seed.prototype._refreshBinding = function (key) {
@@ -248,6 +250,17 @@ Seed.prototype._refreshBinding = function (key) {
     binding.instances.forEach(function (instance) {
         instance.refresh()
     })
+}
+
+Seed.prototype._parseDeps = function (binding) {
+    depsObserver.on('get', function (dep) {
+        if (!dep.dependents) {
+            dep.dependents = []
+        }
+        dep.dependents.push.apply(dep.dependents, binding.instances)
+    })
+    binding.value()
+    depsObserver.off('get')
 }
 
 Seed.prototype._unbind = function () {
@@ -281,7 +294,7 @@ Seed.prototype._dump = function () {
             if (!val) continue
             if (Array.isArray(val)) {
                 dump[key] = val.map(subDump)
-            } else {
+            } else if (typeof val !== 'function') {
                 dump[key] = this._bindings[key].value
             }
         }
@@ -289,10 +302,27 @@ Seed.prototype._dump = function () {
     return dump
 }
 
+/*
+ *  Binding class
+ */
+ function Binding (value) {
+    this.value = value
+    this.instances = []
+    this.dependents = []
+ }
+
+ Binding.prototype.emitChange = function () {
+     this.dependents.forEach(function (dept) {
+         dept.refresh()
+     })
+ }
+
 // Helpers --------------------------------------------------------------------
 
-// determine which scope a key belongs to
-// based on nesting symbols
+/*
+ *  determinScope()
+ *  determine which scope a key belongs to based on nesting symbols
+ */
 function determinScope (key, scope) {
     if (key.nesting) {
         var levels = key.nesting
@@ -307,13 +337,19 @@ function determinScope (key, scope) {
     return scope
 }
 
-// get accurate type of an object
+/* 
+ *  typeOf()
+ *  get accurate type of an object
+ */
 var OtoString = Object.prototype.toString
 function typeOf (obj) {
     return OtoString.call(obj).slice(8, -1)
 }
 
-// augment an Array so that it emit events when mutated
+/*
+ *  watchArray()
+ *  augment an Array so that it emit events when mutated
+ */
 var arrayMutators = ['push','pop','shift','unshift','splice','sort','reverse']
 var arrayAugmentations = {
     remove: function (scope) {

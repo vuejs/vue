@@ -23,7 +23,7 @@ Seed.controller('Todos', function (scope) {
     }}
 
     scope.completed = {get: function () {
-        return scope.total() - scope.remaining
+        return scope.total - scope.remaining
     }}
 
     scope.itemLabel = {get: function () {
@@ -66,7 +66,7 @@ Seed.controller('Todos', function (scope) {
         scope.todos.forEach(function (todo) {
             todo.done = e.el.checked
         })
-        scope.remaining = e.el.checked ? 0 : scope.total()
+        scope.remaining = e.el.checked ? 0 : scope.total
     }
 
     scope.removeCompleted = function () {
