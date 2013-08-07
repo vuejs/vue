@@ -39,8 +39,10 @@ api.bootstrap = function (opts) {
     if (opts) {
         config.prefix = opts.prefix || config.prefix
     }
-    var app = {}, n = 0, el, seed
-    while (el = document.querySelector('[' + config.prefix + '-controller]')) {
+    var app = {}, n = 0, el, seed,
+        selector = '[' + config.prefix + '-controller]'
+    /* jshint boss: true */
+    while (el = document.querySelector(selector)) {
         seed = new Seed(el)
         if (el.id) {
             app['$' + el.id] = seed

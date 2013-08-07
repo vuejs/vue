@@ -14,7 +14,7 @@ module.exports = {
     },
 
     hide: function (value) {
-        this.el.style.display = value ? 'none' : ''  
+        this.el.style.display = value ? 'none' : ''
     },
 
     focus: function (value) {
