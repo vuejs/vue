@@ -1,5 +1,6 @@
 - parse textNodes?
 - method invoke with arguments
+- limited set of expressions (e.g. ternary operator)
 - more directives / filters
     - sd-if
     - sd-route
