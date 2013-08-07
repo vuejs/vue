@@ -1,5 +1,8 @@
+- getter setter should emit events
+- auto dependency extraction for computed properties (evaluate, record triggered getters)
+- use descriptor for computed properties
+
 - parse textNodes?
-- method invoke with arguments
 - limited set of expressions (e.g. ternary operator)
 - more directives / filters
     - sd-if

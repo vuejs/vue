@@ -11,7 +11,7 @@ Seed.controller('Todos', function (scope) {
 
     // regular properties -----------------------------------------------------
     scope.todos = todos
-    scope.filter = 'all'
+    scope.filter = window.location.hash.slice(2)
     scope.allDone = false
     scope.remaining = todos.reduce(function (count, todo) {
         return count + (todo.done ? 0 : 1)
