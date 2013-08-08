@@ -1,14 +1,3 @@
-var matches = 'atchesSelector',
-    prefixes = ['m', 'webkitM', 'mozM', 'msM']
-
-prefixes.some(function (prefix) {
-    var match = prefix + matches
-    if (document.body[match]) {
-        matches = match
-        return true
-    }
-})
-
 function delegateCheck (current, top, marker) {
     if (current[marker]) {
         return current
