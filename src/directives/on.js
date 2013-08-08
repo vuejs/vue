@@ -38,7 +38,7 @@ module.exports = {
         if (this.seed.each && event !== 'blur') {
             // for each blocks, delegate for better performance
             // blur events dont bubble so exclude them
-            var delegator = this.seed.el.parentNode
+            var delegator = this.seed.delegator
             if (!delegator) return
             var marker    = this.expression,
                 dHandler  = delegator.sdDelegationHandlers[marker]

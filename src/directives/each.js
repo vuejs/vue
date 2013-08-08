@@ -101,7 +101,8 @@ module.exports = {
                 eachPrefixRE: new RegExp('^' + this.arg + '.'),
                 parentSeed: this.seed,
                 index: index,
-                data: data
+                data: data,
+                delegator: this.delegator
             })
         this.collection[index] = spore.scope
         return spore
@@ -113,21 +114,21 @@ module.exports = {
         })
     },
 
-    unbind: function (rm) {
+    unbind: function (reset) {
         if (this.collection && this.collection.length) {
-            var fn = rm ? '_destroy' : '_unbind'
+            var fn = reset ? '_destroy' : '_unbind'
             this.collection.forEach(function (scope) {
                 scope.$seed[fn]()
             })
             this.collection = null
         }
         var delegator = this.delegator
-        if (!delegator) return
-        var handlers = delegator.sdDelegationHandlers
-        for (var key in handlers) {
-            console.log('remove: ' + key)
-            delegator.removeEventListener(handlers[key].event, handlers[key])
+        if (delegator) {
+            var handlers = delegator.sdDelegationHandlers
+            for (var key in handlers) {
+                delegator.removeEventListener(handlers[key].event, handlers[key])
+            }
+            delete delegator.sdDelegationHandlers
         }
-        delete delegator.sdDelegationHandlers
     }
 }
