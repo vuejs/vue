@@ -1,4 +1,4 @@
-var Emitter = require('emitter')
+var Emitter  = require('emitter')
 
 /*
  *  Binding class
@@ -43,7 +43,7 @@ Binding.prototype.update = function (value) {
 }
 
 /*
- *  Notify computed properties that depends on this binding
+ *  Notify computed properties that depend on this binding
  *  to update themselves
  */
 Binding.prototype.emitChange = function () {
@@ -55,35 +55,36 @@ Binding.prototype.emitChange = function () {
 /*
  *  get accurate type of an object
  */
-var OtoString = Object.prototype.toString
+var toString = Object.prototype.toString
 function typeOf (obj) {
-    return OtoString.call(obj).slice(8, -1)
+    return toString.call(obj).slice(8, -1)
 }
 
 /*
  *  augment an Array so that it emit events when mutated
  */
-var arrayMutators = ['push','pop','shift','unshift','splice','sort','reverse']
-var arrayAugmentations = {
-    remove: function (scope) {
-        this.splice(scope.$index, 1)
-    },
-    replace: function (index, data) {
-        if (typeof index !== 'number') {
-            index = index.$index
+var aproto = Array.prototype,
+    arrayMutators = ['push','pop','shift','unshift','splice','sort','reverse'],
+    arrayAugmentations = {
+        remove: function (scope) {
+            this.splice(scope.$index, 1)
+        },
+        replace: function (index, data) {
+            if (typeof index !== 'number') {
+                index = index.$index
+            }
+            this.splice(index, 1, data)
         }
-        this.splice(index, 1, data)
     }
-}
 
 function watchArray (collection) {
     Emitter(collection)
     arrayMutators.forEach(function (method) {
         collection[method] = function () {
-            var result = Array.prototype[method].apply(this, arguments)
+            var result = aproto[method].apply(this, arguments)
             collection.emit('mutate', {
                 method: method,
-                args: Array.prototype.slice.call(arguments),
+                args: aproto.slice.call(arguments),
                 result: result
             })
         }
