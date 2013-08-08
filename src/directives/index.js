@@ -57,5 +57,23 @@ module.exports = {
         unbind: function () {
             this.el.removeEventListener('change', this.change)
         }
+    },
+
+    'if': {
+        bind: function () {
+            this.parent = this.el.parentNode
+            this.ref = this.el.nextSibling
+        },
+        update: function (value) {
+            if (!value) {
+                if (this.el.parentNode) {
+                    this.parent.removeChild(this.el)
+                }
+            } else {
+                if (!this.el.parentNode) {
+                    this.parent.insertBefore(this.el, this.ref)
+                }
+            }
+        }
     }
 }
