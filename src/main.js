@@ -1,7 +1,8 @@
 var config      = require('./config'),
     Seed        = require('./seed'),
     directives  = require('./directives'),
-    filters     = require('./filters')
+    filters     = require('./filters'),
+    textParser  = require('./text-parser')
 
 var controllers = config.controllers,
     datum       = config.datum,
@@ -61,6 +62,7 @@ api.bootstrap = function (opts) {
             }
         }
     }
+    textParser.buildRegex()
     var el,
         ctrlSlt = '[' + config.prefix + '-controller]',
         dataSlt = '[' + config.prefix + '-data]'

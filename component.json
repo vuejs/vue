@@ -8,7 +8,7 @@
     "src/seed.js",
     "src/binding.js",
     "src/directive.js",
-    "src/textnode-parser.js",
+    "src/text-parser.js",
     "src/filters.js",
     "src/directives/index.js",
     "src/directives/each.js",

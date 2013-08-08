@@ -55,6 +55,7 @@ module.exports = {
 
     value: {
         bind: function () {
+            if (this.oneway) return
             var el = this.el, self = this
             this.change = function () {
                 self.seed.scope[self.key] = el.value
@@ -65,12 +66,14 @@ module.exports = {
             this.el.value = value
         },
         unbind: function () {
+            if (this.oneway) return
             this.el.removeEventListener('change', this.change)
         }
     },
 
     checked: {
         bind: function () {
+            if (this.oneway) return
             var el = this.el, self = this
             this.change = function () {
                 self.seed.scope[self.key] = el.checked
@@ -81,6 +84,7 @@ module.exports = {
             this.el.checked = !!value
         },
         unbind: function () {
+            if (this.oneway) return
             this.el.removeEventListener('change', this.change)
         }
     },
@@ -88,7 +92,13 @@ module.exports = {
     'if': {
         bind: function () {
             this.parent = this.el.parentNode
-            this.ref = this.el.nextSibling
+            this.ref = document.createComment('sd-if-' + this.key)
+            var next = this.el.nextSibling
+            if (next) {
+                this.parent.insertBefore(this.ref, next)
+            } else {
+                this.parent.appendChild(this.ref)
+            }
         },
         update: function (value) {
             if (!value) {

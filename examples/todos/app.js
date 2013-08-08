@@ -15,7 +15,6 @@ Seed.controller('Todos', function (scope) {
     scope.remaining = todos.reduce(function (count, todo) {
         return count + (todo.done ? 0 : 1)
     }, 0)
-    scope.allDone = scope.remaining === 0
 
     // computed properties ----------------------------------------------------
     scope.total = {get: function () {
@@ -28,6 +27,10 @@ Seed.controller('Todos', function (scope) {
 
     scope.itemLabel = {get: function () {
         return scope.remaining > 1 ? 'items' : 'item'
+    }}
+
+    scope.allDone = {get: function () {
+        return scope.remaining === 0
     }}
 
     // event handlers ---------------------------------------------------------
@@ -47,7 +50,6 @@ Seed.controller('Todos', function (scope) {
 
     scope.updateCount = function (e) {
         scope.remaining += e.scope.done ? -1 : 1
-        scope.allDone = scope.remaining === 0
     }
 
     scope.edit = function (e) {

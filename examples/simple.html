@@ -6,7 +6,8 @@
         <script src="../dist/seed.js"></script>
     </head>
     <body sd-controller="hello">
-        <span sd-text="hello" sd-style="text-transform:format"></span>
+        <input type="checkbox" sd-checked="ok" checked>
+        <span sd-text="hello" sd-style="text-transform:format" sd-if="ok"></span>
         <script>
             var Seed = require('seed')
             Seed.controller('hello', function (scope) {

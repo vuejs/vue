@@ -2,7 +2,7 @@ var config          = require('./config'),
     Emitter         = require('emitter'),
     Binding         = require('./binding'),
     Directive       = require('./directive'),
-    TextNodeParser  = require('./textnode-parser')
+    TextParser      = require('./text-parser')
 
 var slice           = Array.prototype.slice,
     ctrlAttr        = config.prefix + '-controller',
@@ -122,6 +122,8 @@ Seed.prototype._compileNode = function (node, root) {
 
             // parse if has attributes
             if (node.attributes && node.attributes.length) {
+                // forEach vs for loop perf comparison: http://jsperf.com/for-vs-foreach-case
+                // takeaway: not worth it to wrtie manual loops.
                 slice.call(node.attributes).forEach(function (attr) {
                     if (attr.name === ctrlAttr) return
                     var valid = false
@@ -151,7 +153,7 @@ Seed.prototype._compileNode = function (node, root) {
  *  Compile a text node
  */
 Seed.prototype._compileTextNode = function (node) {
-    return TextNodeParser.parse(node)
+    return TextParser.parse(node)
 }
 
 /*
