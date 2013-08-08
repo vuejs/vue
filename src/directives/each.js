@@ -73,13 +73,16 @@ module.exports = {
         var ctn = this.container = this.el.parentNode
         this.marker = document.createComment('sd-each-' + this.arg)
         ctn.insertBefore(this.marker, this.el)
+        this.delegator = this.el.parentNode
         ctn.removeChild(this.el)
     },
 
     update: function (collection) {
         this.unbind(true)
+        // for event delegation
         if (!Array.isArray(collection)) return
         this.collection = collection
+        this.delegator.sdDelegationHandlers = {}
         var self = this
         collection.on('mutate', function (mutation) {
             mutationHandlers[mutation.method].call(self, mutation)
@@ -118,5 +121,13 @@ module.exports = {
             })
             this.collection = null
         }
+        var delegator = this.delegator
+        if (!delegator) return
+        var handlers = delegator.sdDelegationHandlers
+        for (var key in handlers) {
+            console.log('remove: ' + key)
+            delegator.removeEventListener(handlers[key].event, handlers[key])
+        }
+        delete delegator.sdDelegationHandlers
     }
 }

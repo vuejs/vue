@@ -31,21 +31,21 @@ function Seed (el, options) {
         this[op] = options[op]
     }
 
-    // initialize the scope object
-    var dataPrefix = config.prefix + '-data'
-    var scope = this.scope =
-            (options && options.data)
-            || config.datum[el.getAttribute(dataPrefix)]
-            || {}
-    el.removeAttribute(dataPrefix)
+    // check if there's passed in data
+    var dataAttr = config.prefix + '-data',
+        dataId = el.getAttribute(dataAttr),
+        data = (options && options.data) || config.datum[dataId]
+    el.removeAttribute(dataAttr)
 
-    // if the passed in data is already consumed by
-    // a Seed instance, make a copy from it
-    if (scope.$seed) {
-        scope = this.scope = scope.$dump()
+    // if the passed in data is the scope of a Seed instance,
+    // make a copy from it
+    if (data && data.$seed instanceof Seed) {
+        data = data.$dump()
     }
 
-    // expose some useful stuff on the scope
+    // initialize the scope object
+    var scope = this.scope = {}
+    scope.$el       = el
     scope.$seed     = this
     scope.$destroy  = this._destroy.bind(this)
     scope.$dump     = this._dump.bind(this)
@@ -58,6 +58,13 @@ function Seed (el, options) {
 
     // now parse the DOM
     this._compileNode(el, true)
+
+    // copy data
+    if (data) {
+        for (var key in data) {
+            scope[key] = data[key]
+        }
+    }
 
     // if has controller function, apply it
     var ctrlID = el.getAttribute(ctrlAttr)
@@ -79,7 +86,7 @@ function Seed (el, options) {
 }
 
 /*
- *  Compile a node (recursive)
+ *  Compile a DOM node (recursive)
  */
 Seed.prototype._compileNode = function (node, root) {
     var seed = this
@@ -103,13 +110,10 @@ Seed.prototype._compileNode = function (node, root) {
 
         } else if (ctrlExp && !root) { // nested controllers
 
-            var child = new Seed(node, {
+            new Seed(node, {
                 child: true,
                 parentSeed: seed
             })
-            if (node.id) {
-                seed['$' + node.id] = child
-            }
 
         } else { // normal node
 
@@ -155,22 +159,18 @@ Seed.prototype._bind = function (directive) {
     directive.seed = this
 
     var key = directive.key,
-        epr = this.eachPrefixRE,
-        isEachKey = epr && epr.test(key),
-        scope = this
+        seed = this
 
-    if (isEachKey) {
-        key = directive.key = key.replace(epr, '')
+    if (this.each) {
+        if (this.eachPrefixRE.test(key)) {
+            key = directive.key = key.replace(this.eachPrefixRE, '')
+        } else {
+            seed = this.parentSeed
+        }
     }
 
-    if (epr && !isEachKey) {
-        scope = this.parentSeed
-    }
-
-    var ownerScope = determinScope(directive, scope),
-        binding =
-            ownerScope._bindings[key] ||
-            ownerScope._createBinding(key)
+    var ownerScope = determinScope(directive, seed),
+        binding = ownerScope._bindings[key] || ownerScope._createBinding(key)
 
     // add directive to this binding
     binding.instances.push(directive)
@@ -180,18 +180,16 @@ Seed.prototype._bind = function (directive) {
     if (directive.bind) {
         directive.bind(binding.value)
     }
-
-    // set initial value
-    directive.update(binding.value)
-
 }
 
+/*
+ *  Create binding and attach getter/setter for a key to the scope object
+ */
 Seed.prototype._createBinding = function (key) {
 
-    var binding = new Binding(this.scope[key])
+    var binding = new Binding()
     this._bindings[key] = binding
 
-    // bind accessor triggers to scope
     var seed = this
     Object.defineProperty(this.scope, key, {
         get: function () {
@@ -200,7 +198,7 @@ Seed.prototype._createBinding = function (key) {
             }
             seed.emit('get', key)
             return binding.isComputed
-                ? binding.value()
+                ? binding.value.get()
                 : binding.value
         },
         set: function (value) {
@@ -212,6 +210,10 @@ Seed.prototype._createBinding = function (key) {
     return binding
 }
 
+/*
+ *  Update a binding with a new value.
+ *  Triggered in the binding's setter.
+ */
 Seed.prototype._updateBinding = function (key, value) {
 
     var binding = this._bindings[key],
@@ -222,7 +224,6 @@ Seed.prototype._updateBinding = function (key, value) {
         if (value.get) { // computed property
             this._computed.push(binding)
             binding.isComputed = true
-            value = value.get
         } else { // normal object
             // TODO watchObject
         }
@@ -233,17 +234,13 @@ Seed.prototype._updateBinding = function (key, value) {
         })
     }
 
-    binding.value = value
-
-    // update all instances
-    binding.instances.forEach(function (instance) {
-        instance.update(value)
-    })
-
-    // notify dependents to refresh themselves
-    binding.emitChange()
+    binding.update(value)
 }
 
+/*
+ *  Auto-extract the dependencies of a computed property
+ *  by recording the getters triggered when evaluating it
+ */
 Seed.prototype._parseDeps = function (binding) {
     depsObserver.on('get', function (dep) {
         if (!dep.dependents) {
@@ -251,10 +248,14 @@ Seed.prototype._parseDeps = function (binding) {
         }
         dep.dependents.push.apply(dep.dependents, binding.instances)
     })
-    binding.value()
+    binding.value.get()
     depsObserver.off('get')
 }
 
+/*
+ *  Call unbind() of all directive instances
+ *  to remove event listeners, destroy child seeds, etc.
+ */
 Seed.prototype._unbind = function () {
     var unbind = function (instance) {
         if (instance.unbind) {
@@ -266,15 +267,17 @@ Seed.prototype._unbind = function () {
     }
 }
 
+/*
+ *  Unbind and remove element
+ */
 Seed.prototype._destroy = function () {
     this._unbind()
-    delete this.el.seed
     this.el.parentNode.removeChild(this.el)
-    if (this.parentSeed && this.id) {
-        delete this.parentSeed['$' + this.id]
-    }
 }
 
+/*
+ *  Dump a copy of current scope data, excluding seed-exposed properties.
+ */
 Seed.prototype._dump = function () {
     var dump = {}, binding, val,
         subDump = function (scope) {
@@ -289,7 +292,7 @@ Seed.prototype._dump = function () {
         } else if (typeof val !== 'function') {
             dump[key] = val
         } else if (binding.isComputed) {
-            dump[key] = val()
+            dump[key] = val.get()
         }
     }
     return dump
@@ -298,10 +301,22 @@ Seed.prototype._dump = function () {
 /*
  *  Binding class
  */
- function Binding (value) {
-    this.value = value
+ function Binding () {
+    this.value = undefined
     this.instances = []
     this.dependents = []
+ }
+
+ Binding.prototype.update = function (value) {
+     if (value === undefined) {
+        value = this.value
+    } else {
+        this.value = value
+    }
+     this.instances.forEach(function (instance) {
+         instance.update(value)
+     })
+     this.emitChange()
  }
 
  Binding.prototype.emitChange = function () {
@@ -313,25 +328,23 @@ Seed.prototype._dump = function () {
 // Helpers --------------------------------------------------------------------
 
 /*
- *  determinScope()
  *  determine which scope a key belongs to based on nesting symbols
  */
-function determinScope (key, scope) {
+function determinScope (key, seed) {
     if (key.nesting) {
         var levels = key.nesting
-        while (scope.parentSeed && levels--) {
-            scope = scope.parentSeed
+        while (seed.parentSeed && levels--) {
+            seed = seed.parentSeed
         }
     } else if (key.root) {
-        while (scope.parentSeed) {
-            scope = scope.parentSeed
+        while (seed.parentSeed) {
+            seed = seed.parentSeed
         }
     }
-    return scope
+    return seed
 }
 
-/* 
- *  typeOf()
+/*
  *  get accurate type of an object
  */
 var OtoString = Object.prototype.toString
@@ -340,7 +353,6 @@ function typeOf (obj) {
 }
 
 /*
- *  watchArray()
  *  augment an Array so that it emit events when mutated
  */
 var arrayMutators = ['push','pop','shift','unshift','splice','sort','reverse']

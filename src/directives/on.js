@@ -1,5 +1,3 @@
-// sniff matchesSelector() method name.
-
 var matches = 'atchesSelector',
     prefixes = ['m', 'webkitM', 'mozM', 'msM']
 
@@ -11,13 +9,13 @@ prefixes.some(function (prefix) {
     }
 })
 
-function delegateCheck (current, top, selector) {
-    if (current.webkitMatchesSelector(selector)) {
+function delegateCheck (current, top, marker) {
+    if (current[marker]) {
         return current
     } else if (current === top) {
         return false
     } else {
-        return delegateCheck(current.parentNode, top, selector)
+        return delegateCheck(current.parentNode, top, marker)
     }
 }
 
@@ -27,8 +25,8 @@ module.exports = {
 
     bind: function () {
         if (this.seed.each) {
-            this.selector = '[' + this.directiveName + '*="' + this.expression + '"]'
-            this.delegator = this.seed.el.parentNode
+            this.el[this.expression] = true
+            this.el.seed = this.seed
         }
     },
 
@@ -36,50 +34,46 @@ module.exports = {
         this.unbind()
         if (!handler) return
         var self  = this,
-            event = this.arg,
-            selector  = this.selector,
-            delegator = this.delegator
-        if (delegator) {
-
+            event = this.arg
+        if (this.seed.each && event !== 'blur') {
             // for each blocks, delegate for better performance
-            if (!delegator[selector]) {
-                console.log('binding listener')
-                delegator[selector] = function (e) {
-                    var target = delegateCheck(e.target, delegator, selector)
+            // blur events dont bubble so exclude them
+            var delegator = this.seed.el.parentNode
+            if (!delegator) return
+            var marker    = this.expression,
+                dHandler  = delegator.sdDelegationHandlers[marker]
+            // this only gets run once!!!
+            if (!dHandler) {
+                dHandler = delegator.sdDelegationHandlers[marker] = function (e) {
+                    var target = delegateCheck(e.target, delegator, marker)
                     if (target) {
-                        handler.call(self.seed.scope, {
+                        handler({
                             originalEvent : e,
                             el            : target,
                             scope         : target.seed.scope
                         })
                     }
                 }
-                delegator.addEventListener(event, delegator[selector])
+                dHandler.event = event
+                delegator.addEventListener(event, dHandler)
             }
 
         } else {
-
             // a normal handler
             this.handler = function (e) {
-                handler.call(self.seed.scope, {
+                handler({
                     originalEvent : e,
                     el            : e.currentTarget,
                     scope         : self.seed.scope
                 })
             }
             this.el.addEventListener(event, this.handler)
-
         }
     },
 
     unbind: function () {
-        var event = this.arg,
-            selector  = this.selector,
-            delegator = this.delegator
-        if (delegator && delegator[selector]) {
-            delegator.removeEventListener(event, delegator[selector])
-            delete delegator[selector]
-        } else if (this.handler) {
+        var event = this.arg
+        if (this.handler) {
             this.el.removeEventListener(event, this.handler)
         }
     }

@@ -3,14 +3,18 @@ module.exports = function( grunt ) {
     grunt.initConfig({
 
         component_build: {
-            build: {
+            dev: {
                 output: './dist/',
                 name: 'seed',
                 dev: true,
                 sourceUrls: true,
                 styles: false,
-                scripts: true,
                 verbose: true
+            },
+            build: {
+                output: './dist/',
+                name: 'seed',
+                styles: false
             }
         },
 
@@ -51,7 +55,7 @@ module.exports = function( grunt ) {
             },
             component: {
                 files: ['src/**/*.js', 'component.json'],
-                tasks: 'component_build'
+                tasks: 'component_build:dev'
             }
         }
 
@@ -63,6 +67,6 @@ module.exports = function( grunt ) {
     grunt.loadNpmTasks( 'grunt-component-build' )
     grunt.loadNpmTasks( 'grunt-mocha' )
     grunt.registerTask( 'test', ['mocha'] )
-    grunt.registerTask( 'default', ['jshint', 'component_build', 'uglify'] )
+    grunt.registerTask( 'default', ['jshint', 'component_build:build', 'uglify'] )
     
 }
