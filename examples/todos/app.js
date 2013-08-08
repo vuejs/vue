@@ -77,4 +77,8 @@ Seed.controller('Todos', function (scope) {
 
 })
 
+var s = Date.now()
+
 Seed.bootstrap()
+
+console.log(Date.now() - s)

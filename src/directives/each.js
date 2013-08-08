@@ -19,7 +19,7 @@ var mutationHandlers = {
         m.args.forEach(function (data, i) {
             var seed = self.buildItem(data, i),
                 ref  = self.collection.length > m.args.length
-                     ? self.collection[m.args.length].$seed.el
+                     ? self.collection[m.args.length].$el
                      : self.marker
             self.container.insertBefore(seed.el, ref)
         })
@@ -45,7 +45,7 @@ var mutationHandlers = {
                 var seed = self.buildItem(data, index + i),
                     pos  = index - removed + added + 1,
                     ref  = self.collection[pos]
-                         ? self.collection[pos].$seed.el
+                         ? self.collection[pos].$el
                          : self.marker
                 self.container.insertBefore(seed.el, ref)
             })
@@ -59,7 +59,7 @@ var mutationHandlers = {
         var self = this
         self.collection.forEach(function (scope, i) {
             scope.$index = i
-            self.container.insertBefore(scope.$seed.el, self.marker)
+            self.container.insertBefore(scope.$el, self.marker)
         })
     }
 }

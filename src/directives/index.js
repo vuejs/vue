@@ -13,10 +13,20 @@ module.exports = {
     on    : require('./on'),
     each  : require('./each'),
 
+    attr: function (value) {
+        this.el.setAttribute(this.arg, value)  
+    },
+
     text: function (value) {
         this.el.textContent =
-            (value !== null && value !== undefined)
-            ? value.toString() : ''
+            (typeof value === 'string' || typeof value === 'number')
+            ? value : ''
+    },
+
+    html: function (value) {
+        this.el.innerHTML =
+            (typeof value === 'string' || typeof value === 'number')
+            ? value : ''
     },
 
     show: function (value) {
@@ -35,7 +45,9 @@ module.exports = {
         if (this.arg) {
             this.el.classList[value ? 'add' : 'remove'](this.arg)
         } else {
-            this.el.classList.remove(this.lastVal)
+            if (this.lastVal) {
+                this.el.classList.remove(this.lastVal)
+            }
             this.el.classList.add(value)
             this.lastVal = value
         }
