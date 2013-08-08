@@ -1,6 +1,6 @@
 var config     = require('./config'),
     ESCAPE_RE  = /[-.*+?^${}()|[\]\/\\]/g,
-    BINDING_RE = undefined
+    BINDING_RE
 
 function escapeRegex (val) {
     return val.replace(ESCAPE_RE, '\\$&')

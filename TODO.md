@@ -1,4 +1,3 @@
-- parse textNodes
 - sd-with
 - standarized way to reuse components (sd-component?)
 - nested properties in scope (kinda hard, maybe later)

@@ -1,10 +1,12 @@
-WIP, playing with data binding
+# Seed
+## a mini MVVM framework
 
+- 5kb gzipped!
 - DOM based templates with precise and efficient manipulation
-- Keep logic expressions outside of the templates.
-- POJSO (plain old javascript objects) FTW.
+- POJSO (Plain Old JavaScript Objects) FTW.
 - Auto dependency extraction for computed properties.
 - Auto event delegation on repeated items.
+- Component based, but can also be used alone.
 
 ### Template
 

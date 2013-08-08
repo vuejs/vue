@@ -14,7 +14,7 @@ module.exports = {
     each  : require('./each'),
 
     attr: function (value) {
-        this.el.setAttribute(this.arg, value)  
+        this.el.setAttribute(this.arg, value)
     },
 
     text: function (value) {
