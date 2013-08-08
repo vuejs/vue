@@ -60,9 +60,7 @@
             <!-- footer controls -->
             <footer id="footer" sd-show="total">
                 <span id="todo-count">
-                    <strong sd-text="remaining"></strong>
-                    <span sd-text="itemLabel"></span>
-                    left
+                    <strong sd-text="remaining"></strong> {{itemLabel}} left
                 </span>
                 <ul id="filters">
                     <li><a href="#/all" data-filter="all" sd-on="click:setFilter">All</a></li>
@@ -70,7 +68,7 @@
                     <li><a href="#/completed" data-filter="completed" sd-on="click:setFilter">Completed</a></li>
                 </ul>
                 <button id="clear-completed" sd-on="click:removeCompleted">
-                    Remove Completed (<span sd-text="completed"></span>)
+                    Remove Completed ({{completed}})
                 </button>
             </footer>
 

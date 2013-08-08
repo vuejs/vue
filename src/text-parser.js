@@ -1,13 +1,10 @@
-var config = require('./config')
-
-var ESCAPE_RE = /[-.*+?^${}()|[\]\/\\]/g,
+var config     = require('./config'),
+    ESCAPE_RE  = /[-.*+?^${}()|[\]\/\\]/g,
     BINDING_RE = undefined
 
 function escapeRegex (val) {
     return val.replace(ESCAPE_RE, '\\$&')
 }
-
-"this is {{cool}} hahah {{todo.but}} 123 {{total}}"
 
 module.exports = {
 

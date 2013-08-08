@@ -153,7 +153,23 @@ Seed.prototype._compileNode = function (node, root) {
  *  Compile a text node
  */
 Seed.prototype._compileTextNode = function (node) {
-    return TextParser.parse(node)
+    var tokens = TextParser.parse(node)
+    if (!tokens) return
+    var seed = this
+    tokens.forEach(function (token) {
+        var el = document.createTextNode()
+        if (token.key) {
+            var directive = Directive.parse(config.prefix + '-text', token.key)
+            if (directive) {
+                directive.el = el
+                seed._bind(directive)
+            }
+        } else {
+            el.nodeValue = token
+        }
+        node.parentNode.insertBefore(el, node)
+    })
+    node.parentNode.removeChild(node)
 }
 
 /*
