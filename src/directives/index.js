@@ -1,7 +1,17 @@
+var CONVERT_RE = /-(.)/g,
+    converter  = function (m, char) {
+        return char.toUpperCase()
+    }
+    
+function convertCSSProperty (prop) {
+    if (prop.charAt(0) === '-') prop = prop.slice(1)
+    return prop.replace(CONVERT_RE, converter)
+}
+
 module.exports = {
 
-    on   : require('./on'),
-    each : require('./each'),
+    on    : require('./on'),
+    each  : require('./each'),
 
     text: function (value) {
         this.el.textContent =
@@ -11,6 +21,10 @@ module.exports = {
 
     show: function (value) {
         this.el.style.display = value ? '' : 'none'
+    },
+
+    visible: function (value) {
+        this.el.style.visibility = value ? '' : 'hidden'
     },
     
     focus: function (value) {
@@ -74,6 +88,15 @@ module.exports = {
                     this.parent.insertBefore(this.el, this.ref)
                 }
             }
+        }
+    },
+
+    style: {
+        bind: function () {
+            this.arg = convertCSSProperty(this.arg)
+        },
+        update: function (value) {
+            this.el.style[this.arg] = value
         }
     }
 }

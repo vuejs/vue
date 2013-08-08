@@ -5,7 +5,8 @@ var config      = require('./config'),
 
 var controllers = config.controllers,
     datum       = config.datum,
-    api         = {}
+    api         = {},
+    reserved    = ['datum', 'controllers']
 
 /*
  *  Store a piece of plain data in config.datum
@@ -54,7 +55,11 @@ api.filter = function (name, fn) {
  */
 api.bootstrap = function (opts) {
     if (opts) {
-        config.prefix = opts.prefix || config.prefix
+        for (var key in opts) {
+            if (reserved.indexOf(key) === -1) {
+                config[key] = opts[key]
+            }
+        }
     }
     var el,
         ctrlSlt = '[' + config.prefix + '-controller]',

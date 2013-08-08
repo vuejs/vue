@@ -6,11 +6,12 @@
         <script src="../dist/seed.js"></script>
     </head>
     <body sd-controller="hello">
-        <span sd-text="hello"></span>
+        <span sd-text="hello" sd-style="text-transform:format"></span>
         <script>
             var Seed = require('seed')
             Seed.controller('hello', function (scope) {
                 scope.hello = 'Hello World!'
+                scope.format = 'uppercase'
             })
             Seed.bootstrap()
         </script>
