@@ -10,65 +10,8 @@ var KEY_RE          = /^[^\|<]+/,
     NESTING_RE      = /^\^+/
 
 /*
- *  parse a key, extract argument and nesting/root info
- */
-function parseKey (rawKey) {
-
-    var res = {},
-        argMatch = rawKey.match(ARG_RE)
-
-    res.key = argMatch
-        ? argMatch[2].trim()
-        : rawKey.trim()
-
-    res.arg = argMatch
-        ? argMatch[1].trim()
-        : null
-
-    res.inverse = INVERSE_RE.test(res.key)
-    if (res.inverse) {
-        res.key = res.key.slice(1)
-    }
-
-    var nesting = res.key.match(NESTING_RE)
-    res.nesting = nesting
-        ? nesting[0].length
-        : false
-
-    res.root = res.key.charAt(0) === '$'
-
-    if (res.nesting) {
-        res.key = res.key.replace(NESTING_RE, '')
-    } else if (res.root) {
-        res.key = res.key.slice(1)
-    }
-
-    return res
-}
-
-/*
- *  parse a filter expression
- */
-function parseFilter (filter) {
-
-    var tokens = filter.slice(1)
-        .match(FILTER_TOKEN_RE)
-        .map(function (token) {
-            return token.replace(/'/g, '').trim()
-        })
-
-    return {
-        name  : tokens[0],
-        apply : filters[tokens[0]],
-        args  : tokens.length > 1
-                ? tokens.slice(1)
-                : null
-    }
-}
-
-/*
  *  Directive class
- *  represents a single instance of DOM-data connection
+ *  represents a single directive instance in the DOM
  */
 function Directive (directiveName, expression) {
 
@@ -146,6 +89,63 @@ Directive.prototype.applyFilters = function (value) {
         filtered = filter.apply(filtered, filter.args)
     })
     return filtered
+}
+
+/*
+ *  parse a key, extract argument and nesting/root info
+ */
+function parseKey (rawKey) {
+
+    var res = {},
+        argMatch = rawKey.match(ARG_RE)
+
+    res.key = argMatch
+        ? argMatch[2].trim()
+        : rawKey.trim()
+
+    res.arg = argMatch
+        ? argMatch[1].trim()
+        : null
+
+    res.inverse = INVERSE_RE.test(res.key)
+    if (res.inverse) {
+        res.key = res.key.slice(1)
+    }
+
+    var nesting = res.key.match(NESTING_RE)
+    res.nesting = nesting
+        ? nesting[0].length
+        : false
+
+    res.root = res.key.charAt(0) === '$'
+
+    if (res.nesting) {
+        res.key = res.key.replace(NESTING_RE, '')
+    } else if (res.root) {
+        res.key = res.key.slice(1)
+    }
+
+    return res
+}
+
+/*
+ *  parse a filter expression
+ */
+function parseFilter (filter) {
+
+    var tokens = filter.slice(1)
+        .match(FILTER_TOKEN_RE)
+        .map(function (token) {
+            return token.replace(/'/g, '').trim()
+        })
+
+    return {
+        name  : tokens[0],
+        apply : filters[tokens[0]],
+        args  : tokens.length > 1
+                ? tokens.slice(1)
+                : null
+    }
 }
 
 module.exports = {

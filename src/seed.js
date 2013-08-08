@@ -83,6 +83,7 @@ function Seed (el, options) {
     // extract dependencies for computed properties
     parsingDeps = true
     this._computed.forEach(parseDeps)
+    this._computed.forEach(injectDeps)
     delete this._computed
     parsingDeps = false
 }
@@ -266,17 +267,31 @@ Seed.prototype._dump = function () {
 
 /*
  *  Auto-extract the dependencies of a computed property
- *  by recording the getters triggered when evaluating it
+ *  by recording the getters triggered when evaluating it.
+ *
+ *  However, the first pass will contain duplicate dependencies
+ *  for computed properties. It is therefore necessary to do a
+ *  second pass in injectDeps()
  */
 function parseDeps (binding) {
+    binding.dependencies = []
     depsObserver.on('get', function (dep) {
-        if (!dep.dependents) {
-            dep.dependents = []
-        }
-        dep.dependents.push.apply(dep.dependents, binding.instances)
+        binding.dependencies.push(dep)
     })
     binding.value.get()
     depsObserver.off('get')
+}
+
+/*
+ *  The second pass of dependency extraction.
+ *  Only include dependencies that don't have dependencies themselves.
+ */
+function injectDeps (binding) {
+    binding.dependencies.forEach(function (dep) {
+        if (!dep.dependencies || !dep.dependencies.length) {
+            dep.dependents.push.apply(dep.dependents, binding.instances)
+        }
+    })
 }
 
 /*

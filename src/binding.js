@@ -1,7 +1,11 @@
 var Emitter  = require('emitter')
 
 /*
- *  Binding class
+ *  Binding class.
+ *
+ *  each property on the scope has one corresponding Binding object
+ *  which has multiple directive instances on the DOM
+ *  and multiple computed property dependents
  */
 function Binding (value) {
     this.value = value
