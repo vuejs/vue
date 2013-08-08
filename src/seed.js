@@ -1,6 +1,7 @@
 var config          = require('./config'),
     Emitter         = require('emitter'),
-    DirectiveParser = require('./directive-parser'),
+    Binding         = require('./binding'),
+    Directive       = require('./directive'),
     TextNodeParser  = require('./textnode-parser')
 
 var slice           = Array.prototype.slice,
@@ -103,7 +104,7 @@ Seed.prototype._compileNode = function (node, root) {
 
         if (eachExp) { // each block
 
-            var directive = DirectiveParser.parse(eachAttr, eachExp)
+            var directive = Directive.parse(eachAttr, eachExp)
             if (directive) {
                 directive.el = node
                 seed._bind(directive)
@@ -124,7 +125,7 @@ Seed.prototype._compileNode = function (node, root) {
                     if (attr.name === ctrlAttr) return
                     var valid = false
                     attr.value.split(',').forEach(function (exp) {
-                        var directive = DirectiveParser.parse(attr.name, exp)
+                        var directive = Directive.parse(attr.name, exp)
                         if (directive) {
                             valid = true
                             directive.el = node
@@ -191,7 +192,7 @@ Seed.prototype._bind = function (directive) {
 Seed.prototype._createBinding = function (key) {
 
     var binding = new Binding()
-    binding.update(this.scope[key])
+    binding.set(this.scope[key])
     this._bindings[key] = binding
     if (binding.isComputed) this._computed.push(binding)
 
@@ -261,44 +262,6 @@ Seed.prototype._dump = function () {
     return dump
 }
 
-/*
- *  Binding class
- */
-function Binding (value) {
-    this.value = value
-    this.instances = []
-    this.dependents = []
-}
-
-Binding.prototype.update = function (value) {
-    var type = typeOf(value),
-        self = this
-    // preprocess the value depending on its type
-    if (type === 'Object') {
-        if (value.get) { // computed property
-            this.isComputed = true
-        } else { // normal object
-            // TODO watchObject
-        }
-    } else if (type === 'Array') {
-        watchArray(value)
-        value.on('mutate', function () {
-            self.emitChange()
-        })
-    }
-    this.value = value
-    this.instances.forEach(function (instance) {
-        instance.update(value)
-    })
-    this.emitChange()
-}
-
-Binding.prototype.emitChange = function () {
-    this.dependents.forEach(function (dept) {
-        dept.refresh()
-    })
-}
-
 // Helpers --------------------------------------------------------------------
 
 /*
@@ -331,46 +294,6 @@ function getScopeOwner (key, seed) {
         }
     }
     return seed
-}
-
-/*
- *  get accurate type of an object
- */
-var OtoString = Object.prototype.toString
-function typeOf (obj) {
-    return OtoString.call(obj).slice(8, -1)
-}
-
-/*
- *  augment an Array so that it emit events when mutated
- */
-var arrayMutators = ['push','pop','shift','unshift','splice','sort','reverse']
-var arrayAugmentations = {
-    remove: function (scope) {
-        this.splice(scope.$index, 1)
-    },
-    replace: function (index, data) {
-        if (typeof index !== 'number') {
-            index = index.$index
-        }
-        this.splice(index, 1, data)
-    }
-}
-function watchArray (collection) {
-    Emitter(collection)
-    arrayMutators.forEach(function (method) {
-        collection[method] = function () {
-            var result = Array.prototype[method].apply(this, arguments)
-            collection.emit('mutate', {
-                method: method,
-                args: Array.prototype.slice.call(arguments),
-                result: result
-            })
-        }
-    })
-    for (var method in arrayAugmentations) {
-        collection[method] = arrayAugmentations[method]
-    }
 }
 
 Emitter(Seed.prototype)
