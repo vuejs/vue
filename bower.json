@@ -1,0 +1,17 @@
+{
+    "name": "seed",
+    "version": "0.1.0",
+    "main": "dist/seed.js",
+    "ignore": [
+        ".*",
+        "examples",
+        "src",
+        "test",
+        "dist/seed.min.js",
+        "component.json",
+        "package.json",
+        "Gruntfile.js",
+        "TODO.md",
+        "README_Chinese.md"
+    ]
+}
