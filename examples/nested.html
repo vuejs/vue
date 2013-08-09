@@ -12,16 +12,17 @@
 <body>
     <div sd-controller="Grandpa">
         <p sd-text="name"></p>
-
         <div sd-controller="Dad">
             <p><span sd-text="name"></span>, son of <span sd-text="^name"></span></p>
-
             <div sd-controller="Son">
-                <p><span sd-text="name"></span>, son of <span sd-text="^name"></span></p>
-
+                <p><span sd-text="name"></span>,son of <span sd-text="^name"></span></p>
                 <div sd-controller="Baby">
-                    <p><span sd-text="name"></span>, son of <span sd-text="^name"></span>, grandson of <span sd-text="^^name"></span> and great-grandson of <span sd-text="$name"></span></p>
-
+                    <p>
+                        <span sd-text="name"></span>,
+                        son of <span sd-text="^name"></span>,
+                        grandson of <span sd-text="^^name"></span>
+                        and great-grandson of <span sd-text="$name"></span>
+                    </p>
                 </div>
             </div>
         </div>
