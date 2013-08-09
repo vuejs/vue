@@ -11,7 +11,7 @@ var Emitter  = require('emitter'),
  */
 function catchDeps (binding) {
     observer.on('get', function (dep) {
-        binding.dependencies.push(dep)
+        binding.deps.push(dep)
     })
     binding.value.get()
     observer.off('get')
@@ -22,9 +22,9 @@ function catchDeps (binding) {
  *  Only include dependencies that don't have dependencies themselves.
  */
 function injectDeps (binding) {
-    binding.dependencies.forEach(function (dep) {
-        if (!dep.dependencies.length) {
-            dep.dependents.push.apply(dep.dependents, binding.instances)
+    binding.deps.forEach(function (dep) {
+        if (!dep.deps.length) {
+            dep.subs.push.apply(dep.subs, binding.instances)
         }
     })
 }

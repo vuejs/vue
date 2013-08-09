@@ -169,6 +169,7 @@ Seed.prototype._bind = function (directive) {
     var key = directive.key,
         seed = directive.seed = this
 
+    // deal with each block
     if (this.each) {
         if (key.indexOf(this.eachPrefix) === 0) {
             key = directive.key = key.replace(this.eachPrefix, '')
@@ -177,7 +178,8 @@ Seed.prototype._bind = function (directive) {
         }
     }
 
-    seed = getScopeOwner(directive, seed)
+    // deal with nesting
+    seed = trace(directive, seed)
     var binding = seed._bindings[key] || seed._createBinding(key)
 
     // add directive to this binding
@@ -255,7 +257,7 @@ Seed.prototype._dump = function () {
 /*
  *  determine which scope a key belongs to based on nesting symbols
  */
-function getScopeOwner (key, seed) {
+function trace (key, seed) {
     if (key.nesting) {
         var levels = key.nesting
         while (seed.parentSeed && levels--) {

@@ -1,5 +1,6 @@
 var Emitter  = require('emitter'),
-    observer = require('./deps-parser').observer
+    observer = require('./deps-parser').observer,
+    def      = Object.defineProperty
 
 /*
  *  Binding class.
@@ -13,10 +14,10 @@ function Binding (seed, key) {
     this.key  = key
     var path = key.split('.')
     this.set(getValue(seed.scope, path))
-    this.defineAccessors(seed.scope, path)
+    this.def(seed.scope, path)
     this.instances    = []
-    this.dependents   = []
-    this.dependencies = []
+    this.subs   = []
+    this.deps = []
 }
 
 /*
@@ -33,7 +34,7 @@ Binding.prototype.set = function (value) {
     } else if (type === 'Array') {
         watchArray(value)
         value.on('mutate', function () {
-            self.emitChange()
+            self.pub()
         })
     }
     this.value = value
@@ -41,14 +42,15 @@ Binding.prototype.set = function (value) {
 
 /*
  *  Define getter/setter for this binding on scope
+ *  recursive for nested objects
  */
-Binding.prototype.defineAccessors = function (scope, path) {
+Binding.prototype.def = function (scope, path) {
     var self = this,
         key = path[0]
     if (path.length === 1) {
         // here we are! at the end of the path!
         // define the real value accessors.
-        Object.defineProperty(scope, key, {
+        def(scope, key, {
             get: function () {
                 if (observer.isObserving) {
                     observer.emit('get', self)
@@ -78,7 +80,7 @@ Binding.prototype.defineAccessors = function (scope, path) {
         var subScope = scope[key]
         if (!subScope) {
             subScope = {}
-            Object.defineProperty(scope, key, {
+            def(scope, key, {
                 get: function () {
                     return subScope
                 },
@@ -91,7 +93,8 @@ Binding.prototype.defineAccessors = function (scope, path) {
                 }
             })
         }
-        this.defineAccessors(subScope, path.slice(1))
+        // recurse
+        this.def(subScope, path.slice(1))
     }
 }
 
@@ -103,15 +106,15 @@ Binding.prototype.update = function (value) {
     this.instances.forEach(function (instance) {
         instance.update(value)
     })
-    this.emitChange()
+    this.pub()
 }
 
 /*
  *  Notify computed properties that depend on this binding
  *  to update themselves
  */
-Binding.prototype.emitChange = function () {
-    this.dependents.forEach(function (dept) {
+Binding.prototype.pub = function () {
+    this.subs.forEach(function (dept) {
         dept.refresh()
     })
 }
