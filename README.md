@@ -10,6 +10,16 @@
 
 [Doc under construction...]
 
+### Browser Support
+
+- Chrome 8+
+- Firefix 3.6+
+- Safari 5.1+
+- IE9+ (IE9 needs [classList polyfill](https://github.com/remy/polyfills/blob/master/classList.js))
+- Opera 11.5+
+- Android browser 3.0+
+- iOS Safari 5.0+
+
 ### Template
 
 ### Controller
