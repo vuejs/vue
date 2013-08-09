@@ -9,6 +9,7 @@
     "src/binding.js",
     "src/directive.js",
     "src/text-parser.js",
+    "src/deps-parser.js",
     "src/filters.js",
     "src/directives/index.js",
     "src/directives/each.js",

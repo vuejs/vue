@@ -1,4 +1,5 @@
-var Emitter  = require('emitter')
+var Emitter  = require('emitter'),
+    observer = require('./deps-parser').observer
 
 /*
  *  Binding class.
@@ -46,14 +47,21 @@ Binding.prototype.defineAccessors = function (seed, key) {
     var self = this
     Object.defineProperty(seed.scope, key, {
         get: function () {
-            seed.emit('get', key)
+            if (observer.isObserving) {
+                observer.emit('get', self)
+            }
             return self.isComputed
                 ? self.value.get()
                 : self.value
         },
         set: function (value) {
-            if (self.isComputed && self.value.set) {
-                self.value.set(value)
+            if (self.isComputed) {
+                // computed properties cannot be redefined
+                // no need to call binding.update() here,
+                // as dependency extraction has taken care of that
+                if (self.value.set) {
+                    self.value.set(value)
+                }
             } else if (value !== self.value) {
                 self.value = value
                 self.update(value)
