@@ -156,11 +156,12 @@ Seed.prototype._compileNode = function (node, root) {
 Seed.prototype._compileTextNode = function (node) {
     var tokens = TextParser.parse(node)
     if (!tokens) return
-    var seed = this
+    var seed = this,
+        dirname = config.prefix + '-text'
     tokens.forEach(function (token) {
         var el = document.createTextNode()
         if (token.key) {
-            var directive = Directive.parse(config.prefix + '-text', token.key)
+            var directive = Directive.parse(dirname, token.key)
             if (directive) {
                 directive.el = el
                 seed._bind(directive)

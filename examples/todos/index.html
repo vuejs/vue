@@ -21,6 +21,7 @@
             </header>
             
             <section id="main" sd-show="total">
+                <!-- toggle all checkbox-->
                 <input 
                     id="toggle-all"
                     type="checkbox"
@@ -60,7 +61,7 @@
             <!-- footer controls -->
             <footer id="footer" sd-show="total">
                 <span id="todo-count">
-                    <strong sd-text="remaining"></strong> {{itemLabel}} left
+                    <strong>{{remaining}}</strong> {{itemLabel}} left
                 </span>
                 <ul id="filters">
                     <li><a href="#/all" data-filter="all" sd-on="click:setFilter">All</a></li>
