@@ -170,9 +170,7 @@ Seed.prototype._bind = function (directive) {
         seed = directive.seed = this
 
     if (this.each) {
-        if (this.eachPrefixRE.test(key)) {
-            key = directive.key = key.replace(this.eachPrefixRE, '')
-        } else {
+        if (!directive.path || directive.path[0] !== this.eachPrefix) {
             seed = this.parentSeed
         }
     }

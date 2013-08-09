@@ -45,9 +45,9 @@ module.exports = {
                 var target = delegateCheck(e.target, delegator, identifier)
                 if (target) {
                     handler({
-                        originalEvent : e,
-                        el            : target,
-                        scope         : target.sd_scope
+                        el: target,
+                        scope: target.sd_scope,
+                        originalEvent: e
                     })
                 }
             }
@@ -59,9 +59,9 @@ module.exports = {
             // a normal, single element handler
             this.handler = function (e) {
                 handler({
-                    originalEvent : e,
-                    el            : e.currentTarget,
-                    scope         : seed.scope
+                    el: e.currentTarget,
+                    scope: seed.scope,
+                    originalEvent: e
                 })
             }
             this.el.addEventListener(event, this.handler)

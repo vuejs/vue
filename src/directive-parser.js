@@ -34,12 +34,9 @@ function Directive (directiveName, expression, oneway) {
     this.oneway        = !!oneway
     this.directiveName = directiveName
     this.expression    = expression.trim()
-    this.rawKey        = expression.match(KEY_RE)[0]
+    this.rawKey        = expression.match(KEY_RE)[0].trim()
     
-    var keyInfo  = parseKey(this.rawKey)
-    for (prop in keyInfo) {
-        this[prop] = keyInfo[prop]
-    }
+    this.parseKey(this.rawKey)
     
     var filterExps = expression.match(FILTERS_RE)
     this.filters = filterExps
@@ -98,38 +95,43 @@ Directive.prototype.applyFilters = function (value) {
 /*
  *  parse a key, extract argument and nesting/root info
  */
-function parseKey (rawKey) {
+Directive.prototype.parseKey = function (rawKey) {
 
-    var res = {},
-        argMatch = rawKey.match(ARG_RE)
+    var argMatch = rawKey.match(ARG_RE)
 
-    res.key = argMatch
+    var key = argMatch
         ? argMatch[2].trim()
         : rawKey.trim()
 
-    res.arg = argMatch
+    this.arg = argMatch
         ? argMatch[1].trim()
         : null
 
-    res.inverse = INVERSE_RE.test(res.key)
-    if (res.inverse) {
-        res.key = res.key.slice(1)
+    this.inverse = INVERSE_RE.test(key)
+    if (this.inverse) {
+        key = key.slice(1)
     }
 
-    var nesting = res.key.match(NESTING_RE)
-    res.nesting = nesting
+    var nesting = key.match(NESTING_RE)
+    this.nesting = nesting
         ? nesting[0].length
         : false
 
-    res.root = res.key.charAt(0) === '$'
+    this.root = key.charAt(0) === '$'
 
-    if (res.nesting) {
-        res.key = res.key.replace(NESTING_RE, '')
-    } else if (res.root) {
-        res.key = res.key.slice(1)
+    if (this.nesting) {
+        key = key.replace(NESTING_RE, '')
+    } else if (this.root) {
+        key = key.slice(1)
     }
 
-    return res
+    if (key.indexOf('.') > 0) {
+        var path = key.split('.')
+        key = path[path.length - 1]
+        this.path = path.slice(0, -1)
+    }
+
+    this.key = key
 }
 
 /*
