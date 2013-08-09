@@ -1,3 +1,4 @@
+- computed setters
 - nested properties in scope
     - parse path in Directive parser
     - select scope to defineProperty on based on path, create object if needed
