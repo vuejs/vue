@@ -6,7 +6,9 @@
 - POJSO (Plain Old JavaScript Objects) Models FTW.
 - Auto dependency extraction for computed properties.
 - Auto event delegation on repeated items.
-- Component based, but can also be used alone.
+- [Component](https://github.com/component/component) based, can be used as a CommonJS module but can also be used alone.
+
+[Doc under construction...]
 
 ### Template
 
