@@ -3,7 +3,7 @@
 
 - 5kb gzipped!
 - DOM based templates with precise and efficient manipulation
-- POJSO (Plain Old JavaScript Objects) Models FTW.
+- POJSO (Plain Old JavaScript Objects) Models FTW - even nested objects.
 - Auto dependency extraction for computed properties.
 - Auto event delegation on repeated items.
 - [Component](https://github.com/component/component) based, can be used as a CommonJS module but can also be used alone.

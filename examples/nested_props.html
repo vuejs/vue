@@ -6,32 +6,42 @@
         <script src="../dist/seed.js"></script>
     </head>
     <body sd-controller="test">
-        <h1 sd-text="a.b.c"></h1>
-        <h3 sd-text="a.c"></h3>
+        <h1>a.b.c : {{a.b.c}}</h1>
+        <h2>a.c : {{a.c}}</h2>
+        <h3>Computed property that concats the two: {{d}}</h3>
         <button sd-on="click:one">one</button>
         <button sd-on="click:two">two</button>
         <button sd-on="click:three">three</button>
         <script>
             var Seed = require('seed')
             Seed.controller('test', function (scope) {
+
+                // set the data any way you want.
                 scope.one = function () {
                     scope.a = {
                         c: 1,
                         b: {
-                            c: 1
+                            c: 'one'
                         }
                     }
                 }
+
                 scope.two = function () {
                     scope.a.b = {
-                        c: 2
+                        c: 'two'
                     }
                     scope.a.c = 2
                 }
+
                 scope.three = function () {
-                    scope.a.b.c = 3
+                    scope.a.b.c = 'three'
                     scope.a.c = 3
                 }
+
+                // computed properties also works!!!!
+                scope.d = {get: function () {
+                    return (scope.a.b.c + scope.a.c) || ''
+                }}
             })
             var app = Seed.bootstrap()
         </script>
