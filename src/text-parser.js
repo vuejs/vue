@@ -2,6 +2,9 @@ var config     = require('./config'),
     ESCAPE_RE  = /[-.*+?^${}()|[\]\/\\]/g,
     BINDING_RE
 
+/*
+ *  Escapes a string so that it can be used to construct RegExp
+ */
 function escapeRegex (val) {
     return val.replace(ESCAPE_RE, '\\$&')
 }

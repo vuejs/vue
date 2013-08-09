@@ -71,6 +71,7 @@ Seed.controller('Todos', function (scope) {
     }
 
     scope.removeCompleted = function () {
+        if (scope.completed === 0) return
         scope.todos = scope.todos.filter(function (todo) {
             return !todo.done
         })

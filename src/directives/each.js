@@ -1,12 +1,16 @@
 var config = require('../config')
 
+/*
+ *  Mathods that perform precise DOM manipulation
+ *  based on mutator method triggered
+ */
 var mutationHandlers = {
 
     push: function (m) {
         var self = this
         m.args.forEach(function (data, i) {
             var seed = self.buildItem(data, self.collection.length + i)
-            self.container.insertBefore(seed.el, self.marker)
+            self.container.insertBefore(seed.el, self.ref)
         })
     },
 
@@ -20,7 +24,7 @@ var mutationHandlers = {
             var seed = self.buildItem(data, i),
                 ref  = self.collection.length > m.args.length
                      ? self.collection[m.args.length].$el
-                     : self.marker
+                     : self.ref
             self.container.insertBefore(seed.el, ref)
         })
         self.updateIndexes()
@@ -46,7 +50,7 @@ var mutationHandlers = {
                     pos  = index - removed + added + 1,
                     ref  = self.collection[pos]
                          ? self.collection[pos].$el
-                         : self.marker
+                         : self.ref
                 self.container.insertBefore(seed.el, ref)
             })
         }
@@ -59,7 +63,7 @@ var mutationHandlers = {
         var self = this
         self.collection.forEach(function (scope, i) {
             scope.$index = i
-            self.container.insertBefore(scope.$el, self.marker)
+            self.container.insertBefore(scope.$el, self.ref)
         })
     }
 }
@@ -71,25 +75,32 @@ module.exports = {
     bind: function () {
         this.el.removeAttribute(config.prefix + '-each')
         var ctn = this.container = this.el.parentNode
-        this.marker = document.createComment('sd-each-' + this.arg)
-        ctn.insertBefore(this.marker, this.el)
-        this.delegator = this.el.parentNode
+        // create a comment node as a reference node for DOM insertions
+        this.ref = document.createComment('sd-each-' + this.arg)
+        ctn.insertBefore(this.ref, this.el)
         ctn.removeChild(this.el)
     },
 
     update: function (collection) {
+
         this.unbind(true)
-        // for event delegation
         if (!Array.isArray(collection)) return
         this.collection = collection
-        this.delegator.sdDelegationHandlers = {}
+
+        // attach an object to container to hold handlers
+        this.container.sd_dHandlers = {}
+
+        // listen for collection mutation events
+        // the collection has been augmented during Binding.set()
         var self = this
         collection.on('mutate', function (mutation) {
             mutationHandlers[mutation.method].call(self, mutation)
         })
+
+        // create child-seeds and append to DOM
         collection.forEach(function (data, i) {
             var seed = self.buildItem(data, i)
-            self.container.insertBefore(seed.el, self.marker)
+            self.container.insertBefore(seed.el, self.ref)
         })
     },
 
@@ -102,7 +113,7 @@ module.exports = {
                 parentSeed: this.seed,
                 index: index,
                 data: data,
-                delegator: this.delegator
+                delegator: this.container
             })
         this.collection[index] = spore.scope
         return spore
@@ -122,13 +133,11 @@ module.exports = {
             })
             this.collection = null
         }
-        var delegator = this.delegator
-        if (delegator) {
-            var handlers = delegator.sdDelegationHandlers
-            for (var key in handlers) {
-                delegator.removeEventListener(handlers[key].event, handlers[key])
-            }
-            delete delegator.sdDelegationHandlers
+        var ctn = this.container,
+            handlers = ctn.sd_dHandlers
+        for (var key in handlers) {
+            ctn.removeEventListener(handlers[key].event, handlers[key])
         }
+        delete ctn.sd_dHandlers
     }
 }

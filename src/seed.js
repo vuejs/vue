@@ -1,6 +1,6 @@
 var config          = require('./config'),
     Binding         = require('./binding'),
-    Directive       = require('./directive'),
+    DirectiveParser = require('./directive-parser'),
     TextParser      = require('./text-parser'),
     depsParser      = require('./deps-parser')
 
@@ -93,7 +93,7 @@ Seed.prototype._compileNode = function (node, root) {
 
         if (eachExp) { // each block
 
-            var directive = Directive.parse(eachAttr, eachExp)
+            var directive = DirectiveParser.parse(eachAttr, eachExp)
             if (directive) {
                 directive.el = node
                 seed._bind(directive)
@@ -116,7 +116,7 @@ Seed.prototype._compileNode = function (node, root) {
                     if (attr.name === ctrlAttr) return
                     var valid = false
                     attr.value.split(',').forEach(function (exp) {
-                        var directive = Directive.parse(attr.name, exp)
+                        var directive = DirectiveParser.parse(attr.name, exp)
                         if (directive) {
                             valid = true
                             directive.el = node
@@ -148,7 +148,7 @@ Seed.prototype._compileTextNode = function (node) {
     tokens.forEach(function (token) {
         var el = document.createTextNode()
         if (token.key) {
-            var directive = Directive.parse(dirname, token.key)
+            var directive = DirectiveParser.parse(dirname, token.key)
             if (directive) {
                 directive.el = el
                 seed._bind(directive)

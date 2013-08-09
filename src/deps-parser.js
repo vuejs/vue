@@ -30,7 +30,15 @@ function injectDeps (binding) {
 }
 
 module.exports = {
+
+    /*
+     *  the observer that catches events triggered by getters
+     */
     observer: observer,
+
+    /*
+     *  parse a list of computed property bindings
+     */
     parse: function (bindings) {
         observer.isObserving = true
         bindings.forEach(catchDeps)

@@ -7,7 +7,7 @@
     "src/config.js",
     "src/seed.js",
     "src/binding.js",
-    "src/directive.js",
+    "src/directive-parser.js",
     "src/text-parser.js",
     "src/deps-parser.js",
     "src/filters.js",

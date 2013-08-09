@@ -1,10 +1,10 @@
-function delegateCheck (current, top, marker) {
-    if (current[marker]) {
+function delegateCheck (current, top, identifier) {
+    if (current[identifier]) {
         return current
     } else if (current === top) {
         return false
     } else {
-        return delegateCheck(current.parentNode, top, marker)
+        return delegateCheck(current.parentNode, top, identifier)
     }
 }
 
@@ -14,49 +14,58 @@ module.exports = {
 
     bind: function () {
         if (this.seed.each) {
+            // attach an identifier to the el
+            // so it can be matched during event delegation
             this.el[this.expression] = true
-            this.el.seed = this.seed
+            // attach the owner scope of this directive
+            this.el.sd_scope = this.seed.scope
         }
     },
 
     update: function (handler) {
+
         this.unbind()
         if (!handler) return
-        var self  = this,
+
+        var seed  = this.seed,
             event = this.arg
-        if (this.seed.each && event !== 'blur' && event !== 'blur') {
+
+        if (seed.each && event !== 'blur' && event !== 'blur') {
+
             // for each blocks, delegate for better performance
             // focus and blur events dont bubble so exclude them
-            var delegator = this.seed.delegator
-            if (!delegator) return
-            var marker    = this.expression,
-                dHandler  = delegator.sdDelegationHandlers[marker]
-            // this only gets run once!!!
-            if (!dHandler) {
-                dHandler = delegator.sdDelegationHandlers[marker] = function (e) {
-                    var target = delegateCheck(e.target, delegator, marker)
-                    if (target) {
-                        handler({
-                            originalEvent : e,
-                            el            : target,
-                            scope         : target.seed.scope
-                        })
-                    }
+            var delegator  = seed.delegator,
+                identifier = this.expression,
+                dHandler   = delegator.sd_dHandlers[identifier]
+
+            if (dHandler) return
+
+            // the following only gets run once for the entire each block
+            dHandler = delegator.sd_dHandlers[identifier] = function (e) {
+                var target = delegateCheck(e.target, delegator, identifier)
+                if (target) {
+                    handler({
+                        originalEvent : e,
+                        el            : target,
+                        scope         : target.sd_scope
+                    })
                 }
-                dHandler.event = event
-                delegator.addEventListener(event, dHandler)
             }
+            dHandler.event = event
+            delegator.addEventListener(event, dHandler)
 
         } else {
-            // a normal handler
+
+            // a normal, single element handler
             this.handler = function (e) {
                 handler({
                     originalEvent : e,
                     el            : e.currentTarget,
-                    scope         : self.seed.scope
+                    scope         : seed.scope
                 })
             }
             this.el.addEventListener(event, this.handler)
+
         }
     },
 
