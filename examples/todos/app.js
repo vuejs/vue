@@ -1,10 +1,9 @@
 var Seed = require('seed')
 
 var todos = [
-    { text: 'make nesting controllers work', done: true },
-    { text: 'complete ArrayWatcher', done: true },
-    { text: 'computed properties', done: true },
-    { text: 'parse textnodes', done: false }
+    { text: 'make nesting Objects work', done: false },
+    { text: 'auto dependency extraction', done: true },
+    { text: 'computed properties', done: true }
 ]
 
 Seed.controller('Todos', function (scope) {
@@ -35,12 +34,11 @@ Seed.controller('Todos', function (scope) {
 
     // event handlers ---------------------------------------------------------
     scope.addTodo = function (e) {
-        var val = e.el.value
-        if (val) {
+        if (e.el.value) {
+            scope.todos.unshift({ text: e.el.value })
             e.el.value = ''
-            scope.todos.unshift({ text: val, done: false })
+            scope.remaining++
         }
-        scope.remaining++
     }
 
     scope.removeTodo = function (e) {
@@ -79,8 +77,4 @@ Seed.controller('Todos', function (scope) {
 
 })
 
-var s = Date.now()
-
 Seed.bootstrap()
-
-console.log(Date.now() - s)

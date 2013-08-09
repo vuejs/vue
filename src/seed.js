@@ -46,6 +46,7 @@ function Seed (el, options) {
 
     // initialize the scope object
     var scope = this.scope = {}
+
     scope.$el       = el
     scope.$seed     = this
     scope.$destroy  = this._destroy.bind(this)
@@ -64,7 +65,7 @@ function Seed (el, options) {
         el.removeAttribute(ctrlAttr)
         var factory = config.controllers[ctrlID]
         if (factory) {
-            factory.call(this, this.scope)
+            factory(this.scope)
         } else {
             console.warn('controller ' + ctrlID + ' is not defined.')
         }

@@ -16,15 +16,17 @@ var KEY_RE          = /^[^\|<]+/,
  */
 function Directive (directiveName, expression, oneway) {
 
-    var prop, directive = directives[directiveName]
-    if (typeof directive === 'function') {
-        this._update = directive
+    var prop,
+        definition = directives[directiveName]
+
+    // mix in properties from the directive definition
+    if (typeof definition === 'function') {
+        this._update = definition
     } else {
-        for (prop in directive) {
-            if (prop === 'update') {
-                this['_update'] = directive.update
-            } else {
-                this[prop] = directive[prop]
+        this._update = definition.update
+        for (prop in definition) {
+            if (prop !== 'update') {
+                this[prop] = definition[prop]
             }
         }
     }
@@ -67,7 +69,7 @@ Directive.prototype.update = function (value) {
     if (value && (value === this.value)) return
     this.value = value
     // computed property
-    if (typeof value === 'function' && !this.fn) {
+    if (typeof value === 'function' && !this.expectFunction) {
         value = value()
     }
     if (this.inverse) value = !value

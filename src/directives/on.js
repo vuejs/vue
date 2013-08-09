@@ -10,7 +10,7 @@ function delegateCheck (current, top, marker) {
 
 module.exports = {
 
-    fn : true,
+    expectFunction : true,
 
     bind: function () {
         if (this.seed.each) {
@@ -24,9 +24,9 @@ module.exports = {
         if (!handler) return
         var self  = this,
             event = this.arg
-        if (this.seed.each && event !== 'blur') {
+        if (this.seed.each && event !== 'blur' && event !== 'blur') {
             // for each blocks, delegate for better performance
-            // blur events dont bubble so exclude them
+            // focus and blur events dont bubble so exclude them
             var delegator = this.seed.delegator
             if (!delegator) return
             var marker    = this.expression,
@@ -61,9 +61,6 @@ module.exports = {
     },
 
     unbind: function () {
-        var event = this.arg
-        if (this.handler) {
-            this.el.removeEventListener(event, this.handler)
-        }
+        this.el.removeEventListener(this.arg, this.handler)
     }
 }

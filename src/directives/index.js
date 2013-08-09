@@ -1,13 +1,3 @@
-var CONVERT_RE = /-(.)/g,
-    converter  = function (m, char) {
-        return char.toUpperCase()
-    }
-    
-function convertCSSProperty (prop) {
-    if (prop.charAt(0) === '-') prop = prop.slice(1)
-    return prop.replace(CONVERT_RE, converter)
-}
-
 module.exports = {
 
     on    : require('./on'),
@@ -121,4 +111,15 @@ module.exports = {
             this.el.style[this.arg] = value
         }
     }
+}
+
+/*
+ *  convert hyphen style CSS property to Camel style
+ */
+var CONVERT_RE = /-(.)/g
+function convertCSSProperty (prop) {
+    if (prop.charAt(0) === '-') prop = prop.slice(1)
+    return prop.replace(CONVERT_RE, function (m, char) {
+        return char.toUpperCase()
+    })
 }
