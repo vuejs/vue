@@ -65,11 +65,13 @@ api.bootstrap = function (opts) {
     textParser.buildRegex()
     var el,
         ctrlSlt = '[' + config.prefix + '-controller]',
-        dataSlt = '[' + config.prefix + '-data]'
+        dataSlt = '[' + config.prefix + '-data]',
+        seeds = []
     /* jshint boss: true */
     while (el = document.querySelector(ctrlSlt) || document.querySelector(dataSlt)) {
-        new Seed(el)
+        seeds.push(new Seed(el))
     }
+    return seeds
 }
 
 module.exports = api

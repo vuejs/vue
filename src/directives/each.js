@@ -109,7 +109,7 @@ module.exports = {
             node = this.el.cloneNode(true)
         var spore = new Seed(node, {
                 each: true,
-                eachPrefix: this.arg,
+                eachPrefix: this.arg + '.',
                 parentSeed: this.seed,
                 index: index,
                 data: data,

@@ -125,12 +125,6 @@ Directive.prototype.parseKey = function (rawKey) {
         key = key.slice(1)
     }
 
-    if (key.indexOf('.') > 0) {
-        var path = key.split('.')
-        key = path[path.length - 1]
-        this.path = path.slice(0, -1)
-    }
-
     this.key = key
 }
 

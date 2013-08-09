@@ -10,11 +10,12 @@ var Emitter  = require('emitter'),
  */
 function Binding (seed, key) {
     this.seed = seed
-    this.key = key
-    this.set(seed.scope[key])
-    this.defineAccessors(seed, key)
-    this.instances = []
-    this.dependents = []
+    this.key  = key
+    var path = key.split('.')
+    this.set(getValue(seed.scope, path))
+    this.defineAccessors(seed.scope, path)
+    this.instances    = []
+    this.dependents   = []
     this.dependencies = []
 }
 
@@ -28,8 +29,6 @@ Binding.prototype.set = function (value) {
     if (type === 'Object') {
         if (value.get || value.set) { // computed property
             self.isComputed = true
-        } else { // normal object
-            // TODO watchObject
         }
     } else if (type === 'Array') {
         watchArray(value)
@@ -43,31 +42,57 @@ Binding.prototype.set = function (value) {
 /*
  *  Define getter/setter for this binding on scope
  */
-Binding.prototype.defineAccessors = function (seed, key) {
-    var self = this
-    Object.defineProperty(seed.scope, key, {
-        get: function () {
-            if (observer.isObserving) {
-                observer.emit('get', self)
-            }
-            return self.isComputed
-                ? self.value.get()
-                : self.value
-        },
-        set: function (value) {
-            if (self.isComputed) {
-                // computed properties cannot be redefined
-                // no need to call binding.update() here,
-                // as dependency extraction has taken care of that
-                if (self.value.set) {
-                    self.value.set(value)
+Binding.prototype.defineAccessors = function (scope, path) {
+    var self = this,
+        key = path[0]
+    if (path.length === 1) {
+        // here we are! at the end of the path!
+        // define the real value accessors.
+        Object.defineProperty(scope, key, {
+            get: function () {
+                if (observer.isObserving) {
+                    observer.emit('get', self)
                 }
-            } else if (value !== self.value) {
-                self.value = value
-                self.update(value)
+                return self.isComputed
+                    ? self.value.get()
+                    : self.value
+            },
+            set: function (value) {
+                if (self.isComputed) {
+                    // computed properties cannot be redefined
+                    // no need to call binding.update() here,
+                    // as dependency extraction has taken care of that
+                    if (self.value.set) {
+                        self.value.set(value)
+                    }
+                } else if (value !== self.value) {
+                    self.value = value
+                    self.update(value)
+                }
             }
+        })
+    } else {
+        // we are not there yet!!!
+        // create an intermediate subscope
+        // which also has its own getter/setters
+        var subScope = scope[key]
+        if (!subScope) {
+            subScope = {}
+            Object.defineProperty(scope, key, {
+                get: function () {
+                    return subScope
+                },
+                set: function (value) {
+                    // when the subScope is given a new value,
+                    // copy everything over to trigger the setters
+                    for (var prop in value) {
+                        subScope[prop] = value[prop]
+                    }
+                }
+            })
         }
-    })
+        this.defineAccessors(subScope, path.slice(1))
+    }
 }
 
 /*
@@ -89,6 +114,22 @@ Binding.prototype.emitChange = function () {
     this.dependents.forEach(function (dept) {
         dept.refresh()
     })
+}
+
+// Helpers --------------------------------------------------------------------
+
+/*
+ *  Get a value from an object based on a path array
+ */
+function getValue (scope, path) {
+    if (path.length === 1) return scope[path[0]]
+    var i = 0
+    /* jshint boss: true */
+    while (scope[path[i]]) {
+        scope = scope[path[i]]
+        i++
+    }
+    return i === path.length ? scope : undefined
 }
 
 /*
