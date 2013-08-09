@@ -28,9 +28,17 @@ Seed.controller('Todos', function (scope) {
         return scope.remaining > 1 ? 'items' : 'item'
     }}
 
-    scope.allDone = {get: function () {
-        return scope.remaining === 0
-    }}
+    scope.allDone = {
+        get: function () {
+            return scope.remaining === 0
+        },
+        set: function (value) {
+            scope.todos.forEach(function (todo) {
+                todo.done = value
+            })
+            scope.remaining = value ? 0 : scope.total
+        }
+    }
 
     // event handlers ---------------------------------------------------------
     scope.addTodo = function (e) {
@@ -60,13 +68,6 @@ Seed.controller('Todos', function (scope) {
 
     scope.setFilter = function (e) {
         scope.filter = e.el.dataset.filter
-    }
-
-    scope.toggleAll = function (e) {
-        scope.todos.forEach(function (todo) {
-            todo.done = e.el.checked
-        })
-        scope.remaining = e.el.checked ? 0 : scope.total
     }
 
     scope.removeCompleted = function () {

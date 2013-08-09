@@ -7,10 +7,14 @@ var Emitter  = require('emitter')
  *  which has multiple directive instances on the DOM
  *  and multiple computed property dependents
  */
-function Binding (value) {
-    this.value = value
+function Binding (seed, key) {
+    this.seed = seed
+    this.key = key
+    this.set(seed.scope[key])
+    this.defineAccessors(seed, key)
     this.instances = []
     this.dependents = []
+    this.dependencies = []
 }
 
 /*
@@ -21,7 +25,7 @@ Binding.prototype.set = function (value) {
         self = this
     // preprocess the value depending on its type
     if (type === 'Object') {
-        if (value.get) { // computed property
+        if (value.get || value.set) { // computed property
             self.isComputed = true
         } else { // normal object
             // TODO watchObject
@@ -33,6 +37,29 @@ Binding.prototype.set = function (value) {
         })
     }
     this.value = value
+}
+
+/*
+ *  Define getter/setter for this binding on scope
+ */
+Binding.prototype.defineAccessors = function (seed, key) {
+    var self = this
+    Object.defineProperty(seed.scope, key, {
+        get: function () {
+            seed.emit('get', key)
+            return self.isComputed
+                ? self.value.get()
+                : self.value
+        },
+        set: function (value) {
+            if (self.isComputed && self.value.set) {
+                self.value.set(value)
+            } else if (value !== self.value) {
+                self.value = value
+                self.update(value)
+            }
+        }
+    })
 }
 
 /*

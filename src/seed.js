@@ -72,8 +72,12 @@ function Seed (el, options) {
     }
 
     // add event listener to update corresponding binding
-    // when a property is set
     var self = this
+    this.on('get', function (key) {
+        if (parsingDeps) {
+            depsObserver.emit('get', self._bindings[key])
+        }
+    })
     this.on('set', function (key, value) {
         self._bindings[key].update(value)
     })
@@ -211,29 +215,9 @@ Seed.prototype._bind = function (directive) {
  *  Create binding and attach getter/setter for a key to the scope object
  */
 Seed.prototype._createBinding = function (key) {
-
-    var binding = new Binding()
-    binding.set(this.scope[key])
+    var binding = new Binding(this, key)
     this._bindings[key] = binding
     if (binding.isComputed) this._computed.push(binding)
-
-    var seed = this
-    Object.defineProperty(this.scope, key, {
-        get: function () {
-            if (parsingDeps) {
-                depsObserver.emit('get', binding)
-            }
-            seed.emit('get', key)
-            return binding.isComputed
-                ? binding.value.get()
-                : binding.value
-        },
-        set: function (value) {
-            if (value === binding.value) return
-            seed.emit('set', key, value)
-        }
-    })
-
     return binding
 }
 
@@ -294,7 +278,6 @@ Seed.prototype._dump = function () {
  *  second pass in injectDeps()
  */
 function parseDeps (binding) {
-    binding.dependencies = []
     depsObserver.on('get', function (dep) {
         binding.dependencies.push(dep)
     })
