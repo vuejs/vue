@@ -1,3 +1,6 @@
+- nested properties in scope
+    - parse path in Directive parser
+    - select scope to defineProperty on based on path, create object if needed
+    - when a new object is set, recursively replace all properties with getter/setters that emit events.
 - sd-with
 - standarized way to reuse components (sd-component?)
-- nested properties in scope (kinda hard, maybe later)
