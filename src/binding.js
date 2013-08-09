@@ -70,13 +70,12 @@ function typeOf (obj) {
 var aproto = Array.prototype,
     arrayMutators = ['push','pop','shift','unshift','splice','sort','reverse'],
     arrayAugmentations = {
-        remove: function (scope) {
-            this.splice(scope.$index, 1)
+        remove: function (index) {
+            if (typeof index !== 'number') index = index.$index
+            this.splice(index, 1)
         },
         replace: function (index, data) {
-            if (typeof index !== 'number') {
-                index = index.$index
-            }
+            if (typeof index !== 'number') index = index.$index
             this.splice(index, 1, data)
         }
     }
