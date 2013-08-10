@@ -32,7 +32,11 @@ function Seed (el, options) {
     // check if there's passed in data
     var dataAttr = config.prefix + '-data',
         dataId = el.getAttribute(dataAttr),
-        data = (options && options.data) || config.datum[dataId] || {}
+        data = (options && options.data) || config.datum[dataId]
+    if (config.debug && dataId && !data) {
+        console.warn('data "' + dataId + '" is not defined.')
+    }
+    data = data || {}
     el.removeAttribute(dataAttr)
 
     // if the passed in data is the scope of a Seed instance,
@@ -63,8 +67,8 @@ function Seed (el, options) {
         var factory = config.controllers[ctrlID]
         if (factory) {
             factory(this.scope)
-        } else {
-            console.warn('controller ' + ctrlID + ' is not defined.')
+        } else if (config.debug) {
+            console.warn('controller "' + ctrlID + '" is not defined.')
         }
     }
 
@@ -231,22 +235,18 @@ Seed.prototype._destroy = function () {
 
 /*
  *  Dump a copy of current scope data, excluding seed-exposed properties.
+ *  @param key (optional): key for the value to dump
  */
-Seed.prototype._dump = function () {
-    var dump = {}, binding, val,
-        subDump = function (scope) {
-            return scope.$dump()
-        }
-    for (var key in this._bindings) {
-        binding = this._bindings[key]
-        val = binding.value
-        if (!val) continue
-        if (Array.isArray(val)) {
-            dump[key] = val.map(subDump)
-        } else if (typeof val !== 'function') {
-            dump[key] = val
-        } else if (binding.isComputed) {
-            dump[key] = val.get()
+Seed.prototype._dump = function (key) {
+    if (key) {
+        return dumpValue(this._bindings[key])
+    } else {
+        var path, val, dump = {}
+        for (key in this._bindings) {
+            val = dumpValue(this._bindings[key])
+            if (val === undefined) continue
+            path = key.split('.')
+            setNestedValue(dump, path, val)
         }
     }
     return dump
@@ -269,6 +269,41 @@ function trace (key, seed) {
         }
     }
     return seed
+}
+
+/*
+ *  Determine value type before setting it on dump object
+ */
+function dumpValue (binding) {
+    var val = binding.value
+    if (Array.isArray(val)) {
+        return val.map(dumpScope)
+    } else if (binding.isComputed) {
+        return val.get()
+    } else if (typeof val !== 'function') {
+        return val
+    }
+}
+
+/*
+ *  recursively set a nested value on object based on keypath
+ *  used in $dump()
+ */
+function setNestedValue (obj, path, val) {
+    var key = path[0]
+    if (path.length === 1) {
+        obj[key] = val
+    } else {
+        if (!obj[key]) obj[key] = {}
+        setValue(obj[key], path.slice(1), val)
+    }
+}
+
+/*
+ *  dump sub-scope iterator
+ */
+function dumpScope (scope) {
+    return scope.$dump()
 }
 
 module.exports = Seed

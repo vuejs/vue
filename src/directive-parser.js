@@ -168,8 +168,10 @@ module.exports = {
         var dir   = directives[dirname],
             valid = KEY_RE.test(expression)
 
-        if (!dir) console.warn('unknown directive: ' + dirname)
-        if (!valid) console.warn('invalid directive expression: ' + expression)
+        if (config.debug) {
+            if (!dir) console.warn('unknown directive: ' + dirname)
+            if (!valid) console.warn('invalid directive expression: ' + expression)
+        }
 
         return dir && valid
             ? new Directive(dirname, expression, oneway)

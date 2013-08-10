@@ -13,7 +13,7 @@ function Binding (seed, key) {
     this.seed = seed
     this.key  = key
     var path = key.split('.')
-    this.set(getValue(seed.scope, path))
+    this.set(getNestedValue(seed.scope, path))
     this.def(seed.scope, path)
     this.instances    = []
     this.subs   = []
@@ -124,7 +124,7 @@ Binding.prototype.pub = function () {
 /*
  *  Get a value from an object based on a path array
  */
-function getValue (scope, path) {
+function getNestedValue (scope, path) {
     if (path.length === 1) return scope[path[0]]
     var i = 0
     /* jshint boss: true */
