@@ -9,10 +9,8 @@
         "src",
         "test",
         "dist/seed.min.js",
-        "component.json",
-        "package.json",
         "Gruntfile.js",
-        "TODO.md",
-        "README_Chinese.md"
+        "*.json",
+        "*.md"
     ]
 }
