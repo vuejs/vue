@@ -1,19 +1,15 @@
-var Seed = require('seed')
-
-var todos = [
-    { text: 'make nesting Objects work', done: false },
-    { text: 'auto dependency extraction', done: true },
-    { text: 'computed properties', done: true }
-]
+var Seed = require('seed'),
+    storageKey = 'todos-seedjs',
+    storedData = JSON.parse(localStorage.getItem(storageKey))
 
 Seed.controller('Todos', function (scope) {
 
     // regular properties -----------------------------------------------------
-    scope.todos = todos
-    scope.filter = window.location.hash.slice(2) || 'all'
-    scope.remaining = todos.reduce(function (count, todo) {
-        return count + (todo.done ? 0 : 1)
+    scope.todos = Array.isArray(storedData) ? storedData : []
+    scope.remaining = scope.todos.reduce(function (n, todo) {
+        return n + (todo.done ? 0 : 1)
     }, 0)
+    scope.filter = location.hash.slice(2) || 'all'
 
     // computed properties ----------------------------------------------------
     scope.total = {get: function () {
@@ -66,16 +62,26 @@ Seed.controller('Todos', function (scope) {
         e.scope.editing = false
     }
 
-    scope.setFilter = function (e) {
-        scope.filter = e.el.dataset.filter
-    }
-
     scope.removeCompleted = function () {
         if (scope.completed === 0) return
         scope.todos = scope.todos.filter(function (todo) {
             return !todo.done
         })
     }
+
+    // listen for hash change
+    window.addEventListener('hashchange', function () {
+        scope.filter = location.hash.slice(2)
+    })
+
+    // save on leave
+    window.addEventListener('beforeunload', function () {
+        localStorage.setItem(storageKey, scope.$serialize('todos'))
+    })
+
+    scope.$watch('completed', function (value) {
+        scope.$unwatch('completed')
+    })
 
 })
 

@@ -44,7 +44,7 @@ module.exports = {
             dHandler = delegator.sd_dHandlers[identifier] = function (e) {
                 var target = delegateCheck(e.target, delegator, identifier)
                 if (target) {
-                    handler({
+                    handler.call(seed.scope, {
                         el: target,
                         scope: target.sd_scope,
                         originalEvent: e
@@ -58,7 +58,7 @@ module.exports = {
 
             // a normal, single element handler
             this.handler = function (e) {
-                handler({
+                handler.call(seed.scope, {
                     el: e.currentTarget,
                     scope: seed.scope,
                     originalEvent: e

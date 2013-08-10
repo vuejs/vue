@@ -1,3 +1,4 @@
+- scope.$watch / scope.$unwatch
 - grunt release task
     - set version in bower/package/component.json
     - wrap dist/seed.js in closure and expose Seed to window

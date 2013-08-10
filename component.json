@@ -5,7 +5,9 @@
   "scripts": [
     "src/main.js",
     "src/config.js",
+    "src/utils.js",
     "src/seed.js",
+    "src/scope.js",
     "src/binding.js",
     "src/directive-parser.js",
     "src/text-parser.js",

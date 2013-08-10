@@ -39,7 +39,7 @@ module.exports = {
         }
         return function (e) {
             if (e.originalEvent.keyCode === code) {
-                handler(e)
+                handler.call(this, e)
             }
         }
     }

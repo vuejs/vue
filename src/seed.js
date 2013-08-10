@@ -1,4 +1,5 @@
 var config          = require('./config'),
+    Scope           = require('./scope'),
     Binding         = require('./binding'),
     DirectiveParser = require('./directive-parser'),
     TextParser      = require('./text-parser'),
@@ -46,14 +47,7 @@ function Seed (el, options) {
     }
 
     // initialize the scope object
-    var scope = this.scope = {}
-
-    scope.$el       = el
-    scope.$seed     = this
-    scope.$destroy  = this._destroy.bind(this)
-    scope.$dump     = this._dump.bind(this)
-    scope.$index    = options.index
-    scope.$parent   = options.parentSeed && options.parentSeed.scope
+    var scope = this.scope = new Scope(this, options)
 
     // copy data
     for (var key in data) {
@@ -80,10 +74,13 @@ function Seed (el, options) {
     delete this._computed
 }
 
+// for better compression
+var SeedProto = Seed.prototype
+
 /*
  *  Compile a DOM node (recursive)
  */
-Seed.prototype._compileNode = function (node, root) {
+SeedProto._compileNode = function (node, root) {
     var seed = this
 
     if (node.nodeType === 3) { // text node
@@ -133,9 +130,7 @@ Seed.prototype._compileNode = function (node, root) {
 
             // recursively compile childNodes
             if (node.childNodes.length) {
-                slice.call(node.childNodes).forEach(function (child) {
-                    seed._compileNode(child)
-                })
+                slice.call(node.childNodes).forEach(seed._compileNode, seed)
             }
         }
     }
@@ -144,15 +139,17 @@ Seed.prototype._compileNode = function (node, root) {
 /*
  *  Compile a text node
  */
-Seed.prototype._compileTextNode = function (node) {
+SeedProto._compileTextNode = function (node) {
     var tokens = TextParser.parse(node)
     if (!tokens) return
     var seed = this,
-        dirname = config.prefix + '-text'
-    tokens.forEach(function (token) {
-        var el = document.createTextNode()
+        dirname = config.prefix + '-text',
+        el, token, directive
+    for (var i = 0, l = tokens.length; i < l; i++) {
+        token = tokens[i]
+        el = document.createTextNode()
         if (token.key) {
-            var directive = DirectiveParser.parse(dirname, token.key)
+            directive = DirectiveParser.parse(dirname, token.key)
             if (directive) {
                 directive.el = el
                 seed._bind(directive)
@@ -161,14 +158,14 @@ Seed.prototype._compileTextNode = function (node) {
             el.nodeValue = token
         }
         node.parentNode.insertBefore(el, node)
-    })
+    }
     node.parentNode.removeChild(node)
 }
 
 /*
  *  Add a directive instance to the correct binding & scope
  */
-Seed.prototype._bind = function (directive) {
+SeedProto._bind = function (directive) {
 
     var key = directive.key,
         seed = directive.seed = this
@@ -183,7 +180,7 @@ Seed.prototype._bind = function (directive) {
     }
 
     // deal with nesting
-    seed = trace(directive, seed)
+    seed = traceOwnerSeed(directive, seed)
     var binding = seed._bindings[key] || seed._createBinding(key)
 
     // add directive to this binding
@@ -197,13 +194,15 @@ Seed.prototype._bind = function (directive) {
 
     // set initial value
     directive.update(binding.value)
-
+    if (binding.isComputed) {
+        directive.refresh()
+    }
 }
 
 /*
  *  Create binding and attach getter/setter for a key to the scope object
  */
-Seed.prototype._createBinding = function (key) {
+SeedProto._createBinding = function (key) {
     var binding = new Binding(this, key)
     this._bindings[key] = binding
     if (binding.isComputed) this._computed.push(binding)
@@ -214,42 +213,23 @@ Seed.prototype._createBinding = function (key) {
  *  Call unbind() of all directive instances
  *  to remove event listeners, destroy child seeds, etc.
  */
-Seed.prototype._unbind = function () {
-    var unbind = function (instance) {
-        if (instance.unbind) {
-            instance.unbind()
-        }
-    }
+SeedProto._unbind = function () {
+    var i, ins
     for (var key in this._bindings) {
-        this._bindings[key].instances.forEach(unbind)
+        ins = this._bindings[key].instances
+        i = ins.length
+        while (i--) {
+            if (ins[i].unbind) ins[i].unbind()
+        }
     }
 }
 
 /*
  *  Unbind and remove element
  */
-Seed.prototype._destroy = function () {
+SeedProto._destroy = function () {
     this._unbind()
     this.el.parentNode.removeChild(this.el)
-}
-
-/*
- *  Dump a copy of current scope data, excluding seed-exposed properties.
- *  @param key (optional): key for the value to dump
- */
-Seed.prototype._dump = function (key) {
-    if (key) {
-        return dumpValue(this._bindings[key])
-    } else {
-        var path, val, dump = {}
-        for (key in this._bindings) {
-            val = dumpValue(this._bindings[key])
-            if (val === undefined) continue
-            path = key.split('.')
-            setNestedValue(dump, path, val)
-        }
-        return dump
-    }
 }
 
 // Helpers --------------------------------------------------------------------
@@ -257,7 +237,7 @@ Seed.prototype._dump = function (key) {
 /*
  *  determine which scope a key belongs to based on nesting symbols
  */
-function trace (key, seed) {
+function traceOwnerSeed (key, seed) {
     if (key.nesting) {
         var levels = key.nesting
         while (seed.parentSeed && levels--) {
@@ -269,41 +249,6 @@ function trace (key, seed) {
         }
     }
     return seed
-}
-
-/*
- *  Determine value type before setting it on dump object
- */
-function dumpValue (binding) {
-    var val = binding.value
-    if (Array.isArray(val)) {
-        return val.map(dumpScope)
-    } else if (binding.isComputed) {
-        return val.get()
-    } else if (typeof val !== 'function') {
-        return val
-    }
-}
-
-/*
- *  recursively set a nested value on object based on keypath
- *  used in $dump()
- */
-function setNestedValue (obj, path, val) {
-    var key = path[0]
-    if (path.length === 1) {
-        obj[key] = val
-    } else {
-        if (!obj[key]) obj[key] = {}
-        setNestedValue(obj[key], path.slice(1), val)
-    }
-}
-
-/*
- *  dump sub-scope iterator
- */
-function dumpScope (scope) {
-    return scope.$dump()
 }
 
 module.exports = Seed

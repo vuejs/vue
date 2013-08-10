@@ -21,12 +21,16 @@ function catchDeps (binding) {
  *  The second pass of dependency extraction.
  *  Only include dependencies that don't have dependencies themselves.
  */
-function injectDeps (binding) {
-    binding.deps.forEach(function (dep) {
+function filterDeps (binding) {
+    var i = binding.deps.length, dep
+    while (i--) {
+        dep = binding.deps[i]
         if (!dep.deps.length) {
             dep.subs.push.apply(dep.subs, binding.instances)
+        } else {
+            binding.deps.splice(i, 1)
         }
-    })
+    }
 }
 
 module.exports = {
@@ -42,7 +46,7 @@ module.exports = {
     parse: function (bindings) {
         observer.isObserving = true
         bindings.forEach(catchDeps)
-        bindings.forEach(injectDeps)
+        bindings.forEach(filterDeps)
         observer.isObserving = false
     }
 }

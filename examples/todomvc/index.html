@@ -3,8 +3,8 @@
     <head>
         <title>Todo</title>
         <meta charset="utf-8">
-        <link rel="stylesheet" type="text/css" href="todomvc.css">
-        <link rel="stylesheet" type="text/css" href="custom.css">
+        <link rel="stylesheet" type="text/css" href="common/base.css">
+        <link rel="stylesheet" type="text/css" href="css/app.css">
     </head>
     <body>
         <section id="todoapp" sd-controller="Todos" sd-class="filter">
@@ -30,6 +30,7 @@
                 <ul id="todo-list">
                     <!-- a single todo item -->
                     <li
+                        class="todo"
                         sd-each="todo:todos"
                         sd-class="completed:todo.done, editing:todo.editing"
                     >
@@ -63,9 +64,9 @@
                     <strong>{{remaining}}</strong> {{itemLabel}} left
                 </span>
                 <ul id="filters">
-                    <li><a href="#/all" data-filter="all" sd-on="click:setFilter">All</a></li>
-                    <li><a href="#/active" data-filter="active" sd-on="click:setFilter">Active</a></li>
-                    <li><a href="#/completed" data-filter="completed" sd-on="click:setFilter">Completed</a></li>
+                    <li><a href="#/all">All</a></li>
+                    <li><a href="#/active">Active</a></li>
+                    <li><a href="#/completed">Completed</a></li>
                 </ul>
                 <button id="clear-completed" sd-on="click:removeCompleted">
                     Remove Completed ({{completed}})
@@ -83,6 +84,6 @@
 
         <!-- js -->
         <script src="../../dist/seed.js"></script>
-        <script src="app.js"></script>
+        <script src="js/app.js"></script>
     </body>
 </html>
