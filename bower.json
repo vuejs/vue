@@ -8,7 +8,6 @@
         "wrappers",
         "src",
         "test",
-        "dist/seed.min.js",
         "Gruntfile.js",
         "*.json",
         "*.md"
