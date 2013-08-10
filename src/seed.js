@@ -248,8 +248,8 @@ Seed.prototype._dump = function (key) {
             path = key.split('.')
             setNestedValue(dump, path, val)
         }
+        return dump
     }
-    return dump
 }
 
 // Helpers --------------------------------------------------------------------
@@ -295,7 +295,7 @@ function setNestedValue (obj, path, val) {
         obj[key] = val
     } else {
         if (!obj[key]) obj[key] = {}
-        setValue(obj[key], path.slice(1), val)
+        setNestedValue(obj[key], path.slice(1), val)
     }
 }
 
