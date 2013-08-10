@@ -71,7 +71,7 @@ api.bootstrap = function (opts) {
     while (el = document.querySelector(ctrlSlt) || document.querySelector(dataSlt)) {
         seeds.push(new Seed(el))
     }
-    return seeds
+    return seeds.length > 1 ? seeds : seeds[0]
 }
 
 module.exports = api
