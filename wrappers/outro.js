@@ -1,3 +1,3 @@
-window.Seed = Seed || require('seed')
+window.Seed = window.Seed || require('seed')
 Seed.version = {{version}}
 })();

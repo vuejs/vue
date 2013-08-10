@@ -28,7 +28,11 @@ module.exports = {
     },
     
     focus: function (value) {
-        this.el[value ? 'focus' : 'blur']()
+        // yield so it work when toggling visibility
+        var el = this.el
+        setTimeout(function () {
+            el[value ? 'focus' : 'blur']()
+        }, 0)
     },
 
     class: function (value) {

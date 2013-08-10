@@ -32,19 +32,16 @@
                     <li
                         class="todo"
                         sd-each="todo:todos"
-                        sd-class="completed:todo.done, editing:todo.editing"
+                        sd-class="completed:todo.completed, editing:todo.editing"
                     >
                         <div class="view">
                             <input
                                 class="toggle"
                                 type="checkbox"
-                                sd-checked="todo.done"
+                                sd-checked="todo.completed"
                                 sd-on="change:updateCount"
                             >
-                            <label
-                                sd-text="todo.text"
-                                sd-on="dblclick:edit"
-                            ></label>
+                            <label sd-text="todo.title" sd-on="dblclick:edit"></label>
                             <button class="destroy" sd-on="click:removeTodo"></button>
                         </div>
                         <input
@@ -52,7 +49,7 @@
                             type="text"
                             sd-focus="todo.editing"
                             sd-on="blur:stopEdit, keyup:stopEdit | key enter"
-                            sd-value="todo.text"
+                            sd-value="todo.title"
                         >
                     </li>
                 </ul>
@@ -61,14 +58,14 @@
             <!-- footer controls -->
             <footer id="footer" sd-show="total">
                 <span id="todo-count">
-                    <strong>{{remaining}}</strong> {{itemLabel}} left
+                    <strong sd-text="remaining"></strong> {{itemLabel}} left
                 </span>
                 <ul id="filters">
                     <li><a href="#/all">All</a></li>
                     <li><a href="#/active">Active</a></li>
                     <li><a href="#/completed">Completed</a></li>
                 </ul>
-                <button id="clear-completed" sd-on="click:removeCompleted">
+                <button id="clear-completed" sd-on="click:removeCompleted" sd-show="completed">
                     Remove Completed ({{completed}})
                 </button>
             </footer>
