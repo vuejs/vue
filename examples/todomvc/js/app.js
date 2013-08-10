@@ -1,5 +1,4 @@
-var Seed = require('seed'),
-    storageKey = 'todos-seedjs',
+var storageKey = 'todos-seedjs',
     storedData = JSON.parse(localStorage.getItem(storageKey))
 
 Seed.controller('Todos', function (scope) {

@@ -1,23 +1,23 @@
 {
-  "name": "seed",
-  "version": "0.1.0",
-  "main": "src/main.js",
-  "scripts": [
-    "src/main.js",
-    "src/config.js",
-    "src/utils.js",
-    "src/seed.js",
-    "src/scope.js",
-    "src/binding.js",
-    "src/directive-parser.js",
-    "src/text-parser.js",
-    "src/deps-parser.js",
-    "src/filters.js",
-    "src/directives/index.js",
-    "src/directives/each.js",
-    "src/directives/on.js"
-  ],
-  "dependencies": {
-    "component/emitter": "*"
-  }
+    "name": "seed",
+    "version": "0.1.0",
+    "main": "src/main.js",
+    "scripts": [
+        "src/main.js",
+        "src/config.js",
+        "src/utils.js",
+        "src/seed.js",
+        "src/scope.js",
+        "src/binding.js",
+        "src/directive-parser.js",
+        "src/text-parser.js",
+        "src/deps-parser.js",
+        "src/filters.js",
+        "src/directives/index.js",
+        "src/directives/each.js",
+        "src/directives/on.js"
+    ],
+    "dependencies": {
+        "component/emitter": "*"
+    }
 }

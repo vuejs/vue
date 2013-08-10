@@ -5,6 +5,7 @@
     "ignore": [
         ".*",
         "examples",
+        "wrappers",
         "src",
         "test",
         "dist/seed.min.js",
