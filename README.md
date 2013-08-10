@@ -8,8 +8,6 @@
 - Auto event delegation on repeated items.
 - [Component](https://github.com/component/component) based, can be used as a CommonJS module but can also be used alone.
 
-[Doc under construction...]
-
 ### Browser Support
 
 - Chrome 8+
@@ -20,23 +18,25 @@
 - Android browser 3.0+
 - iOS Safari 5.0+
 
-### Template
+### [Doc under construction...]
 
-### Controller
+#### Template
+
+#### Controller
 
 - Nested Controllers and accessing parent scope
 - Controller inheritance
 
-### Data
+#### Data
 
-### Data Binding
+#### Data Binding
 
-### Event Handling
+#### Event Handling
 
-### Filters
+#### Filters
 
-### Computed Properties
+#### Computed Properties
 
-### Custom Filter
+#### Custom Filter
 
-### Custom Directive
+#### Custom Directive
