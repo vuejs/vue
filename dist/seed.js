@@ -582,10 +582,13 @@ function Seed (el, options) {
         el = document.querySelector(el)
     }
 
-    this.el         = el
-    el.seed         = this
-    this._bindings  = {}
-    this._computed  = []
+    this.el               = el
+    el.seed               = this
+    this._bindings        = {}
+    // list of computed properties that need to parse dependencies for
+    this._computed        = []
+    // list of bindings that has dynamic context dependencies
+    this._contextBindings = []
 
     // copy options
     options = options || {}
@@ -643,6 +646,9 @@ function Seed (el, options) {
     // extract dependencies for computed properties
     if (this._computed.length) depsParser.parse(this._computed)
     delete this._computed
+    
+    if (this._contextBindings.length) this._bindContexts(this._contextBindings)
+    delete this._contextBindings
 }
 
 // for better compression
@@ -754,7 +760,10 @@ SeedProto._bind = function (directive) {
     seed = traceOwnerSeed(directive, seed)
     var binding = seed._bindings[key] || seed._createBinding(key)
 
-    // add directive to this binding
+    if (binding.contextDeps) {
+        console.log(1)
+    }
+
     binding.instances.push(directive)
     directive.binding = binding
 
@@ -779,6 +788,23 @@ SeedProto._createBinding = function (key) {
     this._bindings[key] = binding
     if (binding.isComputed) this._computed.push(binding)
     return binding
+}
+
+/*
+ *  Process subscriptions for computed properties that has
+ *  dynamic context dependencies
+ */
+SeedProto._bindContexts = function (bindings) {
+    var i = bindings.length, j, binding, depKey, dep
+    while (i--) {
+        binding = bindings[i]
+        j = binding.contextDeps.length
+        while (j--) {
+            depKey = binding.contextDeps[j]
+            dep = this._bindings[depKey]
+            dep.subs.push(binding)
+        }
+    }
 }
 
 /*
@@ -1016,6 +1042,13 @@ BindingProto.update = function (value) {
         this.instances[i].update(value)
     }
     this.pub()
+}
+
+BindingProto.refresh = function () {
+    var i = this.instances.length
+    while (i--) {
+        this.instances[i].refresh()
+    }
 }
 
 /*
@@ -1282,8 +1315,9 @@ function catchDeps (binding) {
     observer.on('get', function (dep) {
         binding.deps.push(dep)
     })
+    parseContextDependency(binding)
     binding.value.get({
-        scope: createDummyScope(binding.value.get),
+        scope: createDummyScope(binding),
         el: dummyEl
     })
     observer.off('get')
@@ -1300,7 +1334,7 @@ function filterDeps (binding) {
         dep = binding.deps[i]
         if (!dep.deps.length) {
             config.log('  └─' + dep.key)
-            dep.subs.push.apply(dep.subs, binding.instances)
+            dep.subs.push(binding)
         } else {
             binding.deps.splice(i, 1)
         }
@@ -1316,18 +1350,15 @@ function filterDeps (binding) {
  *  the user expects the target scope to possess. They are all assigned
  *  a noop function so they can be invoked with no real harm.
  */
-function createDummyScope (fn) {
+function createDummyScope (binding) {
     var scope = {},
-        str = fn.toString()
-    var args = str.match(ARGS_RE)
-    if (!args) return scope
-    var argRE = new RegExp(args[1] + SCOPE_RE_STR, 'g'),
-        matches = str.match(argRE)
-    if (!matches) return scope
-    var i = matches.length, j, path, key, level
+        deps = binding.contextDeps
+    if (!deps) return scope
+    var i = binding.contextDeps.length,
+        j, level, key, path
     while (i--) {
         level = scope
-        path = matches[i].slice(args[1].length + 7).split('.')
+        path = deps[i].split('.')
         j = 0
         while (j < path.length) {
             key = path[j]
@@ -1337,6 +1368,22 @@ function createDummyScope (fn) {
         }
     }
     return scope
+}
+
+/*
+ *  Extract context dependency paths
+ */
+function parseContextDependency (binding) {
+    var fn   = binding.value.get,
+        str  = fn.toString(),
+        args = str.match(ARGS_RE)
+    if (!args) return null
+    var argRE = new RegExp(args[1] + SCOPE_RE_STR, 'g'),
+        matches = str.match(argRE),
+        base = args[1].length + 7
+    if (!matches) return null
+    binding.contextDeps = matches.map(function (key) { return key.slice(base) })
+    binding.seed._contextBindings.push(binding)
 }
 
 module.exports = {
@@ -1766,5 +1813,5 @@ require.alias("component-indexof/index.js", "component-emitter/deps/indexof/inde
 require.alias("seed/src/main.js", "seed/index.js");
 
 window.Seed = window.Seed || require('seed')
-Seed.version = '0.1.2'
+Seed.version = '0.1.3'
 })();
