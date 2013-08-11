@@ -760,10 +760,6 @@ SeedProto._bind = function (directive) {
     seed = traceOwnerSeed(directive, seed)
     var binding = seed._bindings[key] || seed._createBinding(key)
 
-    if (binding.contextDeps) {
-        console.log(1)
-    }
-
     binding.instances.push(directive)
     directive.binding = binding
 
@@ -1382,7 +1378,15 @@ function parseContextDependency (binding) {
         matches = str.match(argRE),
         base = args[1].length + 7
     if (!matches) return null
-    binding.contextDeps = matches.map(function (key) { return key.slice(base) })
+    var i = matches.length,
+        deps = [], dep
+    while (i--) {
+        dep = matches[i].slice(base)
+        if (deps.indexOf(dep) === -1) {
+            deps.push(dep)
+        }
+    }
+    binding.contextDeps = deps
     binding.seed._contextBindings.push(binding)
 }
 
