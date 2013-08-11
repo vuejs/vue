@@ -3,8 +3,8 @@ var Emitter  = require('emitter'),
     observer = new Emitter()
 
 var dummyEl = document.createElement('div'),
-    ARGS_RE = /^function\s*?\((.+)\)/,
-    SCOPE_RE_STR = '\\.scope\\.[\\.A-Za-z0-9_$]+',
+    ARGS_RE = /^function\s*?\((.+?)\)/,
+    SCOPE_RE_STR = '\\.scope\\.[\\.A-Za-z0-9_][\\.A-Za-z0-9_$]*',
     noop = function () {}
 
 /*

@@ -1299,8 +1299,8 @@ var Emitter  = require('emitter'),
     observer = new Emitter()
 
 var dummyEl = document.createElement('div'),
-    ARGS_RE = /^function\s*?\((.+)\)/,
-    SCOPE_RE_STR = '\\.scope\\.[\\.A-Za-z0-9_$]+',
+    ARGS_RE = /^function\s*?\((.+?)\)/,
+    SCOPE_RE_STR = '\\.scope\\.[\\.A-Za-z0-9_][\\.A-Za-z0-9_$]*',
     noop = function () {}
 
 /*
@@ -1408,14 +1408,14 @@ module.exports = {
 });
 require.register("seed/src/filters.js", function(exports, require, module){
 var keyCodes = {
-    enter: 13,
-    tab: 9,
-    'delete': 46,
-    up: 38,
-    left: 37,
-    right: 39,
-    down: 40,
-    esc: 27
+    enter    : 13,
+    tab      : 9,
+    'delete' : 46,
+    up       : 38,
+    left     : 37,
+    right    : 39,
+    down     : 40,
+    esc      : 27
 }
 
 module.exports = {
