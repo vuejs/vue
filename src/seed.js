@@ -199,10 +199,6 @@ SeedProto._bind = function (directive) {
     seed = traceOwnerSeed(directive, seed)
     var binding = seed._bindings[key] || seed._createBinding(key)
 
-    if (binding.contextDeps) {
-        console.log(1)
-    }
-
     binding.instances.push(directive)
     directive.binding = binding
 
