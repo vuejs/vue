@@ -1766,5 +1766,5 @@ require.alias("component-indexof/index.js", "component-emitter/deps/indexof/inde
 require.alias("seed/src/main.js", "seed/index.js");
 
 window.Seed = window.Seed || require('seed')
-Seed.version = 'dev'
+Seed.version = '0.1.2'
 })();
