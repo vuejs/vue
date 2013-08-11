@@ -1,6 +1,6 @@
 {
     "name": "seed",
-    "version": "0.1.3",
+    "version": "0.1.4",
     "main": "src/main.js",
     "scripts": [
         "src/main.js",
