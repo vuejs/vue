@@ -1,12 +1,12 @@
 var keyCodes = {
-    enter: 13,
-    tab: 9,
-    'delete': 46,
-    up: 38,
-    left: 37,
-    right: 39,
-    down: 40,
-    esc: 27
+    enter    : 13,
+    tab      : 9,
+    'delete' : 46,
+    up       : 38,
+    left     : 37,
+    right    : 39,
+    down     : 40,
+    esc      : 27
 }
 
 module.exports = {
