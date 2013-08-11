@@ -106,11 +106,12 @@ SeedProto._compileNode = function (node, root) {
     } else if (node.nodeType === 1) {
 
         var eachExp = node.getAttribute(eachAttr),
-            ctrlExp = node.getAttribute(ctrlAttr)
+            ctrlExp = node.getAttribute(ctrlAttr),
+            directive
 
         if (eachExp) { // each block
 
-            var directive = DirectiveParser.parse(eachAttr, eachExp)
+            directive = DirectiveParser.parse(eachAttr, eachExp)
             if (directive) {
                 directive.el = node
                 seed._bind(directive)
@@ -127,21 +128,25 @@ SeedProto._compileNode = function (node, root) {
 
             // parse if has attributes
             if (node.attributes && node.attributes.length) {
-                // forEach vs for loop perf comparison: http://jsperf.com/for-vs-foreach-case
-                // takeaway: not worth it to wrtie manual loops.
-                slice.call(node.attributes).forEach(function (attr) {
-                    if (attr.name === ctrlAttr) return
-                    var valid = false
-                    attr.value.split(',').forEach(function (exp) {
-                        var directive = DirectiveParser.parse(attr.name, exp)
+                var attrs = slice.call(node.attributes),
+                    i = attrs.length, attr, j, valid, exps, exp
+                while (i--) {
+                    attr = attrs[i]
+                    if (attr.name === ctrlAttr) continue
+                    valid = false
+                    exps = attr.value.split(',')
+                    j = exps.length
+                    while (j--) {
+                        exp = exps[j]
+                        directive = DirectiveParser.parse(attr.name, exp)
                         if (directive) {
                             valid = true
                             directive.el = node
                             seed._bind(directive)
                         }
-                    })
+                    }
                     if (valid) node.removeAttribute(attr.name)
-                })
+                }
             }
 
             // recursively compile childNodes

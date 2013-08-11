@@ -90,11 +90,12 @@ DirProto.apply = function (value) {
  *  pipe the value through filters
  */
 DirProto.applyFilters = function (value) {
-    var filtered = value
-    this.filters.forEach(function (filter) {
+    var filtered = value, filter
+    for (var i = 0, l = this.filters.length; i < l; i++) {
+        filter = this.filters[i]
         if (!filter.apply) throw new Error('Unknown filter: ' + filter.name)
         filtered = filter.apply(filtered, filter.args)
-    })
+    }
     return filtered
 }
 

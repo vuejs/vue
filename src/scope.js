@@ -20,15 +20,16 @@ ScopeProto.$watch = function (key, callback) {
     setTimeout(function () {
         var scope   = self.$seed.scope,
             binding = self.$seed._bindings[key],
+            i       = binding.deps.length,
             watcher = self.$watchers[key] = {
                 refresh: function () {
                     callback(scope[key])
                 },
                 deps: binding.deps
             }
-        binding.deps.forEach(function (dep) {
-            dep.subs.push(watcher)
-        })
+        while (i--) {
+            binding.deps[i].subs.push(watcher)
+        }
     }, 0)
 }
 
@@ -40,9 +41,11 @@ ScopeProto.$unwatch = function (key) {
     setTimeout(function () {
         var watcher = self.$watchers[key]
         if (!watcher) return
-        watcher.deps.forEach(function (dep) {
-            dep.subs.splice(dep.subs.indexOf(watcher))
-        })
+        var i = watcher.deps.length, subs
+        while (i--) {
+            subs = watcher.deps[i].subs
+            subs.splice(subs.indexOf(watcher))
+        }
         delete self.$watchers[key]
     }, 0)
 }

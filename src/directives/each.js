@@ -7,10 +7,11 @@ var config = require('../config')
 var mutationHandlers = {
 
     push: function (m) {
-        var self = this
-        m.args.forEach(function (data, i) {
-            self.buildItem(self.ref, data, self.collection.length + i)
-        })
+        var i, l = m.args.length,
+            baseIndex = this.collection.length - l
+        for (i = 0; i < l; i++) {
+            this.buildItem(this.ref, m.args[i], baseIndex + i)
+        }
     },
 
     pop: function (m) {
@@ -18,50 +19,52 @@ var mutationHandlers = {
     },
 
     unshift: function (m) {
-        var self = this
-        m.args.forEach(function (data, i) {
-            var ref  = self.collection.length > m.args.length
-                     ? self.collection[m.args.length].$el
-                     : self.ref
-            self.buildItem(ref, data, i)
-        })
-        self.updateIndexes()
+        var i, l = m.args.length, ref
+        for (i = 0; i < l; i++) {
+            ref = this.collection.length > l
+                ? this.collection[l].$el
+                : this.ref
+            this.buildItem(ref, m.args[i], i)
+        }
+        this.updateIndexes()
     },
 
     shift: function (m) {
         m.result.$destroy()
-        var self = this
-        self.updateIndexes()
+        this.updateIndexes()
     },
 
     splice: function (m) {
-        var self    = this,
+        var i, pos, ref,
+            l = m.args.length,
+            k = m.result.length,
             index   = m.args[0],
             removed = m.args[1],
-            added   = m.args.length - 2
-        m.result.forEach(function (scope) {
-            scope.$destroy()
-        })
+            added   = l - 2
+        for (i = 0; i < k; i++) {
+            m.result[i].$destroy()
+        }
         if (added > 0) {
-            m.args.slice(2).forEach(function (data, i) {
-                var pos  = index - removed + added + 1,
-                    ref  = self.collection[pos]
-                         ? self.collection[pos].$el
-                         : self.ref
-                self.buildItem(ref, index + i)
-            })
+            for (i = 2; i < l; i++) {
+                pos  = index - removed + added + 1
+                ref  = this.collection[pos]
+                     ? this.collection[pos].$el
+                     : this.ref
+                this.buildItem(ref, m.args[i], index + i)
+            }
         }
         if (removed !== added) {
-            self.updateIndexes()
+            this.updateIndexes()
         }
     },
 
     sort: function () {
-        var self = this
-        self.collection.forEach(function (scope, i) {
+        var i, l = this.collection.length, scope
+        for (i = 0; i < l; i++) {
+            scope = this.collection[i]
             scope.$index = i
-            self.container.insertBefore(scope.$el, self.ref)
-        })
+            this.container.insertBefore(scope.$el, this.ref)
+        }
     }
 }
 
@@ -95,9 +98,9 @@ module.exports = {
         })
 
         // create child-seeds and append to DOM
-        collection.forEach(function (data, i) {
-            self.buildItem(self.ref, data, i)
-        })
+        for (var i = 0, l = collection.length; i < l; i++) {
+            this.buildItem(this.ref, collection[i], i)
+        }
     },
 
     buildItem: function (ref, data, index) {
@@ -116,17 +119,19 @@ module.exports = {
     },
 
     updateIndexes: function () {
-        this.collection.forEach(function (scope, i) {
-            scope.$index = i
-        })
+        var i = this.collection.length
+        while (i--) {
+            this.collection[i].$index = i
+        }
     },
 
     unbind: function (reset) {
         if (this.collection && this.collection.length) {
-            var fn = reset ? '_destroy' : '_unbind'
-            this.collection.forEach(function (scope) {
-                scope.$seed[fn]()
-            })
+            var i = this.collection.length,
+                fn = reset ? '_destroy' : '_unbind'
+            while (i--) {
+                this.collection[i].$seed[fn]()
+            }
             this.collection = null
         }
         var ctn = this.container,
