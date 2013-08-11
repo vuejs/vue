@@ -62,7 +62,12 @@ DirProto.update = function (value) {
  *  computed properties only
  */
 DirProto.refresh = function () {
-    var value = this.value.get()
+    // pass element and scope info to the getter
+    // enables powerful context-aware bindings
+    var value = this.value.get({
+        el: this.el,
+        scope: this.seed.scope
+    })
     if (value === this.computedValue) return
     this.computedValue = value
     this.apply(value)
@@ -169,10 +174,8 @@ module.exports = {
         var dir   = directives[dirname],
             valid = KEY_RE.test(expression)
 
-        if (config.debug) {
-            if (!dir) console.warn('unknown directive: ' + dirname)
-            if (!valid) console.warn('invalid directive expression: ' + expression)
-        }
+        if (!dir) config.warn('unknown directive: ' + dirname)
+        if (!valid) config.warn('invalid directive expression: ' + expression)
 
         return dir && valid
             ? new Directive(dirname, expression, oneway)

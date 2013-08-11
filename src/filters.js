@@ -5,26 +5,32 @@ var keyCodes = {
     up: 38,
     left: 37,
     right: 39,
-    down: 40
+    down: 40,
+    esc: 27
 }
 
 module.exports = {
 
+    trim: function (value) {
+        return value ? value.toString().trim() : ''
+    },
+
     capitalize: function (value) {
+        if (!value) return ''
         value = value.toString()
         return value.charAt(0).toUpperCase() + value.slice(1)
     },
 
     uppercase: function (value) {
-        return value.toString().toUpperCase()
+        return value ? value.toString().toUpperCase() : ''
     },
 
     lowercase: function (value) {
-        return value.toString().toLowerCase()
+        return value ? value.toString().toLowerCase() : ''
     },
 
     currency: function (value, args) {
-        if (!value) return value
+        if (!value) return ''
         var sign = (args && args[0]) || '$',
             i = value % 3,
             f = '.' + value.toFixed(2).slice(-2),
@@ -33,12 +39,13 @@ module.exports = {
     },
 
     key: function (handler, args) {
+        if (!handler) return
         var code = keyCodes[args[0]]
         if (!code) {
             code = parseInt(args[0], 10)
         }
         return function (e) {
-            if (e.originalEvent.keyCode === code) {
+            if (e.keyCode === code) {
                 handler.call(this, e)
             }
         }

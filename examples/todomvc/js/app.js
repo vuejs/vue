@@ -1,12 +1,16 @@
 var storageKey = 'todos-seedjs',
-    storedData = JSON.parse(localStorage.getItem(storageKey))
+    todos = JSON.parse(localStorage.getItem(storageKey)) || [],
+    filters = {
+        all: function () { return true },
+        active: function (v) { return !v },
+        completed: function (v) { return v }
+    }
 
 Seed.controller('Todos', function (scope) {
 
     // regular properties -----------------------------------------------------
-    scope.todos  = Array.isArray(storedData) ? storedData : []
-    scope.filter = location.hash.slice(2) || 'all'
-    scope.remaining = scope.todos.reduce(function (n, todo) {
+    scope.todos = todos
+    scope.remaining = todos.reduce(function (n, todo) {
         return n + (todo.completed ? 0 : 1)
     }, 0)
 
@@ -23,6 +27,17 @@ Seed.controller('Todos', function (scope) {
         return scope.remaining > 1 ? 'items' : 'item'
     }}
 
+    // computed property using info from target scope
+    scope.filterTodo = {get: function (e) {
+        return filters[scope.filter](e.scope.completed)
+    }}
+
+    // computed property using info from target element
+    scope.checkFilter = {get: function (e) {
+        return scope.filter === e.el.textContent.toLowerCase()
+    }}
+
+    // two-way computed property with both getter and setter
     scope.allDone = {
         get: function () {
             return scope.remaining === 0
@@ -36,47 +51,66 @@ Seed.controller('Todos', function (scope) {
     }
 
     // event handlers ---------------------------------------------------------
-    scope.addTodo = function (e) {
-        if (e.el.value) {
-            scope.todos.unshift({ title: e.el.value, completed: false })
-            e.el.value = ''
+    scope.addTodo = function () {
+        if (scope.newTodo.trim()) {
+            scope.todos.unshift({ title: scope.newTodo.trim(), completed: false })
+            scope.newTodo = ''
             scope.remaining++
+            sync()
         }
     }
 
     scope.removeTodo = function (e) {
         scope.todos.remove(e.scope)
         scope.remaining -= e.scope.completed ? 0 : 1
+        sync()
     }
 
     scope.updateCount = function (e) {
         scope.remaining += e.scope.completed ? -1 : 1
+        sync()
     }
 
+    var beforeEditCache
     scope.edit = function (e) {
+        beforeEditCache = e.scope.title
         e.scope.editing = true
     }
 
-    scope.stopEdit = function (e) {
+    scope.doneEdit = function (e) {
+        if (!e.scope.editing) return
         e.scope.editing = false
+        e.scope.title = e.scope.title.trim()
+        if (!e.scope.title) scope.removeTodo(e)
+        sync()
+    }
+
+    scope.cancelEdit = function (e) {
+        e.scope.editing = false
+        setTimeout(function () {
+            e.scope.title = beforeEditCache
+        }, 0)
     }
 
     scope.removeCompleted = function () {
-        if (scope.completed === 0) return
         scope.todos = scope.todos.filter(function (todo) {
             return !todo.completed
         })
+        sync()
     }
 
-    // listen for hash change
-    window.addEventListener('hashchange', function () {
-        scope.filter = location.hash.slice(2)
-    })
+    // filters
+    updateFilter()
+    window.addEventListener('hashchange', updateFilter)
+    function updateFilter () {
+        if (!location.hash) return
+        scope.filter = location.hash.slice(2) || 'all'
+    }
 
-    // persist data on leave
-    window.addEventListener('beforeunload', function () {
+    // data persistence using localStorage
+    function sync () {
         localStorage.setItem(storageKey, scope.$serialize('todos'))
-    })
+    }
 
 })
 

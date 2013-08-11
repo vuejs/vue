@@ -15,6 +15,8 @@ var slice           = Array.prototype.slice,
  */
 function Seed (el, options) {
 
+    config.log('\ncreated new Seed instance.\n')
+
     if (typeof el === 'string') {
         el = document.querySelector(el)
     }
@@ -34,8 +36,8 @@ function Seed (el, options) {
     var dataAttr = config.prefix + '-data',
         dataId = el.getAttribute(dataAttr),
         data = (options && options.data) || config.datum[dataId]
-    if (config.debug && dataId && !data) {
-        console.warn('data "' + dataId + '" is not defined.')
+    if (dataId && !data) {
+        config.warn('data "' + dataId + '" is not defined.')
     }
     data = data || {}
     el.removeAttribute(dataAttr)
@@ -47,10 +49,11 @@ function Seed (el, options) {
     }
 
     // initialize the scope object
-    var scope = this.scope = new Scope(this, options)
+    var key,
+        scope = this.scope = new Scope(this, options)
 
     // copy data
-    for (var key in data) {
+    for (key in data) {
         scope[key] = data[key]
     }
 
@@ -61,16 +64,23 @@ function Seed (el, options) {
         var factory = config.controllers[ctrlID]
         if (factory) {
             factory(this.scope)
-        } else if (config.debug) {
-            console.warn('controller "' + ctrlID + '" is not defined.')
+        } else {
+            config.warn('controller "' + ctrlID + '" is not defined.')
         }
     }
 
     // now parse the DOM
     this._compileNode(el, true)
 
+    // for anything in scope but not binded in DOM, create bindings for them
+    for (key in scope) {
+        if (key.charAt(0) !== '$' && !this._bindings[key]) {
+            this._createBinding(key)
+        }
+    }
+
     // extract dependencies for computed properties
-    depsParser.parse(this._computed)
+    if (this._computed.length) depsParser.parse(this._computed)
     delete this._computed
 }
 
@@ -203,6 +213,7 @@ SeedProto._bind = function (directive) {
  *  Create binding and attach getter/setter for a key to the scope object
  */
 SeedProto._createBinding = function (key) {
+    config.log('  created binding: ' + key)
     var binding = new Binding(this, key)
     this._bindings[key] = binding
     if (binding.isComputed) this._computed.push(binding)

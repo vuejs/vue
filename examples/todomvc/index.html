@@ -4,10 +4,9 @@
         <title>Todo</title>
         <meta charset="utf-8">
         <link rel="stylesheet" type="text/css" href="common/base.css">
-        <link rel="stylesheet" type="text/css" href="css/app.css">
     </head>
     <body>
-        <section id="todoapp" sd-controller="Todos" sd-class="filter">
+        <section id="todoapp" sd-controller="Todos">
 
             <header id="header">
                 <h1>todos</h1>
@@ -15,8 +14,10 @@
                 <input
                     id="new-todo"
                     autofocus
-                    sd-on="keyup:addTodo | key enter"
+                    autocomplete="off"
                     placeholder="What needs to be done?"
+                    sd-value="newTodo"
+                    sd-on="keyup:addTodo | key enter"
                 >
             </header>
             
@@ -32,6 +33,7 @@
                     <li
                         class="todo"
                         sd-each="todo:todos"
+                        sd-show="filterTodo"
                         sd-class="completed:todo.completed, editing:todo.editing"
                     >
                         <div class="view">
@@ -48,7 +50,7 @@
                             class="edit"
                             type="text"
                             sd-focus="todo.editing"
-                            sd-on="blur:stopEdit, keyup:stopEdit | key enter"
+                            sd-on="blur:doneEdit, keyup:doneEdit | key enter, keyup:cancelEdit | key esc"
                             sd-value="todo.title"
                         >
                     </li>
@@ -61,9 +63,9 @@
                     <strong sd-text="remaining"></strong> {{itemLabel}} left
                 </span>
                 <ul id="filters">
-                    <li><a href="#/all">All</a></li>
-                    <li><a href="#/active">Active</a></li>
-                    <li><a href="#/completed">Completed</a></li>
+                    <li><a href="#/all" sd-class="selected:checkFilter">All</a></li>
+                    <li><a href="#/active" sd-class="selected:checkFilter">Active</a></li>
+                    <li><a href="#/completed" sd-class="selected:checkFilter">Completed</a></li>
                 </ul>
                 <button id="clear-completed" sd-on="click:removeCompleted" sd-show="completed">
                     Remove Completed ({{completed}})

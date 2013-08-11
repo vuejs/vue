@@ -456,6 +456,14 @@ module.exports = {
     interpolateTags : {
         open  : '{{',
         close : '}}'
+    },
+
+    log: function (msg) {
+        if (this.debug) console.log(msg)
+    },
+    
+    warn: function(msg) {
+        if (this.debug) console.warn(msg)
     }
 }
 });
@@ -568,6 +576,8 @@ var slice           = Array.prototype.slice,
  */
 function Seed (el, options) {
 
+    config.log('\ncreated new Seed instance.\n')
+
     if (typeof el === 'string') {
         el = document.querySelector(el)
     }
@@ -587,8 +597,8 @@ function Seed (el, options) {
     var dataAttr = config.prefix + '-data',
         dataId = el.getAttribute(dataAttr),
         data = (options && options.data) || config.datum[dataId]
-    if (config.debug && dataId && !data) {
-        console.warn('data "' + dataId + '" is not defined.')
+    if (dataId && !data) {
+        config.warn('data "' + dataId + '" is not defined.')
     }
     data = data || {}
     el.removeAttribute(dataAttr)
@@ -600,10 +610,11 @@ function Seed (el, options) {
     }
 
     // initialize the scope object
-    var scope = this.scope = new Scope(this, options)
+    var key,
+        scope = this.scope = new Scope(this, options)
 
     // copy data
-    for (var key in data) {
+    for (key in data) {
         scope[key] = data[key]
     }
 
@@ -614,16 +625,23 @@ function Seed (el, options) {
         var factory = config.controllers[ctrlID]
         if (factory) {
             factory(this.scope)
-        } else if (config.debug) {
-            console.warn('controller "' + ctrlID + '" is not defined.')
+        } else {
+            config.warn('controller "' + ctrlID + '" is not defined.')
         }
     }
 
     // now parse the DOM
     this._compileNode(el, true)
 
+    // for anything in scope but not binded in DOM, create bindings for them
+    for (key in scope) {
+        if (key.charAt(0) !== '$' && !this._bindings[key]) {
+            this._createBinding(key)
+        }
+    }
+
     // extract dependencies for computed properties
-    depsParser.parse(this._computed)
+    if (this._computed.length) depsParser.parse(this._computed)
     delete this._computed
 }
 
@@ -756,6 +774,7 @@ SeedProto._bind = function (directive) {
  *  Create binding and attach getter/setter for a key to the scope object
  */
 SeedProto._createBinding = function (key) {
+    config.log('  created binding: ' + key)
     var binding = new Binding(this, key)
     this._bindings[key] = binding
     if (binding.isComputed) this._computed.push(binding)
@@ -895,6 +914,7 @@ var utils    = require('./utils'),
  */
 function Binding (seed, key) {
     this.seed = seed
+    this.scope = seed.scope
     this.key  = key
     var path = key.split('.')
     this.inspect(utils.getNestedValue(seed.scope, path))
@@ -942,7 +962,10 @@ BindingProto.def = function (scope, path) {
                     observer.emit('get', self)
                 }
                 return self.isComputed
-                    ? self.value.get()
+                    ? self.value.get({
+                        el: self.seed.el,
+                        scope: self.seed.scope
+                    })
                     : self.value
             },
             set: function (value) {
@@ -1073,7 +1096,12 @@ DirProto.update = function (value) {
  *  computed properties only
  */
 DirProto.refresh = function () {
-    var value = this.value.get()
+    // pass element and scope info to the getter
+    // enables powerful context-aware bindings
+    var value = this.value.get({
+        el: this.el,
+        scope: this.seed.scope
+    })
     if (value === this.computedValue) return
     this.computedValue = value
     this.apply(value)
@@ -1180,10 +1208,8 @@ module.exports = {
         var dir   = directives[dirname],
             valid = KEY_RE.test(expression)
 
-        if (config.debug) {
-            if (!dir) console.warn('unknown directive: ' + dirname)
-            if (!valid) console.warn('invalid directive expression: ' + expression)
-        }
+        if (!dir) config.warn('unknown directive: ' + dirname)
+        if (!valid) config.warn('invalid directive expression: ' + expression)
 
         return dir && valid
             ? new Directive(dirname, expression, oneway)
@@ -1236,7 +1262,13 @@ module.exports = {
 });
 require.register("seed/src/deps-parser.js", function(exports, require, module){
 var Emitter  = require('emitter'),
+    config   = require('./config'),
     observer = new Emitter()
+
+var dummyEl = document.createElement('div'),
+    ARGS_RE = /^function\s*?\((.+)\)/,
+    SCOPE_RE_STR = '\\.scope\\.[\\.A-Za-z0-9_$]+',
+    noop = function () {}
 
 /*
  *  Auto-extract the dependencies of a computed property
@@ -1250,7 +1282,10 @@ function catchDeps (binding) {
     observer.on('get', function (dep) {
         binding.deps.push(dep)
     })
-    binding.value.get()
+    binding.value.get({
+        scope: createDummyScope(binding.value.get),
+        el: dummyEl
+    })
     observer.off('get')
 }
 
@@ -1260,14 +1295,48 @@ function catchDeps (binding) {
  */
 function filterDeps (binding) {
     var i = binding.deps.length, dep
+    config.log('\n─ ' + binding.key)
     while (i--) {
         dep = binding.deps[i]
         if (!dep.deps.length) {
+            config.log('  └─' + dep.key)
             dep.subs.push.apply(dep.subs, binding.instances)
         } else {
             binding.deps.splice(i, 1)
         }
     }
+}
+
+/*
+ *  We need to invoke each binding's getter for dependency parsing,
+ *  but we don't know what sub-scope properties the user might try
+ *  to access in that getter. To avoid thowing an error or forcing
+ *  the user to guard against an undefined argument, we staticly
+ *  analyze the function to extract any possible nested properties
+ *  the user expects the target scope to possess. They are all assigned
+ *  a noop function so they can be invoked with no real harm.
+ */
+function createDummyScope (fn) {
+    var scope = {},
+        str = fn.toString()
+    var args = str.match(ARGS_RE)
+    if (!args) return scope
+    var argRE = new RegExp(args[1] + SCOPE_RE_STR, 'g'),
+        matches = str.match(argRE)
+    if (!matches) return scope
+    var i = matches.length, j, path, key, level
+    while (i--) {
+        level = scope
+        path = matches[i].slice(args[1].length + 7).split('.')
+        j = 0
+        while (j < path.length) {
+            key = path[j]
+            if (!level[key]) level[key] = noop
+            level = level[key]
+            j++
+        }
+    }
+    return scope
 }
 
 module.exports = {
@@ -1281,10 +1350,12 @@ module.exports = {
      *  parse a list of computed property bindings
      */
     parse: function (bindings) {
+        config.log('\nparsing dependencies...')
         observer.isObserving = true
         bindings.forEach(catchDeps)
         bindings.forEach(filterDeps)
         observer.isObserving = false
+        config.log('\ndone.')
     }
 }
 });
@@ -1296,26 +1367,32 @@ var keyCodes = {
     up: 38,
     left: 37,
     right: 39,
-    down: 40
+    down: 40,
+    esc: 27
 }
 
 module.exports = {
 
+    trim: function (value) {
+        return value ? value.toString().trim() : ''
+    },
+
     capitalize: function (value) {
+        if (!value) return ''
         value = value.toString()
         return value.charAt(0).toUpperCase() + value.slice(1)
     },
 
     uppercase: function (value) {
-        return value.toString().toUpperCase()
+        return value ? value.toString().toUpperCase() : ''
     },
 
     lowercase: function (value) {
-        return value.toString().toLowerCase()
+        return value ? value.toString().toLowerCase() : ''
     },
 
     currency: function (value, args) {
-        if (!value) return value
+        if (!value) return ''
         var sign = (args && args[0]) || '$',
             i = value % 3,
             f = '.' + value.toFixed(2).slice(-2),
@@ -1324,12 +1401,13 @@ module.exports = {
     },
 
     key: function (handler, args) {
+        if (!handler) return
         var code = keyCodes[args[0]]
         if (!code) {
             code = parseInt(args[0], 10)
         }
         return function (e) {
-            if (e.originalEvent.keyCode === code) {
+            if (e.keyCode === code) {
                 handler.call(this, e)
             }
         }
@@ -1368,7 +1446,6 @@ module.exports = {
     },
     
     focus: function (value) {
-        // yield so it work when toggling visibility
         var el = this.el
         setTimeout(function () {
             el[value ? 'focus' : 'blur']()
@@ -1397,7 +1474,7 @@ module.exports = {
             el.addEventListener('change', this.change)
         },
         update: function (value) {
-            this.el.value = value
+            this.el.value = value ? value : ''
         },
         unbind: function () {
             if (this.oneway) return
@@ -1480,8 +1557,7 @@ var mutationHandlers = {
     push: function (m) {
         var self = this
         m.args.forEach(function (data, i) {
-            var seed = self.buildItem(data, self.collection.length + i)
-            self.container.insertBefore(seed.el, self.ref)
+            self.buildItem(self.ref, data, self.collection.length + i)
         })
     },
 
@@ -1492,11 +1568,10 @@ var mutationHandlers = {
     unshift: function (m) {
         var self = this
         m.args.forEach(function (data, i) {
-            var seed = self.buildItem(data, i),
-                ref  = self.collection.length > m.args.length
+            var ref  = self.collection.length > m.args.length
                      ? self.collection[m.args.length].$el
                      : self.ref
-            self.container.insertBefore(seed.el, ref)
+            self.buildItem(ref, data, i)
         })
         self.updateIndexes()
     },
@@ -1517,12 +1592,11 @@ var mutationHandlers = {
         })
         if (added > 0) {
             m.args.slice(2).forEach(function (data, i) {
-                var seed = self.buildItem(data, index + i),
-                    pos  = index - removed + added + 1,
+                var pos  = index - removed + added + 1,
                     ref  = self.collection[pos]
                          ? self.collection[pos].$el
                          : self.ref
-                self.container.insertBefore(seed.el, ref)
+                self.buildItem(ref, index + i)
             })
         }
         if (removed !== added) {
@@ -1570,15 +1644,15 @@ module.exports = {
 
         // create child-seeds and append to DOM
         collection.forEach(function (data, i) {
-            var seed = self.buildItem(data, i)
-            self.container.insertBefore(seed.el, self.ref)
+            self.buildItem(self.ref, data, i)
         })
     },
 
-    buildItem: function (data, index) {
+    buildItem: function (ref, data, index) {
+        var node = this.el.cloneNode(true)
+        this.container.insertBefore(node, ref)
         var Seed = require('../seed'),
-            node = this.el.cloneNode(true)
-        var spore = new Seed(node, {
+            spore = new Seed(node, {
                 each: true,
                 eachPrefix: this.arg + '.',
                 parentSeed: this.seed,
@@ -1587,7 +1661,6 @@ module.exports = {
                 delegator: this.container
             })
         this.collection[index] = spore.scope
-        return spore
     },
 
     updateIndexes: function () {
@@ -1660,11 +1733,9 @@ module.exports = {
             dHandler = delegator.sd_dHandlers[identifier] = function (e) {
                 var target = delegateCheck(e.target, delegator, identifier)
                 if (target) {
-                    handler.call(seed.scope, {
-                        el: target,
-                        scope: target.sd_scope,
-                        originalEvent: e
-                    })
+                    e.el = target
+                    e.scope = target.sd_scope
+                    handler.call(seed.scope, e)
                 }
             }
             dHandler.event = event
@@ -1674,11 +1745,9 @@ module.exports = {
 
             // a normal, single element handler
             this.handler = function (e) {
-                handler.call(seed.scope, {
-                    el: e.currentTarget,
-                    scope: seed.scope,
-                    originalEvent: e
-                })
+                e.el = e.currentTarget
+                e.scope = seed.scope
+                handler.call(seed.scope, e)
             }
             this.el.addEventListener(event, this.handler)
 
@@ -1697,5 +1766,5 @@ require.alias("component-indexof/index.js", "component-emitter/deps/indexof/inde
 require.alias("seed/src/main.js", "seed/index.js");
 
 window.Seed = window.Seed || require('seed')
-Seed.version = '0.1.1'
+Seed.version = 'dev'
 })();

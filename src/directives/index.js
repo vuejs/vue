@@ -28,7 +28,6 @@ module.exports = {
     },
     
     focus: function (value) {
-        // yield so it work when toggling visibility
         var el = this.el
         setTimeout(function () {
             el[value ? 'focus' : 'blur']()
@@ -57,7 +56,7 @@ module.exports = {
             el.addEventListener('change', this.change)
         },
         update: function (value) {
-            this.el.value = value
+            this.el.value = value ? value : ''
         },
         unbind: function () {
             if (this.oneway) return

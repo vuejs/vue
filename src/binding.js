@@ -11,6 +11,7 @@ var utils    = require('./utils'),
  */
 function Binding (seed, key) {
     this.seed = seed
+    this.scope = seed.scope
     this.key  = key
     var path = key.split('.')
     this.inspect(utils.getNestedValue(seed.scope, path))
@@ -58,7 +59,10 @@ BindingProto.def = function (scope, path) {
                     observer.emit('get', self)
                 }
                 return self.isComputed
-                    ? self.value.get()
+                    ? self.value.get({
+                        el: self.seed.el,
+                        scope: self.seed.scope
+                    })
                     : self.value
             },
             set: function (value) {
