@@ -7,10 +7,8 @@
     </head>
     <body>
         <section id="todoapp" sd-controller="Todos">
-
             <header id="header">
                 <h1>todos</h1>
-                <!-- main input box -->
                 <input
                     id="new-todo"
                     autofocus
@@ -20,16 +18,13 @@
                     sd-on="keyup:addTodo | key enter"
                 >
             </header>
-            
             <section id="main" sd-show="total">
-                <!-- toggle all checkbox-->
                 <input 
                     id="toggle-all"
                     type="checkbox"
                     sd-checked="allDone"
                 >
                 <ul id="todo-list">
-                    <!-- a single todo item -->
                     <li
                         class="todo"
                         sd-each="todo:todos"
@@ -56,8 +51,6 @@
                     </li>
                 </ul>
             </section>
-
-            <!-- footer controls -->
             <footer id="footer" sd-show="total">
                 <span id="todo-count">
                     <strong sd-text="remaining"></strong> {{itemLabel}} left
@@ -71,17 +64,12 @@
                     Remove Completed ({{completed}})
                 </button>
             </footer>
-
         </section>
-
-        <!-- info -->
         <footer id="info">
             <p>Double-click to edit a todo</p>
             <p>Powered by <a href="https://github.com/yyx990803/seed">Seed.js</a></p>
             <p>Created by <a href="http://evanyou.me">Evan You</a></p>
         </footer>
-
-        <!-- js -->
         <script src="../../dist/seed.js"></script>
         <script src="js/app.js"></script>
     </body>

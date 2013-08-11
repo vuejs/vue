@@ -1,3 +1,5 @@
+- tests
+- docs
 - sd-with
 - standarized way to reuse components (sd-component?)
 - plugins: seed-touch, seed-storage, seed-router

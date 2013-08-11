@@ -115,6 +115,13 @@ BindingProto.update = function (value) {
     this.pub()
 }
 
+BindingProto.refresh = function () {
+    var i = this.instances.length
+    while (i--) {
+        this.instances[i].refresh()
+    }
+}
+
 /*
  *  Notify computed properties that depend on this binding
  *  to update themselves

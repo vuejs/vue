@@ -19,8 +19,9 @@ function catchDeps (binding) {
     observer.on('get', function (dep) {
         binding.deps.push(dep)
     })
+    parseContextDependency(binding)
     binding.value.get({
-        scope: createDummyScope(binding.value.get),
+        scope: createDummyScope(binding),
         el: dummyEl
     })
     observer.off('get')
@@ -37,7 +38,7 @@ function filterDeps (binding) {
         dep = binding.deps[i]
         if (!dep.deps.length) {
             config.log('  └─' + dep.key)
-            dep.subs.push.apply(dep.subs, binding.instances)
+            dep.subs.push(binding)
         } else {
             binding.deps.splice(i, 1)
         }
@@ -53,18 +54,15 @@ function filterDeps (binding) {
  *  the user expects the target scope to possess. They are all assigned
  *  a noop function so they can be invoked with no real harm.
  */
-function createDummyScope (fn) {
+function createDummyScope (binding) {
     var scope = {},
-        str = fn.toString()
-    var args = str.match(ARGS_RE)
-    if (!args) return scope
-    var argRE = new RegExp(args[1] + SCOPE_RE_STR, 'g'),
-        matches = str.match(argRE)
-    if (!matches) return scope
-    var i = matches.length, j, path, key, level
+        deps = binding.contextDeps
+    if (!deps) return scope
+    var i = binding.contextDeps.length,
+        j, level, key, path
     while (i--) {
         level = scope
-        path = matches[i].slice(args[1].length + 7).split('.')
+        path = deps[i].split('.')
         j = 0
         while (j < path.length) {
             key = path[j]
@@ -74,6 +72,22 @@ function createDummyScope (fn) {
         }
     }
     return scope
+}
+
+/*
+ *  Extract context dependency paths
+ */
+function parseContextDependency (binding) {
+    var fn   = binding.value.get,
+        str  = fn.toString(),
+        args = str.match(ARGS_RE)
+    if (!args) return null
+    var argRE = new RegExp(args[1] + SCOPE_RE_STR, 'g'),
+        matches = str.match(argRE),
+        base = args[1].length + 7
+    if (!matches) return null
+    binding.contextDeps = matches.map(function (key) { return key.slice(base) })
+    binding.seed._contextBindings.push(binding)
 }
 
 module.exports = {

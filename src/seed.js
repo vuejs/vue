@@ -21,10 +21,13 @@ function Seed (el, options) {
         el = document.querySelector(el)
     }
 
-    this.el         = el
-    el.seed         = this
-    this._bindings  = {}
-    this._computed  = []
+    this.el               = el
+    el.seed               = this
+    this._bindings        = {}
+    // list of computed properties that need to parse dependencies for
+    this._computed        = []
+    // list of bindings that has dynamic context dependencies
+    this._contextBindings = []
 
     // copy options
     options = options || {}
@@ -82,6 +85,9 @@ function Seed (el, options) {
     // extract dependencies for computed properties
     if (this._computed.length) depsParser.parse(this._computed)
     delete this._computed
+    
+    if (this._contextBindings.length) this._bindContexts(this._contextBindings)
+    delete this._contextBindings
 }
 
 // for better compression
@@ -193,7 +199,10 @@ SeedProto._bind = function (directive) {
     seed = traceOwnerSeed(directive, seed)
     var binding = seed._bindings[key] || seed._createBinding(key)
 
-    // add directive to this binding
+    if (binding.contextDeps) {
+        console.log(1)
+    }
+
     binding.instances.push(directive)
     directive.binding = binding
 
@@ -218,6 +227,23 @@ SeedProto._createBinding = function (key) {
     this._bindings[key] = binding
     if (binding.isComputed) this._computed.push(binding)
     return binding
+}
+
+/*
+ *  Process subscriptions for computed properties that has
+ *  dynamic context dependencies
+ */
+SeedProto._bindContexts = function (bindings) {
+    var i = bindings.length, j, binding, depKey, dep
+    while (i--) {
+        binding = bindings[i]
+        j = binding.contextDeps.length
+        while (j--) {
+            depKey = binding.contextDeps[j]
+            dep = this._bindings[depKey]
+            dep.subs.push(binding)
+        }
+    }
 }
 
 /*
