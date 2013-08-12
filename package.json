@@ -1,6 +1,6 @@
 {
     "name": "seed",
-    "version": "0.1.4",
+    "version": "0.1.5",
     "devDependencies": {
         "grunt": "~0.4.1",
         "grunt-contrib-watch": "~0.4.4",
