@@ -24,21 +24,22 @@ function typeOf (obj) {
 /*
  *  Recursively dump stuff...
  */
-function dumpValue (val) {
+function dump (val) {
     var type = typeOf(val)
     if (type === 'Array') {
-        return val.map(dumpValue)
+        return val.map(dump)
     } else if (type === 'Object') {
         if (val.get) { // computed property
             return val.get()
         } else { // object / child scope
-            var ret = {}
+            var ret = {}, prop
             for (var key in val) {
-                if (val.hasOwnProperty(key) &&
-                    typeof val[key] !== 'function' &&
+                prop = val[key]
+                if (typeof prop !== 'function' &&
+                    val.hasOwnProperty(key) &&
                     key.charAt(0) !== '$')
                 {
-                    ret[key] = dumpValue(val[key])
+                    ret[key] = dump(prop)
                 }
             }
             return ret
@@ -51,7 +52,14 @@ function dumpValue (val) {
 module.exports = {
 
     typeOf: typeOf,
-    dumpValue: dumpValue,
+    dump: dump,
+
+    /*
+     *  shortcut for JSON.stringify-ing a dumped value
+     */
+    serialize: function (val) {
+        return JSON.stringify(dump(val))
+    },
 
     /*
      *  Get a value from an object based on a path array

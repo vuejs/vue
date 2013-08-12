@@ -15,6 +15,7 @@ module.exports = {
      *  Parse a piece of text, return an array of tokens
      */
     parse: function (node) {
+        if (!BINDING_RE) module.exports.buildRegex()
         var text = node.nodeValue
         if (!BINDING_RE.test(text)) return null
         var m, i, tokens = []

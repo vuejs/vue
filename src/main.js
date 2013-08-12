@@ -2,13 +2,19 @@ var config      = require('./config'),
     Seed        = require('./seed'),
     directives  = require('./directives'),
     filters     = require('./filters'),
-    textParser  = require('./text-parser')
+    textParser  = require('./text-parser'),
+    utils       = require('./utils')
 
 var controllers = config.controllers,
     datum       = config.datum,
     api         = {},
     reserved    = ['datum', 'controllers'],
     booted      = false
+
+/*
+ *  expose utils
+ */
+api.utils = utils
 
 /*
  *  Store a piece of plain data in config.datum
@@ -45,12 +51,9 @@ api.filter = function (name, fn) {
 }
 
 /*
- *  Bootstrap the whole thing
- *  by creating a Seed instance for top level nodes
- *  that has either sd-controller or sd-data
+ *  Set config options
  */
-api.bootstrap = function (opts) {
-    if (booted) return
+api.config = function (opts) {
     if (opts) {
         for (var key in opts) {
             if (reserved.indexOf(key) === -1) {
@@ -59,16 +62,31 @@ api.bootstrap = function (opts) {
         }
     }
     textParser.buildRegex()
+}
+
+/*
+ *  Compile a single element
+ */
+api.compile = function (el) {
+    new Seed(el)
+}
+
+/*
+ *  Bootstrap the whole thing
+ *  by creating a Seed instance for top level nodes
+ *  that has either sd-controller or sd-data
+ */
+api.bootstrap = function (opts) {
+    if (booted) return
+    api.config(opts)
     var el,
         ctrlSlt = '[' + config.prefix + '-controller]',
-        dataSlt = '[' + config.prefix + '-data]',
-        seeds   = []
+        dataSlt = '[' + config.prefix + '-data]'
     /* jshint boss: true */
     while (el = document.querySelector(ctrlSlt) || document.querySelector(dataSlt)) {
-        seeds.push((new Seed(el)).scope)
+        new Seed(el)
     }
     booted = true
-    return seeds.length > 1 ? seeds : seeds[0]
 }
 
 module.exports = api

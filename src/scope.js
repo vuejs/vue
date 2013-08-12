@@ -56,7 +56,7 @@ ScopeProto.$unwatch = function (key) {
  */
 ScopeProto.$dump = function (key) {
     var bindings = this.$seed._bindings
-    return utils.dumpValue(key ? bindings[key].value : this)
+    return utils.dump(key ? bindings[key].value : this)
 }
 
 /*

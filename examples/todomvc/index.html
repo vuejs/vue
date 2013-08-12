@@ -6,7 +6,7 @@
         <link rel="stylesheet" type="text/css" href="common/base.css">
     </head>
     <body>
-        <section id="todoapp" sd-controller="Todos">
+        <section id="todoapp" sd-controller="todos">
             <header id="header">
                 <h1>todos</h1>
                 <input
@@ -38,7 +38,7 @@
                                 sd-checked="todo.completed"
                                 sd-on="change:updateCount"
                             >
-                            <label sd-text="todo.title" sd-on="dblclick:edit"></label>
+                            <label sd-text="todo.title" sd-on="dblclick:editTodo"></label>
                             <button class="destroy" sd-on="click:removeTodo"></button>
                         </div>
                         <input
@@ -71,6 +71,7 @@
             <p>Created by <a href="http://evanyou.me">Evan You</a></p>
         </footer>
         <script src="../../dist/seed.js"></script>
+        <script src="js/todoStorage.js"></script>
         <script src="js/app.js"></script>
     </body>
 </html>

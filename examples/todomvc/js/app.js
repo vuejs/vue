@@ -1,25 +1,7 @@
-Seed.controller('Todos', function (scope) {
-
-    // data persistence -------------------------------------------------------
-    var STORAGE_KEY = 'todos-seedjs'
-    function sync () {
-        localStorage.setItem(STORAGE_KEY, scope.$serialize('todos'))
-    }
-
-    // filters ----------------------------------------------------------------
-    var filters = {
-        all: function () { return true },
-        active: function (v) { return !v },
-        completed: function (v) { return v }
-    }
-    updateFilter()
-    window.addEventListener('hashchange', updateFilter)
-    function updateFilter () {
-        scope.filter = location.hash ? location.hash.slice(2) : 'all'
-    }
+Seed.controller('todos', function (scope) {
 
     // regular properties -----------------------------------------------------
-    scope.todos = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []
+    scope.todos = todoStorage.fetch()
     scope.remaining = scope.todos.reduce(function (n, todo) {
         return n + (todo.completed ? 0 : 1)
     }, 0)
@@ -63,23 +45,23 @@ Seed.controller('Todos', function (scope) {
             scope.todos.unshift({ title: value, completed: false })
             scope.newTodo = ''
             scope.remaining++
-            sync()
+            todoStorage.save(scope.todos)
         }
     }
 
     scope.removeTodo = function (e) {
         scope.todos.remove(e.scope)
         scope.remaining -= e.scope.completed ? 0 : 1
-        sync()
+        todoStorage.save(scope.todos)
     }
 
     scope.updateCount = function (e) {
         scope.remaining += e.scope.completed ? -1 : 1
-        sync()
+        todoStorage.save(scope.todos)
     }
 
     var beforeEditCache
-    scope.edit = function (e) {
+    scope.editTodo = function (e) {
         beforeEditCache = e.scope.title
         e.scope.editing = true
     }
@@ -89,7 +71,7 @@ Seed.controller('Todos', function (scope) {
         e.scope.editing = false
         e.scope.title = e.scope.title.trim()
         if (!e.scope.title) scope.removeTodo(e)
-        sync()
+        todoStorage.save(scope.todos)
     }
 
     scope.cancelEdit = function (e) {
@@ -103,11 +85,23 @@ Seed.controller('Todos', function (scope) {
         scope.todos = scope.todos.filter(function (todo) {
             return !todo.completed
         })
-        sync()
+        todoStorage.save(scope.todos)
     }
+
+    // filters ----------------------------------------------------------------
+    var filters = {
+        all: function () { return true },
+        active: function (v) { return !v },
+        completed: function (v) { return v }
+    }
+
+    function updateFilter () {
+        scope.filter = location.hash ? location.hash.slice(2) : 'all'
+    }
+    
+    updateFilter()
+    window.addEventListener('hashchange', updateFilter)
 
 })
 
-var s = Date.now()
-Seed.bootstrap({ debug: false })
-console.log(Date.now() - s)
+Seed.bootstrap()

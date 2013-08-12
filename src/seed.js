@@ -64,9 +64,10 @@ function Seed (el, options) {
     var ctrlID = el.getAttribute(ctrlAttr)
     if (ctrlID) {
         el.removeAttribute(ctrlAttr)
-        var factory = config.controllers[ctrlID]
-        if (factory) {
-            factory(this.scope)
+        var controller = config.controllers[ctrlID]
+        if (controller) {
+            this._controller = controller
+            controller(this.scope)
         } else {
             config.warn('controller "' + ctrlID + '" is not defined.')
         }
@@ -86,6 +87,7 @@ function Seed (el, options) {
     if (this._computed.length) depsParser.parse(this._computed)
     delete this._computed
     
+    // extract dependencies for computed properties with dynamic context
     if (this._contextBindings.length) this._bindContexts(this._contextBindings)
     delete this._contextBindings
 }
