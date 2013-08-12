@@ -1,5 +1,6 @@
 - tests
 - docs
+- validation as filter, e.g. sd-value="email | validate email"
 - sd-with
 - standarized way to reuse components (sd-component?)
 - plugins: seed-touch, seed-storage, seed-router

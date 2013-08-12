@@ -15,8 +15,7 @@ Seed.controller('Todos', function (scope) {
     updateFilter()
     window.addEventListener('hashchange', updateFilter)
     function updateFilter () {
-        if (!location.hash) return
-        scope.filter = location.hash.slice(2) || 'all'
+        scope.filter = location.hash ? location.hash.slice(2) : 'all'
     }
 
     // regular properties -----------------------------------------------------
@@ -32,10 +31,6 @@ Seed.controller('Todos', function (scope) {
 
     scope.completed = {get: function () {
         return scope.total - scope.remaining
-    }}
-
-    scope.itemLabel = {get: function () {
-        return scope.remaining > 1 ? 'items' : 'item'
     }}
 
     // dynamic context computed property using info from target scope
@@ -63,7 +58,7 @@ Seed.controller('Todos', function (scope) {
 
     // event handlers ---------------------------------------------------------
     scope.addTodo = function () {
-        var value = scope.newTodo.trim()
+        var value = scope.newTodo && scope.newTodo.trim()
         if (value) {
             scope.todos.unshift({ title: value, completed: false })
             scope.newTodo = ''

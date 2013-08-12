@@ -29,6 +29,10 @@ module.exports = {
         return value ? value.toString().toLowerCase() : ''
     },
 
+    pluralize: function (value, args) {
+        return value === 1 ? args[0] : (args[1] || args[0] + 's')
+    },
+
     currency: function (value, args) {
         if (!value) return ''
         var sign = (args && args[0]) || '$',
