@@ -51,6 +51,15 @@ ScopeProto.$unwatch = function (key) {
 }
 
 /*
+ *  load data into scope
+ */
+ScopeProto.$load = function (data) {
+    for (var key in data) {
+        this[key] = data[key]
+    }
+}
+
+/*
  *  Dump a copy of current scope data, excluding seed-exposed properties.
  *  @param key (optional): key for the value to dump
  */
