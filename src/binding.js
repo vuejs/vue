@@ -115,6 +115,10 @@ BindingProto.update = function (value) {
     this.pub()
 }
 
+/*
+ *  -- computed property only --    
+ *  Force all instances to re-evaluate themselves
+ */
 BindingProto.refresh = function () {
     var i = this.instances.length
     while (i--) {

@@ -58,8 +58,8 @@ DirProto.update = function (value) {
 }
 
 /*
+ *  -- computed property only --
  *  called when a dependency has changed
- *  computed properties only
  */
 DirProto.refresh = function () {
     // pass element and scope info to the getter
