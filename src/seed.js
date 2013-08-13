@@ -170,7 +170,7 @@ SeedProto._compileTextNode = function (node) {
         el, token, directive
     for (var i = 0, l = tokens.length; i < l; i++) {
         token = tokens[i]
-        el = document.createTextNode()
+        el = document.createTextNode('')
         if (token.key) {
             directive = DirectiveParser.parse(dirname, token.key)
             if (directive) {
