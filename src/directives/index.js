@@ -30,7 +30,7 @@ module.exports = {
     focus: function (value) {
         var el = this.el
         setTimeout(function () {
-            el[value ? 'focus' : 'blur']()
+            el[value ? 'focus' : 'focus']()
         }, 0)
     },
 
@@ -53,14 +53,14 @@ module.exports = {
             this.change = function () {
                 self.seed.scope[self.key] = el.value
             }
-            el.addEventListener('change', this.change)
+            el.addEventListener('keyup', this.change)
         },
         update: function (value) {
             this.el.value = value ? value : ''
         },
         unbind: function () {
             if (this.oneway) return
-            this.el.removeEventListener('change', this.change)
+            this.el.removeEventListener('keyup', this.change)
         }
     },
 

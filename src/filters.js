@@ -30,7 +30,9 @@ module.exports = {
     },
 
     pluralize: function (value, args) {
-        return value === 1 ? args[0] : (args[1] || args[0] + 's')
+        return args.length > 1
+            ? (args[value - 1] || args[args.length - 1])
+            : (args[value - 1] || args[0] + 's')
     },
 
     currency: function (value, args) {

@@ -16,13 +16,13 @@ Seed.controller('todos', function (scope) {
     }}
 
     // dynamic context computed property using info from target scope
-    scope.filterTodo = {get: function (e) {
-        return filters[scope.filter](e.scope.completed)
+    scope.filterTodo = {get: function (ctx) {
+        return filters[scope.filter](ctx.scope.completed)
     }}
 
     // dynamic context computed property using info from target element
-    scope.checkFilter = {get: function (e) {
-        return scope.filter === e.el.textContent.toLowerCase()
+    scope.checkFilter = {get: function (ctx) {
+        return scope.filter === ctx.el.textContent.toLowerCase()
     }}
 
     // two-way computed property with both getter and setter
@@ -31,10 +31,10 @@ Seed.controller('todos', function (scope) {
             return scope.remaining === 0
         },
         set: function (value) {
+            scope.remaining = value ? 0 : scope.total
             scope.todos.forEach(function (todo) {
                 todo.completed = value
             })
-            scope.remaining = value ? 0 : scope.total
         }
     }
 
@@ -55,7 +55,7 @@ Seed.controller('todos', function (scope) {
         todoStorage.save(scope.todos)
     }
 
-    scope.updateCount = function (e) {
+    scope.toggleTodo = function (e) {
         scope.remaining += e.scope.completed ? -1 : 1
         todoStorage.save(scope.todos)
     }
@@ -76,9 +76,7 @@ Seed.controller('todos', function (scope) {
 
     scope.cancelEdit = function (e) {
         e.scope.editing = false
-        setTimeout(function () {
-            e.scope.title = beforeEditCache
-        }, 0)
+        e.scope.title = beforeEditCache
     }
 
     scope.removeCompleted = function () {
@@ -98,7 +96,7 @@ Seed.controller('todos', function (scope) {
     function updateFilter () {
         scope.filter = location.hash ? location.hash.slice(2) : 'all'
     }
-    
+
     updateFilter()
     window.addEventListener('hashchange', updateFilter)
 
