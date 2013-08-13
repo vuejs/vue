@@ -12,8 +12,6 @@
         <input type="checkbox" sd-checked="checked">
         <span sd-text="hello | uppercase" sd-class="red:checked"></span>
         <script>
-            var Seed = require('seed')
-
             Seed.controller('hello', function (scope) {
                 scope.hello = {get:function () {
                     return scope.checked ? 'red!!!' : 'hello seed'
