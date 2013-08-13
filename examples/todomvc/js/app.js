@@ -1,10 +1,25 @@
+window.addEventListener('hashchange', function () {
+    Seed.broadcast('filterchange')
+})
+
 Seed.controller('todos', function (scope) {
+
+    // filters ----------------------------------------------------------------
+    var filters = {
+        all: function () { return true },
+        active: function (todo) { return !todo.completed },
+        completed: function (todo) { return todo.completed }
+    }
+    var updateFilter = function () {
+        var filter = location.hash.slice(2)
+        scope.filter = (filter in filters) ? filter : 'all'
+    }
+    updateFilter()
+    scope.$on('filterchange', updateFilter)
 
     // regular properties -----------------------------------------------------
     scope.todos = todoStorage.fetch()
-    scope.remaining = scope.todos.reduce(function (n, todo) {
-        return n + (todo.completed ? 0 : 1)
-    }, 0)
+    scope.remaining = scope.todos.filter(filters.active).length
 
     // computed properties ----------------------------------------------------
     scope.total = {get: function () {
@@ -17,7 +32,7 @@ Seed.controller('todos', function (scope) {
 
     // dynamic context computed property using info from target scope
     scope.todoFiltered = {get: function (ctx) {
-        return filters[scope.filter](ctx.scope.completed)
+        return filters[scope.filter](ctx.scope)
     }}
 
     // dynamic context computed property using info from target element
@@ -80,26 +95,9 @@ Seed.controller('todos', function (scope) {
     }
 
     scope.removeCompleted = function () {
-        scope.todos = scope.todos.filter(function (todo) {
-            return !todo.completed
-        })
+        scope.todos = scope.todos.filter(filters.active)
         todoStorage.save(scope.todos)
     }
-
-    // filters ----------------------------------------------------------------
-    var filters = {
-        all: function () { return true },
-        active: function (v) { return !v },
-        completed: function (v) { return v }
-    }
-
-    function updateFilter () {
-        scope.filter = location.hash ? location.hash.slice(2) : 'all'
-    }
-
-    updateFilter()
-    window.addEventListener('hashchange', updateFilter)
-
 })
 
 Seed.bootstrap()

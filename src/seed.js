@@ -3,7 +3,8 @@ var config          = require('./config'),
     Binding         = require('./binding'),
     DirectiveParser = require('./directive-parser'),
     TextParser      = require('./text-parser'),
-    depsParser      = require('./deps-parser')
+    depsParser      = require('./deps-parser'),
+    eventbus        = require('./utils').eventbus
 
 var slice           = Array.prototype.slice,
     ctrlAttr        = config.prefix + '-controller',
@@ -24,6 +25,8 @@ function Seed (el, options) {
     this.el               = el
     el.seed               = this
     this._bindings        = {}
+    this._watchers        = {}
+    this._listeners       = []
     // list of computed properties that need to parse dependencies for
     this._computed        = []
     // list of bindings that has dynamic context dependencies
@@ -254,13 +257,20 @@ SeedProto._bindContexts = function (bindings) {
  *  to remove event listeners, destroy child seeds, etc.
  */
 SeedProto._unbind = function () {
-    var i, ins
-    for (var key in this._bindings) {
+    var i, ins, key, listener
+    // unbind all bindings
+    for (key in this._bindings) {
         ins = this._bindings[key].instances
         i = ins.length
         while (i--) {
             if (ins[i].unbind) ins[i].unbind()
         }
+    }
+    // remove all listeners on eventbus
+    i = this._listeners.length
+    while (i--) {
+        listener = this._listeners[i]
+        eventbus.off(listener.event, listener.handler)
     }
 }
 

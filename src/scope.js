@@ -1,14 +1,46 @@
 var utils   = require('./utils')
 
+/*
+ *  Scope is the ViewModel/whatever exposed to the user
+ *  that holds data, computed properties, event handlers
+ *  and a few reserved methods
+ */
 function Scope (seed, options) {
     this.$seed     = seed
     this.$el       = seed.el
     this.$index    = options.index
     this.$parent   = options.parentSeed && options.parentSeed.scope
-    this.$watchers = {}
+    this.$seed._watchers = {}
 }
 
 var ScopeProto = Scope.prototype
+
+/*
+ *  register a listener that will be broadcasted from the global event bus
+ */
+ScopeProto.$on = function (event, handler) {
+    utils.eventbus.on(event, handler)
+    this.$seed._listeners.push({
+        event: event,
+        handler: handler
+    })
+}
+
+/*
+ *  remove the registered listener
+ */
+ScopeProto.$off = function (event, handler) {
+    utils.eventbus.off(event, handler)
+    var listeners = this.$seed._listeners,
+        i = listeners.length, listener
+    while (i--) {
+        listener = listeners[i]
+        if (listener.event === event && listener.handler === handler) {
+            listeners.splice(i, 1)
+            break
+        }
+    }
+}
 
 /*
  *  watch a key on the scope for changes
@@ -21,7 +53,7 @@ ScopeProto.$watch = function (key, callback) {
         var scope   = self.$seed.scope,
             binding = self.$seed._bindings[key],
             i       = binding.deps.length,
-            watcher = self.$watchers[key] = {
+            watcher = self.$seed._watchers[key] = {
                 refresh: function () {
                     callback(scope[key])
                 },
@@ -39,14 +71,14 @@ ScopeProto.$watch = function (key, callback) {
 ScopeProto.$unwatch = function (key) {
     var self = this
     setTimeout(function () {
-        var watcher = self.$watchers[key]
+        var watcher = self.$seed._watchers[key]
         if (!watcher) return
         var i = watcher.deps.length, subs
         while (i--) {
             subs = watcher.deps[i].subs
             subs.splice(subs.indexOf(watcher))
         }
-        delete self.$watchers[key]
+        delete self.$seed._watchers[key]
     }, 0)
 }
 

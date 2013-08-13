@@ -5,7 +5,8 @@ var config      = require('./config'),
     textParser  = require('./text-parser'),
     utils       = require('./utils')
 
-var controllers = config.controllers,
+var eventbus    = utils.eventbus,
+    controllers = config.controllers,
     datum       = config.datum,
     api         = {},
     reserved    = ['datum', 'controllers'],
@@ -15,6 +16,13 @@ var controllers = config.controllers,
  *  expose utils
  */
 api.utils = utils
+
+/*
+ *  broadcast event
+ */
+api.broadcast = function () {
+    eventbus.emit.apply(eventbus, arguments)
+}
 
 /*
  *  Store a piece of plain data in config.datum
@@ -68,7 +76,7 @@ api.config = function (opts) {
  *  Compile a single element
  */
 api.compile = function (el) {
-    new Seed(el)
+    return new Seed(el).scope
 }
 
 /*
