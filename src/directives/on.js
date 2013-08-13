@@ -28,7 +28,8 @@ module.exports = {
         if (!handler) return
 
         var seed  = this.seed,
-            event = this.arg
+            event = this.arg,
+            ownerScope = this.binding.seed.scope
 
         if (seed.each && event !== 'blur' && event !== 'blur') {
 
@@ -46,7 +47,7 @@ module.exports = {
                 if (target) {
                     e.el = target
                     e.scope = target.sd_scope
-                    handler.call(seed.scope, e)
+                    handler.call(ownerScope, e)
                 }
             }
             dHandler.event = event

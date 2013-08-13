@@ -35,6 +35,8 @@ BindingProto.inspect = function (value) {
             var l = Object.keys(value).length
             if (l === 1 || (l === 2 && value.set)) {
                 self.isComputed = true // computed property
+                value.get = value.get.bind(self.scope)
+                if (value.set) value.set = value.set.bind(self.scope)
             }
         }
     } else if (type === 'Array') {
@@ -52,6 +54,7 @@ BindingProto.inspect = function (value) {
  */
 BindingProto.def = function (scope, path) {
     var self = this,
+        seed = self.seed,
         key = path[0]
     if (path.length === 1) {
         // here we are! at the end of the path!
@@ -63,8 +66,8 @@ BindingProto.def = function (scope, path) {
                 }
                 return self.isComputed
                     ? self.value.get({
-                        el: self.seed.el,
-                        scope: self.seed.scope
+                        el: seed.el,
+                        scope: seed.scope
                     })
                     : self.value
             },

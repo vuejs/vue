@@ -1,5 +1,6 @@
 var config      = require('./config'),
     Seed        = require('./seed'),
+    Scope       = require('./scope'),
     directives  = require('./directives'),
     filters     = require('./filters'),
     textParser  = require('./text-parser'),
@@ -37,9 +38,23 @@ api.data = function (id, data) {
  *  Store a controller function in config.controllers
  *  so it can be consumed by sd-controller
  */
-api.controller = function (id, extensions) {
-    if (!extensions) return controllers[id]
-    controllers[id] = extensions
+api.controller = function (id, properties) {
+    if (!properties) return controllers[id]
+    // create a subclass of Scope that has the extension methods mixed-in
+    var ExtendedScope = function () {
+        Scope.apply(this, arguments)
+    }
+    var p = ExtendedScope.prototype = Object.create(Scope.prototype)
+    p.constructor = ExtendedScope
+    for (var prop in properties) {
+        if (prop !== 'init') {
+            p[prop] = properties[prop]
+        }
+    }
+    controllers[id] = {
+        init: properties.init,
+        ExtendedScope: ExtendedScope
+    }
 }
 
 /*

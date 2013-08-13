@@ -54,26 +54,32 @@ function Seed (el, options) {
         data = data.$dump()
     }
 
-    // initialize the scope object
-    var key,
-        scope = this.scope = new Scope(this, options)
+    // check if there is a controller associated with this seed
+    var ctrlID = el.getAttribute(ctrlAttr), controller
+    if (ctrlID) {
+        el.removeAttribute(ctrlAttr)
+        controller = config.controllers[ctrlID]
+        if (controller) {
+            this._controller = controller
+        } else {
+            config.warn('controller "' + ctrlID + '" is not defined.')
+        }
+    }
+    
+    // create the scope object
+    // if the controller has an extended scope contructor, use it;
+    // otherwise, use the original scope constructor.
+    var ScopeConstructor = (controller && controller.ExtendedScope) || Scope,
+        scope = this.scope = new ScopeConstructor(this, options)
 
     // copy data
     for (key in data) {
         scope[key] = data[key]
     }
 
-    // if has controller function, apply it so we have all the user definitions
-    var ctrlID = el.getAttribute(ctrlAttr)
-    if (ctrlID) {
-        el.removeAttribute(ctrlAttr)
-        var controller = config.controllers[ctrlID]
-        if (controller) {
-            this._controller = controller
-            controller(this.scope)
-        } else {
-            config.warn('controller "' + ctrlID + '" is not defined.')
-        }
+    // apply controller initialize function
+    if (controller && controller.init) {
+        controller.init.call(scope)
     }
 
     // now parse the DOM
