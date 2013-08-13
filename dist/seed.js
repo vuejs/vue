@@ -760,7 +760,7 @@ SeedProto._compileTextNode = function (node) {
         el, token, directive
     for (var i = 0, l = tokens.length; i < l; i++) {
         token = tokens[i]
-        el = document.createTextNode()
+        el = document.createTextNode('')
         if (token.key) {
             directive = DirectiveParser.parse(dirname, token.key)
             if (directive) {
@@ -934,6 +934,15 @@ ScopeProto.$unwatch = function (key) {
         }
         delete self.$watchers[key]
     }, 0)
+}
+
+/*
+ *  load data into scope
+ */
+ScopeProto.$load = function (data) {
+    for (var key in data) {
+        this[key] = data[key]
+    }
 }
 
 /*
@@ -1488,7 +1497,9 @@ module.exports = {
     },
 
     pluralize: function (value, args) {
-        return value === 1 ? args[0] : (args[1] || args[0] + 's')
+        return args.length > 1
+            ? (args[value - 1] || args[args.length - 1])
+            : (args[value - 1] || args[0] + 's')
     },
 
     currency: function (value, args) {
@@ -1548,7 +1559,7 @@ module.exports = {
     focus: function (value) {
         var el = this.el
         setTimeout(function () {
-            el[value ? 'focus' : 'blur']()
+            el[value ? 'focus' : 'focus']()
         }, 0)
     },
 
@@ -1571,14 +1582,14 @@ module.exports = {
             this.change = function () {
                 self.seed.scope[self.key] = el.value
             }
-            el.addEventListener('change', this.change)
+            el.addEventListener('keyup', this.change)
         },
         update: function (value) {
             this.el.value = value ? value : ''
         },
         unbind: function () {
             if (this.oneway) return
-            this.el.removeEventListener('change', this.change)
+            this.el.removeEventListener('keyup', this.change)
         }
     },
 
@@ -1871,5 +1882,5 @@ require.alias("component-indexof/index.js", "component-emitter/deps/indexof/inde
 require.alias("seed/src/main.js", "seed/index.js");
 
 window.Seed = window.Seed || require('seed')
-Seed.version = '0.1.5'
+Seed.version = '0.1.6'
 })();
