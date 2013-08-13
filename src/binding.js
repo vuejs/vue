@@ -31,8 +31,11 @@ BindingProto.inspect = function (value) {
         self = this
     // preprocess the value depending on its type
     if (type === 'Object') {
-        if (value.get || value.set) { // computed property
-            self.isComputed = true
+        if (value.get) {
+            var l = Object.keys(value).length
+            if (l === 1 || (l === 2 && value.set)) {
+                self.isComputed = true // computed property
+            }
         }
     } else if (type === 'Array') {
         utils.watchArray(value)

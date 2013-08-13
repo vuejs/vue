@@ -28,7 +28,7 @@
                     <li
                         class="todo"
                         sd-each="todo:todos"
-                        sd-show="filterTodo"
+                        sd-show="todoFiltered"
                         sd-class="completed:todo.completed, editing:todo.editing"
                     >
                         <div class="view">
@@ -56,9 +56,9 @@
                     <strong sd-text="remaining"></strong> {{remaining | pluralize item}} left
                 </span>
                 <ul id="filters">
-                    <li><a href="#/all" sd-class="selected:checkFilter">All</a></li>
-                    <li><a href="#/active" sd-class="selected:checkFilter">Active</a></li>
-                    <li><a href="#/completed" sd-class="selected:checkFilter">Completed</a></li>
+                    <li><a href="#/all" sd-class="selected:filterSelected">All</a></li>
+                    <li><a href="#/active" sd-class="selected:filterSelected">Active</a></li>
+                    <li><a href="#/completed" sd-class="selected:filterSelected">Completed</a></li>
                 </ul>
                 <button id="clear-completed" sd-on="click:removeCompleted" sd-show="completed">
                     Remove Completed ({{completed}})

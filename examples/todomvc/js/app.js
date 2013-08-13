@@ -16,12 +16,12 @@ Seed.controller('todos', function (scope) {
     }}
 
     // dynamic context computed property using info from target scope
-    scope.filterTodo = {get: function (ctx) {
+    scope.todoFiltered = {get: function (ctx) {
         return filters[scope.filter](ctx.scope.completed)
     }}
 
     // dynamic context computed property using info from target element
-    scope.checkFilter = {get: function (ctx) {
+    scope.filterSelected = {get: function (ctx) {
         return scope.filter === ctx.el.textContent.toLowerCase()
     }}
 
