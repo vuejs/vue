@@ -145,7 +145,7 @@ DirProto.parseKey = function (rawKey) {
 DirProto.unbind = function (update) {
     if (!this.el) return
     if (this._unbind) this._unbind(update)
-    if (!update) this.vm = this.el = this.compiler = this.binding =  null
+    if (!update) this.vm = this.el = this.binding = this.compiler = null
 }
 
 /*

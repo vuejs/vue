@@ -11,7 +11,6 @@ var utils    = require('./utils'),
  */
 function Binding (compiler, key) {
     this.compiler = compiler
-    this.vm = compiler.vm
     this.key = key
     var path = key.split('.')
     this.inspect(utils.getNestedValue(compiler.vm, path))
@@ -35,8 +34,8 @@ BindingProto.inspect = function (value) {
             if (l === 1 || (l === 2 && value.set)) {
                 this.isComputed = true // computed property
                 this.rawGet = value.get
-                value.get = value.get.bind(this.vm)
-                if (value.set) value.set = value.set.bind(this.vm)
+                value.get = value.get.bind(this.compiler.vm)
+                if (value.set) value.set = value.set.bind(this.compiler.vm)
             }
         }
     } else if (type === 'Array') {
@@ -144,8 +143,7 @@ BindingProto.unbind = function () {
         subs.splice(subs.indexOf(this), 1)
     }
     if (Array.isArray(this.value)) this.value.off('mutate')
-    this.vm = this.compiler = this.pubs =
-    this.subs = this.instances = this.deps = null
+    this.compiler = this.pubs = this.subs = this.instances = this.deps = null
 }
 
 /*

@@ -29,7 +29,7 @@ module.exports = {
 
         var compiler = this.compiler,
             event    = this.arg,
-            ownerVM  = this.binding.vm
+            ownerVM  = this.binding.compiler.vm
 
         if (compiler.each && event !== 'blur' && event !== 'blur') {
 
@@ -56,10 +56,11 @@ module.exports = {
         } else {
 
             // a normal, single element handler
+            var vm = this.vm
             this.handler = function (e) {
                 e.el = e.currentTarget
-                e.vm = compiler.vm
-                handler.call(compiler.vm, e)
+                e.vm = vm
+                handler.call(vm, e)
             }
             this.el.addEventListener(event, this.handler)
 
