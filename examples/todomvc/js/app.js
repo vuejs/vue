@@ -12,6 +12,7 @@ Seed.controller('todos', {
 
     // initializer, reserved
     init: function () {
+        window.app = this
         // listen for hashtag change
         this.updateFilter()
         this.$on('filterchange', this.updateFilter.bind(this))
@@ -29,9 +30,9 @@ Seed.controller('todos', {
         return this.total - this.remaining
     }},
 
-    // dynamic context computed property using info from target scope
+    // dynamic context computed property using info from target viewmodel
     todoFiltered: {get: function (ctx) {
-        return filters[this.filter](ctx.scope)
+        return filters[this.filter]({ completed: ctx.vm.completed })
     }},
 
     // dynamic context computed property using info from target element
@@ -45,10 +46,11 @@ Seed.controller('todos', {
             return this.remaining === 0
         },
         set: function (value) {
-            this.remaining = value ? 0 : this.total
             this.todos.forEach(function (todo) {
                 todo.completed = value
             })
+            this.remaining = value ? 0 : this.total
+            todoStorage.save(this.todos)
         }
     },
 
@@ -64,32 +66,32 @@ Seed.controller('todos', {
     },
 
     removeTodo: function (e) {
-        this.todos.remove(e.scope)
-        this.remaining -= e.scope.completed ? 0 : 1
+        this.todos.remove(e.vm)
+        this.remaining -= e.vm.completed ? 0 : 1
         todoStorage.save(this.todos)
     },
 
     toggleTodo: function (e) {
-        this.remaining += e.scope.completed ? -1 : 1
+        this.remaining += e.vm.completed ? -1 : 1
         todoStorage.save(this.todos)
     },
 
     editTodo: function (e) {
-        this.beforeEditCache = e.scope.title
-        e.scope.editing = true
+        this.beforeEditCache = e.vm.title
+        e.vm.editing = true
     },
 
     doneEdit: function (e) {
-        if (!e.scope.editing) return
-        e.scope.editing = false
-        e.scope.title = e.scope.title.trim()
-        if (!e.scope.title) this.removeTodo(e)
+        if (!e.vm.editing) return
+        e.vm.editing = false
+        e.vm.title = e.vm.title.trim()
+        if (!e.vm.title) this.removeTodo(e)
         todoStorage.save(this.todos)
     },
 
     cancelEdit: function (e) {
-        e.scope.editing = false
-        e.scope.title = this.beforeEditCache
+        e.vm.editing = false
+        e.vm.title = this.beforeEditCache
     },
 
     removeCompleted: function () {

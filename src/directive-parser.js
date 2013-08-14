@@ -26,7 +26,11 @@ function Directive (directiveName, expression, oneway) {
         this._update = definition.update
         for (prop in definition) {
             if (prop !== 'update') {
-                this[prop] = definition[prop]
+                if (prop === 'unbind') {
+                    this._unbind = definition[prop]
+                } else {
+                    this[prop] = definition[prop]
+                }
             }
         }
     }
@@ -62,11 +66,11 @@ DirProto.update = function (value) {
  *  called when a dependency has changed
  */
 DirProto.refresh = function () {
-    // pass element and scope info to the getter
+    // pass element and viewmodel info to the getter
     // enables powerful context-aware bindings
     var value = this.value.get({
         el: this.el,
-        scope: this.seed.scope
+        vm: this.vm
     })
     if (value === this.computedValue) return
     this.computedValue = value
@@ -133,6 +137,15 @@ DirProto.parseKey = function (rawKey) {
     }
 
     this.key = key
+}
+
+/*
+ *  unbind noop, to be overwritten by definitions
+ */
+DirProto.unbind = function (update) {
+    if (!this.el) return
+    if (this._unbind) this._unbind(update)
+    if (!update) this.vm = this.el = this.compiler = this.binding =  null
 }
 
 /*

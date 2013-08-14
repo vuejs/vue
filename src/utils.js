@@ -31,7 +31,7 @@ function dump (val) {
     } else if (type === 'Object') {
         if (val.get) { // computed property
             return val.get()
-        } else { // object / child scope
+        } else { // object / child viewmodel
             var ret = {}, prop
             for (var key in val) {
                 prop = val[key]

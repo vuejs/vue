@@ -51,7 +51,7 @@ module.exports = {
             if (this.oneway) return
             var el = this.el, self = this
             this.change = function () {
-                self.seed.scope[self.key] = el.value
+                self.compiler.vm[self.key] = el.value
             }
             el.addEventListener('keyup', this.change)
         },
@@ -69,7 +69,7 @@ module.exports = {
             if (this.oneway) return
             var el = this.el, self = this
             this.change = function () {
-                self.seed.scope[self.key] = el.checked
+                self.compiler.vm[self.key] = el.checked
             }
             el.addEventListener('change', this.change)
         },

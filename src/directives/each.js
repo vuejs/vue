@@ -1,4 +1,5 @@
-var config = require('../config')
+var config = require('../config'),
+    utils  = require('../utils')
 
 /*
  *  Mathods that perform precise DOM manipulation
@@ -59,16 +60,16 @@ var mutationHandlers = {
     },
 
     sort: function () {
-        var i, l = this.collection.length, scope
+        var i, l = this.collection.length, viewmodel
         for (i = 0; i < l; i++) {
-            scope = this.collection[i]
-            scope.$index = i
-            this.container.insertBefore(scope.$el, this.ref)
+            viewmodel = this.collection[i]
+            viewmodel.$index = i
+            this.container.insertBefore(viewmodel.$el, this.ref)
         }
     }
 }
 
-mutationHandlers.reverse = mutationHandlers.sort
+//mutationHandlers.reverse = mutationHandlers.sort
 
 module.exports = {
 
@@ -84,7 +85,6 @@ module.exports = {
     update: function (collection) {
 
         this.unbind(true)
-        if (!Array.isArray(collection)) return
         this.collection = collection
 
         // attach an object to container to hold handlers
@@ -92,10 +92,9 @@ module.exports = {
 
         // listen for collection mutation events
         // the collection has been augmented during Binding.set()
-        var self = this
-        collection.on('mutate', function (mutation) {
-            mutationHandlers[mutation.method].call(self, mutation)
-        })
+        collection.on('mutate', (function (mutation) {
+            mutationHandlers[mutation.method].call(this, mutation)
+        }).bind(this))
 
         // create child-seeds and append to DOM
         for (var i = 0, l = collection.length; i < l; i++) {
@@ -106,16 +105,16 @@ module.exports = {
     buildItem: function (ref, data, index) {
         var node = this.el.cloneNode(true)
         this.container.insertBefore(node, ref)
-        var Seed = require('../seed'),
-            spore = new Seed(node, {
+        var Compiler = require('../compiler'),
+            spore = new Compiler(node, {
                 each: true,
                 eachPrefix: this.arg + '.',
-                parentSeed: this.seed,
+                parentCompiler: this.compiler,
                 index: index,
                 data: data,
                 delegator: this.container
             })
-        this.collection[index] = spore.scope
+        this.collection[index] = spore.vm
     },
 
     updateIndexes: function () {
@@ -125,20 +124,19 @@ module.exports = {
         }
     },
 
-    unbind: function (reset) {
-        if (this.collection && this.collection.length) {
-            var i = this.collection.length,
-                fn = reset ? '_destroy' : '_unbind'
+    unbind: function () {
+        if (this.collection) {
+            this.collection.off('mutate')
+            var i = this.collection.length
             while (i--) {
-                this.collection[i].$seed[fn]()
+                this.collection[i].$destroy()
             }
-            this.collection = null
         }
         var ctn = this.container,
             handlers = ctn.sd_dHandlers
         for (var key in handlers) {
             ctn.removeEventListener(handlers[key].event, handlers[key])
         }
-        delete ctn.sd_dHandlers
+        ctn.sd_dHandlers = null
     }
 }

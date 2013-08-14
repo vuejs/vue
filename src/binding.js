@@ -5,17 +5,17 @@ var utils    = require('./utils'),
 /*
  *  Binding class.
  *
- *  each property on the scope has one corresponding Binding object
+ *  each property on the viewmodel has one corresponding Binding object
  *  which has multiple directive instances on the DOM
  *  and multiple computed property dependents
  */
-function Binding (seed, key) {
-    this.seed = seed
-    this.scope = seed.scope
-    this.key  = key
+function Binding (compiler, key) {
+    this.compiler = compiler
+    this.vm = compiler.vm
+    this.key = key
     var path = key.split('.')
-    this.inspect(utils.getNestedValue(seed.scope, path))
-    this.def(seed.scope, path)
+    this.inspect(utils.getNestedValue(compiler.vm, path))
+    this.def(compiler.vm, path)
     this.instances = []
     this.subs = []
     this.deps = []
@@ -27,85 +27,82 @@ var BindingProto = Binding.prototype
  *  Pre-process a passed in value based on its type
  */
 BindingProto.inspect = function (value) {
-    var type = utils.typeOf(value),
-        self = this
+    var type = utils.typeOf(value)
     // preprocess the value depending on its type
     if (type === 'Object') {
         if (value.get) {
             var l = Object.keys(value).length
             if (l === 1 || (l === 2 && value.set)) {
-                self.isComputed = true // computed property
-                value.get = value.get.bind(self.scope)
-                if (value.set) value.set = value.set.bind(self.scope)
+                this.isComputed = true // computed property
+                this.rawGet = value.get
+                value.get = value.get.bind(this.vm)
+                if (value.set) value.set = value.set.bind(this.vm)
             }
         }
     } else if (type === 'Array') {
+        value = utils.dump(value)
         utils.watchArray(value)
-        value.on('mutate', function () {
-            self.pub()
-        })
+        value.on('mutate', this.pub.bind(this))
     }
-    self.value = value
+    this.value = value
 }
 
 /*
- *  Define getter/setter for this binding on scope
+ *  Define getter/setter for this binding on viewmodel
  *  recursive for nested objects
  */
-BindingProto.def = function (scope, path) {
-    var self = this,
-        seed = self.seed,
-        key = path[0]
+BindingProto.def = function (viewmodel, path) {
+    var key = path[0]
     if (path.length === 1) {
         // here we are! at the end of the path!
         // define the real value accessors.
-        def(scope, key, {
-            get: function () {
+        def(viewmodel, key, {
+            get: (function () {
                 if (observer.isObserving) {
-                    observer.emit('get', self)
+                    observer.emit('get', this)
                 }
-                return self.isComputed
-                    ? self.value.get({
-                        el: seed.el,
-                        scope: seed.scope
+                return this.isComputed
+                    ? this.value.get({
+                        el: this.compiler.el,
+                        vm: this.compiler.vm
                     })
-                    : self.value
-            },
-            set: function (value) {
-                if (self.isComputed) {
+                    : this.value
+            }).bind(this),
+            set: (function (value) {
+                if (this.isComputed) {
                     // computed properties cannot be redefined
                     // no need to call binding.update() here,
                     // as dependency extraction has taken care of that
-                    if (self.value.set) {
-                        self.value.set(value)
+                    if (this.value.set) {
+                        this.value.set(value)
                     }
-                } else if (value !== self.value) {
-                    self.update(value)
+                } else if (value !== this.value) {
+                    this.update(value)
                 }
-            }
+            }).bind(this)
         })
     } else {
         // we are not there yet!!!
-        // create an intermediate subscope
+        // create an intermediate object
         // which also has its own getter/setters
-        var subScope = scope[key]
-        if (!subScope) {
-            subScope = {}
-            def(scope, key, {
-                get: function () {
-                    return subScope
-                },
-                set: function (value) {
-                    // when the subScope is given a new value,
+        var nestedObject = viewmodel[key]
+        if (!nestedObject) {
+            nestedObject = {}
+            def(viewmodel, key, {
+                get: (function () {
+                    return this
+                }).bind(nestedObject),
+                set: (function (value) {
+                    // when the nestedObject is given a new value,
                     // copy everything over to trigger the setters
                     for (var prop in value) {
-                        subScope[prop] = value[prop]
+                        this[prop] = value[prop]
                     }
-                }
+                }).bind(nestedObject)
             })
         }
         // recurse
-        this.def(subScope, path.slice(1))
+        this.def(nestedObject, path.slice(1))
     }
 }
 
@@ -116,7 +113,7 @@ BindingProto.update = function (value) {
     this.inspect(value)
     var i = this.instances.length
     while (i--) {
-        this.instances[i].update(value)
+        this.instances[i].update(this.value)
     }
     this.pub()
 }
@@ -130,6 +127,21 @@ BindingProto.refresh = function () {
     while (i--) {
         this.instances[i].refresh()
     }
+}
+
+BindingProto.unbind = function () {
+    var i = this.instances.length
+    while (i--) {
+        this.instances[i].unbind()
+    }
+    i = this.deps.length
+    var subs
+    while (i--) {
+        subs = this.deps[i].subs
+        subs.splice(subs.indexOf(this), 1)
+    }
+    if (Array.isArray(this.value)) this.value.off('mutate')
+    this.vm = this.compiler = this.pubs = this.subs = this.instances = null
 }
 
 /*

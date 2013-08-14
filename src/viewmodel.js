@@ -1,26 +1,25 @@
 var utils   = require('./utils')
 
 /*
- *  Scope is the ViewModel/whatever exposed to the user
- *  that holds data, computed properties, event handlers
+ *  ViewModel exposed to the user that holds data,
+ *  computed properties, event handlers
  *  and a few reserved methods
  */
-function Scope (seed, options) {
-    this.$seed     = seed
-    this.$el       = seed.el
+function ViewModel (compiler, options) {
+    this.$compiler = compiler
+    this.$el       = compiler.el
     this.$index    = options.index
-    this.$parent   = options.parentSeed && options.parentSeed.scope
-    this.$seed._watchers = {}
+    this.$parent   = options.parentCompiler && options.parentCompiler.vm
 }
 
-var ScopeProto = Scope.prototype
+var VMProto = ViewModel.prototype
 
 /*
  *  register a listener that will be broadcasted from the global event bus
  */
-ScopeProto.$on = function (event, handler) {
+VMProto.$on = function (event, handler) {
     utils.eventbus.on(event, handler)
-    this.$seed._listeners.push({
+    this.$compiler.listeners.push({
         event: event,
         handler: handler
     })
@@ -29,9 +28,9 @@ ScopeProto.$on = function (event, handler) {
 /*
  *  remove the registered listener
  */
-ScopeProto.$off = function (event, handler) {
+VMProto.$off = function (event, handler) {
     utils.eventbus.off(event, handler)
-    var listeners = this.$seed._listeners,
+    var listeners = this.$compiler.listeners,
         i = listeners.length, listener
     while (i--) {
         listener = listeners[i]
@@ -43,19 +42,19 @@ ScopeProto.$off = function (event, handler) {
 }
 
 /*
- *  watch a key on the scope for changes
+ *  watch a key on the viewmodel for changes
  *  fire callback with new value
  */
-ScopeProto.$watch = function (key, callback) {
+VMProto.$watch = function (key, callback) {
     var self = this
-    // yield and wait for seed to finish compiling
+    // yield and wait for compiler to finish compiling
     setTimeout(function () {
-        var scope   = self.$seed.scope,
-            binding = self.$seed._bindings[key],
+        var viewmodel   = self.$compiler.vm,
+            binding = self.$compiler.bindings[key],
             i       = binding.deps.length,
-            watcher = self.$seed._watchers[key] = {
+            watcher = self.$compiler.watchers[key] = {
                 refresh: function () {
-                    callback(scope[key])
+                    callback(viewmodel[key])
                 },
                 deps: binding.deps
             }
@@ -68,50 +67,51 @@ ScopeProto.$watch = function (key, callback) {
 /*
  *  remove watcher
  */
-ScopeProto.$unwatch = function (key) {
+VMProto.$unwatch = function (key) {
     var self = this
     setTimeout(function () {
-        var watcher = self.$seed._watchers[key]
+        var watcher = self.$compiler.watchers[key]
         if (!watcher) return
         var i = watcher.deps.length, subs
         while (i--) {
             subs = watcher.deps[i].subs
             subs.splice(subs.indexOf(watcher))
         }
-        delete self.$seed._watchers[key]
+        self.$compiler.watchers[key] = null
     }, 0)
 }
 
 /*
- *  load data into scope
+ *  load data into viewmodel
  */
-ScopeProto.$load = function (data) {
+VMProto.$load = function (data) {
     for (var key in data) {
         this[key] = data[key]
     }
 }
 
 /*
- *  Dump a copy of current scope data, excluding seed-exposed properties.
+ *  Dump a copy of current viewmodel data, excluding compiler-exposed properties.
  *  @param key (optional): key for the value to dump
  */
-ScopeProto.$dump = function (key) {
-    var bindings = this.$seed._bindings
+VMProto.$dump = function (key) {
+    var bindings = this.$compiler.bindings
     return utils.dump(key ? bindings[key].value : this)
 }
 
 /*
  *  stringify the result from $dump
  */
-ScopeProto.$serialize = function (key) {
+VMProto.$serialize = function (key) {
     return JSON.stringify(this.$dump(key))
 }
 
 /*
  *  unbind everything, remove everything
  */
-ScopeProto.$destroy = function () {
-    this.$seed._destroy()
+VMProto.$destroy = function () {
+    this.$compiler.destroy()
+    this.$compiler = null
 }
 
-module.exports = Scope
+module.exports = ViewModel

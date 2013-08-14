@@ -13,29 +13,29 @@ module.exports = {
     expectFunction : true,
 
     bind: function () {
-        if (this.seed.each) {
+        if (this.compiler.each) {
             // attach an identifier to the el
             // so it can be matched during event delegation
             this.el[this.expression] = true
-            // attach the owner scope of this directive
-            this.el.sd_scope = this.seed.scope
+            // attach the owner viewmodel of this directive
+            this.el.sd_viewmodel = this.vm
         }
     },
 
     update: function (handler) {
 
-        this.unbind()
+        this.unbind(true)
         if (!handler) return
 
-        var seed  = this.seed,
-            event = this.arg,
-            ownerScope = this.binding.seed.scope
+        var compiler = this.compiler,
+            event    = this.arg,
+            ownerVM  = this.binding.vm
 
-        if (seed.each && event !== 'blur' && event !== 'blur') {
+        if (compiler.each && event !== 'blur' && event !== 'blur') {
 
             // for each blocks, delegate for better performance
             // focus and blur events dont bubble so exclude them
-            var delegator  = seed.delegator,
+            var delegator  = compiler.delegator,
                 identifier = this.expression,
                 dHandler   = delegator.sd_dHandlers[identifier]
 
@@ -46,8 +46,8 @@ module.exports = {
                 var target = delegateCheck(e.target, delegator, identifier)
                 if (target) {
                     e.el = target
-                    e.scope = target.sd_scope
-                    handler.call(ownerScope, e)
+                    e.vm = target.sd_viewmodel
+                    handler.call(ownerVM, e)
                 }
             }
             dHandler.event = event
@@ -58,15 +58,17 @@ module.exports = {
             // a normal, single element handler
             this.handler = function (e) {
                 e.el = e.currentTarget
-                e.scope = seed.scope
-                handler.call(seed.scope, e)
+                e.vm = compiler.vm
+                handler.call(compiler.vm, e)
             }
             this.el.addEventListener(event, this.handler)
 
         }
     },
 
-    unbind: function () {
+    unbind: function (update) {
         this.el.removeEventListener(this.arg, this.handler)
+        this.handler = null
+        if (!update) this.el.sd_viewmodel = null
     }
 }

@@ -1,6 +1,6 @@
 var config      = require('./config'),
-    Seed        = require('./seed'),
-    Scope       = require('./scope'),
+    Compiler    = require('./compiler'),
+    ViewModel   = require('./viewmodel'),
     directives  = require('./directives'),
     filters     = require('./filters'),
     textParser  = require('./text-parser'),
@@ -40,12 +40,12 @@ api.data = function (id, data) {
  */
 api.controller = function (id, properties) {
     if (!properties) return controllers[id]
-    // create a subclass of Scope that has the extension methods mixed-in
-    var ExtendedScope = function () {
-        Scope.apply(this, arguments)
+    // create a subclass of ViewModel that has the extension methods mixed-in
+    var ExtendedVM = function () {
+        ViewModel.apply(this, arguments)
     }
-    var p = ExtendedScope.prototype = Object.create(Scope.prototype)
-    p.constructor = ExtendedScope
+    var p = ExtendedVM.prototype = Object.create(ViewModel.prototype)
+    p.constructor = ExtendedVM
     for (var prop in properties) {
         if (prop !== 'init') {
             p[prop] = properties[prop]
@@ -53,7 +53,7 @@ api.controller = function (id, properties) {
     }
     controllers[id] = {
         init: properties.init,
-        ExtendedScope: ExtendedScope
+        ExtendedVM: ExtendedVM
     }
 }
 
@@ -91,12 +91,12 @@ api.config = function (opts) {
  *  Compile a single element
  */
 api.compile = function (el) {
-    return new Seed(el).scope
+    return new Compiler(el).vm
 }
 
 /*
  *  Bootstrap the whole thing
- *  by creating a Seed instance for top level nodes
+ *  by creating a Compiler instance for top level nodes
  *  that has either sd-controller or sd-data
  */
 api.bootstrap = function (opts) {
@@ -107,7 +107,7 @@ api.bootstrap = function (opts) {
         dataSlt = '[' + config.prefix + '-data]'
     /* jshint boss: true */
     while (el = document.querySelector(ctrlSlt) || document.querySelector(dataSlt)) {
-        new Seed(el)
+        new Compiler(el)
     }
     booted = true
 }

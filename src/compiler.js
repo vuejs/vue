@@ -1,5 +1,5 @@
 var config          = require('./config'),
-    Scope           = require('./scope'),
+    ViewModel       = require('./viewmodel'),
     Binding         = require('./binding'),
     DirectiveParser = require('./directive-parser'),
     TextParser      = require('./text-parser'),
@@ -11,26 +11,26 @@ var slice           = Array.prototype.slice,
     eachAttr        = config.prefix + '-each'
 
 /*
- *  The main ViewModel class
- *  scans a node and parse it to populate data bindings
+ *  The DOM compiler
+ *  scans a DOM node and compile bindings for a ViewModel
  */
-function Seed (el, options) {
+function Compiler (el, options) {
 
-    config.log('\ncreated new Seed instance.\n')
-
+    config.log('\ncreated new Compiler instance.\n')
     if (typeof el === 'string') {
         el = document.querySelector(el)
     }
 
-    this.el               = el
-    el.seed               = this
-    this._bindings        = {}
-    this._watchers        = {}
-    this._listeners       = []
+    this.el              = el
+    el.compiler          = this
+    this.bindings        = {}
+    this.directives      = []
+    this.watchers        = {}
+    this.listeners       = []
     // list of computed properties that need to parse dependencies for
-    this._computed        = []
+    this.computed        = []
     // list of bindings that has dynamic context dependencies
-    this._contextBindings = []
+    this.contextBindings = []
 
     // copy options
     options = options || {}
@@ -48,71 +48,71 @@ function Seed (el, options) {
     data = data || {}
     el.removeAttribute(dataAttr)
 
-    // if the passed in data is the scope of a Seed instance,
+    // if the passed in data is the viewmodel of a Compiler instance,
     // make a copy from it
-    if (data.$seed instanceof Seed) {
+    if (data instanceof ViewModel) {
         data = data.$dump()
     }
 
-    // check if there is a controller associated with this seed
+    // check if there is a controller associated with this compiler
     var ctrlID = el.getAttribute(ctrlAttr), controller
     if (ctrlID) {
         el.removeAttribute(ctrlAttr)
         controller = config.controllers[ctrlID]
         if (controller) {
-            this._controller = controller
+            this.controller = controller
         } else {
             config.warn('controller "' + ctrlID + '" is not defined.')
         }
     }
     
-    // create the scope object
-    // if the controller has an extended scope contructor, use it;
-    // otherwise, use the original scope constructor.
-    var ScopeConstructor = (controller && controller.ExtendedScope) || Scope,
-        scope = this.scope = new ScopeConstructor(this, options)
+    // create the viewmodel object
+    // if the controller has an extended viewmodel contructor, use it;
+    // otherwise, use the original viewmodel constructor.
+    var VMCtor = (controller && controller.ExtendedVM) || ViewModel,
+        viewmodel = this.vm = new VMCtor(this, options)
 
     // copy data
     for (var key in data) {
-        scope[key] = data[key]
+        viewmodel[key] = data[key]
     }
 
     // apply controller initialize function
     if (controller && controller.init) {
-        controller.init.call(scope)
+        controller.init.call(viewmodel)
     }
 
     // now parse the DOM
-    this._compileNode(el, true)
+    this.compileNode(el, true)
 
-    // for anything in scope but not binded in DOM, create bindings for them
-    for (key in scope) {
-        if (key.charAt(0) !== '$' && !this._bindings[key]) {
-            this._createBinding(key)
+    // for anything in viewmodel but not binded in DOM, create bindings for them
+    for (key in viewmodel) {
+        if (key.charAt(0) !== '$' && !this.bindings[key]) {
+            this.createBinding(key)
         }
     }
 
     // extract dependencies for computed properties
-    if (this._computed.length) depsParser.parse(this._computed)
-    delete this._computed
+    if (this.computed.length) depsParser.parse(this.computed)
+    this.computed = null
     
     // extract dependencies for computed properties with dynamic context
-    if (this._contextBindings.length) this._bindContexts(this._contextBindings)
-    delete this._contextBindings
+    if (this.contextBindings.length) this.bindContexts(this.contextBindings)
+    this.contextBindings = null
 }
 
 // for better compression
-var SeedProto = Seed.prototype
+var CompilerProto = Compiler.prototype
 
 /*
  *  Compile a DOM node (recursive)
  */
-SeedProto._compileNode = function (node, root) {
-    var seed = this
+CompilerProto.compileNode = function (node, root) {
+    var compiler = this
 
     if (node.nodeType === 3) { // text node
 
-        seed._compileTextNode(node)
+        compiler.compileTextNode(node)
 
     } else if (node.nodeType === 1) {
 
@@ -125,14 +125,14 @@ SeedProto._compileNode = function (node, root) {
             directive = DirectiveParser.parse(eachAttr, eachExp)
             if (directive) {
                 directive.el = node
-                seed._bind(directive)
+                compiler.bindDirective(directive)
             }
 
         } else if (ctrlExp && !root) { // nested controllers
 
-            new Seed(node, {
+            new Compiler(node, {
                 child: true,
-                parentSeed: seed
+                parentCompiler: compiler
             })
 
         } else { // normal node
@@ -153,7 +153,7 @@ SeedProto._compileNode = function (node, root) {
                         if (directive) {
                             valid = true
                             directive.el = node
-                            seed._bind(directive)
+                            compiler.bindDirective(directive)
                         }
                     }
                     if (valid) node.removeAttribute(attr.name)
@@ -162,7 +162,7 @@ SeedProto._compileNode = function (node, root) {
 
             // recursively compile childNodes
             if (node.childNodes.length) {
-                slice.call(node.childNodes).forEach(seed._compileNode, seed)
+                slice.call(node.childNodes).forEach(compiler.compileNode, compiler)
             }
         }
     }
@@ -171,10 +171,10 @@ SeedProto._compileNode = function (node, root) {
 /*
  *  Compile a text node
  */
-SeedProto._compileTextNode = function (node) {
+CompilerProto.compileTextNode = function (node) {
     var tokens = TextParser.parse(node)
     if (!tokens) return
-    var seed = this,
+    var compiler = this,
         dirname = config.prefix + '-text',
         el, token, directive
     for (var i = 0, l = tokens.length; i < l; i++) {
@@ -184,7 +184,7 @@ SeedProto._compileTextNode = function (node) {
             directive = DirectiveParser.parse(dirname, token.key)
             if (directive) {
                 directive.el = el
-                seed._bind(directive)
+                compiler.bindDirective(directive)
             }
         } else {
             el.nodeValue = token
@@ -195,28 +195,55 @@ SeedProto._compileTextNode = function (node) {
 }
 
 /*
- *  Add a directive instance to the correct binding & scope
+ *  Create binding and attach getter/setter for a key to the viewmodel object
  */
-SeedProto._bind = function (directive) {
+CompilerProto.createBinding = function (key) {
+    config.log('  created binding: ' + key)
+    var binding = new Binding(this, key)
+    this.bindings[key] = binding
+    if (binding.isComputed) this.computed.push(binding)
+    return binding
+}
+
+/*
+ *  Add a directive instance to the correct binding & viewmodel
+ */
+CompilerProto.bindDirective = function (directive) {
+
+    this.directives.push(directive)
+    directive.compiler = this
+    directive.vm       = this.vm
 
     var key = directive.key,
-        seed = directive.seed = this
+        compiler = this
 
     // deal with each block
     if (this.each) {
         if (key.indexOf(this.eachPrefix) === 0) {
             key = directive.key = key.replace(this.eachPrefix, '')
         } else {
-            seed = this.parentSeed
+            compiler = this.parentCompiler
         }
     }
 
     // deal with nesting
-    seed = traceOwnerSeed(directive, seed)
-    var binding = seed._bindings[key] || seed._createBinding(key)
+    compiler = traceOwnerCompiler(directive, compiler)
+    var binding = compiler.bindings[key] || compiler.createBinding(key)
 
     binding.instances.push(directive)
     directive.binding = binding
+
+    // for newly inserted sub-VMs (each items), need to bind deps
+    // because they didn't get processed when the parent compiler
+    // was binding dependencies.
+    var i, dep
+    if (binding.contextDeps) {
+        i = binding.contextDeps.length
+        while (i--) {
+            dep = this.bindings[binding.contextDeps[i]]
+            dep.subs.push(directive)
+        }
+    }
 
     // invoke bind hook if exists
     if (directive.bind) {
@@ -231,80 +258,73 @@ SeedProto._bind = function (directive) {
 }
 
 /*
- *  Create binding and attach getter/setter for a key to the scope object
- */
-SeedProto._createBinding = function (key) {
-    config.log('  created binding: ' + key)
-    var binding = new Binding(this, key)
-    this._bindings[key] = binding
-    if (binding.isComputed) this._computed.push(binding)
-    return binding
-}
-
-/*
  *  Process subscriptions for computed properties that has
  *  dynamic context dependencies
  */
-SeedProto._bindContexts = function (bindings) {
-    var i = bindings.length, j, binding, depKey, dep
+CompilerProto.bindContexts = function (bindings) {
+    var i = bindings.length, j, k, binding, depKey, dep, ins
     while (i--) {
         binding = bindings[i]
         j = binding.contextDeps.length
         while (j--) {
             depKey = binding.contextDeps[j]
-            dep = this._bindings[depKey]
-            dep.subs.push(binding)
+            k = binding.instances.length
+            while (k--) {
+                ins = binding.instances[k]
+                dep = ins.compiler.bindings[depKey]
+                dep.subs.push(ins)
+            }
         }
-    }
-}
-
-/*
- *  Call unbind() of all directive instances
- *  to remove event listeners, destroy child seeds, etc.
- */
-SeedProto._unbind = function () {
-    var i, ins, key, listener
-    // unbind all bindings
-    for (key in this._bindings) {
-        ins = this._bindings[key].instances
-        i = ins.length
-        while (i--) {
-            if (ins[i].unbind) ins[i].unbind()
-        }
-    }
-    // remove all listeners on eventbus
-    i = this._listeners.length
-    while (i--) {
-        listener = this._listeners[i]
-        eventbus.off(listener.event, listener.handler)
     }
 }
 
 /*
  *  Unbind and remove element
  */
-SeedProto._destroy = function () {
-    this._unbind()
+CompilerProto.destroy = function () {
+    var i, key, dir, listener, inss
+    // remove all directives that are instances of external bindings
+    i = this.directives.length
+    while (i--) {
+        dir = this.directives[i]
+        if (dir.binding.compiler !== this) {
+            inss = dir.binding.instances
+            inss.splice(inss.indexOf(dir), 1)
+        }
+        dir.unbind()
+    }
+    // remove all listeners on eventbus
+    i = this.listeners.length
+    while (i--) {
+        listener = this.listeners[i]
+        eventbus.off(listener.event, listener.handler)
+    }
+    // unbind all bindings
+    for (key in this.bindings) {
+        this.bindings[key].unbind()
+    }
+    // remove el
+    this.el.compiler = null
     this.el.parentNode.removeChild(this.el)
 }
 
 // Helpers --------------------------------------------------------------------
 
 /*
- *  determine which scope a key belongs to based on nesting symbols
+ *  determine which viewmodel a key belongs to based on nesting symbols
  */
-function traceOwnerSeed (key, seed) {
+function traceOwnerCompiler (key, compiler) {
     if (key.nesting) {
         var levels = key.nesting
-        while (seed.parentSeed && levels--) {
-            seed = seed.parentSeed
+        while (compiler.parentCompiler && levels--) {
+            compiler = compiler.parentCompiler
         }
     } else if (key.root) {
-        while (seed.parentSeed) {
-            seed = seed.parentSeed
+        while (compiler.parentCompiler) {
+            compiler = compiler.parentCompiler
         }
     }
-    return seed
+    return compiler
 }
 
-module.exports = Seed
+module.exports = Compiler

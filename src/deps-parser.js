@@ -4,7 +4,7 @@ var Emitter  = require('emitter'),
 
 var dummyEl = document.createElement('div'),
     ARGS_RE = /^function\s*?\((.+?)\)/,
-    SCOPE_RE_STR = '\\.scope\\.[\\.A-Za-z0-9_][\\.A-Za-z0-9_$]*',
+    SCOPE_RE_STR = '\\.vm\\.[\\.A-Za-z0-9_][\\.A-Za-z0-9_$]*',
     noop = function () {}
 
 /*
@@ -21,7 +21,7 @@ function catchDeps (binding) {
     })
     parseContextDependency(binding)
     binding.value.get({
-        scope: createDummyScope(binding),
+        vm: createDummyVM(binding),
         el: dummyEl
     })
     observer.off('get')
@@ -37,31 +37,37 @@ function filterDeps (binding) {
     while (i--) {
         dep = binding.deps[i]
         if (!dep.deps.length) {
-            config.log('  └─' + dep.key)
+            config.log('  └─ ' + dep.key)
             dep.subs.push(binding)
         } else {
             binding.deps.splice(i, 1)
         }
     }
+    var ctdeps = binding.contextDeps
+    if (!ctdeps || !config.debug) return
+    i = ctdeps.length
+    while (i--) {
+        config.log('  └─ ctx:' + ctdeps[i])
+    }
 }
 
 /*
  *  We need to invoke each binding's getter for dependency parsing,
- *  but we don't know what sub-scope properties the user might try
+ *  but we don't know what sub-viewmodel properties the user might try
  *  to access in that getter. To avoid thowing an error or forcing
  *  the user to guard against an undefined argument, we staticly
  *  analyze the function to extract any possible nested properties
- *  the user expects the target scope to possess. They are all assigned
+ *  the user expects the target viewmodel to possess. They are all assigned
  *  a noop function so they can be invoked with no real harm.
  */
-function createDummyScope (binding) {
-    var scope = {},
+function createDummyVM (binding) {
+    var viewmodel = {},
         deps = binding.contextDeps
-    if (!deps) return scope
+    if (!deps) return viewmodel
     var i = binding.contextDeps.length,
         j, level, key, path
     while (i--) {
-        level = scope
+        level = viewmodel
         path = deps[i].split('.')
         j = 0
         while (j < path.length) {
@@ -71,20 +77,20 @@ function createDummyScope (binding) {
             j++
         }
     }
-    return scope
+    return viewmodel
 }
 
 /*
  *  Extract context dependency paths
  */
 function parseContextDependency (binding) {
-    var fn   = binding.value.get,
+    var fn   = binding.rawGet,
         str  = fn.toString(),
         args = str.match(ARGS_RE)
     if (!args) return null
-    var argRE = new RegExp(args[1] + SCOPE_RE_STR, 'g'),
-        matches = str.match(argRE),
-        base = args[1].length + 7
+    var depsRE = new RegExp(args[1] + SCOPE_RE_STR, 'g'),
+        matches = str.match(depsRE),
+        base = args[1].length + 4
     if (!matches) return null
     var i = matches.length,
         deps = [], dep
@@ -95,7 +101,7 @@ function parseContextDependency (binding) {
         }
     }
     binding.contextDeps = deps
-    binding.seed._contextBindings.push(binding)
+    binding.compiler.contextBindings.push(binding)
 }
 
 module.exports = {
