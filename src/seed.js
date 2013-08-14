@@ -73,7 +73,7 @@ function Seed (el, options) {
         scope = this.scope = new ScopeConstructor(this, options)
 
     // copy data
-    for (key in data) {
+    for (var key in data) {
         scope[key] = data[key]
     }
 
