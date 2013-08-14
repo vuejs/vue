@@ -129,6 +129,9 @@ BindingProto.refresh = function () {
     }
 }
 
+/*
+ *  Unbind the binding, remove itself from all of its dependencies
+ */
 BindingProto.unbind = function () {
     var i = this.instances.length
     while (i--) {
@@ -141,7 +144,8 @@ BindingProto.unbind = function () {
         subs.splice(subs.indexOf(this), 1)
     }
     if (Array.isArray(this.value)) this.value.off('mutate')
-    this.vm = this.compiler = this.pubs = this.subs = this.instances = null
+    this.vm = this.compiler = this.pubs =
+    this.subs = this.instances = this.deps = null
 }
 
 /*

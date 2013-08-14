@@ -289,7 +289,7 @@ CompilerProto.destroy = function () {
         dir = this.directives[i]
         if (dir.binding.compiler !== this) {
             inss = dir.binding.instances
-            inss.splice(inss.indexOf(dir), 1)
+            if (inss) inss.splice(inss.indexOf(dir), 1)
         }
         dir.unbind()
     }

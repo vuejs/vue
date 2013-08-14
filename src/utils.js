@@ -82,17 +82,22 @@ module.exports = {
      */
     watchArray: function (collection) {
         Emitter(collection)
-        arrayMutators.forEach(function (method) {
-            collection[method] = function () {
-                var result = aproto[method].apply(this, arguments)
-                collection.emit('mutate', {
-                    method: method,
-                    args: aproto.slice.call(arguments),
-                    result: result
-                })
-            }
-        })
-        for (var method in arrayAugmentations) {
+        var method, i = arrayMutators.length
+        while (i--) {
+            method = arrayMutators[i]
+            /* jshint loopfunc: true */
+            collection[method] = (function (method) {
+                return function () {
+                    var result = aproto[method].apply(this, arguments)
+                    this.emit('mutate', {
+                        method: method,
+                        args: aproto.slice.call(arguments),
+                        result: result
+                    })
+                }
+            })(method)
+        }
+        for (method in arrayAugmentations) {
             collection[method] = arrayAugmentations[method]
         }
     }

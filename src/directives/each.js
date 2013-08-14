@@ -1,5 +1,4 @@
-var config = require('../config'),
-    utils  = require('../utils')
+var config = require('../config')
 
 /*
  *  Mathods that perform precise DOM manipulation
