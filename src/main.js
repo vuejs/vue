@@ -72,6 +72,9 @@ ViewModel.extend = function (options) {
             p[prop] = options.properties[prop]
         }
     }
+    if (options.id) {
+        utils.registerVM(options.id, ExtendedVM)
+    }
     return ExtendedVM
 }
 

@@ -8,17 +8,12 @@
         </style>
         <script src="../dist/seed.js"></script>
     </head>
-    <body sd-controller="hello">
+    <body>
         <input type="checkbox" sd-checked="checked">
         <span sd-text="hello | uppercase" sd-class="red:checked"></span>
         <script>
-            Seed.controller('hello', function (scope) {
-                scope.hello = {get:function () {
-                    return scope.checked ? 'red!!!' : 'hello seed'
-                }}
-            })
-
-            Seed.bootstrap()
+            var demo = new Seed.ViewModel({ el: 'body' })
+            demo.hello = 'hi'
         </script>
     </body>
 </html>

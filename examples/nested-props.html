@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title></title>
+        <meta charset="utf-8">
+        <script src="../dist/seed.js"></script>
+    </head>
+    <body>
+        <h1>a.b.c : {{a.b.c}}</h1>
+        <h2>a.c : {{a.c}}</h2>
+        <h3>Computed property that concats the two: {{d}}</h3>
+        <button sd-on="click:one">one</button>
+        <button sd-on="click:two">two</button>
+        <button sd-on="click:three">three</button>
+        <script>
+            var Demo = Seed.ViewModel.extend({
+                properties: {
+                    one: function () {
+                        this.a = {
+                            c: 1,
+                            b: {
+                                c: 'one'
+                            }
+                        }
+                    },
+                    two: function () {
+                        this.a.b = {
+                            c: 'two'
+                        }
+                        this.a.c = 2
+                    },
+                    three: function () {
+                        this.a.b.c = 'three'
+                        this.a.c = 3
+                    },
+                    d: {get: function () {
+                        return (this.a.b.c + this.a.c) || ''
+                    }}
+                }
+            })
+            var app = new Demo({ el: document.body })
+        </script>
+    </body>
+</html>

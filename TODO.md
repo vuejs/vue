@@ -1,9 +1,10 @@
 - ability to register a ViewModel so it can be auto-compiled as a nested vm
-- literals, function arguments, simple logic comparisons
 - let user specify which keys are data/state (i.e. available in $dump())
 - tests
 - docs
-- validation as filter, e.g. sd-value="email | validate email"
-- sd-with
-- standarized way to reuse components (sd-component?)
-- plugins: seed-touch, seed-storage, seed-router
+- sd-with?
+- plugins
+    - seed-touch (e.g. sd-drag="onDrag" sd-swipe="onSwipe")
+    - seed-storage (RESTful sync)
+    - seed-router (express style)
+    - sd-validation (e.g. sd-validate="type:email, max:100, required:true")

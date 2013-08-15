@@ -1,4 +1,5 @@
 var config = require('../config'),
+    utils  = require('../utils'),
     ViewModel // lazy def to avoid circular dependency
 
 /*
@@ -111,7 +112,9 @@ module.exports = {
         var node = this.el.cloneNode(true)
         this.container.insertBefore(node, ref)
         ViewModel = ViewModel || require('../viewmodel')
-        var item = new ViewModel({
+        var vmID = node.getAttribute(config.prefix + '-viewmodel'),
+            ChildVM = utils.getVM(vmID) || ViewModel
+        var item = new ChildVM({
             el: node,
             each: true,
             eachPrefix: this.arg + '.',

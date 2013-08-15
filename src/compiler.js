@@ -5,9 +5,10 @@ var config          = require('./config'),
     TextParser      = require('./text-parser'),
     DepsParser      = require('./deps-parser')
 
-var slice           = Array.prototype.slice,
-    ctrlAttr        = config.prefix + '-controller',
-    eachAttr        = config.prefix + '-each'
+var slice           = Array.prototype.slice
+
+// late bindings
+var vmAttr, eachAttr
 
 /*
  *  The DOM compiler
@@ -16,6 +17,10 @@ var slice           = Array.prototype.slice,
 function Compiler (vm, options) {
 
     utils.log('\nnew Compiler instance: ', vm.$el, '\n')
+
+    // need to refresh this everytime we compile
+    eachAttr = config.prefix + '-each'
+    vmAttr   = config.prefix + '-viewmodel'
 
     // copy options
     options = options || {}
@@ -81,7 +86,8 @@ var CompilerProto = Compiler.prototype
  *  Compile a DOM node (recursive)
  */
 CompilerProto.compileNode = function (node, root) {
-    var compiler = this
+
+    var compiler = this, i, j
 
     if (node.nodeType === 3) { // text node
 
@@ -90,7 +96,7 @@ CompilerProto.compileNode = function (node, root) {
     } else if (node.nodeType === 1) {
 
         var eachExp = node.getAttribute(eachAttr),
-            ctrlExp = node.getAttribute(ctrlAttr),
+            vmExp   = node.getAttribute(vmAttr),
             directive
 
         if (eachExp) { // each block
@@ -101,22 +107,27 @@ CompilerProto.compileNode = function (node, root) {
                 compiler.bindDirective(directive)
             }
 
-        } else if (ctrlExp && !root) { // nested controllers
+        } else if (vmExp && !root) { // nested ViewModels
 
-            new Compiler(node, {
-                child: true,
-                parentCompiler: compiler
-            })
+            var ChildVM = utils.getVM(vmExp)
+            if (ChildVM) {
+                new ChildVM({
+                    el: node,
+                    child: true,
+                    parentCompiler: compiler
+                })
+            }
 
         } else { // normal node
 
             // parse if has attributes
             if (node.attributes && node.attributes.length) {
                 var attrs = slice.call(node.attributes),
-                    i = attrs.length, attr, j, valid, exps, exp
+                    attr, valid, exps, exp
+                i = attrs.length
                 while (i--) {
                     attr = attrs[i]
-                    if (attr.name === ctrlAttr) continue
+                    if (attr.name === vmAttr) continue
                     valid = false
                     exps = attr.value.split(',')
                     j = exps.length
@@ -135,7 +146,11 @@ CompilerProto.compileNode = function (node, root) {
 
             // recursively compile childNodes
             if (node.childNodes.length) {
-                slice.call(node.childNodes).forEach(compiler.compileNode, compiler)
+                var nodes = slice.call(node.childNodes)
+                i = nodes.length
+                while (i--) {
+                    this.compileNode(nodes[i])
+                }
             }
         }
     }

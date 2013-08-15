@@ -10,13 +10,13 @@
     <script src="../dist/seed.js"></script>
 </head>
 <body>
-    <div sd-controller="Grandpa">
+    <div id="grandpa">
         <p sd-text="name"></p>
-        <div sd-controller="Dad">
+        <div sd-viewmodel="Dad">
             <p><span sd-text="name"></span>, son of <span sd-text="^name"></span></p>
-            <div sd-controller="Son">
+            <div sd-viewmodel="Son">
                 <p><span sd-text="name"></span>,son of <span sd-text="^name"></span></p>
-                <div sd-controller="Baby">
+                <div sd-viewmodel="Baby">
                     <p>
                         <span sd-text="name"></span>,
                         son of <span sd-text="^name"></span>,
@@ -29,23 +29,39 @@
     </div>
 
     <script>
-        Seed.controller('Grandpa', function (scope, seed) {
-            scope.name = 'John'
+        Seed.config({
+            debug: true
         })
 
-        Seed.controller('Dad', function (scope, seed) {
-            scope.name = 'Jack'
+        var Grandpa = Seed.ViewModel.extend({
+            properties: {
+                name: 'Andy'
+            }
         })
 
-        Seed.controller('Son', function (scope, seed) {
-            scope.name = 'Jason'
+        var Dad = Seed.ViewModel.extend({
+            id: 'Dad',
+            properties: {
+                name: 'Jack'
+            }
         })
 
-        Seed.controller('Baby', function (scope, seed) {
-            scope.name = 'James'
+        var Son = Seed.ViewModel.extend({
+            id: 'Son',
+            properties: {
+                name: 'Mike'
+            }
         })
 
-        Seed.bootstrap()
+        var Baby = Seed.ViewModel.extend({
+            id: 'Baby',
+            properties: {
+                name: 'Tim'
+            }
+        })
+
+        var demo = new Grandpa({ el: '#grandpa' })
+
     </script>
 </body>
 </html>

@@ -2,7 +2,8 @@ var config        = require('./config'),
     Emitter       = require('emitter'),
     toString      = Object.prototype.toString,
     aproto        = Array.prototype,
-    templates     = {}
+    templates     = {},
+    VMs           = {}
 
 var arrayAugmentations = {
     remove: function (index) {
@@ -124,6 +125,14 @@ module.exports = {
             if (el) el.parentNode.removeChild(el)
         }
         return el
+    },
+
+    registerVM: function (id, VM) {
+        VMs[id] = VM
+    },
+
+    getVM: function (id) {
+        return VMs[id]
     },
 
     log: function () {
