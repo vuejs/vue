@@ -469,7 +469,6 @@ var config        = require('./config'),
     Emitter       = require('emitter'),
     toString      = Object.prototype.toString,
     aproto        = Array.prototype,
-    arrayMutators = ['push','pop','shift','unshift','splice','sort','reverse'],
     templates     = {}
 
 var arrayAugmentations = {
@@ -482,6 +481,20 @@ var arrayAugmentations = {
         this.splice(index, 1, data)
     }
 }
+
+var arrayMutators = ['push','pop','shift','unshift','splice','sort','reverse'],
+    mutationInterceptors = {}
+
+arrayMutators.forEach(function (method) {
+    mutationInterceptors[method] = function () {
+        var result = aproto[method].apply(this, arguments)
+        this.emit('mutate', {
+            method: method,
+            args: aproto.slice.call(arguments),
+            result: result
+        })
+    }
+})
 
 /*
  *  get accurate type of an object
@@ -520,8 +533,6 @@ function dump (val) {
 
 module.exports = {
 
-    // the global event bus
-    eventbus: new Emitter(),
     typeOf: typeOf,
     dump: dump,
 
@@ -554,17 +565,7 @@ module.exports = {
         var method, i = arrayMutators.length
         while (i--) {
             method = arrayMutators[i]
-            /* jshint loopfunc: true */
-            collection[method] = (function (method) {
-                return function () {
-                    var result = aproto[method].apply(this, arguments)
-                    this.emit('mutate', {
-                        method: method,
-                        args: aproto.slice.call(arguments),
-                        result: result
-                    })
-                }
-            })(method)
+            collection[method] = mutationInterceptors[method]
         }
         for (method in arrayAugmentations) {
             collection[method] = arrayAugmentations[method]
@@ -598,8 +599,7 @@ var config          = require('./config'),
     Binding         = require('./binding'),
     DirectiveParser = require('./directive-parser'),
     TextParser      = require('./text-parser'),
-    DepsParser      = require('./deps-parser'),
-    eventbus        = require('./utils').eventbus
+    DepsParser      = require('./deps-parser')
 
 var slice           = Array.prototype.slice,
     ctrlAttr        = config.prefix + '-controller',
@@ -625,7 +625,6 @@ function Compiler (vm, options) {
     this.bindings        = {}
     this.directives      = []
     this.watchers        = {}
-    this.listeners       = []
     // list of computed properties that need to parse dependencies for
     this.computed        = []
     // list of bindings that has dynamic context dependencies
@@ -853,7 +852,7 @@ CompilerProto.bindContexts = function (bindings) {
  */
 CompilerProto.destroy = function () {
     utils.log('compiler destroyed: ', this.vm.$el)
-    var i, key, dir, listener, inss
+    var i, key, dir, inss
     // remove all directives that are instances of external bindings
     i = this.directives.length
     while (i--) {
@@ -863,12 +862,6 @@ CompilerProto.destroy = function () {
             if (inss) inss.splice(inss.indexOf(dir), 1)
         }
         dir.unbind()
-    }
-    // remove all listeners on eventbus
-    i = this.listeners.length
-    while (i--) {
-        listener = this.listeners[i]
-        eventbus.off(listener.event, listener.handler)
     }
     // unbind all bindings
     for (key in this.bindings) {
@@ -926,33 +919,6 @@ function ViewModel (options) {
 }
 
 var VMProto = ViewModel.prototype
-
-/*
- *  register a listener that will be broadcasted from the global event bus
- */
-VMProto.$on = function (event, handler) {
-    utils.eventbus.on(event, handler)
-    this.$compiler.listeners.push({
-        event: event,
-        handler: handler
-    })
-}
-
-/*
- *  remove the registered listener
- */
-VMProto.$off = function (event, handler) {
-    utils.eventbus.off(event, handler)
-    var listeners = this.$compiler.listeners,
-        i = listeners.length, listener
-    while (i--) {
-        listener = listeners[i]
-        if (listener.event === event && listener.handler === handler) {
-            listeners.splice(i, 1)
-            break
-        }
-    }
-}
 
 /*
  *  watch a key on the viewmodel for changes
@@ -1993,5 +1959,5 @@ require.alias("component-indexof/index.js", "component-emitter/deps/indexof/inde
 require.alias("seed/src/main.js", "seed/index.js");
 
 window.Seed = window.Seed || require('seed')
-Seed.version = '0.2.0'
+Seed.version = '0.2.1'
 })();

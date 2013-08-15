@@ -26,33 +26,6 @@ function ViewModel (options) {
 var VMProto = ViewModel.prototype
 
 /*
- *  register a listener that will be broadcasted from the global event bus
- */
-VMProto.$on = function (event, handler) {
-    utils.eventbus.on(event, handler)
-    this.$compiler.listeners.push({
-        event: event,
-        handler: handler
-    })
-}
-
-/*
- *  remove the registered listener
- */
-VMProto.$off = function (event, handler) {
-    utils.eventbus.off(event, handler)
-    var listeners = this.$compiler.listeners,
-        i = listeners.length, listener
-    while (i--) {
-        listener = listeners[i]
-        if (listener.event === event && listener.handler === handler) {
-            listeners.splice(i, 1)
-            break
-        }
-    }
-}
-
-/*
  *  watch a key on the viewmodel for changes
  *  fire callback with new value
  */

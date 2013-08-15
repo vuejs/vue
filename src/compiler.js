@@ -3,8 +3,7 @@ var config          = require('./config'),
     Binding         = require('./binding'),
     DirectiveParser = require('./directive-parser'),
     TextParser      = require('./text-parser'),
-    DepsParser      = require('./deps-parser'),
-    eventbus        = require('./utils').eventbus
+    DepsParser      = require('./deps-parser')
 
 var slice           = Array.prototype.slice,
     ctrlAttr        = config.prefix + '-controller',
@@ -30,7 +29,6 @@ function Compiler (vm, options) {
     this.bindings        = {}
     this.directives      = []
     this.watchers        = {}
-    this.listeners       = []
     // list of computed properties that need to parse dependencies for
     this.computed        = []
     // list of bindings that has dynamic context dependencies
@@ -258,7 +256,7 @@ CompilerProto.bindContexts = function (bindings) {
  */
 CompilerProto.destroy = function () {
     utils.log('compiler destroyed: ', this.vm.$el)
-    var i, key, dir, listener, inss
+    var i, key, dir, inss
     // remove all directives that are instances of external bindings
     i = this.directives.length
     while (i--) {
@@ -268,12 +266,6 @@ CompilerProto.destroy = function () {
             if (inss) inss.splice(inss.indexOf(dir), 1)
         }
         dir.unbind()
-    }
-    // remove all listeners on eventbus
-    i = this.listeners.length
-    while (i--) {
-        listener = this.listeners[i]
-        eventbus.off(listener.event, listener.handler)
     }
     // unbind all bindings
     for (key in this.bindings) {

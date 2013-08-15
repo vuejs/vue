@@ -4,19 +4,12 @@ var filters = {
     completed: function (todo) { return todo.completed }
 }
 
-window.addEventListener('hashchange', function () {
-    Seed.broadcast('filterchange')
-})
-
 var Todos = Seed.ViewModel.extend({
 
     initialize: function () {
-        // listen for hashtag change
-        this.updateFilter()
-        this.$on('filterchange', this.updateFilter.bind(this))
-        // instance properties
         this.todos = todoStorage.fetch()
         this.remaining = this.todos.filter(filters.active).length
+        this.updateFilter()
     },
 
     properties: {
@@ -107,3 +100,7 @@ var Todos = Seed.ViewModel.extend({
 })
 
 var app = new Todos({ el: '#todoapp' })
+
+window.addEventListener('hashchange', function () {
+    app.updateFilter()
+})

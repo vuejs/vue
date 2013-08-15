@@ -66,8 +66,6 @@ function dump (val) {
 
 module.exports = {
 
-    // the global event bus
-    eventbus: new Emitter(),
     typeOf: typeOf,
     dump: dump,
 
