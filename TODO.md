@@ -1,3 +1,6 @@
+- ability to register a ViewModel so it can be auto-compiled as a nested vm
+- literals, function arguments, simple logic comparisons
+- let user specify which keys are data/state (i.e. available in $dump())
 - tests
 - docs
 - validation as filter, e.g. sd-value="email | validate email"

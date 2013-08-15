@@ -52,7 +52,8 @@ function dump (val) {
                 prop = val[key]
                 if (typeof prop !== 'function' &&
                     val.hasOwnProperty(key) &&
-                    key.charAt(0) !== '$')
+                    key.charAt(0) !== '$' &&
+                    !isContextual(key, val))
                 {
                     ret[key] = dump(prop)
                 }
@@ -62,6 +63,16 @@ function dump (val) {
     } else if (type !== 'Function') {
         return val
     }
+}
+
+/*
+ *  check if a value belongs to a contextual binding
+ *  because we do NOT want to dump those.
+ */
+function isContextual (key, vm) {
+    if (!vm.$compiler) return false
+    var binding = vm.$compiler.bindings[key]
+    return binding.isContextual
 }
 
 module.exports = {

@@ -4,7 +4,7 @@ var Emitter  = require('emitter'),
     observer = new Emitter()
 
 var dummyEl = document.createElement('div'),
-    ARGS_RE = /^function\s*?\((.+?)\)/,
+    ARGS_RE = /^function\s*?\((.+?)[\),]/,
     SCOPE_RE_STR = '\\.vm\\.[\\.A-Za-z0-9_][\\.A-Za-z0-9_$]*',
     noop = function () {}
 
@@ -44,11 +44,11 @@ function filterDeps (binding) {
             binding.deps.splice(i, 1)
         }
     }
-    var ctdeps = binding.contextDeps
-    if (!ctdeps || !config.debug) return
-    i = ctdeps.length
+    var ctxDeps = binding.contextDeps
+    if (!ctxDeps || !config.debug) return
+    i = ctxDeps.length
     while (i--) {
-        utils.log('  └─ ctx:' + ctdeps[i])
+        utils.log('  └─ ctx:' + ctxDeps[i])
     }
 }
 
@@ -89,6 +89,7 @@ function parseContextDependency (binding) {
         str  = fn.toString(),
         args = str.match(ARGS_RE)
     if (!args) return null
+    binding.isContextual = true
     var depsRE = new RegExp(args[1] + SCOPE_RE_STR, 'g'),
         matches = str.match(depsRE),
         base = args[1].length + 4
