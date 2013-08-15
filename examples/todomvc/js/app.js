@@ -1,4 +1,4 @@
-Seed.config({ debug: true })
+Seed.config({ debug: false })
 
 var filters = {
     all: function () { return true },

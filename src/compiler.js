@@ -257,7 +257,7 @@ CompilerProto.bindContexts = function (bindings) {
  *  Unbind and remove element
  */
 CompilerProto.destroy = function () {
-    console.log('compiler destroyed: ', this.vm.$el)
+    utils.log('compiler destroyed: ', this.vm.$el)
     var i, key, dir, listener, inss
     // remove all directives that are instances of external bindings
     i = this.directives.length

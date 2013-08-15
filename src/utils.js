@@ -3,9 +3,7 @@ var config        = require('./config'),
     toString      = Object.prototype.toString,
     aproto        = Array.prototype,
     arrayMutators = ['push','pop','shift','unshift','splice','sort','reverse'],
-    templates     = {},
-    indentation   = 0,
-    indent        = ''
+    templates     = {}
 
 var arrayAugmentations = {
     remove: function (index) {
