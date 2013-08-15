@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title></title>
+        <meta charset="utf-8">
+        <script src="dist/seed.js"></script>
+    </head>
+    <body>
+        <div sd-template="todo" sd-text="hi" sd-on="click:hello"></div>
+        <script>
+            var Test = Seed.ViewModel.extend({
+                template: 'todo',
+                initialize: function (msg) {
+                    this.hi = 'Aloha'
+                },
+                properties: {
+                    hello: function () {
+                        console.log('Aloha')
+                    }
+                }
+            })
+            var app = new Test()
+            document.body.appendChild(app.$el)
+        </script>
+    </body>
+</html>

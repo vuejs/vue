@@ -1,9 +1,9 @@
 var config          = require('./config'),
-    ViewModel       = require('./viewmodel'),
+    utils           = require('./utils'),
     Binding         = require('./binding'),
     DirectiveParser = require('./directive-parser'),
     TextParser      = require('./text-parser'),
-    depsParser      = require('./deps-parser'),
+    DepsParser      = require('./deps-parser'),
     eventbus        = require('./utils').eventbus
 
 var slice           = Array.prototype.slice,
@@ -14,15 +14,19 @@ var slice           = Array.prototype.slice,
  *  The DOM compiler
  *  scans a DOM node and compile bindings for a ViewModel
  */
-function Compiler (el, options) {
+function Compiler (vm, options) {
 
-    config.log('\ncreated new Compiler instance.\n')
-    if (typeof el === 'string') {
-        el = document.querySelector(el)
+    utils.log('\ncreated new Compiler instance.\n')
+
+    // copy options
+    options = options || {}
+    for (var op in options) {
+        this[op] = options[op]
     }
 
-    this.el              = el
-    el.compiler          = this
+    this.vm              = vm
+    vm.$compiler         = this
+    this.el              = vm.$el
     this.bindings        = {}
     this.directives      = []
     this.watchers        = {}
@@ -32,68 +36,37 @@ function Compiler (el, options) {
     // list of bindings that has dynamic context dependencies
     this.contextBindings = []
 
-    // copy options
-    options = options || {}
-    for (var op in options) {
-        this[op] = options[op]
-    }
-
-    // check if there's passed in data
-    var dataAttr = config.prefix + '-data',
-        dataId = el.getAttribute(dataAttr),
-        data = (options && options.data) || config.datum[dataId]
-    if (dataId && !data) {
-        config.warn('data "' + dataId + '" is not defined.')
-    }
-    data = data || {}
-    el.removeAttribute(dataAttr)
-
-    // if the passed in data is the viewmodel of a Compiler instance,
-    // make a copy from it
-    if (data instanceof ViewModel) {
-        data = data.$dump()
-    }
-
-    // check if there is a controller associated with this compiler
-    var ctrlID = el.getAttribute(ctrlAttr), controller
-    if (ctrlID) {
-        el.removeAttribute(ctrlAttr)
-        controller = config.controllers[ctrlID]
-        if (controller) {
-            this.controller = controller
-        } else {
-            config.warn('controller "' + ctrlID + '" is not defined.')
+    // copy data if any
+    var data = options.data
+    if (data) {
+        if (data instanceof vm.constructor) {
+            data = utils.dump(data)
+        }
+        for (var key in data) {
+            vm[key] = data[key]
         }
     }
-    
-    // create the viewmodel object
-    // if the controller has an extended viewmodel contructor, use it;
-    // otherwise, use the original viewmodel constructor.
-    var VMCtor = (controller && controller.ExtendedVM) || ViewModel,
-        viewmodel = this.vm = new VMCtor(this, options)
 
-    // copy data
-    for (var key in data) {
-        viewmodel[key] = data[key]
-    }
-
-    // apply controller initialize function
-    if (controller && controller.init) {
-        controller.init.call(viewmodel)
+    // call user init
+    if (options.initialize) {
+        options.initialize.apply(vm, options.args || [])
     }
 
     // now parse the DOM
-    this.compileNode(el, true)
+    this.compileNode(this.el, true)
 
     // for anything in viewmodel but not binded in DOM, create bindings for them
-    for (key in viewmodel) {
-        if (key.charAt(0) !== '$' && !this.bindings[key]) {
+    for (var key in vm) {
+        if (vm.hasOwnProperty(key) &&
+            key.charAt(0) !== '$' &&
+            !this.bindings[key])
+        {
             this.createBinding(key)
         }
     }
 
     // extract dependencies for computed properties
-    if (this.computed.length) depsParser.parse(this.computed)
+    if (this.computed.length) DepsParser.parse(this.computed)
     this.computed = null
     
     // extract dependencies for computed properties with dynamic context
@@ -198,7 +171,7 @@ CompilerProto.compileTextNode = function (node) {
  *  Create binding and attach getter/setter for a key to the viewmodel object
  */
 CompilerProto.createBinding = function (key) {
-    config.log('  created binding: ' + key)
+    utils.log('  created binding: ' + key)
     var binding = new Binding(this, key)
     this.bindings[key] = binding
     if (binding.isComputed) this.computed.push(binding)
@@ -304,7 +277,6 @@ CompilerProto.destroy = function () {
         this.bindings[key].unbind()
     }
     // remove el
-    this.el.compiler = null
     this.el.parentNode.removeChild(this.el)
 }
 

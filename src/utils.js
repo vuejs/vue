@@ -1,7 +1,11 @@
-var Emitter       = require('emitter'),
+var config        = require('./config'),
+    Emitter       = require('emitter'),
     toString      = Object.prototype.toString,
     aproto        = Array.prototype,
     arrayMutators = ['push','pop','shift','unshift','splice','sort','reverse']
+
+// hold templates
+var templates = {}
 
 var arrayAugmentations = {
     remove: function (index) {
@@ -100,5 +104,23 @@ module.exports = {
         for (method in arrayAugmentations) {
             collection[method] = arrayAugmentations[method]
         }
+    },
+
+    log: function (msg) {
+        if (config.debug) console.log(msg)
+    },
+    
+    warn: function(msg) {
+        if (config.debug) console.warn(msg)
+    },
+
+    getTemplate: function (id) {
+        var el = templates[id]
+        if (!el && el !== null) {
+            var selector = '[' + config.prefix + '-template="' + id + '"]'
+            el = templates[id] = document.querySelector(selector)
+            if (el) el.parentNode.removeChild(el)
+        }
+        return el
     }
 }

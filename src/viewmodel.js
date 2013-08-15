@@ -1,15 +1,26 @@
-var utils   = require('./utils')
+var utils    = require('./utils'),
+    Compiler = require('./compiler')
 
 /*
  *  ViewModel exposed to the user that holds data,
  *  computed properties, event handlers
  *  and a few reserved methods
  */
-function ViewModel (compiler, options) {
-    this.$compiler = compiler
-    this.$el       = compiler.el
-    this.$index    = options.index
-    this.$parent   = options.parentCompiler && options.parentCompiler.vm
+function ViewModel (options) {
+
+    // determine el
+    this.$el = options.template
+        ? options.template.cloneNode(true)
+        : typeof options.el === 'string'
+            ? document.querySelector(options.el)
+            : options.el
+
+    // possible info inherited as an each item
+    this.$index  = options.index
+    this.$parent = options.parentCompiler && options.parentCompiler.vm
+
+    // compile
+    new Compiler(this, options)
 }
 
 var VMProto = ViewModel.prototype
@@ -49,12 +60,11 @@ VMProto.$watch = function (key, callback) {
     var self = this
     // yield and wait for compiler to finish compiling
     setTimeout(function () {
-        var viewmodel   = self.$compiler.vm,
-            binding = self.$compiler.bindings[key],
+        var binding = self.$compiler.bindings[key],
             i       = binding.deps.length,
             watcher = self.$compiler.watchers[key] = {
                 refresh: function () {
-                    callback(viewmodel[key])
+                    callback(self[key])
                 },
                 deps: binding.deps
             }

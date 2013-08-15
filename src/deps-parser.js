@@ -1,5 +1,6 @@
 var Emitter  = require('emitter'),
     config   = require('./config'),
+    utils    = require('./utils'),
     observer = new Emitter()
 
 var dummyEl = document.createElement('div'),
@@ -33,11 +34,11 @@ function catchDeps (binding) {
  */
 function filterDeps (binding) {
     var i = binding.deps.length, dep
-    config.log('\n─ ' + binding.key)
+    utils.log('\n─ ' + binding.key)
     while (i--) {
         dep = binding.deps[i]
         if (!dep.deps.length) {
-            config.log('  └─ ' + dep.key)
+            utils.log('  └─ ' + dep.key)
             dep.subs.push(binding)
         } else {
             binding.deps.splice(i, 1)
@@ -47,7 +48,7 @@ function filterDeps (binding) {
     if (!ctdeps || !config.debug) return
     i = ctdeps.length
     while (i--) {
-        config.log('  └─ ctx:' + ctdeps[i])
+        utils.log('  └─ ctx:' + ctdeps[i])
     }
 }
 
@@ -115,11 +116,11 @@ module.exports = {
      *  parse a list of computed property bindings
      */
     parse: function (bindings) {
-        config.log('\nparsing dependencies...')
+        utils.log('\nparsing dependencies...')
         observer.isObserving = true
         bindings.forEach(catchDeps)
         bindings.forEach(filterDeps)
         observer.isObserving = false
-        config.log('\ndone.')
+        utils.log('\ndone.')
     }
 }

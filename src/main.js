@@ -1,5 +1,4 @@
 var config      = require('./config'),
-    Compiler    = require('./compiler'),
     ViewModel   = require('./viewmodel'),
     directives  = require('./directives'),
     filters     = require('./filters'),
@@ -7,11 +6,7 @@ var config      = require('./config'),
     utils       = require('./utils')
 
 var eventbus    = utils.eventbus,
-    controllers = config.controllers,
-    datum       = config.datum,
-    api         = {},
-    reserved    = ['datum', 'controllers'],
-    booted      = false
+    api         = {}
 
 /*
  *  expose utils
@@ -23,38 +18,6 @@ api.utils = utils
  */
 api.broadcast = function () {
     eventbus.emit.apply(eventbus, arguments)
-}
-
-/*
- *  Store a piece of plain data in config.datum
- *  so it can be consumed by sd-data
- */
-api.data = function (id, data) {
-    if (!data) return datum[id]
-    datum[id] = data
-}
-
-/*
- *  Store a controller function in config.controllers
- *  so it can be consumed by sd-controller
- */
-api.controller = function (id, properties) {
-    if (!properties) return controllers[id]
-    // create a subclass of ViewModel that has the extension methods mixed-in
-    var ExtendedVM = function () {
-        ViewModel.apply(this, arguments)
-    }
-    var p = ExtendedVM.prototype = Object.create(ViewModel.prototype)
-    p.constructor = ExtendedVM
-    for (var prop in properties) {
-        if (prop !== 'init') {
-            p[prop] = properties[prop]
-        }
-    }
-    controllers[id] = {
-        init: properties.init,
-        ExtendedVM: ExtendedVM
-    }
 }
 
 /*
@@ -79,37 +42,37 @@ api.filter = function (name, fn) {
 api.config = function (opts) {
     if (opts) {
         for (var key in opts) {
-            if (reserved.indexOf(key) === -1) {
-                config[key] = opts[key]
-            }
+            config[key] = opts[key]
         }
     }
     textParser.buildRegex()
 }
 
 /*
- *  Compile a single element
+ *  Expose the main ViewModel class
+ *  and add extend method
  */
-api.compile = function (el) {
-    return new Compiler(el).vm
-}
+api.ViewModel = ViewModel
 
-/*
- *  Bootstrap the whole thing
- *  by creating a Compiler instance for top level nodes
- *  that has either sd-controller or sd-data
- */
-api.bootstrap = function (opts) {
-    if (booted) return
-    api.config(opts)
-    var el,
-        ctrlSlt = '[' + config.prefix + '-controller]',
-        dataSlt = '[' + config.prefix + '-data]'
-    /* jshint boss: true */
-    while (el = document.querySelector(ctrlSlt) || document.querySelector(dataSlt)) {
-        new Compiler(el)
+ViewModel.extend = function (options) {
+    var ExtendedVM = function (opts) {
+        opts = opts || {}
+        if (options.template) {
+            opts.template = utils.getTemplate(options.template)
+        }
+        if (options.initialize) {
+            opts.initialize = options.initialize
+        }
+        ViewModel.call(this, opts)
     }
-    booted = true
+    var p = ExtendedVM.prototype = Object.create(ViewModel.prototype)
+    p.constructor = ExtendedVM
+    if (options.properties) {
+        for (var prop in options.properties) {
+            p[prop] = options.properties[prop]
+        }
+    }
+    return ExtendedVM
 }
 
 module.exports = api

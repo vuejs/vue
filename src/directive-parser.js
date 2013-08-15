@@ -1,4 +1,5 @@
 var config     = require('./config'),
+    utils      = require('./utils'),
     directives = require('./directives'),
     filters    = require('./filters')
 
@@ -188,8 +189,8 @@ module.exports = {
         var dir   = directives[dirname],
             valid = KEY_RE.test(expression)
 
-        if (!dir) config.warn('unknown directive: ' + dirname)
-        if (!valid) config.warn('invalid directive expression: ' + expression)
+        if (!dir) utils.warn('unknown directive: ' + dirname)
+        if (!valid) utils.warn('invalid directive expression: ' + expression)
 
         return dir && valid
             ? new Directive(dirname, expression, oneway)
