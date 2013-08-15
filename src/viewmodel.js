@@ -19,7 +19,7 @@ function ViewModel (options) {
     this.$index  = options.index
     this.$parent = options.parentCompiler && options.parentCompiler.vm
 
-    // compile
+    // compile. options are passed directly to compiler
     new Compiler(this, options)
 }
 

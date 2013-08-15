@@ -1,3 +1,5 @@
+Seed.config({ debug: true })
+
 var filters = {
     all: function () { return true },
     active: function (todo) { return !todo.completed },

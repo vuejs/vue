@@ -16,7 +16,7 @@ var slice           = Array.prototype.slice,
  */
 function Compiler (vm, options) {
 
-    utils.log('\ncreated new Compiler instance.\n')
+    utils.log('\nnew Compiler instance: ', vm.$el, '\n')
 
     // copy options
     options = options || {}
@@ -37,12 +37,12 @@ function Compiler (vm, options) {
     this.contextBindings = []
 
     // copy data if any
-    var data = options.data
+    var key, data = options.data
     if (data) {
         if (data instanceof vm.constructor) {
             data = utils.dump(data)
         }
-        for (var key in data) {
+        for (key in data) {
             vm[key] = data[key]
         }
     }
@@ -56,7 +56,7 @@ function Compiler (vm, options) {
     this.compileNode(this.el, true)
 
     // for anything in viewmodel but not binded in DOM, create bindings for them
-    for (var key in vm) {
+    for (key in vm) {
         if (vm.hasOwnProperty(key) &&
             key.charAt(0) !== '$' &&
             !this.bindings[key])
@@ -72,6 +72,8 @@ function Compiler (vm, options) {
     // extract dependencies for computed properties with dynamic context
     if (this.contextBindings.length) this.bindContexts(this.contextBindings)
     this.contextBindings = null
+    
+    utils.log('\ncompilation done.\n')
 }
 
 // for better compression
@@ -255,6 +257,7 @@ CompilerProto.bindContexts = function (bindings) {
  *  Unbind and remove element
  */
 CompilerProto.destroy = function () {
+    console.log('compiler destroyed: ', this.vm.$el)
     var i, key, dir, listener, inss
     // remove all directives that are instances of external bindings
     i = this.directives.length

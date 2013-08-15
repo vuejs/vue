@@ -1,4 +1,5 @@
-var config = require('../config')
+var config = require('../config'),
+    ViewModel // lazy def to avoid circular dependency
 
 /*
  *  Mathods that perform precise DOM manipulation
@@ -84,10 +85,15 @@ module.exports = {
     update: function (collection) {
 
         this.unbind(true)
-        this.collection = collection
-
         // attach an object to container to hold handlers
         this.container.sd_dHandlers = {}
+        // if initiating with an empty collection, we need to
+        // force a compile so that we get all the bindings for
+        // dependency extraction.
+        if (!this.collection && !collection.length) {
+            this.buildItem(this.ref, null, null)
+        }
+        this.collection = collection
 
         // listen for collection mutation events
         // the collection has been augmented during Binding.set()
@@ -104,16 +110,21 @@ module.exports = {
     buildItem: function (ref, data, index) {
         var node = this.el.cloneNode(true)
         this.container.insertBefore(node, ref)
-        var Compiler = require('../compiler'),
-            spore = new Compiler(node, {
-                each: true,
-                eachPrefix: this.arg + '.',
-                parentCompiler: this.compiler,
-                index: index,
-                data: data,
-                delegator: this.container
-            })
-        this.collection[index] = spore.vm
+        ViewModel = ViewModel || require('../viewmodel')
+        var item = new ViewModel({
+            el: node,
+            each: true,
+            eachPrefix: this.arg + '.',
+            parentCompiler: this.compiler,
+            index: index,
+            data: data,
+            delegator: this.container
+        })
+        if (index !== null) {
+            this.collection[index] = item
+        } else {
+            item.$destroy()
+        }
     },
 
     updateIndexes: function () {
