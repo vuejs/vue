@@ -2,7 +2,6 @@ var config        = require('./config'),
     Emitter       = require('emitter'),
     toString      = Object.prototype.toString,
     aproto        = Array.prototype,
-    arrayMutators = ['push','pop','shift','unshift','splice','sort','reverse'],
     templates     = {}
 
 var arrayAugmentations = {
@@ -15,6 +14,20 @@ var arrayAugmentations = {
         this.splice(index, 1, data)
     }
 }
+
+var arrayMutators = ['push','pop','shift','unshift','splice','sort','reverse'],
+    mutationInterceptors = {}
+
+arrayMutators.forEach(function (method) {
+    mutationInterceptors[method] = function () {
+        var result = aproto[method].apply(this, arguments)
+        this.emit('mutate', {
+            method: method,
+            args: aproto.slice.call(arguments),
+            result: result
+        })
+    }
+})
 
 /*
  *  get accurate type of an object
@@ -87,17 +100,7 @@ module.exports = {
         var method, i = arrayMutators.length
         while (i--) {
             method = arrayMutators[i]
-            /* jshint loopfunc: true */
-            collection[method] = (function (method) {
-                return function () {
-                    var result = aproto[method].apply(this, arguments)
-                    this.emit('mutate', {
-                        method: method,
-                        args: aproto.slice.call(arguments),
-                        result: result
-                    })
-                }
-            })(method)
+            collection[method] = mutationInterceptors[method]
         }
         for (method in arrayAugmentations) {
             collection[method] = arrayAugmentations[method]
