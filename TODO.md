@@ -1,3 +1,4 @@
+- prototypal scope inheritance
 - ability to register a ViewModel so it can be auto-compiled as a nested vm
 - let user specify which keys are data/state (i.e. available in $dump())
 - tests
