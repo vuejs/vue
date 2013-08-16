@@ -51,8 +51,8 @@ function Compiler (vm, options) {
     }
 
     // call user init
-    if (options.initialize) {
-        options.initialize.apply(vm, options.args || [])
+    if (options.init) {
+        options.init.apply(vm, options.args || [])
     }
 
     // now parse the DOM

@@ -60,16 +60,16 @@ ViewModel.extend = function (options) {
         if (options.template) {
             opts.template = utils.getTemplate(options.template)
         }
-        if (options.initialize) {
-            opts.initialize = options.initialize
+        if (options.init) {
+            opts.init = options.init
         }
         ViewModel.call(this, opts)
     }
     var p = ExtendedVM.prototype = Object.create(ViewModel.prototype)
     p.constructor = ExtendedVM
-    if (options.properties) {
-        for (var prop in options.properties) {
-            p[prop] = options.properties[prop]
+    if (options.props) {
+        for (var prop in options.props) {
+            p[prop] = options.props[prop]
         }
     }
     if (options.id) {

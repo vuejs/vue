@@ -6,13 +6,13 @@ var filters = {
 
 var Todos = Seed.ViewModel.extend({
 
-    initialize: function () {
+    init: function () {
         this.todos = todoStorage.fetch()
         this.remaining = this.todos.filter(filters.active).length
         this.updateFilter()
     },
 
-    properties: {
+    props: {
 
         updateFilter: function () {
             var filter = location.hash.slice(2)

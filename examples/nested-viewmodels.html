@@ -3,20 +3,48 @@
 <head>
     <title>Nested Controllers</title>
     <style type="text/css">
-        div {
-            padding-left: 10px;
+        div:not(#grandpa) {
+            padding-left: 15px;
+        }
+        p:not(.ancestor):before {
+            content: "└ ";
         }
     </style>
     <script src="../dist/seed.js"></script>
 </head>
 <body>
-    <div id="grandpa">
-        <p sd-text="name"></p>
-        <div sd-viewmodel="Dad">
+    <div id="grandpa" data-name="Andy">
+        <p class="ancestor" sd-text="name"></p>
+
+        <div sd-viewmodel="man" data-name="Jack">
             <p><span sd-text="name"></span>, son of <span sd-text="^name"></span></p>
-            <div sd-viewmodel="Son">
-                <p><span sd-text="name"></span>,son of <span sd-text="^name"></span></p>
-                <div sd-viewmodel="Baby">
+
+            <div sd-viewmodel="man" data-name="Mike">
+                <p><span sd-text="name"></span>, son of <span sd-text="^name"></span></p>
+
+                <div sd-viewmodel="man" data-name="Tim">
+                    <p>
+                        <span sd-text="name"></span>,
+                        son of <span sd-text="^name"></span>,
+                        grandson of <span sd-text="^^name"></span>
+                        and great-grandson of <span sd-text="$name"></span>
+                    </p>
+                </div>
+
+                <div sd-viewmodel="man" data-name="Tom">
+                    <p>
+                        <span sd-text="name"></span>,
+                        son of <span sd-text="^name"></span>,
+                        grandson of <span sd-text="^^name"></span>
+                        and great-grandson of <span sd-text="$name"></span>
+                    </p>
+                </div>
+            </div>
+
+            <div sd-viewmodel="man" data-name="Jason">
+                <p><span sd-text="name"></span>, son of <span sd-text="^name"></span></p>
+
+                <div sd-viewmodel="man" data-name="Andrew">
                     <p>
                         <span sd-text="name"></span>,
                         son of <span sd-text="^name"></span>,
@@ -33,34 +61,14 @@
             debug: true
         })
 
-        var Grandpa = Seed.ViewModel.extend({
-            properties: {
-                name: 'Andy'
+        var Man = Seed.ViewModel.extend({
+            id: 'man',
+            init: function () {
+                this.name = this.$el.dataset.name
             }
         })
 
-        var Dad = Seed.ViewModel.extend({
-            id: 'Dad',
-            properties: {
-                name: 'Jack'
-            }
-        })
-
-        var Son = Seed.ViewModel.extend({
-            id: 'Son',
-            properties: {
-                name: 'Mike'
-            }
-        })
-
-        var Baby = Seed.ViewModel.extend({
-            id: 'Baby',
-            properties: {
-                name: 'Tim'
-            }
-        })
-
-        var demo = new Grandpa({ el: '#grandpa' })
+        var demo = new Man({ el: '#grandpa' })
 
     </script>
 </body>
