@@ -1,4 +1,6 @@
-- prototypal scope inheritance
+- add a few util methods, e.g. extend, inherits
+- fix architecture: objects as single source of truth...
+- prototypal scope/binding inheritance (Object.create)
 - ability to register a ViewModel so it can be auto-compiled as a nested vm
 - let user specify which keys are data/state (i.e. available in $dump())
 - tests
