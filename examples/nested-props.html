@@ -13,7 +13,16 @@
         <button sd-on="click:two">two</button>
         <button sd-on="click:three">three</button>
         <script>
+            Seed.config({debug: true})
             var Demo = Seed.ViewModel.extend({
+                init: function () {
+                    this.a = {
+                        c: 0,
+                        b: {
+                            c: 'zero'
+                        }
+                    }  
+                },
                 props: {
                     one: function () {
                         this.a = {

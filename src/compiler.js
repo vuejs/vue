@@ -1,4 +1,6 @@
-var config          = require('./config'),
+var Emitter         = require('emitter'),
+    observe         = require('./observe'),
+    config          = require('./config'),
     utils           = require('./utils'),
     Binding         = require('./binding'),
     DirectiveParser = require('./directive-parser'),
@@ -32,12 +34,16 @@ function Compiler (vm, options) {
     vm.$compiler         = this
     this.el              = vm.$el
     this.bindings        = {}
+    this.observer        = new Emitter()
     this.directives      = []
     this.watchers        = {}
     // list of computed properties that need to parse dependencies for
     this.computed        = []
     // list of bindings that has dynamic context dependencies
     this.contextBindings = []
+
+    // setup observer
+    this.setupObserver()
 
     // copy data if any
     var key, data = options.data
@@ -81,6 +87,27 @@ function Compiler (vm, options) {
 
 // for better compression
 var CompilerProto = Compiler.prototype
+
+/*
+ *  setup observer
+ */
+CompilerProto.setupObserver = function () {
+    var bindings = this.bindings, compiler = this
+    this.observer
+        .on('get', function (key) {
+            if (DepsParser.observer.isObserving) {
+                DepsParser.observer.emit('get', bindings[key])
+            }
+        })
+        .on('set', function (key, val) {
+            console.log('set:', key, '=>', val)
+            if (!bindings[key]) compiler.createBinding(key)
+            bindings[key].update(val)
+        })
+        .on('mutate', function (key) {
+            bindings[key].refresh()
+        })
+}
 
 /*
  *  Compile a DOM node (recursive)
@@ -147,8 +174,7 @@ CompilerProto.compileNode = function (node, root) {
             // recursively compile childNodes
             if (node.childNodes.length) {
                 var nodes = slice.call(node.childNodes)
-                i = nodes.length
-                while (i--) {
+                for (i = 0, j = nodes.length; i < j; i++) {
                     this.compileNode(nodes[i])
                 }
             }
@@ -187,10 +213,66 @@ CompilerProto.compileTextNode = function (node) {
  */
 CompilerProto.createBinding = function (key) {
     utils.log('  created binding: ' + key)
+
     var binding = new Binding(this, key)
     this.bindings[key] = binding
-    if (binding.isComputed) this.computed.push(binding)
+
+    var baseKey = key.split('.')[0]
+    if (binding.root) {
+        // this is a root level binding. we need to define getter/setters for it.
+        this.define(baseKey, binding)
+    } else if (!this.bindings[baseKey]) {
+        // this is a nested value binding, but the binding for its root
+        // has not been created yet. We better create that one too.
+        this.createBinding(baseKey)
+    }
+
     return binding
+}
+
+/*
+ *  Defines the getter/setter for a top-level binding on the VM
+ *  and observe the initial value
+ */
+CompilerProto.define = function (key, binding) {
+
+    utils.log('    defined root binding: ' + key)
+
+    var compiler = this,
+        value = binding.value = this.vm[key] // save the value before redefinening it
+
+    if (utils.typeOf(value) === 'Object' && value.get) {
+        binding.isComputed = true
+        binding.rawGet = value.get
+        value.get = value.get.bind(this.vm)
+        this.computed.push(binding)
+    } else {
+        observe(value, key, compiler.observer) // start observing right now
+    }
+
+    Object.defineProperty(this.vm, key, {
+        enumerable: true,
+        get: function () {
+            compiler.observer.emit('get', key)
+            return binding.isComputed
+                ? binding.value.get({
+                    el: compiler.el,
+                    vm: compiler.vm
+                })
+                : binding.value
+        },
+        set: function (value) {
+            if (binding.isComputed) {
+                if (binding.value.set) {
+                    binding.value.set(value)
+                }
+            } else if (value !== binding.value) {
+                compiler.observer.emit('set', key, value)
+                observe(value, key, compiler.observer)
+            }
+        }
+    })
+
 }
 
 /*

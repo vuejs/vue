@@ -9,6 +9,7 @@
         "src/compiler.js",
         "src/viewmodel.js",
         "src/binding.js",
+        "src/observe.js",
         "src/directive-parser.js",
         "src/text-parser.js",
         "src/deps-parser.js",

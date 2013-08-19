@@ -98,7 +98,7 @@ module.exports = {
 
         // listen for collection mutation events
         // the collection has been augmented during Binding.set()
-        collection.on('mutate', (function (mutation) {
+        collection.__observer__.on('mutate', (function (mutation) {
             mutationHandlers[mutation.method].call(this, mutation)
         }).bind(this))
 

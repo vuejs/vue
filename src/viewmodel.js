@@ -65,31 +65,6 @@ VMProto.$unwatch = function (key) {
 }
 
 /*
- *  load data into viewmodel
- */
-VMProto.$load = function (data) {
-    for (var key in data) {
-        this[key] = data[key]
-    }
-}
-
-/*
- *  Dump a copy of current viewmodel data, excluding compiler-exposed properties.
- *  @param key (optional): key for the value to dump
- */
-VMProto.$dump = function (key) {
-    var bindings = this.$compiler.bindings
-    return utils.dump(key ? bindings[key].value : this)
-}
-
-/*
- *  stringify the result from $dump
- */
-VMProto.$serialize = function (key) {
-    return JSON.stringify(this.$dump(key))
-}
-
-/*
  *  unbind everything, remove everything
  */
 VMProto.$destroy = function () {

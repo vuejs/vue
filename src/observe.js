@@ -1,4 +1,6 @@
-var Emitter = require('events').EventEmitter,
+var Emitter = require('emitter'),
+    utils   = require('./utils'),
+    typeOf  = utils.typeOf,
     def     = Object.defineProperty,
     slice   = Array.prototype.slice,
     methods = ['push','pop','shift','unshift','splice','sort','reverse']
@@ -16,11 +18,11 @@ var arrayMutators = {
 
 methods.forEach(function (method) {
     arrayMutators[method] = function () {
-        var result = Array.prototype[method].apply(this, arguments),
-            newElements
+        var result = Array.prototype[method].apply(this, arguments)
 
         // watch new objects - do we need this? maybe do it in each.js
 
+        // var newElements
         // if (method === 'push' || method === 'unshift') {
         //     newElements = arguments
         // } else if (method === 'splice') {
@@ -30,7 +32,7 @@ methods.forEach(function (method) {
         //     var i = newElements.length
         //     while (i--) watch(newElements[i])
         // }
-        this.__observer__.emit('mutate', this.__path__, this, mutation = {
+        this.__observer__.emit('mutate', this.__path__, this, {
             method: method,
             args: slice.call(arguments),
             result: result
@@ -40,18 +42,27 @@ methods.forEach(function (method) {
 
 // EXTERNAL
 function observe (obj, path, observer) {
-    watch(obj)
-    path = path + '.'
-    obj.__observer__
-        .on('get', function (key) {
-            observer.emit('get', path + key)
-        })
-        .on('set', function (key, val) {
-            observer.emit('set', path + key, val)
-        })
-        .on('mutate', function (key, val, mutation) {
-            observer.emit('mutate', path + key, val, mutation)
-        })
+    if (isWatchable(obj)) {
+        path = path + '.'
+        var alreadyConverted = !!obj.__observer__
+        if (!alreadyConverted) {
+            var ob = new Emitter()
+            defProtected(obj, '__observer__', ob)
+        }
+        obj.__observer__
+            .on('get', function (key) {
+                observer.emit('get', path + key)
+            })
+            .on('set', function (key, val) {
+                observer.emit('set', path + key, val)
+            })
+            .on('mutate', function (key, val, mutation) {
+                observer.emit('mutate', path + key, val, mutation)
+            })
+        if (!alreadyConverted) {
+            watch(obj, null, ob)
+        }
+    }
 }
 
 // INTERNAL
@@ -66,7 +77,7 @@ function watch (obj, path, observer) {
 
 function watchObject (obj, path, observer) {
     defProtected(obj, '__values__', {})
-    defProtected(obj, '__observer__', observer || new Emitter())
+    defProtected(obj, '__observer__', observer)
     for (var key in obj) {
         bind(obj, key, path, obj.__observer__)
     }
@@ -74,8 +85,8 @@ function watchObject (obj, path, observer) {
 
 function watchArray (arr, path, observer) {
     defProtected(arr, '__path__', path)
-    defProtected(arr, '__observer__', observer || new Emitter())
-    for (method in arrayMutators) {
+    defProtected(arr, '__observer__', observer)
+    for (var method in arrayMutators) {
         defProtected(arr, method, arrayMutators[method])
     }
     // var i = arr.length
@@ -87,6 +98,7 @@ function bind (obj, key, path, observer) {
         values = obj.__values__,
         fullKey = (path ? path + '.' : '') + key
     values[fullKey] = val
+    observer.emit('set', fullKey, val)
     def(obj, key, {
         enumerable: true,
         get: function () {
@@ -110,40 +122,9 @@ function defProtected (obj, key, val) {
     })
 }
 
-function typeOf (obj) {
-    return toString.call(obj).slice(8, -1)
+function isWatchable (obj) {
+    var type = typeOf(obj)
+    return type === 'Object' || type === 'Array'
 }
 
-var data = {
-    id: 1,
-    user: {
-        firstName: 'Jack',
-        lastName: 'Daniels'
-    },
-    posts: [
-        {
-            title: 'hi',
-            content: 'Whaaat up'
-        },
-        {
-            title: 'lol',
-            content: 'This is cool'
-        }
-    ]
-}
-
-var ob = new Emitter()
-
-observe(data, 'testing', ob)
-ob.on('set', function (key, val) {
-    console.log('set: ' + key + ' =>\n', val)
-})
-ob.on('mutate', function (key, val, mutation) {
-    console.log('mutate: '+ key + ' =>\n', val)
-    console.log(mutation)
-})
-
-data.id = 2
-data.posts.push({ title: 'hola' })
-
-module.exports = data
+module.exports = observe

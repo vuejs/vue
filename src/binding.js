@@ -1,7 +1,3 @@
-var utils    = require('./utils'),
-    observer = require('./deps-parser').observer,
-    def      = Object.defineProperty
-
 /*
  *  Binding class.
  *
@@ -10,11 +6,10 @@ var utils    = require('./utils'),
  *  and multiple computed property dependents
  */
 function Binding (compiler, key) {
+    this.value = undefined
+    this.root = key.indexOf('.') === -1
     this.compiler = compiler
     this.key = key
-    var path = key.split('.')
-    this.inspect(utils.getNestedValue(compiler.vm, path))
-    this.def(compiler.vm, path)
     this.instances = []
     this.subs = []
     this.deps = []
@@ -23,96 +18,13 @@ function Binding (compiler, key) {
 var BindingProto = Binding.prototype
 
 /*
- *  Pre-process a passed in value based on its type
- */
-BindingProto.inspect = function (value) {
-    var type = utils.typeOf(value)
-    // preprocess the value depending on its type
-    if (type === 'Object') {
-        if (value.get) {
-            var l = Object.keys(value).length
-            if (l === 1 || (l === 2 && value.set)) {
-                this.isComputed = true // computed property
-                this.rawGet = value.get
-                value.get = value.get.bind(this.compiler.vm)
-                if (value.set) value.set = value.set.bind(this.compiler.vm)
-            }
-        }
-    } else if (type === 'Array') {
-        value = utils.dump(value)
-        utils.watchArray(value)
-        value.on('mutate', this.pub.bind(this))
-    }
-    this.value = value
-}
-
-/*
- *  Define getter/setter for this binding on viewmodel
- *  recursive for nested objects
- */
-BindingProto.def = function (viewmodel, path) {
-    var key = path[0]
-    if (path.length === 1) {
-        // here we are! at the end of the path!
-        // define the real value accessors.
-        def(viewmodel, key, {
-            get: (function () {
-                if (observer.isObserving) {
-                    observer.emit('get', this)
-                }
-                return this.isComputed
-                    ? this.value.get({
-                        el: this.compiler.el,
-                        vm: this.compiler.vm
-                    })
-                    : this.value
-            }).bind(this),
-            set: (function (value) {
-                if (this.isComputed) {
-                    // computed properties cannot be redefined
-                    // no need to call binding.update() here,
-                    // as dependency extraction has taken care of that
-                    if (this.value.set) {
-                        this.value.set(value)
-                    }
-                } else if (value !== this.value) {
-                    this.update(value)
-                }
-            }).bind(this)
-        })
-    } else {
-        // we are not there yet!!!
-        // create an intermediate object
-        // which also has its own getter/setters
-        var nestedObject = viewmodel[key]
-        if (!nestedObject) {
-            nestedObject = {}
-            def(viewmodel, key, {
-                get: (function () {
-                    return this
-                }).bind(nestedObject),
-                set: (function (value) {
-                    // when the nestedObject is given a new value,
-                    // copy everything over to trigger the setters
-                    for (var prop in value) {
-                        this[prop] = value[prop]
-                    }
-                }).bind(nestedObject)
-            })
-        }
-        // recurse
-        this.def(nestedObject, path.slice(1))
-    }
-}
-
-/*
  *  Process the value, then trigger updates on all dependents
  */
 BindingProto.update = function (value) {
-    this.inspect(value)
+    this.value = value
     var i = this.instances.length
     while (i--) {
-        this.instances[i].update(this.value)
+        this.instances[i].update(value)
     }
     this.pub()
 }
@@ -142,7 +54,7 @@ BindingProto.unbind = function () {
         subs = this.deps[i].subs
         subs.splice(subs.indexOf(this), 1)
     }
-    if (Array.isArray(this.value)) this.value.off('mutate')
+    // TODO if this is a root level binding
     this.compiler = this.pubs = this.subs = this.instances = this.deps = null
 }
 

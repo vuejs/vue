@@ -10,10 +10,15 @@
     </head>
     <body>
         <input type="checkbox" sd-checked="checked">
-        <span sd-text="hello | uppercase" sd-class="red:checked"></span>
+        <span sd-text="hello.msg | uppercase" sd-class="red:checked"></span>
         <script>
-            var demo = new Seed.ViewModel({ el: 'body' })
-            demo.hello = 'hi'
+            Seed.config({ debug: true })
+            var demo = new Seed.ViewModel({
+                el: 'body'
+            })
+            demo.hello = {
+                msg: 'yoyoyo'
+            }
         </script>
     </body>
 </html>
