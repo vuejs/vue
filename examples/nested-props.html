@@ -6,35 +6,41 @@
         <script src="../dist/seed.js"></script>
     </head>
     <body>
-        <h1>a.b.c : {{a.b.c}}</h1>
-        <h2>a.c : {{a.c}}</h2>
-        <h3>Computed property that concats the two: {{d}}</h3>
+        <h1>a.b.c : <span sd-text="a.b.c"></span></h1>
+        <h2>a.c : <span sd-text="a.c"></span></h2>
+        <h3>Computed property that concats the two: <span sd-text="d"></span></h3>
         <button sd-on="click:one">one</button>
         <button sd-on="click:two">two</button>
         <button sd-on="click:three">three</button>
         <p><input sd-value="msg"></p>
         <script>
             seed.config({debug: true})
-            var data1 = {
-                c: 0,
-                b: {
-                    c: 'zero'
+            var data = {
+                    c: 0,
+                    b: {
+                        c: 'zero'
+                    }
                 }
-            },
-            data = {
-                c: 1,
-                b: {
-                    c: 'one'
-                }
-            }
             var Demo = seed.ViewModel.extend({
                 init: function () {
                     this.msg = 'Yoyoyo'
-                    this.a = data1
+
+                    // example of async compilation
+                    var vm = this
+                    vm.$wait()
+                    setTimeout(function () {
+                        vm.a = data
+                        vm.$ready()
+                    }, 30)
                 },
                 props: {
                     one: function () {
-                        this.a = data
+                        this.a = {
+                            c: 1,
+                            b: {
+                                c: 'one'
+                            }
+                        }
                     },
                     two: function () {
                         this.a.b = {

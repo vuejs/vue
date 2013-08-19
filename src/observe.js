@@ -19,19 +19,6 @@ var arrayMutators = {
 methods.forEach(function (method) {
     arrayMutators[method] = function () {
         var result = Array.prototype[method].apply(this, arguments)
-
-        // watch new objects - do we need this? maybe do it in each.js
-
-        // var newElements
-        // if (method === 'push' || method === 'unshift') {
-        //     newElements = arguments
-        // } else if (method === 'splice') {
-        //     newElements = slice.call(arguments, 2)
-        // }
-        // if (newElements) {
-        //     var i = newElements.length
-        //     while (i--) watch(newElements[i])
-        // }
         this.__observer__.emit('mutate', this.__path__, this, {
             method: method,
             args: slice.call(arguments),
@@ -89,8 +76,6 @@ function watchArray (arr, path, observer) {
     for (var method in arrayMutators) {
         defProtected(arr, method, arrayMutators[method])
     }
-    // var i = arr.length
-    // while (i--) watch(arr[i])
 }
 
 function bind (obj, key, path, observer) {

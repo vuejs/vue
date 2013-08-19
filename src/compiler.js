@@ -61,7 +61,27 @@ function Compiler (vm, options) {
         options.init.apply(vm, options.args || [])
     }
 
-    // now parse the DOM
+    if (vm.__wait__) {
+        var self = this
+        this.observer.on('ready', function () {
+            self.observer.off('ready')
+            vm.__wait__ = null
+            self.compile()
+        })
+    } else {
+        this.compile()
+    }
+    
+}
+
+// for better compression
+var CompilerProto = Compiler.prototype
+
+CompilerProto.compile = function () {
+
+    var key, vm = this.vm
+
+    // parse the DOM
     this.compileNode(this.el, true)
 
     // for anything in viewmodel but not binded in DOM, create bindings for them
@@ -84,9 +104,6 @@ function Compiler (vm, options) {
     
     utils.log('\ncompilation done.\n')
 }
-
-// for better compression
-var CompilerProto = Compiler.prototype
 
 /*
  *  setup observer
