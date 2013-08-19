@@ -14,23 +14,26 @@
         <button sd-on="click:three">three</button>
         <script>
             Seed.config({debug: true})
+            var data1 = {
+                c: 0,
+                b: {
+                    c: 'zero'
+                }
+            },
+            data = {
+                c: 1,
+                b: {
+                    c: 'one'
+                }
+            }
             var Demo = Seed.ViewModel.extend({
                 init: function () {
-                    this.a = {
-                        c: 0,
-                        b: {
-                            c: 'zero'
-                        }
-                    }  
+                    this.msg = 'Yoyoyo'
+                    this.a = data1
                 },
                 props: {
                     one: function () {
-                        this.a = {
-                            c: 1,
-                            b: {
-                                c: 'one'
-                            }
-                        }
+                        this.a = data
                     },
                     two: function () {
                         this.a.b = {
@@ -42,8 +45,8 @@
                         this.a.b.c = 'three'
                         this.a.c = 3
                     },
-                    d: {get: function () {
-                        return (this.a.b.c + this.a.c) || ''
+                    d: {get: function (ctx) {
+                        return (ctx.vm.msg + this.a.b.c + this.a.c) || ''
                     }}
                 }
             })

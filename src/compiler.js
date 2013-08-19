@@ -100,7 +100,6 @@ CompilerProto.setupObserver = function () {
             }
         })
         .on('set', function (key, val) {
-            console.log('set:', key, '=>', val)
             if (!bindings[key]) compiler.createBinding(key)
             bindings[key].update(val)
         })
@@ -253,7 +252,11 @@ CompilerProto.define = function (key, binding) {
     Object.defineProperty(this.vm, key, {
         enumerable: true,
         get: function () {
-            compiler.observer.emit('get', key)
+            if (!binding.isComputed && !binding.value.__observer__) {
+                // only emit non-computed, non-observed values
+                // because these are the cleanest dependencies
+                compiler.observer.emit('get', key)
+            }
             return binding.isComputed
                 ? binding.value.get({
                     el: compiler.el,

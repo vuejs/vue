@@ -95,6 +95,7 @@ function watchArray (arr, path, observer) {
 
 function bind (obj, key, path, observer) {
     var val = obj[key],
+        watchable = isWatchable(val),
         values = obj.__values__,
         fullKey = (path ? path + '.' : '') + key
     values[fullKey] = val
@@ -102,7 +103,8 @@ function bind (obj, key, path, observer) {
     def(obj, key, {
         enumerable: true,
         get: function () {
-            observer.emit('get', fullKey)
+            // only emit get on tip values
+            if (!watchable) observer.emit('get', fullKey)
             return values[fullKey]
         },
         set: function (newVal) {
