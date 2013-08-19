@@ -9,12 +9,14 @@ module.exports = function( grunt ) {
                 dev: true,
                 sourceUrls: true,
                 styles: false,
-                verbose: true
+                verbose: true,
+                standalone: true
             },
             build: {
                 output: './dist/',
                 name: 'seed',
-                styles: false
+                styles: false,
+                standalone: true
             }
         },
 
@@ -67,17 +69,7 @@ module.exports = function( grunt ) {
     grunt.loadNpmTasks( 'grunt-component-build' )
     grunt.loadNpmTasks( 'grunt-mocha' )
     grunt.registerTask( 'test', ['mocha'] )
-    grunt.registerTask( 'default', ['jshint', 'component_build:build', 'concat:dev'] )
-
-    grunt.registerTask( 'concat', function (version) {
-        var fs = require('fs'),
-            intro = fs.readFileSync('wrappers/intro.js'),
-            outro = fs.readFileSync('wrappers/outro.js', 'utf-8'),
-            main  = fs.readFileSync('dist/seed.js')
-        outro = new Buffer(outro.replace('{{version}}', "'" + version + "'"))
-        var all   = Buffer.concat([intro, main, outro])
-        fs.writeFileSync('dist/seed.js', all)
-    })
+    grunt.registerTask( 'default', ['jshint', 'component_build:build'] )
 
     grunt.registerTask( 'version', function (version) {
         var fs = require('fs')
@@ -93,7 +85,6 @@ module.exports = function( grunt ) {
         grunt.task.run([
             'jshint',
             'component_build:build',
-            'concat:' + version,
             //'test',
             'uglify',
             'version:' + version

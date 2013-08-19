@@ -1,5 +1,4 @@
-var utils    = require('./utils'),
-    Compiler = require('./compiler')
+var Compiler = require('./compiler')
 
 /*
  *  ViewModel exposed to the user that holds data,

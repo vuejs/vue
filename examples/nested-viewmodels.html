@@ -57,11 +57,9 @@
     </div>
 
     <script>
-        Seed.config({
-            debug: true
-        })
+        seed.config({ debug: true })
 
-        var Man = Seed.ViewModel.extend({
+        var Man = seed.ViewModel.extend({
             id: 'man',
             init: function () {
                 this.name = this.$el.dataset.name

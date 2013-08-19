@@ -12,8 +12,9 @@
         <button sd-on="click:one">one</button>
         <button sd-on="click:two">two</button>
         <button sd-on="click:three">three</button>
+        <p><input sd-value="msg"></p>
         <script>
-            Seed.config({debug: true})
+            seed.config({debug: true})
             var data1 = {
                 c: 0,
                 b: {
@@ -26,7 +27,7 @@
                     c: 'one'
                 }
             }
-            var Demo = Seed.ViewModel.extend({
+            var Demo = seed.ViewModel.extend({
                 init: function () {
                     this.msg = 'Yoyoyo'
                     this.a = data1

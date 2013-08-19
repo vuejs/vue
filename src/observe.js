@@ -44,9 +44,9 @@ methods.forEach(function (method) {
 function observe (obj, path, observer) {
     if (isWatchable(obj)) {
         path = path + '.'
-        var alreadyConverted = !!obj.__observer__
+        var ob, alreadyConverted = !!obj.__observer__
         if (!alreadyConverted) {
-            var ob = new Emitter()
+            ob = new Emitter()
             defProtected(obj, '__observer__', ob)
         }
         obj.__observer__

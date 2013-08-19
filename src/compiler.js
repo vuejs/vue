@@ -220,10 +220,13 @@ CompilerProto.createBinding = function (key) {
     if (binding.root) {
         // this is a root level binding. we need to define getter/setters for it.
         this.define(baseKey, binding)
-    } else if (!this.bindings[baseKey]) {
-        // this is a nested value binding, but the binding for its root
-        // has not been created yet. We better create that one too.
-        this.createBinding(baseKey)
+    } else {
+        // TODO create placeholder objects
+        if (!this.bindings[baseKey]) {
+            // this is a nested value binding, but the binding for its root
+            // has not been created yet. We better create that one too.
+            this.createBinding(baseKey)
+        }
     }
 
     return binding
