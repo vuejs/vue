@@ -1,8 +1,7 @@
-- add a few util methods, e.g. extend, inherits
 - fix architecture: objects as single source of truth...
+- $watch / $unwatch & $destroy(now much easier)
+- add a few util methods, e.g. extend, inherits
 - prototypal scope/binding inheritance (Object.create)
-- ability to register a ViewModel so it can be auto-compiled as a nested vm
-- let user specify which keys are data/state (i.e. available in $dump())
 - tests
 - docs
 - sd-with?
