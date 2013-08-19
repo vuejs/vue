@@ -18,16 +18,18 @@ methods.forEach(function (method) {
     arrayMutators[method] = function () {
         var result = Array.prototype[method].apply(this, arguments),
             newElements
-        // watch new objects
-        if (method === 'push' || method === 'unshift') {
-            newElements = arguments
-        } else if (method === 'splice') {
-            newElements = slice.call(arguments, 2)
-        }
-        if (newElements) {
-            var i = newElements.length
-            while (i--) watch(newElements[i])
-        }
+
+        // watch new objects - do we need this? maybe do it in each.js
+
+        // if (method === 'push' || method === 'unshift') {
+        //     newElements = arguments
+        // } else if (method === 'splice') {
+        //     newElements = slice.call(arguments, 2)
+        // }
+        // if (newElements) {
+        //     var i = newElements.length
+        //     while (i--) watch(newElements[i])
+        // }
         this.__observer__.emit('mutate', this.__path__, this, mutation = {
             method: method,
             args: slice.call(arguments),
@@ -36,6 +38,23 @@ methods.forEach(function (method) {
     }
 })
 
+// EXTERNAL
+function observe (obj, path, observer) {
+    watch(obj)
+    path = path + '.'
+    obj.__observer__
+        .on('get', function (key) {
+            observer.emit('get', path + key)
+        })
+        .on('set', function (key, val) {
+            observer.emit('set', path + key, val)
+        })
+        .on('mutate', function (key, val, mutation) {
+            observer.emit('mutate', path + key, val, mutation)
+        })
+}
+
+// INTERNAL
 function watch (obj, path, observer) {
     var type = typeOf(obj)
     if (type === 'Object') {
@@ -59,8 +78,8 @@ function watchArray (arr, path, observer) {
     for (method in arrayMutators) {
         defProtected(arr, method, arrayMutators[method])
     }
-    var i = arr.length
-    while (i--) watch(arr[i])
+    // var i = arr.length
+    // while (i--) watch(arr[i])
 }
 
 function bind (obj, key, path, observer) {
@@ -113,17 +132,18 @@ var data = {
     ]
 }
 
-watch(data)
-data.__observer__.on('set', function (key, val) {
+var ob = new Emitter()
+
+observe(data, 'testing', ob)
+ob.on('set', function (key, val) {
     console.log('set: ' + key + ' =>\n', val)
 })
-data.__observer__.on('mutate', function (key, val, mutation) {
+ob.on('mutate', function (key, val, mutation) {
     console.log('mutate: '+ key + ' =>\n', val)
     console.log(mutation)
 })
 
-data.posts[0].__observer__.on('set', function (key, val) {
-    console.log('posts[0] set: ' + key + ' =>\n', val)
-})
+data.id = 2
+data.posts.push({ title: 'hola' })
 
 module.exports = data
