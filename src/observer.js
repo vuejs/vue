@@ -27,32 +27,6 @@ methods.forEach(function (method) {
     }
 })
 
-// EXTERNAL
-function observe (obj, path, observer) {
-    if (isWatchable(obj)) {
-        path = path + '.'
-        var ob, alreadyConverted = !!obj.__observer__
-        if (!alreadyConverted) {
-            ob = new Emitter()
-            defProtected(obj, '__observer__', ob)
-        }
-        obj.__observer__
-            .on('get', function (key) {
-                observer.emit('get', path + key)
-            })
-            .on('set', function (key, val) {
-                observer.emit('set', path + key, val)
-            })
-            .on('mutate', function (key, val, mutation) {
-                observer.emit('mutate', path + key, val, mutation)
-            })
-        if (!alreadyConverted) {
-            watch(obj, null, ob)
-        }
-    }
-}
-
-// INTERNAL
 function watch (obj, path, observer) {
     var type = typeOf(obj)
     if (type === 'Object') {
@@ -114,4 +88,45 @@ function isWatchable (obj) {
     return type === 'Object' || type === 'Array'
 }
 
-module.exports = observe
+module.exports = {
+
+    observe: function (obj, path, observer) {
+        if (isWatchable(obj)) {
+            path = path + '.'
+            var ob, alreadyConverted = !!obj.__observer__
+            if (!alreadyConverted) {
+                ob = new Emitter()
+                defProtected(obj, '__observer__', ob)
+            }
+            var proxies = observer.proxies[path] = {
+                get: function (key) {
+                    observer.emit('get', path + key)
+                },
+                set: function (key, val) {
+                    observer.emit('set', path + key, val)
+                },
+                mutate: function (key, val, mutation) {
+                    observer.emit('mutate', path + key, val, mutation)
+                }
+            }
+            obj.__observer__
+                .on('get', proxies.get)
+                .on('set', proxies.set)
+                .on('mutate', proxies.mutate)
+            if (!alreadyConverted) {
+                watch(obj, null, ob)
+            }
+        }
+    },
+
+    unobserve: function (obj, path, observer) {
+        if (!obj.__observer__) return
+        path = path + '.'
+        var proxies = observer.proxies[path]
+        obj.__observer__
+            .off('get', proxies.get)
+            .off('set', proxies.set)
+            .off('mutate', proxies.mutate)
+        observer.proxies[path] = null
+    }
+}

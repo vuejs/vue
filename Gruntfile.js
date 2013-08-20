@@ -57,7 +57,7 @@ module.exports = function( grunt ) {
             },
             component: {
                 files: ['src/**/*.js', 'component.json'],
-                tasks: ['component_build:dev', 'concat:dev']
+                tasks: ['component_build:dev']
             }
         }
 
