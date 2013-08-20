@@ -120,7 +120,7 @@ module.exports = {
     },
 
     unobserve: function (obj, path, observer) {
-        if (!obj.__observer__) return
+        if (!obj || !obj.__observer__) return
         path = path + '.'
         var proxies = observer.proxies[path]
         obj.__observer__

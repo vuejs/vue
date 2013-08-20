@@ -6,19 +6,7 @@ var Compiler = require('./compiler')
  *  and a few reserved methods
  */
 function ViewModel (options) {
-
-    // determine el
-    this.$el = options.template
-        ? options.template.cloneNode(true)
-        : typeof options.el === 'string'
-            ? document.querySelector(options.el)
-            : options.el
-
-    // possible info inherited as an each item
-    this.$index  = options.index
-    this.$parent = options.parentCompiler && options.parentCompiler.vm
-
-    // compile. options are passed directly to compiler
+    // just compile. options are passed directly to compiler
     new Compiler(this, options)
 }
 

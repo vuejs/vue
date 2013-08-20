@@ -49,6 +49,23 @@ api.config = function (opts) {
 }
 
 /*
+ *  Angular style bootstrap
+ */
+api.bootstrap = function (el) {
+    el = (typeof el === 'string'
+        ? document.querySelector(el)
+        : el) || document.body
+    var Ctor = ViewModel,
+        vmAttr = config.prefix + '-viewmodel',
+        vmExp = el.getAttribute(vmAttr)
+    if (vmExp) {
+        Ctor = utils.getVM(vmExp)
+        el.removeAttribute(vmAttr)
+    }
+    return new Ctor({ el: el })
+}
+
+/*
  *  Expose the main ViewModel class
  *  and add extend method
  */
@@ -57,9 +74,6 @@ api.ViewModel = ViewModel
 ViewModel.extend = function (options) {
     var ExtendedVM = function (opts) {
         opts = opts || {}
-        if (options.template) {
-            opts.template = utils.getTemplate(options.template)
-        }
         if (options.init) {
             opts.init = options.init
         }
@@ -77,5 +91,8 @@ ViewModel.extend = function (options) {
     }
     return ExtendedVM
 }
+
+// collect templates on load
+utils.collectTemplates()
 
 module.exports = api

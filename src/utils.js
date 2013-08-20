@@ -14,14 +14,25 @@ module.exports = {
 
     typeOf: typeOf,
 
-    getTemplate: function (id) {
-        var el = templates[id]
-        if (!el && el !== null) {
-            var selector = '[' + config.prefix + '-template="' + id + '"]'
-            el = templates[id] = document.querySelector(selector)
-            if (el) el.parentNode.removeChild(el)
+    collectTemplates: function () {
+        var selector = 'script[type="text/' + config.prefix + '-template"]',
+            templates = document.querySelectorAll(selector),
+            i = templates.length
+        while (i--) {
+            this.storeTemplate(templates[i])
         }
-        return el
+    },
+
+    storeTemplate: function (template) {
+        var id = template.getAttribute(config.prefix + '-template-id')
+        if (id) {
+            templates[id] = template.innerHTML.trim()
+        }
+        template.parentNode.removeChild(template)
+    },
+
+    getTemplate: function (id) {
+        return templates[id]
     },
 
     registerVM: function (id, VM) {

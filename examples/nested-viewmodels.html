@@ -6,68 +6,69 @@
         div:not(#grandpa) {
             padding-left: 15px;
         }
+        p {
+            position: relative;
+        }
         p:not(.ancestor):before {
+            position: absolute;
+            top: 0;
+            left: -22px;
             content: "└ ";
+            color: #F00;
         }
     </style>
-    <script src="../dist/seed.js"></script>
 </head>
 <body>
-    <div id="grandpa" data-name="Andy">
-        <p class="ancestor" sd-text="name"></p>
+    <div id="grandpa" sd-viewmodel="man" data-name="Andy" data-family="Johnson">
+        <p class="ancestor">{{name}} {{family}}</p>
 
         <div sd-viewmodel="man" data-name="Jack">
-            <p><span sd-text="name"></span>, son of <span sd-text="^name"></span></p>
+            <p>{{name}}, son of {{^name}}</p>
 
             <div sd-viewmodel="man" data-name="Mike">
-                <p><span sd-text="name"></span>, son of <span sd-text="^name"></span></p>
+                <p>{{name}}, son of {{^name}}</p>
 
-                <div sd-viewmodel="man" data-name="Tim">
-                    <p>
-                        <span sd-text="name"></span>,
-                        son of <span sd-text="^name"></span>,
-                        grandson of <span sd-text="^^name"></span>
-                        and great-grandson of <span sd-text="$name"></span>
-                    </p>
+                <div sd-viewmodel="man" data-name="Tim" sd-template="offspring">
                 </div>
 
-                <div sd-viewmodel="man" data-name="Tom">
-                    <p>
-                        <span sd-text="name"></span>,
-                        son of <span sd-text="^name"></span>,
-                        grandson of <span sd-text="^^name"></span>
-                        and great-grandson of <span sd-text="$name"></span>
-                    </p>
+                <div sd-viewmodel="man" data-name="Tom" sd-template="offspring">
                 </div>
             </div>
 
             <div sd-viewmodel="man" data-name="Jason">
-                <p><span sd-text="name"></span>, son of <span sd-text="^name"></span></p>
+                <p>{{name}}, son of {{^name}}</p>
 
-                <div sd-viewmodel="man" data-name="Andrew">
-                    <p>
-                        <span sd-text="name"></span>,
-                        son of <span sd-text="^name"></span>,
-                        grandson of <span sd-text="^^name"></span>
-                        and great-grandson of <span sd-text="$name"></span>
-                    </p>
+                <div sd-viewmodel="man" data-name="Andrew" sd-template="offspring">
                 </div>
             </div>
         </div>
     </div>
 
+    <script type="text/sd-template" sd-template-id="offspring">
+        <p>
+            {{name}}, son of {{^name}},
+            <br>
+            grandson of {{^^name}},
+            <br>
+            great-grandson of {{$name}},
+            <br>
+            and offspring of family {{family}}.
+        </p>
+    </script>
+    <script src="../dist/seed.js"></script>
     <script>
         seed.config({ debug: true })
-
         var Man = seed.ViewModel.extend({
             id: 'man',
             init: function () {
                 this.name = this.$el.dataset.name
+                var family = this.$el.dataset.family
+                if (family) {
+                    this.family = family
+                }
             }
         })
-
-        var demo = new Man({ el: '#grandpa' })
-
+        seed.bootstrap('#grandpa')
     </script>
 </body>
 </html>

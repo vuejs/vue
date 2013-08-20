@@ -81,6 +81,11 @@ module.exports = {
         this.ref = document.createComment('sd-each-' + this.arg)
         ctn.insertBefore(this.ref, this.el)
         ctn.removeChild(this.el)
+        this.collection = null
+        this.vms = null
+        this.mutationListener = (function (mutation) {
+            mutationHandlers[mutation.method].call(this, mutation)
+        }).bind(this)
     },
 
     update: function (collection) {
@@ -95,12 +100,11 @@ module.exports = {
             this.buildItem(this.ref, null, null)
         }
         this.collection = collection
+        this.vms = []
 
         // listen for collection mutation events
         // the collection has been augmented during Binding.set()
-        collection.__observer__.on('mutate', (function (mutation) {
-            mutationHandlers[mutation.method].call(this, mutation)
-        }).bind(this))
+        collection.__observer__.on('mutate', this.mutationListener)
 
         // create child-seeds and append to DOM
         for (var i = 0, l = collection.length; i < l; i++) {
@@ -120,11 +124,13 @@ module.exports = {
             eachPrefix: this.arg + '.',
             parentCompiler: this.compiler,
             index: index,
-            data: data,
-            delegator: this.container
+            delegator: this.container,
+            data: {
+                todo: data
+            }
         })
-        if (index !== null) {
-            this.collection[index] = item
+        if (index) {
+            this.vms[index] = item
         } else {
             item.$destroy()
         }
@@ -139,7 +145,7 @@ module.exports = {
 
     unbind: function () {
         if (this.collection) {
-            this.collection.off('mutate')
+            this.collection.off('mutate', this.mutationListener)
             var i = this.collection.length
             while (i--) {
                 this.collection[i].$destroy()

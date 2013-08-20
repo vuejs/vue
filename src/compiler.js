@@ -18,8 +18,6 @@ var vmAttr, eachAttr
  */
 function Compiler (vm, options) {
 
-    utils.log('\nnew Compiler instance: ', vm.$el, '\n')
-
     // need to refresh this everytime we compile
     eachAttr = config.prefix + '-each'
     vmAttr   = config.prefix + '-viewmodel'
@@ -30,17 +28,52 @@ function Compiler (vm, options) {
         this[op] = options[op]
     }
 
+    // determine el
+    var tpl = options.template,
+        el  = options.el
+    el  = typeof el === 'string'
+        ? document.querySelector(el)
+        : el
+    if (el) {
+        var tplExp = tpl || el.getAttribute(config.prefix + '-template')
+        if (tplExp) {
+            el.innerHTML = utils.getTemplate(tplExp) || ''
+            el.removeAttribute(config.prefix + '-template')
+        }
+    } else if (tpl) {
+        var template = utils.getTemplate(tpl)
+        if (template) {
+            var tplHolder = document.createElement('div')
+            tplHolder.innerHTML = template
+            el = tplHolder.childNodes[0]
+        }
+    }
+
+    utils.log('\nnew VM instance: ', el, '\n')
+
+    // set el
+    vm.$el = el
+    // link it up!
+    vm.$compiler = this
+    // possible info inherited as an each item
+    vm.$index    = options.index
+    vm.$parent   = options.parentCompiler && options.parentCompiler.vm
+
+    // now for the compiler itself...
     this.vm              = vm
-    vm.$compiler         = this
     this.el              = vm.$el
-    this.bindings        = {}
-    this.observer        = new Emitter()
     this.directives      = []
-    this.watchers        = {}
-    // list of computed properties that need to parse dependencies for
-    this.computed        = []
-    // list of bindings that has dynamic context dependencies
-    this.contextBindings = []
+    this.computed        = [] // computed props to parse deps from
+    this.contextBindings = [] // computed props with dynamic context
+
+    // prototypal inheritance of bindings
+    var parent = this.parentCompiler
+    this.bindings = parent
+        ? Object.create(parent.bindings)
+        : {}
+    this.rootCompiler = parent
+        ? getRoot(parent)
+        : this
 
     // setup observer
     this.setupObserver()
@@ -78,15 +111,48 @@ function Compiler (vm, options) {
 var CompilerProto = Compiler.prototype
 
 /*
+ *  Setup observer.
+ *  The observer listens for get/set/mutate events on all VM
+ *  values/objects and trigger corresponding binding updates.
+ */
+CompilerProto.setupObserver = function () {
+
+    var compiler = this,
+        bindings = this.bindings,
+        observer = this.observer = new Emitter()
+
+    // a hash to hold event proxies for each root level key
+    // so they can be referenced and removed later
+    observer.proxies = {}
+
+    // add own listeners which trigger binding updates
+    observer
+        .on('get', function (key) {
+            if (DepsParser.observer.isObserving) {
+                DepsParser.observer.emit('get', bindings[key])
+            }
+        })
+        .on('set', function (key, val) {
+            if (!bindings[key]) compiler.createBinding(key)
+            bindings[key].update(val)
+        })
+        .on('mutate', function (key) {
+            bindings[key].refresh()
+        })
+}
+
+/*
  *  Actually parse the DOM nodes for directives, create bindings,
  *  and parse dependencies afterwards. For the dependency extraction to work,
  *  this has to happen after all user-set values are present in the VM.
  */
 CompilerProto.compile = function () {
+
     var key,
         vm = this.vm,
         computed = this.computed,
         contextBindings = this.contextBindings
+
     // parse the DOM
     this.compileNode(this.el, true)
 
@@ -107,39 +173,6 @@ CompilerProto.compile = function () {
     // extract dependencies for computed properties with dynamic context
     if (contextBindings.length) this.bindContexts(contextBindings)
     this.contextBindings = null
-    
-    utils.log('\ncompilation done.\n')
-}
-
-/*
- *  Setup observer.
- *  The observer listens for get/set/mutate events on all VM
- *  values/objects and trigger corresponding binding updates.
- */
-CompilerProto.setupObserver = function () {
-
-    var bindings = this.bindings,
-        observer = this.observer,
-        compiler = this
-
-    // a hash to hold event proxies for each root level key
-    // so they can be referenced and removed later
-    observer.proxies = {}
-
-    // add own listeners which trigger binding updates
-    observer
-        .on('get', function (key) {
-            if (DepsParser.observer.isObserving) {
-                DepsParser.observer.emit('get', bindings[key])
-            }
-        })
-        .on('set', function (key, val) {
-            if (!bindings[key]) compiler.createBinding(key)
-            bindings[key].update(val)
-        })
-        .on('mutate', function (key) {
-            bindings[key].refresh()
-        })
 }
 
 /*
@@ -169,6 +202,7 @@ CompilerProto.compileNode = function (node, root) {
 
         } else if (vmExp && !root) { // nested ViewModels
 
+            node.removeAttribute(vmAttr)
             var ChildVM = utils.getVM(vmExp)
             if (ChildVM) {
                 new ChildVM({
@@ -242,9 +276,62 @@ CompilerProto.compileTextNode = function (node) {
 }
 
 /*
+ *  Add a directive instance to the correct binding & viewmodel
+ */
+CompilerProto.bindDirective = function (directive) {
+
+    this.directives.push(directive)
+    directive.compiler = this
+    directive.vm       = this.vm
+
+    var key = directive.key,
+        compiler = traceOwnerCompiler(directive, this)
+
+    var binding
+    if (compiler.vm.hasOwnProperty(key)) {
+        // if the value is present in the target VM, we create the binding on its compiler
+        binding = compiler.bindings.hasOwnProperty(key)
+            ? compiler.bindings[key]
+            : compiler.createBinding(key)
+    } else {
+        // due to prototypal inheritance of bindings, if a key doesn't exist here,
+        // it doesn't exist in the whole prototype chain. Therefore in that case
+        // we create the new binding at the root level.
+        binding = compiler.bindings[key] || this.rootCompiler.createBinding(key)
+    }
+
+    binding.instances.push(directive)
+    directive.binding = binding
+
+    // for newly inserted sub-VMs (each items), need to bind deps
+    // because they didn't get processed when the parent compiler
+    // was binding dependencies.
+    var i, dep
+    if (binding.contextDeps) {
+        i = binding.contextDeps.length
+        while (i--) {
+            dep = this.bindings[binding.contextDeps[i]]
+            dep.subs.push(directive)
+        }
+    }
+
+    // invoke bind hook if exists
+    if (directive.bind) {
+        directive.bind(binding.value)
+    }
+
+    // set initial value
+    directive.update(binding.value)
+    if (binding.isComputed) {
+        directive.refresh()
+    }
+}
+
+/*
  *  Create binding and attach getter/setter for a key to the viewmodel object
  */
 CompilerProto.createBinding = function (key) {
+    
     utils.log('  created binding: ' + key)
 
     var bindings = this.bindings,
@@ -321,58 +408,6 @@ CompilerProto.define = function (key, binding) {
 }
 
 /*
- *  Add a directive instance to the correct binding & viewmodel
- */
-CompilerProto.bindDirective = function (directive) {
-
-    this.directives.push(directive)
-    directive.compiler = this
-    directive.vm       = this.vm
-
-    var key = directive.key,
-        compiler = this
-
-    // deal with each block
-    if (this.each) {
-        if (key.indexOf(this.eachPrefix) === 0) {
-            key = directive.key = key.replace(this.eachPrefix, '')
-        } else {
-            compiler = this.parentCompiler
-        }
-    }
-
-    // deal with nesting
-    compiler = traceOwnerCompiler(directive, compiler)
-    var binding = compiler.bindings[key] || compiler.createBinding(key)
-
-    binding.instances.push(directive)
-    directive.binding = binding
-
-    // for newly inserted sub-VMs (each items), need to bind deps
-    // because they didn't get processed when the parent compiler
-    // was binding dependencies.
-    var i, dep
-    if (binding.contextDeps) {
-        i = binding.contextDeps.length
-        while (i--) {
-            dep = this.bindings[binding.contextDeps[i]]
-            dep.subs.push(directive)
-        }
-    }
-
-    // invoke bind hook if exists
-    if (directive.bind) {
-        directive.bind(binding.value)
-    }
-
-    // set initial value
-    directive.update(binding.value)
-    if (binding.isComputed) {
-        directive.refresh()
-    }
-}
-
-/*
  *  Process subscriptions for computed properties that has
  *  dynamic context dependencies
  */
@@ -437,6 +472,13 @@ function traceOwnerCompiler (key, compiler) {
         }
     }
     return compiler
+}
+
+/*
+ *  shorthand for getting root compiler
+ */
+function getRoot (compiler) {
+    return traceOwnerCompiler({ root: true }, compiler)
 }
 
 module.exports = Compiler
