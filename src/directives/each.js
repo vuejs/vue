@@ -97,7 +97,7 @@ module.exports = {
         // force a compile so that we get all the bindings for
         // dependency extraction.
         if (!this.collection && !collection.length) {
-            this.buildItem(this.ref, null, null)
+            this.buildItem(this.ref, null, true)
         }
         this.collection = collection
         this.vms = []
@@ -108,11 +108,13 @@ module.exports = {
 
         // create child-seeds and append to DOM
         for (var i = 0, l = collection.length; i < l; i++) {
-            this.buildItem(this.ref, collection[i], i)
+            var item = this.buildItem(this.ref, collection[i])
+            this.container.appendChild(item.$el)
+            this.vms.push(item)
         }
     },
 
-    buildItem: function (ref, data, index) {
+    buildItem: function (ref, data, dummy) {
         var node = this.el.cloneNode(true)
         this.container.insertBefore(node, ref)
         ViewModel = ViewModel || require('../viewmodel')
@@ -123,16 +125,15 @@ module.exports = {
             each: true,
             eachPrefix: this.arg + '.',
             parentCompiler: this.compiler,
-            index: index,
             delegator: this.container,
             data: {
                 todo: data
             }
         })
-        if (index) {
-            this.vms[index] = item
-        } else {
+        if (dummy) {
             item.$destroy()
+        } else {
+            return item
         }
     },
 
@@ -145,10 +146,10 @@ module.exports = {
 
     unbind: function () {
         if (this.collection) {
-            this.collection.off('mutate', this.mutationListener)
-            var i = this.collection.length
+            this.collection.__observer__.off('mutate', this.mutationListener)
+            var i = this.vms.length
             while (i--) {
-                this.collection[i].$destroy()
+                this.vms[i].$destroy()
             }
         }
         var ctn = this.container,

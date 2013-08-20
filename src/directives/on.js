@@ -45,8 +45,8 @@ module.exports = {
             dHandler = delegator.sd_dHandlers[identifier] = function (e) {
                 var target = delegateCheck(e.target, delegator, identifier)
                 if (target) {
-                    e.el = target
                     e.vm = target.sd_viewmodel
+                    e.item = e.vm[compiler.eachPrefix.slice(0, -1)]
                     handler.call(ownerVM, e)
                 }
             }

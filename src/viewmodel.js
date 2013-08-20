@@ -20,6 +20,17 @@ VMProto.$ready = function () {
     this.$compiler.observer.emit('ready')
 }
 
+VMProto.$set = function (key, value) {
+    var path = key.split('.'),
+        level = 0,
+        target = this
+    while (level < path.length - 1) {
+        target = target[path[level]]
+        level++
+    }
+    target[path[level]] = value
+}
+
 /*
  *  watch a key on the viewmodel for changes
  *  fire callback with new value

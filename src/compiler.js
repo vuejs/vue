@@ -55,8 +55,6 @@ function Compiler (vm, options) {
     vm.$el = el
     // link it up!
     vm.$compiler = this
-    // possible info inherited as an each item
-    vm.$index    = options.index
     vm.$parent   = options.parentCompiler && options.parentCompiler.vm
 
     // now for the compiler itself...
@@ -97,8 +95,7 @@ function Compiler (vm, options) {
     // check for async compilation (vm.$wait())
     if (vm.__wait__) {
         var self = this
-        this.observer.on('ready', function () {
-            self.observer.off('ready')
+        this.observer.once('ready', function () {
             vm.__wait__ = null
             self.compile()
         })
@@ -133,6 +130,9 @@ CompilerProto.setupObserver = function () {
             }
         })
         .on('set', function (key, val) {
+            if (key.match(/todo\./)) {
+                console.log(key, val)
+            }
             if (!bindings[key]) compiler.createBinding(key)
             bindings[key].update(val)
         })
@@ -285,10 +285,11 @@ CompilerProto.bindDirective = function (directive) {
     directive.vm       = this.vm
 
     var key = directive.key,
+        baseKey = key.split('.')[0],
         compiler = traceOwnerCompiler(directive, this)
 
     var binding
-    if (compiler.vm.hasOwnProperty(key)) {
+    if (compiler.vm.hasOwnProperty(baseKey)) {
         // if the value is present in the target VM, we create the binding on its compiler
         binding = compiler.bindings.hasOwnProperty(key)
             ? compiler.bindings[key]
@@ -386,7 +387,10 @@ CompilerProto.define = function (key, binding) {
             return binding.isComputed
                 ? binding.value.get({
                     el: compiler.el,
-                    vm: compiler.vm
+                    vm: compiler.vm,
+                    item: compiler.each
+                        ? compiler.vm[compiler.eachPrefix.slice(0, -1)]
+                        : null
                 })
                 : binding.value
         },
@@ -447,9 +451,11 @@ CompilerProto.destroy = function () {
         }
         dir.unbind()
     }
-    // unbind all bindings
+    // unbind all own bindings
     for (key in bindings) {
-        bindings[key].unbind()
+        if (bindings.hasOwnProperty(key)) {
+            bindings[key].unbind()
+        }
     }
     // remove el
     el.parentNode.removeChild(el)
