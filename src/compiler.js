@@ -24,8 +24,16 @@ function Compiler (vm, options) {
 
     // copy options
     options = options || {}
-    for (var op in options) {
-        this[op] = options[op]
+    for (var key in options) {
+        this[key] = options[key]
+    }
+
+    // copy data if any
+    var data = options.data
+    if (data) {
+        for (key in data) {
+            vm[key] = data[key]
+        }
     }
 
     // determine el
@@ -61,8 +69,10 @@ function Compiler (vm, options) {
     this.vm              = vm
     this.el              = vm.$el
     this.directives      = []
-    this.computed        = [] // computed props to parse deps from
-    this.contextBindings = [] // computed props with dynamic context
+
+    var observables = this.observables = []
+    var computed = this.computed = [] // computed props to parse deps from
+    var ctxBindings = this.contextBindings = [] // computed props with dynamic context
 
     // prototypal inheritance of bindings
     var parent = this.parentCompiler
@@ -76,32 +86,36 @@ function Compiler (vm, options) {
     // setup observer
     this.setupObserver()
 
-    // copy data if any
-    var key, data = options.data
-    if (data) {
-        if (data instanceof vm.constructor) {
-            data = utils.dump(data)
-        }
-        for (key in data) {
-            vm[key] = data[key]
-        }
-    }
-
     // call user init
     if (options.init) {
         options.init.apply(vm, options.args || [])
     }
 
-    // check for async compilation (vm.$wait())
-    if (vm.__wait__) {
-        var self = this
-        this.observer.once('ready', function () {
-            vm.__wait__ = null
-            self.compile()
-        })
-    } else {
-        this.compile()
+    // now parse the DOM
+    this.compileNode(this.el, true)
+
+    // for anything in viewmodel but not binded in DOM, create bindings for them
+    for (key in vm) {
+        if (vm.hasOwnProperty(key) &&
+            key.charAt(0) !== '$' &&
+            !this.bindings[key])
+        {
+            this.createBinding(key)
+        }
     }
+
+    // define root keys
+    var i = observables.length, binding
+    while (i--) {
+        binding = observables[i]
+        Observer.observe(binding.value, binding.key, this.observer)
+    }
+    // extract dependencies for computed properties
+    if (computed.length) DepsParser.parse(computed)
+    this.computed = null
+    // extract dependencies for computed properties with dynamic context
+    if (ctxBindings.length) this.bindContexts(ctxBindings)
+    this.contextBindings = null
     
 }
 
@@ -114,8 +128,7 @@ var CompilerProto = Compiler.prototype
  */
 CompilerProto.setupObserver = function () {
 
-    var compiler = this,
-        bindings = this.bindings,
+    var bindings = this.bindings,
         observer = this.observer = new Emitter()
 
     // a hash to hold event proxies for each root level key
@@ -130,49 +143,11 @@ CompilerProto.setupObserver = function () {
             }
         })
         .on('set', function (key, val) {
-            if (key.match(/todo\./)) {
-                console.log(key, val)
-            }
-            if (!bindings[key]) compiler.createBinding(key)
             bindings[key].update(val)
         })
         .on('mutate', function (key) {
-            bindings[key].refresh()
+            bindings[key].pub()
         })
-}
-
-/*
- *  Actually parse the DOM nodes for directives, create bindings,
- *  and parse dependencies afterwards. For the dependency extraction to work,
- *  this has to happen after all user-set values are present in the VM.
- */
-CompilerProto.compile = function () {
-
-    var key,
-        vm = this.vm,
-        computed = this.computed,
-        contextBindings = this.contextBindings
-
-    // parse the DOM
-    this.compileNode(this.el, true)
-
-    // for anything in viewmodel but not binded in DOM, create bindings for them
-    for (key in vm) {
-        if (vm.hasOwnProperty(key) &&
-            key.charAt(0) !== '$' &&
-            !this.bindings[key])
-        {
-            this.createBinding(key)
-        }
-    }
-
-    // extract dependencies for computed properties
-    if (computed.length) DepsParser.parse(computed)
-    this.computed = null
-    
-    // extract dependencies for computed properties with dynamic context
-    if (contextBindings.length) this.bindContexts(contextBindings)
-    this.contextBindings = null
 }
 
 /*
@@ -335,24 +310,39 @@ CompilerProto.createBinding = function (key) {
     
     utils.log('  created binding: ' + key)
 
+    // make sure the key exists in the object so it can be observed
+    // by the Observer!
+    this.ensurePath(key)
+
     var bindings = this.bindings,
         binding = new Binding(this, key)
     bindings[key] = binding
 
-    var baseKey = key.split('.')[0]
     if (binding.root) {
         // this is a root level binding. we need to define getter/setters for it.
-        this.define(baseKey, binding)
+        this.define(key, binding)
     } else {
-        // TODO create placeholder objects
-        if (!bindings[baseKey]) {
-            // this is a nested value binding, but the binding for its root
+        var parentKey = key.slice(0, key.lastIndexOf('.'))
+        if (!bindings.hasOwnProperty(parentKey)) {
+            // this is a nested value binding, but the binding for its parent
             // has not been created yet. We better create that one too.
-            this.createBinding(baseKey)
+            this.createBinding(parentKey)
         }
     }
-
     return binding
+}
+
+CompilerProto.ensurePath = function (key) {
+    var path = key.split('.'), sec,
+        i = 0, depth = path.length - 1,
+        obj = this.vm
+    while (i < depth) {
+        sec = path[i]
+        if (!obj[sec]) obj[sec] = {}
+        obj = obj[sec]
+        i++
+    }
+    obj[path[i]] = obj[path[i]] || undefined
 }
 
 /*
@@ -365,22 +355,32 @@ CompilerProto.define = function (key, binding) {
 
     var compiler = this,
         vm = this.vm,
-        value = binding.value = vm[key] // save the value before redefinening it
+        value = binding.value = vm[key], // save the value before redefinening it
+        type = utils.typeOf(value)
 
-    if (utils.typeOf(value) === 'Object' && value.get) {
-        binding.isComputed = true
-        binding.rawGet = value.get
-        value.get = value.get.bind(vm)
-        this.computed.push(binding)
-    } else {
-        Observer.observe(value, key, compiler.observer) // start observing right now
+    if (type === 'Object') {
+        if (value.get) {// computed property
+            binding.isComputed = true
+            binding.rawGet = value.get
+            value.get = value.get.bind(vm)
+            this.computed.push(binding)
+        } else {
+            // observe objects later, becase there might be more keys
+            // to be added to it
+            this.observables.push(binding)
+        }
+    } else if (type === 'Array') {
+        // observe arrays right now, because they will be needed in
+        // sd-each directives.
+        Observer.observe(value, key, compiler.observer)
     }
 
     Object.defineProperty(vm, key, {
         enumerable: true,
         get: function () {
-            if (!binding.isComputed && !binding.value.__observer__) {
-                // only emit non-computed, non-observed values
+            var value = binding.value
+            if ((!binding.isComputed && (value === undefined || !value.__observer__)) || Array.isArray(value)) {
+                // only emit non-computed, non-observed (tip) values, or Arrays.
                 // because these are the cleanest dependencies
                 compiler.observer.emit('get', key)
             }
@@ -389,7 +389,7 @@ CompilerProto.define = function (key, binding) {
                     el: compiler.el,
                     vm: compiler.vm,
                     item: compiler.each
-                        ? compiler.vm[compiler.eachPrefix.slice(0, -1)]
+                        ? compiler.vm[compiler.eachPrefix]
                         : null
                 })
                 : binding.value

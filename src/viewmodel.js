@@ -12,14 +12,6 @@ function ViewModel (options) {
 
 var VMProto = ViewModel.prototype
 
-VMProto.$wait = function () {
-    this.__wait__ = true
-}
-
-VMProto.$ready = function () {
-    this.$compiler.observer.emit('ready')
-}
-
 VMProto.$set = function (key, value) {
     var path = key.split('.'),
         level = 0,

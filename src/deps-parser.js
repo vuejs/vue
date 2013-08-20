@@ -1,5 +1,5 @@
 var Emitter  = require('emitter'),
-    config   = require('./config'),
+    //config   = require('./config'),
     utils    = require('./utils'),
     observer = new Emitter()
 
@@ -17,8 +17,11 @@ var dummyEl = document.createElement('div'),
  *  second pass in injectDeps()
  */
 function catchDeps (binding) {
+    utils.log('\n─ ' + binding.key)
     observer.on('get', function (dep) {
+        utils.log('  └─ ' + dep.key)
         binding.deps.push(dep)
+        dep.subs.push(binding)
     })
     parseContextDependency(binding)
     binding.value.get({
@@ -28,29 +31,32 @@ function catchDeps (binding) {
     observer.off('get')
 }
 
+// Second pass seems no longer necessary because now we have control
+// over what values to emit (only non-computed values)
+
 /*
  *  The second pass of dependency extraction.
  *  Only include dependencies that don't have dependencies themselves.
  */
-function filterDeps (binding) {
-    var i = binding.deps.length, dep
-    utils.log('\n─ ' + binding.key)
-    while (i--) {
-        dep = binding.deps[i]
-        if (!dep.deps.length) {
-            utils.log('  └─ ' + dep.key)
-            dep.subs.push(binding)
-        } else {
-            binding.deps.splice(i, 1)
-        }
-    }
-    var ctxDeps = binding.contextDeps
-    if (!ctxDeps || !config.debug) return
-    i = ctxDeps.length
-    while (i--) {
-        utils.log('  └─ ctx:' + ctxDeps[i])
-    }
-}
+// function filterDeps (binding) {
+//     var i = binding.deps.length, dep
+//     utils.log('\n─ ' + binding.key)
+//     while (i--) {
+//         dep = binding.deps[i]
+//         if (!dep.deps.length) {
+//             utils.log('  └─ ' + dep.key)
+//             dep.subs.push(binding)
+//         } else {
+//             binding.deps.splice(i, 1)
+//         }
+//     }
+//     var ctxDeps = binding.contextDeps
+//     if (!ctxDeps || !config.debug) return
+//     i = ctxDeps.length
+//     while (i--) {
+//         utils.log('  └─ ctx:' + ctxDeps[i])
+//     }
+// }
 
 /*
  *  We need to invoke each binding's getter for dependency parsing,
@@ -120,7 +126,7 @@ module.exports = {
         utils.log('\nparsing dependencies...')
         observer.isObserving = true
         bindings.forEach(catchDeps)
-        bindings.forEach(filterDeps)
+        //bindings.forEach(filterDeps)
         observer.isObserving = false
         utils.log('\ndone.')
     }

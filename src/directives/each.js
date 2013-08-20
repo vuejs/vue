@@ -102,6 +102,7 @@ module.exports = {
         this.collection = collection
         this.vms = []
 
+        console.log(collection)
         // listen for collection mutation events
         // the collection has been augmented during Binding.set()
         collection.__observer__.on('mutate', this.mutationListener)
@@ -123,7 +124,7 @@ module.exports = {
         var item = new ChildVM({
             el: node,
             each: true,
-            eachPrefix: this.arg + '.',
+            eachPrefix: this.arg,
             parentCompiler: this.compiler,
             delegator: this.container,
             data: {

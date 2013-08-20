@@ -76,6 +76,7 @@ function bind (obj, key, path, observer) {
 }
 
 function defProtected (obj, key, val) {
+    if (obj.hasOwnProperty(key)) return
     def(obj, key, {
         enumerable: false,
         configurable: false,

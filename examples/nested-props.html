@@ -15,24 +15,9 @@
         <p><input sd-value="msg"></p>
         <script>
             seed.config({debug: true})
-            var data = {
-                    c: 0,
-                    b: {
-                        c: 'zero'
-                    }
-                }
             var Demo = seed.ViewModel.extend({
                 init: function () {
-                    this.msg = 'Yoyoyo'
-
-                    // example of async compilation
-                    var vm = this
-                    vm.$wait()
-                    setTimeout(function () {
-                        vm.a = data
-                        vm.$ready()
-                    }, 30)
-                },
+                    this.msg = 'Yoyoyo'                },
                 props: {
                     one: function () {
                         this.a = {
@@ -52,8 +37,8 @@
                         this.a.b.c = 'three'
                         this.a.c = 3
                     },
-                    d: {get: function (ctx) {
-                        return (ctx.vm.msg + this.a.b.c + this.a.c) || ''
+                    d: {get: function () {
+                        return this.msg + (this.a.b.c || '') + (this.a.c || '')
                     }}
                 }
             })
