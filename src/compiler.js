@@ -332,6 +332,12 @@ CompilerProto.createBinding = function (key) {
     return binding
 }
 
+/*
+ *  Sometimes when a binding is found in the template, the value might
+ *  have not been set on the VM yet. To ensure computed properties and
+ *  dependency extraction can work, we have to create a dummy value for
+ *  any given path.
+ */
 CompilerProto.ensurePath = function (key) {
     var path = key.split('.'), sec,
         i = 0, depth = path.length - 1,
@@ -346,7 +352,7 @@ CompilerProto.ensurePath = function (key) {
 }
 
 /*
- *  Defines the getter/setter for a top-level binding on the VM
+ *  Defines the getter/setter for a root-level binding on the VM
  *  and observe the initial value
  */
 CompilerProto.define = function (key, binding) {
@@ -400,12 +406,12 @@ CompilerProto.define = function (key, binding) {
                     binding.value.set(value)
                 }
             } else if (value !== binding.value) {
+                binding.value = value
+                compiler.observer.emit('set', key, value)
                 // unwatch the old value!
                 Observer.unobserve(binding.value, key, compiler.observer)
                 // now watch the new one instead
                 Observer.observe(value, key, compiler.observer)
-                binding.value = value
-                compiler.observer.emit('set', key, value)
             }
         }
     })
