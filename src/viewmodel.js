@@ -12,11 +12,15 @@ function ViewModel (options) {
 
 var VMProto = ViewModel.prototype
 
+/*
+ *  Convenience function to set an actual nested value
+ *  from a flat key string. Used in directives.
+ */
 VMProto.$set = function (key, value) {
     var path = key.split('.'),
-        level = 0,
+        level = 0, l = path.length - 1
         target = this
-    while (level < path.length - 1) {
+    while (level < l) {
         target = target[path[level]]
         level++
     }

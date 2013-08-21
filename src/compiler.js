@@ -104,7 +104,7 @@ function Compiler (vm, options) {
         }
     }
 
-    // define root keys
+    // observe root keys
     var i = observables.length, binding
     while (i--) {
         binding = observables[i]
@@ -443,7 +443,7 @@ CompilerProto.bindContexts = function (bindings) {
  */
 CompilerProto.destroy = function () {
     utils.log('compiler destroyed: ', this.vm.$el)
-    var i, key, dir, inss,
+    var i, key, dir, inss, binding
         directives = this.directives,
         bindings = this.bindings,
         el = this.el
@@ -457,10 +457,14 @@ CompilerProto.destroy = function () {
         }
         dir.unbind()
     }
-    // unbind all own bindings
+    // unbind/unobserve all own bindings
     for (key in bindings) {
+        binding = bindings[key]
         if (bindings.hasOwnProperty(key)) {
-            bindings[key].unbind()
+            if (binding.root) {
+                Observer.unobserve(binding.value, binding.key, this.observer)
+            }
+            binding.unbind()
         }
     }
     // remove el
