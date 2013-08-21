@@ -5,12 +5,10 @@ var Emitter         = require('emitter'),
     Binding         = require('./binding'),
     DirectiveParser = require('./directive-parser'),
     TextParser      = require('./text-parser'),
-    DepsParser      = require('./deps-parser')
-
-var slice           = Array.prototype.slice
-
-// late bindings
-var vmAttr, eachAttr
+    DepsParser      = require('./deps-parser'),
+    slice           = Array.prototype.slice,
+    vmAttr,
+    eachAttr
 
 /*
  *  The DOM compiler
@@ -59,17 +57,19 @@ function Compiler (vm, options) {
 
     utils.log('\nnew VM instance: ', el, '\n')
 
-    // set el
-    vm.$el = el
-    // link it up!
+    // set stuff on the ViewModel
+    vm.$el       = el
     vm.$compiler = this
     vm.$parent   = options.parentCompiler && options.parentCompiler.vm
 
     // now for the compiler itself...
-    this.vm              = vm
-    this.el              = vm.$el
-    this.directives      = []
+    this.vm         = vm
+    this.el         = el
+    this.directives = []
 
+    // Store things during parsing to be processed afterwards,
+    // because we want to have created all bindings before
+    // observing values / parsing dependencies.
     var observables = this.observables = []
     var computed = this.computed = [] // computed props to parse deps from
     var ctxBindings = this.contextBindings = [] // computed props with dynamic context
@@ -86,25 +86,28 @@ function Compiler (vm, options) {
     // setup observer
     this.setupObserver()
 
-    // call user init
+    // call user init. this will capture some initial values.
     if (options.init) {
         options.init.apply(vm, options.args || [])
     }
 
-    // now parse the DOM
+    // now parse the DOM, during which we will create necessary bindings
+    // and bind the parsed directives
     this.compileNode(this.el, true)
 
-    // for anything in viewmodel but not binded in DOM, create bindings for them
+    // for anything in viewmodel but not binded in DOM, also create bindings for them
     for (key in vm) {
         if (vm.hasOwnProperty(key) &&
             key.charAt(0) !== '$' &&
-            !this.bindings[key])
+            !this.bindings.hasOwnProperty(key))
         {
             this.createBinding(key)
         }
     }
 
-    // observe root keys
+    // observe root values so that they emit events when
+    // their nested values change (for an Object)
+    // or when they mutate (for an Array)
     var i = observables.length, binding
     while (i--) {
         binding = observables[i]
@@ -112,11 +115,10 @@ function Compiler (vm, options) {
     }
     // extract dependencies for computed properties
     if (computed.length) DepsParser.parse(computed)
-    this.computed = null
     // extract dependencies for computed properties with dynamic context
     if (ctxBindings.length) this.bindContexts(ctxBindings)
-    this.contextBindings = null
-    
+
+    this.observables = this.computed = this.contextBindings = null
 }
 
 var CompilerProto = Compiler.prototype
@@ -129,7 +131,8 @@ var CompilerProto = Compiler.prototype
 CompilerProto.setupObserver = function () {
 
     var bindings = this.bindings,
-        observer = this.observer = new Emitter()
+        observer = this.observer = new Emitter(),
+        depsOb   = DepsParser.observer
 
     // a hash to hold event proxies for each root level key
     // so they can be referenced and removed later
@@ -138,15 +141,15 @@ CompilerProto.setupObserver = function () {
     // add own listeners which trigger binding updates
     observer
         .on('get', function (key) {
-            if (DepsParser.observer.isObserving) {
-                DepsParser.observer.emit('get', bindings[key])
+            if (depsOb.isObserving && bindings[key]) {
+                depsOb.emit('get', bindings[key])
             }
         })
         .on('set', function (key, val) {
-            bindings[key].update(val)
+            if (bindings[key]) bindings[key].update(val)
         })
         .on('mutate', function (key) {
-            bindings[key].pub()
+            if (bindings[key]) bindings[key].pub()
         })
 }
 
@@ -406,11 +409,13 @@ CompilerProto.define = function (key, binding) {
                     binding.value.set(value)
                 }
             } else if (value !== binding.value) {
+                // unwatch the old value
+                Observer.unobserve(binding.value, key, compiler.observer)
+                // set new value
                 binding.value = value
                 compiler.observer.emit('set', key, value)
-                // unwatch the old value!
-                Observer.unobserve(binding.value, key, compiler.observer)
-                // now watch the new one instead
+                // now watch the new value, which in turn emits 'set'
+                // for all its nested values
                 Observer.observe(value, key, compiler.observer)
             }
         }

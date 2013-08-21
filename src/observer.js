@@ -58,6 +58,9 @@ function bind (obj, key, path, observer) {
         values = obj.__values__,
         fullKey = (path ? path + '.' : '') + key
     values[fullKey] = val
+    // emit set on bind
+    // this means when an object is observed it will emit
+    // a first batch of set events.
     observer.emit('set', fullKey, val)
     def(obj, key, {
         enumerable: true,
@@ -89,6 +92,13 @@ function isWatchable (obj) {
     return type === 'Object' || type === 'Array'
 }
 
+function emitSet (obj, observer) {
+    var values = obj.__values__
+    for (var key in values) {
+        observer.emit('set', key, values[key])
+    }
+}
+
 module.exports = {
 
     observe: function (obj, path, observer) {
@@ -114,7 +124,9 @@ module.exports = {
                 .on('get', proxies.get)
                 .on('set', proxies.set)
                 .on('mutate', proxies.mutate)
-            if (!alreadyConverted) {
+            if (alreadyConverted) {
+                emitSet(obj, obj.__observer__)
+            } else {
                 watch(obj, null, ob)
             }
         }
