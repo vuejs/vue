@@ -106,9 +106,9 @@ module.exports = {
             path = path + '.'
             var ob, alreadyConverted = !!obj.__observer__
             if (!alreadyConverted) {
-                ob = new Emitter()
-                defProtected(obj, '__observer__', ob)
+                defProtected(obj, '__observer__', new Emitter())
             }
+            ob = obj.__observer__
             var proxies = observer.proxies[path] = {
                 get: function (key) {
                     observer.emit('get', path + key)
@@ -120,12 +120,12 @@ module.exports = {
                     observer.emit('mutate', path + key, val, mutation)
                 }
             }
-            obj.__observer__
+            ob
                 .on('get', proxies.get)
                 .on('set', proxies.set)
                 .on('mutate', proxies.mutate)
             if (alreadyConverted) {
-                emitSet(obj, obj.__observer__)
+                emitSet(obj, ob)
             } else {
                 watch(obj, null, ob)
             }
