@@ -18,8 +18,9 @@ var VMProto = ViewModel.prototype
  */
 VMProto.$set = function (key, value) {
     var path = key.split('.'),
-        level = 0, l = path.length - 1
-        target = this
+        l = path.length - 1,
+        target = this,
+        level = 0
     while (level < l) {
         target = target[path[level]]
         level++

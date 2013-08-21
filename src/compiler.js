@@ -448,7 +448,7 @@ CompilerProto.bindContexts = function (bindings) {
  */
 CompilerProto.destroy = function () {
     utils.log('compiler destroyed: ', this.vm.$el)
-    var i, key, dir, inss, binding
+    var i, key, dir, inss, binding,
         directives = this.directives,
         bindings = this.bindings,
         el = this.el
