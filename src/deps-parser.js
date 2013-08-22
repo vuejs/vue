@@ -19,6 +19,7 @@ var dummyEl = document.createElement('div'),
 function catchDeps (binding) {
     utils.log('\n─ ' + binding.key)
     observer.on('get', function (dep) {
+        if (binding.deps.indexOf(dep) !== -1) return
         utils.log('  └─ ' + dep.key)
         binding.deps.push(dep)
         dep.subs.push(binding)
@@ -95,7 +96,6 @@ function parseContextDependency (binding) {
         str  = fn.toString(),
         args = str.match(ARGS_RE)
     if (!args) return null
-    binding.isContextual = true
     var depsRE = new RegExp(args[1] + SCOPE_RE_STR, 'g'),
         matches = str.match(depsRE),
         base = args[1].length + 4

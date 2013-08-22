@@ -18,14 +18,11 @@ var VMProto = ViewModel.prototype
  */
 VMProto.$set = function (key, value) {
     var path = key.split('.'),
-        l = path.length - 1,
-        target = this,
-        level = 0
-    while (level < l) {
-        target = target[path[level]]
-        level++
+        obj = this
+    for (var d = 0, l = path.length - 1; d < l; d++) {
+        obj = obj[path[d]]
     }
-    target[path[level]] = value
+    obj[path[d]] = value
 }
 
 /*

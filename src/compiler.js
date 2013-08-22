@@ -464,8 +464,8 @@ CompilerProto.destroy = function () {
     }
     // unbind/unobserve all own bindings
     for (key in bindings) {
-        binding = bindings[key]
         if (bindings.hasOwnProperty(key)) {
+            binding = bindings[key]
             if (binding.root) {
                 Observer.unobserve(binding.value, binding.key, this.observer)
             }
