@@ -83,7 +83,7 @@ module.exports = {
         ctn.removeChild(this.el)
         this.collection = null
         this.vms = null
-        this.mutationListener = (function (mutation) {
+        this.mutationListener = (function (path, arr, mutation) {
             mutationHandlers[mutation.method].call(this, mutation)
         }).bind(this)
     },
@@ -102,7 +102,6 @@ module.exports = {
         this.collection = collection
         this.vms = []
 
-        console.log(collection)
         // listen for collection mutation events
         // the collection has been augmented during Binding.set()
         collection.__observer__.on('mutate', this.mutationListener)
@@ -120,16 +119,16 @@ module.exports = {
         this.container.insertBefore(node, ref)
         ViewModel = ViewModel || require('../viewmodel')
         var vmID = node.getAttribute(config.prefix + '-viewmodel'),
-            ChildVM = utils.getVM(vmID) || ViewModel
+            ChildVM = utils.getVM(vmID) || ViewModel,
+            wrappedData = {}
+        wrappedData[this.arg] = data
         var item = new ChildVM({
             el: node,
             each: true,
             eachPrefix: this.arg,
             parentCompiler: this.compiler,
             delegator: this.container,
-            data: {
-                todo: data
-            }
+            data: wrappedData
         })
         if (dummy) {
             item.$destroy()

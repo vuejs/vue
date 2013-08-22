@@ -101,10 +101,10 @@ function emitSet (obj, observer) {
 
 module.exports = {
 
-    observe: function (obj, path, observer) {
+    observe: function (obj, rawPath, observer) {
         if (isWatchable(obj)) {
-            path = path + '.'
-            var ob, alreadyConverted = !!obj.__observer__
+            var path = rawPath + '.',
+                ob, alreadyConverted = !!obj.__observer__
             if (!alreadyConverted) {
                 defProtected(obj, '__observer__', new Emitter())
             }
@@ -117,7 +117,15 @@ module.exports = {
                     observer.emit('set', path + key, val)
                 },
                 mutate: function (key, val, mutation) {
-                    observer.emit('mutate', path + key, val, mutation)
+                    // if the Array is a root value
+                    // the key will be null
+                    var fixedPath = key ? path + key : rawPath
+                    observer.emit('mutate', fixedPath, val, mutation)
+                    // also emit set for Array's length when it mutates
+                    var m = mutation.method
+                    if (m !== 'sort' && m !== 'reverse') {
+                        observer.emit('set', fixedPath + '.length', val.length)
+                    }
                 }
             }
             ob

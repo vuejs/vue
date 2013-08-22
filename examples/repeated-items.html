@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>SEED repeated items</title>
+        <meta charset="utf-8">
+    </head>
+    <body>
+        <div id="app">
+            <ul>
+                <li sd-each="item:items" sd-text="item.title"></li>
+            </ul>
+            <p>Total items: {{items.length}}</p>
+        </div>
+        <script src="../dist/seed.js"></script>
+        <script>
+
+            seed.config({debug: true})
+
+            var items = [
+                { title: 'hi' },
+                { title: 'ha' },
+                { title: 'hu' },
+                { title: 'ho' },
+                { title: 'he' }
+            ]
+
+            var test = {
+                test: [1, 2, 3]
+            }
+
+            var demo = new seed.ViewModel({
+                el: '#app',
+                data: {
+                    items: items,
+                    test: test
+                }
+            })
+        </script>
+    </body>
+</html>

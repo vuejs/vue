@@ -73,6 +73,7 @@ function Compiler (vm, options) {
     var observables = this.observables = []
     var computed = this.computed = [] // computed props to parse deps from
     var ctxBindings = this.contextBindings = [] // computed props with dynamic context
+    var arrays = this.arrays = []
 
     // prototypal inheritance of bindings
     var parent = this.parentCompiler
@@ -113,12 +114,18 @@ function Compiler (vm, options) {
         binding = observables[i]
         Observer.observe(binding.value, binding.key, this.observer)
     }
+    // emit set events for array lengths
+    i = arrays.length
+    while (i--) {
+        binding = arrays[i]
+        this.observer.emit('set', binding.key + '.length', binding.value.length)
+    }
     // extract dependencies for computed properties
     if (computed.length) DepsParser.parse(computed)
     // extract dependencies for computed properties with dynamic context
     if (ctxBindings.length) this.bindContexts(ctxBindings)
-
-    this.observables = this.computed = this.contextBindings = null
+    // unset these no longer needed stuff
+    this.observables = this.computed = this.contextBindings = this.arrays = null
 }
 
 var CompilerProto = Compiler.prototype
@@ -141,14 +148,17 @@ CompilerProto.setupObserver = function () {
     // add own listeners which trigger binding updates
     observer
         .on('get', function (key) {
-            if (depsOb.isObserving && bindings[key]) {
+            console.log('get ' + key)
+            if (bindings[key] && depsOb.isObserving) {
                 depsOb.emit('get', bindings[key])
             }
         })
         .on('set', function (key, val) {
+            console.log('set ' + key)
             if (bindings[key]) bindings[key].update(val)
         })
         .on('mutate', function (key) {
+            console.log('mutate ' + key)
             if (bindings[key]) bindings[key].pub()
         })
 }
@@ -300,7 +310,9 @@ CompilerProto.bindDirective = function (directive) {
     }
 
     // set initial value
-    directive.update(binding.value)
+    if (binding.value) {
+        directive.update(binding.value)
+    }
     if (binding.isComputed) {
         directive.refresh()
     }
@@ -375,13 +387,16 @@ CompilerProto.define = function (key, binding) {
             this.computed.push(binding)
         } else {
             // observe objects later, becase there might be more keys
-            // to be added to it
+            // to be added to it. we also want to emit all the set events
+            // when values are available.
             this.observables.push(binding)
         }
     } else if (type === 'Array') {
         // observe arrays right now, because they will be needed in
         // sd-each directives.
         Observer.observe(value, key, compiler.observer)
+        // we need to later emit set event for the arrays length.
+        this.arrays.push(binding)
     }
 
     Object.defineProperty(vm, key, {
