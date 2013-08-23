@@ -1,8 +1,5 @@
-- fix architecture: objects as single source of truth...
-- auto add .length binding for Arrays
-- $watch / $unwatch & $destroy(now much easier)
+- $watch / $unwatch (now much easier)
 - add a few util methods, e.g. extend, inherits, traverse
-- prototypal scope/binding inheritance (Object.create)
 - tests
 - docs
 - sd-with?

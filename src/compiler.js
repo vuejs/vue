@@ -73,7 +73,6 @@ function Compiler (vm, options) {
     var observables = this.observables = []
     var computed = this.computed = [] // computed props to parse deps from
     var ctxBindings = this.contextBindings = [] // computed props with dynamic context
-    var arrays = this.arrays = []
 
     // prototypal inheritance of bindings
     var parent = this.parentCompiler
@@ -114,12 +113,6 @@ function Compiler (vm, options) {
         binding = observables[i]
         Observer.observe(binding.value, binding.key, this.observer)
     }
-    // emit set events for array lengths
-    i = arrays.length
-    while (i--) {
-        binding = arrays[i]
-        this.observer.emit('set', binding.key + '.length', binding.value.length)
-    }
     // extract dependencies for computed properties
     if (computed.length) DepsParser.parse(computed)
     // extract dependencies for computed properties with dynamic context
@@ -148,17 +141,14 @@ CompilerProto.setupObserver = function () {
     // add own listeners which trigger binding updates
     observer
         .on('get', function (key) {
-            console.log('get ' + key)
             if (bindings[key] && depsOb.isObserving) {
                 depsOb.emit('get', bindings[key])
             }
         })
         .on('set', function (key, val) {
-            console.log('set ' + key)
             if (bindings[key]) bindings[key].update(val)
         })
         .on('mutate', function (key) {
-            console.log('mutate ' + key)
             if (bindings[key]) bindings[key].pub()
         })
 }
@@ -363,7 +353,9 @@ CompilerProto.ensurePath = function (key) {
         obj = obj[sec]
         i++
     }
-    obj[path[i]] = obj[path[i]] || undefined
+    if (utils.typeOf(obj) === 'Object') {
+        obj[path[i]] = obj[path[i]] || undefined
+    }
 }
 
 /*
@@ -379,24 +371,17 @@ CompilerProto.define = function (key, binding) {
         value = binding.value = vm[key], // save the value before redefinening it
         type = utils.typeOf(value)
 
-    if (type === 'Object') {
-        if (value.get) {// computed property
-            binding.isComputed = true
-            binding.rawGet = value.get
-            value.get = value.get.bind(vm)
-            this.computed.push(binding)
-        } else {
-            // observe objects later, becase there might be more keys
-            // to be added to it. we also want to emit all the set events
-            // when values are available.
-            this.observables.push(binding)
-        }
-    } else if (type === 'Array') {
-        // observe arrays right now, because they will be needed in
-        // sd-each directives.
-        Observer.observe(value, key, compiler.observer)
-        // we need to later emit set event for the arrays length.
-        this.arrays.push(binding)
+    if (type === 'Object' && value.get) {
+        // computed property
+        binding.isComputed = true
+        binding.rawGet = value.get
+        value.get = value.get.bind(vm)
+        this.computed.push(binding)
+    } else if (type === 'Object' || type === 'Array') {
+        // observe objects later, becase there might be more keys
+        // to be added to it. we also want to emit all the set events
+        // after all values are available.
+        this.observables.push(binding)
     }
 
     Object.defineProperty(vm, key, {
@@ -488,7 +473,9 @@ CompilerProto.destroy = function () {
         }
     }
     // remove el
-    el.parentNode.removeChild(el)
+    if (el.parentNode) {
+        el.parentNode.removeChild(el)
+    }
 }
 
 // Helpers --------------------------------------------------------------------

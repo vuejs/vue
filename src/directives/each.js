@@ -1,5 +1,7 @@
-var config = require('../config'),
-    utils  = require('../utils'),
+var config   = require('../config'),
+    utils    = require('../utils'),
+    Observer = require('../observer'),
+    Emitter  = require('emitter'),
     ViewModel // lazy def to avoid circular dependency
 
 /*
@@ -10,67 +12,72 @@ var mutationHandlers = {
 
     push: function (m) {
         var i, l = m.args.length,
-            baseIndex = this.collection.length - l
+            base = this.collection.length - l
         for (i = 0; i < l; i++) {
-            this.buildItem(this.ref, m.args[i], baseIndex + i)
+            this.buildItem(m.args[i], base + i)
         }
     },
 
-    pop: function (m) {
-        m.result.$destroy()
+    pop: function () {
+        this.vms.pop().$destroy()
     },
 
     unshift: function (m) {
-        var i, l = m.args.length, ref
+        var i, l = m.args.length
         for (i = 0; i < l; i++) {
-            ref = this.collection.length > l
-                ? this.collection[l].$el
-                : this.ref
-            this.buildItem(ref, m.args[i], i)
+            this.buildItem(m.args[i], i)
         }
-        this.updateIndexes()
     },
 
-    shift: function (m) {
-        m.result.$destroy()
-        this.updateIndexes()
+    shift: function () {
+        this.vms.shift().$destroy()
     },
 
     splice: function (m) {
-        var i, pos, ref,
-            l = m.args.length,
-            k = m.result.length,
-            index   = m.args[0],
+        var i,
+            index = m.args[0],
             removed = m.args[1],
-            added   = l - 2
-        for (i = 0; i < k; i++) {
-            m.result[i].$destroy()
+            added = m.args.length - 2,
+            removedVMs = this.vms.splice(index, removed)
+        for (i = 0; i < removed; i++) {
+            removedVMs[i].$destroy()
         }
-        if (added > 0) {
-            for (i = 2; i < l; i++) {
-                pos  = index - removed + added + 1
-                ref  = this.collection[pos]
-                     ? this.collection[pos].$el
-                     : this.ref
-                this.buildItem(ref, m.args[i], index + i)
-            }
-        }
-        if (removed !== added) {
-            this.updateIndexes()
+        for (i = 0; i < added; i++) {
+            this.buildItem(m.args[i + 2], index + i)
         }
     },
 
     sort: function () {
-        var i, l = this.collection.length, viewmodel
+        var key = this.arg,
+            vms = this.vms,
+            col = this.collection,
+            l = col.length,
+            sorted = new Array(l),
+            i, j, vm, data
         for (i = 0; i < l; i++) {
-            viewmodel = this.collection[i]
-            viewmodel.$index = i
-            this.container.insertBefore(viewmodel.$el, this.ref)
+            data = col[i]
+            for (j = 0; j < l; j++) {
+                vm = vms[j]
+                if (vm[key] === data) {
+                    sorted[i] = vm
+                    break
+                }
+            }
+        }
+        for (i = 0; i < l; i++) {
+            this.container.insertBefore(sorted[i].$el, this.ref)
+        }
+        this.vms = sorted
+    },
+
+    reverse: function () {
+        var vms = this.vms
+        vms.reverse()
+        for (var i = 0, l = vms.length; i < l; i++) {
+            this.container.insertBefore(vms[i].$el, this.ref)
         }
     }
 }
-
-//mutationHandlers.reverse = mutationHandlers.sort
 
 module.exports = {
 
@@ -83,9 +90,10 @@ module.exports = {
         ctn.removeChild(this.el)
         this.collection = null
         this.vms = null
-        this.mutationListener = (function (path, arr, mutation) {
-            mutationHandlers[mutation.method].call(this, mutation)
-        }).bind(this)
+        var self = this
+        this.mutationListener = function (path, arr, mutation) {
+            mutationHandlers[mutation.method].call(self, mutation)
+        }
     },
 
     update: function (collection) {
@@ -97,28 +105,28 @@ module.exports = {
         // force a compile so that we get all the bindings for
         // dependency extraction.
         if (!this.collection && !collection.length) {
-            this.buildItem(this.ref, null, true)
+            this.buildItem()
         }
         this.collection = collection
         this.vms = []
 
         // listen for collection mutation events
         // the collection has been augmented during Binding.set()
+        if (!collection.__observer__) Observer.watchArray(collection, null, new Emitter())
         collection.__observer__.on('mutate', this.mutationListener)
+        // this.compiler.observer.emit('set', this.key + '.length', collection.length)
 
         // create child-seeds and append to DOM
         for (var i = 0, l = collection.length; i < l; i++) {
-            var item = this.buildItem(this.ref, collection[i])
-            this.container.appendChild(item.$el)
-            this.vms.push(item)
+            this.buildItem(collection[i], i)
         }
     },
 
-    buildItem: function (ref, data, dummy) {
-        var node = this.el.cloneNode(true)
-        this.container.insertBefore(node, ref)
+    buildItem: function (data, index) {
         ViewModel = ViewModel || require('../viewmodel')
-        var vmID = node.getAttribute(config.prefix + '-viewmodel'),
+        var node = this.el.cloneNode(true),
+            ctn  = this.container,
+            vmID = node.getAttribute(config.prefix + '-viewmodel'),
             ChildVM = utils.getVM(vmID) || ViewModel,
             wrappedData = {}
         wrappedData[this.arg] = data
@@ -127,20 +135,17 @@ module.exports = {
             each: true,
             eachPrefix: this.arg,
             parentCompiler: this.compiler,
-            delegator: this.container,
+            delegator: ctn,
             data: wrappedData
         })
-        if (dummy) {
+        if (!data) {
             item.$destroy()
         } else {
-            return item
-        }
-    },
-
-    updateIndexes: function () {
-        var i = this.collection.length
-        while (i--) {
-            this.collection[i].$index = i
+            var ref = this.vms.length > index
+                ? this.vms[index].$el
+                : this.ref
+            ctn.insertBefore(node, ref)
+            this.vms.splice(index, 0, item)
         }
     },
 

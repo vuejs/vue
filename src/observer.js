@@ -45,7 +45,7 @@ function watchObject (obj, path, observer) {
 }
 
 function watchArray (arr, path, observer) {
-    defProtected(arr, '__path__', path)
+    if (path) defProtected(arr, '__path__', path)
     defProtected(arr, '__observer__', observer)
     for (var method in arrayMutators) {
         defProtected(arr, method, arrayMutators[method])
@@ -93,13 +93,20 @@ function isWatchable (obj) {
 }
 
 function emitSet (obj, observer) {
-    var values = obj.__values__
-    for (var key in values) {
-        observer.emit('set', key, values[key])
+    if (typeOf(obj) === 'Array') {
+        observer.emit('set', 'length', obj.length)
+    } else {
+        var values = obj.__values__
+        for (var key in values) {
+            observer.emit('set', key, values[key])
+        }
     }
 }
 
 module.exports = {
+
+    // used in sd-each
+    watchArray: watchArray,
 
     observe: function (obj, rawPath, observer) {
         if (isWatchable(obj)) {
@@ -133,7 +140,7 @@ module.exports = {
                 .on('set', proxies.set)
                 .on('mutate', proxies.mutate)
             if (alreadyConverted) {
-                emitSet(obj, ob)
+                emitSet(obj, ob, rawPath)
             } else {
                 watch(obj, null, ob)
             }

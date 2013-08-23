@@ -10,6 +10,17 @@
                 <li sd-each="item:items" sd-text="item.title"></li>
             </ul>
             <p>Total items: {{items.length}}</p>
+            <p>
+                <button sd-on="click:push">push</button>
+                <button sd-on="click:pop">pop</button>
+                <button sd-on="click:shift">shift</button>
+                <button sd-on="click:unshift">unshift</button>
+                <button sd-on="click:splice">splice</button>
+                <button sd-on="click:remove">remove</button>
+                <button sd-on="click:replace">replace</button>
+                <button sd-on="click:sort">sort</button>
+                <button sd-on="click:reverse">reverse</button>
+            </p>
         </div>
         <script src="../dist/seed.js"></script>
         <script>
@@ -17,24 +28,51 @@
             seed.config({debug: true})
 
             var items = [
-                { title: 'hi' },
-                { title: 'ha' },
-                { title: 'hu' },
-                { title: 'ho' },
-                { title: 'he' }
             ]
-
-            var test = {
-                test: [1, 2, 3]
-            }
 
             var demo = new seed.ViewModel({
                 el: '#app',
                 data: {
                     items: items,
-                    test: test
+                    push: function () {
+                        this.items.push({ title: randomChar() })
+                    },
+                    pop: function () {
+                        this.items.pop()
+                    },
+                    shift: function () {
+                        this.items.shift()
+                    },
+                    unshift: function () {
+                        this.items.unshift({ title: randomChar() })
+                    },
+                    splice: function () {
+                        this.items.splice(0, 1, { title: randomChar() }, { title: randomChar() })
+                    },
+                    replace: function () {
+                        this.items.replace(randomPos(), { title: randomChar() })
+                    },
+                    remove: function () {
+                        this.items.remove(randomPos())
+                    },
+                    sort: function () {
+                        this.items.sort(function (a, b) {
+                            return a.title.charCodeAt(0) - b.title.charCodeAt(0)
+                        })
+                    },
+                    reverse: function () {
+                        this.items.reverse()
+                    }
                 }
             })
+
+            function randomChar () {
+                return String.fromCharCode(Math.floor(Math.random() * 30 + 50))
+            }
+
+            function randomPos () {
+                return Math.floor(Math.random() * items.length)
+            }
         </script>
     </body>
 </html>
