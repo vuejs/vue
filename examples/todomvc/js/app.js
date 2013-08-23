@@ -1,21 +1,13 @@
-seed.config({ debug: true })
-
 var filters = {
     all: function () { return true },
     active: function (todo) { return !todo.completed },
     completed: function (todo) { return todo.completed }
 }
 
-var todos = [
-            {title: 'hi', completed: true},
-            {title: 'ha', completed: false},
-            {title: 'ho', completed: false},
-        ]
-
 var Todos = seed.ViewModel.extend({
 
     init: function () {
-        this.todos = todos//todoStorage.fetch()
+        this.todos = todoStorage.fetch()
         this.remaining = this.todos.filter(filters.active).length
         this.updateFilter()
     },
@@ -28,12 +20,8 @@ var Todos = seed.ViewModel.extend({
         },
 
         // computed properties ----------------------------------------------------
-        total: {get: function () {
-            return this.todos.length
-        }},
-
         completed: {get: function () {
-            return this.total - this.remaining
+            return this.todos.length - this.remaining
         }},
 
         // dynamic context computed property using info from target viewmodel
@@ -55,8 +43,8 @@ var Todos = seed.ViewModel.extend({
                 this.todos.forEach(function (todo) {
                     todo.completed = value
                 })
-                this.remaining = value ? 0 : this.total
-                todoStorage.save(this.todos)
+                this.remaining = value ? 0 : this.todos.length
+                todoStorage.save()
             }
         },
 
@@ -67,19 +55,19 @@ var Todos = seed.ViewModel.extend({
                 this.todos.unshift({ title: value, completed: false })
                 this.newTodo = ''
                 this.remaining++
-                todoStorage.save(this.todos)
+                todoStorage.save()
             }
         },
 
         removeTodo: function (e) {
             this.todos.remove(e.item)
             this.remaining -= e.item.completed ? 0 : 1
-            todoStorage.save(this.todos)
+            todoStorage.save()
         },
 
         toggleTodo: function (e) {
             this.remaining += e.item.completed ? -1 : 1
-            todoStorage.save(this.todos)
+            todoStorage.save()
         },
 
         editTodo: function (e) {
@@ -92,7 +80,7 @@ var Todos = seed.ViewModel.extend({
             e.item.editing = false
             e.item.title = e.item.title.trim()
             if (!e.item.title) this.removeTodo(e)
-            todoStorage.save(this.todos)
+            todoStorage.save()
         },
 
         cancelEdit: function (e) {
@@ -102,13 +90,12 @@ var Todos = seed.ViewModel.extend({
 
         removeCompleted: function () {
             this.todos = this.todos.filter(filters.active)
-            todoStorage.save(this.todos)
+            todoStorage.save()
         }
     }
 })
 
 var app = new Todos({ el: '#todoapp' })
-
 window.addEventListener('hashchange', function () {
     app.updateFilter()
 })

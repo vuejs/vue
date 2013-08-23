@@ -376,6 +376,7 @@ CompilerProto.define = function (key, binding) {
         binding.isComputed = true
         binding.rawGet = value.get
         value.get = value.get.bind(vm)
+        if (value.set) value.set = value.set.bind(vm)
         this.computed.push(binding)
     } else if (type === 'Object' || type === 'Array') {
         // observe objects later, becase there might be more keys

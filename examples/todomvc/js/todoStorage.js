@@ -1,10 +1,12 @@
 var todoStorage = (function () {
-    var STORAGE_KEY = 'todos-seedjs'
+    var STORAGE_KEY = 'todos-seedjs',
+        todos = null
     return {
         fetch: function () {
-            return JSON.parse(localStorage.getItem(this.STORAGE_KEY) || '[]')
+            if (!todos) todos = JSON.parse(localStorage.getItem(this.STORAGE_KEY) || '[]')
+            return todos
         },
-        save: function (todos) {
+        save: function () {
             localStorage.setItem(this.STORAGE_KEY, JSON.stringify(todos))
         }
     }
