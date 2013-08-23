@@ -1,3 +1,5 @@
+- fix todomvc example.
+- consult https://github.com/RubyLouvre/avalon/issues/11 to allow simple expressions in directives.
 - $watch / $unwatch (now much easier)
 - add a few util methods, e.g. extend, inherits, traverse
 - tests
