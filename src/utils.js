@@ -3,16 +3,17 @@ var config        = require('./config'),
     templates     = {},
     VMs           = {}
 
-/*
- *  get accurate type of an object
- */
-function typeOf (obj) {
-    return toString.call(obj).slice(8, -1)
-}
-
 module.exports = {
 
-    typeOf: typeOf,
+    typeOf: function (obj) {
+        return toString.call(obj).slice(8, -1)
+    },
+
+    extend: function (obj, ext) {
+        for (var key in ext) {
+            obj[key] = ext[key]
+        }
+    },
 
     collectTemplates: function () {
         var selector = 'script[type="text/' + config.prefix + '-template"]',

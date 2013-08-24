@@ -22,17 +22,11 @@ function Compiler (vm, options) {
 
     // copy options
     options = options || {}
-    for (var key in options) {
-        this[key] = options[key]
-    }
+    utils.extend(this, options)
 
     // copy data if any
     var data = options.data
-    if (data) {
-        for (key in data) {
-            vm[key] = data[key]
-        }
-    }
+    if (data) utils.extend(vm, data)
 
     // determine el
     var tpl = options.template,
@@ -96,7 +90,7 @@ function Compiler (vm, options) {
     this.compileNode(this.el, true)
 
     // for anything in viewmodel but not binded in DOM, also create bindings for them
-    for (key in vm) {
+    for (var key in vm) {
         if (vm.hasOwnProperty(key) &&
             key.charAt(0) !== '$' &&
             !this.bindings.hasOwnProperty(key))

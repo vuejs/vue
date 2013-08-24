@@ -8,35 +8,29 @@ var KEY_RE          = /^[^\|<]+/,
     FILTERS_RE      = /\|[^\|<]+/g,
     FILTER_TOKEN_RE = /[^\s']+|'[^']+'/g,
     INVERSE_RE      = /^!/,
-    NESTING_RE      = /^\^+/,
-    ONEWAY_RE       = /-oneway$/
+    NESTING_RE      = /^\^+/
 
 /*
  *  Directive class
  *  represents a single directive instance in the DOM
  */
-function Directive (directiveName, expression, oneway) {
+function Directive (directiveName, expression) {
 
-    var prop,
-        definition = directives[directiveName]
+    var definition = directives[directiveName]
 
     // mix in properties from the directive definition
     if (typeof definition === 'function') {
         this._update = definition
     } else {
-        this._update = definition.update
-        for (prop in definition) {
-            if (prop !== 'update') {
-                if (prop === 'unbind') {
-                    this._unbind = definition[prop]
-                } else {
-                    this[prop] = definition[prop]
-                }
+        for (var prop in definition) {
+            if (prop === 'unbind' || prop === 'update') {
+                this['_' + prop] = definition[prop]
+            } else {
+                this[prop] = definition[prop]
             }
         }
     }
 
-    this.oneway        = !!oneway
     this.directiveName = directiveName
     this.expression    = expression.trim()
     this.rawKey        = expression.match(KEY_RE)[0].trim()
@@ -182,11 +176,6 @@ module.exports = {
         if (dirname.indexOf(prefix) === -1) return null
         dirname = dirname.slice(prefix.length + 1)
 
-        var oneway = ONEWAY_RE.test(dirname)
-        if (oneway) {
-            dirname = dirname.slice(0, -7)
-        }
-
         var dir   = directives[dirname],
             valid = KEY_RE.test(expression)
 
@@ -194,7 +183,7 @@ module.exports = {
         if (!valid) utils.warn('invalid directive expression: ' + expression)
 
         return dir && valid
-            ? new Directive(dirname, expression, oneway)
+            ? new Directive(dirname, expression)
             : null
     }
 }

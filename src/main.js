@@ -40,11 +40,7 @@ api.filter = function (name, fn) {
  *  Set config options
  */
 api.config = function (opts) {
-    if (opts) {
-        for (var key in opts) {
-            config[key] = opts[key]
-        }
-    }
+    if (opts) utils.extend(config, opts)
     textParser.buildRegex()
 }
 
@@ -79,13 +75,9 @@ ViewModel.extend = function (options) {
         }
         ViewModel.call(this, opts)
     }
-    var p = ExtendedVM.prototype = Object.create(ViewModel.prototype)
-    p.constructor = ExtendedVM
-    if (options.props) {
-        for (var prop in options.props) {
-            p[prop] = options.props[prop]
-        }
-    }
+    var proto = ExtendedVM.prototype = Object.create(ViewModel.prototype)
+    proto.constructor = ExtendedVM
+    if (options.props) utils.extend(proto, options.props)
     if (options.id) {
         utils.registerVM(options.id, ExtendedVM)
     }

@@ -5,7 +5,7 @@ var Emitter  = require('emitter'),
 
 var dummyEl = document.createElement('div'),
     ARGS_RE = /^function\s*?\((.+?)[\),]/,
-    SCOPE_RE_STR = '\\.vm\\.[\\.A-Za-z0-9_][\\.A-Za-z0-9_$]*',
+    SCOPE_RE_STR = '\\.vm\\.[\\.\\w][\\.\\w$]*',
     noop = function () {}
 
 /*
