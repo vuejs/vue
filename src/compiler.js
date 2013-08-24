@@ -294,17 +294,17 @@ CompilerProto.bindDirective = function (directive) {
         }
     }
 
+    var value = binding.value
     // invoke bind hook if exists
     if (directive.bind) {
-        directive.bind(binding.value)
+        directive.bind(value)
     }
 
     // set initial value
-    if (binding.value) {
-        directive.update(binding.value)
-    }
     if (binding.isComputed) {
-        directive.refresh()
+        directive.refresh(value)
+    } else {
+        directive.update(value)
     }
 }
 

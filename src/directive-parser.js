@@ -56,8 +56,8 @@ var DirProto = Directive.prototype
  *  for computed properties, this will only be called once
  *  during initialization.
  */
-DirProto.update = function (value) {
-    if (value && (value === this.value)) return
+DirProto.update = function (value, init) {
+    if (!init && value === this.value) return
     this.value = value
     this.apply(value)
 }
@@ -66,14 +66,15 @@ DirProto.update = function (value) {
  *  -- computed property only --
  *  called when a dependency has changed
  */
-DirProto.refresh = function () {
+DirProto.refresh = function (value) {
     // pass element and viewmodel info to the getter
     // enables powerful context-aware bindings
-    var value = this.value.get({
+    if (value) this.value = value
+    value = this.value.get({
         el: this.el,
         vm: this.vm
     })
-    if (value === this.computedValue) return
+    if (value && value === this.computedValue) return
     this.computedValue = value
     this.apply(value)
     this.binding.pub()
