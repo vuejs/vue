@@ -3,22 +3,8 @@ var config      = require('./config'),
     directives  = require('./directives'),
     filters     = require('./filters'),
     textParser  = require('./text-parser'),
-    utils       = require('./utils')
-
-var eventbus    = utils.eventbus,
+    utils       = require('./utils'),
     api         = {}
-
-/*
- *  expose utils
- */
-api.utils = utils
-
-/*
- *  broadcast event
- */
-api.broadcast = function () {
-    eventbus.emit.apply(eventbus, arguments)
-}
 
 /*
  *  Allows user to create a custom directive
