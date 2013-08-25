@@ -1,5 +1,7 @@
 module.exports = function( grunt ) {
 
+    var fs = require('fs')
+
     grunt.initConfig({
 
         component_build: {
@@ -69,10 +71,9 @@ module.exports = function( grunt ) {
     grunt.loadNpmTasks( 'grunt-component-build' )
     grunt.loadNpmTasks( 'grunt-mocha' )
     grunt.registerTask( 'test', ['mocha'] )
-    grunt.registerTask( 'default', ['jshint', 'component_build:build'] )
+    grunt.registerTask( 'default', ['jshint', 'component_build:build', 'uglify'] )
 
     grunt.registerTask( 'version', function (version) {
-        var fs = require('fs')
         ;['package', 'bower', 'component'].forEach(function (file) {
             file = './' + file + '.json'
             var json = fs.readFileSync(file, 'utf-8')

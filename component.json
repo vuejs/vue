@@ -11,6 +11,7 @@
         "src/binding.js",
         "src/observer.js",
         "src/directive-parser.js",
+        "src/exp-parser.js",
         "src/text-parser.js",
         "src/deps-parser.js",
         "src/filters.js",
