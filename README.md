@@ -1,14 +1,13 @@
 # Seed (WIP)
 ## a mini MVVM framework
 
-- 7kb gzipped, no dependency.
+- 8kb gzipped, no dependency.
 - DOM based templates with precise and efficient manipulation
 - POJSO (Plain Old JavaScript Objects) Models FTW - even nested objects.
-- Logic-less templating which enforces separation of concerns.
 - Auto dependency extraction for computed properties.
-- Computed properties can have dynamic context.
 - Auto event delegation on repeated items.
-- [Component](https://github.com/component/component) based, can be used as a CommonJS module but can also be used alone.
+- Flexible API.
+- [Component](https://github.com/component/component) based, can be used as a CommonJS module or as a standalone library.
 
 ### Browser Support
 
