@@ -29,7 +29,7 @@
                         class="todo"
                         sd-each="todo:todos"
                         sd-show="todoFilter(todo)"
-                        sd-class="completed:todo.completed, editing:todo.editing"
+                        sd-class="completed:todo.completed, editing:editedTodo===todo"
                     >
                         <div class="view">
                             <input
@@ -44,7 +44,7 @@
                         <input
                             class="edit"
                             type="text"
-                            sd-focus="todo.editing"
+                            sd-focus="editedTodo===todo"
                             sd-on="blur:doneEdit, keyup:doneEdit | key enter, keyup:cancelEdit | key esc"
                             sd-value="todo.title"
                         >

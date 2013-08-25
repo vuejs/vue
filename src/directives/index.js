@@ -30,7 +30,7 @@ module.exports = {
     focus: function (value) {
         var el = this.el
         setTimeout(function () {
-            el[value ? 'focus' : 'focus']()
+            if (value) el.focus()
         }, 0)
     },
 

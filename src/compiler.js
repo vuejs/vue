@@ -391,7 +391,9 @@ CompilerProto.define = function (key, binding) {
         enumerable: true,
         get: function () {
             var value = binding.value
-            if ((!binding.isComputed && (value === undefined || !value.__observer__)) || Array.isArray(value)) {
+            if ((!binding.isComputed &&
+                (value === undefined || value === null || !value.__observer__)) ||
+                Array.isArray(value)) {
                 // only emit non-computed, non-observed (tip) values, or Arrays.
                 // because these are the cleanest dependencies
                 compiler.observer.emit('get', key)

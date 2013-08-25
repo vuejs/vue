@@ -1,6 +1,4 @@
-/*
- *  Variable extraction scooped from https://github.com/RubyLouvre/avalon 
- */
+// Variable extraction scooped from https://github.com/RubyLouvre/avalon 
 var KEYWORDS =
         // keywords
         'break,case,catch,continue,debugger,default,delete,do,else,false'
@@ -32,7 +30,13 @@ function getVariables (code) {
 }
 
 module.exports = {
-    parseGetter: function (exp) {
+
+    /*
+     *  Parse and create an anonymous computed property getter function
+     *  from an arbitrary expression.
+     */
+    parseGetter: function (exp, compiler) {
+        // extract variable names
         var vars = getVariables(exp)
         if (!vars.length) return null
         var args = [],
@@ -40,9 +44,15 @@ module.exports = {
             hash = {}
         while (i--) {
             v = vars[i]
+            // avoid duplicate keys
             if (hash[v]) continue
             hash[v] = 1
+            // push assignment
             args.push(v + '=this.$get("' + v + '")')
+            // need to create the binding if it does not exist yet
+            if (!compiler.bindings[v]) {
+                compiler.rootCompiler.createBinding(v)
+            }
         }
         args = 'var ' + args.join(',') + ';return ' + exp
         /* jshint evil: true */

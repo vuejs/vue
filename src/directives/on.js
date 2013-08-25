@@ -64,7 +64,7 @@ module.exports = {
                 if (compiler.each) {
                     e.item = vm[compiler.eachPrefix]
                 }
-                handler.call(vm, e)
+                handler.call(ownerVM, e)
             }
             this.el.addEventListener(event, this.handler)
 
