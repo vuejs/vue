@@ -1,18 +1,17 @@
 seed.config({ debug: false })
 
 var filters = {
-    all: function () { return true },
-    active: function (val) { return !val },
-    completed: function (val) { return val }
+    // need to access todo.completed in here so Seed.js can capture dependency.
+    all: function (todo) { return todo.completed || true },
+    active: function (todo) { return !todo.completed },
+    completed: function (todo) { return todo.completed }
 }
 
 var Todos = seed.ViewModel.extend({
 
     init: function () {
         this.todos = todoStorage.fetch()
-        this.remaining = this.todos.filter(function (todo) {
-            return filters.active(todo.completed)
-        }).length
+        this.remaining = this.todos.filter(filters.active).length
         this.updateFilter()
     },
 
@@ -64,9 +63,7 @@ var Todos = seed.ViewModel.extend({
         },
 
         removeCompleted: function () {
-            this.todos.mutateFilter(function (todo) {
-                return filters.active(todo.completed)
-            })
+            this.todos.mutateFilter(filters.active)
             todoStorage.save()
         },
 
