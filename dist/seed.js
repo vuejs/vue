@@ -675,9 +675,11 @@ CompilerProto.setupObserver = function () {
             }
         })
         .on('set', function (key, val) {
+            observer.emit('change:' + key, val)
             if (bindings[key]) bindings[key].update(val)
         })
-        .on('mutate', function (key) {
+        .on('mutate', function (key, val, mutation) {
+            observer.emit('change:' + key, val, mutation)
             if (bindings[key]) bindings[key].pub()
         })
 }
@@ -926,7 +928,9 @@ CompilerProto.define = function (key, binding) {
         enumerable: true,
         get: function () {
             var value = binding.value
-            if ((!binding.isComputed && (value === undefined || !value.__observer__)) || Array.isArray(value)) {
+            if ((!binding.isComputed &&
+                (value === undefined || value === null || !value.__observer__)) ||
+                Array.isArray(value)) {
                 // only emit non-computed, non-observed (tip) values, or Arrays.
                 // because these are the cleanest dependencies
                 compiler.observer.emit('get', key)
@@ -1000,6 +1004,8 @@ CompilerProto.bindContexts = function (bindings) {
  */
 CompilerProto.destroy = function () {
     utils.log('compiler destroyed: ', this.vm.$el)
+    // unwatch
+    this.observer.off()
     var i, key, dir, inss, binding,
         directives = this.directives,
         exps = this.expressions,
@@ -1114,15 +1120,15 @@ VMProto.$get = function (key) {
  *  watch a key on the viewmodel for changes
  *  fire callback with new value
  */
-VMProto.$watch = function () {
-    // TODO just listen on this.$compiler.observer
+VMProto.$watch = function (key, callback) {
+    this.$compiler.observer.on('change:' + key, callback)
 }
 
 /*
  *  remove watcher
  */
-VMProto.$unwatch = function () {
-    // TODO
+VMProto.$unwatch = function (key, callback) {
+    this.$compiler.observer.off('change:' + key, callback)
 }
 
 /*
@@ -1578,9 +1584,7 @@ module.exports = {
 }
 });
 require.register("seed/src/exp-parser.js", function(exports, require, module){
-/*
- *  Variable extraction scooped from https://github.com/RubyLouvre/avalon 
- */
+// Variable extraction scooped from https://github.com/RubyLouvre/avalon 
 var KEYWORDS =
         // keywords
         'break,case,catch,continue,debugger,default,delete,do,else,false'
@@ -1612,7 +1616,13 @@ function getVariables (code) {
 }
 
 module.exports = {
-    parseGetter: function (exp) {
+
+    /*
+     *  Parse and create an anonymous computed property getter function
+     *  from an arbitrary expression.
+     */
+    parseGetter: function (exp, compiler) {
+        // extract variable names
         var vars = getVariables(exp)
         if (!vars.length) return null
         var args = [],
@@ -1620,9 +1630,15 @@ module.exports = {
             hash = {}
         while (i--) {
             v = vars[i]
+            // avoid duplicate keys
             if (hash[v]) continue
             hash[v] = 1
+            // push assignment
             args.push(v + '=this.$get("' + v + '")')
+            // need to create the binding if it does not exist yet
+            if (!compiler.bindings[v]) {
+                compiler.rootCompiler.createBinding(v)
+            }
         }
         args = 'var ' + args.join(',') + ';return ' + exp
         /* jshint evil: true */
@@ -1878,7 +1894,7 @@ module.exports = {
     focus: function (value) {
         var el = this.el
         setTimeout(function () {
-            el[value ? 'focus' : 'focus']()
+            if (value) el.focus()
         }, 0)
     },
 
@@ -2211,7 +2227,7 @@ module.exports = {
                 if (compiler.each) {
                     e.item = vm[compiler.eachPrefix]
                 }
-                handler.call(vm, e)
+                handler.call(ownerVM, e)
             }
             this.el.addEventListener(event, this.handler)
 

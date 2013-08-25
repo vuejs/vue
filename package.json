@@ -1,6 +1,6 @@
 {
     "name": "seed-mvvm",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "main": "dist/seed.js",
     "devDependencies": {
         "grunt": "~0.4.1",

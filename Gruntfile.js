@@ -71,7 +71,12 @@ module.exports = function( grunt ) {
     grunt.loadNpmTasks( 'grunt-component-build' )
     grunt.loadNpmTasks( 'grunt-mocha' )
     grunt.registerTask( 'test', ['mocha'] )
-    grunt.registerTask( 'default', ['jshint', 'component_build:build', 'uglify'] )
+    grunt.registerTask( 'default', [
+        'jshint',
+        'component_build:build',
+        //'test',
+        'uglify'
+    ])
 
     grunt.registerTask( 'version', function (version) {
         ;['package', 'bower', 'component'].forEach(function (file) {
@@ -83,13 +88,7 @@ module.exports = function( grunt ) {
     })
 
     grunt.registerTask( 'release', function (version) {
-        grunt.task.run([
-            'jshint',
-            'component_build:build',
-            //'test',
-            'uglify',
-            'version:' + version
-        ])
+        grunt.task.run(['default', 'version:' + version])
     })
     
 }
