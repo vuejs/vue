@@ -1,6 +1,7 @@
 {
-    "name": "seed",
+    "name": "seed-mvvm",
     "version": "0.3.0",
+    "main": "dist/seed.js",
     "devDependencies": {
         "grunt": "~0.4.1",
         "grunt-contrib-watch": "~0.4.4",
