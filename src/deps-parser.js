@@ -18,8 +18,10 @@ var dummyEl = document.createElement('div'),
  */
 function catchDeps (binding) {
     utils.log('\n─ ' + binding.key)
+    var depsHash = {}
     observer.on('get', function (dep) {
-        if (binding.deps.indexOf(dep) !== -1) return
+        if (depsHash[dep.key]) return
+        depsHash[dep.key] = 1
         utils.log('  └─ ' + dep.key)
         binding.deps.push(dep)
         dep.subs.push(binding)
@@ -31,33 +33,6 @@ function catchDeps (binding) {
     })
     observer.off('get')
 }
-
-// Second pass seems no longer necessary because now we have control
-// over what values to emit (only non-computed values)
-
-/*
- *  The second pass of dependency extraction.
- *  Only include dependencies that don't have dependencies themselves.
- */
-// function filterDeps (binding) {
-//     var i = binding.deps.length, dep
-//     utils.log('\n─ ' + binding.key)
-//     while (i--) {
-//         dep = binding.deps[i]
-//         if (!dep.deps.length) {
-//             utils.log('  └─ ' + dep.key)
-//             dep.subs.push(binding)
-//         } else {
-//             binding.deps.splice(i, 1)
-//         }
-//     }
-//     var ctxDeps = binding.contextDeps
-//     if (!ctxDeps || !config.debug) return
-//     i = ctxDeps.length
-//     while (i--) {
-//         utils.log('  └─ ctx:' + ctxDeps[i])
-//     }
-// }
 
 /*
  *  We need to invoke each binding's getter for dependency parsing,
@@ -126,7 +101,6 @@ module.exports = {
         utils.log('\nparsing dependencies...')
         observer.isObserving = true
         bindings.forEach(catchDeps)
-        //bindings.forEach(filterDeps)
         observer.isObserving = false
         utils.log('\ndone.')
     }

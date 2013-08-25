@@ -13,6 +13,12 @@ var arrayMutators = {
     replace: function (index, data) {
         if (typeof index !== 'number') index = this.indexOf(index)
         this.splice(index, 1, data)
+    },
+    mutateFilter: function (fn) {
+        var i = this.length
+        while (i--) {
+            if (!fn(this[i])) this.splice(i, 1)
+        }
     }
 }
 

@@ -1,14 +1,18 @@
+seed.config({ debug: false })
+
 var filters = {
     all: function () { return true },
-    active: function (todo) { return !todo.completed },
-    completed: function (todo) { return todo.completed }
+    active: function (val) { return !val },
+    completed: function (val) { return val }
 }
 
 var Todos = seed.ViewModel.extend({
 
     init: function () {
         this.todos = todoStorage.fetch()
-        this.remaining = this.todos.filter(filters.active).length
+        this.remaining = this.todos.filter(function (todo) {
+            return filters.active(todo.completed)
+        }).length
         this.updateFilter()
     },
 
@@ -17,38 +21,9 @@ var Todos = seed.ViewModel.extend({
         updateFilter: function () {
             var filter = location.hash.slice(2)
             this.filter = (filter in filters) ? filter : 'all'
+            this.todoFilter = filters[this.filter]
         },
 
-        // computed properties ----------------------------------------------------
-        completed: {get: function () {
-            return this.todos.length - this.remaining
-        }},
-
-        // dynamic context computed property using info from target viewmodel
-        todoFiltered: {get: function (ctx) {
-            return filters[this.filter]({ completed: ctx.vm.todo.completed })
-        }},
-
-        // dynamic context computed property using info from target element
-        filterSelected: {get: function (ctx) {
-            return this.filter === ctx.el.textContent.toLowerCase()
-        }},
-
-        // two-way computed property with both getter and setter
-        allDone: {
-            get: function () {
-                return this.remaining === 0
-            },
-            set: function (value) {
-                this.todos.forEach(function (todo) {
-                    todo.completed = value
-                })
-                this.remaining = value ? 0 : this.todos.length
-                todoStorage.save()
-            }
-        },
-
-        // event handlers ---------------------------------------------------------
         addTodo: function () {
             var value = this.newTodo && this.newTodo.trim()
             if (value) {
@@ -89,8 +64,23 @@ var Todos = seed.ViewModel.extend({
         },
 
         removeCompleted: function () {
-            this.todos = this.todos.filter(filters.active)
+            this.todos.mutateFilter(function (todo) {
+                return filters.active(todo.completed)
+            })
             todoStorage.save()
+        },
+
+        allDone: {
+            get: function () {
+                return this.remaining === 0
+            },
+            set: function (value) {
+                this.todos.forEach(function (todo) {
+                    todo.completed = value
+                })
+                this.remaining = value ? 0 : this.todos.length
+                todoStorage.save()
+            }
         }
     }
 })

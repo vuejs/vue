@@ -5,10 +5,10 @@ var config     = require('./config'),
 
 var KEY_RE          = /^[^\|<]+/,
     ARG_RE          = /([^:]+):(.+)$/,
-    FILTERS_RE      = /\|[^\|<]+/g,
+    FILTERS_RE      = /[^\|]\|[^\|<]+/g,
     FILTER_TOKEN_RE = /[^\s']+|'[^']+'/g,
-    INVERSE_RE      = /^!/,
-    NESTING_RE      = /^\^+/
+    NESTING_RE      = /^\^+/,
+    SINGLE_VAR_RE   = /^[\w\.]+$/
 
 /*
  *  Directive class
@@ -36,6 +36,7 @@ function Directive (directiveName, expression) {
     this.rawKey        = expression.match(KEY_RE)[0].trim()
     
     this.parseKey(this.rawKey)
+    this.isExp = !SINGLE_VAR_RE.test(this.key)
     
     var filterExps = expression.match(FILTERS_RE)
     this.filters = filterExps
@@ -44,6 +45,58 @@ function Directive (directiveName, expression) {
 }
 
 var DirProto = Directive.prototype
+
+/*
+ *  parse a key, extract argument and nesting/root info
+ */
+DirProto.parseKey = function (rawKey) {
+
+    var argMatch = rawKey.match(ARG_RE)
+
+    var key = argMatch
+        ? argMatch[2].trim()
+        : rawKey.trim()
+
+    this.arg = argMatch
+        ? argMatch[1].trim()
+        : null
+
+    var nesting = key.match(NESTING_RE)
+    this.nesting = nesting
+        ? nesting[0].length
+        : false
+
+    this.root = key.charAt(0) === '$'
+
+    if (this.nesting) {
+        key = key.replace(NESTING_RE, '')
+    } else if (this.root) {
+        key = key.slice(1)
+    }
+
+    this.key = key
+}
+
+
+/*
+ *  parse a filter expression
+ */
+function parseFilter (filter) {
+
+    var tokens = filter.slice(2)
+        .match(FILTER_TOKEN_RE)
+        .map(function (token) {
+            return token.replace(/'/g, '').trim()
+        })
+
+    return {
+        name  : tokens[0],
+        apply : filters[tokens[0]],
+        args  : tokens.length > 1
+                ? tokens.slice(1)
+                : null
+    }
+}
 
 /*
  *  called when a new value is set 
@@ -78,7 +131,6 @@ DirProto.refresh = function (value) {
  *  Actually invoking the _update from the directive's definition
  */
 DirProto.apply = function (value) {
-    if (this.inverse) value = !value
     this._update(
         this.filters
         ? this.applyFilters(value)
@@ -93,46 +145,10 @@ DirProto.applyFilters = function (value) {
     var filtered = value, filter
     for (var i = 0, l = this.filters.length; i < l; i++) {
         filter = this.filters[i]
-        if (!filter.apply) throw new Error('Unknown filter: ' + filter.name)
+        if (!filter.apply) utils.warn('Unknown filter: ' + filter.name)
         filtered = filter.apply(filtered, filter.args)
     }
     return filtered
-}
-
-/*
- *  parse a key, extract argument and nesting/root info
- */
-DirProto.parseKey = function (rawKey) {
-
-    var argMatch = rawKey.match(ARG_RE)
-
-    var key = argMatch
-        ? argMatch[2].trim()
-        : rawKey.trim()
-
-    this.arg = argMatch
-        ? argMatch[1].trim()
-        : null
-
-    this.inverse = INVERSE_RE.test(key)
-    if (this.inverse) {
-        key = key.slice(1)
-    }
-
-    var nesting = key.match(NESTING_RE)
-    this.nesting = nesting
-        ? nesting[0].length
-        : false
-
-    this.root = key.charAt(0) === '$'
-
-    if (this.nesting) {
-        key = key.replace(NESTING_RE, '')
-    } else if (this.root) {
-        key = key.slice(1)
-    }
-
-    this.key = key
 }
 
 /*
@@ -142,26 +158,6 @@ DirProto.unbind = function (update) {
     if (!this.el) return
     if (this._unbind) this._unbind(update)
     if (!update) this.vm = this.el = this.binding = this.compiler = null
-}
-
-/*
- *  parse a filter expression
- */
-function parseFilter (filter) {
-
-    var tokens = filter.slice(1)
-        .match(FILTER_TOKEN_RE)
-        .map(function (token) {
-            return token.replace(/'/g, '').trim()
-        })
-
-    return {
-        name  : tokens[0],
-        apply : filters[tokens[0]],
-        args  : tokens.length > 1
-                ? tokens.slice(1)
-                : null
-    }
 }
 
 module.exports = {

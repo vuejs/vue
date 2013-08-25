@@ -129,7 +129,7 @@ module.exports = {
             vmID = node.getAttribute(config.prefix + '-viewmodel'),
             ChildVM = utils.getVM(vmID) || ViewModel,
             wrappedData = {}
-        wrappedData[this.arg] = data
+        wrappedData[this.arg] = data || {}
         var item = new ChildVM({
             el: node,
             each: true,

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title></title>
+        <meta charset="utf-8">
+    </head>
+    <body>
+        <div id="demo">
+            <p sd-text="one + ' ' + two + '!'"></p>
+            <input sd-value="one"> <input sd-value="two">
+        </div>
+        <script src="../dist/seed.js"></script>
+        <script>
+            seed.config({ debug: true })
+            var demo = new seed.ViewModel({
+                el: '#demo',
+                data: {
+                    one: 'Hello',
+                    two: 'World'
+                }
+            })
+        </script>
+    </body>
+</html>

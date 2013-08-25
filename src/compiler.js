@@ -6,6 +6,7 @@ var Emitter         = require('emitter'),
     DirectiveParser = require('./directive-parser'),
     TextParser      = require('./text-parser'),
     DepsParser      = require('./deps-parser'),
+    ExpParser       = require('./exp-parser'),
     slice           = Array.prototype.slice,
     vmAttr,
     eachAttr
@@ -60,6 +61,8 @@ function Compiler (vm, options) {
     this.vm         = vm
     this.el         = el
     this.directives = []
+    // anonymous expression bindings that needs to be unbound during destroy()
+    this.expressions = []
 
     // Store things during parsing to be processed afterwards,
     // because we want to have created all bindings before
@@ -85,19 +88,16 @@ function Compiler (vm, options) {
         options.init.apply(vm, options.args || [])
     }
 
-    // now parse the DOM, during which we will create necessary bindings
-    // and bind the parsed directives
-    this.compileNode(this.el, true)
-
-    // for anything in viewmodel but not binded in DOM, also create bindings for them
+    // create bindings for keys set on the vm by the user
     for (var key in vm) {
-        if (vm.hasOwnProperty(key) &&
-            key.charAt(0) !== '$' &&
-            !this.bindings.hasOwnProperty(key))
-        {
+        if (key.charAt(0) !== '$') {
             this.createBinding(key)
         }
     }
+
+    // now parse the DOM, during which we will create necessary bindings
+    // and bind the parsed directives
+    this.compileNode(this.el, true)
 
     // observe root values so that they emit events when
     // their nested values change (for an Object)
@@ -261,7 +261,9 @@ CompilerProto.bindDirective = function (directive) {
         compiler = traceOwnerCompiler(directive, this)
 
     var binding
-    if (compiler.vm.hasOwnProperty(baseKey)) {
+    if (directive.isExp) {
+        binding = this.createBinding(key, true)
+    } else if (compiler.vm.hasOwnProperty(baseKey)) {
         // if the value is present in the target VM, we create the binding on its compiler
         binding = compiler.bindings.hasOwnProperty(key)
             ? compiler.bindings[key]
@@ -305,27 +307,39 @@ CompilerProto.bindDirective = function (directive) {
 /*
  *  Create binding and attach getter/setter for a key to the viewmodel object
  */
-CompilerProto.createBinding = function (key) {
-    
-    utils.log('  created binding: ' + key)
-
-    // make sure the key exists in the object so it can be observed
-    // by the Observer!
-    this.ensurePath(key)
+CompilerProto.createBinding = function (key, isExp) {
 
     var bindings = this.bindings,
-        binding = new Binding(this, key)
-    bindings[key] = binding
+        binding  = new Binding(this, key, isExp)
 
-    if (binding.root) {
-        // this is a root level binding. we need to define getter/setters for it.
-        this.define(key, binding)
+    if (binding.isExp) {
+        // a complex expression binding
+        // we need to generate an anonymous computed property for it
+        var getter = ExpParser.parseGetter(key, this)
+        if (getter) {
+            utils.log('  created anonymous binding: ' + key)
+            binding.value = { get: getter }
+            this.markComputed(binding)
+            this.expressions.push(binding)
+        } else {
+            utils.warn('  invalid expression: ' + key)
+        }
     } else {
-        var parentKey = key.slice(0, key.lastIndexOf('.'))
-        if (!bindings.hasOwnProperty(parentKey)) {
-            // this is a nested value binding, but the binding for its parent
-            // has not been created yet. We better create that one too.
-            this.createBinding(parentKey)
+        utils.log('  created binding: ' + key)
+        bindings[key] = binding
+        // make sure the key exists in the object so it can be observed
+        // by the Observer!
+        this.ensurePath(key)
+        if (binding.root) {
+            // this is a root level binding. we need to define getter/setters for it.
+            this.define(key, binding)
+        } else {
+            var parentKey = key.slice(0, key.lastIndexOf('.'))
+            if (!bindings.hasOwnProperty(parentKey)) {
+                // this is a nested value binding, but the binding for its parent
+                // has not been created yet. We better create that one too.
+                this.createBinding(parentKey)
+            }
         }
     }
     return binding
@@ -338,17 +352,15 @@ CompilerProto.createBinding = function (key) {
  *  any given path.
  */
 CompilerProto.ensurePath = function (key) {
-    var path = key.split('.'), sec,
-        i = 0, depth = path.length - 1,
-        obj = this.vm
-    while (i < depth) {
+    var path = key.split('.'), sec, obj = this.vm
+    for (var i = 0, d = path.length - 1; i < d; i++) {
         sec = path[i]
         if (!obj[sec]) obj[sec] = {}
         obj = obj[sec]
-        i++
     }
     if (utils.typeOf(obj) === 'Object') {
-        obj[path[i]] = obj[path[i]] || undefined
+        sec = path[i]
+        if (!(sec in obj)) obj[sec] = undefined
     }
 }
 
@@ -367,11 +379,7 @@ CompilerProto.define = function (key, binding) {
 
     if (type === 'Object' && value.get) {
         // computed property
-        binding.isComputed = true
-        binding.rawGet = value.get
-        value.get = value.get.bind(vm)
-        if (value.set) value.set = value.set.bind(vm)
-        this.computed.push(binding)
+        this.markComputed(binding)
     } else if (type === 'Object' || type === 'Array') {
         // observe objects later, becase there might be more keys
         // to be added to it. we also want to emit all the set events
@@ -389,32 +397,46 @@ CompilerProto.define = function (key, binding) {
                 compiler.observer.emit('get', key)
             }
             return binding.isComputed
-                ? binding.value.get({
+                ? value.get({
                     el: compiler.el,
                     vm: compiler.vm,
                     item: compiler.each
                         ? compiler.vm[compiler.eachPrefix]
                         : null
                 })
-                : binding.value
+                : value
         },
-        set: function (value) {
+        set: function (newVal) {
+            var value = binding.value
             if (binding.isComputed) {
-                if (binding.value.set) {
-                    binding.value.set(value)
+                if (value.set) {
+                    value.set(newVal)
                 }
-            } else if (value !== binding.value) {
+            } else if (newVal !== value) {
                 // unwatch the old value
-                Observer.unobserve(binding.value, key, compiler.observer)
+                Observer.unobserve(value, key, compiler.observer)
                 // set new value
-                binding.value = value
-                compiler.observer.emit('set', key, value)
+                binding.value = newVal
+                compiler.observer.emit('set', key, newVal)
                 // now watch the new value, which in turn emits 'set'
                 // for all its nested values
-                Observer.observe(value, key, compiler.observer)
+                Observer.observe(newVal, key, compiler.observer)
             }
         }
     })
+}
+
+/*
+ *  Process a computed property binding
+ */
+CompilerProto.markComputed = function (binding) {
+    var value = binding.value,
+        vm    = this.vm
+    binding.isComputed = true
+    binding.rawGet = value.get
+    value.get = value.get.bind(vm)
+    if (value.set) value.set = value.set.bind(vm)
+    this.computed.push(binding)
 }
 
 /*
@@ -445,6 +467,7 @@ CompilerProto.destroy = function () {
     utils.log('compiler destroyed: ', this.vm.$el)
     var i, key, dir, inss, binding,
         directives = this.directives,
+        exps = this.expressions,
         bindings = this.bindings,
         el = this.el
     // remove all directives that are instances of external bindings
@@ -456,6 +479,11 @@ CompilerProto.destroy = function () {
             if (inss) inss.splice(inss.indexOf(dir), 1)
         }
         dir.unbind()
+    }
+    // unbind all expressions (anonymous bindings)
+    i = exps.length
+    while (i--) {
+        exps[i].unbind()
     }
     // unbind/unobserve all own bindings
     for (key in bindings) {

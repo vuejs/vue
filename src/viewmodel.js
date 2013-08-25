@@ -18,11 +18,29 @@ var VMProto = ViewModel.prototype
  */
 VMProto.$set = function (key, value) {
     var path = key.split('.'),
-        obj = this
+        obj = getTargetVM(this, path)
+    if (!obj) return
     for (var d = 0, l = path.length - 1; d < l; d++) {
         obj = obj[path[d]]
     }
     obj[path[d]] = value
+}
+
+/*
+ *  The function for getting a key
+ *  which will go up along the prototype chain of the bindings
+ *  Used in exp-parser.
+ */
+VMProto.$get = function (key) {
+    var path = key.split('.'),
+        obj = getTargetVM(this, path),
+        vm = obj
+    if (!obj) return
+    for (var d = 0, l = path.length; d < l; d++) {
+        obj = obj[path[d]]
+    }
+    if (typeof obj === 'function') obj = obj.bind(vm)
+    return obj
 }
 
 /*
@@ -46,6 +64,18 @@ VMProto.$unwatch = function () {
 VMProto.$destroy = function () {
     this.$compiler.destroy()
     this.$compiler = null
+}
+
+/*
+ *  If a VM doesn't contain a path, go up the prototype chain
+ *  to locate the ancestor that has it.
+ */
+function getTargetVM (vm, path) {
+    var baseKey = path[0],
+        binding = vm.$compiler.bindings[baseKey]
+    return binding
+        ? binding.compiler.vm
+        : null
 }
 
 module.exports = ViewModel
