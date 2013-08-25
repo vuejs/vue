@@ -5,6 +5,9 @@ var Emitter = require('emitter'),
     slice   = Array.prototype.slice,
     methods = ['push','pop','shift','unshift','splice','sort','reverse']
 
+/*
+ *  Methods to be added to an observed array
+ */
 var arrayMutators = {
     remove: function (index) {
         if (typeof index !== 'number') index = this.indexOf(index)
@@ -22,6 +25,7 @@ var arrayMutators = {
     }
 }
 
+// Define mutation interceptors so we can emit the mutation info
 methods.forEach(function (method) {
     arrayMutators[method] = function () {
         var result = Array.prototype[method].apply(this, arguments)
@@ -33,6 +37,9 @@ methods.forEach(function (method) {
     }
 })
 
+/*
+ *  Watch an object based on type
+ */
 function watch (obj, path, observer) {
     var type = typeOf(obj)
     if (type === 'Object') {
@@ -42,6 +49,9 @@ function watch (obj, path, observer) {
     }
 }
 
+/*
+ *  Watch an Object, recursive.
+ */
 function watchObject (obj, path, observer) {
     defProtected(obj, '__values__', {})
     defProtected(obj, '__observer__', observer)
@@ -50,6 +60,10 @@ function watchObject (obj, path, observer) {
     }
 }
 
+/*
+ *  Watch an Array, attach mutation interceptors
+ *  and augmentations
+ */
 function watchArray (arr, path, observer) {
     if (path) defProtected(arr, '__path__', path)
     defProtected(arr, '__observer__', observer)
@@ -58,6 +72,11 @@ function watchArray (arr, path, observer) {
     }
 }
 
+/*
+ *  Define accessors for a property on an Object
+ *  so it emits get/set events.
+ *  Then watch the value itself.
+ */
 function bind (obj, key, path, observer) {
     var val = obj[key],
         watchable = isWatchable(val),
@@ -84,6 +103,11 @@ function bind (obj, key, path, observer) {
     watch(val, fullKey, observer)
 }
 
+/*
+ *  Define an ienumerable property
+ *  This avoids it being included in JSON.stringify
+ *  or for...in loops.
+ */
 function defProtected (obj, key, val) {
     if (obj.hasOwnProperty(key)) return
     def(obj, key, {
@@ -93,11 +117,20 @@ function defProtected (obj, key, val) {
     })
 }
 
+/*
+ *  Check if a value is watchable
+ */
 function isWatchable (obj) {
     var type = typeOf(obj)
     return type === 'Object' || type === 'Array'
 }
 
+/*
+ *  When a value that is already converted is
+ *  observed again by another observer, we can skip
+ *  the watch conversion and simply emit set event for
+ *  all of its properties.
+ */
 function emitSet (obj, observer) {
     if (typeOf(obj) === 'Array') {
         observer.emit('set', 'length', obj.length)
@@ -114,6 +147,10 @@ module.exports = {
     // used in sd-each
     watchArray: watchArray,
 
+    /*
+     *  Observe an object with a given path,
+     *  and proxy get/set/mutate events to the provided observer.
+     */
     observe: function (obj, rawPath, observer) {
         if (isWatchable(obj)) {
             var path = rawPath + '.',
@@ -153,6 +190,9 @@ module.exports = {
         }
     },
 
+    /*
+     *  Cancel observation, turn off the listeners.
+     */
     unobserve: function (obj, path, observer) {
         if (!obj || !obj.__observer__) return
         path = path + '.'

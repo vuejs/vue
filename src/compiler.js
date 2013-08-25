@@ -283,11 +283,11 @@ CompilerProto.bindDirective = function (directive) {
     // for newly inserted sub-VMs (each items), need to bind deps
     // because they didn't get processed when the parent compiler
     // was binding dependencies.
-    var i, dep
-    if (binding.contextDeps) {
-        i = binding.contextDeps.length
+    var i, dep, deps = binding.contextDeps
+    if (deps) {
+        i = deps.length
         while (i--) {
-            dep = this.bindings[binding.contextDeps[i]]
+            dep = this.bindings[deps[i]]
             dep.subs.push(directive)
         }
     }
@@ -376,6 +376,7 @@ CompilerProto.define = function (key, binding) {
 
     var compiler = this,
         vm = this.vm,
+        ob = this.observer,
         value = binding.value = vm[key], // save the value before redefinening it
         type = utils.typeOf(value)
 
@@ -393,19 +394,18 @@ CompilerProto.define = function (key, binding) {
         enumerable: true,
         get: function () {
             var value = binding.value
-            if ((!binding.isComputed &&
-                (value === undefined || value === null || !value.__observer__)) ||
+            if ((!binding.isComputed && (!value || !value.__observer__)) ||
                 Array.isArray(value)) {
-                // only emit non-computed, non-observed (tip) values, or Arrays.
+                // only emit non-computed, non-observed (primitive) values, or Arrays.
                 // because these are the cleanest dependencies
-                compiler.observer.emit('get', key)
+                ob.emit('get', key)
             }
             return binding.isComputed
                 ? value.get({
                     el: compiler.el,
-                    vm: compiler.vm,
+                    vm: vm,
                     item: compiler.each
-                        ? compiler.vm[compiler.eachPrefix]
+                        ? vm[compiler.eachPrefix]
                         : null
                 })
                 : value
@@ -418,13 +418,13 @@ CompilerProto.define = function (key, binding) {
                 }
             } else if (newVal !== value) {
                 // unwatch the old value
-                Observer.unobserve(value, key, compiler.observer)
+                Observer.unobserve(value, key, ob)
                 // set new value
                 binding.value = newVal
-                compiler.observer.emit('set', key, newVal)
+                ob.emit('set', key, newVal)
                 // now watch the new value, which in turn emits 'set'
                 // for all its nested values
-                Observer.observe(newVal, key, compiler.observer)
+                Observer.observe(newVal, key, ob)
             }
         }
     })
@@ -437,9 +437,13 @@ CompilerProto.markComputed = function (binding) {
     var value = binding.value,
         vm    = this.vm
     binding.isComputed = true
+    // keep a copy of the raw getter
+    // for extracting contextual dependencies
     binding.rawGet = value.get
+    // bind the accessors to the vm
     value.get = value.get.bind(vm)
     if (value.set) value.set = value.set.bind(vm)
+    // keep track for dep parsing later
     this.computed.push(binding)
 }
 

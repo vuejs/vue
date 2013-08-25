@@ -52,7 +52,7 @@ VMProto.$watch = function (key, callback) {
 }
 
 /*
- *  remove watcher
+ *  unwatch a key
  */
 VMProto.$unwatch = function (key, callback) {
     this.$compiler.observer.off('change:' + key, callback)

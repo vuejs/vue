@@ -152,7 +152,7 @@ DirProto.applyFilters = function (value) {
 }
 
 /*
- *  unbind noop, to be overwritten by definitions
+ *  Unbind diretive
  */
 DirProto.unbind = function (update) {
     if (!this.el) return

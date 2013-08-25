@@ -11,10 +11,6 @@ var keyCodes = {
 
 module.exports = {
 
-    trim: function (value) {
-        return value ? value.toString().trim() : ''
-    },
-
     capitalize: function (value) {
         if (!value) return ''
         value = value.toString()

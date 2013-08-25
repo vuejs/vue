@@ -1,7 +1,7 @@
-var config        = require('./config'),
-    toString      = Object.prototype.toString,
-    templates     = {},
-    VMs           = {}
+var config    = require('./config'),
+    toString  = Object.prototype.toString,
+    templates = {},
+    VMs       = {}
 
 module.exports = {
 
