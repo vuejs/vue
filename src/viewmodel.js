@@ -47,15 +47,15 @@ VMProto.$get = function (key) {
  *  watch a key on the viewmodel for changes
  *  fire callback with new value
  */
-VMProto.$watch = function () {
-    // TODO just listen on this.$compiler.observer
+VMProto.$watch = function (key, callback) {
+    this.$compiler.observer.on('change:' + key, callback)
 }
 
 /*
  *  remove watcher
  */
-VMProto.$unwatch = function () {
-    // TODO
+VMProto.$unwatch = function (key, callback) {
+    this.$compiler.observer.off('change:' + key, callback)
 }
 
 /*

@@ -140,9 +140,11 @@ CompilerProto.setupObserver = function () {
             }
         })
         .on('set', function (key, val) {
+            observer.emit('change:' + key, val)
             if (bindings[key]) bindings[key].update(val)
         })
-        .on('mutate', function (key) {
+        .on('mutate', function (key, val, mutation) {
+            observer.emit('change:' + key, val, mutation)
             if (bindings[key]) bindings[key].pub()
         })
 }
@@ -467,6 +469,8 @@ CompilerProto.bindContexts = function (bindings) {
  */
 CompilerProto.destroy = function () {
     utils.log('compiler destroyed: ', this.vm.$el)
+    // unwatch
+    this.observer.off()
     var i, key, dir, inss, binding,
         directives = this.directives,
         exps = this.expressions,

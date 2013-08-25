@@ -1,8 +1,5 @@
-- put child VMs to be compiled AFTER the parent is compiled, so that all parent bindings are available to the child...
-- $watch / $unwatch (now much easier)
 - tests
 - docs
-- sd-with?
 - plugins
     - seed-touch (e.g. sd-drag="onDrag" sd-swipe="onSwipe")
     - seed-storage (RESTful sync)
