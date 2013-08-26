@@ -1,7 +1,7 @@
 var config   = require('../config'),
     utils    = require('../utils'),
     Observer = require('../observer'),
-    Emitter  = require('emitter'),
+    Emitter  = require('../emitter'),
     ViewModel // lazy def to avoid circular dependency
 
 /*

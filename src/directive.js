@@ -160,26 +160,25 @@ DirProto.unbind = function (update) {
     if (!update) this.vm = this.el = this.binding = this.compiler = null
 }
 
-module.exports = {
+/*
+ *  make sure the directive and expression is valid
+ *  before we create an instance
+ */
+Directive.parse = function (dirname, expression) {
 
-    /*
-     *  make sure the directive and expression is valid
-     *  before we create an instance
-     */
-    parse: function (dirname, expression) {
+    var prefix = config.prefix
+    if (dirname.indexOf(prefix) === -1) return null
+    dirname = dirname.slice(prefix.length + 1)
 
-        var prefix = config.prefix
-        if (dirname.indexOf(prefix) === -1) return null
-        dirname = dirname.slice(prefix.length + 1)
+    var dir   = directives[dirname],
+        valid = KEY_RE.test(expression)
 
-        var dir   = directives[dirname],
-            valid = KEY_RE.test(expression)
+    if (!dir) utils.warn('unknown directive: ' + dirname)
+    if (!valid) utils.warn('invalid directive expression: ' + expression)
 
-        if (!dir) utils.warn('unknown directive: ' + dirname)
-        if (!valid) utils.warn('invalid directive expression: ' + expression)
-
-        return dir && valid
-            ? new Directive(dirname, expression)
-            : null
-    }
+    return dir && valid
+        ? new Directive(dirname, expression)
+        : null
 }
+
+module.exports = Directive

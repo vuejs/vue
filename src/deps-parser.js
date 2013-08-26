@@ -1,5 +1,4 @@
-var Emitter  = require('emitter'),
-    //config   = require('./config'),
+var Emitter  = require('./emitter'),
     utils    = require('./utils'),
     observer = new Emitter()
 

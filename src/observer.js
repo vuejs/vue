@@ -1,4 +1,4 @@
-var Emitter = require('emitter'),
+var Emitter = require('./emitter'),
     utils   = require('./utils'),
     typeOf  = utils.typeOf,
     def     = Object.defineProperty,

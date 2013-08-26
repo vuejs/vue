@@ -33,7 +33,7 @@ module.exports = function( grunt ) {
 
         mocha: {
             build: {
-                src: ['test/test.html'],
+                src: ['test/e2e/*.html'],
                 options: {
                     reporter: 'Spec',
                     run: true
@@ -70,13 +70,30 @@ module.exports = function( grunt ) {
     grunt.loadNpmTasks( 'grunt-contrib-uglify' )
     grunt.loadNpmTasks( 'grunt-component-build' )
     grunt.loadNpmTasks( 'grunt-mocha' )
-    grunt.registerTask( 'test', ['mocha'] )
+    grunt.registerTask( 'test', ['unit', 'mocha'] )
     grunt.registerTask( 'default', [
         'jshint',
         'component_build:build',
-        //'test',
+        'test',
         'uglify'
     ])
+
+    grunt.registerTask( 'unit', function () {
+        var done = this.async(),
+            path = 'test/unit',
+            Mocha = require('./node_modules/grunt-mocha/node_modules/mocha'),
+            mocha_instance = new Mocha({
+                ui: 'bdd',
+                reporter: 'spec'
+            })
+        fs.readdirSync(path).forEach(function (file) {
+            mocha_instance.addFile(path + '/' + file)
+        })
+        mocha_instance.run(function (errCount) {
+            var withoutErrors = (errCount === 0)
+            done(withoutErrors)
+        })
+    })
 
     grunt.registerTask( 'version', function (version) {
         ;['package', 'bower', 'component'].forEach(function (file) {

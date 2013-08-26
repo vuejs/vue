@@ -1,13 +1,13 @@
-var Emitter         = require('emitter'),
-    Observer        = require('./observer'),
-    config          = require('./config'),
-    utils           = require('./utils'),
-    Binding         = require('./binding'),
-    DirectiveParser = require('./directive-parser'),
-    TextParser      = require('./text-parser'),
-    DepsParser      = require('./deps-parser'),
-    ExpParser       = require('./exp-parser'),
-    slice           = Array.prototype.slice,
+var Emitter     = require('./emitter'),
+    Observer    = require('./observer'),
+    config      = require('./config'),
+    utils       = require('./utils'),
+    Binding     = require('./binding'),
+    Directive   = require('./directive'),
+    TextParser  = require('./text-parser'),
+    DepsParser  = require('./deps-parser'),
+    ExpParser   = require('./exp-parser'),
+    slice       = Array.prototype.slice,
     vmAttr,
     eachAttr
 
@@ -168,7 +168,7 @@ CompilerProto.compileNode = function (node, root) {
 
         if (eachExp) { // each block
 
-            directive = DirectiveParser.parse(eachAttr, eachExp)
+            directive = Directive.parse(eachAttr, eachExp)
             if (directive) {
                 directive.el = node
                 compiler.bindDirective(directive)
@@ -201,7 +201,7 @@ CompilerProto.compileNode = function (node, root) {
                     j = exps.length
                     while (j--) {
                         exp = exps[j]
-                        directive = DirectiveParser.parse(attr.name, exp)
+                        directive = Directive.parse(attr.name, exp)
                         if (directive) {
                             valid = true
                             directive.el = node
@@ -236,7 +236,7 @@ CompilerProto.compileTextNode = function (node) {
         token = tokens[i]
         el = document.createTextNode('')
         if (token.key) {
-            directive = DirectiveParser.parse(dirname, token.key)
+            directive = Directive.parse(dirname, token.key)
             if (directive) {
                 directive.el = el
                 compiler.bindDirective(directive)

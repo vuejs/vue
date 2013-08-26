@@ -6,10 +6,6 @@
     </head>
     <body>
         <div id="app">
-            <ul>
-                <li sd-each="item:items" sd-text="item.title"></li>
-            </ul>
-            <p>Total items: {{items.length}}</p>
             <p>
                 <button sd-on="click:push">push</button>
                 <button sd-on="click:pop">pop</button>
@@ -21,6 +17,10 @@
                 <button sd-on="click:sort">sort</button>
                 <button sd-on="click:reverse">reverse</button>
             </p>
+            <p>Total items: {{items.length}}</p>
+            <ul>
+                <li sd-each="item:items" sd-text="item.title"></li>
+            </ul>
         </div>
         <script src="../dist/seed.js"></script>
         <script>
