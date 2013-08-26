@@ -2,6 +2,9 @@
     "name": "seed",
     "version": "0.3.1",
     "main": "src/main.js",
+    "description": "A mini MVVM framework",
+    "keywords": ["mvvm", "framework", "data binding"],
+    "license": "MIT",
     "scripts": [
         "src/main.js",
         "src/config.js",
