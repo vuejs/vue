@@ -376,22 +376,8 @@ var config      = require('./config'),
     directives  = require('./directives'),
     filters     = require('./filters'),
     textParser  = require('./text-parser'),
-    utils       = require('./utils')
-
-var eventbus    = utils.eventbus,
+    utils       = require('./utils'),
     api         = {}
-
-/*
- *  expose utils
- */
-api.utils = utils
-
-/*
- *  broadcast event
- */
-api.broadcast = function () {
-    eventbus.emit.apply(eventbus, arguments)
-}
 
 /*
  *  Allows user to create a custom directive
@@ -462,6 +448,20 @@ utils.collectTemplates()
 
 module.exports = api
 });
+require.register("seed/src/emitter.js", function(exports, require, module){
+// shiv to make this work for Component, Browserify and Node at the same time.
+var Emitter,
+    componentEmitter = 'emitter'
+
+try {
+    // Requiring without a string literal will make browserify
+    // unable to parse the dependency, thus preventing it from
+    // stopping the compilation after a failed lookup.
+    Emitter = require(componentEmitter)
+} catch (e) {}
+
+module.exports = Emitter || require('events').EventEmitter
+});
 require.register("seed/src/config.js", function(exports, require, module){
 module.exports = {
 
@@ -475,10 +475,10 @@ module.exports = {
 }
 });
 require.register("seed/src/utils.js", function(exports, require, module){
-var config        = require('./config'),
-    toString      = Object.prototype.toString,
-    templates     = {},
-    VMs           = {}
+var config    = require('./config'),
+    toString  = Object.prototype.toString,
+    templates = {},
+    VMs       = {}
 
 module.exports = {
 
@@ -533,16 +533,16 @@ module.exports = {
 }
 });
 require.register("seed/src/compiler.js", function(exports, require, module){
-var Emitter         = require('emitter'),
-    Observer        = require('./observer'),
-    config          = require('./config'),
-    utils           = require('./utils'),
-    Binding         = require('./binding'),
-    DirectiveParser = require('./directive-parser'),
-    TextParser      = require('./text-parser'),
-    DepsParser      = require('./deps-parser'),
-    ExpParser       = require('./exp-parser'),
-    slice           = Array.prototype.slice,
+var Emitter     = require('./emitter'),
+    Observer    = require('./observer'),
+    config      = require('./config'),
+    utils       = require('./utils'),
+    Binding     = require('./binding'),
+    Directive   = require('./directive'),
+    TextParser  = require('./text-parser'),
+    DepsParser  = require('./deps-parser'),
+    ExpParser   = require('./exp-parser'),
+    slice       = Array.prototype.slice,
     vmAttr,
     eachAttr
 
@@ -703,7 +703,7 @@ CompilerProto.compileNode = function (node, root) {
 
         if (eachExp) { // each block
 
-            directive = DirectiveParser.parse(eachAttr, eachExp)
+            directive = Directive.parse(eachAttr, eachExp)
             if (directive) {
                 directive.el = node
                 compiler.bindDirective(directive)
@@ -736,7 +736,7 @@ CompilerProto.compileNode = function (node, root) {
                     j = exps.length
                     while (j--) {
                         exp = exps[j]
-                        directive = DirectiveParser.parse(attr.name, exp)
+                        directive = Directive.parse(attr.name, exp)
                         if (directive) {
                             valid = true
                             directive.el = node
@@ -771,7 +771,7 @@ CompilerProto.compileTextNode = function (node) {
         token = tokens[i]
         el = document.createTextNode('')
         if (token.key) {
-            directive = DirectiveParser.parse(dirname, token.key)
+            directive = Directive.parse(dirname, token.key)
             if (directive) {
                 directive.el = el
                 compiler.bindDirective(directive)
@@ -818,11 +818,11 @@ CompilerProto.bindDirective = function (directive) {
     // for newly inserted sub-VMs (each items), need to bind deps
     // because they didn't get processed when the parent compiler
     // was binding dependencies.
-    var i, dep
-    if (binding.contextDeps) {
-        i = binding.contextDeps.length
+    var i, dep, deps = binding.contextDeps
+    if (deps) {
+        i = deps.length
         while (i--) {
-            dep = this.bindings[binding.contextDeps[i]]
+            dep = this.bindings[deps[i]]
             dep.subs.push(directive)
         }
     }
@@ -911,6 +911,7 @@ CompilerProto.define = function (key, binding) {
 
     var compiler = this,
         vm = this.vm,
+        ob = this.observer,
         value = binding.value = vm[key], // save the value before redefinening it
         type = utils.typeOf(value)
 
@@ -928,19 +929,18 @@ CompilerProto.define = function (key, binding) {
         enumerable: true,
         get: function () {
             var value = binding.value
-            if ((!binding.isComputed &&
-                (value === undefined || value === null || !value.__observer__)) ||
+            if ((!binding.isComputed && (!value || !value.__observer__)) ||
                 Array.isArray(value)) {
-                // only emit non-computed, non-observed (tip) values, or Arrays.
+                // only emit non-computed, non-observed (primitive) values, or Arrays.
                 // because these are the cleanest dependencies
-                compiler.observer.emit('get', key)
+                ob.emit('get', key)
             }
             return binding.isComputed
                 ? value.get({
                     el: compiler.el,
-                    vm: compiler.vm,
+                    vm: vm,
                     item: compiler.each
-                        ? compiler.vm[compiler.eachPrefix]
+                        ? vm[compiler.eachPrefix]
                         : null
                 })
                 : value
@@ -953,13 +953,13 @@ CompilerProto.define = function (key, binding) {
                 }
             } else if (newVal !== value) {
                 // unwatch the old value
-                Observer.unobserve(value, key, compiler.observer)
+                Observer.unobserve(value, key, ob)
                 // set new value
                 binding.value = newVal
-                compiler.observer.emit('set', key, newVal)
+                ob.emit('set', key, newVal)
                 // now watch the new value, which in turn emits 'set'
                 // for all its nested values
-                Observer.observe(newVal, key, compiler.observer)
+                Observer.observe(newVal, key, ob)
             }
         }
     })
@@ -972,9 +972,13 @@ CompilerProto.markComputed = function (binding) {
     var value = binding.value,
         vm    = this.vm
     binding.isComputed = true
+    // keep a copy of the raw getter
+    // for extracting contextual dependencies
     binding.rawGet = value.get
+    // bind the accessors to the vm
     value.get = value.get.bind(vm)
     if (value.set) value.set = value.set.bind(vm)
+    // keep track for dep parsing later
     this.computed.push(binding)
 }
 
@@ -1125,7 +1129,7 @@ VMProto.$watch = function (key, callback) {
 }
 
 /*
- *  remove watcher
+ *  unwatch a key
  */
 VMProto.$unwatch = function (key, callback) {
     this.$compiler.observer.off('change:' + key, callback)
@@ -1229,13 +1233,16 @@ BindingProto.pub = function () {
 module.exports = Binding
 });
 require.register("seed/src/observer.js", function(exports, require, module){
-var Emitter = require('emitter'),
+var Emitter = require('./emitter'),
     utils   = require('./utils'),
     typeOf  = utils.typeOf,
     def     = Object.defineProperty,
     slice   = Array.prototype.slice,
     methods = ['push','pop','shift','unshift','splice','sort','reverse']
 
+/*
+ *  Methods to be added to an observed array
+ */
 var arrayMutators = {
     remove: function (index) {
         if (typeof index !== 'number') index = this.indexOf(index)
@@ -1253,6 +1260,7 @@ var arrayMutators = {
     }
 }
 
+// Define mutation interceptors so we can emit the mutation info
 methods.forEach(function (method) {
     arrayMutators[method] = function () {
         var result = Array.prototype[method].apply(this, arguments)
@@ -1264,6 +1272,9 @@ methods.forEach(function (method) {
     }
 })
 
+/*
+ *  Watch an object based on type
+ */
 function watch (obj, path, observer) {
     var type = typeOf(obj)
     if (type === 'Object') {
@@ -1273,6 +1284,9 @@ function watch (obj, path, observer) {
     }
 }
 
+/*
+ *  Watch an Object, recursive.
+ */
 function watchObject (obj, path, observer) {
     defProtected(obj, '__values__', {})
     defProtected(obj, '__observer__', observer)
@@ -1281,6 +1295,10 @@ function watchObject (obj, path, observer) {
     }
 }
 
+/*
+ *  Watch an Array, attach mutation interceptors
+ *  and augmentations
+ */
 function watchArray (arr, path, observer) {
     if (path) defProtected(arr, '__path__', path)
     defProtected(arr, '__observer__', observer)
@@ -1289,6 +1307,11 @@ function watchArray (arr, path, observer) {
     }
 }
 
+/*
+ *  Define accessors for a property on an Object
+ *  so it emits get/set events.
+ *  Then watch the value itself.
+ */
 function bind (obj, key, path, observer) {
     var val = obj[key],
         watchable = isWatchable(val),
@@ -1315,6 +1338,11 @@ function bind (obj, key, path, observer) {
     watch(val, fullKey, observer)
 }
 
+/*
+ *  Define an ienumerable property
+ *  This avoids it being included in JSON.stringify
+ *  or for...in loops.
+ */
 function defProtected (obj, key, val) {
     if (obj.hasOwnProperty(key)) return
     def(obj, key, {
@@ -1324,11 +1352,20 @@ function defProtected (obj, key, val) {
     })
 }
 
+/*
+ *  Check if a value is watchable
+ */
 function isWatchable (obj) {
     var type = typeOf(obj)
     return type === 'Object' || type === 'Array'
 }
 
+/*
+ *  When a value that is already converted is
+ *  observed again by another observer, we can skip
+ *  the watch conversion and simply emit set event for
+ *  all of its properties.
+ */
 function emitSet (obj, observer) {
     if (typeOf(obj) === 'Array') {
         observer.emit('set', 'length', obj.length)
@@ -1345,6 +1382,10 @@ module.exports = {
     // used in sd-each
     watchArray: watchArray,
 
+    /*
+     *  Observe an object with a given path,
+     *  and proxy get/set/mutate events to the provided observer.
+     */
     observe: function (obj, rawPath, observer) {
         if (isWatchable(obj)) {
             var path = rawPath + '.',
@@ -1384,6 +1425,9 @@ module.exports = {
         }
     },
 
+    /*
+     *  Cancel observation, turn off the listeners.
+     */
     unobserve: function (obj, path, observer) {
         if (!obj || !obj.__observer__) return
         path = path + '.'
@@ -1396,7 +1440,7 @@ module.exports = {
     }
 }
 });
-require.register("seed/src/directive-parser.js", function(exports, require, module){
+require.register("seed/src/directive.js", function(exports, require, module){
 var config     = require('./config'),
     utils      = require('./utils'),
     directives = require('./directives'),
@@ -1551,7 +1595,7 @@ DirProto.applyFilters = function (value) {
 }
 
 /*
- *  unbind noop, to be overwritten by definitions
+ *  Unbind diretive
  */
 DirProto.unbind = function (update) {
     if (!this.el) return
@@ -1559,29 +1603,28 @@ DirProto.unbind = function (update) {
     if (!update) this.vm = this.el = this.binding = this.compiler = null
 }
 
-module.exports = {
+/*
+ *  make sure the directive and expression is valid
+ *  before we create an instance
+ */
+Directive.parse = function (dirname, expression) {
 
-    /*
-     *  make sure the directive and expression is valid
-     *  before we create an instance
-     */
-    parse: function (dirname, expression) {
+    var prefix = config.prefix
+    if (dirname.indexOf(prefix) === -1) return null
+    dirname = dirname.slice(prefix.length + 1)
 
-        var prefix = config.prefix
-        if (dirname.indexOf(prefix) === -1) return null
-        dirname = dirname.slice(prefix.length + 1)
+    var dir   = directives[dirname],
+        valid = KEY_RE.test(expression)
 
-        var dir   = directives[dirname],
-            valid = KEY_RE.test(expression)
+    if (!dir) utils.warn('unknown directive: ' + dirname)
+    if (!valid) utils.warn('invalid directive expression: ' + expression)
 
-        if (!dir) utils.warn('unknown directive: ' + dirname)
-        if (!valid) utils.warn('invalid directive expression: ' + expression)
-
-        return dir && valid
-            ? new Directive(dirname, expression)
-            : null
-    }
+    return dir && valid
+        ? new Directive(dirname, expression)
+        : null
 }
+
+module.exports = Directive
 });
 require.register("seed/src/exp-parser.js", function(exports, require, module){
 // Variable extraction scooped from https://github.com/RubyLouvre/avalon 
@@ -1691,8 +1734,7 @@ module.exports = {
 }
 });
 require.register("seed/src/deps-parser.js", function(exports, require, module){
-var Emitter  = require('emitter'),
-    //config   = require('./config'),
+var Emitter  = require('./emitter'),
     utils    = require('./utils'),
     observer = new Emitter()
 
@@ -1812,10 +1854,6 @@ var keyCodes = {
 }
 
 module.exports = {
-
-    trim: function (value) {
-        return value ? value.toString().trim() : ''
-    },
 
     capitalize: function (value) {
         if (!value) return ''
@@ -1995,7 +2033,7 @@ require.register("seed/src/directives/each.js", function(exports, require, modul
 var config   = require('../config'),
     utils    = require('../utils'),
     Observer = require('../observer'),
-    Emitter  = require('emitter'),
+    Emitter  = require('../emitter'),
     ViewModel // lazy def to avoid circular dependency
 
 /*
