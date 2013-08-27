@@ -1,5 +1,6 @@
 - tests
 - docs
+- ability to create custom tags
 - plugins
     - seed-touch (e.g. sd-drag="onDrag" sd-swipe="onSwipe")
     - seed-storage (RESTful sync)

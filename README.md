@@ -1,12 +1,18 @@
-# Seed (WIP)
-## a mini MVVM framework
+# Seed.js
+
+Mini MVVM framework
+
+[ **BETA - tests not complete** ]
+
+## Features
 
 - 8kb gzipped, no dependency.
-- DOM based templates with precise and efficient manipulation
-- POJSO (Plain Old JavaScript Objects) Models FTW - even nested objects.
+- DOM based templates with auto data binding.
+- Precise and efficient DOM manipulation with granularity down to a TextNode.
+- POJSO (Plain Old JavaScript Objects) Models that can be shared across ViewModels with arbitrary levels of nesting.
 - Auto dependency extraction for computed properties.
 - Auto event delegation on repeated items.
-- Flexible API.
+- Flexible API: Angular-style or Backbone-style, it's up to you.
 - [Component](https://github.com/component/component) based, but can also be used with [Browserify](https://github.com/substack/node-browserify), as a CommonJS/AMD module or as a standalone library.
 
 ## Browser Support
@@ -29,13 +35,17 @@
 
     $ npm install seed-mvvm
 
+**Bower**
+
+    $ bower install seed
+
 **Module Loaders, e.g. RequireJS, SeaJS**
 
-Built versions in `/dist` can be used directly as a CommonJS or AMD module.
+Built versions in `/dist` or installed via Bower can be used directly as a CommonJS or AMD module.
 
 **Standalone**
 
-Loading a built version in `/dist` via a script tag will register `seed` as a global variable.
+Simply include a built version in `/dist` or installed via Bower with a script tag. `seed` will be registered as a global variable.
 
 ## [ Docs under construction... ]
 
