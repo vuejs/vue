@@ -7,7 +7,7 @@
 - Auto dependency extraction for computed properties.
 - Auto event delegation on repeated items.
 - Flexible API.
-- [Component](https://github.com/component/component) based, can be used as a CommonJS module or as a standalone library.
+- [Component](https://github.com/component/component) based, but can also be used with [Browserify](https://github.com/substack/node-browserify), as a CommonJS/AMD module or as a standalone library.
 
 ### Browser Support
 
@@ -19,25 +19,48 @@
 - Android browser 3.0+
 - iOS Safari 5.0+
 
-### [Doc under construction...]
+### Installation
 
-#### Template
+- Component:  
+    ``` bash
+    $ component install yyx990803/seed
+    ```
+    Then in JS:
+    ``` js
+    var seed = require('seed')
+    ```
 
-#### Controller
+- Browserify:
+    ``` bash
+    $ npm install seed-mvvm
+    ```
+    Then in JS:
+    ``` js
+    var seed = require('seed-mvvm')
+    ```
 
-- Nested Controllers and accessing parent scope
-- Controller inheritance
+- Using Module Loaders
+    Built versions in `/dist` can be used directly as a CommonJS or AMD module.
 
-#### Data
+- Standalone:
+    Including a built version in `/dist` directly will register `seed` as a global variable.
 
-#### Data Binding
+### [ Docs under construction... ]
 
-#### Event Handling
+Simplest possible example (there's much more!):
 
-#### Filters
+``` html
+<div id="demo">
+    <p sd-text="hello"></p>
+</div>
+```
 
-#### Computed Properties
-
-#### Custom Filter
-
-#### Custom Directive
+``` js
+new seed.ViewModel({
+    el: '#demo',
+    data: {
+        hello: 'Hello World!'
+    }
+}
+})
+```
