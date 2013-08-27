@@ -9,7 +9,7 @@
 - Flexible API.
 - [Component](https://github.com/component/component) based, but can also be used with [Browserify](https://github.com/substack/node-browserify), as a CommonJS/AMD module or as a standalone library.
 
-### Browser Support
+## Browser Support
 
 - Chrome 8+
 - Firefix 3.6+
@@ -19,45 +19,43 @@
 - Android browser 3.0+
 - iOS Safari 5.0+
 
-### Installation
+## Installation
 
-- Component:  
-    ``` bash
+**Component**
+
     $ component install yyx990803/seed
-    ```
 
-- Browserify:
-    ``` bash
+**Browserify**
+
     $ npm install seed-mvvm
-    ```
 
-- Using Module Loaders:
+**Module Loaders, e.g. RequireJS, SeaJS**
 
-    Built versions in `/dist` can be used directly as a CommonJS or AMD module.
+Built versions in `/dist` can be used directly as a CommonJS or AMD module.
 
-- Standalone:
+**Standalone**
 
-    Loading a built version in `/dist` via a script tag will register `seed` as a global variable.
+Loading a built version in `/dist` via a script tag will register `seed` as a global variable.
 
-### [ Docs under construction... ]
+## [ Docs under construction... ]
 
 Simplest possible example:
 
-HTML
+**HTML**
 
-``` html
+~~~ html
 <div id="demo">
     <p sd-text="hello"></p>
 </div>
-```
+~~~
 
-JavaScript
+**JavaScript**
 
-``` js
+~~~ js
 new seed.ViewModel({
     el: '#demo',
     data: {
         hello: 'Hello World!'
     }
 })
-```
+~~~
