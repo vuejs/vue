@@ -25,29 +25,25 @@
     ``` bash
     $ component install yyx990803/seed
     ```
-    Then in JS:
-    ``` js
-    var seed = require('seed')
-    ```
 
 - Browserify:
     ``` bash
     $ npm install seed-mvvm
     ```
-    Then in JS:
-    ``` js
-    var seed = require('seed-mvvm')
-    ```
 
-- Using Module Loaders
+- Using Module Loaders:
+
     Built versions in `/dist` can be used directly as a CommonJS or AMD module.
 
 - Standalone:
-    Including a built version in `/dist` directly will register `seed` as a global variable.
+
+    Loading a built version in `/dist` via a script tag will register `seed` as a global variable.
 
 ### [ Docs under construction... ]
 
-Simplest possible example (there's much more!):
+Simplest possible example:
+
+HTML
 
 ``` html
 <div id="demo">
@@ -55,12 +51,13 @@ Simplest possible example (there's much more!):
 </div>
 ```
 
+JavaScript
+
 ``` js
 new seed.ViewModel({
     el: '#demo',
     data: {
         hello: 'Hello World!'
     }
-}
 })
 ```
