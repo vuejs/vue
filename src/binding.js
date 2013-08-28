@@ -39,6 +39,7 @@ BindingProto.refresh = function () {
     while (i--) {
         this.instances[i].refresh()
     }
+    this.pub()
 }
 
 /*

@@ -3,9 +3,9 @@ var config     = require('./config'),
     directives = require('./directives'),
     filters    = require('./filters')
 
-var KEY_RE          = /^[^\|<]+/,
+var KEY_RE          = /^[^\|]+/,
     ARG_RE          = /([^:]+):(.+)$/,
-    FILTERS_RE      = /[^\|]\|[^\|<]+/g,
+    FILTERS_RE      = /\|[^\|]+/g,
     FILTER_TOKEN_RE = /[^\s']+|'[^']+'/g,
     NESTING_RE      = /^\^+/,
     SINGLE_VAR_RE   = /^[\w\.]+$/
@@ -14,7 +14,7 @@ var KEY_RE          = /^[^\|<]+/,
  *  Directive class
  *  represents a single directive instance in the DOM
  */
-function Directive (directiveName, expression) {
+function Directive (directiveName, expression, rawKey) {
 
     var definition = directives[directiveName]
 
@@ -33,15 +33,24 @@ function Directive (directiveName, expression) {
 
     this.directiveName = directiveName
     this.expression    = expression.trim()
-    this.rawKey        = expression.match(KEY_RE)[0].trim()
+    this.rawKey        = rawKey
     
-    this.parseKey(this.rawKey)
+    parseKey(this, rawKey)
+
     this.isExp = !SINGLE_VAR_RE.test(this.key)
     
     var filterExps = expression.match(FILTERS_RE)
-    this.filters = filterExps
-        ? filterExps.map(parseFilter)
-        : null
+    if (filterExps) {
+        this.filters = []
+        var i = 0, l = filterExps.length, filter
+        for (; i < l; i++) {
+            filter = parseFilter(filterExps[i])
+            if (filter) this.filters.push(filter)
+        }
+        if (!this.filters.length) this.filters = null
+    } else {
+        this.filters = null
+    }
 }
 
 var DirProto = Directive.prototype
@@ -49,7 +58,7 @@ var DirProto = Directive.prototype
 /*
  *  parse a key, extract argument and nesting/root info
  */
-DirProto.parseKey = function (rawKey) {
+function parseKey (dir, rawKey) {
 
     var argMatch = rawKey.match(ARG_RE)
 
@@ -57,41 +66,47 @@ DirProto.parseKey = function (rawKey) {
         ? argMatch[2].trim()
         : rawKey.trim()
 
-    this.arg = argMatch
+    dir.arg = argMatch
         ? argMatch[1].trim()
         : null
 
     var nesting = key.match(NESTING_RE)
-    this.nesting = nesting
+    dir.nesting = nesting
         ? nesting[0].length
         : false
 
-    this.root = key.charAt(0) === '$'
+    dir.root = key.charAt(0) === '$'
 
-    if (this.nesting) {
+    if (dir.nesting) {
         key = key.replace(NESTING_RE, '')
-    } else if (this.root) {
+    } else if (dir.root) {
         key = key.slice(1)
     }
 
-    this.key = key
+    dir.key = key
 }
-
 
 /*
  *  parse a filter expression
  */
 function parseFilter (filter) {
 
-    var tokens = filter.slice(2)
-        .match(FILTER_TOKEN_RE)
-        .map(function (token) {
-            return token.replace(/'/g, '').trim()
-        })
+    var tokens = filter.slice(1).match(FILTER_TOKEN_RE)
+    if (!tokens) return
+    tokens = tokens.map(function (token) {
+        return token.replace(/'/g, '').trim()
+    })
+
+    var name = tokens[0],
+        apply = filters[name]
+    if (!apply) {
+        utils.warn('Unknown filter: ' + name)
+        return
+    }
 
     return {
-        name  : tokens[0],
-        apply : filters[tokens[0]],
+        name  : name,
+        apply : apply,
         args  : tokens.length > 1
                 ? tokens.slice(1)
                 : null
@@ -124,7 +139,6 @@ DirProto.refresh = function (value) {
     if (value && value === this.computedValue) return
     this.computedValue = value
     this.apply(value)
-    this.binding.pub()
 }
 
 /*
@@ -145,7 +159,6 @@ DirProto.applyFilters = function (value) {
     var filtered = value, filter
     for (var i = 0, l = this.filters.length; i < l; i++) {
         filter = this.filters[i]
-        if (!filter.apply) utils.warn('Unknown filter: ' + filter.name)
         filtered = filter.apply(filtered, filter.args)
     }
     return filtered
@@ -153,8 +166,13 @@ DirProto.applyFilters = function (value) {
 
 /*
  *  Unbind diretive
+ *  @ param {Boolean} update
+ *    Sometimes we call unbind before an update (i.e. not destroy)
+ *    just to teardown previousstuff, in that case we do not want
+ *    to null everything.
  */
 DirProto.unbind = function (update) {
+    // this can be called before the el is even assigned...
     if (!this.el) return
     if (this._unbind) this._unbind(update)
     if (!update) this.vm = this.el = this.binding = this.compiler = null
@@ -170,14 +188,15 @@ Directive.parse = function (dirname, expression) {
     if (dirname.indexOf(prefix) === -1) return null
     dirname = dirname.slice(prefix.length + 1)
 
-    var dir   = directives[dirname],
-        valid = KEY_RE.test(expression)
+    var dir = directives[dirname],
+        keyMatch = expression.match(KEY_RE),
+        rawKey = keyMatch && keyMatch[0].trim()
 
     if (!dir) utils.warn('unknown directive: ' + dirname)
-    if (!valid) utils.warn('invalid directive expression: ' + expression)
+    if (!rawKey) utils.warn('invalid directive expression: ' + expression)
 
-    return dir && valid
-        ? new Directive(dirname, expression)
+    return dir && rawKey
+        ? new Directive(dirname, expression, rawKey)
         : null
 }
 
