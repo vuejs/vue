@@ -42,6 +42,17 @@ BindingProto.refresh = function () {
 }
 
 /*
+ *  Notify computed properties that depend on this binding
+ *  to update themselves
+ */
+BindingProto.pub = function () {
+    var i = this.subs.length
+    while (i--) {
+        this.subs[i].refresh()
+    }
+}
+
+/*
  *  Unbind the binding, remove itself from all of its dependencies
  */
 BindingProto.unbind = function () {
@@ -55,19 +66,7 @@ BindingProto.unbind = function () {
         subs = this.deps[i].subs
         subs.splice(subs.indexOf(this), 1)
     }
-    // TODO if this is a root level binding
     this.compiler = this.pubs = this.subs = this.instances = this.deps = null
-}
-
-/*
- *  Notify computed properties that depend on this binding
- *  to update themselves
- */
-BindingProto.pub = function () {
-    var i = this.subs.length
-    while (i--) {
-        this.subs[i].refresh()
-    }
 }
 
 module.exports = Binding
