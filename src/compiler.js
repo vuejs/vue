@@ -227,7 +227,7 @@ CompilerProto.compileNode = function (node, root) {
  *  Compile a text node
  */
 CompilerProto.compileTextNode = function (node) {
-    var tokens = TextParser.parse(node)
+    var tokens = TextParser.parse(node.nodeValue)
     if (!tokens) return
     var compiler = this,
         dirname = config.prefix + '-text',
