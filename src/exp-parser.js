@@ -35,7 +35,7 @@ module.exports = {
      *  Parse and create an anonymous computed property getter function
      *  from an arbitrary expression.
      */
-    parseGetter: function (exp, compiler) {
+    parse: function (exp) {
         // extract variable names
         var vars = getVariables(exp)
         if (!vars.length) return null
@@ -49,13 +49,12 @@ module.exports = {
             hash[v] = 1
             // push assignment
             args.push(v + '=this.$get("' + v + '")')
-            // need to create the binding if it does not exist yet
-            if (!compiler.bindings[v]) {
-                compiler.rootCompiler.createBinding(v)
-            }
         }
         args = 'var ' + args.join(',') + ';return ' + exp
         /* jshint evil: true */
-        return new Function(args)
+        return {
+            getter: new Function(args),
+            vars: vars
+        }
     }
 }

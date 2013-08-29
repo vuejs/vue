@@ -317,12 +317,21 @@ CompilerProto.createBinding = function (key, isExp) {
     if (binding.isExp) {
         // a complex expression binding
         // we need to generate an anonymous computed property for it
-        var getter = ExpParser.parseGetter(key, this)
-        if (getter) {
+        var result = ExpParser.parse(key)
+        if (result) {
             utils.log('  created anonymous binding: ' + key)
-            binding.value = { get: getter }
+            binding.value = { get: result.getter }
             this.markComputed(binding)
             this.expressions.push(binding)
+            // need to create the bindings for keys
+            // that do not exist yet
+            var i = result.vars.length, v
+            while (i--) {
+                v = result.vars[i]
+                if (!bindings[v]) {
+                    this.rootCompiler.createBinding(v)
+                }
+            }
         } else {
             utils.warn('  invalid expression: ' + key)
         }
