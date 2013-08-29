@@ -255,8 +255,7 @@ describe('UNIT: Directive', function () {
             d.el = true
             d.unbind(true)
             assert.ok(unbound === true)
-            // should not null everything unless it's an update
-            assert.ok(d.el && d.vm)  
+            assert.ok(d.el)
         })
 
         it('should null everything if it\'s called for VM destruction', function () {
