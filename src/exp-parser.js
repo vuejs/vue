@@ -40,13 +40,13 @@ module.exports = {
         var vars = getVariables(exp)
         if (!vars.length) return null
         var args = [],
-            v, i = vars.length,
+            v, i, l = vars.length,
             hash = {}
-        while (i--) {
+        for (i = 0; i < l; i++) {
             v = vars[i]
             // avoid duplicate keys
             if (hash[v]) continue
-            hash[v] = 1
+            hash[v] = v
             // push assignment
             args.push(v + '=this.$get("' + v + '")')
         }
@@ -54,7 +54,7 @@ module.exports = {
         /* jshint evil: true */
         return {
             getter: new Function(args),
-            vars: vars
+            vars: Object.keys(hash)
         }
     }
 }

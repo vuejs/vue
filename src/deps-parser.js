@@ -102,5 +102,9 @@ module.exports = {
         bindings.forEach(catchDeps)
         observer.isObserving = false
         utils.log('\ndone.')
-    }
+    },
+
+    // for testing only
+    cdvm: createDummyVM,
+    pcd: parseContextDependency
 }

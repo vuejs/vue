@@ -33,7 +33,7 @@ module.exports = function( grunt ) {
 
         mocha: {
             build: {
-                src: ['test/e2e/*.html'],
+                src: ['test/integration/*.html'],
                 options: {
                     reporter: 'Spec',
                     run: true
