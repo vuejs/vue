@@ -22,9 +22,9 @@ describe('UNIT: Binding', function () {
 
         it('should have instances, subs and deps as Arrays', function () {
             var b = new Binding(null, 'test')
-            assert.ok(Array.isArray(b.instances))
-            assert.ok(Array.isArray(b.subs))
-            assert.ok(Array.isArray(b.deps))
+            assert.ok(Array.isArray(b.instances), 'instances')
+            assert.ok(Array.isArray(b.subs), 'subs')
+            assert.ok(Array.isArray(b.deps), 'deps')
         })
 
     })
@@ -50,11 +50,11 @@ describe('UNIT: Binding', function () {
         b.update(val)
 
         it('should set the binding\'s value', function () {
-            assert.ok(b.value === val)
+            assert.strictEqual(b.value, val)
         })
 
         it('should update the binding\'s instances', function () {
-            assert.ok(updated === val * numInstances)
+            assert.strictEqual(updated, val * numInstances)
         })
 
         it('should call the binding\'s pub() method', function () {
@@ -79,7 +79,7 @@ describe('UNIT: Binding', function () {
         b.refresh()
 
         it('should call refresh() of all instances', function () {
-            assert.ok(refreshed === numInstances)
+            assert.strictEqual(refreshed, numInstances)
         })
     })
 
@@ -99,7 +99,7 @@ describe('UNIT: Binding', function () {
         b.pub()
 
         it('should call refresh() of all subscribers', function () {
-            assert.ok(refreshed === numSubs)
+            assert.strictEqual(refreshed, numSubs)
         })
 
     })
@@ -127,20 +127,22 @@ describe('UNIT: Binding', function () {
         b.unbind()
 
         it('should call unbind() of all instances', function () {
-            assert.ok(unbound === numInstances)
+            assert.strictEqual(unbound, numInstances)
         })
 
         it('should remove itself from the subs list of all its dependencies', function () {
-            assert.ok(dep1.subs.indexOf(b) === -1)
-            assert.ok(dep2.subs.indexOf(b) === -1)
+            var notInSubs1 = dep1.subs.indexOf(b) === -1,
+                notInSubs2 = dep2.subs.indexOf(b) === -1
+            assert.ok(notInSubs1)
+            assert.ok(notInSubs2)
         })
 
         it('should unref all instance props', function () {
-            assert.ok(b.compiler === null)
-            assert.ok(b.pubs === null)
-            assert.ok(b.subs === null)
-            assert.ok(b.instances === null)
-            assert.ok(b.deps === null)
+            assert.strictEqual(b.compiler, null)
+            assert.strictEqual(b.pubs, null)
+            assert.strictEqual(b.subs, null)
+            assert.strictEqual(b.instances, null)
+            assert.strictEqual(b.deps, null)
         })
 
     })

@@ -8,7 +8,7 @@ describe('UNIT: Directive', function () {
         
         it('should return null if directive name does not have correct prefix', function () {
             var d = Directive.parse('ds-test', 'abc')
-            assert.ok(d === null)
+            assert.strictEqual(d, null)
         })
 
         it('should return null if directive is unknown', function () {
@@ -21,10 +21,10 @@ describe('UNIT: Directive', function () {
                 e = Directive.parse('sd-text', '  '),
                 f = Directive.parse('sd-text', '|'),
                 g = Directive.parse('sd-text', '  |  ')
-            assert.ok(d === null, 'empty')
-            assert.ok(e === null, 'spaces')
-            assert.ok(f === null, 'single pipe')
-            assert.ok(g === null, 'pipe with spaces')
+            assert.strictEqual(d, null, 'empty')
+            assert.strictEqual(e, null, 'spaces')
+            assert.strictEqual(f, null, 'single pipe')
+            assert.strictEqual(g, null, 'pipe with spaces')
         })
 
         it('should return an instance of Directive if args are good', function () {
@@ -49,30 +49,30 @@ describe('UNIT: Directive', function () {
         
         it('should copy the definition as _update if the def is a function', function () {
             var d = Directive.parse('sd-test', 'abc')
-            assert.ok(d._update === test)                
+            assert.strictEqual(d._update, test)                
         })
 
         it('should copy methods if the def is an object', function () {
             var d = Directive.parse('sd-obj', 'abc')
-            assert.ok(d._update === obj.update, 'update should be copied as _update')
-            assert.ok(d._unbind === obj.unbind, 'unbind should be copied as _unbind')
-            assert.ok(d.bind === obj.bind)
-            assert.ok(d.custom === obj.custom, 'should copy any custom methods')
+            assert.strictEqual(d._update, obj.update, 'update should be copied as _update')
+            assert.strictEqual(d._unbind, obj.unbind, 'unbind should be copied as _unbind')
+            assert.strictEqual(d.bind, obj.bind)
+            assert.strictEqual(d.custom, obj.custom, 'should copy any custom methods')
         })
 
         it('should trim the expression', function () {
             var exp = ' fsfsef   | fsef a  ',
                 d = Directive.parse('sd-text', exp)
-            assert.ok(d.expression === exp.trim())
+            assert.strictEqual(d.expression, exp.trim())
         })
 
         it('should extract correct argument', function () {
             var d = Directive.parse('sd-text', 'todo:todos'),
                 e = Directive.parse('sd-text', 'todo:todos + abc'),
                 f = Directive.parse('sd-text', 'todo:todos | fsf fsef')
-            assert.ok(d.arg === 'todo', 'simple')
-            assert.ok(e.arg === 'todo', 'expression')
-            assert.ok(f.arg === 'todo', 'with filters')
+            assert.strictEqual(d.arg, 'todo', 'simple')
+            assert.strictEqual(e.arg, 'todo', 'expression')
+            assert.strictEqual(f.arg, 'todo', 'with filters')
         })
 
         it('should extract correct nesting info', function () {
@@ -92,7 +92,7 @@ describe('UNIT: Directive', function () {
                 f = Directive.parse('sd-text', 'abc + bcd * 5 / 2'),
                 g = Directive.parse('sd-text', 'abc && (bcd || eee)'),
                 h = Directive.parse('sd-text', 'test(abc)')
-            assert.ok(d.isExp === false)
+            assert.ok(!d.isExp, 'non-expression')
             assert.ok(e.isExp, 'negation')
             assert.ok(f.isExp, 'math')
             assert.ok(g.isExp, 'logic')
@@ -105,26 +105,28 @@ describe('UNIT: Directive', function () {
                 f = Directive.parse('sd-text', 'abc ||'),
                 g = Directive.parse('sd-text', 'abc | | '),
                 h = Directive.parse('sd-text', 'abc | unknown | nothing at all | whaaat')
-            assert.ok(d.filters === null)
-            assert.ok(e.filters === null, 'single')
-            assert.ok(f.filters === null, 'double')
-            assert.ok(g.filters === null, 'with spaces')
-            assert.ok(h.filters === null, 'with unknown filters')
+            assert.strictEqual(d.filters, null)
+            assert.strictEqual(e.filters, null, 'single')
+            assert.strictEqual(f.filters, null, 'double')
+            assert.strictEqual(g.filters, null, 'with spaces')
+            assert.strictEqual(h.filters, null, 'with unknown filters')
         })
 
         it('should extract correct filters (single filter)', function () {
             var d = Directive.parse('sd-text', 'abc | uppercase'),
                 f = d.filters[0]
-            assert.ok(f.name === 'uppercase' && f.args === null)
-            assert.ok(f.apply('test') === 'TEST')
+            assert.strictEqual(f.name, 'uppercase')
+            assert.strictEqual(f.args, null)
+            assert.strictEqual(f.apply('test'), 'TEST')
         })
 
         it('should extract correct filters (single filter with args)', function () {
             var d = Directive.parse('sd-text', 'abc | pluralize item \'arg with spaces\''),
                 f = d.filters[0]
-            assert.ok(f.name === 'pluralize', 'name')
-            assert.ok(f.args.length === 2, 'args length')
-            assert.ok(f.args[0] === 'item' && f.args[1] === 'arg with spaces', 'args value')
+            assert.strictEqual(f.name, 'pluralize', 'name')
+            assert.strictEqual(f.args.length, 2, 'args length')
+            assert.strictEqual(f.args[0], 'item', 'args value 1')
+            assert.strictEqual(f.args[1], 'arg with spaces', 'args value 2')
         })
 
         it('should extract correct filters (multiple filters)', function () {
@@ -133,10 +135,11 @@ describe('UNIT: Directive', function () {
                 f1 = d.filters[0],
                 f2 = d.filters[1],
                 f3 = d.filters[2]
-            assert.ok(d.filters.length === 3)
-            assert.ok(f1.name === 'uppercase')
-            assert.ok(f2.name === 'pluralize' && f2.args[0] === 'item')
-            assert.ok(f3.name === 'lowercase')
+            assert.strictEqual(d.filters.length, 3)
+            assert.strictEqual(f1.name, 'uppercase')
+            assert.strictEqual(f2.name, 'pluralize')
+            assert.strictEqual(f2.args[0], 'item')
+            assert.strictEqual(f3.name, 'lowercase')
         })
 
     })
@@ -146,7 +149,7 @@ describe('UNIT: Directive', function () {
         it('should work', function () {
             var d = Directive.parse('sd-text', 'abc | pluralize item | capitalize'),
                 v = d.applyFilters(2)
-            assert.ok(v === 'Items')
+            assert.strictEqual(v, 'Items')
         })
 
     })
@@ -160,13 +163,13 @@ describe('UNIT: Directive', function () {
         it('should invole the _update function', function () {
             var d = Directive.parse('sd-applyTest', 'abc')
             d.apply(12345)
-            assert.ok(test === 12345)
+            assert.strictEqual(test, 12345)
         })
         
         it('should apply the filter if there is any', function () {
             var d = Directive.parse('sd-applyTest', 'abc | currency £')
             d.apply(12345)
-            assert.ok(test === '£123,45.00')
+            assert.strictEqual(test, '£123,45.00')
         })
 
     })
@@ -179,15 +182,16 @@ describe('UNIT: Directive', function () {
             applied = true
         }
 
-        it('should apply() for first time update, even if the value is undefined', function () {
+        it('should apply() for first time update, even with undefined', function () {
             d.update(undefined, true)
-            assert.ok(applied === true)
+            assert.strictEqual(applied, true)
         })
 
         it('should apply() when a different value is given', function () {
             applied = false
             d.update(123)
-            assert.ok(d.value === 123 && applied === true)
+            assert.strictEqual(d.value, 123)
+            assert.strictEqual(applied, true)
         })
 
         it('should not apply() if the value is the same', function () {
@@ -217,11 +221,11 @@ describe('UNIT: Directive', function () {
         d.refresh(value)
 
         it('should set the value if value arg is given', function () {
-            assert.ok(d.value === value)
+            assert.strictEqual(d.value, value)
         })
 
         it('should get its el&vm context and get correct computedValue', function () {
-            assert.ok(d.computedValue === el + vm)
+            assert.strictEqual(d.computedValue, el + vm)
         })
 
         it('should call apply()', function () {
@@ -248,13 +252,13 @@ describe('UNIT: Directive', function () {
 
         it('should not work if it has no element yet', function () {
             d.unbind()
-            assert.ok(unbound === false)
+            assert.strictEqual(unbound, false)
         })
 
         it('should call _unbind() if it has an element', function () {
             d.el = true
             d.unbind(true)
-            assert.ok(unbound === true)
+            assert.strictEqual(unbound, true)
             assert.ok(d.el)
         })
 
