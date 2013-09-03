@@ -96,8 +96,8 @@ function bind (obj, key, path, observer) {
         },
         set: function (newVal) {
             values[fullKey] = newVal
-            watch(newVal, fullKey, observer)
             observer.emit('set', fullKey, newVal)
+            watch(newVal, fullKey, observer)
         }
     })
     watch(val, fullKey, observer)
@@ -135,9 +135,17 @@ function emitSet (obj, observer) {
     if (typeOf(obj) === 'Array') {
         observer.emit('set', 'length', obj.length)
     } else {
-        var values = obj.__values__
+        emit(obj.__values__)
+    }
+    function emit (values, path) {
+        var val
+        path = path ? path + '.' : ''
         for (var key in values) {
-            observer.emit('set', key, values[key])
+            val = values[key]
+            observer.emit('set', path + key, val)
+            if (typeOf(val) === 'Object') {
+                emit(val, key)
+            }
         }
     }
 }
