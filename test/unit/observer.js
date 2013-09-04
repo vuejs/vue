@@ -87,7 +87,81 @@ describe('UNIT: Observer', function () {
     })
 
     describe('Observing Array', function () {
-        // body...
+
+        var arr = [],
+            ob = new Emitter()
+        ob.proxies = {}
+        Observer.observe(arr, 'test', ob)
+        
+        it('should attach the hidden observer', function () {
+            assert.ok(arr.__observer__ instanceof Emitter)
+        })
+
+        it('should overwrite the native array mutator methods', function () {
+            ['push', 'pop', 'shift', 'unshift', 'splice', 'sort', 'reverse'].forEach(function (method) {
+                assert.notStrictEqual(arr[method], Array.prototype[method])                
+            })
+        })
+
+        it('should emit set for .length when it mutates', function () {
+            var emitted = false
+            ob.once('set', function (key, val) {
+                assert.strictEqual(key, 'test.length')
+                assert.strictEqual(val, 1)
+                emitted = true
+            })
+            arr.push(1)
+            assert.ok(emitted)
+        })
+
+        describe('Mutator Methods', function () {
+            
+            it('push', function () {
+                // body...
+            })
+
+            it('pop', function () {
+                // body...
+            })
+
+            it('shift', function () {
+                // body...
+            })
+
+            it('unshift', function () {
+                // body...
+            })
+
+            it('splice', function () {
+                // body...
+            })
+
+            it('sort', function () {
+                // body...
+            })
+
+            it('reverse', function () {
+                // body...
+            })
+
+        })
+
+        describe('Augmentations', function () {
+            
+            it('remove', function () {
+                // body...
+            })
+
+            it('replace', function () {
+                // body...
+            })
+
+            it('mutateFilter', function () {
+                // body...
+            })
+
+        })
+
     })
 
 })
