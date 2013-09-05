@@ -114,7 +114,6 @@ module.exports = {
         // the collection has been augmented during Binding.set()
         if (!collection.__observer__) Observer.watchArray(collection, null, new Emitter())
         collection.__observer__.on('mutate', this.mutationListener)
-        // this.compiler.observer.emit('set', this.key + '.length', collection.length)
 
         // create child-seeds and append to DOM
         for (var i = 0, l = collection.length; i < l; i++) {

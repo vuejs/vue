@@ -11,17 +11,18 @@ var Emitter = require('./emitter'),
 var arrayMutators = {
     remove: function (index) {
         if (typeof index !== 'number') index = this.indexOf(index)
-        this.splice(index, 1)
+        return this.splice(index, 1)[0]
     },
     replace: function (index, data) {
         if (typeof index !== 'number') index = this.indexOf(index)
-        this.splice(index, 1, data)
+        return this.splice(index, 1, data)[0]
     },
     mutateFilter: function (fn) {
         var i = this.length
         while (i--) {
             if (!fn(this[i])) this.splice(i, 1)
         }
+        return this
     }
 }
 
@@ -34,6 +35,7 @@ methods.forEach(function (method) {
             args: slice.call(arguments),
             result: result
         })
+        return result
     }
 })
 

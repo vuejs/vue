@@ -117,31 +117,143 @@ describe('UNIT: Observer', function () {
         describe('Mutator Methods', function () {
             
             it('push', function () {
-                // body...
+                var arg1 = 123,
+                    arg2 = 234,
+                    emitted = false
+                ob.once('mutate', function (key, array, mutation) {
+                    assert.strictEqual(key, 'test')
+                    assert.strictEqual(array, arr)
+                    assert.strictEqual(array.length, 3)
+                    assert.strictEqual(mutation.method, 'push')
+                    assert.strictEqual(mutation.args.length, 2)
+                    assert.strictEqual(mutation.args[0], arg1)
+                    assert.strictEqual(mutation.args[1], arg2)
+                    assert.strictEqual(mutation.result, arr.length)
+                    emitted = true
+                })
+                var r = arr.push(arg1, arg2)
+                assert.ok(emitted)
+                assert.strictEqual(r, arr.length)
             })
 
             it('pop', function () {
-                // body...
+                var emitted = false,
+                    expected = arr[arr.length - 1]
+                ob.once('mutate', function (key, array, mutation) {
+                    assert.strictEqual(key, 'test')
+                    assert.strictEqual(array, arr)
+                    assert.strictEqual(array.length, 2)
+                    assert.strictEqual(mutation.method, 'pop')
+                    assert.strictEqual(mutation.args.length, 0)
+                    assert.strictEqual(mutation.result, expected)
+                    emitted = true
+                })
+                var r = arr.pop()
+                assert.ok(emitted)
+                assert.strictEqual(r, expected)
             })
 
             it('shift', function () {
-                // body...
+                var emitted = false,
+                    expected = arr[0]
+                ob.once('mutate', function (key, array, mutation) {
+                    assert.strictEqual(key, 'test')
+                    assert.strictEqual(array, arr)
+                    assert.strictEqual(array.length, 1)
+                    assert.strictEqual(mutation.method, 'shift')
+                    assert.strictEqual(mutation.args.length, 0)
+                    assert.strictEqual(mutation.result, expected)
+                    emitted = true
+                })
+                var r = arr.shift()
+                assert.ok(emitted)
+                assert.strictEqual(r, expected)
             })
 
             it('unshift', function () {
-                // body...
+                var emitted = false,
+                    arg1 = 456,
+                    arg2 = 678
+                ob.once('mutate', function (key, array, mutation) {
+                    assert.strictEqual(key, 'test')
+                    assert.strictEqual(array, arr)
+                    assert.strictEqual(array.length, 3)
+                    assert.strictEqual(mutation.method, 'unshift')
+                    assert.strictEqual(mutation.args.length, 2)
+                    assert.strictEqual(mutation.args[0], arg1)
+                    assert.strictEqual(mutation.args[1], arg2)
+                    assert.strictEqual(mutation.result, arr.length)
+                    emitted = true
+                })
+                var r = arr.unshift(arg1, arg2)
+                assert.ok(emitted)
+                assert.strictEqual(r, arr.length)
             })
 
             it('splice', function () {
-                // body...
+                var emitted = false,
+                    arg1 = 789,
+                    arg2 = 910,
+                    expected = arr[1]
+                ob.once('mutate', function (key, array, mutation) {
+                    assert.strictEqual(key, 'test')
+                    assert.strictEqual(array, arr)
+                    assert.strictEqual(array.length, 4)
+                    assert.strictEqual(mutation.method, 'splice')
+                    assert.strictEqual(mutation.args.length, 4)
+                    assert.strictEqual(mutation.args[0], 1)
+                    assert.strictEqual(mutation.args[1], 1)
+                    assert.strictEqual(mutation.args[2], arg1)
+                    assert.strictEqual(mutation.args[3], arg2)
+                    assert.strictEqual(mutation.result.length, 1)
+                    assert.strictEqual(mutation.result[0], expected)
+                    emitted = true
+                })
+                var r = arr.splice(1, 1, arg1, arg2)
+                assert.ok(emitted)
+                assert.strictEqual(r.length, 1)
+                assert.strictEqual(r[0], expected)
             })
 
             it('sort', function () {
-                // body...
+                var emitted = false,
+                    sorter = function (a, b) {
+                        return a > b ? -1 : 1
+                    },
+                    copy = arr.slice().sort(sorter)
+                ob.once('mutate', function (key, array, mutation) {
+                    assert.strictEqual(key, 'test')
+                    assert.strictEqual(array, arr)
+                    assert.strictEqual(mutation.method, 'sort')
+                    assert.strictEqual(mutation.args.length, 1)
+                    assert.strictEqual(mutation.result, arr)
+                    for (var i = 0; i < copy.length; i++) {
+                        assert.strictEqual(array[i], copy[i])
+                    }
+                    emitted = true
+                })
+                var r = arr.sort(sorter)
+                assert.ok(emitted)
+                assert.strictEqual(r, arr)
             })
 
             it('reverse', function () {
-                // body...
+                var emitted = false,
+                    copy = arr.slice().reverse()
+                ob.once('mutate', function (key, array, mutation) {
+                    assert.strictEqual(key, 'test')
+                    assert.strictEqual(array, arr)
+                    assert.strictEqual(mutation.method, 'reverse')
+                    assert.strictEqual(mutation.args.length, 0)
+                    assert.strictEqual(mutation.result, arr)
+                    for (var i = 0; i < copy.length; i++) {
+                        assert.strictEqual(array[i], copy[i])
+                    }
+                    emitted = true
+                })
+                var r = arr.reverse()
+                assert.ok(emitted)
+                assert.strictEqual(r, arr)
             })
 
         })
@@ -149,15 +261,42 @@ describe('UNIT: Observer', function () {
         describe('Augmentations', function () {
             
             it('remove', function () {
-                // body...
+                var emitted = false,
+                    expected = arr[0] = { a: 1 }
+                ob.once('mutate', function (key, array, mutation) {
+                    emitted = true
+                    assert.strictEqual(mutation.method, 'splice')
+                    assert.strictEqual(mutation.args.length, 2)
+                })
+                var r = arr.remove(expected)
+                assert.ok(emitted)
+                assert.strictEqual(r, expected)
             })
 
             it('replace', function () {
-                // body...
+                var emitted = false,
+                    expected = arr[0] = { a: 1 },
+                    arg = 45678
+                ob.once('mutate', function (key, array, mutation) {
+                    emitted = true
+                    assert.strictEqual(mutation.method, 'splice')
+                    assert.strictEqual(mutation.args.length, 3)
+                })
+                var r = arr.replace(expected, arg)
+                assert.ok(emitted)
+                assert.strictEqual(r, expected)
+                assert.strictEqual(arr[0], arg)
             })
 
             it('mutateFilter', function () {
-                // body...
+                var filter = function (e) {
+                        return e > 1000
+                    },
+                    copy = arr.slice().filter(filter)
+                arr.mutateFilter(filter)
+                for (var i = 0; i < copy.length; i++) {
+                    assert.strictEqual(arr[i], copy[i])
+                }
             })
 
         })
