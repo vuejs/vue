@@ -399,8 +399,10 @@ api.filter = function (name, fn) {
  *  Set config options
  */
 api.config = function (opts) {
-    if (opts) utils.extend(config, opts)
-    textParser.buildRegex()
+    if (opts) {
+        utils.extend(config, opts)
+        textParser.buildRegex()
+    }
 }
 
 /*
@@ -762,7 +764,7 @@ CompilerProto.compileNode = function (node, root) {
  *  Compile a text node
  */
 CompilerProto.compileTextNode = function (node) {
-    var tokens = TextParser.parse(node)
+    var tokens = TextParser.parse(node.nodeValue)
     if (!tokens) return
     var compiler = this,
         dirname = config.prefix + '-text',
@@ -852,12 +854,21 @@ CompilerProto.createBinding = function (key, isExp) {
     if (binding.isExp) {
         // a complex expression binding
         // we need to generate an anonymous computed property for it
-        var getter = ExpParser.parseGetter(key, this)
-        if (getter) {
+        var result = ExpParser.parse(key)
+        if (result) {
             utils.log('  created anonymous binding: ' + key)
-            binding.value = { get: getter }
+            binding.value = { get: result.getter }
             this.markComputed(binding)
             this.expressions.push(binding)
+            // need to create the bindings for keys
+            // that do not exist yet
+            var i = result.vars.length, v
+            while (i--) {
+                v = result.vars[i]
+                if (!bindings[v]) {
+                    this.rootCompiler.createBinding(v)
+                }
+            }
         } else {
             utils.warn('  invalid expression: ' + key)
         }
@@ -1199,6 +1210,18 @@ BindingProto.refresh = function () {
     while (i--) {
         this.instances[i].refresh()
     }
+    this.pub()
+}
+
+/*
+ *  Notify computed properties that depend on this binding
+ *  to update themselves
+ */
+BindingProto.pub = function () {
+    var i = this.subs.length
+    while (i--) {
+        this.subs[i].refresh()
+    }
 }
 
 /*
@@ -1215,19 +1238,7 @@ BindingProto.unbind = function () {
         subs = this.deps[i].subs
         subs.splice(subs.indexOf(this), 1)
     }
-    // TODO if this is a root level binding
     this.compiler = this.pubs = this.subs = this.instances = this.deps = null
-}
-
-/*
- *  Notify computed properties that depend on this binding
- *  to update themselves
- */
-BindingProto.pub = function () {
-    var i = this.subs.length
-    while (i--) {
-        this.subs[i].refresh()
-    }
 }
 
 module.exports = Binding
@@ -1246,17 +1257,18 @@ var Emitter = require('./emitter'),
 var arrayMutators = {
     remove: function (index) {
         if (typeof index !== 'number') index = this.indexOf(index)
-        this.splice(index, 1)
+        return this.splice(index, 1)[0]
     },
     replace: function (index, data) {
         if (typeof index !== 'number') index = this.indexOf(index)
-        this.splice(index, 1, data)
+        return this.splice(index, 1, data)[0]
     },
     mutateFilter: function (fn) {
         var i = this.length
         while (i--) {
             if (!fn(this[i])) this.splice(i, 1)
         }
+        return this
     }
 }
 
@@ -1269,6 +1281,7 @@ methods.forEach(function (method) {
             args: slice.call(arguments),
             result: result
         })
+        return result
     }
 })
 
@@ -1331,8 +1344,8 @@ function bind (obj, key, path, observer) {
         },
         set: function (newVal) {
             values[fullKey] = newVal
-            watch(newVal, fullKey, observer)
             observer.emit('set', fullKey, newVal)
+            watch(newVal, fullKey, observer)
         }
     })
     watch(val, fullKey, observer)
@@ -1370,9 +1383,17 @@ function emitSet (obj, observer) {
     if (typeOf(obj) === 'Array') {
         observer.emit('set', 'length', obj.length)
     } else {
-        var values = obj.__values__
+        emit(obj.__values__)
+    }
+    function emit (values, path) {
+        var val
+        path = path ? path + '.' : ''
         for (var key in values) {
-            observer.emit('set', key, values[key])
+            val = values[key]
+            observer.emit('set', path + key, val)
+            if (typeOf(val) === 'Object') {
+                emit(val, key)
+            }
         }
     }
 }
@@ -1446,9 +1467,9 @@ var config     = require('./config'),
     directives = require('./directives'),
     filters    = require('./filters')
 
-var KEY_RE          = /^[^\|<]+/,
+var KEY_RE          = /^[^\|]+/,
     ARG_RE          = /([^:]+):(.+)$/,
-    FILTERS_RE      = /[^\|]\|[^\|<]+/g,
+    FILTERS_RE      = /\|[^\|]+/g,
     FILTER_TOKEN_RE = /[^\s']+|'[^']+'/g,
     NESTING_RE      = /^\^+/,
     SINGLE_VAR_RE   = /^[\w\.]+$/
@@ -1457,7 +1478,7 @@ var KEY_RE          = /^[^\|<]+/,
  *  Directive class
  *  represents a single directive instance in the DOM
  */
-function Directive (directiveName, expression) {
+function Directive (directiveName, expression, rawKey) {
 
     var definition = directives[directiveName]
 
@@ -1476,15 +1497,24 @@ function Directive (directiveName, expression) {
 
     this.directiveName = directiveName
     this.expression    = expression.trim()
-    this.rawKey        = expression.match(KEY_RE)[0].trim()
+    this.rawKey        = rawKey
     
-    this.parseKey(this.rawKey)
+    parseKey(this, rawKey)
+
     this.isExp = !SINGLE_VAR_RE.test(this.key)
     
     var filterExps = expression.match(FILTERS_RE)
-    this.filters = filterExps
-        ? filterExps.map(parseFilter)
-        : null
+    if (filterExps) {
+        this.filters = []
+        var i = 0, l = filterExps.length, filter
+        for (; i < l; i++) {
+            filter = parseFilter(filterExps[i])
+            if (filter) this.filters.push(filter)
+        }
+        if (!this.filters.length) this.filters = null
+    } else {
+        this.filters = null
+    }
 }
 
 var DirProto = Directive.prototype
@@ -1492,7 +1522,7 @@ var DirProto = Directive.prototype
 /*
  *  parse a key, extract argument and nesting/root info
  */
-DirProto.parseKey = function (rawKey) {
+function parseKey (dir, rawKey) {
 
     var argMatch = rawKey.match(ARG_RE)
 
@@ -1500,41 +1530,47 @@ DirProto.parseKey = function (rawKey) {
         ? argMatch[2].trim()
         : rawKey.trim()
 
-    this.arg = argMatch
+    dir.arg = argMatch
         ? argMatch[1].trim()
         : null
 
     var nesting = key.match(NESTING_RE)
-    this.nesting = nesting
+    dir.nesting = nesting
         ? nesting[0].length
         : false
 
-    this.root = key.charAt(0) === '$'
+    dir.root = key.charAt(0) === '$'
 
-    if (this.nesting) {
+    if (dir.nesting) {
         key = key.replace(NESTING_RE, '')
-    } else if (this.root) {
+    } else if (dir.root) {
         key = key.slice(1)
     }
 
-    this.key = key
+    dir.key = key
 }
-
 
 /*
  *  parse a filter expression
  */
 function parseFilter (filter) {
 
-    var tokens = filter.slice(2)
-        .match(FILTER_TOKEN_RE)
-        .map(function (token) {
-            return token.replace(/'/g, '').trim()
-        })
+    var tokens = filter.slice(1).match(FILTER_TOKEN_RE)
+    if (!tokens) return
+    tokens = tokens.map(function (token) {
+        return token.replace(/'/g, '').trim()
+    })
+
+    var name = tokens[0],
+        apply = filters[name]
+    if (!apply) {
+        utils.warn('Unknown filter: ' + name)
+        return
+    }
 
     return {
-        name  : tokens[0],
-        apply : filters[tokens[0]],
+        name  : name,
+        apply : apply,
         args  : tokens.length > 1
                 ? tokens.slice(1)
                 : null
@@ -1567,7 +1603,6 @@ DirProto.refresh = function (value) {
     if (value && value === this.computedValue) return
     this.computedValue = value
     this.apply(value)
-    this.binding.pub()
 }
 
 /*
@@ -1588,7 +1623,6 @@ DirProto.applyFilters = function (value) {
     var filtered = value, filter
     for (var i = 0, l = this.filters.length; i < l; i++) {
         filter = this.filters[i]
-        if (!filter.apply) utils.warn('Unknown filter: ' + filter.name)
         filtered = filter.apply(filtered, filter.args)
     }
     return filtered
@@ -1596,8 +1630,13 @@ DirProto.applyFilters = function (value) {
 
 /*
  *  Unbind diretive
+ *  @ param {Boolean} update
+ *    Sometimes we call unbind before an update (i.e. not destroy)
+ *    just to teardown previousstuff, in that case we do not want
+ *    to null everything.
  */
 DirProto.unbind = function (update) {
+    // this can be called before the el is even assigned...
     if (!this.el) return
     if (this._unbind) this._unbind(update)
     if (!update) this.vm = this.el = this.binding = this.compiler = null
@@ -1613,14 +1652,15 @@ Directive.parse = function (dirname, expression) {
     if (dirname.indexOf(prefix) === -1) return null
     dirname = dirname.slice(prefix.length + 1)
 
-    var dir   = directives[dirname],
-        valid = KEY_RE.test(expression)
+    var dir = directives[dirname],
+        keyMatch = expression.match(KEY_RE),
+        rawKey = keyMatch && keyMatch[0].trim()
 
     if (!dir) utils.warn('unknown directive: ' + dirname)
-    if (!valid) utils.warn('invalid directive expression: ' + expression)
+    if (!rawKey) utils.warn('invalid directive expression: ' + expression)
 
-    return dir && valid
-        ? new Directive(dirname, expression)
+    return dir && rawKey
+        ? new Directive(dirname, expression, rawKey)
         : null
 }
 
@@ -1664,28 +1704,27 @@ module.exports = {
      *  Parse and create an anonymous computed property getter function
      *  from an arbitrary expression.
      */
-    parseGetter: function (exp, compiler) {
+    parse: function (exp) {
         // extract variable names
         var vars = getVariables(exp)
         if (!vars.length) return null
         var args = [],
-            v, i = vars.length,
+            v, i, l = vars.length,
             hash = {}
-        while (i--) {
+        for (i = 0; i < l; i++) {
             v = vars[i]
             // avoid duplicate keys
             if (hash[v]) continue
-            hash[v] = 1
+            hash[v] = v
             // push assignment
             args.push(v + '=this.$get("' + v + '")')
-            // need to create the binding if it does not exist yet
-            if (!compiler.bindings[v]) {
-                compiler.rootCompiler.createBinding(v)
-            }
         }
         args = 'var ' + args.join(',') + ';return ' + exp
         /* jshint evil: true */
-        return new Function(args)
+        return {
+            getter: new Function(args),
+            vars: Object.keys(hash)
+        }
     }
 }
 });
@@ -1706,9 +1745,8 @@ module.exports = {
     /*
      *  Parse a piece of text, return an array of tokens
      */
-    parse: function (node) {
+    parse: function (text) {
         if (!BINDING_RE) module.exports.buildRegex()
-        var text = node.nodeValue
         if (!BINDING_RE.test(text)) return null
         var m, i, tokens = []
         do {
@@ -1716,7 +1754,7 @@ module.exports = {
             if (!m) break
             i = m.index
             if (i > 0) tokens.push(text.slice(0, i))
-            tokens.push({ key: m[1] })
+            tokens.push({ key: m[1].trim() })
             text = text.slice(i + m[0].length)
         } while (true)
         if (text.length) tokens.push(text)
@@ -1838,7 +1876,11 @@ module.exports = {
         bindings.forEach(catchDeps)
         observer.isObserving = false
         utils.log('\ndone.')
-    }
+    },
+
+    // for testing only
+    cdvm: createDummyVM,
+    pcd: parseContextDependency
 }
 });
 require.register("seed/src/filters.js", function(exports, require, module){
@@ -2146,7 +2188,6 @@ module.exports = {
         // the collection has been augmented during Binding.set()
         if (!collection.__observer__) Observer.watchArray(collection, null, new Emitter())
         collection.__observer__.on('mutate', this.mutationListener)
-        // this.compiler.observer.emit('set', this.key + '.length', collection.length)
 
         // create child-seeds and append to DOM
         for (var i = 0, l = collection.length; i < l; i++) {

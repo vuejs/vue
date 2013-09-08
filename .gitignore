@@ -3,3 +3,4 @@
 node_modules
 components
 explorations
+test/seed.test.js

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Test</title>
+        <meta charset="utf-8">
+        <link rel="stylesheet" type="text/css" href="../../node_modules/grunt-mocha/node_modules/mocha/mocha.css">
+    </head>
+    <body>
+        <div id="mocha"></div>
+        <div id="test"></div>
+        <script src="../../node_modules/grunt-mocha/node_modules/mocha/mocha.js"></script>
+        <script src="../../node_modules/chai/chai.js"></script>
+        <script src="../../dist/seed.js"></script>
+        <script>
+            mocha.setup('bdd')
+            var assert = chai.assert
+
+            //...
+
+            if (navigator.userAgent.indexOf('PhantomJS') < 0) {
+                mocha.run();
+            }
+        </script>
+    </body>
+</html>

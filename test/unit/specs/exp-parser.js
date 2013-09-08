@@ -1,5 +1,4 @@
-var ExpParser = require('../../src/exp-parser'),
-    assert    = require('assert')
+var ExpParser = require('seed/src/exp-parser')
 
 describe('UNIT: Expression Parser', function () {
     

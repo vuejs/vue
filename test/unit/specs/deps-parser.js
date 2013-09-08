@@ -7,13 +7,7 @@
  *  it has to work with multiple compilers.
  */
 
-// shiv the document to provide dummy object
-global.document = {
-    createElement: function () { return {} }
-}
-
-var DepsParser = require('../../src/deps-parser'),
-    assert     = require('assert')
+var DepsParser = require('seed/src/deps-parser')
 
 describe('UNIT: Dependency Parser', function () {
 

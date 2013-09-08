@@ -1,5 +1,4 @@
-var assert = require('assert'),
-    Binding = require('../../src/binding')
+var Binding = require('seed/src/binding')
 
 describe('UNIT: Binding', function () {
 

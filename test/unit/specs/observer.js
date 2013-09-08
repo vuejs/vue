@@ -1,6 +1,5 @@
-var Observer = require('../../src/observer'),
-    assert = require('assert'),
-    Emitter = require('events').EventEmitter
+var Observer = require('seed/src/observer'),
+    Emitter = require('emitter')
 
 describe('UNIT: Observer', function () {
     

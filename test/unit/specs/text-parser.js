@@ -1,6 +1,5 @@
-var TextParser = require('../../src/text-parser'),
-    assert = require('assert'),
-    config = require('../../src/config')
+var TextParser = require('seed/src/text-parser'),
+    config = require('seed/src/config')
 
 describe('UNIT: TextNode Parser', function () {
 

@@ -26,8 +26,10 @@ api.filter = function (name, fn) {
  *  Set config options
  */
 api.config = function (opts) {
-    if (opts) utils.extend(config, opts)
-    textParser.buildRegex()
+    if (opts) {
+        utils.extend(config, opts)
+        textParser.buildRegex()
+    }
 }
 
 /*

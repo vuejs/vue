@@ -1,6 +1,5 @@
-var assert = require('assert'),
-    Directive = require('../../src/directive'),
-    directives = require('../../src/directives')
+var Directive = require('seed/src/directive'),
+    directives = require('seed/src/directives')
 
 describe('UNIT: Directive', function () {
 
