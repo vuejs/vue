@@ -38,11 +38,7 @@ describe('UNIT: API', function () {
 
     })
 
-    describe('bootstrap()', function () {
-        
-        it('should compile document.body when no arg is given', function () {
-            // body...
-        })
+    describe('compile()', function () {
 
         it('should querySelector target node if arg is a string', function () {
             // body...

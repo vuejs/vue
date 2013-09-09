@@ -7,6 +7,7 @@
 	</head>
 	<body>
 		<div id="mocha"></div>
+		<div id="test" style="display:none"></div>
 		<script src="../../node_modules/grunt-mocha/node_modules/mocha/mocha.js"></script>
 		<script src="../../node_modules/chai/chai.js"></script>
 		<script src="../seed.test.js"></script>
@@ -14,7 +15,6 @@
 			mocha.setup('bdd')
 			var assert = chai.assert
 		</script>
-		<script src="specs/api.js"></script>
 		<script src="specs/binding.js"></script>
 		<script src="specs/directive.js"></script>
 		<script src="specs/observer.js"></script>
@@ -22,6 +22,9 @@
 		<script src="specs/text-parser.js"></script>
 		<script src="specs/deps-parser.js"></script>
 		<script src="specs/filters.js"></script>
+		<script src="specs/directives.js"></script>
+		<script src="specs/api.js"></script>
+		<script src="specs/viewmodel.js"></script>
 		<script>
 			if (navigator.userAgent.indexOf('PhantomJS') < 0) {
             	mocha.run();

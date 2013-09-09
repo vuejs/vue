@@ -515,7 +515,9 @@ CompilerProto.destroy = function () {
         }
     }
     // remove el
-    if (el.parentNode) {
+    if (el === document.body) {
+        el.innerHTML = ''
+    } else if (el.parentNode) {
         el.parentNode.removeChild(el)
     }
 }

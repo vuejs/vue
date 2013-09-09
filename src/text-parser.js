@@ -1,6 +1,15 @@
 var config     = require('./config'),
     ESCAPE_RE  = /[-.*+?^${}()|[\]\/\\]/g,
-    BINDING_RE
+    BINDING_RE = build()
+
+/*
+ *  Build interpolate tag regex from config settings
+ */
+function build () {
+    var open = escapeRegex(config.interpolateTags.open),
+        close = escapeRegex(config.interpolateTags.close)
+    return new RegExp(open + '(.+?)' + close)
+}
 
 /*
  *  Escapes a string so that it can be used to construct RegExp
@@ -15,7 +24,6 @@ module.exports = {
      *  Parse a piece of text, return an array of tokens
      */
     parse: function (text) {
-        if (!BINDING_RE) module.exports.buildRegex()
         if (!BINDING_RE.test(text)) return null
         var m, i, tokens = []
         do {
@@ -31,11 +39,9 @@ module.exports = {
     },
 
     /*
-     *  Build interpolate tag regex from config settings
+     *  External build
      */
     buildRegex: function () {
-        var open = escapeRegex(config.interpolateTags.open),
-            close = escapeRegex(config.interpolateTags.close)
-        BINDING_RE = new RegExp(open + '(.+?)' + close)
+        BINDING_RE = build()
     }
 }

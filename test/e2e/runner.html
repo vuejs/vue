@@ -14,9 +14,14 @@
         <script>
             mocha.setup('bdd')
             var assert = chai.assert
-
-            //...
-
+        </script>
+        <script src="specs/basic.js"></script>
+        <script src="specs/expressions.js"></script>
+        <script src="specs/computed-props.js"></script>
+        <script src="specs/nested-props.js"></script>
+        <script src="specs/nested-vms.js"></script>
+        <script src="specs/repeated-items.js"></script>
+        <script>
             if (navigator.userAgent.indexOf('PhantomJS') < 0) {
                 mocha.run();
             }

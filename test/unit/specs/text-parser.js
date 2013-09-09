@@ -47,13 +47,16 @@ describe('UNIT: TextNode Parser', function () {
     })
 
     describe('.buildRegex()', function () {
-        
-        it('should update the interpolate tags and work', function () {
+
+        before(function () {
             config.interpolateTags = {
                 open: '<%',
                 close: '%>'
             }
             TextParser.buildRegex()
+        })
+        
+        it('should update the interpolate tags and work', function () {
             var tokens = TextParser.parse('hello <%a%>! <% bcd %><%d.e.f%> <%a + (b || c) ? d : e%>')
             assert.strictEqual(tokens.length, 7)
             assert.strictEqual(typeof tokens[0], 'string')
@@ -63,6 +66,14 @@ describe('UNIT: TextNode Parser', function () {
             assert.strictEqual(tokens[3].key, 'bcd')
             assert.strictEqual(tokens[4].key, 'd.e.f')
             assert.strictEqual(tokens[6].key, 'a + (b || c) ? d : e')
+        })
+
+        after(function () {
+            config.interpolateTags = {
+                open: '{{',
+                close: '}}'
+            }
+            TextParser.buildRegex()
         })
 
     })

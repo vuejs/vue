@@ -33,12 +33,12 @@ api.config = function (opts) {
 }
 
 /*
- *  Angular style bootstrap
+ *  Compile a node
  */
-api.bootstrap = function (el) {
-    el = (typeof el === 'string'
+api.compile = function (el) {
+    el = typeof el === 'string'
         ? document.querySelector(el)
-        : el) || document.body
+        : el
     var Ctor = ViewModel,
         vmAttr = config.prefix + '-viewmodel',
         vmExp = el.getAttribute(vmAttr)
