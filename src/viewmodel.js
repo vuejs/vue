@@ -55,7 +55,13 @@ VMProto.$watch = function (key, callback) {
  *  unwatch a key
  */
 VMProto.$unwatch = function (key, callback) {
-    this.$compiler.observer.off('change:' + key, callback)
+    // workaround here
+    // since the emitter module checks callback existence
+    // by checking the length of arguments
+    var args = ['change:' + key],
+        ob = this.$compiler.observer
+    if (callback) args.push(callback)
+    ob.off.apply(ob, args)
 }
 
 /*

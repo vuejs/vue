@@ -7,5 +7,53 @@
  */
 
 describe('UNIT: Directives', function () {
-    // body...
+    
+    describe('attr', function () {
+        // body...
+    })
+
+    describe('text', function () {
+        // body...
+    })
+
+    describe('html', function () {
+        // body...
+    })
+
+    describe('show', function () {
+        // body...
+    })
+
+    describe('visible', function () {
+        // body...
+    })
+
+    describe('focus', function () {
+        // body...
+    })
+
+    describe('class', function () {
+        // body...
+    })
+
+    describe('value', function () {
+        // body...
+    })
+
+    describe('checked', function () {
+        // body...
+    })
+
+    describe('if', function () {
+        // body...
+    })
+
+    describe('style', function () {
+        // body...
+    })
+
+    describe('on (non-delegated only)', function () {
+        // body...
+    })
+
 })
