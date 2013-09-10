@@ -14,6 +14,18 @@
         <script>
             mocha.setup('bdd')
             var assert = chai.assert
+            function mock (id, html, opts) {
+                var el = document.createElement('div')
+                el.id = id
+                el.innerHTML = html
+                if (opts) {
+                    for (var attr in opts) {
+                        el.setAttribute(attr, opts[attr])
+                    }
+                }
+                document.getElementById('test').appendChild(el)
+                return el
+            }
         </script>
         <script src="specs/basic.js"></script>
         <script src="specs/expressions.js"></script>

@@ -35,7 +35,7 @@ api.config = function (opts) {
 /*
  *  Compile a node
  */
-api.compile = function (el) {
+api.compile = function (el, opts) {
     el = typeof el === 'string'
         ? document.querySelector(el)
         : el
@@ -46,7 +46,9 @@ api.compile = function (el) {
         Ctor = utils.getVM(vmExp)
         el.removeAttribute(vmAttr)
     }
-    return new Ctor({ el: el })
+    opts = opts || {}
+    opts.el = el
+    return new Ctor(opts)
 }
 
 /*
@@ -60,6 +62,10 @@ ViewModel.extend = function (options) {
         opts = opts || {}
         if (options.init) {
             opts.init = options.init
+        }
+        if (options.data) {
+            opts.data = opts.data || {}
+            utils.extend(opts.data, options.data)
         }
         ViewModel.call(this, opts)
     }

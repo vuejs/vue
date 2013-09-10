@@ -31,9 +31,9 @@ function Directive (directiveName, expression, rawKey) {
         }
     }
 
-    this.directiveName = directiveName
-    this.expression    = expression.trim()
-    this.rawKey        = rawKey
+    this.name       = directiveName
+    this.expression = expression.trim()
+    this.rawKey     = rawKey
     
     parseKey(this, rawKey)
 

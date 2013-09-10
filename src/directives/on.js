@@ -1,3 +1,5 @@
+var utils = require('../utils')
+
 function delegateCheck (current, top, identifier) {
     if (current[identifier]) {
         return current
@@ -26,6 +28,10 @@ module.exports = {
 
         this.unbind(true)
         if (!handler) return
+        if (typeof handler !== 'function') {
+            utils.warn('Expression is not allowed where a handler is expected.')
+            return
+        }
 
         var compiler = this.compiler,
             event    = this.arg,

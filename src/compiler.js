@@ -314,7 +314,7 @@ CompilerProto.createBinding = function (key, isExp) {
     var bindings = this.bindings,
         binding  = new Binding(this, key, isExp)
 
-    if (binding.isExp) {
+    if (isExp) {
         // a complex expression binding
         // we need to generate an anonymous computed property for it
         var result = ExpParser.parse(key)
