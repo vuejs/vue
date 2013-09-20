@@ -1,7 +1,8 @@
 - tests
+- group DOM updates for array operations
 - docs
 - ability to create custom tags
-- plugins
+- acoompanying modules
     - seed-touch (e.g. sd-drag="onDrag" sd-swipe="onSwipe")
     - seed-storage (RESTful sync)
     - seed-router (express style)

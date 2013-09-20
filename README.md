@@ -7,7 +7,7 @@ Mini MVVM framework
 ## Features
 
 - 8kb gzipped, no dependency.
-- DOM based templates with auto data binding.
+- DOM based templates with two-way data binding.
 - Precise and efficient DOM manipulation with granularity down to a TextNode.
 - POJSO (Plain Old JavaScript Objects) Models that can be shared across ViewModels with arbitrary levels of nesting.
 - Auto dependency extraction for computed properties.
