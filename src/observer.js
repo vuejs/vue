@@ -5,30 +5,13 @@ var Emitter = require('./emitter'),
     slice   = Array.prototype.slice,
     methods = ['push','pop','shift','unshift','splice','sort','reverse']
 
-/*
- *  Methods to be added to an observed array
- */
-var arrayMutators = {
-    remove: function (index) {
-        if (typeof index !== 'number') index = this.indexOf(index)
-        return this.splice(index, 1)[0]
-    },
-    replace: function (index, data) {
-        if (typeof index !== 'number') index = this.indexOf(index)
-        return this.splice(index, 1, data)[0]
-    },
-    mutateFilter: function (fn) {
-        var i = this.length
-        while (i--) {
-            if (!fn(this[i])) this.splice(i, 1)
-        }
-        return this
-    }
-}
+// The proxy prototype to replace the __proto__ of
+// an observed array
+var ArrayProxy = Object.create(Array.prototype)
 
 // Define mutation interceptors so we can emit the mutation info
 methods.forEach(function (method) {
-    arrayMutators[method] = function () {
+    ArrayProxy[method] = function () {
         var result = Array.prototype[method].apply(this, arguments)
         this.__observer__.emit('mutate', this.__path__, this, {
             method: method,
@@ -38,6 +21,24 @@ methods.forEach(function (method) {
         return result
     }
 })
+
+ArrayProxy.remove = function (index) {
+    if (typeof index !== 'number') index = this.indexOf(index)
+    return this.splice(index, 1)[0]
+}
+    
+ArrayProxy.replace = function (index, data) {
+    if (typeof index !== 'number') index = this.indexOf(index)
+    return this.splice(index, 1, data)[0]
+}
+    
+ArrayProxy.mutateFilter = function (fn) {
+    var i = this.length
+    while (i--) {
+        if (!fn(this[i])) this.splice(i, 1)
+    }
+    return this
+}
 
 /*
  *  Watch an object based on type
@@ -69,9 +70,7 @@ function watchObject (obj, path, observer) {
 function watchArray (arr, path, observer) {
     if (path) defProtected(arr, '__path__', path)
     defProtected(arr, '__observer__', observer)
-    for (var method in arrayMutators) {
-        defProtected(arr, method, arrayMutators[method])
-    }
+    arr.__proto__ = ArrayProxy
 }
 
 /*
