@@ -70,6 +70,7 @@ function watchObject (obj, path, observer) {
 function watchArray (arr, path, observer) {
     if (path) defProtected(arr, '__path__', path)
     defProtected(arr, '__observer__', observer)
+    /* jshint proto:true */
     arr.__proto__ = ArrayProxy
 }
 
