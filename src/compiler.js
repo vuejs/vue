@@ -30,26 +30,17 @@ function Compiler (vm, options) {
     if (data) utils.extend(vm, data)
 
     // determine el
-    var tpl = options.template,
-        el  = options.el
-    el  = typeof el === 'string'
-        ? document.querySelector(el)
-        : el
-    if (el) {
-        var tplExp = tpl || el.getAttribute(config.prefix + '-template')
-        if (tplExp) {
-            el.innerHTML = utils.getTemplate(tplExp) || ''
-            el.removeAttribute(config.prefix + '-template')
-        }
-    } else if (tpl) {
-        var template = utils.getTemplate(tpl)
-        if (template) {
-            var tplHolder = document.createElement('div')
-            tplHolder.innerHTML = template
-            el = tplHolder.childNodes[0]
-        }
-    }
+    var el  = typeof options.el === 'string'
+        ? document.querySelector(options.el)
+        : options.el
+            ? options.el
+            : options.template
+                ? utils.makeTemplateNode(options)
+                : vm.templateNode
+                    ? vm.templateNode.cloneNode(true)
+                    : null
 
+    if (!el) return utils.warn('invalid VM options.')
     utils.log('\nnew VM instance: ', el, '\n')
 
     // set stuff on the ViewModel

@@ -37,6 +37,23 @@ describe('UNIT: API', function () {
             assert.strictEqual(utils.getVM('test'), Test)
         })
 
+        it('should take options.template and work', function () {
+            var Test = seed.ViewModel.extend({
+                    tagName: 'p',
+                    template: '<span>{{hello}}</span><a>haha</a>',
+                    data: {
+                        hello: 'Ahaha'
+                    }
+                }),
+                vm = new Test(),
+                text1 = vm.$el.querySelector('span').textContent,
+                text2 = vm.$el.querySelector('a').textContent
+            assert.ok(Test.prototype.templateNode instanceof HTMLElement)
+            assert.strictEqual(vm.$el.nodeName, 'P')
+            assert.strictEqual(text1, 'Ahaha')
+            assert.strictEqual(text2, 'haha')
+        })
+
         it('should call options.init when instantiating', function () {
             var called = false,
                 Test = seed.ViewModel.extend({ init: function () {

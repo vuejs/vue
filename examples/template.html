@@ -6,31 +6,26 @@
     </head>
     <body>
 
-        <div id="hawaii" sd-template="test"></div>
-
-        <script type="text/sd-template" sd-template-id="test">
+        <script type="text/sd-template" id="test">
             <p>{{hi}}!</p>
         </script>
 
         <script src="../dist/seed.js"></script>
         <script>
-            // compile an existing node with sd-template directive
-            // will replace its innerHTML with the template's content
-            var hawaii = new seed.ViewModel({
-                el: '#hawaii'
-            })
+            var template = document.getElementById('test').innerHTML.trim()
 
-            // if using template without an existing node
-            // the VM's $el will be a clone of the template's content
-            // and you will have to manually append it into DOM.
-            // this is mostly to allow users to create VMs dynamically.
             var china  = new seed.ViewModel({
-                template: 'test'
+                template: template
             })
             document.body.appendChild(china.$el)
-
-            hawaii.hi = 'Aloha'
             china.hi = '你好'
+
+            var Child = seed.ViewModel.extend({
+                template: template
+            })
+            var hawaii = new Child()
+            document.body.appendChild(hawaii.$el)
+            hawaii.hi = 'Aloha!'
         </script>
     </body>
 </html>

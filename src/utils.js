@@ -9,31 +9,17 @@ module.exports = {
         return toString.call(obj).slice(8, -1)
     },
 
-    extend: function (obj, ext) {
+    extend: function (obj, ext, qualifier) {
         for (var key in ext) {
+            if (qualifier && !qualifier(key)) continue
             obj[key] = ext[key]
         }
     },
 
-    collectTemplates: function () {
-        var selector = 'script[type="text/' + config.prefix + '-template"]',
-            templates = document.querySelectorAll(selector),
-            i = templates.length
-        while (i--) {
-            this.storeTemplate(templates[i])
-        }
-    },
-
-    storeTemplate: function (template) {
-        var id = template.getAttribute(config.prefix + '-template-id')
-        if (id) {
-            templates[id] = template.innerHTML.trim()
-        }
-        template.parentNode.removeChild(template)
-    },
-
-    getTemplate: function (id) {
-        return templates[id]
+    makeTemplateNode: function (options) {
+        var node = document.createElement(options.tagName || 'div')
+        node.innerHTML = options.template
+        return node
     },
 
     registerVM: function (id, VM) {

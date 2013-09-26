@@ -56,8 +56,8 @@ api.compile = function (el, opts) {
  *  and add extend method
  */
 api.ViewModel = ViewModel
-
 ViewModel.extend = function (options) {
+    // create child constructor
     var ExtendedVM = function (opts) {
         opts = opts || {}
         if (options.init) {
@@ -69,16 +69,25 @@ ViewModel.extend = function (options) {
         }
         ViewModel.call(this, opts)
     }
+    // inherit from ViewModel
     var proto = ExtendedVM.prototype = Object.create(ViewModel.prototype)
     proto.constructor = ExtendedVM
-    if (options.props) utils.extend(proto, options.props)
+    // copy props
+    if (options.props) {
+        utils.extend(proto, options.props, function (key) {
+            return !(key in ViewModel.prototype)
+        })
+    }
+    // register vm id so it can be found by sd-viewmodel
     if (options.id) {
         utils.registerVM(options.id, ExtendedVM)
     }
+    // convert string template into a node
+    // because cloneNode is faster than innerHTML
+    if (options.template) {
+        proto.templateNode = utils.makeTemplateNode(options)
+    }
     return ExtendedVM
 }
-
-// collect templates on load
-utils.collectTemplates()
 
 module.exports = api
