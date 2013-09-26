@@ -168,7 +168,7 @@ describe('UNIT: Directive', function () {
         it('should apply the filter if there is any', function () {
             var d = Directive.parse('sd-applyTest', 'abc | currency £')
             d.apply(12345)
-            assert.strictEqual(test, '£123,45.00')
+            assert.strictEqual(test, '£12,345.00')
         })
 
     })

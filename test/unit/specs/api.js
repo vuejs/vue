@@ -1,5 +1,3 @@
-var seed = require('seed')
-
 describe('UNIT: API', function () {
 
     describe('ViewModel.extend()', function () {

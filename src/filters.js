@@ -12,19 +12,32 @@ var keyCodes = {
 module.exports = {
 
     capitalize: function (value) {
-        if (!value) return ''
+        if (!value && value !== 0) return ''
         value = value.toString()
         return value.charAt(0).toUpperCase() + value.slice(1)
     },
 
     uppercase: function (value) {
-        return value ? value.toString().toUpperCase() : ''
+        return (value || value === 0)
+            ? value.toString().toUpperCase()
+            : ''
     },
 
     lowercase: function (value) {
-        return value ? value.toString().toLowerCase() : ''
+        return (value || value === 0)
+            ? value.toString().toLowerCase()
+            : ''
     },
 
+    /*
+     *  args: an array of strings corresponding to
+     *  the single, double, triple ... forms of the word to
+     *  be pluralized. When the number to be pluralized
+     *  exceeds the length of the args, it will use the last
+     *  entry in the array.
+     *
+     *  e.g. ['single', 'double', 'triple', 'multiple']
+     */
     pluralize: function (value, args) {
         return args.length > 1
             ? (args[value - 1] || args[args.length - 1])
@@ -32,12 +45,13 @@ module.exports = {
     },
 
     currency: function (value, args) {
-        if (!value) return ''
+        if (!value && value !== 0) return ''
         var sign = (args && args[0]) || '$',
-            i = value % 3,
-            f = '.' + value.toFixed(2).slice(-2),
-            s = Math.floor(value).toString()
-        return sign + s.slice(0, i) + s.slice(i).replace(/(\d{3})(?=\d)/g, '$1,') + f
+            s = Math.floor(value).toString(),
+            i = s.length % 3,
+            h = i > 0 ? (s.slice(0, i) + (s.length > 3 ? ',' : '')) : '',
+            f = '.' + value.toFixed(2).slice(-2)
+        return sign + h + s.slice(i).replace(/(\d{3})(?=\d)/g, '$1,') + f
     },
 
     key: function (handler, args) {
