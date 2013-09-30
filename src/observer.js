@@ -13,7 +13,7 @@ var ArrayProxy = Object.create(Array.prototype)
 methods.forEach(function (method) {
     ArrayProxy[method] = function () {
         var result = Array.prototype[method].apply(this, arguments)
-        this.__observer__.emit('mutate', this.__path__, this, {
+        this.__observer__.emit('mutate', this.__observer__.path, this, {
             method: method,
             args: slice.call(arguments),
             result: result
@@ -56,20 +56,18 @@ function watch (obj, path, observer) {
  *  Watch an Object, recursive.
  */
 function watchObject (obj, path, observer) {
-    defProtected(obj, '__values__', {})
-    defProtected(obj, '__observer__', observer)
     for (var key in obj) {
-        bind(obj, key, path, obj.__observer__)
+        bind(obj, key, path, observer)
     }
 }
 
 /*
- *  Watch an Array, attach mutation interceptors
- *  and augmentations
+ *  Watch an Array, overload mutation methods
+ *  and add augmentations by intercepting the prototype chain
  */
 function watchArray (arr, path, observer) {
-    if (path) defProtected(arr, '__path__', path)
     defProtected(arr, '__observer__', observer)
+    observer.path = path
     /* jshint proto:true */
     arr.__proto__ = ArrayProxy
 }
@@ -80,10 +78,10 @@ function watchArray (arr, path, observer) {
  *  Then watch the value itself.
  */
 function bind (obj, key, path, observer) {
-    var val = obj[key],
+    var val       = obj[key],
         watchable = isWatchable(val),
-        values = obj.__values__,
-        fullKey = (path ? path + '.' : '') + key
+        values    = observer.values,
+        fullKey   = (path ? path + '.' : '') + key
     values[fullKey] = val
     // emit set on bind
     // this means when an object is observed it will emit
@@ -137,17 +135,10 @@ function emitSet (obj, observer) {
     if (typeOf(obj) === 'Array') {
         observer.emit('set', 'length', obj.length)
     } else {
-        emit(obj.__values__)
-    }
-    function emit (values, path) {
-        var val
-        path = path ? path + '.' : ''
-        for (var key in values) {
+        var key, val, values = observer.values
+        for (key in observer.values) {
             val = values[key]
-            observer.emit('set', path + key, val)
-            if (typeOf(val) === 'Object') {
-                emit(val, key)
-            }
+            observer.emit('set', key, val)
         }
     }
 }
@@ -169,6 +160,7 @@ module.exports = {
                 defProtected(obj, '__observer__', new Emitter())
             }
             ob = obj.__observer__
+            ob.values = ob.values || {}
             var proxies = observer.proxies[path] = {
                 get: function (key) {
                     observer.emit('get', path + key)

@@ -10,7 +10,7 @@ describe('UNIT: Observer', function () {
             ob.proxies = {}
             Observer.observe(obj, 'test', ob)
             assert.ok(obj.__observer__ instanceof Emitter)
-            assert.ok(obj.__values__)
+            assert.ok(obj.__observer__.values)
         })
 
         it('should emit set events with correct path', setTestFactory({
