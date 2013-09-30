@@ -29,9 +29,11 @@ module.exports = {
     
     focus: function (value) {
         var el = this.el
-        setTimeout(function () {
-            if (value) el.focus()
-        }, 0)
+        if (value) {
+            setTimeout(function () {
+                el.focus()
+            }, 0)
+        }
     },
 
     class: function (value) {
@@ -48,7 +50,6 @@ module.exports = {
 
     value: {
         bind: function () {
-            if (this.oneway) return
             var el = this.el, self = this
             this.change = function () {
                 self.vm.$set(self.key, el.value)
@@ -59,14 +60,12 @@ module.exports = {
             this.el.value = value ? value : ''
         },
         unbind: function () {
-            if (this.oneway) return
             this.el.removeEventListener('keyup', this.change)
         }
     },
 
     checked: {
         bind: function () {
-            if (this.oneway) return
             var el = this.el, self = this
             this.change = function () {
                 self.vm.$set(self.key, el.checked)
@@ -77,7 +76,6 @@ module.exports = {
             this.el.checked = !!value
         },
         unbind: function () {
-            if (this.oneway) return
             this.el.removeEventListener('change', this.change)
         }
     },
