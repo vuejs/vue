@@ -4,6 +4,7 @@ var config      = require('./config'),
     filters     = require('./filters'),
     textParser  = require('./text-parser'),
     utils       = require('./utils'),
+    templates   = require('./templates'),
     api         = {}
 
 /*
@@ -33,6 +34,15 @@ api.config = function (opts) {
 }
 
 /*
+ *  Register a template
+ */
+api.template = function (name, content) {
+    return content
+        ? templates.set(name, content)
+        : templates.get(name)
+}
+
+/*
  *  Compile a node
  */
 api.compile = function (el, opts) {
@@ -51,42 +61,42 @@ api.compile = function (el, opts) {
     return new Ctor(opts)
 }
 
+api.ViewModel = ViewModel
+ViewModel.extend = extend
+
 /*
  *  Expose the main ViewModel class
  *  and add extend method
  */
-api.ViewModel = ViewModel
-ViewModel.extend = function (options) {
-    // create child constructor
-    var ExtendedVM = function (opts) {
-        opts = opts || {}
-        if (options.init) {
-            opts.init = options.init
+function extend (options) {
+    var ParentVM = this,
+        ExtendedVM = function (opts) {
+            opts = opts || {}
+            if (options.data) {
+                opts.data = opts.data || {}
+                utils.extend(opts.data, options.data)
+            }
+            opts.init = opts.init || options.init
+            opts.template = opts.template || options.template
+            opts.tagName = opts.tagName || options.tagName
+            ParentVM.call(this, opts)
         }
-        if (options.data) {
-            opts.data = opts.data || {}
-            utils.extend(opts.data, options.data)
-        }
-        ViewModel.call(this, opts)
-    }
     // inherit from ViewModel
-    var proto = ExtendedVM.prototype = Object.create(ViewModel.prototype)
-    proto.constructor = ExtendedVM
+    var proto = ExtendedVM.prototype = Object.create(ParentVM.prototype)
+    utils.defProtected(proto, 'constructor', ExtendedVM)
     // copy props
     if (options.props) {
         utils.extend(proto, options.props, function (key) {
-            return !(key in ViewModel.prototype)
+            return !(key in ParentVM.prototype)
         })
     }
     // register vm id so it can be found by sd-viewmodel
     if (options.id) {
         utils.registerVM(options.id, ExtendedVM)
     }
-    // convert string template into a node
-    // because cloneNode is faster than innerHTML
-    if (options.template) {
-        proto.templateNode = utils.makeTemplateNode(options)
-    }
+    // allow extended VM to be further extended
+    ExtendedVM.extend = extend
+    ExtendedVM.super = ParentVM
     return ExtendedVM
 }
 

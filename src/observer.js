@@ -1,7 +1,7 @@
 var Emitter = require('./emitter'),
     utils   = require('./utils'),
     typeOf  = utils.typeOf,
-    def     = Object.defineProperty,
+    def     = utils.defProtected,
     slice   = Array.prototype.slice,
     methods = ['push','pop','shift','unshift','splice','sort','reverse']
 
@@ -66,7 +66,7 @@ function watchObject (obj, path, observer) {
  *  and add augmentations by intercepting the prototype chain
  */
 function watchArray (arr, path, observer) {
-    defProtected(arr, '__observer__', observer)
+    def(arr, '__observer__', observer)
     observer.path = path
     /* jshint proto:true */
     arr.__proto__ = ArrayProxy
@@ -87,7 +87,7 @@ function bind (obj, key, path, observer) {
     // this means when an object is observed it will emit
     // a first batch of set events.
     observer.emit('set', fullKey, val)
-    def(obj, key, {
+    Object.defineProperty(obj, key, {
         enumerable: true,
         get: function () {
             // only emit get on tip values
@@ -101,20 +101,6 @@ function bind (obj, key, path, observer) {
         }
     })
     watch(val, fullKey, observer)
-}
-
-/*
- *  Define an ienumerable property
- *  This avoids it being included in JSON.stringify
- *  or for...in loops.
- */
-function defProtected (obj, key, val) {
-    if (obj.hasOwnProperty(key)) return
-    def(obj, key, {
-        enumerable: false,
-        configurable: false,
-        value: val
-    })
 }
 
 /*
@@ -157,7 +143,7 @@ module.exports = {
             var path = rawPath + '.',
                 ob, alreadyConverted = !!obj.__observer__
             if (!alreadyConverted) {
-                defProtected(obj, '__observer__', new Emitter())
+                def(obj, '__observer__', new Emitter())
             }
             ob = obj.__observer__
             ob.values = ob.values || {}

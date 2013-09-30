@@ -21,7 +21,8 @@
         "src/filters.js",
         "src/directives/index.js",
         "src/directives/each.js",
-        "src/directives/on.js"
+        "src/directives/on.js",
+        "src/templates.js"
     ],
     "dependencies": {
         "component/emitter": "*"

@@ -7,6 +7,7 @@ var Emitter     = require('./emitter'),
     TextParser  = require('./text-parser'),
     DepsParser  = require('./deps-parser'),
     ExpParser   = require('./exp-parser'),
+    templates   = require('./templates'),
     slice       = Array.prototype.slice,
     vmAttr,
     eachAttr
@@ -33,13 +34,23 @@ function Compiler (vm, options) {
     var el  = typeof options.el === 'string'
         ? document.querySelector(options.el)
         : options.el
-            ? options.el
-            : options.template
-                ? utils.makeTemplateNode(options)
-                : vm.templateNode
-                    ? vm.templateNode.cloneNode(true)
-                    : null
 
+    var templateId =
+        (el && el.getAttribute(config.prefix + '-template')) ||
+        options.template
+
+    if (templateId) {
+        var template = templates.get(templateId)
+        if (template) {
+            if (el) { // overwrite content
+                el.innerHTML = ''
+            } else { // create fresh element
+                el = document.createElement(options.tagName || 'div')
+            }
+            el.appendChild(template.cloneNode(true))
+        }
+    }
+    
     if (!el) return utils.warn('invalid VM options.')
     utils.log('\nnew VM instance: ', el, '\n')
 

@@ -6,26 +6,39 @@
     </head>
     <body>
 
+        <div id="japan" sd-template="test"></div>
+
         <script type="text/sd-template" id="test">
             <p>{{hi}}!</p>
         </script>
 
         <script src="../dist/seed.js"></script>
         <script>
-            var template = document.getElementById('test').innerHTML.trim()
+            seed.template('test', document.getElementById('test').innerHTML)
 
+            // direct usage
             var china  = new seed.ViewModel({
-                template: template
+                template: 'test'
             })
             document.body.appendChild(china.$el)
+            // setting value after compile also works,
+            // as long as it has appeared in the template
             china.hi = '你好'
 
-            var Child = seed.ViewModel.extend({
-                template: template
+            // extended usage
+            var Hawaii = seed.ViewModel.extend({
+                template: 'test'
             })
-            var hawaii = new Child()
+            var hawaii = new Hawaii()
             document.body.appendChild(hawaii.$el)
             hawaii.hi = 'Aloha!'
+
+            // compile usage
+            seed.compile('#japan', {
+                data: {
+                    hi: 'こんにちは'
+                }
+            })
         </script>
     </body>
 </html>

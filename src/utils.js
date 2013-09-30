@@ -4,6 +4,20 @@ var config    = require('./config'),
 
 module.exports = {
 
+    /*
+     *  Define an ienumerable property
+     *  This avoids it being included in JSON.stringify
+     *  or for...in loops.
+     */
+    defProtected: function (obj, key, val) {
+        if (obj.hasOwnProperty(key)) return
+        Object.defineProperty(obj, key, {
+            enumerable: false,
+            configurable: false,
+            value: val
+        })
+    },
+
     typeOf: function (obj) {
         return toString.call(obj).slice(8, -1)
     },
@@ -13,12 +27,6 @@ module.exports = {
             if (qualifier && !qualifier(key)) continue
             obj[key] = ext[key]
         }
-    },
-
-    makeTemplateNode: function (options) {
-        var node = document.createElement(options.tagName || 'div')
-        node.innerHTML = options.template
-        return node
     },
 
     registerVM: function (id, VM) {
