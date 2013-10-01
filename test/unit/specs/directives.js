@@ -216,7 +216,7 @@ describe('UNIT: Directives', function () {
                 triggered = true
             }}
             dir.el.value = 'bar'
-            dir.el.dispatchEvent(new Event('keyup'))
+            dir.el.dispatchEvent(mockKeyEvent('keyup'))
             assert.ok(triggered)
         })
 
@@ -226,7 +226,7 @@ describe('UNIT: Directives', function () {
                 removed = false
             }
             dir.unbind()
-            dir.el.dispatchEvent(new Event('keyup'))
+            dir.el.dispatchEvent(mockKeyEvent('keyup'))
             assert.ok(removed)
         })
 
@@ -268,4 +268,13 @@ function mockDirective (dirName, tag) {
     }
     if (tag === 'input') ret.el.type = 'text'
     return ret
+}
+
+function mockKeyEvent (type) {
+    var e = document.createEvent('KeyboardEvent'),
+        initMethod = e.initKeyboardEvent
+            ? 'initKeyboardEvent'
+            : 'initKeyEvent'
+    e[initMethod](type, true, true, null, false, false, false, false, 9, 0)
+    return e
 }
