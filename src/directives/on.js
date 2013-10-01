@@ -12,8 +12,6 @@ function delegateCheck (current, top, identifier) {
 
 module.exports = {
 
-    expectFunction : true,
-
     bind: function () {
         if (this.compiler.each) {
             // attach an identifier to the el
@@ -27,17 +25,15 @@ module.exports = {
     update: function (handler) {
 
         this.unbind(true)
-        if (!handler) return
         if (typeof handler !== 'function') {
-            utils.warn('Expression is not allowed where a handler is expected.')
-            return
+            return utils.warn('Directive "on" expects a function value.')
         }
 
         var compiler = this.compiler,
             event    = this.arg,
             ownerVM  = this.binding.compiler.vm
 
-        if (compiler.each && event !== 'blur' && event !== 'blur') {
+        if (compiler.each && event !== 'blur' && event !== 'focus') {
 
             // for each blocks, delegate for better performance
             // focus and blur events dont bubble so exclude them

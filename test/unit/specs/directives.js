@@ -84,6 +84,26 @@ describe('UNIT: Directives', function () {
 
     })
 
+    describe('style', function () {
+        
+        var dir = mockDirective('style')
+
+        it('should convert the arg from dash style to camel case', function () {
+            dir.arg = 'font-family'
+            dir.bind()
+            assert.strictEqual(dir.arg, 'fontFamily')
+            dir.arg = '-webkit-transform'
+            dir.bind()
+            assert.strictEqual(dir.arg, 'webkitTransform')
+        })
+
+        it('should update the element style', function () {
+            dir.update('rotate(20deg)')
+            assert.strictEqual(dir.el.style.webkitTransform, 'rotate(20deg)')
+        })
+
+    })
+
     describe('show', function () {
         
         var dir = mockDirective('show')
@@ -237,26 +257,139 @@ describe('UNIT: Directives', function () {
     })
 
     describe('checked', function () {
-        // body...
+        
+        var dir = mockDirective('checked', 'input', 'checkbox')
+        dir.bind()
+
+        before(function () {
+            document.body.appendChild(dir.el)
+        })
+
+        it('should set checked on update()', function () {
+            dir.update(true)
+            assert.ok(dir.el.checked)
+            dir.update(false)
+            assert.ok(!dir.el.checked)
+        })
+
+        it('should trigger vm.$set on change event', function () {
+            var triggered = false
+            dir.key = 'foo'
+            dir.vm = { $set: function (key, val) {
+                assert.strictEqual(key, 'foo')
+                assert.strictEqual(val, true)
+                triggered = true
+            }}
+            dir.el.dispatchEvent(mockMouseEvent('click'))
+            assert.ok(triggered)
+        })
+
+        it('should remove event listener with unbind()', function () {
+            var removed = true
+            dir.vm.$set = function () {
+                removed = false
+            }
+            dir.unbind()
+            dir.el.dispatchEvent(mockMouseEvent('click'))
+            assert.ok(removed)
+        })
+
+        after(function () {
+            document.body.removeChild(dir.el)
+        })
+
     })
 
     describe('if', function () {
         // body...
     })
 
-    describe('style', function () {
-        // body...
-    })
-
     describe('on (non-delegated only)', function () {
-        // body...
+        
+        var dir = mockDirective('on')
+        dir.arg = 'click'
+
+        it('should set the handler to be triggered by arg through update()', function () {
+            var triggered = false
+            dir.update(function () {
+                triggered = true
+            })
+            dir.el.dispatchEvent(mockMouseEvent('click'))
+            assert.ok(triggered)
+        })
+
+        it('should wrap the handler to supply expected args', function () {
+            var vm = dir.binding.compiler.vm, // owner VM
+                e  = mockMouseEvent('click'), // original event
+                triggered = false
+            dir.update(function (ev) {
+                assert.strictEqual(this, vm, 'handler should be called on owner VM')
+                assert.strictEqual(ev, e, 'event should be passed in')
+                assert.strictEqual(ev.vm, dir.vm)
+                triggered = true
+            })
+            dir.el.dispatchEvent(e)
+            assert.ok(triggered)
+        })
+
+        it('should remove previous handler when update() a new handler', function () {
+            var triggered1 = false,
+                triggered2 = false
+            dir.update(function () {
+                triggered1 = true
+            })
+            dir.update(function () {
+                triggered2 = true
+            })
+            dir.el.dispatchEvent(mockMouseEvent('click'))
+            assert.notOk(triggered1)
+            assert.ok(triggered2)
+        })
+
+        it('should remove the handler in unbind()', function () {
+            var triggered = false
+            dir.update(function () {
+                triggered = true
+            })
+            dir.unbind()
+            dir.el.dispatchEvent(mockMouseEvent('click'))
+            assert.notOk(triggered)
+            assert.strictEqual(dir.handler, null, 'should remove reference to handler')
+            assert.strictEqual(dir.el.sd_viewmodel, null, 'should remove reference to VM on the element')
+        })
+
+        it('should not use delegation if the event is blur or focus', function () {
+            var dir = mockDirective('on', 'input'),
+                triggerCount = 0,
+                handler = function () {
+                    triggerCount++
+                }
+
+            document.body.appendChild(dir.el)
+
+            dir.arg = 'focus'
+            dir.update(handler)
+            dir.el.focus()
+            assert.strictEqual(triggerCount, 1)
+
+            dir.arg = 'blur'
+            dir.update(handler)
+            dir.el.blur()
+            assert.strictEqual(triggerCount, 2)
+
+            document.body.removeChild(dir.el)
+
+        })
+
     })
 
 })
 
-function mockDirective (dirName, tag) {
+function mockDirective (dirName, tag, type) {
     var dir = seed.directive(dirName),
         ret = {
+            binding: { compiler: { vm: {} } },
+            compiler: { vm: {} },
             el: document.createElement(tag || 'div')
         }
     if (typeof dir === 'function') {
@@ -266,7 +399,7 @@ function mockDirective (dirName, tag) {
             ret[key] = dir[key]
         }
     }
-    if (tag === 'input') ret.el.type = 'text'
+    if (tag === 'input') ret.el.type = type || 'text'
     return ret
 }
 
@@ -276,5 +409,11 @@ function mockKeyEvent (type) {
             ? 'initKeyboardEvent'
             : 'initKeyEvent'
     e[initMethod](type, true, true, null, false, false, false, false, 9, 0)
+    return e
+}
+
+function mockMouseEvent (type) {
+    var e = document.createEvent('MouseEvent')
+    e.initMouseEvent(type, true, true, null, 1, 0, 0, 0, 0, false, false, false, false, 0, null)
     return e
 }

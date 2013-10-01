@@ -19,6 +19,15 @@ module.exports = {
             ? value : ''
     },
 
+    style: {
+        bind: function () {
+            this.arg = convertCSSProperty(this.arg)
+        },
+        update: function (value) {
+            this.el.style[this.arg] = value
+        }
+    },
+
     show: function (value) {
         this.el.style.display = value ? '' : 'none'
     },
@@ -101,15 +110,6 @@ module.exports = {
                     this.parent.insertBefore(this.el, this.ref)
                 }
             }
-        }
-    },
-
-    style: {
-        bind: function () {
-            this.arg = convertCSSProperty(this.arg)
-        },
-        update: function (value) {
-            this.el.style[this.arg] = value
         }
     }
 }
