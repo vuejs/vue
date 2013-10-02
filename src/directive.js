@@ -130,7 +130,7 @@ DirProto.update = function (value, init) {
  */
 DirProto.refresh = function (value) {
     // pass element and viewmodel info to the getter
-    // enables powerful context-aware bindings
+    // enables context-aware bindings
     if (value) this.value = value
     value = this.value.get({
         el: this.el,

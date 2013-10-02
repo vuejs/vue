@@ -301,7 +301,57 @@ describe('UNIT: Directives', function () {
     })
 
     describe('if', function () {
-        // body...
+
+        it('should remain detached if it was detached during bind() and never attached', function () {
+            var dir = mockDirective('if')
+            dir.bind()
+            dir.update(true)
+            assert.notOk(dir.el.parentNode)
+            dir.update(false)
+            assert.notOk(dir.el.parentNode)
+        })
+
+        it('should remove el and insert ref when value is falsy', function () {
+            var dir = mockDirective('if'),
+                parent = document.createElement('div')
+            parent.appendChild(dir.el)
+            dir.bind()
+            dir.update(false)
+            assert.notOk(dir.el.parentNode)
+            assert.notOk(parent.contains(dir.el))
+            assert.ok(parent.contains(dir.ref))
+        })
+
+        it('should append el and remove ref when value is truthy', function () {
+            var dir = mockDirective('if'),
+                parent = document.createElement('div')
+            parent.appendChild(dir.el)
+            dir.bind()
+            dir.update(false)
+            dir.update(true)
+            assert.strictEqual(dir.el.parentNode, parent)
+            assert.ok(parent.contains(dir.el))
+            assert.notOk(parent.contains(dir.ref))
+        })
+
+        it('should work even if it was detached during bind()', function () {
+            var dir = mockDirective('if')
+            dir.bind()
+            var parent = document.createElement('div')
+            parent.appendChild(dir.el)
+
+            dir.update(false)
+            assert.strictEqual(dir.parent, parent)
+            assert.notOk(dir.el.parentNode)
+            assert.notOk(parent.contains(dir.el))
+            assert.ok(parent.contains(dir.ref))
+
+            dir.update(true)
+            assert.strictEqual(dir.el.parentNode, parent)
+            assert.ok(parent.contains(dir.el))
+            assert.notOk(parent.contains(dir.ref))
+        })
+
     })
 
     describe('on (non-delegated only)', function () {

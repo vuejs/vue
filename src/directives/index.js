@@ -93,22 +93,31 @@ module.exports = {
         bind: function () {
             this.parent = this.el.parentNode
             this.ref = document.createComment('sd-if-' + this.key)
-            var next = this.el.nextSibling
-            if (next) {
-                this.parent.insertBefore(this.ref, next)
-            } else {
-                this.parent.appendChild(this.ref)
-            }
         },
         update: function (value) {
+            var attached = !!this.el.parentNode
+            if (!this.parent) { // the node was detached when bound
+                if (!attached) {
+                    return
+                } else {
+                    this.parent = this.el.parentNode
+                }
+            }
+            // should always have this.parent if we reach here
             if (!value) {
-                if (this.el.parentNode) {
+                if (attached) {
+                    // insert the reference node
+                    var next = this.el.nextSibling
+                    if (next) {
+                        this.parent.insertBefore(this.ref, next)
+                    } else {
+                        this.parent.appendChild(this.ref)
+                    }
                     this.parent.removeChild(this.el)
                 }
-            } else {
-                if (!this.el.parentNode) {
-                    this.parent.insertBefore(this.el, this.ref)
-                }
+            } else if (!attached) {
+                this.parent.insertBefore(this.el, this.ref)
+                this.parent.removeChild(this.ref)
             }
         }
     }

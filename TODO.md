@@ -1,5 +1,7 @@
+- sd-partial
+- transition effects
+- component examples
 - tests
-- group DOM updates for array operations
 - docs
 - ability to create custom tags
 - acoompanying modules

@@ -11,6 +11,7 @@
     <body>
         <input type="checkbox" sd-checked="checked">
         <span sd-text="hello.msg | uppercase" sd-class="red:checked"></span>
+        <h1 sd-if="checked">Now you see me</h1>
         <script>
             seed.config({ debug: true })
             var demo = new seed.ViewModel({
