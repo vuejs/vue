@@ -17,7 +17,8 @@ describe('UNIT: ViewModel', function () {
             }
         },
         arr = [1, 2, 3],
-        vm = seed.compile('#vm-test', {
+        vm = new seed.ViewModel({
+            el: '#vm-test',
             data: {
                 a: data,
                 b: arr

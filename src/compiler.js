@@ -7,7 +7,6 @@ var Emitter     = require('./emitter'),
     TextParser  = require('./text-parser'),
     DepsParser  = require('./deps-parser'),
     ExpParser   = require('./exp-parser'),
-    templates   = require('./templates'),
     slice       = Array.prototype.slice,
     vmAttr,
     eachAttr
@@ -22,37 +21,43 @@ function Compiler (vm, options) {
     eachAttr = config.prefix + '-each'
     vmAttr   = config.prefix + '-viewmodel'
 
-    // copy options
-    options = options || {}
-    utils.extend(this, options)
+    options = this.options = options || {}
 
-    // copy data if any
-    var data = options.data
-    if (data) utils.extend(vm, data)
-
-    // determine el
+    // initialize element
     var el  = typeof options.el === 'string'
         ? document.querySelector(options.el)
-        : options.el
+        : options.el || document.createElement(options.tagName || 'div')
 
-    var templateId =
-        (el && el.getAttribute(config.prefix + '-template')) ||
-        options.template
-
-    if (templateId) {
-        var template = templates.get(templateId)
-        if (template) {
-            if (el) { // overwrite content
-                el.innerHTML = ''
-            } else { // create fresh element
-                el = document.createElement(options.tagName || 'div')
-            }
-            el.appendChild(template.cloneNode(true))
+    // apply element options
+    if (options.id) el.id = options.id
+    if (options.className) el.className = options.className
+    var attrs = options.attributes
+    if (attrs) {
+        for (var attr in attrs) {
+            el.setAttribute(attr, attrs[attr])
         }
+    }
+
+    // initialize template
+    var template = options.template
+    if (template) {
+        if (template.charAt(0) === '#') {
+            var templateNode = document.querySelector(template)
+            if (templateNode) {
+                el.innerHTML = templateNode.innerHTML
+            }
+        }
+    } else if (options.templateFragment) {
+        el.innerHTML = ''
+        el.appendChild(options.templateFragment.cloneNode(true))
     }
     
     if (!el) return utils.warn('invalid VM options.')
     utils.log('\nnew VM instance: ', el, '\n')
+
+    // copy data to vm
+    var data = options.data
+    if (data) utils.extend(vm, data)
 
     // set stuff on the ViewModel
     vm.$el       = el

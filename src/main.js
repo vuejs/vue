@@ -4,7 +4,6 @@ var config      = require('./config'),
     filters     = require('./filters'),
     textParser  = require('./text-parser'),
     utils       = require('./utils'),
-    templates   = require('./templates'),
     api         = {}
 
 /*
@@ -33,34 +32,6 @@ api.config = function (opts) {
     }
 }
 
-/*
- *  Register a template
- */
-api.template = function (name, content) {
-    return content
-        ? templates.set(name, content)
-        : templates.get(name)
-}
-
-/*
- *  Compile a node
- */
-api.compile = function (el, opts) {
-    el = typeof el === 'string'
-        ? document.querySelector(el)
-        : el
-    var Ctor = ViewModel,
-        vmAttr = config.prefix + '-viewmodel',
-        vmExp = el.getAttribute(vmAttr)
-    if (vmExp) {
-        Ctor = utils.getVM(vmExp)
-        el.removeAttribute(vmAttr)
-    }
-    opts = opts || {}
-    opts.el = el
-    return new Ctor(opts)
-}
-
 api.ViewModel = ViewModel
 ViewModel.extend = extend
 
@@ -72,32 +43,57 @@ function extend (options) {
     var ParentVM = this,
         ExtendedVM = function (opts) {
             opts = opts || {}
+            // extend instance data
             if (options.data) {
                 opts.data = opts.data || {}
                 utils.extend(opts.data, options.data)
             }
-            opts.init = opts.init || options.init
-            opts.template = opts.template || options.template
-            opts.tagName = opts.tagName || options.tagName
+            // copy in constructor options, but instance options
+            // have priority.
+            for (var key in options) {
+                if (key !== 'props' && key !== 'data' && key !== 'template') {
+                    opts[key] = opts[key] || options[key]
+                }
+            }
             ParentVM.call(this, opts)
         }
     // inherit from ViewModel
     var proto = ExtendedVM.prototype = Object.create(ParentVM.prototype)
     utils.defProtected(proto, 'constructor', ExtendedVM)
-    // copy props
+    // copy prototype props
     if (options.props) {
         utils.extend(proto, options.props, function (key) {
             return !(key in ParentVM.prototype)
         })
     }
-    // register vm id so it can be found by sd-viewmodel
-    if (options.id) {
-        utils.registerVM(options.id, ExtendedVM)
+    // convert template to documentFragment
+    if (options.template) {
+        options.templateFragment = templateToFragment(options.template)
     }
     // allow extended VM to be further extended
     ExtendedVM.extend = extend
     ExtendedVM.super = ParentVM
     return ExtendedVM
+}
+
+/*
+ *  Convert a string template to a dom fragment
+ */
+function templateToFragment (template) {
+    if (template.charAt(0) === '#') {
+        var templateNode = document.querySelector(template)
+        if (!templateNode) return
+        template = templateNode.innerHTML
+    }
+    var node = document.createElement('div'),
+        frag = document.createDocumentFragment(),
+        child
+    node.innerHTML = template.trim()
+    /* jshint boss: true */
+    while (child = node.firstChild) {
+        frag.appendChild(child)
+    }
+    return frag
 }
 
 module.exports = api

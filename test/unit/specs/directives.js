@@ -319,7 +319,9 @@ describe('UNIT: Directives', function () {
             dir.update(false)
             assert.notOk(dir.el.parentNode)
             assert.notOk(parent.contains(dir.el))
-            assert.ok(parent.contains(dir.ref))
+            // phantomJS weird bug:
+            // Node.contains() returns false when argument is a comment node.
+            assert.strictEqual(dir.ref.parentNode, parent)
         })
 
         it('should append el and remove ref when value is truthy', function () {
@@ -344,7 +346,7 @@ describe('UNIT: Directives', function () {
             assert.strictEqual(dir.parent, parent)
             assert.notOk(dir.el.parentNode)
             assert.notOk(parent.contains(dir.el))
-            assert.ok(parent.contains(dir.ref))
+            assert.strictEqual(dir.ref.parentNode, parent)
 
             dir.update(true)
             assert.strictEqual(dir.el.parentNode, parent)

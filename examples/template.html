@@ -14,11 +14,10 @@
 
         <script src="../dist/seed.js"></script>
         <script>
-            seed.template('test', document.getElementById('test').innerHTML)
 
             // direct usage
             var china  = new seed.ViewModel({
-                template: 'test'
+                template: '#test'
             })
             document.body.appendChild(china.$el)
             // setting value after compile also works,
@@ -27,18 +26,11 @@
 
             // extended usage
             var Hawaii = seed.ViewModel.extend({
-                template: 'test'
+                template: '#test'
             })
             var hawaii = new Hawaii()
             document.body.appendChild(hawaii.$el)
             hawaii.hi = 'Aloha!'
-
-            // compile usage
-            seed.compile('#japan', {
-                data: {
-                    hi: 'こんにちは'
-                }
-            })
         </script>
     </body>
 </html>
