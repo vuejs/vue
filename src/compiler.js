@@ -176,9 +176,8 @@ CompilerProto.compileNode = function (node, root) {
 
         if (eachExp) { // each block
 
-            directive = Directive.parse(eachAttr, eachExp)
+            directive = Directive.parse(eachAttr, eachExp, compiler, node)
             if (directive) {
-                directive.el = node
                 compiler.bindDirective(directive)
             }
 
@@ -209,10 +208,9 @@ CompilerProto.compileNode = function (node, root) {
                     j = exps.length
                     while (j--) {
                         exp = exps[j]
-                        directive = Directive.parse(attr.name, exp)
+                        directive = Directive.parse(attr.name, exp, compiler, node)
                         if (directive) {
                             valid = true
-                            directive.el = node
                             compiler.bindDirective(directive)
                         }
                     }
@@ -244,9 +242,8 @@ CompilerProto.compileTextNode = function (node) {
         token = tokens[i]
         el = document.createTextNode('')
         if (token.key) {
-            directive = Directive.parse(dirname, token.key)
+            directive = Directive.parse(dirname, token.key, compiler, el)
             if (directive) {
-                directive.el = el
                 compiler.bindDirective(directive)
             }
         } else {
@@ -263,8 +260,6 @@ CompilerProto.compileTextNode = function (node) {
 CompilerProto.bindDirective = function (directive) {
 
     this.directives.push(directive)
-    directive.compiler = this
-    directive.vm       = this.vm
 
     var key = directive.key,
         baseKey = key.split('.')[0],

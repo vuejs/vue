@@ -6,7 +6,7 @@ describe('UNIT: Directive', function () {
     describe('.parse()', function () {
         
         it('should return null if directive name does not have correct prefix', function () {
-            var d = Directive.parse('ds-test', 'abc')
+            var d = Directive.parse('ds-test', 'abc', {})
             assert.strictEqual(d, null)
         })
 
@@ -16,10 +16,10 @@ describe('UNIT: Directive', function () {
         })
 
         it('should return null if the expression is invalid', function () {
-            var d = Directive.parse('sd-text', ''),
-                e = Directive.parse('sd-text', '  '),
-                f = Directive.parse('sd-text', '|'),
-                g = Directive.parse('sd-text', '  |  ')
+            var d = Directive.parse('sd-text', '', {}),
+                e = Directive.parse('sd-text', '  ', {}),
+                f = Directive.parse('sd-text', '|', {}),
+                g = Directive.parse('sd-text', '  |  ', {})
             assert.strictEqual(d, null, 'empty')
             assert.strictEqual(e, null, 'spaces')
             assert.strictEqual(f, null, 'single pipe')
@@ -27,7 +27,7 @@ describe('UNIT: Directive', function () {
         })
 
         it('should return an instance of Directive if args are good', function () {
-            var d = Directive.parse('sd-text', 'abc')
+            var d = Directive.parse('sd-text', 'abc', {})
             assert.ok(d instanceof Directive)
         })
 
@@ -47,12 +47,12 @@ describe('UNIT: Directive', function () {
         directives.obj = obj
         
         it('should copy the definition as _update if the def is a function', function () {
-            var d = Directive.parse('sd-test', 'abc')
+            var d = Directive.parse('sd-test', 'abc', {})
             assert.strictEqual(d._update, test)                
         })
 
         it('should copy methods if the def is an object', function () {
-            var d = Directive.parse('sd-obj', 'abc')
+            var d = Directive.parse('sd-obj', 'abc', {})
             assert.strictEqual(d._update, obj.update, 'update should be copied as _update')
             assert.strictEqual(d._unbind, obj.unbind, 'unbind should be copied as _unbind')
             assert.strictEqual(d.bind, obj.bind)
@@ -61,24 +61,24 @@ describe('UNIT: Directive', function () {
 
         it('should trim the expression', function () {
             var exp = ' fsfsef   | fsef a  ',
-                d = Directive.parse('sd-text', exp)
+                d = Directive.parse('sd-text', exp, {})
             assert.strictEqual(d.expression, exp.trim())
         })
 
         it('should extract correct argument', function () {
-            var d = Directive.parse('sd-text', 'todo:todos'),
-                e = Directive.parse('sd-text', 'todo:todos + abc'),
-                f = Directive.parse('sd-text', 'todo:todos | fsf fsef')
+            var d = Directive.parse('sd-text', 'todo:todos', {}),
+                e = Directive.parse('sd-text', 'todo:todos + abc', {}),
+                f = Directive.parse('sd-text', 'todo:todos | fsf fsef', {})
             assert.strictEqual(d.arg, 'todo', 'simple')
             assert.strictEqual(e.arg, 'todo', 'expression')
             assert.strictEqual(f.arg, 'todo', 'with filters')
         })
 
         it('should extract correct nesting info', function () {
-            var d = Directive.parse('sd-text', 'abc'),
-                e = Directive.parse('sd-text', '^abc'),
-                f = Directive.parse('sd-text', '^^^abc'),
-                g = Directive.parse('sd-text', '$abc')
+            var d = Directive.parse('sd-text', 'abc', {}),
+                e = Directive.parse('sd-text', '^abc', {}),
+                f = Directive.parse('sd-text', '^^^abc', {}),
+                g = Directive.parse('sd-text', '$abc', {})
             assert.ok(d.nesting === false && d.root === false && d.key === 'abc', 'no nesting')
             assert.ok(e.nesting === 1 && e.root === false && e.key === 'abc', '1 level')
             assert.ok(f.nesting === 3 && f.root === false && f.key === 'abc', '3 levels')
@@ -86,11 +86,11 @@ describe('UNIT: Directive', function () {
         })
 
         it('should be able to determine whether the key is an expression', function () {
-            var d = Directive.parse('sd-text', 'abc'),
-                e = Directive.parse('sd-text', '!abc'),
-                f = Directive.parse('sd-text', 'abc + bcd * 5 / 2'),
-                g = Directive.parse('sd-text', 'abc && (bcd || eee)'),
-                h = Directive.parse('sd-text', 'test(abc)')
+            var d = Directive.parse('sd-text', 'abc', {}),
+                e = Directive.parse('sd-text', '!abc', {}),
+                f = Directive.parse('sd-text', 'abc + bcd * 5 / 2', {}),
+                g = Directive.parse('sd-text', 'abc && (bcd || eee)', {}),
+                h = Directive.parse('sd-text', 'test(abc)', {})
             assert.ok(!d.isExp, 'non-expression')
             assert.ok(e.isExp, 'negation')
             assert.ok(f.isExp, 'math')
@@ -99,11 +99,11 @@ describe('UNIT: Directive', function () {
         })
 
         it('should have a filter prop of null if no filters are present', function () {
-            var d = Directive.parse('sd-text', 'abc'),
-                e = Directive.parse('sd-text', 'abc |'),
-                f = Directive.parse('sd-text', 'abc ||'),
-                g = Directive.parse('sd-text', 'abc | | '),
-                h = Directive.parse('sd-text', 'abc | unknown | nothing at all | whaaat')
+            var d = Directive.parse('sd-text', 'abc', {}),
+                e = Directive.parse('sd-text', 'abc |', {}),
+                f = Directive.parse('sd-text', 'abc ||', {}),
+                g = Directive.parse('sd-text', 'abc | | ', {}),
+                h = Directive.parse('sd-text', 'abc | unknown | nothing at all | whaaat', {})
             assert.strictEqual(d.filters, null)
             assert.strictEqual(e.filters, null, 'single')
             assert.strictEqual(f.filters, null, 'double')
@@ -112,7 +112,7 @@ describe('UNIT: Directive', function () {
         })
 
         it('should extract correct filters (single filter)', function () {
-            var d = Directive.parse('sd-text', 'abc | uppercase'),
+            var d = Directive.parse('sd-text', 'abc | uppercase', {}),
                 f = d.filters[0]
             assert.strictEqual(f.name, 'uppercase')
             assert.strictEqual(f.args, null)
@@ -120,7 +120,7 @@ describe('UNIT: Directive', function () {
         })
 
         it('should extract correct filters (single filter with args)', function () {
-            var d = Directive.parse('sd-text', 'abc | pluralize item \'arg with spaces\''),
+            var d = Directive.parse('sd-text', 'abc | pluralize item \'arg with spaces\'', {}),
                 f = d.filters[0]
             assert.strictEqual(f.name, 'pluralize', 'name')
             assert.strictEqual(f.args.length, 2, 'args length')
@@ -130,7 +130,7 @@ describe('UNIT: Directive', function () {
 
         it('should extract correct filters (multiple filters)', function () {
             // intentional double pipe
-            var d = Directive.parse('sd-text', 'abc | uppercase | pluralize item || lowercase'),
+            var d = Directive.parse('sd-text', 'abc | uppercase | pluralize item || lowercase', {}),
                 f1 = d.filters[0],
                 f2 = d.filters[1],
                 f3 = d.filters[2]
@@ -146,7 +146,7 @@ describe('UNIT: Directive', function () {
     describe('.applyFilters()', function () {
         
         it('should work', function () {
-            var d = Directive.parse('sd-text', 'abc | pluralize item | capitalize'),
+            var d = Directive.parse('sd-text', 'abc | pluralize item | capitalize', {}),
                 v = d.applyFilters(2)
             assert.strictEqual(v, 'Items')
         })
@@ -160,13 +160,13 @@ describe('UNIT: Directive', function () {
         directives.applyTest = applyTest
 
         it('should invole the _update function', function () {
-            var d = Directive.parse('sd-applyTest', 'abc')
+            var d = Directive.parse('sd-applyTest', 'abc', {})
             d.apply(12345)
             assert.strictEqual(test, 12345)
         })
         
         it('should apply the filter if there is any', function () {
-            var d = Directive.parse('sd-applyTest', 'abc | currency £')
+            var d = Directive.parse('sd-applyTest', 'abc | currency £', {})
             d.apply(12345)
             assert.strictEqual(test, '£12,345.00')
         })
@@ -175,7 +175,7 @@ describe('UNIT: Directive', function () {
 
     describe('.update()', function () {
         
-        var d = Directive.parse('sd-text', 'abc'),
+        var d = Directive.parse('sd-text', 'abc', {}),
             applied = false
         d.apply = function () {
             applied = true
@@ -203,7 +203,7 @@ describe('UNIT: Directive', function () {
 
     describe('.refresh()', function () {
         
-        var d = Directive.parse('sd-text', 'abc'),
+        var d = Directive.parse('sd-text', 'abc', {}),
             applied = false,
             el = 1, vm = 2,
             value = {
@@ -241,7 +241,7 @@ describe('UNIT: Directive', function () {
 
     describe('.unbind()', function () {
         
-        var d = Directive.parse('sd-text', 'abc'),
+        var d = Directive.parse('sd-text', 'abc', {}),
             unbound = false,
             val
         d._unbind = function (v) {

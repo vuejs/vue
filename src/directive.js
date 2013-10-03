@@ -14,9 +14,11 @@ var KEY_RE          = /^[^\|]+/,
  *  Directive class
  *  represents a single directive instance in the DOM
  */
-function Directive (directiveName, expression, rawKey) {
+function Directive (definition, directiveName, expression, rawKey, compiler, node) {
 
-    var definition = directives[directiveName]
+    this.compiler = compiler
+    this.vm       = compiler.vm
+    this.el       = node
 
     // mix in properties from the directive definition
     if (typeof definition === 'function') {
@@ -182,7 +184,7 @@ DirProto.unbind = function (update) {
  *  make sure the directive and expression is valid
  *  before we create an instance
  */
-Directive.parse = function (dirname, expression) {
+Directive.parse = function (dirname, expression, compiler, node) {
 
     var prefix = config.prefix
     if (dirname.indexOf(prefix) === -1) return null
@@ -196,7 +198,7 @@ Directive.parse = function (dirname, expression) {
     if (!rawKey) utils.warn('invalid directive expression: ' + expression)
 
     return dir && rawKey
-        ? new Directive(dirname, expression, rawKey)
+        ? new Directive(dir, dirname, expression, rawKey, compiler, node)
         : null
 }
 
