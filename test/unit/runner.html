@@ -16,13 +16,13 @@
 			var seed = require('seed'),
 				assert = chai.assert
 
-			function mock (id, html, opts) {
+			function mock (id, html, attrs) {
 				var el = document.createElement('div')
 				el.id = id
 				el.innerHTML = html
-				if (opts) {
-					for (var attr in opts) {
-						el.setAttribute(attr, opts[attr])
+				if (attrs) {
+					for (var attr in attrs) {
+						el.setAttribute(attr, attrs[attr])
 					}
 				}
 				document.getElementById('test').appendChild(el)

@@ -51,7 +51,10 @@ function extend (options) {
             // copy in constructor options, but instance options
             // have priority.
             for (var key in options) {
-                if (key !== 'props' && key !== 'data' && key !== 'template') {
+                if (key !== 'props' &&
+                    key !== 'data' &&
+                    key !== 'template' &&
+                    key !== 'el') {
                     opts[key] = opts[key] || options[key]
                 }
             }

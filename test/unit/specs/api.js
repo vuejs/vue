@@ -136,29 +136,87 @@ describe('UNIT: API', function () {
             describe('data', function () {
                 
                 it('should be copied to each instance', function () {
+                    var testData = { a: 1 },
+                        Test = seed.ViewModel.extend({
+                            data: {
+                                test: testData
+                            }
+                        })
+                    var t1 = new Test(),
+                        t2 = new Test()
+                    assert.ok(t1.hasOwnProperty('test'))
+                    assert.strictEqual(t1.test, testData)
+                    assert.ok(t2.hasOwnProperty('test'))
+                    assert.strictEqual(t2.test, testData)
                 })
 
             })
 
-            describe('el + options', function () {
+            describe('element options', function () {
                 
-                it('should take a direct node', function () {
+                it('should not accept el as an extension option', function () {
+                    var el = document.createElement('div'),
+                        Test = seed.ViewModel.extend({ el: el }),
+                        t = new Test()
+                    assert.notStrictEqual(t.$el, el)
                 })
 
-                it('should take a string as selector', function () {
+                it('should create el with options: tagName, id, className and attributes', function () {
+                    var Test = seed.ViewModel.extend({
+                        tagName: 'p',
+                        id: 'extend-test',
+                        className: 'extend',
+                        attributes: {
+                            'test': 'hi',
+                            'sd-text': 'hoho'
+                        },
+                        data: {
+                            hoho: 'what'
+                        }
+                    })
+                    var t = new Test()
+                    assert.strictEqual(t.$el.nodeName, 'P', 'tagName should match')
+                    assert.strictEqual(t.$el.id, 'extend-test', 'id should match')
+                    assert.strictEqual(t.$el.className, 'extend', 'className should match')
+                    assert.strictEqual(t.$el.getAttribute('test'), 'hi', 'normal attr should work')
+                    assert.strictEqual(t.$el.textContent, 'what', 'directives passed in as attr should work')
                 })
 
-                it('should process tagName, id, className and attributes', function () {
+                it('should ignore tagName when el is passed as an instance option', function () {
+                    var el = document.createElement('div'),
+                        Test = seed.ViewModel.extend({
+                            tagName: 'p',
+                            id: 'extend-test',
+                            className: 'extend',
+                            attributes: {
+                                'test': 'hi',
+                                'sd-text': 'hoho'
+                            },
+                            data: {
+                                hoho: 'what'
+                            }
+                        }),
+                        t = new Test({
+                            el: el
+                        })
+                    assert.strictEqual(t.$el, el, 'should use instance el')
+                    assert.notStrictEqual(t.$el.nodeName, 'P', 'tagName should NOT match')
+                    assert.strictEqual(t.$el.id, 'extend-test', 'id should match')
+                    assert.strictEqual(t.$el.className, 'extend', 'className should match')
+                    assert.strictEqual(t.$el.getAttribute('test'), 'hi', 'normal attr should work')
+                    assert.strictEqual(t.$el.textContent, 'what', 'directives passed in as attr should work')
                 })
 
             })
 
             describe('template', function () {
+
+                var raw = '<span>{{hello}}</span><a>haha</a>'
                 
                 it('should take direct string template and work', function () {
                     var Test = seed.ViewModel.extend({
                             tagName: 'p',
-                            template: '<span>{{hello}}</span><a>haha</a>',
+                            template: raw,
                             data: {
                                 hello: 'Ahaha'
                             }
@@ -172,9 +230,31 @@ describe('UNIT: API', function () {
                 })
 
                 it('should take a #id and work', function () {
+                    var testId = 'template-test',
+                        tpl = document.createElement('script')
+                    tpl.id = testId
+                    tpl.type = 'text/template'
+                    tpl.innerHTML = raw
+                    document.getElementById('test').appendChild(tpl)
+                    var Test = seed.ViewModel.extend({
+                        template: '#' + testId,
+                        data: { hello: testId }
+                    })
+                    var t = new Test()
+                    assert.strictEqual(t.$el.querySelector('span').textContent, testId)
                 })
 
                 it('should be overwritable', function () {
+                    var Test = seed.ViewModel.extend({
+                        template: '<div>this should not happen</div>'
+                    })
+                    var t = new Test({
+                        template: raw,
+                        data: {
+                            hello: 'overwritten!'
+                        }
+                    })
+                    assert.strictEqual(t.$el.querySelector('span').textContent, 'overwritten!')
                 })
 
             })

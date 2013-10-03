@@ -40,19 +40,20 @@ function Compiler (vm, options) {
 
     // initialize template
     var template = options.template
-    if (template) {
+    if (typeof template === 'string') {
         if (template.charAt(0) === '#') {
             var templateNode = document.querySelector(template)
             if (templateNode) {
                 el.innerHTML = templateNode.innerHTML
             }
+        } else {
+            el.innerHTML = template
         }
     } else if (options.templateFragment) {
         el.innerHTML = ''
         el.appendChild(options.templateFragment.cloneNode(true))
     }
-    
-    if (!el) return utils.warn('invalid VM options.')
+
     utils.log('\nnew VM instance: ', el, '\n')
 
     // copy data to vm
