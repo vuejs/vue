@@ -76,6 +76,7 @@ function extend (options) {
     // allow extended VM to be further extended
     ExtendedVM.extend = extend
     ExtendedVM.super = ParentVM
+    ExtendedVM.options = options
     return ExtendedVM
 }
 

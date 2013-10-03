@@ -259,6 +259,52 @@ describe('UNIT: API', function () {
 
             })
 
+            describe('directives', function () {
+                
+                it('should allow the VM to use private directives', function () {
+                    var Test = seed.ViewModel.extend({
+                        directives: {
+                            test: function (value) {
+                                this.el.innerHTML = value ? 'YES' : 'NO'
+                            }
+                        }
+                    })
+                    var t = new Test({
+                        attributes: {
+                            'sd-test': 'ok'
+                        },
+                        data: {
+                            ok: true
+                        }
+                    })
+                    assert.strictEqual(t.$el.innerHTML, 'YES')
+                    t.ok = false
+                    assert.strictEqual(t.$el.innerHTML, 'NO')
+                })
+
+            })
+
+            describe('filters', function () {
+                
+                it('should allow the VM to use private filters', function () {
+                    var Test = seed.ViewModel.extend({
+                        filters: {
+                            test: function (value) {
+                                return value + '12345'
+                            }
+                        }
+                    })
+                    var t = new Test({
+                        template: '{{hi | test}}',
+                        data: {
+                            hi: 'hohoho'
+                        }
+                    })
+                    assert.strictEqual(t.$el.textContent, 'hohoho12345')
+                })
+
+            })
+
         })
 
     })

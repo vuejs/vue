@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title></title>
+        <meta charset="utf-8">
+    </head>
+    <body>
+        <div id="test" sd-hola="hi | nodigits"></div>
+        <script src="../dist/seed.js"></script>
+        <script>
+            var T = seed.ViewModel.extend({
+                directives: {
+                    hola: function (value) {
+                        this.el.innerHTML = value + '<span style="color:#f00"> this part is added by the directive</span>'
+                    }
+                },
+                filters: {
+                    nodigits: function (value) {
+                        return value.replace(/\d/g, '')
+                    }
+                }
+            })
+            new T({
+                el: '#test',
+                data: {
+                    hi: 'ho43h132oh5o12345'
+                }
+            })
+            // expected ouput: hohoho this part is added by the directive
+        </script>
+    </body>
+</html>

@@ -46,7 +46,7 @@ function Directive (definition, directiveName, expression, rawKey, compiler, nod
         this.filters = []
         var i = 0, l = filterExps.length, filter
         for (; i < l; i++) {
-            filter = parseFilter(filterExps[i])
+            filter = parseFilter(filterExps[i], this.vm.constructor.options)
             if (filter) this.filters.push(filter)
         }
         if (!this.filters.length) this.filters = null
@@ -91,7 +91,7 @@ function parseKey (dir, rawKey) {
 /*
  *  parse a filter expression
  */
-function parseFilter (filter) {
+function parseFilter (filter, options) {
 
     var tokens = filter.slice(1).match(FILTER_TOKEN_RE)
     if (!tokens) return
@@ -100,7 +100,7 @@ function parseFilter (filter) {
     })
 
     var name = tokens[0],
-        apply = filters[name]
+        apply = (options && options.filters && options.filters[name]) || filters[name]
     if (!apply) {
         utils.warn('Unknown filter: ' + name)
         return
@@ -190,7 +190,8 @@ Directive.parse = function (dirname, expression, compiler, node) {
     if (dirname.indexOf(prefix) === -1) return null
     dirname = dirname.slice(prefix.length + 1)
 
-    var dir = directives[dirname],
+    var opts = compiler.vm.constructor.options,
+        dir = (opts && opts.directives && opts.directives[dirname]) || directives[dirname],
         keyMatch = expression.match(KEY_RE),
         rawKey = keyMatch && keyMatch[0].trim()
 
