@@ -11,7 +11,7 @@ var ArrayProxy = Object.create(Array.prototype)
 
 // Define mutation interceptors so we can emit the mutation info
 methods.forEach(function (method) {
-    ArrayProxy[method] = function () {
+    utils.defProtected(ArrayProxy, method, function () {
         var result = Array.prototype[method].apply(this, arguments)
         this.__observer__.emit('mutate', this.__observer__.path, this, {
             method: method,
@@ -19,25 +19,30 @@ methods.forEach(function (method) {
             result: result
         })
         return result
-    }
+    })
 })
 
-ArrayProxy.remove = function (index) {
-    if (typeof index !== 'number') index = this.indexOf(index)
-    return this.splice(index, 1)[0]
-}
-    
-ArrayProxy.replace = function (index, data) {
-    if (typeof index !== 'number') index = this.indexOf(index)
-    return this.splice(index, 1, data)[0]
-}
-    
-ArrayProxy.mutateFilter = function (fn) {
-    var i = this.length
-    while (i--) {
-        if (!fn(this[i])) this.splice(i, 1)
+// Augment it with several convenience methods
+var extensions = {
+    remove: function (index) {
+        if (typeof index !== 'number') index = this.indexOf(index)
+        return this.splice(index, 1)[0]
+    },
+    replace: function (index, data) {
+        if (typeof index !== 'number') index = this.indexOf(index)
+        return this.splice(index, 1, data)[0]
+    },
+    mutateFilter: function (fn) {
+        var i = this.length
+        while (i--) {
+            if (!fn(this[i])) this.splice(i, 1)
+        }
+        return this
     }
-    return this
+}
+
+for (var method in extensions) {
+    utils.defProtected(ArrayProxy, method, extensions[method])
 }
 
 /*
