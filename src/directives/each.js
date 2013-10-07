@@ -136,8 +136,9 @@ module.exports = {
         var item = new ChildVM({
             el: node,
             data: wrappedData,
-            eachOptions: {
+            compilerOptions: {
                 each: true,
+                eachIndex: index,
                 eachPrefix: this.arg,
                 parentCompiler: this.compiler,
                 delegator: ctn

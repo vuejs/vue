@@ -22,9 +22,7 @@ function Compiler (vm, options) {
     vmAttr   = config.prefix + '-viewmodel'
 
     options = this.options = options || {}
-    if (options.eachOptions) {
-        utils.extend(this, options.eachOptions)
-    }
+    utils.extend(this, options.compilerOptions || {})
 
     // initialize element
     var el  = typeof options.el === 'string'
@@ -193,7 +191,9 @@ CompilerProto.compileNode = function (node, root) {
                 new ChildVM({
                     el: node,
                     child: true,
-                    parentCompiler: compiler
+                    compilerOptions: {
+                        parentCompiler: compiler
+                    }
                 })
             }
 

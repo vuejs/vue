@@ -19,7 +19,7 @@
     </style>
 </head>
 <body>
-    <div id="grandpa" sd-viewmodel="man" data-name="Andy" data-family="Johnson">
+    <div id="grandpa" data-name="Andy" data-family="Johnson">
         <p class="ancestor">{{name}} {{family}}</p>
 
         <div sd-viewmodel="man" data-name="Jack">
@@ -58,10 +58,8 @@
     <script src="../dist/seed.js"></script>
     <script>
         seed.config({ debug: true })
-        seed.template('offspring', document.getElementById('sd-template-offspring').innerHTML)
 
         var Man = seed.ViewModel.extend({
-            id: 'man',
             init: function () {
                 this.name = this.$el.dataset.name
                 var family = this.$el.dataset.family
@@ -72,11 +70,16 @@
         })
 
         var Offspring = Man.extend({
-            id: 'offspring',
-            template: 'offspring'
+            template: document.getElementById('sd-template-offspring').innerHTML
         })
 
-        seed.compile('#grandpa')
+        seed.vm('man', Man)
+        seed.vm('offspring', Offspring)
+
+        new Man({
+            el: '#grandpa'
+        })
+        
     </script>
 </body>
 </html>
