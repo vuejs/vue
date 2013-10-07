@@ -126,7 +126,11 @@ module.exports = {
         var node = this.el.cloneNode(true),
             ctn  = this.container,
             vmID = node.getAttribute(config.prefix + '-viewmodel'),
-            ChildVM = utils.getVM(vmID) || ViewModel,
+            opts = this.vm.constructor.options,
+            ChildVM =
+                (opts && opts.vms && opts.vms[vmID]) ||
+                utils.vms[vmID] ||
+                ViewModel,
             wrappedData = {}
         wrappedData[this.arg] = data || {}
         var item = new ChildVM({

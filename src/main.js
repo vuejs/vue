@@ -7,22 +7,6 @@ var config      = require('./config'),
     api         = {}
 
 /*
- *  Allows user to create a custom directive
- */
-api.directive = function (name, fn) {
-    if (!fn) return directives[name]
-    directives[name] = fn
-}
-
-/*
- *  Allows user to create a custom filter
- */
-api.filter = function (name, fn) {
-    if (!fn) return filters[name]
-    filters[name] = fn
-}
-
-/*
  *  Set config options
  */
 api.config = function (opts) {
@@ -30,6 +14,38 @@ api.config = function (opts) {
         utils.extend(config, opts)
         textParser.buildRegex()
     }
+}
+
+/*
+ *  Allows user to register/retrieve a directive definition
+ */
+api.directive = function (id, fn) {
+    if (!fn) return directives[id]
+    directives[id] = fn
+}
+
+/*
+ *  Allows user to register/retrieve a filter function
+ */
+api.filter = function (id, fn) {
+    if (!fn) return filters[id]
+    filters[id] = fn
+}
+
+/*
+ *  Allows user to register/retrieve a ViewModel constructor
+ */
+api.vm = function (id, Ctor) {
+    if (!Ctor) return utils.vms[id]
+    utils.vms[id] = Ctor
+}
+
+/*
+ *  Allows user to register/retrieve a template partial
+ */
+api.partial = function (id, partial) {
+    if (!partial) return utils.partials[id]
+    utils.partials[id] = partial
 }
 
 api.ViewModel = ViewModel
@@ -40,33 +56,21 @@ ViewModel.extend = extend
  *  and add extend method
  */
 function extend (options) {
-    var ParentVM = this,
-        ExtendedVM = function (opts) {
-            opts = opts || {}
-            // extend instance data
-            if (options.data) {
-                opts.data = opts.data || {}
-                utils.extend(opts.data, options.data)
-            }
-            // copy in constructor options, but instance options
-            // have priority.
-            for (var key in options) {
-                if (key !== 'props' &&
-                    key !== 'data' &&
-                    key !== 'template' &&
-                    key !== 'el') {
-                    opts[key] = opts[key] || options[key]
-                }
-            }
-            ParentVM.call(this, opts)
-        }
-    // inherit from ViewModel
+    var ParentVM = this
+    // inherit options
+    options = inheritOptions(options, ParentVM.options, true)
+    var ExtendedVM = function (opts) {
+        opts = inheritOptions(opts, options, true)
+        ParentVM.call(this, opts)
+    }
+    // inherit prototype props
     var proto = ExtendedVM.prototype = Object.create(ParentVM.prototype)
     utils.defProtected(proto, 'constructor', ExtendedVM)
     // copy prototype props
     if (options.props) {
         utils.extend(proto, options.props, function (key) {
-            return !(key in ParentVM.prototype)
+            // do not overwrite the ancestor ViewModel prototype methods
+            return !(key in ViewModel.prototype)
         })
     }
     // convert template to documentFragment
@@ -78,6 +82,33 @@ function extend (options) {
     ExtendedVM.super = ParentVM
     ExtendedVM.options = options
     return ExtendedVM
+}
+
+/*
+ *  Inherit options
+ *
+ *  For options such as `data`, `vms`, `directives`, 'partials',
+ *  they should be further extended. However extending should only
+ *  be done at top level.
+ *  
+ *  `props` is an exception because it's handled directly on the
+ *  prototype.
+ *
+ *  `el` is an exception because it's not allowed as an
+ *  extension option, but only as an instance option.
+ */
+function inheritOptions (child, parent, topLevel) {
+    child = child || {}
+    if (!parent) return child
+    for (var key in parent) {
+        if (key === 'el' || key === 'props') continue
+        if (!child[key]) { // child has priority
+            child[key] = parent[key]
+        } else if (topLevel && utils.typeOf(child[key]) === 'Object') {
+            inheritOptions(child[key], parent[key], false)
+        }
+    }
+    return child
 }
 
 /*

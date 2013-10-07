@@ -25,8 +25,9 @@ function getVariables (code) {
         .replace(KEYWORDS_RE, '')
         .replace(NUMBER_RE, '')
         .replace(BOUNDARY_RE, '')
-    code = code ? code.split(/,+/) : []
     return code
+        ? code.split(/,+/)
+        : []
 }
 
 module.exports = {
@@ -48,7 +49,11 @@ module.exports = {
             if (hash[v]) continue
             hash[v] = v
             // push assignment
-            args.push(v + '=this.$get("' + v + '")')
+            args.push(v + (
+                v.charAt(0) === '$'
+                    ? '=this.' + v
+                    : '=this.$get("' + v + '")'
+                ))
         }
         args = 'var ' + args.join(',') + ';return ' + exp
         /* jshint evil: true */

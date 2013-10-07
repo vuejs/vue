@@ -184,7 +184,8 @@ CompilerProto.compileNode = function (node, root) {
         } else if (vmExp && !root) { // nested ViewModels
 
             node.removeAttribute(vmAttr)
-            var ChildVM = utils.getVM(vmExp)
+            var opts = compiler.vm.constructor.options,
+                ChildVM = (opts && opts.vms && opts.vms[vmExp]) || utils.vms[vmExp]
             if (ChildVM) {
                 new ChildVM({
                     el: node,

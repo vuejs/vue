@@ -1,5 +1,48 @@
 describe('UNIT: API', function () {
 
+    describe('config()', function () {
+        
+        it('should work when changing prefix', function () {
+            var testId = 'config-1'
+            seed.config({
+                prefix: 'test'
+            })
+            mock(testId, '<span test-text="test"></span>')
+            new seed.ViewModel({
+                el: '#' + testId,
+                data: { test: testId }
+            })
+            assert.strictEqual($('#' + testId + ' span'), testId)
+        })
+
+        it('should work when changing interpolate tags', function () {
+            var testId = 'config-2'
+            seed.config({
+                interpolateTags: {
+                    open: '<%',
+                    close: '%>'
+                }
+            })
+            mock(testId, '<% test %>')
+            new seed.ViewModel({
+                el: '#' + testId,
+                data: { test: testId }
+            })
+            assert.strictEqual($('#' + testId), testId)
+        })
+
+        after(function () {
+            seed.config({
+                prefix: 'sd',
+                interpolateTags: {
+                    open: '{{',
+                    close: '}}'
+                }
+            })
+        })
+
+    })
+
     describe('filter()', function () {
 
         var reverse = function (input) {
@@ -78,6 +121,18 @@ describe('UNIT: API', function () {
 
     })
 
+    describe('vm()', function () {
+        it('should be tested', function () {
+            assert.ok(false)
+        })
+    })
+
+    describe('partial()', function () {
+        it('should be tested', function () {
+            assert.ok(false)
+        })
+    })
+
     describe('ViewModel.extend()', function () {
         
         it('should return a subclass of seed.ViewModel', function () {
@@ -93,13 +148,25 @@ describe('UNIT: API', function () {
             })
             var Child = Parent.extend({
                 data: {
-                    test2: 'ho'
+                    test2: 'ho',
+                    test3: {
+                        hi: 1
+                    }
                 }
             })
             assert.strictEqual(Child.super, Parent)
-            var child = new Child()
+            var child = new Child({
+                data: {
+                    test3: {
+                        ho: 2
+                    }
+                }
+            })
             assert.strictEqual(child.test, 'hi')
             assert.strictEqual(child.test2, 'ho')
+            // should overwrite past 1 level deep
+            assert.strictEqual(child.test3.ho, 2)
+            assert.notOk(child.test3.hi)
         })
 
         describe('Options', function () {
@@ -305,49 +372,18 @@ describe('UNIT: API', function () {
 
             })
 
-        })
+            describe('vms', function () {
+                it('should be tested', function () {
+                    assert.ok(false)
+                })
+            })
 
-    })
+            describe('partials', function () {
+                it('should be tested', function () {
+                    assert.ok(false)
+                })
+            })
 
-    describe('config()', function () {
-        
-        it('should work when changing prefix', function () {
-            var testId = 'config-1'
-            seed.config({
-                prefix: 'test'
-            })
-            mock(testId, '<span test-text="test"></span>')
-            new seed.ViewModel({
-                el: '#' + testId,
-                data: { test: testId }
-            })
-            assert.strictEqual($('#' + testId + ' span'), testId)
-        })
-
-        it('should work when changing interpolate tags', function () {
-            var testId = 'config-2'
-            seed.config({
-                interpolateTags: {
-                    open: '<%',
-                    close: '%>'
-                }
-            })
-            mock(testId, '<% test %>')
-            new seed.ViewModel({
-                el: '#' + testId,
-                data: { test: testId }
-            })
-            assert.strictEqual($('#' + testId), testId)
-        })
-
-        after(function () {
-            seed.config({
-                prefix: 'sd',
-                interpolateTags: {
-                    open: '{{',
-                    close: '}}'
-                }
-            })
         })
 
     })

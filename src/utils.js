@@ -1,8 +1,10 @@
 var config    = require('./config'),
-    toString  = Object.prototype.toString,
-    VMs       = {}
+    toString  = Object.prototype.toString
 
 module.exports = {
+
+    vms: {},
+    partials: {},
 
     /*
      *  Define an ienumerable property
@@ -27,14 +29,6 @@ module.exports = {
             if (qualifier && !qualifier(key)) continue
             obj[key] = ext[key]
         }
-    },
-
-    registerVM: function (id, VM) {
-        VMs[id] = VM
-    },
-
-    getVM: function (id) {
-        return VMs[id]
     },
 
     log: function () {

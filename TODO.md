@@ -1,4 +1,5 @@
 - sd-partial
+- $index on sd-each VMs
 - transition effects
 - component examples
 - tests
