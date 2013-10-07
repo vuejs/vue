@@ -19,7 +19,9 @@
             </p>
             <p>Total items: {{items.length}}</p>
             <ul>
-                <li sd-each="item:items" sd-text="item.title"></li>
+                <li sd-each="item:items">
+                    {{item.$index}} {{item.title}}
+                </li>
             </ul>
         </div>
         <script src="../dist/seed.js"></script>

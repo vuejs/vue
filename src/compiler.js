@@ -104,6 +104,11 @@ function Compiler (vm, options) {
         }
     }
 
+    // for each items, create an index binding
+    if (this.each) {
+        vm[this.eachPrefix].$index = this.eachIndex
+    }
+
     // now parse the DOM, during which we will create necessary bindings
     // and bind the parsed directives
     this.compileNode(this.el, true)

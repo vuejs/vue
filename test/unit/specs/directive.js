@@ -97,12 +97,16 @@ describe('UNIT: Directive', function () {
                 e = Directive.parse('sd-text', '!abc', compiler),
                 f = Directive.parse('sd-text', 'abc + bcd * 5 / 2', compiler),
                 g = Directive.parse('sd-text', 'abc && (bcd || eee)', compiler),
-                h = Directive.parse('sd-text', 'test(abc)', compiler)
+                h = Directive.parse('sd-text', 'test(abc)', compiler),
+                i = Directive.parse('sd-text', 'a.b', compiler),
+                j = Directive.parse('sd-text', 'a.$b', compiler)
             assert.ok(!d.isExp, 'non-expression')
             assert.ok(e.isExp, 'negation')
             assert.ok(f.isExp, 'math')
             assert.ok(g.isExp, 'logic')
-            assert.ok(g.isExp, 'function invocation')
+            assert.ok(h.isExp, 'function invocation')
+            assert.ok(!i.isExp, 'dot syntax')
+            assert.ok(!j.isExp, 'dot syntax with $')
         })
 
         it('should have a filter prop of null if no filters are present', function () {

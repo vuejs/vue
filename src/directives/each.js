@@ -92,7 +92,11 @@ module.exports = {
         this.vms = null
         var self = this
         this.mutationListener = function (path, arr, mutation) {
-            mutationHandlers[mutation.method].call(self, mutation)
+            var method = mutation.method
+            mutationHandlers[method].call(self, mutation)
+            if (method !== 'push' && method !== 'pop') {
+                self.updateIndexes()
+            }
         }
     },
 
@@ -152,6 +156,13 @@ module.exports = {
                 : this.ref
             ctn.insertBefore(node, ref)
             this.vms.splice(index, 0, item)
+        }
+    },
+
+    updateIndexes: function () {
+        var i = this.vms.length
+        while (i--) {
+            this.vms[i][this.arg].$index = i
         }
     },
 

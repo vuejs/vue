@@ -8,7 +8,7 @@ var KEY_RE          = /^[^\|]+/,
     FILTERS_RE      = /\|[^\|]+/g,
     FILTER_TOKEN_RE = /[^\s']+|'[^']+'/g,
     NESTING_RE      = /^\^+/,
-    SINGLE_VAR_RE   = /^[\w\.]+$/
+    SINGLE_VAR_RE   = /^[\w\.\$]+$/
 
 /*
  *  Directive class
