@@ -92,11 +92,13 @@ module.exports = {
         this.vms = null
         var self = this
         this.mutationListener = function (path, arr, mutation) {
+            self.detach()
             var method = mutation.method
             mutationHandlers[method].call(self, mutation)
             if (method !== 'push' && method !== 'pop') {
                 self.updateIndexes()
             }
+            self.retach()
         }
     },
 
@@ -120,11 +122,18 @@ module.exports = {
         collection.__observer__.on('mutate', this.mutationListener)
 
         // create child-seeds and append to DOM
+        this.detach()
         for (var i = 0, l = collection.length; i < l; i++) {
             this.buildItem(collection[i], i)
         }
+        this.retach()
     },
 
+    /*
+     *  Create a new child VM from a data object
+     *  passing along compiler options indicating this
+     *  is a sd-each item.
+     */
     buildItem: function (data, index) {
         ViewModel = ViewModel || require('../viewmodel')
         var node = this.el.cloneNode(true),
@@ -159,10 +168,37 @@ module.exports = {
         }
     },
 
+    /*
+     *  Update index of each item after a mutation
+     */
     updateIndexes: function () {
         var i = this.vms.length
         while (i--) {
             this.vms[i][this.arg].$index = i
+        }
+    },
+
+    /*
+     *  Detach/ the container from the DOM before mutation
+     *  so that batch DOM updates are done in-memory and faster
+     */
+    detach: function () {
+        var c = this.container,
+            p = this.parent = c.parentNode,
+            n = this.next = c.nextSibling
+        if (p) {
+            p.removeChild(c)
+        }
+    },
+
+    retach: function () {
+        var n = this.next,
+            p = this.parent,
+            c = this.container
+        if (n) {
+            p.insertBefore(c, n)
+        } else {
+            p.appendChild(c)
         }
     },
 
