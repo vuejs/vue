@@ -126,20 +126,22 @@ module.exports = {
         var node = this.el.cloneNode(true),
             ctn  = this.container,
             vmID = node.getAttribute(config.prefix + '-viewmodel'),
-            opts = this.vm.constructor.options,
+            opts = this.compiler.options,
             ChildVM =
-                (opts && opts.vms && opts.vms[vmID]) ||
+                (opts.vms && opts.vms[vmID]) ||
                 utils.vms[vmID] ||
                 ViewModel,
             wrappedData = {}
         wrappedData[this.arg] = data || {}
         var item = new ChildVM({
             el: node,
-            each: true,
-            eachPrefix: this.arg,
-            parentCompiler: this.compiler,
-            delegator: ctn,
-            data: wrappedData
+            data: wrappedData,
+            eachOptions: {
+                each: true,
+                eachPrefix: this.arg,
+                parentCompiler: this.compiler,
+                delegator: ctn
+            }
         })
         if (!data) {
             item.$destroy()

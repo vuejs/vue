@@ -4,6 +4,7 @@ var Directive = require('seed/src/directive'),
 describe('UNIT: Directive', function () {
 
     var compiler = {
+        options: {},
         vm: {
             constructor: {}
         }

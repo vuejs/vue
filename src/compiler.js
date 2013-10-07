@@ -22,6 +22,9 @@ function Compiler (vm, options) {
     vmAttr   = config.prefix + '-viewmodel'
 
     options = this.options = options || {}
+    if (options.eachOptions) {
+        utils.extend(this, options.eachOptions)
+    }
 
     // initialize element
     var el  = typeof options.el === 'string'
@@ -184,8 +187,8 @@ CompilerProto.compileNode = function (node, root) {
         } else if (vmExp && !root) { // nested ViewModels
 
             node.removeAttribute(vmAttr)
-            var opts = compiler.vm.constructor.options,
-                ChildVM = (opts && opts.vms && opts.vms[vmExp]) || utils.vms[vmExp]
+            var opts = compiler.options,
+                ChildVM = (opts.vms && opts.vms[vmExp]) || utils.vms[vmExp]
             if (ChildVM) {
                 new ChildVM({
                     el: node,
