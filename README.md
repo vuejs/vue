@@ -2,18 +2,19 @@
 
 Mini MVVM framework
 
-[ **BETA - tests not complete** ]
+[ **WARNING pre-alpha status - tests not complete!** ]
 
 ## Features
 
-- 8kb gzipped, no dependency.
+- <10kb gzipped, no dependency.
 - DOM based templates with two-way data binding.
 - Precise and efficient DOM manipulation with granularity down to a TextNode.
 - POJSO (Plain Old JavaScript Objects) Models that can be shared across ViewModels with arbitrary levels of nesting.
 - Auto dependency extraction for computed properties.
 - Auto event delegation on repeated items.
-- Flexible API: Angular-style or Backbone-style, it's up to you.
-- [Component](https://github.com/component/component) based, but can also be used with [Browserify](https://github.com/substack/node-browserify), as a CommonJS/AMD module or as a standalone library.
+- Flexible API that allows easy encapsulation of components.
+- Supports partials, transitions and nested ViewModels.
+- Plays well with module systems. Primarily [Component](https://github.com/component/component) based, but can also be used with [Browserify](https://github.com/substack/node-browserify), as a CommonJS/AMD module or as a standalone library.
 
 ## Browser Support
 
@@ -47,7 +48,21 @@ Built versions in `/dist` or installed via Bower can be used directly as a Commo
 
 Simply include a built version in `/dist` or installed via Bower with a script tag. `seed` will be registered as a global variable. You can also use it directly over [Browserify CDN](http://wzrd.in) at [http://wzrd.in/standalone/seed-mvvm](http://wzrd.in/standalone/seed-mvvm)
 
-## [ Docs under construction... ]
+## Development
+
+**First, install dependencies:**
+
+    $ npm install
+
+**To watch and auto-build dev version during development:**
+
+    $ grunt watch
+
+**To build:**
+
+    $ grunt
+
+## Quickstart
 
 Simplest possible example:
 
@@ -69,3 +84,7 @@ new seed.ViewModel({
     }
 })
 ~~~
+
+## License
+
+MIT
