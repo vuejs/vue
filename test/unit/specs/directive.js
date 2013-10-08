@@ -5,6 +5,7 @@ describe('UNIT: Directive', function () {
 
     var compiler = {
         options: {},
+        getOption: function () {},
         vm: {
             constructor: {}
         }

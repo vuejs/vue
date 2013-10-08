@@ -173,10 +173,9 @@ CompilerProto.compile = function (node, root) {
     var compiler = this
     if (node.nodeType === 1) {
         // a normal node
-        var opts       = compiler.options,
-            eachExp    = node.getAttribute(eachAttr),
-            vmExp      = node.getAttribute(vmAttr),
-            partialExp = node.getAttribute(partialAttr)
+        var eachExp    = node.getAttribute(eachAttr),
+            vmId       = node.getAttribute(vmAttr),
+            partialId  = node.getAttribute(partialAttr)
         // we need to check for any possbile special directives
         // e.g. sd-each, sd-viewmodel & sd-partial
         if (eachExp) { // each block
@@ -184,11 +183,9 @@ CompilerProto.compile = function (node, root) {
             if (directive) {
                 compiler.bindDirective(directive)
             }
-        } else if (vmExp && !root) { // nested ViewModels
+        } else if (vmId && !root) { // nested ViewModels
             node.removeAttribute(vmAttr)
-            var ChildVM =
-                (opts.vms && opts.vms[vmExp]) ||
-                utils.vms[vmExp]
+            var ChildVM = compiler.getOption('vms', vmId)
             if (ChildVM) {
                 new ChildVM({
                     el: node,
@@ -199,11 +196,9 @@ CompilerProto.compile = function (node, root) {
                 })
             }
         } else {
-            if (partialExp) { // replace innerHTML with partial
+            if (partialId) { // replace innerHTML with partial
                 node.removeAttribute(partialAttr)
-                var partial =
-                    (opts.partials && opts.partials[partialExp]) ||
-                    utils.partials[partialExp]
+                var partial = compiler.getOption('partials', partialId)
                 if (partial) {
                     node.innerHTML = ''
                     node.appendChild(partial.cloneNode(true))
@@ -265,14 +260,23 @@ CompilerProto.compileTextNode = function (node) {
         el, token, directive
     for (var i = 0, l = tokens.length; i < l; i++) {
         token = tokens[i]
-        el = document.createTextNode('')
-        if (token.key) {
-            directive = Directive.parse(dirname, token.key, this, el)
-            if (directive) {
-                this.bindDirective(directive)
+        if (token.key) { // a binding
+            if (token.key.charAt(0) === '>') { // a partial
+                var partialId = token.key.slice(1),
+                    partial = this.getOption('partials', partialId)
+                if (partial) {
+                    el = partial.cloneNode(true)
+                    this.compileNode(el)
+                }
+            } else { // a binding
+                el = document.createTextNode('')
+                directive = Directive.parse(dirname, token.key, this, el)
+                if (directive) {
+                    this.bindDirective(directive)
+                }
             }
-        } else {
-            el.nodeValue = token
+        } else { // a plain string
+            el = document.createTextNode(token)
         }
         node.parentNode.insertBefore(el, node)
     }
@@ -503,6 +507,14 @@ CompilerProto.bindContexts = function (bindings) {
             }
         }
     }
+}
+
+/*
+ *  Retrive an option from the compiler
+ */
+CompilerProto.getOption = function (type, id) {
+    var opts = this.options
+    return (opts[type] && opts[type][id]) || (utils[type] && utils[type][id])
 }
 
 /*

@@ -167,16 +167,28 @@ describe('UNIT: API', function () {
             assert.strictEqual(utils.partials[testId], seed.partial(testId))
         })
 
-        it('should work with sd-partial', function () {
-            mock(testId, 'hello', {
-                'sd-partial': testId
-            })
+        it('should work with sd-partial as a directive', function () {
+            var testId = 'api-partial-direcitve'
+            seed.partial(testId, partial)
+            mock(testId, '<div class="directive" sd-partial="' + testId + '">hello</div>')
             var t = new seed.ViewModel({
                 el: '#' + testId,
                 data: { hi: 'hohoho' }
             })
-            assert.strictEqual(t.$el.querySelector('.partial-test a').textContent, 'hohoho')
-            assert.strictEqual(t.$el.querySelector('span').innerHTML, 'hahaha')
+            assert.strictEqual(t.$el.querySelector('.directive .partial-test a').textContent, 'hohoho')
+            assert.strictEqual(t.$el.querySelector('.directive span').innerHTML, 'hahaha')
+        })
+
+        it('should work with sd-partial as an inline interpolation', function () {
+            var testId = 'api-partial-inline'
+            seed.partial(testId, partial)
+            mock(testId, '<div class="inline">{{>' + testId + '}}</div>')
+            var t = new seed.ViewModel({
+                el: '#' + testId,
+                data: { hi: 'hohoho' }
+            })
+            assert.strictEqual(t.$el.querySelector('.inline .partial-test a').textContent, 'hohoho')
+            assert.strictEqual(t.$el.querySelector('.inline span').innerHTML, 'hahaha')
         })
     })
 
@@ -441,15 +453,49 @@ describe('UNIT: API', function () {
             })
 
             describe('vms', function () {
-                it('should be tested', function () {
-                    assert.ok(false)
+
+                it('should allow the VM to use private child VMs', function () {
+                    var Child = seed.ViewModel.extend({
+                        data: {
+                            name: 'child'
+                        }
+                    })
+                    var Parent = seed.ViewModel.extend({
+                        template: '<p>{{name}}</p><div sd-viewmodel="child">{{name}}</div>',
+                        data: {
+                            name: 'dad'
+                        },
+                        vms: {
+                            child: Child
+                        }
+                    })
+                    var p = new Parent()
+                    assert.strictEqual(p.$el.querySelector('p').textContent, 'dad')
+                    assert.strictEqual(p.$el.querySelector('div').textContent, 'child')
                 })
+
             })
 
             describe('partials', function () {
-                it('should be tested', function () {
-                    assert.ok(false)
+                
+                it('should allow the VM to use private partials', function () {
+                    var Test = seed.ViewModel.extend({
+                        attributes: {
+                            'sd-partial': 'test'
+                        },
+                        partials: {
+                            test: '<a>{{a}}</a><p>{{b}}</p>'
+                        },
+                        data: {
+                            a: 'hi',
+                            b: 'ho'
+                        }
+                    })
+                    var t = new Test()
+                    assert.strictEqual(t.$el.querySelector('a').textContent, 'hi')
+                    assert.strictEqual(t.$el.querySelector('p').textContent, 'ho')
                 })
+
             })
 
             describe('transitions', function () {

@@ -109,6 +109,7 @@ function extend (options) {
  */
 function inheritOptions (child, parent, topLevel) {
     child = child || {}
+    convertPartials(child.partials)
     if (!parent) return child
     for (var key in parent) {
         if (key === 'el' || key === 'props') continue
@@ -119,6 +120,18 @@ function inheritOptions (child, parent, topLevel) {
         }
     }
     return child
+}
+
+/*
+ *  Convert an object of partials to dom fragments
+ */
+function convertPartials (partials) {
+    if (!partials) return
+    for (var key in partials) {
+        if (typeof partials[key] === 'string') {
+            partials[key] = templateToFragment(partials[key])
+        }
+    }
 }
 
 /*

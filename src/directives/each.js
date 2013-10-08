@@ -1,5 +1,4 @@
 var config   = require('../config'),
-    utils    = require('../utils'),
     Observer = require('../observer'),
     Emitter  = require('../emitter'),
     ViewModel // lazy def to avoid circular dependency
@@ -139,11 +138,7 @@ module.exports = {
         var node = this.el.cloneNode(true),
             ctn  = this.container,
             vmID = node.getAttribute(config.prefix + '-viewmodel'),
-            opts = this.compiler.options,
-            ChildVM =
-                (opts.vms && opts.vms[vmID]) ||
-                utils.vms[vmID] ||
-                ViewModel,
+            ChildVM = this.compiler.getOption('vms', vmID) || ViewModel,
             wrappedData = {}
         wrappedData[this.arg] = data || {}
         var item = new ChildVM({

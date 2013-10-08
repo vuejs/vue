@@ -16,16 +16,17 @@ describe('UNIT: TextNode Parser', function () {
             assert.strictEqual(result[2], ' &#123;&#123;hello&#125;&#125;')
         })
 
-        var tokens = TextParser.parse('hello {{a}}! {{ bcd }}{{d.e.f}} {{a + (b || c) ? d : e}}')
+        var tokens = TextParser.parse('hello {{a}}! {{ bcd }}{{d.e.f}} {{a + (b || c) ? d : e}} {{>test}}')
         
         it('should extract correct amount of tokens', function () {
-            assert.strictEqual(tokens.length, 7)
+            assert.strictEqual(tokens.length, 9)
         })
 
         it('should extract plain strings', function () {
             assert.strictEqual(typeof tokens[0], 'string')
             assert.strictEqual(typeof tokens[2], 'string')
             assert.strictEqual(typeof tokens[5], 'string')
+            assert.strictEqual(typeof tokens[7], 'string')
         })
 
         it('should extract basic keys', function () {
@@ -42,6 +43,10 @@ describe('UNIT: TextNode Parser', function () {
 
         it('should extract expressions', function () {
             assert.strictEqual(tokens[6].key, 'a + (b || c) ? d : e')
+        })
+
+        it('should extract partials', function () {
+            assert.strictEqual(tokens[8].key, '>test')
         })
 
     })
