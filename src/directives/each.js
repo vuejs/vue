@@ -184,8 +184,8 @@ module.exports = {
      */
     detach: function () {
         var c = this.container,
-            p = this.parent = c.parentNode,
-            n = this.next = c.nextSibling
+            p = this.parent = c.parentNode
+        this.next = c.nextSibling
         if (p) p.removeChild(c)
     },
 

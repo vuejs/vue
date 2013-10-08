@@ -55,7 +55,7 @@ describe('UNIT: Directive', function () {
         
         it('should copy the definition as _update if the def is a function', function () {
             var d = Directive.parse('sd-test', 'abc', compiler)
-            assert.strictEqual(d._update, test)                
+            assert.strictEqual(d._update, test)
         })
 
         it('should copy methods if the def is an object', function () {

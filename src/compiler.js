@@ -9,7 +9,9 @@ var Emitter     = require('./emitter'),
     ExpParser   = require('./exp-parser'),
     slice       = Array.prototype.slice,
     vmAttr,
-    eachAttr
+    eachAttr,
+    partialAttr,
+    transitionAttr
 
 /*
  *  The DOM compiler
@@ -17,9 +19,7 @@ var Emitter     = require('./emitter'),
  */
 function Compiler (vm, options) {
 
-    // need to refresh this everytime we compile
-    eachAttr = config.prefix + '-each'
-    vmAttr   = config.prefix + '-viewmodel'
+    refreshPrefix()
 
     options = this.options = options || {}
     utils.extend(this, options.compilerOptions || {})
@@ -67,18 +67,21 @@ function Compiler (vm, options) {
     vm.$parent   = options.parentCompiler && options.parentCompiler.vm
 
     // now for the compiler itself...
-    this.vm         = vm
-    this.el         = el
-    this.directives = []
-    // anonymous expression bindings that needs to be unbound during destroy()
-    this.expressions = []
+    this.vm   = vm
+    this.el   = el
+    this.dirs = []
+    // keep track of anonymous expression bindings
+    // that needs to be unbound during destroy()
+    this.exps = []
 
     // Store things during parsing to be processed afterwards,
     // because we want to have created all bindings before
     // observing values / parsing dependencies.
     var observables = this.observables = []
-    var computed = this.computed = [] // computed props to parse deps from
-    var ctxBindings = this.contextBindings = [] // computed props with dynamic context
+    // computed props to parse deps from
+    var computed    = this.computed    = []
+    // computed props with dynamic context
+    var ctxBindings = this.ctxBindings = []
 
     // prototypal inheritance of bindings
     var parent = this.parentCompiler
@@ -111,7 +114,7 @@ function Compiler (vm, options) {
 
     // now parse the DOM, during which we will create necessary bindings
     // and bind the parsed directives
-    this.compileNode(this.el, true)
+    this.compile(this.el, true)
 
     // observe root values so that they emit events when
     // their nested values change (for an Object)
@@ -126,7 +129,7 @@ function Compiler (vm, options) {
     // extract dependencies for computed properties with dynamic context
     if (ctxBindings.length) this.bindContexts(ctxBindings)
     // unset these no longer needed stuff
-    this.observables = this.computed = this.contextBindings = this.arrays = null
+    this.observables = this.computed = this.ctxBindings = this.arrays = null
 }
 
 var CompilerProto = Compiler.prototype
@@ -166,9 +169,9 @@ CompilerProto.setupObserver = function () {
 /*
  *  Compile a DOM node (recursive)
  */
-CompilerProto.compileNode = function (node, root) {
+CompilerProto.compile = function (node, root) {
 
-    var compiler = this, i, j
+    var compiler = this
 
     if (node.nodeType === 3) { // text node
 
@@ -176,13 +179,14 @@ CompilerProto.compileNode = function (node, root) {
 
     } else if (node.nodeType === 1) {
 
-        var eachExp = node.getAttribute(eachAttr),
-            vmExp   = node.getAttribute(vmAttr),
-            directive
+        var opts       = compiler.options,
+            eachExp    = node.getAttribute(eachAttr),
+            vmExp      = node.getAttribute(vmAttr),
+            partialExp = node.getAttribute(partialAttr)
 
         if (eachExp) { // each block
 
-            directive = Directive.parse(eachAttr, eachExp, compiler, node)
+            var directive = Directive.parse(eachAttr, eachExp, compiler, node)
             if (directive) {
                 compiler.bindDirective(directive)
             }
@@ -190,8 +194,7 @@ CompilerProto.compileNode = function (node, root) {
         } else if (vmExp && !root) { // nested ViewModels
 
             node.removeAttribute(vmAttr)
-            var opts = compiler.options,
-                ChildVM = (opts.vms && opts.vms[vmExp]) || utils.vms[vmExp]
+            var ChildVM = (opts.vms && opts.vms[vmExp]) || utils.vms[vmExp]
             if (ChildVM) {
                 new ChildVM({
                     el: node,
@@ -204,36 +207,54 @@ CompilerProto.compileNode = function (node, root) {
 
         } else { // normal node
 
-            // parse if has attributes
-            if (node.attributes && node.attributes.length) {
-                var attrs = slice.call(node.attributes),
-                    attr, valid, exps, exp
-                i = attrs.length
-                while (i--) {
-                    attr = attrs[i]
-                    if (attr.name === vmAttr) continue
-                    valid = false
-                    exps = attr.value.split(',')
-                    j = exps.length
-                    while (j--) {
-                        exp = exps[j]
-                        directive = Directive.parse(attr.name, exp, compiler, node)
-                        if (directive) {
-                            valid = true
-                            compiler.bindDirective(directive)
-                        }
-                    }
-                    if (valid) node.removeAttribute(attr.name)
+            if (partialExp) { // set partial
+                var partial =
+                    (opts.partials && opts.partials[partialExp]) ||
+                    utils.partials[partialExp]
+                if (partial) {
+                    node.innerHTML = ''
+                    node.appendChild(partial.cloneNode(true))
                 }
             }
 
-            // recursively compile childNodes
-            if (node.childNodes.length) {
-                var nodes = slice.call(node.childNodes)
-                for (i = 0, j = nodes.length; i < j; i++) {
-                    this.compileNode(nodes[i])
+            this.compileNode(node)
+
+        }
+    }
+}
+
+/*
+ *  Compile a normal node
+ */
+CompilerProto.compileNode = function (node) {
+    var i, j
+    // parse if has attributes
+    if (node.attributes && node.attributes.length) {
+        var attrs = slice.call(node.attributes),
+            attr, valid, exps, exp
+        i = attrs.length
+        while (i--) {
+            attr = attrs[i]
+            if (attr.name === vmAttr) continue
+            valid = false
+            exps = attr.value.split(',')
+            j = exps.length
+            while (j--) {
+                exp = exps[j]
+                var directive = Directive.parse(attr.name, exp, this, node)
+                if (directive) {
+                    valid = true
+                    this.bindDirective(directive)
                 }
             }
+            if (valid) node.removeAttribute(attr.name)
+        }
+    }
+    // recursively compile childNodes
+    if (node.childNodes.length) {
+        var nodes = slice.call(node.childNodes)
+        for (i = 0, j = nodes.length; i < j; i++) {
+            this.compile(nodes[i])
         }
     }
 }
@@ -244,16 +265,15 @@ CompilerProto.compileNode = function (node, root) {
 CompilerProto.compileTextNode = function (node) {
     var tokens = TextParser.parse(node.nodeValue)
     if (!tokens) return
-    var compiler = this,
-        dirname = config.prefix + '-text',
+    var dirname = config.prefix + '-text',
         el, token, directive
     for (var i = 0, l = tokens.length; i < l; i++) {
         token = tokens[i]
         el = document.createTextNode('')
         if (token.key) {
-            directive = Directive.parse(dirname, token.key, compiler, el)
+            directive = Directive.parse(dirname, token.key, this, el)
             if (directive) {
-                compiler.bindDirective(directive)
+                this.bindDirective(directive)
             }
         } else {
             el.nodeValue = token
@@ -268,7 +288,7 @@ CompilerProto.compileTextNode = function (node) {
  */
 CompilerProto.bindDirective = function (directive) {
 
-    this.directives.push(directive)
+    this.dirs.push(directive)
 
     var key = directive.key,
         baseKey = key.split('.')[0],
@@ -334,7 +354,7 @@ CompilerProto.createBinding = function (key, isExp) {
             utils.log('  created anonymous binding: ' + key)
             binding.value = { get: result.getter }
             this.markComputed(binding)
-            this.expressions.push(binding)
+            this.exps.push(binding)
             // need to create the bindings for keys
             // that do not exist yet
             var i = result.vars.length, v
@@ -497,10 +517,10 @@ CompilerProto.destroy = function () {
     // unwatch
     this.observer.off()
     var i, key, dir, inss, binding,
-        directives = this.directives,
-        exps = this.expressions,
-        bindings = this.bindings,
-        el = this.el
+        el         = this.el,
+        directives = this.dirs,
+        exps       = this.exps,
+        bindings   = this.bindings
     // remove all directives that are instances of external bindings
     i = directives.length
     while (i--) {
@@ -535,6 +555,18 @@ CompilerProto.destroy = function () {
 }
 
 // Helpers --------------------------------------------------------------------
+
+/*
+ *  Refresh prefix in case it has been changed
+ *  during compilations
+ */
+function refreshPrefix () {
+    var prefix     = config.prefix
+    eachAttr       = prefix + '-each'
+    vmAttr         = prefix + '-viewmodel'
+    partialAttr    = prefix + '-partial'
+    transitionAttr = prefix + '-transition'
+}
 
 /*
  *  determine which viewmodel a key belongs to based on nesting symbols

@@ -31,7 +31,13 @@ module.exports = function( grunt ) {
             build: {
                 src: ['src/**/*.js'],
                 options: {
-                    jshintrc: "./.jshintrc"
+                    jshintrc: './.jshintrc'
+                }
+            },
+            test: {
+                src: ['test/e2e/**/*.js', 'test/unit/**/*.js'],
+                options: {
+                    jshintrc: 'test/.jshintrc'
                 }
             }
         },

@@ -45,7 +45,15 @@ api.vm = function (id, Ctor) {
  */
 api.partial = function (id, partial) {
     if (!partial) return utils.partials[id]
-    utils.partials[id] = partial
+    utils.partials[id] = templateToFragment(partial)
+}
+
+/*
+ *  Allows user to register/retrieve a transition definition object
+ */
+api.transition = function (id, transition) {
+    if (!transition) return utils.transitions[id]
+    utils.transitions[id] = transition
 }
 
 api.ViewModel = ViewModel

@@ -43,7 +43,7 @@ describe('UNIT: ViewModel', function () {
         it('should trigger callback when a plain value changes', function () {
             var val
             vm.$watch('a.b.c', function (newVal) {
-                val = newVal            
+                val = newVal
             })
             data.b.c = 'new value!'
             assert.strictEqual(val, data.b.c)
@@ -87,13 +87,13 @@ describe('UNIT: ViewModel', function () {
         
         it('should unwatch the stuff', function () {
             var triggered = false
-            vm.$watch('a.b.c', function (newVal) {
+            vm.$watch('a.b.c', function () {
                 triggered = true
             })
-            vm.$watch('a', function (newVal) {
+            vm.$watch('a', function () {
                 triggered = true
             })
-            vm.$watch('b', function (newVal) {
+            vm.$watch('b', function () {
                 triggered = true
             })
             vm.$unwatch('a')

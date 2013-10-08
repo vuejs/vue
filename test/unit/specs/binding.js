@@ -107,7 +107,6 @@ describe('UNIT: Binding', function () {
         
         var b = new Binding(null, 'test'),
             unbound = 0,
-            pubbed = false,
             numInstances = 3,
             instance = {
                 unbind: function () {

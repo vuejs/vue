@@ -92,10 +92,10 @@ describe('UNIT: API', function () {
                 msg = 'wowaaaa?'
             dirTest = {
                 bind: function (value) {
-                    this.el.setAttribute(testId + 'bind', msg + 'bind')
+                    this.el.setAttribute(testId + 'bind', value + 'bind')
                 },
                 update: function (value) {
-                    this.el.setAttribute(testId + 'update', msg + 'update')
+                    this.el.setAttribute(testId + 'update', value + 'update')
                 },
                 unbind: function () {
                     this.el.removeAttribute(testId + 'bind')
@@ -122,15 +122,83 @@ describe('UNIT: API', function () {
     })
 
     describe('vm()', function () {
-        it('should be tested', function () {
-            assert.ok(false)
+
+        var testId = 'api-vm-test',
+            Test = seed.ViewModel.extend({
+                className: 'hihi',
+                data: { hi: 'ok' }
+            }),
+            utils = require('seed/src/utils')
+
+        it('should register a VM constructor', function () {
+            seed.vm(testId, Test)
+            assert.strictEqual(utils.vms[testId], Test)
         })
+
+        it('should retrieve the VM if has only one arg', function () {
+            assert.strictEqual(seed.vm(testId), Test)
+        })
+
+        it('should work with sd-viewmodel', function () {
+            mock(testId, '<div sd-viewmodel="' + testId + '">{{hi}}</div>')
+            var t = new seed.ViewModel({ el: '#' + testId }),
+                child = t.$el.querySelector('div')
+            assert.strictEqual(child.className, 'hihi')
+            assert.strictEqual(child.textContent, 'ok')
+        })
+
     })
 
     describe('partial()', function () {
-        it('should be tested', function () {
+
+        var testId = 'api-partial-test',
+            partial = '<div class="partial-test"><a>{{hi}}</a></div><span>hahaha</span>',
+            utils = require('seed/src/utils')
+
+        it('should register the partial as a dom fragment', function () {
+            seed.partial(testId, partial)
+            var converted = utils.partials[testId]
+            assert.ok(converted instanceof window.DocumentFragment)
+            assert.strictEqual(converted.querySelector('.partial-test a').innerHTML, '{{hi}}')
+            assert.strictEqual(converted.querySelector('span').innerHTML, 'hahaha')
+        })
+
+        it('should retrieve the partial if has only one arg', function () {
+            assert.strictEqual(utils.partials[testId], seed.partial(testId))
+        })
+
+        it('should work with sd-partial', function () {
+            mock(testId, 'hello', {
+                'sd-partial': testId
+            })
+            var t = new seed.ViewModel({
+                el: '#' + testId,
+                data: { hi: 'hohoho' }
+            })
+            assert.strictEqual(t.$el.querySelector('.partial-test a').textContent, 'hohoho')
+            assert.strictEqual(t.$el.querySelector('span').innerHTML, 'hahaha')
+        })
+    })
+
+    describe('transition()', function () {
+        
+        var testId = 'api-trans-test',
+            transition = {},
+            utils = require('seed/src/utils')
+
+        it('should register a transition object', function () {
+            seed.transition(testId, transition)
+            assert.strictEqual(utils.transitions[testId], transition)
+        })
+
+        it('should retrieve the transition if has only one arg', function () {
+            assert.strictEqual(seed.transition(testId), transition)
+        })
+
+        it('should work with sd-transition', function () {
             assert.ok(false)
         })
+
     })
 
     describe('ViewModel.extend()', function () {
@@ -176,9 +244,9 @@ describe('UNIT: API', function () {
                 it('should be called on the instance when instantiating', function () {
                     var called = false,
                         Test = seed.ViewModel.extend({ init: function () {
-                            called = true                           
-                        }}),
-                        test = new Test({ el: document.createElement('div') })
+                            called = true
+                        }})
+                    new Test({ el: document.createElement('div') })
                     assert.ok(called)
                 })
 
@@ -379,6 +447,12 @@ describe('UNIT: API', function () {
             })
 
             describe('partials', function () {
+                it('should be tested', function () {
+                    assert.ok(false)
+                })
+            })
+
+            describe('transitions', function () {
                 it('should be tested', function () {
                     assert.ok(false)
                 })

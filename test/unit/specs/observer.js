@@ -98,7 +98,7 @@ describe('UNIT: Observer', function () {
 
         it('should overwrite the native array mutator methods', function () {
             ['push', 'pop', 'shift', 'unshift', 'splice', 'sort', 'reverse'].forEach(function (method) {
-                assert.notStrictEqual(arr[method], Array.prototype[method])                
+                assert.notStrictEqual(arr[method], Array.prototype[method])
             })
         })
 

@@ -3,8 +3,9 @@ var config    = require('./config'),
 
 module.exports = {
 
-    vms: {},
-    partials: {},
+    vms         : {},
+    partials    : {},
+    transitions : {},
 
     /*
      *  Define an ienumerable property
