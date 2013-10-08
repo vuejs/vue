@@ -3,6 +3,8 @@ var config    = require('./config'),
 
 module.exports = {
 
+    // global storage for user-registered
+    // vms, partials and transitions
     vms         : {},
     partials    : {},
     transitions : {},
@@ -21,22 +23,33 @@ module.exports = {
         })
     },
 
+    /*
+     *  Accurate type check
+     */
     typeOf: function (obj) {
         return toString.call(obj).slice(8, -1)
     },
 
-    extend: function (obj, ext, qualifier) {
+    /*
+     *  simple extend
+     */
+    extend: function (obj, ext) {
         for (var key in ext) {
-            if (qualifier && !qualifier(key)) continue
             obj[key] = ext[key]
         }
     },
 
+    /*
+     *  log for debugging
+     */
     log: function () {
         if (config.debug) console.log.apply(console, arguments)
         return this
     },
     
+    /*
+     *  warn for debugging
+     */
     warn: function() {
         if (config.debug) console.warn.apply(console, arguments)
         return this

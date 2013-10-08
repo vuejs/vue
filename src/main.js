@@ -75,11 +75,13 @@ function extend (options) {
     var proto = ExtendedVM.prototype = Object.create(ParentVM.prototype)
     utils.defProtected(proto, 'constructor', ExtendedVM)
     // copy prototype props
-    if (options.props) {
-        utils.extend(proto, options.props, function (key) {
-            // do not overwrite the ancestor ViewModel prototype methods
-            return !(key in ViewModel.prototype)
-        })
+    var props = options.props
+    if (props) {
+        for (var key in props) {
+            if (!(key in ViewModel.prototype)) {
+                proto[key] = props[key]
+            }
+        }
     }
     // convert template to documentFragment
     if (options.template) {
