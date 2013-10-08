@@ -50,15 +50,19 @@ Simply include a built version in `/dist` or installed via Bower with a script t
 
 ## Development
 
-**First, install dependencies:**
+First, install dependencies:
 
     $ npm install
 
-**To watch and auto-build dev version during development:**
+To watch and auto-build dev version during development:
 
     $ grunt watch
 
-**To build:**
+To test:
+
+    $ grunt test
+
+To build:
 
     $ grunt
 
