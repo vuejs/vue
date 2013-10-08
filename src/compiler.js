@@ -170,30 +170,25 @@ CompilerProto.setupObserver = function () {
  *  Compile a DOM node (recursive)
  */
 CompilerProto.compile = function (node, root) {
-
     var compiler = this
-
-    if (node.nodeType === 3) { // text node
-
-        compiler.compileTextNode(node)
-
-    } else if (node.nodeType === 1) {
-
+    if (node.nodeType === 1) {
+        // a normal node
         var opts       = compiler.options,
             eachExp    = node.getAttribute(eachAttr),
             vmExp      = node.getAttribute(vmAttr),
             partialExp = node.getAttribute(partialAttr)
-
+        // we need to check for any possbile special directives
+        // e.g. sd-each, sd-viewmodel & sd-partial
         if (eachExp) { // each block
-
             var directive = Directive.parse(eachAttr, eachExp, compiler, node)
             if (directive) {
                 compiler.bindDirective(directive)
             }
-
         } else if (vmExp && !root) { // nested ViewModels
             node.removeAttribute(vmAttr)
-            var ChildVM = (opts.vms && opts.vms[vmExp]) || utils.vms[vmExp]
+            var ChildVM =
+                (opts.vms && opts.vms[vmExp]) ||
+                utils.vms[vmExp]
             if (ChildVM) {
                 new ChildVM({
                     el: node,
@@ -203,10 +198,8 @@ CompilerProto.compile = function (node, root) {
                     }
                 })
             }
-
-        } else { // normal node
-
-            if (partialExp) { // set partial
+        } else {
+            if (partialExp) { // replace innerHTML with partial
                 node.removeAttribute(partialAttr)
                 var partial =
                     (opts.partials && opts.partials[partialExp]) ||
@@ -216,10 +209,11 @@ CompilerProto.compile = function (node, root) {
                     node.appendChild(partial.cloneNode(true))
                 }
             }
-
+            // finally, only normal directives left!
             this.compileNode(node)
-
         }
+    } else if (node.nodeType === 3) { // text node
+        compiler.compileTextNode(node)
     }
 }
 
@@ -232,11 +226,14 @@ CompilerProto.compileNode = function (node) {
     if (node.attributes && node.attributes.length) {
         var attrs = slice.call(node.attributes),
             attr, valid, exps, exp
+        // loop through all attributes
         i = attrs.length
         while (i--) {
             attr = attrs[i]
             valid = false
             exps = attr.value.split(',')
+            // loop through clauses (separated by ",")
+            // inside each attribute
             j = exps.length
             while (j--) {
                 exp = exps[j]
