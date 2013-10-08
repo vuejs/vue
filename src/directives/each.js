@@ -186,15 +186,14 @@ module.exports = {
         var c = this.container,
             p = this.parent = c.parentNode,
             n = this.next = c.nextSibling
-        if (p) {
-            p.removeChild(c)
-        }
+        if (p) p.removeChild(c)
     },
 
     retach: function () {
         var n = this.next,
             p = this.parent,
             c = this.container
+        if (!p) return
         if (n) {
             p.insertBefore(c, n)
         } else {
