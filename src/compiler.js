@@ -192,7 +192,6 @@ CompilerProto.compile = function (node, root) {
             }
 
         } else if (vmExp && !root) { // nested ViewModels
-
             node.removeAttribute(vmAttr)
             var ChildVM = (opts.vms && opts.vms[vmExp]) || utils.vms[vmExp]
             if (ChildVM) {
@@ -208,6 +207,7 @@ CompilerProto.compile = function (node, root) {
         } else { // normal node
 
             if (partialExp) { // set partial
+                node.removeAttribute(partialAttr)
                 var partial =
                     (opts.partials && opts.partials[partialExp]) ||
                     utils.partials[partialExp]
@@ -235,7 +235,6 @@ CompilerProto.compileNode = function (node) {
         i = attrs.length
         while (i--) {
             attr = attrs[i]
-            if (attr.name === vmAttr) continue
             valid = false
             exps = attr.value.split(',')
             j = exps.length
