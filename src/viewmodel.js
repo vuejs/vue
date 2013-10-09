@@ -73,6 +73,47 @@ VMProto.$destroy = function () {
 }
 
 /*
+ *  broadcast an event to all child VMs recursively.
+ */
+VMProto.$broadcast = function () {
+    var children = this.$compiler.childCompilers,
+        i = children.length,
+        child
+    while (i--) {
+        child = children[i]
+        child.emitter.emit.apply(child.emitter, arguments)
+        child.vm.$broadcast.apply(child.vm, arguments)
+    }
+}
+
+/*
+ *  emit an event that propagates all the way up to parent VMs.
+ */
+VMProto.$emit = function () {
+    var parent = this.$compiler.parentCompiler
+    if (parent) {
+        parent.emitter.emit.apply(parent.emitter, arguments)
+        parent.vm.$emit.apply(parent.vm, arguments)
+    }
+}
+
+/*
+ *  listen for a broadcasted/emitted event
+ */
+VMProto.$on = function () {
+    var emitter = this.$compiler.emitter
+    emitter.on.apply(emitter, arguments)
+}
+
+/*
+ *  stop listening
+ */
+VMProto.$off = function () {
+    var emitter = this.$compiler.emitter
+    emitter.off.apply(emitter, arguments)
+}
+
+/*
  *  If a VM doesn't contain a path, go up the prototype chain
  *  to locate the ancestor that has it.
  */

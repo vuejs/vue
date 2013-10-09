@@ -21,11 +21,96 @@ function Compiler (vm, options) {
 
     refreshPrefix()
 
-    options = this.options = options || {}
-    utils.extend(this, options.compilerOptions || {})
+    var compiler = this
+
+    // extend options
+    options = compiler.options = options || {}
+    utils.extend(compiler, options.compilerOptions || {})
 
     // initialize element
-    var el  = typeof options.el === 'string'
+    compiler.setupElement(options)
+    utils.log('\nnew VM instance: ', compiler.el, '\n')
+
+    // copy data to vm
+    var data = options.data
+    if (data) utils.extend(vm, data)
+
+    compiler.vm  = vm
+    vm.$compiler = compiler
+    vm.$el       = compiler.el
+
+    // keep track of directives and expressions
+    // so they can be unbound during destroy()
+    compiler.dirs = []
+    compiler.exps = []
+    compiler.childCompilers = [] // keep track of child compilers
+    compiler.emitter = new Emitter() // the emitter used for nested VM communication
+
+    // Store things during parsing to be processed afterwards,
+    // because we want to have created all bindings before
+    // observing values / parsing dependencies.
+    var observables = compiler.observables = [],
+        computed    = compiler.computed    = [],
+        ctxBindings = compiler.ctxBindings = []
+
+    // prototypal inheritance of bindings
+    var parent = compiler.parentCompiler
+    compiler.bindings = parent
+        ? Object.create(parent.bindings)
+        : {}
+    compiler.rootCompiler = parent
+        ? getRoot(parent)
+        : compiler
+
+    // setup observer
+    compiler.setupObserver()
+
+    // call user init. this will capture some initial values.
+    if (options.init) {
+        options.init.apply(vm, options.args || [])
+    }
+
+    // create bindings for keys set on the vm by the user
+    for (var key in vm) {
+        if (key.charAt(0) !== '$') {
+            compiler.createBinding(key)
+        }
+    }
+
+    // for each items, create an index binding
+    if (compiler.each) {
+        vm[compiler.eachPrefix].$index = compiler.eachIndex
+    }
+
+    // now parse the DOM, during which we will create necessary bindings
+    // and bind the parsed directives
+    compiler.compile(compiler.el, true)
+
+    // observe root values so that they emit events when
+    // their nested values change (for an Object)
+    // or when they mutate (for an Array)
+    var i = observables.length, binding
+    while (i--) {
+        binding = observables[i]
+        Observer.observe(binding.value, binding.key, compiler.observer)
+    }
+    // extract dependencies for computed properties
+    if (computed.length) DepsParser.parse(computed)
+    // extract dependencies for computed properties with dynamic context
+    if (ctxBindings.length) compiler.bindContexts(ctxBindings)
+    // unset these no longer needed stuff
+    compiler.observables = compiler.computed = compiler.ctxBindings = compiler.arrays = null
+}
+
+var CompilerProto = Compiler.prototype
+
+/*
+ *  Initialize the VM/Compiler's element.
+ *  Fill it in with the template if necessary.
+ */
+CompilerProto.setupElement = function (options) {
+    // create the node first
+    var el = this.el = typeof options.el === 'string'
         ? document.querySelector(options.el)
         : options.el || document.createElement(options.tagName || 'div')
 
@@ -54,85 +139,7 @@ function Compiler (vm, options) {
         el.innerHTML = ''
         el.appendChild(options.templateFragment.cloneNode(true))
     }
-
-    utils.log('\nnew VM instance: ', el, '\n')
-
-    // copy data to vm
-    var data = options.data
-    if (data) utils.extend(vm, data)
-
-    // set stuff on the ViewModel
-    vm.$el       = el
-    vm.$compiler = this
-    vm.$parent   = options.parentCompiler && options.parentCompiler.vm
-
-    // now for the compiler itself...
-    this.vm   = vm
-    this.el   = el
-    this.dirs = []
-    // keep track of anonymous expression bindings
-    // that needs to be unbound during destroy()
-    this.exps = []
-
-    // Store things during parsing to be processed afterwards,
-    // because we want to have created all bindings before
-    // observing values / parsing dependencies.
-    var observables = this.observables = []
-    // computed props to parse deps from
-    var computed    = this.computed    = []
-    // computed props with dynamic context
-    var ctxBindings = this.ctxBindings = []
-
-    // prototypal inheritance of bindings
-    var parent = this.parentCompiler
-    this.bindings = parent
-        ? Object.create(parent.bindings)
-        : {}
-    this.rootCompiler = parent
-        ? getRoot(parent)
-        : this
-
-    // setup observer
-    this.setupObserver()
-
-    // call user init. this will capture some initial values.
-    if (options.init) {
-        options.init.apply(vm, options.args || [])
-    }
-
-    // create bindings for keys set on the vm by the user
-    for (var key in vm) {
-        if (key.charAt(0) !== '$') {
-            this.createBinding(key)
-        }
-    }
-
-    // for each items, create an index binding
-    if (this.each) {
-        vm[this.eachPrefix].$index = this.eachIndex
-    }
-
-    // now parse the DOM, during which we will create necessary bindings
-    // and bind the parsed directives
-    this.compile(this.el, true)
-
-    // observe root values so that they emit events when
-    // their nested values change (for an Object)
-    // or when they mutate (for an Array)
-    var i = observables.length, binding
-    while (i--) {
-        binding = observables[i]
-        Observer.observe(binding.value, binding.key, this.observer)
-    }
-    // extract dependencies for computed properties
-    if (computed.length) DepsParser.parse(computed)
-    // extract dependencies for computed properties with dynamic context
-    if (ctxBindings.length) this.bindContexts(ctxBindings)
-    // unset these no longer needed stuff
-    this.observables = this.computed = this.ctxBindings = this.arrays = null
 }
-
-var CompilerProto = Compiler.prototype
 
 /*
  *  Setup observer.
@@ -183,17 +190,18 @@ CompilerProto.compile = function (node, root) {
             if (directive) {
                 compiler.bindDirective(directive)
             }
-        } else if (vmId && !root) { // nested ViewModels
+        } else if (vmId && !root) { // child ViewModels
             node.removeAttribute(vmAttr)
             var ChildVM = compiler.getOption('vms', vmId)
             if (ChildVM) {
-                new ChildVM({
+                var child = new ChildVM({
                     el: node,
                     child: true,
                     compilerOptions: {
                         parentCompiler: compiler
                     }
                 })
+                compiler.childCompilers.push(child.$compiler)
             }
         } else {
             if (partialId) { // replace innerHTML with partial
@@ -205,7 +213,7 @@ CompilerProto.compile = function (node, root) {
                 }
             }
             // finally, only normal directives left!
-            this.compileNode(node)
+            compiler.compileNode(node)
         }
     } else if (node.nodeType === 3) { // text node
         compiler.compileTextNode(node)
@@ -288,25 +296,26 @@ CompilerProto.compileTextNode = function (node) {
  */
 CompilerProto.bindDirective = function (directive) {
 
-    this.dirs.push(directive)
+    var binding,
+        compiler      = this,
+        key           = directive.key,
+        baseKey       = key.split('.')[0],
+        ownerCompiler = traceOwnerCompiler(directive, compiler)
 
-    var key = directive.key,
-        baseKey = key.split('.')[0],
-        compiler = traceOwnerCompiler(directive, this)
+    compiler.dirs.push(directive)
 
-    var binding
     if (directive.isExp) {
-        binding = this.createBinding(key, true)
-    } else if (compiler.vm.hasOwnProperty(baseKey)) {
+        binding = compiler.createBinding(key, true)
+    } else if (ownerCompiler.vm.hasOwnProperty(baseKey)) {
         // if the value is present in the target VM, we create the binding on its compiler
-        binding = compiler.bindings.hasOwnProperty(key)
-            ? compiler.bindings[key]
-            : compiler.createBinding(key)
+        binding = ownerCompiler.bindings.hasOwnProperty(key)
+            ? ownerCompiler.bindings[key]
+            : ownerCompiler.createBinding(key)
     } else {
         // due to prototypal inheritance of bindings, if a key doesn't exist here,
         // it doesn't exist in the whole prototype chain. Therefore in that case
         // we create the new binding at the root level.
-        binding = compiler.bindings[key] || this.rootCompiler.createBinding(key)
+        binding = ownerCompiler.bindings[key] || compiler.rootCompiler.createBinding(key)
     }
 
     binding.instances.push(directive)
@@ -319,7 +328,7 @@ CompilerProto.bindDirective = function (directive) {
     if (deps) {
         i = deps.length
         while (i--) {
-            dep = this.bindings[deps[i]]
+            dep = compiler.bindings[deps[i]]
             dep.subs.push(directive)
         }
     }
@@ -343,8 +352,9 @@ CompilerProto.bindDirective = function (directive) {
  */
 CompilerProto.createBinding = function (key, isExp) {
 
-    var bindings = this.bindings,
-        binding  = new Binding(this, key, isExp)
+    var compiler = this,
+        bindings = compiler.bindings,
+        binding  = new Binding(compiler, key, isExp)
 
     if (isExp) {
         // a complex expression binding
@@ -353,15 +363,15 @@ CompilerProto.createBinding = function (key, isExp) {
         if (result) {
             utils.log('  created anonymous binding: ' + key)
             binding.value = { get: result.getter }
-            this.markComputed(binding)
-            this.exps.push(binding)
+            compiler.markComputed(binding)
+            compiler.exps.push(binding)
             // need to create the bindings for keys
             // that do not exist yet
             var i = result.vars.length, v
             while (i--) {
                 v = result.vars[i]
                 if (!bindings[v]) {
-                    this.rootCompiler.createBinding(v)
+                    compiler.rootCompiler.createBinding(v)
                 }
             }
         } else {
@@ -372,16 +382,16 @@ CompilerProto.createBinding = function (key, isExp) {
         bindings[key] = binding
         // make sure the key exists in the object so it can be observed
         // by the Observer!
-        this.ensurePath(key)
+        compiler.ensurePath(key)
         if (binding.root) {
             // this is a root level binding. we need to define getter/setters for it.
-            this.define(key, binding)
+            compiler.define(key, binding)
         } else {
             var parentKey = key.slice(0, key.lastIndexOf('.'))
             if (!bindings.hasOwnProperty(parentKey)) {
                 // this is a nested value binding, but the binding for its parent
                 // has not been created yet. We better create that one too.
-                this.createBinding(parentKey)
+                compiler.createBinding(parentKey)
             }
         }
     }
@@ -416,19 +426,19 @@ CompilerProto.define = function (key, binding) {
     utils.log('    defined root binding: ' + key)
 
     var compiler = this,
-        vm = this.vm,
-        ob = this.observer,
+        vm = compiler.vm,
+        ob = compiler.observer,
         value = binding.value = vm[key], // save the value before redefinening it
         type = utils.typeOf(value)
 
     if (type === 'Object' && value.get) {
         // computed property
-        this.markComputed(binding)
+        compiler.markComputed(binding)
     } else if (type === 'Object' || type === 'Array') {
         // observe objects later, becase there might be more keys
         // to be added to it. we also want to emit all the set events
         // after all values are available.
-        this.observables.push(binding)
+        compiler.observables.push(binding)
     }
 
     Object.defineProperty(vm, key, {
@@ -521,19 +531,20 @@ CompilerProto.getOption = function (type, id) {
  *  Unbind and remove element
  */
 CompilerProto.destroy = function () {
-    utils.log('compiler destroyed: ', this.vm.$el)
+    var compiler = this
+    utils.log('compiler destroyed: ', compiler.vm.$el)
     // unwatch
-    this.observer.off()
+    compiler.observer.off()
     var i, key, dir, inss, binding,
-        el         = this.el,
-        directives = this.dirs,
-        exps       = this.exps,
-        bindings   = this.bindings
+        el         = compiler.el,
+        directives = compiler.dirs,
+        exps       = compiler.exps,
+        bindings   = compiler.bindings
     // remove all directives that are instances of external bindings
     i = directives.length
     while (i--) {
         dir = directives[i]
-        if (dir.binding.compiler !== this) {
+        if (dir.binding.compiler !== compiler) {
             inss = dir.binding.instances
             if (inss) inss.splice(inss.indexOf(dir), 1)
         }
@@ -549,10 +560,15 @@ CompilerProto.destroy = function () {
         if (bindings.hasOwnProperty(key)) {
             binding = bindings[key]
             if (binding.root) {
-                Observer.unobserve(binding.value, binding.key, this.observer)
+                Observer.unobserve(binding.value, binding.key, compiler.observer)
             }
             binding.unbind()
         }
+    }
+    // remove self from parentCompiler
+    var parent = compiler.parentCompiler
+    if (parent) {
+        parent.childCompilers.splice(parent.childCompilers.indexOf(compiler), 1)
     }
     // remove el
     if (el === document.body) {

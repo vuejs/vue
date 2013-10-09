@@ -106,4 +106,16 @@ describe('UNIT: ViewModel', function () {
 
     })
 
+    describe('.$broadcast', function () {
+        // body...
+    })
+
+    describe('.$emit', function () {
+        // body...
+    })
+
+    describe('.$on', function () {
+        // body...
+    })
+
 })
