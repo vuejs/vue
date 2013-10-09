@@ -106,16 +106,110 @@ describe('UNIT: ViewModel', function () {
 
     })
 
-    describe('.$broadcast', function () {
-        // body...
+    describe('.$on', function () {
+        
+        it('should register listener on vm\'s compiler\'s emitter', function () {
+            var t = new seed.ViewModel(),
+                triggered = false,
+                msg = 'on test'
+            t.$on('test', function (m) {
+                assert.strictEqual(m, msg)
+                triggered = true
+            })
+            t.$compiler.emitter.emit('test', msg)
+            assert.ok(triggered)
+        })
+
+    })
+
+    describe('$off', function () {
+        
+        it('should turn off the listener', function () {
+            var t = new seed.ViewModel(),
+                triggered1 = false,
+                triggered2 = false,
+                f1 = function () {
+                    triggered1 = true
+                },
+                f2 = function () {
+                    triggered2 = true
+                }
+            t.$on('test', f1)
+            t.$on('test', f2)
+            t.$off('test', f1)
+            t.$compiler.emitter.emit('test')
+            assert.notOk(triggered1)
+            assert.ok(triggered2)
+        })
+
+    })
+
+    describe('.$broadcast()', function () {
+        
+        it('should notify all child VMs', function () {
+            var triggered = 0,
+                msg = 'broadcast test'
+            var Child = seed.ViewModel.extend({
+                init: function () {
+                    this.$on('hello', function (m) {
+                        assert.strictEqual(m, msg)
+                        triggered++
+                    })
+                }
+            })
+            var Test = seed.ViewModel.extend({
+                template: '<div sd-viewmodel="test"></div><div sd-viewmodel="test"></div>',
+                vms: {
+                    test: Child
+                }
+            })
+            var t = new Test()
+            t.$broadcast('hello', msg)
+            assert.strictEqual(triggered, 2)
+        })
+
     })
 
     describe('.$emit', function () {
-        // body...
-    })
+        
+        it('should notify all ancestor VMs', function (done) {
+            var topTriggered = false,
+                midTriggered = false,
+                msg = 'emit test'
+            var Bottom = seed.ViewModel.extend({
+                init: function () {
+                    var self = this
+                    setTimeout(function () {
+                        self.$emit('hello', msg)
+                        assert.ok(topTriggered)
+                        assert.ok(midTriggered)
+                        done()
+                    }, 0)
+                }
+            })
+            var Middle = seed.ViewModel.extend({
+                template: '<div sd-viewmodel="bottom"></div>',
+                vms: { bottom: Bottom },
+                init: function () {
+                    this.$on('hello', function (m) {
+                        assert.strictEqual(m, msg)
+                        midTriggered = true
+                    })
+                }
+            })
+            var Top = seed.ViewModel.extend({
+                template: '<div sd-viewmodel="middle"></div>',
+                vms: { middle: Middle },
+                init: function () {
+                    this.$on('hello', function (m) {
+                        assert.strictEqual(m, msg)
+                        topTriggered = true
+                    })
+                }
+            })
+            var t = new Top()
+        })
 
-    describe('.$on', function () {
-        // body...
     })
 
 })
