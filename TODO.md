@@ -1,9 +1,19 @@
-- sd-partial
+- change the name to one that no one has used before...
+- change the exposed var to a single one (capitalized constructor)
+- change the default prefix to a single letter (depending on new name)
+- change `sd-each` to `s-repeat`
+- put all API methods on Seed
+- add a method to observe additional data properties
+- add `lazy` option
+- add directive for all form elements, and make it consistent as `s-model`
+- add escape: {{{ things in here should not be parsed }}}
+- rename `props` option to `proto`
+- properties that start with `_` should also be ignored and used as a convention: `$` is library properties, `_` is user properties and non-prefixed properties are data.
+
 - sd-transition
 - component examples
 - tests
 - docs
-- ability to create custom tags
 - acoompanying modules
     - seed-touch (e.g. sd-drag="onDrag" sd-swipe="onSwipe")
     - seed-storage (RESTful sync)
