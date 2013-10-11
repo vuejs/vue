@@ -31,9 +31,9 @@ function Compiler (vm, options) {
     compiler.setupElement(options)
     utils.log('\nnew VM instance: ', compiler.el, '\n')
 
-    // copy data to vm
-    var data = options.data
-    if (data) utils.extend(vm, data)
+    // copy scope properties to vm
+    var scope = options.scope
+    if (scope) utils.extend(vm, scope)
 
     compiler.vm  = vm
     vm.$compiler = compiler

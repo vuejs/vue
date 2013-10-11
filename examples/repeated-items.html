@@ -37,7 +37,7 @@
 
             var demo = new Seed({
                 el: '#app',
-                data: {
+                scope: {
                     items: items,
                     push: function () {
                         this.items.push({ title: randomChar() })

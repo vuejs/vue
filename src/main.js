@@ -95,7 +95,7 @@ function extend (options) {
 /*
  *  Inherit options
  *
- *  For options such as `data`, `vms`, `directives`, 'partials',
+ *  For options such as `scope`, `vms`, `directives`, 'partials',
  *  they should be further extended. However extending should only
  *  be done at top level.
  *  

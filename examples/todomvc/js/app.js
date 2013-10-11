@@ -13,7 +13,7 @@ var app = new Seed({
         this.updateFilter()
     },
 
-    data: {
+    scope: {
 
         todos: todoStorage.fetch(),
 

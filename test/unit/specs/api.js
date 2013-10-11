@@ -10,7 +10,7 @@ describe('UNIT: API', function () {
             mock(testId, '<span test-text="test"></span>')
             new Seed({
                 el: '#' + testId,
-                data: { test: testId }
+                scope: { test: testId }
             })
             assert.strictEqual($('#' + testId + ' span'), testId)
         })
@@ -26,7 +26,7 @@ describe('UNIT: API', function () {
             mock(testId, '<% test %>')
             new Seed({
                 el: '#' + testId,
-                data: { test: testId }
+                scope: { test: testId }
             })
             assert.strictEqual($('#' + testId), testId)
         })
@@ -56,7 +56,7 @@ describe('UNIT: API', function () {
             mock(testId, '{{ test | reverse }}')
             new Seed({
                 el: '#' + testId,
-                data: { test: msg }
+                scope: { test: msg }
             })
             assert.strictEqual($('#' + testId), '54321')
         })
@@ -81,7 +81,7 @@ describe('UNIT: API', function () {
             mock(testId, '<span sd-test="test"></span>')
             new Seed({
                 el: '#' + testId,
-                data: { test: msg }
+                scope: { test: msg }
             })
             var el = document.querySelector('#' + testId + ' span')
             assert.strictEqual(el.getAttribute(testId), msg + '123')
@@ -105,7 +105,7 @@ describe('UNIT: API', function () {
             mock(testId, '<span sd-test2="test"></span>')
             var vm = new Seed({
                     el: '#' + testId,
-                    data: { test: msg }
+                    scope: { test: msg }
                 }),
                 el = document.querySelector('#' + testId + ' span')
             assert.strictEqual(el.getAttribute(testId + 'bind'), msg + 'bind', 'should have called bind()')
@@ -126,7 +126,7 @@ describe('UNIT: API', function () {
         var testId = 'api-vm-test',
             Test = Seed.extend({
                 className: 'hihi',
-                data: { hi: 'ok' }
+                scope: { hi: 'ok' }
             }),
             utils = require('seed/src/utils')
 
@@ -173,7 +173,7 @@ describe('UNIT: API', function () {
             mock(testId, '<div class="directive" sd-partial="' + testId + '">hello</div>')
             var t = new Seed({
                 el: '#' + testId,
-                data: { hi: 'hohoho' }
+                scope: { hi: 'hohoho' }
             })
             assert.strictEqual(t.$el.querySelector('.directive .partial-test a').textContent, 'hohoho')
             assert.strictEqual(t.$el.querySelector('.directive span').innerHTML, 'hahaha')
@@ -185,7 +185,7 @@ describe('UNIT: API', function () {
             mock(testId, '<div class="inline">{{>' + testId + '}}</div>')
             var t = new Seed({
                 el: '#' + testId,
-                data: { hi: 'hohoho' }
+                scope: { hi: 'hohoho' }
             })
             assert.strictEqual(t.$el.querySelector('.inline .partial-test a').textContent, 'hohoho')
             assert.strictEqual(t.$el.querySelector('.inline span').innerHTML, 'hahaha')
@@ -222,12 +222,12 @@ describe('UNIT: API', function () {
 
         it('should allow further extensions', function () {
             var Parent = Seed.extend({
-                data: {
+                scope: {
                     test: 'hi'
                 }
             })
             var Child = Parent.extend({
-                data: {
+                scope: {
                     test2: 'ho',
                     test3: {
                         hi: 1
@@ -236,7 +236,7 @@ describe('UNIT: API', function () {
             })
             assert.strictEqual(Child.super, Parent)
             var child = new Child({
-                data: {
+                scope: {
                     test3: {
                         ho: 2
                     }
@@ -280,12 +280,12 @@ describe('UNIT: API', function () {
 
             })
 
-            describe('data', function () {
+            describe('scope', function () {
                 
                 it('should be copied to each instance', function () {
                     var testData = { a: 1 },
                         Test = Seed.extend({
-                            data: {
+                            scope: {
                                 test: testData
                             }
                         })
@@ -317,7 +317,7 @@ describe('UNIT: API', function () {
                             'test': 'hi',
                             'sd-text': 'hoho'
                         },
-                        data: {
+                        scope: {
                             hoho: 'what'
                         }
                     })
@@ -339,7 +339,7 @@ describe('UNIT: API', function () {
                                 'test': 'hi',
                                 'sd-text': 'hoho'
                             },
-                            data: {
+                            scope: {
                                 hoho: 'what'
                             }
                         }),
@@ -364,7 +364,7 @@ describe('UNIT: API', function () {
                     var Test = Seed.extend({
                             tagName: 'p',
                             template: raw,
-                            data: {
+                            scope: {
                                 hello: 'Ahaha'
                             }
                         }),
@@ -385,7 +385,7 @@ describe('UNIT: API', function () {
                     document.getElementById('test').appendChild(tpl)
                     var Test = Seed.extend({
                         template: '#' + testId,
-                        data: { hello: testId }
+                        scope: { hello: testId }
                     })
                     var t = new Test()
                     assert.strictEqual(t.$el.querySelector('span').textContent, testId)
@@ -397,7 +397,7 @@ describe('UNIT: API', function () {
                     })
                     var t = new Test({
                         template: raw,
-                        data: {
+                        scope: {
                             hello: 'overwritten!'
                         }
                     })
@@ -420,7 +420,7 @@ describe('UNIT: API', function () {
                         attributes: {
                             'sd-test': 'ok'
                         },
-                        data: {
+                        scope: {
                             ok: true
                         }
                     })
@@ -443,7 +443,7 @@ describe('UNIT: API', function () {
                     })
                     var t = new Test({
                         template: '{{hi | test}}',
-                        data: {
+                        scope: {
                             hi: 'hohoho'
                         }
                     })
@@ -456,13 +456,13 @@ describe('UNIT: API', function () {
 
                 it('should allow the VM to use private child VMs', function () {
                     var Child = Seed.extend({
-                        data: {
+                        scope: {
                             name: 'child'
                         }
                     })
                     var Parent = Seed.extend({
                         template: '<p>{{name}}</p><div sd-viewmodel="child">{{name}}</div>',
-                        data: {
+                        scope: {
                             name: 'dad'
                         },
                         vms: {
@@ -486,7 +486,7 @@ describe('UNIT: API', function () {
                         partials: {
                             test: '<a>{{a}}</a><p>{{b}}</p>'
                         },
-                        data: {
+                        scope: {
                             a: 'hi',
                             b: 'ho'
                         }

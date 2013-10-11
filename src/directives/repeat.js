@@ -141,11 +141,11 @@ module.exports = {
             ctn  = this.container,
             vmID = node.getAttribute(config.prefix + '-viewmodel'),
             ChildVM = this.compiler.getOption('vms', vmID) || ViewModel,
-            wrappedData = {}
-        wrappedData[this.arg] = data || {}
+            scope = {}
+        scope[this.arg] = data || {}
         var item = new ChildVM({
             el: node,
-            data: wrappedData,
+            scope: scope,
             compilerOptions: {
                 repeat: true,
                 repeatIndex: index,

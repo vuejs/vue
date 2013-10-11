@@ -19,7 +19,7 @@ describe('UNIT: ViewModel', function () {
         arr = [1, 2, 3],
         vm = new Seed({
             el: '#vm-test',
-            data: {
+            scope: {
                 a: data,
                 b: arr
             }
