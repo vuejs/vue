@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>SEED share data</title>
+        <meta charset="utf-8">
+    </head>
+    <body>
+        <div id="a">{{shared.msg}}</div>
+        <div id="b">{{shared.msg}}</div>
+        <div id="c">
+            <input sd-value="shared.msg" type="text">
+        </div>
+        <div id="d">
+            <pre>{{source}}</pre>
+        </div>
+        <script src="../dist/seed.js"></script>
+        <script>
+            var shared = {
+                msg: 'hello'
+            }
+            new seed.ViewModel({
+                el: '#a',
+                data: {
+                    shared: shared
+                }
+            })
+            new seed.ViewModel({
+                el: '#b',
+                data: {
+                    shared: shared
+                }
+            })
+            new seed.ViewModel({
+                el: '#c',
+                data: {
+                    shared: shared
+                }
+            })
+            new seed.ViewModel({
+                el: '#d',
+                data: {
+                    shared: shared,
+                    source: {
+                        get: function () {
+                            return JSON.stringify(this.shared)
+                        }
+                    }
+                }
+            })
+        </script>
+    </body>
+</html>
