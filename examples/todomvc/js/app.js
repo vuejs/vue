@@ -12,7 +12,7 @@ var Todos = seed.ViewModel.extend({
         this.updateFilter()
     },
 
-    props: {
+    proto: {
 
         updateFilter: function () {
             var filter = location.hash.slice(2)

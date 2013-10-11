@@ -1,10 +1,8 @@
-- `pop`, `remove` and `shift` should return undefined and not throw error
 - put all API methods on Seed
 - add a method to observe additional data properties
 - add `lazy` option
 - add directive for all form elements, and make it consistent as `sd-model`
 - add escape: {{{ things in here should not be parsed }}}
-- rename `props` option to `proto`
 - properties that start with `_` should also be ignored and used as a convention: `$` is library properties, `_` is user properties and non-prefixed properties are data.
 
 - sd-transition

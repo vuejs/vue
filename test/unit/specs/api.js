@@ -264,17 +264,17 @@ describe('UNIT: API', function () {
 
             })
 
-            describe('props', function () {
+            describe('proto', function () {
                 
                 it('should be mixed to the exteded VM\'s prototype', function () {
-                    var props = {
+                    var mixins = {
                         a: 1,
                         b: 2,
                         c: function () {}
                     }
-                    var Test = seed.ViewModel.extend({ props: props })
-                    for (var key in props) {
-                        assert.strictEqual(Test.prototype[key], props[key])
+                    var Test = seed.ViewModel.extend({ proto: mixins })
+                    for (var key in mixins) {
+                        assert.strictEqual(Test.prototype[key], mixins[key])
                     }
                 })
 

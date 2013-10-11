@@ -75,11 +75,11 @@ function extend (options) {
     var proto = ExtendedVM.prototype = Object.create(ParentVM.prototype)
     utils.defProtected(proto, 'constructor', ExtendedVM)
     // copy prototype props
-    var props = options.props
-    if (props) {
-        for (var key in props) {
+    var protoMixins = options.proto
+    if (protoMixins) {
+        for (var key in protoMixins) {
             if (!(key in ViewModel.prototype)) {
-                proto[key] = props[key]
+                proto[key] = protoMixins[key]
             }
         }
     }
@@ -101,7 +101,7 @@ function extend (options) {
  *  they should be further extended. However extending should only
  *  be done at top level.
  *  
- *  `props` is an exception because it's handled directly on the
+ *  `proto` is an exception because it's handled directly on the
  *  prototype.
  *
  *  `el` is an exception because it's not allowed as an
@@ -112,7 +112,7 @@ function inheritOptions (child, parent, topLevel) {
     convertPartials(child.partials)
     if (!parent) return child
     for (var key in parent) {
-        if (key === 'el' || key === 'props') continue
+        if (key === 'el' || key === 'proto') continue
         if (!child[key]) { // child has priority
             child[key] = parent[key]
         } else if (topLevel && utils.typeOf(child[key]) === 'Object') {
