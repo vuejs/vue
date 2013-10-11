@@ -9,7 +9,7 @@ var Emitter     = require('./emitter'),
     ExpParser   = require('./exp-parser'),
     slice       = Array.prototype.slice,
     vmAttr,
-    eachAttr,
+    repeatAttr,
     partialAttr,
     transitionAttr
 
@@ -77,9 +77,9 @@ function Compiler (vm, options) {
         }
     }
 
-    // for each items, create an index binding
-    if (compiler.each) {
-        vm[compiler.eachPrefix].$index = compiler.eachIndex
+    // for repeated items, create an index binding
+    if (compiler.repeat) {
+        vm[compiler.repeatPrefix].$index = compiler.repeatIndex
     }
 
     // now parse the DOM, during which we will create necessary bindings
@@ -180,13 +180,13 @@ CompilerProto.compile = function (node, root) {
     var compiler = this
     if (node.nodeType === 1) {
         // a normal node
-        var eachExp    = node.getAttribute(eachAttr),
+        var repeatExp    = node.getAttribute(repeatAttr),
             vmId       = node.getAttribute(vmAttr),
             partialId  = node.getAttribute(partialAttr)
         // we need to check for any possbile special directives
-        // e.g. sd-each, sd-viewmodel & sd-partial
-        if (eachExp) { // each block
-            var directive = Directive.parse(eachAttr, eachExp, compiler, node)
+        // e.g. sd-repeat, sd-viewmodel & sd-partial
+        if (repeatExp) { // repeat block
+            var directive = Directive.parse(repeatAttr, repeatExp, compiler, node)
             if (directive) {
                 compiler.bindDirective(directive)
             }
@@ -321,7 +321,7 @@ CompilerProto.bindDirective = function (directive) {
     binding.instances.push(directive)
     directive.binding = binding
 
-    // for newly inserted sub-VMs (each items), need to bind deps
+    // for newly inserted sub-VMs (repeat items), need to bind deps
     // because they didn't get processed when the parent compiler
     // was binding dependencies.
     var i, dep, deps = binding.contextDeps
@@ -455,8 +455,8 @@ CompilerProto.define = function (key, binding) {
                 ? value.get({
                     el: compiler.el,
                     vm: vm,
-                    item: compiler.each
-                        ? vm[compiler.eachPrefix]
+                    item: compiler.repeat
+                        ? vm[compiler.repeatPrefix]
                         : null
                 })
                 : value
@@ -586,7 +586,7 @@ CompilerProto.destroy = function () {
  */
 function refreshPrefix () {
     var prefix     = config.prefix
-    eachAttr       = prefix + '-each'
+    repeatAttr       = prefix + '-repeat'
     vmAttr         = prefix + '-viewmodel'
     partialAttr    = prefix + '-partial'
     transitionAttr = prefix + '-transition'

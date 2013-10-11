@@ -136,7 +136,7 @@ function emitSet (obj, observer) {
 
 module.exports = {
 
-    // used in sd-each
+    // used in sd-repeat
     watchArray: watchArray,
 
     /*

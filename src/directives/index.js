@@ -1,7 +1,7 @@
 module.exports = {
 
-    on    : require('./on'),
-    each  : require('./each'),
+    on     : require('./on'),
+    repeat : require('./repeat'),
 
     attr: function (value) {
         this.el.setAttribute(this.arg, value)

@@ -27,10 +27,14 @@ function require(path, parent, orig) {
   // perform real require()
   // by invoking the module's
   // registered function
-  if (!module.exports) {
-    module.exports = {};
-    module.client = module.component = true;
-    module.call(this, module.exports, require.relative(resolved), module);
+  if (!module._resolving && !module.exports) {
+    var mod = {};
+    mod.exports = {};
+    mod.client = mod.component = true;
+    module._resolving = true;
+    module.call(this, mod.exports, require.relative(resolved), mod);
+    delete module._resolving;
+    module.exports = mod.exports;
   }
 
   return module.exports;
@@ -196,2137 +200,2413 @@ require.relative = function(parent) {
 
   return localRequire;
 };
-require.register("component-indexof/index.js", function(exports, require, module){
-module.exports = function(arr, obj){
-  if (arr.indexOf) return arr.indexOf(obj);
-  for (var i = 0; i < arr.length; ++i) {
-    if (arr[i] === obj) return i;
-  }
-  return -1;
-};
-});
-require.register("component-emitter/index.js", function(exports, require, module){
-
-/**
- * Module dependencies.
- */
-
-var index = require('indexof');
-
-/**
- * Expose `Emitter`.
- */
-
-module.exports = Emitter;
-
-/**
- * Initialize a new `Emitter`.
- *
- * @api public
- */
-
-function Emitter(obj) {
-  if (obj) return mixin(obj);
-};
-
-/**
- * Mixin the emitter properties.
- *
- * @param {Object} obj
- * @return {Object}
- * @api private
- */
-
-function mixin(obj) {
-  for (var key in Emitter.prototype) {
-    obj[key] = Emitter.prototype[key];
-  }
-  return obj;
-}
-
-/**
- * Listen on the given `event` with `fn`.
- *
- * @param {String} event
- * @param {Function} fn
- * @return {Emitter}
- * @api public
- */
-
-Emitter.prototype.on = function(event, fn){
-  this._callbacks = this._callbacks || {};
-  (this._callbacks[event] = this._callbacks[event] || [])
-    .push(fn);
-  return this;
-};
-
-/**
- * Adds an `event` listener that will be invoked a single
- * time then automatically removed.
- *
- * @param {String} event
- * @param {Function} fn
- * @return {Emitter}
- * @api public
- */
-
-Emitter.prototype.once = function(event, fn){
-  var self = this;
-  this._callbacks = this._callbacks || {};
-
-  function on() {
-    self.off(event, on);
-    fn.apply(this, arguments);
-  }
-
-  fn._off = on;
-  this.on(event, on);
-  return this;
-};
-
-/**
- * Remove the given callback for `event` or all
- * registered callbacks.
- *
- * @param {String} event
- * @param {Function} fn
- * @return {Emitter}
- * @api public
- */
-
-Emitter.prototype.off =
-Emitter.prototype.removeListener =
-Emitter.prototype.removeAllListeners = function(event, fn){
-  this._callbacks = this._callbacks || {};
-
-  // all
-  if (0 == arguments.length) {
-    this._callbacks = {};
-    return this;
-  }
-
-  // specific event
-  var callbacks = this._callbacks[event];
-  if (!callbacks) return this;
-
-  // remove all handlers
-  if (1 == arguments.length) {
-    delete this._callbacks[event];
-    return this;
-  }
-
-  // remove specific handler
-  var i = index(callbacks, fn._off || fn);
-  if (~i) callbacks.splice(i, 1);
-  return this;
-};
-
-/**
- * Emit `event` with the given args.
- *
- * @param {String} event
- * @param {Mixed} ...
- * @return {Emitter}
- */
-
-Emitter.prototype.emit = function(event){
-  this._callbacks = this._callbacks || {};
-  var args = [].slice.call(arguments, 1)
-    , callbacks = this._callbacks[event];
-
-  if (callbacks) {
-    callbacks = callbacks.slice(0);
-    for (var i = 0, len = callbacks.length; i < len; ++i) {
-      callbacks[i].apply(this, args);
-    }
-  }
-
-  return this;
-};
-
-/**
- * Return array of callbacks for `event`.
- *
- * @param {String} event
- * @return {Array}
- * @api public
- */
-
-Emitter.prototype.listeners = function(event){
-  this._callbacks = this._callbacks || {};
-  return this._callbacks[event] || [];
-};
-
-/**
- * Check if this emitter has `event` handlers.
- *
- * @param {String} event
- * @return {Boolean}
- * @api public
- */
-
-Emitter.prototype.hasListeners = function(event){
-  return !! this.listeners(event).length;
-};
-
-});
-require.register("seed/src/main.js", function(exports, require, module){
-var config      = require('./config'),
-    ViewModel   = require('./viewmodel'),
-    directives  = require('./directives'),
-    filters     = require('./filters'),
-    textParser  = require('./text-parser'),
-    utils       = require('./utils'),
-    api         = {}
-
-/*
- *  Allows user to create a custom directive
- */
-api.directive = function (name, fn) {
-    if (!fn) return directives[name]
-    directives[name] = fn
-}
-
-/*
- *  Allows user to create a custom filter
- */
-api.filter = function (name, fn) {
-    if (!fn) return filters[name]
-    filters[name] = fn
-}
-
-/*
- *  Set config options
- */
-api.config = function (opts) {
-    if (opts) {
-        utils.extend(config, opts)
-        textParser.buildRegex()
-    }
-}
-
-/*
- *  Angular style bootstrap
- */
-api.bootstrap = function (el) {
-    el = (typeof el === 'string'
-        ? document.querySelector(el)
-        : el) || document.body
-    var Ctor = ViewModel,
-        vmAttr = config.prefix + '-viewmodel',
-        vmExp = el.getAttribute(vmAttr)
-    if (vmExp) {
-        Ctor = utils.getVM(vmExp)
-        el.removeAttribute(vmAttr)
-    }
-    return new Ctor({ el: el })
-}
-
-/*
- *  Expose the main ViewModel class
- *  and add extend method
- */
-api.ViewModel = ViewModel
-
-ViewModel.extend = function (options) {
-    var ExtendedVM = function (opts) {
-        opts = opts || {}
-        if (options.init) {
-            opts.init = options.init
-        }
-        ViewModel.call(this, opts)
-    }
-    var proto = ExtendedVM.prototype = Object.create(ViewModel.prototype)
-    proto.constructor = ExtendedVM
-    if (options.props) utils.extend(proto, options.props)
-    if (options.id) {
-        utils.registerVM(options.id, ExtendedVM)
-    }
-    return ExtendedVM
-}
-
-// collect templates on load
-utils.collectTemplates()
-
-module.exports = api
-});
-require.register("seed/src/emitter.js", function(exports, require, module){
-// shiv to make this work for Component, Browserify and Node at the same time.
-var Emitter,
-    componentEmitter = 'emitter'
-
-try {
-    // Requiring without a string literal will make browserify
-    // unable to parse the dependency, thus preventing it from
-    // stopping the compilation after a failed lookup.
-    Emitter = require(componentEmitter)
-} catch (e) {}
-
-module.exports = Emitter || require('events').EventEmitter
-});
-require.register("seed/src/config.js", function(exports, require, module){
-module.exports = {
-
-    prefix      : 'sd',
-    debug       : false,
-
-    interpolateTags : {
-        open  : '{{',
-        close : '}}'
-    }
-}
-});
-require.register("seed/src/utils.js", function(exports, require, module){
-var config    = require('./config'),
-    toString  = Object.prototype.toString,
-    templates = {},
-    VMs       = {}
-
-module.exports = {
-
-    typeOf: function (obj) {
-        return toString.call(obj).slice(8, -1)
-    },
-
-    extend: function (obj, ext) {
-        for (var key in ext) {
-            obj[key] = ext[key]
-        }
-    },
-
-    collectTemplates: function () {
-        var selector = 'script[type="text/' + config.prefix + '-template"]',
-            templates = document.querySelectorAll(selector),
-            i = templates.length
-        while (i--) {
-            this.storeTemplate(templates[i])
-        }
-    },
-
-    storeTemplate: function (template) {
-        var id = template.getAttribute(config.prefix + '-template-id')
-        if (id) {
-            templates[id] = template.innerHTML.trim()
-        }
-        template.parentNode.removeChild(template)
-    },
-
-    getTemplate: function (id) {
-        return templates[id]
-    },
-
-    registerVM: function (id, VM) {
-        VMs[id] = VM
-    },
-
-    getVM: function (id) {
-        return VMs[id]
-    },
-
-    log: function () {
-        if (config.debug) console.log.apply(console, arguments)
-        return this
-    },
-    
-    warn: function() {
-        if (config.debug) console.warn.apply(console, arguments)
-        return this
-    }
-}
-});
-require.register("seed/src/compiler.js", function(exports, require, module){
-var Emitter     = require('./emitter'),
-    Observer    = require('./observer'),
-    config      = require('./config'),
-    utils       = require('./utils'),
-    Binding     = require('./binding'),
-    Directive   = require('./directive'),
-    TextParser  = require('./text-parser'),
-    DepsParser  = require('./deps-parser'),
-    ExpParser   = require('./exp-parser'),
-    slice       = Array.prototype.slice,
-    vmAttr,
-    eachAttr
-
-/*
- *  The DOM compiler
- *  scans a DOM node and compile bindings for a ViewModel
- */
-function Compiler (vm, options) {
-
-    // need to refresh this everytime we compile
-    eachAttr = config.prefix + '-each'
-    vmAttr   = config.prefix + '-viewmodel'
-
-    // copy options
-    options = options || {}
-    utils.extend(this, options)
-
-    // copy data if any
-    var data = options.data
-    if (data) utils.extend(vm, data)
-
-    // determine el
-    var tpl = options.template,
-        el  = options.el
-    el  = typeof el === 'string'
-        ? document.querySelector(el)
-        : el
-    if (el) {
-        var tplExp = tpl || el.getAttribute(config.prefix + '-template')
-        if (tplExp) {
-            el.innerHTML = utils.getTemplate(tplExp) || ''
-            el.removeAttribute(config.prefix + '-template')
-        }
-    } else if (tpl) {
-        var template = utils.getTemplate(tpl)
-        if (template) {
-            var tplHolder = document.createElement('div')
-            tplHolder.innerHTML = template
-            el = tplHolder.childNodes[0]
-        }
-    }
-
-    utils.log('\nnew VM instance: ', el, '\n')
-
-    // set stuff on the ViewModel
-    vm.$el       = el
-    vm.$compiler = this
-    vm.$parent   = options.parentCompiler && options.parentCompiler.vm
-
-    // now for the compiler itself...
-    this.vm         = vm
-    this.el         = el
-    this.directives = []
-    // anonymous expression bindings that needs to be unbound during destroy()
-    this.expressions = []
-
-    // Store things during parsing to be processed afterwards,
-    // because we want to have created all bindings before
-    // observing values / parsing dependencies.
-    var observables = this.observables = []
-    var computed = this.computed = [] // computed props to parse deps from
-    var ctxBindings = this.contextBindings = [] // computed props with dynamic context
-
-    // prototypal inheritance of bindings
-    var parent = this.parentCompiler
-    this.bindings = parent
-        ? Object.create(parent.bindings)
-        : {}
-    this.rootCompiler = parent
-        ? getRoot(parent)
-        : this
-
-    // setup observer
-    this.setupObserver()
-
-    // call user init. this will capture some initial values.
-    if (options.init) {
-        options.init.apply(vm, options.args || [])
-    }
-
-    // create bindings for keys set on the vm by the user
-    for (var key in vm) {
-        if (key.charAt(0) !== '$') {
-            this.createBinding(key)
-        }
-    }
-
-    // now parse the DOM, during which we will create necessary bindings
-    // and bind the parsed directives
-    this.compileNode(this.el, true)
-
-    // observe root values so that they emit events when
-    // their nested values change (for an Object)
-    // or when they mutate (for an Array)
-    var i = observables.length, binding
-    while (i--) {
-        binding = observables[i]
-        Observer.observe(binding.value, binding.key, this.observer)
-    }
-    // extract dependencies for computed properties
-    if (computed.length) DepsParser.parse(computed)
-    // extract dependencies for computed properties with dynamic context
-    if (ctxBindings.length) this.bindContexts(ctxBindings)
-    // unset these no longer needed stuff
-    this.observables = this.computed = this.contextBindings = this.arrays = null
-}
-
-var CompilerProto = Compiler.prototype
-
-/*
- *  Setup observer.
- *  The observer listens for get/set/mutate events on all VM
- *  values/objects and trigger corresponding binding updates.
- */
-CompilerProto.setupObserver = function () {
-
-    var bindings = this.bindings,
-        observer = this.observer = new Emitter(),
-        depsOb   = DepsParser.observer
-
-    // a hash to hold event proxies for each root level key
-    // so they can be referenced and removed later
-    observer.proxies = {}
-
-    // add own listeners which trigger binding updates
-    observer
-        .on('get', function (key) {
-            if (bindings[key] && depsOb.isObserving) {
-                depsOb.emit('get', bindings[key])
-            }
-        })
-        .on('set', function (key, val) {
-            observer.emit('change:' + key, val)
-            if (bindings[key]) bindings[key].update(val)
-        })
-        .on('mutate', function (key, val, mutation) {
-            observer.emit('change:' + key, val, mutation)
-            if (bindings[key]) bindings[key].pub()
-        })
-}
-
-/*
- *  Compile a DOM node (recursive)
- */
-CompilerProto.compileNode = function (node, root) {
-
-    var compiler = this, i, j
-
-    if (node.nodeType === 3) { // text node
-
-        compiler.compileTextNode(node)
-
-    } else if (node.nodeType === 1) {
-
-        var eachExp = node.getAttribute(eachAttr),
-            vmExp   = node.getAttribute(vmAttr),
-            directive
-
-        if (eachExp) { // each block
-
-            directive = Directive.parse(eachAttr, eachExp)
-            if (directive) {
-                directive.el = node
-                compiler.bindDirective(directive)
-            }
-
-        } else if (vmExp && !root) { // nested ViewModels
-
-            node.removeAttribute(vmAttr)
-            var ChildVM = utils.getVM(vmExp)
-            if (ChildVM) {
-                new ChildVM({
-                    el: node,
-                    child: true,
-                    parentCompiler: compiler
-                })
-            }
-
-        } else { // normal node
-
-            // parse if has attributes
-            if (node.attributes && node.attributes.length) {
-                var attrs = slice.call(node.attributes),
-                    attr, valid, exps, exp
-                i = attrs.length
-                while (i--) {
-                    attr = attrs[i]
-                    if (attr.name === vmAttr) continue
-                    valid = false
-                    exps = attr.value.split(',')
-                    j = exps.length
-                    while (j--) {
-                        exp = exps[j]
-                        directive = Directive.parse(attr.name, exp)
-                        if (directive) {
-                            valid = true
-                            directive.el = node
-                            compiler.bindDirective(directive)
-                        }
-                    }
-                    if (valid) node.removeAttribute(attr.name)
-                }
-            }
-
-            // recursively compile childNodes
-            if (node.childNodes.length) {
-                var nodes = slice.call(node.childNodes)
-                for (i = 0, j = nodes.length; i < j; i++) {
-                    this.compileNode(nodes[i])
-                }
-            }
-        }
-    }
-}
-
-/*
- *  Compile a text node
- */
-CompilerProto.compileTextNode = function (node) {
-    var tokens = TextParser.parse(node.nodeValue)
-    if (!tokens) return
-    var compiler = this,
-        dirname = config.prefix + '-text',
-        el, token, directive
-    for (var i = 0, l = tokens.length; i < l; i++) {
-        token = tokens[i]
-        el = document.createTextNode('')
-        if (token.key) {
-            directive = Directive.parse(dirname, token.key)
-            if (directive) {
-                directive.el = el
-                compiler.bindDirective(directive)
-            }
-        } else {
-            el.nodeValue = token
-        }
-        node.parentNode.insertBefore(el, node)
-    }
-    node.parentNode.removeChild(node)
-}
-
-/*
- *  Add a directive instance to the correct binding & viewmodel
- */
-CompilerProto.bindDirective = function (directive) {
-
-    this.directives.push(directive)
-    directive.compiler = this
-    directive.vm       = this.vm
-
-    var key = directive.key,
-        baseKey = key.split('.')[0],
-        compiler = traceOwnerCompiler(directive, this)
-
-    var binding
-    if (directive.isExp) {
-        binding = this.createBinding(key, true)
-    } else if (compiler.vm.hasOwnProperty(baseKey)) {
-        // if the value is present in the target VM, we create the binding on its compiler
-        binding = compiler.bindings.hasOwnProperty(key)
-            ? compiler.bindings[key]
-            : compiler.createBinding(key)
-    } else {
-        // due to prototypal inheritance of bindings, if a key doesn't exist here,
-        // it doesn't exist in the whole prototype chain. Therefore in that case
-        // we create the new binding at the root level.
-        binding = compiler.bindings[key] || this.rootCompiler.createBinding(key)
-    }
-
-    binding.instances.push(directive)
-    directive.binding = binding
-
-    // for newly inserted sub-VMs (each items), need to bind deps
-    // because they didn't get processed when the parent compiler
-    // was binding dependencies.
-    var i, dep, deps = binding.contextDeps
-    if (deps) {
-        i = deps.length
-        while (i--) {
-            dep = this.bindings[deps[i]]
-            dep.subs.push(directive)
-        }
-    }
-
-    var value = binding.value
-    // invoke bind hook if exists
-    if (directive.bind) {
-        directive.bind(value)
-    }
-
-    // set initial value
-    if (binding.isComputed) {
-        directive.refresh(value)
-    } else {
-        directive.update(value)
-    }
-}
-
-/*
- *  Create binding and attach getter/setter for a key to the viewmodel object
- */
-CompilerProto.createBinding = function (key, isExp) {
-
-    var bindings = this.bindings,
-        binding  = new Binding(this, key, isExp)
-
-    if (binding.isExp) {
-        // a complex expression binding
-        // we need to generate an anonymous computed property for it
-        var result = ExpParser.parse(key)
-        if (result) {
-            utils.log('  created anonymous binding: ' + key)
-            binding.value = { get: result.getter }
-            this.markComputed(binding)
-            this.expressions.push(binding)
-            // need to create the bindings for keys
-            // that do not exist yet
-            var i = result.vars.length, v
-            while (i--) {
-                v = result.vars[i]
-                if (!bindings[v]) {
-                    this.rootCompiler.createBinding(v)
-                }
-            }
-        } else {
-            utils.warn('  invalid expression: ' + key)
-        }
-    } else {
-        utils.log('  created binding: ' + key)
-        bindings[key] = binding
-        // make sure the key exists in the object so it can be observed
-        // by the Observer!
-        this.ensurePath(key)
-        if (binding.root) {
-            // this is a root level binding. we need to define getter/setters for it.
-            this.define(key, binding)
-        } else {
-            var parentKey = key.slice(0, key.lastIndexOf('.'))
-            if (!bindings.hasOwnProperty(parentKey)) {
-                // this is a nested value binding, but the binding for its parent
-                // has not been created yet. We better create that one too.
-                this.createBinding(parentKey)
-            }
-        }
-    }
-    return binding
-}
-
-/*
- *  Sometimes when a binding is found in the template, the value might
- *  have not been set on the VM yet. To ensure computed properties and
- *  dependency extraction can work, we have to create a dummy value for
- *  any given path.
- */
-CompilerProto.ensurePath = function (key) {
-    var path = key.split('.'), sec, obj = this.vm
-    for (var i = 0, d = path.length - 1; i < d; i++) {
-        sec = path[i]
-        if (!obj[sec]) obj[sec] = {}
-        obj = obj[sec]
-    }
-    if (utils.typeOf(obj) === 'Object') {
-        sec = path[i]
-        if (!(sec in obj)) obj[sec] = undefined
-    }
-}
-
-/*
- *  Defines the getter/setter for a root-level binding on the VM
- *  and observe the initial value
- */
-CompilerProto.define = function (key, binding) {
-
-    utils.log('    defined root binding: ' + key)
-
-    var compiler = this,
-        vm = this.vm,
-        ob = this.observer,
-        value = binding.value = vm[key], // save the value before redefinening it
-        type = utils.typeOf(value)
-
-    if (type === 'Object' && value.get) {
-        // computed property
-        this.markComputed(binding)
-    } else if (type === 'Object' || type === 'Array') {
-        // observe objects later, becase there might be more keys
-        // to be added to it. we also want to emit all the set events
-        // after all values are available.
-        this.observables.push(binding)
-    }
-
-    Object.defineProperty(vm, key, {
-        enumerable: true,
-        get: function () {
-            var value = binding.value
-            if ((!binding.isComputed && (!value || !value.__observer__)) ||
-                Array.isArray(value)) {
-                // only emit non-computed, non-observed (primitive) values, or Arrays.
-                // because these are the cleanest dependencies
-                ob.emit('get', key)
-            }
-            return binding.isComputed
-                ? value.get({
-                    el: compiler.el,
-                    vm: vm,
-                    item: compiler.each
-                        ? vm[compiler.eachPrefix]
-                        : null
-                })
-                : value
-        },
-        set: function (newVal) {
-            var value = binding.value
-            if (binding.isComputed) {
-                if (value.set) {
-                    value.set(newVal)
-                }
-            } else if (newVal !== value) {
-                // unwatch the old value
-                Observer.unobserve(value, key, ob)
-                // set new value
-                binding.value = newVal
-                ob.emit('set', key, newVal)
-                // now watch the new value, which in turn emits 'set'
-                // for all its nested values
-                Observer.observe(newVal, key, ob)
-            }
-        }
-    })
-}
-
-/*
- *  Process a computed property binding
- */
-CompilerProto.markComputed = function (binding) {
-    var value = binding.value,
-        vm    = this.vm
-    binding.isComputed = true
-    // keep a copy of the raw getter
-    // for extracting contextual dependencies
-    binding.rawGet = value.get
-    // bind the accessors to the vm
-    value.get = value.get.bind(vm)
-    if (value.set) value.set = value.set.bind(vm)
-    // keep track for dep parsing later
-    this.computed.push(binding)
-}
-
-/*
- *  Process subscriptions for computed properties that has
- *  dynamic context dependencies
- */
-CompilerProto.bindContexts = function (bindings) {
-    var i = bindings.length, j, k, binding, depKey, dep, ins
-    while (i--) {
-        binding = bindings[i]
-        j = binding.contextDeps.length
-        while (j--) {
-            depKey = binding.contextDeps[j]
-            k = binding.instances.length
-            while (k--) {
-                ins = binding.instances[k]
-                dep = ins.compiler.bindings[depKey]
-                dep.subs.push(ins)
-            }
-        }
-    }
-}
-
-/*
- *  Unbind and remove element
- */
-CompilerProto.destroy = function () {
-    utils.log('compiler destroyed: ', this.vm.$el)
-    // unwatch
-    this.observer.off()
-    var i, key, dir, inss, binding,
-        directives = this.directives,
-        exps = this.expressions,
-        bindings = this.bindings,
-        el = this.el
-    // remove all directives that are instances of external bindings
-    i = directives.length
-    while (i--) {
-        dir = directives[i]
-        if (dir.binding.compiler !== this) {
-            inss = dir.binding.instances
-            if (inss) inss.splice(inss.indexOf(dir), 1)
-        }
-        dir.unbind()
-    }
-    // unbind all expressions (anonymous bindings)
-    i = exps.length
-    while (i--) {
-        exps[i].unbind()
-    }
-    // unbind/unobserve all own bindings
-    for (key in bindings) {
-        if (bindings.hasOwnProperty(key)) {
-            binding = bindings[key]
-            if (binding.root) {
-                Observer.unobserve(binding.value, binding.key, this.observer)
-            }
-            binding.unbind()
-        }
-    }
-    // remove el
-    if (el.parentNode) {
-        el.parentNode.removeChild(el)
-    }
-}
-
-// Helpers --------------------------------------------------------------------
-
-/*
- *  determine which viewmodel a key belongs to based on nesting symbols
- */
-function traceOwnerCompiler (key, compiler) {
-    if (key.nesting) {
-        var levels = key.nesting
-        while (compiler.parentCompiler && levels--) {
-            compiler = compiler.parentCompiler
-        }
-    } else if (key.root) {
-        while (compiler.parentCompiler) {
-            compiler = compiler.parentCompiler
-        }
-    }
-    return compiler
-}
-
-/*
- *  shorthand for getting root compiler
- */
-function getRoot (compiler) {
-    return traceOwnerCompiler({ root: true }, compiler)
-}
-
-module.exports = Compiler
-});
-require.register("seed/src/viewmodel.js", function(exports, require, module){
-var Compiler = require('./compiler')
-
-/*
- *  ViewModel exposed to the user that holds data,
- *  computed properties, event handlers
- *  and a few reserved methods
- */
-function ViewModel (options) {
-    // just compile. options are passed directly to compiler
-    new Compiler(this, options)
-}
-
-var VMProto = ViewModel.prototype
-
-/*
- *  Convenience function to set an actual nested value
- *  from a flat key string. Used in directives.
- */
-VMProto.$set = function (key, value) {
-    var path = key.split('.'),
-        obj = getTargetVM(this, path)
-    if (!obj) return
-    for (var d = 0, l = path.length - 1; d < l; d++) {
-        obj = obj[path[d]]
-    }
-    obj[path[d]] = value
-}
-
-/*
- *  The function for getting a key
- *  which will go up along the prototype chain of the bindings
- *  Used in exp-parser.
- */
-VMProto.$get = function (key) {
-    var path = key.split('.'),
-        obj = getTargetVM(this, path),
-        vm = obj
-    if (!obj) return
-    for (var d = 0, l = path.length; d < l; d++) {
-        obj = obj[path[d]]
-    }
-    if (typeof obj === 'function') obj = obj.bind(vm)
-    return obj
-}
-
-/*
- *  watch a key on the viewmodel for changes
- *  fire callback with new value
- */
-VMProto.$watch = function (key, callback) {
-    this.$compiler.observer.on('change:' + key, callback)
-}
-
-/*
- *  unwatch a key
- */
-VMProto.$unwatch = function (key, callback) {
-    this.$compiler.observer.off('change:' + key, callback)
-}
-
-/*
- *  unbind everything, remove everything
- */
-VMProto.$destroy = function () {
-    this.$compiler.destroy()
-    this.$compiler = null
-}
-
-/*
- *  If a VM doesn't contain a path, go up the prototype chain
- *  to locate the ancestor that has it.
- */
-function getTargetVM (vm, path) {
-    var baseKey = path[0],
-        binding = vm.$compiler.bindings[baseKey]
-    return binding
-        ? binding.compiler.vm
-        : null
-}
-
-module.exports = ViewModel
-});
-require.register("seed/src/binding.js", function(exports, require, module){
-/*
- *  Binding class.
- *
- *  each property on the viewmodel has one corresponding Binding object
- *  which has multiple directive instances on the DOM
- *  and multiple computed property dependents
- */
-function Binding (compiler, key, isExp) {
-    this.value = undefined
-    this.isExp = !!isExp
-    this.root = !this.isExp && key.indexOf('.') === -1
-    this.compiler = compiler
-    this.key = key
-    this.instances = []
-    this.subs = []
-    this.deps = []
-}
-
-var BindingProto = Binding.prototype
-
-/*
- *  Process the value, then trigger updates on all dependents
- */
-BindingProto.update = function (value) {
-    this.value = value
-    var i = this.instances.length
-    while (i--) {
-        this.instances[i].update(value)
-    }
-    this.pub()
-}
-
-/*
- *  -- computed property only --    
- *  Force all instances to re-evaluate themselves
- */
-BindingProto.refresh = function () {
-    var i = this.instances.length
-    while (i--) {
-        this.instances[i].refresh()
-    }
-    this.pub()
-}
-
-/*
- *  Notify computed properties that depend on this binding
- *  to update themselves
- */
-BindingProto.pub = function () {
-    var i = this.subs.length
-    while (i--) {
-        this.subs[i].refresh()
-    }
-}
-
-/*
- *  Unbind the binding, remove itself from all of its dependencies
- */
-BindingProto.unbind = function () {
-    var i = this.instances.length
-    while (i--) {
-        this.instances[i].unbind()
-    }
-    i = this.deps.length
-    var subs
-    while (i--) {
-        subs = this.deps[i].subs
-        subs.splice(subs.indexOf(this), 1)
-    }
-    this.compiler = this.pubs = this.subs = this.instances = this.deps = null
-}
-
-module.exports = Binding
-});
-require.register("seed/src/observer.js", function(exports, require, module){
-var Emitter = require('./emitter'),
-    utils   = require('./utils'),
-    typeOf  = utils.typeOf,
-    def     = Object.defineProperty,
-    slice   = Array.prototype.slice,
-    methods = ['push','pop','shift','unshift','splice','sort','reverse']
-
-/*
- *  Methods to be added to an observed array
- */
-var arrayMutators = {
-    remove: function (index) {
-        if (typeof index !== 'number') index = this.indexOf(index)
-        return this.splice(index, 1)[0]
-    },
-    replace: function (index, data) {
-        if (typeof index !== 'number') index = this.indexOf(index)
-        return this.splice(index, 1, data)[0]
-    },
-    mutateFilter: function (fn) {
-        var i = this.length
-        while (i--) {
-            if (!fn(this[i])) this.splice(i, 1)
-        }
-        return this
-    }
-}
-
-// Define mutation interceptors so we can emit the mutation info
-methods.forEach(function (method) {
-    arrayMutators[method] = function () {
-        var result = Array.prototype[method].apply(this, arguments)
-        this.__observer__.emit('mutate', this.__path__, this, {
-            method: method,
-            args: slice.call(arguments),
-            result: result
-        })
-        return result
-    }
-})
-
-/*
- *  Watch an object based on type
- */
-function watch (obj, path, observer) {
-    var type = typeOf(obj)
-    if (type === 'Object') {
-        watchObject(obj, path, observer)
-    } else if (type === 'Array') {
-        watchArray(obj, path, observer)
-    }
-}
-
-/*
- *  Watch an Object, recursive.
- */
-function watchObject (obj, path, observer) {
-    defProtected(obj, '__values__', {})
-    defProtected(obj, '__observer__', observer)
-    for (var key in obj) {
-        bind(obj, key, path, obj.__observer__)
-    }
-}
-
-/*
- *  Watch an Array, attach mutation interceptors
- *  and augmentations
- */
-function watchArray (arr, path, observer) {
-    if (path) defProtected(arr, '__path__', path)
-    defProtected(arr, '__observer__', observer)
-    for (var method in arrayMutators) {
-        defProtected(arr, method, arrayMutators[method])
-    }
-}
-
-/*
- *  Define accessors for a property on an Object
- *  so it emits get/set events.
- *  Then watch the value itself.
- */
-function bind (obj, key, path, observer) {
-    var val = obj[key],
-        watchable = isWatchable(val),
-        values = obj.__values__,
-        fullKey = (path ? path + '.' : '') + key
-    values[fullKey] = val
-    // emit set on bind
-    // this means when an object is observed it will emit
-    // a first batch of set events.
-    observer.emit('set', fullKey, val)
-    def(obj, key, {
-        enumerable: true,
-        get: function () {
-            // only emit get on tip values
-            if (!watchable) observer.emit('get', fullKey)
-            return values[fullKey]
-        },
-        set: function (newVal) {
-            values[fullKey] = newVal
-            observer.emit('set', fullKey, newVal)
-            watch(newVal, fullKey, observer)
-        }
-    })
-    watch(val, fullKey, observer)
-}
-
-/*
- *  Define an ienumerable property
- *  This avoids it being included in JSON.stringify
- *  or for...in loops.
- */
-function defProtected (obj, key, val) {
-    if (obj.hasOwnProperty(key)) return
-    def(obj, key, {
-        enumerable: false,
-        configurable: false,
-        value: val
-    })
-}
-
-/*
- *  Check if a value is watchable
- */
-function isWatchable (obj) {
-    var type = typeOf(obj)
-    return type === 'Object' || type === 'Array'
-}
-
-/*
- *  When a value that is already converted is
- *  observed again by another observer, we can skip
- *  the watch conversion and simply emit set event for
- *  all of its properties.
- */
-function emitSet (obj, observer) {
-    if (typeOf(obj) === 'Array') {
-        observer.emit('set', 'length', obj.length)
-    } else {
-        emit(obj.__values__)
-    }
-    function emit (values, path) {
-        var val
-        path = path ? path + '.' : ''
-        for (var key in values) {
-            val = values[key]
-            observer.emit('set', path + key, val)
-            if (typeOf(val) === 'Object') {
-                emit(val, key)
-            }
-        }
-    }
-}
-
-module.exports = {
-
-    // used in sd-each
-    watchArray: watchArray,
-
-    /*
-     *  Observe an object with a given path,
-     *  and proxy get/set/mutate events to the provided observer.
-     */
-    observe: function (obj, rawPath, observer) {
-        if (isWatchable(obj)) {
-            var path = rawPath + '.',
-                ob, alreadyConverted = !!obj.__observer__
-            if (!alreadyConverted) {
-                defProtected(obj, '__observer__', new Emitter())
-            }
-            ob = obj.__observer__
-            var proxies = observer.proxies[path] = {
-                get: function (key) {
-                    observer.emit('get', path + key)
-                },
-                set: function (key, val) {
-                    observer.emit('set', path + key, val)
-                },
-                mutate: function (key, val, mutation) {
-                    // if the Array is a root value
-                    // the key will be null
-                    var fixedPath = key ? path + key : rawPath
-                    observer.emit('mutate', fixedPath, val, mutation)
-                    // also emit set for Array's length when it mutates
-                    var m = mutation.method
-                    if (m !== 'sort' && m !== 'reverse') {
-                        observer.emit('set', fixedPath + '.length', val.length)
-                    }
-                }
-            }
-            ob
-                .on('get', proxies.get)
-                .on('set', proxies.set)
-                .on('mutate', proxies.mutate)
-            if (alreadyConverted) {
-                emitSet(obj, ob, rawPath)
-            } else {
-                watch(obj, null, ob)
-            }
-        }
-    },
-
-    /*
-     *  Cancel observation, turn off the listeners.
-     */
-    unobserve: function (obj, path, observer) {
-        if (!obj || !obj.__observer__) return
-        path = path + '.'
-        var proxies = observer.proxies[path]
-        obj.__observer__
-            .off('get', proxies.get)
-            .off('set', proxies.set)
-            .off('mutate', proxies.mutate)
-        observer.proxies[path] = null
-    }
-}
-});
-require.register("seed/src/directive.js", function(exports, require, module){
-var config     = require('./config'),
-    utils      = require('./utils'),
-    directives = require('./directives'),
-    filters    = require('./filters')
-
-var KEY_RE          = /^[^\|]+/,
-    ARG_RE          = /([^:]+):(.+)$/,
-    FILTERS_RE      = /\|[^\|]+/g,
-    FILTER_TOKEN_RE = /[^\s']+|'[^']+'/g,
-    NESTING_RE      = /^\^+/,
-    SINGLE_VAR_RE   = /^[\w\.]+$/
-
-/*
- *  Directive class
- *  represents a single directive instance in the DOM
- */
-function Directive (directiveName, expression, rawKey) {
-
-    var definition = directives[directiveName]
-
-    // mix in properties from the directive definition
-    if (typeof definition === 'function') {
-        this._update = definition
-    } else {
-        for (var prop in definition) {
-            if (prop === 'unbind' || prop === 'update') {
-                this['_' + prop] = definition[prop]
-            } else {
-                this[prop] = definition[prop]
-            }
-        }
-    }
-
-    this.directiveName = directiveName
-    this.expression    = expression.trim()
-    this.rawKey        = rawKey
-    
-    parseKey(this, rawKey)
-
-    this.isExp = !SINGLE_VAR_RE.test(this.key)
-    
-    var filterExps = expression.match(FILTERS_RE)
-    if (filterExps) {
-        this.filters = []
-        var i = 0, l = filterExps.length, filter
-        for (; i < l; i++) {
-            filter = parseFilter(filterExps[i])
-            if (filter) this.filters.push(filter)
-        }
-        if (!this.filters.length) this.filters = null
-    } else {
-        this.filters = null
-    }
-}
-
-var DirProto = Directive.prototype
-
-/*
- *  parse a key, extract argument and nesting/root info
- */
-function parseKey (dir, rawKey) {
-
-    var argMatch = rawKey.match(ARG_RE)
-
-    var key = argMatch
-        ? argMatch[2].trim()
-        : rawKey.trim()
-
-    dir.arg = argMatch
-        ? argMatch[1].trim()
-        : null
-
-    var nesting = key.match(NESTING_RE)
-    dir.nesting = nesting
-        ? nesting[0].length
-        : false
-
-    dir.root = key.charAt(0) === '$'
-
-    if (dir.nesting) {
-        key = key.replace(NESTING_RE, '')
-    } else if (dir.root) {
-        key = key.slice(1)
-    }
-
-    dir.key = key
-}
-
-/*
- *  parse a filter expression
- */
-function parseFilter (filter) {
-
-    var tokens = filter.slice(1).match(FILTER_TOKEN_RE)
-    if (!tokens) return
-    tokens = tokens.map(function (token) {
-        return token.replace(/'/g, '').trim()
-    })
-
-    var name = tokens[0],
-        apply = filters[name]
-    if (!apply) {
-        utils.warn('Unknown filter: ' + name)
-        return
-    }
-
-    return {
-        name  : name,
-        apply : apply,
-        args  : tokens.length > 1
-                ? tokens.slice(1)
-                : null
-    }
-}
-
-/*
- *  called when a new value is set 
- *  for computed properties, this will only be called once
- *  during initialization.
- */
-DirProto.update = function (value, init) {
-    if (!init && value === this.value) return
-    this.value = value
-    this.apply(value)
-}
-
-/*
- *  -- computed property only --
- *  called when a dependency has changed
- */
-DirProto.refresh = function (value) {
-    // pass element and viewmodel info to the getter
-    // enables powerful context-aware bindings
-    if (value) this.value = value
-    value = this.value.get({
-        el: this.el,
-        vm: this.vm
-    })
-    if (value && value === this.computedValue) return
-    this.computedValue = value
-    this.apply(value)
-}
-
-/*
- *  Actually invoking the _update from the directive's definition
- */
-DirProto.apply = function (value) {
-    this._update(
-        this.filters
-        ? this.applyFilters(value)
-        : value
-    )
-}
-
-/*
- *  pipe the value through filters
- */
-DirProto.applyFilters = function (value) {
-    var filtered = value, filter
-    for (var i = 0, l = this.filters.length; i < l; i++) {
-        filter = this.filters[i]
-        filtered = filter.apply(filtered, filter.args)
-    }
-    return filtered
-}
-
-/*
- *  Unbind diretive
- *  @ param {Boolean} update
- *    Sometimes we call unbind before an update (i.e. not destroy)
- *    just to teardown previousstuff, in that case we do not want
- *    to null everything.
- */
-DirProto.unbind = function (update) {
-    // this can be called before the el is even assigned...
-    if (!this.el) return
-    if (this._unbind) this._unbind(update)
-    if (!update) this.vm = this.el = this.binding = this.compiler = null
-}
-
-/*
- *  make sure the directive and expression is valid
- *  before we create an instance
- */
-Directive.parse = function (dirname, expression) {
-
-    var prefix = config.prefix
-    if (dirname.indexOf(prefix) === -1) return null
-    dirname = dirname.slice(prefix.length + 1)
-
-    var dir = directives[dirname],
-        keyMatch = expression.match(KEY_RE),
-        rawKey = keyMatch && keyMatch[0].trim()
-
-    if (!dir) utils.warn('unknown directive: ' + dirname)
-    if (!rawKey) utils.warn('invalid directive expression: ' + expression)
-
-    return dir && rawKey
-        ? new Directive(dirname, expression, rawKey)
-        : null
-}
-
-module.exports = Directive
-});
-require.register("seed/src/exp-parser.js", function(exports, require, module){
-// Variable extraction scooped from https://github.com/RubyLouvre/avalon 
-var KEYWORDS =
-        // keywords
-        'break,case,catch,continue,debugger,default,delete,do,else,false'
-        + ',finally,for,function,if,in,instanceof,new,null,return,switch,this'
-        + ',throw,true,try,typeof,var,void,while,with'
-        // reserved
-        + ',abstract,boolean,byte,char,class,const,double,enum,export,extends'
-        + ',final,float,goto,implements,import,int,interface,long,native'
-        + ',package,private,protected,public,short,static,super,synchronized'
-        + ',throws,transient,volatile'
-        // ECMA 5 - use strict
-        + ',arguments,let,yield'
-        + ',undefined',
-    KEYWORDS_RE = new RegExp(["\\b" + KEYWORDS.replace(/,/g, '\\b|\\b') + "\\b"].join('|'), 'g'),
-    REMOVE_RE   = /\/\*(?:.|\n)*?\*\/|\/\/[^\n]*\n|\/\/[^\n]*$|'[^']*'|"[^"]*"|[\s\t\n]*\.[\s\t\n]*[$\w\.]+/g,
-    SPLIT_RE    = /[^\w$]+/g,
-    NUMBER_RE   = /\b\d[^,]*/g,
-    BOUNDARY_RE = /^,+|,+$/g
-
-function getVariables (code) {
-    code = code
-        .replace(REMOVE_RE, '')
-        .replace(SPLIT_RE, ',')
-        .replace(KEYWORDS_RE, '')
-        .replace(NUMBER_RE, '')
-        .replace(BOUNDARY_RE, '')
-    code = code ? code.split(/,+/) : []
-    return code
-}
-
-module.exports = {
-
-    /*
-     *  Parse and create an anonymous computed property getter function
-     *  from an arbitrary expression.
-     */
-    parse: function (exp) {
-        // extract variable names
-        var vars = getVariables(exp)
-        if (!vars.length) return null
-        var args = [],
-            v, i, l = vars.length,
-            hash = {}
-        for (i = 0; i < l; i++) {
-            v = vars[i]
-            // avoid duplicate keys
-            if (hash[v]) continue
-            hash[v] = v
-            // push assignment
-            args.push(v + '=this.$get("' + v + '")')
-        }
-        args = 'var ' + args.join(',') + ';return ' + exp
-        /* jshint evil: true */
-        return {
-            getter: new Function(args),
-            vars: Object.keys(hash)
-        }
-    }
-}
-});
-require.register("seed/src/text-parser.js", function(exports, require, module){
-var config     = require('./config'),
-    ESCAPE_RE  = /[-.*+?^${}()|[\]\/\\]/g,
-    BINDING_RE
-
-/*
- *  Escapes a string so that it can be used to construct RegExp
- */
-function escapeRegex (val) {
-    return val.replace(ESCAPE_RE, '\\$&')
-}
-
-module.exports = {
-
-    /*
-     *  Parse a piece of text, return an array of tokens
-     */
-    parse: function (text) {
-        if (!BINDING_RE) module.exports.buildRegex()
-        if (!BINDING_RE.test(text)) return null
-        var m, i, tokens = []
-        do {
-            m = text.match(BINDING_RE)
-            if (!m) break
-            i = m.index
-            if (i > 0) tokens.push(text.slice(0, i))
-            tokens.push({ key: m[1].trim() })
-            text = text.slice(i + m[0].length)
-        } while (true)
-        if (text.length) tokens.push(text)
-        return tokens
-    },
-
-    /*
-     *  Build interpolate tag regex from config settings
-     */
-    buildRegex: function () {
-        var open = escapeRegex(config.interpolateTags.open),
-            close = escapeRegex(config.interpolateTags.close)
-        BINDING_RE = new RegExp(open + '(.+?)' + close)
-    }
-}
-});
-require.register("seed/src/deps-parser.js", function(exports, require, module){
-var Emitter  = require('./emitter'),
-    utils    = require('./utils'),
-    observer = new Emitter()
-
-var dummyEl = document.createElement('div'),
-    ARGS_RE = /^function\s*?\((.+?)[\),]/,
-    SCOPE_RE_STR = '\\.vm\\.[\\.\\w][\\.\\w$]*',
-    noop = function () {}
-
-/*
- *  Auto-extract the dependencies of a computed property
- *  by recording the getters triggered when evaluating it.
- *
- *  However, the first pass will contain duplicate dependencies
- *  for computed properties. It is therefore necessary to do a
- *  second pass in injectDeps()
- */
-function catchDeps (binding) {
-    utils.log('\n─ ' + binding.key)
-    var depsHash = {}
-    observer.on('get', function (dep) {
-        if (depsHash[dep.key]) return
-        depsHash[dep.key] = 1
-        utils.log('  └─ ' + dep.key)
-        binding.deps.push(dep)
-        dep.subs.push(binding)
-    })
-    parseContextDependency(binding)
-    binding.value.get({
-        vm: createDummyVM(binding),
-        el: dummyEl
-    })
-    observer.off('get')
-}
-
-/*
- *  We need to invoke each binding's getter for dependency parsing,
- *  but we don't know what sub-viewmodel properties the user might try
- *  to access in that getter. To avoid thowing an error or forcing
- *  the user to guard against an undefined argument, we staticly
- *  analyze the function to extract any possible nested properties
- *  the user expects the target viewmodel to possess. They are all assigned
- *  a noop function so they can be invoked with no real harm.
- */
-function createDummyVM (binding) {
-    var viewmodel = {},
-        deps = binding.contextDeps
-    if (!deps) return viewmodel
-    var i = binding.contextDeps.length,
-        j, level, key, path
-    while (i--) {
-        level = viewmodel
-        path = deps[i].split('.')
-        j = 0
-        while (j < path.length) {
-            key = path[j]
-            if (!level[key]) level[key] = noop
-            level = level[key]
-            j++
-        }
-    }
-    return viewmodel
-}
-
-/*
- *  Extract context dependency paths
- */
-function parseContextDependency (binding) {
-    var fn   = binding.rawGet,
-        str  = fn.toString(),
-        args = str.match(ARGS_RE)
-    if (!args) return null
-    var depsRE = new RegExp(args[1] + SCOPE_RE_STR, 'g'),
-        matches = str.match(depsRE),
-        base = args[1].length + 4
-    if (!matches) return null
-    var i = matches.length,
-        deps = [], dep
-    while (i--) {
-        dep = matches[i].slice(base)
-        if (deps.indexOf(dep) === -1) {
-            deps.push(dep)
-        }
-    }
-    binding.contextDeps = deps
-    binding.compiler.contextBindings.push(binding)
-}
-
-module.exports = {
-
-    /*
-     *  the observer that catches events triggered by getters
-     */
-    observer: observer,
-
-    /*
-     *  parse a list of computed property bindings
-     */
-    parse: function (bindings) {
-        utils.log('\nparsing dependencies...')
-        observer.isObserving = true
-        bindings.forEach(catchDeps)
-        observer.isObserving = false
-        utils.log('\ndone.')
-    },
-
-    // for testing only
-    cdvm: createDummyVM,
-    pcd: parseContextDependency
-}
-});
-require.register("seed/src/filters.js", function(exports, require, module){
-var keyCodes = {
-    enter    : 13,
-    tab      : 9,
-    'delete' : 46,
-    up       : 38,
-    left     : 37,
-    right    : 39,
-    down     : 40,
-    esc      : 27
-}
-
-module.exports = {
-
-    capitalize: function (value) {
-        if (!value) return ''
-        value = value.toString()
-        return value.charAt(0).toUpperCase() + value.slice(1)
-    },
-
-    uppercase: function (value) {
-        return value ? value.toString().toUpperCase() : ''
-    },
-
-    lowercase: function (value) {
-        return value ? value.toString().toLowerCase() : ''
-    },
-
-    pluralize: function (value, args) {
-        return args.length > 1
-            ? (args[value - 1] || args[args.length - 1])
-            : (args[value - 1] || args[0] + 's')
-    },
-
-    currency: function (value, args) {
-        if (!value) return ''
-        var sign = (args && args[0]) || '$',
-            i = value % 3,
-            f = '.' + value.toFixed(2).slice(-2),
-            s = Math.floor(value).toString()
-        return sign + s.slice(0, i) + s.slice(i).replace(/(\d{3})(?=\d)/g, '$1,') + f
-    },
-
-    key: function (handler, args) {
-        if (!handler) return
-        var code = keyCodes[args[0]]
-        if (!code) {
-            code = parseInt(args[0], 10)
-        }
-        return function (e) {
-            if (e.keyCode === code) {
-                handler.call(this, e)
-            }
-        }
-    }
-
-}
-});
-require.register("seed/src/directives/index.js", function(exports, require, module){
-module.exports = {
-
-    on    : require('./on'),
-    each  : require('./each'),
-
-    attr: function (value) {
-        this.el.setAttribute(this.arg, value)
-    },
-
-    text: function (value) {
-        this.el.textContent =
-            (typeof value === 'string' || typeof value === 'number')
-            ? value : ''
-    },
-
-    html: function (value) {
-        this.el.innerHTML =
-            (typeof value === 'string' || typeof value === 'number')
-            ? value : ''
-    },
-
-    show: function (value) {
-        this.el.style.display = value ? '' : 'none'
-    },
-
-    visible: function (value) {
-        this.el.style.visibility = value ? '' : 'hidden'
-    },
-    
-    focus: function (value) {
-        var el = this.el
-        setTimeout(function () {
-            if (value) el.focus()
-        }, 0)
-    },
-
-    class: function (value) {
-        if (this.arg) {
-            this.el.classList[value ? 'add' : 'remove'](this.arg)
-        } else {
-            if (this.lastVal) {
-                this.el.classList.remove(this.lastVal)
-            }
-            this.el.classList.add(value)
-            this.lastVal = value
-        }
-    },
-
-    value: {
-        bind: function () {
-            if (this.oneway) return
-            var el = this.el, self = this
-            this.change = function () {
-                self.vm.$set(self.key, el.value)
-            }
-            el.addEventListener('keyup', this.change)
-        },
-        update: function (value) {
-            this.el.value = value ? value : ''
-        },
-        unbind: function () {
-            if (this.oneway) return
-            this.el.removeEventListener('keyup', this.change)
-        }
-    },
-
-    checked: {
-        bind: function () {
-            if (this.oneway) return
-            var el = this.el, self = this
-            this.change = function () {
-                self.vm.$set(self.key, el.checked)
-            }
-            el.addEventListener('change', this.change)
-        },
-        update: function (value) {
-            this.el.checked = !!value
-        },
-        unbind: function () {
-            if (this.oneway) return
-            this.el.removeEventListener('change', this.change)
-        }
-    },
-
-    'if': {
-        bind: function () {
-            this.parent = this.el.parentNode
-            this.ref = document.createComment('sd-if-' + this.key)
-            var next = this.el.nextSibling
-            if (next) {
-                this.parent.insertBefore(this.ref, next)
-            } else {
-                this.parent.appendChild(this.ref)
-            }
-        },
-        update: function (value) {
-            if (!value) {
-                if (this.el.parentNode) {
-                    this.parent.removeChild(this.el)
-                }
-            } else {
-                if (!this.el.parentNode) {
-                    this.parent.insertBefore(this.el, this.ref)
-                }
-            }
-        }
-    },
-
-    style: {
-        bind: function () {
-            this.arg = convertCSSProperty(this.arg)
-        },
-        update: function (value) {
-            this.el.style[this.arg] = value
-        }
-    }
-}
-
-/*
- *  convert hyphen style CSS property to Camel style
- */
-var CONVERT_RE = /-(.)/g
-function convertCSSProperty (prop) {
-    if (prop.charAt(0) === '-') prop = prop.slice(1)
-    return prop.replace(CONVERT_RE, function (m, char) {
-        return char.toUpperCase()
-    })
-}
-});
-require.register("seed/src/directives/each.js", function(exports, require, module){
-var config   = require('../config'),
-    utils    = require('../utils'),
-    Observer = require('../observer'),
-    Emitter  = require('../emitter'),
-    ViewModel // lazy def to avoid circular dependency
-
-/*
- *  Mathods that perform precise DOM manipulation
- *  based on mutator method triggered
- */
-var mutationHandlers = {
-
-    push: function (m) {
-        var i, l = m.args.length,
-            base = this.collection.length - l
-        for (i = 0; i < l; i++) {
-            this.buildItem(m.args[i], base + i)
-        }
-    },
-
-    pop: function () {
-        this.vms.pop().$destroy()
-    },
-
-    unshift: function (m) {
-        var i, l = m.args.length
-        for (i = 0; i < l; i++) {
-            this.buildItem(m.args[i], i)
-        }
-    },
-
-    shift: function () {
-        this.vms.shift().$destroy()
-    },
-
-    splice: function (m) {
-        var i,
-            index = m.args[0],
-            removed = m.args[1],
-            added = m.args.length - 2,
-            removedVMs = this.vms.splice(index, removed)
-        for (i = 0; i < removed; i++) {
-            removedVMs[i].$destroy()
-        }
-        for (i = 0; i < added; i++) {
-            this.buildItem(m.args[i + 2], index + i)
-        }
-    },
-
-    sort: function () {
-        var key = this.arg,
-            vms = this.vms,
-            col = this.collection,
-            l = col.length,
-            sorted = new Array(l),
-            i, j, vm, data
-        for (i = 0; i < l; i++) {
-            data = col[i]
-            for (j = 0; j < l; j++) {
-                vm = vms[j]
-                if (vm[key] === data) {
-                    sorted[i] = vm
-                    break
-                }
-            }
-        }
-        for (i = 0; i < l; i++) {
-            this.container.insertBefore(sorted[i].$el, this.ref)
-        }
-        this.vms = sorted
-    },
-
-    reverse: function () {
-        var vms = this.vms
-        vms.reverse()
-        for (var i = 0, l = vms.length; i < l; i++) {
-            this.container.insertBefore(vms[i].$el, this.ref)
-        }
-    }
-}
-
-module.exports = {
-
-    bind: function () {
-        this.el.removeAttribute(config.prefix + '-each')
-        var ctn = this.container = this.el.parentNode
-        // create a comment node as a reference node for DOM insertions
-        this.ref = document.createComment('sd-each-' + this.arg)
-        ctn.insertBefore(this.ref, this.el)
-        ctn.removeChild(this.el)
-        this.collection = null
-        this.vms = null
-        var self = this
-        this.mutationListener = function (path, arr, mutation) {
-            mutationHandlers[mutation.method].call(self, mutation)
-        }
-    },
-
-    update: function (collection) {
-
-        this.unbind(true)
-        // attach an object to container to hold handlers
-        this.container.sd_dHandlers = {}
-        // if initiating with an empty collection, we need to
-        // force a compile so that we get all the bindings for
-        // dependency extraction.
-        if (!this.collection && !collection.length) {
-            this.buildItem()
-        }
-        this.collection = collection
-        this.vms = []
-
-        // listen for collection mutation events
-        // the collection has been augmented during Binding.set()
-        if (!collection.__observer__) Observer.watchArray(collection, null, new Emitter())
-        collection.__observer__.on('mutate', this.mutationListener)
-
-        // create child-seeds and append to DOM
-        for (var i = 0, l = collection.length; i < l; i++) {
-            this.buildItem(collection[i], i)
-        }
-    },
-
-    buildItem: function (data, index) {
-        ViewModel = ViewModel || require('../viewmodel')
-        var node = this.el.cloneNode(true),
-            ctn  = this.container,
-            vmID = node.getAttribute(config.prefix + '-viewmodel'),
-            ChildVM = utils.getVM(vmID) || ViewModel,
-            wrappedData = {}
-        wrappedData[this.arg] = data || {}
-        var item = new ChildVM({
-            el: node,
-            each: true,
-            eachPrefix: this.arg,
-            parentCompiler: this.compiler,
-            delegator: ctn,
-            data: wrappedData
-        })
-        if (!data) {
-            item.$destroy()
-        } else {
-            var ref = this.vms.length > index
-                ? this.vms[index].$el
-                : this.ref
-            ctn.insertBefore(node, ref)
-            this.vms.splice(index, 0, item)
-        }
-    },
-
-    unbind: function () {
-        if (this.collection) {
-            this.collection.__observer__.off('mutate', this.mutationListener)
-            var i = this.vms.length
-            while (i--) {
-                this.vms[i].$destroy()
-            }
-        }
-        var ctn = this.container,
-            handlers = ctn.sd_dHandlers
-        for (var key in handlers) {
-            ctn.removeEventListener(handlers[key].event, handlers[key])
-        }
-        ctn.sd_dHandlers = null
-    }
-}
-});
-require.register("seed/src/directives/on.js", function(exports, require, module){
-function delegateCheck (current, top, identifier) {
-    if (current[identifier]) {
-        return current
-    } else if (current === top) {
-        return false
-    } else {
-        return delegateCheck(current.parentNode, top, identifier)
-    }
-}
-
-module.exports = {
-
-    expectFunction : true,
-
-    bind: function () {
-        if (this.compiler.each) {
-            // attach an identifier to the el
-            // so it can be matched during event delegation
-            this.el[this.expression] = true
-            // attach the owner viewmodel of this directive
-            this.el.sd_viewmodel = this.vm
-        }
-    },
-
-    update: function (handler) {
-
-        this.unbind(true)
-        if (!handler) return
-
-        var compiler = this.compiler,
-            event    = this.arg,
-            ownerVM  = this.binding.compiler.vm
-
-        if (compiler.each && event !== 'blur' && event !== 'blur') {
-
-            // for each blocks, delegate for better performance
-            // focus and blur events dont bubble so exclude them
-            var delegator  = compiler.delegator,
-                identifier = this.expression,
-                dHandler   = delegator.sd_dHandlers[identifier]
-
-            if (dHandler) return
-
-            // the following only gets run once for the entire each block
-            dHandler = delegator.sd_dHandlers[identifier] = function (e) {
-                var target = delegateCheck(e.target, delegator, identifier)
-                if (target) {
-                    e.el = target
-                    e.vm = target.sd_viewmodel
-                    e.item = e.vm[compiler.eachPrefix]
-                    handler.call(ownerVM, e)
-                }
-            }
-            dHandler.event = event
-            delegator.addEventListener(event, dHandler)
-
-        } else {
-
-            // a normal, single element handler
-            var vm = this.vm
-            this.handler = function (e) {
-                e.el = e.currentTarget
-                e.vm = vm
-                if (compiler.each) {
-                    e.item = vm[compiler.eachPrefix]
-                }
-                handler.call(ownerVM, e)
-            }
-            this.el.addEventListener(event, this.handler)
-
-        }
-    },
-
-    unbind: function (update) {
-        this.el.removeEventListener(this.arg, this.handler)
-        this.handler = null
-        if (!update) this.el.sd_viewmodel = null
-    }
-}
-});
+require.register("component-indexof/index.js", Function("exports, require, module",
+"\n\
+var indexOf = [].indexOf;\n\
+\n\
+module.exports = function(arr, obj){\n\
+  if (indexOf) return arr.indexOf(obj);\n\
+  for (var i = 0; i < arr.length; ++i) {\n\
+    if (arr[i] === obj) return i;\n\
+  }\n\
+  return -1;\n\
+};//@ sourceURL=component-indexof/index.js"
+));
+require.register("component-emitter/index.js", Function("exports, require, module",
+"\n\
+/**\n\
+ * Module dependencies.\n\
+ */\n\
+\n\
+var index = require('indexof');\n\
+\n\
+/**\n\
+ * Expose `Emitter`.\n\
+ */\n\
+\n\
+module.exports = Emitter;\n\
+\n\
+/**\n\
+ * Initialize a new `Emitter`.\n\
+ *\n\
+ * @api public\n\
+ */\n\
+\n\
+function Emitter(obj) {\n\
+  if (obj) return mixin(obj);\n\
+};\n\
+\n\
+/**\n\
+ * Mixin the emitter properties.\n\
+ *\n\
+ * @param {Object} obj\n\
+ * @return {Object}\n\
+ * @api private\n\
+ */\n\
+\n\
+function mixin(obj) {\n\
+  for (var key in Emitter.prototype) {\n\
+    obj[key] = Emitter.prototype[key];\n\
+  }\n\
+  return obj;\n\
+}\n\
+\n\
+/**\n\
+ * Listen on the given `event` with `fn`.\n\
+ *\n\
+ * @param {String} event\n\
+ * @param {Function} fn\n\
+ * @return {Emitter}\n\
+ * @api public\n\
+ */\n\
+\n\
+Emitter.prototype.on = function(event, fn){\n\
+  this._callbacks = this._callbacks || {};\n\
+  (this._callbacks[event] = this._callbacks[event] || [])\n\
+    .push(fn);\n\
+  return this;\n\
+};\n\
+\n\
+/**\n\
+ * Adds an `event` listener that will be invoked a single\n\
+ * time then automatically removed.\n\
+ *\n\
+ * @param {String} event\n\
+ * @param {Function} fn\n\
+ * @return {Emitter}\n\
+ * @api public\n\
+ */\n\
+\n\
+Emitter.prototype.once = function(event, fn){\n\
+  var self = this;\n\
+  this._callbacks = this._callbacks || {};\n\
+\n\
+  function on() {\n\
+    self.off(event, on);\n\
+    fn.apply(this, arguments);\n\
+  }\n\
+\n\
+  fn._off = on;\n\
+  this.on(event, on);\n\
+  return this;\n\
+};\n\
+\n\
+/**\n\
+ * Remove the given callback for `event` or all\n\
+ * registered callbacks.\n\
+ *\n\
+ * @param {String} event\n\
+ * @param {Function} fn\n\
+ * @return {Emitter}\n\
+ * @api public\n\
+ */\n\
+\n\
+Emitter.prototype.off =\n\
+Emitter.prototype.removeListener =\n\
+Emitter.prototype.removeAllListeners = function(event, fn){\n\
+  this._callbacks = this._callbacks || {};\n\
+\n\
+  // all\n\
+  if (0 == arguments.length) {\n\
+    this._callbacks = {};\n\
+    return this;\n\
+  }\n\
+\n\
+  // specific event\n\
+  var callbacks = this._callbacks[event];\n\
+  if (!callbacks) return this;\n\
+\n\
+  // remove all handlers\n\
+  if (1 == arguments.length) {\n\
+    delete this._callbacks[event];\n\
+    return this;\n\
+  }\n\
+\n\
+  // remove specific handler\n\
+  var i = index(callbacks, fn._off || fn);\n\
+  if (~i) callbacks.splice(i, 1);\n\
+  return this;\n\
+};\n\
+\n\
+/**\n\
+ * Emit `event` with the given args.\n\
+ *\n\
+ * @param {String} event\n\
+ * @param {Mixed} ...\n\
+ * @return {Emitter}\n\
+ */\n\
+\n\
+Emitter.prototype.emit = function(event){\n\
+  this._callbacks = this._callbacks || {};\n\
+  var args = [].slice.call(arguments, 1)\n\
+    , callbacks = this._callbacks[event];\n\
+\n\
+  if (callbacks) {\n\
+    callbacks = callbacks.slice(0);\n\
+    for (var i = 0, len = callbacks.length; i < len; ++i) {\n\
+      callbacks[i].apply(this, args);\n\
+    }\n\
+  }\n\
+\n\
+  return this;\n\
+};\n\
+\n\
+/**\n\
+ * Return array of callbacks for `event`.\n\
+ *\n\
+ * @param {String} event\n\
+ * @return {Array}\n\
+ * @api public\n\
+ */\n\
+\n\
+Emitter.prototype.listeners = function(event){\n\
+  this._callbacks = this._callbacks || {};\n\
+  return this._callbacks[event] || [];\n\
+};\n\
+\n\
+/**\n\
+ * Check if this emitter has `event` handlers.\n\
+ *\n\
+ * @param {String} event\n\
+ * @return {Boolean}\n\
+ * @api public\n\
+ */\n\
+\n\
+Emitter.prototype.hasListeners = function(event){\n\
+  return !! this.listeners(event).length;\n\
+};\n\
+//@ sourceURL=component-emitter/index.js"
+));
+require.register("seed/src/main.js", Function("exports, require, module",
+"var config      = require('./config'),\n\
+    ViewModel   = require('./viewmodel'),\n\
+    directives  = require('./directives'),\n\
+    filters     = require('./filters'),\n\
+    textParser  = require('./text-parser'),\n\
+    utils       = require('./utils'),\n\
+    api         = {}\n\
+\n\
+/*\n\
+ *  Set config options\n\
+ */\n\
+api.config = function (opts) {\n\
+    if (opts) {\n\
+        utils.extend(config, opts)\n\
+        textParser.buildRegex()\n\
+    }\n\
+}\n\
+\n\
+/*\n\
+ *  Allows user to register/retrieve a directive definition\n\
+ */\n\
+api.directive = function (id, fn) {\n\
+    if (!fn) return directives[id]\n\
+    directives[id] = fn\n\
+}\n\
+\n\
+/*\n\
+ *  Allows user to register/retrieve a filter function\n\
+ */\n\
+api.filter = function (id, fn) {\n\
+    if (!fn) return filters[id]\n\
+    filters[id] = fn\n\
+}\n\
+\n\
+/*\n\
+ *  Allows user to register/retrieve a ViewModel constructor\n\
+ */\n\
+api.vm = function (id, Ctor) {\n\
+    if (!Ctor) return utils.vms[id]\n\
+    utils.vms[id] = Ctor\n\
+}\n\
+\n\
+/*\n\
+ *  Allows user to register/retrieve a template partial\n\
+ */\n\
+api.partial = function (id, partial) {\n\
+    if (!partial) return utils.partials[id]\n\
+    utils.partials[id] = templateToFragment(partial)\n\
+}\n\
+\n\
+/*\n\
+ *  Allows user to register/retrieve a transition definition object\n\
+ */\n\
+api.transition = function (id, transition) {\n\
+    if (!transition) return utils.transitions[id]\n\
+    utils.transitions[id] = transition\n\
+}\n\
+\n\
+api.ViewModel = ViewModel\n\
+ViewModel.extend = extend\n\
+\n\
+/*\n\
+ *  Expose the main ViewModel class\n\
+ *  and add extend method\n\
+ */\n\
+function extend (options) {\n\
+    var ParentVM = this\n\
+    // inherit options\n\
+    options = inheritOptions(options, ParentVM.options, true)\n\
+    var ExtendedVM = function (opts) {\n\
+        opts = inheritOptions(opts, options, true)\n\
+        ParentVM.call(this, opts)\n\
+    }\n\
+    // inherit prototype props\n\
+    var proto = ExtendedVM.prototype = Object.create(ParentVM.prototype)\n\
+    utils.defProtected(proto, 'constructor', ExtendedVM)\n\
+    // copy prototype props\n\
+    var props = options.props\n\
+    if (props) {\n\
+        for (var key in props) {\n\
+            if (!(key in ViewModel.prototype)) {\n\
+                proto[key] = props[key]\n\
+            }\n\
+        }\n\
+    }\n\
+    // convert template to documentFragment\n\
+    if (options.template) {\n\
+        options.templateFragment = templateToFragment(options.template)\n\
+    }\n\
+    // allow extended VM to be further extended\n\
+    ExtendedVM.extend = extend\n\
+    ExtendedVM.super = ParentVM\n\
+    ExtendedVM.options = options\n\
+    return ExtendedVM\n\
+}\n\
+\n\
+/*\n\
+ *  Inherit options\n\
+ *\n\
+ *  For options such as `data`, `vms`, `directives`, 'partials',\n\
+ *  they should be further extended. However extending should only\n\
+ *  be done at top level.\n\
+ *  \n\
+ *  `props` is an exception because it's handled directly on the\n\
+ *  prototype.\n\
+ *\n\
+ *  `el` is an exception because it's not allowed as an\n\
+ *  extension option, but only as an instance option.\n\
+ */\n\
+function inheritOptions (child, parent, topLevel) {\n\
+    child = child || {}\n\
+    convertPartials(child.partials)\n\
+    if (!parent) return child\n\
+    for (var key in parent) {\n\
+        if (key === 'el' || key === 'props') continue\n\
+        if (!child[key]) { // child has priority\n\
+            child[key] = parent[key]\n\
+        } else if (topLevel && utils.typeOf(child[key]) === 'Object') {\n\
+            inheritOptions(child[key], parent[key], false)\n\
+        }\n\
+    }\n\
+    return child\n\
+}\n\
+\n\
+/*\n\
+ *  Convert an object of partials to dom fragments\n\
+ */\n\
+function convertPartials (partials) {\n\
+    if (!partials) return\n\
+    for (var key in partials) {\n\
+        if (typeof partials[key] === 'string') {\n\
+            partials[key] = templateToFragment(partials[key])\n\
+        }\n\
+    }\n\
+}\n\
+\n\
+/*\n\
+ *  Convert a string template to a dom fragment\n\
+ */\n\
+function templateToFragment (template) {\n\
+    if (template.charAt(0) === '#') {\n\
+        var templateNode = document.querySelector(template)\n\
+        if (!templateNode) return\n\
+        template = templateNode.innerHTML\n\
+    }\n\
+    var node = document.createElement('div'),\n\
+        frag = document.createDocumentFragment(),\n\
+        child\n\
+    node.innerHTML = template.trim()\n\
+    /* jshint boss: true */\n\
+    while (child = node.firstChild) {\n\
+        frag.appendChild(child)\n\
+    }\n\
+    return frag\n\
+}\n\
+\n\
+module.exports = api//@ sourceURL=seed/src/main.js"
+));
+require.register("seed/src/emitter.js", Function("exports, require, module",
+"// shiv to make this work for Component, Browserify and Node at the same time.\n\
+var Emitter,\n\
+    componentEmitter = 'emitter'\n\
+\n\
+try {\n\
+    // Requiring without a string literal will make browserify\n\
+    // unable to parse the dependency, thus preventing it from\n\
+    // stopping the compilation after a failed lookup.\n\
+    Emitter = require(componentEmitter)\n\
+} catch (e) {}\n\
+\n\
+module.exports = Emitter || require('events').EventEmitter//@ sourceURL=seed/src/emitter.js"
+));
+require.register("seed/src/config.js", Function("exports, require, module",
+"module.exports = {\n\
+\n\
+    prefix      : 'sd',\n\
+    debug       : false,\n\
+\n\
+    interpolateTags : {\n\
+        open  : '{{',\n\
+        close : '}}'\n\
+    }\n\
+}//@ sourceURL=seed/src/config.js"
+));
+require.register("seed/src/utils.js", Function("exports, require, module",
+"var config    = require('./config'),\n\
+    toString  = Object.prototype.toString\n\
+\n\
+module.exports = {\n\
+\n\
+    // global storage for user-registered\n\
+    // vms, partials and transitions\n\
+    vms         : {},\n\
+    partials    : {},\n\
+    transitions : {},\n\
+\n\
+    /*\n\
+     *  Define an ienumerable property\n\
+     *  This avoids it being included in JSON.stringify\n\
+     *  or for...in loops.\n\
+     */\n\
+    defProtected: function (obj, key, val) {\n\
+        if (obj.hasOwnProperty(key)) return\n\
+        Object.defineProperty(obj, key, {\n\
+            enumerable: false,\n\
+            configurable: false,\n\
+            value: val\n\
+        })\n\
+    },\n\
+\n\
+    /*\n\
+     *  Accurate type check\n\
+     */\n\
+    typeOf: function (obj) {\n\
+        return toString.call(obj).slice(8, -1)\n\
+    },\n\
+\n\
+    /*\n\
+     *  simple extend\n\
+     */\n\
+    extend: function (obj, ext) {\n\
+        for (var key in ext) {\n\
+            obj[key] = ext[key]\n\
+        }\n\
+    },\n\
+\n\
+    /*\n\
+     *  log for debugging\n\
+     */\n\
+    log: function () {\n\
+        if (config.debug) console.log.apply(console, arguments)\n\
+        return this\n\
+    },\n\
+    \n\
+    /*\n\
+     *  warn for debugging\n\
+     */\n\
+    warn: function() {\n\
+        if (config.debug) console.warn.apply(console, arguments)\n\
+        return this\n\
+    }\n\
+}//@ sourceURL=seed/src/utils.js"
+));
+require.register("seed/src/compiler.js", Function("exports, require, module",
+"var Emitter     = require('./emitter'),\n\
+    Observer    = require('./observer'),\n\
+    config      = require('./config'),\n\
+    utils       = require('./utils'),\n\
+    Binding     = require('./binding'),\n\
+    Directive   = require('./directive'),\n\
+    TextParser  = require('./text-parser'),\n\
+    DepsParser  = require('./deps-parser'),\n\
+    ExpParser   = require('./exp-parser'),\n\
+    slice       = Array.prototype.slice,\n\
+    vmAttr,\n\
+    repeatAttr,\n\
+    partialAttr,\n\
+    transitionAttr\n\
+\n\
+/*\n\
+ *  The DOM compiler\n\
+ *  scans a DOM node and compile bindings for a ViewModel\n\
+ */\n\
+function Compiler (vm, options) {\n\
+\n\
+    refreshPrefix()\n\
+\n\
+    var compiler = this\n\
+\n\
+    // extend options\n\
+    options = compiler.options = options || {}\n\
+    utils.extend(compiler, options.compilerOptions || {})\n\
+\n\
+    // initialize element\n\
+    compiler.setupElement(options)\n\
+    utils.log('\\n\
+new VM instance: ', compiler.el, '\\n\
+')\n\
+\n\
+    // copy data to vm\n\
+    var data = options.data\n\
+    if (data) utils.extend(vm, data)\n\
+\n\
+    compiler.vm  = vm\n\
+    vm.$compiler = compiler\n\
+    vm.$el       = compiler.el\n\
+\n\
+    // keep track of directives and expressions\n\
+    // so they can be unbound during destroy()\n\
+    compiler.dirs = []\n\
+    compiler.exps = []\n\
+    compiler.childCompilers = [] // keep track of child compilers\n\
+    compiler.emitter = new Emitter() // the emitter used for nested VM communication\n\
+\n\
+    // Store things during parsing to be processed afterwards,\n\
+    // because we want to have created all bindings before\n\
+    // observing values / parsing dependencies.\n\
+    var observables = compiler.observables = [],\n\
+        computed    = compiler.computed    = [],\n\
+        ctxBindings = compiler.ctxBindings = []\n\
+\n\
+    // prototypal inheritance of bindings\n\
+    var parent = compiler.parentCompiler\n\
+    compiler.bindings = parent\n\
+        ? Object.create(parent.bindings)\n\
+        : {}\n\
+    compiler.rootCompiler = parent\n\
+        ? getRoot(parent)\n\
+        : compiler\n\
+\n\
+    // setup observer\n\
+    compiler.setupObserver()\n\
+\n\
+    // call user init. this will capture some initial values.\n\
+    if (options.init) {\n\
+        options.init.apply(vm, options.args || [])\n\
+    }\n\
+\n\
+    // create bindings for keys set on the vm by the user\n\
+    for (var key in vm) {\n\
+        if (key.charAt(0) !== '$') {\n\
+            compiler.createBinding(key)\n\
+        }\n\
+    }\n\
+\n\
+    // for repeated items, create an index binding\n\
+    if (compiler.repeat) {\n\
+        vm[compiler.repeatPrefix].$index = compiler.repeatIndex\n\
+    }\n\
+\n\
+    // now parse the DOM, during which we will create necessary bindings\n\
+    // and bind the parsed directives\n\
+    compiler.compile(compiler.el, true)\n\
+\n\
+    // observe root values so that they emit events when\n\
+    // their nested values change (for an Object)\n\
+    // or when they mutate (for an Array)\n\
+    var i = observables.length, binding\n\
+    while (i--) {\n\
+        binding = observables[i]\n\
+        Observer.observe(binding.value, binding.key, compiler.observer)\n\
+    }\n\
+    // extract dependencies for computed properties\n\
+    if (computed.length) DepsParser.parse(computed)\n\
+    // extract dependencies for computed properties with dynamic context\n\
+    if (ctxBindings.length) compiler.bindContexts(ctxBindings)\n\
+    // unset these no longer needed stuff\n\
+    compiler.observables = compiler.computed = compiler.ctxBindings = compiler.arrays = null\n\
+}\n\
+\n\
+var CompilerProto = Compiler.prototype\n\
+\n\
+/*\n\
+ *  Initialize the VM/Compiler's element.\n\
+ *  Fill it in with the template if necessary.\n\
+ */\n\
+CompilerProto.setupElement = function (options) {\n\
+    // create the node first\n\
+    var el = this.el = typeof options.el === 'string'\n\
+        ? document.querySelector(options.el)\n\
+        : options.el || document.createElement(options.tagName || 'div')\n\
+\n\
+    // apply element options\n\
+    if (options.id) el.id = options.id\n\
+    if (options.className) el.className = options.className\n\
+    var attrs = options.attributes\n\
+    if (attrs) {\n\
+        for (var attr in attrs) {\n\
+            el.setAttribute(attr, attrs[attr])\n\
+        }\n\
+    }\n\
+\n\
+    // initialize template\n\
+    var template = options.template\n\
+    if (typeof template === 'string') {\n\
+        if (template.charAt(0) === '#') {\n\
+            var templateNode = document.querySelector(template)\n\
+            if (templateNode) {\n\
+                el.innerHTML = templateNode.innerHTML\n\
+            }\n\
+        } else {\n\
+            el.innerHTML = template\n\
+        }\n\
+    } else if (options.templateFragment) {\n\
+        el.innerHTML = ''\n\
+        el.appendChild(options.templateFragment.cloneNode(true))\n\
+    }\n\
+}\n\
+\n\
+/*\n\
+ *  Setup observer.\n\
+ *  The observer listens for get/set/mutate events on all VM\n\
+ *  values/objects and trigger corresponding binding updates.\n\
+ */\n\
+CompilerProto.setupObserver = function () {\n\
+\n\
+    var bindings = this.bindings,\n\
+        observer = this.observer = new Emitter(),\n\
+        depsOb   = DepsParser.observer\n\
+\n\
+    // a hash to hold event proxies for each root level key\n\
+    // so they can be referenced and removed later\n\
+    observer.proxies = {}\n\
+\n\
+    // add own listeners which trigger binding updates\n\
+    observer\n\
+        .on('get', function (key) {\n\
+            if (bindings[key] && depsOb.isObserving) {\n\
+                depsOb.emit('get', bindings[key])\n\
+            }\n\
+        })\n\
+        .on('set', function (key, val) {\n\
+            observer.emit('change:' + key, val)\n\
+            if (bindings[key]) bindings[key].update(val)\n\
+        })\n\
+        .on('mutate', function (key, val, mutation) {\n\
+            observer.emit('change:' + key, val, mutation)\n\
+            if (bindings[key]) bindings[key].pub()\n\
+        })\n\
+}\n\
+\n\
+/*\n\
+ *  Compile a DOM node (recursive)\n\
+ */\n\
+CompilerProto.compile = function (node, root) {\n\
+    var compiler = this\n\
+    if (node.nodeType === 1) {\n\
+        // a normal node\n\
+        var repeatExp    = node.getAttribute(repeatAttr),\n\
+            vmId       = node.getAttribute(vmAttr),\n\
+            partialId  = node.getAttribute(partialAttr)\n\
+        // we need to check for any possbile special directives\n\
+        // e.g. sd-repeat, sd-viewmodel & sd-partial\n\
+        if (repeatExp) { // repeat block\n\
+            var directive = Directive.parse(repeatAttr, repeatExp, compiler, node)\n\
+            if (directive) {\n\
+                compiler.bindDirective(directive)\n\
+            }\n\
+        } else if (vmId && !root) { // child ViewModels\n\
+            node.removeAttribute(vmAttr)\n\
+            var ChildVM = compiler.getOption('vms', vmId)\n\
+            if (ChildVM) {\n\
+                var child = new ChildVM({\n\
+                    el: node,\n\
+                    child: true,\n\
+                    compilerOptions: {\n\
+                        parentCompiler: compiler\n\
+                    }\n\
+                })\n\
+                compiler.childCompilers.push(child.$compiler)\n\
+            }\n\
+        } else {\n\
+            if (partialId) { // replace innerHTML with partial\n\
+                node.removeAttribute(partialAttr)\n\
+                var partial = compiler.getOption('partials', partialId)\n\
+                if (partial) {\n\
+                    node.innerHTML = ''\n\
+                    node.appendChild(partial.cloneNode(true))\n\
+                }\n\
+            }\n\
+            // finally, only normal directives left!\n\
+            compiler.compileNode(node)\n\
+        }\n\
+    } else if (node.nodeType === 3) { // text node\n\
+        compiler.compileTextNode(node)\n\
+    }\n\
+}\n\
+\n\
+/*\n\
+ *  Compile a normal node\n\
+ */\n\
+CompilerProto.compileNode = function (node) {\n\
+    var i, j\n\
+    // parse if has attributes\n\
+    if (node.attributes && node.attributes.length) {\n\
+        var attrs = slice.call(node.attributes),\n\
+            attr, valid, exps, exp\n\
+        // loop through all attributes\n\
+        i = attrs.length\n\
+        while (i--) {\n\
+            attr = attrs[i]\n\
+            valid = false\n\
+            exps = attr.value.split(',')\n\
+            // loop through clauses (separated by \",\")\n\
+            // inside each attribute\n\
+            j = exps.length\n\
+            while (j--) {\n\
+                exp = exps[j]\n\
+                var directive = Directive.parse(attr.name, exp, this, node)\n\
+                if (directive) {\n\
+                    valid = true\n\
+                    this.bindDirective(directive)\n\
+                }\n\
+            }\n\
+            if (valid) node.removeAttribute(attr.name)\n\
+        }\n\
+    }\n\
+    // recursively compile childNodes\n\
+    if (node.childNodes.length) {\n\
+        var nodes = slice.call(node.childNodes)\n\
+        for (i = 0, j = nodes.length; i < j; i++) {\n\
+            this.compile(nodes[i])\n\
+        }\n\
+    }\n\
+}\n\
+\n\
+/*\n\
+ *  Compile a text node\n\
+ */\n\
+CompilerProto.compileTextNode = function (node) {\n\
+    var tokens = TextParser.parse(node.nodeValue)\n\
+    if (!tokens) return\n\
+    var dirname = config.prefix + '-text',\n\
+        el, token, directive\n\
+    for (var i = 0, l = tokens.length; i < l; i++) {\n\
+        token = tokens[i]\n\
+        if (token.key) { // a binding\n\
+            if (token.key.charAt(0) === '>') { // a partial\n\
+                var partialId = token.key.slice(1).trim(),\n\
+                    partial = this.getOption('partials', partialId)\n\
+                if (partial) {\n\
+                    el = partial.cloneNode(true)\n\
+                    this.compileNode(el)\n\
+                }\n\
+            } else { // a binding\n\
+                el = document.createTextNode('')\n\
+                directive = Directive.parse(dirname, token.key, this, el)\n\
+                if (directive) {\n\
+                    this.bindDirective(directive)\n\
+                }\n\
+            }\n\
+        } else { // a plain string\n\
+            el = document.createTextNode(token)\n\
+        }\n\
+        node.parentNode.insertBefore(el, node)\n\
+    }\n\
+    node.parentNode.removeChild(node)\n\
+}\n\
+\n\
+/*\n\
+ *  Add a directive instance to the correct binding & viewmodel\n\
+ */\n\
+CompilerProto.bindDirective = function (directive) {\n\
+\n\
+    var binding,\n\
+        compiler      = this,\n\
+        key           = directive.key,\n\
+        baseKey       = key.split('.')[0],\n\
+        ownerCompiler = traceOwnerCompiler(directive, compiler)\n\
+\n\
+    compiler.dirs.push(directive)\n\
+\n\
+    if (directive.isExp) {\n\
+        binding = compiler.createBinding(key, true)\n\
+    } else if (ownerCompiler.vm.hasOwnProperty(baseKey)) {\n\
+        // if the value is present in the target VM, we create the binding on its compiler\n\
+        binding = ownerCompiler.bindings.hasOwnProperty(key)\n\
+            ? ownerCompiler.bindings[key]\n\
+            : ownerCompiler.createBinding(key)\n\
+    } else {\n\
+        // due to prototypal inheritance of bindings, if a key doesn't exist here,\n\
+        // it doesn't exist in the whole prototype chain. Therefore in that case\n\
+        // we create the new binding at the root level.\n\
+        binding = ownerCompiler.bindings[key] || compiler.rootCompiler.createBinding(key)\n\
+    }\n\
+\n\
+    binding.instances.push(directive)\n\
+    directive.binding = binding\n\
+\n\
+    // for newly inserted sub-VMs (repeat items), need to bind deps\n\
+    // because they didn't get processed when the parent compiler\n\
+    // was binding dependencies.\n\
+    var i, dep, deps = binding.contextDeps\n\
+    if (deps) {\n\
+        i = deps.length\n\
+        while (i--) {\n\
+            dep = compiler.bindings[deps[i]]\n\
+            dep.subs.push(directive)\n\
+        }\n\
+    }\n\
+\n\
+    var value = binding.value\n\
+    // invoke bind hook if exists\n\
+    if (directive.bind) {\n\
+        directive.bind(value)\n\
+    }\n\
+\n\
+    // set initial value\n\
+    if (binding.isComputed) {\n\
+        directive.refresh(value)\n\
+    } else {\n\
+        directive.update(value, true)\n\
+    }\n\
+}\n\
+\n\
+/*\n\
+ *  Create binding and attach getter/setter for a key to the viewmodel object\n\
+ */\n\
+CompilerProto.createBinding = function (key, isExp) {\n\
+\n\
+    var compiler = this,\n\
+        bindings = compiler.bindings,\n\
+        binding  = new Binding(compiler, key, isExp)\n\
+\n\
+    if (isExp) {\n\
+        // a complex expression binding\n\
+        // we need to generate an anonymous computed property for it\n\
+        var result = ExpParser.parse(key)\n\
+        if (result) {\n\
+            utils.log('  created anonymous binding: ' + key)\n\
+            binding.value = { get: result.getter }\n\
+            compiler.markComputed(binding)\n\
+            compiler.exps.push(binding)\n\
+            // need to create the bindings for keys\n\
+            // that do not exist yet\n\
+            var i = result.vars.length, v\n\
+            while (i--) {\n\
+                v = result.vars[i]\n\
+                if (!bindings[v]) {\n\
+                    compiler.rootCompiler.createBinding(v)\n\
+                }\n\
+            }\n\
+        } else {\n\
+            utils.warn('  invalid expression: ' + key)\n\
+        }\n\
+    } else {\n\
+        utils.log('  created binding: ' + key)\n\
+        bindings[key] = binding\n\
+        // make sure the key exists in the object so it can be observed\n\
+        // by the Observer!\n\
+        compiler.ensurePath(key)\n\
+        if (binding.root) {\n\
+            // this is a root level binding. we need to define getter/setters for it.\n\
+            compiler.define(key, binding)\n\
+        } else {\n\
+            var parentKey = key.slice(0, key.lastIndexOf('.'))\n\
+            if (!bindings.hasOwnProperty(parentKey)) {\n\
+                // this is a nested value binding, but the binding for its parent\n\
+                // has not been created yet. We better create that one too.\n\
+                compiler.createBinding(parentKey)\n\
+            }\n\
+        }\n\
+    }\n\
+    return binding\n\
+}\n\
+\n\
+/*\n\
+ *  Sometimes when a binding is found in the template, the value might\n\
+ *  have not been set on the VM yet. To ensure computed properties and\n\
+ *  dependency extraction can work, we have to create a dummy value for\n\
+ *  any given path.\n\
+ */\n\
+CompilerProto.ensurePath = function (key) {\n\
+    var path = key.split('.'), sec, obj = this.vm\n\
+    for (var i = 0, d = path.length - 1; i < d; i++) {\n\
+        sec = path[i]\n\
+        if (!obj[sec]) obj[sec] = {}\n\
+        obj = obj[sec]\n\
+    }\n\
+    if (utils.typeOf(obj) === 'Object') {\n\
+        sec = path[i]\n\
+        if (!(sec in obj)) obj[sec] = undefined\n\
+    }\n\
+}\n\
+\n\
+/*\n\
+ *  Defines the getter/setter for a root-level binding on the VM\n\
+ *  and observe the initial value\n\
+ */\n\
+CompilerProto.define = function (key, binding) {\n\
+\n\
+    utils.log('    defined root binding: ' + key)\n\
+\n\
+    var compiler = this,\n\
+        vm = compiler.vm,\n\
+        ob = compiler.observer,\n\
+        value = binding.value = vm[key], // save the value before redefinening it\n\
+        type = utils.typeOf(value)\n\
+\n\
+    if (type === 'Object' && value.get) {\n\
+        // computed property\n\
+        compiler.markComputed(binding)\n\
+    } else if (type === 'Object' || type === 'Array') {\n\
+        // observe objects later, becase there might be more keys\n\
+        // to be added to it. we also want to emit all the set events\n\
+        // after all values are available.\n\
+        compiler.observables.push(binding)\n\
+    }\n\
+\n\
+    Object.defineProperty(vm, key, {\n\
+        enumerable: true,\n\
+        get: function () {\n\
+            var value = binding.value\n\
+            if ((!binding.isComputed && (!value || !value.__observer__)) ||\n\
+                Array.isArray(value)) {\n\
+                // only emit non-computed, non-observed (primitive) values, or Arrays.\n\
+                // because these are the cleanest dependencies\n\
+                ob.emit('get', key)\n\
+            }\n\
+            return binding.isComputed\n\
+                ? value.get({\n\
+                    el: compiler.el,\n\
+                    vm: vm,\n\
+                    item: compiler.repeat\n\
+                        ? vm[compiler.repeatPrefix]\n\
+                        : null\n\
+                })\n\
+                : value\n\
+        },\n\
+        set: function (newVal) {\n\
+            var value = binding.value\n\
+            if (binding.isComputed) {\n\
+                if (value.set) {\n\
+                    value.set(newVal)\n\
+                }\n\
+            } else if (newVal !== value) {\n\
+                // unwatch the old value\n\
+                Observer.unobserve(value, key, ob)\n\
+                // set new value\n\
+                binding.value = newVal\n\
+                ob.emit('set', key, newVal)\n\
+                // now watch the new value, which in turn emits 'set'\n\
+                // for all its nested values\n\
+                Observer.observe(newVal, key, ob)\n\
+            }\n\
+        }\n\
+    })\n\
+}\n\
+\n\
+/*\n\
+ *  Process a computed property binding\n\
+ */\n\
+CompilerProto.markComputed = function (binding) {\n\
+    var value = binding.value,\n\
+        vm    = this.vm\n\
+    binding.isComputed = true\n\
+    // keep a copy of the raw getter\n\
+    // for extracting contextual dependencies\n\
+    binding.rawGet = value.get\n\
+    // bind the accessors to the vm\n\
+    value.get = value.get.bind(vm)\n\
+    if (value.set) value.set = value.set.bind(vm)\n\
+    // keep track for dep parsing later\n\
+    this.computed.push(binding)\n\
+}\n\
+\n\
+/*\n\
+ *  Process subscriptions for computed properties that has\n\
+ *  dynamic context dependencies\n\
+ */\n\
+CompilerProto.bindContexts = function (bindings) {\n\
+    var i = bindings.length, j, k, binding, depKey, dep, ins\n\
+    while (i--) {\n\
+        binding = bindings[i]\n\
+        j = binding.contextDeps.length\n\
+        while (j--) {\n\
+            depKey = binding.contextDeps[j]\n\
+            k = binding.instances.length\n\
+            while (k--) {\n\
+                ins = binding.instances[k]\n\
+                dep = ins.compiler.bindings[depKey]\n\
+                dep.subs.push(ins)\n\
+            }\n\
+        }\n\
+    }\n\
+}\n\
+\n\
+/*\n\
+ *  Retrive an option from the compiler\n\
+ */\n\
+CompilerProto.getOption = function (type, id) {\n\
+    var opts = this.options\n\
+    return (opts[type] && opts[type][id]) || (utils[type] && utils[type][id])\n\
+}\n\
+\n\
+/*\n\
+ *  Unbind and remove element\n\
+ */\n\
+CompilerProto.destroy = function () {\n\
+    var compiler = this\n\
+    utils.log('compiler destroyed: ', compiler.vm.$el)\n\
+    // unwatch\n\
+    compiler.observer.off()\n\
+    var i, key, dir, inss, binding,\n\
+        el         = compiler.el,\n\
+        directives = compiler.dirs,\n\
+        exps       = compiler.exps,\n\
+        bindings   = compiler.bindings\n\
+    // remove all directives that are instances of external bindings\n\
+    i = directives.length\n\
+    while (i--) {\n\
+        dir = directives[i]\n\
+        if (dir.binding.compiler !== compiler) {\n\
+            inss = dir.binding.instances\n\
+            if (inss) inss.splice(inss.indexOf(dir), 1)\n\
+        }\n\
+        dir.unbind()\n\
+    }\n\
+    // unbind all expressions (anonymous bindings)\n\
+    i = exps.length\n\
+    while (i--) {\n\
+        exps[i].unbind()\n\
+    }\n\
+    // unbind/unobserve all own bindings\n\
+    for (key in bindings) {\n\
+        if (bindings.hasOwnProperty(key)) {\n\
+            binding = bindings[key]\n\
+            if (binding.root) {\n\
+                Observer.unobserve(binding.value, binding.key, compiler.observer)\n\
+            }\n\
+            binding.unbind()\n\
+        }\n\
+    }\n\
+    // remove self from parentCompiler\n\
+    var parent = compiler.parentCompiler\n\
+    if (parent) {\n\
+        parent.childCompilers.splice(parent.childCompilers.indexOf(compiler), 1)\n\
+    }\n\
+    // remove el\n\
+    if (el === document.body) {\n\
+        el.innerHTML = ''\n\
+    } else if (el.parentNode) {\n\
+        el.parentNode.removeChild(el)\n\
+    }\n\
+}\n\
+\n\
+// Helpers --------------------------------------------------------------------\n\
+\n\
+/*\n\
+ *  Refresh prefix in case it has been changed\n\
+ *  during compilations\n\
+ */\n\
+function refreshPrefix () {\n\
+    var prefix     = config.prefix\n\
+    repeatAttr       = prefix + '-repeat'\n\
+    vmAttr         = prefix + '-viewmodel'\n\
+    partialAttr    = prefix + '-partial'\n\
+    transitionAttr = prefix + '-transition'\n\
+}\n\
+\n\
+/*\n\
+ *  determine which viewmodel a key belongs to based on nesting symbols\n\
+ */\n\
+function traceOwnerCompiler (key, compiler) {\n\
+    if (key.nesting) {\n\
+        var levels = key.nesting\n\
+        while (compiler.parentCompiler && levels--) {\n\
+            compiler = compiler.parentCompiler\n\
+        }\n\
+    } else if (key.root) {\n\
+        while (compiler.parentCompiler) {\n\
+            compiler = compiler.parentCompiler\n\
+        }\n\
+    }\n\
+    return compiler\n\
+}\n\
+\n\
+/*\n\
+ *  shorthand for getting root compiler\n\
+ */\n\
+function getRoot (compiler) {\n\
+    return traceOwnerCompiler({ root: true }, compiler)\n\
+}\n\
+\n\
+module.exports = Compiler//@ sourceURL=seed/src/compiler.js"
+));
+require.register("seed/src/viewmodel.js", Function("exports, require, module",
+"var Compiler = require('./compiler')\n\
+\n\
+/*\n\
+ *  ViewModel exposed to the user that holds data,\n\
+ *  computed properties, event handlers\n\
+ *  and a few reserved methods\n\
+ */\n\
+function ViewModel (options) {\n\
+    // just compile. options are passed directly to compiler\n\
+    new Compiler(this, options)\n\
+}\n\
+\n\
+var VMProto = ViewModel.prototype\n\
+\n\
+/*\n\
+ *  Convenience function to set an actual nested value\n\
+ *  from a flat key string. Used in directives.\n\
+ */\n\
+VMProto.$set = function (key, value) {\n\
+    var path = key.split('.'),\n\
+        obj = getTargetVM(this, path)\n\
+    if (!obj) return\n\
+    for (var d = 0, l = path.length - 1; d < l; d++) {\n\
+        obj = obj[path[d]]\n\
+    }\n\
+    obj[path[d]] = value\n\
+}\n\
+\n\
+/*\n\
+ *  The function for getting a key\n\
+ *  which will go up along the prototype chain of the bindings\n\
+ *  Used in exp-parser.\n\
+ */\n\
+VMProto.$get = function (key) {\n\
+    var path = key.split('.'),\n\
+        obj = getTargetVM(this, path),\n\
+        vm = obj\n\
+    if (!obj) return\n\
+    for (var d = 0, l = path.length; d < l; d++) {\n\
+        obj = obj[path[d]]\n\
+    }\n\
+    if (typeof obj === 'function') obj = obj.bind(vm)\n\
+    return obj\n\
+}\n\
+\n\
+/*\n\
+ *  watch a key on the viewmodel for changes\n\
+ *  fire callback with new value\n\
+ */\n\
+VMProto.$watch = function (key, callback) {\n\
+    this.$compiler.observer.on('change:' + key, callback)\n\
+}\n\
+\n\
+/*\n\
+ *  unwatch a key\n\
+ */\n\
+VMProto.$unwatch = function (key, callback) {\n\
+    // workaround here\n\
+    // since the emitter module checks callback existence\n\
+    // by checking the length of arguments\n\
+    var args = ['change:' + key],\n\
+        ob = this.$compiler.observer\n\
+    if (callback) args.push(callback)\n\
+    ob.off.apply(ob, args)\n\
+}\n\
+\n\
+/*\n\
+ *  unbind everything, remove everything\n\
+ */\n\
+VMProto.$destroy = function () {\n\
+    this.$compiler.destroy()\n\
+    this.$compiler = null\n\
+}\n\
+\n\
+/*\n\
+ *  broadcast an event to all child VMs recursively.\n\
+ */\n\
+VMProto.$broadcast = function () {\n\
+    var children = this.$compiler.childCompilers,\n\
+        i = children.length,\n\
+        child\n\
+    while (i--) {\n\
+        child = children[i]\n\
+        child.emitter.emit.apply(child.emitter, arguments)\n\
+        child.vm.$broadcast.apply(child.vm, arguments)\n\
+    }\n\
+}\n\
+\n\
+/*\n\
+ *  emit an event that propagates all the way up to parent VMs.\n\
+ */\n\
+VMProto.$emit = function () {\n\
+    var parent = this.$compiler.parentCompiler\n\
+    if (parent) {\n\
+        parent.emitter.emit.apply(parent.emitter, arguments)\n\
+        parent.vm.$emit.apply(parent.vm, arguments)\n\
+    }\n\
+}\n\
+\n\
+/*\n\
+ *  listen for a broadcasted/emitted event\n\
+ */\n\
+VMProto.$on = function () {\n\
+    var emitter = this.$compiler.emitter\n\
+    emitter.on.apply(emitter, arguments)\n\
+}\n\
+\n\
+/*\n\
+ *  stop listening\n\
+ */\n\
+VMProto.$off = function () {\n\
+    var emitter = this.$compiler.emitter\n\
+    emitter.off.apply(emitter, arguments)\n\
+}\n\
+\n\
+/*\n\
+ *  If a VM doesn't contain a path, go up the prototype chain\n\
+ *  to locate the ancestor that has it.\n\
+ */\n\
+function getTargetVM (vm, path) {\n\
+    var baseKey = path[0],\n\
+        binding = vm.$compiler.bindings[baseKey]\n\
+    return binding\n\
+        ? binding.compiler.vm\n\
+        : null\n\
+}\n\
+\n\
+module.exports = ViewModel//@ sourceURL=seed/src/viewmodel.js"
+));
+require.register("seed/src/binding.js", Function("exports, require, module",
+"/*\n\
+ *  Binding class.\n\
+ *\n\
+ *  each property on the viewmodel has one corresponding Binding object\n\
+ *  which has multiple directive instances on the DOM\n\
+ *  and multiple computed property dependents\n\
+ */\n\
+function Binding (compiler, key, isExp) {\n\
+    this.value = undefined\n\
+    this.isExp = !!isExp\n\
+    this.root = !this.isExp && key.indexOf('.') === -1\n\
+    this.compiler = compiler\n\
+    this.key = key\n\
+    this.instances = []\n\
+    this.subs = []\n\
+    this.deps = []\n\
+}\n\
+\n\
+var BindingProto = Binding.prototype\n\
+\n\
+/*\n\
+ *  Process the value, then trigger updates on all dependents\n\
+ */\n\
+BindingProto.update = function (value) {\n\
+    this.value = value\n\
+    var i = this.instances.length\n\
+    while (i--) {\n\
+        this.instances[i].update(value)\n\
+    }\n\
+    this.pub()\n\
+}\n\
+\n\
+/*\n\
+ *  -- computed property only --    \n\
+ *  Force all instances to re-evaluate themselves\n\
+ */\n\
+BindingProto.refresh = function () {\n\
+    var i = this.instances.length\n\
+    while (i--) {\n\
+        this.instances[i].refresh()\n\
+    }\n\
+    this.pub()\n\
+}\n\
+\n\
+/*\n\
+ *  Notify computed properties that depend on this binding\n\
+ *  to update themselves\n\
+ */\n\
+BindingProto.pub = function () {\n\
+    var i = this.subs.length\n\
+    while (i--) {\n\
+        this.subs[i].refresh()\n\
+    }\n\
+}\n\
+\n\
+/*\n\
+ *  Unbind the binding, remove itself from all of its dependencies\n\
+ */\n\
+BindingProto.unbind = function () {\n\
+    var i = this.instances.length\n\
+    while (i--) {\n\
+        this.instances[i].unbind()\n\
+    }\n\
+    i = this.deps.length\n\
+    var subs\n\
+    while (i--) {\n\
+        subs = this.deps[i].subs\n\
+        subs.splice(subs.indexOf(this), 1)\n\
+    }\n\
+    this.compiler = this.pubs = this.subs = this.instances = this.deps = null\n\
+}\n\
+\n\
+module.exports = Binding//@ sourceURL=seed/src/binding.js"
+));
+require.register("seed/src/observer.js", Function("exports, require, module",
+"var Emitter = require('./emitter'),\n\
+    utils   = require('./utils'),\n\
+    typeOf  = utils.typeOf,\n\
+    def     = utils.defProtected,\n\
+    slice   = Array.prototype.slice,\n\
+    methods = ['push','pop','shift','unshift','splice','sort','reverse']\n\
+\n\
+// The proxy prototype to replace the __proto__ of\n\
+// an observed array\n\
+var ArrayProxy = Object.create(Array.prototype)\n\
+\n\
+// Define mutation interceptors so we can emit the mutation info\n\
+methods.forEach(function (method) {\n\
+    utils.defProtected(ArrayProxy, method, function () {\n\
+        var result = Array.prototype[method].apply(this, arguments)\n\
+        this.__observer__.emit('mutate', this.__observer__.path, this, {\n\
+            method: method,\n\
+            args: slice.call(arguments),\n\
+            result: result\n\
+        })\n\
+        return result\n\
+    })\n\
+})\n\
+\n\
+// Augment it with several convenience methods\n\
+var extensions = {\n\
+    remove: function (index) {\n\
+        if (typeof index !== 'number') index = this.indexOf(index)\n\
+        return this.splice(index, 1)[0]\n\
+    },\n\
+    replace: function (index, data) {\n\
+        if (typeof index !== 'number') index = this.indexOf(index)\n\
+        return this.splice(index, 1, data)[0]\n\
+    },\n\
+    mutateFilter: function (fn) {\n\
+        var i = this.length\n\
+        while (i--) {\n\
+            if (!fn(this[i])) this.splice(i, 1)\n\
+        }\n\
+        return this\n\
+    }\n\
+}\n\
+\n\
+for (var method in extensions) {\n\
+    utils.defProtected(ArrayProxy, method, extensions[method])\n\
+}\n\
+\n\
+/*\n\
+ *  Watch an object based on type\n\
+ */\n\
+function watch (obj, path, observer) {\n\
+    var type = typeOf(obj)\n\
+    if (type === 'Object') {\n\
+        watchObject(obj, path, observer)\n\
+    } else if (type === 'Array') {\n\
+        watchArray(obj, path, observer)\n\
+    }\n\
+}\n\
+\n\
+/*\n\
+ *  Watch an Object, recursive.\n\
+ */\n\
+function watchObject (obj, path, observer) {\n\
+    for (var key in obj) {\n\
+        bind(obj, key, path, observer)\n\
+    }\n\
+}\n\
+\n\
+/*\n\
+ *  Watch an Array, overload mutation methods\n\
+ *  and add augmentations by intercepting the prototype chain\n\
+ */\n\
+function watchArray (arr, path, observer) {\n\
+    def(arr, '__observer__', observer)\n\
+    observer.path = path\n\
+    /* jshint proto:true */\n\
+    arr.__proto__ = ArrayProxy\n\
+}\n\
+\n\
+/*\n\
+ *  Define accessors for a property on an Object\n\
+ *  so it emits get/set events.\n\
+ *  Then watch the value itself.\n\
+ */\n\
+function bind (obj, key, path, observer) {\n\
+    var val       = obj[key],\n\
+        watchable = isWatchable(val),\n\
+        values    = observer.values,\n\
+        fullKey   = (path ? path + '.' : '') + key\n\
+    values[fullKey] = val\n\
+    // emit set on bind\n\
+    // this means when an object is observed it will emit\n\
+    // a first batch of set events.\n\
+    observer.emit('set', fullKey, val)\n\
+    Object.defineProperty(obj, key, {\n\
+        enumerable: true,\n\
+        get: function () {\n\
+            // only emit get on tip values\n\
+            if (!watchable) observer.emit('get', fullKey)\n\
+            return values[fullKey]\n\
+        },\n\
+        set: function (newVal) {\n\
+            values[fullKey] = newVal\n\
+            observer.emit('set', fullKey, newVal)\n\
+            watch(newVal, fullKey, observer)\n\
+        }\n\
+    })\n\
+    watch(val, fullKey, observer)\n\
+}\n\
+\n\
+/*\n\
+ *  Check if a value is watchable\n\
+ */\n\
+function isWatchable (obj) {\n\
+    var type = typeOf(obj)\n\
+    return type === 'Object' || type === 'Array'\n\
+}\n\
+\n\
+/*\n\
+ *  When a value that is already converted is\n\
+ *  observed again by another observer, we can skip\n\
+ *  the watch conversion and simply emit set event for\n\
+ *  all of its properties.\n\
+ */\n\
+function emitSet (obj, observer) {\n\
+    if (typeOf(obj) === 'Array') {\n\
+        observer.emit('set', 'length', obj.length)\n\
+    } else {\n\
+        var key, val, values = observer.values\n\
+        for (key in observer.values) {\n\
+            val = values[key]\n\
+            observer.emit('set', key, val)\n\
+        }\n\
+    }\n\
+}\n\
+\n\
+module.exports = {\n\
+\n\
+    // used in sd-repeat\n\
+    watchArray: watchArray,\n\
+\n\
+    /*\n\
+     *  Observe an object with a given path,\n\
+     *  and proxy get/set/mutate events to the provided observer.\n\
+     */\n\
+    observe: function (obj, rawPath, observer) {\n\
+        if (isWatchable(obj)) {\n\
+            var path = rawPath + '.',\n\
+                ob, alreadyConverted = !!obj.__observer__\n\
+            if (!alreadyConverted) {\n\
+                def(obj, '__observer__', new Emitter())\n\
+            }\n\
+            ob = obj.__observer__\n\
+            ob.values = ob.values || {}\n\
+            var proxies = observer.proxies[path] = {\n\
+                get: function (key) {\n\
+                    observer.emit('get', path + key)\n\
+                },\n\
+                set: function (key, val) {\n\
+                    observer.emit('set', path + key, val)\n\
+                },\n\
+                mutate: function (key, val, mutation) {\n\
+                    // if the Array is a root value\n\
+                    // the key will be null\n\
+                    var fixedPath = key ? path + key : rawPath\n\
+                    observer.emit('mutate', fixedPath, val, mutation)\n\
+                    // also emit set for Array's length when it mutates\n\
+                    var m = mutation.method\n\
+                    if (m !== 'sort' && m !== 'reverse') {\n\
+                        observer.emit('set', fixedPath + '.length', val.length)\n\
+                    }\n\
+                }\n\
+            }\n\
+            ob\n\
+                .on('get', proxies.get)\n\
+                .on('set', proxies.set)\n\
+                .on('mutate', proxies.mutate)\n\
+            if (alreadyConverted) {\n\
+                emitSet(obj, ob, rawPath)\n\
+            } else {\n\
+                watch(obj, null, ob)\n\
+            }\n\
+        }\n\
+    },\n\
+\n\
+    /*\n\
+     *  Cancel observation, turn off the listeners.\n\
+     */\n\
+    unobserve: function (obj, path, observer) {\n\
+        if (!obj || !obj.__observer__) return\n\
+        path = path + '.'\n\
+        var proxies = observer.proxies[path]\n\
+        obj.__observer__\n\
+            .off('get', proxies.get)\n\
+            .off('set', proxies.set)\n\
+            .off('mutate', proxies.mutate)\n\
+        observer.proxies[path] = null\n\
+    }\n\
+}//@ sourceURL=seed/src/observer.js"
+));
+require.register("seed/src/directive.js", Function("exports, require, module",
+"var config     = require('./config'),\n\
+    utils      = require('./utils'),\n\
+    directives = require('./directives'),\n\
+    filters    = require('./filters')\n\
+\n\
+var KEY_RE          = /^[^\\|]+/,\n\
+    ARG_RE          = /([^:]+):(.+)$/,\n\
+    FILTERS_RE      = /\\|[^\\|]+/g,\n\
+    FILTER_TOKEN_RE = /[^\\s']+|'[^']+'/g,\n\
+    NESTING_RE      = /^\\^+/,\n\
+    SINGLE_VAR_RE   = /^[\\w\\.\\$]+$/\n\
+\n\
+/*\n\
+ *  Directive class\n\
+ *  represents a single directive instance in the DOM\n\
+ */\n\
+function Directive (definition, directiveName, expression, rawKey, compiler, node) {\n\
+\n\
+    this.compiler = compiler\n\
+    this.vm       = compiler.vm\n\
+    this.el       = node\n\
+\n\
+    // mix in properties from the directive definition\n\
+    if (typeof definition === 'function') {\n\
+        this._update = definition\n\
+    } else {\n\
+        for (var prop in definition) {\n\
+            if (prop === 'unbind' || prop === 'update') {\n\
+                this['_' + prop] = definition[prop]\n\
+            } else {\n\
+                this[prop] = definition[prop]\n\
+            }\n\
+        }\n\
+    }\n\
+\n\
+    this.name       = directiveName\n\
+    this.expression = expression.trim()\n\
+    this.rawKey     = rawKey\n\
+    \n\
+    parseKey(this, rawKey)\n\
+\n\
+    this.isExp = !SINGLE_VAR_RE.test(this.key)\n\
+    \n\
+    var filterExps = expression.match(FILTERS_RE)\n\
+    if (filterExps) {\n\
+        this.filters = []\n\
+        var i = 0, l = filterExps.length, filter\n\
+        for (; i < l; i++) {\n\
+            filter = parseFilter(filterExps[i], this.compiler)\n\
+            if (filter) this.filters.push(filter)\n\
+        }\n\
+        if (!this.filters.length) this.filters = null\n\
+    } else {\n\
+        this.filters = null\n\
+    }\n\
+}\n\
+\n\
+var DirProto = Directive.prototype\n\
+\n\
+/*\n\
+ *  parse a key, extract argument and nesting/root info\n\
+ */\n\
+function parseKey (dir, rawKey) {\n\
+\n\
+    var argMatch = rawKey.match(ARG_RE)\n\
+\n\
+    var key = argMatch\n\
+        ? argMatch[2].trim()\n\
+        : rawKey.trim()\n\
+\n\
+    dir.arg = argMatch\n\
+        ? argMatch[1].trim()\n\
+        : null\n\
+\n\
+    var nesting = key.match(NESTING_RE)\n\
+    dir.nesting = nesting\n\
+        ? nesting[0].length\n\
+        : false\n\
+\n\
+    dir.root = key.charAt(0) === '$'\n\
+\n\
+    if (dir.nesting) {\n\
+        key = key.replace(NESTING_RE, '')\n\
+    } else if (dir.root) {\n\
+        key = key.slice(1)\n\
+    }\n\
+\n\
+    dir.key = key\n\
+}\n\
+\n\
+/*\n\
+ *  parse a filter expression\n\
+ */\n\
+function parseFilter (filter, compiler) {\n\
+\n\
+    var tokens = filter.slice(1).match(FILTER_TOKEN_RE)\n\
+    if (!tokens) return\n\
+    tokens = tokens.map(function (token) {\n\
+        return token.replace(/'/g, '').trim()\n\
+    })\n\
+\n\
+    var name = tokens[0],\n\
+        apply = compiler.getOption('filters', name) || filters[name]\n\
+    if (!apply) {\n\
+        utils.warn('Unknown filter: ' + name)\n\
+        return\n\
+    }\n\
+\n\
+    return {\n\
+        name  : name,\n\
+        apply : apply,\n\
+        args  : tokens.length > 1\n\
+                ? tokens.slice(1)\n\
+                : null\n\
+    }\n\
+}\n\
+\n\
+/*\n\
+ *  called when a new value is set \n\
+ *  for computed properties, this will only be called once\n\
+ *  during initialization.\n\
+ */\n\
+DirProto.update = function (value, init) {\n\
+    if (!init && value === this.value) return\n\
+    this.value = value\n\
+    this.apply(value)\n\
+}\n\
+\n\
+/*\n\
+ *  -- computed property only --\n\
+ *  called when a dependency has changed\n\
+ */\n\
+DirProto.refresh = function (value) {\n\
+    // pass element and viewmodel info to the getter\n\
+    // enables context-aware bindings\n\
+    if (value) this.value = value\n\
+    value = this.value.get({\n\
+        el: this.el,\n\
+        vm: this.vm\n\
+    })\n\
+    if (value && value === this.computedValue) return\n\
+    this.computedValue = value\n\
+    this.apply(value)\n\
+}\n\
+\n\
+/*\n\
+ *  Actually invoking the _update from the directive's definition\n\
+ */\n\
+DirProto.apply = function (value) {\n\
+    this._update(\n\
+        this.filters\n\
+        ? this.applyFilters(value)\n\
+        : value\n\
+    )\n\
+}\n\
+\n\
+/*\n\
+ *  pipe the value through filters\n\
+ */\n\
+DirProto.applyFilters = function (value) {\n\
+    var filtered = value, filter\n\
+    for (var i = 0, l = this.filters.length; i < l; i++) {\n\
+        filter = this.filters[i]\n\
+        filtered = filter.apply(filtered, filter.args)\n\
+    }\n\
+    return filtered\n\
+}\n\
+\n\
+/*\n\
+ *  Unbind diretive\n\
+ *  @ param {Boolean} update\n\
+ *    Sometimes we call unbind before an update (i.e. not destroy)\n\
+ *    just to teardown previousstuff, in that case we do not want\n\
+ *    to null everything.\n\
+ */\n\
+DirProto.unbind = function (update) {\n\
+    // this can be called before the el is even assigned...\n\
+    if (!this.el) return\n\
+    if (this._unbind) this._unbind(update)\n\
+    if (!update) this.vm = this.el = this.binding = this.compiler = null\n\
+}\n\
+\n\
+/*\n\
+ *  make sure the directive and expression is valid\n\
+ *  before we create an instance\n\
+ */\n\
+Directive.parse = function (dirname, expression, compiler, node) {\n\
+\n\
+    var prefix = config.prefix\n\
+    if (dirname.indexOf(prefix) === -1) return null\n\
+    dirname = dirname.slice(prefix.length + 1)\n\
+\n\
+    var dir = compiler.getOption('directives', dirname) || directives[dirname],\n\
+        keyMatch = expression.match(KEY_RE),\n\
+        rawKey = keyMatch && keyMatch[0].trim()\n\
+\n\
+    if (!dir) utils.warn('unknown directive: ' + dirname)\n\
+    if (!rawKey) utils.warn('invalid directive expression: ' + expression)\n\
+\n\
+    return dir && rawKey\n\
+        ? new Directive(dir, dirname, expression, rawKey, compiler, node)\n\
+        : null\n\
+}\n\
+\n\
+module.exports = Directive//@ sourceURL=seed/src/directive.js"
+));
+require.register("seed/src/exp-parser.js", Function("exports, require, module",
+"// Variable extraction scooped from https://github.com/RubyLouvre/avalon \n\
+var KEYWORDS =\n\
+        // keywords\n\
+        'break,case,catch,continue,debugger,default,delete,do,else,false'\n\
+        + ',finally,for,function,if,in,instanceof,new,null,return,switch,this'\n\
+        + ',throw,true,try,typeof,var,void,while,with'\n\
+        // reserved\n\
+        + ',abstract,boolean,byte,char,class,const,double,enum,export,extends'\n\
+        + ',final,float,goto,implements,import,int,interface,long,native'\n\
+        + ',package,private,protected,public,short,static,super,synchronized'\n\
+        + ',throws,transient,volatile'\n\
+        // ECMA 5 - use strict\n\
+        + ',arguments,let,yield'\n\
+        + ',undefined',\n\
+    KEYWORDS_RE = new RegExp([\"\\\\b\" + KEYWORDS.replace(/,/g, '\\\\b|\\\\b') + \"\\\\b\"].join('|'), 'g'),\n\
+    REMOVE_RE   = /\\/\\*(?:.|\\n\
+)*?\\*\\/|\\/\\/[^\\n\
+]*\\n\
+|\\/\\/[^\\n\
+]*$|'[^']*'|\"[^\"]*\"|[\\s\\t\\n\
+]*\\.[\\s\\t\\n\
+]*[$\\w\\.]+/g,\n\
+    SPLIT_RE    = /[^\\w$]+/g,\n\
+    NUMBER_RE   = /\\b\\d[^,]*/g,\n\
+    BOUNDARY_RE = /^,+|,+$/g\n\
+\n\
+function getVariables (code) {\n\
+    code = code\n\
+        .replace(REMOVE_RE, '')\n\
+        .replace(SPLIT_RE, ',')\n\
+        .replace(KEYWORDS_RE, '')\n\
+        .replace(NUMBER_RE, '')\n\
+        .replace(BOUNDARY_RE, '')\n\
+    return code\n\
+        ? code.split(/,+/)\n\
+        : []\n\
+}\n\
+\n\
+module.exports = {\n\
+\n\
+    /*\n\
+     *  Parse and create an anonymous computed property getter function\n\
+     *  from an arbitrary expression.\n\
+     */\n\
+    parse: function (exp) {\n\
+        // extract variable names\n\
+        var vars = getVariables(exp)\n\
+        if (!vars.length) return null\n\
+        var args = [],\n\
+            v, i, l = vars.length,\n\
+            hash = {}\n\
+        for (i = 0; i < l; i++) {\n\
+            v = vars[i]\n\
+            // avoid duplicate keys\n\
+            if (hash[v]) continue\n\
+            hash[v] = v\n\
+            // push assignment\n\
+            args.push(v + (\n\
+                v.charAt(0) === '$'\n\
+                    ? '=this.' + v\n\
+                    : '=this.$get(\"' + v + '\")'\n\
+                ))\n\
+        }\n\
+        args = 'var ' + args.join(',') + ';return ' + exp\n\
+        /* jshint evil: true */\n\
+        return {\n\
+            getter: new Function(args),\n\
+            vars: Object.keys(hash)\n\
+        }\n\
+    }\n\
+}//@ sourceURL=seed/src/exp-parser.js"
+));
+require.register("seed/src/text-parser.js", Function("exports, require, module",
+"var config     = require('./config'),\n\
+    ESCAPE_RE  = /[-.*+?^${}()|[\\]\\/\\\\]/g,\n\
+    BINDING_RE = build()\n\
+\n\
+/*\n\
+ *  Build interpolate tag regex from config settings\n\
+ */\n\
+function build () {\n\
+    var open = escapeRegex(config.interpolateTags.open),\n\
+        close = escapeRegex(config.interpolateTags.close)\n\
+    return new RegExp(open + '(.+?)' + close)\n\
+}\n\
+\n\
+/*\n\
+ *  Escapes a string so that it can be used to construct RegExp\n\
+ */\n\
+function escapeRegex (val) {\n\
+    return val.replace(ESCAPE_RE, '\\\\$&')\n\
+}\n\
+\n\
+module.exports = {\n\
+\n\
+    /*\n\
+     *  Parse a piece of text, return an array of tokens\n\
+     */\n\
+    parse: function (text) {\n\
+        if (!BINDING_RE.test(text)) return null\n\
+        var m, i, tokens = []\n\
+        do {\n\
+            m = text.match(BINDING_RE)\n\
+            if (!m) break\n\
+            i = m.index\n\
+            if (i > 0) tokens.push(text.slice(0, i))\n\
+            tokens.push({ key: m[1].trim() })\n\
+            text = text.slice(i + m[0].length)\n\
+        } while (true)\n\
+        if (text.length) tokens.push(text)\n\
+        return tokens\n\
+    },\n\
+\n\
+    /*\n\
+     *  External build\n\
+     */\n\
+    buildRegex: function () {\n\
+        BINDING_RE = build()\n\
+    }\n\
+}//@ sourceURL=seed/src/text-parser.js"
+));
+require.register("seed/src/deps-parser.js", Function("exports, require, module",
+"var Emitter  = require('./emitter'),\n\
+    utils    = require('./utils'),\n\
+    observer = new Emitter()\n\
+\n\
+var dummyEl = document.createElement('div'),\n\
+    ARGS_RE = /^function\\s*?\\((.+?)[\\),]/,\n\
+    SCOPE_RE_STR = '\\\\.vm\\\\.[\\\\.\\\\w][\\\\.\\\\w$]*',\n\
+    noop = function () {}\n\
+\n\
+/*\n\
+ *  Auto-extract the dependencies of a computed property\n\
+ *  by recording the getters triggered when evaluating it.\n\
+ *\n\
+ *  However, the first pass will contain duplicate dependencies\n\
+ *  for computed properties. It is therefore necessary to do a\n\
+ *  second pass in injectDeps()\n\
+ */\n\
+function catchDeps (binding) {\n\
+    utils.log('\\n\
+─ ' + binding.key)\n\
+    var depsHash = {}\n\
+    observer.on('get', function (dep) {\n\
+        if (depsHash[dep.key]) return\n\
+        depsHash[dep.key] = 1\n\
+        utils.log('  └─ ' + dep.key)\n\
+        binding.deps.push(dep)\n\
+        dep.subs.push(binding)\n\
+    })\n\
+    parseContextDependency(binding)\n\
+    binding.value.get({\n\
+        vm: createDummyVM(binding),\n\
+        el: dummyEl\n\
+    })\n\
+    observer.off('get')\n\
+}\n\
+\n\
+/*\n\
+ *  We need to invoke each binding's getter for dependency parsing,\n\
+ *  but we don't know what sub-viewmodel properties the user might try\n\
+ *  to access in that getter. To avoid thowing an error or forcing\n\
+ *  the user to guard against an undefined argument, we staticly\n\
+ *  analyze the function to extract any possible nested properties\n\
+ *  the user expects the target viewmodel to possess. They are all assigned\n\
+ *  a noop function so they can be invoked with no real harm.\n\
+ */\n\
+function createDummyVM (binding) {\n\
+    var viewmodel = {},\n\
+        deps = binding.contextDeps\n\
+    if (!deps) return viewmodel\n\
+    var i = binding.contextDeps.length,\n\
+        j, level, key, path\n\
+    while (i--) {\n\
+        level = viewmodel\n\
+        path = deps[i].split('.')\n\
+        j = 0\n\
+        while (j < path.length) {\n\
+            key = path[j]\n\
+            if (!level[key]) level[key] = noop\n\
+            level = level[key]\n\
+            j++\n\
+        }\n\
+    }\n\
+    return viewmodel\n\
+}\n\
+\n\
+/*\n\
+ *  Extract context dependency paths\n\
+ */\n\
+function parseContextDependency (binding) {\n\
+    var fn   = binding.rawGet,\n\
+        str  = fn.toString(),\n\
+        args = str.match(ARGS_RE)\n\
+    if (!args) return null\n\
+    var depsRE = new RegExp(args[1] + SCOPE_RE_STR, 'g'),\n\
+        matches = str.match(depsRE),\n\
+        base = args[1].length + 4\n\
+    if (!matches) return null\n\
+    var i = matches.length,\n\
+        deps = [], dep\n\
+    while (i--) {\n\
+        dep = matches[i].slice(base)\n\
+        if (deps.indexOf(dep) === -1) {\n\
+            deps.push(dep)\n\
+        }\n\
+    }\n\
+    binding.contextDeps = deps\n\
+    binding.compiler.contextBindings.push(binding)\n\
+}\n\
+\n\
+module.exports = {\n\
+\n\
+    /*\n\
+     *  the observer that catches events triggered by getters\n\
+     */\n\
+    observer: observer,\n\
+\n\
+    /*\n\
+     *  parse a list of computed property bindings\n\
+     */\n\
+    parse: function (bindings) {\n\
+        utils.log('\\n\
+parsing dependencies...')\n\
+        observer.isObserving = true\n\
+        bindings.forEach(catchDeps)\n\
+        observer.isObserving = false\n\
+        utils.log('\\n\
+done.')\n\
+    },\n\
+\n\
+    // for testing only\n\
+    cdvm: createDummyVM,\n\
+    pcd: parseContextDependency\n\
+}//@ sourceURL=seed/src/deps-parser.js"
+));
+require.register("seed/src/filters.js", Function("exports, require, module",
+"var keyCodes = {\n\
+    enter    : 13,\n\
+    tab      : 9,\n\
+    'delete' : 46,\n\
+    up       : 38,\n\
+    left     : 37,\n\
+    right    : 39,\n\
+    down     : 40,\n\
+    esc      : 27\n\
+}\n\
+\n\
+module.exports = {\n\
+\n\
+    capitalize: function (value) {\n\
+        if (!value && value !== 0) return ''\n\
+        value = value.toString()\n\
+        return value.charAt(0).toUpperCase() + value.slice(1)\n\
+    },\n\
+\n\
+    uppercase: function (value) {\n\
+        return (value || value === 0)\n\
+            ? value.toString().toUpperCase()\n\
+            : ''\n\
+    },\n\
+\n\
+    lowercase: function (value) {\n\
+        return (value || value === 0)\n\
+            ? value.toString().toLowerCase()\n\
+            : ''\n\
+    },\n\
+\n\
+    /*\n\
+     *  args: an array of strings corresponding to\n\
+     *  the single, double, triple ... forms of the word to\n\
+     *  be pluralized. When the number to be pluralized\n\
+     *  exceeds the length of the args, it will use the last\n\
+     *  entry in the array.\n\
+     *\n\
+     *  e.g. ['single', 'double', 'triple', 'multiple']\n\
+     */\n\
+    pluralize: function (value, args) {\n\
+        return args.length > 1\n\
+            ? (args[value - 1] || args[args.length - 1])\n\
+            : (args[value - 1] || args[0] + 's')\n\
+    },\n\
+\n\
+    currency: function (value, args) {\n\
+        if (!value && value !== 0) return ''\n\
+        var sign = (args && args[0]) || '$',\n\
+            s = Math.floor(value).toString(),\n\
+            i = s.length % 3,\n\
+            h = i > 0 ? (s.slice(0, i) + (s.length > 3 ? ',' : '')) : '',\n\
+            f = '.' + value.toFixed(2).slice(-2)\n\
+        return sign + h + s.slice(i).replace(/(\\d{3})(?=\\d)/g, '$1,') + f\n\
+    },\n\
+\n\
+    key: function (handler, args) {\n\
+        if (!handler) return\n\
+        var code = keyCodes[args[0]]\n\
+        if (!code) {\n\
+            code = parseInt(args[0], 10)\n\
+        }\n\
+        return function (e) {\n\
+            if (e.keyCode === code) {\n\
+                handler.call(this, e)\n\
+            }\n\
+        }\n\
+    }\n\
+\n\
+}//@ sourceURL=seed/src/filters.js"
+));
+require.register("seed/src/directives/index.js", Function("exports, require, module",
+"module.exports = {\n\
+\n\
+    on     : require('./on'),\n\
+    repeat : require('./repeat'),\n\
+\n\
+    attr: function (value) {\n\
+        this.el.setAttribute(this.arg, value)\n\
+    },\n\
+\n\
+    text: function (value) {\n\
+        this.el.textContent =\n\
+            (typeof value === 'string' || typeof value === 'number')\n\
+            ? value : ''\n\
+    },\n\
+\n\
+    html: function (value) {\n\
+        this.el.innerHTML =\n\
+            (typeof value === 'string' || typeof value === 'number')\n\
+            ? value : ''\n\
+    },\n\
+\n\
+    style: {\n\
+        bind: function () {\n\
+            this.arg = convertCSSProperty(this.arg)\n\
+        },\n\
+        update: function (value) {\n\
+            this.el.style[this.arg] = value\n\
+        }\n\
+    },\n\
+\n\
+    show: function (value) {\n\
+        this.el.style.display = value ? '' : 'none'\n\
+    },\n\
+\n\
+    visible: function (value) {\n\
+        this.el.style.visibility = value ? '' : 'hidden'\n\
+    },\n\
+    \n\
+    focus: function (value) {\n\
+        var el = this.el\n\
+        if (value) {\n\
+            setTimeout(function () {\n\
+                el.focus()\n\
+            }, 0)\n\
+        }\n\
+    },\n\
+\n\
+    class: function (value) {\n\
+        if (this.arg) {\n\
+            this.el.classList[value ? 'add' : 'remove'](this.arg)\n\
+        } else {\n\
+            if (this.lastVal) {\n\
+                this.el.classList.remove(this.lastVal)\n\
+            }\n\
+            this.el.classList.add(value)\n\
+            this.lastVal = value\n\
+        }\n\
+    },\n\
+\n\
+    value: {\n\
+        bind: function () {\n\
+            var el = this.el, self = this\n\
+            this.change = function () {\n\
+                self.vm.$set(self.key, el.value)\n\
+            }\n\
+            el.addEventListener('keyup', this.change)\n\
+        },\n\
+        update: function (value) {\n\
+            this.el.value = value ? value : ''\n\
+        },\n\
+        unbind: function () {\n\
+            this.el.removeEventListener('keyup', this.change)\n\
+        }\n\
+    },\n\
+\n\
+    checked: {\n\
+        bind: function () {\n\
+            var el = this.el, self = this\n\
+            this.change = function () {\n\
+                self.vm.$set(self.key, el.checked)\n\
+            }\n\
+            el.addEventListener('change', this.change)\n\
+        },\n\
+        update: function (value) {\n\
+            this.el.checked = !!value\n\
+        },\n\
+        unbind: function () {\n\
+            this.el.removeEventListener('change', this.change)\n\
+        }\n\
+    },\n\
+\n\
+    'if': {\n\
+        bind: function () {\n\
+            this.parent = this.el.parentNode\n\
+            this.ref = document.createComment('sd-if-' + this.key)\n\
+        },\n\
+        update: function (value) {\n\
+            var attached = !!this.el.parentNode\n\
+            if (!this.parent) { // the node was detached when bound\n\
+                if (!attached) {\n\
+                    return\n\
+                } else {\n\
+                    this.parent = this.el.parentNode\n\
+                }\n\
+            }\n\
+            // should always have this.parent if we reach here\n\
+            if (!value) {\n\
+                if (attached) {\n\
+                    // insert the reference node\n\
+                    var next = this.el.nextSibling\n\
+                    if (next) {\n\
+                        this.parent.insertBefore(this.ref, next)\n\
+                    } else {\n\
+                        this.parent.appendChild(this.ref)\n\
+                    }\n\
+                    this.parent.removeChild(this.el)\n\
+                }\n\
+            } else if (!attached) {\n\
+                this.parent.insertBefore(this.el, this.ref)\n\
+                this.parent.removeChild(this.ref)\n\
+            }\n\
+        }\n\
+    }\n\
+}\n\
+\n\
+/*\n\
+ *  convert hyphen style CSS property to Camel style\n\
+ */\n\
+var CONVERT_RE = /-(.)/g\n\
+function convertCSSProperty (prop) {\n\
+    if (prop.charAt(0) === '-') prop = prop.slice(1)\n\
+    return prop.replace(CONVERT_RE, function (m, char) {\n\
+        return char.toUpperCase()\n\
+    })\n\
+}//@ sourceURL=seed/src/directives/index.js"
+));
+require.register("seed/src/directives/repeat.js", Function("exports, require, module",
+"var config   = require('../config'),\n\
+    Observer = require('../observer'),\n\
+    Emitter  = require('../emitter'),\n\
+    ViewModel // lazy def to avoid circular dependency\n\
+\n\
+/*\n\
+ *  Mathods that perform precise DOM manipulation\n\
+ *  based on mutator method triggered\n\
+ */\n\
+var mutationHandlers = {\n\
+\n\
+    push: function (m) {\n\
+        var i, l = m.args.length,\n\
+            base = this.collection.length - l\n\
+        for (i = 0; i < l; i++) {\n\
+            this.buildItem(m.args[i], base + i)\n\
+        }\n\
+    },\n\
+\n\
+    pop: function () {\n\
+        this.vms.pop().$destroy()\n\
+    },\n\
+\n\
+    unshift: function (m) {\n\
+        var i, l = m.args.length\n\
+        for (i = 0; i < l; i++) {\n\
+            this.buildItem(m.args[i], i)\n\
+        }\n\
+    },\n\
+\n\
+    shift: function () {\n\
+        this.vms.shift().$destroy()\n\
+    },\n\
+\n\
+    splice: function (m) {\n\
+        var i,\n\
+            index = m.args[0],\n\
+            removed = m.args[1],\n\
+            added = m.args.length - 2,\n\
+            removedVMs = this.vms.splice(index, removed)\n\
+        for (i = 0; i < removed; i++) {\n\
+            removedVMs[i].$destroy()\n\
+        }\n\
+        for (i = 0; i < added; i++) {\n\
+            this.buildItem(m.args[i + 2], index + i)\n\
+        }\n\
+    },\n\
+\n\
+    sort: function () {\n\
+        var key = this.arg,\n\
+            vms = this.vms,\n\
+            col = this.collection,\n\
+            l = col.length,\n\
+            sorted = new Array(l),\n\
+            i, j, vm, data\n\
+        for (i = 0; i < l; i++) {\n\
+            data = col[i]\n\
+            for (j = 0; j < l; j++) {\n\
+                vm = vms[j]\n\
+                if (vm[key] === data) {\n\
+                    sorted[i] = vm\n\
+                    break\n\
+                }\n\
+            }\n\
+        }\n\
+        for (i = 0; i < l; i++) {\n\
+            this.container.insertBefore(sorted[i].$el, this.ref)\n\
+        }\n\
+        this.vms = sorted\n\
+    },\n\
+\n\
+    reverse: function () {\n\
+        var vms = this.vms\n\
+        vms.reverse()\n\
+        for (var i = 0, l = vms.length; i < l; i++) {\n\
+            this.container.insertBefore(vms[i].$el, this.ref)\n\
+        }\n\
+    }\n\
+}\n\
+\n\
+module.exports = {\n\
+\n\
+    bind: function () {\n\
+        this.el.removeAttribute(config.prefix + '-repeat')\n\
+        var ctn = this.container = this.el.parentNode\n\
+        // create a comment node as a reference node for DOM insertions\n\
+        this.ref = document.createComment('sd-repeat-' + this.arg)\n\
+        ctn.insertBefore(this.ref, this.el)\n\
+        ctn.removeChild(this.el)\n\
+        this.collection = null\n\
+        this.vms = null\n\
+        var self = this\n\
+        this.mutationListener = function (path, arr, mutation) {\n\
+            self.detach()\n\
+            var method = mutation.method\n\
+            mutationHandlers[method].call(self, mutation)\n\
+            if (method !== 'push' && method !== 'pop') {\n\
+                self.updateIndexes()\n\
+            }\n\
+            self.retach()\n\
+        }\n\
+    },\n\
+\n\
+    update: function (collection) {\n\
+\n\
+        this.unbind(true)\n\
+        // attach an object to container to hold handlers\n\
+        this.container.sd_dHandlers = {}\n\
+        // if initiating with an empty collection, we need to\n\
+        // force a compile so that we get all the bindings for\n\
+        // dependency extraction.\n\
+        if (!this.collection && !collection.length) {\n\
+            this.buildItem()\n\
+        }\n\
+        this.collection = collection\n\
+        this.vms = []\n\
+\n\
+        // listen for collection mutation events\n\
+        // the collection has been augmented during Binding.set()\n\
+        if (!collection.__observer__) Observer.watchArray(collection, null, new Emitter())\n\
+        collection.__observer__.on('mutate', this.mutationListener)\n\
+\n\
+        // create child-seeds and append to DOM\n\
+        this.detach()\n\
+        for (var i = 0, l = collection.length; i < l; i++) {\n\
+            this.buildItem(collection[i], i)\n\
+        }\n\
+        this.retach()\n\
+    },\n\
+\n\
+    /*\n\
+     *  Create a new child VM from a data object\n\
+     *  passing along compiler options indicating this\n\
+     *  is a sd-repeat item.\n\
+     */\n\
+    buildItem: function (data, index) {\n\
+        ViewModel = ViewModel || require('../viewmodel')\n\
+        var node = this.el.cloneNode(true),\n\
+            ctn  = this.container,\n\
+            vmID = node.getAttribute(config.prefix + '-viewmodel'),\n\
+            ChildVM = this.compiler.getOption('vms', vmID) || ViewModel,\n\
+            wrappedData = {}\n\
+        wrappedData[this.arg] = data || {}\n\
+        var item = new ChildVM({\n\
+            el: node,\n\
+            data: wrappedData,\n\
+            compilerOptions: {\n\
+                repeat: true,\n\
+                repeatIndex: index,\n\
+                repeatPrefix: this.arg,\n\
+                parentCompiler: this.compiler,\n\
+                delegator: ctn\n\
+            }\n\
+        })\n\
+        if (!data) {\n\
+            item.$destroy()\n\
+        } else {\n\
+            var ref = this.vms.length > index\n\
+                ? this.vms[index].$el\n\
+                : this.ref\n\
+            ctn.insertBefore(node, ref)\n\
+            this.vms.splice(index, 0, item)\n\
+        }\n\
+    },\n\
+\n\
+    /*\n\
+     *  Update index of each item after a mutation\n\
+     */\n\
+    updateIndexes: function () {\n\
+        var i = this.vms.length\n\
+        while (i--) {\n\
+            this.vms[i][this.arg].$index = i\n\
+        }\n\
+    },\n\
+\n\
+    /*\n\
+     *  Detach/ the container from the DOM before mutation\n\
+     *  so that batch DOM updates are done in-memory and faster\n\
+     */\n\
+    detach: function () {\n\
+        var c = this.container,\n\
+            p = this.parent = c.parentNode\n\
+        this.next = c.nextSibling\n\
+        if (p) p.removeChild(c)\n\
+    },\n\
+\n\
+    retach: function () {\n\
+        var n = this.next,\n\
+            p = this.parent,\n\
+            c = this.container\n\
+        if (!p) return\n\
+        if (n) {\n\
+            p.insertBefore(c, n)\n\
+        } else {\n\
+            p.appendChild(c)\n\
+        }\n\
+    },\n\
+\n\
+    unbind: function () {\n\
+        if (this.collection) {\n\
+            this.collection.__observer__.off('mutate', this.mutationListener)\n\
+            var i = this.vms.length\n\
+            while (i--) {\n\
+                this.vms[i].$destroy()\n\
+            }\n\
+        }\n\
+        var ctn = this.container,\n\
+            handlers = ctn.sd_dHandlers\n\
+        for (var key in handlers) {\n\
+            ctn.removeEventListener(handlers[key].event, handlers[key])\n\
+        }\n\
+        ctn.sd_dHandlers = null\n\
+    }\n\
+}//@ sourceURL=seed/src/directives/repeat.js"
+));
+require.register("seed/src/directives/on.js", Function("exports, require, module",
+"var utils = require('../utils')\n\
+\n\
+function delegateCheck (current, top, identifier) {\n\
+    if (current[identifier]) {\n\
+        return current\n\
+    } else if (current === top) {\n\
+        return false\n\
+    } else {\n\
+        return delegateCheck(current.parentNode, top, identifier)\n\
+    }\n\
+}\n\
+\n\
+module.exports = {\n\
+\n\
+    bind: function () {\n\
+        if (this.compiler.repeat) {\n\
+            // attach an identifier to the el\n\
+            // so it can be matched during event delegation\n\
+            this.el[this.expression] = true\n\
+            // attach the owner viewmodel of this directive\n\
+            this.el.sd_viewmodel = this.vm\n\
+        }\n\
+    },\n\
+\n\
+    update: function (handler) {\n\
+\n\
+        this.unbind(true)\n\
+        if (typeof handler !== 'function') {\n\
+            return utils.warn('Directive \"on\" expects a function value.')\n\
+        }\n\
+\n\
+        var compiler = this.compiler,\n\
+            event    = this.arg,\n\
+            ownerVM  = this.binding.compiler.vm\n\
+\n\
+        if (compiler.repeat && event !== 'blur' && event !== 'focus') {\n\
+\n\
+            // for each blocks, delegate for better performance\n\
+            // focus and blur events dont bubble so exclude them\n\
+            var delegator  = compiler.delegator,\n\
+                identifier = this.expression,\n\
+                dHandler   = delegator.sd_dHandlers[identifier]\n\
+\n\
+            if (dHandler) return\n\
+\n\
+            // the following only gets run once for the entire each block\n\
+            dHandler = delegator.sd_dHandlers[identifier] = function (e) {\n\
+                var target = delegateCheck(e.target, delegator, identifier)\n\
+                if (target) {\n\
+                    e.el = target\n\
+                    e.vm = target.sd_viewmodel\n\
+                    e.item = e.vm[compiler.repeatPrefix]\n\
+                    handler.call(ownerVM, e)\n\
+                }\n\
+            }\n\
+            dHandler.event = event\n\
+            delegator.addEventListener(event, dHandler)\n\
+\n\
+        } else {\n\
+\n\
+            // a normal, single element handler\n\
+            var vm = this.vm\n\
+            this.handler = function (e) {\n\
+                e.el = e.currentTarget\n\
+                e.vm = vm\n\
+                if (compiler.repeat) {\n\
+                    e.item = vm[compiler.repeatPrefix]\n\
+                }\n\
+                handler.call(ownerVM, e)\n\
+            }\n\
+            this.el.addEventListener(event, this.handler)\n\
+\n\
+        }\n\
+    },\n\
+\n\
+    unbind: function (update) {\n\
+        this.el.removeEventListener(this.arg, this.handler)\n\
+        this.handler = null\n\
+        if (!update) this.el.sd_viewmodel = null\n\
+    }\n\
+}//@ sourceURL=seed/src/directives/on.js"
+));
 require.alias("component-emitter/index.js", "seed/deps/emitter/index.js");
 require.alias("component-emitter/index.js", "emitter/index.js");
 require.alias("component-indexof/index.js", "component-emitter/deps/indexof/index.js");
 
-require.alias("seed/src/main.js", "seed/index.js");
-
-if (typeof exports == "object") {
+require.alias("seed/src/main.js", "seed/index.js");if (typeof exports == "object") {
   module.exports = require("seed");
 } else if (typeof define == "function" && define.amd) {
   define(function(){ return require("seed"); });

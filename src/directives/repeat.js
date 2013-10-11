@@ -81,10 +81,10 @@ var mutationHandlers = {
 module.exports = {
 
     bind: function () {
-        this.el.removeAttribute(config.prefix + '-each')
+        this.el.removeAttribute(config.prefix + '-repeat')
         var ctn = this.container = this.el.parentNode
         // create a comment node as a reference node for DOM insertions
-        this.ref = document.createComment('sd-each-' + this.arg)
+        this.ref = document.createComment('sd-repeat-' + this.arg)
         ctn.insertBefore(this.ref, this.el)
         ctn.removeChild(this.el)
         this.collection = null
@@ -131,7 +131,7 @@ module.exports = {
     /*
      *  Create a new child VM from a data object
      *  passing along compiler options indicating this
-     *  is a sd-each item.
+     *  is a sd-repeat item.
      */
     buildItem: function (data, index) {
         ViewModel = ViewModel || require('../viewmodel')
@@ -145,9 +145,9 @@ module.exports = {
             el: node,
             data: wrappedData,
             compilerOptions: {
-                each: true,
-                eachIndex: index,
-                eachPrefix: this.arg,
+                repeat: true,
+                repeatIndex: index,
+                repeatPrefix: this.arg,
                 parentCompiler: this.compiler,
                 delegator: ctn
             }

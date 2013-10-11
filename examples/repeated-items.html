@@ -19,7 +19,7 @@
             </p>
             <p>Total items: {{items.length}}</p>
             <ul>
-                <li sd-each="item:items">
+                <li sd-repeat="item:items">
                     {{item.$index}} {{item.title}}
                 </li>
             </ul>

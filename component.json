@@ -20,7 +20,7 @@
         "src/deps-parser.js",
         "src/filters.js",
         "src/directives/index.js",
-        "src/directives/each.js",
+        "src/directives/repeat.js",
         "src/directives/on.js"
     ],
     "dependencies": {

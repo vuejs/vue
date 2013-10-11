@@ -13,7 +13,7 @@ function delegateCheck (current, top, identifier) {
 module.exports = {
 
     bind: function () {
-        if (this.compiler.each) {
+        if (this.compiler.repeat) {
             // attach an identifier to the el
             // so it can be matched during event delegation
             this.el[this.expression] = true
@@ -33,7 +33,7 @@ module.exports = {
             event    = this.arg,
             ownerVM  = this.binding.compiler.vm
 
-        if (compiler.each && event !== 'blur' && event !== 'focus') {
+        if (compiler.repeat && event !== 'blur' && event !== 'focus') {
 
             // for each blocks, delegate for better performance
             // focus and blur events dont bubble so exclude them
@@ -49,7 +49,7 @@ module.exports = {
                 if (target) {
                     e.el = target
                     e.vm = target.sd_viewmodel
-                    e.item = e.vm[compiler.eachPrefix]
+                    e.item = e.vm[compiler.repeatPrefix]
                     handler.call(ownerVM, e)
                 }
             }
@@ -63,8 +63,8 @@ module.exports = {
             this.handler = function (e) {
                 e.el = e.currentTarget
                 e.vm = vm
-                if (compiler.each) {
-                    e.item = vm[compiler.eachPrefix]
+                if (compiler.repeat) {
+                    e.item = vm[compiler.repeatPrefix]
                 }
                 handler.call(ownerVM, e)
             }
