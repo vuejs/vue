@@ -30,7 +30,7 @@ var extensions = {
     },
     replace: function (index, data) {
         if (typeof index !== 'number') index = this.indexOf(index)
-        return this.splice(index, 1, data)[0]
+        if (this[index] !== undefined) return this.splice(index, 1, data)[0]
     },
     mutateFilter: function (fn) {
         var i = this.length
