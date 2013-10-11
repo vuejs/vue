@@ -4,15 +4,18 @@ var filters = {
     completed: function (todo) { return todo.completed }
 }
 
-var Todos = seed.ViewModel.extend({
+var app = new Seed({
+
+    el: '#todoapp',
 
     init: function () {
-        this.todos = todoStorage.fetch()
         this.remaining = this.todos.filter(filters.active).length
         this.updateFilter()
     },
 
-    proto: {
+    data: {
+
+        todos: todoStorage.fetch(),
 
         updateFilter: function () {
             var filter = location.hash.slice(2)
@@ -79,7 +82,6 @@ var Todos = seed.ViewModel.extend({
     }
 })
 
-var app = new Todos({ el: '#todoapp' })
 window.addEventListener('hashchange', function () {
     app.updateFilter()
 })

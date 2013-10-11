@@ -27,7 +27,7 @@
         <script src="../dist/seed.js"></script>
         <script>
 
-            seed.config({debug: true})
+            Seed.config({debug: true})
 
             var items = [
                 { title: 'A'},
@@ -35,7 +35,7 @@
                 { title: 'C'}
             ]
 
-            var demo = new seed.ViewModel({
+            var demo = new Seed({
                 el: '#app',
                 data: {
                     items: items,

@@ -17,7 +17,7 @@ describe('UNIT: ViewModel', function () {
             }
         },
         arr = [1, 2, 3],
-        vm = new seed.ViewModel({
+        vm = new Seed({
             el: '#vm-test',
             data: {
                 a: data,
@@ -109,7 +109,7 @@ describe('UNIT: ViewModel', function () {
     describe('.$on', function () {
         
         it('should register listener on vm\'s compiler\'s emitter', function () {
-            var t = new seed.ViewModel(),
+            var t = new Seed(),
                 triggered = false,
                 msg = 'on test'
             t.$on('test', function (m) {
@@ -125,7 +125,7 @@ describe('UNIT: ViewModel', function () {
     describe('$off', function () {
         
         it('should turn off the listener', function () {
-            var t = new seed.ViewModel(),
+            var t = new Seed(),
                 triggered1 = false,
                 triggered2 = false,
                 f1 = function () {
@@ -149,7 +149,7 @@ describe('UNIT: ViewModel', function () {
         it('should notify all child VMs', function () {
             var triggered = 0,
                 msg = 'broadcast test'
-            var Child = seed.ViewModel.extend({
+            var Child = Seed.extend({
                 init: function () {
                     this.$on('hello', function (m) {
                         assert.strictEqual(m, msg)
@@ -157,7 +157,7 @@ describe('UNIT: ViewModel', function () {
                     })
                 }
             })
-            var Test = seed.ViewModel.extend({
+            var Test = Seed.extend({
                 template: '<div sd-viewmodel="test"></div><div sd-viewmodel="test"></div>',
                 vms: {
                     test: Child
@@ -176,7 +176,7 @@ describe('UNIT: ViewModel', function () {
             var topTriggered = false,
                 midTriggered = false,
                 msg = 'emit test'
-            var Bottom = seed.ViewModel.extend({
+            var Bottom = Seed.extend({
                 init: function () {
                     var self = this
                     setTimeout(function () {
@@ -187,7 +187,7 @@ describe('UNIT: ViewModel', function () {
                     }, 0)
                 }
             })
-            var Middle = seed.ViewModel.extend({
+            var Middle = Seed.extend({
                 template: '<div sd-viewmodel="bottom"></div>',
                 vms: { bottom: Bottom },
                 init: function () {
@@ -197,7 +197,7 @@ describe('UNIT: ViewModel', function () {
                     })
                 }
             })
-            var Top = seed.ViewModel.extend({
+            var Top = Seed.extend({
                 template: '<div sd-viewmodel="middle"></div>',
                 vms: { middle: Middle },
                 init: function () {

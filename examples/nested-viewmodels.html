@@ -57,9 +57,9 @@
     </script>
     <script src="../dist/seed.js"></script>
     <script>
-        seed.config({ debug: true })
+        Seed.config({ debug: true })
 
-        var Man = seed.ViewModel.extend({
+        var Man = Seed.extend({
             init: function () {
                 this.name = this.$el.dataset.name
                 var family = this.$el.dataset.family
@@ -73,8 +73,8 @@
             template: document.getElementById('sd-template-offspring').innerHTML
         })
 
-        seed.vm('man', Man)
-        seed.vm('offspring', Offspring)
+        Seed.vm('man', Man)
+        Seed.vm('offspring', Offspring)
 
         new Man({
             el: '#grandpa'

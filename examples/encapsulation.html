@@ -8,7 +8,7 @@
         <div id="test" sd-hola="hi | nodigits"></div>
         <script src="../dist/seed.js"></script>
         <script>
-            var T = seed.ViewModel.extend({
+            var T = Seed.extend({
                 directives: {
                     hola: function (value) {
                         this.el.innerHTML = value + '<span style="color:#f00"> this part is added by the directive</span>'

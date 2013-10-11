@@ -19,9 +19,9 @@
             <h1 sd-text="a.c"></h1>
         </div>
         <script>
-            seed.config({debug: true})
+            Seed.config({debug: true})
             var data = { c: 555 }
-            var Demo = seed.ViewModel.extend({
+            var Demo = Seed.extend({
                 init: function () {
                     this.msg = 'Yoyoyo'
                     this.a = data
@@ -51,7 +51,7 @@
                 }
             })
             var app = new Demo({ el: '#a' }),
-                app2 = new seed.ViewModel({
+                app2 = new Seed({
                     el: '#b',
                     data: {
                         a: data

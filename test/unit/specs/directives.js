@@ -438,7 +438,7 @@ describe('UNIT: Directives', function () {
 })
 
 function mockDirective (dirName, tag, type) {
-    var dir = seed.directive(dirName),
+    var dir = Seed.directive(dirName),
         ret = {
             binding: { compiler: { vm: {} } },
             compiler: { vm: {} },

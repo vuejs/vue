@@ -3,13 +3,12 @@ var config      = require('./config'),
     directives  = require('./directives'),
     filters     = require('./filters'),
     textParser  = require('./text-parser'),
-    utils       = require('./utils'),
-    api         = {}
+    utils       = require('./utils')
 
 /*
  *  Set config options
  */
-api.config = function (opts) {
+ViewModel.config = function (opts) {
     if (opts) {
         utils.extend(config, opts)
         textParser.buildRegex()
@@ -19,7 +18,7 @@ api.config = function (opts) {
 /*
  *  Allows user to register/retrieve a directive definition
  */
-api.directive = function (id, fn) {
+ViewModel.directive = function (id, fn) {
     if (!fn) return directives[id]
     directives[id] = fn
 }
@@ -27,7 +26,7 @@ api.directive = function (id, fn) {
 /*
  *  Allows user to register/retrieve a filter function
  */
-api.filter = function (id, fn) {
+ViewModel.filter = function (id, fn) {
     if (!fn) return filters[id]
     filters[id] = fn
 }
@@ -35,7 +34,7 @@ api.filter = function (id, fn) {
 /*
  *  Allows user to register/retrieve a ViewModel constructor
  */
-api.vm = function (id, Ctor) {
+ViewModel.vm = function (id, Ctor) {
     if (!Ctor) return utils.vms[id]
     utils.vms[id] = Ctor
 }
@@ -43,7 +42,7 @@ api.vm = function (id, Ctor) {
 /*
  *  Allows user to register/retrieve a template partial
  */
-api.partial = function (id, partial) {
+ViewModel.partial = function (id, partial) {
     if (!partial) return utils.partials[id]
     utils.partials[id] = templateToFragment(partial)
 }
@@ -51,12 +50,11 @@ api.partial = function (id, partial) {
 /*
  *  Allows user to register/retrieve a transition definition object
  */
-api.transition = function (id, transition) {
+ViewModel.transition = function (id, transition) {
     if (!transition) return utils.transitions[id]
     utils.transitions[id] = transition
 }
 
-api.ViewModel = ViewModel
 ViewModel.extend = extend
 
 /*
@@ -154,4 +152,4 @@ function templateToFragment (template) {
     return frag
 }
 
-module.exports = api
+module.exports = ViewModel

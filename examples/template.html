@@ -16,7 +16,7 @@
         <script>
 
             // direct usage
-            var china  = new seed.ViewModel({
+            var china  = new Seed({
                 template: '#test'
             })
             document.body.appendChild(china.$el)
@@ -25,7 +25,7 @@
             china.hi = '你好'
 
             // extended usage
-            var Hawaii = seed.ViewModel.extend({
+            var Hawaii = Seed.extend({
                 template: '#test'
             })
             var hawaii = new Hawaii()

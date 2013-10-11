@@ -12,13 +12,13 @@ module.exports = function( grunt ) {
                 sourceUrls: true,
                 styles: false,
                 verbose: true,
-                standalone: true
+                standalone: 'Seed'
             },
             build: {
                 output: './dist/',
                 name: 'seed',
                 styles: false,
-                standalone: true
+                standalone: 'Seed'
             },
             test: {
                 output: './test/',

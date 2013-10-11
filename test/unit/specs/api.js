@@ -4,11 +4,11 @@ describe('UNIT: API', function () {
         
         it('should work when changing prefix', function () {
             var testId = 'config-1'
-            seed.config({
+            Seed.config({
                 prefix: 'test'
             })
             mock(testId, '<span test-text="test"></span>')
-            new seed.ViewModel({
+            new Seed({
                 el: '#' + testId,
                 data: { test: testId }
             })
@@ -17,14 +17,14 @@ describe('UNIT: API', function () {
 
         it('should work when changing interpolate tags', function () {
             var testId = 'config-2'
-            seed.config({
+            Seed.config({
                 interpolateTags: {
                     open: '<%',
                     close: '%>'
                 }
             })
             mock(testId, '<% test %>')
-            new seed.ViewModel({
+            new Seed({
                 el: '#' + testId,
                 data: { test: testId }
             })
@@ -32,7 +32,7 @@ describe('UNIT: API', function () {
         })
 
         after(function () {
-            seed.config({
+            Seed.config({
                 prefix: 'sd',
                 interpolateTags: {
                     open: '{{',
@@ -52,9 +52,9 @@ describe('UNIT: API', function () {
         it('should create custom filter', function () {
             var testId = 'filter-1',
                 msg = '12345'
-            seed.filter('reverse', reverse)
+            Seed.filter('reverse', reverse)
             mock(testId, '{{ test | reverse }}')
-            new seed.ViewModel({
+            new Seed({
                 el: '#' + testId,
                 data: { test: msg }
             })
@@ -62,7 +62,7 @@ describe('UNIT: API', function () {
         })
 
         it('should return filter function if only one arg is given', function () {
-            var f = seed.filter('reverse')
+            var f = Seed.filter('reverse')
             assert.strictEqual(f, reverse)
         })
 
@@ -75,11 +75,11 @@ describe('UNIT: API', function () {
         it('should create custom directive with set function only', function () {
             var testId = 'directive-1',
                 msg = 'wowow'
-            seed.directive('test', function (value) {
+            Seed.directive('test', function (value) {
                 this.el.setAttribute(testId, value + '123')
             })
             mock(testId, '<span sd-test="test"></span>')
-            new seed.ViewModel({
+            new Seed({
                 el: '#' + testId,
                 data: { test: msg }
             })
@@ -101,9 +101,9 @@ describe('UNIT: API', function () {
                     this.el.removeAttribute(testId + 'bind')
                 }
             }
-            seed.directive('test2', dirTest)
+            Seed.directive('test2', dirTest)
             mock(testId, '<span sd-test2="test"></span>')
-            var vm = new seed.ViewModel({
+            var vm = new Seed({
                     el: '#' + testId,
                     data: { test: msg }
                 }),
@@ -115,7 +115,7 @@ describe('UNIT: API', function () {
         })
 
         it('should return directive object/fn if only one arg is given', function () {
-            var dir = seed.directive('test2')
+            var dir = Seed.directive('test2')
             assert.strictEqual(dir, dirTest)
         })
 
@@ -124,24 +124,24 @@ describe('UNIT: API', function () {
     describe('vm()', function () {
 
         var testId = 'api-vm-test',
-            Test = seed.ViewModel.extend({
+            Test = Seed.extend({
                 className: 'hihi',
                 data: { hi: 'ok' }
             }),
             utils = require('seed/src/utils')
 
         it('should register a VM constructor', function () {
-            seed.vm(testId, Test)
+            Seed.vm(testId, Test)
             assert.strictEqual(utils.vms[testId], Test)
         })
 
         it('should retrieve the VM if has only one arg', function () {
-            assert.strictEqual(seed.vm(testId), Test)
+            assert.strictEqual(Seed.vm(testId), Test)
         })
 
         it('should work with sd-viewmodel', function () {
             mock(testId, '<div sd-viewmodel="' + testId + '">{{hi}}</div>')
-            var t = new seed.ViewModel({ el: '#' + testId }),
+            var t = new Seed({ el: '#' + testId }),
                 child = t.$el.querySelector('div')
             assert.strictEqual(child.className, 'hihi')
             assert.strictEqual(child.textContent, 'ok')
@@ -156,7 +156,7 @@ describe('UNIT: API', function () {
             utils = require('seed/src/utils')
 
         it('should register the partial as a dom fragment', function () {
-            seed.partial(testId, partial)
+            Seed.partial(testId, partial)
             var converted = utils.partials[testId]
             assert.ok(converted instanceof window.DocumentFragment)
             assert.strictEqual(converted.querySelector('.partial-test a').innerHTML, '{{hi}}')
@@ -164,14 +164,14 @@ describe('UNIT: API', function () {
         })
 
         it('should retrieve the partial if has only one arg', function () {
-            assert.strictEqual(utils.partials[testId], seed.partial(testId))
+            assert.strictEqual(utils.partials[testId], Seed.partial(testId))
         })
 
         it('should work with sd-partial as a directive', function () {
             var testId = 'api-partial-direcitve'
-            seed.partial(testId, partial)
+            Seed.partial(testId, partial)
             mock(testId, '<div class="directive" sd-partial="' + testId + '">hello</div>')
-            var t = new seed.ViewModel({
+            var t = new Seed({
                 el: '#' + testId,
                 data: { hi: 'hohoho' }
             })
@@ -181,9 +181,9 @@ describe('UNIT: API', function () {
 
         it('should work with sd-partial as an inline interpolation', function () {
             var testId = 'api-partial-inline'
-            seed.partial(testId, partial)
+            Seed.partial(testId, partial)
             mock(testId, '<div class="inline">{{>' + testId + '}}</div>')
-            var t = new seed.ViewModel({
+            var t = new Seed({
                 el: '#' + testId,
                 data: { hi: 'hohoho' }
             })
@@ -199,12 +199,12 @@ describe('UNIT: API', function () {
             utils = require('seed/src/utils')
 
         it('should register a transition object', function () {
-            seed.transition(testId, transition)
+            Seed.transition(testId, transition)
             assert.strictEqual(utils.transitions[testId], transition)
         })
 
         it('should retrieve the transition if has only one arg', function () {
-            assert.strictEqual(seed.transition(testId), transition)
+            assert.strictEqual(Seed.transition(testId), transition)
         })
 
         // it('should work with sd-transition', function () {
@@ -213,15 +213,15 @@ describe('UNIT: API', function () {
 
     })
 
-    describe('ViewModel.extend()', function () {
+    describe('extend()', function () {
         
-        it('should return a subclass of seed.ViewModel', function () {
-            var Test = seed.ViewModel.extend({})
-            assert.ok(Test.prototype instanceof seed.ViewModel)
+        it('should return a subclass of Seed', function () {
+            var Test = Seed.extend({})
+            assert.ok(Test.prototype instanceof Seed)
         })
 
         it('should allow further extensions', function () {
-            var Parent = seed.ViewModel.extend({
+            var Parent = Seed.extend({
                 data: {
                     test: 'hi'
                 }
@@ -255,7 +255,7 @@ describe('UNIT: API', function () {
                 
                 it('should be called on the instance when instantiating', function () {
                     var called = false,
-                        Test = seed.ViewModel.extend({ init: function () {
+                        Test = Seed.extend({ init: function () {
                             called = true
                         }})
                     new Test({ el: document.createElement('div') })
@@ -272,7 +272,7 @@ describe('UNIT: API', function () {
                         b: 2,
                         c: function () {}
                     }
-                    var Test = seed.ViewModel.extend({ proto: mixins })
+                    var Test = Seed.extend({ proto: mixins })
                     for (var key in mixins) {
                         assert.strictEqual(Test.prototype[key], mixins[key])
                     }
@@ -284,7 +284,7 @@ describe('UNIT: API', function () {
                 
                 it('should be copied to each instance', function () {
                     var testData = { a: 1 },
-                        Test = seed.ViewModel.extend({
+                        Test = Seed.extend({
                             data: {
                                 test: testData
                             }
@@ -303,13 +303,13 @@ describe('UNIT: API', function () {
                 
                 it('should not accept el as an extension option', function () {
                     var el = document.createElement('div'),
-                        Test = seed.ViewModel.extend({ el: el }),
+                        Test = Seed.extend({ el: el }),
                         t = new Test()
                     assert.notStrictEqual(t.$el, el)
                 })
 
                 it('should create el with options: tagName, id, className and attributes', function () {
-                    var Test = seed.ViewModel.extend({
+                    var Test = Seed.extend({
                         tagName: 'p',
                         id: 'extend-test',
                         className: 'extend',
@@ -331,7 +331,7 @@ describe('UNIT: API', function () {
 
                 it('should ignore tagName when el is passed as an instance option', function () {
                     var el = document.createElement('div'),
-                        Test = seed.ViewModel.extend({
+                        Test = Seed.extend({
                             tagName: 'p',
                             id: 'extend-test',
                             className: 'extend',
@@ -361,7 +361,7 @@ describe('UNIT: API', function () {
                 var raw = '<span>{{hello}}</span><a>haha</a>'
                 
                 it('should take direct string template and work', function () {
-                    var Test = seed.ViewModel.extend({
+                    var Test = Seed.extend({
                             tagName: 'p',
                             template: raw,
                             data: {
@@ -383,7 +383,7 @@ describe('UNIT: API', function () {
                     tpl.type = 'text/template'
                     tpl.innerHTML = raw
                     document.getElementById('test').appendChild(tpl)
-                    var Test = seed.ViewModel.extend({
+                    var Test = Seed.extend({
                         template: '#' + testId,
                         data: { hello: testId }
                     })
@@ -392,7 +392,7 @@ describe('UNIT: API', function () {
                 })
 
                 it('should be overwritable', function () {
-                    var Test = seed.ViewModel.extend({
+                    var Test = Seed.extend({
                         template: '<div>this should not happen</div>'
                     })
                     var t = new Test({
@@ -409,7 +409,7 @@ describe('UNIT: API', function () {
             describe('directives', function () {
                 
                 it('should allow the VM to use private directives', function () {
-                    var Test = seed.ViewModel.extend({
+                    var Test = Seed.extend({
                         directives: {
                             test: function (value) {
                                 this.el.innerHTML = value ? 'YES' : 'NO'
@@ -434,7 +434,7 @@ describe('UNIT: API', function () {
             describe('filters', function () {
                 
                 it('should allow the VM to use private filters', function () {
-                    var Test = seed.ViewModel.extend({
+                    var Test = Seed.extend({
                         filters: {
                             test: function (value) {
                                 return value + '12345'
@@ -455,12 +455,12 @@ describe('UNIT: API', function () {
             describe('vms', function () {
 
                 it('should allow the VM to use private child VMs', function () {
-                    var Child = seed.ViewModel.extend({
+                    var Child = Seed.extend({
                         data: {
                             name: 'child'
                         }
                     })
-                    var Parent = seed.ViewModel.extend({
+                    var Parent = Seed.extend({
                         template: '<p>{{name}}</p><div sd-viewmodel="child">{{name}}</div>',
                         data: {
                             name: 'dad'
@@ -479,7 +479,7 @@ describe('UNIT: API', function () {
             describe('partials', function () {
                 
                 it('should allow the VM to use private partials', function () {
-                    var Test = seed.ViewModel.extend({
+                    var Test = Seed.extend({
                         attributes: {
                             'sd-partial': 'test'
                         },
