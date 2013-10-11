@@ -207,7 +207,7 @@ describe('UNIT: ViewModel', function () {
                     })
                 }
             })
-            var t = new Top()
+            new Top()
         })
 
     })

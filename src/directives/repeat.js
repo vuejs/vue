@@ -18,7 +18,8 @@ var mutationHandlers = {
     },
 
     pop: function () {
-        this.vms.pop().$destroy()
+        var vm = this.vms.pop()
+        if (vm) vm.$destroy()
     },
 
     unshift: function (m) {
@@ -29,16 +30,17 @@ var mutationHandlers = {
     },
 
     shift: function () {
-        this.vms.shift().$destroy()
+        var vm = this.vms.shift()
+        if (vm) vm.$destroy()
     },
 
     splice: function (m) {
-        var i,
+        var i, l,
             index = m.args[0],
             removed = m.args[1],
             added = m.args.length - 2,
             removedVMs = this.vms.splice(index, removed)
-        for (i = 0; i < removed; i++) {
+        for (i = 0, l = removedVMs.length; i < l; i++) {
             removedVMs[i].$destroy()
         }
         for (i = 0; i < added; i++) {
