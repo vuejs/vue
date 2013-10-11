@@ -270,7 +270,7 @@ CompilerProto.compileTextNode = function (node) {
         token = tokens[i]
         if (token.key) { // a binding
             if (token.key.charAt(0) === '>') { // a partial
-                var partialId = token.key.slice(1),
+                var partialId = token.key.slice(1).trim(),
                     partial = this.getOption('partials', partialId)
                 if (partial) {
                     el = partial.cloneNode(true)
