@@ -6,8 +6,6 @@
  *  - .$unwatch()
  */
 
- var seed = require('seed')
-
 describe('UNIT: ViewModel', function () {
 
     mock('vm-test', '{{a.b.c}}')

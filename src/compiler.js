@@ -71,9 +71,10 @@ function Compiler (vm, options) {
     }
 
     // create bindings for keys set on the vm by the user
-    for (var key in vm) {
-        key = key.charAt(0)
-        if (key !== '$' && key !== '_') {
+    var key, keyPrefix
+    for (key in vm) {
+        keyPrefix = key.charAt(0)
+        if (keyPrefix !== '$' && keyPrefix !== '_') {
             compiler.createBinding(key)
         }
     }
