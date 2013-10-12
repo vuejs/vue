@@ -50,7 +50,7 @@ module.exports = {
             hash[v] = v
             // push assignment
             args.push(v + (
-                v.charAt(0) === '$'
+                (v.charAt(0) === '$' || v.charAt(0) === '_')
                     ? '=this.' + v
                     : '=this.$get("' + v + '")'
                 ))
