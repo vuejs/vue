@@ -14,7 +14,7 @@
                     autofocus
                     autocomplete="off"
                     placeholder="What needs to be done?"
-                    sd-value="newTodo"
+                    sd-model="newTodo"
                     sd-on="keyup:addTodo | key enter"
                 >
             </header>
@@ -22,7 +22,7 @@
                 <input
                     id="toggle-all"
                     type="checkbox"
-                    sd-checked="allDone"
+                    sd-model="allDone"
                 >
                 <ul id="todo-list">
                     <li
@@ -35,7 +35,7 @@
                             <input
                                 class="toggle"
                                 type="checkbox"
-                                sd-checked="todo.completed"
+                                sd-model="todo.completed"
                                 sd-on="change:toggleTodo"
                             >
                             <label sd-text="todo.title" sd-on="dblclick:editTodo"></label>
@@ -46,7 +46,7 @@
                             type="text"
                             sd-focus="editedTodo===todo"
                             sd-on="blur:doneEdit, keyup:doneEdit | key enter, keyup:cancelEdit | key esc"
-                            sd-value="todo.title"
+                            sd-model="todo.title"
                         >
                     </li>
                 </ul>

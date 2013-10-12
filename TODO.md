@@ -1,8 +1,5 @@
-- add `lazy` option
-- add directive for all form elements, and make it consistent as `sd-model`
+- tests for sd-model, remove sd-value and sd-checked
 - add escape: {{{ things in here should not be parsed }}}
-- properties that start with `_` should also be ignored and used as a convention: `$` is library properties, `_` is user properties and non-prefixed properties are data.
-
 - sd-transition
 - component examples
 - tests

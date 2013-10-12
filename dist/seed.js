@@ -201,11 +201,8 @@ require.relative = function(parent) {
   return localRequire;
 };
 require.register("component-indexof/index.js", Function("exports, require, module",
-"\n\
-var indexOf = [].indexOf;\n\
-\n\
-module.exports = function(arr, obj){\n\
-  if (indexOf) return arr.indexOf(obj);\n\
+"module.exports = function(arr, obj){\n\
+  if (arr.indexOf) return arr.indexOf(obj);\n\
   for (var i = 0; i < arr.length; ++i) {\n\
     if (arr[i] === obj) return i;\n\
   }\n\
@@ -383,13 +380,12 @@ require.register("seed/src/main.js", Function("exports, require, module",
     directives  = require('./directives'),\n\
     filters     = require('./filters'),\n\
     textParser  = require('./text-parser'),\n\
-    utils       = require('./utils'),\n\
-    api         = {}\n\
+    utils       = require('./utils')\n\
 \n\
 /*\n\
  *  Set config options\n\
  */\n\
-api.config = function (opts) {\n\
+ViewModel.config = function (opts) {\n\
     if (opts) {\n\
         utils.extend(config, opts)\n\
         textParser.buildRegex()\n\
@@ -399,7 +395,7 @@ api.config = function (opts) {\n\
 /*\n\
  *  Allows user to register/retrieve a directive definition\n\
  */\n\
-api.directive = function (id, fn) {\n\
+ViewModel.directive = function (id, fn) {\n\
     if (!fn) return directives[id]\n\
     directives[id] = fn\n\
 }\n\
@@ -407,7 +403,7 @@ api.directive = function (id, fn) {\n\
 /*\n\
  *  Allows user to register/retrieve a filter function\n\
  */\n\
-api.filter = function (id, fn) {\n\
+ViewModel.filter = function (id, fn) {\n\
     if (!fn) return filters[id]\n\
     filters[id] = fn\n\
 }\n\
@@ -415,7 +411,7 @@ api.filter = function (id, fn) {\n\
 /*\n\
  *  Allows user to register/retrieve a ViewModel constructor\n\
  */\n\
-api.vm = function (id, Ctor) {\n\
+ViewModel.vm = function (id, Ctor) {\n\
     if (!Ctor) return utils.vms[id]\n\
     utils.vms[id] = Ctor\n\
 }\n\
@@ -423,7 +419,7 @@ api.vm = function (id, Ctor) {\n\
 /*\n\
  *  Allows user to register/retrieve a template partial\n\
  */\n\
-api.partial = function (id, partial) {\n\
+ViewModel.partial = function (id, partial) {\n\
     if (!partial) return utils.partials[id]\n\
     utils.partials[id] = templateToFragment(partial)\n\
 }\n\
@@ -431,12 +427,11 @@ api.partial = function (id, partial) {\n\
 /*\n\
  *  Allows user to register/retrieve a transition definition object\n\
  */\n\
-api.transition = function (id, transition) {\n\
+ViewModel.transition = function (id, transition) {\n\
     if (!transition) return utils.transitions[id]\n\
     utils.transitions[id] = transition\n\
 }\n\
 \n\
-api.ViewModel = ViewModel\n\
 ViewModel.extend = extend\n\
 \n\
 /*\n\
@@ -455,11 +450,11 @@ function extend (options) {\n\
     var proto = ExtendedVM.prototype = Object.create(ParentVM.prototype)\n\
     utils.defProtected(proto, 'constructor', ExtendedVM)\n\
     // copy prototype props\n\
-    var props = options.props\n\
-    if (props) {\n\
-        for (var key in props) {\n\
+    var protoMixins = options.proto\n\
+    if (protoMixins) {\n\
+        for (var key in protoMixins) {\n\
             if (!(key in ViewModel.prototype)) {\n\
-                proto[key] = props[key]\n\
+                proto[key] = protoMixins[key]\n\
             }\n\
         }\n\
     }\n\
@@ -477,11 +472,11 @@ function extend (options) {\n\
 /*\n\
  *  Inherit options\n\
  *\n\
- *  For options such as `data`, `vms`, `directives`, 'partials',\n\
+ *  For options such as `scope`, `vms`, `directives`, 'partials',\n\
  *  they should be further extended. However extending should only\n\
  *  be done at top level.\n\
  *  \n\
- *  `props` is an exception because it's handled directly on the\n\
+ *  `proto` is an exception because it's handled directly on the\n\
  *  prototype.\n\
  *\n\
  *  `el` is an exception because it's not allowed as an\n\
@@ -492,7 +487,7 @@ function inheritOptions (child, parent, topLevel) {\n\
     convertPartials(child.partials)\n\
     if (!parent) return child\n\
     for (var key in parent) {\n\
-        if (key === 'el' || key === 'props') continue\n\
+        if (key === 'el' || key === 'proto') continue\n\
         if (!child[key]) { // child has priority\n\
             child[key] = parent[key]\n\
         } else if (topLevel && utils.typeOf(child[key]) === 'Object') {\n\
@@ -534,7 +529,7 @@ function templateToFragment (template) {\n\
     return frag\n\
 }\n\
 \n\
-module.exports = api//@ sourceURL=seed/src/main.js"
+module.exports = ViewModel//@ sourceURL=seed/src/main.js"
 ));
 require.register("seed/src/emitter.js", Function("exports, require, module",
 "// shiv to make this work for Component, Browserify and Node at the same time.\n\
@@ -657,9 +652,9 @@ function Compiler (vm, options) {\n\
 new VM instance: ', compiler.el, '\\n\
 ')\n\
 \n\
-    // copy data to vm\n\
-    var data = options.data\n\
-    if (data) utils.extend(vm, data)\n\
+    // copy scope properties to vm\n\
+    var scope = options.scope\n\
+    if (scope) utils.extend(vm, scope)\n\
 \n\
     compiler.vm  = vm\n\
     vm.$compiler = compiler\n\
@@ -697,8 +692,10 @@ new VM instance: ', compiler.el, '\\n\
     }\n\
 \n\
     // create bindings for keys set on the vm by the user\n\
-    for (var key in vm) {\n\
-        if (key.charAt(0) !== '$') {\n\
+    var key, keyPrefix\n\
+    for (key in vm) {\n\
+        keyPrefix = key.charAt(0)\n\
+        if (keyPrefix !== '$' && keyPrefix !== '_') {\n\
             compiler.createBinding(key)\n\
         }\n\
     }\n\
@@ -1482,7 +1479,7 @@ var extensions = {\n\
     },\n\
     replace: function (index, data) {\n\
         if (typeof index !== 'number') index = this.indexOf(index)\n\
-        return this.splice(index, 1, data)[0]\n\
+        if (this[index] !== undefined) return this.splice(index, 1, data)[0]\n\
     },\n\
     mutateFilter: function (fn) {\n\
         var i = this.length\n\
@@ -1907,7 +1904,8 @@ module.exports = {\n\
         var vars = getVariables(exp)\n\
         if (!vars.length) return null\n\
         var args = [],\n\
-            v, i, l = vars.length,\n\
+            v, i, keyPrefix,\n\
+            l = vars.length,\n\
             hash = {}\n\
         for (i = 0; i < l; i++) {\n\
             v = vars[i]\n\
@@ -1915,8 +1913,9 @@ module.exports = {\n\
             if (hash[v]) continue\n\
             hash[v] = v\n\
             // push assignment\n\
+            keyPrefix = v.charAt(0)\n\
             args.push(v + (\n\
-                v.charAt(0) === '$'\n\
+                (keyPrefix === '$' || keyPrefix === '_')\n\
                     ? '=this.' + v\n\
                     : '=this.$get(\"' + v + '\")'\n\
                 ))\n\
@@ -2177,15 +2176,15 @@ require.register("seed/src/directives/index.js", Function("exports, require, mod
     },\n\
 \n\
     text: function (value) {\n\
-        this.el.textContent =\n\
-            (typeof value === 'string' || typeof value === 'number')\n\
-            ? value : ''\n\
+        this.el.textContent = isValidTextValue(value)\n\
+            ? value\n\
+            : ''\n\
     },\n\
 \n\
     html: function (value) {\n\
-        this.el.innerHTML =\n\
-            (typeof value === 'string' || typeof value === 'number')\n\
-            ? value : ''\n\
+        this.el.innerHTML = isValidTextValue(value)\n\
+            ? value\n\
+            : ''\n\
     },\n\
 \n\
     style: {\n\
@@ -2258,6 +2257,39 @@ require.register("seed/src/directives/index.js", Function("exports, require, mod
         }\n\
     },\n\
 \n\
+    model: {\n\
+        bind: function () {\n\
+            var self = this,\n\
+                el   = self.el,\n\
+                type = el.type,\n\
+                lazy = self.compiler.options.lazy\n\
+            self.event =\n\
+                (lazy ||\n\
+                type === 'checkbox' ||\n\
+                type === 'select' ||\n\
+                type === 'radio')\n\
+                    ? 'change'\n\
+                    : 'keyup'\n\
+            self.attr = type === 'checkbox'\n\
+                ? 'checked'\n\
+                : 'value'\n\
+            self.set = function () {\n\
+                self.vm.$set(self.key, el[self.attr])\n\
+            }\n\
+            el.addEventListener(self.event, self.set)\n\
+        },\n\
+        update: function (value) {\n\
+            this.el[this.attr] = this.attr === 'checked'\n\
+                ? !!value\n\
+                : isValidTextValue(value)\n\
+                    ? value\n\
+                    : ''\n\
+        },\n\
+        unbind: function () {\n\
+            this.el.removeEventListener(this.event, this.set)\n\
+        }\n\
+    },\n\
+\n\
     'if': {\n\
         bind: function () {\n\
             this.parent = this.el.parentNode\n\
@@ -2301,6 +2333,10 @@ function convertCSSProperty (prop) {\n\
     return prop.replace(CONVERT_RE, function (m, char) {\n\
         return char.toUpperCase()\n\
     })\n\
+}\n\
+\n\
+function isValidTextValue (value) {\n\
+    return typeof value === 'string' || typeof value === 'number'\n\
 }//@ sourceURL=seed/src/directives/index.js"
 ));
 require.register("seed/src/directives/repeat.js", Function("exports, require, module",
@@ -2324,7 +2360,8 @@ var mutationHandlers = {\n\
     },\n\
 \n\
     pop: function () {\n\
-        this.vms.pop().$destroy()\n\
+        var vm = this.vms.pop()\n\
+        if (vm) vm.$destroy()\n\
     },\n\
 \n\
     unshift: function (m) {\n\
@@ -2335,16 +2372,17 @@ var mutationHandlers = {\n\
     },\n\
 \n\
     shift: function () {\n\
-        this.vms.shift().$destroy()\n\
+        var vm = this.vms.shift()\n\
+        if (vm) vm.$destroy()\n\
     },\n\
 \n\
     splice: function (m) {\n\
-        var i,\n\
+        var i, l,\n\
             index = m.args[0],\n\
             removed = m.args[1],\n\
             added = m.args.length - 2,\n\
             removedVMs = this.vms.splice(index, removed)\n\
-        for (i = 0; i < removed; i++) {\n\
+        for (i = 0, l = removedVMs.length; i < l; i++) {\n\
             removedVMs[i].$destroy()\n\
         }\n\
         for (i = 0; i < added; i++) {\n\
@@ -2445,11 +2483,11 @@ module.exports = {\n\
             ctn  = this.container,\n\
             vmID = node.getAttribute(config.prefix + '-viewmodel'),\n\
             ChildVM = this.compiler.getOption('vms', vmID) || ViewModel,\n\
-            wrappedData = {}\n\
-        wrappedData[this.arg] = data || {}\n\
+            scope = {}\n\
+        scope[this.arg] = data || {}\n\
         var item = new ChildVM({\n\
             el: node,\n\
-            data: wrappedData,\n\
+            scope: scope,\n\
             compilerOptions: {\n\
                 repeat: true,\n\
                 repeatIndex: index,\n\
@@ -2611,5 +2649,5 @@ require.alias("seed/src/main.js", "seed/index.js");if (typeof exports == "object
 } else if (typeof define == "function" && define.amd) {
   define(function(){ return require("seed"); });
 } else {
-  this["seed"] = require("seed");
+  this["Seed"] = require("seed");
 }})();

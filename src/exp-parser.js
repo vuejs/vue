@@ -41,7 +41,8 @@ module.exports = {
         var vars = getVariables(exp)
         if (!vars.length) return null
         var args = [],
-            v, i, l = vars.length,
+            v, i, keyPrefix,
+            l = vars.length,
             hash = {}
         for (i = 0; i < l; i++) {
             v = vars[i]
@@ -49,8 +50,9 @@ module.exports = {
             if (hash[v]) continue
             hash[v] = v
             // push assignment
+            keyPrefix = v.charAt(0)
             args.push(v + (
-                (v.charAt(0) === '$' || v.charAt(0) === '_')
+                (keyPrefix === '$' || keyPrefix === '_')
                     ? '=this.' + v
                     : '=this.$get("' + v + '")'
                 ))

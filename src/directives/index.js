@@ -8,15 +8,15 @@ module.exports = {
     },
 
     text: function (value) {
-        this.el.textContent =
-            (typeof value === 'string' || typeof value === 'number')
-            ? value : ''
+        this.el.textContent = isValidTextValue(value)
+            ? value
+            : ''
     },
 
     html: function (value) {
-        this.el.innerHTML =
-            (typeof value === 'string' || typeof value === 'number')
-            ? value : ''
+        this.el.innerHTML = isValidTextValue(value)
+            ? value
+            : ''
     },
 
     style: {
@@ -89,6 +89,39 @@ module.exports = {
         }
     },
 
+    model: {
+        bind: function () {
+            var self = this,
+                el   = self.el,
+                type = el.type,
+                lazy = self.compiler.options.lazy
+            self.event =
+                (lazy ||
+                type === 'checkbox' ||
+                type === 'select' ||
+                type === 'radio')
+                    ? 'change'
+                    : 'keyup'
+            self.attr = type === 'checkbox'
+                ? 'checked'
+                : 'value'
+            self.set = function () {
+                self.vm.$set(self.key, el[self.attr])
+            }
+            el.addEventListener(self.event, self.set)
+        },
+        update: function (value) {
+            this.el[this.attr] = this.attr === 'checked'
+                ? !!value
+                : isValidTextValue(value)
+                    ? value
+                    : ''
+        },
+        unbind: function () {
+            this.el.removeEventListener(this.event, this.set)
+        }
+    },
+
     'if': {
         bind: function () {
             this.parent = this.el.parentNode
@@ -132,4 +165,8 @@ function convertCSSProperty (prop) {
     return prop.replace(CONVERT_RE, function (m, char) {
         return char.toUpperCase()
     })
+}
+
+function isValidTextValue (value) {
+    return typeof value === 'string' || typeof value === 'number'
 }
