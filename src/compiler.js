@@ -11,7 +11,8 @@ var Emitter     = require('./emitter'),
     vmAttr,
     repeatAttr,
     partialAttr,
-    transitionAttr
+    transitionAttr,
+    preAttr
 
 /*
  *  The DOM compiler
@@ -182,7 +183,8 @@ CompilerProto.compile = function (node, root) {
     var compiler = this
     if (node.nodeType === 1) {
         // a normal node
-        var repeatExp    = node.getAttribute(repeatAttr),
+        if (node.hasAttribute(preAttr)) return
+        var repeatExp  = node.getAttribute(repeatAttr),
             vmId       = node.getAttribute(vmAttr),
             partialId  = node.getAttribute(partialAttr)
         // we need to check for any possbile special directives
@@ -589,10 +591,11 @@ CompilerProto.destroy = function () {
  */
 function refreshPrefix () {
     var prefix     = config.prefix
-    repeatAttr       = prefix + '-repeat'
+    repeatAttr     = prefix + '-repeat'
     vmAttr         = prefix + '-viewmodel'
     partialAttr    = prefix + '-partial'
     transitionAttr = prefix + '-transition'
+    preAttr        = prefix + '-pre'
 }
 
 /*

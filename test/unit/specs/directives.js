@@ -537,6 +537,25 @@ describe('UNIT: Directives', function () {
 
     })
 
+    describe('pre', function () {
+        
+        it('should skip compilation', function () {
+            var testId = 'pre-test'
+            mock(testId, '<span sd-pre><strong>{{lol}}</strong><a sd-text="hi"></a></span>')
+            var t = new Seed({
+                el: '#' + testId,
+                scope: {
+                    lol: 'heyhey',
+                    hi: 'hohoho'
+                }
+            })
+            assert.strictEqual(t.$el.querySelector('strong').textContent, '{{lol}}')
+            assert.strictEqual(t.$el.querySelector('a').textContent, '')
+            assert.ok(t.$el.querySelector('a').hasAttribute('sd-text'))
+        })
+
+    })
+
 })
 
 function mockDirective (dirName, tag, type) {
