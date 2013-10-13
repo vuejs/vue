@@ -318,7 +318,7 @@ describe('UNIT: Directives', function () {
                     assert.equal(val, 1)
                 }}
                 dir.el.options.selectedIndex = 1
-                dir.el.dispatchEvent(mockChangeEvent())
+                dir.el.dispatchEvent(mockHTMLEvent('change'))
                 assert.ok(triggered)
             })
 
@@ -328,7 +328,7 @@ describe('UNIT: Directives', function () {
                     removed = false
                 }}
                 dir.unbind()
-                dir.el.dispatchEvent(mockChangeEvent())
+                dir.el.dispatchEvent(mockHTMLEvent('change'))
                 assert.ok(removed)
             })
 
@@ -445,6 +445,10 @@ describe('UNIT: Directives', function () {
         var dir = mockDirective('on')
         dir.arg = 'click'
 
+        before(function () {
+            document.body.appendChild(dir.el)
+        })
+
         it('should set the handler to be triggered by arg through update()', function () {
             var triggered = false
             dir.update(function () {
@@ -505,16 +509,20 @@ describe('UNIT: Directives', function () {
 
             dir.arg = 'focus'
             dir.update(handler)
-            dir.el.focus()
+            dir.el.dispatchEvent(mockHTMLEvent('focus'))
             assert.strictEqual(triggerCount, 1)
 
             dir.arg = 'blur'
             dir.update(handler)
-            dir.el.blur()
+            dir.el.dispatchEvent(mockHTMLEvent('blur'))
             assert.strictEqual(triggerCount, 2)
 
             document.body.removeChild(dir.el)
 
+        })
+
+        after(function () {
+            document.body.removeChild(dir.el)
         })
 
     })

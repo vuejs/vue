@@ -295,7 +295,7 @@ describe('UNIT: API', function () {
                     input.value = 'hohoho'
                     input.dispatchEvent(mockKeyEvent('keyup'))
                     assert.strictEqual(t.test, 'hi')
-                    input.dispatchEvent(mockChangeEvent())
+                    input.dispatchEvent(mockHTMLEvent('change'))
                     assert.strictEqual(t.test, 'hohoho')
                 })
 

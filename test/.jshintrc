@@ -19,7 +19,7 @@
         "mock": true,
         "Seed": true,
         "$": true,
-        "mockChangeEvent": true,
+        "mockHTMLEvent": true,
         "mockMouseEvent": true,
         "mockKeyEvent": true
     }

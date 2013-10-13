@@ -30,9 +30,9 @@
 				return el
 			}
 
-			function mockChangeEvent () {
+			function mockHTMLEvent (type) {
 			    var e = document.createEvent('HTMLEvents')
-			    e.initEvent('change', true, true)
+			    e.initEvent(type, true, true)
 			    return e
 			}
 
