@@ -1,4 +1,3 @@
-- tests for sd-model, remove sd-value and sd-checked
 - add escape: {{{ things in here should not be parsed }}}
 - sd-transition
 - component examples

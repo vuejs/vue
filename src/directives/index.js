@@ -8,15 +8,11 @@ module.exports = {
     },
 
     text: function (value) {
-        this.el.textContent = isValidTextValue(value)
-            ? value
-            : ''
+        this.el.textContent = toText(value)
     },
 
     html: function (value) {
-        this.el.innerHTML = isValidTextValue(value)
-            ? value
-            : ''
+        this.el.innerHTML = toText(value)
     },
 
     style: {
@@ -57,38 +53,6 @@ module.exports = {
         }
     },
 
-    value: {
-        bind: function () {
-            var el = this.el, self = this
-            this.change = function () {
-                self.vm.$set(self.key, el.value)
-            }
-            el.addEventListener('keyup', this.change)
-        },
-        update: function (value) {
-            this.el.value = value ? value : ''
-        },
-        unbind: function () {
-            this.el.removeEventListener('keyup', this.change)
-        }
-    },
-
-    checked: {
-        bind: function () {
-            var el = this.el, self = this
-            this.change = function () {
-                self.vm.$set(self.key, el.checked)
-            }
-            el.addEventListener('change', this.change)
-        },
-        update: function (value) {
-            this.el.checked = !!value
-        },
-        unbind: function () {
-            this.el.removeEventListener('change', this.change)
-        }
-    },
-
     model: {
         bind: function () {
             var self = this,
@@ -97,8 +61,8 @@ module.exports = {
                 lazy = self.compiler.options.lazy
             self.event =
                 (lazy ||
+                el.tagName === 'SELECT' ||
                 type === 'checkbox' ||
-                type === 'select' ||
                 type === 'radio')
                     ? 'change'
                     : 'keyup'
@@ -111,11 +75,14 @@ module.exports = {
             el.addEventListener(self.event, self.set)
         },
         update: function (value) {
-            this.el[this.attr] = this.attr === 'checked'
-                ? !!value
-                : isValidTextValue(value)
-                    ? value
-                    : ''
+            if (this.el.type === 'radio') {
+                /* jshint eqeqeq: false */
+                this.el.checked = value == this.el.value
+            } else {
+                this.el[this.attr] = this.attr === 'checked'
+                    ? !!value
+                    : toText(value)
+            }
         },
         unbind: function () {
             this.el.removeEventListener(this.event, this.set)
@@ -167,6 +134,11 @@ function convertCSSProperty (prop) {
     })
 }
 
-function isValidTextValue (value) {
-    return typeof value === 'string' || typeof value === 'number'
+/*
+ *  Make sure only strings and numbers are output to html
+ */
+function toText (value) {
+    return (typeof value === 'string' || typeof value === 'number')
+        ? value
+        : ''
 }

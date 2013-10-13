@@ -213,89 +213,191 @@ describe('UNIT: Directives', function () {
 
     })
 
-    describe('value', function () {
+    describe('model', function () {
+
+        describe('input[checkbox]', function () {
+
+            var dir = mockDirective('model', 'input', 'checkbox')
+            dir.bind()
+
+            before(function () {
+                document.body.appendChild(dir.el)
+            })
+
+            it('should set checked on update()', function () {
+                dir.update(true)
+                assert.ok(dir.el.checked)
+                dir.update(false)
+                assert.ok(!dir.el.checked)
+            })
+
+            it('should trigger vm.$set when clicked', function () {
+                var triggered = false
+                dir.key = 'foo'
+                dir.vm = { $set: function (key, val) {
+                    assert.strictEqual(key, 'foo')
+                    assert.strictEqual(val, true)
+                    triggered = true
+                }}
+                dir.el.dispatchEvent(mockMouseEvent('click'))
+                assert.ok(triggered)
+            })
+
+            it('should remove event listener with unbind()', function () {
+                var removed = true
+                dir.vm.$set = function () {
+                    removed = false
+                }
+                dir.unbind()
+                dir.el.dispatchEvent(mockMouseEvent('click'))
+                assert.ok(removed)
+            })
+
+            after(function () {
+                document.body.removeChild(dir.el)
+            })
+
+        })
+
+        describe('input[radio]', function () {
+            
+            var dir1 = mockDirective('model', 'input', 'radio'),
+                dir2 = mockDirective('model', 'input', 'radio')
+            dir1.el.name = 'input-radio'
+            dir2.el.name = 'input-radio'
+            dir1.el.value = '12345'
+            dir2.el.value = '54321'
+            dir1.bind()
+            dir2.bind()
+
+            before(function () {
+                document.body.appendChild(dir1.el)
+                document.body.appendChild(dir2.el)
+            })
+
+            it('should set el.checked on update()', function () {
+                assert.notOk(dir1.el.checked)
+                dir1.update(12345)
+                assert.ok(dir1.el.checked)
+            })
+
+            it('should trigger vm.$set when clicked', function () {
+                var triggered = false
+                dir2.key = 'radio'
+                dir2.vm = { $set: function (key, val) {
+                    triggered = true
+                    assert.strictEqual(key, 'radio')
+                    assert.strictEqual(val, dir2.el.value)
+                }}
+                dir2.el.dispatchEvent(mockMouseEvent('click'))
+                assert.ok(triggered)
+                assert.ok(dir2.el.checked)
+                assert.notOk(dir1.el.checked)
+            })
+
+            it('should remove listeners on unbind()', function () {
+                var removed = true
+                dir1.vm = { $set: function () {
+                    removed = false
+                }}
+                dir1.unbind()
+                dir1.el.dispatchEvent(mockMouseEvent('click'))
+                assert.ok(removed)
+            })
+
+            after(function () {
+                document.body.removeChild(dir1.el)
+                document.body.removeChild(dir2.el)
+            })
+
+        })
+
+        describe('select', function () {
+            
+            var dir = mockDirective('model', 'select')
+            dir.el.innerHTML = '<option>0</option><option>1</option>'
+            dir.bind()
+
+            before(function () {
+                document.body.appendChild(dir.el)
+            })
+
+            it('should set value on update()', function () {
+                dir.update(0)
+                assert.strictEqual(dir.el.value, '0')
+            })
+
+            it('should trigger vm.$set when value is changed', function () {
+                var triggered = false
+                dir.key = 'select'
+                dir.vm = { $set: function (key, val) {
+                    triggered = true
+                    assert.strictEqual(key, 'select')
+                    assert.equal(val, 1)
+                }}
+                dir.el.options.selectedIndex = 1
+                dir.el.dispatchEvent(mockChangeEvent())
+                assert.ok(triggered)
+            })
+
+            it('should remove listener on unbind()', function () {
+                var removed = true
+                dir.vm = { $set: function () {
+                    removed = false
+                }}
+                dir.unbind()
+                dir.el.dispatchEvent(mockChangeEvent())
+                assert.ok(removed)
+            })
+
+            after(function () {
+                document.body.removeChild(dir.el)
+            })
+
+        })
         
-        var dir = mockDirective('value', 'input')
-        dir.bind()
-        
-        before(function () {
-            document.body.appendChild(dir.el)
-        })
+        describe('input[text] and others', function () {
+            
+            var dir = mockDirective('model', 'input', 'email')
+            dir.bind()
+            
+            before(function () {
+                document.body.appendChild(dir.el)
+            })
 
-        it('should set the value on update()', function () {
-            dir.update('foobar')
-            assert.strictEqual(dir.el.value, 'foobar')
-        })
+            it('should set the value on update()', function () {
+                dir.update('foobar')
+                assert.strictEqual(dir.el.value, 'foobar')
+            })
 
-        it('should trigger vm.$set when value is changed via keyup', function () {
-            var triggered = false
-            dir.key = 'foo'
-            dir.vm = { $set: function (key, val) {
-                assert.strictEqual(key, 'foo')
-                assert.strictEqual(val, 'bar')
-                triggered = true
-            }}
-            dir.el.value = 'bar'
-            dir.el.dispatchEvent(mockKeyEvent('keyup'))
-            assert.ok(triggered)
-        })
+            // `lazy` option is tested in the API suite
+            it('should trigger vm.$set when value is changed via keyup', function () {
+                var triggered = false
+                dir.key = 'foo'
+                dir.vm = { $set: function (key, val) {
+                    assert.strictEqual(key, 'foo')
+                    assert.strictEqual(val, 'bar')
+                    triggered = true
+                }}
+                dir.el.value = 'bar'
+                dir.el.dispatchEvent(mockKeyEvent('keyup'))
+                assert.ok(triggered)
+            })
 
-        it('should remove event listener with unbind()', function () {
-            var removed = true
-            dir.vm.$set = function () {
-                removed = false
-            }
-            dir.unbind()
-            dir.el.dispatchEvent(mockKeyEvent('keyup'))
-            assert.ok(removed)
-        })
+            it('should remove event listener with unbind()', function () {
+                var removed = true
+                dir.vm.$set = function () {
+                    removed = false
+                }
+                dir.unbind()
+                dir.el.dispatchEvent(mockKeyEvent('keyup'))
+                assert.ok(removed)
+            })
 
-        after(function () {
-            document.body.removeChild(dir.el)
-        })
+            after(function () {
+                document.body.removeChild(dir.el)
+            })
 
-    })
-
-    describe('checked', function () {
-        
-        var dir = mockDirective('checked', 'input', 'checkbox')
-        dir.bind()
-
-        before(function () {
-            document.body.appendChild(dir.el)
-        })
-
-        it('should set checked on update()', function () {
-            dir.update(true)
-            assert.ok(dir.el.checked)
-            dir.update(false)
-            assert.ok(!dir.el.checked)
-        })
-
-        it('should trigger vm.$set on change event', function () {
-            var triggered = false
-            dir.key = 'foo'
-            dir.vm = { $set: function (key, val) {
-                assert.strictEqual(key, 'foo')
-                assert.strictEqual(val, true)
-                triggered = true
-            }}
-            dir.el.dispatchEvent(mockMouseEvent('click'))
-            assert.ok(triggered)
-        })
-
-        it('should remove event listener with unbind()', function () {
-            var removed = true
-            dir.vm.$set = function () {
-                removed = false
-            }
-            dir.unbind()
-            dir.el.dispatchEvent(mockMouseEvent('click'))
-            assert.ok(removed)
-        })
-
-        after(function () {
-            document.body.removeChild(dir.el)
         })
 
     })
@@ -441,7 +543,7 @@ function mockDirective (dirName, tag, type) {
     var dir = Seed.directive(dirName),
         ret = {
             binding: { compiler: { vm: {} } },
-            compiler: { vm: {} },
+            compiler: { vm: {}, options: {} },
             el: document.createElement(tag || 'div')
         }
     if (typeof dir === 'function') {
@@ -453,6 +555,12 @@ function mockDirective (dirName, tag, type) {
     }
     if (tag === 'input') ret.el.type = type || 'text'
     return ret
+}
+
+function mockChangeEvent () {
+    var e = document.createEvent('HTMLEvents')
+    e.initEvent('change', true, true)
+    return e
 }
 
 function mockKeyEvent (type) {

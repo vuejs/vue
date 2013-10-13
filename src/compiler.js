@@ -537,6 +537,7 @@ CompilerProto.destroy = function () {
     utils.log('compiler destroyed: ', compiler.vm.$el)
     // unwatch
     compiler.observer.off()
+    compiler.emitter.off()
     var i, key, dir, inss, binding,
         el         = compiler.el,
         directives = compiler.dirs,
