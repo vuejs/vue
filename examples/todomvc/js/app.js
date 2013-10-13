@@ -4,6 +4,13 @@ var filters = {
     completed: function (todo) { return todo.completed }
 }
 
+Seed.directive('todo-focus', function (value) {
+    var el = this.el
+    if (value) {
+        setTimeout(function () { el.focus() }, 0)
+    }
+})
+
 var app = new Seed({
 
     el: '#todoapp',

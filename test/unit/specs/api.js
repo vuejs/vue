@@ -17,13 +17,14 @@ describe('UNIT: API', function () {
 
         it('should work when changing interpolate tags', function () {
             var testId = 'config-2'
+            // IE treats <% ... %> as a tag... wtf
             Seed.config({
                 interpolateTags: {
-                    open: '<%',
-                    close: '%>'
+                    open: '(%',
+                    close: '%)'
                 }
             })
-            mock(testId, '<% test %>')
+            mock(testId, '(% test %)')
             new Seed({
                 el: '#' + testId,
                 scope: { test: testId }

@@ -31,15 +31,6 @@ module.exports = {
     visible: function (value) {
         this.el.style.visibility = value ? '' : 'hidden'
     },
-    
-    focus: function (value) {
-        var el = this.el
-        if (value) {
-            setTimeout(function () {
-                el.focus()
-            }, 0)
-        }
-    },
 
     class: function (value) {
         if (this.arg) {
@@ -70,14 +61,31 @@ module.exports = {
                 ? 'checked'
                 : 'value'
             self.set = function () {
+                self.lock = true
                 self.vm.$set(self.key, el[self.attr])
+                self.lock = false
             }
             el.addEventListener(self.event, self.set)
         },
         update: function (value) {
-            if (this.el.type === 'radio') {
+            var self = this,
+                el   = self.el
+            if (self.lock) return
+            if (el.type === 'radio') {
                 /* jshint eqeqeq: false */
-                this.el.checked = value == this.el.value
+                el.checked = value == el.value
+            } else if (el.tagName === 'SELECT') {
+                // you cannot set <select>'s value in stupid IE9
+                var o = el.options,
+                    i = o.length,
+                    index = -1
+                while (i--) {
+                    if (o[i].value == value) {
+                        index = i
+                        break
+                    }
+                }
+                o.selectedIndex = index
             } else {
                 this.el[this.attr] = this.attr === 'checked'
                     ? !!value

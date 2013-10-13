@@ -1,4 +1,3 @@
-- add escape: {{{ things in here should not be parsed }}}
 - sd-transition
 - component examples
 - tests

@@ -168,29 +168,6 @@ describe('UNIT: Directives', function () {
 
     })
 
-    describe('focus', function () {
-        
-        var dir = mockDirective('focus', 'input')
-
-        it('should focus on the element', function (done) {
-            var focused = false
-            // the el needs to be in the dom and visible to actually
-            // trigger the focus event
-            document.body.appendChild(dir.el)
-            dir.el.addEventListener('focus', function () {
-                focused = true
-            })
-            dir.update(true)
-            // the focus event has a 0ms timeout to make it async
-            setTimeout(function () {
-                assert.ok(focused)
-                document.body.removeChild(dir.el)
-                done()
-            }, 0)
-        })
-
-    })
-
     describe('class', function () {
 
         it('should set class to the value if it has no arg', function () {
@@ -314,8 +291,13 @@ describe('UNIT: Directives', function () {
 
         describe('select', function () {
             
-            var dir = mockDirective('model', 'select')
-            dir.el.innerHTML = '<option>0</option><option>1</option>'
+            var dir = mockDirective('model', 'select'),
+                o1 = document.createElement('option'),
+                o2 = document.createElement('option')
+            o1.value = 0
+            o2.value = 1
+            dir.el.appendChild(o1)
+            dir.el.appendChild(o2)
             dir.bind()
 
             before(function () {
@@ -358,7 +340,7 @@ describe('UNIT: Directives', function () {
         
         describe('input[text] and others', function () {
             
-            var dir = mockDirective('model', 'input', 'email')
+            var dir = mockDirective('model', 'input', 'text')
             dir.bind()
             
             before(function () {

@@ -1,9 +1,10 @@
-var Emitter = require('./emitter'),
-    utils   = require('./utils'),
-    typeOf  = utils.typeOf,
-    def     = utils.defProtected,
-    slice   = Array.prototype.slice,
-    methods = ['push','pop','shift','unshift','splice','sort','reverse']
+var Emitter  = require('./emitter'),
+    utils    = require('./utils'),
+    typeOf   = utils.typeOf,
+    def      = utils.defProtected,
+    slice    = Array.prototype.slice,
+    methods  = ['push','pop','shift','unshift','splice','sort','reverse'],
+    hasProto = ({}).__proto__ // fix for IE9
 
 // The proxy prototype to replace the __proto__ of
 // an observed array
@@ -11,7 +12,7 @@ var ArrayProxy = Object.create(Array.prototype)
 
 // Define mutation interceptors so we can emit the mutation info
 methods.forEach(function (method) {
-    utils.defProtected(ArrayProxy, method, function () {
+    def(ArrayProxy, method, function () {
         var result = Array.prototype[method].apply(this, arguments)
         this.__observer__.emit('mutate', this.__observer__.path, this, {
             method: method,
@@ -19,7 +20,7 @@ methods.forEach(function (method) {
             result: result
         })
         return result
-    })
+    }, !hasProto)
 })
 
 // Augment it with several convenience methods
@@ -42,7 +43,7 @@ var extensions = {
 }
 
 for (var method in extensions) {
-    utils.defProtected(ArrayProxy, method, extensions[method])
+    def(ArrayProxy, method, extensions[method], !hasProto)
 }
 
 /*
@@ -74,7 +75,13 @@ function watchArray (arr, path, observer) {
     def(arr, '__observer__', observer)
     observer.path = path
     /* jshint proto:true */
-    arr.__proto__ = ArrayProxy
+    if (hasProto) {
+        arr.__proto__ = ArrayProxy
+    } else {
+        for (var key in ArrayProxy) {
+            def(arr, key, ArrayProxy[key])
+        }
+    }
 }
 
 /*

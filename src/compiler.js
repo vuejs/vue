@@ -8,6 +8,7 @@ var Emitter     = require('./emitter'),
     DepsParser  = require('./deps-parser'),
     ExpParser   = require('./exp-parser'),
     slice       = Array.prototype.slice,
+    log         = utils.log,
     vmAttr,
     repeatAttr,
     partialAttr,
@@ -30,7 +31,7 @@ function Compiler (vm, options) {
 
     // initialize element
     compiler.setupElement(options)
-    utils.log('\nnew VM instance: ', compiler.el, '\n')
+    log('\nnew VM instance:', compiler.el.tagName, '\n')
 
     // copy scope properties to vm
     var scope = options.scope
@@ -365,7 +366,7 @@ CompilerProto.createBinding = function (key, isExp) {
         // we need to generate an anonymous computed property for it
         var result = ExpParser.parse(key)
         if (result) {
-            utils.log('  created anonymous binding: ' + key)
+            log('  created anonymous binding: ' + key)
             binding.value = { get: result.getter }
             compiler.markComputed(binding)
             compiler.exps.push(binding)
@@ -382,7 +383,7 @@ CompilerProto.createBinding = function (key, isExp) {
             utils.warn('  invalid expression: ' + key)
         }
     } else {
-        utils.log('  created binding: ' + key)
+        log('  created binding: ' + key)
         bindings[key] = binding
         // make sure the key exists in the object so it can be observed
         // by the Observer!
@@ -427,7 +428,7 @@ CompilerProto.ensurePath = function (key) {
  */
 CompilerProto.define = function (key, binding) {
 
-    utils.log('    defined root binding: ' + key)
+    log('    defined root binding: ' + key)
 
     var compiler = this,
         vm = compiler.vm,
@@ -536,7 +537,7 @@ CompilerProto.getOption = function (type, id) {
  */
 CompilerProto.destroy = function () {
     var compiler = this
-    utils.log('compiler destroyed: ', compiler.vm.$el)
+    log('compiler destroyed: ', compiler.vm.$el)
     // unwatch
     compiler.observer.off()
     compiler.emitter.off()
