@@ -1,18 +1,21 @@
+var utils = require('../utils')
+
 module.exports = {
 
     on     : require('./on'),
     repeat : require('./repeat'),
+    model  : require('./model'),
 
     attr: function (value) {
         this.el.setAttribute(this.arg, value)
     },
 
     text: function (value) {
-        this.el.textContent = toText(value)
+        this.el.textContent = utils.toText(value)
     },
 
     html: function (value) {
-        this.el.innerHTML = toText(value)
+        this.el.innerHTML = utils.toText(value)
     },
 
     style: {
@@ -41,59 +44,6 @@ module.exports = {
             }
             this.el.classList.add(value)
             this.lastVal = value
-        }
-    },
-
-    model: {
-        bind: function () {
-            var self = this,
-                el   = self.el,
-                type = el.type,
-                lazy = self.compiler.options.lazy
-            self.event =
-                (lazy ||
-                el.tagName === 'SELECT' ||
-                type === 'checkbox' ||
-                type === 'radio')
-                    ? 'change'
-                    : 'keyup'
-            self.attr = type === 'checkbox'
-                ? 'checked'
-                : 'value'
-            self.set = function () {
-                self.lock = true
-                self.vm.$set(self.key, el[self.attr])
-                self.lock = false
-            }
-            el.addEventListener(self.event, self.set)
-        },
-        update: function (value) {
-            var self = this,
-                el   = self.el
-            if (self.lock) return
-            if (el.type === 'radio') {
-                /* jshint eqeqeq: false */
-                el.checked = value == el.value
-            } else if (el.tagName === 'SELECT') {
-                // you cannot set <select>'s value in stupid IE9
-                var o = el.options,
-                    i = o.length,
-                    index = -1
-                while (i--) {
-                    if (o[i].value == value) {
-                        index = i
-                        break
-                    }
-                }
-                o.selectedIndex = index
-            } else {
-                this.el[this.attr] = this.attr === 'checked'
-                    ? !!value
-                    : toText(value)
-            }
-        },
-        unbind: function () {
-            this.el.removeEventListener(this.event, this.set)
         }
     },
 
@@ -140,13 +90,4 @@ function convertCSSProperty (prop) {
     return prop.replace(CONVERT_RE, function (m, char) {
         return char.toUpperCase()
     })
-}
-
-/*
- *  Make sure only strings and numbers are output to html
- */
-function toText (value) {
-    return (typeof value === 'string' || typeof value === 'number')
-        ? value
-        : ''
 }

@@ -33,6 +33,18 @@ module.exports = {
     },
 
     /*
+     *  Make sure only strings and numbers are output to html
+     *  output empty string is value is not string or number
+     */
+    toText: function (value) {
+        /* jshint eqeqeq: false */
+        return (typeof value === 'string' ||
+            (typeof value === 'number' && value == value)) // deal with NaN
+            ? value
+            : ''
+    },
+
+    /*
      *  simple extend
      */
     extend: function (obj, ext) {

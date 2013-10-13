@@ -21,7 +21,8 @@
         "src/filters.js",
         "src/directives/index.js",
         "src/directives/repeat.js",
-        "src/directives/on.js"
+        "src/directives/on.js",
+        "src/directives/model.js"
     ],
     "dependencies": {
         "component/emitter": "*"
