@@ -18,6 +18,9 @@
         "assert": true,
         "mock": true,
         "Seed": true,
-        "$": true
+        "$": true,
+        "mockChangeEvent": true,
+        "mockMouseEvent": true,
+        "mockKeyEvent": true
     }
 }

@@ -299,6 +299,28 @@ describe('UNIT: API', function () {
 
             })
 
+            describe('lazy', function () {
+                
+                it('should make text input fields only trigger on change', function () {
+                    var Test = Seed.extend({
+                        template: '<input type="text" sd-model="test">',
+                        lazy: true
+                    })
+                    var t = new Test({
+                        scope: {
+                            test: 'hi'
+                        }
+                    })
+                    var input = t.$el.querySelector('input')
+                    input.value = 'hohoho'
+                    input.dispatchEvent(mockKeyEvent('keyup'))
+                    assert.strictEqual(t.test, 'hi')
+                    input.dispatchEvent(mockChangeEvent())
+                    assert.strictEqual(t.test, 'hohoho')
+                })
+
+            })
+
             describe('element options', function () {
                 
                 it('should not accept el as an extension option', function () {
