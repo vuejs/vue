@@ -1,3 +1,5 @@
+/* jshint proto:true */
+
 var Emitter  = require('./emitter'),
     utils    = require('./utils'),
     typeOf   = utils.typeOf,
@@ -74,7 +76,6 @@ function watchObject (obj, path, observer) {
 function watchArray (arr, path, observer) {
     def(arr, '__observer__', observer)
     observer.path = path
-    /* jshint proto:true */
     if (hasProto) {
         arr.__proto__ = ArrayProxy
     } else {

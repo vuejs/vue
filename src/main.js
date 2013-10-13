@@ -2,7 +2,6 @@ var config      = require('./config'),
     ViewModel   = require('./viewmodel'),
     directives  = require('./directives'),
     filters     = require('./filters'),
-    textParser  = require('./text-parser'),
     utils       = require('./utils')
 
 /*
@@ -11,7 +10,6 @@ var config      = require('./config'),
 ViewModel.config = function (opts) {
     if (opts) {
         utils.extend(config, opts)
-        textParser.buildRegex()
     }
 }
 

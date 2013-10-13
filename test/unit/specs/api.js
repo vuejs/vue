@@ -15,30 +15,9 @@ describe('UNIT: API', function () {
             assert.strictEqual($('#' + testId + ' span'), testId)
         })
 
-        it('should work when changing interpolate tags', function () {
-            var testId = 'config-2'
-            // IE treats <% ... %> as a tag... wtf
-            Seed.config({
-                interpolateTags: {
-                    open: '(%',
-                    close: '%)'
-                }
-            })
-            mock(testId, '(% test %)')
-            new Seed({
-                el: '#' + testId,
-                scope: { test: testId }
-            })
-            assert.strictEqual($('#' + testId), testId)
-        })
-
         after(function () {
             Seed.config({
-                prefix: 'sd',
-                interpolateTags: {
-                    open: '{{',
-                    close: '}}'
-                }
+                prefix: 'sd'
             })
         })
 

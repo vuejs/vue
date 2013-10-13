@@ -1,5 +1,4 @@
-var TextParser = require('seed/src/text-parser'),
-    config = require('seed/src/config')
+var TextParser = require('seed/src/text-parser')
 
 describe('UNIT: TextNode Parser', function () {
 
@@ -47,38 +46,6 @@ describe('UNIT: TextNode Parser', function () {
 
         it('should extract partials', function () {
             assert.strictEqual(tokens[8].key, '>test')
-        })
-
-    })
-
-    describe('.buildRegex()', function () {
-
-        before(function () {
-            config.interpolateTags = {
-                open: '<%',
-                close: '%>'
-            }
-            TextParser.buildRegex()
-        })
-        
-        it('should update the interpolate tags and work', function () {
-            var tokens = TextParser.parse('hello <%a%>! <% bcd %><%d.e.f%> <%a + (b || c) ? d : e%>')
-            assert.strictEqual(tokens.length, 7)
-            assert.strictEqual(typeof tokens[0], 'string')
-            assert.strictEqual(typeof tokens[2], 'string')
-            assert.strictEqual(typeof tokens[5], 'string')
-            assert.strictEqual(tokens[1].key, 'a')
-            assert.strictEqual(tokens[3].key, 'bcd')
-            assert.strictEqual(tokens[4].key, 'd.e.f')
-            assert.strictEqual(tokens[6].key, 'a + (b || c) ? d : e')
-        })
-
-        after(function () {
-            config.interpolateTags = {
-                open: '{{',
-                close: '}}'
-            }
-            TextParser.buildRegex()
         })
 
     })
