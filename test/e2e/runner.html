@@ -3,30 +3,20 @@
     <head>
         <title>Test</title>
         <meta charset="utf-8">
-        <link rel="stylesheet" type="text/css" href="../../node_modules/grunt-mocha/node_modules/mocha/mocha.css">
+        <link rel="stylesheet" type="text/css" href="../lib/mocha.css">
     </head>
     <body>
         <div id="mocha"></div>
         <div id="test"></div>
-        <script src="../../node_modules/grunt-mocha/node_modules/mocha/mocha.js"></script>
-        <script src="../../node_modules/chai/chai.js"></script>
-        <script src="../classList.js"></script>
-        <script src="../../dist/seed.js"></script>
+        <script src="../lib/mocha.js"></script>
+        <script src="../lib/chai.js"></script>
+        <script src="../lib/classList.js"></script>
+        <script src="../lib/mockEvent.js"></script>
+        <script src="../../dist/seed.test.js"></script>
         <script>
             mocha.setup('bdd')
-            var assert = chai.assert
-            function mock (id, html, opts) {
-                var el = document.createElement('div')
-                el.id = id
-                el.innerHTML = html
-                if (opts) {
-                    for (var attr in opts) {
-                        el.setAttribute(attr, opts[attr])
-                    }
-                }
-                document.getElementById('test').appendChild(el)
-                return el
-            }
+            var Seed = require('seed'),
+                assert = chai.assert
         </script>
         <script src="specs/basic.js"></script>
         <script src="specs/expressions.js"></script>

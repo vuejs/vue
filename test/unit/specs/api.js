@@ -12,7 +12,7 @@ describe('UNIT: API', function () {
                 el: '#' + testId,
                 scope: { test: testId }
             })
-            assert.strictEqual($('#' + testId + ' span'), testId)
+            assert.strictEqual(document.querySelector('#' + testId + ' span').innerHTML, testId)
         })
 
         after(function () {
@@ -38,7 +38,7 @@ describe('UNIT: API', function () {
                 el: '#' + testId,
                 scope: { test: msg }
             })
-            assert.strictEqual($('#' + testId), '54321')
+            assert.strictEqual(document.querySelector('#' + testId).innerHTML, '54321')
         })
 
         it('should return filter function if only one arg is given', function () {

@@ -3,15 +3,16 @@
 	<head>
 		<title>Test</title>
 		<meta charset="utf-8">
-		<link rel="stylesheet" type="text/css" href="../../node_modules/grunt-mocha/node_modules/mocha/mocha.css">
+		<link rel="stylesheet" type="text/css" href="../lib/mocha.css">
 	</head>
 	<body>
 		<div id="mocha"></div>
 		<div id="test" style="display:none"></div>
-		<script src="../../node_modules/grunt-mocha/node_modules/mocha/mocha.js"></script>
-		<script src="../../node_modules/chai/chai.js"></script>
-		<script src="../classList.js"></script>
-		<script src="../seed.test.js"></script>
+		<script src="../lib/mocha.js"></script>
+		<script src="../lib/chai.js"></script>
+		<script src="../lib/classList.js"></script>
+		<script src="../lib/mockEvent.js"></script>
+		<script src="../../dist/seed.test.js"></script>
 		<script>
 			mocha.setup('bdd')
 			var Seed = require('seed'),
@@ -28,31 +29,6 @@
 				}
 				document.getElementById('test').appendChild(el)
 				return el
-			}
-
-			function mockHTMLEvent (type) {
-			    var e = document.createEvent('HTMLEvents')
-			    e.initEvent(type, true, true)
-			    return e
-			}
-
-			function mockKeyEvent (type) {
-			    var e = document.createEvent('KeyboardEvent'),
-			        initMethod = e.initKeyboardEvent
-			            ? 'initKeyboardEvent'
-			            : 'initKeyEvent'
-			    e[initMethod](type, true, true, null, false, false, false, false, 9, 0)
-			    return e
-			}
-
-			function mockMouseEvent (type) {
-			    var e = document.createEvent('MouseEvent')
-			    e.initMouseEvent(type, true, true, null, 1, 0, 0, 0, 0, false, false, false, false, 0, null)
-			    return e
-			}
-
-			function $ (selector) {
-				return document.querySelector(selector).innerHTML
 			}
 		</script>
 		<script src="specs/binding.js"></script>

@@ -21,7 +21,7 @@ module.exports = function( grunt ) {
                 standalone: 'Seed'
             },
             test: {
-                output: './test/',
+                output: './dist/',
                 name: 'seed.test',
                 styles: false
             }
