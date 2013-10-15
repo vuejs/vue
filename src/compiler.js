@@ -27,7 +27,7 @@ function Compiler (vm, options) {
 
     // extend options
     options = compiler.options = options || {}
-    utils.extend(compiler, options.compilerOptions || {})
+    utils.extend(compiler, options.compilerOptions)
 
     // initialize element
     compiler.setupElement(options)
@@ -35,7 +35,7 @@ function Compiler (vm, options) {
 
     // copy scope properties to vm
     var scope = options.scope
-    if (scope) utils.extend(vm, scope)
+    if (scope) utils.extend(vm, scope, true)
 
     compiler.vm  = vm
     vm.$compiler = compiler
