@@ -1,4 +1,3 @@
-;(function(){
 
 /**
  * Require the given path.
@@ -2620,10 +2619,4 @@ require.alias("component-emitter/index.js", "seed/deps/emitter/index.js");
 require.alias("component-emitter/index.js", "emitter/index.js");
 require.alias("component-indexof/index.js", "component-emitter/deps/indexof/index.js");
 
-require.alias("seed/src/main.js", "seed/index.js");if (typeof exports == "object") {
-  module.exports = require("seed");
-} else if (typeof define == "function" && define.amd) {
-  define(function(){ return require("seed"); });
-} else {
-  this["Seed"] = require("seed");
-}})();
+require.alias("seed/src/main.js", "seed/index.js");
