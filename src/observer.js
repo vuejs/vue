@@ -65,7 +65,10 @@ function watch (obj, path, observer) {
  */
 function watchObject (obj, path, observer) {
     for (var key in obj) {
-        bind(obj, key, path, observer)
+        var keyPrefix = key.charAt(0)
+        if (keyPrefix !== '$' && keyPrefix !== '_') {
+            bind(obj, key, path, observer)
+        }
     }
 }
 
