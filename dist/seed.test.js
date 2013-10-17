@@ -200,8 +200,11 @@ require.relative = function(parent) {
   return localRequire;
 };
 require.register("component-indexof/index.js", function(exports, require, module){
+
+var indexOf = [].indexOf;
+
 module.exports = function(arr, obj){
-  if (arr.indexOf) return arr.indexOf(obj);
+  if (indexOf) return arr.indexOf(obj);
   for (var i = 0; i < arr.length; ++i) {
     if (arr[i] === obj) return i;
   }
@@ -600,8 +603,10 @@ module.exports = {
     /*
      *  simple extend
      */
-    extend: function (obj, ext) {
+    extend: function (obj, ext, protective) {
+        if (!ext) return
         for (var key in ext) {
+            if (protective && obj[key]) continue
             obj[key] = ext[key]
         }
     },
@@ -655,7 +660,7 @@ function Compiler (vm, options) {
 
     // extend options
     options = compiler.options = options || {}
-    utils.extend(compiler, options.compilerOptions || {})
+    utils.extend(compiler, options.compilerOptions)
 
     // initialize element
     compiler.setupElement(options)
@@ -663,7 +668,7 @@ function Compiler (vm, options) {
 
     // copy scope properties to vm
     var scope = options.scope
-    if (scope) utils.extend(vm, scope)
+    if (scope) utils.extend(vm, scope, true)
 
     compiler.vm  = vm
     vm.$compiler = compiler
@@ -680,8 +685,7 @@ function Compiler (vm, options) {
     // because we want to have created all bindings before
     // observing values / parsing dependencies.
     var observables = compiler.observables = [],
-        computed    = compiler.computed    = [],
-        ctxBindings = compiler.ctxBindings = []
+        computed    = compiler.computed    = []
 
     // prototypal inheritance of bindings
     var parent = compiler.parentCompiler
@@ -728,10 +732,8 @@ function Compiler (vm, options) {
     }
     // extract dependencies for computed properties
     if (computed.length) DepsParser.parse(computed)
-    // extract dependencies for computed properties with dynamic context
-    if (ctxBindings.length) compiler.bindContexts(ctxBindings)
     // unset these no longer needed stuff
-    compiler.observables = compiler.computed = compiler.ctxBindings = compiler.arrays = null
+    compiler.observables = compiler.computed = compiler.arrays = null
 }
 
 var CompilerProto = Compiler.prototype
@@ -1085,13 +1087,7 @@ CompilerProto.define = function (key, binding) {
                 ob.emit('get', key)
             }
             return binding.isComputed
-                ? value.get({
-                    el: compiler.el,
-                    vm: vm,
-                    item: compiler.repeat
-                        ? vm[compiler.repeatPrefix]
-                        : null
-                })
+                ? value.get()
                 : value
         },
         set: function (newVal) {
@@ -1121,9 +1117,6 @@ CompilerProto.markComputed = function (binding) {
     var value = binding.value,
         vm    = this.vm
     binding.isComputed = true
-    // keep a copy of the raw getter
-    // for extracting contextual dependencies
-    binding.rawGet = value.get
     // bind the accessors to the vm
     value.get = value.get.bind(vm)
     if (value.set) value.set = value.set.bind(vm)
@@ -1354,20 +1347,14 @@ VMProto.$emit = function () {
 }
 
 /*
- *  listen for a broadcasted/emitted event
+ *  delegate on/off/once to the compiler's emitter
  */
-VMProto.$on = function () {
-    var emitter = this.$compiler.emitter
-    emitter.on.apply(emitter, arguments)
-}
-
-/*
- *  stop listening
- */
-VMProto.$off = function () {
-    var emitter = this.$compiler.emitter
-    emitter.off.apply(emitter, arguments)
-}
+;['on', 'off', 'once'].forEach(function (method) {
+    VMProto['$' + method] = function () {
+        var emitter = this.$compiler.emitter
+        emitter[method].apply(emitter, arguments)
+    }
+})
 
 /*
  *  If a VM doesn't contain a path, go up the prototype chain
@@ -1973,18 +1960,9 @@ var Emitter  = require('./emitter'),
     utils    = require('./utils'),
     observer = new Emitter()
 
-var dummyEl = document.createElement('div'),
-    ARGS_RE = /^function\s*?\((.+?)[\),]/,
-    SCOPE_RE_STR = '\\.vm\\.[\\.\\w][\\.\\w$]*',
-    noop = function () {}
-
 /*
  *  Auto-extract the dependencies of a computed property
  *  by recording the getters triggered when evaluating it.
- *
- *  However, the first pass will contain duplicate dependencies
- *  for computed properties. It is therefore necessary to do a
- *  second pass in injectDeps()
  */
 function catchDeps (binding) {
     utils.log('\n─ ' + binding.key)
@@ -1996,65 +1974,8 @@ function catchDeps (binding) {
         binding.deps.push(dep)
         dep.subs.push(binding)
     })
-    parseContextDependency(binding)
-    binding.value.get({
-        vm: createDummyVM(binding),
-        el: dummyEl
-    })
+    binding.value.get()
     observer.off('get')
-}
-
-/*
- *  We need to invoke each binding's getter for dependency parsing,
- *  but we don't know what sub-viewmodel properties the user might try
- *  to access in that getter. To avoid thowing an error or forcing
- *  the user to guard against an undefined argument, we staticly
- *  analyze the function to extract any possible nested properties
- *  the user expects the target viewmodel to possess. They are all assigned
- *  a noop function so they can be invoked with no real harm.
- */
-function createDummyVM (binding) {
-    var viewmodel = {},
-        deps = binding.contextDeps
-    if (!deps) return viewmodel
-    var i = binding.contextDeps.length,
-        j, level, key, path
-    while (i--) {
-        level = viewmodel
-        path = deps[i].split('.')
-        j = 0
-        while (j < path.length) {
-            key = path[j]
-            if (!level[key]) level[key] = noop
-            level = level[key]
-            j++
-        }
-    }
-    return viewmodel
-}
-
-/*
- *  Extract context dependency paths
- */
-function parseContextDependency (binding) {
-    var fn   = binding.rawGet,
-        str  = fn.toString(),
-        args = str.match(ARGS_RE)
-    if (!args) return null
-    var depsRE = new RegExp(args[1] + SCOPE_RE_STR, 'g'),
-        matches = str.match(depsRE),
-        base = args[1].length + 4
-    if (!matches) return null
-    var i = matches.length,
-        deps = [], dep
-    while (i--) {
-        dep = matches[i].slice(base)
-        if (deps.indexOf(dep) === -1) {
-            deps.push(dep)
-        }
-    }
-    binding.contextDeps = deps
-    binding.compiler.contextBindings.push(binding)
 }
 
 module.exports = {
@@ -2073,11 +1994,8 @@ module.exports = {
         bindings.forEach(catchDeps)
         observer.isObserving = false
         utils.log('\ndone.')
-    },
-
-    // for testing only
-    cdvm: createDummyVM,
-    pcd: parseContextDependency
+    }
+    
 }
 });
 require.register("seed/src/filters.js", function(exports, require, module){
