@@ -98,20 +98,14 @@ VMProto.$emit = function () {
 }
 
 /*
- *  listen for a broadcasted/emitted event
+ *  delegate on/off/once to the compiler's emitter
  */
-VMProto.$on = function () {
-    var emitter = this.$compiler.emitter
-    emitter.on.apply(emitter, arguments)
-}
-
-/*
- *  stop listening
- */
-VMProto.$off = function () {
-    var emitter = this.$compiler.emitter
-    emitter.off.apply(emitter, arguments)
-}
+;['on', 'off', 'once'].forEach(function (method) {
+    VMProto['$' + method] = function () {
+        var emitter = this.$compiler.emitter
+        emitter[method].apply(emitter, arguments)
+    }
+})
 
 /*
  *  If a VM doesn't contain a path, go up the prototype chain

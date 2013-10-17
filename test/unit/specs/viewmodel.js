@@ -120,6 +120,23 @@ describe('UNIT: ViewModel', function () {
 
     })
 
+    describe('.$once', function () {
+        
+        it('should invoke the listener only once', function () {
+            var t = new Seed(),
+                triggered = 0,
+                msg = 'on once'
+            t.$once('test', function (m) {
+                assert.strictEqual(m, msg)
+                triggered++
+            })
+            t.$compiler.emitter.emit('test', msg)
+            t.$compiler.emitter.emit('test', msg)
+            assert.strictEqual(triggered, 1)
+        })
+
+    })
+
     describe('$off', function () {
         
         it('should turn off the listener', function () {
