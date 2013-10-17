@@ -52,8 +52,7 @@ function Compiler (vm, options) {
     // because we want to have created all bindings before
     // observing values / parsing dependencies.
     var observables = compiler.observables = [],
-        computed    = compiler.computed    = [],
-        ctxBindings = compiler.ctxBindings = []
+        computed    = compiler.computed    = []
 
     // prototypal inheritance of bindings
     var parent = compiler.parentCompiler
@@ -100,10 +99,8 @@ function Compiler (vm, options) {
     }
     // extract dependencies for computed properties
     if (computed.length) DepsParser.parse(computed)
-    // extract dependencies for computed properties with dynamic context
-    if (ctxBindings.length) compiler.bindContexts(ctxBindings)
     // unset these no longer needed stuff
-    compiler.observables = compiler.computed = compiler.ctxBindings = compiler.arrays = null
+    compiler.observables = compiler.computed = compiler.arrays = null
 }
 
 var CompilerProto = Compiler.prototype
@@ -457,13 +454,7 @@ CompilerProto.define = function (key, binding) {
                 ob.emit('get', key)
             }
             return binding.isComputed
-                ? value.get({
-                    el: compiler.el,
-                    vm: vm,
-                    item: compiler.repeat
-                        ? vm[compiler.repeatPrefix]
-                        : null
-                })
+                ? value.get()
                 : value
         },
         set: function (newVal) {
@@ -493,9 +484,6 @@ CompilerProto.markComputed = function (binding) {
     var value = binding.value,
         vm    = this.vm
     binding.isComputed = true
-    // keep a copy of the raw getter
-    // for extracting contextual dependencies
-    binding.rawGet = value.get
     // bind the accessors to the vm
     value.get = value.get.bind(vm)
     if (value.set) value.set = value.set.bind(vm)

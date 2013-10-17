@@ -28,7 +28,7 @@ module.exports = function( grunt ) {
         },
 
         jshint: {
-            build: {
+            dev: {
                 src: ['src/**/*.js'],
                 options: {
                     jshintrc: './.jshintrc'
@@ -90,8 +90,9 @@ module.exports = function( grunt ) {
     grunt.loadNpmTasks( 'grunt-mocha' )
     grunt.registerTask( 'test', ['component_build:test', 'mocha'] )
     grunt.registerTask( 'default', [
-        'jshint',
+        'jshint:dev',
         'component_build:build',
+        'jshint:test',
         'test',
         'uglify'
     ])

@@ -1,56 +1,44 @@
-/*
- *  NOTE
- *
- *  this suite only tests two utility methods used in the
- *  Dependency Parser, but does not test the main .parse()
- *  method. .parse() is covered in integration tests because
- *  it has to work with multiple compilers.
- */
-
 var DepsParser = require('seed/src/deps-parser')
 
 describe('UNIT: Dependency Parser', function () {
 
-    describe('.parseContextDependency()', function () {
-    
-        var binding = {
-            rawGet: function (ctx) {
-                return ctx.vm.a + ctx.vm.a + ctx.vm.b.c
-            },
-            compiler: {
-                contextBindings: []
-            }
+    describe('.parse()', function () {
+
+        // mock the bidnings...
+        var bindings = [],
+            ob = DepsParser.observer
+        for (var i = 0; i < 10; i++) {
+            mockBinding(i)
         }
-        DepsParser.pcd(binding)
 
-        it('should not contain duplicate entries', function () {
-            assert.strictEqual(binding.contextDeps.length, 2)
-        })
-
-        it('should extract correct context dependencies from a getter', function () {
-            assert.strictEqual(binding.contextDeps[0], 'b.c')
-            assert.strictEqual(binding.contextDeps[1], 'a')
-        })
-
-        it('should add the binding to its compiler\'s contextBindings', function () {
-            assert.ok(binding.compiler.contextBindings.indexOf(binding) !== -1)
-        })
-
-    })
-
-    describe('.createDummyVM()', function () {
-
-        var createDummyVM = DepsParser.cdvm,
-            binding = {
-                contextDeps: ['a.b', 'a.b.c', 'b']
+        function mockBinding (i) {
+            var b = {
+                id: i,
+                depId: ~~(Math.random() * i),
+                deps: [],
+                subs: [],
+                value: {
+                    get: function () {
+                        if (i > 0) {
+                            ob.emit('get', bindings[b.depId])
+                        }
+                    }
+                }
             }
-        
-        it('should create a dummy VM that has all context dep paths', function () {
-            var vm = createDummyVM(binding)
-            assert.ok('a' in vm)
-            assert.ok('b' in vm)
-            assert.ok('b' in vm.a)
-            assert.ok('c' in vm.a.b)
+            bindings.push(b)
+        }
+
+        DepsParser.parse(bindings)
+
+        it('should parse the deps correctly', function () {
+            
+            bindings.forEach(function (b) {
+                if (b.id === 0) return
+                var dep = b.deps[0]
+                assert.strictEqual(dep.id, b.depId)
+                assert.ok(dep.subs.indexOf(b) > -1)
+            })
+
         })
 
     })
