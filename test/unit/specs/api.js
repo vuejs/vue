@@ -101,7 +101,7 @@ describe('UNIT: API', function () {
 
     })
 
-    describe('vm()', function () {
+    describe('viewmodel()', function () {
 
         var testId = 'api-vm-test',
             Test = Seed.extend({
@@ -111,12 +111,12 @@ describe('UNIT: API', function () {
             utils = require('seed/src/utils')
 
         it('should register a VM constructor', function () {
-            Seed.vm(testId, Test)
+            Seed.viewmodel(testId, Test)
             assert.strictEqual(utils.vms[testId], Test)
         })
 
         it('should retrieve the VM if has only one arg', function () {
-            assert.strictEqual(Seed.vm(testId), Test)
+            assert.strictEqual(Seed.viewmodel(testId), Test)
         })
 
         it('should work with sd-viewmodel', function () {

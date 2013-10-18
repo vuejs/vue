@@ -73,8 +73,9 @@
             template: document.getElementById('sd-template-offspring').innerHTML
         })
 
-        Seed.vm('man', Man)
-        Seed.vm('offspring', Offspring)
+        Seed
+            .viewmodel('man', Man)
+            .viewmodel('offspring', Offspring)
 
         new Man({
             el: '#grandpa'

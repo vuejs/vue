@@ -11,6 +11,7 @@ ViewModel.config = function (opts) {
     if (opts) {
         utils.extend(config, opts)
     }
+    return this
 }
 
 /**
@@ -19,6 +20,7 @@ ViewModel.config = function (opts) {
 ViewModel.directive = function (id, fn) {
     if (!fn) return directives[id]
     directives[id] = fn
+    return this
 }
 
 /**
@@ -27,14 +29,16 @@ ViewModel.directive = function (id, fn) {
 ViewModel.filter = function (id, fn) {
     if (!fn) return filters[id]
     filters[id] = fn
+    return this
 }
 
 /**
  *  Allows user to register/retrieve a ViewModel constructor
  */
-ViewModel.vm = function (id, Ctor) {
+ViewModel.viewmodel = function (id, Ctor) {
     if (!Ctor) return utils.vms[id]
     utils.vms[id] = Ctor
+    return this
 }
 
 /**
@@ -43,6 +47,7 @@ ViewModel.vm = function (id, Ctor) {
 ViewModel.partial = function (id, partial) {
     if (!partial) return utils.partials[id]
     utils.partials[id] = templateToFragment(partial)
+    return this
 }
 
 /**
@@ -51,6 +56,7 @@ ViewModel.partial = function (id, partial) {
 ViewModel.transition = function (id, transition) {
     if (!transition) return utils.transitions[id]
     utils.transitions[id] = transition
+    return this
 }
 
 ViewModel.extend = extend
