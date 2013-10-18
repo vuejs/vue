@@ -29,7 +29,7 @@ module.exports = {
             : ''
     },
 
-    /*
+    /**
      *  args: an array of strings corresponding to
      *  the single, double, triple ... forms of the word to
      *  be pluralized. When the number to be pluralized

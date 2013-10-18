@@ -2,7 +2,7 @@ var Emitter  = require('./emitter'),
     utils    = require('./utils'),
     observer = new Emitter()
 
-/*
+/**
  *  Auto-extract the dependencies of a computed property
  *  by recording the getters triggered when evaluating it.
  */
@@ -22,12 +22,12 @@ function catchDeps (binding) {
 
 module.exports = {
 
-    /*
+    /**
      *  the observer that catches events triggered by getters
      */
     observer: observer,
 
-    /*
+    /**
      *  parse a list of computed property bindings
      */
     parse: function (bindings) {

@@ -135,14 +135,6 @@ describe('UNIT: Binding', function () {
             assert.ok(notInSubs2)
         })
 
-        it('should unref all instance props', function () {
-            assert.strictEqual(b.compiler, null)
-            assert.strictEqual(b.pubs, null)
-            assert.strictEqual(b.subs, null)
-            assert.strictEqual(b.instances, null)
-            assert.strictEqual(b.deps, null)
-        })
-
     })
 
 })

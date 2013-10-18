@@ -1,4 +1,4 @@
-/*
+/**
  *  Binding class.
  *
  *  each property on the viewmodel has one corresponding Binding object
@@ -18,7 +18,7 @@ function Binding (compiler, key, isExp) {
 
 var BindingProto = Binding.prototype
 
-/*
+/**
  *  Process the value, then trigger updates on all dependents
  */
 BindingProto.update = function (value) {
@@ -30,7 +30,7 @@ BindingProto.update = function (value) {
     this.pub()
 }
 
-/*
+/**
  *  -- computed property only --    
  *  Force all instances to re-evaluate themselves
  */
@@ -42,7 +42,7 @@ BindingProto.refresh = function () {
     this.pub()
 }
 
-/*
+/**
  *  Notify computed properties that depend on this binding
  *  to update themselves
  */
@@ -53,7 +53,7 @@ BindingProto.pub = function () {
     }
 }
 
-/*
+/**
  *  Unbind the binding, remove itself from all of its dependencies
  */
 BindingProto.unbind = function () {
@@ -67,7 +67,6 @@ BindingProto.unbind = function () {
         subs = this.deps[i].subs
         subs.splice(subs.indexOf(this), 1)
     }
-    this.compiler = this.pubs = this.subs = this.instances = this.deps = null
 }
 
 module.exports = Binding

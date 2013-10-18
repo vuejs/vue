@@ -11,7 +11,7 @@ module.exports = {
     partials    : {},
     transitions : {},
 
-    /*
+    /**
      *  Define an ienumerable property
      *  This avoids it being included in JSON.stringify
      *  or for...in loops.
@@ -25,14 +25,14 @@ module.exports = {
         })
     },
 
-    /*
+    /**
      *  Accurate type check
      */
     typeOf: function (obj) {
         return toString.call(obj).slice(8, -1)
     },
 
-    /*
+    /**
      *  Make sure only strings and numbers are output to html
      *  output empty string is value is not string or number
      */
@@ -44,7 +44,7 @@ module.exports = {
             : ''
     },
 
-    /*
+    /**
      *  simple extend
      */
     extend: function (obj, ext, protective) {
@@ -55,7 +55,7 @@ module.exports = {
         }
     },
 
-    /*
+    /**
      *  log for debugging
      */
     log: function () {
@@ -64,7 +64,7 @@ module.exports = {
         }
     },
     
-    /*
+    /**
      *  warn for debugging
      */
     warn: function() {

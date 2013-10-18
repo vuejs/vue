@@ -3,7 +3,7 @@ var config   = require('../config'),
     Emitter  = require('../emitter'),
     ViewModel // lazy def to avoid circular dependency
 
-/*
+/**
  *  Mathods that perform precise DOM manipulation
  *  based on mutator method triggered
  */
@@ -130,7 +130,7 @@ module.exports = {
         this.retach()
     },
 
-    /*
+    /**
      *  Create a new child VM from a data object
      *  passing along compiler options indicating this
      *  is a sd-repeat item.
@@ -165,7 +165,7 @@ module.exports = {
         }
     },
 
-    /*
+    /**
      *  Update index of each item after a mutation
      */
     updateIndexes: function () {
@@ -175,7 +175,7 @@ module.exports = {
         }
     },
 
-    /*
+    /**
      *  Detach/ the container from the DOM before mutation
      *  so that batch DOM updates are done in-memory and faster
      */

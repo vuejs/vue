@@ -2,7 +2,7 @@ var BINDING_RE = /\{\{(.+?)\}\}/
 
 module.exports = {
 
-    /*
+    /**
      *  Parse a piece of text, return an array of tokens
      */
     parse: function (text) {

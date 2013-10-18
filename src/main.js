@@ -4,7 +4,7 @@ var config      = require('./config'),
     filters     = require('./filters'),
     utils       = require('./utils')
 
-/*
+/**
  *  Set config options
  */
 ViewModel.config = function (opts) {
@@ -13,7 +13,7 @@ ViewModel.config = function (opts) {
     }
 }
 
-/*
+/**
  *  Allows user to register/retrieve a directive definition
  */
 ViewModel.directive = function (id, fn) {
@@ -21,7 +21,7 @@ ViewModel.directive = function (id, fn) {
     directives[id] = fn
 }
 
-/*
+/**
  *  Allows user to register/retrieve a filter function
  */
 ViewModel.filter = function (id, fn) {
@@ -29,7 +29,7 @@ ViewModel.filter = function (id, fn) {
     filters[id] = fn
 }
 
-/*
+/**
  *  Allows user to register/retrieve a ViewModel constructor
  */
 ViewModel.vm = function (id, Ctor) {
@@ -37,7 +37,7 @@ ViewModel.vm = function (id, Ctor) {
     utils.vms[id] = Ctor
 }
 
-/*
+/**
  *  Allows user to register/retrieve a template partial
  */
 ViewModel.partial = function (id, partial) {
@@ -45,7 +45,7 @@ ViewModel.partial = function (id, partial) {
     utils.partials[id] = templateToFragment(partial)
 }
 
-/*
+/**
  *  Allows user to register/retrieve a transition definition object
  */
 ViewModel.transition = function (id, transition) {
@@ -55,7 +55,7 @@ ViewModel.transition = function (id, transition) {
 
 ViewModel.extend = extend
 
-/*
+/**
  *  Expose the main ViewModel class
  *  and add extend method
  */
@@ -90,7 +90,7 @@ function extend (options) {
     return ExtendedVM
 }
 
-/*
+/**
  *  Inherit options
  *
  *  For options such as `scope`, `vms`, `directives`, 'partials',
@@ -118,7 +118,7 @@ function inheritOptions (child, parent, topLevel) {
     return child
 }
 
-/*
+/**
  *  Convert an object of partials to dom fragments
  */
 function convertPartials (partials) {
@@ -130,7 +130,7 @@ function convertPartials (partials) {
     }
 }
 
-/*
+/**
  *  Convert a string template to a dom fragment
  */
 function templateToFragment (template) {

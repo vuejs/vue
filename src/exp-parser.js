@@ -32,7 +32,7 @@ function getVariables (code) {
 
 module.exports = {
 
-    /*
+    /**
      *  Parse and create an anonymous computed property getter function
      *  from an arbitrary expression.
      */

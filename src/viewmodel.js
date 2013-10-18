@@ -1,6 +1,7 @@
-var Compiler = require('./compiler')
+var Compiler = require('./compiler'),
+    def      = require('./utils').defProtected
 
-/*
+/**
  *  ViewModel exposed to the user that holds data,
  *  computed properties, event handlers
  *  and a few reserved methods
@@ -10,13 +11,15 @@ function ViewModel (options) {
     new Compiler(this, options)
 }
 
+// All VM prototype methods are inenumerable
+// so it can be stringified/looped through as raw data
 var VMProto = ViewModel.prototype
 
-/*
+/**
  *  Convenience function to set an actual nested value
  *  from a flat key string. Used in directives.
  */
-VMProto.$set = function (key, value) {
+def(VMProto, '$set', function (key, value) {
     var path = key.split('.'),
         obj = getTargetVM(this, path)
     if (!obj) return
@@ -24,14 +27,14 @@ VMProto.$set = function (key, value) {
         obj = obj[path[d]]
     }
     obj[path[d]] = value
-}
+})
 
-/*
+/**
  *  The function for getting a key
  *  which will go up along the prototype chain of the bindings
  *  Used in exp-parser.
  */
-VMProto.$get = function (key) {
+def(VMProto, '$get', function (key) {
     var path = key.split('.'),
         obj = getTargetVM(this, path),
         vm = obj
@@ -41,20 +44,20 @@ VMProto.$get = function (key) {
     }
     if (typeof obj === 'function') obj = obj.bind(vm)
     return obj
-}
+})
 
-/*
+/**
  *  watch a key on the viewmodel for changes
  *  fire callback with new value
  */
-VMProto.$watch = function (key, callback) {
+def(VMProto, '$watch', function (key, callback) {
     this.$compiler.observer.on('change:' + key, callback)
-}
+})
 
-/*
+/**
  *  unwatch a key
  */
-VMProto.$unwatch = function (key, callback) {
+def(VMProto, '$unwatch', function (key, callback) {
     // workaround here
     // since the emitter module checks callback existence
     // by checking the length of arguments
@@ -62,20 +65,19 @@ VMProto.$unwatch = function (key, callback) {
         ob = this.$compiler.observer
     if (callback) args.push(callback)
     ob.off.apply(ob, args)
-}
+})
 
-/*
+/**
  *  unbind everything, remove everything
  */
-VMProto.$destroy = function () {
+def(VMProto, '$destroy', function () {
     this.$compiler.destroy()
-    this.$compiler = null
-}
+})
 
-/*
+/**
  *  broadcast an event to all child VMs recursively.
  */
-VMProto.$broadcast = function () {
+def(VMProto, '$broadcast', function () {
     var children = this.$compiler.childCompilers,
         i = children.length,
         child
@@ -84,30 +86,30 @@ VMProto.$broadcast = function () {
         child.emitter.emit.apply(child.emitter, arguments)
         child.vm.$broadcast.apply(child.vm, arguments)
     }
-}
+})
 
-/*
+/**
  *  emit an event that propagates all the way up to parent VMs.
  */
-VMProto.$emit = function () {
+def(VMProto, '$emit', function () {
     var parent = this.$compiler.parentCompiler
     if (parent) {
         parent.emitter.emit.apply(parent.emitter, arguments)
         parent.vm.$emit.apply(parent.vm, arguments)
     }
-}
+})
 
-/*
+/**
  *  delegate on/off/once to the compiler's emitter
  */
 ;['on', 'off', 'once'].forEach(function (method) {
-    VMProto['$' + method] = function () {
+    def(VMProto, '$' + method, function () {
         var emitter = this.$compiler.emitter
         emitter[method].apply(emitter, arguments)
-    }
+    })
 })
 
-/*
+/**
  *  If a VM doesn't contain a path, go up the prototype chain
  *  to locate the ancestor that has it.
  */

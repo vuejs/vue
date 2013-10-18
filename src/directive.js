@@ -10,7 +10,7 @@ var KEY_RE          = /^[^\|]+/,
     NESTING_RE      = /^\^+/,
     SINGLE_VAR_RE   = /^[\w\.\$]+$/
 
-/*
+/**
  *  Directive class
  *  represents a single directive instance in the DOM
  */
@@ -57,7 +57,7 @@ function Directive (definition, directiveName, expression, rawKey, compiler, nod
 
 var DirProto = Directive.prototype
 
-/*
+/**
  *  parse a key, extract argument and nesting/root info
  */
 function parseKey (dir, rawKey) {
@@ -88,7 +88,7 @@ function parseKey (dir, rawKey) {
     dir.key = key
 }
 
-/*
+/**
  *  parse a filter expression
  */
 function parseFilter (filter, compiler) {
@@ -115,7 +115,7 @@ function parseFilter (filter, compiler) {
     }
 }
 
-/*
+/**
  *  called when a new value is set 
  *  for computed properties, this will only be called once
  *  during initialization.
@@ -126,7 +126,7 @@ DirProto.update = function (value, init) {
     this.apply(value)
 }
 
-/*
+/**
  *  -- computed property only --
  *  called when a dependency has changed
  */
@@ -143,7 +143,7 @@ DirProto.refresh = function (value) {
     this.apply(value)
 }
 
-/*
+/**
  *  Actually invoking the _update from the directive's definition
  */
 DirProto.apply = function (value) {
@@ -154,7 +154,7 @@ DirProto.apply = function (value) {
     )
 }
 
-/*
+/**
  *  pipe the value through filters
  */
 DirProto.applyFilters = function (value) {
@@ -166,11 +166,11 @@ DirProto.applyFilters = function (value) {
     return filtered
 }
 
-/*
+/**
  *  Unbind diretive
  *  @ param {Boolean} update
  *    Sometimes we call unbind before an update (i.e. not destroy)
- *    just to teardown previousstuff, in that case we do not want
+ *    just to teardown previous stuff, in that case we do not want
  *    to null everything.
  */
 DirProto.unbind = function (update) {
@@ -180,7 +180,7 @@ DirProto.unbind = function (update) {
     if (!update) this.vm = this.el = this.binding = this.compiler = null
 }
 
-/*
+/**
  *  make sure the directive and expression is valid
  *  before we create an instance
  */

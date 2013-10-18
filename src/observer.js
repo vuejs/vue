@@ -48,7 +48,7 @@ for (var method in extensions) {
     def(ArrayProxy, method, extensions[method], !hasProto)
 }
 
-/*
+/**
  *  Watch an object based on type
  */
 function watch (obj, path, observer) {
@@ -60,7 +60,7 @@ function watch (obj, path, observer) {
     }
 }
 
-/*
+/**
  *  Watch an Object, recursive.
  */
 function watchObject (obj, path, observer) {
@@ -72,7 +72,7 @@ function watchObject (obj, path, observer) {
     }
 }
 
-/*
+/**
  *  Watch an Array, overload mutation methods
  *  and add augmentations by intercepting the prototype chain
  */
@@ -88,7 +88,7 @@ function watchArray (arr, path, observer) {
     }
 }
 
-/*
+/**
  *  Define accessors for a property on an Object
  *  so it emits get/set events.
  *  Then watch the value itself.
@@ -119,7 +119,7 @@ function bind (obj, key, path, observer) {
     watch(val, fullKey, observer)
 }
 
-/*
+/**
  *  Check if a value is watchable
  */
 function isWatchable (obj) {
@@ -127,7 +127,7 @@ function isWatchable (obj) {
     return type === 'Object' || type === 'Array'
 }
 
-/*
+/**
  *  When a value that is already converted is
  *  observed again by another observer, we can skip
  *  the watch conversion and simply emit set event for
@@ -150,7 +150,7 @@ module.exports = {
     // used in sd-repeat
     watchArray: watchArray,
 
-    /*
+    /**
      *  Observe an object with a given path,
      *  and proxy get/set/mutate events to the provided observer.
      */
@@ -194,7 +194,7 @@ module.exports = {
         }
     },
 
-    /*
+    /**
      *  Cancel observation, turn off the listeners.
      */
     unobserve: function (obj, path, observer) {

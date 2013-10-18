@@ -9,13 +9,14 @@ var Emitter     = require('./emitter'),
     ExpParser   = require('./exp-parser'),
     slice       = Array.prototype.slice,
     log         = utils.log,
+    def         = utils.defProtected,
     vmAttr,
     repeatAttr,
     partialAttr,
     transitionAttr,
     preAttr
 
-/*
+/**
  *  The DOM compiler
  *  scans a DOM node and compile bindings for a ViewModel
  */
@@ -38,8 +39,9 @@ function Compiler (vm, options) {
     if (scope) utils.extend(vm, scope, true)
 
     compiler.vm  = vm
-    vm.$compiler = compiler
-    vm.$el       = compiler.el
+    // special VM properties are inumerable
+    def(vm, '$compiler', compiler)
+    def(vm, '$el', compiler.el)
 
     // keep track of directives and expressions
     // so they can be unbound during destroy()
@@ -99,13 +101,11 @@ function Compiler (vm, options) {
     }
     // extract dependencies for computed properties
     if (computed.length) DepsParser.parse(computed)
-    // unset these no longer needed stuff
-    compiler.observables = compiler.computed = compiler.arrays = null
 }
 
 var CompilerProto = Compiler.prototype
 
-/*
+/**
  *  Initialize the VM/Compiler's element.
  *  Fill it in with the template if necessary.
  */
@@ -142,7 +142,7 @@ CompilerProto.setupElement = function (options) {
     }
 }
 
-/*
+/**
  *  Setup observer.
  *  The observer listens for get/set/mutate events on all VM
  *  values/objects and trigger corresponding binding updates.
@@ -174,7 +174,7 @@ CompilerProto.setupObserver = function () {
         })
 }
 
-/*
+/**
  *  Compile a DOM node (recursive)
  */
 CompilerProto.compile = function (node, root) {
@@ -222,7 +222,7 @@ CompilerProto.compile = function (node, root) {
     }
 }
 
-/*
+/**
  *  Compile a normal node
  */
 CompilerProto.compileNode = function (node) {
@@ -260,7 +260,7 @@ CompilerProto.compileNode = function (node) {
     }
 }
 
-/*
+/**
  *  Compile a text node
  */
 CompilerProto.compileTextNode = function (node) {
@@ -293,7 +293,7 @@ CompilerProto.compileTextNode = function (node) {
     node.parentNode.removeChild(node)
 }
 
-/*
+/**
  *  Add a directive instance to the correct binding & viewmodel
  */
 CompilerProto.bindDirective = function (directive) {
@@ -349,7 +349,7 @@ CompilerProto.bindDirective = function (directive) {
     }
 }
 
-/*
+/**
  *  Create binding and attach getter/setter for a key to the viewmodel object
  */
 CompilerProto.createBinding = function (key, isExp) {
@@ -400,7 +400,7 @@ CompilerProto.createBinding = function (key, isExp) {
     return binding
 }
 
-/*
+/**
  *  Sometimes when a binding is found in the template, the value might
  *  have not been set on the VM yet. To ensure computed properties and
  *  dependency extraction can work, we have to create a dummy value for
@@ -419,7 +419,7 @@ CompilerProto.ensurePath = function (key) {
     }
 }
 
-/*
+/**
  *  Defines the getter/setter for a root-level binding on the VM
  *  and observe the initial value
  */
@@ -477,7 +477,7 @@ CompilerProto.define = function (key, binding) {
     })
 }
 
-/*
+/**
  *  Process a computed property binding
  */
 CompilerProto.markComputed = function (binding) {
@@ -491,7 +491,7 @@ CompilerProto.markComputed = function (binding) {
     this.computed.push(binding)
 }
 
-/*
+/**
  *  Process subscriptions for computed properties that has
  *  dynamic context dependencies
  */
@@ -512,7 +512,7 @@ CompilerProto.bindContexts = function (bindings) {
     }
 }
 
-/*
+/**
  *  Retrive an option from the compiler
  */
 CompilerProto.getOption = function (type, id) {
@@ -520,7 +520,7 @@ CompilerProto.getOption = function (type, id) {
     return (opts[type] && opts[type][id]) || (utils[type] && utils[type][id])
 }
 
-/*
+/**
  *  Unbind and remove element
  */
 CompilerProto.destroy = function () {
@@ -574,7 +574,7 @@ CompilerProto.destroy = function () {
 
 // Helpers --------------------------------------------------------------------
 
-/*
+/**
  *  Refresh prefix in case it has been changed
  *  during compilations
  */
@@ -587,7 +587,7 @@ function refreshPrefix () {
     preAttr        = prefix + '-pre'
 }
 
-/*
+/**
  *  determine which viewmodel a key belongs to based on nesting symbols
  */
 function traceOwnerCompiler (key, compiler) {
@@ -604,7 +604,7 @@ function traceOwnerCompiler (key, compiler) {
     return compiler
 }
 
-/*
+/**
  *  shorthand for getting root compiler
  */
 function getRoot (compiler) {

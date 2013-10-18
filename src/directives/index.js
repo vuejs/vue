@@ -81,7 +81,7 @@ module.exports = {
     }
 }
 
-/*
+/**
  *  convert hyphen style CSS property to Camel style
  */
 var CONVERT_RE = /-(.)/g
