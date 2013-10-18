@@ -1,11 +1,10 @@
 {
     "name": "seed",
-    "version": "0.4.0",
+    "version": "0.4.1",
     "main": "dist/seed.js",
     "ignore": [
         ".*",
         "examples",
-        "dist/seed.js",
         "dist/seed.test.js",
         "src",
         "test",

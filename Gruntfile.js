@@ -64,11 +64,10 @@ module.exports = function( grunt ) {
                 options: {
                     compress: true,
                     mangle: true,
-                    sourceMap: 'dist/seed.min.js.map',
                     banner:
-                        '// Seed.js\n' +
-                        '// Version ' + require('./package.json').version + '\n' +
-                        '// by Evan You <github:@yyx990803>\n'
+                        '// Seed.js ' + require('./package.json').version + '\n' +
+                        '// (c) 2013 Evan You\n' +
+                        '// https://github.com/yyx990803/seed\n'
                 },
                 files: {
                     'dist/seed.min.js': 'dist/seed.js'
