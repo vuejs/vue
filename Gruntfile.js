@@ -111,7 +111,26 @@ module.exports = function( grunt ) {
     })
 
     grunt.registerTask( 'release', function (version) {
-        grunt.task.run(['default', 'version:' + version])
+        if (!version || !isValid(version)) {
+            return grunt.fail.warn('Must provide a valid semver version number.')
+        }
+        grunt.task.run(['version:' + version, 'default'])
+
+        function isValid (v) {
+            var nums = v.split('.')
+            if (nums.length !== 3) return false
+            var current = require('./package.json').version.split('.'),
+                a1 = +nums[0],
+                b1 = +nums[1],
+                c1 = +nums[2],
+                a2 = +current[0],
+                b2 = +current[1],
+                c2 = +current[2]
+            if (a1 < a2) return false
+            if (a1 === a2 && b1 < b2) return false
+            if (a1 === a2 && b1 === b2 && c1 < c2) return false
+            return true
+        }
     })
     
 }
