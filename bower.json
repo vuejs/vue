@@ -5,7 +5,8 @@
     "ignore": [
         ".*",
         "examples",
-        "wrappers",
+        "dist/seed.js",
+        "dist/seed.test.js",
         "src",
         "test",
         "Gruntfile.js",

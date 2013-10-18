@@ -383,58 +383,64 @@ var config      = require('./config'),
     filters     = require('./filters'),
     utils       = require('./utils')
 
-/*
+/**
  *  Set config options
  */
 ViewModel.config = function (opts) {
     if (opts) {
         utils.extend(config, opts)
     }
+    return this
 }
 
-/*
+/**
  *  Allows user to register/retrieve a directive definition
  */
 ViewModel.directive = function (id, fn) {
     if (!fn) return directives[id]
     directives[id] = fn
+    return this
 }
 
-/*
+/**
  *  Allows user to register/retrieve a filter function
  */
 ViewModel.filter = function (id, fn) {
     if (!fn) return filters[id]
     filters[id] = fn
+    return this
 }
 
-/*
+/**
  *  Allows user to register/retrieve a ViewModel constructor
  */
-ViewModel.vm = function (id, Ctor) {
+ViewModel.viewmodel = function (id, Ctor) {
     if (!Ctor) return utils.vms[id]
     utils.vms[id] = Ctor
+    return this
 }
 
-/*
+/**
  *  Allows user to register/retrieve a template partial
  */
 ViewModel.partial = function (id, partial) {
     if (!partial) return utils.partials[id]
     utils.partials[id] = templateToFragment(partial)
+    return this
 }
 
-/*
+/**
  *  Allows user to register/retrieve a transition definition object
  */
 ViewModel.transition = function (id, transition) {
     if (!transition) return utils.transitions[id]
     utils.transitions[id] = transition
+    return this
 }
 
 ViewModel.extend = extend
 
-/*
+/**
  *  Expose the main ViewModel class
  *  and add extend method
  */
@@ -469,7 +475,7 @@ function extend (options) {
     return ExtendedVM
 }
 
-/*
+/**
  *  Inherit options
  *
  *  For options such as `scope`, `vms`, `directives`, 'partials',
@@ -497,7 +503,7 @@ function inheritOptions (child, parent, topLevel) {
     return child
 }
 
-/*
+/**
  *  Convert an object of partials to dom fragments
  */
 function convertPartials (partials) {
@@ -509,7 +515,7 @@ function convertPartials (partials) {
     }
 }
 
-/*
+/**
  *  Convert a string template to a dom fragment
  */
 function templateToFragment (template) {
@@ -567,7 +573,7 @@ module.exports = {
     partials    : {},
     transitions : {},
 
-    /*
+    /**
      *  Define an ienumerable property
      *  This avoids it being included in JSON.stringify
      *  or for...in loops.
@@ -581,14 +587,14 @@ module.exports = {
         })
     },
 
-    /*
+    /**
      *  Accurate type check
      */
     typeOf: function (obj) {
         return toString.call(obj).slice(8, -1)
     },
 
-    /*
+    /**
      *  Make sure only strings and numbers are output to html
      *  output empty string is value is not string or number
      */
@@ -600,7 +606,7 @@ module.exports = {
             : ''
     },
 
-    /*
+    /**
      *  simple extend
      */
     extend: function (obj, ext, protective) {
@@ -611,7 +617,7 @@ module.exports = {
         }
     },
 
-    /*
+    /**
      *  log for debugging
      */
     log: function () {
@@ -620,7 +626,7 @@ module.exports = {
         }
     },
     
-    /*
+    /**
      *  warn for debugging
      */
     warn: function() {
@@ -642,13 +648,14 @@ var Emitter     = require('./emitter'),
     ExpParser   = require('./exp-parser'),
     slice       = Array.prototype.slice,
     log         = utils.log,
+    def         = utils.defProtected,
     vmAttr,
     repeatAttr,
     partialAttr,
     transitionAttr,
     preAttr
 
-/*
+/**
  *  The DOM compiler
  *  scans a DOM node and compile bindings for a ViewModel
  */
@@ -671,8 +678,9 @@ function Compiler (vm, options) {
     if (scope) utils.extend(vm, scope, true)
 
     compiler.vm  = vm
-    vm.$compiler = compiler
-    vm.$el       = compiler.el
+    // special VM properties are inumerable
+    def(vm, '$compiler', compiler)
+    def(vm, '$el', compiler.el)
 
     // keep track of directives and expressions
     // so they can be unbound during destroy()
@@ -732,13 +740,11 @@ function Compiler (vm, options) {
     }
     // extract dependencies for computed properties
     if (computed.length) DepsParser.parse(computed)
-    // unset these no longer needed stuff
-    compiler.observables = compiler.computed = compiler.arrays = null
 }
 
 var CompilerProto = Compiler.prototype
 
-/*
+/**
  *  Initialize the VM/Compiler's element.
  *  Fill it in with the template if necessary.
  */
@@ -775,7 +781,7 @@ CompilerProto.setupElement = function (options) {
     }
 }
 
-/*
+/**
  *  Setup observer.
  *  The observer listens for get/set/mutate events on all VM
  *  values/objects and trigger corresponding binding updates.
@@ -807,7 +813,7 @@ CompilerProto.setupObserver = function () {
         })
 }
 
-/*
+/**
  *  Compile a DOM node (recursive)
  */
 CompilerProto.compile = function (node, root) {
@@ -855,7 +861,7 @@ CompilerProto.compile = function (node, root) {
     }
 }
 
-/*
+/**
  *  Compile a normal node
  */
 CompilerProto.compileNode = function (node) {
@@ -893,7 +899,7 @@ CompilerProto.compileNode = function (node) {
     }
 }
 
-/*
+/**
  *  Compile a text node
  */
 CompilerProto.compileTextNode = function (node) {
@@ -926,7 +932,7 @@ CompilerProto.compileTextNode = function (node) {
     node.parentNode.removeChild(node)
 }
 
-/*
+/**
  *  Add a directive instance to the correct binding & viewmodel
  */
 CompilerProto.bindDirective = function (directive) {
@@ -982,7 +988,7 @@ CompilerProto.bindDirective = function (directive) {
     }
 }
 
-/*
+/**
  *  Create binding and attach getter/setter for a key to the viewmodel object
  */
 CompilerProto.createBinding = function (key, isExp) {
@@ -1033,7 +1039,7 @@ CompilerProto.createBinding = function (key, isExp) {
     return binding
 }
 
-/*
+/**
  *  Sometimes when a binding is found in the template, the value might
  *  have not been set on the VM yet. To ensure computed properties and
  *  dependency extraction can work, we have to create a dummy value for
@@ -1052,7 +1058,7 @@ CompilerProto.ensurePath = function (key) {
     }
 }
 
-/*
+/**
  *  Defines the getter/setter for a root-level binding on the VM
  *  and observe the initial value
  */
@@ -1110,7 +1116,7 @@ CompilerProto.define = function (key, binding) {
     })
 }
 
-/*
+/**
  *  Process a computed property binding
  */
 CompilerProto.markComputed = function (binding) {
@@ -1124,7 +1130,7 @@ CompilerProto.markComputed = function (binding) {
     this.computed.push(binding)
 }
 
-/*
+/**
  *  Process subscriptions for computed properties that has
  *  dynamic context dependencies
  */
@@ -1145,7 +1151,7 @@ CompilerProto.bindContexts = function (bindings) {
     }
 }
 
-/*
+/**
  *  Retrive an option from the compiler
  */
 CompilerProto.getOption = function (type, id) {
@@ -1153,7 +1159,7 @@ CompilerProto.getOption = function (type, id) {
     return (opts[type] && opts[type][id]) || (utils[type] && utils[type][id])
 }
 
-/*
+/**
  *  Unbind and remove element
  */
 CompilerProto.destroy = function () {
@@ -1207,7 +1213,7 @@ CompilerProto.destroy = function () {
 
 // Helpers --------------------------------------------------------------------
 
-/*
+/**
  *  Refresh prefix in case it has been changed
  *  during compilations
  */
@@ -1220,7 +1226,7 @@ function refreshPrefix () {
     preAttr        = prefix + '-pre'
 }
 
-/*
+/**
  *  determine which viewmodel a key belongs to based on nesting symbols
  */
 function traceOwnerCompiler (key, compiler) {
@@ -1237,7 +1243,7 @@ function traceOwnerCompiler (key, compiler) {
     return compiler
 }
 
-/*
+/**
  *  shorthand for getting root compiler
  */
 function getRoot (compiler) {
@@ -1247,9 +1253,10 @@ function getRoot (compiler) {
 module.exports = Compiler
 });
 require.register("seed/src/viewmodel.js", function(exports, require, module){
-var Compiler = require('./compiler')
+var Compiler = require('./compiler'),
+    def      = require('./utils').defProtected
 
-/*
+/**
  *  ViewModel exposed to the user that holds data,
  *  computed properties, event handlers
  *  and a few reserved methods
@@ -1259,13 +1266,15 @@ function ViewModel (options) {
     new Compiler(this, options)
 }
 
+// All VM prototype methods are inenumerable
+// so it can be stringified/looped through as raw data
 var VMProto = ViewModel.prototype
 
-/*
+/**
  *  Convenience function to set an actual nested value
  *  from a flat key string. Used in directives.
  */
-VMProto.$set = function (key, value) {
+def(VMProto, '$set', function (key, value) {
     var path = key.split('.'),
         obj = getTargetVM(this, path)
     if (!obj) return
@@ -1273,14 +1282,14 @@ VMProto.$set = function (key, value) {
         obj = obj[path[d]]
     }
     obj[path[d]] = value
-}
+})
 
-/*
+/**
  *  The function for getting a key
  *  which will go up along the prototype chain of the bindings
  *  Used in exp-parser.
  */
-VMProto.$get = function (key) {
+def(VMProto, '$get', function (key) {
     var path = key.split('.'),
         obj = getTargetVM(this, path),
         vm = obj
@@ -1290,20 +1299,20 @@ VMProto.$get = function (key) {
     }
     if (typeof obj === 'function') obj = obj.bind(vm)
     return obj
-}
+})
 
-/*
+/**
  *  watch a key on the viewmodel for changes
  *  fire callback with new value
  */
-VMProto.$watch = function (key, callback) {
+def(VMProto, '$watch', function (key, callback) {
     this.$compiler.observer.on('change:' + key, callback)
-}
+})
 
-/*
+/**
  *  unwatch a key
  */
-VMProto.$unwatch = function (key, callback) {
+def(VMProto, '$unwatch', function (key, callback) {
     // workaround here
     // since the emitter module checks callback existence
     // by checking the length of arguments
@@ -1311,20 +1320,19 @@ VMProto.$unwatch = function (key, callback) {
         ob = this.$compiler.observer
     if (callback) args.push(callback)
     ob.off.apply(ob, args)
-}
+})
 
-/*
+/**
  *  unbind everything, remove everything
  */
-VMProto.$destroy = function () {
+def(VMProto, '$destroy', function () {
     this.$compiler.destroy()
-    this.$compiler = null
-}
+})
 
-/*
+/**
  *  broadcast an event to all child VMs recursively.
  */
-VMProto.$broadcast = function () {
+def(VMProto, '$broadcast', function () {
     var children = this.$compiler.childCompilers,
         i = children.length,
         child
@@ -1333,30 +1341,30 @@ VMProto.$broadcast = function () {
         child.emitter.emit.apply(child.emitter, arguments)
         child.vm.$broadcast.apply(child.vm, arguments)
     }
-}
+})
 
-/*
+/**
  *  emit an event that propagates all the way up to parent VMs.
  */
-VMProto.$emit = function () {
+def(VMProto, '$emit', function () {
     var parent = this.$compiler.parentCompiler
     if (parent) {
         parent.emitter.emit.apply(parent.emitter, arguments)
         parent.vm.$emit.apply(parent.vm, arguments)
     }
-}
+})
 
-/*
+/**
  *  delegate on/off/once to the compiler's emitter
  */
 ;['on', 'off', 'once'].forEach(function (method) {
-    VMProto['$' + method] = function () {
+    def(VMProto, '$' + method, function () {
         var emitter = this.$compiler.emitter
         emitter[method].apply(emitter, arguments)
-    }
+    })
 })
 
-/*
+/**
  *  If a VM doesn't contain a path, go up the prototype chain
  *  to locate the ancestor that has it.
  */
@@ -1371,7 +1379,7 @@ function getTargetVM (vm, path) {
 module.exports = ViewModel
 });
 require.register("seed/src/binding.js", function(exports, require, module){
-/*
+/**
  *  Binding class.
  *
  *  each property on the viewmodel has one corresponding Binding object
@@ -1391,7 +1399,7 @@ function Binding (compiler, key, isExp) {
 
 var BindingProto = Binding.prototype
 
-/*
+/**
  *  Process the value, then trigger updates on all dependents
  */
 BindingProto.update = function (value) {
@@ -1403,7 +1411,7 @@ BindingProto.update = function (value) {
     this.pub()
 }
 
-/*
+/**
  *  -- computed property only --    
  *  Force all instances to re-evaluate themselves
  */
@@ -1415,7 +1423,7 @@ BindingProto.refresh = function () {
     this.pub()
 }
 
-/*
+/**
  *  Notify computed properties that depend on this binding
  *  to update themselves
  */
@@ -1426,7 +1434,7 @@ BindingProto.pub = function () {
     }
 }
 
-/*
+/**
  *  Unbind the binding, remove itself from all of its dependencies
  */
 BindingProto.unbind = function () {
@@ -1440,7 +1448,6 @@ BindingProto.unbind = function () {
         subs = this.deps[i].subs
         subs.splice(subs.indexOf(this), 1)
     }
-    this.compiler = this.pubs = this.subs = this.instances = this.deps = null
 }
 
 module.exports = Binding
@@ -1496,7 +1503,7 @@ for (var method in extensions) {
     def(ArrayProxy, method, extensions[method], !hasProto)
 }
 
-/*
+/**
  *  Watch an object based on type
  */
 function watch (obj, path, observer) {
@@ -1508,16 +1515,19 @@ function watch (obj, path, observer) {
     }
 }
 
-/*
+/**
  *  Watch an Object, recursive.
  */
 function watchObject (obj, path, observer) {
     for (var key in obj) {
-        bind(obj, key, path, observer)
+        var keyPrefix = key.charAt(0)
+        if (keyPrefix !== '$' && keyPrefix !== '_') {
+            bind(obj, key, path, observer)
+        }
     }
 }
 
-/*
+/**
  *  Watch an Array, overload mutation methods
  *  and add augmentations by intercepting the prototype chain
  */
@@ -1533,7 +1543,7 @@ function watchArray (arr, path, observer) {
     }
 }
 
-/*
+/**
  *  Define accessors for a property on an Object
  *  so it emits get/set events.
  *  Then watch the value itself.
@@ -1564,7 +1574,7 @@ function bind (obj, key, path, observer) {
     watch(val, fullKey, observer)
 }
 
-/*
+/**
  *  Check if a value is watchable
  */
 function isWatchable (obj) {
@@ -1572,7 +1582,7 @@ function isWatchable (obj) {
     return type === 'Object' || type === 'Array'
 }
 
-/*
+/**
  *  When a value that is already converted is
  *  observed again by another observer, we can skip
  *  the watch conversion and simply emit set event for
@@ -1595,7 +1605,7 @@ module.exports = {
     // used in sd-repeat
     watchArray: watchArray,
 
-    /*
+    /**
      *  Observe an object with a given path,
      *  and proxy get/set/mutate events to the provided observer.
      */
@@ -1639,7 +1649,7 @@ module.exports = {
         }
     },
 
-    /*
+    /**
      *  Cancel observation, turn off the listeners.
      */
     unobserve: function (obj, path, observer) {
@@ -1667,7 +1677,7 @@ var KEY_RE          = /^[^\|]+/,
     NESTING_RE      = /^\^+/,
     SINGLE_VAR_RE   = /^[\w\.\$]+$/
 
-/*
+/**
  *  Directive class
  *  represents a single directive instance in the DOM
  */
@@ -1714,7 +1724,7 @@ function Directive (definition, directiveName, expression, rawKey, compiler, nod
 
 var DirProto = Directive.prototype
 
-/*
+/**
  *  parse a key, extract argument and nesting/root info
  */
 function parseKey (dir, rawKey) {
@@ -1745,7 +1755,7 @@ function parseKey (dir, rawKey) {
     dir.key = key
 }
 
-/*
+/**
  *  parse a filter expression
  */
 function parseFilter (filter, compiler) {
@@ -1772,7 +1782,7 @@ function parseFilter (filter, compiler) {
     }
 }
 
-/*
+/**
  *  called when a new value is set 
  *  for computed properties, this will only be called once
  *  during initialization.
@@ -1783,7 +1793,7 @@ DirProto.update = function (value, init) {
     this.apply(value)
 }
 
-/*
+/**
  *  -- computed property only --
  *  called when a dependency has changed
  */
@@ -1800,7 +1810,7 @@ DirProto.refresh = function (value) {
     this.apply(value)
 }
 
-/*
+/**
  *  Actually invoking the _update from the directive's definition
  */
 DirProto.apply = function (value) {
@@ -1811,7 +1821,7 @@ DirProto.apply = function (value) {
     )
 }
 
-/*
+/**
  *  pipe the value through filters
  */
 DirProto.applyFilters = function (value) {
@@ -1823,11 +1833,11 @@ DirProto.applyFilters = function (value) {
     return filtered
 }
 
-/*
+/**
  *  Unbind diretive
  *  @ param {Boolean} update
  *    Sometimes we call unbind before an update (i.e. not destroy)
- *    just to teardown previousstuff, in that case we do not want
+ *    just to teardown previous stuff, in that case we do not want
  *    to null everything.
  */
 DirProto.unbind = function (update) {
@@ -1837,7 +1847,7 @@ DirProto.unbind = function (update) {
     if (!update) this.vm = this.el = this.binding = this.compiler = null
 }
 
-/*
+/**
  *  make sure the directive and expression is valid
  *  before we create an instance
  */
@@ -1896,7 +1906,7 @@ function getVariables (code) {
 
 module.exports = {
 
-    /*
+    /**
      *  Parse and create an anonymous computed property getter function
      *  from an arbitrary expression.
      */
@@ -1935,7 +1945,7 @@ var BINDING_RE = /\{\{(.+?)\}\}/
 
 module.exports = {
 
-    /*
+    /**
      *  Parse a piece of text, return an array of tokens
      */
     parse: function (text) {
@@ -1960,7 +1970,7 @@ var Emitter  = require('./emitter'),
     utils    = require('./utils'),
     observer = new Emitter()
 
-/*
+/**
  *  Auto-extract the dependencies of a computed property
  *  by recording the getters triggered when evaluating it.
  */
@@ -1980,12 +1990,12 @@ function catchDeps (binding) {
 
 module.exports = {
 
-    /*
+    /**
      *  the observer that catches events triggered by getters
      */
     observer: observer,
 
-    /*
+    /**
      *  parse a list of computed property bindings
      */
     parse: function (bindings) {
@@ -2030,7 +2040,7 @@ module.exports = {
             : ''
     },
 
-    /*
+    /**
      *  args: an array of strings corresponding to
      *  the single, double, triple ... forms of the word to
      *  be pluralized. When the number to be pluralized
@@ -2154,7 +2164,7 @@ module.exports = {
     }
 }
 
-/*
+/**
  *  convert hyphen style CSS property to Camel style
  */
 var CONVERT_RE = /-(.)/g
@@ -2171,7 +2181,7 @@ var config   = require('../config'),
     Emitter  = require('../emitter'),
     ViewModel // lazy def to avoid circular dependency
 
-/*
+/**
  *  Mathods that perform precise DOM manipulation
  *  based on mutator method triggered
  */
@@ -2298,7 +2308,7 @@ module.exports = {
         this.retach()
     },
 
-    /*
+    /**
      *  Create a new child VM from a data object
      *  passing along compiler options indicating this
      *  is a sd-repeat item.
@@ -2333,7 +2343,7 @@ module.exports = {
         }
     },
 
-    /*
+    /**
      *  Update index of each item after a mutation
      */
     updateIndexes: function () {
@@ -2343,7 +2353,7 @@ module.exports = {
         }
     },
 
-    /*
+    /**
      *  Detach/ the container from the DOM before mutation
      *  so that batch DOM updates are done in-memory and faster
      */
