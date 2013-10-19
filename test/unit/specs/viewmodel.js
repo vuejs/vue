@@ -174,7 +174,7 @@ describe('UNIT: ViewModel', function () {
             })
             var Test = Seed.extend({
                 template: '<div sd-viewmodel="test"></div><div sd-viewmodel="test"></div>',
-                vms: {
+                viewmodels: {
                     test: Child
                 }
             })
@@ -204,7 +204,7 @@ describe('UNIT: ViewModel', function () {
             })
             var Middle = Seed.extend({
                 template: '<div sd-viewmodel="bottom"></div>',
-                vms: { bottom: Bottom },
+                viewmodels: { bottom: Bottom },
                 init: function () {
                     this.$on('hello', function (m) {
                         assert.strictEqual(m, msg)
@@ -214,7 +214,7 @@ describe('UNIT: ViewModel', function () {
             })
             var Top = Seed.extend({
                 template: '<div sd-viewmodel="middle"></div>',
-                vms: { middle: Middle },
+                viewmodels: { middle: Middle },
                 init: function () {
                     this.$on('hello', function (m) {
                         assert.strictEqual(m, msg)

@@ -209,7 +209,7 @@ CompilerProto.compile = function (node, root) {
             }
         } else if (vmId && !root) { // child ViewModels
             node.removeAttribute(vmAttr)
-            var ChildVM = compiler.getOption('vms', vmId)
+            var ChildVM = compiler.getOption('viewmodels', vmId)
             if (ChildVM) {
                 var child = new ChildVM({
                     el: node,

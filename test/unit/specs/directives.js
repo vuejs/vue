@@ -546,6 +546,30 @@ describe('UNIT: Directives', function () {
 
     })
 
+    describe('id', function () {
+        
+        it('should register a VM isntance on its parent\'s $', function () {
+            var called = false
+            var Child = Seed.extend({
+                proto: {
+                    test: function () {
+                        called = true
+                    }
+                }
+            })
+            var t = new Seed({
+                template: '<div sd-viewmodel="child" sd-id="hihi"></div>',
+                viewmodels: {
+                    child: Child
+                }
+            })
+            assert.ok(t.$.hihi instanceof Child)
+            t.$.hihi.test()
+            assert.ok(called)
+        })
+
+    })
+
 })
 
 function mockDirective (dirName, tag, type) {

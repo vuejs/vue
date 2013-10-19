@@ -7,7 +7,7 @@ module.exports = {
 
     // global storage for user-registered
     // vms, partials and transitions
-    vms         : {},
+    viewmodels  : {},
     partials    : {},
     transitions : {},
 

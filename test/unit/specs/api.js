@@ -112,7 +112,7 @@ describe('UNIT: API', function () {
 
         it('should register a VM constructor', function () {
             Seed.viewmodel(testId, Test)
-            assert.strictEqual(utils.vms[testId], Test)
+            assert.strictEqual(utils.viewmodels[testId], Test)
         })
 
         it('should retrieve the VM if has only one arg', function () {
@@ -454,7 +454,7 @@ describe('UNIT: API', function () {
 
             })
 
-            describe('vms', function () {
+            describe('viewmodels', function () {
 
                 it('should allow the VM to use private child VMs', function () {
                     var Child = Seed.extend({
@@ -467,7 +467,7 @@ describe('UNIT: API', function () {
                         scope: {
                             name: 'dad'
                         },
-                        vms: {
+                        viewmodels: {
                             child: Child
                         }
                     })

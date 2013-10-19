@@ -36,8 +36,8 @@ ViewModel.filter = function (id, fn) {
  *  Allows user to register/retrieve a ViewModel constructor
  */
 ViewModel.viewmodel = function (id, Ctor) {
-    if (!Ctor) return utils.vms[id]
-    utils.vms[id] = Ctor
+    if (!Ctor) return utils.viewmodels[id]
+    utils.viewmodels[id] = Ctor
     return this
 }
 
