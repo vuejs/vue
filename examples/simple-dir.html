@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title></title>
+        <meta charset="utf-8">
+        <script src="../dist/seed.js"></script>
+    </head>
+    <body>
+        <div id="hi" sd-test sd-test2></div>
+        <script>
+            var a = new Seed({
+                el: '#hi',
+                directives: {
+                    test: {
+                        bind: function () {
+                            console.log('bind')
+                        },
+                        unbind: function () {
+                            console.log('unbind')
+                        }
+                    },
+                    test2: function () {
+                        console.log('test2 bind')
+                    }
+                }
+            })
+            a.$destroy()
+        </script>
+    </body>
+</html>

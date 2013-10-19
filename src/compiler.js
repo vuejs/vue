@@ -7,14 +7,20 @@ var Emitter     = require('./emitter'),
     TextParser  = require('./text-parser'),
     DepsParser  = require('./deps-parser'),
     ExpParser   = require('./exp-parser'),
+
+    // cache methods
     slice       = Array.prototype.slice,
     log         = utils.log,
     def         = utils.defProtected,
+
+    // special directives
+    idAttr,
     vmAttr,
+    preAttr,
     repeatAttr,
     partialAttr,
-    transitionAttr,
-    preAttr
+    transitionAttr
+
 
 /**
  *  The DOM compiler
@@ -40,8 +46,9 @@ function Compiler (vm, options) {
 
     compiler.vm  = vm
     // special VM properties are inumerable
-    def(vm, '$compiler', compiler)
+    def(vm, '$', {})
     def(vm, '$el', compiler.el)
+    def(vm, '$compiler', compiler)
 
     // keep track of directives and expressions
     // so they can be unbound during destroy()
@@ -64,6 +71,12 @@ function Compiler (vm, options) {
     compiler.rootCompiler = parent
         ? getRoot(parent)
         : compiler
+
+    // register child id on parent
+    var childId = compiler.el.getAttribute(idAttr)
+    if (childId && parent) {
+        parent.vm.$[childId] = vm
+    }
 
     // setup observer
     compiler.setupObserver()
@@ -182,12 +195,14 @@ CompilerProto.compile = function (node, root) {
     if (node.nodeType === 1) {
         // a normal node
         if (node.hasAttribute(preAttr)) return
-        var repeatExp  = node.getAttribute(repeatAttr),
-            vmId       = node.getAttribute(vmAttr),
+        var vmId       = node.getAttribute(vmAttr),
+            repeatExp  = node.getAttribute(repeatAttr),
             partialId  = node.getAttribute(partialAttr)
         // we need to check for any possbile special directives
         // e.g. sd-repeat, sd-viewmodel & sd-partial
         if (repeatExp) { // repeat block
+            // repeat block cannot have sd-id at the same time.
+            node.removeAttribute(idAttr)
             var directive = Directive.parse(repeatAttr, repeatExp, compiler, node)
             if (directive) {
                 compiler.bindDirective(directive)
@@ -592,11 +607,12 @@ CompilerProto.destroy = function () {
  */
 function refreshPrefix () {
     var prefix     = config.prefix
-    repeatAttr     = prefix + '-repeat'
+    idAttr         = prefix + '-id'
     vmAttr         = prefix + '-viewmodel'
+    preAttr        = prefix + '-pre'
+    repeatAttr     = prefix + '-repeat'
     partialAttr    = prefix + '-partial'
     transitionAttr = prefix + '-transition'
-    preAttr        = prefix + '-pre'
 }
 
 /**

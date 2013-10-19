@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title></title>
+        <meta charset="utf-8">
+        <script src="../dist/seed.js"></script>
+    </head>
+    <body>
+        <div id="parent">
+            <div sd-id="child" sd-viewmodel="child">
+                {{msg}}
+            </div>
+        </div>
+        <script>
+            Seed.viewmodel('child', Seed.extend({
+                init: function () {
+                    console.log('child init!')
+                },
+                proto: {
+                    hi: function () {
+                        console.log('hi from child!')
+                    }
+                },
+                scope: {
+                    msg: 'I am a child'
+                }
+            }))
+            var app = new Seed({el:'#parent'})
+        </script>
+    </body>
+</html>
