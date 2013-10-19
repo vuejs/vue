@@ -298,25 +298,37 @@ CompilerProto.compileTextNode = function (node) {
  */
 CompilerProto.bindDirective = function (directive) {
 
+    // keep track of it so we can unbind() later
+    this.dirs.push(directive)
+
+    // for a simple directive, simply call its bind() or _update()
+    // and we're done.
+    if (directive.isSimple) {
+        if (directive.bind) directive.bind()
+        return
+    }
+
+    // otherwise, we got more work to do...
     var binding,
         compiler      = this,
         key           = directive.key,
         baseKey       = key.split('.')[0],
         ownerCompiler = traceOwnerCompiler(directive, compiler)
 
-    compiler.dirs.push(directive)
-
     if (directive.isExp) {
+        // expression bindings are always created on current compiler
         binding = compiler.createBinding(key, true)
     } else if (ownerCompiler.vm.hasOwnProperty(baseKey)) {
-        // if the value is present in the target VM, we create the binding on its compiler
+        // If the directive's owner compiler's VM has the key,
+        // it belongs there. Create the binding if it's not already
+        // created, and return it.
         binding = ownerCompiler.bindings.hasOwnProperty(key)
             ? ownerCompiler.bindings[key]
             : ownerCompiler.createBinding(key)
     } else {
-        // due to prototypal inheritance of bindings, if a key doesn't exist here,
-        // it doesn't exist in the whole prototype chain. Therefore in that case
-        // we create the new binding at the root level.
+        // due to prototypal inheritance of bindings, if a key doesn't exist
+        // on the owner compiler's VM, then it doesn't exist in the whole
+        // prototype chain. In this case we create the new binding at the root level.
         binding = ownerCompiler.bindings[key] || compiler.rootCompiler.createBinding(key)
     }
 
@@ -538,7 +550,7 @@ CompilerProto.destroy = function () {
     i = directives.length
     while (i--) {
         dir = directives[i]
-        if (dir.binding.compiler !== compiler) {
+        if (!dir.isSimple && dir.binding.compiler !== compiler) {
             inss = dir.binding.instances
             if (inss) inss.splice(inss.indexOf(dir), 1)
         }

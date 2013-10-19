@@ -13,25 +13,29 @@ describe('UNIT: Directive', function () {
 
     describe('.parse()', function () {
         
-        it('should return null if directive name does not have correct prefix', function () {
+        it('should return undefined if directive name does not have correct prefix', function () {
             var d = Directive.parse('ds-test', 'abc', compiler)
-            assert.strictEqual(d, null)
+            assert.strictEqual(d, undefined)
         })
 
-        it('should return null if directive is unknown', function () {
+        it('should return undefined if directive is unknown', function () {
             var d = Directive.parse('sd-directive-that-does-not-exist', 'abc', compiler)
-            assert.ok(d === null)
+            assert.ok(d === undefined)
         })
 
-        it('should return null if the expression is invalid', function () {
-            var d = Directive.parse('sd-text', '', compiler),
-                e = Directive.parse('sd-text', '  ', compiler),
+        it('should return undefined if the expression is invalid', function () {
+            var e = Directive.parse('sd-text', '  ', compiler),
                 f = Directive.parse('sd-text', '|', compiler),
                 g = Directive.parse('sd-text', '  |  ', compiler)
-            assert.strictEqual(d, null, 'empty')
-            assert.strictEqual(e, null, 'spaces')
-            assert.strictEqual(f, null, 'single pipe')
-            assert.strictEqual(g, null, 'pipe with spaces')
+            assert.strictEqual(e, undefined, 'spaces')
+            assert.strictEqual(f, undefined, 'single pipe')
+            assert.strictEqual(g, undefined, 'pipe with spaces')
+        })
+
+        it('should return a simple Directive if expression is empty', function () {
+            var d = Directive.parse('sd-text', '', compiler)
+            assert.ok(d instanceof Directive)
+            assert.ok(d.isSimple)
         })
 
         it('should return an instance of Directive if args are good', function () {
@@ -276,6 +280,36 @@ describe('UNIT: Directive', function () {
         it('should null everything if it\'s called for VM destruction', function () {
             d.unbind()
             assert.ok(d.el === null && d.vm === null && d.binding === null && d.compiler === null)
+        })
+
+    })
+
+    describe('simple directive', function () {
+        
+        it('should copy as bind() if the def is a function', function () {
+            var called = 0
+            function call () {
+                called++
+            }
+            Seed.directive('simple-dir-test1', call)
+            var d = Directive.parse('sd-simple-dir-test1', '', compiler)
+            d.bind()
+            assert.strictEqual(called, 1)
+        })
+
+        it('should copy/delegate bind and unbind if the def is an object', function () {
+            var called = 0
+            function call () {
+                called++
+            }
+            Seed.directive('simple-dir-test2', {
+                bind: call,
+                unbind: call
+            })
+            var d = Directive.parse('sd-simple-dir-test2', '', compiler, true)
+            d.bind()
+            d.unbind()
+            assert.strictEqual(called, 2)
         })
 
     })

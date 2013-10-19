@@ -14,15 +14,17 @@ var KEY_RE          = /^[^\|]+/,
  *  Directive class
  *  represents a single directive instance in the DOM
  */
-function Directive (definition, directiveName, expression, rawKey, compiler, node) {
+function Directive (definition, expression, rawKey, compiler, node) {
 
     this.compiler = compiler
     this.vm       = compiler.vm
     this.el       = node
 
+    var isSimple  = expression === ''
+
     // mix in properties from the directive definition
     if (typeof definition === 'function') {
-        this._update = definition
+        this[isSimple ? 'bind' : '_update'] = definition
     } else {
         for (var prop in definition) {
             if (prop === 'unbind' || prop === 'update') {
@@ -33,7 +35,12 @@ function Directive (definition, directiveName, expression, rawKey, compiler, nod
         }
     }
 
-    this.name       = directiveName
+    // empty expression, we're done.
+    if (isSimple) {
+        this.isSimple = true
+        return
+    }
+
     this.expression = expression.trim()
     this.rawKey     = rawKey
     
@@ -187,19 +194,18 @@ DirProto.unbind = function (update) {
 Directive.parse = function (dirname, expression, compiler, node) {
 
     var prefix = config.prefix
-    if (dirname.indexOf(prefix) === -1) return null
+    if (dirname.indexOf(prefix) === -1) return
     dirname = dirname.slice(prefix.length + 1)
 
-    var dir = compiler.getOption('directives', dirname) || directives[dirname],
-        keyMatch = expression.match(KEY_RE),
+    var dir = compiler.getOption('directives', dirname) || directives[dirname]
+    if (!dir) return utils.warn('unknown directive: ' + dirname)
+
+    var keyMatch = expression.match(KEY_RE),
         rawKey = keyMatch && keyMatch[0].trim()
-
-    if (!dir) utils.warn('unknown directive: ' + dirname)
-    if (!rawKey) utils.warn('invalid directive expression: ' + expression)
-
-    return dir && rawKey
-        ? new Directive(dir, dirname, expression, rawKey, compiler, node)
-        : null
+    // have a valid raw key, or be an empty directive
+    return (rawKey || expression === '')
+        ? new Directive(dir, expression, rawKey, compiler, node)
+        : utils.warn('invalid directive expression: ' + expression)
 }
 
 module.exports = Directive
