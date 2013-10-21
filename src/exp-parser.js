@@ -30,6 +30,11 @@ function getVariables (code) {
         : []
 }
 
+function getPaths (code, vars) {
+    var pathRE = new RegExp("\\b(" + vars.join('|') + ")[$\\w\\.]*\\b", 'g')
+    return code.match(pathRE)
+}
+
 module.exports = {
 
     /**
@@ -61,7 +66,7 @@ module.exports = {
         /* jshint evil: true */
         return {
             getter: new Function(args),
-            vars: Object.keys(hash)
+            paths: getPaths(exp, Object.keys(hash))
         }
     }
 }

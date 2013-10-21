@@ -44,6 +44,7 @@ describe('UNIT: Expression Parser', function () {
         {
             // complex with nested values
             exp: "todo.title + ' : ' + (todo.done ? 'yep' : 'nope')",
+            paths: ['todo.title', 'todo.done'],
             vm: {
                 todo: {
                     title: 'write tests',
@@ -61,16 +62,16 @@ describe('UNIT: Expression Parser', function () {
 
             var result = ExpParser.parse(testCase.exp),
                 vm     = testCase.vm,
-                vars   = Object.keys(vm)
+                vars   = testCase.paths || Object.keys(vm)
 
             // mock the $get().
             // the real $get() will be tested in integration tests.
             vm.$get = function (key) { return this[key] }
 
             it('should get correct args', function () {
-                assert.strictEqual(result.vars.length, vars.length)
+                assert.strictEqual(result.paths.length, vars.length)
                 for (var i = 0; i < vars.length; i++) {
-                    assert.strictEqual(vars[i], result.vars[i])
+                    assert.strictEqual(vars[i], result.paths[i])
                 }
             })
 

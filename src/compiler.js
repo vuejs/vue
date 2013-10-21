@@ -396,9 +396,9 @@ CompilerProto.createBinding = function (key, isExp) {
             compiler.exps.push(binding)
             // need to create the bindings for keys
             // that do not exist yet
-            var i = result.vars.length, v
+            var i = result.paths.length, v
             while (i--) {
-                v = result.vars[i]
+                v = result.paths[i]
                 if (!bindings[v]) {
                     compiler.rootCompiler.createBinding(v)
                 }
