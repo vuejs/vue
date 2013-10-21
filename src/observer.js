@@ -2,11 +2,20 @@
 
 var Emitter  = require('./emitter'),
     utils    = require('./utils'),
+
+    // cache methods
     typeOf   = utils.typeOf,
     def      = utils.defProtected,
     slice    = Array.prototype.slice,
+
+    // Array mutation methods to wrap
     methods  = ['push','pop','shift','unshift','splice','sort','reverse'],
-    hasProto = ({}).__proto__ // fix for IE9
+
+    // fix for IE + __proto__ problem
+    // define methods as inenumerable if __proto__ is present,
+    // otherwise enumerable so we can loop through and manually
+    // attach to array instances
+    hasProto = ({}).__proto__
 
 // The proxy prototype to replace the __proto__ of
 // an observed array

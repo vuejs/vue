@@ -35,7 +35,7 @@ module.exports = {
         this.el.style.visibility = value ? '' : 'hidden'
     },
 
-    class: function (value) {
+    'class': function (value) {
         if (this.arg) {
             this.el.classList[value ? 'add' : 'remove'](this.arg)
         } else {

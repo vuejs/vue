@@ -178,7 +178,7 @@ module.exports = {
     },
 
     /**
-     *  Detach/ the container from the DOM before mutation
+     *  Detach/retach the container from the DOM before mutation
      *  so that batch DOM updates are done in-memory and faster
      */
     detach: function () {

@@ -1,4 +1,5 @@
-// Variable extraction scooped from https://github.com/RubyLouvre/avalon 
+// Variable extraction scooped from https://github.com/RubyLouvre/avalon
+
 var KEYWORDS =
         // keywords
         'break,case,catch,continue,debugger,default,delete,do,else,false'
@@ -18,6 +19,9 @@ var KEYWORDS =
     NUMBER_RE   = /\b\d[^,]*/g,
     BOUNDARY_RE = /^,+|,+$/g
 
+/**
+ *  Strip top level variable names from a snippet of JS expression
+ */
 function getVariables (code) {
     code = code
         .replace(REMOVE_RE, '')
@@ -30,6 +34,11 @@ function getVariables (code) {
         : []
 }
 
+/**
+ *  Based on top level variables, extract full keypaths accessed.
+ *  We need full paths because we need to define them in the compiler's
+ *  bindings, so that they emit 'get' events during dependency tracking.
+ */
 function getPaths (code, vars) {
     var pathRE = new RegExp("\\b(" + vars.join('|') + ")[$\\w\\.]*\\b", 'g')
     return code.match(pathRE)
@@ -38,8 +47,9 @@ function getPaths (code, vars) {
 module.exports = {
 
     /**
-     *  Parse and create an anonymous computed property getter function
-     *  from an arbitrary expression.
+     *  Parse and return an anonymous computed property getter function
+     *  from an arbitrary expression, together with a list of paths to be
+     *  created as bindings.
      */
     parse: function (exp) {
         // extract variable names

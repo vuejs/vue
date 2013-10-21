@@ -1,9 +1,10 @@
 var config     = require('./config'),
     utils      = require('./utils'),
     directives = require('./directives'),
-    filters    = require('./filters')
+    filters    = require('./filters'),
 
-var KEY_RE          = /^[^\|]+/,
+    // Regexes!
+    KEY_RE          = /^[^\|]+/,
     ARG_RE          = /([^:]+):(.+)$/,
     FILTERS_RE      = /\|[^\|]+/g,
     FILTER_TOKEN_RE = /[^\s']+|'[^']+'/g,

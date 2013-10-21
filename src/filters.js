@@ -11,22 +11,44 @@ var keyCodes = {
 
 module.exports = {
 
+    /**
+     *  'abc' => 'Abc'
+     */
     capitalize: function (value) {
         if (!value && value !== 0) return ''
         value = value.toString()
         return value.charAt(0).toUpperCase() + value.slice(1)
     },
 
+    /**
+     *  'abc' => 'ABC'
+     */
     uppercase: function (value) {
         return (value || value === 0)
             ? value.toString().toUpperCase()
             : ''
     },
 
+    /**
+     *  'AbC' => 'abc'
+     */
     lowercase: function (value) {
         return (value || value === 0)
             ? value.toString().toLowerCase()
             : ''
+    },
+
+    /**
+     *  12345 => $12,345.00
+     */
+    currency: function (value, args) {
+        if (!value && value !== 0) return ''
+        var sign = (args && args[0]) || '$',
+            s = Math.floor(value).toString(),
+            i = s.length % 3,
+            h = i > 0 ? (s.slice(0, i) + (s.length > 3 ? ',' : '')) : '',
+            f = '.' + value.toFixed(2).slice(-2)
+        return sign + h + s.slice(i).replace(/(\d{3})(?=\d)/g, '$1,') + f
     },
 
     /**
@@ -44,16 +66,10 @@ module.exports = {
             : (args[value - 1] || args[0] + 's')
     },
 
-    currency: function (value, args) {
-        if (!value && value !== 0) return ''
-        var sign = (args && args[0]) || '$',
-            s = Math.floor(value).toString(),
-            i = s.length % 3,
-            h = i > 0 ? (s.slice(0, i) + (s.length > 3 ? ',' : '')) : '',
-            f = '.' + value.toFixed(2).slice(-2)
-        return sign + h + s.slice(i).replace(/(\d{3})(?=\d)/g, '$1,') + f
-    },
-
+    /**
+     *  A special filter that takes a handler function,
+     *  wraps it so it only gets triggered on specific keypresses.
+     */
     key: function (handler, args) {
         if (!handler) return
         var code = keyCodes[args[0]]
@@ -66,5 +82,4 @@ module.exports = {
             }
         }
     }
-
 }
