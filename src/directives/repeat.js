@@ -136,12 +136,14 @@ module.exports = {
      *  is a sd-repeat item.
      */
     buildItem: function (data, index) {
-        ViewModel = ViewModel || require('../viewmodel')
-        var node = this.el.cloneNode(true),
-            ctn  = this.container,
-            vmID = node.getAttribute(config.prefix + '-viewmodel'),
+        ViewModel   = ViewModel || require('../viewmodel')
+        var node    = this.el.cloneNode(true),
+            ctn     = this.container,
+            vmAttr  = config.prefix + '-viewmodel',
+            vmID    = node.getAttribute(vmAttr),
             ChildVM = this.compiler.getOption('viewmodels', vmID) || ViewModel,
-            scope = {}
+            scope   = {}
+        if (vmID) node.removeAttribute(vmAttr)
         scope[this.arg] = data || {}
         var item = new ChildVM({
             el: node,

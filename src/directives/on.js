@@ -33,7 +33,11 @@ module.exports = {
             event    = this.arg,
             ownerVM  = this.binding.compiler.vm
 
-        if (compiler.repeat && event !== 'blur' && event !== 'focus') {
+        if (compiler.repeat &&
+            // do not delegate if the repeat is combined with an extended VM
+            !this.vm.constructor.super &&
+            // blur and focus events do not bubble
+            event !== 'blur' && event !== 'focus') {
 
             // for each blocks, delegate for better performance
             // focus and blur events dont bubble so exclude them

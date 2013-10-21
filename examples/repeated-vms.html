@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title></title>
+        <meta charset="utf-8">
+        <script src="../dist/seed.js"></script>
+    </head>
+    <body>
+        <div sd-repeat="item:items" sd-viewmodel="item" sd-on="click:toggle">
+            {{item.title + msg}}
+        </div>
+        <script>
+            Seed.config({ debug: true })
+
+            Seed.viewmodel('item', Seed.extend({
+                init: function () {
+                    this.item.title += 'ho'
+                },
+                proto: {
+                    toggle: function () {
+                        this.item.title += 'hi'
+                    }
+                },
+                scope: {
+                    msg: 'msg'
+                }
+            }))
+
+            new Seed({
+                el: 'body',
+                scope: {
+                    items: [
+                        {title:'a'},
+                        {title:'b'},
+                        {title:'c'},
+                        {title:'d'},
+                        {title:'e'}
+                    ]
+                }
+            })
+        </script>
+    </body>
+</html>
