@@ -1,6 +1,6 @@
 # Seed.js
 
-Mini MVVM framework
+Modern, lightweight JavaScript MVVM
 
 [ **WARNING pre-alpha status - tests not complete!** ]
 
@@ -19,7 +19,7 @@ Mini MVVM framework
 ## Browser Support
 
 - Most Webkit/Blink-based browsers
-- Firefix 4+
+- Firefox 4+
 - IE9+ (IE9 needs [classList polyfill](https://github.com/remy/polyfills/blob/master/classList.js))
 
 ## Installation
@@ -46,7 +46,7 @@ Simply include a built version in `/dist` or installed via Bower with a script t
 
 ## Development
 
-First, install dependencies:
+Make sure you have `grunt-cli` installed globally. Then clone the repo and install dependencies:
 
     $ npm install
 
@@ -64,12 +64,10 @@ To build:
 
 ## Quickstart
 
-Simplest possible example:
-
 **HTML**
 
 ~~~ html
-<div id="demo">
+<div id="demo" sd-on="click:changeText">
     <p sd-text="hello"></p>
 </div>
 ~~~
@@ -77,13 +75,20 @@ Simplest possible example:
 **JavaScript**
 
 ~~~ js
-new seed.ViewModel({
+new Seed({
     el: '#demo',
-    data: {
-        hello: 'Hello World!'
+    scope: {
+        hello: 'Hello World!',
+        changeText: function () {
+            this.hello = 'Hello Seed!'
+        }
     }
 })
 ~~~
+
+## Documentation
+
+Coming soon...
 
 ## License
 
