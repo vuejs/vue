@@ -3,13 +3,13 @@
     <head>
         <title></title>
         <meta charset="utf-8">
+        <script src="../../../dist/seed.js"></script>
     </head>
     <body>
         <div id="demo">
             <p sd-text="one + ' ' + two + '!'"></p>
             <input sd-model="one"> <input sd-model="two">
         </div>
-        <script src="../dist/seed.js"></script>
         <script>
             Seed.config({ debug: true })
             var demo = new Seed({

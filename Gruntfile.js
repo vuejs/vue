@@ -1,19 +1,11 @@
-module.exports = function( grunt ) {
+var fs   = require('fs'),
+    path = require('path')
 
-    var fs = require('fs')
+module.exports = function( grunt ) {
 
     grunt.initConfig({
 
         component_build: {
-            dev: {
-                output: './dist/',
-                name: 'seed',
-                dev: true,
-                sourceUrls: true,
-                styles: false,
-                verbose: true,
-                standalone: 'Seed'
-            },
             build: {
                 output: './dist/',
                 name: 'seed',
@@ -35,7 +27,7 @@ module.exports = function( grunt ) {
                 }
             },
             test: {
-                src: ['test/e2e/**/*.js', 'test/unit/**/*.js'],
+                src: ['test/unit/specs/*.js', 'test/functional/specs/*.js'],
                 options: {
                     jshintrc: 'test/.jshintrc'
                 }
@@ -43,15 +35,8 @@ module.exports = function( grunt ) {
         },
 
         mocha: {
-            unit: {
-                src: ['test/unit/*.html'],
-                options: {
-                    reporter: 'Spec',
-                    run: true
-                }
-            },
-            e2e: {
-                src: ['test/e2e/*.html'],
+            test: {
+                src: ['test/unit/runner.html'],
                 options: {
                     reporter: 'Spec',
                     run: true
@@ -81,7 +66,7 @@ module.exports = function( grunt ) {
             },
             component: {
                 files: ['src/**/*.js', 'component.json'],
-                tasks: ['component_build:dev', 'component_build:test']
+                tasks: ['component_build']
             }
         }
 
@@ -92,14 +77,6 @@ module.exports = function( grunt ) {
     grunt.loadNpmTasks( 'grunt-contrib-uglify' )
     grunt.loadNpmTasks( 'grunt-component-build' )
     grunt.loadNpmTasks( 'grunt-mocha' )
-    grunt.registerTask( 'test', ['component_build:test', 'mocha'] )
-    grunt.registerTask( 'default', [
-        'jshint:dev',
-        'component_build:build',
-        'jshint:test',
-        'test',
-        'uglify'
-    ])
 
     grunt.registerTask( 'version', function (version) {
         ;['package', 'bower', 'component'].forEach(function (file) {
@@ -132,5 +109,31 @@ module.exports = function( grunt ) {
             return true
         }
     })
+
+    grunt.registerTask( 'casper', function () {
+        var done = this.async()
+        grunt.util.spawn({
+            cmd: 'casperjs',
+            args: ['test', 'specs/'],
+            opts: {
+                stdio: 'inherit',
+                cwd: path.resolve('test/functional')
+            }
+        }, function (err, res) {
+            if (err) grunt.fail.fatal(res.stdout)
+            grunt.log.writeln(res.stdout)
+            done()
+        })
+    })
+
+    grunt.registerTask( 'test', ['mocha', 'casper'] )
+
+    grunt.registerTask( 'default', [
+        'jshint:dev',
+        'component_build',
+        'jshint:test',
+        'test',
+        'uglify'
+    ])
     
 }

@@ -21,6 +21,7 @@
         "$": true,
         "mockHTMLEvent": true,
         "mockMouseEvent": true,
-        "mockKeyEvent": true
+        "mockKeyEvent": true,
+        "casper": true
     }
 }
