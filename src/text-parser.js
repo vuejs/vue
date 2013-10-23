@@ -8,14 +8,13 @@ module.exports = {
     parse: function (text) {
         if (!BINDING_RE.test(text)) return null
         var m, i, tokens = []
-        do {
-            m = text.match(BINDING_RE)
-            if (!m) break
+        /* jshint boss: true */
+        while (m = text.match(BINDING_RE)) {
             i = m.index
             if (i > 0) tokens.push(text.slice(0, i))
             tokens.push({ key: m[1].trim() })
             text = text.slice(i + m[0].length)
-        } while (true)
+        }
         if (text.length) tokens.push(text)
         return tokens
     }
