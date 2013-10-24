@@ -17,11 +17,11 @@ describe('UNIT: Utils', function () {
             var a = {}
             utils.defProtected(a, 'test', 1)
 
-            var count = 0
+            var keys = []
             for (var key in a) {
-                count++
+                keys.push(key)
             }
-            assert.strictEqual(count, 0, 'inenumerable')
+            assert.strictEqual(keys.length, 0, 'inenumerable')
             assert.strictEqual(JSON.stringify(a), '{}', 'unstringifiable')
 
             a.test = 2
@@ -32,11 +32,12 @@ describe('UNIT: Utils', function () {
             var a = {}
             utils.defProtected(a, 'test', 1, true)
 
-            var count = 0
+            var keys = []
             for (var key in a) {
-                count++
+                keys.push(key)
             }
-            assert.strictEqual(count, 1, 'enumerable')
+            assert.strictEqual(keys.length, 1, 'enumerable')
+            assert.strictEqual(keys[0], 'test')
             assert.strictEqual(JSON.stringify(a), '{"test":1}', 'stringifiable')
         })
 
@@ -51,8 +52,9 @@ describe('UNIT: Utils', function () {
             assert.equal(tof(1), 'Number')
             assert.equal(tof(''), 'String')
             assert.equal(tof(true), 'Boolean')
-            assert.equal(tof(null), 'Null')
-            assert.equal(tof(undefined), 'Undefined')
+            // phantomjs weirdness
+            assert.ok(tof(null) === 'Null' || tof(null) === 'DOMWindow')
+            assert.ok(tof(undefined) === 'Undefined' || tof(undefined) === 'DOMWindow')
         })
 
     })
