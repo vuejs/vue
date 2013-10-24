@@ -1,9 +1,0 @@
-- sd-transition
-- component examples
-- tests
-- docs
-- acoompanying modules
-    - seed-touch (e.g. sd-drag="onDrag" sd-swipe="onSwipe")
-    - seed-storage (RESTful sync)
-    - seed-router (express style)
-    - sd-validation (e.g. sd-validate="type:email, max:100, required:true")
