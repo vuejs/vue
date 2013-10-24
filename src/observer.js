@@ -171,7 +171,7 @@ module.exports = {
                 def(obj, '__observer__', new Emitter())
             }
             ob = obj.__observer__
-            ob.values = ob.values || {}
+            ob.values = ob.values || utils.hash()
             var proxies = observer.proxies[path] = {
                 get: function (key) {
                     observer.emit('get', path + key)

@@ -110,7 +110,7 @@ function extend (options) {
  *  extension option, but only as an instance option.
  */
 function inheritOptions (child, parent, topLevel) {
-    child = child || {}
+    child = child || utils.hash()
     convertPartials(child.partials)
     if (!parent) return child
     for (var key in parent) {

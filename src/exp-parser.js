@@ -58,7 +58,7 @@ module.exports = {
         var args = [],
             v, i, keyPrefix,
             l = vars.length,
-            hash = {}
+            hash = Object.create(null)
         for (i = 0; i < l; i++) {
             v = vars[i]
             // avoid duplicate keys

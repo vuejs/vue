@@ -12,6 +12,8 @@ var Emitter     = require('./emitter'),
     slice       = Array.prototype.slice,
     log         = utils.log,
     def         = utils.defProtected,
+    makeHash    = utils.hash,
+    hasOwn      = Object.prototype.hasOwnProperty,
 
     // special directives
     idAttr,
@@ -33,7 +35,7 @@ function Compiler (vm, options) {
     var compiler = this
 
     // extend options
-    options = compiler.options = options || {}
+    options = compiler.options = options || makeHash()
     utils.extend(compiler, options.compilerOptions)
 
     // initialize element
@@ -46,7 +48,7 @@ function Compiler (vm, options) {
 
     compiler.vm  = vm
     // special VM properties are inumerable
-    def(vm, '$', {})
+    def(vm, '$', makeHash())
     def(vm, '$el', compiler.el)
     def(vm, '$compiler', compiler)
 
@@ -67,7 +69,7 @@ function Compiler (vm, options) {
     var parent = compiler.parentCompiler
     compiler.bindings = parent
         ? Object.create(parent.bindings)
-        : {}
+        : makeHash()
     compiler.rootCompiler = parent
         ? getRoot(parent)
         : compiler
@@ -168,7 +170,7 @@ CompilerProto.setupObserver = function () {
 
     // a hash to hold event proxies for each root level key
     // so they can be referenced and removed later
-    observer.proxies = {}
+    observer.proxies = makeHash()
 
     // add own listeners which trigger binding updates
     observer
@@ -337,7 +339,7 @@ CompilerProto.bindDirective = function (directive) {
         // If the directive's owner compiler's VM has the key,
         // it belongs there. Create the binding if it's not already
         // created, and return it.
-        binding = ownerCompiler.bindings.hasOwnProperty(key)
+        binding = hasOwn.call(ownerCompiler.bindings, key)
             ? ownerCompiler.bindings[key]
             : ownerCompiler.createBinding(key)
     } else {
@@ -417,7 +419,7 @@ CompilerProto.createBinding = function (key, isExp) {
             compiler.define(key, binding)
         } else {
             var parentKey = key.slice(0, key.lastIndexOf('.'))
-            if (!bindings.hasOwnProperty(parentKey)) {
+            if (!hasOwn.call(bindings, parentKey)) {
                 // this is a nested value binding, but the binding for its parent
                 // has not been created yet. We better create that one too.
                 compiler.createBinding(parentKey)
@@ -578,7 +580,7 @@ CompilerProto.destroy = function () {
     }
     // unbind/unobserve all own bindings
     for (key in bindings) {
-        if (bindings.hasOwnProperty(key)) {
+        if (hasOwn.call(bindings, key)) {
             binding = bindings[key]
             if (binding.root) {
                 Observer.unobserve(binding.value, binding.key, compiler.observer)

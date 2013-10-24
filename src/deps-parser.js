@@ -8,7 +8,7 @@ var Emitter  = require('./emitter'),
  */
 function catchDeps (binding) {
     utils.log('\n─ ' + binding.key)
-    var depsHash = {}
+    var depsHash = utils.hash()
     observer.on('get', function (dep) {
         if (depsHash[dep.key]) return
         depsHash[dep.key] = 1

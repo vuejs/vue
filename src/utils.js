@@ -3,13 +3,23 @@ var config    = require('./config'),
     join      = Array.prototype.join,
     console   = window.console
 
+/**
+ *  Create a prototype-less object
+ *  which is a better hash/map
+ */
+function makeHash () {
+    return Object.create(null)
+}
+
 module.exports = {
+
+    hash: makeHash,
 
     // global storage for user-registered
     // vms, partials and transitions
-    viewmodels  : {},
-    partials    : {},
-    transitions : {},
+    viewmodels  : makeHash(),
+    partials    : makeHash(),
+    transitions : makeHash(),
 
     /**
      *  Define an ienumerable property

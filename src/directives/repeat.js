@@ -1,6 +1,7 @@
 var config   = require('../config'),
     Observer = require('../observer'),
     Emitter  = require('../emitter'),
+    utils    = require('../utils'),
     ViewModel // lazy def to avoid circular dependency
 
 /**
@@ -107,7 +108,7 @@ module.exports = {
 
         this.unbind(true)
         // attach an object to container to hold handlers
-        this.container.sd_dHandlers = {}
+        this.container.sd_dHandlers = utils.hash()
         // if initiating with an empty collection, we need to
         // force a compile so that we get all the bindings for
         // dependency extraction.
