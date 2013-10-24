@@ -46,7 +46,7 @@ ViewModel.viewmodel = function (id, Ctor) {
  */
 ViewModel.partial = function (id, partial) {
     if (!partial) return utils.partials[id]
-    utils.partials[id] = templateToFragment(partial)
+    utils.partials[id] = utils.templateToFragment(partial)
     return this
 }
 
@@ -87,7 +87,7 @@ function extend (options) {
     }
     // convert template to documentFragment
     if (options.template) {
-        options.templateFragment = templateToFragment(options.template)
+        options.templateFragment = utils.templateToFragment(options.template)
     }
     // allow extended VM to be further extended
     ExtendedVM.extend = extend
@@ -111,7 +111,6 @@ function extend (options) {
  */
 function inheritOptions (child, parent, topLevel) {
     child = child || utils.hash()
-    convertPartials(child.partials)
     if (!parent) return child
     for (var key in parent) {
         if (key === 'el' || key === 'proto') continue
@@ -122,38 +121,6 @@ function inheritOptions (child, parent, topLevel) {
         }
     }
     return child
-}
-
-/**
- *  Convert an object of partials to dom fragments
- */
-function convertPartials (partials) {
-    if (!partials) return
-    for (var key in partials) {
-        if (typeof partials[key] === 'string') {
-            partials[key] = templateToFragment(partials[key])
-        }
-    }
-}
-
-/**
- *  Convert a string template to a dom fragment
- */
-function templateToFragment (template) {
-    if (template.charAt(0) === '#') {
-        var templateNode = document.querySelector(template)
-        if (!templateNode) return
-        template = templateNode.innerHTML
-    }
-    var node = document.createElement('div'),
-        frag = document.createDocumentFragment(),
-        child
-    node.innerHTML = template.trim()
-    /* jshint boss: true */
-    while (child = node.firstChild) {
-        frag.appendChild(child)
-    }
-    return frag
 }
 
 module.exports = ViewModel

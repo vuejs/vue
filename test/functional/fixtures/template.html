@@ -3,11 +3,13 @@
     <head>
         <title></title>
         <meta charset="utf-8">
+        <script src="bind.js"></script>
         <script src="../../../dist/seed.js"></script>
     </head>
     <body>
 
-        <div id="japan" sd-template="test"></div>
+        <div id="usa" sd-partial="global"></div>
+        <div id="japan" sd-partial="local"></div>
 
         <script type="text/sd-template" id="test">
             <p>{{hi}}!</p>
@@ -17,6 +19,7 @@
 
             // direct usage
             var china  = new Seed({
+                id: 'china',
                 template: '#test'
             })
             document.body.appendChild(china.$el)
@@ -26,11 +29,28 @@
 
             // extended usage
             var Hawaii = Seed.extend({
+                id: 'hawaii',
                 template: '#test'
             })
             var hawaii = new Hawaii()
             document.body.appendChild(hawaii.$el)
-            hawaii.hi = 'Aloha!'
+            hawaii.hi = 'Aloha'
+
+            // global partial
+            Seed.partial('global', document.querySelector('#test').innerHTML)
+            var usa = new Seed({
+                el: '#usa'
+            })
+            usa.hi = 'Hi dude'
+
+            // direct partial
+            var japan = new Seed({
+                el: '#japan',
+                partials: {
+                    local: document.querySelector('#test').innerHTML
+                }
+            })
+            japan.hi = 'こんにちは'
         </script>
     </body>
 </html>

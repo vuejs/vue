@@ -3,20 +3,35 @@
     <head>
         <title></title>
         <meta charset="utf-8">
+        <script src="bind.js"></script>
         <script src="../../../dist/seed.js"></script>
     </head>
     <body>
-        <div id="demo">
+        <div id="normal">
             <p sd-text="one + ' ' + two + '!'"></p>
-            <input sd-model="one"> <input sd-model="two">
+            <input id="one" sd-model="one" name="one"> <input id="two" sd-model="two" name="two">
+        </div>
+        <div id="lazy">
+            <p sd-text="one + ' ' + two + '!'"></p>
+            <form id="form">
+                <input sd-model="one" name="three"> <input sd-model="two" name="four">
+            </form>
         </div>
         <script>
-            Seed.config({ debug: true })
-            var demo = new Seed({
-                el: '#demo',
+            var normal = new Seed({
+                el: '#normal',
                 scope: {
                     one: 'Hello',
                     two: 'World'
+                }
+            })
+
+            var lazy = new Seed({
+                el: '#lazy',
+                lazy: true,
+                scope: {
+                    one: 'Hi',
+                    two: 'Ho'
                 }
             })
         </script>

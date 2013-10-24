@@ -37,6 +37,7 @@ function Compiler (vm, options) {
     // extend options
     options = compiler.options = options || makeHash()
     utils.extend(compiler, options.compilerOptions)
+    utils.convertPartials(options.partials)
 
     // initialize element
     compiler.setupElement(options)

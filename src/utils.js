@@ -11,7 +11,7 @@ function makeHash () {
     return Object.create(null)
 }
 
-module.exports = {
+var utils = module.exports = {
 
     hash: makeHash,
 
@@ -63,6 +63,39 @@ module.exports = {
             if (protective && obj[key]) continue
             obj[key] = ext[key]
         }
+    },
+
+    /**
+     *  Convert an object of partial strings
+     *  to domFragments
+     */
+    convertPartials: function (partials) {
+        if (!partials) return
+        for (var key in partials) {
+            if (typeof partials[key] === 'string') {
+                partials[key] = utils.templateToFragment(partials[key])
+            }
+        }
+    },
+
+    /**
+     *  Convert a string template to a dom fragment
+     */
+    templateToFragment: function (template) {
+        if (template.charAt(0) === '#') {
+            var templateNode = document.querySelector(template)
+            if (!templateNode) return
+            template = templateNode.innerHTML
+        }
+        var node = document.createElement('div'),
+            frag = document.createDocumentFragment(),
+            child
+        node.innerHTML = template.trim()
+        /* jshint boss: true */
+        while (child = node.firstChild) {
+            frag.appendChild(child)
+        }
+        return frag
     },
 
     /**
