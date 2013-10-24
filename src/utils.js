@@ -37,6 +37,7 @@ module.exports = {
 
     /**
      *  Accurate type check
+     *  internal use only, so no need to check for NaN
      */
     typeOf: function (obj) {
         return toString.call(obj).slice(8, -1)
@@ -58,7 +59,6 @@ module.exports = {
      *  simple extend
      */
     extend: function (obj, ext, protective) {
-        if (!ext) return
         for (var key in ext) {
             if (protective && obj[key]) continue
             obj[key] = ext[key]
