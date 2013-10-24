@@ -3,28 +3,31 @@
     <head>
         <title></title>
         <meta charset="utf-8">
+        <script src="bind.js"></script>
         <script src="../../../dist/seed.js"></script>
     </head>
     <body>
-        <div id="hi" sd-test sd-test2></div>
+        <div id="hi" sd-test sd-test2>
+        </div>
+        <p class="one"></p>
+        <p class="two"></p>
         <script>
             var a = new Seed({
                 el: '#hi',
                 directives: {
                     test: {
                         bind: function () {
-                            console.log('bind')
+                            document.querySelector('.one').textContent = 'bind'
                         },
                         unbind: function () {
-                            console.log('unbind')
+                            document.querySelector('.one').textContent = 'unbind'
                         }
                     },
                     test2: function () {
-                        console.log('test2 bind')
+                        document.querySelector('.two').textContent = 'bind'
                     }
                 }
             })
-            a.$destroy()
         </script>
     </body>
 </html>

@@ -1,4 +1,4 @@
-casper.test.begin('Expression', 8, function (test) {
+casper.test.begin('Expression', 9, function (test) {
     
     casper
     .start('./fixtures/expression.html', function () {
@@ -10,14 +10,20 @@ casper.test.begin('Expression', 8, function (test) {
         test.assertField('three', 'Hi')
         test.assertField('four', 'Ho')
 
-        // lazy
+        // setting value
+        this.evaluate(function () {
+            normal.one = 'Hola'
+        })
+        test.assertSelectorHasText('#normal p', 'Hola World!')
+
+        // lazy input
         this.fill('#form', {
             three: 'three',
             four: 'four'
         })
         test.assertSelectorHasText('#lazy p', 'three four!')
 
-        // normal
+        // normal input
         this.evaluate(function () {
             var one = document.getElementById('one')
             var e = document.createEvent('MouseEvent')
@@ -26,7 +32,7 @@ casper.test.begin('Expression', 8, function (test) {
             one.dispatchEvent(e)
         })
         test.assertSelectorHasText('#normal p', 'Bye World!')
-        
+
     })
     .run(function () {
         test.done()
