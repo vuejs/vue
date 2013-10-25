@@ -566,6 +566,8 @@ describe('UNIT: Directives', function () {
             assert.ok(t.$.hihi instanceof Child)
             t.$.hihi.test()
             assert.ok(called)
+            t.$.hihi.$destroy()
+            assert.notOk('hihi' in t.$)
         })
 
     })

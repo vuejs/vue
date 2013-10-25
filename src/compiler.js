@@ -78,6 +78,7 @@ function Compiler (vm, options) {
     // register child id on parent
     var childId = compiler.el.getAttribute(idAttr)
     if (childId && parent) {
+        compiler.childId = childId
         parent.vm.$[childId] = vm
     }
 
@@ -590,9 +591,13 @@ CompilerProto.destroy = function () {
         }
     }
     // remove self from parentCompiler
-    var parent = compiler.parentCompiler
+    var parent = compiler.parentCompiler,
+        childId = compiler.childId
     if (parent) {
         parent.childCompilers.splice(parent.childCompilers.indexOf(compiler), 1)
+        if (childId) {
+            delete parent.vm.$[childId]
+        }
     }
     // remove el
     if (el === document.body) {
