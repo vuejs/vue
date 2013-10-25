@@ -83,7 +83,7 @@ var utils = module.exports = {
      */
     templateToFragment: function (template) {
         if (template.charAt(0) === '#') {
-            var templateNode = document.querySelector(template)
+            var templateNode = document.getElementById(template.slice(1))
             if (!templateNode) return
             template = templateNode.innerHTML
         }

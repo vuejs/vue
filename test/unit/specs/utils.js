@@ -98,4 +98,48 @@ describe('UNIT: Utils', function () {
 
     })
 
+    describe('templateToFragment', function () {
+        
+        it('should convert a string tempalte to a documentFragment', function () {
+            var template = '<div class="a">hi</div><p>ha</p>',
+                frag = utils.templateToFragment(template)
+            assert.ok(frag instanceof window.DocumentFragment)
+            assert.equal(frag.querySelector('.a').textContent, 'hi')
+            assert.equal(frag.querySelector('p').textContent, 'ha')
+        })
+
+        it('should also work if the string is an ID selector', function () {
+            var id = 'utils-template-to-fragment',
+                template = '<div class="a">hi</div><p>ha</p>',
+                el = document.createElement('template')
+                el.id = id
+                el.innerHTML = template
+            document.getElementById('test').appendChild(el)
+
+            var frag = utils.templateToFragment('#' + id)
+            assert.ok(frag instanceof window.DocumentFragment)
+            assert.equal(frag.querySelector('.a').textContent, 'hi')
+            assert.equal(frag.querySelector('p').textContent, 'ha')
+        })
+
+    })
+
+    describe('convertPartials', function () {
+        
+        it('should convert a hash object of strings to fragments', function () {
+            var partials = {
+                a: '#utils-template-to-fragment',
+                b: '<div class="a">hi</div><p>ha</p>'
+            }
+            utils.convertPartials(partials)
+            for (var key in partials) {
+                var frag = partials[key]
+                assert.ok(frag instanceof window.DocumentFragment)
+                assert.equal(frag.querySelector('.a').textContent, 'hi')
+                assert.equal(frag.querySelector('p').textContent, 'ha')
+            }
+        })
+
+    })
+
 })
