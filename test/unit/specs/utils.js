@@ -63,16 +63,16 @@ describe('UNIT: Utils', function () {
 
         var txt = utils.toText
 
-        it('should do nothing for strings and numbers', function () {
+        it('should do nothing for strings, numbers and booleans', function () {
             assert.strictEqual(txt('hihi'), 'hihi')
             assert.strictEqual(txt(123), 123)
+            assert.strictEqual(txt(true), true)
+            assert.strictEqual(txt(false), false)
         })
         
         it('should output empty string if value is not string or number', function () {
             assert.strictEqual(txt({}), '')
             assert.strictEqual(txt([]), '')
-            assert.strictEqual(txt(false), '')
-            assert.strictEqual(txt(true), '')
             assert.strictEqual(txt(undefined), '')
             assert.strictEqual(txt(null), '')
             assert.strictEqual(txt(NaN), '')

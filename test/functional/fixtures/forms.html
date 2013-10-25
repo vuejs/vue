@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Forms test</title>
+        <meta charset="utf-8">
+        <script src="bind.js"></script>
+        <script src="../../../dist/seed.js"></script>
+    </head>
+    <body>
+        <form id="forms">
+
+            <input type="text" name="text" sd-model="text">
+
+            <input type="checkbox" name="checkbox" sd-model="checked">
+
+            <input type="radio" name="radio" sd-model="radio" value="a">
+            <input type="radio" name="radio" sd-model="radio" value="b">
+
+            <select sd-model="select" name="select">
+                <option>a</option>
+                <option>b</option>
+            </select>
+
+            <textarea name="textarea" sd-model="textarea"></textarea>
+
+        </form>
+
+        <div id="values">
+            <p class="text">{{text}}</p>
+            <p class="checkbox">{{checked}}</p>
+            <p class="radio">{{radio}}</p>
+            <p class="select">{{select}}</p>
+            <p class="textarea">{{textarea}}</p>
+        </div>
+
+        <script>
+            var test = new Seed({
+                el: 'body',
+                lazy: true,
+                scope: {
+                    text: 'some text',
+                    checked: true,
+                    radio: 'b',
+                    select: 'b',
+                    textarea: 'more text'
+                }
+            })
+        </script>
+    </body>
+</html>

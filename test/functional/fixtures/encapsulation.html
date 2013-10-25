@@ -6,12 +6,27 @@
         <script src="../../../dist/seed.js"></script>
     </head>
     <body>
-        <div id="test" sd-hola="hi | nodigits"></div>
+        <div id="test">
+            <div class="dir" sd-hola="dirMsg"></div>
+            <div class="filter">{{filterMsg | nodigits}}</div>
+            <div class="partial" sd-partial="partial-test"></div>
+            <div class="vm" sd-viewmodel="vm-test">{{vmMsg}}</div>
+        </div>
         <script>
             var T = Seed.extend({
+                viewmodels: {
+                    'vm-test': Seed.extend({
+                        scope: {
+                            vmMsg: 'viewmodel works'
+                        }
+                    })
+                },
+                partials: {
+                    'partial-test': '{{partialMsg}}'
+                },
                 directives: {
                     hola: function (value) {
-                        this.el.innerHTML = value + '<span style="color:#f00"> this part is added by the directive</span>'
+                        this.el.innerHTML = value + ' works'
                     }
                 },
                 filters: {
@@ -23,10 +38,11 @@
             new T({
                 el: '#test',
                 scope: {
-                    hi: 'ho43h132oh5o12345'
+                    dirMsg: 'directive',
+                    filterMsg: 'fi43l132ter5 w12345orks',
+                    partialMsg: 'partial works'
                 }
             })
-            // expected ouput: hohoho this part is added by the directive
         </script>
     </body>
 </html>

@@ -35,12 +35,13 @@ describe('UNIT: Directives', function () {
             assert.strictEqual(dir.el.textContent, '12345')
         })
 
+        it('should work with booleans', function () {
+            dir.update(true)
+            assert.strictEqual(dir.el.textContent, 'true')
+        })
+
         it('should be empty with other stuff', function () {
             dir.update(null)
-            assert.strictEqual(dir.el.textContent, '')
-            dir.update(false)
-            assert.strictEqual(dir.el.textContent, '')
-            dir.update(true)
             assert.strictEqual(dir.el.textContent, '')
             dir.update(undefined)
             assert.strictEqual(dir.el.textContent, '')
@@ -67,12 +68,13 @@ describe('UNIT: Directives', function () {
             assert.strictEqual(dir.el.innerHTML, '12345')
         })
 
+        it('should work with booleans', function () {
+            dir.update(true)
+            assert.strictEqual(dir.el.textContent, 'true')
+        })
+
         it('should be empty with other stuff', function () {
             dir.update(null)
-            assert.strictEqual(dir.el.innerHTML, '')
-            dir.update(false)
-            assert.strictEqual(dir.el.innerHTML, '')
-            dir.update(true)
             assert.strictEqual(dir.el.innerHTML, '')
             dir.update(undefined)
             assert.strictEqual(dir.el.innerHTML, '')

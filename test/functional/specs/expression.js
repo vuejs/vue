@@ -12,6 +12,7 @@ casper.test.begin('Expression', 9, function (test) {
 
         // setting value
         this.evaluate(function () {
+            /* global normal */
             normal.one = 'Hola'
         })
         test.assertSelectorHasText('#normal p', 'Hola World!')

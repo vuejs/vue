@@ -50,6 +50,7 @@ var utils = module.exports = {
     toText: function (value) {
         /* jshint eqeqeq: false */
         return (typeof value === 'string' ||
+            typeof value === 'boolean' ||
             (typeof value === 'number' && value == value)) // deal with NaN
             ? value
             : ''

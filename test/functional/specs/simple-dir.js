@@ -7,6 +7,7 @@ casper.test.begin('Simple Directive', 3, function (test) {
         test.assertSelectorHasText('.two', 'bind', 'function definition bind')
 
         this.evaluate(function () {
+            /* global a */
             a.$destroy()
         })
 
