@@ -3,22 +3,23 @@
     <head>
         <title></title>
         <meta charset="utf-8">
+        <script src="bind.js"></script>
         <script src="../../../dist/seed.js"></script>
     </head>
     <body>
-        <div sd-repeat="item:items" sd-viewmodel="item" sd-on="click:toggle">
-            {{item.title + msg}}
+        <div class="item" sd-repeat="item:items" sd-viewmodel="item" sd-on="click:click">
+            {{msg + ' ' + item.title}}
         </div>
         <script>
             Seed.config({ debug: true })
 
             Seed.viewmodel('item', Seed.extend({
                 init: function () {
-                    this.item.title += 'ho'
+                    this.item.title += ' init'
                 },
                 proto: {
-                    toggle: function () {
-                        this.item.title += 'hi'
+                    click: function () {
+                        this.item.title += ' click'
                     }
                 },
                 scope: {
@@ -32,9 +33,7 @@
                     items: [
                         {title:'a'},
                         {title:'b'},
-                        {title:'c'},
-                        {title:'d'},
-                        {title:'e'}
+                        {title:'c'}
                     ]
                 }
             })

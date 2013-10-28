@@ -1,4 +1,6 @@
-casper.test.begin('Expression', 9, function (test) {
+/* global normal */
+
+casper.test.begin('Expression', 12, function (test) {
     
     casper
     .start('./fixtures/expression.html', function () {
@@ -12,10 +14,17 @@ casper.test.begin('Expression', 9, function (test) {
 
         // setting value
         this.evaluate(function () {
-            /* global normal */
             normal.one = 'Hola'
         })
         test.assertSelectorHasText('#normal p', 'Hola World!')
+        test.assertField('one', 'Hola')
+
+        // setting nested value
+        this.evaluate(function () {
+            normal.two.three = 'Casper'
+        })
+        test.assertSelectorHasText('#normal p', 'Hola Casper!')
+        test.assertField('two', 'Casper')
 
         // lazy input
         this.fill('#form', {
@@ -25,14 +34,8 @@ casper.test.begin('Expression', 9, function (test) {
         test.assertSelectorHasText('#lazy p', 'three four!')
 
         // normal input
-        this.evaluate(function () {
-            var one = document.getElementById('one')
-            var e = document.createEvent('MouseEvent')
-            e.initMouseEvent('keyup', true, true, null, 1, 0, 0, 0, 0, false, false, false, false, 0, null)
-            one.value = 'Bye'
-            one.dispatchEvent(e)
-        })
-        test.assertSelectorHasText('#normal p', 'Bye World!')
+        this.sendKeys('#one', 'Bye')
+        test.assertSelectorHasText('#normal p', 'Bye Casper!')
 
     })
     .run(function () {

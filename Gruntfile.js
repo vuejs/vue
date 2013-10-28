@@ -120,7 +120,7 @@ module.exports = function( grunt ) {
                 cwd: path.resolve('test/functional')
             }
         }, function (err, res) {
-            if (err) grunt.fail.fatal(res.stdout)
+            if (err) grunt.fail.fatal(res.stdout || 'CasperJS test failed')
             grunt.log.writeln(res.stdout)
             done()
         })

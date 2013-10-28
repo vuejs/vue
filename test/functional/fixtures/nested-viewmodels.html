@@ -17,6 +17,7 @@
             color: #F00;
         }
     </style>
+    <script src="bind.js"></script>
     <script src="../../../dist/seed.js"></script>
 </head>
 <body>
@@ -24,37 +25,29 @@
         <p class="ancestor">{{name}} {{family}}</p>
 
         <div sd-viewmodel="man" data-name="Jack">
-            <p>{{name}}, son of {{^name}}</p>
+            <p class="jack">{{name}}, son of {{^name}}</p>
 
             <div sd-viewmodel="man" data-name="Mike">
-                <p>{{name}}, son of {{^name}}</p>
+                <p class="mike">{{name}}, son of {{^name}}</p>
 
-                <div sd-viewmodel="offspring" data-name="Tim">
+                <div sd-viewmodel="offspring" data-name="Tim" class="tim">
                 </div>
 
-                <div sd-viewmodel="offspring" data-name="Tom">
+                <div sd-viewmodel="offspring" data-name="Tom" class="tom">
                 </div>
             </div>
 
             <div sd-viewmodel="man" data-name="Jason">
-                <p>{{name}}, son of {{^name}}</p>
+                <p class="jason">{{name}}, son of {{^name}}</p>
 
-                <div sd-viewmodel="offspring" data-name="Andrew">
+                <div sd-viewmodel="offspring" data-name="Andrew" class="andrew">
                 </div>
             </div>
         </div>
     </div>
 
     <script type="text/sd-template" id="sd-template-offspring">
-        <p>
-            {{name}}, son of {{^name}},
-            <br>
-            grandson of {{^^name}},
-            <br>
-            great-grandson of {{$name}},
-            <br>
-            and offspring of family {{family}}.
-        </p>
+        <p>{{name}}, son of {{^name}}, grandson of {{^^name}}, great-grandson of {{$name}}, and offspring of family {{family}}.</p>
     </script>
     
     <script>
@@ -71,7 +64,7 @@
         })
 
         var Offspring = Man.extend({
-            template: document.getElementById('sd-template-offspring').innerHTML
+            template: document.getElementById('sd-template-offspring').innerHTML.trim()
         })
 
         Seed

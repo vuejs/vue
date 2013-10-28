@@ -26,12 +26,12 @@ var utils = module.exports = {
      *  This avoids it being included in JSON.stringify
      *  or for...in loops.
      */
-    defProtected: function (obj, key, val, enumerable) {
+    defProtected: function (obj, key, val, enumerable, configurable) {
         if (obj.hasOwnProperty(key)) return
         Object.defineProperty(obj, key, {
-            enumerable: !!enumerable,
-            configurable: false,
-            value: val
+            value        : val,
+            enumerable   : !!enumerable,
+            configurable : !!configurable
         })
     },
 

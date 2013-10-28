@@ -3,24 +3,25 @@
     <head>
         <title>SEED repeated items</title>
         <meta charset="utf-8">
+        <script src="bind.js"></script>
         <script src="../../../dist/seed.js"></script>
     </head>
     <body>
         <div id="app">
             <p>
-                <button sd-on="click:push">push</button>
-                <button sd-on="click:pop">pop</button>
-                <button sd-on="click:shift">shift</button>
-                <button sd-on="click:unshift">unshift</button>
-                <button sd-on="click:splice">splice</button>
-                <button sd-on="click:remove">remove</button>
-                <button sd-on="click:replace">replace</button>
-                <button sd-on="click:sort">sort</button>
-                <button sd-on="click:reverse">reverse</button>
+                <button class="push" sd-on="click:push">push</button>
+                <button class="pop" sd-on="click:pop">pop</button>
+                <button class="shift" sd-on="click:shift">shift</button>
+                <button class="unshift" sd-on="click:unshift">unshift</button>
+                <button class="splice" sd-on="click:splice">splice</button>
+                <button class="remove" sd-on="click:remove">remove</button>
+                <button class="replace" sd-on="click:replace">replace</button>
+                <button class="sort" sd-on="click:sort">sort</button>
+                <button class="reverse" sd-on="click:reverse">reverse</button>
             </p>
-            <p>Total items: {{items.length}}</p>
+            <p>Total items: <span class="count" sd-text="items.length"></span></p>
             <ul>
-                <li sd-repeat="item:items">
+                <li class="item" sd-repeat="item:items">
                     {{item.$index}} {{item.title}}
                 </li>
             </ul>
@@ -40,7 +41,7 @@
                 scope: {
                     items: items,
                     push: function () {
-                        this.items.push({ title: randomChar() })
+                        this.items.push({ title: getChar() })
                     },
                     pop: function () {
                         this.items.pop()
@@ -49,16 +50,16 @@
                         this.items.shift()
                     },
                     unshift: function () {
-                        this.items.unshift({ title: randomChar() })
+                        this.items.unshift({ title: getChar() })
                     },
                     splice: function () {
-                        this.items.splice(0, 1, { title: randomChar() }, { title: randomChar() })
+                        this.items.splice(1, 1, { title: getChar() }, { title: getChar() })
                     },
                     replace: function () {
-                        this.items.replace(randomPos(), { title: randomChar() })
+                        this.items.replace(getPos(), { title: getChar() })
                     },
                     remove: function () {
-                        this.items.remove(randomPos())
+                        this.items.remove(getPos())
                     },
                     sort: function () {
                         this.items.sort(function (a, b) {
@@ -71,12 +72,15 @@
                 }
             })
 
-            function randomChar () {
-                return String.fromCharCode(Math.floor(Math.random() * 30 + 50))
-            }
+            var getChar = (function () {
+                var count = 0
+                return function () {
+                    return (count++).toString()
+                }
+            })()
 
-            function randomPos () {
-                return Math.floor(Math.random() * items.length)
+            function getPos () {
+                return items.length - 1
             }
         </script>
     </body>

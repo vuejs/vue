@@ -79,6 +79,10 @@ function watchObject (obj, path, observer) {
             bind(obj, key, path, observer)
         }
     }
+    // $index is inenumerable
+    if (obj.$index !== undefined) {
+        bind(obj, '$index', path, observer)
+    }
 }
 
 /**

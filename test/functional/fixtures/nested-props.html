@@ -3,6 +3,7 @@
     <head>
         <title></title>
         <meta charset="utf-8">
+        <script src="bind.js"></script>
         <script src="../../../dist/seed.js"></script>
     </head>
     <body>
@@ -10,18 +11,16 @@
             <h1>a.b.c : <span sd-text="a.b.c"></span></h1>
             <h2>a.c : <span sd-text="a.c"></span></h2>
             <h3>Computed property that concats the two: <span sd-text="d"></span></h3>
-            <button sd-on="click:one">one</button>
-            <button sd-on="click:two">two</button>
-            <button sd-on="click:three">three</button>
-            <p><input sd-model="msg"></p>
-        </div>
-        <div id="b">
-            <h1 sd-text="a.c"></h1>
+            <button class="one" sd-on="click:one">one</button>
+            <button class="two" sd-on="click:two">two</button>
+            <button class="three" sd-on="click:three">three</button>
+            <form id="form"><input name="msg" sd-model="msg"></form>
         </div>
         <script>
             Seed.config({debug: true})
             var data = { c: 555 }
             var Demo = Seed.extend({
+                lazy: true,
                 init: function () {
                     this.msg = 'Yoyoyo'
                     this.a = data
@@ -50,13 +49,7 @@
                     }}
                 }
             })
-            var app = new Demo({ el: '#a' }),
-                app2 = new Seed({
-                    el: '#b',
-                    scope: {
-                        a: data
-                    }
-                })
+            var app = new Demo({ el: '#a' })
         </script>
     </body>
 </html>

@@ -8,13 +8,13 @@
     </head>
     <body>
         <div id="normal">
-            <p sd-text="one + ' ' + two + '!'"></p>
-            <input id="one" sd-model="one" name="one"> <input id="two" sd-model="two" name="two">
+            <p sd-text="one + ' ' + two.three + '!'"></p>
+            <input id="one" sd-model="one" name="one"> <input id="two" sd-model="two.three" name="two">
         </div>
         <div id="lazy">
-            <p sd-text="one + ' ' + two + '!'"></p>
+            <p sd-text="one + ' ' + two.three + '!'"></p>
             <form id="form">
-                <input sd-model="one" name="three"> <input sd-model="two" name="four">
+                <input sd-model="one" name="three"> <input sd-model="two.three" name="four">
             </form>
         </div>
         <script>
@@ -22,7 +22,9 @@
                 el: '#normal',
                 scope: {
                     one: 'Hello',
-                    two: 'World'
+                    two: {
+                        three: 'World'
+                    }
                 }
             })
 
@@ -31,7 +33,9 @@
                 lazy: true,
                 scope: {
                     one: 'Hi',
-                    two: 'Ho'
+                    two: {
+                        three: 'Ho'
+                    }
                 }
             })
         </script>

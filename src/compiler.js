@@ -100,8 +100,9 @@ function Compiler (vm, options) {
     }
 
     // for repeated items, create an index binding
+    // which should be inenumerable but configurable
     if (compiler.repeat) {
-        vm[compiler.repeatPrefix].$index = compiler.repeatIndex
+        def(vm[compiler.repeatPrefix], '$index', compiler.repeatIndex, false, true)
     }
 
     // now parse the DOM, during which we will create necessary bindings

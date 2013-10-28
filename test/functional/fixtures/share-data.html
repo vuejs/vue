@@ -3,14 +3,15 @@
     <head>
         <title>SEED share data</title>
         <meta charset="utf-8">
+        <script src="bind.js"></script>
         <script src="../../../dist/seed.js"></script>
     </head>
     <body>
         <div id="a">{{shared.msg}}</div>
         <div id="b">{{shared.msg}}</div>
-        <div id="c">
-            <input sd-model="shared.msg" type="text">
-        </div>
+        <form id="c">
+            <input name="input" sd-model="shared.msg" type="text">
+        </form>
         <div id="d">
             <pre>{{source}}</pre>
         </div>
@@ -31,6 +32,7 @@
                 }
             })
             new Seed({
+                lazy: true,
                 el: '#c',
                 scope: {
                     shared: shared
