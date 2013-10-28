@@ -1,4 +1,5 @@
-var utils = require('../utils')
+var utils = require('../utils'),
+    isIE  = !!document.attachEvent
 
 module.exports = {
 
@@ -17,7 +18,7 @@ module.exports = {
             type === 'checkbox' ||
             type === 'radio')
                 ? 'change'
-                : 'keyup'
+                : 'input'
 
         // determin the attribute to change when updating
         var attr = type === 'checkbox'
@@ -31,6 +32,17 @@ module.exports = {
             self.lock = false
         }
         el.addEventListener(self.event, self.set)
+
+        // fix shit for IE9
+        // since it doesn't fire input on backspace / del / cut
+        if (isIE) {
+            el.addEventListener('cut', self.set)
+            el.addEventListener('keydown', function (e) {
+                if (e.keyCode === 46 || e.keyCode === 8) {
+                    self.set()
+                }
+            })
+        }
     },
 
     update: function (value) {
