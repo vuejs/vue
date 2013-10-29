@@ -355,7 +355,7 @@ describe('UNIT: Directives', function () {
             })
 
             // `lazy` option is tested in the API suite
-            it('should trigger vm.$set when value is changed via keyup', function () {
+            it('should trigger vm.$set when value is changed via input', function () {
                 var triggered = false
                 dir.key = 'foo'
                 dir.vm = { $set: function (key, val) {
@@ -364,7 +364,7 @@ describe('UNIT: Directives', function () {
                     triggered = true
                 }}
                 dir.el.value = 'bar'
-                dir.el.dispatchEvent(mockKeyEvent('keyup'))
+                dir.el.dispatchEvent(mockHTMLEvent('input'))
                 assert.ok(triggered)
             })
 
@@ -374,7 +374,7 @@ describe('UNIT: Directives', function () {
                     removed = false
                 }
                 dir.unbind()
-                dir.el.dispatchEvent(mockKeyEvent('keyup'))
+                dir.el.dispatchEvent(mockHTMLEvent('input'))
                 assert.ok(removed)
             })
 

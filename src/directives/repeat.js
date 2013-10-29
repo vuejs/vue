@@ -137,16 +137,32 @@ module.exports = {
      *  is a sd-repeat item.
      */
     buildItem: function (data, index) {
+
+        // late def
         ViewModel   = ViewModel || require('../viewmodel')
+
         var node    = this.el.cloneNode(true),
             ctn     = this.container,
             vmAttr  = config.prefix + '-viewmodel',
             vmID    = node.getAttribute(vmAttr),
             ChildVM = this.compiler.getOption('viewmodels', vmID) || ViewModel,
-            scope   = {}
+            scope   = {},
+            ref, item
+
         if (vmID) node.removeAttribute(vmAttr)
+
+        // append node into DOM first
+        // so sd-if can get access to parentNode
+        if (data) {
+            ref = this.vms.length > index
+                ? this.vms[index].$el
+                : this.ref
+            ctn.insertBefore(node, ref)
+        }
+
+        // set data on scope and compile
         scope[this.arg] = data || {}
-        var item = new ChildVM({
+        item = new ChildVM({
             el: node,
             scope: scope,
             compilerOptions: {
@@ -157,13 +173,12 @@ module.exports = {
                 delegator: ctn
             }
         })
+
         if (!data) {
+            // this is a forced compile for an empty collection.
+            // let's remove it...
             item.$destroy()
         } else {
-            var ref = this.vms.length > index
-                ? this.vms[index].$el
-                : this.ref
-            ctn.insertBefore(node, ref)
             this.vms.splice(index, 0, item)
         }
     },

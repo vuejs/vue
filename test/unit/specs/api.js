@@ -293,7 +293,7 @@ describe('UNIT: API', function () {
                     })
                     var input = t.$el.querySelector('input')
                     input.value = 'hohoho'
-                    input.dispatchEvent(mockKeyEvent('keyup'))
+                    input.dispatchEvent(mockHTMLEvent('input'))
                     assert.strictEqual(t.test, 'hi')
                     input.dispatchEvent(mockHTMLEvent('change'))
                     assert.strictEqual(t.test, 'hohoho')
