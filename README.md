@@ -2,8 +2,6 @@
 
 Modern, lightweight JavaScript MVVM
 
-[ **WARNING pre-alpha status - tests not complete!** ]
-
 ## Features
 
 - <10kb gzipped, no dependency.
@@ -54,7 +52,7 @@ To watch and auto-build dev version during development:
 
     $ grunt watch
 
-To test:
+To test (install [CasperJS](http://casperjs.org/) first):
 
     $ grunt test
 
