@@ -1,0 +1,63 @@
+#cover-stats {
+    position: fixed;
+    top: 60px;
+    right: 10px;
+    font-size: 12px;
+    margin: 0;
+    color: #888;
+    z-index: 1;
+}
+
+#cover-stats li {
+    display: inline-block;
+    margin: 0 5px;
+    list-style: none;
+    padding-top: 11px;
+}
+
+#cover-stats em {
+    color: black;
+}
+
+#cover-stats em.hits {
+    color: #00d6b2;
+}
+
+#cover-stats em.misses {
+    color: #c00;
+}
+
+#cover-stats .cov {
+    color: black;
+    width: 38px;
+    height: 38px;
+    border: 1px solid #bbb;
+    border-radius: 100%;
+    padding: 0;
+    line-height: 40px;
+    text-align: center;
+}
+
+#cover-src {
+    background-color: #eee;
+    font-family: 'Inconsolata-g', 'Monaco', monospace;
+    font-size: 12px;
+    padding: 30px;
+    color: #333;
+}
+
+#cover-src p {
+    display: inline-block;
+    margin: 1px;
+    line-height: 20px;
+}
+
+#cover-src span {
+    display: inline-block;
+    line-height: 20px;
+}
+
+#cover-src .uncovered {
+    color: #fff;
+    background-color: #C00;
+}

@@ -27,6 +27,7 @@
     "grunt-component-build": "~0.3.2",
     "grunt-contrib-jshint": "~0.6.4",
     "grunt-contrib-uglify": "~0.2.4",
-    "grunt-mocha": "~0.4.1"
+    "grunt-mocha": "~0.4.1",
+    "jscoverage": "~0.3.8"
   }
 }

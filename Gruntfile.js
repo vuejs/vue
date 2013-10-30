@@ -13,7 +13,7 @@ module.exports = function( grunt ) {
                 standalone: 'Seed'
             },
             test: {
-                output: './dist/',
+                output: './test/',
                 name: 'seed.test',
                 styles: false
             }
@@ -38,7 +38,7 @@ module.exports = function( grunt ) {
             test: {
                 src: ['test/unit/runner.html'],
                 options: {
-                    reporter: 'Spec',
+                    log: true,
                     run: true
                 }
             }
@@ -114,7 +114,7 @@ module.exports = function( grunt ) {
         var done = this.async()
         grunt.util.spawn({
             cmd: 'casperjs',
-            args: ['test', 'specs/'],
+            args: ['test', '--concise', 'specs/'],
             opts: {
                 stdio: 'inherit',
                 cwd: path.resolve('test/functional')
@@ -126,11 +126,31 @@ module.exports = function( grunt ) {
         })
     })
 
-    grunt.registerTask( 'test', ['mocha', 'casper'] )
+    grunt.registerTask( 'jsc', function () {
+        var done = this.async()
+        grunt.util.spawn({
+            cmd: './node_modules/jscoverage/bin/jscoverage',
+            args: ['./test/seed.test.js'],
+            opts: {
+                stdio: 'inherit'
+            }
+        }, function (err, res) {
+            if (err) grunt.fail.fatal(res.stdout || 'Jscoverage instrumentation failed')
+            grunt.log.writeln(res.stdout)
+            fs.unlinkSync('./test/seed.test.js')
+            done()
+        })
+    })
+
+    grunt.registerTask( 'test', [
+        'component_build',
+        'jsc',
+        'mocha',
+        'casper'
+    ])
 
     grunt.registerTask( 'default', [
         'jshint:dev',
-        'component_build',
         'jshint:test',
         'test',
         'uglify'

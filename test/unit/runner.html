@@ -4,6 +4,7 @@
 		<title>Test</title>
 		<meta charset="utf-8">
 		<link rel="stylesheet" type="text/css" href="vendor/mocha.css">
+		<link rel="stylesheet" type="text/css" href="vendor/cover.css">
 	</head>
 	<body>
 		<div id="mocha"></div>
@@ -12,7 +13,8 @@
 		<script src="vendor/chai.js"></script>
 		<script src="vendor/classList.js"></script>
 		<script src="vendor/mockEvent.js"></script>
-		<script src="../../dist/seed.test.js"></script>
+		<script src="vendor/cover.js"></script>
+		<script src="../seed.test-cov.js"></script>
 		<script>
 			mocha.setup('bdd')
 			var Seed = require('seed'),
@@ -44,7 +46,22 @@
 		<script src="specs/viewmodel.js"></script>
 		<script>
 			if (navigator.userAgent.indexOf('PhantomJS') < 0) {
-            	mocha.run();
+            	mocha.run(Cover.report)
+        	} else {
+        		// intercept test end
+        		// and report coverage to grunt-mocha
+        		var al = window.alert
+        		window.alert = function (msg) {
+        			if (msg.indexOf('mocha.end') > 0) {
+        				var stats = Cover.getStats()[0]
+        				console.log('\n')
+        		    	console.log('     SLOC : ' + stats.sloc)
+        		    	console.log('     Hits : ' + stats.hits)
+        		    	console.log('   Misses : ' + stats.misses)
+        		    	console.log(' Coverage : ' + stats.coverage.toFixed(2) + '%')
+        		    }
+        		    al(msg)
+        		}
         	}
 		</script>
 	</body>
