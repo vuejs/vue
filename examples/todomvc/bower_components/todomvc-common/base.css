@@ -14,7 +14,6 @@ button {
 	font-family: inherit;
 	color: inherit;
 	-webkit-appearance: none;
-	/*-moz-appearance: none;*/
 	-ms-appearance: none;
 	-o-appearance: none;
 	appearance: none;
@@ -32,6 +31,11 @@ body {
 	-ms-font-smoothing: antialiased;
 	-o-font-smoothing: antialiased;
 	font-smoothing: antialiased;
+}
+
+button,
+input[type="checkbox"] {
+  outline: none;
 }
 
 #todoapp {
@@ -100,9 +104,6 @@ body {
 	background: #8d7d77;
 	background: -webkit-gradient(linear, left top, left bottom, from(rgba(132, 110, 100, 0.8)),to(rgba(101, 84, 76, 0.8)));
 	background: -webkit-linear-gradient(top, rgba(132, 110, 100, 0.8), rgba(101, 84, 76, 0.8));
-	background: -moz-linear-gradient(top, rgba(132, 110, 100, 0.8), rgba(101, 84, 76, 0.8));
-	background: -o-linear-gradient(top, rgba(132, 110, 100, 0.8), rgba(101, 84, 76, 0.8));
-	background: -ms-linear-gradient(top, rgba(132, 110, 100, 0.8), rgba(101, 84, 76, 0.8));
 	background: linear-gradient(top, rgba(132, 110, 100, 0.8), rgba(101, 84, 76, 0.8));
 	filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0,StartColorStr='#9d8b83', EndColorStr='#847670');
 	border-top-left-radius: 1px;
@@ -123,7 +124,6 @@ body {
 	padding: 6px;
 	border: 1px solid #999;
 	box-shadow: inset 0 -1px 5px 0 rgba(0, 0, 0, 0.2);
-	-webkit-box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-ms-box-sizing: border-box;
 	-o-box-sizing: border-box;
@@ -159,7 +159,8 @@ label[for='toggle-all'] {
 	left: -4px;
 	width: 40px;
 	text-align: center;
-	border: none; /* Mobile Safari */
+	/* Mobile Safari */
+	border: none;
 }
 
 #toggle-all:before {
@@ -214,9 +215,9 @@ label[for='toggle-all'] {
 	top: 0;
 	bottom: 0;
 	margin: auto 0;
-	border: none; /* Mobile Safari */
+	/* Mobile Safari */
+	border: none;
 	-webkit-appearance: none;
-	/*-moz-appearance: none;*/
 	-ms-appearance: none;
 	-o-appearance: none;
 	appearance: none;
@@ -224,7 +225,8 @@ label[for='toggle-all'] {
 
 #todo-list li .toggle:after {
 	content: '✔';
-	line-height: 43px; /* 40 + a couple of pixels visual adjustment */
+	/* 40 + a couple of pixels visual adjustment */
+	line-height: 43px;
 	font-size: 20px;
 	color: #d9d9d9;
 	text-shadow: 0 -1px 0 #bfbfbf;
@@ -238,15 +240,13 @@ label[for='toggle-all'] {
 }
 
 #todo-list li label {
+	white-space: pre;
 	word-break: break-word;
-	padding: 15px;
+	padding: 15px 60px 15px 15px;
 	margin-left: 45px;
 	display: block;
 	line-height: 1.2;
 	-webkit-transition: color 0.4s;
-	-moz-transition: color 0.4s;
-	-ms-transition: color 0.4s;
-	-o-transition: color 0.4s;
 	transition: color 0.4s;
 }
 
@@ -267,9 +267,6 @@ label[for='toggle-all'] {
 	font-size: 22px;
 	color: #a88a8a;
 	-webkit-transition: all 0.2s;
-	-moz-transition: all 0.2s;
-	-ms-transition: all 0.2s;
-	-o-transition: all 0.2s;
 	transition: all 0.2s;
 }
 
@@ -277,9 +274,7 @@ label[for='toggle-all'] {
 	text-shadow: 0 0 1px #000,
 				 0 0 10px rgba(199, 107, 107, 0.8);
 	-webkit-transform: scale(1.3);
-	-moz-transform: scale(1.3);
 	-ms-transform: scale(1.3);
-	-o-transform: scale(1.3);
 	transform: scale(1.3);
 }
 
@@ -387,6 +382,7 @@ label[for='toggle-all'] {
 	Hack to remove background from Mobile Safari.
 	Can't use it globally since it destroys checkboxes in Firefox and Opera
 */
+
 @media screen and (-webkit-min-device-pixel-ratio:0) {
 	#toggle-all,
 	#todo-list li .toggle {
@@ -403,12 +399,158 @@ label[for='toggle-all'] {
 		width: 65px;
 		height: 41px;
 		-webkit-transform: rotate(90deg);
+		-ms-transform: rotate(90deg);
 		transform: rotate(90deg);
 		-webkit-appearance: none;
 		appearance: none;
 	}
 }
 
-.hidden{
-	display:none;
+.hidden {
+	display: none;
+}
+
+hr {
+	margin: 20px 0;
+	border: 0;
+	border-top: 1px dashed #C5C5C5;
+	border-bottom: 1px dashed #F7F7F7;
+}
+
+.learn a {
+	font-weight: normal;
+	text-decoration: none;
+	color: #b83f45;
+}
+
+.learn a:hover {
+	text-decoration: underline;
+	color: #787e7e;
+}
+
+.learn h3,
+.learn h4,
+.learn h5 {
+	margin: 10px 0;
+	font-weight: 500;
+	line-height: 1.2;
+	color: #000;
+}
+
+.learn h3 {
+	font-size: 24px;
+}
+
+.learn h4 {
+	font-size: 18px;
+}
+
+.learn h5 {
+	margin-bottom: 0;
+	font-size: 14px;
+}
+
+.learn ul {
+	padding: 0;
+	margin: 0 0 30px 25px;
+}
+
+.learn li {
+	line-height: 20px;
+}
+
+.learn p {
+	font-size: 15px;
+	font-weight: 300;
+	line-height: 1.3;
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
+.quote {
+	border: none;
+	margin: 20px 0 60px 0;
+}
+
+.quote p {
+	font-style: italic;
+}
+
+.quote p:before {
+	content: '“';
+	font-size: 50px;
+	opacity: .15;
+	position: absolute;
+	top: -20px;
+	left: 3px;
+}
+
+.quote p:after {
+	content: '”';
+	font-size: 50px;
+	opacity: .15;
+	position: absolute;
+	bottom: -42px;
+	right: 3px;
+}
+
+.quote footer {
+	position: absolute;
+	bottom: -40px;
+	right: 0;
+}
+
+.quote footer img {
+	border-radius: 3px;
+}
+
+.quote footer a {
+	margin-left: 5px;
+	vertical-align: middle;
+}
+
+.speech-bubble {
+	position: relative;
+	padding: 10px;
+	background: rgba(0, 0, 0, .04);
+	border-radius: 5px;
+}
+
+.speech-bubble:after {
+	content: '';
+	position: absolute;
+	top: 100%;
+	right: 30px;
+	border: 13px solid transparent;
+	border-top-color: rgba(0, 0, 0, .04);
+}
+
+.learn-bar > .learn {
+	position: absolute;
+	width: 272px;
+	top: 8px;
+	left: -300px;
+	padding: 10px;
+	border-radius: 5px;
+	background-color: rgba(255, 255, 255, .6);
+	-webkit-transition-property: left;
+	transition-property: left;
+	-webkit-transition-duration: 500ms;
+	transition-duration: 500ms;
+}
+
+@media (min-width: 899px) {
+	.learn-bar {
+		width: auto;
+		margin: 0 0 0 300px;
+	}
+
+	.learn-bar > .learn {
+		left: 8px;
+	}
+
+	.learn-bar #todoapp {
+		width: 550px;
+		margin: 130px auto 40px auto;
+	}
 }
