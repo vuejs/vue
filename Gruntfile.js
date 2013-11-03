@@ -1,5 +1,6 @@
-var fs   = require('fs'),
-    path = require('path')
+var fs     = require('fs'),
+    path   = require('path'),
+    stream = require('stream')
 
 module.exports = function( grunt ) {
 
@@ -119,7 +120,7 @@ module.exports = function( grunt ) {
             cmd: 'casperjs',
             args: ['test', '--concise', 'specs/'],
             opts: {
-                stdio: 'inherit',
+                stdio: ['ignore', process.stdout, 'ignore'],
                 cwd: path.resolve('test/functional')
             }
         }, function (err, res) {
