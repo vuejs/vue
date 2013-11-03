@@ -20,6 +20,9 @@ module.exports = function( grunt ) {
         },
 
         jshint: {
+            options: {
+                reporter: require('jshint-stylish')
+            },
             dev: {
                 src: ['src/**/*.js'],
                 options: {
