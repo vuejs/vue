@@ -556,31 +556,42 @@ CompilerProto.getOption = function (type, id) {
  *  Unbind and remove element
  */
 CompilerProto.destroy = function () {
-    var compiler = this
-    log('compiler destroyed: ', compiler.vm.$el)
-    // unwatch
-    compiler.observer.off()
-    compiler.emitter.off()
-    var i, key, dir, inss, binding,
+
+    var compiler = this,
+        i, key, dir, instances, binding,
         el         = compiler.el,
         directives = compiler.dirs,
         exps       = compiler.exps,
-        bindings   = compiler.bindings
-    // remove all directives that are instances of external bindings
+        bindings   = compiler.bindings,
+        teardown   = compiler.options.teardown
+
+    // call user teardown first
+    if (teardown) teardown()
+
+    // unwatch
+    compiler.observer.off()
+    compiler.emitter.off()
+
+    // unbind all direcitves
     i = directives.length
     while (i--) {
         dir = directives[i]
+        // if this directive is an instance of an external binding
+        // e.g. a directive that refers to a variable on the parent VM
+        // we need to remove it from that binding's instances
         if (!dir.isSimple && dir.binding.compiler !== compiler) {
-            inss = dir.binding.instances
-            if (inss) inss.splice(inss.indexOf(dir), 1)
+            instances = dir.binding.instances
+            if (instances) instances.splice(instances.indexOf(dir), 1)
         }
         dir.unbind()
     }
+
     // unbind all expressions (anonymous bindings)
     i = exps.length
     while (i--) {
         exps[i].unbind()
     }
+
     // unbind/unobserve all own bindings
     for (key in bindings) {
         if (hasOwn.call(bindings, key)) {
@@ -591,6 +602,7 @@ CompilerProto.destroy = function () {
             binding.unbind()
         }
     }
+
     // remove self from parentCompiler
     var parent = compiler.parentCompiler,
         childId = compiler.childId
@@ -600,7 +612,8 @@ CompilerProto.destroy = function () {
             delete parent.vm.$[childId]
         }
     }
-    // remove el
+
+    // finally remove dom element
     if (el === document.body) {
         el.innerHTML = ''
     } else if (el.parentNode) {

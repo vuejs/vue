@@ -500,6 +500,22 @@ describe('UNIT: API', function () {
 
             })
 
+            describe('teardown', function () {
+                
+                it('should be called when a vm is destroyed', function () {
+                    var called = false
+                    var Test = Seed.extend({
+                        teardown: function () {
+                            called = true
+                        }
+                    })
+                    var test = new Test()
+                    test.$destroy()
+                    assert.ok(called)
+                })
+
+            })
+
             describe('transitions', function () {
                 // it('should be tested', function () {
                 //     assert.ok(false)

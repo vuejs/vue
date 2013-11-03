@@ -1,11 +1,3 @@
-/*
- *  Only tests the following:
- *  - .$get()
- *  - .$set()
- *  - .$watch()
- *  - .$unwatch()
- */
-
 describe('UNIT: ViewModel', function () {
 
     mock('vm-test', '{{a.b.c}}')
@@ -223,6 +215,146 @@ describe('UNIT: ViewModel', function () {
                 }
             })
             new Top()
+        })
+
+    })
+
+    describe('.$destroy', function () {
+        
+        // since this simply delegates to Compiler.prototype.destroy(),
+        // that's what we are actually testing here.
+        var destroy = require('seed/src/compiler').prototype.destroy
+
+        var tearDownCalled = false,
+            observerOffCalled = false,
+            emitterOffCalled = false,
+            dirUnbindCalled = false,
+            expUnbindCalled = false,
+            bindingUnbindCalled = false,
+            unobserveCalled = 0,
+            elRemoved = false,
+            externalBindingUnbindCalled = false
+
+        var dirMock = {
+            binding: {
+                compiler: null,
+                instances: []
+            },
+            unbind: function () {
+                dirUnbindCalled = true
+            }
+        }
+        dirMock.binding.instances.push(dirMock)
+
+        var bindingsMock = Object.create({
+            'test2': {
+                unbind: function () {
+                    externalBindingUnbindCalled = true
+                }
+            }
+        })
+        bindingsMock.test = {
+            root: true,
+            key: 'test',
+            value: {
+                __observer__: {
+                    off: function () {
+                        unobserveCalled++
+                        return this
+                    }
+                }
+            },
+            unbind: function () {
+                bindingUnbindCalled = true
+            }
+        }
+
+        var compilerMock = {
+            options: {
+                teardown: function () {
+                    tearDownCalled = true
+                }
+            },
+            observer: {
+                off: function () {
+                    observerOffCalled = true
+                },
+                proxies: {
+                    'test.': {}
+                }
+            },
+            emitter: {
+                off: function () {
+                    emitterOffCalled = true
+                }
+            },
+            dirs: [dirMock],
+            exps: [{
+                unbind: function () {
+                    expUnbindCalled = true
+                }
+            }],
+            bindings: bindingsMock,
+            childId: 'test',
+            parentCompiler: {
+                childCompilers: [],
+                vm: {
+                    $: {
+                        'test': true
+                    }
+                }
+            },
+            el: {
+                parentNode: {
+                    removeChild: function () {
+                        elRemoved = true
+                    }
+                }
+            }
+        }
+
+        compilerMock.parentCompiler.childCompilers.push(compilerMock)
+
+        destroy.call(compilerMock)
+
+        it('should call the teardown option', function () {
+            assert.ok(tearDownCalled)
+        })
+
+        it('should turn observer and emitter off', function () {
+            assert.ok(observerOffCalled)
+            assert.ok(emitterOffCalled)
+        })
+
+        it('should unbind all directives', function () {
+            assert.ok(dirUnbindCalled)
+        })
+
+        it('should remove directives from external bindings', function () {
+            assert.strictEqual(dirMock.binding.instances.indexOf(dirMock), -1)
+        })
+
+        it('should unbind all expressions', function () {
+            assert.ok(expUnbindCalled)
+        })
+
+        it('should unbind and unobserve own bindings', function () {
+            assert.ok(bindingUnbindCalled)
+            assert.strictEqual(unobserveCalled, 3)
+        })
+
+        it('should not unbind external bindings', function () {
+            assert.notOk(externalBindingUnbindCalled)
+        })
+
+        it('should remove self from parentCompiler', function () {
+            var parent = compilerMock.parentCompiler
+            assert.ok(parent.childCompilers.indexOf(compilerMock), -1)
+            assert.strictEqual(parent.vm.$[compilerMock.childId], undefined)
+        })
+
+        it('should remove the dom element', function () {
+            assert.ok(elRemoved)
         })
 
     })
