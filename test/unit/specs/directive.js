@@ -90,7 +90,7 @@ describe('UNIT: Directive', function () {
             var d = Directive.parse('sd-text', 'abc', compiler),
                 e = Directive.parse('sd-text', '^abc', compiler),
                 f = Directive.parse('sd-text', '^^^abc', compiler),
-                g = Directive.parse('sd-text', '$abc', compiler)
+                g = Directive.parse('sd-text', '*abc', compiler)
             assert.ok(d.nesting === false && d.root === false && d.key === 'abc', 'no nesting')
             assert.ok(e.nesting === 1 && e.root === false && e.key === 'abc', '1 level')
             assert.ok(f.nesting === 3 && f.root === false && f.key === 'abc', '3 levels')

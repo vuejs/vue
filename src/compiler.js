@@ -11,7 +11,6 @@ var Emitter     = require('./emitter'),
     // cache methods
     slice       = Array.prototype.slice,
     log         = utils.log,
-    def         = utils.defProtected,
     makeHash    = utils.hash,
     hasOwn      = Object.prototype.hasOwnProperty,
 
@@ -48,10 +47,9 @@ function Compiler (vm, options) {
     if (scope) utils.extend(vm, scope, true)
 
     compiler.vm  = vm
-    // special VM properties are inumerable
-    def(vm, '$', makeHash())
-    def(vm, '$el', compiler.el)
-    def(vm, '$compiler', compiler)
+    vm.$ = makeHash()
+    vm.$el = compiler.el
+    vm.$compiler = compiler
 
     // keep track of directives and expressions
     // so they can be unbound during destroy()
@@ -75,11 +73,15 @@ function Compiler (vm, options) {
         ? getRoot(parent)
         : compiler
 
-    // register child id on parent
+    // set parent VM
+    // and register child id on parent
     var childId = compiler.el.getAttribute(idAttr)
-    if (childId && parent) {
-        compiler.childId = childId
-        parent.vm.$[childId] = vm
+    if (parent) {
+        vm.$parent = parent.vm
+        if (childId) {
+            compiler.childId = childId
+            parent.vm.$[childId] = vm
+        }
     }
 
     // setup observer
@@ -102,7 +104,9 @@ function Compiler (vm, options) {
     // for repeated items, create an index binding
     // which should be inenumerable but configurable
     if (compiler.repeat) {
-        def(vm[compiler.repeatPrefix], '$index', compiler.repeatIndex, false, true)
+        vm.$index = compiler.repeatIndex
+        vm.$collection = compiler.repeatCollection
+        compiler.createBinding('$index')
     }
 
     // now parse the DOM, during which we will create necessary bindings

@@ -85,7 +85,7 @@ function parseKey (dir, rawKey) {
         ? nesting[0].length
         : false
 
-    dir.root = key.charAt(0) === '$'
+    dir.root = key.charAt(0) === '*'
 
     if (dir.nesting) {
         key = key.replace(NESTING_RE, '')

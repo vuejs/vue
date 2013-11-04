@@ -168,6 +168,7 @@ module.exports = {
             compilerOptions: {
                 repeat: true,
                 repeatIndex: index,
+                repeatCollection: this.collection,
                 repeatPrefix: this.arg,
                 parentCompiler: this.compiler,
                 delegator: ctn
@@ -189,7 +190,7 @@ module.exports = {
     updateIndexes: function () {
         var i = this.vms.length
         while (i--) {
-            this.vms[i][this.arg].$index = i
+            this.vms[i].$index = i
         }
     },
 
