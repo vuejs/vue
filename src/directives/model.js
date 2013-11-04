@@ -1,5 +1,5 @@
 var utils = require('../utils'),
-    isIE  = !!document.attachEvent
+    isIE9 = navigator.userAgent.indexOf('MSIE 9.0') > 0
 
 module.exports = {
 
@@ -35,13 +35,20 @@ module.exports = {
 
         // fix shit for IE9
         // since it doesn't fire input on backspace / del / cut
-        if (isIE) {
-            el.addEventListener('cut', self.set)
-            el.addEventListener('keydown', function (e) {
+        if (isIE9) {
+            self.onCut = function () {
+                // cut event fires before the value actually changes
+                setTimeout(function () {
+                    self.set()
+                }, 0)
+            }
+            self.onDel = function (e) {
                 if (e.keyCode === 46 || e.keyCode === 8) {
                     self.set()
                 }
-            })
+            }
+            el.addEventListener('cut', self.onCut)
+            el.addEventListener('keyup', self.onDel)
         }
     },
 
@@ -73,5 +80,9 @@ module.exports = {
 
     unbind: function () {
         this.el.removeEventListener(this.event, this.set)
+        if (isIE9) {
+            this.el.removeEventListener('cut', this.onCut)
+            this.el.removeEventListener('keyup', this.onDel)
+        }
     }
 }
