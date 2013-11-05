@@ -51,6 +51,7 @@ module.exports = {
         bind: function () {
             this.parent = this.el.parentNode
             this.ref = document.createComment('sd-if-' + this.key)
+            this.el.sd_ref = this.ref
         },
         update: function (value) {
             var attached = !!this.el.parentNode
@@ -77,6 +78,9 @@ module.exports = {
                 this.parent.insertBefore(this.el, this.ref)
                 this.parent.removeChild(this.ref)
             }
+        },
+        unbind: function () {
+            this.el.sd_ref = null
         }
     }
 }

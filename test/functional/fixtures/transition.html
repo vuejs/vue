@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title></title>
+        <meta charset="utf-8">
+        <style type="text/css">
+            #test {
+                width: 100px;
+                height: 100px;
+                background-color: #f00;
+                transition: all .5s ease;
+            }
+            #test.test {
+                height: 0;
+                background-color: #0f0;
+            }
+        </style>
+        <script src="../../../dist/seed.js"></script>
+    </head>
+    <body>
+        <div id="test" sd-show="a"></div>
+        <h1 style="margin:0">123123</h1>
+        <script>
+            var test = new Seed({
+                el: '#test'
+            })
+        </script>
+    </body>
+</html>

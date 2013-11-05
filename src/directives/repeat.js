@@ -157,6 +157,8 @@ module.exports = {
             ref = this.vms.length > index
                 ? this.vms[index].$el
                 : this.ref
+            // make sure it works with sd-if
+            if (!ref.parentNode) ref = ref.sd_ref
             ctn.insertBefore(node, ref)
         }
 

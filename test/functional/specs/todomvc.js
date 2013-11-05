@@ -1,6 +1,6 @@
 /* global __utils__ */
 
-casper.test.begin('todomvc', 66, function (test) {
+casper.test.begin('todomvc', 67, function (test) {
     
     casper
     .start('../../examples/todomvc/index.html', function () {
@@ -101,15 +101,21 @@ casper.test.begin('todomvc', 66, function (test) {
     .then(function () {
         createNewItem('test')
         createNewItem('test')
-        createNewItem('test')
         this.click('.todo:nth-child(1) .toggle')
         this.click('.todo:nth-child(2) .toggle')
     })
 
     // active filter ----------------------------------------------------------
     .thenClick('#filters li:nth-child(2) a', function () {
-        test.assertElementCount('.todo', 2, 'filter active should have 2 items')
+        test.assertElementCount('.todo', 1, 'filter active should have 2 items')
         test.assertElementCount('.todo.completed', 0, 'visible items should be incompleted')
+    })
+
+    // add item with filter active --------------------------------------------
+    // mostly make sure sd-repeat works well with sd-if
+    .then(function () {
+        createNewItem('test')
+        test.assertElementCount('.todo', 2, 'should be able to create new item when fitler active')
     })
 
     // completed filter -------------------------------------------------------

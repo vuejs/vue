@@ -3,7 +3,7 @@ var utils = require('../utils')
 function delegateCheck (current, top, identifier) {
     if (current[identifier]) {
         return current
-    } else if (current === top) {
+    } else if (current === top || !current.parentNode) {
         return false
     } else {
         return delegateCheck(current.parentNode, top, identifier)
