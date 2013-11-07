@@ -11,7 +11,10 @@ module.exports = function (el, stage, changeState, init) {
 
     // TODO: directly return if IE9
 
-    var className = el.sd_transition
+    var className         = el.sd_transition,
+        classList         = el.classList,
+        lastLeaveCallback = el.sd_trans_cb,
+        lastEnterTimeout  = el.sd_trans_to
 
     // in sd-repeat, the sd-transition directive
     // might not have been processed yet
@@ -30,25 +33,44 @@ module.exports = function (el, stage, changeState, init) {
         return changeState()
     }
 
-    var cl = el.classList
-
     if (stage > 0) { // enter
 
-        cl.add(className)
+        // cancel unfinished leave transition
+        if (lastLeaveCallback) {
+            el.removeEventListener(endEvent, lastLeaveCallback)
+            el.sd_trans_cb = null
+        }
+
+        // set to hidden state before appending
+        classList.add(className)
+        // append
         changeState()
-        setTimeout(function () {
-            cl.remove(className)
+        // trigger show transition next tick
+        el.sd_trans_to = setTimeout(function () {
+            classList.remove(className)
+            el.sd_trans_to = null
         }, 0)
 
     } else { // leave
 
-        cl.add(className)
-        el.addEventListener(endEvent, onEnd)
-        
-    }
+        // cancel unfinished enter transition
+        if (lastEnterTimeout) {
+            clearTimeout(lastEnterTimeout)
+            el.sd_trans_to = null
+        }
 
-    function onEnd () {
-        el.removeEventListener(endEvent, onEnd)
-        changeState()
+        // trigger hide transition
+        classList.add(className)
+        var onEnd = function () {
+            el.removeEventListener(endEvent, onEnd)
+            el.sd_trans_cb = null
+            // actually remove node here
+            changeState()
+            classList.remove(className)
+        }
+        // attach transition end listener
+        el.addEventListener(endEvent, onEnd)
+        el.sd_trans_cb = onEnd
+        
     }
 }

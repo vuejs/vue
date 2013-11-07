@@ -20,25 +20,17 @@ module.exports = {
         this.el.innerHTML = utils.toText(value)
     },
 
-    style: {
-        bind: function () {
-            this.arg = convertCSSProperty(this.arg)
-        },
-        update: function (value) {
-            this.el.style[this.arg] = value
-        }
-    },
-
-    show: function (value, init) {
-        var el = this.el,
-            change = function () {
-                el.style.display = value ? '' : 'none'
-            }
-        transition(el, value ? 1 : -1, change, init)
-    },
-
     visible: function (value) {
         this.el.style.visibility = value ? '' : 'hidden'
+    },
+
+    show: function (value) {
+        var el = this.el,
+            target = value ? '' : 'none',
+            change = function () {
+                el.style.display = target
+            }
+        transition(el, value ? 1 : -1, change, this.compiler.init)
     },
 
     'class': function (value) {
@@ -50,6 +42,15 @@ module.exports = {
             }
             this.el.classList.add(value)
             this.lastVal = value
+        }
+    },
+
+    style: {
+        bind: function () {
+            this.arg = convertCSSProperty(this.arg)
+        },
+        update: function (value) {
+            this.el.style[this.arg] = value
         }
     }
 }

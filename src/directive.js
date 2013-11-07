@@ -146,7 +146,7 @@ DirProto.refresh = function (value) {
         el: this.el,
         vm: this.vm
     })
-    if (value && value === this.computedValue) return
+    if (value !== undefined && value === this.computedValue) return
     this.computedValue = value
     this.apply(value)
 }

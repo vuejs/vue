@@ -11,11 +11,10 @@ module.exports = {
     update: function (value) {
 
         var el       = this.el,
-            init     = this.compiler.init,
-            attached = !!el.parentNode
+            init     = this.compiler.init
 
         if (!this.parent) { // the node was detached when bound
-            if (!attached) {
+            if (!el.parentNode) {
                 return
             } else {
                 this.parent = el.parentNode
@@ -27,25 +26,25 @@ module.exports = {
             ref    = this.ref
 
         if (!value) {
-            if (attached) {
-                // insert the reference node
-                var next = el.nextSibling
-                if (next) {
-                    parent.insertBefore(ref, next)
-                } else {
-                    parent.appendChild(ref)
-                }
-                transition(el, -1, remove, init)
-            }
-        } else if (!attached) {
+            transition(el, -1, remove, init)
+        } else {
             transition(el, 1, insert, init)
         }
 
         function remove () {
+            if (!el.parentNode) return
+            // insert the reference node
+            var next = el.nextSibling
+            if (next) {
+                parent.insertBefore(ref, next)
+            } else {
+                parent.appendChild(ref)
+            }
             parent.removeChild(el)
         }
 
         function insert () {
+            if (el.parentNode) return
             parent.insertBefore(el, ref)
             parent.removeChild(ref)
         }
