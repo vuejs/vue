@@ -2,6 +2,7 @@ var config   = require('../config'),
     Observer = require('../observer'),
     Emitter  = require('../emitter'),
     utils    = require('../utils'),
+    trans    = require('../transition'),
     ViewModel // lazy def to avoid circular dependency
 
 /**
@@ -159,7 +160,9 @@ module.exports = {
                 : this.ref
             // make sure it works with sd-if
             if (!ref.parentNode) ref = ref.sd_ref
-            ctn.insertBefore(node, ref)
+            trans(node, 1, function () {
+                ctn.insertBefore(node, ref)
+            }, this.compiler.init)
         }
 
         // set data on scope and compile

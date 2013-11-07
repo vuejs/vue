@@ -21,6 +21,7 @@
         "src/filters.js",
         "src/transition.js",
         "src/directives/index.js",
+        "src/directives/if.js",
         "src/directives/repeat.js",
         "src/directives/on.js",
         "src/directives/model.js"

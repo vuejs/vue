@@ -1,4 +1,6 @@
-var endEvent = 'transitionend'
+var config   = require('./config'),
+    // TODO: sniff proper transitonend event name
+    endEvent = 'transitionend'
 
 /**
  *  stage:
@@ -8,6 +10,17 @@ var endEvent = 'transitionend'
 module.exports = function (el, stage, changeState, init) {
 
     var className = el.sd_transition
+
+    // in sd-repeat, the sd-transition directive
+    // might not have been processed yet
+    if (!className) {
+        className = el.getAttribute(config.prefix + '-transition')
+    }
+
+    // TODO: optional duration which
+    // can override the default transitionend event
+
+    // if no transition, just
     if (init || !className) {
         return changeState()
     }

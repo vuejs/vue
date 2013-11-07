@@ -7,6 +7,7 @@ var Emitter     = require('./emitter'),
     TextParser  = require('./text-parser'),
     DepsParser  = require('./deps-parser'),
     ExpParser   = require('./exp-parser'),
+    transition  = require('./transition'),
 
     // cache methods
     slice       = Array.prototype.slice,
@@ -21,6 +22,10 @@ var Emitter     = require('./emitter'),
 function Compiler (vm, options) {
 
     var compiler = this
+
+    // indicate that we are intiating this instance
+    // so we should not run any transitions
+    compiler.init = true
 
     // extend options
     options = compiler.options = options || makeHash()
@@ -112,6 +117,9 @@ function Compiler (vm, options) {
     }
     // extract dependencies for computed properties
     if (computed.length) DepsParser.parse(computed)
+
+    // done!
+    compiler.init = false
 }
 
 var CompilerProto = Compiler.prototype
@@ -618,7 +626,9 @@ CompilerProto.destroy = function () {
     if (el === document.body) {
         el.innerHTML = ''
     } else if (el.parentNode) {
-        el.parentNode.removeChild(el)
+        transition(el, -1, function () {
+            el.parentNode.removeChild(el)
+        })
     }
 }
 
