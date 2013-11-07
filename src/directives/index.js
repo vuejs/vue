@@ -1,4 +1,5 @@
-var utils = require('../utils')
+var utils = require('../utils'),
+    transition = require('../transition')
 
 module.exports = {
 
@@ -27,8 +28,12 @@ module.exports = {
         }
     },
 
-    show: function (value) {
-        this.el.style.display = value ? '' : 'none'
+    show: function (value, init) {
+        var el = this.el,
+            change = function () {
+                el.style.display = value ? '' : 'none'
+            }
+        transition(el, value ? 1 : -1, change, init)
     },
 
     visible: function (value) {
@@ -53,30 +58,45 @@ module.exports = {
             this.ref = document.createComment('sd-if-' + this.key)
             this.el.sd_ref = this.ref
         },
-        update: function (value) {
-            var attached = !!this.el.parentNode
+        update: function (value, init) {
+
+            var el = this.el,
+                attached = !!el.parentNode
+
             if (!this.parent) { // the node was detached when bound
                 if (!attached) {
                     return
                 } else {
-                    this.parent = this.el.parentNode
+                    this.parent = el.parentNode
                 }
             }
+
             // should always have this.parent if we reach here
+            var parent = this.parent,
+                ref    = this.ref
+
             if (!value) {
                 if (attached) {
                     // insert the reference node
-                    var next = this.el.nextSibling
+                    var next = el.nextSibling
                     if (next) {
-                        this.parent.insertBefore(this.ref, next)
+                        parent.insertBefore(ref, next)
                     } else {
-                        this.parent.appendChild(this.ref)
+                        parent.appendChild(ref)
                     }
-                    this.parent.removeChild(this.el)
+                    transition(el, -1, remove, init)
                 }
             } else if (!attached) {
-                this.parent.insertBefore(this.el, this.ref)
-                this.parent.removeChild(this.ref)
+                transition(el, 1, insert, init)
+            }
+
+            function remove () {
+                parent.removeChild(el)  
+            }
+
+            function insert () {
+                parent.insertBefore(el, ref)
+                parent.removeChild(ref) 
             }
         },
         unbind: function () {

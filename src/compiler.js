@@ -195,7 +195,9 @@ CompilerProto.compile = function (node, root) {
         if (node.hasAttribute(config.preAttr)) return
         var vmId       = node.getAttribute(config.vmAttr),
             repeatExp  = node.getAttribute(config.repeatAttr),
-            partialId  = node.getAttribute(config.partialAttr)
+            partialId  = node.getAttribute(config.partialAttr),
+            transId    = node.getAttribute(config.transAttr),
+            transClass = node.getAttribute(config.transClassAttr)
         // we need to check for any possbile special directives
         // e.g. sd-repeat, sd-viewmodel & sd-partial
         if (repeatExp) { // repeat block
@@ -226,6 +228,12 @@ CompilerProto.compile = function (node, root) {
                     node.innerHTML = ''
                     node.appendChild(partial.cloneNode(true))
                 }
+            }
+            if (transId) {
+                // attach the transition id to node
+                // its only text so should be fine...
+                node.sd_transition = transId
+                node.removeAttribute(transitionAttr)
             }
             // finally, only normal directives left!
             compiler.compileNode(node)

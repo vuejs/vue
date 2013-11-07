@@ -131,7 +131,7 @@ function parseFilter (filter, compiler) {
 DirProto.update = function (value, init) {
     if (!init && value === this.value) return
     this.value = value
-    this.apply(value)
+    this.apply(value, init)
 }
 
 /**
@@ -154,11 +154,12 @@ DirProto.refresh = function (value) {
 /**
  *  Actually invoking the _update from the directive's definition
  */
-DirProto.apply = function (value) {
+DirProto.apply = function (value, init) {
     this._update(
         this.filters
-        ? this.applyFilters(value)
-        : value
+            ? this.applyFilters(value)
+            : value,
+        init
     )
 }
 
