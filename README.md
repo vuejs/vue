@@ -18,7 +18,7 @@ Modern, lightweight JavaScript MVVM
 
 - Most Webkit/Blink-based browsers
 - Firefox 4+
-- IE9+ (IE9 needs [classList polyfill](https://github.com/remy/polyfills/blob/master/classList.js))
+- IE9+ (IE9 needs [classList polyfill](https://github.com/remy/polyfills/blob/master/classList.js) and doesn't support transitions)
 
 ## Installation
 
