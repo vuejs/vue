@@ -85,16 +85,32 @@ var mutationHandlers = {
 module.exports = {
 
     bind: function () {
-        this.el.removeAttribute(config.prefix + '-repeat')
-        var ctn = this.container = this.el.parentNode
+
+        var self = this,
+            el   = self.el,
+            ctn  = self.container = el.parentNode
+
+        el.removeAttribute(config.prefix + '-repeat')
+
+        // extract child VM information, if any
+        ViewModel   = ViewModel || require('../viewmodel')
+        var vmAttr  = config.prefix + '-viewmodel',
+            vmId    = el.getAttribute(vmAttr)
+        if (vmId) el.removeAttribute(vmAttr)
+        self.ChildVM = self.compiler.getOption('viewmodels', vmId) || ViewModel
+
+        // extract transition information
+        var transAttr = config.prefix + '-transition-class'
+        self.hasTransition = !!el.getAttribute(transAttr)
+
         // create a comment node as a reference node for DOM insertions
-        this.ref = document.createComment('sd-repeat-' + this.arg)
-        ctn.insertBefore(this.ref, this.el)
-        ctn.removeChild(this.el)
-        this.collection = null
-        this.vms = null
-        var self = this
-        this.mutationListener = function (path, arr, mutation) {
+        self.ref = document.createComment('sd-repeat-' + self.arg)
+        ctn.insertBefore(self.ref, el)
+        ctn.removeChild(el)
+
+        self.collection = null
+        self.vms = null
+        self.mutationListener = function (path, arr, mutation) {
             self.detach()
             var method = mutation.method
             mutationHandlers[method].call(self, mutation)
@@ -103,6 +119,7 @@ module.exports = {
             }
             self.retach()
         }
+
     },
 
     update: function (collection) {
@@ -139,18 +156,10 @@ module.exports = {
      */
     buildItem: function (data, index) {
 
-        // late def
-        ViewModel   = ViewModel || require('../viewmodel')
-
         var node    = this.el.cloneNode(true),
             ctn     = this.container,
-            vmAttr  = config.prefix + '-viewmodel',
-            vmID    = node.getAttribute(vmAttr),
-            ChildVM = this.compiler.getOption('viewmodels', vmID) || ViewModel,
             scope   = {},
             ref, item
-
-        if (vmID) node.removeAttribute(vmAttr)
 
         // append node into DOM first
         // so sd-if can get access to parentNode
@@ -167,7 +176,7 @@ module.exports = {
 
         // set data on scope and compile
         scope[this.arg] = data || {}
-        item = new ChildVM({
+        item = new this.ChildVM({
             el: node,
             scope: scope,
             compilerOptions: {
@@ -204,6 +213,7 @@ module.exports = {
      *  so that batch DOM updates are done in-memory and faster
      */
     detach: function () {
+        if (this.hasTransition) return
         var c = this.container,
             p = this.parent = c.parentNode
         this.next = c.nextSibling
@@ -211,6 +221,7 @@ module.exports = {
     },
 
     retach: function () {
+        if (this.hasTransition) return
         var n = this.next,
             p = this.parent,
             c = this.container

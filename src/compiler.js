@@ -240,7 +240,7 @@ CompilerProto.compile = function (node, root) {
             if (transId) {
                 // attach the transition id to node
                 // its only text so should be fine...
-                node.sd_transition = transId
+                node.sd_trans_class = transId
                 node.removeAttribute(transitionAttr)
             }
             // finally, only normal directives left!

@@ -11,7 +11,7 @@ module.exports = function (el, stage, changeState, init) {
 
     // TODO: directly return if IE9
 
-    var className         = el.sd_transition,
+    var className         = el.sd_trans_class,
         classList         = el.classList,
         lastLeaveCallback = el.sd_trans_cb,
         lastEnterTimeout  = el.sd_trans_to
@@ -19,7 +19,7 @@ module.exports = function (el, stage, changeState, init) {
     // in sd-repeat, the sd-transition directive
     // might not have been processed yet
     if (!className) {
-        className = el.getAttribute(config.prefix + '-transition')
+        className = el.getAttribute(config.prefix + '-transition-class')
     }
 
     // TODO: optional duration which
