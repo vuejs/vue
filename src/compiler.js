@@ -12,24 +12,13 @@ var Emitter     = require('./emitter'),
     slice       = Array.prototype.slice,
     log         = utils.log,
     makeHash    = utils.hash,
-    hasOwn      = Object.prototype.hasOwnProperty,
-
-    // special directives
-    idAttr,
-    vmAttr,
-    preAttr,
-    repeatAttr,
-    partialAttr,
-    transitionAttr
-
+    hasOwn      = Object.prototype.hasOwnProperty
 
 /**
  *  The DOM compiler
  *  scans a DOM node and compile bindings for a ViewModel
  */
 function Compiler (vm, options) {
-
-    refreshPrefix()
 
     var compiler = this
 
@@ -75,7 +64,7 @@ function Compiler (vm, options) {
 
     // set parent VM
     // and register child id on parent
-    var childId = compiler.el.getAttribute(idAttr)
+    var childId = compiler.el.getAttribute(config.idAttr)
     if (parent) {
         vm.$parent = parent.vm
         if (childId) {
@@ -203,21 +192,21 @@ CompilerProto.compile = function (node, root) {
     var compiler = this
     if (node.nodeType === 1) {
         // a normal node
-        if (node.hasAttribute(preAttr)) return
-        var vmId       = node.getAttribute(vmAttr),
-            repeatExp  = node.getAttribute(repeatAttr),
-            partialId  = node.getAttribute(partialAttr)
+        if (node.hasAttribute(config.preAttr)) return
+        var vmId       = node.getAttribute(config.vmAttr),
+            repeatExp  = node.getAttribute(config.repeatAttr),
+            partialId  = node.getAttribute(config.partialAttr)
         // we need to check for any possbile special directives
         // e.g. sd-repeat, sd-viewmodel & sd-partial
         if (repeatExp) { // repeat block
             // repeat block cannot have sd-id at the same time.
-            node.removeAttribute(idAttr)
-            var directive = Directive.parse(repeatAttr, repeatExp, compiler, node)
+            node.removeAttribute(config.idAttr)
+            var directive = Directive.parse(config.repeatAttr, repeatExp, compiler, node)
             if (directive) {
                 compiler.bindDirective(directive)
             }
         } else if (vmId && !root) { // child ViewModels
-            node.removeAttribute(vmAttr)
+            node.removeAttribute(config.vmAttr)
             var ChildVM = compiler.getOption('viewmodels', vmId)
             if (ChildVM) {
                 var child = new ChildVM({
@@ -231,7 +220,7 @@ CompilerProto.compile = function (node, root) {
             }
         } else {
             if (partialId) { // replace innerHTML with partial
-                node.removeAttribute(partialAttr)
+                node.removeAttribute(config.partialAttr)
                 var partial = compiler.getOption('partials', partialId)
                 if (partial) {
                     node.innerHTML = ''
@@ -626,20 +615,6 @@ CompilerProto.destroy = function () {
 }
 
 // Helpers --------------------------------------------------------------------
-
-/**
- *  Refresh prefix in case it has been changed
- *  during compilations
- */
-function refreshPrefix () {
-    var prefix     = config.prefix
-    idAttr         = prefix + '-id'
-    vmAttr         = prefix + '-viewmodel'
-    preAttr        = prefix + '-pre'
-    repeatAttr     = prefix + '-repeat'
-    partialAttr    = prefix + '-partial'
-    transitionAttr = prefix + '-transition'
-}
 
 /**
  *  determine which viewmodel a key belongs to based on nesting symbols

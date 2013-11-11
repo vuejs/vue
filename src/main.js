@@ -10,6 +10,7 @@ var config      = require('./config'),
 ViewModel.config = function (opts) {
     if (opts) {
         utils.extend(config, opts)
+        if (opts.prefix) updatePrefix()
     }
     return this
 }
@@ -123,4 +124,20 @@ function inheritOptions (child, parent, topLevel) {
     return child
 }
 
+/**
+ *  Update prefix for some special directives
+ *  that are used in compilation.
+ */
+function updatePrefix () {
+    var prefix = config.prefix
+    config.idAttr         = prefix + '-id'
+    config.vmAttr         = prefix + '-viewmodel'
+    config.preAttr        = prefix + '-pre'
+    config.repeatAttr     = prefix + '-repeat'
+    config.partialAttr    = prefix + '-partial'
+    config.transAttr      = prefix + '-transition'
+    config.transClassAttr = prefix + '-transition-class'
+}
+
+updatePrefix()
 module.exports = ViewModel
