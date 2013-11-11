@@ -1,6 +1,5 @@
 var config   = require('./config'),
-    // TODO: sniff proper transitonend event name
-    endEvent = 'transitionend'
+    endEvent = sniffTransitionEndEvent()
 
 /**
  *  stage:
@@ -9,28 +8,22 @@ var config   = require('./config'),
  */
 module.exports = function (el, stage, changeState, init) {
 
-    // TODO: directly return if IE9
-
-    var className         = el.sd_trans_class,
-        classList         = el.classList,
-        lastLeaveCallback = el.sd_trans_cb
-
-    // in sd-repeat, the sd-transition directive
-    // might not have been processed yet
-    if (!className) {
-        className = el.getAttribute(config.transClassAttr)
-    }
-
-    // TODO: optional duration which
-    //       can override the default transitionend event
-
-    // if no transition, just call changeState sync.
-    // this is internal API and the changeState callback
-    // will always contain only dom manipulations that
-    // doesn't care about the sync/async-ness of this method.
-    if (init || !className) {
+    if (!endEvent || init) {
         return changeState()
     }
+
+    var className =
+        el.sd_trans_class ||
+        // in sd-repeat, the sd-transition directive
+        // might not have been processed yet
+        el.getAttribute(config.transClassAttr)
+
+    if (!className) {
+        return changeState()
+    }
+
+    var classList         = el.classList,
+        lastLeaveCallback = el.sd_trans_cb
 
     if (stage > 0) { // enter
 
@@ -65,5 +58,23 @@ module.exports = function (el, stage, changeState, init) {
         el.addEventListener(endEvent, onEnd)
         el.sd_trans_cb = onEnd
         
+    }
+}
+
+/**
+ *  Sniff proper transition end event name
+ */
+function sniffTransitionEndEvent () {
+    var el = document.createElement('div'),
+        defaultEvent = 'transitionend',
+        events = {
+            'transition'       : defaultEvent,
+            'MozTransition'    : defaultEvent,
+            'WebkitTransition' : 'webkitTransitionEnd'
+        }
+    for (var name in events) {
+        if (el.style[name] !== undefined) {
+            return events[name]
+        }
     }
 }
