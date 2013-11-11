@@ -13,8 +13,7 @@ module.exports = function (el, stage, changeState, init) {
 
     var className         = el.sd_trans_class,
         classList         = el.classList,
-        lastLeaveCallback = el.sd_trans_cb,
-        lastEnterTimeout  = el.sd_trans_to
+        lastLeaveCallback = el.sd_trans_cb
 
     // in sd-repeat, the sd-transition directive
     // might not have been processed yet
@@ -45,19 +44,12 @@ module.exports = function (el, stage, changeState, init) {
         classList.add(className)
         // append
         changeState()
-        // trigger show transition next tick
-        el.sd_trans_to = setTimeout(function () {
-            classList.remove(className)
-            el.sd_trans_to = null
-        }, 0)
+        // force a layout so transition can be triggered
+        var forceLayout = el.clientHeight
+        // trigger transition
+        classList.remove(className)
 
     } else { // leave
-
-        // cancel unfinished enter transition
-        if (lastEnterTimeout) {
-            clearTimeout(lastEnterTimeout)
-            el.sd_trans_to = null
-        }
 
         // trigger hide transition
         classList.add(className)
