@@ -18,7 +18,7 @@ module.exports = function (el, stage, changeState, init) {
     // in sd-repeat, the sd-transition directive
     // might not have been processed yet
     if (!className) {
-        className = el.getAttribute(config.prefix + '-transition-class')
+        className = el.getAttribute(config.transClassAttr)
     }
 
     // TODO: optional duration which
@@ -45,6 +45,7 @@ module.exports = function (el, stage, changeState, init) {
         // append
         changeState()
         // force a layout so transition can be triggered
+        /* jshint unused: false */
         var forceLayout = el.clientHeight
         // trigger transition
         classList.remove(className)

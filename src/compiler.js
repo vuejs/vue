@@ -229,7 +229,9 @@ CompilerProto.compile = function (node, root) {
                 compiler.childCompilers.push(child.$compiler)
             }
         } else {
-            if (partialId) { // replace innerHTML with partial
+
+            // replace innerHTML with partial
+            if (partialId) {
                 node.removeAttribute(config.partialAttr)
                 var partial = compiler.getOption('partials', partialId)
                 if (partial) {
@@ -237,12 +239,21 @@ CompilerProto.compile = function (node, root) {
                     node.appendChild(partial.cloneNode(true))
                 }
             }
+
+            // Javascript transition
             if (transId) {
+                // TODO implement this
+                node.removeAttribute(config.transAttr)
+            }
+
+            // CSS class transition
+            if (transClass) {
                 // attach the transition id to node
                 // its only text so should be fine...
-                node.sd_trans_class = transId
-                node.removeAttribute(transitionAttr)
+                node.sd_trans_class = transClass
+                node.removeAttribute(config.transClassAttr)
             }
+
             // finally, only normal directives left!
             compiler.compileNode(node)
         }
