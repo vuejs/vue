@@ -6,35 +6,34 @@ module.exports = function( grunt ) {
 
     grunt.initConfig({
 
-        component_build: {
+        componentbuild: {
             build: {
-                output: './dist/',
-                name: 'seed',
-                styles: false,
-                standalone: 'Seed'
+                options: {
+                    name: 'seed',
+                    standalone: 'Seed'
+                },
+                src: '.',
+                dest: 'dist'
             },
             test: {
-                output: './test/',
-                name: 'seed.test',
-                styles: false
+                options: {
+                    name: 'seed.test'
+                },
+                src: '.',
+                dest: 'test'
             }
         },
 
         jshint: {
             options: {
-                reporter: require('jshint-stylish')
+                reporter: require('jshint-stylish'),
+                jshintrc: true
             },
             dev: {
-                src: ['src/**/*.js'],
-                options: {
-                    jshintrc: './.jshintrc'
-                }
+                src: ['src/**/*.js']
             },
             test: {
-                src: ['test/unit/specs/*.js', 'test/functional/specs/*.js'],
-                options: {
-                    jshintrc: 'test/.jshintrc'
-                }
+                src: ['test/unit/specs/*.js', 'test/functional/specs/*.js']
             }
         },
 
@@ -54,7 +53,7 @@ module.exports = function( grunt ) {
                     compress: true,
                     mangle: true,
                     banner:
-                        '// Seed.js ' + require('./package.json').version + '\n' +
+                        '// Seed.js - v' + require('./package.json').version + '\n' +
                         '// (c) 2013 Evan You\n' +
                         '// https://github.com/yyx990803/seed\n'
                 },
@@ -67,7 +66,7 @@ module.exports = function( grunt ) {
         watch: {
             dev: {
                 files: ['src/**/*.js', 'component.json'],
-                tasks: ['component_build', 'jsc']
+                tasks: ['componentbuild', 'jsc']
             }
         }
 
@@ -144,7 +143,7 @@ module.exports = function( grunt ) {
     })
 
     grunt.registerTask( 'test', [
-        'component_build',
+        'componentbuild',
         'jsc',
         'mocha',
         'casper'
