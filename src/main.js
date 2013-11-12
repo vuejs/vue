@@ -133,6 +133,7 @@ function updatePrefix () {
     config.idAttr         = prefix + '-id'
     config.vmAttr         = prefix + '-viewmodel'
     config.preAttr        = prefix + '-pre'
+    config.textAttr       = prefix + '-text'
     config.repeatAttr     = prefix + '-repeat'
     config.partialAttr    = prefix + '-partial'
     config.transAttr      = prefix + '-transition'

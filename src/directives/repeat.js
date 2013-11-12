@@ -1,8 +1,8 @@
-var config   = require('../config'),
-    Observer = require('../observer'),
-    Emitter  = require('../emitter'),
-    utils    = require('../utils'),
-    trans    = require('../transition'),
+var config     = require('../config'),
+    Observer   = require('../observer'),
+    Emitter    = require('../emitter'),
+    utils      = require('../utils'),
+    transition = require('../transition'),
     ViewModel // lazy def to avoid circular dependency
 
 /**
@@ -90,18 +90,19 @@ module.exports = {
             el   = self.el,
             ctn  = self.container = el.parentNode
 
-        el.removeAttribute(config.prefix + '-repeat')
+        el.removeAttribute(config.repeatAttr)
 
         // extract child VM information, if any
         ViewModel   = ViewModel || require('../viewmodel')
-        var vmAttr  = config.prefix + '-viewmodel',
-            vmId    = el.getAttribute(vmAttr)
-        if (vmId) el.removeAttribute(vmAttr)
+        var vmId    = el.getAttribute(config.vmAttr)
+        if (vmId) el.removeAttribute(config.vmAttr)
         self.ChildVM = self.compiler.getOption('viewmodels', vmId) || ViewModel
 
         // extract transition information
-        var transAttr = config.prefix + '-transition-class'
-        self.hasTransition = !!el.getAttribute(transAttr)
+        self.hasTransition = !!(
+            el.getAttribute(config.transAttr) ||
+            el.getAttribute(config.transClassAttr)
+        )
 
         // create a comment node as a reference node for DOM insertions
         self.ref = document.createComment('sd-repeat-' + self.arg)
@@ -169,9 +170,9 @@ module.exports = {
                 : this.ref
             // make sure it works with sd-if
             if (!ref.parentNode) ref = ref.sd_ref
-            trans(node, 1, function () {
+            transition(node, 1, function () {
                 ctn.insertBefore(node, ref)
-            }, this.compiler.init)
+            }, this.compiler)
         }
 
         // set data on scope and compile

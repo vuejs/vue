@@ -30,7 +30,7 @@ module.exports = {
             change = function () {
                 el.style.display = target
             }
-        transition(el, value ? 1 : -1, change, this.compiler.init)
+        transition(el, value ? 1 : -1, change, this.compiler)
     },
 
     'class': function (value) {

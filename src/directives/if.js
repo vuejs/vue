@@ -10,8 +10,7 @@ module.exports = {
 
     update: function (value) {
 
-        var el       = this.el,
-            init     = this.compiler.init
+        var el       = this.el
 
         if (!this.parent) { // the node was detached when bound
             if (!el.parentNode) {
@@ -22,13 +21,14 @@ module.exports = {
         }
 
         // should always have this.parent if we reach here
-        var parent = this.parent,
-            ref    = this.ref
+        var parent   = this.parent,
+            ref      = this.ref,
+            compiler = this.compiler
 
         if (!value) {
-            transition(el, -1, remove, init)
+            transition(el, -1, remove, compiler)
         } else {
-            transition(el, 1, insert, init)
+            transition(el, 1, insert, compiler)
         }
 
         function remove () {

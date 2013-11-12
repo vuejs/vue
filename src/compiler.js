@@ -197,8 +197,11 @@ CompilerProto.setupObserver = function () {
  *  Compile a DOM node (recursive)
  */
 CompilerProto.compile = function (node, root) {
+
     var compiler = this
+
     if (node.nodeType === 1) {
+
         // a normal node
         if (node.hasAttribute(config.preAttr)) return
         var vmId       = node.getAttribute(config.vmAttr),
@@ -206,16 +209,20 @@ CompilerProto.compile = function (node, root) {
             partialId  = node.getAttribute(config.partialAttr),
             transId    = node.getAttribute(config.transAttr),
             transClass = node.getAttribute(config.transClassAttr)
+
         // we need to check for any possbile special directives
         // e.g. sd-repeat, sd-viewmodel & sd-partial
         if (repeatExp) { // repeat block
+
             // repeat block cannot have sd-id at the same time.
             node.removeAttribute(config.idAttr)
             var directive = Directive.parse(config.repeatAttr, repeatExp, compiler, node)
             if (directive) {
                 compiler.bindDirective(directive)
             }
+
         } else if (vmId && !root) { // child ViewModels
+
             node.removeAttribute(config.vmAttr)
             var ChildVM = compiler.getOption('viewmodels', vmId)
             if (ChildVM) {
@@ -228,6 +235,7 @@ CompilerProto.compile = function (node, root) {
                 })
                 compiler.childCompilers.push(child.$compiler)
             }
+
         } else {
 
             // replace innerHTML with partial
@@ -242,23 +250,24 @@ CompilerProto.compile = function (node, root) {
 
             // Javascript transition
             if (transId) {
-                // TODO implement this
                 node.removeAttribute(config.transAttr)
+                node.sd_trans = transId
             }
 
             // CSS class transition
             if (transClass) {
-                // attach the transition id to node
-                // its only text so should be fine...
-                node.sd_trans_class = transClass
                 node.removeAttribute(config.transClassAttr)
+                node.sd_trans_class = transClass
             }
 
             // finally, only normal directives left!
             compiler.compileNode(node)
         }
+
     } else if (node.nodeType === 3) { // text node
+
         compiler.compileTextNode(node)
+
     }
 }
 
@@ -306,7 +315,7 @@ CompilerProto.compileNode = function (node) {
 CompilerProto.compileTextNode = function (node) {
     var tokens = TextParser.parse(node.nodeValue)
     if (!tokens) return
-    var dirname = config.prefix + '-text',
+    var dirname = config.textAttr,
         el, token, directive
     for (var i = 0, l = tokens.length; i < l; i++) {
         token = tokens[i]
@@ -639,7 +648,7 @@ CompilerProto.destroy = function () {
     } else if (el.parentNode) {
         transition(el, -1, function () {
             el.parentNode.removeChild(el)
-        })
+        }, this)
     }
 }
 
