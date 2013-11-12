@@ -1,6 +1,6 @@
-var ExpParser = require('seed/src/exp-parser')
-
 describe('UNIT: Expression Parser', function () {
+
+    var ExpParser = require('seed/src/exp-parser')
     
     var testCases = [
         {

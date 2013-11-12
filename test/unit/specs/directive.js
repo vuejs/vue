@@ -1,7 +1,7 @@
-var Directive = require('seed/src/directive'),
-    directives = require('seed/src/directives')
-
 describe('UNIT: Directive', function () {
+
+    var Directive  = require('seed/src/directive'),
+        directives = require('seed/src/directives')
 
     var compiler = {
         options: {},

@@ -1,6 +1,6 @@
-var utils = require('seed/src/utils')
-
 describe('UNIT: Utils', function () {
+
+    var utils = require('seed/src/utils')
     
     describe('hash', function () {
 

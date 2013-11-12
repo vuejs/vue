@@ -1,6 +1,6 @@
-var Binding = require('seed/src/binding')
-
 describe('UNIT: Binding', function () {
+
+    var Binding = require('seed/src/binding')
 
     describe('instantiation', function () {
 

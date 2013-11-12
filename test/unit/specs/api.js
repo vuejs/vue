@@ -187,9 +187,44 @@ describe('UNIT: API', function () {
             assert.strictEqual(Seed.transition(testId), transition)
         })
 
-        // it('should work with sd-transition', function () {
-        //     assert.ok(false)
-        // })
+        it('should work with sd-transition', function () {
+
+            var enterCalled = false,
+                leaveCalled = false
+
+            Seed.transition('transition-api-test', {
+                enter: function (el, done) {
+                    enterCalled = true
+                    done()
+                },
+                leave: function (el, done) {
+                    leaveCalled = true
+                    done()
+                }
+            })
+
+            var t = new Seed({
+                attributes: {
+                    'sd-show': 'show',
+                    'sd-transition': 'transition-api-test'
+                },
+                scope: {
+                    show: false
+                }
+            })
+
+            document.body.appendChild(t.$el)
+            
+            t.show = true
+            assert.ok(enterCalled)
+            assert.strictEqual(t.$el.style.display, '')
+
+            t.show = false
+            assert.ok(leaveCalled)
+            assert.strictEqual(t.$el.style.display, 'none')
+
+            t.$destroy()
+        })
 
     })
 
@@ -517,9 +552,48 @@ describe('UNIT: API', function () {
             })
 
             describe('transitions', function () {
-                // it('should be tested', function () {
-                //     assert.ok(false)
-                // })
+                
+                it('should get called during transitions', function () {
+                    
+                    var enterCalled = false,
+                        leaveCalled = false
+
+                    var t = new Seed({
+                        attributes: {
+                            'sd-show': 'show',
+                            'sd-transition': 'test'
+                        },
+                        transitions: {
+                            test: {
+                                enter: function (el, done) {
+                                    enterCalled = true
+                                    done()
+                                },
+                                leave: function (el, done) {
+                                    leaveCalled = true
+                                    done()
+                                }
+                            }
+                        },
+                        scope: {
+                            show: false
+                        }
+                    })
+
+                    document.body.appendChild(t.$el)
+                    
+                    t.show = true
+                    assert.ok(enterCalled)
+                    assert.strictEqual(t.$el.style.display, '')
+
+                    t.show = false
+                    assert.ok(leaveCalled)
+                    assert.strictEqual(t.$el.style.display, 'none')
+
+                    t.$destroy()
+
+                })
+
             })
 
         })

@@ -64,13 +64,27 @@ var Cover = (function () {
     }
 
     function buildSource (file) {
+
+        var p = document.createElement('p'),
+            button = document.createElement('button')
+        button.textContent = 'Show source coverage details'
+        p.style.marginLeft = '50px'
+        p.appendChild(button)
+        document.body.appendChild(p)
+
         var src = document.createElement('pre')
         src.id = "cover-src"
+        src.style.display = 'none'
         file.src.forEach(function (line, i) {
             src.appendChild(buildLine(i, line, file.uncoveredNums[i]))
             src.appendChild(document.createElement('br'))
         })
         document.body.appendChild(src)
+
+        button.addEventListener('click', function () {
+            document.body.removeChild(p)
+            src.style.display = 'block'
+        })
     }
 
     function buildLine (i, line, uncovered) {

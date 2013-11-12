@@ -1,6 +1,6 @@
-var TextParser = require('seed/src/text-parser')
-
 describe('UNIT: TextNode Parser', function () {
+
+    var TextParser = require('seed/src/text-parser')
 
     describe('.parse()', function () {
         

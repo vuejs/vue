@@ -1,6 +1,6 @@
-var DepsParser = require('seed/src/deps-parser')
-
 describe('UNIT: Dependency Parser', function () {
+
+    var DepsParser = require('seed/src/deps-parser')
 
     describe('.parse()', function () {
 

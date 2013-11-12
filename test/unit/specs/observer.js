@@ -1,7 +1,7 @@
-var Observer = require('seed/src/observer'),
-    Emitter = require('emitter')
-
 describe('UNIT: Observer', function () {
+
+    var Observer = require('seed/src/observer'),
+        Emitter  = require('emitter')
     
     describe('Observing Object', function () {
         
@@ -302,59 +302,59 @@ describe('UNIT: Observer', function () {
 
     })
 
+    function setTestFactory (opts) {
+        return function () {
+            var ob = new Emitter(),
+                i  = 0,
+                obj = opts.obj,
+                expects = opts.expects
+            ob.proxies = {}
+            Observer.observe(obj, opts.path, ob)
+            ob.on('set', function (key, val) {
+                var expect = expects[i]
+                assert.strictEqual(key, expect.key)
+                assert.strictEqual(val, expect.val)
+                i++
+            })
+            expects.forEach(function (expect) {
+                if (expect.skip) return
+                var path = expect.key.split('.'),
+                    j = 1,
+                    scope = obj
+                while (j < path.length - 1) {
+                    scope = scope[path[j]]
+                    j++
+                }
+                scope[path[j]] = expect.val
+            })
+            assert.strictEqual(i, expects.length)
+        }
+    }
+
+    function getTestFactory (opts) {
+        return function () {
+            var ob = new Emitter(),
+                i  = 0,
+                obj = opts.obj,
+                expects = opts.expects
+            ob.proxies = {}
+            Observer.observe(obj, opts.path, ob)
+            ob.on('get', function (key) {
+                var expected = expects[i]
+                assert.strictEqual(key, expected)
+                i++
+            })
+            expects.forEach(function (key) {
+                var path = key.split('.'),
+                    j = 1,
+                    scope = obj
+                while (j < path.length) {
+                    scope = scope[path[j]]
+                    j++
+                }
+            })
+            assert.strictEqual(i, expects.length)
+        }
+    }
+
 })
-
-function setTestFactory (opts) {
-    return function () {
-        var ob = new Emitter(),
-            i  = 0,
-            obj = opts.obj,
-            expects = opts.expects
-        ob.proxies = {}
-        Observer.observe(obj, opts.path, ob)
-        ob.on('set', function (key, val) {
-            var expect = expects[i]
-            assert.strictEqual(key, expect.key)
-            assert.strictEqual(val, expect.val)
-            i++
-        })
-        expects.forEach(function (expect) {
-            if (expect.skip) return
-            var path = expect.key.split('.'),
-                j = 1,
-                scope = obj
-            while (j < path.length - 1) {
-                scope = scope[path[j]]
-                j++
-            }
-            scope[path[j]] = expect.val
-        })
-        assert.strictEqual(i, expects.length)
-    }
-}
-
-function getTestFactory (opts) {
-    return function () {
-        var ob = new Emitter(),
-            i  = 0,
-            obj = opts.obj,
-            expects = opts.expects
-        ob.proxies = {}
-        Observer.observe(obj, opts.path, ob)
-        ob.on('get', function (key) {
-            var expected = expects[i]
-            assert.strictEqual(key, expected)
-            i++
-        })
-        expects.forEach(function (key) {
-            var path = key.split('.'),
-                j = 1,
-                scope = obj
-            while (j < path.length) {
-                scope = scope[path[j]]
-                j++
-            }
-        })
-        assert.strictEqual(i, expects.length)
-    }
-}
