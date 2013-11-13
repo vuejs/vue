@@ -390,6 +390,7 @@ var config      = require('./config'),
 ViewModel.config = function (opts) {
     if (opts) {
         utils.extend(config, opts)
+        if (opts.prefix) updatePrefix()
     }
     return this
 }
@@ -503,6 +504,23 @@ function inheritOptions (child, parent, topLevel) {
     return child
 }
 
+/**
+ *  Update prefix for some special directives
+ *  that are used in compilation.
+ */
+function updatePrefix () {
+    var prefix = config.prefix
+    config.idAttr         = prefix + '-id'
+    config.vmAttr         = prefix + '-viewmodel'
+    config.preAttr        = prefix + '-pre'
+    config.textAttr       = prefix + '-text'
+    config.repeatAttr     = prefix + '-repeat'
+    config.partialAttr    = prefix + '-partial'
+    config.transAttr      = prefix + '-transition'
+    config.transClassAttr = prefix + '-transition-class'
+}
+
+updatePrefix()
 module.exports = ViewModel
 });
 require.register("seed/src/emitter.js", function(exports, require, module){
@@ -658,22 +676,13 @@ var Emitter     = require('./emitter'),
     TextParser  = require('./text-parser'),
     DepsParser  = require('./deps-parser'),
     ExpParser   = require('./exp-parser'),
+    transition  = require('./transition'),
 
     // cache methods
     slice       = Array.prototype.slice,
     log         = utils.log,
-    def         = utils.defProtected,
     makeHash    = utils.hash,
-    hasOwn      = Object.prototype.hasOwnProperty,
-
-    // special directives
-    idAttr,
-    vmAttr,
-    preAttr,
-    repeatAttr,
-    partialAttr,
-    transitionAttr
-
+    hasOwn      = Object.prototype.hasOwnProperty
 
 /**
  *  The DOM compiler
@@ -681,9 +690,11 @@ var Emitter     = require('./emitter'),
  */
 function Compiler (vm, options) {
 
-    refreshPrefix()
-
     var compiler = this
+
+    // indicate that we are intiating this instance
+    // so we should not run any transitions
+    compiler.init = true
 
     // extend options
     options = compiler.options = options || makeHash()
@@ -699,10 +710,9 @@ function Compiler (vm, options) {
     if (scope) utils.extend(vm, scope, true)
 
     compiler.vm  = vm
-    // special VM properties are inumerable
-    def(vm, '$', makeHash())
-    def(vm, '$el', compiler.el)
-    def(vm, '$compiler', compiler)
+    vm.$ = makeHash()
+    vm.$el = compiler.el
+    vm.$compiler = compiler
 
     // keep track of directives and expressions
     // so they can be unbound during destroy()
@@ -726,11 +736,15 @@ function Compiler (vm, options) {
         ? getRoot(parent)
         : compiler
 
-    // register child id on parent
-    var childId = compiler.el.getAttribute(idAttr)
-    if (childId && parent) {
-        compiler.childId = childId
-        parent.vm.$[childId] = vm
+    // set parent VM
+    // and register child id on parent
+    var childId = compiler.el.getAttribute(config.idAttr)
+    if (parent) {
+        vm.$parent = parent.vm
+        if (childId) {
+            compiler.childId = childId
+            parent.vm.$[childId] = vm
+        }
     }
 
     // setup observer
@@ -753,7 +767,9 @@ function Compiler (vm, options) {
     // for repeated items, create an index binding
     // which should be inenumerable but configurable
     if (compiler.repeat) {
-        def(vm[compiler.repeatPrefix], '$index', compiler.repeatIndex, false, true)
+        vm.$index = compiler.repeatIndex
+        vm.$collection = compiler.repeatCollection
+        compiler.createBinding('$index')
     }
 
     // now parse the DOM, during which we will create necessary bindings
@@ -770,6 +786,9 @@ function Compiler (vm, options) {
     }
     // extract dependencies for computed properties
     if (computed.length) DepsParser.parse(computed)
+
+    // done!
+    compiler.init = false
 }
 
 var CompilerProto = Compiler.prototype
@@ -847,24 +866,33 @@ CompilerProto.setupObserver = function () {
  *  Compile a DOM node (recursive)
  */
 CompilerProto.compile = function (node, root) {
+
     var compiler = this
+
     if (node.nodeType === 1) {
+
         // a normal node
-        if (node.hasAttribute(preAttr)) return
-        var vmId       = node.getAttribute(vmAttr),
-            repeatExp  = node.getAttribute(repeatAttr),
-            partialId  = node.getAttribute(partialAttr)
+        if (node.hasAttribute(config.preAttr)) return
+        var vmId       = node.getAttribute(config.vmAttr),
+            repeatExp  = node.getAttribute(config.repeatAttr),
+            partialId  = node.getAttribute(config.partialAttr),
+            transId    = node.getAttribute(config.transAttr),
+            transClass = node.getAttribute(config.transClassAttr)
+
         // we need to check for any possbile special directives
         // e.g. sd-repeat, sd-viewmodel & sd-partial
         if (repeatExp) { // repeat block
+
             // repeat block cannot have sd-id at the same time.
-            node.removeAttribute(idAttr)
-            var directive = Directive.parse(repeatAttr, repeatExp, compiler, node)
+            node.removeAttribute(config.idAttr)
+            var directive = Directive.parse(config.repeatAttr, repeatExp, compiler, node)
             if (directive) {
                 compiler.bindDirective(directive)
             }
+
         } else if (vmId && !root) { // child ViewModels
-            node.removeAttribute(vmAttr)
+
+            node.removeAttribute(config.vmAttr)
             var ChildVM = compiler.getOption('viewmodels', vmId)
             if (ChildVM) {
                 var child = new ChildVM({
@@ -876,20 +904,39 @@ CompilerProto.compile = function (node, root) {
                 })
                 compiler.childCompilers.push(child.$compiler)
             }
+
         } else {
-            if (partialId) { // replace innerHTML with partial
-                node.removeAttribute(partialAttr)
+
+            // replace innerHTML with partial
+            if (partialId) {
+                node.removeAttribute(config.partialAttr)
                 var partial = compiler.getOption('partials', partialId)
                 if (partial) {
                     node.innerHTML = ''
                     node.appendChild(partial.cloneNode(true))
                 }
             }
+
+            // Javascript transition
+            if (transId) {
+                node.removeAttribute(config.transAttr)
+                node.sd_trans = transId
+            }
+
+            // CSS class transition
+            if (transClass) {
+                node.removeAttribute(config.transClassAttr)
+                node.sd_trans_class = transClass
+            }
+
             // finally, only normal directives left!
             compiler.compileNode(node)
         }
+
     } else if (node.nodeType === 3) { // text node
+
         compiler.compileTextNode(node)
+
     }
 }
 
@@ -937,7 +984,7 @@ CompilerProto.compileNode = function (node) {
 CompilerProto.compileTextNode = function (node) {
     var tokens = TextParser.parse(node.nodeValue)
     if (!tokens) return
-    var dirname = config.prefix + '-text',
+    var dirname = config.textAttr,
         el, token, directive
     for (var i = 0, l = tokens.length; i < l; i++) {
         token = tokens[i]
@@ -1207,31 +1254,42 @@ CompilerProto.getOption = function (type, id) {
  *  Unbind and remove element
  */
 CompilerProto.destroy = function () {
-    var compiler = this
-    log('compiler destroyed: ', compiler.vm.$el)
-    // unwatch
-    compiler.observer.off()
-    compiler.emitter.off()
-    var i, key, dir, inss, binding,
+
+    var compiler = this,
+        i, key, dir, instances, binding,
         el         = compiler.el,
         directives = compiler.dirs,
         exps       = compiler.exps,
-        bindings   = compiler.bindings
-    // remove all directives that are instances of external bindings
+        bindings   = compiler.bindings,
+        teardown   = compiler.options.teardown
+
+    // call user teardown first
+    if (teardown) teardown()
+
+    // unwatch
+    compiler.observer.off()
+    compiler.emitter.off()
+
+    // unbind all direcitves
     i = directives.length
     while (i--) {
         dir = directives[i]
+        // if this directive is an instance of an external binding
+        // e.g. a directive that refers to a variable on the parent VM
+        // we need to remove it from that binding's instances
         if (!dir.isSimple && dir.binding.compiler !== compiler) {
-            inss = dir.binding.instances
-            if (inss) inss.splice(inss.indexOf(dir), 1)
+            instances = dir.binding.instances
+            if (instances) instances.splice(instances.indexOf(dir), 1)
         }
         dir.unbind()
     }
+
     // unbind all expressions (anonymous bindings)
     i = exps.length
     while (i--) {
         exps[i].unbind()
     }
+
     // unbind/unobserve all own bindings
     for (key in bindings) {
         if (hasOwn.call(bindings, key)) {
@@ -1242,6 +1300,7 @@ CompilerProto.destroy = function () {
             binding.unbind()
         }
     }
+
     // remove self from parentCompiler
     var parent = compiler.parentCompiler,
         childId = compiler.childId
@@ -1251,29 +1310,18 @@ CompilerProto.destroy = function () {
             delete parent.vm.$[childId]
         }
     }
-    // remove el
+
+    // finally remove dom element
     if (el === document.body) {
         el.innerHTML = ''
     } else if (el.parentNode) {
-        el.parentNode.removeChild(el)
+        transition(el, -1, function () {
+            el.parentNode.removeChild(el)
+        }, this)
     }
 }
 
 // Helpers --------------------------------------------------------------------
-
-/**
- *  Refresh prefix in case it has been changed
- *  during compilations
- */
-function refreshPrefix () {
-    var prefix     = config.prefix
-    idAttr         = prefix + '-id'
-    vmAttr         = prefix + '-viewmodel'
-    preAttr        = prefix + '-pre'
-    repeatAttr     = prefix + '-repeat'
-    partialAttr    = prefix + '-partial'
-    transitionAttr = prefix + '-transition'
-}
 
 /**
  *  determine which viewmodel a key belongs to based on nesting symbols
@@ -1583,10 +1631,6 @@ function watchObject (obj, path, observer) {
             bind(obj, key, path, observer)
         }
     }
-    // $index is inenumerable
-    if (obj.$index !== undefined) {
-        bind(obj, '$index', path, observer)
-    }
 }
 
 /**
@@ -1814,7 +1858,7 @@ function parseKey (dir, rawKey) {
         ? nesting[0].length
         : false
 
-    dir.root = key.charAt(0) === '$'
+    dir.root = key.charAt(0) === '*'
 
     if (dir.nesting) {
         key = key.replace(NESTING_RE, '')
@@ -1875,7 +1919,7 @@ DirProto.refresh = function (value) {
         el: this.el,
         vm: this.vm
     })
-    if (value && value === this.computedValue) return
+    if (value !== undefined && value === this.computedValue) return
     this.computedValue = value
     this.apply(value)
 }
@@ -1886,8 +1930,8 @@ DirProto.refresh = function (value) {
 DirProto.apply = function (value) {
     this._update(
         this.filters
-        ? this.applyFilters(value)
-        : value
+            ? this.applyFilters(value)
+            : value
     )
 }
 
@@ -1945,17 +1989,17 @@ require.register("seed/src/exp-parser.js", function(exports, require, module){
 
 var KEYWORDS =
         // keywords
-        'break,case,catch,continue,debugger,default,delete,do,else,false'
-        + ',finally,for,function,if,in,instanceof,new,null,return,switch,this'
-        + ',throw,true,try,typeof,var,void,while,with'
+        'break,case,catch,continue,debugger,default,delete,do,else,false' +
+        ',finally,for,function,if,in,instanceof,new,null,return,switch,this' +
+        ',throw,true,try,typeof,var,void,while,with,undefined' +
         // reserved
-        + ',abstract,boolean,byte,char,class,const,double,enum,export,extends'
-        + ',final,float,goto,implements,import,int,interface,long,native'
-        + ',package,private,protected,public,short,static,super,synchronized'
-        + ',throws,transient,volatile'
+        ',abstract,boolean,byte,char,class,const,double,enum,export,extends' +
+        ',final,float,goto,implements,import,int,interface,long,native' +
+        ',package,private,protected,public,short,static,super,synchronized' +
+        ',throws,transient,volatile' +
         // ECMA 5 - use strict
-        + ',arguments,let,yield'
-        + ',undefined',
+        ',arguments,let,yield',
+        
     KEYWORDS_RE = new RegExp(["\\b" + KEYWORDS.replace(/,/g, '\\b|\\b') + "\\b"].join('|'), 'g'),
     REMOVE_RE   = /\/\*(?:.|\n)*?\*\/|\/\/[^\n]*\n|\/\/[^\n]*$|'[^']*'|"[^"]*"|[\s\t\n]*\.[\s\t\n]*[$\w\.]+/g,
     SPLIT_RE    = /[^\w$]+/g,
@@ -2178,14 +2222,178 @@ module.exports = {
     }
 }
 });
+require.register("seed/src/transition.js", function(exports, require, module){
+var config   = require('./config'),
+    endEvent = sniffTransitionEndEvent(),
+    codes    = {
+        CSS_E     : 1,
+        CSS_L     : 2,
+        JS_E      : 3,
+        JS_L      : 4,
+        CSS_SKIP  : -1,
+        JS_SKIP   : -2,
+        JS_SKIP_E : -3,
+        JS_SKIP_L : -4,
+        INIT      : -5,
+        SKIP      : -6
+    }
+
+/**
+ *  stage:
+ *    1 = enter
+ *    2 = leave
+ */
+var transition = module.exports = function (el, stage, changeState, compiler) {
+
+    if (compiler.init) {
+        changeState()
+        return codes.INIT
+    }
+
+    // in sd-repeat, the transition directives
+    // might not have been processed yet
+    var transitionFunctionId =
+            el.sd_trans ||
+            el.getAttribute(config.transAttr),
+        transitionClass =
+            el.sd_trans_class ||
+            el.getAttribute(config.transClassAttr)
+
+    if (transitionFunctionId) {
+        return applyTransitionFunctions(
+            el,
+            stage,
+            changeState,
+            transitionFunctionId,
+            compiler
+        )
+    } else if (transitionClass) {
+        return applyTransitionClass(
+            el,
+            stage,
+            changeState,
+            transitionClass
+        )
+    } else {
+        changeState()
+        return codes.SKIP
+    }
+
+}
+
+transition.codes = codes
+
+/**
+ *  Togggle a CSS class to trigger transition
+ */
+function applyTransitionClass (el, stage, changeState, className) {
+
+    if (!endEvent) {
+        changeState()
+        return codes.CSS_SKIP
+    }
+
+    var classList         = el.classList,
+        lastLeaveCallback = el.sd_trans_cb
+
+    if (stage > 0) { // enter
+
+        // cancel unfinished leave transition
+        if (lastLeaveCallback) {
+            el.removeEventListener(endEvent, lastLeaveCallback)
+            el.sd_trans_cb = null
+        }
+
+        // set to hidden state before appending
+        classList.add(className)
+        // append
+        changeState()
+        // force a layout so transition can be triggered
+        /* jshint unused: false */
+        var forceLayout = el.clientHeight
+        // trigger transition
+        classList.remove(className)
+        return codes.CSS_E
+
+    } else { // leave
+
+        // trigger hide transition
+        classList.add(className)
+        var onEnd = function (e) {
+            if (e.target === el) {
+                el.removeEventListener(endEvent, onEnd)
+                el.sd_trans_cb = null
+                // actually remove node here
+                changeState()
+                classList.remove(className)
+            }
+        }
+        // attach transition end listener
+        el.addEventListener(endEvent, onEnd)
+        el.sd_trans_cb = onEnd
+        return codes.CSS_L
+        
+    }
+
+}
+
+function applyTransitionFunctions (el, stage, changeState, functionId, compiler) {
+
+    var funcs = compiler.getOption('transitions', functionId)
+    if (!funcs) {
+        changeState()
+        return codes.JS_SKIP
+    }
+
+    var enter = funcs.enter,
+        leave = funcs.leave
+
+    if (stage > 0) { // enter
+        if (typeof enter !== 'function') {
+            changeState()
+            return codes.JS_SKIP_E
+        }
+        enter(el, changeState)
+        return codes.JS_E
+    } else { // leave
+        if (typeof leave !== 'function') {
+            changeState()
+            return codes.JS_SKIP_L
+        }
+        leave(el, changeState)
+        return codes.JS_L
+    }
+
+}
+
+/**
+ *  Sniff proper transition end event name
+ */
+function sniffTransitionEndEvent () {
+    var el = document.createElement('seed'),
+        defaultEvent = 'transitionend',
+        events = {
+            'transition'       : defaultEvent,
+            'MozTransition'    : defaultEvent,
+            'WebkitTransition' : 'webkitTransitionEnd'
+        }
+    for (var name in events) {
+        if (el.style[name] !== undefined) {
+            return events[name]
+        }
+    }
+}
+});
 require.register("seed/src/directives/index.js", function(exports, require, module){
-var utils = require('../utils')
+var utils      = require('../utils'),
+    transition = require('../transition')
 
 module.exports = {
 
     on     : require('./on'),
     repeat : require('./repeat'),
     model  : require('./model'),
+    'if'   : require('./if'),
 
     attr: function (value) {
         this.el.setAttribute(this.arg, value)
@@ -2199,21 +2407,17 @@ module.exports = {
         this.el.innerHTML = utils.toText(value)
     },
 
-    style: {
-        bind: function () {
-            this.arg = convertCSSProperty(this.arg)
-        },
-        update: function (value) {
-            this.el.style[this.arg] = value
-        }
+    visible: function (value) {
+        this.el.style.visibility = value ? '' : 'hidden'
     },
 
     show: function (value) {
-        this.el.style.display = value ? '' : 'none'
-    },
-
-    visible: function (value) {
-        this.el.style.visibility = value ? '' : 'hidden'
+        var el = this.el,
+            target = value ? '' : 'none',
+            change = function () {
+                el.style.display = target
+            }
+        transition(el, value ? 1 : -1, change, this.compiler)
     },
 
     'class': function (value) {
@@ -2223,41 +2427,19 @@ module.exports = {
             if (this.lastVal) {
                 this.el.classList.remove(this.lastVal)
             }
-            this.el.classList.add(value)
-            this.lastVal = value
+            if (value) {
+                this.el.classList.add(value)
+                this.lastVal = value
+            }
         }
     },
 
-    'if': {
+    style: {
         bind: function () {
-            this.parent = this.el.parentNode
-            this.ref = document.createComment('sd-if-' + this.key)
+            this.arg = convertCSSProperty(this.arg)
         },
         update: function (value) {
-            var attached = !!this.el.parentNode
-            if (!this.parent) { // the node was detached when bound
-                if (!attached) {
-                    return
-                } else {
-                    this.parent = this.el.parentNode
-                }
-            }
-            // should always have this.parent if we reach here
-            if (!value) {
-                if (attached) {
-                    // insert the reference node
-                    var next = this.el.nextSibling
-                    if (next) {
-                        this.parent.insertBefore(this.ref, next)
-                    } else {
-                        this.parent.appendChild(this.ref)
-                    }
-                    this.parent.removeChild(this.el)
-                }
-            } else if (!attached) {
-                this.parent.insertBefore(this.el, this.ref)
-                this.parent.removeChild(this.ref)
-            }
+            this.el.style[this.arg] = value
         }
     }
 }
@@ -2273,11 +2455,70 @@ function convertCSSProperty (prop) {
     })
 }
 });
+require.register("seed/src/directives/if.js", function(exports, require, module){
+var transition = require('../transition')
+
+module.exports = {
+
+    bind: function () {
+        this.parent = this.el.parentNode
+        this.ref = document.createComment('sd-if-' + this.key)
+        this.el.sd_ref = this.ref
+    },
+
+    update: function (value) {
+
+        var el       = this.el
+
+        if (!this.parent) { // the node was detached when bound
+            if (!el.parentNode) {
+                return
+            } else {
+                this.parent = el.parentNode
+            }
+        }
+
+        // should always have this.parent if we reach here
+        var parent   = this.parent,
+            ref      = this.ref,
+            compiler = this.compiler
+
+        if (!value) {
+            transition(el, -1, remove, compiler)
+        } else {
+            transition(el, 1, insert, compiler)
+        }
+
+        function remove () {
+            if (!el.parentNode) return
+            // insert the reference node
+            var next = el.nextSibling
+            if (next) {
+                parent.insertBefore(ref, next)
+            } else {
+                parent.appendChild(ref)
+            }
+            parent.removeChild(el)
+        }
+
+        function insert () {
+            if (el.parentNode) return
+            parent.insertBefore(el, ref)
+            parent.removeChild(ref)
+        }
+    },
+
+    unbind: function () {
+        this.el.sd_ref = null
+    }
+}
+});
 require.register("seed/src/directives/repeat.js", function(exports, require, module){
-var config   = require('../config'),
-    Observer = require('../observer'),
-    Emitter  = require('../emitter'),
-    utils    = require('../utils'),
+var config     = require('../config'),
+    Observer   = require('../observer'),
+    Emitter    = require('../emitter'),
+    utils      = require('../utils'),
+    transition = require('../transition'),
     ViewModel // lazy def to avoid circular dependency
 
 /**
@@ -2360,16 +2601,33 @@ var mutationHandlers = {
 module.exports = {
 
     bind: function () {
-        this.el.removeAttribute(config.prefix + '-repeat')
-        var ctn = this.container = this.el.parentNode
+
+        var self = this,
+            el   = self.el,
+            ctn  = self.container = el.parentNode
+
+        el.removeAttribute(config.repeatAttr)
+
+        // extract child VM information, if any
+        ViewModel   = ViewModel || require('../viewmodel')
+        var vmId    = el.getAttribute(config.vmAttr)
+        if (vmId) el.removeAttribute(config.vmAttr)
+        self.ChildVM = self.compiler.getOption('viewmodels', vmId) || ViewModel
+
+        // extract transition information
+        self.hasTransition = !!(
+            el.getAttribute(config.transAttr) ||
+            el.getAttribute(config.transClassAttr)
+        )
+
         // create a comment node as a reference node for DOM insertions
-        this.ref = document.createComment('sd-repeat-' + this.arg)
-        ctn.insertBefore(this.ref, this.el)
-        ctn.removeChild(this.el)
-        this.collection = null
-        this.vms = null
-        var self = this
-        this.mutationListener = function (path, arr, mutation) {
+        self.ref = document.createComment('sd-repeat-' + self.arg)
+        ctn.insertBefore(self.ref, el)
+        ctn.removeChild(el)
+
+        self.collection = null
+        self.vms = null
+        self.mutationListener = function (path, arr, mutation) {
             self.detach()
             var method = mutation.method
             mutationHandlers[method].call(self, mutation)
@@ -2378,6 +2636,7 @@ module.exports = {
             }
             self.retach()
         }
+
     },
 
     update: function (collection) {
@@ -2414,18 +2673,10 @@ module.exports = {
      */
     buildItem: function (data, index) {
 
-        // late def
-        ViewModel   = ViewModel || require('../viewmodel')
-
         var node    = this.el.cloneNode(true),
             ctn     = this.container,
-            vmAttr  = config.prefix + '-viewmodel',
-            vmID    = node.getAttribute(vmAttr),
-            ChildVM = this.compiler.getOption('viewmodels', vmID) || ViewModel,
             scope   = {},
             ref, item
-
-        if (vmID) node.removeAttribute(vmAttr)
 
         // append node into DOM first
         // so sd-if can get access to parentNode
@@ -2433,17 +2684,22 @@ module.exports = {
             ref = this.vms.length > index
                 ? this.vms[index].$el
                 : this.ref
-            ctn.insertBefore(node, ref)
+            // make sure it works with sd-if
+            if (!ref.parentNode) ref = ref.sd_ref
+            transition(node, 1, function () {
+                ctn.insertBefore(node, ref)
+            }, this.compiler)
         }
 
         // set data on scope and compile
         scope[this.arg] = data || {}
-        item = new ChildVM({
+        item = new this.ChildVM({
             el: node,
             scope: scope,
             compilerOptions: {
                 repeat: true,
                 repeatIndex: index,
+                repeatCollection: this.collection,
                 repeatPrefix: this.arg,
                 parentCompiler: this.compiler,
                 delegator: ctn
@@ -2465,7 +2721,7 @@ module.exports = {
     updateIndexes: function () {
         var i = this.vms.length
         while (i--) {
-            this.vms[i][this.arg].$index = i
+            this.vms[i].$index = i
         }
     },
 
@@ -2474,6 +2730,7 @@ module.exports = {
      *  so that batch DOM updates are done in-memory and faster
      */
     detach: function () {
+        if (this.hasTransition) return
         var c = this.container,
             p = this.parent = c.parentNode
         this.next = c.nextSibling
@@ -2481,6 +2738,7 @@ module.exports = {
     },
 
     retach: function () {
+        if (this.hasTransition) return
         var n = this.next,
             p = this.parent,
             c = this.container
@@ -2515,7 +2773,7 @@ var utils = require('../utils')
 function delegateCheck (current, top, identifier) {
     if (current[identifier]) {
         return current
-    } else if (current === top) {
+    } else if (current === top || !current.parentNode) {
         return false
     } else {
         return delegateCheck(current.parentNode, top, identifier)
@@ -2598,7 +2856,7 @@ module.exports = {
 });
 require.register("seed/src/directives/model.js", function(exports, require, module){
 var utils = require('../utils'),
-    isIE  = !!document.attachEvent
+    isIE9 = navigator.userAgent.indexOf('MSIE 9.0') > 0
 
 module.exports = {
 
@@ -2634,13 +2892,20 @@ module.exports = {
 
         // fix shit for IE9
         // since it doesn't fire input on backspace / del / cut
-        if (isIE) {
-            el.addEventListener('cut', self.set)
-            el.addEventListener('keydown', function (e) {
+        if (isIE9) {
+            self.onCut = function () {
+                // cut event fires before the value actually changes
+                setTimeout(function () {
+                    self.set()
+                }, 0)
+            }
+            self.onDel = function (e) {
                 if (e.keyCode === 46 || e.keyCode === 8) {
                     self.set()
                 }
-            })
+            }
+            el.addEventListener('cut', self.onCut)
+            el.addEventListener('keyup', self.onDel)
         }
     },
 
@@ -2672,6 +2937,10 @@ module.exports = {
 
     unbind: function () {
         this.el.removeEventListener(this.event, this.set)
+        if (isIE9) {
+            this.el.removeEventListener('cut', this.onCut)
+            this.el.removeEventListener('keyup', this.onDel)
+        }
     }
 }
 });
