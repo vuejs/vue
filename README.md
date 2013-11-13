@@ -28,7 +28,7 @@ Modern, lightweight JavaScript MVVM
 
 **Browserify**
 
-    $ npm install seed-mvvm
+    $ npm install yyx990803/seed
 
 **Bower**
 
@@ -40,7 +40,7 @@ Built versions in `/dist` or installed via Bower can be used directly as a Commo
 
 **Standalone**
 
-Simply include a built version in `/dist` or installed via Bower with a script tag. `seed` will be registered as a global variable. You can also use it directly over [Browserify CDN](http://wzrd.in) at [http://wzrd.in/standalone/seed-mvvm](http://wzrd.in/standalone/seed-mvvm)
+Simply include a built version in `/dist` or installed via Bower with a script tag. `seed` will be registered as a global variable.
 
 ## Development
 
