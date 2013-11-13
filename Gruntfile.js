@@ -110,11 +110,12 @@ module.exports = function( grunt ) {
         }
     })
 
-    grunt.registerTask( 'casper', function () {
-        var done = this.async()
+    grunt.registerTask( 'casper', function (id) {
+        var done = this.async(),
+            file = id ? id + '.js' : ''
         grunt.util.spawn({
             cmd: 'casperjs',
-            args: ['test', '--concise', 'specs/'],
+            args: ['test', '--concise', 'specs/' + file],
             opts: {
                 stdio: ['ignore', process.stdout, 'ignore'],
                 cwd: path.resolve('test/functional')

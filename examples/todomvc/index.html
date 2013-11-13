@@ -4,8 +4,6 @@
         <title>Todo</title>
         <meta charset="utf-8">
         <link rel="stylesheet" type="text/css" href="bower_components/todomvc-common/base.css">
-        <!-- for PhantomJS/CasperJS testing only -->
-        <script src="../../test/functional/fixtures/bind.js"></script>
     </head>
     <body>
         <section id="todoapp">
@@ -72,6 +70,16 @@
             <p>Powered by <a href="https://github.com/yyx990803/seed">Seed.js</a></p>
             <p>Created by <a href="http://evanyou.me">Evan You</a></p>
         </footer>
+
+        <!-- for PhantomJS/CasperJS testing only -->
+        <script src="../../test/functional/fixtures/bind.js"></script>
+        <script>
+            if (navigator.userAgent.indexOf('PhantomJS') > -1) {
+                localStorage.clear()
+            }
+        </script>
+        <!-- end testing -->
+
         <script src="../../dist/seed.js"></script>
         <script src="js/store.js"></script>
         <script src="js/app.js"></script>

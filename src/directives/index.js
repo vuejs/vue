@@ -40,8 +40,10 @@ module.exports = {
             if (this.lastVal) {
                 this.el.classList.remove(this.lastVal)
             }
-            this.el.classList.add(value)
-            this.lastVal = value
+            if (value) {
+                this.el.classList.add(value)
+                this.lastVal = value
+            }
         }
     },
 
