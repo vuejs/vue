@@ -11,6 +11,35 @@ describe('UNIT: Utils', function () {
 
     })
 
+    describe('attr', function () {
+
+        var el = document.createElement('div')
+        el.setAttribute('sd-transition-class', 'test')
+        
+        it('should append the prefix and return the attribute value', function () {
+            var val = utils.attr(el, 'transition-class')
+            assert.strictEqual(val, 'test')
+        })
+
+        it('should remove the attribute', function () {
+            assert.notOk(el.hasAttribute('sd-transition-class'))
+        })
+
+        it('should work with different prefix', function () {
+
+            Seed.config({ prefix: 'test' })
+
+            var el = document.createElement('div')
+            el.setAttribute('test-transition-class', 'test')
+            var val = utils.attr(el, 'transition-class')
+            assert.strictEqual(val, 'test')
+            assert.notOk(el.hasAttribute('test-transition-class'))
+
+            Seed.config({ prefix: 'sd' })
+        })
+
+    })
+
     describe('defProtected', function () {
         
         it('should define a protected property', function () {
