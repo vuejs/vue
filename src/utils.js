@@ -1,7 +1,8 @@
 var config    = require('./config'),
     toString  = Object.prototype.toString,
     join      = Array.prototype.join,
-    console   = window.console
+    console   = window.console,
+    ViewModel // late def
 
 /**
  *  Create a prototype-less object
@@ -67,22 +68,12 @@ var utils = module.exports = {
     },
 
     /**
-     *  Convert an object of partial strings
-     *  to domFragments
-     */
-    convertPartials: function (partials) {
-        if (!partials) return
-        for (var key in partials) {
-            if (typeof partials[key] === 'string') {
-                partials[key] = utils.templateToFragment(partials[key])
-            }
-        }
-    },
-
-    /**
      *  Convert a string template to a dom fragment
      */
-    templateToFragment: function (template) {
+    toFragment: function (template) {
+        if (typeof template !== 'string') {
+            return template
+        }
         if (template.charAt(0) === '#') {
             var templateNode = document.getElementById(template.slice(1))
             if (!templateNode) return
@@ -97,6 +88,41 @@ var utils = module.exports = {
             frag.appendChild(child)
         }
         return frag
+    },
+
+    /**
+     *  Convert the object to a ViewModel constructor
+     *  if it is not already one
+     */
+    toConstructor: function (obj) {
+        ViewModel = ViewModel || require('./viewmodel')
+        return obj.prototype instanceof ViewModel || obj === ViewModel
+            ? obj
+            : ViewModel.extend(obj)
+    },
+
+    /**
+     *  convert certain option values to the desired format.
+     */
+    processOptions: function (options) {
+        if (!options) return
+        var components = options.components,
+            partials   = options.partials,
+            template   = options.template,
+            key
+        if (components) {
+            for (key in components) {
+                components[key] = utils.toConstructor(components[key])
+            }
+        }
+        if (partials) {
+            for (key in partials) {
+                partials[key] = utils.toFragment(partials[key])
+            }
+        }
+        if (template) {
+            options.template = utils.toFragment(template)
+        }
     },
 
     /**

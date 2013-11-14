@@ -525,6 +525,25 @@ describe('UNIT: API', function () {
                     assert.strictEqual(p.$el.querySelector('div').textContent, 'child')
                 })
 
+                it('should work with plain option object', function () {
+                    var Parent = Seed.extend({
+                        template: '<p>{{name}}</p><div sd-component="child">{{name}}</div>',
+                        scope: {
+                            name: 'dad'
+                        },
+                        components: {
+                            child: {
+                                scope: {
+                                    name: 'child'
+                                }
+                            }
+                        }
+                    })
+                    var p = new Parent()
+                    assert.strictEqual(p.$el.querySelector('p').textContent, 'dad')
+                    assert.strictEqual(p.$el.querySelector('div').textContent, 'child')
+                })
+
             })
 
             describe('partials', function () {

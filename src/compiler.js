@@ -28,9 +28,9 @@ function Compiler (vm, options) {
     compiler.init = true
 
     // extend options
+    utils.processOptions(options)
     options = compiler.options = options || makeHash()
     utils.extend(compiler, options.compilerOptions)
-    utils.convertPartials(options.partials)
 
     // initialize element
     compiler.setupElement(options)
@@ -146,18 +146,9 @@ CompilerProto.setupElement = function (options) {
 
     // initialize template
     var template = options.template
-    if (typeof template === 'string') {
-        if (template.charAt(0) === '#') {
-            var templateNode = document.querySelector(template)
-            if (templateNode) {
-                el.innerHTML = templateNode.innerHTML
-            }
-        } else {
-            el.innerHTML = template
-        }
-    } else if (options.templateFragment) {
+    if (template) {
         el.innerHTML = ''
-        el.appendChild(options.templateFragment.cloneNode(true))
+        el.appendChild(template.cloneNode(true))
     }
 }
 

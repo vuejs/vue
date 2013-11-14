@@ -98,11 +98,11 @@ describe('UNIT: Utils', function () {
 
     })
 
-    describe('templateToFragment', function () {
+    describe('toFragment', function () {
         
         it('should convert a string tempalte to a documentFragment', function () {
             var template = '<div class="a">hi</div><p>ha</p>',
-                frag = utils.templateToFragment(template)
+                frag = utils.toFragment(template)
             assert.ok(frag instanceof window.DocumentFragment)
             assert.equal(frag.querySelector('.a').textContent, 'hi')
             assert.equal(frag.querySelector('p').textContent, 'ha')
@@ -116,7 +116,7 @@ describe('UNIT: Utils', function () {
                 el.innerHTML = template
             document.getElementById('test').appendChild(el)
 
-            var frag = utils.templateToFragment('#' + id)
+            var frag = utils.toFragment('#' + id)
             assert.ok(frag instanceof window.DocumentFragment)
             assert.equal(frag.querySelector('.a').textContent, 'hi')
             assert.equal(frag.querySelector('p').textContent, 'ha')
@@ -124,20 +124,61 @@ describe('UNIT: Utils', function () {
 
     })
 
-    describe('convertPartials', function () {
+    describe('toConstructor', function () {
         
-        it('should convert a hash object of strings to fragments', function () {
-            var partials = {
+        it('should convert an non-VM object to a VM constructor', function () {
+            var a = { test: 1 },
+                A = utils.toConstructor(a)
+            assert.ok(A.prototype instanceof Seed)
+            assert.strictEqual(A.options, a)
+        })
+
+        it('should return the argument if it is already a consutructor', function () {
+            var A = utils.toConstructor(Seed)
+            assert.strictEqual(A, Seed)
+        })
+
+    })
+
+    describe('processOptions', function () {
+        
+        var options = {
+            partials: {
                 a: '#utils-template-to-fragment',
                 b: '<div class="a">hi</div><p>ha</p>'
-            }
-            utils.convertPartials(partials)
+            },
+            components: {
+                a: { scope: { data: 1 } },
+                b: { scope: { data: 2 } }
+            },
+            template: '<a>{{hi}}</a>'
+        }
+
+        it('should convert string partials to fragment nodes', function () {
+
+            // call it here
+            utils.processOptions(options)
+
+            var partials = options.partials
             for (var key in partials) {
                 var frag = partials[key]
                 assert.ok(frag instanceof window.DocumentFragment)
                 assert.equal(frag.querySelector('.a').textContent, 'hi')
                 assert.equal(frag.querySelector('p').textContent, 'ha')
             }
+        })
+
+        it('should convert string template to fragment node', function () {
+            assert.ok(options.template instanceof window.DocumentFragment)
+            assert.equal(options.template.querySelector('a').textContent, '{{hi}}')
+        })
+
+        it('should convert plain object components to constructors', function () {
+            var components = options.components
+            assert.ok(components.a.prototype instanceof Seed)
+            assert.strictEqual(components.a.options.scope.data, 1)
+            assert.ok(components.b.prototype instanceof Seed)
+            assert.strictEqual(components.b.options.scope.data, 2)
         })
 
     })

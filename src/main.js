@@ -38,9 +38,7 @@ ViewModel.filter = function (id, fn) {
  */
 ViewModel.component = function (id, Ctor) {
     if (!Ctor) return utils.components[id]
-    utils.components[id] = Ctor.prototype instanceof ViewModel
-        ? Ctor
-        : ViewModel.extend(Ctor)
+    utils.components[id] = utils.toConstructor(Ctor)
     return this
 }
 
@@ -49,7 +47,7 @@ ViewModel.component = function (id, Ctor) {
  */
 ViewModel.partial = function (id, partial) {
     if (!partial) return utils.partials[id]
-    utils.partials[id] = utils.templateToFragment(partial)
+    utils.partials[id] = utils.toFragment(partial)
     return this
 }
 
@@ -69,16 +67,22 @@ ViewModel.extend = extend
  *  and add extend method
  */
 function extend (options) {
+
     var ParentVM = this
+
     // inherit options
     options = inheritOptions(options, ParentVM.options, true)
+    utils.processOptions(options)
+
     var ExtendedVM = function (opts) {
         opts = inheritOptions(opts, options, true)
         ParentVM.call(this, opts)
     }
+
     // inherit prototype props
     var proto = ExtendedVM.prototype = Object.create(ParentVM.prototype)
     utils.defProtected(proto, 'constructor', ExtendedVM)
+
     // copy prototype props
     var protoMixins = options.proto
     if (protoMixins) {
@@ -88,10 +92,7 @@ function extend (options) {
             }
         }
     }
-    // convert template to documentFragment
-    if (options.template) {
-        options.templateFragment = utils.templateToFragment(options.template)
-    }
+
     // allow extended VM to be further extended
     ExtendedVM.extend = extend
     ExtendedVM.super = ParentVM
