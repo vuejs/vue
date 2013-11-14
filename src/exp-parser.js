@@ -11,7 +11,9 @@ var KEYWORDS =
         ',package,private,protected,public,short,static,super,synchronized' +
         ',throws,transient,volatile' +
         // ECMA 5 - use strict
-        ',arguments,let,yield',
+        ',arguments,let,yield' +
+        // skip
+        ',window',
         
     KEYWORDS_RE = new RegExp(["\\b" + KEYWORDS.replace(/,/g, '\\b|\\b') + "\\b"].join('|'), 'g'),
     REMOVE_RE   = /\/\*(?:.|\n)*?\*\/|\/\/[^\n]*\n|\/\/[^\n]*$|'[^']*'|"[^"]*"|[\s\t\n]*\.[\s\t\n]*[$\w\.]+/g,
@@ -52,9 +54,14 @@ module.exports = {
      *  created as bindings.
      */
     parse: function (exp) {
+        /* jshint evil: true */
         // extract variable names
         var vars = getVariables(exp)
-        if (!vars.length) return null
+        if (!vars.length) {
+            return {
+                getter: new Function('return ' + exp)
+            }
+        }
         var args = [],
             v, i, keyPrefix,
             l = vars.length,
@@ -73,7 +80,6 @@ module.exports = {
                 ))
         }
         args = 'var ' + args.join(',') + ';return ' + exp
-        /* jshint evil: true */
         return {
             getter: new Function(args),
             paths: getPaths(exp, Object.keys(hash))

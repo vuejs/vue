@@ -5,9 +5,10 @@
  *  which has multiple directive instances on the DOM
  *  and multiple computed property dependents
  */
-function Binding (compiler, key, isExp) {
+function Binding (compiler, key, isExp, isFn) {
     this.value = undefined
     this.isExp = !!isExp
+    this.isFn = isFn
     this.root = !this.isExp && key.indexOf('.') === -1
     this.compiler = compiler
     this.key = key

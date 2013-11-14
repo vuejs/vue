@@ -368,7 +368,7 @@ CompilerProto.bindDirective = function (directive) {
 
     if (directive.isExp) {
         // expression bindings are always created on current compiler
-        binding = compiler.createBinding(key, true)
+        binding = compiler.createBinding(key, true, directive.isFn)
     } else if (ownerCompiler.vm.hasOwnProperty(baseKey)) {
         // If the directive's owner compiler's VM has the key,
         // it belongs there. Create the binding if it's not already
@@ -415,11 +415,11 @@ CompilerProto.bindDirective = function (directive) {
 /**
  *  Create binding and attach getter/setter for a key to the viewmodel object
  */
-CompilerProto.createBinding = function (key, isExp) {
+CompilerProto.createBinding = function (key, isExp, isFn) {
 
     var compiler = this,
         bindings = compiler.bindings,
-        binding  = new Binding(compiler, key, isExp)
+        binding  = new Binding(compiler, key, isExp, isFn)
 
     if (isExp) {
         // a complex expression binding
@@ -427,16 +427,20 @@ CompilerProto.createBinding = function (key, isExp) {
         var result = ExpParser.parse(key)
         if (result) {
             log('  created anonymous binding: ' + key)
-            binding.value = { get: result.getter }
+            binding.value = isFn
+                ? result.getter
+                : { get: result.getter }
             compiler.markComputed(binding)
             compiler.exps.push(binding)
             // need to create the bindings for keys
             // that do not exist yet
-            var i = result.paths.length, v
-            while (i--) {
-                v = result.paths[i]
-                if (!bindings[v]) {
-                    compiler.rootCompiler.createBinding(v)
+            if (result.paths) {
+                var i = result.paths.length, v
+                while (i--) {
+                    v = result.paths[i]
+                    if (!bindings[v]) {
+                        compiler.rootCompiler.createBinding(v)
+                    }
                 }
             }
         } else {
@@ -548,8 +552,12 @@ CompilerProto.markComputed = function (binding) {
         vm    = this.vm
     binding.isComputed = true
     // bind the accessors to the vm
-    value.get = value.get.bind(vm)
-    if (value.set) value.set = value.set.bind(vm)
+    if (binding.isFn) {
+        binding.value = value.bind(vm)
+    } else {
+        value.get = value.get.bind(vm)
+        if (value.set) value.set = value.set.bind(vm)
+    }
     // keep track for dep parsing later
     this.computed.push(binding)
 }

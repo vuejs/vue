@@ -12,6 +12,8 @@ function delegateCheck (current, top, identifier) {
 
 module.exports = {
 
+    isFn: true,
+
     bind: function () {
         if (this.compiler.repeat) {
             // attach an identifier to the el
@@ -23,7 +25,6 @@ module.exports = {
     },
 
     update: function (handler) {
-
         this.unbind(true)
         if (typeof handler !== 'function') {
             return utils.warn('Directive "on" expects a function value.')

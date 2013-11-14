@@ -7,6 +7,7 @@ var Emitter  = require('./emitter'),
  *  by recording the getters triggered when evaluating it.
  */
 function catchDeps (binding) {
+    if (binding.isFn) return
     utils.log('\n─ ' + binding.key)
     var depsHash = utils.hash()
     observer.on('get', function (dep) {

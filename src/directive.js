@@ -142,12 +142,17 @@ DirProto.refresh = function (value) {
     // pass element and viewmodel info to the getter
     // enables context-aware bindings
     if (value) this.value = value
-    value = this.value.get({
-        el: this.el,
-        vm: this.vm
-    })
-    if (value !== undefined && value === this.computedValue) return
-    this.computedValue = value
+
+    if (this.isFn) {
+        value = this.value
+    } else {
+        value = this.value.get({
+            el: this.el,
+            vm: this.vm
+        })
+        if (value !== undefined && value === this.computedValue) return
+        this.computedValue = value
+    }
     this.apply(value)
 }
 
