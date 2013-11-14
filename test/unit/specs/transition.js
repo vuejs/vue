@@ -2,8 +2,7 @@ describe('UNIT: Transition', function () {
 
     var transition = require('seed/src/transition'),
         codes      = transition.codes,
-        endEvent   = sniffTransitionEndEvent(),
-        config     = require('seed/src/config')
+        endEvent   = sniffTransitionEndEvent()
 
     describe('General', function () {
         
@@ -77,7 +76,7 @@ describe('UNIT: Transition', function () {
 
         describe('leave', function () {
 
-            var el = mockEl('css', true),
+            var el = mockEl('css'),
                 c = mockChange(),
                 code = transition(el, -1, c.change, {})
 
@@ -176,7 +175,7 @@ describe('UNIT: Transition', function () {
 
             var code,
                 c = mockChange(),
-                el = mockEl('js', true),
+                el = mockEl('js'),
                 def = {
                     leave: function (element, change) {
                         assert.strictEqual(el, element)
@@ -213,20 +212,12 @@ describe('UNIT: Transition', function () {
         return c
     }
 
-    function mockEl (type, attr) {
+    function mockEl (type) {
         var el = document.createElement('div')
         if (type === 'css') {
-            if (attr) {
-                el.setAttribute(config.transClassAttr, 'test')
-            } else {
-                el.sd_trans_class = 'test'
-            }
+            el.sd_trans_class = 'test'
         } else if (type === 'js') {
-            if (attr) {
-                el.setAttribute(config.transAttr, 'test')
-            } else {
-                el.sd_trans = 'test'
-            }
+            el.sd_trans = 'test'
         }
         return el
     }

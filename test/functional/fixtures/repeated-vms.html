@@ -12,8 +12,8 @@
         </div>
         <script>
             Seed.config({ debug: true })
-
-            var Item = Seed.extend({
+            
+            Seed.component('item', {
                 init: function () {
                     this.item.title += ' init'
                 },
@@ -26,8 +26,6 @@
                     msg: 'msg'
                 }
             })
-
-            Seed.component('item', Item)
 
             new Seed({
                 el: 'body',

@@ -33,16 +33,16 @@ function Compiler (vm, options) {
     utils.extend(compiler, options.compilerOptions)
 
     // initialize element
-    compiler.setupElement(options)
-    log('\nnew VM instance:', compiler.el.tagName, '\n')
+    var el = compiler.setupElement(options)
+    log('\nnew VM instance:', el.tagName, '\n')
 
     // copy scope properties to vm
     var scope = options.scope
     if (scope) utils.extend(vm, scope, true)
 
     compiler.vm  = vm
-    vm.$ = makeHash()
-    vm.$el = compiler.el
+    vm.$         = makeHash()
+    vm.$el       = el
     vm.$compiler = compiler
 
     // keep track of directives and expressions
@@ -69,7 +69,7 @@ function Compiler (vm, options) {
 
     // set parent VM
     // and register child id on parent
-    var childId = compiler.el.getAttribute(config.idAttr)
+    var childId = utils.attr(el, 'id')
     if (parent) {
         vm.$parent = parent.vm
         if (childId) {
@@ -105,7 +105,7 @@ function Compiler (vm, options) {
 
     // now parse the DOM, during which we will create necessary bindings
     // and bind the parsed directives
-    compiler.compile(compiler.el, true)
+    compiler.compile(el, true)
 
     // observe root values so that they emit events when
     // their nested values change (for an Object)
@@ -150,6 +150,7 @@ CompilerProto.setupElement = function (options) {
         el.innerHTML = ''
         el.appendChild(template.cloneNode(true))
     }
+    return el
 }
 
 /**
@@ -191,31 +192,40 @@ CompilerProto.compile = function (node, root) {
 
     var compiler = this
 
-    if (node.nodeType === 1) {
+    if (node.nodeType === 1) { // a normal node
 
-        // a normal node
-        if (node.hasAttribute(config.preAttr)) return
-        var vmId       = node.getAttribute(config.vmAttr),
-            repeatExp  = node.getAttribute(config.repeatAttr),
-            partialId  = node.getAttribute(config.partialAttr),
-            transId    = node.getAttribute(config.transAttr),
-            transClass = node.getAttribute(config.transClassAttr)
+        // skip anything with sd-pre
+        if (utils.attr(node, 'pre') !== null) return
 
-        // we need to check for any possbile special directives
-        // e.g. sd-repeat, sd-component & sd-partial
-        if (repeatExp) { // repeat block
+        // special attributes to check
+        var repeatExp,
+            componentId,
+            partialId,
+            transId,
+            transClass
+
+        // It is important that we access these attributes
+        // procedurally because the order matters.
+        //
+        // `utils.attr` removes the attribute once it gets the
+        // value, so we should not access them all at once.
+
+        // sd-repeat has the highest priority
+        // and we need to preserve all other attributes for it.
+        /* jshint boss: true */
+        if (repeatExp = utils.attr(node, 'repeat')) {
 
             // repeat block cannot have sd-id at the same time.
-            node.removeAttribute(config.idAttr)
-            var directive = Directive.parse(config.repeatAttr, repeatExp, compiler, node)
+            var directive = Directive.parse(config.attrs.repeat, repeatExp, compiler, node)
             if (directive) {
                 compiler.bindDirective(directive)
             }
 
-        } else if (vmId && !root) { // child ViewModels
+        // sd-component has second highest priority
+        // and we preseve all other attributes as well.
+        } else if (!root && (componentId = utils.attr(node, 'component'))) {
 
-            node.removeAttribute(config.vmAttr)
-            var ChildVM = compiler.getOption('components', vmId)
+            var ChildVM = compiler.getOption('components', componentId)
             if (ChildVM) {
                 var child = new ChildVM({
                     el: node,
@@ -228,10 +238,13 @@ CompilerProto.compile = function (node, root) {
             }
 
         } else {
+            
+            partialId   = utils.attr(node, 'partial')
+            transId     = utils.attr(node, 'transition')
+            transClass  = utils.attr(node, 'transition-class')
 
             // replace innerHTML with partial
             if (partialId) {
-                node.removeAttribute(config.partialAttr)
                 var partial = compiler.getOption('partials', partialId)
                 if (partial) {
                     node.innerHTML = ''
@@ -241,13 +254,11 @@ CompilerProto.compile = function (node, root) {
 
             // Javascript transition
             if (transId) {
-                node.removeAttribute(config.transAttr)
                 node.sd_trans = transId
             }
 
             // CSS class transition
             if (transClass) {
-                node.removeAttribute(config.transClassAttr)
                 node.sd_trans_class = transClass
             }
 
@@ -306,7 +317,7 @@ CompilerProto.compileNode = function (node) {
 CompilerProto.compileTextNode = function (node) {
     var tokens = TextParser.parse(node.nodeValue)
     if (!tokens) return
-    var dirname = config.textAttr,
+    var dirname = config.attrs.text,
         el, token, directive
     for (var i = 0, l = tokens.length; i < l; i++) {
         token = tokens[i]

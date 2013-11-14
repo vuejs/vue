@@ -1,4 +1,5 @@
 var config    = require('./config'),
+    attrs     = config.attrs,
     toString  = Object.prototype.toString,
     join      = Array.prototype.join,
     console   = window.console,
@@ -21,6 +22,16 @@ var utils = module.exports = {
     components  : makeHash(),
     partials    : makeHash(),
     transitions : makeHash(),
+
+    /**
+     *  get an attribute and remove it.
+     */
+    attr: function (el, type) {
+        var attr = attrs[type],
+            val = el.getAttribute(attr)
+        if (val) el.removeAttribute(attr)
+        return val
+    },
 
     /**
      *  Define an ienumerable property

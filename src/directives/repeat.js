@@ -1,5 +1,4 @@
-var config     = require('../config'),
-    Observer   = require('../observer'),
+var Observer   = require('../observer'),
     Emitter    = require('../emitter'),
     utils      = require('../utils'),
     transition = require('../transition'),
@@ -90,19 +89,15 @@ module.exports = {
             el   = self.el,
             ctn  = self.container = el.parentNode
 
-        el.removeAttribute(config.repeatAttr)
-
         // extract child VM information, if any
-        ViewModel   = ViewModel || require('../viewmodel')
-        var vmId    = el.getAttribute(config.vmAttr)
-        if (vmId) el.removeAttribute(config.vmAttr)
-        self.ChildVM = self.compiler.getOption('components', vmId) || ViewModel
+        ViewModel       = ViewModel || require('../viewmodel')
+        var componentId = utils.attr(el, 'component')
+        self.ChildVM    = self.compiler.getOption('components', componentId) || ViewModel
 
         // extract transition information
-        self.hasTransition = !!(
-            el.getAttribute(config.transAttr) ||
-            el.getAttribute(config.transClassAttr)
-        )
+        self.trans      = utils.attr(el, 'transition')
+        self.transClass = utils.attr(el, 'transition-class')
+        self.hasTrans   = self.trans || self.transClass
 
         // create a comment node as a reference node for DOM insertions
         self.ref = document.createComment('sd-repeat-' + self.arg)
@@ -162,6 +157,10 @@ module.exports = {
             scope   = {},
             ref, item
 
+        // add transition info
+        node.sd_trans = this.trans
+        node.sd_trans_class = this.transClass
+
         // append node into DOM first
         // so sd-if can get access to parentNode
         if (data) {
@@ -214,7 +213,7 @@ module.exports = {
      *  so that batch DOM updates are done in-memory and faster
      */
     detach: function () {
-        if (this.hasTransition) return
+        if (this.hasTrans) return
         var c = this.container,
             p = this.parent = c.parentNode
         this.next = c.nextSibling
@@ -222,7 +221,7 @@ module.exports = {
     },
 
     retach: function () {
-        if (this.hasTransition) return
+        if (this.hasTrans) return
         var n = this.next,
             p = this.parent,
             c = this.container

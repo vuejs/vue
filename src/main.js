@@ -131,16 +131,23 @@ function inheritOptions (child, parent, topLevel) {
  *  Update prefix for some special directives
  *  that are used in compilation.
  */
+var specialAttributes = [
+    'id',
+    'pre',
+    'text',
+    'repeat',
+    'partial',
+    'component',
+    'transition',
+    'transition-class'
+]
+
 function updatePrefix () {
-    var prefix = config.prefix
-    config.idAttr         = prefix + '-id'
-    config.vmAttr         = prefix + '-component'
-    config.preAttr        = prefix + '-pre'
-    config.textAttr       = prefix + '-text'
-    config.repeatAttr     = prefix + '-repeat'
-    config.partialAttr    = prefix + '-partial'
-    config.transAttr      = prefix + '-transition'
-    config.transClassAttr = prefix + '-transition-class'
+    specialAttributes.forEach(setPrefix)
+}
+
+function setPrefix (attr) {
+    config.attrs[attr] = config.prefix + '-' + attr
 }
 
 updatePrefix()

@@ -1,6 +1,7 @@
 module.exports = {
 
     prefix      : 'sd',
-    debug       : false
+    debug       : false,
+    attrs       : {}
     
 }

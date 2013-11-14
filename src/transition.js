@@ -1,5 +1,4 @@
-var config   = require('./config'),
-    endEvent = sniffTransitionEndEvent(),
+var endEvent = sniffTransitionEndEvent(),
     codes    = {
         CSS_E     : 1,
         CSS_L     : 2,
@@ -25,14 +24,8 @@ var transition = module.exports = function (el, stage, changeState, compiler) {
         return codes.INIT
     }
 
-    // in sd-repeat, the transition directives
-    // might not have been processed yet
-    var transitionFunctionId =
-            el.sd_trans ||
-            el.getAttribute(config.transAttr),
-        transitionClass =
-            el.sd_trans_class ||
-            el.getAttribute(config.transClassAttr)
+    var transitionFunctionId = el.sd_trans,
+        transitionClass = el.sd_trans_class
 
     if (transitionFunctionId) {
         return applyTransitionFunctions(
