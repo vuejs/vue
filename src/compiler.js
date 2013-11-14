@@ -28,8 +28,8 @@ function Compiler (vm, options) {
     compiler.init = true
 
     // extend options
-    utils.processOptions(options)
     options = compiler.options = options || makeHash()
+    utils.processOptions(options)
     utils.extend(compiler, options.compilerOptions)
 
     // initialize element

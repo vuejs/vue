@@ -105,7 +105,6 @@ var utils = module.exports = {
      *  convert certain option values to the desired format.
      */
     processOptions: function (options) {
-        if (!options) return
         var components = options.components,
             partials   = options.partials,
             template   = options.template,
