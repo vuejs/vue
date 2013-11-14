@@ -101,30 +101,44 @@ describe('UNIT: API', function () {
 
     })
 
-    describe('viewmodel()', function () {
+    describe('component()', function () {
 
         var testId = 'api-vm-test',
-            Test = Seed.extend({
+            testId2 = testId + '2',
+            opts = {
                 className: 'hihi',
                 scope: { hi: 'ok' }
-            }),
+            },
+            Test = Seed.extend(opts),
             utils = require('seed/src/utils')
 
-        it('should register a VM constructor', function () {
-            Seed.viewmodel(testId, Test)
-            assert.strictEqual(utils.viewmodels[testId], Test)
+        it('should register a Component constructor', function () {
+            Seed.component(testId, Test)
+            assert.strictEqual(utils.components[testId], Test)
+        })
+
+        it('should also work with option objects', function () {
+            Seed.component(testId2, opts)
+            assert.ok(utils.components[testId2].prototype instanceof Seed)
         })
 
         it('should retrieve the VM if has only one arg', function () {
-            assert.strictEqual(Seed.viewmodel(testId), Test)
+            assert.strictEqual(Seed.component(testId), Test)
         })
 
-        it('should work with sd-viewmodel', function () {
-            mock(testId, '<div sd-viewmodel="' + testId + '">{{hi}}</div>')
+        it('should work with sd-component', function () {
+
+            mock(testId, '<div sd-component="' + testId + '">{{hi}}</div>')
             var t = new Seed({ el: '#' + testId }),
                 child = t.$el.querySelector('div')
             assert.strictEqual(child.className, 'hihi')
             assert.strictEqual(child.textContent, 'ok')
+
+            mock(testId2, '<div sd-component="' + testId2 + '">{{hi}}</div>')
+            var t2 = new Seed({ el: '#' + testId2 }),
+                child2 = t2.$el.querySelector('div')
+            assert.strictEqual(child2.className, 'hihi')
+            assert.strictEqual(child2.textContent, 'ok')
         })
 
     })
@@ -489,7 +503,7 @@ describe('UNIT: API', function () {
 
             })
 
-            describe('viewmodels', function () {
+            describe('components', function () {
 
                 it('should allow the VM to use private child VMs', function () {
                     var Child = Seed.extend({
@@ -498,11 +512,11 @@ describe('UNIT: API', function () {
                         }
                     })
                     var Parent = Seed.extend({
-                        template: '<p>{{name}}</p><div sd-viewmodel="child">{{name}}</div>',
+                        template: '<p>{{name}}</p><div sd-component="child">{{name}}</div>',
                         scope: {
                             name: 'dad'
                         },
-                        viewmodels: {
+                        components: {
                             child: Child
                         }
                     })

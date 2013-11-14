@@ -36,9 +36,11 @@ ViewModel.filter = function (id, fn) {
 /**
  *  Allows user to register/retrieve a ViewModel constructor
  */
-ViewModel.viewmodel = function (id, Ctor) {
-    if (!Ctor) return utils.viewmodels[id]
-    utils.viewmodels[id] = Ctor
+ViewModel.component = function (id, Ctor) {
+    if (!Ctor) return utils.components[id]
+    utils.components[id] = Ctor.prototype instanceof ViewModel
+        ? Ctor
+        : ViewModel.extend(Ctor)
     return this
 }
 
@@ -131,7 +133,7 @@ function inheritOptions (child, parent, topLevel) {
 function updatePrefix () {
     var prefix = config.prefix
     config.idAttr         = prefix + '-id'
-    config.vmAttr         = prefix + '-viewmodel'
+    config.vmAttr         = prefix + '-component'
     config.preAttr        = prefix + '-pre'
     config.textAttr       = prefix + '-text'
     config.repeatAttr     = prefix + '-repeat'

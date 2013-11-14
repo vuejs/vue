@@ -24,23 +24,23 @@
     <div id="grandpa" data-name="Andy" data-family="Johnson">
         <p class="ancestor">{{name}} {{family}}</p>
 
-        <div sd-viewmodel="man" data-name="Jack">
+        <div sd-component="man" data-name="Jack">
             <p class="jack">{{name}}, son of {{^name}}</p>
 
-            <div sd-viewmodel="man" data-name="Mike">
+            <div sd-component="man" data-name="Mike">
                 <p class="mike">{{name}}, son of {{^name}}</p>
 
-                <div sd-viewmodel="offspring" data-name="Tim" class="tim">
+                <div sd-component="offspring" data-name="Tim" class="tim">
                 </div>
 
-                <div sd-viewmodel="offspring" data-name="Tom" class="tom">
+                <div sd-component="offspring" data-name="Tom" class="tom">
                 </div>
             </div>
 
-            <div sd-viewmodel="man" data-name="Jason">
+            <div sd-component="man" data-name="Jason">
                 <p class="jason">{{name}}, son of {{^name}}</p>
 
-                <div sd-viewmodel="offspring" data-name="Andrew" class="andrew">
+                <div sd-component="offspring" data-name="Andrew" class="andrew">
                 </div>
             </div>
         </div>
@@ -68,8 +68,8 @@
         })
 
         Seed
-            .viewmodel('man', Man)
-            .viewmodel('offspring', Offspring)
+            .component('man', Man)
+            .component('offspring', Offspring)
 
         new Man({
             el: '#grandpa'

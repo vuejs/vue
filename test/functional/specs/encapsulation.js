@@ -5,7 +5,7 @@ casper.test.begin('Component Encapsulation', 4, function (test) {
         test.assertSelectorHasText('.dir', 'directive works')
         test.assertSelectorHasText('.filter', 'filter works')
         test.assertSelectorHasText('.partial', 'partial works')
-        test.assertSelectorHasText('.vm', 'viewmodel works')
+        test.assertSelectorHasText('.vm', 'component works')
     })
     .run(function () {
         test.done()

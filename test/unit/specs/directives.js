@@ -560,8 +560,8 @@ describe('UNIT: Directives', function () {
                 }
             })
             var t = new Seed({
-                template: '<div sd-viewmodel="child" sd-id="hihi"></div>',
-                viewmodels: {
+                template: '<div sd-component="child" sd-id="hihi"></div>',
+                components: {
                     child: Child
                 }
             })

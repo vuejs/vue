@@ -211,7 +211,7 @@ CompilerProto.compile = function (node, root) {
             transClass = node.getAttribute(config.transClassAttr)
 
         // we need to check for any possbile special directives
-        // e.g. sd-repeat, sd-viewmodel & sd-partial
+        // e.g. sd-repeat, sd-component & sd-partial
         if (repeatExp) { // repeat block
 
             // repeat block cannot have sd-id at the same time.
@@ -224,7 +224,7 @@ CompilerProto.compile = function (node, root) {
         } else if (vmId && !root) { // child ViewModels
 
             node.removeAttribute(config.vmAttr)
-            var ChildVM = compiler.getOption('viewmodels', vmId)
+            var ChildVM = compiler.getOption('components', vmId)
             if (ChildVM) {
                 var child = new ChildVM({
                     el: node,

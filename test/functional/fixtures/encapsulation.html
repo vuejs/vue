@@ -11,14 +11,14 @@
             <div class="dir" sd-hola="dirMsg"></div>
             <div class="filter">{{filterMsg | nodigits}}</div>
             <div class="partial" sd-partial="partial-test"></div>
-            <div class="vm" sd-viewmodel="vm-test">{{vmMsg}}</div>
+            <div class="vm" sd-component="vm-test">{{vmMsg}}</div>
         </div>
         <script>
             var T = Seed.extend({
-                viewmodels: {
+                components: {
                     'vm-test': Seed.extend({
                         scope: {
-                            vmMsg: 'viewmodel works'
+                            vmMsg: 'component works'
                         }
                     })
                 },

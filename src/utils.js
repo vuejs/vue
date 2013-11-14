@@ -17,7 +17,7 @@ var utils = module.exports = {
 
     // global storage for user-registered
     // vms, partials and transitions
-    viewmodels  : makeHash(),
+    components  : makeHash(),
     partials    : makeHash(),
     transitions : makeHash(),
 

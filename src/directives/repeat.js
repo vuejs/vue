@@ -96,7 +96,7 @@ module.exports = {
         ViewModel   = ViewModel || require('../viewmodel')
         var vmId    = el.getAttribute(config.vmAttr)
         if (vmId) el.removeAttribute(config.vmAttr)
-        self.ChildVM = self.compiler.getOption('viewmodels', vmId) || ViewModel
+        self.ChildVM = self.compiler.getOption('components', vmId) || ViewModel
 
         // extract transition information
         self.hasTransition = !!(

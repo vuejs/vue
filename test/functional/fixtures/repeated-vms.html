@@ -7,13 +7,13 @@
         <script src="../../../dist/seed.js"></script>
     </head>
     <body>
-        <div class="item" sd-repeat="item:items" sd-viewmodel="item" sd-on="click:click">
+        <div class="item" sd-repeat="item:items" sd-component="item" sd-on="click:click">
             {{msg + ' ' + item.title}}
         </div>
         <script>
             Seed.config({ debug: true })
 
-            Seed.viewmodel('item', Seed.extend({
+            var Item = Seed.extend({
                 init: function () {
                     this.item.title += ' init'
                 },
@@ -25,7 +25,9 @@
                 scope: {
                     msg: 'msg'
                 }
-            }))
+            })
+
+            Seed.component('item', Item)
 
             new Seed({
                 el: 'body',
