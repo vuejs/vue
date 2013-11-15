@@ -1,6 +1,8 @@
 # Seed.js
 
-Modern, lightweight JavaScript MVVM
+Modular & Lightweight JavaScript MVVM
+
+[![Build Status](https://travis-ci.org/yyx990803/seed.png?branch=master)](https://travis-ci.org/yyx990803/seed)
 
 ## Features
 
