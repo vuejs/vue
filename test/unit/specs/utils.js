@@ -40,6 +40,25 @@ describe('UNIT: Utils', function () {
 
     })
 
+    describe('split', function () {
+        
+        it('should split by comma and trim', function () {
+            var res = utils.split(' enter, leave ')
+            assert.ok(Array.isArray(res))
+            assert.strictEqual(res.length, 2)
+            assert.strictEqual(res[0], 'enter')
+            assert.strictEqual(res[1], 'leave')
+        })
+
+        it('should work with no commas', function () {
+            var res = utils.split(' sefeffse-fsef ')
+            assert.ok(Array.isArray(res))
+            assert.strictEqual(res.length, 1)
+            assert.strictEqual(res[0], 'sefeffse-fsef')
+        })
+
+    })
+
     describe('defProtected', function () {
         
         it('should define a protected property', function () {
