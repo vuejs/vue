@@ -47,22 +47,27 @@ Simply include a built version in `/dist` or installed via Bower with a script t
 
 ## Development
 
-    # in case you don't already have them:
-    # npm install -g grunt-cli component
-    $ npm install
-    $ component install
+``` bash
+# in case you don't already have them:
+# npm install -g grunt-cli component
+$ npm install
+$ component install
+```
 
 To build:
-
-    $ grunt componentbuild
+``` bash
+$ grunt componentbuild
+```
 
 To watch and auto-build dev version during development:
-
-    $ grunt watch
+``` bash
+$ grunt watch
+```
 
 To test (install [CasperJS](http://casperjs.org/) first):
-
-    $ grunt test
+``` bash
+$ grunt test
+```
 
 ## Quickstart
 
