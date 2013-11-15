@@ -1,8 +1,11 @@
 describe('UNIT: Transition', function () {
 
     var transition = require('seed/src/transition'),
+        config     = require('seed/src/config'),
         codes      = transition.codes,
-        endEvent   = sniffTransitionEndEvent()
+        endEvent   = sniffTransitionEndEvent(),
+        enterClass = config.enterClass,
+        leaveClass = config.leaveClass
 
     describe('General', function () {
         
@@ -43,7 +46,7 @@ describe('UNIT: Transition', function () {
             var el = mockEl('css'),
                 c = mockChange(function () {
                     c.called = true
-                    assert.ok(el.classList.contains('enter'))
+                    assert.ok(el.classList.contains(enterClass))
                 }),
                 code,
                 cbCalled = false
@@ -65,7 +68,7 @@ describe('UNIT: Transition', function () {
             })
             
             it('should remove the class afterwards', function () {
-                assert.notOk(el.classList.contains('enter'))
+                assert.notOk(el.classList.contains(enterClass))
             })
 
             it('should return correct code', function () {
@@ -85,7 +88,7 @@ describe('UNIT: Transition', function () {
             })
 
             it('should add the class', function () {
-                assert.ok(el.classList.contains('leave'))
+                assert.ok(el.classList.contains(leaveClass))
             })
 
             it('should call changeState on transitionend', function () {
@@ -102,7 +105,7 @@ describe('UNIT: Transition', function () {
             })
 
             it('should remove the class after called', function () {
-                assert.notOk(el.classList.contains('leave'))
+                assert.notOk(el.classList.contains(leaveClass))
             })
 
             it('should return correct code', function () {
@@ -215,7 +218,7 @@ describe('UNIT: Transition', function () {
     function mockEl (type) {
         var el = document.createElement('div')
         if (type === 'css') {
-            el.sd_trans_class = ['enter', 'leave']
+            el.sd_trans = ''
         } else if (type === 'js') {
             el.sd_trans = 'test'
         }

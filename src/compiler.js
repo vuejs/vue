@@ -200,9 +200,7 @@ CompilerProto.compile = function (node, root) {
         // special attributes to check
         var repeatExp,
             componentId,
-            partialId,
-            transId,
-            transClass
+            partialId
 
         // It is important that we access these attributes
         // procedurally because the order matters.
@@ -238,28 +236,18 @@ CompilerProto.compile = function (node, root) {
             }
 
         } else {
-            
-            partialId   = utils.attr(node, 'partial')
-            transId     = utils.attr(node, 'transition')
-            transClass  = utils.attr(node, 'transition-class')
 
+            // check transition property
+            node.sd_trans = utils.attr(node, 'transition')
+            
             // replace innerHTML with partial
+            partialId = utils.attr(node, 'partial')
             if (partialId) {
                 var partial = compiler.getOption('partials', partialId)
                 if (partial) {
                     node.innerHTML = ''
                     node.appendChild(partial.cloneNode(true))
                 }
-            }
-
-            // Javascript transition
-            if (transId) {
-                node.sd_trans = transId
-            }
-
-            // CSS class transition
-            if (transClass) {
-                node.sd_trans_class = utils.split(transClass)
             }
 
             // finally, only normal directives left!

@@ -1,6 +1,7 @@
 var Observer   = require('../observer'),
     Emitter    = require('../emitter'),
     utils      = require('../utils'),
+    config     = require('../config'),
     transition = require('../transition'),
     ViewModel // lazy def to avoid circular dependency
 
@@ -95,9 +96,7 @@ module.exports = {
         self.ChildVM    = self.compiler.getOption('components', componentId) || ViewModel
 
         // extract transition information
-        self.trans      = utils.attr(el, 'transition')
-        self.transClass = utils.attr(el, 'transition-class')
-        self.hasTrans   = self.trans || self.transClass
+        self.hasTrans   = el.hasAttribute(config.attrs.transition)
 
         // create a comment node as a reference node for DOM insertions
         self.ref = document.createComment('sd-repeat-' + self.arg)
@@ -156,10 +155,6 @@ module.exports = {
             ctn     = this.container,
             scope   = {},
             ref, item
-
-        // add transition info
-        node.sd_trans = this.trans
-        node.sd_trans_class = utils.split(this.transClass)
 
         // append node into DOM first
         // so sd-if can get access to parentNode

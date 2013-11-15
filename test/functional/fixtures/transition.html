@@ -13,21 +13,21 @@
                 padding: 10px;
                 border: 1px solid #000;
                 overflow: hidden;
-                transition: all .2s ease;
+                transition: all 1s ease;
                 -moz-transition: all .2s ease;
                 -webkit-transition: all .2s ease;
             }
-            .test.enter, .test.leave {
+            .sd-enter, .sd-leave {
                 height: 0;
                 padding-top: 0;
                 padding-bottom: 0;
                 border-top-width: 0;
                 border-bottom-width: 0;
             }
-            .test.enter {
+            .sd-enter {
                 background-color: #00f;
             }
-            .test.leave {
+            .sd-leave {
                 background-color: #0f0;
             }
         </style>
@@ -46,7 +46,7 @@
                 class="test"
                 sd-repeat="item:items"
                 sd-if="filter(item)"
-                sd-transition-class="enter, leave"
+                sd-transition
                 sd-attr="data-id:item.a">
                 {{item.a}}
             </div>
@@ -54,7 +54,7 @@
                 class="test"
                 sd-repeat="item:items"
                 sd-show="filter(item)"
-                sd-transition-class="enter, leave"
+                sd-transition
                 sd-attr="data-id:item.a">
                 {{item.a}}
             </div>

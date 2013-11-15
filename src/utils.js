@@ -13,13 +13,6 @@ function makeHash () {
     return Object.create(null)
 }
 
-/**
- *  trim for map
- */
-function trim (str) {
-    return str.trim()
-}
-
 var utils = module.exports = {
 
     hash: makeHash,
@@ -36,7 +29,7 @@ var utils = module.exports = {
     attr: function (el, type) {
         var attr = attrs[type],
             val = el.getAttribute(attr)
-        if (val) el.removeAttribute(attr)
+        if (val !== null) el.removeAttribute(attr)
         return val
     },
 
@@ -52,15 +45,6 @@ var utils = module.exports = {
             enumerable   : !!enumerable,
             configurable : !!configurable
         })
-    },
-
-    /**
-     *  split a transition class string into array
-     */
-    split: function (classString) {
-        if (classString) {
-            return classString.split(',').map(trim)
-        }
     },
 
     /**

@@ -1,5 +1,9 @@
-var endEvent = sniffTransitionEndEvent(),
-    codes    = {
+var endEvent   = sniffTransitionEndEvent(),
+    config     = require('./config'),
+    enterClass = config.enterClass,
+    leaveClass = config.leaveClass,
+    // exit codes for testing
+    codes = {
         CSS_E     : 1,
         CSS_L     : 2,
         JS_E      : 3,
@@ -24,23 +28,21 @@ var transition = module.exports = function (el, stage, changeState, compiler) {
         return codes.INIT
     }
 
-    var transitionFunctionId = el.sd_trans,
-        transitionClass = el.sd_trans_class
+    var transitionId = el.sd_trans
 
-    if (transitionFunctionId) {
+    if (transitionId) {
         return applyTransitionFunctions(
             el,
             stage,
             changeState,
-            transitionFunctionId,
+            transitionId,
             compiler
         )
-    } else if (transitionClass) {
+    } else if (transitionId === '') {
         return applyTransitionClass(
             el,
             stage,
-            changeState,
-            transitionClass
+            changeState
         )
     } else {
         changeState()
@@ -54,7 +56,7 @@ transition.codes = codes
 /**
  *  Togggle a CSS class to trigger transition
  */
-function applyTransitionClass (el, stage, changeState, classes) {
+function applyTransitionClass (el, stage, changeState) {
 
     if (!endEvent) {
         changeState()
@@ -62,12 +64,9 @@ function applyTransitionClass (el, stage, changeState, classes) {
     }
 
     var classList         = el.classList,
-        lastLeaveCallback = el.sd_trans_cb,
-        className
+        lastLeaveCallback = el.sd_trans_cb
 
     if (stage > 0) { // enter
-
-        className = classes[0]
 
         // cancel unfinished leave transition
         if (lastLeaveCallback) {
@@ -76,29 +75,27 @@ function applyTransitionClass (el, stage, changeState, classes) {
         }
 
         // set to hidden state before appending
-        classList.add(className)
+        classList.add(enterClass)
         // append
         changeState()
         // force a layout so transition can be triggered
         /* jshint unused: false */
         var forceLayout = el.clientHeight
         // trigger transition
-        classList.remove(className)
+        classList.remove(enterClass)
         return codes.CSS_E
 
     } else { // leave
 
-        className = classes[classes.length > 1 ? 1 : 0]
-
         // trigger hide transition
-        classList.add(className)
+        classList.add(leaveClass)
         var onEnd = function (e) {
             if (e.target === el) {
                 el.removeEventListener(endEvent, onEnd)
                 el.sd_trans_cb = null
                 // actually remove node here
                 changeState()
-                classList.remove(className)
+                classList.remove(leaveClass)
             }
         }
         // attach transition end listener

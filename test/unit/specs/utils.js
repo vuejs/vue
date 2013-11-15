@@ -13,16 +13,18 @@ describe('UNIT: Utils', function () {
 
     describe('attr', function () {
 
-        var el = document.createElement('div')
-        el.setAttribute('sd-transition-class', 'test')
+        var el = document.createElement('div'),
+            testAttr = 'transition',
+            full = 'sd-' + testAttr
+        el.setAttribute (full, 'test')
         
         it('should append the prefix and return the attribute value', function () {
-            var val = utils.attr(el, 'transition-class')
+            var val = utils.attr(el, testAttr)
             assert.strictEqual(val, 'test')
         })
 
         it('should remove the attribute', function () {
-            assert.notOk(el.hasAttribute('sd-transition-class'))
+            assert.notOk(el.hasAttribute(full))
         })
 
         it('should work with different prefix', function () {
@@ -30,31 +32,12 @@ describe('UNIT: Utils', function () {
             Seed.config({ prefix: 'test' })
 
             var el = document.createElement('div')
-            el.setAttribute('test-transition-class', 'test')
-            var val = utils.attr(el, 'transition-class')
+            el.setAttribute('test-' + testAttr, 'test')
+            var val = utils.attr(el, testAttr)
             assert.strictEqual(val, 'test')
-            assert.notOk(el.hasAttribute('test-transition-class'))
+            assert.notOk(el.hasAttribute('test-' + testAttr))
 
             Seed.config({ prefix: 'sd' })
-        })
-
-    })
-
-    describe('split', function () {
-        
-        it('should split by comma and trim', function () {
-            var res = utils.split(' enter, leave ')
-            assert.ok(Array.isArray(res))
-            assert.strictEqual(res.length, 2)
-            assert.strictEqual(res[0], 'enter')
-            assert.strictEqual(res[1], 'leave')
-        })
-
-        it('should work with no commas', function () {
-            var res = utils.split(' sefeffse-fsef ')
-            assert.ok(Array.isArray(res))
-            assert.strictEqual(res.length, 1)
-            assert.strictEqual(res[0], 'sefeffse-fsef')
         })
 
     })

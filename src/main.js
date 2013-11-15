@@ -138,8 +138,7 @@ var specialAttributes = [
     'repeat',
     'partial',
     'component',
-    'transition',
-    'transition-class'
+    'transition'
 ]
 
 function updatePrefix () {
