@@ -1,6 +1,6 @@
 {
     "name": "seed",
-    "version": "0.4.2",
+    "version": "0.5.0",
     "main": "src/main.js",
     "description": "A mini MVVM framework",
     "keywords": ["mvvm", "framework", "data binding"],

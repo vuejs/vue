@@ -416,9 +416,9 @@ ViewModel.filter = function (id, fn) {
 /**
  *  Allows user to register/retrieve a ViewModel constructor
  */
-ViewModel.viewmodel = function (id, Ctor) {
-    if (!Ctor) return utils.viewmodels[id]
-    utils.viewmodels[id] = Ctor
+ViewModel.component = function (id, Ctor) {
+    if (!Ctor) return utils.components[id]
+    utils.components[id] = utils.toConstructor(Ctor)
     return this
 }
 
@@ -427,7 +427,7 @@ ViewModel.viewmodel = function (id, Ctor) {
  */
 ViewModel.partial = function (id, partial) {
     if (!partial) return utils.partials[id]
-    utils.partials[id] = utils.templateToFragment(partial)
+    utils.partials[id] = utils.toFragment(partial)
     return this
 }
 
@@ -447,16 +447,22 @@ ViewModel.extend = extend
  *  and add extend method
  */
 function extend (options) {
+
     var ParentVM = this
+
     // inherit options
     options = inheritOptions(options, ParentVM.options, true)
+    utils.processOptions(options)
+
     var ExtendedVM = function (opts) {
         opts = inheritOptions(opts, options, true)
         ParentVM.call(this, opts)
     }
+
     // inherit prototype props
     var proto = ExtendedVM.prototype = Object.create(ParentVM.prototype)
     utils.defProtected(proto, 'constructor', ExtendedVM)
+
     // copy prototype props
     var protoMixins = options.proto
     if (protoMixins) {
@@ -466,10 +472,7 @@ function extend (options) {
             }
         }
     }
-    // convert template to documentFragment
-    if (options.template) {
-        options.templateFragment = utils.templateToFragment(options.template)
-    }
+
     // allow extended VM to be further extended
     ExtendedVM.extend = extend
     ExtendedVM.super = ParentVM
@@ -508,16 +511,22 @@ function inheritOptions (child, parent, topLevel) {
  *  Update prefix for some special directives
  *  that are used in compilation.
  */
+var specialAttributes = [
+    'id',
+    'pre',
+    'text',
+    'repeat',
+    'partial',
+    'component',
+    'transition'
+]
+
 function updatePrefix () {
-    var prefix = config.prefix
-    config.idAttr         = prefix + '-id'
-    config.vmAttr         = prefix + '-viewmodel'
-    config.preAttr        = prefix + '-pre'
-    config.textAttr       = prefix + '-text'
-    config.repeatAttr     = prefix + '-repeat'
-    config.partialAttr    = prefix + '-partial'
-    config.transAttr      = prefix + '-transition'
-    config.transClassAttr = prefix + '-transition-class'
+    specialAttributes.forEach(setPrefix)
+}
+
+function setPrefix (attr) {
+    config.attrs[attr] = config.prefix + '-' + attr
 }
 
 updatePrefix()
@@ -541,15 +550,21 @@ require.register("seed/src/config.js", function(exports, require, module){
 module.exports = {
 
     prefix      : 'sd',
-    debug       : false
+    debug       : false,
+    silent      : false,
+    enterClass  : 'sd-enter',
+    leaveClass  : 'sd-leave',
+    attrs       : {}
     
 }
 });
 require.register("seed/src/utils.js", function(exports, require, module){
 var config    = require('./config'),
+    attrs     = config.attrs,
     toString  = Object.prototype.toString,
     join      = Array.prototype.join,
-    console   = window.console
+    console   = window.console,
+    ViewModel // late def
 
 /**
  *  Create a prototype-less object
@@ -565,9 +580,19 @@ var utils = module.exports = {
 
     // global storage for user-registered
     // vms, partials and transitions
-    viewmodels  : makeHash(),
+    components  : makeHash(),
     partials    : makeHash(),
     transitions : makeHash(),
+
+    /**
+     *  get an attribute and remove it.
+     */
+    attr: function (el, type) {
+        var attr = attrs[type],
+            val = el.getAttribute(attr)
+        if (val !== null) el.removeAttribute(attr)
+        return val
+    },
 
     /**
      *  Define an ienumerable property
@@ -615,22 +640,12 @@ var utils = module.exports = {
     },
 
     /**
-     *  Convert an object of partial strings
-     *  to domFragments
-     */
-    convertPartials: function (partials) {
-        if (!partials) return
-        for (var key in partials) {
-            if (typeof partials[key] === 'string') {
-                partials[key] = utils.templateToFragment(partials[key])
-            }
-        }
-    },
-
-    /**
      *  Convert a string template to a dom fragment
      */
-    templateToFragment: function (template) {
+    toFragment: function (template) {
+        if (typeof template !== 'string') {
+            return template
+        }
         if (template.charAt(0) === '#') {
             var templateNode = document.getElementById(template.slice(1))
             if (!templateNode) return
@@ -648,6 +663,40 @@ var utils = module.exports = {
     },
 
     /**
+     *  Convert the object to a ViewModel constructor
+     *  if it is not already one
+     */
+    toConstructor: function (obj) {
+        ViewModel = ViewModel || require('./viewmodel')
+        return obj.prototype instanceof ViewModel || obj === ViewModel
+            ? obj
+            : ViewModel.extend(obj)
+    },
+
+    /**
+     *  convert certain option values to the desired format.
+     */
+    processOptions: function (options) {
+        var components = options.components,
+            partials   = options.partials,
+            template   = options.template,
+            key
+        if (components) {
+            for (key in components) {
+                components[key] = utils.toConstructor(components[key])
+            }
+        }
+        if (partials) {
+            for (key in partials) {
+                partials[key] = utils.toFragment(partials[key])
+            }
+        }
+        if (template) {
+            options.template = utils.toFragment(template)
+        }
+    },
+
+    /**
      *  log for debugging
      */
     log: function () {
@@ -657,10 +706,10 @@ var utils = module.exports = {
     },
     
     /**
-     *  warn for debugging
+     *  warnings, thrown in all cases
      */
     warn: function() {
-        if (config.debug && console) {
+        if (!config.silent && console) {
             console.warn(join.call(arguments, ' '))
         }
     }
@@ -698,20 +747,20 @@ function Compiler (vm, options) {
 
     // extend options
     options = compiler.options = options || makeHash()
+    utils.processOptions(options)
     utils.extend(compiler, options.compilerOptions)
-    utils.convertPartials(options.partials)
 
     // initialize element
-    compiler.setupElement(options)
-    log('\nnew VM instance:', compiler.el.tagName, '\n')
+    var el = compiler.setupElement(options)
+    log('\nnew VM instance:', el.tagName, '\n')
 
     // copy scope properties to vm
     var scope = options.scope
     if (scope) utils.extend(vm, scope, true)
 
     compiler.vm  = vm
-    vm.$ = makeHash()
-    vm.$el = compiler.el
+    vm.$         = makeHash()
+    vm.$el       = el
     vm.$compiler = compiler
 
     // keep track of directives and expressions
@@ -738,7 +787,7 @@ function Compiler (vm, options) {
 
     // set parent VM
     // and register child id on parent
-    var childId = compiler.el.getAttribute(config.idAttr)
+    var childId = utils.attr(el, 'id')
     if (parent) {
         vm.$parent = parent.vm
         if (childId) {
@@ -774,7 +823,7 @@ function Compiler (vm, options) {
 
     // now parse the DOM, during which we will create necessary bindings
     // and bind the parsed directives
-    compiler.compile(compiler.el, true)
+    compiler.compile(el, true)
 
     // observe root values so that they emit events when
     // their nested values change (for an Object)
@@ -815,19 +864,11 @@ CompilerProto.setupElement = function (options) {
 
     // initialize template
     var template = options.template
-    if (typeof template === 'string') {
-        if (template.charAt(0) === '#') {
-            var templateNode = document.querySelector(template)
-            if (templateNode) {
-                el.innerHTML = templateNode.innerHTML
-            }
-        } else {
-            el.innerHTML = template
-        }
-    } else if (options.templateFragment) {
+    if (template) {
         el.innerHTML = ''
-        el.appendChild(options.templateFragment.cloneNode(true))
+        el.appendChild(template.cloneNode(true))
     }
+    return el
 }
 
 /**
@@ -869,31 +910,38 @@ CompilerProto.compile = function (node, root) {
 
     var compiler = this
 
-    if (node.nodeType === 1) {
+    if (node.nodeType === 1) { // a normal node
 
-        // a normal node
-        if (node.hasAttribute(config.preAttr)) return
-        var vmId       = node.getAttribute(config.vmAttr),
-            repeatExp  = node.getAttribute(config.repeatAttr),
-            partialId  = node.getAttribute(config.partialAttr),
-            transId    = node.getAttribute(config.transAttr),
-            transClass = node.getAttribute(config.transClassAttr)
+        // skip anything with sd-pre
+        if (utils.attr(node, 'pre') !== null) return
 
-        // we need to check for any possbile special directives
-        // e.g. sd-repeat, sd-viewmodel & sd-partial
-        if (repeatExp) { // repeat block
+        // special attributes to check
+        var repeatExp,
+            componentId,
+            partialId
+
+        // It is important that we access these attributes
+        // procedurally because the order matters.
+        //
+        // `utils.attr` removes the attribute once it gets the
+        // value, so we should not access them all at once.
+
+        // sd-repeat has the highest priority
+        // and we need to preserve all other attributes for it.
+        /* jshint boss: true */
+        if (repeatExp = utils.attr(node, 'repeat')) {
 
             // repeat block cannot have sd-id at the same time.
-            node.removeAttribute(config.idAttr)
-            var directive = Directive.parse(config.repeatAttr, repeatExp, compiler, node)
+            var directive = Directive.parse(config.attrs.repeat, repeatExp, compiler, node)
             if (directive) {
                 compiler.bindDirective(directive)
             }
 
-        } else if (vmId && !root) { // child ViewModels
+        // sd-component has second highest priority
+        // and we preseve all other attributes as well.
+        } else if (!root && (componentId = utils.attr(node, 'component'))) {
 
-            node.removeAttribute(config.vmAttr)
-            var ChildVM = compiler.getOption('viewmodels', vmId)
+            var ChildVM = compiler.getOption('components', componentId)
             if (ChildVM) {
                 var child = new ChildVM({
                     el: node,
@@ -907,26 +955,17 @@ CompilerProto.compile = function (node, root) {
 
         } else {
 
+            // check transition property
+            node.sd_trans = utils.attr(node, 'transition')
+            
             // replace innerHTML with partial
+            partialId = utils.attr(node, 'partial')
             if (partialId) {
-                node.removeAttribute(config.partialAttr)
                 var partial = compiler.getOption('partials', partialId)
                 if (partial) {
                     node.innerHTML = ''
                     node.appendChild(partial.cloneNode(true))
                 }
-            }
-
-            // Javascript transition
-            if (transId) {
-                node.removeAttribute(config.transAttr)
-                node.sd_trans = transId
-            }
-
-            // CSS class transition
-            if (transClass) {
-                node.removeAttribute(config.transClassAttr)
-                node.sd_trans_class = transClass
             }
 
             // finally, only normal directives left!
@@ -984,7 +1023,7 @@ CompilerProto.compileNode = function (node) {
 CompilerProto.compileTextNode = function (node) {
     var tokens = TextParser.parse(node.nodeValue)
     if (!tokens) return
-    var dirname = config.textAttr,
+    var dirname = config.attrs.text,
         el, token, directive
     for (var i = 0, l = tokens.length; i < l; i++) {
         token = tokens[i]
@@ -1035,7 +1074,7 @@ CompilerProto.bindDirective = function (directive) {
 
     if (directive.isExp) {
         // expression bindings are always created on current compiler
-        binding = compiler.createBinding(key, true)
+        binding = compiler.createBinding(key, true, directive.isFn)
     } else if (ownerCompiler.vm.hasOwnProperty(baseKey)) {
         // If the directive's owner compiler's VM has the key,
         // it belongs there. Create the binding if it's not already
@@ -1082,32 +1121,34 @@ CompilerProto.bindDirective = function (directive) {
 /**
  *  Create binding and attach getter/setter for a key to the viewmodel object
  */
-CompilerProto.createBinding = function (key, isExp) {
+CompilerProto.createBinding = function (key, isExp, isFn) {
 
     var compiler = this,
         bindings = compiler.bindings,
-        binding  = new Binding(compiler, key, isExp)
+        binding  = new Binding(compiler, key, isExp, isFn)
 
     if (isExp) {
         // a complex expression binding
         // we need to generate an anonymous computed property for it
         var result = ExpParser.parse(key)
-        if (result) {
-            log('  created anonymous binding: ' + key)
-            binding.value = { get: result.getter }
+        if (result.getter) {
+            log('  created expression binding: ' + key)
+            binding.value = isFn
+                ? result.getter
+                : { $get: result.getter }
             compiler.markComputed(binding)
             compiler.exps.push(binding)
             // need to create the bindings for keys
             // that do not exist yet
-            var i = result.paths.length, v
-            while (i--) {
-                v = result.paths[i]
-                if (!bindings[v]) {
-                    compiler.rootCompiler.createBinding(v)
+            if (result.paths) {
+                var i = result.paths.length, v
+                while (i--) {
+                    v = result.paths[i]
+                    if (!bindings[v]) {
+                        compiler.rootCompiler.createBinding(v)
+                    }
                 }
             }
-        } else {
-            utils.warn('  invalid expression: ' + key)
         }
     } else {
         log('  created binding: ' + key)
@@ -1163,7 +1204,7 @@ CompilerProto.define = function (key, binding) {
         value = binding.value = vm[key], // save the value before redefinening it
         type = utils.typeOf(value)
 
-    if (type === 'Object' && value.get) {
+    if (type === 'Object' && value.$get) {
         // computed property
         compiler.markComputed(binding)
     } else if (type === 'Object' || type === 'Array') {
@@ -1184,14 +1225,14 @@ CompilerProto.define = function (key, binding) {
                 ob.emit('get', key)
             }
             return binding.isComputed
-                ? value.get()
+                ? value.$get()
                 : value
         },
         set: function (newVal) {
             var value = binding.value
             if (binding.isComputed) {
-                if (value.set) {
-                    value.set(newVal)
+                if (value.$set) {
+                    value.$set(newVal)
                 }
             } else if (newVal !== value) {
                 // unwatch the old value
@@ -1215,8 +1256,12 @@ CompilerProto.markComputed = function (binding) {
         vm    = this.vm
     binding.isComputed = true
     // bind the accessors to the vm
-    value.get = value.get.bind(vm)
-    if (value.set) value.set = value.set.bind(vm)
+    if (binding.isFn) {
+        binding.value = value.bind(vm)
+    } else {
+        value.$get = value.$get.bind(vm)
+        if (value.$set) value.$set = value.$set.bind(vm)
+    }
     // keep track for dep parsing later
     this.computed.push(binding)
 }
@@ -1483,9 +1528,10 @@ require.register("seed/src/binding.js", function(exports, require, module){
  *  which has multiple directive instances on the DOM
  *  and multiple computed property dependents
  */
-function Binding (compiler, key, isExp) {
+function Binding (compiler, key, isExp, isFn) {
     this.value = undefined
     this.isExp = !!isExp
+    this.isFn = isFn
     this.root = !this.isExp && key.indexOf('.') === -1
     this.compiler = compiler
     this.key = key
@@ -1915,12 +1961,17 @@ DirProto.refresh = function (value) {
     // pass element and viewmodel info to the getter
     // enables context-aware bindings
     if (value) this.value = value
-    value = this.value.get({
-        el: this.el,
-        vm: this.vm
-    })
-    if (value !== undefined && value === this.computedValue) return
-    this.computedValue = value
+
+    if (this.isFn) {
+        value = this.value
+    } else {
+        value = this.value.$get({
+            el: this.el,
+            vm: this.vm
+        })
+        if (value !== undefined && value === this.computedValue) return
+        this.computedValue = value
+    }
     this.apply(value)
 }
 
@@ -1942,7 +1993,7 @@ DirProto.applyFilters = function (value) {
     var filtered = value, filter
     for (var i = 0, l = this.filters.length; i < l; i++) {
         filter = this.filters[i]
-        filtered = filter.apply(filtered, filter.args)
+        filtered = filter.apply.call(this.vm, filtered, filter.args)
     }
     return filtered
 }
@@ -1985,6 +2036,8 @@ Directive.parse = function (dirname, expression, compiler, node) {
 module.exports = Directive
 });
 require.register("seed/src/exp-parser.js", function(exports, require, module){
+var utils = require('./utils')
+
 // Variable extraction scooped from https://github.com/RubyLouvre/avalon
 
 var KEYWORDS =
@@ -2031,6 +2084,22 @@ function getPaths (code, vars) {
     return code.match(pathRE)
 }
 
+/**
+ *  Create a function from a string...
+ *  this looks like evil magic but since all variables are limited
+ *  to the VM's scope it's actually properly sandboxed
+ */
+function makeGetter (exp, raw) {
+    /* jshint evil: true */
+    var fn
+    try {
+        fn = new Function(exp)
+    } catch (e) {
+        utils.warn('Invalid expression: ' + raw)
+    }
+    return fn
+}
+
 module.exports = {
 
     /**
@@ -2041,7 +2110,11 @@ module.exports = {
     parse: function (exp) {
         // extract variable names
         var vars = getVariables(exp)
-        if (!vars.length) return null
+        if (!vars.length) {
+            return {
+                getter: makeGetter('return ' + exp, exp)
+            }
+        }
         var args = [],
             v, i, keyPrefix,
             l = vars.length,
@@ -2060,9 +2133,8 @@ module.exports = {
                 ))
         }
         args = 'var ' + args.join(',') + ';return ' + exp
-        /* jshint evil: true */
         return {
-            getter: new Function(args),
+            getter: makeGetter(args, exp),
             paths: getPaths(exp, Object.keys(hash))
         }
     }
@@ -2102,6 +2174,7 @@ var Emitter  = require('./emitter'),
  *  by recording the getters triggered when evaluating it.
  */
 function catchDeps (binding) {
+    if (binding.isFn) return
     utils.log('\n─ ' + binding.key)
     var depsHash = utils.hash()
     observer.on('get', function (dep) {
@@ -2111,7 +2184,7 @@ function catchDeps (binding) {
         binding.deps.push(dep)
         dep.subs.push(binding)
     })
-    binding.value.get()
+    binding.value.$get()
     observer.off('get')
 }
 
@@ -2223,9 +2296,12 @@ module.exports = {
 }
 });
 require.register("seed/src/transition.js", function(exports, require, module){
-var config   = require('./config'),
-    endEvent = sniffTransitionEndEvent(),
-    codes    = {
+var endEvent   = sniffTransitionEndEvent(),
+    config     = require('./config'),
+    enterClass = config.enterClass,
+    leaveClass = config.leaveClass,
+    // exit codes for testing
+    codes = {
         CSS_E     : 1,
         CSS_L     : 2,
         JS_E      : 3,
@@ -2250,29 +2326,21 @@ var transition = module.exports = function (el, stage, changeState, compiler) {
         return codes.INIT
     }
 
-    // in sd-repeat, the transition directives
-    // might not have been processed yet
-    var transitionFunctionId =
-            el.sd_trans ||
-            el.getAttribute(config.transAttr),
-        transitionClass =
-            el.sd_trans_class ||
-            el.getAttribute(config.transClassAttr)
+    var transitionId = el.sd_trans
 
-    if (transitionFunctionId) {
+    if (transitionId) {
         return applyTransitionFunctions(
             el,
             stage,
             changeState,
-            transitionFunctionId,
+            transitionId,
             compiler
         )
-    } else if (transitionClass) {
+    } else if (transitionId === '') {
         return applyTransitionClass(
             el,
             stage,
-            changeState,
-            transitionClass
+            changeState
         )
     } else {
         changeState()
@@ -2286,7 +2354,7 @@ transition.codes = codes
 /**
  *  Togggle a CSS class to trigger transition
  */
-function applyTransitionClass (el, stage, changeState, className) {
+function applyTransitionClass (el, stage, changeState) {
 
     if (!endEvent) {
         changeState()
@@ -2305,27 +2373,27 @@ function applyTransitionClass (el, stage, changeState, className) {
         }
 
         // set to hidden state before appending
-        classList.add(className)
+        classList.add(enterClass)
         // append
         changeState()
         // force a layout so transition can be triggered
         /* jshint unused: false */
         var forceLayout = el.clientHeight
         // trigger transition
-        classList.remove(className)
+        classList.remove(enterClass)
         return codes.CSS_E
 
     } else { // leave
 
         // trigger hide transition
-        classList.add(className)
+        classList.add(leaveClass)
         var onEnd = function (e) {
             if (e.target === el) {
                 el.removeEventListener(endEvent, onEnd)
                 el.sd_trans_cb = null
                 // actually remove node here
                 changeState()
-                classList.remove(className)
+                classList.remove(leaveClass)
             }
         }
         // attach transition end listener
@@ -2514,10 +2582,10 @@ module.exports = {
 }
 });
 require.register("seed/src/directives/repeat.js", function(exports, require, module){
-var config     = require('../config'),
-    Observer   = require('../observer'),
+var Observer   = require('../observer'),
     Emitter    = require('../emitter'),
     utils      = require('../utils'),
+    config     = require('../config'),
     transition = require('../transition'),
     ViewModel // lazy def to avoid circular dependency
 
@@ -2606,19 +2674,13 @@ module.exports = {
             el   = self.el,
             ctn  = self.container = el.parentNode
 
-        el.removeAttribute(config.repeatAttr)
-
         // extract child VM information, if any
-        ViewModel   = ViewModel || require('../viewmodel')
-        var vmId    = el.getAttribute(config.vmAttr)
-        if (vmId) el.removeAttribute(config.vmAttr)
-        self.ChildVM = self.compiler.getOption('viewmodels', vmId) || ViewModel
+        ViewModel       = ViewModel || require('../viewmodel')
+        var componentId = utils.attr(el, 'component')
+        self.ChildVM    = self.compiler.getOption('components', componentId) || ViewModel
 
         // extract transition information
-        self.hasTransition = !!(
-            el.getAttribute(config.transAttr) ||
-            el.getAttribute(config.transClassAttr)
-        )
+        self.hasTrans   = el.hasAttribute(config.attrs.transition)
 
         // create a comment node as a reference node for DOM insertions
         self.ref = document.createComment('sd-repeat-' + self.arg)
@@ -2730,7 +2792,7 @@ module.exports = {
      *  so that batch DOM updates are done in-memory and faster
      */
     detach: function () {
-        if (this.hasTransition) return
+        if (this.hasTrans) return
         var c = this.container,
             p = this.parent = c.parentNode
         this.next = c.nextSibling
@@ -2738,7 +2800,7 @@ module.exports = {
     },
 
     retach: function () {
-        if (this.hasTransition) return
+        if (this.hasTrans) return
         var n = this.next,
             p = this.parent,
             c = this.container
@@ -2782,6 +2844,8 @@ function delegateCheck (current, top, identifier) {
 
 module.exports = {
 
+    isFn: true,
+
     bind: function () {
         if (this.compiler.repeat) {
             // attach an identifier to the el
@@ -2793,7 +2857,6 @@ module.exports = {
     },
 
     update: function (handler) {
-
         this.unbind(true)
         if (typeof handler !== 'function') {
             return utils.warn('Directive "on" expects a function value.')
