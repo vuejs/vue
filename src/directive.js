@@ -174,7 +174,7 @@ DirProto.applyFilters = function (value) {
     var filtered = value, filter
     for (var i = 0, l = this.filters.length; i < l; i++) {
         filter = this.filters[i]
-        filtered = filter.apply(filtered, filter.args)
+        filtered = filter.apply.call(this.vm, filtered, filter.args)
     }
     return filtered
 }
