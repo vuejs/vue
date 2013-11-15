@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>route</title>
+        <meta charset="utf-8">
+        <script src="bind.js"></script>
+        <script src="../../../dist/seed.js"></script>
+    </head>
+    <body>
+        <div sd-if="route.hi">Hi! <a href="#ho">Next</a></div>
+        <div sd-if="route.ho">Ho! <a href="#ha">Next</a></div>
+        <div sd-if="route.ha">Ha! <a href="#hi">Next</a></div>
+        <script>
+
+            var route = {
+                hi: false,
+                ho: false,
+                ha: false
+            }
+
+            window.addEventListener('hashchange', updateRoute)
+            function updateRoute () {
+                var path = location.hash.slice(1) || 'hi'
+                for (var key in route) {
+                    route[key] = key === path
+                }
+            }
+
+            var app = new Seed({
+                el: 'body'
+            })
+            app.route = route
+
+            updateRoute()
+        </script>
+    </body>
+</html>
