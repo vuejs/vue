@@ -1,6 +1,6 @@
 /* global normal */
 
-casper.test.begin('Expression', 12, function (test) {
+casper.test.begin('Expression', 16, function (test) {
     
     casper
     .start('./fixtures/expression.html', function () {
@@ -36,6 +36,16 @@ casper.test.begin('Expression', 12, function (test) {
         // normal input
         this.sendKeys('#one', 'Bye')
         test.assertSelectorHasText('#normal p', 'Bye Casper!')
+
+        // sd-on with expression
+        this.click('#normal button')
+        test.assertField('one', 'clicked')
+        test.assertSelectorHasText('#normal p', 'clicked Casper!')
+
+        // sd-on with expression
+        this.click('#lazy button')
+        test.assertField('four', 'clicked')
+        test.assertSelectorHasText('#lazy p', 'three clicked!')
 
     })
     .run(function () {

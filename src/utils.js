@@ -161,10 +161,10 @@ var utils = module.exports = {
     },
     
     /**
-     *  warn for debugging
+     *  warnings, thrown in all cases
      */
     warn: function() {
-        if (config.debug && console) {
+        if (!config.silent && console) {
             console.warn(join.call(arguments, ' '))
         }
     }

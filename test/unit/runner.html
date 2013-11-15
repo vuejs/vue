@@ -20,6 +20,8 @@
 			var Seed = require('seed'),
 				assert = chai.assert
 
+            Seed.config({silent:true})
+
 			function mock (id, html, attrs) {
 				var el = document.createElement('div')
 				el.id = id

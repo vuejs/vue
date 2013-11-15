@@ -52,6 +52,12 @@ describe('UNIT: Expression Parser', function () {
                 }
             },
             expectedValue: 'write tests : nope'
+        },
+        {
+            // expression with no scope variables
+            exp: "'a' + 'b'",
+            vm: {},
+            expectedValue: 'ab'
         }
     ]
 
@@ -69,6 +75,7 @@ describe('UNIT: Expression Parser', function () {
             vm.$get = function (key) { return this[key] }
 
             it('should get correct args', function () {
+                if (!vars.length) return
                 assert.strictEqual(result.paths.length, vars.length)
                 for (var i = 0; i < vars.length; i++) {
                     assert.strictEqual(vars[i], result.paths[i])
@@ -82,5 +89,22 @@ describe('UNIT: Expression Parser', function () {
 
         })
     }
+
+    // extra case for invalid expressions
+    describe('invalid expression', function () {
+        
+        it('should capture the error and warn', function () {
+            var utils = require('seed/src/utils'),
+                oldWarn = utils.warn,
+                warned = false
+            utils.warn = function () {
+                warned = true
+            }
+            ExpParser.parse('a + "fsef')
+            assert.ok(warned)
+            utils.warn = oldWarn
+        })
+
+    })
 
 })

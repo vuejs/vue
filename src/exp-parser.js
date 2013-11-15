@@ -1,3 +1,5 @@
+var utils = require('./utils')
+
 // Variable extraction scooped from https://github.com/RubyLouvre/avalon
 
 var KEYWORDS =
@@ -44,6 +46,22 @@ function getPaths (code, vars) {
     return code.match(pathRE)
 }
 
+/**
+ *  Create a function from a string...
+ *  this looks like evil magic but since all variables are limited
+ *  to the VM's scope it's actually properly sandboxed
+ */
+function makeGetter (exp, raw) {
+    /* jshint evil: true */
+    var fn
+    try {
+        fn = new Function(exp)
+    } catch (e) {
+        utils.warn('Invalid expression: ' + raw)
+    }
+    return fn
+}
+
 module.exports = {
 
     /**
@@ -52,12 +70,11 @@ module.exports = {
      *  created as bindings.
      */
     parse: function (exp) {
-        /* jshint evil: true */
         // extract variable names
         var vars = getVariables(exp)
         if (!vars.length) {
             return {
-                getter: new Function('return ' + exp)
+                getter: makeGetter('return ' + exp, exp)
             }
         }
         var args = [],
@@ -79,7 +96,7 @@ module.exports = {
         }
         args = 'var ' + args.join(',') + ';return ' + exp
         return {
-            getter: new Function(args),
+            getter: makeGetter(args, exp),
             paths: getPaths(exp, Object.keys(hash))
         }
     }

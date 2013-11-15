@@ -10,12 +10,14 @@
         <div id="normal">
             <p sd-text="one + ' ' + two.three + '!'"></p>
             <input id="one" sd-model="one" name="one"> <input id="two" sd-model="two.three" name="two">
+            <button sd-on="click: this.one = 'clicked'">click</button>
         </div>
         <div id="lazy">
             <p sd-text="one + ' ' + two.three + '!'"></p>
             <form id="form">
                 <input sd-model="one" name="three"> <input sd-model="two.three" name="four">
             </form>
+            <button sd-on="click: two.three = 'clicked'">click</button>
         </div>
         <script>
             var normal = new Seed({

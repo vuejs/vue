@@ -425,8 +425,8 @@ CompilerProto.createBinding = function (key, isExp, isFn) {
         // a complex expression binding
         // we need to generate an anonymous computed property for it
         var result = ExpParser.parse(key)
-        if (result) {
-            log('  created anonymous binding: ' + key)
+        if (result.getter) {
+            log('  created expression binding: ' + key)
             binding.value = isFn
                 ? result.getter
                 : { $get: result.getter }
@@ -443,8 +443,6 @@ CompilerProto.createBinding = function (key, isExp, isFn) {
                     }
                 }
             }
-        } else {
-            utils.warn('  invalid expression: ' + key)
         }
     } else {
         log('  created binding: ' + key)
