@@ -7,3 +7,4 @@ before_install:
   - cd ~/casperjs
   - git checkout tags/1.1-beta1
   - export PATH=$PATH:`pwd`/bin
+  - cd -
