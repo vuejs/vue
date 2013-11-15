@@ -16,7 +16,6 @@
             email: <input type="text" sd-model="a | email" sd-class="valid:validation.email">
         </div>
         <script>
-            Seed.config({debug: true})
             var RE = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
             var test = new Seed({
                 el: '#test',

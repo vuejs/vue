@@ -1,0 +1,9 @@
+language: node_js
+node_js:
+  - "0.10"
+before_install:
+  - npm install -g grunt-cli
+  - git clone git://github.com/n1k0/casperjs.git ~/casperjs
+  - cd ~/casperjs
+  - git checkout tags/1.1-beta1
+  - export PATH=$PATH:`pwd`/bin
