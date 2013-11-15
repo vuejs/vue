@@ -16,17 +16,17 @@ casper.test.begin('Transition', 23, function (test) {
     .thenClick('.button-1')
     .wait(minWait, function () {
         test.assertElementCount('.test', 4)
-        test.assertElementCount('.test.shrink', 2)
+        test.assertElementCount('.test.leave', 2)
     })
     .wait(transDuration, function () {
         test.assertElementCount('.test', 3)
-        test.assertElementCount('.test.shrink', 0)
+        test.assertElementCount('.test.leave', 0)
         test.assertNotVisible('.test[data-id="1"]')
     })
     .thenClick('.button-2')
     .wait(minWait, function () {
         test.assertElementCount('.test', 3)
-        test.assertElementCount('.test.shrink', 2)
+        test.assertElementCount('.test.leave', 2)
     })
     .wait(transDuration, function () {
         test.assertElementCount('.test', 2)
@@ -41,7 +41,7 @@ casper.test.begin('Transition', 23, function (test) {
     .thenClick('.pop')
     .wait(minWait, function () {
         test.assertElementCount('.test', 4)
-        test.assertElementCount('.test.shrink', 2)
+        test.assertElementCount('.test.leave', 2)
     })
     .wait(transDuration, function () {
         test.assertElementCount('.test', 2)

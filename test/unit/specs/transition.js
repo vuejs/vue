@@ -43,7 +43,7 @@ describe('UNIT: Transition', function () {
             var el = mockEl('css'),
                 c = mockChange(function () {
                     c.called = true
-                    assert.ok(el.classList.contains('test'))
+                    assert.ok(el.classList.contains('enter'))
                 }),
                 code,
                 cbCalled = false
@@ -65,7 +65,7 @@ describe('UNIT: Transition', function () {
             })
             
             it('should remove the class afterwards', function () {
-                assert.notOk(el.classList.contains('test'))
+                assert.notOk(el.classList.contains('enter'))
             })
 
             it('should return correct code', function () {
@@ -85,7 +85,7 @@ describe('UNIT: Transition', function () {
             })
 
             it('should add the class', function () {
-                assert.ok(el.classList.contains('test'))
+                assert.ok(el.classList.contains('leave'))
             })
 
             it('should call changeState on transitionend', function () {
@@ -102,7 +102,7 @@ describe('UNIT: Transition', function () {
             })
 
             it('should remove the class after called', function () {
-                assert.notOk(el.classList.contains('test'))
+                assert.notOk(el.classList.contains('leave'))
             })
 
             it('should return correct code', function () {
@@ -215,7 +215,7 @@ describe('UNIT: Transition', function () {
     function mockEl (type) {
         var el = document.createElement('div')
         if (type === 'css') {
-            el.sd_trans_class = 'test'
+            el.sd_trans_class = ['enter', 'leave']
         } else if (type === 'js') {
             el.sd_trans = 'test'
         }

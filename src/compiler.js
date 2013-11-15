@@ -259,7 +259,7 @@ CompilerProto.compile = function (node, root) {
 
             // CSS class transition
             if (transClass) {
-                node.sd_trans_class = transClass
+                node.sd_trans_class = utils.split(transClass)
             }
 
             // finally, only normal directives left!

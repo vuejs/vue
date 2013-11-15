@@ -17,12 +17,18 @@
                 -moz-transition: all .2s ease;
                 -webkit-transition: all .2s ease;
             }
-            .test.shrink {
+            .test.enter, .test.leave {
                 height: 0;
                 padding-top: 0;
                 padding-bottom: 0;
                 border-top-width: 0;
                 border-bottom-width: 0;
+            }
+            .test.enter {
+                background-color: #00f;
+            }
+            .test.leave {
+                background-color: #0f0;
             }
         </style>
     </head>
@@ -40,7 +46,7 @@
                 class="test"
                 sd-repeat="item:items"
                 sd-if="filter(item)"
-                sd-transition-class="shrink"
+                sd-transition-class="enter, leave"
                 sd-attr="data-id:item.a">
                 {{item.a}}
             </div>
@@ -48,7 +54,7 @@
                 class="test"
                 sd-repeat="item:items"
                 sd-show="filter(item)"
-                sd-transition-class="shrink"
+                sd-transition-class="enter, leave"
                 sd-attr="data-id:item.a">
                 {{item.a}}
             </div>

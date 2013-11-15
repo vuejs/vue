@@ -13,6 +13,13 @@ function makeHash () {
     return Object.create(null)
 }
 
+/**
+ *  trim for map
+ */
+function trim (str) {
+    return str.trim()
+}
+
 var utils = module.exports = {
 
     hash: makeHash,
@@ -45,6 +52,15 @@ var utils = module.exports = {
             enumerable   : !!enumerable,
             configurable : !!configurable
         })
+    },
+
+    /**
+     *  split a transition class string into array
+     */
+    split: function (classString) {
+        if (classString) {
+            return classString.split(',').map(trim)
+        }
     },
 
     /**

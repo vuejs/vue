@@ -159,7 +159,7 @@ module.exports = {
 
         // add transition info
         node.sd_trans = this.trans
-        node.sd_trans_class = this.transClass
+        node.sd_trans_class = utils.split(this.transClass)
 
         // append node into DOM first
         // so sd-if can get access to parentNode

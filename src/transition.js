@@ -54,7 +54,7 @@ transition.codes = codes
 /**
  *  Togggle a CSS class to trigger transition
  */
-function applyTransitionClass (el, stage, changeState, className) {
+function applyTransitionClass (el, stage, changeState, classes) {
 
     if (!endEvent) {
         changeState()
@@ -62,9 +62,12 @@ function applyTransitionClass (el, stage, changeState, className) {
     }
 
     var classList         = el.classList,
-        lastLeaveCallback = el.sd_trans_cb
+        lastLeaveCallback = el.sd_trans_cb,
+        className
 
     if (stage > 0) { // enter
+
+        className = classes[0]
 
         // cancel unfinished leave transition
         if (lastLeaveCallback) {
@@ -84,6 +87,8 @@ function applyTransitionClass (el, stage, changeState, className) {
         return codes.CSS_E
 
     } else { // leave
+
+        className = classes[classes.length > 1 ? 1 : 0]
 
         // trigger hide transition
         classList.add(className)
