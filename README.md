@@ -10,10 +10,11 @@ Modular & Lightweight JavaScript MVVM
 - DOM based templates with two-way data binding.
 - Precise and efficient DOM manipulation with granularity down to a TextNode.
 - POJSO (Plain Old JavaScript Objects) Models that can be shared across ViewModels with arbitrary levels of nesting.
+- Extendable with custom directives and filters.
 - Auto dependency extraction for computed properties.
 - Auto event delegation on repeated items.
 - Flexible API that allows easy encapsulation of components.
-- Supports partials, transitions and nested ViewModels.
+- Supports partials, transitions and nested view models.
 - Plays well with module systems. Primarily [Component](https://github.com/component/component) based, but can also be used with [Browserify](https://github.com/substack/node-browserify), as a CommonJS/AMD module or as a standalone library.
 
 ## Browser Support
@@ -46,9 +47,14 @@ Simply include a built version in `/dist` or installed via Bower with a script t
 
 ## Development
 
-Make sure you have `grunt-cli` installed globally. Then clone the repo and install dependencies:
-
+    # in case you don't already have them:
+    # npm install -g grunt-cli component
     $ npm install
+    $ component install
+
+To build:
+
+    $ grunt componentbuild
 
 To watch and auto-build dev version during development:
 
@@ -57,10 +63,6 @@ To watch and auto-build dev version during development:
 To test (install [CasperJS](http://casperjs.org/) first):
 
     $ grunt test
-
-To build:
-
-    $ grunt
 
 ## Quickstart
 
