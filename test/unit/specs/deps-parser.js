@@ -18,7 +18,7 @@ describe('UNIT: Dependency Parser', function () {
                 deps: [],
                 subs: [],
                 value: {
-                    get: function () {
+                    $get: function () {
                         if (i > 0) {
                             ob.emit('get', bindings[b.depId])
                         }

@@ -75,10 +75,10 @@ var app = new Seed({
         },
 
         allDone: {
-            get: function () {
+            $get: function () {
                 return this.remaining === 0
             },
-            set: function (value) {
+            $set: function (value) {
                 this.todos.forEach(function (todo) {
                     todo.completed = value
                 })

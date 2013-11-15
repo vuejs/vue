@@ -223,7 +223,7 @@ describe('UNIT: Directive', function () {
             applied = false,
             el = 1, vm = 2,
             value = {
-                get: function (ctx) {
+                $get: function (ctx) {
                     return ctx.el + ctx.vm
                 }
             }

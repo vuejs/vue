@@ -17,7 +17,7 @@ function catchDeps (binding) {
         binding.deps.push(dep)
         dep.subs.push(binding)
     })
-    binding.value.get()
+    binding.value.$get()
     observer.off('get')
 }
 

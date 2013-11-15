@@ -429,7 +429,7 @@ CompilerProto.createBinding = function (key, isExp, isFn) {
             log('  created anonymous binding: ' + key)
             binding.value = isFn
                 ? result.getter
-                : { get: result.getter }
+                : { $get: result.getter }
             compiler.markComputed(binding)
             compiler.exps.push(binding)
             // need to create the bindings for keys
@@ -500,7 +500,7 @@ CompilerProto.define = function (key, binding) {
         value = binding.value = vm[key], // save the value before redefinening it
         type = utils.typeOf(value)
 
-    if (type === 'Object' && value.get) {
+    if (type === 'Object' && value.$get) {
         // computed property
         compiler.markComputed(binding)
     } else if (type === 'Object' || type === 'Array') {
@@ -521,14 +521,14 @@ CompilerProto.define = function (key, binding) {
                 ob.emit('get', key)
             }
             return binding.isComputed
-                ? value.get()
+                ? value.$get()
                 : value
         },
         set: function (newVal) {
             var value = binding.value
             if (binding.isComputed) {
-                if (value.set) {
-                    value.set(newVal)
+                if (value.$set) {
+                    value.$set(newVal)
                 }
             } else if (newVal !== value) {
                 // unwatch the old value
@@ -555,8 +555,8 @@ CompilerProto.markComputed = function (binding) {
     if (binding.isFn) {
         binding.value = value.bind(vm)
     } else {
-        value.get = value.get.bind(vm)
-        if (value.set) value.set = value.set.bind(vm)
+        value.$get = value.$get.bind(vm)
+        if (value.$set) value.$set = value.$set.bind(vm)
     }
     // keep track for dep parsing later
     this.computed.push(binding)

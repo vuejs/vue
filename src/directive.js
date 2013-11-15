@@ -146,7 +146,7 @@ DirProto.refresh = function (value) {
     if (this.isFn) {
         value = this.value
     } else {
-        value = this.value.get({
+        value = this.value.$get({
             el: this.el,
             vm: this.vm
         })

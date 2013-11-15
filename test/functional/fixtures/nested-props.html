@@ -44,9 +44,11 @@
                         this.a.b.c = 'three'
                         this.a.c = 3
                     },
-                    d: {get: function () {
-                        return this.msg + (this.a.b.c || '') + (this.a.c || '')
-                    }}
+                    d: {
+                        $get: function () {
+                            return this.msg + (this.a.b.c || '') + (this.a.c || '')
+                        }
+                    }
                 }
             })
             var app = new Demo({ el: '#a' })
