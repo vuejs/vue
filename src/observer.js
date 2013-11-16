@@ -142,14 +142,14 @@ function isWatchable (obj) {
  *  the watch conversion and simply emit set event for
  *  all of its properties.
  */
-function emitSet (obj, observer) {
+function emitSet (obj, observer, set) {
     if (typeOf(obj) === 'Array') {
-        observer.emit('set', 'length', obj.length)
+        set('length', obj.length)
     } else {
         var key, val, values = observer.values
         for (key in observer.values) {
             val = values[key]
-            observer.emit('set', key, val)
+            set(key, val)
         }
     }
 }
@@ -196,7 +196,7 @@ module.exports = {
                 .on('set', proxies.set)
                 .on('mutate', proxies.mutate)
             if (alreadyConverted) {
-                emitSet(obj, ob, rawPath)
+                emitSet(obj, ob, proxies.set)
             } else {
                 watch(obj, null, ob)
             }
