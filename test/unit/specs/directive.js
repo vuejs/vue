@@ -11,6 +11,68 @@ describe('UNIT: Directive', function () {
         }
     }
 
+    describe('.split()', function () {
+        
+        it('should return array with one empty string for empty string', function () {
+            var e = Directive.split('')
+            assert.strictEqual(e.length, 1)
+            assert.strictEqual(e[0], '')
+        })
+
+        it('should return array with the string if it\'s a single clause', function () {
+            var e,
+                test1 = 'fsef',
+                test2 = 'ffsef + "fse,fsef"',
+                test3 = 'fsef + \'fesfsfe\'',
+                test4 = '\"fsefsf,fsef,fsef\"'
+
+            e = Directive.split(test1)
+            assert.strictEqual(e.length, 1)
+            assert.strictEqual(e[0], test1)
+
+            e = Directive.split(test2)
+            assert.strictEqual(e.length, 1)
+            assert.strictEqual(e[0], test2)
+
+            e = Directive.split(test3)
+            assert.strictEqual(e.length, 1)
+            assert.strictEqual(e[0], test3)
+
+            e = Directive.split(test4)
+            assert.strictEqual(e.length, 1)
+            assert.strictEqual(e[0], test4)
+        })
+
+        it('should return split multiple clauses correctly', function () {
+            var e,
+                test1 = ['fsef', 'fsf:fsefsef'],
+                test2 = ['asf-fsef:fsf', '"efs,sefsf"'],
+                test3 = ['\'fsef,sef\'', 'fse:fsf'],
+                test4 = ['\"fsef,fsef\"', 'sefsef\'fesfsf']
+
+            e = Directive.split(test1.join(','))
+            assert.strictEqual(e.length, 2)
+            assert.strictEqual(e[0], test1[0])
+            assert.strictEqual(e[1], test1[1])
+
+            e = Directive.split(test2.join(','))
+            assert.strictEqual(e.length, 2)
+            assert.strictEqual(e[0], test2[0])
+            assert.strictEqual(e[1], test2[1])
+
+            e = Directive.split(test3.join(','))
+            assert.strictEqual(e.length, 2)
+            assert.strictEqual(e[0], test3[0])
+            assert.strictEqual(e[1], test3[1])
+
+            e = Directive.split(test4.join(','))
+            assert.strictEqual(e.length, 2)
+            assert.strictEqual(e[0], test4[0])
+            assert.strictEqual(e[1], test4[1])
+        })
+
+    })
+
     describe('.parse()', function () {
         
         it('should return undefined if directive name does not have correct prefix', function () {

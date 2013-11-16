@@ -276,7 +276,7 @@ CompilerProto.compileNode = function (node) {
         while (i--) {
             attr = attrs[i]
             valid = false
-            exps = attr.value.split(',')
+            exps = Directive.split(attr.value)
             // loop through clauses (separated by ",")
             // inside each attribute
             j = exps.length

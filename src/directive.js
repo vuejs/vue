@@ -4,6 +4,8 @@ var config     = require('./config'),
     filters    = require('./filters'),
 
     // Regexes!
+    // regex to split multiple directive expressions
+    SPLIT_RE        = /(?:['"](?:\\.|[^'"])*['"]|\\.|[^,])+/g,
     KEY_RE          = /^[^\|]+/,
     ARG_RE          = /([^:]+):(.+)$/,
     FILTERS_RE      = /\|[^\|]+/g,
@@ -191,6 +193,16 @@ DirProto.unbind = function (update) {
     if (!this.el) return
     if (this._unbind) this._unbind(update)
     if (!update) this.vm = this.el = this.binding = this.compiler = null
+}
+
+// exposed methods ------------------------------------------------------------
+
+/**
+ *  split a unquoted-comma separated expression into
+ *  multiple clauses
+ */
+Directive.split = function (exp) {
+    return exp.match(SPLIT_RE) || ['']
 }
 
 /**
