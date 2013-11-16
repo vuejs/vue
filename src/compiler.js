@@ -13,6 +13,7 @@ var Emitter     = require('./emitter'),
     slice       = Array.prototype.slice,
     log         = utils.log,
     makeHash    = utils.hash,
+    def         = utils.defProtected,
     hasOwn      = Object.prototype.hasOwnProperty
 
 /**
@@ -41,9 +42,9 @@ function Compiler (vm, options) {
     if (scope) utils.extend(vm, scope, true)
 
     compiler.vm  = vm
-    vm.$         = makeHash()
-    vm.$el       = el
-    vm.$compiler = compiler
+    def(vm, '$', makeHash())
+    def(vm, '$el', el)
+    def(vm, '$compiler', compiler)
 
     // keep track of directives and expressions
     // so they can be unbound during destroy()
