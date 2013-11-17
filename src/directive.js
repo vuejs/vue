@@ -7,7 +7,7 @@ var config     = require('./config'),
     // regex to split multiple directive expressions
     SPLIT_RE        = /(?:['"](?:\\.|[^'"])*['"]|\\.|[^,])+/g,
     KEY_RE          = /^[^\|]+/,
-    ARG_RE          = /([^:]+):(.+)$/,
+    ARG_RE          = /^([\w- ]+):(.+)$/,
     FILTERS_RE      = /\|[^\|]+/g,
     FILTER_TOKEN_RE = /[^\s']+|'[^']+'/g,
     NESTING_RE      = /^\^+/,

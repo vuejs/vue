@@ -15,6 +15,9 @@
             <button class="two" sd-on="click:two">two</button>
             <button class="three" sd-on="click:three">three</button>
             <form id="form"><input name="msg" sd-model="msg"></form>
+            <p class="hidden">{{sum}}</p>
+            <button class="four" sd-on="click:four">four</button>
+            <button class="five" sd-on="click:setEmpty">empty</button>
         </div>
         <script>
             Seed.config({debug: true})
@@ -48,6 +51,21 @@
                         $get: function () {
                             return this.msg + (this.a.b.c || '') + (this.a.c || '')
                         }
+                    },
+                    hidden: {
+                        a: 1,
+                        b: 2
+                    },
+                    sum: {
+                        $get: function () {
+                            return this.hidden.a + this.hidden.b
+                        }
+                    },
+                    four: function () {
+                        this.hidden.a++
+                    },
+                    setEmpty: function () {
+                        this.a.b = {}
                     }
                 }
             })

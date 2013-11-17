@@ -161,8 +161,9 @@ CompilerProto.setupElement = function (options) {
  */
 CompilerProto.setupObserver = function () {
 
-    var bindings = this.bindings,
-        observer = this.observer = new Emitter(),
+    var compiler = this,
+        bindings = compiler.bindings,
+        observer = compiler.observer = new Emitter(),
         depsOb   = DepsParser.observer
 
     // a hash to hold event proxies for each root level key
@@ -172,18 +173,27 @@ CompilerProto.setupObserver = function () {
     // add own listeners which trigger binding updates
     observer
         .on('get', function (key) {
-            if (bindings[key] && depsOb.isObserving) {
+            check(key)
+            if (depsOb.isObserving) {
                 depsOb.emit('get', bindings[key])
             }
         })
         .on('set', function (key, val) {
             observer.emit('change:' + key, val)
-            if (bindings[key]) bindings[key].update(val)
+            check(key)
+            bindings[key].update(val)
         })
         .on('mutate', function (key, val, mutation) {
             observer.emit('change:' + key, val, mutation)
-            if (bindings[key]) bindings[key].pub()
+            check(key)
+            bindings[key].pub()
         })
+
+    function check (key) {
+        if (!bindings[key]) {
+            compiler.createBinding(key)
+        }
+    }
 }
 
 /**
@@ -438,7 +448,7 @@ CompilerProto.createBinding = function (key, isExp, isFn) {
         bindings[key] = binding
         // make sure the key exists in the object so it can be observed
         // by the Observer!
-        compiler.ensurePath(key)
+        Observer.ensurePath(compiler.vm, key)
         if (binding.root) {
             // this is a root level binding. we need to define getter/setters for it.
             compiler.define(key, binding)
@@ -452,25 +462,6 @@ CompilerProto.createBinding = function (key, isExp, isFn) {
         }
     }
     return binding
-}
-
-/**
- *  Sometimes when a binding is found in the template, the value might
- *  have not been set on the VM yet. To ensure computed properties and
- *  dependency extraction can work, we have to create a dummy value for
- *  any given path.
- */
-CompilerProto.ensurePath = function (key) {
-    var path = key.split('.'), sec, obj = this.vm
-    for (var i = 0, d = path.length - 1; i < d; i++) {
-        sec = path[i]
-        if (!obj[sec]) obj[sec] = {}
-        obj = obj[sec]
-    }
-    if (utils.typeOf(obj) === 'Object') {
-        sec = path[i]
-        if (!(sec in obj)) obj[sec] = undefined
-    }
 }
 
 /**
@@ -523,6 +514,7 @@ CompilerProto.define = function (key, binding) {
                 // set new value
                 binding.value = newVal
                 ob.emit('set', key, newVal)
+                Observer.ensurePaths(key, newVal, compiler.bindings)
                 // now watch the new value, which in turn emits 'set'
                 // for all its nested values
                 Observer.observe(newVal, key, ob)

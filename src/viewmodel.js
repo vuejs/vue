@@ -92,7 +92,10 @@ def(VMProto, '$broadcast', function () {
  *  emit an event that propagates all the way up to parent VMs.
  */
 def(VMProto, '$emit', function () {
-    var parent = this.$compiler.parentCompiler
+    var compiler = this.$compiler,
+        emitter = compiler.emitter,
+        parent = compiler.parentCompiler
+    emitter.emit.apply(emitter, arguments)
     if (parent) {
         parent.emitter.emit.apply(parent.emitter, arguments)
         parent.vm.$emit.apply(parent.vm, arguments)

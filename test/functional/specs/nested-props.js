@@ -1,4 +1,4 @@
-casper.test.begin('Nested Properties', 13, function (test) {
+casper.test.begin('Nested Properties', 15, function (test) {
     
     casper
     .start('./fixtures/nested-props.html', function () {
@@ -26,6 +26,14 @@ casper.test.begin('Nested Properties', 13, function (test) {
             msg: 'Oh yeah '
         })
         test.assertSelectorHasText('h3 span', 'Oh yeah three3')
+
+        // hidden scope variables
+        // i.e. nested under an object, not explicitly
+        // bound in the template, but is depended upon
+        // by an expression or a computed property
+        test.assertSelectorHasText('.hidden', '3')
+        this.click('.four')
+        test.assertSelectorHasText('.hidden', '4')
 
     })
     .run(function () {

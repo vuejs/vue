@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title></title>
+        <meta charset="utf-8">
+        <link rel="stylesheet" type="text/css" href="style.css">
+        <script src='https://cdn.firebase.com/v0/firebase.js'></script>
+        <script src="../../dist/seed.js"></script>
+    </head>
+    <body>
+        <div id="app">
+            <ul>
+                <li class="user" sd-repeat="user:users" sd-transition>
+                    <span>{{user.name}} - {{user.email}}</span>
+                    <button sd-on="click:removeUser">X</button>
+                </li>
+            </ul>
+            <form id="form" sd-on="submit:addUser">
+                <input sd-model="newUser.name | nameValidator | capitalize">
+                <input sd-model="newUser.email | emailValidator">
+                <input type="submit" value="Add User">
+            </form>
+            <ul class="errors">
+                <li sd-show="!validation.name">Name cannot be empty.</li>
+                <li sd-show="!validation.email">Please provide a valid email address.</li>
+            </ul>
+        </div>
+        <script src="validators.js"></script>
+        <script src="app.js"></script>
+    </body>
+</html>

@@ -103,6 +103,7 @@ module.exports = {
         ctn.insertBefore(self.ref, el)
         ctn.removeChild(el)
 
+        self.initiated = false
         self.collection = null
         self.vms = null
         self.mutationListener = function (path, arr, mutation) {
@@ -125,10 +126,11 @@ module.exports = {
         // if initiating with an empty collection, we need to
         // force a compile so that we get all the bindings for
         // dependency extraction.
-        if (!this.collection && !collection.length) {
+        if (!this.initiated && (!collection || !collection.length)) {
             this.buildItem()
+            this.initiated = true
         }
-        this.collection = collection
+        this.collection = collection || []
         this.vms = []
 
         // listen for collection mutation events
@@ -137,11 +139,13 @@ module.exports = {
         collection.__observer__.on('mutate', this.mutationListener)
 
         // create child-seeds and append to DOM
-        this.detach()
-        for (var i = 0, l = collection.length; i < l; i++) {
-            this.buildItem(collection[i], i)
+        if (collection.length) {
+            this.detach()
+            for (var i = 0, l = collection.length; i < l; i++) {
+                this.buildItem(collection[i], i)
+            }
+            this.retach()
         }
-        this.retach()
     },
 
     /**
@@ -164,6 +168,8 @@ module.exports = {
                 : this.ref
             // make sure it works with sd-if
             if (!ref.parentNode) ref = ref.sd_ref
+            // process transition info before appending
+            node.sd_trans = utils.attr(node, 'transition', true)
             transition(node, 1, function () {
                 ctn.insertBefore(node, ref)
             }, this.compiler)

@@ -121,6 +121,7 @@ function bind (obj, key, path, observer) {
         },
         set: function (newVal) {
             values[fullKey] = newVal
+            ensurePaths(key, newVal, values)
             observer.emit('set', fullKey, newVal)
             watch(newVal, fullKey, observer)
         }
@@ -154,10 +155,45 @@ function emitSet (obj, observer, set) {
     }
 }
 
+/**
+ *  Sometimes when a binding is found in the template, the value might
+ *  have not been set on the VM yet. To ensure computed properties and
+ *  dependency extraction can work, we have to create a dummy value for
+ *  any given path.
+ */
+function ensurePaths (key, val, paths) {
+    key += '.'
+    for (var path in paths) {
+        if (!path.indexOf(key)) {
+            ensurePath(val, path.replace(key, ''))
+        }
+    }
+}
+
+/**
+ *  walk along a path and make sure it can be accessed
+ *  and enumerated in that object
+ */
+function ensurePath (obj, key) {
+    if (typeOf(obj) !== 'Object') return
+    var path = key.split('.'), sec
+    for (var i = 0, d = path.length - 1; i < d; i++) {
+        sec = path[i]
+        if (!obj[sec]) obj[sec] = {}
+        obj = obj[sec]
+    }
+    if (typeOf(obj) === 'Object') {
+        sec = path[i]
+        if (!(sec in obj)) obj[sec] = undefined
+    }
+}
+
 module.exports = {
 
     // used in sd-repeat
     watchArray: watchArray,
+    ensurePath: ensurePath,
+    ensurePaths: ensurePaths,
 
     /**
      *  Observe an object with a given path,

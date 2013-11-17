@@ -26,10 +26,10 @@ var utils = module.exports = {
     /**
      *  get an attribute and remove it.
      */
-    attr: function (el, type) {
+    attr: function (el, type, noRemove) {
         var attr = attrs[type],
             val = el.getAttribute(attr)
-        if (val !== null) el.removeAttribute(attr)
+        if (!noRemove && val !== null) el.removeAttribute(attr)
         return val
     },
 

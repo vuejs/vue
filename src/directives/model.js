@@ -27,9 +27,7 @@ module.exports = {
 
         // attach listener
         self.set = function () {
-            self.lock = true
             self.vm.$set(self.key, el[attr])
-            self.lock = false
         }
         el.addEventListener(self.event, self.set)
 
@@ -56,7 +54,6 @@ module.exports = {
         /* jshint eqeqeq: false */
         var self = this,
             el   = self.el
-        if (self.lock) return
         if (el.tagName === 'SELECT') { // select dropdown
             // setting <select>'s value in IE9 doesn't work
             var o = el.options,
