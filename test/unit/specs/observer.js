@@ -302,6 +302,104 @@ describe('UNIT: Observer', function () {
 
     })
 
+    describe('Multiple observers', function () {
+
+        var ob1 = new Emitter(),
+            ob2 = new Emitter(),
+            obj = {a:1}
+        ob1.proxies = {}
+        ob2.proxies = {}
+        Observer.observe(obj, 'test', ob1)
+        Observer.observe(obj, 'test', ob2)
+
+        var ob1Called = false,
+            ob2Called = false
+
+        ob1.on('set', function () {
+            ob1Called = true
+        })
+        ob2.on('set', function () {
+            ob2Called = true
+        })
+
+        it('should trigger events for multiple observers observing the same object', function () {
+            obj.a = 2
+            assert.ok(ob1Called)
+            assert.ok(ob2Called)
+        })
+
+    })
+
+    describe('.unobserve()', function () {
+        
+        var ob1 = new Emitter(),
+            ob2 = new Emitter(),
+            obj = {a:1}
+        ob1.proxies = {}
+        ob2.proxies = {}
+        Observer.observe(obj, 'test', ob1)
+        Observer.observe(obj, 'test', ob2)
+        Observer.unobserve(obj, 'test', ob1)
+
+        var ob1Called = false
+        ob1.on('set', function () {
+            ob1Called = true
+        })
+        var ob2Called = false
+        ob2.on('set', function () {
+            ob2Called = true
+        })
+
+        it('should set observer proxies path to null', function () {
+            assert.strictEqual(ob1.proxies['test.'], null)
+        })
+
+        it('should turn off corresponding event listeners', function () {
+            var callbacks = obj.__observer__._callbacks
+            for (var e in callbacks) {
+                assert.strictEqual(callbacks[e].length, 1)
+            }
+        })
+
+        it('should no longer emit events', function () {
+            obj.a = 2
+            assert.notOk(ob1Called)
+            assert.ok(ob2Called)
+        })
+
+    })
+
+    describe('.ensurePath()', function () {
+        
+        it('should ensure a path can be accessed without error', function () {
+            var obj = {},
+                path = 'a.b.c'
+            Observer.ensurePath(obj, path)
+            assert.strictEqual(obj.a.b.c, undefined)
+        })
+
+    })
+
+    describe('.ensurePaths()', function () {
+        
+        it('should ensure path for all paths that start with the given key', function () {
+            var key = 'a',
+                obj = {},
+                paths = {
+                    'a.b.c': 1,
+                    'a.d': 2,
+                    'e.f': 3,
+                    'g': 4
+                }
+            Observer.ensurePaths(key, obj, paths)
+            assert.strictEqual(obj.b.c, undefined)
+            assert.strictEqual(obj.d, undefined)
+            assert.notOk('f' in obj)
+            assert.strictEqual(Object.keys(obj).length, 2)
+        })
+
+    })
+
     function setTestFactory (opts) {
         return function () {
             var ob = new Emitter(),

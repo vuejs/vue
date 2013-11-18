@@ -17,7 +17,8 @@
             <form id="form"><input name="msg" sd-model="msg"></form>
             <p class="hidden">{{sum}}</p>
             <button class="four" sd-on="click:four">four</button>
-            <button class="five" sd-on="click:setEmpty">empty</button>
+            <button class="empty1" sd-on="click:setEmpty">empty a.b</button>
+            <button class="empty2" sd-on="click:setEmpty2">empty a</button>
         </div>
         <script>
             Seed.config({debug: true})
@@ -66,6 +67,9 @@
                     },
                     setEmpty: function () {
                         this.a.b = {}
+                    },
+                    setEmpty2: function () {
+                        this.a = {}
                     }
                 }
             })

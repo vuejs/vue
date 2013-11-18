@@ -1,4 +1,4 @@
-casper.test.begin('Nested Properties', 15, function (test) {
+casper.test.begin('Nested Properties', 20, function (test) {
     
     casper
     .start('./fixtures/nested-props.html', function () {
@@ -34,6 +34,16 @@ casper.test.begin('Nested Properties', 15, function (test) {
         test.assertSelectorHasText('.hidden', '3')
         this.click('.four')
         test.assertSelectorHasText('.hidden', '4')
+
+        // set a nested object to {}
+        this.click('.empty1')
+        test.assertSelectorHasText('h1 span', '')
+        test.assertSelectorHasText('h3 span', 'Oh yeah 3')
+
+        this.click('.empty2')
+        test.assertSelectorHasText('h1 span', '')
+        test.assertSelectorHasText('h2 span', '')
+        test.assertSelectorHasText('h3 span', 'Oh yeah ')
 
     })
     .run(function () {

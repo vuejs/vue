@@ -359,6 +359,7 @@ describe('UNIT: Directives', function () {
                 var triggered = false
                 dir.key = 'foo'
                 dir.vm = { $set: function (key, val) {
+                    assert.ok(dir.lock, 'the directive should be locked if it has no filters')
                     assert.strictEqual(key, 'foo')
                     assert.strictEqual(val, 'bar')
                     triggered = true
@@ -376,6 +377,20 @@ describe('UNIT: Directives', function () {
                 dir.unbind()
                 dir.el.dispatchEvent(mockHTMLEvent('input'))
                 assert.ok(removed)
+            })
+
+            it('should not lock during vm.$set if it has filters', function () {
+                var triggered = false
+                var dir = mockDirective('model', 'input', 'text')
+                dir.filters = []
+                dir.bind()
+                dir.vm = {$set:function () {
+                    assert.notOk(dir.lock)
+                    triggered = true
+                }}
+                dir.el.value = 'foo'
+                dir.el.dispatchEvent(mockHTMLEvent('input'))
+                assert.ok(triggered)
             })
 
             after(function () {
