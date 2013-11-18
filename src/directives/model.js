@@ -26,9 +26,29 @@ module.exports = {
             : 'value'
 
         // attach listener
-        self.set = function () {
-            self.vm.$set(self.key, el[attr])
-        }
+        self.set = self.filters
+            ? function () {
+                // if this directive has filters
+                // we need to let the vm.$set trigger
+                // update() so filters are applied.
+                // therefore we have to record cursor position
+                // so that after vm.$set changes the input
+                // value we can put the cursor back at where it is
+                var cursorPos
+                try {
+                    cursorPos = el.selectionStart
+                } catch (e) {}
+                self.vm.$set(self.key, el[attr])
+                if (cursorPos !== undefined) {
+                    el.setSelectionRange(cursorPos, cursorPos)
+                }
+            }
+            : function () {
+                // no filters, don't let it trigger update()
+                self.lock = true
+                self.vm.$set(self.key, el[attr])
+                self.lock = false
+            }
         el.addEventListener(self.event, self.set)
 
         // fix shit for IE9
@@ -51,6 +71,7 @@ module.exports = {
     },
 
     update: function (value) {
+        if (this.lock) return
         /* jshint eqeqeq: false */
         var self = this,
             el   = self.el
