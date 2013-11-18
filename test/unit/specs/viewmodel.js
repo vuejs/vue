@@ -14,12 +14,6 @@ describe('UNIT: ViewModel', function () {
                 b: arr
             }
         })
-    
-    describe('.$get()', function () {
-        it('should retrieve correct value', function () {
-            assert.strictEqual(vm.$get('a.b.c'), data.b.c)
-        })
-    })
 
     describe('.$set()', function () {
         vm.$set('a.b.c', 54321)

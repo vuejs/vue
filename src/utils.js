@@ -56,6 +56,16 @@ var utils = module.exports = {
     },
 
     /**
+     *  Most simple bind with no arguments
+     *  enough for the usecase and fast than native bind()
+     */
+    bind: function (fn, ctx) {
+        return function () {
+            return fn.call(ctx)
+        }
+    },
+
+    /**
      *  Make sure only strings and numbers are output to html
      *  output empty string is value is not string or number
      */

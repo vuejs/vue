@@ -507,10 +507,12 @@ CompilerProto.markComputed = function (binding) {
     binding.isComputed = true
     // bind the accessors to the vm
     if (binding.isFn) {
-        binding.value = value.bind(vm)
+        binding.value = utils.bind(value, vm)
     } else {
-        value.$get = value.$get.bind(vm)
-        if (value.$set) value.$set = value.$set.bind(vm)
+        value.$get = utils.bind(value.$get, vm)
+        if (value.$set) {
+            value.$set = utils.bind(value.$set, vm)
+        }
     }
     // keep track for dep parsing later
     this.computed.push(binding)

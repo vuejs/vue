@@ -30,23 +30,6 @@ def(VMProto, '$set', function (key, value) {
 })
 
 /**
- *  The function for getting a key
- *  which will go up along the prototype chain of the bindings
- *  Used in exp-parser.
- */
-def(VMProto, '$get', function (key) {
-    var path = key.split('.'),
-        obj = getTargetVM(this, path),
-        vm = obj
-    if (!obj) return
-    for (var d = 0, l = path.length; d < l; d++) {
-        obj = obj[path[d]]
-    }
-    if (typeof obj === 'function') obj = obj.bind(vm)
-    return obj
-})
-
-/**
  *  watch a key on the viewmodel for changes
  *  fire callback with new value
  */
