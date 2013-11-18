@@ -143,6 +143,19 @@ describe('UNIT: Utils', function () {
 
     })
 
+
+    describe('bind', function () {
+        
+        it('should bind the right context', function () {
+            function test () {
+                return this + 1
+            }
+            var bound = utils.bind(test, 2)
+            assert.strictEqual(bound(), 3)
+        })
+
+    })
+
     describe('toFragment', function () {
         
         it('should convert a string tempalte to a documentFragment', function () {
