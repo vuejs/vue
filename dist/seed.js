@@ -201,11 +201,8 @@ require.relative = function(parent) {
   return localRequire;
 };
 require.register("component-indexof/index.js", function(exports, require, module){
-
-var indexOf = [].indexOf;
-
 module.exports = function(arr, obj){
-  if (indexOf) return arr.indexOf(obj);
+  if (arr.indexOf) return arr.indexOf(obj);
   for (var i = 0; i < arr.length; ++i) {
     if (arr[i] === obj) return i;
   }
@@ -587,10 +584,10 @@ var utils = module.exports = {
     /**
      *  get an attribute and remove it.
      */
-    attr: function (el, type) {
+    attr: function (el, type, noRemove) {
         var attr = attrs[type],
             val = el.getAttribute(attr)
-        if (val !== null) el.removeAttribute(attr)
+        if (!noRemove && val !== null) el.removeAttribute(attr)
         return val
     },
 
@@ -617,6 +614,16 @@ var utils = module.exports = {
     },
 
     /**
+     *  Most simple bind with no arguments
+     *  enough for the usecase and fast than native bind()
+     */
+    bind: function (fn, ctx) {
+        return function () {
+            return fn.call(ctx)
+        }
+    },
+
+    /**
      *  Make sure only strings and numbers are output to html
      *  output empty string is value is not string or number
      */
@@ -637,6 +644,22 @@ var utils = module.exports = {
             if (protective && obj[key]) continue
             obj[key] = ext[key]
         }
+    },
+
+    /**
+     *  filter an array with duplicates into uniques
+     */
+    unique: function (arr) {
+        var hash = utils.hash(),
+            i = arr.length,
+            key, res = []
+        while (i--) {
+            key = arr[i]
+            if (hash[key]) continue
+            hash[key] = 1
+            res.push(key)
+        }
+        return res
     },
 
     /**
@@ -726,11 +749,13 @@ var Emitter     = require('./emitter'),
     DepsParser  = require('./deps-parser'),
     ExpParser   = require('./exp-parser'),
     transition  = require('./transition'),
-
+    // cache deps ob
+    depsOb      = DepsParser.observer,
     // cache methods
     slice       = Array.prototype.slice,
     log         = utils.log,
     makeHash    = utils.hash,
+    def         = utils.defProtected,
     hasOwn      = Object.prototype.hasOwnProperty
 
 /**
@@ -759,9 +784,9 @@ function Compiler (vm, options) {
     if (scope) utils.extend(vm, scope, true)
 
     compiler.vm  = vm
-    vm.$         = makeHash()
-    vm.$el       = el
-    vm.$compiler = compiler
+    def(vm, '$', makeHash())
+    def(vm, '$el', el)
+    def(vm, '$compiler', compiler)
 
     // keep track of directives and expressions
     // so they can be unbound during destroy()
@@ -789,7 +814,7 @@ function Compiler (vm, options) {
     // and register child id on parent
     var childId = utils.attr(el, 'id')
     if (parent) {
-        vm.$parent = parent.vm
+        def(vm, '$parent', parent.vm)
         if (childId) {
             compiler.childId = childId
             parent.vm.$[childId] = vm
@@ -817,7 +842,7 @@ function Compiler (vm, options) {
     // which should be inenumerable but configurable
     if (compiler.repeat) {
         vm.$index = compiler.repeatIndex
-        vm.$collection = compiler.repeatCollection
+        def(vm, '$collection', compiler.repeatCollection)
         compiler.createBinding('$index')
     }
 
@@ -878,9 +903,9 @@ CompilerProto.setupElement = function (options) {
  */
 CompilerProto.setupObserver = function () {
 
-    var bindings = this.bindings,
-        observer = this.observer = new Emitter(),
-        depsOb   = DepsParser.observer
+    var compiler = this,
+        bindings = compiler.bindings,
+        observer = compiler.observer = new Emitter()
 
     // a hash to hold event proxies for each root level key
     // so they can be referenced and removed later
@@ -889,18 +914,25 @@ CompilerProto.setupObserver = function () {
     // add own listeners which trigger binding updates
     observer
         .on('get', function (key) {
-            if (bindings[key] && depsOb.isObserving) {
-                depsOb.emit('get', bindings[key])
-            }
+            check(key)
+            depsOb.emit('get', bindings[key])
         })
         .on('set', function (key, val) {
             observer.emit('change:' + key, val)
-            if (bindings[key]) bindings[key].update(val)
+            check(key)
+            bindings[key].update(val)
         })
         .on('mutate', function (key, val, mutation) {
             observer.emit('change:' + key, val, mutation)
-            if (bindings[key]) bindings[key].pub()
+            check(key)
+            bindings[key].pub()
         })
+
+    function check (key) {
+        if (!bindings[key]) {
+            compiler.createBinding(key)
+        }
+    }
 }
 
 /**
@@ -993,7 +1025,7 @@ CompilerProto.compileNode = function (node) {
         while (i--) {
             attr = attrs[i]
             valid = false
-            exps = attr.value.split(',')
+            exps = Directive.split(attr.value)
             // loop through clauses (separated by ",")
             // inside each attribute
             j = exps.length
@@ -1092,18 +1124,6 @@ CompilerProto.bindDirective = function (directive) {
     binding.instances.push(directive)
     directive.binding = binding
 
-    // for newly inserted sub-VMs (repeat items), need to bind deps
-    // because they didn't get processed when the parent compiler
-    // was binding dependencies.
-    var i, dep, deps = binding.contextDeps
-    if (deps) {
-        i = deps.length
-        while (i--) {
-            dep = compiler.bindings[deps[i]]
-            dep.subs.push(directive)
-        }
-    }
-
     var value = binding.value
     // invoke bind hook if exists
     if (directive.bind) {
@@ -1130,32 +1150,21 @@ CompilerProto.createBinding = function (key, isExp, isFn) {
     if (isExp) {
         // a complex expression binding
         // we need to generate an anonymous computed property for it
-        var result = ExpParser.parse(key)
-        if (result.getter) {
+        var getter = ExpParser.parse(key, compiler)
+        if (getter) {
             log('  created expression binding: ' + key)
             binding.value = isFn
-                ? result.getter
-                : { $get: result.getter }
+                ? getter
+                : { $get: getter }
             compiler.markComputed(binding)
             compiler.exps.push(binding)
-            // need to create the bindings for keys
-            // that do not exist yet
-            if (result.paths) {
-                var i = result.paths.length, v
-                while (i--) {
-                    v = result.paths[i]
-                    if (!bindings[v]) {
-                        compiler.rootCompiler.createBinding(v)
-                    }
-                }
-            }
         }
     } else {
         log('  created binding: ' + key)
         bindings[key] = binding
         // make sure the key exists in the object so it can be observed
         // by the Observer!
-        compiler.ensurePath(key)
+        Observer.ensurePath(compiler.vm, key)
         if (binding.root) {
             // this is a root level binding. we need to define getter/setters for it.
             compiler.define(key, binding)
@@ -1169,25 +1178,6 @@ CompilerProto.createBinding = function (key, isExp, isFn) {
         }
     }
     return binding
-}
-
-/**
- *  Sometimes when a binding is found in the template, the value might
- *  have not been set on the VM yet. To ensure computed properties and
- *  dependency extraction can work, we have to create a dummy value for
- *  any given path.
- */
-CompilerProto.ensurePath = function (key) {
-    var path = key.split('.'), sec, obj = this.vm
-    for (var i = 0, d = path.length - 1; i < d; i++) {
-        sec = path[i]
-        if (!obj[sec]) obj[sec] = {}
-        obj = obj[sec]
-    }
-    if (utils.typeOf(obj) === 'Object') {
-        sec = path[i]
-        if (!(sec in obj)) obj[sec] = undefined
-    }
 }
 
 /**
@@ -1218,7 +1208,7 @@ CompilerProto.define = function (key, binding) {
         enumerable: true,
         get: function () {
             var value = binding.value
-            if ((!binding.isComputed && (!value || !value.__observer__)) ||
+            if (depsOb.active && (!binding.isComputed && (!value || !value.__observer__)) ||
                 Array.isArray(value)) {
                 // only emit non-computed, non-observed (primitive) values, or Arrays.
                 // because these are the cleanest dependencies
@@ -1240,6 +1230,7 @@ CompilerProto.define = function (key, binding) {
                 // set new value
                 binding.value = newVal
                 ob.emit('set', key, newVal)
+                Observer.ensurePaths(key, newVal, compiler.bindings)
                 // now watch the new value, which in turn emits 'set'
                 // for all its nested values
                 Observer.observe(newVal, key, ob)
@@ -1257,34 +1248,15 @@ CompilerProto.markComputed = function (binding) {
     binding.isComputed = true
     // bind the accessors to the vm
     if (binding.isFn) {
-        binding.value = value.bind(vm)
+        binding.value = utils.bind(value, vm)
     } else {
-        value.$get = value.$get.bind(vm)
-        if (value.$set) value.$set = value.$set.bind(vm)
+        value.$get = utils.bind(value.$get, vm)
+        if (value.$set) {
+            value.$set = utils.bind(value.$set, vm)
+        }
     }
     // keep track for dep parsing later
     this.computed.push(binding)
-}
-
-/**
- *  Process subscriptions for computed properties that has
- *  dynamic context dependencies
- */
-CompilerProto.bindContexts = function (bindings) {
-    var i = bindings.length, j, k, binding, depKey, dep, ins
-    while (i--) {
-        binding = bindings[i]
-        j = binding.contextDeps.length
-        while (j--) {
-            depKey = binding.contextDeps[j]
-            k = binding.instances.length
-            while (k--) {
-                ins = binding.instances[k]
-                dep = ins.compiler.bindings[depKey]
-                dep.subs.push(ins)
-            }
-        }
-    }
 }
 
 /**
@@ -1427,23 +1399,6 @@ def(VMProto, '$set', function (key, value) {
 })
 
 /**
- *  The function for getting a key
- *  which will go up along the prototype chain of the bindings
- *  Used in exp-parser.
- */
-def(VMProto, '$get', function (key) {
-    var path = key.split('.'),
-        obj = getTargetVM(this, path),
-        vm = obj
-    if (!obj) return
-    for (var d = 0, l = path.length; d < l; d++) {
-        obj = obj[path[d]]
-    }
-    if (typeof obj === 'function') obj = obj.bind(vm)
-    return obj
-})
-
-/**
  *  watch a key on the viewmodel for changes
  *  fire callback with new value
  */
@@ -1489,7 +1444,10 @@ def(VMProto, '$broadcast', function () {
  *  emit an event that propagates all the way up to parent VMs.
  */
 def(VMProto, '$emit', function () {
-    var parent = this.$compiler.parentCompiler
+    var compiler = this.$compiler,
+        emitter = compiler.emitter,
+        parent = compiler.parentCompiler
+    emitter.emit.apply(emitter, arguments)
     if (parent) {
         parent.emitter.emit.apply(parent.emitter, arguments)
         parent.vm.$emit.apply(parent.vm, arguments)
@@ -1600,6 +1558,7 @@ require.register("seed/src/observer.js", function(exports, require, module){
 
 var Emitter  = require('./emitter'),
     utils    = require('./utils'),
+    depsOb   = require('./deps-parser').observer,
 
     // cache methods
     typeOf   = utils.typeOf,
@@ -1714,11 +1673,14 @@ function bind (obj, key, path, observer) {
         enumerable: true,
         get: function () {
             // only emit get on tip values
-            if (!watchable) observer.emit('get', fullKey)
+            if (depsOb.active && !watchable) {
+                observer.emit('get', fullKey)
+            }
             return values[fullKey]
         },
         set: function (newVal) {
             values[fullKey] = newVal
+            ensurePaths(key, newVal, values)
             observer.emit('set', fullKey, newVal)
             watch(newVal, fullKey, observer)
         }
@@ -1740,15 +1702,48 @@ function isWatchable (obj) {
  *  the watch conversion and simply emit set event for
  *  all of its properties.
  */
-function emitSet (obj, observer) {
+function emitSet (obj, observer, set) {
     if (typeOf(obj) === 'Array') {
-        observer.emit('set', 'length', obj.length)
+        set('length', obj.length)
     } else {
         var key, val, values = observer.values
         for (key in observer.values) {
             val = values[key]
-            observer.emit('set', key, val)
+            set(key, val)
         }
+    }
+}
+
+/**
+ *  Sometimes when a binding is found in the template, the value might
+ *  have not been set on the VM yet. To ensure computed properties and
+ *  dependency extraction can work, we have to create a dummy value for
+ *  any given path.
+ */
+function ensurePaths (key, val, paths) {
+    key += '.'
+    for (var path in paths) {
+        if (!path.indexOf(key)) {
+            ensurePath(val, path.replace(key, ''))
+        }
+    }
+}
+
+/**
+ *  walk along a path and make sure it can be accessed
+ *  and enumerated in that object
+ */
+function ensurePath (obj, key) {
+    if (typeOf(obj) !== 'Object') return
+    var path = key.split('.'), sec
+    for (var i = 0, d = path.length - 1; i < d; i++) {
+        sec = path[i]
+        if (!obj[sec]) obj[sec] = {}
+        obj = obj[sec]
+    }
+    if (typeOf(obj) === 'Object') {
+        sec = path[i]
+        if (!(sec in obj)) obj[sec] = undefined
     }
 }
 
@@ -1756,6 +1751,8 @@ module.exports = {
 
     // used in sd-repeat
     watchArray: watchArray,
+    ensurePath: ensurePath,
+    ensurePaths: ensurePaths,
 
     /**
      *  Observe an object with a given path,
@@ -1794,7 +1791,7 @@ module.exports = {
                 .on('set', proxies.set)
                 .on('mutate', proxies.mutate)
             if (alreadyConverted) {
-                emitSet(obj, ob, rawPath)
+                emitSet(obj, ob, proxies.set)
             } else {
                 watch(obj, null, ob)
             }
@@ -1823,8 +1820,10 @@ var config     = require('./config'),
     filters    = require('./filters'),
 
     // Regexes!
+    // regex to split multiple directive expressions
+    SPLIT_RE        = /(?:['"](?:\\.|[^'"])*['"]|\\.|[^,])+/g,
     KEY_RE          = /^[^\|]+/,
-    ARG_RE          = /([^:]+):(.+)$/,
+    ARG_RE          = /^([\w- ]+):(.+)$/,
     FILTERS_RE      = /\|[^\|]+/g,
     FILTER_TOKEN_RE = /[^\s']+|'[^']+'/g,
     NESTING_RE      = /^\^+/,
@@ -1965,10 +1964,7 @@ DirProto.refresh = function (value) {
     if (this.isFn) {
         value = this.value
     } else {
-        value = this.value.$get({
-            el: this.el,
-            vm: this.vm
-        })
+        value = this.value.$get()
         if (value !== undefined && value === this.computedValue) return
         this.computedValue = value
     }
@@ -2012,6 +2008,16 @@ DirProto.unbind = function (update) {
     if (!update) this.vm = this.el = this.binding = this.compiler = null
 }
 
+// exposed methods ------------------------------------------------------------
+
+/**
+ *  split a unquoted-comma separated expression into
+ *  multiple clauses
+ */
+Directive.split = function (exp) {
+    return exp.match(SPLIT_RE) || ['']
+}
+
 /**
  *  make sure the directive and expression is valid
  *  before we create an instance
@@ -2036,7 +2042,8 @@ Directive.parse = function (dirname, expression, compiler, node) {
 module.exports = Directive
 });
 require.register("seed/src/exp-parser.js", function(exports, require, module){
-var utils = require('./utils')
+var utils = require('./utils'),
+    hasOwn = Object.prototype.hasOwnProperty
 
 // Variable extraction scooped from https://github.com/RubyLouvre/avalon
 
@@ -2075,13 +2082,40 @@ function getVariables (code) {
 }
 
 /**
- *  Based on top level variables, extract full keypaths accessed.
- *  We need full paths because we need to define them in the compiler's
- *  bindings, so that they emit 'get' events during dependency tracking.
+ *  A given path could potentially exist not on the
+ *  current compiler, but up in the parent chain somewhere.
+ *  This function generates an access relationship string
+ *  that can be used in the getter function by walking up
+ *  the parent chain to check for key existence.
+ *
+ *  It stops at top parent if no vm in the chain has the
+ *  key. It then creates any missing bindings on the
+ *  final resolved vm.
  */
-function getPaths (code, vars) {
-    var pathRE = new RegExp("\\b(" + vars.join('|') + ")[$\\w\\.]*\\b", 'g')
-    return code.match(pathRE)
+function getRel (path, compiler) {
+    var rel = '',
+        vm  = compiler.vm,
+        dot = path.indexOf('.'),
+        key = dot > -1
+            ? path.slice(0, dot)
+            : path
+    while (true) {
+        if (hasOwn.call(vm, key)) {
+            break
+        } else {
+            if (vm.$parent) {
+                vm = vm.$parent
+                rel += '$parent.'
+            } else {
+                break
+            }
+        }
+    }
+    compiler = vm.$compiler
+    if (!hasOwn.call(compiler.bindings, path)) {
+        compiler.createBinding(path)
+    }
+    return rel
 }
 
 /**
@@ -2107,36 +2141,18 @@ module.exports = {
      *  from an arbitrary expression, together with a list of paths to be
      *  created as bindings.
      */
-    parse: function (exp) {
+    parse: function (exp, compiler) {
         // extract variable names
         var vars = getVariables(exp)
         if (!vars.length) {
-            return {
-                getter: makeGetter('return ' + exp, exp)
-            }
+            return makeGetter('return ' + exp, exp)
         }
-        var args = [],
-            v, i, keyPrefix,
-            l = vars.length,
-            hash = Object.create(null)
-        for (i = 0; i < l; i++) {
-            v = vars[i]
-            // avoid duplicate keys
-            if (hash[v]) continue
-            hash[v] = v
-            // push assignment
-            keyPrefix = v.charAt(0)
-            args.push(v + (
-                (keyPrefix === '$' || keyPrefix === '_')
-                    ? '=this.' + v
-                    : '=this.$get("' + v + '")'
-                ))
-        }
-        args = 'var ' + args.join(',') + ';return ' + exp
-        return {
-            getter: makeGetter(args, exp),
-            paths: getPaths(exp, Object.keys(hash))
-        }
+        vars = utils.unique(vars)
+        var pathRE = new RegExp("\\b(" + vars.join('|') + ")[$\\w\\.]*\\b", 'g'),
+            body   = 'return ' + exp.replace(pathRE, function (path) {
+                return 'this.' + getRel(path, compiler) + path
+            })
+        return makeGetter(body, exp)
     }
 }
 });
@@ -2200,9 +2216,9 @@ module.exports = {
      */
     parse: function (bindings) {
         utils.log('\nparsing dependencies...')
-        observer.isObserving = true
+        observer.active = true
         bindings.forEach(catchDeps)
-        observer.isObserving = false
+        observer.active = false
         utils.log('\ndone.')
     }
     
@@ -2687,6 +2703,7 @@ module.exports = {
         ctn.insertBefore(self.ref, el)
         ctn.removeChild(el)
 
+        self.initiated = false
         self.collection = null
         self.vms = null
         self.mutationListener = function (path, arr, mutation) {
@@ -2709,10 +2726,11 @@ module.exports = {
         // if initiating with an empty collection, we need to
         // force a compile so that we get all the bindings for
         // dependency extraction.
-        if (!this.collection && !collection.length) {
+        if (!this.initiated && (!collection || !collection.length)) {
             this.buildItem()
+            this.initiated = true
         }
-        this.collection = collection
+        this.collection = collection || []
         this.vms = []
 
         // listen for collection mutation events
@@ -2721,11 +2739,13 @@ module.exports = {
         collection.__observer__.on('mutate', this.mutationListener)
 
         // create child-seeds and append to DOM
-        this.detach()
-        for (var i = 0, l = collection.length; i < l; i++) {
-            this.buildItem(collection[i], i)
+        if (collection.length) {
+            this.detach()
+            for (var i = 0, l = collection.length; i < l; i++) {
+                this.buildItem(collection[i], i)
+            }
+            this.retach()
         }
-        this.retach()
     },
 
     /**
@@ -2748,6 +2768,8 @@ module.exports = {
                 : this.ref
             // make sure it works with sd-if
             if (!ref.parentNode) ref = ref.sd_ref
+            // process transition info before appending
+            node.sd_trans = utils.attr(node, 'transition', true)
             transition(node, 1, function () {
                 ctn.insertBefore(node, ref)
             }, this.compiler)
@@ -2946,11 +2968,29 @@ module.exports = {
             : 'value'
 
         // attach listener
-        self.set = function () {
-            self.lock = true
-            self.vm.$set(self.key, el[attr])
-            self.lock = false
-        }
+        self.set = self.filters
+            ? function () {
+                // if this directive has filters
+                // we need to let the vm.$set trigger
+                // update() so filters are applied.
+                // therefore we have to record cursor position
+                // so that after vm.$set changes the input
+                // value we can put the cursor back at where it is
+                var cursorPos
+                try {
+                    cursorPos = el.selectionStart
+                } catch (e) {}
+                self.vm.$set(self.key, el[attr])
+                if (cursorPos !== undefined) {
+                    el.setSelectionRange(cursorPos, cursorPos)
+                }
+            }
+            : function () {
+                // no filters, don't let it trigger update()
+                self.lock = true
+                self.vm.$set(self.key, el[attr])
+                self.lock = false
+            }
         el.addEventListener(self.event, self.set)
 
         // fix shit for IE9
@@ -2973,10 +3013,10 @@ module.exports = {
     },
 
     update: function (value) {
+        if (this.lock) return
         /* jshint eqeqeq: false */
         var self = this,
             el   = self.el
-        if (self.lock) return
         if (el.tagName === 'SELECT') { // select dropdown
             // setting <select>'s value in IE9 doesn't work
             var o = el.options,

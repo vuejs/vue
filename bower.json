@@ -1,6 +1,6 @@
 {
     "name": "seed",
-    "version": "0.5.0",
+    "version": "0.5.1",
     "main": "dist/seed.js",
     "ignore": [
         ".*",
