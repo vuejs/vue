@@ -8,7 +8,8 @@ var Emitter     = require('./emitter'),
     DepsParser  = require('./deps-parser'),
     ExpParser   = require('./exp-parser'),
     transition  = require('./transition'),
-
+    // cache deps ob
+    depsOb      = DepsParser.observer,
     // cache methods
     slice       = Array.prototype.slice,
     log         = utils.log,
@@ -163,8 +164,7 @@ CompilerProto.setupObserver = function () {
 
     var compiler = this,
         bindings = compiler.bindings,
-        observer = compiler.observer = new Emitter(),
-        depsOb   = DepsParser.observer
+        observer = compiler.observer = new Emitter()
 
     // a hash to hold event proxies for each root level key
     // so they can be referenced and removed later
@@ -174,9 +174,7 @@ CompilerProto.setupObserver = function () {
     observer
         .on('get', function (key) {
             check(key)
-            if (depsOb.isObserving) {
-                depsOb.emit('get', bindings[key])
-            }
+            depsOb.emit('get', bindings[key])
         })
         .on('set', function (key, val) {
             observer.emit('change:' + key, val)
@@ -492,7 +490,7 @@ CompilerProto.define = function (key, binding) {
         enumerable: true,
         get: function () {
             var value = binding.value
-            if ((!binding.isComputed && (!value || !value.__observer__)) ||
+            if (depsOb.active && (!binding.isComputed && (!value || !value.__observer__)) ||
                 Array.isArray(value)) {
                 // only emit non-computed, non-observed (primitive) values, or Arrays.
                 // because these are the cleanest dependencies

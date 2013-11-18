@@ -1,7 +1,8 @@
 describe('UNIT: Observer', function () {
 
     var Observer = require('seed/src/observer'),
-        Emitter  = require('emitter')
+        Emitter  = require('emitter'),
+        DepsOb   = require('seed/src/deps-parser').observer
     
     describe('Observing Object', function () {
         
@@ -31,14 +32,18 @@ describe('UNIT: Observer', function () {
             path: 'test'
         }))
 
-        it('should emit get events on tip values', getTestFactory({
-            obj: { a: 1, b: { c: 2 } },
-            expects: [
-                'test.a',
-                'test.b.c'
-            ],
-            path: 'test'
-        }))
+        it('should emit get events on tip values', function () {
+            DepsOb.active = true
+            getTestFactory({
+                obj: { a: 1, b: { c: 2 } },
+                expects: [
+                    'test.a',
+                    'test.b.c'
+                ],
+                path: 'test'
+            })()
+            DepsOb.active = false
+        })
 
         it('should emit set when first observing', function () {
             var obj = { a: 1, b: { c: 2} },

@@ -2,6 +2,7 @@
 
 var Emitter  = require('./emitter'),
     utils    = require('./utils'),
+    depsOb   = require('./deps-parser').observer,
 
     // cache methods
     typeOf   = utils.typeOf,
@@ -116,7 +117,9 @@ function bind (obj, key, path, observer) {
         enumerable: true,
         get: function () {
             // only emit get on tip values
-            if (!watchable) observer.emit('get', fullKey)
+            if (depsOb.active && !watchable) {
+                observer.emit('get', fullKey)
+            }
             return values[fullKey]
         },
         set: function (newVal) {

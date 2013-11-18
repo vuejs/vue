@@ -33,9 +33,9 @@ module.exports = {
      */
     parse: function (bindings) {
         utils.log('\nparsing dependencies...')
-        observer.isObserving = true
+        observer.active = true
         bindings.forEach(catchDeps)
-        observer.isObserving = false
+        observer.active = false
         utils.log('\ndone.')
     }
     
