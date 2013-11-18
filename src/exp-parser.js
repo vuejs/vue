@@ -38,21 +38,16 @@ function getVariables (code) {
 }
 
 /**
- *  Filter 
+ *  A given path could potentially exist not on the
+ *  current compiler, but up in the parent chain somewhere.
+ *  This function generates an access relationship string
+ *  that can be used in the getter function by walking up
+ *  the parent chain to check for key existence.
+ *
+ *  It stops at top parent if no vm in the chain has the
+ *  key. It then creates any missing bindings on the
+ *  final resolved vm.
  */
-function filterUnique (vars) {
-    var hash = utils.hash(),
-        i = vars.length,
-        key, res = []
-    while (i--) {
-        key = vars[i]
-        if (hash[key]) continue
-        hash[key] = 1
-        res.push(key)
-    }
-    return res
-}
-
 function getRel (path, compiler) {
     var rel = '',
         vm  = compiler.vm,
@@ -108,7 +103,7 @@ module.exports = {
         if (!vars.length) {
             return makeGetter('return ' + exp, exp)
         }
-        vars = filterUnique(vars)
+        vars = utils.unique(vars)
         var pathRE = new RegExp("\\b(" + vars.join('|') + ")[$\\w\\.]*\\b", 'g'),
             body   = 'return ' + exp.replace(pathRE, function (path) {
                 return 'this.' + getRel(path, compiler) + path

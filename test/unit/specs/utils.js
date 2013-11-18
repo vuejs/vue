@@ -129,6 +129,20 @@ describe('UNIT: Utils', function () {
 
     })
 
+    describe('unique', function () {
+        
+        it('should filter an array with duplicates into unqiue ones', function () {
+            var arr = [1, 2, 3, 1, 2, 3, 4, 5],
+                res = utils.unique(arr),
+                l = res.length
+            assert.strictEqual(l, 5)
+            while (l--) {
+                assert.strictEqual(res[l], 5 - l)
+            }
+        })
+
+    })
+
     describe('toFragment', function () {
         
         it('should convert a string tempalte to a documentFragment', function () {

@@ -66,7 +66,18 @@ describe('UNIT: Expression Parser', function () {
     function describeCase (testCase) {
         describe(testCase.exp, function () {
 
-            var result = ExpParser.parse(testCase.exp),
+            var caughtMissingPaths = [],
+                compilerMock = {
+                    vm:{
+                        $compiler:{
+                            bindings:{},
+                            createBinding: function (path) {
+                                caughtMissingPaths.push(path)
+                            }
+                        }
+                    }
+                },
+                getter = ExpParser.parse(testCase.exp, compilerMock),
                 vm     = testCase.vm,
                 vars   = testCase.paths || Object.keys(vm)
 
@@ -74,16 +85,16 @@ describe('UNIT: Expression Parser', function () {
             // the real $get() will be tested in integration tests.
             vm.$get = function (key) { return this[key] }
 
-            it('should get correct args', function () {
+            it('should get correct paths', function () {
                 if (!vars.length) return
-                assert.strictEqual(result.paths.length, vars.length)
+                assert.strictEqual(caughtMissingPaths.length, vars.length)
                 for (var i = 0; i < vars.length; i++) {
-                    assert.strictEqual(vars[i], result.paths[i])
+                    assert.strictEqual(vars[i], caughtMissingPaths[i])
                 }
             })
 
             it('should generate correct getter function', function () {
-                var value = result.getter.call(vm)
+                var value = getter.call(vm)
                 assert.strictEqual(value, testCase.expectedValue)
             })
 
@@ -100,7 +111,14 @@ describe('UNIT: Expression Parser', function () {
             utils.warn = function () {
                 warned = true
             }
-            ExpParser.parse('a + "fsef')
+            ExpParser.parse('a + "fsef', {
+                vm: {
+                    $compiler: {
+                        bindings: {},
+                        createBinding: function () {}
+                    }
+                }
+            })
             assert.ok(warned)
             utils.warn = oldWarn
         })

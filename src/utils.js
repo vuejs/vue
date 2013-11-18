@@ -79,6 +79,22 @@ var utils = module.exports = {
     },
 
     /**
+     *  filter an array with duplicates into uniques
+     */
+    unique: function (arr) {
+        var hash = utils.hash(),
+            i = arr.length,
+            key, res = []
+        while (i--) {
+            key = arr[i]
+            if (hash[key]) continue
+            hash[key] = 1
+            res.push(key)
+        }
+        return res
+    },
+
+    /**
      *  Convert a string template to a dom fragment
      */
     toFragment: function (template) {
