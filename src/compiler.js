@@ -383,18 +383,6 @@ CompilerProto.bindDirective = function (directive) {
     binding.instances.push(directive)
     directive.binding = binding
 
-    // for newly inserted sub-VMs (repeat items), need to bind deps
-    // because they didn't get processed when the parent compiler
-    // was binding dependencies.
-    var i, dep, deps = binding.contextDeps
-    if (deps) {
-        i = deps.length
-        while (i--) {
-            dep = compiler.bindings[deps[i]]
-            dep.subs.push(directive)
-        }
-    }
-
     var value = binding.value
     // invoke bind hook if exists
     if (directive.bind) {
@@ -537,27 +525,6 @@ CompilerProto.markComputed = function (binding) {
     }
     // keep track for dep parsing later
     this.computed.push(binding)
-}
-
-/**
- *  Process subscriptions for computed properties that has
- *  dynamic context dependencies
- */
-CompilerProto.bindContexts = function (bindings) {
-    var i = bindings.length, j, k, binding, depKey, dep, ins
-    while (i--) {
-        binding = bindings[i]
-        j = binding.contextDeps.length
-        while (j--) {
-            depKey = binding.contextDeps[j]
-            k = binding.instances.length
-            while (k--) {
-                ins = binding.instances[k]
-                dep = ins.compiler.bindings[depKey]
-                dep.subs.push(ins)
-            }
-        }
-    }
 }
 
 /**
