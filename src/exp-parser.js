@@ -41,9 +41,21 @@ function getVariables (code) {
  *  We need full paths because we need to define them in the compiler's
  *  bindings, so that they emit 'get' events during dependency tracking.
  */
-function getPaths (code, vars) {
-    var pathRE = new RegExp("\\b(" + vars.join('|') + ")[$\\w\\.]*\\b", 'g')
-    return code.match(pathRE)
+// function getPaths (code, vars) {
+//     var pathRE = new RegExp("\\b(" + vars.join('|') + ")[$\\w\\.]*\\b", 'g')
+//     return code.match(pathRE)
+// }
+
+function filterUnique (vars) {
+    var hash = utils.hash(),
+        i = vars.length,
+        key
+    while (i--) {
+        key = vars[i]
+        if (hash[key]) continue
+        hash[key] = 1
+    }
+    return Object.keys(hash)
 }
 
 /**
@@ -77,27 +89,33 @@ module.exports = {
                 getter: makeGetter('return ' + exp, exp)
             }
         }
-        var args = [],
-            v, i, keyPrefix,
-            l = vars.length,
-            hash = Object.create(null)
-        for (i = 0; i < l; i++) {
-            v = vars[i]
-            // avoid duplicate keys
-            if (hash[v]) continue
-            hash[v] = v
-            // push assignment
-            keyPrefix = v.charAt(0)
-            args.push(v + (
-                (keyPrefix === '$' || keyPrefix === '_')
-                    ? '=this.' + v
-                    : '=this.$get("' + v + '")'
-                ))
-        }
-        args = 'var ' + args.join(',') + ';return ' + exp
+        console.log(vars)
+        vars = filterUnique(vars)
+        // var args = [],
+        //     v, i, keyPrefix,
+        //     l = vars.length,
+        //     hash = Object.create(null)
+        // for (i = 0; i < l; i++) {
+        //     v = vars[i]
+        //     // avoid duplicate keys
+        //     if (hash[v]) continue
+        //     hash[v] = v
+        //     // push assignment
+        //     keyPrefix = v.charAt(0)
+        //     args.push(v + (
+        //         (keyPrefix === '$' || keyPrefix === '_')
+        //             ? '=this.' + v
+        //             : '=this.$get("' + v + '")'
+        //         ))
+        // }
+        // args = 'var ' + args.join(',') + ';return ' + exp
+        var pathRE = new RegExp("\\b(" + vars.join('|') + ")[$\\w\\.]*\\b", 'g'),
+            paths  = exp.match(pathRE),
+            body   = 'return ' + exp.replace(pathRE, 'this.$&')
+        console.log(paths, body)
         return {
-            getter: makeGetter(args, exp),
-            paths: getPaths(exp, Object.keys(hash))
+            getter: makeGetter(body, exp),
+            paths: paths
         }
     }
 }
