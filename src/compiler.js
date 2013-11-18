@@ -73,7 +73,7 @@ function Compiler (vm, options) {
     // and register child id on parent
     var childId = utils.attr(el, 'id')
     if (parent) {
-        vm.$parent = parent.vm
+        def(vm, '$parent', parent.vm)
         if (childId) {
             compiler.childId = childId
             parent.vm.$[childId] = vm
@@ -101,7 +101,7 @@ function Compiler (vm, options) {
     // which should be inenumerable but configurable
     if (compiler.repeat) {
         vm.$index = compiler.repeatIndex
-        vm.$collection = compiler.repeatCollection
+        def(vm, '$collection', compiler.repeatCollection)
         compiler.createBinding('$index')
     }
 
@@ -409,25 +409,14 @@ CompilerProto.createBinding = function (key, isExp, isFn) {
     if (isExp) {
         // a complex expression binding
         // we need to generate an anonymous computed property for it
-        var result = ExpParser.parse(key)
-        if (result.getter) {
+        var getter = ExpParser.parse(key, compiler)
+        if (getter) {
             log('  created expression binding: ' + key)
             binding.value = isFn
-                ? result.getter
-                : { $get: result.getter }
+                ? getter
+                : { $get: getter }
             compiler.markComputed(binding)
             compiler.exps.push(binding)
-            // need to create the bindings for keys
-            // that do not exist yet
-            if (result.paths) {
-                var i = result.paths.length, v
-                while (i--) {
-                    v = result.paths[i]
-                    if (!bindings[v]) {
-                        compiler.rootCompiler.createBinding(v)
-                    }
-                }
-            }
         }
     } else {
         log('  created binding: ' + key)

@@ -1,4 +1,5 @@
-var utils = require('./utils')
+var utils = require('./utils'),
+    hasOwn = Object.prototype.hasOwnProperty
 
 // Variable extraction scooped from https://github.com/RubyLouvre/avalon
 
@@ -37,25 +38,45 @@ function getVariables (code) {
 }
 
 /**
- *  Based on top level variables, extract full keypaths accessed.
- *  We need full paths because we need to define them in the compiler's
- *  bindings, so that they emit 'get' events during dependency tracking.
+ *  Filter 
  */
-// function getPaths (code, vars) {
-//     var pathRE = new RegExp("\\b(" + vars.join('|') + ")[$\\w\\.]*\\b", 'g')
-//     return code.match(pathRE)
-// }
-
 function filterUnique (vars) {
     var hash = utils.hash(),
         i = vars.length,
-        key
+        key, res = []
     while (i--) {
         key = vars[i]
         if (hash[key]) continue
         hash[key] = 1
+        res.push(key)
     }
-    return Object.keys(hash)
+    return res
+}
+
+function getRel (path, compiler) {
+    var rel = '',
+        vm  = compiler.vm,
+        dot = path.indexOf('.'),
+        key = dot > -1
+            ? path.slice(0, dot)
+            : path
+    while (true) {
+        if (hasOwn.call(vm, key)) {
+            break
+        } else {
+            if (vm.$parent) {
+                vm = vm.$parent
+                rel += '$parent.'
+            } else {
+                break
+            }
+        }
+    }
+    compiler = vm.$compiler
+    if (!hasOwn.call(compiler.bindings, path)) {
+        compiler.createBinding(path)
+    }
+    return rel
 }
 
 /**
@@ -81,41 +102,17 @@ module.exports = {
      *  from an arbitrary expression, together with a list of paths to be
      *  created as bindings.
      */
-    parse: function (exp) {
+    parse: function (exp, compiler) {
         // extract variable names
         var vars = getVariables(exp)
         if (!vars.length) {
-            return {
-                getter: makeGetter('return ' + exp, exp)
-            }
+            return makeGetter('return ' + exp, exp)
         }
-        console.log(vars)
         vars = filterUnique(vars)
-        // var args = [],
-        //     v, i, keyPrefix,
-        //     l = vars.length,
-        //     hash = Object.create(null)
-        // for (i = 0; i < l; i++) {
-        //     v = vars[i]
-        //     // avoid duplicate keys
-        //     if (hash[v]) continue
-        //     hash[v] = v
-        //     // push assignment
-        //     keyPrefix = v.charAt(0)
-        //     args.push(v + (
-        //         (keyPrefix === '$' || keyPrefix === '_')
-        //             ? '=this.' + v
-        //             : '=this.$get("' + v + '")'
-        //         ))
-        // }
-        // args = 'var ' + args.join(',') + ';return ' + exp
         var pathRE = new RegExp("\\b(" + vars.join('|') + ")[$\\w\\.]*\\b", 'g'),
-            paths  = exp.match(pathRE),
-            body   = 'return ' + exp.replace(pathRE, 'this.$&')
-        console.log(paths, body)
-        return {
-            getter: makeGetter(body, exp),
-            paths: paths
-        }
+            body   = 'return ' + exp.replace(pathRE, function (path) {
+                return 'this.' + getRel(path, compiler) + path
+            })
+        return makeGetter(body, exp)
     }
 }
