@@ -1,6 +1,5 @@
 var fs     = require('fs'),
-    path   = require('path'),
-    stream = require('stream')
+    path   = require('path')
 
 module.exports = function( grunt ) {
 
@@ -151,8 +150,7 @@ module.exports = function( grunt ) {
     ])
 
     grunt.registerTask( 'default', [
-        'jshint:dev',
-        'jshint:test',
+        'jshint',
         'test',
         'uglify'
     ])
