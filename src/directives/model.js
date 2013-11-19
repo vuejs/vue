@@ -38,10 +38,15 @@ module.exports = {
                 try {
                     cursorPos = el.selectionStart
                 } catch (e) {}
-                self.vm.$set(self.key, el[attr])
-                if (cursorPos !== undefined) {
-                    el.setSelectionRange(cursorPos, cursorPos)
-                }
+                // `input` event has weird updating issue with
+                // International (e.g. Chinese) input methods,
+                // have to use a Timeout to hack around it...
+                setTimeout(function () {
+                    self.vm.$set(self.key, el[attr])
+                    if (cursorPos !== undefined) {
+                        el.setSelectionRange(cursorPos, cursorPos)
+                    }
+                }, 0)
             }
             : function () {
                 // no filters, don't let it trigger update()

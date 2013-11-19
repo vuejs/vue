@@ -379,7 +379,7 @@ describe('UNIT: Directives', function () {
                 assert.ok(removed)
             })
 
-            it('should not lock during vm.$set if it has filters', function () {
+            it('should not lock during vm.$set if it has filters', function (done) {
                 var triggered = false
                 var dir = mockDirective('model', 'input', 'text')
                 dir.filters = []
@@ -390,7 +390,11 @@ describe('UNIT: Directives', function () {
                 }}
                 dir.el.value = 'foo'
                 dir.el.dispatchEvent(mockHTMLEvent('input'))
-                assert.ok(triggered)
+                // timeout becuase the update is async
+                setTimeout(function () {
+                    assert.ok(triggered)
+                    done()
+                }, 1)
             })
 
             after(function () {
