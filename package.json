@@ -22,12 +22,12 @@
     "test": "grunt test"
   },
   "devDependencies": {
-    "grunt": "~0.4.1",
+    "grunt": "~0.4.2",
     "grunt-contrib-watch": "~0.5.3",
     "grunt-component-build": "~0.4.1",
     "grunt-contrib-jshint": "~0.7.1",
     "grunt-contrib-uglify": "~0.2.7",
-    "grunt-mocha": "~0.4.1",
+    "grunt-mocha": "~0.4.6",
     "jscoverage": "~0.3.8",
     "jshint-stylish": "0.1.3"
   }
