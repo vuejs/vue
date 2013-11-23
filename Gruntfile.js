@@ -1,5 +1,6 @@
 var fs     = require('fs'),
-    path   = require('path')
+    path   = require('path'),
+    semver = require('semver')
 
 module.exports = function( grunt ) {
 
@@ -78,6 +79,13 @@ module.exports = function( grunt ) {
     grunt.loadNpmTasks( 'grunt-mocha' )
 
     grunt.registerTask( 'version', function (version) {
+        if (!version || !semver.valid(version)) {
+            return grunt.fail.warn('Invalid semver version.')
+        }
+        var current = require('./package.json').version
+        if (semver.lt(version, current)) {
+            return grunt.fail.warn('Version is older than current.')
+        }
         ;['package', 'bower', 'component'].forEach(function (file) {
             file = './' + file + '.json'
             var json = fs.readFileSync(file, 'utf-8')
@@ -87,26 +95,7 @@ module.exports = function( grunt ) {
     })
 
     grunt.registerTask( 'release', function (version) {
-        if (!version || !isValid(version)) {
-            return grunt.fail.warn('Must provide a valid semver version number.')
-        }
-        grunt.task.run(['version:' + version, 'default'])
-
-        function isValid (v) {
-            var nums = v.split('.')
-            if (nums.length !== 3) return false
-            var current = require('./package.json').version.split('.'),
-                a1 = +nums[0],
-                b1 = +nums[1],
-                c1 = +nums[2],
-                a2 = +current[0],
-                b2 = +current[1],
-                c2 = +current[2]
-            if (a1 < a2) return false
-            if (a1 === a2 && b1 < b2) return false
-            if (a1 === a2 && b1 === b2 && c1 < c2) return false
-            return true
-        }
+        grunt.task.run(['default', 'version:' + version])
     })
 
     grunt.registerTask( 'casper', function (id) {
