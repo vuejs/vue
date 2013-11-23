@@ -104,10 +104,14 @@ module.exports = {
             return makeGetter('return ' + exp, exp)
         }
         vars = utils.unique(vars)
-        var pathRE = new RegExp("\\b(" + vars.join('|') + ")[$\\w\\.]*\\b", 'g'),
-            body   = 'return ' + exp.replace(pathRE, function (path) {
-                return 'this.' + getRel(path, compiler) + path
+        var accessors = '',
+            pathRE = new RegExp("\\b(" + vars.join('|') + ")[$\\w\\.]*\\b", 'g'),
+            body = 'return ' + exp.replace(pathRE, function (path) {
+                var val = 'this.' + getRel(path, compiler) + path
+                accessors += val + ';'
+                return val
             })
+        body = accessors + body
         return makeGetter(body, exp)
     }
 }

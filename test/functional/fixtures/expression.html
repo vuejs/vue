@@ -18,7 +18,13 @@
             </form>
             <button sd-on="click: two.three = 'clicked'">click</button>
         </div>
+        <div id="conditional">
+            <p>{{ok ? yesMsg : noMsg}}</p>
+            <button sd-on="click: ok = !ok" class="toggle">toggle</button>
+            <button sd-on="click: noMsg = 'Nah'" class="change">change</button>
+        </div>
         <script>
+        Seed.config({debug:true})
             var normal = new Seed({
                 el: '#normal',
                 scope: {
@@ -37,6 +43,15 @@
                     two: {
                         three: 'Ho'
                     }
+                }
+            })
+
+            var conditional = new Seed({
+                el: '#conditional',
+                scope: {
+                    ok: true,
+                    yesMsg: 'YES',
+                    noMsg: 'NO'
                 }
             })
         </script>

@@ -1,6 +1,6 @@
 /* global normal */
 
-casper.test.begin('Expression', 16, function (test) {
+casper.test.begin('Expression', 19, function (test) {
     
     casper
     .start('./fixtures/expression.html', function () {
@@ -46,6 +46,15 @@ casper.test.begin('Expression', 16, function (test) {
         this.click('#lazy button')
         test.assertField('four', 'clicked')
         test.assertSelectorHasText('#lazy p', 'three clicked!')
+
+        // conditional expression
+        // e.g. ok ? yesMSg : noMsg
+        // make sure all three are captured as dependency
+        test.assertSelectorHasText('#conditional p', 'YES')
+        this.click('#conditional .toggle')
+        test.assertSelectorHasText('#conditional p', 'NO')
+        this.click('#conditional .change')
+        test.assertSelectorHasText('#conditional p', 'Nah')
 
     })
     .run(function () {
