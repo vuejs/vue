@@ -350,6 +350,49 @@ describe('UNIT: API', function () {
 
             })
 
+            describe('replace', function () {
+                
+                it('should replace an in DOM node', function () {
+                    var testId = 'replace-test'
+                    mock(testId, '<div>ho</div>')
+                    var old = document.getElementById(testId),
+                        parent = old.parentNode
+                    var Test = Seed.extend({
+                        template: '<p>hi</p>',
+                        replace: true
+                    })
+                    var t = new Test({
+                        el: '#' + testId
+                    })
+                    assert.strictEqual(t.$el.tagName, 'P')
+                    assert.strictEqual(t.$el.textContent, 'hi')
+                    assert.strictEqual(t.$el.parentNode, parent)
+                    var now = document.getElementById(testId)
+                    assert.strictEqual(now, null)
+                })
+
+                it('should replace an off DOM Seed\'s $el', function () {
+                    var Test = Seed.extend({
+                        template: '<p>hi</p>',
+                        replace: true
+                    })
+                    var t = new Test()
+                    assert.strictEqual(t.$el.tagName, 'P')
+                    assert.strictEqual(t.$el.textContent, 'hi')
+                })
+
+                it('should not work if template has more than one child node', function () {
+                    var Test = Seed.extend({
+                        template: '<p>hi</p><p>ho</p>',
+                        replace: true
+                    })
+                    var t = new Test()
+                    assert.notStrictEqual(t.$el.tagName, 'P')
+                    assert.strictEqual(t.$el.innerHTML, '<p>hi</p><p>ho</p>')
+                })
+
+            })
+
             describe('element options', function () {
                 
                 it('should not accept el as an extension option', function () {

@@ -136,6 +136,23 @@ CompilerProto.setupElement = function (options) {
         ? document.querySelector(options.el)
         : options.el || document.createElement(options.tagName || 'div')
 
+    var template = options.template
+    if (template) {
+        // replace option: use the first node in
+        // the template directly
+        if (options.replace && template.childNodes.length === 1) {
+            var replacer = template.childNodes[0].cloneNode(true)
+            if (el.parentNode) {
+                el.parentNode.insertBefore(replacer, el)
+                el.parentNode.removeChild(el)
+            }
+            el = replacer
+        } else {
+            el.innerHTML = ''
+            el.appendChild(template.cloneNode(true))
+        }
+    }
+
     // apply element options
     if (options.id) el.id = options.id
     if (options.className) el.className = options.className
@@ -146,12 +163,6 @@ CompilerProto.setupElement = function (options) {
         }
     }
 
-    // initialize template
-    var template = options.template
-    if (template) {
-        el.innerHTML = ''
-        el.appendChild(template.cloneNode(true))
-    }
     return el
 }
 
