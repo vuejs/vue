@@ -877,6 +877,23 @@ CompilerProto.setupElement = function (options) {
         ? document.querySelector(options.el)
         : options.el || document.createElement(options.tagName || 'div')
 
+    var template = options.template
+    if (template) {
+        // replace option: use the first node in
+        // the template directly
+        if (options.replace && template.childNodes.length === 1) {
+            var replacer = template.childNodes[0].cloneNode(true)
+            if (el.parentNode) {
+                el.parentNode.insertBefore(replacer, el)
+                el.parentNode.removeChild(el)
+            }
+            el = replacer
+        } else {
+            el.innerHTML = ''
+            el.appendChild(template.cloneNode(true))
+        }
+    }
+
     // apply element options
     if (options.id) el.id = options.id
     if (options.className) el.className = options.className
@@ -887,12 +904,6 @@ CompilerProto.setupElement = function (options) {
         }
     }
 
-    // initialize template
-    var template = options.template
-    if (template) {
-        el.innerHTML = ''
-        el.appendChild(template.cloneNode(true))
-    }
     return el
 }
 
@@ -2148,10 +2159,14 @@ module.exports = {
             return makeGetter('return ' + exp, exp)
         }
         vars = utils.unique(vars)
-        var pathRE = new RegExp("\\b(" + vars.join('|') + ")[$\\w\\.]*\\b", 'g'),
-            body   = 'return ' + exp.replace(pathRE, function (path) {
-                return 'this.' + getRel(path, compiler) + path
+        var accessors = '',
+            pathRE = new RegExp("\\b(" + vars.join('|') + ")[$\\w\\.]*\\b", 'g'),
+            body = 'return ' + exp.replace(pathRE, function (path) {
+                var val = 'this.' + getRel(path, compiler) + path
+                accessors += val + ';'
+                return val
             })
+        body = accessors + body
         return makeGetter(body, exp)
     }
 }
@@ -2854,13 +2869,10 @@ module.exports = {
 require.register("seed/src/directives/on.js", function(exports, require, module){
 var utils = require('../utils')
 
-function delegateCheck (current, top, identifier) {
-    if (current[identifier]) {
-        return current
-    } else if (current === top || !current.parentNode) {
-        return false
-    } else {
-        return delegateCheck(current.parentNode, top, identifier)
+function delegateCheck (el, root, identifier) {
+    while (el && el !== root) {
+        if (el[identifier]) return el
+        el = el.parentNode
     }
 }
 
@@ -2980,10 +2992,15 @@ module.exports = {
                 try {
                     cursorPos = el.selectionStart
                 } catch (e) {}
-                self.vm.$set(self.key, el[attr])
-                if (cursorPos !== undefined) {
-                    el.setSelectionRange(cursorPos, cursorPos)
-                }
+                // `input` event has weird updating issue with
+                // International (e.g. Chinese) input methods,
+                // have to use a Timeout to hack around it...
+                setTimeout(function () {
+                    self.vm.$set(self.key, el[attr])
+                    if (cursorPos !== undefined) {
+                        el.setSelectionRange(cursorPos, cursorPos)
+                    }
+                }, 0)
             }
             : function () {
                 // no filters, don't let it trigger update()
