@@ -1,6 +1,6 @@
 /* global __utils__ */
 
-casper.test.begin('todomvc', 67, function (test) {
+casper.test.begin('todomvc', 69, function (test) {
     
     casper
     .start('../../examples/todomvc/index.html', function () {
@@ -204,6 +204,14 @@ casper.test.begin('todomvc', 67, function (test) {
         test.assertElementCount('.todo', 3, 'item should have been deleted')
     })
 
+    //test toggle all
+    .thenClick('#toggle-all', function () {
+        test.assertElementCount('.todo.completed', 3, 'should toggle all items to completed')
+    })
+    .thenClick('#toggle-all', function () {
+        test.assertElementCount('.todo:not(.completed)', 3, 'should toggle all items to active')
+    })
+
     // run
     .run(function () {
         test.done()
@@ -249,10 +257,4 @@ casper.test.begin('todomvc', 67, function (test) {
         })
     }
 
-})
-
-casper.on('remote.message', function (m) {
-    console.log()
-    console.log(m)
-    console.log()
 })

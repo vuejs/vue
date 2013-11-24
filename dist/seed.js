@@ -614,12 +614,12 @@ var utils = module.exports = {
     },
 
     /**
-     *  Most simple bind with no arguments
+     *  Most simple bind
      *  enough for the usecase and fast than native bind()
      */
     bind: function (fn, ctx) {
         return function () {
-            return fn.call(ctx)
+            return fn.apply(ctx, arguments)
         }
     },
 
