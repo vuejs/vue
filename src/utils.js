@@ -60,8 +60,8 @@ var utils = module.exports = {
      *  enough for the usecase and fast than native bind()
      */
     bind: function (fn, ctx) {
-        return function () {
-            return fn.apply(ctx, arguments)
+        return function (arg) {
+            return fn.call(ctx, arg)
         }
     },
 
