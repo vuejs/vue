@@ -31,7 +31,7 @@ Modular & Lightweight JavaScript MVVM
 
 **Browserify**
 
-    $ npm install yyx990803/seed
+    $ npm install seed-mvvm
 
 **Bower**
 
