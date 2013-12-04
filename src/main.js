@@ -43,6 +43,15 @@ ViewModel.component = function (id, Ctor) {
 }
 
 /**
+ *  Allows user to register/retrieve a Custom element constructor
+ */
+ViewModel.element = function (id, Ctor) {
+    if (!Ctor) return utils.elements[id]
+    utils.elements[id] = utils.toConstructor(Ctor)
+    return this
+}
+
+/**
  *  Allows user to register/retrieve a template partial
  */
 ViewModel.partial = function (id, partial) {

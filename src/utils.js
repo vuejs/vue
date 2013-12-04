@@ -22,6 +22,7 @@ var utils = module.exports = {
     components  : makeHash(),
     partials    : makeHash(),
     transitions : makeHash(),
+    elements    : makeHash(),
 
     /**
      *  get an attribute and remove it.
@@ -133,9 +134,16 @@ var utils = module.exports = {
      */
     toConstructor: function (obj) {
         ViewModel = ViewModel || require('./viewmodel')
+        return utils.typeOf(obj) === 'Object'
+            ? ViewModel.extend(obj)
+            : typeof obj === 'function'
+                ? obj
+                : null
+    },
+
+    isConstructor: function (obj) {
+        ViewModel = ViewModel || require('./viewmodel')
         return obj.prototype instanceof ViewModel || obj === ViewModel
-            ? obj
-            : ViewModel.extend(obj)
     },
 
     /**

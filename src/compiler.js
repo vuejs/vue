@@ -220,7 +220,8 @@ CompilerProto.compile = function (node, root) {
         // special attributes to check
         var repeatExp,
             componentId,
-            partialId
+            partialId,
+            customElementFn = utils.elements[node.tagName.toLowerCase()]
 
         // It is important that we access these attributes
         // procedurally because the order matters.
@@ -239,21 +240,16 @@ CompilerProto.compile = function (node, root) {
                 compiler.bindDirective(directive)
             }
 
-        // sd-component has second highest priority
-        // and we preseve all other attributes as well.
+        // custom elements has 2nd highest priority
+        } else if (customElementFn) {
+
+            addChild(customElementFn)
+
+        // sd-component has 3rd highest priority
         } else if (!root && (componentId = utils.attr(node, 'component'))) {
 
             var ChildVM = compiler.getOption('components', componentId)
-            if (ChildVM) {
-                var child = new ChildVM({
-                    el: node,
-                    child: true,
-                    compilerOptions: {
-                        parentCompiler: compiler
-                    }
-                })
-                compiler.childCompilers.push(child.$compiler)
-            }
+            if (ChildVM) addChild(ChildVM)
 
         } else {
 
@@ -278,6 +274,22 @@ CompilerProto.compile = function (node, root) {
 
         compiler.compileTextNode(node)
 
+    }
+
+    function addChild (Ctor) {
+        if (utils.isConstructor(Ctor)) {
+            var child = new Ctor({
+                el: node,
+                child: true,
+                compilerOptions: {
+                    parentCompiler: compiler
+                }
+            })
+            compiler.childCompilers.push(child.$compiler)
+        } else {
+            // simply call the function
+            Ctor(node)
+        }
     }
 }
 
