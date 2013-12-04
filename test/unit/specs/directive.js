@@ -22,9 +22,9 @@ describe('UNIT: Directive', function () {
         it('should return array with the string if it\'s a single clause', function () {
             var e,
                 test1 = 'fsef',
-                test2 = 'ffsef + "fse,fsef"',
+                test2 = 'ffsef + "fse&fsef"',
                 test3 = 'fsef + \'fesfsfe\'',
-                test4 = '\"fsefsf,fsef,fsef\"'
+                test4 = '\"fsefsf&fsef&fsef\"'
 
             e = Directive.split(test1)
             assert.strictEqual(e.length, 1)
@@ -45,28 +45,28 @@ describe('UNIT: Directive', function () {
 
         it('should return split multiple clauses correctly', function () {
             var e,
-                test1 = ['fsef', 'fsf:fsefsef'],
-                test2 = ['asf-fsef:fsf', '"efs,sefsf"'],
-                test3 = ['\'fsef,sef\'', 'fse:fsf'],
-                test4 = ['\"fsef,fsef\"', 'sefsef\'fesfsf']
+                test1 = ['fsef && ggg', 'fsf:fsefsef'],
+                test2 = ['asf-fsef:fsf', '"efs&sefsf"'],
+                test3 = ['\'fsef&sef\'', 'fse:fsf'],
+                test4 = ['\"fsef&fsef\"', 'sefsef\'fesfsf']
 
-            e = Directive.split(test1.join(','))
-            assert.strictEqual(e.length, 2)
+            e = Directive.split(test1.join('&'))
+            assert.strictEqual(e.length, 2, 'expression with &&')
             assert.strictEqual(e[0], test1[0])
             assert.strictEqual(e[1], test1[1])
 
-            e = Directive.split(test2.join(','))
-            assert.strictEqual(e.length, 2)
+            e = Directive.split(test2.join('&'))
+            assert.strictEqual(e.length, 2, 'expression with double quotes')
             assert.strictEqual(e[0], test2[0])
             assert.strictEqual(e[1], test2[1])
 
-            e = Directive.split(test3.join(','))
-            assert.strictEqual(e.length, 2)
+            e = Directive.split(test3.join('&'))
+            assert.strictEqual(e.length, 2, 'expression with single quotes')
             assert.strictEqual(e[0], test3[0])
             assert.strictEqual(e[1], test3[1])
 
-            e = Directive.split(test4.join(','))
-            assert.strictEqual(e.length, 2)
+            e = Directive.split(test4.join('&'))
+            assert.strictEqual(e.length, 2, 'expression with escaped quotes')
             assert.strictEqual(e[0], test4[0])
             assert.strictEqual(e[1], test4[1])
         })
@@ -139,6 +139,15 @@ describe('UNIT: Directive', function () {
             assert.strictEqual(d.expression, exp.trim())
         })
 
+        it('should extract correct key', function () {
+            var d = Directive.parse('sd-text', '"fsefse | fsefsef" && bc', compiler),
+                e = Directive.parse('sd-text', '"fsefsf & fsefs" | test', compiler),
+                f = Directive.parse('sd-text', '"fsef:fsefsf" || ff', compiler)
+            assert.strictEqual(d.key, '"fsefse | fsefsef" && bc', 'pipe inside quotes and &&')
+            assert.strictEqual(e.key, '"fsefsf & fsefs"', '& inside quotes with filter')
+            assert.strictEqual(f.key, '"fsef:fsefsf" || ff', ': inside quotes and ||')
+        })
+
         it('should extract correct argument', function () {
             var d = Directive.parse('sd-text', 'todo:todos', compiler),
                 e = Directive.parse('sd-text', 'todo:todos + abc', compiler),
@@ -190,7 +199,7 @@ describe('UNIT: Directive', function () {
         })
 
         it('should extract correct filters (single filter)', function () {
-            var d = Directive.parse('sd-text', 'abc | uppercase', compiler),
+            var d = Directive.parse('sd-text', 'abc || a + "b|c" | uppercase', compiler),
                 f = d.filters[0]
             assert.strictEqual(f.name, 'uppercase')
             assert.strictEqual(f.args, null)
@@ -198,7 +207,7 @@ describe('UNIT: Directive', function () {
         })
 
         it('should extract correct filters (single filter with args)', function () {
-            var d = Directive.parse('sd-text', 'abc | pluralize item \'arg with spaces\'', compiler),
+            var d = Directive.parse('sd-text', 'abc + \'b | c | d\' | pluralize item \'arg with spaces\'', compiler),
                 f = d.filters[0]
             assert.strictEqual(f.name, 'pluralize', 'name')
             assert.strictEqual(f.args.length, 2, 'args length')

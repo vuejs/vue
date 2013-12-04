@@ -5,8 +5,8 @@ var config     = require('./config'),
 
     // Regexes!
     // regex to split multiple directive expressions
-    SPLIT_RE        = /(?:['"](?:\\.|[^'"])*['"]|\\.|[^,])+/g,
-    KEY_RE          = /^[^\|]+/,
+    SPLIT_RE        = /(?:['"](?:\\.|[^'"])*['"]|\\.|[^&]|&&)+/g,
+    KEY_RE          = /^(?:['"](?:\\.|[^'"])*['"]|\\.|[^\|]|\|\|)+/,
     ARG_RE          = /^([\w- ]+):(.+)$/,
     FILTERS_RE      = /\|[^\|]+/g,
     FILTER_TOKEN_RE = /[^\s']+|'[^']+'/g,
@@ -51,7 +51,7 @@ function Directive (definition, expression, rawKey, compiler, node) {
 
     this.isExp = !SINGLE_VAR_RE.test(this.key)
     
-    var filterExps = expression.match(FILTERS_RE)
+    var filterExps = this.expression.slice(rawKey.length).match(FILTERS_RE)
     if (filterExps) {
         this.filters = []
         var i = 0, l = filterExps.length, filter
