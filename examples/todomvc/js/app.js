@@ -1,7 +1,7 @@
 var filters = {
-    all: function (todo) { return todo.completed || true },
-    active: function (todo) { return !todo.completed },
-    completed: function (todo) { return todo.completed }
+    all: function () { return true },
+    active: function (completed) { return !completed },
+    completed: function (completed) { return completed }
 }
 
 Seed.directive('todo-focus', function (value) {
@@ -16,8 +16,10 @@ var app = new Seed({
     el: '#todoapp',
 
     init: function () {
-        this.remaining = this.todos.filter(filters.active).length
         this.updateFilter()
+        this.remaining = this.todos.filter(function (todo) {
+            return !todo.completed
+        }).length
     },
 
     scope: {
@@ -70,7 +72,9 @@ var app = new Seed({
         },
 
         removeCompleted: function () {
-            this.todos.mutateFilter(filters.active)
+            this.todos.mutateFilter(function (todo) {
+                return !todo.completed
+            })
             todoStorage.save()
         },
 

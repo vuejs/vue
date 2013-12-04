@@ -28,8 +28,8 @@
                     <li
                         class="todo"
                         sd-repeat="todo:todos"
-                        sd-if="todoFilter(todo)"
-                        sd-class="completed:todo.completed, editing:todo == editedTodo"
+                        sd-if="todoFilter(todo.completed)"
+                        sd-class="completed:todo.completed & editing:todo == editedTodo"
                     >
                         <div class="view">
                             <input
@@ -44,7 +44,7 @@
                         <input
                             class="edit"
                             type="text"
-                            sd-on="blur:doneEdit, keyup:doneEdit | key enter, keyup:cancelEdit | key esc"
+                            sd-on="blur:doneEdit & keyup:doneEdit | key enter & keyup:cancelEdit | key esc"
                             sd-model="todo.title"
                             sd-todo-focus="todo == editedTodo"
                         >
