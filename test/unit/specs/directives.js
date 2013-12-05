@@ -389,10 +389,12 @@ describe('UNIT: Directives', function () {
                     triggered = true
                 }}
                 dir.el.value = 'foo'
+                document.body.appendChild(dir.el)
                 dir.el.dispatchEvent(mockHTMLEvent('input'))
                 // timeout becuase the update is async
                 setTimeout(function () {
                     assert.ok(triggered)
+                    document.body.removeChild(dir.el)
                     done()
                 }, 1)
             })

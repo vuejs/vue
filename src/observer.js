@@ -38,19 +38,44 @@ methods.forEach(function (method) {
 // Augment it with several convenience methods
 var extensions = {
     remove: function (index) {
-        if (typeof index !== 'number') index = this.indexOf(index)
-        return this.splice(index, 1)[0]
+        if (typeof index === 'function') {
+            var i = this.length,
+                removed = []
+            while (i--) {
+                if (index(this[i])) {
+                    removed.push(this.splice(i, 1)[0])
+                }
+            }
+            return removed.reverse()
+        } else {
+            if (typeof index !== 'number') {
+                index = this.indexOf(index)
+            }
+            if (index > -1) {
+                return this.splice(index, 1)[0]
+            }
+        }
     },
     replace: function (index, data) {
-        if (typeof index !== 'number') index = this.indexOf(index)
-        if (this[index] !== undefined) return this.splice(index, 1, data)[0]
-    },
-    mutateFilter: function (fn) {
-        var i = this.length
-        while (i--) {
-            if (!fn(this[i])) this.splice(i, 1)
+        if (typeof index === 'function') {
+            var i = this.length,
+                replaced = [],
+                replacer
+            while (i--) {
+                replacer = index(this[i])
+                if (replacer !== undefined) {
+                    replaced.push(this.splice(i, 1, replacer)[0])
+                }
+            }
+            return replaced.reverse()
+        } else {
+            if (typeof index !== 'number') {
+                index = this.indexOf(index)
+            }
+            if (index > -1) {
+                return this.splice(index, 1, data)[0]
+            }
         }
-        return this
     }
 }
 

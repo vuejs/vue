@@ -221,7 +221,7 @@ CompilerProto.compile = function (node, root) {
         var repeatExp,
             componentId,
             partialId,
-            customElementFn = utils.elements[node.tagName.toLowerCase()]
+            customElementFn = compiler.getOption('elements', node.tagName.toLowerCase())
 
         // It is important that we access these attributes
         // procedurally because the order matters.

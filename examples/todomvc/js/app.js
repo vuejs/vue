@@ -72,8 +72,8 @@ var app = new Seed({
         },
 
         removeCompleted: function () {
-            this.todos.mutateFilter(function (todo) {
-                return !todo.completed
+            this.todos.remove(function (todo) {
+                return todo.completed
             })
             todoStorage.save()
         },
