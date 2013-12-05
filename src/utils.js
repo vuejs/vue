@@ -153,10 +153,16 @@ var utils = module.exports = {
         var components = options.components,
             partials   = options.partials,
             template   = options.template,
+            elements   = options.elements,
             key
         if (components) {
             for (key in components) {
                 components[key] = utils.toConstructor(components[key])
+            }
+        }
+        if (elements) {
+            for (key in elements) {
+                elements[key] = utils.toConstructor(elements[key])
             }
         }
         if (partials) {

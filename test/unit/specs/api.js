@@ -103,7 +103,7 @@ describe('UNIT: API', function () {
 
     describe('component()', function () {
 
-        var testId = 'api-vm-test',
+        var testId = 'api-component-test',
             testId2 = testId + '2',
             opts = {
                 className: 'hihi',
@@ -139,6 +139,64 @@ describe('UNIT: API', function () {
                 child2 = t2.$el.querySelector('div')
             assert.strictEqual(child2.className, 'hihi')
             assert.strictEqual(child2.textContent, 'ok')
+        })
+
+    })
+
+    describe('element()', function () {
+        
+        var testId = 'api-element-test',
+            testId2 = testId + '2',
+            testId3 = testId + '3',
+            opts = {
+                className: 'hihi',
+                scope: { hi: 'ok' }
+            },
+            Test = Seed.extend(opts),
+            utils = require('seed/src/utils')
+
+        it('should register a Custom Element constructor', function () {
+            Seed.element(testId, Test)
+            assert.strictEqual(utils.elements[testId], Test)
+        })
+
+        it('should also work with option objects', function () {
+            Seed.element(testId2, opts)
+            assert.ok(utils.elements[testId2].prototype instanceof Seed)
+        })
+
+        it('should accept simple function as-is', function () {
+            var fn = function (el) {
+                el.className = 'hihi3'
+                el.textContent = 'ok3'
+            }
+            Seed.element(testId3, fn)
+            assert.strictEqual(utils.elements[testId3], fn)
+        })
+
+        it('should retrieve the VM if has only one arg', function () {
+            assert.strictEqual(Seed.element(testId), Test)
+        })
+
+        it('should work with custom tag names', function () {
+
+            mock(testId, '<' + testId + '>{{hi}}</' + testId + '>')
+            var t = new Seed({ el: '#' + testId }),
+                child = t.$el.querySelector(testId)
+            assert.strictEqual(child.className, 'hihi')
+            assert.strictEqual(child.textContent, 'ok')
+
+            mock(testId2, '<' + testId2 + '>{{hi}}</' + testId2 + '>')
+            var t2 = new Seed({ el: '#' + testId2 }),
+                child2 = t2.$el.querySelector(testId2)
+            assert.strictEqual(child2.className, 'hihi')
+            assert.strictEqual(child2.textContent, 'ok')
+
+            mock(testId3, '<' + testId3 + '></' + testId3 + '>')
+            var t3 = new Seed({ el: '#' + testId3 }),
+                child3 = t3.$el.querySelector(testId3)
+            assert.strictEqual(child3.className, 'hihi3')
+            assert.strictEqual(child3.textContent, 'ok3')
         })
 
     })
@@ -585,6 +643,66 @@ describe('UNIT: API', function () {
                     var p = new Parent()
                     assert.strictEqual(p.$el.querySelector('p').textContent, 'dad')
                     assert.strictEqual(p.$el.querySelector('div').textContent, 'child')
+                })
+
+            })
+            
+            describe('elements', function () {
+                
+                it('should allow the VM to use private custom elements', function () {
+                    var Child = Seed.extend({
+                        scope: {
+                            name: 'child'
+                        }
+                    })
+                    var Parent = Seed.extend({
+                        template: '<p>{{name}}</p><child>{{name}}</child>',
+                        scope: {
+                            name: 'dad'
+                        },
+                        elements: {
+                            child: Child
+                        }
+                    })
+                    var p = new Parent()
+                    assert.strictEqual(p.$el.querySelector('p').textContent, 'dad')
+                    assert.strictEqual(p.$el.querySelector('child').textContent, 'child')
+                })
+
+                it('should work with plain option object', function () {
+                    var Parent = Seed.extend({
+                        template: '<p>{{name}}</p><child>{{name}}</child>',
+                        scope: {
+                            name: 'dad'
+                        },
+                        elements: {
+                            child: {
+                                scope: {
+                                    name: 'child'
+                                }
+                            }
+                        }
+                    })
+                    var p = new Parent()
+                    assert.strictEqual(p.$el.querySelector('p').textContent, 'dad')
+                    assert.strictEqual(p.$el.querySelector('child').textContent, 'child')
+                })
+
+                it('should work with a simple function', function () {
+                    var Parent = Seed.extend({
+                        template: '<p>{{name}}</p><child></child>',
+                        scope: {
+                            name: 'dad'
+                        },
+                        elements: {
+                            child: function (el) {
+                                el.textContent = 'child'
+                            }
+                        }
+                    })
+                    var p = new Parent()
+                    assert.strictEqual(p.$el.querySelector('p').textContent, 'dad')
+                    assert.strictEqual(p.$el.querySelector('child').textContent, 'child')
                 })
 
             })

@@ -209,6 +209,9 @@ describe('UNIT: Utils', function () {
                 a: { scope: { data: 1 } },
                 b: { scope: { data: 2 } }
             },
+            elements: {
+                c: { scope: { data: 3 }}
+            },
             template: '<a>{{hi}}</a>'
         }
 
@@ -231,12 +234,15 @@ describe('UNIT: Utils', function () {
             assert.equal(options.template.querySelector('a').textContent, '{{hi}}')
         })
 
-        it('should convert plain object components to constructors', function () {
+        it('should convert plain object components & elements to constructors', function () {
             var components = options.components
             assert.ok(components.a.prototype instanceof Seed)
             assert.strictEqual(components.a.options.scope.data, 1)
             assert.ok(components.b.prototype instanceof Seed)
             assert.strictEqual(components.b.options.scope.data, 2)
+            var elements = options.elements
+            assert.ok(elements.c.prototype instanceof Seed)
+            assert.strictEqual(elements.c.options.scope.data, 3)
         })
 
     })

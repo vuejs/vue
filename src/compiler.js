@@ -241,7 +241,7 @@ CompilerProto.compile = function (node, root) {
             }
 
         // custom elements has 2nd highest priority
-        } else if (customElementFn) {
+        } else if (!root && customElementFn) {
 
             addChild(customElementFn)
 
