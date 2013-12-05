@@ -4,9 +4,14 @@ var config     = require('./config'),
     filters    = require('./filters'),
 
     // Regexes!
+
     // regex to split multiple directive expressions
-    SPLIT_RE        = /(?:['"](?:\\.|[^'"])*['"]|\\.|[^&]|&&)+/g,
+    // split by commas, but ignore commas within quotes, parens and escapes.
+    SPLIT_RE        = /(?:['"](?:\\.|[^'"])*['"]|\((?:\\.|[^\)])*\)|\\.|[^,])+/g,
+
+    // match up to the first single pipe, ignore those within quotes.
     KEY_RE          = /^(?:['"](?:\\.|[^'"])*['"]|\\.|[^\|]|\|\|)+/,
+
     ARG_RE          = /^([\w- ]+):(.+)$/,
     FILTERS_RE      = /\|[^\|]+/g,
     FILTER_TOKEN_RE = /[^\s']+|'[^']+'/g,
