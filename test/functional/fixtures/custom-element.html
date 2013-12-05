@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Custom Elements</title>
+        <meta charset="utf-8">
+        <script src="../../../dist/seed.js"></script>
+    </head>
+    <body>
+        <my-element>afsefsefse</my-element>
+        <cool>hmm</cool>
+        <wow></wow>
+        <script>
+            // global custom element with option object + replace
+            Seed.element('my-element', {
+                replace: true,
+                className: 'test',
+                template: '<div>{{msg}}</div>'
+            })
+            new Seed({
+                el:'body',
+                scope: {
+                    msg: 'hihi',
+                },
+                elements: {
+                    // private custom element with simple function
+                    cool: function (el) {
+                        el.className = 'cool'
+                        el.innerHTML = 'This is cool'
+                    },
+                    // private custom element with constructor
+                    wow: Seed.extend({
+                        init: function () {
+                            this.$el.textContent = 'this is wow'
+                        }
+                    })
+                }
+            })
+        </script>
+    </body>
+</html>
