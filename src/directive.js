@@ -77,25 +77,26 @@ var DirProto = Directive.prototype
  */
 function parseKey (dir, rawKey) {
 
-    var argMatch = rawKey.match(ARG_RE)
+    var key = rawKey
+    if (rawKey.indexOf(':') > -1) {
+        var argMatch = rawKey.match(ARG_RE)
+        key = argMatch
+            ? argMatch[2].trim()
+            : key
+        dir.arg = argMatch
+            ? argMatch[1].trim()
+            : null
+    }
 
-    var key = argMatch
-        ? argMatch[2].trim()
-        : rawKey.trim()
-
-    dir.arg = argMatch
-        ? argMatch[1].trim()
-        : null
-
-    var nesting = key.match(NESTING_RE)
-    dir.nesting = nesting
-        ? nesting[0].length
+    // nesting
+    var firstChar = key.charAt(0)
+    dir.root = firstChar === '*'
+    dir.nesting = firstChar === '^'
+        ? key.match(NESTING_RE)[0].length
         : false
 
-    dir.root = key.charAt(0) === '*'
-
     if (dir.nesting) {
-        key = key.replace(NESTING_RE, '')
+        key = key.slice(dir.nesting)
     } else if (dir.root) {
         key = key.slice(1)
     }
@@ -204,7 +205,9 @@ DirProto.unbind = function (update) {
  *  multiple clauses
  */
 Directive.split = function (exp) {
-    return exp.match(SPLIT_RE) || ['']
+    return exp.indexOf(',') > -1
+        ? exp.match(SPLIT_RE) || ['']
+        : [exp]
 }
 
 /**
@@ -220,8 +223,16 @@ Directive.parse = function (dirname, expression, compiler, node) {
     var dir = compiler.getOption('directives', dirname) || directives[dirname]
     if (!dir) return utils.warn('unknown directive: ' + dirname)
 
-    var keyMatch = expression.match(KEY_RE),
-        rawKey = keyMatch && keyMatch[0].trim()
+    var rawKey
+    if (expression.indexOf('|') > -1) {
+        var keyMatch = expression.match(KEY_RE)
+        if (keyMatch) {
+            rawKey = keyMatch[0].trim()
+        }
+    } else {
+        rawKey = expression.trim()
+    }
+    
     // have a valid raw key, or be an empty directive
     return (rawKey || expression === '')
         ? new Directive(dir, expression, rawKey, compiler, node)
