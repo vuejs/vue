@@ -130,7 +130,7 @@ module.exports = {
             this.buildItem()
             this.initiated = true
         }
-        this.collection = collection || []
+        collection = this.collection = collection || []
         this.vms = []
 
         // listen for collection mutation events

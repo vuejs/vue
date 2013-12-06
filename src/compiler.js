@@ -413,10 +413,12 @@ CompilerProto.bindDirective = function (directive) {
     }
 
     // set initial value
-    if (binding.isComputed) {
-        directive.refresh(value)
-    } else {
-        directive.update(value, true)
+    if (value !== undefined) {
+        if (binding.isComputed) {
+            directive.refresh(value)
+        } else {
+            directive.update(value, true)
+        }
     }
 }
 

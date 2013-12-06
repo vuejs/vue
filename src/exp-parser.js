@@ -68,7 +68,10 @@ function getRel (path, compiler) {
         }
     }
     compiler = vm.$compiler
-    if (!hasOwn.call(compiler.bindings, path)) {
+    if (
+        !hasOwn.call(compiler.bindings, path) &&
+        path.charAt(0) !== '$'
+    ) {
         compiler.createBinding(path)
     }
     return rel
@@ -90,6 +93,15 @@ function makeGetter (exp, raw) {
     return fn
 }
 
+/**
+ *  Escape a leading dollar sign for regex construction
+ */
+function escapeDollar (v) {
+    return v.charAt(0) === '$'
+        ? '\\' + v
+        : v
+}
+
 module.exports = {
 
     /**
@@ -105,11 +117,22 @@ module.exports = {
         }
         vars = utils.unique(vars)
         var accessors = '',
-            pathRE = new RegExp("\\b(" + vars.join('|') + ")[$\\w\\.]*\\b", 'g'),
-            body = 'return ' + exp.replace(pathRE, function (path) {
+            // construct a regex to extract all valid variable paths
+            // ones that begin with "$" are particularly tricky
+            // because we can't use \b for them
+            pathRE = new RegExp(
+                "[^$\\w\\.](" +
+                vars.map(escapeDollar).join('|') +
+                ")[$\\w\\.]*\\b", 'g'
+            ),
+            body = ('return ' + exp).replace(pathRE, function (path) {
+                // keep track of the first char
+                var c = path.charAt(0)
+                path = path.slice(1)
                 var val = 'this.' + getRel(path, compiler) + path
                 accessors += val + ';'
-                return val
+                // don't forget to put that first char back
+                return c + val
             })
         body = accessors + body
         return makeGetter(body, exp)
