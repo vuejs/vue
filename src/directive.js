@@ -216,9 +216,9 @@ Directive.split = function (exp) {
  */
 Directive.parse = function (dirname, expression, compiler, node) {
 
-    var prefix = config.prefix
-    if (dirname.indexOf(prefix) === -1) return
-    dirname = dirname.slice(prefix.length + 1)
+    var prefix = config.prefix + '-'
+    if (dirname.indexOf(prefix) !== 0) return
+    dirname = dirname.slice(prefix.length)
 
     var dir = compiler.getOption('directives', dirname) || directives[dirname]
     if (!dir) return utils.warn('unknown directive: ' + dirname)

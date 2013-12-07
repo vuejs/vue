@@ -17,42 +17,42 @@
             color: #F00;
         }
     </style>
-    <script src="../../../dist/seed.js"></script>
+    <script src="../../../dist/vue.js"></script>
 </head>
 <body>
     <div id="grandpa" data-name="Andy" data-family="Johnson">
         <p class="ancestor">{{name}} {{family}}</p>
 
-        <div sd-component="man" data-name="Jack">
+        <div v-component="man" data-name="Jack">
             <p class="jack">{{name}}, son of {{^name}}</p>
 
-            <div sd-component="man" data-name="Mike">
+            <div v-component="man" data-name="Mike">
                 <p class="mike">{{name}}, son of {{^name}}</p>
 
-                <div sd-component="offspring" data-name="Tim" class="tim">
+                <div v-component="offspring" data-name="Tim" class="tim">
                 </div>
 
-                <div sd-component="offspring" data-name="Tom" class="tom">
+                <div v-component="offspring" data-name="Tom" class="tom">
                 </div>
             </div>
 
-            <div sd-component="man" data-name="Jason">
+            <div v-component="man" data-name="Jason">
                 <p class="jason">{{name}}, son of {{^name}}</p>
 
-                <div sd-component="offspring" data-name="Andrew" class="andrew">
+                <div v-component="offspring" data-name="Andrew" class="andrew">
                 </div>
             </div>
         </div>
     </div>
 
-    <script type="text/sd-template" id="sd-template-offspring">
+    <script type="text/v-template" id="v-template-offspring">
         <p>{{name}}, son of {{^name}}, grandson of {{^^name}}, great-grandson of {{*name}}, and offspring of family {{family}}.</p>
     </script>
     
     <script>
-        Seed.config({ debug: true })
+        Vue.config({ debug: true })
 
-        var Man = Seed.extend({
+        var Man = Vue.extend({
             init: function () {
                 this.name = this.$el.dataset.name
                 var family = this.$el.dataset.family
@@ -63,10 +63,10 @@
         })
 
         var Offspring = Man.extend({
-            template: document.getElementById('sd-template-offspring').innerHTML.trim()
+            template: document.getElementById('v-template-offspring').innerHTML.trim()
         })
 
-        Seed
+        Vue
             .component('man', Man)
             .component('offspring', Offspring)
 

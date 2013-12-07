@@ -3,15 +3,15 @@
     <head>
         <title></title>
         <meta charset="utf-8">
-        <script src="../../../dist/seed.js"></script>
+        <script src="../../../dist/vue.js"></script>
     </head>
     <body>
-        <div id="hi" sd-test sd-test2>
+        <div id="hi" v-test v-test2>
         </div>
         <p class="one"></p>
         <p class="two"></p>
         <script>
-            var a = new Seed({
+            var a = new Vue({
                 el: '#hi',
                 directives: {
                     test: {

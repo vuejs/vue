@@ -3,29 +3,29 @@
     <head>
         <title></title>
         <meta charset="utf-8">
-        <script src="../../../dist/seed.js"></script>
+        <script src="../../../dist/vue.js"></script>
     </head>
     <body>
         <div id="normal">
-            <p sd-text="one + ' ' + two.three + '!'"></p>
-            <input id="one" sd-model="one" name="one"> <input id="two" sd-model="two.three" name="two">
-            <button sd-on="click: this.one = 'clicked'">click</button>
+            <p v-text="one + ' ' + two.three + '!'"></p>
+            <input id="one" v-model="one" name="one"> <input id="two" v-model="two.three" name="two">
+            <button v-on="click: this.one = 'clicked'">click</button>
         </div>
         <div id="lazy">
-            <p sd-text="one + ' ' + two.three + '!'"></p>
+            <p v-text="one + ' ' + two.three + '!'"></p>
             <form id="form">
-                <input sd-model="one" name="three"> <input sd-model="two.three" name="four">
+                <input v-model="one" name="three"> <input v-model="two.three" name="four">
             </form>
-            <button sd-on="click: two.three = 'clicked'">click</button>
+            <button v-on="click: two.three = 'clicked'">click</button>
         </div>
         <div id="conditional">
             <p>{{ok ? yesMsg : noMsg}}</p>
-            <button sd-on="click: ok = !ok" class="toggle">toggle</button>
-            <button sd-on="click: noMsg = 'Nah'" class="change">change</button>
+            <button v-on="click: ok = !ok" class="toggle">toggle</button>
+            <button v-on="click: noMsg = 'Nah'" class="change">change</button>
         </div>
         <script>
-        Seed.config({debug:true})
-            var normal = new Seed({
+        Vue.config({debug:true})
+            var normal = new Vue({
                 el: '#normal',
                 scope: {
                     one: 'Hello',
@@ -35,7 +35,7 @@
                 }
             })
 
-            var lazy = new Seed({
+            var lazy = new Vue({
                 el: '#lazy',
                 lazy: true,
                 scope: {
@@ -46,7 +46,7 @@
                 }
             })
 
-            var conditional = new Seed({
+            var conditional = new Vue({
                 el: '#conditional',
                 scope: {
                     ok: true,

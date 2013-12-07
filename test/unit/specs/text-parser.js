@@ -1,6 +1,6 @@
 describe('UNIT: TextNode Parser', function () {
 
-    var TextParser = require('seed/src/text-parser')
+    var TextParser = require('vue/src/text-parser')
 
     describe('.parse()', function () {
         

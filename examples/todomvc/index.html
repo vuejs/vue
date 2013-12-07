@@ -14,22 +14,22 @@
                     autofocus
                     autocomplete="off"
                     placeholder="What needs to be done?"
-                    sd-model="newTodo"
-                    sd-on="keyup:addTodo | key enter"
+                    v-model="newTodo"
+                    v-on="keyup:addTodo | key enter"
                 >
             </header>
-            <section id="main" sd-show="todos.length">
+            <section id="main" v-show="todos.length">
                 <input
                     id="toggle-all"
                     type="checkbox"
-                    sd-model="allDone"
+                    v-model="allDone"
                 >
                 <ul id="todo-list">
                     <li
                         class="todo"
-                        sd-repeat="todo:todos"
-                        sd-if="todoFilter(todo.completed)"
-                        sd-class="
+                        v-repeat="todo:todos"
+                        v-if="todoFilter(todo.completed)"
+                        v-class="
                             completed : todo.completed,
                             editing   : todo == editedTodo
                         "
@@ -38,18 +38,18 @@
                             <input
                                 class="toggle"
                                 type="checkbox"
-                                sd-model="todo.completed"
-                                sd-on="change:toggleTodo"
+                                v-model="todo.completed"
+                                v-on="change:toggleTodo"
                             >
-                            <label sd-text="todo.title" sd-on="dblclick:editTodo"></label>
-                            <button class="destroy" sd-on="click:removeTodo"></button>
+                            <label v-text="todo.title" v-on="dblclick:editTodo"></label>
+                            <button class="destroy" v-on="click:removeTodo"></button>
                         </div>
                         <input
                             class="edit"
                             type="text"
-                            sd-model="todo.title"
-                            sd-todo-focus="todo == editedTodo"
-                            sd-on="
+                            v-model="todo.title"
+                            v-todo-focus="todo == editedTodo"
+                            v-on="
                                 blur  : doneEdit,
                                 keyup : doneEdit | key enter,
                                 keyup : cancelEdit | key esc
@@ -58,23 +58,23 @@
                     </li>
                 </ul>
             </section>
-            <footer id="footer" sd-show="todos.length">
+            <footer id="footer" v-show="todos.length">
                 <span id="todo-count">
-                    <strong sd-text="remaining"></strong> {{remaining | pluralize item}} left
+                    <strong v-text="remaining"></strong> {{remaining | pluralize item}} left
                 </span>
                 <ul id="filters">
-                    <li><a href="#/all" sd-class="selected:filter=='all'">All</a></li>
-                    <li><a href="#/active" sd-class="selected:filter=='active'">Active</a></li>
-                    <li><a href="#/completed" sd-class="selected:filter=='completed'">Completed</a></li>
+                    <li><a href="#/all" v-class="selected:filter=='all'">All</a></li>
+                    <li><a href="#/active" v-class="selected:filter=='active'">Active</a></li>
+                    <li><a href="#/completed" v-class="selected:filter=='completed'">Completed</a></li>
                 </ul>
-                <button id="clear-completed" sd-on="click:removeCompleted" sd-show="todos.length > remaining">
+                <button id="clear-completed" v-on="click:removeCompleted" v-show="todos.length > remaining">
                     Remove Completed ({{todos.length - remaining}})
                 </button>
             </footer>
         </section>
         <footer id="info">
             <p>Double-click to edit a todo</p>
-            <p>Powered by <a href="https://github.com/yyx990803/seed">Seed.js</a></p>
+            <p>Powered by <a href="https://github.com/yyx990803/vue">Vue.js</a></p>
             <p>Created by <a href="http://evanyou.me">Evan You</a></p>
         </footer>
 
@@ -86,7 +86,7 @@
         </script>
         <!-- end testing -->
 
-        <script src="../../dist/seed.js"></script>
+        <script src="../../dist/vue.js"></script>
         <script src="js/store.js"></script>
         <script src="js/app.js"></script>
     </body>

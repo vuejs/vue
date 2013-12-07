@@ -12,7 +12,7 @@ ul {
 .user:last-child {
     border-bottom: 1px solid #eee;
 }
-.sd-enter, .sd-leave {
+.v-enter, .v-leave {
     height: 0;
     padding-top: 0;
     padding-bottom: 0;

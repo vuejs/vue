@@ -1,6 +1,6 @@
 describe('UNIT: Utils', function () {
 
-    var utils = require('seed/src/utils')
+    var utils = require('vue/src/utils')
     
     describe('hash', function () {
 
@@ -15,7 +15,7 @@ describe('UNIT: Utils', function () {
 
         var el = document.createElement('div'),
             testAttr = 'transition',
-            full = 'sd-' + testAttr
+            full = 'v-' + testAttr
         el.setAttribute (full, 'test')
         
         it('should append the prefix and return the attribute value', function () {
@@ -29,7 +29,7 @@ describe('UNIT: Utils', function () {
 
         it('should work with different prefix', function () {
 
-            Seed.config({ prefix: 'test' })
+            Vue.config({ prefix: 'test' })
 
             var el = document.createElement('div')
             el.setAttribute('test-' + testAttr, 'test')
@@ -37,7 +37,7 @@ describe('UNIT: Utils', function () {
             assert.strictEqual(val, 'test')
             assert.notOk(el.hasAttribute('test-' + testAttr))
 
-            Seed.config({ prefix: 'sd' })
+            Vue.config({ prefix: 'v' })
         })
 
     })
@@ -187,13 +187,13 @@ describe('UNIT: Utils', function () {
         it('should convert an non-VM object to a VM constructor', function () {
             var a = { test: 1 },
                 A = utils.toConstructor(a)
-            assert.ok(A.prototype instanceof Seed)
+            assert.ok(A.prototype instanceof Vue)
             assert.strictEqual(A.options, a)
         })
 
         it('should return the argument if it is already a consutructor', function () {
-            var A = utils.toConstructor(Seed)
-            assert.strictEqual(A, Seed)
+            var A = utils.toConstructor(Vue)
+            assert.strictEqual(A, Vue)
         })
 
     })
@@ -236,12 +236,12 @@ describe('UNIT: Utils', function () {
 
         it('should convert plain object components & elements to constructors', function () {
             var components = options.components
-            assert.ok(components.a.prototype instanceof Seed)
+            assert.ok(components.a.prototype instanceof Vue)
             assert.strictEqual(components.a.options.scope.data, 1)
-            assert.ok(components.b.prototype instanceof Seed)
+            assert.ok(components.b.prototype instanceof Vue)
             assert.strictEqual(components.b.options.scope.data, 2)
             var elements = options.elements
-            assert.ok(elements.c.prototype instanceof Seed)
+            assert.ok(elements.c.prototype instanceof Vue)
             assert.strictEqual(elements.c.options.scope.data, 3)
         })
 

@@ -1,10 +1,10 @@
 module.exports = {
 
-    prefix      : 'sd',
+    prefix      : 'v',
     debug       : false,
     silent      : false,
-    enterClass  : 'sd-enter',
-    leaveClass  : 'sd-leave',
+    enterClass  : 'v-enter',
+    leaveClass  : 'v-leave',
     attrs       : {}
     
 }

@@ -1,4 +1,4 @@
-var baseURL = 'https://seed-demo.firebaseIO.com/',
+var baseURL = 'https://vue-demo.firebaseIO.com/',
     Users   = new Firebase(baseURL + 'users')
 
 Users.on('child_added', function (snapshot) {
@@ -17,7 +17,7 @@ Users.on('child_removed', function (snapshot) {
     })
 })
 
-var app = new Seed({
+var app = new Vue({
     el: '#app',
     filters: validators,
     scope: {

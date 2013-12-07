@@ -1,6 +1,6 @@
 describe('UNIT: Binding', function () {
 
-    var Binding = require('seed/src/binding')
+    var Binding = require('vue/src/binding')
 
     describe('instantiation', function () {
 

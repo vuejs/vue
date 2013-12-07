@@ -3,32 +3,32 @@
     <head>
         <title>Nested repeat</title>
         <meta charset="utf-8">
-        <script src="../../../dist/seed.js"></script>
+        <script src="../../../dist/vue.js"></script>
     </head>
     <body>
         <div id="test">
             <ul>
-                <li sd-repeat="item : items" sd-class="'list-' + $index">
+                <li v-repeat="item : items" v-class="'list-' + $index">
                     <ul>
-                        <li sd-repeat="subitem : item.items" sd-class="'list-' + $index">
+                        <li v-repeat="subitem : item.items" v-class="'list-' + $index">
                             {{$parent.$index + '.' + $index + ' : ' + item.title + '<-' + subitem.title}}
                         </li>
                     </ul>
                 </li>
             </ul>
-            <button id="b0" sd-on="click: items[0].title = 'hi'">1</button>
-            <button id="b1" sd-on="click: items[1].title = 'hi'">2</button>
-            <button id="b0-0" sd-on="click: items[0].items[0].title = 'hi'">1.1</button>
-            <button id="b0-1" sd-on="click: items[0].items[1].title = 'hi'">1.2</button>
-            <button id="b1-0" sd-on="click: items[1].items[0].title = 'hi'">2.1</button>
-            <button id="b1-1" sd-on="click: items[1].items[1].title = 'hi'">2.2</button>
+            <button id="b0" v-on="click: items[0].title = 'hi'">1</button>
+            <button id="b1" v-on="click: items[1].title = 'hi'">2</button>
+            <button id="b0-0" v-on="click: items[0].items[0].title = 'hi'">1.1</button>
+            <button id="b0-1" v-on="click: items[0].items[1].title = 'hi'">1.2</button>
+            <button id="b1-0" v-on="click: items[1].items[0].title = 'hi'">2.1</button>
+            <button id="b1-1" v-on="click: items[1].items[1].title = 'hi'">2.2</button>
         </div>
         <script>
         var items = [
             { title: 0, items: [{title:0}, {title:1}] },
             { title: 1, items: [{title:0}, {title:1}] }
         ]
-        new Seed({
+        new Vue({
             el: '#test',
             scope: {
                 items: items

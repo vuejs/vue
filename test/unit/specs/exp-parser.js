@@ -1,6 +1,6 @@
 describe('UNIT: Expression Parser', function () {
 
-    var ExpParser = require('seed/src/exp-parser')
+    var ExpParser = require('vue/src/exp-parser')
     
     var testCases = [
         {
@@ -105,7 +105,7 @@ describe('UNIT: Expression Parser', function () {
     describe('invalid expression', function () {
         
         it('should capture the error and warn', function () {
-            var utils = require('seed/src/utils'),
+            var utils = require('vue/src/utils'),
                 oldWarn = utils.warn,
                 warned = false
             utils.warn = function () {

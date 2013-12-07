@@ -3,31 +3,31 @@
     <head>
         <title>SEED repeated items</title>
         <meta charset="utf-8">
-        <script src="../../../dist/seed.js"></script>
+        <script src="../../../dist/vue.js"></script>
     </head>
     <body>
         <div id="app">
             <p>
-                <button class="push" sd-on="click:push">push</button>
-                <button class="pop" sd-on="click:pop">pop</button>
-                <button class="shift" sd-on="click:shift">shift</button>
-                <button class="unshift" sd-on="click:unshift">unshift</button>
-                <button class="splice" sd-on="click:splice">splice</button>
-                <button class="remove" sd-on="click:remove">remove</button>
-                <button class="replace" sd-on="click:replace">replace</button>
-                <button class="sort" sd-on="click:sort">sort</button>
-                <button class="reverse" sd-on="click:reverse">reverse</button>
+                <button class="push" v-on="click:push">push</button>
+                <button class="pop" v-on="click:pop">pop</button>
+                <button class="shift" v-on="click:shift">shift</button>
+                <button class="unshift" v-on="click:unshift">unshift</button>
+                <button class="splice" v-on="click:splice">splice</button>
+                <button class="remove" v-on="click:remove">remove</button>
+                <button class="replace" v-on="click:replace">replace</button>
+                <button class="sort" v-on="click:sort">sort</button>
+                <button class="reverse" v-on="click:reverse">reverse</button>
             </p>
-            <p>Total items: <span class="count" sd-text="items.length"></span></p>
+            <p>Total items: <span class="count" v-text="items.length"></span></p>
             <ul>
-                <li class="item" sd-repeat="item:items">
+                <li class="item" v-repeat="item:items">
                     {{$index}} {{item.title}}
                 </li>
             </ul>
         </div>
         <script>
 
-            Seed.config({debug: true})
+            Vue.config({debug: true})
 
             var items = [
                 { title: 'A'},
@@ -35,7 +35,7 @@
                 { title: 'C'}
             ]
 
-            var demo = new Seed({
+            var demo = new Vue({
                 el: '#app',
                 scope: {
                     items: items,

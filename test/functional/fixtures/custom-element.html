@@ -3,7 +3,7 @@
     <head>
         <title>Custom Elements</title>
         <meta charset="utf-8">
-        <script src="../../../dist/seed.js"></script>
+        <script src="../../../dist/vue.js"></script>
     </head>
     <body>
         <my-element>afsefsefse</my-element>
@@ -11,12 +11,12 @@
         <wow></wow>
         <script>
             // global custom element with option object + replace
-            Seed.element('my-element', {
+            Vue.element('my-element', {
                 replace: true,
                 className: 'test',
                 template: '<div>{{msg}}</div>'
             })
-            new Seed({
+            new Vue({
                 el:'body',
                 scope: {
                     msg: 'hihi',
@@ -28,7 +28,7 @@
                         el.innerHTML = 'This is cool'
                     },
                     // private custom element with constructor
-                    wow: Seed.extend({
+                    wow: Vue.extend({
                         init: function () {
                             this.$el.textContent = 'this is wow'
                         }

@@ -1,8 +1,8 @@
 describe('UNIT: Observer', function () {
 
-    var Observer = require('seed/src/observer'),
+    var Observer = require('vue/src/observer'),
         Emitter  = require('emitter'),
-        DepsOb   = require('seed/src/deps-parser').observer
+        DepsOb   = require('vue/src/deps-parser').observer
     
     describe('Observing Object', function () {
         

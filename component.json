@@ -1,8 +1,8 @@
 {
-    "name": "seed",
-    "version": "0.5.2",
+    "name": "vue",
+    "version": "0.6.0",
     "main": "src/main.js",
-    "description": "A mini MVVM framework",
+    "description": "Data-driven View Models",
     "keywords": ["mvvm", "framework", "data binding"],
     "license": "MIT",
     "scripts": [

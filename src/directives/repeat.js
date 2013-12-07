@@ -99,7 +99,7 @@ module.exports = {
         self.hasTrans   = el.hasAttribute(config.attrs.transition)
 
         // create a comment node as a reference node for DOM insertions
-        self.ref = document.createComment('sd-repeat-' + self.arg)
+        self.ref = document.createComment(config.prefix + '-repeat-' + self.arg)
         ctn.insertBefore(self.ref, el)
         ctn.removeChild(el)
 
@@ -122,7 +122,7 @@ module.exports = {
 
         this.unbind(true)
         // attach an object to container to hold handlers
-        this.container.sd_dHandlers = utils.hash()
+        this.container.vue_dHandlers = utils.hash()
         // if initiating with an empty collection, we need to
         // force a compile so that we get all the bindings for
         // dependency extraction.
@@ -138,7 +138,7 @@ module.exports = {
         if (!collection.__observer__) Observer.watchArray(collection, null, new Emitter())
         collection.__observer__.on('mutate', this.mutationListener)
 
-        // create child-seeds and append to DOM
+        // create child-vms and append to DOM
         if (collection.length) {
             this.detach()
             for (var i = 0, l = collection.length; i < l; i++) {
@@ -151,7 +151,7 @@ module.exports = {
     /**
      *  Create a new child VM from a data object
      *  passing along compiler options indicating this
-     *  is a sd-repeat item.
+     *  is a v-repeat item.
      */
     buildItem: function (data, index) {
 
@@ -161,15 +161,15 @@ module.exports = {
             ref, item
 
         // append node into DOM first
-        // so sd-if can get access to parentNode
+        // so v-if can get access to parentNode
         if (data) {
             ref = this.vms.length > index
                 ? this.vms[index].$el
                 : this.ref
-            // make sure it works with sd-if
-            if (!ref.parentNode) ref = ref.sd_ref
+            // make sure it works with v-if
+            if (!ref.parentNode) ref = ref.vue_ref
             // process transition info before appending
-            node.sd_trans = utils.attr(node, 'transition', true)
+            node.vue_trans = utils.attr(node, 'transition', true)
             transition(node, 1, function () {
                 ctn.insertBefore(node, ref)
             }, this.compiler)
@@ -243,10 +243,10 @@ module.exports = {
             }
         }
         var ctn = this.container,
-            handlers = ctn.sd_dHandlers
+            handlers = ctn.vue_dHandlers
         for (var key in handlers) {
             ctn.removeEventListener(handlers[key].event, handlers[key])
         }
-        ctn.sd_dHandlers = null
+        ctn.vue_dHandlers = null
     }
 }

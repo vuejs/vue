@@ -1,11 +1,12 @@
-var transition = require('../transition')
+var config = require('../config'),
+    transition = require('../transition')
 
 module.exports = {
 
     bind: function () {
         this.parent = this.el.parentNode
-        this.ref = document.createComment('sd-if-' + this.key)
-        this.el.sd_ref = this.ref
+        this.ref = document.createComment(config.prefix + '-if-' + this.key)
+        this.el.vue_ref = this.ref
     },
 
     update: function (value) {
@@ -51,6 +52,6 @@ module.exports = {
     },
 
     unbind: function () {
-        this.el.sd_ref = null
+        this.el.vue_ref = null
     }
 }

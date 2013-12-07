@@ -28,7 +28,7 @@ var transition = module.exports = function (el, stage, changeState, compiler) {
         return codes.INIT
     }
 
-    var transitionId = el.sd_trans
+    var transitionId = el.vue_trans
 
     if (transitionId) {
         return applyTransitionFunctions(
@@ -64,14 +64,14 @@ function applyTransitionClass (el, stage, changeState) {
     }
 
     var classList         = el.classList,
-        lastLeaveCallback = el.sd_trans_cb
+        lastLeaveCallback = el.vue_trans_cb
 
     if (stage > 0) { // enter
 
         // cancel unfinished leave transition
         if (lastLeaveCallback) {
             el.removeEventListener(endEvent, lastLeaveCallback)
-            el.sd_trans_cb = null
+            el.vue_trans_cb = null
         }
 
         // set to hidden state before appending
@@ -92,7 +92,7 @@ function applyTransitionClass (el, stage, changeState) {
         var onEnd = function (e) {
             if (e.target === el) {
                 el.removeEventListener(endEvent, onEnd)
-                el.sd_trans_cb = null
+                el.vue_trans_cb = null
                 // actually remove node here
                 changeState()
                 classList.remove(leaveClass)
@@ -100,7 +100,7 @@ function applyTransitionClass (el, stage, changeState) {
         }
         // attach transition end listener
         el.addEventListener(endEvent, onEnd)
-        el.sd_trans_cb = onEnd
+        el.vue_trans_cb = onEnd
         return codes.CSS_L
         
     }
@@ -140,7 +140,7 @@ function applyTransitionFunctions (el, stage, changeState, functionId, compiler)
  *  Sniff proper transition end event name
  */
 function sniffTransitionEndEvent () {
-    var el = document.createElement('seed'),
+    var el = document.createElement('vue'),
         defaultEvent = 'transitionend',
         events = {
             'transition'       : defaultEvent,

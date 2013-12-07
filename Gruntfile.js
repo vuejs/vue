@@ -9,15 +9,15 @@ module.exports = function( grunt ) {
         componentbuild: {
             build: {
                 options: {
-                    name: 'seed',
-                    standalone: 'Seed'
+                    name: 'vue',
+                    standalone: 'Vue'
                 },
                 src: '.',
                 dest: 'dist'
             },
             test: {
                 options: {
-                    name: 'seed.test'
+                    name: 'vue.test'
                 },
                 src: '.',
                 dest: 'test'
@@ -53,12 +53,12 @@ module.exports = function( grunt ) {
                     compress: true,
                     mangle: true,
                     banner:
-                        '// Seed.js - v' + require('./package.json').version + '\n' +
+                        '// Vue.js - v' + require('./package.json').version + '\n' +
                         '// (c) 2013 Evan You\n' +
-                        '// https://github.com/yyx990803/seed\n'
+                        '// https://github.com/yyx990803/vue\n'
                 },
                 files: {
-                    'dist/seed.min.js': 'dist/seed.js'
+                    'dist/vue.min.js': 'dist/vue.js'
                 }
             }
         },
@@ -119,14 +119,14 @@ module.exports = function( grunt ) {
         var done = this.async()
         grunt.util.spawn({
             cmd: './node_modules/jscoverage/bin/jscoverage',
-            args: ['./test/seed.test.js'],
+            args: ['./test/vue.test.js'],
             opts: {
                 stdio: 'inherit'
             }
         }, function (err, res) {
             if (err) grunt.fail.fatal(res.stdout || 'Jscoverage instrumentation failed')
             grunt.log.writeln(res.stdout)
-            fs.unlinkSync('./test/seed.test.js')
+            fs.unlinkSync('./test/vue.test.js')
             done()
         })
     })

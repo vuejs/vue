@@ -120,7 +120,7 @@ var JsDiff = (function() {
         var maxEditLength = newLen + oldLen;
         var bestPath = [{ newPos: -1, components: [] }];
 
-        // Seed editLength = 0
+        // Vue editLength = 0
         var oldPos = this.extractCommon(bestPath[0], newString, oldString, 0);
         if (bestPath[0].newPos+1 >= newLen && oldPos+1 >= oldLen) {
           return bestPath[0].components;

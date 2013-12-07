@@ -17,7 +17,7 @@
         "after": true,
         "assert": true,
         "mock": true,
-        "Seed": true,
+        "Vue": true,
         "$": true,
         "mockHTMLEvent": true,
         "mockMouseEvent": true,

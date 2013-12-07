@@ -1,6 +1,6 @@
 describe('UNIT: Dependency Parser', function () {
 
-    var DepsParser = require('seed/src/deps-parser')
+    var DepsParser = require('vue/src/deps-parser')
 
     describe('.parse()', function () {
 

@@ -214,7 +214,7 @@ CompilerProto.compile = function (node, root) {
 
     if (node.nodeType === 1) { // a normal node
 
-        // skip anything with sd-pre
+        // skip anything with v-pre
         if (utils.attr(node, 'pre') !== null) return
 
         // special attributes to check
@@ -229,12 +229,12 @@ CompilerProto.compile = function (node, root) {
         // `utils.attr` removes the attribute once it gets the
         // value, so we should not access them all at once.
 
-        // sd-repeat has the highest priority
+        // v-repeat has the highest priority
         // and we need to preserve all other attributes for it.
         /* jshint boss: true */
         if (repeatExp = utils.attr(node, 'repeat')) {
 
-            // repeat block cannot have sd-id at the same time.
+            // repeat block cannot have v-id at the same time.
             var directive = Directive.parse(config.attrs.repeat, repeatExp, compiler, node)
             if (directive) {
                 compiler.bindDirective(directive)
@@ -245,7 +245,7 @@ CompilerProto.compile = function (node, root) {
 
             addChild(customElementFn)
 
-        // sd-component has 3rd highest priority
+        // v-component has 3rd highest priority
         } else if (!root && (componentId = utils.attr(node, 'component'))) {
 
             var ChildVM = compiler.getOption('components', componentId)
@@ -254,7 +254,7 @@ CompilerProto.compile = function (node, root) {
         } else {
 
             // check transition property
-            node.sd_trans = utils.attr(node, 'transition')
+            node.vue_trans = utils.attr(node, 'transition')
             
             // replace innerHTML with partial
             partialId = utils.attr(node, 'partial')
@@ -297,11 +297,10 @@ CompilerProto.compile = function (node, root) {
  *  Compile a normal node
  */
 CompilerProto.compileNode = function (node) {
-    var i, j
+    var i, j, attrs = node.attributes
     // parse if has attributes
-    if (node.attributes && node.attributes.length) {
-        var attrs = slice.call(node.attributes),
-            attr, valid, exps, exp
+    if (attrs && attrs.length) {
+        var attr, valid, exps, exp
         // loop through all attributes
         i = attrs.length
         while (i--) {

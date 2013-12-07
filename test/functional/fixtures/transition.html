@@ -3,7 +3,7 @@
     <head>
         <title></title>
         <meta charset="utf-8">
-        <script src="../../../dist/seed.js"></script>
+        <script src="../../../dist/vue.js"></script>
         <style type="text/css">
             .test {
                 width: 600px;
@@ -16,17 +16,17 @@
                 -moz-transition: all .2s ease;
                 -webkit-transition: all .2s ease;
             }
-            .sd-enter, .sd-leave {
+            .v-enter, .v-leave {
                 height: 0;
                 padding-top: 0;
                 padding-bottom: 0;
                 border-top-width: 0;
                 border-bottom-width: 0;
             }
-            .sd-enter {
+            .v-enter {
                 background-color: #00f;
             }
-            .sd-leave {
+            .v-leave {
                 background-color: #0f0;
             }
         </style>
@@ -34,33 +34,33 @@
     <body>
         <div id="test">
             <div>
-                <button class="button-0" sd-on="click:set">0</button>
-                <button class="button-1" sd-on="click:set">1</button>
-                <button class="button-2" sd-on="click:set">2</button>
-                <button class="push" sd-on="click:push">push</button>
-                <button class="pop" sd-on="click:pop">pop</button>
-                <button class="splice" sd-on="click:splice">splice</button>
+                <button class="button-0" v-on="click:set">0</button>
+                <button class="button-1" v-on="click:set">1</button>
+                <button class="button-2" v-on="click:set">2</button>
+                <button class="push" v-on="click:push">push</button>
+                <button class="pop" v-on="click:pop">pop</button>
+                <button class="splice" v-on="click:splice">splice</button>
             </div>
             <div
                 class="test"
-                sd-repeat="item:items"
-                sd-if="filter(item)"
-                sd-transition
-                sd-attr="data-id:item.a">
+                v-repeat="item:items"
+                v-if="filter(item)"
+                v-transition
+                v-attr="data-id:item.a">
                 {{item.a}}
             </div>
             <div
                 class="test"
-                sd-repeat="item:items"
-                sd-show="filter(item)"
-                sd-transition
-                sd-attr="data-id:item.a">
+                v-repeat="item:items"
+                v-show="filter(item)"
+                v-transition
+                v-attr="data-id:item.a">
                 {{item.a}}
             </div>
         </div>
         <h1 style="margin:0">123</h1>
         <script>
-            var test = new Seed({
+            var test = new Vue({
                 el: '#test',
                 scope: {
                     b: 1,

@@ -1,11 +1,10 @@
 {
-    "name": "seed",
-    "version": "0.5.2",
-    "main": "dist/seed.js",
+    "name": "vue",
+    "version": "0.6.0",
+    "main": "dist/vue.js",
     "ignore": [
         ".*",
         "examples",
-        "dist/seed.test.js",
         "src",
         "test",
         "Gruntfile.js",

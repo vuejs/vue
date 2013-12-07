@@ -3,21 +3,21 @@
     <head>
         <title></title>
         <meta charset="utf-8">
-        <script src="../../../dist/seed.js"></script>
+        <script src="../../../dist/vue.js"></script>
     </head>
     <body>
 
-        <div id="usa" sd-partial="global"></div>
-        <div id="japan" sd-partial="local"></div>
+        <div id="usa" v-partial="global"></div>
+        <div id="japan" v-partial="local"></div>
 
-        <script type="text/sd-template" id="test">
+        <script type="text/v-template" id="test">
             <p>{{hi}}!</p>
         </script>
 
         <script>
 
             // direct usage
-            var china  = new Seed({
+            var china  = new Vue({
                 id: 'china',
                 template: '#test'
             })
@@ -27,7 +27,7 @@
             china.hi = '你好'
 
             // extended usage
-            var Hawaii = Seed.extend({
+            var Hawaii = Vue.extend({
                 id: 'hawaii',
                 template: '#test'
             })
@@ -36,14 +36,14 @@
             hawaii.hi = 'Aloha'
 
             // global partial
-            Seed.partial('global', document.querySelector('#test').innerHTML)
-            var usa = new Seed({
+            Vue.partial('global', document.querySelector('#test').innerHTML)
+            var usa = new Vue({
                 el: '#usa'
             })
             usa.hi = 'Hi dude'
 
             // direct partial
-            var japan = new Seed({
+            var japan = new Vue({
                 el: '#japan',
                 partials: {
                     local: document.querySelector('#test').innerHTML

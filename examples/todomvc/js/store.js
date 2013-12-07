@@ -1,5 +1,5 @@
 var todoStorage = (function () {
-    var STORAGE_KEY = 'todos-seedjs',
+    var STORAGE_KEY = 'todos-vuejs',
         todos = null
     return {
         fetch: function () {

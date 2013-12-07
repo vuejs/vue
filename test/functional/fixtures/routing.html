@@ -3,12 +3,12 @@
     <head>
         <title>route</title>
         <meta charset="utf-8">
-        <script src="../../../dist/seed.js"></script>
+        <script src="../../../dist/vue.js"></script>
     </head>
     <body>
-        <div sd-if="route.hi">Hi! <a href="#ho">Next</a></div>
-        <div sd-if="route.ho">Ho! <a href="#ha">Next</a></div>
-        <div sd-if="route.ha">Ha! <a href="#hi">Next</a></div>
+        <div v-if="route.hi">Hi! <a href="#ho">Next</a></div>
+        <div v-if="route.ho">Ho! <a href="#ha">Next</a></div>
+        <div v-if="route.ha">Ha! <a href="#hi">Next</a></div>
         <script>
 
             var route = {
@@ -25,7 +25,7 @@
                 }
             }
 
-            var app = new Seed({
+            var app = new Vue({
                 el: 'body'
             })
             app.route = route

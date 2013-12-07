@@ -7,7 +7,7 @@ describe('UNIT: ViewModel', function () {
             }
         },
         arr = [1, 2, 3],
-        vm = new Seed({
+        vm = new Vue({
             el: '#vm-test',
             scope: {
                 a: data,
@@ -93,7 +93,7 @@ describe('UNIT: ViewModel', function () {
     describe('.$on', function () {
         
         it('should register listener on vm\'s compiler\'s emitter', function () {
-            var t = new Seed(),
+            var t = new Vue(),
                 triggered = false,
                 msg = 'on test'
             t.$on('test', function (m) {
@@ -109,7 +109,7 @@ describe('UNIT: ViewModel', function () {
     describe('.$once', function () {
         
         it('should invoke the listener only once', function () {
-            var t = new Seed(),
+            var t = new Vue(),
                 triggered = 0,
                 msg = 'on once'
             t.$once('test', function (m) {
@@ -126,7 +126,7 @@ describe('UNIT: ViewModel', function () {
     describe('$off', function () {
         
         it('should turn off the listener', function () {
-            var t = new Seed(),
+            var t = new Vue(),
                 triggered1 = false,
                 triggered2 = false,
                 f1 = function () {
@@ -150,7 +150,7 @@ describe('UNIT: ViewModel', function () {
         it('should notify all child VMs', function () {
             var triggered = 0,
                 msg = 'broadcast test'
-            var Child = Seed.extend({
+            var Child = Vue.extend({
                 init: function () {
                     this.$on('hello', function (m) {
                         assert.strictEqual(m, msg)
@@ -158,8 +158,8 @@ describe('UNIT: ViewModel', function () {
                     })
                 }
             })
-            var Test = Seed.extend({
-                template: '<div sd-component="test"></div><div sd-component="test"></div>',
+            var Test = Vue.extend({
+                template: '<div v-component="test"></div><div v-component="test"></div>',
                 components: {
                     test: Child
                 }
@@ -177,7 +177,7 @@ describe('UNIT: ViewModel', function () {
             var topTriggered = false,
                 midTriggered = false,
                 msg = 'emit test'
-            var Bottom = Seed.extend({
+            var Bottom = Vue.extend({
                 init: function () {
                     var self = this
                     setTimeout(function () {
@@ -188,8 +188,8 @@ describe('UNIT: ViewModel', function () {
                     }, 0)
                 }
             })
-            var Middle = Seed.extend({
-                template: '<div sd-component="bottom"></div>',
+            var Middle = Vue.extend({
+                template: '<div v-component="bottom"></div>',
                 components: { bottom: Bottom },
                 init: function () {
                     this.$on('hello', function (m) {
@@ -198,8 +198,8 @@ describe('UNIT: ViewModel', function () {
                     })
                 }
             })
-            var Top = Seed.extend({
-                template: '<div sd-component="middle"></div>',
+            var Top = Vue.extend({
+                template: '<div v-component="middle"></div>',
                 components: { middle: Middle },
                 init: function () {
                     this.$on('hello', function (m) {
@@ -217,7 +217,7 @@ describe('UNIT: ViewModel', function () {
         
         // since this simply delegates to Compiler.prototype.destroy(),
         // that's what we are actually testing here.
-        var destroy = require('seed/src/compiler').prototype.destroy
+        var destroy = require('vue/src/compiler').prototype.destroy
 
         var tearDownCalled = false,
             observerOffCalled = false,

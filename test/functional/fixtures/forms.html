@@ -3,24 +3,24 @@
     <head>
         <title>Forms test</title>
         <meta charset="utf-8">
-        <script src="../../../dist/seed.js"></script>
+        <script src="../../../dist/vue.js"></script>
     </head>
     <body>
         <form id="forms">
 
-            <input type="text" name="text" sd-model="text">
+            <input type="text" name="text" v-model="text">
 
-            <input type="checkbox" name="checkbox" sd-model="checked">
+            <input type="checkbox" name="checkbox" v-model="checked">
 
-            <input type="radio" name="radio" sd-model="radio" value="a">
-            <input type="radio" name="radio" sd-model="radio" value="b">
+            <input type="radio" name="radio" v-model="radio" value="a">
+            <input type="radio" name="radio" v-model="radio" value="b">
 
-            <select sd-model="select" name="select">
+            <select v-model="select" name="select">
                 <option>a</option>
                 <option>b</option>
             </select>
 
-            <textarea name="textarea" sd-model="textarea"></textarea>
+            <textarea name="textarea" v-model="textarea"></textarea>
 
         </form>
 
@@ -33,7 +33,7 @@
         </div>
 
         <script>
-            var test = new Seed({
+            var test = new Vue({
                 el: 'body',
                 lazy: true,
                 scope: {

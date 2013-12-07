@@ -1,6 +1,6 @@
 describe('UNIT: Filters', function () {
 
-    var filters = require('seed/src/filters')
+    var filters = require('vue/src/filters')
     
     describe('capitalize', function () {
 

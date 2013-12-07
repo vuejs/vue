@@ -5,24 +5,24 @@
         <meta charset="utf-8">
         <link rel="stylesheet" type="text/css" href="style.css">
         <script src='https://cdn.firebase.com/v0/firebase.js'></script>
-        <script src="../../dist/seed.js"></script>
+        <script src="../../dist/vue.js"></script>
     </head>
     <body>
         <div id="app">
             <ul>
-                <li class="user" sd-repeat="user:users" sd-transition>
+                <li class="user" v-repeat="user:users" v-transition>
                     <span>{{user.name}} - {{user.email}}</span>
-                    <button sd-on="click:removeUser">X</button>
+                    <button v-on="click:removeUser">X</button>
                 </li>
             </ul>
-            <form id="form" sd-on="submit:addUser">
-                <input sd-model="newUser.name | nameValidator | capitalize">
-                <input sd-model="newUser.email | emailValidator">
+            <form id="form" v-on="submit:addUser">
+                <input v-model="newUser.name | nameValidator | capitalize">
+                <input v-model="newUser.email | emailValidator">
                 <input type="submit" value="Add User">
             </form>
             <ul class="errors">
-                <li sd-show="!validation.name">Name cannot be empty.</li>
-                <li sd-show="!validation.email">Please provide a valid email address.</li>
+                <li v-show="!validation.name">Name cannot be empty.</li>
+                <li v-show="!validation.email">Please provide a valid email address.</li>
             </ul>
         </div>
         <script src="validators.js"></script>

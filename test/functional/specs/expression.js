@@ -37,12 +37,12 @@ casper.test.begin('Expression', 19, function (test) {
         this.sendKeys('#one', 'Bye')
         test.assertSelectorHasText('#normal p', 'Bye Casper!')
 
-        // sd-on with expression
+        // v-on with expression
         this.click('#normal button')
         test.assertField('one', 'clicked')
         test.assertSelectorHasText('#normal p', 'clicked Casper!')
 
-        // sd-on with expression
+        // v-on with expression
         this.click('#lazy button')
         test.assertField('four', 'clicked')
         test.assertSelectorHasText('#lazy p', 'three clicked!')

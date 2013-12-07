@@ -218,7 +218,7 @@ function ensurePath (obj, key) {
 
 module.exports = {
 
-    // used in sd-repeat
+    // used in v-repeat
     watchArray: watchArray,
     ensurePath: ensurePath,
     ensurePaths: ensurePaths,

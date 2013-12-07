@@ -4,14 +4,14 @@ var filters = {
     completed: function (completed) { return completed }
 }
 
-Seed.directive('todo-focus', function (value) {
+Vue.directive('todo-focus', function (value) {
     var el = this.el
     if (value) {
         setTimeout(function () { el.focus() }, 0)
     }
 })
 
-var app = new Seed({
+var app = new Vue({
 
     el: '#todoapp',
 

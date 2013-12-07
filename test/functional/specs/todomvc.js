@@ -112,7 +112,7 @@ casper.test.begin('todomvc', 69, function (test) {
     })
 
     // add item with filter active --------------------------------------------
-    // mostly make sure sd-repeat works well with sd-if
+    // mostly make sure v-repeat works well with v-if
     .then(function () {
         createNewItem('test')
         test.assertElementCount('.todo', 2, 'should be able to create new item when fitler active')

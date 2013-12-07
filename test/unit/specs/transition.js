@@ -1,7 +1,7 @@
 describe('UNIT: Transition', function () {
 
-    var transition = require('seed/src/transition'),
-        config     = require('seed/src/config'),
+    var transition = require('vue/src/transition'),
+        config     = require('vue/src/config'),
         codes      = transition.codes,
         endEvent   = sniffTransitionEndEvent(),
         enterClass = config.enterClass,
@@ -50,10 +50,10 @@ describe('UNIT: Transition', function () {
                 }),
                 code,
                 cbCalled = false
-            el.sd_trans_cb = function () {
+            el.vue_trans_cb = function () {
                 cbCalled = true
             }
-            el.addEventListener(endEvent, el.sd_trans_cb)
+            el.addEventListener(endEvent, el.vue_trans_cb)
 
             it('should add the class before calling changeState()', function () {
                 code = transition(el, 1, c.change, {})
@@ -61,7 +61,7 @@ describe('UNIT: Transition', function () {
             })
 
             it('should remove unfinished leave callback if exists', function () {
-                assert.notOk(el.sd_trans_cb)
+                assert.notOk(el.vue_trans_cb)
                 var e = mockHTMLEvent(endEvent)
                 el.dispatchEvent(e)
                 assert.notOk(cbCalled)
@@ -84,7 +84,7 @@ describe('UNIT: Transition', function () {
                 code = transition(el, -1, c.change, {})
 
             it('should attach an ontransitionend listener', function () {
-                assert.ok(typeof el.sd_trans_cb === 'function')
+                assert.ok(typeof el.vue_trans_cb === 'function')
             })
 
             it('should add the class', function () {
@@ -98,7 +98,7 @@ describe('UNIT: Transition', function () {
             })
 
             it('should remove the callback after called', function () {
-                assert.notOk(el.sd_trans_cb)
+                assert.notOk(el.vue_trans_cb)
                 var e = mockHTMLEvent(endEvent)
                 el.dispatchEvent(e)
                 assert.strictEqual(c.n, 1)
@@ -218,15 +218,15 @@ describe('UNIT: Transition', function () {
     function mockEl (type) {
         var el = document.createElement('div')
         if (type === 'css') {
-            el.sd_trans = ''
+            el.vue_trans = ''
         } else if (type === 'js') {
-            el.sd_trans = 'test'
+            el.vue_trans = 'test'
         }
         return el
     }
 
     function sniffTransitionEndEvent () {
-        var el = document.createElement('seed'),
+        var el = document.createElement('vue'),
             defaultEvent = 'transitionend',
             events = {
                 'transition'       : defaultEvent,

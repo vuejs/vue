@@ -4,11 +4,11 @@ describe('UNIT: API', function () {
         
         it('should work when changing prefix', function () {
             var testId = 'config-1'
-            Seed.config({
+            Vue.config({
                 prefix: 'test'
             })
             mock(testId, '<span test-text="test"></span>')
-            new Seed({
+            new Vue({
                 el: '#' + testId,
                 scope: { test: testId }
             })
@@ -16,8 +16,8 @@ describe('UNIT: API', function () {
         })
 
         after(function () {
-            Seed.config({
-                prefix: 'sd'
+            Vue.config({
+                prefix: 'v'
             })
         })
 
@@ -32,9 +32,9 @@ describe('UNIT: API', function () {
         it('should create custom filter', function () {
             var testId = 'filter-1',
                 msg = '12345'
-            Seed.filter('reverse', reverse)
+            Vue.filter('reverse', reverse)
             mock(testId, '{{ test | reverse }}')
-            new Seed({
+            new Vue({
                 el: '#' + testId,
                 scope: { test: msg }
             })
@@ -42,7 +42,7 @@ describe('UNIT: API', function () {
         })
 
         it('should return filter function if only one arg is given', function () {
-            var f = Seed.filter('reverse')
+            var f = Vue.filter('reverse')
             assert.strictEqual(f, reverse)
         })
 
@@ -55,11 +55,11 @@ describe('UNIT: API', function () {
         it('should create custom directive with set function only', function () {
             var testId = 'directive-1',
                 msg = 'wowow'
-            Seed.directive('test', function (value) {
+            Vue.directive('test', function (value) {
                 this.el.setAttribute(testId, value + '123')
             })
-            mock(testId, '<span sd-test="test"></span>')
-            new Seed({
+            mock(testId, '<span v-test="test"></span>')
+            new Vue({
                 el: '#' + testId,
                 scope: { test: msg }
             })
@@ -81,9 +81,9 @@ describe('UNIT: API', function () {
                     this.el.removeAttribute(testId + 'bind')
                 }
             }
-            Seed.directive('test2', dirTest)
-            mock(testId, '<span sd-test2="test"></span>')
-            var vm = new Seed({
+            Vue.directive('test2', dirTest)
+            mock(testId, '<span v-test2="test"></span>')
+            var vm = new Vue({
                     el: '#' + testId,
                     scope: { test: msg }
                 }),
@@ -95,7 +95,7 @@ describe('UNIT: API', function () {
         })
 
         it('should return directive object/fn if only one arg is given', function () {
-            var dir = Seed.directive('test2')
+            var dir = Vue.directive('test2')
             assert.strictEqual(dir, dirTest)
         })
 
@@ -109,33 +109,33 @@ describe('UNIT: API', function () {
                 className: 'hihi',
                 scope: { hi: 'ok' }
             },
-            Test = Seed.extend(opts),
-            utils = require('seed/src/utils')
+            Test = Vue.extend(opts),
+            utils = require('vue/src/utils')
 
         it('should register a Component constructor', function () {
-            Seed.component(testId, Test)
+            Vue.component(testId, Test)
             assert.strictEqual(utils.components[testId], Test)
         })
 
         it('should also work with option objects', function () {
-            Seed.component(testId2, opts)
-            assert.ok(utils.components[testId2].prototype instanceof Seed)
+            Vue.component(testId2, opts)
+            assert.ok(utils.components[testId2].prototype instanceof Vue)
         })
 
         it('should retrieve the VM if has only one arg', function () {
-            assert.strictEqual(Seed.component(testId), Test)
+            assert.strictEqual(Vue.component(testId), Test)
         })
 
-        it('should work with sd-component', function () {
+        it('should work with v-component', function () {
 
-            mock(testId, '<div sd-component="' + testId + '">{{hi}}</div>')
-            var t = new Seed({ el: '#' + testId }),
+            mock(testId, '<div v-component="' + testId + '">{{hi}}</div>')
+            var t = new Vue({ el: '#' + testId }),
                 child = t.$el.querySelector('div')
             assert.strictEqual(child.className, 'hihi')
             assert.strictEqual(child.textContent, 'ok')
 
-            mock(testId2, '<div sd-component="' + testId2 + '">{{hi}}</div>')
-            var t2 = new Seed({ el: '#' + testId2 }),
+            mock(testId2, '<div v-component="' + testId2 + '">{{hi}}</div>')
+            var t2 = new Vue({ el: '#' + testId2 }),
                 child2 = t2.$el.querySelector('div')
             assert.strictEqual(child2.className, 'hihi')
             assert.strictEqual(child2.textContent, 'ok')
@@ -152,17 +152,17 @@ describe('UNIT: API', function () {
                 className: 'hihi',
                 scope: { hi: 'ok' }
             },
-            Test = Seed.extend(opts),
-            utils = require('seed/src/utils')
+            Test = Vue.extend(opts),
+            utils = require('vue/src/utils')
 
         it('should register a Custom Element constructor', function () {
-            Seed.element(testId, Test)
+            Vue.element(testId, Test)
             assert.strictEqual(utils.elements[testId], Test)
         })
 
         it('should also work with option objects', function () {
-            Seed.element(testId2, opts)
-            assert.ok(utils.elements[testId2].prototype instanceof Seed)
+            Vue.element(testId2, opts)
+            assert.ok(utils.elements[testId2].prototype instanceof Vue)
         })
 
         it('should accept simple function as-is', function () {
@@ -170,30 +170,30 @@ describe('UNIT: API', function () {
                 el.className = 'hihi3'
                 el.textContent = 'ok3'
             }
-            Seed.element(testId3, fn)
+            Vue.element(testId3, fn)
             assert.strictEqual(utils.elements[testId3], fn)
         })
 
         it('should retrieve the VM if has only one arg', function () {
-            assert.strictEqual(Seed.element(testId), Test)
+            assert.strictEqual(Vue.element(testId), Test)
         })
 
         it('should work with custom tag names', function () {
 
             mock(testId, '<' + testId + '>{{hi}}</' + testId + '>')
-            var t = new Seed({ el: '#' + testId }),
+            var t = new Vue({ el: '#' + testId }),
                 child = t.$el.querySelector(testId)
             assert.strictEqual(child.className, 'hihi')
             assert.strictEqual(child.textContent, 'ok')
 
             mock(testId2, '<' + testId2 + '>{{hi}}</' + testId2 + '>')
-            var t2 = new Seed({ el: '#' + testId2 }),
+            var t2 = new Vue({ el: '#' + testId2 }),
                 child2 = t2.$el.querySelector(testId2)
             assert.strictEqual(child2.className, 'hihi')
             assert.strictEqual(child2.textContent, 'ok')
 
             mock(testId3, '<' + testId3 + '></' + testId3 + '>')
-            var t3 = new Seed({ el: '#' + testId3 }),
+            var t3 = new Vue({ el: '#' + testId3 }),
                 child3 = t3.$el.querySelector(testId3)
             assert.strictEqual(child3.className, 'hihi3')
             assert.strictEqual(child3.textContent, 'ok3')
@@ -205,10 +205,10 @@ describe('UNIT: API', function () {
 
         var testId = 'api-partial-test',
             partial = '<div class="partial-test"><a>{{hi}}</a></div><span>hahaha</span>',
-            utils = require('seed/src/utils')
+            utils = require('vue/src/utils')
 
         it('should register the partial as a dom fragment', function () {
-            Seed.partial(testId, partial)
+            Vue.partial(testId, partial)
             var converted = utils.partials[testId]
             assert.ok(converted instanceof window.DocumentFragment)
             assert.strictEqual(converted.querySelector('.partial-test a').innerHTML, '{{hi}}')
@@ -216,14 +216,14 @@ describe('UNIT: API', function () {
         })
 
         it('should retrieve the partial if has only one arg', function () {
-            assert.strictEqual(utils.partials[testId], Seed.partial(testId))
+            assert.strictEqual(utils.partials[testId], Vue.partial(testId))
         })
 
-        it('should work with sd-partial as a directive', function () {
+        it('should work with v-partial as a directive', function () {
             var testId = 'api-partial-direcitve'
-            Seed.partial(testId, partial)
-            mock(testId, '<div class="directive" sd-partial="' + testId + '">hello</div>')
-            var t = new Seed({
+            Vue.partial(testId, partial)
+            mock(testId, '<div class="directive" v-partial="' + testId + '">hello</div>')
+            var t = new Vue({
                 el: '#' + testId,
                 scope: { hi: 'hohoho' }
             })
@@ -231,11 +231,11 @@ describe('UNIT: API', function () {
             assert.strictEqual(t.$el.querySelector('.directive span').innerHTML, 'hahaha')
         })
 
-        it('should work with sd-partial as an inline interpolation', function () {
+        it('should work with v-partial as an inline interpolation', function () {
             var testId = 'api-partial-inline'
-            Seed.partial(testId, partial)
+            Vue.partial(testId, partial)
             mock(testId, '<div class="inline">{{>' + testId + '}}</div>')
-            var t = new Seed({
+            var t = new Vue({
                 el: '#' + testId,
                 scope: { hi: 'hohoho' }
             })
@@ -248,23 +248,23 @@ describe('UNIT: API', function () {
         
         var testId = 'api-trans-test',
             transition = {},
-            utils = require('seed/src/utils')
+            utils = require('vue/src/utils')
 
         it('should register a transition object', function () {
-            Seed.transition(testId, transition)
+            Vue.transition(testId, transition)
             assert.strictEqual(utils.transitions[testId], transition)
         })
 
         it('should retrieve the transition if has only one arg', function () {
-            assert.strictEqual(Seed.transition(testId), transition)
+            assert.strictEqual(Vue.transition(testId), transition)
         })
 
-        it('should work with sd-transition', function () {
+        it('should work with v-transition', function () {
 
             var enterCalled = false,
                 leaveCalled = false
 
-            Seed.transition('transition-api-test', {
+            Vue.transition('transition-api-test', {
                 enter: function (el, done) {
                     enterCalled = true
                     done()
@@ -275,10 +275,10 @@ describe('UNIT: API', function () {
                 }
             })
 
-            var t = new Seed({
+            var t = new Vue({
                 attributes: {
-                    'sd-show': 'show',
-                    'sd-transition': 'transition-api-test'
+                    'v-show': 'show',
+                    'v-transition': 'transition-api-test'
                 },
                 scope: {
                     show: false
@@ -302,13 +302,13 @@ describe('UNIT: API', function () {
 
     describe('extend()', function () {
         
-        it('should return a subclass of Seed', function () {
-            var Test = Seed.extend({})
-            assert.ok(Test.prototype instanceof Seed)
+        it('should return a subclass of Vue', function () {
+            var Test = Vue.extend({})
+            assert.ok(Test.prototype instanceof Vue)
         })
 
         it('should allow further extensions', function () {
-            var Parent = Seed.extend({
+            var Parent = Vue.extend({
                 scope: {
                     test: 'hi'
                 }
@@ -342,7 +342,7 @@ describe('UNIT: API', function () {
                 
                 it('should be called on the instance when instantiating', function () {
                     var called = false,
-                        Test = Seed.extend({ init: function () {
+                        Test = Vue.extend({ init: function () {
                             called = true
                         }})
                     new Test({ el: document.createElement('div') })
@@ -359,7 +359,7 @@ describe('UNIT: API', function () {
                         b: 2,
                         c: function () {}
                     }
-                    var Test = Seed.extend({ proto: mixins })
+                    var Test = Vue.extend({ proto: mixins })
                     for (var key in mixins) {
                         assert.strictEqual(Test.prototype[key], mixins[key])
                     }
@@ -371,7 +371,7 @@ describe('UNIT: API', function () {
                 
                 it('should be copied to each instance', function () {
                     var testData = { a: 1 },
-                        Test = Seed.extend({
+                        Test = Vue.extend({
                             scope: {
                                 test: testData
                             }
@@ -389,8 +389,8 @@ describe('UNIT: API', function () {
             describe('lazy', function () {
                 
                 it('should make text input fields only trigger on change', function () {
-                    var Test = Seed.extend({
-                        template: '<input type="text" sd-model="test">',
+                    var Test = Vue.extend({
+                        template: '<input type="text" v-model="test">',
                         lazy: true
                     })
                     var t = new Test({
@@ -415,7 +415,7 @@ describe('UNIT: API', function () {
                     mock(testId, '<div>ho</div>')
                     var old = document.getElementById(testId),
                         parent = old.parentNode
-                    var Test = Seed.extend({
+                    var Test = Vue.extend({
                         template: '<p>hi</p>',
                         replace: true
                     })
@@ -429,8 +429,8 @@ describe('UNIT: API', function () {
                     assert.strictEqual(now, null)
                 })
 
-                it('should replace an off DOM Seed\'s $el', function () {
-                    var Test = Seed.extend({
+                it('should replace an off DOM Vue\'s $el', function () {
+                    var Test = Vue.extend({
                         template: '<p>hi</p>',
                         replace: true
                     })
@@ -440,7 +440,7 @@ describe('UNIT: API', function () {
                 })
 
                 it('should not work if template has more than one child node', function () {
-                    var Test = Seed.extend({
+                    var Test = Vue.extend({
                         template: '<p>hi</p><p>ho</p>',
                         replace: true
                     })
@@ -455,19 +455,19 @@ describe('UNIT: API', function () {
                 
                 it('should not accept el as an extension option', function () {
                     var el = document.createElement('div'),
-                        Test = Seed.extend({ el: el }),
+                        Test = Vue.extend({ el: el }),
                         t = new Test()
                     assert.notStrictEqual(t.$el, el)
                 })
 
                 it('should create el with options: tagName, id, className and attributes', function () {
-                    var Test = Seed.extend({
+                    var Test = Vue.extend({
                         tagName: 'p',
                         id: 'extend-test',
                         className: 'extend',
                         attributes: {
                             'test': 'hi',
-                            'sd-text': 'hoho'
+                            'v-text': 'hoho'
                         },
                         scope: {
                             hoho: 'what'
@@ -483,13 +483,13 @@ describe('UNIT: API', function () {
 
                 it('should ignore tagName when el is passed as an instance option', function () {
                     var el = document.createElement('div'),
-                        Test = Seed.extend({
+                        Test = Vue.extend({
                             tagName: 'p',
                             id: 'extend-test',
                             className: 'extend',
                             attributes: {
                                 'test': 'hi',
-                                'sd-text': 'hoho'
+                                'v-text': 'hoho'
                             },
                             scope: {
                                 hoho: 'what'
@@ -513,7 +513,7 @@ describe('UNIT: API', function () {
                 var raw = '<span>{{hello}}</span><a>haha</a>'
                 
                 it('should take direct string template and work', function () {
-                    var Test = Seed.extend({
+                    var Test = Vue.extend({
                             tagName: 'p',
                             template: raw,
                             scope: {
@@ -535,7 +535,7 @@ describe('UNIT: API', function () {
                     tpl.type = 'text/template'
                     tpl.innerHTML = raw
                     document.getElementById('test').appendChild(tpl)
-                    var Test = Seed.extend({
+                    var Test = Vue.extend({
                         template: '#' + testId,
                         scope: { hello: testId }
                     })
@@ -544,7 +544,7 @@ describe('UNIT: API', function () {
                 })
 
                 it('should be overwritable', function () {
-                    var Test = Seed.extend({
+                    var Test = Vue.extend({
                         template: '<div>this should not happen</div>'
                     })
                     var t = new Test({
@@ -561,7 +561,7 @@ describe('UNIT: API', function () {
             describe('directives', function () {
                 
                 it('should allow the VM to use private directives', function () {
-                    var Test = Seed.extend({
+                    var Test = Vue.extend({
                         directives: {
                             test: function (value) {
                                 this.el.innerHTML = value ? 'YES' : 'NO'
@@ -570,7 +570,7 @@ describe('UNIT: API', function () {
                     })
                     var t = new Test({
                         attributes: {
-                            'sd-test': 'ok'
+                            'v-test': 'ok'
                         },
                         scope: {
                             ok: true
@@ -586,7 +586,7 @@ describe('UNIT: API', function () {
             describe('filters', function () {
                 
                 it('should allow the VM to use private filters', function () {
-                    var Test = Seed.extend({
+                    var Test = Vue.extend({
                         filters: {
                             test: function (value) {
                                 return value + '12345'
@@ -607,13 +607,13 @@ describe('UNIT: API', function () {
             describe('components', function () {
 
                 it('should allow the VM to use private child VMs', function () {
-                    var Child = Seed.extend({
+                    var Child = Vue.extend({
                         scope: {
                             name: 'child'
                         }
                     })
-                    var Parent = Seed.extend({
-                        template: '<p>{{name}}</p><div sd-component="child">{{name}}</div>',
+                    var Parent = Vue.extend({
+                        template: '<p>{{name}}</p><div v-component="child">{{name}}</div>',
                         scope: {
                             name: 'dad'
                         },
@@ -627,8 +627,8 @@ describe('UNIT: API', function () {
                 })
 
                 it('should work with plain option object', function () {
-                    var Parent = Seed.extend({
-                        template: '<p>{{name}}</p><div sd-component="child">{{name}}</div>',
+                    var Parent = Vue.extend({
+                        template: '<p>{{name}}</p><div v-component="child">{{name}}</div>',
                         scope: {
                             name: 'dad'
                         },
@@ -650,12 +650,12 @@ describe('UNIT: API', function () {
             describe('elements', function () {
                 
                 it('should allow the VM to use private custom elements', function () {
-                    var Child = Seed.extend({
+                    var Child = Vue.extend({
                         scope: {
                             name: 'child'
                         }
                     })
-                    var Parent = Seed.extend({
+                    var Parent = Vue.extend({
                         template: '<p>{{name}}</p><child>{{name}}</child>',
                         scope: {
                             name: 'dad'
@@ -670,7 +670,7 @@ describe('UNIT: API', function () {
                 })
 
                 it('should work with plain option object', function () {
-                    var Parent = Seed.extend({
+                    var Parent = Vue.extend({
                         template: '<p>{{name}}</p><child>{{name}}</child>',
                         scope: {
                             name: 'dad'
@@ -689,7 +689,7 @@ describe('UNIT: API', function () {
                 })
 
                 it('should work with a simple function', function () {
-                    var Parent = Seed.extend({
+                    var Parent = Vue.extend({
                         template: '<p>{{name}}</p><child></child>',
                         scope: {
                             name: 'dad'
@@ -710,9 +710,9 @@ describe('UNIT: API', function () {
             describe('partials', function () {
                 
                 it('should allow the VM to use private partials', function () {
-                    var Test = Seed.extend({
+                    var Test = Vue.extend({
                         attributes: {
-                            'sd-partial': 'test'
+                            'v-partial': 'test'
                         },
                         partials: {
                             test: '<a>{{a}}</a><p>{{b}}</p>'
@@ -733,7 +733,7 @@ describe('UNIT: API', function () {
                 
                 it('should be called when a vm is destroyed', function () {
                     var called = false
-                    var Test = Seed.extend({
+                    var Test = Vue.extend({
                         teardown: function () {
                             called = true
                         }
@@ -752,10 +752,10 @@ describe('UNIT: API', function () {
                     var enterCalled = false,
                         leaveCalled = false
 
-                    var t = new Seed({
+                    var t = new Vue({
                         attributes: {
-                            'sd-show': 'show',
-                            'sd-transition': 'test'
+                            'v-show': 'show',
+                            'v-transition': 'test'
                         },
                         transitions: {
                             test: {

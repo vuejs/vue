@@ -17,7 +17,7 @@ module.exports = {
             // so it can be matched during event delegation
             this.el[this.expression] = true
             // attach the owner viewmodel of this directive
-            this.el.sd_viewmodel = this.vm
+            this.el.vue_viewmodel = this.vm
         }
     },
 
@@ -41,16 +41,16 @@ module.exports = {
             // focus and blur events dont bubble so exclude them
             var delegator  = compiler.delegator,
                 identifier = this.expression,
-                dHandler   = delegator.sd_dHandlers[identifier]
+                dHandler   = delegator.vue_dHandlers[identifier]
 
             if (dHandler) return
 
             // the following only gets run once for the entire each block
-            dHandler = delegator.sd_dHandlers[identifier] = function (e) {
+            dHandler = delegator.vue_dHandlers[identifier] = function (e) {
                 var target = delegateCheck(e.target, delegator, identifier)
                 if (target) {
                     e.el = target
-                    e.vm = target.sd_viewmodel
+                    e.vm = target.vue_viewmodel
                     e.item = e.vm[compiler.repeatPrefix]
                     handler.call(ownerVM, e)
                 }
@@ -78,6 +78,6 @@ module.exports = {
     unbind: function (update) {
         this.el.removeEventListener(this.arg, this.handler)
         this.handler = null
-        if (!update) this.el.sd_viewmodel = null
+        if (!update) this.el.vue_viewmodel = null
     }
 }

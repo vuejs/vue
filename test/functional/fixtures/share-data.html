@@ -3,13 +3,13 @@
     <head>
         <title>SEED share data</title>
         <meta charset="utf-8">
-        <script src="../../../dist/seed.js"></script>
+        <script src="../../../dist/vue.js"></script>
     </head>
     <body>
         <div id="a">{{shared.msg}}</div>
         <div id="b">{{shared.msg}}</div>
         <form id="c">
-            <input name="input" sd-model="shared.msg" type="text">
+            <input name="input" v-model="shared.msg" type="text">
         </form>
         <div id="d">
             <pre>{{source}}</pre>
@@ -18,26 +18,26 @@
             var shared = {
                 msg: 'hello'
             }
-            new Seed({
+            new Vue({
                 el: '#a',
                 scope: {
                     shared: shared
                 }
             })
-            new Seed({
+            new Vue({
                 el: '#b',
                 scope: {
                     shared: shared
                 }
             })
-            new Seed({
+            new Vue({
                 lazy: true,
                 el: '#c',
                 scope: {
                     shared: shared
                 }
             })
-            new Seed({
+            new Vue({
                 el: '#d',
                 scope: {
                     shared: shared,

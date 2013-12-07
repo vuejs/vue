@@ -14,13 +14,13 @@
 		<script src="vendor/classList.js"></script>
 		<script src="vendor/mockEvent.js"></script>
 		<script src="vendor/cover.js"></script>
-		<script src="../seed.test-cov.js"></script>
+		<script src="../vue.test-cov.js"></script>
 		<script>
 			mocha.setup('bdd')
-			var Seed = require('seed'),
+			var Vue = require('vue'),
 				assert = chai.assert
 
-            Seed.config({silent:true})
+            Vue.config({silent:true})
 
 			function mock (id, html, attrs) {
 				var el = document.createElement('div')

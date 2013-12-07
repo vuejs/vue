@@ -3,16 +3,16 @@
     <head>
         <title></title>
         <meta charset="utf-8">
-        <script src="../../../dist/seed.js"></script>
+        <script src="../../../dist/vue.js"></script>
     </head>
     <body>
-        <div class="item" sd-repeat="item:items" sd-component="item" sd-on="click:click">
+        <div class="item" v-repeat="item:items" v-component="item" v-on="click:click">
             {{msg + ' ' + item.title}}
         </div>
         <script>
-            Seed.config({ debug: true })
+            Vue.config({ debug: true })
             
-            Seed.component('item', {
+            Vue.component('item', {
                 init: function () {
                     this.item.title += ' init'
                 },
@@ -26,7 +26,7 @@
                 }
             })
 
-            new Seed({
+            new Vue({
                 el: 'body',
                 scope: {
                     items: [

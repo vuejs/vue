@@ -1,8 +1,8 @@
 /*
  *  Only tests directives in `src/directives/index.js`
- *  and the non-delegated case for `sd-on`
+ *  and the non-delegated case for `v-on`
  *
- *  The combination of `sd-repeat` and `sd-on` are covered in
+ *  The combination of `v-repeat` and `v-on` are covered in
  *  the E2E test case for repeated items.
  */
 
@@ -518,7 +518,7 @@ describe('UNIT: Directives', function () {
             dir.el.dispatchEvent(mockMouseEvent('click'))
             assert.notOk(triggered)
             assert.strictEqual(dir.handler, null, 'should remove reference to handler')
-            assert.strictEqual(dir.el.sd_viewmodel, null, 'should remove reference to VM on the element')
+            assert.strictEqual(dir.el.vue_viewmodel, null, 'should remove reference to VM on the element')
         })
 
         it('should not use delegation if the event is blur or focus', function () {
@@ -554,8 +554,8 @@ describe('UNIT: Directives', function () {
         
         it('should skip compilation', function () {
             var testId = 'pre-test'
-            mock(testId, '<span sd-pre><strong>{{lol}}</strong><a sd-text="hi"></a></span>')
-            var t = new Seed({
+            mock(testId, '<span v-pre><strong>{{lol}}</strong><a v-text="hi"></a></span>')
+            var t = new Vue({
                 el: '#' + testId,
                 scope: {
                     lol: 'heyhey',
@@ -564,7 +564,7 @@ describe('UNIT: Directives', function () {
             })
             assert.strictEqual(t.$el.querySelector('strong').textContent, '{{lol}}')
             assert.strictEqual(t.$el.querySelector('a').textContent, '')
-            assert.ok(t.$el.querySelector('a').hasAttribute('sd-text'))
+            assert.ok(t.$el.querySelector('a').hasAttribute('v-text'))
         })
 
     })
@@ -573,15 +573,15 @@ describe('UNIT: Directives', function () {
         
         it('should register a VM isntance on its parent\'s $', function () {
             var called = false
-            var Child = Seed.extend({
+            var Child = Vue.extend({
                 proto: {
                     test: function () {
                         called = true
                     }
                 }
             })
-            var t = new Seed({
-                template: '<div sd-component="child" sd-id="hihi"></div>',
+            var t = new Vue({
+                template: '<div v-component="child" v-id="hihi"></div>',
                 components: {
                     child: Child
                 }
@@ -598,7 +598,7 @@ describe('UNIT: Directives', function () {
 })
 
 function mockDirective (dirName, tag, type) {
-    var dir = Seed.directive(dirName),
+    var dir = Vue.directive(dirName),
         ret = {
             binding: { compiler: { vm: {} } },
             compiler: { vm: {}, options: {} },
