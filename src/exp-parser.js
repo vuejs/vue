@@ -14,7 +14,9 @@ var KEYWORDS =
         ',package,private,protected,public,short,static,super,synchronized' +
         ',throws,transient,volatile' +
         // ECMA 5 - use strict
-        ',arguments,let,yield',
+        ',arguments,let,yield' +
+        // allow using Math in expressions
+        ',Math',
         
     KEYWORDS_RE = new RegExp(["\\b" + KEYWORDS.replace(/,/g, '\\b|\\b') + "\\b"].join('|'), 'g'),
     REMOVE_RE   = /\/\*(?:.|\n)*?\*\/|\/\/[^\n]*\n|\/\/[^\n]*$|'[^']*'|"[^"]*"|[\s\t\n]*\.[\s\t\n]*[$\w\.]+/g,
