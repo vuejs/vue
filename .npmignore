@@ -6,6 +6,9 @@ components
 node_modules
 .jshintrc
 .gitignore
+.travis.yml
+.sass-cache
+.npmignore
 bower.json
 component.json
 Gruntfile.js

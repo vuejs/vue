@@ -7,6 +7,14 @@ try {
     // unable to parse the dependency, thus preventing it from
     // stopping the compilation after a failed lookup.
     Emitter = require(componentEmitter)
-} catch (e) {}
+} catch (e) {
+    Emitter = require('events').EventEmitter
+    Emitter.prototype.off = function () {
+        var method = arguments.length > 1
+            ? this.removeListener
+            : this.removeAllListeners
+        return method.apply(this, arguments)
+    }
+}
 
-module.exports = Emitter || require('events').EventEmitter
+module.exports = Emitter

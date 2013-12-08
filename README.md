@@ -1,8 +1,8 @@
-# Seed.js
+# VueJS
 
-Modular & Lightweight JavaScript MVVM
+Data-driven, modular & lightweight ViewModels
 
-[![Build Status](https://travis-ci.org/yyx990803/seed.png?branch=master)](https://travis-ci.org/yyx990803/seed)
+[![Build Status](https://travis-ci.org/yyx990803/vue.png?branch=master)](https://travis-ci.org/yyx990803/vue)
 
 ## Features
 
@@ -27,15 +27,15 @@ Modular & Lightweight JavaScript MVVM
 
 **Component**
 
-    $ component install yyx990803/seed
+    $ component install yyx990803/vue
 
 **Browserify**
 
-    $ npm install seed-mvvm
+    $ npm install vue
 
 **Bower**
 
-    $ bower install seed
+    $ bower install vue
 
 **Module Loaders, e.g. RequireJS, SeaJS**
 
@@ -43,7 +43,7 @@ Built versions in `/dist` or installed via Bower can be used directly as a Commo
 
 **Standalone**
 
-Simply include a built version in `/dist` or installed via Bower with a script tag. `seed` will be registered as a global variable.
+Simply include a built version in `/dist` or installed via Bower with a script tag. `Vue` will be registered as a global variable.
 
 ## Development
 
@@ -74,20 +74,20 @@ $ grunt test
 **HTML**
 
 ~~~ html
-<div id="demo" sd-on="click:changeText">
-    <p sd-text="hello"></p>
+<div id="demo" v-on="click:changeText">
+    <p v-text="hello"></p>
 </div>
 ~~~
 
 **JavaScript**
 
 ~~~ js
-new Seed({
+new Vue({
     el: '#demo',
     scope: {
         hello: 'Hello World!',
         changeText: function () {
-            this.hello = 'Hello Seed!'
+            this.hello = 'Hello VueJS!'
         }
     }
 })

@@ -3,5 +3,5 @@
 node_modules
 components
 explorations
-test/seed.test.js
-test/seed.test-cov.js
+test/vue.test.js
+test/vue.test-cov.js
