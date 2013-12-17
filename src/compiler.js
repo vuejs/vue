@@ -29,7 +29,7 @@ function Compiler (vm, options) {
     // so we should not run any transitions
     compiler.init = true
 
-    // extend options
+    // process and extend options
     options = compiler.options = options || makeHash()
     utils.processOptions(options)
     utils.extend(compiler, options.compilerOptions)
@@ -83,12 +83,13 @@ function Compiler (vm, options) {
     // setup observer
     compiler.setupObserver()
 
-    // call user init. this will capture some initial values.
-    if (options.init) {
-        options.init.apply(vm, options.args || [])
+    // pre compile / created hook
+    var created = options.beforeCompile || options.created
+    if (created) {
+        created.call(vm, options)
     }
 
-    // create bindings for keys set on the vm by the user
+    // create bindings for things already in scope
     var key, keyPrefix
     for (key in vm) {
         keyPrefix = key.charAt(0)
@@ -122,6 +123,12 @@ function Compiler (vm, options) {
 
     // done!
     compiler.init = false
+
+    // post compile / ready hook
+    var ready = options.afterCompile || options.ready
+    if (ready) {
+        ready.call(vm, options)
+    }
 }
 
 var CompilerProto = Compiler.prototype
@@ -557,14 +564,18 @@ CompilerProto.destroy = function () {
 
     var compiler = this,
         i, key, dir, instances, binding,
-        el         = compiler.el,
-        directives = compiler.dirs,
-        exps       = compiler.exps,
-        bindings   = compiler.bindings,
-        teardown   = compiler.options.teardown
+        vm          = compiler.vm,
+        el          = compiler.el,
+        directives  = compiler.dirs,
+        exps        = compiler.exps,
+        bindings    = compiler.bindings,
+        beforeDestroy  = compiler.options.beforeDestroy,
+        afterDestroy = compiler.options.afterDestroy
 
     // call user teardown first
-    if (teardown) teardown()
+    if (beforeDestroy) {
+        beforeDestroy.call(vm)
+    }
 
     // unwatch
     compiler.observer.off()
@@ -618,6 +629,11 @@ CompilerProto.destroy = function () {
         transition(el, -1, function () {
             el.parentNode.removeChild(el)
         }, this)
+    }
+
+    // post teardown hook
+    if (afterDestroy) {
+        afterDestroy.call(vm)
     }
 }
 

@@ -151,7 +151,7 @@ describe('UNIT: ViewModel', function () {
             var triggered = 0,
                 msg = 'broadcast test'
             var Child = Vue.extend({
-                init: function () {
+                ready: function () {
                     this.$on('hello', function (m) {
                         assert.strictEqual(m, msg)
                         triggered++
@@ -178,7 +178,7 @@ describe('UNIT: ViewModel', function () {
                 midTriggered = false,
                 msg = 'emit test'
             var Bottom = Vue.extend({
-                init: function () {
+                ready: function () {
                     var self = this
                     setTimeout(function () {
                         self.$emit('hello', msg)
@@ -191,7 +191,7 @@ describe('UNIT: ViewModel', function () {
             var Middle = Vue.extend({
                 template: '<div v-component="bottom"></div>',
                 components: { bottom: Bottom },
-                init: function () {
+                ready: function () {
                     this.$on('hello', function (m) {
                         assert.strictEqual(m, msg)
                         midTriggered = true
@@ -201,7 +201,7 @@ describe('UNIT: ViewModel', function () {
             var Top = Vue.extend({
                 template: '<div v-component="middle"></div>',
                 components: { middle: Middle },
-                init: function () {
+                ready: function () {
                     this.$on('hello', function (m) {
                         assert.strictEqual(m, msg)
                         topTriggered = true
@@ -219,7 +219,8 @@ describe('UNIT: ViewModel', function () {
         // that's what we are actually testing here.
         var destroy = require('vue/src/compiler').prototype.destroy
 
-        var tearDownCalled = false,
+        var beforeDestroyCalled = false,
+            afterDestroyCalled = false,
             observerOffCalled = false,
             emitterOffCalled = false,
             dirUnbindCalled = false,
@@ -265,8 +266,11 @@ describe('UNIT: ViewModel', function () {
 
         var compilerMock = {
             options: {
-                teardown: function () {
-                    tearDownCalled = true
+                beforeDestroy: function () {
+                    beforeDestroyCalled = true
+                },
+                afterDestroy: function () {
+                    afterDestroyCalled = true
                 }
             },
             observer: {
@@ -312,8 +316,9 @@ describe('UNIT: ViewModel', function () {
 
         destroy.call(compilerMock)
 
-        it('should call the teardown option', function () {
-            assert.ok(tearDownCalled)
+        it('should call the pre and post destroy hooks', function () {
+            assert.ok(beforeDestroyCalled)
+            assert.ok(afterDestroyCalled)
         })
 
         it('should turn observer and emitter off', function () {

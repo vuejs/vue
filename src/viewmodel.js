@@ -80,7 +80,6 @@ def(VMProto, '$emit', function () {
         parent = compiler.parentCompiler
     emitter.emit.apply(emitter, arguments)
     if (parent) {
-        parent.emitter.emit.apply(parent.emitter, arguments)
         parent.vm.$emit.apply(parent.vm, arguments)
     }
 })

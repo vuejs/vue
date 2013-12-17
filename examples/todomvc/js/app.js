@@ -15,7 +15,7 @@ var app = new Vue({
 
     el: '#todoapp',
 
-    init: function () {
+    created: function () {
         this.updateFilter()
         this.remaining = this.todos.filter(function (todo) {
             return !todo.completed

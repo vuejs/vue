@@ -13,7 +13,7 @@
             Vue.config({ debug: true })
             
             Vue.component('item', {
-                init: function () {
+                ready: function () {
                     this.item.title += ' init'
                 },
                 proto: {

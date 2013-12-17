@@ -338,19 +338,6 @@ describe('UNIT: API', function () {
 
         describe('Options', function () {
 
-            describe('init', function () {
-                
-                it('should be called on the instance when instantiating', function () {
-                    var called = false,
-                        Test = Vue.extend({ init: function () {
-                            called = true
-                        }})
-                    new Test({ el: document.createElement('div') })
-                    assert.ok(called)
-                })
-
-            })
-
             describe('proto', function () {
                 
                 it('should be mixed to the exteded VM\'s prototype', function () {
@@ -451,7 +438,7 @@ describe('UNIT: API', function () {
 
             })
 
-            describe('element options', function () {
+            describe('DOM element options', function () {
                 
                 it('should not accept el as an extension option', function () {
                     var el = document.createElement('div'),
@@ -729,22 +716,6 @@ describe('UNIT: API', function () {
 
             })
 
-            describe('teardown', function () {
-                
-                it('should be called when a vm is destroyed', function () {
-                    var called = false
-                    var Test = Vue.extend({
-                        teardown: function () {
-                            called = true
-                        }
-                    })
-                    var test = new Test()
-                    test.$destroy()
-                    assert.ok(called)
-                })
-
-            })
-
             describe('transitions', function () {
                 
                 it('should get called during transitions', function () {
@@ -785,6 +756,86 @@ describe('UNIT: API', function () {
                     assert.strictEqual(t.$el.style.display, 'none')
 
                     t.$destroy()
+
+                })
+
+            })
+
+            describe('hooks', function () {
+
+                describe('beforeCompile / created', function () {
+                
+                    it('should be called before compile', function () {
+                        
+                        var called = false,
+                            Test = Vue.extend({ beforeCompile: function (options) {
+                                assert.ok(options.ok)
+                                called = true
+                            }}),
+                            Test2 = Vue.extend({ created: function (options) {
+                                assert.ok(options.ok)
+                                called = true
+                            }})
+                        new Test({ ok: true })
+                        assert.ok(called)
+                        called = false
+                        new Test2({ ok: true })
+                        assert.ok(called)
+                    })
+
+                })
+
+                describe('afterCompile / ready', function () {
+
+                    it('should be called after compile with options', function () {
+                        var called = false,
+                            hook = function (options) {
+                                assert.ok(options.ok)
+                                assert.notOk(this.$compiler.init)
+                                called = true
+                            },
+                            Test = Vue.extend({ afterCompile: hook }),
+                            Test2 = Vue.extend({ ready: hook })
+                        new Test({ ok: true })
+                        assert.ok(called)
+                        called = false
+                        new Test2({ ok: true })
+                        assert.ok(called)
+                    })
+
+                })
+                
+                describe('beforeDestroy', function () {
+                
+                    it('should be called before a vm is destroyed', function () {
+                        var called = false
+                        var Test = Vue.extend({
+                            beforeDestroy: function () {
+                                called = true
+                            }
+                        })
+                        var test = new Test()
+                        test.$destroy()
+                        assert.ok(called)
+                    })
+
+                })
+
+                describe('afterDestroy', function () {
+                    
+                    it('should be called after a vm is destroyed', function () {
+                        var called = false,
+                            Test = Vue.extend({
+                                afterDestroy: function () {
+                                    assert.notOk(this.$el.parentNode)
+                                    called = true
+                                }
+                            })
+                        var test = new Test()
+                        document.body.appendChild(test.$el)
+                        test.$destroy()
+                        assert.ok(called)
+                    })
 
                 })
 

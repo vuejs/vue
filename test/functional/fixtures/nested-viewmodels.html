@@ -53,7 +53,7 @@
         Vue.config({ debug: true })
 
         var Man = Vue.extend({
-            init: function () {
+            created: function () {
                 this.name = this.$el.dataset.name
                 var family = this.$el.dataset.family
                 if (family) {

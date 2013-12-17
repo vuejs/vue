@@ -24,7 +24,7 @@
             var data = { c: 555 }
             var Demo = Vue.extend({
                 lazy: true,
-                init: function () {
+                ready: function () {
                     this.msg = 'Yoyoyo'
                     this.a = data
                 },
