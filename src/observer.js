@@ -16,7 +16,10 @@ var Emitter  = require('./emitter'),
     // define methods as inenumerable if __proto__ is present,
     // otherwise enumerable so we can loop through and manually
     // attach to array instances
-    hasProto = ({}).__proto__
+    hasProto = ({}).__proto__,
+
+    // lazy load
+    ViewModel
 
 // The proxy prototype to replace the __proto__ of
 // an observed array
@@ -161,8 +164,9 @@ function bind (obj, key, path, observer) {
  *  Check if a value is watchable
  */
 function isWatchable (obj) {
+    ViewModel = ViewModel || require('./viewmodel')
     var type = typeOf(obj)
-    return type === 'Object' || type === 'Array'
+    return (type === 'Object' || type === 'Array') && !(obj instanceof ViewModel)
 }
 
 /**

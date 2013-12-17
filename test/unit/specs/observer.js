@@ -5,6 +5,13 @@ describe('UNIT: Observer', function () {
         DepsOb   = require('vue/src/deps-parser').observer
     
     describe('Observing Object', function () {
+
+        it('should not watch a ViewModel instance', function () {
+            var obj = new Vue(), ob = new Emitter()
+            ob.proxies = {}
+            Observer.observe(obj, 'test', ob)
+            assert.notOk(obj.__observer__)
+        })
         
         it('should attach hidden observer and values to the object', function () {
             var obj = {}, ob = new Emitter()
