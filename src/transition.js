@@ -144,8 +144,8 @@ function sniffTransitionEndEvent () {
         defaultEvent = 'transitionend',
         events = {
             'transition'       : defaultEvent,
-            'MozTransition'    : defaultEvent,
-            'WebkitTransition' : 'webkitTransitionEnd'
+            'mozTransition'    : defaultEvent,
+            'webkitTransition' : 'webkitTransitionEnd'
         }
     for (var name in events) {
         if (el.style[name] !== undefined) {
