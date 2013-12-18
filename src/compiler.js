@@ -83,11 +83,8 @@ function Compiler (vm, options) {
     // setup observer
     compiler.setupObserver()
 
-    // pre compile / created hook
-    var created = options.beforeCompile || options.created
-    if (created) {
-        created.call(vm, options)
-    }
+    // beforeCompile hook
+    compiler.execHook('beforeCompile', 'created')
 
     // create bindings for things already in scope
     var key, keyPrefix
@@ -125,10 +122,7 @@ function Compiler (vm, options) {
     compiler.init = false
 
     // post compile / ready hook
-    var ready = options.afterCompile || options.ready
-    if (ready) {
-        ready.call(vm, options)
-    }
+    compiler.execHook('afterCompile', 'ready')
 }
 
 var CompilerProto = Compiler.prototype
@@ -550,6 +544,17 @@ CompilerProto.getOption = function (type, id) {
 }
 
 /**
+ *  Execute a user hook
+ */
+CompilerProto.execHook = function (id, alt) {
+    var opts = this.options,
+        hook = opts[id] || opts[alt]
+    if (hook) {
+        hook.call(this.vm, opts)
+    }
+}
+
+/**
  *  Unbind and remove element
  */
 CompilerProto.destroy = function () {
@@ -560,14 +565,9 @@ CompilerProto.destroy = function () {
         el          = compiler.el,
         directives  = compiler.dirs,
         exps        = compiler.exps,
-        bindings    = compiler.bindings,
-        beforeDestroy  = compiler.options.beforeDestroy,
-        afterDestroy = compiler.options.afterDestroy
+        bindings    = compiler.bindings
 
-    // call user teardown first
-    if (beforeDestroy) {
-        beforeDestroy.call(vm)
-    }
+    compiler.execHook('beforeDestroy')
 
     // unwatch
     compiler.observer.off()
@@ -621,10 +621,7 @@ CompilerProto.destroy = function () {
         vm.$remove()
     }
 
-    // post teardown hook
-    if (afterDestroy) {
-        afterDestroy.call(vm)
-    }
+    compiler.execHook('afterDestroy')
 }
 
 // Helpers --------------------------------------------------------------------

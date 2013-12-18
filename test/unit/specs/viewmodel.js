@@ -306,6 +306,9 @@ describe('UNIT: ViewModel', function () {
                 $remove: function () {
                     elRemoved = true
                 }
+            },
+            execHook: function (id) {
+                this.options[id].call(this)
             }
         }
 
