@@ -213,6 +213,30 @@ describe('UNIT: ViewModel', function () {
 
     })
 
+    describe('.$appendTo', function () {
+        it('should pass', function () {
+            assert.ok(false)
+        })
+    })
+
+    describe('.$before', function () {
+        it('should pass', function () {
+            assert.ok(false)
+        })
+    })
+
+    describe('.$after', function () {
+        it('should pass', function () {
+            assert.ok(false)
+        })
+    })
+
+    describe('.$remove', function () {
+        it('should pass', function () {
+            assert.ok(false)
+        })
+    })
+
     describe('.$destroy', function () {
         
         // since this simply delegates to Compiler.prototype.destroy(),

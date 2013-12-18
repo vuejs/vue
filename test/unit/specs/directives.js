@@ -570,7 +570,15 @@ describe('UNIT: Directives', function () {
     })
 
     describe('component', function () {
-        // body...
+        
+        it('should work with no args', function () {
+            assert.ok(false)
+        })
+
+        it('should work with arg (passed-in model from parent)', function () {
+            assert.ok(false)
+        })
+
     })
 
     describe('component-id', function () {
