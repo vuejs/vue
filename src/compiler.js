@@ -7,7 +7,6 @@ var Emitter     = require('./emitter'),
     TextParser  = require('./text-parser'),
     DepsParser  = require('./deps-parser'),
     ExpParser   = require('./exp-parser'),
-    transition  = require('./transition'),
     // cache deps ob
     depsOb      = DepsParser.observer,
     // cache methods
@@ -618,10 +617,8 @@ CompilerProto.destroy = function () {
     // finally remove dom element
     if (el === document.body) {
         el.innerHTML = ''
-    } else if (el.parentNode) {
-        transition(el, -1, function () {
-            el.parentNode.removeChild(el)
-        }, this)
+    } else {
+        vm.$remove()
     }
 
     // post teardown hook

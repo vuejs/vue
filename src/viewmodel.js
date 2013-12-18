@@ -1,5 +1,6 @@
-var Compiler = require('./compiler'),
-    def      = require('./utils').defProtected
+var Compiler   = require('./compiler'),
+    def        = require('./utils').defProtected,
+    transition = require('./transition')
 
 /**
  *  ViewModel exposed to the user that holds data,
@@ -93,6 +94,56 @@ def(VMProto, '$emit', function () {
         emitter[method].apply(emitter, arguments)
     })
 })
+
+// DOM convenience methods
+
+def(VMProto, '$appendTo', function (target) {
+    target = query(target)
+    var el = this.$el
+    transition(el, 1, function () {
+        target.appendChild(el)
+    }, this.$compiler)
+})
+
+def(VMProto, '$remove', function () {
+    var el = this.$el,
+        parent = el.parentNode
+    if (!parent) return
+    transition(el, -1, function () {
+        parent.removeChild(el)
+    }, this.$compiler)
+})
+
+def(VMProto, '$before', function (target) {
+    target = query(target)
+    var el = this.$el,
+        parent = target.parentNode
+    if (!parent) return
+    transition(el, 1, function () {
+        parent.insertBefore(el, target)
+    }, this.$compiler)
+})
+
+def(VMProto, '$after', function (target) {
+    target = query(target)
+    var el = this.$el,
+        parent = target.parentNode,
+        next = target.nextSibling
+    if (!parent) return
+    transition(el, 1, function () {
+        if (next) {
+            parent.insertBefore(el, next)
+        } else {
+            parent.appendChild(el)
+        }
+    }, this.$compiler)
+})
+
+function query (el) {
+    return typeof el === 'string'
+        ? document.querySelector(el)
+        : el
+}
 
 /**
  *  If a VM doesn't contain a path, go up the prototype chain

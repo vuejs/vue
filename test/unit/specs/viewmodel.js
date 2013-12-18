@@ -302,12 +302,9 @@ describe('UNIT: ViewModel', function () {
                     }
                 }
             },
-            el: {
-                getAttribute: function () {},
-                parentNode: {
-                    removeChild: function () {
-                        elRemoved = true
-                    }
+            vm: {
+                $remove: function () {
+                    elRemoved = true
                 }
             }
         }
