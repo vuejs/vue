@@ -71,8 +71,9 @@ function Compiler (vm, options) {
 
     // set parent VM
     // and register child id on parent
-    var childId = utils.attr(el, 'id')
+    var childId = utils.attr(el, 'component-id')
     if (parent) {
+        parent.childCompilers.push(compiler)
         def(vm, '$parent', parent.vm)
         if (childId) {
             compiler.childId = childId
@@ -217,18 +218,20 @@ CompilerProto.setupObserver = function () {
  */
 CompilerProto.compile = function (node, root) {
 
-    var compiler = this
+    var compiler = this,
+        nodeType = node.nodeType,
+        tagName  = node.tagName
 
-    if (node.nodeType === 1) { // a normal node
+    if (nodeType === 1 && tagName !== 'SCRIPT') { // a normal node
 
         // skip anything with v-pre
         if (utils.attr(node, 'pre') !== null) return
 
         // special attributes to check
         var repeatExp,
-            componentId,
+            componentExp,
             partialId,
-            customElementFn = compiler.getOption('elements', node.tagName.toLowerCase())
+            directive
 
         // It is important that we access these attributes
         // procedurally because the order matters.
@@ -242,21 +245,25 @@ CompilerProto.compile = function (node, root) {
         if (repeatExp = utils.attr(node, 'repeat')) {
 
             // repeat block cannot have v-id at the same time.
-            var directive = Directive.parse(config.attrs.repeat, repeatExp, compiler, node)
+            directive = Directive.parse(config.attrs.repeat, repeatExp, compiler, node)
             if (directive) {
                 compiler.bindDirective(directive)
             }
 
-        // custom elements has 2nd highest priority
-        } else if (!root && customElementFn) {
+        // v-component has 2nd highest priority
+        } else if (!root && (componentExp = utils.attr(node, 'component'))) {
 
-            addChild(customElementFn)
-
-        // v-component has 3rd highest priority
-        } else if (!root && (componentId = utils.attr(node, 'component'))) {
-
-            var ChildVM = compiler.getOption('components', componentId)
-            if (ChildVM) addChild(ChildVM)
+            directive = Directive.parse(config.attrs.component, componentExp, compiler, node)
+            if (directive) {
+                // component directive is a bit different from the others.
+                // when it has no argument, it should be treated as a
+                // simple directive with its key as the argument.
+                if (componentExp.indexOf(':') === -1) {
+                    directive.isSimple = true
+                    directive.arg = directive.key
+                }
+                compiler.bindDirective(directive)
+            }
 
         } else {
 
@@ -277,27 +284,12 @@ CompilerProto.compile = function (node, root) {
             compiler.compileNode(node)
         }
 
-    } else if (node.nodeType === 3) { // text node
+    } else if (nodeType === 3) { // text node
 
         compiler.compileTextNode(node)
 
     }
 
-    function addChild (Ctor) {
-        if (utils.isConstructor(Ctor)) {
-            var child = new Ctor({
-                el: node,
-                child: true,
-                compilerOptions: {
-                    parentCompiler: compiler
-                }
-            })
-            compiler.childCompilers.push(child.$compiler)
-        } else {
-            // simply call the function
-            Ctor(node)
-        }
-    }
 }
 
 /**
@@ -412,13 +404,13 @@ CompilerProto.bindDirective = function (directive) {
     binding.instances.push(directive)
     directive.binding = binding
 
-    var value = binding.value
     // invoke bind hook if exists
     if (directive.bind) {
-        directive.bind(value)
+        directive.bind()
     }
 
     // set initial value
+    var value = binding.value
     if (value !== undefined) {
         if (binding.isComputed) {
             directive.refresh(value)
@@ -454,11 +446,11 @@ CompilerProto.createBinding = function (key, isExp, isFn) {
         bindings[key] = binding
         // make sure the key exists in the object so it can be observed
         // by the Observer!
-        Observer.ensurePath(compiler.vm, key)
         if (binding.root) {
             // this is a root level binding. we need to define getter/setters for it.
             compiler.define(key, binding)
         } else {
+            Observer.ensurePath(compiler.vm, key)
             var parentKey = key.slice(0, key.lastIndexOf('.'))
             if (!hasOwn.call(bindings, parentKey)) {
                 // this is a nested value binding, but the binding for its parent
@@ -488,9 +480,10 @@ CompilerProto.define = function (key, binding) {
         // computed property
         compiler.markComputed(binding)
     } else if (type === 'Object' || type === 'Array') {
-        // observe objects later, becase there might be more keys
-        // to be added to it. we also want to emit all the set events
-        // after all values are available.
+        // observe objects later, because there might be more keys
+        // to be added to it during Observer.ensurePath().
+        // we also want to emit all the set events after all values
+        // are available.
         compiler.observables.push(binding)
     }
 

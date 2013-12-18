@@ -3,10 +3,11 @@ var utils      = require('../utils'),
 
 module.exports = {
 
-    on     : require('./on'),
-    repeat : require('./repeat'),
-    model  : require('./model'),
-    'if'   : require('./if'),
+    on        : require('./on'),
+    repeat    : require('./repeat'),
+    model     : require('./model'),
+    'if'      : require('./if'),
+    component : require('./component'),
 
     attr: function (value) {
         this.el.setAttribute(this.arg, value)

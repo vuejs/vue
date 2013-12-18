@@ -24,7 +24,8 @@
         "src/directives/if.js",
         "src/directives/repeat.js",
         "src/directives/on.js",
-        "src/directives/model.js"
+        "src/directives/model.js",
+        "src/directives/component.js"
     ],
     "dependencies": {
         "component/emitter": "*"

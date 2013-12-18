@@ -1,4 +1,4 @@
-casper.test.begin('Component Encapsulation', 4, function (test) {
+casper.test.begin('Component Encapsulation', 5, function (test) {
     
     casper
     .start('./fixtures/encapsulation.html', function () {
@@ -6,6 +6,7 @@ casper.test.begin('Component Encapsulation', 4, function (test) {
         test.assertSelectorHasText('.filter', 'filter works')
         test.assertSelectorHasText('.partial', 'partial works')
         test.assertSelectorHasText('.vm', 'component works')
+        test.assertSelectorHasText('.vm-w-model', 'component with model works')
     })
     .run(function () {
         test.done()

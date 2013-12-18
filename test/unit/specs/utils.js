@@ -209,9 +209,6 @@ describe('UNIT: Utils', function () {
                 a: { scope: { data: 1 } },
                 b: { scope: { data: 2 } }
             },
-            elements: {
-                c: { scope: { data: 3 }}
-            },
             template: '<a>{{hi}}</a>'
         }
 
@@ -240,9 +237,6 @@ describe('UNIT: Utils', function () {
             assert.strictEqual(components.a.options.scope.data, 1)
             assert.ok(components.b.prototype instanceof Vue)
             assert.strictEqual(components.b.options.scope.data, 2)
-            var elements = options.elements
-            assert.ok(elements.c.prototype instanceof Vue)
-            assert.strictEqual(elements.c.options.scope.data, 3)
         })
 
     })

@@ -11,7 +11,7 @@
                 <li v-repeat="item : items" v-class="'list-' + $index">
                     <ul>
                         <li v-repeat="subitem : item.items" v-class="'list-' + $index">
-                            {{$parent.$index + '.' + $index + ' : ' + item.title + '<-' + subitem.title}}
+                            {{$parent.$index + '.' + $index + ' : ' + item.title + '&lt;-' + subitem.title}}
                         </li>
                     </ul>
                 </li>
@@ -24,6 +24,7 @@
             <button id="b1-1" v-on="click: items[1].items[1].title = 'hi'">2.2</button>
         </div>
         <script>
+        Vue.config({debug:true})
         var items = [
             { title: 0, items: [{title:0}, {title:1}] },
             { title: 1, items: [{title:0}, {title:1}] }

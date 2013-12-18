@@ -71,8 +71,8 @@ describe('UNIT: API', function () {
             var testId = 'directive-2',
                 msg = 'wowaaaa?'
             dirTest = {
-                bind: function (value) {
-                    this.el.setAttribute(testId + 'bind', value + 'bind')
+                bind: function () {
+                    this.el.setAttribute(testId + 'bind', 'bind')
                 },
                 update: function (value) {
                     this.el.setAttribute(testId + 'update', value + 'update')
@@ -88,7 +88,7 @@ describe('UNIT: API', function () {
                     scope: { test: msg }
                 }),
                 el = document.querySelector('#' + testId + ' span')
-            assert.strictEqual(el.getAttribute(testId + 'bind'), msg + 'bind', 'should have called bind()')
+            assert.strictEqual(el.getAttribute(testId + 'bind'), 'bind', 'should have called bind()')
             assert.strictEqual(el.getAttribute(testId + 'update'), msg + 'update', 'should have called update()')
             vm.$destroy() // assuming this works
             assert.notOk(el.getAttribute(testId + 'bind'), 'should have called unbind()')
@@ -139,64 +139,6 @@ describe('UNIT: API', function () {
                 child2 = t2.$el.querySelector('div')
             assert.strictEqual(child2.className, 'hihi')
             assert.strictEqual(child2.textContent, 'ok')
-        })
-
-    })
-
-    describe('element()', function () {
-        
-        var testId = 'api-element-test',
-            testId2 = testId + '2',
-            testId3 = testId + '3',
-            opts = {
-                className: 'hihi',
-                scope: { hi: 'ok' }
-            },
-            Test = Vue.extend(opts),
-            utils = require('vue/src/utils')
-
-        it('should register a Custom Element constructor', function () {
-            Vue.element(testId, Test)
-            assert.strictEqual(utils.elements[testId], Test)
-        })
-
-        it('should also work with option objects', function () {
-            Vue.element(testId2, opts)
-            assert.ok(utils.elements[testId2].prototype instanceof Vue)
-        })
-
-        it('should accept simple function as-is', function () {
-            var fn = function (el) {
-                el.className = 'hihi3'
-                el.textContent = 'ok3'
-            }
-            Vue.element(testId3, fn)
-            assert.strictEqual(utils.elements[testId3], fn)
-        })
-
-        it('should retrieve the VM if has only one arg', function () {
-            assert.strictEqual(Vue.element(testId), Test)
-        })
-
-        it('should work with custom tag names', function () {
-
-            mock(testId, '<' + testId + '>{{hi}}</' + testId + '>')
-            var t = new Vue({ el: '#' + testId }),
-                child = t.$el.querySelector(testId)
-            assert.strictEqual(child.className, 'hihi')
-            assert.strictEqual(child.textContent, 'ok')
-
-            mock(testId2, '<' + testId2 + '>{{hi}}</' + testId2 + '>')
-            var t2 = new Vue({ el: '#' + testId2 }),
-                child2 = t2.$el.querySelector(testId2)
-            assert.strictEqual(child2.className, 'hihi')
-            assert.strictEqual(child2.textContent, 'ok')
-
-            mock(testId3, '<' + testId3 + '></' + testId3 + '>')
-            var t3 = new Vue({ el: '#' + testId3 }),
-                child3 = t3.$el.querySelector(testId3)
-            assert.strictEqual(child3.className, 'hihi3')
-            assert.strictEqual(child3.textContent, 'ok3')
         })
 
     })
@@ -630,66 +572,6 @@ describe('UNIT: API', function () {
                     var p = new Parent()
                     assert.strictEqual(p.$el.querySelector('p').textContent, 'dad')
                     assert.strictEqual(p.$el.querySelector('div').textContent, 'child')
-                })
-
-            })
-            
-            describe('elements', function () {
-                
-                it('should allow the VM to use private custom elements', function () {
-                    var Child = Vue.extend({
-                        scope: {
-                            name: 'child'
-                        }
-                    })
-                    var Parent = Vue.extend({
-                        template: '<p>{{name}}</p><child>{{name}}</child>',
-                        scope: {
-                            name: 'dad'
-                        },
-                        elements: {
-                            child: Child
-                        }
-                    })
-                    var p = new Parent()
-                    assert.strictEqual(p.$el.querySelector('p').textContent, 'dad')
-                    assert.strictEqual(p.$el.querySelector('child').textContent, 'child')
-                })
-
-                it('should work with plain option object', function () {
-                    var Parent = Vue.extend({
-                        template: '<p>{{name}}</p><child>{{name}}</child>',
-                        scope: {
-                            name: 'dad'
-                        },
-                        elements: {
-                            child: {
-                                scope: {
-                                    name: 'child'
-                                }
-                            }
-                        }
-                    })
-                    var p = new Parent()
-                    assert.strictEqual(p.$el.querySelector('p').textContent, 'dad')
-                    assert.strictEqual(p.$el.querySelector('child').textContent, 'child')
-                })
-
-                it('should work with a simple function', function () {
-                    var Parent = Vue.extend({
-                        template: '<p>{{name}}</p><child></child>',
-                        scope: {
-                            name: 'dad'
-                        },
-                        elements: {
-                            child: function (el) {
-                                el.textContent = 'child'
-                            }
-                        }
-                    })
-                    var p = new Parent()
-                    assert.strictEqual(p.$el.querySelector('p').textContent, 'dad')
-                    assert.strictEqual(p.$el.querySelector('child').textContent, 'child')
                 })
 
             })

@@ -214,10 +214,12 @@ function ensurePath (obj, key) {
         if (!obj[sec]) obj[sec] = {}
         obj = obj[sec]
     }
-    if (typeOf(obj) === 'Object') {
+    var type = typeOf(obj)
+    if (type === 'Object' || type === 'Array') {
         sec = path[i]
         if (!(sec in obj)) obj[sec] = undefined
     }
+    return obj[sec]
 }
 
 module.exports = {

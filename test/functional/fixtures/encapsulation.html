@@ -11,15 +11,21 @@
             <div class="filter">{{filterMsg | nodigits}}</div>
             <div class="partial" v-partial="partial-test"></div>
             <div class="vm" v-component="vm-test">{{vmMsg}}</div>
+            <div class="vm-w-model" v-component="vm-w-model:vmData">{{msg + model.msg}}</div>
         </div>
         <script>
             var T = Vue.extend({
                 components: {
-                    'vm-test': Vue.extend({
+                    'vm-test': {
                         scope: {
                             vmMsg: 'component works'
                         }
-                    })
+                    },
+                    'vm-w-model': {
+                        scope : {
+                            msg: 'component with model '
+                        }
+                    }
                 },
                 partials: {
                     'partial-test': '{{partialMsg}}'
@@ -40,7 +46,10 @@
                 scope: {
                     dirMsg: 'directive',
                     filterMsg: 'fi43l132ter5 w12345orks',
-                    partialMsg: 'partial works'
+                    partialMsg: 'partial works',
+                    vmData: {
+                        msg: 'works'
+                    }
                 }
             })
         </script>

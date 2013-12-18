@@ -22,7 +22,6 @@ var utils = module.exports = {
     components  : makeHash(),
     partials    : makeHash(),
     transitions : makeHash(),
-    elements    : makeHash(),
 
     /**
      *  get an attribute and remove it.
@@ -141,11 +140,6 @@ var utils = module.exports = {
                 : null
     },
 
-    isConstructor: function (obj) {
-        ViewModel = ViewModel || require('./viewmodel')
-        return obj.prototype instanceof ViewModel || obj === ViewModel
-    },
-
     /**
      *  convert certain option values to the desired format.
      */
@@ -153,16 +147,10 @@ var utils = module.exports = {
         var components = options.components,
             partials   = options.partials,
             template   = options.template,
-            elements   = options.elements,
             key
         if (components) {
             for (key in components) {
                 components[key] = utils.toConstructor(components[key])
-            }
-        }
-        if (elements) {
-            for (key in elements) {
-                elements[key] = utils.toConstructor(elements[key])
             }
         }
         if (partials) {
@@ -185,11 +173,11 @@ var utils = module.exports = {
     },
     
     /**
-     *  warnings, thrown in all cases
+     *  warnings, traces by default
+     *  can be suppressed by `silent` option.
      */
     warn: function() {
         if (!config.silent && console) {
-            console.trace()
             console.warn(join.call(arguments, ' '))
         }
     }

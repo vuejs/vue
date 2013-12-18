@@ -43,15 +43,6 @@ ViewModel.component = function (id, Ctor) {
 }
 
 /**
- *  Allows user to register/retrieve a Custom element constructor
- */
-ViewModel.element = function (id, Ctor) {
-    if (!Ctor) return utils.elements[id]
-    utils.elements[id] = utils.toConstructor(Ctor)
-    return this
-}
-
-/**
  *  Allows user to register/retrieve a template partial
  */
 ViewModel.partial = function (id, partial) {
@@ -141,12 +132,12 @@ function inheritOptions (child, parent, topLevel) {
  *  that are used in compilation.
  */
 var specialAttributes = [
-    'id',
     'pre',
     'text',
     'repeat',
     'partial',
     'component',
+    'component-id',
     'transition'
 ]
 

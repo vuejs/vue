@@ -9,10 +9,10 @@ var Emitter  = require('./emitter'),
 function catchDeps (binding) {
     if (binding.isFn) return
     utils.log('\n─ ' + binding.key)
-    var depsHash = utils.hash()
+    var has = []
     observer.on('get', function (dep) {
-        if (depsHash[dep.key]) return
-        depsHash[dep.key] = 1
+        if (has.indexOf(dep) > -1) return
+        has.push(dep)
         utils.log('  └─ ' + dep.key)
         binding.deps.push(dep)
         dep.subs.push(binding)
