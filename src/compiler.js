@@ -539,8 +539,13 @@ CompilerProto.markComputed = function (binding) {
  *  Retrive an option from the compiler
  */
 CompilerProto.getOption = function (type, id) {
-    var opts = this.options
-    return (opts[type] && opts[type][id]) || (utils[type] && utils[type][id])
+    var opts = this.options,
+        parent = this.parentCompiler
+    return (opts[type] && opts[type][id]) || (
+        parent
+            ? parent.getOption(type, id)
+            : utils[type] && utils[type][id]
+    )
 }
 
 /**
