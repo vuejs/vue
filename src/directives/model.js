@@ -7,23 +7,25 @@ module.exports = {
 
         var self = this,
             el   = self.el,
-            type = el.type
+            type = el.type,
+            tag  = el.tagName
 
         self.lock = false
 
         // determine what event to listen to
         self.event =
             (self.compiler.options.lazy ||
-            el.tagName === 'SELECT' ||
-            type === 'checkbox' ||
-            type === 'radio')
+            tag === 'SELECT' ||
+            type === 'checkbox' || type === 'radio')
                 ? 'change'
                 : 'input'
 
         // determin the attribute to change when updating
-        var attr = type === 'checkbox'
+        var attr = self.attr = type === 'checkbox'
             ? 'checked'
-            : 'value'
+            : (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA')
+                ? 'value'
+                : 'innerHTML'
 
         // attach listener
         self.set = self.filters
@@ -97,7 +99,7 @@ module.exports = {
         } else if (el.type === 'checkbox') { // checkbox
             el.checked = !!value
         } else {
-            el.value = utils.toText(value)
+            el[self.attr] = utils.toText(value)
         }
     },
 
