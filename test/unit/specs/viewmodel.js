@@ -213,28 +213,83 @@ describe('UNIT: ViewModel', function () {
 
     })
 
-    describe('.$appendTo', function () {
-        it('should pass', function () {
-            assert.ok(false)
-        })
-    })
+    describe('DOM methods', function () {
 
-    describe('.$before', function () {
-        it('should pass', function () {
-            assert.ok(false)
+        var enterCalled,
+            leaveCalled
+        
+        var v = new Vue({
+            attributes: {
+                'v-transition': 'test'
+            },
+            transitions: {
+                test: {
+                    enter: function (el, change) {
+                        enterCalled = true
+                        change()
+                    },
+                    leave: function (el, change) {
+                        leaveCalled = true
+                        change()
+                    }
+                }
+            }
         })
-    })
 
-    describe('.$after', function () {
-        it('should pass', function () {
-            assert.ok(false)
-        })
-    })
+        function reset () {
+            enterCalled = false
+            leaveCalled = false
+        }
 
-    describe('.$remove', function () {
-        it('should pass', function () {
-            assert.ok(false)
+        it('$appendTo', function () {
+            reset()
+            var parent = document.createElement('div')
+            v.$appendTo(parent)
+            assert.strictEqual(v.$el.parentNode, parent)
+            assert.ok(enterCalled)
         })
+
+        it('$before', function () {
+            reset()
+            var parent = document.createElement('div'),
+                ref = document.createElement('div')
+            parent.appendChild(ref)
+            v.$before(ref)
+            assert.strictEqual(v.$el.parentNode, parent)
+            assert.strictEqual(v.$el.nextSibling, ref)
+            assert.ok(enterCalled)
+        })
+
+        it('$after', function () {
+            reset()
+            var parent = document.createElement('div'),
+                ref1 = document.createElement('div'),
+                ref2 = document.createElement('div')
+            parent.appendChild(ref1)
+            parent.appendChild(ref2)
+            v.$after(ref1)
+            assert.strictEqual(v.$el.parentNode, parent)
+            assert.strictEqual(v.$el.nextSibling, ref2)
+            assert.strictEqual(ref1.nextSibling, v.$el)
+            assert.ok(enterCalled)
+            reset()
+            v.$after(ref2)
+            assert.strictEqual(v.$el.parentNode, parent)
+            assert.notOk(v.$el.nextSibling)
+            assert.strictEqual(ref2.nextSibling, v.$el)
+            assert.ok(enterCalled)
+        })
+
+        it('$remove', function () {
+            reset()
+            var parent = document.createElement('div')
+            v.$appendTo(parent)
+            v.$remove()
+            assert.notOk(v.$el.parentNode)
+            assert.ok(enterCalled)
+            assert.ok(leaveCalled)
+        })
+
     })
 
     describe('.$destroy', function () {
