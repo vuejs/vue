@@ -21,7 +21,12 @@ var endEvent   = sniffTransitionEndEvent(),
  *    1 = enter
  *    2 = leave
  */
-var transition = module.exports = function (el, stage, changeState, compiler) {
+var transition = module.exports = function (el, stage, cb, compiler) {
+
+    var changeState = function () {
+        cb()
+        compiler.execHook(stage > 0 ? 'enteredView' : 'leftView')
+    }
 
     if (compiler.init) {
         changeState()
@@ -79,7 +84,6 @@ function applyTransitionClass (el, stage, changeState, compiler) {
         classList.add(enterClass)
         // append
         changeState()
-        compiler.execHook('enteredView')
         // force a layout so transition can be triggered
         /* jshint unused: false */
         var forceLayout = el.clientHeight
@@ -98,7 +102,6 @@ function applyTransitionClass (el, stage, changeState, compiler) {
                 // actually remove node here
                 changeState()
                 classList.remove(leaveClass)
-                compiler.execHook('leftView')
             }
         }
         // attach transition end listener
@@ -123,28 +126,18 @@ function applyTransitionFunctions (el, stage, changeState, functionId, compiler)
 
     if (stage > 0) { // enter
         if (typeof enter !== 'function') {
-            doEnter()
+            changeState()
             return codes.JS_SKIP_E
         }
-        enter(el, doEnter)
+        enter(el, changeState)
         return codes.JS_E
     } else { // leave
         if (typeof leave !== 'function') {
-            doLeave()
+            changeState()
             return codes.JS_SKIP_L
         }
-        leave(el, doLeave)
+        leave(el, changeState)
         return codes.JS_L
-    }
-
-    function doEnter () {
-        compiler.execHook('enteredView')
-        changeState()
-    }
-
-    function doLeave () {
-        compiler.execHook('leftView')
-        changeState()
     }
 
 }

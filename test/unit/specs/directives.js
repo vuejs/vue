@@ -613,7 +613,7 @@ function mockDirective (dirName, tag, type) {
     var dir = Vue.directive(dirName),
         ret = {
             binding: { compiler: { vm: {} } },
-            compiler: { vm: {}, options: {} },
+            compiler: { vm: {}, options: {}, execHook: function () {}},
             el: document.createElement(tag || 'div')
         }
     if (typeof dir === 'function') {

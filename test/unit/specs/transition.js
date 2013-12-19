@@ -11,16 +11,21 @@ describe('UNIT: Transition', function () {
         
         it('should skip if compiler is in init stage', function () {
             var c = mockChange(),
-                code = transition(null, 1, c.change, { init: true })
+                compiler = mockCompiler()
+            compiler.init = true
+            var code = transition(null, 1, c.change, compiler)
             assert.ok(c.called)
             assert.strictEqual(code, codes.INIT)
+            assert.ok(compiler.enteredView)
         })
 
         it('should skip if no transition is found on the node', function () {
             var c = mockChange(),
-                code = transition(mockEl(), 1, c.change, {})
+                compiler = mockCompiler(),
+                code = transition(mockEl(), 1, c.change, compiler)
             assert.ok(c.called)
             assert.strictEqual(code, codes.SKIP)
+            assert.ok(compiler.enteredView)
         })
 
     })
@@ -31,9 +36,11 @@ describe('UNIT: Transition', function () {
 
             it('should skip if transition is not available', function () {
                 var c = mockChange(),
-                    code = transition(mockEl('css'), 1, c.change, {})
+                    compiler = mockCompiler(),
+                    code = transition(mockEl('css'), 1, c.change, compiler)
                 assert.ok(c.called)
                 assert.strictEqual(code, codes.CSS_SKIP)
+                assert.ok(compiler.enteredView)
             })
 
             // skip the rest
@@ -130,21 +137,27 @@ describe('UNIT: Transition', function () {
 
         it('should skip if correspinding option is not defined', function () {
             var c = mockChange(),
-                code = transition(mockEl('js'), 1, c.change, mockCompiler())
+                compiler = mockCompiler(),
+                code = transition(mockEl('js'), 1, c.change, compiler)
             assert.ok(c.called)
             assert.strictEqual(code, codes.JS_SKIP)
+            assert.ok(compiler.enteredView)
         })
 
         it('should skip if the option is given but the enter/leave func is not defined', function () {
             var c = mockChange(),
-                code = transition(mockEl('js'), 1, c.change, mockCompiler({}))
+                compiler = mockCompiler({}),
+                code = transition(mockEl('js'), 1, c.change, compiler)
             assert.ok(c.called)
             assert.strictEqual(code, codes.JS_SKIP_E)
+            assert.ok(compiler.enteredView)
 
             c = mockChange()
-            code = transition(mockEl('js'), -1, c.change, mockCompiler({}))
+            compiler = mockCompiler({})
+            code = transition(mockEl('js'), -1, c.change, compiler)
             assert.ok(c.called)
             assert.strictEqual(code, codes.JS_SKIP_L)
+            assert.ok(compiler.leftView)
         })
 
         describe('enter', function () {
