@@ -6,6 +6,7 @@
         <script src="../../../dist/vue.js"></script>
     </head>
     <body>
+        <div id="log"></div>
         <div id="test">
             <div class="dir" v-hola="dirMsg"></div>
             <div class="filter">{{filterMsg | nodigits}}</div>
@@ -13,8 +14,18 @@
             <div class="vm" v-component="vm-test">{{vmMsg}}</div>
             <div class="vm-w-model" v-component="vm-w-model:vmData">{{msg + model.msg}}</div>
         </div>
+        <div id="child">
+            <div class="cvm" v-component="vm-test">{{vmMsg}}</div>
+        </div>
         <script>
+            var log = document.getElementById('log')
             var T = Vue.extend({
+                created: function () {
+                    log.textContent += ' T created'  
+                },
+                ready: function () {
+                    log.textContent += ' T ready'
+                },
                 components: {
                     'vm-test': {
                         scope: {
@@ -41,6 +52,14 @@
                     }
                 }
             })
+            var C = T.extend({
+                created: function () {
+                    log.textContent += ' C created'  
+                },
+                ready: function () {
+                    log.textContent += ' C ready'
+                }
+            })
             new T({
                 el: '#test',
                 scope: {
@@ -51,6 +70,9 @@
                         msg: 'works'
                     }
                 }
+            })
+            new C({
+                el: '#child'
             })
         </script>
     </body>

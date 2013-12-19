@@ -74,9 +74,11 @@ function extend (options) {
     options = inheritOptions(options, ParentVM.options, true)
     utils.processOptions(options)
 
-    var ExtendedVM = function (opts) {
-        opts = inheritOptions(opts, options, true)
-        ParentVM.call(this, opts)
+    var ExtendedVM = function (opts, asParent) {
+        if (!asParent) {
+            opts = inheritOptions(opts, options, true)
+        }
+        ParentVM.call(this, opts, true)
     }
 
     // inherit prototype props
@@ -118,13 +120,32 @@ function inheritOptions (child, parent, topLevel) {
     if (!parent) return child
     for (var key in parent) {
         if (key === 'el' || key === 'proto') continue
-        if (!child[key]) { // child has priority
-            child[key] = parent[key]
-        } else if (topLevel && utils.typeOf(child[key]) === 'Object') {
-            inheritOptions(child[key], parent[key], false)
+        var val = child[key],
+            parentVal = parent[key],
+            type = utils.typeOf(val)
+        if (topLevel && type === 'Function' && parentVal) {
+            // merge hook functions
+            child[key] = mergeHook(val, parentVal)
+        } else if (topLevel && type === 'Object') {
+            // merge toplevel object options
+            inheritOptions(val, parentVal)
+        } else if (val === undefined) {
+            // inherit if child doesn't override
+            child[key] = parentVal
         }
     }
     return child
+}
+
+/**
+ *  Merge hook functions
+ *  so parent hooks also get called
+ */
+function mergeHook (fn, parentFn) {
+    return function (opts) {
+        parentFn.call(this, opts)
+        fn.call(this, opts)
+    }
 }
 
 /**
