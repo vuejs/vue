@@ -48,6 +48,7 @@ describe('UNIT: Transition', function () {
                     c.called = true
                     assert.ok(el.classList.contains(enterClass))
                 }),
+                compiler = mockCompiler(),
                 code,
                 cbCalled = false
             el.vue_trans_cb = function () {
@@ -56,7 +57,7 @@ describe('UNIT: Transition', function () {
             el.addEventListener(endEvent, el.vue_trans_cb)
 
             it('should add the class before calling changeState()', function () {
-                code = transition(el, 1, c.change, {})
+                code = transition(el, 1, c.change, compiler)
                 assert.ok(c.called)
             })
 
@@ -75,13 +76,18 @@ describe('UNIT: Transition', function () {
                 assert.strictEqual(code, codes.CSS_E)
             })
 
+            it('should have called enteredView hook', function () {
+                assert.ok(compiler.enteredView)
+            })
+
         })
 
         describe('leave', function () {
 
             var el = mockEl('css'),
                 c = mockChange(),
-                code = transition(el, -1, c.change, {})
+                compiler = mockCompiler(),
+                code = transition(el, -1, c.change, compiler)
 
             it('should attach an ontransitionend listener', function () {
                 assert.ok(typeof el.vue_trans_cb === 'function')
@@ -112,6 +118,10 @@ describe('UNIT: Transition', function () {
                 assert.strictEqual(code, codes.CSS_L)
             })
 
+            it('should have called leftView hook', function () {
+                assert.ok(compiler.leftView)
+            })
+
         })
 
     })
@@ -120,29 +130,19 @@ describe('UNIT: Transition', function () {
 
         it('should skip if correspinding option is not defined', function () {
             var c = mockChange(),
-                code = transition(mockEl('js'), 1, c.change, {
-                    getOption: function () {}
-                })
+                code = transition(mockEl('js'), 1, c.change, mockCompiler())
             assert.ok(c.called)
             assert.strictEqual(code, codes.JS_SKIP)
         })
 
         it('should skip if the option is given but the enter/leave func is not defined', function () {
             var c = mockChange(),
-                code = transition(mockEl('js'), 1, c.change, {
-                    getOption: function () {
-                        return {}
-                    }
-                })
+                code = transition(mockEl('js'), 1, c.change, mockCompiler({}))
             assert.ok(c.called)
             assert.strictEqual(code, codes.JS_SKIP_E)
 
             c = mockChange()
-            code = transition(mockEl('js'), -1, c.change, {
-                getOption: function () {
-                    return {}
-                }
-            })
+            code = transition(mockEl('js'), -1, c.change, mockCompiler({}))
             assert.ok(c.called)
             assert.strictEqual(code, codes.JS_SKIP_L)
         })
@@ -157,19 +157,20 @@ describe('UNIT: Transition', function () {
                         assert.strictEqual(el, element)
                         change()
                     }
-                }
+                },
+                compiler = mockCompiler(def)
 
             it('should call the enter function', function () {
-                code = transition(el, 1, c.change, {
-                    getOption: function () {
-                        return def
-                    }
-                })
+                code = transition(el, 1, c.change, compiler)
                 assert.ok(c.called)
             })
 
             it('should return correct code', function () {
                 assert.strictEqual(code, codes.JS_E)
+            })
+
+            it('should have called enteredView hook', function () {
+                assert.ok(compiler.enteredView)
             })
 
         })
@@ -184,19 +185,20 @@ describe('UNIT: Transition', function () {
                         assert.strictEqual(el, element)
                         change()
                     }
-                }
+                },
+                compiler = mockCompiler(def)
 
             it('should call the leave function', function () {
-                code = transition(el, -1, c.change, {
-                    getOption: function () {
-                        return def
-                    }
-                })
+                code = transition(el, -1, c.change, compiler)
                 assert.ok(c.called)
             })
 
             it('should return correct code', function () {
                 assert.strictEqual(code, codes.JS_L)
+            })
+
+            it('should have called leftView hook', function () {
+                assert.ok(compiler.leftView)
             })
 
         })
@@ -223,6 +225,17 @@ describe('UNIT: Transition', function () {
             el.vue_trans = 'test'
         }
         return el
+    }
+
+    function mockCompiler (opt) {
+        return {
+            getOption: function () {
+                return opt
+            },
+            execHook: function (hook) {
+                this[hook] = true
+            }
+        }
     }
 
     function sniffTransitionEndEvent () {
