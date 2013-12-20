@@ -1,6 +1,8 @@
 var Compiler   = require('./compiler'),
-    def        = require('./utils').defProtected,
-    transition = require('./transition')
+    utils      = require('./utils'),
+    transition = require('./transition'),
+    def        = utils.defProtected,
+    nextTick   = utils.nextTick
 
 /**
  *  ViewModel exposed to the user that holds data,
@@ -102,7 +104,7 @@ def(VMProto, '$appendTo', function (target, cb) {
     var el = this.$el
     transition(el, 1, function () {
         target.appendChild(el)
-        if (cb) cb()
+        if (cb) nextTick(cb)
     }, this.$compiler)
 })
 
@@ -112,7 +114,7 @@ def(VMProto, '$remove', function (cb) {
     if (!parent) return
     transition(el, -1, function () {
         parent.removeChild(el)
-        if (cb) cb()
+        if (cb) nextTick(cb)
     }, this.$compiler)
 })
 
@@ -123,7 +125,7 @@ def(VMProto, '$before', function (target, cb) {
     if (!parent) return
     transition(el, 1, function () {
         parent.insertBefore(el, target)
-        if (cb) cb()
+        if (cb) nextTick(cb)
     }, this.$compiler)
 })
 
@@ -139,7 +141,7 @@ def(VMProto, '$after', function (target, cb) {
         } else {
             parent.appendChild(el)
         }
-        if (cb) cb()
+        if (cb) nextTick(cb)
     }, this.$compiler)
 })
 
