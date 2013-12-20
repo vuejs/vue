@@ -97,34 +97,37 @@ def(VMProto, '$emit', function () {
 
 // DOM convenience methods
 
-def(VMProto, '$appendTo', function (target) {
+def(VMProto, '$appendTo', function (target, cb) {
     target = query(target)
     var el = this.$el
     transition(el, 1, function () {
         target.appendChild(el)
+        if (cb) cb()
     }, this.$compiler)
 })
 
-def(VMProto, '$remove', function () {
+def(VMProto, '$remove', function (cb) {
     var el = this.$el,
         parent = el.parentNode
     if (!parent) return
     transition(el, -1, function () {
         parent.removeChild(el)
+        if (cb) cb()
     }, this.$compiler)
 })
 
-def(VMProto, '$before', function (target) {
+def(VMProto, '$before', function (target, cb) {
     target = query(target)
     var el = this.$el,
         parent = target.parentNode
     if (!parent) return
     transition(el, 1, function () {
         parent.insertBefore(el, target)
+        if (cb) cb()
     }, this.$compiler)
 })
 
-def(VMProto, '$after', function (target) {
+def(VMProto, '$after', function (target, cb) {
     target = query(target)
     var el = this.$el,
         parent = target.parentNode,
@@ -136,6 +139,7 @@ def(VMProto, '$after', function (target) {
         } else {
             parent.appendChild(el)
         }
+        if (cb) cb()
     }, this.$compiler)
 })
 

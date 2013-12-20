@@ -216,7 +216,8 @@ describe('UNIT: ViewModel', function () {
     describe('DOM methods', function () {
 
         var enterCalled,
-            leaveCalled
+            leaveCalled,
+            callbackCalled
         
         var v = new Vue({
             attributes: {
@@ -239,14 +240,20 @@ describe('UNIT: ViewModel', function () {
         function reset () {
             enterCalled = false
             leaveCalled = false
+            callbackCalled = false
+        }
+
+        function cb () {
+            callbackCalled = true
         }
 
         it('$appendTo', function () {
             reset()
             var parent = document.createElement('div')
-            v.$appendTo(parent)
+            v.$appendTo(parent, cb)
             assert.strictEqual(v.$el.parentNode, parent)
             assert.ok(enterCalled)
+            assert.ok(callbackCalled)
         })
 
         it('$before', function () {
@@ -254,10 +261,11 @@ describe('UNIT: ViewModel', function () {
             var parent = document.createElement('div'),
                 ref = document.createElement('div')
             parent.appendChild(ref)
-            v.$before(ref)
+            v.$before(ref, cb)
             assert.strictEqual(v.$el.parentNode, parent)
             assert.strictEqual(v.$el.nextSibling, ref)
             assert.ok(enterCalled)
+            assert.ok(callbackCalled)
         })
 
         it('$after', function () {
@@ -267,27 +275,30 @@ describe('UNIT: ViewModel', function () {
                 ref2 = document.createElement('div')
             parent.appendChild(ref1)
             parent.appendChild(ref2)
-            v.$after(ref1)
+            v.$after(ref1, cb)
             assert.strictEqual(v.$el.parentNode, parent)
             assert.strictEqual(v.$el.nextSibling, ref2)
             assert.strictEqual(ref1.nextSibling, v.$el)
             assert.ok(enterCalled)
+            assert.ok(callbackCalled)
             reset()
-            v.$after(ref2)
+            v.$after(ref2, cb)
             assert.strictEqual(v.$el.parentNode, parent)
             assert.notOk(v.$el.nextSibling)
             assert.strictEqual(ref2.nextSibling, v.$el)
             assert.ok(enterCalled)
+            assert.ok(callbackCalled)
         })
 
         it('$remove', function () {
             reset()
             var parent = document.createElement('div')
             v.$appendTo(parent)
-            v.$remove()
+            v.$remove(cb)
             assert.notOk(v.$el.parentNode)
             assert.ok(enterCalled)
             assert.ok(leaveCalled)
+            assert.ok(callbackCalled)
         })
 
     })
