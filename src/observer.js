@@ -87,25 +87,13 @@ for (var method in extensions) {
 }
 
 /**
- *  Watch an object based on type
- */
-function watch (obj, path, observer) {
-    var type = typeOf(obj)
-    if (type === 'Object') {
-        watchObject(obj, path, observer)
-    } else if (type === 'Array') {
-        watchArray(obj, path, observer)
-    }
-}
-
-/**
  *  Watch an Object, recursive.
  */
 function watchObject (obj, path, observer) {
     for (var key in obj) {
         var keyPrefix = key.charAt(0)
         if (keyPrefix !== '$' && keyPrefix !== '_') {
-            bind(obj, key, path, observer)
+            convert(obj, key, observer)
         }
     }
 }
@@ -131,33 +119,34 @@ function watchArray (arr, path, observer) {
  *  so it emits get/set events.
  *  Then watch the value itself.
  */
-function bind (obj, key, path, observer) {
+function convert (obj, key, observer) {
     var val       = obj[key],
-        watchable = isWatchable(val),
-        values    = observer.values,
-        fullKey   = (path ? path + '.' : '') + key
-    values[fullKey] = val
+        values    = observer.values
+    values[key] = val
     // emit set on bind
     // this means when an object is observed it will emit
     // a first batch of set events.
-    observer.emit('set', fullKey, val)
+    observer.emit('set', key, val)
     Object.defineProperty(obj, key, {
         enumerable: true,
         get: function () {
+            var value = values[key]
             // only emit get on tip values
-            if (depsOb.active && !watchable) {
-                observer.emit('get', fullKey)
+            if (depsOb.active && !isWatchable(value)) {
+                observer.emit('get', key)
             }
-            return values[fullKey]
+            return value
         },
         set: function (newVal) {
-            values[fullKey] = newVal
-            ensurePaths(key, newVal, values)
-            observer.emit('set', fullKey, newVal)
-            watch(newVal, fullKey, observer)
+            var oldVal = values[key]
+            unobserve(oldVal, key, observer)
+            values[key] = newVal
+            ensurePaths('', newVal, oldVal)
+            observer.emit('set', key, newVal)
+            observe(newVal, key, observer)
         }
     })
-    watch(val, fullKey, observer)
+    observe(val, key, observer)
 }
 
 /**
@@ -175,14 +164,17 @@ function isWatchable (obj) {
  *  the watch conversion and simply emit set event for
  *  all of its properties.
  */
-function emitSet (obj, observer, set) {
-    if (typeOf(obj) === 'Array') {
-        set('length', obj.length)
-    } else {
-        var key, val, values = observer.values
-        for (key in observer.values) {
-            val = values[key]
-            set(key, val)
+function emitSet (obj) {
+    var type = typeOf(obj),
+        emitter = obj.__observer__
+    if (type === 'Array') {
+        emitter.emit('set', 'length', obj.length)
+    } else if (type === 'Object') {
+        var key, val
+        for (key in obj) {
+            val = obj[key]
+            emitter.emit('set', key, val)
+            emitSet(val)
         }
     }
 }
@@ -194,10 +186,10 @@ function emitSet (obj, observer, set) {
  *  any given path.
  */
 function ensurePaths (key, val, paths) {
-    key += '.'
+    key = key ? key + '.' : ''
     for (var path in paths) {
-        if (!path.indexOf(key)) {
-            ensurePath(val, path.replace(key, ''))
+        if (!key || !path.indexOf(key)) {
+            ensurePath(val, key ? path.replace(key, '') : path)
         }
     }
 }
@@ -222,68 +214,74 @@ function ensurePath (obj, key) {
     return obj[sec]
 }
 
-module.exports = {
-
-    // used in v-repeat
-    watchArray: watchArray,
-    ensurePath: ensurePath,
-    ensurePaths: ensurePaths,
-
-    /**
-     *  Observe an object with a given path,
-     *  and proxy get/set/mutate events to the provided observer.
-     */
-    observe: function (obj, rawPath, observer) {
-        if (isWatchable(obj)) {
-            var path = rawPath + '.',
-                ob, alreadyConverted = !!obj.__observer__
-            if (!alreadyConverted) {
-                def(obj, '__observer__', new Emitter())
-            }
-            ob = obj.__observer__
-            ob.values = ob.values || utils.hash()
-            var proxies = observer.proxies[path] = {
-                get: function (key) {
-                    observer.emit('get', path + key)
-                },
-                set: function (key, val) {
-                    observer.emit('set', path + key, val)
-                },
-                mutate: function (key, val, mutation) {
-                    // if the Array is a root value
-                    // the key will be null
-                    var fixedPath = key ? path + key : rawPath
-                    observer.emit('mutate', fixedPath, val, mutation)
-                    // also emit set for Array's length when it mutates
-                    var m = mutation.method
-                    if (m !== 'sort' && m !== 'reverse') {
-                        observer.emit('set', fixedPath + '.length', val.length)
-                    }
-                }
-            }
-            ob
-                .on('get', proxies.get)
-                .on('set', proxies.set)
-                .on('mutate', proxies.mutate)
-            if (alreadyConverted) {
-                emitSet(obj, ob, proxies.set)
-            } else {
-                watch(obj, null, ob)
+/**
+ *  Observe an object with a given path,
+ *  and proxy get/set/mutate events to the provided observer.
+ */
+function observe (obj, rawPath, observer) {
+    if (!isWatchable(obj)) return
+    var path = rawPath ? rawPath + '.' : '',
+        ob, alreadyConverted = !!obj.__observer__
+    if (!alreadyConverted) {
+        def(obj, '__observer__', new Emitter())
+    }
+    ob = obj.__observer__
+    ob.values = ob.values || utils.hash()
+    observer.proxies = observer.proxies || {}
+    var proxies = observer.proxies[path] = {
+        get: function (key) {
+            observer.emit('get', path + key)
+        },
+        set: function (key, val) {
+            observer.emit('set', path + key, val)
+        },
+        mutate: function (key, val, mutation) {
+            // if the Array is a root value
+            // the key will be null
+            var fixedPath = key ? path + key : rawPath
+            observer.emit('mutate', fixedPath, val, mutation)
+            // also emit set for Array's length when it mutates
+            var m = mutation.method
+            if (m !== 'sort' && m !== 'reverse') {
+                observer.emit('set', fixedPath + '.length', val.length)
             }
         }
-    },
-
-    /**
-     *  Cancel observation, turn off the listeners.
-     */
-    unobserve: function (obj, path, observer) {
-        if (!obj || !obj.__observer__) return
-        path = path + '.'
-        var proxies = observer.proxies[path]
-        obj.__observer__
-            .off('get', proxies.get)
-            .off('set', proxies.set)
-            .off('mutate', proxies.mutate)
-        observer.proxies[path] = null
     }
+    ob
+        .on('get', proxies.get)
+        .on('set', proxies.set)
+        .on('mutate', proxies.mutate)
+    if (alreadyConverted) {
+        emitSet(obj)
+    } else {
+        var type = typeOf(obj)
+        if (type === 'Object') {
+            watchObject(obj, null, ob)
+        } else if (type === 'Array') {
+            watchArray(obj, null, ob)
+        }
+    }
+}
+
+/**
+ *  Cancel observation, turn off the listeners.
+ */
+function unobserve (obj, path, observer) {
+    if (!obj || !obj.__observer__) return
+    path = path + '.'
+    var proxies = observer.proxies[path]
+    obj.__observer__
+        .off('get', proxies.get)
+        .off('set', proxies.set)
+        .off('mutate', proxies.mutate)
+    observer.proxies[path] = null
+}
+
+module.exports = {
+    observe     : observe,
+    unobserve   : unobserve,
+    ensurePath  : ensurePath,
+    ensurePaths : ensurePaths,
+    // used in v-repeat
+    watchArray  : watchArray,
 }

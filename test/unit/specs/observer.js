@@ -8,14 +8,12 @@ describe('UNIT: Observer', function () {
 
         it('should not watch a ViewModel instance', function () {
             var obj = new Vue(), ob = new Emitter()
-            ob.proxies = {}
             Observer.observe(obj, 'test', ob)
             assert.notOk(obj.__observer__)
         })
         
         it('should attach hidden observer and values to the object', function () {
             var obj = {}, ob = new Emitter()
-            ob.proxies = {}
             Observer.observe(obj, 'test', ob)
             assert.ok(obj.__observer__ instanceof Emitter)
             assert.ok(obj.__observer__.values)
@@ -55,7 +53,6 @@ describe('UNIT: Observer', function () {
         it('should emit set when first observing', function () {
             var obj = { a: 1, b: { c: 2} },
                 ob = new Emitter(), i = 0
-            ob.proxies = {}
             var expects = [
                 { key: 'test.a', val: obj.a },
                 { key: 'test.b', val: obj.b },
@@ -76,8 +73,6 @@ describe('UNIT: Observer', function () {
                 ob1 = new Emitter(),
                 ob2 = new Emitter(),
                 i = 0
-            ob1.proxies = {}
-            ob2.proxies = {}
             Observer.observe(obj, 'test', ob1) // watch first time
 
             var expects = [
@@ -86,6 +81,7 @@ describe('UNIT: Observer', function () {
                 { key: 'test.b.c', val: obj.b.c }
             ]
             ob2.on('set', function (key, val) {
+                console.log(key)
                 var exp = expects[i]
                 assert.strictEqual(key, exp.key)
                 assert.strictEqual(val, exp.val)
@@ -101,7 +97,6 @@ describe('UNIT: Observer', function () {
 
         var arr = [],
             ob = new Emitter()
-        ob.proxies = {}
         Observer.observe(arr, 'test', ob)
         
         it('should attach the hidden observer', function () {
@@ -371,8 +366,6 @@ describe('UNIT: Observer', function () {
         var ob1 = new Emitter(),
             ob2 = new Emitter(),
             obj = {a:1}
-        ob1.proxies = {}
-        ob2.proxies = {}
         Observer.observe(obj, 'test', ob1)
         Observer.observe(obj, 'test', ob2)
 
@@ -399,8 +392,6 @@ describe('UNIT: Observer', function () {
         var ob1 = new Emitter(),
             ob2 = new Emitter(),
             obj = {a:1}
-        ob1.proxies = {}
-        ob2.proxies = {}
         Observer.observe(obj, 'test', ob1)
         Observer.observe(obj, 'test', ob2)
         Observer.unobserve(obj, 'test', ob1)
@@ -470,7 +461,6 @@ describe('UNIT: Observer', function () {
                 i  = 0,
                 obj = opts.obj,
                 expects = opts.expects
-            ob.proxies = {}
             Observer.observe(obj, opts.path, ob)
             ob.on('set', function (key, val) {
                 var expect = expects[i]
@@ -499,7 +489,6 @@ describe('UNIT: Observer', function () {
                 i  = 0,
                 obj = opts.obj,
                 expects = opts.expects
-            ob.proxies = {}
             Observer.observe(obj, opts.path, ob)
             ob.on('get', function (key) {
                 var expected = expects[i]
