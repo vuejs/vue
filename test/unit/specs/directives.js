@@ -572,11 +572,41 @@ describe('UNIT: Directives', function () {
     describe('component', function () {
         
         it('should work with no args', function () {
-            assert.ok(false)
+            var testId = 'component-test'
+            mock(testId, '<div v-component="' + testId + '"></div>')
+            var t = new Vue({
+                el: '#' + testId,
+                scope: {
+                    msg: '123'
+                },
+                components: {
+                    'component-test': {
+                        template: '<span>{{msg}}</span>'
+                    }
+                }
+            })
+            assert.strictEqual(t.$el.querySelector('span').textContent, '123')
         })
 
         it('should work with arg (passed-in model from parent)', function () {
-            assert.ok(false)
+            var testId = 'component-test-2'
+            mock(testId, '<div v-component="' + testId + ':options.test"></div>')
+            var t = new Vue({
+                el: '#' + testId,
+                scope: {
+                    options: {
+                        test: {
+                            msg: '123'
+                        }
+                    }
+                },
+                components: {
+                    'component-test-2': {
+                        template: '<span>{{model.msg}}</span>'
+                    }
+                }
+            })
+            assert.strictEqual(t.$el.querySelector('span').textContent, '123')
         })
 
     })
