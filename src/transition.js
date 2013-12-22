@@ -47,8 +47,7 @@ var transition = module.exports = function (el, stage, cb, compiler) {
         return applyTransitionClass(
             el,
             stage,
-            changeState,
-            compiler
+            changeState
         )
     } else {
         changeState()
@@ -62,7 +61,7 @@ transition.codes = codes
 /**
  *  Togggle a CSS class to trigger transition
  */
-function applyTransitionClass (el, stage, changeState, compiler) {
+function applyTransitionClass (el, stage, changeState) {
 
     if (!endEvent) {
         changeState()
