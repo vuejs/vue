@@ -107,13 +107,11 @@ module.exports = {
         self.collection = null
         self.vms = null
         self.mutationListener = function (path, arr, mutation) {
-            self.detach()
             var method = mutation.method
             mutationHandlers[method].call(self, mutation)
             if (method !== 'push' && method !== 'pop') {
                 self.updateIndexes()
             }
-            self.retach()
         }
 
     },
@@ -140,11 +138,9 @@ module.exports = {
 
         // create child-vms and append to DOM
         if (collection.length) {
-            this.detach()
             for (var i = 0, l = collection.length; i < l; i++) {
                 this.buildItem(collection[i], i)
             }
-            this.retach()
         }
     },
 
@@ -206,31 +202,6 @@ module.exports = {
         var i = this.vms.length
         while (i--) {
             this.vms[i].$index = i
-        }
-    },
-
-    /**
-     *  Detach/retach the container from the DOM before mutation
-     *  so that batch DOM updates are done in-memory and faster
-     */
-    detach: function () {
-        if (this.hasTrans) return
-        var c = this.container,
-            p = this.parent = c.parentNode
-        this.next = c.nextSibling
-        if (p) p.removeChild(c)
-    },
-
-    retach: function () {
-        if (this.hasTrans) return
-        var n = this.next,
-            p = this.parent,
-            c = this.container
-        if (!p) return
-        if (n) {
-            p.insertBefore(c, n)
-        } else {
-            p.appendChild(c)
         }
     },
 

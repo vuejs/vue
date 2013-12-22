@@ -10,51 +10,65 @@ if (navigator.userAgent.indexOf('PhantomJS') === -1) {
 
 function runBenchmark () {
     
-    var now = window.performance && window.performance.now
+    var itemsToAdd = 200,
+        now = window.performance && window.performance.now
             ? function () { return window.performance.now(); }
             : Date.now,
-        beforeRender = now(),
+        beforeBoot = now(),
         render,
-        sync,
-        async
+        bench,
+        addTime,
+        toggleTime,
+        removeTime
 
     setTimeout(function () {
 
-        render = now() - beforeRender
+        boot = now() - beforeBoot
 
         var start = now(),
-            newTodo = '12345'
+            last
 
-        for (var i = 0; i < 100; i++) {
-            app.newTodo = newTodo
-            app.addTodo()
+        add()
+
+        function add() {
+            last = now()
+            var newTodo = '12345'
+            for (var i = 0; i < itemsToAdd; i++) {
+                app.newTodo = newTodo
+                app.addTodo()
+            }
+            setTimeout(toggle, 0)
         }
-        setTimeout(toggle, 0)
 
         function toggle () {
+            addTime = now() - last
             var checkboxes = document.querySelectorAll('.toggle')
             for (var i = 0; i < checkboxes.length; i++) {
                 checkboxes[i].click()
             }
-            setTimeout(del, 0)
+            last = now()
+            setTimeout(remove, 0)
         }
 
-        function del () {
+        function remove () {
+            toggleTime = now() - last
             var deleteButtons = document.querySelectorAll('.destroy');
             for (var i = 0; i < deleteButtons.length; i++) {
                 deleteButtons[i].click()
             }
-            report()
+            last = now()
+            setTimeout(report, 0)
         }
 
         function report () {
-            sync = now() - start
-            setTimeout(function () {
-                async = now() - start
-                console.log('render: ' + render.toFixed(2) + 'ms')
-                console.log('sync:   ' + sync.toFixed(2) + 'ms')
-                console.log('async:  ' + async.toFixed(2) + 'ms')
-            }, 0)   
+            bench = now() - start
+            removeTime = now() - last
+            console.log('Benchmark x ' + itemsToAdd)
+            console.log('boot   : ' + boot.toFixed(2) + 'ms')
+            console.log('add    : ' + addTime.toFixed(2) + 'ms')
+            console.log('toggle : ' + toggleTime.toFixed(2) + 'ms')
+            console.log('remove : ' + removeTime.toFixed(2) + 'ms')
+            console.log('total  : ' + bench.toFixed(2) + 'ms')
         }
     }, 0)
 
