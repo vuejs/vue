@@ -51,8 +51,7 @@ var mutationHandlers = {
     },
 
     sort: function () {
-        var key = this.arg,
-            vms = this.vms,
+        var vms = this.vms,
             col = this.collection,
             l = col.length,
             sorted = new Array(l),
@@ -61,7 +60,7 @@ var mutationHandlers = {
             data = col[i]
             for (j = 0; j < l; j++) {
                 vm = vms[j]
-                if (vm.$scope[key] === data) {
+                if (vm.$scope === data) {
                     sorted[i] = vm
                     break
                 }
@@ -153,7 +152,6 @@ module.exports = {
 
         var node    = this.el.cloneNode(true),
             ctn     = this.container,
-            scope   = {},
             ref, item
 
         // append node into DOM first
@@ -171,16 +169,13 @@ module.exports = {
             }, this.compiler)
         }
 
-        // set data on scope and compile
-        scope[this.arg] = data || {}
         item = new this.ChildVM({
             el: node,
-            scope: scope,
+            scope: data,
             compilerOptions: {
                 repeat: true,
                 repeatIndex: index,
                 repeatCollection: this.collection,
-                repeatPrefix: this.arg,
                 parentCompiler: this.compiler,
                 delegator: ctn
             }

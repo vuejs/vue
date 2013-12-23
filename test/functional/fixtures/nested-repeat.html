@@ -8,10 +8,10 @@
     <body>
         <div id="test">
             <ul>
-                <li v-repeat="item : items" v-class="'list-' + $index">
+                <li v-repeat="items" v-class="'list-' + $index">
                     <ul>
-                        <li v-repeat="subitem : item.items" v-class="'list-' + $index">
-                            {{$parent.$index + '.' + $index + ' : ' + item.title + '&lt;-' + subitem.title}}
+                        <li v-repeat="items" v-class="'list-' + $index">
+                            {{$parent.$index + '.' + $index + ' : ' + $parent.title + '&lt;-' + title}}
                         </li>
                     </ul>
                 </li>

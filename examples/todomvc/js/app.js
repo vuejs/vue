@@ -1,3 +1,5 @@
+Vue.config({debug:true})
+
 var filters = {
     all: function () { return true },
     active: function (completed) { return !completed },
@@ -43,32 +45,32 @@ var app = new Vue({
         },
 
         removeTodo: function (e) {
-            this.todos.remove(e.item)
-            this.remaining -= e.item.completed ? 0 : 1
+            this.todos.remove(e.targetVM.$scope)
+            this.remaining -= e.targetVM.completed ? 0 : 1
             todoStorage.save()
         },
 
         toggleTodo: function (e) {
-            this.remaining += e.item.completed ? -1 : 1
+            this.remaining += e.targetVM.completed ? -1 : 1
             todoStorage.save()
         },
 
         editTodo: function (e) {
-            this.beforeEditCache = e.item.title
-            this.editedTodo = e.item
+            this.beforeEditCache = e.targetVM.title
+            this.editedTodo = e.targetVM
         },
 
         doneEdit: function (e) {
             if (!this.editedTodo) return
             this.editedTodo = null
-            e.item.title = e.item.title.trim()
-            if (!e.item.title) this.removeTodo(e)
+            e.targetVM.title = e.targetVM.title.trim()
+            if (!e.targetVM.title) this.removeTodo(e)
             todoStorage.save()
         },
 
         cancelEdit: function (e) {
             this.editedTodo = null
-            e.item.title = this.beforeEditCache
+            e.targetVM.title = this.beforeEditCache
         },
 
         removeCompleted: function () {

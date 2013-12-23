@@ -6,19 +6,19 @@
         <script src="../../../dist/vue.js"></script>
     </head>
     <body>
-        <div class="item" v-repeat="item:items" v-component="item" v-on="click:click">
-            {{msg + ' ' + item.title}}
+        <div class="item" v-repeat="items" v-component="item" v-on="click:click">
+            {{msg + ' ' + title}}
         </div>
         <script>
             Vue.config({ debug: true })
             
             Vue.component('item', {
                 ready: function () {
-                    this.item.title += ' init'
+                    this.title += ' init'
                 },
                 proto: {
                     click: function () {
-                        this.item.title += ' click'
+                        this.title += ' click'
                     }
                 },
                 scope: {

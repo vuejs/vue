@@ -43,19 +43,19 @@
             </div>
             <div
                 class="test"
-                v-repeat="item:items"
-                v-if="filter(item)"
+                v-repeat="items"
+                v-if="filter(this)"
                 v-transition
-                v-attr="data-id:item.a">
-                {{item.a}}
+                v-attr="data-id:a">
+                {{a}}
             </div>
             <div
                 class="test"
-                v-repeat="item:items"
-                v-show="filter(item)"
+                v-repeat="items"
+                v-show="filter(this)"
                 v-transition
-                v-attr="data-id:item.a">
-                {{item.a}}
+                v-attr="data-id:a">
+                {{a}}
             </div>
         </div>
         <h1 style="margin:0">123</h1>

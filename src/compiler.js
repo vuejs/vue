@@ -95,7 +95,8 @@ function Compiler (vm, options) {
     // for repeated items, create an index binding
     // which should be inenumerable but configurable
     if (compiler.repeat) {
-        scope.$index = compiler.repeatIndex
+        //scope.$index = compiler.repeatIndex
+        def(scope, '$index', compiler.repeatIndex, false, true)
         compiler.createBinding('$index')
     }
 
@@ -463,10 +464,13 @@ CompilerProto.define = function (key, binding) {
         compiler.markComputed(binding)
     }
 
-    if (!(key in scope)) {
+    // $index is inenumerable
+    if (!(key in scope) && key !== '$index') {
         scope[key] = undefined
     }
 
+    // if the scope object is already observed, that means
+    // this binding is created late. we need to observe it now.
     if (scope.__observer__) {
         Observer.convert(scope, key)
     }

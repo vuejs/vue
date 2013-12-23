@@ -20,8 +20,8 @@
             </p>
             <p>Total items: <span class="count" v-text="items.length"></span></p>
             <ul>
-                <li class="item" v-repeat="item:items">
-                    {{$index}} {{item.title}}
+                <li class="item" v-repeat="items">
+                    {{$index}} {{title}}
                 </li>
             </ul>
         </div>

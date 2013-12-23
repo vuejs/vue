@@ -1,7 +1,7 @@
 casper.test.begin('Nested Viewmodels', 7, function (test) {
     
     casper
-    .start('./fixtures/nested-viewmodels.html', function () {
+    .start('./fixtures/nested-vms.html', function () {
 
         test.assertSelectorHasText('.ancestor', 'Andy Johnson')
         test.assertSelectorHasText('.jack', 'Jack, son of Andy')

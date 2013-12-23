@@ -50,8 +50,7 @@ module.exports = {
                 var target = delegateCheck(e.target, delegator, identifier)
                 if (target) {
                     e.el = target
-                    e.vm = target.vue_viewmodel
-                    e.item = e.vm.$scope[compiler.repeatPrefix]
+                    e.targetVM = target.vue_viewmodel
                     handler.call(ownerVM, e)
                 }
             }
@@ -64,10 +63,7 @@ module.exports = {
             var vm = this.vm
             this.handler = function (e) {
                 e.el = e.currentTarget
-                e.vm = vm
-                if (compiler.repeat) {
-                    e.item = vm.$scope[compiler.repeatPrefix]
-                }
+                e.targetVM = vm
                 handler.call(ownerVM, e)
             }
             this.el.addEventListener(event, this.handler)

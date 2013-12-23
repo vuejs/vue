@@ -27,28 +27,28 @@
                 <ul id="todo-list">
                     <li
                         class="todo"
-                        v-repeat="todo:todos"
-                        v-if="todoFilter(todo.completed)"
+                        v-repeat="todos"
+                        v-if="todoFilter(completed)"
                         v-class="
-                            completed : todo.completed,
-                            editing   : todo == editedTodo
+                            completed : completed,
+                            editing   : this == editedTodo
                         "
                     >
                         <div class="view">
                             <input
                                 class="toggle"
                                 type="checkbox"
-                                v-model="todo.completed"
+                                v-model="completed"
                                 v-on="change:toggleTodo"
                             >
-                            <label v-text="todo.title" v-on="dblclick:editTodo"></label>
+                            <label v-text="title" v-on="dblclick:editTodo"></label>
                             <button class="destroy" v-on="click:removeTodo"></button>
                         </div>
                         <input
                             class="edit"
                             type="text"
-                            v-model="todo.title"
-                            v-todo-focus="todo == editedTodo"
+                            v-model="title"
+                            v-todo-focus="this == editedTodo"
                             v-on="
                                 blur  : doneEdit,
                                 keyup : doneEdit | key enter,
