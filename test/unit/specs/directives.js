@@ -602,7 +602,7 @@ describe('UNIT: Directives', function () {
                 },
                 components: {
                     'component-test-2': {
-                        template: '<span>{{model.msg}}</span>'
+                        template: '<span>{{msg}}</span>'
                     }
                 }
             })
