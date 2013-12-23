@@ -28,7 +28,23 @@
                     this.msg = 'Yoyoyo'
                     this.a = data
                 },
-                proto: {
+                data: {
+                    d: {
+                        $get: function () {
+                            return this.msg + (this.a.b.c || '') + (this.a.c || '')
+                        }
+                    },
+                    hidden: {
+                        a: 1,
+                        b: 2
+                    },
+                    sum: {
+                        $get: function () {
+                            return this.hidden.a + this.hidden.b
+                        }
+                    }
+                },
+                methods: {
                     one: function () {
                         this.a = {
                             c: 1,
@@ -46,20 +62,6 @@
                     three: function () {
                         this.a.b.c = 'three'
                         this.a.c = 3
-                    },
-                    d: {
-                        $get: function () {
-                            return this.msg + (this.a.b.c || '') + (this.a.c || '')
-                        }
-                    },
-                    hidden: {
-                        a: 1,
-                        b: 2
-                    },
-                    sum: {
-                        $get: function () {
-                            return this.hidden.a + this.hidden.b
-                        }
                     },
                     four: function () {
                         this.hidden.a++

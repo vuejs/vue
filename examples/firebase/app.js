@@ -20,7 +20,7 @@ Users.on('child_removed', function (snapshot) {
 var app = new Vue({
     el: '#app',
     filters: validators,
-    scope: {
+    data: {
         users: [],
         newUser: {
             name: '',
@@ -40,7 +40,9 @@ var app = new Vue({
                 }
                 return valid
             }
-        },
+        }
+    },
+    methods: {
         addUser: function (e) {
             e.preventDefault()
             if (this.isValid) {
@@ -49,7 +51,7 @@ var app = new Vue({
             }
         },
         removeUser: function (e) {
-            new Firebase(baseURL + 'users/' + e.item.id).remove()
+            new Firebase(baseURL + 'users/' + e.targetVM.id).remove()
         }
     }
 })

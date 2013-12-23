@@ -24,10 +24,25 @@ var app = new Vue({
         }).length
     },
 
-    scope: {
+    data: {
 
         todos: todoStorage.fetch(),
 
+        allDone: {
+            $get: function () {
+                return this.remaining === 0
+            },
+            $set: function (value) {
+                this.todos.forEach(function (todo) {
+                    todo.completed = value
+                })
+                this.remaining = value ? 0 : this.todos.length
+                todoStorage.save()
+            }
+        }
+    },
+
+    methods: {
         updateFilter: function () {
             var filter = location.hash.slice(2)
             this.filter = (filter in filters) ? filter : 'all'
@@ -45,7 +60,7 @@ var app = new Vue({
         },
 
         removeTodo: function (e) {
-            this.todos.remove(e.targetVM.$scope)
+            this.todos.remove(e.targetVM.$data)
             this.remaining -= e.targetVM.completed ? 0 : 1
             todoStorage.save()
         },
@@ -78,19 +93,6 @@ var app = new Vue({
                 return todo.completed
             })
             todoStorage.save()
-        },
-
-        allDone: {
-            $get: function () {
-                return this.remaining === 0
-            },
-            $set: function (value) {
-                this.todos.forEach(function (todo) {
-                    todo.completed = value
-                })
-                this.remaining = value ? 0 : this.todos.length
-                todoStorage.save()
-            }
         }
     }
 })

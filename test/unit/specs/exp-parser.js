@@ -54,7 +54,7 @@ describe('UNIT: Expression Parser', function () {
             expectedValue: 'write tests : nope'
         },
         {
-            // expression with no scope variables
+            // expression with no data variables
             exp: "'a' + 'b'",
             vm: {},
             expectedValue: 'ab'
@@ -69,7 +69,7 @@ describe('UNIT: Expression Parser', function () {
             var caughtMissingPaths = [],
                 compilerMock = {
                     vm:{
-                        $scope: {},
+                        $data: {},
                         $compiler:{
                             bindings:{},
                             createBinding: function (path) {
@@ -114,7 +114,7 @@ describe('UNIT: Expression Parser', function () {
                         bindings: {},
                         createBinding: function () {}
                     },
-                    $scope: {}
+                    $data: {}
                 }
             })
             assert.ok(warned)

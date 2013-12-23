@@ -86,11 +86,14 @@ function extend (options) {
     utils.defProtected(proto, 'constructor', ExtendedVM)
 
     // copy prototype props
-    var protoMixins = options.proto
-    if (protoMixins) {
-        for (var key in protoMixins) {
-            if (!(key in ViewModel.prototype)) {
-                proto[key] = protoMixins[key]
+    var methods = options.methods
+    if (methods) {
+        for (var key in methods) {
+            if (
+                !(key in ViewModel.prototype) &&
+                typeof methods[key] === 'function'
+            ) {
+                proto[key] = methods[key]
             }
         }
     }
@@ -105,7 +108,7 @@ function extend (options) {
 /**
  *  Inherit options
  *
- *  For options such as `scope`, `vms`, `directives`, 'partials',
+ *  For options such as `data`, `vms`, `directives`, 'partials',
  *  they should be further extended. However extending should only
  *  be done at top level.
  *  
@@ -119,7 +122,7 @@ function inheritOptions (child, parent, topLevel) {
     child = child || utils.hash()
     if (!parent) return child
     for (var key in parent) {
-        if (key === 'el' || key === 'proto') continue
+        if (key === 'el' || key === 'methods') continue
         var val = child[key],
             parentVal = parent[key],
             type = utils.typeOf(val)

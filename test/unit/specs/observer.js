@@ -471,12 +471,12 @@ describe('UNIT: Observer', function () {
                 if (expect.skip) return
                 var path = expect.key.split('.'),
                     j = 1,
-                    scope = obj
+                    data = obj
                 while (j < path.length - 1) {
-                    scope = scope[path[j]]
+                    data = data[path[j]]
                     j++
                 }
-                scope[path[j]] = expect.val
+                data[path[j]] = expect.val
             })
             assert.strictEqual(i, expects.length)
         }
@@ -497,9 +497,9 @@ describe('UNIT: Observer', function () {
             expects.forEach(function (key) {
                 var path = key.split('.'),
                     j = 1,
-                    scope = obj
+                    data = obj
                 while (j < path.length) {
-                    scope = scope[path[j]]
+                    data = data[path[j]]
                     j++
                 }
             })

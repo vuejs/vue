@@ -27,7 +27,7 @@ casper.test.begin('Nested Properties', 20, function (test) {
         })
         test.assertSelectorHasText('h3 span', 'Oh yeah three3')
 
-        // hidden scope variables
+        // hidden data variables
         // i.e. nested under an object, not explicitly
         // bound in the template, but is depended upon
         // by an expression or a computed property

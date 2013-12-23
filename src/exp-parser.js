@@ -59,7 +59,7 @@ function getRel (path, compiler) {
             : path
     while (true) {
         if (
-            hasOwn.call(vm.$scope, key) ||
+            hasOwn.call(vm.$data, key) ||
             hasOwn.call(vm, key)
         ) {
             break
@@ -85,7 +85,7 @@ function getRel (path, compiler) {
 /**
  *  Create a function from a string...
  *  this looks like evil magic but since all variables are limited
- *  to the VM's scope it's actually properly sandboxed
+ *  to the VM's data it's actually properly sandboxed
  */
 function makeGetter (exp, raw) {
     /* jshint evil: true */

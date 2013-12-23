@@ -37,7 +37,7 @@
 
             var demo = new Vue({
                 el: '#app',
-                scope: {
+                data: {
                     items: items,
                     push: function () {
                         this.items.push({ title: getChar() })

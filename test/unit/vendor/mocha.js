@@ -5093,13 +5093,13 @@ exports.escape = function(html){
  *
  * @param {Array} array
  * @param {Function} fn
- * @param {Object} scope
+ * @param {Object} data
  * @api private
  */
 
-exports.forEach = function(arr, fn, scope){
+exports.forEach = function(arr, fn, data){
   for (var i = 0, l = arr.length; i < l; i++)
-    fn.call(scope, arr[i], i);
+    fn.call(data, arr[i], i);
 };
 
 /**

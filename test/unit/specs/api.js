@@ -10,7 +10,7 @@ describe('UNIT: API', function () {
             mock(testId, '<span test-text="test"></span>')
             new Vue({
                 el: '#' + testId,
-                scope: { test: testId }
+                data: { test: testId }
             })
             assert.strictEqual(document.querySelector('#' + testId + ' span').innerHTML, testId)
         })
@@ -36,7 +36,7 @@ describe('UNIT: API', function () {
             mock(testId, '{{ test | reverse }}')
             new Vue({
                 el: '#' + testId,
-                scope: { test: msg }
+                data: { test: msg }
             })
             assert.strictEqual(document.querySelector('#' + testId).innerHTML, '54321')
         })
@@ -61,7 +61,7 @@ describe('UNIT: API', function () {
             mock(testId, '<span v-test="test"></span>')
             new Vue({
                 el: '#' + testId,
-                scope: { test: msg }
+                data: { test: msg }
             })
             var el = document.querySelector('#' + testId + ' span')
             assert.strictEqual(el.getAttribute(testId), msg + '123')
@@ -85,7 +85,7 @@ describe('UNIT: API', function () {
             mock(testId, '<span v-test2="test"></span>')
             var vm = new Vue({
                     el: '#' + testId,
-                    scope: { test: msg }
+                    data: { test: msg }
                 }),
                 el = document.querySelector('#' + testId + ' span')
             assert.strictEqual(el.getAttribute(testId + 'bind'), 'bind', 'should have called bind()')
@@ -107,7 +107,7 @@ describe('UNIT: API', function () {
             testId2 = testId + '2',
             opts = {
                 className: 'hihi',
-                scope: { hi: 'ok' }
+                data: { hi: 'ok' }
             },
             Test = Vue.extend(opts),
             utils = require('vue/src/utils')
@@ -167,7 +167,7 @@ describe('UNIT: API', function () {
             mock(testId, '<div class="directive" v-partial="' + testId + '">hello</div>')
             var t = new Vue({
                 el: '#' + testId,
-                scope: { hi: 'hohoho' }
+                data: { hi: 'hohoho' }
             })
             assert.strictEqual(t.$el.querySelector('.directive .partial-test a').textContent, 'hohoho')
             assert.strictEqual(t.$el.querySelector('.directive span').innerHTML, 'hahaha')
@@ -179,7 +179,7 @@ describe('UNIT: API', function () {
             mock(testId, '<div class="inline">{{>' + testId + '}}</div>')
             var t = new Vue({
                 el: '#' + testId,
-                scope: { hi: 'hohoho' }
+                data: { hi: 'hohoho' }
             })
             assert.strictEqual(t.$el.querySelector('.inline .partial-test a').textContent, 'hohoho')
             assert.strictEqual(t.$el.querySelector('.inline span').innerHTML, 'hahaha')
@@ -222,7 +222,7 @@ describe('UNIT: API', function () {
                     'v-show': 'show',
                     'v-transition': 'transition-api-test'
                 },
-                scope: {
+                data: {
                     show: false
                 }
             })
@@ -251,12 +251,12 @@ describe('UNIT: API', function () {
 
         it('should allow further extensions', function () {
             var Parent = Vue.extend({
-                scope: {
+                data: {
                     test: 'hi'
                 }
             })
             var Child = Parent.extend({
-                scope: {
+                data: {
                     test2: 'ho',
                     test3: {
                         hi: 1
@@ -265,7 +265,7 @@ describe('UNIT: API', function () {
             })
             assert.strictEqual(Child.super, Parent)
             var child = new Child({
-                scope: {
+                data: {
                     test3: {
                         ho: 2
                     }
@@ -280,15 +280,14 @@ describe('UNIT: API', function () {
 
         describe('Options', function () {
 
-            describe('proto', function () {
+            describe('methods', function () {
                 
                 it('should be mixed to the exteded VM\'s prototype', function () {
                     var mixins = {
-                        a: 1,
-                        b: 2,
-                        c: function () {}
+                        c: function () {},
+                        d: function () {}
                     }
-                    var Test = Vue.extend({ proto: mixins })
+                    var Test = Vue.extend({ methods: mixins })
                     for (var key in mixins) {
                         assert.strictEqual(Test.prototype[key], mixins[key])
                     }
@@ -296,12 +295,12 @@ describe('UNIT: API', function () {
 
             })
 
-            describe('scope', function () {
+            describe('data', function () {
                 
                 it('should be copied to each instance', function () {
                     var testData = { a: 1 },
                         Test = Vue.extend({
-                            scope: {
+                            data: {
                                 test: testData
                             }
                         })
@@ -323,7 +322,7 @@ describe('UNIT: API', function () {
                         lazy: true
                     })
                     var t = new Test({
-                        scope: {
+                        data: {
                             test: 'hi'
                         }
                     })
@@ -398,7 +397,7 @@ describe('UNIT: API', function () {
                             'test': 'hi',
                             'v-text': 'hoho'
                         },
-                        scope: {
+                        data: {
                             hoho: 'what'
                         }
                     })
@@ -420,7 +419,7 @@ describe('UNIT: API', function () {
                                 'test': 'hi',
                                 'v-text': 'hoho'
                             },
-                            scope: {
+                            data: {
                                 hoho: 'what'
                             }
                         }),
@@ -445,7 +444,7 @@ describe('UNIT: API', function () {
                     var Test = Vue.extend({
                             tagName: 'p',
                             template: raw,
-                            scope: {
+                            data: {
                                 hello: 'Ahaha'
                             }
                         }),
@@ -466,7 +465,7 @@ describe('UNIT: API', function () {
                     document.getElementById('test').appendChild(tpl)
                     var Test = Vue.extend({
                         template: '#' + testId,
-                        scope: { hello: testId }
+                        data: { hello: testId }
                     })
                     var t = new Test()
                     assert.strictEqual(t.$el.querySelector('span').textContent, testId)
@@ -478,7 +477,7 @@ describe('UNIT: API', function () {
                     })
                     var t = new Test({
                         template: raw,
-                        scope: {
+                        data: {
                             hello: 'overwritten!'
                         }
                     })
@@ -501,7 +500,7 @@ describe('UNIT: API', function () {
                         attributes: {
                             'v-test': 'ok'
                         },
-                        scope: {
+                        data: {
                             ok: true
                         }
                     })
@@ -524,7 +523,7 @@ describe('UNIT: API', function () {
                     })
                     var t = new Test({
                         template: '{{hi | test}}',
-                        scope: {
+                        data: {
                             hi: 'hohoho'
                         }
                     })
@@ -537,13 +536,13 @@ describe('UNIT: API', function () {
 
                 it('should allow the VM to use private child VMs', function () {
                     var Child = Vue.extend({
-                        scope: {
+                        data: {
                             name: 'child'
                         }
                     })
                     var Parent = Vue.extend({
                         template: '<p>{{name}}</p><div v-component="child">{{name}}</div>',
-                        scope: {
+                        data: {
                             name: 'dad'
                         },
                         components: {
@@ -558,12 +557,12 @@ describe('UNIT: API', function () {
                 it('should work with plain option object', function () {
                     var Parent = Vue.extend({
                         template: '<p>{{name}}</p><div v-component="child">{{name}}</div>',
-                        scope: {
+                        data: {
                             name: 'dad'
                         },
                         components: {
                             child: {
-                                scope: {
+                                data: {
                                     name: 'child'
                                 }
                             }
@@ -586,7 +585,7 @@ describe('UNIT: API', function () {
                         partials: {
                             test: '<a>{{a}}</a><p>{{b}}</p>'
                         },
-                        scope: {
+                        data: {
                             a: 'hi',
                             b: 'ho'
                         }
@@ -622,7 +621,7 @@ describe('UNIT: API', function () {
                                 }
                             }
                         },
-                        scope: {
+                        data: {
                             show: false
                         }
                     })

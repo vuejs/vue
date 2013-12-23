@@ -16,19 +16,19 @@
                 ready: function () {
                     this.title += ' init'
                 },
-                proto: {
+                methods: {
                     click: function () {
                         this.title += ' click'
                     }
                 },
-                scope: {
+                data: {
                     msg: 'msg'
                 }
             })
 
             new Vue({
                 el: 'body',
-                scope: {
+                data: {
                     items: [
                         {title:'a'},
                         {title:'b'},

@@ -29,12 +29,12 @@
                 },
                 components: {
                     'vm-test': {
-                        scope: {
+                        data: {
                             vmMsg: 'component works'
                         }
                     },
                     'vm-w-model': {
-                        scope : {
+                        data : {
                             selfMsg: 'component with model '
                         }
                     }
@@ -63,7 +63,7 @@
             })
             new T({
                 el: '#test',
-                scope: {
+                data: {
                     dirMsg: 'directive',
                     filterMsg: 'fi43l132ter5 w12345orks',
                     partialMsg: 'partial works',

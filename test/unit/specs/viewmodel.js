@@ -9,7 +9,7 @@ describe('UNIT: ViewModel', function () {
         arr = [1, 2, 3],
         vm = new Vue({
             el: '#vm-test',
-            scope: {
+            data: {
                 a: data,
                 b: arr
             }

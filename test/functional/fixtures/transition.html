@@ -62,7 +62,7 @@
         <script>
             var test = new Vue({
                 el: '#test',
-                scope: {
+                data: {
                     b: 1,
                     set: function (e) {
                         this.b = +e.el.textContent

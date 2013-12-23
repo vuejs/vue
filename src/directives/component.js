@@ -21,7 +21,7 @@ module.exports = {
         if (!Ctor) utils.warn('unknown component: ' + this.arg)
         var options = {
             el: this.el,
-            scope: value,
+            data: value,
             compilerOptions: {
                 parentCompiler: this.compiler
             }

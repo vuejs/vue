@@ -27,7 +27,7 @@
         Vue.config({debug:true})
             var normal = new Vue({
                 el: '#normal',
-                scope: {
+                data: {
                     one: 'Hello',
                     two: {
                         three: 'World'
@@ -38,7 +38,7 @@
             var lazy = new Vue({
                 el: '#lazy',
                 lazy: true,
-                scope: {
+                data: {
                     one: 'Hi',
                     two: {
                         three: 'Ho'
@@ -48,7 +48,7 @@
 
             var conditional = new Vue({
                 el: '#conditional',
-                scope: {
+                data: {
                     ok: true,
                     yesMsg: 'YES',
                     noMsg: 'NO'

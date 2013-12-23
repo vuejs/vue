@@ -206,8 +206,8 @@ describe('UNIT: Utils', function () {
                 b: '<div class="a">hi</div><p>ha</p>'
             },
             components: {
-                a: { scope: { data: 1 } },
-                b: { scope: { data: 2 } }
+                a: { data: { data: 1 } },
+                b: { data: { data: 2 } }
             },
             template: '<a>{{hi}}</a>'
         }
@@ -234,9 +234,9 @@ describe('UNIT: Utils', function () {
         it('should convert plain object components & elements to constructors', function () {
             var components = options.components
             assert.ok(components.a.prototype instanceof Vue)
-            assert.strictEqual(components.a.options.scope.data, 1)
+            assert.strictEqual(components.a.options.data.data, 1)
             assert.ok(components.b.prototype instanceof Vue)
-            assert.strictEqual(components.b.options.scope.data, 2)
+            assert.strictEqual(components.b.options.data.data, 2)
         })
 
     })

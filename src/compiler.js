@@ -13,6 +13,7 @@ var Emitter     = require('./emitter'),
     slice       = Array.prototype.slice,
     log         = utils.log,
     makeHash    = utils.hash,
+    extend      = utils.extend,
     def         = utils.defProtected,
     hasOwn      = Object.prototype.hasOwnProperty
 
@@ -30,21 +31,20 @@ function Compiler (vm, options) {
 
     // process and extend options
     options = compiler.options = options || makeHash()
+    var data = compiler.data = options.data || {}
     utils.processOptions(options)
-    utils.extend(compiler, options.compilerOptions)
+    extend(compiler, options.compilerOptions)
+    extend(vm, options.data, true)
+    extend(vm, options.methods, true)
 
     // initialize element
     var el = compiler.setupElement(options)
     log('\nnew VM instance:', el.tagName, '\n')
 
-    // init scope
-    var scope = compiler.scope = options.scope || {}
-    utils.extend(vm, scope, true)
-
     compiler.vm  = vm
     def(vm, '$', makeHash())
     def(vm, '$el', el)
-    def(vm, '$scope', scope)
+    def(vm, '$data', data)
     def(vm, '$compiler', compiler)
 
     // keep track of directives and expressions
@@ -87,16 +87,16 @@ function Compiler (vm, options) {
     // beforeCompile hook
     compiler.execHook('beforeCompile', 'created')
     // the user might have set some props on the vm 
-    // so copy it back to the scope...
-    utils.extend(scope, vm)
-    // observe the scope
-    Observer.observe(scope, '', compiler.observer)
+    // so copy it back to the data...
+    extend(data, vm)
+    // observe the data
+    Observer.observe(data, '', compiler.observer)
 
     // for repeated items, create an index binding
     // which should be inenumerable but configurable
     if (compiler.repeat) {
-        //scope.$index = compiler.repeatIndex
-        def(scope, '$index', compiler.repeatIndex, false, true)
+        //data.$index = compiler.repeatIndex
+        def(data, '$index', compiler.repeatIndex, false, true)
         compiler.createBinding('$index')
     }
 
@@ -369,7 +369,7 @@ CompilerProto.bindDirective = function (directive) {
         // expression bindings are always created on current compiler
         binding = compiler.createBinding(key, true, directive.isFn)
     } else if (
-        hasOwn.call(compiler.scope, baseKey) ||
+        hasOwn.call(compiler.data, baseKey) ||
         hasOwn.call(compiler.vm, baseKey)
     ) {
         // If the directive's compiler's VM has the base key,
@@ -409,7 +409,7 @@ CompilerProto.bindDirective = function (directive) {
 CompilerProto.createBinding = function (key, isExp, isFn) {
 
     var compiler = this,
-        scope = compiler.scope,
+        data = compiler.data,
         bindings = compiler.bindings,
         binding  = new Binding(compiler, key, isExp, isFn)
 
@@ -434,8 +434,8 @@ CompilerProto.createBinding = function (key, isExp, isFn) {
             // this is a root level binding. we need to define getter/setters for it.
             compiler.define(key, binding)
         } else {
-            // ensure path in scope so it can be observed
-            Observer.ensurePath(scope, key)
+            // ensure path in data so it can be observed
+            Observer.ensurePath(data, key)
             var parentKey = key.slice(0, key.lastIndexOf('.'))
             if (!hasOwn.call(bindings, parentKey)) {
                 // this is a nested value binding, but the binding for its parent
@@ -456,41 +456,40 @@ CompilerProto.define = function (key, binding) {
     log('    defined root binding: ' + key)
 
     var compiler = this,
-        scope = compiler.scope,
+        data = compiler.data,
         vm = compiler.vm,
-        value = binding.value = scope[key] // save the value before redefinening it
+        value = binding.value = data[key] // save the value before redefinening it
 
     if (utils.typeOf(value) === 'Object' && value.$get) {
         compiler.markComputed(binding)
     }
 
-    // $index is inenumerable
-    if (!(key in scope) && key !== '$index') {
-        scope[key] = undefined
+    if (!(key in data)) {
+        data[key] = undefined
     }
 
-    // if the scope object is already observed, that means
+    // if the data object is already observed, that means
     // this binding is created late. we need to observe it now.
-    if (scope.__observer__) {
-        Observer.convert(scope, key)
+    if (data.__observer__) {
+        Observer.convert(data, key)
     }
 
     Object.defineProperty(vm, key, {
         get: binding.isComputed
             ? function () {
-                return scope[key].$get()
+                return data[key].$get()
             }
             : function () {
-                return scope[key]
+                return data[key]
             },
         set: binding.isComputed
             ? function (val) {
-                if (scope[key].$set) {
-                    scope[key].$set(val)
+                if (data[key].$set) {
+                    data[key].$set(val)
                 }
             }
             : function (val) {
-                scope[key] = val
+                data[key] = val
             }
     })
 }

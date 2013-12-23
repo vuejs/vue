@@ -557,7 +557,7 @@ describe('UNIT: Directives', function () {
             mock(testId, '<span v-pre><strong>{{lol}}</strong><a v-text="hi"></a></span>')
             var t = new Vue({
                 el: '#' + testId,
-                scope: {
+                data: {
                     lol: 'heyhey',
                     hi: 'hohoho'
                 }
@@ -576,7 +576,7 @@ describe('UNIT: Directives', function () {
             mock(testId, '<div v-component="' + testId + '"></div>')
             var t = new Vue({
                 el: '#' + testId,
-                scope: {
+                data: {
                     msg: '123'
                 },
                 components: {
@@ -593,7 +593,7 @@ describe('UNIT: Directives', function () {
             mock(testId, '<div v-component="' + testId + ':options.test"></div>')
             var t = new Vue({
                 el: '#' + testId,
-                scope: {
+                data: {
                     options: {
                         test: {
                             msg: '123'
@@ -616,7 +616,7 @@ describe('UNIT: Directives', function () {
         it('should register a VM isntance on its parent\'s $', function () {
             var called = false
             var Child = Vue.extend({
-                proto: {
+                methods: {
                     test: function () {
                         called = true
                     }
