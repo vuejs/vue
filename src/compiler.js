@@ -57,8 +57,7 @@ function Compiler (vm, options) {
     // Store things during parsing to be processed afterwards,
     // because we want to have created all bindings before
     // observing values / parsing dependencies.
-    var observables = compiler.observables = [],
-        computed    = compiler.computed    = []
+    var computed = compiler.computed = []
 
     // prototypal inheritance of bindings
     var parent = compiler.parentCompiler
@@ -467,7 +466,7 @@ CompilerProto.define = function (key, binding) {
         scope[key] = undefined
     }
 
-    if (scope.__observer__) { 
+    if (scope.__observer__) {
         Observer.convert(scope, key)
     }
 

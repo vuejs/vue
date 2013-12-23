@@ -93,7 +93,7 @@ for (var method in extensions) {
 /**
  *  Watch an Object, recursive.
  */
-function watchObject (obj, path) {
+function watchObject (obj) {
     for (var key in obj) {
         var keyPrefix = key.charAt(0)
         if ((keyPrefix !== '$' && keyPrefix !== '_') || key === '$index') {
