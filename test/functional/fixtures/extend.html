@@ -18,6 +18,7 @@
             <div class="cvm" v-component="vm-test">{{vmMsg}}</div>
         </div>
         <script>
+            Vue.config({debug:true})
             var log = document.getElementById('log')
             var T = Vue.extend({
                 created: function () {

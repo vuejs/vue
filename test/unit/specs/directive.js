@@ -162,17 +162,6 @@ describe('UNIT: Directive', function () {
             assert.strictEqual(f.arg, 'todo', 'with filters')
         })
 
-        it('should extract correct nesting info', function () {
-            var d = Directive.parse('v-text', 'abc', compiler),
-                e = Directive.parse('v-text', '^abc', compiler),
-                f = Directive.parse('v-text', '^^^abc', compiler),
-                g = Directive.parse('v-text', '*abc', compiler)
-            assert.ok(d.nesting === false && d.root === false && d.key === 'abc', 'no nesting')
-            assert.ok(e.nesting === 1 && e.root === false && e.key === 'abc', '1 level')
-            assert.ok(f.nesting === 3 && f.root === false && f.key === 'abc', '3 levels')
-            assert.ok(g.root === true && g.nesting === false && g.key === 'abc', 'root')
-        })
-
         it('should be able to determine whether the key is an expression', function () {
             var d = Directive.parse('v-text', 'abc', compiler),
                 e = Directive.parse('v-text', '!abc', compiler),

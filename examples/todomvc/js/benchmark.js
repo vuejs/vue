@@ -4,7 +4,7 @@
 // then delete them one by one
 
 // do not run when testing in PhantomJS
-if (navigator.userAgent.indexOf('PhantomJS') === -1) {
+if (window.location.search === '?benchmark=1') {
     runBenchmark()
 }
 

@@ -15,7 +15,6 @@ var config     = require('./config'),
     ARG_RE          = /^([\w- ]+):(.+)$/,
     FILTERS_RE      = /\|[^\|]+/g,
     FILTER_TOKEN_RE = /[^\s']+|'[^']+'/g,
-    NESTING_RE      = /^\^+/,
     SINGLE_VAR_RE   = /^[\w\.\$]+$/
 
 /**
@@ -76,7 +75,6 @@ var DirProto = Directive.prototype
  *  parse a key, extract argument and nesting/root info
  */
 function parseKey (dir, rawKey) {
-
     var key = rawKey
     if (rawKey.indexOf(':') > -1) {
         var argMatch = rawKey.match(ARG_RE)
@@ -87,20 +85,6 @@ function parseKey (dir, rawKey) {
             ? argMatch[1].trim()
             : null
     }
-
-    // nesting
-    var firstChar = key.charAt(0)
-    dir.root = firstChar === '*'
-    dir.nesting = firstChar === '^'
-        ? key.match(NESTING_RE)[0].length
-        : false
-
-    if (dir.nesting) {
-        key = key.slice(dir.nesting)
-    } else if (dir.root) {
-        key = key.slice(1)
-    }
-
     dir.key = key
 }
 

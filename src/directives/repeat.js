@@ -61,7 +61,7 @@ var mutationHandlers = {
             data = col[i]
             for (j = 0; j < l; j++) {
                 vm = vms[j]
-                if (vm[key] === data) {
+                if (vm.$scope[key] === data) {
                     sorted[i] = vm
                     break
                 }
@@ -201,7 +201,7 @@ module.exports = {
     updateIndexes: function () {
         var i = this.vms.length
         while (i--) {
-            this.vms[i].$index = i
+            this.vms[i].$scope.$index = i
         }
     },
 

@@ -58,7 +58,10 @@ function getRel (path, compiler) {
             ? path.slice(0, dot)
             : path
     while (true) {
-        if (hasOwn.call(vm, key)) {
+        if (
+            hasOwn.call(vm.$scope, key) ||
+            hasOwn.call(vm, key)
+        ) {
             break
         } else {
             if (vm.$parent) {

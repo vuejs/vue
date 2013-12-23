@@ -37,13 +37,14 @@ function Compiler (vm, options) {
     var el = compiler.setupElement(options)
     log('\nnew VM instance:', el.tagName, '\n')
 
-    // copy scope properties to vm
-    var scope = options.scope
-    if (scope) utils.extend(vm, scope, true)
+    // init scope
+    var scope = compiler.scope = options.scope || {}
+    utils.extend(vm, scope, true)
 
     compiler.vm  = vm
     def(vm, '$', makeHash())
     def(vm, '$el', el)
+    def(vm, '$scope', scope)
     def(vm, '$compiler', compiler)
 
     // keep track of directives and expressions
@@ -85,21 +86,16 @@ function Compiler (vm, options) {
 
     // beforeCompile hook
     compiler.execHook('beforeCompile', 'created')
-
-    // create bindings for things already in scope
-    var key, keyPrefix
-    for (key in vm) {
-        keyPrefix = key.charAt(0)
-        if (keyPrefix !== '$' && keyPrefix !== '_') {
-            compiler.createBinding(key)
-        }
-    }
+    // the user might have set some props on the vm 
+    // so copy it back to the scope...
+    utils.extend(scope, vm)
+    // observe the scope
+    Observer.observe(scope, '', compiler.observer)
 
     // for repeated items, create an index binding
     // which should be inenumerable but configurable
     if (compiler.repeat) {
-        vm.$index = compiler.repeatIndex
-        def(vm, '$collection', compiler.repeatCollection)
+        scope.$index = compiler.repeatIndex
         compiler.createBinding('$index')
     }
 
@@ -107,14 +103,6 @@ function Compiler (vm, options) {
     // and bind the parsed directives
     compiler.compile(el, true)
 
-    // observe root values so that they emit events when
-    // their nested values change (for an Object)
-    // or when they mutate (for an Array)
-    var i = observables.length, binding
-    while (i--) {
-        binding = observables[i]
-        Observer.observe(binding.value, binding.key, compiler.observer)
-    }
     // extract dependencies for computed properties
     if (computed.length) DepsParser.parse(computed)
 
@@ -374,24 +362,25 @@ CompilerProto.bindDirective = function (directive) {
     var binding,
         compiler      = this,
         key           = directive.key,
-        baseKey       = key.split('.')[0],
-        ownerCompiler = traceOwnerCompiler(directive, compiler)
+        baseKey       = key.split('.')[0]
 
     if (directive.isExp) {
         // expression bindings are always created on current compiler
         binding = compiler.createBinding(key, true, directive.isFn)
-    } else if (ownerCompiler.vm.hasOwnProperty(baseKey)) {
-        // If the directive's owner compiler's VM has the key,
-        // it belongs there. Create the binding if it's not already
-        // created, and return it.
-        binding = hasOwn.call(ownerCompiler.bindings, key)
-            ? ownerCompiler.bindings[key]
-            : ownerCompiler.createBinding(key)
+    } else if (
+        hasOwn.call(compiler.scope, baseKey) ||
+        hasOwn.call(compiler.vm, baseKey)
+    ) {
+        // If the directive's compiler's VM has the base key,
+        // it belongs here. Create the binding if it's not created already.
+        binding = hasOwn.call(compiler.bindings, key)
+            ? compiler.bindings[key]
+            : compiler.createBinding(key)
     } else {
         // due to prototypal inheritance of bindings, if a key doesn't exist
-        // on the owner compiler's VM, then it doesn't exist in the whole
+        // on the bindings object, then it doesn't exist in the whole
         // prototype chain. In this case we create the new binding at the root level.
-        binding = ownerCompiler.bindings[key] || compiler.rootCompiler.createBinding(key)
+        binding = compiler.bindings[key] || compiler.rootCompiler.createBinding(key)
     }
 
     binding.instances.push(directive)
@@ -419,6 +408,7 @@ CompilerProto.bindDirective = function (directive) {
 CompilerProto.createBinding = function (key, isExp, isFn) {
 
     var compiler = this,
+        scope = compiler.scope,
         bindings = compiler.bindings,
         binding  = new Binding(compiler, key, isExp, isFn)
 
@@ -443,7 +433,8 @@ CompilerProto.createBinding = function (key, isExp, isFn) {
             // this is a root level binding. we need to define getter/setters for it.
             compiler.define(key, binding)
         } else {
-            Observer.ensurePath(compiler.vm, key)
+            // ensure path in scope so it can be observed
+            Observer.ensurePath(scope, key)
             var parentKey = key.slice(0, key.lastIndexOf('.'))
             if (!hasOwn.call(bindings, parentKey)) {
                 // this is a nested value binding, but the binding for its parent
@@ -464,52 +455,35 @@ CompilerProto.define = function (key, binding) {
     log('    defined root binding: ' + key)
 
     var compiler = this,
+        scope = compiler.scope,
         vm = compiler.vm,
-        ob = compiler.observer,
-        value = binding.value = vm[key], // save the value before redefinening it
-        type = utils.typeOf(value)
+        value = binding.value = scope[key] // save the value before redefinening it
 
-    if (type === 'Object' && value.$get) {
-        // computed property
+    if (utils.typeOf(value) === 'Object' && value.$get) {
         compiler.markComputed(binding)
-    } else if (type === 'Object' || type === 'Array') {
-        // observe objects later, because there might be more keys
-        // to be added to it during Observer.ensurePath().
-        // we also want to emit all the set events after all values
-        // are available.
-        compiler.observables.push(binding)
+    }
+
+    if (!(key in scope)) {
+        scope[key] = undefined
+    }
+
+    if (scope.__observer__) { 
+        Observer.convert(scope, key)
     }
 
     Object.defineProperty(vm, key, {
-        enumerable: true,
         get: function () {
-            var value = binding.value
-            if (depsOb.active && (!binding.isComputed && (!value || !value.__observer__)) ||
-                Array.isArray(value)) {
-                // only emit non-computed, non-observed (primitive) values, or Arrays.
-                // because these are the cleanest dependencies
-                ob.emit('get', key)
-            }
+            var val = scope[key]
             return binding.isComputed
-                ? value.$get()
-                : value
+                ? val.$get()
+                : val
         },
         set: function (newVal) {
-            var value = binding.value
+            var val = scope[key]
             if (binding.isComputed) {
-                if (value.$set) {
-                    value.$set(newVal)
-                }
-            } else if (newVal !== value) {
-                // unwatch the old value
-                Observer.unobserve(value, key, ob)
-                // set new value
-                binding.value = newVal
-                ob.emit('set', key, newVal)
-                Observer.ensurePaths(key, newVal, compiler.bindings)
-                // now watch the new value, which in turn emits 'set'
-                // for all its nested values
-                Observer.observe(newVal, key, ob)
+                if (val.$set) val.$set(newVal)
+            } else {
+                scope[key] = newVal
             }
         }
     })
@@ -632,27 +606,13 @@ CompilerProto.destroy = function () {
 // Helpers --------------------------------------------------------------------
 
 /**
- *  determine which viewmodel a key belongs to based on nesting symbols
- */
-function traceOwnerCompiler (key, compiler) {
-    if (key.nesting) {
-        var levels = key.nesting
-        while (compiler.parentCompiler && levels--) {
-            compiler = compiler.parentCompiler
-        }
-    } else if (key.root) {
-        while (compiler.parentCompiler) {
-            compiler = compiler.parentCompiler
-        }
-    }
-    return compiler
-}
-
-/**
  *  shorthand for getting root compiler
  */
 function getRoot (compiler) {
-    return traceOwnerCompiler({ root: true }, compiler)
+    while (compiler.parentCompiler) {
+        compiler = compiler.parentCompiler
+    }
+    return compiler
 }
 
 module.exports = Compiler

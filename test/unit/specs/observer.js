@@ -81,7 +81,6 @@ describe('UNIT: Observer', function () {
                 { key: 'test.b.c', val: obj.b.c }
             ]
             ob2.on('set', function (key, val) {
-                console.log(key)
                 var exp = expects[i]
                 assert.strictEqual(key, exp.key)
                 assert.strictEqual(val, exp.val)
@@ -435,25 +434,25 @@ describe('UNIT: Observer', function () {
 
     })
 
-    describe('.ensurePaths()', function () {
+    // describe('.copyPaths()', function () {
         
-        it('should ensure path for all paths that start with the given key', function () {
-            var key = 'a',
-                obj = {},
-                paths = {
-                    'a.b.c': 1,
-                    'a.d': 2,
-                    'e.f': 3,
-                    'g': 4
-                }
-            Observer.ensurePaths(key, obj, paths)
-            assert.strictEqual(obj.b.c, undefined)
-            assert.strictEqual(obj.d, undefined)
-            assert.notOk('f' in obj)
-            assert.strictEqual(Object.keys(obj).length, 2)
-        })
+    //     it('should ensure path for all paths that start with the given key', function () {
+    //         var key = 'a',
+    //             obj = {},
+    //             paths = {
+    //                 'a.b.c': 1,
+    //                 'a.d': 2,
+    //                 'e.f': 3,
+    //                 'g': 4
+    //             }
+    //         Observer.ensurePaths(key, obj, paths)
+    //         assert.strictEqual(obj.b.c, undefined)
+    //         assert.strictEqual(obj.d, undefined)
+    //         assert.notOk('f' in obj)
+    //         assert.strictEqual(Object.keys(obj).length, 2)
+    //     })
 
-    })
+    // })
 
     function setTestFactory (opts) {
         return function () {

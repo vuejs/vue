@@ -55,6 +55,8 @@
         var Man = Vue.extend({
             created: function () {
                 this.name = this.$el.dataset.name
+                console.log(this.$el)
+                console.log(this.name)
                 var family = this.$el.dataset.family
                 if (family) {
                     this.family = family

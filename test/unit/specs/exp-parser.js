@@ -69,6 +69,7 @@ describe('UNIT: Expression Parser', function () {
             var caughtMissingPaths = [],
                 compilerMock = {
                     vm:{
+                        $scope: {},
                         $compiler:{
                             bindings:{},
                             createBinding: function (path) {
@@ -80,10 +81,6 @@ describe('UNIT: Expression Parser', function () {
                 getter = ExpParser.parse(testCase.exp, compilerMock),
                 vm     = testCase.vm,
                 vars   = testCase.paths || Object.keys(vm)
-
-            // mock the $get().
-            // the real $get() will be tested in integration tests.
-            vm.$get = function (key) { return this[key] }
 
             it('should get correct paths', function () {
                 if (!vars.length) return
@@ -116,7 +113,8 @@ describe('UNIT: Expression Parser', function () {
                     $compiler: {
                         bindings: {},
                         createBinding: function () {}
-                    }
+                    },
+                    $scope: {}
                 }
             })
             assert.ok(warned)

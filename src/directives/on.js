@@ -51,7 +51,7 @@ module.exports = {
                 if (target) {
                     e.el = target
                     e.vm = target.vue_viewmodel
-                    e.item = e.vm[compiler.repeatPrefix]
+                    e.item = e.vm.$scope[compiler.repeatPrefix]
                     handler.call(ownerVM, e)
                 }
             }
@@ -66,7 +66,7 @@ module.exports = {
                 e.el = e.currentTarget
                 e.vm = vm
                 if (compiler.repeat) {
-                    e.item = vm[compiler.repeatPrefix]
+                    e.item = vm.$scope[compiler.repeatPrefix]
                 }
                 handler.call(ownerVM, e)
             }

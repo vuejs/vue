@@ -9,6 +9,10 @@ var Emitter  = require('./emitter'),
     def      = utils.defProtected,
     slice    = Array.prototype.slice,
 
+    // types
+    OBJECT   = 'Object',
+    ARRAY    = 'Array',
+
     // Array mutation methods to wrap
     methods  = ['push','pop','shift','unshift','splice','sort','reverse'],
 
@@ -89,11 +93,11 @@ for (var method in extensions) {
 /**
  *  Watch an Object, recursive.
  */
-function watchObject (obj, path, observer) {
+function watchObject (obj, path) {
     for (var key in obj) {
         var keyPrefix = key.charAt(0)
-        if (keyPrefix !== '$' && keyPrefix !== '_') {
-            convert(obj, key, observer)
+        if ((keyPrefix !== '$' && keyPrefix !== '_') || key === '$index') {
+            convert(obj, key)
         }
     }
 }
@@ -102,8 +106,12 @@ function watchObject (obj, path, observer) {
  *  Watch an Array, overload mutation methods
  *  and add augmentations by intercepting the prototype chain
  */
-function watchArray (arr, path, observer) {
-    def(arr, '__observer__', observer)
+function watchArray (arr, path) {
+    var observer = arr.__observer__
+    if (!observer) {
+        observer = new Emitter()
+        def(arr, '__observer__', observer)
+    }
     observer.path = path
     if (hasProto) {
         arr.__proto__ = ArrayProxy
@@ -119,8 +127,9 @@ function watchArray (arr, path, observer) {
  *  so it emits get/set events.
  *  Then watch the value itself.
  */
-function convert (obj, key, observer) {
-    var val       = obj[key],
+function convert (obj, key) {
+    var observer  = obj.__observer__,
+        val       = obj[key],
         values    = observer.values
     values[key] = val
     // emit set on bind
@@ -128,11 +137,10 @@ function convert (obj, key, observer) {
     // a first batch of set events.
     observer.emit('set', key, val)
     Object.defineProperty(obj, key, {
-        enumerable: true,
         get: function () {
             var value = values[key]
             // only emit get on tip values
-            if (depsOb.active && !isWatchable(value)) {
+            if (depsOb.active && typeOf(value) !== OBJECT) {
                 observer.emit('get', key)
             }
             return value
@@ -141,7 +149,7 @@ function convert (obj, key, observer) {
             var oldVal = values[key]
             unobserve(oldVal, key, observer)
             values[key] = newVal
-            ensurePaths('', newVal, oldVal)
+            copyPaths(newVal, oldVal)
             observer.emit('set', key, newVal)
             observe(newVal, key, observer)
         }
@@ -155,7 +163,7 @@ function convert (obj, key, observer) {
 function isWatchable (obj) {
     ViewModel = ViewModel || require('./viewmodel')
     var type = typeOf(obj)
-    return (type === 'Object' || type === 'Array') && !(obj instanceof ViewModel)
+    return (type === OBJECT || type === ARRAY) && !(obj instanceof ViewModel)
 }
 
 /**
@@ -167,9 +175,9 @@ function isWatchable (obj) {
 function emitSet (obj) {
     var type = typeOf(obj),
         emitter = obj.__observer__
-    if (type === 'Array') {
+    if (type === ARRAY) {
         emitter.emit('set', 'length', obj.length)
-    } else if (type === 'Object') {
+    } else if (type === OBJECT) {
         var key, val
         for (key in obj) {
             val = obj[key]
@@ -180,16 +188,28 @@ function emitSet (obj) {
 }
 
 /**
- *  Sometimes when a binding is found in the template, the value might
- *  have not been set on the VM yet. To ensure computed properties and
- *  dependency extraction can work, we have to create a dummy value for
- *  any given path.
+ *  Make sure all the paths in an old object exists
+ *  in a new object.
+ *  So when an object changes, all missing keys will
+ *  emit a set event with undefined value.
  */
-function ensurePaths (key, val, paths) {
-    key = key ? key + '.' : ''
-    for (var path in paths) {
-        if (!key || !path.indexOf(key)) {
-            ensurePath(val, key ? path.replace(key, '') : path)
+function copyPaths (newObj, oldObj) {
+    if (typeOf(oldObj) !== OBJECT || typeOf(newObj) !== OBJECT) {
+        return
+    }
+    var path, type, oldVal, newVal
+    for (path in oldObj) {
+        if (!(path in newObj)) {
+            oldVal = oldObj[path]
+            type = typeOf(oldVal)
+            if (type === OBJECT) {
+                newVal = newObj[path] = {}
+                copyPaths(newVal, oldVal)
+            } else if (type === ARRAY) {
+                newObj[path] = []
+            } else {
+                newObj[path] = undefined
+            }
         }
     }
 }
@@ -199,19 +219,22 @@ function ensurePaths (key, val, paths) {
  *  and enumerated in that object
  */
 function ensurePath (obj, key) {
-    if (typeOf(obj) !== 'Object') return
     var path = key.split('.'), sec
     for (var i = 0, d = path.length - 1; i < d; i++) {
         sec = path[i]
-        if (!obj[sec]) obj[sec] = {}
+        if (!obj[sec]) {
+            obj[sec] = {}
+            if (obj.__observer__) convert(obj, sec)
+        }
         obj = obj[sec]
     }
-    var type = typeOf(obj)
-    if (type === 'Object' || type === 'Array') {
+    if (typeOf(obj) === OBJECT) {
         sec = path[i]
-        if (!(sec in obj)) obj[sec] = undefined
+        if (!(sec in obj)) {
+            obj[sec] = undefined
+            if (obj.__observer__) convert(obj, sec)
+        }
     }
-    return obj[sec]
 }
 
 /**
@@ -255,10 +278,10 @@ function observe (obj, rawPath, observer) {
         emitSet(obj)
     } else {
         var type = typeOf(obj)
-        if (type === 'Object') {
-            watchObject(obj, null, ob)
-        } else if (type === 'Array') {
-            watchArray(obj, null, ob)
+        if (type === OBJECT) {
+            watchObject(obj)
+        } else if (type === ARRAY) {
+            watchArray(obj)
         }
     }
 }
@@ -270,6 +293,7 @@ function unobserve (obj, path, observer) {
     if (!obj || !obj.__observer__) return
     path = path + '.'
     var proxies = observer.proxies[path]
+    if (!proxies) return
     obj.__observer__
         .off('get', proxies.get)
         .off('set', proxies.set)
@@ -281,7 +305,7 @@ module.exports = {
     observe     : observe,
     unobserve   : unobserve,
     ensurePath  : ensurePath,
-    ensurePaths : ensurePaths,
+    convert     : convert,
     // used in v-repeat
     watchArray  : watchArray,
 }
