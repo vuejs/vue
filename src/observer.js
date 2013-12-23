@@ -95,10 +95,7 @@ for (var method in extensions) {
  */
 function watchObject (obj) {
     for (var key in obj) {
-        var keyPrefix = key.charAt(0)
-        if ((keyPrefix !== '$' && keyPrefix !== '_') || key === '$index') {
-            convert(obj, key)
-        }
+        convert(obj, key)
     }
 }
 
@@ -128,6 +125,10 @@ function watchArray (arr, path) {
  *  Then watch the value itself.
  */
 function convert (obj, key) {
+    var keyPrefix = key.charAt(0)
+    if ((keyPrefix === '$' || keyPrefix === '_') && key !== '$index') {
+        return
+    }
     var observer  = obj.__observer__,
         val       = obj[key],
         values    = observer.values

@@ -67,6 +67,7 @@ function Compiler (vm, options) {
     compiler.rootCompiler = parent
         ? getRoot(parent)
         : compiler
+    def(vm, '$root', compiler.rootCompiler.vm)
 
     // set parent VM
     // and register child id on parent
@@ -187,7 +188,7 @@ CompilerProto.setupObserver = function () {
         })
 
     function check (key) {
-        if (!bindings[key]) {
+        if (!hasOwn.call(bindings, key)) {
             compiler.createBinding(key)
         }
     }
@@ -471,20 +472,22 @@ CompilerProto.define = function (key, binding) {
     }
 
     Object.defineProperty(vm, key, {
-        get: function () {
-            var val = scope[key]
-            return binding.isComputed
-                ? val.$get()
-                : val
-        },
-        set: function (newVal) {
-            var val = scope[key]
-            if (binding.isComputed) {
-                if (val.$set) val.$set(newVal)
-            } else {
-                scope[key] = newVal
+        get: binding.isComputed
+            ? function () {
+                return scope[key].$get()
             }
-        }
+            : function () {
+                return scope[key]
+            },
+        set: binding.isComputed
+            ? function (val) {
+                if (scope[key].$set) {
+                    scope[key].$set(val)
+                }
+            }
+            : function (val) {
+                scope[key] = val
+            }
     })
 }
 

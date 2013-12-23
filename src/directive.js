@@ -15,6 +15,7 @@ var config     = require('./config'),
     ARG_RE          = /^([\w- ]+):(.+)$/,
     FILTERS_RE      = /\|[^\|]+/g,
     FILTER_TOKEN_RE = /[^\s']+|'[^']+'/g,
+    NESTING_RE      = /^\$(parent|root)\./,
     SINGLE_VAR_RE   = /^[\w\.\$]+$/
 
 /**
@@ -53,7 +54,7 @@ function Directive (definition, expression, rawKey, compiler, node) {
     
     parseKey(this, rawKey)
 
-    this.isExp = !SINGLE_VAR_RE.test(this.key)
+    this.isExp = !SINGLE_VAR_RE.test(this.key) || NESTING_RE.test(this.key)
     
     var filterExps = this.expression.slice(rawKey.length).match(FILTERS_RE)
     if (filterExps) {

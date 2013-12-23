@@ -24,10 +24,10 @@
         <p class="ancestor">{{name}} {{family}}</p>
 
         <div v-component="man" data-name="Jack">
-            <p class="jack">{{name}}, son of {{^name}}</p>
+            <p class="jack">{{name}}, son of {{$parent.name}}</p>
 
             <div v-component="man" data-name="Mike">
-                <p class="mike">{{name}}, son of {{^name}}</p>
+                <p class="mike">{{name}}, son of {{$parent.name}}</p>
 
                 <div v-component="offspring" data-name="Tim" class="tim">
                 </div>
@@ -37,7 +37,7 @@
             </div>
 
             <div v-component="man" data-name="Jason">
-                <p class="jason">{{name}}, son of {{^name}}</p>
+                <p class="jason">{{name}}, son of {{$parent.name}}</p>
 
                 <div v-component="offspring" data-name="Andrew" class="andrew">
                 </div>
@@ -46,7 +46,7 @@
     </div>
 
     <script type="text/v-template" id="v-template-offspring">
-        <p>{{name}}, son of {{^name}}, grandson of {{^^name}}, great-grandson of {{*name}}, and offspring of family {{family}}.</p>
+        <p>{{name}}, son of {{$parent.name}}, grandson of {{$parent.$parent.name}}, great-grandson of {{$root.name}}, and offspring of family {{family}}.</p>
     </script>
     
     <script>
