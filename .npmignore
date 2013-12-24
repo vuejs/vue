@@ -1,9 +1,9 @@
 test
 dist
+tasks
 examples
 explorations
 components
-node_modules
 .jshintrc
 .gitignore
 .travis.yml
