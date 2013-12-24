@@ -1,24 +1,27 @@
 casper.test.begin('Repeated ViewModels', 7, function (test) {
     
     casper
-    .start('./fixtures/repeated-vms.html', function () {
+    .start('./fixtures/repeated-vms.html')
+    .then(function () {
 
         test.assertSelectorHasText('.item:nth-child(1)', 'msg a init')
         test.assertSelectorHasText('.item:nth-child(2)', 'msg b init')
         test.assertSelectorHasText('.item:nth-child(3)', 'msg c init')
 
-        // click everything to test event handlers (delegated)
-        this.click('.item:nth-child(1)')
+    })
+    // click everything to test event handlers (delegated)
+    .thenClick('.item:nth-child(1)', function () {
         test.assertSelectorHasText('.item:nth-child(1)', 'msg a init click')
-        this.click('.item:nth-child(2)')
+    })
+    .thenClick('.item:nth-child(2)', function () {
         test.assertSelectorHasText('.item:nth-child(2)', 'msg b init click')
-        this.click('.item:nth-child(3)')
+    })
+    .thenClick('.item:nth-child(3)', function () {
         test.assertSelectorHasText('.item:nth-child(3)', 'msg c init click')
-
-        // more clicks
-        this.click('.item:nth-child(1)')
+    })
+    // more clicks
+    .thenClick('.item:nth-child(1)', function () {
         test.assertSelectorHasText('.item:nth-child(1)', 'msg a init click click')
-
     })
     .run(function () {
         test.done()

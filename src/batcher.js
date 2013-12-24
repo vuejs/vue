@@ -24,9 +24,11 @@ exports.queue = function (binding, method) {
 
 function flush () {
     for (var i = 0; i < queue.length; i++) {
-        var task = queue[i]
-        task.binding['_' + task.method]()
-        has[task.binding.id] = false
+        var task = queue[i],
+            b = task.binding
+        if (b.unbound) continue
+        b['_' + task.method]()
+        has[b.id] = false
     }
     reset()
 }

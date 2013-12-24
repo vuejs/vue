@@ -7,10 +7,11 @@ casper.test.begin('Validation', 4, function (test) {
     })
     .then(function () {
         test.assertElementCount('.valid', 1)
-
-        this.evaluate(function () {
-            document.querySelector('input').setSelectionRange(4,4)
-        })
+    })
+    .thenEvaluate(function () {
+        document.querySelector('input').setSelectionRange(4,4)
+    })
+    .then(function () {
         this.sendKeys('input', 'hoho')
     })
     .then(function () {

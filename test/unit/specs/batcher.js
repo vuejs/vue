@@ -52,7 +52,7 @@ describe('Batcher', function () {
 
     })
 
-    it('should queue dependency bidnings triggered during flush', function () {
+    it('should queue dependency bidnings triggered during flush', function (done) {
         
         updateCount = 0
         var b1 = mockBinding(1),

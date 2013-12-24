@@ -1,7 +1,8 @@
 casper.test.begin('Repeated Items', 41, function (test) {
     
     casper
-    .start('./fixtures/repeated-items.html', function () {
+    .start('./fixtures/repeated-items.html')
+    .then(function () {
 
         // initial values
         test.assertSelectorHasText('.count', '3')
@@ -9,58 +10,60 @@ casper.test.begin('Repeated Items', 41, function (test) {
         test.assertSelectorHasText('.item:nth-child(2)', '1 B')
         test.assertSelectorHasText('.item:nth-child(3)', '2 C')
 
-        this.click('.push')
+    })
+    .thenClick('.push', function () {
         test.assertSelectorHasText('.count', '4')
         test.assertSelectorHasText('.item:nth-child(4)', '3 0')
-
-        this.click('.shift')
+    })
+    .thenClick('.shift', function () {
         test.assertSelectorHasText('.count', '3')
         test.assertSelectorHasText('.item:nth-child(1)', '0 B')
         test.assertSelectorHasText('.item:nth-child(2)', '1 C')
         test.assertSelectorHasText('.item:nth-child(3)', '2 0')
-
-        this.click('.pop')
+    })
+    .thenClick('.pop', function () {
         test.assertSelectorHasText('.count', '2')
         test.assertSelectorHasText('.item:nth-child(1)', '0 B')
         test.assertSelectorHasText('.item:nth-child(2)', '1 C')
-
-        this.click('.unshift')
+    })
+    .thenClick('.unshift', function () {
         test.assertSelectorHasText('.count', '3')
         test.assertSelectorHasText('.item:nth-child(1)', '0 1')
         test.assertSelectorHasText('.item:nth-child(2)', '1 B')
         test.assertSelectorHasText('.item:nth-child(3)', '2 C')
-
-        this.click('.splice')
+    })
+    .thenClick('.splice', function () {
         test.assertSelectorHasText('.count', '4')
         test.assertSelectorHasText('.item:nth-child(1)', '0 1')
         test.assertSelectorHasText('.item:nth-child(2)', '1 2')
         test.assertSelectorHasText('.item:nth-child(3)', '2 3')
         test.assertSelectorHasText('.item:nth-child(4)', '3 C')
-
-        this.click('.remove')
+    })
+    .thenClick('.remove', function () {
         test.assertSelectorHasText('.count', '3')
         test.assertSelectorHasText('.item:nth-child(1)', '0 1')
         test.assertSelectorHasText('.item:nth-child(2)', '1 2')
         test.assertSelectorHasText('.item:nth-child(3)', '2 3')
-
-        this.click('.replace')
+    })
+    .thenClick('.replace', function () {
         test.assertSelectorHasText('.count', '3')
         test.assertSelectorHasText('.item:nth-child(1)', '0 1')
         test.assertSelectorHasText('.item:nth-child(2)', '1 2')
         test.assertSelectorHasText('.item:nth-child(3)', '2 4')
-
-        this.click('.reverse')
+    })
+    .thenClick('.reverse', function () {
         test.assertSelectorHasText('.count', '3')
         test.assertSelectorHasText('.item:nth-child(1)', '0 4')
         test.assertSelectorHasText('.item:nth-child(2)', '1 2')
         test.assertSelectorHasText('.item:nth-child(3)', '2 1')
-
-        this.click('.sort')
+    })
+    .thenClick('.sort', function () {
         test.assertSelectorHasText('.count', '3')
         test.assertSelectorHasText('.item:nth-child(1)', '0 1')
         test.assertSelectorHasText('.item:nth-child(2)', '1 2')
         test.assertSelectorHasText('.item:nth-child(3)', '2 4')
-
+    })
+    .then(function () {
         // make sure things work on empty array
         this.click('.pop')
         this.click('.pop')
@@ -72,10 +75,11 @@ casper.test.begin('Repeated Items', 41, function (test) {
         this.click('.sort')
         this.click('.reverse')
         this.click('.splice')
+    })
+    .then(function () {
         test.assertSelectorHasText('.count', '2')
         test.assertSelectorHasText('.item:nth-child(1)', '0 6')
         test.assertSelectorHasText('.item:nth-child(2)', '1 7')
-
     })
     .run(function () {
         test.done()

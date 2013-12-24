@@ -43,9 +43,11 @@ function runBenchmark () {
         function toggle () {
             addTime = now() - last
             var checkboxes = document.querySelectorAll('.toggle')
-            for (var i = 0; i < checkboxes.length; i++) {
-                checkboxes[i].click()
-            }
+            //for (var j = 0; j < 5; j++) {
+                for (var i = 0; i < checkboxes.length; i++) {
+                    checkboxes[i].click()
+                }
+            //}
             last = now()
             setTimeout(remove, 0)
         }

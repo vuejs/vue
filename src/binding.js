@@ -19,6 +19,7 @@ function Binding (compiler, key, isExp, isFn) {
     this.instances = []
     this.subs = []
     this.deps = []
+    this.unbound = false
 }
 
 var BindingProto = Binding.prototype
@@ -70,6 +71,11 @@ BindingProto.pub = function () {
  *  Unbind the binding, remove itself from all of its dependencies
  */
 BindingProto.unbind = function () {
+    // Indicate this has been unbound.
+    // It's possible this binding will be in
+    // the batcher's flush queue when its owner
+    // compiler has already been destroyed.
+    this.unbound = true
     var i = this.instances.length
     while (i--) {
         this.instances[i].unbind()

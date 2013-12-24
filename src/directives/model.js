@@ -40,15 +40,14 @@ module.exports = {
                 try {
                     cursorPos = el.selectionStart
                 } catch (e) {}
-                // `input` event has weird updating issue with
-                // International (e.g. Chinese) input methods,
-                // have to use a Timeout to hack around it...
-                setTimeout(function () {
-                    self.vm.$set(self.key, el[attr])
+                self.vm.$set(self.key, el[attr])
+                // since updates are async
+                // we need to reset cursor position async too
+                utils.nextTick(function () {
                     if (cursorPos !== undefined) {
                         el.setSelectionRange(cursorPos, cursorPos)
                     }
-                }, 0)
+                })
             }
             : function () {
                 // no filters, don't let it trigger update()
@@ -63,9 +62,9 @@ module.exports = {
         if (isIE9) {
             self.onCut = function () {
                 // cut event fires before the value actually changes
-                setTimeout(function () {
+                utils.nextTick(function () {
                     self.set()
-                }, 0)
+                })
             }
             self.onDel = function (e) {
                 if (e.keyCode === 46 || e.keyCode === 8) {
