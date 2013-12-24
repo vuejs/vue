@@ -1,6 +1,6 @@
 {
   "name": "vue",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "author": {
     "name": "Evan You",
     "email": "yyx990803@gmail.com",
@@ -30,6 +30,7 @@
     "grunt-mocha": "~0.4.6",
     "jscoverage": "~0.3.8",
     "jshint-stylish": "0.1.3",
-    "semver": "~2.2.1"
+    "semver": "~2.2.1",
+    "shell-task": "~0.1.1"
   }
 }

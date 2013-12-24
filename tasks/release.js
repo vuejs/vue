@@ -1,6 +1,6 @@
 var semver = require('semver'),
     readline = require('readline'),
-    exec = require('child_process').exec
+    ShellTask = require('shell-task')
 
 module.exports = function (grunt) {
 
@@ -14,29 +14,27 @@ module.exports = function (grunt) {
     })
 
     grunt.registerTask('git', function (version) {
-        exec(
-            'git add -A;' +
-            'git commit -m "Release v' + version + '";' + 
-            'git tag v' + version + ';' +
-            'git push;' + 
-            'git push origin v' + version,
-            this.async()
-        )
+        new ShellTask('git add -A')
+            .then('git commit -m "Release v' + version + '"')
+            .then('git tag v' + version)
+            .then('git push')
+            .then('git push origin v' + version)
+            .run(this.async(), function (err) {
+                grunt.fail.fatal(err)
+            })
     })
 
     grunt.registerTask('release', function (version) {
 
         var done = this.async(),
             current = grunt.config('pkg.version'),
-            next = semver.inc(current, version || 'patch')
+            next = semver.inc(current, version || 'patch') || version
 
-        if (!next) {
-            if (!semver.valid(version)) {
-                return grunt.fail.warn('Invalid version.')
-            }
-            if (semver.lt(version, current)) {
-                return grunt.fail.warn('Version is older than current.')
-            }
+        if (!semver.valid(next)) {
+            return grunt.fail.warn('Invalid version.')
+        }
+        if (semver.lt(next, current)) {
+            return grunt.fail.warn('Version is older than current.')
         }
 
         readline.createInterface({
