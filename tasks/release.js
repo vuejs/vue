@@ -15,7 +15,7 @@ module.exports = function (grunt) {
 
     grunt.registerTask('git', function (version) {
         new ShellTask('git add -A')
-            .then('git commit -m "Release v' + version + '"')
+            .then('git commit -m Release-v' + version)
             .then('git tag v' + version)
             .then('git push')
             .then('git push origin v' + version)
