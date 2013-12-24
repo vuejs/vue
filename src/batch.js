@@ -1,9 +1,14 @@
-var utils = require('./utils'),
+var config = require('./config'),
+    utils = require('./utils'),
     queue, has, waiting
 
 reset()
 
 exports.queue = function (binding, method) {
+    if (!config.async) {
+        binding['_' + method]()
+        return
+    }
     if (!has[binding.id]) {
         queue.push({
             binding: binding,

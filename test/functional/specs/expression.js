@@ -3,59 +3,69 @@
 casper.test.begin('Expression', 19, function (test) {
     
     casper
-    .start('./fixtures/expression.html', function () {
-
+    .start('./fixtures/expression.html')
+    .then(function () {
         test.assertSelectorHasText('#normal p', 'Hello World!')
         test.assertSelectorHasText('#lazy p', 'Hi Ho!')
         test.assertField('one', 'Hello')
         test.assertField('two', 'World')
         test.assertField('three', 'Hi')
         test.assertField('four', 'Ho')
-
+    })
+    .thenEvaluate(function () {
         // setting value
-        this.evaluate(function () {
-            normal.one = 'Hola'
-        })
+        normal.one = 'Hola'
+    })
+    .then(function () {
         test.assertSelectorHasText('#normal p', 'Hola World!')
-        test.assertField('one', 'Hola')
-
+        test.assertField('one', 'Hola')  
+    })
+    .thenEvaluate(function () {
         // setting nested value
-        this.evaluate(function () {
-            normal.two.three = 'Casper'
-        })
+        normal.two.three = 'Casper'
+    })
+    .then(function () {
         test.assertSelectorHasText('#normal p', 'Hola Casper!')
-        test.assertField('two', 'Casper')
-
+        test.assertField('two', 'Casper')  
+    })
+    .then(function () {
         // lazy input
         this.fill('#form', {
             three: 'three',
             four: 'four'
         })
+    })
+    .then(function () {
         test.assertSelectorHasText('#lazy p', 'three four!')
-
+    })
+    .then(function () {
         // normal input
         this.sendKeys('#one', 'Bye')
+    })
+    .then(function () {
         test.assertSelectorHasText('#normal p', 'Bye Casper!')
-
-        // v-on with expression
-        this.click('#normal button')
+    })
+    // v-on with expression
+    .thenClick('#normal button', function () {
         test.assertField('one', 'clicked')
         test.assertSelectorHasText('#normal p', 'clicked Casper!')
-
-        // v-on with expression
-        this.click('#lazy button')
+    })
+    // v-on with expression
+    .thenClick('#lazy button', function () {
         test.assertField('four', 'clicked')
         test.assertSelectorHasText('#lazy p', 'three clicked!')
-
-        // conditional expression
-        // e.g. ok ? yesMSg : noMsg
-        // make sure all three are captured as dependency
+    })
+    // conditional expression
+    // e.g. ok ? yesMSg : noMsg
+    // make sure all three are captured as dependency
+    .then(function () {
         test.assertSelectorHasText('#conditional p', 'YES')
-        this.click('#conditional .toggle')
+    })
+    .thenClick('#conditional .toggle', function () {
         test.assertSelectorHasText('#conditional p', 'NO')
-        this.click('#conditional .change')
+    })
+    .thenClick('#conditional .change', function () {
         test.assertSelectorHasText('#conditional p', 'Nah')
-
     })
     .run(function () {
         test.done()

@@ -201,7 +201,7 @@ describe('UNIT: API', function () {
             assert.strictEqual(Vue.transition(testId), transition)
         })
 
-        it('should work with v-transition', function () {
+        it('should work with v-transition', function (done) {
 
             var enterCalled = false,
                 leaveCalled = false
@@ -230,14 +230,17 @@ describe('UNIT: API', function () {
             document.body.appendChild(t.$el)
             
             t.show = true
-            assert.ok(enterCalled)
-            assert.strictEqual(t.$el.style.display, '')
-
-            t.show = false
-            assert.ok(leaveCalled)
-            assert.strictEqual(t.$el.style.display, 'none')
-
-            t.$destroy()
+            setTimeout(function () {
+                assert.ok(enterCalled)
+                assert.strictEqual(t.$el.style.display, '')
+                t.show = false
+                setTimeout(function () {
+                    assert.ok(leaveCalled)
+                    assert.strictEqual(t.$el.style.display, 'none')
+                    t.$destroy()
+                    done()
+                }, 0)
+            }, 0)
         })
 
     })
@@ -488,7 +491,7 @@ describe('UNIT: API', function () {
 
             describe('directives', function () {
                 
-                it('should allow the VM to use private directives', function () {
+                it('should allow the VM to use private directives', function (done) {
                     var Test = Vue.extend({
                         directives: {
                             test: function (value) {
@@ -506,7 +509,10 @@ describe('UNIT: API', function () {
                     })
                     assert.strictEqual(t.$el.innerHTML, 'YES')
                     t.ok = false
-                    assert.strictEqual(t.$el.innerHTML, 'NO')
+                    setTimeout(function () {
+                        assert.strictEqual(t.$el.innerHTML, 'NO')
+                        done()
+                    }, 0)
                 })
 
             })
@@ -599,7 +605,7 @@ describe('UNIT: API', function () {
 
             describe('transitions', function () {
                 
-                it('should get called during transitions', function () {
+                it('should get called during transitions', function (done) {
                     
                     var enterCalled = false,
                         leaveCalled = false
@@ -627,16 +633,19 @@ describe('UNIT: API', function () {
                     })
 
                     document.body.appendChild(t.$el)
-                    
+
                     t.show = true
-                    assert.ok(enterCalled)
-                    assert.strictEqual(t.$el.style.display, '')
-
-                    t.show = false
-                    assert.ok(leaveCalled)
-                    assert.strictEqual(t.$el.style.display, 'none')
-
-                    t.$destroy()
+                    setTimeout(function () {
+                        assert.ok(enterCalled)
+                        assert.strictEqual(t.$el.style.display, '')
+                        t.show = false
+                        setTimeout(function () {
+                            assert.ok(leaveCalled)
+                            assert.strictEqual(t.$el.style.display, 'none')
+                            t.$destroy()
+                            done()
+                        }, 0)
+                    }, 0)
 
                 })
 
