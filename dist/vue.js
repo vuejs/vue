@@ -377,10 +377,15 @@ var config      = require('./config'),
 /**
  *  Set config options
  */
-ViewModel.config = function (opts) {
-    if (opts) {
+ViewModel.config = function (opts, val) {
+    if (typeof opts === 'string') {
+        if (val === undefined) {
+            return config[opts]
+        } else {
+            config[opts] = val
+        }
+    } else {
         utils.extend(config, opts)
-        if (opts.prefix) updatePrefix()
     }
     return this
 }
@@ -521,29 +526,6 @@ function mergeHook (fn, parentFn) {
     }
 }
 
-/**
- *  Update prefix for some special directives
- *  that are used in compilation.
- */
-var specialAttributes = [
-    'pre',
-    'text',
-    'repeat',
-    'partial',
-    'component',
-    'component-id',
-    'transition'
-]
-
-function updatePrefix () {
-    specialAttributes.forEach(setPrefix)
-}
-
-function setPrefix (attr) {
-    config.attrs[attr] = config.prefix + '-' + attr
-}
-
-updatePrefix()
 module.exports = ViewModel
 });
 require.register("vue/src/emitter.js", function(exports, require, module){
@@ -569,16 +551,42 @@ try {
 module.exports = Emitter
 });
 require.register("vue/src/config.js", function(exports, require, module){
-module.exports = {
+var prefix = 'v',
+    specialAttributes = [
+        'pre',
+        'text',
+        'repeat',
+        'partial',
+        'component',
+        'component-id',
+        'transition'
+    ],
+    config = module.exports = {
 
-    prefix      : 'v',
-    debug       : false,
-    silent      : false,
-    enterClass  : 'v-enter',
-    leaveClass  : 'v-leave',
-    attrs       : {}
-    
+        async       : true,
+        debug       : false,
+        silent      : false,
+        enterClass  : 'v-enter',
+        leaveClass  : 'v-leave',
+        attrs       : {},
+
+        get prefix () {
+            return prefix
+        },
+        set prefix (val) {
+            prefix = val
+            updatePrefix()
+        }
+        
+    }
+
+function updatePrefix () {
+    specialAttributes.forEach(function (attr) {
+        config.attrs[attr] = prefix + '-' + attr
+    })
 }
+
+updatePrefix()
 });
 require.register("vue/src/utils.js", function(exports, require, module){
 var config    = require('./config'),
@@ -588,10 +596,13 @@ var config    = require('./config'),
     console   = window.console,
     ViewModel // late def
 
-var defer =
-    window.webkitRequestAnimationFrame ||
-    window.requestAnimationFrame ||
-    window.setTimeout
+// PhantomJS doesn't support rAF, yet it has the global
+// variable exposed. Use setTimeout so tests can work.
+var defer = navigator.userAgent.indexOf('PhantomJS') > -1
+    ? window.setTimeout
+    : (window.webkitRequestAnimationFrame ||
+        window.requestAnimationFrame ||
+        window.setTimeout)
 
 /**
  *  Create a prototype-less object
@@ -771,7 +782,7 @@ var utils = module.exports = {
     },
 
     /**
-     * Defer DOM updates
+     *  used to defer batch updates
      */
     nextTick: function (cb) {
         defer(cb, 0)
@@ -1586,6 +1597,9 @@ function getTargetVM (vm, path) {
 module.exports = ViewModel
 });
 require.register("vue/src/binding.js", function(exports, require, module){
+var batcher = require('./batcher'),
+    id = 0
+
 /**
  *  Binding class.
  *
@@ -1594,6 +1608,7 @@ require.register("vue/src/binding.js", function(exports, require, module){
  *  and multiple computed property dependents
  */
 function Binding (compiler, key, isExp, isFn) {
+    this.id = id++
     this.value = undefined
     this.isExp = !!isExp
     this.isFn = isFn
@@ -1603,6 +1618,7 @@ function Binding (compiler, key, isExp, isFn) {
     this.instances = []
     this.subs = []
     this.deps = []
+    this.unbound = false
 }
 
 var BindingProto = Binding.prototype
@@ -1612,9 +1628,13 @@ var BindingProto = Binding.prototype
  */
 BindingProto.update = function (value) {
     this.value = value
+    batcher.queue(this, 'update')
+}
+
+BindingProto._update = function () {
     var i = this.instances.length
     while (i--) {
-        this.instances[i].update(value)
+        this.instances[i].update(this.value)
     }
     this.pub()
 }
@@ -1624,6 +1644,10 @@ BindingProto.update = function (value) {
  *  Force all instances to re-evaluate themselves
  */
 BindingProto.refresh = function () {
+    batcher.queue(this, 'refresh')
+}
+
+BindingProto._refresh = function () {
     var i = this.instances.length
     while (i--) {
         this.instances[i].refresh()
@@ -1646,6 +1670,11 @@ BindingProto.pub = function () {
  *  Unbind the binding, remove itself from all of its dependencies
  */
 BindingProto.unbind = function () {
+    // Indicate this has been unbound.
+    // It's possible this binding will be in
+    // the batcher's flush queue when its owner
+    // compiler has already been destroyed.
+    this.unbound = true
     var i = this.instances.length
     while (i--) {
         this.instances[i].unbind()
@@ -2668,6 +2697,48 @@ function sniffTransitionEndEvent () {
     }
 }
 });
+require.register("vue/src/batcher.js", function(exports, require, module){
+var config = require('./config'),
+    utils = require('./utils'),
+    queue, has, waiting
+
+reset()
+
+exports.queue = function (binding, method) {
+    if (!config.async) {
+        binding['_' + method]()
+        return
+    }
+    if (!has[binding.id]) {
+        queue.push({
+            binding: binding,
+            method: method
+        })
+        has[binding.id] = true
+        if (!waiting) {
+            waiting = true
+            utils.nextTick(flush)
+        }
+    }
+}
+
+function flush () {
+    for (var i = 0; i < queue.length; i++) {
+        var task = queue[i],
+            b = task.binding
+        if (b.unbound) continue
+        b['_' + task.method]()
+        has[b.id] = false
+    }
+    reset()
+}
+
+function reset () {
+    queue = []
+    has = utils.hash()
+    waiting = false
+}
+});
 require.register("vue/src/directives/index.js", function(exports, require, module){
 var utils      = require('../utils'),
     transition = require('../transition')
@@ -3143,15 +3214,14 @@ module.exports = {
                 try {
                     cursorPos = el.selectionStart
                 } catch (e) {}
-                // `input` event has weird updating issue with
-                // International (e.g. Chinese) input methods,
-                // have to use a Timeout to hack around it...
-                setTimeout(function () {
-                    self.vm.$set(self.key, el[attr])
+                self.vm.$set(self.key, el[attr])
+                // since updates are async
+                // we need to reset cursor position async too
+                utils.nextTick(function () {
                     if (cursorPos !== undefined) {
                         el.setSelectionRange(cursorPos, cursorPos)
                     }
-                }, 0)
+                })
             }
             : function () {
                 // no filters, don't let it trigger update()
@@ -3166,9 +3236,9 @@ module.exports = {
         if (isIE9) {
             self.onCut = function () {
                 // cut event fires before the value actually changes
-                setTimeout(function () {
+                utils.nextTick(function () {
                     self.set()
-                }, 0)
+                })
             }
             self.onDel = function (e) {
                 if (e.keyCode === 46 || e.keyCode === 8) {

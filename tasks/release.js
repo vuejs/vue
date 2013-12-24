@@ -27,7 +27,7 @@ module.exports = function (grunt) {
     grunt.registerTask('release', function (version) {
 
         var done = this.async(),
-            current = grunt.config('pkg.version'),
+            current = grunt.config('version'),
             next = semver.inc(current, version || 'patch') || version
 
         if (!semver.valid(next)) {

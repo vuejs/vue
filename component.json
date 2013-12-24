@@ -1,6 +1,6 @@
 {
     "name": "vue",
-    "version": "0.7.0",
+    "version": "0.7.1",
     "main": "src/main.js",
     "description": "Data-driven View Models",
     "keywords": ["mvvm", "framework", "data binding"],
