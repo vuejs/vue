@@ -24,41 +24,33 @@ var Emitter     = require('./emitter'),
 function Compiler (vm, options) {
 
     var compiler = this
-
     // indicate that we are intiating this instance
     // so we should not run any transitions
     compiler.init = true
 
     // process and extend options
     options = compiler.options = options || makeHash()
-    var data = compiler.data = options.data || {}
     utils.processOptions(options)
-    extend(compiler, options.compilerOptions)
+
+    // copy data, methods & compiler options
+    var data = compiler.data = options.data || {}
     extend(vm, data, true)
     extend(vm, options.methods, true)
+    extend(compiler, options.compilerOptions)
 
     // initialize element
     var el = compiler.setupElement(options)
     log('\nnew VM instance:', el.tagName, '\n')
 
+    // set compiler properties
     compiler.vm  = vm
-    def(vm, '$', makeHash())
-    def(vm, '$el', el)
-    def(vm, '$compiler', compiler)
-
-    // keep track of directives and expressions
-    // so they can be unbound during destroy()
     compiler.dirs = []
     compiler.exps = []
-    compiler.childCompilers = [] // keep track of child compilers
-    compiler.emitter = new Emitter() // the emitter used for nested VM communication
+    compiler.computed = []
+    compiler.childCompilers = []
+    compiler.emitter = new Emitter()
 
-    // Store things during parsing to be processed afterwards,
-    // because we want to have created all bindings before
-    // observing values / parsing dependencies.
-    var computed = compiler.computed = []
-
-    // prototypal inheritance of bindings
+    // inherit parent bindings
     var parent = compiler.parentCompiler
     compiler.bindings = parent
         ? Object.create(parent.bindings)
@@ -66,6 +58,11 @@ function Compiler (vm, options) {
     compiler.rootCompiler = parent
         ? getRoot(parent)
         : compiler
+
+    // set inenumerable VM properties
+    def(vm, '$', makeHash())
+    def(vm, '$el', el)
+    def(vm, '$compiler', compiler)
     def(vm, '$root', compiler.rootCompiler.vm)
 
     // set parent VM
@@ -82,13 +79,17 @@ function Compiler (vm, options) {
 
     // setup observer
     compiler.setupObserver()
+
     // beforeCompile hook
     compiler.execHook('beforeCompile', 'created')
+
     // the user might have set some props on the vm 
     // so copy it back to the data...
     extend(data, vm)
+
     // observe the data
     Observer.observe(data, '', compiler.observer)
+    
     // for repeated items, create an index binding
     // which should be inenumerable but configurable
     if (compiler.repeat) {
@@ -97,6 +98,7 @@ function Compiler (vm, options) {
         compiler.createBinding('$index')
     }
 
+    // allow the $data object to be swapped
     Object.defineProperty(vm, '$data', {
         enumerable: false,
         get: function () {
@@ -114,10 +116,15 @@ function Compiler (vm, options) {
     // now parse the DOM, during which we will create necessary bindings
     // and bind the parsed directives
     compiler.compile(el, true)
+
     // extract dependencies for computed properties
-    if (computed.length) DepsParser.parse(computed)
+    if (compiler.computed.length) {
+        DepsParser.parse(compiler.computed)
+    }
+
     // done!
     compiler.init = false
+
     // post compile / ready hook
     compiler.execHook('afterCompile', 'ready')
 }
