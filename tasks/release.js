@@ -53,6 +53,7 @@ module.exports = function (grunt) {
                     'test',
                     'version:' + next,
                     'uglify',
+                    'size',
                     'git:' + next
                 ])
             }

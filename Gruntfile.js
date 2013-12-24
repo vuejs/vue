@@ -6,7 +6,7 @@ module.exports = function( grunt ) {
 
     grunt.initConfig({
 
-        pkg: grunt.file.readJSON('package.json'),
+        version: grunt.file.readJSON('package.json').version,
 
         componentbuild: {
             build: {
@@ -95,7 +95,9 @@ module.exports = function( grunt ) {
 
     grunt.registerTask( 'default', [
         'jshint',
-        'test'
+        'test',
+        'uglify',
+        'size'
     ])
     
 }

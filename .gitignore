@@ -5,3 +5,4 @@ components
 explorations
 test/vue.test.js
 test/vue.test-cov.js
+dist/vue.min.js.gz
