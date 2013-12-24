@@ -1,3 +1,6 @@
+var batch = require('./batch'),
+    id = 0
+
 /**
  *  Binding class.
  *
@@ -6,6 +9,7 @@
  *  and multiple computed property dependents
  */
 function Binding (compiler, key, isExp, isFn) {
+    this.id = id++
     this.value = undefined
     this.isExp = !!isExp
     this.isFn = isFn
@@ -24,9 +28,13 @@ var BindingProto = Binding.prototype
  */
 BindingProto.update = function (value) {
     this.value = value
+    batch.queue(this, 'update')
+}
+
+BindingProto._update = function () {
     var i = this.instances.length
     while (i--) {
-        this.instances[i].update(value)
+        this.instances[i].update(this.value)
     }
     this.pub()
 }
@@ -36,6 +44,10 @@ BindingProto.update = function (value) {
  *  Force all instances to re-evaluate themselves
  */
 BindingProto.refresh = function () {
+    batch.queue(this, 'refresh')
+}
+
+BindingProto._refresh = function () {
     var i = this.instances.length
     while (i--) {
         this.instances[i].refresh()

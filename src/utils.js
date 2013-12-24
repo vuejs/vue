@@ -5,11 +5,6 @@ var config    = require('./config'),
     console   = window.console,
     ViewModel // late def
 
-var defer =
-    window.webkitRequestAnimationFrame ||
-    window.requestAnimationFrame ||
-    window.setTimeout
-
 /**
  *  Create a prototype-less object
  *  which is a better hash/map
@@ -185,12 +180,5 @@ var utils = module.exports = {
         if (!config.silent && console) {
             console.warn(join.call(arguments, ' '))
         }
-    },
-
-    /**
-     * Defer DOM updates
-     */
-    nextTick: function (cb) {
-        defer(cb, 0)
     }
 }
