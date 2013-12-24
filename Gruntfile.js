@@ -86,6 +86,12 @@ module.exports = function( grunt ) {
         require('./' + path)(grunt)
     })
 
+    grunt.registerTask( 'build', [
+        'componentbuild',
+        'uglify',
+        'size'
+    ])
+
     grunt.registerTask( 'test', [
         'componentbuild',
         'jsc',

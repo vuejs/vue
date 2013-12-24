@@ -1,8 +1,6 @@
-# VueJS
+# VueJS [![Build Status](https://travis-ci.org/yyx990803/vue.png?branch=master)](https://travis-ci.org/yyx990803/vue)
 
-Data-driven, modular & lightweight ViewModels
-
-[![Build Status](https://travis-ci.org/yyx990803/vue.png?branch=master)](https://travis-ci.org/yyx990803/vue)
+> Simple, fast, modular & lightweight MVVM library for building interactive user interfaces.
 
 ## Features
 
@@ -10,11 +8,11 @@ Data-driven, modular & lightweight ViewModels
 - DOM based templates with two-way data binding.
 - Precise and efficient DOM manipulation with granularity down to a TextNode.
 - POJSO (Plain Old JavaScript Objects) Models that can be shared across ViewModels with arbitrary levels of nesting.
-- Extendable with custom directives and filters.
-- Auto dependency extraction for computed properties.
+- Auto dependency tracking for expressions and computed properties.
 - Auto event delegation on repeated items.
-- Flexible API that allows easy encapsulation of components.
-- Supports partials, transitions and nested view models.
+- Flexible API that encourages composition of components.
+- Extendable with custom directives and filters.
+- Supports partials, transitions and nested ViewModels.
 - Plays well with module systems. Primarily [Component](https://github.com/component/component) based, but can also be used with [Browserify](https://github.com/substack/node-browserify), as a CommonJS/AMD module or as a standalone library.
 
 ## Browser Support
@@ -27,15 +25,21 @@ Data-driven, modular & lightweight ViewModels
 
 **Component**
 
-    $ component install yyx990803/vue
+``` bash
+$ component install yyx990803/vue
+```
 
 **Browserify**
 
-    $ npm install vue
+``` bash
+$ npm install vue
+```
 
 **Bower**
 
-    $ bower install vue
+``` bash
+$ bower install vue
+```
 
 **Module Loaders, e.g. RequireJS, SeaJS**
 
@@ -56,7 +60,7 @@ $ component install
 
 To build:
 ``` bash
-$ grunt componentbuild
+$ grunt build
 ```
 
 To watch and auto-build dev version during development:
