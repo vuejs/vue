@@ -17,7 +17,7 @@ module.exports = function( grunt ) {
                 src: '.',
                 dest: 'dist'
             },
-            test: {
+            unit: {
                 options: {
                     name: 'vue.test'
                 },
@@ -87,16 +87,25 @@ module.exports = function( grunt ) {
     })
 
     grunt.registerTask( 'build', [
-        'componentbuild',
+        'componentbuild:build',
         'uglify',
         'size'
     ])
 
-    grunt.registerTask( 'test', [
-        'componentbuild',
+    grunt.registerTask( 'unit', [
+        'componentbuild:unit',
         'jsc',
-        'mocha',
+        'mocha'
+    ])
+
+    grunt.registerTask( 'e2e', [
+        'componentbuild:build',
         'casper'
+    ])
+
+    grunt.registerTask( 'test', [
+        'unit',
+        'e2e'
     ])
 
     grunt.registerTask( 'default', [

@@ -18,7 +18,7 @@ casper.test.begin('Expression', 19, function (test) {
     })
     .then(function () {
         test.assertSelectorHasText('#normal p', 'Hola World!')
-        test.assertField('one', 'Hola')  
+        test.assertField('one', 'Hola')
     })
     .thenEvaluate(function () {
         // setting nested value
@@ -26,7 +26,7 @@ casper.test.begin('Expression', 19, function (test) {
     })
     .then(function () {
         test.assertSelectorHasText('#normal p', 'Hola Casper!')
-        test.assertField('two', 'Casper')  
+        test.assertField('two', 'Casper')
     })
     .then(function () {
         // lazy input
