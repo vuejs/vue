@@ -34,7 +34,7 @@ function Compiler (vm, options) {
     var data = compiler.data = options.data || {}
     utils.processOptions(options)
     extend(compiler, options.compilerOptions)
-    extend(vm, options.data, true)
+    extend(vm, data, true)
     extend(vm, options.methods, true)
 
     // initialize element
@@ -44,7 +44,6 @@ function Compiler (vm, options) {
     compiler.vm  = vm
     def(vm, '$', makeHash())
     def(vm, '$el', el)
-    def(vm, '$data', data)
     def(vm, '$compiler', compiler)
 
     // keep track of directives and expressions
@@ -83,7 +82,6 @@ function Compiler (vm, options) {
 
     // setup observer
     compiler.setupObserver()
-
     // beforeCompile hook
     compiler.execHook('beforeCompile', 'created')
     // the user might have set some props on the vm 
@@ -91,7 +89,6 @@ function Compiler (vm, options) {
     extend(data, vm)
     // observe the data
     Observer.observe(data, '', compiler.observer)
-
     // for repeated items, create an index binding
     // which should be inenumerable but configurable
     if (compiler.repeat) {
@@ -100,16 +97,27 @@ function Compiler (vm, options) {
         compiler.createBinding('$index')
     }
 
+    Object.defineProperty(vm, '$data', {
+        enumerable: false,
+        get: function () {
+            return compiler.data
+        },
+        set: function (newData) {
+            var oldData = compiler.data
+            Observer.unobserve(oldData, '', compiler.observer)
+            compiler.data = newData
+            Observer.copyPaths(newData, oldData)
+            Observer.observe(newData, '', compiler.observer)
+        }
+    })
+
     // now parse the DOM, during which we will create necessary bindings
     // and bind the parsed directives
     compiler.compile(el, true)
-
     // extract dependencies for computed properties
     if (computed.length) DepsParser.parse(computed)
-
     // done!
     compiler.init = false
-
     // post compile / ready hook
     compiler.execHook('afterCompile', 'ready')
 }
@@ -409,7 +417,6 @@ CompilerProto.bindDirective = function (directive) {
 CompilerProto.createBinding = function (key, isExp, isFn) {
 
     var compiler = this,
-        data = compiler.data,
         bindings = compiler.bindings,
         binding  = new Binding(compiler, key, isExp, isFn)
 
@@ -435,7 +442,7 @@ CompilerProto.createBinding = function (key, isExp, isFn) {
             compiler.define(key, binding)
         } else {
             // ensure path in data so it can be observed
-            Observer.ensurePath(data, key)
+            Observer.ensurePath(compiler.data, key)
             var parentKey = key.slice(0, key.lastIndexOf('.'))
             if (!hasOwn.call(bindings, parentKey)) {
                 // this is a nested value binding, but the binding for its parent
@@ -477,19 +484,19 @@ CompilerProto.define = function (key, binding) {
     Object.defineProperty(vm, key, {
         get: binding.isComputed
             ? function () {
-                return data[key].$get()
+                return compiler.data[key].$get()
             }
             : function () {
-                return data[key]
+                return compiler.data[key]
             },
         set: binding.isComputed
             ? function (val) {
-                if (data[key].$set) {
-                    data[key].$set(val)
+                if (compiler.data[key].$set) {
+                    compiler.data[key].$set(val)
                 }
             }
             : function (val) {
-                data[key] = val
+                compiler.data[key] = val
             }
     })
 }

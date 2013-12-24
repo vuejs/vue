@@ -175,7 +175,7 @@ function isWatchable (obj) {
  */
 function emitSet (obj) {
     var type = typeOf(obj),
-        emitter = obj.__observer__
+        emitter = obj && obj.__observer__
     if (type === ARRAY) {
         emitter.emit('set', 'length', obj.length)
     } else if (type === OBJECT) {
@@ -292,7 +292,7 @@ function observe (obj, rawPath, observer) {
  */
 function unobserve (obj, path, observer) {
     if (!obj || !obj.__observer__) return
-    path = path + '.'
+    path = path ? path + '.' : ''
     var proxies = observer.proxies[path]
     if (!proxies) return
     obj.__observer__
@@ -307,6 +307,6 @@ module.exports = {
     unobserve   : unobserve,
     ensurePath  : ensurePath,
     convert     : convert,
-    // used in v-repeat
+    copyPaths   : copyPaths,
     watchArray  : watchArray,
 }

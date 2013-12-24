@@ -1,5 +1,3 @@
-Vue.config({debug:true})
-
 var filters = {
     all: function () { return true },
     active: function (completed) { return !completed },

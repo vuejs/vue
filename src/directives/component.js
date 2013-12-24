@@ -12,7 +12,7 @@ module.exports = {
         if (!this.component) {
             this.build(value)
         } else {
-            this.component.model = value
+            this.component.$data = value
         }
     },
 
