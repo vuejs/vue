@@ -20,7 +20,7 @@
         "src/deps-parser.js",
         "src/filters.js",
         "src/transition.js",
-        "src/batch.js",
+        "src/batcher.js",
         "src/directives/index.js",
         "src/directives/if.js",
         "src/directives/repeat.js",

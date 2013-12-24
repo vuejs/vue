@@ -17,7 +17,7 @@ exports.queue = function (binding, method) {
         has[binding.id] = true
         if (!waiting) {
             waiting = true
-            setTimeout(flush, 0)
+            utils.nextTick(flush)
         }
     }
 }

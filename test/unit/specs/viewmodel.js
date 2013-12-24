@@ -1,5 +1,7 @@
 describe('UNIT: ViewModel', function () {
 
+    var nextTick = require('vue/src/utils').nextTick
+
     mock('vm-test', '{{a.b.c}}')
     var data = {
             b: {
@@ -180,12 +182,12 @@ describe('UNIT: ViewModel', function () {
             var Bottom = Vue.extend({
                 ready: function () {
                     var self = this
-                    setTimeout(function () {
+                    nextTick(function () {
                         self.$emit('hello', msg)
                         assert.ok(topTriggered)
                         assert.ok(midTriggered)
                         done()
-                    }, 0)
+                    })
                 }
             })
             var Middle = Vue.extend({
@@ -253,10 +255,10 @@ describe('UNIT: ViewModel', function () {
             v.$appendTo(parent, cb)
             assert.strictEqual(v.$el.parentNode, parent)
             assert.ok(enterCalled)
-            setTimeout(function () {
+            nextTick(function () {
                 assert.ok(callbackCalled)
                 done()
-            }, 0)
+            })
         })
 
         it('$before', function (done) {
@@ -268,10 +270,10 @@ describe('UNIT: ViewModel', function () {
             assert.strictEqual(v.$el.parentNode, parent)
             assert.strictEqual(v.$el.nextSibling, ref)
             assert.ok(enterCalled)
-            setTimeout(function () {
+            nextTick(function () {
                 assert.ok(callbackCalled)
                 done()
-            }, 0)
+            })
         })
 
         it('$after', function (done) {
@@ -286,10 +288,10 @@ describe('UNIT: ViewModel', function () {
             assert.strictEqual(v.$el.nextSibling, ref2)
             assert.strictEqual(ref1.nextSibling, v.$el)
             assert.ok(enterCalled)
-            setTimeout(function () {
+            nextTick(function () {
                 assert.ok(callbackCalled)
                 next()
-            }, 0)
+            })
 
             function next () {
                 reset()
@@ -298,10 +300,10 @@ describe('UNIT: ViewModel', function () {
                 assert.notOk(v.$el.nextSibling)
                 assert.strictEqual(ref2.nextSibling, v.$el)
                 assert.ok(enterCalled)
-                setTimeout(function () {
+                nextTick(function () {
                     assert.ok(callbackCalled)
                     done()
-                }, 0)
+                })
             }
         })
 
@@ -313,7 +315,7 @@ describe('UNIT: ViewModel', function () {
             assert.notOk(v.$el.parentNode)
             assert.ok(enterCalled)
             assert.ok(leaveCalled)
-            setTimeout(function () {
+            nextTick(function () {
                 assert.ok(callbackCalled)
                 done()
             })

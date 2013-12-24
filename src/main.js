@@ -7,10 +7,15 @@ var config      = require('./config'),
 /**
  *  Set config options
  */
-ViewModel.config = function (opts) {
-    if (opts) {
+ViewModel.config = function (opts, val) {
+    if (typeof opts === 'string') {
+        if (val === undefined) {
+            return config[opts]
+        } else {
+            config[opts] = val
+        }
+    } else {
         utils.extend(config, opts)
-        if (opts.prefix) updatePrefix()
     }
     return this
 }
@@ -151,27 +156,4 @@ function mergeHook (fn, parentFn) {
     }
 }
 
-/**
- *  Update prefix for some special directives
- *  that are used in compilation.
- */
-var specialAttributes = [
-    'pre',
-    'text',
-    'repeat',
-    'partial',
-    'component',
-    'component-id',
-    'transition'
-]
-
-function updatePrefix () {
-    specialAttributes.forEach(setPrefix)
-}
-
-function setPrefix (attr) {
-    config.attrs[attr] = config.prefix + '-' + attr
-}
-
-updatePrefix()
 module.exports = ViewModel

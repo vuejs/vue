@@ -1,6 +1,11 @@
 describe('UNIT: API', function () {
 
+    var utils = require('vue/src/utils'),
+        nextTick = utils.nextTick
+
     describe('config()', function () {
+
+        var config = require('vue/src/config')
         
         it('should work when changing prefix', function () {
             var testId = 'config-1'
@@ -13,6 +18,15 @@ describe('UNIT: API', function () {
                 data: { test: testId }
             })
             assert.strictEqual(document.querySelector('#' + testId + ' span').innerHTML, testId)
+        })
+
+        it('should get', function () {
+            assert.strictEqual(Vue.config('debug'), false)
+        })
+
+        it('should set', function () {
+            Vue.config('test', 1)
+            assert.strictEqual(config.test, 1)
         })
 
         after(function () {
@@ -109,8 +123,7 @@ describe('UNIT: API', function () {
                 className: 'hihi',
                 data: { hi: 'ok' }
             },
-            Test = Vue.extend(opts),
-            utils = require('vue/src/utils')
+            Test = Vue.extend(opts)
 
         it('should register a Component constructor', function () {
             Vue.component(testId, Test)
@@ -146,8 +159,7 @@ describe('UNIT: API', function () {
     describe('partial()', function () {
 
         var testId = 'api-partial-test',
-            partial = '<div class="partial-test"><a>{{hi}}</a></div><span>hahaha</span>',
-            utils = require('vue/src/utils')
+            partial = '<div class="partial-test"><a>{{hi}}</a></div><span>hahaha</span>'
 
         it('should register the partial as a dom fragment', function () {
             Vue.partial(testId, partial)
@@ -189,8 +201,7 @@ describe('UNIT: API', function () {
     describe('transition()', function () {
         
         var testId = 'api-trans-test',
-            transition = {},
-            utils = require('vue/src/utils')
+            transition = {}
 
         it('should register a transition object', function () {
             Vue.transition(testId, transition)
@@ -230,17 +241,17 @@ describe('UNIT: API', function () {
             document.body.appendChild(t.$el)
             
             t.show = true
-            setTimeout(function () {
+            nextTick(function () {
                 assert.ok(enterCalled)
                 assert.strictEqual(t.$el.style.display, '')
                 t.show = false
-                setTimeout(function () {
+                nextTick(function () {
                     assert.ok(leaveCalled)
                     assert.strictEqual(t.$el.style.display, 'none')
                     t.$destroy()
                     done()
-                }, 0)
-            }, 0)
+                })
+            })
         })
 
     })
@@ -509,10 +520,10 @@ describe('UNIT: API', function () {
                     })
                     assert.strictEqual(t.$el.innerHTML, 'YES')
                     t.ok = false
-                    setTimeout(function () {
+                    nextTick(function () {
                         assert.strictEqual(t.$el.innerHTML, 'NO')
                         done()
-                    }, 0)
+                    })
                 })
 
             })
@@ -635,17 +646,17 @@ describe('UNIT: API', function () {
                     document.body.appendChild(t.$el)
 
                     t.show = true
-                    setTimeout(function () {
+                    nextTick(function () {
                         assert.ok(enterCalled)
                         assert.strictEqual(t.$el.style.display, '')
                         t.show = false
-                        setTimeout(function () {
+                        nextTick(function () {
                             assert.ok(leaveCalled)
                             assert.strictEqual(t.$el.style.display, 'none')
                             t.$destroy()
                             done()
-                        }, 0)
-                    }, 0)
+                        })
+                    })
 
                 })
 

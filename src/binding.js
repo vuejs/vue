@@ -1,4 +1,4 @@
-var batch = require('./batch'),
+var batcher = require('./batcher'),
     id = 0
 
 /**
@@ -28,7 +28,7 @@ var BindingProto = Binding.prototype
  */
 BindingProto.update = function (value) {
     this.value = value
-    batch.queue(this, 'update')
+    batcher.queue(this, 'update')
 }
 
 BindingProto._update = function () {
@@ -44,7 +44,7 @@ BindingProto._update = function () {
  *  Force all instances to re-evaluate themselves
  */
 BindingProto.refresh = function () {
-    batch.queue(this, 'refresh')
+    batcher.queue(this, 'refresh')
 }
 
 BindingProto._refresh = function () {

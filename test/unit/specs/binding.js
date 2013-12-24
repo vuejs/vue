@@ -1,6 +1,7 @@
 describe('UNIT: Binding', function () {
 
-    var Binding = require('vue/src/binding')
+    var Binding = require('vue/src/binding'),
+        nextTick = require('vue/src/utils').nextTick
 
     describe('instantiation', function () {
 
@@ -46,7 +47,13 @@ describe('UNIT: Binding', function () {
         b.pub = function () {
             pubbed = true
         }
-        b.update(val)
+
+        before(function (done) {
+            b.update(val)
+            nextTick(function () {
+                done()
+            })
+        })
 
         it('should set the binding\'s value', function () {
             assert.strictEqual(b.value, val)
@@ -75,7 +82,13 @@ describe('UNIT: Binding', function () {
         for (var i = 0; i < numInstances; i++) {
             b.instances.push(instance)
         }
-        b.refresh()
+
+        before(function (done) {
+            b.refresh()
+            nextTick(function () {
+                done()
+            })
+        })
 
         it('should call refresh() of all instances', function () {
             assert.strictEqual(refreshed, numInstances)
