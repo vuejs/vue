@@ -3,14 +3,12 @@
 // toggle them one by one
 // then delete them one by one
 
-// do not run when testing in PhantomJS
-if (window.location.search === '?benchmark=1') {
-    runBenchmark()
-}
+(function () {
 
-function runBenchmark () {
+    var benchSetting = window.location.search.match(/\bbenchmark=(\d+)/)
+    if (!benchSetting) return
     
-    var itemsToAdd = 200,
+    var itemsToAdd = +benchSetting[1],
         now = window.performance && window.performance.now
             ? function () { return window.performance.now(); }
             : Date.now,
@@ -74,4 +72,4 @@ function runBenchmark () {
         }
     }, 0)
 
-}
+})()

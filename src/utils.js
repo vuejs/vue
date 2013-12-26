@@ -187,6 +187,9 @@ var utils = module.exports = {
     warn: function() {
         if (!config.silent && console) {
             console.warn(join.call(arguments, ' '))
+            if (config.debug) {
+                console.trace()
+            }
         }
     },
 
