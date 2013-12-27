@@ -129,14 +129,16 @@ function convert (obj, key) {
     if ((keyPrefix === '$' || keyPrefix === '_') && key !== '$index') {
         return
     }
-    var observer  = obj.__observer__,
-        val       = obj[key],
-        values    = observer.values
-    values[key] = val
     // emit set on bind
     // this means when an object is observed it will emit
     // a first batch of set events.
+    var observer = obj.__observer__,
+        values   = observer.values,
+        val      = values[key] = obj[key]
     observer.emit('set', key, val)
+    if (Array.isArray(val)) {
+        observer.emit('set', key + '.length', val.length)
+    }
     Object.defineProperty(obj, key, {
         get: function () {
             var value = values[key]

@@ -470,25 +470,27 @@ CompilerProto.define = function (key, binding) {
     log('    defined root binding: ' + key)
 
     var compiler = this,
-        data = compiler.data,
-        vm = compiler.vm,
-        value = binding.value = data[key] // save the value before redefinening it
-
-    if (utils.typeOf(value) === 'Object' && value.$get) {
-        compiler.markComputed(binding)
-    }
+        data     = compiler.data,
+        vm       = compiler.vm,
+        ob       = data.__observer__
 
     if (!(key in data)) {
         data[key] = undefined
     }
 
-    // if the data object is already observed, that means
-    // this binding is created late. we need to observe it now.
-    if (data.__observer__) {
+    // if the data object is already observed, but the key
+    // is not observed, we need to add it to the observed keys.
+    if (ob && !(key in ob.values)) {
         Observer.convert(data, key)
     }
 
+    var value = binding.value = data[key]
+    if (utils.typeOf(value) === 'Object' && value.$get) {
+        compiler.markComputed(binding)
+    }
+
     Object.defineProperty(vm, key, {
+        enumerable: !binding.isComputed,
         get: binding.isComputed
             ? function () {
                 return compiler.data[key].$get()
