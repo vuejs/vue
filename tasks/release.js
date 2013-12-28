@@ -52,8 +52,7 @@ module.exports = function (grunt) {
                     'jshint',
                     'test',
                     'version:' + next,
-                    'uglify',
-                    'size',
+                    'dist',
                     'git:' + next
                 ])
             }

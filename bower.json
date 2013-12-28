@@ -1,12 +1,13 @@
 {
     "name": "vue",
-    "version": "0.7.1",
+    "version": "0.7.2",
     "main": "dist/vue.js",
     "ignore": [
         ".*",
         "examples",
         "src",
         "test",
+        "tasks",
         "Gruntfile.js",
         "*.json",
         "*.md"

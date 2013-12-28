@@ -1,19 +1,13 @@
-var fs = require('fs')
+var fs = require('fs'),
+    jsc = require('jscoverage')
 
 module.exports = function (grunt) {
     grunt.registerTask( 'jsc', function () {
-        var done = this.async()
-        grunt.util.spawn({
-            cmd: './node_modules/jscoverage/bin/jscoverage',
-            args: ['./test/vue.test.js'],
-            opts: {
-                stdio: 'inherit'
-            }
-        }, function (err, res) {
-            if (err) grunt.fail.fatal(res.stdout || 'Jscoverage instrumentation failed')
-            grunt.log.writeln(res.stdout)
-            fs.unlinkSync('./test/vue.test.js')
-            done()
-        })
+        jsc.processFile(
+            './test/vue.test.js',
+            './test/vue.test-cov.js',
+            null, {}
+        )
+        fs.unlink('./test/vue.test.js', this.async())
     })
 }

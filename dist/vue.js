@@ -1,3 +1,8 @@
+/*
+ VueJS v0.7.2
+ (c) 2013 Evan You
+ License: MIT
+*/
 ;(function(){
 
 /**
@@ -778,6 +783,9 @@ var utils = module.exports = {
     warn: function() {
         if (!config.silent && console) {
             console.warn(join.call(arguments, ' '))
+            if (config.debug) {
+                console.trace()
+            }
         }
     },
 
@@ -1262,25 +1270,27 @@ CompilerProto.define = function (key, binding) {
     log('    defined root binding: ' + key)
 
     var compiler = this,
-        data = compiler.data,
-        vm = compiler.vm,
-        value = binding.value = data[key] // save the value before redefinening it
-
-    if (utils.typeOf(value) === 'Object' && value.$get) {
-        compiler.markComputed(binding)
-    }
+        data     = compiler.data,
+        vm       = compiler.vm,
+        ob       = data.__observer__
 
     if (!(key in data)) {
         data[key] = undefined
     }
 
-    // if the data object is already observed, that means
-    // this binding is created late. we need to observe it now.
-    if (data.__observer__) {
+    // if the data object is already observed, but the key
+    // is not observed, we need to add it to the observed keys.
+    if (ob && !(key in ob.values)) {
         Observer.convert(data, key)
     }
 
+    var value = binding.value = data[key]
+    if (utils.typeOf(value) === 'Object' && value.$get) {
+        compiler.markComputed(binding)
+    }
+
     Object.defineProperty(vm, key, {
+        enumerable: !binding.isComputed,
         get: binding.isComputed
             ? function () {
                 return compiler.data[key].$get()
@@ -1821,14 +1831,16 @@ function convert (obj, key) {
     if ((keyPrefix === '$' || keyPrefix === '_') && key !== '$index') {
         return
     }
-    var observer  = obj.__observer__,
-        val       = obj[key],
-        values    = observer.values
-    values[key] = val
     // emit set on bind
     // this means when an object is observed it will emit
     // a first batch of set events.
+    var observer = obj.__observer__,
+        values   = observer.values,
+        val      = values[key] = obj[key]
     observer.emit('set', key, val)
+    if (Array.isArray(val)) {
+        observer.emit('set', key + '.length', val.length)
+    }
     Object.defineProperty(obj, key, {
         get: function () {
             var value = values[key]
