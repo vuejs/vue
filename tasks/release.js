@@ -47,12 +47,11 @@ module.exports = function (grunt) {
                     'Releasing: v' + next +
                     '\x1b[39m\x1b[22m'
                 )
-                grunt.config.set('version', next)
                 grunt.task.run([
                     'jshint',
+                    'build:' + next,
                     'test',
                     'version:' + next,
-                    'dist',
                     'git:' + next
                 ])
             }

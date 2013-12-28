@@ -4,34 +4,16 @@ module.exports = function( grunt ) {
 
         version: grunt.file.readJSON('package.json').version,
 
-        componentbuild: {
-            build: {
-                options: {
-                    name: 'vue',
-                    standalone: 'Vue'
-                },
-                src: '.',
-                dest: 'dist'
-            },
-            test: {
-                options: {
-                    name: 'vue.test'
-                },
-                src: '.',
-                dest: 'test'
-            }
-        },
-
         jshint: {
             options: {
                 reporter: require('jshint-stylish'),
                 jshintrc: true
             },
             dev: {
-                src: ['src/**/*.js']
+                src: 'src/**/*.js'
             },
             test: {
-                src: ['test/unit/specs/*.js', 'test/functional/specs/*.js']
+                src: 'test/*/specs/*.js'
             }
         },
 
@@ -45,65 +27,42 @@ module.exports = function( grunt ) {
             }
         },
 
-        uglify: {
-            build: {
-                options: {
-                    compress: true,
-                    mangle: true
-                },
-                files: {
-                    'dist/vue.min.js': 'dist/vue.js'
-                }
-            }
-        },
-
         watch: {
             options: {
                 nospawn: true
             },
             dev: {
                 files: ['src/**/*.js', './component.json'],
-                tasks: ['componentbuild', 'jsc']
+                tasks: ['dev', 'instrument']
             }
         }
 
     })
 
-    // load npm tasks
-    require('load-grunt-tasks')(grunt)
+    grunt.loadNpmTasks('grunt-mocha')
+    grunt.loadNpmTasks('grunt-contrib-watch')
+    grunt.loadNpmTasks('grunt-contrib-jshint')
 
     // load custom tasks
     grunt.file.recurse('tasks', function (path) {
         require('./' + path)(grunt)
     })
 
-    grunt.registerTask( 'dist', [
-        'uglify',
-        'banner',
-        'size'
-    ])
-
-    grunt.registerTask( 'build', [
-        'componentbuild:build',
-        'dist'
-    ])
-
     grunt.registerTask( 'unit', [
-        'componentbuild:test',
-        'jsc',
+        'instrument',
         'mocha'
     ])
 
     grunt.registerTask( 'test', [
         'unit',
-        'componentbuild:build',
         'casper'
     ])
 
     grunt.registerTask( 'default', [
         'jshint',
+        'build',
         'test',
-        'dist'
+        'size'
     ])
     
 }
