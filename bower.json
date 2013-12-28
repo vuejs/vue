@@ -2,6 +2,9 @@
     "name": "vue",
     "version": "0.7.2",
     "main": "dist/vue.js",
+    "description": "Lightweight, Simple, Fast & Composable MVVM library for building interactive user interfaces.",
+    "authors": ["Evan You <yyx990803@gmail.com>"],
+    "license": "MIT",
     "ignore": [
         ".*",
         "examples",

@@ -2,7 +2,8 @@
     "name": "vue",
     "version": "0.7.2",
     "main": "src/main.js",
-    "description": "Data-driven View Models",
+    "author": "Evan You <yyx990803@gmail.com>",
+    "description": "Lightweight, Simple, Fast & Composable MVVM library for building interactive user interfaces.",
     "keywords": ["mvvm", "framework", "data binding"],
     "license": "MIT",
     "scripts": [

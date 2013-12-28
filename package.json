@@ -7,7 +7,7 @@
     "url": "http://evanyou.me"
   },
   "license": "MIT",
-  "description": "A mini front-end MVVM framework",
+  "description": "Lightweight, Simple, Fast & Composable MVVM library for building interactive user interfaces.",
   "keywords": [
     "mvvm",
     "browser",
