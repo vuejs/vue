@@ -19,7 +19,7 @@
     "url": "https://github.com/yyx990803/vue.git"
   },
   "scripts": {
-    "test": "grunt test"
+    "test": "grunt"
   },
   "devDependencies": {
     "grunt": "~0.4.2",
