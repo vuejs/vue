@@ -60,11 +60,16 @@ function uglify (file, cb) {
 function gzip (file, cb) {
     zlib.gzip(file.contents, function (err, buf) {
         file.contents = buf
+        file.path = file.path + '.gz'
         cb(err, file)
     })
 }
 
 function size (file, cb) {
-    console.log(file.relative + ': ' + (file.contents.length / 1024).toFixed(2) + 'kb')
+    console.log(blue(file.relative + ': ') + (file.contents.length / 1024).toFixed(2) + 'kb')
     cb(null, file)
+}
+
+function blue (str) {
+    return '\x1b[1m\x1b[34m' + str + '\x1b[39m\x1b[22m'
 }

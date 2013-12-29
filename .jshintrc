@@ -10,18 +10,6 @@
     "node": true,
     "laxbreak": true,
     "globals": {
-        "console": true,
-        "it": true,
-        "describe": true,
-        "before": true,
-        "after": true,
-        "assert": true,
-        "mock": true,
-        "Vue": true,
-        "$": true,
-        "mockHTMLEvent": true,
-        "mockMouseEvent": true,
-        "mockKeyEvent": true,
-        "casper": true
+        "console": true
     }
 }

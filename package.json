@@ -24,14 +24,15 @@
   "devDependencies": {
     "grunt": "~0.4.2",
     "grunt-contrib-watch": "~0.5.3",
-    "grunt-component-build": "~0.4.1",
     "grunt-contrib-jshint": "~0.8.0",
-    "grunt-contrib-uglify": "~0.2.7",
     "grunt-mocha": "~0.4.6",
     "jscoverage": "~0.3.8",
     "jshint-stylish": "~0.1.4",
     "semver": "~2.2.1",
     "shell-task": "~0.1.1",
-    "load-grunt-tasks": "~0.2.1"
+    "map-stream": "0.0.4",
+    "uglify-js": "~2.4.8",
+    "vinyl-fs": "git://github.com/wearefractal/vinyl-fs",
+    "gulp-component": "~0.1.3"
   }
 }

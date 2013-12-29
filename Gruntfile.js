@@ -9,7 +9,10 @@ module.exports = function( grunt ) {
                 reporter: require('jshint-stylish'),
                 jshintrc: true
             },
-            dev: {
+            build: {
+                src: ['Gruntfile.js', 'tasks/*.js']
+            },
+            src: {
                 src: 'src/**/*.js'
             },
             test: {
@@ -61,8 +64,7 @@ module.exports = function( grunt ) {
     grunt.registerTask( 'default', [
         'jshint',
         'build',
-        'test',
-        'size'
+        'test'
     ])
     
 }

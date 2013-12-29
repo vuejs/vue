@@ -1,15 +1,19 @@
-var gulp = require('vinyl-fs'),
+var fs = require('vinyl-fs'),
     component = require('gulp-component'),
-    jsc = require('gulp-jscoverage')
+    jsc = require('jscoverage'),
+    map = require('map-stream')
 
 module.exports = function (grunt) {
     grunt.registerTask('instrument', function () {
-        gulp.src('./component.json')
+        fs.src('./component.json')
             .pipe(component.scripts({
-                name: 'vue.test'
+                name: 'vue.test-cov'
             }))
-            .pipe(jsc())
-            .pipe(gulp.dest('./test'))
+            .pipe(map(function (file, cb) {
+                file.contents = new Buffer(jsc.process(file.path, file.contents.toString()))
+                cb(null, file)
+            }))
+            .pipe(fs.dest('./test'))
             .on('end', this.async())
     })
 }
