@@ -1,11 +1,3 @@
-/*
- *  Only tests directives in `src/directives/index.js`
- *  and the non-delegated case for `v-on`
- *
- *  The combination of `v-repeat` and `v-on` are covered in
- *  the E2E test case for repeated items.
- */
-
 describe('UNIT: Directives', function () {
     
     describe('attr', function () {
@@ -633,6 +625,62 @@ describe('UNIT: Directives', function () {
             assert.ok(called)
             t.$.hihi.$destroy()
             assert.notOk('hihi' in t.$)
+        })
+
+    })
+
+    // More detailed testing for v-repeat can be found in functional tests.
+    // this is mainly for code coverage
+    describe('repeat', function () {
+
+        var nextTick = require('vue/src/utils').nextTick,
+            VM = require('vue/src/viewmodel')
+
+        it('should work', function (done) {
+            var handlerCalled = false
+            var v = new Vue({
+                template: '<span v-repeat="items" v-on="click:check">{{title}}</span>',
+                data: {
+                    items: [
+                        {title: 1},
+                        {title: 2}
+                    ]
+                },
+                methods: {
+                    check: function (e) {
+                        assert.ok(e.targetVM instanceof VM)
+                        assert.strictEqual(this, v)
+                        handlerCalled = true
+                    }
+                }
+            })
+            nextTick(function () {
+                assert.equal(v.$el.innerHTML, '<span>1</span><span>2</span><!--v-repeat-items-->')
+                v.items.push({title:3})
+                v.items.pop()
+                v.items.unshift({title:0})
+                v.items.shift()
+                v.items.splice(0, 1, {title:-1})
+                v.items.sort(function (a, b) {
+                    return a.title > b.title
+                })
+                v.items.reverse()
+                nextTick(function () {
+                    assert.equal(v.$el.innerHTML, '<span>2</span><span>-1</span><!--v-repeat-items-->')
+                    testHandler()
+                })
+            })
+
+            function testHandler () {
+                document.getElementById('test').appendChild(v.$el)
+                var span = v.$el.querySelector('span'),
+                    e = mockMouseEvent('click')
+                span.dispatchEvent(e)
+                nextTick(function () {
+                    assert.ok(handlerCalled)
+                    done()
+                })
+            }
         })
 
     })

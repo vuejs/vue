@@ -740,6 +740,28 @@ describe('UNIT: API', function () {
 
                 })
 
+                describe('Hook inheritance', function () {
+                    
+                    it('should merge hooks with parent Class', function () {
+                        var parentCreated = false,
+                            childCreated = false
+                        var Parent = Vue.extend({
+                            created: function () {
+                                parentCreated = true
+                            }
+                        })
+                        var Child = Parent.extend({
+                            created: function () {
+                                childCreated = true
+                            }
+                        })
+                        new Child()
+                        assert.ok(parentCreated)
+                        assert.ok(childCreated)
+                    })
+
+                })
+
             })
 
         })

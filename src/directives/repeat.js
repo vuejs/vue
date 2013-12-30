@@ -98,7 +98,7 @@ module.exports = {
         self.hasTrans   = el.hasAttribute(config.attrs.transition)
 
         // create a comment node as a reference node for DOM insertions
-        self.ref = document.createComment(config.prefix + '-repeat-' + self.arg)
+        self.ref = document.createComment(config.prefix + '-repeat-' + self.key)
         ctn.insertBefore(self.ref, el)
         ctn.removeChild(el)
 

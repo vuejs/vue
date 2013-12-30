@@ -8,13 +8,13 @@ var Emitter  = require('./emitter'),
  */
 function catchDeps (binding) {
     if (binding.isFn) return
-    utils.log('\n─ ' + binding.key)
+    utils.log('\n- ' + binding.key)
     var got = utils.hash()
     observer.on('get', function (dep) {
         var has = got[dep.key]
         if (has && has.compiler === dep.compiler) return
         got[dep.key] = dep
-        utils.log('  └─ ' + dep.key)
+        utils.log('  - ' + dep.key)
         binding.deps.push(dep)
         dep.subs.push(binding)
     })

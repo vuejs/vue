@@ -469,4 +469,27 @@ describe('UNIT: ViewModel', function () {
 
     })
 
+    describe('$data', function () {
+
+        it('should be the same data', function () {
+            var data = {},
+                vm = new Vue({data:data})
+            assert.strictEqual(vm.$data, data)
+        })
+
+        it('should be able to be swapped', function () {
+            var data1 = { a: 1 },
+                data2 = { a: 2 },
+                vm = new Vue({data: data1}),
+                emittedChange = false
+            vm.$watch('a', function (v) {
+                assert.equal(v, 2)
+                emittedChange = true
+            })
+            vm.$data = data2
+            assert.equal(vm.a, 2)
+            assert.ok(emittedChange)
+        })
+    })
+
 })

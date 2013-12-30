@@ -1,6 +1,13 @@
 describe('UNIT: Utils', function () {
 
-    var utils = require('vue/src/utils')
+    var utils = require('vue/src/utils'),
+        config = require('vue/src/config')
+
+    try {
+        require('non-existent')
+    } catch (e) {
+        console.log('testing require fail')
+    }
     
     describe('hash', function () {
 
@@ -237,6 +244,72 @@ describe('UNIT: Utils', function () {
             assert.strictEqual(components.a.options.data.data, 1)
             assert.ok(components.b.prototype instanceof Vue)
             assert.strictEqual(components.b.options.data.data, 2)
+        })
+
+    })
+
+    describe('log', function () {
+        
+        it('should only log in debug mode', function () {
+            // overwrite log temporarily
+            var oldLog = console.log,
+                logged
+            console.log = function (msg) {
+                logged = msg
+            }
+
+            utils.log('123')
+            assert.notOk(logged)
+
+            config.debug = true
+            utils.log('123')
+            assert.strictEqual(logged, '123')
+
+            // teardown
+            config.debug = false
+            console.log = oldLog
+        })
+
+    })
+
+    describe('warn', function () {
+        
+        it('should only warn when not in silent mode', function () {
+            config.silent = true
+            var oldWarn = console.warn,
+                warned
+            console.warn = function (msg) {
+                warned = msg
+            }
+
+            utils.warn('123')
+            assert.notOk(warned)
+
+            config.silent = false
+            utils.warn('123')
+            assert.strictEqual(warned, '123')
+
+            console.warn = oldWarn
+        })
+
+        it('should also trace in debug mode', function () {
+            config.silent = false
+            config.debug = true
+            var oldTrace = console.trace,
+                oldWarn = console.warn,
+                traced
+            console.warn = function () {}
+            console.trace = function () {
+                traced = true
+            }
+
+            utils.warn('testing trace')
+            assert.ok(traced)
+
+            config.silent = true
+            config.debug = false
+            console.trace = oldTrace
+            console.warn = oldWarn
         })
 
     })
