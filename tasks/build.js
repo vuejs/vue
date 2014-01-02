@@ -9,7 +9,7 @@ var dest = './dist',
     headerTemplate =
     '/*\n' +
     ' VueJS v{{version}}\n' +
-    ' (c) 2013 Evan You\n' +
+    ' (c) 2014 Evan You\n' +
     ' License: MIT\n' +
     '*/\n'
 
