@@ -37,7 +37,15 @@ def(VMProto, '$set', function (key, value) {
  *  fire callback with new value
  */
 def(VMProto, '$watch', function (key, callback) {
-    this.$compiler.observer.on('change:' + key, callback)
+    var self = this
+    function on () {
+        var args = arguments
+        utils.nextTick(function () {
+            callback.apply(self, args)
+        })
+    }
+    callback._fn = on
+    self.$compiler.observer.on('change:' + key, on)
 })
 
 /**
@@ -49,7 +57,7 @@ def(VMProto, '$unwatch', function (key, callback) {
     // by checking the length of arguments
     var args = ['change:' + key],
         ob = this.$compiler.observer
-    if (callback) args.push(callback)
+    if (callback) args.push(callback._fn)
     ob.off.apply(ob, args)
 })
 

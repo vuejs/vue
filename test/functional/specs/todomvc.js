@@ -16,7 +16,12 @@ casper.test.begin('todomvc', 69, function (test) {
     // let's add a new item -----------------------------------------------
 
     .then(function () {
-        createNewItem('test')
+        casper.sendKeys('#new-todo', 'test')
+    })
+    .then(function () {
+        // wait before hitting enter
+        // so v-model unlocks
+        createNewItem()
     })
     .then(function () {
 
@@ -31,10 +36,7 @@ casper.test.begin('todomvc', 69, function (test) {
         test.assertVisible('#main', '#main should now be visible')
         test.assertVisible('#footer', '#footer should now be visible')
         test.assertNotVisible('#clear-completed', '#clear-completed should be hidden')
-
-        test.assertEvalEquals(function () {
-            return __utils__.findOne('#new-todo').value
-        }, '', 'new todo input should be reset')
+        test.assertField({type:'css',path:'#new-todo'}, '', 'new todo input should be reset')
 
     })
 
@@ -256,7 +258,9 @@ casper.test.begin('todomvc', 69, function (test) {
     // helper ===============
 
     function createNewItem (text) {
-        casper.sendKeys('#new-todo', text)
+        if (text) {
+            casper.sendKeys('#new-todo', text)
+        }
         casper.evaluate(function () {
             // casper.mouseEvent can't set keyCode
             var field = document.getElementById('new-todo'),

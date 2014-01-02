@@ -66,6 +66,7 @@ ViewModel.transition = function (id, transition) {
 }
 
 ViewModel.extend = extend
+ViewModel.nextTick = utils.nextTick
 
 /**
  *  Expose the main ViewModel class

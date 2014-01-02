@@ -53,7 +53,9 @@ module.exports = {
                 // no filters, don't let it trigger update()
                 self.lock = true
                 self.vm.$set(self.key, el[attr])
-                self.lock = false
+                utils.nextTick(function () {
+                    self.lock = false
+                })
             }
         el.addEventListener(self.event, self.set)
 

@@ -26,16 +26,19 @@ describe('UNIT: ViewModel', function () {
 
     describe('.$watch()', function () {
 
-        it('should trigger callback when a plain value changes', function () {
+        it('should trigger callback when a plain value changes', function (done) {
             var val
             vm.$watch('a.b.c', function (newVal) {
                 val = newVal
             })
             data.b.c = 'new value!'
-            assert.strictEqual(val, data.b.c)
+            nextTick(function () {
+                assert.strictEqual(val, data.b.c)
+                done()
+            })
         })
 
-        it('should trigger callback when an object value changes', function () {
+        it('should trigger callback when an object value changes', function (done) {
             var val, subVal, rootVal,
                 target = { c: 'hohoho' }
             vm.$watch('a.b', function (newVal) {
@@ -47,31 +50,45 @@ describe('UNIT: ViewModel', function () {
             vm.$watch('a', function (newVal) {
                 rootVal = newVal
             })
+
             data.b = target
-            assert.strictEqual(val, target)
-            assert.strictEqual(subVal, target.c)
-            vm.a = 'hehehe'
-            assert.strictEqual(rootVal, 'hehehe')
+            nextTick(function () {
+                assert.strictEqual(val, target)
+                assert.strictEqual(subVal, target.c)
+                next()
+            })
+
+            function next () {
+                vm.a = 'hehehe'
+                nextTick(function () {
+                    assert.strictEqual(rootVal, 'hehehe')
+                    done()
+                })
+            }
+            
         })
 
-        it('should trigger callback when an array mutates', function () {
+        it('should trigger callback when an array mutates', function (done) {
             var val, mut
             vm.$watch('b', function (array, mutation) {
                 val = array
                 mut = mutation
             })
             arr.push(4)
-            assert.strictEqual(val, arr)
-            assert.strictEqual(mut.method, 'push')
-            assert.strictEqual(mut.args.length, 1)
-            assert.strictEqual(mut.args[0], 4)
+            nextTick(function () {
+                assert.strictEqual(val, arr)
+                assert.strictEqual(mut.method, 'push')
+                assert.strictEqual(mut.args.length, 1)
+                assert.strictEqual(mut.args[0], 4)
+                done()
+            })
         })
 
     })
 
     describe('.$unwatch()', function () {
         
-        it('should unwatch the stuff', function () {
+        it('should unwatch the stuff', function (done) {
             var triggered = false
             vm.$watch('a.b.c', function () {
                 triggered = true
@@ -87,7 +104,10 @@ describe('UNIT: ViewModel', function () {
             vm.$unwatch('a.b.c')
             vm.a = { b: { c:123123 }}
             vm.b.push(5)
-            assert.notOk(triggered)
+            nextTick(function () {
+                assert.notOk(triggered)
+                done()
+            })
         })
 
     })
@@ -477,7 +497,7 @@ describe('UNIT: ViewModel', function () {
             assert.strictEqual(vm.$data, data)
         })
 
-        it('should be able to be swapped', function () {
+        it('should be able to be swapped', function (done) {
             var data1 = { a: 1 },
                 data2 = { a: 2 },
                 vm = new Vue({data: data1}),
@@ -488,7 +508,10 @@ describe('UNIT: ViewModel', function () {
             })
             vm.$data = data2
             assert.equal(vm.a, 2)
-            assert.ok(emittedChange)
+            nextTick(function () {
+                assert.ok(emittedChange)
+                done()
+            })
         })
     })
 

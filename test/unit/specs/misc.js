@@ -45,7 +45,7 @@ describe('Misc Features', function () {
     })
 
     describe('setting an object to empty', function () {
-        it('should emit undefined for paths in the old object', function () {
+        it('should emit undefined for paths in the old object', function (done) {
             var v = new Vue({
                 data: {
                     a: {
@@ -59,7 +59,10 @@ describe('Misc Features', function () {
                 emitted = true
             })
             v.a = {}
-            assert.ok(emitted)
+            nextTick(function () {
+                assert.ok(emitted)
+                done()
+            })
         })
     })
 
