@@ -27,9 +27,18 @@ module.exports = {
                 ? 'value'
                 : 'innerHTML'
 
+        var compositionLock = false
+        el.addEventListener('compositionstart', function () {
+            compositionLock = true
+        })
+        el.addEventListener('compositionend', function () {
+            compositionLock = false
+        })
+
         // attach listener
         self.set = self.filters
             ? function () {
+                if (compositionLock) return
                 // if this directive has filters
                 // we need to let the vm.$set trigger
                 // update() so filters are applied.
