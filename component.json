@@ -3,7 +3,7 @@
     "version": "0.7.2",
     "main": "src/main.js",
     "author": "Evan You <yyx990803@gmail.com>",
-    "description": "Lightweight, Simple, Fast & Composable MVVM library for building interactive user interfaces.",
+    "description": "Simple, Fast & Composable MVVM for building interative interfaces",
     "keywords": ["mvvm", "framework", "data binding"],
     "license": "MIT",
     "scripts": [

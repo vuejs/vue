@@ -1,10 +1,16 @@
-# VueJS [![Build Status](https://travis-ci.org/yyx990803/vue.png?branch=master)](https://travis-ci.org/yyx990803/vue)
+# Vue.js [![Build Status](https://travis-ci.org/yyx990803/vue.png?branch=master)](https://travis-ci.org/yyx990803/vue)
 
-> Lightweight, Simple, Fast & Composable MVVM library for building interactive user interfaces.
+> Simple, Fast & Composable MVVM for building interative interfaces.
 
 ## Introduction
 
-VueJS is a library for building interactive interfaces. It provides the **ViewModel** layer of the MVVM pattern, which connects the **View** (the actual HTML that the user sees) and the **Model** (JSON-compliant plain JavaScript objects) via two way data-bindings. [Read more.](https://github.com/yyx990803/vue/wiki/What-is-VueJS)
+Vue.js is a library that aims to simplify the development of interactive interfaces.
+
+Technically, it provides the **ViewModel** layer of the MVVM pattern, which connects the **View** (the actual HTML that the user sees) and the **Model** (JSON-compliant plain JavaScript objects) via two way data-bindings.
+
+Philosophically, the goal is to allow the developer to embrace an extremely minimal mental model when dealing with interfaces - there's only one type of object you need to worry about: the ViewModel. It is where all the view logic happens, and manipulating the ViewModel will automatically keep the View and the Model in sync. Actuall DOM manipulations and output formatting are abstracted away into **Directives** and **Filters**.
+
+To learn more, visit [vuejs.org](http://vuejs.org).
 
 ## Browser Support
 
@@ -14,7 +20,7 @@ VueJS is a library for building interactive interfaces. It provides the **ViewMo
 
 ## Documentation
 
-Please see the [Wiki](https://github.com/yyx990803/vue/wiki). (under construction)
+Available at [vuejs.org/docs](http://vuejs.org/docs)
 
 ## Development
 
