@@ -28,12 +28,14 @@ module.exports = {
                 : 'innerHTML'
 
         var compositionLock = false
-        el.addEventListener('compositionstart', function () {
+        this.cLock = function () {
             compositionLock = true
-        })
-        el.addEventListener('compositionend', function () {
+        }
+        this.cUnlock = function () {
             compositionLock = false
-        })
+        }
+        el.addEventListener('compositionstart', this.cLock)
+        el.addEventListener('compositionend', this.cUnlock)
 
         // attach listener
         self.set = self.filters
@@ -114,10 +116,13 @@ module.exports = {
     },
 
     unbind: function () {
-        this.el.removeEventListener(this.event, this.set)
+        var el = this.el
+        el.removeEventListener(this.event, this.set)
+        el.removeEventListener('compositionstart', this.cLock)
+        el.removeEventListener('compositionend', this.cUnlock)
         if (isIE9) {
-            this.el.removeEventListener('cut', this.onCut)
-            this.el.removeEventListener('keyup', this.onDel)
+            el.removeEventListener('cut', this.onCut)
+            el.removeEventListener('keyup', this.onDel)
         }
     }
 }
