@@ -85,20 +85,20 @@ def(VMProto, '$broadcast', function () {
 /**
  *  emit an event that propagates all the way up to parent VMs.
  */
-def(VMProto, '$emit', function () {
+def(VMProto, '$dispatch', function () {
     var compiler = this.$compiler,
         emitter = compiler.emitter,
         parent = compiler.parentCompiler
     emitter.emit.apply(emitter, arguments)
     if (parent) {
-        parent.vm.$emit.apply(parent.vm, arguments)
+        parent.vm.$dispatch.apply(parent.vm, arguments)
     }
 })
 
 /**
  *  delegate on/off/once to the compiler's emitter
  */
-;['on', 'off', 'once'].forEach(function (method) {
+;['emit', 'on', 'off', 'once'].forEach(function (method) {
     def(VMProto, '$' + method, function () {
         var emitter = this.$compiler.emitter
         emitter[method].apply(emitter, arguments)

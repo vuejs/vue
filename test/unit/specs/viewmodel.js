@@ -167,6 +167,20 @@ describe('UNIT: ViewModel', function () {
 
     })
 
+    describe('$emit', function () {
+        
+        it('should trigger the event', function () {
+            var t = new Vue(),
+                triggered = false
+            t.$compiler.emitter.on('test', function (m) {
+                triggered = m
+            })
+            t.$emit('test', 'hi')
+            assert.strictEqual(triggered, 'hi')
+        })
+
+    })
+
     describe('.$broadcast()', function () {
         
         it('should notify all child VMs', function () {
@@ -193,7 +207,7 @@ describe('UNIT: ViewModel', function () {
 
     })
 
-    describe('.$emit', function () {
+    describe('.$dispatch', function () {
         
         it('should notify all ancestor VMs', function (done) {
             var topTriggered = false,
@@ -203,7 +217,7 @@ describe('UNIT: ViewModel', function () {
                 ready: function () {
                     var self = this
                     nextTick(function () {
-                        self.$emit('hello', msg)
+                        self.$dispatch('hello', msg)
                         assert.ok(topTriggered)
                         assert.ok(midTriggered)
                         done()
