@@ -1,4 +1,6 @@
-# Vue.js [![Build Status](https://travis-ci.org/yyx990803/vue.png?branch=master)](https://travis-ci.org/yyx990803/vue)
+<p align="center"><a href="http://vuejs.org" target="_blank"><img src="http://vuejs.org/images/logo.png"></a></p>
+
+# vue.js [![Build Status](https://travis-ci.org/yyx990803/vue.png?branch=master)](https://travis-ci.org/yyx990803/vue)
 
 > Simple, Fast & Composable MVVM for building interative interfaces.
 
