@@ -9,7 +9,7 @@ describe('UNIT: TextNode Parser', function () {
             assert.strictEqual(result, null)
         })
 
-        it('should ignore escapped tags', function () {
+        it('should ignore escaped tags', function () {
             var result = TextParser.parse('test {{key}} &#123;&#123;hello&#125;&#125;')
             assert.strictEqual(result.length, 3)
             assert.strictEqual(result[2], ' &#123;&#123;hello&#125;&#125;')
@@ -46,6 +46,16 @@ describe('UNIT: TextNode Parser', function () {
 
         it('should extract partials', function () {
             assert.strictEqual(tokens[8].key, '>test')
+        })
+
+    })
+
+    describe('.parseAttr()', function () {
+    
+        it('should return Directive.parse friendly expression', function () {
+            assert.strictEqual(TextParser.parseAttr('{{msg}}'), 'msg')
+            assert.strictEqual(TextParser.parseAttr('{{msg + "123"}}'), 'msg + "123"')
+            assert.strictEqual(TextParser.parseAttr('ha {{msg + "123"}} ho'), '"ha "+msg + "123"+" ho"')
         })
 
     })

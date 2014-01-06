@@ -1,5 +1,4 @@
-var config     = require('./config'),
-    utils      = require('./utils'),
+var utils      = require('./utils'),
     directives = require('./directives'),
     filters    = require('./filters'),
 
@@ -200,10 +199,6 @@ Directive.split = function (exp) {
  *  before we create an instance
  */
 Directive.parse = function (dirname, expression, compiler, node) {
-
-    var prefix = config.prefix + '-'
-    if (dirname.indexOf(prefix) !== 0) return
-    dirname = dirname.slice(prefix.length)
 
     var dir = compiler.getOption('directives', dirname) || directives[dirname]
     if (!dir) return utils.warn('unknown directive: ' + dirname)

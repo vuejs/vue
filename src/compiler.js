@@ -242,7 +242,7 @@ CompilerProto.compile = function (node, root) {
         if (repeatExp = utils.attr(node, 'repeat')) {
 
             // repeat block cannot have v-id at the same time.
-            directive = Directive.parse(config.attrs.repeat, repeatExp, compiler, node)
+            directive = Directive.parse('repeat', repeatExp, compiler, node)
             if (directive) {
                 compiler.bindDirective(directive)
             }
@@ -250,7 +250,7 @@ CompilerProto.compile = function (node, root) {
         // v-component has 2nd highest priority
         } else if (!root && (componentExp = utils.attr(node, 'component'))) {
 
-            directive = Directive.parse(config.attrs.component, componentExp, compiler, node)
+            directive = Directive.parse('component', componentExp, compiler, node)
             if (directive) {
                 // component directive is a bit different from the others.
                 // when it has no argument, it should be treated as a
@@ -293,28 +293,44 @@ CompilerProto.compile = function (node, root) {
  *  Compile a normal node
  */
 CompilerProto.compileNode = function (node) {
-    var i, j, attrs = node.attributes
+    var i, j,
+        attrs = node.attributes,
+        prefix = config.prefix + '-'
     // parse if has attributes
     if (attrs && attrs.length) {
-        var attr, valid, exps, exp
+        var attr, isDirective, exps, exp, directive
         // loop through all attributes
         i = attrs.length
         while (i--) {
             attr = attrs[i]
-            valid = false
-            exps = Directive.split(attr.value)
-            // loop through clauses (separated by ",")
-            // inside each attribute
-            j = exps.length
-            while (j--) {
-                exp = exps[j]
-                var directive = Directive.parse(attr.name, exp, this, node)
-                if (directive) {
-                    valid = true
-                    this.bindDirective(directive)
+            isDirective = false
+
+            if (attr.name.indexOf(prefix) === 0) {
+                // a directive - split, parse and bind it.
+                isDirective = true
+                exps = Directive.split(attr.value)
+                // loop through clauses (separated by ",")
+                // inside each attribute
+                j = exps.length
+                while (j--) {
+                    exp = exps[j]
+                    directive = Directive.parse(attr.name.slice(prefix.length), exp, this, node)
+                    if (directive) {
+                        this.bindDirective(directive)
+                    }
+                }
+            } else {
+                // non directive attribute, check interpolation tags
+                exp = TextParser.parseAttr(attr.value)
+                if (exp) {
+                    directive = Directive.parse('attr', attr.name + ':' + exp, this, node)
+                    if (directive) {
+                        this.bindDirective(directive)
+                    }
                 }
             }
-            if (valid) node.removeAttribute(attr.name)
+
+            if (isDirective) node.removeAttribute(attr.name)
         }
     }
     // recursively compile childNodes
@@ -332,8 +348,7 @@ CompilerProto.compileNode = function (node) {
 CompilerProto.compileTextNode = function (node) {
     var tokens = TextParser.parse(node.nodeValue)
     if (!tokens) return
-    var dirname = config.attrs.text,
-        el, token, directive
+    var el, token, directive
     for (var i = 0, l = tokens.length; i < l; i++) {
         token = tokens[i]
         if (token.key) { // a binding
@@ -346,7 +361,7 @@ CompilerProto.compileTextNode = function (node) {
                 }
             } else { // a binding
                 el = document.createTextNode('')
-                directive = Directive.parse(dirname, token.key, this, el)
+                directive = Directive.parse('text', token.key, this, el)
                 if (directive) {
                     this.bindDirective(directive)
                 }

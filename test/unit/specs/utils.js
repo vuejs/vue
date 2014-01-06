@@ -6,7 +6,8 @@ describe('UNIT: Utils', function () {
     try {
         require('non-existent')
     } catch (e) {
-        console.log('testing require fail')
+        // testing require fail
+        // for code coverage
     }
     
     describe('hash', function () {

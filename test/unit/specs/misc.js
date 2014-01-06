@@ -17,6 +17,25 @@ describe('Misc Features', function () {
         })
     })
 
+    describe('expression inside attributes', function () {
+        it('should interpolate the attribute', function (done) {
+            var v = new Vue({
+                attributes: {
+                    test: 'one {{msg}} three'
+                },
+                data: {
+                    msg: 'two'
+                }
+            })
+            assert.strictEqual(v.$el.getAttribute('test'), 'one two three')
+            v.msg = '2'
+            nextTick(function () {
+                assert.strictEqual(v.$el.getAttribute('test'), 'one 2 three')
+                done()
+            })
+        })
+    })
+
     describe('computed properties', function () {
         it('should be accessible like a normal attribtue', function () {
             var b = 2

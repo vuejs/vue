@@ -23,8 +23,10 @@
             <button v-on="click: ok = !ok" class="toggle">toggle</button>
             <button v-on="click: noMsg = 'Nah'" class="change">change</button>
         </div>
+        <div id="attrs" data-test="hi {{msg}} ha"></div>
         <script>
-        Vue.config({debug:true})
+            Vue.config({debug:true})
+
             var normal = new Vue({
                 el: '#normal',
                 data: {
@@ -52,6 +54,13 @@
                     ok: true,
                     yesMsg: 'YES',
                     noMsg: 'NO'
+                }
+            })
+
+            var attrs = new Vue({
+                el: '#attrs',
+                data: {
+                    msg: 'ho'
                 }
             })
         </script>

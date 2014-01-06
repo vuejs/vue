@@ -1,6 +1,6 @@
-/* global normal */
+/* global normal, attrs */
 
-casper.test.begin('Expression', 19, function (test) {
+casper.test.begin('Expression', 21, function (test) {
     
     casper
     .start('./fixtures/expression.html')
@@ -11,6 +11,10 @@ casper.test.begin('Expression', 19, function (test) {
         test.assertField('two', 'World')
         test.assertField('three', 'Hi')
         test.assertField('four', 'Ho')
+        // attrs
+        test.assertEval(function () {
+            return document.getElementById('attrs').dataset.test === 'hi ho ha'
+        })
     })
     .thenEvaluate(function () {
         // setting value
@@ -66,6 +70,14 @@ casper.test.begin('Expression', 19, function (test) {
     })
     .thenClick('#conditional .change', function () {
         test.assertSelectorHasText('#conditional p', 'Nah')
+    })
+    .thenEvaluate(function () {
+        attrs.msg = 'hoho'
+    })
+    .then(function () {
+        test.assertEval(function () {
+            return document.getElementById('attrs').dataset.test === 'hi hoho ha'
+        })
     })
     .run(function () {
         test.done()
