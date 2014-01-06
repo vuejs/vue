@@ -5,11 +5,6 @@ branches:
   only:
     - master
 before_install:
-  - npm install -g grunt-cli component
-  - git clone git://github.com/n1k0/casperjs.git ~/casperjs
-  - cd ~/casperjs
-  - git checkout tags/1.1-beta1
-  - export PATH=$PATH:`pwd`/bin
-  - cd -
+  - npm install -g grunt-cli component phantomjs casperjs
 before_script:
   - component install
