@@ -21,10 +21,6 @@ module.exports = {
         this.el.innerHTML = utils.toText(value)
     },
 
-    visible: function (value) {
-        this.el.style.visibility = value ? '' : 'hidden'
-    },
-
     show: function (value) {
         var el = this.el,
             target = value ? '' : 'none',
@@ -46,25 +42,6 @@ module.exports = {
                 this.lastVal = value
             }
         }
-    },
-
-    style: {
-        bind: function () {
-            this.arg = convertCSSProperty(this.arg)
-        },
-        update: function (value) {
-            this.el.style[this.arg] = value
-        }
     }
-}
 
-/**
- *  convert hyphen style CSS property to Camel style
- */
-var CONVERT_RE = /-(.)/g
-function convertCSSProperty (prop) {
-    if (prop.charAt(0) === '-') prop = prop.slice(1)
-    return prop.replace(CONVERT_RE, function (m, char) {
-        return char.toUpperCase()
-    })
 }

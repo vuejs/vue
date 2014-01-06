@@ -78,26 +78,6 @@ describe('UNIT: Directives', function () {
 
     })
 
-    describe('style', function () {
-        
-        var dir = mockDirective('style')
-
-        it('should convert the arg from dash style to camel case', function () {
-            dir.arg = 'font-family'
-            dir.bind()
-            assert.strictEqual(dir.arg, 'fontFamily')
-            dir.arg = '-webkit-transform'
-            dir.bind()
-            assert.strictEqual(dir.arg, 'webkitTransform')
-        })
-
-        it('should update the element style', function () {
-            dir.update('rotate(20deg)')
-            assert.strictEqual(dir.el.style.webkitTransform, 'rotate(20deg)')
-        })
-
-    })
-
     describe('show', function () {
         
         var dir = mockDirective('show')
@@ -126,38 +106,6 @@ describe('UNIT: Directives', function () {
             assert.strictEqual(dir.el.style.display, 'none')
             dir.update(undefined)
             assert.strictEqual(dir.el.style.display, 'none')
-        })
-
-    })
-
-    describe('visible', function () {
-        
-        var dir = mockDirective('visible')
-
-        it('should be default value when value is truthy', function () {
-            dir.update(1)
-            assert.strictEqual(dir.el.style.visibility, '')
-            dir.update('hi!')
-            assert.strictEqual(dir.el.style.visibility, '')
-            dir.update(true)
-            assert.strictEqual(dir.el.style.visibility, '')
-            dir.update({})
-            assert.strictEqual(dir.el.style.visibility, '')
-            dir.update(function () {})
-            assert.strictEqual(dir.el.style.visibility, '')
-        })
-
-        it('should be hidden when value is falsy', function () {
-            dir.update(0)
-            assert.strictEqual(dir.el.style.visibility, 'hidden')
-            dir.update('')
-            assert.strictEqual(dir.el.style.visibility, 'hidden')
-            dir.update(false)
-            assert.strictEqual(dir.el.style.visibility, 'hidden')
-            dir.update(null)
-            assert.strictEqual(dir.el.style.visibility, 'hidden')
-            dir.update(undefined)
-            assert.strictEqual(dir.el.style.visibility, 'hidden')
         })
 
     })
