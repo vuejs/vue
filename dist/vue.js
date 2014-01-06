@@ -1,6 +1,6 @@
 /*
- VueJS v0.7.2
- (c) 2013 Evan You
+ VueJS v0.7.3
+ (c) 2014 Evan You
  License: MIT
 */
 ;(function(){
@@ -441,6 +441,7 @@ ViewModel.transition = function (id, transition) {
 }
 
 ViewModel.extend = extend
+ViewModel.nextTick = utils.nextTick
 
 /**
  *  Expose the main ViewModel class
@@ -1042,7 +1043,7 @@ CompilerProto.compile = function (node, root) {
         if (repeatExp = utils.attr(node, 'repeat')) {
 
             // repeat block cannot have v-id at the same time.
-            directive = Directive.parse(config.attrs.repeat, repeatExp, compiler, node)
+            directive = Directive.parse('repeat', repeatExp, compiler, node)
             if (directive) {
                 compiler.bindDirective(directive)
             }
@@ -1050,7 +1051,7 @@ CompilerProto.compile = function (node, root) {
         // v-component has 2nd highest priority
         } else if (!root && (componentExp = utils.attr(node, 'component'))) {
 
-            directive = Directive.parse(config.attrs.component, componentExp, compiler, node)
+            directive = Directive.parse('component', componentExp, compiler, node)
             if (directive) {
                 // component directive is a bit different from the others.
                 // when it has no argument, it should be treated as a
@@ -1093,28 +1094,44 @@ CompilerProto.compile = function (node, root) {
  *  Compile a normal node
  */
 CompilerProto.compileNode = function (node) {
-    var i, j, attrs = node.attributes
+    var i, j,
+        attrs = node.attributes,
+        prefix = config.prefix + '-'
     // parse if has attributes
     if (attrs && attrs.length) {
-        var attr, valid, exps, exp
+        var attr, isDirective, exps, exp, directive
         // loop through all attributes
         i = attrs.length
         while (i--) {
             attr = attrs[i]
-            valid = false
-            exps = Directive.split(attr.value)
-            // loop through clauses (separated by ",")
-            // inside each attribute
-            j = exps.length
-            while (j--) {
-                exp = exps[j]
-                var directive = Directive.parse(attr.name, exp, this, node)
-                if (directive) {
-                    valid = true
-                    this.bindDirective(directive)
+            isDirective = false
+
+            if (attr.name.indexOf(prefix) === 0) {
+                // a directive - split, parse and bind it.
+                isDirective = true
+                exps = Directive.split(attr.value)
+                // loop through clauses (separated by ",")
+                // inside each attribute
+                j = exps.length
+                while (j--) {
+                    exp = exps[j]
+                    directive = Directive.parse(attr.name.slice(prefix.length), exp, this, node)
+                    if (directive) {
+                        this.bindDirective(directive)
+                    }
+                }
+            } else {
+                // non directive attribute, check interpolation tags
+                exp = TextParser.parseAttr(attr.value)
+                if (exp) {
+                    directive = Directive.parse('attr', attr.name + ':' + exp, this, node)
+                    if (directive) {
+                        this.bindDirective(directive)
+                    }
                 }
             }
-            if (valid) node.removeAttribute(attr.name)
+
+            if (isDirective) node.removeAttribute(attr.name)
         }
     }
     // recursively compile childNodes
@@ -1132,8 +1149,7 @@ CompilerProto.compileNode = function (node) {
 CompilerProto.compileTextNode = function (node) {
     var tokens = TextParser.parse(node.nodeValue)
     if (!tokens) return
-    var dirname = config.attrs.text,
-        el, token, directive
+    var el, token, directive
     for (var i = 0, l = tokens.length; i < l; i++) {
         token = tokens[i]
         if (token.key) { // a binding
@@ -1146,7 +1162,7 @@ CompilerProto.compileTextNode = function (node) {
                 }
             } else { // a binding
                 el = document.createTextNode('')
-                directive = Directive.parse(dirname, token.key, this, el)
+                directive = Directive.parse('text', token.key, this, el)
                 if (directive) {
                     this.bindDirective(directive)
                 }
@@ -1478,7 +1494,15 @@ def(VMProto, '$set', function (key, value) {
  *  fire callback with new value
  */
 def(VMProto, '$watch', function (key, callback) {
-    this.$compiler.observer.on('change:' + key, callback)
+    var self = this
+    function on () {
+        var args = arguments
+        utils.nextTick(function () {
+            callback.apply(self, args)
+        })
+    }
+    callback._fn = on
+    self.$compiler.observer.on('change:' + key, on)
 })
 
 /**
@@ -1490,7 +1514,7 @@ def(VMProto, '$unwatch', function (key, callback) {
     // by checking the length of arguments
     var args = ['change:' + key],
         ob = this.$compiler.observer
-    if (callback) args.push(callback)
+    if (callback) args.push(callback._fn)
     ob.off.apply(ob, args)
 })
 
@@ -1518,20 +1542,20 @@ def(VMProto, '$broadcast', function () {
 /**
  *  emit an event that propagates all the way up to parent VMs.
  */
-def(VMProto, '$emit', function () {
+def(VMProto, '$dispatch', function () {
     var compiler = this.$compiler,
         emitter = compiler.emitter,
         parent = compiler.parentCompiler
     emitter.emit.apply(emitter, arguments)
     if (parent) {
-        parent.vm.$emit.apply(parent.vm, arguments)
+        parent.vm.$dispatch.apply(parent.vm, arguments)
     }
 })
 
 /**
  *  delegate on/off/once to the compiler's emitter
  */
-;['on', 'off', 'once'].forEach(function (method) {
+;['emit', 'on', 'off', 'once'].forEach(function (method) {
     def(VMProto, '$' + method, function () {
         var emitter = this.$compiler.emitter
         emitter[method].apply(emitter, arguments)
@@ -2016,8 +2040,7 @@ module.exports = {
 }
 });
 require.register("vue/src/directive.js", function(exports, require, module){
-var config     = require('./config'),
-    utils      = require('./utils'),
+var utils      = require('./utils'),
     directives = require('./directives'),
     filters    = require('./filters'),
 
@@ -2219,10 +2242,6 @@ Directive.split = function (exp) {
  */
 Directive.parse = function (dirname, expression, compiler, node) {
 
-    var prefix = config.prefix + '-'
-    if (dirname.indexOf(prefix) !== 0) return
-    dirname = dirname.slice(prefix.length)
-
     var dir = compiler.getOption('directives', dirname) || directives[dirname]
     if (!dir) return utils.warn('unknown directive: ' + dirname)
 
@@ -2394,26 +2413,40 @@ module.exports = {
 require.register("vue/src/text-parser.js", function(exports, require, module){
 var BINDING_RE = /\{\{(.+?)\}\}/
 
-module.exports = {
-
-    /**
-     *  Parse a piece of text, return an array of tokens
-     */
-    parse: function (text) {
-        if (!BINDING_RE.test(text)) return null
-        var m, i, tokens = []
-        /* jshint boss: true */
-        while (m = text.match(BINDING_RE)) {
-            i = m.index
-            if (i > 0) tokens.push(text.slice(0, i))
-            tokens.push({ key: m[1].trim() })
-            text = text.slice(i + m[0].length)
-        }
-        if (text.length) tokens.push(text)
-        return tokens
+/**
+ *  Parse a piece of text, return an array of tokens
+ */
+function parse (text) {
+    if (!BINDING_RE.test(text)) return null
+    var m, i, tokens = []
+    /* jshint boss: true */
+    while (m = text.match(BINDING_RE)) {
+        i = m.index
+        if (i > 0) tokens.push(text.slice(0, i))
+        tokens.push({ key: m[1].trim() })
+        text = text.slice(i + m[0].length)
     }
-    
+    if (text.length) tokens.push(text)
+    return tokens
 }
+
+/**
+ *  Parse an attribute value with possible interpolation tags
+ *  return a Directive-friendly expression
+ */
+function parseAttr (attr) {
+    var tokens = parse(attr)
+    if (!tokens) return null
+    var res = [], token
+    for (var i = 0, l = tokens.length; i < l; i++) {
+        token = tokens[i]
+        res.push(token.key || ('"' + token + '"'))
+    }
+    return res.join('+')
+}
+
+exports.parse = parse
+exports.parseAttr = parseAttr
 });
 require.register("vue/src/deps-parser.js", function(exports, require, module){
 var Emitter  = require('./emitter'),
@@ -2426,13 +2459,13 @@ var Emitter  = require('./emitter'),
  */
 function catchDeps (binding) {
     if (binding.isFn) return
-    utils.log('\n─ ' + binding.key)
+    utils.log('\n- ' + binding.key)
     var got = utils.hash()
     observer.on('get', function (dep) {
         var has = got[dep.key]
         if (has && has.compiler === dep.compiler) return
         got[dep.key] = dep
-        utils.log('  └─ ' + dep.key)
+        utils.log('  - ' + dep.key)
         binding.deps.push(dep)
         dep.subs.push(binding)
     })
@@ -2983,7 +3016,7 @@ module.exports = {
         self.hasTrans   = el.hasAttribute(config.attrs.transition)
 
         // create a comment node as a reference node for DOM insertions
-        self.ref = document.createComment(config.prefix + '-repeat-' + self.arg)
+        self.ref = document.createComment(config.prefix + '-repeat-' + self.key)
         ctn.insertBefore(self.ref, el)
         ctn.removeChild(el)
 
@@ -3206,16 +3239,29 @@ module.exports = {
                 ? 'change'
                 : 'input'
 
-        // determin the attribute to change when updating
+        // determine the attribute to change when updating
         var attr = self.attr = type === 'checkbox'
             ? 'checked'
             : (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA')
                 ? 'value'
                 : 'innerHTML'
 
+        if (self.filters) {
+            var compositionLock = false
+            this.cLock = function () {
+                compositionLock = true
+            }
+            this.cUnlock = function () {
+                compositionLock = false
+            }
+            el.addEventListener('compositionstart', this.cLock)
+            el.addEventListener('compositionend', this.cUnlock)
+        }
+
         // attach listener
         self.set = self.filters
             ? function () {
+                if (compositionLock) return
                 // if this directive has filters
                 // we need to let the vm.$set trigger
                 // update() so filters are applied.
@@ -3239,7 +3285,9 @@ module.exports = {
                 // no filters, don't let it trigger update()
                 self.lock = true
                 self.vm.$set(self.key, el[attr])
-                self.lock = false
+                utils.nextTick(function () {
+                    self.lock = false
+                })
             }
         el.addEventListener(self.event, self.set)
 
@@ -3289,10 +3337,15 @@ module.exports = {
     },
 
     unbind: function () {
-        this.el.removeEventListener(this.event, this.set)
+        var el = this.el
+        el.removeEventListener(this.event, this.set)
+        if (this.filters) {
+            el.removeEventListener('compositionstart', this.cLock)
+            el.removeEventListener('compositionend', this.cUnlock)
+        }
         if (isIE9) {
-            this.el.removeEventListener('cut', this.onCut)
-            this.el.removeEventListener('keyup', this.onDel)
+            el.removeEventListener('cut', this.onCut)
+            el.removeEventListener('keyup', this.onDel)
         }
     }
 }
@@ -3338,7 +3391,8 @@ module.exports = {
 require.alias("component-emitter/index.js", "vue/deps/emitter/index.js");
 require.alias("component-emitter/index.js", "emitter/index.js");
 
-require.alias("vue/src/main.js", "vue/index.js");if (typeof exports == "object") {
+require.alias("vue/src/main.js", "vue/index.js");
+if (typeof exports == "object") {
   module.exports = require("vue");
 } else if (typeof define == "function" && define.amd) {
   define(function(){ return require("vue"); });

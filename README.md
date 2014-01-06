@@ -10,17 +10,13 @@ Technically, it provides the **ViewModel** layer of the MVVM pattern, which conn
 
 Philosophically, the goal is to allow the developer to embrace an extremely minimal mental model when dealing with interfaces - there's only one type of object you need to worry about: the ViewModel. It is where all the view logic happens, and manipulating the ViewModel will automatically keep the View and the Model in sync. Actuall DOM manipulations and output formatting are abstracted away into **Directives** and **Filters**.
 
-To learn more, visit [vuejs.org](http://vuejs.org).
+For more details, guides and documentations, visit [vuejs.org](http://vuejs.org).
 
 ## Browser Support
 
 - Most Webkit/Blink-based browsers
 - Firefox 4+
 - IE9+ (IE9 needs [classList polyfill](https://github.com/remy/polyfills/blob/master/classList.js) and doesn't support transitions)
-
-## Documentation
-
-Available at [vuejs.org/docs](http://vuejs.org/docs)
 
 ## Development
 
@@ -43,9 +39,11 @@ To watch and auto-build dev version during development:
 $ grunt watch
 ```
 
-To test (install [CasperJS](http://casperjs.org/) first):
+To test:
 
 ``` bash
+# if you don't have these yet:
+# npm install -g phantomjs casperjs
 $ grunt test
 ```
 
