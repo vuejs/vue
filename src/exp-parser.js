@@ -1,5 +1,7 @@
 var utils = require('./utils'),
-    hasOwn = Object.prototype.hasOwnProperty
+    hasOwn = Object.prototype.hasOwnProperty,
+    stringSaveRE = /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/g,
+    stringRestoreRE = /"(\d+)"/g
 
 // Variable extraction scooped from https://github.com/RubyLouvre/avalon
 
@@ -122,6 +124,8 @@ module.exports = {
         }
         vars = utils.unique(vars)
         var accessors = '',
+            has       = utils.hash(),
+            strings   = [],
             // construct a regex to extract all valid variable paths
             // ones that begin with "$" are particularly tricky
             // because we can't use \b for them
@@ -130,16 +134,35 @@ module.exports = {
                 vars.map(escapeDollar).join('|') +
                 ")[$\\w\\.]*\\b", 'g'
             ),
-            body = ('return ' + exp).replace(pathRE, function (path) {
-                // keep track of the first char
-                var c = path.charAt(0)
-                path = path.slice(1)
-                var val = 'this.' + getRel(path, compiler) + path
-                accessors += val + ';'
-                // don't forget to put that first char back
-                return c + val
-            })
+            body = ('return ' + exp)
+                .replace(stringSaveRE, saveStrings)
+                .replace(pathRE, replacePath)
+                .replace(stringRestoreRE, restoreStrings)
         body = accessors + body
+
+        function saveStrings (str) {
+            var i = strings.length
+            strings[i] = str
+            return '"' + i + '"'
+        }
+
+        function replacePath (path) {
+            // keep track of the first char
+            var c = path.charAt(0)
+            path = path.slice(1)
+            var val = 'this.' + getRel(path, compiler) + path
+            if (!has[path]) {
+                accessors += val + ';'
+                has[path] = 1
+            }
+            // don't forget to put that first char back
+            return c + val
+        }
+
+        function restoreStrings (str, i) {
+            return strings[i]
+        }
+
         return makeGetter(body, exp)
     }
 }

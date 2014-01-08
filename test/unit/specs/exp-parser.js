@@ -58,6 +58,15 @@ describe('UNIT: Expression Parser', function () {
             exp: "'a' + 'b'",
             vm: {},
             expectedValue: 'ab'
+        },
+        {
+            // values with same variable name inside strings
+            exp: "'\"test\"' + test + \"'hi'\" + hi",
+            vm: {
+                test: 1,
+                hi: 2
+            },
+            expectedValue: '"test"1\'hi\'2'
         }
     ]
 
