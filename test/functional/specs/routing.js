@@ -1,7 +1,8 @@
 casper.test.begin('Routing', 10, function (test) {
     
     casper
-    .start('./fixtures/routing.html', function () {
+    .start('./fixtures/routing.html')
+    .then(function () {
         test.assertElementCount('div', 1)
         test.assertSelectorHasText('div', 'Hi!')
     })

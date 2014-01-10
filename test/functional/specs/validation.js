@@ -1,7 +1,8 @@
 casper.test.begin('Validation', 4, function (test) {
     
     casper
-    .start('./fixtures/validation.html', function () {
+    .start('./fixtures/validation.html')
+    .then(function () {
         test.assertElementCount('.valid', 0)
         this.sendKeys('input', '@hello.com')
     })
