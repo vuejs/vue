@@ -1,4 +1,4 @@
-var utils = require('../utils')
+var ViewModel
 
 module.exports = {
 
@@ -17,16 +17,15 @@ module.exports = {
     },
 
     build: function (value) {
-        var Ctor = this.compiler.getOption('components', this.arg)
-        if (!Ctor) utils.warn('unknown component: ' + this.arg)
-        var options = {
+        ViewModel = ViewModel || require('../viewmodel')
+        var Ctor = this.Ctor || ViewModel
+        this.component = new Ctor({
             el: this.el,
             data: value,
             compilerOptions: {
                 parentCompiler: this.compiler
             }
-        }
-        this.component = new Ctor(options)
+        })
     },
 
     unbind: function () {

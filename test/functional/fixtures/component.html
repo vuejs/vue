@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Component</title>
+        <meta charset="utf-8">
+    </head>
+    <body>
+        <div id="test">
+            <!-- v-component + v-with -->
+            <div id="component-and-with" v-component="avatar" v-with="user"></div>
+
+            <!-- custom element + v-with -->
+            <avatar id="element-and-with" v-with="user"></avatar>
+
+            <!-- v-with alone -->
+            <div id="with" v-with="user">{{hi}} {{name}}</div>
+
+            <!-- v-component alone -->
+            <div id="component" v-component="simple"></div>
+
+            <!-- custom element alone -->
+            <simple id="element"></simple>
+        </div>
+        <script src="../../../dist/vue.js"></script>
+        <script>
+
+            Vue.config({debug: true})
+
+            Vue.component('avatar', {
+                template: '{{hi}} {{name}}',
+                ready: function () {
+                    console.log(JSON.stringify(this))
+                }
+            })
+
+            Vue.component('simple', {
+                template: '{{hi}} {{user.name}}'
+            })
+
+            var app = new Vue({
+                el: '#test',
+                data: {
+                    hi: '123',
+                    user: {
+                        name: 'Jack'
+                    }
+                }
+            })
+        </script>
+    </body>
+</html>

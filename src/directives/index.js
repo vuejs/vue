@@ -7,7 +7,7 @@ module.exports = {
     repeat    : require('./repeat'),
     model     : require('./model'),
     'if'      : require('./if'),
-    component : require('./component'),
+    'with'    : require('./with'),
 
     attr: function (value) {
         this.el.setAttribute(this.arg, value)

@@ -27,7 +27,7 @@
         "src/directives/repeat.js",
         "src/directives/on.js",
         "src/directives/model.js",
-        "src/directives/component.js"
+        "src/directives/with.js"
     ],
     "dependencies": {
         "component/emitter": "*"

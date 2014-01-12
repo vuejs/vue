@@ -226,9 +226,11 @@ CompilerProto.compile = function (node, root) {
 
         // special attributes to check
         var repeatExp,
-            componentExp,
+            withKey,
             partialId,
-            directive
+            directive,
+            componentId = utils.attr(node, 'component') || tagName.toLowerCase(),
+            componentCtor = compiler.getOption('components', componentId)
 
         // It is important that we access these attributes
         // procedurally because the order matters.
@@ -244,21 +246,16 @@ CompilerProto.compile = function (node, root) {
             // repeat block cannot have v-id at the same time.
             directive = Directive.parse('repeat', repeatExp, compiler, node)
             if (directive) {
+                directive.Ctor = componentCtor
                 compiler.bindDirective(directive)
             }
 
-        // v-component has 2nd highest priority
-        } else if (!root && (componentExp = utils.attr(node, 'component'))) {
+        // v-with has 2nd highest priority
+        } else if (!root && ((withKey = utils.attr(node, 'with')) || componentCtor)) {
 
-            directive = Directive.parse('component', componentExp, compiler, node)
+            directive = Directive.parse('with', withKey || '', compiler, node)
             if (directive) {
-                // component directive is a bit different from the others.
-                // when it has no argument, it should be treated as a
-                // simple directive with its key as the argument.
-                if (componentExp.indexOf(':') === -1) {
-                    directive.isSimple = true
-                    directive.arg = directive.key
-                }
+                directive.Ctor = componentCtor
                 compiler.bindDirective(directive)
             }
 

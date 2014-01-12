@@ -511,7 +511,7 @@ describe('UNIT: Directives', function () {
 
     describe('component', function () {
         
-        it('should work with no args', function () {
+        it('should create a child viewmodel with given constructor', function () {
             var testId = 'component-test'
             mock(testId, '<div v-component="' + testId + '"></div>')
             var t = new Vue({
@@ -528,25 +528,22 @@ describe('UNIT: Directives', function () {
             assert.strictEqual(t.$el.querySelector('span').textContent, '123')
         })
 
-        it('should work with arg (passed-in model from parent)', function () {
-            var testId = 'component-test-2'
-            mock(testId, '<div v-component="' + testId + ':options.test"></div>')
+    })
+
+    describe('with', function () {
+        
+        it('should create a child viewmodel with given data', function () {
+            var testId = 'with-test'
+            mock(testId, '<span v-with="test">{{msg}}</span>')
             var t = new Vue({
                 el: '#' + testId,
                 data: {
-                    options: {
-                        test: {
-                            msg: '123'
-                        }
-                    }
-                },
-                components: {
-                    'component-test-2': {
-                        template: '<span>{{msg}}</span>'
+                    test: {
+                        msg: testId
                     }
                 }
             })
-            assert.strictEqual(t.$el.querySelector('span').textContent, '123')
+            assert.strictEqual(t.$el.querySelector('span').textContent, testId)
         })
 
     })

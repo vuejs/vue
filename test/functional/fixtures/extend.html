@@ -12,7 +12,7 @@
             <div class="filter">{{filterMsg | nodigits}}</div>
             <div class="partial" v-partial="partial-test"></div>
             <div class="vm" v-component="vm-test">{{vmMsg}}</div>
-            <div class="vm-w-model" v-component="vm-w-model:vmData">{{selfMsg + msg}}</div>
+            <div class="vm-w-model" v-component="vm-w-model" v-with="vmData">{{selfMsg + msg}}</div>
         </div>
         <div id="child">
             <div class="cvm" v-component="vm-test">{{vmMsg}}</div>

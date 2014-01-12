@@ -90,9 +90,8 @@ module.exports = {
             ctn  = self.container = el.parentNode
 
         // extract child VM information, if any
-        ViewModel       = ViewModel || require('../viewmodel')
-        var componentId = utils.attr(el, 'component')
-        self.ChildVM    = self.compiler.getOption('components', componentId) || ViewModel
+        ViewModel = ViewModel || require('../viewmodel')
+        self.Ctor = self.Ctor || ViewModel
 
         // extract transition information
         self.hasTrans   = el.hasAttribute(config.attrs.transition)
@@ -169,7 +168,7 @@ module.exports = {
             }, this.compiler)
         }
 
-        item = new this.ChildVM({
+        item = new this.Ctor({
             el: node,
             data: data,
             compilerOptions: {

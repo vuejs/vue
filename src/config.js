@@ -4,6 +4,7 @@ var prefix = 'v',
         'text',
         'repeat',
         'partial',
+        'with',
         'component',
         'component-id',
         'transition'
