@@ -1,5 +1,5 @@
 /*
- VueJS v0.7.4
+ VueJS v0.7.5
  (c) 2014 Evan You
  License: MIT
 */
@@ -563,6 +563,7 @@ var prefix = 'v',
         'text',
         'repeat',
         'partial',
+        'with',
         'component',
         'component-id',
         'transition'
@@ -1027,9 +1028,11 @@ CompilerProto.compile = function (node, root) {
 
         // special attributes to check
         var repeatExp,
-            componentExp,
+            withKey,
             partialId,
-            directive
+            directive,
+            componentId = utils.attr(node, 'component') || tagName.toLowerCase(),
+            componentCtor = compiler.getOption('components', componentId)
 
         // It is important that we access these attributes
         // procedurally because the order matters.
@@ -1045,21 +1048,16 @@ CompilerProto.compile = function (node, root) {
             // repeat block cannot have v-id at the same time.
             directive = Directive.parse('repeat', repeatExp, compiler, node)
             if (directive) {
+                directive.Ctor = componentCtor
                 compiler.bindDirective(directive)
             }
 
-        // v-component has 2nd highest priority
-        } else if (!root && (componentExp = utils.attr(node, 'component'))) {
+        // v-with has 2nd highest priority
+        } else if (!root && ((withKey = utils.attr(node, 'with')) || componentCtor)) {
 
-            directive = Directive.parse('component', componentExp, compiler, node)
+            directive = Directive.parse('with', withKey || '', compiler, node)
             if (directive) {
-                // component directive is a bit different from the others.
-                // when it has no argument, it should be treated as a
-                // simple directive with its key as the argument.
-                if (componentExp.indexOf(':') === -1) {
-                    directive.isSimple = true
-                    directive.arg = directive.key
-                }
+                directive.Ctor = componentCtor
                 compiler.bindDirective(directive)
             }
 
@@ -2817,7 +2815,7 @@ module.exports = {
     repeat    : require('./repeat'),
     model     : require('./model'),
     'if'      : require('./if'),
-    component : require('./component'),
+    'with'    : require('./with'),
 
     attr: function (value) {
         this.el.setAttribute(this.arg, value)
@@ -3008,9 +3006,8 @@ module.exports = {
             ctn  = self.container = el.parentNode
 
         // extract child VM information, if any
-        ViewModel       = ViewModel || require('../viewmodel')
-        var componentId = utils.attr(el, 'component')
-        self.ChildVM    = self.compiler.getOption('components', componentId) || ViewModel
+        ViewModel = ViewModel || require('../viewmodel')
+        self.Ctor = self.Ctor || ViewModel
 
         // extract transition information
         self.hasTrans   = el.hasAttribute(config.attrs.transition)
@@ -3087,7 +3084,7 @@ module.exports = {
             }, this.compiler)
         }
 
-        item = new this.ChildVM({
+        item = new this.Ctor({
             el: node,
             data: data,
             compilerOptions: {
@@ -3350,8 +3347,8 @@ module.exports = {
     }
 }
 });
-require.register("vue/src/directives/component.js", function(exports, require, module){
-var utils = require('../utils')
+require.register("vue/src/directives/with.js", function(exports, require, module){
+var ViewModel
 
 module.exports = {
 
@@ -3370,16 +3367,15 @@ module.exports = {
     },
 
     build: function (value) {
-        var Ctor = this.compiler.getOption('components', this.arg)
-        if (!Ctor) utils.warn('unknown component: ' + this.arg)
-        var options = {
+        ViewModel = ViewModel || require('../viewmodel')
+        var Ctor = this.Ctor || ViewModel
+        this.component = new Ctor({
             el: this.el,
             data: value,
             compilerOptions: {
                 parentCompiler: this.compiler
             }
-        }
-        this.component = new Ctor(options)
+        })
     },
 
     unbind: function () {
