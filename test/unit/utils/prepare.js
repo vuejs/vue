@@ -1,3 +1,16 @@
+function mock (id, html, attrs) {
+    var el = document.createElement('div')
+    el.id = id
+    el.innerHTML = html
+    if (attrs) {
+        for (var attr in attrs) {
+            el.setAttribute(attr, attrs[attr])
+        }
+    }
+    document.getElementById('test').appendChild(el)
+    return el
+}
+
 function mockHTMLEvent (type) {
     var e = document.createEvent('HTMLEvents')
     e.initEvent(type, true, true)
@@ -18,3 +31,15 @@ function mockMouseEvent (type) {
     e.initMouseEvent(type, true, true, null, 1, 0, 0, 0, 0, false, false, false, false, 0, null)
     return e
 }
+
+// setup
+
+mocha.setup('bdd')
+var Vue = require('vue')
+var assert = chai.assert
+Vue.config({silent:true})
+
+var testDiv = document.createElement('div')
+testDiv.id = 'test'
+testDiv.style.display = 'none'
+document.body.appendChild(testDiv)

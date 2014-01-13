@@ -3,38 +3,21 @@
 	<head>
 		<title>Test</title>
 		<meta charset="utf-8">
-		<link rel="stylesheet" type="text/css" href="vendor/mocha.css">
-		<link rel="stylesheet" type="text/css" href="vendor/cover.css">
+		<link rel="stylesheet" type="text/css" href="utils/mocha.css">
 	</head>
 	<body>
 		<div id="mocha"></div>
-		<div id="test" style="display:none"></div>
-		<script src="vendor/mocha.js"></script>
-		<script src="vendor/chai.js"></script>
-		<script src="vendor/classList.js"></script>
-		<script src="vendor/mockEvent.js"></script>
-		<script src="vendor/cover.js"></script>
-		<script src="../vue.test-cov.js"></script>
-		<script>
-			mocha.setup('bdd')
-			var Vue = require('vue'),
-				assert = chai.assert
 
-            Vue.config({silent:true})
+        <!-- include vue -->
+        <script src="../vue.test.js"></script>
 
-			function mock (id, html, attrs) {
-				var el = document.createElement('div')
-				el.id = id
-				el.innerHTML = html
-				if (attrs) {
-					for (var attr in attrs) {
-						el.setAttribute(attr, attrs[attr])
-					}
-				}
-				document.getElementById('test').appendChild(el)
-				return el
-			}
-		</script>
+        <!-- include test utilities -->
+		<script src="utils/mocha.js"></script>
+		<script src="utils/chai.js"></script>
+		<script src="utils/classList.js"></script>
+        <script src="utils/prepare.js"></script>
+
+        <!-- specs -->
 		<script src="specs/utils.js"></script>
 		<script src="specs/binding.js"></script>
 		<script src="specs/directive.js"></script>
@@ -49,25 +32,9 @@
         <script src="specs/transition.js"></script>
         <script src="specs/batcher.js"></script>
         <script src="specs/misc.js"></script>
+
 		<script>
-			if (navigator.userAgent.indexOf('PhantomJS') < 0) {
-            	mocha.run(Cover.report)
-        	} else {
-        		// intercept test end
-        		// and report coverage to grunt-mocha
-        		var al = window.alert
-        		window.alert = function (msg) {
-        			if (msg.indexOf('mocha.end') > 0) {
-        				var stats = Cover.getStats()[0]
-        				console.log('\n')
-        		    	console.log('     SLOC : ' + stats.sloc)
-        		    	console.log('     Hits : ' + stats.hits)
-        		    	console.log('   Misses : ' + stats.misses)
-        		    	console.log(' Coverage : ' + stats.coverage.toFixed(2) + '%')
-        		    }
-        		    al(msg)
-        		}
-        	}
+			mocha.run()
 		</script>
 	</body>
 </html>

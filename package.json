@@ -19,20 +19,32 @@
     "url": "https://github.com/yyx990803/vue.git"
   },
   "scripts": {
-    "test": "grunt"
+    "test": "grunt travis"
   },
   "devDependencies": {
     "grunt": "~0.4.2",
     "grunt-contrib-watch": "~0.5.3",
     "grunt-contrib-jshint": "~0.8.0",
-    "grunt-mocha": "~0.4.6",
-    "jscoverage": "~0.3.8",
     "jshint-stylish": "~0.1.4",
     "semver": "~2.2.1",
     "shell-task": "~0.1.1",
     "map-stream": "0.0.4",
     "uglify-js": "~2.4.8",
-    "vinyl-fs": "git://github.com/yyx990803/vinyl-fs",
-    "gulp-component": "~0.1.3"
+    "vinyl-fs": "git://github.com/wearefractal/vinyl-fs",
+    "gulp-component": "~0.1.4",
+    "grunt-karma": "~0.6.2",
+    "karma-script-launcher": "~0.1.0",
+    "karma-chrome-launcher": "~0.1.2",
+    "karma-firefox-launcher": "~0.1.3",
+    "karma-requirejs": "~0.2.1",
+    "karma-html2js-preprocessor": "~0.1.0",
+    "karma-jasmine": "~0.1.5",
+    "karma-coffee-preprocessor": "~0.1.2",
+    "karma-phantomjs-launcher": "~0.1.1",
+    "karma": "~0.10.9",
+    "karma-mocha": "~0.1.1",
+    "karma-coverage": "~0.1.4",
+    "karma-safari-launcher": "~0.1.1",
+    "grunt-karma-coveralls": "~2.3.0"
   }
 }

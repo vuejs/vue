@@ -20,13 +20,43 @@ module.exports = function( grunt ) {
             }
         },
 
-        mocha: {
-            test: {
-                src: ['test/unit/runner.html'],
+        karma: {
+            options: {
+                frameworks: ['mocha'],
+                files: [
+                    'test/vue.test.js',
+                    'test/unit/utils/chai.js',
+                    'test/unit/utils/prepare.js',
+                    'test/unit/specs/*.js'
+                ],
+                singleRun: true
+            },
+            browsers: {
                 options: {
-                    log: true,
-                    run: true
+                   browsers: ['Chrome', 'Firefox', 'Safari'],
+                   reporters: ['progress']
                 }
+            },
+            phantom: {
+                options: {
+                    browsers: ['PhantomJS'],
+                    reporters: ['progress', 'coverage'],
+                    preprocessors: {
+                        'test/vue.test.js': ['coverage']
+                    },
+                    coverageReporter: {
+                        reporters: [
+                            { type: 'lcov' },
+                            { type: 'text-summary' }
+                        ]
+                    }
+                }
+            }
+        },
+
+        coveralls: {
+            options: {
+                coverage_dir: 'coverage/'
             }
         },
 
@@ -42,7 +72,8 @@ module.exports = function( grunt ) {
 
     })
 
-    grunt.loadNpmTasks('grunt-mocha')
+    grunt.loadNpmTasks('grunt-karma')
+    grunt.loadNpmTasks('grunt-karma-coveralls')
     grunt.loadNpmTasks('grunt-contrib-watch')
     grunt.loadNpmTasks('grunt-contrib-jshint')
 
@@ -53,7 +84,7 @@ module.exports = function( grunt ) {
 
     grunt.registerTask( 'unit', [
         'instrument',
-        'mocha'
+        'karma:browsers'
     ])
 
     grunt.registerTask( 'test', [
@@ -65,6 +96,14 @@ module.exports = function( grunt ) {
         'jshint',
         'build',
         'test'
+    ])
+
+    grunt.registerTask( 'travis', [
+        'build',
+        'instrument',
+        'karma:phantom',
+        'casper',
+        'coveralls'
     ])
     
 }

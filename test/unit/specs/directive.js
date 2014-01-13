@@ -113,24 +113,26 @@ describe('UNIT: Directive', function () {
     })
 
     describe('instantiation', function () {
-
-        var test = function () {}
-        directives.test = test
-
-        var obj = {
-            bind: function () {},
-            update: function () {},
-            unbind: function () {},
-            custom: function () {}
-        }
-        directives.obj = obj
         
         it('should copy the definition as _update if the def is a function', function () {
+
+            var testDir = function () {}
+            directives.test = testDir
+
             var d = Directive.parse('test', 'abc', compiler)
-            assert.strictEqual(d._update, test)
+            assert.strictEqual(d._update, testDir)
         })
 
         it('should copy methods if the def is an object', function () {
+
+            var obj = {
+                bind: function () {},
+                update: function () {},
+                unbind: function () {},
+                custom: function () {}
+            }
+            directives.obj = obj
+            
             var d = Directive.parse('obj', 'abc', compiler)
             assert.strictEqual(d._update, obj.update, 'update should be copied as _update')
             assert.strictEqual(d._unbind, obj.unbind, 'unbind should be copied as _unbind')
