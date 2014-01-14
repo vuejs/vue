@@ -5,13 +5,10 @@ var config    = require('./config'),
     console   = window.console,
     ViewModel // late def
 
-// PhantomJS doesn't support rAF, yet it has the global
-// variable exposed. Use setTimeout so tests can work.
-var defer = navigator.userAgent.indexOf('PhantomJS') > -1
-    ? window.setTimeout
-    : (window.webkitRequestAnimationFrame ||
-        window.requestAnimationFrame ||
-        window.setTimeout)
+var defer =
+    window.requestAnimationFrame ||
+    window.webkitRequestAnimationFrame ||
+    window.setTimeout
 
 /**
  *  Create a prototype-less object
