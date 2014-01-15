@@ -16,9 +16,9 @@ For more details, guides and documentations, visit [vuejs.org](http://vuejs.org)
 
 ## Browser Support
 
-- Most Webkit/Blink-based browsers
-- Firefox 4+
-- IE9+ (IE9 needs [classList polyfill](https://github.com/remy/polyfills/blob/master/classList.js) and doesn't support transitions)
+[![Selenium Test Status](https://saucelabs.com/browser-matrix/vuejs.svg)](https://saucelabs.com/u/vuejs)
+
+Vue.js supports ECMAScript 5 compliant browsers, essentially IE9+ (IE9 needs [classList polyfill](https://github.com/remy/polyfills/blob/master/classList.js) and doesn't support transitions)
 
 ## Development
 

@@ -250,6 +250,8 @@ describe('UNIT: Utils', function () {
     })
 
     describe('log', function () {
+
+        if (!window.console) return
         
         it('should only log in debug mode', function () {
             // overwrite log temporarily
@@ -274,6 +276,8 @@ describe('UNIT: Utils', function () {
     })
 
     describe('warn', function () {
+
+        if (!window.console) return
         
         it('should only warn when not in silent mode', function () {
             config.silent = true

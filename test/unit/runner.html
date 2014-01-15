@@ -34,7 +34,12 @@
         <script src="specs/misc.js"></script>
 
 		<script>
-			mocha.run()
+			onload = function () {
+                var runner = mocha.run()
+                runner.on('end', function () {
+                    window.mochaResults = runner.stats
+                })
+            }
 		</script>
 	</body>
 </html>
