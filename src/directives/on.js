@@ -29,6 +29,7 @@ module.exports = {
 
         var compiler = this.compiler,
             event    = this.arg,
+            isExp    = this.binding.isExp,
             ownerVM  = this.binding.compiler.vm
 
         if (compiler.repeat &&
@@ -51,7 +52,7 @@ module.exports = {
                 if (target) {
                     e.el = target
                     e.targetVM = target.vue_viewmodel
-                    handler.call(ownerVM, e)
+                    handler.call(isExp ? e.targetVM : ownerVM, e)
                 }
             }
             dHandler.event = event

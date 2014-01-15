@@ -530,9 +530,7 @@ CompilerProto.markComputed = function (binding) {
         vm    = this.vm
     binding.isComputed = true
     // bind the accessors to the vm
-    if (binding.isFn) {
-        binding.value = utils.bind(value, vm)
-    } else {
+    if (!binding.isFn) {
         value.$get = utils.bind(value.$get, vm)
         if (value.$set) {
             value.$set = utils.bind(value.$set, vm)
