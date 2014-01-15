@@ -1,45 +1,45 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<title>Test</title>
-		<meta charset="utf-8">
-		<link rel="stylesheet" type="text/css" href="utils/mocha.css">
-	</head>
-	<body>
-		<div id="mocha"></div>
+    <head>
+        <title>Test</title>
+        <meta charset="utf-8">
+        <link rel="stylesheet" type="text/css" href="utils/mocha.css">
+    </head>
+    <body>
+        <div id="mocha"></div>
 
         <!-- include vue -->
         <script src="../vue.test.js"></script>
 
         <!-- include test utilities -->
-		<script src="utils/mocha.js"></script>
-		<script src="utils/chai.js"></script>
-		<script src="utils/classList.js"></script>
+        <script src="utils/mocha.js"></script>
+        <script src="utils/chai.js"></script>
+        <script src="utils/classList.js"></script>
         <script src="utils/prepare.js"></script>
 
         <!-- specs -->
-		<script src="specs/utils.js"></script>
-		<script src="specs/binding.js"></script>
-		<script src="specs/directive.js"></script>
-		<script src="specs/observer.js"></script>
-		<script src="specs/exp-parser.js"></script>
-		<script src="specs/text-parser.js"></script>
-		<script src="specs/deps-parser.js"></script>
-		<script src="specs/filters.js"></script>
-		<script src="specs/directives.js"></script>
-		<script src="specs/api.js"></script>
-		<script src="specs/viewmodel.js"></script>
+        <script src="specs/utils.js"></script>
+        <script src="specs/binding.js"></script>
+        <script src="specs/directive.js"></script>
+        <script src="specs/observer.js"></script>
+        <script src="specs/exp-parser.js"></script>
+        <script src="specs/text-parser.js"></script>
+        <script src="specs/deps-parser.js"></script>
+        <script src="specs/filters.js"></script>
+        <script src="specs/directives.js"></script>
+        <script src="specs/api.js"></script>
+        <script src="specs/viewmodel.js"></script>
         <script src="specs/transition.js"></script>
         <script src="specs/batcher.js"></script>
         <script src="specs/misc.js"></script>
 
-		<script>
-			onload = function () {
+        <script>
+            onload = function () {
                 var runner = mocha.run()
                 runner.on('end', function () {
                     window.mochaResults = runner.stats
                 })
             }
-		</script>
-	</body>
+        </script>
+    </body>
 </html>
