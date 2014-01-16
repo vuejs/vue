@@ -343,20 +343,24 @@ CompilerProto.compileNode = function (node) {
  *  Compile a text node
  */
 CompilerProto.compileTextNode = function (node) {
+
     var tokens = TextParser.parse(node.nodeValue)
     if (!tokens) return
-    var el, token, directive
+    var el, token, directive, partial, partialId, partialNodes
+
     for (var i = 0, l = tokens.length; i < l; i++) {
         token = tokens[i]
         if (token.key) { // a binding
             if (token.key.charAt(0) === '>') { // a partial
-                var partialId = token.key.slice(1).trim(),
-                    partial = this.getOption('partials', partialId)
+                partialId = token.key.slice(1).trim()
+                partial = this.getOption('partials', partialId)
                 if (partial) {
                     el = partial.cloneNode(true)
-                    this.compileNode(el)
+                    // save an Array reference of the partial's nodes
+                    // so we can compile them AFTER appending the fragment
+                    partialNodes = slice.call(el.childNodes)
                 }
-            } else { // a binding
+            } else { // a real binding
                 el = document.createTextNode('')
                 directive = Directive.parse('text', token.key, this, el)
                 if (directive) {
@@ -366,7 +370,20 @@ CompilerProto.compileTextNode = function (node) {
         } else { // a plain string
             el = document.createTextNode(token)
         }
+
+        // insert node
         node.parentNode.insertBefore(el, node)
+
+        // compile partial after appending, because its children's parentNode
+        // will change from the fragment to the correct parentNode.
+        // This could affect directives that need access to its element's parentNode.
+        if (partialNodes) {
+            for (var j = 0, k = partialNodes.length; j < k; j++) {
+                this.compile(partialNodes[j])
+            }
+            partialNodes = null
+        }
+
     }
     node.parentNode.removeChild(node)
 }

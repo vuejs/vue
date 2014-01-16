@@ -8,15 +8,20 @@
     <body>
 
         <div id="usa" v-partial="global"></div>
-        <div id="japan" v-partial="local"></div>
+        <div id="japan">{{> local}}</div>
+        <div id="repeat">{{> repeat}}</div>
 
         <script type="text/v-template" id="test">
             <p>{{hi}}!</p>
         </script>
 
+        <script type="text/v-template" id="repeat-template">
+            <p v-repeat="items">{{title}}</p>
+        </script>
+
         <script>
 
-            Vue.config({debug:true})
+           // Vue.config({debug:true})
 
             // direct usage
             var china  = new Vue({
@@ -48,10 +53,20 @@
             var japan = new Vue({
                 el: '#japan',
                 partials: {
-                    local: document.querySelector('#test').innerHTML
+                    local: '#test'
                 }
             })
             japan.hi = 'こんにちは'
+
+            var repeat = new Vue({
+                el: '#repeat',
+                partials: {
+                    repeat: '#repeat-template'
+                },
+                data: {
+                    items: [{ title: 'Repeat' }]
+                }
+            })
         </script>
     </body>
 </html>
