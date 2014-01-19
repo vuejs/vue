@@ -1,5 +1,5 @@
 /*
- VueJS v0.7.5
+ VueJS v0.7.6
  (c) 2014 Evan You
  License: MIT
 */
@@ -603,13 +603,10 @@ var config    = require('./config'),
     console   = window.console,
     ViewModel // late def
 
-// PhantomJS doesn't support rAF, yet it has the global
-// variable exposed. Use setTimeout so tests can work.
-var defer = navigator.userAgent.indexOf('PhantomJS') > -1
-    ? window.setTimeout
-    : (window.webkitRequestAnimationFrame ||
-        window.requestAnimationFrame ||
-        window.setTimeout)
+var defer =
+    window.requestAnimationFrame ||
+    window.webkitRequestAnimationFrame ||
+    window.setTimeout
 
 /**
  *  Create a prototype-less object
@@ -1145,20 +1142,24 @@ CompilerProto.compileNode = function (node) {
  *  Compile a text node
  */
 CompilerProto.compileTextNode = function (node) {
+
     var tokens = TextParser.parse(node.nodeValue)
     if (!tokens) return
-    var el, token, directive
+    var el, token, directive, partial, partialId, partialNodes
+
     for (var i = 0, l = tokens.length; i < l; i++) {
         token = tokens[i]
         if (token.key) { // a binding
             if (token.key.charAt(0) === '>') { // a partial
-                var partialId = token.key.slice(1).trim(),
-                    partial = this.getOption('partials', partialId)
+                partialId = token.key.slice(1).trim()
+                partial = this.getOption('partials', partialId)
                 if (partial) {
                     el = partial.cloneNode(true)
-                    this.compileNode(el)
+                    // save an Array reference of the partial's nodes
+                    // so we can compile them AFTER appending the fragment
+                    partialNodes = slice.call(el.childNodes)
                 }
-            } else { // a binding
+            } else { // a real binding
                 el = document.createTextNode('')
                 directive = Directive.parse('text', token.key, this, el)
                 if (directive) {
@@ -1168,7 +1169,20 @@ CompilerProto.compileTextNode = function (node) {
         } else { // a plain string
             el = document.createTextNode(token)
         }
+
+        // insert node
         node.parentNode.insertBefore(el, node)
+
+        // compile partial after appending, because its children's parentNode
+        // will change from the fragment to the correct parentNode.
+        // This could affect directives that need access to its element's parentNode.
+        if (partialNodes) {
+            for (var j = 0, k = partialNodes.length; j < k; j++) {
+                this.compile(partialNodes[j])
+            }
+            partialNodes = null
+        }
+
     }
     node.parentNode.removeChild(node)
 }
@@ -1332,9 +1346,7 @@ CompilerProto.markComputed = function (binding) {
         vm    = this.vm
     binding.isComputed = true
     // bind the accessors to the vm
-    if (binding.isFn) {
-        binding.value = utils.bind(value, vm)
-    } else {
+    if (!binding.isFn) {
         value.$get = utils.bind(value.$get, vm)
         if (value.$set) {
             value.$set = utils.bind(value.$set, vm)
@@ -3164,6 +3176,7 @@ module.exports = {
 
         var compiler = this.compiler,
             event    = this.arg,
+            isExp    = this.binding.isExp,
             ownerVM  = this.binding.compiler.vm
 
         if (compiler.repeat &&
@@ -3186,7 +3199,7 @@ module.exports = {
                 if (target) {
                     e.el = target
                     e.targetVM = target.vue_viewmodel
-                    handler.call(ownerVM, e)
+                    handler.call(isExp ? e.targetVM : ownerVM, e)
                 }
             }
             dHandler.event = event

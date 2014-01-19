@@ -28,7 +28,7 @@
                     <li
                         class="todo"
                         v-repeat="todos"
-                        v-if="todoFilter(completed)"
+                        v-if="filterTodo(this)"
                         v-class="
                             completed : completed,
                             editing   : this == editedTodo
@@ -39,10 +39,10 @@
                                 class="toggle"
                                 type="checkbox"
                                 v-model="completed"
-                                v-on="change:toggleTodo"
+                                v-on="change: toggleTodo(this)"
                             >
-                            <label v-text="title" v-on="dblclick:editTodo"></label>
-                            <button class="destroy" v-on="click:removeTodo"></button>
+                            <label v-text="title" v-on="dblclick: editTodo(this)"></label>
+                            <button class="destroy" v-on="click: removeTodo(this)"></button>
                         </div>
                         <input
                             class="edit"
@@ -50,9 +50,9 @@
                             v-model="title"
                             v-todo-focus="this == editedTodo"
                             v-on="
-                                blur  : doneEdit,
-                                keyup : doneEdit | key enter,
-                                keyup : cancelEdit | key esc
+                                blur  : doneEdit(this),
+                                keyup : doneEdit(this) | key enter,
+                                keyup : cancelEdit(this) | key esc
                             "
                         >
                     </li>
