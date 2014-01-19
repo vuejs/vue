@@ -2,8 +2,8 @@ language: node_js
 node_js:
 - '0.10'
 branches:
-  except:
-  - dev
+  only:
+  - master
 before_install:
 - npm install -g grunt-cli component phantomjs casperjs
 before_script:
