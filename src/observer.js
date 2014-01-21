@@ -310,5 +310,5 @@ module.exports = {
     ensurePath  : ensurePath,
     convert     : convert,
     copyPaths   : copyPaths,
-    watchArray  : watchArray,
+    watchArray  : watchArray
 }
