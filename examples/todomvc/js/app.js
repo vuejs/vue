@@ -1,7 +1,10 @@
 var app = new Vue({
 
+    // the root element that will be compiled
     el: '#todoapp',
 
+    // a custom directive to wait for the DOM to be updated
+    // before focusing on the input field.
     directives: {
         'todo-focus': function (value) {
             if (value) {
@@ -11,6 +14,8 @@ var app = new Vue({
         }
     },
 
+    // the `created` lifecycle hook.
+    // it will be called when the ViewModel instance is created.
     created: function () {
         this.filters = {
             all: function (todo) { todo.completed; return true },
@@ -26,8 +31,13 @@ var app = new Vue({
         }).length
     },
 
+    // data
     data: {
+
+        // fetch the saved todos from localStorage
         todos: todoStorage.fetch(),
+
+        // a computed property with custom getter/setter
         allDone: {
             $get: function () {
                 return this.remaining === 0
@@ -42,6 +52,8 @@ var app = new Vue({
         }
     },
 
+    // methods that implement data logic.
+    // note there's no DOM manipulation here at all!
     methods: {
 
         updateFilter: function () {
