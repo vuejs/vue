@@ -53,10 +53,12 @@ function getVariables (code) {
  *  final resolved vm.
  */
 function getRel (path, compiler) {
-    var rel = '',
-        vm  = compiler.vm,
-        dot = path.indexOf('.'),
-        key = dot > -1
+    var rel  = '',
+        has  = false,
+        nest = 0,
+        vm   = compiler.vm,
+        dot  = path.indexOf('.'),
+        key  = dot > -1
             ? path.slice(0, dot)
             : path
     while (true) {
@@ -64,21 +66,25 @@ function getRel (path, compiler) {
             hasOwn.call(vm.$data, key) ||
             hasOwn.call(vm, key)
         ) {
+            has = true
             break
         } else {
             if (vm.$parent) {
                 vm = vm.$parent
-                rel += '$parent.'
+                nest++
             } else {
                 break
             }
         }
     }
-    compiler = vm.$compiler
-    if (
-        !hasOwn.call(compiler.bindings, path) &&
-        path.charAt(0) !== '$'
-    ) {
+    if (has) {
+        while (nest--) {
+            rel += '$parent.'
+        }
+        if (!hasOwn.call(vm.$compiler.bindings, path) && path.charAt(0) !== '$') {
+            vm.$compiler.createBinding(path)
+        }
+    } else {
         compiler.createBinding(path)
     }
     return rel

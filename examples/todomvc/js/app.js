@@ -1,3 +1,5 @@
+'use strict'
+
 var app = new Vue({
 
     // the root element that will be compiled
@@ -14,9 +16,10 @@ var app = new Vue({
         }
     },
 
-    // the `created` lifecycle hook.
-    // it will be called when the ViewModel instance is created.
+    // the `created` lifecycle hook, which will be called
+    // when the ViewModel instance is created but not yet compiled.
     created: function () {
+        // setup filters
         this.filters = {
             all: function (todo) { todo.completed; return true },
             active: function (todo) { return !todo.completed },
@@ -26,17 +29,16 @@ var app = new Vue({
         window.addEventListener('hashchange', function () {
             app.updateFilter()
         })
-        this.remaining = this.todos.filter(function (todo) {
-            return !todo.completed
-        }).length
+        // initialize some state
+        this.newTodo = ''
+        this.editedTodo = null
+        this.remaining = this.todos.filter(this.filters.active).length
     },
 
     // data
     data: {
-
         // fetch the saved todos from localStorage
         todos: todoStorage.fetch(),
-
         // a computed property with custom getter/setter
         allDone: {
             $get: function () {

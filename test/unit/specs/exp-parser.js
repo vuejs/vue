@@ -75,15 +75,18 @@ describe('UNIT: Expression Parser', function () {
     function describeCase (testCase) {
         describe(testCase.exp, function () {
 
+            function createBinding (path) {
+                caughtMissingPaths.push(path)
+            }
+
             var caughtMissingPaths = [],
                 compilerMock = {
+                    createBinding: createBinding,
                     vm:{
                         $data: {},
                         $compiler:{
                             bindings:{},
-                            createBinding: function (path) {
-                                caughtMissingPaths.push(path)
-                            }
+                            createBinding: createBinding
                         }
                     }
                 },
@@ -118,6 +121,7 @@ describe('UNIT: Expression Parser', function () {
                 warned = true
             }
             ExpParser.parse('a + "fsef', {
+                createBinding: function () {},
                 vm: {
                     $compiler: {
                         bindings: {},

@@ -412,20 +412,24 @@ CompilerProto.bindDirective = function (directive) {
     if (directive.isExp) {
         // expression bindings are always created on current compiler
         binding = compiler.createBinding(key, true, directive.isFn)
-    } else if (
-        hasOwn.call(compiler.data, baseKey) ||
-        hasOwn.call(compiler.vm, baseKey)
-    ) {
-        // If the directive's compiler's VM has the base key,
-        // it belongs here. Create the binding if it's not created already.
-        binding = hasOwn.call(compiler.bindings, key)
-            ? compiler.bindings[key]
-            : compiler.createBinding(key)
     } else {
-        // due to prototypal inheritance of bindings, if a key doesn't exist
-        // on the bindings object, then it doesn't exist in the whole
-        // prototype chain. In this case we create the new binding at the root level.
-        binding = compiler.bindings[key] || compiler.rootCompiler.createBinding(key)
+        // recursively locate where to place the binding
+        while (compiler) {
+            if (
+                hasOwn.call(compiler.data, baseKey) ||
+                hasOwn.call(compiler.vm, baseKey)
+            ) {
+                // If a compiler has the base key, the directive should
+                // belong to it. Create the binding if it's not created already.
+                binding = hasOwn.call(compiler.bindings, key)
+                    ? compiler.bindings[key]
+                    : compiler.createBinding(key)
+                break
+            } else {
+                compiler = compiler.parentCompiler
+            }
+        }
+        if (!binding) binding = this.createBinding(key)
     }
 
     binding.instances.push(directive)
