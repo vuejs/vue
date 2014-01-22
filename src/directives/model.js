@@ -27,17 +27,15 @@ module.exports = {
                 ? 'value'
                 : 'innerHTML'
 
-        if (self.filters) {
-            var compositionLock = false
-            this.cLock = function () {
-                compositionLock = true
-            }
-            this.cUnlock = function () {
-                compositionLock = false
-            }
-            el.addEventListener('compositionstart', this.cLock)
-            el.addEventListener('compositionend', this.cUnlock)
+        var compositionLock = false
+        this.cLock = function () {
+            compositionLock = true
         }
+        this.cUnlock = function () {
+            compositionLock = false
+        }
+        el.addEventListener('compositionstart', this.cLock)
+        el.addEventListener('compositionend', this.cUnlock)
 
         // attach listener
         self.set = self.filters
@@ -63,6 +61,7 @@ module.exports = {
                 })
             }
             : function () {
+                if (compositionLock) return
                 // no filters, don't let it trigger update()
                 self.lock = true
                 self.vm.$set(self.key, el[attr])
@@ -120,10 +119,8 @@ module.exports = {
     unbind: function () {
         var el = this.el
         el.removeEventListener(this.event, this.set)
-        if (this.filters) {
-            el.removeEventListener('compositionstart', this.cLock)
-            el.removeEventListener('compositionend', this.cUnlock)
-        }
+        el.removeEventListener('compositionstart', this.cLock)
+        el.removeEventListener('compositionend', this.cUnlock)
         if (isIE9) {
             el.removeEventListener('cut', this.onCut)
             el.removeEventListener('keyup', this.onDel)
