@@ -3,7 +3,7 @@ var ViewModel
 module.exports = {
 
     bind: function () {
-        if (this.isSimple) {
+        if (this.isEmpty) {
             this.build()
         }
     },

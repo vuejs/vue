@@ -391,7 +391,7 @@ CompilerProto.bindDirective = function (directive) {
 
     // for a simple directive, simply call its bind() or _update()
     // and we're done.
-    if (directive.isSimple) {
+    if (directive.isEmpty) {
         if (directive.bind) directive.bind()
         return
     }
@@ -605,7 +605,7 @@ CompilerProto.destroy = function () {
         // if this directive is an instance of an external binding
         // e.g. a directive that refers to a variable on the parent VM
         // we need to remove it from that binding's instances
-        if (!dir.isSimple && dir.binding.compiler !== compiler) {
+        if (!dir.isEmpty && dir.binding.compiler !== compiler) {
             instances = dir.binding.instances
             if (instances) instances.splice(instances.indexOf(dir), 1)
         }

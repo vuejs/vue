@@ -27,11 +27,11 @@ function Directive (definition, expression, rawKey, compiler, node) {
     this.vm       = compiler.vm
     this.el       = node
 
-    var isSimple  = expression === ''
+    var isEmpty  = expression === ''
 
     // mix in properties from the directive definition
     if (typeof definition === 'function') {
-        this[isSimple ? 'bind' : '_update'] = definition
+        this[isEmpty ? 'bind' : '_update'] = definition
     } else {
         for (var prop in definition) {
             if (prop === 'unbind' || prop === 'update') {
@@ -43,8 +43,8 @@ function Directive (definition, expression, rawKey, compiler, node) {
     }
 
     // empty expression, we're done.
-    if (isSimple) {
-        this.isSimple = true
+    if (isEmpty) {
+        this.isEmpty = true
         return
     }
 

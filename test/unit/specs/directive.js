@@ -102,7 +102,7 @@ describe('UNIT: Directive', function () {
         it('should return a simple Directive if expression is empty', function () {
             var d = Directive.parse('text', '', compiler)
             assert.ok(d instanceof Directive)
-            assert.ok(d.isSimple)
+            assert.ok(d.isEmpty)
         })
 
         it('should return an instance of Directive if args are good', function () {
