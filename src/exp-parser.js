@@ -1,5 +1,4 @@
 var utils = require('./utils'),
-    hasOwn = Object.prototype.hasOwnProperty,
     stringSaveRE = /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/g,
     stringRestoreRE = /"(\d+)"/g
 
@@ -54,38 +53,25 @@ function getVariables (code) {
  */
 function getRel (path, compiler) {
     var rel  = '',
-        has  = false,
-        nest = 0,
-        vm   = compiler.vm,
-        dot  = path.indexOf('.'),
-        key  = dot > -1
-            ? path.slice(0, dot)
-            : path
-    while (true) {
-        if (
-            hasOwn.call(vm.$data, key) ||
-            hasOwn.call(vm, key)
-        ) {
-            has = true
+        dist = 0,
+        self = compiler
+    while (compiler) {
+        if (compiler.hasKey(path)) {
             break
         } else {
-            if (vm.$parent) {
-                vm = vm.$parent
-                nest++
-            } else {
-                break
-            }
+            compiler = compiler.parentCompiler
+            dist++
         }
     }
-    if (has) {
-        while (nest--) {
+    if (compiler) {
+        while (dist--) {
             rel += '$parent.'
         }
-        if (!hasOwn.call(vm.$compiler.bindings, path) && path.charAt(0) !== '$') {
-            vm.$compiler.createBinding(path)
+        if (!compiler.bindings[path] && path.charAt(0) !== '$') {
+            compiler.createBinding(path)
         }
     } else {
-        compiler.createBinding(path)
+        self.createBinding(path)
     }
     return rel
 }

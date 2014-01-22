@@ -82,6 +82,7 @@ describe('UNIT: Expression Parser', function () {
             var caughtMissingPaths = [],
                 compilerMock = {
                     createBinding: createBinding,
+                    hasKey: function () {},
                     vm:{
                         $data: {},
                         $compiler:{
@@ -120,12 +121,14 @@ describe('UNIT: Expression Parser', function () {
             utils.warn = function () {
                 warned = true
             }
+            function noop () {}
             ExpParser.parse('a + "fsef', {
-                createBinding: function () {},
+                createBinding: noop,
+                hasKey: noop,
                 vm: {
                     $compiler: {
                         bindings: {},
-                        createBinding: function () {}
+                        createBinding: noop
                     },
                     $data: {}
                 }

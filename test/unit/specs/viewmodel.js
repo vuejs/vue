@@ -371,8 +371,7 @@ describe('UNIT: ViewModel', function () {
             expUnbindCalled = false,
             bindingUnbindCalled = false,
             unobserveCalled = 0,
-            elRemoved = false,
-            externalBindingUnbindCalled = false
+            elRemoved = false
 
         var dirMock = {
             binding: {
@@ -385,26 +384,21 @@ describe('UNIT: ViewModel', function () {
         }
         dirMock.binding.instances.push(dirMock)
 
-        var bindingsMock = Object.create({
-            'test2': {
-                unbind: function () {
-                    externalBindingUnbindCalled = true
-                }
-            }
-        })
-        bindingsMock.test = {
-            root: true,
-            key: 'test',
-            value: {
-                __observer__: {
-                    off: function () {
-                        unobserveCalled++
-                        return this
+        var bindingsMock = {
+            test: {
+                root: true,
+                key: 'test',
+                value: {
+                    __observer__: {
+                        off: function () {
+                            unobserveCalled++
+                            return this
+                        }
                     }
+                },
+                unbind: function () {
+                    bindingUnbindCalled = true
                 }
-            },
-            unbind: function () {
-                bindingUnbindCalled = true
             }
         }
 
@@ -485,10 +479,6 @@ describe('UNIT: ViewModel', function () {
         it('should unbind and unobserve own bindings', function () {
             assert.ok(bindingUnbindCalled)
             assert.strictEqual(unobserveCalled, 3)
-        })
-
-        it('should not unbind external bindings', function () {
-            assert.notOk(externalBindingUnbindCalled)
         })
 
         it('should remove self from parentCompiler', function () {

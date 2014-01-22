@@ -44,30 +44,23 @@ function Compiler (vm, options) {
 
     // set compiler properties
     compiler.vm  = vm
+    compiler.bindings = makeHash()
     compiler.dirs = []
     compiler.exps = []
     compiler.computed = []
     compiler.childCompilers = []
     compiler.emitter = new Emitter()
 
-    // inherit parent bindings
-    var parent = compiler.parentCompiler
-    compiler.bindings = parent
-        ? Object.create(parent.bindings)
-        : makeHash()
-    compiler.rootCompiler = parent
-        ? getRoot(parent)
-        : compiler
-
     // set inenumerable VM properties
     def(vm, '$', makeHash())
     def(vm, '$el', el)
     def(vm, '$compiler', compiler)
-    def(vm, '$root', compiler.rootCompiler.vm)
+    def(vm, '$root', getRoot(compiler).vm)
 
     // set parent VM
     // and register child id on parent
-    var childId = utils.attr(el, 'component-id')
+    var parent = compiler.parentCompiler,
+        childId = utils.attr(el, 'component-id')
     if (parent) {
         parent.childCompilers.push(compiler)
         def(vm, '$parent', parent.vm)
@@ -204,7 +197,7 @@ CompilerProto.setupObserver = function () {
         })
 
     function check (key) {
-        if (!hasOwn.call(bindings, key)) {
+        if (!bindings[key]) {
             compiler.createBinding(key)
         }
     }
@@ -405,31 +398,23 @@ CompilerProto.bindDirective = function (directive) {
 
     // otherwise, we got more work to do...
     var binding,
-        compiler      = this,
-        key           = directive.key,
-        baseKey       = key.split('.')[0]
+        compiler = this,
+        key      = directive.key
 
     if (directive.isExp) {
         // expression bindings are always created on current compiler
         binding = compiler.createBinding(key, true, directive.isFn)
     } else {
-        // recursively locate where to place the binding
+        // recursively locate which compiler owns the binding
         while (compiler) {
-            if (
-                hasOwn.call(compiler.data, baseKey) ||
-                hasOwn.call(compiler.vm, baseKey)
-            ) {
-                // If a compiler has the base key, the directive should
-                // belong to it. Create the binding if it's not created already.
-                binding = hasOwn.call(compiler.bindings, key)
-                    ? compiler.bindings[key]
-                    : compiler.createBinding(key)
+            if (compiler.hasKey(key)) {
                 break
             } else {
                 compiler = compiler.parentCompiler
             }
         }
-        if (!binding) binding = this.createBinding(key)
+        compiler = compiler || this
+        binding = compiler.bindings[key] || compiler.createBinding(key)
     }
 
     binding.instances.push(directive)
@@ -484,7 +469,7 @@ CompilerProto.createBinding = function (key, isExp, isFn) {
             // ensure path in data so it can be observed
             Observer.ensurePath(compiler.data, key)
             var parentKey = key.slice(0, key.lastIndexOf('.'))
-            if (!hasOwn.call(bindings, parentKey)) {
+            if (!bindings[parentKey]) {
                 // this is a nested value binding, but the binding for its parent
                 // has not been created yet. We better create that one too.
                 compiler.createBinding(parentKey)
@@ -586,6 +571,15 @@ CompilerProto.execHook = function (id, alt) {
 }
 
 /**
+ *  Check if a compiler's data contains a keypath
+ */
+CompilerProto.hasKey = function (key) {
+    var baseKey = key.split('.')[0]
+    return hasOwn.call(this.data, baseKey) ||
+        hasOwn.call(this.vm, baseKey)
+}
+
+/**
  *  Unbind and remove element
  */
 CompilerProto.destroy = function () {
@@ -626,8 +620,8 @@ CompilerProto.destroy = function () {
 
     // unbind/unobserve all own bindings
     for (key in bindings) {
-        if (hasOwn.call(bindings, key)) {
-            binding = bindings[key]
+        binding = bindings[key]
+        if (binding) {
             if (binding.root) {
                 Observer.unobserve(binding.value, binding.key, compiler.observer)
             }
