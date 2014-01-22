@@ -149,11 +149,13 @@ DirProto.refresh = function (value) {
  *  Actually invoking the _update from the directive's definition
  */
 DirProto.apply = function (value) {
-    this._update(
-        this.filters
-            ? this.applyFilters(value)
-            : value
-    )
+    if (this._update) {
+        this._update(
+            this.filters
+                ? this.applyFilters(value)
+                : value
+        )
+    }
 }
 
 /**
