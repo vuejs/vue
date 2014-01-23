@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+
+<style>
+    #demo {
+        font-family: 'Helvetica', Arial, sans-serif;
+    }
+    a {
+        text-decoration: none;
+        color: #f66;
+    }
+    li {
+        line-height: 1.5em;
+        margin-bottom: 20px;
+    }
+    .author, .date {
+        font-weight: bold;
+    }
+</style>
+
+<ul id="demo">
+    <h1>Latest Vue.js Commits</h1>
+    <li v-repeat="commits">
+        <a href="{{html_url}}" target="_blank" class="commit">{{sha.slice(0, 7)}}</a>
+        - <span class="message">{{commit.message | truncate}}</span><br>
+        by <span class="author">{{commit.author.name}}</span>
+        at <span class="date">{{commit.author.date | formatDate}}</span>
+    </li>
+</ul>
+
+<script src="../../dist/vue.js"></script>
+<script>
+    var demo = new Vue({
+        el: '#demo',
+        filters: {
+            truncate: function (v) {
+                var newline = v.indexOf('\n')
+                return newline > 0 ? v.slice(0, newline) : v
+            },
+            formatDate: function (v) {
+                return v.replace(/T|Z/g, ' ')
+            }
+        },
+        created: function () {
+            var xhr = new XMLHttpRequest()
+            xhr.open('GET', 'https://api.github.com/repos/yyx990803/vue/commits?per_page=3')
+            xhr.onload = function () {
+                demo.commits = JSON.parse(xhr.responseText)
+            }
+            xhr.send()
+        }
+    })
+</script>
