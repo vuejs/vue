@@ -6,7 +6,7 @@ describe('UNIT: Dependency Parser', function () {
 
         // mock the bidnings...
         var bindings = [],
-            ob = DepsParser.observer
+            catcher = DepsParser.catcher
         for (var i = 0; i < 10; i++) {
             mockBinding(i)
         }
@@ -20,7 +20,7 @@ describe('UNIT: Dependency Parser', function () {
                 value: {
                     $get: function () {
                         if (i > 0) {
-                            ob.emit('get', bindings[b.depId])
+                            catcher.emit('get', bindings[b.depId])
                         }
                     }
                 }

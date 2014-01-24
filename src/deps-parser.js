@@ -1,6 +1,7 @@
 var Emitter  = require('./emitter'),
     utils    = require('./utils'),
-    observer = new Emitter()
+    Observer = require('./observer'),
+    catcher  = new Emitter()
 
 /**
  *  Auto-extract the dependencies of a computed property
@@ -10,7 +11,7 @@ function catchDeps (binding) {
     if (binding.isFn) return
     utils.log('\n- ' + binding.key)
     var got = utils.hash()
-    observer.on('get', function (dep) {
+    catcher.on('get', function (dep) {
         var has = got[dep.key]
         if (has && has.compiler === dep.compiler) return
         got[dep.key] = dep
@@ -19,7 +20,7 @@ function catchDeps (binding) {
         dep.subs.push(binding)
     })
     binding.value.$get()
-    observer.off('get')
+    catcher.off('get')
 }
 
 module.exports = {
@@ -27,16 +28,16 @@ module.exports = {
     /**
      *  the observer that catches events triggered by getters
      */
-    observer: observer,
+    catcher: catcher,
 
     /**
      *  parse a list of computed property bindings
      */
     parse: function (bindings) {
         utils.log('\nparsing dependencies...')
-        observer.active = true
+        Observer.shouldGet = true
         bindings.forEach(catchDeps)
-        observer.active = false
+        Observer.shouldGet = false
         utils.log('\ndone.')
     }
     

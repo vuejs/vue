@@ -1,7 +1,5 @@
 var endEvent   = sniffTransitionEndEvent(),
     config     = require('./config'),
-    enterClass = config.enterClass,
-    leaveClass = config.leaveClass,
     // exit codes for testing
     codes = {
         CSS_E     : 1,
@@ -80,27 +78,27 @@ function applyTransitionClass (el, stage, changeState) {
         }
 
         // set to hidden state before appending
-        classList.add(enterClass)
+        classList.add(config.enterClass)
         // append
         changeState()
         // force a layout so transition can be triggered
         /* jshint unused: false */
         var forceLayout = el.clientHeight
         // trigger transition
-        classList.remove(enterClass)
+        classList.remove(config.enterClass)
         return codes.CSS_E
 
     } else { // leave
 
         // trigger hide transition
-        classList.add(leaveClass)
+        classList.add(config.leaveClass)
         var onEnd = function (e) {
             if (e.target === el) {
                 el.removeEventListener(endEvent, onEnd)
                 el.vue_trans_cb = null
                 // actually remove node here
                 changeState()
-                classList.remove(leaveClass)
+                classList.remove(config.leaveClass)
             }
         }
         // attach transition end listener

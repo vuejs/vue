@@ -7,8 +7,7 @@ var Emitter     = require('./emitter'),
     TextParser  = require('./text-parser'),
     DepsParser  = require('./deps-parser'),
     ExpParser   = require('./exp-parser'),
-    // cache deps ob
-    depsOb      = DepsParser.observer,
+    
     // cache methods
     slice       = Array.prototype.slice,
     log         = utils.log,
@@ -183,7 +182,7 @@ CompilerProto.setupObserver = function () {
     observer
         .on('get', function (key) {
             check(key)
-            depsOb.emit('get', bindings[key])
+            DepsParser.catcher.emit('get', bindings[key])
         })
         .on('set', function (key, val) {
             observer.emit('change:' + key, val)

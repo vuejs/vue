@@ -2,7 +2,6 @@
 
 var Emitter  = require('./emitter'),
     utils    = require('./utils'),
-    depsOb   = require('./deps-parser').observer,
 
     // cache methods
     typeOf   = utils.typeOf,
@@ -143,7 +142,7 @@ function convert (obj, key) {
         get: function () {
             var value = values[key]
             // only emit get on tip values
-            if (depsOb.active && typeOf(value) !== OBJECT) {
+            if (pub.shouldGet && typeOf(value) !== OBJECT) {
                 observer.emit('get', key)
             }
             return value
@@ -304,7 +303,12 @@ function unobserve (obj, path, observer) {
     observer.proxies[path] = null
 }
 
-module.exports = {
+var pub = module.exports = {
+
+    // whether to emit get events
+    // only enabled during dependency parsing
+    shouldGet   : false,
+
     observe     : observe,
     unobserve   : unobserve,
     ensurePath  : ensurePath,

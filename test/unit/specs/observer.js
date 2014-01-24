@@ -1,8 +1,7 @@
 describe('UNIT: Observer', function () {
 
     var Observer = require('vue/src/observer'),
-        Emitter  = require('emitter'),
-        DepsOb   = require('vue/src/deps-parser').observer
+        Emitter  = require('emitter')
     
     describe('Observing Object', function () {
 
@@ -38,7 +37,7 @@ describe('UNIT: Observer', function () {
         }))
 
         it('should emit get events on tip values', function () {
-            DepsOb.active = true
+            Observer.shouldGet = true
             getTestFactory({
                 obj: { a: 1, b: { c: 2 } },
                 expects: [
@@ -47,7 +46,7 @@ describe('UNIT: Observer', function () {
                 ],
                 path: 'test'
             })()
-            DepsOb.active = false
+            Observer.shouldGet = false
         })
 
         it('should emit set when first observing', function () {
