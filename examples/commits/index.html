@@ -17,20 +17,39 @@
     }
 </style>
 
-<ul id="demo">
+<div id="demo">
     <h1>Latest Vue.js Commits</h1>
-    <li v-repeat="commits">
-        <a href="{{html_url}}" target="_blank" class="commit">{{sha.slice(0, 7)}}</a>
-        - <span class="message">{{commit.message | truncate}}</span><br>
-        by <span class="author">{{commit.author.name}}</span>
-        at <span class="date">{{commit.author.date | formatDate}}</span>
-    </li>
-</ul>
+    <input type="radio" id="master" name="branch" v-model="branch" value="master">
+    <label for="master">master</label>
+    <br>
+    <input type="radio" id="dev" name="branch" v-model="branch" value="dev">
+    <label for="dev">dev</label>
+    <ul>
+        <li v-repeat="commits">
+            <a href="{{html_url}}" target="_blank" class="commit">{{sha.slice(0, 7)}}</a>
+            - <span class="message">{{commit.message | truncate}}</span><br>
+            by <span class="author">{{commit.author.name}}</span>
+            at <span class="date">{{commit.author.date | formatDate}}</span>
+        </li>
+    </ul>
+</div>
 
 <script src="../../dist/vue.js"></script>
 <script>
     var demo = new Vue({
+
         el: '#demo',
+
+        data: {
+            branch: 'master'
+        },
+
+        created: function () {
+            this.$watch('branch', function () {
+                this.fetchData()
+            })
+        },
+
         filters: {
             truncate: function (v) {
                 var newline = v.indexOf('\n')
@@ -40,13 +59,17 @@
                 return v.replace(/T|Z/g, ' ')
             }
         },
-        created: function () {
-            var xhr = new XMLHttpRequest()
-            xhr.open('GET', 'https://api.github.com/repos/yyx990803/vue/commits?per_page=3')
-            xhr.onload = function () {
-                demo.commits = JSON.parse(xhr.responseText)
+
+        methods: {
+            fetchData: function () {
+                var xhr = new XMLHttpRequest(),
+                    self = this
+                xhr.open('GET', 'https://api.github.com/repos/yyx990803/vue/commits?per_page=3&sha=' + self.branch)
+                xhr.onload = function () {
+                    self.commits = JSON.parse(xhr.responseText)
+                }
+                xhr.send()
             }
-            xhr.send()
         }
     })
 </script>
