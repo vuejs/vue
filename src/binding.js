@@ -1,4 +1,5 @@
 var batcher = require('./batcher'),
+    utils = require('./utils'),
     id = 0
 
 /**
@@ -28,7 +29,9 @@ var BindingProto = Binding.prototype
  *  Update value and queue instance updates.
  */
 BindingProto.update = function (value) {
-    if (arguments.length) this.value = value
+    if (!this.isComputed || this.isFn) {
+        this.value = value
+    }
     batcher.queue(this)
 }
 

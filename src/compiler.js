@@ -500,18 +500,17 @@ CompilerProto.define = function (key, binding) {
     }
 
     Object.defineProperty(vm, key, {
-        enumerable: !binding.isComputed,
         get: binding.isComputed
             ? function () {
-                return compiler.data[key].$get()
+                return binding.value.$get()
             }
             : function () {
                 return compiler.data[key]
             },
         set: binding.isComputed
             ? function (val) {
-                if (compiler.data[key].$set) {
-                    compiler.data[key].$set(val)
+                if (binding.value.$set) {
+                    binding.value.$set(val)
                 }
             }
             : function (val) {
@@ -529,9 +528,11 @@ CompilerProto.markComputed = function (binding) {
     binding.isComputed = true
     // bind the accessors to the vm
     if (!binding.isFn) {
-        value.$get = utils.bind(value.$get, vm)
+        binding.value = {
+            $get: utils.bind(value.$get, vm)
+        }
         if (value.$set) {
-            value.$set = utils.bind(value.$set, vm)
+            binding.value.$set = utils.bind(value.$set, vm)
         }
     }
     // keep track for dep parsing later
