@@ -11,7 +11,6 @@ var prefix = 'v',
     ],
     config = module.exports = {
 
-        async       : true,
         debug       : false,
         silent      : false,
         enterClass  : 'v-enter',

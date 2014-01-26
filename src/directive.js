@@ -123,32 +123,6 @@ function parseFilter (filter, compiler) {
 DirProto.update = function (value, init) {
     if (!init && value === this.value) return
     this.value = value
-    this.apply(value)
-}
-
-/**
- *  -- computed property only --
- *  called when a dependency has changed
- */
-DirProto.refresh = function (value) {
-    // pass element and viewmodel info to the getter
-    // enables context-aware bindings
-    if (value) this.value = value
-
-    if (this.isFn) {
-        value = this.value
-    } else {
-        value = this.value.$get()
-        if (value !== undefined && value === this.computedValue) return
-        this.computedValue = value
-    }
-    this.apply(value)
-}
-
-/**
- *  Actually invoking the _update from the directive's definition
- */
-DirProto.apply = function (value) {
     if (this._update) {
         this._update(
             this.filters

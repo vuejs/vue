@@ -25,35 +25,33 @@ function Binding (compiler, key, isExp, isFn) {
 var BindingProto = Binding.prototype
 
 /**
- *  Process the value, then trigger updates on all dependents
+ *  Update value and queue instance updates.
  */
 BindingProto.update = function (value) {
-    this.value = value
-    batcher.queue(this, 'update')
+    if (arguments.length) this.value = value
+    batcher.queue(this)
 }
 
+/**
+ *  Actually update the instances.
+ */
 BindingProto._update = function () {
-    var i = this.instances.length
+    var i = this.instances.length,
+        value = this.eval()
     while (i--) {
-        this.instances[i].update(this.value)
+        this.instances[i].update(value)
     }
     this.pub()
 }
 
 /**
- *  -- computed property only --    
- *  Force all instances to re-evaluate themselves
+ *  Return the valuated value regardless
+ *  of whether it is computed or not
  */
-BindingProto.refresh = function () {
-    batcher.queue(this, 'refresh')
-}
-
-BindingProto._refresh = function () {
-    var i = this.instances.length
-    while (i--) {
-        this.instances[i].refresh()
-    }
-    this.pub()
+BindingProto.eval = function () {
+    return this.isComputed && !this.isFn
+        ? this.value.$get()
+        : this.value
 }
 
 /**
@@ -63,7 +61,7 @@ BindingProto._refresh = function () {
 BindingProto.pub = function () {
     var i = this.subs.length
     while (i--) {
-        this.subs[i].refresh()
+        this.subs[i].update()
     }
 }
 
