@@ -29,14 +29,16 @@
                     this.a = data
                 },
                 data: {
+                    hidden: {
+                        a: 1,
+                        b: 2
+                    }
+                },
+                computed: {
                     d: {
                         $get: function () {
                             return this.msg + (this.a.b.c || '') + (this.a.c || '')
                         }
-                    },
-                    hidden: {
-                        a: 1,
-                        b: 2
                     },
                     sum: {
                         $get: function () {

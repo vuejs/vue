@@ -37,9 +37,11 @@ var app = new Vue({
 
     // data
     data: {
-        // fetch the saved todos from localStorage
         todos: todoStorage.fetch(),
-        // a computed property with custom getter/setter
+    },
+
+    // computed property
+    computed: {
         allDone: {
             $get: function () {
                 return this.remaining === 0

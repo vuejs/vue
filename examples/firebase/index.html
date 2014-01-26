@@ -12,7 +12,7 @@
             <ul>
                 <li class="user" v-repeat="users" v-transition>
                     <span>{{name}} - {{email}}</span>
-                    <button v-on="click:removeUser">X</button>
+                    <button v-on="click:removeUser(this)">X</button>
                 </li>
             </ul>
             <form id="form" v-on="submit:addUser">

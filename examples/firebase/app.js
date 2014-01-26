@@ -29,7 +29,9 @@ var app = new Vue({
         validation: {
             name: false,
             email: false
-        },
+        }
+    },
+    computed: {
         isValid: {
             $get: function () {
                 var valid = true
@@ -45,13 +47,14 @@ var app = new Vue({
     methods: {
         addUser: function (e) {
             e.preventDefault()
+            console.log(this)
             if (this.isValid) {
                 Users.push(this.newUser)
                 this.newUser = {}
             }
         },
-        removeUser: function (e) {
-            new Firebase(baseURL + 'users/' + e.targetVM.id).remove()
+        removeUser: function (user) {
+            new Firebase(baseURL + 'users/' + user.id).remove()
         }
     }
 })

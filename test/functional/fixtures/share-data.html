@@ -41,7 +41,9 @@
             new Vue({
                 el: '#d',
                 data: {
-                    shared: shared,
+                    shared: shared
+                },
+                computed: {
                     source: {
                         $get: function () {
                             return JSON.stringify(this.shared)

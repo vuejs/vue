@@ -72,6 +72,14 @@ function Compiler (vm, options) {
     // setup observer
     compiler.setupObserver()
 
+    // create bindings for computed properties
+    var computed = options.computed
+    if (computed) {
+        for (var key in computed) {
+            compiler.createBinding(key)
+        }
+    }
+
     // beforeCompile hook
     compiler.execHook('beforeCompile', 'created')
 
@@ -482,21 +490,24 @@ CompilerProto.define = function (key, binding) {
     var compiler = this,
         data     = compiler.data,
         vm       = compiler.vm,
-        ob       = data.__observer__
+        comps    = compiler.options.computed,
+        ob       = data.__observer__,
+        value
 
-    if (!(key in data)) {
-        data[key] = undefined
-    }
-
-    // if the data object is already observed, but the key
-    // is not observed, we need to add it to the observed keys.
-    if (ob && !(key in ob.values)) {
-        Observer.convert(data, key)
-    }
-
-    var value = binding.value = data[key]
-    if (utils.typeOf(value) === 'Object' && value.$get) {
+    if (comps && comps[key]) {
+        // computed property
+        value = binding.value = comps[key]
         compiler.markComputed(binding)
+    } else {
+        if (!(key in data)) {
+            data[key] = undefined
+        }
+        // if the data object is already observed, but the key
+        // is not observed, we need to add it to the observed keys.
+        if (ob && !(key in ob.values)) {
+            Observer.convert(data, key)
+        }
+        value = binding.value = data[key]
     }
 
     Object.defineProperty(vm, key, {
