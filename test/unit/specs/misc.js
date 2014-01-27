@@ -42,6 +42,8 @@ describe('Misc Features', function () {
             var v = new Vue({
                 data: {
                     a: 1,
+                },
+                computed: {
                     test: {
                         $get: function () {
                             return this.a + b

@@ -67,32 +67,45 @@ describe('UNIT: Binding', function () {
             assert.ok(pubbed)
         })
 
+        it('should not set the value if it is computed unless a function', function () {
+            var b1 = new Binding(null, 'test'),
+                b2 = new Binding(null, 'test', false, true)
+            b1.isComputed = true
+            b2.isComputed = true
+            var ov = { $get: function () {} }
+            b1.value = ov
+            b2.value = function () {}
+            b1.update(1)
+            b2.update(1)
+            assert.strictEqual(b1.value, ov)
+            assert.strictEqual(b2.value, 1)
+        })
+
     })
 
-    describe('.refresh()', function () {
+    describe('.val()', function () {
+        
+        it('should return the raw value for non-computed and function bindings', function () {
+            var b1 = new Binding(null, 'test'),
+                b2 = new Binding(null, 'test', false, true)
+            b2.isComputed = true
+            b1.value = 1
+            b2.value = 2
+            assert.strictEqual(b1.val(), 1)
+            assert.strictEqual(b2.val(), 2)
+        })
 
-        var b = new Binding(null, 'test'),
-            refreshed = 0,
-            numInstances = 3,
-            instance = {
-                refresh: function () {
-                    refreshed++
+        it('should return computed value for computed bindings', function () {
+            var b = new Binding(null, 'test')
+            b.isComputed = true
+            b.value = {
+                $get: function () {
+                    return 3
                 }
             }
-        for (var i = 0; i < numInstances; i++) {
-            b.instances.push(instance)
-        }
-
-        before(function (done) {
-            b.refresh()
-            nextTick(function () {
-                done()
-            })
+            assert.strictEqual(b.val(), 3)
         })
 
-        it('should call refresh() of all instances', function () {
-            assert.strictEqual(refreshed, numInstances)
-        })
     })
 
     describe('.pub()', function () {
@@ -101,7 +114,7 @@ describe('UNIT: Binding', function () {
             refreshed = 0,
             numSubs = 3,
             sub = {
-                refresh: function () {
+                update: function () {
                     refreshed++
                 }
             }
@@ -110,7 +123,7 @@ describe('UNIT: Binding', function () {
         }
         b.pub()
 
-        it('should call refresh() of all subscribers', function () {
+        it('should call update() of all subscribers', function () {
             assert.strictEqual(refreshed, numSubs)
         })
 

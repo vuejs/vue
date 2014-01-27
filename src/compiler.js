@@ -433,7 +433,7 @@ CompilerProto.bindDirective = function (directive) {
     }
 
     // set initial value
-    directive.update(binding.eval(), true)
+    directive.update(binding.val(), true)
 }
 
 /**

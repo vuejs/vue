@@ -1,5 +1,4 @@
 var batcher = require('./batcher'),
-    utils = require('./utils'),
     id = 0
 
 /**
@@ -40,7 +39,7 @@ BindingProto.update = function (value) {
  */
 BindingProto._update = function () {
     var i = this.instances.length,
-        value = this.eval()
+        value = this.val()
     while (i--) {
         this.instances[i].update(value)
     }
@@ -51,7 +50,7 @@ BindingProto._update = function () {
  *  Return the valuated value regardless
  *  of whether it is computed or not
  */
-BindingProto.eval = function () {
+BindingProto.val = function () {
     return this.isComputed && !this.isFn
         ? this.value.$get()
         : this.value

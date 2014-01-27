@@ -20,8 +20,8 @@ describe('Batcher', function () {
         updateCount = 0
         var b1 = mockBinding(1),
             b2 = mockBinding(2)
-        batcher.queue(b1, 'update')
-        batcher.queue(b2, 'update')
+        batcher.queue(b1)
+        batcher.queue(b2)
         assert.strictEqual(updateCount, 0)
         assert.notOk(b1.updated)
         assert.notOk(b2.updated)
@@ -40,8 +40,8 @@ describe('Batcher', function () {
         updateCount = 0
         var b1 = mockBinding(1),
             b2 = mockBinding(1)
-        batcher.queue(b1, 'update')
-        batcher.queue(b2, 'update')
+        batcher.queue(b1)
+        batcher.queue(b2)
 
         nextTick(function () {
             assert.strictEqual(updateCount, 1)
@@ -57,9 +57,9 @@ describe('Batcher', function () {
         updateCount = 0
         var b1 = mockBinding(1),
             b2 = mockBinding(2, function () {
-                batcher.queue(b1, 'update')
+                batcher.queue(b1)
             })
-        batcher.queue(b2, 'update')
+        batcher.queue(b2)
 
         nextTick(function () {
             assert.strictEqual(updateCount, 2)

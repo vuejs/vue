@@ -236,88 +236,40 @@ describe('UNIT: Directive', function () {
 
     })
 
-    describe('.apply()', function () {
-
-        var test,
-            applyTest = function (val) { test = val }
-        directives.applyTest = applyTest
-
-        it('should invole the _update function', function () {
-            var d = Directive.parse('applyTest', 'abc', compiler)
-            d.apply(12345)
-            assert.strictEqual(test, 12345)
-        })
-        
-        it('should apply the filter if there is any', function () {
-            var d = Directive.parse('applyTest', 'abc | currency £', compiler)
-            d.apply(12345)
-            assert.strictEqual(test, '£12,345.00')
-        })
-
-    })
-
     describe('.update()', function () {
         
         var d = Directive.parse('text', 'abc', compiler),
-            applied = false
-        d.apply = function () {
-            applied = true
+            updated = false
+        d._update = function () {
+            updated = true
         }
 
-        it('should apply() for first time update, even with undefined', function () {
+        it('should call _update() for first time update, even with undefined', function () {
             d.update(undefined, true)
-            assert.strictEqual(applied, true)
+            assert.strictEqual(updated, true)
         })
 
-        it('should apply() when a different value is given', function () {
-            applied = false
+        it('should _update() when a different value is given', function () {
+            updated = false
             d.update(123)
             assert.strictEqual(d.value, 123)
-            assert.strictEqual(applied, true)
+            assert.strictEqual(updated, true)
         })
 
-        it('should not apply() if the value is the same', function () {
-            applied = false
+        it('should not _update() if the value is the same', function () {
+            updated = false
             d.update(123)
-            assert.ok(!applied)
+            assert.ok(!updated)
         })
 
-    })
-
-    describe('.refresh()', function () {
-        
-        var d = Directive.parse('text', 'abc', compiler),
-            applied = false,
-            el = 1, vm = 2,
-            value = {
-                $get: function () {
-                    return el + vm
-                }
+        it('should call applyFilter() is there are filters', function () {
+            var filterApplied = false
+            d.filters = []
+            d.applyFilters = function () {
+                filterApplied = true
             }
-        d.el = el
-        d.vm = vm
-        d.apply = function () {
-            applied = true
-        }
-
-        d.refresh(value)
-
-        it('should set the value if value arg is given', function () {
-            assert.strictEqual(d.value, value)
-        })
-
-        it('should get its el&vm context and get correct computedValue', function () {
-            assert.strictEqual(d.computedValue, el + vm)
-        })
-
-        it('should call apply()', function () {
-            assert.ok(applied)
-        })
-
-        it('should not call apply() if computedValue is the same', function () {
-            applied = false
-            d.refresh()
-            assert.ok(!applied)
+            d.update(234)
+            assert.ok(filterApplied)
         })
 
     })
