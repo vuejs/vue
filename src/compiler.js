@@ -441,30 +441,27 @@ CompilerProto.bindDirective = function (directive) {
  */
 CompilerProto.createBinding = function (key, isExp, isFn) {
 
+    log('  created binding: ' + key)
+
     var compiler = this,
         bindings = compiler.bindings,
+        computed = compiler.options.computed,
         binding  = new Binding(compiler, key, isExp, isFn)
 
     if (isExp) {
-        // a complex expression binding
-        // we need to generate an anonymous computed property for it
-        var getter = ExpParser.parse(key, compiler)
-        if (getter) {
-            log('  created expression binding: ' + key)
-            binding.value = isFn
-                ? getter
-                : { $get: getter }
-            compiler.markComputed(binding)
-            compiler.exps.push(binding)
-        }
+        // expression bindings are anonymous
+        compiler.defineExp(key, binding)
     } else {
-        log('  created binding: ' + key)
         bindings[key] = binding
-        // make sure the key exists in the object so it can be observed
-        // by the Observer!
         if (binding.root) {
             // this is a root level binding. we need to define getter/setters for it.
-            compiler.define(key, binding)
+            if (computed && computed[key]) {
+                // computed property
+                compiler.defineComputed(key, binding, computed[key])
+            } else {
+                // normal property
+                compiler.defineProp(key, binding)
+            }
         } else {
             // ensure path in data so it can be observed
             Observer.ensurePath(compiler.data, key)
@@ -480,70 +477,82 @@ CompilerProto.createBinding = function (key, isExp, isFn) {
 }
 
 /**
- *  Defines the getter/setter for a root-level binding on the VM
+ *  Define the getter/setter for a root-level property on the VM
  *  and observe the initial value
  */
-CompilerProto.define = function (key, binding) {
-
-    log('    defined root binding: ' + key)
-
+CompilerProto.defineProp = function (key, binding) {
+    
     var compiler = this,
         data     = compiler.data,
-        vm       = compiler.vm,
-        comps    = compiler.options.computed,
-        ob       = data.__observer__,
-        value
+        ob       = data.__observer__
 
-    if (comps && comps[key]) {
-        // computed property
-        value = binding.value = comps[key]
-        compiler.markComputed(binding)
-    } else {
-        if (!(key in data)) {
-            data[key] = undefined
-        }
-        // if the data object is already observed, but the key
-        // is not observed, we need to add it to the observed keys.
-        if (ob && !(key in ob.values)) {
-            Observer.convert(data, key)
-        }
-        value = binding.value = data[key]
+    // make sure the key is present in data
+    // so it can be observed
+    if (!(key in data)) {
+        data[key] = undefined
     }
 
-    Object.defineProperty(vm, key, {
-        get: binding.isComputed
-            ? function () {
-                return binding.value.$get()
-            }
-            : function () {
-                return compiler.data[key]
-            },
-        set: binding.isComputed
-            ? function (val) {
-                if (binding.value.$set) {
-                    binding.value.$set(val)
-                }
-            }
-            : function (val) {
-                compiler.data[key] = val
-            }
+    // if the data object is already observed, but the key
+    // is not observed, we need to add it to the observed keys.
+    if (ob && !(key in ob.values)) {
+        Observer.convert(data, key)
+    }
+
+    binding.value = data[key]
+
+    Object.defineProperty(compiler.vm, key, {
+        get: function () {
+            return compiler.data[key]
+        },
+        set: function (val) {
+            compiler.data[key] = val
+        }
     })
 }
 
 /**
- *  Process a computed property binding
+ *  Define an expression binding, which is essentially
+ *  an anonymous computed property
  */
-CompilerProto.markComputed = function (binding) {
-    var value = binding.value,
-        vm    = this.vm
+CompilerProto.defineExp = function (key, binding) {
+    var getter = ExpParser.parse(key, this)
+    if (getter) {
+        var value = binding.isFn
+            ? getter
+            : { $get: getter }
+        this.markComputed(binding, value)
+        this.exps.push(binding)
+    }
+}
+
+/**
+ *  Define a computed property on the VM
+ */
+CompilerProto.defineComputed = function (key, binding, value) {
+    this.markComputed(binding, value)
+    var def = {
+        get: binding.value.$get
+    }
+    if (binding.value.$set) {
+        def.set = binding.value.$set
+    }
+    Object.defineProperty(this.vm, key, def)
+}
+
+/**
+ *  Process a computed property binding
+ *  so its getter/setter are bound to proper context
+ */
+CompilerProto.markComputed = function (binding, value) {
+    binding.value = value
     binding.isComputed = true
     // bind the accessors to the vm
     if (!binding.isFn) {
         binding.value = {
-            $get: utils.bind(value.$get, vm)
+            $get: utils.bind(value.$get, this.vm)
         }
         if (value.$set) {
-            binding.value.$set = utils.bind(value.$set, vm)
+            binding.value.$set = utils.bind(value.$set, this.vm)
         }
     }
     // keep track for dep parsing later
