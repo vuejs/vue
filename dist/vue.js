@@ -1,5 +1,5 @@
 /*
- VueJS v0.7.6
+ VueJS v0.8.0
  (c) 2014 Evan You
  License: MIT
 */
@@ -570,7 +570,6 @@ var prefix = 'v',
     ],
     config = module.exports = {
 
-        async       : true,
         debug       : false,
         silent      : false,
         enterClass  : 'v-enter',
@@ -806,8 +805,7 @@ var Emitter     = require('./emitter'),
     TextParser  = require('./text-parser'),
     DepsParser  = require('./deps-parser'),
     ExpParser   = require('./exp-parser'),
-    // cache deps ob
-    depsOb      = DepsParser.observer,
+    
     // cache methods
     slice       = Array.prototype.slice,
     log         = utils.log,
@@ -843,30 +841,23 @@ function Compiler (vm, options) {
 
     // set compiler properties
     compiler.vm  = vm
+    compiler.bindings = makeHash()
     compiler.dirs = []
     compiler.exps = []
     compiler.computed = []
     compiler.childCompilers = []
     compiler.emitter = new Emitter()
 
-    // inherit parent bindings
-    var parent = compiler.parentCompiler
-    compiler.bindings = parent
-        ? Object.create(parent.bindings)
-        : makeHash()
-    compiler.rootCompiler = parent
-        ? getRoot(parent)
-        : compiler
-
     // set inenumerable VM properties
     def(vm, '$', makeHash())
     def(vm, '$el', el)
     def(vm, '$compiler', compiler)
-    def(vm, '$root', compiler.rootCompiler.vm)
+    def(vm, '$root', getRoot(compiler).vm)
 
     // set parent VM
     // and register child id on parent
-    var childId = utils.attr(el, 'component-id')
+    var parent = compiler.parentCompiler,
+        childId = utils.attr(el, 'component-id')
     if (parent) {
         parent.childCompilers.push(compiler)
         def(vm, '$parent', parent.vm)
@@ -878,6 +869,14 @@ function Compiler (vm, options) {
 
     // setup observer
     compiler.setupObserver()
+
+    // create bindings for computed properties
+    var computed = options.computed
+    if (computed) {
+        for (var key in computed) {
+            compiler.createBinding(key)
+        }
+    }
 
     // beforeCompile hook
     compiler.execHook('beforeCompile', 'created')
@@ -989,7 +988,7 @@ CompilerProto.setupObserver = function () {
     observer
         .on('get', function (key) {
             check(key)
-            depsOb.emit('get', bindings[key])
+            DepsParser.catcher.emit('get', bindings[key])
         })
         .on('set', function (key, val) {
             observer.emit('change:' + key, val)
@@ -1003,7 +1002,7 @@ CompilerProto.setupObserver = function () {
         })
 
     function check (key) {
-        if (!hasOwn.call(bindings, key)) {
+        if (!bindings[key]) {
             compiler.createBinding(key)
         }
     }
@@ -1197,34 +1196,30 @@ CompilerProto.bindDirective = function (directive) {
 
     // for a simple directive, simply call its bind() or _update()
     // and we're done.
-    if (directive.isSimple) {
+    if (directive.isEmpty) {
         if (directive.bind) directive.bind()
         return
     }
 
     // otherwise, we got more work to do...
     var binding,
-        compiler      = this,
-        key           = directive.key,
-        baseKey       = key.split('.')[0]
+        compiler = this,
+        key      = directive.key
 
     if (directive.isExp) {
         // expression bindings are always created on current compiler
         binding = compiler.createBinding(key, true, directive.isFn)
-    } else if (
-        hasOwn.call(compiler.data, baseKey) ||
-        hasOwn.call(compiler.vm, baseKey)
-    ) {
-        // If the directive's compiler's VM has the base key,
-        // it belongs here. Create the binding if it's not created already.
-        binding = hasOwn.call(compiler.bindings, key)
-            ? compiler.bindings[key]
-            : compiler.createBinding(key)
     } else {
-        // due to prototypal inheritance of bindings, if a key doesn't exist
-        // on the bindings object, then it doesn't exist in the whole
-        // prototype chain. In this case we create the new binding at the root level.
-        binding = compiler.bindings[key] || compiler.rootCompiler.createBinding(key)
+        // recursively locate which compiler owns the binding
+        while (compiler) {
+            if (compiler.hasKey(key)) {
+                break
+            } else {
+                compiler = compiler.parentCompiler
+            }
+        }
+        compiler = compiler || this
+        binding = compiler.bindings[key] || compiler.createBinding(key)
     }
 
     binding.instances.push(directive)
@@ -1236,14 +1231,7 @@ CompilerProto.bindDirective = function (directive) {
     }
 
     // set initial value
-    var value = binding.value
-    if (value !== undefined) {
-        if (binding.isComputed) {
-            directive.refresh(value)
-        } else {
-            directive.update(value, true)
-        }
-    }
+    directive.update(binding.val(), true)
 }
 
 /**
@@ -1251,35 +1239,32 @@ CompilerProto.bindDirective = function (directive) {
  */
 CompilerProto.createBinding = function (key, isExp, isFn) {
 
+    log('  created binding: ' + key)
+
     var compiler = this,
         bindings = compiler.bindings,
+        computed = compiler.options.computed,
         binding  = new Binding(compiler, key, isExp, isFn)
 
     if (isExp) {
-        // a complex expression binding
-        // we need to generate an anonymous computed property for it
-        var getter = ExpParser.parse(key, compiler)
-        if (getter) {
-            log('  created expression binding: ' + key)
-            binding.value = isFn
-                ? getter
-                : { $get: getter }
-            compiler.markComputed(binding)
-            compiler.exps.push(binding)
-        }
+        // expression bindings are anonymous
+        compiler.defineExp(key, binding)
     } else {
-        log('  created binding: ' + key)
         bindings[key] = binding
-        // make sure the key exists in the object so it can be observed
-        // by the Observer!
         if (binding.root) {
             // this is a root level binding. we need to define getter/setters for it.
-            compiler.define(key, binding)
+            if (computed && computed[key]) {
+                // computed property
+                compiler.defineComputed(key, binding, computed[key])
+            } else {
+                // normal property
+                compiler.defineProp(key, binding)
+            }
         } else {
             // ensure path in data so it can be observed
             Observer.ensurePath(compiler.data, key)
             var parentKey = key.slice(0, key.lastIndexOf('.'))
-            if (!hasOwn.call(bindings, parentKey)) {
+            if (!bindings[parentKey]) {
                 // this is a nested value binding, but the binding for its parent
                 // has not been created yet. We better create that one too.
                 compiler.createBinding(parentKey)
@@ -1290,18 +1275,17 @@ CompilerProto.createBinding = function (key, isExp, isFn) {
 }
 
 /**
- *  Defines the getter/setter for a root-level binding on the VM
+ *  Define the getter/setter for a root-level property on the VM
  *  and observe the initial value
  */
-CompilerProto.define = function (key, binding) {
-
-    log('    defined root binding: ' + key)
-
+CompilerProto.defineProp = function (key, binding) {
+    
     var compiler = this,
         data     = compiler.data,
-        vm       = compiler.vm,
         ob       = data.__observer__
 
+    // make sure the key is present in data
+    // so it can be observed
     if (!(key in data)) {
         data[key] = undefined
     }
@@ -1312,44 +1296,61 @@ CompilerProto.define = function (key, binding) {
         Observer.convert(data, key)
     }
 
-    var value = binding.value = data[key]
-    if (utils.typeOf(value) === 'Object' && value.$get) {
-        compiler.markComputed(binding)
-    }
+    binding.value = data[key]
 
-    Object.defineProperty(vm, key, {
-        enumerable: !binding.isComputed,
-        get: binding.isComputed
-            ? function () {
-                return compiler.data[key].$get()
-            }
-            : function () {
-                return compiler.data[key]
-            },
-        set: binding.isComputed
-            ? function (val) {
-                if (compiler.data[key].$set) {
-                    compiler.data[key].$set(val)
-                }
-            }
-            : function (val) {
-                compiler.data[key] = val
-            }
+    Object.defineProperty(compiler.vm, key, {
+        get: function () {
+            return compiler.data[key]
+        },
+        set: function (val) {
+            compiler.data[key] = val
+        }
     })
 }
 
 /**
- *  Process a computed property binding
+ *  Define an expression binding, which is essentially
+ *  an anonymous computed property
  */
-CompilerProto.markComputed = function (binding) {
-    var value = binding.value,
-        vm    = this.vm
+CompilerProto.defineExp = function (key, binding) {
+    var getter = ExpParser.parse(key, this)
+    if (getter) {
+        var value = binding.isFn
+            ? getter
+            : { $get: getter }
+        this.markComputed(binding, value)
+        this.exps.push(binding)
+    }
+}
+
+/**
+ *  Define a computed property on the VM
+ */
+CompilerProto.defineComputed = function (key, binding, value) {
+    this.markComputed(binding, value)
+    var def = {
+        get: binding.value.$get
+    }
+    if (binding.value.$set) {
+        def.set = binding.value.$set
+    }
+    Object.defineProperty(this.vm, key, def)
+}
+
+/**
+ *  Process a computed property binding
+ *  so its getter/setter are bound to proper context
+ */
+CompilerProto.markComputed = function (binding, value) {
+    binding.value = value
     binding.isComputed = true
     // bind the accessors to the vm
     if (!binding.isFn) {
-        value.$get = utils.bind(value.$get, vm)
+        binding.value = {
+            $get: utils.bind(value.$get, this.vm)
+        }
         if (value.$set) {
-            value.$set = utils.bind(value.$set, vm)
+            binding.value.$set = utils.bind(value.$set, this.vm)
         }
     }
     // keep track for dep parsing later
@@ -1381,6 +1382,15 @@ CompilerProto.execHook = function (id, alt) {
 }
 
 /**
+ *  Check if a compiler's data contains a keypath
+ */
+CompilerProto.hasKey = function (key) {
+    var baseKey = key.split('.')[0]
+    return hasOwn.call(this.data, baseKey) ||
+        hasOwn.call(this.vm, baseKey)
+}
+
+/**
  *  Unbind and remove element
  */
 CompilerProto.destroy = function () {
@@ -1406,7 +1416,7 @@ CompilerProto.destroy = function () {
         // if this directive is an instance of an external binding
         // e.g. a directive that refers to a variable on the parent VM
         // we need to remove it from that binding's instances
-        if (!dir.isSimple && dir.binding.compiler !== compiler) {
+        if (!dir.isEmpty && dir.binding.compiler !== compiler) {
             instances = dir.binding.instances
             if (instances) instances.splice(instances.indexOf(dir), 1)
         }
@@ -1421,8 +1431,8 @@ CompilerProto.destroy = function () {
 
     // unbind/unobserve all own bindings
     for (key in bindings) {
-        if (hasOwn.call(bindings, key)) {
-            binding = bindings[key]
+        binding = bindings[key]
+        if (binding) {
             if (binding.root) {
                 Observer.unobserve(binding.value, binding.key, compiler.observer)
             }
@@ -1668,35 +1678,35 @@ function Binding (compiler, key, isExp, isFn) {
 var BindingProto = Binding.prototype
 
 /**
- *  Process the value, then trigger updates on all dependents
+ *  Update value and queue instance updates.
  */
 BindingProto.update = function (value) {
-    this.value = value
-    batcher.queue(this, 'update')
+    if (!this.isComputed || this.isFn) {
+        this.value = value
+    }
+    batcher.queue(this)
 }
 
+/**
+ *  Actually update the instances.
+ */
 BindingProto._update = function () {
-    var i = this.instances.length
+    var i = this.instances.length,
+        value = this.val()
     while (i--) {
-        this.instances[i].update(this.value)
+        this.instances[i].update(value)
     }
     this.pub()
 }
 
 /**
- *  -- computed property only --    
- *  Force all instances to re-evaluate themselves
+ *  Return the valuated value regardless
+ *  of whether it is computed or not
  */
-BindingProto.refresh = function () {
-    batcher.queue(this, 'refresh')
-}
-
-BindingProto._refresh = function () {
-    var i = this.instances.length
-    while (i--) {
-        this.instances[i].refresh()
-    }
-    this.pub()
+BindingProto.val = function () {
+    return this.isComputed && !this.isFn
+        ? this.value.$get()
+        : this.value
 }
 
 /**
@@ -1706,7 +1716,7 @@ BindingProto._refresh = function () {
 BindingProto.pub = function () {
     var i = this.subs.length
     while (i--) {
-        this.subs[i].refresh()
+        this.subs[i].update()
     }
 }
 
@@ -1738,7 +1748,6 @@ require.register("vue/src/observer.js", function(exports, require, module){
 
 var Emitter  = require('./emitter'),
     utils    = require('./utils'),
-    depsOb   = require('./deps-parser').observer,
 
     // cache methods
     typeOf   = utils.typeOf,
@@ -1879,7 +1888,7 @@ function convert (obj, key) {
         get: function () {
             var value = values[key]
             // only emit get on tip values
-            if (depsOb.active && typeOf(value) !== OBJECT) {
+            if (pub.shouldGet && typeOf(value) !== OBJECT) {
                 observer.emit('get', key)
             }
             return value
@@ -2040,13 +2049,18 @@ function unobserve (obj, path, observer) {
     observer.proxies[path] = null
 }
 
-module.exports = {
+var pub = module.exports = {
+
+    // whether to emit get events
+    // only enabled during dependency parsing
+    shouldGet   : false,
+
     observe     : observe,
     unobserve   : unobserve,
     ensurePath  : ensurePath,
     convert     : convert,
     copyPaths   : copyPaths,
-    watchArray  : watchArray,
+    watchArray  : watchArray
 }
 });
 require.register("vue/src/directive.js", function(exports, require, module){
@@ -2079,11 +2093,11 @@ function Directive (definition, expression, rawKey, compiler, node) {
     this.vm       = compiler.vm
     this.el       = node
 
-    var isSimple  = expression === ''
+    var isEmpty  = expression === ''
 
     // mix in properties from the directive definition
     if (typeof definition === 'function') {
-        this[isSimple ? 'bind' : '_update'] = definition
+        this[isEmpty ? 'bind' : '_update'] = definition
     } else {
         for (var prop in definition) {
             if (prop === 'unbind' || prop === 'update') {
@@ -2095,8 +2109,8 @@ function Directive (definition, expression, rawKey, compiler, node) {
     }
 
     // empty expression, we're done.
-    if (isSimple) {
-        this.isSimple = true
+    if (isEmpty) {
+        this.isEmpty = true
         return
     }
 
@@ -2175,37 +2189,13 @@ function parseFilter (filter, compiler) {
 DirProto.update = function (value, init) {
     if (!init && value === this.value) return
     this.value = value
-    this.apply(value)
-}
-
-/**
- *  -- computed property only --
- *  called when a dependency has changed
- */
-DirProto.refresh = function (value) {
-    // pass element and viewmodel info to the getter
-    // enables context-aware bindings
-    if (value) this.value = value
-
-    if (this.isFn) {
-        value = this.value
-    } else {
-        value = this.value.$get()
-        if (value !== undefined && value === this.computedValue) return
-        this.computedValue = value
+    if (this._update) {
+        this._update(
+            this.filters
+                ? this.applyFilters(value)
+                : value
+        )
     }
-    this.apply(value)
-}
-
-/**
- *  Actually invoking the _update from the directive's definition
- */
-DirProto.apply = function (value) {
-    this._update(
-        this.filters
-            ? this.applyFilters(value)
-            : value
-    )
 }
 
 /**
@@ -2275,7 +2265,6 @@ module.exports = Directive
 });
 require.register("vue/src/exp-parser.js", function(exports, require, module){
 var utils = require('./utils'),
-    hasOwn = Object.prototype.hasOwnProperty,
     stringSaveRE = /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/g,
     stringRestoreRE = /"(\d+)"/g
 
@@ -2329,33 +2318,26 @@ function getVariables (code) {
  *  final resolved vm.
  */
 function getRel (path, compiler) {
-    var rel = '',
-        vm  = compiler.vm,
-        dot = path.indexOf('.'),
-        key = dot > -1
-            ? path.slice(0, dot)
-            : path
-    while (true) {
-        if (
-            hasOwn.call(vm.$data, key) ||
-            hasOwn.call(vm, key)
-        ) {
+    var rel  = '',
+        dist = 0,
+        self = compiler
+    while (compiler) {
+        if (compiler.hasKey(path)) {
             break
         } else {
-            if (vm.$parent) {
-                vm = vm.$parent
-                rel += '$parent.'
-            } else {
-                break
-            }
+            compiler = compiler.parentCompiler
+            dist++
         }
     }
-    compiler = vm.$compiler
-    if (
-        !hasOwn.call(compiler.bindings, path) &&
-        path.charAt(0) !== '$'
-    ) {
-        compiler.createBinding(path)
+    if (compiler) {
+        while (dist--) {
+            rel += '$parent.'
+        }
+        if (!compiler.bindings[path] && path.charAt(0) !== '$') {
+            compiler.createBinding(path)
+        }
+    } else {
+        self.createBinding(path)
     }
     return rel
 }
@@ -2484,7 +2466,8 @@ exports.parseAttr = parseAttr
 require.register("vue/src/deps-parser.js", function(exports, require, module){
 var Emitter  = require('./emitter'),
     utils    = require('./utils'),
-    observer = new Emitter()
+    Observer = require('./observer'),
+    catcher  = new Emitter()
 
 /**
  *  Auto-extract the dependencies of a computed property
@@ -2494,7 +2477,7 @@ function catchDeps (binding) {
     if (binding.isFn) return
     utils.log('\n- ' + binding.key)
     var got = utils.hash()
-    observer.on('get', function (dep) {
+    catcher.on('get', function (dep) {
         var has = got[dep.key]
         if (has && has.compiler === dep.compiler) return
         got[dep.key] = dep
@@ -2503,7 +2486,7 @@ function catchDeps (binding) {
         dep.subs.push(binding)
     })
     binding.value.$get()
-    observer.off('get')
+    catcher.off('get')
 }
 
 module.exports = {
@@ -2511,16 +2494,16 @@ module.exports = {
     /**
      *  the observer that catches events triggered by getters
      */
-    observer: observer,
+    catcher: catcher,
 
     /**
      *  parse a list of computed property bindings
      */
     parse: function (bindings) {
         utils.log('\nparsing dependencies...')
-        observer.active = true
+        Observer.shouldGet = true
         bindings.forEach(catchDeps)
-        observer.active = false
+        Observer.shouldGet = false
         utils.log('\ndone.')
     }
     
@@ -2616,8 +2599,6 @@ module.exports = {
 require.register("vue/src/transition.js", function(exports, require, module){
 var endEvent   = sniffTransitionEndEvent(),
     config     = require('./config'),
-    enterClass = config.enterClass,
-    leaveClass = config.leaveClass,
     // exit codes for testing
     codes = {
         CSS_E     : 1,
@@ -2696,27 +2677,27 @@ function applyTransitionClass (el, stage, changeState) {
         }
 
         // set to hidden state before appending
-        classList.add(enterClass)
+        classList.add(config.enterClass)
         // append
         changeState()
         // force a layout so transition can be triggered
         /* jshint unused: false */
         var forceLayout = el.clientHeight
         // trigger transition
-        classList.remove(enterClass)
+        classList.remove(config.enterClass)
         return codes.CSS_E
 
     } else { // leave
 
         // trigger hide transition
-        classList.add(leaveClass)
+        classList.add(config.leaveClass)
         var onEnd = function (e) {
             if (e.target === el) {
                 el.removeEventListener(endEvent, onEnd)
                 el.vue_trans_cb = null
                 // actually remove node here
                 changeState()
-                classList.remove(leaveClass)
+                classList.remove(config.leaveClass)
             }
         }
         // attach transition end listener
@@ -2776,22 +2757,14 @@ function sniffTransitionEndEvent () {
 }
 });
 require.register("vue/src/batcher.js", function(exports, require, module){
-var config = require('./config'),
-    utils = require('./utils'),
+var utils = require('./utils'),
     queue, has, waiting
 
 reset()
 
-exports.queue = function (binding, method) {
-    if (!config.async) {
-        binding['_' + method]()
-        return
-    }
+exports.queue = function (binding) {
     if (!has[binding.id]) {
-        queue.push({
-            binding: binding,
-            method: method
-        })
+        queue.push(binding)
         has[binding.id] = true
         if (!waiting) {
             waiting = true
@@ -2802,10 +2775,9 @@ exports.queue = function (binding, method) {
 
 function flush () {
     for (var i = 0; i < queue.length; i++) {
-        var task = queue[i],
-            b = task.binding
+        var b = queue[i]
         if (b.unbound) continue
-        b['_' + task.method]()
+        b._update()
         has[b.id] = false
     }
     reset()
@@ -3256,17 +3228,15 @@ module.exports = {
                 ? 'value'
                 : 'innerHTML'
 
-        if (self.filters) {
-            var compositionLock = false
-            this.cLock = function () {
-                compositionLock = true
-            }
-            this.cUnlock = function () {
-                compositionLock = false
-            }
-            el.addEventListener('compositionstart', this.cLock)
-            el.addEventListener('compositionend', this.cUnlock)
+        var compositionLock = false
+        this.cLock = function () {
+            compositionLock = true
         }
+        this.cUnlock = function () {
+            compositionLock = false
+        }
+        el.addEventListener('compositionstart', this.cLock)
+        el.addEventListener('compositionend', this.cUnlock)
 
         // attach listener
         self.set = self.filters
@@ -3292,6 +3262,7 @@ module.exports = {
                 })
             }
             : function () {
+                if (compositionLock) return
                 // no filters, don't let it trigger update()
                 self.lock = true
                 self.vm.$set(self.key, el[attr])
@@ -3349,10 +3320,8 @@ module.exports = {
     unbind: function () {
         var el = this.el
         el.removeEventListener(this.event, this.set)
-        if (this.filters) {
-            el.removeEventListener('compositionstart', this.cLock)
-            el.removeEventListener('compositionend', this.cUnlock)
-        }
+        el.removeEventListener('compositionstart', this.cLock)
+        el.removeEventListener('compositionend', this.cUnlock)
         if (isIE9) {
             el.removeEventListener('cut', this.onCut)
             el.removeEventListener('keyup', this.onDel)
@@ -3366,7 +3335,7 @@ var ViewModel
 module.exports = {
 
     bind: function () {
-        if (this.isSimple) {
+        if (this.isEmpty) {
             this.build()
         }
     },
