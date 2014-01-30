@@ -517,10 +517,7 @@ CompilerProto.defineProp = function (key, binding) {
 CompilerProto.defineExp = function (key, binding) {
     var getter = ExpParser.parse(key, this)
     if (getter) {
-        var value = binding.isFn
-            ? getter
-            : { $get: getter }
-        this.markComputed(binding, value)
+        this.markComputed(binding, getter)
         this.exps.push(binding)
     }
 }
@@ -531,10 +528,8 @@ CompilerProto.defineExp = function (key, binding) {
 CompilerProto.defineComputed = function (key, binding, value) {
     this.markComputed(binding, value)
     var def = {
-        get: binding.value.$get
-    }
-    if (binding.value.$set) {
-        def.set = binding.value.$set
+        get: binding.value.$get,
+        set: binding.value.$set
     }
     Object.defineProperty(this.vm, key, def)
 }
@@ -544,15 +539,19 @@ CompilerProto.defineComputed = function (key, binding, value) {
  *  so its getter/setter are bound to proper context
  */
 CompilerProto.markComputed = function (binding, value) {
-    binding.value = value
     binding.isComputed = true
     // bind the accessors to the vm
-    if (!binding.isFn) {
-        binding.value = {
-            $get: utils.bind(value.$get, this.vm)
+    if (binding.isFn) {
+        binding.value = value
+    } else {
+        if (typeof value === 'function') {
+            value = { $get: value }
         }
-        if (value.$set) {
-            binding.value.$set = utils.bind(value.$set, this.vm)
+        binding.value = {
+            $get: utils.bind(value.$get, this.vm),
+            $set: value.$set
+                ? utils.bind(value.$set, this.vm)
+                : undefined
         }
     }
     // keep track for dep parsing later

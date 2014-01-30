@@ -51,13 +51,18 @@ describe('Misc Features', function () {
                         $set: function (v) {
                             b = v - this.a
                         }
+                    },
+                    getOnly: function () {
+                        return this.a + 1
                     }
                 }
             })
 
             assert.strictEqual(v.test, 3)
+            assert.strictEqual(v.getOnly, 2)
             v.a = 2
             assert.strictEqual(v.test, 4)
+            assert.strictEqual(v.getOnly, 3)
             b = 3
             assert.strictEqual(v.test, 5)
             v.test = 10
