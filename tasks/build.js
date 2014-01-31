@@ -41,7 +41,7 @@ module.exports = function (grunt) {
 }
 
 function rename (file, cb) {
-    file.path = file.base + 'vue.min.js'
+    file.path = file.base + '/vue.min.js'
     cb(null, file)
 }
 
@@ -66,7 +66,7 @@ function gzip (file, cb) {
 }
 
 function size (file, cb) {
-    console.log(blue(file.relative + ': ') + (file.contents.length / 1024).toFixed(2) + 'kb')
+    console.log(blue(dest + '/' + file.relative + ': ') + (file.contents.length / 1024).toFixed(2) + 'kb')
     cb(null, file)
 }
 
