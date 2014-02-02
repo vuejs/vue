@@ -44,10 +44,8 @@
                     shared: shared
                 },
                 computed: {
-                    source: {
-                        $get: function () {
-                            return JSON.stringify(this.shared)
-                        }
+                    source: function () {
+                        return JSON.stringify(this.shared)
                     }
                 }
             })

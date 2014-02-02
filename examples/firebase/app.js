@@ -32,16 +32,14 @@ var app = new Vue({
         }
     },
     computed: {
-        isValid: {
-            $get: function () {
-                var valid = true
-                for (var key in this.validation) {
-                    if (!this.validation[key]) {
-                        valid = false
-                    }
+        isValid: function () {
+            var valid = true
+            for (var key in this.validation) {
+                if (!this.validation[key]) {
+                    valid = false
                 }
-                return valid
             }
+            return valid
         }
     },
     methods: {

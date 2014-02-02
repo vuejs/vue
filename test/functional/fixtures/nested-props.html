@@ -35,15 +35,11 @@
                     }
                 },
                 computed: {
-                    d: {
-                        $get: function () {
-                            return this.msg + (this.a.b.c || '') + (this.a.c || '')
-                        }
+                    d: function () {
+                        return this.msg + (this.a.b.c || '') + (this.a.c || '')
                     },
-                    sum: {
-                        $get: function () {
-                            return this.hidden.a + this.hidden.b
-                        }
+                    sum: function () {
+                        return this.hidden.a + this.hidden.b
                     }
                 },
                 methods: {
