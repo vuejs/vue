@@ -124,9 +124,7 @@ function Compiler (vm, options) {
     }
 
     // extract dependencies for computed properties
-    if (compiler.computed.length) {
-        DepsParser.parse(compiler.computed)
-    }
+    compiler.parseDeps()
 
     // done!
     compiler.init = false
@@ -598,6 +596,14 @@ CompilerProto.hasKey = function (key) {
     var baseKey = key.split('.')[0]
     return hasOwn.call(this.data, baseKey) ||
         hasOwn.call(this.vm, baseKey)
+}
+
+/**
+ *  Collect dependencies for computed properties
+ */
+CompilerProto.parseDeps = function () {
+    if (!this.computed.length) return
+    DepsParser.parse(this.computed)
 }
 
 /**

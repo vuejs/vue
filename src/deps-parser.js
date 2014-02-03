@@ -11,6 +11,7 @@ function catchDeps (binding) {
     if (binding.isFn) return
     utils.log('\n- ' + binding.key)
     var got = utils.hash()
+    binding.deps = []
     catcher.on('get', function (dep) {
         var has = got[dep.key]
         if (has && has.compiler === dep.compiler) return
@@ -36,7 +37,8 @@ module.exports = {
     parse: function (bindings) {
         utils.log('\nparsing dependencies...')
         Observer.shouldGet = true
-        bindings.forEach(catchDeps)
+        var i = bindings.length
+        while (i--) { catchDeps(bindings[i]) }
         Observer.shouldGet = false
         utils.log('\ndone.')
     }

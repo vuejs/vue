@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Repeated form elements</title>
+        <meta charset="utf-8">
+        <script src="../../../dist/vue.js"></script>
+    </head>
+    <body>
+        <form id="form">
+            <p v-repeat="items">
+                <input type="text" name="text{{$index}}" v-model="text">
+            </p>
+            <button v-on="click: add" id="add">Add</button>
+            <p id="texts">{{texts}}</p>
+        </form>
+        <script>
+            var app = new Vue({
+                el: '#form',
+                data: {
+                    items: [
+                        { text: "a" },
+                        { text: "b" }
+                    ]
+                },
+                methods: {
+                    add: function(e) {
+                        this.items.push({ text: "c" })
+                        e.preventDefault()
+                    }
+                },
+                computed: {
+                    texts: function () {
+                        return this.items.map(function(item) {
+                            return item.text
+                        }).join(",")
+                    }
+                }
+            })
+        </script>
+    </body>
+</html>

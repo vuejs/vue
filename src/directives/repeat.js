@@ -110,36 +110,57 @@ module.exports = {
             if (method !== 'push' && method !== 'pop') {
                 self.updateIndexes()
             }
+            if (method === 'push' || method === 'unshift' || method === 'splice') {
+                self.changed()
+            }
         }
 
     },
 
-    update: function (collection) {
+    update: function (collection, init) {
 
-        this.unbind(true)
+        var self = this
+        self.unbind(true)
         // attach an object to container to hold handlers
-        this.container.vue_dHandlers = utils.hash()
+        self.container.vue_dHandlers = utils.hash()
         // if initiating with an empty collection, we need to
         // force a compile so that we get all the bindings for
         // dependency extraction.
-        if (!this.initiated && (!collection || !collection.length)) {
-            this.buildItem()
-            this.initiated = true
+        if (!self.initiated && (!collection || !collection.length)) {
+            self.buildItem()
+            self.initiated = true
         }
-        collection = this.collection = collection || []
-        this.vms = []
+        collection = self.collection = collection || []
+        self.vms = []
 
         // listen for collection mutation events
         // the collection has been augmented during Binding.set()
         if (!collection.__observer__) Observer.watchArray(collection, null, new Emitter())
-        collection.__observer__.on('mutate', this.mutationListener)
+        collection.__observer__.on('mutate', self.mutationListener)
 
         // create child-vms and append to DOM
         if (collection.length) {
             for (var i = 0, l = collection.length; i < l; i++) {
-                this.buildItem(collection[i], i)
+                self.buildItem(collection[i], i)
             }
+            if (!init) self.changed()
         }
+    },
+
+    /**
+     *  Notify parent compiler that new items
+     *  have been added to the collection, it needs
+     *  to re-calculate computed property dependencies.
+     *  Batched to ensure it's called only once every event loop.
+     */
+    changed: function () {
+        var self = this
+        if (self.queued) return
+        self.queued = true
+        setTimeout(function () {
+            self.compiler.parseDeps()
+            self.queued = false
+        }, 0)
     },
 
     /**
