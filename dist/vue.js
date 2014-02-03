@@ -1,5 +1,5 @@
 /*
- VueJS v0.8.1
+ Vue.js v0.8.2
  (c) 2014 Evan You
  License: MIT
 */
@@ -843,6 +843,7 @@ function Compiler (vm, options) {
     compiler.vm  = vm
     compiler.bindings = makeHash()
     compiler.dirs = []
+    compiler.deferred = []
     compiler.exps = []
     compiler.computed = []
     compiler.childCompilers = []
@@ -915,10 +916,13 @@ function Compiler (vm, options) {
     // and bind the parsed directives
     compiler.compile(el, true)
 
-    // extract dependencies for computed properties
-    if (compiler.computed.length) {
-        DepsParser.parse(compiler.computed)
+    // bind deferred directives (child components)
+    for (var i = 0, l = compiler.deferred.length; i < l; i++) {
+        compiler.bindDirective(compiler.deferred[i])
     }
+
+    // extract dependencies for computed properties
+    compiler.parseDeps()
 
     // done!
     compiler.init = false
@@ -1045,7 +1049,10 @@ CompilerProto.compile = function (node, root) {
             directive = Directive.parse('repeat', repeatExp, compiler, node)
             if (directive) {
                 directive.Ctor = componentCtor
-                compiler.bindDirective(directive)
+                // defer child component compilation
+                // so by the time they are compiled, the parent
+                // would have collected all bindings
+                compiler.deferred.push(directive)
             }
 
         // v-with has 2nd highest priority
@@ -1054,7 +1061,7 @@ CompilerProto.compile = function (node, root) {
             directive = Directive.parse('with', withKey || '', compiler, node)
             if (directive) {
                 directive.Ctor = componentCtor
-                compiler.bindDirective(directive)
+                compiler.deferred.push(directive)
             }
 
         } else {
@@ -1387,6 +1394,14 @@ CompilerProto.hasKey = function (key) {
     var baseKey = key.split('.')[0]
     return hasOwn.call(this.data, baseKey) ||
         hasOwn.call(this.vm, baseKey)
+}
+
+/**
+ *  Collect dependencies for computed properties
+ */
+CompilerProto.parseDeps = function () {
+    if (!this.computed.length) return
+    DepsParser.parse(this.computed)
 }
 
 /**
@@ -2476,6 +2491,7 @@ function catchDeps (binding) {
     if (binding.isFn) return
     utils.log('\n- ' + binding.key)
     var got = utils.hash()
+    binding.deps = []
     catcher.on('get', function (dep) {
         var has = got[dep.key]
         if (has && has.compiler === dep.compiler) return
@@ -2501,7 +2517,8 @@ module.exports = {
     parse: function (bindings) {
         utils.log('\nparsing dependencies...')
         Observer.shouldGet = true
-        bindings.forEach(catchDeps)
+        var i = bindings.length
+        while (i--) { catchDeps(bindings[i]) }
         Observer.shouldGet = false
         utils.log('\ndone.')
     }
@@ -3009,36 +3026,57 @@ module.exports = {
             if (method !== 'push' && method !== 'pop') {
                 self.updateIndexes()
             }
+            if (method === 'push' || method === 'unshift' || method === 'splice') {
+                self.changed()
+            }
         }
 
     },
 
-    update: function (collection) {
+    update: function (collection, init) {
 
-        this.unbind(true)
+        var self = this
+        self.unbind(true)
         // attach an object to container to hold handlers
-        this.container.vue_dHandlers = utils.hash()
+        self.container.vue_dHandlers = utils.hash()
         // if initiating with an empty collection, we need to
         // force a compile so that we get all the bindings for
         // dependency extraction.
-        if (!this.initiated && (!collection || !collection.length)) {
-            this.buildItem()
-            this.initiated = true
+        if (!self.initiated && (!collection || !collection.length)) {
+            self.buildItem()
+            self.initiated = true
         }
-        collection = this.collection = collection || []
-        this.vms = []
+        collection = self.collection = collection || []
+        self.vms = []
 
         // listen for collection mutation events
         // the collection has been augmented during Binding.set()
         if (!collection.__observer__) Observer.watchArray(collection, null, new Emitter())
-        collection.__observer__.on('mutate', this.mutationListener)
+        collection.__observer__.on('mutate', self.mutationListener)
 
         // create child-vms and append to DOM
         if (collection.length) {
             for (var i = 0, l = collection.length; i < l; i++) {
-                this.buildItem(collection[i], i)
+                self.buildItem(collection[i], i)
             }
+            if (!init) self.changed()
         }
+    },
+
+    /**
+     *  Notify parent compiler that new items
+     *  have been added to the collection, it needs
+     *  to re-calculate computed property dependencies.
+     *  Batched to ensure it's called only once every event loop.
+     */
+    changed: function () {
+        var self = this
+        if (self.queued) return
+        self.queued = true
+        setTimeout(function () {
+            self.compiler.parseDeps()
+            self.queued = false
+        }, 0)
     },
 
     /**
