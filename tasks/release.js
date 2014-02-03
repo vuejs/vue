@@ -20,6 +20,7 @@ module.exports = function (grunt) {
             .then('git tag v' + version)
             .then('git push')
             .then('git push origin v' + version)
+            .then('npm publish')
             .run(this.async(), function (err) {
                 grunt.fail.fatal(err)
             })
