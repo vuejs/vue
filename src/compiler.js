@@ -45,6 +45,7 @@ function Compiler (vm, options) {
     compiler.vm  = vm
     compiler.bindings = makeHash()
     compiler.dirs = []
+    compiler.deferred = []
     compiler.exps = []
     compiler.computed = []
     compiler.childCompilers = []
@@ -116,6 +117,11 @@ function Compiler (vm, options) {
     // now parse the DOM, during which we will create necessary bindings
     // and bind the parsed directives
     compiler.compile(el, true)
+
+    // bind deferred directives (child components)
+    for (var i = 0, l = compiler.deferred.length; i < l; i++) {
+        compiler.bindDirective(compiler.deferred[i])
+    }
 
     // extract dependencies for computed properties
     if (compiler.computed.length) {
@@ -247,7 +253,10 @@ CompilerProto.compile = function (node, root) {
             directive = Directive.parse('repeat', repeatExp, compiler, node)
             if (directive) {
                 directive.Ctor = componentCtor
-                compiler.bindDirective(directive)
+                // defer child component compilation
+                // so by the time they are compiled, the parent
+                // would have collected all bindings
+                compiler.deferred.push(directive)
             }
 
         // v-with has 2nd highest priority
@@ -256,7 +265,7 @@ CompilerProto.compile = function (node, root) {
             directive = Directive.parse('with', withKey || '', compiler, node)
             if (directive) {
                 directive.Ctor = componentCtor
-                compiler.bindDirective(directive)
+                compiler.deferred.push(directive)
             }
 
         } else {
