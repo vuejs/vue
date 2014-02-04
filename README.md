@@ -21,7 +21,7 @@ Vue.js supports [most ECMAScript 5 compliant browsers](https://saucelabs.com/u/v
 
 ## Contribution
 
-Read the [contributing guide](https://github.com/yyx990803/vue/blob/master/README.md).
+Read the [contributing guide](https://github.com/yyx990803/vue/blob/master/CONTRIBUTING.md).
 
 ## Get in Touch
 
