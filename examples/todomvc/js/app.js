@@ -69,7 +69,7 @@ var app = new Vue({
         addTodo: function () {
             var value = this.newTodo && this.newTodo.trim()
             if (value) {
-                this.todos.unshift({ title: value, completed: false })
+                this.todos.push({ title: value, completed: false })
                 this.newTodo = ''
                 this.remaining++
                 todoStorage.save()

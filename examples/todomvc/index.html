@@ -68,7 +68,7 @@
                     <li><a href="#/completed" v-class="selected:filter=='completed'">Completed</a></li>
                 </ul>
                 <button id="clear-completed" v-on="click:removeCompleted" v-show="todos.length > remaining">
-                    Remove Completed ({{todos.length - remaining}})
+                    Clear completed ({{todos.length - remaining}})
                 </button>
             </footer>
         </section>

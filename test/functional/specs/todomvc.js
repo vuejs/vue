@@ -47,7 +47,7 @@ casper.test.begin('todomvc', 69, function (test) {
     })
     .then(function () {
         test.assertElementCount('.todo', 2, 'should have 2 items now')
-        test.assertSelectorHasText('.todo label', 'test2', 'new item should have correct label text')
+        test.assertSelectorHasText('.todo:nth-child(2) label', 'test2', 'new item should have correct label text')
         test.assertSelectorHasText('#todo-count strong', '2', 'remaining count should be 2')
     })
 
@@ -61,7 +61,7 @@ casper.test.begin('todomvc', 69, function (test) {
 
         test.assertSelectorHasText('#todo-count strong', '1', 'remaining count should be 1')
         test.assertVisible('#clear-completed', '#clear-completed should now be visible')
-        test.assertSelectorHasText('#clear-completed', 'Remove Completed (1)')
+        test.assertSelectorHasText('#clear-completed', 'Clear completed (1)')
     })
 
     // add yet another item -----------------------------------------------
@@ -71,7 +71,7 @@ casper.test.begin('todomvc', 69, function (test) {
     })
     .then(function () {
         test.assertElementCount('.todo', 3, 'should have 3 items now')
-        test.assertSelectorHasText('.todo label', 'test3', 'new item should have correct label text')
+        test.assertSelectorHasText('.todo:nth-child(3) label', 'test3', 'new item should have correct label text')
         test.assertSelectorHasText('#todo-count strong', '2', 'remaining count should be 2')
     })
 
@@ -88,12 +88,12 @@ casper.test.begin('todomvc', 69, function (test) {
 
     // check more as completed --------------------------------------------
     .then(function () {
-        this.click('.todo:nth-child(1) .toggle')
-        this.click('.todo:nth-child(2) .toggle')
+        this.click('.todo:nth-child(4) .toggle')
+        this.click('.todo:nth-child(5) .toggle')
     })
     .then(function () {
         test.assertElementCount('.todo.completed', 3, 'should have 3 item completed')
-        test.assertSelectorHasText('#clear-completed', 'Remove Completed (3)')
+        test.assertSelectorHasText('#clear-completed', 'Clear completed (3)')
         test.assertSelectorHasText('#todo-count strong', '2', 'remaining count should be 2')
     })
 
@@ -102,7 +102,7 @@ casper.test.begin('todomvc', 69, function (test) {
     .thenClick('.todo:nth-child(1) .destroy', function () {
         test.assertElementCount('.todo', 4, 'should have 4 items now')
         test.assertElementCount('.todo.completed', 2, 'should have 2 item completed')
-        test.assertSelectorHasText('#clear-completed', 'Remove Completed (2)')
+        test.assertSelectorHasText('#clear-completed', 'Clear completed (2)')
         test.assertSelectorHasText('#todo-count strong', '2', 'remaining count should be 2')
     })
 
@@ -111,7 +111,7 @@ casper.test.begin('todomvc', 69, function (test) {
     .thenClick('.todo:nth-child(2) .destroy', function () {
         test.assertElementCount('.todo', 3, 'should have 3 items now')
         test.assertElementCount('.todo.completed', 2, 'should have 2 item completed')
-        test.assertSelectorHasText('#clear-completed', 'Remove Completed (2)')
+        test.assertSelectorHasText('#clear-completed', 'Clear completed (2)')
         test.assertSelectorHasText('#todo-count strong', '1', 'remaining count should be 1')
     })
 
@@ -119,7 +119,7 @@ casper.test.begin('todomvc', 69, function (test) {
 
     .thenClick('#clear-completed', function () {
         test.assertElementCount('.todo', 1, 'should have 1 item now')
-        test.assertSelectorHasText('.todo label', 'test', 'the remaining one should be the first one')
+        test.assertSelectorHasText('.todo label', 'test2', 'the remaining one should be the second one')
         test.assertElementCount('.todo.completed', 0, 'should have no completed items now')
         test.assertSelectorHasText('#todo-count strong', '1', 'remaining count should be 1')
         test.assertNotVisible('#clear-completed', '#clear-completed should be hidden')
@@ -129,14 +129,14 @@ casper.test.begin('todomvc', 69, function (test) {
     .then(function () {
         createNewItem('test')
         createNewItem('test')
-        this.click('.todo:nth-child(1) .toggle')
         this.click('.todo:nth-child(2) .toggle')
+        this.click('.todo:nth-child(3) .toggle')
     })
 
     // active filter ----------------------------------------------------------
     .thenClick('#filters li:nth-child(2) a', function () {
-        test.assertElementCount('.todo', 1, 'filter active should have 2 items')
-        test.assertElementCount('.todo.completed', 0, 'visible items should be incompleted')
+        test.assertElementCount('.todo', 1, 'filter active should have 1 item')
+        test.assertElementCount('.todo.completed', 0, 'visible items should be incomplete')
     })
 
     // add item with filter active --------------------------------------------
@@ -158,7 +158,7 @@ casper.test.begin('todomvc', 69, function (test) {
     .thenOpen('../../examples/todomvc/index.html#/active', function () {
         test.assertElementCount('.todo', 2, 'filter active should have 2 items')
         test.assertElementCount('.todo.completed', 0, 'visible items should be incompleted')
-        test.assertSelectorHasText('#clear-completed', 'Remove Completed (2)')
+        test.assertSelectorHasText('#clear-completed', 'Clear completed (2)')
         test.assertSelectorHasText('#todo-count strong', '2', 'remaining count should be 2')
     })
 
@@ -166,7 +166,7 @@ casper.test.begin('todomvc', 69, function (test) {
     .thenOpen('../../examples/todomvc/index.html#/completed', function () {
         test.assertElementCount('.todo', 2, 'filter completed should have 2 items')
         test.assertElementCount('.todo.completed', 2, 'visible items should be completed')
-        test.assertSelectorHasText('#clear-completed', 'Remove Completed (2)')
+        test.assertSelectorHasText('#clear-completed', 'Clear completed (2)')
         test.assertSelectorHasText('#todo-count strong', '2', 'remaining count should be 2')
     })
 
