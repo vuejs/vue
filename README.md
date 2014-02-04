@@ -2,48 +2,32 @@
 
 # Vue.js [![Build Status](https://travis-ci.org/yyx990803/vue.png?branch=master)](https://travis-ci.org/yyx990803/vue) [![Selenium Test Status](https://saucelabs.com/buildstatus/vuejs)](https://saucelabs.com/u/vuejs) [![Coverage Status](https://coveralls.io/repos/yyx990803/vue/badge.png)](https://coveralls.io/r/yyx990803/vue)
 
-> Simple, Fast & Composable MVVM for building interative interfaces.
+> MVVM made simple.
 
 ## Introduction
 
-Vue.js is a library that aims to simplify the development of interactive interfaces.
+Vue.js is a library for building interactive web interfaces. It provides the benefits of MVVM data binding with a simple and flexible API. You should try it out if you like:
 
-It provides the **ViewModel** layer of the MVVM pattern, which connects the **View** (the actual HTML that the user sees) and the **Model** (JSON-compliant plain JavaScript objects) via two-way data bindings. Actuall DOM manipulations and output formatting are abstracted away into **Directives** and **Filters**.
+- Extendable Data bindings
+- Plain JavaScript objects as models
+- Intuitive API that simply makes sense
+- The flexibility to mix & match small libraries for a custom front-end stack
 
-For more details, guides and documentations, visit [vuejs.org](http://vuejs.org).
+For more details, guides and API reference, visit [vuejs.org](http://vuejs.org).
 
 ## Browser Support
 
 Vue.js supports [most ECMAScript 5 compliant browsers](https://saucelabs.com/u/vuejs), essentially IE9+. IE9 needs [classList polyfill](https://github.com/remy/polyfills/blob/master/classList.js) and doesn't support transitions.
 
-## Development
+## Contribution
 
-``` bash
-# in case you don't already have them:
-# npm install -g grunt-cli component
-$ npm install
-$ component install
-```
+Read the [contributing guide](https://github.com/yyx990803/vue/blob/master/README.md).
 
-To build:
+## Get in Touch
 
-``` bash
-$ grunt build
-```
-
-To watch and auto-build dev version during development:
-
-``` bash
-$ grunt watch
-```
-
-To test:
-
-``` bash
-# if you don't have these yet:
-# npm install -g phantomjs casperjs
-$ grunt test
-```
+- Bugs, suggestions & feature requests: [open an issue](https://github.com/yyx990803/vue/issues)
+- Twitter: [@vuejs](https://twitter.com/vuejs)
+- freenode IRC Channel: #vuejs
 
 ## License
 
