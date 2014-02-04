@@ -8,6 +8,7 @@ module.exports = {
     model     : require('./model'),
     'if'      : require('./if'),
     'with'    : require('./with'),
+    html      : require('./html'),
 
     attr: function (value) {
         this.el.setAttribute(this.arg, value)
@@ -15,10 +16,6 @@ module.exports = {
 
     text: function (value) {
         this.el.textContent = utils.toText(value)
-    },
-
-    html: function (value) {
-        this.el.innerHTML = utils.toText(value)
     },
 
     show: function (value) {

@@ -24,6 +24,7 @@
             <button v-on="click: noMsg = 'Nah'" class="change">change</button>
         </div>
         <div id="attrs" data-test="hi {{msg}} ha"></div>
+        <div id="html">html {{{html}}} work</div>
         <script>
             Vue.config({debug:true})
 
@@ -61,6 +62,13 @@
                 el: '#attrs',
                 data: {
                     msg: 'ho'
+                }
+            })
+
+            var html = new Vue({
+                el: '#html',
+                data: {
+                    html: '<p>should</p> <a>probably</a>'
                 }
             })
         </script>

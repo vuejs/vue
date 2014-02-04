@@ -357,6 +357,7 @@ CompilerProto.compileTextNode = function (node) {
 
     for (var i = 0, l = tokens.length; i < l; i++) {
         token = tokens[i]
+        directive = null
         if (token.key) { // a binding
             if (token.key.charAt(0) === '>') { // a partial
                 partialId = token.key.slice(1).trim()
@@ -368,14 +369,12 @@ CompilerProto.compileTextNode = function (node) {
                     partialNodes = slice.call(el.childNodes)
                 }
             } else { // a real binding
-                if (!token.html) // text binding
+                if (!token.html) { // text binding
                     el = document.createTextNode('')
                     directive = Directive.parse('text', token.key, this, el)
-                    if (directive) {
-                        this.bindDirective(directive)
-                    }
                 } else { // html binding
-                    
+                    el = document.createComment(config.prefix + '-html')
+                    directive = Directive.parse('html', token.key, this, el)
                 }
             }
         } else { // a plain string
@@ -384,6 +383,9 @@ CompilerProto.compileTextNode = function (node) {
 
         // insert node
         node.parentNode.insertBefore(el, node)
+        if (directive) {
+            this.bindDirective(directive)
+        }
 
         // compile partial after appending, because its children's parentNode
         // will change from the fragment to the correct parentNode.

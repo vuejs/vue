@@ -1,6 +1,6 @@
-/* global normal, attrs */
+/* global normal, attrs, html */
 
-casper.test.begin('Expression', 21, function (test) {
+casper.test.begin('Expression', 23, function (test) {
     
     casper
     .start('./fixtures/expression.html')
@@ -75,9 +75,22 @@ casper.test.begin('Expression', 21, function (test) {
         attrs.msg = 'hoho'
     })
     .then(function () {
-        test.assertEval(function () {
-            return document.getElementById('attrs').dataset.test === 'hi hoho ha'
-        })
+        // attr
+        test.assertEvalEquals(function () {
+            return document.getElementById('attrs').dataset.test
+        }, 'hi hoho ha')
+        // html
+        test.assertEvalEquals(function () {
+            return document.getElementById('html').innerHTML
+        }, 'html <p>should</p> <a>probably</a><!--v-html--> work')
+    })
+    .thenEvaluate(function () {
+        html.html = '<span>should</span> <a>change work</a>'
+    })
+    .then(function () {
+        test.assertEvalEquals(function () {
+            return document.getElementById('html').innerHTML
+        }, 'html <span>should</span> <a>change work</a><!--v-html--> work')
     })
     .run(function () {
         test.done()

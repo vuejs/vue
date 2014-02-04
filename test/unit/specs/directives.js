@@ -76,6 +76,28 @@ describe('UNIT: Directives', function () {
             assert.strictEqual(dir.el.innerHTML, '')
         })
 
+        it('should swap html if el is a comment placeholder', function () {
+            var dir = mockDirective('html'),
+                comment = document.createComment('hi'),
+                parent = dir.el
+            parent.innerHTML = 'what!'
+            parent.appendChild(comment)
+            dir.el = comment
+
+            dir.bind()
+            assert.ok(dir.holder)
+            assert.ok(dir.nodes)
+
+            var pre = 'what!',
+                after = '<!--hi-->',
+                h1 = '<span>hello</span><span>world</span>',
+                h2 = '<a>whats</a><a>up</a>'
+            dir.update(h1)
+            assert.strictEqual(parent.innerHTML, pre + h1 + after)
+            dir.update(h2)
+            assert.strictEqual(parent.innerHTML, pre + h2 + after)
+        })
+
     })
 
     describe('show', function () {
