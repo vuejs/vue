@@ -1,5 +1,5 @@
 test
-dist
+dist/vue.min.js.gz
 tasks
 examples
 explorations
@@ -13,3 +13,4 @@ bower.json
 component.json
 Gruntfile.js
 TODO.md
+sauce_connect.log
