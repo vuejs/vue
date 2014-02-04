@@ -1,4 +1,5 @@
-casper.test.begin('Repeated ViewModels', 7, function (test) {
+/* global app */
+casper.test.begin('Repeated ViewModels', 8, function (test) {
     
     casper
     .start('./fixtures/repeated-vms.html')
@@ -22,6 +23,15 @@ casper.test.begin('Repeated ViewModels', 7, function (test) {
     // more clicks
     .thenClick('.item:nth-child(1)', function () {
         test.assertSelectorHasText('.item:nth-child(1)', 'msg a init click click')
+    })
+    .then(function () {
+        test.assertEvalEquals(
+            function () {
+                return app.$.items[0].reversed
+            },
+            'a init click click'.split('').reverse().join(''),
+            'should be able to access repeated vms with v-component-id'
+        )
     })
     .run(function () {
         test.done()

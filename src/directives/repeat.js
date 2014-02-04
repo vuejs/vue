@@ -85,26 +85,28 @@ module.exports = {
 
     bind: function () {
 
-        var self = this,
-            el   = self.el,
-            ctn  = self.container = el.parentNode
+        var el   = this.el,
+            ctn  = this.container = el.parentNode
 
         // extract child VM information, if any
         ViewModel = ViewModel || require('../viewmodel')
-        self.Ctor = self.Ctor || ViewModel
-
+        this.Ctor = this.Ctor || ViewModel
         // extract transition information
-        self.hasTrans   = el.hasAttribute(config.attrs.transition)
+        this.hasTrans = el.hasAttribute(config.attrs.transition)
+        // extract child Id, if any
+        this.childId = utils.attr(el, 'component-id')
 
         // create a comment node as a reference node for DOM insertions
-        self.ref = document.createComment(config.prefix + '-repeat-' + self.key)
-        ctn.insertBefore(self.ref, el)
+        this.ref = document.createComment(config.prefix + '-repeat-' + this.key)
+        ctn.insertBefore(this.ref, el)
         ctn.removeChild(el)
 
-        self.initiated = false
-        self.collection = null
-        self.vms = null
-        self.mutationListener = function (path, arr, mutation) {
+        this.initiated = false
+        this.collection = null
+        this.vms = null
+
+        var self = this
+        this.mutationListener = function (path, arr, mutation) {
             var method = mutation.method
             mutationHandlers[method].call(self, mutation)
             if (method !== 'push' && method !== 'pop') {
@@ -119,31 +121,33 @@ module.exports = {
 
     update: function (collection, init) {
 
-        var self = this
-        self.unbind(true)
+        this.unbind(true)
         // attach an object to container to hold handlers
-        self.container.vue_dHandlers = utils.hash()
+        this.container.vue_dHandlers = utils.hash()
         // if initiating with an empty collection, we need to
         // force a compile so that we get all the bindings for
         // dependency extraction.
-        if (!self.initiated && (!collection || !collection.length)) {
-            self.buildItem()
-            self.initiated = true
+        if (!this.initiated && (!collection || !collection.length)) {
+            this.buildItem()
+            this.initiated = true
         }
-        collection = self.collection = collection || []
-        self.vms = []
+        collection = this.collection = collection || []
+        this.vms = []
+        if (this.childId) {
+            this.vm.$[this.childId] = this.vms
+        }
 
         // listen for collection mutation events
         // the collection has been augmented during Binding.set()
         if (!collection.__observer__) Observer.watchArray(collection, null, new Emitter())
-        collection.__observer__.on('mutate', self.mutationListener)
+        collection.__observer__.on('mutate', this.mutationListener)
 
         // create child-vms and append to DOM
         if (collection.length) {
             for (var i = 0, l = collection.length; i < l; i++) {
-                self.buildItem(collection[i], i)
+                this.buildItem(collection[i], i)
             }
-            if (!init) self.changed()
+            if (!init) this.changed()
         }
     },
 
@@ -154,9 +158,9 @@ module.exports = {
      *  Batched to ensure it's called only once every event loop.
      */
     changed: function () {
+        if (this.queued) return
+        this.queued = true
         var self = this
-        if (self.queued) return
-        self.queued = true
         setTimeout(function () {
             self.compiler.parseDeps()
             self.queued = false
@@ -221,6 +225,9 @@ module.exports = {
     },
 
     unbind: function () {
+        if (this.childId) {
+            delete this.vm.$[this.childId]
+        }
         if (this.collection) {
             this.collection.__observer__.off('mutate', this.mutationListener)
             var i = this.vms.length

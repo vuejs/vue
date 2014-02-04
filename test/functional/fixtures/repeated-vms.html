@@ -6,7 +6,7 @@
         <script src="../../../dist/vue.js"></script>
     </head>
     <body>
-        <div class="item" v-repeat="items" v-component="item" v-on="click:click">
+        <div class="item" v-repeat="items" v-component="item" v-component-id="items" v-on="click:click">
             {{msg + ' ' + title}}
         </div>
         <script>
@@ -23,10 +23,15 @@
                 },
                 data: {
                     msg: 'msg'
+                },
+                computed: {
+                    reversed: function () {
+                        return this.title.split('').reverse().join('')
+                    }
                 }
             })
 
-            new Vue({
+            var app = new Vue({
                 el: 'body',
                 data: {
                     items: [
