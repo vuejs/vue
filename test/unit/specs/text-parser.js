@@ -3,6 +3,13 @@ describe('UNIT: TextNode Parser', function () {
     var TextParser = require('vue/src/text-parser')
 
     describe('.parse()', function () {
+
+        var tokens, badTokens
+
+        before(function () {
+            tokens = TextParser.parse('hello {{a}}! {{ bcd }}{{d.e.f}} {{a + (b || c) ? d : e}} {{>test}}{{{ a + "<em>" }}}')
+            badTokens = TextParser.parse('{{{a}}{{{{{{{{b}}}}')
+        })
         
         it('should return null if no interpolate tags are present', function () {
             var result = TextParser.parse('hello no tags')
@@ -14,11 +21,9 @@ describe('UNIT: TextNode Parser', function () {
             assert.strictEqual(result.length, 3)
             assert.strictEqual(result[2], ' &#123;&#123;hello&#125;&#125;')
         })
-
-        var tokens = TextParser.parse('hello {{a}}! {{ bcd }}{{d.e.f}} {{a + (b || c) ? d : e}} {{>test}}')
         
         it('should extract correct amount of tokens', function () {
-            assert.strictEqual(tokens.length, 9)
+            assert.strictEqual(tokens.length, 10)
         })
 
         it('should extract plain strings', function () {
@@ -46,6 +51,21 @@ describe('UNIT: TextNode Parser', function () {
 
         it('should extract partials', function () {
             assert.strictEqual(tokens[8].key, '>test')
+        })
+
+        it('should extract triple mustache (html instead of text)', function () {
+            assert.strictEqual(tokens[9].key, 'a + "<em>"')
+            assert.ok(tokens[9].html)
+        })
+
+        it('should deal with bad binding tags', function () {
+            assert.strictEqual(badTokens.length, 4)
+            assert.strictEqual(badTokens[0].key, 'a')
+            assert.notOk(badTokens[0].html)
+            assert.strictEqual(badTokens[1], '{{{{{')
+            assert.strictEqual(badTokens[2].key, 'b')
+            assert.ok(badTokens[2].html)
+            assert.strictEqual(badTokens[3], '}')
         })
 
     })

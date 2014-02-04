@@ -368,10 +368,14 @@ CompilerProto.compileTextNode = function (node) {
                     partialNodes = slice.call(el.childNodes)
                 }
             } else { // a real binding
-                el = document.createTextNode('')
-                directive = Directive.parse('text', token.key, this, el)
-                if (directive) {
-                    this.bindDirective(directive)
+                if (!token.html) // text binding
+                    el = document.createTextNode('')
+                    directive = Directive.parse('text', token.key, this, el)
+                    if (directive) {
+                        this.bindDirective(directive)
+                    }
+                } else { // html binding
+                    
                 }
             }
         } else { // a plain string
