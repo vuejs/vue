@@ -27,7 +27,12 @@ Read the [contributing guide](https://github.com/yyx990803/vue/blob/master/CONTR
 
 - Bugs, suggestions & feature requests: [open an issue](https://github.com/yyx990803/vue/issues)
 - Twitter: [@vuejs](https://twitter.com/vuejs)
+- [Google+ Community](https://plus.google.com/communities/112229843610661683911)
 - freenode IRC Channel: #vuejs
+
+## Changelog
+
+See details changes for each version in the [release notes](https://github.com/yyx990803/vue/releases).
 
 ## License
 
