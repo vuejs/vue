@@ -319,4 +319,33 @@ describe('UNIT: Utils', function () {
 
     })
 
+    describe('addClass', function () {
+
+        var el = document.createElement('div')
+        
+        it('should work', function () {
+            utils.addClass(el, 'hihi')
+            assert.strictEqual(el.className, 'hihi')
+            utils.addClass(el, 'hi')
+            assert.strictEqual(el.className, 'hihi hi')
+        })
+
+        it('should not add duplicate', function () {
+            utils.addClass(el, 'hi')
+            assert.strictEqual(el.className, 'hihi hi')
+        })
+
+    })
+
+    describe('removeClass', function () {
+        
+        it('should work', function () {
+            var el = document.createElement('div')
+            el.className = 'hihi hi'
+            utils.removeClass(el, 'hi')
+            assert.strictEqual(el.className, 'hihi')
+        })
+
+    })
+
 })

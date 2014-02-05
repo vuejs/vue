@@ -66,6 +66,8 @@ function applyTransitionClass (el, stage, changeState) {
         return codes.CSS_SKIP
     }
 
+    // if the browser supports transition,
+    // it must have classList...
     var classList         = el.classList,
         lastLeaveCallback = el.vue_trans_cb
 

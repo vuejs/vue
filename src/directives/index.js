@@ -29,13 +29,13 @@ module.exports = {
 
     'class': function (value) {
         if (this.arg) {
-            this.el.classList[value ? 'add' : 'remove'](this.arg)
+            utils[value ? 'addClass' : 'removeClass'](this.el, this.arg)
         } else {
             if (this.lastVal) {
-                this.el.classList.remove(this.lastVal)
+                utils.removeClass(this.el, this.lastVal)
             }
             if (value) {
-                this.el.classList.add(value)
+                utils.addClass(this.el, value)
                 this.lastVal = value
             }
         }

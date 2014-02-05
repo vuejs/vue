@@ -3,6 +3,8 @@ var config    = require('./config'),
     toString  = Object.prototype.toString,
     join      = Array.prototype.join,
     console   = window.console,
+
+    hasClassList = 'classList' in document.documentElement,
     ViewModel // late def
 
 var defer =
@@ -195,5 +197,33 @@ var utils = module.exports = {
      */
     nextTick: function (cb) {
         defer(cb, 0)
+    },
+
+    /**
+     *  add class for IE9
+     *  uses classList if available
+     */
+    addClass: function (el, cls) {
+        if (hasClassList) {
+            el.classList.add(cls)
+        } else {
+            var cur = ' ' + el.className + ' '
+            if (cur.indexOf(' ' + cls + ' ') < 0) {
+                el.className = (cur + cls).trim()
+            }
+        }
+    },
+
+    /**
+     *  remove class for IE9
+     */
+    removeClass: function (el, cls) {
+        if (hasClassList) {
+            el.classList.remove(cls)
+        } else {
+            el.className = (' ' + el.className + ' ')
+                .replace(' ' + cls + ' ', '')
+                .trim()
+        }
     }
 }
