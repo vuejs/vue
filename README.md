@@ -17,7 +17,7 @@ For more details, guides and API reference, visit [vuejs.org](http://vuejs.org).
 
 ## Browser Support
 
-Vue.js supports [most ECMAScript 5 compliant browsers](https://saucelabs.com/u/vuejs), essentially IE9+. IE9 needs [classList polyfill](https://github.com/remy/polyfills/blob/master/classList.js) and doesn't support transitions.
+Vue.js supports [most ECMAScript 5 compliant browsers](https://saucelabs.com/u/vuejs), essentially IE9+. IE8 and below are not supported.
 
 ## Contribution
 
