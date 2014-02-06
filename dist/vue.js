@@ -1,5 +1,5 @@
 /*
- Vue.js v0.8.2
+ Vue.js v0.8.3
  (c) 2014 Evan You
  License: MIT
 */
@@ -600,6 +600,8 @@ var config    = require('./config'),
     toString  = Object.prototype.toString,
     join      = Array.prototype.join,
     console   = window.console,
+
+    hasClassList = 'classList' in document.documentElement,
     ViewModel // late def
 
 var defer =
@@ -792,6 +794,34 @@ var utils = module.exports = {
      */
     nextTick: function (cb) {
         defer(cb, 0)
+    },
+
+    /**
+     *  add class for IE9
+     *  uses classList if available
+     */
+    addClass: function (el, cls) {
+        if (hasClassList) {
+            el.classList.add(cls)
+        } else {
+            var cur = ' ' + el.className + ' '
+            if (cur.indexOf(' ' + cls + ' ') < 0) {
+                el.className = (cur + cls).trim()
+            }
+        }
+    },
+
+    /**
+     *  remove class for IE9
+     */
+    removeClass: function (el, cls) {
+        if (hasClassList) {
+            el.classList.remove(cls)
+        } else {
+            el.className = (' ' + el.className + ' ')
+                .replace(' ' + cls + ' ', '')
+                .trim()
+        }
     }
 }
 });
@@ -1155,6 +1185,7 @@ CompilerProto.compileTextNode = function (node) {
 
     for (var i = 0, l = tokens.length; i < l; i++) {
         token = tokens[i]
+        directive = null
         if (token.key) { // a binding
             if (token.key.charAt(0) === '>') { // a partial
                 partialId = token.key.slice(1).trim()
@@ -1166,10 +1197,12 @@ CompilerProto.compileTextNode = function (node) {
                     partialNodes = slice.call(el.childNodes)
                 }
             } else { // a real binding
-                el = document.createTextNode('')
-                directive = Directive.parse('text', token.key, this, el)
-                if (directive) {
-                    this.bindDirective(directive)
+                if (!token.html) { // text binding
+                    el = document.createTextNode('')
+                    directive = Directive.parse('text', token.key, this, el)
+                } else { // html binding
+                    el = document.createComment(config.prefix + '-html')
+                    directive = Directive.parse('html', token.key, this, el)
                 }
             }
         } else { // a plain string
@@ -1178,6 +1211,9 @@ CompilerProto.compileTextNode = function (node) {
 
         // insert node
         node.parentNode.insertBefore(el, node)
+        if (directive) {
+            this.bindDirective(directive)
+        }
 
         // compile partial after appending, because its children's parentNode
         // will change from the fragment to the correct parentNode.
@@ -2440,19 +2476,22 @@ module.exports = {
 }
 });
 require.register("vue/src/text-parser.js", function(exports, require, module){
-var BINDING_RE = /\{\{(.+?)\}\}/
+var BINDING_RE = /{{{?([^{}]+?)}?}}/,
+    TRIPLE_RE = /{{{[^{}]+}}}/
 
 /**
  *  Parse a piece of text, return an array of tokens
  */
 function parse (text) {
     if (!BINDING_RE.test(text)) return null
-    var m, i, tokens = []
+    var m, i, token, tokens = []
     /* jshint boss: true */
     while (m = text.match(BINDING_RE)) {
         i = m.index
         if (i > 0) tokens.push(text.slice(0, i))
-        tokens.push({ key: m[1].trim() })
+        token = { key: m[1].trim() }
+        if (TRIPLE_RE.test(m[0])) token.html = true
+        tokens.push(token)
         text = text.slice(i + m[0].length)
     }
     if (text.length) tokens.push(text)
@@ -2681,6 +2720,8 @@ function applyTransitionClass (el, stage, changeState) {
         return codes.CSS_SKIP
     }
 
+    // if the browser supports transition,
+    // it must have classList...
     var classList         = el.classList,
         lastLeaveCallback = el.vue_trans_cb
 
@@ -2816,6 +2857,7 @@ module.exports = {
     model     : require('./model'),
     'if'      : require('./if'),
     'with'    : require('./with'),
+    html      : require('./html'),
 
     attr: function (value) {
         this.el.setAttribute(this.arg, value)
@@ -2823,10 +2865,6 @@ module.exports = {
 
     text: function (value) {
         this.el.textContent = utils.toText(value)
-    },
-
-    html: function (value) {
-        this.el.innerHTML = utils.toText(value)
     },
 
     show: function (value) {
@@ -2840,13 +2878,13 @@ module.exports = {
 
     'class': function (value) {
         if (this.arg) {
-            this.el.classList[value ? 'add' : 'remove'](this.arg)
+            utils[value ? 'addClass' : 'removeClass'](this.el, this.arg)
         } else {
             if (this.lastVal) {
-                this.el.classList.remove(this.lastVal)
+                utils.removeClass(this.el, this.lastVal)
             }
             if (value) {
-                this.el.classList.add(value)
+                utils.addClass(this.el, value)
                 this.lastVal = value
             }
         }
@@ -3001,26 +3039,28 @@ module.exports = {
 
     bind: function () {
 
-        var self = this,
-            el   = self.el,
-            ctn  = self.container = el.parentNode
+        var el   = this.el,
+            ctn  = this.container = el.parentNode
 
         // extract child VM information, if any
         ViewModel = ViewModel || require('../viewmodel')
-        self.Ctor = self.Ctor || ViewModel
-
+        this.Ctor = this.Ctor || ViewModel
         // extract transition information
-        self.hasTrans   = el.hasAttribute(config.attrs.transition)
+        this.hasTrans = el.hasAttribute(config.attrs.transition)
+        // extract child Id, if any
+        this.childId = utils.attr(el, 'component-id')
 
         // create a comment node as a reference node for DOM insertions
-        self.ref = document.createComment(config.prefix + '-repeat-' + self.key)
-        ctn.insertBefore(self.ref, el)
+        this.ref = document.createComment(config.prefix + '-repeat-' + this.key)
+        ctn.insertBefore(this.ref, el)
         ctn.removeChild(el)
 
-        self.initiated = false
-        self.collection = null
-        self.vms = null
-        self.mutationListener = function (path, arr, mutation) {
+        this.initiated = false
+        this.collection = null
+        this.vms = null
+
+        var self = this
+        this.mutationListener = function (path, arr, mutation) {
             var method = mutation.method
             mutationHandlers[method].call(self, mutation)
             if (method !== 'push' && method !== 'pop') {
@@ -3035,31 +3075,33 @@ module.exports = {
 
     update: function (collection, init) {
 
-        var self = this
-        self.unbind(true)
+        this.unbind(true)
         // attach an object to container to hold handlers
-        self.container.vue_dHandlers = utils.hash()
+        this.container.vue_dHandlers = utils.hash()
         // if initiating with an empty collection, we need to
         // force a compile so that we get all the bindings for
         // dependency extraction.
-        if (!self.initiated && (!collection || !collection.length)) {
-            self.buildItem()
-            self.initiated = true
+        if (!this.initiated && (!collection || !collection.length)) {
+            this.buildItem()
+            this.initiated = true
         }
-        collection = self.collection = collection || []
-        self.vms = []
+        collection = this.collection = collection || []
+        this.vms = []
+        if (this.childId) {
+            this.vm.$[this.childId] = this.vms
+        }
 
         // listen for collection mutation events
         // the collection has been augmented during Binding.set()
         if (!collection.__observer__) Observer.watchArray(collection, null, new Emitter())
-        collection.__observer__.on('mutate', self.mutationListener)
+        collection.__observer__.on('mutate', this.mutationListener)
 
         // create child-vms and append to DOM
         if (collection.length) {
             for (var i = 0, l = collection.length; i < l; i++) {
-                self.buildItem(collection[i], i)
+                this.buildItem(collection[i], i)
             }
-            if (!init) self.changed()
+            if (!init) this.changed()
         }
     },
 
@@ -3070,9 +3112,9 @@ module.exports = {
      *  Batched to ensure it's called only once every event loop.
      */
     changed: function () {
+        if (this.queued) return
+        this.queued = true
         var self = this
-        if (self.queued) return
-        self.queued = true
         setTimeout(function () {
             self.compiler.parseDeps()
             self.queued = false
@@ -3137,6 +3179,9 @@ module.exports = {
     },
 
     unbind: function () {
+        if (this.childId) {
+            delete this.vm.$[this.childId]
+        }
         if (this.collection) {
             this.collection.__observer__.off('mutate', this.mutationListener)
             var i = this.vms.length
@@ -3401,6 +3446,47 @@ module.exports = {
         this.component.$destroy()
     }
 
+}
+});
+require.register("vue/src/directives/html.js", function(exports, require, module){
+var toText = require('../utils').toText,
+    slice = Array.prototype.slice
+
+module.exports = {
+
+    bind: function () {
+        // a comment node means this is a binding for
+        // {{{ inline unescaped html }}}
+        if (this.el.nodeType === 8) {
+            // hold nodes
+            this.holder = document.createElement('div')
+            this.nodes = []
+        }
+    },
+
+    update: function (value) {
+        value = toText(value)
+        if (this.holder) {
+            this.swap(value)
+        } else {
+            this.el.innerHTML = value
+        }
+    },
+
+    swap: function (value) {
+        var parent = this.el.parentNode,
+            holder = this.holder,
+            nodes = this.nodes,
+            i = nodes.length, l
+        while (i--) {
+            parent.removeChild(nodes[i])
+        }
+        holder.innerHTML = value
+        nodes = this.nodes = slice.call(holder.childNodes)
+        for (i = 0, l = nodes.length; i < l; i++) {
+            parent.insertBefore(nodes[i], this.el)
+        }
+    }
 }
 });
 require.alias("component-emitter/index.js", "vue/deps/emitter/index.js");
