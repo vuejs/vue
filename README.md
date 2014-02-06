@@ -13,7 +13,24 @@ Vue.js is a library for building interactive web interfaces. It provides the ben
 - Intuitive API that simply makes sense
 - The flexibility to mix & match small libraries for a custom front-end stack
 
-For more details, guides and API reference, visit [vuejs.org](http://vuejs.org).
+It's really really easy to get started. Seriously, it's so easy:
+
+``` html
+<div id="demo">
+    {{message}}
+</div>
+```
+
+``` js
+var demo = new Vue({
+    el: '#demo',
+    data: {
+        message: 'Hello Vue.js!'
+    }
+})
+```
+
+But there's much more to it, and it will make your life developing interfaces so much easier. For more details, guides and API reference, visit [vuejs.org](http://vuejs.org).
 
 ## Browser Support
 
