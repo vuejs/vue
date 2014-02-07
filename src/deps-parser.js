@@ -37,8 +37,7 @@ module.exports = {
     parse: function (bindings) {
         utils.log('\nparsing dependencies...')
         Observer.shouldGet = true
-        var i = bindings.length
-        while (i--) { catchDeps(bindings[i]) }
+        bindings.forEach(catchDeps)
         Observer.shouldGet = false
         utils.log('\ndone.')
     }

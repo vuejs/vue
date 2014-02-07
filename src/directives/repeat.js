@@ -25,10 +25,7 @@ var mutationHandlers = {
     },
 
     unshift: function (m) {
-        var i, l = m.args.length
-        for (i = 0; i < l; i++) {
-            this.buildItem(m.args[i], i)
-        }
+        m.args.forEach(this.buildItem, this)
     },
 
     shift: function () {
@@ -144,9 +141,7 @@ module.exports = {
 
         // create child-vms and append to DOM
         if (collection.length) {
-            for (var i = 0, l = collection.length; i < l; i++) {
-                this.buildItem(collection[i], i)
-            }
+            collection.forEach(this.buildItem, this)
             if (!init) this.changed()
         }
     },

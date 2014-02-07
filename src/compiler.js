@@ -126,9 +126,7 @@ function Compiler (vm, options) {
     compiler.compile(el, true)
 
     // bind deferred directives (child components)
-    for (var i = 0, l = compiler.deferred.length; i < l; i++) {
-        compiler.bindDirective(compiler.deferred[i])
-    }
+    compiler.deferred.forEach(compiler.bindDirective, compiler)
 
     // extract dependencies for computed properties
     compiler.parseDeps()
@@ -288,7 +286,7 @@ CompilerProto.compile = function (node, root) {
             }
 
         // v-with has 2nd highest priority
-        } else if (!root && ((withKey = utils.attr(node, 'with')) || componentCtor)) {
+        } else if (root !== true && ((withKey = utils.attr(node, 'with')) || componentCtor)) {
 
             directive = Directive.parse('with', withKey || '', compiler, node)
             if (directive) {
@@ -369,10 +367,7 @@ CompilerProto.compileNode = function (node) {
     }
     // recursively compile childNodes
     if (node.childNodes.length) {
-        var nodes = slice.call(node.childNodes)
-        for (i = 0, j = nodes.length; i < j; i++) {
-            this.compile(nodes[i])
-        }
+        slice.call(node.childNodes).forEach(this.compile, this)
     }
 }
 
@@ -387,7 +382,7 @@ CompilerProto.compileTextNode = function (node) {
 
     for (var i = 0, l = tokens.length; i < l; i++) {
         token = tokens[i]
-        directive = null
+        directive = partialNodes = null
         if (token.key) { // a binding
             if (token.key.charAt(0) === '>') { // a partial
                 partialId = token.key.slice(1).trim()
@@ -413,6 +408,8 @@ CompilerProto.compileTextNode = function (node) {
 
         // insert node
         node.parentNode.insertBefore(el, node)
+
+        // bind directive
         if (directive) {
             this.bindDirective(directive)
         }
@@ -421,10 +418,7 @@ CompilerProto.compileTextNode = function (node) {
         // will change from the fragment to the correct parentNode.
         // This could affect directives that need access to its element's parentNode.
         if (partialNodes) {
-            for (var j = 0, k = partialNodes.length; j < k; j++) {
-                this.compile(partialNodes[j])
-            }
-            partialNodes = null
+            partialNodes.forEach(this.compile, this)
         }
 
     }
