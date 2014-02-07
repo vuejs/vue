@@ -221,9 +221,12 @@ var utils = module.exports = {
         if (hasClassList) {
             el.classList.remove(cls)
         } else {
-            el.className = (' ' + el.className + ' ')
-                .replace(' ' + cls + ' ', '')
-                .trim()
+            var cur = ' ' + el.className + ' ',
+                tar = ' ' + cls + ' '
+            while (cur.indexOf(tar) >= 0) {
+                cur = cur.replace(tar, ' ')
+            }
+            el.className = cur.trim()
         }
     }
 }

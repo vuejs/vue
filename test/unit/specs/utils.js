@@ -341,8 +341,10 @@ describe('UNIT: Utils', function () {
         
         it('should work', function () {
             var el = document.createElement('div')
-            el.className = 'hihi hi'
+            el.className = 'hihi hi ha'
             utils.removeClass(el, 'hi')
+            assert.strictEqual(el.className, 'hihi ha')
+            utils.removeClass(el, 'ha')
             assert.strictEqual(el.className, 'hihi')
         })
 
