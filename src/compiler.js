@@ -639,6 +639,10 @@ CompilerProto.parseDeps = function () {
  */
 CompilerProto.destroy = function () {
 
+    // avoid being called more than once
+    // this is irreversible!
+    if (this.destroyed) return
+
     var compiler = this,
         i, key, dir, instances, binding,
         vm          = compiler.vm,
@@ -697,6 +701,7 @@ CompilerProto.destroy = function () {
         vm.$remove()
     }
 
+    this.destroyed = true
     // emit destroy hook
     compiler.execHook('afterDestroy')
 

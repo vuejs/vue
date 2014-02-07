@@ -107,7 +107,7 @@ module.exports = {
             var method = mutation.method
             mutationHandlers[method].call(self, mutation)
             if (method !== 'push' && method !== 'pop') {
-                self.updateIndexes()
+                self.updateIndex()
             }
             if (method === 'push' || method === 'unshift' || method === 'splice') {
                 self.changed()
@@ -169,32 +169,33 @@ module.exports = {
      */
     buildItem: function (data, index) {
 
-        var node    = this.el.cloneNode(true),
-            ctn     = this.container,
+        var el  = this.el.cloneNode(true),
+            ctn = this.container,
+            vms = this.vms,
+            col = this.collection,
             ref, item
 
         // append node into DOM first
         // so v-if can get access to parentNode
         if (data) {
-            ref = this.vms.length > index
-                ? this.vms[index].$el
+            ref = vms.length > index
+                ? vms[index].$el
                 : this.ref
             // make sure it works with v-if
             if (!ref.parentNode) ref = ref.vue_ref
             // process transition info before appending
-            node.vue_trans = utils.attr(node, 'transition', true)
-            transition(node, 1, function () {
-                ctn.insertBefore(node, ref)
+            el.vue_trans = utils.attr(el, 'transition', true)
+            transition(el, 1, function () {
+                ctn.insertBefore(el, ref)
             }, this.compiler)
         }
 
         item = new this.Ctor({
-            el: node,
+            el: el,
             data: data,
             compilerOptions: {
                 repeat: true,
                 repeatIndex: index,
-                repeatCollection: this.collection,
                 parentCompiler: this.compiler,
                 delegator: ctn
             }
@@ -205,14 +206,19 @@ module.exports = {
             // let's remove it...
             item.$destroy()
         } else {
-            this.vms.splice(index, 0, item)
+            vms.splice(index, 0, item)
+            // in case `$destroy` is called directly on a repeated vm
+            // make sure the vm's data is properly removed
+            item.$compiler.observer.on('hook:afterDestroy', function () {
+                col.remove(data)
+            })
         }
     },
 
     /**
      *  Update index of each item after a mutation
      */
-    updateIndexes: function () {
+    updateIndex: function () {
         var i = this.vms.length
         while (i--) {
             this.vms[i].$data.$index = i

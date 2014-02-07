@@ -6,7 +6,7 @@
 
 ## Introduction
 
-Vue.js is a library for building interactive web interfaces. It provides the benefits of MVVM data binding with a simple and flexible API. You should try it out if you like:
+Vue.js is a library for building interactive web interfaces. It provides the benefits of MVVM data binding and a composable component system with a simple and flexible API. You should try it out if you like:
 
 - Extendable Data bindings
 - Plain JavaScript objects as models
