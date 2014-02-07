@@ -133,8 +133,13 @@ function inheritOptions (child, parent, topLevel) {
             parentVal = parent[key],
             type = utils.typeOf(val)
         if (topLevel && type === 'Function' && parentVal) {
-            // merge hook functions
-            child[key] = mergeHook(val, parentVal)
+            // merge hook functions into an array
+            child[key] = [val]
+            if (Array.isArray(parentVal)) {
+                child[key] = child[key].concat(parentVal)
+            } else {
+                child[key].push(parentVal)
+            }
         } else if (topLevel && type === 'Object') {
             // merge toplevel object options
             inheritOptions(val, parentVal)
@@ -144,17 +149,6 @@ function inheritOptions (child, parent, topLevel) {
         }
     }
     return child
-}
-
-/**
- *  Merge hook functions
- *  so parent hooks also get called
- */
-function mergeHook (fn, parentFn) {
-    return function (opts) {
-        parentFn.call(this, opts)
-        fn.call(this, opts)
-    }
 }
 
 module.exports = ViewModel

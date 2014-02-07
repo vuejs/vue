@@ -14,7 +14,14 @@ var Emitter     = require('./emitter'),
     makeHash    = utils.hash,
     extend      = utils.extend,
     def         = utils.defProtected,
-    hasOwn      = Object.prototype.hasOwnProperty
+    hasOwn      = Object.prototype.hasOwnProperty,
+
+    // hooks to register
+    hooks = [
+        'created', 'ready',
+        'beforeDestroy', 'afterDestroy',
+        'enteredView', 'leftView'
+    ]
 
 /**
  *  The DOM compiler
@@ -82,7 +89,7 @@ function Compiler (vm, options) {
     }
 
     // beforeCompile hook
-    compiler.execHook('beforeCompile', 'created')
+    compiler.execHook('created')
 
     // the user might have set some props on the vm 
     // so copy it back to the data...
@@ -130,7 +137,7 @@ function Compiler (vm, options) {
     compiler.init = false
 
     // post compile / ready hook
-    compiler.execHook('afterCompile', 'ready')
+    compiler.execHook('ready')
 }
 
 var CompilerProto = Compiler.prototype
@@ -179,11 +186,13 @@ CompilerProto.setupElement = function (options) {
  *  Setup observer.
  *  The observer listens for get/set/mutate events on all VM
  *  values/objects and trigger corresponding binding updates.
+ *  It also listens for lifecycle hooks.
  */
 CompilerProto.setupObserver = function () {
 
     var compiler = this,
         bindings = compiler.bindings,
+        options  = compiler.options,
         observer = compiler.observer = new Emitter()
 
     // a hash to hold event proxies for each root level key
@@ -206,6 +215,27 @@ CompilerProto.setupObserver = function () {
             check(key)
             bindings[key].pub()
         })
+    
+    // register hooks
+    hooks.forEach(function (hook) {
+        var fns = options[hook]
+        if (Array.isArray(fns)) {
+            var i = fns.length
+            // since hooks were merged with child at head,
+            // we loop reversely.
+            while (i--) {
+                register(hook, fns[i])
+            }
+        } else if (fns) {
+            register(hook, fns)
+        }
+    })
+
+    function register (hook, fn) {
+        observer.on('hook:' + hook, function () {
+            fn.call(compiler.vm, options)
+        })
+    }
 
     function check (key) {
         if (!bindings[key]) {
@@ -585,14 +615,12 @@ CompilerProto.getOption = function (type, id) {
 }
 
 /**
- *  Execute a user hook
+ *  Emit lifecycle events to trigger hooks
  */
-CompilerProto.execHook = function (id, alt) {
-    var opts = this.options,
-        hook = opts[id] || opts[alt]
-    if (hook) {
-        hook.call(this.vm, opts)
-    }
+CompilerProto.execHook = function (event) {
+    event = 'hook:' + event
+    this.observer.emit(event)
+    this.emitter.emit(event)
 }
 
 /**
@@ -626,10 +654,6 @@ CompilerProto.destroy = function () {
         bindings    = compiler.bindings
 
     compiler.execHook('beforeDestroy')
-
-    // unwatch
-    compiler.observer.off()
-    compiler.emitter.off()
 
     // unbind all direcitves
     i = directives.length
@@ -679,7 +703,12 @@ CompilerProto.destroy = function () {
         vm.$remove()
     }
 
+    // emit destroy hook
     compiler.execHook('afterDestroy')
+
+    // finally, unregister all listeners
+    compiler.observer.off()
+    compiler.emitter.off()
 }
 
 // Helpers --------------------------------------------------------------------
