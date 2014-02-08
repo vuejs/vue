@@ -157,11 +157,11 @@ describe('UNIT: Directive', function () {
 
         it('should extract correct argument', function () {
             var d = Directive.parse('text', 'todo:todos', compiler),
-                e = Directive.parse('text', 'todo:todos + abc', compiler),
-                f = Directive.parse('text', 'todo:todos | fsf fsef', compiler)
+                e = Directive.parse('text', '$todo:todos + abc', compiler),
+                f = Directive.parse('text', '-todo-fsef:todos | fsf fsef', compiler)
             assert.strictEqual(d.arg, 'todo', 'simple')
-            assert.strictEqual(e.arg, 'todo', 'expression')
-            assert.strictEqual(f.arg, 'todo', 'with filters')
+            assert.strictEqual(e.arg, '$todo', 'expression')
+            assert.strictEqual(f.arg, '-todo-fsef', 'with hyphens and filters')
         })
 
         it('should be able to determine whether the key is an expression', function () {

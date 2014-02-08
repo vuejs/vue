@@ -11,11 +11,11 @@ var utils      = require('./utils'),
     // match up to the first single pipe, ignore those within quotes.
     KEY_RE          = /^(?:['"](?:\\.|[^'"])*['"]|\\.|[^\|]|\|\|)+/,
 
-    ARG_RE          = /^([\w- ]+):(.+)$/,
+    ARG_RE          = /^([\w-$ ]+):(.+)$/,
     FILTERS_RE      = /\|[^\|]+/g,
     FILTER_TOKEN_RE = /[^\s']+|'[^']+'/g,
     NESTING_RE      = /^\$(parent|root)\./,
-    SINGLE_VAR_RE   = /^[\w\.\$]+$/
+    SINGLE_VAR_RE   = /^[\w\.$]+$/
 
 /**
  *  Directive class

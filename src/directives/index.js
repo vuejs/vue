@@ -9,6 +9,7 @@ module.exports = {
     'if'      : require('./if'),
     'with'    : require('./with'),
     html      : require('./html'),
+    style     : require('./style'),
 
     attr: function (value) {
         this.el.setAttribute(this.arg, value)

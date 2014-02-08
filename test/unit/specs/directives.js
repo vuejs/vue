@@ -652,6 +652,42 @@ describe('UNIT: Directives', function () {
 
     })
 
+    describe('style', function () {
+        
+        it('should apply a normal style', function () {
+            var d = mockDirective('style')
+            d.arg = 'text-align'
+            d.bind()
+            assert.strictEqual(d.prop, 'textAlign')
+            d.update('center')
+            assert.strictEqual(d.el.style.textAlign, 'center')
+        })
+
+        it('should apply prefixed style', function () {
+            var d = mockDirective('style')
+            d.arg = '-webkit-transform'
+            d.bind()
+            assert.strictEqual(d.prop, 'webkitTransform')
+            d.update('scale(2)')
+            assert.strictEqual(d.el.style.webkitTransform, 'scale(2)')
+        })
+
+        it('should auto prefix styles', function () {
+            var d = mockDirective('style')
+            d.arg = '$transform'
+            d.bind()
+            assert.ok(d.prefixed)
+            assert.strictEqual(d.prop, 'transform')
+            var val = 'scale(2)'
+            d.update(val)
+            assert.strictEqual(d.el.style.transform, val)
+            assert.strictEqual(d.el.style.webkitTransform, val)
+            assert.strictEqual(d.el.style.mozTransform, val)
+            assert.strictEqual(d.el.style.msTransform, val)
+        })
+
+    })
+
 })
 
 function mockDirective (dirName, tag, type) {
