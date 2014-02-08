@@ -8,16 +8,18 @@
 
 Vue.js is a library for building interactive web interfaces. It provides the benefits of MVVM data binding and a composable component system with a simple and flexible API. You should try it out if you like:
 
+- Intuitive API that simply makes sense
 - Extendable Data bindings
 - Plain JavaScript objects as models
-- Intuitive API that simply makes sense
-- The flexibility to mix & match small libraries for a custom front-end stack
+- Building interface by composing reusable components
+- Flexibility to mix & match small libraries for a custom front-end stack
 
 It's really really easy to get started. Seriously, it's so easy:
 
 ``` html
 <div id="demo">
     {{message}}
+    <input v-model="message">
 </div>
 ```
 
@@ -30,7 +32,7 @@ var demo = new Vue({
 })
 ```
 
-But there's much more to it, and it will make your life developing interfaces so much easier. For more details, guides and API reference, visit [vuejs.org](http://vuejs.org).
+To check out the live demo, guides and API reference, visit [vuejs.org](http://vuejs.org).
 
 ## Browser Support
 
