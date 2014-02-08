@@ -66,7 +66,7 @@ describe('UNIT: API', function () {
 
         var dirTest
         
-        it('should create custom directive with set function only', function () {
+        it('should create custom directive with update() function only', function () {
             var testId = 'directive-1',
                 msg = 'wowow'
             Vue.directive('test', function (value) {
@@ -106,6 +106,21 @@ describe('UNIT: API', function () {
             assert.strictEqual(el.getAttribute(testId + 'update'), msg + 'update', 'should have called update()')
             vm.$destroy() // assuming this works
             assert.notOk(el.getAttribute(testId + 'bind'), 'should have called unbind()')
+        })
+
+        it('should create literal directive if given option', function () {
+            var called = false
+            Vue.directive('test-literal', {
+                isLiteral: true,
+                bind: function () {
+                    called = true
+                    assert.strictEqual(this.value, 'hihi')
+                }
+            })
+            new Vue({
+                template: '<div v-test-literal="hihi"></div>'
+            })
+            assert.ok(called)
         })
 
         it('should return directive object/fn if only one arg is given', function () {
