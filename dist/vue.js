@@ -1,3 +1,8 @@
+/*
+ Vue.js v0.8.3
+ (c) 2014 Evan You
+ License: MIT
+*/
 ;(function(){
 'use strict';
 
@@ -3538,8 +3543,8 @@ module.exports = {
         var prop = this.prop
         this.el.style[prop] = value
         if (this.prefixed) {
-            var i = prefixes.length,
-                prop = prop.charAt(0).toUpperCase() + prop.slice(1)
+            prop = prop.charAt(0).toUpperCase() + prop.slice(1)
+            var i = prefixes.length
             while (i--) {
                 this.el.style[prefixes[i] + prop] = value
             }

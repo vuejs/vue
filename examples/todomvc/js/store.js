@@ -1,9 +1,13 @@
-var todoStorage = (function () {
+/*jshint unused:false */
 
-    var STORAGE_KEY = 'todos-vuejs',
-        todos = null
-        
-    return {
+(function (exports) {
+
+    'use strict'
+
+    var STORAGE_KEY = 'todos-vuejs'
+    var todos = null
+
+    exports.todoStorage = {
         fetch: function () {
             if (!todos) {
                 todos = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]')
@@ -14,4 +18,5 @@ var todoStorage = (function () {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(todos))
         }
     }
-}())
+
+})(window)
