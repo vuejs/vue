@@ -73,8 +73,8 @@ var utils = module.exports = {
     },
 
     /**
-     *  Make sure only strings and numbers are output to html
-     *  output empty string is value is not string or number
+     *  Make sure only strings,numbers and objects are output to html
+     *  output empty string is value is not string or number or object
      */
     toText: function (value) {
         /* jshint eqeqeq: false */
@@ -82,7 +82,7 @@ var utils = module.exports = {
             typeof value === 'boolean' ||
             (typeof value === 'number' && value == value)) // deal with NaN
             ? value
-            : ''
+            : (value !== null && typeof value === 'object' ? JSON.stringify(value) : '')
     },
 
     /**
