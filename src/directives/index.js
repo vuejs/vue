@@ -12,7 +12,11 @@ module.exports = {
     style     : require('./style'),
 
     attr: function (value) {
-        this.el.setAttribute(this.arg, value)
+        if (value || value === 0) {
+            this.el.setAttribute(this.arg, value)
+        } else {
+            this.el.removeAttribute(this.arg)
+        }
     },
 
     text: function (value) {
