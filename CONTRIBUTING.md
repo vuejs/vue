@@ -4,7 +4,8 @@ Hi! I'm really excited that you are interested in contributing to Vue.js. Before
 
 ## Pull Request Checklist
 
-- Work in a topic branch and merge against `dev`.
+- Checkout a topic branch from `dev` and merge back against `dev`.
+- Work in the `src` folder and **DO NOT** checkin `dist` in the commits.
 - Squash the commit if there are too many small ones.
 - Follow the [code style](#code-style).
 - Make sure the default grunt task passes. (see [development setup](#development-setup))
