@@ -326,7 +326,7 @@ CompilerProto.compile = function (node, root) {
  */
 CompilerProto.compileNode = function (node) {
     var i, j,
-        attrs = node.attributes,
+        attrs = slice.call(node.attributes),
         prefix = config.prefix + '-'
     // parse if has attributes
     if (attrs && attrs.length) {
