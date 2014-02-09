@@ -674,7 +674,7 @@ var utils = module.exports = {
             typeof value === 'boolean' ||
             (typeof value === 'number' && value == value)) // deal with NaN
             ? value
-            : ''
+            : (value !== null && typeof value === 'object' ? JSON.stringify(value) : '')
     },
 
     /**

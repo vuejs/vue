@@ -110,11 +110,13 @@ describe('UNIT: Utils', function () {
         })
         
         it('should output empty string if value is not string or number', function () {
-            assert.strictEqual(txt({}), '')
-            assert.strictEqual(txt([]), '')
             assert.strictEqual(txt(undefined), '')
             assert.strictEqual(txt(null), '')
             assert.strictEqual(txt(NaN), '')
+        })
+
+        it('should stringify value if is object', function () {
+            assert.strictEqual(txt({foo:"bar"}), '{"foo":"bar"}')
         })
 
     })
