@@ -1,5 +1,5 @@
 /*
- Vue.js v0.8.3
+ Vue.js v0.8.4
  (c) 2014 Evan You
  License: MIT
 */
@@ -1152,7 +1152,7 @@ CompilerProto.compile = function (node, root) {
  */
 CompilerProto.compileNode = function (node) {
     var i, j,
-        attrs = node.attributes,
+        attrs = slice.call(node.attributes),
         prefix = config.prefix + '-'
     // parse if has attributes
     if (attrs && attrs.length) {
@@ -1259,9 +1259,9 @@ CompilerProto.bindDirective = function (directive) {
     // keep track of it so we can unbind() later
     this.dirs.push(directive)
 
-    // for a simple directive, simply call its bind() or _update()
+    // for empty or literal directives, simply call its bind()
     // and we're done.
-    if (directive.isEmpty) {
+    if (directive.isEmpty || directive.isLiteral) {
         if (directive.bind) directive.bind()
         return
     }
@@ -2187,6 +2187,13 @@ function Directive (definition, expression, rawKey, compiler, node) {
     // empty expression, we're done.
     if (isEmpty) {
         this.isEmpty = true
+        return
+    }
+
+    // for literal directives, all we need
+    // is the expression as the value.
+    if (this.isLiteral) {
+        this.value = expression.trim()
         return
     }
 
