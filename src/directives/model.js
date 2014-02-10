@@ -1,6 +1,19 @@
 var utils = require('../utils'),
     isIE9 = navigator.userAgent.indexOf('MSIE 9.0') > 0
 
+/**
+ *  Returns an array of values from a multiple select
+ */
+function getMultipleSelectOptions (select) {
+    return Array.prototype.filter
+        .call(select.options, function (option) {
+            return option.selected
+        })
+        .map(function (option) {
+            return option.value || option.text
+        })
+}
+
 module.exports = {
 
     bind: function () {
@@ -21,17 +34,22 @@ module.exports = {
                 : 'input'
 
         // determine the attribute to change when updating
-        var attr = self.attr = type === 'checkbox'
+        self.attr = type === 'checkbox'
             ? 'checked'
             : (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA')
                 ? 'value'
                 : 'innerHTML'
 
+        // select[multiple] support
+        if(tag === 'SELECT' && el.hasAttribute('multiple')) {
+            this.multi = true
+        }
+
         var compositionLock = false
-        this.cLock = function () {
+        self.cLock = function () {
             compositionLock = true
         }
-        this.cUnlock = function () {
+        self.cUnlock = function () {
             compositionLock = false
         }
         el.addEventListener('compositionstart', this.cLock)
@@ -48,10 +66,10 @@ module.exports = {
                 // so that after vm.$set changes the input
                 // value we can put the cursor back at where it is
                 var cursorPos
-                try {
-                    cursorPos = el.selectionStart
-                } catch (e) {}
-                self.vm.$set(self.key, el[attr])
+                try { cursorPos = el.selectionStart } catch (e) {}
+
+                self._set()
+
                 // since updates are async
                 // we need to reset cursor position async too
                 utils.nextTick(function () {
@@ -64,7 +82,9 @@ module.exports = {
                 if (compositionLock) return
                 // no filters, don't let it trigger update()
                 self.lock = true
-                self.vm.$set(self.key, el[attr])
+
+                self._set()
+
                 utils.nextTick(function () {
                     self.lock = false
                 })
@@ -90,29 +110,45 @@ module.exports = {
         }
     },
 
+    _set: function () {
+        this.vm.$set(
+            this.key, this.multi
+                ? getMultipleSelectOptions(this.el)
+                : this.el[this.attr]
+        )
+    },
+
     update: function (value) {
-        if (this.lock) return
         /* jshint eqeqeq: false */
-        var self = this,
-            el   = self.el
+        if (this.lock) return
+        var el = this.el
         if (el.tagName === 'SELECT') { // select dropdown
-            // setting <select>'s value in IE9 doesn't work
-            var o = el.options,
-                i = o.length,
-                index = -1
-            while (i--) {
-                if (o[i].value == value) {
-                    index = i
-                    break
-                }
+            el.selectedIndex = -1
+            if(this.multi && Array.isArray(value)) {
+                value.forEach(this.updateSelect, this)
+            } else {
+                this.updateSelect(value)
             }
-            o.selectedIndex = index
         } else if (el.type === 'radio') { // radio button
             el.checked = value == el.value
         } else if (el.type === 'checkbox') { // checkbox
             el.checked = !!value
         } else {
-            el[self.attr] = utils.toText(value)
+            el[this.attr] = utils.toText(value)
+        }
+    },
+
+    updateSelect: function (value) {
+        /* jshint eqeqeq: false */
+        // setting <select>'s value in IE9 doesn't work
+        // we have to manually loop through the options
+        var options = this.el.options,
+            i = options.length
+        while (i--) {
+            if (options[i].value == value) {
+                options[i].selected = true
+                break
+            }
         }
     },
 

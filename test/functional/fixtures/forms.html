@@ -20,6 +20,13 @@
                 <option>b</option>
             </select>
 
+            <select id="multi" v-model="multipleSelect" name="multi" multiple>
+                <option>a</option>
+                <option>b</option>
+                <option>c</option>
+                <option>d</option>
+            </select>
+
             <textarea name="textarea" v-model="textarea"></textarea>
 
         </form>
@@ -29,6 +36,7 @@
             <p class="checkbox">{{checked}}</p>
             <p class="radio">{{radio}}</p>
             <p class="select">{{select}}</p>
+            <p class="multipleSelect">{{multipleSelect}}</p>
             <p class="textarea">{{textarea}}</p>
         </div>
 
@@ -41,6 +49,7 @@
                     checked: true,
                     radio: 'b',
                     select: 'b',
+                    multipleSelect: ['a','c'],
                     textarea: 'more text'
                 }
             })
