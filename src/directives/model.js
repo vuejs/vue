@@ -1,5 +1,21 @@
 var utils = require('../utils'),
-    isIE9 = navigator.userAgent.indexOf('MSIE 9.0') > 0
+    isIE9 = navigator.userAgent.indexOf('MSIE 9.0') > 0,
+
+    getMultipleSelectOptions = function(select) {
+
+        var result = [],
+            options = select && select.options,
+            length = options.length;
+
+        for (var i = 0; i < length; i++) {
+            if (options[i].selected) {
+                result.push(options[i].value || options[i].text);
+            }
+        }
+
+        return result;
+    }
+
 
 module.exports = {
 
@@ -27,6 +43,10 @@ module.exports = {
                 ? 'value'
                 : 'innerHTML'
 
+        if( tag === 'SELECT' && el.hasAttribute('multiple') ) {
+            attr = getMultipleSelectOptions;
+        }
+
         var compositionLock = false
         this.cLock = function () {
             compositionLock = true
@@ -51,7 +71,7 @@ module.exports = {
                 try {
                     cursorPos = el.selectionStart
                 } catch (e) {}
-                self.vm.$set(self.key, el[attr])
+                self.vm.$set(self.key, typeof attr === 'function' ? attr(el) : el[attr])
                 // since updates are async
                 // we need to reset cursor position async too
                 utils.nextTick(function () {
@@ -64,7 +84,8 @@ module.exports = {
                 if (compositionLock) return
                 // no filters, don't let it trigger update()
                 self.lock = true
-                self.vm.$set(self.key, el[attr])
+                self.vm.$set(self.key, typeof attr === 'function' ? attr(el) : el[attr])
+
                 utils.nextTick(function () {
                     self.lock = false
                 })
@@ -100,13 +121,39 @@ module.exports = {
             var o = el.options,
                 i = o.length,
                 index = -1
-            while (i--) {
-                if (o[i].value == value) {
-                    index = i
-                    break
+            
+            // <select> has multiple options
+            if( el.hasAttribute('multiple') ) {
+
+                // reset the options to blank
+                el.selectedIndex = -1;
+
+                // Convert value to array if not and map
+                (typeof value === 'object'? value : [value])
+                    .forEach(function(multiple_value){
+                        
+                        i = o.length;
+                        
+                        while (i--) {
+                            if (o[i].value == multiple_value) {
+                                o[i].selected = true;
+                                break
+                            }
+                        }
+                        
+                    });
+
+            } else {
+                while (i--) {
+                    if (o[i].value == value) {
+                        index = i
+                        break
+                    }
                 }
+                console.log('Updating index');
+                o.selectedIndex = index
             }
-            o.selectedIndex = index
+
         } else if (el.type === 'radio') { // radio button
             el.checked = value == el.value
         } else if (el.type === 'checkbox') { // checkbox
