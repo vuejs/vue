@@ -289,16 +289,17 @@ describe('UNIT: Directive', function () {
             assert.strictEqual(unbound, false)
         })
 
-        it('should call _unbind() if it has an element', function () {
+        it('should call _unbind() and null everything if it has an element', function () {
             d.el = true
-            d.unbind(true)
+            d.unbind()
             assert.strictEqual(unbound, true)
-            assert.ok(d.el)
+            assert.ok(d.el === null && d.vm === null && d.binding === null && d.compiler === null)
         })
 
-        it('should null everything if it\'s called for VM destruction', function () {
+        it('should not execute if called more than once', function () {
+            unbound = false
             d.unbind()
-            assert.ok(d.el === null && d.vm === null && d.binding === null && d.compiler === null)
+            assert.notOk(unbound)
         })
 
     })

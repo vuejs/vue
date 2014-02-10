@@ -22,7 +22,7 @@ module.exports = {
     },
 
     update: function (handler) {
-        this.unbind(true)
+        this.reset()
         if (typeof handler !== 'function') {
             return utils.warn('Directive "on" expects a function value.')
         }
@@ -72,9 +72,13 @@ module.exports = {
         }
     },
 
-    unbind: function (update) {
+    reset: function () {
         this.el.removeEventListener(this.arg, this.handler)
         this.handler = null
-        if (!update) this.el.vue_viewmodel = null
+    },
+
+    unbind: function () {
+        this.reset()
+        this.el.vue_viewmodel = null
     }
 }

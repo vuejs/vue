@@ -653,6 +653,9 @@ CompilerProto.destroy = function () {
 
     compiler.execHook('beforeDestroy')
 
+    // unobserve data
+    Observer.unobserve(compiler.data, '', compiler.observer)
+
     // unbind all direcitves
     i = directives.length
     while (i--) {
@@ -660,7 +663,8 @@ CompilerProto.destroy = function () {
         // if this directive is an instance of an external binding
         // e.g. a directive that refers to a variable on the parent VM
         // we need to remove it from that binding's instances
-        if (!dir.isEmpty && dir.binding.compiler !== compiler) {
+        // * empty and literal bindings do not have binding.
+        if (dir.binding && dir.binding.compiler !== compiler) {
             instances = dir.binding.instances
             if (instances) instances.splice(instances.indexOf(dir), 1)
         }
@@ -673,13 +677,10 @@ CompilerProto.destroy = function () {
         exps[i].unbind()
     }
 
-    // unbind/unobserve all own bindings
+    // unbind all own bindings
     for (key in bindings) {
         binding = bindings[key]
         if (binding) {
-            if (binding.root) {
-                Observer.unobserve(binding.value, binding.key, compiler.observer)
-            }
             binding.unbind()
         }
     }

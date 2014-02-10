@@ -370,7 +370,7 @@ describe('UNIT: ViewModel', function () {
             dirUnbindCalled = false,
             expUnbindCalled = false,
             bindingUnbindCalled = false,
-            unobserveCalled = 0,
+            unobserveCalled = false,
             elRemoved = false
 
         var dirMock = {
@@ -388,14 +388,6 @@ describe('UNIT: ViewModel', function () {
             test: {
                 root: true,
                 key: 'test',
-                value: {
-                    __observer__: {
-                        off: function () {
-                            unobserveCalled++
-                            return this
-                        }
-                    }
-                },
                 unbind: function () {
                     bindingUnbindCalled = true
                 }
@@ -411,12 +403,21 @@ describe('UNIT: ViewModel', function () {
                     afterDestroyCalled = true
                 }
             },
+            data: {
+                __observer__: {
+                    off: function () {
+                        unobserveCalled = true
+                        return this
+                    }
+                }
+            },
             observer: {
                 off: function () {
                     observerOffCalled = true
                 },
                 proxies: {
-                    'test.': {}
+                    'test.': {},
+                    '': {}
                 }
             },
             emitter: {
@@ -464,6 +465,10 @@ describe('UNIT: ViewModel', function () {
             assert.ok(emitterOffCalled)
         })
 
+        it('should unobserve the data', function () {
+            assert.ok(unobserveCalled)
+        })
+
         it('should unbind all directives', function () {
             assert.ok(dirUnbindCalled)
         })
@@ -478,7 +483,6 @@ describe('UNIT: ViewModel', function () {
 
         it('should unbind and unobserve own bindings', function () {
             assert.ok(bindingUnbindCalled)
-            assert.strictEqual(unobserveCalled, 3)
         })
 
         it('should remove self from parentCompiler', function () {

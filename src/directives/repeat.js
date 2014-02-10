@@ -118,7 +118,7 @@ module.exports = {
 
     update: function (collection, init) {
 
-        this.unbind(true)
+        this.reset()
         // attach an object to container to hold handlers
         this.container.vue_dHandlers = utils.hash()
         // if initiating with an empty collection, we need to
@@ -173,7 +173,7 @@ module.exports = {
             ctn = this.container,
             vms = this.vms,
             col = this.collection,
-            ref, item
+            ref, item, primitive
 
         // append node into DOM first
         // so v-if can get access to parentNode
@@ -188,6 +188,11 @@ module.exports = {
             transition(el, 1, function () {
                 ctn.insertBefore(el, ref)
             }, this.compiler)
+            // wrap primitive element in an object
+            if (utils.typeOf(data) !== 'Object') {
+                primitive = true
+                data = { value: data }
+            }
         }
 
         item = new this.Ctor({
@@ -207,6 +212,14 @@ module.exports = {
             item.$destroy()
         } else {
             vms.splice(index, 0, item)
+            // for primitive values, listen for value change
+            if (primitive) {
+                data.__observer__.on('set', function (key, val) {
+                    if (key === 'value') {
+                        col[item.$index] = val
+                    }
+                })
+            }
             // in case `$destroy` is called directly on a repeated vm
             // make sure the vm's data is properly removed
             item.$compiler.observer.on('hook:afterDestroy', function () {
@@ -225,7 +238,7 @@ module.exports = {
         }
     },
 
-    unbind: function () {
+    reset: function () {
         if (this.childId) {
             delete this.vm.$[this.childId]
         }
@@ -242,5 +255,9 @@ module.exports = {
             ctn.removeEventListener(handlers[key].event, handlers[key])
         }
         ctn.vue_dHandlers = null
+    },
+
+    unbind: function () {
+        this.reset()
     }
 }

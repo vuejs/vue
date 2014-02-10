@@ -152,16 +152,12 @@ DirProto.applyFilters = function (value) {
 
 /**
  *  Unbind diretive
- *  @ param {Boolean} update
- *    Sometimes we call unbind before an update (i.e. not destroy)
- *    just to teardown previous stuff, in that case we do not want
- *    to null everything.
  */
-DirProto.unbind = function (update) {
+DirProto.unbind = function () {
     // this can be called before the el is even assigned...
-    if (!this.el) return
-    if (this._unbind) this._unbind(update)
-    if (!update) this.vm = this.el = this.binding = this.compiler = null
+    if (!this.el || !this.vm) return
+    if (this._unbind) this._unbind()
+    this.vm = this.el = this.binding = this.compiler = null
 }
 
 // exposed methods ------------------------------------------------------------
