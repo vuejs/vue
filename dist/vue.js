@@ -1,5 +1,5 @@
 /*
- Vue.js v0.8.4
+ Vue.js v0.8.5
  (c) 2014 Evan You
  License: MIT
 */
@@ -441,6 +441,31 @@ ViewModel.transition = function (id, transition) {
     return this
 }
 
+/**
+ *  Expose internal modules for plugins
+ */
+ViewModel.require = function (path) {
+    return require('./' + path)
+}
+
+/**
+ *  Expose an interface for plugins
+ */
+ViewModel.use = function (plugin) {
+    if (typeof plugin === 'string') {
+        try {
+            plugin = require(plugin)
+        } catch (e) {
+            return utils.warn('Cannot find plugin: ' + plugin)
+        }
+    }
+    if (typeof plugin === 'function') {
+        plugin(ViewModel)
+    } else if (plugin.install) {
+        plugin.install(ViewModel)
+    }
+}
+
 ViewModel.extend = extend
 ViewModel.nextTick = utils.nextTick
 
@@ -665,16 +690,19 @@ var utils = module.exports = {
     },
 
     /**
-     *  Make sure only strings and numbers are output to html
-     *  output empty string is value is not string or number
+     *  Make sure only strings, booleans, numbers and
+     *  objects are output to html. otherwise, ouput empty string.
      */
     toText: function (value) {
         /* jshint eqeqeq: false */
-        return (typeof value === 'string' ||
-            typeof value === 'boolean' ||
-            (typeof value === 'number' && value == value)) // deal with NaN
-            ? value
-            : ''
+        var type = typeof value
+        return (type === 'string' ||
+            type === 'boolean' ||
+            (type === 'number' && value == value)) // deal with NaN
+                ? value
+                : type === 'object' && value !== null
+                    ? JSON.stringify(value)
+                    : ''
     },
 
     /**
@@ -1479,6 +1507,9 @@ CompilerProto.destroy = function () {
 
     compiler.execHook('beforeDestroy')
 
+    // unobserve data
+    Observer.unobserve(compiler.data, '', compiler.observer)
+
     // unbind all direcitves
     i = directives.length
     while (i--) {
@@ -1486,7 +1517,8 @@ CompilerProto.destroy = function () {
         // if this directive is an instance of an external binding
         // e.g. a directive that refers to a variable on the parent VM
         // we need to remove it from that binding's instances
-        if (!dir.isEmpty && dir.binding.compiler !== compiler) {
+        // * empty and literal bindings do not have binding.
+        if (dir.binding && dir.binding.compiler !== compiler) {
             instances = dir.binding.instances
             if (instances) instances.splice(instances.indexOf(dir), 1)
         }
@@ -1499,13 +1531,10 @@ CompilerProto.destroy = function () {
         exps[i].unbind()
     }
 
-    // unbind/unobserve all own bindings
+    // unbind all own bindings
     for (key in bindings) {
         binding = bindings[key]
         if (binding) {
-            if (binding.root) {
-                Observer.unobserve(binding.value, binding.key, compiler.observer)
-            }
             binding.unbind()
         }
     }
@@ -1863,53 +1892,60 @@ methods.forEach(function (method) {
     }, !hasProto)
 })
 
-// Augment it with several convenience methods
-var extensions = {
-    remove: function (index) {
-        if (typeof index === 'function') {
-            var i = this.length,
-                removed = []
-            while (i--) {
-                if (index(this[i])) {
-                    removed.push(this.splice(i, 1)[0])
-                }
-            }
-            return removed.reverse()
-        } else {
-            if (typeof index !== 'number') {
-                index = this.indexOf(index)
-            }
-            if (index > -1) {
-                return this.splice(index, 1)[0]
+/**
+ *  Convenience method to remove an element in an Array
+ *  This will be attached to observed Array instances
+ */
+function removeElement (index) {
+    if (typeof index === 'function') {
+        var i = this.length,
+            removed = []
+        while (i--) {
+            if (index(this[i])) {
+                removed.push(this.splice(i, 1)[0])
             }
         }
-    },
-    replace: function (index, data) {
-        if (typeof index === 'function') {
-            var i = this.length,
-                replaced = [],
-                replacer
-            while (i--) {
-                replacer = index(this[i])
-                if (replacer !== undefined) {
-                    replaced.push(this.splice(i, 1, replacer)[0])
-                }
-            }
-            return replaced.reverse()
-        } else {
-            if (typeof index !== 'number') {
-                index = this.indexOf(index)
-            }
-            if (index > -1) {
-                return this.splice(index, 1, data)[0]
-            }
+        return removed.reverse()
+    } else {
+        if (typeof index !== 'number') {
+            index = this.indexOf(index)
+        }
+        if (index > -1) {
+            return this.splice(index, 1)[0]
         }
     }
 }
 
-for (var method in extensions) {
-    def(ArrayProxy, method, extensions[method], !hasProto)
+/**
+ *  Convenience method to replace an element in an Array
+ *  This will be attached to observed Array instances
+ */
+function replaceElement (index, data) {
+    if (typeof index === 'function') {
+        var i = this.length,
+            replaced = [],
+            replacer
+        while (i--) {
+            replacer = index(this[i])
+            if (replacer !== undefined) {
+                replaced.push(this.splice(i, 1, replacer)[0])
+            }
+        }
+        return replaced.reverse()
+    } else {
+        if (typeof index !== 'number') {
+            index = this.indexOf(index)
+        }
+        if (index > -1) {
+            return this.splice(index, 1, data)[0]
+        }
+    }
 }
+
+// Augment the ArrayProxy with convenience methods
+def(ArrayProxy, 'remove', removeElement, !hasProto)
+def(ArrayProxy, 'set', replaceElement, !hasProto)
+def(ArrayProxy, 'replace', replaceElement, !hasProto)
 
 /**
  *  Watch an Object, recursive.
@@ -2294,16 +2330,12 @@ DirProto.applyFilters = function (value) {
 
 /**
  *  Unbind diretive
- *  @ param {Boolean} update
- *    Sometimes we call unbind before an update (i.e. not destroy)
- *    just to teardown previous stuff, in that case we do not want
- *    to null everything.
  */
-DirProto.unbind = function (update) {
+DirProto.unbind = function () {
     // this can be called before the el is even assigned...
-    if (!this.el) return
-    if (this._unbind) this._unbind(update)
-    if (!update) this.vm = this.el = this.binding = this.compiler = null
+    if (!this.el || !this.vm) return
+    if (this._unbind) this._unbind()
+    this.vm = this.el = this.binding = this.compiler = null
 }
 
 // exposed methods ------------------------------------------------------------
@@ -2346,9 +2378,11 @@ Directive.parse = function (dirname, expression, compiler, node) {
 module.exports = Directive
 });
 require.register("vue/src/exp-parser.js", function(exports, require, module){
-var utils = require('./utils'),
-    stringSaveRE = /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/g,
-    stringRestoreRE = /"(\d+)"/g
+var utils           = require('./utils'),
+    stringSaveRE    = /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/g,
+    stringRestoreRE = /"(\d+)"/g,
+    constructorRE   = new RegExp('constructor'.split('').join('[\'"+, ]*')),
+    unicodeRE       = /\\u\d\d\d\d/
 
 // Variable extraction scooped from https://github.com/RubyLouvre/avalon
 
@@ -2457,6 +2491,11 @@ module.exports = {
      *  created as bindings.
      */
     parse: function (exp, compiler) {
+        // unicode and 'constructor' are not allowed for XSS security.
+        if (unicodeRE.test(exp) || constructorRE.test(exp)) {
+            utils.warn('Unsafe expression: ' + exp)
+            return function () {}
+        }
         // extract variable names
         var vars = getVariables(exp)
         if (!vars.length) {
@@ -2892,7 +2931,11 @@ module.exports = {
     style     : require('./style'),
 
     attr: function (value) {
-        this.el.setAttribute(this.arg, value)
+        if (value || value === 0) {
+            this.el.setAttribute(this.arg, value)
+        } else {
+            this.el.removeAttribute(this.arg)
+        }
     },
 
     text: function (value) {
@@ -3104,7 +3147,7 @@ module.exports = {
 
     update: function (collection, init) {
 
-        this.unbind(true)
+        this.reset()
         // attach an object to container to hold handlers
         this.container.vue_dHandlers = utils.hash()
         // if initiating with an empty collection, we need to
@@ -3159,7 +3202,7 @@ module.exports = {
             ctn = this.container,
             vms = this.vms,
             col = this.collection,
-            ref, item
+            ref, item, primitive
 
         // append node into DOM first
         // so v-if can get access to parentNode
@@ -3174,6 +3217,11 @@ module.exports = {
             transition(el, 1, function () {
                 ctn.insertBefore(el, ref)
             }, this.compiler)
+            // wrap primitive element in an object
+            if (utils.typeOf(data) !== 'Object') {
+                primitive = true
+                data = { value: data }
+            }
         }
 
         item = new this.Ctor({
@@ -3193,6 +3241,14 @@ module.exports = {
             item.$destroy()
         } else {
             vms.splice(index, 0, item)
+            // for primitive values, listen for value change
+            if (primitive) {
+                data.__observer__.on('set', function (key, val) {
+                    if (key === 'value') {
+                        col[item.$index] = val
+                    }
+                })
+            }
             // in case `$destroy` is called directly on a repeated vm
             // make sure the vm's data is properly removed
             item.$compiler.observer.on('hook:afterDestroy', function () {
@@ -3211,7 +3267,7 @@ module.exports = {
         }
     },
 
-    unbind: function () {
+    reset: function () {
         if (this.childId) {
             delete this.vm.$[this.childId]
         }
@@ -3228,6 +3284,10 @@ module.exports = {
             ctn.removeEventListener(handlers[key].event, handlers[key])
         }
         ctn.vue_dHandlers = null
+    },
+
+    unbind: function () {
+        this.reset()
     }
 }
 });
@@ -3256,7 +3316,7 @@ module.exports = {
     },
 
     update: function (handler) {
-        this.unbind(true)
+        this.reset()
         if (typeof handler !== 'function') {
             return utils.warn('Directive "on" expects a function value.')
         }
@@ -3306,16 +3366,33 @@ module.exports = {
         }
     },
 
-    unbind: function (update) {
+    reset: function () {
         this.el.removeEventListener(this.arg, this.handler)
         this.handler = null
-        if (!update) this.el.vue_viewmodel = null
+    },
+
+    unbind: function () {
+        this.reset()
+        this.el.vue_viewmodel = null
     }
 }
 });
 require.register("vue/src/directives/model.js", function(exports, require, module){
 var utils = require('../utils'),
     isIE9 = navigator.userAgent.indexOf('MSIE 9.0') > 0
+
+/**
+ *  Returns an array of values from a multiple select
+ */
+function getMultipleSelectOptions (select) {
+    return Array.prototype.filter
+        .call(select.options, function (option) {
+            return option.selected
+        })
+        .map(function (option) {
+            return option.value || option.text
+        })
+}
 
 module.exports = {
 
@@ -3337,17 +3414,22 @@ module.exports = {
                 : 'input'
 
         // determine the attribute to change when updating
-        var attr = self.attr = type === 'checkbox'
+        self.attr = type === 'checkbox'
             ? 'checked'
             : (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA')
                 ? 'value'
                 : 'innerHTML'
 
+        // select[multiple] support
+        if(tag === 'SELECT' && el.hasAttribute('multiple')) {
+            this.multi = true
+        }
+
         var compositionLock = false
-        this.cLock = function () {
+        self.cLock = function () {
             compositionLock = true
         }
-        this.cUnlock = function () {
+        self.cUnlock = function () {
             compositionLock = false
         }
         el.addEventListener('compositionstart', this.cLock)
@@ -3364,10 +3446,10 @@ module.exports = {
                 // so that after vm.$set changes the input
                 // value we can put the cursor back at where it is
                 var cursorPos
-                try {
-                    cursorPos = el.selectionStart
-                } catch (e) {}
-                self.vm.$set(self.key, el[attr])
+                try { cursorPos = el.selectionStart } catch (e) {}
+
+                self._set()
+
                 // since updates are async
                 // we need to reset cursor position async too
                 utils.nextTick(function () {
@@ -3380,7 +3462,9 @@ module.exports = {
                 if (compositionLock) return
                 // no filters, don't let it trigger update()
                 self.lock = true
-                self.vm.$set(self.key, el[attr])
+
+                self._set()
+
                 utils.nextTick(function () {
                     self.lock = false
                 })
@@ -3406,29 +3490,45 @@ module.exports = {
         }
     },
 
+    _set: function () {
+        this.vm.$set(
+            this.key, this.multi
+                ? getMultipleSelectOptions(this.el)
+                : this.el[this.attr]
+        )
+    },
+
     update: function (value) {
-        if (this.lock) return
         /* jshint eqeqeq: false */
-        var self = this,
-            el   = self.el
+        if (this.lock) return
+        var el = this.el
         if (el.tagName === 'SELECT') { // select dropdown
-            // setting <select>'s value in IE9 doesn't work
-            var o = el.options,
-                i = o.length,
-                index = -1
-            while (i--) {
-                if (o[i].value == value) {
-                    index = i
-                    break
-                }
+            el.selectedIndex = -1
+            if(this.multi && Array.isArray(value)) {
+                value.forEach(this.updateSelect, this)
+            } else {
+                this.updateSelect(value)
             }
-            o.selectedIndex = index
         } else if (el.type === 'radio') { // radio button
             el.checked = value == el.value
         } else if (el.type === 'checkbox') { // checkbox
             el.checked = !!value
         } else {
-            el[self.attr] = utils.toText(value)
+            el[this.attr] = utils.toText(value)
+        }
+    },
+
+    updateSelect: function (value) {
+        /* jshint eqeqeq: false */
+        // setting <select>'s value in IE9 doesn't work
+        // we have to manually loop through the options
+        var options = this.el.options,
+            i = options.length
+        while (i--) {
+            if (options[i].value == value) {
+                options[i].selected = true
+                break
+            }
         }
     },
 
