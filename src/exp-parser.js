@@ -1,6 +1,7 @@
 var utils = require('./utils'),
     stringSaveRE = /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/g,
-    stringRestoreRE = /"(\d+)"/g
+    stringRestoreRE = /"(\d+)"/g,
+    constructorRE = /(^|\.)constructor\(/
 
 // Variable extraction scooped from https://github.com/RubyLouvre/avalon
 
@@ -109,6 +110,10 @@ module.exports = {
      *  created as bindings.
      */
     parse: function (exp, compiler) {
+        if (constructorRE.test(exp)) {
+            utils.warn('Unsafe expression: ' + exp)
+            return function () {}
+        }
         // extract variable names
         var vars = getVariables(exp)
         if (!vars.length) {

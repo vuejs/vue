@@ -1,6 +1,21 @@
 describe('UNIT: Expression Parser', function () {
 
-    var ExpParser = require('vue/src/exp-parser')
+    var ExpParser = require('vue/src/exp-parser'),
+        utils = require('vue/src/utils'),
+        oldWarn = utils.warn
+
+    var warnSpy = {
+        warned: false,
+        swapWarn: function () {
+            utils.warn = function () {
+                warnSpy.warned = true
+            }
+        },
+        resetWarn: function () {
+            utils.warn = oldWarn
+            warnSpy.warned = false
+        }
+    }
     
     var testCases = [
         {
@@ -72,6 +87,50 @@ describe('UNIT: Expression Parser', function () {
 
     testCases.forEach(describeCase)
 
+    // extra case for invalid expressions
+    describe('invalid expression', function () {
+
+        before(warnSpy.swapWarn)
+        
+        it('should capture the error and warn', function () {
+            function noop () {}
+            ExpParser.parse('a + "fsef', {
+                createBinding: noop,
+                hasKey: noop,
+                vm: {
+                    $compiler: {
+                        bindings: {},
+                        createBinding: noop
+                    },
+                    $data: {}
+                }
+            })
+            assert.ok(warnSpy.warned)
+        })
+
+        after(warnSpy.resetWarn)
+
+    })
+
+    describe('Basic XSS protection', function () {
+        
+        var cases = [{
+            xss: true,
+            exp: "constructor.constructor('alert(1)')()",
+            vm: {},
+            expectedValue: undefined
+        },
+        {
+            xss: true,
+            exp: "\"\".toString.constructor.constructor('alert(1)')()",
+            vm: {},
+            expectedValue: undefined
+        }]
+
+        cases.forEach(describeCase)
+
+    })
+
     function describeCase (testCase) {
         describe(testCase.exp, function () {
 
@@ -91,52 +150,41 @@ describe('UNIT: Expression Parser', function () {
                         }
                     }
                 },
-                getter = ExpParser.parse(testCase.exp, compilerMock),
                 vm     = testCase.vm,
-                vars   = testCase.paths || Object.keys(vm)
+                vars   = testCase.paths || Object.keys(vm),
+                getter
 
-            it('should get correct paths', function () {
-                if (!vars.length) return
-                assert.strictEqual(caughtMissingPaths.length, vars.length)
-                for (var i = 0; i < vars.length; i++) {
-                    assert.strictEqual(vars[i], caughtMissingPaths[i])
-                }
+            if (testCase.xss) {
+                before(warnSpy.swapWarn)
+                after(warnSpy.resetWarn)
+            }
+
+            before(function () {
+                getter = ExpParser.parse(testCase.exp, compilerMock)
             })
 
-            it('should generate correct getter function', function () {
+            if (!testCase.xss) {
+                it('should get correct paths', function () {
+                    if (!vars.length) return
+                    assert.strictEqual(caughtMissingPaths.length, vars.length)
+                    for (var i = 0; i < vars.length; i++) {
+                        assert.strictEqual(vars[i], caughtMissingPaths[i])
+                    }
+                })
+            }
+
+            it('getter function should return expected value', function () {
                 var value = getter.call(vm)
                 assert.strictEqual(value, testCase.expectedValue)
             })
 
+            if (testCase.xss) {
+                it('should have warned', function () {
+                    assert.ok(warnSpy.warned)
+                })
+            }
+
         })
     }
-
-    // extra case for invalid expressions
-    describe('invalid expression', function () {
-        
-        it('should capture the error and warn', function () {
-            var utils = require('vue/src/utils'),
-                oldWarn = utils.warn,
-                warned = false
-            utils.warn = function () {
-                warned = true
-            }
-            function noop () {}
-            ExpParser.parse('a + "fsef', {
-                createBinding: noop,
-                hasKey: noop,
-                vm: {
-                    $compiler: {
-                        bindings: {},
-                        createBinding: noop
-                    },
-                    $data: {}
-                }
-            })
-            assert.ok(warned)
-            utils.warn = oldWarn
-        })
-
-    })
 
 })
