@@ -61,12 +61,15 @@ describe('UNIT: Directives', function () {
             assert.strictEqual(dir.el.textContent, 'true')
         })
 
+        it('should work with objects', function () {
+            dir.update({foo:"bar"})
+            assert.strictEqual(dir.el.textContent, '{"foo":"bar"}')
+        })
+
         it('should be empty with other stuff', function () {
             dir.update(null)
             assert.strictEqual(dir.el.textContent, '')
             dir.update(undefined)
-            assert.strictEqual(dir.el.textContent, '')
-            dir.update({a:123})
             assert.strictEqual(dir.el.textContent, '')
             dir.update(function () {})
             assert.strictEqual(dir.el.textContent, '')
@@ -94,12 +97,15 @@ describe('UNIT: Directives', function () {
             assert.strictEqual(dir.el.textContent, 'true')
         })
 
+        it('should work with objects', function () {
+            dir.update({foo:"bar"})
+            assert.strictEqual(dir.el.textContent, '{"foo":"bar"}')
+        })
+
         it('should be empty with other stuff', function () {
             dir.update(null)
             assert.strictEqual(dir.el.innerHTML, '')
             dir.update(undefined)
-            assert.strictEqual(dir.el.innerHTML, '')
-            dir.update({a:123})
             assert.strictEqual(dir.el.innerHTML, '')
             dir.update(function () {})
             assert.strictEqual(dir.el.innerHTML, '')
