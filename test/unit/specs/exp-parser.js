@@ -112,20 +112,34 @@ describe('UNIT: Expression Parser', function () {
 
     })
 
-    describe('Basic XSS protection', function () {
+    describe('XSS protection', function () {
         
-        var cases = [{
-            xss: true,
-            exp: "constructor.constructor('alert(1)')()",
-            vm: {},
-            expectedValue: undefined
-        },
-        {
-            xss: true,
-            exp: "\"\".toString.constructor.constructor('alert(1)')()",
-            vm: {},
-            expectedValue: undefined
-        }]
+        var cases = [
+            {
+                xss: true,
+                exp: "constructor.constructor('alert(1)')()",
+                vm: {},
+                expectedValue: undefined
+            },
+            {
+                xss: true,
+                exp: "\"\".toString.constructor.constructor('alert(1)')()",
+                vm: {},
+                expectedValue: undefined
+            },
+            {
+                xss: true,
+                exp: "\"\".toString['cons' + 'tructor']['cons' + 'tructor']('alert(1)')()",
+                vm: {},
+                expectedValue: undefined
+            },
+            {
+                xss: true,
+                exp: "\"\".toString['\\u0063ons' + 'tructor']['\\u0063ons' + 'tructor']('alert(1)')()",
+                vm: {},
+                expectedValue: undefined
+            }
+        ]
 
         cases.forEach(describeCase)
 
