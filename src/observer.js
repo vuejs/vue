@@ -41,53 +41,60 @@ methods.forEach(function (method) {
     }, !hasProto)
 })
 
-// Augment it with several convenience methods
-var extensions = {
-    remove: function (index) {
-        if (typeof index === 'function') {
-            var i = this.length,
-                removed = []
-            while (i--) {
-                if (index(this[i])) {
-                    removed.push(this.splice(i, 1)[0])
-                }
-            }
-            return removed.reverse()
-        } else {
-            if (typeof index !== 'number') {
-                index = this.indexOf(index)
-            }
-            if (index > -1) {
-                return this.splice(index, 1)[0]
+/**
+ *  Convenience method to remove an element in an Array
+ *  This will be attached to observed Array instances
+ */
+function removeElement (index) {
+    if (typeof index === 'function') {
+        var i = this.length,
+            removed = []
+        while (i--) {
+            if (index(this[i])) {
+                removed.push(this.splice(i, 1)[0])
             }
         }
-    },
-    replace: function (index, data) {
-        if (typeof index === 'function') {
-            var i = this.length,
-                replaced = [],
-                replacer
-            while (i--) {
-                replacer = index(this[i])
-                if (replacer !== undefined) {
-                    replaced.push(this.splice(i, 1, replacer)[0])
-                }
-            }
-            return replaced.reverse()
-        } else {
-            if (typeof index !== 'number') {
-                index = this.indexOf(index)
-            }
-            if (index > -1) {
-                return this.splice(index, 1, data)[0]
-            }
+        return removed.reverse()
+    } else {
+        if (typeof index !== 'number') {
+            index = this.indexOf(index)
+        }
+        if (index > -1) {
+            return this.splice(index, 1)[0]
         }
     }
 }
 
-for (var method in extensions) {
-    def(ArrayProxy, method, extensions[method], !hasProto)
+/**
+ *  Convenience method to replace an element in an Array
+ *  This will be attached to observed Array instances
+ */
+function replaceElement (index, data) {
+    if (typeof index === 'function') {
+        var i = this.length,
+            replaced = [],
+            replacer
+        while (i--) {
+            replacer = index(this[i])
+            if (replacer !== undefined) {
+                replaced.push(this.splice(i, 1, replacer)[0])
+            }
+        }
+        return replaced.reverse()
+    } else {
+        if (typeof index !== 'number') {
+            index = this.indexOf(index)
+        }
+        if (index > -1) {
+            return this.splice(index, 1, data)[0]
+        }
+    }
 }
+
+// Augment the ArrayProxy with convenience methods
+def(ArrayProxy, 'remove', removeElement, !hasProto)
+def(ArrayProxy, 'set', replaceElement, !hasProto)
+def(ArrayProxy, 'replace', replaceElement, !hasProto)
 
 /**
  *  Watch an Object, recursive.
