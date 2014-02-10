@@ -8,6 +8,7 @@ casper.test.begin('Forms', 10, function (test) {
         test.assertField('checkbox', true)
         test.assertField('radio', 'b')
         test.assertField('select', 'b')
+        test.assertField('multipleSelect', ['a','c'])
         test.assertField('textarea', 'more text')
     })
     .then(function () {
@@ -16,6 +17,7 @@ casper.test.begin('Forms', 10, function (test) {
             'checkbox': false,
             'radio': 'a',
             'select': 'a',
+            'multipleSelect': ['b','d'],
             'textarea': 'more changed text'
         })
     })
@@ -24,6 +26,7 @@ casper.test.begin('Forms', 10, function (test) {
         test.assertSelectorHasText('.checkbox', 'false')
         test.assertSelectorHasText('.radio', 'a')
         test.assertSelectorHasText('.select', 'a')
+        test.assertSelectorHasText('.multipleSelect', "['a','c']")
         test.assertSelectorHasText('.textarea', 'more changed text')
     })
     .run(function () {
