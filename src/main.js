@@ -65,6 +65,31 @@ ViewModel.transition = function (id, transition) {
     return this
 }
 
+/**
+ *  Expose internal modules for plugins
+ */
+ViewModel.require = function (path) {
+    return require('./' + path)
+}
+
+/**
+ *  Expose an interface for plugins
+ */
+ViewModel.use = function (plugin) {
+    if (typeof plugin === 'string') {
+        try {
+            plugin = require(plugin)
+        } catch (e) {
+            return utils.warn('Cannot find plugin: ' + plugin)
+        }
+    }
+    if (typeof plugin === 'function') {
+        plugin(ViewModel)
+    } else if (plugin.install) {
+        plugin.install(ViewModel)
+    }
+}
+
 ViewModel.extend = extend
 ViewModel.nextTick = utils.nextTick
 

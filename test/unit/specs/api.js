@@ -37,6 +37,40 @@ describe('UNIT: API', function () {
 
     })
 
+    describe('require()', function () {
+        
+        it('should expose internal modules', function () {
+            var c = Vue.require('config'),
+                cc = require('vue/src/config')
+            assert.strictEqual(c, cc)
+        })
+
+    })
+
+    describe('use()', function () {
+        
+        it('should install a plugin via its install function', function () {
+            var called = false
+            Vue.use({
+                install: function (vue) {
+                    called = true
+                    assert.strictEqual(vue, Vue)
+                }
+            })
+            assert.ok(called)
+        })
+
+        it('should install a plugin if its a function itself', function () {
+            var called = false
+            Vue.use(function (vue) {
+                called = true
+                assert.strictEqual(vue, Vue)
+            })
+            assert.ok(called)
+        })
+
+    })
+
     describe('filter()', function () {
 
         var reverse = function (input) {
