@@ -1,6 +1,6 @@
 /* global items */
 
-casper.test.begin('Repeated Items', 44, function (test) {
+casper.test.begin('Repeated Items', 41, function (test) {
     
     casper
     .start('./fixtures/repeated-items.html')
@@ -82,13 +82,6 @@ casper.test.begin('Repeated Items', 44, function (test) {
         test.assertSelectorHasText('.count', '2')
         test.assertSelectorHasText('.item:nth-child(1)', '0 6')
         test.assertSelectorHasText('.item:nth-child(2)', '1 7')
-    })
-    .thenClick('.item:nth-child(1)', function () {
-        test.assertSelectorHasText('.count', '1')
-        test.assertSelectorHasText('.item:nth-child(1)', '0 7')
-        test.assertEval(function () {
-            return items.length === 1 && items[0].title === '7'
-        })
     })
     .run(function () {
         test.done()

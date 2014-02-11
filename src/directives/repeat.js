@@ -222,9 +222,9 @@ module.exports = {
             }
             // in case `$destroy` is called directly on a repeated vm
             // make sure the vm's data is properly removed
-            item.$compiler.observer.on('hook:afterDestroy', function () {
-                col.remove(data)
-            })
+            // item.$compiler.observer.on('hook:afterDestroy', function () {
+            //     col.remove(data)
+            // })
         }
     },
 

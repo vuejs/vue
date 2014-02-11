@@ -20,7 +20,7 @@
             </p>
             <p>Total items: <span class="count" v-text="items.length"></span></p>
             <ul>
-                <li class="item" v-repeat="items" v-on="click:this.$destroy()">
+                <li class="item" v-repeat="items">
                     {{$index}} {{title}}
                 </li>
             </ul>
