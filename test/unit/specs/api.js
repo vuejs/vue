@@ -142,13 +142,13 @@ describe('UNIT: API', function () {
             assert.notOk(el.getAttribute(testId + 'bind'), 'should have called unbind()')
         })
 
-        it('should create literal directive if given option', function () {
+        it('should not bind directive if no update() is provided', function () {
             var called = false
             Vue.directive('test-literal', {
-                isLiteral: true,
                 bind: function () {
                     called = true
-                    assert.strictEqual(this.value, 'hihi')
+                    assert.strictEqual(this.expression, 'hihi')
+                    assert.notOk(this.binding)
                 }
             })
             new Vue({

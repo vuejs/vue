@@ -1,5 +1,3 @@
-/* global items */
-
 casper.test.begin('Repeated Items', 41, function (test) {
     
     casper

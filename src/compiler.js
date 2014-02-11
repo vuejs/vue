@@ -435,7 +435,7 @@ CompilerProto.bindDirective = function (directive) {
 
     // for empty or literal directives, simply call its bind()
     // and we're done.
-    if (directive.isEmpty || directive.isLiteral) {
+    if (directive.isEmpty || !directive._update) {
         if (directive.bind) directive.bind()
         return
     }

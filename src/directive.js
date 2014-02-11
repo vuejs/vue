@@ -48,13 +48,6 @@ function Directive (definition, expression, rawKey, compiler, node) {
         return
     }
 
-    // for literal directives, all we need
-    // is the expression as the value.
-    if (this.isLiteral) {
-        this.value = expression.trim()
-        return
-    }
-
     this.expression = expression.trim()
     this.rawKey     = rawKey
     
