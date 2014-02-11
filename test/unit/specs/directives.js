@@ -723,6 +723,24 @@ describe('UNIT: Directives', function () {
 
     })
 
+    describe('cloak', function () {
+        
+        it('should remove itself after the instance is ready', function () {
+            // it doesn't make sense to test with a mock for this one, so...
+            var v = new Vue({
+                template: '<div v-cloak></div>',
+                replace: true,
+                ready: function () {
+                    // this hook is attached before the v-cloak hook
+                    // so it should still have the attribute
+                    assert.ok(this.$el.hasAttribute('v-cloak'))
+                }
+            })
+            assert.notOk(v.$el.hasAttribute('v-cloak'))
+        })
+
+    })
+
 })
 
 function mockDirective (dirName, tag, type) {
