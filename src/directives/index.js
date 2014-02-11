@@ -51,8 +51,8 @@ module.exports = {
         bind: function () {
             var el = this.el
             this.compiler.observer.once('hook:ready', function () {
-                el.removeAttribute(config.prefix + '-cloak')                
-            })   
+                el.removeAttribute(config.prefix + '-cloak')
+            })
         }
     }
 
