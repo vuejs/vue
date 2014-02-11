@@ -4,6 +4,7 @@
         <title>Todo</title>
         <meta charset="utf-8">
         <link rel="stylesheet" type="text/css" href="bower_components/todomvc-common/base.css">
+        <style> [v-cloak] { display: none; } </style>
     </head>
     <body>
         <section id="todoapp">
@@ -18,7 +19,7 @@
                     v-on="keyup:addTodo | key enter"
                 >
             </header>
-            <section id="main" v-show="todos.length">
+            <section id="main" v-show="todos.length" v-cloak>
                 <input
                     id="toggle-all"
                     type="checkbox"
@@ -58,7 +59,7 @@
                     </li>
                 </ul>
             </section>
-            <footer id="footer" v-show="todos.length">
+            <footer id="footer" v-show="todos.length" v-cloak>
                 <span id="todo-count">
                     <strong v-text="remaining"></strong> {{remaining | pluralize item}} left
                 </span>

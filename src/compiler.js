@@ -330,7 +330,7 @@ CompilerProto.compileNode = function (node) {
         prefix = config.prefix + '-'
     // parse if has attributes
     if (attrs && attrs.length) {
-        var attr, isDirective, exps, exp, directive
+        var attr, isDirective, exps, exp, directive, dirname
         // loop through all attributes
         i = attrs.length
         while (i--) {
@@ -346,7 +346,8 @@ CompilerProto.compileNode = function (node) {
                 j = exps.length
                 while (j--) {
                     exp = exps[j]
-                    directive = Directive.parse(attr.name.slice(prefix.length), exp, this, node)
+                    dirname = attr.name.slice(prefix.length)
+                    directive = Directive.parse(dirname, exp, this, node)
                     if (directive) {
                         this.bindDirective(directive)
                     }
@@ -362,7 +363,9 @@ CompilerProto.compileNode = function (node) {
                 }
             }
 
-            if (isDirective) node.removeAttribute(attr.name)
+            if (isDirective && dirname !== 'cloak') {
+                node.removeAttribute(attr.name)
+            }
         }
     }
     // recursively compile childNodes

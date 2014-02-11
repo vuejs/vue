@@ -1,4 +1,5 @@
 var utils      = require('../utils'),
+    config     = require('../config'),
     transition = require('../transition')
 
 module.exports = {
@@ -43,6 +44,15 @@ module.exports = {
                 utils.addClass(this.el, value)
                 this.lastVal = value
             }
+        }
+    },
+
+    cloak: {
+        bind: function () {
+            var el = this.el
+            this.compiler.observer.once('hook:ready', function () {
+                el.removeAttribute(config.prefix + '-cloak')                
+            })   
         }
     }
 
