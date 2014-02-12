@@ -266,6 +266,8 @@ function observe (obj, rawPath, observer) {
         },
         set: function (key, val) {
             observer.emit('set', path + key, val)
+            // also notify observer that the object itself chagned
+            if (rawPath) observer.emit('set', rawPath, obj)
         },
         mutate: function (key, val, mutation) {
             // if the Array is a root value

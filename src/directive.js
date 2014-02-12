@@ -120,7 +120,7 @@ function parseFilter (filter, compiler) {
  *  during initialization.
  */
 DirProto.update = function (value, init) {
-    if (!init && value === this.value) return
+    if (!init && value === this.value && utils.typeOf(value) !== 'Object') return
     this.value = value
     if (this._update) {
         this._update(
