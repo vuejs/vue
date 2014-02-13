@@ -1,5 +1,4 @@
 var Observer   = require('../observer'),
-    Emitter    = require('../emitter'),
     utils      = require('../utils'),
     config     = require('../config'),
     transition = require('../transition'),
@@ -136,7 +135,7 @@ module.exports = {
 
         // listen for collection mutation events
         // the collection has been augmented during Binding.set()
-        if (!collection.__observer__) Observer.watchArray(collection, null, new Emitter())
+        if (!collection.__observer__) Observer.watchArray(collection)
         collection.__observer__.on('mutate', this.mutationListener)
 
         // create child-vms and append to DOM
@@ -157,6 +156,7 @@ module.exports = {
         this.queued = true
         var self = this
         setTimeout(function () {
+            if (!self.compiler) return
             self.compiler.parseDeps()
             self.queued = false
         }, 0)

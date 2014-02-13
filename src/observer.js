@@ -32,7 +32,7 @@ var ArrayProxy = Object.create(Array.prototype)
 methods.forEach(function (method) {
     def(ArrayProxy, method, function () {
         var result = Array.prototype[method].apply(this, arguments)
-        this.__observer__.emit('mutate', this.__observer__.path, this, {
+        this.__observer__.emit('mutate', null, this, {
             method: method,
             args: slice.call(arguments),
             result: result
@@ -109,13 +109,12 @@ function watchObject (obj) {
  *  Watch an Array, overload mutation methods
  *  and add augmentations by intercepting the prototype chain
  */
-function watchArray (arr, path) {
+function watchArray (arr) {
     var observer = arr.__observer__
     if (!observer) {
         observer = new Emitter()
         def(arr, '__observer__', observer)
     }
-    observer.path = path
     if (hasProto) {
         arr.__proto__ = ArrayProxy
     } else {
@@ -252,46 +251,61 @@ function ensurePath (obj, key) {
  *  Observe an object with a given path,
  *  and proxy get/set/mutate events to the provided observer.
  */
-function observe (obj, rawPath, observer) {
+function observe (obj, rawPath, parentOb) {
+
     if (!isWatchable(obj)) return
+
     var path = rawPath ? rawPath + '.' : '',
-        ob, alreadyConverted = !!obj.__observer__
+        alreadyConverted = !!obj.__observer__,
+        childOb
+
     if (!alreadyConverted) {
         def(obj, '__observer__', new Emitter())
     }
-    ob = obj.__observer__
-    ob.values = ob.values || utils.hash()
-    observer.proxies = observer.proxies || {}
-    var proxies = observer.proxies[path] = {
+
+    childOb = obj.__observer__
+    childOb.values = childOb.values || utils.hash()
+
+    // setup proxy listeners on the parent observer.
+    // we need to keep reference to them so that they
+    // can be removed when the object is un-observed.
+    parentOb.proxies = parentOb.proxies || {}
+    var proxies = parentOb.proxies[path] = {
         get: function (key) {
-            observer.emit('get', path + key)
+            parentOb.emit('get', path + key)
         },
         set: function (key, val, propagate) {
-            observer.emit('set', path + key, val)
+            parentOb.emit('set', path + key, val)
             // also notify observer that the object itself changed
             // but only do so when it's a immediate property. this
             // avoids duplicate event firing.
             if (rawPath && propagate) {
-                observer.emit('set', rawPath, obj, true)
+                parentOb.emit('set', rawPath, obj, true)
             }
         },
         mutate: function (key, val, mutation) {
             // if the Array is a root value
             // the key will be null
             var fixedPath = key ? path + key : rawPath
-            observer.emit('mutate', fixedPath, val, mutation)
+            parentOb.emit('mutate', fixedPath, val, mutation)
             // also emit set for Array's length when it mutates
             var m = mutation.method
             if (m !== 'sort' && m !== 'reverse') {
-                observer.emit('set', fixedPath + '.length', val.length)
+                parentOb.emit('set', fixedPath + '.length', val.length)
             }
         }
     }
-    ob
+
+    // attach the listeners to the child observer.
+    // now all the events will propagate upwards.
+    childOb
         .on('get', proxies.get)
         .on('set', proxies.set)
         .on('mutate', proxies.mutate)
+
     if (alreadyConverted) {
+        // for objects that have already been converted,
+        // emit set events for everything inside
         emitSet(obj)
     } else {
         var type = typeOf(obj)
@@ -307,14 +321,20 @@ function observe (obj, rawPath, observer) {
  *  Cancel observation, turn off the listeners.
  */
 function unobserve (obj, path, observer) {
+
     if (!obj || !obj.__observer__) return
+
     path = path ? path + '.' : ''
     var proxies = observer.proxies[path]
     if (!proxies) return
+
+    // turn off listeners
     obj.__observer__
         .off('get', proxies.get)
         .off('set', proxies.set)
         .off('mutate', proxies.mutate)
+
+    // remove reference
     observer.proxies[path] = null
 }
 
