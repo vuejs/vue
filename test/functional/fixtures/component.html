@@ -1,51 +1,43 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <title>Component</title>
-        <meta charset="utf-8">
-    </head>
-    <body>
-        <div id="test">
-            <!-- v-component + v-with -->
-            <div id="component-and-with" v-component="avatar" v-with="user"></div>
+<div id="test">
+    <!-- v-component + v-with -->
+    <div id="component-and-with" v-component="avatar" v-with="user"></div>
 
-            <!-- custom element + v-with -->
-            <avatar id="element-and-with" v-with="user"></avatar>
+    <!-- custom element + v-with -->
+    <avatar id="element-and-with" v-with="user"></avatar>
 
-            <!-- v-with alone -->
-            <div id="with" v-with="user">{{hi}} {{name}}</div>
+    <!-- v-with alone -->
+    <div id="with" v-with="user">{{hi}} {{name}}</div>
 
-            <!-- v-component alone -->
-            <div id="component" v-component="simple"></div>
+    <!-- v-component alone -->
+    <div id="component" v-component="simple"></div>
 
-            <!-- custom element alone -->
-            <simple id="element"></simple>
-        </div>
-        <script src="../../../dist/vue.js"></script>
-        <script>
+    <!-- custom element alone -->
+    <simple id="element"></simple>
+</div>
 
-            Vue.config({debug: true})
+<script src="../../../dist/vue.js"></script>
+<script>
 
-            Vue.component('avatar', {
-                template: '{{hi}} {{name}}',
-                ready: function () {
-                    console.log(JSON.stringify(this))
-                }
-            })
+    Vue.config({debug: true})
 
-            Vue.component('simple', {
-                template: '{{hi}} {{user.name}}'
-            })
+    Vue.component('avatar', {
+        template: '{{hi}} {{name}}',
+        ready: function () {
+            console.log(JSON.stringify(this))
+        }
+    })
 
-            var app = new Vue({
-                el: '#test',
-                data: {
-                    hi: '123',
-                    user: {
-                        name: 'Jack'
-                    }
-                }
-            })
-        </script>
-    </body>
-</html>
+    Vue.component('simple', {
+        template: '{{hi}} {{user.name}}'
+    })
+
+    var app = new Vue({
+        el: '#test',
+        data: {
+            hi: '123',
+            user: {
+                name: 'Jack'
+            }
+        }
+    })
+</script>

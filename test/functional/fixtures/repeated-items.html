@@ -1,86 +1,78 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <title>Vue.js repeated items</title>
-        <meta charset="utf-8">
-        <script src="../../../dist/vue.js"></script>
-    </head>
-    <body>
-        <div id="app">
-            <p>
-                <button class="push" v-on="click:push">push</button>
-                <button class="pop" v-on="click:pop">pop</button>
-                <button class="shift" v-on="click:shift">shift</button>
-                <button class="unshift" v-on="click:unshift">unshift</button>
-                <button class="splice" v-on="click:splice">splice</button>
-                <button class="remove" v-on="click:remove">remove</button>
-                <button class="replace" v-on="click:replace">replace</button>
-                <button class="sort" v-on="click:sort">sort</button>
-                <button class="reverse" v-on="click:reverse">reverse</button>
-            </p>
-            <p>Total items: <span class="count" v-text="items.length"></span></p>
-            <ul>
-                <li class="item" v-repeat="items">
-                    {{$index}} {{title}}
-                </li>
-            </ul>
-        </div>
-        <script>
+<div id="app">
+    <p>
+        <button class="push" v-on="click:push">push</button>
+        <button class="pop" v-on="click:pop">pop</button>
+        <button class="shift" v-on="click:shift">shift</button>
+        <button class="unshift" v-on="click:unshift">unshift</button>
+        <button class="splice" v-on="click:splice">splice</button>
+        <button class="remove" v-on="click:remove">remove</button>
+        <button class="replace" v-on="click:replace">replace</button>
+        <button class="sort" v-on="click:sort">sort</button>
+        <button class="reverse" v-on="click:reverse">reverse</button>
+    </p>
+    <p>Total items: <span class="count" v-text="items.length"></span></p>
+    <ul>
+        <li class="item" v-repeat="items">
+            {{$index}} {{title}}
+        </li>
+    </ul>
+</div>
 
-            //Vue.config({debug: true})
+<script src="../../../dist/vue.js"></script>
+<script>
 
-            var items = [
-                { title: 'A'},
-                { title: 'B'},
-                { title: 'C'}
-            ]
+    //Vue.config({debug: true})
 
-            var demo = new Vue({
-                el: '#app',
-                data: {
-                    items: items,
-                    push: function () {
-                        this.items.push({ title: getChar() })
-                    },
-                    pop: function () {
-                        this.items.pop()
-                    },
-                    shift: function () {
-                        this.items.shift()
-                    },
-                    unshift: function () {
-                        this.items.unshift({ title: getChar() })
-                    },
-                    splice: function () {
-                        this.items.splice(1, 1, { title: getChar() }, { title: getChar() })
-                    },
-                    replace: function () {
-                        this.items.replace(getPos(), { title: getChar() })
-                    },
-                    remove: function () {
-                        this.items.remove(getPos())
-                    },
-                    sort: function () {
-                        this.items.sort(function (a, b) {
-                            return a.title.charCodeAt(0) - b.title.charCodeAt(0)
-                        })
-                    },
-                    reverse: function () {
-                        this.items.reverse()
-                    }
-                }
-            })
+    var items = [
+        { title: 'A'},
+        { title: 'B'},
+        { title: 'C'}
+    ]
 
-            var getChar = (function () {
-                var count = 0
-                return function () {
-                    return (count++).toString()
-                }
-            })()
-
-            function getPos () {
-                return items.length - 1
+    var demo = new Vue({
+        el: '#app',
+        data: {
+            items: items,
+            push: function () {
+                this.items.push({ title: getChar() })
+            },
+            pop: function () {
+                this.items.pop()
+            },
+            shift: function () {
+                this.items.shift()
+            },
+            unshift: function () {
+                this.items.unshift({ title: getChar() })
+            },
+            splice: function () {
+                this.items.splice(1, 1, { title: getChar() }, { title: getChar() })
+            },
+            replace: function () {
+                this.items.replace(getPos(), { title: getChar() })
+            },
+            remove: function () {
+                this.items.remove(getPos())
+            },
+            sort: function () {
+                this.items.sort(function (a, b) {
+                    return a.title.charCodeAt(0) - b.title.charCodeAt(0)
+                })
+            },
+            reverse: function () {
+                this.items.reverse()
             }
-        </script>
-    </body>
-</html>
+        }
+    })
+
+    var getChar = (function () {
+        var count = 0
+        return function () {
+            return (count++).toString()
+        }
+    })()
+
+    function getPos () {
+        return items.length - 1
+    }
+</script>

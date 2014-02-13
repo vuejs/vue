@@ -1,54 +1,46 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <title>SEED share data</title>
-        <meta charset="utf-8">
-        <script src="../../../dist/vue.js"></script>
-    </head>
-    <body>
-        <div id="a">{{shared.msg}}</div>
-        <div id="b">{{shared.msg}}</div>
-        <form id="c">
-            <input name="input" v-model="shared.msg" type="text">
-        </form>
-        <div id="d">
-            <pre>{{source}}</pre>
-        </div>
-        <script>
-            Vue.config({debug:true})
-            var shared = {
-                msg: 'hello'
+<div id="a">{{shared.msg}}</div>
+<div id="b">{{shared.msg}}</div>
+<form id="c">
+    <input name="input" v-model="shared.msg" type="text">
+</form>
+<div id="d">
+    <pre>{{source}}</pre>
+</div>
+
+<script src="../../../dist/vue.js"></script>
+<script>
+    Vue.config({debug:true})
+    var shared = {
+        msg: 'hello'
+    }
+    new Vue({
+        el: '#a',
+        data: {
+            shared: shared
+        }
+    })
+    new Vue({
+        el: '#b',
+        data: {
+            shared: shared
+        }
+    })
+    new Vue({
+        lazy: true,
+        el: '#c',
+        data: {
+            shared: shared
+        }
+    })
+    new Vue({
+        el: '#d',
+        data: {
+            shared: shared
+        },
+        computed: {
+            source: function () {
+                return JSON.stringify(this.shared)
             }
-            new Vue({
-                el: '#a',
-                data: {
-                    shared: shared
-                }
-            })
-            new Vue({
-                el: '#b',
-                data: {
-                    shared: shared
-                }
-            })
-            new Vue({
-                lazy: true,
-                el: '#c',
-                data: {
-                    shared: shared
-                }
-            })
-            new Vue({
-                el: '#d',
-                data: {
-                    shared: shared
-                },
-                computed: {
-                    source: function () {
-                        return JSON.stringify(this.shared)
-                    }
-                }
-            })
-        </script>
-    </body>
-</html>
+        }
+    })
+</script>

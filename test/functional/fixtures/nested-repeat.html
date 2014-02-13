@@ -1,40 +1,32 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <title>Nested repeat</title>
-        <meta charset="utf-8">
-        <script src="../../../dist/vue.js"></script>
-    </head>
-    <body>
-        <div id="test">
+<div id="test">
+    <ul>
+        <li v-repeat="items" v-class="'list-' + $index">
             <ul>
                 <li v-repeat="items" v-class="'list-' + $index">
-                    <ul>
-                        <li v-repeat="items" v-class="'list-' + $index">
-                            {{$parent.$index + '.' + $index + ' : ' + $parent.title + '&lt;-' + title}}
-                        </li>
-                    </ul>
+                    {{$parent.$index + '.' + $index + ' : ' + $parent.title + '&lt;-' + title}}
                 </li>
             </ul>
-            <button id="b0" v-on="click: items[0].title = 'hi'">1</button>
-            <button id="b1" v-on="click: items[1].title = 'hi'">2</button>
-            <button id="b0-0" v-on="click: items[0].items[0].title = 'hi'">1.1</button>
-            <button id="b0-1" v-on="click: items[0].items[1].title = 'hi'">1.2</button>
-            <button id="b1-0" v-on="click: items[1].items[0].title = 'hi'">2.1</button>
-            <button id="b1-1" v-on="click: items[1].items[1].title = 'hi'">2.2</button>
-        </div>
-        <script>
-        Vue.config({debug:true})
-        var items = [
-            { title: 0, items: [{title:0}, {title:1}] },
-            { title: 1, items: [{title:0}, {title:1}] }
-        ]
-        new Vue({
-            el: '#test',
-            data: {
-                items: items
-            }
-        })
-        </script>
-    </body>
-</html>
+        </li>
+    </ul>
+    <button id="b0" v-on="click: items[0].title = 'hi'">1</button>
+    <button id="b1" v-on="click: items[1].title = 'hi'">2</button>
+    <button id="b0-0" v-on="click: items[0].items[0].title = 'hi'">1.1</button>
+    <button id="b0-1" v-on="click: items[0].items[1].title = 'hi'">1.2</button>
+    <button id="b1-0" v-on="click: items[1].items[0].title = 'hi'">2.1</button>
+    <button id="b1-1" v-on="click: items[1].items[1].title = 'hi'">2.2</button>
+</div>
+
+<script src="../../../dist/vue.js"></script>
+<script>
+Vue.config({debug:true})
+var items = [
+    { title: 0, items: [{title:0}, {title:1}] },
+    { title: 1, items: [{title:0}, {title:1}] }
+]
+new Vue({
+    el: '#test',
+    data: {
+        items: items
+    }
+})
+</script>

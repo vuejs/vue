@@ -1,46 +1,38 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <title></title>
-        <meta charset="utf-8">
-        <script src="../../../dist/vue.js"></script>
-    </head>
-    <body>
-        <div class="item" v-repeat="items" v-component="item" v-component-id="items" v-on="click:click">
-            {{msg + ' ' + title}}
-        </div>
-        <script>
-            Vue.config({ debug: true })
-            
-            Vue.component('item', {
-                ready: function () {
-                    this.title += ' init'
-                },
-                methods: {
-                    click: function () {
-                        this.title += ' click'
-                    }
-                },
-                data: {
-                    msg: 'msg'
-                },
-                computed: {
-                    reversed: function () {
-                        return this.title.split('').reverse().join('')
-                    }
-                }
-            })
+<div class="item" v-repeat="items" v-component="item" v-component-id="items" v-on="click:click">
+    {{msg + ' ' + title}}
+</div>
 
-            var app = new Vue({
-                el: 'body',
-                data: {
-                    items: [
-                        {title:'a'},
-                        {title:'b'},
-                        {title:'c'}
-                    ]
-                }
-            })
-        </script>
-    </body>
-</html>
+<script src="../../../dist/vue.js"></script>
+<script>
+    Vue.config({ debug: true })
+    
+    Vue.component('item', {
+        ready: function () {
+            this.title += ' init'
+        },
+        methods: {
+            click: function () {
+                this.title += ' click'
+            }
+        },
+        data: {
+            msg: 'msg'
+        },
+        computed: {
+            reversed: function () {
+                return this.title.split('').reverse().join('')
+            }
+        }
+    })
+
+    var app = new Vue({
+        el: 'body',
+        data: {
+            items: [
+                {title:'a'},
+                {title:'b'},
+                {title:'c'}
+            ]
+        }
+    })
+</script>

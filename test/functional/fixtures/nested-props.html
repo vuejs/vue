@@ -1,78 +1,70 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <title></title>
-        <meta charset="utf-8">
-        <script src="../../../dist/vue.js"></script>
-    </head>
-    <body>
-        <div id="a">
-            <h1>a.b.c : <span v-text="a.b.c"></span></h1>
-            <h2>a.c : <span v-text="a.c"></span></h2>
-            <h3>Computed property that concats the two: <span v-text="d"></span></h3>
-            <button class="one" v-on="click:one">one</button>
-            <button class="two" v-on="click:two">two</button>
-            <button class="three" v-on="click:three">three</button>
-            <form id="form"><input name="msg" v-model="msg"></form>
-            <p class="hidden">{{sum}}</p>
-            <button class="four" v-on="click:four">four</button>
-            <button class="empty1" v-on="click:setEmpty">empty a.b</button>
-            <button class="empty2" v-on="click:setEmpty2">empty a</button>
-        </div>
-        <script>
-            Vue.config({debug: true})
-            var data = { c: 555 }
-            var Demo = Vue.extend({
-                lazy: true,
-                created: function () {
-                    this.msg = 'Yoyoyo'
-                    this.a = data
-                },
-                data: {
-                    hidden: {
-                        a: 1,
-                        b: 2
-                    }
-                },
-                computed: {
-                    d: function () {
-                        return this.msg + (this.a.b.c || '') + (this.a.c || '')
-                    },
-                    sum: function () {
-                        return this.hidden.a + this.hidden.b
-                    }
-                },
-                methods: {
-                    one: function () {
-                        this.a = {
-                            c: 1,
-                            b: {
-                                c: 'one'
-                            }
-                        }
-                    },
-                    two: function () {
-                        this.a.b = {
-                            c: 'two'
-                        }
-                        this.a.c = 2
-                    },
-                    three: function () {
-                        this.a.b.c = 'three'
-                        this.a.c = 3
-                    },
-                    four: function () {
-                        this.hidden.a++
-                    },
-                    setEmpty: function () {
-                        this.a.b = {}
-                    },
-                    setEmpty2: function () {
-                        this.a = {}
+<div id="a">
+    <h1>a.b.c : <span v-text="a.b.c"></span></h1>
+    <h2>a.c : <span v-text="a.c"></span></h2>
+    <h3>Computed property that concats the two: <span v-text="d"></span></h3>
+    <button class="one" v-on="click:one">one</button>
+    <button class="two" v-on="click:two">two</button>
+    <button class="three" v-on="click:three">three</button>
+    <form id="form"><input name="msg" v-model="msg"></form>
+    <p class="hidden">{{sum}}</p>
+    <button class="four" v-on="click:four">four</button>
+    <button class="empty1" v-on="click:setEmpty">empty a.b</button>
+    <button class="empty2" v-on="click:setEmpty2">empty a</button>
+</div>
+
+<script src="../../../dist/vue.js"></script>
+<script>
+    Vue.config({debug: true})
+    var data = { c: 555 }
+    var Demo = Vue.extend({
+        lazy: true,
+        created: function () {
+            this.msg = 'Yoyoyo'
+            this.a = data
+        },
+        data: {
+            hidden: {
+                a: 1,
+                b: 2
+            }
+        },
+        computed: {
+            d: function () {
+                return this.msg + (this.a.b.c || '') + (this.a.c || '')
+            },
+            sum: function () {
+                return this.hidden.a + this.hidden.b
+            }
+        },
+        methods: {
+            one: function () {
+                this.a = {
+                    c: 1,
+                    b: {
+                        c: 'one'
                     }
                 }
-            })
-            var app = new Demo({ el: '#a' })
-        </script>
-    </body>
-</html>
+            },
+            two: function () {
+                this.a.b = {
+                    c: 'two'
+                }
+                this.a.c = 2
+            },
+            three: function () {
+                this.a.b.c = 'three'
+                this.a.c = 3
+            },
+            four: function () {
+                this.hidden.a++
+            },
+            setEmpty: function () {
+                this.a.b = {}
+            },
+            setEmpty2: function () {
+                this.a = {}
+            }
+        }
+    })
+    var app = new Demo({ el: '#a' })
+</script>

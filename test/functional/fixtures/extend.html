@@ -1,80 +1,72 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <title></title>
-        <meta charset="utf-8">
-        <script src="../../../dist/vue.js"></script>
-    </head>
-    <body>
-        <div id="log"></div>
-        <div id="test">
-            <div class="dir" v-hola="dirMsg"></div>
-            <div class="filter">{{filterMsg | nodigits}}</div>
-            <div class="partial" v-partial="partial-test"></div>
-            <div class="vm" v-component="vm-test">{{vmMsg}}</div>
-            <div class="vm-w-model" v-component="vm-w-model" v-with="vmData">{{selfMsg + msg}}</div>
-        </div>
-        <div id="child">
-            <div class="cvm" v-component="vm-test">{{vmMsg}}</div>
-        </div>
-        <script>
-            Vue.config({debug:true})
-            var log = document.getElementById('log')
-            var T = Vue.extend({
-                created: function () {
-                    log.textContent += ' T created'  
-                },
-                ready: function () {
-                    log.textContent += ' T ready'
-                },
-                components: {
-                    'vm-test': {
-                        data: {
-                            vmMsg: 'component works'
-                        }
-                    },
-                    'vm-w-model': {
-                        data : {
-                            selfMsg: 'component with model '
-                        }
-                    }
-                },
-                partials: {
-                    'partial-test': '{{partialMsg}}'
-                },
-                directives: {
-                    hola: function (value) {
-                        this.el.innerHTML = value + ' works'
-                    }
-                },
-                filters: {
-                    nodigits: function (value) {
-                        return value.replace(/\d/g, '')
-                    }
-                }
-            })
-            var C = T.extend({
-                created: function () {
-                    log.textContent += ' C created'  
-                },
-                ready: function () {
-                    log.textContent += ' C ready'
-                }
-            })
-            var test = new T({
-                el: '#test',
+<div id="log"></div>
+<div id="test">
+    <div class="dir" v-hola="dirMsg"></div>
+    <div class="filter">{{filterMsg | nodigits}}</div>
+    <div class="partial" v-partial="partial-test"></div>
+    <div class="vm" v-component="vm-test">{{vmMsg}}</div>
+    <div class="vm-w-model" v-component="vm-w-model" v-with="vmData">{{selfMsg + msg}}</div>
+</div>
+<div id="child">
+    <div class="cvm" v-component="vm-test">{{vmMsg}}</div>
+</div>
+
+<script src="../../../dist/vue.js"></script>
+<script>
+    Vue.config({debug:true})
+    var log = document.getElementById('log')
+    var T = Vue.extend({
+        created: function () {
+            log.textContent += ' T created'  
+        },
+        ready: function () {
+            log.textContent += ' T ready'
+        },
+        components: {
+            'vm-test': {
                 data: {
-                    dirMsg: 'directive',
-                    filterMsg: 'fi43l132ter5 w12345orks',
-                    partialMsg: 'partial works',
-                    vmData: {
-                        msg: 'works'
-                    }
+                    vmMsg: 'component works'
                 }
-            })
-            new C({
-                el: '#child'
-            })
-        </script>
-    </body>
-</html>
+            },
+            'vm-w-model': {
+                data : {
+                    selfMsg: 'component with model '
+                }
+            }
+        },
+        partials: {
+            'partial-test': '{{partialMsg}}'
+        },
+        directives: {
+            hola: function (value) {
+                this.el.innerHTML = value + ' works'
+            }
+        },
+        filters: {
+            nodigits: function (value) {
+                return value.replace(/\d/g, '')
+            }
+        }
+    })
+    var C = T.extend({
+        created: function () {
+            log.textContent += ' C created'  
+        },
+        ready: function () {
+            log.textContent += ' C ready'
+        }
+    })
+    var test = new T({
+        el: '#test',
+        data: {
+            dirMsg: 'directive',
+            filterMsg: 'fi43l132ter5 w12345orks',
+            partialMsg: 'partial works',
+            vmData: {
+                msg: 'works'
+            }
+        }
+    })
+    new C({
+        el: '#child'
+    })
+</script>

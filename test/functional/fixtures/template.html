@@ -1,72 +1,64 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <title></title>
-        <meta charset="utf-8">
-        <script src="../../../dist/vue.js"></script>
-    </head>
-    <body>
+<meta charset="utf-8">
 
-        <div id="usa" v-partial="global"></div>
-        <div id="japan">{{> local}}</div>
-        <div id="repeat">{{> repeat}}</div>
+<div id="usa" v-partial="global"></div>
+<div id="japan">{{> local}}</div>
+<div id="repeat">{{> repeat}}</div>
 
-        <script type="text/v-template" id="test">
-            <p>{{hi}}!</p>
-        </script>
+<script type="text/v-template" id="test">
+    <p>{{hi}}!</p>
+</script>
 
-        <script type="text/v-template" id="repeat-template">
-            <p v-repeat="items">{{title}}</p>
-        </script>
+<script type="text/v-template" id="repeat-template">
+    <p v-repeat="items">{{title}}</p>
+</script>
 
-        <script>
+<script src="../../../dist/vue.js"></script>
+<script>
 
-           // Vue.config({debug:true})
+   // Vue.config({debug:true})
 
-            // direct usage
-            var china  = new Vue({
-                id: 'china',
-                template: '#test'
-            })
-            document.body.appendChild(china.$el)
-            // setting value after compile also works,
-            // as long as it has appeared in the template
-            china.hi = '你好'
+    // direct usage
+    var china  = new Vue({
+        id: 'china',
+        template: '#test'
+    })
+    document.body.appendChild(china.$el)
+    // setting value after compile also works,
+    // as long as it has appeared in the template
+    china.hi = '你好'
 
-            // extended usage
-            var Hawaii = Vue.extend({
-                id: 'hawaii',
-                template: '#test'
-            })
-            var hawaii = new Hawaii()
-            document.body.appendChild(hawaii.$el)
-            hawaii.hi = 'Aloha'
+    // extended usage
+    var Hawaii = Vue.extend({
+        id: 'hawaii',
+        template: '#test'
+    })
+    var hawaii = new Hawaii()
+    document.body.appendChild(hawaii.$el)
+    hawaii.hi = 'Aloha'
 
-            // global partial
-            Vue.partial('global', document.querySelector('#test').innerHTML)
-            var usa = new Vue({
-                el: '#usa'
-            })
-            usa.hi = 'Hi dude'
+    // global partial
+    Vue.partial('global', document.querySelector('#test').innerHTML)
+    var usa = new Vue({
+        el: '#usa'
+    })
+    usa.hi = 'Hi dude'
 
-            // direct partial
-            var japan = new Vue({
-                el: '#japan',
-                partials: {
-                    local: '#test'
-                }
-            })
-            japan.hi = 'こんにちは'
+    // direct partial
+    var japan = new Vue({
+        el: '#japan',
+        partials: {
+            local: '#test'
+        }
+    })
+    japan.hi = 'こんにちは'
 
-            var repeat = new Vue({
-                el: '#repeat',
-                partials: {
-                    repeat: '#repeat-template'
-                },
-                data: {
-                    items: [{ title: 'Repeat' }]
-                }
-            })
-        </script>
-    </body>
-</html>
+    var repeat = new Vue({
+        el: '#repeat',
+        partials: {
+            repeat: '#repeat-template'
+        },
+        data: {
+            items: [{ title: 'Repeat' }]
+        }
+    })
+</script>

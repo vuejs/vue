@@ -1,81 +1,74 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Nested Controllers</title>
-    <style type="text/css">
-        div:not(#grandpa) {
-            padding-left: 15px;
-        }
-        p {
-            position: relative;
-        }
-        p:not(.ancestor):before {
-            position: absolute;
-            top: 0;
-            left: -22px;
-            content: "└ ";
-            color: #F00;
-        }
-    </style>
-    <script src="../../../dist/vue.js"></script>
-</head>
-<body>
-    <div id="grandpa" data-name="Andy" data-family="Johnson">
-        <p class="ancestor">{{name}} {{family}}</p>
+<style type="text/css">
+    div:not(#grandpa) {
+        padding-left: 15px;
+    }
+    p {
+        position: relative;
+    }
+    p:not(.ancestor):before {
+        position: absolute;
+        top: 0;
+        left: -22px;
+        content: "└ ";
+        color: #F00;
+    }
+</style>
 
-        <div v-component="man" data-name="Jack">
-            <p class="jack">{{name}}, son of {{$parent.name}}</p>
+<div id="grandpa" data-name="Andy" data-family="Johnson">
+    <p class="ancestor">{{name}} {{family}}</p>
 
-            <div v-component="man" data-name="Mike">
-                <p class="mike">{{name}}, son of {{$parent.name}}</p>
+    <div v-component="man" data-name="Jack">
+        <p class="jack">{{name}}, son of {{$parent.name}}</p>
 
-                <div v-component="offspring" data-name="Tim" class="tim">
-                </div>
+        <div v-component="man" data-name="Mike">
+            <p class="mike">{{name}}, son of {{$parent.name}}</p>
 
-                <div v-component="offspring" data-name="Tom" class="tom">
-                </div>
+            <div v-component="offspring" data-name="Tim" class="tim">
             </div>
 
-            <div v-component="man" data-name="Jason">
-                <p class="jason">{{name}}, son of {{$parent.name}}</p>
+            <div v-component="offspring" data-name="Tom" class="tom">
+            </div>
+        </div>
 
-                <div v-component="offspring" data-name="Andrew" class="andrew">
-                </div>
+        <div v-component="man" data-name="Jason">
+            <p class="jason">{{name}}, son of {{$parent.name}}</p>
+
+            <div v-component="offspring" data-name="Andrew" class="andrew">
             </div>
         </div>
     </div>
+</div>
 
-    <script type="text/v-template" id="v-template-offspring">
-        <p>{{name}}, son of {{$parent.name}}, grandson of {{$parent.$parent.name}}, great-grandson of {{$root.name}}, and offspring of family {{family}}.</p>
-    </script>
-    
-    <script>
-        Vue.config({ debug: true })
+<script type="text/v-template" id="v-template-offspring">
+    <p>{{name}}, son of {{$parent.name}}, grandson of {{$parent.$parent.name}}, great-grandson of {{$root.name}}, and offspring of family {{family}}.</p>
+</script>
 
-        var Man = Vue.extend({
-            created: function () {
-                this.name = this.$el.dataset.name
-                console.log(this.$el)
-                console.log(this.name)
-                var family = this.$el.dataset.family
-                if (family) {
-                    this.family = family
-                }
+<script src="../../../dist/vue.js"></script>
+<script>
+    Vue.config({ debug: true })
+
+    var Man = Vue.extend({
+        created: function () {
+            this.name = this.$el.dataset.name
+            console.log(this.$el)
+            console.log(this.name)
+            var family = this.$el.dataset.family
+            if (family) {
+                this.family = family
             }
-        })
+        }
+    })
 
-        var Offspring = Man.extend({
-            template: document.getElementById('v-template-offspring').innerHTML.trim()
-        })
+    var Offspring = Man.extend({
+        template: document.getElementById('v-template-offspring').innerHTML.trim()
+    })
 
-        Vue
-            .component('man', Man)
-            .component('offspring', Offspring)
+    Vue
+        .component('man', Man)
+        .component('offspring', Offspring)
 
-        new Man({
-            el: '#grandpa'
-        })
-        
-    </script>
-</body>
-</html>
+    new Man({
+        el: '#grandpa'
+    })
+    
+</script>

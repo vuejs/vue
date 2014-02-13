@@ -1,71 +1,64 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <title></title>
-        <meta charset="utf-8">
-        <script src="../../../dist/vue.js"></script>
-        <style type="text/css">
-            input:not(.valid) {
-                outline-color: #f00;
+<style type="text/css">
+    input:not(.valid) {
+        outline-color: #f00;
+    }
+</style>
+
+<div id="test">
+    name: <input type="text" v-model="name | nameValidator" v-class="valid:validation.name" name="name">
+    email: <input type="text" v-model="email | emailValidator" v-class="valid:validation.email" name="email">
+    <a id="go" v-on="click:go">Go</a>
+    <ul>
+        <li class="user" v-repeat="users">
+            {{name}} {{email}}
+        </li>
+    </ul>
+</div>
+
+<script src="../../../dist/vue.js"></script>
+<script>
+    var RE = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    var test = new Vue({
+        el: '#test',
+        filters: {
+            nameValidator: function (val) {
+                this.validation.name = !!val
+                return val
+            },
+            emailValidator: function (val) {
+                this.validation.email = RE.test(val)
+                return val
             }
-        </style>
-    </head>
-    <body>
-        <div id="test">
-            name: <input type="text" v-model="name | nameValidator" v-class="valid:validation.name" name="name">
-            email: <input type="text" v-model="email | emailValidator" v-class="valid:validation.email" name="email">
-            <a id="go" v-on="click:go">Go</a>
-            <ul>
-                <li class="user" v-repeat="users">
-                    {{name}} {{email}}
-                </li>
-            </ul>
-        </div>
-        <script>
-            var RE = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-            var test = new Vue({
-                el: '#test',
-                filters: {
-                    nameValidator: function (val) {
-                        this.validation.name = !!val
-                        return val
-                    },
-                    emailValidator: function (val) {
-                        this.validation.email = RE.test(val)
-                        return val
-                    }
-                },
-                data: {
-                    name: '',
-                    email: '',
-                    users: [],
-                    validation: {
-                        email: false,
-                        name: false
-                    }
-                },
-                computed: {
-                    isValid: function () {
-                        var valid = true
-                        for (var key in this.validation) {
-                            if (!this.validation[key]) {
-                                valid = false
-                            }
-                        }
-                        return valid
-                    }
-                },
-                methods: {
-                    go: function () {
-                        if (this.isValid) {
-                            this.users.push({
-                                name: this.name,
-                                email: this.email
-                            })
-                        }
+        },
+        data: {
+            name: '',
+            email: '',
+            users: [],
+            validation: {
+                email: false,
+                name: false
+            }
+        },
+        computed: {
+            isValid: function () {
+                var valid = true
+                for (var key in this.validation) {
+                    if (!this.validation[key]) {
+                        valid = false
                     }
                 }
-            })
-        </script>
-    </body>
-</html>
+                return valid
+            }
+        },
+        methods: {
+            go: function () {
+                if (this.isValid) {
+                    this.users.push({
+                        name: this.name,
+                        email: this.email
+                    })
+                }
+            }
+        }
+    })
+</script>

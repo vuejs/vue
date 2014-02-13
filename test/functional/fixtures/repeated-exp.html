@@ -1,31 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <title>Repeated Expressions</title>
-        <meta charset="utf-8">
-        <script src="../../../dist/vue.js"></script>
-    </head>
-    <body>
-        <ul id="test">
-            <li
-                v-repeat="items"
-                v-on="click:n++"
-                class="item-{{$index}}"
-            >
-                {{n}}
-            </li>
-        </ul>
-        <script>
-            var app = new Vue({
-                el: '#test',
-                data: {
-                    items: [
-                        { n: 1 },
-                        { n: 2 },
-                        { n: 3 }
-                    ]
-                }
-            })
-        </script>
-    </body>
-</html>
+<ul id="test">
+    <li
+        v-repeat="items"
+        v-on="click:n++"
+        class="item-{{$index}}"
+    >
+        {{n}}
+    </li>
+</ul>
+
+<script src="../../../dist/vue.js"></script>
+<script>
+    var app = new Vue({
+        el: '#test',
+        data: {
+            items: [
+                { n: 1 },
+                { n: 2 },
+                { n: 3 }
+            ]
+        }
+    })
+</script>

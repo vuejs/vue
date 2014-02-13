@@ -1,94 +1,87 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <title></title>
-        <meta charset="utf-8">
-        <script src="../../../dist/vue.js"></script>
-        <style type="text/css">
-            .test {
-                width: 600px;
-                height: 100px;
-                background-color: #f00;
-                padding: 10px;
-                border: 1px solid #000;
-                overflow: hidden;
-                transition: all .2s ease;
-                -moz-transition: all .2s ease;
-                -webkit-transition: all .2s ease;
-            }
-            .v-enter, .v-leave {
-                height: 0;
-                padding-top: 0;
-                padding-bottom: 0;
-                border-top-width: 0;
-                border-bottom-width: 0;
-            }
-            .v-enter {
-                background-color: #00f;
-            }
-            .v-leave {
-                background-color: #0f0;
-            }
-        </style>
-    </head>
-    <body>
-        <div id="test">
-            <div>
-                <button class="button-0" v-on="click:set">0</button>
-                <button class="button-1" v-on="click:set">1</button>
-                <button class="button-2" v-on="click:set">2</button>
-                <button class="push" v-on="click:push">push</button>
-                <button class="pop" v-on="click:pop">pop</button>
-                <button class="splice" v-on="click:splice">splice</button>
-            </div>
-            <div
-                class="test"
-                v-repeat="items"
-                v-if="filter(this)"
-                v-transition
-                v-attr="data-id:a">
-                {{a}}
-            </div>
-            <div
-                class="test"
-                v-repeat="items"
-                v-show="filter(this)"
-                v-transition
-                v-attr="data-id:a">
-                {{a}}
-            </div>
-        </div>
-        <h1 style="margin:0">123</h1>
-        <script>
-            var test = new Vue({
-                el: '#test',
-                data: {
-                    b: 1,
-                    set: function (e) {
-                        this.b = +e.el.textContent
-                    },
-                    push: function () {
-                        this.items.push({a: this.items.length + 1 })  
-                    },
-                    pop: function () {
-                        this.items.pop()  
-                    },
-                    splice: function () {
-                        this.items.splice(0, 1, {a:99})
-                    },
-                    filter: function (item) {
-                        return item.a > this.b
-                    },
-                    items: [
-                        {
-                            a: 1
-                        },
-                        {
-                            a: 2
-                        }
-                    ]
+<style type="text/css">
+    .test {
+        width: 600px;
+        height: 100px;
+        background-color: #f00;
+        padding: 10px;
+        border: 1px solid #000;
+        overflow: hidden;
+        transition: all .2s ease;
+        -moz-transition: all .2s ease;
+        -webkit-transition: all .2s ease;
+    }
+    .v-enter, .v-leave {
+        height: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+        border-top-width: 0;
+        border-bottom-width: 0;
+    }
+    .v-enter {
+        background-color: #00f;
+    }
+    .v-leave {
+        background-color: #0f0;
+    }
+</style>
+
+<div id="test">
+    <div>
+        <button class="button-0" v-on="click:set">0</button>
+        <button class="button-1" v-on="click:set">1</button>
+        <button class="button-2" v-on="click:set">2</button>
+        <button class="push" v-on="click:push">push</button>
+        <button class="pop" v-on="click:pop">pop</button>
+        <button class="splice" v-on="click:splice">splice</button>
+    </div>
+    <div
+        class="test"
+        v-repeat="items"
+        v-if="filter(this)"
+        v-transition
+        v-attr="data-id:a">
+        {{a}}
+    </div>
+    <div
+        class="test"
+        v-repeat="items"
+        v-show="filter(this)"
+        v-transition
+        v-attr="data-id:a">
+        {{a}}
+    </div>
+</div>
+<h1 style="margin:0">123</h1>
+
+<script src="../../../dist/vue.js"></script>
+<script>
+    var test = new Vue({
+        el: '#test',
+        data: {
+            b: 1,
+            set: function (e) {
+                this.b = +e.el.textContent
+            },
+            push: function () {
+                this.items.push({a: this.items.length + 1 })  
+            },
+            pop: function () {
+                this.items.pop()  
+            },
+            splice: function () {
+                this.items.splice(0, 1, {a:99})
+            },
+            filter: function (item) {
+                return item.a > this.b
+            },
+            items: [
+                {
+                    a: 1
+                },
+                {
+                    a: 2
                 }
-            })
-        </script>
-    </body>
-</html>
+            ]
+        }
+    })
+</script>

@@ -1,36 +1,28 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <title>route</title>
-        <meta charset="utf-8">
-        <script src="../../../dist/vue.js"></script>
-    </head>
-    <body>
-        <div v-if="route.hi">Hi! <a href="#ho">Next</a></div>
-        <div v-if="route.ho">Ho! <a href="#ha">Next</a></div>
-        <div v-if="route.ha">Ha! <a href="#hi">Next</a></div>
-        <script>
+<div v-if="route.hi">Hi! <a href="#ho">Next</a></div>
+<div v-if="route.ho">Ho! <a href="#ha">Next</a></div>
+<div v-if="route.ha">Ha! <a href="#hi">Next</a></div>
 
-            var route = {
-                hi: false,
-                ho: false,
-                ha: false
-            }
+<script src="../../../dist/vue.js"></script>
+<script>
 
-            window.addEventListener('hashchange', updateRoute)
-            function updateRoute () {
-                var path = location.hash.slice(1) || 'hi'
-                for (var key in route) {
-                    route[key] = key === path
-                }
-            }
+    var route = {
+        hi: false,
+        ho: false,
+        ha: false
+    }
 
-            var app = new Vue({
-                el: 'body'
-            })
-            app.route = route
+    window.addEventListener('hashchange', updateRoute)
+    function updateRoute () {
+        var path = location.hash.slice(1) || 'hi'
+        for (var key in route) {
+            route[key] = key === path
+        }
+    }
 
-            updateRoute()
-        </script>
-    </body>
-</html>
+    var app = new Vue({
+        el: 'body'
+    })
+    app.route = route
+
+    updateRoute()
+</script>

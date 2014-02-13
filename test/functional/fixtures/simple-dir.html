@@ -1,32 +1,24 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <title></title>
-        <meta charset="utf-8">
-        <script src="../../../dist/vue.js"></script>
-    </head>
-    <body>
-        <div id="hi" v-test v-test2>
-        </div>
-        <p class="one"></p>
-        <p class="two"></p>
-        <script>
-            var a = new Vue({
-                el: '#hi',
-                directives: {
-                    test: {
-                        bind: function () {
-                            document.querySelector('.one').textContent = 'bind'
-                        },
-                        unbind: function () {
-                            document.querySelector('.one').textContent = 'unbind'
-                        }
-                    },
-                    test2: function () {
-                        document.querySelector('.two').textContent = 'bind'
-                    }
+<div id="hi" v-test v-test2>
+</div>
+<p class="one"></p>
+<p class="two"></p>
+
+<script src="../../../dist/vue.js"></script>
+<script>
+    var a = new Vue({
+        el: '#hi',
+        directives: {
+            test: {
+                bind: function () {
+                    document.querySelector('.one').textContent = 'bind'
+                },
+                unbind: function () {
+                    document.querySelector('.one').textContent = 'unbind'
                 }
-            })
-        </script>
-    </body>
-</html>
+            },
+            test2: function () {
+                document.querySelector('.two').textContent = 'bind'
+            }
+        }
+    })
+</script>

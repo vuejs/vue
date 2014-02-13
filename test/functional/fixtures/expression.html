@@ -1,76 +1,68 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <title></title>
-        <meta charset="utf-8">
-        <script src="../../../dist/vue.js"></script>
-    </head>
-    <body>
-        <div id="normal">
-            <p v-text="one + ' ' + two.three + '!'"></p>
-            <input id="one" v-model="one" name="one"> <input id="two" v-model="two.three" name="two">
-            <button v-on="click: this.one = 'clicked'">click</button>
-        </div>
-        <div id="lazy">
-            <p v-text="one + ' ' + two.three + '!'"></p>
-            <form id="form">
-                <input v-model="one" name="three"> <input v-model="two.three" name="four">
-            </form>
-            <button v-on="click: two.three = 'clicked'">click</button>
-        </div>
-        <div id="conditional">
-            <p>{{ok ? yesMsg : noMsg}}</p>
-            <button v-on="click: ok = !ok" class="toggle">toggle</button>
-            <button v-on="click: noMsg = 'Nah'" class="change">change</button>
-        </div>
-        <div id="attrs" data-test="hi {{msg}} ha"></div>
-        <div id="html">html {{{html}}} work</div>
-        <script>
-            Vue.config({debug:true})
+<div id="normal">
+    <p v-text="one + ' ' + two.three + '!'"></p>
+    <input id="one" v-model="one" name="one"> <input id="two" v-model="two.three" name="two">
+    <button v-on="click: this.one = 'clicked'">click</button>
+</div>
+<div id="lazy">
+    <p v-text="one + ' ' + two.three + '!'"></p>
+    <form id="form">
+        <input v-model="one" name="three"> <input v-model="two.three" name="four">
+    </form>
+    <button v-on="click: two.three = 'clicked'">click</button>
+</div>
+<div id="conditional">
+    <p>{{ok ? yesMsg : noMsg}}</p>
+    <button v-on="click: ok = !ok" class="toggle">toggle</button>
+    <button v-on="click: noMsg = 'Nah'" class="change">change</button>
+</div>
+<div id="attrs" data-test="hi {{msg}} ha"></div>
+<div id="html">html {{{html}}} work</div>
 
-            var normal = new Vue({
-                el: '#normal',
-                data: {
-                    one: 'Hello',
-                    two: {
-                        three: 'World'
-                    }
-                }
-            })
+<script src="../../../dist/vue.js"></script>
+<script>
+    Vue.config({debug:true})
 
-            var lazy = new Vue({
-                el: '#lazy',
-                lazy: true,
-                data: {
-                    one: 'Hi',
-                    two: {
-                        three: 'Ho'
-                    }
-                }
-            })
+    var normal = new Vue({
+        el: '#normal',
+        data: {
+            one: 'Hello',
+            two: {
+                three: 'World'
+            }
+        }
+    })
 
-            var conditional = new Vue({
-                el: '#conditional',
-                data: {
-                    ok: true,
-                    yesMsg: 'YES',
-                    noMsg: 'NO'
-                }
-            })
+    var lazy = new Vue({
+        el: '#lazy',
+        lazy: true,
+        data: {
+            one: 'Hi',
+            two: {
+                three: 'Ho'
+            }
+        }
+    })
 
-            var attrs = new Vue({
-                el: '#attrs',
-                data: {
-                    msg: 'ho'
-                }
-            })
+    var conditional = new Vue({
+        el: '#conditional',
+        data: {
+            ok: true,
+            yesMsg: 'YES',
+            noMsg: 'NO'
+        }
+    })
 
-            var html = new Vue({
-                el: '#html',
-                data: {
-                    html: '<p>should</p> <a>probably</a>'
-                }
-            })
-        </script>
-    </body>
-</html>
+    var attrs = new Vue({
+        el: '#attrs',
+        data: {
+            msg: 'ho'
+        }
+    })
+
+    var html = new Vue({
+        el: '#html',
+        data: {
+            html: '<p>should</p> <a>probably</a>'
+        }
+    })
+</script>
