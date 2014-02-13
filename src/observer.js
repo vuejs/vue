@@ -159,7 +159,9 @@ function convert (obj, key) {
             unobserve(oldVal, key, observer)
             values[key] = newVal
             copyPaths(newVal, oldVal)
-            observer.emit('set', key, newVal)
+            // an immediate property should notify its parent
+            // to emit set for itself too
+            observer.emit('set', key, newVal, true)
             observe(newVal, key, observer)
         }
     })
@@ -264,10 +266,14 @@ function observe (obj, rawPath, observer) {
         get: function (key) {
             observer.emit('get', path + key)
         },
-        set: function (key, val) {
+        set: function (key, val, propagate) {
             observer.emit('set', path + key, val)
-            // also notify observer that the object itself chagned
-            if (rawPath) observer.emit('set', rawPath, obj)
+            // also notify observer that the object itself changed
+            // but only do so when it's a immediate property. this
+            // avoids duplicate event firing.
+            if (rawPath && propagate) {
+                observer.emit('set', rawPath, obj, true)
+            }
         },
         mutate: function (key, val, mutation) {
             // if the Array is a root value

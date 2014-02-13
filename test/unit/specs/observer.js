@@ -18,19 +18,25 @@ describe('UNIT: Observer', function () {
             assert.ok(obj.__observer__.values)
         })
 
+        var o1 = { a: 1, b: { c: 2 } }
         it('should emit set events with correct path', setTestFactory({
-            obj: { a: 1, b: { c: 2 } },
+            obj: o1,
             expects: [
                 { key: 'test.a', val: 1 },
-                { key: 'test.b.c', val: 3 }
+                { key: 'test', val: o1, skip: true },
+                { key: 'test.b.c', val: 3 },
+                { key: 'test.b', val: o1.b, skip: true },
+                { key: 'test', val: o1, skip: true }
             ],
             path: 'test'
         }))
 
+        var o2 = { a: 1, b: { c: 2 } }
         it('should emit multiple events when a nested object is set', setTestFactory({
-            obj: { a: 1, b: { c: 2 } },
+            obj: o2,
             expects: [
                 { key: 'test.b', val: { c: 3 } },
+                { key: 'test', val: o2, skip: true },
                 { key: 'test.b.c', val: 3, skip: true }
             ],
             path: 'test'
@@ -432,26 +438,6 @@ describe('UNIT: Observer', function () {
         })
 
     })
-
-    // describe('.copyPaths()', function () {
-        
-    //     it('should ensure path for all paths that start with the given key', function () {
-    //         var key = 'a',
-    //             obj = {},
-    //             paths = {
-    //                 'a.b.c': 1,
-    //                 'a.d': 2,
-    //                 'e.f': 3,
-    //                 'g': 4
-    //             }
-    //         Observer.ensurePaths(key, obj, paths)
-    //         assert.strictEqual(obj.b.c, undefined)
-    //         assert.strictEqual(obj.d, undefined)
-    //         assert.notOk('f' in obj)
-    //         assert.strictEqual(Object.keys(obj).length, 2)
-    //     })
-
-    // })
 
     function setTestFactory (opts) {
         return function () {
