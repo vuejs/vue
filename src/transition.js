@@ -23,7 +23,7 @@ var transition = module.exports = function (el, stage, cb, compiler) {
 
     var changeState = function () {
         cb()
-        compiler.execHook(stage > 0 ? 'enteredView' : 'leftView')
+        compiler.execHook(stage > 0 ? 'attached' : 'detached')
     }
 
     if (compiler.init) {

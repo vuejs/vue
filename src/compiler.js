@@ -20,7 +20,7 @@ var Emitter     = require('./emitter'),
     hooks = [
         'created', 'ready',
         'beforeDestroy', 'afterDestroy',
-        'enteredView', 'leftView'
+        'attached', 'detached'
     ]
 
 /**

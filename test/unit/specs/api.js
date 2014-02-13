@@ -788,17 +788,17 @@ describe('UNIT: API', function () {
 
                 })
 
-                describe('enteredView', function () {
+                describe('attached', function () {
                     
                     it('should be called after enter view', function () {
                         var called1 = false, called2 = false,
                             test = new Vue({
-                                enteredView: function () {
+                                attached: function () {
                                     assert.strictEqual(this.$el.parentNode, document.getElementById('test'))
                                     called1 = true
                                 }
                             })
-                        test.$on('hook:enteredView', function () {
+                        test.$on('hook:attached', function () {
                             called2 = true
                         })
                         test.$appendTo('#test')
@@ -808,17 +808,17 @@ describe('UNIT: API', function () {
 
                 })
 
-                describe('leftView', function () {
+                describe('detached', function () {
                     
                     it('should be called after left view', function () {
                         var called1 = false, called2 = false,
                             test = new Vue({
-                                leftView: function () {
+                                detached: function () {
                                     assert.strictEqual(this.$el.parentNode, null)
                                     called1 = true
                                 }
                             })
-                        test.$on('hook:leftView', function () {
+                        test.$on('hook:detached', function () {
                             called2 = true
                         })
                         document.getElementById('test').appendChild(test.$el)

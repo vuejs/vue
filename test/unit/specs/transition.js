@@ -16,7 +16,7 @@ describe('UNIT: Transition', function () {
             var code = transition(null, 1, c.change, compiler)
             assert.ok(c.called)
             assert.strictEqual(code, codes.INIT)
-            assert.ok(compiler.enteredView)
+            assert.ok(compiler.attached)
         })
 
         it('should skip if no transition is found on the node', function () {
@@ -25,7 +25,7 @@ describe('UNIT: Transition', function () {
                 code = transition(mockEl(), 1, c.change, compiler)
             assert.ok(c.called)
             assert.strictEqual(code, codes.SKIP)
-            assert.ok(compiler.enteredView)
+            assert.ok(compiler.attached)
         })
 
     })
@@ -40,7 +40,7 @@ describe('UNIT: Transition', function () {
                     code = transition(mockEl('css'), 1, c.change, compiler)
                 assert.ok(c.called)
                 assert.strictEqual(code, codes.CSS_SKIP)
-                assert.ok(compiler.enteredView)
+                assert.ok(compiler.attached)
             })
 
             // skip the rest
@@ -83,8 +83,8 @@ describe('UNIT: Transition', function () {
                 assert.strictEqual(code, codes.CSS_E)
             })
 
-            it('should have called enteredView hook', function () {
-                assert.ok(compiler.enteredView)
+            it('should have called attached hook', function () {
+                assert.ok(compiler.attached)
             })
 
         })
@@ -125,8 +125,8 @@ describe('UNIT: Transition', function () {
                 assert.strictEqual(code, codes.CSS_L)
             })
 
-            it('should have called leftView hook', function () {
-                assert.ok(compiler.leftView)
+            it('should have called detached hook', function () {
+                assert.ok(compiler.detached)
             })
 
         })
@@ -141,7 +141,7 @@ describe('UNIT: Transition', function () {
                 code = transition(mockEl('js'), 1, c.change, compiler)
             assert.ok(c.called)
             assert.strictEqual(code, codes.JS_SKIP)
-            assert.ok(compiler.enteredView)
+            assert.ok(compiler.attached)
         })
 
         it('should skip if the option is given but the enter/leave func is not defined', function () {
@@ -150,14 +150,14 @@ describe('UNIT: Transition', function () {
                 code = transition(mockEl('js'), 1, c.change, compiler)
             assert.ok(c.called)
             assert.strictEqual(code, codes.JS_SKIP_E)
-            assert.ok(compiler.enteredView)
+            assert.ok(compiler.attached)
 
             c = mockChange()
             compiler = mockCompiler({})
             code = transition(mockEl('js'), -1, c.change, compiler)
             assert.ok(c.called)
             assert.strictEqual(code, codes.JS_SKIP_L)
-            assert.ok(compiler.leftView)
+            assert.ok(compiler.detached)
         })
 
         describe('enter', function () {
@@ -182,8 +182,8 @@ describe('UNIT: Transition', function () {
                 assert.strictEqual(code, codes.JS_E)
             })
 
-            it('should have called enteredView hook', function () {
-                assert.ok(compiler.enteredView)
+            it('should have called attached hook', function () {
+                assert.ok(compiler.attached)
             })
 
         })
@@ -210,8 +210,8 @@ describe('UNIT: Transition', function () {
                 assert.strictEqual(code, codes.JS_L)
             })
 
-            it('should have called leftView hook', function () {
-                assert.ok(compiler.leftView)
+            it('should have called detached hook', function () {
+                assert.ok(compiler.detached)
             })
 
         })
