@@ -106,7 +106,10 @@ module.exports = {
             var method = mutation.method
             mutationHandlers[method].call(self, mutation)
             if (method !== 'push' && method !== 'pop') {
-                self.updateIndex()
+                var i = arr.length
+                while (i--) {
+                    arr[i].$index = i
+                }
             }
             if (method === 'push' || method === 'unshift' || method === 'splice') {
                 self.changed()
@@ -220,16 +223,6 @@ module.exports = {
                     }
                 })
             }
-        }
-    },
-
-    /**
-     *  Update index of each item after a mutation
-     */
-    updateIndex: function () {
-        var i = this.vms.length
-        while (i--) {
-            this.vms[i].$data.$index = i
         }
     },
 
