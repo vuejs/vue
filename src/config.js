@@ -1,12 +1,12 @@
 var prefix = 'v',
     specialAttributes = [
         'pre',
+        'ref',
+        'with',
         'text',
         'repeat',
         'partial',
-        'with',
         'component',
-        'component-id',
         'transition'
     ],
     config = module.exports = {

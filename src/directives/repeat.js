@@ -90,7 +90,7 @@ module.exports = {
         // extract transition information
         this.hasTrans = el.hasAttribute(config.attrs.transition)
         // extract child Id, if any
-        this.childId = utils.attr(el, 'component-id')
+        this.childId = utils.attr(el, 'ref')
 
         // create a comment node as a reference node for DOM insertions
         this.ref = document.createComment(config.prefix + '-repeat-' + this.key)

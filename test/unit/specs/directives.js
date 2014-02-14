@@ -610,7 +610,7 @@ describe('UNIT: Directives', function () {
 
     })
 
-    describe('component-id', function () {
+    describe('ref', function () {
         
         it('should register a VM isntance on its parent\'s $', function () {
             var called = false
@@ -622,7 +622,7 @@ describe('UNIT: Directives', function () {
                 }
             })
             var t = new Vue({
-                template: '<div v-component="child" v-component-id="hihi"></div>',
+                template: '<div v-component="child" v-ref="hihi"></div>',
                 components: {
                     child: Child
                 }

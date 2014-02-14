@@ -1,5 +1,5 @@
 /*
- Vue.js v0.8.5
+ Vue.js v0.8.6
  (c) 2014 Evan You
  License: MIT
 */
@@ -580,12 +580,12 @@ require.register("vue/src/config.js", function(exports, require, module){
 var prefix = 'v',
     specialAttributes = [
         'pre',
+        'ref',
+        'with',
         'text',
         'repeat',
         'partial',
-        'with',
         'component',
-        'component-id',
         'transition'
     ],
     config = module.exports = {
@@ -749,7 +749,9 @@ var utils = module.exports = {
         node.innerHTML = template.trim()
         /* jshint boss: true */
         while (child = node.firstChild) {
-            frag.appendChild(child)
+            if (node.nodeType === 1) {
+                frag.appendChild(child)
+            }
         }
         return frag
     },
@@ -874,7 +876,7 @@ var Emitter     = require('./emitter'),
     hooks = [
         'created', 'ready',
         'beforeDestroy', 'afterDestroy',
-        'enteredView', 'leftView'
+        'attached', 'detached'
     ]
 
 /**
@@ -921,7 +923,7 @@ function Compiler (vm, options) {
     // set parent VM
     // and register child id on parent
     var parent = compiler.parentCompiler,
-        childId = utils.attr(el, 'component-id')
+        childId = utils.attr(el, 'ref')
     if (parent) {
         parent.childCompilers.push(compiler)
         def(vm, '$parent', parent.vm)
@@ -950,7 +952,7 @@ function Compiler (vm, options) {
     extend(data, vm)
 
     // observe the data
-    Observer.observe(data, '', compiler.observer)
+    compiler.observeData(data)
     
     // for repeated items, create an index binding
     // which should be inenumerable but configurable
@@ -959,21 +961,6 @@ function Compiler (vm, options) {
         def(data, '$index', compiler.repeatIndex, false, true)
         compiler.createBinding('$index')
     }
-
-    // allow the $data object to be swapped
-    Object.defineProperty(vm, '$data', {
-        enumerable: false,
-        get: function () {
-            return compiler.data
-        },
-        set: function (newData) {
-            var oldData = compiler.data
-            Observer.unobserve(oldData, '', compiler.observer)
-            compiler.data = newData
-            Observer.copyPaths(newData, oldData)
-            Observer.observe(newData, '', compiler.observer)
-        }
-    })
 
     // now parse the DOM, during which we will create necessary bindings
     // and bind the parsed directives
@@ -1053,21 +1040,10 @@ CompilerProto.setupObserver = function () {
 
     // add own listeners which trigger binding updates
     observer
-        .on('get', function (key) {
-            check(key)
-            DepsParser.catcher.emit('get', bindings[key])
-        })
-        .on('set', function (key, val) {
-            observer.emit('change:' + key, val)
-            check(key)
-            bindings[key].update(val)
-        })
-        .on('mutate', function (key, val, mutation) {
-            observer.emit('change:' + key, val, mutation)
-            check(key)
-            bindings[key].pub()
-        })
-    
+        .on('get', onGet)
+        .on('set', onSet)
+        .on('mutate', onSet)
+
     // register hooks
     hooks.forEach(function (hook) {
         var fns = options[hook]
@@ -1083,6 +1059,17 @@ CompilerProto.setupObserver = function () {
         }
     })
 
+    function onGet (key) {
+        check(key)
+        DepsParser.catcher.emit('get', bindings[key])
+    }
+
+    function onSet (key, val, mutation) {
+        observer.emit('change:' + key, val, mutation)
+        check(key)
+        bindings[key].update(val)
+    }
+
     function register (hook, fn) {
         observer.on('hook:' + hook, function () {
             fn.call(compiler.vm, options)
@@ -1092,6 +1079,48 @@ CompilerProto.setupObserver = function () {
     function check (key) {
         if (!bindings[key]) {
             compiler.createBinding(key)
+        }
+    }
+}
+
+CompilerProto.observeData = function (data) {
+
+    var compiler = this,
+        observer = compiler.observer
+
+    // recursively observe nested properties
+    Observer.observe(data, '', observer)
+
+    // also create binding for top level $data
+    // so it can be used in templates too
+    var $dataBinding = compiler.bindings['$data'] = new Binding(compiler, '$data')
+    $dataBinding.update(data)
+
+    // allow $data to be swapped
+    Object.defineProperty(compiler.vm, '$data', {
+        enumerable: false,
+        get: function () {
+            compiler.observer.emit('get', '$data')
+            return compiler.data
+        },
+        set: function (newData) {
+            var oldData = compiler.data
+            Observer.unobserve(oldData, '', observer)
+            compiler.data = newData
+            Observer.copyPaths(newData, oldData)
+            Observer.observe(newData, '', observer)
+            compiler.observer.emit('set', '$data', newData)
+        }
+    })
+
+    // emit $data change on all changes
+    observer
+        .on('set', onSet)
+        .on('mutate', onSet)
+
+    function onSet (key) {
+        if (key !== '$data') {
+            $dataBinding.update(compiler.data)
         }
     }
 }
@@ -1317,8 +1346,7 @@ CompilerProto.bindDirective = function (directive) {
         compiler = compiler || this
         binding = compiler.bindings[key] || compiler.createBinding(key)
     }
-
-    binding.instances.push(directive)
+    binding.dirs.push(directive)
     directive.binding = binding
 
     // invoke bind hook if exists
@@ -1421,11 +1449,10 @@ CompilerProto.defineExp = function (key, binding) {
  */
 CompilerProto.defineComputed = function (key, binding, value) {
     this.markComputed(binding, value)
-    var def = {
+    Object.defineProperty(this.vm, key, {
         get: binding.value.$get,
         set: binding.value.$set
-    }
-    Object.defineProperty(this.vm, key, def)
+    })
 }
 
 /**
@@ -1501,7 +1528,7 @@ CompilerProto.destroy = function () {
     if (this.destroyed) return
 
     var compiler = this,
-        i, key, dir, instances, binding,
+        i, key, dir, dirs, binding,
         vm          = compiler.vm,
         el          = compiler.el,
         directives  = compiler.dirs,
@@ -1519,11 +1546,11 @@ CompilerProto.destroy = function () {
         dir = directives[i]
         // if this directive is an instance of an external binding
         // e.g. a directive that refers to a variable on the parent VM
-        // we need to remove it from that binding's instances
+        // we need to remove it from that binding's directives
         // * empty and literal bindings do not have binding.
         if (dir.binding && dir.binding.compiler !== compiler) {
-            instances = dir.binding.instances
-            if (instances) instances.splice(instances.indexOf(dir), 1)
+            dirs = dir.binding.dirs
+            if (dirs) dirs.splice(dirs.indexOf(dir), 1)
         }
         dir.unbind()
     }
@@ -1777,7 +1804,7 @@ function Binding (compiler, key, isExp, isFn) {
     this.root = !this.isExp && key.indexOf('.') === -1
     this.compiler = compiler
     this.key = key
-    this.instances = []
+    this.dirs = []
     this.subs = []
     this.deps = []
     this.unbound = false
@@ -1792,17 +1819,19 @@ BindingProto.update = function (value) {
     if (!this.isComputed || this.isFn) {
         this.value = value
     }
-    batcher.queue(this)
+    if (this.dirs.length || this.subs.length) {
+        batcher.queue(this)
+    }
 }
 
 /**
- *  Actually update the instances.
+ *  Actually update the directives.
  */
 BindingProto._update = function () {
-    var i = this.instances.length,
+    var i = this.dirs.length,
         value = this.val()
     while (i--) {
-        this.instances[i].update(value)
+        this.dirs[i].update(value)
     }
     this.pub()
 }
@@ -1837,9 +1866,9 @@ BindingProto.unbind = function () {
     // the batcher's flush queue when its owner
     // compiler has already been destroyed.
     this.unbound = true
-    var i = this.instances.length
+    var i = this.dirs.length
     while (i--) {
-        this.instances[i].unbind()
+        this.dirs[i].unbind()
     }
     i = this.deps.length
     var subs
@@ -1886,7 +1915,7 @@ var ArrayProxy = Object.create(Array.prototype)
 methods.forEach(function (method) {
     def(ArrayProxy, method, function () {
         var result = Array.prototype[method].apply(this, arguments)
-        this.__observer__.emit('mutate', this.__observer__.path, this, {
+        this.__observer__.emit('mutate', null, this, {
             method: method,
             args: slice.call(arguments),
             result: result
@@ -1963,13 +1992,12 @@ function watchObject (obj) {
  *  Watch an Array, overload mutation methods
  *  and add augmentations by intercepting the prototype chain
  */
-function watchArray (arr, path) {
+function watchArray (arr) {
     var observer = arr.__observer__
     if (!observer) {
         observer = new Emitter()
         def(arr, '__observer__', observer)
     }
-    observer.path = path
     if (hasProto) {
         arr.__proto__ = ArrayProxy
     } else {
@@ -2013,7 +2041,9 @@ function convert (obj, key) {
             unobserve(oldVal, key, observer)
             values[key] = newVal
             copyPaths(newVal, oldVal)
-            observer.emit('set', key, newVal)
+            // an immediate property should notify its parent
+            // to emit set for itself too
+            observer.emit('set', key, newVal, true)
             observe(newVal, key, observer)
         }
     })
@@ -2104,40 +2134,61 @@ function ensurePath (obj, key) {
  *  Observe an object with a given path,
  *  and proxy get/set/mutate events to the provided observer.
  */
-function observe (obj, rawPath, observer) {
+function observe (obj, rawPath, parentOb) {
+
     if (!isWatchable(obj)) return
+
     var path = rawPath ? rawPath + '.' : '',
-        ob, alreadyConverted = !!obj.__observer__
+        alreadyConverted = !!obj.__observer__,
+        childOb
+
     if (!alreadyConverted) {
         def(obj, '__observer__', new Emitter())
     }
-    ob = obj.__observer__
-    ob.values = ob.values || utils.hash()
-    observer.proxies = observer.proxies || {}
-    var proxies = observer.proxies[path] = {
+
+    childOb = obj.__observer__
+    childOb.values = childOb.values || utils.hash()
+
+    // setup proxy listeners on the parent observer.
+    // we need to keep reference to them so that they
+    // can be removed when the object is un-observed.
+    parentOb.proxies = parentOb.proxies || {}
+    var proxies = parentOb.proxies[path] = {
         get: function (key) {
-            observer.emit('get', path + key)
+            parentOb.emit('get', path + key)
         },
-        set: function (key, val) {
-            observer.emit('set', path + key, val)
+        set: function (key, val, propagate) {
+            parentOb.emit('set', path + key, val)
+            // also notify observer that the object itself changed
+            // but only do so when it's a immediate property. this
+            // avoids duplicate event firing.
+            if (rawPath && propagate) {
+                parentOb.emit('set', rawPath, obj, true)
+            }
         },
         mutate: function (key, val, mutation) {
             // if the Array is a root value
             // the key will be null
             var fixedPath = key ? path + key : rawPath
-            observer.emit('mutate', fixedPath, val, mutation)
+            parentOb.emit('mutate', fixedPath, val, mutation)
             // also emit set for Array's length when it mutates
             var m = mutation.method
             if (m !== 'sort' && m !== 'reverse') {
-                observer.emit('set', fixedPath + '.length', val.length)
+                parentOb.emit('set', fixedPath + '.length', val.length)
             }
         }
     }
-    ob
+
+    // attach the listeners to the child observer.
+    // now all the events will propagate upwards.
+    childOb
         .on('get', proxies.get)
         .on('set', proxies.set)
         .on('mutate', proxies.mutate)
+
     if (alreadyConverted) {
+        // for objects that have already been converted,
+        // emit set events for everything inside
         emitSet(obj)
     } else {
         var type = typeOf(obj)
@@ -2153,14 +2204,20 @@ function observe (obj, rawPath, observer) {
  *  Cancel observation, turn off the listeners.
  */
 function unobserve (obj, path, observer) {
+
     if (!obj || !obj.__observer__) return
+
     path = path ? path + '.' : ''
     var proxies = observer.proxies[path]
     if (!proxies) return
+
+    // turn off listeners
     obj.__observer__
         .off('get', proxies.get)
         .off('set', proxies.set)
         .off('mutate', proxies.mutate)
+
+    // remove reference
     observer.proxies[path] = null
 }
 
@@ -2301,14 +2358,16 @@ function parseFilter (filter, compiler) {
  *  during initialization.
  */
 DirProto.update = function (value, init) {
-    if (!init && value === this.value) return
-    this.value = value
-    if (this._update) {
-        this._update(
-            this.filters
-                ? this.applyFilters(value)
-                : value
-        )
+    var type = utils.typeOf(value)
+    if (init || value !== this.value || type === 'Object' || type === 'Array') {
+        this.value = value
+        if (this._update) {
+            this._update(
+                this.filters
+                    ? this.applyFilters(value)
+                    : value
+            )
+        }
     }
 }
 
@@ -2743,7 +2802,7 @@ var transition = module.exports = function (el, stage, cb, compiler) {
 
     var changeState = function () {
         cb()
-        compiler.execHook(stage > 0 ? 'enteredView' : 'leftView')
+        compiler.execHook(stage > 0 ? 'attached' : 'detached')
     }
 
     if (compiler.init) {
@@ -3034,7 +3093,6 @@ module.exports = {
 });
 require.register("vue/src/directives/repeat.js", function(exports, require, module){
 var Observer   = require('../observer'),
-    Emitter    = require('../emitter'),
     utils      = require('../utils'),
     config     = require('../config'),
     transition = require('../transition'),
@@ -3126,7 +3184,7 @@ module.exports = {
         // extract transition information
         this.hasTrans = el.hasAttribute(config.attrs.transition)
         // extract child Id, if any
-        this.childId = utils.attr(el, 'component-id')
+        this.childId = utils.attr(el, 'ref')
 
         // create a comment node as a reference node for DOM insertions
         this.ref = document.createComment(config.prefix + '-repeat-' + this.key)
@@ -3142,7 +3200,10 @@ module.exports = {
             var method = mutation.method
             mutationHandlers[method].call(self, mutation)
             if (method !== 'push' && method !== 'pop') {
-                self.updateIndex()
+                var i = arr.length
+                while (i--) {
+                    arr[i].$index = i
+                }
             }
             if (method === 'push' || method === 'unshift' || method === 'splice') {
                 self.changed()
@@ -3152,6 +3213,8 @@ module.exports = {
     },
 
     update: function (collection, init) {
+        
+        if (collection === this.collection) return
 
         this.reset()
         // attach an object to container to hold handlers
@@ -3171,7 +3234,7 @@ module.exports = {
 
         // listen for collection mutation events
         // the collection has been augmented during Binding.set()
-        if (!collection.__observer__) Observer.watchArray(collection, null, new Emitter())
+        if (!collection.__observer__) Observer.watchArray(collection)
         collection.__observer__.on('mutate', this.mutationListener)
 
         // create child-vms and append to DOM
@@ -3192,6 +3255,7 @@ module.exports = {
         this.queued = true
         var self = this
         setTimeout(function () {
+            if (!self.compiler) return
             self.compiler.parseDeps()
             self.queued = false
         }, 0)
@@ -3255,16 +3319,6 @@ module.exports = {
                     }
                 })
             }
-        }
-    },
-
-    /**
-     *  Update index of each item after a mutation
-     */
-    updateIndex: function () {
-        var i = this.vms.length
-        while (i--) {
-            this.vms[i].$data.$index = i
         }
     },
 

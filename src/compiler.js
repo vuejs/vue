@@ -67,7 +67,7 @@ function Compiler (vm, options) {
     // set parent VM
     // and register child id on parent
     var parent = compiler.parentCompiler,
-        childId = utils.attr(el, 'component-id')
+        childId = utils.attr(el, 'ref')
     if (parent) {
         parent.childCompilers.push(compiler)
         def(vm, '$parent', parent.vm)

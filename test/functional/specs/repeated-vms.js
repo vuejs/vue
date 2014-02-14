@@ -30,7 +30,7 @@ casper.test.begin('Repeated ViewModels', 8, function (test) {
                 return app.$.items[0].reversed
             },
             'a init click click'.split('').reverse().join(''),
-            'should be able to access repeated vms with v-component-id'
+            'should be able to access repeated vms with v-ref'
         )
     })
     .run(function () {
