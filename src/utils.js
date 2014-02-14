@@ -132,7 +132,9 @@ var utils = module.exports = {
         node.innerHTML = template.trim()
         /* jshint boss: true */
         while (child = node.firstChild) {
-            frag.appendChild(child)
+            if (node.nodeType === 1) {
+                frag.appendChild(child)
+            }
         }
         return frag
     },
