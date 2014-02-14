@@ -376,13 +376,13 @@ describe('UNIT: ViewModel', function () {
         var dirMock = {
             binding: {
                 compiler: null,
-                instances: []
+                dirs: []
             },
             unbind: function () {
                 dirUnbindCalled = true
             }
         }
-        dirMock.binding.instances.push(dirMock)
+        dirMock.binding.dirs.push(dirMock)
 
         var bindingsMock = {
             test: {
@@ -474,7 +474,7 @@ describe('UNIT: ViewModel', function () {
         })
 
         it('should remove directives from external bindings', function () {
-            assert.strictEqual(dirMock.binding.instances.indexOf(dirMock), -1)
+            assert.strictEqual(dirMock.binding.dirs.indexOf(dirMock), -1)
         })
 
         it('should unbind all expressions', function () {

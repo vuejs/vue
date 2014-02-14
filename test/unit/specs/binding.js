@@ -20,9 +20,9 @@ describe('UNIT: Binding', function () {
             assert.ok(!b.root)
         })
 
-        it('should have instances, subs and deps as Arrays', function () {
+        it('should have dirs, subs and deps as Arrays', function () {
             var b = new Binding(null, 'test')
-            assert.ok(Array.isArray(b.instances), 'instances')
+            assert.ok(Array.isArray(b.dirs), 'dirs')
             assert.ok(Array.isArray(b.subs), 'subs')
             assert.ok(Array.isArray(b.deps), 'deps')
         })
@@ -42,7 +42,7 @@ describe('UNIT: Binding', function () {
                 }
             }
         for (var i = 0; i < numInstances; i++) {
-            b.instances.push(instance)
+            b.dirs.push(instance)
         }
         b.pub = function () {
             pubbed = true
@@ -59,7 +59,7 @@ describe('UNIT: Binding', function () {
             assert.strictEqual(b.value, val)
         })
 
-        it('should update the binding\'s instances', function () {
+        it('should update the binding\'s directives', function () {
             assert.strictEqual(updated, val * numInstances)
         })
 
@@ -140,7 +140,7 @@ describe('UNIT: Binding', function () {
                 }
             }
         for (var i = 0; i < numInstances; i++) {
-            b.instances.push(instance)
+            b.dirs.push(instance)
         }
 
         // mock deps
@@ -150,7 +150,7 @@ describe('UNIT: Binding', function () {
 
         b.unbind()
 
-        it('should call unbind() of all instances', function () {
+        it('should call unbind() of all directives', function () {
             assert.strictEqual(unbound, numInstances)
         })
 

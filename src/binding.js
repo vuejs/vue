@@ -16,7 +16,7 @@ function Binding (compiler, key, isExp, isFn) {
     this.root = !this.isExp && key.indexOf('.') === -1
     this.compiler = compiler
     this.key = key
-    this.instances = []
+    this.dirs = []
     this.subs = []
     this.deps = []
     this.unbound = false
@@ -31,17 +31,19 @@ BindingProto.update = function (value) {
     if (!this.isComputed || this.isFn) {
         this.value = value
     }
-    batcher.queue(this)
+    if (this.dirs.length || this.subs.length) {
+        batcher.queue(this)
+    }
 }
 
 /**
- *  Actually update the instances.
+ *  Actually update the directives.
  */
 BindingProto._update = function () {
-    var i = this.instances.length,
+    var i = this.dirs.length,
         value = this.val()
     while (i--) {
-        this.instances[i].update(value)
+        this.dirs[i].update(value)
     }
     this.pub()
 }
@@ -76,9 +78,9 @@ BindingProto.unbind = function () {
     // the batcher's flush queue when its owner
     // compiler has already been destroyed.
     this.unbound = true
-    var i = this.instances.length
+    var i = this.dirs.length
     while (i--) {
-        this.instances[i].unbind()
+        this.dirs[i].unbind()
     }
     i = this.deps.length
     var subs

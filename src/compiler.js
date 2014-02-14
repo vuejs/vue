@@ -490,7 +490,7 @@ CompilerProto.bindDirective = function (directive) {
         compiler = compiler || this
         binding = compiler.bindings[key] || compiler.createBinding(key)
     }
-    binding.instances.push(directive)
+    binding.dirs.push(directive)
     directive.binding = binding
 
     // invoke bind hook if exists
@@ -672,7 +672,7 @@ CompilerProto.destroy = function () {
     if (this.destroyed) return
 
     var compiler = this,
-        i, key, dir, instances, binding,
+        i, key, dir, dirs, binding,
         vm          = compiler.vm,
         el          = compiler.el,
         directives  = compiler.dirs,
@@ -690,11 +690,11 @@ CompilerProto.destroy = function () {
         dir = directives[i]
         // if this directive is an instance of an external binding
         // e.g. a directive that refers to a variable on the parent VM
-        // we need to remove it from that binding's instances
+        // we need to remove it from that binding's directives
         // * empty and literal bindings do not have binding.
         if (dir.binding && dir.binding.compiler !== compiler) {
-            instances = dir.binding.instances
-            if (instances) instances.splice(instances.indexOf(dir), 1)
+            dirs = dir.binding.dirs
+            if (dirs) dirs.splice(dirs.indexOf(dir), 1)
         }
         dir.unbind()
     }
