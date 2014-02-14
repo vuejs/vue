@@ -1,6 +1,7 @@
 <div id="test">
     <p id="data">{{$data}}</p>
     <p id="obj">{{test}}</p>
+    <p id="arr">{{arr}}</p>
 </div>
 
 <script src="../../../dist/vue.js"></script>
@@ -11,7 +12,8 @@
         data: {
             test: {
                 prop: 1
-            }
-        }    
+            },
+            arr: [{a: 1}]
+        }
     })
 </script>

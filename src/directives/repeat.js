@@ -119,6 +119,8 @@ module.exports = {
     },
 
     update: function (collection, init) {
+        
+        if (collection === this.collection) return
 
         this.reset()
         // attach an object to container to hold handlers

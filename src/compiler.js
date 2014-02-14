@@ -184,21 +184,10 @@ CompilerProto.setupObserver = function () {
 
     // add own listeners which trigger binding updates
     observer
-        .on('get', function (key) {
-            check(key)
-            DepsParser.catcher.emit('get', bindings[key])
-        })
-        .on('set', function (key, val) {
-            observer.emit('change:' + key, val)
-            check(key)
-            bindings[key].update(val)
-        })
-        .on('mutate', function (key, val, mutation) {
-            observer.emit('change:' + key, val, mutation)
-            check(key)
-            bindings[key].pub()
-        })
-    
+        .on('get', onGet)
+        .on('set', onSet)
+        .on('mutate', onSet)
+
     // register hooks
     hooks.forEach(function (hook) {
         var fns = options[hook]
@@ -213,6 +202,17 @@ CompilerProto.setupObserver = function () {
             register(hook, fns)
         }
     })
+
+    function onGet (key) {
+        check(key)
+        DepsParser.catcher.emit('get', bindings[key])
+    }
+
+    function onSet (key, val, mutation) {
+        observer.emit('change:' + key, val, mutation)
+        check(key)
+        bindings[key].update(val)
+    }
 
     function register (hook, fn) {
         observer.on('hook:' + hook, function () {
@@ -258,11 +258,15 @@ CompilerProto.observeData = function (data) {
     })
 
     // emit $data change on all changes
-    observer.on('set', function (key) {
+    observer
+        .on('set', onSet)
+        .on('mutate', onSet)
+
+    function onSet (key) {
         if (key !== '$data') {
             $dataBinding.update(compiler.data)
         }
-    })
+    }
 }
 
 /**
