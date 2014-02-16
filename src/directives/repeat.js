@@ -2,6 +2,7 @@ var Observer   = require('../observer'),
     utils      = require('../utils'),
     config     = require('../config'),
     transition = require('../transition'),
+    def        = utils.defProtected,
     ViewModel // lazy def to avoid circular dependency
 
 /**
@@ -77,6 +78,35 @@ var mutationHandlers = {
     }
 }
 
+/**
+ *  Convert an Object to a v-repeat friendly Array
+ */
+function objectToArray (obj) {
+    var res = [], val, data
+    for (var key in obj) {
+        val = obj[key]
+        data = utils.typeOf(val) === 'Object'
+            ? val
+            : { $value: val }
+        def(data, '$key', key, false, true)
+        res.push(data)
+    }
+    return res
+}
+
+/**
+ *  Find an object or a wrapped data object
+ *  from an Array
+ */
+function indexOf (arr, obj) {
+    for (var i = 0, l = arr.length; i < l; i++) {
+        if (arr[i] === obj || (obj.$value && arr[i].$value === obj.$value)) {
+            return i
+        }
+    }
+    return -1
+}
+
 module.exports = {
 
     bind: function () {
@@ -119,6 +149,12 @@ module.exports = {
     },
 
     update: function (collection, init) {
+
+        if (utils.typeOf(collection) === 'Object') {
+            this.object = collection
+            collection = objectToArray(collection)
+            def(this.object, '$repeater', collection, false, true)
+        }
         
         if (collection === this.collection) return
 
@@ -204,9 +240,9 @@ module.exports = {
         if (data) {
 
             if (this.old) {
-                i = this.old.indexOf(data)
+                i = indexOf(this.old, data)
             }
-            
+
             if (i > -1) { // existing, reuse the old VM
 
                 item = this.oldVMs[i]
@@ -227,8 +263,10 @@ module.exports = {
                 // wrap primitive element in an object
                 if (utils.typeOf(data) !== 'Object') {
                     primitive = true
-                    data = { value: data }
+                    data = { $value: data }
                 }
+                // define index
+                def(data, '$index', index, false, true)
 
             }
 
@@ -250,7 +288,6 @@ module.exports = {
             data: data,
             compilerOptions: {
                 repeat: true,
-                repeatIndex: index,
                 parentCompiler: this.compiler,
                 delegator: ctn
             }
@@ -265,7 +302,7 @@ module.exports = {
             // for primitive values, listen for value change
             if (primitive) {
                 data.__observer__.on('set', function (key, val) {
-                    if (key === 'value') {
+                    if (key === '$value') {
                         col[item.$index] = val
                     }
                 })

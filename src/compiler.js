@@ -98,12 +98,11 @@ function Compiler (vm, options) {
     // observe the data
     compiler.observeData(data)
     
-    // for repeated items, create an index binding
-    // which should be inenumerable but configurable
+    // for repeated items, create index/key bindings
+    // because they are ienumerable
     if (compiler.repeat) {
-        //data.$index = compiler.repeatIndex
-        def(data, '$index', compiler.repeatIndex, false, true)
         compiler.createBinding('$index')
+        if (data.$key) compiler.createBinding('$key')
     }
 
     // now parse the DOM, during which we will create necessary bindings

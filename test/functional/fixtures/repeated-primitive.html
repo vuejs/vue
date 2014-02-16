@@ -1,11 +1,12 @@
 <div id="test">
-    <p v-repeat="numbers" v-on="click: value+=' modified'">{{value}}</p>
+    <p v-repeat="numbers" v-on="click: $value+=' modified'">{{$value}}</p>
 </div>
 
 <script src="../../../dist/vue.js"></script>
 <script>
+    Vue.config('debug', true)
     var numbers = [1, 2, 'text']
-    new Vue({
+    var test = new Vue({
         el: '#test',
         data: {
             numbers: numbers

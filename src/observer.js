@@ -131,7 +131,12 @@ function watchArray (arr) {
  */
 function convert (obj, key) {
     var keyPrefix = key.charAt(0)
-    if ((keyPrefix === '$' || keyPrefix === '_') && key !== '$index') {
+    if (
+        (keyPrefix === '$' || keyPrefix === '_') &&
+        key !== '$index' &&
+        key !== '$key' &&
+        key !== '$value'
+    ) {
         return
     }
     // emit set on bind
