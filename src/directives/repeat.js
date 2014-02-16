@@ -296,10 +296,15 @@ module.exports = {
             // make sure it works with v-if
             if (!ref.parentNode) ref = ref.vue_ref
             if (!detached) {
-                // insert node with transition
-                transition(el, 1, function () {
+                if (i > -1) {
+                    // no need to transition existing node
                     ctn.insertBefore(el, ref)
-                }, this.compiler)
+                } else {
+                    // insert new node with transition
+                    transition(el, 1, function () {
+                        ctn.insertBefore(el, ref)
+                    }, this.compiler)
+                }
             } else {
                 // detached by v-if
                 // just move the comment ref node
