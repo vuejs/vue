@@ -233,7 +233,7 @@ module.exports = {
         var ctn = this.container,
             vms = this.vms,
             col = this.collection,
-            el, i, ref, item, primitive, noInsert
+            el, i, ref, item, primitive, detached
 
         // append node into DOM first
         // so v-if can get access to parentNode
@@ -253,7 +253,7 @@ module.exports = {
                 data.$index = index
                 // existing VM's el can possibly be detached by v-if.
                 // in that case don't insert.
-                noInsert = !el.parentNode
+                detached = !el.parentNode
 
             } else { // new data, need to create new VM
 
@@ -275,11 +275,15 @@ module.exports = {
                 : this.ref
             // make sure it works with v-if
             if (!ref.parentNode) ref = ref.vue_ref
-            // insert node with transition
-            if (!noInsert) {
+            if (!detached) {
+                // insert node with transition
                 transition(el, 1, function () {
                     ctn.insertBefore(el, ref)
                 }, this.compiler)
+            } else {
+                // detached by v-if
+                // just move the comment ref node
+                ctn.insertBefore(el.vue_ref, ref)
             }
         }
 
