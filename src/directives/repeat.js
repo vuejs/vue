@@ -132,6 +132,12 @@ module.exports = {
             this.buildItem()
             this.initiated = true
         }
+
+        // keep reference of old data and VMs
+        // so we can reuse them if possible
+        this.old = this.collection
+        var oldVMs = this.oldVMs = this.vms
+
         collection = this.collection = collection || []
         this.vms = []
         if (this.childId) {
@@ -143,11 +149,25 @@ module.exports = {
         if (!collection.__observer__) Observer.watchArray(collection)
         collection.__observer__.on('mutate', this.mutationListener)
 
-        // create child-vms and append to DOM
+        // create new VMs and append to DOM
         if (collection.length) {
             collection.forEach(this.buildItem, this)
             if (!init) this.changed()
         }
+
+        // destroy unused old VMs
+        if (oldVMs) {
+            var i = oldVMs.length, vm
+            while (i--) {
+                vm = oldVMs[i]
+                if (vm.$reused) {
+                    vm.$reused = false
+                } else {
+                    vm.$destroy()
+                }
+            }
+        }
+        this.old = this.oldVMs = null
     },
 
     /**
@@ -174,33 +194,58 @@ module.exports = {
      */
     buildItem: function (data, index) {
 
-        var el  = this.el.cloneNode(true),
-            ctn = this.container,
+        var ctn = this.container,
             vms = this.vms,
             col = this.collection,
-            ref, item, primitive
+            el, i, ref, item, primitive, noInsert
 
         // append node into DOM first
         // so v-if can get access to parentNode
         if (data) {
+
+            if (this.old) {
+                i = this.old.indexOf(data)
+            }
+            
+            if (i > -1) { // existing, reuse the old VM
+
+                item = this.oldVMs[i]
+                // mark, so it won't be destroyed
+                item.$reused = true
+                el = item.$el
+                // don't forget to update index
+                data.$index = index
+                // existing VM's el can possibly be detached by v-if.
+                // in that case don't insert.
+                noInsert = !el.parentNode
+
+            } else { // new data, need to create new VM
+
+                el = this.el.cloneNode(true)
+                // process transition info before appending
+                el.vue_trans = utils.attr(el, 'transition', true)
+                // wrap primitive element in an object
+                if (utils.typeOf(data) !== 'Object') {
+                    primitive = true
+                    data = { value: data }
+                }
+
+            }
+
             ref = vms.length > index
                 ? vms[index].$el
                 : this.ref
             // make sure it works with v-if
             if (!ref.parentNode) ref = ref.vue_ref
-            // process transition info before appending
-            el.vue_trans = utils.attr(el, 'transition', true)
-            transition(el, 1, function () {
-                ctn.insertBefore(el, ref)
-            }, this.compiler)
-            // wrap primitive element in an object
-            if (utils.typeOf(data) !== 'Object') {
-                primitive = true
-                data = { value: data }
+            // insert node with transition
+            if (!noInsert) {
+                transition(el, 1, function () {
+                    ctn.insertBefore(el, ref)
+                }, this.compiler)
             }
         }
 
-        item = new this.Ctor({
+        item = item || new this.Ctor({
             el: el,
             data: data,
             compilerOptions: {
@@ -228,15 +273,17 @@ module.exports = {
         }
     },
 
-    reset: function () {
+    reset: function (destroyAll) {
         if (this.childId) {
             delete this.vm.$[this.childId]
         }
         if (this.collection) {
             this.collection.__observer__.off('mutate', this.mutationListener)
-            var i = this.vms.length
-            while (i--) {
-                this.vms[i].$destroy()
+            if (destroyAll) {
+                var i = this.vms.length
+                while (i--) {
+                    this.vms[i].$destroy()
+                }
             }
         }
         var ctn = this.container,
@@ -248,6 +295,6 @@ module.exports = {
     },
 
     unbind: function () {
-        this.reset()
+        this.reset(true)
     }
 }

@@ -94,9 +94,24 @@ describe('UNIT: Transition', function () {
             var el = mockEl('css'),
                 c = mockChange(),
                 compiler = mockCompiler(),
+                code
+
+            before(function () {
+                document.body.appendChild(el)
+            })
+
+            it('should call change immediately if el is invisible', function () {
+                var el = mockEl('css'),
+                    c = mockChange(),
+                    compiler = mockCompiler()
                 code = transition(el, -1, c.change, compiler)
+                assert.ok(c.called)
+                assert.ok(compiler.detached)
+            })
 
             it('should attach an ontransitionend listener', function () {
+                el.style.width = '1px'
+                code = transition(el, -1, c.change, compiler)
                 assert.ok(typeof el.vue_trans_cb === 'function')
             })
 

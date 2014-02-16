@@ -53,5 +53,9 @@ module.exports = {
 
     unbind: function () {
         this.el.vue_ref = null
+        var ref = this.ref
+        if (ref.parentNode) {
+            ref.parentNode.removeChild(ref)
+        }
     }
 }

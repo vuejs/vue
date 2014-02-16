@@ -138,12 +138,10 @@ function convert (obj, key) {
     // this means when an object is observed it will emit
     // a first batch of set events.
     var observer = obj.__observer__,
-        values   = observer.values,
-        val      = values[key] = obj[key]
-    observer.emit('set', key, val)
-    if (Array.isArray(val)) {
-        observer.emit('set', key + '.length', val.length)
-    }
+        values   = observer.values
+
+    init(obj[key])
+
     Object.defineProperty(obj, key, {
         get: function () {
             var value = values[key]
@@ -156,15 +154,21 @@ function convert (obj, key) {
         set: function (newVal) {
             var oldVal = values[key]
             unobserve(oldVal, key, observer)
-            values[key] = newVal
             copyPaths(newVal, oldVal)
             // an immediate property should notify its parent
             // to emit set for itself too
-            observer.emit('set', key, newVal, true)
-            observe(newVal, key, observer)
+            init(newVal, true)
         }
     })
-    observe(val, key, observer)
+
+    function init (val, propagate) {
+        values[key] = val
+        observer.emit('set', key, val, propagate)
+        if (Array.isArray(val)) {
+            observer.emit('set', key + '.length', val.length)
+        }
+        observe(val, key, observer)
+    }
 }
 
 /**

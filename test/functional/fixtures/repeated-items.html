@@ -12,7 +12,7 @@
     </p>
     <p>Total items: <span class="count" v-text="items.length"></span></p>
     <ul>
-        <li class="item" v-repeat="items">
+        <li class="item" v-repeat="items" v-ref="items">
             {{$index}} {{title}}
         </li>
     </ul>

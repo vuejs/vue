@@ -1,4 +1,6 @@
-casper.test.begin('Repeated Items', 41, function (test) {
+/* global demo */
+
+casper.test.begin('Repeated Items', 50, function (test) {
     
     casper
     .start('./fixtures/repeated-items.html')
@@ -80,6 +82,37 @@ casper.test.begin('Repeated Items', 41, function (test) {
         test.assertSelectorHasText('.count', '2')
         test.assertSelectorHasText('.item:nth-child(1)', '0 6')
         test.assertSelectorHasText('.item:nth-child(2)', '1 7')
+    })
+    // test swap entire array
+    .thenEvaluate(function () {
+        demo.items = [{title:'A'}, {title:'B'}, {title:'C'}]
+    })
+    .then(function () {
+        test.assertSelectorHasText('.count', '3')
+        test.assertSelectorHasText('.item:nth-child(1)', '0 A')
+        test.assertSelectorHasText('.item:nth-child(2)', '1 B')
+        test.assertSelectorHasText('.item:nth-child(3)', '2 C')
+    })
+    // test swap array with old elements
+    // should reuse existing VMs!
+    .thenEvaluate(function () {
+        window.oldVMs = demo.$.items
+        demo.items = [demo.items[2],demo.items[1],demo.items[0]]
+    })
+    .then(function () {
+        test.assertSelectorHasText('.count', '3')
+        test.assertSelectorHasText('.item:nth-child(1)', '0 C')
+        test.assertSelectorHasText('.item:nth-child(2)', '1 B')
+        test.assertSelectorHasText('.item:nth-child(3)', '2 A')
+        test.assertEval(function () {
+            var i = window.oldVMs.length
+            while (i--) {
+                if (window.oldVMs[i] !== demo.$.items[2 - i]) {
+                    return false
+                }
+            }
+            return true
+        })
     })
     .run(function () {
         test.done()

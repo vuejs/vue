@@ -92,20 +92,25 @@ function applyTransitionClass (el, stage, changeState) {
 
     } else { // leave
 
-        // trigger hide transition
-        classList.add(config.leaveClass)
-        var onEnd = function (e) {
-            if (e.target === el) {
-                el.removeEventListener(endEvent, onEnd)
-                el.vue_trans_cb = null
-                // actually remove node here
-                changeState()
-                classList.remove(config.leaveClass)
+        if (el.offsetWidth || el.offsetHeight) {
+            // trigger hide transition
+            classList.add(config.leaveClass)
+            var onEnd = function (e) {
+                if (e.target === el) {
+                    el.removeEventListener(endEvent, onEnd)
+                    el.vue_trans_cb = null
+                    // actually remove node here
+                    changeState()
+                    classList.remove(config.leaveClass)
+                }
             }
+            // attach transition end listener
+            el.addEventListener(endEvent, onEnd)
+            el.vue_trans_cb = onEnd
+        } else {
+            // directly remove invisible elements
+            changeState()
         }
-        // attach transition end listener
-        el.addEventListener(endEvent, onEnd)
-        el.vue_trans_cb = onEnd
         return codes.CSS_L
         
     }

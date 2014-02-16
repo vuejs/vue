@@ -1,4 +1,4 @@
-casper.test.begin('Transition', 23, function (test) {
+casper.test.begin('Transition', 25, function (test) {
 
     var minWait = 50,
         transDuration = 200
@@ -50,8 +50,16 @@ casper.test.begin('Transition', 23, function (test) {
     })
     .thenClick('.splice')
     .wait(minWait, function () {
-        test.assertElementCount('.test', 4)
+        test.assertElementCount('.test', 3)
         test.assertVisible('.test[data-id="99"]')
+    })
+    // test Array swapping with transition
+    .thenEvaluate(function () {
+        test.items = [test.items[1], {a:3}]
+    })
+    .wait(transDuration + minWait, function () {
+        test.assertElementCount('.test', 3)
+        test.assertVisible('.test[data-id="3"]')
     })
     .run(function () {
         test.done()
