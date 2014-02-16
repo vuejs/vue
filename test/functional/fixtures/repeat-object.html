@@ -1,0 +1,58 @@
+<div id="test">
+    <ul>
+        <li class="primitive" v-repeat="primitive">{{$key}} {{$value}}</li>
+    </ul>
+    <ul>
+        <li class="obj" v-repeat="obj">{{$key}} {{msg}}</li>
+    </ul>
+    <button id="push" v-on="click:t1">push to primitive</button>
+    <button id="pop" v-on="click:t2">pop from primitive</button>
+    <button id="shift" v-on="click:t3">shift from object</button>
+    <button id="unshift" v-on="click:t4">unshift to object</button>
+    <button id="splice" v-on="click:t5">splice in object</button>
+    <p id="primitive">{{primitive}}</p>
+    <p id="obj">{{obj}}</p>
+</div>
+
+<script src="../../../dist/vue.js"></script>
+<script>
+var test = new Vue({
+    el: '#test',
+    data: {
+        primitive: {
+            a: 1,
+            b: 2
+        },
+        obj: {
+            a: { msg: 'hi!' },
+            b: { msg: 'ha!' }
+        }
+    },
+    methods: {
+        t1: function () {
+            this.primitive.$repeater.push({
+                $key: 'c',
+                $value: 3
+            })  
+        },
+        t2: function () {
+            this.primitive.$repeater.pop()
+        },
+        t3: function () {
+            this.obj.$repeater.shift()
+        },
+        t4: function () {
+            this.obj.$repeater.unshift({
+                $key: 'c',
+                msg: 'ho!'
+            })
+        },
+        t5: function () {
+            this.obj.$repeater.splice(1, 1, {
+                $key: 'd',
+                msg: 'he!'
+            })
+        }
+    }
+})
+</script>

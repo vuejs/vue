@@ -12,25 +12,35 @@ var Observer   = require('../observer'),
 var mutationHandlers = {
 
     push: function (m) {
-        var i, l = m.args.length,
+        var l = m.args.length,
             base = this.collection.length - l
-        for (i = 0; i < l; i++) {
+        for (var i = 0; i < l; i++) {
             this.buildItem(m.args[i], base + i)
+            this.updateObject(m.args[i], 1)
         }
     },
 
     pop: function () {
         var vm = this.vms.pop()
-        if (vm) vm.$destroy()
+        if (vm) {
+            vm.$destroy()
+            this.updateObject(vm.$data, -1)
+        }
     },
 
     unshift: function (m) {
-        m.args.forEach(this.buildItem, this)
+        for (var i = 0, l = m.args.length; i < l; i++) {
+            this.buildItem(m.args[i], i)
+            this.updateObject(m.args[i], 1)
+        }
     },
 
     shift: function () {
         var vm = this.vms.shift()
-        if (vm) vm.$destroy()
+        if (vm) {
+            vm.$destroy()
+            this.updateObject(vm.$data, -1)
+        }
     },
 
     splice: function (m) {
@@ -41,9 +51,11 @@ var mutationHandlers = {
             removedVMs = this.vms.splice(index, removed)
         for (i = 0, l = removedVMs.length; i < l; i++) {
             removedVMs[i].$destroy()
+            this.updateObject(removedVMs[i].$data, -1)
         }
         for (i = 0; i < added; i++) {
             this.buildItem(m.args[i + 2], index + i)
+            this.updateObject(m.args[i + 2], 1)
         }
     },
 
@@ -136,12 +148,14 @@ module.exports = {
             var method = mutation.method
             mutationHandlers[method].call(self, mutation)
             if (method !== 'push' && method !== 'pop') {
+                // update index
                 var i = arr.length
                 while (i--) {
                     arr[i].$index = i
                 }
             }
             if (method === 'push' || method === 'unshift' || method === 'splice') {
+                // recalculate dependency
                 self.changed()
             }
         }
@@ -150,13 +164,19 @@ module.exports = {
 
     update: function (collection, init) {
 
+        if (
+            collection === this.collection ||
+            collection === this.object
+        ) return
+
         if (utils.typeOf(collection) === 'Object') {
+            if (this.object) {
+                delete this.object.$repeater
+            }
             this.object = collection
             collection = objectToArray(collection)
             def(this.object, '$repeater', collection, false, true)
         }
-        
-        if (collection === this.collection) return
 
         this.reset()
         // attach an object to container to hold handlers
@@ -311,6 +331,26 @@ module.exports = {
                     }
                 })
             }
+        }
+    },
+
+    /**
+     *  Sync changes in the $repeater Array
+     *  back to the represented Object
+     */
+    updateObject: function (data, action) {
+        if (this.object && data.$key) {
+            var key = data.$key,
+                val = data.$value || data
+            if (action > 0) { // new property
+                // make key ienumerable
+                delete data.$key
+                def(data, '$key', key, false, true)
+                this.object[key] = val
+            } else {
+                delete this.object[key]
+            }
+            this.object.__observer__.emit('set', key, val, true)
         }
     },
 
