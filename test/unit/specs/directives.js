@@ -215,7 +215,7 @@ describe('UNIT: Directives', function () {
             it('should trigger vm.$set when clicked', function () {
                 var triggered = false
                 dir.key = 'foo'
-                dir.vm = { $set: function (key, val) {
+                dir.ownerVM = { $set: function (key, val) {
                     assert.strictEqual(key, 'foo')
                     assert.strictEqual(val, true)
                     triggered = true
@@ -226,8 +226,10 @@ describe('UNIT: Directives', function () {
 
             it('should remove event listener with unbind()', function () {
                 var removed = true
-                dir.vm.$set = function () {
-                    removed = false
+                dir.ownerVM = {
+                    $set: function () {
+                       removed = false
+                    }
                 }
                 dir.unbind()
                 dir.el.dispatchEvent(mockMouseEvent('click'))
@@ -265,7 +267,7 @@ describe('UNIT: Directives', function () {
             it('should trigger vm.$set when clicked', function () {
                 var triggered = false
                 dir2.key = 'radio'
-                dir2.vm = { $set: function (key, val) {
+                dir2.ownerVM = { $set: function (key, val) {
                     triggered = true
                     assert.strictEqual(key, 'radio')
                     assert.strictEqual(val, dir2.el.value)
@@ -278,7 +280,7 @@ describe('UNIT: Directives', function () {
 
             it('should remove listeners on unbind()', function () {
                 var removed = true
-                dir1.vm = { $set: function () {
+                dir1.ownerVM = { $set: function () {
                     removed = false
                 }}
                 dir1.unbind()
@@ -316,7 +318,7 @@ describe('UNIT: Directives', function () {
             it('should trigger vm.$set when value is changed', function () {
                 var triggered = false
                 dir.key = 'select'
-                dir.vm = { $set: function (key, val) {
+                dir.ownerVM = { $set: function (key, val) {
                     triggered = true
                     assert.strictEqual(key, 'select')
                     assert.equal(val, 1)
@@ -328,7 +330,7 @@ describe('UNIT: Directives', function () {
 
             it('should remove listener on unbind()', function () {
                 var removed = true
-                dir.vm = { $set: function () {
+                dir.ownerVM = { $set: function () {
                     removed = false
                 }}
                 dir.unbind()
@@ -360,7 +362,7 @@ describe('UNIT: Directives', function () {
             it('should trigger vm.$set when value is changed via input', function () {
                 var triggered = false
                 dir.key = 'foo'
-                dir.vm = { $set: function (key, val) {
+                dir.ownerVM = { $set: function (key, val) {
                     assert.ok(dir.lock, 'the directive should be locked if it has no filters')
                     assert.strictEqual(key, 'foo')
                     assert.strictEqual(val, 'bar')
@@ -373,8 +375,10 @@ describe('UNIT: Directives', function () {
 
             it('should remove event listener with unbind()', function () {
                 var removed = true
-                dir.vm.$set = function () {
-                    removed = false
+                dir.ownerVM = {
+                    $set: function () {
+                        removed = false
+                    }
                 }
                 dir.unbind()
                 dir.el.dispatchEvent(mockHTMLEvent('input'))
@@ -386,7 +390,7 @@ describe('UNIT: Directives', function () {
                 var dir = mockDirective('model', 'input', 'text')
                 dir.filters = []
                 dir.bind()
-                dir.vm = {$set:function () {
+                dir.ownerVM = {$set:function () {
                     assert.notOk(dir.lock)
                     triggered = true
                 }}

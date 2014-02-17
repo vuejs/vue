@@ -24,6 +24,7 @@ module.exports = {
             tag  = el.tagName
 
         self.lock = false
+        self.ownerVM = self.binding.compiler.vm
 
         // determine what event to listen to
         self.event =
@@ -111,7 +112,7 @@ module.exports = {
     },
 
     _set: function () {
-        this.vm.$set(
+        this.ownerVM.$set(
             this.key, this.multi
                 ? getMultipleSelectOptions(this.el)
                 : this.el[this.attr]

@@ -24,8 +24,7 @@ var VMProto = ViewModel.prototype
  */
 def(VMProto, '$set', function (key, value) {
     var path = key.split('.'),
-        obj = getTargetVM(this, path)
-    if (!obj) return
+        obj = this
     for (var d = 0, l = path.length - 1; d < l; d++) {
         obj = obj[path[d]]
     }
@@ -157,18 +156,6 @@ function query (el) {
     return typeof el === 'string'
         ? document.querySelector(el)
         : el
-}
-
-/**
- *  If a VM doesn't contain a path, go up the prototype chain
- *  to locate the ancestor that has it.
- */
-function getTargetVM (vm, path) {
-    var baseKey = path[0],
-        binding = vm.$compiler.bindings[baseKey]
-    return binding
-        ? binding.compiler.vm
-        : null
 }
 
 module.exports = ViewModel
