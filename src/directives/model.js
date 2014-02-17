@@ -118,8 +118,12 @@ module.exports = {
         )
     },
 
-    update: function (value) {
+    update: function (value, init) {
         /* jshint eqeqeq: false */
+        // sync back inline value if initial data is undefined
+        if (init && value === undefined) {
+            return this._set()
+        }
         if (this.lock) return
         var el = this.el
         if (el.tagName === 'SELECT') { // select dropdown

@@ -127,7 +127,8 @@ DirProto.update = function (value, init) {
             this._update(
                 this.filters
                     ? this.applyFilters(value)
-                    : value
+                    : value,
+                init
             )
         }
     }
