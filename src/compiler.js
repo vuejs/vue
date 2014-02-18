@@ -116,6 +116,7 @@ function Compiler (vm, options) {
     compiler.parseDeps()
 
     // done!
+    compiler.rawContent = null
     compiler.init = false
 
     // post compile / ready hook
@@ -136,6 +137,13 @@ CompilerProto.setupElement = function (options) {
 
     var template = options.template
     if (template) {
+        // collect anything already in there
+        /* jshint boss: true */
+        var child,
+            frag = this.rawContent = document.createDocumentFragment()
+        while (child = el.firstChild) {
+            frag.appendChild(child)
+        }
         // replace option: use the first node in
         // the template directly
         if (options.replace && template.childNodes.length === 1) {
@@ -146,7 +154,6 @@ CompilerProto.setupElement = function (options) {
             }
             el = replacer
         } else {
-            el.innerHTML = ''
             el.appendChild(template.cloneNode(true))
         }
     }
@@ -415,9 +422,18 @@ CompilerProto.compileTextNode = function (node) {
         if (token.key) { // a binding
             if (token.key.charAt(0) === '>') { // a partial
                 partialId = token.key.slice(1).trim()
-                partial = this.getOption('partials', partialId)
-                if (partial) {
-                    el = partial.cloneNode(true)
+                if (partialId === 'yield') {
+                    el = this.rawContent
+                } else {
+                    partial = this.getOption('partials', partialId)
+                    if (partial) {
+                        el = partial.cloneNode(true)
+                    } else {
+                        utils.warn('Unknown partial: ' + partialId)
+                        continue
+                    }
+                }
+                if (el) {
                     // save an Array reference of the partial's nodes
                     // so we can compile them AFTER appending the fragment
                     partialNodes = slice.call(el.childNodes)

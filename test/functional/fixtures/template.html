@@ -3,6 +3,7 @@
 <div id="usa" v-partial="global"></div>
 <div id="japan">{{> local}}</div>
 <div id="repeat">{{> repeat}}</div>
+<div id="yielder"><yielder><p>{{a}}</p><p>{{b}}</p></yielder></div>
 
 <script type="text/v-template" id="test">
     <p>{{hi}}!</p>
@@ -10,6 +11,10 @@
 
 <script type="text/v-template" id="repeat-template">
     <p v-repeat="items">{{title}}</p>
+</script>
+
+<script type="text/v-template" id="yield-template">
+    <h1>before</h1>{{>yield}}<h2>after</h2>
 </script>
 
 <script src="../../../dist/vue.js"></script>
@@ -61,4 +66,13 @@
             items: [{ title: 'Repeat' }]
         }
     })
+
+    Vue.component('yielder', {
+        template: '#yield-template',
+        data: {
+            a: 'A', b: 'B'
+        }
+    })
+
+    new Vue({el:'#yielder'})
 </script>
