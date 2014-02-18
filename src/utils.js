@@ -12,23 +12,15 @@ var defer =
     window.webkitRequestAnimationFrame ||
     window.setTimeout
 
-/**
- *  Create a prototype-less object
- *  which is a better hash/map
- */
-function makeHash () {
-    return Object.create(null)
-}
-
 var utils = module.exports = {
 
-    hash: makeHash,
-
-    // global storage for user-registered
-    // vms, partials and transitions
-    components  : makeHash(),
-    partials    : makeHash(),
-    transitions : makeHash(),
+    /**
+     *  Create a prototype-less object
+     *  which is a better hash/map
+     */
+    hash: function () {
+        return Object.create(null)
+    },
 
     /**
      *  get an attribute and remove it.

@@ -1,6 +1,7 @@
 describe('UNIT: API', function () {
 
     var utils = require('vue/src/utils'),
+        assets = require('vue/src/config').globalAssets,
         nextTick = utils.nextTick
 
     describe('config()', function () {
@@ -176,12 +177,12 @@ describe('UNIT: API', function () {
 
         it('should register a Component constructor', function () {
             Vue.component(testId, Test)
-            assert.strictEqual(utils.components[testId], Test)
+            assert.strictEqual(assets.components[testId], Test)
         })
 
         it('should also work with option objects', function () {
             Vue.component(testId2, opts)
-            assert.ok(utils.components[testId2].prototype instanceof Vue)
+            assert.ok(assets.components[testId2].prototype instanceof Vue)
         })
 
         it('should retrieve the VM if has only one arg', function () {
@@ -212,14 +213,14 @@ describe('UNIT: API', function () {
 
         it('should register the partial as a dom fragment', function () {
             Vue.partial(testId, partial)
-            var converted = utils.partials[testId]
+            var converted = assets.partials[testId]
             assert.ok(converted instanceof window.DocumentFragment)
             assert.strictEqual(converted.querySelector('.partial-test a').innerHTML, '{{hi}}')
             assert.strictEqual(converted.querySelector('span').innerHTML, 'hahaha')
         })
 
         it('should retrieve the partial if has only one arg', function () {
-            assert.strictEqual(utils.partials[testId], Vue.partial(testId))
+            assert.strictEqual(assets.partials[testId], Vue.partial(testId))
         })
 
         it('should work with v-partial as a directive', function () {
@@ -254,7 +255,7 @@ describe('UNIT: API', function () {
 
         it('should register a transition object', function () {
             Vue.transition(testId, transition)
-            assert.strictEqual(utils.transitions[testId], transition)
+            assert.strictEqual(assets.transitions[testId], transition)
         })
 
         it('should retrieve the transition if has only one arg', function () {
@@ -339,6 +340,14 @@ describe('UNIT: API', function () {
             // should overwrite past 1 level deep
             assert.strictEqual(child.test3.ho, 2)
             assert.notOk(child.test3.hi)
+        })
+
+        it('should allow subclasses to attach private assets', function () {
+            var Sub = Vue.extend({})
+            Sub.component('test', {})
+            assert.strictEqual(Sub.options.components.test.super, Vue)
+            Sub.partial('test', '123')
+            assert.ok(Sub.options.partials.test instanceof window.DocumentFragment)
         })
 
         describe('Options', function () {

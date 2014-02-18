@@ -627,11 +627,12 @@ CompilerProto.markComputed = function (binding, value) {
  */
 CompilerProto.getOption = function (type, id) {
     var opts = this.options,
-        parent = this.parentCompiler
+        parent = this.parentCompiler,
+        globalAssets = config.globalAssets
     return (opts[type] && opts[type][id]) || (
         parent
             ? parent.getOption(type, id)
-            : utils[type] && utils[type][id]
+            : globalAssets[type] && globalAssets[type][id]
     )
 }
 

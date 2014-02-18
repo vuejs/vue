@@ -26,25 +26,22 @@
                 data: {
                     vmMsg: 'component works'
                 }
-            },
-            'vm-w-model': {
-                data : {
-                    selfMsg: 'component with model '
-                }
-            }
-        },
-        partials: {
-            'partial-test': '{{partialMsg}}'
-        },
-        directives: {
-            hola: function (value) {
-                this.el.innerHTML = value + ' works'
             }
         },
         filters: {
             nodigits: function (value) {
                 return value.replace(/\d/g, '')
             }
+        }
+    })
+    // test late asset addition
+    T.directive('hola', function (value) {
+        this.el.innerHTML = value + ' works'
+    })
+    T.partial('partial-test', '{{partialMsg}}')
+    T.component('vm-w-model', {
+        data : {
+            selfMsg: 'component with model '
         }
     })
     var C = T.extend({

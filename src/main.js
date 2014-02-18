@@ -1,8 +1,36 @@
 var config      = require('./config'),
     ViewModel   = require('./viewmodel'),
-    directives  = require('./directives'),
-    filters     = require('./filters'),
-    utils       = require('./utils')
+    utils       = require('./utils'),
+    makeHash    = utils.hash,
+    assetTypes  = ['directive', 'filter', 'partial', 'transition', 'component']
+
+ViewModel.options = config.globalAssets = {
+    directives  : require('./directives'),
+    filters     : require('./filters'),
+    partials    : makeHash(),
+    transitions : makeHash(),
+    components  : makeHash()
+}
+
+/**
+ *  Expose asset registration methods
+ */
+assetTypes.forEach(function (type) {
+    ViewModel[type] = function (id, value) {
+        var hash = this.options[type + 's']
+        if (!hash) {
+            hash = this.options[type + 's'] = makeHash()
+        }
+        if (!value) return hash[id]
+        if (type === 'partial') {
+            value = utils.toFragment(value)
+        } else if (type === 'component') {
+            value = utils.toConstructor(value)
+        }
+        hash[id] = value
+        return this
+    }
+})
 
 /**
  *  Set config options
@@ -17,51 +45,6 @@ ViewModel.config = function (opts, val) {
     } else {
         utils.extend(config, opts)
     }
-    return this
-}
-
-/**
- *  Allows user to register/retrieve a directive definition
- */
-ViewModel.directive = function (id, fn) {
-    if (!fn) return directives[id]
-    directives[id] = fn
-    return this
-}
-
-/**
- *  Allows user to register/retrieve a filter function
- */
-ViewModel.filter = function (id, fn) {
-    if (!fn) return filters[id]
-    filters[id] = fn
-    return this
-}
-
-/**
- *  Allows user to register/retrieve a ViewModel constructor
- */
-ViewModel.component = function (id, Ctor) {
-    if (!Ctor) return utils.components[id]
-    utils.components[id] = utils.toConstructor(Ctor)
-    return this
-}
-
-/**
- *  Allows user to register/retrieve a template partial
- */
-ViewModel.partial = function (id, partial) {
-    if (!partial) return utils.partials[id]
-    utils.partials[id] = utils.toFragment(partial)
-    return this
-}
-
-/**
- *  Allows user to register/retrieve a transition definition object
- */
-ViewModel.transition = function (id, transition) {
-    if (!transition) return utils.transitions[id]
-    utils.transitions[id] = transition
     return this
 }
 
@@ -133,6 +116,12 @@ function extend (options) {
     ExtendedVM.extend = extend
     ExtendedVM.super = ParentVM
     ExtendedVM.options = options
+
+    // allow extended VM to add its own assets
+    assetTypes.forEach(function (type) {
+        ExtendedVM[type] = ViewModel[type]
+    })
+
     return ExtendedVM
 }
 
@@ -150,7 +139,7 @@ function extend (options) {
  *  extension option, but only as an instance option.
  */
 function inheritOptions (child, parent, topLevel) {
-    child = child || utils.hash()
+    child = child || makeHash()
     if (!parent) return child
     for (var key in parent) {
         if (key === 'el' || key === 'methods') continue
