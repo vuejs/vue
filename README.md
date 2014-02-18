@@ -44,6 +44,7 @@ Read the [contributing guide](https://github.com/yyx990803/vue/blob/master/CONTR
 
 ## Get in Touch
 
+- If you have a Vue-related project/component/tool, add it to the [Wiki page](https://github.com/yyx990803/vue/wiki/User-Contributed-Components-&-Tools)!
 - Bugs, suggestions & feature requests: [open an issue](https://github.com/yyx990803/vue/issues)
 - Twitter: [@vuejs](https://twitter.com/vuejs)
 - [Google+ Community](https://plus.google.com/communities/112229843610661683911)
