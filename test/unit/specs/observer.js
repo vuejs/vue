@@ -8,14 +8,14 @@ describe('UNIT: Observer', function () {
         it('should not watch a ViewModel instance', function () {
             var obj = new Vue(), ob = new Emitter()
             Observer.observe(obj, 'test', ob)
-            assert.notOk(obj.__observer__)
+            assert.notOk(obj.__emitter__)
         })
         
         it('should attach hidden observer and values to the object', function () {
             var obj = {}, ob = new Emitter()
             Observer.observe(obj, 'test', ob)
-            assert.ok(obj.__observer__ instanceof Emitter)
-            assert.ok(obj.__observer__.values)
+            assert.ok(obj.__emitter__ instanceof Emitter)
+            assert.ok(obj.__emitter__.values)
         })
 
         var o1 = { a: 1, b: { c: 2 } }
@@ -104,7 +104,7 @@ describe('UNIT: Observer', function () {
         Observer.observe(arr, 'test', ob)
         
         it('should attach the hidden observer', function () {
-            assert.ok(arr.__observer__ instanceof Emitter)
+            assert.ok(arr.__emitter__ instanceof Emitter)
         })
 
         it('should overwrite the native array mutator methods', function () {
@@ -414,7 +414,7 @@ describe('UNIT: Observer', function () {
         })
 
         it('should turn off corresponding event listeners', function () {
-            var callbacks = obj.__observer__._callbacks
+            var callbacks = obj.__emitter__._callbacks
             for (var e in callbacks) {
                 assert.strictEqual(callbacks[e].length, 1)
             }

@@ -404,7 +404,7 @@ describe('UNIT: ViewModel', function () {
                 }
             },
             data: {
-                __observer__: {
+                __emitter__: {
                     off: function () {
                         unobserveCalled = true
                         return this

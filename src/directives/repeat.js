@@ -202,8 +202,8 @@ module.exports = {
 
         // listen for collection mutation events
         // the collection has been augmented during Binding.set()
-        if (!collection.__observer__) Observer.watchArray(collection)
-        collection.__observer__.on('mutate', this.mutationListener)
+        if (!collection.__emitter__) Observer.watchArray(collection)
+        collection.__emitter__.on('mutate', this.mutationListener)
 
         // create new VMs and append to DOM
         if (collection.length) {
@@ -330,7 +330,7 @@ module.exports = {
             vms.splice(index, 0, item)
             // for primitive values, listen for value change
             if (primitive) {
-                data.__observer__.on('set', function (key, val) {
+                data.__emitter__.on('set', function (key, val) {
                     if (key === '$value') {
                         col[item.$index] = val
                     }
@@ -355,7 +355,7 @@ module.exports = {
             } else {
                 delete this.object[key]
             }
-            this.object.__observer__.emit('set', key, val, true)
+            this.object.__emitter__.emit('set', key, val, true)
         }
     },
 
@@ -364,7 +364,7 @@ module.exports = {
             delete this.vm.$[this.childId]
         }
         if (this.collection) {
-            this.collection.__observer__.off('mutate', this.mutationListener)
+            this.collection.__emitter__.off('mutate', this.mutationListener)
             if (destroyAll) {
                 var i = this.vms.length
                 while (i--) {

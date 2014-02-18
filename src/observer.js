@@ -32,7 +32,7 @@ var ArrayProxy = Object.create(Array.prototype)
 methods.forEach(function (method) {
     def(ArrayProxy, method, function () {
         var result = Array.prototype[method].apply(this, arguments)
-        this.__observer__.emit('mutate', null, this, {
+        this.__emitter__.emit('mutate', null, this, {
             method: method,
             args: slice.call(arguments),
             result: result
@@ -110,10 +110,10 @@ function watchObject (obj) {
  *  and add augmentations by intercepting the prototype chain
  */
 function watchArray (arr) {
-    var observer = arr.__observer__
-    if (!observer) {
-        observer = new Emitter()
-        def(arr, '__observer__', observer)
+    var emitter = arr.__emitter__
+    if (!emitter) {
+        emitter = new Emitter()
+        def(arr, '__emitter__', emitter)
     }
     if (hasProto) {
         arr.__proto__ = ArrayProxy
@@ -142,8 +142,8 @@ function convert (obj, key) {
     // emit set on bind
     // this means when an object is observed it will emit
     // a first batch of set events.
-    var observer = obj.__observer__,
-        values   = observer.values
+    var emitter = obj.__emitter__,
+        values  = emitter.values
 
     init(obj[key])
 
@@ -152,13 +152,13 @@ function convert (obj, key) {
             var value = values[key]
             // only emit get on tip values
             if (pub.shouldGet && typeOf(value) !== OBJECT) {
-                observer.emit('get', key)
+                emitter.emit('get', key)
             }
             return value
         },
         set: function (newVal) {
             var oldVal = values[key]
-            unobserve(oldVal, key, observer)
+            unobserve(oldVal, key, emitter)
             copyPaths(newVal, oldVal)
             // an immediate property should notify its parent
             // to emit set for itself too
@@ -168,11 +168,11 @@ function convert (obj, key) {
 
     function init (val, propagate) {
         values[key] = val
-        observer.emit('set', key, val, propagate)
+        emitter.emit('set', key, val, propagate)
         if (Array.isArray(val)) {
-            observer.emit('set', key + '.length', val.length)
+            emitter.emit('set', key + '.length', val.length)
         }
-        observe(val, key, observer)
+        observe(val, key, emitter)
     }
 }
 
@@ -193,7 +193,7 @@ function isWatchable (obj) {
  */
 function emitSet (obj) {
     var type = typeOf(obj),
-        emitter = obj && obj.__observer__
+        emitter = obj && obj.__emitter__
     if (type === ARRAY) {
         emitter.emit('set', 'length', obj.length)
     } else if (type === OBJECT) {
@@ -243,7 +243,7 @@ function ensurePath (obj, key) {
         sec = path[i]
         if (!obj[sec]) {
             obj[sec] = {}
-            if (obj.__observer__) convert(obj, sec)
+            if (obj.__emitter__) convert(obj, sec)
         }
         obj = obj[sec]
     }
@@ -251,7 +251,7 @@ function ensurePath (obj, key) {
         sec = path[i]
         if (!(sec in obj)) {
             obj[sec] = undefined
-            if (obj.__observer__) convert(obj, sec)
+            if (obj.__emitter__) convert(obj, sec)
         }
     }
 }
@@ -260,54 +260,54 @@ function ensurePath (obj, key) {
  *  Observe an object with a given path,
  *  and proxy get/set/mutate events to the provided observer.
  */
-function observe (obj, rawPath, parentOb) {
+function observe (obj, rawPath, observer) {
 
     if (!isWatchable(obj)) return
 
     var path = rawPath ? rawPath + '.' : '',
-        alreadyConverted = !!obj.__observer__,
-        childOb
+        alreadyConverted = !!obj.__emitter__,
+        emitter
 
     if (!alreadyConverted) {
-        def(obj, '__observer__', new Emitter())
+        def(obj, '__emitter__', new Emitter())
     }
 
-    childOb = obj.__observer__
-    childOb.values = childOb.values || utils.hash()
+    emitter = obj.__emitter__
+    emitter.values = emitter.values || utils.hash()
 
     // setup proxy listeners on the parent observer.
     // we need to keep reference to them so that they
     // can be removed when the object is un-observed.
-    parentOb.proxies = parentOb.proxies || {}
-    var proxies = parentOb.proxies[path] = {
+    observer.proxies = observer.proxies || {}
+    var proxies = observer.proxies[path] = {
         get: function (key) {
-            parentOb.emit('get', path + key)
+            observer.emit('get', path + key)
         },
         set: function (key, val, propagate) {
-            parentOb.emit('set', path + key, val)
+            observer.emit('set', path + key, val)
             // also notify observer that the object itself changed
             // but only do so when it's a immediate property. this
             // avoids duplicate event firing.
             if (rawPath && propagate) {
-                parentOb.emit('set', rawPath, obj, true)
+                observer.emit('set', rawPath, obj, true)
             }
         },
         mutate: function (key, val, mutation) {
             // if the Array is a root value
             // the key will be null
             var fixedPath = key ? path + key : rawPath
-            parentOb.emit('mutate', fixedPath, val, mutation)
+            observer.emit('mutate', fixedPath, val, mutation)
             // also emit set for Array's length when it mutates
             var m = mutation.method
             if (m !== 'sort' && m !== 'reverse') {
-                parentOb.emit('set', fixedPath + '.length', val.length)
+                observer.emit('set', fixedPath + '.length', val.length)
             }
         }
     }
 
     // attach the listeners to the child observer.
     // now all the events will propagate upwards.
-    childOb
+    emitter
         .on('get', proxies.get)
         .on('set', proxies.set)
         .on('mutate', proxies.mutate)
@@ -331,14 +331,14 @@ function observe (obj, rawPath, parentOb) {
  */
 function unobserve (obj, path, observer) {
 
-    if (!obj || !obj.__observer__) return
+    if (!obj || !obj.__emitter__) return
 
     path = path ? path + '.' : ''
     var proxies = observer.proxies[path]
     if (!proxies) return
 
     // turn off listeners
-    obj.__observer__
+    obj.__emitter__
         .off('get', proxies.get)
         .off('set', proxies.set)
         .off('mutate', proxies.mutate)

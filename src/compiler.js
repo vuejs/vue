@@ -565,7 +565,7 @@ CompilerProto.defineProp = function (key, binding) {
     
     var compiler = this,
         data     = compiler.data,
-        ob       = data.__observer__
+        ob       = data.__emitter__
 
     // make sure the key is present in data
     // so it can be observed
