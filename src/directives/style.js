@@ -8,8 +8,9 @@ function camelReplacer (m) {
 module.exports = {
 
     bind: function () {
-        var prop = this.arg,
-            first = prop.charAt(0)
+        var prop = this.arg
+        if (!prop) return
+        var first = prop.charAt(0)
         if (first === '$') {
             // properties that start with $ will be auto-prefixed
             prop = prop.slice(1)
@@ -23,13 +24,17 @@ module.exports = {
 
     update: function (value) {
         var prop = this.prop
-        this.el.style[prop] = value
-        if (this.prefixed) {
-            prop = prop.charAt(0).toUpperCase() + prop.slice(1)
-            var i = prefixes.length
-            while (i--) {
-                this.el.style[prefixes[i] + prop] = value
+        if (prop) {
+            this.el.style[prop] = value
+            if (this.prefixed) {
+                prop = prop.charAt(0).toUpperCase() + prop.slice(1)
+                var i = prefixes.length
+                while (i--) {
+                    this.el.style[prefixes[i] + prop] = value
+                }
             }
+        } else {
+            this.el.style.cssText = value
         }
     }
 

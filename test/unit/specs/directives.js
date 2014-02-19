@@ -730,6 +730,14 @@ describe('UNIT: Directives', function () {
             assert.strictEqual(d.el.style.msTransform, val)
         })
 
+        it('should set cssText if no arg', function () {
+            var d = mockDirective('style')
+            d.bind()
+            var val = 'color:#fff'
+            d.update(val)
+            assert.strictEqual(d.el.style.color, 'rgb(255, 255, 255)')
+        })
+
     })
 
     describe('cloak', function () {
