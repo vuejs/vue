@@ -1,16 +1,17 @@
 var config    = require('./config'),
     attrs     = config.attrs,
-    toString  = Object.prototype.toString,
-    join      = Array.prototype.join,
-    console   = window.console,
+    toString  = ({}).toString,
+    join      = [].join,
+    win       = window,
+    console   = win.console,
 
     hasClassList = 'classList' in document.documentElement,
     ViewModel // late def
 
 var defer =
-    window.requestAnimationFrame ||
-    window.webkitRequestAnimationFrame ||
-    window.setTimeout
+    win.requestAnimationFrame ||
+    win.webkitRequestAnimationFrame ||
+    win.setTimeout
 
 var utils = module.exports = {
 

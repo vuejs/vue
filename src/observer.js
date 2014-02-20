@@ -6,7 +6,7 @@ var Emitter  = require('./emitter'),
     // cache methods
     typeOf   = utils.typeOf,
     def      = utils.defProtected,
-    slice    = Array.prototype.slice,
+    slice    = [].slice,
 
     // types
     OBJECT   = 'Object',

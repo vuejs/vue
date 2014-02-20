@@ -9,12 +9,12 @@ var Emitter     = require('./emitter'),
     ExpParser   = require('./exp-parser'),
     
     // cache methods
-    slice       = Array.prototype.slice,
+    slice       = [].slice,
     log         = utils.log,
     makeHash    = utils.hash,
     extend      = utils.extend,
     def         = utils.defProtected,
-    hasOwn      = Object.prototype.hasOwnProperty,
+    hasOwn      = ({}).hasOwnProperty,
 
     // hooks to register
     hooks = [

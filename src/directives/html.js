@@ -1,5 +1,5 @@
 var toText = require('../utils').toText,
-    slice = Array.prototype.slice
+    slice = [].slice
 
 module.exports = {
 

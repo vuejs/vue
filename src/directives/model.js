@@ -1,11 +1,12 @@
 var utils = require('../utils'),
-    isIE9 = navigator.userAgent.indexOf('MSIE 9.0') > 0
+    isIE9 = navigator.userAgent.indexOf('MSIE 9.0') > 0,
+    filter = [].filter
 
 /**
  *  Returns an array of values from a multiple select
  */
 function getMultipleSelectOptions (select) {
-    return Array.prototype.filter
+    return filter
         .call(select.options, function (option) {
             return option.selected
         })
