@@ -170,12 +170,7 @@ module.exports = {
         ) return
 
         if (utils.typeOf(collection) === 'Object') {
-            if (this.object) {
-                delete this.object.$repeater
-            }
-            this.object = collection
-            collection = objectToArray(collection)
-            def(this.object, '$repeater', collection, false, true)
+            collection = this.convertObject(collection)
         }
 
         this.reset()
@@ -340,22 +335,67 @@ module.exports = {
     },
 
     /**
+     *  Convert an object to a repeater Array
+     *  and make sure changes in the object are synced to the repeater
+     */
+    convertObject: function (object) {
+
+        if (this.object) {
+            delete this.object.$repeater
+            this.object.__emitter__.off('set', this.updateRepeater)
+        }
+
+        this.object = object
+        var collection = objectToArray(object)
+        def(object, '$repeater', collection, false, true)
+
+        var self = this
+        this.updateRepeater = function (key, val) {
+            if (key.indexOf('.') === -1) {
+                var i = collection.length, item
+                while (i--) {
+                    item = collection[i]
+                    if (item.$key === key) {
+                        if (item !== val && item.$value !== val) {
+                            if ('$value' in item) {
+                                item.$value = val
+                            } else {
+                                def(val, '$key', key, false, true)
+                                self.lock = true
+                                collection.set(i, val)
+                                self.lock = false
+                            }
+                        }
+                        break
+                    }
+                }
+            }
+        }
+
+        object.__emitter__.on('set', this.updateRepeater)
+        return collection
+    },
+
+    /**
      *  Sync changes in the $repeater Array
      *  back to the represented Object
      */
     updateObject: function (data, action) {
-        if (this.object && data.$key) {
+        if (this.lock) return
+        var obj = this.object
+        if (obj && data.$key) {
             var key = data.$key,
                 val = data.$value || data
             if (action > 0) { // new property
                 // make key ienumerable
                 delete data.$key
                 def(data, '$key', key, false, true)
-                this.object[key] = val
+                obj[key] = val
+                Observer.convert(obj, key)
             } else {
-                delete this.object[key]
+                delete obj[key]
             }
-            this.object.__emitter__.emit('set', key, val, true)
+            obj.__emitter__.emit('set', key, val, true)
         }
     },
 

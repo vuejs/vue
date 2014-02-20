@@ -1,4 +1,7 @@
 describe('UNIT: Directives', function () {
+
+    var nextTick = require('vue/src/utils').nextTick,
+        VM = require('vue/src/viewmodel')
     
     describe('attr', function () {
 
@@ -644,9 +647,6 @@ describe('UNIT: Directives', function () {
     // this is mainly for code coverage
     describe('repeat', function () {
 
-        var nextTick = require('vue/src/utils').nextTick,
-            VM = require('vue/src/viewmodel')
-
         it('should work', function (done) {
             var handlerCalled = false
             var v = new Vue({
@@ -692,6 +692,92 @@ describe('UNIT: Directives', function () {
                     done()
                 })
             }
+        })
+
+        it('should work with primitive values', function () {
+            var v = new Vue({
+                template: '<span v-repeat="tags" v-ref="tags">{{$value}}</span>',
+                data: {
+                    tags: ['a', 'b', 'c']
+                }
+            })
+            assert.strictEqual(v.$el.textContent, 'abc')
+            v.$.tags[0].$value = 'd'
+            assert.strictEqual(v.tags[0], 'd')
+        })
+
+        it('should diff and reuse existing VMs when reseting arrays', function (done) {
+            var v = new Vue({
+                template: '<span v-repeat="tags" v-ref="tags">{{$value}}</span>',
+                data: {
+                    tags: ['a', 'b', 'c']
+                }
+            })
+            var oldVMs = v.$.tags
+            v.tags = v.tags.slice()
+            nextTick(function () {
+                assert.deepEqual(oldVMs, v.$.tags)
+                done()
+            })
+        })
+        
+        it('should also work on objects', function (done) {
+            var v = new Vue({
+                template: '<span v-repeat="obj">{{$key}} {{msg}}</span>',
+                data: {
+                    obj: {
+                        a: {
+                            msg: 'hi!'
+                        },
+                        b: {
+                            msg: 'ha!'
+                        }
+                    }
+                }
+            })
+            assert.strictEqual(v.$el.textContent, 'a hi!b ha!')
+
+            v.obj.a.msg = 'ho!'
+            
+            nextTick(function () {
+                assert.strictEqual(v.$el.textContent, 'a ho!b ha!')
+                testAddKey()
+            })
+
+            function testAddKey () {
+                v.obj.$repeater.push({ $key: 'c', msg: 'he!' })
+                nextTick(function () {
+                    assert.strictEqual(v.$el.textContent, 'a ho!b ha!c he!')
+                    assert.strictEqual(v.obj.c.msg, 'he!')
+                    testRemoveKey()
+                })
+            }
+
+            function testRemoveKey () {
+                v.obj.$repeater.shift()
+                nextTick(function () {
+                    assert.strictEqual(v.$el.textContent, 'b ha!c he!')
+                    assert.strictEqual(v.obj.a, undefined)
+                    testSwap()
+                })
+            }
+
+            function testSwap () {
+                v.obj.b = { msg: 'hehe' }
+                nextTick(function () {
+                    assert.strictEqual(v.$el.textContent, 'b hehec he!')
+                    testRootSwap()
+                })
+            }
+
+            function testRootSwap () {
+                v.obj = { b: { msg: 'wa'}, c: {msg: 'wo'} }
+                nextTick(function () {
+                    assert.strictEqual(v.$el.textContent, 'b wac wo')
+                    done()
+                })
+            }
+           
         })
 
     })
@@ -754,6 +840,21 @@ describe('UNIT: Directives', function () {
                 }
             })
             assert.notOk(v.$el.hasAttribute('v-cloak'))
+        })
+
+    })
+
+    describe('data', function () {
+        
+        it('should set data on the child VM', function () {
+            var v = new Vue({
+                template: '<div v-component="test" v-ref="test" v-data="a:1,b:hi"></div>',
+                components: {
+                    test: Vue
+                }
+            })
+            assert.strictEqual(v.$.test.a, 1)
+            assert.strictEqual(v.$.test.b, 'hi')
         })
 
     })

@@ -10,6 +10,7 @@
     <button id="shift" v-on="click:t3">shift from object</button>
     <button id="unshift" v-on="click:t4">unshift to object</button>
     <button id="splice" v-on="click:t5">splice in object</button>
+    <button id="set" v-on="click:t6">Setting the original object</button>
     <p id="primitive">{{primitive}}</p>
     <p id="obj">{{obj}}</p>
 </div>
@@ -52,6 +53,10 @@ var test = new Vue({
                 $key: 'd',
                 msg: 'he!'
             })
+        },
+        t6: function () {
+            this.primitive.a = 3
+            this.obj.c = { msg: 'hu!' }
         }
     }
 })

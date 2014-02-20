@@ -36,6 +36,18 @@ describe('Misc Features', function () {
         })
     })
 
+    describe('triple mustache', function () {
+        it('should set unescaped HTML', function () {
+            var v = new Vue({
+                template: '{{{html}}}',
+                data: {
+                    html: '<span>a</span><a>hi</a>'
+                }
+            })
+            assert.strictEqual(v.$el.innerHTML, '<span>a</span><a>hi</a><!--v-html-->')
+        })
+    })
+
     describe('computed properties', function () {
         it('should be accessible like a normal attribtue', function () {
             var b = 2

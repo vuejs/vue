@@ -1,4 +1,4 @@
-casper.test.begin('Repeat properties of an Object', 24, function (test) {
+casper.test.begin('Repeat properties of an Object', 28, function (test) {
     
     casper
     .start('./fixtures/repeat-object.html')
@@ -37,6 +37,13 @@ casper.test.begin('Repeat properties of an Object', 24, function (test) {
         test.assertSelectorHasText('.obj:nth-child(1)', 'c ho!')
         test.assertSelectorHasText('.obj:nth-child(2)', 'd he!')
         test.assertSelectorHasText('#obj', '{"c":{"msg":"ho!"},"d":{"msg":"he!"}}')
+    })
+    // changing the object syncs to repeater
+    .thenClick('#set', function () {
+        test.assertSelectorHasText('.primitive:nth-child(1)', 'a 3')
+        test.assertSelectorHasText('.obj:nth-child(1)', 'c hu!')
+        test.assertSelectorHasText('#primitive', '{"a":3,"b":2}')
+        test.assertSelectorHasText('#obj', '{"c":{"msg":"hu!"},"d":{"msg":"he!"}}')
     })
     .run(function () {
         test.done()
