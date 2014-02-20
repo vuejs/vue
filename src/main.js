@@ -66,10 +66,15 @@ ViewModel.use = function (plugin) {
             return utils.warn('Cannot find plugin: ' + plugin)
         }
     }
-    if (typeof plugin === 'function') {
-        plugin(ViewModel)
-    } else if (plugin.install) {
-        plugin.install(ViewModel)
+
+    // additional parameters
+    var args = [].slice.call(arguments, 1)
+    args.unshift(ViewModel)
+
+    if (typeof plugin.install === 'function') {
+        plugin.install.apply(plugin, args)
+    } else {
+        plugin.apply(null, args)
     }
 }
 

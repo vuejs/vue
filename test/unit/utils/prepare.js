@@ -43,3 +43,5 @@ var testDiv = document.createElement('div')
 testDiv.id = 'test'
 testDiv.style.display = 'none'
 document.body.appendChild(testDiv)
+
+var global = this

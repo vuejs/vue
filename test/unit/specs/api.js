@@ -61,13 +61,43 @@ describe('UNIT: API', function () {
             assert.ok(called)
         })
 
-        it('should install a plugin if its a function itself', function () {
+        it('should install a plugin if it’s a function itself', function () {
             var called = false
             Vue.use(function (vue) {
                 called = true
                 assert.strictEqual(vue, Vue)
             })
             assert.ok(called)
+        })
+
+        it('should pass any additional parameter', function () {
+            var param1 = 'a',
+                param2 = { b: 'c' }
+
+            Vue.use(function (vue, p1, p2) {
+                assert.strictEqual(p1, param1)
+                assert.strictEqual(p2, param2)
+            }, param1, param2)
+
+            Vue.use({
+                install: function (vue, p1, p2) {
+                    assert.strictEqual(p1, param1)
+                    assert.strictEqual(p2, param2)
+                }
+            }, param1, param2)
+        })
+
+        it('should properly set the value of this', function () {
+            var plugin = {
+                install: function () {
+                    assert.strictEqual(this, plugin)
+                }
+            }
+            Vue.use(plugin)
+
+            Vue.use(function () {
+                assert.strictEqual(this, global)
+            })
         })
 
     })
