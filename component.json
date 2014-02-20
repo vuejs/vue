@@ -29,7 +29,8 @@
         "src/directives/model.js",
         "src/directives/with.js",
         "src/directives/html.js",
-        "src/directives/style.js"
+        "src/directives/style.js",
+        "src/directives/control.js"
     ],
     "dependencies": {
         "component/emitter": "*"

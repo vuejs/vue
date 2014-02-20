@@ -13,6 +13,7 @@ module.exports = {
     'with'    : require('./with'),
     html      : require('./html'),
     style     : require('./style'),
+    control   : require('./control'),
 
     attr: function (value) {
         if (value || value === 0) {
