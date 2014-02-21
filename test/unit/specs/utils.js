@@ -137,6 +137,12 @@ describe('UNIT: Utils', function () {
             assert.strictEqual(a.b, b.b)
         })
 
+        it('should always return the extended object', function () {
+            var a = {a: 1}, b = {a: {}, b: 2}
+            assert.strictEqual(a, utils.extend(a, b))
+            assert.strictEqual(a, utils.extend(a, undefined))
+        })
+
     })
 
     describe('unique', function () {
