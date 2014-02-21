@@ -380,6 +380,14 @@ describe('UNIT: API', function () {
             assert.ok(Sub.options.partials.test instanceof window.DocumentFragment)
         })
 
+        it('should allow subclasses to use plugins', function () {
+            var Sub = Vue.extend({})
+            Sub.use(function (Sub) {
+                Sub.directive('hello', {})
+            })
+            assert.ok(Sub.options.directives.hello)
+        })
+
         describe('Options', function () {
 
             describe('methods', function () {
