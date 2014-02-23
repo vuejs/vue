@@ -844,21 +844,6 @@ describe('UNIT: Directives', function () {
 
     })
 
-    describe('data', function () {
-        
-        it('should set data on the child VM', function () {
-            var v = new Vue({
-                template: '<div v-component="test" v-ref="test" v-data="a:1,b:hi"></div>',
-                components: {
-                    test: Vue
-                }
-            })
-            assert.strictEqual(v.$.test.a, 1)
-            assert.strictEqual(v.$.test.b, 'hi')
-        })
-
-    })
-
 })
 
 function mockDirective (dirName, tag, type) {

@@ -89,6 +89,14 @@ function Compiler (vm, options) {
         }
     }
 
+    // copy paramAttributes
+    if (options.paramAttributes) {
+        options.paramAttributes.forEach(function (attr) {
+            var val = el.getAttribute(attr)
+            vm[attr] = isNaN(val) ? val : Number(val)
+        })
+    }
+
     // beforeCompile hook
     compiler.execHook('created')
 

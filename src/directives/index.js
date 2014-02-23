@@ -1,8 +1,6 @@
 var utils      = require('../utils'),
     config     = require('../config'),
-    transition = require('../transition'),
-    NumberRE   = /^[\d\.]+$/,
-    CommaRE    = /\\,/g
+    transition = require('../transition')
 
 module.exports = {
 
@@ -55,18 +53,6 @@ module.exports = {
             this.compiler.observer.once('hook:ready', function () {
                 el.removeAttribute(config.prefix + '-cloak')
             })
-        }
-    },
-
-    data: {
-        bind: function () {
-            var val = this.key
-            this.vm.$set(
-                this.arg,
-                NumberRE.test(val)
-                    ? +val
-                    : val.replace(CommaRE, ',')
-            )
         }
     }
 

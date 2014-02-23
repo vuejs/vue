@@ -602,6 +602,23 @@ describe('UNIT: API', function () {
 
             })
 
+            describe('paramAttributes', function () {
+                
+                it('should copy listed attributes into data and parse Numbers', function () {
+                    var Test = Vue.extend({
+                        template: '<div a="1" b="hello"></div>',
+                        replace: true,
+                        paramAttributes: ['a', 'b']
+                    })
+                    var v = new Test()
+                    assert.strictEqual(v.a, 1)
+                    assert.strictEqual(v.$data.a, 1)
+                    assert.strictEqual(v.b, 'hello')
+                    assert.strictEqual(v.$data.b, 'hello')
+                })
+
+            })
+
             describe('directives', function () {
                 
                 it('should allow the VM to use private directives', function (done) {
