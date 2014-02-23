@@ -74,7 +74,16 @@ describe('UNIT: Transition', function () {
                 el.dispatchEvent(e)
                 assert.notOk(cbCalled)
             })
-            
+
+            it('should remove the v-leave class if the leave callback exists', function () {
+                var el = mockEl('css')
+                document.body.appendChild(el)
+                el.style.width = '1px'
+                code = transition(el, -1, function(){}, compiler)
+                code = transition(el, 1, function(){}, compiler)
+                assert.notOk(el.classList.contains(leaveClass))
+            })
+
             it('should remove the class afterwards', function () {
                 assert.notOk(el.classList.contains(enterClass))
             })

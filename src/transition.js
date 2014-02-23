@@ -76,6 +76,7 @@ function applyTransitionClass (el, stage, changeState) {
         // cancel unfinished leave transition
         if (lastLeaveCallback) {
             el.removeEventListener(endEvent, lastLeaveCallback)
+            classList.remove(config.leaveClass)
             el.vue_trans_cb = null
         }
 
