@@ -154,13 +154,14 @@ function extend (options) {
  *  extension option, but only as an instance option.
  */
 function inheritOptions (child, parent, topLevel) {
-    child = child || makeHash()
+    child = child || {}
     if (!parent) return child
     for (var key in parent) {
         if (key === 'el' || key === 'methods') continue
         var val = child[key],
             parentVal = parent[key],
-            type = utils.typeOf(val)
+            type = utils.typeOf(val),
+            parentType = utils.typeOf(parentVal)
         if (topLevel && type === 'Function' && parentVal) {
             // merge hook functions into an array
             child[key] = [val]
@@ -169,9 +170,9 @@ function inheritOptions (child, parent, topLevel) {
             } else {
                 child[key].push(parentVal)
             }
-        } else if (topLevel && type === 'Object') {
+        } else if (topLevel && (type === 'Object' || parentType === 'Object')) {
             // merge toplevel object options
-            inheritOptions(val, parentVal)
+            child[key] = inheritOptions(val, parentVal)
         } else if (val === undefined) {
             // inherit if child doesn't override
             child[key] = parentVal

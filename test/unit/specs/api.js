@@ -373,11 +373,17 @@ describe('UNIT: API', function () {
         })
 
         it('should allow subclasses to attach private assets', function () {
+            var testId = 'sub-private'
             var Sub = Vue.extend({})
-            Sub.component('test', {})
-            assert.strictEqual(Sub.options.components.test.super, Vue)
-            Sub.partial('test', '123')
-            assert.ok(Sub.options.partials.test instanceof window.DocumentFragment)
+            Sub.component(testId, {})
+            assert.strictEqual(Sub.options.components[testId].super, Vue)
+            Sub.partial(testId, '123')
+            assert.ok(Sub.options.partials[testId] instanceof window.DocumentFragment)
+
+            var Sub2 = Vue.extend({})
+            Sub2.component(testId, {})
+            assert.notStrictEqual(Sub.options.components[testId], Sub2.options.components[testId])
+            assert.notOk(Vue.options.components[testId])
         })
 
         it('should allow subclasses to use plugins', function () {
