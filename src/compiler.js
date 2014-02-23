@@ -58,6 +58,7 @@ function Compiler (vm, options) {
     compiler.childCompilers = []
     compiler.emitter = new Emitter()
     compiler.emitter._ctx = vm
+    compiler.delegators = makeHash()
 
     // set inenumerable VM properties
     def(vm, '$', makeHash())
@@ -688,6 +689,41 @@ CompilerProto.parseDeps = function () {
 }
 
 /**
+ *  Add an event delegation listener
+ *  listeners are instances of directives with `isFn:true`
+ */
+CompilerProto.addListener = function (listener) {
+    var event = listener.arg,
+        delegator = this.delegators[event]
+    if (!delegator) {
+        // initialize a delegator
+        delegator = this.delegators[event] = {
+            targets: [],
+            handler: function (e) {
+                var i = delegator.targets.length,
+                    target
+                while (i--) {
+                    target = delegator.targets[i]
+                    if (e.target === target.el && target.handler) {
+                        target.handler(e)
+                    }
+                }
+            }
+        }
+        this.el.addEventListener(event, delegator.handler)
+    }
+    delegator.targets.push(listener)
+}
+
+/**
+ *  Remove an event delegation listener
+ */
+CompilerProto.removeListener = function (listener) {
+    var targets = this.delegators[listener.arg].targets
+    targets.splice(targets.indexOf(listener), 1)
+}
+
+/**
  *  Unbind and remove element
  */
 CompilerProto.destroy = function () {
@@ -702,7 +738,8 @@ CompilerProto.destroy = function () {
         el          = compiler.el,
         directives  = compiler.dirs,
         exps        = compiler.exps,
-        bindings    = compiler.bindings
+        bindings    = compiler.bindings,
+        delegators  = compiler.delegators
 
     compiler.execHook('beforeDestroy')
 
@@ -736,6 +773,11 @@ CompilerProto.destroy = function () {
         if (binding) {
             binding.unbind()
         }
+    }
+
+    // remove all event delegators
+    for (key in delegators) {
+        el.removeEventListener(key, delegators[key].handler)
     }
 
     // remove self from parentCompiler

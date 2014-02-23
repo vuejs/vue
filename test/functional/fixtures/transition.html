@@ -60,7 +60,7 @@
         data: {
             b: 1,
             set: function (e) {
-                this.b = +e.el.textContent
+                this.b = +e.target.textContent
             },
             push: function () {
                 this.items.push({a: this.items.length + 1 })  
