@@ -1,7 +1,7 @@
 describe('UNIT: Observer', function () {
 
     var Observer = require('vue/src/observer'),
-        Emitter  = require('emitter')
+        Emitter  = require('vue/src/emitter')
     
     describe('Observing Object', function () {
 

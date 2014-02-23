@@ -57,6 +57,7 @@ function Compiler (vm, options) {
     compiler.computed = []
     compiler.childCompilers = []
     compiler.emitter = new Emitter()
+    compiler.emitter._ctx = vm
 
     // set inenumerable VM properties
     def(vm, '$', makeHash())

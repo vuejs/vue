@@ -33,12 +33,12 @@ var a = superLongConditionalStatement
 
 ## Development Setup
 
-You will need [Node](http://nodejs.org), [Grunt](http://gruntjs.com), [Component](https://github.com/component/component), [PhantomJS](http://phantomjs.org) and [CasperJS](http://casperjs.org).
+You will need [Node](http://nodejs.org), [Grunt](http://gruntjs.com), [PhantomJS](http://phantomjs.org) and [CasperJS](http://casperjs.org).
 
 ``` bash
-# in case you don't already have them:
-# npm install -g grunt-cli component
-$ npm install && component install
+# in case you don't already it:
+# npm install -g grunt-cli
+$ npm install
 ```
 
 To watch and auto-build `dist/vue.js` during development:

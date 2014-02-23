@@ -30,8 +30,5 @@
         "src/directives/with.js",
         "src/directives/html.js",
         "src/directives/style.js"
-    ],
-    "dependencies": {
-        "component/emitter": "*"
-    }
+    ]
 }
