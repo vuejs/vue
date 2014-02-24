@@ -41,7 +41,7 @@ var transition = module.exports = function (el, stage, cb, compiler) {
     }
 
     var transitionId = el.vue_trans,
-        animation = el.vue_anim
+        isAnimation = el.vue_anim === ''
 
     if (transitionId) {
         return applyTransitionFunctions(
@@ -51,12 +51,12 @@ var transition = module.exports = function (el, stage, cb, compiler) {
             transitionId,
             compiler
         )
-    } else if (transitionId === '' || animation === '') {
+    } else if (transitionId === '' || isAnimation) {
         return applyTransitionClass(
             el,
             stage,
             changeState,
-            animation
+            isAnimation
         )
     } else {
         changeState()
@@ -70,7 +70,7 @@ transition.codes = codes
 /**
  *  Togggle a CSS class to trigger transition
  */
-function applyTransitionClass (el, stage, changeState, animation) {
+function applyTransitionClass (el, stage, changeState, isAnimation) {
 
     if (!endEvents.trans) {
         changeState()
@@ -84,7 +84,6 @@ function applyTransitionClass (el, stage, changeState, animation) {
         existingCallback = el.vue_trans_cb,
         enterClass       = config.enterClass,
         leaveClass       = config.leaveClass,
-        isAnimation      = animation === '',
         endEvent = isAnimation
             ? endEvents.anim
             : endEvents.trans

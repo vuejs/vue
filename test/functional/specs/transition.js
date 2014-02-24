@@ -1,4 +1,4 @@
-casper.test.begin('Transition', 25, function (test) {
+casper.test.begin('CSS Transition', 25, function (test) {
 
     var minWait = 50,
         transDuration = 200

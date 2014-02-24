@@ -4,12 +4,12 @@
         display: inline-block;
     }
     .v-enter {
-        -webkit-animation: fadein .5s;
-        animation: fadein .5s;
+        -webkit-animation: fadein .2s;
+        animation: fadein .2s;
     }
     .v-leave {
-        -webkit-animation: fadeout .5s;
-        animation: fadeout .5s;
+        -webkit-animation: fadeout .2s;
+        animation: fadeout .2s;
     }
     @keyframes fadein {
         0% {
@@ -70,10 +70,4 @@
             ok: true
         }
     })
-    setTimeout(function () {
-        test.ok = !test.ok
-        setTimeout(function () {
-            test.ok = !test.ok
-        }, 100)
-    }, 100)
 </script>

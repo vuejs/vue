@@ -3,9 +3,10 @@ describe('UNIT: Transition', function () {
     var transition = require('vue/src/transition'),
         config     = require('vue/src/config'),
         codes      = transition.codes,
-        endEvent   = sniffTransitionEndEvent(),
+        endEvents  = sniffEndEvents(),
         enterClass = config.enterClass,
-        leaveClass = config.leaveClass
+        leaveClass = config.leaveClass,
+        nextTick   = Vue.nextTick
 
     describe('General', function () {
         
@@ -30,9 +31,9 @@ describe('UNIT: Transition', function () {
 
     })
 
-    describe('CSS class transition', function () {
+    describe('CSS Transitions', function () {
 
-        if (!endEvent) { // IE9 only test case
+        if (!endEvents.trans) { // IE9 only test case
 
             it('should skip if transition is not available', function () {
                 var c = mockChange(),
@@ -48,7 +49,7 @@ describe('UNIT: Transition', function () {
 
         }
 
-        describe('enter', function () {
+        describe('enter: transition', function () {
 
             var el = mockEl('css'),
                 c = mockChange(function () {
@@ -61,7 +62,7 @@ describe('UNIT: Transition', function () {
             el.vue_trans_cb = function () {
                 cbCalled = true
             }
-            el.addEventListener(endEvent, el.vue_trans_cb)
+            el.addEventListener(endEvents.trans, el.vue_trans_cb)
 
             it('should add the class before calling changeState()', function () {
                 code = transition(el, 1, c.change, compiler)
@@ -70,7 +71,7 @@ describe('UNIT: Transition', function () {
 
             it('should remove unfinished leave callback if exists', function () {
                 assert.notOk(el.vue_trans_cb)
-                var e = mockHTMLEvent(endEvent)
+                var e = mockHTMLEvent(endEvents.trans)
                 el.dispatchEvent(e)
                 assert.notOk(cbCalled)
             })
@@ -85,7 +86,7 @@ describe('UNIT: Transition', function () {
             })
 
             it('should remove the class afterwards', function (done) {
-                Vue.nextTick(function () {
+                nextTick(function () {
                     assert.notOk(el.classList.contains(enterClass))
                     done()
                 })
@@ -101,6 +102,50 @@ describe('UNIT: Transition', function () {
 
         })
 
+        describe('enter: animation', function () {
+            
+            var el = mockEl('css'),
+                c = mockChange(function () {
+                    c.called = true
+                    assert.notOk(el.classList.contains(enterClass))
+                }),
+                compiler = mockCompiler(),
+                code
+            // mark it to use CSS animation instead of transition
+            el.vue_anim = ''
+
+            before(function () {
+                document.body.appendChild(el)
+            })
+
+            after(function () {
+                document.body.removeChild(el)
+            })
+
+            it('should not add enterClass before calling changeState()', function () {
+                code = transition(el, 1, c.change, compiler)
+                assert.ok(c.called)
+            })
+
+            it('should add the class on nextTick', function (done) {
+                nextTick(function () {
+                    assert.ok(el.classList.contains(enterClass))
+                    done()
+                })
+            })
+
+            it('should remove the class when the animation is done', function (done) {
+                el.addEventListener(endEvents.anim, function () {
+                    assert.notOk(el.vue_trans_cb)
+                    assert.notOk(el.classList.contains(enterClass))
+                    done()
+                })
+                var e = mockHTMLEvent(endEvents.anim)
+                el.dispatchEvent(e)
+            })
+
+        })
+
         describe('leave', function () {
 
             var el = mockEl('css'),
@@ -110,6 +155,10 @@ describe('UNIT: Transition', function () {
 
             before(function () {
                 document.body.appendChild(el)
+            })
+
+            after(function () {
+                document.body.removeChild(el)
             })
 
             it('should call change immediately if el is invisible', function () {
@@ -132,14 +181,14 @@ describe('UNIT: Transition', function () {
             })
 
             it('should call changeState on transitionend', function () {
-                var e = mockHTMLEvent(endEvent)
+                var e = mockHTMLEvent(endEvents.trans)
                 el.dispatchEvent(e)
                 assert.ok(c.called)
             })
 
             it('should remove the callback after called', function () {
                 assert.notOk(el.vue_trans_cb)
-                var e = mockHTMLEvent(endEvent)
+                var e = mockHTMLEvent(endEvents.trans)
                 el.dispatchEvent(e)
                 assert.strictEqual(c.n, 1)
             })
@@ -160,7 +209,7 @@ describe('UNIT: Transition', function () {
 
     })
 
-    describe('JavaScript transition', function () {
+    describe('JavaScript Transitions', function () {
 
         it('should skip if correspinding option is not defined', function () {
             var c = mockChange(),
@@ -278,19 +327,25 @@ describe('UNIT: Transition', function () {
         }
     }
 
-    function sniffTransitionEndEvent () {
+    function sniffEndEvents () {
         var el = document.createElement('vue'),
             defaultEvent = 'transitionend',
             events = {
                 'transition'       : defaultEvent,
-                'MozTransition'    : defaultEvent,
-                'WebkitTransition' : 'webkitTransitionEnd'
-            }
+                'mozTransition'    : defaultEvent,
+                'webkitTransition' : 'webkitTransitionEnd'
+            },
+            ret = {}
         for (var name in events) {
             if (el.style[name] !== undefined) {
-                return events[name]
+                ret.trans = events[name]
+                break
             }
         }
+        ret.anim = el.style.animation === ''
+            ? 'animationend'
+            : 'webkitAnimationEnd'
+        return ret
     }
 
 })
