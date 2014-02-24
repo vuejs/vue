@@ -107,7 +107,7 @@ describe('UNIT: Transition', function () {
             var el = mockEl('css'),
                 c = mockChange(function () {
                     c.called = true
-                    assert.notOk(el.classList.contains(enterClass))
+                    assert.ok(el.classList.contains(enterClass))
                 }),
                 compiler = mockCompiler(),
                 code
@@ -122,12 +122,12 @@ describe('UNIT: Transition', function () {
                 document.body.removeChild(el)
             })
 
-            it('should not add enterClass before calling changeState()', function () {
+            it('should add enterClass before calling changeState()', function () {
                 code = transition(el, 1, c.change, compiler)
                 assert.ok(c.called)
             })
 
-            it('should add the class on nextTick', function (done) {
+            it('should still have the class on nextTick', function (done) {
                 nextTick(function () {
                     assert.ok(el.classList.contains(enterClass))
                     done()

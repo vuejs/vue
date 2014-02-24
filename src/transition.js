@@ -20,12 +20,6 @@ var endEvents  = sniffEndEvents(),
         SKIP      : -6
     }
 
-// force a layout so transition can be triggered
-batcher._preFlush = function () {
-    /* jshint unused: false */
-    var forceLayout = document.body.clientHeight
-}
-
 /**
  *  stage:
  *    1 = enter
@@ -83,14 +77,12 @@ function applyTransitionClass (el, stage, changeState, hasAnimation) {
 
     // if the browser supports transition,
     // it must have classList...
-    var onEnd, job,
+    var onEnd,
         classList        = el.classList,
         existingCallback = el.vue_trans_cb,
         enterClass       = config.enterClass,
         leaveClass       = config.leaveClass,
-        endEvent = hasAnimation
-            ? endEvents.anim
-            : endEvents.trans
+        endEvent         = hasAnimation ? endEvents.anim : endEvents.trans
 
     // cancel unfinished callbacks and jobs
     if (existingCallback) {
@@ -102,18 +94,17 @@ function applyTransitionClass (el, stage, changeState, hasAnimation) {
 
     if (stage > 0) { // enter
 
-        // set to hidden state before appending
-        if (!hasAnimation) {
-            classList.add(enterClass)
-        }
+        // set to enter state before appending
+        classList.add(enterClass)
         // append
         changeState()
-        job = {}
         // trigger transition
         if (!hasAnimation) {
-            job.execute = function () {
-                classList.remove(enterClass)
-            }
+            batcher.push({
+                execute: function () {
+                    classList.remove(enterClass)
+                }
+            })
         } else {
             onEnd = function (e) {
                 if (e.target === el) {
@@ -122,13 +113,9 @@ function applyTransitionClass (el, stage, changeState, hasAnimation) {
                     classList.remove(enterClass)
                 }
             }
-            job.execute = function () {
-                classList.add(enterClass)
-                el.addEventListener(endEvent, onEnd)
-                el.vue_trans_cb = onEnd
-            }
+            el.addEventListener(endEvent, onEnd)
+            el.vue_trans_cb = onEnd
         }
-        batcher.push(job)
         return codes.CSS_E
 
     } else { // leave
