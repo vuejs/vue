@@ -275,6 +275,7 @@ module.exports = {
                 el = this.el.cloneNode(true)
                 // process transition info before appending
                 el.vue_trans = utils.attr(el, 'transition', true)
+                el.vue_anim = utils.attr(el, 'animation', true)
                 // wrap primitive element in an object
                 if (utils.typeOf(data) !== 'Object') {
                     primitive = true

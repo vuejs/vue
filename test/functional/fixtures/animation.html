@@ -1,0 +1,73 @@
+<script src="../dist/vue.js"></script>
+<style type="text/css">
+    h1 {
+        display: inline-block;
+    }
+    .v-enter {
+        -webkit-animation: fadein .5s;
+        animation: fadein .5s;
+    }
+    .v-leave {
+        -webkit-animation: fadeout .5s;
+        animation: fadeout .5s;
+    }
+    @keyframes fadein {
+        0% {
+            transform: scale(0);
+        }
+        50% {
+            transform: scale(1.5);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+    @keyframes fadeout {
+        0% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.5);
+        }
+        100% {
+            transform: scale(0);
+        }
+    }
+    @-webkit-keyframes fadein {
+        0% {
+            -webkit-transform: scale(0);
+        }
+        50% {
+            -webkit-transform: scale(1.5);
+        }
+        100% {
+            -webkit-transform: scale(1);
+        }
+    }
+    @-webkit-keyframes fadeout {
+        0% {
+            -webkit-transform: scale(1);
+        }
+        50% {
+            -webkit-transform: scale(1.5);
+        }
+        100% {
+            -webkit-transform: scale(0);
+        }
+    }
+</style>
+
+<div id="test">
+    <h1 v-animation v-if="ok">Hahahah</h1>
+    <br>
+    <button v-on="click: ok = !ok">toggle</button>
+</div>
+
+<script>
+    var test = new Vue({
+        el: '#test',
+        data: {
+            ok: true
+        }
+    })
+</script>

@@ -7,6 +7,7 @@ var prefix = 'v',
         'repeat',
         'partial',
         'component',
+        'animation',
         'transition'
     ],
     config = module.exports = {

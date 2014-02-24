@@ -340,8 +340,9 @@ CompilerProto.compile = function (node, root) {
 
         } else {
 
-            // check transition property
+            // check transition & animation properties
             node.vue_trans = utils.attr(node, 'transition')
+            node.vue_anim = utils.attr(node, 'animation')
             
             // replace innerHTML with partial
             partialId = utils.attr(node, 'partial')
