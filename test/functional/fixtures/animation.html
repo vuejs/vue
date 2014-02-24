@@ -1,4 +1,4 @@
-<script src="../dist/vue.js"></script>
+<script src="../../../dist/vue.js"></script>
 <style type="text/css">
     h1 {
         display: inline-block;
@@ -70,4 +70,10 @@
             ok: true
         }
     })
+    setTimeout(function () {
+        test.ok = !test.ok
+        setTimeout(function () {
+            test.ok = !test.ok
+        }, 100)
+    }, 100)
 </script>

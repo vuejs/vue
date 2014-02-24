@@ -1,6 +1,6 @@
 var Batcher        = require('./batcher'),
     bindingBatcher = new Batcher(),
-    bindingId      = 0
+    bindingId      = 1
 
 /**
  *  Binding class.

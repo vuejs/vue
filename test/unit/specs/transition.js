@@ -84,8 +84,11 @@ describe('UNIT: Transition', function () {
                 assert.notOk(el.classList.contains(leaveClass))
             })
 
-            it('should remove the class afterwards', function () {
-                assert.notOk(el.classList.contains(enterClass))
+            it('should remove the class afterwards', function (done) {
+                Vue.nextTick(function () {
+                    assert.notOk(el.classList.contains(enterClass))
+                    done()
+                })
             })
 
             it('should return correct code', function () {

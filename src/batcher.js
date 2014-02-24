@@ -7,7 +7,7 @@ function Batcher () {
 var BatcherProto = Batcher.prototype
 
 BatcherProto.push = function (job) {
-    if (!this.has[job.id]) {
+    if (!job.id || !this.has[job.id]) {
         this.queue.push(job)
         this.has[job.id] = job
         if (!this.waiting) {

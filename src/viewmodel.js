@@ -8,7 +8,7 @@ var Compiler   = require('./compiler'),
 
     // batch $watch callbacks
     watcherBatcher = new Batcher(),
-    watcherId      = 0
+    watcherId      = 1
 
 /**
  *  ViewModel exposed to the user that holds data,
