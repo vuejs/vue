@@ -280,9 +280,9 @@ describe('UNIT: ViewModel', function () {
         
         var v = new Vue({
             attributes: {
-                'v-transition': 'test'
+                'v-effect': 'test'
             },
-            transitions: {
+            effects: {
                 test: {
                     enter: function (el, change) {
                         enterCalled = true

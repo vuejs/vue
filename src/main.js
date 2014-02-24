@@ -2,7 +2,7 @@ var config      = require('./config'),
     ViewModel   = require('./viewmodel'),
     utils       = require('./utils'),
     makeHash    = utils.hash,
-    assetTypes  = ['directive', 'filter', 'partial', 'transition', 'component']
+    assetTypes  = ['directive', 'filter', 'partial', 'effect', 'component']
 
 // require these so Browserify can catch them
 // so they can be used in Vue.require
@@ -13,7 +13,7 @@ ViewModel.options = config.globalAssets = {
     directives  : require('./directives'),
     filters     : require('./filters'),
     partials    : makeHash(),
-    transitions : makeHash(),
+    effects     : makeHash(),
     components  : makeHash()
 }
 

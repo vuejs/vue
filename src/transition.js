@@ -40,23 +40,24 @@ var transition = module.exports = function (el, stage, cb, compiler) {
         return codes.INIT
     }
 
-    var transitionId = el.vue_trans,
-        isAnimation = el.vue_anim === ''
+    var hasTransition = el.vue_trans === '',
+        hasAnimation  = el.vue_anim === '',
+        effectId      = el.vue_effect
 
-    if (transitionId) {
+    if (effectId) {
         return applyTransitionFunctions(
             el,
             stage,
             changeState,
-            transitionId,
+            effectId,
             compiler
         )
-    } else if (transitionId === '' || isAnimation) {
+    } else if (hasTransition || hasAnimation) {
         return applyTransitionClass(
             el,
             stage,
             changeState,
-            isAnimation
+            hasAnimation
         )
     } else {
         changeState()
@@ -70,7 +71,7 @@ transition.codes = codes
 /**
  *  Togggle a CSS class to trigger transition
  */
-function applyTransitionClass (el, stage, changeState, isAnimation) {
+function applyTransitionClass (el, stage, changeState, hasAnimation) {
 
     if (!endEvents.trans) {
         changeState()
@@ -84,7 +85,7 @@ function applyTransitionClass (el, stage, changeState, isAnimation) {
         existingCallback = el.vue_trans_cb,
         enterClass       = config.enterClass,
         leaveClass       = config.leaveClass,
-        endEvent = isAnimation
+        endEvent = hasAnimation
             ? endEvents.anim
             : endEvents.trans
 
@@ -99,14 +100,14 @@ function applyTransitionClass (el, stage, changeState, isAnimation) {
     if (stage > 0) { // enter
 
         // set to hidden state before appending
-        if (!isAnimation) {
+        if (!hasAnimation) {
             classList.add(enterClass)
         }
         // append
         changeState()
         job = {}
         // trigger transition
-        if (!isAnimation) {
+        if (!hasAnimation) {
             job.execute = function () {
                 classList.remove(enterClass)
             }
@@ -154,9 +155,9 @@ function applyTransitionClass (el, stage, changeState, isAnimation) {
 
 }
 
-function applyTransitionFunctions (el, stage, changeState, functionId, compiler) {
+function applyTransitionFunctions (el, stage, changeState, effectId, compiler) {
 
-    var funcs = compiler.getOption('transitions', functionId)
+    var funcs = compiler.getOption('effects', effectId)
     if (!funcs) {
         changeState()
         return codes.JS_SKIP

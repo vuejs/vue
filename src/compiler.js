@@ -341,8 +341,9 @@ CompilerProto.compile = function (node, root) {
         } else {
 
             // check transition & animation properties
-            node.vue_trans = utils.attr(node, 'transition')
-            node.vue_anim = utils.attr(node, 'animation')
+            node.vue_trans  = utils.attr(node, 'transition')
+            node.vue_anim   = utils.attr(node, 'animation')
+            node.vue_effect = utils.attr(node, 'effect')
             
             // replace innerHTML with partial
             partialId = utils.attr(node, 'partial')

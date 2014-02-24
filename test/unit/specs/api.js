@@ -278,26 +278,26 @@ describe('UNIT: API', function () {
         })
     })
 
-    describe('transition()', function () {
+    describe('effect()', function () {
         
-        var testId = 'api-trans-test',
-            transition = {}
+        var testId = 'api-effect-test',
+            effect = {}
 
-        it('should register a transition object', function () {
-            Vue.transition(testId, transition)
-            assert.strictEqual(assets.transitions[testId], transition)
+        it('should register a effect object', function () {
+            Vue.effect(testId, effect)
+            assert.strictEqual(assets.effects[testId], effect)
         })
 
-        it('should retrieve the transition if has only one arg', function () {
-            assert.strictEqual(Vue.transition(testId), transition)
+        it('should retrieve the effect if has only one arg', function () {
+            assert.strictEqual(Vue.effect(testId), effect)
         })
 
-        it('should work with v-transition', function (done) {
+        it('should work with v-effect', function (done) {
 
             var enterCalled = false,
                 leaveCalled = false
 
-            Vue.transition('transition-api-test', {
+            Vue.effect('effect-api-test', {
                 enter: function (el, done) {
                     enterCalled = true
                     done()
@@ -311,7 +311,7 @@ describe('UNIT: API', function () {
             var t = new Vue({
                 attributes: {
                     'v-show': 'show',
-                    'v-transition': 'transition-api-test'
+                    'v-effect': 'effect-api-test'
                 },
                 data: {
                     show: false
@@ -733,9 +733,9 @@ describe('UNIT: API', function () {
 
             })
 
-            describe('transitions', function () {
+            describe('effects', function () {
                 
-                it('should get called during transitions', function (done) {
+                it('should get called during effects', function (done) {
                     
                     var enterCalled = false,
                         leaveCalled = false
@@ -743,9 +743,9 @@ describe('UNIT: API', function () {
                     var t = new Vue({
                         attributes: {
                             'v-show': 'show',
-                            'v-transition': 'test'
+                            'v-effect': 'test'
                         },
-                        transitions: {
+                        effects: {
                             test: {
                                 enter: function (el, done) {
                                     enterCalled = true

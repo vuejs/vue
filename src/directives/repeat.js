@@ -129,8 +129,6 @@ module.exports = {
         // extract child VM information, if any
         ViewModel = ViewModel || require('../viewmodel')
         this.Ctor = this.Ctor || ViewModel
-        // extract transition information
-        this.hasTrans = el.hasAttribute(config.attrs.transition)
         // extract child Id, if any
         this.childId = utils.attr(el, 'ref')
 
@@ -274,8 +272,9 @@ module.exports = {
 
                 el = this.el.cloneNode(true)
                 // process transition info before appending
-                el.vue_trans = utils.attr(el, 'transition', true)
-                el.vue_anim = utils.attr(el, 'animation', true)
+                el.vue_trans  = utils.attr(el, 'transition', true)
+                el.vue_anim   = utils.attr(el, 'animation', true)
+                el.vue_effect = utils.attr(el, 'effect', true)
                 // wrap primitive element in an object
                 if (utils.typeOf(data) !== 'Object') {
                     primitive = true

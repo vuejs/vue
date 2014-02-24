@@ -8,7 +8,8 @@ var prefix = 'v',
         'partial',
         'component',
         'animation',
-        'transition'
+        'transition',
+        'effect'
     ],
     config = module.exports = {
 

@@ -311,7 +311,7 @@ describe('UNIT: Transition', function () {
         if (type === 'css') {
             el.vue_trans = ''
         } else if (type === 'js') {
-            el.vue_trans = 'test'
+            el.vue_effect = 'test'
         }
         return el
     }
