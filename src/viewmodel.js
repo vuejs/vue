@@ -1,8 +1,14 @@
 var Compiler   = require('./compiler'),
     utils      = require('./utils'),
     transition = require('./transition'),
+    Batcher    = require('./batcher'),
+    slice      = [].slice,
     def        = utils.defProtected,
-    nextTick   = utils.nextTick
+    nextTick   = utils.nextTick,
+
+    // batch $watch callbacks
+    watcherBatcher = new Batcher(),
+    watcherId      = 0
 
 /**
  *  ViewModel exposed to the user that holds data,
@@ -36,11 +42,17 @@ def(VMProto, '$set', function (key, value) {
  *  fire callback with new value
  */
 def(VMProto, '$watch', function (key, callback) {
-    var self = this
+    // save a unique id for each watcher
+    var id = watcherId++,
+        self = this
     function on () {
-        var args = arguments
-        utils.nextTick(function () {
-            callback.apply(self, args)
+        var args = slice.call(arguments)
+        watcherBatcher.push({
+            id: id,
+            override: true,
+            execute: function () {
+                callback.apply(self, args)
+            }
         })
     }
     callback._fn = on

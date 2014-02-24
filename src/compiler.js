@@ -197,6 +197,7 @@ CompilerProto.setupObserver = function () {
     // a hash to hold event proxies for each root level key
     // so they can be referenced and removed later
     observer.proxies = makeHash()
+    observer._ctx = compiler.vm
 
     // add own listeners which trigger binding updates
     observer

@@ -84,6 +84,29 @@ describe('UNIT: ViewModel', function () {
             })
         })
 
+        it('should batch mutiple changes in a single event loop', function (done) {
+            var callbackCount = 0,
+                gotVal,
+                finalValue =  { b: { c: 3} },
+                vm = new Vue({
+                    data: {
+                        a: { b: { c: 0 }}
+                    }
+                })
+            vm.$watch('a', function (newVal) {
+                callbackCount++
+                gotVal = newVal
+            })
+            vm.a.b.c = 1
+            vm.a.b = { c: 2 }
+            vm.a = finalValue
+            nextTick(function () {
+                assert.strictEqual(callbackCount, 1)
+                assert.strictEqual(gotVal, finalValue)
+                done()
+            })
+        })
+
     })
 
     describe('.$unwatch()', function () {

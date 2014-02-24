@@ -1,5 +1,6 @@
-var batcher = require('./batcher'),
-    id = 0
+var Batcher        = require('./batcher'),
+    bindingBatcher = new Batcher(),
+    bindingId      = 0
 
 /**
  *  Binding class.
@@ -9,7 +10,7 @@ var batcher = require('./batcher'),
  *  and multiple computed property dependents
  */
 function Binding (compiler, key, isExp, isFn) {
-    this.id = id++
+    this.id = bindingId++
     this.value = undefined
     this.isExp = !!isExp
     this.isFn = isFn
@@ -32,7 +33,17 @@ BindingProto.update = function (value) {
         this.value = value
     }
     if (this.dirs.length || this.subs.length) {
-        batcher.queue(this)
+        var self = this
+        bindingBatcher.push({
+            id: this.id,
+            execute: function () {
+                if (!self.unbound) {
+                    self._update()
+                } else {
+                    return false
+                }
+            }
+        })
     }
 }
 

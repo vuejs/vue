@@ -1,31 +1,46 @@
-var utils = require('./utils'),
-    queue, has, waiting
+var utils = require('./utils')
 
-reset()
+function Batcher () {
+    this.reset()
+}
 
-exports.queue = function (binding) {
-    if (!has[binding.id]) {
-        queue.push(binding)
-        has[binding.id] = true
-        if (!waiting) {
-            waiting = true
-            utils.nextTick(flush)
+var BatcherProto = Batcher.prototype
+
+BatcherProto.push = function (job) {
+    if (!this.has[job.id]) {
+        this.queue.push(job)
+        this.has[job.id] = job
+        if (!this.waiting) {
+            this.waiting = true
+            utils.nextTick(utils.bind(this.flush, this))
+        }
+    } else if (job.override) {
+        var oldJob = this.has[job.id]
+        oldJob.cancelled = true
+        this.queue.push(job)
+        this.has[job.id] = job
+    }
+}
+
+BatcherProto.flush = function () {
+    // before flush hook
+    if (this._preFlush) this._preFlush()
+    // do not cache length because more jobs might be pushed
+    // as we execute existing jobs
+    for (var i = 0; i < this.queue.length; i++) {
+        var job = this.queue[i]
+        if (job.cancelled) continue
+        if (job.execute() !== false) {
+            this.has[job.id] = false
         }
     }
+    this.reset()
 }
 
-function flush () {
-    for (var i = 0; i < queue.length; i++) {
-        var b = queue[i]
-        if (b.unbound) continue
-        b._update()
-        has[b.id] = false
-    }
-    reset()
+BatcherProto.reset = function () {
+    this.has = utils.hash()
+    this.queue = []
+    this.waiting = false
 }
 
-function reset () {
-    queue = []
-    has = utils.hash()
-    waiting = false
-}
+module.exports = Batcher
