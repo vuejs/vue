@@ -9,7 +9,7 @@ module.exports = {
         // so they can't be delegated
         this.bubbles = this.arg !== 'blur' && this.arg !== 'focus'
         if (this.bubbles) {
-            this.compiler.addListener(this)
+            this.binding.compiler.addListener(this)
         }
     },
 
@@ -37,7 +37,7 @@ module.exports = {
     
     unbind: function () {
         if (this.bubbles) {
-            this.compiler.removeListener(this)
+            this.binding.compiler.removeListener(this)
         } else {
             this.reset()
         }
