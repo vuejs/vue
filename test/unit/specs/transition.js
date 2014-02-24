@@ -292,6 +292,35 @@ describe('UNIT: Transition', function () {
 
         })
 
+        describe('wrapped timeout', function () {
+            
+            var el = mockEl('js'),
+                c = mockChange(),
+                timerFired = false,
+                def = {
+                    enter: function (el, change, timeout) {
+                        change()
+                        timeout(function () {
+                            timerFired = true
+                        }, 0)
+                    },
+                    leave: function () {}
+                },
+                compiler = mockCompiler(def)
+
+            it('should cancel previous unfired timers', function (done) {
+                transition(el, 1, c.change, compiler)
+                assert.strictEqual(el.vue_timeouts.length, 1)
+                transition(el, -1, c.change, compiler)
+                assert.strictEqual(el.vue_timeouts.length, 0)
+                setTimeout(function () {
+                    assert.notOk(timerFired)
+                    done()
+                }, 0)
+            })
+
+        })
+
     })
 
     function mockChange (change) {

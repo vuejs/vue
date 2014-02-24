@@ -3,6 +3,9 @@ var endEvents  = sniffEndEvents(),
     // batch enter animations so we only force the layout once
     Batcher    = require('./batcher'),
     batcher    = new Batcher(),
+    // cache timer functions
+    setTO      = window.setTimeout,
+    clearTO    = window.clearTimeout,
     // exit codes for testing
     codes = {
         CSS_E     : 1,
@@ -164,21 +167,42 @@ function applyTransitionFunctions (el, stage, changeState, effectId, compiler) {
     }
 
     var enter = funcs.enter,
-        leave = funcs.leave
+        leave = funcs.leave,
+        timeouts = el.vue_timeouts
+
+    // clear previous timeouts
+    if (timeouts) {
+        var i = timeouts.length
+        while (i--) {
+            clearTO(timeouts[i])
+        }
+    }
+
+    timeouts = el.vue_timeouts = []
+    function timeout (cb, delay) {
+        var id = setTO(function () {
+            cb()
+            timeouts.splice(timeouts.indexOf(id), 1)
+            if (!timeouts.length) {
+                el.vue_timeouts = null
+            }
+        }, delay)
+        timeouts.push(id)
+    }
 
     if (stage > 0) { // enter
         if (typeof enter !== 'function') {
             changeState()
             return codes.JS_SKIP_E
         }
-        enter(el, changeState)
+        enter(el, changeState, timeout)
         return codes.JS_E
     } else { // leave
         if (typeof leave !== 'function') {
             changeState()
             return codes.JS_SKIP_L
         }
-        leave(el, changeState)
+        leave(el, changeState, timeout)
         return codes.JS_L
     }
 
