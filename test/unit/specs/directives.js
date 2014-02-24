@@ -472,7 +472,7 @@ describe('UNIT: Directives', function () {
 
     })
 
-    describe('on (non-delegated only)', function () {
+    describe('on', function () {
         
         var dir = mockDirective('on')
         dir.arg = 'click'
@@ -526,8 +526,6 @@ describe('UNIT: Directives', function () {
             dir.unbind()
             dir.el.dispatchEvent(mockMouseEvent('click'))
             assert.notOk(triggered)
-            assert.strictEqual(dir.handler, null, 'should remove reference to handler')
-            assert.strictEqual(dir.el.vue_viewmodel, null, 'should remove reference to VM on the element')
         })
 
         it('should not use delegation if the event is blur or focus', function () {

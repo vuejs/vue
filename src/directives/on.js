@@ -1,4 +1,4 @@
-var warn = require('utils').warn
+var warn = require('../utils').warn
 
 module.exports = {
 

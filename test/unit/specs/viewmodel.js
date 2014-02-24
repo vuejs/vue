@@ -371,7 +371,8 @@ describe('UNIT: ViewModel', function () {
             expUnbindCalled = false,
             bindingUnbindCalled = false,
             unobserveCalled = false,
-            elRemoved = false
+            elRemoved = false,
+            delegatorsRemoved = false
 
         var dirMock = {
             binding: {
@@ -448,6 +449,18 @@ describe('UNIT: ViewModel', function () {
             },
             execHook: function (id) {
                 this.options[id].call(this)
+            },
+            el: {
+                removeEventListener: function (event, handler) {
+                    assert.strictEqual(event, 'click')
+                    assert.strictEqual(handler, compilerMock.delegators.click.handler)
+                    delegatorsRemoved = true
+                }
+            },
+            delegators: {
+                click: {
+                    handler: function () {}
+                }
             }
         }
 
@@ -493,6 +506,10 @@ describe('UNIT: ViewModel', function () {
 
         it('should remove the dom element', function () {
             assert.ok(elRemoved)
+        })
+
+        it('should remove all event delegator listeners', function () {
+            assert.ok(delegatorsRemoved)
         })
 
     })

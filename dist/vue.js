@@ -206,179 +206,17 @@ require.relative = function(parent) {
 
   return localRequire;
 };
-require.register("component-emitter/index.js", function(exports, require, module){
-
-/**
- * Expose `Emitter`.
- */
-
-module.exports = Emitter;
-
-/**
- * Initialize a new `Emitter`.
- *
- * @api public
- */
-
-function Emitter(obj) {
-  if (obj) return mixin(obj);
-};
-
-/**
- * Mixin the emitter properties.
- *
- * @param {Object} obj
- * @return {Object}
- * @api private
- */
-
-function mixin(obj) {
-  for (var key in Emitter.prototype) {
-    obj[key] = Emitter.prototype[key];
-  }
-  return obj;
-}
-
-/**
- * Listen on the given `event` with `fn`.
- *
- * @param {String} event
- * @param {Function} fn
- * @return {Emitter}
- * @api public
- */
-
-Emitter.prototype.on =
-Emitter.prototype.addEventListener = function(event, fn){
-  this._callbacks = this._callbacks || {};
-  (this._callbacks[event] = this._callbacks[event] || [])
-    .push(fn);
-  return this;
-};
-
-/**
- * Adds an `event` listener that will be invoked a single
- * time then automatically removed.
- *
- * @param {String} event
- * @param {Function} fn
- * @return {Emitter}
- * @api public
- */
-
-Emitter.prototype.once = function(event, fn){
-  var self = this;
-  this._callbacks = this._callbacks || {};
-
-  function on() {
-    self.off(event, on);
-    fn.apply(this, arguments);
-  }
-
-  on.fn = fn;
-  this.on(event, on);
-  return this;
-};
-
-/**
- * Remove the given callback for `event` or all
- * registered callbacks.
- *
- * @param {String} event
- * @param {Function} fn
- * @return {Emitter}
- * @api public
- */
-
-Emitter.prototype.off =
-Emitter.prototype.removeListener =
-Emitter.prototype.removeAllListeners =
-Emitter.prototype.removeEventListener = function(event, fn){
-  this._callbacks = this._callbacks || {};
-
-  // all
-  if (0 == arguments.length) {
-    this._callbacks = {};
-    return this;
-  }
-
-  // specific event
-  var callbacks = this._callbacks[event];
-  if (!callbacks) return this;
-
-  // remove all handlers
-  if (1 == arguments.length) {
-    delete this._callbacks[event];
-    return this;
-  }
-
-  // remove specific handler
-  var cb;
-  for (var i = 0; i < callbacks.length; i++) {
-    cb = callbacks[i];
-    if (cb === fn || cb.fn === fn) {
-      callbacks.splice(i, 1);
-      break;
-    }
-  }
-  return this;
-};
-
-/**
- * Emit `event` with the given args.
- *
- * @param {String} event
- * @param {Mixed} ...
- * @return {Emitter}
- */
-
-Emitter.prototype.emit = function(event){
-  this._callbacks = this._callbacks || {};
-  var args = [].slice.call(arguments, 1)
-    , callbacks = this._callbacks[event];
-
-  if (callbacks) {
-    callbacks = callbacks.slice(0);
-    for (var i = 0, len = callbacks.length; i < len; ++i) {
-      callbacks[i].apply(this, args);
-    }
-  }
-
-  return this;
-};
-
-/**
- * Return array of callbacks for `event`.
- *
- * @param {String} event
- * @return {Array}
- * @api public
- */
-
-Emitter.prototype.listeners = function(event){
-  this._callbacks = this._callbacks || {};
-  return this._callbacks[event] || [];
-};
-
-/**
- * Check if this emitter has `event` handlers.
- *
- * @param {String} event
- * @return {Boolean}
- * @api public
- */
-
-Emitter.prototype.hasListeners = function(event){
-  return !! this.listeners(event).length;
-};
-
-});
 require.register("vue/src/main.js", function(exports, require, module){
 var config      = require('./config'),
     ViewModel   = require('./viewmodel'),
     utils       = require('./utils'),
     makeHash    = utils.hash,
     assetTypes  = ['directive', 'filter', 'partial', 'transition', 'component']
+
+// require these so Browserify can catch them
+// so they can be used in Vue.require
+require('./observer')
+require('./transition')
 
 ViewModel.options = config.globalAssets = {
     directives  : require('./directives'),
@@ -425,13 +263,6 @@ ViewModel.config = function (opts, val) {
 }
 
 /**
- *  Expose internal modules for plugins
- */
-ViewModel.require = function (path) {
-    return require('./' + path)
-}
-
-/**
  *  Expose an interface for plugins
  */
 ViewModel.use = function (plugin) {
@@ -445,13 +276,21 @@ ViewModel.use = function (plugin) {
 
     // additional parameters
     var args = [].slice.call(arguments, 1)
-    args.unshift(ViewModel)
+    args.unshift(this)
 
     if (typeof plugin.install === 'function') {
         plugin.install.apply(plugin, args)
     } else {
         plugin.apply(null, args)
     }
+    return this
+}
+
+/**
+ *  Expose internal modules for plugins
+ */
+ViewModel.require = function (path) {
+    return require('./' + path)
 }
 
 ViewModel.extend = extend
@@ -494,14 +333,18 @@ function extend (options) {
     }
 
     // allow extended VM to be further extended
-    ExtendedVM.extend = extend
-    ExtendedVM.super = ParentVM
+    ExtendedVM.extend  = extend
+    ExtendedVM.super   = ParentVM
     ExtendedVM.options = options
 
     // allow extended VM to add its own assets
     assetTypes.forEach(function (type) {
         ExtendedVM[type] = ViewModel[type]
     })
+
+    // allow extended VM to use plugins
+    ExtendedVM.use     = ViewModel.use
+    ExtendedVM.require = ViewModel.require
 
     return ExtendedVM
 }
@@ -520,13 +363,14 @@ function extend (options) {
  *  extension option, but only as an instance option.
  */
 function inheritOptions (child, parent, topLevel) {
-    child = child || makeHash()
+    child = child || {}
     if (!parent) return child
     for (var key in parent) {
         if (key === 'el' || key === 'methods') continue
         var val = child[key],
             parentVal = parent[key],
-            type = utils.typeOf(val)
+            type = utils.typeOf(val),
+            parentType = utils.typeOf(parentVal)
         if (topLevel && type === 'Function' && parentVal) {
             // merge hook functions into an array
             child[key] = [val]
@@ -535,9 +379,9 @@ function inheritOptions (child, parent, topLevel) {
             } else {
                 child[key].push(parentVal)
             }
-        } else if (topLevel && type === 'Object') {
+        } else if (topLevel && (type === 'Object' || parentType === 'Object')) {
             // merge toplevel object options
-            inheritOptions(val, parentVal)
+            child[key] = inheritOptions(val, parentVal)
         } else if (val === undefined) {
             // inherit if child doesn't override
             child[key] = parentVal
@@ -549,23 +393,76 @@ function inheritOptions (child, parent, topLevel) {
 module.exports = ViewModel
 });
 require.register("vue/src/emitter.js", function(exports, require, module){
-// shiv to make this work for Component, Browserify and Node at the same time.
-var Emitter,
-    componentEmitter = 'emitter'
+function Emitter () {}
 
-try {
-    // Requiring without a string literal will make browserify
-    // unable to parse the dependency, thus preventing it from
-    // stopping the compilation after a failed lookup.
-    Emitter = require(componentEmitter)
-} catch (e) {
-    Emitter = require('events').EventEmitter
-    Emitter.prototype.off = function () {
-        var method = arguments.length > 1
-            ? this.removeListener
-            : this.removeAllListeners
-        return method.apply(this, arguments)
+var EmitterProto = Emitter.prototype,
+    slice = [].slice
+
+EmitterProto.on = function(event, fn){
+    this._cbs = this._cbs || {}
+    ;(this._cbs[event] = this._cbs[event] || [])
+        .push(fn)
+    return this
+}
+
+Emitter.prototype.once = function(event, fn){
+    var self = this
+    this._cbs = this._cbs || {}
+
+    function on() {
+        self.off(event, on)
+        fn.apply(this, arguments)
     }
+
+    on.fn = fn
+    this.on(event, on)
+    return this
+}
+
+Emitter.prototype.off = function(event, fn){
+    this._cbs = this._cbs || {}
+
+    // all
+    if (!arguments.length) {
+        this._cbs = {}
+        return this
+    }
+
+    // specific event
+    var callbacks = this._cbs[event]
+    if (!callbacks) return this
+
+    // remove all handlers
+    if (arguments.length === 1) {
+        delete this._cbs[event]
+        return this
+    }
+
+    // remove specific handler
+    var cb
+    for (var i = 0; i < callbacks.length; i++) {
+        cb = callbacks[i]
+        if (cb === fn || cb.fn === fn) {
+            callbacks.splice(i, 1)
+            break
+        }
+    }
+    return this
+}
+
+Emitter.prototype.emit = function(event){
+    this._cbs = this._cbs || {}
+    var args = slice.call(arguments, 1),
+        callbacks = this._cbs[event]
+
+    if (callbacks) {
+        callbacks = callbacks.slice(0)
+        for (var i = 0, len = callbacks.length; i < len; i++) {
+            callbacks[i].apply(this._ctx || this, args)
+        }
+    }
+
+    return this
 }
 
 module.exports = Emitter
@@ -700,6 +597,7 @@ var utils = module.exports = {
             if (protective && obj[key]) continue
             obj[key] = ext[key]
         }
+        return obj
     },
 
     /**
@@ -900,6 +798,8 @@ function Compiler (vm, options) {
     compiler.computed = []
     compiler.childCompilers = []
     compiler.emitter = new Emitter()
+    compiler.emitter._ctx = vm
+    compiler.delegators = makeHash()
 
     // set inenumerable VM properties
     def(vm, '$', makeHash())
@@ -929,6 +829,14 @@ function Compiler (vm, options) {
         for (var key in computed) {
             compiler.createBinding(key)
         }
+    }
+
+    // copy paramAttributes
+    if (options.paramAttributes) {
+        options.paramAttributes.forEach(function (attr) {
+            var val = el.getAttribute(attr)
+            vm[attr] = isNaN(val) ? val : Number(val)
+        })
     }
 
     // beforeCompile hook
@@ -1522,6 +1430,41 @@ CompilerProto.parseDeps = function () {
 }
 
 /**
+ *  Add an event delegation listener
+ *  listeners are instances of directives with `isFn:true`
+ */
+CompilerProto.addListener = function (listener) {
+    var event = listener.arg,
+        delegator = this.delegators[event]
+    if (!delegator) {
+        // initialize a delegator
+        delegator = this.delegators[event] = {
+            targets: [],
+            handler: function (e) {
+                var i = delegator.targets.length,
+                    target
+                while (i--) {
+                    target = delegator.targets[i]
+                    if (e.target === target.el && target.handler) {
+                        target.handler(e)
+                    }
+                }
+            }
+        }
+        this.el.addEventListener(event, delegator.handler)
+    }
+    delegator.targets.push(listener)
+}
+
+/**
+ *  Remove an event delegation listener
+ */
+CompilerProto.removeListener = function (listener) {
+    var targets = this.delegators[listener.arg].targets
+    targets.splice(targets.indexOf(listener), 1)
+}
+
+/**
  *  Unbind and remove element
  */
 CompilerProto.destroy = function () {
@@ -1536,7 +1479,8 @@ CompilerProto.destroy = function () {
         el          = compiler.el,
         directives  = compiler.dirs,
         exps        = compiler.exps,
-        bindings    = compiler.bindings
+        bindings    = compiler.bindings,
+        delegators  = compiler.delegators
 
     compiler.execHook('beforeDestroy')
 
@@ -1570,6 +1514,11 @@ CompilerProto.destroy = function () {
         if (binding) {
             binding.unbind()
         }
+    }
+
+    // remove all event delegators
+    for (key in delegators) {
+        el.removeEventListener(key, delegators[key].handler)
     }
 
     // remove self from parentCompiler
@@ -2855,6 +2804,7 @@ function applyTransitionClass (el, stage, changeState) {
         // cancel unfinished leave transition
         if (lastLeaveCallback) {
             el.removeEventListener(endEvent, lastLeaveCallback)
+            classList.remove(config.leaveClass)
             el.vue_trans_cb = null
         }
 
@@ -2979,9 +2929,7 @@ function reset () {
 require.register("vue/src/directives/index.js", function(exports, require, module){
 var utils      = require('../utils'),
     config     = require('../config'),
-    transition = require('../transition'),
-    NumberRE   = /^[\d\.]+$/,
-    CommaRE    = /\\,/g
+    transition = require('../transition')
 
 module.exports = {
 
@@ -3034,18 +2982,6 @@ module.exports = {
             this.compiler.observer.once('hook:ready', function () {
                 el.removeAttribute(config.prefix + '-cloak')
             })
-        }
-    },
-
-    data: {
-        bind: function () {
-            var val = this.key
-            this.vm.$set(
-                this.arg,
-                NumberRE.test(val)
-                    ? +val
-                    : val.replace(CommaRE, ',')
-            )
         }
     }
 
@@ -3543,88 +3479,49 @@ module.exports = {
 }
 });
 require.register("vue/src/directives/on.js", function(exports, require, module){
-var utils = require('../utils')
-
-function delegateCheck (el, root, identifier) {
-    while (el && el !== root) {
-        if (el[identifier]) return el
-        el = el.parentNode
-    }
-}
+var warn = require('../utils').warn
 
 module.exports = {
 
     isFn: true,
 
     bind: function () {
-        if (this.compiler.repeat) {
-            // attach an identifier to the el
-            // so it can be matched during event delegation
-            this.el[this.expression] = true
-            // attach the owner viewmodel of this directive
-            this.el.vue_viewmodel = this.vm
+        // blur and focus events do not bubble
+        // so they can't be delegated
+        this.bubbles = this.arg !== 'blur' && this.arg !== 'focus'
+        if (this.bubbles) {
+            this.compiler.addListener(this)
         }
     },
 
     update: function (handler) {
-        this.reset()
         if (typeof handler !== 'function') {
-            return utils.warn('Directive "on" expects a function value.')
+            return warn('Directive "on" expects a function value.')
         }
-
-        var compiler = this.compiler,
-            event    = this.arg,
+        var targetVM = this.vm,
+            ownerVM  = this.binding.compiler.vm,
             isExp    = this.binding.isExp,
-            ownerVM  = this.binding.compiler.vm
-
-        if (compiler.repeat &&
-            // do not delegate if the repeat is combined with an extended VM
-            !this.vm.constructor.super &&
-            // blur and focus events do not bubble
-            event !== 'blur' && event !== 'focus') {
-
-            // for each blocks, delegate for better performance
-            // focus and blur events dont bubble so exclude them
-            var delegator  = compiler.delegator,
-                identifier = this.expression,
-                dHandler   = delegator.vue_dHandlers[identifier]
-
-            if (dHandler) return
-
-            // the following only gets run once for the entire each block
-            dHandler = delegator.vue_dHandlers[identifier] = function (e) {
-                var target = delegateCheck(e.target, delegator, identifier)
-                if (target) {
-                    e.el = target
-                    e.targetVM = target.vue_viewmodel
-                    handler.call(isExp ? e.targetVM : ownerVM, e)
-                }
+            newHandler = function (e) {
+                e.targetVM = targetVM
+                handler.call(isExp ? targetVM : ownerVM, e)
             }
-            dHandler.event = event
-            delegator.addEventListener(event, dHandler)
-
-        } else {
-
-            // a normal, single element handler
-            var vm = this.vm
-            this.handler = function (e) {
-                e.el = e.currentTarget
-                e.targetVM = vm
-                handler.call(ownerVM, e)
-            }
-            this.el.addEventListener(event, this.handler)
-
+        if (!this.bubbles) {
+            this.reset()
+            this.el.addEventListener(this.arg, newHandler)
         }
+        this.handler = newHandler
     },
 
     reset: function () {
         this.el.removeEventListener(this.arg, this.handler)
-        this.handler = null
     },
-
+    
     unbind: function () {
-        this.reset()
-        this.el.vue_viewmodel = null
+        if (this.bubbles) {
+            this.compiler.removeListener(this)
+        } else {
+            this.reset()
+        }
     }
 }
 });
@@ -3922,9 +3819,6 @@ module.exports = {
 
 }
 });
-require.alias("component-emitter/index.js", "vue/deps/emitter/index.js");
-require.alias("component-emitter/index.js", "emitter/index.js");
-
 require.alias("vue/src/main.js", "vue/index.js");
 if (typeof exports == 'object') {
   module.exports = require('vue');
