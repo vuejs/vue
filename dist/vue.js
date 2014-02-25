@@ -1,5 +1,5 @@
 /*
- Vue.js v0.9.0
+ Vue.js v0.9.1
  (c) 2014 Evan You
  License: MIT
 */
@@ -1450,7 +1450,7 @@ CompilerProto.addListener = function (listener) {
                     target
                 while (i--) {
                     target = delegator.targets[i]
-                    if (e.target === target.el && target.handler) {
+                    if (target.el.contains(e.target) && target.handler) {
                         target.handler(e)
                     }
                 }
