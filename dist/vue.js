@@ -1,5 +1,5 @@
 /*
- Vue.js v0.8.8
+ Vue.js v0.9.0
  (c) 2014 Evan You
  License: MIT
 */
@@ -211,7 +211,7 @@ var config      = require('./config'),
     ViewModel   = require('./viewmodel'),
     utils       = require('./utils'),
     makeHash    = utils.hash,
-    assetTypes  = ['directive', 'filter', 'partial', 'transition', 'component']
+    assetTypes  = ['directive', 'filter', 'partial', 'effect', 'component']
 
 // require these so Browserify can catch them
 // so they can be used in Vue.require
@@ -222,7 +222,7 @@ ViewModel.options = config.globalAssets = {
     directives  : require('./directives'),
     filters     : require('./filters'),
     partials    : makeHash(),
-    transitions : makeHash(),
+    effects     : makeHash(),
     components  : makeHash()
 }
 
@@ -477,7 +477,9 @@ var prefix = 'v',
         'repeat',
         'partial',
         'component',
-        'transition'
+        'animation',
+        'transition',
+        'effect'
     ],
     config = module.exports = {
 
@@ -938,6 +940,7 @@ CompilerProto.setupObserver = function () {
     // a hash to hold event proxies for each root level key
     // so they can be referenced and removed later
     observer.proxies = makeHash()
+    observer._ctx = compiler.vm
 
     // add own listeners which trigger binding updates
     observer
@@ -1080,8 +1083,10 @@ CompilerProto.compile = function (node, root) {
 
         } else {
 
-            // check transition property
-            node.vue_trans = utils.attr(node, 'transition')
+            // check transition & animation properties
+            node.vue_trans  = utils.attr(node, 'transition')
+            node.vue_anim   = utils.attr(node, 'animation')
+            node.vue_effect = utils.attr(node, 'effect')
             
             // replace innerHTML with partial
             partialId = utils.attr(node, 'partial')
@@ -1565,8 +1570,14 @@ require.register("vue/src/viewmodel.js", function(exports, require, module){
 var Compiler   = require('./compiler'),
     utils      = require('./utils'),
     transition = require('./transition'),
+    Batcher    = require('./batcher'),
+    slice      = [].slice,
     def        = utils.defProtected,
-    nextTick   = utils.nextTick
+    nextTick   = utils.nextTick,
+
+    // batch $watch callbacks
+    watcherBatcher = new Batcher(),
+    watcherId      = 1
 
 /**
  *  ViewModel exposed to the user that holds data,
@@ -1600,11 +1611,17 @@ def(VMProto, '$set', function (key, value) {
  *  fire callback with new value
  */
 def(VMProto, '$watch', function (key, callback) {
-    var self = this
+    // save a unique id for each watcher
+    var id = watcherId++,
+        self = this
     function on () {
-        var args = arguments
-        utils.nextTick(function () {
-            callback.apply(self, args)
+        var args = slice.call(arguments)
+        watcherBatcher.push({
+            id: id,
+            override: true,
+            execute: function () {
+                callback.apply(self, args)
+            }
         })
     }
     callback._fn = on
@@ -1725,8 +1742,9 @@ function query (el) {
 module.exports = ViewModel
 });
 require.register("vue/src/binding.js", function(exports, require, module){
-var batcher = require('./batcher'),
-    id = 0
+var Batcher        = require('./batcher'),
+    bindingBatcher = new Batcher(),
+    bindingId      = 1
 
 /**
  *  Binding class.
@@ -1736,7 +1754,7 @@ var batcher = require('./batcher'),
  *  and multiple computed property dependents
  */
 function Binding (compiler, key, isExp, isFn) {
-    this.id = id++
+    this.id = bindingId++
     this.value = undefined
     this.isExp = !!isExp
     this.isFn = isFn
@@ -1759,7 +1777,17 @@ BindingProto.update = function (value) {
         this.value = value
     }
     if (this.dirs.length || this.subs.length) {
-        batcher.queue(this)
+        var self = this
+        bindingBatcher.push({
+            id: this.id,
+            execute: function () {
+                if (!self.unbound) {
+                    self._update()
+                } else {
+                    return false
+                }
+            }
+        })
     }
 }
 
@@ -2726,8 +2754,14 @@ module.exports = {
 }
 });
 require.register("vue/src/transition.js", function(exports, require, module){
-var endEvent   = sniffTransitionEndEvent(),
+var endEvents  = sniffEndEvents(),
     config     = require('./config'),
+    // batch enter animations so we only force the layout once
+    Batcher    = require('./batcher'),
+    batcher    = new Batcher(),
+    // cache timer functions
+    setTO      = window.setTimeout,
+    clearTO    = window.clearTimeout,
     // exit codes for testing
     codes = {
         CSS_E     : 1,
@@ -2759,21 +2793,24 @@ var transition = module.exports = function (el, stage, cb, compiler) {
         return codes.INIT
     }
 
-    var transitionId = el.vue_trans
+    var hasTransition = el.vue_trans === '',
+        hasAnimation  = el.vue_anim === '',
+        effectId      = el.vue_effect
 
-    if (transitionId) {
+    if (effectId) {
         return applyTransitionFunctions(
             el,
             stage,
             changeState,
-            transitionId,
+            effectId,
             compiler
         )
-    } else if (transitionId === '') {
+    } else if (hasTransition || hasAnimation) {
         return applyTransitionClass(
             el,
             stage,
-            changeState
+            changeState,
+            hasAnimation
         )
     } else {
         changeState()
@@ -2787,50 +2824,68 @@ transition.codes = codes
 /**
  *  Togggle a CSS class to trigger transition
  */
-function applyTransitionClass (el, stage, changeState) {
+function applyTransitionClass (el, stage, changeState, hasAnimation) {
 
-    if (!endEvent) {
+    if (!endEvents.trans) {
         changeState()
         return codes.CSS_SKIP
     }
 
     // if the browser supports transition,
     // it must have classList...
-    var classList         = el.classList,
-        lastLeaveCallback = el.vue_trans_cb
+    var onEnd,
+        classList        = el.classList,
+        existingCallback = el.vue_trans_cb,
+        enterClass       = config.enterClass,
+        leaveClass       = config.leaveClass,
+        endEvent         = hasAnimation ? endEvents.anim : endEvents.trans
+
+    // cancel unfinished callbacks and jobs
+    if (existingCallback) {
+        el.removeEventListener(endEvent, existingCallback)
+        classList.remove(enterClass)
+        classList.remove(leaveClass)
+        el.vue_trans_cb = null
+    }
 
     if (stage > 0) { // enter
 
-        // cancel unfinished leave transition
-        if (lastLeaveCallback) {
-            el.removeEventListener(endEvent, lastLeaveCallback)
-            classList.remove(config.leaveClass)
-            el.vue_trans_cb = null
-        }
-
-        // set to hidden state before appending
-        classList.add(config.enterClass)
+        // set to enter state before appending
+        classList.add(enterClass)
         // append
         changeState()
-        // force a layout so transition can be triggered
-        /* jshint unused: false */
-        var forceLayout = el.clientHeight
         // trigger transition
-        classList.remove(config.enterClass)
+        if (!hasAnimation) {
+            batcher.push({
+                execute: function () {
+                    classList.remove(enterClass)
+                }
+            })
+        } else {
+            onEnd = function (e) {
+                if (e.target === el) {
+                    el.removeEventListener(endEvent, onEnd)
+                    el.vue_trans_cb = null
+                    classList.remove(enterClass)
+                }
+            }
+            el.addEventListener(endEvent, onEnd)
+            el.vue_trans_cb = onEnd
+        }
         return codes.CSS_E
 
     } else { // leave
 
         if (el.offsetWidth || el.offsetHeight) {
             // trigger hide transition
-            classList.add(config.leaveClass)
-            var onEnd = function (e) {
+            classList.add(leaveClass)
+            onEnd = function (e) {
                 if (e.target === el) {
                     el.removeEventListener(endEvent, onEnd)
                     el.vue_trans_cb = null
                     // actually remove node here
                     changeState()
-                    classList.remove(config.leaveClass)
+                    classList.remove(leaveClass)
                 }
             }
             // attach transition end listener
@@ -2846,30 +2901,51 @@ function applyTransitionClass (el, stage, changeState) {
 
 }
 
-function applyTransitionFunctions (el, stage, changeState, functionId, compiler) {
+function applyTransitionFunctions (el, stage, changeState, effectId, compiler) {
 
-    var funcs = compiler.getOption('transitions', functionId)
+    var funcs = compiler.getOption('effects', effectId)
     if (!funcs) {
         changeState()
         return codes.JS_SKIP
     }
 
     var enter = funcs.enter,
-        leave = funcs.leave
+        leave = funcs.leave,
+        timeouts = el.vue_timeouts
+
+    // clear previous timeouts
+    if (timeouts) {
+        var i = timeouts.length
+        while (i--) {
+            clearTO(timeouts[i])
+        }
+    }
+
+    timeouts = el.vue_timeouts = []
+    function timeout (cb, delay) {
+        var id = setTO(function () {
+            cb()
+            timeouts.splice(timeouts.indexOf(id), 1)
+            if (!timeouts.length) {
+                el.vue_timeouts = null
+            }
+        }, delay)
+        timeouts.push(id)
+    }
 
     if (stage > 0) { // enter
         if (typeof enter !== 'function') {
             changeState()
             return codes.JS_SKIP_E
         }
-        enter(el, changeState)
+        enter(el, changeState, timeout)
         return codes.JS_E
     } else { // leave
         if (typeof leave !== 'function') {
             changeState()
             return codes.JS_SKIP_L
         }
-        leave(el, changeState)
+        leave(el, changeState, timeout)
         return codes.JS_L
     }
 
@@ -2878,53 +2954,74 @@ function applyTransitionFunctions (el, stage, changeState, functionId, compiler)
 /**
  *  Sniff proper transition end event name
  */
-function sniffTransitionEndEvent () {
+function sniffEndEvents () {
     var el = document.createElement('vue'),
         defaultEvent = 'transitionend',
         events = {
             'transition'       : defaultEvent,
             'mozTransition'    : defaultEvent,
             'webkitTransition' : 'webkitTransitionEnd'
-        }
+        },
+        ret = {}
     for (var name in events) {
         if (el.style[name] !== undefined) {
-            return events[name]
+            ret.trans = events[name]
+            break
         }
     }
+    ret.anim = el.style.animation === ''
+        ? 'animationend'
+        : 'webkitAnimationEnd'
+    return ret
 }
 });
 require.register("vue/src/batcher.js", function(exports, require, module){
-var utils = require('./utils'),
-    queue, has, waiting
+var utils = require('./utils')
 
-reset()
+function Batcher () {
+    this.reset()
+}
 
-exports.queue = function (binding) {
-    if (!has[binding.id]) {
-        queue.push(binding)
-        has[binding.id] = true
-        if (!waiting) {
-            waiting = true
-            utils.nextTick(flush)
+var BatcherProto = Batcher.prototype
+
+BatcherProto.push = function (job) {
+    if (!job.id || !this.has[job.id]) {
+        this.queue.push(job)
+        this.has[job.id] = job
+        if (!this.waiting) {
+            this.waiting = true
+            utils.nextTick(utils.bind(this.flush, this))
+        }
+    } else if (job.override) {
+        var oldJob = this.has[job.id]
+        oldJob.cancelled = true
+        this.queue.push(job)
+        this.has[job.id] = job
+    }
+}
+
+BatcherProto.flush = function () {
+    // before flush hook
+    if (this._preFlush) this._preFlush()
+    // do not cache length because more jobs might be pushed
+    // as we execute existing jobs
+    for (var i = 0; i < this.queue.length; i++) {
+        var job = this.queue[i]
+        if (job.cancelled) continue
+        if (job.execute() !== false) {
+            this.has[job.id] = false
         }
     }
+    this.reset()
 }
 
-function flush () {
-    for (var i = 0; i < queue.length; i++) {
-        var b = queue[i]
-        if (b.unbound) continue
-        b._update()
-        has[b.id] = false
-    }
-    reset()
+BatcherProto.reset = function () {
+    this.has = utils.hash()
+    this.queue = []
+    this.waiting = false
 }
 
-function reset () {
-    queue = []
-    has = utils.hash()
-    waiting = false
-}
+module.exports = Batcher
 });
 require.register("vue/src/directives/index.js", function(exports, require, module){
 var utils      = require('../utils'),
@@ -3182,8 +3279,6 @@ module.exports = {
         // extract child VM information, if any
         ViewModel = ViewModel || require('../viewmodel')
         this.Ctor = this.Ctor || ViewModel
-        // extract transition information
-        this.hasTrans = el.hasAttribute(config.attrs.transition)
         // extract child Id, if any
         this.childId = utils.attr(el, 'ref')
 
@@ -3327,7 +3422,9 @@ module.exports = {
 
                 el = this.el.cloneNode(true)
                 // process transition info before appending
-                el.vue_trans = utils.attr(el, 'transition', true)
+                el.vue_trans  = utils.attr(el, 'transition', true)
+                el.vue_anim   = utils.attr(el, 'animation', true)
+                el.vue_effect = utils.attr(el, 'effect', true)
                 // wrap primitive element in an object
                 if (utils.typeOf(data) !== 'Object') {
                     primitive = true
@@ -3490,7 +3587,7 @@ module.exports = {
         // so they can't be delegated
         this.bubbles = this.arg !== 'blur' && this.arg !== 'focus'
         if (this.bubbles) {
-            this.compiler.addListener(this)
+            this.binding.compiler.addListener(this)
         }
     },
 
@@ -3518,7 +3615,7 @@ module.exports = {
     
     unbind: function () {
         if (this.bubbles) {
-            this.compiler.removeListener(this)
+            this.binding.compiler.removeListener(this)
         } else {
             this.reset()
         }
