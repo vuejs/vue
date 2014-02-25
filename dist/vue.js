@@ -1,5 +1,5 @@
 /*
- Vue.js v0.9.1
+ Vue.js v0.9.2
  (c) 2014 Evan You
  License: MIT
 */
@@ -837,7 +837,9 @@ function Compiler (vm, options) {
     if (options.paramAttributes) {
         options.paramAttributes.forEach(function (attr) {
             var val = el.getAttribute(attr)
-            vm[attr] = isNaN(val) ? val : Number(val)
+            vm[attr] = (isNaN(val) || val === null)
+                ? val
+                : Number(val)
         })
     }
 
@@ -2775,6 +2777,12 @@ var endEvents  = sniffEndEvents(),
         INIT      : -5,
         SKIP      : -6
     }
+
+// force layout before triggering transitions/animations
+batcher._preFlush = function () {
+    /* jshint unused: false */
+    var f = document.body.offsetHeight
+}
 
 /**
  *  stage:
