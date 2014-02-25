@@ -20,6 +20,12 @@ var endEvents  = sniffEndEvents(),
         SKIP      : -6
     }
 
+// force layout before triggering transitions/animations
+batcher._preFlush = function () {
+    /* jshint unused: false */
+    var f = document.body.offsetHeight
+}
+
 /**
  *  stage:
  *    1 = enter
