@@ -707,7 +707,7 @@ CompilerProto.addListener = function (listener) {
                     target
                 while (i--) {
                     target = delegator.targets[i]
-                    if (e.target === target.el && target.handler) {
+                    if (target.el.contains(e.target) && target.handler) {
                         target.handler(e)
                     }
                 }

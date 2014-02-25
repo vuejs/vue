@@ -490,6 +490,17 @@ describe('UNIT: Directives', function () {
             assert.ok(triggered)
         })
 
+        it('delegation should work', function () {
+            var triggered = false,
+                child = document.createElement('div')
+            dir.el.appendChild(child)
+            dir.update(function () {
+                triggered = true
+            })
+            child.dispatchEvent(mockMouseEvent('click'))
+            assert.ok(triggered)
+        })
+
         it('should wrap the handler to supply expected args', function () {
             var vm = dir.binding.compiler.vm, // owner VM
                 e  = mockMouseEvent('click'), // original event
