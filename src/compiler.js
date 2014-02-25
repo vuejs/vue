@@ -94,7 +94,9 @@ function Compiler (vm, options) {
     if (options.paramAttributes) {
         options.paramAttributes.forEach(function (attr) {
             var val = el.getAttribute(attr)
-            vm[attr] = isNaN(val) ? val : Number(val)
+            vm[attr] = (isNaN(val) || val === null)
+                ? val
+                : Number(val)
         })
     }
 

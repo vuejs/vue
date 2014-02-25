@@ -608,13 +608,15 @@ describe('UNIT: API', function () {
                     var Test = Vue.extend({
                         template: '<div a="1" b="hello"></div>',
                         replace: true,
-                        paramAttributes: ['a', 'b']
+                        paramAttributes: ['a', 'b', 'c']
                     })
                     var v = new Test()
                     assert.strictEqual(v.a, 1)
                     assert.strictEqual(v.$data.a, 1)
                     assert.strictEqual(v.b, 'hello')
                     assert.strictEqual(v.$data.b, 'hello')
+                    assert.strictEqual(v.c, null)
+                    assert.strictEqual(v.$data.c, null)
                 })
 
             })
