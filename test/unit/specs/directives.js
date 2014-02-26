@@ -624,6 +624,49 @@ describe('UNIT: Directives', function () {
             assert.strictEqual(t.$el.querySelector('span').textContent, testId)
         })
 
+        it('should accept args and sync parent and child', function (done) {
+            var t = new Vue({
+                template:
+                    '<span>{{test.msg}} {{n}}</span>'
+                    + '<p v-with="childMsg:test.msg, n:n" v-ref="child">{{childMsg}} {{n}}</p>',
+                data: {
+                    n: 1,
+                    test: {
+                        msg: 'haha!'
+                    }
+                }
+            })
+
+            nextTick(function () {
+                assert.strictEqual(t.$el.querySelector('span').textContent, 'haha! 1')
+                assert.strictEqual(t.$el.querySelector('p').textContent, 'haha! 1')
+                testParentToChild()
+            })
+            
+            function testParentToChild () {
+                // test sync from parent to child
+                t.test = { msg: 'hehe!' }
+                nextTick(function () {
+                    assert.strictEqual(t.$el.querySelector('p').textContent, 'hehe! 1')
+                    testChildToParent()
+                })
+            }
+            
+            function testChildToParent () {
+                // test sync back
+                t.$.child.childMsg = 'hoho!'
+                t.$.child.n = 2
+                assert.strictEqual(t.test.msg, 'hoho!')
+                assert.strictEqual(t.n, 2)
+                nextTick(function () {
+                    assert.strictEqual(t.$el.querySelector('span').textContent, 'hoho! 2')
+                    assert.strictEqual(t.$el.querySelector('p').textContent, 'hoho! 2')
+                    done()
+                })
+            }
+
+        })
+
     })
 
     describe('ref', function () {

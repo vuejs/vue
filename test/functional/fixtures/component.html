@@ -13,6 +13,13 @@
 
     <!-- custom element alone -->
     <simple id="element"></simple>
+
+    <!-- v-with + binding sync -->
+    <div id="with-sync" v-with="childHi:hi, childName:user.name">
+        {{childHi}} {{childName}}
+    </div>
+
+    <div id="component-with-sync" v-component="sync" v-with="childHi:hi, childName:user.name">
 </div>
 
 <script src="../../../dist/vue.js"></script>
@@ -21,14 +28,20 @@
     Vue.config({debug: true})
 
     Vue.component('avatar', {
-        template: '{{hi}} {{name}}',
-        ready: function () {
-            console.log(JSON.stringify(this))
-        }
+        template: '{{hi}} {{name}}'
     })
 
     Vue.component('simple', {
         template: '{{hi}} {{user.name}}'
+    })
+
+    Vue.component('sync', {
+        template: '{{childHi}} {{childName}}',
+        ready: function () {
+            // should sync back to parent
+            this.childHi = 'hello'
+            this.childName = 'Vue'
+        }
     })
 
     var app = new Vue({

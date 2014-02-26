@@ -49,7 +49,7 @@ function Compiler (vm, options) {
     log('\nnew VM instance:', el.tagName, '\n')
 
     // set compiler properties
-    compiler.vm  = vm
+    compiler.vm = el.vue_vm = vm
     compiler.bindings = makeHash()
     compiler.dirs = []
     compiler.deferred = []
@@ -132,7 +132,9 @@ function Compiler (vm, options) {
     compiler.init = false
 
     // post compile / ready hook
-    compiler.execHook('ready')
+    if (!compiler.delayReady) {
+        compiler.execHook('ready')
+    }
 }
 
 var CompilerProto = Compiler.prototype
@@ -304,7 +306,7 @@ CompilerProto.compile = function (node, root) {
 
         // special attributes to check
         var repeatExp,
-            withKey,
+            withExp,
             partialId,
             directive,
             componentId = utils.attr(node, 'component') || tagName.toLowerCase(),
@@ -332,13 +334,19 @@ CompilerProto.compile = function (node, root) {
             }
 
         // v-with has 2nd highest priority
-        } else if (root !== true && ((withKey = utils.attr(node, 'with')) || componentCtor)) {
+        } else if (root !== true && ((withExp = utils.attr(node, 'with')) || componentCtor)) {
 
-            directive = Directive.parse('with', withKey || '', compiler, node)
-            if (directive) {
-                directive.Ctor = componentCtor
-                compiler.deferred.push(directive)
-            }
+            withExp = Directive.split(withExp || '')
+            withExp.forEach(function (exp, i) {
+                var directive = Directive.parse('with', exp, compiler, node)
+                if (directive) {
+                    directive.Ctor = componentCtor
+                    // notify the directive that this is the
+                    // last expression in the group
+                    directive.last = i === withExp.length - 1
+                    compiler.deferred.push(directive)
+                }
+            })
 
         } else {
 
@@ -801,6 +809,7 @@ CompilerProto.destroy = function () {
     } else {
         vm.$remove()
     }
+    el.vue_vm = null
 
     this.destroyed = true
     // emit destroy hook
