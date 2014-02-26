@@ -4,14 +4,9 @@ var config    = require('./config'),
     join      = [].join,
     win       = window,
     console   = win.console,
-
+    timeout   = win.setTimeout,
     hasClassList = 'classList' in document.documentElement,
     ViewModel // late def
-
-var defer =
-    win.requestAnimationFrame ||
-    win.webkitRequestAnimationFrame ||
-    win.setTimeout
 
 var utils = module.exports = {
 
@@ -195,7 +190,7 @@ var utils = module.exports = {
      *  used to defer batch updates
      */
     nextTick: function (cb) {
-        defer(cb, 0)
+        timeout(cb, 0)
     },
 
     /**

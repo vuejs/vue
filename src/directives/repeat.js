@@ -229,11 +229,11 @@ module.exports = {
         if (this.queued) return
         this.queued = true
         var self = this
-        setTimeout(function () {
+        utils.nextTick(function () {
             if (!self.compiler) return
             self.compiler.parseDeps()
             self.queued = false
-        }, 0)
+        })
     },
 
     /**
