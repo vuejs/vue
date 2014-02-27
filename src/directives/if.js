@@ -11,7 +11,7 @@ module.exports = {
 
     update: function (value) {
 
-        var el       = this.el
+        var el = this.el
 
         if (!this.parent) { // the node was detached when bound
             if (!el.parentNode) {

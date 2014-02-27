@@ -175,8 +175,6 @@ module.exports = {
         }
 
         this.reset()
-        // attach an object to container to hold handlers
-        this.container.vue_dHandlers = utils.hash()
         // if initiating with an empty collection, we need to
         // force a compile so that we get all the bindings for
         // dependency extraction.
@@ -311,8 +309,7 @@ module.exports = {
             data: data,
             compilerOptions: {
                 repeat: true,
-                parentCompiler: this.compiler,
-                delegator: ctn
+                parentCompiler: this.compiler
             }
         })
         item.$index = index
@@ -410,12 +407,6 @@ module.exports = {
                 }
             }
         }
-        var ctn = this.container,
-            handlers = ctn.vue_dHandlers
-        for (var key in handlers) {
-            ctn.removeEventListener(handlers[key].event, handlers[key])
-        }
-        ctn.vue_dHandlers = null
     },
 
     unbind: function () {
