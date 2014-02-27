@@ -48,7 +48,9 @@ var mutationHandlers = {
             index = m.args[0],
             removed = m.args[1],
             added = m.args.length - 2,
-            removedVMs = this.vms.splice(index, removed)
+            removedVMs = removed === undefined
+                ? this.vms.splice(index)
+                : this.vms.splice(index, removed)
         for (i = 0, l = removedVMs.length; i < l; i++) {
             removedVMs[i].$destroy()
             this.updateObject(removedVMs[i].$data, -1)
