@@ -102,7 +102,7 @@ function objectToArray (obj) {
         data = utils.typeOf(val) === 'Object'
             ? val
             : { $value: val }
-        def(data, '$key', key, false, true)
+        def(data, '$key', key)
         res.push(data)
     }
     return res
@@ -283,7 +283,7 @@ module.exports = {
                     data = { $value: data }
                 }
                 // define index
-                def(data, '$index', index, false, true)
+                def(data, '$index', index)
 
             }
 
@@ -349,7 +349,7 @@ module.exports = {
 
         this.object = object
         var collection = objectToArray(object)
-        def(object, '$repeater', collection, false, true)
+        def(object, '$repeater', collection)
 
         var self = this
         this.updateRepeater = function (key, val) {
@@ -362,7 +362,7 @@ module.exports = {
                             if ('$value' in item) {
                                 item.$value = val
                             } else {
-                                def(val, '$key', key, false, true)
+                                def(val, '$key', key)
                                 self.lock = true
                                 collection.set(i, val)
                                 self.lock = false
@@ -391,7 +391,7 @@ module.exports = {
             if (action > 0) { // new property
                 // make key ienumerable
                 delete data.$key
-                def(data, '$key', key, false, true)
+                def(data, '$key', key)
                 obj[key] = val
                 Observer.convert(obj, key)
             } else {
