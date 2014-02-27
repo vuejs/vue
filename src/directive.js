@@ -27,7 +27,7 @@ function Directive (definition, expression, rawKey, compiler, node) {
     this.vm       = compiler.vm
     this.el       = node
 
-    var isEmpty  = expression === ''
+    var isEmpty   = expression === ''
 
     // mix in properties from the directive definition
     if (typeof definition === 'function') {
@@ -43,7 +43,7 @@ function Directive (definition, expression, rawKey, compiler, node) {
     }
 
     // empty expression, we're done.
-    if (isEmpty) {
+    if (isEmpty || this.isEmpty) {
         this.isEmpty = true
         return
     }

@@ -48,6 +48,7 @@ module.exports = {
     },
 
     cloak: {
+        isEmpty: true,
         bind: function () {
             var el = this.el
             this.compiler.observer.once('hook:ready', function () {

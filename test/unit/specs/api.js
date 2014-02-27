@@ -150,8 +150,8 @@ describe('UNIT: API', function () {
             var testId = 'directive-2',
                 msg = 'wowaaaa?'
             dirTest = {
-                bind: function () {
-                    this.el.setAttribute(testId + 'bind', 'bind')
+                bind: function (value) {
+                    this.el.setAttribute(testId + 'bind', value + 'bind')
                 },
                 update: function (value) {
                     this.el.setAttribute(testId + 'update', value + 'update')
@@ -167,25 +167,38 @@ describe('UNIT: API', function () {
                     data: { test: msg }
                 }),
                 el = document.querySelector('#' + testId + ' span')
-            assert.strictEqual(el.getAttribute(testId + 'bind'), 'bind', 'should have called bind()')
-            assert.strictEqual(el.getAttribute(testId + 'update'), msg + 'update', 'should have called update()')
+            assert.strictEqual(el.getAttribute(testId + 'bind'), msg + 'bind', 'should have called bind() with value')
+            assert.strictEqual(el.getAttribute(testId + 'update'), msg + 'update', 'should have called update() with value')
             vm.$destroy() // assuming this works
             assert.notOk(el.getAttribute(testId + 'bind'), 'should have called unbind()')
         })
 
-        it('should not bind directive if no update() is provided', function () {
-            var called = false
+        it('should not create binding for literal or empty directives', function () {
+            var literalCalled = false,
+                emptyCalled = false
             Vue.directive('test-literal', {
+                isLiteral: true,
                 bind: function () {
-                    called = true
+                    literalCalled = true
                     assert.strictEqual(this.expression, 'hihi')
                     assert.notOk(this.binding)
-                }
+                },
+                update: function () {}
+            })
+            Vue.directive('test-empty', {
+                isEmpty: true,
+                bind: function () {
+                    emptyCalled = true
+                    assert.notOk(this.expression)
+                    assert.notOk(this.binding)
+                },
+                update: function () {}
             })
             new Vue({
-                template: '<div v-test-literal="hihi"></div>'
+                template: '<div v-test-literal="hihi"></div><div v-test-empty="123"></div>'
             })
-            assert.ok(called)
+            assert.ok(literalCalled)
+            assert.ok(emptyCalled)
         })
 
         it('should return directive object/fn if only one arg is given', function () {

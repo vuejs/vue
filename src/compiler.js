@@ -503,7 +503,7 @@ CompilerProto.bindDirective = function (directive) {
 
     // for empty or literal directives, simply call its bind()
     // and we're done.
-    if (directive.isEmpty || !directive._update) {
+    if (directive.isEmpty || directive.isLiteral) {
         if (directive.bind) directive.bind()
         return
     }
@@ -531,13 +531,13 @@ CompilerProto.bindDirective = function (directive) {
     binding.dirs.push(directive)
     directive.binding = binding
 
+    var value = binding.val()
     // invoke bind hook if exists
     if (directive.bind) {
-        directive.bind()
+        directive.bind(value)
     }
-
     // set initial value
-    directive.update(binding.val(), true)
+    directive.update(value, true)
 }
 
 /**
