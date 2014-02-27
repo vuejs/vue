@@ -262,7 +262,7 @@ CompilerProto.observeData = function (data) {
     $dataBinding.update(data)
 
     // allow $data to be swapped
-    Object.defineProperty(compiler.vm, '$data', {
+    defGetSet(compiler.vm, '$data', {
         enumerable: false,
         get: function () {
             compiler.observer.emit('get', '$data')
@@ -562,9 +562,11 @@ CompilerProto.createBinding = function (key, isExp, isFn) {
             if (computed && computed[key]) {
                 // computed property
                 compiler.defineComputed(key, binding, computed[key])
-            } else {
+            } else if (key.charAt(0) !== '$') {
                 // normal property
                 compiler.defineProp(key, binding)
+            } else {
+                compiler.defineMeta(key, binding)
             }
         } else {
             // ensure path in data so it can be observed
@@ -604,12 +606,33 @@ CompilerProto.defineProp = function (key, binding) {
 
     binding.value = data[key]
 
-    Object.defineProperty(compiler.vm, key, {
+    defGetSet(compiler.vm, key, {
         get: function () {
             return compiler.data[key]
         },
         set: function (val) {
             compiler.data[key] = val
+        }
+    })
+}
+
+/**
+ *  Define a meta property, e.g. $index or $key,
+ *  which is bindable but only accessible on the VM,
+ *  not in the data.
+ */
+CompilerProto.defineMeta = function (key, binding) {
+    var vm = this.vm,
+        ob = this.observer,
+        value = binding.value = vm[key] || this.data[key]
+    defGetSet(vm, key, {
+        get: function () {
+            if (Observer.shouldGet) ob.emit('get', key)
+            return value
+        },
+        set: function (val) {
+            ob.emit('set', key, val)
+            value = val
         }
     })
 }
@@ -631,7 +654,7 @@ CompilerProto.defineExp = function (key, binding) {
  */
 CompilerProto.defineComputed = function (key, binding, value) {
     this.markComputed(binding, value)
-    Object.defineProperty(this.vm, key, {
+    defGetSet(this.vm, key, {
         get: binding.value.$get,
         set: binding.value.$set
     })
@@ -830,6 +853,13 @@ function getRoot (compiler) {
         compiler = compiler.parentCompiler
     }
     return compiler
+}
+
+/**
+ *  for convenience & minification
+ */
+function defGetSet (obj, key, def) {
+    Object.defineProperty(obj, key, def)
 }
 
 module.exports = Compiler

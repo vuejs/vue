@@ -12,11 +12,11 @@ var Observer   = require('../observer'),
 var mutationHandlers = {
 
     push: function (m) {
-        var l = m.args.length,
+        var i = 0, l = m.args.length, vm,
             base = this.collection.length - l
-        for (var i = 0; i < l; i++) {
-            this.buildItem(m.args[i], base + i)
-            this.updateObject(m.args[i], 1)
+        for (; i < l; i++) {
+            vm = this.buildItem(m.args[i], base + i)
+            this.updateObject(vm, 1)
         }
     },
 
@@ -24,14 +24,15 @@ var mutationHandlers = {
         var vm = this.vms.pop()
         if (vm) {
             vm.$destroy()
-            this.updateObject(vm.$data, -1)
+            this.updateObject(vm, -1)
         }
     },
 
     unshift: function (m) {
-        for (var i = 0, l = m.args.length; i < l; i++) {
-            this.buildItem(m.args[i], i)
-            this.updateObject(m.args[i], 1)
+        var i = 0, l = m.args.length, vm
+        for (; i < l; i++) {
+            vm = this.buildItem(m.args[i], i)
+            this.updateObject(vm, 1)
         }
     },
 
@@ -39,12 +40,12 @@ var mutationHandlers = {
         var vm = this.vms.shift()
         if (vm) {
             vm.$destroy()
-            this.updateObject(vm.$data, -1)
+            this.updateObject(vm, -1)
         }
     },
 
     splice: function (m) {
-        var i, l,
+        var i, l, vm,
             index = m.args[0],
             removed = m.args[1],
             added = m.args.length - 2,
@@ -53,11 +54,11 @@ var mutationHandlers = {
                 : this.vms.splice(index, removed)
         for (i = 0, l = removedVMs.length; i < l; i++) {
             removedVMs[i].$destroy()
-            this.updateObject(removedVMs[i].$data, -1)
+            this.updateObject(removedVMs[i], -1)
         }
         for (i = 0; i < added; i++) {
-            this.buildItem(m.args[i + 2], index + i)
-            this.updateObject(m.args[i + 2], 1)
+            vm = this.buildItem(m.args[i + 2], index + i)
+            this.updateObject(vm, 1)
         }
     },
 
@@ -151,7 +152,7 @@ module.exports = {
                 // update index
                 var i = arr.length
                 while (i--) {
-                    arr[i].$index = i
+                    self.vms[i].$index = i
                 }
             }
             if (method === 'push' || method === 'unshift' || method === 'splice') {
@@ -264,8 +265,6 @@ module.exports = {
                 // mark, so it won't be destroyed
                 item.$reused = true
                 el = item.$el
-                // don't forget to update index
-                data.$index = index
                 // existing VM's el can possibly be detached by v-if.
                 // in that case don't insert.
                 detached = !el.parentNode
@@ -282,8 +281,6 @@ module.exports = {
                     primitive = true
                     data = { $value: data }
                 }
-                // define index
-                def(data, '$index', index)
 
             }
 
@@ -318,6 +315,7 @@ module.exports = {
                 delegator: ctn
             }
         })
+        item.$index = index
 
         if (!data) {
             // this is a forced compile for an empty collection.
@@ -327,13 +325,15 @@ module.exports = {
             vms.splice(index, 0, item)
             // for primitive values, listen for value change
             if (primitive) {
-                data.__emitter__.on('set', function (key, val) {
+                item.$compiler.observer.on('set', function (key, val) {
                     if (key === '$value') {
                         col[item.$index] = val
                     }
                 })
             }
         }
+
+        return item
     },
 
     /**
@@ -355,18 +355,15 @@ module.exports = {
         var self = this
         this.updateRepeater = function (key, val) {
             if (key.indexOf('.') === -1) {
-                var i = collection.length, item
+                var i = self.vms.length, item
                 while (i--) {
-                    item = collection[i]
+                    item = self.vms[i]
                     if (item.$key === key) {
-                        if (item !== val && item.$value !== val) {
+                        if (item.$data !== val && item.$value !== val) {
                             if ('$value' in item) {
                                 item.$value = val
                             } else {
-                                def(val, '$key', key)
-                                self.lock = true
-                                collection.set(i, val)
-                                self.lock = false
+                                item.$data = val
                             }
                         }
                         break
@@ -380,19 +377,17 @@ module.exports = {
     },
 
     /**
-     *  Sync changes in the $repeater Array
+     *  Sync changes from the $repeater Array
      *  back to the represented Object
      */
-    updateObject: function (data, action) {
-        if (this.lock) return
+    updateObject: function (vm, action) {
         var obj = this.object
-        if (obj && data.$key) {
-            var key = data.$key,
-                val = data.$value || data
+        if (obj && vm.$key) {
+            var key = vm.$key,
+                val = vm.$value || vm.$data
             if (action > 0) { // new property
                 // make key ienumerable
-                delete data.$key
-                def(data, '$key', key)
+                delete vm.$data.$key
                 obj[key] = val
                 Observer.convert(obj, key)
             } else {
