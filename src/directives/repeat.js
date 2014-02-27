@@ -343,13 +343,14 @@ module.exports = {
     convertObject: function (object) {
 
         if (this.object) {
-            delete this.object.$repeater
             this.object.__emitter__.off('set', this.updateRepeater)
         }
 
         this.object = object
-        var collection = objectToArray(object)
-        def(object, '$repeater', collection)
+        var collection = object.$repeater || objectToArray(object)
+        if (!object.$repeater) {
+            def(object, '$repeater', collection)
+        }
 
         var self = this
         this.updateRepeater = function (key, val) {
