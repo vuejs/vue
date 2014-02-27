@@ -45,7 +45,7 @@ function Compiler (vm, options) {
     extend(compiler, options.compilerOptions)
 
     // initialize element
-    var el = compiler.setupElement(options)
+    var el = compiler.el = compiler.setupElement(options)
     log('\nnew VM instance:', el.tagName, '\n')
 
     // set compiler properties
@@ -145,7 +145,7 @@ var CompilerProto = Compiler.prototype
  */
 CompilerProto.setupElement = function (options) {
     // create the node first
-    var el = this.el = typeof options.el === 'string'
+    var el = typeof options.el === 'string'
         ? document.querySelector(options.el)
         : options.el || document.createElement(options.tagName || 'div')
 
