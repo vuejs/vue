@@ -1,7 +1,6 @@
 var config    = require('./config'),
     attrs     = config.attrs,
     toString  = ({}).toString,
-    join      = [].join,
     win       = window,
     console   = win.console,
     timeout   = win.setTimeout,
@@ -167,9 +166,9 @@ var utils = module.exports = {
     /**
      *  log for debugging
      */
-    log: function () {
+    log: function (msg) {
         if (config.debug && console) {
-            console.log(join.call(arguments, ' '))
+            console.log(msg)
         }
     },
     
@@ -177,11 +176,11 @@ var utils = module.exports = {
      *  warnings, traces by default
      *  can be suppressed by `silent` option.
      */
-    warn: function() {
+    warn: function (msg) {
         if (!config.silent && console) {
-            console.warn(join.call(arguments, ' '))
-            if (config.debug) {
-                console.trace()
+            console.warn(msg)
+            if (config.debug && console.trace) {
+                console.trace(msg)
             }
         }
     },

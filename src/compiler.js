@@ -49,7 +49,7 @@ function Compiler (vm, options) {
 
     // initialize element
     var el = compiler.el = compiler.setupElement(options)
-    log('\nnew VM instance:', el.tagName, '\n')
+    log('\nnew VM instance: ' + el.tagName + '\n')
 
     // set compiler properties
     compiler.vm = el.vue_vm = vm
@@ -399,7 +399,7 @@ CompilerProto.compile = function (node, root) {
             compiler.compileNode(node)
         }
 
-    } else if (nodeType === 3) { // text node
+    } else if (nodeType === 3 && config.interpolate) { // text node
 
         compiler.compileTextNode(node)
 
@@ -438,7 +438,7 @@ CompilerProto.compileNode = function (node) {
                         this.bindDirective(directive)
                     }
                 }
-            } else {
+            } else if (config.interpolate) {
                 // non directive attribute, check interpolation tags
                 exp = TextParser.parseAttr(attr.value)
                 if (exp) {

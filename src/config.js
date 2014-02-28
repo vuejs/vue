@@ -17,6 +17,7 @@ var prefix = 'v',
         silent      : false,
         enterClass  : 'v-enter',
         leaveClass  : 'v-leave',
+        interpolate : true,
         attrs       : {},
 
         get prefix () {
