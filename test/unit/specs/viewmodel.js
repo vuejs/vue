@@ -457,8 +457,9 @@ describe('UNIT: ViewModel', function () {
             }],
             bindings: bindingsMock,
             childId: 'test',
+            children: [],
             parent: {
-                childCompilers: [],
+                children: [],
                 vm: {
                     $: {
                         'test': true
@@ -487,7 +488,7 @@ describe('UNIT: ViewModel', function () {
             }
         }
 
-        compilerMock.parent.childCompilers.push(compilerMock)
+        compilerMock.parent.children.push(compilerMock)
 
         destroy.call(compilerMock)
 
@@ -523,7 +524,7 @@ describe('UNIT: ViewModel', function () {
 
         it('should remove self from parent', function () {
             var parent = compilerMock.parent
-            assert.ok(parent.childCompilers.indexOf(compilerMock), -1)
+            assert.ok(parent.children.indexOf(compilerMock), -1)
             assert.strictEqual(parent.vm.$[compilerMock.childId], undefined)
         })
 

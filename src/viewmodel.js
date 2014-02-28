@@ -83,7 +83,7 @@ def(VMProto, '$destroy', function () {
  *  broadcast an event to all child VMs recursively.
  */
 def(VMProto, '$broadcast', function () {
-    var children = this.$compiler.childCompilers,
+    var children = this.$compiler.children,
         i = children.length,
         child
     while (i--) {

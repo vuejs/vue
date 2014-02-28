@@ -635,22 +635,28 @@ describe('UNIT: API', function () {
             })
 
             describe('parent', function () {
+
+                var parent, child
                 
-                it('should create parent-child relation between VMs', function () {
-                    
-                    var parent = new Vue({
+                it('should allow child to access parent bindings', function () {
+
+                    parent = new Vue({
                         data: {
                             test: 'from parent'
                         }
                     })
 
-                    var child = new Vue({
+                    child = new Vue({
                         parent: parent,
                         template: '{{test}}'
                     })
 
                     assert.strictEqual(child.$el.textContent, 'from parent')
 
+                })
+
+                it('should allow event communication between parent and child', function () {
+                    
                     var dispatched = false,
                         broadcasted = false
                     parent.$on('dispatch', function () {
@@ -664,6 +670,13 @@ describe('UNIT: API', function () {
 
                     assert.ok(dispatched)
                     assert.ok(broadcasted)
+
+                })
+
+                it('should destroy the child when parent is destroyed', function () {
+                    
+                    parent.$destroy()
+                    assert.ok(child.$compiler.destroyed)
 
                 })
 

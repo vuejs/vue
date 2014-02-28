@@ -30,9 +30,12 @@ var Emitter     = require('./emitter'),
 function Compiler (vm, options) {
 
     var compiler = this
-    // indicate that we are intiating this instance
-    // so we should not run any transitions
-    compiler.init = true
+
+    // default state
+    compiler.init       = true
+    compiler.repeat     = false
+    compiler.destroyed  = false
+    compiler.delayReady = false
 
     // process and extend options
     options = compiler.options = options || makeHash()
@@ -55,7 +58,7 @@ function Compiler (vm, options) {
     compiler.deferred = []
     compiler.exps = []
     compiler.computed = []
-    compiler.childCompilers = []
+    compiler.children = []
     compiler.emitter = new Emitter()
     compiler.emitter._ctx = vm
     compiler.delegators = makeHash()
@@ -71,7 +74,7 @@ function Compiler (vm, options) {
         childId = utils.attr(el, 'ref')
     if (parentVM) {
         compiler.parent = parentVM.$compiler
-        parentVM.$compiler.childCompilers.push(compiler)
+        parentVM.$compiler.children.push(compiler)
         def(vm, '$parent', parentVM)
         if (childId) {
             compiler.childId = childId
@@ -254,7 +257,7 @@ CompilerProto.setupObserver = function () {
     }
 
     function broadcast (event) {
-        var children = compiler.childCompilers
+        var children = compiler.children
         if (children) {
             var child, i = children.length
             while (i--) {
@@ -806,7 +809,9 @@ CompilerProto.destroy = function () {
         directives  = compiler.dirs,
         exps        = compiler.exps,
         bindings    = compiler.bindings,
-        delegators  = compiler.delegators
+        delegators  = compiler.delegators,
+        children    = compiler.children,
+        parent      = compiler.parent
 
     compiler.execHook('beforeDestroy')
 
@@ -847,13 +852,17 @@ CompilerProto.destroy = function () {
         el.removeEventListener(key, delegators[key].handler)
     }
 
+    // destroy all children
+    i = children.length
+    while (i--) {
+        children[i].destroy()
+    }
+
     // remove self from parent
-    var parent = compiler.parent,
-        childId = compiler.childId
     if (parent) {
-        parent.childCompilers.splice(parent.childCompilers.indexOf(compiler), 1)
-        if (childId) {
-            delete parent.vm.$[childId]
+        parent.children.splice(parent.children.indexOf(compiler), 1)
+        if (compiler.childId) {
+            delete parent.vm.$[compiler.childId]
         }
     }
 
