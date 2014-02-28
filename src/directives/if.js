@@ -4,27 +4,34 @@ var config = require('../config'),
 module.exports = {
 
     bind: function () {
-        this.parent = this.el.parentNode
+        this.parent = this.el.parentNode || this.el.vue_if_parent
         this.ref = document.createComment(config.prefix + '-if-' + this.key)
-        this.el.vue_ref = this.ref
+        if (this.el.vue_if_ref) {
+            this.parent.insertBefore(this.ref, this.el.vue_if_ref)
+        }
+        this.el.vue_if_ref = this.ref
     },
 
     update: function (value) {
 
         var el = this.el
 
-        if (!this.parent) { // the node was detached when bound
-            if (!el.parentNode) {
-                return
-            } else {
-                this.parent = el.parentNode
-            }
-        }
+        // sometimes we need to create a VM on a detached node,
+        // e.g. in v-repeat. In that case, store the desired v-if
+        // state on the node itself so we can deal with it elsewhere.
+        el.vue_if = !!value
 
-        // should always have this.parent if we reach here
         var parent   = this.parent,
             ref      = this.ref,
             compiler = this.compiler
+
+        if (!parent) {
+            if (!el.parentNode) {
+                return
+            } else {
+                parent = this.parent = el.parentNode
+            }
+        }
 
         if (!value) {
             transition(el, -1, remove, compiler)
@@ -52,7 +59,7 @@ module.exports = {
     },
 
     unbind: function () {
-        this.el.vue_ref = null
+        this.el.vue_if_ref = this.el.vue_if_parent = null
         var ref = this.ref
         if (ref.parentNode) {
             ref.parentNode.removeChild(ref)

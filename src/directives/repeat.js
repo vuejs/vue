@@ -1,7 +1,6 @@
 var Observer   = require('../observer'),
     utils      = require('../utils'),
     config     = require('../config'),
-    transition = require('../transition'),
     def        = utils.defProtected,
     ViewModel // lazy def to avoid circular dependency
 
@@ -247,17 +246,19 @@ module.exports = {
         var ctn = this.container,
             vms = this.vms,
             col = this.collection,
-            el, i, ref, item, primitive, detached
+            el, i, existing, ref, item, primitive, detached
 
         // append node into DOM first
         // so v-if can get access to parentNode
+        // TODO: logic here is a total mess.
         if (data) {
 
             if (this.old) {
                 i = indexOf(this.old, data)
             }
+            existing = i > -1
 
-            if (i > -1) { // existing, reuse the old VM
+            if (existing) { // existing, reuse the old VM
 
                 item = this.oldVMs[i]
                 // mark, so it won't be destroyed
@@ -285,23 +286,26 @@ module.exports = {
             ref = vms.length > index
                 ? vms[index].$el
                 : this.ref
-            // make sure it works with v-if
-            if (!ref.parentNode) ref = ref.vue_ref
-            if (!detached) {
-                if (i > -1) {
-                    // no need to transition existing node
-                    ctn.insertBefore(el, ref)
-                } else {
-                    // insert new node with transition
-                    transition(el, 1, function () {
-                        ctn.insertBefore(el, ref)
-                    }, this.compiler)
-                }
-            } else {
-                // detached by v-if
-                // just move the comment ref node
-                ctn.insertBefore(el.vue_ref, ref)
+            
+            // if ref VM's el is detached by v-if
+            // use its v-if ref node instead
+            if (!ref.parentNode) {
+                ref = ref.vue_if_ref
             }
+
+            if (existing) {
+                // existing node
+                // if not detached, just re-insert to new location
+                // else re-insert its v-if ref node
+                ctn.insertBefore(detached ? el.vue_if_ref : el, ref)
+            } else {
+                // new node, prepare it for v-if
+                el.vue_if_parent = ctn
+                el.vue_if_ref = ref
+            }
+            // set index so vm can init with it
+            // and do not trigger stuff early
+            data.$index = index
         }
 
         item = item || new this.Ctor({
@@ -320,6 +324,7 @@ module.exports = {
             item.$destroy()
         } else {
             vms.splice(index, 0, item)
+
             // for primitive values, listen for value change
             if (primitive) {
                 item.$compiler.observer.on('set', function (key, val) {
@@ -327,6 +332,19 @@ module.exports = {
                         col[item.$index] = val
                     }
                 })
+            }
+
+            // new instance and v-if doesn't want it detached
+            // good to insert.
+            if (!existing && el.vue_if !== false) {
+                if (this.compiler.init) {
+                    // do not transition on initial compile.
+                    ctn.insertBefore(item.$el, ref)
+                    item.$compiler.execHook('attached')
+                } else {
+                    // transition in...
+                    item.$before(ref)
+                }
             }
         }
 

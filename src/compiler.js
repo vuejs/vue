@@ -217,12 +217,21 @@ CompilerProto.setupObserver = function () {
             // since hooks were merged with child at head,
             // we loop reversely.
             while (i--) {
-                register(hook, fns[i])
+                registerHook(hook, fns[i])
             }
         } else if (fns) {
-            register(hook, fns)
+            registerHook(hook, fns)
         }
     })
+
+    // broadcast attached/detached hooks
+    observer
+        .on('hook:attached', function () {
+            broadcast(1)
+        })
+        .on('hook:detached', function () {
+            broadcast(0)
+        })
 
     function onGet (key) {
         check(key)
@@ -235,10 +244,25 @@ CompilerProto.setupObserver = function () {
         bindings[key].update(val)
     }
 
-    function register (hook, fn) {
+    function registerHook (hook, fn) {
         observer.on('hook:' + hook, function () {
             fn.call(compiler.vm, options)
         })
+    }
+
+    function broadcast (event) {
+        var children = compiler.childCompilers
+        if (children) {
+            var child, i = children.length
+            while (i--) {
+                child = children[i]
+                if (child.el.parentNode) {
+                    event = 'hook:' + (event ? 'attached' : 'detached')
+                    child.observer.emit(event)
+                    child.emitter.emit(event)
+                }
+            }
+        }
     }
 
     function check (key) {
@@ -625,6 +649,10 @@ CompilerProto.defineMeta = function (key, binding) {
     var vm = this.vm,
         ob = this.observer,
         value = binding.value = vm[key] || this.data[key]
+    // remove initital meta in data, since the same piece
+    // of data can be observed by different VMs, each have
+    // its own associated meta info.
+    delete this.data[key]
     defGetSet(vm, key, {
         get: function () {
             if (Observer.shouldGet) ob.emit('get', key)
