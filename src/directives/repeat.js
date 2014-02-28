@@ -92,35 +92,6 @@ var mutationHandlers = {
     }
 }
 
-/**
- *  Convert an Object to a v-repeat friendly Array
- */
-function objectToArray (obj) {
-    var res = [], val, data
-    for (var key in obj) {
-        val = obj[key]
-        data = utils.typeOf(val) === 'Object'
-            ? val
-            : { $value: val }
-        def(data, '$key', key)
-        res.push(data)
-    }
-    return res
-}
-
-/**
- *  Find an object or a wrapped data object
- *  from an Array
- */
-function indexOf (arr, obj) {
-    for (var i = 0, l = arr.length; i < l; i++) {
-        if (arr[i] === obj || (obj.$value && arr[i].$value === obj.$value)) {
-            return i
-        }
-    }
-    return -1
-}
-
 module.exports = {
 
     bind: function () {
@@ -178,8 +149,7 @@ module.exports = {
         // force a compile so that we get all the bindings for
         // dependency extraction.
         if (!this.initiated && (!collection || !collection.length)) {
-            this.buildItem()
-            this.initiated = true
+            this.dryBuild()
         }
 
         // keep reference of old data and VMs
@@ -205,17 +175,7 @@ module.exports = {
         }
 
         // destroy unused old VMs
-        if (oldVMs) {
-            var i = oldVMs.length, vm
-            while (i--) {
-                vm = oldVMs[i]
-                if (vm.$reused) {
-                    vm.$reused = false
-                } else {
-                    vm.$destroy()
-                }
-            }
-        }
+        if (oldVMs) destroyVMs(oldVMs)
         this.old = this.oldVMs = null
     },
 
@@ -237,6 +197,20 @@ module.exports = {
     },
 
     /**
+     *  Run a dry buildItem just to collect bindings
+     */
+    dryBuild: function () {
+        new this.Ctor({
+            el: this.el.cloneNode(true),
+            compilerOptions: {
+                repeat: true,
+                parentCompiler: this.compiler
+            }
+        }).$destroy()
+        this.initiated = true
+    },
+
+    /**
      *  Create a new child VM from a data object
      *  passing along compiler options indicating this
      *  is a v-repeat item.
@@ -246,87 +220,61 @@ module.exports = {
         var ctn = this.container,
             vms = this.vms,
             col = this.collection,
-            el, i, existing, ref, item, primitive, detached
+            el, oldIndex, existing, item, nonObject
 
-        // append node into DOM first
-        // so v-if can get access to parentNode
-        // TODO: logic here is a total mess.
-        if (data) {
-
-            if (this.old) {
-                i = indexOf(this.old, data)
-            }
-            existing = i > -1
-
-            if (existing) { // existing, reuse the old VM
-
-                item = this.oldVMs[i]
-                // mark, so it won't be destroyed
-                item.$reused = true
-                el = item.$el
-                // existing VM's el can possibly be detached by v-if.
-                // in that case don't insert.
-                detached = !el.parentNode
-
-            } else { // new data, need to create new VM
-
-                el = this.el.cloneNode(true)
-                // process transition info before appending
-                el.vue_trans  = utils.attr(el, 'transition', true)
-                el.vue_anim   = utils.attr(el, 'animation', true)
-                el.vue_effect = utils.attr(el, 'effect', true)
-                // wrap primitive element in an object
-                if (utils.typeOf(data) !== 'Object') {
-                    primitive = true
-                    data = { $value: data }
-                }
-
-            }
-
-            ref = vms.length > index
-                ? vms[index].$el
-                : this.ref
-            
-            // if ref VM's el is detached by v-if
-            // use its v-if ref node instead
-            if (!ref.parentNode) {
-                ref = ref.vue_if_ref
-            }
-
-            if (existing) {
-                // existing node
-                // if not detached, just re-insert to new location
-                // else re-insert its v-if ref node
-                ctn.insertBefore(detached ? el.vue_if_ref : el, ref)
-            } else {
-                // new node, prepare it for v-if
-                el.vue_if_parent = ctn
-                el.vue_if_ref = ref
-            }
-            // set index so vm can init with it
-            // and do not trigger stuff early
-            data.$index = index
+        // get our DOM insertion reference node
+        var ref = vms.length > index
+            ? vms[index].$el
+            : this.ref
+        
+        // if reference VM is detached by v-if,
+        // use its v-if ref node instead
+        if (!ref.parentNode) {
+            ref = ref.vue_if_ref
         }
 
-        item = item || new this.Ctor({
-            el: el,
-            data: data,
-            compilerOptions: {
-                repeat: true,
-                parentCompiler: this.compiler
-            }
-        })
-        item.$index = index
+        // check if data already exists in the old array
+        oldIndex = this.old ? indexOf(this.old, data) : -1
+        existing = oldIndex > -1
 
-        if (!data) {
-            // this is a forced compile for an empty collection.
-            // let's remove it...
-            item.$destroy()
+        if (existing) {
+
+            // existing, reuse the old VM
+            item = this.oldVMs[oldIndex]
+            // mark, so it won't be destroyed
+            item.$reused = true
+
         } else {
-            vms.splice(index, 0, item)
 
-            // for primitive values, listen for value change
-            if (primitive) {
+            // new data, need to create new VM.
+            // there's some preparation work to do...
+
+            // first clone the template node
+            el = this.el.cloneNode(true)
+            // then we provide the parentNode for v-if
+            // so that it can still work in a detached state
+            el.vue_if_parent = ctn
+            el.vue_if_ref = ref
+            // wrap non-object value in an object
+            nonObject = utils.typeOf(data) !== 'Object'
+            if (nonObject) {
+                data = { $value: data }
+            }
+            // set index so vm can init with the correct
+            // index instead of undefined
+            data.$index = index
+            // initialize the new VM
+            item = new this.Ctor({
+                el: el,
+                data: data,
+                compilerOptions: {
+                    repeat: true,
+                    parentCompiler: this.compiler
+                }
+            })
+            // for non-object values, listen for value change
+            // so we can sync it back to the original Array
+            if (nonObject) {
                 item.$compiler.observer.on('set', function (key, val) {
                     if (key === '$value') {
                         col[item.$index] = val
@@ -334,15 +282,30 @@ module.exports = {
                 })
             }
 
-            // new instance and v-if doesn't want it detached
-            // good to insert.
-            if (!existing && el.vue_if !== false) {
+        }
+
+        // put the item into the VM Array
+        vms.splice(index, 0, item)
+        // update the index
+        item.$index = index
+
+        // Finally, DOM operations...
+        el = item.$el
+        if (existing) {
+            // we simplify need to re-insert the existing node
+            // to its new position. However, it can possibly be
+            // detached by v-if. in that case we insert its v-if
+            // ref node instead.
+            ctn.insertBefore(el.parentNode ? el : el.vue_if_ref, ref)
+        } else {
+            if (el.vue_if !== false) {
                 if (this.compiler.init) {
-                    // do not transition on initial compile.
-                    ctn.insertBefore(item.$el, ref)
+                    // do not transition on initial compile,
+                    // just manually insert.
+                    ctn.insertBefore(el, ref)
                     item.$compiler.execHook('attached')
                 } else {
-                    // transition in...
+                    // give it some nice transition.
                     item.$before(ref)
                 }
             }
@@ -401,8 +364,6 @@ module.exports = {
             var key = vm.$key,
                 val = vm.$value || vm.$data
             if (action > 0) { // new property
-                // make key ienumerable
-                delete vm.$data.$key
                 obj[key] = val
                 Observer.convert(obj, key)
             } else {
@@ -412,22 +373,65 @@ module.exports = {
         }
     },
 
-    reset: function (destroyAll) {
+    reset: function (destroy) {
         if (this.childId) {
             delete this.vm.$[this.childId]
         }
         if (this.collection) {
             this.collection.__emitter__.off('mutate', this.mutationListener)
-            if (destroyAll) {
-                var i = this.vms.length
-                while (i--) {
-                    this.vms[i].$destroy()
-                }
+            if (destroy) {
+                destroyVMs(this.vms)
             }
         }
     },
 
     unbind: function () {
         this.reset(true)
+    }
+}
+
+// Helpers --------------------------------------------------------------------
+
+/**
+ *  Convert an Object to a v-repeat friendly Array
+ */
+function objectToArray (obj) {
+    var res = [], val, data
+    for (var key in obj) {
+        val = obj[key]
+        data = utils.typeOf(val) === 'Object'
+            ? val
+            : { $value: val }
+        def(data, '$key', key)
+        res.push(data)
+    }
+    return res
+}
+
+/**
+ *  Find an object or a wrapped data object
+ *  from an Array
+ */
+function indexOf (arr, obj) {
+    for (var i = 0, l = arr.length; i < l; i++) {
+        if (arr[i] === obj || (obj.$value && arr[i].$value === obj.$value)) {
+            return i
+        }
+    }
+    return -1
+}
+
+/**
+ *  Destroy some VMs, yeah.
+ */
+function destroyVMs (vms) {
+    var i = vms.length, vm
+    while (i--) {
+        vm = vms[i]
+        if (vm.$reused) {
+            vm.$reused = false
+        } else {
+            vm.$destroy()
+        }
     }
 }

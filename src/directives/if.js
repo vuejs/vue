@@ -6,8 +6,9 @@ module.exports = {
     bind: function () {
         this.parent = this.el.parentNode || this.el.vue_if_parent
         this.ref = document.createComment(config.prefix + '-if-' + this.key)
-        if (this.el.vue_if_ref) {
-            this.parent.insertBefore(this.ref, this.el.vue_if_ref)
+        var detachedRef = this.el.vue_if_ref
+        if (detachedRef) {
+            this.parent.insertBefore(this.ref, detachedRef)
         }
         this.el.vue_if_ref = this.ref
     },
