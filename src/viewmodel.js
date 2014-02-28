@@ -99,7 +99,7 @@ def(VMProto, '$broadcast', function () {
 def(VMProto, '$dispatch', function () {
     var compiler = this.$compiler,
         emitter = compiler.emitter,
-        parent = compiler.parentCompiler
+        parent = compiler.parent
     emitter.emit.apply(emitter, arguments)
     if (parent) {
         parent.vm.$dispatch.apply(parent.vm, arguments)

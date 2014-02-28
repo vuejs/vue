@@ -47,14 +47,14 @@ module.exports = {
             data[this.arg] = value
         }
         this.subVM = new Ctor({
-            el: this.el,
-            data: data,
+            el     : this.el,
+            data   : data,
+            parent : this.vm,
             compilerOptions: {
                 // it is important to delay the ready hook
                 // so that when it's called, all `v-with` wathcers
                 // would have been set up.
-                delayReady: !this.last,
-                parentCompiler: this.compiler
+                delayReady: !this.last
             }
         })
     },

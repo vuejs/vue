@@ -64,20 +64,23 @@ function Compiler (vm, options) {
     def(vm, '$', makeHash())
     def(vm, '$el', el)
     def(vm, '$compiler', compiler)
-    def(vm, '$root', getRoot(compiler).vm)
 
     // set parent VM
     // and register child id on parent
-    var parent = compiler.parentCompiler,
+    var parentVM = options.parent,
         childId = utils.attr(el, 'ref')
-    if (parent) {
-        parent.childCompilers.push(compiler)
-        def(vm, '$parent', parent.vm)
+    if (parentVM) {
+        compiler.parent = parentVM.$compiler
+        parentVM.$compiler.childCompilers.push(compiler)
+        def(vm, '$parent', parentVM)
         if (childId) {
             compiler.childId = childId
-            parent.vm.$[childId] = vm
+            parentVM.$[childId] = vm
         }
     }
+
+    // set root
+    def(vm, '$root', getRoot(compiler).vm)
 
     // setup observer
     compiler.setupObserver()
@@ -546,7 +549,7 @@ CompilerProto.bindDirective = function (directive) {
             if (compiler.hasKey(key)) {
                 break
             } else {
-                compiler = compiler.parentCompiler
+                compiler = compiler.parent
             }
         }
         compiler = compiler || this
@@ -717,7 +720,7 @@ CompilerProto.markComputed = function (binding, value) {
  */
 CompilerProto.getOption = function (type, id) {
     var opts = this.options,
-        parent = this.parentCompiler,
+        parent = this.parent,
         globalAssets = config.globalAssets
     return (opts[type] && opts[type][id]) || (
         parent
@@ -844,8 +847,8 @@ CompilerProto.destroy = function () {
         el.removeEventListener(key, delegators[key].handler)
     }
 
-    // remove self from parentCompiler
-    var parent = compiler.parentCompiler,
+    // remove self from parent
+    var parent = compiler.parent,
         childId = compiler.childId
     if (parent) {
         parent.childCompilers.splice(parent.childCompilers.indexOf(compiler), 1)
@@ -877,8 +880,8 @@ CompilerProto.destroy = function () {
  *  shorthand for getting root compiler
  */
 function getRoot (compiler) {
-    while (compiler.parentCompiler) {
-        compiler = compiler.parentCompiler
+    while (compiler.parent) {
+        compiler = compiler.parent
     }
     return compiler
 }

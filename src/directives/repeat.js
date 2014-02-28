@@ -201,10 +201,10 @@ module.exports = {
      */
     dryBuild: function () {
         new this.Ctor({
-            el: this.el.cloneNode(true),
+            el     : this.el.cloneNode(true),
+            parent : this.vm,
             compilerOptions: {
-                repeat: true,
-                parentCompiler: this.compiler
+                repeat: true
             }
         }).$destroy()
         this.initiated = true
@@ -265,11 +265,11 @@ module.exports = {
             data.$index = index
             // initialize the new VM
             item = new this.Ctor({
-                el: el,
-                data: data,
+                el     : el,
+                data   : data,
+                parent : this.vm,
                 compilerOptions: {
-                    repeat: true,
-                    parentCompiler: this.compiler
+                    repeat: true
                 }
             })
             // for non-object values, listen for value change

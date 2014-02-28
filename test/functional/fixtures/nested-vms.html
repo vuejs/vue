@@ -1,5 +1,6 @@
 <style type="text/css">
-    div:not(#grandpa) {
+    man, offspring {
+        display: block;
         padding-left: 15px;
     }
     p {
@@ -14,53 +15,43 @@
     }
 </style>
 
-<div id="grandpa" data-name="Andy" data-family="Johnson">
+<meta charset="utf8">
+<div id="grandpa" name="Andy">
     <p class="ancestor">{{name}} {{family}}</p>
 
-    <div v-component="man" data-name="Jack">
+    <man name="Jack">
         <p class="jack">{{name}}, son of {{$parent.name}}</p>
 
-        <div v-component="man" data-name="Mike">
+        <man name="Mike">
             <p class="mike">{{name}}, son of {{$parent.name}}</p>
 
-            <div v-component="offspring" data-name="Tim" class="tim">
-            </div>
+            <offspring name="Tim" class="tim"></offspring>
 
-            <div v-component="offspring" data-name="Tom" class="tom">
-            </div>
-        </div>
+            <offspring name="Tom" class="tom"></offspring>
+        </man>
 
-        <div v-component="man" data-name="Jason">
+        <man name="Jason">
             <p class="jason">{{name}}, son of {{$parent.name}}</p>
 
-            <div v-component="offspring" data-name="Andrew" class="andrew">
-            </div>
-        </div>
-    </div>
+            <offspring name="Andrew" class="andrew"></offspring>
+        </man>
+    </man>
 </div>
 
-<script type="text/v-template" id="v-template-offspring">
+<script type="text/x-template" id="offspring-template">
     <p>{{name}}, son of {{$parent.name}}, grandson of {{$parent.$parent.name}}, great-grandson of {{$root.name}}, and offspring of family {{family}}.</p>
 </script>
 
 <script src="../../../dist/vue.js"></script>
 <script>
-    Vue.config({ debug: true })
+    //Vue.config({ debug: true })
 
     var Man = Vue.extend({
-        created: function () {
-            this.name = this.$el.dataset.name
-            console.log(this.$el)
-            console.log(this.name)
-            var family = this.$el.dataset.family
-            if (family) {
-                this.family = family
-            }
-        }
+        paramAttributes: ['name']
     })
 
     var Offspring = Man.extend({
-        template: document.getElementById('v-template-offspring').innerHTML.trim()
+        template: '#offspring-template'
     })
 
     Vue
@@ -68,7 +59,10 @@
         .component('offspring', Offspring)
 
     new Man({
-        el: '#grandpa'
+        el: '#grandpa',
+        data: {
+            family: 'Johnson'
+        }
     })
     
 </script>

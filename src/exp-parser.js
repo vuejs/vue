@@ -61,7 +61,7 @@ function getRel (path, compiler) {
         if (compiler.hasKey(path)) {
             break
         } else {
-            compiler = compiler.parentCompiler
+            compiler = compiler.parent
             dist++
         }
     }

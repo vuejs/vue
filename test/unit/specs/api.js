@@ -634,6 +634,41 @@ describe('UNIT: API', function () {
 
             })
 
+            describe('parent', function () {
+                
+                it('should create parent-child relation between VMs', function () {
+                    
+                    var parent = new Vue({
+                        data: {
+                            test: 'from parent'
+                        }
+                    })
+
+                    var child = new Vue({
+                        parent: parent,
+                        template: '{{test}}'
+                    })
+
+                    assert.strictEqual(child.$el.textContent, 'from parent')
+
+                    var dispatched = false,
+                        broadcasted = false
+                    parent.$on('dispatch', function () {
+                        dispatched = true
+                    })
+                    child.$on('broadcast', function () {
+                        broadcasted = true
+                    })
+                    parent.$broadcast('broadcast')
+                    child.$dispatch('dispatch')
+
+                    assert.ok(dispatched)
+                    assert.ok(broadcasted)
+
+                })
+
+            })
+
             describe('directives', function () {
                 
                 it('should allow the VM to use private directives', function (done) {
