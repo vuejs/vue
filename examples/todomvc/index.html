@@ -75,23 +75,31 @@
         </section>
         <footer id="info">
             <p>Double-click to edit a todo</p>
-            <p>Powered by <a href="https://github.com/yyx990803/vue">VueJS</a></p>
+            <p>Powered by <a href="http://vuejs.org">Vue.js</a></p>
             <p>Created by <a href="http://evanyou.me">Evan You</a></p>
         </footer>
 
-        <!-- for PhantomJS/CasperJS testing only -->
+        <!-- testing/benchmark only -->
         <script>
             if (navigator.userAgent.indexOf('PhantomJS') > -1) {
                 localStorage.clear()
             }
+            var now = window.performance && window.performance.now
+                ? function () { return window.performance.now() }
+                : Date.now
+            var metrics = { beforeLoad: now() }
         </script>
-        <!-- end testing -->
+        <!-- end testing/bench -->
 
         <script src="../../dist/vue.js"></script>
+        <script>metrics.afterLoad = now()</script>
         <script src="bower_components/director/director.js"></script>
         <script src="js/store.js"></script>
+        <script>metrics.beforeRender = now()</script>
         <script src="js/app.js"></script>
         <script src="js/routes.js"></script>
-        <script src="js/benchmark.js"></script>
+        <script>metrics.afterRender = now()</script>
+        <script src="js/perf.js"></script>
+
     </body>
 </html>
