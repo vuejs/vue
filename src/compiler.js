@@ -66,6 +66,7 @@ function Compiler (vm, options) {
     // set inenumerable VM properties
     def(vm, '$', makeHash())
     def(vm, '$el', el)
+    def(vm, '$options', options)
     def(vm, '$compiler', compiler)
 
     // set parent VM
@@ -252,7 +253,7 @@ CompilerProto.setupObserver = function () {
 
     function registerHook (hook, fn) {
         observer.on('hook:' + hook, function () {
-            fn.call(compiler.vm, options)
+            fn.call(compiler.vm)
         })
     }
 

@@ -851,8 +851,8 @@ describe('UNIT: API', function () {
                     it('should be called before compile', function () {
                         
                         var called = false,
-                            Test = Vue.extend({ created: function (options) {
-                                assert.ok(options.ok)
+                            Test = Vue.extend({ created: function () {
+                                assert.ok(this.$options.ok)
                                 called = true
                             }})
                         new Test({ ok: true })
@@ -864,10 +864,10 @@ describe('UNIT: API', function () {
 
                 describe('ready', function () {
 
-                    it('should be called after compile with options', function () {
+                    it('should be called after compile', function () {
                         var called = false,
-                            hook = function (options) {
-                                assert.ok(options.ok)
+                            hook = function () {
+                                assert.ok(this.$options.ok)
                                 assert.notOk(this.$compiler.init)
                                 called = true
                             },
