@@ -11,54 +11,31 @@ var Observer   = require('../observer'),
 var mutationHandlers = {
 
     push: function (m) {
-        var i = 0, l = m.args.length, vm,
-            base = this.collection.length - l
-        for (; i < l; i++) {
-            vm = this.buildItem(m.args[i], base + i)
-            this.updateObject(vm, 1)
-        }
+        this.addItems(m.args, this.vms.length)
     },
 
     pop: function () {
         var vm = this.vms.pop()
-        if (vm) {
-            vm.$destroy()
-            this.updateObject(vm, -1)
-        }
+        if (vm) this.removeItems([vm])
     },
 
     unshift: function (m) {
-        var i = 0, l = m.args.length, vm
-        for (; i < l; i++) {
-            vm = this.buildItem(m.args[i], i)
-            this.updateObject(vm, 1)
-        }
+        this.addItems(m.args)
     },
 
     shift: function () {
         var vm = this.vms.shift()
-        if (vm) {
-            vm.$destroy()
-            this.updateObject(vm, -1)
-        }
+        if (vm) this.removeItems([vm])
     },
 
     splice: function (m) {
-        var i, l, vm,
-            index = m.args[0],
+        var index = m.args[0],
             removed = m.args[1],
-            added = m.args.length - 2,
             removedVMs = removed === undefined
                 ? this.vms.splice(index)
                 : this.vms.splice(index, removed)
-        for (i = 0, l = removedVMs.length; i < l; i++) {
-            removedVMs[i].$destroy()
-            this.updateObject(removedVMs[i], -1)
-        }
-        for (i = 0; i < added; i++) {
-            vm = this.buildItem(m.args[i + 2], index + i)
-            this.updateObject(vm, 1)
-        }
+        this.removeItems(removedVMs)
+        this.addItems(m.args.slice(2), index)
     },
 
     sort: function () {
@@ -170,13 +147,29 @@ module.exports = {
 
         // create new VMs and append to DOM
         if (collection.length) {
-            collection.forEach(this.buildItem, this)
+            collection.forEach(this.build, this)
             if (!init) this.changed()
         }
 
         // destroy unused old VMs
         if (oldVMs) destroyVMs(oldVMs)
         this.old = this.oldVMs = null
+    },
+
+    addItems: function (data, base) {
+        base = base || 0
+        for (var i = 0, l = data.length; i < l; i++) {
+            var vm = this.build(data[i], base + i)
+            this.updateObject(vm, 1)
+        }
+    },
+
+    removeItems: function (data) {
+        var i = data.length
+        while (i--) {
+            data[i].$destroy()
+            this.updateObject(data[i], -1)
+        }
     },
 
     /**
@@ -197,7 +190,7 @@ module.exports = {
     },
 
     /**
-     *  Run a dry buildItem just to collect bindings
+     *  Run a dry build just to collect bindings
      */
     dryBuild: function () {
         new this.Ctor({
@@ -215,7 +208,7 @@ module.exports = {
      *  passing along compiler options indicating this
      *  is a v-repeat item.
      */
-    buildItem: function (data, index) {
+    build: function (data, index) {
 
         var ctn = this.container,
             vms = this.vms,
