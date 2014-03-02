@@ -28,18 +28,69 @@ var Emitter  = require('./emitter'),
 // an observed array
 var ArrayProxy = Object.create(Array.prototype)
 
-// Define mutation interceptors so we can emit the mutation info
+/**
+ *  Define mutation interceptors so we can emit the mutation info
+ */
 methods.forEach(function (method) {
     def(ArrayProxy, method, function () {
-        var result = Array.prototype[method].apply(this, arguments)
-        this.__emitter__.emit('mutate', null, this, {
-            method: method,
-            args: slice.call(arguments),
-            result: result
-        })
-        return result
+        var mutation = applyMutation(this, method, slice.call(arguments))
+        linkArrayElements(this, mutation.inserted)
+        unlinkArrayElements(this, mutation.removed)
+        this.__emitter__.emit('mutate', null, this, mutation)
+        return mutation.result
     }, !hasProto)
 })
+
+/**
+ *  Mutate the Array and extract mutation info
+ */
+function applyMutation (arr, method, args) {
+    var result = Array.prototype[method].apply(arr, args),
+        mutation = {
+            method: method,
+            args: args,
+            result: result
+        }
+    if (method === 'push' || method === 'unshift') {
+        mutation.inserted = args
+    } else if (method === 'pop' || method === 'shift') {
+        mutation.removed = [result]
+    } else if (method === 'splice') {
+        mutation.inserted = args.slice(2)
+        mutation.removed = result
+    }
+    return mutation
+}
+
+function linkArrayElements (arr, items) {
+    if (items) {
+        var i = items.length, item
+        while (i--) {
+            item = items[i]
+            if (typeOf(item) === 'Object') {
+                convert(item)
+                watchObject(item)
+                if (!item.__ownerArrays__) {
+                    def(item, '__ownerArrays__', [])
+                }
+                item.__ownerArrays__.push(arr)
+            }
+        }
+    }
+}
+
+function unlinkArrayElements (arr, items) {
+    if (items) {
+        var i = items.length, item
+        while (i--) {
+            item = items[i]
+            if (typeOf(item) === 'Object') {
+                var owners = item.__ownerArrays__
+                owners.splice(owners.indexOf(arr))
+            }
+        }
+    }
+}
 
 /**
  *  Convenience method to remove an element in an Array
@@ -101,7 +152,7 @@ def(ArrayProxy, 'replace', replaceElement, !hasProto)
  */
 function watchObject (obj) {
     for (var key in obj) {
-        convert(obj, key)
+        convertKey(obj, key)
     }
 }
 
@@ -122,6 +173,7 @@ function watchArray (arr) {
             def(arr, key, ArrayProxy[key])
         }
     }
+    linkArrayElements(arr, arr)
 }
 
 /**
@@ -129,7 +181,7 @@ function watchArray (arr) {
  *  so it emits get/set events.
  *  Then watch the value itself.
  */
-function convert (obj, key) {
+function convertKey (obj, key) {
     var keyPrefix = key.charAt(0)
     if (keyPrefix === '$' || keyPrefix === '_') {
         return
@@ -238,7 +290,7 @@ function ensurePath (obj, key) {
         sec = path[i]
         if (!obj[sec]) {
             obj[sec] = {}
-            if (obj.__emitter__) convert(obj, sec)
+            if (obj.__emitter__) convertKey(obj, sec)
         }
         obj = obj[sec]
     }
@@ -246,9 +298,26 @@ function ensurePath (obj, key) {
         sec = path[i]
         if (!(sec in obj)) {
             obj[sec] = undefined
-            if (obj.__emitter__) convert(obj, sec)
+            if (obj.__emitter__) convertKey(obj, sec)
         }
     }
+}
+
+function convert (obj) {
+    if (obj.__emitter__) return false
+    var emitter = new Emitter()
+    def(obj, '__emitter__', emitter)
+    emitter.on('set', function () {
+        var owners = obj.__ownerArrays__
+        if (owners) {
+            var i = owners.length
+            while (i--) {
+                owners[i].__emitter__.emit('set', '')
+            }
+        }
+    })
+    emitter.values = utils.hash()
+    return true
 }
 
 /**
@@ -260,15 +329,8 @@ function observe (obj, rawPath, observer) {
     if (!isWatchable(obj)) return
 
     var path = rawPath ? rawPath + '.' : '',
-        alreadyConverted = !!obj.__emitter__,
-        emitter
-
-    if (!alreadyConverted) {
-        def(obj, '__emitter__', new Emitter())
-    }
-
-    emitter = obj.__emitter__
-    emitter.values = emitter.values || utils.hash()
+        alreadyConverted = !convert(obj),
+        emitter = obj.__emitter__
 
     // setup proxy listeners on the parent observer.
     // we need to keep reference to them so that they
@@ -351,7 +413,7 @@ var pub = module.exports = {
     observe     : observe,
     unobserve   : unobserve,
     ensurePath  : ensurePath,
-    convert     : convert,
+    convertKey  : convertKey,
     copyPaths   : copyPaths,
     watchArray  : watchArray
 }

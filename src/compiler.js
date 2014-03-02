@@ -632,7 +632,7 @@ CompilerProto.defineProp = function (key, binding) {
     // if the data object is already observed, but the key
     // is not observed, we need to add it to the observed keys.
     if (ob && !(key in ob.values)) {
-        Observer.convert(data, key)
+        Observer.convertKey(data, key)
     }
 
     binding.value = data[key]
