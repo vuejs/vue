@@ -1,5 +1,5 @@
 /*
- Vue.js v0.9.2
+ Vue.js v0.9.3
  (c) 2014 Evan You
  License: MIT
 */
@@ -393,7 +393,9 @@ function inheritOptions (child, parent, topLevel) {
 module.exports = ViewModel
 });
 require.register("vue/src/emitter.js", function(exports, require, module){
-function Emitter () {}
+function Emitter () {
+    this._ctx = this
+}
 
 var EmitterProto = Emitter.prototype,
     slice = [].slice
@@ -458,7 +460,7 @@ Emitter.prototype.emit = function(event){
     if (callbacks) {
         callbacks = callbacks.slice(0)
         for (var i = 0, len = callbacks.length; i < len; i++) {
-            callbacks[i].apply(this._ctx || this, args)
+            callbacks[i].apply(this._ctx, args)
         }
     }
 
@@ -487,6 +489,7 @@ var prefix = 'v',
         silent      : false,
         enterClass  : 'v-enter',
         leaveClass  : 'v-leave',
+        interpolate : true,
         attrs       : {},
 
         get prefix () {
@@ -511,17 +514,11 @@ require.register("vue/src/utils.js", function(exports, require, module){
 var config    = require('./config'),
     attrs     = config.attrs,
     toString  = ({}).toString,
-    join      = [].join,
     win       = window,
     console   = win.console,
-
+    timeout   = win.setTimeout,
     hasClassList = 'classList' in document.documentElement,
     ViewModel // late def
-
-var defer =
-    win.requestAnimationFrame ||
-    win.webkitRequestAnimationFrame ||
-    win.setTimeout
 
 var utils = module.exports = {
 
@@ -536,10 +533,10 @@ var utils = module.exports = {
     /**
      *  get an attribute and remove it.
      */
-    attr: function (el, type, noRemove) {
+    attr: function (el, type) {
         var attr = attrs[type],
             val = el.getAttribute(attr)
-        if (!noRemove && val !== null) el.removeAttribute(attr)
+        if (val !== null) el.removeAttribute(attr)
         return val
     },
 
@@ -548,12 +545,12 @@ var utils = module.exports = {
      *  This avoids it being included in JSON.stringify
      *  or for...in loops.
      */
-    defProtected: function (obj, key, val, enumerable, configurable) {
+    defProtected: function (obj, key, val, enumerable) {
         if (obj.hasOwnProperty(key)) return
         Object.defineProperty(obj, key, {
             value        : val,
             enumerable   : !!enumerable,
-            configurable : !!configurable
+            configurable : true
         })
     },
 
@@ -682,9 +679,9 @@ var utils = module.exports = {
     /**
      *  log for debugging
      */
-    log: function () {
+    log: function (msg) {
         if (config.debug && console) {
-            console.log(join.call(arguments, ' '))
+            console.log(msg)
         }
     },
     
@@ -692,11 +689,11 @@ var utils = module.exports = {
      *  warnings, traces by default
      *  can be suppressed by `silent` option.
      */
-    warn: function() {
+    warn: function (msg) {
         if (!config.silent && console) {
-            console.warn(join.call(arguments, ' '))
-            if (config.debug) {
-                console.trace()
+            console.warn(msg)
+            if (config.debug && console.trace) {
+                console.trace(msg)
             }
         }
     },
@@ -705,7 +702,7 @@ var utils = module.exports = {
      *  used to defer batch updates
      */
     nextTick: function (cb) {
-        defer(cb, 0)
+        timeout(cb, 0)
     },
 
     /**
@@ -773,9 +770,12 @@ var Emitter     = require('./emitter'),
 function Compiler (vm, options) {
 
     var compiler = this
-    // indicate that we are intiating this instance
-    // so we should not run any transitions
-    compiler.init = true
+
+    // default state
+    compiler.init       = true
+    compiler.repeat     = false
+    compiler.destroyed  = false
+    compiler.delayReady = false
 
     // process and extend options
     options = compiler.options = options || makeHash()
@@ -788,17 +788,17 @@ function Compiler (vm, options) {
     extend(compiler, options.compilerOptions)
 
     // initialize element
-    var el = compiler.setupElement(options)
-    log('\nnew VM instance:', el.tagName, '\n')
+    var el = compiler.el = compiler.setupElement(options)
+    log('\nnew VM instance: ' + el.tagName + '\n')
 
     // set compiler properties
-    compiler.vm  = vm
+    compiler.vm = el.vue_vm = vm
     compiler.bindings = makeHash()
     compiler.dirs = []
     compiler.deferred = []
     compiler.exps = []
     compiler.computed = []
-    compiler.childCompilers = []
+    compiler.children = []
     compiler.emitter = new Emitter()
     compiler.emitter._ctx = vm
     compiler.delegators = makeHash()
@@ -806,21 +806,25 @@ function Compiler (vm, options) {
     // set inenumerable VM properties
     def(vm, '$', makeHash())
     def(vm, '$el', el)
+    def(vm, '$options', options)
     def(vm, '$compiler', compiler)
-    def(vm, '$root', getRoot(compiler).vm)
 
     // set parent VM
     // and register child id on parent
-    var parent = compiler.parentCompiler,
+    var parentVM = options.parent,
         childId = utils.attr(el, 'ref')
-    if (parent) {
-        parent.childCompilers.push(compiler)
-        def(vm, '$parent', parent.vm)
+    if (parentVM) {
+        compiler.parent = parentVM.$compiler
+        parentVM.$compiler.children.push(compiler)
+        def(vm, '$parent', parentVM)
         if (childId) {
             compiler.childId = childId
-            parent.vm.$[childId] = vm
+            parentVM.$[childId] = vm
         }
     }
+
+    // set root
+    def(vm, '$root', getRoot(compiler).vm)
 
     // setup observer
     compiler.setupObserver()
@@ -875,7 +879,9 @@ function Compiler (vm, options) {
     compiler.init = false
 
     // post compile / ready hook
-    compiler.execHook('ready')
+    if (!compiler.delayReady) {
+        compiler.execHook('ready')
+    }
 }
 
 var CompilerProto = Compiler.prototype
@@ -886,7 +892,7 @@ var CompilerProto = Compiler.prototype
  */
 CompilerProto.setupElement = function (options) {
     // create the node first
-    var el = this.el = typeof options.el === 'string'
+    var el = typeof options.el === 'string'
         ? document.querySelector(options.el)
         : options.el || document.createElement(options.tagName || 'div')
 
@@ -958,12 +964,21 @@ CompilerProto.setupObserver = function () {
             // since hooks were merged with child at head,
             // we loop reversely.
             while (i--) {
-                register(hook, fns[i])
+                registerHook(hook, fns[i])
             }
         } else if (fns) {
-            register(hook, fns)
+            registerHook(hook, fns)
         }
     })
+
+    // broadcast attached/detached hooks
+    observer
+        .on('hook:attached', function () {
+            broadcast(1)
+        })
+        .on('hook:detached', function () {
+            broadcast(0)
+        })
 
     function onGet (key) {
         check(key)
@@ -976,10 +991,25 @@ CompilerProto.setupObserver = function () {
         bindings[key].update(val)
     }
 
-    function register (hook, fn) {
+    function registerHook (hook, fn) {
         observer.on('hook:' + hook, function () {
-            fn.call(compiler.vm, options)
+            fn.call(compiler.vm)
         })
+    }
+
+    function broadcast (event) {
+        var children = compiler.children
+        if (children) {
+            var child, i = children.length
+            while (i--) {
+                child = children[i]
+                if (child.el.parentNode) {
+                    event = 'hook:' + (event ? 'attached' : 'detached')
+                    child.observer.emit(event)
+                    child.emitter.emit(event)
+                }
+            }
+        }
     }
 
     function check (key) {
@@ -1003,7 +1033,7 @@ CompilerProto.observeData = function (data) {
     $dataBinding.update(data)
 
     // allow $data to be swapped
-    Object.defineProperty(compiler.vm, '$data', {
+    defGetSet(compiler.vm, '$data', {
         enumerable: false,
         get: function () {
             compiler.observer.emit('get', '$data')
@@ -1047,7 +1077,7 @@ CompilerProto.compile = function (node, root) {
 
         // special attributes to check
         var repeatExp,
-            withKey,
+            withExp,
             partialId,
             directive,
             componentId = utils.attr(node, 'component') || tagName.toLowerCase(),
@@ -1075,13 +1105,19 @@ CompilerProto.compile = function (node, root) {
             }
 
         // v-with has 2nd highest priority
-        } else if (root !== true && ((withKey = utils.attr(node, 'with')) || componentCtor)) {
+        } else if (root !== true && ((withExp = utils.attr(node, 'with')) || componentCtor)) {
 
-            directive = Directive.parse('with', withKey || '', compiler, node)
-            if (directive) {
-                directive.Ctor = componentCtor
-                compiler.deferred.push(directive)
-            }
+            withExp = Directive.split(withExp || '')
+            withExp.forEach(function (exp, i) {
+                var directive = Directive.parse('with', exp, compiler, node)
+                if (directive) {
+                    directive.Ctor = componentCtor
+                    // notify the directive that this is the
+                    // last expression in the group
+                    directive.last = i === withExp.length - 1
+                    compiler.deferred.push(directive)
+                }
+            })
 
         } else {
 
@@ -1104,7 +1140,7 @@ CompilerProto.compile = function (node, root) {
             compiler.compileNode(node)
         }
 
-    } else if (nodeType === 3) { // text node
+    } else if (nodeType === 3 && config.interpolate) { // text node
 
         compiler.compileTextNode(node)
 
@@ -1143,7 +1179,7 @@ CompilerProto.compileNode = function (node) {
                         this.bindDirective(directive)
                     }
                 }
-            } else {
+            } else if (config.interpolate) {
                 // non directive attribute, check interpolation tags
                 exp = TextParser.parseAttr(attr.value)
                 if (exp) {
@@ -1238,7 +1274,7 @@ CompilerProto.bindDirective = function (directive) {
 
     // for empty or literal directives, simply call its bind()
     // and we're done.
-    if (directive.isEmpty || !directive._update) {
+    if (directive.isEmpty || directive.isLiteral) {
         if (directive.bind) directive.bind()
         return
     }
@@ -1257,7 +1293,7 @@ CompilerProto.bindDirective = function (directive) {
             if (compiler.hasKey(key)) {
                 break
             } else {
-                compiler = compiler.parentCompiler
+                compiler = compiler.parent
             }
         }
         compiler = compiler || this
@@ -1266,13 +1302,13 @@ CompilerProto.bindDirective = function (directive) {
     binding.dirs.push(directive)
     directive.binding = binding
 
+    var value = binding.val()
     // invoke bind hook if exists
     if (directive.bind) {
-        directive.bind()
+        directive.bind(value)
     }
-
     // set initial value
-    directive.update(binding.val(), true)
+    directive.update(value, true)
 }
 
 /**
@@ -1297,9 +1333,11 @@ CompilerProto.createBinding = function (key, isExp, isFn) {
             if (computed && computed[key]) {
                 // computed property
                 compiler.defineComputed(key, binding, computed[key])
-            } else {
+            } else if (key.charAt(0) !== '$') {
                 // normal property
                 compiler.defineProp(key, binding)
+            } else {
+                compiler.defineMeta(key, binding)
             }
         } else {
             // ensure path in data so it can be observed
@@ -1334,17 +1372,42 @@ CompilerProto.defineProp = function (key, binding) {
     // if the data object is already observed, but the key
     // is not observed, we need to add it to the observed keys.
     if (ob && !(key in ob.values)) {
-        Observer.convert(data, key)
+        Observer.convertKey(data, key)
     }
 
     binding.value = data[key]
 
-    Object.defineProperty(compiler.vm, key, {
+    defGetSet(compiler.vm, key, {
         get: function () {
             return compiler.data[key]
         },
         set: function (val) {
             compiler.data[key] = val
+        }
+    })
+}
+
+/**
+ *  Define a meta property, e.g. $index or $key,
+ *  which is bindable but only accessible on the VM,
+ *  not in the data.
+ */
+CompilerProto.defineMeta = function (key, binding) {
+    var vm = this.vm,
+        ob = this.observer,
+        value = binding.value = vm[key] || this.data[key]
+    // remove initital meta in data, since the same piece
+    // of data can be observed by different VMs, each have
+    // its own associated meta info.
+    delete this.data[key]
+    defGetSet(vm, key, {
+        get: function () {
+            if (Observer.shouldGet) ob.emit('get', key)
+            return value
+        },
+        set: function (val) {
+            ob.emit('set', key, val)
+            value = val
         }
     })
 }
@@ -1366,7 +1429,7 @@ CompilerProto.defineExp = function (key, binding) {
  */
 CompilerProto.defineComputed = function (key, binding, value) {
     this.markComputed(binding, value)
-    Object.defineProperty(this.vm, key, {
+    defGetSet(this.vm, key, {
         get: binding.value.$get,
         set: binding.value.$set
     })
@@ -1401,7 +1464,7 @@ CompilerProto.markComputed = function (binding, value) {
  */
 CompilerProto.getOption = function (type, id) {
     var opts = this.options,
-        parent = this.parentCompiler,
+        parent = this.parent,
         globalAssets = config.globalAssets
     return (opts[type] && opts[type][id]) || (
         parent
@@ -1487,7 +1550,9 @@ CompilerProto.destroy = function () {
         directives  = compiler.dirs,
         exps        = compiler.exps,
         bindings    = compiler.bindings,
-        delegators  = compiler.delegators
+        delegators  = compiler.delegators,
+        children    = compiler.children,
+        parent      = compiler.parent
 
     compiler.execHook('beforeDestroy')
 
@@ -1528,13 +1593,17 @@ CompilerProto.destroy = function () {
         el.removeEventListener(key, delegators[key].handler)
     }
 
-    // remove self from parentCompiler
-    var parent = compiler.parentCompiler,
-        childId = compiler.childId
+    // destroy all children
+    i = children.length
+    while (i--) {
+        children[i].destroy()
+    }
+
+    // remove self from parent
     if (parent) {
-        parent.childCompilers.splice(parent.childCompilers.indexOf(compiler), 1)
-        if (childId) {
-            delete parent.vm.$[childId]
+        parent.children.splice(parent.children.indexOf(compiler), 1)
+        if (compiler.childId) {
+            delete parent.vm.$[compiler.childId]
         }
     }
 
@@ -1544,6 +1613,7 @@ CompilerProto.destroy = function () {
     } else {
         vm.$remove()
     }
+    el.vue_vm = null
 
     this.destroyed = true
     // emit destroy hook
@@ -1560,10 +1630,17 @@ CompilerProto.destroy = function () {
  *  shorthand for getting root compiler
  */
 function getRoot (compiler) {
-    while (compiler.parentCompiler) {
-        compiler = compiler.parentCompiler
+    while (compiler.parent) {
+        compiler = compiler.parent
     }
     return compiler
+}
+
+/**
+ *  for convenience & minification
+ */
+function defGetSet (obj, key, def) {
+    Object.defineProperty(obj, key, def)
 }
 
 module.exports = Compiler
@@ -1654,7 +1731,7 @@ def(VMProto, '$destroy', function () {
  *  broadcast an event to all child VMs recursively.
  */
 def(VMProto, '$broadcast', function () {
-    var children = this.$compiler.childCompilers,
+    var children = this.$compiler.children,
         i = children.length,
         child
     while (i--) {
@@ -1670,7 +1747,7 @@ def(VMProto, '$broadcast', function () {
 def(VMProto, '$dispatch', function () {
     var compiler = this.$compiler,
         emitter = compiler.emitter,
-        parent = compiler.parentCompiler
+        parent = compiler.parent
     emitter.emit.apply(emitter, arguments)
     if (parent) {
         parent.vm.$dispatch.apply(parent.vm, arguments)
@@ -1854,44 +1931,116 @@ require.register("vue/src/observer.js", function(exports, require, module){
 
 var Emitter  = require('./emitter'),
     utils    = require('./utils'),
-
     // cache methods
     typeOf   = utils.typeOf,
     def      = utils.defProtected,
     slice    = [].slice,
-
     // types
     OBJECT   = 'Object',
     ARRAY    = 'Array',
-
-    // Array mutation methods to wrap
-    methods  = ['push','pop','shift','unshift','splice','sort','reverse'],
-
     // fix for IE + __proto__ problem
     // define methods as inenumerable if __proto__ is present,
     // otherwise enumerable so we can loop through and manually
     // attach to array instances
     hasProto = ({}).__proto__,
-
     // lazy load
     ViewModel
+
+// Array Mutation Handlers & Augmentations ------------------------------------
 
 // The proxy prototype to replace the __proto__ of
 // an observed array
 var ArrayProxy = Object.create(Array.prototype)
 
-// Define mutation interceptors so we can emit the mutation info
-methods.forEach(function (method) {
+// intercept mutation methods
+;[
+    'push',
+    'pop',
+    'shift',
+    'unshift',
+    'splice',
+    'sort',
+    'reverse'
+].forEach(watchMutation)
+
+// Augment the ArrayProxy with convenience methods
+def(ArrayProxy, 'remove', removeElement, !hasProto)
+def(ArrayProxy, 'set', replaceElement, !hasProto)
+def(ArrayProxy, 'replace', replaceElement, !hasProto)
+
+/**
+ *  Intercep a mutation event so we can emit the mutation info.
+ *  we also analyze what elements are added/removed and link/unlink
+ *  them with the parent Array.
+ */
+function watchMutation (method) {
     def(ArrayProxy, method, function () {
-        var result = Array.prototype[method].apply(this, arguments)
+
+        var args = slice.call(arguments),
+            result = Array.prototype[method].apply(this, args),
+            inserted, removed
+
+        // determine new / removed elements
+        if (method === 'push' || method === 'unshift') {
+            inserted = args
+        } else if (method === 'pop' || method === 'shift') {
+            removed = [result]
+        } else if (method === 'splice') {
+            inserted = args.slice(2)
+            removed = result
+        }
+        // link & unlink
+        linkArrayElements(this, inserted)
+        unlinkArrayElements(this, removed)
+
+        // emit the mutation event
         this.__emitter__.emit('mutate', null, this, {
             method: method,
-            args: slice.call(arguments),
+            args: args,
             result: result
         })
+
         return result
+        
     }, !hasProto)
-})
+}
+
+/**
+ *  Link new elements to an Array, so when they change
+ *  and emit events, the owner Array can be notified.
+ */
+function linkArrayElements (arr, items) {
+    if (items) {
+        var i = items.length, item, owners
+        while (i--) {
+            item = items[i]
+            if (isWatchable(item)) {
+                convert(item)
+                watch(item)
+                owners = item.__emitter__.owners
+                if (owners.indexOf(arr) < 0) {
+                    owners.push(arr)
+                }
+            }
+        }
+    }
+}
+
+/**
+ *  Unlink removed elements from the ex-owner Array.
+ */
+function unlinkArrayElements (arr, items) {
+    if (items) {
+        var i = items.length, item
+        while (i--) {
+            item = items[i]
+            if (item && item.__emitter__) {
+                var owners = item.__emitter__.owners
+                if (owners) owners.splice(owners.indexOf(arr))
+            }
+        }
+    }
+}
 
 /**
  *  Convenience method to remove an element in an Array
@@ -1943,17 +2092,54 @@ function replaceElement (index, data) {
     }
 }
 
-// Augment the ArrayProxy with convenience methods
-def(ArrayProxy, 'remove', removeElement, !hasProto)
-def(ArrayProxy, 'set', replaceElement, !hasProto)
-def(ArrayProxy, 'replace', replaceElement, !hasProto)
+// Watch Helpers --------------------------------------------------------------
+
+/**
+ *  Check if a value is watchable
+ */
+function isWatchable (obj) {
+    ViewModel = ViewModel || require('./viewmodel')
+    var type = typeOf(obj)
+    return (type === OBJECT || type === ARRAY) && !(obj instanceof ViewModel)
+}
+
+/**
+ *  Convert an Object/Array to give it a change emitter.
+ */
+function convert (obj) {
+    if (obj.__emitter__) return true
+    var emitter = new Emitter()
+    def(obj, '__emitter__', emitter)
+    emitter.on('set', function () {
+        var owners = obj.__emitter__.owners,
+            i = owners.length
+        while (i--) {
+            owners[i].__emitter__.emit('set', '', '', true)
+        }
+    })
+    emitter.values = utils.hash()
+    emitter.owners = []
+    return false
+}
+
+/**
+ *  Watch target based on its type
+ */
+function watch (obj) {
+    var type = typeOf(obj)
+    if (type === OBJECT) {
+        watchObject(obj)
+    } else if (type === ARRAY) {
+        watchArray(obj)
+    }
+}
 
 /**
  *  Watch an Object, recursive.
  */
 function watchObject (obj) {
     for (var key in obj) {
-        convert(obj, key)
+        convertKey(obj, key)
     }
 }
 
@@ -1962,11 +2148,6 @@ function watchObject (obj) {
  *  and add augmentations by intercepting the prototype chain
  */
 function watchArray (arr) {
-    var emitter = arr.__emitter__
-    if (!emitter) {
-        emitter = new Emitter()
-        def(arr, '__emitter__', emitter)
-    }
     if (hasProto) {
         arr.__proto__ = ArrayProxy
     } else {
@@ -1974,6 +2155,7 @@ function watchArray (arr) {
             def(arr, key, ArrayProxy[key])
         }
     }
+    linkArrayElements(arr, arr)
 }
 
 /**
@@ -1981,14 +2163,9 @@ function watchArray (arr) {
  *  so it emits get/set events.
  *  Then watch the value itself.
  */
-function convert (obj, key) {
+function convertKey (obj, key) {
     var keyPrefix = key.charAt(0)
-    if (
-        (keyPrefix === '$' || keyPrefix === '_') &&
-        key !== '$index' &&
-        key !== '$key' &&
-        key !== '$value'
-    ) {
+    if (keyPrefix === '$' || keyPrefix === '_') {
         return
     }
     // emit set on bind
@@ -2026,15 +2203,6 @@ function convert (obj, key) {
         }
         observe(val, key, emitter)
     }
-}
-
-/**
- *  Check if a value is watchable
- */
-function isWatchable (obj) {
-    ViewModel = ViewModel || require('./viewmodel')
-    var type = typeOf(obj)
-    return (type === OBJECT || type === ARRAY) && !(obj instanceof ViewModel)
 }
 
 /**
@@ -2095,7 +2263,7 @@ function ensurePath (obj, key) {
         sec = path[i]
         if (!obj[sec]) {
             obj[sec] = {}
-            if (obj.__emitter__) convert(obj, sec)
+            if (obj.__emitter__) convertKey(obj, sec)
         }
         obj = obj[sec]
     }
@@ -2103,10 +2271,12 @@ function ensurePath (obj, key) {
         sec = path[i]
         if (!(sec in obj)) {
             obj[sec] = undefined
-            if (obj.__emitter__) convert(obj, sec)
+            if (obj.__emitter__) convertKey(obj, sec)
         }
     }
 }
+
+// Main API Methods -----------------------------------------------------------
 
 /**
  *  Observe an object with a given path,
@@ -2117,15 +2287,8 @@ function observe (obj, rawPath, observer) {
     if (!isWatchable(obj)) return
 
     var path = rawPath ? rawPath + '.' : '',
-        alreadyConverted = !!obj.__emitter__,
-        emitter
-
-    if (!alreadyConverted) {
-        def(obj, '__emitter__', new Emitter())
-    }
-
-    emitter = obj.__emitter__
-    emitter.values = emitter.values || utils.hash()
+        alreadyConverted = convert(obj),
+        emitter = obj.__emitter__
 
     // setup proxy listeners on the parent observer.
     // we need to keep reference to them so that they
@@ -2136,7 +2299,7 @@ function observe (obj, rawPath, observer) {
             observer.emit('get', path + key)
         },
         set: function (key, val, propagate) {
-            observer.emit('set', path + key, val)
+            if (key) observer.emit('set', path + key, val)
             // also notify observer that the object itself changed
             // but only do so when it's a immediate property. this
             // avoids duplicate event firing.
@@ -2169,12 +2332,7 @@ function observe (obj, rawPath, observer) {
         // emit set events for everything inside
         emitSet(obj)
     } else {
-        var type = typeOf(obj)
-        if (type === OBJECT) {
-            watchObject(obj)
-        } else if (type === ARRAY) {
-            watchArray(obj)
-        }
+        watch(obj)
     }
 }
 
@@ -2199,6 +2357,8 @@ function unobserve (obj, path, observer) {
     observer.proxies[path] = null
 }
 
+// Expose API -----------------------------------------------------------------
+
 var pub = module.exports = {
 
     // whether to emit get events
@@ -2208,9 +2368,10 @@ var pub = module.exports = {
     observe     : observe,
     unobserve   : unobserve,
     ensurePath  : ensurePath,
-    convert     : convert,
     copyPaths   : copyPaths,
-    watchArray  : watchArray
+    watch       : watch,
+    convert     : convert,
+    convertKey  : convertKey
 }
 });
 require.register("vue/src/directive.js", function(exports, require, module){
@@ -2243,7 +2404,7 @@ function Directive (definition, expression, rawKey, compiler, node) {
     this.vm       = compiler.vm
     this.el       = node
 
-    var isEmpty  = expression === ''
+    var isEmpty   = expression === ''
 
     // mix in properties from the directive definition
     if (typeof definition === 'function') {
@@ -2259,7 +2420,7 @@ function Directive (definition, expression, rawKey, compiler, node) {
     }
 
     // empty expression, we're done.
-    if (isEmpty) {
+    if (isEmpty || this.isEmpty) {
         this.isEmpty = true
         return
     }
@@ -2475,7 +2636,7 @@ function getRel (path, compiler) {
         if (compiler.hasKey(path)) {
             break
         } else {
-            compiler = compiler.parentCompiler
+            compiler = compiler.parent
             dist++
         }
     }
@@ -3082,6 +3243,7 @@ module.exports = {
     },
 
     cloak: {
+        isEmpty: true,
         bind: function () {
             var el = this.el
             this.compiler.observer.once('hook:ready', function () {
@@ -3099,27 +3261,35 @@ var config = require('../config'),
 module.exports = {
 
     bind: function () {
-        this.parent = this.el.parentNode
+        this.parent = this.el.parentNode || this.el.vue_if_parent
         this.ref = document.createComment(config.prefix + '-if-' + this.key)
-        this.el.vue_ref = this.ref
+        var detachedRef = this.el.vue_if_ref
+        if (detachedRef) {
+            this.parent.insertBefore(this.ref, detachedRef)
+        }
+        this.el.vue_if_ref = this.ref
     },
 
     update: function (value) {
 
-        var el       = this.el
+        var el = this.el
 
-        if (!this.parent) { // the node was detached when bound
-            if (!el.parentNode) {
-                return
-            } else {
-                this.parent = el.parentNode
-            }
-        }
+        // sometimes we need to create a VM on a detached node,
+        // e.g. in v-repeat. In that case, store the desired v-if
+        // state on the node itself so we can deal with it elsewhere.
+        el.vue_if = !!value
 
-        // should always have this.parent if we reach here
         var parent   = this.parent,
             ref      = this.ref,
             compiler = this.compiler
+
+        if (!parent) {
+            if (!el.parentNode) {
+                return
+            } else {
+                parent = this.parent = el.parentNode
+            }
+        }
 
         if (!value) {
             transition(el, -1, remove, compiler)
@@ -3147,7 +3317,7 @@ module.exports = {
     },
 
     unbind: function () {
-        this.el.vue_ref = null
+        this.el.vue_if_ref = this.el.vue_if_parent = null
         var ref = this.ref
         if (ref.parentNode) {
             ref.parentNode.removeChild(ref)
@@ -3159,7 +3329,6 @@ require.register("vue/src/directives/repeat.js", function(exports, require, modu
 var Observer   = require('../observer'),
     utils      = require('../utils'),
     config     = require('../config'),
-    transition = require('../transition'),
     def        = utils.defProtected,
     ViewModel // lazy def to avoid circular dependency
 
@@ -3170,51 +3339,31 @@ var Observer   = require('../observer'),
 var mutationHandlers = {
 
     push: function (m) {
-        var l = m.args.length,
-            base = this.collection.length - l
-        for (var i = 0; i < l; i++) {
-            this.buildItem(m.args[i], base + i)
-            this.updateObject(m.args[i], 1)
-        }
+        this.addItems(m.args, this.vms.length)
     },
 
     pop: function () {
         var vm = this.vms.pop()
-        if (vm) {
-            vm.$destroy()
-            this.updateObject(vm.$data, -1)
-        }
+        if (vm) this.removeItems([vm])
     },
 
     unshift: function (m) {
-        for (var i = 0, l = m.args.length; i < l; i++) {
-            this.buildItem(m.args[i], i)
-            this.updateObject(m.args[i], 1)
-        }
+        this.addItems(m.args)
     },
 
     shift: function () {
         var vm = this.vms.shift()
-        if (vm) {
-            vm.$destroy()
-            this.updateObject(vm.$data, -1)
-        }
+        if (vm) this.removeItems([vm])
     },
 
     splice: function (m) {
-        var i, l,
-            index = m.args[0],
+        var index = m.args[0],
             removed = m.args[1],
-            added = m.args.length - 2,
-            removedVMs = this.vms.splice(index, removed)
-        for (i = 0, l = removedVMs.length; i < l; i++) {
-            removedVMs[i].$destroy()
-            this.updateObject(removedVMs[i].$data, -1)
-        }
-        for (i = 0; i < added; i++) {
-            this.buildItem(m.args[i + 2], index + i)
-            this.updateObject(m.args[i + 2], 1)
-        }
+            removedVMs = removed === undefined
+                ? this.vms.splice(index)
+                : this.vms.splice(index, removed)
+        this.removeItems(removedVMs)
+        this.addItems(m.args.slice(2), index)
     },
 
     sort: function () {
@@ -3248,35 +3397,6 @@ var mutationHandlers = {
     }
 }
 
-/**
- *  Convert an Object to a v-repeat friendly Array
- */
-function objectToArray (obj) {
-    var res = [], val, data
-    for (var key in obj) {
-        val = obj[key]
-        data = utils.typeOf(val) === 'Object'
-            ? val
-            : { $value: val }
-        def(data, '$key', key, false, true)
-        res.push(data)
-    }
-    return res
-}
-
-/**
- *  Find an object or a wrapped data object
- *  from an Array
- */
-function indexOf (arr, obj) {
-    for (var i = 0, l = arr.length; i < l; i++) {
-        if (arr[i] === obj || (obj.$value && arr[i].$value === obj.$value)) {
-            return i
-        }
-    }
-    return -1
-}
-
 module.exports = {
 
     bind: function () {
@@ -3307,7 +3427,7 @@ module.exports = {
                 // update index
                 var i = arr.length
                 while (i--) {
-                    arr[i].$index = i
+                    self.vms[i].$index = i
                 }
             }
             if (method === 'push' || method === 'unshift' || method === 'splice') {
@@ -3330,14 +3450,11 @@ module.exports = {
         }
 
         this.reset()
-        // attach an object to container to hold handlers
-        this.container.vue_dHandlers = utils.hash()
         // if initiating with an empty collection, we need to
         // force a compile so that we get all the bindings for
         // dependency extraction.
         if (!this.initiated && (!collection || !collection.length)) {
-            this.buildItem()
-            this.initiated = true
+            this.dryBuild()
         }
 
         // keep reference of old data and VMs
@@ -3351,30 +3468,39 @@ module.exports = {
             this.vm.$[this.childId] = this.vms
         }
 
+        // If the collection is not already converted for observation,
+        // we need to convert and watch it.
+        if (!Observer.convert(collection)) {
+            Observer.watch(collection)
+        }
         // listen for collection mutation events
-        // the collection has been augmented during Binding.set()
-        if (!collection.__emitter__) Observer.watchArray(collection)
         collection.__emitter__.on('mutate', this.mutationListener)
 
         // create new VMs and append to DOM
         if (collection.length) {
-            collection.forEach(this.buildItem, this)
+            collection.forEach(this.build, this)
             if (!init) this.changed()
         }
 
         // destroy unused old VMs
-        if (oldVMs) {
-            var i = oldVMs.length, vm
-            while (i--) {
-                vm = oldVMs[i]
-                if (vm.$reused) {
-                    vm.$reused = false
-                } else {
-                    vm.$destroy()
-                }
-            }
-        }
+        if (oldVMs) destroyVMs(oldVMs)
         this.old = this.oldVMs = null
+    },
+
+    addItems: function (data, base) {
+        base = base || 0
+        for (var i = 0, l = data.length; i < l; i++) {
+            var vm = this.build(data[i], base + i)
+            this.updateObject(vm, 1)
+        }
+    },
+
+    removeItems: function (data) {
+        var i = data.length
+        while (i--) {
+            data[i].$destroy()
+            this.updateObject(data[i], -1)
+        }
     },
 
     /**
@@ -3387,11 +3513,25 @@ module.exports = {
         if (this.queued) return
         this.queued = true
         var self = this
-        setTimeout(function () {
+        utils.nextTick(function () {
             if (!self.compiler) return
             self.compiler.parseDeps()
             self.queued = false
-        }, 0)
+        })
+    },
+
+    /**
+     *  Run a dry build just to collect bindings
+     */
+    dryBuild: function () {
+        new this.Ctor({
+            el     : this.el.cloneNode(true),
+            parent : this.vm,
+            compilerOptions: {
+                repeat: true
+            }
+        }).$destroy()
+        this.initiated = true
     },
 
     /**
@@ -3399,97 +3539,103 @@ module.exports = {
      *  passing along compiler options indicating this
      *  is a v-repeat item.
      */
-    buildItem: function (data, index) {
+    build: function (data, index) {
 
         var ctn = this.container,
             vms = this.vms,
             col = this.collection,
-            el, i, ref, item, primitive, detached
+            el, oldIndex, existing, item, nonObject
 
-        // append node into DOM first
-        // so v-if can get access to parentNode
-        if (data) {
-
-            if (this.old) {
-                i = indexOf(this.old, data)
-            }
-
-            if (i > -1) { // existing, reuse the old VM
-
-                item = this.oldVMs[i]
-                // mark, so it won't be destroyed
-                item.$reused = true
-                el = item.$el
-                // don't forget to update index
-                data.$index = index
-                // existing VM's el can possibly be detached by v-if.
-                // in that case don't insert.
-                detached = !el.parentNode
-
-            } else { // new data, need to create new VM
-
-                el = this.el.cloneNode(true)
-                // process transition info before appending
-                el.vue_trans  = utils.attr(el, 'transition', true)
-                el.vue_anim   = utils.attr(el, 'animation', true)
-                el.vue_effect = utils.attr(el, 'effect', true)
-                // wrap primitive element in an object
-                if (utils.typeOf(data) !== 'Object') {
-                    primitive = true
-                    data = { $value: data }
-                }
-                // define index
-                def(data, '$index', index, false, true)
-
-            }
-
-            ref = vms.length > index
-                ? vms[index].$el
-                : this.ref
-            // make sure it works with v-if
-            if (!ref.parentNode) ref = ref.vue_ref
-            if (!detached) {
-                if (i > -1) {
-                    // no need to transition existing node
-                    ctn.insertBefore(el, ref)
-                } else {
-                    // insert new node with transition
-                    transition(el, 1, function () {
-                        ctn.insertBefore(el, ref)
-                    }, this.compiler)
-                }
-            } else {
-                // detached by v-if
-                // just move the comment ref node
-                ctn.insertBefore(el.vue_ref, ref)
-            }
+        // get our DOM insertion reference node
+        var ref = vms.length > index
+            ? vms[index].$el
+            : this.ref
+        
+        // if reference VM is detached by v-if,
+        // use its v-if ref node instead
+        if (!ref.parentNode) {
+            ref = ref.vue_if_ref
         }
 
-        item = item || new this.Ctor({
-            el: el,
-            data: data,
-            compilerOptions: {
-                repeat: true,
-                parentCompiler: this.compiler,
-                delegator: ctn
-            }
-        })
+        // check if data already exists in the old array
+        oldIndex = this.old ? indexOf(this.old, data) : -1
+        existing = oldIndex > -1
 
-        if (!data) {
-            // this is a forced compile for an empty collection.
-            // let's remove it...
-            item.$destroy()
+        if (existing) {
+
+            // existing, reuse the old VM
+            item = this.oldVMs[oldIndex]
+            // mark, so it won't be destroyed
+            item.$reused = true
+
         } else {
-            vms.splice(index, 0, item)
-            // for primitive values, listen for value change
-            if (primitive) {
-                data.__emitter__.on('set', function (key, val) {
+
+            // new data, need to create new VM.
+            // there's some preparation work to do...
+
+            // first clone the template node
+            el = this.el.cloneNode(true)
+            // then we provide the parentNode for v-if
+            // so that it can still work in a detached state
+            el.vue_if_parent = ctn
+            el.vue_if_ref = ref
+            // wrap non-object value in an object
+            nonObject = utils.typeOf(data) !== 'Object'
+            if (nonObject) {
+                data = { $value: data }
+            }
+            // set index so vm can init with the correct
+            // index instead of undefined
+            data.$index = index
+            // initialize the new VM
+            item = new this.Ctor({
+                el     : el,
+                data   : data,
+                parent : this.vm,
+                compilerOptions: {
+                    repeat: true
+                }
+            })
+            // for non-object values, listen for value change
+            // so we can sync it back to the original Array
+            if (nonObject) {
+                item.$compiler.observer.on('set', function (key, val) {
                     if (key === '$value') {
                         col[item.$index] = val
                     }
                 })
             }
+
         }
+
+        // put the item into the VM Array
+        vms.splice(index, 0, item)
+        // update the index
+        item.$index = index
+
+        // Finally, DOM operations...
+        el = item.$el
+        if (existing) {
+            // we simplify need to re-insert the existing node
+            // to its new position. However, it can possibly be
+            // detached by v-if. in that case we insert its v-if
+            // ref node instead.
+            ctn.insertBefore(el.parentNode ? el : el.vue_if_ref, ref)
+        } else {
+            if (el.vue_if !== false) {
+                if (this.compiler.init) {
+                    // do not transition on initial compile,
+                    // just manually insert.
+                    ctn.insertBefore(el, ref)
+                    item.$compiler.execHook('attached')
+                } else {
+                    // give it some nice transition.
+                    item.$before(ref)
+                }
+            }
+        }
+
+        return item
     },
 
     /**
@@ -3499,29 +3645,27 @@ module.exports = {
     convertObject: function (object) {
 
         if (this.object) {
-            delete this.object.$repeater
             this.object.__emitter__.off('set', this.updateRepeater)
         }
 
         this.object = object
-        var collection = objectToArray(object)
-        def(object, '$repeater', collection, false, true)
+        var collection = object.$repeater || objectToArray(object)
+        if (!object.$repeater) {
+            def(object, '$repeater', collection)
+        }
 
         var self = this
         this.updateRepeater = function (key, val) {
             if (key.indexOf('.') === -1) {
-                var i = collection.length, item
+                var i = self.vms.length, item
                 while (i--) {
-                    item = collection[i]
+                    item = self.vms[i]
                     if (item.$key === key) {
-                        if (item !== val && item.$value !== val) {
+                        if (item.$data !== val && item.$value !== val) {
                             if ('$value' in item) {
                                 item.$value = val
                             } else {
-                                def(val, '$key', key, false, true)
-                                self.lock = true
-                                collection.set(i, val)
-                                self.lock = false
+                                item.$data = val
                             }
                         }
                         break
@@ -3535,21 +3679,17 @@ module.exports = {
     },
 
     /**
-     *  Sync changes in the $repeater Array
+     *  Sync changes from the $repeater Array
      *  back to the represented Object
      */
-    updateObject: function (data, action) {
-        if (this.lock) return
+    updateObject: function (vm, action) {
         var obj = this.object
-        if (obj && data.$key) {
-            var key = data.$key,
-                val = data.$value || data
+        if (obj && vm.$key) {
+            var key = vm.$key,
+                val = vm.$value || vm.$data
             if (action > 0) { // new property
-                // make key ienumerable
-                delete data.$key
-                def(data, '$key', key, false, true)
                 obj[key] = val
-                Observer.convert(obj, key)
+                Observer.convertKey(obj, key)
             } else {
                 delete obj[key]
             }
@@ -3557,29 +3697,66 @@ module.exports = {
         }
     },
 
-    reset: function (destroyAll) {
+    reset: function (destroy) {
         if (this.childId) {
             delete this.vm.$[this.childId]
         }
         if (this.collection) {
             this.collection.__emitter__.off('mutate', this.mutationListener)
-            if (destroyAll) {
-                var i = this.vms.length
-                while (i--) {
-                    this.vms[i].$destroy()
-                }
+            if (destroy) {
+                destroyVMs(this.vms)
             }
         }
-        var ctn = this.container,
-            handlers = ctn.vue_dHandlers
-        for (var key in handlers) {
-            ctn.removeEventListener(handlers[key].event, handlers[key])
-        }
-        ctn.vue_dHandlers = null
     },
 
     unbind: function () {
         this.reset(true)
+    }
+}
+
+// Helpers --------------------------------------------------------------------
+
+/**
+ *  Convert an Object to a v-repeat friendly Array
+ */
+function objectToArray (obj) {
+    var res = [], val, data
+    for (var key in obj) {
+        val = obj[key]
+        data = utils.typeOf(val) === 'Object'
+            ? val
+            : { $value: val }
+        def(data, '$key', key)
+        res.push(data)
+    }
+    return res
+}
+
+/**
+ *  Find an object or a wrapped data object
+ *  from an Array
+ */
+function indexOf (arr, obj) {
+    for (var i = 0, l = arr.length; i < l; i++) {
+        if (arr[i] === obj || (obj.$value && arr[i].$value === obj.$value)) {
+            return i
+        }
+    }
+    return -1
+}
+
+/**
+ *  Destroy some VMs, yeah.
+ */
+function destroyVMs (vms) {
+    var i = vms.length, vm
+    while (i--) {
+        vm = vms[i]
+        if (vm.$reused) {
+            vm.$reused = false
+        } else {
+            vm.$destroy()
+        }
     }
 }
 });
@@ -3804,38 +3981,91 @@ module.exports = {
 }
 });
 require.register("vue/src/directives/with.js", function(exports, require, module){
-var ViewModel
+var ViewModel,
+    nextTick = require('../utils').nextTick
 
 module.exports = {
 
     bind: function () {
-        if (this.isEmpty) {
+        if (this.el.vue_vm) {
+            this.subVM = this.el.vue_vm
+            var compiler = this.subVM.$compiler
+            if (!compiler.bindings[this.arg]) {
+                compiler.createBinding(this.arg)
+            }
+        } else if (this.isEmpty) {
             this.build()
         }
     },
 
-    update: function (value) {
-        if (!this.component) {
+    update: function (value, init) {
+        var vm = this.subVM,
+            key = this.arg || '$data'
+        if (!vm) {
             this.build(value)
-        } else {
-            this.component.$data = value
+        } else if (!this.lock && vm[key] !== value) {
+            vm[key] = value
+        }
+        if (init) {
+            // watch after first set
+            this.watch()
+            // The v-with directive can have multiple expressions,
+            // and we want to make sure when the ready hook is called
+            // on the subVM, all these clauses have been properly set up.
+            // So this is a hack that sniffs whether we have reached
+            // the last expression. We hold off the subVM's ready hook
+            // until we are actually ready.
+            if (this.last) {
+                this.subVM.$compiler.execHook('ready')
+            }
         }
     },
 
     build: function (value) {
         ViewModel = ViewModel || require('../viewmodel')
-        var Ctor = this.Ctor || ViewModel
-        this.component = new Ctor({
-            el: this.el,
-            data: value,
+        var Ctor = this.Ctor || ViewModel,
+            data = value
+        if (this.arg) {
+            data = {}
+            data[this.arg] = value
+        }
+        this.subVM = new Ctor({
+            el     : this.el,
+            data   : data,
+            parent : this.vm,
             compilerOptions: {
-                parentCompiler: this.compiler
+                // it is important to delay the ready hook
+                // so that when it's called, all `v-with` wathcers
+                // would have been set up.
+                delayReady: !this.last
             }
         })
     },
 
+    /**
+     *  For inhertied keys, need to watch
+     *  and sync back to the parent
+     */
+    watch: function () {
+        if (!this.arg) return
+        var self    = this,
+            key     = self.key,
+            ownerVM = self.binding.compiler.vm
+        this.subVM.$compiler.observer.on('change:' + this.arg, function (val) {
+            if (!self.lock) {
+                self.lock = true
+                nextTick(function () {
+                    self.lock = false
+                })
+            }
+            ownerVM.$set(key, val)
+        })
+    },
+
     unbind: function () {
-        this.component.$destroy()
+        // all watchers are turned off during destroy
+        // so no need to worry about it
+        this.subVM.$destroy()
     }
 
 }
