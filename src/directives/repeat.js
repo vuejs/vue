@@ -142,7 +142,6 @@ module.exports = {
 
         // listen for collection mutation events
         // the collection has been augmented during Binding.set()
-        if (!collection.__emitter__) Observer.watchArray(collection)
         collection.__emitter__.on('mutate', this.mutationListener)
 
         // create new VMs and append to DOM
@@ -358,7 +357,7 @@ module.exports = {
                 val = vm.$value || vm.$data
             if (action > 0) { // new property
                 obj[key] = val
-                Observer.convert(obj, key)
+                Observer.convertKey(obj, key)
             } else {
                 delete obj[key]
             }
@@ -398,6 +397,8 @@ function objectToArray (obj) {
         def(data, '$key', key)
         res.push(data)
     }
+    Observer.convert(res)
+    Observer.watch(res)
     return res
 }
 

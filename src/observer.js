@@ -2,74 +2,92 @@
 
 var Emitter  = require('./emitter'),
     utils    = require('./utils'),
-
     // cache methods
     typeOf   = utils.typeOf,
     def      = utils.defProtected,
     slice    = [].slice,
-
     // types
     OBJECT   = 'Object',
     ARRAY    = 'Array',
-
-    // Array mutation methods to wrap
-    methods  = ['push','pop','shift','unshift','splice','sort','reverse'],
-
     // fix for IE + __proto__ problem
     // define methods as inenumerable if __proto__ is present,
     // otherwise enumerable so we can loop through and manually
     // attach to array instances
     hasProto = ({}).__proto__,
-
     // lazy load
     ViewModel
+
+// Array Mutation Handlers & Augmentations ------------------------------------
 
 // The proxy prototype to replace the __proto__ of
 // an observed array
 var ArrayProxy = Object.create(Array.prototype)
 
-/**
- *  Define mutation interceptors so we can emit the mutation info
- */
-methods.forEach(function (method) {
-    def(ArrayProxy, method, function () {
-        var mutation = applyMutation(this, method, slice.call(arguments))
-        linkArrayElements(this, mutation.inserted)
-        unlinkArrayElements(this, mutation.removed)
-        this.__emitter__.emit('mutate', null, this, mutation)
-        return mutation.result
-    }, !hasProto)
-})
+// intercept mutation methods
+;[
+    'push',
+    'pop',
+    'shift',
+    'unshift',
+    'splice',
+    'sort',
+    'reverse'
+].forEach(watchMutation)
+
+// Augment the ArrayProxy with convenience methods
+def(ArrayProxy, 'remove', removeElement, !hasProto)
+def(ArrayProxy, 'set', replaceElement, !hasProto)
+def(ArrayProxy, 'replace', replaceElement, !hasProto)
 
 /**
- *  Mutate the Array and extract mutation info
+ *  Intercep a mutation event so we can emit the mutation info.
+ *  we also analyze what elements are added/removed and link/unlink
+ *  them with the parent Array.
  */
-function applyMutation (arr, method, args) {
-    var result = Array.prototype[method].apply(arr, args),
-        mutation = {
+function watchMutation (method) {
+    def(ArrayProxy, method, function () {
+
+        var args = slice.call(arguments),
+            result = Array.prototype[method].apply(this, args),
+            inserted, removed
+
+        // determine new / removed elements
+        if (method === 'push' || method === 'unshift') {
+            inserted = args
+        } else if (method === 'pop' || method === 'shift') {
+            removed = [result]
+        } else if (method === 'splice') {
+            inserted = args.slice(2)
+            removed = result
+        }
+        // link & unlink
+        linkArrayElements(this, inserted)
+        unlinkArrayElements(this, removed)
+
+        // emit the mutation event
+        this.__emitter__.emit('mutate', null, this, {
             method: method,
             args: args,
             result: result
-        }
-    if (method === 'push' || method === 'unshift') {
-        mutation.inserted = args
-    } else if (method === 'pop' || method === 'shift') {
-        mutation.removed = [result]
-    } else if (method === 'splice') {
-        mutation.inserted = args.slice(2)
-        mutation.removed = result
-    }
-    return mutation
+        })
+
+        return result
+        
+    }, !hasProto)
 }
 
+/**
+ *  Link new elements to an Array, so when they change
+ *  and emit events, the owner Array can be notified.
+ */
 function linkArrayElements (arr, items) {
     if (items) {
         var i = items.length, item
         while (i--) {
             item = items[i]
-            if (typeOf(item) === 'Object') {
+            if (isWatchable(item)) {
                 convert(item)
-                watchObject(item)
+                watch(item)
                 if (!item.__ownerArrays__) {
                     def(item, '__ownerArrays__', [])
                 }
@@ -79,6 +97,9 @@ function linkArrayElements (arr, items) {
     }
 }
 
+/**
+ *  Unlink removed elements from the ex-owner Array.
+ */
 function unlinkArrayElements (arr, items) {
     if (items) {
         var i = items.length, item
@@ -86,7 +107,7 @@ function unlinkArrayElements (arr, items) {
             item = items[i]
             if (typeOf(item) === 'Object') {
                 var owners = item.__ownerArrays__
-                owners.splice(owners.indexOf(arr))
+                if (owners) owners.splice(owners.indexOf(arr))
             }
         }
     }
@@ -142,10 +163,48 @@ function replaceElement (index, data) {
     }
 }
 
-// Augment the ArrayProxy with convenience methods
-def(ArrayProxy, 'remove', removeElement, !hasProto)
-def(ArrayProxy, 'set', replaceElement, !hasProto)
-def(ArrayProxy, 'replace', replaceElement, !hasProto)
+// Watch Helpers --------------------------------------------------------------
+
+/**
+ *  Check if a value is watchable
+ */
+function isWatchable (obj) {
+    ViewModel = ViewModel || require('./viewmodel')
+    var type = typeOf(obj)
+    return (type === OBJECT || type === ARRAY) && !(obj instanceof ViewModel)
+}
+
+/**
+ *  Convert an Object/Array to give it a change emitter.
+ */
+function convert (obj) {
+    if (obj.__emitter__) return false
+    var emitter = new Emitter()
+    def(obj, '__emitter__', emitter)
+    emitter.on('set', function () {
+        var owners = obj.__ownerArrays__, i
+        if (owners) {
+            i = owners.length
+            while (i--) {
+                owners[i].__emitter__.emit('set', '')
+            }
+        }
+    })
+    emitter.values = utils.hash()
+    return true
+}
+
+/**
+ *  Watch target based on its type
+ */
+function watch (obj) {
+    var type = typeOf(obj)
+    if (type === OBJECT) {
+        watchObject(obj)
+    } else if (type === ARRAY) {
+        watchArray(obj)
+    }
+}
 
 /**
  *  Watch an Object, recursive.
@@ -161,11 +220,6 @@ function watchObject (obj) {
  *  and add augmentations by intercepting the prototype chain
  */
 function watchArray (arr) {
-    var emitter = arr.__emitter__
-    if (!emitter) {
-        emitter = new Emitter()
-        def(arr, '__emitter__', emitter)
-    }
     if (hasProto) {
         arr.__proto__ = ArrayProxy
     } else {
@@ -221,15 +275,6 @@ function convertKey (obj, key) {
         }
         observe(val, key, emitter)
     }
-}
-
-/**
- *  Check if a value is watchable
- */
-function isWatchable (obj) {
-    ViewModel = ViewModel || require('./viewmodel')
-    var type = typeOf(obj)
-    return (type === OBJECT || type === ARRAY) && !(obj instanceof ViewModel)
 }
 
 /**
@@ -303,22 +348,7 @@ function ensurePath (obj, key) {
     }
 }
 
-function convert (obj) {
-    if (obj.__emitter__) return false
-    var emitter = new Emitter()
-    def(obj, '__emitter__', emitter)
-    emitter.on('set', function () {
-        var owners = obj.__ownerArrays__
-        if (owners) {
-            var i = owners.length
-            while (i--) {
-                owners[i].__emitter__.emit('set', '')
-            }
-        }
-    })
-    emitter.values = utils.hash()
-    return true
-}
+// Main API Methods -----------------------------------------------------------
 
 /**
  *  Observe an object with a given path,
@@ -374,12 +404,7 @@ function observe (obj, rawPath, observer) {
         // emit set events for everything inside
         emitSet(obj)
     } else {
-        var type = typeOf(obj)
-        if (type === OBJECT) {
-            watchObject(obj)
-        } else if (type === ARRAY) {
-            watchArray(obj)
-        }
+        watch(obj)
     }
 }
 
@@ -404,6 +429,8 @@ function unobserve (obj, path, observer) {
     observer.proxies[path] = null
 }
 
+// Expose API -----------------------------------------------------------------
+
 var pub = module.exports = {
 
     // whether to emit get events
@@ -413,7 +440,8 @@ var pub = module.exports = {
     observe     : observe,
     unobserve   : unobserve,
     ensurePath  : ensurePath,
-    convertKey  : convertKey,
     copyPaths   : copyPaths,
-    watchArray  : watchArray
+    watch       : watch,
+    convert     : convert,
+    convertKey  : convertKey
 }
