@@ -1,4 +1,4 @@
-casper.test.begin('Outputting Objects', 15, function (test) {
+casper.test.begin('Outputting Objects', 17, function (test) {
     
     casper
     .start('./fixtures/output-object.html')
@@ -38,6 +38,14 @@ casper.test.begin('Outputting Objects', 15, function (test) {
     .then(function () {
         test.assertSelectorHasText('#data', '{"test":{"hi":3},"arr":[{"a":2},{"a":1}]}')
         test.assertSelectorHasText('#arr', '[{"a":2},{"a":1}]')
+    })
+    // setting objects inside Array
+    .thenEvaluate(function () {
+        test.arr[0].a = 3
+    })
+    .then(function () {
+        test.assertSelectorHasText('#data', '{"test":{"hi":3},"arr":[{"a":3},{"a":1}]}')
+        test.assertSelectorHasText('#arr', '[{"a":3},{"a":1}]')
     })
     // swap the array
     .thenEvaluate(function () {

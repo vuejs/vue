@@ -82,16 +82,16 @@ function watchMutation (method) {
  */
 function linkArrayElements (arr, items) {
     if (items) {
-        var i = items.length, item
+        var i = items.length, item, owners
         while (i--) {
             item = items[i]
             if (isWatchable(item)) {
                 convert(item)
                 watch(item)
-                if (!item.__ownerArrays__) {
-                    def(item, '__ownerArrays__', [])
+                owners = item.__emitter__.owners
+                if (owners.indexOf(arr) < 0) {
+                    owners.push(arr)
                 }
-                item.__ownerArrays__.push(arr)
             }
         }
     }
@@ -105,8 +105,8 @@ function unlinkArrayElements (arr, items) {
         var i = items.length, item
         while (i--) {
             item = items[i]
-            if (typeOf(item) === 'Object') {
-                var owners = item.__ownerArrays__
+            if (item && item.__emitter__) {
+                var owners = item.__emitter__.owners
                 if (owners) owners.splice(owners.indexOf(arr))
             }
         }
@@ -182,15 +182,14 @@ function convert (obj) {
     var emitter = new Emitter()
     def(obj, '__emitter__', emitter)
     emitter.on('set', function () {
-        var owners = obj.__ownerArrays__, i
-        if (owners) {
+        var owners = obj.__emitter__.owners,
             i = owners.length
-            while (i--) {
-                owners[i].__emitter__.emit('set', '')
-            }
+        while (i--) {
+            owners[i].__emitter__.emit('set', '', '', true)
         }
     })
     emitter.values = utils.hash()
+    emitter.owners = []
     return true
 }
 
@@ -371,7 +370,7 @@ function observe (obj, rawPath, observer) {
             observer.emit('get', path + key)
         },
         set: function (key, val, propagate) {
-            observer.emit('set', path + key, val)
+            if (key) observer.emit('set', path + key, val)
             // also notify observer that the object itself changed
             // but only do so when it's a immediate property. this
             // avoids duplicate event firing.

@@ -363,6 +363,44 @@ describe('UNIT: Observer', function () {
 
         })
 
+        describe('Link/Unlink', function () {
+            
+            var arr = [{a:1}]
+            Observer.convert(arr)
+            Observer.watch(arr)
+
+            it('should emit empty set when inner objects change', function () {
+                var emitted = false
+                arr.__emitter__.on('set', function (key) {
+                    assert.strictEqual(key, '')
+                    emitted = true
+                })
+                arr[0].a = 2
+                assert.ok(emitted)
+                arr.__emitter__.off()
+            })
+
+            it('should emit for objects added later too', function () {
+                var emitCount = 0,
+                    a = {c:1}, b = {c:1}, c = {c:1}
+                arr.__emitter__.on('set', function () {
+                    emitCount++
+                })
+                arr.push(a)
+                arr.unshift(b)
+                arr.splice(0, 0, c)
+                a.c = b.c = c.c = 2
+                assert.strictEqual(emitCount, 3)
+            })
+
+            it('should remove itself from unlinked elements', function () {
+                var removed = arr.pop(),
+                    index = removed.__emitter__.owners.indexOf(arr)
+                assert.strictEqual(index, -1)
+            })
+
+        })
+
     })
 
     describe('Multiple observers', function () {
