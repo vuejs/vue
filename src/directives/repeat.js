@@ -140,8 +140,12 @@ module.exports = {
             this.vm.$[this.childId] = this.vms
         }
 
+        // If the collection is not already converted for observation,
+        // we need to convert and watch it.
+        if (!Observer.convert(collection)) {
+            Observer.watch(collection)
+        }
         // listen for collection mutation events
-        // the collection has been augmented during Binding.set()
         collection.__emitter__.on('mutate', this.mutationListener)
 
         // create new VMs and append to DOM
@@ -397,8 +401,6 @@ function objectToArray (obj) {
         def(data, '$key', key)
         res.push(data)
     }
-    Observer.convert(res)
-    Observer.watch(res)
     return res
 }
 

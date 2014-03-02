@@ -178,7 +178,7 @@ function isWatchable (obj) {
  *  Convert an Object/Array to give it a change emitter.
  */
 function convert (obj) {
-    if (obj.__emitter__) return false
+    if (obj.__emitter__) return true
     var emitter = new Emitter()
     def(obj, '__emitter__', emitter)
     emitter.on('set', function () {
@@ -190,7 +190,7 @@ function convert (obj) {
     })
     emitter.values = utils.hash()
     emitter.owners = []
-    return true
+    return false
 }
 
 /**
@@ -358,7 +358,7 @@ function observe (obj, rawPath, observer) {
     if (!isWatchable(obj)) return
 
     var path = rawPath ? rawPath + '.' : '',
-        alreadyConverted = !convert(obj),
+        alreadyConverted = convert(obj),
         emitter = obj.__emitter__
 
     // setup proxy listeners on the parent observer.
