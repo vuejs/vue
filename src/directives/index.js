@@ -20,8 +20,15 @@ module.exports = {
         }
     },
 
-    text: function (value) {
-        this.el.textContent = utils.toText(value)
+    text: {
+        bind: function () {
+            this.attr = this.el.nodeType === 3
+                ? 'nodeValue'
+                : 'textContent'
+        },
+        update: function (value) {
+            this.el[this.attr] = utils.toText(value)
+        }
     },
 
     show: function (value) {

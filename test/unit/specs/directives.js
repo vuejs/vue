@@ -48,6 +48,7 @@ describe('UNIT: Directives', function () {
     describe('text', function () {
 
         var dir = mockDirective('text')
+        dir.bind()
 
         it('should work with a string', function () {
             dir.update('hallo')
