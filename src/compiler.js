@@ -10,6 +10,7 @@ var Emitter     = require('./emitter'),
     
     // cache methods
     slice       = [].slice,
+    each        = [].forEach,
     log         = utils.log,
     makeHash    = utils.hash,
     extend      = utils.extend,
@@ -173,6 +174,11 @@ CompilerProto.setupElement = function (options) {
                 el.parentNode.insertBefore(replacer, el)
                 el.parentNode.removeChild(el)
             }
+            // copy over attributes
+            each.call(el.attributes, function (attr) {
+                replacer.setAttribute(attr.name, attr.value)
+            })
+            // replace
             el = replacer
         } else {
             el.appendChild(template.cloneNode(true))

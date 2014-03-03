@@ -483,7 +483,7 @@ describe('UNIT: API', function () {
                     assert.strictEqual(t.$el.textContent, 'hi')
                     assert.strictEqual(t.$el.parentNode, parent)
                     var now = document.getElementById(testId)
-                    assert.strictEqual(now, null)
+                    assert.strictEqual(now, t.$el, 'should copy over attributes from replaced node')
                 })
 
                 it('should replace an off DOM Vue\'s $el', function () {
