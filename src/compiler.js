@@ -340,8 +340,12 @@ CompilerProto.compile = function (node, root) {
             withExp,
             partialId,
             directive,
-            componentId = utils.attr(node, 'component') || tagName.toLowerCase(),
-            componentCtor = compiler.getOption('components', componentId)
+            componentId =
+                utils.attr(node, 'component') ||
+                (config.customTags && tagName.toLowerCase()),
+            componentCtor =
+                componentId &&
+                compiler.getOption('components', componentId)
 
         // It is important that we access these attributes
         // procedurally because the order matters.

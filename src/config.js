@@ -13,12 +13,13 @@ var prefix = 'v',
     ],
     config = module.exports = {
 
-        debug       : false,
-        silent      : false,
-        enterClass  : 'v-enter',
-        leaveClass  : 'v-leave',
-        interpolate : true,
-        attrs       : {},
+        debug          : false,
+        silent         : false,
+        enterClass     : 'v-enter',
+        leaveClass     : 'v-leave',
+        interpolate    : true,
+        customTags     : false,
+        attrs          : {},
 
         get prefix () {
             return prefix

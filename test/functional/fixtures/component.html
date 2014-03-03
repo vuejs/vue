@@ -25,7 +25,10 @@
 <script src="../../../dist/vue.js"></script>
 <script>
 
-    Vue.config({debug: true})
+    Vue.config({
+        debug: true,
+        customTags: true
+    })
 
     Vue.component('avatar', {
         template: '{{hi}} {{name}}'
