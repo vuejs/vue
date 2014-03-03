@@ -746,16 +746,33 @@ describe('UNIT: Directives', function () {
             }
         })
 
-        it('should work with primitive values', function () {
+        it('should work with primitive values', function (done) {
+            var triggeredChange = 0
             var v = new Vue({
                 template: '<span v-repeat="tags" v-ref="tags">{{$value}}</span>',
                 data: {
                     tags: ['a', 'b', 'c']
+                },
+                created: function () {
+                    this.$watch('tags', function () {
+                        triggeredChange++
+                    })
+                },
+                computed: {
+                    concat: function () {
+                        return this.tags.join(',')
+                    }
                 }
             })
+            assert.strictEqual(v.concat, 'a,b,c')
             assert.strictEqual(v.$el.textContent, 'abc')
             v.$.tags[0].$value = 'd'
             assert.strictEqual(v.tags[0], 'd')
+            nextTick(function () {
+                assert.strictEqual(triggeredChange, 1)
+                assert.strictEqual(v.concat, 'd,b,c')
+                done()
+            })
         })
 
         it('should diff and reuse existing VMs when reseting arrays', function (done) {

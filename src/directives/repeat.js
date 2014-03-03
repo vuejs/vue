@@ -93,6 +93,7 @@ module.exports = {
 
         var self = this
         this.mutationListener = function (path, arr, mutation) {
+            if (self.lock) return
             var method = mutation.method
             mutationHandlers[method].call(self, mutation)
             if (method !== 'push' && method !== 'pop') {
@@ -213,15 +214,15 @@ module.exports = {
      */
     build: function (data, index) {
 
-        var ctn = this.container,
-            vms = this.vms,
-            col = this.collection,
+        var self = this,
+            ctn = self.container,
+            vms = self.vms,
             el, oldIndex, existing, item, nonObject
 
         // get our DOM insertion reference node
         var ref = vms.length > index
             ? vms[index].$el
-            : this.ref
+            : self.ref
         
         // if reference VM is detached by v-if,
         // use its v-if ref node instead
@@ -230,13 +231,13 @@ module.exports = {
         }
 
         // check if data already exists in the old array
-        oldIndex = this.old ? indexOf(this.old, data) : -1
+        oldIndex = self.old ? indexOf(self.old, data) : -1
         existing = oldIndex > -1
 
         if (existing) {
 
             // existing, reuse the old VM
-            item = this.oldVMs[oldIndex]
+            item = self.oldVMs[oldIndex]
             // mark, so it won't be destroyed
             item.$reused = true
 
@@ -246,7 +247,7 @@ module.exports = {
             // there's some preparation work to do...
 
             // first clone the template node
-            el = this.el.cloneNode(true)
+            el = self.el.cloneNode(true)
             // then we provide the parentNode for v-if
             // so that it can still work in a detached state
             el.vue_if_parent = ctn
@@ -260,10 +261,10 @@ module.exports = {
             // index instead of undefined
             data.$index = index
             // initialize the new VM
-            item = new this.Ctor({
+            item = new self.Ctor({
                 el     : el,
                 data   : data,
-                parent : this.vm,
+                parent : self.vm,
                 compilerOptions: {
                     repeat: true
                 }
@@ -271,10 +272,10 @@ module.exports = {
             // for non-object values, listen for value change
             // so we can sync it back to the original Array
             if (nonObject) {
-                item.$compiler.observer.on('set', function (key, val) {
-                    if (key === '$value') {
-                        col[item.$index] = val
-                    }
+                item.$compiler.observer.on('change:$value', function (val) {
+                    self.lock = true
+                    self.collection.set(item.$index, val)
+                    self.lock = false
                 })
             }
 
@@ -295,7 +296,7 @@ module.exports = {
             ctn.insertBefore(el.parentNode ? el : el.vue_if_ref, ref)
         } else {
             if (el.vue_if !== false) {
-                if (this.compiler.init) {
+                if (self.compiler.init) {
                     // do not transition on initial compile,
                     // just manually insert.
                     ctn.insertBefore(el, ref)

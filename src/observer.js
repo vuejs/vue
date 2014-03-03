@@ -60,15 +60,18 @@ function watchMutation (method) {
             inserted = args.slice(2)
             removed = result
         }
+        
         // link & unlink
         linkArrayElements(this, inserted)
         unlinkArrayElements(this, removed)
 
         // emit the mutation event
         this.__emitter__.emit('mutate', null, this, {
-            method: method,
-            args: args,
-            result: result
+            method   : method,
+            args     : args,
+            result   : result,
+            inserted : inserted,
+            removed  : removed
         })
 
         return result
