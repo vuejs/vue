@@ -3,7 +3,7 @@
 <div id="usa" v-partial="global"></div>
 <div id="japan">{{> local}}</div>
 <div id="repeat">{{> repeat}}</div>
-<div id="yielder"><yielder><p>{{a}}</p><p>{{b}}</p></yielder></div>
+<div id="yielder"><x-yielder><p>{{a}}</p><p>{{b}}</p></x-yielder></div>
 
 <script type="text/v-template" id="test">
     <p>{{hi}}!</p>
@@ -70,7 +70,7 @@
         }
     })
 
-    Vue.component('yielder', {
+    Vue.component('x-yielder', {
         template: '#yield-template',
         data: {
             a: 'A', b: 'B'

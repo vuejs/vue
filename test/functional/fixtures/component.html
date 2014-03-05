@@ -1,18 +1,18 @@
 <div id="test">
     <!-- v-component + v-with -->
-    <div id="component-and-with" v-component="avatar" v-with="user"></div>
+    <div id="component-and-with" v-component="my-avatar" v-with="user"></div>
 
     <!-- custom element + v-with -->
-    <avatar id="element-and-with" v-with="user"></avatar>
+    <my-avatar id="element-and-with" v-with="user"></my-avatar>
 
     <!-- v-with alone -->
     <div id="with" v-with="user">{{hi}} {{name}}</div>
 
     <!-- v-component alone -->
-    <div id="component" v-component="simple"></div>
+    <div id="component" v-component="my-element"></div>
 
     <!-- custom element alone -->
-    <simple id="element"></simple>
+    <my-element id="element"></my-element>
 
     <!-- v-with + binding sync -->
     <div id="with-sync" v-with="childHi:hi, childName:user.name">
@@ -30,11 +30,11 @@
         customTags: true
     })
 
-    Vue.component('avatar', {
+    Vue.component('my-avatar', {
         template: '{{hi}} {{name}}'
     })
 
-    Vue.component('simple', {
+    Vue.component('my-element', {
         template: '{{hi}} {{user.name}}'
     })
 

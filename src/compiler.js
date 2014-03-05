@@ -348,7 +348,7 @@ CompilerProto.compile = function (node, root) {
             directive,
             componentId =
                 utils.attr(node, 'component') ||
-                (config.customTags && tagName.toLowerCase()),
+                (tagName.indexOf('-') > 0 && tagName.toLowerCase()),
             componentCtor =
                 componentId &&
                 compiler.getOption('components', componentId)

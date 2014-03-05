@@ -18,7 +18,6 @@ var prefix = 'v',
         enterClass     : 'v-enter',
         leaveClass     : 'v-leave',
         interpolate    : true,
-        customTags     : false,
         attrs          : {},
 
         get prefix () {
