@@ -164,28 +164,6 @@ var utils = module.exports = {
     },
 
     /**
-     *  log for debugging
-     */
-    log: function (msg) {
-        if (config.debug && console) {
-            console.log(msg)
-        }
-    },
-    
-    /**
-     *  warnings, traces by default
-     *  can be suppressed by `silent` option.
-     */
-    warn: function (msg) {
-        if (!config.silent && console) {
-            console.warn(msg)
-            if (config.debug && console.trace) {
-                console.trace(msg)
-            }
-        }
-    },
-
-    /**
      *  used to defer batch updates
      */
     nextTick: function (cb) {
@@ -220,6 +198,31 @@ var utils = module.exports = {
                 cur = cur.replace(tar, ' ')
             }
             el.className = cur.trim()
+        }
+    }
+}
+
+enableDebug()
+function enableDebug () {
+    /**
+     *  log for debugging
+     */
+    utils.log = function (msg) {
+        if (config.debug && console) {
+            console.log(msg)
+        }
+    }
+    
+    /**
+     *  warnings, traces by default
+     *  can be suppressed by `silent` option.
+     */
+    utils.warn = function (msg) {
+        if (!config.silent && console) {
+            console.warn(msg)
+            if (config.debug && console.trace) {
+                console.trace(msg)
+            }
         }
     }
 }

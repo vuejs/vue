@@ -52,7 +52,14 @@ function header (file, cb) {
 
 function uglify (file, cb) {
     file.contents = new Buffer(uglifyjs.minify(file.contents.toString(), {
-        fromString: true
+        fromString: true,
+        compress: {
+            pure_funcs: [
+                'utils.log',
+                'utils.warn',
+                'enableDebug'
+            ]
+        }
     }).code)
     cb(null, file)
 }
