@@ -341,7 +341,7 @@ CompilerProto.compile = function (node, root) {
             withExp,
             directive,
             // resolve a standalone child component with no inherited data
-            Ctor = this.resolveComponent(node, null, true)
+            hasComponent = this.resolveComponent(node, undefined, true)
 
         // It is important that we access these attributes
         // procedurally because the order matters.
@@ -364,7 +364,7 @@ CompilerProto.compile = function (node, root) {
             }
 
         // Child component has 2nd highest priority
-        } else if (root !== true && ((withExp = utils.attr(node, 'with')) || Ctor)) {
+        } else if (root !== true && ((withExp = utils.attr(node, 'with')) || hasComponent)) {
 
             withExp = Directive.split(withExp || '')
             withExp.forEach(function (exp, i) {
@@ -380,6 +380,7 @@ CompilerProto.compile = function (node, root) {
         } else {
 
             // compile normal directives
+            utils.attr(node, 'component')
             compiler.compileNode(node)
 
         }
@@ -782,11 +783,15 @@ CompilerProto.eval = function (exp, data) {
             if (token.key) {
                 if (SINGLE_VAR_RE.test(token.key)) {
                     dataVal = data && utils.get(data, token.key)
-                    res += dataVal === undefined
-                        ? utils.get(this.vm, token.key)
-                        : dataVal
+                    res += utils.toText(
+                        dataVal === undefined
+                            ? utils.get(this.data, token.key)
+                            : dataVal
+                    )
                 } else {
-                    res += ExpParser.eval(token.key, this, data)
+                    res += utils.toText(
+                        ExpParser.eval(token.key, this, data)
+                    )
                 }
             } else {
                 res += token
@@ -801,11 +806,17 @@ CompilerProto.eval = function (exp, data) {
  *  with the data to be used
  */
 CompilerProto.resolveComponent = function (node, data, test) {
+
     var exp     = utils.attr(node, 'component', test),
         tagName = node.tagName,
-        id      = this.eval(exp, data) ||
-                  (tagName.indexOf('-') > 0 && tagName.toLowerCase()),
-        Ctor    = this.getOption('components', id)
+        id      = this.eval(exp, data),
+        tagId   = (tagName.indexOf('-') > 0 && tagName.toLowerCase()),
+        Ctor    = this.getOption('components', id || tagId)
+
+    if (id && !Ctor) {
+        utils.warn('Unknown component: ' + id)
+    }
+
     return test
         ? Ctor
         : Ctor || (ViewModel || (ViewModel = require('./viewmodel')))
