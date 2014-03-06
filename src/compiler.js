@@ -807,6 +807,28 @@ CompilerProto.removeListener = function (listener) {
 }
 
 /**
+ *  Do a one-time eval of a string that potentially
+ *  includes bindings.
+ */
+CompilerProto.eval = function (exp) {
+    var tokens = TextParser.parse(exp)
+    if (!tokens) { // no bindings
+        return exp
+    } else {
+        var token, i = -1, l = tokens.length, res = ''
+        while (++i < l) {
+            token = tokens[i]
+            if (token.key) {
+                res += utils.toText(ExpParser.eval(token.key, this))
+            } else {
+                res += token
+            }
+        }
+        return res
+    }
+}
+
+/**
  *  Unbind and remove element
  */
 CompilerProto.destroy = function () {
