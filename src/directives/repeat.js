@@ -80,7 +80,7 @@ module.exports = {
         ViewModel = ViewModel || require('../viewmodel')
         this.Ctor = this.Ctor || ViewModel
         // extract child Id, if any
-        this.childId = utils.attr(el, 'ref')
+        this.childId = this.compiler.eval(utils.attr(el, 'ref'))
 
         // create a comment node as a reference node for DOM insertions
         this.ref = document.createComment(config.prefix + '-repeat-' + this.key)

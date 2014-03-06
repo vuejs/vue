@@ -69,20 +69,13 @@ function Compiler (vm, options) {
     def(vm, '$options', options)
     def(vm, '$compiler', compiler)
 
-    // set parent VM
-    // and register child id on parent
-    var parentVM = options.parent,
-        childId = utils.attr(el, 'ref')
+    // set parent
+    var parentVM = options.parent
     if (parentVM) {
         compiler.parent = parentVM.$compiler
         parentVM.$compiler.children.push(compiler)
         def(vm, '$parent', parentVM)
-        if (childId) {
-            compiler.childId = childId
-            parentVM.$[childId] = vm
-        }
     }
-
     // set root
     def(vm, '$root', getRoot(compiler).vm)
 
@@ -343,7 +336,6 @@ CompilerProto.compile = function (node, root) {
         // special attributes to check
         var repeatExp,
             withExp,
-            partialId,
             directive,
             componentId =
                 utils.attr(node, 'component') ||
@@ -390,27 +382,14 @@ CompilerProto.compile = function (node, root) {
 
         } else {
 
-            // check transition & animation properties
-            node.vue_trans  = utils.attr(node, 'transition')
-            node.vue_anim   = utils.attr(node, 'animation')
-            node.vue_effect = utils.attr(node, 'effect')
-            
-            // replace innerHTML with partial
-            partialId = utils.attr(node, 'partial')
-            if (partialId) {
-                var partial = compiler.getOption('partials', partialId)
-                if (partial) {
-                    node.innerHTML = ''
-                    node.appendChild(partial.cloneNode(true))
-                }
-            }
-
-            // finally, only normal directives left!
+            // compile normal directives
             compiler.compileNode(node)
+
         }
 
-    } else if (nodeType === 3 && config.interpolate) { // text node
+    } else if (nodeType === 3 && config.interpolate) {
 
+        // text node
         compiler.compileTextNode(node)
 
     }
@@ -421,49 +400,48 @@ CompilerProto.compile = function (node, root) {
  *  Compile a normal node
  */
 CompilerProto.compileNode = function (node) {
-    var i, j,
+
+    // check transition & animation properties
+    node.vue_trans  = utils.attr(node, 'transition')
+    node.vue_anim   = utils.attr(node, 'animation')
+    node.vue_effect = this.eval(utils.attr(node, 'effect'))
+
+    var prefix = config.prefix + '-',
         attrs = slice.call(node.attributes),
-        prefix = config.prefix + '-'
-    // parse if has attributes
-    if (attrs && attrs.length) {
-        var attr, isDirective, exps, exp, directive, dirname
-        // loop through all attributes
-        i = attrs.length
-        while (i--) {
-            attr = attrs[i]
-            isDirective = false
+        i = attrs.length, j, attr, isDirective, exps, exp, directive, dirname
 
-            if (attr.name.indexOf(prefix) === 0) {
-                // a directive - split, parse and bind it.
-                isDirective = true
-                exps = Directive.split(attr.value)
-                // loop through clauses (separated by ",")
-                // inside each attribute
-                j = exps.length
-                while (j--) {
-                    exp = exps[j]
-                    dirname = attr.name.slice(prefix.length)
-                    directive = Directive.parse(dirname, exp, this, node)
-                    if (directive) {
-                        this.bindDirective(directive)
-                    }
-                }
-            } else if (config.interpolate) {
-                // non directive attribute, check interpolation tags
-                exp = TextParser.parseAttr(attr.value)
-                if (exp) {
-                    directive = Directive.parse('attr', attr.name + ':' + exp, this, node)
-                    if (directive) {
-                        this.bindDirective(directive)
-                    }
-                }
+    while (i--) {
+
+        attr = attrs[i]
+        isDirective = false
+
+        if (attr.name.indexOf(prefix) === 0) {
+            // a directive - split, parse and bind it.
+            isDirective = true
+            exps = Directive.split(attr.value)
+            // loop through clauses (separated by ",")
+            // inside each attribute
+            j = exps.length
+            while (j--) {
+                exp = exps[j]
+                dirname = attr.name.slice(prefix.length)
+                directive = Directive.parse(dirname, exp, this, node)
+                this.bindDirective(directive)
             }
-
-            if (isDirective && dirname !== 'cloak') {
-                node.removeAttribute(attr.name)
+        } else if (config.interpolate) {
+            // non directive attribute, check interpolation tags
+            exp = TextParser.parseAttr(attr.value)
+            if (exp) {
+                directive = Directive.parse('attr', attr.name + ':' + exp, this, node)
+                this.bindDirective(directive)
             }
         }
+
+        if (isDirective && dirname !== 'cloak') {
+            node.removeAttribute(attr.name)
+        }
     }
+
     // recursively compile childNodes
     if (node.childNodes.length) {
         slice.call(node.childNodes).forEach(this.compile, this)
@@ -477,30 +455,17 @@ CompilerProto.compileTextNode = function (node) {
 
     var tokens = TextParser.parse(node.nodeValue)
     if (!tokens) return
-    var el, token, directive, partial, partialId, partialNodes
+    var el, token, directive
 
     for (var i = 0, l = tokens.length; i < l; i++) {
+
         token = tokens[i]
-        directive = partialNodes = null
+        directive = null
+
         if (token.key) { // a binding
             if (token.key.charAt(0) === '>') { // a partial
-                partialId = token.key.slice(1).trim()
-                if (partialId === 'yield') {
-                    el = this.rawContent
-                } else {
-                    partial = this.getOption('partials', partialId)
-                    if (partial) {
-                        el = partial.cloneNode(true)
-                    } else {
-                        utils.warn('Unknown partial: ' + partialId)
-                        continue
-                    }
-                }
-                if (el) {
-                    // save an Array reference of the partial's nodes
-                    // so we can compile them AFTER appending the fragment
-                    partialNodes = slice.call(el.childNodes)
-                }
+                el = document.createComment('ref')
+                directive = Directive.parse('partial', token.key.slice(1), this, el)
             } else { // a real binding
                 if (!token.html) { // text binding
                     el = document.createTextNode('')
@@ -516,18 +481,8 @@ CompilerProto.compileTextNode = function (node) {
 
         // insert node
         node.parentNode.insertBefore(el, node)
-
         // bind directive
-        if (directive) {
-            this.bindDirective(directive)
-        }
-
-        // compile partial after appending, because its children's parentNode
-        // will change from the fragment to the correct parentNode.
-        // This could affect directives that need access to its element's parentNode.
-        if (partialNodes) {
-            partialNodes.forEach(this.compile, this)
-        }
+        this.bindDirective(directive)
 
     }
     node.parentNode.removeChild(node)
@@ -537,6 +492,8 @@ CompilerProto.compileTextNode = function (node) {
  *  Add a directive instance to the correct binding & viewmodel
  */
 CompilerProto.bindDirective = function (directive) {
+
+    if (!directive) return
 
     // keep track of it so we can unbind() later
     this.dirs.push(directive)
@@ -815,11 +772,17 @@ CompilerProto.eval = function (exp) {
     if (!tokens) { // no bindings
         return exp
     } else {
-        var token, i = -1, l = tokens.length, res = ''
+        var token, getter,
+            i = -1,
+            l = tokens.length,
+            res = ''
         while (++i < l) {
             token = tokens[i]
             if (token.key) {
-                res += utils.toText(ExpParser.eval(token.key, this))
+                getter = ExpParser.parse(token.key, this)
+                if (getter) {
+                    res += utils.toText(getter.call(this.vm))
+                }
             } else {
                 res += token
             }
@@ -896,9 +859,6 @@ CompilerProto.destroy = function () {
     // remove self from parent
     if (parent) {
         parent.children.splice(parent.children.indexOf(compiler), 1)
-        if (compiler.childId) {
-            delete parent.vm.$[compiler.childId]
-        }
     }
 
     // finally remove dom element

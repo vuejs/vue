@@ -11,6 +11,7 @@ module.exports = {
     'with'    : require('./with'),
     html      : require('./html'),
     style     : require('./style'),
+    partial   : require('./partial'),
 
     attr: function (value) {
         if (value || value === 0) {
@@ -61,6 +62,21 @@ module.exports = {
             this.compiler.observer.once('hook:ready', function () {
                 el.removeAttribute(config.prefix + '-cloak')
             })
+        }
+    },
+
+    ref: {
+        isLiteral: true,
+        bind: function () {
+            var id = this.id = this.compiler.eval(this.expression)
+            if (id) {
+                this.vm.$parent.$[id] = this.vm
+            }
+        },
+        unbind: function () {
+            if (this.id) {
+                delete this.vm.$parent.$[this.id]
+            }
         }
     }
 

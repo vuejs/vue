@@ -107,7 +107,7 @@ function escapeDollar (v) {
  *  from an arbitrary expression, together with a list of paths to be
  *  created as bindings.
  */
-function parse (exp, compiler) {
+exports.parse = function (exp, compiler) {
     // unicode and 'constructor' are not allowed for XSS security.
     if (unicodeRE.test(exp) || constructorRE.test(exp)) {
         utils.warn('Unsafe expression: ' + exp)
@@ -161,15 +161,3 @@ function parse (exp, compiler) {
 
     return makeGetter(body, exp)
 }
-
-/**
- *  Evaludate an expression in the context of
- *  given compiler
- */
-function evaluate (exp, compiler) {
-    var getter = parse(exp, compiler)
-    return getter && getter.call(compiler.vm)
-}
-
-exports.parse = parse
-exports.eval  = evaluate

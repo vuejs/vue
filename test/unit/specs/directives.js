@@ -671,6 +671,8 @@ describe('Directives', function () {
     })
 
     describe('ref', function () {
+
+        var t
         
         it('should register a VM isntance on its parent\'s $', function () {
             var called = false
@@ -681,7 +683,7 @@ describe('Directives', function () {
                     }
                 }
             })
-            var t = new Vue({
+            t = new Vue({
                 template: '<div v-component="child" v-ref="hihi"></div>',
                 components: {
                     child: Child
@@ -690,8 +692,57 @@ describe('Directives', function () {
             assert.ok(t.$.hihi instanceof Child)
             t.$.hihi.test()
             assert.ok(called)
+        })
+
+        it('should remove the reference if child is destroyed', function () {
             t.$.hihi.$destroy()
             assert.notOk('hihi' in t.$)
+        })
+
+        it('should register an Array of VMs with v-repeat', function () {
+            t = new Vue({
+                template: '<p v-repeat="list" v-ref="list"></p>',
+                data: { list: [{a:1}, {a:2}, {a:3}] }
+            })
+            assert.equal(t.$.list.length, 3)
+            assert.ok(t.$.list[0] instanceof Vue)
+            assert.equal(t.$.list[1].a, 2)
+        })
+
+        it('should work with interpolation', function () {
+            t = new Vue({
+                template: '<div v-with="obj" v-ref="{{ok ? \'a\' : \'b\'}}"></div>',
+                data: { obj: { a: 123 } }
+            })
+            assert.equal(t.$.b.a, 123)
+        })
+
+    })
+
+    describe('partial', function () {
+        
+        it('should replace the node\'s content', function () {
+            var t = new Vue({
+                template: '<div v-partial="test"></div>',
+                partials: {
+                    test: '<a>ahahaha!</a>'
+                }
+            })
+            assert.strictEqual(t.$el.innerHTML, '<div><a>ahahaha!</a></div>')
+        })
+
+        it('should work with interpolation', function () {
+            var t = new Vue({
+                template: '<div v-partial="{{ ready ? \'a\' : \'b\'}}"></div>',
+                partials: {
+                    a: 'A',
+                    b: 'B'
+                },
+                data: {
+                    ready: true
+                }
+            })
+            assert.strictEqual(t.$el.innerHTML, '<div>A</div>')
         })
 
     })

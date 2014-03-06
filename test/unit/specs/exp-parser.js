@@ -181,11 +181,6 @@ describe('Expression Parser', function () {
                     assert.strictEqual(value, testCase.expectedValue)
                 })
 
-                it('should eval', function () {
-                    var value = ExpParser.eval(testCase.exp, compilerMock)
-                    assert.strictEqual(value, testCase.expectedValue)
-                })
-
             } else {
 
                 it('should return undefined getter', function () {

@@ -459,12 +459,7 @@ describe('ViewModel', function () {
             childId: 'test',
             children: [],
             parent: {
-                children: [],
-                vm: {
-                    $: {
-                        'test': true
-                    }
-                }
+                children: []
             },
             vm: {
                 $remove: function () {
@@ -525,7 +520,6 @@ describe('ViewModel', function () {
         it('should remove self from parent', function () {
             var parent = compilerMock.parent
             assert.ok(parent.children.indexOf(compilerMock), -1)
-            assert.strictEqual(parent.vm.$[compilerMock.childId], undefined)
         })
 
         it('should remove the dom element', function () {
