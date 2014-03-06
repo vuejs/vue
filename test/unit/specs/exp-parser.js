@@ -118,26 +118,22 @@ describe('UNIT: Expression Parser', function () {
             {
                 xss: true,
                 exp: "constructor.constructor('alert(1)')()",
-                vm: {},
-                expectedValue: undefined
+                vm: {}
             },
             {
                 xss: true,
                 exp: "\"\".toString.constructor.constructor('alert(1)')()",
-                vm: {},
-                expectedValue: undefined
+                vm: {}
             },
             {
                 xss: true,
                 exp: "\"\".toString['cons' + 'tructor']['cons' + 'tructor']('alert(1)')()",
-                vm: {},
-                expectedValue: undefined
+                vm: {}
             },
             {
                 xss: true,
                 exp: "\"\".toString['\\u0063ons' + 'tructor']['\\u0063ons' + 'tructor']('alert(1)')()",
-                vm: {},
-                expectedValue: undefined
+                vm: {}
             }
         ]
 
@@ -156,16 +152,9 @@ describe('UNIT: Expression Parser', function () {
                 compilerMock = {
                     createBinding: createBinding,
                     hasKey: function () {},
-                    vm:{
-                        $data: {},
-                        $compiler:{
-                            bindings:{},
-                            createBinding: createBinding
-                        }
-                    }
+                    vm: testCase.vm
                 },
-                vm     = testCase.vm,
-                vars   = testCase.paths || Object.keys(vm),
+                vars = testCase.paths || Object.keys(testCase.vm),
                 getter
 
             if (testCase.xss) {
@@ -178,6 +167,7 @@ describe('UNIT: Expression Parser', function () {
             })
 
             if (!testCase.xss) {
+
                 it('should get correct paths', function () {
                     if (!vars.length) return
                     assert.strictEqual(caughtMissingPaths.length, vars.length)
@@ -185,17 +175,27 @@ describe('UNIT: Expression Parser', function () {
                         assert.strictEqual(vars[i], caughtMissingPaths[i])
                     }
                 })
-            }
 
-            it('getter function should return expected value', function () {
-                var value = getter.call(vm)
-                assert.strictEqual(value, testCase.expectedValue)
-            })
+                it('getter function should return expected value', function () {
+                    var value = getter.call(testCase.vm)
+                    assert.strictEqual(value, testCase.expectedValue)
+                })
 
-            if (testCase.xss) {
+                it('should eval', function () {
+                    var value = ExpParser.eval(testCase.exp, compilerMock)
+                    assert.strictEqual(value, testCase.expectedValue)
+                })
+
+            } else {
+
+                it('should return undefined getter', function () {
+                    assert.strictEqual(getter, undefined)
+                })
+
                 it('should have warned', function () {
                     assert.ok(warnSpy.warned)
                 })
+
             }
 
         })

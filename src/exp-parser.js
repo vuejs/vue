@@ -84,7 +84,6 @@ function getRel (path, compiler) {
  *  to the VM's data it's actually properly sandboxed
  */
 function makeGetter (exp, raw) {
-    /* jshint evil: true */
     var fn
     try {
         fn = new Function(exp)
@@ -103,65 +102,74 @@ function escapeDollar (v) {
         : v
 }
 
-module.exports = {
-
-    /**
-     *  Parse and return an anonymous computed property getter function
-     *  from an arbitrary expression, together with a list of paths to be
-     *  created as bindings.
-     */
-    parse: function (exp, compiler) {
-        // unicode and 'constructor' are not allowed for XSS security.
-        if (unicodeRE.test(exp) || constructorRE.test(exp)) {
-            utils.warn('Unsafe expression: ' + exp)
-            return function () {}
-        }
-        // extract variable names
-        var vars = getVariables(exp)
-        if (!vars.length) {
-            return makeGetter('return ' + exp, exp)
-        }
-        vars = utils.unique(vars)
-        var accessors = '',
-            has       = utils.hash(),
-            strings   = [],
-            // construct a regex to extract all valid variable paths
-            // ones that begin with "$" are particularly tricky
-            // because we can't use \b for them
-            pathRE = new RegExp(
-                "[^$\\w\\.](" +
-                vars.map(escapeDollar).join('|') +
-                ")[$\\w\\.]*\\b", 'g'
-            ),
-            body = ('return ' + exp)
-                .replace(stringSaveRE, saveStrings)
-                .replace(pathRE, replacePath)
-                .replace(stringRestoreRE, restoreStrings)
-        body = accessors + body
-
-        function saveStrings (str) {
-            var i = strings.length
-            strings[i] = str
-            return '"' + i + '"'
-        }
-
-        function replacePath (path) {
-            // keep track of the first char
-            var c = path.charAt(0)
-            path = path.slice(1)
-            var val = 'this.' + getRel(path, compiler) + path
-            if (!has[path]) {
-                accessors += val + ';'
-                has[path] = 1
-            }
-            // don't forget to put that first char back
-            return c + val
-        }
-
-        function restoreStrings (str, i) {
-            return strings[i]
-        }
-
-        return makeGetter(body, exp)
+/**
+ *  Parse and return an anonymous computed property getter function
+ *  from an arbitrary expression, together with a list of paths to be
+ *  created as bindings.
+ */
+function parse (exp, compiler) {
+    // unicode and 'constructor' are not allowed for XSS security.
+    if (unicodeRE.test(exp) || constructorRE.test(exp)) {
+        utils.warn('Unsafe expression: ' + exp)
+        return
     }
+    // extract variable names
+    var vars = getVariables(exp)
+    if (!vars.length) {
+        return makeGetter('return ' + exp, exp)
+    }
+    vars = utils.unique(vars)
+    var accessors = '',
+        has       = utils.hash(),
+        strings   = [],
+        // construct a regex to extract all valid variable paths
+        // ones that begin with "$" are particularly tricky
+        // because we can't use \b for them
+        pathRE = new RegExp(
+            "[^$\\w\\.](" +
+            vars.map(escapeDollar).join('|') +
+            ")[$\\w\\.]*\\b", 'g'
+        ),
+        body = ('return ' + exp)
+            .replace(stringSaveRE, saveStrings)
+            .replace(pathRE, replacePath)
+            .replace(stringRestoreRE, restoreStrings)
+    body = accessors + body
+
+    function saveStrings (str) {
+        var i = strings.length
+        strings[i] = str
+        return '"' + i + '"'
+    }
+
+    function replacePath (path) {
+        // keep track of the first char
+        var c = path.charAt(0)
+        path = path.slice(1)
+        var val = 'this.' + getRel(path, compiler) + path
+        if (!has[path]) {
+            accessors += val + ';'
+            has[path] = 1
+        }
+        // don't forget to put that first char back
+        return c + val
+    }
+
+    function restoreStrings (str, i) {
+        return strings[i]
+    }
+
+    return makeGetter(body, exp)
 }
+
+/**
+ *  Evaludate an expression in the context of
+ *  given compiler
+ */
+function evaluate (exp, compiler) {
+    var getter = parse(exp, compiler)
+    return getter && getter.call(compiler.vm)
+}
+
+exports.parse = parse
+exports.eval  = evaluate
