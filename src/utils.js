@@ -1,5 +1,4 @@
 var config    = require('./config'),
-    attrs     = config.attrs,
     toString  = ({}).toString,
     win       = window,
     console   = win.console,
@@ -8,6 +7,33 @@ var config    = require('./config'),
     ViewModel // late def
 
 var utils = module.exports = {
+
+    /**
+     *  get a value from an object keypath
+     */
+    get: function (obj, key) {
+        var path = key.split('.'),
+            d = -1, l = path.length
+        while (++d < l && obj !== undefined) {
+            obj = obj[path[d]]
+        }
+        return obj
+    },
+
+    /**
+     *  set a value to an object keypath
+     */
+    set: function (obj, key, val) {
+        var path = key.split('.'),
+            d = -1, l = path.length - 1
+        while (++d < l) {
+            if (obj[path[d]] === undefined) {
+                obj[path[d]] = {}
+            }
+            obj = obj[path[d]]
+        }
+        obj[path[d]] = val
+    },
 
     /**
      *  Create a prototype-less object
@@ -20,10 +46,12 @@ var utils = module.exports = {
     /**
      *  get an attribute and remove it.
      */
-    attr: function (el, type) {
-        var attr = attrs[type],
+    attr: function (el, type, preserve) {
+        var attr = config.prefix + '-' + type,
             val = el.getAttribute(attr)
-        if (val !== null) el.removeAttribute(attr)
+        if (!preserve && val !== null) {
+            el.removeAttribute(attr)
+        }
         return val
     },
 

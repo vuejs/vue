@@ -53,10 +53,16 @@ function getVariables (code) {
  *  key. It then creates any missing bindings on the
  *  final resolved vm.
  */
-function getRel (path, compiler) {
+function getRel (path, compiler, data) {
     var rel  = '',
         dist = 0,
         self = compiler
+
+    if (data && utils.get(data, path) !== undefined) {
+        // hack: temporarily attached data
+        return '$temp.'
+    }
+
     while (compiler) {
         if (compiler.hasKey(path)) {
             break
@@ -107,7 +113,7 @@ function escapeDollar (v) {
  *  from an arbitrary expression, together with a list of paths to be
  *  created as bindings.
  */
-exports.parse = function (exp, compiler) {
+exports.parse = function (exp, compiler, data) {
     // unicode and 'constructor' are not allowed for XSS security.
     if (unicodeRE.test(exp) || constructorRE.test(exp)) {
         utils.warn('Unsafe expression: ' + exp)
@@ -146,7 +152,7 @@ exports.parse = function (exp, compiler) {
         // keep track of the first char
         var c = path.charAt(0)
         path = path.slice(1)
-        var val = 'this.' + getRel(path, compiler) + path
+        var val = 'this.' + getRel(path, compiler, data) + path
         if (!has[path]) {
             accessors += val + ';'
             has[path] = 1
@@ -160,4 +166,20 @@ exports.parse = function (exp, compiler) {
     }
 
     return makeGetter(body, exp)
+}
+
+/**
+ *  Evaluate an expression in the context of a compiler.
+ *  Accepts additional data.
+ */
+exports.eval = function (exp, compiler, data) {
+    var getter = exports.parse(exp, compiler, data), res
+    if (getter) {
+        // hack: temporarily attach the additional data so
+        // it can be accessed in the getter
+        compiler.vm.$temp = data
+        res = getter.call(compiler.vm)
+        delete compiler.vm.$temp
+    }
+    return res
 }

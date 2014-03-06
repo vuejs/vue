@@ -1,8 +1,7 @@
 var Observer   = require('../observer'),
     utils      = require('../utils'),
     config     = require('../config'),
-    def        = utils.defProtected,
-    ViewModel // lazy def to avoid circular dependency
+    def        = utils.defProtected
 
 /**
  *  Mathods that perform precise DOM manipulation
@@ -76,9 +75,6 @@ module.exports = {
         var el   = this.el,
             ctn  = this.container = el.parentNode
 
-        // extract child VM information, if any
-        ViewModel = ViewModel || require('../viewmodel')
-        this.Ctor = this.Ctor || ViewModel
         // extract child Id, if any
         this.childId = this.compiler.eval(utils.attr(el, 'ref'))
 
@@ -197,7 +193,8 @@ module.exports = {
      *  Run a dry build just to collect bindings
      */
     dryBuild: function () {
-        new this.Ctor({
+        var Ctor = this.compiler.resolveComponent(this.el)
+        new Ctor({
             el     : this.el.cloneNode(true),
             parent : this.vm,
             compilerOptions: {
@@ -217,7 +214,7 @@ module.exports = {
         var self = this,
             ctn = self.container,
             vms = self.vms,
-            el, oldIndex, existing, item, nonObject
+            el, Ctor, oldIndex, existing, item, nonObject
 
         // get our DOM insertion reference node
         var ref = vms.length > index
@@ -260,8 +257,10 @@ module.exports = {
             // set index so vm can init with the correct
             // index instead of undefined
             data.$index = index
+            // resolve the constructor
+            Ctor = this.compiler.resolveComponent(el, data)
             // initialize the new VM
-            item = new self.Ctor({
+            item = new Ctor({
                 el     : el,
                 data   : data,
                 parent : self.vm,

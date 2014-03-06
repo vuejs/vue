@@ -17,9 +17,16 @@ describe('ViewModel', function () {
             }
         })
 
-    describe('.$set()', function () {
-        vm.$set('a.b.c', 54321)
+    describe('.$get()', function () {
         it('should set correct value', function () {
+            var v = vm.$get('a.b.c')
+            assert.strictEqual(v, 12345)
+        })
+    })
+
+    describe('.$set()', function () {
+        it('should set correct value', function () {
+            vm.$set('a.b.c', 54321)
             assert.strictEqual(data.b.c, 54321)
         })
     })

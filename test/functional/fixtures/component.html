@@ -19,7 +19,13 @@
         {{childHi}} {{childName}}
     </div>
 
-    <div id="component-with-sync" v-component="sync" v-with="childHi:hi, childName:user.name">
+    <div id="component-with-sync" v-component="sync" v-with="childHi:hi, childName:user.name"></div>
+
+    <!-- conditional component -->
+    <div id="conditional" v-component="{{ok ? 'my-element' : 'nope'}}"></div>
+
+    <!-- conditional component with v-repeat! -->
+    <div class="repeat-conditional {{type}}" v-repeat="items" v-component="{{type}}"></div>
 </div>
 
 <script src="../../../dist/vue.js"></script>
@@ -46,13 +52,22 @@
         }
     })
 
+    Vue.component('nope', {
+        template: 'NOPE'
+    })
+
     var app = new Vue({
         el: '#test',
         data: {
+            ok: true,
             hi: '123',
             user: {
                 name: 'Jack'
-            }
+            },
+            items: [
+                { type: 'my-element' },
+                { type: 'nope' }
+            ]
         }
     })
 </script>

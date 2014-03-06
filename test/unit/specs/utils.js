@@ -9,6 +9,36 @@ describe('Utils', function () {
         // testing require fail
         // for code coverage
     }
+
+    describe('get', function () {
+        
+        it('should get value', function () {
+            var obj = { a: { b: { c: 123 }}}
+            assert.strictEqual(utils.get(obj, 'a.b.c'), 123)
+        })
+
+        it('should return undefined if path does not exist', function () {
+            var obj = { a: {}}
+            assert.strictEqual(utils.get(obj, 'a.b.c'), undefined)
+        })
+
+    })
+
+    describe('set', function () {
+        
+        it('should set value', function () {
+            var obj = { a: { b: { c: 0 }}}
+            utils.set(obj, 'a.b.c', 123)
+            assert.strictEqual(obj.a.b.c, 123)
+        })
+
+        it('should set even if path does not exist', function () {
+            var obj = {}
+            utils.set(obj, 'a.b.c', 123)
+            assert.strictEqual(obj.a.b.c, 123)
+        })
+
+    })
     
     describe('hash', function () {
 

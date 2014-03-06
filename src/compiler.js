@@ -7,6 +7,7 @@ var Emitter     = require('./emitter'),
     TextParser  = require('./text-parser'),
     DepsParser  = require('./deps-parser'),
     ExpParser   = require('./exp-parser'),
+    ViewModel,
     
     // cache methods
     slice       = [].slice,
@@ -15,6 +16,8 @@ var Emitter     = require('./emitter'),
     extend      = utils.extend,
     def         = utils.defProtected,
     hasOwn      = ({}).hasOwnProperty,
+
+    SINGLE_VAR_RE = /^[\w\.$]+$/,
 
     // hooks to register
     hooks = [
@@ -337,12 +340,8 @@ CompilerProto.compile = function (node, root) {
         var repeatExp,
             withExp,
             directive,
-            componentId =
-                utils.attr(node, 'component') ||
-                (tagName.indexOf('-') > 0 && tagName.toLowerCase()),
-            componentCtor =
-                componentId &&
-                compiler.getOption('components', componentId)
+            // resolve a standalone child component with no inherited data
+            Ctor = this.resolveComponent(node, null, true)
 
         // It is important that we access these attributes
         // procedurally because the order matters.
@@ -358,21 +357,19 @@ CompilerProto.compile = function (node, root) {
             // repeat block cannot have v-id at the same time.
             directive = Directive.parse('repeat', repeatExp, compiler, node)
             if (directive) {
-                directive.Ctor = componentCtor
                 // defer child component compilation
                 // so by the time they are compiled, the parent
                 // would have collected all bindings
                 compiler.deferred.push(directive)
             }
 
-        // v-with has 2nd highest priority
-        } else if (root !== true && ((withExp = utils.attr(node, 'with')) || componentCtor)) {
+        // Child component has 2nd highest priority
+        } else if (root !== true && ((withExp = utils.attr(node, 'with')) || Ctor)) {
 
             withExp = Directive.split(withExp || '')
             withExp.forEach(function (exp, i) {
                 var directive = Directive.parse('with', exp, compiler, node)
                 if (directive) {
-                    directive.Ctor = componentCtor
                     // notify the directive that this is the
                     // last expression in the group
                     directive.last = i === withExp.length - 1
@@ -765,23 +762,31 @@ CompilerProto.removeListener = function (listener) {
 
 /**
  *  Do a one-time eval of a string that potentially
- *  includes bindings.
+ *  includes bindings. It accepts additional raw data
+ *  because we need to dynamically resolve v-component
+ *  before a childVM is even compiled...
+ *  TODO: make it less of a hack.
  */
-CompilerProto.eval = function (exp) {
+CompilerProto.eval = function (exp, data) {
     var tokens = TextParser.parse(exp)
     if (!tokens) { // no bindings
         return exp
     } else {
-        var token, getter,
+        var token,
             i = -1,
             l = tokens.length,
-            res = ''
+            res = '',
+            dataVal
         while (++i < l) {
             token = tokens[i]
             if (token.key) {
-                getter = ExpParser.parse(token.key, this)
-                if (getter) {
-                    res += utils.toText(getter.call(this.vm))
+                if (SINGLE_VAR_RE.test(token.key)) {
+                    dataVal = data && utils.get(data, token.key)
+                    res += dataVal === undefined
+                        ? utils.get(this.vm, token.key)
+                        : dataVal
+                } else {
+                    res += ExpParser.eval(token.key, this, data)
                 }
             } else {
                 res += token
@@ -789,6 +794,21 @@ CompilerProto.eval = function (exp) {
         }
         return res
     }
+}
+
+/**
+ *  Resolve a Component constructor for an element
+ *  with the data to be used
+ */
+CompilerProto.resolveComponent = function (node, data, test) {
+    var exp     = utils.attr(node, 'component', test),
+        tagName = node.tagName,
+        id      = this.eval(exp, data) ||
+                  (tagName.indexOf('-') > 0 && tagName.toLowerCase()),
+        Ctor    = this.getOption('components', id)
+    return test
+        ? Ctor
+        : Ctor || (ViewModel || (ViewModel = require('./viewmodel')))
 }
 
 /**

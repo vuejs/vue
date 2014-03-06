@@ -1,4 +1,4 @@
-casper.test.begin('Components', 7, function (test) {
+casper.test.begin('Components', 11, function (test) {
     
     casper
     .start('./fixtures/component.html')
@@ -11,6 +11,10 @@ casper.test.begin('Components', 7, function (test) {
         test.assertSelectorHasText('#element', expected)
         test.assertSelectorHasText('#with-sync', expected)
         test.assertSelectorHasText('#component-with-sync', expected)
+        test.assertSelectorHasText('#conditional', expected)
+        test.assertElementCount('.repeat-conditional', 2)
+        test.assertSelectorHasText('.repeat-conditional.my-element', expected)
+        test.assertSelectorHasText('.repeat-conditional.nope', 'NOPE')
     })
     .run(function () {
         test.done()

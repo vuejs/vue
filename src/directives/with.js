@@ -1,5 +1,4 @@
-var ViewModel,
-    nextTick = require('../utils').nextTick
+var nextTick = require('../utils').nextTick
 
 module.exports = {
 
@@ -39,13 +38,12 @@ module.exports = {
     },
 
     build: function (value) {
-        ViewModel = ViewModel || require('../viewmodel')
-        var Ctor = this.Ctor || ViewModel,
-            data = value
+        var data = value
         if (this.arg) {
             data = {}
             data[this.arg] = value
         }
+        var Ctor = this.compiler.resolveComponent(this.el, data)
         this.subVM = new Ctor({
             el     : this.el,
             data   : data,

@@ -25,16 +25,19 @@ function ViewModel (options) {
 var VMProto = ViewModel.prototype
 
 /**
+ *  Convenience function to get a value from
+ *  a keypath
+ */
+def(VMProto, '$get', function (key, value) {
+    return utils.get(this, key, value)
+})
+
+/**
  *  Convenience function to set an actual nested value
  *  from a flat key string. Used in directives.
  */
 def(VMProto, '$set', function (key, value) {
-    var path = key.split('.'),
-        obj = this
-    for (var d = 0, l = path.length - 1; d < l; d++) {
-        obj = obj[path[d]]
-    }
-    obj[path[d]] = value
+    utils.set(this, key, value)
 })
 
 /**
