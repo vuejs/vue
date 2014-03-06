@@ -68,14 +68,15 @@ module.exports = {
     ref: {
         isLiteral: true,
         bind: function () {
-            var id = this.id = this.compiler.eval(this.expression)
+            var id = this.expression
             if (id) {
                 this.vm.$parent.$[id] = this.vm
             }
         },
         unbind: function () {
-            if (this.id) {
-                delete this.vm.$parent.$[this.id]
+            var id = this.expression
+            if (id) {
+                delete this.vm.$parent.$[id]
             }
         }
     }

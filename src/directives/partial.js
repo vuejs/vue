@@ -7,7 +7,7 @@ module.exports = {
     bind: function () {
 
         var compiler = this.compiler,
-            id = this.id = compiler.eval(this.expression)
+            id = this.expression
         if (!id) return
 
         var partial = id === 'yield'

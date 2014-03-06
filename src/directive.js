@@ -48,8 +48,11 @@ function Directive (definition, expression, rawKey, compiler, node) {
         return
     }
 
-    this.expression = expression.trim()
-    this.rawKey     = rawKey
+    this.expression = (
+        this.isLiteral
+            ? compiler.eval(expression)
+            : expression
+    ).trim()
     
     parseKey(this, rawKey)
 
