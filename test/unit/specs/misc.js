@@ -49,9 +49,11 @@ describe('Misc Features', function () {
     })
 
     describe('computed properties', function () {
+
         it('should be accessible like a normal attribtue', function () {
             var b = 2
             var v = new Vue({
+                template: '{{nested.value.a}}',
                 data: {
                     a: 1,
                 },
@@ -80,6 +82,30 @@ describe('Misc Features', function () {
             v.test = 10
             assert.strictEqual(b, 8)
         })
+
+        it('should be bindable in templates, even nested', function (done) {
+            var v = new Vue({
+                template: '{{nested.value.a}}',
+                data: { a: 1 },
+                computed: {
+                    nested: function () {
+                        return {
+                            value: {
+                                a: this.a + 2
+                            }
+                        }
+                    }
+                }
+            })
+            assert.strictEqual(v.$el.textContent, '3')
+
+            v.a = 2
+            nextTick(function () {
+                assert.strictEqual(v.$el.textContent, '4')
+                done()
+            })
+        })
+
     })
 
     describe('setting an object to empty', function () {

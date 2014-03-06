@@ -608,6 +608,9 @@ CompilerProto.createBinding = function (key, isExp, isFn) {
             } else {
                 compiler.defineMeta(key, binding)
             }
+        } else if (computed && computed[key.split('.')[0]]) {
+            // nested path on computed property
+            compiler.defineExp(key, binding)
         } else {
             // ensure path in data so it can be observed
             Observer.ensurePath(compiler.data, key)
