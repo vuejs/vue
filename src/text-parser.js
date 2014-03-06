@@ -1,5 +1,5 @@
-var BINDING_RE = /{{{?([^{}]+?)}?}}/,
-    TRIPLE_RE = /{{{[^{}]+}}}/
+var BINDING_RE = /{{{?(.+?)}?}}/,
+    TRIPLE_RE = /{{{.+}}}/
 
 /**
  *  Parse a piece of text, return an array of tokens
@@ -12,7 +12,7 @@ function parse (text) {
         i = m.index
         if (i > 0) tokens.push(text.slice(0, i))
         token = { key: m[1].trim() }
-        if (TRIPLE_RE.test(m[0])) token.html = true
+        token.html = TRIPLE_RE.test(m[0])
         tokens.push(token)
         text = text.slice(i + m[0].length)
     }
