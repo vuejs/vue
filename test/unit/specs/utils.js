@@ -1,4 +1,4 @@
-describe('UNIT: Utils', function () {
+describe('Utils', function () {
 
     var utils = require('vue/src/utils'),
         config = require('vue/src/config')

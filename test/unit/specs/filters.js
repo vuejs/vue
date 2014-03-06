@@ -1,4 +1,4 @@
-describe('UNIT: Filters', function () {
+describe('Filters', function () {
 
     var filters = require('vue/src/filters')
     

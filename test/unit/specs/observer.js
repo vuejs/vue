@@ -1,4 +1,4 @@
-describe('UNIT: Observer', function () {
+describe('Observer', function () {
 
     var Observer = require('vue/src/observer'),
         Emitter  = require('vue/src/emitter')

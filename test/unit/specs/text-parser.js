@@ -1,4 +1,4 @@
-describe('UNIT: TextNode Parser', function () {
+describe('Text Parser', function () {
 
     var TextParser = require('vue/src/text-parser')
 

@@ -1,4 +1,4 @@
-describe('UNIT: ViewModel', function () {
+describe('ViewModel', function () {
 
     var nextTick = require('vue/src/utils').nextTick
 

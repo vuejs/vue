@@ -1,4 +1,4 @@
-describe('UNIT: Directives', function () {
+describe('Directives', function () {
 
     var nextTick = require('vue/src/utils').nextTick,
         VM = require('vue/src/viewmodel')

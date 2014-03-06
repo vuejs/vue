@@ -1,4 +1,4 @@
-describe('UNIT: API', function () {
+describe('API', function () {
 
     var utils = require('vue/src/utils'),
         assets = require('vue/src/config').globalAssets,

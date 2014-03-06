@@ -1,4 +1,4 @@
-describe('UNIT: Expression Parser', function () {
+describe('Expression Parser', function () {
 
     var ExpParser = require('vue/src/exp-parser'),
         utils = require('vue/src/utils'),

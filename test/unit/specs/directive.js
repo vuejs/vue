@@ -1,4 +1,4 @@
-describe('UNIT: Directive', function () {
+describe('Directive', function () {
 
     var Directive  = require('vue/src/directive'),
         directives = require('vue/src/directives')
