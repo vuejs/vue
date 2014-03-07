@@ -130,4 +130,42 @@ describe('Misc Features', function () {
         })
     })
 
+    describe('event delegation', function () {
+
+        var inCalled = 0,
+            outCalled = 0,
+            innerHandler = function () {}
+        var v = new Vue({
+            template: '<div v-on="click:out"><div class="inner" v-on="click:in"></div></div>',
+            methods: {
+                'in': function (e) {
+                    inCalled++
+                    innerHandler(e)
+                },
+                out: function () {
+                    outCalled++
+                }
+            }
+        })
+        v.$appendTo('#test')
+
+        it('should work', function () {
+            var e = mockMouseEvent('click')
+            v.$el.querySelector('.inner').dispatchEvent(e)
+            assert.strictEqual(inCalled, 1)
+            assert.strictEqual(outCalled, 1)
+        })
+        
+        it('should allow stopPropagation()', function () {
+            innerHandler = function (e) {
+                e.stopPropagation()
+            }
+            var e = mockMouseEvent('click')
+            v.$el.querySelector('.inner').dispatchEvent(e)
+            assert.strictEqual(inCalled, 2)
+            assert.strictEqual(outCalled, 1)
+        })
+
+    })
+
 })
