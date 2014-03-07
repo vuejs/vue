@@ -739,10 +739,15 @@ CompilerProto.addListener = function (listener) {
             targets: [],
             handler: function (e) {
                 var i = delegator.targets.length,
-                    target
+                    target,
+                    stopPropagation = e.stopPropagation
+                e.stopPropagation = function () {
+                    this.isPropagationStopped = true
+                    stopPropagation.call(e)
+                }
                 while (i--) {
                     target = delegator.targets[i]
-                    if (target.el.contains(e.target) && target.handler) {
+                    if (target.el.contains(e.target) && target.handler && !e.isPropagationStopped) {
                         target.handler(e)
                     }
                 }
