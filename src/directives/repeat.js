@@ -249,6 +249,14 @@ module.exports = {
             // so that it can still work in a detached state
             el.vue_if_parent = ctn
             el.vue_if_ref = ref
+
+            // we have an alias, wrap the data
+            if (self.arg) {
+                var actual = data
+                data = {}
+                data[self.arg] = actual
+            }
+
             // wrap non-object value in an object
             nonObject = utils.typeOf(data) !== 'Object'
             if (nonObject) {
@@ -268,14 +276,15 @@ module.exports = {
                     repeat: true
                 }
             })
-            // for non-object values, listen for value change
+            // for non-object values or aliased items, listen for value change
             // so we can sync it back to the original Array
-            if (nonObject) {
-                item.$compiler.observer.on('change:$value', function (val) {
+            if (nonObject || self.arg) {
+                var sync = function (val) {
                     self.lock = true
                     self.collection.set(item.$index, val)
                     self.lock = false
-                })
+                }
+                item.$compiler.observer.on('change:' + (self.arg || '$value'), sync)
             }
 
         }

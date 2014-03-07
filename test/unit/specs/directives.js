@@ -901,6 +901,44 @@ describe('Directives', function () {
            
         })
 
+        it('should accept arg for aliasing on primitive arrays', function (done) {
+            
+            var v = new Vue({
+                template: '<span v-repeat="item:items" v-ref="items">{{item}}</span>',
+                data: {
+                    items: [1,2,3]
+                }
+            })
+            assert.strictEqual(v.$el.textContent, '123')
+            v.$.items[0].item = 2
+
+            nextTick(function () {
+                assert.strictEqual(v.$el.textContent, '223')
+                assert.deepEqual(v.items, [2,2,3])
+                done()
+            })
+
+        })
+
+        it('should accept arg for aliasing on object arrays', function (done) {
+            
+            var v = new Vue({
+                template: '<span v-repeat="item:items" v-ref="items">{{item.id}}</span>',
+                data: {
+                    items: [{id:1},{id:2},{id:3}]
+                }
+            })
+            assert.strictEqual(v.$el.textContent, '123')
+            v.$.items[0].item = { id: 2 }
+
+            nextTick(function () {
+                assert.strictEqual(v.$el.textContent, '223')
+                assert.strictEqual(v.items[0].id, 2)
+                done()
+            })
+
+        })
+
     })
 
     describe('style', function () {
