@@ -20,7 +20,7 @@ describe('Compiler', function () {
 
         it('should accept additional data', function () {
             var res = v.$compiler.eval('{{c.d}}', { c: { d: 3 } })
-            assert.strictEqual(res, '3')
+            assert.strictEqual(res, 3)
             res = v.$compiler.eval('{{c.d === 3 ? "a" : "b"}}', { c: { d: 3 } })
             assert.strictEqual(res, 'a')
         })

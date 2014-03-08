@@ -70,12 +70,10 @@ describe('Directives', function () {
             assert.strictEqual(dir.el.textContent, '{"foo":"bar"}')
         })
 
-        it('should be empty with other stuff', function () {
+        it('should be empty with null & undefined', function () {
             dir.update(null)
             assert.strictEqual(dir.el.textContent, '')
             dir.update(undefined)
-            assert.strictEqual(dir.el.textContent, '')
-            dir.update(function () {})
             assert.strictEqual(dir.el.textContent, '')
         })
     })
@@ -106,12 +104,10 @@ describe('Directives', function () {
             assert.strictEqual(dir.el.textContent, '{"foo":"bar"}')
         })
 
-        it('should be empty with other stuff', function () {
+        it('should be empty with with null & undefined', function () {
             dir.update(null)
             assert.strictEqual(dir.el.innerHTML, '')
             dir.update(undefined)
-            assert.strictEqual(dir.el.innerHTML, '')
-            dir.update(function () {})
             assert.strictEqual(dir.el.innerHTML, '')
         })
 

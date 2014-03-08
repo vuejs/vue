@@ -27,10 +27,15 @@ function parse (text) {
 function parseAttr (attr) {
     var tokens = parse(attr)
     if (!tokens) return null
+    if (tokens.length === 1) return tokens[0].key
     var res = [], token
     for (var i = 0, l = tokens.length; i < l; i++) {
         token = tokens[i]
-        res.push(token.key || ('"' + token + '"'))
+        res.push(
+            token.key
+                ? ('(' + token.key + ')')
+                : ('"' + token + '"')
+        )
     }
     return res.join('+')
 }

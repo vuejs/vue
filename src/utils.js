@@ -88,19 +88,15 @@ var utils = module.exports = {
     },
 
     /**
-     *  Make sure only strings, booleans, numbers and
-     *  objects are output to html. otherwise, ouput empty string.
+     *  Make sure null and undefined output empty string
      */
-    toText: function (value) {
-        /* jshint eqeqeq: false */
-        var type = typeof value
-        return (type === 'string' ||
-            type === 'boolean' ||
-            (type === 'number' && value == value)) // deal with NaN
-                ? value
-                : type === 'object' && value !== null
-                    ? JSON.stringify(value)
-                    : ''
+    guard: function (value) {
+        /* jshint eqeqeq: false, eqnull: true */
+        return value == null
+            ? ''
+            : (typeof value == 'object')
+                ? JSON.stringify(value)
+                : value
     },
 
     /**

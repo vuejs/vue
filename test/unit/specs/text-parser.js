@@ -64,7 +64,7 @@ describe('Text Parser', function () {
         it('should return Directive.parse friendly expression', function () {
             assert.strictEqual(TextParser.parseAttr('{{msg}}'), 'msg')
             assert.strictEqual(TextParser.parseAttr('{{msg + "123"}}'), 'msg + "123"')
-            assert.strictEqual(TextParser.parseAttr('ha {{msg + "123"}} ho'), '"ha "+msg + "123"+" ho"')
+            assert.strictEqual(TextParser.parseAttr('ha {{msg + "123"}} ho'), '"ha "+(msg + "123")+" ho"')
         })
 
     })

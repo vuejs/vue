@@ -17,8 +17,6 @@ var Emitter     = require('./emitter'),
     def         = utils.defProtected,
     hasOwn      = ({}).hasOwnProperty,
 
-    SINGLE_VAR_RE = /^[\w\.$]+$/,
-
     // hooks to register
     hooks = [
         'created', 'ready',
@@ -776,39 +774,12 @@ CompilerProto.addDelegator = function (event) {
  *  includes bindings. It accepts additional raw data
  *  because we need to dynamically resolve v-component
  *  before a childVM is even compiled...
- *  TODO: make it less of a hack.
  */
 CompilerProto.eval = function (exp, data) {
-    var tokens = TextParser.parse(exp)
-    if (!tokens) { // no bindings
-        return exp
-    } else {
-        var token,
-            i = -1,
-            l = tokens.length,
-            res = '',
-            dataVal
-        while (++i < l) {
-            token = tokens[i]
-            if (token.key) {
-                if (SINGLE_VAR_RE.test(token.key)) {
-                    dataVal = data && utils.get(data, token.key)
-                    res += utils.toText(
-                        dataVal === undefined
-                            ? utils.get(this.data, token.key)
-                            : dataVal
-                    )
-                } else {
-                    res += utils.toText(
-                        ExpParser.eval(token.key, this, data)
-                    )
-                }
-            } else {
-                res += token
-            }
-        }
-        return res
-    }
+    var parsed = TextParser.parseAttr(exp)
+    return parsed
+        ? ExpParser.eval(parsed, this, data)
+        : exp
 }
 
 /**

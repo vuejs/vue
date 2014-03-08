@@ -128,25 +128,16 @@ describe('Utils', function () {
 
     })
 
-    describe('toText', function () {
-
-        var txt = utils.toText
-
-        it('should do nothing for strings, numbers and booleans', function () {
-            assert.strictEqual(txt('hihi'), 'hihi')
-            assert.strictEqual(txt(123), 123)
-            assert.strictEqual(txt(true), true)
-            assert.strictEqual(txt(false), false)
-        })
+    describe('guard', function () {
         
-        it('should output empty string if value is not string or number', function () {
-            assert.strictEqual(txt(undefined), '')
-            assert.strictEqual(txt(null), '')
-            assert.strictEqual(txt(NaN), '')
+        it('should output empty string if value is null or undefined', function () {
+            assert.strictEqual(utils.guard(undefined), '')
+            assert.strictEqual(utils.guard(null), '')
         })
 
-        it('should stringify value if is object', function () {
-            assert.strictEqual(txt({foo:"bar"}), '{"foo":"bar"}')
+        it('should output stringified data if value is object', function () {
+            assert.strictEqual(utils.guard({a:1}), '{"a":1}')
+            assert.strictEqual(utils.guard([1,2,3]), '[1,2,3]')
         })
 
     })

@@ -28,7 +28,7 @@ module.exports = {
                 : 'textContent'
         },
         update: function (value) {
-            this.el[this.attr] = utils.toText(value)
+            this.el[this.attr] = utils.guard(value)
         }
     },
 
