@@ -12,6 +12,7 @@ module.exports = {
     html      : require('./html'),
     style     : require('./style'),
     partial   : require('./partial'),
+    view      : require('./view'),
 
     attr: function (value) {
         if (value || value === 0) {

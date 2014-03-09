@@ -336,6 +336,7 @@ CompilerProto.compile = function (node, root) {
 
         // special attributes to check
         var repeatExp,
+            viewExp,
             withExp,
             directive,
             // resolve a standalone child component with no inherited data
@@ -361,6 +362,13 @@ CompilerProto.compile = function (node, root) {
                 compiler.deferred.push(directive)
             }
 
+        } else if (viewExp = utils.attr(node, 'view')) {
+
+            directive = Directive.parse('view', viewExp, compiler, node)
+            if (directive) {
+                compiler.deferred.push(directive)
+            }
+
         // Child component has 2nd highest priority
         } else if (root !== true && ((withExp = utils.attr(node, 'with')) || hasComponent)) {
 
@@ -377,8 +385,9 @@ CompilerProto.compile = function (node, root) {
 
         } else {
 
-            // compile normal directives
+            // remove the component directive
             utils.attr(node, 'component')
+            // compile normal directives
             compiler.compileNode(node)
 
         }

@@ -1,4 +1,4 @@
-var nextTick = require('../utils').nextTick
+var utils = require('../utils')
 
 module.exports = {
 
@@ -6,7 +6,7 @@ module.exports = {
         if (this.el.vue_vm) {
             this.subVM = this.el.vue_vm
             var compiler = this.subVM.$compiler
-            if (!compiler.bindings[this.arg]) {
+            if (this.arg && !compiler.bindings[this.arg]) {
                 compiler.createBinding(this.arg)
             }
         } else if (this.isEmpty) {
@@ -55,6 +55,8 @@ module.exports = {
                 delayReady: !this.last
             }
         })
+        // mark that this VM is created by v-with
+        utils.defProtected(this.subVM, '$with', true)
     },
 
     /**
@@ -69,7 +71,7 @@ module.exports = {
         this.subVM.$compiler.observer.on('change:' + this.arg, function (val) {
             if (!self.lock) {
                 self.lock = true
-                nextTick(function () {
+                utils.nextTick(function () {
                     self.lock = false
                 })
             }
@@ -80,7 +82,9 @@ module.exports = {
     unbind: function () {
         // all watchers are turned off during destroy
         // so no need to worry about it
-        this.subVM.$destroy()
+        if (this.subVM.$with) {
+            this.subVM.$destroy()
+        }
     }
 
 }

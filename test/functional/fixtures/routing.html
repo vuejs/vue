@@ -1,28 +1,101 @@
-<div v-if="route.hi">Hi! <a href="#ho">Next</a></div>
-<div v-if="route.ho">Ho! <a href="#ha">Next</a></div>
-<div v-if="route.ha">Ha! <a href="#hi">Next</a></div>
-
 <script src="../../../dist/vue.js"></script>
+<style type="text/css">
+    body {
+        padding: 20px;
+        font-family: 'Helvetica Neue', Arial, sans-serif;
+    }
+    ul {
+        list-style-type: none;
+        padding: 0;
+    }
+    li {
+        display: inline-block;
+        margin-right: 10px;
+    }
+    a {
+        color: #999;
+        text-decoration: none;
+    }
+    a.current {
+        color: blue;
+    }
+    .view {
+        position: absolute;
+        opacity: 1;
+        -webkit-transition: all .2s ease;
+        transition: all .2s ease;
+    }
+    .v-enter {
+        opacity: 0;
+        -webkit-transform: translate3d(30px, 0, 0);
+        transform: translate3d(30px, 0, 0);
+    }
+    .v-leave {
+        opacity: 0;
+        -webkit-transform: translate3d(-30px, 0, 0);
+        transform: translate3d(-30px, 0, 0);
+    }
+</style>
+
+<div>
+    <ul>
+        <li v-repeat="routes">
+            <a href="#!/{{$value}}" v-class="current:currentView == $value">{{$value}}</a>
+        </li>
+    </ul>
+    <div v-view="currentView" class="view" v-transition>
+        <p>Hello! {{msg}}</p>
+    </div>
+</div>
+
 <script>
 
-    var route = {
-        hi: false,
-        ho: false,
-        ha: false
+Vue.component('home', {
+    template: '<h1>Home</h1><div class="content">{{>yield}}</div>',
+    created: function () {
+        this.msg = "Home sweet home!"
     }
+})
 
-    window.addEventListener('hashchange', updateRoute)
-    function updateRoute () {
-        var path = location.hash.slice(1) || 'hi'
-        for (var key in route) {
-            route[key] = key === path
-        }
+Vue.component('page1', {
+    template: '<h1>Page1</h1><div class="content">{{>yield}}</div>',
+    created: function () {
+        this.msg = "Welcome to page 1!"
     }
+})
 
-    var app = new Vue({
-        el: 'body'
-    })
-    app.route = route
+Vue.component('page2', {
+    template: '<h1>Page2</h1><div class="content">{{>yield}}</div>',
+    created: function () {
+        this.msg = "Welcome to page 2!"
+    }
+})
 
-    updateRoute()
+Vue.component('notfound', {
+    template: '<h1>404 yo</h1>'
+})
+
+// simple routing
+var routes = ['home', 'page1', 'page2']
+
+function getRoute () {
+    var path = location.hash.replace(/^#!\/?/, '') || 'home'
+    return routes.indexOf(path) > -1
+        ? path
+        : 'notfound'
+}
+
+window.addEventListener('hashchange', function () {
+    app.currentView = getRoute()
+})
+
+// load the app
+var app = new Vue({
+    el: 'div',
+    data: {
+        currentView: getRoute(),
+        routes: routes
+    }
+})
+
 </script>
