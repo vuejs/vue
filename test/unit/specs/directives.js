@@ -999,6 +999,39 @@ describe('Directives', function () {
 
     })
 
+    describe('view', function () {
+        
+        it('should dynamically switch components', function (done) {
+            
+            var v = new Vue({
+                template: '<div v-view="view" class="view"></div>',
+                data: {
+                    view: 'a'
+                },
+                components: {
+                    a: { template: 'A' },
+                    b: { template: 'B' }
+                }
+            })
+
+            assert.equal(
+                v.$el.innerHTML,
+                '<div class="view">A</div><!--v-view-->'
+            )
+            v.view = 'b'
+
+            nextTick(function () {
+                assert.equal(
+                    v.$el.innerHTML,
+                    '<div class="view">B</div><!--v-view-->'
+                )
+                done()
+            })
+
+        })
+
+    })
+
 })
 
 function mockDirective (dirName, tag, type) {
