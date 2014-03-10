@@ -98,15 +98,11 @@ module.exports = {
                     self.vms[i].$index = i
                 }
             }
-            if (method === 'push' || method === 'unshift' || method === 'splice') {
-                // recalculate dependency
-                self.changed()
-            }
         }
 
     },
 
-    update: function (collection, init) {
+    update: function (collection) {
 
         if (
             collection === this.collection ||
@@ -127,7 +123,6 @@ module.exports = {
 
         // keep reference of old data and VMs
         // so we can reuse them if possible
-        this.old = this.collection
         var oldVMs = this.oldVMs = this.vms
 
         collection = this.collection = collection || []
@@ -147,7 +142,6 @@ module.exports = {
         // create new VMs and append to DOM
         if (collection.length) {
             collection.forEach(this.build, this)
-            if (!init) this.changed()
         }
 
         // listen for object changes and sync the repeater
@@ -158,7 +152,7 @@ module.exports = {
 
         // destroy unused old VMs
         if (oldVMs) destroyVMs(oldVMs)
-        this.old = this.oldVMs = null
+        this.oldVMs = null
     },
 
     addItems: function (data, base) {
@@ -173,23 +167,6 @@ module.exports = {
         while (i--) {
             data[i].$destroy()
         }
-    },
-
-    /**
-     *  Notify parent compiler that new items
-     *  have been added to the collection, it needs
-     *  to re-calculate computed property dependencies.
-     *  Batched to ensure it's called only once every event loop.
-     */
-    changed: function () {
-        if (this.queued) return
-        this.queued = true
-        var self = this
-        utils.nextTick(function () {
-            if (!self.compiler) return
-            self.compiler.parseDeps()
-            self.queued = false
-        })
     },
 
     /**
@@ -231,7 +208,7 @@ module.exports = {
         }
 
         // check if data already exists in the old array
-        oldIndex = self.old ? indexOf(self.old, data) : -1
+        oldIndex = self.oldVMs ? indexOf(self.oldVMs, data) : -1
         existing = oldIndex > -1
 
         if (existing) {
@@ -419,9 +396,10 @@ function objectToArray (obj) {
  *  Find an object or a wrapped data object
  *  from an Array
  */
-function indexOf (arr, obj) {
-    for (var i = 0, l = arr.length; i < l; i++) {
-        if (arr[i] === obj || (obj.$value && arr[i].$value === obj.$value)) {
+function indexOf (vms, obj) {
+    for (var vm, i = 0, l = vms.length; i < l; i++) {
+        vm = vms[i]
+        if (!vm.$reused && (vm.$data === obj || vm.$value === obj)) {
             return i
         }
     }
@@ -436,7 +414,7 @@ function destroyVMs (vms) {
     while (i--) {
         vm = vms[i]
         if (vm.$reused) {
-            vm.$reused = false
+            delete vm.$reused
         } else {
             vm.$destroy()
         }

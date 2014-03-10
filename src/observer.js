@@ -89,8 +89,12 @@ function linkArrayElements (arr, items) {
         while (i--) {
             item = items[i]
             if (isWatchable(item)) {
-                convert(item)
-                watch(item)
+                // if object is not converted for observing
+                // convert it...
+                if (!item.__emitter__) {
+                    convert(item)
+                    watch(item)
+                }
                 owners = item.__emitter__.owners
                 if (owners.indexOf(arr) < 0) {
                     owners.push(arr)
