@@ -28,8 +28,7 @@
                 <ul id="todo-list">
                     <li
                         class="todo"
-                        v-repeat="todos"
-                        v-if="filterTodo(this)"
+                        v-repeat="filteredTodos"
                         v-class="
                             completed : completed,
                             editing   : this == editedTodo
