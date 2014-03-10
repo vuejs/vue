@@ -862,7 +862,7 @@ describe('Directives', function () {
             })
 
             function testAddKey () {
-                v.obj.$repeater.push({ $key: 'c', msg: 'he!' })
+                v.obj.$add('c', { msg: 'he!' })
                 nextTick(function () {
                     assert.strictEqual(v.$el.textContent, 'a ho!b ha!c he!')
                     assert.strictEqual(v.obj.c.msg, 'he!')
@@ -871,7 +871,7 @@ describe('Directives', function () {
             }
 
             function testRemoveKey () {
-                v.obj.$repeater.shift()
+                v.obj.$delete('a')
                 nextTick(function () {
                     assert.strictEqual(v.$el.textContent, 'b ha!c he!')
                     assert.strictEqual(v.obj.a, undefined)

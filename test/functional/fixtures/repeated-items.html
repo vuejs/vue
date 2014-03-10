@@ -49,10 +49,10 @@
                 this.items.splice(1, 1, { title: getChar() }, { title: getChar() })
             },
             replace: function () {
-                this.items.replace(getPos(), { title: getChar() })
+                this.items.$replace(getPos(), { title: getChar() })
             },
             remove: function () {
-                this.items.remove(getPos())
+                this.items.$remove(getPos())
             },
             sort: function () {
                 this.items.sort(function (a, b) {

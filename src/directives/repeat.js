@@ -1,7 +1,6 @@
 var Observer   = require('../observer'),
     utils      = require('../utils'),
-    config     = require('../config'),
-    def        = utils.defProtected
+    config     = require('../config')
 
 /**
  *  Mathods that perform precise DOM manipulation
@@ -151,6 +150,12 @@ module.exports = {
             if (!init) this.changed()
         }
 
+        // listen for object changes and sync the repeater
+        if (this.object) {
+            this.object.__emitter__.on('set', this.syncRepeater)
+            this.object.__emitter__.on('delete', this.deleteProp)
+        }
+
         // destroy unused old VMs
         if (oldVMs) destroyVMs(oldVMs)
         this.old = this.oldVMs = null
@@ -159,8 +164,7 @@ module.exports = {
     addItems: function (data, base) {
         base = base || 0
         for (var i = 0, l = data.length; i < l; i++) {
-            var vm = this.build(data[i], base + i)
-            this.updateObject(vm, 1)
+            this.build(data[i], base + i)
         }
     },
 
@@ -168,7 +172,6 @@ module.exports = {
         var i = data.length
         while (i--) {
             data[i].$destroy()
-            this.updateObject(data[i], -1)
         }
     },
 
@@ -281,7 +284,7 @@ module.exports = {
             if (nonObject || self.arg) {
                 var sync = function (val) {
                     self.lock = true
-                    self.collection.set(item.$index, val)
+                    self.collection.$set(item.$index, val)
                     self.lock = false
                 }
                 item.$compiler.observer.on('change:' + (self.arg || '$value'), sync)
@@ -315,8 +318,6 @@ module.exports = {
                 }
             }
         }
-
-        return item
     },
 
     /**
@@ -325,62 +326,63 @@ module.exports = {
      */
     convertObject: function (object) {
 
-        if (this.object) {
-            this.object.__emitter__.off('set', this.updateRepeater)
-        }
-
         this.object = object
-        var collection = object.$repeater || objectToArray(object)
-        if (!object.$repeater) {
-            def(object, '$repeater', collection)
-        }
+        var self = this,
+            collection = objectToArray(object)
 
-        var self = this
-        this.updateRepeater = function (key, val) {
-            if (key.indexOf('.') === -1) {
-                var i = self.vms.length, item
-                while (i--) {
-                    item = self.vms[i]
-                    if (item.$key === key) {
-                        if (item.$data !== val && item.$value !== val) {
-                            if ('$value' in item) {
-                                item.$value = val
-                            } else {
-                                item.$data = val
-                            }
+        this.syncRepeater = function (key, val) {
+            if (key in object) {
+                var vm = self.findVMByKey(key)
+                if (vm) {
+                    // existing vm, update property
+                    if (vm.$data !== val && vm.$value !== val) {
+                        if ('$value' in vm) {
+                            vm.$value = val
+                        } else {
+                            vm.$data = val
                         }
-                        break
                     }
+                } else {
+                    // new property added!
+                    var data
+                    if (utils.typeOf(val) === 'Object') {
+                        data = val
+                        data.$key = key
+                    } else {
+                        data = {
+                            $key: key,
+                            $value: val
+                        }
+                    }
+                    collection.push(data)
                 }
             }
         }
 
-        object.__emitter__.on('set', this.updateRepeater)
+        this.deleteProp = function (key) {
+            var i = self.findVMByKey(key).$index
+            collection.splice(i, 1)
+        }
+
         return collection
     },
 
-    /**
-     *  Sync changes from the $repeater Array
-     *  back to the represented Object
-     */
-    updateObject: function (vm, action) {
-        var obj = this.object
-        if (obj && vm.$key) {
-            var key = vm.$key,
-                val = vm.$value || vm.$data
-            if (action > 0) { // new property
-                obj[key] = val
-                Observer.convertKey(obj, key)
-            } else {
-                delete obj[key]
+    findVMByKey: function (key) {
+        var i = this.vms.length, vm
+        while (i--) {
+            vm = this.vms[i]
+            if (vm.$key === key) {
+                return vm
             }
-            obj.__emitter__.emit('set', key, val, true)
         }
     },
 
     reset: function (destroy) {
         if (this.childId) {
             delete this.vm.$[this.childId]
+        }
+        if (this.object) {
+            this.object.__emitter__.off('set', this.updateRepeater)
         }
         if (this.collection) {
             this.collection.__emitter__.off('mutate', this.mutationListener)
@@ -407,7 +409,7 @@ function objectToArray (obj) {
         data = utils.typeOf(val) === 'Object'
             ? val
             : { $value: val }
-        def(data, '$key', key)
+        data.$key = key
         res.push(data)
     }
     return res

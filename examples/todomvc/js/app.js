@@ -94,7 +94,7 @@
             },
 
             removeTodo: function (todo) {
-                this.todos.remove(todo.$data);
+                this.todos.$remove(todo.$data);
                 todoStorage.save();
             },
 
@@ -125,7 +125,7 @@
             },
             
             removeCompleted: function () {
-                this.todos.remove(function (todo) {
+                this.todos.$remove(function (todo) {
                     return todo.completed;
                 });
                 todoStorage.save();
