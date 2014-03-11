@@ -1,16 +1,46 @@
-var keyCodes = {
-        enter    : 13,
-        tab      : 9,
-        'delete' : 46,
-        up       : 38,
-        left     : 37,
-        right    : 39,
-        down     : 40,
-        esc      : 27
-    },
-    slice = [].slice
+var utils    = require('./utils'),
+    get      = utils.get,
+    slice    = [].slice,
+    QUOTE_RE = /^'.*'$/
 
-module.exports = {
+var keyCodes = {
+    enter    : 13,
+    tab      : 9,
+    'delete' : 46,
+    up       : 38,
+    left     : 37,
+    right    : 39,
+    down     : 40,
+    esc      : 27
+}
+
+/**
+ *  String contain helper
+ */
+function contains (val, search) {
+    /* jshint eqeqeq: false */
+    if (utils.typeOf(val) === 'Object') {
+        for (var key in val) {
+            if (contains(val[key], search)) {
+                return true
+            }
+        }
+    } else if (val != null) {
+        return val.toString().toLowerCase().indexOf(search) > -1
+    }
+}
+
+/**
+ *  Test whether a string is in quotes,
+ *  if yes return stripped string
+ */
+function stripQuotes (str) {
+    if (QUOTE_RE.test(str)) {
+        return str.slice(1, -1)
+    }
+}
+
+var filters = module.exports = {
 
     /**
      *  'abc' => 'Abc'
@@ -83,5 +113,54 @@ module.exports = {
                 handler.call(this, e)
             }
         }
+    },
+
+    filterBy: function (arr, searchKey, delimiter, dataKey) {
+
+        // get the search string
+        var search = stripQuotes(searchKey) || get(this, searchKey)
+        if (!search) return arr
+        search = search.toLowerCase()
+
+        // get the optional dataKey
+        dataKey = dataKey && (stripQuotes(dataKey) || get(this, dataKey))
+
+        return arr.filter(function (item) {
+            return dataKey
+                ? contains(get(item, dataKey), search)
+                : contains(item, search)
+        })
+
+    },
+
+    orderBy: function (arr, sortKey, reverseKey) {
+
+        var key = stripQuotes(sortKey) || get(this, sortKey)
+        if (!key) return arr
+
+        var order = 1
+        if (reverseKey) {
+            if (reverseKey === '-1') {
+                order = -1
+            } else if (reverseKey.charAt(0) === '!') {
+                reverseKey = reverseKey.slice(1)
+                order = get(this, reverseKey) ? 1 : -1
+            } else {
+                order = get(this, reverseKey) ? -1 : 1
+            }
+        }
+
+        // sort on a copy to avoid mutating original array
+        return arr.slice().sort(function (a, b) {
+            a = a[key]
+            b = b[key]
+            return a === b ? 0 : a > b ? order : -order
+        })
+
     }
+
 }
+
+// mark computed filters
+filters.filterBy.computed = true
+filters.orderBy.computed = true

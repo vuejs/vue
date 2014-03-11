@@ -1,8 +1,9 @@
 var utils           = require('./utils'),
-    stringSaveRE    = /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/g,
-    stringRestoreRE = /"(\d+)"/g,
-    constructorRE   = new RegExp('constructor'.split('').join('[\'"+, ]*')),
-    unicodeRE       = /\\u\d\d\d\d/
+    STR_SAVE_RE     = /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/g,
+    STR_RESTORE_RE  = /"(\d+)"/g,
+    CTOR_RE         = new RegExp('constructor'.split('').join('[\'"+, ]*')),
+    UNICODE_RE      = /\\u\d\d\d\d/,
+    QUOTE_RE        = /"/g
 
 // Variable extraction scooped from https://github.com/RubyLouvre/avalon
 
@@ -94,7 +95,7 @@ function makeGetter (exp, raw) {
     try {
         fn = new Function(exp)
     } catch (e) {
-        utils.warn('Invalid expression: ' + raw)
+        utils.warn('Error parsing expression: ' + raw)
     }
     return fn
 }
@@ -109,13 +110,23 @@ function escapeDollar (v) {
 }
 
 /**
+ *  Convert double quotes to single quotes
+ *  so they don't mess up the generated function body
+ */
+function escapeQuote (v) {
+    return v.indexOf('"') > -1
+        ? v.replace(QUOTE_RE, '\'')
+        : v
+}
+
+/**
  *  Parse and return an anonymous computed property getter function
  *  from an arbitrary expression, together with a list of paths to be
  *  created as bindings.
  */
 exports.parse = function (exp, compiler, data, filters) {
     // unicode and 'constructor' are not allowed for XSS security.
-    if (unicodeRE.test(exp) || constructorRE.test(exp)) {
+    if (UNICODE_RE.test(exp) || CTOR_RE.test(exp)) {
         utils.warn('Unsafe expression: ' + exp)
         return
     }
@@ -138,15 +149,15 @@ exports.parse = function (exp, compiler, data, filters) {
             ")[$\\w\\.]*\\b", 'g'
         ),
         body = (' ' + exp)
-            .replace(stringSaveRE, saveStrings)
+            .replace(STR_SAVE_RE, saveStrings)
             .replace(pathRE, replacePath)
-            .replace(stringRestoreRE, restoreStrings)
+            .replace(STR_RESTORE_RE, restoreStrings)
 
     // wrap expression with computed filters
     if (filters) {
         filters.forEach(function (filter) {
             var args = filter.args
-                ? ',"' + filter.args.join('","') + '"'
+                ? ',"' + filter.args.map(escapeQuote).join('","') + '"'
                 : ''
             body =
                 'this.$compiler.getOption("filters", "' +

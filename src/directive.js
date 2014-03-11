@@ -12,7 +12,7 @@ var utils      = require('./utils'),
 
     ARG_RE          = /^([\w-$ ]+):(.+)$/,
     FILTERS_RE      = /\|[^\|]+/g,
-    FILTER_TOKEN_RE = /[^\s']+|'[^']+'/g,
+    FILTER_TOKEN_RE = /[^\s']+|'[^']+'|[^\s"]+|"[^"]+"/g,
     NESTING_RE      = /^\$(parent|root)\./,
     SINGLE_VAR_RE   = /^[\w\.$]+$/
 
@@ -110,9 +110,6 @@ function parseFilter (filter, compiler) {
 
     var tokens = filter.slice(1).match(FILTER_TOKEN_RE)
     if (!tokens) return
-    tokens = tokens.map(function (token) {
-        return token.replace(/'/g, '').trim()
-    })
 
     var name = tokens[0],
         apply = compiler.getOption('filters', name)

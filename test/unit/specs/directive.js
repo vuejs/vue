@@ -210,7 +210,7 @@ describe('Directive', function () {
             assert.strictEqual(f.name, 'pluralize', 'name')
             assert.strictEqual(f.args.length, 2, 'args length')
             assert.strictEqual(f.args[0], 'item', 'args value 1')
-            assert.strictEqual(f.args[1], 'arg with spaces', 'args value 2')
+            assert.strictEqual(f.args[1], '\'arg with spaces\'', 'args value 2')
         })
 
         it('should extract correct filters (multiple filters)', function () {

@@ -13,6 +13,9 @@ var utils = module.exports = {
      *  get a value from an object keypath
      */
     get: function (obj, key) {
+        if (key.indexOf('.') < 0) {
+            return obj[key]
+        }
         var path = key.split('.'),
             d = -1, l = path.length
         while (++d < l && obj !== undefined) {
@@ -25,6 +28,10 @@ var utils = module.exports = {
      *  set a value to an object keypath
      */
     set: function (obj, key, val) {
+        if (key.indexOf('.') < 0) {
+            obj[key] = val
+            return
+        }
         var path = key.split('.'),
             d = -1, l = path.length - 1
         while (++d < l) {

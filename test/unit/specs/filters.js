@@ -128,6 +128,30 @@ describe('Filters', function () {
 
     })
 
+    describe('filterBy', function () {
+        
+        var filter = filters.filterBy
+
+        it('should be computed', function () {
+            assert.ok(filter.computed)
+        })
+
+        // TODO
+
+    })
+
+    describe('orderBy', function () {
+
+        var filter = filters.orderBy
+        
+        it('should be computed', function () {
+            assert.ok(filter.computed)
+        })
+
+        // TODO
+
+    })
+
 })
 
 function assertNumberAndFalsy (filter) {
