@@ -3,7 +3,7 @@ var config    = require('./config'),
     win       = window,
     console   = win.console,
     timeout   = win.setTimeout,
-    THIS_RE   = /[^\w]this\./,
+    THIS_RE   = /[^\w]this[\.\[]/,
     hasClassList = 'classList' in document.documentElement,
     ViewModel // late def
 
