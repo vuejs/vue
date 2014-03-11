@@ -47,21 +47,20 @@ describe('Filters', function () {
         var filter = filters.pluralize
 
         it('should simply add "s" if arg length is 1', function () {
-            var args = ['item'],
-                res0 = filter(0, args),
-                res1 = filter(1, args),
-                res2 = filter(2, args)
+            var arg = 'item',
+                res0 = filter(0, arg),
+                res1 = filter(1, arg),
+                res2 = filter(2, arg)
             assert.strictEqual(res0, 'items')
             assert.strictEqual(res1, 'item')
             assert.strictEqual(res2, 'items')
         })
 
         it('should use corresponding format when arg length is greater than 1', function () {
-            var args = ['st', 'nd', 'rd'],
-                res0 = filter(0, args),
-                res1 = filter(1, args),
-                res2 = filter(2, args),
-                res3 = filter(3, args)
+            var res0 = filter(0, 'st', 'nd', 'rd'),
+                res1 = filter(1, 'st', 'nd', 'rd'),
+                res2 = filter(2, 'st', 'nd', 'rd'),
+                res3 = filter(3, 'st', 'nd', 'rd')
             assert.strictEqual(res0, 'rd')
             assert.strictEqual(res1, 'st')
             assert.strictEqual(res2, 'nd')
@@ -106,11 +105,10 @@ describe('Filters', function () {
         var filter = filters.key
 
         it('should return a function that only triggers when key matches', function () {
-            var args = ['enter'],
-                triggered = false,
+            var triggered = false,
                 handler = filter(function () {
                     triggered = true
-                }, args)
+                }, 'enter')
             handler({ keyCode: 0 })
             assert.notOk(triggered)
             handler({ keyCode: 13 })
@@ -118,11 +116,10 @@ describe('Filters', function () {
         })
 
         it('should also work for direct keyCode', function () {
-            var args = [13],
-                triggered = false,
+            var triggered = false,
                 handler = filter(function () {
                     triggered = true
-                }, args)
+                }, 13)
             handler({ keyCode: 0 })
             assert.notOk(triggered)
             handler({ keyCode: 13 })

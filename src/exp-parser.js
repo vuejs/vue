@@ -53,7 +53,7 @@ function getVariables (code) {
  *  key. It then creates any missing bindings on the
  *  final resolved vm.
  */
-function getRel (path, compiler, data) {
+function traceScope (path, compiler, data) {
     var rel  = '',
         dist = 0,
         self = compiler
@@ -126,17 +126,6 @@ exports.parse = function (exp, compiler, data, filters) {
     }
     vars = utils.unique(vars)
 
-    if (filters) {
-        filters.forEach(function (filter) {
-            var args = filter.args
-                ? ',[' + filter.args.map(function (arg) {
-                    return '"' + arg + '"'
-                }).join(',') + ']'
-                : ''
-            exp = 'this.$compiler.getOption("filters", "' + filter.name + '").call(this,' + exp + args + ')'
-        })
-    }
-
     var accessors = '',
         has       = utils.hash(),
         strings   = [],
@@ -148,11 +137,27 @@ exports.parse = function (exp, compiler, data, filters) {
             vars.map(escapeDollar).join('|') +
             ")[$\\w\\.]*\\b", 'g'
         ),
-        body = ('return ' + exp)
+        body = (' ' + exp)
             .replace(stringSaveRE, saveStrings)
             .replace(pathRE, replacePath)
             .replace(stringRestoreRE, restoreStrings)
-    body = accessors + body
+
+    // wrap expression with computed filters
+    if (filters) {
+        filters.forEach(function (filter) {
+            var args = filter.args
+                ? ',"' + filter.args.join('","') + '"'
+                : ''
+            body =
+                'this.$compiler.getOption("filters", "' +
+                    filter.name +
+                '").call(this,' +
+                    body + args +
+                ')'
+        })
+    }
+
+    body = accessors + 'return ' + body
 
     function saveStrings (str) {
         var i = strings.length
@@ -164,7 +169,7 @@ exports.parse = function (exp, compiler, data, filters) {
         // keep track of the first char
         var c = path.charAt(0)
         path = path.slice(1)
-        var val = 'this.' + getRel(path, compiler, data) + path
+        var val = 'this.' + traceScope(path, compiler, data) + path
         if (!has[path]) {
             accessors += val + ';'
             has[path] = 1

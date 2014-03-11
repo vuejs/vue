@@ -1,13 +1,14 @@
 var keyCodes = {
-    enter    : 13,
-    tab      : 9,
-    'delete' : 46,
-    up       : 38,
-    left     : 37,
-    right    : 39,
-    down     : 40,
-    esc      : 27
-}
+        enter    : 13,
+        tab      : 9,
+        'delete' : 46,
+        up       : 38,
+        left     : 37,
+        right    : 39,
+        down     : 40,
+        esc      : 27
+    },
+    slice = [].slice
 
 module.exports = {
 
@@ -41,10 +42,10 @@ module.exports = {
     /**
      *  12345 => $12,345.00
      */
-    currency: function (value, args) {
+    currency: function (value, sign) {
         if (!value && value !== 0) return ''
-        var sign = (args && args[0]) || '$',
-            s = Math.floor(value).toString(),
+        sign = sign || '$'
+        var s = Math.floor(value).toString(),
             i = s.length % 3,
             h = i > 0 ? (s.slice(0, i) + (s.length > 3 ? ',' : '')) : '',
             f = '.' + value.toFixed(2).slice(-2)
@@ -60,7 +61,8 @@ module.exports = {
      *
      *  e.g. ['single', 'double', 'triple', 'multiple']
      */
-    pluralize: function (value, args) {
+    pluralize: function (value) {
+        var args = slice.call(arguments, 1)
         return args.length > 1
             ? (args[value - 1] || args[args.length - 1])
             : (args[value - 1] || args[0] + 's')
@@ -70,11 +72,11 @@ module.exports = {
      *  A special filter that takes a handler function,
      *  wraps it so it only gets triggered on specific keypresses.
      */
-    key: function (handler, args) {
+    key: function (handler, key) {
         if (!handler) return
-        var code = keyCodes[args[0]]
+        var code = keyCodes[key]
         if (!code) {
-            code = parseInt(args[0], 10)
+            code = parseInt(key, 10)
         }
         return function (e) {
             if (e.keyCode === code) {

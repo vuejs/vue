@@ -87,31 +87,6 @@ describe('Expression Parser', function () {
 
     testCases.forEach(describeCase)
 
-    // extra case for invalid expressions
-    describe('invalid expression', function () {
-
-        before(warnSpy.swapWarn)
-        
-        it('should capture the error and warn', function () {
-            function noop () {}
-            ExpParser.parse('a + "fsef', {
-                createBinding: noop,
-                hasKey: noop,
-                vm: {
-                    $compiler: {
-                        bindings: {},
-                        createBinding: noop
-                    },
-                    $data: {}
-                }
-            })
-            assert.ok(warnSpy.warned)
-        })
-
-        after(warnSpy.resetWarn)
-
-    })
-
     describe('XSS protection', function () {
         
         var cases = [
@@ -138,6 +113,98 @@ describe('Expression Parser', function () {
         ]
 
         cases.forEach(describeCase)
+
+    })
+
+    describe('scope trace', function () {
+        
+        it('should determine the correct scope for variables', function () {
+
+            var bindingsCreated = {}
+
+            var getter = ExpParser.parse('a + b', mockCompiler({
+                parent: {
+                    bindings: {},
+                    createBinding: function (key) {
+                        assert.strictEqual(key, 'a')
+                        bindingsCreated[key] = true
+                    },
+                    hasKey: function (key) {
+                        return key === 'a'
+                    },
+                    parent: {
+                        bindings: {},
+                        createBinding: function (key) {
+                            assert.strictEqual(key, 'b')
+                            bindingsCreated[key] = true
+                        },
+                        hasKey: function (key) {
+                            return key === 'b'
+                        }
+                    }
+                }
+            }))
+            var getterString = getter.toString()
+            assert.ok(getterString.indexOf('this.$parent.a') > -1)
+            assert.ok(getterString.indexOf('this.$parent.$parent.b') > -1)
+        })
+
+    })
+
+    // extra case for invalid expressions
+    describe('invalid expression', function () {
+
+        before(warnSpy.swapWarn)
+
+        it('should capture the error and warn', function () {
+            ExpParser.parse('a + "fsef', mockCompiler())
+            assert.ok(warnSpy.warned)
+        })
+
+        after(warnSpy.resetWarn)
+
+    })
+
+    describe('.eval() with extra data', function () {
+        
+        it('should be able to eval an epxression with temporary additional data', function () {
+            var res = ExpParser.eval('a + b', mockCompiler(), { a: 1, b: 2 })
+            assert.strictEqual(res, 3)
+        })
+
+    })
+
+    describe('computed filters', function () {
+        
+        it('should wrap expression with computed filters', function () {
+            
+            var filters = [
+                    { name: 'test', args: ['a', 'b'] },
+                    { name: 'wrap', args: ['c', 'd'] }
+                ],
+                filterFns = {
+                    test: function (v, a, b) {
+                        return v + a + b
+                    },
+                    wrap: function (v, c, d) {
+                        return v + c + d
+                    }
+                }
+
+            var compiler = mockCompiler({
+                getOption: function (type, id) {
+                    return filterFns[id]
+                }
+            })
+
+            var getter = ExpParser.parse('a + b', compiler, null, filters)
+            var res = getter.call({
+                $compiler: compiler,
+                a: 1,
+                b: 2
+            })
+            assert.strictEqual(res, '3abcd')
+        })
 
     })
 
@@ -194,6 +261,26 @@ describe('Expression Parser', function () {
             }
 
         })
+    }
+
+    function noop () {}
+
+    function mockCompiler (opts) {
+        var mock = {
+            createBinding: noop,
+            hasKey: noop,
+            vm: {
+                $compiler: {
+                    bindings: {},
+                    createBinding: noop
+                },
+                $data: {}
+            }
+        }
+        for (var key in opts) {
+            mock[key] = opts[key]
+        }
+        return mock
     }
 
 })
