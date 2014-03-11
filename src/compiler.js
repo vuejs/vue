@@ -631,7 +631,9 @@ CompilerProto.defineProp = function (key, binding) {
 CompilerProto.defineMeta = function (key, binding) {
     var vm = this.vm,
         ob = this.observer,
-        value = binding.value = vm[key] || this.data[key]
+        value = binding.value = key in vm
+            ? vm[key]
+            : this.data[key]
     // remove initital meta in data, since the same piece
     // of data can be observed by different VMs, each have
     // its own associated meta info.
