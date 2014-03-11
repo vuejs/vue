@@ -31,6 +31,8 @@ assetTypes.forEach(function (type) {
             value = utils.toFragment(value)
         } else if (type === 'component') {
             value = utils.toConstructor(value)
+        } else if (type === 'filter') {
+            utils.checkFilter(value)
         }
         hash[id] = value
         return this

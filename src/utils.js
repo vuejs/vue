@@ -3,6 +3,7 @@ var config    = require('./config'),
     win       = window,
     console   = win.console,
     timeout   = win.setTimeout,
+    THIS_RE   = /[^\w]this\./,
     hasClassList = 'classList' in document.documentElement,
     ViewModel // late def
 
@@ -165,12 +166,23 @@ var utils = module.exports = {
     },
 
     /**
+     *  Check if a filter function contains references to `this`
+     *  If yes, mark it as a computed filter.
+     */
+    checkFilter: function (filter) {
+        if (THIS_RE.test(filter.toString())) {
+            filter.computed = true
+        }
+    },
+
+    /**
      *  convert certain option values to the desired format.
      */
     processOptions: function (options) {
         var components = options.components,
             partials   = options.partials,
             template   = options.template,
+            filters    = options.filters,
             key
         if (components) {
             for (key in components) {
@@ -180,6 +192,11 @@ var utils = module.exports = {
         if (partials) {
             for (key in partials) {
                 partials[key] = utils.toFragment(partials[key])
+            }
+        }
+        if (filters) {
+            for (key in filters) {
+                utils.checkFilter(filters[key])
             }
         }
         if (template) {

@@ -168,4 +168,43 @@ describe('Misc Features', function () {
 
     })
 
+    describe('computed filter', function () {
+        
+        it('should process filter with `this` as computed', function (done) {
+            
+            var V = Vue.extend({
+                template: '<div class="plus">{{n | plus}}</div><div class="minus">{{n | minus}}</div>',
+                filters: {
+                    plus: function (v) {
+                        return v + this.a
+                    }
+                }
+            })
+
+            V.filter('minus', function (v) {
+                return v - this.a
+            })
+
+            var v = new V({
+                data: {
+                    a: 1,
+                    n: 1
+                }
+            })
+
+            assert.strictEqual(v.$el.querySelector('.plus').textContent, '2')
+            assert.strictEqual(v.$el.querySelector('.minus').textContent, '0')
+
+            v.a = 2
+
+            nextTick(function () {
+                assert.strictEqual(v.$el.querySelector('.plus').textContent, '3')
+                assert.strictEqual(v.$el.querySelector('.minus').textContent, '-1')
+                done()
+            })
+
+        })
+
+    })
+
 })

@@ -44,14 +44,17 @@
             }
         },
 
+        filters: {
+            filterTodos: function (todos) {
+                return todos.filter(filters[this.filter]);
+            }
+        },
+
         // computed property
         // http://vuejs.org/guide/computed.html
         computed: {
-            filteredTodos: function () {
-                return this.todos.filter(filters[this.filter]);
-            },
             remaining: function () {
-                return this.todos.filter(filters.active).length
+                return this.todos.filter(filters.active).length;
             },
             allDone: {
                 $get: function () {

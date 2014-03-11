@@ -177,8 +177,6 @@ exports.parse = function (exp, compiler, data, filters) {
         return strings[i]
     }
 
-    console.log(body)
-
     return makeGetter(body, exp)
 }
 

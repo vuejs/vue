@@ -5,7 +5,9 @@ describe('Directive', function () {
 
     var compiler = {
         options: {},
-        getOption: function () {},
+        getOption: function (type, id) {
+            return Vue.options[type][id]
+        },
         vm: {
             constructor: {}
         }
