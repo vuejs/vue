@@ -517,7 +517,7 @@ CompilerProto.bindDirective = function (directive) {
 
     if (directive.isExp) {
         // expression bindings are always created on current compiler
-        binding = compiler.createBinding(key, true, directive.isFn)
+        binding = compiler.createBinding(key, directive)
     } else {
         // recursively locate which compiler owns the binding
         while (compiler) {
@@ -545,18 +545,20 @@ CompilerProto.bindDirective = function (directive) {
 /**
  *  Create binding and attach getter/setter for a key to the viewmodel object
  */
-CompilerProto.createBinding = function (key, isExp, isFn) {
+CompilerProto.createBinding = function (key, directive) {
 
     utils.log('  created binding: ' + key)
 
     var compiler = this,
+        isExp    = directive && directive.isExp,
+        isFn     = directive && directive.isFn,
         bindings = compiler.bindings,
         computed = compiler.options.computed,
         binding  = new Binding(compiler, key, isExp, isFn)
 
     if (isExp) {
         // expression bindings are anonymous
-        compiler.defineExp(key, binding)
+        compiler.defineExp(key, binding, directive)
     } else {
         bindings[key] = binding
         if (binding.root) {
@@ -650,8 +652,9 @@ CompilerProto.defineMeta = function (key, binding) {
  *  Define an expression binding, which is essentially
  *  an anonymous computed property
  */
-CompilerProto.defineExp = function (key, binding) {
-    var getter = ExpParser.parse(key, this)
+CompilerProto.defineExp = function (key, binding, directive) {
+    var filters = directive && directive.computeFilters && directive.filters,
+        getter  = ExpParser.parse(key, this, null, filters)
     if (getter) {
         this.markComputed(binding, getter)
         this.exps.push(binding)

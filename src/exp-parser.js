@@ -113,7 +113,7 @@ function escapeDollar (v) {
  *  from an arbitrary expression, together with a list of paths to be
  *  created as bindings.
  */
-exports.parse = function (exp, compiler, data) {
+exports.parse = function (exp, compiler, data, filters) {
     // unicode and 'constructor' are not allowed for XSS security.
     if (unicodeRE.test(exp) || constructorRE.test(exp)) {
         utils.warn('Unsafe expression: ' + exp)
@@ -125,6 +125,18 @@ exports.parse = function (exp, compiler, data) {
         return makeGetter('return ' + exp, exp)
     }
     vars = utils.unique(vars)
+
+    if (filters) {
+        filters.forEach(function (filter) {
+            var args = filter.args
+                ? ',[' + filter.args.map(function (arg) {
+                    return '"' + arg + '"'
+                }).join(',') + ']'
+                : ''
+            exp = 'this.$compiler.getOption("filters", "' + filter.name + '").call(this,' + exp + args + ')'
+        })
+    }
+
     var accessors = '',
         has       = utils.hash(),
         strings   = [],
@@ -164,6 +176,8 @@ exports.parse = function (exp, compiler, data) {
     function restoreStrings (str, i) {
         return strings[i]
     }
+
+    console.log(body)
 
     return makeGetter(body, exp)
 }
