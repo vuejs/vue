@@ -57,7 +57,8 @@ function uglify (file, cb) {
             pure_funcs: [
                 'utils.log',
                 'utils.warn',
-                'enableDebug'
+                'enableDebug',
+                'throwError'
             ]
         }
     }).code)
