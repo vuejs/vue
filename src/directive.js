@@ -191,7 +191,10 @@ Directive.split = function (exp) {
 Directive.parse = function (dirname, expression, compiler, node) {
 
     var dir = compiler.getOption('directives', dirname) || directives[dirname]
-    if (!dir) return utils.warn('unknown directive: ' + dirname)
+    if (!dir) {
+        utils.warn('unknown directive: ' + dirname)
+        return
+    }
 
     var rawKey
     if (expression.indexOf('|') > -1) {
@@ -204,9 +207,11 @@ Directive.parse = function (dirname, expression, compiler, node) {
     }
     
     // have a valid raw key, or be an empty directive
-    return (rawKey || expression === '')
-        ? new Directive(dirname, dir, expression, rawKey, compiler, node)
-        : utils.warn('invalid directive expression: ' + expression)
+    if (rawKey || expression === '') {
+        return new Directive(dirname, dir, expression, rawKey, compiler, node)
+    } else {
+        utils.warn('invalid directive expression: ' + expression)
+    }
 }
 
 module.exports = Directive

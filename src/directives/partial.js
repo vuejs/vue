@@ -13,8 +13,10 @@ module.exports = {
         var partial = id === 'yield'
             ? this.compiler.rawContent
             : this.compiler.getOption('partials', id)
+
         if (!partial) {
-            return utils.warn('Unknown partial: ' + id)
+            utils.warn('Unknown partial: ' + id)
+            return
         }
 
         // comment ref node means inline partial

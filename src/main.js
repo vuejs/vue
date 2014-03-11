@@ -63,7 +63,8 @@ ViewModel.use = function (plugin) {
         try {
             plugin = require(plugin)
         } catch (e) {
-            return utils.warn('Cannot find plugin: ' + plugin)
+            utils.warn('Cannot find plugin: ' + plugin)
+            return
         }
     }
 
