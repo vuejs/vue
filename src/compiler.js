@@ -325,6 +325,8 @@ CompilerProto.observeData = function (data) {
  */
 CompilerProto.compile = function (node, root) {
 
+    /* jshint boss: true */
+
     var compiler = this,
         nodeType = node.nodeType,
         tagName  = node.tagName
@@ -335,22 +337,15 @@ CompilerProto.compile = function (node, root) {
         if (utils.attr(node, 'pre') !== null) return
 
         // special attributes to check
-        var repeatExp,
-            viewExp,
-            withExp,
-            directive,
-            // resolve a standalone child component with no inherited data
-            hasComponent = this.resolveComponent(node, undefined, true)
+        var directive, repeatExp, viewExp, Component
 
         // It is important that we access these attributes
         // procedurally because the order matters.
-        //
         // `utils.attr` removes the attribute once it gets the
         // value, so we should not access them all at once.
 
         // v-repeat has the highest priority
         // and we need to preserve all other attributes for it.
-        /* jshint boss: true */
         if (repeatExp = utils.attr(node, 'repeat')) {
 
             // repeat block cannot have v-id at the same time.
@@ -370,18 +365,26 @@ CompilerProto.compile = function (node, root) {
             }
 
         // Child component has 2nd highest priority
-        } else if (root !== true && ((withExp = utils.attr(node, 'with')) || hasComponent)) {
+        } else if (root !== true && (Component = this.resolveComponent(node, undefined, true))) {
 
-            withExp = Directive.split(withExp || '')
-            withExp.forEach(function (exp, i) {
-                var directive = Directive.parse('with', exp, compiler, node)
-                if (directive) {
-                    // notify the directive that this is the
-                    // last expression in the group
-                    directive.last = i === withExp.length - 1
-                    compiler.deferred.push(directive)
-                }
-            })
+            directive = Directive.parse('component', '', compiler, node)
+            if (directive) {
+                directive.Ctor = Component
+                compiler.deferred.push(directive)
+            }
+
+            // should build component
+
+            // withExp = Directive.split(withExp || '')
+            // withExp.forEach(function (exp, i) {
+            //     var directive = Directive.parse('with', exp, compiler, node)
+            //     if (directive) {
+            //         // notify the directive that this is the
+            //         // last expression in the group
+            //         directive.last = i === withExp.length - 1
+            //         compiler.deferred.push(directive)
+            //     }
+            // })
 
         } else {
 
@@ -432,7 +435,13 @@ CompilerProto.compileNode = function (node) {
                 exp = exps[j]
                 dirname = attr.name.slice(prefix.length)
                 directive = Directive.parse(dirname, exp, this, node)
-                this.bindDirective(directive)
+
+                if (dirname === 'with') {
+                    this.bindDirective(directive, this.parent)
+                } else {
+                    this.bindDirective(directive)
+                }
+                
             }
         } else if (config.interpolate) {
             // non directive attribute, check interpolation tags
@@ -811,7 +820,10 @@ CompilerProto.eval = function (exp, data) {
  */
 CompilerProto.resolveComponent = function (node, data, test) {
 
-    var exp     = utils.attr(node, 'component', test),
+    // late require to avoid circular deps
+    ViewModel = ViewModel || require('./viewmodel')
+
+    var exp     = utils.attr(node, 'component'),
         tagName = node.tagName,
         id      = this.eval(exp, data),
         tagId   = (tagName.indexOf('-') > 0 && tagName.toLowerCase()),
@@ -822,8 +834,10 @@ CompilerProto.resolveComponent = function (node, data, test) {
     }
 
     return test
-        ? Ctor
-        : Ctor || (ViewModel || (ViewModel = require('./viewmodel')))
+        ? exp === ''
+            ? ViewModel
+            : Ctor
+        : Ctor || ViewModel
 }
 
 /**

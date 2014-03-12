@@ -13,6 +13,7 @@ module.exports = {
     style     : require('./style'),
     partial   : require('./partial'),
     view      : require('./view'),
+    component : require('./component'),
 
     attr: {
         bind: function () {

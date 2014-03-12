@@ -63,10 +63,10 @@ var utils = module.exports = {
     /**
      *  get an attribute and remove it.
      */
-    attr: function (el, type, preserve) {
+    attr: function (el, type) {
         var attr = config.prefix + '-' + type,
             val = el.getAttribute(attr)
-        if (!preserve && val !== null) {
+        if (val !== null) {
             el.removeAttribute(attr)
         }
         return val

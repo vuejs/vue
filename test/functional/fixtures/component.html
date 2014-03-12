@@ -5,8 +5,8 @@
     <!-- custom element + v-with -->
     <my-avatar id="element-and-with" v-with="user"></my-avatar>
 
-    <!-- v-with alone -->
-    <div id="with" v-with="user">{{hi}} {{name}}</div>
+    <!-- v-with with default Ctor -->
+    <div id="with" v-component v-with="user">{{hi}} {{name}}</div>
 
     <!-- v-component alone -->
     <div id="component" v-component="my-element"></div>
@@ -15,14 +15,15 @@
     <my-element id="element"></my-element>
 
     <!-- v-with + binding sync -->
-    <div id="with-sync" v-with="childHi:hi, childName:user.name">
+    <div id="with-sync" v-component v-with="childHi:hi, childName:user.name">
         {{childHi}} {{childName}}
     </div>
 
-    <div id="component-with-sync" v-component="sync" v-with="childHi:hi, childName:user.name"></div>
-
     <!-- conditional component -->
     <div id="conditional" v-component="{{ok ? 'my-element' : 'nope'}}"></div>
+
+    <!-- this one will change everything for everyone else... -->
+    <div id="component-with-sync" v-component="sync" v-with="childHi:hi, childName:user.name"></div>
 
     <!-- conditional component with v-repeat! -->
     <div class="repeat-conditional {{type}}" v-repeat="items" v-component="{{type}}"></div>
@@ -31,9 +32,9 @@
 <script src="../../../dist/vue.js"></script>
 <script>
 
-    Vue.config({
-        debug: true
-    })
+    // Vue.config({
+    //     debug: true
+    // })
 
     Vue.component('my-avatar', {
         template: '{{hi}} {{name}}'

@@ -609,7 +609,7 @@ describe('Directives', function () {
         
         it('should create a child viewmodel with given data', function () {
             var testId = 'with-test'
-            mock(testId, '<span v-with="test">{{msg}}</span>')
+            mock(testId, '<span v-component v-with="test">{{msg}}</span>')
             var t = new Vue({
                 el: '#' + testId,
                 data: {
@@ -625,7 +625,7 @@ describe('Directives', function () {
             var t = new Vue({
                 template:
                     '<span>{{test.msg}} {{n}}</span>'
-                    + '<p v-with="childMsg:test.msg, n:n" v-ref="child">{{childMsg}} {{n}}</p>',
+                    + '<p v-component v-with="childMsg:test.msg, n:n" v-ref="child">{{childMsg}} {{n}}</p>',
                 data: {
                     n: 1,
                     test: {
@@ -707,7 +707,7 @@ describe('Directives', function () {
 
         it('should work with interpolation', function () {
             t = new Vue({
-                template: '<div v-with="obj" v-ref="{{ok ? \'a\' : \'b\'}}"></div>',
+                template: '<div v-component v-with="obj" v-ref="{{ok ? \'a\' : \'b\'}}"></div>',
                 data: { obj: { a: 123 } }
             })
             assert.equal(t.$.b.a, 123)

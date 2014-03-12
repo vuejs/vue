@@ -12,7 +12,7 @@
 
 <script src="../../../dist/vue.js"></script>
 <script>
-    Vue.config({debug:true})
+    // Vue.config({debug:true})
     var log = document.getElementById('log')
     var T = Vue.extend({
         created: function () {
@@ -40,8 +40,8 @@
     })
     T.partial('partial-test', '{{partialMsg}}')
     T.component('vm-w-model', {
-        data : {
-            selfMsg: 'component with model '
+        ready: function () {
+            this.selfMsg = 'component + with '
         }
     })
     var C = T.extend({
