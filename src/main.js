@@ -173,7 +173,11 @@ function inheritOptions (child, parent, topLevel) {
             } else {
                 child[key].push(parentVal)
             }
-        } else if (topLevel && (type === 'Object' || parentType === 'Object')) {
+        } else if (
+            topLevel &&
+            (type === 'Object' || parentType === 'Object')
+            && !(parentVal instanceof ViewModel)
+        ) {
             // merge toplevel object options
             child[key] = inheritOptions(val, parentVal)
         } else if (val === undefined) {

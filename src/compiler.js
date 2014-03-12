@@ -576,7 +576,9 @@ CompilerProto.createBinding = function (key, directive) {
             // nested path on computed property
             compiler.defineExp(key, binding)
         } else {
-            // ensure path in data so it can be observed
+            // ensure path in data so that computed properties that
+            // access the path don't throw an error and can collect
+            // dependencies
             Observer.ensurePath(compiler.data, key)
             var parentKey = key.slice(0, key.lastIndexOf('.'))
             if (!bindings[parentKey]) {
