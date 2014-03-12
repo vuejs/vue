@@ -379,4 +379,12 @@ describe('Utils', function () {
 
     })
 
+    describe('checkNumber', function () {
+        // TODO
+    })
+
+    describe('objectToArray', function () {
+        // TODO
+    })
+
 })

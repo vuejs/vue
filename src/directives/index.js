@@ -14,11 +14,20 @@ module.exports = {
     partial   : require('./partial'),
     view      : require('./view'),
 
-    attr: function (value) {
-        if (value || value === 0) {
-            this.el.setAttribute(this.arg, value)
-        } else {
-            this.el.removeAttribute(this.arg)
+    attr: {
+        bind: function () {
+            var params = this.vm.$options.paramAttributes
+            this.isParam = params && params.indexOf(this.arg) > -1
+        },
+        update: function (value) {
+            if (value || value === 0) {
+                this.el.setAttribute(this.arg, value)
+            } else {
+                this.el.removeAttribute(this.arg)
+            }
+            if (this.isParam) {
+                this.vm[this.arg] = utils.checkNumber(value)
+            }
         }
     },
 

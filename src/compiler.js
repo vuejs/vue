@@ -94,10 +94,8 @@ function Compiler (vm, options) {
     // copy paramAttributes
     if (options.paramAttributes) {
         options.paramAttributes.forEach(function (attr) {
-            var val = el.getAttribute(attr)
-            vm[attr] = (isNaN(val) || val === null)
-                ? val
-                : Number(val)
+            var val = compiler.eval(el.getAttribute(attr))
+            vm[attr] = utils.checkNumber(val)
         })
     }
 
@@ -123,7 +121,9 @@ function Compiler (vm, options) {
     compiler.compile(el, true)
 
     // bind deferred directives (child components)
-    compiler.deferred.forEach(compiler.bindDirective, compiler)
+    compiler.deferred.forEach(function (dir) {
+        compiler.bindDirective(dir)
+    })
 
     // extract dependencies for computed properties
     compiler.parseDeps()
@@ -413,6 +413,7 @@ CompilerProto.compileNode = function (node) {
 
     var prefix = config.prefix + '-',
         attrs = slice.call(node.attributes),
+        params = this.options.paramAttributes,
         i = attrs.length, j, attr, isDirective, exps, exp, directive, dirname
 
     while (i--) {
@@ -438,7 +439,13 @@ CompilerProto.compileNode = function (node) {
             exp = TextParser.parseAttr(attr.value)
             if (exp) {
                 directive = Directive.parse('attr', attr.name + ':' + exp, this, node)
-                this.bindDirective(directive)
+                if (params && params.indexOf(attr.name) > -1) {
+                    // a param attribute... we should use the parent binding
+                    // to avoid circular updates like size={{size}}
+                    this.bindDirective(directive, this.parent)
+                } else {
+                    this.bindDirective(directive)
+                }
             }
         }
 
@@ -496,7 +503,7 @@ CompilerProto.compileTextNode = function (node) {
 /**
  *  Add a directive instance to the correct binding & viewmodel
  */
-CompilerProto.bindDirective = function (directive) {
+CompilerProto.bindDirective = function (directive, bindingOwner) {
 
     if (!directive) return
 
@@ -512,7 +519,7 @@ CompilerProto.bindDirective = function (directive) {
 
     // otherwise, we got more work to do...
     var binding,
-        compiler = this,
+        compiler = bindingOwner || this,
         key      = directive.key
 
     if (directive.isExp) {

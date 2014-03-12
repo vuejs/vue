@@ -117,6 +117,15 @@ var utils = module.exports = {
     },
 
     /**
+     *  When setting value on the VM, parse possible numbers
+     */
+    checkNumber: function (value) {
+        return (isNaN(value) || value === null || typeof value === 'boolean')
+            ? value
+            : Number(value)
+    },
+
+    /**
      *  simple extend
      */
     extend: function (obj, ext, protective) {
