@@ -3,7 +3,7 @@ var config    = require('./config'),
     win       = window,
     console   = win.console,
     timeout   = win.setTimeout,
-    THIS_RE   = /[^\w]this[\.\[]/,
+    THIS_RE   = /[^\w]this[^\w]/,
     hasClassList = 'classList' in document.documentElement,
     ViewModel // late def
 
@@ -41,6 +41,15 @@ var utils = module.exports = {
             obj = obj[path[d]]
         }
         obj[path[d]] = val
+    },
+
+    /**
+     *  return the base segment of a keypath
+     */
+    baseKey: function (key) {
+        return key.indexOf('.') > 0
+            ? key.split('.')[0]
+            : key
     },
 
     /**

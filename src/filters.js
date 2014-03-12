@@ -117,6 +117,12 @@ var filters = module.exports = {
 
     filterBy: function (arr, searchKey, delimiter, dataKey) {
 
+        // allow optional `in` delimiter
+        // because why not
+        if (delimiter && delimiter !== 'in') {
+            dataKey = delimiter
+        }
+
         // get the search string
         var search = stripQuotes(searchKey) || get(this, searchKey)
         if (!search) return arr
@@ -152,8 +158,8 @@ var filters = module.exports = {
 
         // sort on a copy to avoid mutating original array
         return arr.slice().sort(function (a, b) {
-            a = a[key]
-            b = b[key]
+            a = get(a, key)
+            b = get(b, key)
             return a === b ? 0 : a > b ? order : -order
         })
 

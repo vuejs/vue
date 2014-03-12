@@ -572,7 +572,7 @@ CompilerProto.createBinding = function (key, directive) {
             } else {
                 compiler.defineMeta(key, binding)
             }
-        } else if (computed && computed[key.split('.')[0]]) {
+        } else if (computed && computed[utils.baseKey(key)]) {
             // nested path on computed property
             compiler.defineExp(key, binding)
         } else {
@@ -725,7 +725,7 @@ CompilerProto.execHook = function (event) {
  *  Check if a compiler's data contains a keypath
  */
 CompilerProto.hasKey = function (key) {
-    var baseKey = key.split('.')[0]
+    var baseKey = utils.baseKey(key)
     return hasOwn.call(this.data, baseKey) ||
         hasOwn.call(this.vm, baseKey)
 }

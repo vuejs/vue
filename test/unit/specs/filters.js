@@ -130,25 +130,86 @@ describe('Filters', function () {
 
     describe('filterBy', function () {
         
-        var filter = filters.filterBy
+        var filter = filters.filterBy,
+            arr = [
+                { a: 1, b: { c: 'hello' }},
+                { a: 1, b: 'hello'},
+                { a: 1, b: 2 }
+            ],
+            vm = { search: { key: 'hello', datakey: 'b.c' }}
 
         it('should be computed', function () {
             assert.ok(filter.computed)
         })
 
-        // TODO
+        it('should recursively check for searchKey if no dataKey is provided', function () {
+            var res = filter.call(vm, arr, 'search.key')
+            assert.strictEqual(res.length, 2)
+            assert.deepEqual(res, arr.slice(0, 2))
+        })
+
+        it('should check for datakey only if provided', function () {
+            var res = filter.call(vm, arr, 'search.key', 'search.datakey')
+            assert.strictEqual(res.length, 1)
+            assert.strictEqual(res[0], arr[0])
+        })
+
+        it('should use literal searchKey if in single quotes', function () {
+            var res = filter.call(vm, arr, "'hello'", "'b.c'")
+            assert.strictEqual(res.length, 1)
+            assert.strictEqual(res[0], arr[0])
+        })
+
+        it('should accept optional delimiter', function () {
+            var res = filter.call(vm, arr, 'search.key', 'in', 'search.datakey')
+            assert.strictEqual(res.length, 1)
+            assert.strictEqual(res[0], arr[0])
+        })
 
     })
 
     describe('orderBy', function () {
 
-        var filter = filters.orderBy
+        var filter = filters.orderBy,
+            arr = [
+                { a: { b: 0 }, c: 'b'},
+                { a: { b: 2 }, c: 'c'},
+                { a: { b: 1 }, c: 'a'}
+            ]
         
         it('should be computed', function () {
             assert.ok(filter.computed)
         })
 
-        // TODO
+        it('should sort based on sortKey', function () {
+            var vm = { sortby: 'a.b' }
+            var res = filter.call(vm, arr, 'sortby')
+            assert.strictEqual(res[0].a.b, 0)
+            assert.strictEqual(res[1].a.b, 1)
+            assert.strictEqual(res[2].a.b, 2)
+        })
+
+        it('should sort based on sortKey and reverseKey', function () {
+            var vm = { sortby: 'a.b', reverse: true }
+            var res = filter.call(vm, arr, 'sortby', 'reverse')
+            assert.strictEqual(res[0].a.b, 2)
+            assert.strictEqual(res[1].a.b, 1)
+            assert.strictEqual(res[2].a.b, 0)
+        })
+
+        it('should sort with literal args and special -1 syntax', function () {
+            var res = filter.call({}, arr, "'c'", '-1')
+            assert.strictEqual(res[0].c, 'c')
+            assert.strictEqual(res[1].c, 'b')
+            assert.strictEqual(res[2].c, 'a')
+        })
+
+        it('should accept negate reverse key', function () {
+            var res = filter.call({ reverse: true }, arr, "'c'", '!reverse')
+            assert.strictEqual(res[0].c, 'a')
+            assert.strictEqual(res[1].c, 'b')
+            assert.strictEqual(res[2].c, 'c')
+        })
 
     })
 

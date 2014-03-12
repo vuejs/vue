@@ -3,17 +3,17 @@
 
 <div id="test">
     Sort by
-    <select v-model="sortKey">
+    <select id="sortby" v-model="sortKey">
         <option>name</option>
         <option>phone</option>
     </select>
     <br>
-    <input type="checkbox" v-model="reverse"> Reverse
+    <input id="reverse" type="checkbox" v-model="reverse"> Reverse
     <hr></hr>
-    Filter by <input v-model="searchText"> in name only
+    Filter by <input id="search" name="search" v-model="searchText"> in name only
     <table id="t1">
         <tr><th>Name</th><th>Phone</th></tr>
-        <tr v-repeat="friends | filterBy searchText in 'name' | orderBy sortKey reverse">
+        <tr v-repeat="friends | filterBy searchText in 'name' | orderBy sortKey reverse" class="item">
             <td>{{name}}</td>
             <td>{{phone}}</td>
         </tr>
@@ -22,20 +22,21 @@
     Filter by input in all fields and reversed
     <table id="t2">
         <tr><th>Name</th><th>Phone</th></tr>
-        <tr v-repeat="friends | filterBy searchText | orderBy sortKey !reverse">
+        <tr v-repeat="friends | filterBy searchText | orderBy sortKey !reverse" class="item">
             <td>{{name}}</td>
             <td>{{phone}}</td>
         </tr>
     </table>
     <hr></hr>
     Filter by "Julie" in
-    <select v-model="filterKey">
+    <select id="filterby" v-model="filterKey">
         <option>name</option>
         <option>phone</option>
     </select>
+    and reversed with literal -1
     <table id="t3">
         <tr><th>Name</th><th>Phone</th></tr>
-        <tr v-repeat="friends | filterBy 'Julie' in filterKey | orderBy sortKey -1">
+        <tr v-repeat="friends | filterBy 'Julie' in filterKey | orderBy sortKey -1" class="item">
             <td>{{name}}</td>
             <td>{{phone}}</td>
         </tr>
