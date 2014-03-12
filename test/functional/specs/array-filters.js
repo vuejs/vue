@@ -1,4 +1,4 @@
-casper.test.begin('Array Filters', 53, function (test) {
+casper.test.begin('Array Filters', 55, function (test) {
 
     var names = ['Adam', 'John', 'Julie', 'Juliette', 'Mary', 'Mike'],
         namesReversed = names.slice().reverse(),
@@ -55,6 +55,14 @@ casper.test.begin('Array Filters', 53, function (test) {
     .then(function () {
         test.assertElementCount('#t1 .item', 0)
         test.assertElementCount('#t2 .item', 5)
+    })
+    // enter search filter for nested properties
+    .then(function () {
+        this.sendKeys('#search', 'hidden', { reset: true })
+    })
+    .then(function () {
+        test.assertElementCount('#t1 .item', 0)
+        test.assertElementCount('#t2 .item', 1)
     })
     // change filterkey
     .thenEvaluate(function () {

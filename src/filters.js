@@ -14,32 +14,6 @@ var keyCodes = {
     esc      : 27
 }
 
-/**
- *  String contain helper
- */
-function contains (val, search) {
-    /* jshint eqeqeq: false */
-    if (utils.typeOf(val) === 'Object') {
-        for (var key in val) {
-            if (contains(val[key], search)) {
-                return true
-            }
-        }
-    } else if (val != null) {
-        return val.toString().toLowerCase().indexOf(search) > -1
-    }
-}
-
-/**
- *  Test whether a string is in quotes,
- *  if yes return stripped string
- */
-function stripQuotes (str) {
-    if (QUOTE_RE.test(str)) {
-        return str.slice(1, -1)
-    }
-}
-
 var filters = module.exports = {
 
     /**
@@ -131,6 +105,11 @@ var filters = module.exports = {
         // get the optional dataKey
         dataKey = dataKey && (stripQuotes(dataKey) || get(this, dataKey))
 
+        // convert object to array
+        if (!Array.isArray(arr)) {
+            arr = utils.objectToArray(arr)
+        }
+
         return arr.filter(function (item) {
             return dataKey
                 ? contains(get(item, dataKey), search)
@@ -143,6 +122,11 @@ var filters = module.exports = {
 
         var key = stripQuotes(sortKey) || get(this, sortKey)
         if (!key) return arr
+
+        // convert object to array
+        if (!Array.isArray(arr)) {
+            arr = utils.objectToArray(arr)
+        }
 
         var order = 1
         if (reverseKey) {
@@ -165,6 +149,34 @@ var filters = module.exports = {
 
     }
 
+}
+
+// Array filter helpers -------------------------------------------------------
+
+/**
+ *  String contain helper
+ */
+function contains (val, search) {
+    /* jshint eqeqeq: false */
+    if (utils.typeOf(val) === 'Object') {
+        for (var key in val) {
+            if (contains(val[key], search)) {
+                return true
+            }
+        }
+    } else if (val != null) {
+        return val.toString().toLowerCase().indexOf(search) > -1
+    }
+}
+
+/**
+ *  Test whether a string is in quotes,
+ *  if yes return stripped string
+ */
+function stripQuotes (str) {
+    if (QUOTE_RE.test(str)) {
+        return str.slice(1, -1)
+    }
 }
 
 // mark computed filters

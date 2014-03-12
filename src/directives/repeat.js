@@ -305,7 +305,7 @@ module.exports = {
 
         this.object = object
         var self = this,
-            collection = objectToArray(object)
+            collection = utils.objectToArray(object)
 
         this.syncRepeater = function (key, val) {
             if (key in object) {
@@ -375,22 +375,6 @@ module.exports = {
 }
 
 // Helpers --------------------------------------------------------------------
-
-/**
- *  Convert an Object to a v-repeat friendly Array
- */
-function objectToArray (obj) {
-    var res = [], val, data
-    for (var key in obj) {
-        val = obj[key]
-        data = utils.typeOf(val) === 'Object'
-            ? val
-            : { $value: val }
-        data.$key = key
-        res.push(data)
-    }
-    return res
-}
 
 /**
  *  Find an object or a wrapped data object

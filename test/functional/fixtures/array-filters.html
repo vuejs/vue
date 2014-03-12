@@ -19,10 +19,10 @@
         </tr>
     </table>
     <hr></hr>
-    Filter by input in all fields and reversed
+    Object, filtered by input in all fields and reversed
     <table id="t2">
         <tr><th>Name</th><th>Phone</th></tr>
-        <tr v-repeat="friends | filterBy searchText | orderBy sortKey !reverse" class="item">
+        <tr v-repeat="friendsObj | filterBy searchText | orderBy sortKey !reverse" class="item">
             <td>{{name}}</td>
             <td>{{phone}}</td>
         </tr>
@@ -58,7 +58,15 @@ new Vue({
             {name:'Adam', phone:'555-5678'},
             {name:'Julie', phone:'555-8765'},
             {name:'Juliette', phone:'555-5678'}
-        ]
+        ],
+        friendsObj: {
+            a: {name:'John', phone:'555-1276', hidden: { id: 'hidden!' } },
+            b: {name:'Mary', phone:'800-BIG-MARY'},
+            c: {name:'Mike', phone:'555-4321'},
+            d: {name:'Adam', phone:'555-5678'},
+            e: {name:'Julie', phone:'555-8765'},
+            f: {name:'Juliette', phone:'555-5678'}
+        }
     }
 })
 </script>

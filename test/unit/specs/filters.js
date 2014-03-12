@@ -166,6 +166,17 @@ describe('Filters', function () {
             assert.strictEqual(res[0], arr[0])
         })
 
+        it('should work with objects', function () {
+            var obj = {
+                a: arr[0],
+                b: arr[1],
+                c: arr[2]
+            }
+            var res = filter.call(vm, obj, "'a'", "'$key'")
+            assert.strictEqual(res.length, 1)
+            assert.strictEqual(res[0], arr[0])
+        })
+
     })
 
     describe('orderBy', function () {
@@ -209,6 +220,18 @@ describe('Filters', function () {
             assert.strictEqual(res[0].c, 'a')
             assert.strictEqual(res[1].c, 'b')
             assert.strictEqual(res[2].c, 'c')
+        })
+
+        it('should work with objects', function () {
+            var obj = {
+                a: arr[0],
+                b: arr[1],
+                c: arr[2]
+            }
+            var res = filter.call({}, obj, "'$key'", '-1')
+            assert.strictEqual(res[0].c, 'a')
+            assert.strictEqual(res[1].c, 'c')
+            assert.strictEqual(res[2].c, 'b')
         })
 
     })

@@ -256,6 +256,23 @@ var utils = module.exports = {
             }
             el.className = cur.trim()
         }
+    },
+
+    /**
+     *  Convert an object to Array
+     *  used in v-repeat and array filters
+     */
+    objectToArray: function (obj) {
+        var res = [], val, data
+        for (var key in obj) {
+            val = obj[key]
+            data = utils.typeOf(val) === 'Object'
+                ? val
+                : { $value: val }
+            data.$key = key
+            res.push(data)
+        }
+        return res
     }
 }
 
