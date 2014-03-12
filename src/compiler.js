@@ -57,7 +57,6 @@ function Compiler (vm, options) {
     compiler.bindings = makeHash()
     compiler.dirs = []
     compiler.deferred = []
-    compiler.exps = []
     compiler.computed = []
     compiler.children = []
     compiler.emitter = new Emitter()
@@ -657,7 +656,6 @@ CompilerProto.defineExp = function (key, binding, directive) {
         getter  = ExpParser.parse(key, this, null, filters)
     if (getter) {
         this.markComputed(binding, getter)
-        this.exps.push(binding)
     }
 }
 
@@ -834,7 +832,7 @@ CompilerProto.destroy = function () {
         vm          = compiler.vm,
         el          = compiler.el,
         directives  = compiler.dirs,
-        exps        = compiler.exps,
+        computed    = compiler.computed,
         bindings    = compiler.bindings,
         delegators  = compiler.delegators,
         children    = compiler.children,
@@ -860,13 +858,13 @@ CompilerProto.destroy = function () {
         dir.unbind()
     }
 
-    // unbind all expressions (anonymous bindings)
-    i = exps.length
+    // unbind all computed, anonymous bindings
+    i = computed.length
     while (i--) {
-        exps[i].unbind()
+        computed[i].unbind()
     }
 
-    // unbind all own bindings
+    // unbind all keypath bindings
     for (key in bindings) {
         binding = bindings[key]
         if (binding) {

@@ -457,7 +457,7 @@ describe('ViewModel', function () {
                 }
             },
             dirs: [dirMock],
-            exps: [{
+            computed: [{
                 unbind: function () {
                     expUnbindCalled = true
                 }
