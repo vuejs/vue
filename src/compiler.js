@@ -22,6 +22,15 @@ var Emitter     = require('./emitter'),
         'created', 'ready',
         'beforeDestroy', 'afterDestroy',
         'attached', 'detached'
+    ],
+
+    // list of priority directives
+    // that needs to be checked in specific order
+    priorityDirectives = [
+        //'if',
+        'repeat',
+        'view',
+        'component'
     ]
 
 /**
@@ -324,67 +333,56 @@ CompilerProto.observeData = function (data) {
  */
 CompilerProto.compile = function (node, root) {
 
-    /* jshint boss: true */
-
     var compiler = this,
-        nodeType = node.nodeType,
-        tagName  = node.tagName
+        nodeType = node.nodeType
 
-    if (nodeType === 1 && tagName !== 'SCRIPT') { // a normal node
-
+    if (nodeType === 1 && node.tagName !== 'SCRIPT') { // a normal node
+        
         // skip anything with v-pre
-        if (utils.attr(node, 'pre') !== null) return
-
-        // special attributes to check
-        var directive, repeatExp, viewExp, Component
-
-        // priority order for directives that create child VMs:
-        // repeat => view => component
-
-        if (repeatExp = utils.attr(node, 'repeat')) {
-
-            // repeat block cannot have v-id at the same time.
-            directive = Directive.parse('repeat', repeatExp, compiler, node)
-            if (directive) {
-                // defer child component compilation
-                // so by the time they are compiled, the parent
-                // would have collected all bindings
-                compiler.deferred.push(directive)
-            }
-
-        } else if (viewExp = utils.attr(node, 'view')) {
-
-            directive = Directive.parse('view', viewExp, compiler, node)
-            if (directive) {
-                compiler.deferred.push(directive)
-            }
-
-        } else if (root !== true && (Component = this.resolveComponent(node, undefined, true))) {
-
-            directive = Directive.parse('component', '', compiler, node)
-            if (directive) {
-                directive.Ctor = Component
-                compiler.deferred.push(directive)
-            }
-
-        } else {
-
-            // compile normal directives
-            compiler.compileNode(node)
-
+        if (utils.attr(node, 'pre') !== null) {
+            return
         }
 
-    } else if (nodeType === 3 && config.interpolate) {
+        // check priority directives.
+        // if any of them are present, it will take over the node with a childVM
+        // so we can skip the rest
+        for (var i = 0, l = priorityDirectives.length; i < l; i++) {
+            if (compiler.checkPriorityDir(priorityDirectives[i], node, root)) {
+                return
+            }
+        }
 
+        // if none of the priority directives applies,
+        // compile the normal directives.
+        compiler.compileNode(node)
+
+    } else if (nodeType === 3 && config.interpolate) {
         // text node
         compiler.compileTextNode(node)
-
     }
-
 }
 
 /**
- *  Compile a normal node
+ *  Check for a priority directive
+ *  If it is present and valid, return true to skip the rest
+ */
+CompilerProto.checkPriorityDir = function (dirname, node, root) {
+    var expression, directive, Ctor
+    if (dirname === 'component' && root !== true && (Ctor = this.resolveComponent(node, undefined, true))) {
+        directive = Directive.parse(dirname, '', this, node)
+        directive.Ctor = Ctor
+    } else {
+        expression = utils.attr(node, dirname)
+        directive = expression && Directive.parse(dirname, expression, this, node)
+    }
+    if (directive) {
+        this.deferred.push(directive)
+        return true
+    }
+}
+
+/**
+ *  Compile normal directives on a node
  */
 CompilerProto.compileNode = function (node) {
 
