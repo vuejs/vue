@@ -339,13 +339,9 @@ CompilerProto.compile = function (node, root) {
         // special attributes to check
         var directive, repeatExp, viewExp, Component
 
-        // It is important that we access these attributes
-        // procedurally because the order matters.
-        // `utils.attr` removes the attribute once it gets the
-        // value, so we should not access them all at once.
+        // priority order for directives that create child VMs:
+        // repeat => view => component
 
-        // v-repeat has the highest priority
-        // and we need to preserve all other attributes for it.
         if (repeatExp = utils.attr(node, 'repeat')) {
 
             // repeat block cannot have v-id at the same time.
@@ -364,7 +360,6 @@ CompilerProto.compile = function (node, root) {
                 compiler.deferred.push(directive)
             }
 
-        // Child component has 2nd highest priority
         } else if (root !== true && (Component = this.resolveComponent(node, undefined, true))) {
 
             directive = Directive.parse('component', '', compiler, node)
@@ -373,23 +368,8 @@ CompilerProto.compile = function (node, root) {
                 compiler.deferred.push(directive)
             }
 
-            // should build component
-
-            // withExp = Directive.split(withExp || '')
-            // withExp.forEach(function (exp, i) {
-            //     var directive = Directive.parse('with', exp, compiler, node)
-            //     if (directive) {
-            //         // notify the directive that this is the
-            //         // last expression in the group
-            //         directive.last = i === withExp.length - 1
-            //         compiler.deferred.push(directive)
-            //     }
-            // })
-
         } else {
 
-            // remove the component directive
-            utils.attr(node, 'component')
             // compile normal directives
             compiler.compileNode(node)
 

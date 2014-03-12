@@ -23,7 +23,6 @@
         "src/transition.js",
         "src/batcher.js",
         "src/directives/index.js",
-        "src/directives/component.js",
         "src/directives/if.js",
         "src/directives/repeat.js",
         "src/directives/on.js",
