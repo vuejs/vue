@@ -534,6 +534,11 @@ CompilerProto.bindDirective = function (directive, bindingOwner) {
     }
     // set initial value
     directive.update(value, true)
+
+    // handle textarea initial value
+    if (directive.el.tagName === 'TEXTAREA' && directive.el.hasChildNodes()) {
+        directive._dirty = true;
+    }
 }
 
 /**
