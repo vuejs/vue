@@ -1,6 +1,7 @@
 var utils           = require('./utils'),
     STR_SAVE_RE     = /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/g,
     STR_RESTORE_RE  = /"(\d+)"/g,
+    NEWLINE_RE      = /\n/g,
     CTOR_RE         = new RegExp('constructor'.split('').join('[\'"+, ]*')),
     UNICODE_RE      = /\\u\d\d\d\d/,
     QUOTE_RE        = /"/g
@@ -172,7 +173,9 @@ exports.parse = function (exp, compiler, data, filters) {
 
     function saveStrings (str) {
         var i = strings.length
-        strings[i] = str
+        // escape newlines in strings so the expression
+        // can be correctly evaluated
+        strings[i] = str.replace(NEWLINE_RE, '\\n')
         return '"' + i + '"'
     }
 

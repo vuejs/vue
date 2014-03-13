@@ -332,33 +332,11 @@ CompilerProto.observeData = function (data) {
  *  Compile a DOM node (recursive)
  */
 CompilerProto.compile = function (node, root) {
-
-    var compiler = this,
-        nodeType = node.nodeType
-
+    var nodeType = node.nodeType
     if (nodeType === 1 && node.tagName !== 'SCRIPT') { // a normal node
-        
-        // skip anything with v-pre
-        if (utils.attr(node, 'pre') !== null) {
-            return
-        }
-
-        // check priority directives.
-        // if any of them are present, it will take over the node with a childVM
-        // so we can skip the rest
-        for (var i = 0, l = priorityDirectives.length; i < l; i++) {
-            if (compiler.checkPriorityDir(priorityDirectives[i], node, root)) {
-                return
-            }
-        }
-
-        // if none of the priority directives applies,
-        // compile the normal directives.
-        compiler.compileNode(node)
-
+        this.compileElement(node, root)
     } else if (nodeType === 3 && config.interpolate) {
-        // text node
-        compiler.compileTextNode(node)
+        this.compileTextNode(node)
     }
 }
 
@@ -368,7 +346,7 @@ CompilerProto.compile = function (node, root) {
  */
 CompilerProto.checkPriorityDir = function (dirname, node, root) {
     var expression, directive, Ctor
-    if (dirname === 'component' && (Ctor = this.resolveComponent(node, undefined, true))) {
+    if (dirname === 'component' && root !== true && (Ctor = this.resolveComponent(node, undefined, true))) {
         directive = Directive.parse(dirname, '', this, node)
         directive.Ctor = Ctor
     } else {
@@ -388,64 +366,83 @@ CompilerProto.checkPriorityDir = function (dirname, node, root) {
 /**
  *  Compile normal directives on a node
  */
-CompilerProto.compileNode = function (node) {
+CompilerProto.compileElement = function (node, root) {
 
-    // check transition & animation properties
-    node.vue_trans  = utils.attr(node, 'transition')
-    node.vue_anim   = utils.attr(node, 'animation')
-    node.vue_effect = this.eval(utils.attr(node, 'effect'))
+    if (node.hasAttributes() || node.tagName.indexOf('-') > -1) {
 
-    var prefix = config.prefix + '-',
-        attrs = slice.call(node.attributes),
-        params = this.options.paramAttributes,
-        i = attrs.length, j, attr, isDirective, exps, exp, directive, dirname
+        // skip anything with v-pre
+        if (utils.attr(node, 'pre') !== null) {
+            return
+        }
 
-    while (i--) {
-
-        attr = attrs[i]
-        isDirective = false
-
-        if (attr.name.indexOf(prefix) === 0) {
-            // a directive - split, parse and bind it.
-            isDirective = true
-            exps = Directive.split(attr.value)
-            // loop through clauses (separated by ",")
-            // inside each attribute
-            j = exps.length
-            while (j--) {
-                exp = exps[j]
-                dirname = attr.name.slice(prefix.length)
-                directive = Directive.parse(dirname, exp, this, node)
-
-                if (dirname === 'with') {
-                    this.bindDirective(directive, this.parent)
-                } else {
-                    this.bindDirective(directive)
-                }
-                
-            }
-        } else if (config.interpolate) {
-            // non directive attribute, check interpolation tags
-            exp = TextParser.parseAttr(attr.value)
-            if (exp) {
-                directive = Directive.parse('attr', attr.name + ':' + exp, this, node)
-                if (params && params.indexOf(attr.name) > -1) {
-                    // a param attribute... we should use the parent binding
-                    // to avoid circular updates like size={{size}}
-                    this.bindDirective(directive, this.parent)
-                } else {
-                    this.bindDirective(directive)
-                }
+        // check priority directives.
+        // if any of them are present, it will take over the node with a childVM
+        // so we can skip the rest
+        for (var i = 0, l = priorityDirectives.length; i < l; i++) {
+            if (this.checkPriorityDir(priorityDirectives[i], node, root)) {
+                return
             }
         }
 
-        if (isDirective && dirname !== 'cloak') {
-            node.removeAttribute(attr.name)
+        // check transition & animation properties
+        node.vue_trans  = utils.attr(node, 'transition')
+        node.vue_anim   = utils.attr(node, 'animation')
+        node.vue_effect = this.eval(utils.attr(node, 'effect'))
+
+        var prefix = config.prefix + '-',
+            attrs = slice.call(node.attributes),
+            params = this.options.paramAttributes,
+            attr, isDirective, exps, exp, directive, dirname
+
+        i = attrs.length
+        while (i--) {
+
+            attr = attrs[i]
+            isDirective = false
+
+            if (attr.name.indexOf(prefix) === 0) {
+                // a directive - split, parse and bind it.
+                isDirective = true
+                exps = Directive.split(attr.value)
+                // loop through clauses (separated by ",")
+                // inside each attribute
+                l = exps.length
+                while (l--) {
+                    exp = exps[l]
+                    dirname = attr.name.slice(prefix.length)
+                    directive = Directive.parse(dirname, exp, this, node)
+
+                    if (dirname === 'with') {
+                        this.bindDirective(directive, this.parent)
+                    } else {
+                        this.bindDirective(directive)
+                    }
+                    
+                }
+            } else if (config.interpolate) {
+                // non directive attribute, check interpolation tags
+                exp = TextParser.parseAttr(attr.value)
+                if (exp) {
+                    directive = Directive.parse('attr', attr.name + ':' + exp, this, node)
+                    if (params && params.indexOf(attr.name) > -1) {
+                        // a param attribute... we should use the parent binding
+                        // to avoid circular updates like size={{size}}
+                        this.bindDirective(directive, this.parent)
+                    } else {
+                        this.bindDirective(directive)
+                    }
+                }
+            }
+
+            if (isDirective && dirname !== 'cloak') {
+                node.removeAttribute(attr.name)
+            }
         }
+
     }
 
     // recursively compile childNodes
-    if (node.childNodes.length) {
+    if (node.hasChildNodes() && node.tagName !== 'TEXTAREA') {
         slice.call(node.childNodes).forEach(this.compile, this)
     }
 }

@@ -20,7 +20,7 @@ casper.test.begin('Forms', 13, function (test) {
                 return o.value || o.text
             })
         }, ['a', 'c'])
-        test.assertField('textarea', 'more text')
+        test.assertField('textarea', 'more some text')
     })
     .then(function () {
         this.fill('#forms', {

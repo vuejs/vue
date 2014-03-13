@@ -27,6 +27,11 @@ module.exports = {
         self.lock = false
         self.ownerVM = self.binding.compiler.vm
 
+        // textarea
+        if (tag === 'TEXTAREA' && el.value) {
+            el.value = self.compiler.eval(el.value)
+        }
+
         // determine what event to listen to
         self.event =
             (self.compiler.options.lazy ||
