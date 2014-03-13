@@ -27,7 +27,7 @@ var Emitter     = require('./emitter'),
     // list of priority directives
     // that needs to be checked in specific order
     priorityDirectives = [
-        'if',
+        'i' + 'f',
         'repeat',
         'view',
         'component'
