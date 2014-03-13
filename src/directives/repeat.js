@@ -200,12 +200,6 @@ module.exports = {
         var ref = vms.length > index
             ? vms[index].$el
             : self.ref
-        
-        // if reference VM is detached by v-if,
-        // use its v-if ref node instead
-        if (!ref.parentNode) {
-            ref = ref.vue_if_ref
-        }
 
         // check if data already exists in the old array
         oldIndex = self.oldVMs ? indexOf(self.oldVMs, data) : -1
@@ -225,10 +219,6 @@ module.exports = {
 
             // first clone the template node
             el = self.el.cloneNode(true)
-            // then we provide the parentNode for v-if
-            // so that it can still work in a detached state
-            el.vue_if_parent = ctn
-            el.vue_if_ref = ref
 
             // we have an alias, wrap the data
             if (self.arg) {
@@ -277,22 +267,18 @@ module.exports = {
         // Finally, DOM operations...
         el = item.$el
         if (existing) {
-            // we simplify need to re-insert the existing node
-            // to its new position. However, it can possibly be
-            // detached by v-if. in that case we insert its v-if
-            // ref node instead.
-            ctn.insertBefore(el.parentNode ? el : el.vue_if_ref, ref)
+            // existing vm, we simplify need to re-insert
+            // its element to the new position.
+            ctn.insertBefore(el, ref)
         } else {
-            if (el.vue_if !== false) {
-                if (self.compiler.init) {
-                    // do not transition on initial compile,
-                    // just manually insert.
-                    ctn.insertBefore(el, ref)
-                    item.$compiler.execHook('attached')
-                } else {
-                    // give it some nice transition.
-                    item.$before(ref)
-                }
+            if (self.compiler.init) {
+                // do not transition on initial compile,
+                // just manually insert.
+                ctn.insertBefore(el, ref)
+                item.$compiler.execHook('attached')
+            } else {
+                // give it some nice transition.
+                item.$before(ref)
             }
         }
     },

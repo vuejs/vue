@@ -18,15 +18,15 @@ module.exports = {
         isLiteral: true,
         bind: function () {
             if (!this.el.vue_vm) {
-                this.component = new this.Ctor({
+                this.childVM = new this.Ctor({
                     el: this.el,
                     parent: this.vm
                 })
             }
         },
         unbind: function () {
-            if (this.component) {
-                this.component.$destroy()
+            if (this.childVM) {
+                this.childVM.$destroy()
             }
         }
     },

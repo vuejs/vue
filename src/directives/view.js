@@ -21,9 +21,7 @@ module.exports = {
 
     update: function(value) {
 
-        if (this.childVM) {
-            this.childVM.$destroy()
-        }
+        this._unbind()
 
         var Ctor  = this.compiler.getOption('components', value)
         if (!Ctor) return

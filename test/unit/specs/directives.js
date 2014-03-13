@@ -413,62 +413,6 @@ describe('Directives', function () {
 
     })
 
-    describe('if', function () {
-
-        it('should remain detached if it was detached during bind() and never attached', function () {
-            var dir = mockDirective('if')
-            dir.bind()
-            dir.update(true)
-            assert.notOk(dir.el.parentNode)
-            dir.update(false)
-            assert.notOk(dir.el.parentNode)
-        })
-
-        it('should remove el and insert ref when value is falsy', function () {
-            var dir = mockDirective('if'),
-                parent = document.createElement('div')
-            parent.appendChild(dir.el)
-            dir.bind()
-            dir.update(false)
-            assert.notOk(dir.el.parentNode)
-            assert.notOk(parent.contains(dir.el))
-            // phantomJS weird bug:
-            // Node.contains() returns false when argument is a comment node.
-            assert.strictEqual(dir.ref.parentNode, parent)
-        })
-
-        it('should append el and remove ref when value is truthy', function () {
-            var dir = mockDirective('if'),
-                parent = document.createElement('div')
-            parent.appendChild(dir.el)
-            dir.bind()
-            dir.update(false)
-            dir.update(true)
-            assert.strictEqual(dir.el.parentNode, parent)
-            assert.ok(parent.contains(dir.el))
-            assert.notOk(parent.contains(dir.ref))
-        })
-
-        it('should work even if it was detached during bind()', function () {
-            var dir = mockDirective('if')
-            dir.bind()
-            var parent = document.createElement('div')
-            parent.appendChild(dir.el)
-
-            dir.update(false)
-            assert.strictEqual(dir.parent, parent)
-            assert.notOk(dir.el.parentNode)
-            assert.notOk(parent.contains(dir.el))
-            assert.strictEqual(dir.ref.parentNode, parent)
-
-            dir.update(true)
-            assert.strictEqual(dir.el.parentNode, parent)
-            assert.ok(parent.contains(dir.el))
-            assert.notOk(parent.contains(dir.ref))
-        })
-
-    })
-
     describe('on', function () {
         
         var dir = mockDirective('on')
@@ -743,6 +687,154 @@ describe('Directives', function () {
 
     })
 
+    describe('style', function () {
+        
+        it('should apply a normal style', function () {
+            var d = mockDirective('style')
+            d.arg = 'text-align'
+            d.bind()
+            assert.strictEqual(d.prop, 'textAlign')
+            d.update('center')
+            assert.strictEqual(d.el.style.textAlign, 'center')
+        })
+
+        it('should apply prefixed style', function () {
+            var d = mockDirective('style')
+            d.arg = '-webkit-transform'
+            d.bind()
+            assert.strictEqual(d.prop, 'webkitTransform')
+            d.update('scale(2)')
+            assert.strictEqual(d.el.style.webkitTransform, 'scale(2)')
+        })
+
+        it('should auto prefix styles', function () {
+            var d = mockDirective('style')
+            d.arg = '$transform'
+            d.bind()
+            assert.ok(d.prefixed)
+            assert.strictEqual(d.prop, 'transform')
+            var val = 'scale(2)'
+            d.update(val)
+            assert.strictEqual(d.el.style.transform, val)
+            assert.strictEqual(d.el.style.webkitTransform, val)
+            assert.strictEqual(d.el.style.mozTransform, val)
+            assert.strictEqual(d.el.style.msTransform, val)
+        })
+
+        it('should set cssText if no arg', function () {
+            var d = mockDirective('style')
+            d.bind()
+            var val = 'color:#fff'
+            d.update(val)
+            assert.strictEqual(d.el.style.color, 'rgb(255, 255, 255)')
+        })
+
+    })
+
+    describe('cloak', function () {
+        
+        it('should remove itself after the instance is ready', function () {
+            // it doesn't make sense to test with a mock for this one, so...
+            var v = new Vue({
+                template: '<div v-cloak></div>',
+                replace: true,
+                ready: function () {
+                    // this hook is attached before the v-cloak hook
+                    // so it should still have the attribute
+                    assert.ok(this.$el.hasAttribute('v-cloak'))
+                }
+            })
+            assert.notOk(v.$el.hasAttribute('v-cloak'))
+        })
+
+    })
+
+    describe('if', function () {
+
+        var v
+
+        it('should create and insert the childVM when value is truthy', function () {
+
+            v = new Vue({
+                template: '<div v-if="ok">{{msg}}</div>',
+                data: {
+                    ok: true,
+                    msg: 'hello'
+                }
+            })
+            assert.strictEqual(v.$el.innerHTML, '<div>hello</div><!--vue-if-->')
+
+        })
+
+        it('should destroy childVM and remove content when value is falsy', function (done) {
+
+            v.ok = false
+            nextTick(function () {
+                assert.strictEqual(v.$el.innerHTML, '<!--vue-if-->')
+                done()
+            })
+
+        })
+
+        it('should work with v-component', function (done) {
+            
+            v = new Vue({
+                template: '<div v-if="ok" v-component="test"></div>',
+                data: {
+                    ok: true,
+                    msg: 'hello'
+                },
+                components: {
+                    test: {
+                        template: '{{msg}}'
+                    }
+                }
+            })
+            assert.strictEqual(v.$el.innerHTML, '<div>hello</div><!--vue-if-->')
+
+            v.ok = false
+            nextTick(function () {
+                assert.strictEqual(v.$el.innerHTML, '<!--vue-if-->')
+                done()
+            })
+
+        })
+
+    })
+
+    describe('view', function () {
+        
+        it('should dynamically switch components', function (done) {
+            
+            var v = new Vue({
+                template: '<div v-view="view" class="view"></div>',
+                data: {
+                    view: 'a'
+                },
+                components: {
+                    a: { template: 'A' },
+                    b: { template: 'B' }
+                }
+            })
+
+            assert.equal(
+                v.$el.innerHTML,
+                '<div class="view">A</div><!--v-view-->'
+            )
+            v.view = 'b'
+
+            nextTick(function () {
+                assert.equal(
+                    v.$el.innerHTML,
+                    '<div class="view">B</div><!--v-view-->'
+                )
+                done()
+            })
+
+        })
+
+    })
+
     // More detailed testing for v-repeat can be found in functional tests.
     // this is mainly for code coverage
     describe('repeat', function () {
@@ -930,101 +1022,6 @@ describe('Directives', function () {
             nextTick(function () {
                 assert.strictEqual(v.$el.textContent, '223')
                 assert.strictEqual(v.items[0].id, 2)
-                done()
-            })
-
-        })
-
-    })
-
-    describe('style', function () {
-        
-        it('should apply a normal style', function () {
-            var d = mockDirective('style')
-            d.arg = 'text-align'
-            d.bind()
-            assert.strictEqual(d.prop, 'textAlign')
-            d.update('center')
-            assert.strictEqual(d.el.style.textAlign, 'center')
-        })
-
-        it('should apply prefixed style', function () {
-            var d = mockDirective('style')
-            d.arg = '-webkit-transform'
-            d.bind()
-            assert.strictEqual(d.prop, 'webkitTransform')
-            d.update('scale(2)')
-            assert.strictEqual(d.el.style.webkitTransform, 'scale(2)')
-        })
-
-        it('should auto prefix styles', function () {
-            var d = mockDirective('style')
-            d.arg = '$transform'
-            d.bind()
-            assert.ok(d.prefixed)
-            assert.strictEqual(d.prop, 'transform')
-            var val = 'scale(2)'
-            d.update(val)
-            assert.strictEqual(d.el.style.transform, val)
-            assert.strictEqual(d.el.style.webkitTransform, val)
-            assert.strictEqual(d.el.style.mozTransform, val)
-            assert.strictEqual(d.el.style.msTransform, val)
-        })
-
-        it('should set cssText if no arg', function () {
-            var d = mockDirective('style')
-            d.bind()
-            var val = 'color:#fff'
-            d.update(val)
-            assert.strictEqual(d.el.style.color, 'rgb(255, 255, 255)')
-        })
-
-    })
-
-    describe('cloak', function () {
-        
-        it('should remove itself after the instance is ready', function () {
-            // it doesn't make sense to test with a mock for this one, so...
-            var v = new Vue({
-                template: '<div v-cloak></div>',
-                replace: true,
-                ready: function () {
-                    // this hook is attached before the v-cloak hook
-                    // so it should still have the attribute
-                    assert.ok(this.$el.hasAttribute('v-cloak'))
-                }
-            })
-            assert.notOk(v.$el.hasAttribute('v-cloak'))
-        })
-
-    })
-
-    describe('view', function () {
-        
-        it('should dynamically switch components', function (done) {
-            
-            var v = new Vue({
-                template: '<div v-view="view" class="view"></div>',
-                data: {
-                    view: 'a'
-                },
-                components: {
-                    a: { template: 'A' },
-                    b: { template: 'B' }
-                }
-            })
-
-            assert.equal(
-                v.$el.innerHTML,
-                '<div class="view">A</div><!--v-view-->'
-            )
-            v.view = 'b'
-
-            nextTick(function () {
-                assert.equal(
-                    v.$el.innerHTML,
-                    '<div class="view">B</div><!--v-view-->'
-                )
                 done()
             })
 

@@ -27,7 +27,7 @@ var Emitter     = require('./emitter'),
     // list of priority directives
     // that needs to be checked in specific order
     priorityDirectives = [
-        //'if',
+        'if',
         'repeat',
         'view',
         'component'
@@ -368,7 +368,7 @@ CompilerProto.compile = function (node, root) {
  */
 CompilerProto.checkPriorityDir = function (dirname, node, root) {
     var expression, directive, Ctor
-    if (dirname === 'component' && root !== true && (Ctor = this.resolveComponent(node, undefined, true))) {
+    if (dirname === 'component' && (Ctor = this.resolveComponent(node, undefined, true))) {
         directive = Directive.parse(dirname, '', this, node)
         directive.Ctor = Ctor
     } else {
@@ -376,6 +376,10 @@ CompilerProto.checkPriorityDir = function (dirname, node, root) {
         directive = expression && Directive.parse(dirname, expression, this, node)
     }
     if (directive) {
+        if (root === true) {
+            utils.warn('Directive v-' + dirname + ' cannot be used on manually instantiated root node.')
+            return
+        }
         this.deferred.push(directive)
         return true
     }
