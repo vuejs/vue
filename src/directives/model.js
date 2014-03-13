@@ -139,6 +139,9 @@ module.exports = {
             el.checked = value == el.value
         } else if (el.type === 'checkbox') { // checkbox
             el.checked = !!value
+        } else if (el.type === 'textarea' && this._dirty) {
+            this._set()
+            this._dirty = false
         } else {
             el[this.attr] = utils.guard(value)
         }
