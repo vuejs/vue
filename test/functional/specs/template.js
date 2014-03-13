@@ -10,7 +10,7 @@ casper.test.begin('Templates and Partials', 6, function (test) {
         test.assertSelectorHasText('#repeat', 'Repeat', 'inline partial with repeat')
         test.assertEvalEquals(function () {
             return document.querySelector('#yielder').innerHTML
-        }, '<yielder><h1>before</h1><p>A</p><p>B</p><h2>after</h2></yielder>')
+        }, '<x-yielder><h1>before</h1><p>A</p><p>B</p><h2>after</h2></x-yielder>')
     })
     .run(function () {
         test.done()

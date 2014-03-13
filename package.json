@@ -31,7 +31,7 @@
     "grunt-karma": "~0.6.2",
     "grunt-karma-coveralls": "~2.3.0",
     "grunt-saucelabs": "~4.1.2",
-    "gulp-component": "~0.1.4",
+    "gulp-component": "~0.1.6",
     "vinyl-fs": "~0.0.2",
     "jshint-stylish": "~0.1.4",
     "semver": "~2.2.1",

@@ -1,6 +1,5 @@
 var utils      = require('./utils'),
     directives = require('./directives'),
-    filters    = require('./filters'),
 
     // Regexes!
 
@@ -13,7 +12,7 @@ var utils      = require('./utils'),
 
     ARG_RE          = /^([\w-$ ]+):(.+)$/,
     FILTERS_RE      = /\|[^\|]+/g,
-    FILTER_TOKEN_RE = /[^\s']+|'[^']+'/g,
+    FILTER_TOKEN_RE = /[^\s']+|'[^']+'|[^\s"]+|"[^"]+"/g,
     NESTING_RE      = /^\$(parent|root)\./,
     SINGLE_VAR_RE   = /^[\w\.$]+$/
 
@@ -21,11 +20,13 @@ var utils      = require('./utils'),
  *  Directive class
  *  represents a single directive instance in the DOM
  */
-function Directive (definition, expression, rawKey, compiler, node) {
+function Directive (dirname, definition, expression, rawKey, compiler, node) {
 
-    this.compiler = compiler
-    this.vm       = compiler.vm
-    this.el       = node
+    this.name           = dirname
+    this.compiler       = compiler
+    this.vm             = compiler.vm
+    this.el             = node
+    this.computeFilters = false
 
     var isEmpty   = expression === ''
 
@@ -48,24 +49,39 @@ function Directive (definition, expression, rawKey, compiler, node) {
         return
     }
 
-    this.expression = expression.trim()
-    this.rawKey     = rawKey
+    this.expression = (
+        this.isLiteral
+            ? compiler.eval(expression)
+            : expression
+    ).trim()
     
     parseKey(this, rawKey)
-
-    this.isExp = !SINGLE_VAR_RE.test(this.key) || NESTING_RE.test(this.key)
     
     var filterExps = this.expression.slice(rawKey.length).match(FILTERS_RE)
     if (filterExps) {
         this.filters = []
         for (var i = 0, l = filterExps.length, filter; i < l; i++) {
             filter = parseFilter(filterExps[i], this.compiler)
-            if (filter) this.filters.push(filter)
+            if (filter) {
+                this.filters.push(filter)
+                if (filter.apply.computed) {
+                    // some special filters, e.g. filterBy & orderBy,
+                    // can involve VM properties and they often need to
+                    // be computed.
+                    this.computeFilters = true
+                }
+            }
         }
         if (!this.filters.length) this.filters = null
     } else {
         this.filters = null
     }
+
+    this.isExp =
+        this.computeFilters ||
+        !SINGLE_VAR_RE.test(this.key) ||
+        NESTING_RE.test(this.key)
+
 }
 
 var DirProto = Directive.prototype
@@ -94,12 +110,9 @@ function parseFilter (filter, compiler) {
 
     var tokens = filter.slice(1).match(FILTER_TOKEN_RE)
     if (!tokens) return
-    tokens = tokens.map(function (token) {
-        return token.replace(/'/g, '').trim()
-    })
 
     var name = tokens[0],
-        apply = compiler.getOption('filters', name) || filters[name]
+        apply = compiler.getOption('filters', name)
     if (!apply) {
         utils.warn('Unknown filter: ' + name)
         return
@@ -125,7 +138,7 @@ DirProto.update = function (value, init) {
         this.value = value
         if (this._update) {
             this._update(
-                this.filters
+                this.filters && !this.computeFilters
                     ? this.applyFilters(value)
                     : value,
                 init
@@ -141,7 +154,7 @@ DirProto.applyFilters = function (value) {
     var filtered = value, filter
     for (var i = 0, l = this.filters.length; i < l; i++) {
         filter = this.filters[i]
-        filtered = filter.apply.call(this.vm, filtered, filter.args)
+        filtered = filter.apply.apply(this.vm, [filtered].concat(filter.args))
     }
     return filtered
 }
@@ -175,7 +188,10 @@ Directive.split = function (exp) {
 Directive.parse = function (dirname, expression, compiler, node) {
 
     var dir = compiler.getOption('directives', dirname) || directives[dirname]
-    if (!dir) return utils.warn('unknown directive: ' + dirname)
+    if (!dir) {
+        utils.warn('unknown directive: ' + dirname)
+        return
+    }
 
     var rawKey
     if (expression.indexOf('|') > -1) {
@@ -188,9 +204,11 @@ Directive.parse = function (dirname, expression, compiler, node) {
     }
     
     // have a valid raw key, or be an empty directive
-    return (rawKey || expression === '')
-        ? new Directive(dir, expression, rawKey, compiler, node)
-        : utils.warn('invalid directive expression: ' + expression)
+    if (rawKey || expression === '') {
+        return new Directive(dirname, dir, expression, rawKey, compiler, node)
+    } else {
+        utils.warn('invalid directive expression: ' + expression)
+    }
 }
 
 module.exports = Directive

@@ -1,4 +1,4 @@
-describe('UNIT: Expression Parser', function () {
+describe('Expression Parser', function () {
 
     var ExpParser = require('vue/src/exp-parser'),
         utils = require('vue/src/utils'),
@@ -87,24 +87,77 @@ describe('UNIT: Expression Parser', function () {
 
     testCases.forEach(describeCase)
 
+    describe('XSS protection', function () {
+        
+        var cases = [
+            {
+                xss: true,
+                exp: "constructor.constructor('alert(1)')()",
+                vm: {}
+            },
+            {
+                xss: true,
+                exp: "\"\".toString.constructor.constructor('alert(1)')()",
+                vm: {}
+            },
+            {
+                xss: true,
+                exp: "\"\".toString['cons' + 'tructor']['cons' + 'tructor']('alert(1)')()",
+                vm: {}
+            },
+            {
+                xss: true,
+                exp: "\"\".toString['\\u0063ons' + 'tructor']['\\u0063ons' + 'tructor']('alert(1)')()",
+                vm: {}
+            }
+        ]
+
+        cases.forEach(describeCase)
+
+    })
+
+    describe('scope trace', function () {
+        
+        it('should determine the correct scope for variables', function () {
+
+            var bindingsCreated = {}
+
+            var getter = ExpParser.parse('a + b', mockCompiler({
+                parent: {
+                    bindings: {},
+                    createBinding: function (key) {
+                        assert.strictEqual(key, 'a')
+                        bindingsCreated[key] = true
+                    },
+                    hasKey: function (key) {
+                        return key === 'a'
+                    },
+                    parent: {
+                        bindings: {},
+                        createBinding: function (key) {
+                            assert.strictEqual(key, 'b')
+                            bindingsCreated[key] = true
+                        },
+                        hasKey: function (key) {
+                            return key === 'b'
+                        }
+                    }
+                }
+            }))
+            var getterString = getter.toString()
+            assert.ok(getterString.indexOf('this.$parent.a') > -1)
+            assert.ok(getterString.indexOf('this.$parent.$parent.b') > -1)
+        })
+
+    })
+
     // extra case for invalid expressions
     describe('invalid expression', function () {
 
         before(warnSpy.swapWarn)
-        
+
         it('should capture the error and warn', function () {
-            function noop () {}
-            ExpParser.parse('a + "fsef', {
-                createBinding: noop,
-                hasKey: noop,
-                vm: {
-                    $compiler: {
-                        bindings: {},
-                        createBinding: noop
-                    },
-                    $data: {}
-                }
-            })
+            ExpParser.parse('a + "fsef', mockCompiler())
             assert.ok(warnSpy.warned)
         })
 
@@ -112,36 +165,46 @@ describe('UNIT: Expression Parser', function () {
 
     })
 
-    describe('XSS protection', function () {
+    describe('.eval() with extra data', function () {
         
-        var cases = [
-            {
-                xss: true,
-                exp: "constructor.constructor('alert(1)')()",
-                vm: {},
-                expectedValue: undefined
-            },
-            {
-                xss: true,
-                exp: "\"\".toString.constructor.constructor('alert(1)')()",
-                vm: {},
-                expectedValue: undefined
-            },
-            {
-                xss: true,
-                exp: "\"\".toString['cons' + 'tructor']['cons' + 'tructor']('alert(1)')()",
-                vm: {},
-                expectedValue: undefined
-            },
-            {
-                xss: true,
-                exp: "\"\".toString['\\u0063ons' + 'tructor']['\\u0063ons' + 'tructor']('alert(1)')()",
-                vm: {},
-                expectedValue: undefined
-            }
-        ]
+        it('should be able to eval an epxression with temporary additional data', function () {
+            var res = ExpParser.eval('a + b', mockCompiler(), { a: 1, b: 2 })
+            assert.strictEqual(res, 3)
+        })
 
-        cases.forEach(describeCase)
+    })
+
+    describe('computed filters', function () {
+        
+        it('should wrap expression with computed filters', function () {
+            
+            var filters = [
+                    { name: 'test', args: ['a', 'b'] },
+                    { name: 'wrap', args: ['c', 'd'] }
+                ],
+                filterFns = {
+                    test: function (v, a, b) {
+                        return v + a + b
+                    },
+                    wrap: function (v, c, d) {
+                        return v + c + d
+                    }
+                }
+
+            var compiler = mockCompiler({
+                getOption: function (type, id) {
+                    return filterFns[id]
+                }
+            })
+
+            var getter = ExpParser.parse('a + b', compiler, null, filters)
+            var res = getter.call({
+                $compiler: compiler,
+                a: 1,
+                b: 2
+            })
+            assert.strictEqual(res, '3abcd')
+        })
 
     })
 
@@ -156,16 +219,9 @@ describe('UNIT: Expression Parser', function () {
                 compilerMock = {
                     createBinding: createBinding,
                     hasKey: function () {},
-                    vm:{
-                        $data: {},
-                        $compiler:{
-                            bindings:{},
-                            createBinding: createBinding
-                        }
-                    }
+                    vm: testCase.vm
                 },
-                vm     = testCase.vm,
-                vars   = testCase.paths || Object.keys(vm),
+                vars = testCase.paths || Object.keys(testCase.vm),
                 getter
 
             if (testCase.xss) {
@@ -178,6 +234,7 @@ describe('UNIT: Expression Parser', function () {
             })
 
             if (!testCase.xss) {
+
                 it('should get correct paths', function () {
                     if (!vars.length) return
                     assert.strictEqual(caughtMissingPaths.length, vars.length)
@@ -185,20 +242,45 @@ describe('UNIT: Expression Parser', function () {
                         assert.strictEqual(vars[i], caughtMissingPaths[i])
                     }
                 })
-            }
 
-            it('getter function should return expected value', function () {
-                var value = getter.call(vm)
-                assert.strictEqual(value, testCase.expectedValue)
-            })
+                it('getter function should return expected value', function () {
+                    var value = getter.call(testCase.vm)
+                    assert.strictEqual(value, testCase.expectedValue)
+                })
 
-            if (testCase.xss) {
+            } else {
+
+                it('should return undefined getter', function () {
+                    assert.strictEqual(getter, undefined)
+                })
+
                 it('should have warned', function () {
                     assert.ok(warnSpy.warned)
                 })
+
             }
 
         })
+    }
+
+    function noop () {}
+
+    function mockCompiler (opts) {
+        var mock = {
+            createBinding: noop,
+            hasKey: noop,
+            vm: {
+                $compiler: {
+                    bindings: {},
+                    createBinding: noop
+                },
+                $data: {}
+            }
+        }
+        for (var key in opts) {
+            mock[key] = opts[key]
+        }
+        return mock
     }
 
 })

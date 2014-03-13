@@ -1,37 +1,46 @@
 <div id="test">
     <!-- v-component + v-with -->
-    <div id="component-and-with" v-component="avatar" v-with="user"></div>
+    <div id="component-and-with" v-component="my-avatar" v-with="user"></div>
 
     <!-- custom element + v-with -->
-    <avatar id="element-and-with" v-with="user"></avatar>
+    <my-avatar id="element-and-with" v-with="user"></my-avatar>
 
-    <!-- v-with alone -->
-    <div id="with" v-with="user">{{hi}} {{name}}</div>
+    <!-- v-with with default Ctor -->
+    <div id="with" v-component v-with="user">{{hi}} {{name}}</div>
 
     <!-- v-component alone -->
-    <div id="component" v-component="simple"></div>
+    <div id="component" v-component="my-element"></div>
 
     <!-- custom element alone -->
-    <simple id="element"></simple>
+    <my-element id="element"></my-element>
 
     <!-- v-with + binding sync -->
-    <div id="with-sync" v-with="childHi:hi, childName:user.name">
+    <div id="with-sync" v-component v-with="childHi:hi, childName:user.name">
         {{childHi}} {{childName}}
     </div>
 
-    <div id="component-with-sync" v-component="sync" v-with="childHi:hi, childName:user.name">
+    <!-- conditional component -->
+    <div id="conditional" v-component="{{ok ? 'my-element' : 'nope'}}"></div>
+
+    <!-- this one will change everything for everyone else... -->
+    <div id="component-with-sync" v-component="sync" v-with="childHi:hi, childName:user.name"></div>
+
+    <!-- conditional component with v-repeat! -->
+    <div class="repeat-conditional {{type}}" v-repeat="items" v-component="{{type}}"></div>
 </div>
 
 <script src="../../../dist/vue.js"></script>
 <script>
 
-    Vue.config({debug: true})
+    // Vue.config({
+    //     debug: true
+    // })
 
-    Vue.component('avatar', {
+    Vue.component('my-avatar', {
         template: '{{hi}} {{name}}'
     })
 
-    Vue.component('simple', {
+    Vue.component('my-element', {
         template: '{{hi}} {{user.name}}'
     })
 
@@ -44,13 +53,22 @@
         }
     })
 
+    Vue.component('nope', {
+        template: 'NOPE'
+    })
+
     var app = new Vue({
         el: '#test',
         data: {
+            ok: true,
             hi: '123',
             user: {
                 name: 'Jack'
-            }
+            },
+            items: [
+                { type: 'my-element' },
+                { type: 'nope' }
+            ]
         }
     })
 </script>

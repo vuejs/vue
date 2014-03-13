@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<script src="../../../dist/vue.js"></script>
+
+<div id="test">
+    Sort by
+    <select id="sortby" v-model="sortKey">
+        <option>name</option>
+        <option>phone</option>
+    </select>
+    <br>
+    <input id="reverse" type="checkbox" v-model="reverse"> Reverse
+    <hr></hr>
+    Filter by <input id="search" name="search" v-model="searchText"> in name only
+    <table id="t1">
+        <tr><th>Name</th><th>Phone</th></tr>
+        <tr v-repeat="friends | filterBy searchText in 'name' | orderBy sortKey reverse" class="item">
+            <td>{{name}}</td>
+            <td>{{phone}}</td>
+        </tr>
+    </table>
+    <hr></hr>
+    Object, filtered by input in all fields and reversed
+    <table id="t2">
+        <tr><th>Name</th><th>Phone</th></tr>
+        <tr v-repeat="friendsObj | filterBy searchText | orderBy sortKey !reverse" class="item">
+            <td>{{name}}</td>
+            <td>{{phone}}</td>
+        </tr>
+    </table>
+    <hr></hr>
+    Filter by "Julie" in
+    <select id="filterby" v-model="filterKey">
+        <option>name</option>
+        <option>phone</option>
+    </select>
+    and reversed with literal -1
+    <table id="t3">
+        <tr><th>Name</th><th>Phone</th></tr>
+        <tr v-repeat="friends | filterBy 'Julie' in filterKey | orderBy sortKey -1" class="item">
+            <td>{{name}}</td>
+            <td>{{phone}}</td>
+        </tr>
+    </table>
+</div>
+
+<script>
+new Vue({
+    el: '#test',
+    data: {
+        searchText: '',
+        filterKey: 'name',
+        sortKey: 'name',
+        reverse: false,
+        friends: [
+            {name:'John', phone:'555-1276', hidden: { id: 'hidden!' } },
+            {name:'Mary', phone:'800-BIG-MARY'},
+            {name:'Mike', phone:'555-4321'},
+            {name:'Adam', phone:'555-5678'},
+            {name:'Julie', phone:'555-8765'},
+            {name:'Juliette', phone:'555-5678'}
+        ],
+        friendsObj: {
+            a: {name:'John', phone:'555-1276', hidden: { id: 'hidden!' } },
+            b: {name:'Mary', phone:'800-BIG-MARY'},
+            c: {name:'Mike', phone:'555-4321'},
+            d: {name:'Adam', phone:'555-5678'},
+            e: {name:'Julie', phone:'555-8765'},
+            f: {name:'Juliette', phone:'555-5678'}
+        }
+    }
+})
+</script>

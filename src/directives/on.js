@@ -1,4 +1,5 @@
-var warn = require('../utils').warn
+var utils    = require('../utils'),
+    noBubble = ['blur', 'focus', 'load']
 
 module.exports = {
 
@@ -7,7 +8,7 @@ module.exports = {
     bind: function () {
         // blur and focus events do not bubble
         // so they can't be delegated
-        this.bubbles = this.arg !== 'blur' && this.arg !== 'focus'
+        this.bubbles = noBubble.indexOf(this.arg) === -1
         if (this.bubbles) {
             this.binding.compiler.addListener(this)
         }
@@ -15,7 +16,8 @@ module.exports = {
 
     update: function (handler) {
         if (typeof handler !== 'function') {
-            return warn('Directive "on" expects a function value.')
+            utils.warn('Directive "on" expects a function value.')
+            return
         }
         var targetVM = this.vm,
             ownerVM  = this.binding.compiler.vm,

@@ -1,4 +1,4 @@
-describe('UNIT: API', function () {
+describe('API', function () {
 
     var utils = require('vue/src/utils'),
         assets = require('vue/src/config').globalAssets,
@@ -483,7 +483,7 @@ describe('UNIT: API', function () {
                     assert.strictEqual(t.$el.textContent, 'hi')
                     assert.strictEqual(t.$el.parentNode, parent)
                     var now = document.getElementById(testId)
-                    assert.strictEqual(now, null)
+                    assert.strictEqual(now, t.$el, 'should copy over attributes from replaced node')
                 })
 
                 it('should replace an off DOM Vue\'s $el', function () {
@@ -630,6 +630,32 @@ describe('UNIT: API', function () {
                     assert.strictEqual(v.$data.b, 'hello')
                     assert.strictEqual(v.c, null)
                     assert.strictEqual(v.$data.c, null)
+                })
+
+                it('should be able in bind data from parents', function (done) {
+                    var v = new Vue({
+                        template: '<div v-component="test" v-ref="child"></div>',
+                        data: {
+                            size: 123
+                        },
+                        components: {
+                            test: {
+                                paramAttributes: ['size'],
+                                template: '<div class="child" size="{{size}}"></div>'
+                            }
+                        }
+                    })
+                    var childAttr = v.$el.querySelector('.child').getAttribute('size')
+                    assert.strictEqual(childAttr, '123')
+
+                    v.size = 234
+
+                    nextTick(function () {
+                        var childAttr = v.$el.querySelector('.child').getAttribute('size')
+                        assert.strictEqual(childAttr, '234')
+                        assert.strictEqual(v.$.child.size, 234)
+                        done()
+                    })
                 })
 
             })

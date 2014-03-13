@@ -39,8 +39,6 @@ BindingProto.update = function (value) {
             execute: function () {
                 if (!self.unbound) {
                     self._update()
-                } else {
-                    return false
                 }
             }
         })

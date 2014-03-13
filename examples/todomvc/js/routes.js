@@ -2,16 +2,16 @@
 
 (function (app, Router) {
 
-    'use strict'
+    'use strict';
 
-    var router = new Router()
+    var router = new Router();
 
     Object.keys(app.filters).forEach(function (filter) {
         router.on(filter, function () {
-            app.setFilter(filter)
-        })
-    })
+            app.filter = filter;
+        });
+    });
 
-    router.init()
+    router.init();
     
-})(app, Router)
+})(app, Router);

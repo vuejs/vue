@@ -1,4 +1,4 @@
-describe('UNIT: Dependency Parser', function () {
+describe('Dependency Parser', function () {
 
     var DepsParser = require('vue/src/deps-parser')
 

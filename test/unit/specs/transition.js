@@ -1,4 +1,4 @@
-describe('UNIT: Transition', function () {
+describe('Transition', function () {
 
     var transition = require('vue/src/transition'),
         config     = require('vue/src/config'),

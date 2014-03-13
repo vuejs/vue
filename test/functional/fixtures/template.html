@@ -1,9 +1,10 @@
 <meta charset="utf-8">
 
 <div id="usa" v-partial="global"></div>
+<div id="conditional" v-partial="{{ok ? 'global' : 'nope'}}"></div>
 <div id="japan">{{> local}}</div>
 <div id="repeat">{{> repeat}}</div>
-<div id="yielder"><yielder><p>{{a}}</p><p>{{b}}</p></yielder></div>
+<div id="yielder"><x-yielder><p>{{a}}</p><p>{{b}}</p></x-yielder></div>
 
 <script type="text/v-template" id="test">
     <p>{{hi}}!</p>
@@ -20,7 +21,9 @@
 <script src="../../../dist/vue.js"></script>
 <script>
 
-   // Vue.config({debug:true})
+    Vue.config({
+        debug:true
+    })
 
     // direct usage
     var china  = new Vue({
@@ -42,11 +45,17 @@
     hawaii.hi = 'Aloha'
 
     // global partial
-    Vue.partial('global', document.querySelector('#test').innerHTML)
+    Vue.partial('global', '#test')
     var usa = new Vue({
         el: '#usa'
     })
     usa.hi = 'Hi dude'
+
+    // conditional partial
+    Vue.partial('nope', '<p>nope</p>')
+    new Vue({
+        el: '#conditional'
+    })
 
     // direct partial
     var japan = new Vue({
@@ -67,7 +76,7 @@
         }
     })
 
-    Vue.component('yielder', {
+    Vue.component('x-yielder', {
         template: '#yield-template',
         data: {
             a: 'A', b: 'B'

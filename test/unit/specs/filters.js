@@ -1,4 +1,4 @@
-describe('UNIT: Filters', function () {
+describe('Filters', function () {
 
     var filters = require('vue/src/filters')
     
@@ -47,21 +47,20 @@ describe('UNIT: Filters', function () {
         var filter = filters.pluralize
 
         it('should simply add "s" if arg length is 1', function () {
-            var args = ['item'],
-                res0 = filter(0, args),
-                res1 = filter(1, args),
-                res2 = filter(2, args)
+            var arg = 'item',
+                res0 = filter(0, arg),
+                res1 = filter(1, arg),
+                res2 = filter(2, arg)
             assert.strictEqual(res0, 'items')
             assert.strictEqual(res1, 'item')
             assert.strictEqual(res2, 'items')
         })
 
         it('should use corresponding format when arg length is greater than 1', function () {
-            var args = ['st', 'nd', 'rd'],
-                res0 = filter(0, args),
-                res1 = filter(1, args),
-                res2 = filter(2, args),
-                res3 = filter(3, args)
+            var res0 = filter(0, 'st', 'nd', 'rd'),
+                res1 = filter(1, 'st', 'nd', 'rd'),
+                res2 = filter(2, 'st', 'nd', 'rd'),
+                res3 = filter(3, 'st', 'nd', 'rd')
             assert.strictEqual(res0, 'rd')
             assert.strictEqual(res1, 'st')
             assert.strictEqual(res2, 'nd')
@@ -106,11 +105,10 @@ describe('UNIT: Filters', function () {
         var filter = filters.key
 
         it('should return a function that only triggers when key matches', function () {
-            var args = ['enter'],
-                triggered = false,
+            var triggered = false,
                 handler = filter(function () {
                     triggered = true
-                }, args)
+                }, 'enter')
             handler({ keyCode: 0 })
             assert.notOk(triggered)
             handler({ keyCode: 13 })
@@ -118,15 +116,122 @@ describe('UNIT: Filters', function () {
         })
 
         it('should also work for direct keyCode', function () {
-            var args = [13],
-                triggered = false,
+            var triggered = false,
                 handler = filter(function () {
                     triggered = true
-                }, args)
+                }, 13)
             handler({ keyCode: 0 })
             assert.notOk(triggered)
             handler({ keyCode: 13 })
             assert.ok(triggered)
+        })
+
+    })
+
+    describe('filterBy', function () {
+        
+        var filter = filters.filterBy,
+            arr = [
+                { a: 1, b: { c: 'hello' }},
+                { a: 1, b: 'hello'},
+                { a: 1, b: 2 }
+            ],
+            vm = { search: { key: 'hello', datakey: 'b.c' }}
+
+        it('should be computed', function () {
+            assert.ok(filter.computed)
+        })
+
+        it('should recursively check for searchKey if no dataKey is provided', function () {
+            var res = filter.call(vm, arr, 'search.key')
+            assert.strictEqual(res.length, 2)
+            assert.deepEqual(res, arr.slice(0, 2))
+        })
+
+        it('should check for datakey only if provided', function () {
+            var res = filter.call(vm, arr, 'search.key', 'search.datakey')
+            assert.strictEqual(res.length, 1)
+            assert.strictEqual(res[0], arr[0])
+        })
+
+        it('should use literal searchKey if in single quotes', function () {
+            var res = filter.call(vm, arr, "'hello'", "'b.c'")
+            assert.strictEqual(res.length, 1)
+            assert.strictEqual(res[0], arr[0])
+        })
+
+        it('should accept optional delimiter', function () {
+            var res = filter.call(vm, arr, 'search.key', 'in', 'search.datakey')
+            assert.strictEqual(res.length, 1)
+            assert.strictEqual(res[0], arr[0])
+        })
+
+        it('should work with objects', function () {
+            var obj = {
+                a: arr[0],
+                b: arr[1],
+                c: arr[2]
+            }
+            var res = filter.call(vm, obj, "'a'", "'$key'")
+            assert.strictEqual(res.length, 1)
+            assert.strictEqual(res[0], arr[0])
+        })
+
+    })
+
+    describe('orderBy', function () {
+
+        var filter = filters.orderBy,
+            arr = [
+                { a: { b: 0 }, c: 'b'},
+                { a: { b: 2 }, c: 'c'},
+                { a: { b: 1 }, c: 'a'}
+            ]
+        
+        it('should be computed', function () {
+            assert.ok(filter.computed)
+        })
+
+        it('should sort based on sortKey', function () {
+            var vm = { sortby: 'a.b' }
+            var res = filter.call(vm, arr, 'sortby')
+            assert.strictEqual(res[0].a.b, 0)
+            assert.strictEqual(res[1].a.b, 1)
+            assert.strictEqual(res[2].a.b, 2)
+        })
+
+        it('should sort based on sortKey and reverseKey', function () {
+            var vm = { sortby: 'a.b', reverse: true }
+            var res = filter.call(vm, arr, 'sortby', 'reverse')
+            assert.strictEqual(res[0].a.b, 2)
+            assert.strictEqual(res[1].a.b, 1)
+            assert.strictEqual(res[2].a.b, 0)
+        })
+
+        it('should sort with literal args and special -1 syntax', function () {
+            var res = filter.call({}, arr, "'c'", '-1')
+            assert.strictEqual(res[0].c, 'c')
+            assert.strictEqual(res[1].c, 'b')
+            assert.strictEqual(res[2].c, 'a')
+        })
+
+        it('should accept negate reverse key', function () {
+            var res = filter.call({ reverse: true }, arr, "'c'", '!reverse')
+            assert.strictEqual(res[0].c, 'a')
+            assert.strictEqual(res[1].c, 'b')
+            assert.strictEqual(res[2].c, 'c')
+        })
+
+        it('should work with objects', function () {
+            var obj = {
+                a: arr[0],
+                b: arr[1],
+                c: arr[2]
+            }
+            var res = filter.call({}, obj, "'$key'", '-1')
+            assert.strictEqual(res[0].c, 'a')
+            assert.strictEqual(res[1].c, 'c')
+            assert.strictEqual(res[2].c, 'b')
         })
 
     })

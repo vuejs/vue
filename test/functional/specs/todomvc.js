@@ -129,6 +129,8 @@ casper.test.begin('todomvc', 69, function (test) {
     .then(function () {
         createNewItem('test')
         createNewItem('test')
+    })
+    .then(function () {
         this.click('.todo:nth-child(2) .toggle')
         this.click('.todo:nth-child(3) .toggle')
     })

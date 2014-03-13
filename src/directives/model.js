@@ -140,7 +140,7 @@ module.exports = {
         } else if (el.type === 'checkbox') { // checkbox
             el.checked = !!value
         } else {
-            el[this.attr] = utils.toText(value)
+            el[this.attr] = utils.guard(value)
         }
     },
 

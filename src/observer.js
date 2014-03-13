@@ -35,9 +35,9 @@ var ArrayProxy = Object.create(Array.prototype)
 ].forEach(watchMutation)
 
 // Augment the ArrayProxy with convenience methods
-def(ArrayProxy, 'remove', removeElement, !hasProto)
-def(ArrayProxy, 'set', replaceElement, !hasProto)
-def(ArrayProxy, 'replace', replaceElement, !hasProto)
+def(ArrayProxy, '$remove', removeElement, !hasProto)
+def(ArrayProxy, '$set', replaceElement, !hasProto)
+def(ArrayProxy, '$replace', replaceElement, !hasProto)
 
 /**
  *  Intercep a mutation event so we can emit the mutation info.
@@ -60,15 +60,18 @@ function watchMutation (method) {
             inserted = args.slice(2)
             removed = result
         }
+        
         // link & unlink
         linkArrayElements(this, inserted)
         unlinkArrayElements(this, removed)
 
         // emit the mutation event
         this.__emitter__.emit('mutate', null, this, {
-            method: method,
-            args: args,
-            result: result
+            method   : method,
+            args     : args,
+            result   : result,
+            inserted : inserted,
+            removed  : removed
         })
 
         return result
@@ -86,8 +89,12 @@ function linkArrayElements (arr, items) {
         while (i--) {
             item = items[i]
             if (isWatchable(item)) {
-                convert(item)
-                watch(item)
+                // if object is not converted for observing
+                // convert it...
+                if (!item.__emitter__) {
+                    convert(item)
+                    watch(item)
+                }
                 owners = item.__emitter__.owners
                 if (owners.indexOf(arr) < 0) {
                     owners.push(arr)
@@ -163,6 +170,26 @@ function replaceElement (index, data) {
     }
 }
 
+// Object add/delete key augmentation -----------------------------------------
+
+var ObjProxy = Object.create(Object.prototype)
+
+def(ObjProxy, '$add', function (key, val) {
+    if (key in this) return
+    this[key] = val
+    convertKey(this, key)
+    // emit a propagating set event
+    this.__emitter__.emit('set', key, val, true)
+}, !hasProto)
+
+def(ObjProxy, '$delete', function (key) {
+    if (!(key in this)) return
+    // trigger set events
+    this[key] = undefined
+    delete this[key]
+    this.__emitter__.emit('delete', key)
+}, !hasProto)
+
 // Watch Helpers --------------------------------------------------------------
 
 /**
@@ -206,9 +233,24 @@ function watch (obj) {
 }
 
 /**
+ *  Augment target objects with modified
+ *  methods
+ */
+function augment (target, src) {
+    if (hasProto) {
+        target.__proto__ = src
+    } else {
+        for (var key in src) {
+            def(target, key, src[key])
+        }
+    }
+}
+
+/**
  *  Watch an Object, recursive.
  */
 function watchObject (obj) {
+    augment(obj, ObjProxy)
     for (var key in obj) {
         convertKey(obj, key)
     }
@@ -219,13 +261,7 @@ function watchObject (obj) {
  *  and add augmentations by intercepting the prototype chain
  */
 function watchArray (arr) {
-    if (hasProto) {
-        arr.__proto__ = ArrayProxy
-    } else {
-        for (var key in ArrayProxy) {
-            def(arr, key, ArrayProxy[key])
-        }
-    }
+    augment(arr, ArrayProxy)
     linkArrayElements(arr, arr)
 }
 

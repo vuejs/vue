@@ -37,19 +37,12 @@
     <div
         class="test"
         v-repeat="items"
-        v-if="filter(this)"
-        v-transition
-        v-attr="data-id:a">
-        {{a}}
-    </div>
-    <div
-        class="test"
-        v-repeat="items"
         v-show="filter(this)"
         v-transition
         v-attr="data-id:a">
         {{a}}
     </div>
+    <div class="test if" v-transition v-if="items.length > 1">This is only visible when item.length > 1</div>
 </div>
 <h1 style="margin:0">123</h1>
 

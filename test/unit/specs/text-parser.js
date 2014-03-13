@@ -1,14 +1,13 @@
-describe('UNIT: TextNode Parser', function () {
+describe('Text Parser', function () {
 
     var TextParser = require('vue/src/text-parser')
 
     describe('.parse()', function () {
 
-        var tokens, badTokens
+        var tokens
 
         before(function () {
-            tokens = TextParser.parse('hello {{a}}! {{ bcd }}{{d.e.f}} {{a + (b || c) ? d : e}} {{>test}}{{{ a + "<em>" }}}')
-            badTokens = TextParser.parse('{{{a}}{{{{{{{{b}}}}')
+            tokens = TextParser.parse('hello {{a}}! {{ {bcd} }}{{d.e.f}} {{a + (b || c) ? d : e}} {{>test}}{{{ a + "<em>" }}}')
         })
         
         it('should return null if no interpolate tags are present', function () {
@@ -38,7 +37,7 @@ describe('UNIT: TextNode Parser', function () {
         })
 
         it('should trim extracted keys', function () {
-            assert.strictEqual(tokens[3].key, 'bcd')
+            assert.strictEqual(tokens[3].key, '{bcd}')
         })
 
         it('should extract nested keys', function () {
@@ -58,16 +57,6 @@ describe('UNIT: TextNode Parser', function () {
             assert.ok(tokens[9].html)
         })
 
-        it('should deal with bad binding tags', function () {
-            assert.strictEqual(badTokens.length, 4)
-            assert.strictEqual(badTokens[0].key, 'a')
-            assert.notOk(badTokens[0].html)
-            assert.strictEqual(badTokens[1], '{{{{{')
-            assert.strictEqual(badTokens[2].key, 'b')
-            assert.ok(badTokens[2].html)
-            assert.strictEqual(badTokens[3], '}')
-        })
-
     })
 
     describe('.parseAttr()', function () {
@@ -75,7 +64,7 @@ describe('UNIT: TextNode Parser', function () {
         it('should return Directive.parse friendly expression', function () {
             assert.strictEqual(TextParser.parseAttr('{{msg}}'), 'msg')
             assert.strictEqual(TextParser.parseAttr('{{msg + "123"}}'), 'msg + "123"')
-            assert.strictEqual(TextParser.parseAttr('ha {{msg + "123"}} ho'), '"ha "+msg + "123"+" ho"')
+            assert.strictEqual(TextParser.parseAttr('ha {{msg + "123"}} ho'), '"ha "+(msg + "123")+" ho"')
         })
 
     })
