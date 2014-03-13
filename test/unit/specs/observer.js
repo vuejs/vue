@@ -42,16 +42,38 @@ describe('Observer', function () {
             path: 'test'
         }))
 
-        it('should emit get events on tip values', function () {
+        it('should emit get events', function () {
             Observer.shouldGet = true
-            getTestFactory({
-                obj: { a: 1, b: { c: 2 } },
-                expects: [
-                    'test.a',
-                    'test.b.c'
+
+            var ob = new Emitter(),
+                i  = 0,
+                obj = { a: 1, b: { c: 2 } },
+                gets = [
+                    'a',
+                    'b.c'
                 ],
-                path: 'test'
-            })()
+                expects = [
+                    'test.a',
+                    'test.b',
+                    'test.b.c'
+                ]
+            Observer.observe(obj, 'test', ob)
+            ob.on('get', function (key) {
+                var expected = expects[i]
+                assert.strictEqual(key, expected)
+                i++
+            })
+            gets.forEach(function (key) {
+                var path = key.split('.'),
+                    j = 0,
+                    data = obj
+                while (j < path.length) {
+                    data = data[path[j]]
+                    j++
+                }
+            })
+            assert.strictEqual(i, expects.length)
+
             Observer.shouldGet = false
         })
 
@@ -500,31 +522,6 @@ describe('Observer', function () {
                     j++
                 }
                 data[path[j]] = expect.val
-            })
-            assert.strictEqual(i, expects.length)
-        }
-    }
-
-    function getTestFactory (opts) {
-        return function () {
-            var ob = new Emitter(),
-                i  = 0,
-                obj = opts.obj,
-                expects = opts.expects
-            Observer.observe(obj, opts.path, ob)
-            ob.on('get', function (key) {
-                var expected = expects[i]
-                assert.strictEqual(key, expected)
-                i++
-            })
-            expects.forEach(function (key) {
-                var path = key.split('.'),
-                    j = 1,
-                    data = obj
-                while (j < path.length) {
-                    data = data[path[j]]
-                    j++
-                }
             })
             assert.strictEqual(i, expects.length)
         }

@@ -17,6 +17,7 @@ describe('Dependency Parser', function () {
                 depId: ~~(Math.random() * i),
                 deps: [],
                 subs: [],
+                compiler: {},
                 value: {
                     $get: function () {
                         if (i > 0) {

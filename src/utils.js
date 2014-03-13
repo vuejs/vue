@@ -13,12 +13,13 @@ var utils = module.exports = {
      *  get a value from an object keypath
      */
     get: function (obj, key) {
+        /* jshint eqeqeq: false */
         if (key.indexOf('.') < 0) {
             return obj[key]
         }
         var path = key.split('.'),
             d = -1, l = path.length
-        while (++d < l && obj !== undefined) {
+        while (++d < l && obj != null) {
             obj = obj[path[d]]
         }
         return obj
@@ -28,6 +29,7 @@ var utils = module.exports = {
      *  set a value to an object keypath
      */
     set: function (obj, key, val) {
+        /* jshint eqeqeq: false */
         if (key.indexOf('.') < 0) {
             obj[key] = val
             return
@@ -35,7 +37,7 @@ var utils = module.exports = {
         var path = key.split('.'),
             d = -1, l = path.length - 1
         while (++d < l) {
-            if (obj[path[d]] === undefined) {
+            if (obj[path[d]] == null) {
                 obj[path[d]] = {}
             }
             obj = obj[path[d]]

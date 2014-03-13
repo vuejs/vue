@@ -14,7 +14,15 @@ function catchDeps (binding) {
     binding.deps = []
     catcher.on('get', function (dep) {
         var has = got[dep.key]
-        if (has && has.compiler === dep.compiler) return
+        if (
+            // avoid duplicate bindings
+            (has && has.compiler === dep.compiler) ||
+            // avoid repeated items as dependency
+            // since all inside changes trigger array change too
+            (dep.compiler.repeat && dep.compiler.parent === binding.compiler)
+        ) {
+            return
+        }
         got[dep.key] = dep
         utils.log('  - ' + dep.key)
         binding.deps.push(dep)

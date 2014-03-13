@@ -287,7 +287,7 @@ function convertKey (obj, key) {
         get: function () {
             var value = values[key]
             // only emit get on tip values
-            if (pub.shouldGet && typeOf(value) !== OBJECT) {
+            if (pub.shouldGet) {
                 emitter.emit('get', key)
             }
             return value
