@@ -368,6 +368,16 @@ CompilerProto.checkPriorityDir = function (dirname, node, root) {
  */
 CompilerProto.compileElement = function (node, root) {
 
+    // textarea is pretty annoying
+    // because its value creates childNodes which
+    // we don't want to compile.
+    if (node.tagName === 'TEXTAREA' && node.value) {
+        node.value = this.eval(node.value)
+    }
+
+    // only compile if this element has attributes
+    // or its tagName contains a hyphen (which means it could
+    // potentially be a custom element)
     if (node.hasAttributes() || node.tagName.indexOf('-') > -1) {
 
         // skip anything with v-pre
@@ -442,7 +452,7 @@ CompilerProto.compileElement = function (node, root) {
     }
 
     // recursively compile childNodes
-    if (node.hasChildNodes() && node.tagName !== 'TEXTAREA') {
+    if (node.hasChildNodes()) {
         slice.call(node.childNodes).forEach(this.compile, this)
     }
 }
@@ -465,7 +475,7 @@ CompilerProto.compileTextNode = function (node) {
             if (token.key.charAt(0) === '>') { // a partial
                 el = document.createComment('ref')
                 directive = Directive.parse('partial', token.key.slice(1), this, el)
-            } else { // a real binding
+            } else {
                 if (!token.html) { // text binding
                     el = document.createTextNode('')
                     directive = Directive.parse('text', token.key, this, el)
