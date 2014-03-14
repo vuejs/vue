@@ -19,10 +19,12 @@ module.exports = {
             utils.warn('Directive "on" expects a function value.')
             return
         }
-        var targetVM = this.vm,
+        var el       = this.el,
+            targetVM = this.vm,
             ownerVM  = this.binding.compiler.vm,
             isExp    = this.binding.isExp,
             newHandler = function (e) {
+                e.targetEl = el
                 e.targetVM = targetVM
                 handler.call(isExp ? targetVM : ownerVM, e)
             }
