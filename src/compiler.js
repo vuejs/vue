@@ -45,7 +45,6 @@ function Compiler (vm, options) {
     compiler.init       = true
     compiler.repeat     = false
     compiler.destroyed  = false
-    compiler.delayReady = false
 
     // process and extend options
     options = compiler.options = options || makeHash()
@@ -141,9 +140,7 @@ function Compiler (vm, options) {
     compiler.init = false
 
     // post compile / ready hook
-    if (!compiler.delayReady) {
-        compiler.execHook('ready')
-    }
+    compiler.execHook('ready')
 }
 
 var CompilerProto = Compiler.prototype

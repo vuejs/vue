@@ -1,5 +1,6 @@
 var utils      = require('./utils'),
     directives = require('./directives'),
+    dirId      = 1,
 
     // Regexes!
 
@@ -22,6 +23,7 @@ var utils      = require('./utils'),
  */
 function Directive (dirname, definition, expression, rawKey, compiler, node) {
 
+    this.id             = dirId++
     this.name           = dirname
     this.compiler       = compiler
     this.vm             = compiler.vm
