@@ -140,7 +140,7 @@ describe('Misc Features', function () {
             methods: {
                 'in': function (e) {
                     inCalled++
-                    innerHandler(e)
+                    return innerHandler(e)
                 },
                 out: function () {
                     outCalled++
@@ -164,6 +164,36 @@ describe('Misc Features', function () {
             v.$el.querySelector('.inner').dispatchEvent(e)
             assert.strictEqual(inCalled, 2)
             assert.strictEqual(outCalled, 1)
+        })
+        
+        it('should stop propagation on returning true', function () {
+            innerHandler = function () {
+                return true
+            }
+            var e = mockMouseEvent('click')
+            v.$el.querySelector('.inner').dispatchEvent(e)
+            assert.strictEqual(inCalled, 3)
+            assert.strictEqual(outCalled, 1)
+        })
+        
+        it('should not stop propagation', function () {
+            innerHandler = function () {
+                // do nothing
+            }
+            var e = mockMouseEvent('click')
+            v.$el.querySelector('.inner').dispatchEvent(e)
+            assert.strictEqual(inCalled, 4)
+            assert.strictEqual(outCalled, 2)
+        })
+        
+        it('should not stop propagation on returning anything but the boolean: true', function () {
+            innerHandler = function () {
+                return 'true'
+            }
+            var e = mockMouseEvent('click')
+            v.$el.querySelector('.inner').dispatchEvent(e)
+            assert.strictEqual(inCalled, 5)
+            assert.strictEqual(outCalled, 3)
         })
 
     })
