@@ -1,4 +1,4 @@
-describe('UNIT: ViewModel', function () {
+describe('ViewModel', function () {
 
     var nextTick = require('vue/src/utils').nextTick
 
@@ -17,9 +17,16 @@ describe('UNIT: ViewModel', function () {
             }
         })
 
-    describe('.$set()', function () {
-        vm.$set('a.b.c', 54321)
+    describe('.$get()', function () {
         it('should set correct value', function () {
+            var v = vm.$get('a.b.c')
+            assert.strictEqual(v, 12345)
+        })
+    })
+
+    describe('.$set()', function () {
+        it('should set correct value', function () {
+            vm.$set('a.b.c', 54321)
             assert.strictEqual(data.b.c, 54321)
         })
     })
@@ -450,7 +457,7 @@ describe('UNIT: ViewModel', function () {
                 }
             },
             dirs: [dirMock],
-            exps: [{
+            computed: [{
                 unbind: function () {
                     expUnbindCalled = true
                 }
@@ -459,12 +466,7 @@ describe('UNIT: ViewModel', function () {
             childId: 'test',
             children: [],
             parent: {
-                children: [],
-                vm: {
-                    $: {
-                        'test': true
-                    }
-                }
+                children: []
             },
             vm: {
                 $remove: function () {
@@ -525,7 +527,6 @@ describe('UNIT: ViewModel', function () {
         it('should remove self from parent', function () {
             var parent = compilerMock.parent
             assert.ok(parent.children.indexOf(compilerMock), -1)
-            assert.strictEqual(parent.vm.$[compilerMock.childId], undefined)
         })
 
         it('should remove the dom element', function () {

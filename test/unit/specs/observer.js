@@ -1,4 +1,4 @@
-describe('UNIT: Observer', function () {
+describe('Observer', function () {
 
     var Observer = require('vue/src/observer'),
         Emitter  = require('vue/src/emitter')
@@ -42,16 +42,38 @@ describe('UNIT: Observer', function () {
             path: 'test'
         }))
 
-        it('should emit get events on tip values', function () {
+        it('should emit get events', function () {
             Observer.shouldGet = true
-            getTestFactory({
-                obj: { a: 1, b: { c: 2 } },
-                expects: [
-                    'test.a',
-                    'test.b.c'
+
+            var ob = new Emitter(),
+                i  = 0,
+                obj = { a: 1, b: { c: 2 } },
+                gets = [
+                    'a',
+                    'b.c'
                 ],
-                path: 'test'
-            })()
+                expects = [
+                    'test.a',
+                    'test.b',
+                    'test.b.c'
+                ]
+            Observer.observe(obj, 'test', ob)
+            ob.on('get', function (key) {
+                var expected = expects[i]
+                assert.strictEqual(key, expected)
+                i++
+            })
+            gets.forEach(function (key) {
+                var path = key.split('.'),
+                    j = 0,
+                    data = obj
+                while (j < path.length) {
+                    data = data[path[j]]
+                    j++
+                }
+            })
+            assert.strictEqual(i, expects.length)
+
             Observer.shouldGet = false
         })
 
@@ -270,7 +292,7 @@ describe('UNIT: Observer', function () {
 
         describe('Augmentations', function () {
 
-            it('remove (index)', function () {
+            it('$remove (index)', function () {
                 var emitted = false,
                     index = ~~(Math.random() * arr.length),
                     expected = arr[index] = { a: 1 }
@@ -280,12 +302,12 @@ describe('UNIT: Observer', function () {
                     assert.strictEqual(mutation.args.length, 2)
                     assert.strictEqual(mutation.args[0], index)
                 })
-                var r = arr.remove(index)
+                var r = arr.$remove(index)
                 assert.ok(emitted)
                 assert.strictEqual(r, expected)
             })
             
-            it('remove (object)', function () {
+            it('$remove (object)', function () {
                 var emitted = false,
                     index = ~~(Math.random() * arr.length),
                     expected = arr[index] = { a: 1 }
@@ -295,12 +317,12 @@ describe('UNIT: Observer', function () {
                     assert.strictEqual(mutation.args.length, 2)
                     assert.strictEqual(mutation.args[0], index)
                 })
-                var r = arr.remove(expected)
+                var r = arr.$remove(expected)
                 assert.ok(emitted)
                 assert.strictEqual(r, expected)
             })
 
-            it('remove (function)', function () {
+            it('$remove (function)', function () {
                 var expected = [1001, 1002]
                 arr.push.apply(arr, expected)
                 var filter = function (e) {
@@ -309,12 +331,12 @@ describe('UNIT: Observer', function () {
                     copy = arr.filter(function (e) {
                         return e <= 1000
                     })
-                var removed = arr.remove(filter)
+                var removed = arr.$remove(filter)
                 assert.deepEqual(arr, copy)
                 assert.deepEqual(expected, removed)
             })
 
-            it('replace (index)', function () {
+            it('$replace (index)', function () {
                 var emitted = false,
                     index = ~~(Math.random() * arr.length),
                     expected = arr[index] = { a: 1 },
@@ -325,13 +347,13 @@ describe('UNIT: Observer', function () {
                     assert.strictEqual(mutation.args.length, 3)
                     assert.strictEqual(mutation.args[0], index)
                 })
-                var r = arr.replace(index, arg)
+                var r = arr.$replace(index, arg)
                 assert.ok(emitted)
                 assert.strictEqual(r, expected)
                 assert.strictEqual(arr[index], arg)
             })
 
-            it('replace (object)', function () {
+            it('$replace (object)', function () {
                 var emitted = false,
                     index = ~~(Math.random() * arr.length),
                     expected = arr[index] = { a: 1 },
@@ -342,19 +364,19 @@ describe('UNIT: Observer', function () {
                     assert.strictEqual(mutation.args.length, 3)
                     assert.strictEqual(mutation.args[0], index)
                 })
-                var r = arr.replace(expected, arg)
+                var r = arr.$replace(expected, arg)
                 assert.ok(emitted)
                 assert.strictEqual(r, expected)
                 assert.strictEqual(arr[index], arg)
             })
 
-            it('replace (function)', function () {
+            it('$replace (function)', function () {
                 arr[0] = 1
                 arr[1] = 2
                 arr[2] = 3
                 var expected = [2, 3, 3],
                     expectRet = [1, 2]
-                var replaced = arr.replace(function (e) {
+                var replaced = arr.$replace(function (e) {
                     if (e < 3) return e + 1
                 })
                 assert.deepEqual(arr, expected)
@@ -500,31 +522,6 @@ describe('UNIT: Observer', function () {
                     j++
                 }
                 data[path[j]] = expect.val
-            })
-            assert.strictEqual(i, expects.length)
-        }
-    }
-
-    function getTestFactory (opts) {
-        return function () {
-            var ob = new Emitter(),
-                i  = 0,
-                obj = opts.obj,
-                expects = opts.expects
-            Observer.observe(obj, opts.path, ob)
-            ob.on('get', function (key) {
-                var expected = expects[i]
-                assert.strictEqual(key, expected)
-                i++
-            })
-            expects.forEach(function (key) {
-                var path = key.split('.'),
-                    j = 1,
-                    data = obj
-                while (j < path.length) {
-                    data = data[path[j]]
-                    j++
-                }
             })
             assert.strictEqual(i, expects.length)
         }

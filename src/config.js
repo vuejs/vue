@@ -1,39 +1,19 @@
-var prefix = 'v',
-    specialAttributes = [
-        'pre',
-        'ref',
-        'with',
-        'text',
-        'repeat',
-        'partial',
-        'component',
-        'animation',
-        'transition',
-        'effect'
-    ],
-    config = module.exports = {
+var TextParser = require('./text-parser')
 
-        debug       : false,
-        silent      : false,
-        enterClass  : 'v-enter',
-        leaveClass  : 'v-leave',
-        interpolate : true,
-        attrs       : {},
-
-        get prefix () {
-            return prefix
-        },
-        set prefix (val) {
-            prefix = val
-            updatePrefix()
-        }
-        
-    }
-
-function updatePrefix () {
-    specialAttributes.forEach(function (attr) {
-        config.attrs[attr] = prefix + '-' + attr
-    })
+module.exports = {
+    prefix         : 'v',
+    debug          : false,
+    silent         : false,
+    enterClass     : 'v-enter',
+    leaveClass     : 'v-leave',
+    interpolate    : true
 }
 
-updatePrefix()
+Object.defineProperty(module.exports, 'delimiters', {
+    get: function () {
+        return TextParser.delimiters
+    },
+    set: function (delimiters) {
+        TextParser.setDelimiters(delimiters)
+    }
+})

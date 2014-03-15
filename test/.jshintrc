@@ -9,6 +9,7 @@
     "sub": true,
     "node": true,
     "laxbreak": true,
+    "evil": true,
     "globals": {
         "console": true,
         "it": true,

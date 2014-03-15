@@ -29,9 +29,8 @@ BatcherProto.flush = function () {
     // as we execute existing jobs
     for (var i = 0; i < this.queue.length; i++) {
         var job = this.queue[i]
-        if (job.cancelled) continue
-        if (job.execute() !== false) {
-            this.has[job.id] = false
+        if (!job.cancelled) {
+            job.execute()
         }
     }
     this.reset()

@@ -1,4 +1,4 @@
-describe('UNIT: API', function () {
+describe('API', function () {
 
     var utils = require('vue/src/utils'),
         assets = require('vue/src/config').globalAssets,
@@ -7,19 +7,6 @@ describe('UNIT: API', function () {
     describe('config()', function () {
 
         var config = require('vue/src/config')
-        
-        it('should work when changing prefix', function () {
-            var testId = 'config-1'
-            Vue.config({
-                prefix: 'test'
-            })
-            mock(testId, '<span test-text="test"></span>')
-            new Vue({
-                el: '#' + testId,
-                data: { test: testId }
-            })
-            assert.strictEqual(document.querySelector('#' + testId + ' span').innerHTML, testId)
-        })
 
         it('should get', function () {
             assert.strictEqual(Vue.config('debug'), false)
@@ -30,10 +17,72 @@ describe('UNIT: API', function () {
             assert.strictEqual(config.test, 1)
         })
 
-        after(function () {
-            Vue.config({
-                prefix: 'v'
+        describe('changing prefix', function () {
+            
+            before(function () {
+                Vue.config({ prefix: 'test' })
             })
+
+            after(function () {
+                Vue.config({ prefix: 'v' })
+            })
+
+            it('should work', function () {
+                var v = new Vue({
+                    template: '<span test-text="test"></span>',
+                    data: { test: 'helllllo' }
+                })
+                assert.strictEqual(v.$el.innerHTML, '<span>' + v.test + '</span>')
+            })
+
+        })
+
+        describe('changing interpolation delimiters', function () {
+            
+            before(function () {
+                Vue.config({ delimiters: ['[', ']'] })
+            })
+
+            after(function () {
+                Vue.config({ delimiters: ['{', '}'] })
+            })
+
+            it('should work', function () {
+                var v = new Vue({
+                    template: '<span>[[text]]</span><div>[[[html]]]</div>',
+                    data: {
+                        text: 'hello!!!',
+                        html: '<span><a>some raw html</a></span>'
+                    }
+                })
+
+                assert.strictEqual(v.$el.querySelector('span').innerHTML, v.text)
+                assert.strictEqual(v.$el.querySelector('div').innerHTML, v.html + '<!--v-html-->')
+            })
+
+        })
+
+        describe('skipping interpolation', function () {
+            
+            before(function () {
+                Vue.config({ interpolate: false })
+            })
+
+            after(function () {
+                Vue.config({ interpolate: true })
+            })
+
+            it('should work', function () {
+                var raw = '<span class="{{text}}">{{text}}</span>'
+                var v = new Vue({
+                    template: raw,
+                    data: {
+                        text: 'hello!!!'
+                    }
+                })
+                assert.strictEqual(v.$el.innerHTML, raw)
+            })
+
         })
 
     })
@@ -483,7 +532,7 @@ describe('UNIT: API', function () {
                     assert.strictEqual(t.$el.textContent, 'hi')
                     assert.strictEqual(t.$el.parentNode, parent)
                     var now = document.getElementById(testId)
-                    assert.strictEqual(now, null)
+                    assert.strictEqual(now, t.$el, 'should copy over attributes from replaced node')
                 })
 
                 it('should replace an off DOM Vue\'s $el', function () {
@@ -630,6 +679,32 @@ describe('UNIT: API', function () {
                     assert.strictEqual(v.$data.b, 'hello')
                     assert.strictEqual(v.c, null)
                     assert.strictEqual(v.$data.c, null)
+                })
+
+                it('should be able in bind data from parents', function (done) {
+                    var v = new Vue({
+                        template: '<div v-component="test" v-ref="child"></div>',
+                        data: {
+                            size: 123
+                        },
+                        components: {
+                            test: {
+                                paramAttributes: ['size'],
+                                template: '<div class="child" size="{{size}}"></div>'
+                            }
+                        }
+                    })
+                    var childAttr = v.$el.querySelector('.child').getAttribute('size')
+                    assert.strictEqual(childAttr, '123')
+
+                    v.size = 234
+
+                    nextTick(function () {
+                        var childAttr = v.$el.querySelector('.child').getAttribute('size')
+                        assert.strictEqual(childAttr, '234')
+                        assert.strictEqual(v.$.child.size, 234)
+                        done()
+                    })
                 })
 
             })

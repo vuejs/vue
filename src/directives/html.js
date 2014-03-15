@@ -1,4 +1,4 @@
-var toText = require('../utils').toText,
+var guard = require('../utils').guard,
     slice = [].slice
 
 module.exports = {
@@ -14,7 +14,7 @@ module.exports = {
     },
 
     update: function (value) {
-        value = toText(value)
+        value = guard(value)
         if (this.holder) {
             this.swap(value)
         } else {

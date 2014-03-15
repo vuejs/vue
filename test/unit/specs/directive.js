@@ -1,11 +1,13 @@
-describe('UNIT: Directive', function () {
+describe('Directive', function () {
 
     var Directive  = require('vue/src/directive'),
         directives = require('vue/src/directives')
 
     var compiler = {
         options: {},
-        getOption: function () {},
+        getOption: function (type, id) {
+            return Vue.options[type][id]
+        },
         vm: {
             constructor: {}
         }
@@ -208,7 +210,7 @@ describe('UNIT: Directive', function () {
             assert.strictEqual(f.name, 'pluralize', 'name')
             assert.strictEqual(f.args.length, 2, 'args length')
             assert.strictEqual(f.args[0], 'item', 'args value 1')
-            assert.strictEqual(f.args[1], 'arg with spaces', 'args value 2')
+            assert.strictEqual(f.args[1], '\'arg with spaces\'', 'args value 2')
         })
 
         it('should extract correct filters (multiple filters)', function () {

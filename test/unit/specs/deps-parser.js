@@ -1,4 +1,4 @@
-describe('UNIT: Dependency Parser', function () {
+describe('Dependency Parser', function () {
 
     var DepsParser = require('vue/src/deps-parser')
 
@@ -17,6 +17,7 @@ describe('UNIT: Dependency Parser', function () {
                 depId: ~~(Math.random() * i),
                 deps: [],
                 subs: [],
+                compiler: {},
                 value: {
                     $get: function () {
                         if (i > 0) {

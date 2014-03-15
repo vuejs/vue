@@ -31,6 +31,8 @@ assetTypes.forEach(function (type) {
             value = utils.toFragment(value)
         } else if (type === 'component') {
             value = utils.toConstructor(value)
+        } else if (type === 'filter') {
+            utils.checkFilter(value)
         }
         hash[id] = value
         return this
@@ -61,7 +63,8 @@ ViewModel.use = function (plugin) {
         try {
             plugin = require(plugin)
         } catch (e) {
-            return utils.warn('Cannot find plugin: ' + plugin)
+            utils.warn('Cannot find plugin: ' + plugin)
+            return
         }
     }
 
@@ -170,7 +173,11 @@ function inheritOptions (child, parent, topLevel) {
             } else {
                 child[key].push(parentVal)
             }
-        } else if (topLevel && (type === 'Object' || parentType === 'Object')) {
+        } else if (
+            topLevel &&
+            (type === 'Object' || parentType === 'Object')
+            && !(parentVal instanceof ViewModel)
+        ) {
             // merge toplevel object options
             child[key] = inheritOptions(val, parentVal)
         } else if (val === undefined) {

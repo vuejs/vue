@@ -19,7 +19,7 @@
         <option>d</option>
     </select>
 
-    <textarea name="textarea" v-model="textarea"></textarea>
+    <textarea name="textarea" v-model="textarea">more {{text}}</textarea>
 
 </form>
 
@@ -43,7 +43,7 @@
             radio: 'b',
             select: 'b',
             multipleSelect: ['a','c'],
-            textarea: 'more text'
+            textarea: undefined
         }
     })
 </script>

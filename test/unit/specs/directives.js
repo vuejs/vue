@@ -1,4 +1,4 @@
-describe('UNIT: Directives', function () {
+describe('Directives', function () {
 
     var nextTick = require('vue/src/utils').nextTick,
         VM = require('vue/src/viewmodel')
@@ -48,6 +48,7 @@ describe('UNIT: Directives', function () {
     describe('text', function () {
 
         var dir = mockDirective('text')
+        dir.bind()
 
         it('should work with a string', function () {
             dir.update('hallo')
@@ -69,12 +70,10 @@ describe('UNIT: Directives', function () {
             assert.strictEqual(dir.el.textContent, '{"foo":"bar"}')
         })
 
-        it('should be empty with other stuff', function () {
+        it('should be empty with null & undefined', function () {
             dir.update(null)
             assert.strictEqual(dir.el.textContent, '')
             dir.update(undefined)
-            assert.strictEqual(dir.el.textContent, '')
-            dir.update(function () {})
             assert.strictEqual(dir.el.textContent, '')
         })
     })
@@ -105,12 +104,10 @@ describe('UNIT: Directives', function () {
             assert.strictEqual(dir.el.textContent, '{"foo":"bar"}')
         })
 
-        it('should be empty with other stuff', function () {
+        it('should be empty with with null & undefined', function () {
             dir.update(null)
             assert.strictEqual(dir.el.innerHTML, '')
             dir.update(undefined)
-            assert.strictEqual(dir.el.innerHTML, '')
-            dir.update(function () {})
             assert.strictEqual(dir.el.innerHTML, '')
         })
 
@@ -416,62 +413,6 @@ describe('UNIT: Directives', function () {
 
     })
 
-    describe('if', function () {
-
-        it('should remain detached if it was detached during bind() and never attached', function () {
-            var dir = mockDirective('if')
-            dir.bind()
-            dir.update(true)
-            assert.notOk(dir.el.parentNode)
-            dir.update(false)
-            assert.notOk(dir.el.parentNode)
-        })
-
-        it('should remove el and insert ref when value is falsy', function () {
-            var dir = mockDirective('if'),
-                parent = document.createElement('div')
-            parent.appendChild(dir.el)
-            dir.bind()
-            dir.update(false)
-            assert.notOk(dir.el.parentNode)
-            assert.notOk(parent.contains(dir.el))
-            // phantomJS weird bug:
-            // Node.contains() returns false when argument is a comment node.
-            assert.strictEqual(dir.ref.parentNode, parent)
-        })
-
-        it('should append el and remove ref when value is truthy', function () {
-            var dir = mockDirective('if'),
-                parent = document.createElement('div')
-            parent.appendChild(dir.el)
-            dir.bind()
-            dir.update(false)
-            dir.update(true)
-            assert.strictEqual(dir.el.parentNode, parent)
-            assert.ok(parent.contains(dir.el))
-            assert.notOk(parent.contains(dir.ref))
-        })
-
-        it('should work even if it was detached during bind()', function () {
-            var dir = mockDirective('if')
-            dir.bind()
-            var parent = document.createElement('div')
-            parent.appendChild(dir.el)
-
-            dir.update(false)
-            assert.strictEqual(dir.parent, parent)
-            assert.notOk(dir.el.parentNode)
-            assert.notOk(parent.contains(dir.el))
-            assert.strictEqual(dir.ref.parentNode, parent)
-
-            dir.update(true)
-            assert.strictEqual(dir.el.parentNode, parent)
-            assert.ok(parent.contains(dir.el))
-            assert.notOk(parent.contains(dir.ref))
-        })
-
-    })
-
     describe('on', function () {
         
         var dir = mockDirective('on')
@@ -612,7 +553,7 @@ describe('UNIT: Directives', function () {
         
         it('should create a child viewmodel with given data', function () {
             var testId = 'with-test'
-            mock(testId, '<span v-with="test">{{msg}}</span>')
+            mock(testId, '<span v-component v-with="test">{{msg}}</span>')
             var t = new Vue({
                 el: '#' + testId,
                 data: {
@@ -628,7 +569,7 @@ describe('UNIT: Directives', function () {
             var t = new Vue({
                 template:
                     '<span>{{test.msg}} {{n}}</span>'
-                    + '<p v-with="childMsg:test.msg, n:n" v-ref="child">{{childMsg}} {{n}}</p>',
+                    + '<p v-component v-with="childMsg:test.msg, n:n" v-ref="child">{{childMsg}} {{n}}</p>',
                 data: {
                     n: 1,
                     test: {
@@ -670,6 +611,8 @@ describe('UNIT: Directives', function () {
     })
 
     describe('ref', function () {
+
+        var t
         
         it('should register a VM isntance on its parent\'s $', function () {
             var called = false
@@ -680,7 +623,7 @@ describe('UNIT: Directives', function () {
                     }
                 }
             })
-            var t = new Vue({
+            t = new Vue({
                 template: '<div v-component="child" v-ref="hihi"></div>',
                 components: {
                     child: Child
@@ -689,147 +632,57 @@ describe('UNIT: Directives', function () {
             assert.ok(t.$.hihi instanceof Child)
             t.$.hihi.test()
             assert.ok(called)
+        })
+
+        it('should remove the reference if child is destroyed', function () {
             t.$.hihi.$destroy()
             assert.notOk('hihi' in t.$)
         })
 
+        it('should register an Array of VMs with v-repeat', function () {
+            t = new Vue({
+                template: '<p v-repeat="list" v-ref="list"></p>',
+                data: { list: [{a:1}, {a:2}, {a:3}] }
+            })
+            assert.equal(t.$.list.length, 3)
+            assert.ok(t.$.list[0] instanceof Vue)
+            assert.equal(t.$.list[1].a, 2)
+        })
+
+        it('should work with interpolation', function () {
+            t = new Vue({
+                template: '<div v-component v-with="obj" v-ref="{{ok ? \'a\' : \'b\'}}"></div>',
+                data: { obj: { a: 123 } }
+            })
+            assert.equal(t.$.b.a, 123)
+        })
+
     })
 
-    // More detailed testing for v-repeat can be found in functional tests.
-    // this is mainly for code coverage
-    describe('repeat', function () {
-
-        it('should work', function (done) {
-            var handlerCalled = false
-            var v = new Vue({
-                template: '<span v-repeat="items" v-on="click:check">{{title}}</span>',
-                data: {
-                    items: [
-                        {title: 1},
-                        {title: 2}
-                    ]
-                },
-                methods: {
-                    check: function (e) {
-                        assert.ok(e.targetVM instanceof VM)
-                        assert.strictEqual(this, v)
-                        handlerCalled = true
-                    }
-                }
-            })
-            nextTick(function () {
-                assert.equal(v.$el.innerHTML, '<span>1</span><span>2</span><!--v-repeat-items-->')
-                v.items.push({title:3})
-                v.items.pop()
-                v.items.unshift({title:0})
-                v.items.shift()
-                v.items.splice(0, 1, {title:-1})
-                v.items.sort(function (a, b) {
-                    return a.title > b.title
-                })
-                v.items.reverse()
-                nextTick(function () {
-                    assert.equal(v.$el.innerHTML, '<span>2</span><span>-1</span><!--v-repeat-items-->')
-                    testHandler()
-                })
-            })
-
-            function testHandler () {
-                document.getElementById('test').appendChild(v.$el)
-                var span = v.$el.querySelector('span'),
-                    e = mockMouseEvent('click')
-                span.dispatchEvent(e)
-                nextTick(function () {
-                    assert.ok(handlerCalled)
-                    done()
-                })
-            }
-        })
-
-        it('should work with primitive values', function () {
-            var v = new Vue({
-                template: '<span v-repeat="tags" v-ref="tags">{{$value}}</span>',
-                data: {
-                    tags: ['a', 'b', 'c']
-                }
-            })
-            assert.strictEqual(v.$el.textContent, 'abc')
-            v.$.tags[0].$value = 'd'
-            assert.strictEqual(v.tags[0], 'd')
-        })
-
-        it('should diff and reuse existing VMs when reseting arrays', function (done) {
-            var v = new Vue({
-                template: '<span v-repeat="tags" v-ref="tags">{{$value}}</span>',
-                data: {
-                    tags: ['a', 'b', 'c']
-                }
-            })
-            var oldVMs = v.$.tags
-            v.tags = v.tags.slice()
-            nextTick(function () {
-                assert.deepEqual(oldVMs, v.$.tags)
-                done()
-            })
-        })
+    describe('partial', function () {
         
-        it('should also work on objects', function (done) {
-            var v = new Vue({
-                template: '<span v-repeat="obj">{{$key}} {{msg}}</span>',
-                data: {
-                    obj: {
-                        a: {
-                            msg: 'hi!'
-                        },
-                        b: {
-                            msg: 'ha!'
-                        }
-                    }
+        it('should replace the node\'s content', function () {
+            var t = new Vue({
+                template: '<div v-partial="test"></div>',
+                partials: {
+                    test: '<a>ahahaha!</a>'
                 }
             })
-            assert.strictEqual(v.$el.textContent, 'a hi!b ha!')
+            assert.strictEqual(t.$el.innerHTML, '<div><a>ahahaha!</a></div>')
+        })
 
-            v.obj.a.msg = 'ho!'
-            
-            nextTick(function () {
-                assert.strictEqual(v.$el.textContent, 'a ho!b ha!')
-                testAddKey()
+        it('should work with interpolation', function () {
+            var t = new Vue({
+                template: '<div v-partial="{{ ready ? \'a\' : \'b\'}}"></div>',
+                partials: {
+                    a: 'A',
+                    b: 'B'
+                },
+                data: {
+                    ready: true
+                }
             })
-
-            function testAddKey () {
-                v.obj.$repeater.push({ $key: 'c', msg: 'he!' })
-                nextTick(function () {
-                    assert.strictEqual(v.$el.textContent, 'a ho!b ha!c he!')
-                    assert.strictEqual(v.obj.c.msg, 'he!')
-                    testRemoveKey()
-                })
-            }
-
-            function testRemoveKey () {
-                v.obj.$repeater.shift()
-                nextTick(function () {
-                    assert.strictEqual(v.$el.textContent, 'b ha!c he!')
-                    assert.strictEqual(v.obj.a, undefined)
-                    testSwap()
-                })
-            }
-
-            function testSwap () {
-                v.obj.b = { msg: 'hehe' }
-                nextTick(function () {
-                    assert.strictEqual(v.$el.textContent, 'b hehec he!')
-                    testRootSwap()
-                })
-            }
-
-            function testRootSwap () {
-                v.obj = { b: { msg: 'wa'}, c: {msg: 'wo'} }
-                nextTick(function () {
-                    assert.strictEqual(v.$el.textContent, 'b wac wo')
-                    done()
-                })
-            }
-           
+            assert.strictEqual(t.$el.innerHTML, '<div>A</div>')
         })
 
     })
@@ -892,6 +745,286 @@ describe('UNIT: Directives', function () {
                 }
             })
             assert.notOk(v.$el.hasAttribute('v-cloak'))
+        })
+
+    })
+
+    describe('if', function () {
+
+        var v
+
+        it('should create and insert the childVM when value is truthy', function () {
+
+            v = new Vue({
+                template: '<div v-if="ok">{{msg}}</div>',
+                data: {
+                    ok: true,
+                    msg: 'hello'
+                }
+            })
+            assert.strictEqual(v.$el.innerHTML, '<div>hello</div><!--vue-if-->')
+
+        })
+
+        it('should destroy childVM and remove content when value is falsy', function (done) {
+
+            v.ok = false
+            nextTick(function () {
+                assert.strictEqual(v.$el.innerHTML, '<!--vue-if-->')
+                done()
+            })
+
+        })
+
+        it('should work with v-component', function (done) {
+            
+            v = new Vue({
+                template: '<div v-if="ok" v-component="test"></div>',
+                data: {
+                    ok: true,
+                    msg: 'hello'
+                },
+                components: {
+                    test: {
+                        template: '{{msg}}'
+                    }
+                }
+            })
+            assert.strictEqual(v.$el.innerHTML, '<div>hello</div><!--vue-if-->')
+
+            v.ok = false
+            nextTick(function () {
+                assert.strictEqual(v.$el.innerHTML, '<!--vue-if-->')
+                done()
+            })
+
+        })
+
+    })
+
+    describe('view', function () {
+        
+        it('should dynamically switch components', function (done) {
+            
+            var v = new Vue({
+                template: '<div v-view="view" class="view"></div>',
+                data: {
+                    view: 'a'
+                },
+                components: {
+                    a: { template: 'A' },
+                    b: { template: 'B' }
+                }
+            })
+
+            assert.equal(
+                v.$el.innerHTML,
+                '<div class="view">A</div><!--v-view-->'
+            )
+            v.view = 'b'
+
+            nextTick(function () {
+                assert.equal(
+                    v.$el.innerHTML,
+                    '<div class="view">B</div><!--v-view-->'
+                )
+                done()
+            })
+
+        })
+
+    })
+
+    // More detailed testing for v-repeat can be found in functional tests.
+    // this is mainly for code coverage
+    describe('repeat', function () {
+
+        it('should work', function (done) {
+            var handlerCalled = false
+            var v = new Vue({
+                template: '<span v-repeat="items" v-on="click:check">{{title}}</span>',
+                data: {
+                    items: [
+                        {title: 1},
+                        {title: 2}
+                    ]
+                },
+                methods: {
+                    check: function (e) {
+                        assert.ok(e.targetVM instanceof VM)
+                        assert.strictEqual(this, v)
+                        handlerCalled = true
+                    }
+                }
+            })
+            nextTick(function () {
+                assert.equal(v.$el.innerHTML, '<span>1</span><span>2</span><!--v-repeat-items-->')
+                v.items.push({title:3})
+                v.items.pop()
+                v.items.unshift({title:0})
+                v.items.shift()
+                v.items.splice(0, 1, {title:-1})
+                v.items.sort(function (a, b) {
+                    return a.title > b.title
+                })
+                v.items.reverse()
+                nextTick(function () {
+                    assert.equal(v.$el.innerHTML, '<span>2</span><span>-1</span><!--v-repeat-items-->')
+                    testHandler()
+                })
+            })
+
+            function testHandler () {
+                document.getElementById('test').appendChild(v.$el)
+                var span = v.$el.querySelector('span'),
+                    e = mockMouseEvent('click')
+                span.dispatchEvent(e)
+                nextTick(function () {
+                    assert.ok(handlerCalled)
+                    done()
+                })
+            }
+        })
+
+        it('should work with primitive values', function (done) {
+            var triggeredChange = 0
+            var v = new Vue({
+                template: '<span v-repeat="tags" v-ref="tags">{{$value}}</span>',
+                data: {
+                    tags: ['a', 'b', 'c']
+                },
+                created: function () {
+                    this.$watch('tags', function () {
+                        triggeredChange++
+                    })
+                },
+                computed: {
+                    concat: function () {
+                        return this.tags.join(',')
+                    }
+                }
+            })
+            assert.strictEqual(v.concat, 'a,b,c')
+            assert.strictEqual(v.$el.textContent, 'abc')
+            v.$.tags[0].$value = 'd'
+            assert.strictEqual(v.tags[0], 'd')
+            nextTick(function () {
+                assert.strictEqual(triggeredChange, 1)
+                assert.strictEqual(v.concat, 'd,b,c')
+                done()
+            })
+        })
+
+        it('should diff and reuse existing VMs when reseting arrays', function (done) {
+            var v = new Vue({
+                template: '<span v-repeat="tags" v-ref="tags">{{$value}}</span>',
+                data: {
+                    tags: ['a', 'b', 'c']
+                }
+            })
+            var oldVMs = v.$.tags
+            v.tags = v.tags.slice()
+            nextTick(function () {
+                assert.deepEqual(oldVMs, v.$.tags)
+                done()
+            })
+        })
+        
+        it('should also work on objects', function (done) {
+            var v = new Vue({
+                template: '<span v-repeat="obj">{{$key}} {{msg}}</span>',
+                data: {
+                    obj: {
+                        a: {
+                            msg: 'hi!'
+                        },
+                        b: {
+                            msg: 'ha!'
+                        }
+                    }
+                }
+            })
+            assert.strictEqual(v.$el.textContent, 'a hi!b ha!')
+
+            v.obj.a.msg = 'ho!'
+            
+            nextTick(function () {
+                assert.strictEqual(v.$el.textContent, 'a ho!b ha!')
+                testAddKey()
+            })
+
+            function testAddKey () {
+                v.obj.$add('c', { msg: 'he!' })
+                nextTick(function () {
+                    assert.strictEqual(v.$el.textContent, 'a ho!b ha!c he!')
+                    assert.strictEqual(v.obj.c.msg, 'he!')
+                    testRemoveKey()
+                })
+            }
+
+            function testRemoveKey () {
+                v.obj.$delete('a')
+                nextTick(function () {
+                    assert.strictEqual(v.$el.textContent, 'b ha!c he!')
+                    assert.strictEqual(v.obj.a, undefined)
+                    testSwap()
+                })
+            }
+
+            function testSwap () {
+                v.obj.b = { msg: 'hehe' }
+                nextTick(function () {
+                    assert.strictEqual(v.$el.textContent, 'b hehec he!')
+                    testRootSwap()
+                })
+            }
+
+            function testRootSwap () {
+                v.obj = { b: { msg: 'wa'}, c: {msg: 'wo'} }
+                nextTick(function () {
+                    assert.strictEqual(v.$el.textContent, 'b wac wo')
+                    done()
+                })
+            }
+           
+        })
+
+        it('should accept arg for aliasing on primitive arrays', function (done) {
+            
+            var v = new Vue({
+                template: '<span v-repeat="item:items" v-ref="items">{{item}}</span>',
+                data: {
+                    items: [1,2,3]
+                }
+            })
+            assert.strictEqual(v.$el.textContent, '123')
+            v.$.items[0].item = 2
+
+            nextTick(function () {
+                assert.strictEqual(v.$el.textContent, '223')
+                assert.deepEqual(v.items, [2,2,3])
+                done()
+            })
+
+        })
+
+        it('should accept arg for aliasing on object arrays', function (done) {
+            
+            var v = new Vue({
+                template: '<span v-repeat="item:items" v-ref="items">{{item.id}}</span>',
+                data: {
+                    items: [{id:1},{id:2},{id:3}]
+                }
+            })
+            assert.strictEqual(v.$el.textContent, '123')
+            v.$.items[0].item = { id: 2 }
+
+            nextTick(function () {
+                assert.strictEqual(v.$el.textContent, '223')
+                assert.strictEqual(v.items[0].id, 2)
+                done()
+            })
+
         })
 
     })

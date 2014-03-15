@@ -1,8 +1,4 @@
 <style type="text/css">
-    man, offspring {
-        display: block;
-        padding-left: 15px;
-    }
     p {
         position: relative;
     }
@@ -19,23 +15,23 @@
 <div id="grandpa" name="Andy">
     <p class="ancestor">{{name}} {{family}}</p>
 
-    <man name="Jack">
+    <div v-component="man" name="Jack">
         <p class="jack">{{name}}, son of {{$parent.name}}</p>
 
-        <man name="Mike">
+        <div v-component="man" name="Mike">
             <p class="mike">{{name}}, son of {{$parent.name}}</p>
 
-            <offspring name="Tim" class="tim"></offspring>
+            <div v-component="offspring" name="Tim" class="tim"></div>
 
-            <offspring name="Tom" class="tom"></offspring>
-        </man>
+            <div v-component="offspring" name="Tom" class="tom"></div>
+        </div>
 
-        <man name="Jason">
+        <div v-component="man" name="Jason">
             <p class="jason">{{name}}, son of {{$parent.name}}</p>
 
-            <offspring name="Andrew" class="andrew"></offspring>
-        </man>
-    </man>
+            <div v-component="offspring" name="Andrew" class="andrew"></div>
+        </div>
+    </div>
 </div>
 
 <script type="text/x-template" id="offspring-template">
@@ -44,7 +40,9 @@
 
 <script src="../../../dist/vue.js"></script>
 <script>
-    //Vue.config({ debug: true })
+    Vue.config({
+        debug: true
+    })
 
     var Man = Vue.extend({
         paramAttributes: ['name']

@@ -1,4 +1,4 @@
-describe('UNIT: Binding', function () {
+describe('Binding', function () {
 
     var Binding = require('vue/src/binding'),
         nextTick = require('vue/src/utils').nextTick

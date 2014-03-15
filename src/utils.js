@@ -1,13 +1,58 @@
 var config    = require('./config'),
-    attrs     = config.attrs,
     toString  = ({}).toString,
     win       = window,
     console   = win.console,
     timeout   = win.setTimeout,
+    THIS_RE   = /[^\w]this[^\w]/,
     hasClassList = 'classList' in document.documentElement,
     ViewModel // late def
 
 var utils = module.exports = {
+
+    /**
+     *  get a value from an object keypath
+     */
+    get: function (obj, key) {
+        /* jshint eqeqeq: false */
+        if (key.indexOf('.') < 0) {
+            return obj[key]
+        }
+        var path = key.split('.'),
+            d = -1, l = path.length
+        while (++d < l && obj != null) {
+            obj = obj[path[d]]
+        }
+        return obj
+    },
+
+    /**
+     *  set a value to an object keypath
+     */
+    set: function (obj, key, val) {
+        /* jshint eqeqeq: false */
+        if (key.indexOf('.') < 0) {
+            obj[key] = val
+            return
+        }
+        var path = key.split('.'),
+            d = -1, l = path.length - 1
+        while (++d < l) {
+            if (obj[path[d]] == null) {
+                obj[path[d]] = {}
+            }
+            obj = obj[path[d]]
+        }
+        obj[path[d]] = val
+    },
+
+    /**
+     *  return the base segment of a keypath
+     */
+    baseKey: function (key) {
+        return key.indexOf('.') > 0
+            ? key.split('.')[0]
+            : key
+    },
 
     /**
      *  Create a prototype-less object
@@ -21,9 +66,11 @@ var utils = module.exports = {
      *  get an attribute and remove it.
      */
     attr: function (el, type) {
-        var attr = attrs[type],
+        var attr = config.prefix + '-' + type,
             val = el.getAttribute(attr)
-        if (val !== null) el.removeAttribute(attr)
+        if (val !== null) {
+            el.removeAttribute(attr)
+        }
         return val
     },
 
@@ -60,19 +107,24 @@ var utils = module.exports = {
     },
 
     /**
-     *  Make sure only strings, booleans, numbers and
-     *  objects are output to html. otherwise, ouput empty string.
+     *  Make sure null and undefined output empty string
      */
-    toText: function (value) {
-        /* jshint eqeqeq: false */
-        var type = typeof value
-        return (type === 'string' ||
-            type === 'boolean' ||
-            (type === 'number' && value == value)) // deal with NaN
-                ? value
-                : type === 'object' && value !== null
-                    ? JSON.stringify(value)
-                    : ''
+    guard: function (value) {
+        /* jshint eqeqeq: false, eqnull: true */
+        return value == null
+            ? ''
+            : (typeof value == 'object')
+                ? JSON.stringify(value)
+                : value
+    },
+
+    /**
+     *  When setting value on the VM, parse possible numbers
+     */
+    checkNumber: function (value) {
+        return (isNaN(value) || value === null || typeof value === 'boolean')
+            ? value
+            : Number(value)
     },
 
     /**
@@ -141,12 +193,23 @@ var utils = module.exports = {
     },
 
     /**
+     *  Check if a filter function contains references to `this`
+     *  If yes, mark it as a computed filter.
+     */
+    checkFilter: function (filter) {
+        if (THIS_RE.test(filter.toString())) {
+            filter.computed = true
+        }
+    },
+
+    /**
      *  convert certain option values to the desired format.
      */
     processOptions: function (options) {
         var components = options.components,
             partials   = options.partials,
             template   = options.template,
+            filters    = options.filters,
             key
         if (components) {
             for (key in components) {
@@ -158,30 +221,13 @@ var utils = module.exports = {
                 partials[key] = utils.toFragment(partials[key])
             }
         }
+        if (filters) {
+            for (key in filters) {
+                utils.checkFilter(filters[key])
+            }
+        }
         if (template) {
             options.template = utils.toFragment(template)
-        }
-    },
-
-    /**
-     *  log for debugging
-     */
-    log: function (msg) {
-        if (config.debug && console) {
-            console.log(msg)
-        }
-    },
-    
-    /**
-     *  warnings, traces by default
-     *  can be suppressed by `silent` option.
-     */
-    warn: function (msg) {
-        if (!config.silent && console) {
-            console.warn(msg)
-            if (config.debug && console.trace) {
-                console.trace(msg)
-            }
         }
     },
 
@@ -220,6 +266,48 @@ var utils = module.exports = {
                 cur = cur.replace(tar, ' ')
             }
             el.className = cur.trim()
+        }
+    },
+
+    /**
+     *  Convert an object to Array
+     *  used in v-repeat and array filters
+     */
+    objectToArray: function (obj) {
+        var res = [], val, data
+        for (var key in obj) {
+            val = obj[key]
+            data = utils.typeOf(val) === 'Object'
+                ? val
+                : { $value: val }
+            data.$key = key
+            res.push(data)
+        }
+        return res
+    }
+}
+
+enableDebug()
+function enableDebug () {
+    /**
+     *  log for debugging
+     */
+    utils.log = function (msg) {
+        if (config.debug && console) {
+            console.log(msg)
+        }
+    }
+    
+    /**
+     *  warnings, traces by default
+     *  can be suppressed by `silent` option.
+     */
+    utils.warn = function (msg) {
+        if (!config.silent && console) {
+            console.warn(msg)
+            if (config.debug && console.trace) {
+                console.trace(msg)
+            }
         }
     }
 }

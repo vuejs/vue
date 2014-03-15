@@ -7,10 +7,11 @@ var Emitter     = require('./emitter'),
     TextParser  = require('./text-parser'),
     DepsParser  = require('./deps-parser'),
     ExpParser   = require('./exp-parser'),
+    ViewModel,
     
     // cache methods
     slice       = [].slice,
-    log         = utils.log,
+    each        = [].forEach,
     makeHash    = utils.hash,
     extend      = utils.extend,
     def         = utils.defProtected,
@@ -21,6 +22,15 @@ var Emitter     = require('./emitter'),
         'created', 'ready',
         'beforeDestroy', 'afterDestroy',
         'attached', 'detached'
+    ],
+
+    // list of priority directives
+    // that needs to be checked in specific order
+    priorityDirectives = [
+        'i' + 'f',
+        'repeat',
+        'view',
+        'component'
     ]
 
 /**
@@ -49,14 +59,13 @@ function Compiler (vm, options) {
 
     // initialize element
     var el = compiler.el = compiler.setupElement(options)
-    log('\nnew VM instance: ' + el.tagName + '\n')
+    utils.log('\nnew VM instance: ' + el.tagName + '\n')
 
     // set compiler properties
     compiler.vm = el.vue_vm = vm
     compiler.bindings = makeHash()
     compiler.dirs = []
     compiler.deferred = []
-    compiler.exps = []
     compiler.computed = []
     compiler.children = []
     compiler.emitter = new Emitter()
@@ -69,20 +78,13 @@ function Compiler (vm, options) {
     def(vm, '$options', options)
     def(vm, '$compiler', compiler)
 
-    // set parent VM
-    // and register child id on parent
-    var parentVM = options.parent,
-        childId = utils.attr(el, 'ref')
+    // set parent
+    var parentVM = options.parent
     if (parentVM) {
         compiler.parent = parentVM.$compiler
         parentVM.$compiler.children.push(compiler)
         def(vm, '$parent', parentVM)
-        if (childId) {
-            compiler.childId = childId
-            parentVM.$[childId] = vm
-        }
     }
-
     // set root
     def(vm, '$root', getRoot(compiler).vm)
 
@@ -100,10 +102,8 @@ function Compiler (vm, options) {
     // copy paramAttributes
     if (options.paramAttributes) {
         options.paramAttributes.forEach(function (attr) {
-            var val = el.getAttribute(attr)
-            vm[attr] = (isNaN(val) || val === null)
-                ? val
-                : Number(val)
+            var val = compiler.eval(el.getAttribute(attr))
+            vm[attr] = utils.checkNumber(val)
         })
     }
 
@@ -129,7 +129,9 @@ function Compiler (vm, options) {
     compiler.compile(el, true)
 
     // bind deferred directives (child components)
-    compiler.deferred.forEach(compiler.bindDirective, compiler)
+    compiler.deferred.forEach(function (dir) {
+        compiler.bindDirective(dir)
+    })
 
     // extract dependencies for computed properties
     compiler.parseDeps()
@@ -173,6 +175,11 @@ CompilerProto.setupElement = function (options) {
                 el.parentNode.insertBefore(replacer, el)
                 el.parentNode.removeChild(el)
             }
+            // copy over attributes
+            each.call(el.attributes, function (attr) {
+                replacer.setAttribute(attr.name, attr.value)
+            })
+            // replace
             el = replacer
         } else {
             el.appendChild(template.cloneNode(true))
@@ -325,102 +332,81 @@ CompilerProto.observeData = function (data) {
  *  Compile a DOM node (recursive)
  */
 CompilerProto.compile = function (node, root) {
-
-    var compiler = this,
-        nodeType = node.nodeType,
-        tagName  = node.tagName
-
-    if (nodeType === 1 && tagName !== 'SCRIPT') { // a normal node
-
-        // skip anything with v-pre
-        if (utils.attr(node, 'pre') !== null) return
-
-        // special attributes to check
-        var repeatExp,
-            withExp,
-            partialId,
-            directive,
-            componentId = utils.attr(node, 'component') || tagName.toLowerCase(),
-            componentCtor = compiler.getOption('components', componentId)
-
-        // It is important that we access these attributes
-        // procedurally because the order matters.
-        //
-        // `utils.attr` removes the attribute once it gets the
-        // value, so we should not access them all at once.
-
-        // v-repeat has the highest priority
-        // and we need to preserve all other attributes for it.
-        /* jshint boss: true */
-        if (repeatExp = utils.attr(node, 'repeat')) {
-
-            // repeat block cannot have v-id at the same time.
-            directive = Directive.parse('repeat', repeatExp, compiler, node)
-            if (directive) {
-                directive.Ctor = componentCtor
-                // defer child component compilation
-                // so by the time they are compiled, the parent
-                // would have collected all bindings
-                compiler.deferred.push(directive)
-            }
-
-        // v-with has 2nd highest priority
-        } else if (root !== true && ((withExp = utils.attr(node, 'with')) || componentCtor)) {
-
-            withExp = Directive.split(withExp || '')
-            withExp.forEach(function (exp, i) {
-                var directive = Directive.parse('with', exp, compiler, node)
-                if (directive) {
-                    directive.Ctor = componentCtor
-                    // notify the directive that this is the
-                    // last expression in the group
-                    directive.last = i === withExp.length - 1
-                    compiler.deferred.push(directive)
-                }
-            })
-
-        } else {
-
-            // check transition & animation properties
-            node.vue_trans  = utils.attr(node, 'transition')
-            node.vue_anim   = utils.attr(node, 'animation')
-            node.vue_effect = utils.attr(node, 'effect')
-            
-            // replace innerHTML with partial
-            partialId = utils.attr(node, 'partial')
-            if (partialId) {
-                var partial = compiler.getOption('partials', partialId)
-                if (partial) {
-                    node.innerHTML = ''
-                    node.appendChild(partial.cloneNode(true))
-                }
-            }
-
-            // finally, only normal directives left!
-            compiler.compileNode(node)
-        }
-
-    } else if (nodeType === 3 && config.interpolate) { // text node
-
-        compiler.compileTextNode(node)
-
+    var nodeType = node.nodeType
+    if (nodeType === 1 && node.tagName !== 'SCRIPT') { // a normal node
+        this.compileElement(node, root)
+    } else if (nodeType === 3 && config.interpolate) {
+        this.compileTextNode(node)
     }
-
 }
 
 /**
- *  Compile a normal node
+ *  Check for a priority directive
+ *  If it is present and valid, return true to skip the rest
  */
-CompilerProto.compileNode = function (node) {
-    var i, j,
-        attrs = slice.call(node.attributes),
-        prefix = config.prefix + '-'
-    // parse if has attributes
-    if (attrs && attrs.length) {
-        var attr, isDirective, exps, exp, directive, dirname
-        // loop through all attributes
+CompilerProto.checkPriorityDir = function (dirname, node, root) {
+    var expression, directive, Ctor
+    if (dirname === 'component' && root !== true && (Ctor = this.resolveComponent(node, undefined, true))) {
+        directive = Directive.parse(dirname, '', this, node)
+        directive.Ctor = Ctor
+    } else {
+        expression = utils.attr(node, dirname)
+        directive = expression && Directive.parse(dirname, expression, this, node)
+    }
+    if (directive) {
+        if (root === true) {
+            utils.warn('Directive v-' + dirname + ' cannot be used on manually instantiated root node.')
+            return
+        }
+        this.deferred.push(directive)
+        return true
+    }
+}
+
+/**
+ *  Compile normal directives on a node
+ */
+CompilerProto.compileElement = function (node, root) {
+
+    // textarea is pretty annoying
+    // because its value creates childNodes which
+    // we don't want to compile.
+    if (node.tagName === 'TEXTAREA' && node.value) {
+        node.value = this.eval(node.value)
+    }
+
+    // only compile if this element has attributes
+    // or its tagName contains a hyphen (which means it could
+    // potentially be a custom element)
+    if (node.hasAttributes() || node.tagName.indexOf('-') > -1) {
+
+        // skip anything with v-pre
+        if (utils.attr(node, 'pre') !== null) {
+            return
+        }
+
+        // check priority directives.
+        // if any of them are present, it will take over the node with a childVM
+        // so we can skip the rest
+        for (var i = 0, l = priorityDirectives.length; i < l; i++) {
+            if (this.checkPriorityDir(priorityDirectives[i], node, root)) {
+                return
+            }
+        }
+
+        // check transition & animation properties
+        node.vue_trans  = utils.attr(node, 'transition')
+        node.vue_anim   = utils.attr(node, 'animation')
+        node.vue_effect = this.eval(utils.attr(node, 'effect'))
+
+        var prefix = config.prefix + '-',
+            attrs = slice.call(node.attributes),
+            params = this.options.paramAttributes,
+            attr, isDirective, exps, exp, directive, dirname
+
         i = attrs.length
         while (i--) {
+
             attr = attrs[i]
             isDirective = false
 
@@ -430,21 +416,29 @@ CompilerProto.compileNode = function (node) {
                 exps = Directive.split(attr.value)
                 // loop through clauses (separated by ",")
                 // inside each attribute
-                j = exps.length
-                while (j--) {
-                    exp = exps[j]
+                l = exps.length
+                while (l--) {
+                    exp = exps[l]
                     dirname = attr.name.slice(prefix.length)
                     directive = Directive.parse(dirname, exp, this, node)
-                    if (directive) {
+
+                    if (dirname === 'with') {
+                        this.bindDirective(directive, this.parent)
+                    } else {
                         this.bindDirective(directive)
                     }
+                    
                 }
             } else if (config.interpolate) {
                 // non directive attribute, check interpolation tags
                 exp = TextParser.parseAttr(attr.value)
                 if (exp) {
                     directive = Directive.parse('attr', attr.name + ':' + exp, this, node)
-                    if (directive) {
+                    if (params && params.indexOf(attr.name) > -1) {
+                        // a param attribute... we should use the parent binding
+                        // to avoid circular updates like size={{size}}
+                        this.bindDirective(directive, this.parent)
+                    } else {
                         this.bindDirective(directive)
                     }
                 }
@@ -454,9 +448,11 @@ CompilerProto.compileNode = function (node) {
                 node.removeAttribute(attr.name)
             }
         }
+
     }
+
     // recursively compile childNodes
-    if (node.childNodes.length) {
+    if (node.hasChildNodes()) {
         slice.call(node.childNodes).forEach(this.compile, this)
     }
 }
@@ -468,31 +464,18 @@ CompilerProto.compileTextNode = function (node) {
 
     var tokens = TextParser.parse(node.nodeValue)
     if (!tokens) return
-    var el, token, directive, partial, partialId, partialNodes
+    var el, token, directive
 
     for (var i = 0, l = tokens.length; i < l; i++) {
+
         token = tokens[i]
-        directive = partialNodes = null
+        directive = null
+
         if (token.key) { // a binding
             if (token.key.charAt(0) === '>') { // a partial
-                partialId = token.key.slice(1).trim()
-                if (partialId === 'yield') {
-                    el = this.rawContent
-                } else {
-                    partial = this.getOption('partials', partialId)
-                    if (partial) {
-                        el = partial.cloneNode(true)
-                    } else {
-                        utils.warn('Unknown partial: ' + partialId)
-                        continue
-                    }
-                }
-                if (el) {
-                    // save an Array reference of the partial's nodes
-                    // so we can compile them AFTER appending the fragment
-                    partialNodes = slice.call(el.childNodes)
-                }
-            } else { // a real binding
+                el = document.createComment('ref')
+                directive = Directive.parse('partial', token.key.slice(1), this, el)
+            } else {
                 if (!token.html) { // text binding
                     el = document.createTextNode('')
                     directive = Directive.parse('text', token.key, this, el)
@@ -507,18 +490,8 @@ CompilerProto.compileTextNode = function (node) {
 
         // insert node
         node.parentNode.insertBefore(el, node)
-
         // bind directive
-        if (directive) {
-            this.bindDirective(directive)
-        }
-
-        // compile partial after appending, because its children's parentNode
-        // will change from the fragment to the correct parentNode.
-        // This could affect directives that need access to its element's parentNode.
-        if (partialNodes) {
-            partialNodes.forEach(this.compile, this)
-        }
+        this.bindDirective(directive)
 
     }
     node.parentNode.removeChild(node)
@@ -527,7 +500,9 @@ CompilerProto.compileTextNode = function (node) {
 /**
  *  Add a directive instance to the correct binding & viewmodel
  */
-CompilerProto.bindDirective = function (directive) {
+CompilerProto.bindDirective = function (directive, bindingOwner) {
+
+    if (!directive) return
 
     // keep track of it so we can unbind() later
     this.dirs.push(directive)
@@ -541,12 +516,12 @@ CompilerProto.bindDirective = function (directive) {
 
     // otherwise, we got more work to do...
     var binding,
-        compiler = this,
+        compiler = bindingOwner || this,
         key      = directive.key
 
     if (directive.isExp) {
         // expression bindings are always created on current compiler
-        binding = compiler.createBinding(key, true, directive.isFn)
+        binding = compiler.createBinding(key, directive)
     } else {
         // recursively locate which compiler owns the binding
         while (compiler) {
@@ -574,18 +549,20 @@ CompilerProto.bindDirective = function (directive) {
 /**
  *  Create binding and attach getter/setter for a key to the viewmodel object
  */
-CompilerProto.createBinding = function (key, isExp, isFn) {
+CompilerProto.createBinding = function (key, directive) {
 
-    log('  created binding: ' + key)
+    utils.log('  created binding: ' + key)
 
     var compiler = this,
+        isExp    = directive && directive.isExp,
+        isFn     = directive && directive.isFn,
         bindings = compiler.bindings,
         computed = compiler.options.computed,
         binding  = new Binding(compiler, key, isExp, isFn)
 
     if (isExp) {
         // expression bindings are anonymous
-        compiler.defineExp(key, binding)
+        compiler.defineExp(key, binding, directive)
     } else {
         bindings[key] = binding
         if (binding.root) {
@@ -599,8 +576,13 @@ CompilerProto.createBinding = function (key, isExp, isFn) {
             } else {
                 compiler.defineMeta(key, binding)
             }
+        } else if (computed && computed[utils.baseKey(key)]) {
+            // nested path on computed property
+            compiler.defineExp(key, binding)
         } else {
-            // ensure path in data so it can be observed
+            // ensure path in data so that computed properties that
+            // access the path don't throw an error and can collect
+            // dependencies
             Observer.ensurePath(compiler.data, key)
             var parentKey = key.slice(0, key.lastIndexOf('.'))
             if (!bindings[parentKey]) {
@@ -655,7 +637,9 @@ CompilerProto.defineProp = function (key, binding) {
 CompilerProto.defineMeta = function (key, binding) {
     var vm = this.vm,
         ob = this.observer,
-        value = binding.value = vm[key] || this.data[key]
+        value = binding.value = key in vm
+            ? vm[key]
+            : this.data[key]
     // remove initital meta in data, since the same piece
     // of data can be observed by different VMs, each have
     // its own associated meta info.
@@ -676,11 +660,11 @@ CompilerProto.defineMeta = function (key, binding) {
  *  Define an expression binding, which is essentially
  *  an anonymous computed property
  */
-CompilerProto.defineExp = function (key, binding) {
-    var getter = ExpParser.parse(key, this)
+CompilerProto.defineExp = function (key, binding, directive) {
+    var filters = directive && directive.computeFilters && directive.filters,
+        getter  = ExpParser.parse(key, this, null, filters)
     if (getter) {
         this.markComputed(binding, getter)
-        this.exps.push(binding)
     }
 }
 
@@ -746,7 +730,7 @@ CompilerProto.execHook = function (event) {
  *  Check if a compiler's data contains a keypath
  */
 CompilerProto.hasKey = function (key) {
-    var baseKey = key.split('.')[0]
+    var baseKey = utils.baseKey(key)
     return hasOwn.call(this.data, baseKey) ||
         hasOwn.call(this.vm, baseKey)
 }
@@ -760,29 +744,12 @@ CompilerProto.parseDeps = function () {
 }
 
 /**
- *  Add an event delegation listener
+ *  Add an event listener to the delegator
  *  listeners are instances of directives with `isFn:true`
  */
 CompilerProto.addListener = function (listener) {
     var event = listener.arg,
-        delegator = this.delegators[event]
-    if (!delegator) {
-        // initialize a delegator
-        delegator = this.delegators[event] = {
-            targets: [],
-            handler: function (e) {
-                var i = delegator.targets.length,
-                    target
-                while (i--) {
-                    target = delegator.targets[i]
-                    if (target.el.contains(e.target) && target.handler) {
-                        target.handler(e)
-                    }
-                }
-            }
-        }
-        this.el.addEventListener(event, delegator.handler)
-    }
+        delegator = this.delegators[event] || this.addDelegator(event)
     delegator.targets.push(listener)
 }
 
@@ -792,6 +759,72 @@ CompilerProto.addListener = function (listener) {
 CompilerProto.removeListener = function (listener) {
     var targets = this.delegators[listener.arg].targets
     targets.splice(targets.indexOf(listener), 1)
+}
+
+/**
+ *  Add an event delegator
+ */
+CompilerProto.addDelegator = function (event) {
+    var delegator = this.delegators[event] = {
+        targets: [],
+        handler: function (e) {
+            var target,
+                i = delegator.targets.length,
+                stop = e.stopPropagation
+            // overwrite propagation control
+            e.stopPropagation = function () {
+                e.stopped = true
+                stop.call(e)
+            }
+            while (i--) {
+                target = delegator.targets[i]
+                if (!e.stopped && target.handler && target.el.contains(e.target)) {
+                    target.handler(e)
+                }
+            }
+        }
+    }
+    this.el.addEventListener(event, delegator.handler)
+    return delegator
+}
+
+/**
+ *  Do a one-time eval of a string that potentially
+ *  includes bindings. It accepts additional raw data
+ *  because we need to dynamically resolve v-component
+ *  before a childVM is even compiled...
+ */
+CompilerProto.eval = function (exp, data) {
+    var parsed = TextParser.parseAttr(exp)
+    return parsed
+        ? ExpParser.eval(parsed, this, data)
+        : exp
+}
+
+/**
+ *  Resolve a Component constructor for an element
+ *  with the data to be used
+ */
+CompilerProto.resolveComponent = function (node, data, test) {
+
+    // late require to avoid circular deps
+    ViewModel = ViewModel || require('./viewmodel')
+
+    var exp     = utils.attr(node, 'component'),
+        tagName = node.tagName,
+        id      = this.eval(exp, data),
+        tagId   = (tagName.indexOf('-') > 0 && tagName.toLowerCase()),
+        Ctor    = this.getOption('components', id || tagId)
+
+    if (id && !Ctor) {
+        utils.warn('Unknown component: ' + id)
+    }
+
+    return test
+        ? exp === ''
+            ? ViewModel
+            : Ctor
+        : Ctor || ViewModel
 }
 
 /**
@@ -808,7 +841,7 @@ CompilerProto.destroy = function () {
         vm          = compiler.vm,
         el          = compiler.el,
         directives  = compiler.dirs,
-        exps        = compiler.exps,
+        computed    = compiler.computed,
         bindings    = compiler.bindings,
         delegators  = compiler.delegators,
         children    = compiler.children,
@@ -834,13 +867,13 @@ CompilerProto.destroy = function () {
         dir.unbind()
     }
 
-    // unbind all expressions (anonymous bindings)
-    i = exps.length
+    // unbind all computed, anonymous bindings
+    i = computed.length
     while (i--) {
-        exps[i].unbind()
+        computed[i].unbind()
     }
 
-    // unbind all own bindings
+    // unbind all keypath bindings
     for (key in bindings) {
         binding = bindings[key]
         if (binding) {
@@ -862,9 +895,6 @@ CompilerProto.destroy = function () {
     // remove self from parent
     if (parent) {
         parent.children.splice(parent.children.indexOf(compiler), 1)
-        if (compiler.childId) {
-            delete parent.vm.$[compiler.childId]
-        }
     }
 
     // finally remove dom element

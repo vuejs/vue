@@ -4,6 +4,18 @@
 
     'use strict';
 
+    var filters = {
+        all: function (todo) {
+            return true;
+        },
+        active: function (todo) {
+            return !todo.completed;
+        },
+        completed: function (todo) {
+            return todo.completed;
+        }
+    };
+
     exports.app = new Vue({
 
         // the root element that will be compiled
@@ -13,7 +25,8 @@
         data: {
             todos: todoStorage.fetch(),
             newTodo: '',
-            editedTodo: null
+            editedTodo: null,
+            filter: 'all'
         },
 
         // a custom directive to wait for the DOM to be updated
@@ -31,35 +44,17 @@
             }
         },
 
-        // the `created` lifecycle hook.
-        // this is where we do the initialization work.
-        // http://vuejs.org/api/instantiation-options.html#created
-        created: function () {
-            // setup filters
-            this.filters = {
-                all: function (todo) {
-                    // collect dependency.
-                    // http://vuejs.org/guide/computed.html#Dependency_Collection_Gotcha
-                    /* jshint expr:true */
-                    todo.completed;
-                    return true;
-                },
-                active: function (todo) {
-                    return !todo.completed;
-                },
-                completed: function (todo) {
-                    return todo.completed;
-                }
-            };
-            // default filter
-            this.setFilter('all');
+        filters: {
+            filterTodos: function (todos) {
+                return todos.filter(filters[this.filter]);
+            }
         },
 
         // computed property
         // http://vuejs.org/guide/computed.html
         computed: {
             remaining: function () {
-                return this.todos.filter(this.filters.active).length
+                return this.todos.filter(filters.active).length;
             },
             allDone: {
                 $get: function () {
@@ -78,11 +73,6 @@
         // note there's no DOM manipulation here at all.
         methods: {
 
-            setFilter: function (filter) {
-                this.filter = filter;
-                this.filterTodo = this.filters[filter];
-            },
-
             addTodo: function () {
                 var value = this.newTodo && this.newTodo.trim();
                 if (!value) {
@@ -94,7 +84,7 @@
             },
 
             removeTodo: function (todo) {
-                this.todos.remove(todo.$data);
+                this.todos.$remove(todo.$data);
                 todoStorage.save();
             },
 
@@ -125,12 +115,14 @@
             },
             
             removeCompleted: function () {
-                this.todos.remove(function (todo) {
+                this.todos.$remove(function (todo) {
                     return todo.completed;
                 });
                 todoStorage.save();
             }
         }
     });
+
+    app.filters = filters;
 
 })(window);
