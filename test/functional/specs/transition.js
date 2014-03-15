@@ -50,7 +50,7 @@ casper.test.begin('CSS Transition', 20, function (test) {
     })
     // test Array swapping with transition
     .thenEvaluate(function () {
-        test.items = [test.items[1], {a:3}]
+        test.items = [test.items[0], {a:3}]
     })
     .wait(minWait, function () {
         test.assertVisible('.test.if')

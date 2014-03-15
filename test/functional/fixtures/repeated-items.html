@@ -6,7 +6,7 @@
         <button class="unshift" v-on="click:unshift">unshift</button>
         <button class="splice" v-on="click:splice">splice</button>
         <button class="remove" v-on="click:remove">remove</button>
-        <button class="replace" v-on="click:replace">replace</button>
+        <button class="set" v-on="click:set">set</button>
         <button class="sort" v-on="click:sort">sort</button>
         <button class="reverse" v-on="click:reverse">reverse</button>
     </p>
@@ -48,8 +48,8 @@
             splice: function () {
                 this.items.splice(1, 1, { title: getChar() }, { title: getChar() })
             },
-            replace: function () {
-                this.items.$replace(getPos(), { title: getChar() })
+            set: function () {
+                this.items.$set(getPos(), { title: getChar() })
             },
             remove: function () {
                 this.items.$remove(getPos())

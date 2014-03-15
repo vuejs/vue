@@ -47,7 +47,7 @@ casper.test.begin('Repeated Items', 50, function (test) {
         test.assertSelectorHasText('.item:nth-child(2)', '1 2')
         test.assertSelectorHasText('.item:nth-child(3)', '2 3')
     })
-    .thenClick('.replace', function () {
+    .thenClick('.set', function () {
         test.assertSelectorHasText('.count', '3')
         test.assertSelectorHasText('.item:nth-child(1)', '0 1')
         test.assertSelectorHasText('.item:nth-child(2)', '1 2')
@@ -73,15 +73,14 @@ casper.test.begin('Repeated Items', 50, function (test) {
         this.click('.pop')
         this.click('.shift')
         this.click('.remove')
-        this.click('.replace')
         this.click('.sort')
         this.click('.reverse')
         this.click('.splice')
     })
     .then(function () {
         test.assertSelectorHasText('.count', '2')
-        test.assertSelectorHasText('.item:nth-child(1)', '0 6')
-        test.assertSelectorHasText('.item:nth-child(2)', '1 7')
+        test.assertSelectorHasText('.item:nth-child(1)', '0 5')
+        test.assertSelectorHasText('.item:nth-child(2)', '1 6')
     })
     // test swap entire array
     .thenEvaluate(function () {

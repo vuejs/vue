@@ -31,7 +31,8 @@ casper.test.begin('Validation', 9, function (test) {
         test.assertElementCount('.valid', 2)
         test.assertField('email', 'hello@bar.com')
     })
-    .thenClick('#go', function () {
+    .thenClick('#go')
+    .then(function () {
         test.assertElementCount('.user', 1)
         test.assertSelectorHasText('.user', 'haha hello@bar.com')
     })

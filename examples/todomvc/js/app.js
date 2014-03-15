@@ -115,9 +115,7 @@
             },
             
             removeCompleted: function () {
-                this.todos.$remove(function (todo) {
-                    return todo.completed;
-                });
+                this.todos = this.todos.filter(filters.active);
                 todoStorage.save();
             }
         }

@@ -35,9 +35,18 @@ var ArrayProxy = Object.create(Array.prototype)
 ].forEach(watchMutation)
 
 // Augment the ArrayProxy with convenience methods
-def(ArrayProxy, '$remove', removeElement, !hasProto)
-def(ArrayProxy, '$set', replaceElement, !hasProto)
-def(ArrayProxy, '$replace', replaceElement, !hasProto)
+def(ArrayProxy, '$set', function (index, data) {
+    return this.splice(index, 1, data)[0]
+}, !hasProto)
+
+def(ArrayProxy, '$remove', function (index) {
+    if (typeof index !== 'number') {
+        index = this.indexOf(index)
+    }
+    if (index > -1) {
+        return this.splice(index, 1)[0]
+    }
+}, !hasProto)
 
 /**
  *  Intercep a mutation event so we can emit the mutation info.
@@ -116,56 +125,6 @@ function unlinkArrayElements (arr, items) {
                 var owners = item.__emitter__.owners
                 if (owners) owners.splice(owners.indexOf(arr))
             }
-        }
-    }
-}
-
-/**
- *  Convenience method to remove an element in an Array
- *  This will be attached to observed Array instances
- */
-function removeElement (index) {
-    if (typeof index === 'function') {
-        var i = this.length,
-            removed = []
-        while (i--) {
-            if (index(this[i])) {
-                removed.push(this.splice(i, 1)[0])
-            }
-        }
-        return removed.reverse()
-    } else {
-        if (typeof index !== 'number') {
-            index = this.indexOf(index)
-        }
-        if (index > -1) {
-            return this.splice(index, 1)[0]
-        }
-    }
-}
-
-/**
- *  Convenience method to replace an element in an Array
- *  This will be attached to observed Array instances
- */
-function replaceElement (index, data) {
-    if (typeof index === 'function') {
-        var i = this.length,
-            replaced = [],
-            replacer
-        while (i--) {
-            replacer = index(this[i])
-            if (replacer !== undefined) {
-                replaced.push(this.splice(i, 1, replacer)[0])
-            }
-        }
-        return replaced.reverse()
-    } else {
-        if (typeof index !== 'number') {
-            index = this.indexOf(index)
-        }
-        if (index > -1) {
-            return this.splice(index, 1, data)[0]
         }
     }
 }

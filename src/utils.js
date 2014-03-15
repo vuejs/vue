@@ -132,7 +132,7 @@ var utils = module.exports = {
      */
     extend: function (obj, ext, protective) {
         for (var key in ext) {
-            if (protective && obj[key]) continue
+            if ((protective && obj[key]) || obj[key] === ext[key]) continue
             obj[key] = ext[key]
         }
         return obj

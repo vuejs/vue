@@ -120,7 +120,9 @@ function Compiler (vm, options) {
     // because they are ienumerable
     if (compiler.repeat) {
         compiler.createBinding('$index')
-        if (data.$key) compiler.createBinding('$key')
+        if (data.$key) {
+            compiler.createBinding('$key')
+        }
     }
 
     // now parse the DOM, during which we will create necessary bindings
@@ -604,13 +606,13 @@ CompilerProto.defineProp = function (key, binding) {
 
     // make sure the key is present in data
     // so it can be observed
-    if (!(key in data)) {
+    if (!(hasOwn.call(data, key))) {
         data[key] = undefined
     }
 
     // if the data object is already observed, but the key
     // is not observed, we need to add it to the observed keys.
-    if (ob && !(key in ob.values)) {
+    if (ob && !(hasOwn.call(ob.values, key))) {
         Observer.convertKey(data, key)
     }
 
