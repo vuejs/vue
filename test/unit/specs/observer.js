@@ -292,6 +292,23 @@ describe('Observer', function () {
 
         describe('Augmentations', function () {
 
+            it('$set', function () {
+                var emitted = false,
+                    index = ~~(Math.random() * arr.length),
+                    expected = arr[index] = { a: 1 },
+                    arg = 34567
+                ob.once('mutate', function (key, array, mutation) {
+                    emitted = true
+                    assert.strictEqual(mutation.method, 'splice')
+                    assert.strictEqual(mutation.args.length, 3)
+                    assert.strictEqual(mutation.args[0], index)
+                })
+                var r = arr.$set(index, arg)
+                assert.ok(emitted)
+                assert.strictEqual(r, expected)
+                assert.strictEqual(arr[index], arg)
+            })
+
             it('$remove (index)', function () {
                 var emitted = false,
                     index = ~~(Math.random() * arr.length),
@@ -320,67 +337,6 @@ describe('Observer', function () {
                 var r = arr.$remove(expected)
                 assert.ok(emitted)
                 assert.strictEqual(r, expected)
-            })
-
-            it('$remove (function)', function () {
-                var expected = [1001, 1002]
-                arr.push.apply(arr, expected)
-                var filter = function (e) {
-                        return e > 1000
-                    },
-                    copy = arr.filter(function (e) {
-                        return e <= 1000
-                    })
-                var removed = arr.$remove(filter)
-                assert.deepEqual(arr, copy)
-                assert.deepEqual(expected, removed)
-            })
-
-            it('$replace (index)', function () {
-                var emitted = false,
-                    index = ~~(Math.random() * arr.length),
-                    expected = arr[index] = { a: 1 },
-                    arg = 34567
-                ob.once('mutate', function (key, array, mutation) {
-                    emitted = true
-                    assert.strictEqual(mutation.method, 'splice')
-                    assert.strictEqual(mutation.args.length, 3)
-                    assert.strictEqual(mutation.args[0], index)
-                })
-                var r = arr.$replace(index, arg)
-                assert.ok(emitted)
-                assert.strictEqual(r, expected)
-                assert.strictEqual(arr[index], arg)
-            })
-
-            it('$replace (object)', function () {
-                var emitted = false,
-                    index = ~~(Math.random() * arr.length),
-                    expected = arr[index] = { a: 1 },
-                    arg = 45678
-                ob.once('mutate', function (key, array, mutation) {
-                    emitted = true
-                    assert.strictEqual(mutation.method, 'splice')
-                    assert.strictEqual(mutation.args.length, 3)
-                    assert.strictEqual(mutation.args[0], index)
-                })
-                var r = arr.$replace(expected, arg)
-                assert.ok(emitted)
-                assert.strictEqual(r, expected)
-                assert.strictEqual(arr[index], arg)
-            })
-
-            it('$replace (function)', function () {
-                arr[0] = 1
-                arr[1] = 2
-                arr[2] = 3
-                var expected = [2, 3, 3],
-                    expectRet = [1, 2]
-                var replaced = arr.$replace(function (e) {
-                    if (e < 3) return e + 1
-                })
-                assert.deepEqual(arr, expected)
-                assert.deepEqual(replaced, expectRet)
             })
 
         })
