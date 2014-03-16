@@ -26,7 +26,9 @@ module.exports = {
             newHandler = function (e) {
                 e.targetEl = el
                 e.targetVM = targetVM
-                handler.call(isExp ? targetVM : ownerVM, e)
+                if (true === handler.call(isExp ? targetVM : ownerVM, e)) {
+                    e.stopPropagation()
+                }
             }
         if (!this.bubbles) {
             this.reset()
