@@ -178,10 +178,13 @@ module.exports = {
     build: function (data, index, isObject) {
 
         // wrap non-object values
-        if (!isObject || this.arg) {
-            var raw = data
+        var raw, alias,
+            wrap = !isObject || this.arg
+        if (wrap) {
+            raw = data
+            alias = this.arg || '$value'
             data = { $index: index }
-            data[this.arg || '$value'] = raw
+            data[alias] = raw
         }
 
         var el = this.el.cloneNode(true),
@@ -199,14 +202,14 @@ module.exports = {
         utils.defProtected(data, this.identifier, true)
         vm.$index = index
 
-        if (!isObject || this.arg) {
+        if (wrap) {
             var self = this,
                 sync = function (val) {
                     self.lock = true
                     self.collection.$set(vm.$index, val)
                     self.lock = false
                 }
-            vm.$compiler.observer.on('change:' + (this.arg || '$value'), sync)
+            vm.$compiler.observer.on('change:' + alias, sync)
         }
 
         return vm
