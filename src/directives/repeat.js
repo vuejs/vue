@@ -71,25 +71,14 @@ module.exports = {
     },
 
     init: function (collection, isObject) {
-        var vm, vms = [],
-            data,
-            ref = this.ref,
-            ctn = this.container,
-            init = this.compiler.init
+        var vm, vms = []
         for (var i = 0, l = collection.length; i < l; i++) {
-            if (isObject) {
-                data = collection[i]
-                data.$index = i
-            } else {
-                data = { $index: i }
-                data.$value = collection[i]
-            }
-            vm = this.build(data, i, isObject)
+            vm = this.build(collection[i], i, isObject)
             vms.push(vm)
-            if (init) {
-                ctn.insertBefore(vm.$el, ref)
+            if (this.compiler.init) {
+                this.container.insertBefore(vm.$el, this.ref)
             } else {
-                vm.$before(ref)
+                vm.$before(this.ref)
             }
         }
         return vms
@@ -97,20 +86,19 @@ module.exports = {
 
     /**
      *  Diff the new array with the old
-     *  and determine the minimum amount of DOM manipulations
+     *  and determine the minimum amount of DOM manipulations.
      */
     diff: function (newCollection, isObject) {
 
-        var i, l, item, vm, oi, ni, wrapper, ref,
-            ctn        = this.container,
-            oldVMs     = this.oldVMs,
-            alias      = this.arg || '$value',
-            OLD_REUSED = [],
-            NEW_REUSED = [],
-            NEW_DATA   = [],
-            FINAL      = []
+        var i, l, item, vm,
+            oldIndex,
+            targetNext,
+            currentNext,
+            ctn    = this.container,
+            oldVMs = this.oldVMs,
+            vms    = []
 
-        FINAL.length = newCollection.length
+        vms.length = newCollection.length
 
         // first pass, collect new reused and new created
         for (i = 0, l = newCollection.length; i < l; i++) {
@@ -120,22 +108,20 @@ module.exports = {
                 if (item[this.identifier]) {
                     // this piece of data is being reused.
                     // record its final position in reused vms
-                    item.$newReuseIndex = NEW_REUSED.length++
+                    item.$reused = true
                 } else {
-                    NEW_DATA.push(item)
+                    vms[i] = this.build(item, i, isObject)
                 }
             } else {
                 // we can't attach an identifier to primitive values
-                // so have to do an indexOf
-                oi = indexOf(oldVMs, item)
-                if (oi > -1) {
+                // so have to do an indexOf...
+                oldIndex = indexOf(oldVMs, item)
+                if (oldIndex > -1) {
                     // record the position on the existing vm
-                    oldVMs[oi].$newReuseIndex = NEW_REUSED.length++
-                    oldVMs[oi].$data.$index = i
+                    oldVMs[oldIndex].$reused = true
+                    oldVMs[oldIndex].$data.$index = i
                 } else {
-                    wrapper = { $index: i }
-                    wrapper[alias] = item
-                    NEW_DATA.push(wrapper)
+                    vms[i] = this.build(item, i, isObject)
                 }
             }
         }
@@ -144,22 +130,18 @@ module.exports = {
         for (i = 0, l = oldVMs.length; i < l; i++) {
             vm = oldVMs[i]
             item = vm.$data
-            ni = isObject
-                ? item.$newReuseIndex
-                : vm.$newReuseIndex
-            if (ni != null) {
-                // this vm can be reused.
-                vm.$newReuseIndex = ni
+            if (item.$reused) {
+                vm.$reused = true
+                delete item.$reused
+            }
+            if (vm.$reused) {
                 // update the index to latest
                 vm.$index = item.$index
                 // the item could have had a new key
                 if (item.$key && item.$key !== vm.$key) {
                     vm.$key = item.$key
                 }
-                NEW_REUSED[ni] = vm
-                FINAL[vm.$index] = vm
-                vm.$oldReuseIndex = OLD_REUSED.length
-                OLD_REUSED.push(vm)
+                vms[vm.$index] = vm
             } else {
                 // this one can be destroyed.
                 delete item[this.identifier]
@@ -167,54 +149,40 @@ module.exports = {
             }
         }
 
-        // sort reused
-        var targetNext,
-            currentNext,
-            moves = 0
-
-        i = NEW_REUSED.length
+        // final pass, move/insert DOM elements
+        i = vms.length
         while (i--) {
-            vm = NEW_REUSED[i]
+            vm = vms[i]
             item = vm.$data
-            currentNext = vm.$el.nextSibling.vue_vm
-            targetNext = NEW_REUSED[i + 1]
-            if (currentNext !== targetNext) {
-                moves++
-                if (!targetNext) {
-                    ctn.insertBefore(vm.$el, this.ref)
-                } else {
-                    ctn.insertBefore(vm.$el, targetNext.$el)
+            targetNext = vms[i + 1]
+            if (vm.$reused) {
+                currentNext = vm.$el.nextSibling.vue_vm
+                if (currentNext !== targetNext) {
+                    if (!targetNext) {
+                        ctn.insertBefore(vm.$el, this.ref)
+                    } else {
+                        ctn.insertBefore(vm.$el, targetNext.$el)
+                    }
                 }
+                delete vm.$reused
+                delete item.$index
+                delete item.$key
+            } else { // a new vm
+                vm.$before(targetNext ? targetNext.$el : this.ref)
             }
-            delete vm.$newReuseIndex
-            delete vm.$oldReuseIndex
-            delete item.$newReuseIndex
-            delete item.$index
-            delete item.$key
         }
 
-        // create new
-        for (i = 0, l = NEW_DATA.length; i < l; i++) {
-            item = NEW_DATA[i]
-            ni = item.$index
-            vm = this.build(item, ni, isObject)
-            ref = ni === FINAL.length - 1
-                ? this.ref
-                : ni === 0
-                    ? NEW_REUSED.length
-                        ? NEW_REUSED[0].$el
-                        : this.ref
-                    : FINAL[ni - 1].$el.nextSibling
-            vm.$before(ref)
-            FINAL[ni] = vm
-        }
-
-        console.log('moves: ' + moves)
-
-        return FINAL
+        return vms
     },
 
     build: function (data, index, isObject) {
+
+        // wrap non-object values
+        if (!isObject || this.arg) {
+            var raw = data
+            data = { $index: index }
+            data[this.arg || '$value'] = raw
+        }
 
         var el = this.el.cloneNode(true),
             Ctor = this.compiler.resolveComponent(el, data),
@@ -245,29 +213,14 @@ module.exports = {
 
     },
 
-    findVMByKey: function (key) {
-        var i = this.vms.length, vm
-        while (i--) {
-            vm = this.vms[i]
-            if (vm.$key === key) {
-                return vm
-            }
-        }
-    },
-
     unbind: function () {
         if (this.childId) {
             delete this.vm.$[this.childId]
         }
         if (this.vms) {
-            var i = vms.length, vm
+            var i = this.vms.length
             while (i--) {
-                vm = vms[i]
-                if (vm.$reused) {
-                    delete vm.$reused
-                } else {
-                    vm.$destroy()
-                }
+                this.vms[i].$destroy()
             }
         }
     }
@@ -282,7 +235,7 @@ module.exports = {
 function indexOf (vms, obj) {
     for (var vm, i = 0, l = vms.length; i < l; i++) {
         vm = vms[i]
-        if (vm.$newReuseIndex == null && vm.$value === obj) {
+        if (!vm.$reused && vm.$value === obj) {
             return i
         }
     }
