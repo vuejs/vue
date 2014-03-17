@@ -21,12 +21,15 @@ module.exports = {
         }
         var el       = this.el,
             targetVM = this.vm,
-            ownerVM  = this.binding.compiler.vm,
-            isExp    = this.binding.isExp,
+            context  = this.binding.isExp
+                ? targetVM
+                : this.binding.compiler.vm,
             newHandler = function (e) {
                 e.targetEl = el
                 e.targetVM = targetVM
-                handler.call(isExp ? targetVM : ownerVM, e)
+                context.$event = e
+                handler.call(context, e)
+                context.$event = null
             }
         if (!this.bubbles) {
             this.reset()

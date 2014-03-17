@@ -4,54 +4,66 @@
         display: inline-block;
     }
     .v-enter {
-        -webkit-animation: fadein .2s;
         animation: fadein .2s;
+        -webkit-animation: fadein .2s;
     }
     .v-leave {
-        -webkit-animation: fadeout .2s;
         animation: fadeout .2s;
+        -webkit-animation: fadeout .2s;
     }
     @keyframes fadein {
         0% {
+            -webkit-transform: scale(0);
             transform: scale(0);
         }
         50% {
+            -webkit-transform: scale(1.5);
             transform: scale(1.5);
         }
         100% {
+            -webkit-transform: scale(1);
             transform: scale(1);
         }
     }
     @keyframes fadeout {
         0% {
             transform: scale(1);
+            -webkit-transform: scale(1);
         }
         50% {
             transform: scale(1.5);
+            -webkit-transform: scale(1.5);
         }
         100% {
             transform: scale(0);
+            -webkit-transform: scale(0);
         }
     }
     @-webkit-keyframes fadein {
         0% {
             -webkit-transform: scale(0);
+            transform: scale(0);
         }
         50% {
             -webkit-transform: scale(1.5);
+            transform: scale(1.5);
         }
         100% {
             -webkit-transform: scale(1);
+            transform: scale(1);
         }
     }
     @-webkit-keyframes fadeout {
         0% {
+            transform: scale(1);
             -webkit-transform: scale(1);
         }
         50% {
+            transform: scale(1.5);
             -webkit-transform: scale(1.5);
         }
         100% {
+            transform: scale(0);
             -webkit-transform: scale(0);
         }
     }

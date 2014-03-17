@@ -1,0 +1,27 @@
+<script src="../../../dist/vue.js"></script>
+
+<div v-on="click:outer">
+    <p class="outer" v-show="outerTriggered">Outer triggered</p>
+    <p class="msg">{{msg}}</p>
+    <a class="normal" v-on="click:normal">normal</a>
+    <a class="exp" href="#triggered" v-on="click:exp('hello', $event)">exp</a>
+</div>
+
+<script>
+var test = new Vue({
+    el: 'div',
+    methods: {
+        outer: function () {
+            this.outerTriggered = true
+        },
+        normal: function (e) {
+            e.stopPropagation()
+        },
+        exp: function (msg, e) {
+            this.msg = msg
+            e.stopPropagation()
+            e.preventDefault()
+        }
+    }
+})
+</script>

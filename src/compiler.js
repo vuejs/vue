@@ -76,6 +76,7 @@ function Compiler (vm, options) {
     def(vm, '$el', el)
     def(vm, '$options', options)
     def(vm, '$compiler', compiler)
+    def(vm, '$event', null, false, true)
 
     // set parent
     var parentVM = options.parent
@@ -783,7 +784,8 @@ CompilerProto.addDelegator = function (event) {
             }
         }
     }
-    this.el.addEventListener(event, delegator.handler)
+    // useCapture:true so e.preventDefault() works
+    this.el.addEventListener(event, delegator.handler, true)
     return delegator
 }
 
