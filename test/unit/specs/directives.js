@@ -417,6 +417,7 @@ describe('Directives', function () {
         
         var dir = mockDirective('on')
         dir.arg = 'click'
+        dir.bind()
 
         before(function () {
             document.body.appendChild(dir.el)
@@ -428,31 +429,6 @@ describe('Directives', function () {
                 triggered = true
             })
             dir.el.dispatchEvent(mockMouseEvent('click'))
-            assert.ok(triggered)
-        })
-
-        it('delegation should work', function () {
-            var triggered = false,
-                child = document.createElement('div')
-            dir.el.appendChild(child)
-            dir.update(function () {
-                triggered = true
-            })
-            child.dispatchEvent(mockMouseEvent('click'))
-            assert.ok(triggered)
-        })
-
-        it('should wrap the handler to supply expected args', function () {
-            var vm = dir.binding.compiler.vm, // owner VM
-                e  = mockMouseEvent('click'), // original event
-                triggered = false
-            dir.update(function (ev) {
-                assert.strictEqual(this, vm, 'handler should be called on owner VM')
-                assert.strictEqual(ev, e, 'event should be passed in')
-                assert.strictEqual(ev.vm, dir.vm)
-                triggered = true
-            })
-            dir.el.dispatchEvent(e)
             assert.ok(triggered)
         })
 
@@ -470,6 +446,20 @@ describe('Directives', function () {
             assert.ok(triggered2)
         })
 
+        it('should wrap the handler to supply expected args', function () {
+            var vm = dir.binding.compiler.vm, // owner VM
+                e  = mockMouseEvent('click'), // original event
+                triggered = false
+            dir.update(function (ev) {
+                assert.strictEqual(this, vm, 'handler should be called on owner VM')
+                assert.strictEqual(ev, e, 'event should be passed in')
+                assert.strictEqual(ev.targetVM, dir.vm)
+                triggered = true
+            })
+            dir.el.dispatchEvent(e)
+            assert.ok(triggered)
+        })
+
         it('should remove the handler in unbind()', function () {
             var triggered = false
             dir.update(function () {
@@ -478,29 +468,6 @@ describe('Directives', function () {
             dir.unbind()
             dir.el.dispatchEvent(mockMouseEvent('click'))
             assert.notOk(triggered)
-        })
-
-        it('should not use delegation if the event is blur or focus', function () {
-            var dir = mockDirective('on', 'input'),
-                triggerCount = 0,
-                handler = function () {
-                    triggerCount++
-                }
-
-            document.body.appendChild(dir.el)
-
-            dir.arg = 'focus'
-            dir.update(handler)
-            dir.el.dispatchEvent(mockHTMLEvent('focus'))
-            assert.strictEqual(triggerCount, 1)
-
-            dir.arg = 'blur'
-            dir.update(handler)
-            dir.el.dispatchEvent(mockHTMLEvent('blur'))
-            assert.strictEqual(triggerCount, 2)
-
-            document.body.removeChild(dir.el)
-
         })
 
         after(function () {
@@ -1043,6 +1010,8 @@ function mockDirective (dirName, tag, type) {
     } else {
         for (var key in dir) {
             ret[key] = dir[key]
+            ret._update = dir.update
+            ret._unbind = dir.unbind
         }
     }
     if (tag === 'input') ret.el.type = type || 'text'

@@ -744,52 +744,6 @@ CompilerProto.parseDeps = function () {
 }
 
 /**
- *  Add an event listener to the delegator
- *  listeners are instances of directives with `isFn:true`
- */
-CompilerProto.addListener = function (listener) {
-    var event = listener.arg,
-        delegator = this.delegators[event] || this.addDelegator(event)
-    delegator.targets.push(listener)
-}
-
-/**
- *  Remove an event delegation listener
- */
-CompilerProto.removeListener = function (listener) {
-    var targets = this.delegators[listener.arg].targets
-    targets.splice(targets.indexOf(listener), 1)
-}
-
-/**
- *  Add an event delegator
- */
-CompilerProto.addDelegator = function (event) {
-    var delegator = this.delegators[event] = {
-        targets: [],
-        handler: function (e) {
-            var target,
-                i = delegator.targets.length,
-                stop = e.stopPropagation
-            // overwrite propagation control
-            e.stopPropagation = function () {
-                e.stopped = true
-                stop.call(e)
-            }
-            while (i--) {
-                target = delegator.targets[i]
-                if (!e.stopped && target.handler && target.el.contains(e.target)) {
-                    target.handler(e)
-                }
-            }
-        }
-    }
-    // useCapture:true so e.preventDefault() works
-    this.el.addEventListener(event, delegator.handler, true)
-    return delegator
-}
-
-/**
  *  Do a one-time eval of a string that potentially
  *  includes bindings. It accepts additional raw data
  *  because we need to dynamically resolve v-component

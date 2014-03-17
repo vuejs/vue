@@ -1,17 +1,13 @@
-var utils    = require('../utils'),
-    noBubble = ['blur', 'focus', 'load']
+var utils    = require('../utils')
 
 module.exports = {
 
     isFn: true,
 
     bind: function () {
-        // blur and focus events do not bubble
-        // so they can't be delegated
-        this.bubbles = noBubble.indexOf(this.arg) === -1
-        if (this.bubbles) {
-            this.binding.compiler.addListener(this)
-        }
+        this.context = this.binding.isExp
+            ? this.vm
+            : this.binding.compiler.vm
     },
 
     update: function (handler) {
@@ -19,34 +15,19 @@ module.exports = {
             utils.warn('Directive "on" expects a function value.')
             return
         }
-        var el       = this.el,
-            targetVM = this.vm,
-            context  = this.binding.isExp
-                ? targetVM
-                : this.binding.compiler.vm,
-            newHandler = function (e) {
-                e.delegationTarget = el
-                e.targetVM = targetVM
-                context.$event = e
-                handler.call(context, e)
-                context.$event = null
-            }
-        if (!this.bubbles) {
-            this.reset()
-            this.el.addEventListener(this.arg, newHandler)
+        this._unbind()
+        var vm = this.vm,
+            context = this.context
+        this.handler = function (e) {
+            e.targetVM = vm
+            context.$event = e
+            handler.call(context, e)
+            context.$event = null
         }
-        this.handler = newHandler
+        this.el.addEventListener(this.arg, this.handler)
     },
 
-    reset: function () {
-        this.el.removeEventListener(this.arg, this.handler)
-    },
-    
     unbind: function () {
-        if (this.bubbles) {
-            this.binding.compiler.removeListener(this)
-        } else {
-            this.reset()
-        }
+        this.el.removeEventListener(this.arg, this.handler)
     }
 }
