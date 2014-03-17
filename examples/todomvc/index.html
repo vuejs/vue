@@ -39,7 +39,6 @@
                                 class="toggle"
                                 type="checkbox"
                                 v-model="completed"
-                                v-on="change: toggleTodo(this)"
                             >
                             <label v-text="title" v-on="dblclick: editTodo(this)"></label>
                             <button class="destroy" v-on="click: removeTodo(this)"></button>

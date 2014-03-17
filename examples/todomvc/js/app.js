@@ -29,6 +29,13 @@
             filter: 'all'
         },
 
+        // ready hook, watch todos change for data persistence
+        ready: function () {
+            this.$watch('todos', function (todos) {
+                todoStorage.save(todos);
+            });
+        },
+
         // a custom directive to wait for the DOM to be updated
         // before focusing on the input field.
         // http://vuejs.org/guide/directives.html#Writing_a_Custom_Directive
@@ -64,7 +71,6 @@
                     this.todos.forEach(function (todo) {
                         todo.completed = value;
                     });
-                    todoStorage.save();
                 }
             }
         },
@@ -80,16 +86,10 @@
                 }
                 this.todos.push({ title: value, completed: false });
                 this.newTodo = '';
-                todoStorage.save();
             },
 
             removeTodo: function (todo) {
                 this.todos.$remove(todo.$data);
-                todoStorage.save();
-            },
-
-            toggleTodo: function (todo) {
-                todoStorage.save();
             },
 
             editTodo: function (todo) {
@@ -106,7 +106,6 @@
                 if (!todo.title) {
                     this.removeTodo(todo);
                 }
-                todoStorage.save();
             },
 
             cancelEdit: function (todo) {
@@ -116,7 +115,6 @@
             
             removeCompleted: function () {
                 this.todos = this.todos.filter(filters.active);
-                todoStorage.save();
             }
         }
     });

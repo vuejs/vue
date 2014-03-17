@@ -5,16 +5,12 @@
     'use strict';
 
     var STORAGE_KEY = 'todos-vuejs';
-    var todos = null;
 
     exports.todoStorage = {
         fetch: function () {
-            if (!todos) {
-                todos = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-            }
-            return todos;
+            return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
         },
-        save: function () {
+        save: function (todos) {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
         }
     };
