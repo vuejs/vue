@@ -167,7 +167,8 @@ function convert (obj) {
     if (obj.__emitter__) return true
     var emitter = new Emitter()
     def(obj, '__emitter__', emitter)
-    emitter.on('set', function () {
+    emitter.on('set', function (key, val, propagate) {
+        if (!propagate) return
         var owners = obj.__emitter__.owners,
             i = owners.length
         while (i--) {
