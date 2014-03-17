@@ -25,7 +25,7 @@ module.exports = {
                 ? targetVM
                 : this.binding.compiler.vm,
             newHandler = function (e) {
-                e.targetEl = el
+                e.delegationTarget = el
                 e.targetVM = targetVM
                 context.$event = e
                 handler.call(context, e)
