@@ -21,8 +21,9 @@ module.exports = {
         this.handler = function (e) {
             e.targetVM = vm
             context.$event = e
-            handler.call(context, e)
+            var res = handler.call(context, e)
             context.$event = null
+            return res
         }
         this.el.addEventListener(this.arg, this.handler)
     },
