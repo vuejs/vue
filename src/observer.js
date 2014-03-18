@@ -75,7 +75,7 @@ function watchMutation (method) {
         unlinkArrayElements(this, removed)
 
         // emit the mutation event
-        this.__emitter__.emit('mutate', null, this, {
+        this.__emitter__.emit('mutate', '', this, {
             method   : method,
             args     : args,
             result   : result,
@@ -167,17 +167,27 @@ function convert (obj) {
     if (obj.__emitter__) return true
     var emitter = new Emitter()
     def(obj, '__emitter__', emitter)
-    emitter.on('set', function (key, val, propagate) {
-        if (!propagate) return
-        var owners = obj.__emitter__.owners,
-            i = owners.length
-        while (i--) {
-            owners[i].__emitter__.emit('set', '', '', true)
-        }
-    })
+    emitter
+        .on('set', function (key, val, propagate) {
+            if (propagate) propagateChange(obj)
+        })
+        .on('mutate', function () {
+            propagateChange(obj)
+        })
     emitter.values = utils.hash()
     emitter.owners = []
     return false
+}
+
+/**
+ *  Propagate an array element's change to its owner arrays
+ */
+function propagateChange (obj) {
+    var owners = obj.__emitter__.owners,
+        i = owners.length
+    while (i--) {
+        owners[i].__emitter__.emit('set', '', '', true)
+    }
 }
 
 /**
@@ -266,7 +276,7 @@ function convertKey (obj, key) {
         values[key] = val
         emitter.emit('set', key, val, propagate)
         if (Array.isArray(val)) {
-            emitter.emit('set', key + '.length', val.length)
+            emitter.emit('set', key + '.length', val.length, propagate)
         }
         observe(val, key, emitter)
     }
