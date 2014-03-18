@@ -131,37 +131,32 @@ def(VMProto, '$appendTo', function (target, cb) {
 })
 
 def(VMProto, '$remove', function (cb) {
-    var el = this.$el,
-        parent = el.parentNode
-    if (!parent) return
+    var el = this.$el
     transition(el, -1, function () {
-        parent.removeChild(el)
+        if (el.parentNode) {
+            el.parentNode.removeChild(el)
+        }
         if (cb) nextTick(cb)
     }, this.$compiler)
 })
 
 def(VMProto, '$before', function (target, cb) {
     target = query(target)
-    var el = this.$el,
-        parent = target.parentNode
-    if (!parent) return
+    var el = this.$el
     transition(el, 1, function () {
-        parent.insertBefore(el, target)
+        target.parentNode.insertBefore(el, target)
         if (cb) nextTick(cb)
     }, this.$compiler)
 })
 
 def(VMProto, '$after', function (target, cb) {
     target = query(target)
-    var el = this.$el,
-        parent = target.parentNode,
-        next = target.nextSibling
-    if (!parent) return
+    var el = this.$el
     transition(el, 1, function () {
-        if (next) {
-            parent.insertBefore(el, next)
+        if (target.nextSibling) {
+            target.parentNode.insertBefore(el, target.nextSibling)
         } else {
-            parent.appendChild(el)
+            target.parentNode.appendChild(el)
         }
         if (cb) nextTick(cb)
     }, this.$compiler)

@@ -863,7 +863,7 @@ CompilerProto.destroy = function () {
     }
     el.vue_vm = null
 
-    this.destroyed = true
+    compiler.destroyed = true
     // emit destroy hook
     compiler.execHook('afterDestroy')
 

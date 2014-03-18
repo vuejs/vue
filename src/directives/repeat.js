@@ -94,6 +94,7 @@ module.exports = {
             oldIndex,
             targetNext,
             currentNext,
+            nextEl,
             ctn    = this.container,
             oldVMs = this.oldVMs,
             vms    = []
@@ -156,12 +157,27 @@ module.exports = {
             item = vm.$data
             targetNext = vms[i + 1]
             if (vm.$reused) {
-                currentNext = vm.$el.nextSibling.vue_vm
+                nextEl = vm.$el.nextSibling
+                // destroyed VMs' element might still be in the DOM
+                // due to transitions
+                while (!nextEl.vue_vm && nextEl !== this.ref) {
+                    nextEl = nextEl.nextSibling
+                }
+                currentNext = nextEl.vue_vm
                 if (currentNext !== targetNext) {
                     if (!targetNext) {
                         ctn.insertBefore(vm.$el, this.ref)
                     } else {
-                        ctn.insertBefore(vm.$el, targetNext.$el)
+                        nextEl = targetNext.$el
+                        // new VMs' element might not be in the DOM yet
+                        // due to transitions
+                        while (!nextEl.parentNode) {
+                            targetNext = vms[nextEl.vue_vm.$index + 1]
+                            nextEl = targetNext
+                                ? targetNext.$el
+                                : this.ref
+                        }
+                        ctn.insertBefore(vm.$el, nextEl)
                     }
                 }
                 delete vm.$reused
