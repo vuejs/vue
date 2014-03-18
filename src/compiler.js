@@ -312,7 +312,7 @@ CompilerProto.observeData = function (data) {
             compiler.data = newData
             Observer.copyPaths(newData, oldData)
             Observer.observe(newData, '', observer)
-            compiler.observer.emit('set', '$data', newData)
+            update()
         }
     })
 
@@ -322,9 +322,12 @@ CompilerProto.observeData = function (data) {
         .on('mutate', onSet)
 
     function onSet (key) {
-        if (key !== '$data') {
-            $dataBinding.update(compiler.data)
-        }
+        if (key !== '$data') update()
+    }
+
+    function update () {
+        $dataBinding.update(compiler.data)
+        observer.emit('change:$data', compiler.data)
     }
 }
 
