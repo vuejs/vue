@@ -23,6 +23,9 @@
     .v-leave {
         background-color: #0f0;
     }
+    ul {
+        padding: 0;
+    }
 </style>
 
 <div id="test">
@@ -34,14 +37,16 @@
         <button class="pop" v-on="click:pop">pop</button>
         <button class="splice" v-on="click:splice">splice</button>
     </div>
-    <div
-        class="test"
-        v-repeat="items"
-        v-show="filter(this)"
-        v-transition
-        v-attr="data-id:a">
-        {{a}}
-    </div>
+    <ul>
+        <li
+            class="test"
+            v-repeat="items"
+            v-show="filter(this)"
+            v-transition
+            v-attr="data-id:a">
+            {{a}}
+        </li>
+    </ul>
     <div class="test if" v-transition v-if="items.length > 1">This is only visible when item.length > 1</div>
 </div>
 <h1 style="margin:0">123</h1>
