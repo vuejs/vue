@@ -19,6 +19,8 @@ module.exports = {
             return
         }
 
+        partial = partial.cloneNode(true)
+
         // comment ref node means inline partial
         if (this.el.nodeType === 8) {
 
