@@ -28,8 +28,11 @@ var VMProto = ViewModel.prototype
  *  Convenience function to get a value from
  *  a keypath
  */
-def(VMProto, '$get', function (key, value) {
-    return utils.get(this, key, value)
+def(VMProto, '$get', function (key) {
+    var val = utils.get(this, key)
+    return val === undefined && this.$parent
+        ? this.$parent.$get(key)
+        : val
 })
 
 /**

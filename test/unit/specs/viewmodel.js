@@ -9,8 +9,12 @@ describe('ViewModel', function () {
             }
         },
         arr = [1, 2, 3],
+        parentVM = new Vue({
+            data: { fromParent: 'hello' }
+        }),
         vm = new Vue({
             el: '#vm-test',
+            parent: parentVM,
             data: {
                 a: data,
                 b: arr
@@ -18,9 +22,14 @@ describe('ViewModel', function () {
         })
 
     describe('.$get()', function () {
-        it('should set correct value', function () {
+        it('should get correct value', function () {
             var v = vm.$get('a.b.c')
             assert.strictEqual(v, 12345)
+        })
+
+        it('should recursively get value from parents', function () {
+            var v = vm.$get('fromParent')
+            assert.strictEqual(v, 'hello')
         })
     })
 
