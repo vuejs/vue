@@ -11,7 +11,6 @@ var Emitter     = require('./emitter'),
     
     // cache methods
     slice       = [].slice,
-    each        = [].forEach,
     makeHash    = utils.hash,
     extend      = utils.extend,
     def         = utils.defProtected,
@@ -27,7 +26,7 @@ var Emitter     = require('./emitter'),
     // list of priority directives
     // that needs to be checked in specific order
     priorityDirectives = [
-        'i' + 'f',
+        'if',
         'repeat',
         'view',
         'component'
@@ -39,7 +38,8 @@ var Emitter     = require('./emitter'),
  */
 function Compiler (vm, options) {
 
-    var compiler = this
+    var compiler = this,
+        key, i
 
     // default state
     compiler.init       = true
@@ -94,17 +94,22 @@ function Compiler (vm, options) {
     // create bindings for computed properties
     var computed = options.computed
     if (computed) {
-        for (var key in computed) {
+        for (key in computed) {
             compiler.createBinding(key)
         }
     }
 
     // copy paramAttributes
-    if (options.paramAttributes) {
-        options.paramAttributes.forEach(function (attr) {
-            var val = compiler.eval(el.getAttribute(attr))
-            vm[attr] = utils.checkNumber(val)
-        })
+    var params = options.paramAttributes
+    if (params) {
+        i = params.length
+        while (i--) {
+            vm[params[i]] = utils.checkNumber(
+                compiler.eval(
+                    el.getAttribute(params[i])
+                )
+            )
+        }
     }
 
     // beforeCompile hook
@@ -131,9 +136,10 @@ function Compiler (vm, options) {
     compiler.compile(el, true)
 
     // bind deferred directives (child components)
-    compiler.deferred.forEach(function (dir) {
-        compiler.bindDirective(dir)
-    })
+    i = compiler.deferred.length
+    while (i--) {
+        compiler.bindDirective(compiler.deferred[i])
+    }
 
     // extract dependencies for computed properties
     compiler.parseDeps()
@@ -158,27 +164,32 @@ CompilerProto.setupElement = function (options) {
         ? document.querySelector(options.el)
         : options.el || document.createElement(options.tagName || 'div')
 
-    var template = options.template
+    var template = options.template,
+        child, frag, replacer, i, attr, attrs
+
     if (template) {
         // collect anything already in there
         /* jshint boss: true */
-        var child,
-            frag = this.rawContent = document.createDocumentFragment()
+        frag = this.rawContent = document.createDocumentFragment()
         while (child = el.firstChild) {
             frag.appendChild(child)
         }
         // replace option: use the first node in
         // the template directly
         if (options.replace && template.childNodes.length === 1) {
-            var replacer = template.childNodes[0].cloneNode(true)
+            replacer = template.childNodes[0].cloneNode(true)
             if (el.parentNode) {
                 el.parentNode.insertBefore(replacer, el)
                 el.parentNode.removeChild(el)
             }
             // copy over attributes
-            each.call(el.attributes, function (attr) {
-                replacer.setAttribute(attr.name, attr.value)
-            })
+            if (el.hasAttributes()) {
+                i = el.attributes.length
+                while (i--) {
+                    attr = el.attributes[i]
+                    replacer.setAttribute(attr.name, attr.value)
+                }
+            }
             // replace
             el = replacer
         } else {
@@ -189,9 +200,9 @@ CompilerProto.setupElement = function (options) {
     // apply element options
     if (options.id) el.id = options.id
     if (options.className) el.className = options.className
-    var attrs = options.attributes
+    attrs = options.attributes
     if (attrs) {
-        for (var attr in attrs) {
+        for (attr in attrs) {
             el.setAttribute(attr, attrs[attr])
         }
     }
@@ -224,19 +235,21 @@ CompilerProto.setupObserver = function () {
         .on('mutate', onSet)
 
     // register hooks
-    hooks.forEach(function (hook) {
-        var fns = options[hook]
+    var i = hooks.length, j, hook, fns
+    while (i--) {
+        hook = hooks[i]
+        fns = options[hook]
         if (Array.isArray(fns)) {
-            var i = fns.length
+            j = fns.length
             // since hooks were merged with child at head,
             // we loop reversely.
-            while (i--) {
-                registerHook(hook, fns[i])
+            while (j--) {
+                registerHook(hook, fns[j])
             }
         } else if (fns) {
             registerHook(hook, fns)
         }
-    })
+    }
 
     // broadcast attached/detached hooks
     observer
@@ -300,8 +313,7 @@ CompilerProto.observeData = function (data) {
     $dataBinding.update(data)
 
     // allow $data to be swapped
-    defGetSet(compiler.vm, '$data', {
-        enumerable: false,
+    Object.defineProperty(compiler.vm, '$data', {
         get: function () {
             compiler.observer.emit('get', '$data')
             return compiler.data
@@ -622,7 +634,7 @@ CompilerProto.defineProp = function (key, binding) {
 
     binding.value = data[key]
 
-    defGetSet(compiler.vm, key, {
+    Object.defineProperty(compiler.vm, key, {
         get: function () {
             return compiler.data[key]
         },
@@ -640,14 +652,14 @@ CompilerProto.defineProp = function (key, binding) {
 CompilerProto.defineMeta = function (key, binding) {
     var vm = this.vm,
         ob = this.observer,
-        value = binding.value = key in vm
+        value = binding.value = hasOwn.call(vm, key)
             ? vm[key]
             : this.data[key]
     // remove initital meta in data, since the same piece
     // of data can be observed by different VMs, each have
     // its own associated meta info.
     delete this.data[key]
-    defGetSet(vm, key, {
+    Object.defineProperty(vm, key, {
         get: function () {
             if (Observer.shouldGet) ob.emit('get', key)
             return value
@@ -676,7 +688,7 @@ CompilerProto.defineExp = function (key, binding, directive) {
  */
 CompilerProto.defineComputed = function (key, binding, value) {
     this.markComputed(binding, value)
-    defGetSet(this.vm, key, {
+    Object.defineProperty(this.vm, key, {
         get: binding.value.$get,
         set: binding.value.$set
     })
@@ -882,13 +894,6 @@ function getRoot (compiler) {
         compiler = compiler.parent
     }
     return compiler
-}
-
-/**
- *  for convenience & minification
- */
-function defGetSet (obj, key, def) {
-    Object.defineProperty(obj, key, def)
 }
 
 module.exports = Compiler

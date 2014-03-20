@@ -80,11 +80,10 @@ var utils = module.exports = {
      *  or for...in loops.
      */
     defProtected: function (obj, key, val, enumerable, writable) {
-        if (obj.hasOwnProperty(key)) return
         Object.defineProperty(obj, key, {
             value        : val,
-            enumerable   : !!enumerable,
-            writable     : !!writable,
+            enumerable   : enumerable,
+            writable     : writable,
             configurable : true
         })
     },

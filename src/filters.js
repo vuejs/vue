@@ -98,12 +98,12 @@ var filters = module.exports = {
         }
 
         // get the search string
-        var search = stripQuotes(searchKey) || get(this, searchKey)
+        var search = stripQuotes(searchKey) || this.$get(searchKey)
         if (!search) return arr
         search = search.toLowerCase()
 
         // get the optional dataKey
-        dataKey = dataKey && (stripQuotes(dataKey) || get(this, dataKey))
+        dataKey = dataKey && (stripQuotes(dataKey) || this.$get(dataKey))
 
         // convert object to array
         if (!Array.isArray(arr)) {
@@ -120,7 +120,7 @@ var filters = module.exports = {
 
     orderBy: function (arr, sortKey, reverseKey) {
 
-        var key = stripQuotes(sortKey) || get(this, sortKey)
+        var key = stripQuotes(sortKey) || this.$get(sortKey)
         if (!key) return arr
 
         // convert object to array
@@ -134,9 +134,9 @@ var filters = module.exports = {
                 order = -1
             } else if (reverseKey.charAt(0) === '!') {
                 reverseKey = reverseKey.slice(1)
-                order = get(this, reverseKey) ? 1 : -1
+                order = this.$get(reverseKey) ? 1 : -1
             } else {
-                order = get(this, reverseKey) ? -1 : 1
+                order = this.$get(reverseKey) ? -1 : 1
             }
         }
 

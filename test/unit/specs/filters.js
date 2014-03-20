@@ -136,7 +136,11 @@ describe('Filters', function () {
                 { a: 1, b: 'hello'},
                 { a: 1, b: 2 }
             ],
-            vm = { search: { key: 'hello', datakey: 'b.c' }}
+            vm = new Vue({
+                data: {
+                    search: { key: 'hello', datakey: 'b.c' }
+                }
+            })
 
         it('should be computed', function () {
             assert.ok(filter.computed)
@@ -193,7 +197,9 @@ describe('Filters', function () {
         })
 
         it('should sort based on sortKey', function () {
-            var vm = { sortby: 'a.b' }
+            var vm = new Vue({
+                data: { sortby: 'a.b' }
+            })
             var res = filter.call(vm, arr, 'sortby')
             assert.strictEqual(res[0].a.b, 0)
             assert.strictEqual(res[1].a.b, 1)
@@ -201,7 +207,9 @@ describe('Filters', function () {
         })
 
         it('should sort based on sortKey and reverseKey', function () {
-            var vm = { sortby: 'a.b', reverse: true }
+            var vm = new Vue({
+                data: { sortby: 'a.b', reverse: true }
+            })
             var res = filter.call(vm, arr, 'sortby', 'reverse')
             assert.strictEqual(res[0].a.b, 2)
             assert.strictEqual(res[1].a.b, 1)
@@ -209,14 +217,16 @@ describe('Filters', function () {
         })
 
         it('should sort with literal args and special -1 syntax', function () {
-            var res = filter.call({}, arr, "'c'", '-1')
+            var res = filter.call(new Vue(), arr, "'c'", '-1')
             assert.strictEqual(res[0].c, 'c')
             assert.strictEqual(res[1].c, 'b')
             assert.strictEqual(res[2].c, 'a')
         })
 
         it('should accept negate reverse key', function () {
-            var res = filter.call({ reverse: true }, arr, "'c'", '!reverse')
+            var res = filter.call(new Vue({
+                data: { reverse: true }
+            }), arr, "'c'", '!reverse')
             assert.strictEqual(res[0].c, 'a')
             assert.strictEqual(res[1].c, 'b')
             assert.strictEqual(res[2].c, 'c')
@@ -228,7 +238,7 @@ describe('Filters', function () {
                 b: arr[1],
                 c: arr[2]
             }
-            var res = filter.call({}, obj, "'$key'", '-1')
+            var res = filter.call(new Vue(), obj, "'$key'", '-1')
             assert.strictEqual(res[0].c, 'a')
             assert.strictEqual(res[1].c, 'c')
             assert.strictEqual(res[2].c, 'b')

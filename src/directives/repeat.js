@@ -5,7 +5,7 @@ module.exports = {
 
     bind: function () {
 
-        this.identifier = '$repeat' + this.id
+        this.identifier = '$r' + this.id
 
         var el   = this.el,
             ctn  = this.container = el.parentNode
@@ -106,7 +106,7 @@ module.exports = {
             item = newCollection[i]
             if (isObject) {
                 item.$index = i
-                if (item[this.identifier]) {
+                if (item.__emitter__ && item.__emitter__[this.identifier]) {
                     // this piece of data is being reused.
                     // record its final position in reused vms
                     item.$reused = true
@@ -145,7 +145,7 @@ module.exports = {
                 vms[vm.$index] = vm
             } else {
                 // this one can be destroyed.
-                delete item[this.identifier]
+                delete item.__emitter__[this.identifier]
                 vm.$destroy()
             }
         }
@@ -215,7 +215,7 @@ module.exports = {
             })
 
         // attach an ienumerable identifier
-        utils.defProtected(data, this.identifier, true)
+        data.__emitter__[this.identifier] = true
         vm.$index = index
 
         if (wrap) {

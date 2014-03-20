@@ -5,6 +5,7 @@ var Emitter  = require('./emitter'),
     // cache methods
     typeOf   = utils.typeOf,
     def      = utils.defProtected,
+    hasOwn   = ({}).hasOwnProperty,
     slice    = [].slice,
     // types
     OBJECT   = 'Object',
@@ -134,7 +135,7 @@ function unlinkArrayElements (arr, items) {
 var ObjProxy = Object.create(Object.prototype)
 
 def(ObjProxy, '$add', function (key, val) {
-    if (key in this) return
+    if (hasOwn.call(this, key)) return
     this[key] = val
     convertKey(this, key)
     // emit a propagating set event
@@ -142,7 +143,7 @@ def(ObjProxy, '$add', function (key, val) {
 }, !hasProto)
 
 def(ObjProxy, '$delete', function (key) {
-    if (!(key in this)) return
+    if (!(hasOwn.call(this, key))) return
     // trigger set events
     this[key] = undefined
     delete this[key]
@@ -315,7 +316,7 @@ function copyPaths (newObj, oldObj) {
     }
     var path, type, oldVal, newVal
     for (path in oldObj) {
-        if (!(path in newObj)) {
+        if (!(hasOwn.call(newObj, path))) {
             oldVal = oldObj[path]
             type = typeOf(oldVal)
             if (type === OBJECT) {
@@ -346,7 +347,7 @@ function ensurePath (obj, key) {
     }
     if (typeOf(obj) === OBJECT) {
         sec = path[i]
-        if (!(sec in obj)) {
+        if (!(hasOwn.call(obj, sec))) {
             obj[sec] = undefined
             if (obj.__emitter__) convertKey(obj, sec)
         }

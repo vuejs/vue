@@ -156,8 +156,10 @@ exports.parse = function (exp, compiler, data, filters) {
 
     // wrap expression with computed filters
     if (filters) {
-        filters.forEach(function (filter) {
-            var args = filter.args
+        var args, filter
+        for (var i = 0, l = filters.length; i < l; i++) {
+            filter = filters[i]
+            args = filter.args
                 ? ',"' + filter.args.map(escapeQuote).join('","') + '"'
                 : ''
             body =
@@ -166,7 +168,7 @@ exports.parse = function (exp, compiler, data, filters) {
                 '").call(this,' +
                     body + args +
                 ')'
-        })
+        }
     }
 
     body = accessors + 'return ' + body

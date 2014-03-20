@@ -2,8 +2,7 @@ function Emitter () {
     this._ctx = this
 }
 
-var EmitterProto = Emitter.prototype,
-    slice = [].slice
+var EmitterProto = Emitter.prototype
 
 EmitterProto.on = function(event, fn){
     this._cbs = this._cbs || {}
@@ -16,7 +15,7 @@ Emitter.prototype.once = function(event, fn){
     var self = this
     this._cbs = this._cbs || {}
 
-    function on() {
+    function on () {
         self.off(event, on)
         fn.apply(this, arguments)
     }
@@ -57,15 +56,14 @@ Emitter.prototype.off = function(event, fn){
     return this
 }
 
-Emitter.prototype.emit = function(event){
+Emitter.prototype.emit = function(event, a, b, c){
     this._cbs = this._cbs || {}
-    var args = slice.call(arguments, 1),
-        callbacks = this._cbs[event]
+    var callbacks = this._cbs[event]
 
     if (callbacks) {
         callbacks = callbacks.slice(0)
         for (var i = 0, len = callbacks.length; i < len; i++) {
-            callbacks[i].apply(this._ctx, args)
+            callbacks[i].call(this._ctx, a, b, c)
         }
     }
 
