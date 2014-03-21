@@ -191,7 +191,7 @@ Directive.parse = function (dirname, expression, compiler, node) {
 
     var dir = compiler.getOption('directives', dirname) || directives[dirname]
     if (!dir) {
-        utils.warn('unknown directive: ' + dirname)
+        utils.warn('Unknown directive: ' + dirname)
         return
     }
 
@@ -209,7 +209,7 @@ Directive.parse = function (dirname, expression, compiler, node) {
     if (rawKey || expression === '') {
         return new Directive(dirname, dir, expression, rawKey, compiler, node)
     } else {
-        utils.warn('invalid directive expression: ' + expression)
+        utils.warn('Invalid directive expression: ' + expression)
     }
 }
 

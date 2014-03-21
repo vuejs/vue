@@ -370,7 +370,11 @@ CompilerProto.compile = function (node, root) {
  */
 CompilerProto.checkPriorityDir = function (dirname, node, root) {
     var expression, directive, Ctor
-    if (dirname === 'component' && root !== true && (Ctor = this.resolveComponent(node, undefined, true))) {
+    if (
+        dirname === 'component' &&
+        root !== true &&
+        (Ctor = this.resolveComponent(node, undefined, true))
+    ) {
         directive = Directive.parse(dirname, '', this, node)
         directive.Ctor = Ctor
     } else {
@@ -379,7 +383,10 @@ CompilerProto.checkPriorityDir = function (dirname, node, root) {
     }
     if (directive) {
         if (root === true) {
-            utils.warn('Directive v-' + dirname + ' cannot be used on manually instantiated root node.')
+            utils.warn(
+                'Directive v-' + dirname + ' cannot be used on an already instantiated ' +
+                'VM\'s root node. Use it from the parent\'s template instead.'
+            )
             return
         }
         this.deferred.push(directive)

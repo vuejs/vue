@@ -12,7 +12,7 @@ module.exports = {
 
     update: function (handler) {
         if (typeof handler !== 'function') {
-            utils.warn('Directive "on" expects a function value.')
+            utils.warn('Directive "v-on:' + this.expression + '" expects a method.')
             return
         }
         this._unbind()
