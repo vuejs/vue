@@ -52,8 +52,6 @@ function Compiler (vm, options) {
 
     // copy data, methods & compiler options
     var data = compiler.data = options.data || {}
-    extend(vm, data, true)
-    extend(vm, options.methods, true)
     extend(compiler, options.compilerOptions)
 
     // initialize element
@@ -92,10 +90,15 @@ function Compiler (vm, options) {
     // setup observer
     compiler.setupObserver()
 
-    // create bindings for computed properties
-    var computed = options.computed
-    if (computed) {
-        for (key in computed) {
+    // create bindings for computed properties and methods
+    if (options.methods) {
+        for (key in options.methods) {
+            compiler.createBinding(key)
+        }
+    }
+
+    if (options.computed) {
+        for (key in options.computed) {
             compiler.createBinding(key)
         }
     }
@@ -105,7 +108,7 @@ function Compiler (vm, options) {
     if (params) {
         i = params.length
         while (i--) {
-            vm[params[i]] = utils.checkNumber(
+            data[params[i]] = utils.checkNumber(
                 compiler.eval(
                     el.getAttribute(params[i])
                 )
@@ -118,7 +121,15 @@ function Compiler (vm, options) {
 
     // the user might have set some props on the vm 
     // so copy it back to the data...
-    extend(data, vm)
+    for (key in vm) {
+        if (typeof vm[key] !== 'function') {
+            data[key] = vm[key]
+        }
+    }
+
+    vm.$index = data.$index
+    vm.$value = data.$value
+    vm.$key   = data.$key
 
     // observe the data
     compiler.observeData(data)
@@ -570,8 +581,9 @@ CompilerProto.createBinding = function (key, directive) {
     utils.log('  created binding: ' + key)
 
     var compiler = this,
+        methods  = compiler.options.methods,
         isExp    = directive && directive.isExp,
-        isFn     = directive && directive.isFn,
+        isFn     = (directive && directive.isFn) || (methods && methods[key]),
         bindings = compiler.bindings,
         computed = compiler.options.computed,
         binding  = new Binding(compiler, key, isExp, isFn)
@@ -579,6 +591,9 @@ CompilerProto.createBinding = function (key, directive) {
     if (isExp) {
         // expression bindings are anonymous
         compiler.defineExp(key, binding, directive)
+    } else if (isFn) {
+        bindings[key] = binding
+        binding.value = compiler.vm[key] = methods[key]
     } else {
         bindings[key] = binding
         if (binding.root) {
@@ -653,9 +668,7 @@ CompilerProto.defineProp = function (key, binding) {
 CompilerProto.defineMeta = function (key, binding) {
     var vm = this.vm,
         ob = this.observer,
-        value = binding.value = hasOwn.call(vm, key)
-            ? vm[key]
-            : this.data[key]
+        value = binding.value = vm[key]
     // remove initital meta in data, since the same piece
     // of data can be observed by different VMs, each have
     // its own associated meta info.

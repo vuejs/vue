@@ -50,6 +50,8 @@
 
 <script>
 
+Vue.config('debug', true)
+
 Vue.component('home', {
     template: '<h1>Home</h1><div class="content">{{>yield}}</div>',
     created: function () {

@@ -113,19 +113,6 @@ function extend (options) {
     var proto = ExtendedVM.prototype = Object.create(ParentVM.prototype)
     utils.defProtected(proto, 'constructor', ExtendedVM)
 
-    // copy prototype props
-    var methods = options.methods
-    if (methods) {
-        for (var key in methods) {
-            if (
-                !(key in ViewModel.prototype) &&
-                typeof methods[key] === 'function'
-            ) {
-                proto[key] = methods[key]
-            }
-        }
-    }
-
     // allow extended VM to be further extended
     ExtendedVM.extend  = extend
     ExtendedVM.super   = ParentVM
@@ -160,7 +147,7 @@ function inheritOptions (child, parent, topLevel) {
     child = child || {}
     if (!parent) return child
     for (var key in parent) {
-        if (key === 'el' || key === 'methods') continue
+        if (key === 'el') continue
         var val = child[key],
             parentVal = parent[key],
             type = utils.typeOf(val),

@@ -130,10 +130,11 @@ var utils = module.exports = {
     /**
      *  simple extend
      */
-    extend: function (obj, ext, protective) {
+    extend: function (obj, ext) {
         for (var key in ext) {
-            if ((protective && obj[key]) || obj[key] === ext[key]) continue
-            obj[key] = ext[key]
+            if (obj[key] !== ext[key]) {
+                obj[key] = ext[key]
+            }
         }
         return obj
     },

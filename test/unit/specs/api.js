@@ -460,15 +460,15 @@ describe('API', function () {
 
             describe('methods', function () {
                 
-                it('should be mixed to the exteded VM\'s prototype', function () {
-                    var mixins = {
+                it('should be mixed to the exteded VM\'s instances', function () {
+                    var methods = {
                         c: function () {},
                         d: function () {}
                     }
-                    var Test = Vue.extend({ methods: mixins })
-                    for (var key in mixins) {
-                        assert.strictEqual(Test.prototype[key], mixins[key])
-                    }
+                    var Test = Vue.extend({ methods: methods })
+                    var t = new Test()
+                    assert.strictEqual(t.c, methods.c)
+                    assert.strictEqual(t.d, methods.d)
                 })
 
             })

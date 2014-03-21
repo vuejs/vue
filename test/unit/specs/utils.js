@@ -151,13 +151,6 @@ describe('Utils', function () {
             assert.strictEqual(a.b, b.b)
         })
 
-        it('should respect the protective option', function () {
-            var a = {a: 1}, b = {a: {}, b: 2}
-            utils.extend(a, b, true)
-            assert.strictEqual(a.a, 1)
-            assert.strictEqual(a.b, b.b)
-        })
-
         it('should always return the extended object', function () {
             var a = {a: 1}, b = {a: {}, b: 2}
             assert.strictEqual(a, utils.extend(a, b))
