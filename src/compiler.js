@@ -63,6 +63,7 @@ function Compiler (vm, options) {
     // set compiler properties
     compiler.vm = el.vue_vm = vm
     compiler.bindings = makeHash()
+    compiler.expCache = compiler.expCache || makeHash()
     compiler.dirs = []
     compiler.deferred = []
     compiler.computed = []
@@ -677,7 +678,11 @@ CompilerProto.defineMeta = function (key, binding) {
  */
 CompilerProto.defineExp = function (key, binding, directive) {
     var filters = directive && directive.computeFilters && directive.filters,
-        getter  = ExpParser.parse(key, this, null, filters)
+        exp     = filters ? directive.expression : key,
+        getter  = this.expCache[exp]
+    if (!getter) {
+        getter = this.expCache[exp] = ExpParser.parse(key, this, null, filters)
+    }
     if (getter) {
         this.markComputed(binding, getter)
     }

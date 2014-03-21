@@ -7,6 +7,10 @@ module.exports = {
 
         this.identifier = '$r' + this.id
 
+        // a hash to cache the same expressions on repeated instances
+        // so they don't have to be compiled for every single instance
+        this.expCache = utils.hash()
+
         var el   = this.el,
             ctn  = this.container = el.parentNode
 
@@ -64,7 +68,8 @@ module.exports = {
             el     : el,
             parent : this.vm,
             compilerOptions: {
-                repeat: true
+                repeat: true,
+                expCache: this.expCache
             }
         }).$destroy()
         this.initiated = true
@@ -210,7 +215,8 @@ module.exports = {
                 data: data,
                 parent: this.vm,
                 compilerOptions: {
-                    repeat: true
+                    repeat: true,
+                    expCache: this.expCache
                 }
             })
 
