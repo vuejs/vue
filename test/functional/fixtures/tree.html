@@ -1,0 +1,82 @@
+<script src="../../../dist/vue.js"></script>
+<style>
+.item {
+    cursor: pointer;
+    font-family: monospace;
+    color: #999;
+}
+.item.folder {
+    color: #333;
+}
+</style>
+
+<div id="demo">
+    <ul id="root">
+        <li v-component="folder" v-with="model: treeData"></li>
+    </ul>
+</div>
+
+<script type="text/x-template" id="folder-template">
+    <div class="item folder" v-on="click: open = !open">
+        {{model.name}} [{{open ? '-' : '+'}}]
+    </div>
+    <ul v-show="open">
+        <li v-repeat="model: model.children | orderBy 'type'"
+            v-component="{{model.type}}">
+        </li>
+    </ul>
+</script>
+
+<script type="text/x-template" id="file-template">
+    <div class="item file">{{model.name}}</div>
+</script>
+
+<script>
+Vue.component('folder', {
+    template: '#folder-template',
+    data: {
+        open: false
+    }
+})
+
+Vue.component('file', {
+    template: '#file-template'
+})
+
+var menu = new Vue({
+    el: '#demo',
+    data: {
+        treeData: {
+            name: 'My Tree',
+            children: [
+                { type: 'file', name: 'hello' },
+                { type: 'file', name: 'wat' },
+                {
+                    type: 'folder',
+                    name: 'child folder',
+                    children: [
+                        {
+                            type: 'folder',
+                            name: 'child folder',
+                            children: [
+                                { type: 'file', name: 'hello' },
+                                { type: 'file', name: 'wat' }
+                            ]
+                        },
+                        { type: 'file', name: 'hello' },
+                        { type: 'file', name: 'wat' },
+                        {
+                            type: 'folder',
+                            name: 'child folder',
+                            children: [
+                                { type: 'file', name: 'hello' },
+                                { type: 'file', name: 'wat' }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+})
+</script>
