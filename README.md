@@ -12,7 +12,7 @@ Vue.js is a library for building interactive web interfaces. It provides the ben
 - Extendable Data bindings
 - Plain JavaScript objects as models
 - Building interface by composing reusable components
-- Flexibility to mix & match small libraries for a custom front-end stack
+- Flexibility to mix & match the view layer with other libraries
 
 It's really really easy to get started. Seriously, it's so easy:
 
@@ -44,7 +44,7 @@ Read the [contributing guide](https://github.com/yyx990803/vue/blob/master/CONTR
 
 ## Get in Touch
 
-- General questions: check the [FAQ](https://github.com/yyx990803/vue/wiki/FAQ) first, if it's not addressed in there, ask [here](https://github.com/yyx990803/vue/issues/96).
+- General, non source-code related questions: check the [FAQ](https://github.com/yyx990803/vue/wiki/FAQ) first, if it's not addressed in there, ask [here](https://github.com/vuejs/Discussion/issues).
 - If you have a Vue-related project/component/tool, add it to [this list](https://github.com/yyx990803/vue/wiki/User-Contributed-Components-&-Tools)!
 - Bugs, suggestions & feature requests: [open an issue](https://github.com/yyx990803/vue/issues)
 - Twitter: [@vuejs](https://twitter.com/vuejs)
