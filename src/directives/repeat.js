@@ -67,6 +67,7 @@ module.exports = {
         new Ctor({
             el     : el,
             parent : this.vm,
+            data   : { $index: 0 },
             compilerOptions: {
                 repeat: true,
                 expCache: this.expCache
@@ -204,9 +205,10 @@ module.exports = {
         if (wrap) {
             raw = data
             alias = this.arg || '$value'
-            data = { $index: index }
+            data = {}
             data[alias] = raw
         }
+        data.$index = index
 
         var el = this.el.cloneNode(true),
             Ctor = this.compiler.resolveComponent(el, data),
@@ -222,7 +224,6 @@ module.exports = {
 
         // attach an ienumerable identifier
         data.__emitter__[this.identifier] = true
-        vm.$index = index
 
         if (wrap) {
             var self = this,

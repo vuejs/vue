@@ -13,7 +13,6 @@ var Emitter     = require('./emitter'),
     slice       = [].slice,
     makeHash    = utils.hash,
     extend      = utils.extend,
-    def         = utils.defProtected,
     hasOwn      = ({}).hasOwnProperty,
 
     // hooks to register
@@ -59,33 +58,32 @@ function Compiler (vm, options) {
     utils.log('\nnew VM instance: ' + el.tagName + '\n')
 
     // set compiler properties
-    compiler.vm = el.vue_vm = vm
-    compiler.bindings = makeHash()
-    compiler.expCache = compiler.expCache || makeHash()
-    compiler.dirs = []
-    compiler.deferred = []
-    compiler.computed = []
-    compiler.children = []
-    compiler.emitter = new Emitter()
+    compiler.vm           = el.vue_vm = vm
+    compiler.bindings     = makeHash()
+    compiler.expCache     = compiler.expCache || makeHash()
+    compiler.dirs         = []
+    compiler.deferred     = []
+    compiler.computed     = []
+    compiler.children     = []
+    compiler.emitter      = new Emitter()
     compiler.emitter._ctx = vm
-    compiler.delegators = makeHash()
+    compiler.delegators   = makeHash()
 
-    // set inenumerable VM properties
-    def(vm, '$', makeHash())
-    def(vm, '$el', el)
-    def(vm, '$options', options)
-    def(vm, '$compiler', compiler)
-    def(vm, '$event', null, false, true)
+    // set VM properties
+    vm.$         = makeHash()
+    vm.$el       = el
+    vm.$options  = options
+    vm.$compiler = compiler
+    vm.$event    = null
 
-    // set parent
+    // set parent & root
     var parentVM = options.parent
     if (parentVM) {
         compiler.parent = parentVM.$compiler
         parentVM.$compiler.children.push(compiler)
-        def(vm, '$parent', parentVM)
+        vm.$parent = parentVM
     }
-    // set root
-    def(vm, '$root', getRoot(compiler).vm)
+    vm.$root = getRoot(compiler).vm
 
     // setup observer
     compiler.setupObserver()
@@ -122,26 +120,18 @@ function Compiler (vm, options) {
     // the user might have set some props on the vm 
     // so copy it back to the data...
     for (key in vm) {
-        if (typeof vm[key] !== 'function') {
+        if (key.charAt(0) !== '$' && typeof vm[key] !== 'function') {
             data[key] = vm[key]
         }
     }
 
+    // copy meta properties
     vm.$index = data.$index
     vm.$value = data.$value
     vm.$key   = data.$key
 
     // observe the data
     compiler.observeData(data)
-    
-    // for repeated items, create index/key bindings
-    // because they are ienumerable
-    if (compiler.repeat) {
-        compiler.createBinding('$index')
-        if (data.$key) {
-            compiler.createBinding('$key')
-        }
-    }
 
     // now parse the DOM, during which we will create necessary bindings
     // and bind the parsed directives
@@ -668,7 +658,7 @@ CompilerProto.defineProp = function (key, binding) {
 CompilerProto.defineMeta = function (key, binding) {
     var vm = this.vm,
         ob = this.observer,
-        value = binding.value = vm[key]
+        value = binding.value = this.data[key]
     // remove initital meta in data, since the same piece
     // of data can be observed by different VMs, each have
     // its own associated meta info.
