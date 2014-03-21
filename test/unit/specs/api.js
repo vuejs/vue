@@ -923,10 +923,15 @@ describe('API', function () {
 
                 describe('created', function () {
                 
-                    it('should be called before compile', function () {
+                    it('should be called before compile and give access to all vm properties', function () {
                         
                         var called = false,
                             Test = Vue.extend({ created: function () {
+                                assert.ok(this.$data)
+                                assert.ok(this.$el)
+                                assert.ok(this.$)
+                                assert.ok(this.$compiler)
+                                assert.ok(this.$root)
                                 assert.ok(this.$options.ok)
                                 called = true
                             }})
