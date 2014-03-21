@@ -256,6 +256,8 @@ function convertKey (obj, key) {
     init(obj[key])
 
     oDef(obj, key, {
+        enumerable: true,
+        configurable: true,
         get: function () {
             var value = values[key]
             // only emit get on tip values
