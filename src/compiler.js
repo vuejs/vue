@@ -114,21 +114,27 @@ function Compiler (vm, options) {
         }
     }
 
+    // copy data properties to vm
+    // so user can access them in the created hook
+    extend(vm, data)
+    vm.$data = data
+
     // beforeCompile hook
     compiler.execHook('created')
 
     // the user might have set some props on the vm 
     // so copy it back to the data...
+    var vmProp
     for (key in vm) {
-        if (key.charAt(0) !== '$' && typeof vm[key] !== 'function') {
-            data[key] = vm[key]
+        vmProp = vm[key]
+        if (
+            key.charAt(0) !== '$' &&
+            typeof vmProp !== 'function' &&
+            data[key] !== vmProp
+        ) {
+            data[key] = vmProp
         }
     }
-
-    // copy meta properties
-    vm.$index = data.$index
-    vm.$value = data.$value
-    vm.$key   = data.$key
 
     // observe the data
     compiler.observeData(data)
@@ -621,7 +627,6 @@ CompilerProto.createBinding = function (key, directive) {
  *  and observe the initial value
  */
 CompilerProto.defineProp = function (key, binding) {
-    
     var compiler = this,
         data     = compiler.data,
         ob       = data.__emitter__
@@ -656,21 +661,16 @@ CompilerProto.defineProp = function (key, binding) {
  *  not in the data.
  */
 CompilerProto.defineMeta = function (key, binding) {
-    var vm = this.vm,
-        ob = this.observer,
-        value = binding.value = this.data[key]
-    // remove initital meta in data, since the same piece
-    // of data can be observed by different VMs, each have
-    // its own associated meta info.
+    var ob = this.observer
+    binding.value = this.data[key]
     delete this.data[key]
-    Object.defineProperty(vm, key, {
+    Object.defineProperty(this.vm, key, {
         get: function () {
             if (Observer.shouldGet) ob.emit('get', key)
-            return value
+            return binding.value
         },
         set: function (val) {
             ob.emit('set', key, val)
-            value = val
         }
     })
 }
