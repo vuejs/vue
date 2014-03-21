@@ -3,6 +3,7 @@ var config    = require('./config'),
     win       = window,
     console   = win.console,
     timeout   = win.setTimeout,
+    def       = Object.defineProperty,
     THIS_RE   = /[^\w]this[^\w]/,
     hasClassList = 'classList' in document.documentElement,
     ViewModel // late def
@@ -80,7 +81,7 @@ var utils = module.exports = {
      *  or for...in loops.
      */
     defProtected: function (obj, key, val, enumerable, writable) {
-        Object.defineProperty(obj, key, {
+        def(obj, key, {
             value        : val,
             enumerable   : enumerable,
             writable     : writable,

@@ -14,6 +14,7 @@ var Emitter     = require('./emitter'),
     makeHash    = utils.hash,
     extend      = utils.extend,
     hasOwn      = ({}).hasOwnProperty,
+    def         = Object.defineProperty,
 
     // hooks to register
     hooks = [
@@ -321,7 +322,7 @@ CompilerProto.observeData = function (data) {
     $dataBinding.update(data)
 
     // allow $data to be swapped
-    Object.defineProperty(compiler.vm, '$data', {
+    def(compiler.vm, '$data', {
         get: function () {
             compiler.observer.emit('get', '$data')
             return compiler.data
@@ -645,7 +646,7 @@ CompilerProto.defineProp = function (key, binding) {
 
     binding.value = data[key]
 
-    Object.defineProperty(compiler.vm, key, {
+    def(compiler.vm, key, {
         get: function () {
             return compiler.data[key]
         },
@@ -664,7 +665,7 @@ CompilerProto.defineMeta = function (key, binding) {
     var ob = this.observer
     binding.value = this.data[key]
     delete this.data[key]
-    Object.defineProperty(this.vm, key, {
+    def(this.vm, key, {
         get: function () {
             if (Observer.shouldGet) ob.emit('get', key)
             return binding.value
@@ -696,7 +697,7 @@ CompilerProto.defineExp = function (key, binding, directive) {
  */
 CompilerProto.defineComputed = function (key, binding, value) {
     this.markComputed(binding, value)
-    Object.defineProperty(this.vm, key, {
+    def(this.vm, key, {
         get: binding.value.$get,
         set: binding.value.$set
     })

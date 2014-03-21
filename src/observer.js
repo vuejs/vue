@@ -6,6 +6,7 @@ var Emitter  = require('./emitter'),
     typeOf   = utils.typeOf,
     def      = utils.defProtected,
     hasOwn   = ({}).hasOwnProperty,
+    oDef     = Object.defineProperty,
     slice    = [].slice,
     // types
     OBJECT   = 'Object',
@@ -254,7 +255,7 @@ function convertKey (obj, key) {
 
     init(obj[key])
 
-    Object.defineProperty(obj, key, {
+    oDef(obj, key, {
         get: function () {
             var value = values[key]
             // only emit get on tip values
