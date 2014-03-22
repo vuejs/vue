@@ -1,6 +1,9 @@
 var utils      = require('../utils'),
     config     = require('../config')
 
+/**
+ *  Binding that manages VMs based on an Array
+ */
 module.exports = {
 
     bind: function () {

@@ -15,6 +15,9 @@ function getMultipleSelectOptions (select) {
         })
 }
 
+/**
+ *  Two-way binding for form input elements
+ */
 module.exports = {
 
     bind: function () {

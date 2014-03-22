@@ -1,6 +1,9 @@
 var guard = require('../utils').guard,
     slice = [].slice
 
+/**
+ *  Binding for innerHTML
+ */
 module.exports = {
 
     bind: function () {

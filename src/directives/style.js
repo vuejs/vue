@@ -5,6 +5,9 @@ function camelReplacer (m) {
     return m[1].toUpperCase()
 }
 
+/**
+ *  Binding for CSS styles
+ */
 module.exports = {
 
     bind: function () {

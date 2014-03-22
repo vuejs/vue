@@ -1,3 +1,7 @@
+/**
+ *  Manages a conditional child VM using the
+ *  binding's value as the component ID.
+ */
 module.exports = {
 
     bind: function () {

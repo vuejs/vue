@@ -1,5 +1,8 @@
 var utils    = require('../utils')
 
+/**
+ *  Manages a conditional child VM
+ */
 module.exports = {
 
     bind: function () {

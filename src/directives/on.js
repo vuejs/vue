@@ -1,5 +1,8 @@
 var utils    = require('../utils')
 
+/**
+ *  Binding for event listeners
+ */
 module.exports = {
 
     isFn: true,

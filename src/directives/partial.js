@@ -1,5 +1,8 @@
 var utils = require('../utils')
 
+/**
+ *  Binding for partials
+ */
 module.exports = {
 
     isLiteral: true,

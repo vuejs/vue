@@ -1,5 +1,8 @@
 var utils = require('../utils')
 
+/**
+ *  Binding for inheriting data from parent VMs.
+ */
 module.exports = {
 
     bind: function () {

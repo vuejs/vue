@@ -11,7 +11,6 @@ var Emitter     = require('./emitter'),
     
     // cache methods
     slice       = [].slice,
-    makeHash    = utils.hash,
     extend      = utils.extend,
     hasOwn      = ({}).hasOwnProperty,
     def         = Object.defineProperty,
@@ -46,7 +45,7 @@ function Compiler (vm, options) {
     compiler.destroyed  = false
 
     // process and extend options
-    options = compiler.options = options || makeHash()
+    options = compiler.options = options || {}
     utils.processOptions(options)
 
     // copy compiler options
@@ -54,7 +53,7 @@ function Compiler (vm, options) {
     // repeat indicates this is a v-repeat instance
     compiler.repeat   = compiler.repeat || false
     // expCache will be shared between v-repeat instances
-    compiler.expCache = compiler.expCache || makeHash()
+    compiler.expCache = compiler.expCache || {}
 
     // initialize element
     var el = compiler.el = compiler.setupElement(options)
@@ -62,7 +61,7 @@ function Compiler (vm, options) {
 
     // set other compiler properties
     compiler.vm       = el.vue_vm = vm
-    compiler.bindings = makeHash()
+    compiler.bindings = utils.hash()
     compiler.dirs     = []
     compiler.deferred = []
     compiler.computed = []
@@ -86,7 +85,7 @@ function Compiler (vm, options) {
     // VM ---------------------------------------------------------------------
 
     // set VM properties
-    vm.$         = makeHash()
+    vm.$         = {}
     vm.$el       = el
     vm.$options  = options
     vm.$compiler = compiler
@@ -258,7 +257,7 @@ CompilerProto.setupObserver = function () {
 
     // a hash to hold event proxies for each root level key
     // so they can be referenced and removed later
-    observer.proxies = makeHash()
+    observer.proxies = {}
     observer._ctx = compiler.vm
 
     // add own listeners which trigger binding updates
