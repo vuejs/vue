@@ -1,5 +1,5 @@
-function Emitter () {
-    this._ctx = this
+function Emitter (ctx) {
+    this._ctx = ctx || this
 }
 
 var EmitterProto = Emitter.prototype

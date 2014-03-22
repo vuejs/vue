@@ -43,32 +43,47 @@ function Compiler (vm, options) {
 
     // default state
     compiler.init       = true
-    compiler.repeat     = false
     compiler.destroyed  = false
 
     // process and extend options
     options = compiler.options = options || makeHash()
     utils.processOptions(options)
 
-    // copy data, methods & compiler options
-    var data = compiler.data = options.data || {}
+    // copy compiler options
     extend(compiler, options.compilerOptions)
+    // repeat indicates this is a v-repeat instance
+    compiler.repeat   = compiler.repeat || false
+    // expCache will be shared between v-repeat instances
+    compiler.expCache = compiler.expCache || makeHash()
 
     // initialize element
     var el = compiler.el = compiler.setupElement(options)
     utils.log('\nnew VM instance: ' + el.tagName + '\n')
 
-    // set compiler properties
-    compiler.vm           = el.vue_vm = vm
-    compiler.bindings     = makeHash()
-    compiler.expCache     = compiler.expCache || makeHash()
-    compiler.dirs         = []
-    compiler.deferred     = []
-    compiler.computed     = []
-    compiler.children     = []
-    compiler.emitter      = new Emitter()
-    compiler.emitter._ctx = vm
-    compiler.delegators   = makeHash()
+    // set other compiler properties
+    compiler.vm       = el.vue_vm = vm
+    compiler.bindings = makeHash()
+    compiler.dirs     = []
+    compiler.deferred = []
+    compiler.computed = []
+    compiler.children = []
+    compiler.emitter  = new Emitter(vm)
+
+    // create bindings for computed properties
+    if (options.methods) {
+        for (key in options.methods) {
+            compiler.createBinding(key)
+        }
+    }
+
+    // create bindings for methods
+    if (options.computed) {
+        for (key in options.computed) {
+            compiler.createBinding(key)
+        }
+    }
+
+    // VM ---------------------------------------------------------------------
 
     // set VM properties
     vm.$         = makeHash()
@@ -86,21 +101,14 @@ function Compiler (vm, options) {
     }
     vm.$root = getRoot(compiler).vm
 
+    // DATA -------------------------------------------------------------------
+
     // setup observer
+    // this is necesarry for all hooks and data observation events
     compiler.setupObserver()
 
-    // create bindings for computed properties and methods
-    if (options.methods) {
-        for (key in options.methods) {
-            compiler.createBinding(key)
-        }
-    }
-
-    if (options.computed) {
-        for (key in options.computed) {
-            compiler.createBinding(key)
-        }
-    }
+    // initialize data
+    var data = compiler.data = options.data || {}
 
     // copy paramAttributes
     var params = options.paramAttributes
@@ -123,35 +131,51 @@ function Compiler (vm, options) {
     // beforeCompile hook
     compiler.execHook('created')
 
-    // the user might have set some props on the vm 
-    // so copy it back to the data...
+    // the user might have swapped the data ...
+    data = compiler.data = vm.$data
+
+    // user might also set some properties on the vm
+    // in which case we should copy back to $data
     var vmProp
     for (key in vm) {
         vmProp = vm[key]
         if (
             key.charAt(0) !== '$' &&
-            typeof vmProp !== 'function' &&
-            data[key] !== vmProp
+            data[key] !== vmProp &&
+            typeof vmProp !== 'function'
         ) {
             data[key] = vmProp
         }
     }
 
-    // observe the data
+    // now we can observe the data.
+    // this will convert data properties to getter/setters
+    // and emit the first batch of set events, which will
+    // in turn create the corresponding bindings.
     compiler.observeData(data)
 
-    // now parse the DOM, during which we will create necessary bindings
-    // and bind the parsed directives
+    // COMPILE ----------------------------------------------------------------
+
+    // now parse the DOM and bind directives.
+    // During this stage, we will also create bindings for
+    // encountered keypaths that don't have a binding yet.
     compiler.compile(el, true)
 
-    // bind deferred directives (child components)
+    // Any directive that creates child VMs are deferred
+    // so that when they are compiled, all bindings on the
+    // parent VM have been created.
     i = compiler.deferred.length
     while (i--) {
         compiler.bindDirective(compiler.deferred[i])
     }
+    compiler.deferred = null
 
-    // extract dependencies for computed properties
-    compiler.parseDeps()
+    // extract dependencies for computed properties.
+    // this will evaluated all collected computed bindings
+    // and collect get events that are emitted.
+    if (this.computed.length) {
+        DepsParser.parse(this.computed)
+    }
 
     // done!
     compiler.rawContent = null
@@ -767,14 +791,6 @@ CompilerProto.hasKey = function (key) {
 }
 
 /**
- *  Collect dependencies for computed properties
- */
-CompilerProto.parseDeps = function () {
-    if (!this.computed.length) return
-    DepsParser.parse(this.computed)
-}
-
-/**
  *  Do a one-time eval of a string that potentially
  *  includes bindings. It accepts additional raw data
  *  because we need to dynamically resolve v-component
@@ -829,7 +845,6 @@ CompilerProto.destroy = function () {
         directives  = compiler.dirs,
         computed    = compiler.computed,
         bindings    = compiler.bindings,
-        delegators  = compiler.delegators,
         children    = compiler.children,
         parent      = compiler.parent
 
@@ -865,11 +880,6 @@ CompilerProto.destroy = function () {
         if (binding) {
             binding.unbind()
         }
-    }
-
-    // remove all event delegators
-    for (key in delegators) {
-        el.removeEventListener(key, delegators[key].handler)
     }
 
     // destroy all children
