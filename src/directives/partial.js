@@ -9,30 +9,32 @@ module.exports = {
 
     bind: function () {
 
-        var compiler = this.compiler,
-            id = this.expression
+        var id = this.expression
         if (!id) return
 
-        var partial = id === 'yield'
-            ? this.compiler.rawContent
-            : this.compiler.getOption('partials', id)
+        var el       = this.el,
+            compiler = this.compiler,
+            partial  = compiler.getOption('partials', id)
 
         if (!partial) {
-            utils.warn('Unknown partial: ' + id)
+            if (id === 'yield') {
+                utils.warn('{{>yield}} syntax has been deprecated. Use <content> tag instead.')
+            } else {
+                utils.warn('Unknown partial: ' + id)
+            }
             return
         }
 
         partial = partial.cloneNode(true)
 
         // comment ref node means inline partial
-        if (this.el.nodeType === 8) {
+        if (el.nodeType === 8) {
 
             // keep a ref for the partial's content nodes
             var nodes = [].slice.call(partial.childNodes),
-                ref = this.el,
-                parent = ref.parentNode
-            parent.insertBefore(partial, ref)
-            parent.removeChild(ref)
+                parent = el.parentNode
+            parent.insertBefore(partial, el)
+            parent.removeChild(el)
             // compile partial after appending, because its children's parentNode
             // will change from the fragment to the correct parentNode.
             // This could affect directives that need access to its element's parentNode.
@@ -41,8 +43,8 @@ module.exports = {
         } else {
 
             // just set innerHTML...
-            this.el.innerHTML = ''
-            this.el.appendChild(partial.cloneNode(true))
+            el.innerHTML = ''
+            el.appendChild(partial.cloneNode(true))
 
         }
     }

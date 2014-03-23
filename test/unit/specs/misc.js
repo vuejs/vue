@@ -207,4 +207,44 @@ describe('Misc Features', function () {
 
     })
 
+    describe('content insertion points', function () {
+        
+        it('should insert original content', function () {
+            var div = document.createElement('div')
+            div.innerHTML = '<h1>hello!</h1>'
+            var t = new Vue({
+                el: div,
+                template: '<h1>before</h1><content></content><p>after</p>'
+            })
+            assert.strictEqual(t.$el.innerHTML, '<h1>before</h1><h1>hello!</h1><p>after</p>')
+        })
+
+        it('should respect "select" attributes', function () {
+            var div = document.createElement('div')
+            div.innerHTML = '<h1>hi</h1><h1>ha</h1><p>hehe</p>'
+            var t = new Vue({
+                el: div,
+                template: '<h1>before</h1>' +
+                    '<content></content>' +
+                    '<content select="h1:nth-of-type(2)"></content>' +
+                    '<content select="h1:nth-of-type(1)"></content>' +
+                    '<p>after</p>'
+            })
+            assert.strictEqual(t.$el.innerHTML,
+                '<h1>before</h1>' +
+                '<p>hehe</p>' +
+                '<h1>ha</h1><h1>hi</h1>' +
+                '<p>after</p>'
+            )
+        })
+
+        it('should use fallback content if no rawContent is available', function () {
+            var t = new Vue({
+                template: '<content>Hello!</content>'
+            })
+            assert.strictEqual(t.$el.innerHTML, 'Hello!')
+        })
+
+    })
+
 })

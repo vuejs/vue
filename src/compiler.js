@@ -177,7 +177,6 @@ function Compiler (vm, options) {
     }
 
     // done!
-    compiler.rawContent = null
     compiler.init = false
 
     // post compile / ready hook
@@ -197,14 +196,16 @@ CompilerProto.setupElement = function (options) {
         : options.el || document.createElement(options.tagName || 'div')
 
     var template = options.template,
-        child, frag, replacer, i, attr, attrs
+        child, replacer, i, attr, attrs
 
     if (template) {
         // collect anything already in there
-        /* jshint boss: true */
-        frag = this.rawContent = document.createDocumentFragment()
-        while (child = el.firstChild) {
-            frag.appendChild(child)
+        if (el.hasChildNodes()) {
+            this.rawContent = document.createElement('div')
+            /* jshint boss: true */
+            while (child = el.firstChild) {
+                this.rawContent.appendChild(child)
+            }
         }
         // replace option: use the first node in
         // the template directly
@@ -227,6 +228,8 @@ CompilerProto.setupElement = function (options) {
         } else {
             el.appendChild(template.cloneNode(true))
         }
+
+        this.setupContent(el)
     }
 
     // apply element options
@@ -240,6 +243,59 @@ CompilerProto.setupElement = function (options) {
     }
 
     return el
+}
+
+/**
+ *  Deal with <content> insertion points
+ *  per the Web Components spec
+ */
+CompilerProto.setupContent = function (el) {
+
+    var outlets = slice.call(el.getElementsByTagName('content')),
+        raw = this.rawContent,
+        outlet, select, i, j, main
+
+    i = outlets.length
+    if (i) {
+        // first pass, collect corresponding content
+        // for each outlet.
+        while (i--) {
+            outlet = outlets[i]
+            if (raw) {
+                select = outlet.getAttribute('select')
+                if (select) { // select content
+                    outlet.content =
+                        slice.call(raw.querySelectorAll(select))
+                } else { // default content
+                    main = outlet
+                }
+            } else { // fallback content
+                outlet.content =
+                    slice.call(outlet.childNodes)
+            }
+        }
+        // second pass, actually insert the contents
+        for (i = 0, j = outlets.length; i < j; i++) {
+            outlet = outlets[i]
+            if (outlet === main) continue
+            insert(outlet, outlet.content)
+        }
+        // finally insert the main content
+        if (raw) {
+            insert(main, slice.call(raw.childNodes))
+        }
+    }
+
+    function insert (outlet, contents) {
+        var parent = outlet.parentNode,
+            i = 0, j = contents.length
+        for (; i < j; i++) {
+            parent.insertBefore(contents[i], outlet)
+        }
+        parent.removeChild(outlet)
+    }
+
+    this.rawContent = null
 }
 
 /**

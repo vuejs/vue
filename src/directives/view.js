@@ -16,7 +16,7 @@ module.exports = {
         // cache original content
         /* jshint boss: true */
         var node,
-            frag = this.inner = document.createDocumentFragment()
+            frag = this.inner = document.createElement('div')
         while (node = el.firstChild) {
             frag.appendChild(node)
         }
@@ -30,13 +30,11 @@ module.exports = {
         var Ctor  = this.compiler.getOption('components', value)
         if (!Ctor) return
 
-        var inner = this.inner.cloneNode(true)
-
         this.childVM = new Ctor({
             el: this.raw.cloneNode(true),
             parent: this.vm,
-            created: function () {
-                this.$compiler.rawContent = inner
+            compilerOptions: {
+                rawContent: this.inner.cloneNode(true)
             }
         })
 

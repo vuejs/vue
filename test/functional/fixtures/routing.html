@@ -53,21 +53,21 @@
 Vue.config('debug', true)
 
 Vue.component('home', {
-    template: '<h1>Home</h1><div class="content">{{>yield}}</div>',
+    template: '<h1>Home</h1><div class="content"><content/></div>',
     created: function () {
         this.msg = "Home sweet home!"
     }
 })
 
 Vue.component('page1', {
-    template: '<h1>Page1</h1><div class="content">{{>yield}}</div>',
+    template: '<h1>Page1</h1><div class="content"><content/></div>',
     created: function () {
         this.msg = "Welcome to page 1!"
     }
 })
 
 Vue.component('page2', {
-    template: '<h1>Page2</h1><div class="content">{{>yield}}</div>',
+    template: '<h1>Page2</h1><div class="content"><content/></div>',
     created: function () {
         this.msg = "Welcome to page 2!"
     }

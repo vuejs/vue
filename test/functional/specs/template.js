@@ -1,4 +1,4 @@
-casper.test.begin('Templates and Partials', 6, function (test) {
+casper.test.begin('Templates and Partials', 7, function (test) {
     
     casper
     .start('./fixtures/template.html')
@@ -9,8 +9,11 @@ casper.test.begin('Templates and Partials', 6, function (test) {
         test.assertSelectorHasText('#hawaii', 'Aloha', 'extend option')
         test.assertSelectorHasText('#repeat', 'Repeat', 'inline partial with repeat')
         test.assertEvalEquals(function () {
-            return document.querySelector('#yielder').innerHTML
-        }, '<x-yielder><h1>before</h1><p>A</p><p>B</p><h2>after</h2></x-yielder>')
+            return document.querySelector('#content').textContent
+                .replace(/\n/g, ' ')
+                .replace(/\s+/g, ' ')
+        }, ' before A B rest rest after ')
+        test.assertSelectorHasText('#fallback', 'This is fallback')
     })
     .run(function () {
         test.done()

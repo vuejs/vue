@@ -4,7 +4,6 @@
 <div id="conditional" v-partial="{{ok ? 'global' : 'nope'}}"></div>
 <div id="japan">{{> local}}</div>
 <div id="repeat">{{> repeat}}</div>
-<div id="yielder"><x-yielder><p>{{a}}</p><p>{{b}}</p></x-yielder></div>
 
 <script type="text/v-template" id="test">
     <p>{{hi}}!</p>
@@ -14,9 +13,26 @@
     <p v-repeat="items">{{title}}</p>
 </script>
 
-<script type="text/v-template" id="yield-template">
-    <h1>before</h1>{{>yield}}<h2>after</h2>
+<!-- content insertion point tests -->
+<div id="content">
+<my-compponent>
+    <p class="b">{{b}}</p>
+    <p class="rest1">rest</p>
+    <p class="rest2">rest</p>
+    <p class="a">{{a}}</p>
+</my-compponent>
+</div>
+
+<script type="text/v-template" id="content-template">
+<h1>before</h1>
+<content select=".a"></content>
+<content select=".b"></content>
+<content></content>
+<h2>after</h2>
 </script>
+
+<!-- content fallback test -->
+<div id="fallback"></div>
 
 <script src="../../../dist/vue.js"></script>
 <script>
@@ -76,12 +92,17 @@
         }
     })
 
-    Vue.component('x-yielder', {
-        template: '#yield-template',
+    Vue.component('my-compponent', {
+        template: '#content-template',
         data: {
             a: 'A', b: 'B'
         }
     })
 
-    new Vue({el:'#yielder'})
+    new Vue({el:'#content'})
+
+    new Vue({
+        el: '#fallback',
+        template: '<content>This is fallback</content>'
+    })
 </script>

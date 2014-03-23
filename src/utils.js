@@ -313,7 +313,7 @@ function enableDebug () {
         if (!config.silent && console) {
             console.warn(msg)
             if (config.debug && console.trace) {
-                console.trace(msg)
+                console.trace()
             }
         }
     }
