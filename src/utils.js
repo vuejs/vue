@@ -166,6 +166,11 @@ var utils = module.exports = {
         if (template.charAt(0) === '#') {
             var templateNode = document.getElementById(template.slice(1))
             if (!templateNode) return
+            // if its a template tag and the browser supports it,
+            // its content is already a document fragment!
+            if (templateNode.tagName === 'TEMPLATE' && templateNode.content) {
+                return templateNode.content
+            }
             template = templateNode.innerHTML
         }
         var node = document.createElement('div'),
