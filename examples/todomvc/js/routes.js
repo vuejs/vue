@@ -12,6 +12,13 @@
         });
     });
 
+    router.configure({
+        notfound: function () {
+            window.location.hash = '';
+            app.filter = 'all';
+        }
+    });
+
     router.init();
     
 })(app, Router);

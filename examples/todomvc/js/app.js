@@ -5,7 +5,7 @@
     'use strict';
 
     var filters = {
-        all: function (todo) {
+        all: function () {
             return true;
         },
         active: function (todo) {
@@ -16,7 +16,7 @@
         }
     };
 
-    exports.app = new Vue({
+    var app = exports.app = new Vue({
 
         // the root element that will be compiled
         el: '#todoapp',
