@@ -163,6 +163,11 @@ function Compiler (vm, options) {
 
     // COMPILE ----------------------------------------------------------------
 
+    // before compiling, resolve content insertion points
+    if (options.template) {
+        this.resolveContent()
+    }
+
     // now parse the DOM and bind directives.
     // During this stage, we will also create bindings for
     // encountered keypaths that don't have a binding yet.
@@ -237,7 +242,6 @@ CompilerProto.setupElement = function (options) {
             el.appendChild(template.cloneNode(true))
         }
 
-        this.setupContent(el)
     }
 
     // apply element options
@@ -257,9 +261,9 @@ CompilerProto.setupElement = function (options) {
  *  Deal with <content> insertion points
  *  per the Web Components spec
  */
-CompilerProto.setupContent = function (el) {
+CompilerProto.resolveContent = function () {
 
-    var outlets = slice.call(el.getElementsByTagName('content')),
+    var outlets = slice.call(this.el.getElementsByTagName('content')),
         raw = this.rawContent,
         outlet, select, i, j, main
 
@@ -289,7 +293,7 @@ CompilerProto.setupContent = function (el) {
             insert(outlet, outlet.content)
         }
         // finally insert the main content
-        if (raw) {
+        if (raw && main) {
             insert(main, slice.call(raw.childNodes))
         }
     }
