@@ -5,6 +5,7 @@ var config    = require('./config'),
     timeout   = win.setTimeout,
     def       = Object.defineProperty,
     THIS_RE   = /[^\w]this[^\w]/,
+    OBJECT    = 'object',
     hasClassList = 'classList' in document.documentElement,
     ViewModel // late def
 
@@ -90,11 +91,18 @@ var utils = module.exports = {
     },
 
     /**
-     *  Accurate type check
-     *  internal use only, so no need to check for NaN
+     *  A less bullet-proof but more efficient type check
+     *  than Object.prototype.toString
      */
-    typeOf: function (obj) {
-        return toString.call(obj).slice(8, -1)
+    isObject: function (obj) {
+        return typeof obj === OBJECT && obj && !Array.isArray(obj)
+    },
+
+    /**
+     *  A more accurate but less efficient type check
+     */
+    isTrueObject: function (obj) {
+        return toString.call(obj) === '[object Object]'
     },
 
     /**
@@ -192,7 +200,7 @@ var utils = module.exports = {
      */
     toConstructor: function (obj) {
         ViewModel = ViewModel || require('./viewmodel')
-        return utils.typeOf(obj) === 'Object'
+        return utils.isObject(obj)
             ? ViewModel.extend(obj)
             : typeof obj === 'function'
                 ? obj
@@ -284,7 +292,7 @@ var utils = module.exports = {
         var res = [], val, data
         for (var key in obj) {
             val = obj[key]
-            data = utils.typeOf(val) === 'Object'
+            data = utils.isObject(val)
                 ? val
                 : { $value: val }
             data.$key = key

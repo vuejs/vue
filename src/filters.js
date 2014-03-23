@@ -168,7 +168,7 @@ filters.orderBy.computed = true
  */
 function contains (val, search) {
     /* jshint eqeqeq: false */
-    if (utils.typeOf(val) === 'Object') {
+    if (utils.isObject(val)) {
         for (var key in val) {
             if (contains(val[key], search)) {
                 return true

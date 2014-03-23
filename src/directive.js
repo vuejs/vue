@@ -135,8 +135,7 @@ function parseFilter (filter, compiler) {
  *  during initialization.
  */
 DirProto.update = function (value, init) {
-    var type = utils.typeOf(value)
-    if (init || value !== this.value || type === 'Object' || type === 'Array') {
+    if (init || value !== this.value || (value && typeof value === 'object')) {
         this.value = value
         if (this._update) {
             this._update(

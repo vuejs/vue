@@ -33,8 +33,12 @@ module.exports = {
 
     update: function (collection) {
 
-        if (utils.typeOf(collection) === 'Object') {
-            collection = utils.objectToArray(collection)
+        if (!Array.isArray(collection)) {
+            if (utils.isObject(collection)) {
+                collection = utils.objectToArray(collection)
+            } else {
+                utils.warn('v-repeat only accepts Array or Object values.')
+            }
         }
 
         // if initiating with an empty collection, we need to
@@ -50,7 +54,7 @@ module.exports = {
         this.oldCollection = this.collection
         collection = this.collection = collection || []
 
-        var isObject = collection[0] && utils.typeOf(collection[0]) === 'Object'
+        var isObject = collection[0] && utils.isObject(collection[0])
         this.vms = this.oldCollection
             ? this.diff(collection, isObject)
             : this.init(collection, isObject)

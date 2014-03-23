@@ -112,18 +112,31 @@ describe('Utils', function () {
 
     })
 
-    describe('typeOf', function () {
+    describe('isObject', function () {
         
-        it('should return correct type', function () {
-            var tof = utils.typeOf
-            assert.equal(tof({}), 'Object')
-            assert.equal(tof([]), 'Array')
-            assert.equal(tof(1), 'Number')
-            assert.equal(tof(''), 'String')
-            assert.equal(tof(true), 'Boolean')
-            // phantomjs weirdness
-            assert.ok(tof(null) === 'Null' || tof(null) === 'DOMWindow')
-            assert.ok(tof(undefined) === 'Undefined' || tof(undefined) === 'DOMWindow')
+        it('should return correct result', function () {
+            var iso = utils.isObject
+            assert.ok(iso({}))
+            assert.notOk(iso([]))
+            assert.notOk(iso(1))
+            assert.notOk(iso(true))
+            assert.notOk(iso(null))
+            assert.notOk(iso(undefined))
+        })
+
+    })
+
+    describe('isTrueObject', function () {
+        
+        it('should return correct result', function () {
+            var iso = utils.isTrueObject
+            assert.ok(iso({}))
+            assert.notOk(iso([]))
+            assert.notOk(iso(1))
+            assert.notOk(iso(true))
+            assert.notOk(iso(null))
+            assert.notOk(iso(undefined))
+            assert.notOk(iso(document.createElement('div')))
         })
 
     })
@@ -264,9 +277,9 @@ describe('Utils', function () {
         it('should convert plain object components & elements to constructors', function () {
             var components = options.components
             assert.ok(components.a.prototype instanceof Vue)
-            assert.strictEqual(components.a.options.data.data, 1)
+            assert.strictEqual(components.a.options.defaultData.data, 1)
             assert.ok(components.b.prototype instanceof Vue)
-            assert.strictEqual(components.b.options.data.data, 2)
+            assert.strictEqual(components.b.options.defaultData.data, 2)
         })
 
     })

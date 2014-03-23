@@ -98,6 +98,13 @@ function extend (options) {
 
     var ParentVM = this
 
+    // extend data options need to be copied
+    // on instantiation
+    if (options.data) {
+        options.defaultData = options.data
+        delete options.data
+    }
+
     // inherit options
     options = inheritOptions(options, ParentVM.options, true)
     utils.processOptions(options)
@@ -149,10 +156,8 @@ function inheritOptions (child, parent, topLevel) {
     for (var key in parent) {
         if (key === 'el') continue
         var val = child[key],
-            parentVal = parent[key],
-            type = utils.typeOf(val),
-            parentType = utils.typeOf(parentVal)
-        if (topLevel && type === 'Function' && parentVal) {
+            parentVal = parent[key]
+        if (topLevel && typeof val === 'function' && parentVal) {
             // merge hook functions into an array
             child[key] = [val]
             if (Array.isArray(parentVal)) {
@@ -162,7 +167,7 @@ function inheritOptions (child, parent, topLevel) {
             }
         } else if (
             topLevel &&
-            (type === 'Object' || parentType === 'Object')
+            (utils.isTrueObject(val) || utils.isTrueObject(parentVal))
             && !(parentVal instanceof ViewModel)
         ) {
             // merge toplevel object options

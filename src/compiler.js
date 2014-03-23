@@ -107,7 +107,15 @@ function Compiler (vm, options) {
     compiler.setupObserver()
 
     // initialize data
-    var data = compiler.data = options.data || {}
+    var data = compiler.data = options.data || {},
+        defaultData = options.defaultData
+    if (defaultData) {
+        for (key in defaultData) {
+            if (!hasOwn.call(data, key)) {
+                data[key] = defaultData[key]
+            }
+        }
+    }
 
     // copy paramAttributes
     var params = options.paramAttributes
