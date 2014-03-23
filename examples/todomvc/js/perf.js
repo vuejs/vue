@@ -31,10 +31,14 @@ setTimeout(function () {
 
     function add() {
         last = now()
-        var newTodo = '12345'
+        var newTodo = '12345',
+            todoInput = document.getElementById('new-todo')
         for (var i = 0; i < itemsToAdd; i++) {
-            app.newTodo = newTodo
-            app.addTodo()
+            var keyupEvent = document.createEvent('Event');
+            keyupEvent.initEvent('keyup', true, true);
+            keyupEvent.keyCode = 13;
+            app.newTodo = 'Something to do ' + i;
+            todoInput.dispatchEvent(keyupEvent)
         }
         setTimeout(toggle, 0)
     }
@@ -42,11 +46,9 @@ setTimeout(function () {
     function toggle () {
         addTime = now() - last
         var checkboxes = document.querySelectorAll('.toggle')
-        //for (var j = 0; j < 5; j++) {
-            for (var i = 0; i < checkboxes.length; i++) {
-                checkboxes[i].click()
-            }
-        //}
+        for (var i = 0; i < checkboxes.length; i++) {
+            checkboxes[i].click()
+        }
         last = now()
         setTimeout(remove, 0)
     }
