@@ -86,7 +86,7 @@ filters.key = function (handler, key) {
     }
     return function (e) {
         if (e.keyCode === code) {
-            handler.call(this, e)
+            return handler.call(this, e)
         }
     }
 }
