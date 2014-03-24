@@ -321,12 +321,11 @@ CompilerProto.setupObserver = function () {
     var compiler = this,
         bindings = compiler.bindings,
         options  = compiler.options,
-        observer = compiler.observer = new Emitter()
+        observer = compiler.observer = new Emitter(compiler.vm)
 
     // a hash to hold event proxies for each root level key
     // so they can be referenced and removed later
     observer.proxies = {}
-    observer._ctx = compiler.vm
 
     // add own listeners which trigger binding updates
     observer
