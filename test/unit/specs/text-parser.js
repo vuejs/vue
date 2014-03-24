@@ -69,16 +69,6 @@ describe('Text Parser', function () {
 
         it('should extract and inline any filters', function () {
             var res = TextParser.parseAttr('a {{msg | test}} b')
-            var vm = new Vue({
-                data: {
-                    msg: 'haha'
-                },
-                filters: {
-                    test: function (v) {
-                        return v + '123'
-                    }
-                }
-            })
             assert.strictEqual(res, '"a "+(this.$compiler.getOption("filters", "test").call(this,msg))+" b"')
         })
 

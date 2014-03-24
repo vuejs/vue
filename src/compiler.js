@@ -778,11 +778,11 @@ CompilerProto.defineMeta = function (key, binding) {
  *  an anonymous computed property
  */
 CompilerProto.defineExp = function (key, binding, directive) {
-    var filters = directive && directive.computeFilters && directive.filters,
-        exp     = filters ? directive.expression : key,
-        getter  = this.expCache[exp]
+    var computedKey = directive && directive.computedKey,
+        exp         = computedKey ? directive.expression : key,
+        getter      = this.expCache[exp]
     if (!getter) {
-        getter = this.expCache[exp] = ExpParser.parse(key, this, null, filters)
+        getter = this.expCache[exp] = ExpParser.parse(computedKey || key, this)
     }
     if (getter) {
         this.markComputed(binding, getter)

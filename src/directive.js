@@ -1,16 +1,12 @@
 var utils      = require('./utils'),
-    directives = require('./directives'),
     dirId      = 1,
 
     // Regexes!
-
     // regex to split multiple directive expressions
     // split by commas, but ignore commas within quotes, parens and escapes.
     SPLIT_RE        = /(?:['"](?:\\.|[^'"])*['"]|\((?:\\.|[^\)])*\)|\\.|[^,])+/g,
-
     // match up to the first single pipe, ignore those within quotes.
     KEY_RE          = /^(?:['"](?:\\.|[^'"])*['"]|\\.|[^\|]|\|\|)+/,
-
     ARG_RE          = /^([\w-$ ]+):(.+)$/,
     FILTERS_RE      = /\|[^\|]+/g,
     FILTER_TOKEN_RE = /[^\s']+|'[^']+'|[^\s"]+|"[^"]+"/g,
@@ -63,7 +59,7 @@ function Directive (dirname, definition, expression, rawKey, compiler, node) {
     this.arg = parsed.arg
     
     var filters = Directive.parseFilters(this.expression.slice(rawKey.length)),
-        filter, fn, i, l
+        filter, fn, i, l, computed
     if (filters) {
         this.filters = []
         for (i = 0, l = filters.length; i < l; i++) {
@@ -73,7 +69,7 @@ function Directive (dirname, definition, expression, rawKey, compiler, node) {
                 filter.apply = fn
                 this.filters.push(filter)
                 if (fn.computed) {
-                    this.computeFilters = true
+                    computed = true
                 }
             }
         }
@@ -83,12 +79,13 @@ function Directive (dirname, definition, expression, rawKey, compiler, node) {
         this.filters = null
     }
 
-    if (this.computeFilters) {
-        this.key = Directive.inlineFilters(this.key, this.filters)
+    if (computed) {
+        this.computedKey = Directive.inlineFilters(this.key, this.filters)
+        this.filters = null
     }
 
     this.isExp =
-        this.computeFilters ||
+        computed ||
         !SINGLE_VAR_RE.test(this.key) ||
         NESTING_RE.test(this.key)
 
@@ -174,7 +171,9 @@ Directive.parseArg = function (rawKey) {
  *  parse a the filters
  */
 Directive.parseFilters = function (exp) {
-    if (!exp.indexOf('|') < 0) return
+    if (exp.indexOf('|') < 0) {
+        return
+    }
     var filters = exp.match(FILTERS_RE),
         res, i, l, tokens
     if (filters) {

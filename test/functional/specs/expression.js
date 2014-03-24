@@ -13,7 +13,7 @@ casper.test.begin('Expression', 23, function (test) {
         test.assertField('four', 'Ho')
         // attrs
         test.assertEval(function () {
-            return document.getElementById('attrs').dataset.test === 'hi ho ha'
+            return document.getElementById('attrs').dataset.test === 'hi hoef ha'
         })
     })
     .thenEvaluate(function () {
@@ -78,7 +78,7 @@ casper.test.begin('Expression', 23, function (test) {
         // attr
         test.assertEvalEquals(function () {
             return document.getElementById('attrs').dataset.test
-        }, 'hi hoho ha')
+        }, 'hi hohoef ha')
         // html
         test.assertEvalEquals(function () {
             return document.getElementById('html').innerHTML
