@@ -143,7 +143,9 @@ module.exports = {
         // second pass, collect old reused and destroy unused
         for (i = 0, l = oldVMs.length; i < l; i++) {
             vm = oldVMs[i]
-            item = vm.$data
+            item = this.arg
+                ? vm.$data[this.arg]
+                : vm.$data
             if (item.$reused) {
                 vm.$reused = true
                 delete item.$reused
@@ -158,7 +160,9 @@ module.exports = {
                 vms[vm.$index] = vm
             } else {
                 // this one can be destroyed.
-                delete item.__emitter__[this.identifier]
+                if (item.__emitter__) {
+                    delete item.__emitter__[this.identifier]
+                }
                 vm.$destroy()
             }
         }
@@ -229,8 +233,10 @@ module.exports = {
                 }
             })
 
-        // attach an ienumerable identifier
-        data.__emitter__[this.identifier] = true
+        if (isObject) {
+            // attach an ienumerable identifier to the raw data
+            (raw || data).__emitter__[this.identifier] = true
+        }
 
         if (wrap) {
             var self = this,
