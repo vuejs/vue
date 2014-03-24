@@ -3,8 +3,7 @@ var utils           = require('./utils'),
     STR_RESTORE_RE  = /"(\d+)"/g,
     NEWLINE_RE      = /\n/g,
     CTOR_RE         = new RegExp('constructor'.split('').join('[\'"+, ]*')),
-    UNICODE_RE      = /\\u\d\d\d\d/,
-    QUOTE_RE        = /"/g
+    UNICODE_RE      = /\\u\d\d\d\d/
 
 // Variable extraction scooped from https://github.com/RubyLouvre/avalon
 
@@ -111,21 +110,11 @@ function escapeDollar (v) {
 }
 
 /**
- *  Convert double quotes to single quotes
- *  so they don't mess up the generated function body
- */
-function escapeQuote (v) {
-    return v.indexOf('"') > -1
-        ? v.replace(QUOTE_RE, '\'')
-        : v
-}
-
-/**
  *  Parse and return an anonymous computed property getter function
  *  from an arbitrary expression, together with a list of paths to be
  *  created as bindings.
  */
-exports.parse = function (exp, compiler, data, filters) {
+exports.parse = function (exp, compiler, data) {
     // unicode and 'constructor' are not allowed for XSS security.
     if (UNICODE_RE.test(exp) || CTOR_RE.test(exp)) {
         utils.warn('Unsafe expression: ' + exp)
@@ -153,23 +142,6 @@ exports.parse = function (exp, compiler, data, filters) {
             .replace(STR_SAVE_RE, saveStrings)
             .replace(pathRE, replacePath)
             .replace(STR_RESTORE_RE, restoreStrings)
-
-    // wrap expression with computed filters
-    if (filters) {
-        var args, filter
-        for (var i = 0, l = filters.length; i < l; i++) {
-            filter = filters[i]
-            args = filter.args
-                ? ',"' + filter.args.map(escapeQuote).join('","') + '"'
-                : ''
-            body =
-                'this.$compiler.getOption("filters", "' +
-                    filter.name +
-                '").call(this,' +
-                    body + args +
-                ')'
-        }
-    }
 
     body = accessors + 'return ' + body
 

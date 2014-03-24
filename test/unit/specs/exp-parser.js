@@ -174,40 +174,6 @@ describe('Expression Parser', function () {
 
     })
 
-    describe('computed filters', function () {
-        
-        it('should wrap expression with computed filters', function () {
-            
-            var filters = [
-                    { name: 'test', args: ['a', 'b'] },
-                    { name: 'wrap', args: ['c', 'd'] }
-                ],
-                filterFns = {
-                    test: function (v, a, b) {
-                        return v + a + b
-                    },
-                    wrap: function (v, c, d) {
-                        return v + c + d
-                    }
-                }
-
-            var compiler = mockCompiler({
-                getOption: function (type, id) {
-                    return filterFns[id]
-                }
-            })
-
-            var getter = ExpParser.parse('a + b', compiler, null, filters)
-            var res = getter.call({
-                $compiler: compiler,
-                a: 1,
-                b: 2
-            })
-            assert.strictEqual(res, '3abcd')
-        })
-
-    })
-
     function describeCase (testCase) {
         describe(testCase.exp, function () {
 

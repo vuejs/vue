@@ -61,10 +61,25 @@ describe('Text Parser', function () {
 
     describe('.parseAttr()', function () {
     
-        it('should return Directive.parse friendly expression', function () {
+        it('should return Directive.build friendly expression', function () {
             assert.strictEqual(TextParser.parseAttr('{{msg}}'), 'msg')
             assert.strictEqual(TextParser.parseAttr('{{msg + "123"}}'), 'msg + "123"')
             assert.strictEqual(TextParser.parseAttr('ha {{msg + "123"}} ho'), '"ha "+(msg + "123")+" ho"')
+        })
+
+        it('should extract and inline any filters', function () {
+            var res = TextParser.parseAttr('a {{msg | test}} b')
+            var vm = new Vue({
+                data: {
+                    msg: 'haha'
+                },
+                filters: {
+                    test: function (v) {
+                        return v + '123'
+                    }
+                }
+            })
+            assert.strictEqual(res, '"a "+(this.$compiler.getOption("filters", "test").call(this,msg))+" b"')
         })
 
     })

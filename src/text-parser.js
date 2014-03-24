@@ -1,7 +1,9 @@
-var openChar  = '{',
-    endChar   = '}',
-    ESCAPE_RE  = /[-.*+?^${}()|[\]\/\\]/g,
-    BINDING_RE = buildInterpolationRegex()
+var openChar        = '{',
+    endChar         = '}',
+    ESCAPE_RE       = /[-.*+?^${}()|[\]\/\\]/g,
+    BINDING_RE      = buildInterpolationRegex(),
+    // lazy require
+    Directive
 
 function buildInterpolationRegex () {
     var open = escapeRegex(openChar),
@@ -53,6 +55,7 @@ function parse (text) {
  *  e.g.  a {{b}} c  =>  "a " + b + " c"
  */
 function parseAttr (attr) {
+    Directive = Directive || require('./directive')
     var tokens = parse(attr)
     if (!tokens) return null
     if (tokens.length === 1) return tokens[0].key
@@ -61,11 +64,26 @@ function parseAttr (attr) {
         token = tokens[i]
         res.push(
             token.key
-                ? ('(' + token.key + ')')
+                ? inlineFilters(token.key)
                 : ('"' + token + '"')
         )
     }
     return res.join('+')
+}
+
+/**
+ *  Inlines any possible filters in a binding
+ *  so that we can combine everything into a huge expression
+ */
+function inlineFilters (key) {
+    var filters = Directive.parseFilters(key)
+    if (filters) {
+        key = Directive.inlineFilters(
+            Directive.parseKey(key),
+            filters
+        )
+    }
+    return '(' + key + ')'
 }
 
 exports.parse         = parse

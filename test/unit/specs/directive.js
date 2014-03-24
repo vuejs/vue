@@ -80,35 +80,107 @@ describe('Directive', function () {
 
     })
 
-    describe('.parse()', function () {
+    describe('.parseKey()', function () {
+        
+        it('should extract the raw key', function () {
+            var res = Directive.parseKey('arg: hehehe | abc | d')
+            assert.strictEqual(res, 'arg: hehehe')
+        })
+
+    })
+
+    describe('.parseArg()', function () {
+
+        it('should extract the argument', function () {
+            var res = Directive.parseArg('abc:def')
+            assert.strictEqual(res.key, 'def')
+            assert.strictEqual(res.arg, 'abc')
+        })
+
+        it('should deal with spaces', function () {
+            var res = Directive.parseArg('  abc :  def')
+            assert.strictEqual(res.key, 'def')
+            assert.strictEqual(res.arg, 'abc')
+        })
+
+        it('should omit colons in strings', function () {
+            var res = Directive.parseArg('"abc:def" + bcd')
+            assert.strictEqual(res.key, '"abc:def" + bcd')
+            assert.strictEqual(res.arg, null)
+        })
+
+    })
+
+    describe('.parseFilters()', function () {
+        
+        it('should extract filters', function () {
+            var res = Directive.parseFilters('a | b | c d e')
+            assert.strictEqual(res.length, 2)
+            assert.strictEqual(res[0].name, 'b')
+            assert.strictEqual(res[1].name, 'c')
+            assert.deepEqual(res[1].args, ['d', 'e'])
+        })
+
+    })
+
+    describe('.inlineFilters()', function () {
+        
+        it('should inline computed filters', function () {
+            var filters = Directive.parseFilters('| a | b | c d')
+            var exp = Directive.inlineFilters('this.a + this.b', filters)
+            var mock = new Vue({
+                filters: {
+                    a: function (v) {
+                        return v + 'a'
+                    },
+                    b: function (v) {
+                        return v + 'b'
+                    },
+                    c: function (v, d) {
+                        return v + 'c' + d
+                    }
+                },
+                data: {
+                    a: 'a',
+                    b: 'b'
+                }
+            })
+            var getter = new Function('return ' + exp)
+            var res = getter.call(mock)
+            assert.strictEqual(res, 'ababcd')
+        })
+
+    })
+
+    describe('.build()', function () {
         
         it('should return undefined if directive name does not have correct prefix', function () {
-            var d = Directive.parse('ds-test', 'abc', compiler)
+            var d = Directive.build('ds-test', 'abc', compiler)
             assert.strictEqual(d, undefined)
         })
 
         it('should return undefined if directive is unknown', function () {
-            var d = Directive.parse('directive-that-does-not-exist', 'abc', compiler)
+            var d = Directive.build('directive-that-does-not-exist', 'abc', compiler)
             assert.ok(d === undefined)
         })
 
         it('should return undefined if the expression is invalid', function () {
-            var e = Directive.parse('text', '  ', compiler),
-                f = Directive.parse('text', '|', compiler),
-                g = Directive.parse('text', '  |  ', compiler)
+            var e = Directive.build('text', '  ', compiler),
+                f = Directive.build('text', '|', compiler),
+                g = Directive.build('text', '  |  ', compiler)
             assert.strictEqual(e, undefined, 'spaces')
             assert.strictEqual(f, undefined, 'single pipe')
             assert.strictEqual(g, undefined, 'pipe with spaces')
         })
 
         it('should return a simple Directive if expression is empty', function () {
-            var d = Directive.parse('text', '', compiler)
+            var d = Directive.build('text', '', compiler)
             assert.ok(d instanceof Directive)
             assert.ok(d.isEmpty)
         })
 
         it('should return an instance of Directive if args are good', function () {
-            var d = Directive.parse('text', 'abc', compiler)
+            var d = Directive.build('text', 'abc', compiler)
             assert.ok(d instanceof Directive)
         })
 
@@ -121,7 +193,7 @@ describe('Directive', function () {
             var testDir = function () {}
             directives.test = testDir
 
-            var d = Directive.parse('test', 'abc', compiler)
+            var d = Directive.build('test', 'abc', compiler)
             assert.strictEqual(d._update, testDir)
         })
 
@@ -135,7 +207,7 @@ describe('Directive', function () {
             }
             directives.obj = obj
             
-            var d = Directive.parse('obj', 'abc', compiler)
+            var d = Directive.build('obj', 'abc', compiler)
             assert.strictEqual(d._update, obj.update, 'update should be copied as _update')
             assert.strictEqual(d._unbind, obj.unbind, 'unbind should be copied as _unbind')
             assert.strictEqual(d.bind, obj.bind)
@@ -144,36 +216,36 @@ describe('Directive', function () {
 
         it('should trim the expression', function () {
             var exp = ' fsfsef   | fsef a  ',
-                d = Directive.parse('text', exp, compiler)
+                d = Directive.build('text', exp, compiler)
             assert.strictEqual(d.expression, exp.trim())
         })
 
         it('should extract correct key', function () {
-            var d = Directive.parse('text', '"fsefse | fsefsef" && bc', compiler),
-                e = Directive.parse('text', '"fsefsf & fsefs" | test', compiler),
-                f = Directive.parse('text', '"fsef:fsefsf" || ff', compiler)
+            var d = Directive.build('text', '"fsefse | fsefsef" && bc', compiler),
+                e = Directive.build('text', '"fsefsf & fsefs" | test', compiler),
+                f = Directive.build('text', '"fsef:fsefsf" || ff', compiler)
             assert.strictEqual(d.key, '"fsefse | fsefsef" && bc', 'pipe inside quotes and &&')
             assert.strictEqual(e.key, '"fsefsf & fsefs"', '& inside quotes with filter')
             assert.strictEqual(f.key, '"fsef:fsefsf" || ff', ': inside quotes and ||')
         })
 
         it('should extract correct argument', function () {
-            var d = Directive.parse('text', 'todo:todos', compiler),
-                e = Directive.parse('text', '$todo:todos + abc', compiler),
-                f = Directive.parse('text', '-todo-fsef:todos | fsf fsef', compiler)
+            var d = Directive.build('text', 'todo:todos', compiler),
+                e = Directive.build('text', '$todo:todos + abc', compiler),
+                f = Directive.build('text', '-todo-fsef:todos | fsf fsef', compiler)
             assert.strictEqual(d.arg, 'todo', 'simple')
             assert.strictEqual(e.arg, '$todo', 'expression')
             assert.strictEqual(f.arg, '-todo-fsef', 'with hyphens and filters')
         })
 
         it('should be able to determine whether the key is an expression', function () {
-            var d = Directive.parse('text', 'abc', compiler),
-                e = Directive.parse('text', '!abc', compiler),
-                f = Directive.parse('text', 'abc + bcd * 5 / 2', compiler),
-                g = Directive.parse('text', 'abc && (bcd || eee)', compiler),
-                h = Directive.parse('text', 'test(abc)', compiler),
-                i = Directive.parse('text', 'a.b', compiler),
-                j = Directive.parse('text', 'a.$b', compiler)
+            var d = Directive.build('text', 'abc', compiler),
+                e = Directive.build('text', '!abc', compiler),
+                f = Directive.build('text', 'abc + bcd * 5 / 2', compiler),
+                g = Directive.build('text', 'abc && (bcd || eee)', compiler),
+                h = Directive.build('text', 'test(abc)', compiler),
+                i = Directive.build('text', 'a.b', compiler),
+                j = Directive.build('text', 'a.$b', compiler)
             assert.ok(!d.isExp, 'non-expression')
             assert.ok(e.isExp, 'negation')
             assert.ok(f.isExp, 'math')
@@ -184,11 +256,11 @@ describe('Directive', function () {
         })
 
         it('should have a filter prop of null if no filters are present', function () {
-            var d = Directive.parse('text', 'abc', compiler),
-                e = Directive.parse('text', 'abc |', compiler),
-                f = Directive.parse('text', 'abc ||', compiler),
-                g = Directive.parse('text', 'abc | | ', compiler),
-                h = Directive.parse('text', 'abc | unknown | nothing at all | whaaat', compiler)
+            var d = Directive.build('text', 'abc', compiler),
+                e = Directive.build('text', 'abc |', compiler),
+                f = Directive.build('text', 'abc ||', compiler),
+                g = Directive.build('text', 'abc | | ', compiler),
+                h = Directive.build('text', 'abc | unknown | nothing at all | whaaat', compiler)
             assert.strictEqual(d.filters, null)
             assert.strictEqual(e.filters, null, 'single')
             assert.strictEqual(f.filters, null, 'double')
@@ -197,7 +269,7 @@ describe('Directive', function () {
         })
 
         it('should extract correct filters (single filter)', function () {
-            var d = Directive.parse('text', 'abc || a + "b|c" | uppercase', compiler),
+            var d = Directive.build('text', 'abc || a + "b|c" | uppercase', compiler),
                 f = d.filters[0]
             assert.strictEqual(f.name, 'uppercase')
             assert.strictEqual(f.args, null)
@@ -205,7 +277,7 @@ describe('Directive', function () {
         })
 
         it('should extract correct filters (single filter with args)', function () {
-            var d = Directive.parse('text', 'abc + \'b | c | d\' | pluralize item \'arg with spaces\'', compiler),
+            var d = Directive.build('text', 'abc + \'b | c | d\' | pluralize item \'arg with spaces\'', compiler),
                 f = d.filters[0]
             assert.strictEqual(f.name, 'pluralize', 'name')
             assert.strictEqual(f.args.length, 2, 'args length')
@@ -215,7 +287,7 @@ describe('Directive', function () {
 
         it('should extract correct filters (multiple filters)', function () {
             // intentional double pipe
-            var d = Directive.parse('text', 'abc | uppercase | pluralize item || lowercase', compiler),
+            var d = Directive.build('text', 'abc | uppercase | pluralize item || lowercase', compiler),
                 f1 = d.filters[0],
                 f2 = d.filters[1],
                 f3 = d.filters[2]
@@ -231,7 +303,7 @@ describe('Directive', function () {
     describe('.applyFilters()', function () {
         
         it('should work', function () {
-            var d = Directive.parse('text', 'abc | pluralize item | capitalize', compiler),
+            var d = Directive.build('text', 'abc | pluralize item | capitalize', compiler),
                 v = d.applyFilters(2)
             assert.strictEqual(v, 'Items')
         })
@@ -240,7 +312,7 @@ describe('Directive', function () {
 
     describe('.update()', function () {
         
-        var d = Directive.parse('text', 'abc', compiler),
+        var d = Directive.build('text', 'abc', compiler),
             updated = false
         d._update = function () {
             updated = true
@@ -278,7 +350,7 @@ describe('Directive', function () {
 
     describe('.unbind()', function () {
         
-        var d = Directive.parse('text', 'abc', compiler),
+        var d = Directive.build('text', 'abc', compiler),
             unbound = false,
             val
         d._unbind = function (v) {
@@ -314,7 +386,7 @@ describe('Directive', function () {
                 called++
             }
             Vue.directive('simple-dir-test1', call)
-            var d = Directive.parse('simple-dir-test1', '', compiler)
+            var d = Directive.build('simple-dir-test1', '', compiler)
             d.bind()
             assert.strictEqual(called, 1)
         })
@@ -328,7 +400,7 @@ describe('Directive', function () {
                 bind: call,
                 unbind: call
             })
-            var d = Directive.parse('simple-dir-test2', '', compiler, true)
+            var d = Directive.build('simple-dir-test2', '', compiler, true)
             d.bind()
             d.unbind()
             assert.strictEqual(called, 2)

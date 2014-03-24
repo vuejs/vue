@@ -18,6 +18,7 @@ describe('Misc Features', function () {
     })
 
     describe('expression inside attributes', function () {
+
         it('should interpolate the attribute', function (done) {
             var v = new Vue({
                 attributes: {
@@ -31,6 +32,28 @@ describe('Misc Features', function () {
             v.msg = '2'
             nextTick(function () {
                 assert.strictEqual(v.$el.getAttribute('test'), 'one 2 three')
+                done()
+            })
+        })
+
+        it('should work with filters', function (done) {
+            var v = new Vue({
+                attributes: {
+                    'class': '{{msg | test}}'
+                },
+                data: {
+                    msg: 'hello'
+                },
+                filters: {
+                    test: function (v) {
+                        return v + '-bye'
+                    }
+                }
+            })
+            assert.strictEqual(v.$el.className, 'hello-bye')
+            v.msg = 'ok'
+            nextTick(function () {
+                assert.strictEqual(v.$el.className, 'ok-bye')
                 done()
             })
         })

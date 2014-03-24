@@ -19,8 +19,6 @@ module.exports = {
         if (!partial) {
             if (id === 'yield') {
                 utils.warn('{{>yield}} syntax has been deprecated. Use <content> tag instead.')
-            } else {
-                utils.warn('Unknown partial: ' + id)
             }
             return
         }
