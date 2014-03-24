@@ -1,5 +1,5 @@
 /*
- Vue.js v0.10.0
+ Vue.js v0.10.1
  (c) 2014 Evan You
  License: MIT
 */
@@ -407,7 +407,7 @@ EmitterProto.on = function(event, fn){
     return this
 }
 
-Emitter.prototype.once = function(event, fn){
+EmitterProto.once = function(event, fn){
     var self = this
     this._cbs = this._cbs || {}
 
@@ -421,7 +421,7 @@ Emitter.prototype.once = function(event, fn){
     return this
 }
 
-Emitter.prototype.off = function(event, fn){
+EmitterProto.off = function(event, fn){
     this._cbs = this._cbs || {}
 
     // all
@@ -452,7 +452,7 @@ Emitter.prototype.off = function(event, fn){
     return this
 }
 
-Emitter.prototype.emit = function(event, a, b, c){
+EmitterProto.emit = function(event, a, b, c){
     this._cbs = this._cbs || {}
     var callbacks = this._cbs[event]
 
@@ -1143,12 +1143,11 @@ CompilerProto.setupObserver = function () {
     var compiler = this,
         bindings = compiler.bindings,
         options  = compiler.options,
-        observer = compiler.observer = new Emitter()
+        observer = compiler.observer = new Emitter(compiler.vm)
 
     // a hash to hold event proxies for each root level key
     // so they can be referenced and removed later
     observer.proxies = {}
-    observer._ctx = compiler.vm
 
     // add own listeners which trigger binding updates
     observer
@@ -1288,11 +1287,11 @@ CompilerProto.checkPriorityDir = function (dirname, node, root) {
         root !== true &&
         (Ctor = this.resolveComponent(node, undefined, true))
     ) {
-        directive = Directive.parse(dirname, '', this, node)
+        directive = Directive.build(dirname, '', this, node)
         directive.Ctor = Ctor
     } else {
         expression = utils.attr(node, dirname)
-        directive = expression && Directive.parse(dirname, expression, this, node)
+        directive = expression && Directive.build(dirname, expression, this, node)
     }
     if (directive) {
         if (root === true) {
@@ -1364,7 +1363,7 @@ CompilerProto.compileElement = function (node, root) {
                 while (l--) {
                     exp = exps[l]
                     dirname = attr.name.slice(prefix.length)
-                    directive = Directive.parse(dirname, exp, this, node)
+                    directive = Directive.build(dirname, exp, this, node)
 
                     if (dirname === 'with') {
                         this.bindDirective(directive, this.parent)
@@ -1377,7 +1376,7 @@ CompilerProto.compileElement = function (node, root) {
                 // non directive attribute, check interpolation tags
                 exp = TextParser.parseAttr(attr.value)
                 if (exp) {
-                    directive = Directive.parse('attr', attr.name + ':' + exp, this, node)
+                    directive = Directive.build('attr', attr.name + ':' + exp, this, node)
                     if (params && params.indexOf(attr.name) > -1) {
                         // a param attribute... we should use the parent binding
                         // to avoid circular updates like size={{size}}
@@ -1418,14 +1417,14 @@ CompilerProto.compileTextNode = function (node) {
         if (token.key) { // a binding
             if (token.key.charAt(0) === '>') { // a partial
                 el = document.createComment('ref')
-                directive = Directive.parse('partial', token.key.slice(1), this, el)
+                directive = Directive.build('partial', token.key.slice(1), this, el)
             } else {
                 if (!token.html) { // text binding
                     el = document.createTextNode('')
-                    directive = Directive.parse('text', token.key, this, el)
+                    directive = Directive.build('text', token.key, this, el)
                 } else { // html binding
                     el = document.createComment(config.prefix + '-html')
-                    directive = Directive.parse('html', token.key, this, el)
+                    directive = Directive.build('html', token.key, this, el)
                 }
             }
         } else { // a plain string
@@ -1601,11 +1600,11 @@ CompilerProto.defineMeta = function (key, binding) {
  *  an anonymous computed property
  */
 CompilerProto.defineExp = function (key, binding, directive) {
-    var filters = directive && directive.computeFilters && directive.filters,
-        exp     = filters ? directive.expression : key,
-        getter  = this.expCache[exp]
+    var computedKey = directive && directive.computedKey,
+        exp         = computedKey ? directive.expression : key,
+        getter      = this.expCache[exp]
     if (!getter) {
-        getter = this.expCache[exp] = ExpParser.parse(key, this, null, filters)
+        getter = this.expCache[exp] = ExpParser.parse(computedKey || key, this)
     }
     if (getter) {
         this.markComputed(binding, getter)
@@ -1650,15 +1649,19 @@ CompilerProto.markComputed = function (binding, value) {
 /**
  *  Retrive an option from the compiler
  */
-CompilerProto.getOption = function (type, id) {
+CompilerProto.getOption = function (type, id, silent) {
     var opts = this.options,
         parent = this.parent,
-        globalAssets = config.globalAssets
-    return (opts[type] && opts[type][id]) || (
-        parent
-            ? parent.getOption(type, id)
-            : globalAssets[type] && globalAssets[type][id]
-    )
+        globalAssets = config.globalAssets,
+        res = (opts[type] && opts[type][id]) || (
+            parent
+                ? parent.getOption(type, id, silent)
+                : globalAssets[type] && globalAssets[type][id]
+        )
+    if (!res && !silent) {
+        utils.warn('Unknown ' + type.slice(0, -1) + ': ' + id)
+    }
+    return res
 }
 
 /**
@@ -1705,7 +1708,7 @@ CompilerProto.resolveComponent = function (node, data, test) {
         tagName = node.tagName,
         id      = this.eval(exp, data),
         tagId   = (tagName.indexOf('-') > 0 && tagName.toLowerCase()),
-        Ctor    = this.getOption('components', id || tagId)
+        Ctor    = this.getOption('components', id || tagId, true)
 
     if (id && !Ctor) {
         utils.warn('Unknown component: ' + id)
@@ -2545,23 +2548,20 @@ var pub = module.exports = {
 });
 require.register("vue/src/directive.js", function(exports, require, module){
 var utils      = require('./utils'),
-    directives = require('./directives'),
     dirId      = 1,
 
     // Regexes!
-
     // regex to split multiple directive expressions
     // split by commas, but ignore commas within quotes, parens and escapes.
     SPLIT_RE        = /(?:['"](?:\\.|[^'"])*['"]|\((?:\\.|[^\)])*\)|\\.|[^,])+/g,
-
     // match up to the first single pipe, ignore those within quotes.
     KEY_RE          = /^(?:['"](?:\\.|[^'"])*['"]|\\.|[^\|]|\|\|)+/,
-
     ARG_RE          = /^([\w-$ ]+):(.+)$/,
     FILTERS_RE      = /\|[^\|]+/g,
     FILTER_TOKEN_RE = /[^\s']+|'[^']+'|[^\s"]+|"[^"]+"/g,
     NESTING_RE      = /^\$(parent|root)\./,
-    SINGLE_VAR_RE   = /^[\w\.$]+$/
+    SINGLE_VAR_RE   = /^[\w\.$]+$/,
+    QUOTE_RE        = /"/g
 
 /**
  *  Directive class
@@ -2603,77 +2603,44 @@ function Directive (dirname, definition, expression, rawKey, compiler, node) {
             : expression
     ).trim()
     
-    parseKey(this, rawKey)
+    var parsed = Directive.parseArg(rawKey)
+    this.key = parsed.key
+    this.arg = parsed.arg
     
-    var filterExps = this.expression.slice(rawKey.length).match(FILTERS_RE)
-    if (filterExps) {
+    var filters = Directive.parseFilters(this.expression.slice(rawKey.length)),
+        filter, fn, i, l, computed
+    if (filters) {
         this.filters = []
-        for (var i = 0, l = filterExps.length, filter; i < l; i++) {
-            filter = parseFilter(filterExps[i], this.compiler)
-            if (filter) {
+        for (i = 0, l = filters.length; i < l; i++) {
+            filter = filters[i]
+            fn = this.compiler.getOption('filters', filter.name)
+            if (fn) {
+                filter.apply = fn
                 this.filters.push(filter)
-                if (filter.apply.computed) {
-                    // some special filters, e.g. filterBy & orderBy,
-                    // can involve VM properties and they often need to
-                    // be computed.
-                    this.computeFilters = true
+                if (fn.computed) {
+                    computed = true
                 }
             }
         }
-        if (!this.filters.length) this.filters = null
-    } else {
+    }
+
+    if (!this.filters || !this.filters.length) {
+        this.filters = null
+    }
+
+    if (computed) {
+        this.computedKey = Directive.inlineFilters(this.key, this.filters)
         this.filters = null
     }
 
     this.isExp =
-        this.computeFilters ||
+        computed ||
         !SINGLE_VAR_RE.test(this.key) ||
         NESTING_RE.test(this.key)
 
 }
 
 var DirProto = Directive.prototype
-
-/**
- *  parse a key, extract argument and nesting/root info
- */
-function parseKey (dir, rawKey) {
-    var key = rawKey
-    if (rawKey.indexOf(':') > -1) {
-        var argMatch = rawKey.match(ARG_RE)
-        key = argMatch
-            ? argMatch[2].trim()
-            : key
-        dir.arg = argMatch
-            ? argMatch[1].trim()
-            : null
-    }
-    dir.key = key
-}
-
-/**
- *  parse a filter expression
- */
-function parseFilter (filter, compiler) {
-
-    var tokens = filter.slice(1).match(FILTER_TOKEN_RE)
-    if (!tokens) return
-
-    var name = tokens[0],
-        apply = compiler.getOption('filters', name)
-    if (!apply) {
-        utils.warn('Unknown filter: ' + name)
-        return
-    }
-
-    return {
-        name  : name,
-        apply : apply,
-        args  : tokens.length > 1
-                ? tokens.slice(1)
-                : null
-    }
-}
 
 /**
  *  called when a new value is set 
@@ -2716,7 +2683,7 @@ DirProto.unbind = function () {
     this.vm = this.el = this.binding = this.compiler = null
 }
 
-// exposed methods ------------------------------------------------------------
+// Exposed static methods -----------------------------------------------------
 
 /**
  *  split a unquoted-comma separated expression into
@@ -2729,27 +2696,106 @@ Directive.split = function (exp) {
 }
 
 /**
- *  make sure the directive and expression is valid
- *  before we create an instance
+ *  parse a key, extract argument
  */
-Directive.parse = function (dirname, expression, compiler, node) {
+Directive.parseArg = function (rawKey) {
+    var key = rawKey,
+        arg = null
+    if (rawKey.indexOf(':') > -1) {
+        var argMatch = rawKey.match(ARG_RE)
+        key = argMatch
+            ? argMatch[2].trim()
+            : key
+        arg = argMatch
+            ? argMatch[1].trim()
+            : arg
+    }
+    return {
+        key: key,
+        arg: arg
+    }
+}
 
-    var dir = compiler.getOption('directives', dirname) || directives[dirname]
-    if (!dir) {
-        utils.warn('Unknown directive: ' + dirname)
+/**
+ *  parse a the filters
+ */
+Directive.parseFilters = function (exp) {
+    if (exp.indexOf('|') < 0) {
         return
     }
+    var filters = exp.match(FILTERS_RE),
+        res, i, l, tokens
+    if (filters) {
+        res = []
+        for (i = 0, l = filters.length; i < l; i++) {
+            tokens = filters[i].slice(1).match(FILTER_TOKEN_RE)
+            if (tokens) {
+                res.push({
+                    name: tokens[0],
+                    args: tokens.length > 1
+                        ? tokens.slice(1)
+                        : null
+                })
+            }
+        }
+    }
+    return res
+}
 
-    var rawKey
+/**
+ *  Inline computed filters so they become part
+ *  of the expression
+ */
+Directive.inlineFilters = function (key, filters) {
+    var args, filter
+    for (var i = 0, l = filters.length; i < l; i++) {
+        filter = filters[i]
+        args = filter.args
+            ? ',"' + filter.args.map(escapeQuote).join('","') + '"'
+            : ''
+        key = 'this.$compiler.getOption("filters", "' +
+                filter.name +
+            '").call(this,' +
+                key + args +
+            ')'
+    }
+    return key
+}
+
+/**
+ *  Convert double quotes to single quotes
+ *  so they don't mess up the generated function body
+ */
+function escapeQuote (v) {
+    return v.indexOf('"') > -1
+        ? v.replace(QUOTE_RE, '\'')
+        : v
+}
+
+/**
+ *  Parse the key from a directive raw expression
+ */
+Directive.parseKey = function (expression) {
     if (expression.indexOf('|') > -1) {
         var keyMatch = expression.match(KEY_RE)
         if (keyMatch) {
-            rawKey = keyMatch[0].trim()
+            return keyMatch[0].trim()
         }
     } else {
-        rawKey = expression.trim()
+        return expression.trim()
     }
-    
+}
+
+/**
+ *  make sure the directive and expression is valid
+ *  before we create an instance
+ */
+Directive.build = function (dirname, expression, compiler, node) {
+
+    var dir = compiler.getOption('directives', dirname)
+    if (!dir) return
+
+    var rawKey = Directive.parseKey(expression)
     // have a valid raw key, or be an empty directive
     if (rawKey || expression === '') {
         return new Directive(dirname, dir, expression, rawKey, compiler, node)
@@ -2766,8 +2812,7 @@ var utils           = require('./utils'),
     STR_RESTORE_RE  = /"(\d+)"/g,
     NEWLINE_RE      = /\n/g,
     CTOR_RE         = new RegExp('constructor'.split('').join('[\'"+, ]*')),
-    UNICODE_RE      = /\\u\d\d\d\d/,
-    QUOTE_RE        = /"/g
+    UNICODE_RE      = /\\u\d\d\d\d/
 
 // Variable extraction scooped from https://github.com/RubyLouvre/avalon
 
@@ -2874,21 +2919,11 @@ function escapeDollar (v) {
 }
 
 /**
- *  Convert double quotes to single quotes
- *  so they don't mess up the generated function body
- */
-function escapeQuote (v) {
-    return v.indexOf('"') > -1
-        ? v.replace(QUOTE_RE, '\'')
-        : v
-}
-
-/**
  *  Parse and return an anonymous computed property getter function
  *  from an arbitrary expression, together with a list of paths to be
  *  created as bindings.
  */
-exports.parse = function (exp, compiler, data, filters) {
+exports.parse = function (exp, compiler, data) {
     // unicode and 'constructor' are not allowed for XSS security.
     if (UNICODE_RE.test(exp) || CTOR_RE.test(exp)) {
         utils.warn('Unsafe expression: ' + exp)
@@ -2916,23 +2951,6 @@ exports.parse = function (exp, compiler, data, filters) {
             .replace(STR_SAVE_RE, saveStrings)
             .replace(pathRE, replacePath)
             .replace(STR_RESTORE_RE, restoreStrings)
-
-    // wrap expression with computed filters
-    if (filters) {
-        var args, filter
-        for (var i = 0, l = filters.length; i < l; i++) {
-            filter = filters[i]
-            args = filter.args
-                ? ',"' + filter.args.map(escapeQuote).join('","') + '"'
-                : ''
-            body =
-                'this.$compiler.getOption("filters", "' +
-                    filter.name +
-                '").call(this,' +
-                    body + args +
-                ')'
-        }
-    }
 
     body = accessors + 'return ' + body
 
@@ -2981,10 +2999,12 @@ exports.eval = function (exp, compiler, data) {
 }
 });
 require.register("vue/src/text-parser.js", function(exports, require, module){
-var openChar  = '{',
-    endChar   = '}',
-    ESCAPE_RE  = /[-.*+?^${}()|[\]\/\\]/g,
-    BINDING_RE = buildInterpolationRegex()
+var openChar        = '{',
+    endChar         = '}',
+    ESCAPE_RE       = /[-.*+?^${}()|[\]\/\\]/g,
+    BINDING_RE      = buildInterpolationRegex(),
+    // lazy require
+    Directive
 
 function buildInterpolationRegex () {
     var open = escapeRegex(openChar),
@@ -3036,6 +3056,7 @@ function parse (text) {
  *  e.g.  a {{b}} c  =>  "a " + b + " c"
  */
 function parseAttr (attr) {
+    Directive = Directive || require('./directive')
     var tokens = parse(attr)
     if (!tokens) return null
     if (tokens.length === 1) return tokens[0].key
@@ -3044,11 +3065,26 @@ function parseAttr (attr) {
         token = tokens[i]
         res.push(
             token.key
-                ? ('(' + token.key + ')')
+                ? inlineFilters(token.key)
                 : ('"' + token + '"')
         )
     }
     return res.join('+')
+}
+
+/**
+ *  Inlines any possible filters in a binding
+ *  so that we can combine everything into a huge expression
+ */
+function inlineFilters (key) {
+    var filters = Directive.parseFilters(key)
+    if (filters) {
+        key = Directive.inlineFilters(
+            Directive.parseKey(key),
+            filters
+        )
+    }
+    return '(' + key + ')'
 }
 
 exports.parse         = parse
@@ -3200,7 +3236,7 @@ filters.key = function (handler, key) {
     }
     return function (e) {
         if (e.keyCode === code) {
-            handler.call(this, e)
+            return handler.call(this, e)
         }
     }
 }
@@ -4424,8 +4460,6 @@ module.exports = {
         if (!partial) {
             if (id === 'yield') {
                 utils.warn('{{>yield}} syntax has been deprecated. Use <content> tag instead.')
-            } else {
-                utils.warn('Unknown partial: ' + id)
             }
             return
         }
