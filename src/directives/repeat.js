@@ -25,7 +25,6 @@ module.exports = {
         ctn.insertBefore(this.ref, el)
         ctn.removeChild(el)
 
-        this.initiated = false
         this.collection = null
         this.vms = null
 
@@ -39,13 +38,6 @@ module.exports = {
             } else {
                 utils.warn('v-repeat only accepts Array or Object values.')
             }
-        }
-
-        // if initiating with an empty collection, we need to
-        // force a compile so that we get all the bindings for
-        // dependency extraction.
-        if (!this.initiated && (!collection || !collection.length)) {
-            this.dryBuild()
         }
 
         // keep reference of old data and VMs
@@ -63,24 +55,6 @@ module.exports = {
             this.vm.$[this.childId] = this.vms
         }
 
-    },
-
-    /**
-     *  Run a dry build just to collect bindings
-     */
-    dryBuild: function () {
-        var el = this.el.cloneNode(true),
-            Ctor = this.compiler.resolveComponent(el)
-        new Ctor({
-            el     : el,
-            parent : this.vm,
-            data   : { $index: 0 },
-            compilerOptions: {
-                repeat: true,
-                expCache: this.expCache
-            }
-        }).$destroy()
-        this.initiated = true
     },
 
     init: function (collection, isObject) {

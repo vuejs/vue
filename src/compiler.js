@@ -836,7 +836,7 @@ CompilerProto.getOption = function (type, id, silent) {
                 ? parent.getOption(type, id, silent)
                 : globalAssets[type] && globalAssets[type][id]
         )
-    if (!res && !silent) {
+    if (!res && !silent && typeof id === 'string') {
         utils.warn('Unknown ' + type.slice(0, -1) + ': ' + id)
     }
     return res
