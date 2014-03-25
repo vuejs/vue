@@ -95,7 +95,8 @@ BindingProto.unbind = function () {
     var subs
     while (i--) {
         subs = this.deps[i].subs
-        subs.splice(subs.indexOf(this), 1)
+        var j = subs.indexOf(this)
+        if (j > -1) subs.splice(j, 1)
     }
 }
 

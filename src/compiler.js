@@ -909,7 +909,7 @@ CompilerProto.destroy = function () {
     if (this.destroyed) return
 
     var compiler = this,
-        i, key, dir, dirs, binding,
+        i, j, key, dir, dirs, binding,
         vm          = compiler.vm,
         el          = compiler.el,
         directives  = compiler.dirs,
@@ -933,7 +933,10 @@ CompilerProto.destroy = function () {
         // * empty and literal bindings do not have binding.
         if (dir.binding && dir.binding.compiler !== compiler) {
             dirs = dir.binding.dirs
-            if (dirs) dirs.splice(dirs.indexOf(dir), 1)
+            if (dirs) {
+                j = dirs.indexOf(dir)
+                if (j > -1) dirs.splice(j, 1)
+            }
         }
         dir.unbind()
     }
@@ -960,7 +963,8 @@ CompilerProto.destroy = function () {
 
     // remove self from parent
     if (parent) {
-        parent.children.splice(parent.children.indexOf(compiler), 1)
+        j = parent.children.indexOf(compiler)
+        if (j > -1) parent.children.splice(j, 1)
     }
 
     // finally remove dom element

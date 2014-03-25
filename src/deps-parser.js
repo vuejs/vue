@@ -18,8 +18,8 @@ function catchDeps (binding) {
             // avoid duplicate bindings
             (has && has.compiler === dep.compiler) ||
             // avoid repeated items as dependency
-            // since all inside changes trigger array change too
-            (dep.compiler.repeat && dep.compiler.parent === binding.compiler)
+            // only when the binding is from self or the parent chain
+            (dep.compiler.repeat && !isParentOf(dep.compiler, binding.compiler))
         ) {
             return
         }
@@ -30,6 +30,18 @@ function catchDeps (binding) {
     })
     binding.value.$get()
     catcher.off('get')
+}
+
+/**
+ *  Test if A is a parent of or equals B
+ */
+function isParentOf (a, b) {
+    while (b) {
+        if (a === b) {
+            return true
+        }
+        b = b.parent
+    }
 }
 
 module.exports = {
