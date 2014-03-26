@@ -76,12 +76,15 @@ function parseAttr (attr) {
  *  so that we can combine everything into a huge expression
  */
 function inlineFilters (key) {
-    var filters = Directive.parseFilters(key)
-    if (filters) {
-        key = Directive.inlineFilters(
-            Directive.parseKey(key),
-            filters
-        )
+    if (key.indexOf('|') > -1) {
+        var dirs = Directive.parse(key),
+            dir = dirs && dirs[0]
+        if (dir && dir.filters) {
+            key = Directive.inlineFilters(
+                dir.key,
+                dir.filters
+            )
+        }
     }
     return '(' + key + ')'
 }

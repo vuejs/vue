@@ -238,7 +238,6 @@ describe('API', function () {
                 isEmpty: true,
                 bind: function () {
                     emptyCalled = true
-                    assert.notOk(this.expression)
                     assert.notOk(this.binding)
                 },
                 update: function () {}
