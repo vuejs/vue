@@ -1,5 +1,5 @@
 var dirId           = 1,
-    ARG_RE          = /^[\w-]+$/,
+    ARG_RE          = /^[\w\$-]+$/,
     FILTER_TOKEN_RE = /[^\s'"]+|'[^']+'|"[^"]+"/g,
     NESTING_RE      = /^\$(parent|root)\./,
     SINGLE_VAR_RE   = /^[\w\.$]+$/,
@@ -165,7 +165,7 @@ Directive.parse = function (str) {
                 argIndex = i + 1
                 dir.arg = str.slice(begin, i).trim()
             }
-        } else if (c === '|' && str.charAt(i + 1) !== '|') {
+        } else if (c === '|' && str.charAt(i + 1) !== '|' && str.charAt(i - 1) !== '|') {
             if (dir.key === undefined) {
                 // first filter, end of key
                 lastFilterIndex = i + 1
