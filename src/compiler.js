@@ -506,10 +506,12 @@ CompilerProto.compileElement = function (node, root) {
             return
         }
 
+        var i, l, j, k
+
         // check priority directives.
         // if any of them are present, it will take over the node with a childVM
         // so we can skip the rest
-        for (var i = 0, l = priorityDirectives.length; i < l; i++) {
+        for (i = 0, l = priorityDirectives.length; i < l; i++) {
             if (this.checkPriorityDir(priorityDirectives[i], node, root)) {
                 return
             }
@@ -525,8 +527,7 @@ CompilerProto.compileElement = function (node, root) {
             params = this.options.paramAttributes,
             attr, isDirective, exps, exp, directive, dirname
 
-        i = attrs.length
-        while (i--) {
+        for (i = 0, l = attrs.length; i < l; i++) {
 
             attr = attrs[i]
             isDirective = false
@@ -537,9 +538,8 @@ CompilerProto.compileElement = function (node, root) {
                 exps = Directive.split(attr.value)
                 // loop through clauses (separated by ",")
                 // inside each attribute
-                l = exps.length
-                while (l--) {
-                    exp = exps[l]
+                for (j = 0, k = exps.length; j < k; j++) {
+                    exp = exps[j]
                     dirname = attr.name.slice(prefix.length)
                     directive = Directive.build(dirname, exp, this, node)
 
