@@ -1,10 +1,6 @@
 var utils      = require('./utils'),
     dirId      = 1,
 
-    // Regexes!
-    // regex to split multiple directive expressions
-    // split by commas, but ignore commas within quotes, parens and escapes.
-    SPLIT_RE        = /(?:['"](?:\\.|[^'"])*['"]|\((?:\\.|[^\)])*\)|\\.|[^,])+/g,
     // match up to the first single pipe, ignore those within quotes.
     KEY_RE          = /^(?:['"](?:\\.|[^'"])*['"]|\\.|[^\|]|\|\|)+/,
     ARG_RE          = /^([\w-$ ]+):(.+)$/,
@@ -140,58 +136,184 @@ DirProto.unbind = function () {
  *  split a unquoted-comma separated expression into
  *  multiple clauses
  */
-Directive.split = function (exp) {
-    return exp.indexOf(',') > -1
-        ? exp.match(SPLIT_RE) || ['']
-        : [exp]
-}
+Directive.parse = function (str) {
 
-/**
- *  parse a key, extract argument
- */
-Directive.parseArg = function (rawKey) {
-    var key = rawKey,
-        arg = null
-    if (rawKey.indexOf(':') > -1) {
-        var argMatch = rawKey.match(ARG_RE)
-        key = argMatch
-            ? argMatch[2].trim()
-            : key
-        arg = argMatch
-            ? argMatch[1].trim()
-            : arg
-    }
-    return {
-        key: key,
-        arg: arg
-    }
-}
+    var inSingle = false,
+        inDouble = false,
+        curly    = 0,
+        square   = 0,
+        paren    = 0,
+        begin    = 0,
+        argIndex = 0,
+        dirs     = [],
+        dir      = {},
+        lastFilterIndex = 0
 
-/**
- *  parse a the filters
- */
-Directive.parseFilters = function (exp) {
-    if (exp.indexOf('|') < 0) {
-        return
-    }
-    var filters = exp.match(FILTERS_RE),
-        res, i, l, tokens
-    if (filters) {
-        res = []
-        for (i = 0, l = filters.length; i < l; i++) {
-            tokens = filters[i].slice(1).match(FILTER_TOKEN_RE)
-            if (tokens) {
-                res.push({
-                    name: tokens[0],
-                    args: tokens.length > 1
-                        ? tokens.slice(1)
-                        : null
-                })
+    for (var c, i = 0, l = str.length; i < l; i++) {
+        c = str.charAt(i)
+        if (inSingle) {
+            // check single quote
+            if (c === "'") inSingle = !inSingle
+        } else if (inDouble) {
+            // check double quote
+            if (c === '"') inDouble = !inDouble
+        } else if (c === ',' && !paren && !curly && !square) {
+            // reached the end of a directive
+            pushDir()
+            // reset & skip the comma
+            dir = {}
+            begin = argIndex = lastFilterIndex = i + 1
+        } else if (c === ':' && !dir.key && !dir.arg) {
+            // argument
+            argIndex = i + 1
+            dir.arg = str.slice(begin, i).trim()
+        } else if (c === '|' && str.charAt(i + 1) !== '|') {
+            if (!dir.key) {
+                // first filter, end of key
+                lastFilterIndex = i
+                dir.key = str.slice(argIndex, i).trim()
+            } else {
+                // already has filter
+                pushFilter()
             }
+        } else if (c === '"') {
+            inDouble = true
+        } else if (c === "'") {
+            inSingle = true
+        } else if (c === '(') {
+            paren++
+        } else if (c === ')') {
+            paren--
+        } else if (c === '[') {
+            square++
+        } else if (c === ']') {
+            square--
+        } else if (c === '{') {
+            curly++
+        } else if (c === '}') {
+            curly--
         }
     }
-    return res
+    if (begin !== i) {
+        pushDir()
+    }
+
+    function pushDir () {
+        dir.expression = str.slice(begin, i).trim()
+        if (!dir.key) {
+            dir.key = str.slice(argIndex, i).trim()
+        } else if (lastFilterIndex !== begin) {
+            pushFilter()
+        }
+        dirs.push(dir)
+    }
+
+    function pushFilter () {
+        (dir.filters = dir.filters || [])
+            .push(str.slice(lastFilterIndex + 1, i).trim())
+        lastFilterIndex = i + 1
+    }
+
+    return dirs
 }
+
+// function split (str) {
+//     var inSingle = false,
+//         inDouble = false,
+//         curly    = 0,
+//         square   = 0,
+//         paren    = 0,
+//         begin    = 0,
+//         end      = 0,
+//         res      = []
+//     for (var c, i = 0, l = str.length; i < l; i++) {
+//         c = str.charAt(i)
+//         if (inSingle) {
+//             if (c === "'") {
+//                 inSingle = !inSingle
+//             }
+//             end++
+//         } else if (inDouble) {
+//             if (c === '"') {
+//                 inDouble = !inDouble
+//             }
+//             end++
+//         } else if (c === ',' && !paren && !curly && !square) {
+//             res.push(str.slice(begin, end))
+//             begin = end = i + 1
+//         } else {
+//             if (c === '"') {
+//                 inDouble = true
+//             } else if (c === "'") {
+//                 inSingle = true
+//             } else if (c === '(') {
+//                 paren++
+//             } else if (c === ')') {
+//                 paren--
+//             } else if (c === '[') {
+//                 square++
+//             } else if (c === ']') {
+//                 square--
+//             } else if (c === '{') {
+//                 curly++
+//             } else if (c === '}') {
+//                 curly--
+//             }
+//             end++
+//         }
+//     }
+//     if (begin !== end) {
+//         res.push(str.slice(begin, end))
+//     }
+//     return res
+// }
+
+// /**
+//  *  parse a key, extract argument
+//  */
+// Directive.parseArg = function (rawKey) {
+//     var key = rawKey,
+//         arg = null
+//     if (rawKey.indexOf(':') > -1) {
+//         var argMatch = rawKey.match(ARG_RE)
+//         key = argMatch
+//             ? argMatch[2].trim()
+//             : key
+//         arg = argMatch
+//             ? argMatch[1].trim()
+//             : arg
+//     }
+//     return {
+//         key: key,
+//         arg: arg
+//     }
+// }
+
+// /**
+//  *  parse a the filters
+//  */
+// Directive.parseFilters = function (exp) {
+//     if (exp.indexOf('|') < 0) {
+//         return
+//     }
+//     var filters = exp.match(FILTERS_RE),
+//         res, i, l, tokens
+//     if (filters) {
+//         res = []
+//         for (i = 0, l = filters.length; i < l; i++) {
+//             tokens = filters[i].slice(1).match(FILTER_TOKEN_RE)
+//             if (tokens) {
+//                 res.push({
+//                     name: tokens[0],
+//                     args: tokens.length > 1
+//                         ? tokens.slice(1)
+//                         : null
+//                 })
+//             }
+//         }
+//     }
+//     return res
+// }
 
 /**
  *  Inline computed filters so they become part

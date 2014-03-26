@@ -23,11 +23,11 @@ describe('Directive', function () {
 
         it('should return array with the string if it\'s a single clause', function () {
             var e,
-                test1 = 'fsef(a, b, c)',
+                test1 = 'fsef(a, b(d,e(f,g),k), c)',
                 test2 = 'ffsef + "fse,fsef"',
                 test3 = 'fsef + \'fesfsfe\'',
                 test4 = '\"fsefsf,fsef,fsef\"',
-                test5 = '(a, b)'
+                test5 = '(a, {a:1, b:2})'
 
             e = Directive.split(test1)
             assert.strictEqual(e.length, 1)
@@ -53,8 +53,8 @@ describe('Directive', function () {
         it('should return split multiple clauses correctly', function () {
             var e,
                 test1 = ['(fse,fggg)', 'fsf:({a:1,b:2}, [1,2,3])'],
-                test2 = ['asf-fsef:fsf', '"efs,s(e,f)sf"'],
-                test3 = ['\'fsef,sef\'', 'fse:fsf(a,b,c)'],
+                test2 = ['asf-fsef:fsf', '"efs,s(e,f),sf"'],
+                test3 = ['\'fsef,sef\'', 'fse:fsf(a,b(c,d),c)'],
                 test4 = ['\"fsef,fsef\"', 'sefsef\'fesfsf']
 
             e = Directive.split(test1.join(','))
