@@ -1,5 +1,5 @@
 /*
- Vue.js v0.10.2
+ Vue.js v0.10.3
  (c) 2014 Evan You
  License: MIT
 */
@@ -1287,11 +1287,11 @@ CompilerProto.checkPriorityDir = function (dirname, node, root) {
         root !== true &&
         (Ctor = this.resolveComponent(node, undefined, true))
     ) {
-        directive = Directive.build(dirname, '', this, node)
+        directive = this.parseDirective(dirname, '', node)
         directive.Ctor = Ctor
     } else {
         expression = utils.attr(node, dirname)
-        directive = expression && Directive.build(dirname, expression, this, node)
+        directive = expression && this.parseDirective(dirname, expression, node)
     }
     if (directive) {
         if (root === true) {
@@ -1328,10 +1328,12 @@ CompilerProto.compileElement = function (node, root) {
             return
         }
 
+        var i, l, j, k
+
         // check priority directives.
         // if any of them are present, it will take over the node with a childVM
         // so we can skip the rest
-        for (var i = 0, l = priorityDirectives.length; i < l; i++) {
+        for (i = 0, l = priorityDirectives.length; i < l; i++) {
             if (this.checkPriorityDir(priorityDirectives[i], node, root)) {
                 return
             }
@@ -1345,10 +1347,9 @@ CompilerProto.compileElement = function (node, root) {
         var prefix = config.prefix + '-',
             attrs = slice.call(node.attributes),
             params = this.options.paramAttributes,
-            attr, isDirective, exps, exp, directive, dirname
+            attr, isDirective, exp, directives, directive, dirname
 
-        i = attrs.length
-        while (i--) {
+        for (i = 0, l = attrs.length; i < l; i++) {
 
             attr = attrs[i]
             isDirective = false
@@ -1356,27 +1357,24 @@ CompilerProto.compileElement = function (node, root) {
             if (attr.name.indexOf(prefix) === 0) {
                 // a directive - split, parse and bind it.
                 isDirective = true
-                exps = Directive.split(attr.value)
+                dirname = attr.name.slice(prefix.length)
+                // build with multiple: true
+                directives = this.parseDirective(dirname, attr.value, node, true)
                 // loop through clauses (separated by ",")
                 // inside each attribute
-                l = exps.length
-                while (l--) {
-                    exp = exps[l]
-                    dirname = attr.name.slice(prefix.length)
-                    directive = Directive.build(dirname, exp, this, node)
-
+                for (j = 0, k = directives.length; j < k; j++) {
+                    directive = directives[j]
                     if (dirname === 'with') {
                         this.bindDirective(directive, this.parent)
                     } else {
                         this.bindDirective(directive)
                     }
-                    
                 }
             } else if (config.interpolate) {
                 // non directive attribute, check interpolation tags
                 exp = TextParser.parseAttr(attr.value)
                 if (exp) {
-                    directive = Directive.build('attr', attr.name + ':' + exp, this, node)
+                    directive = this.parseDirective('attr', attr.name + ':' + exp, node)
                     if (params && params.indexOf(attr.name) > -1) {
                         // a param attribute... we should use the parent binding
                         // to avoid circular updates like size={{size}}
@@ -1417,14 +1415,14 @@ CompilerProto.compileTextNode = function (node) {
         if (token.key) { // a binding
             if (token.key.charAt(0) === '>') { // a partial
                 el = document.createComment('ref')
-                directive = Directive.build('partial', token.key.slice(1), this, el)
+                directive = this.parseDirective('partial', token.key.slice(1), el)
             } else {
                 if (!token.html) { // text binding
                     el = document.createTextNode('')
-                    directive = Directive.build('text', token.key, this, el)
+                    directive = this.parseDirective('text', token.key, el)
                 } else { // html binding
                     el = document.createComment(config.prefix + '-html')
-                    directive = Directive.build('html', token.key, this, el)
+                    directive = this.parseDirective('html', token.key, el)
                 }
             }
         } else { // a plain string
@@ -1438,6 +1436,25 @@ CompilerProto.compileTextNode = function (node) {
 
     }
     node.parentNode.removeChild(node)
+}
+
+/**
+ *  Parse a directive name/value pair into one or more
+ *  directive instances
+ */
+CompilerProto.parseDirective = function (name, value, el, multiple) {
+    var compiler = this,
+        definition = compiler.getOption('directives', name)
+    if (definition) {
+        // parse into AST-like objects
+        var asts = Directive.parse(value)
+        return multiple
+            ? asts.map(build)
+            : build(asts[0])
+    }
+    function build (ast) {
+        return new Directive(name, ast, definition, compiler, el)
+    }
 }
 
 /**
@@ -1731,7 +1748,7 @@ CompilerProto.destroy = function () {
     if (this.destroyed) return
 
     var compiler = this,
-        i, key, dir, dirs, binding,
+        i, j, key, dir, dirs, binding,
         vm          = compiler.vm,
         el          = compiler.el,
         directives  = compiler.dirs,
@@ -1755,7 +1772,10 @@ CompilerProto.destroy = function () {
         // * empty and literal bindings do not have binding.
         if (dir.binding && dir.binding.compiler !== compiler) {
             dirs = dir.binding.dirs
-            if (dirs) dirs.splice(dirs.indexOf(dir), 1)
+            if (dirs) {
+                j = dirs.indexOf(dir)
+                if (j > -1) dirs.splice(j, 1)
+            }
         }
         dir.unbind()
     }
@@ -1782,7 +1802,8 @@ CompilerProto.destroy = function () {
 
     // remove self from parent
     if (parent) {
-        parent.children.splice(parent.children.indexOf(compiler), 1)
+        j = parent.children.indexOf(compiler)
+        if (j > -1) parent.children.splice(j, 1)
     }
 
     // finally remove dom element
@@ -2090,7 +2111,8 @@ BindingProto.unbind = function () {
     var subs
     while (i--) {
         subs = this.deps[i].subs
-        subs.splice(subs.indexOf(this), 1)
+        var j = subs.indexOf(this)
+        if (j > -1) subs.splice(j, 1)
     }
 }
 
@@ -2547,18 +2569,9 @@ var pub = module.exports = {
 }
 });
 require.register("vue/src/directive.js", function(exports, require, module){
-var utils      = require('./utils'),
-    dirId      = 1,
-
-    // Regexes!
-    // regex to split multiple directive expressions
-    // split by commas, but ignore commas within quotes, parens and escapes.
-    SPLIT_RE        = /(?:['"](?:\\.|[^'"])*['"]|\((?:\\.|[^\)])*\)|\\.|[^,])+/g,
-    // match up to the first single pipe, ignore those within quotes.
-    KEY_RE          = /^(?:['"](?:\\.|[^'"])*['"]|\\.|[^\|]|\|\|)+/,
-    ARG_RE          = /^([\w-$ ]+):(.+)$/,
-    FILTERS_RE      = /\|[^\|]+/g,
-    FILTER_TOKEN_RE = /[^\s']+|'[^']+'|[^\s"]+|"[^"]+"/g,
+var dirId           = 1,
+    ARG_RE          = /^[\w\$-]+$/,
+    FILTER_TOKEN_RE = /[^\s'"]+|'[^']+'|"[^"]+"/g,
     NESTING_RE      = /^\$(parent|root)\./,
     SINGLE_VAR_RE   = /^[\w\.$]+$/,
     QUOTE_RE        = /"/g
@@ -2567,16 +2580,19 @@ var utils      = require('./utils'),
  *  Directive class
  *  represents a single directive instance in the DOM
  */
-function Directive (dirname, definition, expression, rawKey, compiler, node) {
+function Directive (name, ast, definition, compiler, el) {
 
     this.id             = dirId++
-    this.name           = dirname
+    this.name           = name
     this.compiler       = compiler
     this.vm             = compiler.vm
-    this.el             = node
+    this.el             = el
     this.computeFilters = false
+    this.key            = ast.key
+    this.arg            = ast.arg
+    this.expression     = ast.expression
 
-    var isEmpty   = expression === ''
+    var isEmpty = this.expression === ''
 
     // mix in properties from the directive definition
     if (typeof definition === 'function') {
@@ -2599,15 +2615,11 @@ function Directive (dirname, definition, expression, rawKey, compiler, node) {
 
     this.expression = (
         this.isLiteral
-            ? compiler.eval(expression)
-            : expression
+            ? compiler.eval(this.expression)
+            : this.expression
     ).trim()
-    
-    var parsed = Directive.parseArg(rawKey)
-    this.key = parsed.key
-    this.arg = parsed.arg
-    
-    var filters = Directive.parseFilters(this.expression.slice(rawKey.length)),
+
+    var filters = ast.filters,
         filter, fn, i, l, computed
     if (filters) {
         this.filters = []
@@ -2686,60 +2698,103 @@ DirProto.unbind = function () {
 // Exposed static methods -----------------------------------------------------
 
 /**
- *  split a unquoted-comma separated expression into
- *  multiple clauses
+ *  Parse a directive string into an Array of
+ *  AST-like objects representing directives
  */
-Directive.split = function (exp) {
-    return exp.indexOf(',') > -1
-        ? exp.match(SPLIT_RE) || ['']
-        : [exp]
-}
+Directive.parse = function (str) {
 
-/**
- *  parse a key, extract argument
- */
-Directive.parseArg = function (rawKey) {
-    var key = rawKey,
-        arg = null
-    if (rawKey.indexOf(':') > -1) {
-        var argMatch = rawKey.match(ARG_RE)
-        key = argMatch
-            ? argMatch[2].trim()
-            : key
-        arg = argMatch
-            ? argMatch[1].trim()
-            : arg
-    }
-    return {
-        key: key,
-        arg: arg
-    }
-}
+    var inSingle = false,
+        inDouble = false,
+        curly    = 0,
+        square   = 0,
+        paren    = 0,
+        begin    = 0,
+        argIndex = 0,
+        dirs     = [],
+        dir      = {},
+        lastFilterIndex = 0,
+        arg
 
-/**
- *  parse a the filters
- */
-Directive.parseFilters = function (exp) {
-    if (exp.indexOf('|') < 0) {
-        return
-    }
-    var filters = exp.match(FILTERS_RE),
-        res, i, l, tokens
-    if (filters) {
-        res = []
-        for (i = 0, l = filters.length; i < l; i++) {
-            tokens = filters[i].slice(1).match(FILTER_TOKEN_RE)
-            if (tokens) {
-                res.push({
-                    name: tokens[0],
-                    args: tokens.length > 1
-                        ? tokens.slice(1)
-                        : null
-                })
+    for (var c, i = 0, l = str.length; i < l; i++) {
+        c = str.charAt(i)
+        if (inSingle) {
+            // check single quote
+            if (c === "'") inSingle = !inSingle
+        } else if (inDouble) {
+            // check double quote
+            if (c === '"') inDouble = !inDouble
+        } else if (c === ',' && !paren && !curly && !square) {
+            // reached the end of a directive
+            pushDir()
+            // reset & skip the comma
+            dir = {}
+            begin = argIndex = lastFilterIndex = i + 1
+        } else if (c === ':' && !dir.key && !dir.arg) {
+            // argument
+            arg = str.slice(begin, i).trim()
+            if (ARG_RE.test(arg)) {
+                argIndex = i + 1
+                dir.arg = str.slice(begin, i).trim()
             }
+        } else if (c === '|' && str.charAt(i + 1) !== '|' && str.charAt(i - 1) !== '|') {
+            if (dir.key === undefined) {
+                // first filter, end of key
+                lastFilterIndex = i + 1
+                dir.key = str.slice(argIndex, i).trim()
+            } else {
+                // already has filter
+                pushFilter()
+            }
+        } else if (c === '"') {
+            inDouble = true
+        } else if (c === "'") {
+            inSingle = true
+        } else if (c === '(') {
+            paren++
+        } else if (c === ')') {
+            paren--
+        } else if (c === '[') {
+            square++
+        } else if (c === ']') {
+            square--
+        } else if (c === '{') {
+            curly++
+        } else if (c === '}') {
+            curly--
         }
     }
-    return res
+    if (i === 0 || begin !== i) {
+        pushDir()
+    }
+
+    function pushDir () {
+        dir.expression = str.slice(begin, i).trim()
+        if (dir.key === undefined) {
+            dir.key = str.slice(argIndex, i).trim()
+        } else if (lastFilterIndex !== begin) {
+            pushFilter()
+        }
+        if (i === 0 || dir.key) {
+            dirs.push(dir)
+        }
+    }
+
+    function pushFilter () {
+        var exp = str.slice(lastFilterIndex, i).trim(),
+            filter
+        if (exp) {
+            filter = {}
+            var tokens = exp.match(FILTER_TOKEN_RE)
+            filter.name = tokens[0]
+            filter.args = tokens.length > 1 ? tokens.slice(1) : null
+        }
+        if (filter) {
+            (dir.filters = dir.filters || []).push(filter)
+        }
+        lastFilterIndex = i + 1
+    }
+
+    return dirs
 }
 
 /**
@@ -2770,38 +2825,6 @@ function escapeQuote (v) {
     return v.indexOf('"') > -1
         ? v.replace(QUOTE_RE, '\'')
         : v
-}
-
-/**
- *  Parse the key from a directive raw expression
- */
-Directive.parseKey = function (expression) {
-    if (expression.indexOf('|') > -1) {
-        var keyMatch = expression.match(KEY_RE)
-        if (keyMatch) {
-            return keyMatch[0].trim()
-        }
-    } else {
-        return expression.trim()
-    }
-}
-
-/**
- *  make sure the directive and expression is valid
- *  before we create an instance
- */
-Directive.build = function (dirname, expression, compiler, node) {
-
-    var dir = compiler.getOption('directives', dirname)
-    if (!dir) return
-
-    var rawKey = Directive.parseKey(expression)
-    // have a valid raw key, or be an empty directive
-    if (rawKey || expression === '') {
-        return new Directive(dirname, dir, expression, rawKey, compiler, node)
-    } else {
-        utils.warn('Invalid directive expression: ' + expression)
-    }
 }
 
 module.exports = Directive
@@ -3077,12 +3100,15 @@ function parseAttr (attr) {
  *  so that we can combine everything into a huge expression
  */
 function inlineFilters (key) {
-    var filters = Directive.parseFilters(key)
-    if (filters) {
-        key = Directive.inlineFilters(
-            Directive.parseKey(key),
-            filters
-        )
+    if (key.indexOf('|') > -1) {
+        var dirs = Directive.parse(key),
+            dir = dirs && dirs[0]
+        if (dir && dir.filters) {
+            key = Directive.inlineFilters(
+                dir.key,
+                dir.filters
+            )
+        }
     }
     return '(' + key + ')'
 }
@@ -3113,8 +3139,8 @@ function catchDeps (binding) {
             // avoid duplicate bindings
             (has && has.compiler === dep.compiler) ||
             // avoid repeated items as dependency
-            // since all inside changes trigger array change too
-            (dep.compiler.repeat && dep.compiler.parent === binding.compiler)
+            // only when the binding is from self or the parent chain
+            (dep.compiler.repeat && !isParentOf(dep.compiler, binding.compiler))
         ) {
             return
         }
@@ -3125,6 +3151,18 @@ function catchDeps (binding) {
     })
     binding.value.$get()
     catcher.off('get')
+}
+
+/**
+ *  Test if A is a parent of or equals B
+ */
+function isParentOf (a, b) {
+    while (b) {
+        if (a === b) {
+            return true
+        }
+        b = b.parent
+    }
 }
 
 module.exports = {
