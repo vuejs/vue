@@ -52,7 +52,7 @@ BindingProto._update = function () {
     var i = this.dirs.length,
         value = this.val()
     while (i--) {
-        this.dirs[i].update(value)
+        this.dirs[i].$update(value)
     }
     this.pub()
 }
@@ -89,7 +89,7 @@ BindingProto.unbind = function () {
     this.unbound = true
     var i = this.dirs.length
     while (i--) {
-        this.dirs[i].unbind()
+        this.dirs[i].$unbind()
     }
     i = this.deps.length
     var subs

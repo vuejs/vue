@@ -25,7 +25,7 @@ module.exports = {
 
     update: function(value) {
 
-        this._unbind()
+        this.unbind()
 
         var Ctor  = this.compiler.getOption('components', value)
         if (!Ctor) return

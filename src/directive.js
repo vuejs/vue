@@ -25,14 +25,10 @@ function Directive (name, ast, definition, compiler, el) {
 
     // mix in properties from the directive definition
     if (typeof definition === 'function') {
-        this[isEmpty ? 'bind' : '_update'] = definition
+        this[isEmpty ? 'bind' : 'update'] = definition
     } else {
         for (var prop in definition) {
-            if (prop === 'unbind' || prop === 'update') {
-                this['_' + prop] = definition[prop]
-            } else {
-                this[prop] = definition[prop]
-            }
+            this[prop] = definition[prop]
         }
     }
 
@@ -88,13 +84,14 @@ var DirProto = Directive.prototype
  *  for computed properties, this will only be called once
  *  during initialization.
  */
-DirProto.update = function (value, init) {
+DirProto.$update = function (value, init) {
+    if (this.$lock) return
     if (init || value !== this.value || (value && typeof value === 'object')) {
         this.value = value
-        if (this._update) {
-            this._update(
+        if (this.update) {
+            this.update(
                 this.filters && !this.computeFilters
-                    ? this.applyFilters(value)
+                    ? this.$applyFilters(value)
                     : value,
                 init
             )
@@ -105,7 +102,7 @@ DirProto.update = function (value, init) {
 /**
  *  pipe the value through filters
  */
-DirProto.applyFilters = function (value) {
+DirProto.$applyFilters = function (value) {
     var filtered = value, filter
     for (var i = 0, l = this.filters.length; i < l; i++) {
         filter = this.filters[i]
@@ -117,10 +114,10 @@ DirProto.applyFilters = function (value) {
 /**
  *  Unbind diretive
  */
-DirProto.unbind = function () {
+DirProto.$unbind = function () {
     // this can be called before the el is even assigned...
     if (!this.el || !this.vm) return
-    if (this._unbind) this._unbind()
+    if (this.unbind) this.unbind()
     this.vm = this.el = this.binding = this.compiler = null
 }
 

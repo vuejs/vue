@@ -148,13 +148,13 @@ describe('Directive', function () {
 
     describe('instantiation', function () {
         
-        it('should copy the definition as _update if the def is a function', function () {
+        it('should copy the definition as update if the def is a function', function () {
 
             var testDir = function () {}
             directives.test = testDir
 
             var d = build('test', 'abc', compiler)
-            assert.strictEqual(d._update, testDir)
+            assert.strictEqual(d.update, testDir)
         })
 
         it('should copy methods if the def is an object', function () {
@@ -168,8 +168,8 @@ describe('Directive', function () {
             directives.obj = obj
             
             var d = build('obj', 'abc', compiler)
-            assert.strictEqual(d._update, obj.update, 'update should be copied as _update')
-            assert.strictEqual(d._unbind, obj.unbind, 'unbind should be copied as _unbind')
+            assert.strictEqual(d.update, obj.update)
+            assert.strictEqual(d.unbind, obj.unbind)
             assert.strictEqual(d.bind, obj.bind)
             assert.strictEqual(d.custom, obj.custom, 'should copy any custom methods')
         })
@@ -261,80 +261,80 @@ describe('Directive', function () {
 
     })
 
-    describe('.applyFilters()', function () {
+    describe('.$applyFilters()', function () {
         
         it('should work', function () {
             var d = build('text', 'abc | pluralize item | capitalize', compiler),
-                v = d.applyFilters(2)
+                v = d.$applyFilters(2)
             assert.strictEqual(v, 'Items')
         })
 
     })
 
-    describe('.update()', function () {
+    describe('.$update()', function () {
         
         var d = build('text', 'abc', compiler),
             updated = false
-        d._update = function () {
+        d.update = function () {
             updated = true
         }
 
-        it('should call _update() for first time update, even with undefined', function () {
-            d.update(undefined, true)
+        it('should call user update() for first time update, even with undefined', function () {
+            d.$update(undefined, true)
             assert.strictEqual(updated, true)
         })
 
-        it('should _update() when a different value is given', function () {
+        it('should user update() when a different value is given', function () {
             updated = false
-            d.update(123)
+            d.$update(123)
             assert.strictEqual(d.value, 123)
             assert.strictEqual(updated, true)
         })
 
-        it('should not _update() if the value is the same', function () {
+        it('should not call user update() if the value is the same', function () {
             updated = false
-            d.update(123)
+            d.$update(123)
             assert.ok(!updated)
         })
 
-        it('should call applyFilter() is there are filters', function () {
+        it('should call $applyFilter() is there are filters', function () {
             var filterApplied = false
             d.filters = []
-            d.applyFilters = function () {
+            d.$applyFilters = function () {
                 filterApplied = true
             }
-            d.update(234)
+            d.$update(234)
             assert.ok(filterApplied)
         })
 
     })
 
-    describe('.unbind()', function () {
+    describe('.$unbind()', function () {
         
         var d = build('text', 'abc', compiler),
             unbound = false,
             val
-        d._unbind = function (v) {
+        d.unbind = function (v) {
             val = v
             unbound = true
         }
 
         it('should not work if it has no element yet', function () {
             d.el = null
-            d.unbind()
+            d.$unbind()
             assert.strictEqual(unbound, false)
         })
 
-        it('should call _unbind() and null everything if it has an element', function () {
+        it('should call user unbind() and null everything if it has an element', function () {
             d.el = true
-            d.unbind()
+            d.$unbind()
             assert.strictEqual(unbound, true)
             assert.ok(d.el === null && d.vm === null && d.binding === null && d.compiler === null)
         })
 
         it('should not execute if called more than once', function () {
             unbound = false
-            d.unbind()
+            d.$unbind()
             assert.notOk(unbound)
         })
 

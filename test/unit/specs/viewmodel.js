@@ -417,7 +417,7 @@ describe('ViewModel', function () {
                 compiler: null,
                 dirs: []
             },
-            unbind: function () {
+            $unbind: function () {
                 dirUnbindCalled = true
             }
         }

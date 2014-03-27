@@ -37,7 +37,7 @@ describe('Binding', function () {
             pubbed = false,
             numInstances = 3,
             instance = {
-                update: function (value) {
+                $update: function (value) {
                     updated += value
                 }
             }
@@ -135,7 +135,7 @@ describe('Binding', function () {
             unbound = 0,
             numInstances = 3,
             instance = {
-                unbind: function () {
+                $unbind: function () {
                     unbound++
                 }
             }

@@ -18,7 +18,7 @@ module.exports = {
             utils.warn('Directive "v-on:' + this.expression + '" expects a method.')
             return
         }
-        this._unbind()
+        this.unbind()
         var vm = this.vm,
             context = this.context
         this.handler = function (e) {

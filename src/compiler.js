@@ -681,7 +681,7 @@ CompilerProto.bindDirective = function (directive, bindingOwner) {
         directive.bind(value)
     }
     // set initial value
-    directive.update(value, true)
+    directive.$update(value, true)
 }
 
 /**
@@ -955,7 +955,7 @@ CompilerProto.destroy = function () {
                 if (j > -1) dirs.splice(j, 1)
             }
         }
-        dir.unbind()
+        dir.$unbind()
     }
 
     // unbind all computed, anonymous bindings
