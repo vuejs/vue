@@ -223,6 +223,19 @@ describe('Utils', function () {
             assert.equal(frag.querySelector('p').textContent, 'ha')
         })
 
+        it('should work with table elements', function () {
+            var frag = utils.toFragment('<td></td>')
+            assert.ok(frag instanceof window.DocumentFragment)
+            assert.equal(frag.firstChild.tagName, 'TD')
+        })
+
+        it('should work with SVG elements', function () {
+            var frag = utils.toFragment('<polygon></polygon>')
+            assert.ok(frag instanceof window.DocumentFragment)
+            assert.equal(frag.firstChild.tagName.toLowerCase(), 'polygon')
+            assert.equal(frag.firstChild.namespaceURI, 'http://www.w3.org/2000/svg')
+        })
+
     })
 
     describe('toConstructor', function () {

@@ -11,6 +11,7 @@
         "src/emitter.js",
         "src/config.js",
         "src/utils.js",
+        "src/fragment.js",
         "src/compiler.js",
         "src/viewmodel.js",
         "src/binding.js",

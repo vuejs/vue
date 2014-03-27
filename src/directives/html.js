@@ -1,4 +1,4 @@
-var guard = require('../utils').guard,
+var utils = require('../utils'),
     slice = [].slice
 
 /**
@@ -11,14 +11,13 @@ module.exports = {
         // {{{ inline unescaped html }}}
         if (this.el.nodeType === 8) {
             // hold nodes
-            this.holder = document.createElement('div')
             this.nodes = []
         }
     },
 
     update: function (value) {
-        value = guard(value)
-        if (this.holder) {
+        value = utils.guard(value)
+        if (this.nodes) {
             this.swap(value)
         } else {
             this.el.innerHTML = value
@@ -27,16 +26,16 @@ module.exports = {
 
     swap: function (value) {
         var parent = this.el.parentNode,
-            holder = this.holder,
-            nodes = this.nodes,
-            i = nodes.length, l
+            nodes  = this.nodes,
+            i      = nodes.length
+        // remove old nodes
         while (i--) {
             parent.removeChild(nodes[i])
         }
-        holder.innerHTML = value
-        nodes = this.nodes = slice.call(holder.childNodes)
-        for (i = 0, l = nodes.length; i < l; i++) {
-            parent.insertBefore(nodes[i], this.el)
-        }
+        // convert new value to a fragment
+        var frag = utils.toFragment(value)
+        // save a reference to these nodes so we can remove later
+        this.nodes = slice.call(frag.childNodes)
+        parent.insertBefore(frag, this.el)
     }
 }

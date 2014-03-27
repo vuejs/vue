@@ -120,7 +120,6 @@ describe('Directives', function () {
             dir.el = comment
 
             dir.bind()
-            assert.ok(dir.holder)
             assert.ok(dir.nodes)
 
             var pre = 'what!',

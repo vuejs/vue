@@ -222,8 +222,8 @@ CompilerProto.setupElement = function (options) {
         }
         // replace option: use the first node in
         // the template directly
-        if (options.replace && template.childNodes.length === 1) {
-            replacer = template.childNodes[0].cloneNode(true)
+        if (options.replace && template.firstChild === template.lastChild) {
+            replacer = template.firstChild.cloneNode(true)
             if (el.parentNode) {
                 el.parentNode.insertBefore(replacer, el)
                 el.parentNode.removeChild(el)
