@@ -134,9 +134,7 @@ var ObjProxy = Object.create(Object.prototype)
 def(ObjProxy, '$add', function (key, val) {
     if (hasOwn.call(this, key)) return
     this[key] = val
-    convertKey(this, key)
-    // emit a propagating set event
-    this.__emitter__.emit('set', key, val, true)
+    convertKey(this, key, true)
 }, !hasProto)
 
 def(ObjProxy, '$delete', function (key) {
@@ -235,7 +233,7 @@ function watchArray (arr) {
  *  so it emits get/set events.
  *  Then watch the value itself.
  */
-function convertKey (obj, key) {
+function convertKey (obj, key, propagate) {
     var keyPrefix = key.charAt(0)
     if (keyPrefix === '$' || keyPrefix === '_') {
         return
@@ -246,7 +244,7 @@ function convertKey (obj, key) {
     var emitter = obj.__emitter__,
         values  = emitter.values
 
-    init(obj[key])
+    init(obj[key], propagate)
 
     oDef(obj, key, {
         enumerable: true,
