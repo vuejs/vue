@@ -1,17 +1,19 @@
+var slice = [].slice
+
 function Emitter (ctx) {
     this._ctx = ctx || this
 }
 
 var EmitterProto = Emitter.prototype
 
-EmitterProto.on = function(event, fn){
+EmitterProto.on = function (event, fn) {
     this._cbs = this._cbs || {}
     ;(this._cbs[event] = this._cbs[event] || [])
         .push(fn)
     return this
 }
 
-EmitterProto.once = function(event, fn){
+EmitterProto.once = function (event, fn) {
     var self = this
     this._cbs = this._cbs || {}
 
@@ -25,7 +27,7 @@ EmitterProto.once = function(event, fn){
     return this
 }
 
-EmitterProto.off = function(event, fn){
+EmitterProto.off = function (event, fn) {
     this._cbs = this._cbs || {}
 
     // all
@@ -56,7 +58,11 @@ EmitterProto.off = function(event, fn){
     return this
 }
 
-EmitterProto.emit = function(event, a, b, c){
+/**
+ *  The internal, faster emit with fixed amount of arguments
+ *  using Function.call
+ */
+EmitterProto.emit = function (event, a, b, c) {
     this._cbs = this._cbs || {}
     var callbacks = this._cbs[event]
 
@@ -64,6 +70,24 @@ EmitterProto.emit = function(event, a, b, c){
         callbacks = callbacks.slice(0)
         for (var i = 0, len = callbacks.length; i < len; i++) {
             callbacks[i].call(this._ctx, a, b, c)
+        }
+    }
+
+    return this
+}
+
+/**
+ *  The external emit using Function.apply
+ */
+EmitterProto.applyEmit = function (event) {
+    this._cbs = this._cbs || {}
+    var callbacks = this._cbs[event], args
+
+    if (callbacks) {
+        callbacks = callbacks.slice(0)
+        args = slice.call(arguments, 1)
+        for (var i = 0, len = callbacks.length; i < len; i++) {
+            callbacks[i].apply(this._ctx, args)
         }
     }
 

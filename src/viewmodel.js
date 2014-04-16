@@ -94,7 +94,7 @@ def(VMProto, '$broadcast', function () {
         child
     while (i--) {
         child = children[i]
-        child.emitter.emit.apply(child.emitter, arguments)
+        child.emitter.applyEmit.apply(child.emitter, arguments)
         child.vm.$broadcast.apply(child.vm, arguments)
     }
 })
@@ -106,7 +106,7 @@ def(VMProto, '$dispatch', function () {
     var compiler = this.$compiler,
         emitter = compiler.emitter,
         parent = compiler.parent
-    emitter.emit.apply(emitter, arguments)
+    emitter.applyEmit.apply(emitter, arguments)
     if (parent) {
         parent.vm.$dispatch.apply(parent.vm, arguments)
     }
@@ -116,9 +116,15 @@ def(VMProto, '$dispatch', function () {
  *  delegate on/off/once to the compiler's emitter
  */
 ;['emit', 'on', 'off', 'once'].forEach(function (method) {
+    // internal emit has fixed number of arguments.
+    // exposed emit uses the external version
+    // with fn.apply.
+    var realMethod = method === 'emit'
+        ? 'applyEmit'
+        : method
     def(VMProto, '$' + method, function () {
         var emitter = this.$compiler.emitter
-        emitter[method].apply(emitter, arguments)
+        emitter[realMethod].apply(emitter, arguments)
     })
 })
 
