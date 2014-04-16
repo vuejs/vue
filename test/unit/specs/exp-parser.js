@@ -82,6 +82,16 @@ describe('Expression Parser', function () {
                 hi: 2
             },
             expectedValue: '"test"1\'hi\'2'
+        },
+        {
+            // expressions with inline object literals
+            exp: "sortRows({ column: 'name', test: 'haha', durrr: 123 })",
+            vm: {
+                sortRows: function (params) {
+                    return params.column + params.durrr
+                }
+            },
+            expectedValue: 'name123'
         }
     ]
 
