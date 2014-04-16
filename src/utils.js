@@ -2,12 +2,16 @@ var config    = require('./config'),
     toString  = ({}).toString,
     win       = window,
     console   = win.console,
-    timeout   = win.setTimeout,
     def       = Object.defineProperty,
     OBJECT    = 'object',
     THIS_RE   = /[^\w]this[^\w]/,
     hasClassList = 'classList' in document.documentElement,
     ViewModel // late def
+
+var defer =
+    win.requestAnimationFrame ||
+    win.webkitRequestAnimationFrame ||
+    win.setTimeout
 
 var utils = module.exports = {
 
@@ -225,7 +229,7 @@ var utils = module.exports = {
      *  used to defer batch updates
      */
     nextTick: function (cb) {
-        timeout(cb, 0)
+        defer(cb, 0)
     },
 
     /**
