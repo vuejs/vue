@@ -106,7 +106,10 @@ function extend (options) {
     }
 
     // inherit options
-    options = inheritOptions(options, ParentVM.options, true)
+    // but only when the super class is not the native Vue.
+    if (ParentVM !== ViewModel) {
+        options = inheritOptions(options, ParentVM.options, true)
+    }
     utils.processOptions(options)
 
     var ExtendedVM = function (opts, asParent) {
