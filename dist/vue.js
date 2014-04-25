@@ -1,5 +1,5 @@
 /*
- Vue.js v0.10.3
+ Vue.js v0.10.4
  (c) 2014 Evan You
  License: MIT
 */
@@ -317,7 +317,10 @@ function extend (options) {
     }
 
     // inherit options
-    options = inheritOptions(options, ParentVM.options, true)
+    // but only when the super class is not the native Vue.
+    if (ParentVM !== ViewModel) {
+        options = inheritOptions(options, ParentVM.options, true)
+    }
     utils.processOptions(options)
 
     var ExtendedVM = function (opts, asParent) {
@@ -394,20 +397,22 @@ function inheritOptions (child, parent, topLevel) {
 module.exports = ViewModel
 });
 require.register("vue/src/emitter.js", function(exports, require, module){
+var slice = [].slice
+
 function Emitter (ctx) {
     this._ctx = ctx || this
 }
 
 var EmitterProto = Emitter.prototype
 
-EmitterProto.on = function(event, fn){
+EmitterProto.on = function (event, fn) {
     this._cbs = this._cbs || {}
     ;(this._cbs[event] = this._cbs[event] || [])
         .push(fn)
     return this
 }
 
-EmitterProto.once = function(event, fn){
+EmitterProto.once = function (event, fn) {
     var self = this
     this._cbs = this._cbs || {}
 
@@ -421,7 +426,7 @@ EmitterProto.once = function(event, fn){
     return this
 }
 
-EmitterProto.off = function(event, fn){
+EmitterProto.off = function (event, fn) {
     this._cbs = this._cbs || {}
 
     // all
@@ -452,7 +457,11 @@ EmitterProto.off = function(event, fn){
     return this
 }
 
-EmitterProto.emit = function(event, a, b, c){
+/**
+ *  The internal, faster emit with fixed amount of arguments
+ *  using Function.call
+ */
+EmitterProto.emit = function (event, a, b, c) {
     this._cbs = this._cbs || {}
     var callbacks = this._cbs[event]
 
@@ -460,6 +469,24 @@ EmitterProto.emit = function(event, a, b, c){
         callbacks = callbacks.slice(0)
         for (var i = 0, len = callbacks.length; i < len; i++) {
             callbacks[i].call(this._ctx, a, b, c)
+        }
+    }
+
+    return this
+}
+
+/**
+ *  The external emit using Function.apply
+ */
+EmitterProto.applyEmit = function (event) {
+    this._cbs = this._cbs || {}
+    var callbacks = this._cbs[event], args
+
+    if (callbacks) {
+        callbacks = callbacks.slice(0)
+        args = slice.call(arguments, 1)
+        for (var i = 0, len = callbacks.length; i < len; i++) {
+            callbacks[i].apply(this._ctx, args)
         }
     }
 
@@ -494,14 +521,23 @@ var config    = require('./config'),
     toString  = ({}).toString,
     win       = window,
     console   = win.console,
-    timeout   = win.setTimeout,
     def       = Object.defineProperty,
-    THIS_RE   = /[^\w]this[^\w]/,
     OBJECT    = 'object',
+    THIS_RE   = /[^\w]this[^\w]/,
     hasClassList = 'classList' in document.documentElement,
     ViewModel // late def
 
+var defer =
+    win.requestAnimationFrame ||
+    win.webkitRequestAnimationFrame ||
+    win.setTimeout
+
 var utils = module.exports = {
+
+    /**
+     *  Convert a string template to a dom fragment
+     */
+    toFragment: require('./fragment'),
 
     /**
      *  get a value from an object keypath
@@ -657,36 +693,6 @@ var utils = module.exports = {
     },
 
     /**
-     *  Convert a string template to a dom fragment
-     */
-    toFragment: function (template) {
-        if (typeof template !== 'string') {
-            return template
-        }
-        if (template.charAt(0) === '#') {
-            var templateNode = document.getElementById(template.slice(1))
-            if (!templateNode) return
-            // if its a template tag and the browser supports it,
-            // its content is already a document fragment!
-            if (templateNode.tagName === 'TEMPLATE' && templateNode.content) {
-                return templateNode.content
-            }
-            template = templateNode.innerHTML
-        }
-        var node = document.createElement('div'),
-            frag = document.createDocumentFragment(),
-            child
-        node.innerHTML = template.trim()
-        /* jshint boss: true */
-        while (child = node.firstChild) {
-            if (node.nodeType === 1) {
-                frag.appendChild(child)
-            }
-        }
-        return frag
-    },
-
-    /**
      *  Convert the object to a ViewModel constructor
      *  if it is not already one
      */
@@ -742,7 +748,7 @@ var utils = module.exports = {
      *  used to defer batch updates
      */
     nextTick: function (cb) {
-        timeout(cb, 0)
+        defer(cb, 0)
     },
 
     /**
@@ -817,6 +823,92 @@ function enableDebug () {
             }
         }
     }
+}
+});
+require.register("vue/src/fragment.js", function(exports, require, module){
+// string -> DOM conversion
+// wrappers originally from jQuery, scooped from component/domify
+var map = {
+    legend   : [1, '<fieldset>', '</fieldset>'],
+    tr       : [2, '<table><tbody>', '</tbody></table>'],
+    col      : [2, '<table><tbody></tbody><colgroup>', '</colgroup></table>'],
+    _default : [0, '', '']
+}
+
+map.td =
+map.th = [3, '<table><tbody><tr>', '</tr></tbody></table>']
+
+map.option =
+map.optgroup = [1, '<select multiple="multiple">', '</select>']
+
+map.thead =
+map.tbody =
+map.colgroup =
+map.caption =
+map.tfoot = [1, '<table>', '</table>']
+
+map.text =
+map.circle =
+map.ellipse =
+map.line =
+map.path =
+map.polygon =
+map.polyline =
+map.rect = [1, '<svg xmlns="http://www.w3.org/2000/svg" version="1.1">','</svg>']
+
+var TAG_RE = /<([\w:]+)/
+
+module.exports = function (template) {
+
+    if (typeof template !== 'string') {
+        return template
+    }
+
+    // template by ID
+    if (template.charAt(0) === '#') {
+        var templateNode = document.getElementById(template.slice(1))
+        if (!templateNode) return
+        // if its a template tag and the browser supports it,
+        // its content is already a document fragment!
+        if (templateNode.tagName === 'TEMPLATE' && templateNode.content) {
+            return templateNode.content
+        }
+        template = templateNode.innerHTML
+    }
+
+    var frag = document.createDocumentFragment(),
+        m = TAG_RE.exec(template)
+    // text only
+    if (!m) {
+        frag.appendChild(document.createTextNode(template))
+        return frag
+    }
+
+    var tag = m[1],
+        wrap = map[tag] || map._default,
+        depth = wrap[0],
+        prefix = wrap[1],
+        suffix = wrap[2],
+        node = document.createElement('div')
+
+    node.innerHTML = prefix + template.trim() + suffix
+    while (depth--) node = node.lastChild
+
+    // one element
+    if (node.firstChild === node.lastChild) {
+        frag.appendChild(node.firstChild)
+        return frag
+    }
+
+    // multiple nodes, return a fragment
+    var child
+    /* jshint boss: true */
+    while (child = node.firstChild) {
+        if (node.nodeType === 1) {
+            frag.appendChild(child)
+        }
+    }
+    return frag
 }
 });
 require.register("vue/src/compiler.js", function(exports, require, module){
@@ -1044,8 +1136,8 @@ CompilerProto.setupElement = function (options) {
         }
         // replace option: use the first node in
         // the template directly
-        if (options.replace && template.childNodes.length === 1) {
-            replacer = template.childNodes[0].cloneNode(true)
+        if (options.replace && template.firstChild === template.lastChild) {
+            replacer = template.firstChild.cloneNode(true)
             if (el.parentNode) {
                 el.parentNode.insertBefore(replacer, el)
                 el.parentNode.removeChild(el)
@@ -1503,7 +1595,7 @@ CompilerProto.bindDirective = function (directive, bindingOwner) {
         directive.bind(value)
     }
     // set initial value
-    directive.update(value, true)
+    directive.$update(value, true)
 }
 
 /**
@@ -1777,7 +1869,7 @@ CompilerProto.destroy = function () {
                 if (j > -1) dirs.splice(j, 1)
             }
         }
-        dir.unbind()
+        dir.$unbind()
     }
 
     // unbind all computed, anonymous bindings
@@ -1934,7 +2026,7 @@ def(VMProto, '$broadcast', function () {
         child
     while (i--) {
         child = children[i]
-        child.emitter.emit.apply(child.emitter, arguments)
+        child.emitter.applyEmit.apply(child.emitter, arguments)
         child.vm.$broadcast.apply(child.vm, arguments)
     }
 })
@@ -1946,7 +2038,7 @@ def(VMProto, '$dispatch', function () {
     var compiler = this.$compiler,
         emitter = compiler.emitter,
         parent = compiler.parent
-    emitter.emit.apply(emitter, arguments)
+    emitter.applyEmit.apply(emitter, arguments)
     if (parent) {
         parent.vm.$dispatch.apply(parent.vm, arguments)
     }
@@ -1956,9 +2048,15 @@ def(VMProto, '$dispatch', function () {
  *  delegate on/off/once to the compiler's emitter
  */
 ;['emit', 'on', 'off', 'once'].forEach(function (method) {
+    // internal emit has fixed number of arguments.
+    // exposed emit uses the external version
+    // with fn.apply.
+    var realMethod = method === 'emit'
+        ? 'applyEmit'
+        : method
     def(VMProto, '$' + method, function () {
         var emitter = this.$compiler.emitter
-        emitter[method].apply(emitter, arguments)
+        emitter[realMethod].apply(emitter, arguments)
     })
 })
 
@@ -2068,7 +2166,7 @@ BindingProto._update = function () {
     var i = this.dirs.length,
         value = this.val()
     while (i--) {
-        this.dirs[i].update(value)
+        this.dirs[i].$update(value)
     }
     this.pub()
 }
@@ -2105,7 +2203,7 @@ BindingProto.unbind = function () {
     this.unbound = true
     var i = this.dirs.length
     while (i--) {
-        this.dirs[i].unbind()
+        this.dirs[i].$unbind()
     }
     i = this.deps.length
     var subs
@@ -2255,9 +2353,7 @@ var ObjProxy = Object.create(Object.prototype)
 def(ObjProxy, '$add', function (key, val) {
     if (hasOwn.call(this, key)) return
     this[key] = val
-    convertKey(this, key)
-    // emit a propagating set event
-    this.__emitter__.emit('set', key, val, true)
+    convertKey(this, key, true)
 }, !hasProto)
 
 def(ObjProxy, '$delete', function (key) {
@@ -2356,7 +2452,7 @@ function watchArray (arr) {
  *  so it emits get/set events.
  *  Then watch the value itself.
  */
-function convertKey (obj, key) {
+function convertKey (obj, key, propagate) {
     var keyPrefix = key.charAt(0)
     if (keyPrefix === '$' || keyPrefix === '_') {
         return
@@ -2367,7 +2463,7 @@ function convertKey (obj, key) {
     var emitter = obj.__emitter__,
         values  = emitter.values
 
-    init(obj[key])
+    init(obj[key], propagate)
 
     oDef(obj, key, {
         enumerable: true,
@@ -2596,14 +2692,10 @@ function Directive (name, ast, definition, compiler, el) {
 
     // mix in properties from the directive definition
     if (typeof definition === 'function') {
-        this[isEmpty ? 'bind' : '_update'] = definition
+        this[isEmpty ? 'bind' : 'update'] = definition
     } else {
         for (var prop in definition) {
-            if (prop === 'unbind' || prop === 'update') {
-                this['_' + prop] = definition[prop]
-            } else {
-                this[prop] = definition[prop]
-            }
+            this[prop] = definition[prop]
         }
     }
 
@@ -2659,13 +2751,14 @@ var DirProto = Directive.prototype
  *  for computed properties, this will only be called once
  *  during initialization.
  */
-DirProto.update = function (value, init) {
+DirProto.$update = function (value, init) {
+    if (this.$lock) return
     if (init || value !== this.value || (value && typeof value === 'object')) {
         this.value = value
-        if (this._update) {
-            this._update(
+        if (this.update) {
+            this.update(
                 this.filters && !this.computeFilters
-                    ? this.applyFilters(value)
+                    ? this.$applyFilters(value)
                     : value,
                 init
             )
@@ -2676,7 +2769,7 @@ DirProto.update = function (value, init) {
 /**
  *  pipe the value through filters
  */
-DirProto.applyFilters = function (value) {
+DirProto.$applyFilters = function (value) {
     var filtered = value, filter
     for (var i = 0, l = this.filters.length; i < l; i++) {
         filter = this.filters[i]
@@ -2688,10 +2781,10 @@ DirProto.applyFilters = function (value) {
 /**
  *  Unbind diretive
  */
-DirProto.unbind = function () {
+DirProto.$unbind = function () {
     // this can be called before the el is even assigned...
     if (!this.el || !this.vm) return
-    if (this._unbind) this._unbind()
+    if (this.unbind) this.unbind()
     this.vm = this.el = this.binding = this.compiler = null
 }
 
@@ -2855,7 +2948,7 @@ var KEYWORDS =
         ',Math',
         
     KEYWORDS_RE = new RegExp(["\\b" + KEYWORDS.replace(/,/g, '\\b|\\b') + "\\b"].join('|'), 'g'),
-    REMOVE_RE   = /\/\*(?:.|\n)*?\*\/|\/\/[^\n]*\n|\/\/[^\n]*$|'[^']*'|"[^"]*"|[\s\t\n]*\.[\s\t\n]*[$\w\.]+/g,
+    REMOVE_RE   = /\/\*(?:.|\n)*?\*\/|\/\/[^\n]*\n|\/\/[^\n]*$|'[^']*'|"[^"]*"|[\s\t\n]*\.[\s\t\n]*[$\w\.]+|[\{,]\s*[\w\$_]+\s*:/g,
     SPLIT_RE    = /[^\w$]+/g,
     NUMBER_RE   = /\b\d[^,]*/g,
     BOUNDARY_RE = /^,+|,+$/g
@@ -3818,7 +3911,7 @@ module.exports = {
     update: function (value) {
 
         if (!value) {
-            this._unbind()
+            this.unbind()
         } else if (!this.childVM) {
             this.childVM = new this.Ctor({
                 el: this.el.cloneNode(true),
@@ -4056,16 +4149,6 @@ module.exports = {
             (raw || data).__emitter__[this.identifier] = true
         }
 
-        if (wrap) {
-            var self = this,
-                sync = function (val) {
-                    self.lock = true
-                    self.collection.$set(vm.$index, val)
-                    self.lock = false
-                }
-            vm.$compiler.observer.on('change:' + alias, sync)
-        }
-
         return vm
 
     },
@@ -4120,7 +4203,7 @@ module.exports = {
             utils.warn('Directive "v-on:' + this.expression + '" expects a method.')
             return
         }
-        this._unbind()
+        this.unbind()
         var vm = this.vm,
             context = this.context
         this.handler = function (e) {
@@ -4367,7 +4450,7 @@ module.exports = {
 }
 });
 require.register("vue/src/directives/html.js", function(exports, require, module){
-var guard = require('../utils').guard,
+var utils = require('../utils'),
     slice = [].slice
 
 /**
@@ -4380,14 +4463,13 @@ module.exports = {
         // {{{ inline unescaped html }}}
         if (this.el.nodeType === 8) {
             // hold nodes
-            this.holder = document.createElement('div')
             this.nodes = []
         }
     },
 
     update: function (value) {
-        value = guard(value)
-        if (this.holder) {
+        value = utils.guard(value)
+        if (this.nodes) {
             this.swap(value)
         } else {
             this.el.innerHTML = value
@@ -4396,17 +4478,17 @@ module.exports = {
 
     swap: function (value) {
         var parent = this.el.parentNode,
-            holder = this.holder,
-            nodes = this.nodes,
-            i = nodes.length, l
+            nodes  = this.nodes,
+            i      = nodes.length
+        // remove old nodes
         while (i--) {
             parent.removeChild(nodes[i])
         }
-        holder.innerHTML = value
-        nodes = this.nodes = slice.call(holder.childNodes)
-        for (i = 0, l = nodes.length; i < l; i++) {
-            parent.insertBefore(nodes[i], this.el)
-        }
+        // convert new value to a fragment
+        var frag = utils.toFragment(value)
+        // save a reference to these nodes so we can remove later
+        this.nodes = slice.call(frag.childNodes)
+        parent.insertBefore(frag, this.el)
     }
 }
 });
@@ -4536,7 +4618,7 @@ module.exports = {
 
     update: function(value) {
 
-        this._unbind()
+        this.unbind()
 
         var Ctor  = this.compiler.getOption('components', value)
         if (!Ctor) return
