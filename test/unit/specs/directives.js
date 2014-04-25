@@ -852,17 +852,11 @@ describe('Directives', function () {
             }
         })
 
-        it('should work with primitive values', function (done) {
-            var triggeredChange = 0
+        it('should work with primitive values', function () {
             var v = new Vue({
-                template: '<span v-repeat="tags" v-ref="tags">{{$value}}</span>',
+                template: '<span v-repeat="tags">{{$value}}</span>',
                 data: {
                     tags: ['a', 'b', 'c']
-                },
-                created: function () {
-                    this.$watch('tags', function () {
-                        triggeredChange++
-                    })
                 },
                 computed: {
                     concat: function () {
@@ -872,13 +866,6 @@ describe('Directives', function () {
             })
             assert.strictEqual(v.concat, 'a,b,c')
             assert.strictEqual(v.$el.textContent, 'abc')
-            v.$.tags[0].$value = 'd'
-            assert.strictEqual(v.tags[0], 'd')
-            nextTick(function () {
-                assert.strictEqual(triggeredChange, 1)
-                assert.strictEqual(v.concat, 'd,b,c')
-                done()
-            })
         })
 
         it('should diff and reuse existing VMs when reseting arrays', function (done) {
@@ -955,41 +942,27 @@ describe('Directives', function () {
            
         })
 
-        it('should accept arg for aliasing on primitive arrays', function (done) {
+        it('should accept arg for aliasing on primitive arrays', function () {
             
             var v = new Vue({
-                template: '<span v-repeat="item:items" v-ref="items">{{item}}</span>',
+                template: '<span v-repeat="item:items" >{{item}}</span>',
                 data: {
                     items: [1,2,3]
                 }
             })
             assert.strictEqual(v.$el.textContent, '123')
-            v.$.items[0].item = 2
-
-            nextTick(function () {
-                assert.strictEqual(v.$el.textContent, '223')
-                assert.deepEqual(v.items, [2,2,3])
-                done()
-            })
 
         })
 
-        it('should accept arg for aliasing on object arrays', function (done) {
+        it('should accept arg for aliasing on object arrays', function () {
             
             var v = new Vue({
-                template: '<span v-repeat="item:items" v-ref="items">{{item.id}}</span>',
+                template: '<span v-repeat="item:items">{{item.id}}</span>',
                 data: {
                     items: [{id:1},{id:2},{id:3}]
                 }
             })
             assert.strictEqual(v.$el.textContent, '123')
-            v.$.items[0].item = { id: 2 }
-
-            nextTick(function () {
-                assert.strictEqual(v.$el.textContent, '223')
-                assert.strictEqual(v.items[0].id, 2)
-                done()
-            })
 
         })
 

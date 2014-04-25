@@ -212,16 +212,6 @@ module.exports = {
             (raw || data).__emitter__[this.identifier] = true
         }
 
-        if (wrap) {
-            var self = this,
-                sync = function (val) {
-                    self.lock = true
-                    self.collection.$set(vm.$index, val)
-                    self.lock = false
-                }
-            vm.$compiler.observer.on('change:' + alias, sync)
-        }
-
         return vm
 
     },
