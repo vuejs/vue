@@ -3,7 +3,7 @@ describe('Transition', function () {
     var transition = require('vue/src/transition'),
         config     = require('vue/src/config'),
         codes      = transition.codes,
-        endEvents  = sniffEndEvents(),
+        endEvents  = transition.sniff(),
         enterClass = config.enterClass,
         leaveClass = config.leaveClass,
         nextTick   = Vue.nextTick
@@ -354,27 +354,6 @@ describe('Transition', function () {
                 this[hook] = true
             }
         }
-    }
-
-    function sniffEndEvents () {
-        var el = document.createElement('vue'),
-            defaultEvent = 'transitionend',
-            events = {
-                'transition'       : defaultEvent,
-                'mozTransition'    : defaultEvent,
-                'webkitTransition' : 'webkitTransitionEnd'
-            },
-            ret = {}
-        for (var name in events) {
-            if (el.style[name] !== undefined) {
-                ret.trans = events[name]
-                break
-            }
-        }
-        ret.anim = el.style.animation === ''
-            ? 'animationend'
-            : 'webkitAnimationEnd'
-        return ret
     }
 
 })
