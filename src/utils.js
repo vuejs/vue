@@ -1,10 +1,12 @@
-var config    = require('./config'),
-    toString  = ({}).toString,
-    win       = window,
-    console   = win.console,
-    def       = Object.defineProperty,
-    OBJECT    = 'object',
-    THIS_RE   = /[^\w]this[^\w]/,
+var config       = require('./config'),
+    toString     = ({}).toString,
+    win          = window,
+    console      = win.console,
+    def          = Object.defineProperty,
+    OBJECT       = 'object',
+    THIS_RE      = /[^\w]this[^\w]/,
+    BRACKET_RE_S = /\['([^']+)'\]/g,
+    BRACKET_RE_D = /\["([^"]+)"\]/g,
     hasClassList = 'classList' in document.documentElement,
     ViewModel // late def
 
@@ -12,6 +14,16 @@ var defer =
     win.requestAnimationFrame ||
     win.webkitRequestAnimationFrame ||
     win.setTimeout
+
+/**
+ *  Normalize keypath with possible brackets into dot notations
+ */
+function normalizeKeypath (key) {
+    return key.indexOf('[') < 0
+        ? key
+        : key.replace(BRACKET_RE_S, '.$1')
+             .replace(BRACKET_RE_D, '.$1')
+}
 
 var utils = module.exports = {
 
@@ -25,6 +37,7 @@ var utils = module.exports = {
      */
     get: function (obj, key) {
         /* jshint eqeqeq: false */
+        key = normalizeKeypath(key)
         if (key.indexOf('.') < 0) {
             return obj[key]
         }
@@ -41,6 +54,7 @@ var utils = module.exports = {
      */
     set: function (obj, key, val) {
         /* jshint eqeqeq: false */
+        key = normalizeKeypath(key)
         if (key.indexOf('.') < 0) {
             obj[key] = val
             return

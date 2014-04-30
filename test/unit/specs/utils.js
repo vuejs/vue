@@ -17,6 +17,12 @@ describe('Utils', function () {
             assert.strictEqual(utils.get(obj, 'a.b.c'), 123)
         })
 
+        it('should work on keypath with brackets', function () {
+            var obj = { a: { 'key-with-dash': { b: 123 } }}
+            assert.strictEqual(utils.get(obj, 'a["key-with-dash"].b'), 123)
+            assert.strictEqual(utils.get(obj, "a['key-with-dash'].b"), 123)
+        })
+
         it('should return undefined if path does not exist', function () {
             var obj = { a: {}}
             assert.strictEqual(utils.get(obj, 'a.b.c'), undefined)
@@ -30,6 +36,14 @@ describe('Utils', function () {
             var obj = { a: { b: { c: 0 }}}
             utils.set(obj, 'a.b.c', 123)
             assert.strictEqual(obj.a.b.c, 123)
+        })
+
+        it('should work on keypath with brackets', function () {
+            var obj = { a: { 'key-with-dash': { b: 1 }}}
+            utils.set(obj, 'a["key-with-dash"].b', 2)
+            assert.strictEqual(obj.a['key-with-dash'].b, 2)
+            utils.set(obj, "a['key-with-dash'].b", 3)
+            assert.strictEqual(obj.a['key-with-dash'].b, 3)
         })
 
         it('should set even if path does not exist', function () {
