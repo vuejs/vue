@@ -13,6 +13,15 @@ describe('Directive', function () {
         }
     }
 
+    function makeSpy () {
+        var spy = function () {
+            spy.called++
+            spy.args = [].slice.call(arguments)
+        }
+        spy.called = 0
+        return spy
+    }
+
     function build (name, exp, compiler) {
         var ast = Directive.parse(exp)[0]
         return new Directive(name, ast, directives[name], compiler, {})
@@ -257,6 +266,13 @@ describe('Directive', function () {
             assert.strictEqual(f2.name, 'pluralize')
             assert.strictEqual(f2.args[0], 'item')
             assert.strictEqual(f3.name, 'lowercase')
+        })
+
+        it('should compile the key if the key contains interpolation tags', function () {
+            compiler.eval = makeSpy()
+            build('model', '{{abc}} | uppercase', compiler)
+            assert.ok(compiler.eval.called)
+            assert.equal(compiler.eval.args[0], '{{abc}}')
         })
 
     })

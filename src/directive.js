@@ -3,7 +3,8 @@ var dirId           = 1,
     FILTER_TOKEN_RE = /[^\s'"]+|'[^']+'|"[^"]+"/g,
     NESTING_RE      = /^\$(parent|root)\./,
     SINGLE_VAR_RE   = /^[\w\.$]+$/,
-    QUOTE_RE        = /"/g
+    QUOTE_RE        = /"/g,
+    TextParser      = require('./text-parser')
 
 /**
  *  Directive class
@@ -38,11 +39,12 @@ function Directive (name, ast, definition, compiler, el) {
         return
     }
 
-    this.expression = (
-        this.isLiteral
-            ? compiler.eval(this.expression)
-            : this.expression
-    ).trim()
+    if (TextParser.Regex.test(this.key)) {
+        this.key = compiler.eval(this.key)
+        if (this.isLiteral) {
+            this.expression = this.key
+        }
+    }
 
     var filters = ast.filters,
         filter, fn, i, l, computed

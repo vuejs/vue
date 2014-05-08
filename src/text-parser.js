@@ -1,9 +1,10 @@
 var openChar        = '{',
     endChar         = '}',
     ESCAPE_RE       = /[-.*+?^${}()|[\]\/\\]/g,
-    BINDING_RE      = buildInterpolationRegex(),
     // lazy require
     Directive
+
+exports.Regex = buildInterpolationRegex()
 
 function buildInterpolationRegex () {
     var open = escapeRegex(openChar),
@@ -16,10 +17,10 @@ function escapeRegex (str) {
 }
 
 function setDelimiters (delimiters) {
-    exports.delimiters = delimiters
     openChar = delimiters[0]
     endChar = delimiters[1]
-    BINDING_RE = buildInterpolationRegex()
+    exports.delimiters = delimiters
+    exports.Regex = buildInterpolationRegex()
 }
 
 /** 
@@ -30,10 +31,10 @@ function setDelimiters (delimiters) {
  *  3. object with key & html = true
  */
 function parse (text) {
-    if (!BINDING_RE.test(text)) return null
+    if (!exports.Regex.test(text)) return null
     var m, i, token, match, tokens = []
     /* jshint boss: true */
-    while (m = text.match(BINDING_RE)) {
+    while (m = text.match(exports.Regex)) {
         i = m.index
         if (i > 0) tokens.push(text.slice(0, i))
         token = { key: m[1].trim() }

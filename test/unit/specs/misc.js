@@ -270,4 +270,19 @@ describe('Misc Features', function () {
 
     })
 
+    describe('interpolation in directive values', function () {
+        
+        it('should be evaled by the compiler', function () {
+            var t = new Vue({
+                template: '<input v-model="{{field}}">',
+                data: {
+                    field: 'test',
+                    test: 'hello'
+                }
+            })
+            assert.equal(t.$el.childNodes[0].value, 'hello')
+        })
+
+    })
+
 })
