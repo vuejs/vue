@@ -1,6 +1,13 @@
 # Vue.js Contributing Guide
 
-Hi! I'm really excited that you are interested in contributing to Vue.js. Before submitting a pull request though, please make sure to take a moment and read through the following guidelines.
+Hi! I’m really excited that you are interested in contributing to Vue.js. Before submitting your contribution though, please make sure to take a moment and read through the following guidelines.
+
+## Issue Reporting Checklist
+
+- Make sure that you are using the latest version of Vue.
+- Try to search for your issue, it may have already been answered or even fixed in the development branch.
+- It is recommended that you make a JSFiddle to reproduce your issue. You could start with [this template](http://jsfiddle.net/5sH6A/) that already includes the latest version of Vue.
+- If your issue is resolved but still open, don’t hesitate to close it. In case you found a solution by yourself, it could be helpful to explain how you fixed it.
 
 ## Pull Request Checklist
 
@@ -36,7 +43,7 @@ var a = superLongConditionalStatement
 You will need [Node](http://nodejs.org), [Grunt](http://gruntjs.com), [PhantomJS](http://phantomjs.org) and [CasperJS](http://casperjs.org).
 
 ``` bash
-# in case you don't already it:
+# in case you don’t already it:
 # npm install -g grunt-cli
 $ npm install
 ```
@@ -62,7 +69,7 @@ $ grunt build
 To test:
 
 ``` bash
-# if you don't have these yet:
+# if you don’t have these yet:
 # npm install -g phantomjs casperjs
 $ grunt test
 ```
@@ -71,4 +78,4 @@ The unit tests are written with Mocha + Chai and run with Karma. The functional 
 
 **If you are not using a Mac**
 
-You can modify the Gruntfile to only run Karma tests in browsers that are available on your system. Just make sure don't check in the Gruntfile for the commit.
+You can modify the Gruntfile to only run Karma tests in browsers that are available on your system. Just make sure don’t check in the Gruntfile for the commit.
