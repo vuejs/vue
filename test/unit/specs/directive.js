@@ -44,6 +44,14 @@ describe('Directive', function () {
             assert.equal(res[0].expression, 'arg:key')
         })
 
+        it('a\\:arg:key', function () {
+            var res = Directive.parse('a\\:arg:key')
+            assert.equal(res.length , 1)
+            assert.equal(res[0].key, 'key')
+            assert.equal(res[0].arg, 'a:arg')
+            assert.equal(res[0].expression, 'a\\:arg:key')
+        })
+
         it('arg : key | abc', function () {
             var res = Directive.parse(' arg : key | abc de')
             assert.equal(res.length , 1)

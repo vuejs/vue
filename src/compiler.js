@@ -525,17 +525,18 @@ CompilerProto.compileElement = function (node, root) {
         var prefix = config.prefix + '-',
             attrs = slice.call(node.attributes),
             params = this.options.paramAttributes,
-            attr, isDirective, exp, directives, directive, dirname
+            attr, attrname, isDirective, exp, directives, directive, dirname
 
         for (i = 0, l = attrs.length; i < l; i++) {
 
             attr = attrs[i]
+            attrname = attr.name
             isDirective = false
 
-            if (attr.name.indexOf(prefix) === 0) {
+            if (attrname.indexOf(prefix) === 0) {
                 // a directive - split, parse and bind it.
                 isDirective = true
-                dirname = attr.name.slice(prefix.length)
+                dirname = attrname.slice(prefix.length)
                 // build with multiple: true
                 directives = this.parseDirective(dirname, attr.value, node, true)
                 // loop through clauses (separated by ",")
@@ -552,8 +553,11 @@ CompilerProto.compileElement = function (node, root) {
                 // non directive attribute, check interpolation tags
                 exp = TextParser.parseAttr(attr.value)
                 if (exp) {
-                    directive = this.parseDirective('attr', attr.name + ':' + exp, node)
-                    if (params && params.indexOf(attr.name) > -1) {
+                    if (attrname.indexOf(':') > -1) {
+                        attrname = attrname.replace(/\:/g, '\\:')
+                    }
+                    directive = this.parseDirective('attr', attrname + ':' + exp, node)
+                    if (params && params.indexOf(attrname) > -1) {
                         // a param attribute... we should use the parent binding
                         // to avoid circular updates like size={{size}}
                         this.bindDirective(directive, this.parent)
@@ -564,7 +568,7 @@ CompilerProto.compileElement = function (node, root) {
             }
 
             if (isDirective && dirname !== 'cloak') {
-                node.removeAttribute(attr.name)
+                node.removeAttribute(attrname)
             }
         }
 
