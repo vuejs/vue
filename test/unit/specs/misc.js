@@ -285,4 +285,18 @@ describe('Misc Features', function () {
 
     })
 
+    describe('attribute names with colons', function () {
+        
+        it('should be parsed properly', function () {
+            var t = new Vue({
+                template: '<use xlink:href="{{icon}}"></use>',
+                data: {
+                    icon: 'test'
+                }
+            })
+            assert.equal(t.$el.firstChild.getAttribute('xlink:href'), 'test')
+        })
+
+    })
+
 })

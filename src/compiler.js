@@ -552,7 +552,8 @@ CompilerProto.compileElement = function (node, root) {
                 // non directive attribute, check interpolation tags
                 exp = TextParser.parseAttr(attr.value)
                 if (exp) {
-                    directive = this.parseDirective('attr', attr.name + ':' + exp, node)
+                    directive = this.parseDirective('attr', exp, node)
+                    directive.arg = attr.name
                     if (params && params.indexOf(attr.name) > -1) {
                         // a param attribute... we should use the parent binding
                         // to avoid circular updates like size={{size}}
