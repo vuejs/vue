@@ -162,7 +162,7 @@ Directive.parse = function (str) {
             arg = str.slice(begin, i).trim()
             if (ARG_RE.test(arg)) {
                 argIndex = i + 1
-                dir.arg = str.slice(begin, i).trim()
+                dir.arg = arg
             }
         } else if (c === '|' && str.charAt(i + 1) !== '|' && str.charAt(i - 1) !== '|') {
             if (dir.key === undefined) {
