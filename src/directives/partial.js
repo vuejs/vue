@@ -42,7 +42,7 @@ module.exports = {
 
             // just set innerHTML...
             el.innerHTML = ''
-            el.appendChild(partial.cloneNode(true))
+            el.appendChild(partial)
 
         }
     }
