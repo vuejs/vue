@@ -517,13 +517,15 @@ Object.defineProperty(module.exports, 'delimiters', {
 })
 });
 require.register("vue/src/utils.js", function(exports, require, module){
-var config    = require('./config'),
-    toString  = ({}).toString,
-    win       = window,
-    console   = win.console,
-    def       = Object.defineProperty,
-    OBJECT    = 'object',
-    THIS_RE   = /[^\w]this[^\w]/,
+var config       = require('./config'),
+    toString     = ({}).toString,
+    win          = window,
+    console      = win.console,
+    def          = Object.defineProperty,
+    OBJECT       = 'object',
+    THIS_RE      = /[^\w]this[^\w]/,
+    BRACKET_RE_S = /\['([^']+)'\]/g,
+    BRACKET_RE_D = /\["([^"]+)"\]/g,
     hasClassList = 'classList' in document.documentElement,
     ViewModel // late def
 
@@ -531,6 +533,16 @@ var defer =
     win.requestAnimationFrame ||
     win.webkitRequestAnimationFrame ||
     win.setTimeout
+
+/**
+ *  Normalize keypath with possible brackets into dot notations
+ */
+function normalizeKeypath (key) {
+    return key.indexOf('[') < 0
+        ? key
+        : key.replace(BRACKET_RE_S, '.$1')
+             .replace(BRACKET_RE_D, '.$1')
+}
 
 var utils = module.exports = {
 
@@ -544,6 +556,7 @@ var utils = module.exports = {
      */
     get: function (obj, key) {
         /* jshint eqeqeq: false */
+        key = normalizeKeypath(key)
         if (key.indexOf('.') < 0) {
             return obj[key]
         }
@@ -560,6 +573,7 @@ var utils = module.exports = {
      */
     set: function (obj, key, val) {
         /* jshint eqeqeq: false */
+        key = normalizeKeypath(key)
         if (key.indexOf('.') < 0) {
             obj[key] = val
             return
@@ -1439,17 +1453,18 @@ CompilerProto.compileElement = function (node, root) {
         var prefix = config.prefix + '-',
             attrs = slice.call(node.attributes),
             params = this.options.paramAttributes,
-            attr, isDirective, exp, directives, directive, dirname
+            attr, attrname, isDirective, exp, directives, directive, dirname
 
         for (i = 0, l = attrs.length; i < l; i++) {
 
             attr = attrs[i]
+            attrname = attr.name
             isDirective = false
 
-            if (attr.name.indexOf(prefix) === 0) {
+            if (attrname.indexOf(prefix) === 0) {
                 // a directive - split, parse and bind it.
                 isDirective = true
-                dirname = attr.name.slice(prefix.length)
+                dirname = attrname.slice(prefix.length)
                 // build with multiple: true
                 directives = this.parseDirective(dirname, attr.value, node, true)
                 // loop through clauses (separated by ",")
@@ -1466,8 +1481,9 @@ CompilerProto.compileElement = function (node, root) {
                 // non directive attribute, check interpolation tags
                 exp = TextParser.parseAttr(attr.value)
                 if (exp) {
-                    directive = this.parseDirective('attr', attr.name + ':' + exp, node)
-                    if (params && params.indexOf(attr.name) > -1) {
+                    directive = this.parseDirective('attr', exp, node)
+                    directive.arg = attrname
+                    if (params && params.indexOf(attrname) > -1) {
                         // a param attribute... we should use the parent binding
                         // to avoid circular updates like size={{size}}
                         this.bindDirective(directive, this.parent)
@@ -1478,7 +1494,7 @@ CompilerProto.compileElement = function (node, root) {
             }
 
             if (isDirective && dirname !== 'cloak') {
-                node.removeAttribute(attr.name)
+                node.removeAttribute(attrname)
             }
         }
 
@@ -2670,7 +2686,8 @@ var dirId           = 1,
     FILTER_TOKEN_RE = /[^\s'"]+|'[^']+'|"[^"]+"/g,
     NESTING_RE      = /^\$(parent|root)\./,
     SINGLE_VAR_RE   = /^[\w\.$]+$/,
-    QUOTE_RE        = /"/g
+    QUOTE_RE        = /"/g,
+    TextParser      = require('./text-parser')
 
 /**
  *  Directive class
@@ -2705,11 +2722,12 @@ function Directive (name, ast, definition, compiler, el) {
         return
     }
 
-    this.expression = (
-        this.isLiteral
-            ? compiler.eval(this.expression)
-            : this.expression
-    ).trim()
+    if (TextParser.Regex.test(this.key)) {
+        this.key = compiler.eval(this.key)
+        if (this.isLiteral) {
+            this.expression = this.key
+        }
+    }
 
     var filters = ast.filters,
         filter, fn, i, l, computed
@@ -2827,7 +2845,7 @@ Directive.parse = function (str) {
             arg = str.slice(begin, i).trim()
             if (ARG_RE.test(arg)) {
                 argIndex = i + 1
-                dir.arg = str.slice(begin, i).trim()
+                dir.arg = arg
             }
         } else if (c === '|' && str.charAt(i + 1) !== '|' && str.charAt(i - 1) !== '|') {
             if (dir.key === undefined) {
@@ -3118,9 +3136,10 @@ require.register("vue/src/text-parser.js", function(exports, require, module){
 var openChar        = '{',
     endChar         = '}',
     ESCAPE_RE       = /[-.*+?^${}()|[\]\/\\]/g,
-    BINDING_RE      = buildInterpolationRegex(),
     // lazy require
     Directive
+
+exports.Regex = buildInterpolationRegex()
 
 function buildInterpolationRegex () {
     var open = escapeRegex(openChar),
@@ -3133,10 +3152,10 @@ function escapeRegex (str) {
 }
 
 function setDelimiters (delimiters) {
-    exports.delimiters = delimiters
     openChar = delimiters[0]
     endChar = delimiters[1]
-    BINDING_RE = buildInterpolationRegex()
+    exports.delimiters = delimiters
+    exports.Regex = buildInterpolationRegex()
 }
 
 /** 
@@ -3147,10 +3166,10 @@ function setDelimiters (delimiters) {
  *  3. object with key & html = true
  */
 function parse (text) {
-    if (!BINDING_RE.test(text)) return null
+    if (!exports.Regex.test(text)) return null
     var m, i, token, match, tokens = []
     /* jshint boss: true */
-    while (m = text.match(BINDING_RE)) {
+    while (m = text.match(exports.Regex)) {
         i = m.index
         if (i > 0) tokens.push(text.slice(0, i))
         token = { key: m[1].trim() }
@@ -3542,8 +3561,6 @@ var transition = module.exports = function (el, stage, cb, compiler) {
 
 }
 
-transition.codes = codes
-
 /**
  *  Togggle a CSS class to trigger transition
  */
@@ -3681,9 +3698,9 @@ function sniffEndEvents () {
     var el = document.createElement('vue'),
         defaultEvent = 'transitionend',
         events = {
+            'webkitTransition' : 'webkitTransitionEnd',
             'transition'       : defaultEvent,
-            'mozTransition'    : defaultEvent,
-            'webkitTransition' : 'webkitTransitionEnd'
+            'mozTransition'    : defaultEvent
         },
         ret = {}
     for (var name in events) {
@@ -3697,6 +3714,10 @@ function sniffEndEvents () {
         : 'webkitAnimationEnd'
     return ret
 }
+
+// Expose some stuff for testing purposes
+transition.codes = codes
+transition.sniff = sniffEndEvents
 });
 require.register("vue/src/batcher.js", function(exports, require, module){
 var utils = require('./utils')
@@ -4583,7 +4604,7 @@ module.exports = {
 
             // just set innerHTML...
             el.innerHTML = ''
-            el.appendChild(partial.cloneNode(true))
+            el.appendChild(partial)
 
         }
     }
