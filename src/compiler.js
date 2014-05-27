@@ -921,7 +921,7 @@ CompilerProto.resolveComponent = function (node, data, test) {
 /**
  *  Unbind and remove element
  */
-CompilerProto.destroy = function () {
+CompilerProto.destroy = function (noRemove) {
 
     // avoid being called more than once
     // this is irreversible!
@@ -941,6 +941,14 @@ CompilerProto.destroy = function () {
 
     // unobserve data
     Observer.unobserve(compiler.data, '', compiler.observer)
+
+    // destroy all children
+    // do not remove their elements since the parent
+    // may have transitions and the children may not
+    i = children.length
+    while (i--) {
+        children[i].destroy(true)
+    }
 
     // unbind all direcitves
     i = directives.length
@@ -974,12 +982,6 @@ CompilerProto.destroy = function () {
         }
     }
 
-    // destroy all children
-    i = children.length
-    while (i--) {
-        children[i].destroy()
-    }
-
     // remove self from parent
     if (parent) {
         j = parent.children.indexOf(compiler)
@@ -987,10 +989,12 @@ CompilerProto.destroy = function () {
     }
 
     // finally remove dom element
-    if (el === document.body) {
-        el.innerHTML = ''
-    } else {
-        vm.$remove()
+    if (!noRemove) {
+        if (el === document.body) {
+            el.innerHTML = ''
+        } else {
+            vm.$remove()
+        }
     }
     el.vue_vm = null
 
