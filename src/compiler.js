@@ -523,10 +523,24 @@ CompilerProto.compileElement = function (node, root) {
         node.vue_effect = this.eval(utils.attr(node, 'effect'))
 
         var prefix = config.prefix + '-',
-            attrs = slice.call(node.attributes),
             params = this.options.paramAttributes,
             attr, attrname, isDirective, exp, directives, directive, dirname
 
+        // v-with has special priority among the rest
+        // it needs to pull in the value from the parent before
+        // computed properties are evaluated, because at this stage
+        // the computed properties have not set up their dependencies yet.
+        if (root) {
+            var withExp = utils.attr(node, 'with')
+            if (withExp) {
+                directives = this.parseDirective('with', withExp, node, true)
+                for (j = 0, k = directives.length; j < k; j++) {
+                    this.bindDirective(directives[j], this.parent)
+                }
+            }
+        }
+
+        var attrs = slice.call(node.attributes)
         for (i = 0, l = attrs.length; i < l; i++) {
 
             attr = attrs[i]
@@ -542,12 +556,7 @@ CompilerProto.compileElement = function (node, root) {
                 // loop through clauses (separated by ",")
                 // inside each attribute
                 for (j = 0, k = directives.length; j < k; j++) {
-                    directive = directives[j]
-                    if (dirname === 'with') {
-                        this.bindDirective(directive, this.parent)
-                    } else {
-                        this.bindDirective(directive)
-                    }
+                    this.bindDirective(directives[j])
                 }
             } else if (config.interpolate) {
                 // non directive attribute, check interpolation tags
