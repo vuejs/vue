@@ -50,5 +50,14 @@
     "karma-html2js-preprocessor": "~0.1.0",
     "karma-jasmine": "~0.1.5",
     "karma-coffee-preprocessor": "~0.1.2"
+  },
+  "spm": {
+    "main": "src/main.js",
+    "ignore": [
+      "dist",
+      "examples",
+      "task",
+      "test"
+    ]
   }
 }
