@@ -97,6 +97,10 @@ function Compiler (vm, options) {
         compiler.parent = parentVM.$compiler
         parentVM.$compiler.children.push(compiler)
         vm.$parent = parentVM
+        // inherit lazy option
+        if (!('lazy' in options)) {
+            options.lazy = compiler.parent.options.lazy
+        }
     }
     vm.$root = getRoot(compiler).vm
 
