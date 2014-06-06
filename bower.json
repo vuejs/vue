@@ -1,6 +1,6 @@
 {
     "name": "vue",
-    "version": "0.10.4",
+    "version": "0.10.5",
     "main": "dist/vue.js",
     "description": "Simple, Fast & Composable MVVM for building interative interfaces",
     "authors": ["Evan You <yyx990803@gmail.com>"],

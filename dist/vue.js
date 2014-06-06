@@ -1,5 +1,5 @@
 /*
- Vue.js v0.10.4
+ Vue.js v0.10.5
  (c) 2014 Evan You
  License: MIT
 */
@@ -517,13 +517,15 @@ Object.defineProperty(module.exports, 'delimiters', {
 })
 });
 require.register("vue/src/utils.js", function(exports, require, module){
-var config    = require('./config'),
-    toString  = ({}).toString,
-    win       = window,
-    console   = win.console,
-    def       = Object.defineProperty,
-    OBJECT    = 'object',
-    THIS_RE   = /[^\w]this[^\w]/,
+var config       = require('./config'),
+    toString     = ({}).toString,
+    win          = window,
+    console      = win.console,
+    def          = Object.defineProperty,
+    OBJECT       = 'object',
+    THIS_RE      = /[^\w]this[^\w]/,
+    BRACKET_RE_S = /\['([^']+)'\]/g,
+    BRACKET_RE_D = /\["([^"]+)"\]/g,
     hasClassList = 'classList' in document.documentElement,
     ViewModel // late def
 
@@ -531,6 +533,16 @@ var defer =
     win.requestAnimationFrame ||
     win.webkitRequestAnimationFrame ||
     win.setTimeout
+
+/**
+ *  Normalize keypath with possible brackets into dot notations
+ */
+function normalizeKeypath (key) {
+    return key.indexOf('[') < 0
+        ? key
+        : key.replace(BRACKET_RE_S, '.$1')
+             .replace(BRACKET_RE_D, '.$1')
+}
 
 var utils = module.exports = {
 
@@ -544,6 +556,7 @@ var utils = module.exports = {
      */
     get: function (obj, key) {
         /* jshint eqeqeq: false */
+        key = normalizeKeypath(key)
         if (key.indexOf('.') < 0) {
             return obj[key]
         }
@@ -560,6 +573,7 @@ var utils = module.exports = {
      */
     set: function (obj, key, val) {
         /* jshint eqeqeq: false */
+        key = normalizeKeypath(key)
         if (key.indexOf('.') < 0) {
             obj[key] = val
             return
@@ -982,20 +996,6 @@ function Compiler (vm, options) {
     compiler.children = []
     compiler.emitter  = new Emitter(vm)
 
-    // create bindings for computed properties
-    if (options.methods) {
-        for (key in options.methods) {
-            compiler.createBinding(key)
-        }
-    }
-
-    // create bindings for methods
-    if (options.computed) {
-        for (key in options.computed) {
-            compiler.createBinding(key)
-        }
-    }
-
     // VM ---------------------------------------------------------------------
 
     // set VM properties
@@ -1011,6 +1011,10 @@ function Compiler (vm, options) {
         compiler.parent = parentVM.$compiler
         parentVM.$compiler.children.push(compiler)
         vm.$parent = parentVM
+        // inherit lazy option
+        if (!('lazy' in options)) {
+            options.lazy = compiler.parent.options.lazy
+        }
     }
     vm.$root = getRoot(compiler).vm
 
@@ -1019,6 +1023,20 @@ function Compiler (vm, options) {
     // setup observer
     // this is necesarry for all hooks and data observation events
     compiler.setupObserver()
+
+    // create bindings for computed properties
+    if (options.methods) {
+        for (key in options.methods) {
+            compiler.createBinding(key)
+        }
+    }
+
+    // create bindings for methods
+    if (options.computed) {
+        for (key in options.computed) {
+            compiler.createBinding(key)
+        }
+    }
 
     // initialize data
     var data = compiler.data = options.data || {},
@@ -1437,37 +1455,48 @@ CompilerProto.compileElement = function (node, root) {
         node.vue_effect = this.eval(utils.attr(node, 'effect'))
 
         var prefix = config.prefix + '-',
-            attrs = slice.call(node.attributes),
             params = this.options.paramAttributes,
-            attr, isDirective, exp, directives, directive, dirname
+            attr, attrname, isDirective, exp, directives, directive, dirname
 
+        // v-with has special priority among the rest
+        // it needs to pull in the value from the parent before
+        // computed properties are evaluated, because at this stage
+        // the computed properties have not set up their dependencies yet.
+        if (root) {
+            var withExp = utils.attr(node, 'with')
+            if (withExp) {
+                directives = this.parseDirective('with', withExp, node, true)
+                for (j = 0, k = directives.length; j < k; j++) {
+                    this.bindDirective(directives[j], this.parent)
+                }
+            }
+        }
+
+        var attrs = slice.call(node.attributes)
         for (i = 0, l = attrs.length; i < l; i++) {
 
             attr = attrs[i]
+            attrname = attr.name
             isDirective = false
 
-            if (attr.name.indexOf(prefix) === 0) {
+            if (attrname.indexOf(prefix) === 0) {
                 // a directive - split, parse and bind it.
                 isDirective = true
-                dirname = attr.name.slice(prefix.length)
+                dirname = attrname.slice(prefix.length)
                 // build with multiple: true
                 directives = this.parseDirective(dirname, attr.value, node, true)
                 // loop through clauses (separated by ",")
                 // inside each attribute
                 for (j = 0, k = directives.length; j < k; j++) {
-                    directive = directives[j]
-                    if (dirname === 'with') {
-                        this.bindDirective(directive, this.parent)
-                    } else {
-                        this.bindDirective(directive)
-                    }
+                    this.bindDirective(directives[j])
                 }
             } else if (config.interpolate) {
                 // non directive attribute, check interpolation tags
                 exp = TextParser.parseAttr(attr.value)
                 if (exp) {
-                    directive = this.parseDirective('attr', attr.name + ':' + exp, node)
-                    if (params && params.indexOf(attr.name) > -1) {
+                    directive = this.parseDirective('attr', exp, node)
+                    directive.arg = attrname
+                    if (params && params.indexOf(attrname) > -1) {
                         // a param attribute... we should use the parent binding
                         // to avoid circular updates like size={{size}}
                         this.bindDirective(directive, this.parent)
@@ -1478,7 +1507,7 @@ CompilerProto.compileElement = function (node, root) {
             }
 
             if (isDirective && dirname !== 'cloak') {
-                node.removeAttribute(attr.name)
+                node.removeAttribute(attrname)
             }
         }
 
@@ -1618,7 +1647,7 @@ CompilerProto.createBinding = function (key, directive) {
         compiler.defineExp(key, binding, directive)
     } else if (isFn) {
         bindings[key] = binding
-        binding.value = compiler.vm[key] = methods[key]
+        compiler.defineVmProp(key, binding, methods[key])
     } else {
         bindings[key] = binding
         if (binding.root) {
@@ -1628,9 +1657,12 @@ CompilerProto.createBinding = function (key, directive) {
                 compiler.defineComputed(key, binding, computed[key])
             } else if (key.charAt(0) !== '$') {
                 // normal property
-                compiler.defineProp(key, binding)
+                compiler.defineDataProp(key, binding)
             } else {
-                compiler.defineMeta(key, binding)
+                // properties that start with $ are meta properties
+                // they should be kept on the vm but not in the data object.
+                compiler.defineVmProp(key, binding, compiler.data[key])
+                delete compiler.data[key]
             }
         } else if (computed && computed[utils.baseKey(key)]) {
             // nested path on computed property
@@ -1652,10 +1684,10 @@ CompilerProto.createBinding = function (key, directive) {
 }
 
 /**
- *  Define the getter/setter for a root-level property on the VM
- *  and observe the initial value
+ *  Define the getter/setter to proxy a root-level
+ *  data property on the VM
  */
-CompilerProto.defineProp = function (key, binding) {
+CompilerProto.defineDataProp = function (key, binding) {
     var compiler = this,
         data     = compiler.data,
         ob       = data.__emitter__
@@ -1685,14 +1717,13 @@ CompilerProto.defineProp = function (key, binding) {
 }
 
 /**
- *  Define a meta property, e.g. $index or $key,
- *  which is bindable but only accessible on the VM,
+ *  Define a vm property, e.g. $index, $key, or mixin methods
+ *  which are bindable but only accessible on the VM,
  *  not in the data.
  */
-CompilerProto.defineMeta = function (key, binding) {
+CompilerProto.defineVmProp = function (key, binding, value) {
     var ob = this.observer
-    binding.value = this.data[key]
-    delete this.data[key]
+    binding.value = value
     def(this.vm, key, {
         get: function () {
             if (Observer.shouldGet) ob.emit('get', key)
@@ -1833,7 +1864,7 @@ CompilerProto.resolveComponent = function (node, data, test) {
 /**
  *  Unbind and remove element
  */
-CompilerProto.destroy = function () {
+CompilerProto.destroy = function (noRemove) {
 
     // avoid being called more than once
     // this is irreversible!
@@ -1853,6 +1884,14 @@ CompilerProto.destroy = function () {
 
     // unobserve data
     Observer.unobserve(compiler.data, '', compiler.observer)
+
+    // destroy all children
+    // do not remove their elements since the parent
+    // may have transitions and the children may not
+    i = children.length
+    while (i--) {
+        children[i].destroy(true)
+    }
 
     // unbind all direcitves
     i = directives.length
@@ -1886,12 +1925,6 @@ CompilerProto.destroy = function () {
         }
     }
 
-    // destroy all children
-    i = children.length
-    while (i--) {
-        children[i].destroy()
-    }
-
     // remove self from parent
     if (parent) {
         j = parent.children.indexOf(compiler)
@@ -1899,10 +1932,12 @@ CompilerProto.destroy = function () {
     }
 
     // finally remove dom element
-    if (el === document.body) {
-        el.innerHTML = ''
-    } else {
-        vm.$remove()
+    if (!noRemove) {
+        if (el === document.body) {
+            el.innerHTML = ''
+        } else {
+            vm.$remove()
+        }
     }
     el.vue_vm = null
 
@@ -2670,7 +2705,8 @@ var dirId           = 1,
     FILTER_TOKEN_RE = /[^\s'"]+|'[^']+'|"[^"]+"/g,
     NESTING_RE      = /^\$(parent|root)\./,
     SINGLE_VAR_RE   = /^[\w\.$]+$/,
-    QUOTE_RE        = /"/g
+    QUOTE_RE        = /"/g,
+    TextParser      = require('./text-parser')
 
 /**
  *  Directive class
@@ -2705,11 +2741,12 @@ function Directive (name, ast, definition, compiler, el) {
         return
     }
 
-    this.expression = (
-        this.isLiteral
-            ? compiler.eval(this.expression)
-            : this.expression
-    ).trim()
+    if (TextParser.Regex.test(this.key)) {
+        this.key = compiler.eval(this.key)
+        if (this.isLiteral) {
+            this.expression = this.key
+        }
+    }
 
     var filters = ast.filters,
         filter, fn, i, l, computed
@@ -2827,7 +2864,7 @@ Directive.parse = function (str) {
             arg = str.slice(begin, i).trim()
             if (ARG_RE.test(arg)) {
                 argIndex = i + 1
-                dir.arg = str.slice(begin, i).trim()
+                dir.arg = arg
             }
         } else if (c === '|' && str.charAt(i + 1) !== '|' && str.charAt(i - 1) !== '|') {
             if (dir.key === undefined) {
@@ -3118,9 +3155,10 @@ require.register("vue/src/text-parser.js", function(exports, require, module){
 var openChar        = '{',
     endChar         = '}',
     ESCAPE_RE       = /[-.*+?^${}()|[\]\/\\]/g,
-    BINDING_RE      = buildInterpolationRegex(),
     // lazy require
     Directive
+
+exports.Regex = buildInterpolationRegex()
 
 function buildInterpolationRegex () {
     var open = escapeRegex(openChar),
@@ -3133,10 +3171,10 @@ function escapeRegex (str) {
 }
 
 function setDelimiters (delimiters) {
-    exports.delimiters = delimiters
     openChar = delimiters[0]
     endChar = delimiters[1]
-    BINDING_RE = buildInterpolationRegex()
+    exports.delimiters = delimiters
+    exports.Regex = buildInterpolationRegex()
 }
 
 /** 
@@ -3147,10 +3185,10 @@ function setDelimiters (delimiters) {
  *  3. object with key & html = true
  */
 function parse (text) {
-    if (!BINDING_RE.test(text)) return null
+    if (!exports.Regex.test(text)) return null
     var m, i, token, match, tokens = []
     /* jshint boss: true */
-    while (m = text.match(BINDING_RE)) {
+    while (m = text.match(exports.Regex)) {
         i = m.index
         if (i > 0) tokens.push(text.slice(0, i))
         token = { key: m[1].trim() }
@@ -3542,8 +3580,6 @@ var transition = module.exports = function (el, stage, cb, compiler) {
 
 }
 
-transition.codes = codes
-
 /**
  *  Togggle a CSS class to trigger transition
  */
@@ -3681,9 +3717,9 @@ function sniffEndEvents () {
     var el = document.createElement('vue'),
         defaultEvent = 'transitionend',
         events = {
+            'webkitTransition' : 'webkitTransitionEnd',
             'transition'       : defaultEvent,
-            'mozTransition'    : defaultEvent,
-            'webkitTransition' : 'webkitTransitionEnd'
+            'mozTransition'    : defaultEvent
         },
         ret = {}
     for (var name in events) {
@@ -3697,6 +3733,10 @@ function sniffEndEvents () {
         : 'webkitAnimationEnd'
     return ret
 }
+
+// Expose some stuff for testing purposes
+transition.codes = codes
+transition.sniff = sniffEndEvents
 });
 require.register("vue/src/batcher.js", function(exports, require, module){
 var utils = require('./utils')
@@ -4196,6 +4236,13 @@ module.exports = {
         this.context = this.binding.isExp
             ? this.vm
             : this.binding.compiler.vm
+        if (this.el.tagName === 'IFRAME' && this.arg !== 'load') {
+            var self = this
+            this.iframeBind = function () {
+                self.el.contentWindow.addEventListener(self.arg, self.handler)
+            }
+            this.el.addEventListener('load', this.iframeBind)
+        }
     },
 
     update: function (handler) {
@@ -4203,7 +4250,7 @@ module.exports = {
             utils.warn('Directive "v-on:' + this.expression + '" expects a method.')
             return
         }
-        this.unbind()
+        this.reset()
         var vm = this.vm,
             context = this.context
         this.handler = function (e) {
@@ -4213,11 +4260,23 @@ module.exports = {
             context.$event = null
             return res
         }
-        this.el.addEventListener(this.arg, this.handler)
+        if (this.iframeBind) {
+            this.iframeBind()
+        } else {
+            this.el.addEventListener(this.arg, this.handler)
+        }
+    },
+
+    reset: function () {
+        var el = this.iframeBind
+            ? this.el.contentWindow
+            : this.el
+        el.removeEventListener(this.arg, this.handler)
     },
 
     unbind: function () {
-        this.el.removeEventListener(this.arg, this.handler)
+        this.reset()
+        this.el.removeEventListener('load', this.iframeBind)
     }
 }
 });
@@ -4441,7 +4500,7 @@ module.exports = {
         if (!this.alone && !this.lock) {
             if (this.arg) {
                 this.vm.$set(this.arg, value)
-            } else {
+            } else if (this.vm.$data !== value) {
                 this.vm.$data = value
             }
         }
@@ -4493,12 +4552,7 @@ module.exports = {
 }
 });
 require.register("vue/src/directives/style.js", function(exports, require, module){
-var camelRE = /-([a-z])/g,
-    prefixes = ['webkit', 'moz', 'ms']
-
-function camelReplacer (m) {
-    return m[1].toUpperCase()
-}
+var prefixes = ['-webkit-', '-moz-', '-ms-']
 
 /**
  *  Binding for CSS styles
@@ -4508,27 +4562,28 @@ module.exports = {
     bind: function () {
         var prop = this.arg
         if (!prop) return
-        var first = prop.charAt(0)
-        if (first === '$') {
+        if (prop.charAt(0) === '$') {
             // properties that start with $ will be auto-prefixed
             prop = prop.slice(1)
             this.prefixed = true
-        } else if (first === '-') {
-            // normal starting hyphens should not be converted
-            prop = prop.slice(1)
         }
-        this.prop = prop.replace(camelRE, camelReplacer)
+        this.prop = prop
     },
 
     update: function (value) {
         var prop = this.prop
         if (prop) {
-            this.el.style[prop] = value
+            var isImportant = value.slice(-10) === '!important'
+                ? 'important'
+                : ''
+            if (isImportant) {
+                value = value.slice(0, -10).trim()
+            }
+            this.el.style.setProperty(prop, value, isImportant)
             if (this.prefixed) {
-                prop = prop.charAt(0).toUpperCase() + prop.slice(1)
                 var i = prefixes.length
                 while (i--) {
-                    this.el.style[prefixes[i] + prop] = value
+                    this.el.style.setProperty(prefixes[i] + prop, value, isImportant)
                 }
             }
         } else {
@@ -4583,7 +4638,7 @@ module.exports = {
 
             // just set innerHTML...
             el.innerHTML = ''
-            el.appendChild(partial.cloneNode(true))
+            el.appendChild(partial)
 
         }
     }
