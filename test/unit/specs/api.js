@@ -470,6 +470,29 @@ describe('API', function () {
                     assert.strictEqual(t.d, methods.d)
                 })
 
+                it('should be bindable like normal properties', function (done) {
+                    var Test = Vue.extend({
+                        template: '{{ go(msg) }}',
+                        data: {
+                            msg: 'ok'
+                        },
+                        methods: {
+                            go: function (v) {
+                                return v + ' before'
+                            }
+                        }
+                    })
+                    var vm = new Test()
+                    assert.equal(vm.$el.textContent, 'ok before')
+                    vm.go = function (v) {
+                        return v + ' after'
+                    }
+                    nextTick(function () {
+                        assert.equal(vm.$el.textContent, 'ok after')
+                        done()
+                    })
+                })
+
             })
 
             describe('data', function () {

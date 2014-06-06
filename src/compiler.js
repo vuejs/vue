@@ -68,20 +68,6 @@ function Compiler (vm, options) {
     compiler.children = []
     compiler.emitter  = new Emitter(vm)
 
-    // create bindings for computed properties
-    if (options.methods) {
-        for (key in options.methods) {
-            compiler.createBinding(key)
-        }
-    }
-
-    // create bindings for methods
-    if (options.computed) {
-        for (key in options.computed) {
-            compiler.createBinding(key)
-        }
-    }
-
     // VM ---------------------------------------------------------------------
 
     // set VM properties
@@ -109,6 +95,20 @@ function Compiler (vm, options) {
     // setup observer
     // this is necesarry for all hooks and data observation events
     compiler.setupObserver()
+
+    // create bindings for computed properties
+    if (options.methods) {
+        for (key in options.methods) {
+            compiler.createBinding(key)
+        }
+    }
+
+    // create bindings for methods
+    if (options.computed) {
+        for (key in options.computed) {
+            compiler.createBinding(key)
+        }
+    }
 
     // initialize data
     var data = compiler.data = options.data || {},
@@ -719,7 +719,7 @@ CompilerProto.createBinding = function (key, directive) {
         compiler.defineExp(key, binding, directive)
     } else if (isFn) {
         bindings[key] = binding
-        binding.value = compiler.vm[key] = methods[key]
+        compiler.defineVmProp(key, binding, methods[key])
     } else {
         bindings[key] = binding
         if (binding.root) {
@@ -729,9 +729,12 @@ CompilerProto.createBinding = function (key, directive) {
                 compiler.defineComputed(key, binding, computed[key])
             } else if (key.charAt(0) !== '$') {
                 // normal property
-                compiler.defineProp(key, binding)
+                compiler.defineDataProp(key, binding)
             } else {
-                compiler.defineMeta(key, binding)
+                // properties that start with $ are meta properties
+                // they should be kept on the vm but not in the data object.
+                compiler.defineVmProp(key, binding, compiler.data[key])
+                delete compiler.data[key]
             }
         } else if (computed && computed[utils.baseKey(key)]) {
             // nested path on computed property
@@ -753,10 +756,10 @@ CompilerProto.createBinding = function (key, directive) {
 }
 
 /**
- *  Define the getter/setter for a root-level property on the VM
- *  and observe the initial value
+ *  Define the getter/setter to proxy a root-level
+ *  data property on the VM
  */
-CompilerProto.defineProp = function (key, binding) {
+CompilerProto.defineDataProp = function (key, binding) {
     var compiler = this,
         data     = compiler.data,
         ob       = data.__emitter__
@@ -786,14 +789,13 @@ CompilerProto.defineProp = function (key, binding) {
 }
 
 /**
- *  Define a meta property, e.g. $index or $key,
- *  which is bindable but only accessible on the VM,
+ *  Define a vm property, e.g. $index, $key, or mixin methods
+ *  which are bindable but only accessible on the VM,
  *  not in the data.
  */
-CompilerProto.defineMeta = function (key, binding) {
+CompilerProto.defineVmProp = function (key, binding, value) {
     var ob = this.observer
-    binding.value = this.data[key]
-    delete this.data[key]
+    binding.value = value
     def(this.vm, key, {
         get: function () {
             if (Observer.shouldGet) ob.emit('get', key)
