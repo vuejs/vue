@@ -41,7 +41,7 @@ module.exports = {
         if (!this.alone && !this.lock) {
             if (this.arg) {
                 this.vm.$set(this.arg, value)
-            } else {
+            } else if (this.vm.$data !== value) {
                 this.vm.$data = value
             }
         }
