@@ -11,6 +11,13 @@ module.exports = {
         this.context = this.binding.isExp
             ? this.vm
             : this.binding.compiler.vm
+        if (this.el.tagName === 'IFRAME' && this.arg !== 'load') {
+            var self = this
+            this.iframeBind = function () {
+                self.el.contentWindow.addEventListener(self.arg, self.handler)
+            }
+            this.el.addEventListener('load', this.iframeBind)
+        }
     },
 
     update: function (handler) {
@@ -18,7 +25,7 @@ module.exports = {
             utils.warn('Directive "v-on:' + this.expression + '" expects a method.')
             return
         }
-        this.unbind()
+        this.reset()
         var vm = this.vm,
             context = this.context
         this.handler = function (e) {
@@ -28,10 +35,22 @@ module.exports = {
             context.$event = null
             return res
         }
-        this.el.addEventListener(this.arg, this.handler)
+        if (this.iframeBind) {
+            this.iframeBind()
+        } else {
+            this.el.addEventListener(this.arg, this.handler)
+        }
+    },
+
+    reset: function () {
+        var el = this.iframeBind
+            ? this.el.contentWindow
+            : this.el
+        el.removeEventListener(this.arg, this.handler)
     },
 
     unbind: function () {
-        this.el.removeEventListener(this.arg, this.handler)
+        this.reset()
+        this.el.removeEventListener('load', this.iframeBind)
     }
 }
