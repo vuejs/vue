@@ -42,7 +42,9 @@ module.exports = {
             if (this.arg) {
                 this.vm.$set(this.arg, value)
             } else if (this.vm.$data !== value) {
-                this.vm.$data = value
+              this.vm.$data = this.vm.$data
+              ? utils.extend(this.vm.$data, value)
+              : value
             }
         }
     }
