@@ -17,10 +17,11 @@ module.exports = {
     },
 
     update: function (value) {
-        var prop = this.prop
+        var prop = this.prop,
+            isImportant
         if (prop) {
             if (value){
-                var isImportant = value.slice(-10) === '!important'
+                isImportant = value.slice(-10) === '!important'
                     ? 'important'
                     : ''
                 if (isImportant) {
