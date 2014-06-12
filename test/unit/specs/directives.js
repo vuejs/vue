@@ -715,6 +715,14 @@ describe('Directives', function () {
             assert.strictEqual(d.el.style.color, 'rgb(255, 255, 255)')
         })
 
+        it('should apply a style with a number value', function () {
+            var d = mockDirective('style')
+            d.arg = 'line-height'
+            d.bind()
+            d.update(5)
+            assert.strictEqual(d.el.style.lineHeight, '5')
+        })
+
     })
 
     describe('cloak', function () {

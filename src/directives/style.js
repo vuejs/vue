@@ -17,15 +17,12 @@ module.exports = {
     },
 
     update: function (value) {
-        var prop = this.prop
+        var prop        = this.prop,
+            isImportant = ''
         if (prop) {
-            if (value){
-                var isImportant = value.slice(-10) === '!important'
-                    ? 'important'
-                    : ''
-                if (isImportant) {
-                    value = value.slice(0, -10).trim()
-                }
+            if (value && value.slice && value.slice(-10) === '!important') {
+                isImportant = 'important'
+                value = value.slice(0, -10).trim()
             }
             this.el.style.setProperty(prop, value, isImportant)
             if (this.prefixed) {
