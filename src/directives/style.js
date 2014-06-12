@@ -19,8 +19,11 @@ module.exports = {
     update: function (value) {
         var prop = this.prop,
             isImportant
+        /* jshint eqeqeq: true */
+        // cast possible numbers/booleans into strings
+        if (value != null) value += ''
         if (prop) {
-            if (value){
+            if (value) {
                 isImportant = value.slice(-10) === '!important'
                     ? 'important'
                     : ''
