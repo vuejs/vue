@@ -149,26 +149,28 @@ module.exports = {
             targetNext = vms[i + 1]
             if (vm.$reused) {
                 nextEl = vm.$el.nextSibling
-                // destroyed VMs' element might still be in the DOM
-                // due to transitions
-                while (!nextEl.vue_vm && nextEl !== this.ref) {
-                    nextEl = nextEl.nextSibling
-                }
-                currentNext = nextEl.vue_vm
-                if (currentNext !== targetNext) {
-                    if (!targetNext) {
-                        ctn.insertBefore(vm.$el, this.ref)
-                    } else {
-                        nextEl = targetNext.$el
-                        // new VMs' element might not be in the DOM yet
-                        // due to transitions
-                        while (!nextEl.parentNode) {
-                            targetNext = vms[nextEl.vue_vm.$index + 1]
-                            nextEl = targetNext
-                                ? targetNext.$el
-                                : this.ref
+                if (nextEl) {
+                    // destroyed VMs' element might still be in the DOM
+                    // due to transitions
+                    while (!nextEl.vue_vm && nextEl !== this.ref) {
+                        nextEl = nextEl.nextSibling
+                    }
+                    currentNext = nextEl.vue_vm
+                    if (currentNext !== targetNext) {
+                        if (!targetNext) {
+                            ctn.insertBefore(vm.$el, this.ref)
+                        } else {
+                            nextEl = targetNext.$el
+                            // new VMs' element might not be in the DOM yet
+                            // due to transitions
+                            while (!nextEl.parentNode) {
+                                targetNext = vms[nextEl.vue_vm.$index + 1]
+                                nextEl = targetNext
+                                    ? targetNext.$el
+                                    : this.ref
+                            }
+                            ctn.insertBefore(vm.$el, nextEl)
                         }
-                        ctn.insertBefore(vm.$el, nextEl)
                     }
                 }
                 delete vm.$reused
