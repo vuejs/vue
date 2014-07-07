@@ -81,8 +81,8 @@ def(VMProto, '$unwatch', function (key, callback) {
 /**
  *  unbind everything, remove everything
  */
-def(VMProto, '$destroy', function () {
-    this.$compiler.destroy()
+def(VMProto, '$destroy', function (noRemove) {
+    this.$compiler.destroy(noRemove)
 })
 
 /**
