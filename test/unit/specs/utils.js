@@ -1,4 +1,5 @@
 describe('Utils', function () {
+    afterEach(cleanupMocks)
 
     var utils = require('vue/src/utils'),
         config = require('vue/src/config')
@@ -215,23 +216,9 @@ describe('Utils', function () {
 
     describe('toFragment', function () {
         
-        it('should convert a string tempalte to a documentFragment', function () {
+        it('should convert a string template to a documentFragment', function () {
             var template = '<div class="a">hi</div><p>ha</p>',
                 frag = utils.toFragment(template)
-            assert.ok(frag instanceof window.DocumentFragment)
-            assert.equal(frag.querySelector('.a').textContent, 'hi')
-            assert.equal(frag.querySelector('p').textContent, 'ha')
-        })
-
-        it('should also work if the string is an ID selector', function () {
-            var id = 'utils-template-to-fragment',
-                template = '<div class="a">hi</div><p>ha</p>',
-                el = document.createElement('template')
-                el.id = id
-                el.innerHTML = template
-            document.getElementById('test').appendChild(el)
-
-            var frag = utils.toFragment('#' + id)
             assert.ok(frag instanceof window.DocumentFragment)
             assert.equal(frag.querySelector('.a').textContent, 'hi')
             assert.equal(frag.querySelector('p').textContent, 'ha')
@@ -249,6 +236,75 @@ describe('Utils', function () {
             assert.equal(frag.firstChild.tagName.toLowerCase(), 'polygon')
             assert.equal(frag.firstChild.namespaceURI, 'http://www.w3.org/2000/svg')
         })
+
+    })
+
+    describe('parseTemplateOption', function () {
+        
+        afterEach(cleanupMocks)
+
+        it('should convert a string template to a documentFragment', function () {
+            var template = '<div class="a">hi</div><p>ha</p>',
+                frag = utils.parseTemplateOption(template)
+            assert.ok(frag instanceof window.DocumentFragment)
+            assert.equal(frag.querySelector('.a').textContent, 'hi')
+            assert.equal(frag.querySelector('p').textContent, 'ha')
+        })
+
+        describe('id selector', function() {
+            it('should work with a TEMPLATE tag', function() {
+                var id       = 'utils-template-parse-template-option-template-tag',
+                    template = '<div class="a">hi</div><p>ha</p>',
+                    el       = document.createElement('template')
+                el.id = id
+                el.innerHTML = template
+                appendMock(el)
+
+                var frag = utils.parseTemplateOption('#' + id)
+                assert.ok(frag instanceof window.DocumentFragment)
+                assert.equal(frag.querySelector('.a').textContent, 'hi')
+                assert.equal(frag.querySelector('p').textContent, 'ha')
+            })
+
+            it('should work with a DIV tag', function() {
+                var id       = 'utils-template-parse-template-option-div-tag',
+                    template = '<div class="a">hi</div><p>ha</p>',
+                    el       = document.createElement('div')
+                el.id = id
+                el.innerHTML = template
+                appendMock(el)
+
+                var frag = utils.parseTemplateOption('#' + id)
+                assert.ok(frag instanceof window.DocumentFragment)
+                assert.equal(frag.querySelector('.a').textContent, 'hi')
+                assert.equal(frag.querySelector('p').textContent, 'ha')
+            })
+        })
+
+        describe('when passed a Node', function() {
+            it('should work with a TEMPLATE tag', function() {
+                var el = document.createElement('template')
+                el.innerHTML = '<div class="a">hi</div><p>ha</p>'
+
+                var frag = utils.parseTemplateOption(el)
+                assert.ok(frag instanceof window.DocumentFragment)
+                assert.equal(frag.querySelector('.a').textContent, 'hi')
+                assert.equal(frag.querySelector('p').textContent, 'ha')
+            })
+
+            it('should work with a DIV tag', function() {
+                var el = document.createElement('div')
+                el.innerHTML = '<span class="a">hi</span><p>ha</p>'
+
+                var frag = utils.parseTemplateOption(el)
+                assert.ok(frag instanceof window.DocumentFragment)
+
+                assert.equal(frag.firstChild.outerHTML, el.outerHTML)
+                assert.equal(frag.querySelector('.a').textContent, 'hi')
+                assert.equal(frag.querySelector('p').textContent, 'ha')
+            })
+        })
+
 
     })
 
@@ -270,6 +326,17 @@ describe('Utils', function () {
 
     describe('processOptions', function () {
         
+        beforeEach(function() {
+            var id = 'utils-template-to-fragment',
+                template = '<div class="a">hi</div><p>ha</p>',
+                el = document.createElement('template')
+            el.id = id
+            el.innerHTML = template
+            appendMock(el)
+        })
+
+        afterEach(cleanupMocks)
+
         var options = {
             partials: {
                 a: '#utils-template-to-fragment',
