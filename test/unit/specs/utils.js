@@ -1,3 +1,5 @@
+/* global cleanupMocks, appendMock */
+
 describe('Utils', function () {
     afterEach(cleanupMocks)
 
