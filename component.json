@@ -1,0 +1,43 @@
+{
+  "name": "vue",
+  "version": "0.11.0",
+  "main": "src/main.js",
+  "author": "Evan You <yyx990803@gmail.com>",
+  "description": "Simple, Fast & Composable MVVM for building interative interfaces",
+  "keywords": [
+    "mvvm",
+    "framework",
+    "data binding"
+  ],
+  "license": "MIT",
+  "scripts": [
+    "src/api/asset-register.js",
+    "src/api/config.js",
+    "src/api/extend.js",
+    "src/api/require.js",
+    "src/api/use.js",
+    "src/batcher.js",
+    "src/binding.js",
+    "src/compiler/compiler.js",
+    "src/config.js",
+    "src/directive.js",
+    "src/emitter.js",
+    "src/instance/data.js",
+    "src/instance/dom.js",
+    "src/instance/events.js",
+    "src/instance/lifecycle.js",
+    "src/observer/observer.js",
+    "src/observer/watch-array.js",
+    "src/observer/watch-object.js",
+    "src/parsers/directive.js",
+    "src/parsers/expression.js",
+    "src/parsers/path.js",
+    "src/parsers/template.js",
+    "src/parsers/text.js",
+    "src/transition/css.js",
+    "src/transition/js.js",
+    "src/transition/transition.js",
+    "src/util.js",
+    "src/vue.js"
+  ]
+}

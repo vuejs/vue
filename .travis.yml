@@ -1,0 +1,12 @@
+language: node_js
+node_js:
+- '0.10'
+branches:
+  only:
+  - master
+before_install:
+- npm install -g grunt-cli phantomjs casperjs
+env:
+  global:
+  - secure: Ce9jxsESszOnGyj3A6wILO5W412El9iD/HCHiFgbr8/cSXa4Yt0ZOEZysZeyaBX6IFUCjHtQPLasVgCxijDHrhi7/drmyCE+ksruk/6LJWn9C46PZK6nI+N04iYA2TRnocFllhGbyttpbpxY04smCmGWqXwLppu9nb+VIDkKGmE=
+  - secure: cZQTby8mGxb4QHi9net2/kK7N2VMOZKPepa+8ob2+jxICSukPgTqGP1iVQWR+tVlU60lFAHpos2o8vQLB4e5Rt5IFEajCr+RppE9xUWxMUulbrXaIrzz1OYA5DvTi/8ZeE6/x0+MpZJT1b/GIqhlrU4QwjjpeJWLwAkv8ysZaEs=

@@ -1,0 +1,15 @@
+test
+tasks
+examples
+explorations
+components
+.jshintrc
+.gitignore
+.travis.yml
+.npmignore
+bower.json
+component.json
+gruntfile.js
+TODO.md
+sauce_connect.log
+coverage

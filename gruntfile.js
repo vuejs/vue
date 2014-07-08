@@ -61,9 +61,15 @@ module.exports = function (grunt) {
 
   })
   
+  // load npm tasks
   grunt.loadNpmTasks('grunt-contrib-jshint')
   grunt.loadNpmTasks('grunt-karma')
   grunt.loadNpmTasks('grunt-browserify')
+
+  // load custom tasks
+  grunt.file.recurse('tasks', function (path) {
+    require('./' + path)(grunt)
+  })
 
   grunt.registerTask('unit', ['karma:browsers'])
   grunt.registerTask('watch', ['browserify:watch'])
