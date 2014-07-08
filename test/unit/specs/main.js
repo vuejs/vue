@@ -1,7 +1,7 @@
-var vue = require('../../../src/vue.js')
+var Vue = require('../../../src/vue.js')
 
 describe('test', function () {
-    it('should work', function () {
-        expect(vue.test()).toEqual(123)
-    })
+  it('should work', function () {
+    expect(Vue).toBeDefined()
+  })
 })

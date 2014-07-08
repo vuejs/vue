@@ -1,0 +1,28 @@
+{
+  "eqeqeq": true,
+  "browser": true,
+  "asi": true,
+  "multistr": true,
+  "undef": true,
+  "unused": true,
+  "trailing": true,
+  "sub": true,
+  "node": true,
+  "laxbreak": true,
+  "evil": true,
+  "globals": {
+    "console": true,
+    "it": true,
+    "describe": true,
+    "beforeEach": true,
+    "afterEach": true,
+    "expect": true,
+    "mock": true,
+    "Vue": true,
+    "$": true,
+    "mockHTMLEvent": true,
+    "mockMouseEvent": true,
+    "mockKeyEvent": true,
+    "casper": true
+  }
+}

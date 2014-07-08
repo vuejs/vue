@@ -1,15 +1,15 @@
-exports.$get = function (path) {
+exports.$get = function () {
     
 }
 
-exports.$set = function (path, val) {
+exports.$set = function () {
     
 }
 
-exports.$watch = function (key, cb) {
+exports.$watch = function () {
     
 }
 
-exports.$unwatch = function (id) {
+exports.$unwatch = function () {
     
 }

@@ -1,4 +1,4 @@
-exports.$mount = function (el) {
+exports.$mount = function () {
     
 }
 
