@@ -16,13 +16,23 @@ var Compiler   = require('./compiler'),
  *  and a few reserved methods
  */
 function ViewModel (options) {
-    // just compile. options are passed directly to compiler
+    // compile if options passed, if false return. options are passed directly to compiler
+    if (options === false) return
     new Compiler(this, options)
 }
 
 // All VM prototype methods are inenumerable
 // so it can be stringified/looped through as raw data
 var VMProto = ViewModel.prototype
+
+/**
+ *  init allows config compilation after instantiation:
+ *    var a = new Vue(false)
+ *    a.init(config)
+ */
+def(VMProto, '$init', function (options) {
+    new Compiler(this, options)
+})
 
 /**
  *  Convenience function to get a value from
@@ -81,8 +91,8 @@ def(VMProto, '$unwatch', function (key, callback) {
 /**
  *  unbind everything, remove everything
  */
-def(VMProto, '$destroy', function () {
-    this.$compiler.destroy()
+def(VMProto, '$destroy', function (noRemove) {
+    this.$compiler.destroy(noRemove)
 })
 
 /**

@@ -30,29 +30,12 @@ map.rect = [1, '<svg xmlns="http://www.w3.org/2000/svg" version="1.1">','</svg>'
 
 var TAG_RE = /<([\w:]+)/
 
-module.exports = function (template) {
-
-    if (typeof template !== 'string') {
-        return template
-    }
-
-    // template by ID
-    if (template.charAt(0) === '#') {
-        var templateNode = document.getElementById(template.slice(1))
-        if (!templateNode) return
-        // if its a template tag and the browser supports it,
-        // its content is already a document fragment!
-        if (templateNode.tagName === 'TEMPLATE' && templateNode.content) {
-            return templateNode.content
-        }
-        template = templateNode.innerHTML
-    }
-
+module.exports = function (templateString) {
     var frag = document.createDocumentFragment(),
-        m = TAG_RE.exec(template)
+        m = TAG_RE.exec(templateString)
     // text only
     if (!m) {
-        frag.appendChild(document.createTextNode(template))
+        frag.appendChild(document.createTextNode(templateString))
         return frag
     }
 
@@ -63,7 +46,7 @@ module.exports = function (template) {
         suffix = wrap[2],
         node = document.createElement('div')
 
-    node.innerHTML = prefix + template.trim() + suffix
+    node.innerHTML = prefix + templateString.trim() + suffix
     while (depth--) node = node.lastChild
 
     // one element

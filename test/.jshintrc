@@ -23,6 +23,8 @@
         "mockHTMLEvent": true,
         "mockMouseEvent": true,
         "mockKeyEvent": true,
-        "casper": true
+        "casper": true,
+        "beforeEach": true,
+        "afterEach": true
     }
 }

@@ -18,6 +18,7 @@
         "src/observer.js",
         "src/directive.js",
         "src/exp-parser.js",
+        "src/template-parser.js",
         "src/text-parser.js",
         "src/deps-parser.js",
         "src/filters.js",

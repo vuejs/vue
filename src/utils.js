@@ -33,6 +33,11 @@ var utils = module.exports = {
     toFragment: require('./fragment'),
 
     /**
+     *  Parse the various types of template options
+     */
+    parseTemplateOption: require('./template-parser.js'),
+
+    /**
      *  get a value from an object keypath
      */
     get: function (obj, key) {
@@ -226,7 +231,7 @@ var utils = module.exports = {
         }
         if (partials) {
             for (key in partials) {
-                partials[key] = utils.toFragment(partials[key])
+                partials[key] = utils.parseTemplateOption(partials[key])
             }
         }
         if (filters) {
@@ -235,7 +240,7 @@ var utils = module.exports = {
             }
         }
         if (template) {
-            options.template = utils.toFragment(template)
+            options.template = utils.parseTemplateOption(template)
         }
     },
 
