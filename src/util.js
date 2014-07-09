@@ -37,7 +37,7 @@ exports.isArray = function (obj) {
 }
 
 /**
- * Define a readonly, in-enumerable property
+ * Define a non-enumerable property
  *
  * @param {Object} obj
  * @param {String} key
@@ -46,9 +46,31 @@ exports.isArray = function (obj) {
 
 exports.define = function (obj, key, val) {
   Object.defineProperty(obj, key, {
-    value: val,
-    enumerable: false,
-    writable: false,
-    configurable: true
+    value        : val,
+    enumerable   : false,
+    writable     : true,
+    configurable : true
   })
+}
+
+/**
+ * Augment an target Object or Array by either
+ * intercepting the prototype chain using __proto__,
+ * or copy over property descriptors
+ *
+ * @param {Object|Array} target
+ * @param {Object} proto
+ */
+
+if ('__proto__' in {}) {
+  exports.augment = function (target, proto) {
+    target.__proto__ = proto
+  }
+} else {
+  exports.augment = function (target, proto) {
+    Object.getOwnPropertyNames(proto).forEach(function (key) {
+      var descriptor = Object.getOwnPropertyDescriptor(proto, key)
+      Object.defineProperty(target, key, descriptor)
+    })
+  }
 }

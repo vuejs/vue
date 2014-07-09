@@ -23,18 +23,24 @@ module.exports = function (grunt) {
         frameworks: ['jasmine', 'commonjs'],
         files: [
           'src/**/*.js',
-          'test/unit/specs/*.js'
+          'test/unit/**/*.js'
         ],
         preprocessors: {
           'src/**/*.js': ['commonjs'],
-          'test/unit/specs/*.js': ['commonjs']
+          'test/unit/**/*.js': ['commonjs']
         },
         singleRun: true
       },
       browsers: {
         options: {
-           browsers: ['Chrome', 'Firefox'],
-           reporters: ['progress']
+          browsers: ['Chrome', 'Firefox'],
+          reporters: ['progress']
+        }
+      },
+      phantom: {
+        options: {
+          browsers: ['PhantomJS'],
+          reporters: ['progress']
         }
       }
     },
@@ -72,6 +78,7 @@ module.exports = function (grunt) {
   })
 
   grunt.registerTask('unit', ['karma:browsers'])
+  grunt.registerTask('phantom', ['karma:phantom'])
   grunt.registerTask('watch', ['browserify:watch'])
   grunt.registerTask('build', ['browserify:build'])
 

@@ -11,6 +11,7 @@
   "laxbreak": true,
   "evil": true,
   "eqnull": true,
+  "proto": true,
   "globals": {
     "console": true
   }
