@@ -17,7 +17,7 @@ var Compiler   = require('./compiler'),
  */
 function ViewModel (options) {
     // compile if options passed, if false return. options are passed directly to compiler
-    if( options === false ) return;
+    if (options === false) return;
     new Compiler(this, options)
 }
 
