@@ -35,3 +35,20 @@ exports.isObject = function (obj) {
 exports.isArray = function (obj) {
   return Array.isArray(obj)
 }
+
+/**
+ * Define a readonly, in-enumerable property
+ *
+ * @param {Object} obj
+ * @param {String} key
+ * @param {*} val
+ */
+
+exports.define = function (obj, key, val) {
+  Object.defineProperty(obj, key, {
+    value: val,
+    enumerable: false,
+    writable: false,
+    configurable: true
+  })
+}
