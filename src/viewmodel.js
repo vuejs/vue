@@ -17,7 +17,7 @@ var Compiler   = require('./compiler'),
  */
 function ViewModel (options) {
     // compile if options passed, if false return. options are passed directly to compiler
-    if( options === false ) return;
+    if (options === false) return
     new Compiler(this, options)
 }
 
@@ -26,11 +26,12 @@ function ViewModel (options) {
 var VMProto = ViewModel.prototype
 
 /**
- *  init allows config compilation after instantiation
- *  var a = new Vue(false); a.init( config );
+ *  init allows config compilation after instantiation:
+ *    var a = new Vue(false)
+ *    a.init(config)
  */
-def(VMProto, 'init', function (options) {
-    new Compiler( this, options )
+def(VMProto, '$init', function (options) {
+    new Compiler(this, options)
 })
 
 /**
