@@ -29,7 +29,7 @@ var VMProto = ViewModel.prototype
  *  init allows config compilation after instantiation
  *  var a = new Vue(false); a.init( config );
  */
-def(VMProto, 'init', function (options) {
+def(VMProto, '$init', function (options) {
     new Compiler( this, options )
 })
 
