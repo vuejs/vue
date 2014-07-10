@@ -25,4 +25,16 @@ describe('Observer', function () {
     expect(spy).toHaveBeenCalledWith('b' + delimiter + 'c', 4, undefined)
   })
 
+  it('should emit get events', function () {
+    // body...
+  })
+
+  it('should emit mutation events on Array mutation', function () {
+    // body...
+  })
+
+  it('should emit ', function () {
+    // body...
+  })
+
 })
