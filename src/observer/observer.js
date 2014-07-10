@@ -30,7 +30,7 @@ function Observer (value, type) {
   this.value = value
   this.type = type
   this.initiated = false
-  this.children = Object.create(null)
+  this.adaptors = Object.create(null)
   if (value) {
     _.define(value, '$observer', this)
   }
@@ -63,26 +63,90 @@ p.init = function () {
  */
 
 p.walk = function (obj) {
-  var key, val, ob
+  var key, val
   for (key in obj) {
     val = obj[key]
-    ob = Observer.create(val)
-    if (ob) {
-      this.add(key, ob)
-      if (ob.initiated) {
-        this.deliver(key, val)
-      } else {
-        ob.init()
-      }
+    this.observe(key, val)
+    this.convert(key, val)
+  }
+}
+
+/**
+ * If a property is observable,
+ * create an Observer for it and add it as a child.
+ * This method is called only on properties observed
+ * for the first time.
+ *
+ * @param {String} key
+ * @param {*} val
+ */
+
+p.observe = function (key, val) {
+  var ob = Observer.create(val)
+  if (ob) {
+    this.add(key, ob)
+    if (ob.initiated) {
+      this.deliver(key, val)
     } else {
-      this.convert(key, val)
+      ob.init()
     }
   }
+  // emit an initial set event
+  this.emit('set', key, val)
+  if (_.isArray(val)) {
+    this.emit('set', key + '.length', val.length)
+  }
+}
+
+/**
+ * Unobserve a property.
+ * If it has an observer, remove it from children.
+ *
+ * @param {String} key
+ * @param {*} val
+ */
+
+p.unobserve = function (key, val) {
+  if (val && val.$observer) {
+    this.remove(key, val.$observer)
+  }
+}
+
+/**
+ * Convert a tip value into getter/setter so we can emit
+ * the events when the property is accessed/changed.
+ * Properties prefixed with `$` or `_` are ignored.
+ *
+ * @param {String} key
+ * @param {*} val
+ */
+
+p.convert = function (key, val) {
+  var prefix = key.charAt(0)
+  if (prefix === '$' || prefix === '_') {
+    return
+  }
+  var ob = this
+  Object.defineProperty(this.value, key, {
+    enumerable: true,
+    configurable: true,
+    get: function () {
+      ob.emit('get', key)
+      return val
+    },
+    set: function (newVal) {
+      if (newVal === val) return
+      ob.unobserve(key, val)
+      ob.observe(key, newVal)
+      val = newVal
+    }
+  })
 }
 
 /**
  * Link a list of items to the observer's value Array.
  * When any of these items emit change event, the Array will be notified.
+ * This method should only be called when value type is Array.
  *
  * @param {Array} items
  */
@@ -98,18 +162,6 @@ p.link = function (items) {
  */
 
 p.unlink = function (items) {
-  
-}
-
-/**
- * Convert a tip value into getter/setter so we can emit the events
- * when the property is accessed/changed.
- *
- * @param {String} key
- * @param {*} val
- */
-
-p.convert = function (key, val) {
   
 }
 
@@ -137,7 +189,34 @@ p.deliver = function (key, val) {
  */
 
 p.add = function (key, ob) {
+  var self = this
+  var base = key + '.'
+  var adaptors = this.adaptors[key] = {}
 
+  adaptors.get = function (path) {
+    path = base + path
+    self.emit('get', path)
+  }
+
+  adaptors.set = function (path, val) {
+    path = base + path
+    self.emit('set', path, val)
+  }
+
+  adaptors.mutate = function (path, val, mutation) {
+    // if path is empty string, the mutation
+    // comes directly from an Array
+    path = path
+      ? base + path
+      : key
+    self.emit('mutate', path, val, mutation)
+    // also emit for length
+    self.emit('set', path + '.length', val.length)
+  }
+
+  ob.on('get', adaptors.get)
+    .on('set', adaptors.set)
+    .on('mutate', adaptors.mutate)
 }
 
 /**
@@ -148,7 +227,11 @@ p.add = function (key, ob) {
  */
 
 p.remove = function (key, ob) {
-  
+  var adaptors = this.adaptors[key]
+  this.adaptors[key] = null
+  ob.off('get', adaptors.get)
+    .off('set', adaptors.set)
+    .off('mutate', adaptors.mutate)
 }
 
 /**
@@ -157,7 +240,7 @@ p.remove = function (key, ob) {
  * or the existing observer if the value already has one.
  *
  * @param {*} value
- * @return {Observer}
+ * @return {Observer|undefined}
  * @static
  */
 
