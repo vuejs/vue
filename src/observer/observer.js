@@ -40,9 +40,11 @@ function Observer (value, type) {
 var p = Observer.prototype = Object.create(Emitter.prototype)
 
 /**
+ * Simply concatenating the path segments with `.` cannot
+ * deal with keys that happen to contain the dot.
+ *
  * Instead of the dot, we use the backspace character
- * which is much less likely to appear as property keys
- * in JavaScript.
+ * which is much less likely to appear in property keys.
  */
 
 var delimiter = Observer.pathDelimiter = '\b'
