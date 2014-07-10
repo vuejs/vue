@@ -40,7 +40,7 @@ filters.currency = function (value, sign) {
     var s = Math.floor(value).toString(),
         i = s.length % 3,
         h = i > 0 ? (s.slice(0, i) + (s.length > 3 ? ',' : '')) : '',
-        f = '.' + value.toFixed(2).slice(-2)
+        f = '.' + parseFloat(value).toFixed(2).slice(-2)
     return sign + h + s.slice(i).replace(/(\d{3})(?=\d)/g, '$1,') + f
 }
 
