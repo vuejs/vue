@@ -1,4 +1,5 @@
 var Observer = require('../../src/observer/observer')
+var delimiter = Observer.pathDelimiter
 
 describe('Observer', function () {
 
@@ -21,7 +22,7 @@ describe('Observer', function () {
     obj.a = 3
     expect(spy).toHaveBeenCalledWith('a', 3, undefined)
     obj.b.c = 4
-    expect(spy).toHaveBeenCalledWith('b.c', 4, undefined)
+    expect(spy).toHaveBeenCalledWith('b' + delimiter + 'c', 4, undefined)
   })
 
 })

@@ -42,8 +42,8 @@ var arrayAugmentations = Object.create(Array.prototype)
 
     ob.link(inserted)
     ob.unlink(removed)
-    // empty key, value is self
-    ob.emit('mutate', '', this, {
+    // empty path, value is the Array itself
+    ob.emit('mutate', [], this, {
       method   : method,
       args     : args,
       result   : result,

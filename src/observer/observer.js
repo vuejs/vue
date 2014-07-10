@@ -3,17 +3,18 @@ var Emitter = require('../emitter')
 var arrayAugmentations = require('./array-augmentations')
 var objectAugmentations = require('./object-augmentations')
 
-// Type enums
+/**
+ * Type enums
+ */
 
 var ARRAY  = 0
 var OBJECT = 1
 
 /**
  * Observer class that are attached to each observed
- * object. They are essentially event emitters, but can
- * connect to each other like nodes to map the hierarchy
- * of data objects. Once connected, detected change events
- * can propagate up the nested object chain.
+ * object. Observers can connect to each other like nodes
+ * to map the hierarchy of data objects. Once connected,
+ * detected change events can propagate up the nested chain.
  *
  * The constructor can be invoked without arguments to
  * create a value-less observer that simply listens to
@@ -37,6 +38,34 @@ function Observer (value, type) {
 }
 
 var p = Observer.prototype = Object.create(Emitter.prototype)
+
+/**
+ * Instead of the dot, we use the backspace character
+ * which is much less likely to appear as property keys
+ * in JavaScript.
+ */
+
+var delimiter = Observer.pathDelimiter = '\b'
+
+/**
+ * Attempt to create an observer instance for a value,
+ * returns the new observer if successfully observed,
+ * or the existing observer if the value already has one.
+ *
+ * @param {*} value
+ * @return {Observer|undefined}
+ * @static
+ */
+
+Observer.create = function (value) {
+  if (value && value.$observer) {
+    return value.$observer
+  } if (_.isArray(value)) {
+    return new Observer(value, ARRAY)
+  } else if (_.isObject(value)) {
+    return new Observer(value, OBJECT)
+  }
+}
 
 /**
  * Initialize the observation based on value type.
@@ -94,7 +123,7 @@ p.observe = function (key, val) {
   // emit an initial set event
   this.emit('set', key, val)
   if (_.isArray(val)) {
-    this.emit('set', key + '.length', val.length)
+    this.emit('set', key + delimiter + 'length', val.length)
   }
 }
 
@@ -190,7 +219,7 @@ p.deliver = function (key, val) {
 
 p.add = function (key, ob) {
   var self = this
-  var base = key + '.'
+  var base = key + delimiter
   var adaptors = this.adaptors[key] = {}
 
   adaptors.get = function (path) {
@@ -211,7 +240,7 @@ p.add = function (key, ob) {
       : key
     self.emit('mutate', path, val, mutation)
     // also emit for length
-    self.emit('set', path + '.length', val.length)
+    self.emit('set', path + delimiter + 'length', val.length)
   }
 
   ob.on('get', adaptors.get)
@@ -232,26 +261,6 @@ p.remove = function (key, ob) {
   ob.off('get', adaptors.get)
     .off('set', adaptors.set)
     .off('mutate', adaptors.mutate)
-}
-
-/**
- * Attempt to create an observer instance for a value,
- * returns the new observer if successfully observed,
- * or the existing observer if the value already has one.
- *
- * @param {*} value
- * @return {Observer|undefined}
- * @static
- */
-
-Observer.create = function (value) {
-  if (value && value.$observer) {
-    return value.$observer
-  } if (_.isArray(value)) {
-    return new Observer(value, ARRAY)
-  } else if (_.isObject(value)) {
-    return new Observer(value, OBJECT)
-  }
 }
 
 module.exports = Observer
