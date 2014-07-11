@@ -1,3 +1,7 @@
+/**
+ * Run benchmarks in Node
+ */
+
 module.exports = function (grunt) {
   grunt.registerTask('bench', function () {
 
@@ -13,8 +17,7 @@ module.exports = function (grunt) {
     require('fs')
       .readdirSync('./benchmarks')
       .forEach(function (mod) {
-        if (mod === 'run.js') return
-        console.log('\n' + mod.slice(0, -3).toUpperCase() + '\n')
+        if (mod === 'browser.js' || mod === 'runner.html') return
         require('../benchmarks/' + mod)
       })
 

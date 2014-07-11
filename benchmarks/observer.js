@@ -1,3 +1,5 @@
+console.log('\nObserver\n')
+
 var Observer = require('../src/observer/observer')
 var Emitter = require('../src/emitter')
 var OldObserver = require('../../vue/src/observer')
@@ -7,15 +9,17 @@ function cb () {
   sideEffect = !sideEffect
 }
 
-var loadTime = getNano()
-
 function getNano () {
   var hr = process.hrtime()
   return hr[0] * 1e9 + hr[1]
 }
 
 function now () {
-  return (getNano() - loadTime) / 1e6
+  return process.hrtime
+    ? getNano() / 1e6
+    : window.performence
+      ? window.performence.now()
+      : Date.now()
 }
 
 function bench (desc, fac, run) {

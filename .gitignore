@@ -3,3 +3,4 @@ test/vue.test.js
 explorations
 node_modules
 .DS_Store
+benchmarks/browser.js

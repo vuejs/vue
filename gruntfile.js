@@ -46,22 +46,29 @@ module.exports = function (grunt) {
     },
 
     browserify: {
-      options: {
-        bundleOptions: {
-          standalone: 'Vue'
-        }
-      },
       build: {
         src: ['src/vue.js'],
-        dest: 'dist/vue.js'
+        dest: 'dist/vue.js',
+        options: {
+          bundleOptions: {
+            standalone: 'Vue'
+          }
+        }
       },
       watch: {
         src: ['src/vue.js'],
         dest: 'dist/vue.js',
         options: {
           watch: true,
-          keepAlive: true
+          keepAlive: true,
+          bundleOptions: {
+            standalone: 'Vue'
+          }
         }
+      },
+      bench: {
+        src: ['benchmarks/*.js', '!benchmarks/browser.js'],
+        dest: 'benchmarks/browser.js'
       }
     }
 
