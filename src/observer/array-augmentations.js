@@ -24,26 +24,40 @@ var arrayAugmentations = Object.create(Array.prototype)
     var args = slice.call(arguments)
     var result = original.apply(this, args)
     var ob = this.$observer
-    var inserted, removed
+    var inserted, removed, index
 
     switch (method) {
       case 'push':
+        inserted = args
+        index = this.length - args.length
+        break
       case 'unshift':
         inserted = args
+        index = 0
         break
       case 'pop':
+        removed = [result]
+        index = this.length
+        break
       case 'shift':
         removed = [result]
+        index = 0
         break
       case 'splice':
         inserted = args.slice(2)
         removed = result
+        index = args[0]
         break
     }
 
     // link/unlink added/removed elements
-    if (inserted) ob.link(inserted)
+    if (inserted) ob.link(inserted, index)
     if (removed) ob.unlink(removed)
+
+    // update indices
+    if (method !== 'push' && method !== 'pop') {
+      ob.updateIndices()
+    }
 
     // emit length change
     if (inserted || removed) {
@@ -55,6 +69,7 @@ var arrayAugmentations = Object.create(Array.prototype)
       method   : method,
       args     : args,
       result   : result,
+      index    : index,
       inserted : inserted,
       removed  : removed
     })
@@ -89,3 +104,5 @@ _.define(arrayAugmentations, '$remove', function (index) {
     return this.splice(index, 1)[0]
   }
 })
+
+module.exports = arrayAugmentations
