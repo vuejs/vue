@@ -254,12 +254,7 @@ p.findParent = function (parent, remove) {
   while (i--) {
     var p = parents[i]
     if (p.ob === parent) {
-      if (remove) {
-        parents.splice(i, 1)
-        if (!parents.length) {
-          this.parents = null
-        }
-      }
+      if (remove) parents.splice(i, 1)
       return i
     }
   }

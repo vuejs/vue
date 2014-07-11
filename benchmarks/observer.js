@@ -1,12 +1,3 @@
-// polyfill window/document for old Vue
-global.window = {
-  setTimeout: setTimeout,
-  console: console
-}
-global.document = {
-  documentElement: {}
-}
-
 var Observer = require('../src/observer/observer')
 var Emitter = require('../src/emitter')
 var OldObserver = require('../../vue/src/observer')
