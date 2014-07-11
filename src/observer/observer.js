@@ -85,10 +85,11 @@ Observer.create = function (value) {
 p.walk = function (obj) {
   var key, val
   for (key in obj) {
-    if (!obj.hasOwnProperty(key)) return
-    val = obj[key]
-    this.observe(key, val)
-    this.convert(key, val)
+    if (obj.hasOwnProperty(key)) {
+      val = obj[key]
+      this.observe(key, val)
+      this.convert(key, val)
+    }
   }
 }
 
@@ -112,15 +113,14 @@ p.link = function (items) {
 
 p.unlink = function (items) {
   for (var i = 0, l = items.length; i < l; i++) {
-    this.unobserve(items[i], i)
+    this.unobserve(items[i])
   }
 }
 
 /**
  * If a property is observable,
- * create an Observer for it and add it as a child.
- * This method is called only on properties observed
- * for the first time.
+ * create an Observer for it, and register self as
+ * one of its parents with the associated property key.
  *
  * @param {String} key
  * @param {*} val
@@ -138,8 +138,8 @@ p.observe = function (key, val) {
 }
 
 /**
- * Unobserve a property.
- * If it has an observer, remove it from children.
+ * Unobserve a property, removing self from
+ * its observer's parent list.
  *
  * @param {*} val
  */
@@ -161,7 +161,7 @@ p.unobserve = function (val) {
 }
 
 /**
- * Convert a tip value into getter/setter so we can emit
+ * Convert a property into getter/setter so we can emit
  * the events when the property is accessed/changed.
  * Properties prefixed with `$` or `_` are ignored.
  *
