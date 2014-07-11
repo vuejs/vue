@@ -1,0 +1,1 @@
+- array.$remove now only accepts number index as argument.

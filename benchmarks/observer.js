@@ -1,10 +1,10 @@
 var Observer = require('../src/observer/observer')
 var Emitter = require('../src/emitter')
 var OldObserver = require('../../vue/src/observer')
-var sideEffect = 0
+var sideEffect = true
 var runs = 1000
 function cb () {
-  sideEffect++
+  sideEffect = !sideEffect
 }
 
 var loadTime = getNano()
@@ -234,6 +234,34 @@ bench(
   },
   function (o) {
     o.a.b.c = 2
+  }
+)
+
+bench(
+  'swap set      ',
+  function () {
+    var a = {a:{b:{c:1}}}
+    var ob = new Observer()
+    ob.observe('', a)
+    ob.on('set', cb)
+    return a
+  },
+  function (o) {
+    o.a = {b:{c:2}}
+  }
+)
+
+bench(
+  'old swap set  ',
+  function () {
+    var a = {a:{b:{c:1}}}
+    var ob = new Emitter()
+    OldObserver.observe(a, '', ob)
+    ob.on('set', cb)
+    return a
+  },
+  function (o) {
+    o.a = {b:{c:2}}
   }
 )
 

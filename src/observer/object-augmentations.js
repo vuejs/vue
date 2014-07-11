@@ -13,8 +13,10 @@ var objectAgumentations = Object.create(Object.prototype)
 _.define(objectAgumentations, '$add', function (key, val) {
   if (this.hasOwnProperty(key)) return
   this[key] = val
-  this.$observer.convert(key, val)
-  this.$observer.notify('added', key, val)
+  var ob = this.$observer
+  ob.observe(key, val)
+  ob.convert(key, val)
+  ob.notify('added', key, val)
 })
 
 /**

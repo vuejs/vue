@@ -70,9 +70,11 @@ var arrayAugmentations = Object.create(Array.prototype)
       args     : args,
       result   : result,
       index    : index,
-      inserted : inserted,
-      removed  : removed
+      inserted : inserted || [],
+      removed  : removed || []
     })
+
+    return result
   })
 })
 
