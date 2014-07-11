@@ -46,7 +46,7 @@ bench(
 )
 
 bench(
-  'old observe (simple object)    ',
+  'observe (simple object) old    ',
   function (i) {
     return {a:i}
   },
@@ -66,7 +66,7 @@ bench(
 )
 
 bench(
-  'old observe (3 nested objects) ',
+  'observe (3 nested objects) old ',
   function (i) {
     return {a:{b:{c:i}}}
   },
@@ -86,7 +86,7 @@ bench(
 )
 
 bench(
-  'old observe (array, 3 objects) ',
+  'observe (array, 3 objects) old ',
   function (i) {
     return [{a:i}, {a:i+1}, {a:i+2}]
   },
@@ -110,7 +110,7 @@ bench(
 )
 
 bench(
-  'old observe (array, 30 objects)',
+  'observe (array, 30 objects) old',
   function () {
     var a = [], i = 30
     while (i--) {
@@ -141,7 +141,7 @@ bench(
 )
 
 bench(
-  'old simple get',
+  'simple get old',
   function () {
     var a = {a:1}
     var ob = new Emitter()
@@ -169,7 +169,7 @@ bench(
 )
 
 bench(
-  'old nested get',
+  'nested get old',
   function () {
     var a = {a:{b:{c:1}}}
     var ob = new Emitter()
@@ -200,7 +200,7 @@ bench(
 )
 
 bench(
-  'old simple set',
+  'simple set old',
   function () {
     var a = {a:1}
     var ob = new Emitter()
@@ -228,7 +228,7 @@ bench(
 )
 
 bench(
-  'old nested set',
+  'nested set old',
   function () {
     var a = {a:{b:{c:1}}}
     var ob = new Emitter()
@@ -256,7 +256,7 @@ bench(
 )
 
 bench(
-  'old swap set  ',
+  'swap set old  ',
   function () {
     var a = {a:{b:{c:1}}}
     var ob = new Emitter()
@@ -284,7 +284,7 @@ bench(
 )
 
 bench(
-  'old array push',
+  'array push old',
   function () {
     var a = []
     var ob = new Emitter()
@@ -315,7 +315,7 @@ bench(
 )
 
 bench(
-  'old array reverse (5 objects) ',
+  'array reverse (5 objects) old ',
   function () {
     var a = [], i = 5
     while (i--) {
@@ -349,7 +349,7 @@ bench(
 )
 
 bench(
-  'old array reverse (50 objects)',
+  'array reverse (50 objects) old',
   function () {
     var a = [], i = 50
     while (i--) {
