@@ -1,3 +1,12 @@
+// polyfill window/document for old Vue
+global.window = {
+  setTimeout: setTimeout,
+  console: console
+}
+global.document = {
+  documentElement: {}
+}
+
 var Observer = require('../src/observer/observer')
 var Emitter = require('../src/emitter')
 var OldObserver = require('../../vue/src/observer')
@@ -238,7 +247,35 @@ bench(
 )
 
 bench(
-  'array mutation (5 objects)     ',
+  'array push    ',
+  function () {
+    var a = []
+    var ob = new Observer()
+    ob.observe('', a)
+    ob.on('mutation', cb)
+    return a
+  },
+  function (o) {
+    o.push({a:1})
+  }
+)
+
+bench(
+  'old array push',
+  function () {
+    var a = []
+    var ob = new Emitter()
+    OldObserver.observe(a, '', ob)
+    ob.on('mutation', cb)
+    return a
+  },
+  function (o) {
+    o.push({a:1})
+  }
+)
+
+bench(
+  'array reverse (5 objects)     ',
   function () {
     var a = [], i = 5
     while (i--) {
@@ -255,7 +292,7 @@ bench(
 )
 
 bench(
-  'old array mutation (5 objects) ',
+  'old array reverse (5 objects) ',
   function () {
     var a = [], i = 5
     while (i--) {
@@ -272,7 +309,7 @@ bench(
 )
 
 bench(
-  'array mutation (50 objects)    ',
+  'array reverse (50 objects)    ',
   function () {
     var a = [], i = 50
     while (i--) {
@@ -289,7 +326,7 @@ bench(
 )
 
 bench(
-  'old array mutation (50 objects)',
+  'old array reverse (50 objects)',
   function () {
     var a = [], i = 50
     while (i--) {
