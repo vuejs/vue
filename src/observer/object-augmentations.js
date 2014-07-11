@@ -14,7 +14,7 @@ _.define(objectAgumentations, '$add', function (key, val) {
   if (this.hasOwnProperty(key)) return
   this[key] = val
   this.$observer.convert(key, val)
-  this.$observer.emit('add', key, val)
+  this.$observer.notify('added', key, val)
 })
 
 /**
@@ -30,7 +30,7 @@ _.define(objectAgumentations, '$delete', function (key) {
   // trigger set events
   this[key] = undefined
   delete this[key]
-  this.$observer.emit('delete', key)
+  this.$observer.notify('deleted', key)
 })
 
 module.exports = objectAgumentations

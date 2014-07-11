@@ -20,6 +20,7 @@ var arrayAugmentations = Object.create(Array.prototype)
   var original = Array.prototype[method]
   // define wrapped method
   _.define(arrayAugmentations, method, function () {
+    
     var args = slice.call(arguments)
     var result = original.apply(this, args)
     var ob = this.$observer
@@ -40,10 +41,17 @@ var arrayAugmentations = Object.create(Array.prototype)
         break
     }
 
-    ob.link(inserted)
-    ob.unlink(removed)
+    // link/unlink added/removed elements
+    if (inserted) ob.link(inserted)
+    if (removed) ob.unlink(removed)
+
+    // emit length change
+    if (inserted || removed) {
+      ob.notify('set', 'length', this.length)
+    }
+
     // empty path, value is the Array itself
-    ob.emit('mutate', [], this, {
+    ob.notify('mutate', '', this, {
       method   : method,
       args     : args,
       result   : result,

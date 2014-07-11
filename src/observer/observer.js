@@ -30,10 +30,16 @@ function Observer (value, type) {
   Emitter.call(this)
   this.value = value
   this.type = type
-  this.initiated = false
-  this.adaptors = Object.create(null)
+  this.parents = null
   if (value) {
     _.define(value, '$observer', this)
+    if (type === ARRAY) {
+      _.augment(value, arrayAugmentations)
+      this.link(value)
+    } else if (type === OBJECT) {
+      _.augment(value, objectAugmentations)
+      this.walk(value)
+    }
   }
 }
 
@@ -70,23 +76,6 @@ Observer.create = function (value) {
 }
 
 /**
- * Initialize the observation based on value type.
- * Should only be called once.
- */
-
-p.init = function () {
-  var value = this.value
-  if (this.type === ARRAY) {
-    _.augment(value, arrayAugmentations)
-    this.link(value)
-  } else if (this.type === OBJECT) {
-    _.augment(value, objectAugmentations)
-    this.walk(value)
-  }
-  this.initiated = true
-}
-
-/**
  * Walk through each property, converting them and adding them as child.
  * This method should only be called when value type is Object.
  *
@@ -104,6 +93,30 @@ p.walk = function (obj) {
 }
 
 /**
+ * Link a list of Array items to the observer.
+ *
+ * @param {Array} items
+ */
+
+p.link = function (items) {
+  for (var i = 0, l = items.length; i < l; i++) {
+    this.observe(i, items[i])
+  }
+}
+
+/**
+ * Unlink a list of Array items from the observer.
+ *
+ * @param {Array} items
+ */
+
+p.unlink = function (items) {
+  for (var i = 0, l = items.length; i < l; i++) {
+    this.unobserve(items[i], i)
+  }
+}
+
+/**
  * If a property is observable,
  * create an Observer for it and add it as a child.
  * This method is called only on properties observed
@@ -116,17 +129,11 @@ p.walk = function (obj) {
 p.observe = function (key, val) {
   var ob = Observer.create(val)
   if (ob) {
-    this.add(key, ob)
-    if (ob.initiated) {
-      this.deliver(key, val)
-    } else {
-      ob.init()
-    }
-  }
-  // emit an initial set event
-  this.emit('set', key, val)
-  if (_.isArray(val)) {
-    this.emit('set', key + delimiter + 'length', val.length)
+    // register self as a parent of the child observer.
+    (ob.parents || (ob.parents = [])).push({
+      ob: this,
+      key: key
+    })
   }
 }
 
@@ -134,13 +141,22 @@ p.observe = function (key, val) {
  * Unobserve a property.
  * If it has an observer, remove it from children.
  *
- * @param {String} key
  * @param {*} val
  */
 
-p.unobserve = function (key, val) {
+p.unobserve = function (val) {
   if (val && val.$observer) {
-    this.remove(key, val.$observer)
+    var parents = val.$observer.parents
+    var i = parents.length
+    while (i--) {
+      if (parents[i].ob === this) {
+        parents.splice(i, 1)
+        break
+      }
+    }
+    if (!parents.length) {
+      val.$observer.parents = null
+    }
   }
 }
 
@@ -163,109 +179,43 @@ p.convert = function (key, val) {
     enumerable: true,
     configurable: true,
     get: function () {
-      ob.emit('get', key)
+      ob.notify('get', key)
       return val
     },
     set: function (newVal) {
       if (newVal === val) return
-      ob.unobserve(key, val)
+      ob.unobserve(val)
       ob.observe(key, newVal)
+      ob.notify('set', key, newVal)
+      if (_.isArray(newVal)) {
+        ob.notify('set', key + delimiter + 'length', newVal.length)
+      }
       val = newVal
     }
   })
 }
 
 /**
- * Link a list of items to the observer's value Array.
- * When any of these items emit change event, the Array will be notified.
- * This method should only be called when value type is Array.
+ * Emit event on self and recursively notify all parents.
  *
- * @param {Array} items
+ * @param {String} event
+ * @param {String} path
+ * @param {*} val
+ * @param {Object|undefined} mutation
  */
 
-p.link = function (items) {
-  
-}
-
-/**
- * Unlink the items from the observer's value Array.
- *
- * @param {Array} items
- */
-
-p.unlink = function (items) {
-  
-}
-
-/**
- * Walk through an already observed object and emit its tip values.
- * This is necessary because newly observed objects emit their values
- * during init; for already observed ones we can skip the initialization,
- * but still need to emit the values.
- *
- * If called with no arguments, it delivers set events for the root value.
- *
- * @param {String} [key]
- * @param {*} [val]
- */
-
-p.deliver = function (key, val) {
-  
-}
-
-/**
- * Add a child observer for a property key,
- * capture its get/set/mutate events and relay the events
- * while prepending a key segment to the path.
- *
- * @param {String} key
- * @param {Observer} ob
- */
-
-p.add = function (key, ob) {
-  var self = this
-  var base = key + delimiter
-  var adaptors = this.adaptors[key] = {}
-
-  adaptors.get = function (path) {
-    path = base + path
-    self.emit('get', path)
-  }
-
-  adaptors.set = function (path, val) {
-    path = base + path
-    self.emit('set', path, val)
-  }
-
-  adaptors.mutate = function (path, val, mutation) {
-    // if path is empty string, the mutation
-    // comes directly from an Array
-    path = path
-      ? base + path
+p.notify = function (event, path, val, mutation) {
+  this.emit(event, path, val, mutation)
+  if (!this.parents) return
+  for (var i = 0, l = this.parents.length; i < l; i++) {
+    var parent = this.parents[i]
+    var ob = parent.ob
+    var key = parent.key
+    var parentPath = path
+      ? key + delimiter + path
       : key
-    self.emit('mutate', path, val, mutation)
-    // also emit for length
-    self.emit('set', path + delimiter + 'length', val.length)
+    ob.notify(event, parentPath, val, mutation)
   }
-
-  ob.on('get', adaptors.get)
-    .on('set', adaptors.set)
-    .on('mutate', adaptors.mutate)
-}
-
-/**
- * Remove a child observer.
- *
- * @param {String} key
- * @param {Observer} ob
- */
-
-p.remove = function (key, ob) {
-  var adaptors = this.adaptors[key]
-  this.adaptors[key] = null
-  ob.off('get', adaptors.get)
-    .off('set', adaptors.set)
-    .off('mutate', adaptors.mutate)
 }
 
 module.exports = Observer

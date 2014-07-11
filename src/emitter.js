@@ -21,7 +21,7 @@ var p = Emitter.prototype
 
 p.on = function (event, fn) {
   this._cbs = this._cbs || {}
-  ;(this._cbs[event] = this._cbs[event] || [])
+  ;(this._cbs[event] || (this._cbs[event] = []))
     .push(fn)
   return this
 }
