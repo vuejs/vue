@@ -1,15 +1,35 @@
+# Instantiation
+
+Instances are no longer compiled at instantiation. Data will be observed, but no DOM compilation will happen until the new instance method `$mount` has been called. Also, when a new instance is created without `el` option, it no longers auto creates one.
+
+``` js
+var vm = new Vue({ data: {a:1} }) // only observes the data
+vm.$mount('#app') // actually compile the DOM
+```
+
 # More flexible directive syntax
   
   - v-on
+
+    ``` html
     <a v-on=”{click: onClick, dragmove: onMove}”></a>
+    ```
 
   - v-style
+
+    ``` html
     <a v-style=”{top: list + ‘px’}”></a>
+    ```
 
   - custom directive
-    <a v-table=”{ data:hello, rows:5, cols:10 }”>fsef</a>
+
+    ``` html
+    <a v-my-table=”{ data:hello, rows:5, cols:10 }”>fsef</a>
+    ```
 
   - v-repeat
+
+    ``` html
     <ul>
       <li v-repeat="{
         data     : list,
@@ -18,6 +38,7 @@
         orderBy  : orderKey
       }"></li>
     </ul>
+    ```
 
 # Two Way filters
 
@@ -48,4 +69,10 @@ Vue.filter('format', {
   })
   // this.$validation.abc // false
   // this.$valid // false
+```
+
+# (Experimental) One time interpolations
+
+``` html
+<span>{{* hello }}</span>
 ```
