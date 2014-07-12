@@ -102,6 +102,9 @@ _.define(arrayAugmentations, '$set', function (index, val) {
  */
 
 _.define(arrayAugmentations, '$remove', function (index) {
+  if (typeof index !== 'number') {
+    index = this.indexOf(index)
+  }
   if (index > -1) {
     return this.splice(index, 1)[0]
   }
