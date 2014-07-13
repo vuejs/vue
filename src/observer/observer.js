@@ -26,7 +26,7 @@ var OBJECT = 1
  * @param {Number} [type]
  */
 
-function Observer (value, type) {
+function Observer (value, type, noProto) {
   Emitter.call(this)
   this.value = value
   this.type = type
@@ -37,7 +37,11 @@ function Observer (value, type) {
       _.augment(value, arrayAugmentations)
       this.link(value)
     } else if (type === OBJECT) {
-      _.augment(value, objectAugmentations)
+      if (noProto) {
+        _.deepMixin(value, objectAugmentations)
+      } else {
+        _.augment(value, objectAugmentations)
+      }
       this.walk(value)
     }
   }
@@ -72,13 +76,15 @@ Observer.emitGet = false
  * @static
  */
 
-Observer.create = function (value) {
-  if (value && value.$observer) {
+Observer.create = function (value, noProto) {
+  if (value &&
+      value.hasOwnProperty('$observer') &&
+      value.$observer instanceof Observer) {
     return value.$observer
   } if (_.isArray(value)) {
     return new Observer(value, ARRAY)
   } else if (_.isObject(value)) {
-    return new Observer(value, OBJECT)
+    return new Observer(value, OBJECT, noProto)
   }
 }
 

@@ -1,16 +1,51 @@
 /**
  * Mix properties into target object.
  *
- * @param {Object} target
- * @param {Object} mixin
+ * @param {Object} to
+ * @param {Object} from
  */
 
-exports.mixin = function (target, mixin) {
-  for (var key in mixin) {
-    if (target[key] !== mixin[key]) {
-      target[key] = mixin[key]
+exports.mixin = function (to, from) {
+  for (var key in from) {
+    if (to[key] !== from[key]) {
+      to[key] = from[key]
     }
   }
+}
+
+/**
+ * Mixin including non-enumerables, and copy property descriptors.
+ *
+ * @param {Object} to
+ * @param {Object} from
+ */
+
+exports.deepMixin = function (to, from) {
+  Object.getOwnPropertyNames(from).forEach(function (key) {
+    var descriptor = Object.getOwnPropertyDescriptor(from, key)
+    Object.defineProperty(to, key, descriptor)
+  })
+}
+
+/**
+ * Proxy a property on one object to another.
+ *
+ * @param {Object} to
+ * @param {Object} from
+ * @param {String} key
+ */
+
+exports.proxy = function (to, from, key) {
+  Object.defineProperty(to, key, {
+    enumerable: true,
+    configurable: true,
+    get: function () {
+      return from[key]
+    },
+    set: function (val) {
+      from[key] = val
+    }
+  })
 }
 
 /**
@@ -42,12 +77,13 @@ exports.isArray = function (obj) {
  * @param {Object} obj
  * @param {String} key
  * @param {*} val
+ * @param {Boolean} [enumerable]
  */
 
-exports.define = function (obj, key, val) {
+exports.define = function (obj, key, val, enumerable) {
   Object.defineProperty(obj, key, {
     value        : val,
-    enumerable   : false,
+    enumerable   : !!enumerable,
     writable     : true,
     configurable : true
   })
@@ -67,10 +103,5 @@ if ('__proto__' in {}) {
     target.__proto__ = proto
   }
 } else {
-  exports.augment = function (target, proto) {
-    Object.getOwnPropertyNames(proto).forEach(function (key) {
-      var descriptor = Object.getOwnPropertyDescriptor(proto, key)
-      Object.defineProperty(target, key, descriptor)
-    })
-  }
+  exports.augment = exports.deepMixin
 }

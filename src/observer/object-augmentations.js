@@ -12,7 +12,8 @@ var objectAgumentations = Object.create(Object.prototype)
 
 _.define(objectAgumentations, '$add', function (key, val) {
   if (this.hasOwnProperty(key)) return
-  this[key] = val
+  // make sure it's defined on itself.
+  _.define(this, key, val, true)
   var ob = this.$observer
   ob.observe(key, val)
   ob.convert(key, val)
@@ -29,8 +30,6 @@ _.define(objectAgumentations, '$add', function (key, val) {
 
 _.define(objectAgumentations, '$delete', function (key) {
   if (!this.hasOwnProperty(key)) return
-  // trigger set events
-  this[key] = undefined
   delete this[key]
   this.$observer.notify('deleted', key)
 })
