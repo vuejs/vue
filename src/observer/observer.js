@@ -22,11 +22,12 @@ var OBJECT = 1
  *
  * @constructor
  * @extends Emitter
- * @param {Array|Object} [value]
- * @param {Number} [type]
+ * @param {Array|Object} value
+ * @param {Number} type
+ * @param {Object} [options]
  */
 
-function Observer (value, type, noProto) {
+function Observer (value, type, options) {
   Emitter.call(this)
   this.value = value
   this.type = type
@@ -37,7 +38,7 @@ function Observer (value, type, noProto) {
       _.augment(value, arrayAugmentations)
       this.link(value)
     } else if (type === OBJECT) {
-      if (noProto) {
+      if (options && options.noProto) {
         _.deepMixin(value, objectAugmentations)
       } else {
         _.augment(value, objectAugmentations)
@@ -72,19 +73,20 @@ Observer.emitGet = false
  * or the existing observer if the value already has one.
  *
  * @param {*} value
+ * @param {Object} [options]
  * @return {Observer|undefined}
  * @static
  */
 
-Observer.create = function (value, noProto) {
+Observer.create = function (value, options) {
   if (value &&
       value.hasOwnProperty('$observer') &&
       value.$observer instanceof Observer) {
     return value.$observer
   } if (_.isArray(value)) {
-    return new Observer(value, ARRAY)
+    return new Observer(value, ARRAY, options)
   } else if (_.isObject(value)) {
-    return new Observer(value, OBJECT, noProto)
+    return new Observer(value, OBJECT, options)
   }
 }
 
