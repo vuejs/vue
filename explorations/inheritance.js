@@ -4,8 +4,9 @@ var _ = require('../src/util')
 function Vue (options) {
 
   var data = options.data
-  var scope = this._scope = options.parent
-    ? Object.create(options.parent._scope)
+  var parent = options.parent
+  var scope = this._scope = parent
+    ? Object.create(parent._scope)
     : {}
 
   // copy instantiation data into scope
@@ -23,35 +24,35 @@ function Vue (options) {
 
   // create observer
   // pass in noProto:true to avoid mutating the __proto__
-  var ob = this._observer = Observer.create(this._scope, true)
+  var ob = this._observer = Observer.create(scope, { noProto: true })
   var dob = Observer.create(data)
   var locked = false
 
   // sync scope and original data.
   ob
-  .on('set', guard(function (key, val) {
-    data[key] = val
-  }))
-  .on('added', guard(function (key, val) {
-    data.$add(key, val)
-  }))
-  .on('deleted', guard(function (key) {
-    data.$delete(key)
-  }))
+    .on('set', guard(function (key, val) {
+      data[key] = val
+    }))
+    .on('added', guard(function (key, val) {
+      data.$add(key, val)
+    }))
+    .on('deleted', guard(function (key) {
+      data.$delete(key)
+    }))
 
   // also need to sync data object changes to scope...
   // this would cause cycle updates, so we need to lock
   // stuff when one side updates the other
   dob
-  .on('set', guard(function (key, val) {
-    scope[key] = val
-  }))
-  .on('added', guard(function (key, val) {
-    scope.$add(key, val)
-  }))
-  .on('deleted', guard(function (key) {
-    scope.$delete(key)
-  }))
+    .on('set', guard(function (key, val) {
+      scope[key] = val
+    }))
+    .on('added', guard(function (key, val) {
+      scope.$add(key, val)
+    }))
+    .on('deleted', guard(function (key) {
+      scope.$delete(key)
+    }))
 
   function guard (fn) {
     return function (key, val) {
@@ -67,8 +68,8 @@ function Vue (options) {
   // relay change events from parent scope.
   // this ensures the current Vue instance is aware of
   // stuff going on up in the scope chain.
-  if (options.parent) {
-    var po = options.parent._observer
+  if (parent) {
+    var po = parent._observer
     ;['set', 'mutate', 'added', 'deleted'].forEach(function (event) {
       po.on(event, function (key, a, b) {
         if (!scope.hasOwnProperty(key)) {
@@ -85,8 +86,7 @@ function Vue (options) {
 
   // also proxy newly added keys.
   var self = this
-  ob
-  .on('added', function (key) {
+  ob.on('added', function (key) {
     if (!self.hasOwnProperty(key)) {
       _.proxy(self, scope, key)
     }
@@ -100,6 +100,17 @@ Vue.prototype.$add = function (key, val) {
 
 Vue.prototype.$delete = function (key) {
   this._scope.$delete.call(this._scope, key)
+}
+
+Vue.prototype.$toJSON = function () {
+  return JSON.stringify(this._scope)
+}
+
+Vue.prototype.$log = function (key) {
+  var data = key
+    ? this._scope[key]
+    : this._scope
+  console.log(JSON.parse(JSON.stringify(data)))
 }
 
 window.model = {
@@ -130,7 +141,8 @@ window.child = new Vue({
   }
 })
 
-window.v2 = new Vue({
+window.item = new Vue({
+  parent: vm,
   data: model.arr[0]
 })
 
@@ -138,14 +150,22 @@ vm._observer.on('set', function (key, val) {
   console.log('vm set:' + key.replace(/[\b]/g, '.'), val)
 })
 
-child._observer.on('set', function (key, val) {
-  console.log('child set:' + key.replace(/[\b]/g, '.'), val)
-})
-
 vm._observer.on('mutate', function (key, val) {
   console.log('vm mutate:' + key.replace(/[\b]/g, '.'), val)
 })
 
+child._observer.on('set', function (key, val) {
+  console.log('child set:' + key.replace(/[\b]/g, '.'), val)
+})
+
 child._observer.on('mutate', function (key, val) {
   console.log('child mutate:' + key.replace(/[\b]/g, '.'), val)
+})
+
+item._observer.on('set', function (key, val) {
+  console.log('item set:' + key.replace(/[\b]/g, '.'), val)
+})
+
+item._observer.on('mutate', function (key, val) {
+  console.log('item mutate:' + key.replace(/[\b]/g, '.'), val)
 })
