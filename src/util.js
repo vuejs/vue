@@ -36,6 +36,7 @@ exports.deepMixin = function (to, from) {
  */
 
 exports.proxy = function (to, from, key) {
+  if (to.hasOwnProperty(key)) return
   Object.defineProperty(to, key, {
     enumerable: true,
     configurable: true,

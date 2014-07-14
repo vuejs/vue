@@ -1,7 +1,4 @@
-var Observer = require('../src/observe/observer')
-var _ = require('../src/util')
-
-function Vue (options) {
+exports._init = function (options) {
 
   var data = options.data
   var parent = options.parent
@@ -89,81 +86,5 @@ function Vue (options) {
   ob.on('added', function (key) {
     _.proxy(self, scope, key)
   })
-
+  
 }
-
-Vue.prototype.$add = function (key, val) {
-  this._scope.$add.call(this._scope, key, val)
-}
-
-Vue.prototype.$delete = function (key) {
-  this._scope.$delete.call(this._scope, key)
-}
-
-Vue.prototype.$toJSON = function () {
-  return JSON.stringify(this._scope)
-}
-
-Vue.prototype.$log = function (key) {
-  var data = key
-    ? this._scope[key]
-    : this._scope
-  console.log(JSON.parse(JSON.stringify(data)))
-}
-
-window.model = {
-  a: 'go!',
-  b: 2,
-  c: {
-    d: 3
-  },
-  arr: [{a:1}, {a:2}, {a:3}],
-  go: function () {
-    console.log(this.a)
-  }
-}
-
-window.vm = new Vue({
-  data: model
-})
-
-window.child = new Vue({
-  parent: vm,
-  data: {
-    a: 1,
-    change: function () {
-      this.c.d = 4
-      this.b = 456 // Unlike Angular, setting primitive values in Vue WILL affect outer scope,
-                   // unless you overwrite it in the instantiation data!
-    }
-  }
-})
-
-window.item = new Vue({
-  parent: vm,
-  data: model.arr[0]
-})
-
-vm._observer.on('set', function (key, val) {
-  console.log('vm set:' + key.replace(/[\b]/g, '.'), val)
-})
-
-vm._observer.on('mutate', function (key, val) {
-  console.log('vm mutate:' + key.replace(/[\b]/g, '.'), val)
-})
-
-child._observer.on('set', function (key, val) {
-  console.log('child set:' + key.replace(/[\b]/g, '.'), val)
-})
-
-child._observer.on('mutate', function (key, val) {
-  console.log('child mutate:' + key.replace(/[\b]/g, '.'), val)
-})
-
-item._observer.on('set', function (key, val) {
-  console.log('item set:' + key.replace(/[\b]/g, '.'), val)
-})
-
-item._observer.on('mutate', function (key, val) {
-  console.log('item mutate:' + key.replace(/[\b]/g, '.'), val)
-})

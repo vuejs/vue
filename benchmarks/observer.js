@@ -1,6 +1,6 @@
 console.log('\nObserver\n')
 
-var Observer = require('../src/observer/observer')
+var Observer = require('../src/observe/observer')
 var Emitter = require('../src/emitter')
 var OldObserver = require('../../vue/src/observer')
 var sideEffect = true
