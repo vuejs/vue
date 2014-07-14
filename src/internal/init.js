@@ -27,8 +27,8 @@ exports._init = function (options) {
 exports._initScope = function (options) {
 
   var parent = this.$parent = options.parent
-  var scope = this._scope = parent && options._inheritScope !== false
-    ? Object.create(parent._scope)
+  var scope = this.$scope = parent && options._inheritScope !== false
+    ? Object.create(parent.$scope)
     : {}
   // create scope observer
   this._observer = Observer.create(scope, {
@@ -62,7 +62,7 @@ exports._initScope = function (options) {
  */
 
 exports._teardownScope = function () {
-  this._scope = null
+  this.$scope = null
   if (!this.$parent) return
   var pob = this.$parent._observer
   var listeners = this._scopeListeners
@@ -81,13 +81,14 @@ exports._teardownScope = function () {
  */
 
 exports._initData = function (data, init) {
-  var scope = this._scope
+  var scope = this.$scope
+  var key
 
   if (!init) {
     // teardown old sync listeners
     this._unsync()
     // delete keys not present in the new data
-    for (var key in scope) {
+    for (key in scope) {
       if (scope.hasOwnProperty(key) && !(key in data)) {
         scope.$delete(key)
       }
@@ -95,7 +96,7 @@ exports._initData = function (data, init) {
   }
 
   // copy instantiation data into scope
-  for (var key in data) {
+  for (key in data) {
     if (scope.hasOwnProperty(key)) {
       // existing property, trigger set
       scope[key] = data[key]
@@ -113,14 +114,23 @@ exports._initData = function (data, init) {
 
 /**
  * Proxy the scope properties on the instance itself.
- * So that vm.a === vm._scope.a
+ * So that vm.a === vm.$scope.a.
+ *
+ * Note this only proxy *local* scope properties.
+ * This prevents child instances accidentally modifying properties
+ * with the same name up in the scope chain because scope perperties
+ * are all getter/setters.
+ *
+ * To access parent properties through prototypal fall through,
+ * access it on the instance's $scope.
  */
 
 exports._initProxy = function () {
-  // proxy every scope property on the instance itself
-  var scope = this._scope
+  var scope = this.$scope
   for (var key in scope) {
-    _.proxy(this, scope, key)
+    if (scope.hasOwnProperty(key)) {
+      _.proxy(this, scope, key)
+    }
   }
   // keep proxying up-to-date with added/deleted keys.
   this._observer
@@ -139,7 +149,7 @@ exports._initProxy = function () {
 
 exports._sync = function () {
   var data = this._data
-  var scope = this._scope
+  var scope = this.$scope
   var locked = false
 
   var listeners = this._syncListeners = {

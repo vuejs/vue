@@ -48,10 +48,16 @@ item._observer.on('set', function (key, val) {
 // TODO turn these into tests
 
 console.log(vm.a) // 'parent a'
+
 console.log(child.a) // 'child a'
-console.log(child.b) // 'parent b'
+console.log(child.$scope.a) // 'child a'
+console.log(child.b) // undefined
+console.log(child.$scope.b) // 'parent b'
+
 console.log(item.a) // 'item a'
-console.log(item.b) // 'parent b'
+console.log(item.$scope.a) // 'item a'
+console.log(item.b) // undefined
+console.log(item.$scope.b) // 'parent b'
 
 // set shadowed parent property
 vm.a = 'haha!' // vm set:a haha!
