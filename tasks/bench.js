@@ -3,7 +3,7 @@
  */
 
 module.exports = function (grunt) {
-  grunt.registerTask('bench', function () {
+  grunt.registerTask('bench', function (target) {
 
     // polyfill window/document for old Vue
     global.window = {
@@ -14,12 +14,18 @@ module.exports = function (grunt) {
       documentElement: {}
     }
 
-    require('fs')
-      .readdirSync('./benchmarks')
-      .forEach(function (mod) {
-        if (mod === 'browser.js' || mod === 'runner.html') return
-        require('../benchmarks/' + mod)
-      })
+    if (target) {
+      run(target)
+    } else {
+      require('fs')
+        .readdirSync('./benchmarks')
+        .forEach(run)
+    }
+
+    function run (mod) {
+      if (mod === 'browser.js' || mod === 'runner.html') return
+      require('../benchmarks/' + mod)
+    }
 
   })
 }

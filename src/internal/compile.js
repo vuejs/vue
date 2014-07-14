@@ -1,5 +1,9 @@
-function Compiler () {
-    
-}
+/**
+ * Start compilation of an instance.
+ *
+ * @private
+ */
 
-module.exports = Compiler
+exports._compile = function () {
+  
+}

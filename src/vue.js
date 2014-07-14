@@ -3,6 +3,11 @@ var _ = require('./util')
 /**
  * The exposed Vue constructor.
  *
+ * API conventions:
+ * - public API methods/properties are prefiexed with `$`
+ * - internal methods/properties are prefixed with `_`
+ * - non-prefixed properties are assumed to be proxied user data.
+ *
  * @constructor
  * @param {Object} [options]
  * @public
@@ -13,6 +18,12 @@ function Vue (options) {
 }
 
 var p = Vue.prototype
+
+/**
+ * Define prototype properties
+ */
+
+require('./internal/properties')(p)
 
 /**
  * Mixin internal instance methods

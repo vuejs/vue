@@ -25,10 +25,12 @@ var OBJECT = 1
  * @param {Array|Object} value
  * @param {Number} type
  * @param {Object} [options]
+ *                 - doNotAlterProto: if true, do not alter object's __proto__
+ *                 - callbackContext: `this` context for callbacks
  */
 
 function Observer (value, type, options) {
-  Emitter.call(this)
+  Emitter.call(this, options && options.callbackContext)
   this.value = value
   this.type = type
   this.parents = null
@@ -38,7 +40,7 @@ function Observer (value, type, options) {
       _.augment(value, arrayAugmentations)
       this.link(value)
     } else if (type === OBJECT) {
-      if (options && options.noProto) {
+      if (options && options.doNotAlterProto) {
         _.deepMixin(value, objectAugmentations)
       } else {
         _.augment(value, objectAugmentations)
@@ -73,7 +75,7 @@ Observer.emitGet = false
  * or the existing observer if the value already has one.
  *
  * @param {*} value
- * @param {Object} [options]
+ * @param {Object} [options] - see the Observer constructor.
  * @return {Observer|undefined}
  * @static
  */
@@ -187,7 +189,7 @@ p.convert = function (key, val) {
     configurable: true,
     get: function () {
       if (Observer.emitGet) {
-        ob.notify('get', key)
+        ob.propagate('get', key)
       }
       return val
     },
@@ -195,11 +197,12 @@ p.convert = function (key, val) {
       if (newVal === val) return
       ob.unobserve(val)
       ob.observe(key, newVal)
-      ob.notify('set', key, newVal)
+      ob.emit('set:self', key, newVal)
+      ob.propagate('set', key, newVal)
       if (_.isArray(newVal)) {
-        ob.notify('set',
-                  key + Observer.pathDelimiter + 'length',
-                  newVal.length)
+        ob.propagate('set',
+                     key + Observer.pathDelimiter + 'length',
+                     newVal.length)
       }
       val = newVal
     }
@@ -207,7 +210,7 @@ p.convert = function (key, val) {
 }
 
 /**
- * Emit event on self and recursively notify all parents.
+ * Emit event on self and recursively propagate all parents.
  *
  * @param {String} event
  * @param {String} path
@@ -215,7 +218,7 @@ p.convert = function (key, val) {
  * @param {Object|undefined} mutation
  */
 
-p.notify = function (event, path, val, mutation) {
+p.propagate = function (event, path, val, mutation) {
   this.emit(event, path, val, mutation)
   if (!this.parents) return
   for (var i = 0, l = this.parents.length; i < l; i++) {
@@ -225,7 +228,7 @@ p.notify = function (event, path, val, mutation) {
     var parentPath = path
       ? key + Observer.pathDelimiter + path
       : key
-    ob.notify(event, parentPath, val, mutation)
+    ob.propagate(event, parentPath, val, mutation)
   }
 }
 

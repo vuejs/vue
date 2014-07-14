@@ -61,11 +61,11 @@ var arrayAugmentations = Object.create(Array.prototype)
 
     // emit length change
     if (inserted || removed) {
-      ob.notify('set', 'length', this.length)
+      ob.propagate('set', 'length', this.length)
     }
 
     // empty path, value is the Array itself
-    ob.notify('mutate', '', this, {
+    ob.propagate('mutate', '', this, {
       method   : method,
       args     : args,
       result   : result,
