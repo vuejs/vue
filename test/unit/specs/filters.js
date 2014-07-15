@@ -98,6 +98,13 @@ describe('Filters', function () {
             assert.strictEqual(res4, '$0.00')
         })
 
+        it('should cast strings into float', function () {
+            var res1 = filter('fesf'),
+                res2 = filter('0.24')
+            assert.strictEqual(res1, '')
+            assert.strictEqual(res2, '$0.24')
+        })
+
     })
 
     describe('key', function () {
