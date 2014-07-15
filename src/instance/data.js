@@ -1,12 +1,13 @@
 var Observer = require('../observe/observer')
 
 /**
- * Set the instances data object. Teasdown previous data
- * object if necessary, and setup syncing between the scope
- * and the data object.
+ * Setup the instances data object, copying properties into
+ * scope and setup the syncing between the data and the scope.
+ * If swapping data object with the `$data` accessor, teardown
+ * previous sync listeners and delete keys not present in new data.
  *
  * @param {Object} data
- * @param {Boolean} init
+ * @param {Boolean} init - if not ture, indicates its a `$data` swap.
  */
 
 exports._initData = function (data, init) {
@@ -24,7 +25,7 @@ exports._initData = function (data, init) {
     }
   }
 
-  // copy instantiation data into scope
+  // copy properties into scope
   for (key in data) {
     if (scope.hasOwnProperty(key)) {
       // existing property, trigger set
@@ -35,7 +36,7 @@ exports._initData = function (data, init) {
     }
   }
 
-  // sync scope and new data
+  // setup sync between scope and new data
   this._data = data
   this._dataObserver = Observer.create(data)
   this._sync()

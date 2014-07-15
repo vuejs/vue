@@ -16,7 +16,7 @@ var _ = require('./util')
 function Vue (options) {
   this.$options = options = options || {}
   // create scope
-  this._initScope(options)
+  this._initScope()
   // setup initial data.
   this._initData(options.data || {}, true)
   // setup property proxying

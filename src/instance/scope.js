@@ -2,12 +2,16 @@ var Observer = require('../observe/observer')
 var scopeEvents = ['set', 'mutate', 'added', 'deleted']
 
 /**
- * Setup scope and listen to parent scope changes.
- * Only called once during _init().
+ * Setup instance scope.
+ * The scope is reponsible for prototypal inheritance of
+ * parent instance propertiesm abd all binding paths and
+ * expressions of the current instance are evaluated against its scope.
+ *
+ * This should only be called once during _init().
  */
 
-exports._initScope = function (options) {
-
+exports._initScope = function () {
+  var options = this.$options
   var parent = this.$parent = options.parent
   var scope = this.$scope = parent && options._inheritScope !== false
     ? Object.create(parent.$scope)
