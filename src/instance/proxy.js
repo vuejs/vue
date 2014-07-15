@@ -24,10 +24,10 @@ exports._initProxy = function () {
   }
   // keep proxying up-to-date with added/deleted keys.
   this._observer
-    .on('added:self', function (key) {
+    .on('add:self', function (key) {
       _.proxy(this, scope, key)
     })
-    .on('deleted:self', function (key) {
+    .on('delete:self', function (key) {
       delete this[key]
     })
 }

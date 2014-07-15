@@ -9,6 +9,12 @@ var vm = new Vue({ data: {a:1} }) // only observes the data
 vm.$mount('#app') // actually compile the DOM
 ```
 
+## Scope & Data
+
+- new option: `syncData`.
+
+Each Vue instance now creates an associated `$scope` object which has prototypal inheritance similar to Angular. This makes expression evaluation much cleaner. A side effect of this change is that the `data` object being passed in is no longer mutated by default. You need to now explicitly pass in  `syncData: true` in the options for direct property changes on the scope to be synced back to the root data object. In most cases, this is not necessary.
+
 ## More flexible directive syntax
   
   - v-on

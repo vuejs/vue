@@ -1,5 +1,5 @@
 var Observer = require('../observe/observer')
-var scopeEvents = ['set', 'mutate', 'added', 'deleted']
+var scopeEvents = ['set', 'mutate', 'add', 'delete']
 
 /**
  * Setup instance scope.
@@ -13,7 +13,7 @@ var scopeEvents = ['set', 'mutate', 'added', 'deleted']
 exports._initScope = function () {
   var options = this.$options
   var parent = this.$parent = options.parent
-  var scope = this.$scope = parent && options._inheritScope !== false
+  var scope = this.$scope = parent
     ? Object.create(parent.$scope)
     : {}
   // create scope observer

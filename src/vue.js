@@ -21,7 +21,7 @@ function Vue (options) {
   this._initData(options.data || {}, true)
   // setup property proxying
   this._initProxy()
-  // setup root binding
+  // setup binding tree
   this._initBindings()
 }
 

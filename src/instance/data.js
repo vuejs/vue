@@ -1,8 +1,17 @@
 var Observer = require('../observe/observer')
 
 /**
- * Setup the instances data object, copying properties into
- * scope and setup the syncing between the data and the scope.
+ * Setup the instances data object.
+ *
+ * Properties are copied into the scope object to take advantage of
+ * prototypal inheritance.
+ *
+ * If the `syncData` option is true, Vue will maintain property
+ * syncing between the scope and the original data object, so that
+ * any changes to the scope are synced back to the passed in object.
+ * This is useful internally when e.g. creating v-repeat instances
+ * with no alias.
+ *
  * If swapping data object with the `$data` accessor, teardown
  * previous sync listeners and delete keys not present in new data.
  *
@@ -12,11 +21,14 @@ var Observer = require('../observe/observer')
 
 exports._initData = function (data, init) {
   var scope = this.$scope
+  var options = this.$options
   var key
 
   if (!init) {
     // teardown old sync listeners
-    this._unsync()
+    if (options.syncData) {
+      this._unsync()
+    }
     // delete keys not present in the new data
     for (key in scope) {
       if (scope.hasOwnProperty(key) && !(key in data)) {
@@ -37,9 +49,11 @@ exports._initData = function (data, init) {
   }
 
   // setup sync between scope and new data
-  this._data = data
-  this._dataObserver = Observer.create(data)
-  this._sync()
+  if (options.syncData) {
+    this._data = data
+    this._dataObserver = Observer.create(data)
+    this._sync()
+  }
 }
 
 /**
@@ -57,10 +71,10 @@ exports._sync = function () {
       set: guard(function (key, val) {
         data[key] = val
       }),
-      added: guard(function (key, val) {
+      add: guard(function (key, val) {
         data.$add(key, val)
       }),
-      deleted: guard(function (key) {
+      delete: guard(function (key) {
         data.$delete(key)
       })
     },
@@ -68,10 +82,10 @@ exports._sync = function () {
       set: guard(function (key, val) {
         scope[key] = val
       }),
-      added: guard(function (key, val) {
+      add: guard(function (key, val) {
         scope.$add(key, val)
       }),
-      deleted: guard(function (key) {
+      delete: guard(function (key) {
         scope.$delete(key)
       })
     }
@@ -80,13 +94,13 @@ exports._sync = function () {
   // sync scope and original data.
   this._observer
     .on('set:self', listeners.data.set)
-    .on('added:self', listeners.data.added)
-    .on('deleted:self', listeners.data.deleted)
+    .on('add:self', listeners.data.add)
+    .on('delete:self', listeners.data.delete)
 
   this._dataObserver
     .on('set:self', listeners.scope.set)
-    .on('added:self', listeners.scope.added)
-    .on('deleted:self', listeners.scope.deleted)
+    .on('add:self', listeners.scope.add)
+    .on('delete:self', listeners.scope.delete)
 
   /**
    * The guard function prevents infinite loop
@@ -112,11 +126,11 @@ exports._unsync = function () {
 
   this._observer
     .off('set:self', listeners.data.set)
-    .off('added:self', listeners.data.added)
-    .off('deleted:self', listeners.data.deleted)
+    .off('add:self', listeners.data.add)
+    .off('delete:self', listeners.data.delete)
 
   this._dataObserver
     .off('set:self', listeners.scope.set)
-    .off('added:self', listeners.scope.added)
-    .off('deleted:self', listeners.scope.deleted)
+    .off('add:self', listeners.scope.add)
+    .off('delete:self', listeners.scope.delete)
 }
