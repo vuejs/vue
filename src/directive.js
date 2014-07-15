@@ -1,5 +1,5 @@
 var dirId           = 1,
-    ARG_RE          = /^[\w\$-]+$/,
+    ARG_RE          = /^[\w\$\-:]+$/,
     FILTER_TOKEN_RE = /[^\s'"]+|'[^']+'|"[^"]+"/g,
     NESTING_RE      = /^\$(parent|root)\./,
     SINGLE_VAR_RE   = /^[\w\.$]+$/,
@@ -157,7 +157,7 @@ Directive.parse = function (str) {
             // reset & skip the comma
             dir = {}
             begin = argIndex = lastFilterIndex = i + 1
-        } else if (c === ':' && !dir.key && !dir.arg) {
+        } else if (c === ':' && !dir.key) {
             // argument
             arg = str.slice(begin, i).trim()
             if (ARG_RE.test(arg)) {

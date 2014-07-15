@@ -201,10 +201,12 @@ describe('Directive', function () {
         it('should extract correct argument', function () {
             var d = build('text', 'todo:todos', compiler),
                 e = build('text', '$todo:todos + abc', compiler),
-                f = build('text', '-todo-fsef:todos | fsf fsef', compiler)
+                f = build('text', '-todo-fsef:todos | fsf fsef', compiler),
+                g = build('text', 'ns:todo:todos', compiler)
             assert.strictEqual(d.arg, 'todo', 'simple')
             assert.strictEqual(e.arg, '$todo', 'expression')
             assert.strictEqual(f.arg, '-todo-fsef', 'with hyphens and filters')
+            assert.strictEqual(g.arg, 'ns:todo', 'with a namespace prefix')
         })
 
         it('should be able to determine whether the key is an expression', function () {
