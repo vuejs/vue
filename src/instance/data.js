@@ -85,7 +85,7 @@ exports._sync = function () {
   this._dataObserver
     .on('set:self', listeners.scope.set)
     .on('added:self', listeners.scope.added)
-    .on('deleted:self', listeners.scope.delted)
+    .on('deleted:self', listeners.scope.deleted)
 
   /**
    * The guard function prevents infinite loop
@@ -117,5 +117,5 @@ exports._unsync = function () {
   this._dataObserver
     .off('set:self', listeners.scope.set)
     .off('added:self', listeners.scope.added)
-    .off('deleted:self', listeners.scope.delted)
+    .off('deleted:self', listeners.scope.deleted)
 }
