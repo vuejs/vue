@@ -14,26 +14,58 @@ var _ = require('./util')
  */
 
 function Vue (options) {
-  this._init(options)
+  this.$options = options = options || {}
+  // create scope
+  this._initScope(options)
+  // setup initial data.
+  this._initData(options.data || {}, true)
+  // setup property proxying
+  this._initProxy()
+  // setup root binding
+  this._initBindings()
 }
 
 var p = Vue.prototype
 
 /**
- * Define prototype properties
+ * The $root recursively points to the root instance.
+ *
+ * @readonly
  */
 
-require('./internal/properties')(p)
+Object.defineProperty(p, '$root', {
+  get: function () {
+    return this.$parent
+      ? this.$parent.$root
+      : this
+  }
+})
+
+/**
+ * $data has a setter which does a bunch of teardown/setup work
+ */
+
+Object.defineProperty(p, '$data', {
+  get: function () {
+    return this._data
+  },
+  set: function (newData) {
+    this._initData(newData)
+  }
+})
 
 /**
  * Mixin internal instance methods
  */
 
- _.mixin(p, require('./internal/init'))
- _.mixin(p, require('./internal/compile'))
+_.mixin(p, require('./instance/scope'))
+_.mixin(p, require('./instance/data'))
+_.mixin(p, require('./instance/proxy'))
+_.mixin(p, require('./instance/bindings'))
+_.mixin(p, require('./instance/compile'))
 
 /**
- * Mixin API instance methods
+ * Mixin public API methods
  */
 
 _.mixin(p, require('./api/data'))
