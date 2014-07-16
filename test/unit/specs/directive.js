@@ -123,6 +123,22 @@ describe('Directive', function () {
             assert.equal(res[2].arg, 'ok')
             assert.equal(res[2].key, '{a:1,b:2}')
         })
+        
+        it('a:b:c | d, e:\'f:g\', "h\',i":j, "k\\"l":m', function () {
+            var res = Directive.parse('a:b:c | d, e:\'f:g\', "h\',i":j, "k\\"l":m')
+            assert.equal(res.length, 4)
+            assert.equal(res[0].arg, 'a:b')
+            assert.equal(res[0].key, 'c')
+            assert.equal(res[0].filters.length, 1)
+            assert.equal(res[0].filters[0].name, 'd')
+            assert.notOk(res[0].filters[0].args)
+            assert.equal(res[1].arg, 'e')
+            assert.equal(res[1].key, '\'f:g\'')
+            assert.equal(res[2].arg, 'h\',i')
+            assert.equal(res[2].key, 'j')
+            assert.equal(res[3].arg, 'k"l')
+            assert.equal(res[3].key, 'm')
+        })
 
     })
 
