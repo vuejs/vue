@@ -1,5 +1,14 @@
+/**
+ * A binding is an observable that can have multiple directives
+ * subscribing to it. It can also have multiple other bindings
+ * as children to form a trie-like structure.
+ *
+ * @constructor
+ */
+
 function Binding () {
     this.children = Object.create(null)
+    this.subs = []
 }
 
 var p = Binding.prototype
@@ -36,10 +45,30 @@ p.updateSubTree = function () {
 }
 
 /**
- * Notify all subscribers of it self
+ * Add a directive subscriber.
+ *
+ * @param {Directive} sub
  */
 
-p.notify = function () {
+p.addSubscriber = function (sub) {
+  
+}
+
+/**
+ * Remove a directive subscriber.
+ *
+ * @param {Directive} sub
+ */
+
+p.removeSubscriber = function (sub) {
+  
+}
+
+/**
+ * Notify all subscribers of a new value.
+ */
+
+p.publish = function () {
   
 }
 
