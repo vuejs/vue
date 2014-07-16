@@ -1,4 +1,12 @@
 /**
+ * Assign unique id to each binding created so that directives
+ * can have an easier time avoiding duplicates and refreshing
+ * dependencies.
+ */
+
+var uid = 0
+
+/**
  * A binding is an observable that can have multiple directives
  * subscribing to it. It can also have multiple other bindings
  * as children to form a trie-like structure.
@@ -7,8 +15,9 @@
  */
 
 function Binding () {
-    this.children = Object.create(null)
-    this.subs = []
+  this.uid = uid++
+  this.children = Object.create(null)
+  this.subs = []
 }
 
 var p = Binding.prototype
