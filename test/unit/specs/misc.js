@@ -294,7 +294,7 @@ describe('Misc Features', function () {
                     icon: 'test'
                 }
             })
-            assert.equal(t.$el.firstChild.getAttribute('xlink:href'), 'test')
+            assert.equal(t.$el.firstChild.getAttributeNS('http://www.w3.org/1999/xlink', 'href'), 'test')
         })
 
     })

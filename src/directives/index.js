@@ -1,7 +1,8 @@
 var utils      = require('../utils'),
     config     = require('../config'),
     transition = require('../transition'),
-    directives = module.exports = utils.hash()
+    directives = module.exports = utils.hash(),
+    XLINK_NS   = 'http://www.w3.org/1999/xlink'
 
 /**
  *  Nest and manage a Child VM
@@ -30,10 +31,15 @@ directives.attr = {
     bind: function () {
         var params = this.vm.$options.paramAttributes
         this.isParam = params && params.indexOf(this.arg) > -1
+        this.isXlink = this.arg && this.arg.indexOf("xlink:") === 0
     },
     update: function (value) {
         if (value || value === 0) {
-            this.el.setAttribute(this.arg, value)
+            if (this.isXlink) {
+                this.el.setAttributeNS(XLINK_NS, this.arg, value)
+            } else {
+                this.el.setAttribute(this.arg, value)
+            }
         } else {
             this.el.removeAttribute(this.arg)
         }
