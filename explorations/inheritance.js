@@ -30,6 +30,7 @@ window.child = new Vue({
 
 window.item = new Vue({
   parent: vm,
+  syncData: true,
   data: vm.arr[0]
 })
 

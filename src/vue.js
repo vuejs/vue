@@ -14,16 +14,20 @@ var _ = require('./util')
  */
 
 function Vue (options) {
-  this.$options = options = options || {}
+  this.$options = options || {}
   // create scope
   this._initScope()
   // setup initial data.
-  this._initData(options.data || {}, true)
+  this._initData(this.$options.data || {}, true)
   // setup property proxying
   this._initProxy()
   // setup binding tree
   this._initBindings()
 }
+
+/**
+ * Build up the prototype
+ */
 
 var p = Vue.prototype
 

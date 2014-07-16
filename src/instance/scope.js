@@ -11,8 +11,7 @@ var scopeEvents = ['set', 'mutate', 'add', 'delete']
  */
 
 exports._initScope = function () {
-  var options = this.$options
-  var parent = this.$parent = options.parent
+  var parent = this.$parent = this.$options.parent
   var scope = this.$scope = parent
     ? Object.create(parent.$scope)
     : {}
