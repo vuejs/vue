@@ -80,7 +80,7 @@ exports.use = function (plugin) {
 
 createAssetRegisters(exports)
 function createAssetRegisters (Ctor) {
-  config.assetTypes.forEach(function (type) {
+  config._assetTypes.forEach(function (type) {
 
     /**
      * Asset registration method.

@@ -1,4 +1,4 @@
-var Observer = require('../../src/observer/observer')
+var Observer = require('../../src/observe/observer')
 // internal emitter has fixed 3 arguments
 // so we need to fill up the assetions with undefined
 var u = undefined
@@ -244,14 +244,14 @@ describe('Observer', function () {
   it('object.$add', function () {
     var obj = {a:{b:1}}
     var ob = Observer.create(obj)
-    ob.on('added', spy)
+    ob.on('add', spy)
 
     // add event
-    var added = {d:2}
-    obj.a.$add('c', added)
-    expect(spy).toHaveBeenCalledWith('a.c', added, u)
+    var add = {d:2}
+    obj.a.$add('c', add)
+    expect(spy).toHaveBeenCalledWith('a.c', add, u)
 
-    // check if added object is properly observed
+    // check if add object is properly observed
     ob.on('set', spy)
     obj.a.c.d = 3
     expect(spy).toHaveBeenCalledWith('a.c.d', 3, u)
@@ -260,7 +260,7 @@ describe('Observer', function () {
   it('object.$delete', function () {
     var obj = {a:{b:1}}
     var ob = Observer.create(obj)
-    ob.on('deleted', spy)
+    ob.on('delete', spy)
 
     obj.a.$delete('b')
     expect(spy).toHaveBeenCalledWith('a.b', u, u)

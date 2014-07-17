@@ -1,11 +1,3 @@
-var assetTypes = [
-  'directive',
-  'filter',
-  'partial',
-  'effect',
-  'component'
-]
-
 module.exports = {
 
   /**
@@ -43,8 +35,12 @@ module.exports = {
    * @readonly
    */
 
-  get assetTypes () {
-    return assetTypes
-  }
+  _assetTypes: [
+    'directive',
+    'filter',
+    'partial',
+    'effect',
+    'component'
+  ]
 
 }
