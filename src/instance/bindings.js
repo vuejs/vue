@@ -29,11 +29,15 @@ exports._initBindings = function () {
     root.addChild('$parent', this.$parent._rootBinding)
     root.addChild('$root', this.$root._rootBinding)
   }
+  var self = this
+  var updateBindings = function (path) {
+    self._updateBindings(path)
+  }
   this._observer
-    .on('set', this._updateBindings)
-    .on('add', this._updateBindings)
-    .on('delete', this._updateBindings)
-    .on('mutate', this._updateBindings)
+    .on('set', updateBindings)
+    .on('add', updateBindings)
+    .on('delete', updateBindings)
+    .on('mutate', updateBindings)
 }
 
 /**
