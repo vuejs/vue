@@ -30,7 +30,7 @@ var p = Binding.prototype
  */
 
 p.addChild = function (key, child) {
-  
+  this.children[key] = child
 }
 
 /**

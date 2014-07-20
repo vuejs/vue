@@ -1,3 +1,11 @@
+var Cache = require('../cache')
+
+/**
+ * Path cache
+ */
+
+var pathCache = new Cache(1000)
+
 /**
  * Path-parsing algorithm scooped from Polymer/observe-js
  */
@@ -72,6 +80,13 @@ var pathStateMachine = {
 
 function noop () {}
 
+/**
+ * Determine the type of a character in a keypath.
+ *
+ * @param {Char} char
+ * @return {String} type
+ */
+
 function getPathCharType (char) {
   if (char === undefined)
     return 'eof'
@@ -121,20 +136,19 @@ function getPathCharType (char) {
  * @return {Array|undefined}
  */
 
-exports.parse = function (path) {
+function parsePath (path) {
   var keys = []
   var index = -1
   var c, newChar, key, type, transition, action, typeMap, mode = 'beforePath'
 
   var actions = {
     push: function() {
-      if (key === undefined)
+      if (key === undefined) {
         return
-
+      }
       keys.push(key)
       key = undefined
     },
-
     append: function() {
       if (key === undefined)
         key = newChar
@@ -144,12 +158,12 @@ exports.parse = function (path) {
   }
 
   function maybeUnescapeQuote() {
-    if (index >= path.length)
+    if (index >= path.length) {
       return
-
+    }
     var nextChar = path[index + 1]
-    if ((mode == 'inSingleQuote' && nextChar == "'") ||
-        (mode == 'inDoubleQuote' && nextChar == '"')) {
+    if ((mode === 'inSingleQuote' && nextChar === "'") ||
+        (mode === 'inDoubleQuote' && nextChar === '"')) {
       index++
       newChar = nextChar
       actions.append()
@@ -161,15 +175,17 @@ exports.parse = function (path) {
     index++
     c = path[index]
 
-    if (c == '\\' && maybeUnescapeQuote(mode))
+    if (c === '\\' && maybeUnescapeQuote(mode)) {
       continue
+    }
 
     type = getPathCharType(c)
     typeMap = pathStateMachine[mode]
     transition = typeMap[type] || typeMap['else'] || 'error'
 
-    if (transition == 'error')
+    if (transition === 'error') {
       return // parse error
+    }
 
     mode = transition[0]
     action = actions[transition[1]] || noop
@@ -185,6 +201,22 @@ exports.parse = function (path) {
 }
 
 /**
+ * External parse that check for a cache hit first
+ *
+ * @param {String} path
+ * @return {Array|undefined}
+ */
+
+exports.parse = function (path) {
+  var hit = pathCache.get(path)
+  if (!hit) {
+    hit = parsePath(path)
+    pathCache.put(path, hit)
+  }
+  return hit
+}
+
+/**
  * Get from an object from a path
  *
  * @param {Object} obj
@@ -192,7 +224,17 @@ exports.parse = function (path) {
  */
 
 exports.get = function (obj, path) {
-  
+  if (typeof path === 'string') {
+    path = exports.parse(path)
+  }
+  if (!path) {
+    return
+  }
+  for (var i = 0, l = path.length; i < l; i++) {
+    if (obj == null) return
+    obj = obj[path[i]]
+  }
+  return obj
 }
 
 /**
@@ -204,17 +246,21 @@ exports.get = function (obj, path) {
  */
 
 exports.set = function (obj, path, val) {
-  
-}
-
-/**
- * Traverse an object along a path and trigger callback
- *
- * @param {Object} obj
- * @param {String} path
- * @param {Function} cb
- */
-
-exports.traverse = function (obj, path, cb) {
-  
+  if (typeof path === 'string') {
+    path = exports.parse(path)
+  }
+  if (!path) {
+    return
+  }
+  for (var i = 0, l = path.length - 1; i < l; i++) {
+    if (typeof obj !== 'object') {
+      return false
+    }
+    obj = obj[path[i]]
+  }
+  if (typeof obj !== 'object') {
+    return false
+  }
+  obj[path] = val
+  return true
 }

@@ -1,3 +1,7 @@
+/**
+ * Test data observation.
+ */
+
 var Observer = require('../../src/observe/observer')
 // internal emitter has fixed 3 arguments
 // so we need to fill up the assetions with undefined

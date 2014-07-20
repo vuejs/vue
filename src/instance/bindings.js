@@ -1,6 +1,5 @@
 var Binding = require('../binding')
 var Observer = require('../observe/observer')
-var Path = require('../parse/path')
 
 /**
  * Setup the binding tree.
@@ -43,17 +42,25 @@ exports._initBindings = function () {
 /**
  * Create bindings along a path
  *
- * @param {String|Array} path
+ * @param {Array} path - this should already be a parsed Array.
  */
 
 exports._createBindings = function (path) {
-  
+  var b = this._rootBinding
+  var child
+  for (var i = 0, l = path.length; i < l; i++) {
+    child = new Binding()
+    b.addChild(path[i], child)
+    b = child
+  }
 }
 
 /**
  * Traverse the binding tree
  *
- * @param {String} path
+ * @param {String} path - this path comes directly from the
+ *                        data observer, so it is a single string
+ *                        delimited by "\b".
  */
 
 exports._updateBindings = function (path) {
