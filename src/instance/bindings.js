@@ -21,22 +21,22 @@ var Observer = require('../observe/observer')
 exports._initBindings = function () {
   var root = this._rootBinding = new Binding()
   // the $data binding points to the root itself!
-  root.addChild('$data', root)
+  root.children.$data = root
   // point $parent and $root bindings to their
   // repective owners.
   if (this.$parent) {
-    root.addChild('$parent', this.$parent._rootBinding)
-    root.addChild('$root', this.$root._rootBinding)
+    root.children.$parent = this.$parent._rootBinding
+    root.children.$root = this.$root._rootBinding
   }
   var self = this
-  var updateBindings = function (path) {
-    self._updateBindings(path)
+  var updateBinding = function (path) {
+    self._updateBinding(path)
   }
   this._observer
-    .on('set', updateBindings)
-    .on('add', updateBindings)
-    .on('delete', updateBindings)
-    .on('mutate', updateBindings)
+    .on('set', updateBinding)
+    .on('add', updateBinding)
+    .on('delete', updateBinding)
+    .on('mutate', updateBinding)
 }
 
 /**
@@ -64,14 +64,14 @@ exports._createBindingAt = function (path) {
 }
 
 /**
- * Traverse the binding tree
+ * Trigger a path update on the root binding.
  *
  * @param {String} path - this path comes directly from the
  *                        data observer, so it is a single string
  *                        delimited by "\b".
  */
 
-exports._updateBindings = function (path) {
+exports._updateBinding = function (path) {
   path = path.split(Observer.pathDelimiter)
   this._rootBinding.updatePath(path)
 }

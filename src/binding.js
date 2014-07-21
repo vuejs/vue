@@ -15,7 +15,7 @@ var uid = 0
  */
 
 function Binding () {
-  this.uid = uid++
+  this.id = uid++
   this.children = Object.create(null)
   this.subs = []
 }
@@ -40,7 +40,7 @@ p.updatePath = function (path) {
   // change for every children. i.e. when an object is
   // swapped, all its content need to be updated.
   if (b) {
-    b.updateSubTree()
+    b.updateTree()
   }
 }
 
@@ -81,8 +81,8 @@ p.removeSub = function (sub) {
  */
 
 p.notify = function () {
-  for (var i = 0, l = this.subs.length; i++) {
-    this.subs[i]._update()
+  for (var i = 0, l = this.subs.length; i < l; i++) {
+    this.subs[i]._update(this)
   }
 }
 
