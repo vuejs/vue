@@ -21,12 +21,12 @@ var Observer = require('../observe/observer')
 exports._initBindings = function () {
   var root = this._rootBinding = new Binding()
   // the $data binding points to the root itself!
-  root.children.$data = root
+  root.addChild('$data', root)
   // point $parent and $root bindings to their
   // repective owners.
   if (this.$parent) {
-    root.children.$parent = this.$parent._rootBinding
-    root.children.$root = this.$root._rootBinding
+    root.addChild('$parent', this.$parent._rootBinding)
+    root.addChild('$root', this.$root._rootBinding)
   }
   var self = this
   var updateBinding = function (path) {
@@ -42,7 +42,7 @@ exports._initBindings = function () {
 /**
  * Create a binding for a given path, and create necessary
  * parent bindings along the path. Returns the binding at
- * the end of thep path.
+ * the end of the path.
  *
  * @param {Array} path - this should already be a parsed Array.
  * @return {Binding} - the binding created/retrieved at the destination.
@@ -53,11 +53,7 @@ exports._createBindingAt = function (path) {
   var child, key
   for (var i = 0, l = path.length; i < l; i++) {
     key = path[i]
-    child = b.children[key]
-    if (!child) {
-      child = new Binding()
-      b.children[key] = child
-    }
+    child = b.getChild(key) || b.addChild(key)
     b = child
   }
   return b

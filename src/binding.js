@@ -23,6 +23,30 @@ function Binding () {
 var p = Binding.prototype
 
 /**
+ * Add a child binding to the tree.
+ *
+ * @param {String} key
+ * @param {Binding} child
+ */
+
+p.addChild = function (key, child) {
+  child = child || new Binding()
+  this.children[key] = child
+  return child
+}
+
+/**
+ * Return the child at the given key
+ *
+ * @param {String} key
+ * @return {Binding}
+ */
+
+p.getChild = function (key) {
+  return this.children[key]
+}
+
+/**
  * Traverse along a path and trigger updates
  * along the way.
  *
