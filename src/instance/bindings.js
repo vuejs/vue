@@ -28,10 +28,8 @@ exports._initBindings = function () {
     root.addChild('$parent', this.$parent._rootBinding)
     root.addChild('$root', this.$root._rootBinding)
   }
-  var self = this
-  var updateBinding = function (path) {
-    self._updateBinding(path)
-  }
+  // observer already has callback context set to `this`
+  var updateBinding = this._updateBinding
   this._observer
     .on('set', updateBinding)
     .on('add', updateBinding)
