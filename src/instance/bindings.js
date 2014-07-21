@@ -40,19 +40,27 @@ exports._initBindings = function () {
 }
 
 /**
- * Create bindings along a path
+ * Create a binding for a given path, and create necessary
+ * parent bindings along the path. Returns the binding at
+ * the end of thep path.
  *
  * @param {Array} path - this should already be a parsed Array.
+ * @return {Binding} - the binding created/retrieved at the destination.
  */
 
-exports._createBindings = function (path) {
+exports._createBindingAt = function (path) {
   var b = this._rootBinding
-  var child
+  var child, key
   for (var i = 0, l = path.length; i < l; i++) {
-    child = new Binding()
-    b.addChild(path[i], child)
+    key = path[i]
+    child = b.children[key]
+    if (!child) {
+      child = new Binding()
+      b.children[key] = child
+    }
     b = child
   }
+  return b
 }
 
 /**

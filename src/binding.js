@@ -23,34 +23,37 @@ function Binding () {
 var p = Binding.prototype
 
 /**
- * Add a child binding to the tree.
- *
- * @param {String} key
- * @param {Binding} child
- */
-
-p.addChild = function (key, child) {
-  this.children[key] = child
-}
-
-/**
  * Traverse along a path and trigger updates
  * along the way.
  *
- * @param {String} path
+ * @param {Array} path
  */
 
 p.updatePath = function (path) {
-  
+  var b = this
+  for (var i = 0, l = path.length; i < l; i++) {
+    if (!b) return
+    b.notify()
+    b = b.children[path[i]]
+  }
+  // for the destination of path, we need to trigger
+  // change for every children. i.e. when an object is
+  // swapped, all its content need to be updated.
+  if (b) {
+    b.updateSubTree()
+  }
 }
 
 /**
  * Trigger updates for the subtree starting at
- * self as root.
+ * self as root. Recursive.
  */
 
-p.updateSubTree = function () {
-  
+p.updateTree = function () {
+  this.notify()
+  for (var key in this.children) {
+    this.children[key].updateTree()
+  }
 }
 
 /**
@@ -59,8 +62,8 @@ p.updateSubTree = function () {
  * @param {Directive} sub
  */
 
-p.addSubscriber = function (sub) {
-  
+p.addSub = function (sub) {
+  this.subs.push(sub)
 }
 
 /**
@@ -69,16 +72,18 @@ p.addSubscriber = function (sub) {
  * @param {Directive} sub
  */
 
-p.removeSubscriber = function (sub) {
-  
+p.removeSub = function (sub) {
+  this.subs.splice(this.subs.indexOf(sub), 1)
 }
 
 /**
  * Notify all subscribers of a new value.
  */
 
-p.publish = function () {
-  
+p.notify = function () {
+  for (var i = 0, l = this.subs.length; i++) {
+    this.subs[i]._update()
+  }
 }
 
 module.exports = Binding

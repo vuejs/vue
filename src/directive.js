@@ -4,14 +4,14 @@
  * a list of dependencies (Bindings) and refreshes the list during
  * its getter evaluation.
  *
- * @param {String} id
+ * @param {String} type
  * @param {Node} el
  * @param {Vue} vm
  * @param {String} expression
  * @constructor
  */
 
-function Directive (id, el, vm, expression) {
+function Directive (type, el, vm, expression) {
   
 }
 
