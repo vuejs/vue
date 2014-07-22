@@ -1,4 +1,16 @@
 var config = require('./config')
+var slice = [].slice
+
+/**
+ * Convert an Array-like object to a real Array.
+ *
+ * @param {Array-like} list
+ * @param {Number} [i] - start index
+ */
+
+exports.toArray = function (list, i) {
+  return slice.call(list, i || 0)
+}
 
 /**
  * Mix properties into target object.

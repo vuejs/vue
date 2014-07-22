@@ -62,7 +62,7 @@ exports.use = function (plugin) {
     }
   }
   // additional parameters
-  var args = [].slice.call(arguments, 1)
+  var args = _.toArray(arguments, 1)
   args.unshift(this)
   if (typeof plugin.install === 'function') {
     plugin.install.apply(plugin, args)

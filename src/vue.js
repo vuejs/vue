@@ -14,7 +14,12 @@ var _ = require('./util')
  */
 
 function Vue (options) {
+  // instance options
   this.$options = options || {}
+  // general state
+  this._isBlock = false
+  this._isMounted = false
+  this._isDestroyed = false
   // create scope
   this._initScope()
   // setup initial data.
@@ -23,6 +28,10 @@ function Vue (options) {
   this._initProxy()
   // setup binding tree
   this._initBindings()
+  // if `el` option is passed, start compilation.
+  if (this.$options.el) {
+    this.$mount(this.$options.el)
+  }
 }
 
 /**
