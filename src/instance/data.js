@@ -49,8 +49,8 @@ exports._initData = function (data, init) {
   }
 
   // setup sync between scope and new data
+  this._data = data
   if (options.syncData) {
-    this._data = data
     this._dataObserver = Observer.create(data)
     this._sync()
   }

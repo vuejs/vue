@@ -14,24 +14,7 @@ var _ = require('./util')
  */
 
 function Vue (options) {
-  // instance options
-  this.$options = options || {}
-  // general state
-  this._isBlock = false
-  this._isMounted = false
-  this._isDestroyed = false
-  // create scope
-  this._initScope()
-  // setup initial data.
-  this._initData(this.$options.data || {}, true)
-  // setup property proxying
-  this._initProxy()
-  // setup binding tree
-  this._initBindings()
-  // if `el` option is passed, start compilation.
-  if (this.$options.el) {
-    this.$mount(this.$options.el)
-  }
+  this._init(options)
 }
 
 /**
@@ -71,6 +54,7 @@ Object.defineProperty(p, '$data', {
  * Mixin internal instance methods
  */
 
+_.mixin(p, require('./instance/init'))
 _.mixin(p, require('./instance/scope'))
 _.mixin(p, require('./instance/data'))
 _.mixin(p, require('./instance/proxy'))
