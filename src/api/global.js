@@ -1,5 +1,11 @@
 var _ = require('../util')
-var config = require('../config')
+var assetTypes = [
+  'directive',
+  'filter',
+  'partial',
+  'effect',
+  'component'
+]
 
 /**
  * Vue and every constructor that extends Vue has an associated
@@ -19,9 +25,9 @@ exports.options = {
  * Expose useful internals
  */
 
-exports.util = _
-exports.config = config
-exports.nextTick = _.nextTick
+exports.util       = _
+exports.nextTick   = _.nextTick
+exports.config     = require('../config')
 exports.transition = require('../transition/transition')
 
 /**
@@ -33,12 +39,15 @@ exports.transition = require('../transition/transition')
 exports.extend = function (extendOptions) {
   var Super = this
   var Sub = function (instanceOptions) {
-    var mergedOptions = _.mergeOptions(Sub.options, instanceOptions)
-    Super.call(this, mergedOptions)
+    Super.call(this, instanceOptions)
   }
   Sub.prototype = Object.create(Super.prototype)
   _.define(Sub.prototype, 'constructor', Sub)
-  Sub.options = _.mergeOptions(Super.options, extendOptions)
+  Sub.options = _.mergeOptions(
+    Super.options,
+    extendOptions,
+    true // indicates an inheritance merge
+  )
   Sub.super = Super
   // allow further extension
   Sub.extend = Super.extend
@@ -80,7 +89,7 @@ exports.use = function (plugin) {
 
 createAssetRegisters(exports)
 function createAssetRegisters (Ctor) {
-  config._assetTypes.forEach(function (type) {
+  assetTypes.forEach(function (type) {
 
     /**
      * Asset registration method.

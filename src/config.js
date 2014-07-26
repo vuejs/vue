@@ -27,20 +27,6 @@ module.exports = {
    * @type {Boolean}
    */
 
-  interpolate: true,
-
-  /**
-   * Asset types
-   * @type {Array.<String>}
-   * @readonly
-   */
-
-  _assetTypes: [
-    'directive',
-    'filter',
-    'partial',
-    'effect',
-    'component'
-  ]
+  interpolate: true
 
 }

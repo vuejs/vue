@@ -1,3 +1,5 @@
+var _ = require('../util')
+
 /**
  * The main init sequence. This is called for every instance,
  * including ones that are created from extended constructors.
@@ -9,67 +11,35 @@
  */
 
 exports._init = function (options) {
-
-  /**
-   * Expose instance options.
-   * @type {Object}
-   *
-   * @public
-   */
-
-  this.$options = options || {}
-
-  /**
-   * Indicates whether this is a block instance. (One with more
-   * than one top-level nodes)
-   *
-   * @type {Boolean}
-   * @private
-   */
-
-  this._isBlock = false
-
-  /**
-   * Indicates whether the instance has been mounted to a DOM node.
-   *
-   * @type {Boolean}
-   * @private
-   */
-
-  this._isMounted = false
-
-  /**
-   * Indicates whether the instance has been destroyed.
-   *
-   * @type {Boolean}
-   * @private
-   */
-
-  this._isDestroyed = false
-
-  /**
-   * If the instance has a template option, the raw content it holds
-   * before compilation will be preserved so they can be queried against
-   * during content insertion.
-   *
-   * @type {DocumentFragment}
-   * @private
-   */
-
-  this._rawContent = null
+  // merge options.
+  this.$options = _.mergeOptions(
+    this.constructor.options,
+    options
+  )
 
   // create scope.
+  // @creates this.$parent
+  // @creates this.$scope
   this._initScope()
 
   // setup initial data.
+  // @creates this._data
   this._initData(this.$options.data || {}, true)
 
   // setup property proxying
   this._initProxy()
 
   // setup binding tree.
+  // @creates this._rootBinding
   this._initBindings()
-  
+
+  // compilation and lifecycle related state properties
+  this.$el = null
+  this._rawContent = null
+  this._isBlock = false
+  this._isMounted = false
+  this._isDestroyed = false 
+
   // if `el` option is passed, start compilation.
   if (this.$options.el) {
     this.$mount(this.$options.el)
