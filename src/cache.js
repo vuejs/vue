@@ -1,20 +1,10 @@
 /**
  * A doubly linked list-based Least Recently Used (LRU) cache.
  * Will keep most recently used items while discarding least
- * recently used items when its limit is reached.
+ * recently used items when its limit is reached. This is a
+ * bare-bone version of Rasmus Andersson's js-lru:
  *
- * Licensed under MIT.
- * Copyright (c) 2010 Rasmus Andersson <http://hunch.se/>
- *
- * Illustration of the design:
- *
- *       entry             entry             entry             entry
- *       ______            ______            ______            ______
- *      | head |.newer => |      |.newer => |      |.newer => | tail |
- *      |  A   |          |  B   |          |  C   |          |  D   |
- *      |______| <= older.|______| <= older.|______| <= older.|______|
- *
- *  removed  <--  <--  <--  <--  <--  <--  <--  <--  <--  <--  <--  added
+ *   https://github.com/rsms/js-lru
  *
  * @param {Number} limit
  * @constructor
