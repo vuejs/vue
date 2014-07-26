@@ -1,15 +1,16 @@
 var config = require('./config')
-var slice = [].slice
-var defer =
-  win.requestAnimationFrame ||
-  win.webkitRequestAnimationFrame ||
-  win.setTimeout
 
 /**
  * Defer a task to the start of the next event loop
  *
  * @param {Function} fn
  */
+
+var defer = typeof window === 'undefined'
+  ? setTimeout
+  : (window.requestAnimationFrame ||
+    window.webkitRequestAnimationFrame ||
+    setTimeout)
 
 exports.nextTick = function (fn) {
   return defer(fn, 0)
@@ -21,6 +22,8 @@ exports.nextTick = function (fn) {
  * @param {Array-like} list
  * @param {Number} [i] - start index
  */
+
+var slice = [].slice
 
 exports.toArray = function (list, i) {
   return slice.call(list, i || 0)

@@ -30,12 +30,12 @@ describe('Observer', function () {
 
     var t = obj.a
     expect(spy).toHaveBeenCalledWith('a', u, u)
-    expect(spy.callCount).toEqual(1)
+    expect(spy.callCount).toBe(1)
 
     t = obj.b.c
     expect(spy).toHaveBeenCalledWith('b', u, u)
     expect(spy).toHaveBeenCalledWith('b.c', u, u)
-    expect(spy.callCount).toEqual(3)
+    expect(spy.callCount).toBe(3)
 
     Observer.emitGet = false
   })
@@ -52,21 +52,21 @@ describe('Observer', function () {
 
     obj.a = 3
     expect(spy).toHaveBeenCalledWith('a', 3, u)
-    expect(spy.callCount).toEqual(1)
+    expect(spy.callCount).toBe(1)
 
     obj.b.c = 4
     expect(spy).toHaveBeenCalledWith('b.c', 4, u)
-    expect(spy.callCount).toEqual(2)
+    expect(spy.callCount).toBe(2)
 
     // swap set
     var newB = { c: 5 }
     obj.b = newB
     expect(spy).toHaveBeenCalledWith('b', newB, u)
-    expect(spy.callCount).toEqual(3)
+    expect(spy.callCount).toBe(3)
 
     // same value set should not emit events
     obj.a = 3
-    expect(spy.callCount).toEqual(3)
+    expect(spy.callCount).toBe(3)
   })
 
   it('array get', function () {
@@ -82,7 +82,7 @@ describe('Observer', function () {
     var t = obj.arr[0].a
     expect(spy).toHaveBeenCalledWith('arr', u, u)
     expect(spy).toHaveBeenCalledWith('arr.0.a', u, u)
-    expect(spy.callCount).toEqual(2)
+    expect(spy.callCount).toBe(2)
 
     Observer.emitGet = false
   })
@@ -108,15 +108,15 @@ describe('Observer', function () {
     var ob = Observer.create(arr)
     ob.on('mutate', spy)
     arr.push({a:3})
-    expect(spy.mostRecentCall.args[0]).toEqual('')
-    expect(spy.mostRecentCall.args[1]).toEqual(arr)
+    expect(spy.mostRecentCall.args[0]).toBe('')
+    expect(spy.mostRecentCall.args[1]).toBe(arr)
     var mutation = spy.mostRecentCall.args[2]
     expect(mutation).toBeDefined()
-    expect(mutation.method).toEqual('push')
-    expect(mutation.index).toEqual(2)
-    expect(mutation.removed.length).toEqual(0)
-    expect(mutation.inserted.length).toEqual(1)
-    expect(mutation.inserted[0]).toEqual(arr[2])
+    expect(mutation.method).toBe('push')
+    expect(mutation.index).toBe(2)
+    expect(mutation.removed.length).toBe(0)
+    expect(mutation.inserted.length).toBe(1)
+    expect(mutation.inserted[0]).toBe(arr[2])
     // test index update after mutation
     ob.on('set', spy)
     arr[2].a = 4
@@ -129,15 +129,15 @@ describe('Observer', function () {
     var ob = Observer.create(arr)
     ob.on('mutate', spy)
     arr.pop()
-    expect(spy.mostRecentCall.args[0]).toEqual('')
-    expect(spy.mostRecentCall.args[1]).toEqual(arr)
+    expect(spy.mostRecentCall.args[0]).toBe('')
+    expect(spy.mostRecentCall.args[1]).toBe(arr)
     var mutation = spy.mostRecentCall.args[2]
     expect(mutation).toBeDefined()
-    expect(mutation.method).toEqual('pop')
-    expect(mutation.index).toEqual(1)
-    expect(mutation.inserted.length).toEqual(0)
-    expect(mutation.removed.length).toEqual(1)
-    expect(mutation.removed[0]).toEqual(popped)
+    expect(mutation.method).toBe('pop')
+    expect(mutation.index).toBe(1)
+    expect(mutation.inserted.length).toBe(0)
+    expect(mutation.removed.length).toBe(1)
+    expect(mutation.removed[0]).toBe(popped)
   })
 
   it('array shift', function () {
@@ -146,15 +146,15 @@ describe('Observer', function () {
     var ob = Observer.create(arr)
     ob.on('mutate', spy)
     arr.shift()
-    expect(spy.mostRecentCall.args[0]).toEqual('')
-    expect(spy.mostRecentCall.args[1]).toEqual(arr)
+    expect(spy.mostRecentCall.args[0]).toBe('')
+    expect(spy.mostRecentCall.args[1]).toBe(arr)
     var mutation = spy.mostRecentCall.args[2]
     expect(mutation).toBeDefined()
-    expect(mutation.method).toEqual('shift')
-    expect(mutation.index).toEqual(0)
-    expect(mutation.inserted.length).toEqual(0)
-    expect(mutation.removed.length).toEqual(1)
-    expect(mutation.removed[0]).toEqual(shifted)
+    expect(mutation.method).toBe('shift')
+    expect(mutation.index).toBe(0)
+    expect(mutation.inserted.length).toBe(0)
+    expect(mutation.removed.length).toBe(1)
+    expect(mutation.removed[0]).toBe(shifted)
     // test index update after mutation
     ob.on('set', spy)
     arr[0].a = 4
@@ -167,15 +167,15 @@ describe('Observer', function () {
     var ob = Observer.create(arr)
     ob.on('mutate', spy)
     arr.unshift(unshifted)
-    expect(spy.mostRecentCall.args[0]).toEqual('')
-    expect(spy.mostRecentCall.args[1]).toEqual(arr)
+    expect(spy.mostRecentCall.args[0]).toBe('')
+    expect(spy.mostRecentCall.args[1]).toBe(arr)
     var mutation = spy.mostRecentCall.args[2]
     expect(mutation).toBeDefined()
-    expect(mutation.method).toEqual('unshift')
-    expect(mutation.index).toEqual(0)
-    expect(mutation.removed.length).toEqual(0)
-    expect(mutation.inserted.length).toEqual(1)
-    expect(mutation.inserted[0]).toEqual(unshifted)
+    expect(mutation.method).toBe('unshift')
+    expect(mutation.index).toBe(0)
+    expect(mutation.removed.length).toBe(0)
+    expect(mutation.inserted.length).toBe(1)
+    expect(mutation.inserted[0]).toBe(unshifted)
     // test index update after mutation
     ob.on('set', spy)
     arr[1].a = 4
@@ -189,16 +189,16 @@ describe('Observer', function () {
     var ob = Observer.create(arr)
     ob.on('mutate', spy)
     arr.splice(1, 1, inserted)
-    expect(spy.mostRecentCall.args[0]).toEqual('')
-    expect(spy.mostRecentCall.args[1]).toEqual(arr)
+    expect(spy.mostRecentCall.args[0]).toBe('')
+    expect(spy.mostRecentCall.args[1]).toBe(arr)
     var mutation = spy.mostRecentCall.args[2]
     expect(mutation).toBeDefined()
-    expect(mutation.method).toEqual('splice')
-    expect(mutation.index).toEqual(1)
-    expect(mutation.removed.length).toEqual(1)
-    expect(mutation.inserted.length).toEqual(1)
-    expect(mutation.removed[0]).toEqual(removed)
-    expect(mutation.inserted[0]).toEqual(inserted)
+    expect(mutation.method).toBe('splice')
+    expect(mutation.index).toBe(1)
+    expect(mutation.removed.length).toBe(1)
+    expect(mutation.inserted.length).toBe(1)
+    expect(mutation.removed[0]).toBe(removed)
+    expect(mutation.inserted[0]).toBe(inserted)
     // test index update after mutation
     ob.on('set', spy)
     arr[1].a = 4
@@ -212,14 +212,14 @@ describe('Observer', function () {
     arr.sort(function (a, b) {
       return a.a < b.a ? 1 : -1
     })
-    expect(spy.mostRecentCall.args[0]).toEqual('')
-    expect(spy.mostRecentCall.args[1]).toEqual(arr)
+    expect(spy.mostRecentCall.args[0]).toBe('')
+    expect(spy.mostRecentCall.args[1]).toBe(arr)
     var mutation = spy.mostRecentCall.args[2]
     expect(mutation).toBeDefined()
-    expect(mutation.method).toEqual('sort')
+    expect(mutation.method).toBe('sort')
     expect(mutation.index).toBeUndefined()
-    expect(mutation.removed.length).toEqual(0)
-    expect(mutation.inserted.length).toEqual(0)
+    expect(mutation.removed.length).toBe(0)
+    expect(mutation.inserted.length).toBe(0)
     // test index update after mutation
     ob.on('set', spy)
     arr[1].a = 4
@@ -231,14 +231,14 @@ describe('Observer', function () {
     var ob = Observer.create(arr)
     ob.on('mutate', spy)
     arr.reverse()
-    expect(spy.mostRecentCall.args[0]).toEqual('')
-    expect(spy.mostRecentCall.args[1]).toEqual(arr)
+    expect(spy.mostRecentCall.args[0]).toBe('')
+    expect(spy.mostRecentCall.args[1]).toBe(arr)
     var mutation = spy.mostRecentCall.args[2]
     expect(mutation).toBeDefined()
-    expect(mutation.method).toEqual('reverse')
+    expect(mutation.method).toBe('reverse')
     expect(mutation.index).toBeUndefined()
-    expect(mutation.removed.length).toEqual(0)
-    expect(mutation.inserted.length).toEqual(0)
+    expect(mutation.removed.length).toBe(0)
+    expect(mutation.inserted.length).toBe(0)
     // test index update after mutation
     ob.on('set', spy)
     arr[1].a = 4
@@ -278,16 +278,16 @@ describe('Observer', function () {
     var removed = arr[1]
     arr.$set(1, inserted)
 
-    expect(spy.mostRecentCall.args[0]).toEqual('')
-    expect(spy.mostRecentCall.args[1]).toEqual(arr)
+    expect(spy.mostRecentCall.args[0]).toBe('')
+    expect(spy.mostRecentCall.args[1]).toBe(arr)
     var mutation = spy.mostRecentCall.args[2]
     expect(mutation).toBeDefined()
-    expect(mutation.method).toEqual('splice')
-    expect(mutation.index).toEqual(1)
-    expect(mutation.removed.length).toEqual(1)
-    expect(mutation.inserted.length).toEqual(1)
-    expect(mutation.removed[0]).toEqual(removed)
-    expect(mutation.inserted[0]).toEqual(inserted)
+    expect(mutation.method).toBe('splice')
+    expect(mutation.index).toBe(1)
+    expect(mutation.removed.length).toBe(1)
+    expect(mutation.inserted.length).toBe(1)
+    expect(mutation.removed[0]).toBe(removed)
+    expect(mutation.inserted[0]).toBe(inserted)
 
     ob.on('set', spy)
     arr[1].a = 4
@@ -300,15 +300,15 @@ describe('Observer', function () {
     ob.on('mutate', spy)
     var removed = arr.$remove(0)
 
-    expect(spy.mostRecentCall.args[0]).toEqual('')
-    expect(spy.mostRecentCall.args[1]).toEqual(arr)
+    expect(spy.mostRecentCall.args[0]).toBe('')
+    expect(spy.mostRecentCall.args[1]).toBe(arr)
     var mutation = spy.mostRecentCall.args[2]
     expect(mutation).toBeDefined()
-    expect(mutation.method).toEqual('splice')
-    expect(mutation.index).toEqual(0)
-    expect(mutation.removed.length).toEqual(1)
-    expect(mutation.inserted.length).toEqual(0)
-    expect(mutation.removed[0]).toEqual(removed)
+    expect(mutation.method).toBe('splice')
+    expect(mutation.index).toBe(0)
+    expect(mutation.removed.length).toBe(1)
+    expect(mutation.inserted.length).toBe(0)
+    expect(mutation.removed[0]).toBe(removed)
 
     ob.on('set', spy)
     arr[0].a = 3

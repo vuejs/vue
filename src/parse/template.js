@@ -67,22 +67,14 @@ function stringToFragment (templateString) {
       node = node.lastChild
     }
 
-    if (node.firstChild === node.lastChild) {
-      // one element
-      frag.appendChild(node.firstChild)
-      templateCache.put(templateString, frag)
-      return frag
-    } else {
-      // multiple nodes, return a fragment
-      /* jshint boss: true */
-      var child
-      while (child = node.firstChild) {
-        if (node.nodeType === 1) {
-          frag.appendChild(child)
-        }
+    var child
+    while (child = node.firstChild) {
+      if (node.nodeType === 1) {
+        frag.appendChild(child)
       }
     }
   }
+
   templateCache.put(templateString, frag)
   return frag
 }
@@ -101,12 +93,9 @@ function nodeToFragment (node) {
   if (tag === 'TEMPLATE' && node.content) {
     return node.content
   }
-  // script tag
-  if (tag === 'SCRIPT') {
-    return stringToFragment(node.textContent)
-  }
-  // non-script node. not recommended...
-  return toFragment(node.outerHTML)
+  return tag === 'SCRIPT'
+    ? stringToFragment(node.textContent)
+    : stringToFragment(node.outerHTML)
 }
 
 /**

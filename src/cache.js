@@ -92,7 +92,6 @@ p.shift = function () {
 p.get = function (key, returnEntry) {
   var entry = this._keymap[key]
   if (entry === undefined) return
-  console.log('cache hit!')
   if (entry === this.tail) {
     return returnEntry
       ? entry
