@@ -1,10 +1,9 @@
+var _ = require('../util')
 var Cache = require('../cache')
-
-/**
- * Path cache
- */
-
 var pathCache = new Cache(1000)
+var identStart = '[\$_a-zA-Z]'
+var identPart = '[\$_a-zA-Z0-9]'
+var IDENT_RE = new RegExp('^' + identStart + '+' + identPart + '*' + '$')
 
 /**
  * Path-parsing algorithm scooped from Polymer/observe-js
@@ -62,13 +61,13 @@ var pathStateMachine = {
 
   'inSingleQuote': {
     "'": ['afterElement'],
-    'eof': ['error'],
+    'eof': 'error',
     'else': ['inSingleQuote', 'append']
   },
 
   'inDoubleQuote': {
     '"': ['afterElement'],
-    'eof': ['error'],
+    'eof': 'error',
     'else': ['inDoubleQuote', 'append']
   },
 
@@ -88,8 +87,9 @@ function noop () {}
  */
 
 function getPathCharType (char) {
-  if (char === undefined)
+  if (char === undefined) {
     return 'eof'
+  }
 
   var code = char.charCodeAt(0)
 
@@ -118,12 +118,15 @@ function getPathCharType (char) {
   }
 
   // a-z, A-Z
-  if ((0x61 <= code && code <= 0x7A) || (0x41 <= code && code <= 0x5A))
+  if ((0x61 <= code && code <= 0x7A) ||
+      (0x41 <= code && code <= 0x5A)) {
     return 'ident'
+  }
 
   // 1-9
-  if (0x31 <= code && code <= 0x39)
+  if (0x31 <= code && code <= 0x39) {
     return 'number'
+  }
 
   return 'else'
 }
@@ -150,10 +153,11 @@ function parsePath (path) {
       key = undefined
     },
     append: function() {
-      if (key === undefined)
+      if (key === undefined) {
         key = newChar
-      else
+      } else {
         key += newChar
+      }
     }
   }
 
@@ -200,6 +204,47 @@ function parsePath (path) {
   return // parse error
 }
 
+function isIndex(s) {
+  return +s === s >>> 0;
+}
+
+function isIdent(s) {
+  return IDENT_RE.test(s);
+}
+
+function formatAccessor(key) {
+  if (isIdent(key)) {
+    return '.' + key
+  } else if (isIndex(key)) {
+    return '[' + key + ']';
+  } else {
+    return '["' + key.replace(/"/g, '\\"') + '"]';
+  }
+}
+
+/**
+ * Compiles a getter function with a set path, which
+ * is much more efficient than the dynamic path getter.
+ *
+ * @param {Array} path
+ * @return {Function}
+ */
+
+exports.compileGetter = function (path) {
+  var body = 'if (o != null'
+  var pathString = 'o'
+  var key
+  for (var i = 0, l = path.length - 1; i < l; i++) {
+    key = path[i]
+    pathString += formatAccessor(key)
+    body += ' && ' + pathString + ' != null'
+  }
+  key = path[i]
+  pathString += formatAccessor(key)
+  body += ') return ' + pathString
+  return new Function('o', body)
+}
+
 /**
  * External parse that check for a cache hit first
  *
@@ -211,7 +256,12 @@ exports.parse = function (path) {
   var hit = pathCache.get(path)
   if (!hit) {
     hit = parsePath(path)
-    pathCache.put(path, hit)
+    if (hit) {
+      if (_.hasEval) {
+        hit.get = exports.compileGetter(hit)
+      }
+      pathCache.put(path, hit)
+    }
   }
   return hit
 }
@@ -230,6 +280,11 @@ exports.get = function (obj, path) {
   if (!path) {
     return
   }
+  // path has compiled getter
+  if (path.get) {
+    return path.get(obj)
+  }
+  // else do the traversal
   for (var i = 0, l = path.length; i < l; i++) {
     if (obj == null) return
     obj = obj[path[i]]
@@ -253,14 +308,14 @@ exports.set = function (obj, path, val) {
     return
   }
   for (var i = 0, l = path.length - 1; i < l; i++) {
-    if (typeof obj !== 'object') {
+    if (!obj || typeof obj !== 'object') {
       return false
     }
     obj = obj[path[i]]
   }
-  if (typeof obj !== 'object') {
+  if (!obj || typeof obj !== 'object') {
     return false
   }
-  obj[path] = val
+  obj[path[i]] = val
   return true
 }

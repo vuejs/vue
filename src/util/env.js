@@ -38,6 +38,10 @@ exports.hasEval = (function () {
       chrome.app.runtime) {
     return false
   }
+  // so does Firefox OS apps...
+  if (inBrowser && navigator.getDeviceStorage) {
+    return false
+  }
   try {
     var f = new Function('', 'return true;')
     return f()
