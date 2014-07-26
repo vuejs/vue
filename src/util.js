@@ -1,5 +1,19 @@
 var config = require('./config')
 var slice = [].slice
+var defer =
+  win.requestAnimationFrame ||
+  win.webkitRequestAnimationFrame ||
+  win.setTimeout
+
+/**
+ * Defer a task to the start of the next event loop
+ *
+ * @param {Function} fn
+ */
+
+exports.nextTick = function (fn) {
+  return defer(fn, 0)
+}
 
 /**
  * Convert an Array-like object to a real Array.
