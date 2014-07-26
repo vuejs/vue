@@ -10,17 +10,7 @@ var _ = require('../util')
  */
 
 exports.$mount = function (el) {
-  if (typeof el === 'string') {
-    el = document.querySelector(el)
-  }
-  // If the passed in `el` is a DocumentFragment, the instance is
-  // considered a "block instance" which manages not a single element,
-  // but multiple elements. A block instance's `$el` is an Array of
-  // the elements it manages.
-  this._isBlock = el instanceof DocumentFragment
-  this.$el = this._isBlock
-    ? _.toArray(el.childNodes)
-    : el
+  this._initElement(el)
   this._compile()
   this._isMounted = true
 }

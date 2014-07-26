@@ -47,6 +47,17 @@ exports._init = function (options) {
 
   this._isDestroyed = false
 
+  /**
+   * If the instance has a template option, the raw content it holds
+   * before compilation will be preserved so they can be queried against
+   * during content insertion.
+   *
+   * @type {DocumentFragment}
+   * @private
+   */
+
+  this._rawContent = null
+
   // create scope.
   this._initScope()
 
