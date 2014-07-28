@@ -20,9 +20,7 @@ exports.toArray = function (list, i) {
 
 exports.mixin = function (to, from) {
   for (var key in from) {
-    if (to[key] !== from[key]) {
-      to[key] = from[key]
-    }
+    to[key] = from[key]
   }
 }
 

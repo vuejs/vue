@@ -43,11 +43,7 @@ exports.extend = function (extendOptions) {
   }
   Sub.prototype = Object.create(Super.prototype)
   _.define(Sub.prototype, 'constructor', Sub)
-  Sub.options = _.mergeOptions(
-    Super.options,
-    extendOptions,
-    true // indicates an inheritance merge
-  )
+  Sub.options = _.mergeOptions(Super.options, extendOptions)
   Sub.super = Super
   // allow further extension
   Sub.extend = Super.extend

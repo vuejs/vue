@@ -12,7 +12,6 @@ var _ = require('../util')
 exports.$mount = function (el) {
   this._initElement(el)
   this._compile()
-  this._isMounted = true
 }
 
 /**

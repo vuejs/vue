@@ -11,20 +11,29 @@ var _ = require('../util')
  */
 
 exports._init = function (options) {
+
+  options = options || {}
+
+  this.$el          = null
+  this.$parent      = options.parent
+  this._isBlock     = false
+  this._isDestroyed = false 
+  this._rawContent  = null
+
   // merge options.
   this.$options = _.mergeOptions(
     this.constructor.options,
-    options
+    options,
+    this
   )
 
   // create scope.
-  // @creates this.$parent
   // @creates this.$scope
   this._initScope()
 
   // setup initial data.
   // @creates this._data
-  this._initData(this.$options.data || {}, true)
+  this._initData(options.data || {}, true)
 
   // setup property proxying
   this._initProxy()
@@ -33,15 +42,8 @@ exports._init = function (options) {
   // @creates this._rootBinding
   this._initBindings()
 
-  // compilation and lifecycle related state properties
-  this.$el = null
-  this._rawContent = null
-  this._isBlock = false
-  this._isMounted = false
-  this._isDestroyed = false 
-
   // if `el` option is passed, start compilation.
-  if (this.$options.el) {
-    this.$mount(this.$options.el)
+  if (options.el) {
+    this.$mount(options.el)
   }
 }

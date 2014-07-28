@@ -1,8 +1,8 @@
 var _ = exports
+var config = require('../config')
 var env = require('./env')
 var lang = require('./lang')
 var dom = require('./dom')
-
 var mixin = lang.mixin
 
 mixin(_, env)
@@ -13,6 +13,12 @@ mixin(_, dom)
  * Option overwriting strategies are functions that handle
  * how to merge a parent option value and a child option
  * value into the final value.
+ *
+ * All strategy functions follow the same signature:
+ *
+ * @param {*} parentVal
+ * @param {*} childVal
+ * @param {Vue} [vm]
  */
 
 var strats = {}
@@ -32,26 +38,39 @@ strats.paramAttributes = function (parentVal, childVal) {
 }
 
 /**
- * Assets, methods and computed properties are hash objects,
- * and are merged with prototypal inheritance.
+ * Assets
+ *
+ * When a vm is present (instance creation), we need to do a
+ * 3-way merge for assets: constructor assets, instance assets,
+ * and instance scope assets.
  */
 
 strats.directives =
 strats.filters =
 strats.partials =
 strats.effects =
-strats.components = 
-strats.methods =
-strats.computed = function (parentVal, childVal) {
-  var ret = Object.create(parentVal || null)
-  for (var key in childVal) {
-    ret[key] = childVal[key]
-  }
+strats.components = function (parentVal, childVal, key, vm) {
+  var ret = Object.create(vm.$parent
+    ? vm.$parent.$options[key]
+    : null)
+  mixin(ret, parentVal) 
+  mixin(ret, childVal)
   return ret
 }
 
 /**
- * Default strategy - overwrite if child value is not undefined.
+ * Methods and computed properties
+ */
+
+strats.methods =
+strats.computed = function (parentVal, childVal) {
+  var ret = Object.create(parentVal || null)
+  mixin(ret, childVal)
+  return ret
+}
+
+/**
+ * Default strategy
  */
 
 var defaultStrat = function (parentVal, childVal) {
@@ -66,10 +85,11 @@ var defaultStrat = function (parentVal, childVal) {
  *
  * @param {Object} parent
  * @param {Object} child
- * @param {Boolean} inheriting
+ * @param {Vue} [vm] - if vm is present, indicates this is
+ *                     an instantiation merge.
  */
 
-exports.mergeOptions = function (parent, child, inheriting) {
+_.mergeOptions = function (parent, child, vm) {
   var options = {}
   var key
   for (key in parent) {
@@ -81,7 +101,7 @@ exports.mergeOptions = function (parent, child, inheriting) {
     }
   }
   function merge (key) {
-    if (inheriting && (key === 'el' || key === 'data')) {
+    if (!vm && (key === 'el' || key === 'data' || key === 'parent')) {
       _.warn(
         'The "' + key + '" option can only be used as an instantiation ' +
         'option and will be ignored in Vue.extend().'
@@ -89,7 +109,7 @@ exports.mergeOptions = function (parent, child, inheriting) {
       return
     }
     var strat = strats[key] || defaultStrat
-    options[key] = strat(parent[key], child[key])
+    options[key] = strat(parent[key], child[key], key, vm)
   }
   return options
 }
@@ -112,7 +132,7 @@ function enableDebug () {
    * @param {String} msg
    */
 
-  exports.log = function (msg) {
+  _.log = function (msg) {
     if (hasConsole && config.debug) {
       console.log(msg)
     }
@@ -124,7 +144,7 @@ function enableDebug () {
    * @param {String} msg
    */
 
-  exports.warn = function (msg) {
+  _.warn = function (msg) {
     if (hasConsole && !config.silent) {
       console.warn(msg)
       if (config.debug && console.trace) {
