@@ -149,7 +149,6 @@ exports.parse = function (code) {
     expressionCache.put(code, fn)
   } else {
     _.warn('Invalid expression: "' + code + '"\nGenerated function body: ' + body)
-    console.log(paths)
   }
   return fn || noop
 }
