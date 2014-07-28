@@ -25,6 +25,7 @@
     "grunt": "^0.4.5",
     "grunt-browserify": "^2.1.3",
     "grunt-contrib-jshint": "^0.10.0",
+    "grunt-contrib-uglify": "^0.5.1",
     "grunt-karma": "^0.8.3",
     "jshint-stylish": "^0.3.0",
     "karma": "^0.12.16",
