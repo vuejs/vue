@@ -37,12 +37,21 @@ var testCases = [
     expected: 'worked'
   },
   {
-    // inline string
-    exp: "a + 'hello'",
+    // inline string with newline
+    exp: "a + 'hel\nlo'",
     scope: {
       a: 'inline '
     },
-    expected: 'inline hello'
+    expected: 'inline hel\nlo'
+  },
+  {
+    // dollar signs and underscore
+    exp: "_a + ' ' + $b",
+    scope: {
+      _a: 'underscore',
+      $b: 'dollar'
+    },
+    expected: 'underscore dollar'
   },
   {
     // complex with nested values
