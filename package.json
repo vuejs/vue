@@ -18,7 +18,7 @@
   "homepage": "http://vuejs.org",
   "scripts": {
     "test": "grunt ci",
-    "jasmine": "jasmine-node test/unit/ --verbose"
+    "jasmine": "jasmine-node test/unit/"
   },
   "devDependencies": {
     "browserify": "^4.2.0",
