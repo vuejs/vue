@@ -1,4 +1,4 @@
-var _ = require('./util')
+var extend = require('./util').extend
 
 /**
  * The exposed Vue constructor.
@@ -54,26 +54,26 @@ Object.defineProperty(p, '$data', {
  * Mixin internal instance methods
  */
 
-_.mixin(p, require('./instance/init'))
-_.mixin(p, require('./instance/scope'))
-_.mixin(p, require('./instance/data'))
-_.mixin(p, require('./instance/proxy'))
-_.mixin(p, require('./instance/bindings'))
-_.mixin(p, require('./instance/compile'))
+extend(p, require('./instance/init'))
+extend(p, require('./instance/scope'))
+extend(p, require('./instance/data'))
+extend(p, require('./instance/proxy'))
+extend(p, require('./instance/bindings'))
+extend(p, require('./instance/compile'))
 
 /**
  * Mixin public API methods
  */
 
-_.mixin(p, require('./api/data'))
-_.mixin(p, require('./api/dom'))
-_.mixin(p, require('./api/events'))
-_.mixin(p, require('./api/lifecycle'))
+extend(p, require('./api/data'))
+extend(p, require('./api/dom'))
+extend(p, require('./api/events'))
+extend(p, require('./api/lifecycle'))
 
 /**
  * Mixin global API
  */
 
-_.mixin(Vue, require('./api/global'))
+extend(Vue, require('./api/global'))
 
 module.exports = Vue

@@ -1,4 +1,4 @@
-var _ = require('../util')
+var mergeOptions = require('../util').mergeOptions
 
 /**
  * The main init sequence. This is called for every instance,
@@ -21,7 +21,7 @@ exports._init = function (options) {
   this._rawContent  = null
 
   // merge options.
-  this.$options = _.mergeOptions(
+  this.$options = mergeOptions(
     this.constructor.options,
     options,
     this

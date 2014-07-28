@@ -3,11 +3,11 @@ var config = require('../config')
 var env = require('./env')
 var lang = require('./lang')
 var dom = require('./dom')
-var mixin = lang.mixin
+var extend = lang.extend
 
-mixin(_, env)
-mixin(_, lang)
-mixin(_, dom)
+extend(_, env)
+extend(_, lang)
+extend(_, dom)
 
 /**
  * Option overwriting strategies are functions that handle
@@ -53,8 +53,8 @@ strats.components = function (parentVal, childVal, key, vm) {
   var ret = Object.create(vm.$parent
     ? vm.$parent.$options[key]
     : null)
-  mixin(ret, parentVal) 
-  mixin(ret, childVal)
+  extend(ret, parentVal) 
+  extend(ret, childVal)
   return ret
 }
 
@@ -65,7 +65,7 @@ strats.components = function (parentVal, childVal, key, vm) {
 strats.methods =
 strats.computed = function (parentVal, childVal) {
   var ret = Object.create(parentVal || null)
-  mixin(ret, childVal)
+  extend(ret, childVal)
   return ret
 }
 

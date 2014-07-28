@@ -18,7 +18,7 @@ exports.toArray = function (list, i) {
  * @param {Object} from
  */
 
-exports.mixin = function (to, from) {
+exports.extend = function (to, from) {
   for (var key in from) {
     to[key] = from[key]
   }
