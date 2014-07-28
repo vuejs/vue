@@ -23,6 +23,21 @@ exports._initScope = function () {
 
   if (!parent) return
 
+  // scope parent accessor
+  Object.defineProperty(scope, '$parent', {
+    get: function () {
+      return parent.$scope
+    }
+  })
+
+  // scope root accessor
+  var self = this
+  Object.defineProperty(scope, '$root', {
+    get: function () {
+      return self.$root.$scope
+    }
+  })
+
   // relay change events that sent down from
   // the scope prototype chain.
   var ob = this._observer
