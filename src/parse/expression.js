@@ -36,7 +36,6 @@ function extractPaths (code) {
 
 /**
  * Escape leading dollar signs from paths for regex construction.
- * Otherwise it can be mistaken as the linestart token.
  *
  * @param {String} path
  * @return {String}
