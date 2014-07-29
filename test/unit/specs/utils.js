@@ -1,7 +1,6 @@
-/* global cleanupMocks, appendMock */
+/* global cleanupMock, appendMock */
 
 describe('Utils', function () {
-    afterEach(cleanupMocks)
 
     var utils = require('vue/src/utils'),
         config = require('vue/src/config')
@@ -242,8 +241,6 @@ describe('Utils', function () {
     })
 
     describe('parseTemplateOption', function () {
-        
-        afterEach(cleanupMocks)
 
         it('should convert a string template to a documentFragment', function () {
             var template = '<div class="a">hi</div><p>ha</p>',
@@ -328,16 +325,20 @@ describe('Utils', function () {
 
     describe('processOptions', function () {
         
+        var el
+
         beforeEach(function() {
             var id = 'utils-template-to-fragment',
-                template = '<div class="a">hi</div><p>ha</p>',
-                el = document.createElement('template')
+                template = '<div class="a">hi</div><p>ha</p>'
+            el = document.createElement('template')
             el.id = id
             el.innerHTML = template
             appendMock(el)
         })
 
-        afterEach(cleanupMocks)
+        afterEach(function () {
+            cleanupMock(el)
+        })
 
         var options = {
             partials: {

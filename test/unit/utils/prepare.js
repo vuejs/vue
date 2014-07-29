@@ -15,8 +15,8 @@ function appendMock(el) {
     document.getElementById('test').appendChild(el)
 }
 
-function cleanupMocks() {
-    document.getElementById('test').innerHTML = ''
+function cleanupMock(el) {
+    document.getElementById('test').removeChild(el)
 }
 
 function mockHTMLEvent (type) {
