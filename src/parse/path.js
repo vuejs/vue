@@ -1,8 +1,8 @@
 var _ = require('../util')
 var Cache = require('../cache')
 var pathCache = new Cache(1000)
-var identStart = '[\$_a-zA-Z]'
-var identPart = '[\$_a-zA-Z0-9]'
+var identStart = '[$_a-zA-Z]'
+var identPart = '[$_a-zA-Z0-9]'
 var IDENT_RE = new RegExp('^' + identStart + '+' + identPart + '*' + '$')
 
 /**

@@ -68,6 +68,7 @@ function stringToFragment (templateString) {
     }
 
     var child
+    /* jshint boss:true */
     while (child = node.firstChild) {
       if (node.nodeType === 1) {
         frag.appendChild(child)
@@ -116,7 +117,7 @@ exports.parse = function (template) {
   var node, frag
 
   // if the template is already a document fragment -- do nothing
-  if (template instanceof DocumentFragment) {
+  if (template instanceof window.DocumentFragment) {
     return template
   }
 

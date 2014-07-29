@@ -1,3 +1,5 @@
+/* global chrome */
+
 /**
  * Are we in a browser or in Node?
  * Calling toString on window has inconsistent results in browsers

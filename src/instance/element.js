@@ -18,7 +18,7 @@ exports._initElement = function (el) {
   // considered a "block instance" which manages not a single element,
   // but multiple elements. A block instance's `$el` is an Array of
   // the elements it manages.
-  if (el instanceof DocumentFragment) {
+  if (el instanceof window.DocumentFragment) {
     this._isBlock = true
     this.$el = _.toArray(el.childNodes)
   } else {
@@ -77,6 +77,8 @@ exports._initTemplate = function () {
  */
 
 exports._collectRawContent = function () {
+  var el = this.$el
+  var child
   if (el.hasChildNodes()) {
     this.rawContent = document.createElement('div')
     /* jshint boss: true */
