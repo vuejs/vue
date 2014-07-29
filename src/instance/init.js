@@ -16,8 +16,9 @@ exports._init = function (options) {
 
   this.$el          = null
   this.$parent      = options.parent
+  this._data        = options.data || {}
   this._isBlock     = false
-  this._isDestroyed = false 
+  this._isDestroyed = false
   this._rawContent  = null
 
   // merge options.
@@ -27,13 +28,14 @@ exports._init = function (options) {
     this
   )
 
+  // TODO fire created hook
+
   // create scope.
   // @creates this.$scope
   this._initScope()
 
   // setup initial data.
-  // @creates this._data
-  this._initData(options.data || {}, true)
+  this._initData(this._data, true)
 
   // setup property proxying
   this._initProxy()
