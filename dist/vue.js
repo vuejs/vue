@@ -1,5 +1,5 @@
 /*
- Vue.js v0.10.5
+ Vue.js v0.10.6
  (c) 2014 Evan You
  License: MIT
 */
@@ -213,12 +213,14 @@ var config      = require('./config'),
     ViewModel   = require('./viewmodel'),
     utils       = require('./utils'),
     makeHash    = utils.hash,
-    assetTypes  = ['directive', 'filter', 'partial', 'effect', 'component']
-
-// require these so Browserify can catch them
-// so they can be used in Vue.require
-require('./observer')
-require('./transition')
+    assetTypes  = ['directive', 'filter', 'partial', 'effect', 'component'],
+    // Internal modules that are exposed for plugins
+    pluginAPI   = {
+        utils: utils,
+        config: config,
+        transition: require('./transition'),
+        observer: require('./observer')
+    }
 
 ViewModel.options = config.globalAssets = {
     directives  : require('./directives'),
@@ -239,7 +241,7 @@ assetTypes.forEach(function (type) {
         }
         if (!value) return hash[id]
         if (type === 'partial') {
-            value = utils.toFragment(value)
+            value = utils.parseTemplateOption(value)
         } else if (type === 'component') {
             value = utils.toConstructor(value)
         } else if (type === 'filter') {
@@ -294,8 +296,8 @@ ViewModel.use = function (plugin) {
 /**
  *  Expose internal modules for plugins
  */
-ViewModel.require = function (path) {
-    return require('./' + path)
+ViewModel.require = function (module) {
+    return pluginAPI[module]
 }
 
 ViewModel.extend = extend
@@ -552,6 +554,11 @@ var utils = module.exports = {
     toFragment: require('./fragment'),
 
     /**
+     *  Parse the various types of template options
+     */
+    parseTemplateOption: require('./template-parser.js'),
+
+    /**
      *  get a value from an object keypath
      */
     get: function (obj, key) {
@@ -745,7 +752,7 @@ var utils = module.exports = {
         }
         if (partials) {
             for (key in partials) {
-                partials[key] = utils.toFragment(partials[key])
+                partials[key] = utils.parseTemplateOption(partials[key])
             }
         }
         if (filters) {
@@ -754,7 +761,7 @@ var utils = module.exports = {
             }
         }
         if (template) {
-            options.template = utils.toFragment(template)
+            options.template = utils.parseTemplateOption(template)
         }
     },
 
@@ -872,29 +879,12 @@ map.rect = [1, '<svg xmlns="http://www.w3.org/2000/svg" version="1.1">','</svg>'
 
 var TAG_RE = /<([\w:]+)/
 
-module.exports = function (template) {
-
-    if (typeof template !== 'string') {
-        return template
-    }
-
-    // template by ID
-    if (template.charAt(0) === '#') {
-        var templateNode = document.getElementById(template.slice(1))
-        if (!templateNode) return
-        // if its a template tag and the browser supports it,
-        // its content is already a document fragment!
-        if (templateNode.tagName === 'TEMPLATE' && templateNode.content) {
-            return templateNode.content
-        }
-        template = templateNode.innerHTML
-    }
-
+module.exports = function (templateString) {
     var frag = document.createDocumentFragment(),
-        m = TAG_RE.exec(template)
+        m = TAG_RE.exec(templateString)
     // text only
     if (!m) {
-        frag.appendChild(document.createTextNode(template))
+        frag.appendChild(document.createTextNode(templateString))
         return frag
     }
 
@@ -905,7 +895,7 @@ module.exports = function (template) {
         suffix = wrap[2],
         node = document.createElement('div')
 
-    node.innerHTML = prefix + template.trim() + suffix
+    node.innerHTML = prefix + templateString.trim() + suffix
     while (depth--) node = node.lastChild
 
     // one element
@@ -1983,13 +1973,23 @@ var Compiler   = require('./compiler'),
  *  and a few reserved methods
  */
 function ViewModel (options) {
-    // just compile. options are passed directly to compiler
+    // compile if options passed, if false return. options are passed directly to compiler
+    if (options === false) return
     new Compiler(this, options)
 }
 
 // All VM prototype methods are inenumerable
 // so it can be stringified/looped through as raw data
 var VMProto = ViewModel.prototype
+
+/**
+ *  init allows config compilation after instantiation:
+ *    var a = new Vue(false)
+ *    a.init(config)
+ */
+def(VMProto, '$init', function (options) {
+    new Compiler(this, options)
+})
 
 /**
  *  Convenience function to get a value from
@@ -2048,8 +2048,8 @@ def(VMProto, '$unwatch', function (key, callback) {
 /**
  *  unbind everything, remove everything
  */
-def(VMProto, '$destroy', function () {
-    this.$compiler.destroy()
+def(VMProto, '$destroy', function (noRemove) {
+    this.$compiler.destroy(noRemove)
 })
 
 /**
@@ -2145,6 +2145,7 @@ function query (el) {
 }
 
 module.exports = ViewModel
+
 });
 require.register("vue/src/binding.js", function(exports, require, module){
 var Batcher        = require('./batcher'),
@@ -3151,6 +3152,55 @@ exports.eval = function (exp, compiler, data) {
     return res
 }
 });
+require.register("vue/src/template-parser.js", function(exports, require, module){
+var toFragment = require('./fragment');
+
+/**
+ * Parses a template string or node and normalizes it into a
+ * a node that can be used as a partial of a template option
+ *
+ * Possible values include
+ * id selector: '#some-template-id'
+ * template string: '<div><span>my template</span></div>'
+ * DocumentFragment object
+ * Node object of type Template
+ */
+module.exports = function(template) {
+    var templateNode;
+
+    if (template instanceof window.DocumentFragment) {
+        // if the template is already a document fragment -- do nothing
+        return template
+    }
+
+    if (typeof template === 'string') {
+        // template by ID
+        if (template.charAt(0) === '#') {
+            templateNode = document.getElementById(template.slice(1))
+            if (!templateNode) return
+        } else {
+            return toFragment(template)
+        }
+    } else if (template.nodeType) {
+        templateNode = template
+    } else {
+        return
+    }
+
+    // if its a template tag and the browser supports it,
+    // its content is already a document fragment!
+    if (templateNode.tagName === 'TEMPLATE' && templateNode.content) {
+        return templateNode.content
+    }
+
+    if (templateNode.tagName === 'SCRIPT') {
+        return toFragment(templateNode.innerHTML)
+    }
+
+    return toFragment(templateNode.outerHTML);
+}
+
+});
 require.register("vue/src/text-parser.js", function(exports, require, module){
 var openChar        = '{',
     endChar         = '}',
@@ -3354,6 +3404,7 @@ filters.lowercase = function (value) {
  *  12345 => $12,345.00
  */
 filters.currency = function (value, sign) {
+    value = parseFloat(value)
     if (!value && value !== 0) return ''
     sign = sign || '$'
     var s = Math.floor(value).toString(),
@@ -4271,7 +4322,9 @@ module.exports = {
         var el = this.iframeBind
             ? this.el.contentWindow
             : this.el
-        el.removeEventListener(this.arg, this.handler)
+        if (this.handler) {
+            el.removeEventListener(this.arg, this.handler)
+        }
     },
 
     unbind: function () {
@@ -4571,13 +4624,19 @@ module.exports = {
     },
 
     update: function (value) {
-        var prop = this.prop
+        var prop = this.prop,
+            isImportant
+        /* jshint eqeqeq: true */
+        // cast possible numbers/booleans into strings
+        if (value != null) value += ''
         if (prop) {
-            var isImportant = value.slice(-10) === '!important'
-                ? 'important'
-                : ''
-            if (isImportant) {
-                value = value.slice(0, -10).trim()
+            if (value) {
+                isImportant = value.slice(-10) === '!important'
+                    ? 'important'
+                    : ''
+                if (isImportant) {
+                    value = value.slice(0, -10).trim()
+                }
             }
             this.el.style.setProperty(prop, value, isImportant)
             if (this.prefixed) {
