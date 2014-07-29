@@ -22,8 +22,7 @@ var strats = {}
 
 strats.created =
 strats.ready =
-strats.attached =
-strats.detached =
+strats.beforeMount =
 strats.beforeDestroy =
 strats.afterDestroy =
 strats.paramAttributes = function (parentVal, childVal) {
@@ -68,7 +67,12 @@ strats.events = function (parentVal, childVal) {
 }
 
 /**
- * Default strategy
+ * Default strategy.
+ * Applies to:
+ * - data
+ * - el
+ * - parent
+ * - replace
  */
 
 var defaultStrat = function (parentVal, childVal) {

@@ -22,9 +22,31 @@ The result of this model is a much cleaner expression evaluation implementation.
 
 This is very useful, but it probably should only be available in implicit child instances created by flow-control directives like `v-repeat`, `v-if`, etc. Explicit components should retain its own root scope and use some sort of two way binding like `v-with` to bind to data from outer scope.
 
-- new option: `syncData`.
+## Option changes
+
+### new option: `syncData`.
 
 A side effect of the new scope/data model is that the `data` object being passed in is no longer mutated by default, because all its properties are copied into the scope instead. To sync changes to the scope back to the original data object, you need to now explicitly pass in  `syncData: true` in the options. In most cases, this is not necessary, but you do need to be aware of this.
+
+### new option: `events`.
+
+When events are used extensively for cross-vm communication, the ready hook can get kinda messy. The new `events` option is similar to its Backbone equivalent, where you can declaratiely register a bunch of event listeners.
+
+### removed options: `id`, `tagName`, `className`, `attributes`, `lazy`.
+
+Since now a vm must always be provided the `el` option or explicitly mounted to an existing element, the element creation releated options have been removed for simplicity. If you need to modify your element's attributes, simply do so in the new `beforeMount` hook.
+
+The `lazy` option is removed because this does not belong at the vm level. Users should be able to configure individual `v-model` instances to be lazy or not.
+
+## Hook changes
+
+### new hook: `beforeMount`
+
+This new hook is introduced to accompany the separation of instantiation and DOM mounting. It is called right before the DOM compilation starts and `this.$el` is available, so you can do some pre-processing on the element here.
+
+### removed hooks: `attached` & `detached`
+
+These two have caused confusions about when they'd actually fire, and proper use cases seem to be rare. Let me know if you have important use cases for these two hooks.
 
 ## Two Way filters
 
