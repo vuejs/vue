@@ -56,9 +56,7 @@ These two have caused confusions about when they'd actually fire, and proper use
 
 ## Two Way filters
 
-``` html
-  <input v-model="abc | email">
-```
+If a filter is defined as a function, it is treated as a read filter by default - i.e. it is applied when data is read from the model and applied to the DOM. You can now specify write filters as well, which are applied when writing to the model, triggered by user input. Write filters are only triggered on two-way bindings like `v-model`.
 
 ``` js
 Vue.filter('format', {
@@ -88,6 +86,8 @@ Vue.filter('format', {
 ```
 
 ## (Experimental) Validators
+
+This is largely write filters that accept a Boolean return value. Probably should live as a plugin.
 
 ``` html
   <input v-model="abc @ email">
