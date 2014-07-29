@@ -1,12 +1,14 @@
 /**
  * Are we in a browser or in Node?
+ * Calling toString on window has inconsistent results in browsers
+ * so we do it on the document instead.
  *
  * @type {Boolean}
  */
 
 var inBrowser = exports.inBrowser =
-  typeof window !== 'undefined' &&
-  Object.prototype.toString.call(window) === '[object global]'
+  typeof document !== 'undefined' &&
+  Object.prototype.toString.call(document) === '[object HTMLDocument]'
 
 /**
  * Defer a task to the start of the next event loop

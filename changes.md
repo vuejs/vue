@@ -59,48 +59,6 @@ Vue.filter('format', {
 <!-- v-if-end -->
 ```
 
-## (Experimental) More flexible directive syntax
-  
-  - v-on
-
-    ``` html
-    <a v-on="{click: onClick, dragmove: onMove}"></a>
-    ```
-
-  - v-style
-
-    ``` html
-    <a v-style="{top: list + ‘px’}"></a>
-    ```
-
-  - custom directive
-
-    ``` html
-    <a v-my-table="{ data:hello, rows:5, cols:10 }">fsef</a>
-    ```
-
-  - v-with
-
-    ``` html
-    <div v-component="my-comp" v-with="{
-      id: id,
-      name: name
-    }">
-    ```
-
-  - v-repeat
-
-    ``` html
-    <ul>
-      <li v-repeat="{
-        data     : list,
-        as       : 'item',
-        filterBy : filterKey,
-        orderBy  : orderKey
-      }"></li>
-    </ul>
-    ```
-
 ## (Experimental) Validators
 
 ``` html

@@ -1,3 +1,5 @@
+// alias debug as _ so we can drop _.warn during uglification
+var _ = require('./debug')
 var extend = require('./lang').extend
 
 /**
@@ -41,21 +43,26 @@ strats.filters =
 strats.partials =
 strats.effects =
 strats.components = function (parentVal, childVal, key, vm) {
-  var ret = Object.create(vm.$parent
-    ? vm.$parent.$options[key]
-    : null)
+  var ret = Object.create(
+    vm && vm.$parent
+      ? vm.$parent.$options[key]
+      : null
+  )
   extend(ret, parentVal) 
   extend(ret, childVal)
   return ret
 }
 
 /**
- * Methods and computed properties
+ * Other object hashes.
+ * These are instance-specific and do not inehrit from nested parents.
  */
 
 strats.methods =
-strats.computed = function (parentVal, childVal) {
-  var ret = Object.create(parentVal || null)
+strats.computed =
+strats.events = function (parentVal, childVal) {
+  var ret = Object.create(null)
+  extend(ret, parentVal)
   extend(ret, childVal)
   return ret
 }
