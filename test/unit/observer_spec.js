@@ -69,6 +69,30 @@ describe('Observer', function () {
     expect(spy.callCount).toBe(3)
   })
 
+  it('ignore prefix', function () {
+    var obj = {
+      _test: 123,
+      $test: 234
+    }
+    var ob = Observer.create(obj)
+    ob.on('set', spy)
+    obj._test = 234
+    obj.$test = 345
+    expect(spy.callCount).toBe(0)
+  })
+
+  it('ignore accessors', function () {
+    var obj = {
+      a: 123,
+      get b () {
+        return this.a
+      }
+    }
+    var ob = Observer.create(obj)
+    obj.a = 234
+    expect(obj.b).toBe(234)
+  })
+
   it('array get', function () {
 
     Observer.emitGet = true

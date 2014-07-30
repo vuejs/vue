@@ -95,14 +95,21 @@ Observer.create = function (value, options) {
 /**
  * Walk through each property, converting them and adding them as child.
  * This method should only be called when value type is Object.
+ * Properties prefixed with `$` or `_` and accessor properties are ignored.
  *
  * @param {Object} obj
  */
 
 p.walk = function (obj) {
-  var key, val
+  var key, val, descriptor, prefix
   for (key in obj) {
-    if (obj.hasOwnProperty(key)) {
+    prefix = key.charAt(0)
+    if (prefix === '$' || prefix === '_') {
+      continue
+    }
+    descriptor = Object.getOwnPropertyDescriptor(obj, key)
+    // only process own non-accessor properties
+    if (descriptor && !descriptor.get) {
       val = obj[key]
       this.observe(key, val)
       this.convert(key, val)
@@ -172,19 +179,14 @@ p.unobserve = function (val) {
 /**
  * Convert a property into getter/setter so we can emit
  * the events when the property is accessed/changed.
- * Properties prefixed with `$` or `_` are ignored.
  *
  * @param {String} key
  * @param {*} val
  */
 
 p.convert = function (key, val) {
-  var prefix = key.charAt(0)
-  if (prefix === '$' || prefix === '_') {
-    return
-  }
   var ob = this
-  Object.defineProperty(this.value, key, {
+  Object.defineProperty(ob.value, key, {
     enumerable: true,
     configurable: true,
     get: function () {
