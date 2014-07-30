@@ -257,9 +257,7 @@ exports.parse = function (path) {
   if (!hit) {
     hit = parsePath(path)
     if (hit) {
-      if (_.hasEval) {
-        hit.get = exports.compileGetter(hit)
-      }
+      hit.get = exports.compileGetter(hit)
       pathCache.put(path, hit)
     }
   }

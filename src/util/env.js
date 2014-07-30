@@ -29,32 +29,6 @@ exports.nextTick = function (fn) {
 }
 
 /**
- * Detect if the environment allows creating
- * a function from strings.
- *
- * @type {Boolean}
- */
-
-exports.hasEval = (function () {
-  // chrome apps enforces CSP
-  if (typeof chrome !== 'undefined' &&
-      chrome.app &&
-      chrome.app.runtime) {
-    return false
-  }
-  // so does Firefox OS apps...
-  if (inBrowser && navigator.getDeviceStorage) {
-    return false
-  }
-  try {
-    var f = new Function('', 'return true;')
-    return f()
-  } catch (e) {
-    return false
-  }
-})()
-
-/**
  * Detect if we are in IE9...
  *
  * @type {Boolean}
