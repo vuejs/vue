@@ -2,8 +2,6 @@ var _ = require('../util')
 var Cache = require('../cache')
 var expressionCache = new Cache(1000)
 
-function noop () {}
-
 /**
  * Extract all accessor paths from an expression.
  *
@@ -82,7 +80,7 @@ function save (str) {
  */
 
 function rewrite (path) {
-  return path.charAt(0) + 'scope.' + path.slice(1)
+  return 'scope.' + path
 }
 
 /**
@@ -99,6 +97,7 @@ function restore (str, i) {
 
 /**
  * Build a getter function. Requires eval.
+ *
  * We isolate the try/catch so it doesn't affect the optimization
  * of the parse function when it is not called.
  *
@@ -106,20 +105,41 @@ function restore (str, i) {
  * @return {Function|undefined}
  */
 
-function build (body) {
+function makeGetter (body) {
   try {
-    return new Function('scope', body)
+    return new Function('scope', 'return ' + body + ';')
   } catch (e) {}
 }
 
 /**
- * Parse an expression and rewrite into a getter function
+ * Build a setter function.
+ *
+ * This is only needed in rare situations like "a[b]" where
+ * a settable path requires dynamic evaluation.
+ *
+ * This setter function may throw error when called if the
+ * expression body is not a valid left-hand expression in
+ * assignment.
+ *
+ * @param {String} body
+ * @return {Function|undefined}
+ */
+
+function makeSetter (body) {
+  try {
+    return new Function('scope', 'value', body + ' = value;')
+  } catch (e) {}
+}
+
+/**
+ * Parse an expression and rewrite into a getter/setter functions
  *
  * @param {String} code
+ * @param {Boolean} needSet
  * @return {Function}
  */
 
-exports.parse = function (code) {
+exports.parse = function (code, needSet) {
   // try cache
   var hit = expressionCache.get(code)
   if (hit) {
@@ -127,27 +147,31 @@ exports.parse = function (code) {
   }
   // extract paths
   var paths = extractPaths(code)
-  var body = 'return ' + code + ';'
+  var body = code
   // rewrite paths
   if (paths.length) {
     var pathRE = new RegExp(
-      '[^$\\w\\.](' +
+      '(\\b|\\$)' +
       paths.map(escapeDollar).join('|') +
-      ')[^$\\w\\.]',
+      '(\\b|\\$)',
       'g'
     )
     saved.length = 0
-    body = body
+    body = body // pad for regex
       .replace(PREPARE_RE, save)
       .replace(pathRE, rewrite)
       .replace(RESTORE_RE, restore)
+      .trim()
   }
   // generate function
-  var fn = build(body)
-  if (fn) {
-    expressionCache.put(code, fn)
+  var getter = makeGetter(body)
+  if (getter) {
+    if (needSet) {
+      getter.setter = makeSetter(body)
+    }
+    expressionCache.put(code, getter)
   } else {
     _.warn('Invalid expression: "' + code + '"\nGenerated function body: ' + body)
   }
-  return fn || noop
+  return getter
 }
