@@ -82,6 +82,15 @@ describe('Filters', function () {
             assert.strictEqual(res3, '$123,443,434.43')
         })
 
+        it('should format a negative number correctly', function () {
+            var res1 = filter(-50),
+                res2 = filter(-150.43),
+                res3 = filter(-1500.4343434)
+            assert.strictEqual(res1, '-$50.00')
+            assert.strictEqual(res2, '-$150.43')
+            assert.strictEqual(res3, '-$1,500.43')
+        })
+
         it('should use the arg for the currency sign', function () {
             var res = filter(2134, '@')
             assert.strictEqual(res, '@2,134.00')
