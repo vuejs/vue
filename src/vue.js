@@ -59,6 +59,7 @@ extend(p, require('./instance/scope'))
 extend(p, require('./instance/data'))
 extend(p, require('./instance/proxy'))
 extend(p, require('./instance/bindings'))
+extend(p, require('./instance/element'))
 extend(p, require('./instance/compile'))
 
 /**

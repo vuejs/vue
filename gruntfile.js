@@ -78,7 +78,7 @@ module.exports = function (grunt) {
         }
       },
       bench: {
-        src: ['benchmarks/*.js', '!benchmarks/browser.js'],
+        src: ['benchmarks/bench.js'],
         dest: 'benchmarks/browser.js'
       }
     },
@@ -116,6 +116,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('unit', ['karma:browsers'])
   grunt.registerTask('phantom', ['karma:phantom'])
+  grunt.registerTask('bench', ['browserify:bench'])
   grunt.registerTask('watch', ['browserify:watch'])
   grunt.registerTask('build', ['browserify:build', 'uglify:build'])
 

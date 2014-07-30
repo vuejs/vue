@@ -1,5 +1,6 @@
 console.log('\nObserver\n')
 
+var done = null
 var Observer = require('../src/observe/observer')
 var Emitter = require('../src/emitter')
 var OldObserver = require('../../vue/src/observer')
@@ -9,30 +10,36 @@ function cb () {
   sideEffect = !sideEffect
 }
 
-function getNano () {
-  var hr = process.hrtime()
-  return hr[0] * 1e9 + hr[1]
+function now () {
+  return window.performence
+    ? window.performence.now()
+    : Date.now()
 }
 
-function now () {
-  return process.hrtime
-    ? getNano() / 1e6
-    : window.performence
-      ? window.performence.now()
-      : Date.now()
-}
+var queue = []
 
 function bench (desc, fac, run) {
-  var objs = []
-  for (var i = 0; i < runs; i++) {
-    objs.push(fac(i))
+  queue.push(function () {
+    var objs = []
+    for (var i = 0; i < runs; i++) {
+      objs.push(fac(i))
+    }
+    var s = now()
+    for (var i = 0; i < runs; i++) {
+      run(objs[i])
+    }
+    var passed = now() - s
+    console.log(desc + ' - ' + (16 / (passed / runs)).toFixed(2) + ' ops/frame')
+  })  
+}
+
+function run () {
+  queue.shift()()
+  if (queue.length) {
+    setTimeout(run, 0)
+  } else {
+    done && done()
   }
-  var s = now()
-  for (var i = 0; i < runs; i++) {
-    run(objs[i])
-  }
-  var passed = now() - s
-  console.log(desc + ' - ' + (16 / (passed / runs)).toFixed(2) + ' ops/frame')
 }
 
 bench(
@@ -364,3 +371,8 @@ bench(
     o.reverse()
   }
 )
+
+exports.run = function (cb) {
+  done = cb
+  run()
+}
