@@ -1,4 +1,3 @@
-var _ = require('../util')
 var Cache = require('../cache')
 var pathCache = new Cache(1000)
 var identStart = '[$_a-zA-Z]'
