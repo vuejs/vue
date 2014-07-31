@@ -96,5 +96,68 @@ exports._collectRawContent = function () {
  */
 
 exports._initContent = function () {
-  // TODO
+  var outlets = getOutlets(this.$el)
+  var raw = this._rawContent
+  var i = outlets.length
+  var outlet, select, j, main
+  if (i) {
+    // first pass, collect corresponding content
+    // for each outlet.
+    while (i--) {
+      outlet = outlets[i]
+      if (raw) {
+        select = outlet.getAttribute('select')
+        if (select) { // select content
+          outlet.content = _.toArray(raw.querySelectorAll(select))
+        } else { // default content
+          main = outlet
+        }
+      } else { // fallback content
+        outlet.content = _.toArray(outlet.childNodes)
+      }
+    }
+    // second pass, actually insert the contents
+    for (i = 0, j = outlets.length; i < j; i++) {
+      outlet = outlets[i]
+      if (outlet === main) continue
+      insertContentAt(outlet, outlet.content)
+    }
+    // finally insert the main content
+    if (raw && main) {
+      insertContentAt(main, _.toArray(raw.childNodes))
+    }
+  }
+  this._rawContent = null
+}
+
+/**
+ * Get <content> outlets from the element/list
+ *
+ * @param {Element|Array} el
+ * @return {Array}
+ */
+
+var concat = [].concat
+
+function getOutlets (el) {
+  return _.isArray(el)
+    ? concat.apply([], el.map(getOutlets))
+    : _.toArray(el.getElementsByTagName('content'))
+}
+
+/**
+ * Insert an array of nodes at outlet, then remove the outlet.
+ *
+ * @param {Element} outlet
+ * @param {Array} contents
+ */
+
+function insertContentAt (outlet, contents) {
+  // not using util DOM methods here because
+  // parentNode can be cached
+  var parent = outlet.parentNode
+  for (var i = 0, j = contents.length; i < j; i++) {
+    parent.insertBefore(contents[i], outlet)
+  }
+  parent.removeChild(outlet)
 }
