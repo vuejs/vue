@@ -54,6 +54,19 @@ This new hook is introduced to accompany the separation of instantiation and DOM
 
 These two have caused confusions about when they'd actually fire, and proper use cases seem to be rare. Let me know if you have important use cases for these two hooks.
 
+## Computed Properties
+
+`$get` and `$set` is now simply `get` and `set`:
+
+``` js
+computed: {
+  fullName: {
+    get: function () {},
+    set: function () {}
+  }
+}
+```
+
 ## Two Way filters
 
 If a filter is defined as a function, it is treated as a read filter by default - i.e. it is applied when data is read from the model and applied to the DOM. You can now specify write filters as well, which are applied when writing to the model, triggered by user input. Write filters are only triggered on two-way bindings like `v-model`.

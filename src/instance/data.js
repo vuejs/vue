@@ -1,4 +1,76 @@
+var _ = require('../util')
 var Observer = require('../observe/observer')
+var scopeEvents = ['set', 'mutate', 'add', 'delete']
+
+/**
+ * Setup instance scope.
+ * The scope is reponsible for prototypal inheritance of
+ * parent instance propertiesm abd all binding paths and
+ * expressions of the current instance are evaluated against its scope.
+ *
+ * This should only be called once during _init().
+ */
+
+exports._initScope = function () {
+  var parent = this.$parent
+  var scope = this.$scope = parent
+    ? Object.create(parent.$scope)
+    : {}
+  // create scope observer
+  this._observer = Observer.create(scope, {
+    callbackContext: this,
+    doNotAlterProto: true
+  })
+
+  if (!parent) return
+
+  // scope parent accessor
+  Object.defineProperty(scope, '$parent', {
+    get: function () {
+      return parent.$scope
+    }
+  })
+
+  // scope root accessor
+  var self = this
+  Object.defineProperty(scope, '$root', {
+    get: function () {
+      return self.$root.$scope
+    }
+  })
+
+  // relay change events that sent down from
+  // the scope prototype chain.
+  var ob = this._observer
+  var pob = parent._observer
+  var listeners = this._scopeListeners = {}
+  scopeEvents.forEach(function (event) {
+    var cb = listeners[event] = function (key, a, b) {
+      // since these events come from upstream,
+      // we only emit them if we don't have the same keys
+      // shadowing them in current scope.
+      if (!scope.hasOwnProperty(key)) {
+        ob.emit(event, key, a, b)
+      }
+    }
+    pob.on(event, cb)
+  })
+}
+
+/**
+ * Teardown scope and remove listeners attached to parent scope.
+ * Only called once during $destroy().
+ */
+
+exports._teardownScope = function () {
+  this.$scope = null
+  if (!this.$parent) return
+  var pob = this.$parent._observer
+  var listeners = this._scopeListeners
+  scopeEvents.forEach(function (event) {
+    pob.off(event, listeners[event])
+  })
+}
 
 /**
  * Setup the instances data object.
@@ -53,6 +125,58 @@ exports._initData = function (data, init) {
     this._dataObserver = Observer.create(data)
     this._sync()
   }
+}
+
+/**
+ * Setup computed properties.
+ */
+
+exports._initComputed = function () {
+  var computed = this.$options.computed
+  var scope = this.$scope
+  if (computed) {
+    for (var key in computed) {
+      var def = computed[key]
+      if (typeof def === 'function') {
+        def = { get: def }
+      }
+      def.enumerable = true
+      def.configurable = true
+      Object.defineProperty(scope, key, def)
+    }
+  }
+}
+
+/**
+ * Proxy the scope properties on the instance itself,
+ * so that vm.a === vm.$scope.a.
+ *
+ * Note this only proxies *local* scope properties. We want to
+ * prevent child instances accidentally modifying properties
+ * with the same name up in the scope chain because scope
+ * perperties are all getter/setters.
+ *
+ * To access parent properties through prototypal fall through,
+ * access it on the instance's $scope.
+ *
+ * This should only be called once during _init().
+ */
+
+exports._initProxy = function () {
+  var scope = this.$scope
+  for (var key in scope) {
+    if (scope.hasOwnProperty(key)) {
+      _.proxy(this, scope, key)
+    }
+  }
+  // keep proxying up-to-date with added/deleted keys.
+  this._observer
+    .on('add:self', function (key) {
+      _.proxy(this, scope, key)
+    })
+    .on('delete:self', function (key) {
+      delete this[key]
+    })
 }
 
 /**

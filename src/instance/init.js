@@ -50,6 +50,9 @@ exports._init = function (options) {
   // setup initial data.
   this._initData(this._data, true)
 
+  // setup computed properties
+  this._initComputed()
+
   // setup property proxying
   this._initProxy()
 
