@@ -6,7 +6,7 @@
   var realMethod = method === 'emit'
     ? 'applyEmit'
     : method
-  exports[method] = function () {
+  exports['$' + method] = function () {
     this._emitter[realMethod].apply(this._emitter, arguments)
   }
 })

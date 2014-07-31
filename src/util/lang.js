@@ -1,4 +1,17 @@
 /**
+ * Simple bind, faster than native
+ *
+ * @param {Function} fn
+ * @param {Object} ctx
+ */
+
+exports.bind = function (fn, ctx) {
+  return function () {
+    fn.apply(ctx, arguments)
+  }
+}
+
+/**
  * Convert an Array-like object to a real Array.
  *
  * @param {Array-like} list

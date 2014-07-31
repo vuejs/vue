@@ -24,21 +24,6 @@ exports._initScope = function () {
 
   if (!parent) return
 
-  // scope parent accessor
-  Object.defineProperty(scope, '$parent', {
-    get: function () {
-      return parent.$scope
-    }
-  })
-
-  // scope root accessor
-  var self = this
-  Object.defineProperty(scope, '$root', {
-    get: function () {
-      return self.$root.$scope
-    }
-  })
-
   // relay change events that sent down from
   // the scope prototype chain.
   var ob = this._observer
@@ -133,7 +118,6 @@ exports._initData = function (data, init) {
 
 exports._initComputed = function () {
   var computed = this.$options.computed
-  var scope = this.$scope
   if (computed) {
     for (var key in computed) {
       var def = computed[key]
@@ -142,9 +126,17 @@ exports._initComputed = function () {
       }
       def.enumerable = true
       def.configurable = true
-      Object.defineProperty(scope, key, def)
+      Object.defineProperty(this, key, def)
     }
   }
+}
+
+/**
+ * Setup instance methods.
+ */
+
+exports._initMethods = function () {
+  _.extend(this, this.$options.methods)
 }
 
 /**
@@ -163,8 +155,14 @@ exports._initComputed = function () {
  */
 
 exports._initProxy = function () {
+  var key
+  var options = this.$options
   var scope = this.$scope
-  for (var key in scope) {
+
+  // scope --> vm
+
+  // proxy scope data on vm
+  for (key in scope) {
     if (scope.hasOwnProperty(key)) {
       _.proxy(this, scope, key)
     }
@@ -177,6 +175,30 @@ exports._initProxy = function () {
     .on('delete:self', function (key) {
       delete this[key]
     })
+
+  // vm --> scope
+
+  // proxy vm parent & root on scope
+  _.proxy(scope, this, '$parent')
+  _.proxy(scope, this, '$root')
+
+  // proxy computed properties on scope.
+  // since they are accessors, they are still bound to the vm.
+  var computed = options.computed
+  if (computed) {
+    for (key in computed) {
+      _.proxy(scope, this, key)
+    }
+  }
+
+  // and methods need to be explicitly bound to the vm
+  // so it actually has all the API methods.
+  var methods = options.methods
+  if (methods) {
+    for (key in methods) {
+      scope[key] = _.bind(methods[key], this)
+    }
+  }
 }
 
 /**

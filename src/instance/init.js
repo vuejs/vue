@@ -53,6 +53,9 @@ exports._init = function (options) {
   // setup computed properties
   this._initComputed()
 
+  // setup instance methods
+  this._initMethods()
+
   // setup property proxying
   this._initProxy()
 
