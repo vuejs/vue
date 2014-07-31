@@ -7,7 +7,7 @@
 
 exports.bind = function (fn, ctx) {
   return function () {
-    fn.apply(ctx, arguments)
+    return fn.apply(ctx, arguments)
   }
 }
 

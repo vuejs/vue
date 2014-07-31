@@ -5,6 +5,16 @@ config.silent = true
 describe('Util', function () {
 
   describe('Language Enhancement', function () {
+
+    it('bind', function () {
+      var original = function (a) {
+        return this.a + a
+      }
+      var ctx = { a: 'ctx a ' }
+      var bound = _.bind(original, ctx)
+      var res = bound('arg a')
+      expect(res).toBe('ctx a arg a')
+    })
     
     it('toArray', function () {
       // should make a copy of original array

@@ -232,4 +232,62 @@ describe('Scope', function () {
 
   })
 
+  describe('computed', function () {
+    
+    var vm = new Vue({
+      data: {
+        a: 'a',
+        b: 'b'
+      },
+      computed: {
+        c: function () {
+          expect(this).toBe(vm)
+          return this.a + this.b
+        },
+        d: {
+          get: function () {
+            expect(this).toBe(vm)
+            return this.a + this.b
+          },
+          set: function (newVal) {
+            expect(this).toBe(vm)
+            var vals = newVal.split(' ')
+            this.a = vals[0]
+            this.b = vals[1]
+          }
+        }
+      }
+    })
+
+    it('get', function () {
+      expect(vm.c).toBe('ab')
+      expect(vm.d).toBe('ab')
+    })
+
+    it('set', function () {
+      vm.c = 123 // should do nothing
+      vm.d = 'c d'
+      expect(vm.a).toBe('c')
+      expect(vm.b).toBe('d')
+      expect(vm.c).toBe('cd')
+      expect(vm.d).toBe('cd')
+    })
+
+    it('inherit', function () {
+      var child = new Vue({ parent: vm })
+      expect(child.$scope.c).toBe('cd')
+
+      child.$scope.d = 'e f'
+      expect(vm.a).toBe('e')
+      expect(vm.b).toBe('f')
+      expect(vm.c).toBe('ef')
+      expect(vm.d).toBe('ef')
+      expect(child.$scope.a).toBe('e')
+      expect(child.$scope.b).toBe('f')
+      expect(child.$scope.c).toBe('ef')
+      expect(child.$scope.d).toBe('ef')
+    })
+
+  })
+
 })
