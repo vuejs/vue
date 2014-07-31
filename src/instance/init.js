@@ -1,3 +1,4 @@
+var Emitter = require('../emitter')
 var mergeOptions = require('../util').mergeOptions
 
 /**
@@ -15,11 +16,18 @@ exports._init = function (options) {
   options = options || {}
 
   this.$el          = null
-  this.$parent      = options.parent
   this._data        = options.data || {}
   this._isBlock     = false
   this._isDestroyed = false
   this._rawContent  = null
+  this._emitter     = new Emitter(this)
+
+  // setup parent relationship
+  this.$parent = options.parent
+  this._children = []
+  if (this.$parent) {
+    this.$parent._children.push(this)
+  }
 
   // merge options.
   this.$options = mergeOptions(
@@ -28,7 +36,12 @@ exports._init = function (options) {
     this
   )
 
-  // TODO fire created hook
+  // the `created` hook is called after basic properties have
+  // been set up & before data observation happens.
+  this._callHook('created')
+
+  // setup event system and option events
+  this._initEvents()
 
   // create scope.
   // @creates this.$scope

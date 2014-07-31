@@ -53,13 +53,32 @@ strats.components = function (parentVal, childVal, key, vm) {
 }
 
 /**
+ * Events
+ *
+ * Events should not overwrite one another, so we merge
+ * them as arrays.
+ */
+
+strats.events = function (parentVal, childVal) {
+  var ret = Object.create(null)
+  extend(ret, parentVal)
+  for (var key in childVal) {
+    var parent = ret[key]
+    var child = childVal[key]
+    ret[key] = parent
+      ? parent.concat(child)
+      : [child]
+  }
+  return ret
+}
+
+/**
  * Other object hashes.
  * These are instance-specific and do not inehrit from nested parents.
  */
 
 strats.methods =
-strats.computed =
-strats.events = function (parentVal, childVal) {
+strats.computed = function (parentVal, childVal) {
   var ret = Object.create(null)
   extend(ret, parentVal)
   extend(ret, childVal)

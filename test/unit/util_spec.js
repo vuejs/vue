@@ -213,19 +213,52 @@ describe('Util', function () {
       expect(res[1]).toBe(fn2)
     })
 
-    it('object hashes', function () {
+    it('events', function () {
+
+      var fn1 = function () {}
+      var fn2 = function () {}
+      var fn3 = function () {}
+      var parent = {
+        events: {
+          'fn1': [fn1, fn2],
+          'fn2': [fn2]
+        }
+      }
+      var child = {
+        events: {
+          'fn1': fn3,
+          'fn3': fn3
+        }
+      }
+      var res = merge(parent, child).events
+      assertRes(res.fn1, [fn1, fn2, fn3])
+      assertRes(res.fn2, [fn2])
+      assertRes(res.fn3, [fn3])
+      
+      function assertRes (res, expected) {
+        expect(Array.isArray(res)).toBe(true)
+        expect(res.length).toBe(expected.length)
+        var i = expected.length
+        while (i--) {
+          expect(res[i]).toBe(expected[i])
+        }
+      }
+
+    })
+
+    it('normal object hashes', function () {
       var fn1 = function () {}
       var fn2 = function () {}
       var res
       // parent undefined
-      res = merge({}, {events: {test: fn1}}).events
+      res = merge({}, {methods: {test: fn1}}).methods
       expect(res.test).toBe(fn1)
       // child undefined
-      res = merge({events: {test: fn1}}, {}).events
+      res = merge({methods: {test: fn1}}, {}).methods
       expect(res.test).toBe(fn1)
       // both defined
-      var parent = {events: {test: fn1}}
-      res = merge(parent, {events: {test2: fn2}}).events
+      var parent = {methods: {test: fn1}}
+      res = merge(parent, {methods: {test2: fn2}}).methods
       expect(res.test).toBe(fn1)
       expect(res.test2).toBe(fn2)
     })

@@ -10,8 +10,10 @@ var _ = require('../util')
  */
 
 exports.$mount = function (el) {
+  this._callHook('beforeMount')
   this._initElement(el)
   this._compile()
+  this._callHook('ready')
 }
 
 /**
@@ -23,5 +25,7 @@ exports.$mount = function (el) {
  */
 
 exports.$destroy = function (remove) {
-  
+  this._callHook('beforeDestroy')
+  // TODO
+  this._callHook('afterDestroy')
 }
