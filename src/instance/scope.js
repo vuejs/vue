@@ -116,13 +116,18 @@ exports._initData = function (data, init) {
  * Setup computed properties.
  */
 
+function noop () {}
+
 exports._initComputed = function () {
   var computed = this.$options.computed
   if (computed) {
     for (var key in computed) {
       var def = computed[key]
       if (typeof def === 'function') {
-        def = { get: def }
+        def = {
+          get: def,
+          set: noop
+        }
       }
       def.enumerable = true
       def.configurable = true
