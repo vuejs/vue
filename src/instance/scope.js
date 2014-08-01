@@ -78,14 +78,11 @@ exports._teardownScope = function () {
 
 exports._initData = function (data, init) {
   var scope = this.$scope
-  var options = this.$options
   var key
 
   if (!init) {
     // teardown old sync listeners
-    if (options.syncData) {
-      this._unsync()
-    }
+    this._teardownData()
     // delete keys not present in the new data
     for (key in scope) {
       if (scope.hasOwnProperty(key) && !(key in data)) {
@@ -106,42 +103,20 @@ exports._initData = function (data, init) {
   }
 
   // setup sync between scope and new data
-  if (options.syncData) {
+  if (this.$options.syncData) {
     this._dataObserver = Observer.create(data)
     this._sync()
   }
 }
 
 /**
- * Setup computed properties.
+ * Stop data-syncing.
  */
 
-function noop () {}
-
-exports._initComputed = function () {
-  var computed = this.$options.computed
-  if (computed) {
-    for (var key in computed) {
-      var def = computed[key]
-      if (typeof def === 'function') {
-        def = {
-          get: def,
-          set: noop
-        }
-      }
-      def.enumerable = true
-      def.configurable = true
-      Object.defineProperty(this, key, def)
-    }
+exports._teardownData = function () {
+  if (this.$options.syncData) {
+    this._unsync()
   }
-}
-
-/**
- * Setup instance methods.
- */
-
-exports._initMethods = function () {
-  _.extend(this, this.$options.methods)
 }
 
 /**
@@ -160,14 +135,13 @@ exports._initMethods = function () {
  */
 
 exports._initProxy = function () {
-  var key
   var options = this.$options
   var scope = this.$scope
 
   // scope --> vm
 
   // proxy scope data on vm
-  for (key in scope) {
+  for (var key in scope) {
     if (scope.hasOwnProperty(key)) {
       _.proxy(this, scope, key)
     }
@@ -186,22 +160,51 @@ exports._initProxy = function () {
   // proxy vm parent & root on scope
   _.proxy(scope, this, '$parent')
   _.proxy(scope, this, '$root')
+}
 
-  // proxy computed properties on scope.
-  // since they are accessors, they are still bound to the vm.
-  var computed = options.computed
+/**
+ * Setup computed properties.
+ * All computed properties are proxied onto the scope.
+ * Because they are accessors their `this` context will
+ * be the instance instead of the scope.
+ */
+
+function noop () {}
+
+exports._initComputed = function () {
+  var computed = this.$options.computed
+  var scope = this.$scope
   if (computed) {
-    for (key in computed) {
+    for (var key in computed) {
+      var def = computed[key]
+      if (typeof def === 'function') {
+        def = {
+          get: def,
+          set: noop
+        }
+      }
+      def.enumerable = true
+      def.configurable = true
+      Object.defineProperty(this, key, def)
       _.proxy(scope, this, key)
     }
   }
+}
 
-  // and methods need to be explicitly bound to the vm
-  // so it actually has all the API methods.
-  var methods = options.methods
+/**
+ * Setup instance methods.
+ * Methods are also copied into scope, but they must
+ * be bound to the instance.
+ */
+
+exports._initMethods = function () {
+  var methods = this.$options.methods
+  var scope = this.$scope
   if (methods) {
-    for (key in methods) {
-      scope[key] = _.bind(methods[key], this)
+    for (var key in methods) {
+      var method = methods[key]
+      this[key] = method
+      scope[key] = _.bind(method, this)
     }
   }
 }

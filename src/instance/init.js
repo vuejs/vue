@@ -50,14 +50,14 @@ exports._init = function (options) {
   // setup initial data.
   this._initData(this._data, true)
 
+  // setup property proxying
+  this._initProxy()
+
   // setup computed properties
   this._initComputed()
 
   // setup instance methods
   this._initMethods()
-
-  // setup property proxying
-  this._initProxy()
 
   // setup binding tree.
   // @creates this._rootBinding

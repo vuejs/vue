@@ -290,4 +290,24 @@ describe('Scope', function () {
 
   })
 
+  describe('methods', function () {
+
+    it('should work and have correct context', function () {
+      var vm = new Vue({
+        data: {
+          a: 1
+        },
+        methods: {
+          test: function () {
+            expect(this instanceof Vue).toBe(true)
+            return this.a
+          }
+        }
+      })
+      expect(vm.test()).toBe(1)
+      expect(vm.$scope.test()).toBe(1)
+    })
+
+  })
+
 })
