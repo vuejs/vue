@@ -20,6 +20,8 @@ map.colgroup =
 map.caption =
 map.tfoot = [1, '<table>', '</table>']
 
+map.g =
+map.defs =
 map.text =
 map.circle =
 map.ellipse =
@@ -96,7 +98,7 @@ function nodeToFragment (node) {
   }
   return tag === 'SCRIPT'
     ? stringToFragment(node.textContent)
-    : stringToFragment(node.outerHTML)
+    : stringToFragment(node.innerHTML)
 }
 
 /**

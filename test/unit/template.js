@@ -35,13 +35,13 @@ describe('Template Parser', function () {
     expect(res.querySelector('.test').textContent).toBe('world')
   })
 
-  it('should parse outerHTML if argument is a normal node', function () {
+  it('should parse innerHTML if argument is a normal node', function () {
     var node = document.createElement('div')
     node.innerHTML = testString
     var res = parse(node)
     expect(res instanceof DocumentFragment).toBeTruthy()
-    expect(res.childNodes.length).toBe(1)
-    expect(res.querySelector('div .test').textContent).toBe('world')
+    expect(res.childNodes.length).toBe(2)
+    expect(res.querySelector('.test').textContent).toBe('world')
   })
 
   it('should retrieve and parse if argument is an id selector', function () {
