@@ -80,10 +80,10 @@ exports._collectRawContent = function () {
   var el = this.$el
   var child
   if (el.hasChildNodes()) {
-    this.rawContent = document.createElement('div')
+    this._rawContent = document.createElement('div')
     /* jshint boss: true */
     while (child = el.firstChild) {
-      this.rawContent.appendChild(child)
+      this._rawContent.appendChild(child)
     }
   }
 }

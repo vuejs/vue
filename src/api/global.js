@@ -50,6 +50,7 @@ exports.extend = function (extendOptions) {
   // create asset registers, so extended classes
   // can have their private assets too.
   createAssetRegisters(Sub)
+  return Sub
 }
 
 /**
