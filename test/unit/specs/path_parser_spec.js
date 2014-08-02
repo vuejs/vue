@@ -1,4 +1,5 @@
 var Path = require('../../../src/parse/path')
+var Observer = require('../../../src/observe/observer')
 
 function assertPath (str, expected) {
   var path = Path.parse(str)
@@ -72,20 +73,6 @@ describe('Path', function () {
     expect(path1).toBe(path2)
   })
 
-  it('compiled getter', function () {
-    var path = ['a', 'b-$$-c', '0']
-    var obj = {
-      a: {
-        'b-$$-c': [12345]
-      }
-    }
-    var getter = Path.compileGetter(path)
-    expect(getter(obj)).toBe(12345)
-
-    var path = Path.parse('a["b-$$-c"][0]')
-    expect(path.get(obj)).toBe(12345)
-  })
-
   it('get', function () {
     var path = 'a[\'b"b"c\'][0]'
     var obj = {
@@ -94,6 +81,30 @@ describe('Path', function () {
       }
     }
     expect(Path.get(obj, path)).toBe(12345)
+    expect(Path.get(obj, 'a.c')).toBeUndefined()
+  })
+
+  it('get from Array', function () {
+    var path = ['a','b','0']
+    var obj = {
+      a: {
+        b: [123]
+      }
+    }
+    expect(Path.getFromArray(obj, path)).toBe(123)
+    expect(Path.getFromArray(obj, ['a','c'])).toBeUndefined()
+  })
+
+  it('get from observer delimited path', function () {
+    var delim = Observer.pathDelimiter
+    var path = ['a','b','0'].join(delim)
+    var obj = {
+      a: {
+        b: [123]
+      }
+    }
+    expect(Path.getFromObserver(obj, path)).toBe(123)
+    expect(Path.getFromObserver(obj, ['a','c'].join(delim))).toBeUndefined()
   })
 
   it('set success', function () {

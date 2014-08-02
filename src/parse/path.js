@@ -1,5 +1,6 @@
 var Cache = require('../cache')
 var pathCache = new Cache(1000)
+var Observer = require('../observe/observer')
 var identStart = '[$_a-zA-Z]'
 var identPart = '[$_a-zA-Z0-9]'
 var IDENT_RE = new RegExp('^' + identStart + '+' + identPart + '*' + '$')
@@ -229,7 +230,7 @@ function formatAccessor(key) {
  * @return {Function}
  */
 
-exports.compileGetter = function (path) {
+function compileGetter (path) {
   var body = 'if (o != null'
   var pathString = 'o'
   var key
@@ -256,7 +257,7 @@ exports.parse = function (path) {
   if (!hit) {
     hit = parsePath(path)
     if (hit) {
-      hit.get = exports.compileGetter(hit)
+      hit.get = compileGetter(hit)
       pathCache.put(path, hit)
     }
   }
@@ -264,24 +265,27 @@ exports.parse = function (path) {
 }
 
 /**
- * Get from an object from a path
+ * Get from an object from a path string
  *
  * @param {Object} obj
  * @param {String} path
  */
 
 exports.get = function (obj, path) {
-  if (typeof path === 'string') {
-    path = exports.parse(path)
-  }
-  if (!path) {
-    return
-  }
-  // path has compiled getter
-  if (path.get) {
+  path = exports.parse(path)
+  if (path) {
     return path.get(obj)
   }
-  // else do the traversal
+}
+
+/**
+ * Get from an object from an array
+ *
+ * @param {Object} obj
+ * @param {Array} path
+ */
+
+exports.getFromArray = function (obj, path) {
   for (var i = 0, l = path.length; i < l; i++) {
     if (obj == null) return
     obj = obj[path[i]]
@@ -290,10 +294,28 @@ exports.get = function (obj, path) {
 }
 
 /**
- * Set on an object from a path
+ * Get from an object from an Observer-delimitered path.
+ * e.g. "a\bb\bc"
  *
  * @param {Object} obj
  * @param {String} path
+ */
+
+exports.getFromObserver = function (obj, path) {
+  var hit = pathCache.get(path)
+  if (!hit) {
+    hit = path.split(Observer.pathDelimiter)
+    hit.get = compileGetter(hit)
+    pathCache.put(path, hit)
+  }
+  return hit.get(obj)
+}
+
+/**
+ * Set on an object from a path
+ *
+ * @param {Object} obj
+ * @param {String | Array} path
  * @param {*} val
  */
 

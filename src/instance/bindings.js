@@ -1,5 +1,5 @@
 var Binding = require('../binding')
-var Observer = require('../observe/observer')
+var Path = require('../parse/path')
 
 /**
  * Setup the binding tree.
@@ -29,12 +29,12 @@ exports._initBindings = function () {
     root.addChild('$root', this.$root._rootBinding)
   }
   // observer already has callback context set to `this`
-  var updateBinding = this._updateBinding
+  var update = this._updateBindingAt
   this._observer
-    .on('set', updateBinding)
-    .on('add', updateBinding)
-    .on('delete', updateBinding)
-    .on('mutate', updateBinding)
+    .on('set', update)
+    .on('add', update)
+    .on('delete', update)
+    .on('mutate', update)
 }
 
 /**
@@ -42,27 +42,15 @@ exports._initBindings = function () {
  * If `create` is true, create all bindings that do not
  * exist yet along the way.
  *
- * @param {Array} path
- * @param {Boolean} create
+ * @param {String} path
+ * @param {Boolean} fromObserver
  * @return {Binding|undefined}
  */
 
-exports._getBindingAt = function (path, create) {
-  var b = this._rootBinding
-  var child, key
-  for (var i = 0, l = path.length; i < l; i++) {
-    key = path[i]
-    child = b.getChild(key)
-    if (!child) {
-      if (create) {
-        child = b.addChild(key)
-      } else {
-        return
-      }
-    }
-    b = child
-  }
-  return b
+exports._getBindingAt = function (path, fromObserver) {
+  return fromObserver
+    ? Path.getFromObserver(this._rootBinding, path)
+    : Path.get(this._rootBinding, path)
 }
 
 /**
@@ -74,18 +62,27 @@ exports._getBindingAt = function (path, create) {
  */
 
 exports._createBindingAt = function (path) {
-  return this._getBindingAt(path, true)
+  var b = this._rootBinding
+  var child, key
+  for (var i = 0, l = path.length; i < l; i++) {
+    key = path[i]
+    child = b.children[key] || b.addChild(key)
+    b = child
+  }
+  return b
 }
 
 /**
- * Trigger a path update on the root binding.
+ * Trigger update for the binding at given path.
  *
  * @param {String} path - this path comes directly from the
  *                        data observer, so it is a single string
  *                        delimited by "\b".
  */
 
-exports._updateBinding = function (path) {
-  path = path.split(Observer.pathDelimiter)
-  this._rootBinding.updatePath(path)
+exports._updateBindingAt = function (path) {
+  var binding = this._getBindingAt(path, true)
+  if (binding) {
+    binding.notify()
+  }
 }
