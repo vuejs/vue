@@ -1,4 +1,4 @@
-var expParser = require('../../src/parse/expression')
+var expParser = require('../../../src/parse/expression')
 
 function assertExp (testCase) {
   var fn = expParser.parse(testCase.exp)

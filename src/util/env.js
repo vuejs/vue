@@ -9,8 +9,8 @@
  */
 
 var inBrowser = exports.inBrowser =
-  typeof document !== 'undefined' &&
-  Object.prototype.toString.call(document) === '[object HTMLDocument]'
+  typeof window !== 'undefined' &&
+  Object.prototype.toString.call(window) !== '[object Object]'
 
 /**
  * Defer a task to the start of the next event loop

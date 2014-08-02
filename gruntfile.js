@@ -31,11 +31,11 @@ module.exports = function (grunt) {
         frameworks: ['jasmine', 'commonjs'],
         files: [
           'src/**/*.js',
-          'test/unit/**/*.js'
+          'test/unit/specs/*.js'
         ],
         preprocessors: {
           'src/**/*.js': ['commonjs'],
-          'test/unit/**/*.js': ['commonjs']
+          'test/unit/specs/*.js': ['commonjs']
         },
         singleRun: true
       },
@@ -80,6 +80,10 @@ module.exports = function (grunt) {
       bench: {
         src: ['benchmarks/bench.js'],
         dest: 'benchmarks/browser.js'
+      },
+      test: {
+        src: ['test/unit/specs/*.js'],
+        dest: 'test/unit/specs.js'
       }
     },
 
@@ -118,6 +122,6 @@ module.exports = function (grunt) {
   grunt.registerTask('phantom', ['karma:phantom'])
   grunt.registerTask('bench', ['browserify:bench'])
   grunt.registerTask('watch', ['browserify:watch'])
-  grunt.registerTask('build', ['browserify:build', 'uglify:build'])
+  grunt.registerTask('build', ['browserify:test', 'browserify:build', 'uglify:build'])
 
 }

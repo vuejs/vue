@@ -1,4 +1,4 @@
-var Cache = require('../../src/cache')
+var Cache = require('../../../src/cache')
 
 /**
  * Debug function to assert cache state
