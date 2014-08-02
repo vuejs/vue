@@ -18,15 +18,11 @@ var inBrowser = exports.inBrowser =
  * @param {Function} fn
  */
 
-var defer = inBrowser
+exports.nextTick = inBrowser
   ? (window.requestAnimationFrame ||
     window.webkitRequestAnimationFrame ||
     setTimeout)
   : setTimeout
-
-exports.nextTick = function (fn) {
-  return defer(fn, 0)
-}
 
 /**
  * Detect if we are in IE9...
