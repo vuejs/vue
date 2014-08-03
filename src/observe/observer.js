@@ -198,6 +198,7 @@ p.convert = function (key, val) {
     set: function (newVal) {
       if (newVal === val) return
       ob.unobserve(val)
+      val = newVal
       ob.observe(key, newVal)
       ob.emit('set:self', key, newVal)
       ob.propagate('set', key, newVal)
@@ -206,7 +207,6 @@ p.convert = function (key, val) {
                      key + Observer.pathDelimiter + 'length',
                      newVal.length)
       }
-      val = newVal
     }
   })
 }

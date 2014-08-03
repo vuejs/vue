@@ -1,5 +1,6 @@
 var Binding = require('../binding')
 var Path = require('../parse/path')
+var Observer = require('../observe/observer')
 
 /**
  * Setup the binding tree.
@@ -21,20 +22,23 @@ var Path = require('../parse/path')
 exports._initBindings = function () {
   var root = this._rootBinding = new Binding()
   // the $data binding points to the root itself!
-  root.addChild('$data', root)
+  root._addChild('$data', root)
   // point $parent and $root bindings to their
   // repective owners.
   if (this.$parent) {
-    root.addChild('$parent', this.$parent._rootBinding)
-    root.addChild('$root', this.$root._rootBinding)
+    root._addChild('$parent', this.$parent._rootBinding)
+    root._addChild('$root', this.$root._rootBinding)
   }
-  // observer already has callback context set to `this`
-  var update = this._updateBindingAt
+  // setup observer events
   this._observer
-    .on('set', update)
-    .on('add', update)
-    .on('delete', update)
-    .on('mutate', update)
+    // simple updates
+    .on('set', this._updateBindingAt)
+    .on('mutate', this._updateBindingAt)
+    .on('delete', this._updateBindingAt)
+    // adding properties is a bit different
+    .on('add', this._updateAdd)
+    // collect dependency
+    .on('get', this._collectDep)
 }
 
 /**
@@ -43,7 +47,8 @@ exports._initBindings = function () {
  * exist yet along the way.
  *
  * @param {String} path
- * @param {Boolean} fromObserver
+ * @param {Boolean} fromObserver - paths coming from the Observer are
+ *                                 strings of segments delimted by "\b".
  * @return {Binding|undefined}
  */
 
@@ -57,16 +62,21 @@ exports._getBindingAt = function (path, fromObserver) {
  * Create a binding at a given path. Will also create
  * all bindings that do not exist yet along the way.
  *
- * @param {Array} path
+ * @param {String} path
+ * @param {Boolean} fromObserver
  * @return {Binding}
  */
 
-exports._createBindingAt = function (path) {
+exports._createBindingAt = function (path, fromObserver) {
+  path = fromObserver
+    ? path.split(Observer.pathDelimiter)
+    : Path.parse(path)
+  if (!path) return
   var b = this._rootBinding
   var child, key
   for (var i = 0, l = path.length; i < l; i++) {
     key = path[i]
-    child = b.children[key] || b.addChild(key)
+    child = b[key] || b._addChild(key)
     b = child
   }
   return b
@@ -75,14 +85,43 @@ exports._createBindingAt = function (path) {
 /**
  * Trigger update for the binding at given path.
  *
- * @param {String} path - this path comes directly from the
- *                        data observer, so it is a single string
- *                        delimited by "\b".
+ * @param {String} path
  */
 
 exports._updateBindingAt = function (path) {
   var binding = this._getBindingAt(path, true)
   if (binding) {
-    binding.notify()
+    binding._notify()
+  }
+}
+
+/**
+ * For newly added properties, since its binding has not been
+ * created yet, directives will not have it as a dependency yet.
+ * However, they will have its parent as a dependency. Therefore
+ * here we remove the last segment from the path and notify the
+ * added property's parent instead.
+ *
+ * @param {String} path
+ */
+
+exports._updateAdd = function (path) {
+  var index = path.lastIndexOf(Observer.pathDelimiter)
+  if (index > -1) path = path.slice(0, index)
+  this._updateBindingAt(path)
+}
+
+/**
+ * Collect dependency for the target directive being evaluated.
+ *
+ * @param {String} path
+ */
+
+exports._collectDep = function (path) {
+  var directive = this._targetDir
+  // the get event might have come from a child vm's directive
+  // so this._targetDir is not guarunteed to be defined
+  if (directive) {
+    directive._addDep(path)
   }
 }

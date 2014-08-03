@@ -1,23 +1,16 @@
 /**
- * Assign unique id to each binding created so that directives
- * can have an easier time avoiding duplicates and refreshing
- * dependencies.
- */
-
-var uid = 0
-
-/**
  * A binding is an observable that can have multiple directives
  * subscribing to it. It can also have multiple other bindings
  * as children to form a trie-like structure.
+ *
+ * All binding properties are prefixed with `_` so that they
+ * don't conflict with children keys.
  *
  * @constructor
  */
 
 function Binding () {
-  this.id = uid++
-  this.children = Object.create(null)
-  this.subs = []
+  this._subs = []
 }
 
 var p = Binding.prototype
@@ -29,9 +22,9 @@ var p = Binding.prototype
  * @param {Binding} child
  */
 
-p.addChild = function (key, child) {
+p._addChild = function (key, child) {
   child = child || new Binding()
-  this.children[key] = child
+  this[key] = child
   return child
 }
 
@@ -41,8 +34,8 @@ p.addChild = function (key, child) {
  * @param {Directive} sub
  */
 
-p.addSub = function (sub) {
-  this.subs.push(sub)
+p._addSub = function (sub) {
+  this._subs.push(sub)
 }
 
 /**
@@ -51,17 +44,17 @@ p.addSub = function (sub) {
  * @param {Directive} sub
  */
 
-p.removeSub = function (sub) {
-  this.subs.splice(this.subs.indexOf(sub), 1)
+p._removeSub = function (sub) {
+  this._subs.splice(this._subs.indexOf(sub), 1)
 }
 
 /**
  * Notify all subscribers of a new value.
  */
 
-p.notify = function () {
-  for (var i = 0, l = this.subs.length; i < l; i++) {
-    this.subs[i]._update(this)
+p._notify = function () {
+  for (var i = 0, l = this._subs.length; i < l; i++) {
+    this._subs[i]._update(this)
   }
 }
 
