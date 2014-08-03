@@ -55,7 +55,7 @@ var testCases = [
   },
   {
     // complex with nested values
-    exp: "todo.title + ' : ' + (todo.done ? 'yep' : 'nope')",
+    exp: "todo.title + ' : ' + (todo['done'] ? 'yep' : 'nope')",
     scope: {
       todo: {
         title: 'write tests',
@@ -89,6 +89,55 @@ var testCases = [
       haha: 'hoho'
     },
     expected: 'namehoho123'
+  },
+  {
+    // space between path segments
+    exp: '  a    .   b    .  c + d',
+    scope: {
+      a: { b: { c: 12 }},
+      d: 3
+    },
+    expected: 15
+  },
+  {
+    // space in bracket identifiers
+    exp: ' a[ " a.b.c " ] + b  [ \' e \' ]',
+    scope: {
+      a: {' a.b.c ': 123},
+      b: {' e ': 234}
+    },
+    expected: 357
+  },
+  {
+    // number literal
+    exp: 'a * 1e2 + 1.1',
+    scope: {
+      a: 3
+    },
+    expected: 301.1
+  },
+  {
+    //keyowrd + keyword literal
+    exp: 'true && a.true',
+    scope: {
+      a: { 'true': false }
+    },
+    expected: false
+  },
+  {
+    // super complex
+    exp: ' $a + b[ "  a.b.c  " ][\'123\'].$e&&c[ " d " ].e + Math.round(e) ',
+    scope: {
+      $a: 1,
+      b: {
+        '  a.b.c  ': {
+          '123': { $e: 2 }
+        }
+      },
+      c: { ' d ': {e: 3}},
+      e: 4.5
+    },
+    expected: 8
   }
 ]
 

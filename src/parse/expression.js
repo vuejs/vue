@@ -2,48 +2,13 @@ var _ = require('../util')
 var Cache = require('../cache')
 var expressionCache = new Cache(1000)
 
-/**
- * Extract all accessor paths from an expression.
- *
- * @param {String} code
- * @return {Array} - extracted paths
- */
-
-// remove strings and object literal keys that could contain arbitrary chars
-var PREPARE_RE = /'[^']*'|"[^"]*"|[\{,]\s*[\w\$_]+\s*:/g
-// turn anything that is not valid path char into commas
-var CONVERT_RE = /[^\w$\.]+/g
-// remove keywords & number literals
-var KEYWORDS = 'Math,break,case,catch,continue,debugger,default,delete,do,else,false,finally,for,function,if,in,instanceof,new,null,return,switch,this,throw,true,try,typeof,var,void,while,with,undefined,abstract,boolean,byte,char,class,const,double,enum,export,extends,final,float,goto,implements,import,int,interface,long,native,package,private,protected,public,short,static,super,synchronized,throws,transient,volatile,arguments,let,yield'
-var KEYWORDS_RE = new RegExp('\\b' + KEYWORDS.replace(/,/g, '\\b|\\b') + '\\b|\\b\\d[^,]*', 'g')
-// remove trailing commas
-var COMMA_RE = /^,+|,+$/
-// split by commas
-var SPLIT_RE = /,+/
-
-function extractPaths (code) {
-  code = code
-    .replace(PREPARE_RE, ',')
-    .replace(CONVERT_RE, ',')
-    .replace(KEYWORDS_RE, '')
-    .replace(COMMA_RE, '')
-  return code
-    ? code.split(SPLIT_RE)
-    : []
-}
-
-/**
- * Escape leading dollar signs from paths for regex construction.
- *
- * @param {String} path
- * @return {String}
- */
-
-function escapeDollar (path) {
-  return path.charAt(0) === '$'
-    ? '\\' + path
-    : path
-}
+var wsRE = /\s/g
+var newlineRE = /\n/g
+var saveRE = /[\{,]\s*[\w\$_]+\s*:|'[^']*'|"[^"]*"/g
+var restoreRE = /"(\d+)"/g
+var pathRE = /[^\w$\.]([A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\])*)/g
+var keywords = 'Math,break,case,catch,continue,debugger,default,delete,do,else,false,finally,for,function,if,in,instanceof,new,null,return,switch,this,throw,true,try,typeof,var,void,while,with,undefined,abstract,boolean,byte,char,class,const,double,enum,export,extends,final,float,goto,implements,import,int,interface,long,native,package,private,protected,public,short,static,super,synchronized,throws,transient,volatile,arguments,let,yield'
+var keywordsRE = new RegExp('^(' + keywords.replace(/,/g, '\\b|') + '\\b)')
 
 /**
  * Save / Rewrite / Restore
@@ -56,8 +21,8 @@ function escapeDollar (path) {
  */
 
 var saved = []
-var NEWLINE_RE = /\n/g
-var RESTORE_RE = /<%(\d+)%>/g
+var paths = []
+var has = null
 
 /**
  * Save replacer
@@ -68,19 +33,30 @@ var RESTORE_RE = /<%(\d+)%>/g
 
 function save (str) {
   var i = saved.length
-  saved[i] = str.replace(NEWLINE_RE, '\\n')
-  return '<%' + i + '%>'
+  saved[i] = str.replace(newlineRE, '\\n')
+  return '"' + i + '"'
 }
 
 /**
  * Path rewrite replacer
  *
- * @param {String} path
+ * @param {String} raw
  * @return {String}
  */
 
-function rewrite (path) {
-  return 'scope.' + path
+function rewrite (raw) {
+  var c = raw.charAt(0)
+  path = raw.slice(1)
+  if (keywordsRE.test(path)) {
+    return raw
+  } else {
+    path = path.replace(restoreRE, restore)
+    if (!has[path]) {
+      paths.push(path)
+      has[path] = true
+    }
+    return c + 'scope.' + path
+  }
 }
 
 /**
@@ -134,44 +110,40 @@ function makeSetter (body) {
 /**
  * Parse an expression and rewrite into a getter/setter functions
  *
- * @param {String} code
+ * @param {String} exp
  * @param {Boolean} needSet
  * @return {Function}
  */
 
-exports.parse = function (code, needSet) {
+exports.parse = function (exp, needSet) {
   // try cache
-  var hit = expressionCache.get(code)
+  var hit = expressionCache.get(exp)
   if (hit) {
     return hit
   }
-  // extract paths
-  var paths = extractPaths(code)
-  var body = code
-  // rewrite paths
-  if (paths.length) {
-    var pathRE = new RegExp(
-      '(\\b|\\$)' +
-      paths.map(escapeDollar).join('|') +
-      '(\\b|\\$)',
-      'g'
-    )
-    saved.length = 0
-    body = body // pad for regex
-      .replace(PREPARE_RE, save)
-      .replace(pathRE, rewrite)
-      .replace(RESTORE_RE, restore)
-      .trim()
-  }
+  // reset state
+  saved.length = 0
+  paths.length = 0
+  has = Object.create(null)
+  // save strings and object literal keys
+  var body = exp
+    .replace(saveRE, save)
+    .replace(wsRE, '')
+  // rewrite all paths
+  // pad 1 space here becaue the regex matches 1 extra char
+  body = (' ' + body)
+    .replace(pathRE, rewrite)
+    .replace(restoreRE, restore)
   // generate function
   var getter = makeGetter(body)
   if (getter) {
+    getter.paths = paths.slice()
     if (needSet) {
       getter.setter = makeSetter(body)
     }
-    expressionCache.put(code, getter)
+    expressionCache.put(exp, getter)
   } else {
-    _.warn('Invalid expression: "' + code + '"\nGenerated function body: ' + body)
+    _.warn('Invalid expression: "' + exp + '"\nGenerated function body: ' + body)
   }
   return getter
 }
