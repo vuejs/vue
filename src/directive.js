@@ -2,6 +2,10 @@ var _ = require('./util')
 var Path = require('./parse/path')
 var Observer = require('./observe/observer')
 var expParser = require('./parse/expression')
+var Batcher = require('./batcher')
+
+var batcher = new Batcher()
+var uid = 0
 
 /**
  * A directive links a DOM element with a piece of data, which can
@@ -29,7 +33,13 @@ function Directive (type, el, vm, descriptor) {
   this.filters = descriptor.filters
   this.value = undefined
 
+  // TODO
+  // mixin type definition
+
   // private
+  this._id = ++uid
+  this._locked = false
+  this._unbound = false
   this._deps = Object.create(null)
   this._newDeps = Object.create(null)
 
@@ -53,14 +63,39 @@ function Directive (type, el, vm, descriptor) {
   })
   this._deps = this._newDeps
 
-  // lock/unlock for setter
-  this._locked = false
+  /**
+   * Unlock function used in .set()
+   */
+
   this._unlock = function () {
     self._locked = false
   }
 
-  // collect initial dependencies
-  this.get()
+  /**
+   * real updater with bound context
+   * to be pushed into batcher queue
+   *
+   * @param {Boolean} init
+   */
+
+  this._realUpdate = function (init) {
+    if (self._unbound) {
+      return
+    }
+    var value = self.get()
+    if (
+      (typeof value === 'object' && value !== null) ||
+      value !== self.value ||
+      init
+    ) {
+      self.value = value
+      // TODO call definition update
+      console.log('updated! new value: ' + value)
+    }
+  }
+
+  // update for the first time
+  this._realUpdate(true)
 }
 
 var p = Directive.prototype
@@ -145,8 +180,10 @@ p._afterGet = function () {
  */
 
 p._update = function () {
-  this.value = this.get()
-  console.log('updated! new value: ' + this.value)
+  batcher.push({
+    id: this._id,
+    execute: this._realUpdate
+  })
 }
 
 /**
@@ -171,6 +208,7 @@ p._applyFilters = function (value, direction) {
  */
 
 p._teardown = function () {
+  this._unbound = true
   for (var p in this._deps) {
     this._deps[p]._removeSub(this)
   }
