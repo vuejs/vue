@@ -60,6 +60,17 @@ function pushFilter () {
  * Parse a directive string into an Array of AST-like objects
  * representing directives.
  *
+ * Example:
+ *
+ * "click: a = a + 1 | uppercase" will yield:
+ * {
+ *   arg: 'click',
+ *   expression: 'a = a + 1',
+ *   filters: [
+ *     { name: 'uppercase', args: null }
+ *   ]
+ * }
+ *
  * @param {String} str
  * @return {Array<Object>}
  */

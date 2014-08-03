@@ -67,6 +67,18 @@ computed: {
 }
 ```
 
+## Directive changes
+
+### New options
+
+- `literal`: replaces old options `isLiteral` and `isEmpty`.
+- `twoway`: indicates the directive is two-way and may write back to the model. Allows the use of `directive.set(value)`.
+- `paramAttributes`: an Array of attribute names to extract as parameters for the directive. For example, given the option value `['lazy']` and markup `<input v-my-dir="msg" my-param="123">`, you can access `this.params['my-param']` with value `'123'` inside directive functions.
+
+### Removed options: `isLiteral`, `isEmpty`, `isFn`
+
+- `isFn` is no longer necessary for directives expecting function values.
+
 ## Two Way filters
 
 If a filter is defined as a function, it is treated as a read filter by default - i.e. it is applied when data is read from the model and applied to the DOM. You can now specify write filters as well, which are applied when writing to the model, triggered by user input. Write filters are only triggered on two-way bindings like `v-model`.
