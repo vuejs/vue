@@ -89,10 +89,11 @@ function restore (str, i) {
  * and generate getter/setter functions.
  *
  * @param {String} exp
+ * @param {Boolean} needSet
  * @return {Function}
  */
 
-function compileExpFns (exp) {
+function compileExpFns (exp, needSet) {
   // reset state
   saved.length = 0
   paths = []
@@ -106,10 +107,13 @@ function compileExpFns (exp) {
   body = (' ' + body)
     .replace(pathReplaceRE, rewrite)
     .replace(restoreRE, restore)
-  var getter = makeGetter(exp, body)
+  var getter = makeGetter(body)
   if (getter) {
+    getter.body = body
     getter.paths = paths
-    getter.setter = makeSetter(body)
+    if (needSet) {
+      getter.setter = makeSetter(body)
+    }
   }
   return getter
 }
@@ -134,6 +138,7 @@ function compilePathFns (exp) {
   }
   // save root path segment
   getter.paths = [exp.match(rootPathRE)[0]]
+  // always generate setter for simple paths
   getter.setter = function (obj, val) {
     Path.set(obj, path, val)
   }
@@ -150,11 +155,11 @@ function compilePathFns (exp) {
  * @return {Function|undefined}
  */
 
-function makeGetter (exp, body) {
+function makeGetter (body) {
   try {
     return new Function('scope', 'return ' + body + ';')
   } catch (e) {
-    _.warn('Invalid expression: "' + exp + '\nGenerated function body: ' + body)
+    _.warn('Invalid expression. Generated function body: ' + body)
   }
 }
 
@@ -163,9 +168,6 @@ function makeGetter (exp, body) {
  *
  * This is only needed in rare situations like "a[b]" where
  * a settable path requires dynamic evaluation.
- *
- * Not doing try-catch here because this only gets called
- * if makeGetter() worked.
  *
  * This setter function may throw error when called if the
  * expression body is not a valid left-hand expression in
@@ -176,20 +178,40 @@ function makeGetter (exp, body) {
  */
 
 function makeSetter (body) {
-  return new Function('scope', 'value', body + ' = value;')
+  try {
+    return new Function('scope', 'value', body + ' = value;')
+  } catch (e) {
+    _.warn('Invalid setter function body: ' + body)
+  }
+}
+
+/**
+ * Check for setter existence on a cache hit.
+ *
+ * @param {Function} fn
+ */
+
+function checkSetter (fn) {
+  if (!fn.setter) {
+    fn.setter = makeSetter(fn.body)
+  }
 }
 
 /**
  * Parse an expression and rewrite into a getter/setter functions
  *
  * @param {String} exp
+ * @param {Boolean} needSet
  * @return {Function}
  */
 
-exports.parse = function (exp) {
+exports.parse = function (exp, needSet) {
   // try cache
   var hit = expressionCache.get(exp)
   if (hit) {
+    if (needSet) {
+      checkSetter(hit)
+    }
     return hit
   }
   exp = exp.trim()
@@ -198,7 +220,7 @@ exports.parse = function (exp) {
   // that's too rare and we don't care.
   var getter = pathTestRE.test(exp)
     ? compilePathFns(exp)
-    : compileExpFns(exp)
+    : compileExpFns(exp, needSet)
   expressionCache.put(exp, getter)
   return getter
 }

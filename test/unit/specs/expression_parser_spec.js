@@ -172,7 +172,7 @@ describe('Expression Parser', function () {
   })
 
   it('dynamic setter', function () {
-    var setter = expParser.parse('a[b]').setter
+    var setter = expParser.parse('a[b]', true).setter
     var scope = {
       a: { c: 1 },
       b: 'c'
@@ -182,7 +182,7 @@ describe('Expression Parser', function () {
   })
 
   it('simple path setter', function () {
-    var setter = expParser.parse('a.b.c').setter
+    var setter = expParser.parse('a.b.c', true).setter
     var scope = {}
     expect(function () {
       setter(scope, 123)
