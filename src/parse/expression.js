@@ -129,7 +129,7 @@ function compilePathFns (exp) {
     getter = Path.compileGetter(path)
   } else {
     // do the real parsing
-    path = Path.parse(path)
+    path = Path.parse(exp)
     getter = path.get
   }
   // save root path segment

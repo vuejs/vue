@@ -22,6 +22,14 @@ var testCases = [
     },
     expected: 123
   },
+  // complex path
+  {
+    exp: 'a["b"].c',
+    scope: {
+      a:{b:{c:234}}
+    },
+    expected: 234
+  },
   {
     // string concat
     exp: 'a+b',
