@@ -7,6 +7,22 @@ function assertExp (testCase) {
 
 var testCases = [
   {
+    // simple path that doesn't exist
+    exp: 'a.b.c',
+    scope: {
+      a: {}
+    },
+    expected: undefined
+  },
+  {
+    // simple path that exists
+    exp: 'a.b.d',
+    scope: {
+      a:{b:{d:123}}
+    },
+    expected: 123
+  },
+  {
     // string concat
     exp: 'a+b',
     scope: {
@@ -147,14 +163,25 @@ describe('Expression Parser', function () {
     testCases.forEach(assertExp)
   })
 
-  it('parse setter', function () {
-    var setter = expParser.parse('a[b]', true).setter
+  it('dynamic setter', function () {
+    var setter = expParser.parse('a[b]').setter
     var scope = {
       a: { c: 1 },
       b: 'c'
     }
     setter(scope, 2)
     expect(scope.a.c).toBe(2)
+  })
+
+  it('simple path setter', function () {
+    var setter = expParser.parse('a.b.c').setter
+    var scope = {}
+    expect(function () {
+      setter(scope, 123)
+    }).not.toThrow()
+    scope.a = {b:{c:0}}
+    setter(scope, 123)
+    expect(scope.a.b.c).toBe(123)
   })
 
   it('cache', function () {

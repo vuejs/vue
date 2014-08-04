@@ -135,7 +135,6 @@ exports._teardownData = function () {
  */
 
 exports._initProxy = function () {
-  var options = this.$options
   var scope = this.$scope
 
   // scope --> vm

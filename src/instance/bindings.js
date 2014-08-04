@@ -47,15 +47,11 @@ exports._initBindings = function () {
  * exist yet along the way.
  *
  * @param {String} path
- * @param {Boolean} fromObserver - paths coming from the Observer are
- *                                 strings of segments delimted by "\b".
  * @return {Binding|undefined}
  */
 
-exports._getBindingAt = function (path, fromObserver) {
-  return fromObserver
-    ? Path.getFromObserver(this._rootBinding, path)
-    : Path.get(this._rootBinding, path)
+exports._getBindingAt = function (path) {
+  return Path.getFromObserver(this._rootBinding, path)
 }
 
 /**
@@ -63,15 +59,11 @@ exports._getBindingAt = function (path, fromObserver) {
  * all bindings that do not exist yet along the way.
  *
  * @param {String} path
- * @param {Boolean} fromObserver
  * @return {Binding}
  */
 
-exports._createBindingAt = function (path, fromObserver) {
-  path = fromObserver
-    ? path.split(Observer.pathDelimiter)
-    : Path.parse(path)
-  if (!path) return
+exports._createBindingAt = function (path) {
+  path = path.split(Observer.pathDelimiter)
   var b = this._rootBinding
   var child, key
   for (var i = 0, l = path.length; i < l; i++) {

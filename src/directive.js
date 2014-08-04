@@ -1,5 +1,4 @@
 var _ = require('./util')
-var Path = require('./parse/path')
 var Observer = require('./observe/observer')
 var expParser = require('./parse/expression')
 var Batcher = require('./batcher')
@@ -70,6 +69,28 @@ function Directive (type, el, vm, descriptor, definition) {
 var p = Directive.prototype
 
 /**
+ * Initialize the directive instance's definition.
+ */
+
+p._initDef = function (definition) {
+  _.extend(this, definition)
+  // init params
+  var el = this.el
+  var attrs = this.paramAttributes
+  if (attrs) {
+    var params = this.params = {}
+    attrs.forEach(function (p) {
+      params[p] = el.getAttribute(p)
+      el.removeAttribute(p)
+    })
+  }
+  // call bind hook
+  if (this.bind) {
+    this.bind()
+  }
+}
+
+/**
  * Initialize read and write filters
  */
 
@@ -118,40 +139,19 @@ p._initFilters = function () {
  * this is specifically for the case where the expression
  * references a non-existing root level path, and later
  * that path is created with `vm.$add`.
- * e.g. "a && a.b"
+ *
+ * e.g. in "a && a.b", if `a` is not present at compilation,
+ * the directive will end up with no dependency at all and
+ * never gets updated.
  */
 
 p._initDeps = function () {
   var self = this
   var paths = this._getter.paths
   paths.forEach(function (path) {
-    if (path.indexOf('.') < 0 && path.indexOf('[') < 0) {
-      self._addDep(path)
-    }
+    self._addDep(path)
   })
   this._deps = this._newDeps
-}
-
-/**
- * Initialize the directive instance's definition.
- */
-
-p._initDef = function (definition) {
-  _.extend(this, definition)
-  // init params
-  var el = this.el
-  var attrs = this.paramAttributes
-  if (attrs) {
-    var params = this.params = {}
-    attrs.forEach(function (p) {
-      params[p] = el.getAttribute(p)
-      el.removeAttribute(p)
-    })
-  }
-  // call bind hook
-  if (this.bind) {
-    this.bind()
-  }
 }
 
 /**
@@ -209,8 +209,8 @@ p._addDep = function (path) {
     newDeps[path] = true
     if (!oldDeps[path]) {
       var binding =
-        vm._getBindingAt(path, true) ||
-        vm._createBindingAt(path, true)
+        vm._getBindingAt(path) ||
+        vm._createBindingAt(path)
       binding._addSub(this)
     }
   }

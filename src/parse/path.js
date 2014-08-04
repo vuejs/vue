@@ -1,9 +1,7 @@
 var Cache = require('../cache')
 var pathCache = new Cache(1000)
 var Observer = require('../observe/observer')
-var identStart = '[$_a-zA-Z]'
-var identPart = '[$_a-zA-Z0-9]'
-var IDENT_RE = new RegExp('^' + identStart + '+' + identPart + '*' + '$')
+var identRE = /^[$_a-zA-Z]+[\w$]*$/
 
 /**
  * Path-parsing algorithm scooped from Polymer/observe-js
@@ -204,33 +202,31 @@ function parsePath (path) {
   return // parse error
 }
 
-function isIndex(s) {
-  return +s === s >>> 0;
-}
-
-function isIdent(s) {
-  return IDENT_RE.test(s);
-}
+/**
+ * Format a accessor segment based on its type.
+ *
+ * @param {String} key
+ * @return {Boolean}
+ */
 
 function formatAccessor(key) {
-  if (isIdent(key)) {
+  if (identRE.test(key)) { // identifier
     return '.' + key
-  } else if (isIndex(key)) {
+  } else if (+key === key >>> 0) { // bracket index
     return '[' + key + ']';
-  } else {
+  } else { // bracket string
     return '["' + key.replace(/"/g, '\\"') + '"]';
   }
 }
 
 /**
- * Compiles a getter function with a set path, which
- * is much more efficient than the dynamic path getter.
+ * Compiles a getter function with a fixed path.
  *
  * @param {Array} path
  * @return {Function}
  */
 
-function compileGetter (path) {
+exports.compileGetter = function (path) {
   var body = 'if (o != null'
   var pathString = 'o'
   var key
@@ -257,7 +253,7 @@ exports.parse = function (path) {
   if (!hit) {
     hit = parsePath(path)
     if (hit) {
-      hit.get = compileGetter(hit)
+      hit.get = exports.compileGetter(hit)
       pathCache.put(path, hit)
     }
   }
@@ -305,7 +301,7 @@ exports.getFromObserver = function (obj, path) {
   var hit = pathCache.get(path)
   if (!hit) {
     hit = path.split(Observer.pathDelimiter)
-    hit.get = compileGetter(hit)
+    hit.get = exports.compileGetter(hit)
     pathCache.put(path, hit)
   }
   return hit.get(obj)
