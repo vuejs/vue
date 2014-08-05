@@ -1,10 +1,10 @@
 var expParser = require('../../../src/parse/expression')
 
 function assertExp (testCase) {
-  var fn = expParser.parse(testCase.exp)
-  expect(fn(testCase.scope)).toEqual(testCase.expected)
-  expect(fn.paths.length).toBe(testCase.paths.length)
-  fn.paths.forEach(function (p, i) {
+  var res = expParser.parse(testCase.exp)
+  expect(res.get(testCase.scope)).toEqual(testCase.expected)
+  expect(res.paths.length).toBe(testCase.paths.length)
+  res.paths.forEach(function (p, i) {
     expect(p).toBe(testCase.paths[i])
   })
 }
@@ -193,23 +193,23 @@ describe('Expression Parser', function () {
   })
 
   it('dynamic setter', function () {
-    var setter = expParser.parse('a[b]', true).setter
+    var res = expParser.parse('a[b]', true)
     var scope = {
       a: { c: 1 },
       b: 'c'
     }
-    setter(scope, 2)
+    res.set(scope, 2)
     expect(scope.a.c).toBe(2)
   })
 
   it('simple path setter', function () {
-    var setter = expParser.parse('a.b.c', true).setter
+    var res = expParser.parse('a.b.c', true)
     var scope = {}
     expect(function () {
-      setter(scope, 123)
+      res.set(scope, 123)
     }).not.toThrow()
     scope.a = {b:{c:0}}
-    setter(scope, 123)
+    res.set(scope, 123)
     expect(scope.a.b.c).toBe(123)
   })
 

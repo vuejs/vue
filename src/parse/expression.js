@@ -108,13 +108,15 @@ function compileExpFns (exp, needSet) {
     .replace(restoreRE, restore)
   var getter = makeGetter(body)
   if (getter) {
-    getter.body = body
-    getter.paths = paths
-    if (needSet) {
-      getter.setter = makeSetter(body)
+    return {
+      get   : getter,
+      body  : body,
+      paths : paths,
+      set   : needSet
+        ? makeSetter(body)
+        : null
     }
   }
-  return getter
 }
 
 /**
@@ -135,13 +137,15 @@ function compilePathFns (exp) {
     path = Path.parse(exp)
     getter = path.get
   }
-  // save root path segment
-  getter.paths = [exp.match(rootPathRE)[0]]
-  // always generate setter for simple paths
-  getter.setter = function (obj, val) {
-    Path.set(obj, path, val)
+  return {
+    get: getter,
+    // always generate setter for simple paths
+    set: function (obj, val) {
+      Path.set(obj, path, val)
+    },
+    // save root path segment
+    paths: [exp.match(rootPathRE)[0]]
   }
-  return getter
 }
 
 /**
@@ -190,9 +194,9 @@ function makeSetter (body) {
  * @param {Function} fn
  */
 
-function checkSetter (fn) {
-  if (!fn.setter) {
-    fn.setter = makeSetter(fn.body)
+function checkSetter (hit) {
+  if (!hit.set) {
+    fn.set = makeSetter(hit.body)
   }
 }
 
@@ -217,9 +221,9 @@ exports.parse = function (exp, needSet) {
   // we do a simple path check to optimize for that scenario.
   // the check fails valid paths with unusal whitespaces, but
   // that's too rare and we don't care.
-  var getter = pathTestRE.test(exp)
+  var res = pathTestRE.test(exp)
     ? compilePathFns(exp)
     : compileExpFns(exp, needSet)
-  expressionCache.put(exp, getter)
-  return getter
+  expressionCache.put(exp, res)
+  return res
 }

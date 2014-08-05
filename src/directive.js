@@ -50,15 +50,14 @@ function Directive (type, el, vm, descriptor, definition) {
   this._initDef(definition)
 
   if (this.expression && !this.isLiteral) {
-    // TODO
-    // test for simple path vs. expression
-    this._getter = expParser.parse(this.expression, this.twoway)
-    this._setter = this._getter.setter
-
+    // parse expression
+    var res = expParser.parse(this.expression, this.twoway)
+    this._getter = res.get
+    this._setter = res.set
+    // init dependencies
+    this._initDeps(res.paths)
     // init filters
     this._initFilters()
-    // init dependencies
-    this._initDeps()
     // init methods that need to be context-bound
     this._initBoundMethods()
     // update for the first time
@@ -143,11 +142,12 @@ p._initFilters = function () {
  * e.g. in "a && a.b", if `a` is not present at compilation,
  * the directive will end up with no dependency at all and
  * never gets updated.
+ *
+ * @param {Array} paths
  */
 
-p._initDeps = function () {
+p._initDeps = function (paths) {
   var self = this
-  var paths = this._getter.paths
   paths.forEach(function (path) {
     self._addDep(path)
   })
