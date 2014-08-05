@@ -1,4 +1,5 @@
 var expParser = require('../../../src/parse/expression')
+var _ = require('../../../src/util')
 
 function assertExp (testCase) {
   var res = expParser.parse(testCase.exp)
@@ -217,9 +218,40 @@ describe('Expression Parser', function () {
   })
 
   it('cache', function () {
-    var fn1 = expParser.parse('a + b')
-    var fn2 = expParser.parse('a + b')
-    expect(fn1).toBe(fn2)
+    var res1 = expParser.parse('a + b')
+    var res2 = expParser.parse('a + b')
+    expect(res1).toBe(res2)
   })
 
+  describe('invalid expression', function () {
+    
+    beforeEach(function () {
+      spyOn(_, 'warn')
+    })
+
+    it('should warn on invalid expression', function () {
+      var res = expParser.parse('a--b"ffff')
+      expect(_.warn).toHaveBeenCalled()
+    })
+
+    if (leftHandThrows()) {
+      it('should warn on invalid left hand expression for setter', function () {
+        var res = expParser.parse('a+b', true)
+        expect(_.warn).toHaveBeenCalled()
+      })
+    }
+  })
 })
+
+/**
+ * check if creating a new Function with invalid left-hand
+ * assignment would throw
+ */
+
+function leftHandThrows () {
+  try {
+    var fn = new Function('a + b = 1')
+  } catch (e) {
+    return true
+  }
+}

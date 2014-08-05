@@ -3,6 +3,7 @@
  */
 
 var Observer = require('../../../src/observe/observer')
+var _ = require('../../../src/util')
 // internal emitter has fixed 3 arguments
 // so we need to fill up the assetions with undefined
 var u = undefined
@@ -91,6 +92,17 @@ describe('Observer', function () {
     var ob = Observer.create(obj)
     obj.a = 234
     expect(obj.b).toBe(234)
+  })
+
+  it('warn duplicate value', function () {
+    spyOn(_, 'warn')
+    var obj = {
+      a: { b: 123 },
+      b: null
+    }
+    var ob = Observer.create(obj)
+    obj.b = obj.a
+    expect(_.warn).toHaveBeenCalled()
   })
 
   it('array get', function () {
@@ -274,6 +286,10 @@ describe('Observer', function () {
     var ob = Observer.create(obj)
     ob.on('add', spy)
 
+    // ignore existing keys
+    obj.$add('a', 123)
+    expect(spy.callCount).toBe(0)
+
     // add event
     var add = {d:2}
     obj.a.$add('c', add)
@@ -289,6 +305,10 @@ describe('Observer', function () {
     var obj = {a:{b:1}}
     var ob = Observer.create(obj)
     ob.on('delete', spy)
+
+    // ignore non-present key
+    obj.$delete('c')
+    expect(spy.callCount).toBe(0)
 
     obj.a.$delete('b')
     expect(spy).toHaveBeenCalledWith('a.b', u, u)
@@ -318,11 +338,42 @@ describe('Observer', function () {
     expect(spy).toHaveBeenCalledWith('1.a', 4, u)
   })
 
+  it('array.$set with out of bound length', function () {
+    var arr = [{a:1}, {a:2}]
+    var ob = Observer.create(arr)
+    var inserted = {a:3}
+    arr.$set(3, inserted)
+    expect(arr.length).toBe(4)
+    expect(arr[2]).toBeUndefined()
+    expect(arr[3]).toBe(inserted)
+  })
+
   it('array.$remove', function () {
     var arr = [{a:1}, {a:2}]
     var ob = Observer.create(arr)
     ob.on('mutate', spy)
     var removed = arr.$remove(0)
+
+    expect(spy.mostRecentCall.args[0]).toBe('')
+    expect(spy.mostRecentCall.args[1]).toBe(arr)
+    var mutation = spy.mostRecentCall.args[2]
+    expect(mutation).toBeDefined()
+    expect(mutation.method).toBe('splice')
+    expect(mutation.index).toBe(0)
+    expect(mutation.removed.length).toBe(1)
+    expect(mutation.inserted.length).toBe(0)
+    expect(mutation.removed[0]).toBe(removed)
+
+    ob.on('set', spy)
+    arr[0].a = 3
+    expect(spy).toHaveBeenCalledWith('0.a', 3, u)
+  })
+
+  it('array.$remove object', function () {
+    var arr = [{a:1}, {a:2}]
+    var ob = Observer.create(arr)
+    ob.on('mutate', spy)
+    var removed = arr.$remove(arr[0])
 
     expect(spy.mostRecentCall.args[0]).toBe('')
     expect(spy.mostRecentCall.args[1]).toBe(arr)

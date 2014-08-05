@@ -31,7 +31,8 @@
     "karma": "^0.12.16",
     "karma-browserify": "^0.2.1",
     "karma-chrome-launcher": "^0.1.4",
-    "karma-commonjs": "0.0.10",
+    "karma-commonjs": "^0.0.10",
+    "karma-coverage": "^0.2.5",
     "karma-firefox-launcher": "^0.1.3",
     "karma-jasmine": "^0.1.5",
     "karma-phantomjs-launcher": "^0.1.4"

@@ -10,20 +10,28 @@ describe('Template Parser', function () {
     expect(res).toBe(frag)
   })
 
-  // only test template node if it works in the browser being tested.
-  var templateNode = document.createElement('template')
-  if (templateNode.content) {
-    it('should return content if argument is a valid template node', function () {
-      var res = parse(templateNode)
-      expect(res).toBe(templateNode.content)
-    })
-  }
+  it('should return content if argument is a valid template node', function () {
+    var templateNode = document.createElement('template')
+    if (!templateNode.content) {
+      // mock the content 
+      templateNode.content = document.createDocumentFragment()
+    }
+    var res = parse(templateNode)
+    expect(res).toBe(templateNode.content)
+  })
 
   it('should parse if argument is a template string', function () {
     var res = parse(testString)
     expect(res instanceof DocumentFragment).toBeTruthy()
     expect(res.childNodes.length).toBe(2)
     expect(res.querySelector('.test').textContent).toBe('world')
+  })
+
+  it('should work if the template string doesn\'t contain tags', function () {
+    var res = parse('hello!')
+    expect(res instanceof DocumentFragment).toBeTruthy()
+    expect(res.childNodes.length).toBe(1)
+    expect(res.firstChild.nodeType).toBe(3) // Text node
   })
 
   it('should parse textContent if argument is a script node', function () {

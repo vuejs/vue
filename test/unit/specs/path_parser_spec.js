@@ -92,7 +92,7 @@ describe('Path', function () {
       }
     }
     expect(Path.getFromArray(obj, path)).toBe(123)
-    expect(Path.getFromArray(obj, ['a','c'])).toBeUndefined()
+    expect(Path.getFromArray(obj, ['a','c','d'])).toBeUndefined()
   })
 
   it('get from observer delimited path', function () {
@@ -122,11 +122,17 @@ describe('Path', function () {
   })
 
   it('set fail', function () {
-    var path = 'a.b.c'
     var obj = {
       a: null
     }
-    var res = Path.set(obj, path, 12345)
+    var res = Path.set(obj, 'a.b.c', 12345)
+    expect(res).toBe(false)
+    res = Path.set(obj, 'a.b', 12345)
+    expect(res).toBe(false)
+  })
+
+  it('set invalid', function () {
+    var res = Path.set({}, 'ab[c]d', 123)
     expect(res).toBe(false)
   })
 

@@ -3,6 +3,8 @@ var Emitter = require('../emitter')
 var arrayAugmentations = require('./array-augmentations')
 var objectAugmentations = require('./object-augmentations')
 
+var uid = 0
+
 /**
  * Type enums
  */
@@ -31,6 +33,7 @@ var OBJECT = 1
 
 function Observer (value, type, options) {
   Emitter.call(this, options && options.callbackContext)
+  this.id = ++uid
   this.value = value
   this.type = type
   this.parents = null
@@ -155,11 +158,18 @@ p.observe = function (key, val) {
   var ob = Observer.create(val)
   if (ob) {
     // register self as a parent of the child observer.
-    if (ob.findParent(this) > -1) return
-    (ob.parents || (ob.parents = [])).push({
+    var parents = ob.parents
+    if (!parents) {
+      ob.parents = parents = Object.create(null)
+    }
+    if (parents[this.id]) {
+      _.warn('Observing duplicate key: ' + key)
+      return
+    }
+    parents[this.id] = {
       ob: this,
       key: key
-    })
+    }
   }
 }
 
@@ -172,7 +182,7 @@ p.observe = function (key, val) {
 
 p.unobserve = function (val) {
   if (val && val.$observer) {
-    val.$observer.findParent(this, true)
+    val.$observer.parents[this.id] = null
   }
 }
 
@@ -202,11 +212,6 @@ p.convert = function (key, val) {
       ob.observe(key, newVal)
       ob.emit('set:self', key, newVal)
       ob.propagate('set', key, newVal)
-      if (_.isArray(newVal)) {
-        ob.propagate('set',
-                     key + Observer.pathDelimiter + 'length',
-                     newVal.length)
-      }
     }
   })
 }
@@ -223,14 +228,13 @@ p.convert = function (key, val) {
 p.propagate = function (event, path, val, mutation) {
   this.emit(event, path, val, mutation)
   if (!this.parents) return
-  for (var i = 0, l = this.parents.length; i < l; i++) {
-    var parent = this.parents[i]
-    var ob = parent.ob
+  for (var id in this.parents) {
+    var parent = this.parents[id]
     var key = parent.key
     var parentPath = path
       ? key + Observer.pathDelimiter + path
       : key
-    ob.propagate(event, parentPath, val, mutation)
+    parent.ob.propagate(event, parentPath, val, mutation)
   }
 }
 
@@ -246,32 +250,9 @@ p.updateIndices = function () {
   while (i--) {
     ob = arr[i] && arr[i].$observer
     if (ob) {
-      var j = ob.findParent(this)
-      ob.parents[j].key = i
+      ob.parents[this.id].key = i
     }
   }
-}
-
-/**
- * Find a parent option object
- *
- * @param {Observer} parent
- * @param {Boolean} [remove] - whether to remove the parent
- * @return {Number} - index of parent
- */
-
-p.findParent = function (parent, remove) {
-  var parents = this.parents
-  if (!parents) return -1
-  var i = parents.length
-  while (i--) {
-    var p = parents[i]
-    if (p.ob === parent) {
-      if (remove) parents.splice(i, 1)
-      return i
-    }
-  }
-  return -1
 }
 
 module.exports = Observer

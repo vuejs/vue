@@ -159,10 +159,7 @@ function parsePath (path) {
     }
   }
 
-  function maybeUnescapeQuote() {
-    if (index >= path.length) {
-      return
-    }
+  function maybeUnescapeQuote () {
     var nextChar = path[index + 1]
     if ((mode === 'inSingleQuote' && nextChar === "'") ||
         (mode === 'inDoubleQuote' && nextChar === '"')) {
@@ -177,7 +174,7 @@ function parsePath (path) {
     index++
     c = path[index]
 
-    if (c === '\\' && maybeUnescapeQuote(mode)) {
+    if (c === '\\' && maybeUnescapeQuote()) {
       continue
     }
 
@@ -198,8 +195,6 @@ function parsePath (path) {
       return keys
     }
   }
-
-  return // parse error
 }
 
 /**
@@ -320,7 +315,7 @@ exports.set = function (obj, path, val) {
     path = exports.parse(path)
   }
   if (!path) {
-    return
+    return false
   }
   for (var i = 0, l = path.length - 1; i < l; i++) {
     if (!obj || typeof obj !== 'object') {

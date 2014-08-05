@@ -1,3 +1,5 @@
+/* global DocumentFragment */
+
 var Cache = require('../cache')
 var templateCache = new Cache(100)
 
@@ -93,7 +95,7 @@ function nodeToFragment (node) {
   var tag = node.tagName
   // if its a template tag and the browser supports it,
   // its content is already a document fragment.
-  if (tag === 'TEMPLATE' && node.content) {
+  if (tag === 'TEMPLATE' && node.content instanceof DocumentFragment) {
     return node.content
   }
   return tag === 'SCRIPT'
@@ -119,7 +121,7 @@ exports.parse = function (template) {
   var node, frag
 
   // if the template is already a document fragment -- do nothing
-  if (template instanceof window.DocumentFragment) {
+  if (template instanceof DocumentFragment) {
     return template
   }
 

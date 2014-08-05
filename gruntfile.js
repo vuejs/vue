@@ -48,7 +48,17 @@ module.exports = function (grunt) {
       phantom: {
         options: {
           browsers: ['PhantomJS'],
-          reporters: ['progress']
+          reporters: ['progress', 'coverage'],
+          preprocessors: {
+            'src/**/*.js': ['commonjs', 'coverage'],
+            'test/unit/specs/*.js': ['commonjs']
+          },
+          coverageReporter: {
+            reporters: [
+              { type: 'lcov' },
+              { type: 'text-summary' }
+            ]
+          }
         }
       }
     },
@@ -119,7 +129,7 @@ module.exports = function (grunt) {
   })
 
   grunt.registerTask('unit', ['karma:browsers'])
-  grunt.registerTask('phantom', ['karma:phantom'])
+  grunt.registerTask('cover', ['karma:phantom'])
   grunt.registerTask('bench', ['browserify:bench'])
   grunt.registerTask('watch', ['browserify:watch'])
   grunt.registerTask('build', ['browserify:test', 'browserify:build', 'uglify:build'])

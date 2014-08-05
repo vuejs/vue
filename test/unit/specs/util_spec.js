@@ -163,6 +163,14 @@ describe('Util', function () {
         expect(child.nextSibling).toBe(target)
       })
 
+      it('after with sibling', function () {
+        var sibling = div()
+        parent.appendChild(sibling)
+        _.after(target, child)
+        expect(target.parentNode).toBe(parent)
+        expect(child.nextSibling).toBe(target)
+      })
+
       it('remove', function () {
         _.remove(child)
         expect(child.parentNode).toBeNull()
@@ -170,6 +178,13 @@ describe('Util', function () {
       })
 
       it('prepend', function () {
+        _.prepend(target, parent)
+        expect(target.parentNode).toBe(parent)
+        expect(parent.firstChild).toBe(target)
+      })
+
+      it('prepend to empty node', function () {
+        parent.removeChild(child)
         _.prepend(target, parent)
         expect(target.parentNode).toBe(parent)
         expect(parent.firstChild).toBe(target)
@@ -183,9 +198,56 @@ describe('Util', function () {
         expect(target.getAttribute('test1')).toBe('1')
         expect(target.getAttribute('test2')).toBe('2')
       })
-
     })
+  }
 
+  if (typeof console !== undefined) {
+
+    describe('Debug', function () {
+
+      beforeEach(function () {
+        spyOn(console, 'log')
+        spyOn(console, 'warn')
+        if (console.trace) {
+          spyOn(console, 'trace')
+        }
+      })
+      
+      it('log when debug is true', function () {
+        config.debug = true
+        _.log('hello', 'world')
+        expect(console.log).toHaveBeenCalledWith('hello', 'world')
+      })
+
+      it('not log when debug is false', function () {
+        config.debug = false
+        _.log('bye', 'world')
+        expect(console.log.callCount).toBe(0)
+      })
+
+      it('warn when silent is false', function () {
+        config.silent = false
+        _.warn('oops', 'ops')
+        expect(console.warn).toHaveBeenCalledWith('oops', 'ops')
+      })
+
+      it('not warn when silent is ture', function () {
+        config.silent = true
+        _.warn('oops', 'ops')
+        expect(console.warn.callCount).toBe(0)
+      })
+
+      if (console.trace) {
+        it('trace when not silent and debugging', function () {
+          config.debug = true
+          config.silent = false
+          _.warn('haha')
+          expect(console.trace).toHaveBeenCalled()
+          config.debug = false
+          config.silent = true
+        })
+      }
+    })
   }
 
   describe('Option merging', function () {

@@ -51,7 +51,7 @@ var arrayAugmentations = Object.create(Array.prototype)
 
     // link/unlink added/removed elements
     if (inserted) ob.link(inserted, index)
-    if (removed) ob.unlink(removed)
+    if (removed) ob.unlink(removed, index)
 
     // update indices
     if (method !== 'push' && method !== 'pop') {
