@@ -230,6 +230,7 @@ p.propagate = function (event, path, val, mutation) {
   if (!this.parents) return
   for (var id in this.parents) {
     var parent = this.parents[id]
+    if (!parent) continue
     var key = parent.key
     var parentPath = path
       ? key + Observer.pathDelimiter + path

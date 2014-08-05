@@ -390,4 +390,24 @@ describe('Observer', function () {
     expect(spy).toHaveBeenCalledWith('0.a', 3, u)
   })
 
+  it('shared observe', function () {
+    var obj = { a: 1 }
+    var parentA = { child1: obj }
+    var parentB = { child2: obj }
+    var obA = Observer.create(parentA)
+    var obB = Observer.create(parentB)
+    obA.on('set', spy)
+    obB.on('set', spy)
+    obj.a = 2
+    expect(spy.callCount).toBe(2)
+    expect(spy).toHaveBeenCalledWith('child1.a', 2, u)
+    expect(spy).toHaveBeenCalledWith('child2.a', 2, u)
+    // test unobserve
+    parentA.child1 = null
+    obj.a = 3
+    expect(spy.callCount).toBe(4)
+    expect(spy).toHaveBeenCalledWith('child1', null, u)
+    expect(spy).toHaveBeenCalledWith('child2.a', 3, u)
+  })
+
 })
