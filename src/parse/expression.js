@@ -11,10 +11,9 @@ var pathTestRE = /^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\])*$/
 var pathReplaceRE = /[^\w$\.]([A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\])*)/g
 var keywords = 'Math,break,case,catch,continue,debugger,default,delete,do,else,false,finally,for,function,if,in,instanceof,new,null,return,switch,this,throw,true,try,typeof,var,void,while,with,undefined,abstract,boolean,byte,char,class,const,double,enum,export,extends,final,float,goto,implements,import,int,interface,long,native,package,private,protected,public,short,static,super,synchronized,throws,transient,volatile,arguments,let,yield'
 var keywordsRE = new RegExp('^(' + keywords.replace(/,/g, '\\b|') + '\\b)')
-// note the following two regexes are only used on valid paths
+// note the following regex is only used on valid paths
 // so no need to exclude number for first char
 var rootPathRE = /^[\w$]+/
-var rootPathTestRE = /^[\w$]+$/
 
 /**
  * Save / Rewrite / Restore
@@ -59,14 +58,14 @@ function rewrite (raw) {
     path = path.indexOf('"') > -1
       ? path.replace(restoreRE, restore)
       : path
-    if (!has[path]) {
-      // we store root level paths e.g. "a"
-      // so that the owner directive can add
-      // them as default dependencies.
-      if (rootPathTestRE.test(path)) {
-        paths.push(path)
-      }
-      has[path] = true
+    // we store root level paths e.g. "a"
+    // so that the owner directive can add
+    // them as default dependencies.
+    var match = path.match(rootPathRE)
+    var rootPath = match && match[0]
+    if (rootPath && !has[rootPath]) {
+      paths.push(rootPath)
+      has[rootPath] = true
     }
     return c + 'scope.' + path
   }

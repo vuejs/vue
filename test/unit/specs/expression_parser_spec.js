@@ -3,6 +3,10 @@ var expParser = require('../../../src/parse/expression')
 function assertExp (testCase) {
   var fn = expParser.parse(testCase.exp)
   expect(fn(testCase.scope)).toEqual(testCase.expected)
+  expect(fn.paths.length).toBe(testCase.paths.length)
+  fn.paths.forEach(function (p, i) {
+    expect(p).toBe(testCase.paths[i])
+  })
 }
 
 var testCases = [
@@ -12,7 +16,8 @@ var testCases = [
     scope: {
       a: {}
     },
-    expected: undefined
+    expected: undefined,
+    paths: ['a']
   },
   {
     // simple path that exists
@@ -20,7 +25,8 @@ var testCases = [
     scope: {
       a:{b:{d:123}}
     },
-    expected: 123
+    expected: 123,
+    paths: ['a']
   },
   // complex path
   {
@@ -28,7 +34,8 @@ var testCases = [
     scope: {
       a:{b:{c:234}}
     },
-    expected: 234
+    expected: 234,
+    paths: ['a']
   },
   {
     // string concat
@@ -37,7 +44,8 @@ var testCases = [
       a: 'hello',
       b: 'world'
     },
-    expected: 'helloworld'
+    expected: 'helloworld',
+    paths: ['a', 'b']
   },
   {
     // math
@@ -46,7 +54,8 @@ var testCases = [
       a: 100,
       b: 23
     },
-    expected: 100 - 23 * 2 + 45
+    expected: 100 - 23 * 2 + 45,
+    paths: ['a', 'b']
   },
   {
     // boolean logic
@@ -58,7 +67,8 @@ var testCases = [
       d: false,
       e: 'worked'
     },
-    expected: 'worked'
+    expected: 'worked',
+    paths: ['a', 'b', 'c', 'd', 'e']
   },
   {
     // inline string with newline
@@ -66,7 +76,8 @@ var testCases = [
     scope: {
       a: 'inline '
     },
-    expected: 'inline hel\nlo'
+    expected: 'inline hel\nlo',
+    paths: ['a']
   },
   {
     // dollar signs and underscore
@@ -75,7 +86,8 @@ var testCases = [
       _a: 'underscore',
       $b: 'dollar'
     },
-    expected: 'underscore dollar'
+    expected: 'underscore dollar',
+    paths: ['_a', '$b']
   },
   {
     // complex with nested values
@@ -86,13 +98,15 @@ var testCases = [
         done: false
       }
     },
-    expected: 'write tests : nope'
+    expected: 'write tests : nope',
+    paths: ['todo']
   },
   {
     // expression with no data variables
     exp: "'a' + 'b'",
     scope: {},
-    expected: 'ab'
+    expected: 'ab',
+    paths: []
   },
   {
     // values with same variable name inside strings
@@ -101,7 +115,8 @@ var testCases = [
       test: 1,
       hi: 2
     },
-    expected: '"test"1\'hi\'2'
+    expected: '"test"1\'hi\'2',
+    paths: ['test', 'hi']
   },
   {
     // expressions with inline object literals
@@ -112,7 +127,8 @@ var testCases = [
       },
       haha: 'hoho'
     },
-    expected: 'namehoho123'
+    expected: 'namehoho123',
+    paths: ['sortRows', 'haha']
   },
   {
     // space between path segments
@@ -121,7 +137,8 @@ var testCases = [
       a: { b: { c: 12 }},
       d: 3
     },
-    expected: 15
+    expected: 15,
+    paths: ['a', 'd']
   },
   {
     // space in bracket identifiers
@@ -130,7 +147,8 @@ var testCases = [
       a: {' a.b.c ': 123},
       b: {' e ': 234}
     },
-    expected: 357
+    expected: 357,
+    paths: ['a', 'b']
   },
   {
     // number literal
@@ -138,7 +156,8 @@ var testCases = [
     scope: {
       a: 3
     },
-    expected: 301.1
+    expected: 301.1,
+    paths: ['a']
   },
   {
     //keyowrd + keyword literal
@@ -146,7 +165,8 @@ var testCases = [
     scope: {
       a: { 'true': false }
     },
-    expected: false
+    expected: false,
+    paths: ['a']
   },
   {
     // super complex
@@ -161,7 +181,8 @@ var testCases = [
       c: { ' d ': {e: 3}},
       e: 4.5
     },
-    expected: 8
+    expected: 8,
+    paths: ['$a', 'b', 'c', 'e']
   }
 ]
 
