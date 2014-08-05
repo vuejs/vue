@@ -1,5 +1,3 @@
-var _ = require('../util')
-
 /**
  * Set instance target element and kick off the compilation process.
  * The passed in `el` can be a selector string, an existing Element,
@@ -26,6 +24,8 @@ exports.$mount = function (el) {
 
 exports.$destroy = function (remove) {
   this._callHook('beforeDestroy')
-  // TODO
+  if (remove) {
+    // TODO
+  }
   this._callHook('afterDestroy')
 }
