@@ -191,12 +191,12 @@ function makeSetter (body) {
 /**
  * Check for setter existence on a cache hit.
  *
- * @param {Function} fn
+ * @param {Function} hit
  */
 
 function checkSetter (hit) {
   if (!hit.set) {
-    fn.set = makeSetter(hit.body)
+    hit.set = makeSetter(hit.body)
   }
 }
 

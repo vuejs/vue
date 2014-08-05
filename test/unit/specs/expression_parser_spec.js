@@ -193,6 +193,9 @@ describe('Expression Parser', function () {
   })
 
   it('dynamic setter', function () {
+    // make sure checkSetter works:
+    // should add setter if a cache hit doesn't have hit function.
+    expParser.parse('a[b]')
     var res = expParser.parse('a[b]', true)
     var scope = {
       a: { c: 1 },
