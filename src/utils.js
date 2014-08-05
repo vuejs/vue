@@ -247,8 +247,13 @@ var utils = module.exports = {
     /**
      *  used to defer batch updates
      */
-    nextTick: function (cb) {
-        defer(cb, 0)
+    nextTick: function (cb, context) {
+        if (context) {
+            defer(utils.bind(cb, context), 0)
+        }
+        else {
+            defer(cb, 0)
+        }
     },
 
     /**
@@ -310,7 +315,7 @@ function enableDebug () {
             console.log(msg)
         }
     }
-    
+
     /**
      *  warnings, traces by default
      *  can be suppressed by `silent` option.
