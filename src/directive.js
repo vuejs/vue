@@ -147,10 +147,10 @@ p._initFilters = function () {
  */
 
 p._initDeps = function (paths) {
-  var self = this
-  paths.forEach(function (path) {
-    self._addDep(path)
-  })
+  var i = paths.length
+  while (i--) {
+    this._addDep(paths[i])
+  }
   this._deps = this._newDeps
 }
 

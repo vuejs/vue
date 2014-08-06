@@ -12,7 +12,11 @@ var templateParser = require('../parse/template')
 
 exports._initElement = function (el) {
   if (typeof el === 'string') {
+    var selector = el
     el = document.querySelector(el)
+    if (!el) {
+      _.warn('Cannot find element: ' + selector)
+    }
   }
   // If the passed in `el` is a DocumentFragment, the instance is
   // considered a "block instance" which manages not a single element,

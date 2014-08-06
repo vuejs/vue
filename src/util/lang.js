@@ -123,10 +123,8 @@ exports.define = function (obj, key, val, enumerable) {
  * @param {Object} proto
  */
 
-if ('__proto__' in {}) {
-  exports.augment = function (target, proto) {
-    target.__proto__ = proto
-  }
-} else {
-  exports.augment = exports.deepMixin
-}
+exports.augment = '__proto__' in {}
+  ? function (target, proto) {
+      target.__proto__ = proto
+    }
+  : exports.deepMixin

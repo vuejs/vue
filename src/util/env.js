@@ -38,20 +38,19 @@ exports.isIE9 =
 
 var testElement = inBrowser
   ? document.createElement('div')
-  : null
+  : undefined
 
 exports.transitionEndEvent = (function () {
-  if (!inBrowser) {
-    return null
-  }
-  var map = {
-    'webkitTransition' : 'webkitTransitionEnd',
-    'transition'       : 'transitionend',
-    'mozTransition'    : 'transitionend'
-  }
-  for (var prop in map) {
-    if (testElement.style[prop] !== undefined) {
-      return map[prop]
+  if (inBrowser) {
+    var map = {
+      'webkitTransition' : 'webkitTransitionEnd',
+      'transition'       : 'transitionend',
+      'mozTransition'    : 'transitionend'
+    }
+    for (var prop in map) {
+      if (testElement.style[prop] !== undefined) {
+        return map[prop]
+      }
     }
   }
 })()
@@ -60,4 +59,4 @@ exports.animationEndEvent = inBrowser
   ? testElement.style.animation !== undefined
     ? 'animationend'
     : 'webkitAnimationEnd'
-  : null
+  : undefined
