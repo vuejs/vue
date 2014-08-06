@@ -35,7 +35,7 @@ var utils = module.exports = {
     /**
      *  Parse the various types of template options
      */
-    parseTemplateOption: require('./template-parser.js'),
+    parseTemplateOption: require('./template-parser'),
 
     /**
      *  get a value from an object keypath

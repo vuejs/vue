@@ -223,7 +223,7 @@ var config      = require('./config'),
     }
 
 ViewModel.options = config.globalAssets = {
-    directives  : require('./directives'),
+    directives  : require('./directive'),
     filters     : require('./filters'),
     partials    : makeHash(),
     effects     : makeHash(),
@@ -397,6 +397,7 @@ function inheritOptions (child, parent, topLevel) {
 }
 
 module.exports = ViewModel
+
 });
 require.register("vue/src/emitter.js", function(exports, require, module){
 var slice = [].slice
@@ -768,8 +769,13 @@ var utils = module.exports = {
     /**
      *  used to defer batch updates
      */
-    nextTick: function (cb) {
-        defer(cb, 0)
+    nextTick: function (cb, context) {
+        if (context) {
+            defer(utils.bind(cb, context), 0)
+        }
+        else {
+            defer(cb, 0)
+        }
     },
 
     /**
@@ -831,7 +837,7 @@ function enableDebug () {
             console.log(msg)
         }
     }
-    
+
     /**
      *  warnings, traces by default
      *  can be suppressed by `silent` option.
@@ -3407,11 +3413,11 @@ filters.currency = function (value, sign) {
     value = parseFloat(value)
     if (!value && value !== 0) return ''
     sign = sign || '$'
-    var s = Math.floor(value).toString(),
+    var s = Math.floor(Math.abs(value)).toString(),
         i = s.length % 3,
         h = i > 0 ? (s.slice(0, i) + (s.length > 3 ? ',' : '')) : '',
         f = '.' + value.toFixed(2).slice(-2)
-    return sign + h + s.slice(i).replace(/(\d{3})(?=\d)/g, '$1,') + f
+    return (value < 0 ? '-' : '') + sign + h + s.slice(i).replace(/(\d{3})(?=\d)/g, '$1,') + f
 }
 
 /**

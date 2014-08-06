@@ -12,7 +12,7 @@ var config      = require('./config'),
     }
 
 ViewModel.options = config.globalAssets = {
-    directives  : require('./directives'),
+    directives  : require('./directive'),
     filters     : require('./filters'),
     partials    : makeHash(),
     effects     : makeHash(),
