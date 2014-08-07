@@ -1,7 +1,7 @@
 var Cache = require('../cache')
 var cache = new Cache(1000)
-var ARG_RE = /^[\w\$-]+$/
-var FILTER_TOKEN_RE = /[^\s'"]+|'[^']+'|"[^"]+"/g
+var argRE = /^[\w\$-]+$|^'[^']*'$|^"[^"]*"$/
+var filterTokenRE = /[^\s'"]+|'[^']+'|"[^"]+"/g
 
 /**
  * Parser state
@@ -20,6 +20,7 @@ var dirs
 var dir
 var lastFilterIndex
 var arg
+var argC
 
 /**
  * Push a directive object into the result Array
@@ -46,7 +47,7 @@ function pushFilter () {
   var filter
   if (exp) {
     filter = {}
-    var tokens = exp.match(FILTER_TOKEN_RE)
+    var tokens = exp.match(filterTokenRE)
     filter.name = tokens[0]
     filter.args = tokens.length > 1 ? tokens.slice(1) : null
   }
@@ -107,9 +108,16 @@ exports.parse = function (s) {
     } else if (c === ':' && !dir.expression && !dir.arg) {
       // argument
       arg = str.slice(begin, i).trim()
-      if (ARG_RE.test(arg)) {
+      // test for valid argument here
+      // since we may have caught stuff like first half of
+      // an object literal or a ternary expression.
+      if (argRE.test(arg)) {
         argIndex = i + 1
-        dir.arg = arg
+        argC = arg.charAt(0)
+        // strip quotes
+        dir.arg = argC === '"' || argC === "'"
+          ? arg.slice(1, -1)
+          : arg
       }
     } else if (c === '|' && str.charAt(i + 1) !== '|' && str.charAt(i - 1) !== '|') {
       if (dir.expression === undefined) {

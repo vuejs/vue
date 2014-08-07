@@ -2,14 +2,14 @@ var parse = require('../../../src/parse/directive').parse
 
 describe('Directive Parser', function () {
 
-  it('exp', function () {
+  it('simple', function () {
     var res = parse('exp')
     expect(res.length).toBe(1)
     expect(res[0].expression).toBe('exp')
     expect(res[0].raw).toBe('exp')
   })
 
-  it('arg:exp', function () {
+  it('with arg', function () {
     var res = parse('arg:exp')
     expect(res.length).toBe(1)
     expect(res[0].expression).toBe('exp')
@@ -17,8 +17,7 @@ describe('Directive Parser', function () {
     expect(res[0].raw).toBe('arg:exp')
   })
 
-  // filters
-  it('arg : exp | abc de | bcd', function () {
+  it('with filters', function () {
     var res = parse(' arg : exp | abc de | bcd')
     expect(res.length).toBe(1)
     expect(res[0].expression).toBe('exp')
@@ -32,8 +31,7 @@ describe('Directive Parser', function () {
     expect(res[0].filters[1].args).toBeNull()
   })
 
-  // double pipe
-  it('a || b | c', function () {
+  it('double pipe', function () {
     var res = parse('a || b | c')
     expect(res.length).toBe(1)
     expect(res[0].expression).toBe('a || b')
@@ -43,16 +41,14 @@ describe('Directive Parser', function () {
     expect(res[0].filters[0].args).toBeNull()
   })
 
-  // single quote + boolean
-  it('a ? \'b\' : c', function () {
+  it('single quote + boolean', function () {
     var res = parse('a ? \'b\' : c')
     expect(res.length).toBe(1)
     expect(res[0].expression).toBe('a ? \'b\' : c')
     expect(res[0].filters).toBeUndefined()
   })
 
-  // double quote + boolean
-  it('"a:b:c||d|e|f" || d ? a : b', function () {
+  it('double quote + boolean', function () {
     var res = parse('"a:b:c||d|e|f" || d ? a : b')
     expect(res.length).toBe(1)
     expect(res[0].expression).toBe('"a:b:c||d|e|f" || d ? a : b')
@@ -60,8 +56,7 @@ describe('Directive Parser', function () {
     expect(res[0].arg).toBeUndefined()
   })
 
-  // multiple simple clause
-  it('a, b, c', function () {
+  it('multiple simple clauses', function () {
     var res = parse('a, b, c')
     expect(res.length).toBe(3)
     expect(res[0].expression).toBe('a')
@@ -69,8 +64,7 @@ describe('Directive Parser', function () {
     expect(res[2].expression).toBe('c')
   })
 
-  // multiple complex clause
-  it('a:b | c | j, d:e | f | k l, g:h | i', function () {
+  it('multiple complex clauses', function () {
     var res = parse('a:b | c | j, d:e | f | k l, g:h | i')
     expect(res.length).toBe(3)
 
@@ -98,8 +92,7 @@ describe('Directive Parser', function () {
     expect(res[2].filters[0].args).toBeNull()
   })
 
-  // super complex
-  it('click:test(c.indexOf(d,f),"e,f"), input: d || [e,f], ok:{a:1,b:2}', function () {
+  it('nexted function calls + array/object literals', function () {
     var res = parse('click:test(c.indexOf(d,f),"e,f"), input: d || [e,f], ok:{a:1,b:2}')
     expect(res.length).toBe(3)
     expect(res[0].arg).toBe('click')
@@ -109,6 +102,12 @@ describe('Directive Parser', function () {
     expect(res[1].filters).toBeUndefined()
     expect(res[2].arg).toBe('ok')
     expect(res[2].expression).toBe('{a:1,b:2}')
+  })
+
+  it('quoted arguments', function () {
+    var res = parse('"xlink:href":a?"fsef":ff')
+    expect(res.length).toBe(1)
+    expect(res[0].arg).toBe('xlink:href')
   })
 
   it('cache', function () {
