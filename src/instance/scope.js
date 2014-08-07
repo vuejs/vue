@@ -49,12 +49,13 @@ exports._initScope = function () {
 
 exports._teardownScope = function () {
   this.$scope = null
-  if (!this.$parent) return
-  var pob = this.$parent._observer
-  var listeners = this._scopeListeners
-  scopeEvents.forEach(function (event) {
-    pob.off(event, listeners[event])
-  })
+  if (this.$parent) {
+    var pob = this.$parent._observer
+    var listeners = this._scopeListeners
+    scopeEvents.forEach(function (event) {
+      pob.off(event, listeners[event])
+    })
+  }
 }
 
 /**
@@ -82,10 +83,14 @@ exports._initData = function (data, init) {
 
   if (!init) {
     // teardown old sync listeners
-    this._teardownData()
+    this._unsyncData()
     // delete keys not present in the new data
     for (key in scope) {
-      if (scope.hasOwnProperty(key) && !(key in data)) {
+      if (
+        key.charAt(0) !== '$' &&
+        scope.hasOwnProperty(key) &&
+        !(key in data)
+      ) {
         scope.$delete(key)
       }
     }
@@ -103,20 +108,9 @@ exports._initData = function (data, init) {
   }
 
   // setup sync between scope and new data
-  if (this.$options.syncData) {
-    this._dataObserver = Observer.create(data)
-    this._sync()
-  }
-}
-
-/**
- * Stop data-syncing.
- */
-
-exports._teardownData = function () {
-  if (this.$options.syncData) {
-    this._unsync()
-  }
+  this._data = data
+  this._dataObserver = Observer.create(data)
+  this._syncData()
 }
 
 /**
@@ -159,6 +153,7 @@ exports._initProxy = function () {
   // proxy vm parent & root on scope
   _.proxy(scope, this, '$parent')
   _.proxy(scope, this, '$root')
+  _.proxy(scope, this, '$data')
 }
 
 /**
@@ -213,7 +208,7 @@ exports._initMethods = function () {
  * the original data. Requires teardown.
  */
 
-exports._sync = function () {
+exports._syncData = function () {
   var data = this._data
   var scope = this.$scope
   var locked = false
@@ -273,7 +268,7 @@ exports._sync = function () {
  * Teardown the sync between scope and previous data object.
  */
 
-exports._unsync = function () {
+exports._unsyncData = function () {
   var listeners = this._syncListeners
 
   this._observer

@@ -77,7 +77,6 @@ describe('Scope', function () {
     }
     
     var vm = new Vue({
-      syncData: true,
       data: data
     })
 
@@ -207,7 +206,6 @@ describe('Scope', function () {
 
     var child = new Vue({
       parent: parent,
-      syncData: true,
       data: parent.arr[0]
     })
 
@@ -230,6 +228,60 @@ describe('Scope', function () {
       expect(childSpy).toHaveBeenCalledWith('arr.0.a', 3, u)
     })
 
+  })
+
+  describe('swapping $data', function () {
+    
+    var oldData = { a: 1, c: 4 }
+    var newData = { a: 2, b: 3 }
+    var vm = new Vue({
+      data: oldData
+    })
+    var vmSpy = jasmine.createSpy('vm')
+    var vmAddSpy = jasmine.createSpy('vmAdd')
+    var oldDataSpy = jasmine.createSpy('oldData')
+    vm._observer.on('set', vmSpy)
+    vm._observer.on('add', vmAddSpy)
+    oldData.$observer.on('set', oldDataSpy)
+
+    vm.$data = newData
+
+    it('should sync new data', function () {
+      expect(vm._data).toBe(newData)
+      expect(vm.a).toBe(2)
+      expect(vm.b).toBe(3)
+      expect(vmSpy).toHaveBeenCalledWith('a', 2, u)
+      expect(vmAddSpy).toHaveBeenCalledWith('b', 3, u)
+    })
+
+    it('should unsync old data', function () {
+      expect(vm.hasOwnProperty('c')).toBe(false)
+      vm.a = 3
+      expect(oldDataSpy.callCount).toBe(0)
+      expect(oldData.a).toBe(1)
+      expect(newData.a).toBe(3)
+    })
+
+  })
+
+  describe('scope teardown', function () {
+    var parent = new Vue({
+      data: {
+        a: 123
+      }
+    })
+    var child = new Vue({
+      parent: parent
+    })
+    var spy = jasmine.createSpy('teardown')
+    child._observer.on('set', spy)
+
+    it('should stop relaying parent events', function () {
+      child._teardownScope()
+      parent.a = 234
+      expect(spy.callCount).toBe(0)
+      expect(child.$scope).toBeNull()
+    })
   })
 
   describe('computed', function () {

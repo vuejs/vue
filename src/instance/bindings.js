@@ -81,6 +81,8 @@ exports._createBindingAt = function (path) {
  */
 
 exports._updateBindingAt = function (path) {
+  // root binding updates on any change
+  this._rootBinding._notify()
   var binding = this._getBindingAt(path, true)
   if (binding) {
     binding._notify()
