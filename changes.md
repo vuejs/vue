@@ -50,10 +50,6 @@ The `lazy` option is removed because this does not belong at the vm level. Users
 
 This new hook is introduced to accompany the separation of instantiation and DOM mounting. It is called right before the DOM compilation starts and `this.$el` is available, so you can do some pre-processing on the element here.
 
-### removed hooks: `attached` & `detached`
-
-These two have caused confusions about when they'd actually fire, and proper use cases seem to be rare. Let me know if you have important use cases for these two hooks.
-
 ## Computed Properties
 
 `$get` and `$set` is now simply `get` and `set`:

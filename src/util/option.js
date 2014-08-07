@@ -22,6 +22,8 @@ var strats = {}
 
 strats.created =
 strats.ready =
+strats.attached =
+strats.detached =
 strats.beforeMount =
 strats.beforeDestroy =
 strats.afterDestroy =
