@@ -59,7 +59,7 @@ module.exports = function (templateString) {
     var child
     /* jshint boss: true */
     while (child = node.firstChild) {
-        if (node.nodeType === 1) {
+        if (child.nodeType === 1) {
             frag.appendChild(child)
         }
     }
