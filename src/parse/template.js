@@ -74,9 +74,7 @@ function stringToFragment (templateString) {
     var child
     /* jshint boss:true */
     while (child = node.firstChild) {
-      if (node.nodeType === 1) {
-        frag.appendChild(child)
-      }
+      frag.appendChild(child)
     }
   }
 
