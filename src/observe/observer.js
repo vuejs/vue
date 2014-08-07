@@ -90,7 +90,7 @@ Observer.create = function (value, options) {
     return value.$observer
   } if (_.isArray(value)) {
     return new Observer(value, ARRAY, options)
-  } else if (_.isObject(value) && !value._scope) { // avoid Vue instance
+  } else if (_.isObject(value) && !value.$scope) { // avoid Vue instance
     return new Observer(value, OBJECT, options)
   }
 }
