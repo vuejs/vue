@@ -203,8 +203,9 @@ p.run = function () {
       (typeof value === 'object' && value !== null) ||
       value !== this.value
     ) {
-      this.cb.call(this.ctx, value, this.value)
+      var oldValue = this.value
       this.value = value
+      this.cb.call(this.ctx, value, oldValue)
     }
   }
 }

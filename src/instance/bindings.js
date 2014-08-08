@@ -112,10 +112,10 @@ exports._updateAdd = function (path) {
  */
 
 exports._collectDep = function (path) {
-  var directive = this._targetDir
-  // the get event might have come from a child vm's directive
-  // so this._targetDir is not guarunteed to be defined
-  if (directive) {
-    directive._addDep(path)
+  var watcher = this._currentWatcher
+  // the get event might have come from a child vm's watcher
+  // so this._currentWatcher is not guarunteed to be defined
+  if (watcher) {
+    watcher.addDep(path)
   }
 }
