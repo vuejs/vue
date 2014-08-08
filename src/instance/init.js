@@ -21,8 +21,8 @@ exports._init = function (options) {
   this._isDestroyed = false
   this._rawContent  = null
   this._emitter     = new Emitter(this)
-  // the current target directive for dependency collection
-  this._targetDir   = null
+  // the current target watcher for dependency collection
+  this._currentWatcher = null
 
   // setup parent relationship
   this.$parent = options.parent

@@ -13,14 +13,23 @@ var inBrowser = exports.inBrowser =
 /**
  * Defer a task to the start of the next event loop
  *
- * @param {Function} fn
+ * @param {Function} cb
+ * @param {Object} ctx
  */
 
-exports.nextTick = inBrowser
+var defer = inBrowser
   ? (window.requestAnimationFrame ||
     window.webkitRequestAnimationFrame ||
     setTimeout)
   : setTimeout
+
+exports.nextTick = function (cb, ctx) {
+  if (ctx) {
+    defer(function () { cb.call(ctx) }, 0)
+  } else {
+    defer(cb, 0)
+  }
+}
 
 /**
  * Detect if we are in IE9...
