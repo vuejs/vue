@@ -187,7 +187,7 @@ p.afterGet = function () {
  * Will be called when a dependency changes.
  */
 
-p._update = function () {
+p.update = function () {
   batcher.push(this)
 }
 
