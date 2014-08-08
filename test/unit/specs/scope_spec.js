@@ -37,12 +37,12 @@ describe('Scope', function () {
 
       // set on scope
       vm.$scope.a = 2
-      expect(spy.callCount).toBe(1)
+      expect(spy.calls.count()).toBe(1)
       expect(spy).toHaveBeenCalledWith('a', 2, u)
 
       // set on vm
       vm.b.c = 3
-      expect(spy.callCount).toBe(2)
+      expect(spy.calls.count()).toBe(2)
       expect(spy).toHaveBeenCalledWith('b.c', 3, u)
     })
 
@@ -54,12 +54,12 @@ describe('Scope', function () {
 
       // add on scope
       vm.$scope.$add('c', 123)
-      expect(spy.callCount).toBe(1)
+      expect(spy.calls.count()).toBe(1)
       expect(spy).toHaveBeenCalledWith('c', 123, u)
 
       // delete on scope
       vm.$scope.$delete('c')
-      expect(spy.callCount).toBe(2)
+      expect(spy.calls.count()).toBe(2)
       expect(spy).toHaveBeenCalledWith('c', u, u)
 
       // vm $add/$delete are tested in the api suite
@@ -161,27 +161,27 @@ describe('Scope', function () {
       var spy = jasmine.createSpy('inheritance')
       child._observer.on('set', spy)
       parent.c = 'c changed'
-      expect(spy.callCount).toBe(1)
+      expect(spy.calls.count()).toBe(1)
       expect(spy).toHaveBeenCalledWith('c', 'c changed', u)
 
       spy = jasmine.createSpy('inheritance')
       child._observer.on('add', spy)
       parent.$scope.$add('e', 123)
-      expect(spy.callCount).toBe(1)
+      expect(spy.calls.count()).toBe(1)
       expect(spy).toHaveBeenCalledWith('e', 123, u)
 
       spy = jasmine.createSpy('inheritance')
       child._observer.on('delete', spy)
       parent.$scope.$delete('e')
-      expect(spy.callCount).toBe(1)
+      expect(spy.calls.count()).toBe(1)
       expect(spy).toHaveBeenCalledWith('e', u, u)
 
       spy = jasmine.createSpy('inheritance')
       child._observer.on('mutate', spy)
       parent.arr.reverse()
-      expect(spy.mostRecentCall.args[0]).toBe('arr')
-      expect(spy.mostRecentCall.args[1]).toBe(parent.arr)
-      expect(spy.mostRecentCall.args[2].method).toBe('reverse')
+      expect(spy.calls.mostRecent().args[0]).toBe('arr')
+      expect(spy.calls.mostRecent().args[1]).toBe(parent.arr)
+      expect(spy.calls.mostRecent().args[2].method).toBe('reverse')
 
     })
 
@@ -191,7 +191,7 @@ describe('Scope', function () {
       var spy = jasmine.createSpy('inheritance')
       child._observer.on('set', spy)
       parent.a = 'a changed'
-      expect(spy.callCount).toBe(0)
+      expect(spy.calls.count()).toBe(0)
     })
 
   })
@@ -220,10 +220,10 @@ describe('Scope', function () {
       // make sure data sync is working
       expect(parent.arr[0].a).toBe(3)
 
-      expect(parentSpy.callCount).toBe(1)
+      expect(parentSpy.calls.count()).toBe(1)
       expect(parentSpy).toHaveBeenCalledWith('arr.0.a', 3, u)
 
-      expect(childSpy.callCount).toBe(2)
+      expect(childSpy.calls.count()).toBe(2)
       expect(childSpy).toHaveBeenCalledWith('a', 3, u)
       expect(childSpy).toHaveBeenCalledWith('arr.0.a', 3, u)
     })
@@ -257,7 +257,7 @@ describe('Scope', function () {
     it('should unsync old data', function () {
       expect(vm.hasOwnProperty('c')).toBe(false)
       vm.a = 3
-      expect(oldDataSpy.callCount).toBe(0)
+      expect(oldDataSpy.calls.count()).toBe(0)
       expect(oldData.a).toBe(1)
       expect(newData.a).toBe(3)
     })
@@ -279,7 +279,7 @@ describe('Scope', function () {
     it('should stop relaying parent events', function () {
       child._teardownScope()
       parent.a = 234
-      expect(spy.callCount).toBe(0)
+      expect(spy.calls.count()).toBe(0)
       expect(child.$scope).toBeNull()
     })
   })

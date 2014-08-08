@@ -7,22 +7,8 @@
     <link rel="stylesheet" type="text/css" href="lib/jasmine.css">
     <script type="text/javascript" src="lib/jasmine.js"></script>
     <script type="text/javascript" src="lib/jasmine-html.js"></script>
-    <script type="text/javascript" src="lib/jasmine-async.js"></script>
+    <script type="text/javascript" src="lib/boot.js"></script>
     <script src="specs.js"></script>
-    <script type="text/javascript">
-      (function() {
-        var jasmineEnv = jasmine.getEnv()
-        jasmineEnv.updateInterval = 1000
-        var htmlReporter = new jasmine.HtmlReporter()
-        jasmineEnv.addReporter(htmlReporter)
-        jasmineEnv.specFilter = function(spec) {
-          return htmlReporter.specFilter(spec)
-        }
-        window.onload = function () {
-          jasmineEnv.execute()
-        }
-      })()
-    </script>
   </head>
   <body>
   </body>

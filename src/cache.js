@@ -58,12 +58,8 @@ p.put = function (key, value) {
 p.shift = function () {
   var entry = this.head
   if (entry) {
-    if (this.head.newer) {
-      this.head = this.head.newer
-      this.head.older = undefined
-    } else {
-      this.head = undefined
-    }
+    this.head = this.head.newer
+    this.head.older = undefined
     entry.newer = entry.older = undefined
     this._keymap[entry.key] = undefined
   }

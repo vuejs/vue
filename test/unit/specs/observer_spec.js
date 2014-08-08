@@ -31,12 +31,12 @@ describe('Observer', function () {
 
     var t = obj.a
     expect(spy).toHaveBeenCalledWith('a', u, u)
-    expect(spy.callCount).toBe(1)
+    expect(spy.calls.count()).toBe(1)
 
     t = obj.b.c
     expect(spy).toHaveBeenCalledWith('b', u, u)
     expect(spy).toHaveBeenCalledWith('b.c', u, u)
-    expect(spy.callCount).toBe(3)
+    expect(spy.calls.count()).toBe(3)
 
     Observer.emitGet = false
   })
@@ -53,21 +53,21 @@ describe('Observer', function () {
 
     obj.a = 3
     expect(spy).toHaveBeenCalledWith('a', 3, u)
-    expect(spy.callCount).toBe(1)
+    expect(spy.calls.count()).toBe(1)
 
     obj.b.c = 4
     expect(spy).toHaveBeenCalledWith('b.c', 4, u)
-    expect(spy.callCount).toBe(2)
+    expect(spy.calls.count()).toBe(2)
 
     // swap set
     var newB = { c: 5 }
     obj.b = newB
     expect(spy).toHaveBeenCalledWith('b', newB, u)
-    expect(spy.callCount).toBe(3)
+    expect(spy.calls.count()).toBe(3)
 
     // same value set should not emit events
     obj.a = 3
-    expect(spy.callCount).toBe(3)
+    expect(spy.calls.count()).toBe(3)
   })
 
   it('ignore prefix', function () {
@@ -79,7 +79,7 @@ describe('Observer', function () {
     ob.on('set', spy)
     obj._test = 234
     obj.$test = 345
-    expect(spy.callCount).toBe(0)
+    expect(spy.calls.count()).toBe(0)
   })
 
   it('ignore accessors', function () {
@@ -118,7 +118,7 @@ describe('Observer', function () {
     var t = obj.arr[0].a
     expect(spy).toHaveBeenCalledWith('arr', u, u)
     expect(spy).toHaveBeenCalledWith('arr.0.a', u, u)
-    expect(spy.callCount).toBe(2)
+    expect(spy.calls.count()).toBe(2)
 
     Observer.emitGet = false
   })
@@ -144,9 +144,9 @@ describe('Observer', function () {
     var ob = Observer.create(arr)
     ob.on('mutate', spy)
     arr.push({a:3})
-    expect(spy.mostRecentCall.args[0]).toBe('')
-    expect(spy.mostRecentCall.args[1]).toBe(arr)
-    var mutation = spy.mostRecentCall.args[2]
+    expect(spy.calls.mostRecent().args[0]).toBe('')
+    expect(spy.calls.mostRecent().args[1]).toBe(arr)
+    var mutation = spy.calls.mostRecent().args[2]
     expect(mutation).toBeDefined()
     expect(mutation.method).toBe('push')
     expect(mutation.index).toBe(2)
@@ -165,9 +165,9 @@ describe('Observer', function () {
     var ob = Observer.create(arr)
     ob.on('mutate', spy)
     arr.pop()
-    expect(spy.mostRecentCall.args[0]).toBe('')
-    expect(spy.mostRecentCall.args[1]).toBe(arr)
-    var mutation = spy.mostRecentCall.args[2]
+    expect(spy.calls.mostRecent().args[0]).toBe('')
+    expect(spy.calls.mostRecent().args[1]).toBe(arr)
+    var mutation = spy.calls.mostRecent().args[2]
     expect(mutation).toBeDefined()
     expect(mutation.method).toBe('pop')
     expect(mutation.index).toBe(1)
@@ -182,9 +182,9 @@ describe('Observer', function () {
     var ob = Observer.create(arr)
     ob.on('mutate', spy)
     arr.shift()
-    expect(spy.mostRecentCall.args[0]).toBe('')
-    expect(spy.mostRecentCall.args[1]).toBe(arr)
-    var mutation = spy.mostRecentCall.args[2]
+    expect(spy.calls.mostRecent().args[0]).toBe('')
+    expect(spy.calls.mostRecent().args[1]).toBe(arr)
+    var mutation = spy.calls.mostRecent().args[2]
     expect(mutation).toBeDefined()
     expect(mutation.method).toBe('shift')
     expect(mutation.index).toBe(0)
@@ -203,9 +203,9 @@ describe('Observer', function () {
     var ob = Observer.create(arr)
     ob.on('mutate', spy)
     arr.unshift(unshifted)
-    expect(spy.mostRecentCall.args[0]).toBe('')
-    expect(spy.mostRecentCall.args[1]).toBe(arr)
-    var mutation = spy.mostRecentCall.args[2]
+    expect(spy.calls.mostRecent().args[0]).toBe('')
+    expect(spy.calls.mostRecent().args[1]).toBe(arr)
+    var mutation = spy.calls.mostRecent().args[2]
     expect(mutation).toBeDefined()
     expect(mutation.method).toBe('unshift')
     expect(mutation.index).toBe(0)
@@ -225,9 +225,9 @@ describe('Observer', function () {
     var ob = Observer.create(arr)
     ob.on('mutate', spy)
     arr.splice(1, 1, inserted)
-    expect(spy.mostRecentCall.args[0]).toBe('')
-    expect(spy.mostRecentCall.args[1]).toBe(arr)
-    var mutation = spy.mostRecentCall.args[2]
+    expect(spy.calls.mostRecent().args[0]).toBe('')
+    expect(spy.calls.mostRecent().args[1]).toBe(arr)
+    var mutation = spy.calls.mostRecent().args[2]
     expect(mutation).toBeDefined()
     expect(mutation.method).toBe('splice')
     expect(mutation.index).toBe(1)
@@ -248,9 +248,9 @@ describe('Observer', function () {
     arr.sort(function (a, b) {
       return a.a < b.a ? 1 : -1
     })
-    expect(spy.mostRecentCall.args[0]).toBe('')
-    expect(spy.mostRecentCall.args[1]).toBe(arr)
-    var mutation = spy.mostRecentCall.args[2]
+    expect(spy.calls.mostRecent().args[0]).toBe('')
+    expect(spy.calls.mostRecent().args[1]).toBe(arr)
+    var mutation = spy.calls.mostRecent().args[2]
     expect(mutation).toBeDefined()
     expect(mutation.method).toBe('sort')
     expect(mutation.index).toBeUndefined()
@@ -267,9 +267,9 @@ describe('Observer', function () {
     var ob = Observer.create(arr)
     ob.on('mutate', spy)
     arr.reverse()
-    expect(spy.mostRecentCall.args[0]).toBe('')
-    expect(spy.mostRecentCall.args[1]).toBe(arr)
-    var mutation = spy.mostRecentCall.args[2]
+    expect(spy.calls.mostRecent().args[0]).toBe('')
+    expect(spy.calls.mostRecent().args[1]).toBe(arr)
+    var mutation = spy.calls.mostRecent().args[2]
     expect(mutation).toBeDefined()
     expect(mutation.method).toBe('reverse')
     expect(mutation.index).toBeUndefined()
@@ -288,7 +288,7 @@ describe('Observer', function () {
 
     // ignore existing keys
     obj.$add('a', 123)
-    expect(spy.callCount).toBe(0)
+    expect(spy.calls.count()).toBe(0)
 
     // add event
     var add = {d:2}
@@ -308,7 +308,7 @@ describe('Observer', function () {
 
     // ignore non-present key
     obj.$delete('c')
-    expect(spy.callCount).toBe(0)
+    expect(spy.calls.count()).toBe(0)
 
     obj.a.$delete('b')
     expect(spy).toHaveBeenCalledWith('a.b', u, u)
@@ -322,9 +322,9 @@ describe('Observer', function () {
     var removed = arr[1]
     arr.$set(1, inserted)
 
-    expect(spy.mostRecentCall.args[0]).toBe('')
-    expect(spy.mostRecentCall.args[1]).toBe(arr)
-    var mutation = spy.mostRecentCall.args[2]
+    expect(spy.calls.mostRecent().args[0]).toBe('')
+    expect(spy.calls.mostRecent().args[1]).toBe(arr)
+    var mutation = spy.calls.mostRecent().args[2]
     expect(mutation).toBeDefined()
     expect(mutation.method).toBe('splice')
     expect(mutation.index).toBe(1)
@@ -354,9 +354,9 @@ describe('Observer', function () {
     ob.on('mutate', spy)
     var removed = arr.$remove(0)
 
-    expect(spy.mostRecentCall.args[0]).toBe('')
-    expect(spy.mostRecentCall.args[1]).toBe(arr)
-    var mutation = spy.mostRecentCall.args[2]
+    expect(spy.calls.mostRecent().args[0]).toBe('')
+    expect(spy.calls.mostRecent().args[1]).toBe(arr)
+    var mutation = spy.calls.mostRecent().args[2]
     expect(mutation).toBeDefined()
     expect(mutation.method).toBe('splice')
     expect(mutation.index).toBe(0)
@@ -375,9 +375,9 @@ describe('Observer', function () {
     ob.on('mutate', spy)
     var removed = arr.$remove(arr[0])
 
-    expect(spy.mostRecentCall.args[0]).toBe('')
-    expect(spy.mostRecentCall.args[1]).toBe(arr)
-    var mutation = spy.mostRecentCall.args[2]
+    expect(spy.calls.mostRecent().args[0]).toBe('')
+    expect(spy.calls.mostRecent().args[1]).toBe(arr)
+    var mutation = spy.calls.mostRecent().args[2]
     expect(mutation).toBeDefined()
     expect(mutation.method).toBe('splice')
     expect(mutation.index).toBe(0)
@@ -399,13 +399,13 @@ describe('Observer', function () {
     obA.on('set', spy)
     obB.on('set', spy)
     obj.a = 2
-    expect(spy.callCount).toBe(2)
+    expect(spy.calls.count()).toBe(2)
     expect(spy).toHaveBeenCalledWith('child1.a', 2, u)
     expect(spy).toHaveBeenCalledWith('child2.a', 2, u)
     // test unobserve
     parentA.child1 = null
     obj.a = 3
-    expect(spy.callCount).toBe(4)
+    expect(spy.calls.count()).toBe(4)
     expect(spy).toHaveBeenCalledWith('child1', null, u)
     expect(spy).toHaveBeenCalledWith('child2.a', 3, u)
   })

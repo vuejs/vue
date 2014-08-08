@@ -1,5 +1,5 @@
 var Vue = require('../../../src/vue')
-var then = Vue.nextTick
+var nextTick = Vue.nextTick
 var Watcher = require('../../../src/watcher')
 
 describe('Watcher', function () {
@@ -24,11 +24,11 @@ describe('Watcher', function () {
     var watcher = new Watcher(vm, 'b.c', spy)
     expect(watcher.value).toBe(2)
     vm.b.c = 3
-    then(function () {
+    nextTick(function () {
       expect(watcher.value).toBe(3)
       expect(spy).toHaveBeenCalledWith(3, 2)
       vm.b = { c: 4 } // swapping the object
-      then(function () {
+      nextTick(function () {
         expect(watcher.value).toBe(4)
         expect(spy).toHaveBeenCalledWith(4, 3)
         done()
@@ -40,11 +40,11 @@ describe('Watcher', function () {
     var watcher = new Watcher(vm, 'b["c"]', spy)
     expect(watcher.value).toBe(2)
     vm.b.c = 3
-    then(function () {
+    nextTick(function () {
       expect(watcher.value).toBe(3)
       expect(spy).toHaveBeenCalledWith(3, 2)
       vm.b = { c: 4 } // swapping the object
-      then(function () {
+      nextTick(function () {
         expect(watcher.value).toBe(4)
         expect(spy).toHaveBeenCalledWith(4, 3)
         done()
@@ -56,11 +56,11 @@ describe('Watcher', function () {
     var watcher = new Watcher(vm, 'b[c]', spy)
     expect(watcher.value).toBe(2)
     vm.b.c = 3
-    then(function () {
+    nextTick(function () {
       expect(watcher.value).toBe(3)
       expect(spy).toHaveBeenCalledWith(3, 2)
       vm.c = 'd' // changing the dynamic segment in path
-      then(function () {
+      nextTick(function () {
         expect(watcher.value).toBe(4)
         expect(spy).toHaveBeenCalledWith(4, 3)
         done()
@@ -72,18 +72,18 @@ describe('Watcher', function () {
     var watcher = new Watcher(vm, 'a + b.c', spy)
     expect(watcher.value).toBe(3)
     vm.b.c = 3
-    then(function () {
+    nextTick(function () {
       expect(watcher.value).toBe(4)
-      expect(spy.callCount).toBe(1)
+      expect(spy.calls.count()).toBe(1)
       expect(spy).toHaveBeenCalledWith(4, 3)
       // change two dependencies at once
       vm.a = 2
       vm.b.c = 4
-      then(function () {
+      nextTick(function () {
         expect(watcher.value).toBe(6)
         // should trigger only once callback,
         // because it was in the same event loop.
-        expect(spy.callCount).toBe(2)
+        expect(spy.calls.count()).toBe(2)
         expect(spy).toHaveBeenCalledWith(6, 4)
         done()
       })
@@ -95,11 +95,11 @@ describe('Watcher', function () {
     var watcher = new Watcher(vm, 'a > 1 ? b.c : b.d', spy)
     expect(watcher.value).toBe(4)
     vm.a = 2
-    then(function () {
+    nextTick(function () {
       expect(watcher.value).toBe(2)
       expect(spy).toHaveBeenCalledWith(2, 4)
       vm.b.c = 3
-      then(function () {
+      nextTick(function () {
         expect(watcher.value).toBe(3)
         expect(spy).toHaveBeenCalledWith(3, 2)
         done()
@@ -111,7 +111,7 @@ describe('Watcher', function () {
     var watcher = new Watcher(vm, 'd.e', spy)
     expect(watcher.value).toBeUndefined()
     vm.$scope.$add('d', { e: 123 })
-    then(function () {
+    nextTick(function () {
       expect(watcher.value).toBe(123)
       expect(spy).toHaveBeenCalledWith(123, undefined)
       done()
@@ -122,7 +122,7 @@ describe('Watcher', function () {
     var watcher = new Watcher(vm, 'b.c', spy)
     expect(watcher.value).toBe(2)
     vm.$scope.$delete('b')
-    then(function () {
+    nextTick(function () {
       expect(watcher.value).toBeUndefined()
       expect(spy).toHaveBeenCalledWith(undefined, 2)
       done()
@@ -133,7 +133,7 @@ describe('Watcher', function () {
     var watcher = new Watcher(vm, 'b.c', spy)
     expect(watcher.value).toBe(2)
     vm.$data = { b: { c: 3}}
-    then(function () {
+    nextTick(function () {
       expect(watcher.value).toBe(3)
       expect(spy).toHaveBeenCalledWith(3, 2)
       done()
@@ -144,11 +144,11 @@ describe('Watcher', function () {
     var watcher = new Watcher(vm, '$data.b.c', spy)
     expect(watcher.value).toBe(2)
     vm.b = { c: 3 }
-    then(function () {
+    nextTick(function () {
       expect(watcher.value).toBe(3)
       expect(spy).toHaveBeenCalledWith(3, 2)
       vm.$data = { b: {c: 4}}
-      then(function () {
+      nextTick(function () {
         expect(watcher.value).toBe(4)
         expect(spy).toHaveBeenCalledWith(4, 3)
         done()
@@ -161,11 +161,11 @@ describe('Watcher', function () {
     var watcher = new Watcher(vm, '$data', spy)
     expect(watcher.value).toBe(oldData)
     vm.a = 2
-    then(function () {
+    nextTick(function () {
       expect(spy).toHaveBeenCalledWith(oldData, oldData)
       var newData = {}
       vm.$data = newData
-      then(function() {
+      nextTick(function() {
         expect(spy).toHaveBeenCalledWith(newData, oldData)
         expect(watcher.value).toBe(newData)
         done()
@@ -180,7 +180,7 @@ describe('Watcher', function () {
       expect(this).toBe(context)
     }, context)
     vm.b.c = 3
-    then(function () {
+    nextTick(function () {
       expect(spy).toHaveBeenCalledWith(3, 2)
       done()
     })
@@ -199,7 +199,7 @@ describe('Watcher', function () {
     ])
     expect(watcher.value).toBe('6yo')
     vm.b.c = 3
-    then(function () {
+    nextTick(function () {
       expect(watcher.value).toBe('9yo')
       expect(spy).toHaveBeenCalledWith('9yo', '6yo')
       done()
@@ -217,17 +217,28 @@ describe('Watcher', function () {
     ], true)
     expect(watcher.value).toBe(2)
     watcher.set(4) // shoud not change the value
-    then(function () {
+    nextTick(function () {
       expect(vm.b.c).toBe(2)
       expect(watcher.value).toBe(2)
-      expect(spy.callCount).toBe(0)
+      expect(spy.calls.count()).toBe(0)
       watcher.set(6)
-      then(function () {
+      nextTick(function () {
         expect(vm.b.c).toBe(6)
         expect(watcher.value).toBe(6)
         expect(spy).toHaveBeenCalledWith(6, 2)
         done()
       })
+    })
+  })
+
+  it('teardown', function (done) {
+    var watcher = new Watcher(vm, 'b.c', spy)
+    watcher.teardown()
+    vm.b.c = 3
+    nextTick(function () {
+      expect(watcher.active).toBe(false)
+      expect(spy.calls.count()).toBe(0)
+      done()
     })
   })
 

@@ -18,7 +18,7 @@
   "homepage": "http://vuejs.org",
   "scripts": {
     "test": "grunt ci",
-    "jasmine": "jasmine-node test/unit/"
+    "j": "jasmine-node test/unit/ --verbose"
   },
   "devDependencies": {
     "browserify": "^4.2.0",
@@ -34,7 +34,7 @@
     "karma-commonjs": "^0.0.10",
     "karma-coverage": "^0.2.5",
     "karma-firefox-launcher": "^0.1.3",
-    "karma-jasmine": "^0.1.5",
+    "karma-jasmine": "^0.2.2",
     "karma-phantomjs-launcher": "^0.1.4"
   }
 }

@@ -201,7 +201,7 @@ describe('Util', function () {
     })
   }
 
-  if (typeof console !== undefined) {
+  if (typeof console !== 'undefined') {
 
     describe('Debug', function () {
 
@@ -222,7 +222,7 @@ describe('Util', function () {
       it('not log when debug is false', function () {
         config.debug = false
         _.log('bye', 'world')
-        expect(console.log.callCount).toBe(0)
+        expect(console.log.calls.count()).toBe(0)
       })
 
       it('warn when silent is false', function () {
@@ -234,7 +234,7 @@ describe('Util', function () {
       it('not warn when silent is ture', function () {
         config.silent = true
         _.warn('oops', 'ops')
-        expect(console.warn.callCount).toBe(0)
+        expect(console.warn.calls.count()).toBe(0)
       })
 
       if (console.trace) {

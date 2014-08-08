@@ -216,8 +216,9 @@ p.run = function () {
 
 p.teardown = function () {
   this.active = false
-  for (var p in this.deps) {
-    this.deps[p].removeSub(this)
+  var vm = this.vm
+  for (var path in this.deps) {
+    vm._getBindingAt(path)._removeSub(this)
   }
 }
 
