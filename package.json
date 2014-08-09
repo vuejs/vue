@@ -17,8 +17,7 @@
   "bugs": "https://github.com/yyx990803/vue/issues",
   "homepage": "http://vuejs.org",
   "scripts": {
-    "test": "grunt ci",
-    "j": "jasmine-node test/unit/ --verbose"
+    "test": "grunt ci"
   },
   "devDependencies": {
     "browserify": "^4.2.0",

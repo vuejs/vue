@@ -1,3 +1,0 @@
-/**
- * Test the binding class
- */
