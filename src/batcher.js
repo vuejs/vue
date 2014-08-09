@@ -30,10 +30,7 @@ p.push = function (job) {
     this.has[job.id] = job
     if (!this.waiting) {
       this.waiting = true
-      var self = this
-      _.nextTick(function () {
-        self.flush()
-      })
+      _.nextTick(this.flush, this)
     }
   } else if (job.override) {
     var oldJob = this.has[job.id]

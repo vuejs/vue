@@ -109,11 +109,16 @@ describe('Watcher', function () {
 
   it('non-existent path, $add later', function (done) {
     var watcher = new Watcher(vm, 'd.e', spy)
+    var watcher2 = new Watcher(vm, 'b.e', spy)
     expect(watcher.value).toBeUndefined()
+    expect(watcher2.value).toBeUndefined()
     vm.$scope.$add('d', { e: 123 })
+    vm.b.$add('e', 234)
     nextTick(function () {
       expect(watcher.value).toBe(123)
+      expect(watcher2.value).toBe(234)
       expect(spy).toHaveBeenCalledWith(123, undefined)
+      expect(spy).toHaveBeenCalledWith(234, undefined)
       done()
     })
   })
