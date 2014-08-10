@@ -28,20 +28,9 @@ function Directive (name, el, vm, descriptor) {
 
   // private
   this._locked = false
-  this._unbound = false
+  this._bound = false
   // init definition
   this._initDef()
-
-  if (this.expression && !this.isLiteral && this.update) {
-    this._watcher = new Watcher(
-      vm,
-      this.expression,
-      this._update,
-      this, // callback context
-      this.filters,
-      this.twoway
-    )
-  }
 }
 
 var p = Directive.prototype
@@ -66,20 +55,33 @@ p._initDef = function () {
 }
 
 /**
- * Apply the directive, call definition bind() if present,
- * and call first update().
- *
- * @private
+ * Initialize the directive, setup the watcher,
+ * call definition bind() and update() if present.
  */
 
 p._bind = function () {
-  var value = this._watcher.value
-  if (this.bind) {
-    this.bind(value)
+  if (this.expression && !this.isLiteral && this.update) {
+    this._watcher = new Watcher(
+      this.vm,
+      this.expression,
+      this._update, // callback
+      this, // callback context
+      this.filters,
+      this.twoway // need setter
+    )
+    var value = this._watcher.value
+    if (this.bind) {
+      this.bind(value)
+    }
+    if (this.update) {
+      this.update(value)
+    }
+  } else {
+    if (this.bind) {
+      this.bind()
+    }
   }
-  if (this.update) {
-    this.update(value)
-  }
+  this._bound = true
 }
 
 /**
@@ -87,7 +89,6 @@ p._bind = function () {
  * Check locked or not before calling definition update.
  *
  * @param {*} value
- * @private
  */
 
 p._update = function (value) {
@@ -98,16 +99,16 @@ p._update = function (value) {
 
 /**
  * Teardown the watcher and call unbind.
- *
- * @private
  */
 
 p._teardown = function () {
-  if (this.unbind) {
-    this.unbind()
+  if (this._bound) {
+    if (this.unbind) {
+      this.unbind()
+    }
+    this._watcher.teardown()
+    this._bound = false
   }
-  this._watcher.teardown()
-  this._unbound = true
 }
 
 /**

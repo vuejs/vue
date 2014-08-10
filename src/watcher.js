@@ -167,7 +167,7 @@ p.set = function (value) {
 
 p.beforeGet = function () {
   Observer.emitGet = true
-  this.vm._currentWatcher = this
+  this.vm._activeWatcher = this
   this.newDeps = Object.create(null)
 }
 
@@ -176,7 +176,7 @@ p.beforeGet = function () {
  */
 
 p.afterGet = function () {
-  this.vm._currentWatcher = null
+  this.vm._activeWatcher = null
   Observer.emitGet = false
   _.extend(this.newDeps, this.deps)
   this.deps = this.newDeps
@@ -215,10 +215,12 @@ p.run = function () {
  */
 
 p.teardown = function () {
-  this.active = false
-  var vm = this.vm
-  for (var path in this.deps) {
-    vm._getBindingAt(path)._removeSub(this)
+  if (this.active) {
+    this.active = false
+    var vm = this.vm
+    for (var path in this.deps) {
+      vm._getBindingAt(path)._removeSub(this)
+    }
   }
 }
 

@@ -43,11 +43,14 @@ exports._initScope = function () {
 }
 
 /**
- * Teardown scope and remove listeners attached to parent scope.
+ * Teardown scope, unsync data, and remove all listeners
+ * including ones attached to parent's observer.
  * Only called once during $destroy().
  */
 
 exports._teardownScope = function () {
+  this._observer.off()
+  this._unsyncData()
   this.$scope = null
   if (this.$parent) {
     var pob = this.$parent._observer
@@ -251,12 +254,22 @@ exports._syncData = function () {
 
   /**
    * The guard function prevents infinite loop
-   * when syncing between two observers.
+   * when syncing between two observers. Also
+   * filters out properties prefixed with $ or _.
+   *
+   * @param {Function} fn
+   * @return {Function}
    */
 
   function guard (fn) {
     return function (key, val) {
-      if (locked) return
+      if (locked) {
+        return
+      }
+      var c = key.charAt(0)
+      if (c === '$' || c === '_') {
+        return
+      }
       locked = true
       fn(key, val)
       locked = false

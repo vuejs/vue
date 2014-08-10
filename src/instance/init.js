@@ -21,8 +21,9 @@ exports._init = function (options) {
   this._isDestroyed = false
   this._rawContent  = null
   this._emitter     = new Emitter(this)
-  // the current target watcher for dependency collection
-  this._currentWatcher = null
+  this._watchers    = {}
+  this._activeWatcher = null
+  this._directives  = []
 
   // setup parent relationship
   this.$parent = options.parent
@@ -41,9 +42,6 @@ exports._init = function (options) {
   // the `created` hook is called after basic properties have
   // been set up & before data observation happens.
   this._callHook('created')
-
-  // setup event system and option events
-  this._initEvents()
 
   // create scope.
   // @creates this.$scope
@@ -64,6 +62,9 @@ exports._init = function (options) {
   // setup binding tree.
   // @creates this._rootBinding
   this._initBindings()
+
+  // setup event system and option events
+  this._initEvents()
 
   // if `el` option is passed, start compilation.
   if (options.el) {

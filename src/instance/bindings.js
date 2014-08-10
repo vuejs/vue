@@ -112,9 +112,9 @@ exports._updateAdd = function (path) {
  */
 
 exports._collectDep = function (path) {
-  var watcher = this._currentWatcher
+  var watcher = this._activeWatcher
   // the get event might have come from a child vm's watcher
-  // so this._currentWatcher is not guarunteed to be defined
+  // so this._activeWatcher is not guarunteed to be defined
   if (watcher) {
     watcher.addDep(path)
   }
