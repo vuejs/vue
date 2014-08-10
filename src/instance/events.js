@@ -13,8 +13,8 @@ exports._initEvents = function () {
     for (e in events) {
       handlers = events[e]
       for (i = 0, j = handlers.length; i < j; i++) {
-        var handler = (methods && typeof handlers[i] === 'string')
-          ? methods[handlers[i]]
+        var handler = typeof handlers[i] === 'string'
+          ? methods && methods[handlers[i]]
           : handlers[i]
         this.$on(e, handler)
       }

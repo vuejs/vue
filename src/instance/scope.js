@@ -6,7 +6,8 @@ var scopeEvents = ['set', 'mutate', 'add', 'delete']
  * Setup instance scope.
  * The scope is reponsible for prototypal inheritance of
  * parent instance propertiesm abd all binding paths and
- * expressions of the current instance are evaluated against its scope.
+ * expressions of the current instance are evaluated against
+ * its scope.
  *
  * This should only be called once during _init().
  */
@@ -64,20 +65,22 @@ exports._teardownScope = function () {
 /**
  * Setup the instances data object.
  *
- * Properties are copied into the scope object to take advantage of
- * prototypal inheritance.
+ * Properties are copied into the scope object to take
+ * advantage of prototypal inheritance.
  *
- * If the `syncData` option is true, Vue will maintain property
- * syncing between the scope and the original data object, so that
- * any changes to the scope are synced back to the passed in object.
- * This is useful internally when e.g. creating v-repeat instances
- * with no alias.
+ * If the `syncData` option is true, Vue will maintain
+ * property syncing between the scope and the original data
+ * object, so that any changes to the scope are synced back
+ * to the passed in object. This is useful internally when
+ * e.g. creating v-repeat instances with no alias.
  *
- * If swapping data object with the `$data` accessor, teardown
- * previous sync listeners and delete keys not present in new data.
+ * If swapping data object with the `$data` accessor,
+ * teardown previous sync listeners and delete keys not
+ * present in new data.
  *
  * @param {Object} data
- * @param {Boolean} init - if not ture, indicates its a `$data` swap.
+ * @param {Boolean} init - if not ture, indicates its a
+ *                         `$data` swap.
  */
 
 exports._initData = function (data, init) {
@@ -120,13 +123,13 @@ exports._initData = function (data, init) {
  * Proxy the scope properties on the instance itself,
  * so that vm.a === vm.$scope.a.
  *
- * Note this only proxies *local* scope properties. We want to
- * prevent child instances accidentally modifying properties
- * with the same name up in the scope chain because scope
- * perperties are all getter/setters.
+ * Note this only proxies *local* scope properties. We want
+ * to prevent child instances accidentally modifying
+ * properties with the same name up in the scope chain
+ * because scope perperties are all getter/setters.
  *
- * To access parent properties through prototypal fall through,
- * access it on the instance's $scope.
+ * To access parent properties through prototypal fall
+ * through, access it on the instance's $scope.
  *
  * This should only be called once during _init().
  */

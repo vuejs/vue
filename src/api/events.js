@@ -7,7 +7,10 @@
     ? 'applyEmit'
     : method
   exports['$' + method] = function () {
-    this._emitter[realMethod].apply(this._emitter, arguments)
+    this._emitter[realMethod].apply(
+      this._emitter,
+      arguments
+    )
   }
 })
 
@@ -22,8 +25,14 @@ exports.$broadcast = function () {
   var children = this.children
   for (var i = 0, l = children.length; i < l; i++) {
     var child = children[i]
-    child._emitter.applyEmit.apply(child._emitter, arguments)
-    child.$broadcast.apply(child, arguments)
+    child._emitter.applyEmit.apply(
+      child._emitter,
+      arguments
+    )
+    child.$broadcast.apply(
+      child,
+      arguments
+    )
   }
 }
 
@@ -35,9 +44,15 @@ exports.$broadcast = function () {
  */
 
 exports.$dispatch = function () {
-  this._emitter.applyEmit.apply(this._emitter, arguments)
+  this._emitter.applyEmit.apply(
+    this._emitter,
+    arguments
+  )
   var parent = this.$parent
   if (parent) {
-    parent.$dispatch.apply(parent, arguments)
+    parent.$dispatch.apply(
+      parent,
+      arguments
+    )
   }
 }

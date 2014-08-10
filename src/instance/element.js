@@ -18,10 +18,10 @@ exports._initElement = function (el) {
       _.warn('Cannot find element: ' + selector)
     }
   }
-  // If the passed in `el` is a DocumentFragment, the instance is
-  // considered a "block instance" which manages not a single element,
-  // but multiple elements. A block instance's `$el` is an Array of
-  // the elements it manages.
+  // If the passed in `el` is a DocumentFragment, the
+  // instance is considered a "block instance" which manages
+  // not a single element, but multiple elements. A block
+  // instance's `$el` is an Array of the elements it manages.
   if (el instanceof window.DocumentFragment) {
     this._isBlock = true
     this.$el = _.toArray(el.childNodes)
@@ -34,7 +34,7 @@ exports._initElement = function (el) {
 
 /**
  * Process the template option.
- * If the replace option is true this will also modify the $el.
+ * If the replace option is true this will swap the $el.
  */
 
 exports._initTemplate = function () {
@@ -46,7 +46,7 @@ exports._initTemplate = function () {
     if (!frag) {
       _.warn('Invalid template option: ' + template)
     } else {
-      // collect raw content. this wipes out the container el.
+      // collect raw content. this wipes out $el.
       this._collectRawContent()
       frag = frag.cloneNode(true)
       if (options.replace) {
@@ -93,10 +93,10 @@ exports._collectRawContent = function () {
 }
 
 /**
- * Resolve <content> insertion points per W3C Web Components
- * working draft:
+ * Resolve <content> insertion points mimicking the behavior
+ * of the Shadow DOM spec:
  *
- *  http://www.w3.org/TR/2013/WD-components-intro-20130606/#insertion-points
+ *  http://w3c.github.io/webcomponents/spec/shadow/#insertion-points
  */
 
 exports._initContent = function () {
@@ -112,7 +112,9 @@ exports._initContent = function () {
       if (raw) {
         select = outlet.getAttribute('select')
         if (select) { // select content
-          outlet.content = _.toArray(raw.querySelectorAll(select))
+          outlet.content = _.toArray(
+            raw.querySelectorAll(select)
+          )
         } else { // default content
           main = outlet
         }
@@ -142,7 +144,6 @@ exports._initContent = function () {
  */
 
 var concat = [].concat
-
 function getOutlets (el) {
   return _.isArray(el)
     ? concat.apply([], el.map(getOutlets))
@@ -150,7 +151,8 @@ function getOutlets (el) {
 }
 
 /**
- * Insert an array of nodes at outlet, then remove the outlet.
+ * Insert an array of nodes at outlet,
+ * then remove the outlet.
  *
  * @param {Element} outlet
  * @param {Array} contents

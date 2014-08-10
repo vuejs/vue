@@ -37,8 +37,8 @@ var TAG_RE = /<([\w:]+)/
 
 /**
  * Convert a string template to a DocumentFragment.
- * Determines correct wrapping by tag types. Wrapping strategy
- * originally from jQuery, scooped from component/domify.
+ * Determines correct wrapping by tag types. Wrapping
+ * strategy found in jQuery & component/domify.
  *
  * @param {String} templateString
  * @return {DocumentFragment}
@@ -56,7 +56,9 @@ function stringToFragment (templateString) {
 
   if (!tagMatch) {
     // text only, return a single text node.
-    frag.appendChild(document.createTextNode(templateString))
+    frag.appendChild(
+      document.createTextNode(templateString)
+    )
   } else {
 
     var tag    = tagMatch[1]
@@ -93,7 +95,10 @@ function nodeToFragment (node) {
   var tag = node.tagName
   // if its a template tag and the browser supports it,
   // its content is already a document fragment.
-  if (tag === 'TEMPLATE' && node.content instanceof DocumentFragment) {
+  if (
+    tag === 'TEMPLATE' &&
+    node.content instanceof DocumentFragment
+  ) {
     return node.content
   }
   return tag === 'SCRIPT'
@@ -111,14 +116,15 @@ function nodeToFragment (node) {
  *    - DocumentFragment object
  *    - Node object of type Template
  *    - id selector: '#some-template-id'
- *    - template string: '<div><span>my template</span></div>'
+ *    - template string: '<div><span>{{msg}}</span></div>'
  * @return {DocumentFragment|undefined}
  */
 
 exports.parse = function (template) {
   var node, frag
 
-  // if the template is already a document fragment -- do nothing
+  // if the template is already a document fragment,
+  // do nothing
   if (template instanceof DocumentFragment) {
     return template
   }

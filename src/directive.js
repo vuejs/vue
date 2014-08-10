@@ -2,10 +2,10 @@ var _ = require('./util')
 var Watcher = require('./watcher')
 
 /**
- * A directive links a DOM element with a piece of data, which can
- * be either simple paths or computed properties. It subscribes to
- * a list of dependencies (Bindings) and refreshes the list during
- * its getter evaluation.
+ * A directive links a DOM element with a piece of data,
+ * which is the result of evaluating an expression.
+ * It registers a watcher with the expression and calls
+ * the DOM update function when a change is triggered.
  *
  * @param {String} name
  * @param {Node} el
@@ -113,7 +113,8 @@ p._teardown = function () {
 
 /**
  * Set the corresponding value with the setter.
- * This should only be used in two-way bindings like v-model.
+ * This should only be used in two-way directives
+ * e.g. v-model.
  *
  * @param {*} value
  * @param {Boolean} lock - prevent wrtie triggering update.

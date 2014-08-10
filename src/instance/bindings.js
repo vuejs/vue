@@ -5,18 +5,13 @@ var Observer = require('../observe/observer')
 /**
  * Setup the binding tree.
  *
- * Bindings form a tree-like structure that maps the Object structure
- * of observed data. However, only paths present in the templates are
- * created in the binding tree. When a change event from the data 
- * observer arrives on the instance, we traverse the binding tree
- * along the changed path, triggering binding updates along the way.
- * When we reach the path endpoint, if it has any children, we also
- * trigger updates on the entire sub-tree.
- *
- * Each instance has a root binding and it has three special children:
- * `$data`, `$parent` & `$root`. `$data` points to the root binding
- * itself. `$parent` and `$root` point to the instance's parent and
- * root's root bindings, respectively.
+ * Bindings form a tree-like structure that maps the Object
+ * structure of observed data. However, only paths present
+ * in the templates are created in the binding tree. When a
+ * change event from the data observer arrives on the
+ * instance, we traverse the binding tree along the changed
+ * path to find the corresponding binding, and trigger
+ * change for all its subscribers.
  */
 
 exports._initBindings = function () {
@@ -90,11 +85,12 @@ exports._updateBindingAt = function (path) {
 }
 
 /**
- * For newly added properties, since its binding has not been
- * created yet, directives will not have it as a dependency yet.
- * However, they will have its parent as a dependency. Therefore
- * here we remove the last segment from the path and notify the
- * added property's parent instead.
+ * For newly added properties, since its binding has not
+ * been created yet, directives will not have it as a
+ * dependency yet. However, they will have its parent as a
+ * dependency. Therefore here we remove the last segment
+ * from the path and notify the added property's parent
+ * instead.
  *
  * @param {String} path
  */
@@ -106,7 +102,8 @@ exports._updateAdd = function (path) {
 }
 
 /**
- * Collect dependency for the target directive being evaluated.
+ * Collect dependency for the target directive being
+ * evaluated.
  *
  * @param {String} path
  */

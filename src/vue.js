@@ -6,7 +6,8 @@ var extend = require('./util').extend
  * API conventions:
  * - public API methods/properties are prefiexed with `$`
  * - internal methods/properties are prefixed with `_`
- * - non-prefixed properties are assumed to be proxied user data.
+ * - non-prefixed properties are assumed to be proxied user
+ *   data.
  *
  * @constructor
  * @param {Object} [options]
@@ -38,7 +39,8 @@ Object.defineProperty(p, '$root', {
 })
 
 /**
- * $data has a setter which does a bunch of teardown/setup work
+ * $data has a setter which does a bunch of
+ * teardown/setup work
  */
 
 Object.defineProperty(p, '$data', {

@@ -18,8 +18,8 @@ exports.$get = function (exp) {
 
 /**
  * Set the value from an expression on this vm.
- * The expression must be a valid left-hand expression
- * in an assignment.
+ * The expression must be a valid left-hand
+ * expression in an assignment.
  *
  * @param {String} exp
  * @param {*} val
@@ -33,7 +33,8 @@ exports.$set = function (exp, val) {
 }
 
 /**
- * Add a property on the VM (and also on $scope and $data)
+ * Add a property on the VM
+ * (and also on $scope and $data)
  *
  * @param {String} key
  * @param {*} val
@@ -44,7 +45,8 @@ exports.$add = function (key, val) {
 }
 
 /**
- * Delete a property on the VM (and also on $scope and $data)
+ * Delete a property on the VM
+ * (and also on $scope and $data)
  *
  * @param {String} key
  */
@@ -54,8 +56,9 @@ exports.$delete = function (key) {
 }
 
 /**
- * Watch an expression, trigger callback when its value changes.
- * Returns the created watcher's id so it can be teardown later.
+ * Watch an expression, trigger callback when its
+ * value changes. Returns the created watcher's
+ * id so it can be teardown later.
  *
  * @param {String} exp
  * @param {Function} cb
@@ -86,6 +89,7 @@ exports.$unwatch = function (id) {
  * Interpolate a piece of template string.
  *
  * @param {String} string
+ * @return {String}
  */
 
 exports.$interpolate = function (string) {

@@ -8,9 +8,9 @@ var assetTypes = [
 ]
 
 /**
- * Vue and every constructor that extends Vue has an associated
- * options object, which can be accessed during compilation steps
- * as `this.constructor.options`.
+ * Vue and every constructor that extends Vue has an
+ * associated options object, which can be accessed during
+ * compilation steps as `this.constructor.options`.
  */
 
 exports.options = {

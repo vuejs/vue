@@ -19,7 +19,6 @@ exports.bind = function (fn, ctx) {
  */
 
 var slice = [].slice
-
 exports.toArray = function (list, i) {
   return slice.call(list, i || 0)
 }
@@ -38,7 +37,8 @@ exports.extend = function (to, from) {
 }
 
 /**
- * Mixin including non-enumerables, and copy property descriptors.
+ * Mixin including non-enumerables, and copy property
+ * descriptors.
  *
  * @param {Object} to
  * @param {Object} from
@@ -46,8 +46,8 @@ exports.extend = function (to, from) {
 
 exports.deepMixin = function (to, from) {
   Object.getOwnPropertyNames(from).forEach(function (key) {
-    var descriptor = Object.getOwnPropertyDescriptor(from, key)
-    Object.defineProperty(to, key, descriptor)
+    var desc =Object.getOwnPropertyDescriptor(from, key)
+    Object.defineProperty(to, key, desc)
   })
 }
 
@@ -81,8 +81,9 @@ exports.proxy = function (to, from, key) {
  * @return {Boolean}
  */
 
+var toString = Object.prototype.toString
 exports.isObject = function (obj) {
-  return Object.prototype.toString.call(obj) === '[object Object]'
+  return toString.call(obj) === '[object Object]'
 }
 
 /**

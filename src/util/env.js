@@ -1,14 +1,15 @@
 /**
  * Are we in a browser or in Node?
- * Calling toString on window has inconsistent results in browsers
- * so we do it on the document instead.
+ * Calling toString on window has inconsistent results in
+ * browsers so we do it on the document instead.
  *
  * @type {Boolean}
  */
 
+var toString = Object.prototype.toString
 var inBrowser = exports.inBrowser =
   typeof window !== 'undefined' &&
-  Object.prototype.toString.call(window) !== '[object Object]'
+  toString.call(window) !== '[object Object]'
 
 /**
  * Defer a task to the start of the next event loop

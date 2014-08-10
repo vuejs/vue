@@ -1,8 +1,9 @@
 /**
- * A doubly linked list-based Least Recently Used (LRU) cache.
- * Will keep most recently used items while discarding least
- * recently used items when its limit is reached. This is a
- * bare-bone version of Rasmus Andersson's js-lru:
+ * A doubly linked list-based Least Recently Used (LRU)
+ * cache. Will keep most recently used items while
+ * discarding least recently used items when its limit is
+ * reached. This is a bare-bone version of
+ * Rasmus Andersson's js-lru:
  *
  *   https://github.com/rsms/js-lru
  *
@@ -51,8 +52,9 @@ p.put = function (key, value) {
 }
 
 /**
- * Purge the least recently used (oldest) entry from the cache.
- * Returns the removed entry or undefined if the cache was empty.
+ * Purge the least recently used (oldest) entry from the
+ * cache. Returns the removed entry or undefined if the
+ * cache was empty.
  */
 
 p.shift = function () {

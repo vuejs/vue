@@ -58,8 +58,8 @@ function pushFilter () {
 }
 
 /**
- * Parse a directive string into an Array of AST-like objects
- * representing directives.
+ * Parse a directive string into an Array of AST-like
+ * objects representing directives.
  *
  * Example:
  *
@@ -86,7 +86,8 @@ exports.parse = function (s) {
   // reset parser state
   str = s
   inSingle = inDouble = false
-  curly = square = paren = begin = argIndex = lastFilterIndex = 0
+  curly = square = paren = begin = argIndex = 0
+  lastFilterIndex = 0
   dirs = []
   dir = {}
   arg = null
@@ -99,13 +100,20 @@ exports.parse = function (s) {
     } else if (inDouble) {
       // check double quote
       if (c === '"') inDouble = !inDouble
-    } else if (c === ',' && !paren && !curly && !square) {
+    } else if (
+      c === ',' &&
+      !paren && !curly && !square
+    ) {
       // reached the end of a directive
       pushDir()
       // reset & skip the comma
       dir = {}
       begin = argIndex = lastFilterIndex = i + 1
-    } else if (c === ':' && !dir.expression && !dir.arg) {
+    } else if (
+      c === ':' &&
+      !dir.expression &&
+      !dir.arg
+    ) {
       // argument
       arg = str.slice(begin, i).trim()
       // test for valid argument here
@@ -119,7 +127,11 @@ exports.parse = function (s) {
           ? arg.slice(1, -1)
           : arg
       }
-    } else if (c === '|' && str.charAt(i + 1) !== '|' && str.charAt(i - 1) !== '|') {
+    } else if (
+      c === '|' &&
+      str.charAt(i + 1) !== '|' &&
+      str.charAt(i - 1) !== '|'
+    ) {
       if (dir.expression === undefined) {
         // first filter, end of expression
         lastFilterIndex = i + 1

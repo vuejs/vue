@@ -140,7 +140,8 @@ function getPathCharType (char) {
 function parsePath (path) {
   var keys = []
   var index = -1
-  var c, newChar, key, type, transition, action, typeMap, mode = 'beforePath'
+  var mode = 'beforePath'
+  var c, newChar, key, type, transition, action, typeMap
 
   var actions = {
     push: function() {
@@ -188,7 +189,9 @@ function parsePath (path) {
 
     mode = transition[0]
     action = actions[transition[1]] || noop
-    newChar = transition[2] === undefined ? c : transition[2]
+    newChar = transition[2] === undefined
+      ? c
+      : transition[2]
     action()
 
     if (mode === 'afterPath') {

@@ -27,8 +27,8 @@ var OBJECT = 1
  * @param {Array|Object} value
  * @param {Number} type
  * @param {Object} [options]
- *                 - doNotAlterProto: if true, do not alter object's __proto__
- *                 - callbackContext: `this` context for callbacks
+ *                 - doNotAlterProto
+ *                 - callbackContext
  */
 
 function Observer (value, type, options) {
@@ -90,15 +90,19 @@ Observer.create = function (value, options) {
     return value.$observer
   } if (_.isArray(value)) {
     return new Observer(value, ARRAY, options)
-  } else if (_.isObject(value) && !value.$scope) { // avoid Vue instance
+  } else if (
+    _.isObject(value) &&
+    !value.$scope // avoid Vue instance
+  ) {
     return new Observer(value, OBJECT, options)
   }
 }
 
 /**
- * Walk through each property, converting them and adding them as child.
- * This method should only be called when value type is Object.
- * Properties prefixed with `$` or `_` and accessor properties are ignored.
+ * Walk through each property, converting them and adding
+ * them as child. This method should only be called when
+ * value type is Object. Properties prefixed with `$` or `_`
+ * and accessor properties are ignored.
  *
  * @param {Object} obj
  */

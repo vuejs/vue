@@ -2,13 +2,14 @@ var Emitter = require('../emitter')
 var mergeOptions = require('../util').mergeOptions
 
 /**
- * The main init sequence. This is called for every instance,
- * including ones that are created from extended constructors.
+ * The main init sequence. This is called for every
+ * instance, including ones that are created from extended
+ * constructors.
  *
- * @param {Object} options - this options object should be the
- *                           result of merging class options
- *                           and the options passed in to the
- *                           constructor.
+ * @param {Object} options - this options object should be
+ *                           the result of merging class
+ *                           options and the options passed
+ *                           in to the constructor.
  */
 
 exports._init = function (options) {
@@ -39,8 +40,8 @@ exports._init = function (options) {
     this
   )
 
-  // the `created` hook is called after basic properties have
-  // been set up & before data observation happens.
+  // the `created` hook is called after basic properties
+  // have been set up & before data observation happens.
   this._callHook('created')
 
   // create scope.

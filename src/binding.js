@@ -1,7 +1,7 @@
 /**
- * A binding is an observable that can have multiple directives
- * subscribing to it. It can also have multiple other bindings
- * as children to form a trie-like structure.
+ * A binding is an observable that can have multiple
+ * directives subscribing to it. It can also have multiple
+ * other bindings as children to form a trie-like structure.
  *
  * All binding properties are prefixed with `_` so that they
  * don't conflict with children keys.

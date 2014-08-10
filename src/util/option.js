@@ -1,4 +1,4 @@
-// alias debug as _ so we can drop _.warn during uglification
+// alias debug as _ so we can drop _.warn during uglify
 var _ = require('./debug')
 var extend = require('./lang').extend
 
@@ -35,8 +35,8 @@ strats.paramAttributes = function (parentVal, childVal) {
  * Assets
  *
  * When a vm is present (instance creation), we need to do a
- * 3-way merge for assets: constructor assets, instance assets,
- * and instance scope assets.
+ * 3-way merge for assets: constructor assets, instance
+ * assets, and instance scope assets.
  */
 
 strats.directives =
@@ -76,7 +76,8 @@ strats.events = function (parentVal, childVal) {
 
 /**
  * Other object hashes.
- * These are instance-specific and do not inehrit from nested parents.
+ * These are instance-specific and do not inehrit from
+ * nested parents.
  */
 
 strats.methods =
@@ -124,10 +125,14 @@ exports.mergeOptions = function (parent, child, vm) {
     }
   }
   function merge (key) {
-    if (!vm && (key === 'el' || key === 'data' || key === 'parent')) {
+    if (
+      !vm &&
+      (key === 'el' || key === 'data' || key === 'parent')
+    ) {
       _.warn(
-        'The "' + key + '" option can only be used as an instantiation ' +
-        'option and will be ignored in Vue.extend().'
+        'The "' + key + '" option can only be used as an' +
+        'instantiation option and will be ignored in' +
+        'Vue.extend().'
       )
       return
     }
