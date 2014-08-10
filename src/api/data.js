@@ -86,14 +86,17 @@ exports.$unwatch = function (id) {
 }
 
 /**
- * Interpolate a piece of template string.
+ * Interpolate a piece of template text.
  *
- * @param {String} string
+ * @param {String} text
  * @return {String}
  */
 
-exports.$interpolate = function (string) {
-  
+exports.$interpolate = function (text) {
+  var exp = textParser.textToExpression(text)
+  return exp
+    ? this.$get(exp)
+    : text
 }
 
 /**
