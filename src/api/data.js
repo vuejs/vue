@@ -81,8 +81,8 @@ exports.$unwatch = function (id) {
   var watcher = this._watchers[id]
   if (watcher) {
     watcher.teardown()
+    this._watchers[id] = null
   }
-  this._watchers[id] = null
 }
 
 /**
