@@ -102,6 +102,36 @@ Vue.filter('format', {
 <!-- v-if-end -->
 ```
 
+``` html
+<!-- v-partial="hello" -->
+```
+
+**Note** The old inline partial syntax `{{> partial}}` has been removed. This is to keep the semantics of interpolation tags purely for interpolation purposes; flow control and partials are now either used in the form of attribute directives or comment directives.
+
+## Config API change
+
+Instead of the old `Vue.config()` with a heavily overloaded API, the config object is now available globally as `Vue.config`, and you can simply change its properties:
+
+``` js
+// old
+// Vue.config('debug', true)
+
+// new
+Vue.config.debug = true
+```
+
+## Interpolation Delimiters
+
+In the old version the interpolation delimiters are limited to the same base character (i.e. `['{','}']` translates into `{{}}` for text and `{{{}}}` for HTML). Now you can set them to whatever you like (*almost), and to indicate HTML interpolation, simply wrap the tag with one extra outer most character on each end. Example:
+
+``` js
+Vue.config.delimiters = ['(%', '%)']
+// tags now are (% %) for text
+// and ((% %)) for HTML
+```
+
+* Note you still cannot use `<` or `>` in delimiters because Vue uses DOM-based templating.
+
 ## (Experimental) Validators
 
 This is largely write filters that accept a Boolean return value. Probably should live as a plugin.
