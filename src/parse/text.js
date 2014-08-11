@@ -1,8 +1,5 @@
-var _ = require('../util')
 var Cache = require('../cache')
 var config = require('../config')
-var dirParser = require('./directive')
-
 var regexEscapeRE = /[-.*+?^${}()|[\]\/\\]/g
 var cache, tagRE, htmlRE, firstChar, lastChar
 
