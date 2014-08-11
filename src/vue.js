@@ -19,6 +19,26 @@ function Vue (options) {
 }
 
 /**
+ * Mixin global API
+ */
+
+extend(Vue, require('./api/global'))
+
+/**
+ * Vue and every constructor that extends Vue has an
+ * associated options object, which can be accessed during
+ * compilation steps as `this.constructor.options`.
+ */
+
+Vue.options = {
+  directives : require('./directives'),
+  filters    : require('./filters'),
+  partials   : {},
+  effects    : {},
+  components : {}
+}
+
+/**
  * Build up the prototype
  */
 
@@ -71,11 +91,5 @@ extend(p, require('./api/data'))
 extend(p, require('./api/dom'))
 extend(p, require('./api/events'))
 extend(p, require('./api/lifecycle'))
-
-/**
- * Mixin global API
- */
-
-extend(Vue, require('./api/global'))
 
 module.exports = Vue
