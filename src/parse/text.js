@@ -1,5 +1,8 @@
+var _ = require('../util')
 var Cache = require('../cache')
 var config = require('../config')
+var dirParser = require('./directive')
+
 var regexEscapeRE = /[-.*+?^${}()|[\]\/\\]/g
 var cache, tagRE, htmlRE, firstChar, lastChar
 
@@ -70,6 +73,7 @@ exports.parse = function (text) {
   var tokens = []
   var lastIndex = tagRE.lastIndex = 0
   var match, index, value, oneTime
+  /* jshint boss:true */
   while (match = tagRE.exec(text)) {
     index = match.index
     // push text token
@@ -79,11 +83,13 @@ exports.parse = function (text) {
       })
     }
     // tag token
-    value = match[1].trim()
-    oneTime = value.charAt(0) === '*'
+    oneTime = match[1].charAt(0) === '*'
+    value = oneTime
+      ? match[1].slice(1)
+      : match[1]
     tokens.push({
       tag: true,
-      value: oneTime ? value.slice(1) : value,
+      value: value.trim(),
       html: htmlRE.test(match[0]),
       oneTime: oneTime
     })
@@ -96,22 +102,4 @@ exports.parse = function (text) {
   }
   cache.put(text, tokens)
   return tokens
-}
-
-/**
- * Parse a template text string into an expression
- *
- * @param {String} text
- * @return {String}
- */
-
-exports.textToExpression = function (text) {
-  var tokens = exports.parse(text)
-  if (tokens) {
-    return tokens.map(function (token) {
-      return token.tag
-        ? token.value
-        : ('"' + token.value + '"')
-    }).join('+')
-  }
 }

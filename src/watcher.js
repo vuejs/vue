@@ -31,9 +31,14 @@ function Watcher (vm, expression, cb, ctx, filters, needSet) {
   this.deps = Object.create(null)
   this.newDeps = Object.create(null)
   // setup filters if any.
-  this.initFilters(filters)
+  // We delegate directive filters here to the watcher
+  // because they need to be included in the dependency
+  // collection process.
+  var res = _.resolveFilters(vm, filters, this)
+  this.readFilters = res && res.read
+  this.writeFilters = res && res.write
   // parse expression for getter/setter
-  var res = expParser.parse(expression, needSet)
+  res = expParser.parse(expression, needSet)
   this.getter = res.get
   this.setter = res.set
   this.initDeps(res.paths)
@@ -65,55 +70,6 @@ p.initDeps = function (paths) {
 }
 
 /**
- * Initialize read and write filters.
- * We delegate directive filters here to the watcher
- * because they need to be included in the dependency
- * collection process.
- *
- * @param {Array} filters
- */
-
-p.initFilters = function (filters) {
-  if (!filters) {
-    return
-  }
-  var self = this
-  var vm = this.vm
-  var registry = vm.$options.filters
-  filters.forEach(function (f) {
-    var def = registry[f.name]
-    var args = f.args
-    var read, write
-    if (typeof def === 'function') {
-      read = def
-    } else {
-      read = def.read
-      write = def.write
-    }
-    if (read) {
-      if (!self.readFilters) {
-        self.readFilters = []
-      }
-      self.readFilters.push(function (value) {
-        return args
-          ? read.apply(vm, [value].concat(args))
-          : read.call(vm, value)
-      })
-    }
-    if (write) {
-      if (!self.writeFilters) {
-        self.writeFilters = []
-      }
-      self.writeFilters.push(function (value) {
-        return args
-          ? write.apply(vm, [value, self.value].concat(args))
-          : write.call(vm, value, self.value)
-      })
-    }
-  })
-}
-
-/**
  * Add a binding dependency to this directive.
  *
  * @param {String} path
@@ -141,9 +97,7 @@ p.addDep = function (path) {
 p.get = function () {
   this.beforeGet()
   var value = this.getter.call(this.vm, this.vm.$scope)
-  if (this.readFilters) {
-    value = applyFilters(value, this.readFilters)
-  }
+  value = _.applyFilters(value, this.readFilters)
   this.afterGet()
   return value
 }
@@ -155,9 +109,7 @@ p.get = function () {
  */
 
 p.set = function (value) {
-  if (this.writeFilters) {
-    value = applyFilters(value, this.writeFilters)
-  }
+  value = _.applyFilters(value, this.writeFilters)
   this.setter.call(this.vm, this.vm.$scope, value)
 }
 
@@ -222,20 +174,6 @@ p.teardown = function () {
       vm._getBindingAt(path)._removeSub(this)
     }
   }
-}
-
-/**
- * Apply filters to a value
- *
- * @param {*} value
- * @param {Array} filters
- */
-
-function applyFilters (value, filters) {
-  for (var i = 0, l = filters.length; i < l; i++) {
-    value = filters[i](value)
-  }
-  return value
 }
 
 module.exports = Watcher

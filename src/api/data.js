@@ -1,6 +1,9 @@
-var expParser = require('../parse/expression')
-var textParser = require('../parse/text')
+var _ = require('../util')
 var Watcher = require('../watcher')
+var textParser = require('../parse/text')
+var dirParser = require('../parse/directive')
+var expParser = require('../parse/expression')
+var filterRE = /[^|]\|[^|]/
 
 /**
  * Get the value from an expression on this vm.
@@ -86,6 +89,32 @@ exports.$unwatch = function (id) {
 }
 
 /**
+ * Evaluate a text directive, including filters.
+ *
+ * @param {String} text
+ * @return {String}
+ */
+
+exports.$eval = function (text) {
+  // check for filters.
+  if (filterRE.test(text)) {
+    var dir = dirParser.parse(text)[0]
+    // the filter regex check might give false positive
+    // for pipes inside strings, so it's possible that
+    // we don't get any filters here
+    return dir.filters
+      ? _.applyFilters(
+          this.$get(dir.expression),
+          _.resolveFilters(this, dir.filters).read
+        )
+      : this.$get(dir.expression)
+  } else {
+    // no filter
+    return this.$get(text)
+  }
+}
+
+/**
  * Interpolate a piece of template text.
  *
  * @param {String} text
@@ -93,10 +122,17 @@ exports.$unwatch = function (id) {
  */
 
 exports.$interpolate = function (text) {
-  var exp = textParser.textToExpression(text)
-  return exp
-    ? this.$get(exp)
-    : text
+  var tokens = textParser.parse(text)
+  var vm = this
+  if (tokens) {
+    return tokens.map(function (token) {
+      return token.tag
+        ? vm.$eval(token.value)
+        : token.value
+    }).join('')
+  } else {
+    return text
+  }
 }
 
 /**
