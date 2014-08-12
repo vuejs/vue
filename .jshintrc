@@ -13,6 +13,7 @@
   "eqnull": true,
   "proto": true,
   "globals": {
-    "console": true
+    "console": true,
+    "DocumentFragment": true
   }
 }

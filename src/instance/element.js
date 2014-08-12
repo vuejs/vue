@@ -22,9 +22,9 @@ exports._initElement = function (el) {
   // instance is considered a "block instance" which manages
   // not a single element, but multiple elements. A block
   // instance's `$el` is an Array of the elements it manages.
-  if (el instanceof window.DocumentFragment) {
-    this._isBlock = true
-    this.$el = _.toArray(el.childNodes)
+  if (el instanceof DocumentFragment) {
+    this._blockNodes = _.toArray(el.childNodes)
+    this.$el = document.createComment('vue-block')
   } else {
     this.$el = el
   }
@@ -55,8 +55,8 @@ exports._initTemplate = function () {
           // the template contains multiple nodes
           // in this case the original `el` is simply
           // a placeholder.
-          this._isBlock = true
-          this.$el = _.toArray(frag.childNodes)
+          this._blockNodes = _.toArray(frag.childNodes)
+          this.$el = document.createComment('vue-block')
         } else {
           // 1 to 1 replace, we need to copy all the
           // attributes from the original el to the replacer

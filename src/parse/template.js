@@ -1,5 +1,3 @@
-/* global DocumentFragment */
-
 var Cache = require('../cache')
 var templateCache = new Cache(100)
 

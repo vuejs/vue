@@ -18,7 +18,7 @@ exports._init = function (options) {
 
   this.$el          = null
   this._data        = options.data || {}
-  this._isBlock     = false
+  this._blockNodes  = null
   this._isDestroyed = false
   this._rawContent  = null
   this._emitter     = new Emitter(this)

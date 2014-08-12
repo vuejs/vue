@@ -8,8 +8,8 @@ var config = require('../config')
  */
 
 exports._compile = function () {
-  if (this._isBlock) {
-    this.$el.forEach(this._compileNode, this)
+  if (this._blockNodes) {
+    this._blockNodes.forEach(this._compileNode, this)
   } else {
     this._compileNode(this.$el)
   }
