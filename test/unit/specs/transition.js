@@ -176,8 +176,11 @@ describe('Transition', function () {
                 assert.ok(typeof el.vue_trans_cb === 'function')
             })
 
-            it('should add the class', function () {
-                assert.ok(el.classList.contains(leaveClass))
+            it('should add the class', function (done) {
+                nextTick(function () {
+                    assert.ok(el.classList.contains(leaveClass))
+                    done()
+                })
             })
 
             it('should call changeState on transitionend', function () {

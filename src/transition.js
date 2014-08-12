@@ -126,7 +126,11 @@ function applyTransitionClass (el, stage, changeState, hasAnimation) {
 
         if (el.offsetWidth || el.offsetHeight) {
             // trigger hide transition
-            classList.add(leaveClass)
+            batcher.push({
+                execute: function () {
+                    classList.add(leaveClass)
+                }
+            })
             onEnd = function (e) {
                 if (e.target === el) {
                     el.removeEventListener(endEvent, onEnd)
