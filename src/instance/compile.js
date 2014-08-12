@@ -47,7 +47,22 @@ exports._compileNode = function (node) {
  */
 
 exports._compileElement = function (node) {
-  
+  var tag = node.tagName
+  // textarea is pretty annoying
+  // because its value creates childNodes which
+  // we don't want to compile.
+  if (tag === 'TEXTAREA' && node.value) {
+      node.value = this.$interpolate(node.value)
+  }
+  if (
+    // skip non-component with no attributes
+    (!node.hasAttributes() && tag.indexOf('-') < 0) ||
+    // skip v-pre
+    _.attr(node, 'pre') !== null
+  ) {
+    return
+  }
+  // TODO
 }
 
 /**
