@@ -93,15 +93,15 @@ exports.parse = function (s) {
   arg = null
 
   for (i = 0, l = str.length; i < l; i++) {
-    c = str.charAt(i)
+    c = str.charCodeAt(i)
     if (inSingle) {
       // check single quote
-      if (c === "'") inSingle = !inSingle
+      if (c === 0x27) inSingle = !inSingle
     } else if (inDouble) {
       // check double quote
-      if (c === '"') inDouble = !inDouble
+      if (c === 0x22) inDouble = !inDouble
     } else if (
-      c === ',' &&
+      c === 0x2C && // comma
       !paren && !curly && !square
     ) {
       // reached the end of a directive
@@ -110,7 +110,7 @@ exports.parse = function (s) {
       dir = {}
       begin = argIndex = lastFilterIndex = i + 1
     } else if (
-      c === ':' &&
+      c === 0x3A && // colon
       !dir.expression &&
       !dir.arg
     ) {
@@ -121,16 +121,16 @@ exports.parse = function (s) {
       // an object literal or a ternary expression.
       if (argRE.test(arg)) {
         argIndex = i + 1
-        argC = arg.charAt(0)
+        argC = arg.charCodeAt(0)
         // strip quotes
-        dir.arg = argC === '"' || argC === "'"
+        dir.arg = argC === 0x22 || argC === 0x27
           ? arg.slice(1, -1)
           : arg
       }
     } else if (
-      c === '|' &&
-      str.charAt(i + 1) !== '|' &&
-      str.charAt(i - 1) !== '|'
+      c === 0x7C && // pipe
+      str.charCodeAt(i + 1) !== 0x7C &&
+      str.charCodeAt(i - 1) !== 0x7C
     ) {
       if (dir.expression === undefined) {
         // first filter, end of expression
@@ -142,14 +142,14 @@ exports.parse = function (s) {
       }
     } else {
       switch (c) {
-        case '"': inDouble = true; break
-        case "'": inSingle = true; break
-        case '(': paren++; break
-        case ')': paren--; break
-        case '[': square++; break
-        case ']': square--; break
-        case '{': curly++; break
-        case '}': curly--; break
+        case 0x22: inDouble = true; break // "
+        case 0x27: inSingle = true; break // '
+        case 0x28: paren++; break         // (
+        case 0x29: paren--; break         // )
+        case 0x5B: square++; break        // [
+        case 0x5D: square--; break        // ]
+        case 0x7B: curly++; break         // {
+        case 0x7D: curly--; break         // }
       }
     }
   }

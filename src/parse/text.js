@@ -80,7 +80,7 @@ exports.parse = function (text) {
       })
     }
     // tag token
-    oneTime = match[1].charAt(0) === '*'
+    oneTime = match[1].charCodeAt(0) === 0x2A // *
     value = oneTime
       ? match[1].slice(1)
       : match[1]

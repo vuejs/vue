@@ -93,7 +93,7 @@ exports._initData = function (data, init) {
     // delete keys not present in the new data
     for (key in scope) {
       if (
-        key.charAt(0) !== '$' &&
+        key.charCodeAt(0) !== 0x24 && // $
         scope.hasOwnProperty(key) &&
         !(key in data)
       ) {
@@ -269,8 +269,8 @@ exports._syncData = function () {
       if (locked) {
         return
       }
-      var c = key.charAt(0)
-      if (c === '$' || c === '_') {
+      var c = key.charCodeAt(0)
+      if (c === 0x24 || c === 0x5F) { // $ and _
         return
       }
       locked = true
