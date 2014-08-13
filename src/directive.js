@@ -31,6 +31,7 @@ function Directive (name, el, vm, descriptor) {
   this._bound = false
   // init definition
   this._initDef()
+  this._bind()
 }
 
 var p = Directive.prototype
@@ -71,7 +72,7 @@ p._bind = function () {
     )
     var value = this._watcher.value
     if (this.bind) {
-      this.bind(value)
+      this.bind()
     }
     if (this.update) {
       this.update(value)

@@ -120,6 +120,10 @@ Instead of the old `Vue.config()` with a heavily overloaded API, the config obje
 Vue.config.debug = true
 ```
 
+## Prefix
+
+Config prefix now should include the hyphen: so the default is now `v-` and if you want to change it make sure to include the hyphen as well. e.g. `Vue.config.prefix = "data-"`.
+
 ## Interpolation Delimiters
 
 In the old version the interpolation delimiters are limited to the same base character (i.e. `['{','}']` translates into `{{}}` for text and `{{{}}}` for HTML). Now you can set them to whatever you like (*almost), and to indicate HTML interpolation, simply wrap the tag with one extra outer most character on each end. Example:

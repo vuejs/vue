@@ -8,7 +8,7 @@ var config = require('../config')
  */
 
 exports.attr = function (node, attr) {
-  attr = config.prefix + '-' + attr
+  attr = config.prefix + attr
   var val = node.getAttribute(attr)
   node.removeAttribute(attr)
   return val
