@@ -16,6 +16,13 @@ if (_.inBrowser) {
       target = div()
       parent.appendChild(child) 
     })
+
+    it('attr', function () {
+      target.setAttribute('v-test', 'ok')
+      var val = _.attr(target, 'test')
+      expect(val).toBe('ok')
+      expect(target.hasAttribute('v-test')).toBe(false)
+    })
     
     it('before', function () {
       _.before(target, child)

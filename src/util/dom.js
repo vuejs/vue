@@ -10,7 +10,9 @@ var config = require('../config')
 exports.attr = function (node, attr) {
   attr = config.prefix + attr
   var val = node.getAttribute(attr)
-  node.removeAttribute(attr)
+  if (val !== null) {
+    node.removeAttribute(attr)
+  }
   return val
 }
 

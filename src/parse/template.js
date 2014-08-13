@@ -115,10 +115,11 @@ function nodeToFragment (node) {
  *    - Node object of type Template
  *    - id selector: '#some-template-id'
  *    - template string: '<div><span>{{msg}}</span></div>'
+ * @param {Boolean} clone
  * @return {DocumentFragment|undefined}
  */
 
-exports.parse = function (template) {
+exports.parse = function (template, clone) {
   var node, frag
 
   // if the template is already a document fragment,
@@ -149,5 +150,7 @@ exports.parse = function (template) {
     frag = nodeToFragment(template)
   }
 
-  return frag
+  return frag && clone
+    ? frag.cloneNode(true)
+    : frag
 }

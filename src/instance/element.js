@@ -43,13 +43,12 @@ exports._initTemplate = function () {
   var options = this.$options
   var template = options.template
   if (template) {
-    var frag = templateParser.parse(template)
+    var frag = templateParser.parse(template, true)
     if (!frag) {
       _.warn('Invalid template option: ' + template)
     } else {
       // collect raw content. this wipes out $el.
       this._collectRawContent()
-      frag = frag.cloneNode(true)
       if (options.replace) {
         // replace
         if (frag.childNodes.length > 1) {

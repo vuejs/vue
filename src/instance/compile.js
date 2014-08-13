@@ -1,7 +1,9 @@
 var _ = require('../util')
 var config = require('../config')
 var Direcitve = require('../directive')
+var textParser = require('../parse/text')
 var dirParser = require('../parse/directive')
+var templateParser = require('../parse/template')
 
 /**
  * The main entrance to the compilation process.
@@ -109,6 +111,8 @@ exports._compileAttrs = function (node) {
       } else {
         _.warn('Unknown directive: ' + dirName)
       }
+    } else if (config.interpolate) {
+      this._bindAttr(node, attr)
     }
   }
   // sort the directives by priority, low to high
@@ -131,7 +135,38 @@ exports._compileAttrs = function (node) {
  */
 
 exports._compileTextNode = function (node) {
-  
+  var tokens = textParser.parse(node.nodeValue)
+  if (!tokens) {
+    return
+  }
+  var el, token, value
+  for (var i = 0, l = tokens.length; i < l; i++) {
+    token = tokens[i]
+    if (token.tag) {
+      if (token.oneTime) {
+        value = this.$get(token.value)
+        el = token.html
+          ? templateParser.parse(value, true)
+          : document.createTextNode(value)
+        _.before(el, node)
+      } else {
+        value = token.value
+        if (token.html) {
+          el = document.createComment('vue-html')
+          _.before(el, node)
+          this._bindDirective('html', value, el)
+        } else {
+          el = document.createTextNode('')
+          _.before(el, node)
+          this._bindDirective('text', value, el)
+        }
+      }
+    } else {
+      el = document.createTextNode(token.value)
+      _.before(el, node)
+    }
+  }
+  _.remove(node)
 }
 
 /**
@@ -142,6 +177,36 @@ exports._compileTextNode = function (node) {
 
 exports._compileComment = function (node) {
   
+}
+
+/**
+ * Check an attribute for potential bindings
+ */
+
+exports._bindAttr = function (node, attr) {
+  var tokens = textParser.parse(attr.value)
+  if (!tokens) {
+    return
+  }
+  var expression = tokens.map(expifyToken).join('+')
+  this._bindDirective(
+    'attr',
+    attr.name + ':' + expression,
+    node
+  )
+}
+
+/**
+ * Helper to translate token value into expression parts.
+ *
+ * @param {Object} token
+ * @return {String}
+ */
+
+function expifyToken (token) {
+  return token.tag
+    ? token.value
+    : ("'" + token.value + "'")
 }
 
 /**

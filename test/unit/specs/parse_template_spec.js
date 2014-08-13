@@ -99,6 +99,12 @@ if (_.inBrowser) {
       expect(res1).toBe(res2)
     })
 
+    it('should clone', function () {
+      var res1 = parse(testString, true)
+      var res2 = parse(testString, true)
+      expect(res1).not.toBe(res2)
+    })
+
     it('should cache id selectors', function () {
       var node = document.createElement('script')
       node.setAttribute('id', 'template-test')
