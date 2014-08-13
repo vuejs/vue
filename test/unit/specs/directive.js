@@ -123,6 +123,22 @@ describe('Directive', function () {
             assert.equal(res[2].arg, 'ok')
             assert.equal(res[2].key, '{a:1,b:2}')
         })
+        
+        it('a:b:c | d, e:\'f:g\', "h\',i":j, "k\\"l":m', function () {
+            var res = Directive.parse('a:b:c | d, e:\'f:g\', "h\',i":j, "k\\"l":m')
+            assert.equal(res.length, 4)
+            assert.equal(res[0].arg, 'a:b')
+            assert.equal(res[0].key, 'c')
+            assert.equal(res[0].filters.length, 1)
+            assert.equal(res[0].filters[0].name, 'd')
+            assert.notOk(res[0].filters[0].args)
+            assert.equal(res[1].arg, 'e')
+            assert.equal(res[1].key, '\'f:g\'')
+            assert.equal(res[2].arg, 'h\',i')
+            assert.equal(res[2].key, 'j')
+            assert.equal(res[3].arg, 'k"l')
+            assert.equal(res[3].key, 'm')
+        })
 
     })
 
@@ -201,10 +217,12 @@ describe('Directive', function () {
         it('should extract correct argument', function () {
             var d = build('text', 'todo:todos', compiler),
                 e = build('text', '$todo:todos + abc', compiler),
-                f = build('text', '-todo-fsef:todos | fsf fsef', compiler)
+                f = build('text', '-todo-fsef:todos | fsf fsef', compiler),
+                g = build('text', 'ns:todo:todos', compiler)
             assert.strictEqual(d.arg, 'todo', 'simple')
             assert.strictEqual(e.arg, '$todo', 'expression')
             assert.strictEqual(f.arg, '-todo-fsef', 'with hyphens and filters')
+            assert.strictEqual(g.arg, 'ns:todo', 'with a namespace prefix')
         })
 
         it('should be able to determine whether the key is an expression', function () {

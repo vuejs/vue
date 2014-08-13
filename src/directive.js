@@ -1,5 +1,6 @@
 var dirId           = 1,
-    ARG_RE          = /^[\w\$-]+$/,
+    ARG_RE          = /^[\w\$\-:]+$/,
+    QUOTED_RE       = /^('|")(.+)\1$/,
     FILTER_TOKEN_RE = /[^\s'"]+|'[^']+'|"[^"]+"/g,
     NESTING_RE      = /^\$(parent|root)\./,
     SINGLE_VAR_RE   = /^[\w\.$]+$/,
@@ -133,6 +134,7 @@ Directive.parse = function (str) {
 
     var inSingle = false,
         inDouble = false,
+        escaped  = false,
         curly    = 0,
         square   = 0,
         paren    = 0,
@@ -145,7 +147,14 @@ Directive.parse = function (str) {
 
     for (var c, i = 0, l = str.length; i < l; i++) {
         c = str.charAt(i)
-        if (inSingle) {
+        if (escaped) {
+            escaped = false
+            str = str.slice(0, i - 1) + str.slice(i, str.length)
+            l--
+            i--
+        }else if (c === '\\') {
+            escaped = true
+        }else if (inSingle) {
             // check single quote
             if (c === "'") inSingle = !inSingle
         } else if (inDouble) {
@@ -157,10 +166,13 @@ Directive.parse = function (str) {
             // reset & skip the comma
             dir = {}
             begin = argIndex = lastFilterIndex = i + 1
-        } else if (c === ':' && !dir.key && !dir.arg) {
+        } else if (c === ':' && !dir.key) {
             // argument
             arg = str.slice(begin, i).trim()
-            if (ARG_RE.test(arg)) {
+            if (QUOTED_RE.test(arg)) {
+                argIndex = i + 1
+                dir.arg = RegExp.$2
+            }else if (ARG_RE.test(arg)) {
                 argIndex = i + 1
                 dir.arg = arg
             }
