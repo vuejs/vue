@@ -37,6 +37,8 @@ exports.$destroy = function (remove) {
       this.$remove()
     }
   }
+  this.$el.__vue__ = null
+  this.$el = null
   var i
   // remove self from parent. only necessary
   // if this is called by the user.

@@ -28,6 +28,7 @@ exports._initElement = function (el) {
   } else {
     this.$el = el
   }
+  this.$el.__vue__ = this
   this._initTemplate()
   this._initContent()
 }
