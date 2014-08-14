@@ -2,17 +2,29 @@ var Cache = require('../cache')
 var templateCache = new Cache(100)
 
 var map = {
+  _default : [0, '', ''],
   legend   : [1, '<fieldset>', '</fieldset>'],
   tr       : [2, '<table><tbody>', '</tbody></table>'],
-  col      : [2, '<table><tbody></tbody><colgroup>', '</colgroup></table>'],
-  _default : [0, '', '']
+  col      : [
+    2,
+    '<table><tbody></tbody><colgroup>',
+    '</colgroup></table>'
+  ],
 }
 
 map.td =
-map.th = [3, '<table><tbody><tr>', '</tr></tbody></table>']
+map.th = [
+  3,
+  '<table><tbody><tr>',
+  '</tr></tbody></table>'
+]
 
 map.option =
-map.optgroup = [1, '<select multiple="multiple">', '</select>']
+map.optgroup = [
+  1,
+  '<select multiple="multiple">',
+  '</select>'
+]
 
 map.thead =
 map.tbody =
@@ -29,7 +41,15 @@ map.line =
 map.path =
 map.polygon =
 map.polyline =
-map.rect = [1, '<svg xmlns="http://www.w3.org/2000/svg" version="1.1">','</svg>']
+map.rect = [
+  1,
+  '<svg ' +
+    'xmlns="http://www.w3.org/2000/svg" ' +
+    'xmlns:xlink="http://www.w3.org/1999/xlink" ' +
+    'xmlns:ev="http://www.w3.org/2001/xml-events"' +
+    'version="1.1">',
+  '</svg>'
+]
 
 var TAG_RE = /<([\w:]+)/
 

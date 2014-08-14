@@ -109,7 +109,7 @@ exports._compileAttrs = function (node) {
           value: attr.value
         })
       } else {
-        _.warn('Unknown directive: ' + dirName)
+        _.warn('Failed to resolve directive: ' + dirName)
       }
     } else if (config.interpolate) {
       this._bindAttr(node, attr)
@@ -188,10 +188,22 @@ exports._bindAttr = function (node, attr) {
   if (!tokens) {
     return
   }
-  var expression = tokens.map(expifyToken).join('+')
+  if (tokens.length > 1) {
+    _.warn(
+      'Invalid attribute binding: "' + attr.value + '"' +
+      '\nUse one single interpolation tag in ' +
+      'attribute bindings.'
+    )
+    return
+  }
+  // wrap namespaced attribute so it won't mess up
+  // the directive parser
+  var arg = attr.name.indexOf(':') > 0
+    ? "'" + attr.name + "'"
+    : attr.name
   this._bindDirective(
     'attr',
-    attr.name + ':' + expression,
+    arg + ':' + tokens[0].value,
     node
   )
 }
