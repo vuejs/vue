@@ -317,18 +317,53 @@ exports.set = function (obj, path, val) {
   if (typeof path === 'string') {
     path = exports.parse(path)
   }
-  if (!path) {
+  if (!path || !isSettable(obj)) {
     return false
   }
+  var last, key
   for (var i = 0, l = path.length - 1; i < l; i++) {
-    if (!obj || typeof obj !== 'object') {
-      return false
+    last = obj
+    key = path[i]
+    obj = obj[key]
+    if (!isSettable(obj)) {
+      obj = {}
+      add(last, key, obj)
     }
-    obj = obj[path[i]]
   }
-  if (!obj || typeof obj !== 'object') {
-    return false
+  key = path[i]
+  if (obj.hasOwnProperty(key)) {
+    obj[key] = val
+  } else {
+    add(obj, key, val)
   }
-  obj[path[i]] = val
   return true
+}
+
+/**
+ * Check if a value is an object that can have values
+ * set on it. Slightly faster than _.isObject.
+ *
+ * @param {*} val
+ * @return {Boolean}
+ */
+
+function isSettable (val) {
+  return val && typeof val === 'object'
+}
+
+/**
+ * Add a property to an object, using $add if target
+ * has been augmented by Vue's observer.
+ *
+ * @param {Object} obj
+ * @param {String} key
+ * @param {*} val
+ */
+
+function add (obj, key, val) {
+  if (obj.$add) {
+    obj.$add(key, val)
+  } else {
+    obj[key] = val
+  }
 }

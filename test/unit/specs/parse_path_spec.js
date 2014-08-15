@@ -107,7 +107,7 @@ describe('Path', function () {
     expect(Path.getFromObserver(obj, ['a','c'].join(delim))).toBeUndefined()
   })
 
-  it('set success', function () {
+  it('set', function () {
     var path = 'a.b.c'
     var obj = {
       a: {
@@ -121,19 +121,16 @@ describe('Path', function () {
     expect(obj.a.b.c).toBe(12345)
   })
 
-  it('set fail', function () {
-    var obj = {
-      a: null
-    }
-    var res = Path.set(obj, 'a.b.c', 12345)
-    expect(res).toBe(false)
-    res = Path.set(obj, 'a.b', 12345)
-    expect(res).toBe(false)
-  })
-
   it('set invalid', function () {
     var res = Path.set({}, 'ab[c]d', 123)
     expect(res).toBe(false)
+  })
+
+  it('force set', function () {
+    var target = {}
+    var res = Path.set(target, 'a.b.c', 123, true)
+    expect(res).toBe(true)
+    expect(target.a.b.c).toBe(123)
   })
 
 })

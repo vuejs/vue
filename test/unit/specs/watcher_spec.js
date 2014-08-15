@@ -236,6 +236,18 @@ describe('Watcher', function () {
     })
   })
 
+  it('set non-existent values', function (done) {
+    var watcher = new Watcher(vm, 'd.e.f', spy)
+    expect(watcher.value).toBeUndefined()
+    watcher.set(123)
+    nextTick(function () {
+      expect(vm.d.e.f).toBe(123)
+      expect(watcher.value).toBe(123)
+      expect(spy).toHaveBeenCalledWith(123, undefined)
+      done()
+    })
+  })
+
   it('teardown', function (done) {
     var watcher = new Watcher(vm, 'b.c', spy)
     watcher.teardown()
