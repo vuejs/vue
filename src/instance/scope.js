@@ -18,7 +18,7 @@ exports._initScope = function () {
     ? Object.create(parent.$scope)
     : {}
   // create scope observer
-  this._observer = Observer.create(scope, {
+  this.$observer = Observer.create(scope, {
     callbackContext: this,
     doNotAlterProto: true
   })
@@ -27,8 +27,8 @@ exports._initScope = function () {
 
   // relay change events that sent down from
   // the scope prototype chain.
-  var ob = this._observer
-  var pob = parent._observer
+  var ob = this.$observer
+  var pob = parent.$observer
   var listeners = this._scopeListeners = {}
   scopeEvents.forEach(function (event) {
     var cb = listeners[event] = function (key, a, b) {
@@ -50,11 +50,11 @@ exports._initScope = function () {
  */
 
 exports._teardownScope = function () {
-  this._observer.off()
+  this.$observer.off()
   this._unsyncData()
   this.$scope = null
   if (this.$parent) {
-    var pob = this.$parent._observer
+    var pob = this.$parent.$observer
     var listeners = this._scopeListeners
     scopeEvents.forEach(function (event) {
       pob.off(event, listeners[event])
@@ -146,7 +146,7 @@ exports._initProxy = function () {
     }
   }
   // keep proxying up-to-date with added/deleted keys.
-  this._observer
+  this.$observer
     .on('add:self', function (key) {
       _.proxy(this, scope, key)
     })
@@ -245,7 +245,7 @@ exports._syncData = function () {
   }
 
   // sync scope and original data.
-  this._observer
+  this.$observer
     .on('set:self', listeners.data.set)
     .on('add:self', listeners.data.add)
     .on('delete:self', listeners.data.delete)
@@ -287,7 +287,7 @@ exports._syncData = function () {
 exports._unsyncData = function () {
   var listeners = this._syncListeners
 
-  this._observer
+  this.$observer
     .off('set:self', listeners.data.set)
     .off('add:self', listeners.data.add)
     .off('delete:self', listeners.data.delete)

@@ -25,7 +25,7 @@ exports._initBindings = function () {
     root._addChild('$root', this.$root._rootBinding)
   }
   // setup observer events
-  this._observer
+  this.$observer
     // simple updates
     .on('set', this._updateBindingAt)
     .on('mutate', this._updateBindingAt)
