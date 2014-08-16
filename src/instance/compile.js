@@ -13,8 +13,9 @@ var templateParser = require('../parse/template')
  */
 
 exports._compile = function () {
-  if (this._blockNodes) {
-    this._blockNodes.forEach(this._compileNode, this)
+  if (this._isBlock) {
+    _.toArray(this._blockFragment.childNodes)
+      .forEach(this._compileNode, this)
   } else {
     this._compileNode(this.$el)
   }

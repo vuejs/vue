@@ -18,19 +18,34 @@ exports._initElement = function (el) {
       _.warn('Cannot find element: ' + selector)
     }
   }
-  // If the passed in `el` is a DocumentFragment, the
-  // instance is considered a "block instance" which manages
-  // not a single element, but multiple elements. A block
-  // instance's `$el` is an Array of the elements it manages.
   if (el instanceof DocumentFragment) {
-    this._blockNodes = _.toArray(el.childNodes)
-    this.$el = document.createComment('vue-block')
+    this._initBlock(el)
   } else {
     this.$el = el
+    this._initTemplate()
+    this._initContent()
   }
   this.$el.__vue__ = this
-  this._initTemplate()
-  this._initContent()
+}
+
+/**
+ * Initialize a block instance that manages a group of
+ * nodes instead of one element. The group is denoted by
+ * a starting node and an ending node.
+ *
+ * @param {DocumentFragment} frag
+ */
+
+exports._initBlock = function (frag) {
+  this._isBlock = true
+  this.$el =
+  this._blockStart =
+    document.createComment('v-block-start')
+  this._blockEnd =
+    document.createComment('v-block-end')
+  _.prepend(this._blockStart, frag)
+  frag.appendChild(this._blockEnd)
+  this._blockFragment = frag
 }
 
 /**
@@ -147,7 +162,7 @@ var concat = [].concat
 function getOutlets (el) {
   return _.isArray(el)
     ? concat.apply([], el.map(getOutlets))
-    : _.toArray(el.getElementsByTagName('content'))
+    : _.toArray(el.querySelectorAll('content'))
 }
 
 /**

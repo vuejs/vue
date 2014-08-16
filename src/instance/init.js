@@ -18,13 +18,16 @@ exports._init = function (options) {
 
   this.$el          = null
   this._data        = options.data || {}
-  this._blockNodes  = null
   this._isDestroyed = false
   this._rawContent  = null
   this._emitter     = new Emitter(this)
   this._watchers    = {}
   this._activeWatcher = null
   this._directives  = []
+
+  this._isBlock     = false
+  this._blockStart  = null
+  this._blockEnd    = null
 
   // setup parent relationship
   this.$parent = options.parent

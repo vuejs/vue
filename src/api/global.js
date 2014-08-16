@@ -14,7 +14,7 @@ var assetTypes = [
 exports.util       = _
 exports.nextTick   = _.nextTick
 exports.config     = require('../config')
-exports.transition = require('../transition/transition')
+exports.transition = require('../transition')
 
 /**
  * Class inehritance
