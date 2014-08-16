@@ -230,19 +230,6 @@ exports._bindAttr = function (node, attr) {
 }
 
 /**
- * Helper to translate token value into expression parts.
- *
- * @param {Object} token
- * @return {String}
- */
-
-function expifyToken (token) {
-  return token.tag
-    ? token.value
-    : ("'" + token.value + "'")
-}
-
-/**
  * Check for priority directives that would potentially
  * skip other directives:
  *

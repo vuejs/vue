@@ -1,5 +1,3 @@
-var _ = require('../util')
-
 // SVG xml namespaces
 var namespaces = {
   xlink: 'http://www.w3.org/1999/xlink',
