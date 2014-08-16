@@ -35,4 +35,5 @@ exports._callHook = function (hook) {
       handlers[i].call(this)
     }
   }
+  this.$emit('hook:' + hook)
 }

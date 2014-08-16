@@ -61,14 +61,14 @@ p._initDef = function () {
  */
 
 p._bind = function () {
-  if (this.expression && !this.isLiteral && this.update) {
+  if (this.expression && !this.literal && this.update) {
     this._watcher = new Watcher(
       this.vm,
       this.expression,
       this._update, // callback
       this, // callback context
       this.filters,
-      this.twoway // need setter
+      this.twoWay // need setter
     )
     var value = this._watcher.value
     if (this.bind) {
@@ -78,6 +78,10 @@ p._bind = function () {
       this.update(value)
     }
   } else {
+    if (this.literal) {
+      this.expression =
+        this.vm.$interpolate(this.expression)
+    }
     if (this.bind) {
       this.bind()
     }
@@ -124,7 +128,7 @@ p._teardown = function () {
  */
 
 p.set = function (value, lock) {
-  if (this.twoway) {
+  if (this.twoWay) {
     if (lock) {
       this._locked = true
     }

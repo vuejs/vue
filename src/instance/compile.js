@@ -19,6 +19,7 @@ exports._compile = function () {
   } else {
     this._compileNode(this.$el)
   }
+  this._isCompiled = true
 }
 
 /**

@@ -12,7 +12,7 @@ exports.$appendTo = function (target, cb) {
   if (this._isBlock) {
     blockOp(this, target, transition.append, cb)
   } else {
-    transition.append(this.$el, target, cb)
+    transition.append(this.$el, target, cb, this)
   }
 }
 
@@ -44,7 +44,7 @@ exports.$before = function (target, cb) {
   if (this._isBlock) {
     blockOp(this, target, transition.before, cb)
   } else {
-    transition.before(this.$el, target, cb)
+    transition.before(this.$el, target, cb, this)
   }
 }
 
@@ -82,7 +82,7 @@ exports.$remove = function (cb) {
       cb
     )
   } else if (this.$el.parentNode) {
-    transition.remove(this.$el, cb)
+    transition.remove(this.$el, cb, this)
   }
 }
 
@@ -102,10 +102,10 @@ function blockOp (vm, target, op, cb) {
   var next
   while (next !== end) {
     next = current.nextSibling
-    op(current, target)
+    op(current, target, null, vm)
     current = next
   }
-  op(end, target, cb)
+  op(end, target, cb, vm)
 }
 
 /**

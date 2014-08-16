@@ -17,8 +17,8 @@ exports._init = function (options) {
   options = options || {}
 
   this.$el          = null
+  this.$            = {}
   this._data        = options.data || {}
-  this._isDestroyed = false
   this._rawContent  = null
   this._emitter     = new Emitter(this)
   this._watchers    = {}
@@ -28,6 +28,9 @@ exports._init = function (options) {
   this._isBlock     = false
   this._blockStart  = null
   this._blockEnd    = null
+
+  this._isCompiled  = false
+  this._isDestroyed = false
 
   // setup parent relationship
   this.$parent = options.parent
