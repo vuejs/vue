@@ -244,3 +244,6 @@ exports.parse = function (exp, needSet) {
   expressionCache.put(exp, res)
   return res
 }
+
+// Export the pathRegex for external use
+exports.pathTestRE = pathTestRE

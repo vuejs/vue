@@ -1,6 +1,7 @@
 var _ = require('./util')
 var Watcher = require('./watcher')
 var textParser = require('./parse/text')
+var expParser = require('./parse/expression')
 
 /**
  * A directive links a DOM element with a piece of data,
@@ -62,11 +63,44 @@ p._initDef = function () {
  */
 
 p._bind = function () {
-  // check if this is a dynamic literal binding
-  // e.g. v-component="{{currentView}}"
+  this.watcherExp = this.expression
+  var isDynamicLiteral = this._checkDynamicLiteral()
+  if (this.bind) {
+    this.bind()
+  }
+  if (
+    this.expression && this.update &&
+    (!this.isLiteral || isDynamicLiteral)
+  ) {
+    if (!this._checkExpFn())
+    // check if this is a function directive with an
+    // inline expression
+     {
+      this._watcher = new Watcher(
+        this.vm,
+        this.watcherExp,
+        this._update, // callback
+        this, // callback context
+        this.filters,
+        this.twoWay // need setter
+      )
+      this.update(this._watcher.value)
+    }
+  }
+  this._bound = true
+}
+
+/**
+ * check if this is a dynamic literal binding.
+ *
+ * e.g. v-component="{{currentView}}"
+ *
+ * @return {Boolean}
+ */
+
+p._checkDynamicLiteral = function () {
   var expression = this.expression
-  var isDynamicLiteral = false
-  if (this.literal) {
+  if (expression && this.isLiteral) {
     var tokens = textParser.parse(expression)
     if (tokens) {
       if (tokens.length > 1) {
@@ -77,30 +111,38 @@ p._bind = function () {
           'in literal directives.'
         )
       } else {
-        isDynamicLiteral = true
-        expression = tokens[0].value
+        this.watcherExp = tokens[0].value
         this.expression = this.vm.$eval(expression)
+        return true
       }
     }
   }
-  if (this.bind) {
-    this.bind()
-  }
+}
+
+/**
+ * Check if the directive is a function caller
+ * and if the expression is a callable one. If both true,
+ * we wrap up the expression and use it as the event
+ * handler.
+ *
+ * e.g. v-on="click: a++"
+ *
+ * @return {Boolean}
+ */
+
+p._checkExpFn = function () {
+  var expression = this.expression
   if (
-    expression && this.update &&
-    (!this.literal || isDynamicLiteral)
+    expression && this.isFn &&
+    !expParser.pathTestRE.test(expression)
   ) {
-    this._watcher = new Watcher(
-      this.vm,
-      expression,
-      this._update, // callback
-      this, // callback context
-      this.filters,
-      this.twoWay // need setter
-    )
-    this.update(this._watcher.value)
+    var fn = expParser.parse(expression).get
+    var scope = this.vm.$scope
+    this.update(function () {
+      fn(scope)
+    })
+    return true
   }
-  this._bound = true
 }
 
 /**

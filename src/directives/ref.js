@@ -1,6 +1,6 @@
 module.exports = {
 
-  literal: true,
+  isLiteral: true,
 
   bind: function () {
     var id = this.expression

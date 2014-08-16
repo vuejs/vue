@@ -1,4 +1,5 @@
-var extend = require('./util').extend
+var _ = require('./util')
+var extend = _.extend
 
 /**
  * The exposed Vue constructor.
@@ -96,4 +97,4 @@ extend(p, require('./api/dom'))
 extend(p, require('./api/events'))
 extend(p, require('./api/lifecycle'))
 
-module.exports = Vue
+module.exports = _.Vue = Vue

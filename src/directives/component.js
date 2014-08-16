@@ -2,7 +2,7 @@ var _ = require('../util')
 
 module.exports = {
 
-  literal: true,
+  isLiteral: true,
 
   bind: function () {
     if (!this.el.__vue__) {

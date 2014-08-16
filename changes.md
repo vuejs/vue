@@ -69,13 +69,10 @@ computed: {
 
 ### New options
 
-- `literal`: replaces old options `isLiteral` and `isEmpty`.
 - `twoWay`: indicates the directive is two-way and may write back to the model. Allows the use of `this.set(value)` inside directive functions.
 - `paramAttributes`: an Array of attribute names to extract as parameters for the directive. For example, given the option value `['my-param']` and markup `<input v-my-dir="msg" my-param="123">`, you can access `this.params['my-param']` with value `'123'` inside directive functions.
 
-### Removed options: `isLiteral`, `isEmpty`, `isFn`
-
-- `isFn` is no longer necessary for directives expecting function values.
+### Removed option: `isEmpty`
 
 ## Interpolation
 

@@ -61,7 +61,7 @@ exports._compileElement = function (node) {
   var hasAttributes = node.hasAttributes()
   // check priority directives
   if (hasAttributes) {
-    if (this._checkPriorityDirectives(node)) {
+    if (this._checkPriorityDirs(node)) {
       return
     }
   }
@@ -170,31 +170,31 @@ exports._compileTextNode = function (node) {
 
 /**
  * Check for priority directives that would potentially
- * skip other directives:
- *
- * - v-pre
- * - v-repeat
- * - v-if
- * - v-component
+ * skip other directives.
  *
  * @param {Element} node
  * @return {Boolean}
  */
 
-exports._checkPriorityDirectives = function (node) {
-  var value
-  /* jshint boss: true */
+var priorityDirs = [
+  'repeat',
+  'if',
+  'view',
+  'component'
+]
+
+exports._checkPriorityDirs = function (node) {
   if (_.attr(node, 'pre') !== null) {
     return true
-  } else if (value = _.attr(node, 'repeat')) {
-    this._bindDirective('repeat', value)
-    return true
-  } else if (value = _.attr(node, 'if')) {
-    this._bindDirective('if', value)
-    return true
-  } else if (value = _.attr(node, 'component')) {
-    this._bindDirective('component', value)
-    return true
+  }
+  var value, dir
+  /* jshint boss: true */
+  for (var i = 0, l = priorityDirs.length; i < l; i++) {
+    dir = priorityDirs[i]
+    if (value = _.attr(node, dir)) {
+      this._bindDirective(dir, value)
+      return true
+    }
   }
 }
 
