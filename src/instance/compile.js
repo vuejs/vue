@@ -180,29 +180,50 @@ exports._compileComment = function (node) {
 }
 
 /**
- * Check an attribute for potential bindings
+ * Check an attribute for potential bindings.
  */
 
 exports._bindAttr = function (node, attr) {
-  var tokens = textParser.parse(attr.value)
+  var name = attr.name
+  var value = attr.value
+  // check if this is a param attribute.
+  var params = this.$options.paramAttributes
+  var isParam =
+    node === this.$el && // only check on root node
+    params &&
+    params.indexOf(name) > -1
+  if (isParam) {
+    node.removeAttribute(name)
+  }
+  // parse attribute value
+  var tokens = textParser.parse(value)
   if (!tokens) {
+    if (isParam) {
+      this.$set(name, value)
+    }
     return
   }
+  // only 1 binding tag allowed
   if (tokens.length > 1) {
     _.warn(
-      'Invalid attribute binding: "' + attr.value + '"' +
+      'Invalid attribute binding: "' + value + '"' +
       '\nUse one single interpolation tag in ' +
       'attribute bindings.'
     )
     return
   }
+  // param attributes are bound as v-with
+  var dirName = isParam
+    ? 'with'
+    : 'attr'
   // wrap namespaced attribute so it won't mess up
   // the directive parser
-  var arg = attr.name.indexOf(':') > 0
-    ? "'" + attr.name + "'"
-    : attr.name
+  var arg = name.indexOf(':') > 0
+    ? "'" + name + "'"
+    : name
+  // bind
   this._bindDirective(
-    'attr',
+    dirName,
     arg + ':' + tokens[0].value,
     node
   )

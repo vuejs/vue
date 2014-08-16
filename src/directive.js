@@ -90,11 +90,12 @@ p._bind = function () {
  * Check locked or not before calling definition update.
  *
  * @param {*} value
+ * @param {*} oldValue
  */
 
-p._update = function (value) {
+p._update = function (value, oldValue) {
   if (!this._locked) {
-    this.update(value)
+    this.update(value, oldValue)
   }
 }
 
