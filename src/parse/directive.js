@@ -1,3 +1,4 @@
+var _ = require('../util')
 var Cache = require('../cache')
 var cache = new Cache(1000)
 var argRE = /^[\w\$-]+$|^'[^']*'$|^"[^"]*"$/
@@ -20,7 +21,6 @@ var dirs
 var dir
 var lastFilterIndex
 var arg
-var argC
 
 /**
  * Push a directive object into the result Array
@@ -121,11 +121,7 @@ exports.parse = function (s) {
       // an object literal or a ternary expression.
       if (argRE.test(arg)) {
         argIndex = i + 1
-        argC = arg.charCodeAt(0)
-        // strip quotes
-        dir.arg = argC === 0x22 || argC === 0x27
-          ? arg.slice(1, -1)
-          : arg
+        dir.arg = _.stripQuotes(arg)
       }
     } else if (
       c === 0x7C && // pipe
