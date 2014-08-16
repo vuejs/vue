@@ -1,5 +1,6 @@
 var _ = require('./util')
 var Watcher = require('./watcher')
+var textParser = require('./parse/text')
 
 /**
  * A directive links a DOM element with a piece of data,
@@ -61,30 +62,43 @@ p._initDef = function () {
  */
 
 p._bind = function () {
-  if (this.expression && !this.literal && this.update) {
+  // check if this is a dynamic literal binding
+  // e.g. v-component="{{currentView}}"
+  var expression = this.expression
+  var isDynamicLiteral = false
+  if (this.literal) {
+    var tokens = textParser.parse(expression)
+    if (tokens) {
+      if (tokens.length > 1) {
+        _.warn(
+          'Invalid literal directive: ' +
+          this.name + '="' + expression + '"' +
+          '\nDon\'t mix binding tags with plain text ' +
+          'in literal directives.'
+        )
+      } else {
+        isDynamicLiteral = true
+        expression = tokens[0].value
+        this.expression = this.vm.$eval(expression)
+      }
+    }
+  }
+  if (this.bind) {
+    this.bind()
+  }
+  if (
+    expression && this.update &&
+    (!this.literal || isDynamicLiteral)
+  ) {
     this._watcher = new Watcher(
       this.vm,
-      this.expression,
+      expression,
       this._update, // callback
       this, // callback context
       this.filters,
       this.twoWay // need setter
     )
-    var value = this._watcher.value
-    if (this.bind) {
-      this.bind()
-    }
-    if (this.update) {
-      this.update(value)
-    }
-  } else {
-    if (this.literal) {
-      this.expression =
-        this.vm.$interpolate(this.expression)
-    }
-    if (this.bind) {
-      this.bind()
-    }
+    this.update(this._watcher.value)
   }
   this._bound = true
 }

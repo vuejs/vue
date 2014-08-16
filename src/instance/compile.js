@@ -208,9 +208,10 @@ exports._bindAttr = function (node, attr) {
   // only 1 binding tag allowed
   if (tokens.length > 1) {
     _.warn(
-      'Invalid attribute binding: "' + value + '"' +
-      '\nUse one single interpolation tag in ' +
-      'attribute bindings.'
+      'Invalid attribute binding: "' +
+      name + '="' + value + '"' +
+      '\nDon\'t mix binding tags with plain text ' +
+      'in attribute bindings.'
     )
     return
   }
