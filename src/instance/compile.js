@@ -41,9 +41,6 @@ exports._compileNode = function (node) {
         this._compileTextNode(node)
       }
       break
-    case 8: // comment
-      this._compileComment(node)
-      break
   }
 }
 
@@ -172,13 +169,51 @@ exports._compileTextNode = function (node) {
 }
 
 /**
- * Compile a comment node (check for block flow-controls)
+ * Check for priority directives that would potentially
+ * skip other directives:
  *
- * @param {CommentNode} node
+ * - v-pre
+ * - v-repeat
+ * - v-if
+ * - v-component
+ *
+ * @param {Element} node
+ * @return {Boolean}
  */
 
-exports._compileComment = function (node) {
-  
+exports._checkPriorityDirectives = function (node) {
+  var value
+  /* jshint boss: true */
+  if (_.attr(node, 'pre') !== null) {
+    return true
+  } else if (value = _.attr(node, 'repeat')) {
+    this._bindDirective('repeat', value)
+    return true
+  } else if (value = _.attr(node, 'if')) {
+    this._bindDirective('if', value)
+    return true
+  } else if (value = _.attr(node, 'component')) {
+    this._bindDirective('component', value)
+    return true
+  }
+}
+
+/**
+ * Bind a directive.
+ *
+ * @param {String} name
+ * @param {String} value
+ * @param {Element} node
+ */
+
+exports._bindDirective = function (name, value, node) {
+  var descriptors = dirParser.parse(value)
+  var dirs = this._directives
+  for (var i = 0, l = descriptors.length; i < l; i++) {
+    dirs.push(
+      new Direcitve(name, node, this, descriptors[i])
+    )
+  }
 }
 
 /**
@@ -230,52 +265,4 @@ exports._bindAttr = function (node, attr) {
     arg + ':' + tokens[0].value,
     node
   )
-}
-
-/**
- * Check for priority directives that would potentially
- * skip other directives:
- *
- * - v-pre
- * - v-repeat
- * - v-if
- * - v-component
- *
- * @param {Element} node
- * @return {Boolean}
- */
-
-exports._checkPriorityDirectives = function (node) {
-  var value
-  /* jshint boss: true */
-  if (_.attr(node, 'pre') !== null) {
-    return true
-  } else if (value = _.attr(node, 'repeat')) {
-    this._bindDirective('repeat', value)
-    return true
-  } else if (value = _.attr(node, 'if')) {
-    this._bindDirective('if', value)
-    return true
-  } else if (value = _.attr(node, 'component')) {
-    this._bindDirective('component', value)
-    return true
-  }
-}
-
-/**
- * Bind a directive.
- *
- * @param {String} name
- * @param {String} value
- * @param {Element} node
- */
-
-exports._bindDirective = function (name, value, node) {
-  var descriptors = dirParser.parse(value)
-  var dirs = this._directives
-  for (var i = 0, l = descriptors.length; i < l; i++) {
-    dirs.push(
-      new Direcitve(name, node, this, descriptors[i])
-    )
-  }
 }

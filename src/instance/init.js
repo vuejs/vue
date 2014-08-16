@@ -25,12 +25,18 @@ exports._init = function (options) {
   this._activeWatcher = null
   this._directives  = []
 
+  // block instance properties
   this._isBlock     = false
   this._blockStart  = null
   this._blockEnd    = null
 
+  // lifecycle state
   this._isCompiled  = false
   this._isDestroyed = false
+
+  // anonymous instances are created by flow-control
+  // directives such as v-if and v-repeat
+  this._isAnonymous = options.anonymous
 
   // setup parent relationship
   this.$parent = options.parent

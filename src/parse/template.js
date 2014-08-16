@@ -145,7 +145,9 @@ exports.parse = function (template, clone) {
   // if the template is already a document fragment,
   // do nothing
   if (template instanceof DocumentFragment) {
-    return template
+    return clone
+      ? template.cloneNode(true)
+      : template
   }
 
   if (typeof template === 'string') {
