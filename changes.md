@@ -34,6 +34,12 @@ It's probably easy to understand why `el` and `parent` are instance only. But wh
 
 When events are used extensively for cross-vm communication, the ready hook can get kinda messy. The new `events` option is similar to its Backbone equivalent, where you can declaratiely register a bunch of event listeners.
 
+### new option: `inheritScope`.
+
+Default: `true`.
+
+Whether to inherit parent scope data. Set it to `false` if you want to create a component that have an isolated scope of its own.
+
 ### removed options: `id`, `tagName`, `className`, `attributes`, `lazy`.
 
 Since now a vm must always be provided the `el` option or explicitly mounted to an existing element, the element creation releated options have been removed for simplicity. If you need to modify your element's attributes, simply do so in the new `beforeMount` hook.

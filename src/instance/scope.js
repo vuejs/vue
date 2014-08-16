@@ -14,7 +14,8 @@ var scopeEvents = ['set', 'mutate', 'add', 'delete']
 
 exports._initScope = function () {
   var parent = this.$parent
-  var scope = this.$scope = parent
+  var inherit = parent && this.$options.inheritScope
+  var scope = this.$scope = inherit
     ? Object.create(parent.$scope)
     : {}
   // create scope observer
@@ -23,7 +24,7 @@ exports._initScope = function () {
     doNotAlterProto: true
   })
 
-  if (!parent) return
+  if (!inherit) return
 
   // relay change events that sent down from
   // the scope prototype chain.

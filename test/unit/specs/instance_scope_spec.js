@@ -33,7 +33,7 @@ describe('Scope', function () {
 
     it('should trigger set events', function () {
       var spy = jasmine.createSpy('basic')
-      vm._observer.on('set', spy)
+      vm.$observer.on('set', spy)
 
       // set on scope
       vm.$scope.a = 2
@@ -48,7 +48,7 @@ describe('Scope', function () {
 
     it('should trigger add/delete events', function () {
       var spy = jasmine.createSpy('instantiation')
-      vm._observer
+      vm.$observer
         .on('add', spy)
         .on('delete', spy)
 
@@ -159,25 +159,25 @@ describe('Scope', function () {
       // when a shadowed property changed on parent scope,
       // the event should NOT be propagated down
       var spy = jasmine.createSpy('inheritance')
-      child._observer.on('set', spy)
+      child.$observer.on('set', spy)
       parent.c = 'c changed'
       expect(spy.calls.count()).toBe(1)
       expect(spy).toHaveBeenCalledWith('c', 'c changed', u)
 
       spy = jasmine.createSpy('inheritance')
-      child._observer.on('add', spy)
+      child.$observer.on('add', spy)
       parent.$scope.$add('e', 123)
       expect(spy.calls.count()).toBe(1)
       expect(spy).toHaveBeenCalledWith('e', 123, u)
 
       spy = jasmine.createSpy('inheritance')
-      child._observer.on('delete', spy)
+      child.$observer.on('delete', spy)
       parent.$scope.$delete('e')
       expect(spy.calls.count()).toBe(1)
       expect(spy).toHaveBeenCalledWith('e', u, u)
 
       spy = jasmine.createSpy('inheritance')
-      child._observer.on('mutate', spy)
+      child.$observer.on('mutate', spy)
       parent.arr.reverse()
       expect(spy.calls.mostRecent().args[0]).toBe('arr')
       expect(spy.calls.mostRecent().args[1]).toBe(parent.arr)
@@ -189,7 +189,7 @@ describe('Scope', function () {
       // when a shadowed property changed on parent scope,
       // the event should NOT be propagated down
       var spy = jasmine.createSpy('inheritance')
-      child._observer.on('set', spy)
+      child.$observer.on('set', spy)
       parent.a = 'a changed'
       expect(spy.calls.count()).toBe(0)
     })
@@ -213,8 +213,8 @@ describe('Scope', function () {
       
       var parentSpy = jasmine.createSpy('parent')
       var childSpy = jasmine.createSpy('child')
-      parent._observer.on('set', parentSpy)
-      child._observer.on('set', childSpy)
+      parent.$observer.on('set', parentSpy)
+      child.$observer.on('set', childSpy)
       child.a = 3
 
       // make sure data sync is working
@@ -240,8 +240,8 @@ describe('Scope', function () {
     var vmSpy = jasmine.createSpy('vm')
     var vmAddSpy = jasmine.createSpy('vmAdd')
     var oldDataSpy = jasmine.createSpy('oldData')
-    vm._observer.on('set', vmSpy)
-    vm._observer.on('add', vmAddSpy)
+    vm.$observer.on('set', vmSpy)
+    vm.$observer.on('add', vmAddSpy)
     oldData.$observer.on('set', oldDataSpy)
 
     vm.$data = newData
@@ -274,7 +274,7 @@ describe('Scope', function () {
       parent: parent
     })
     var spy = jasmine.createSpy('teardown')
-    child._observer.on('set', spy)
+    child.$observer.on('set', spy)
 
     it('should stop relaying parent events', function () {
       child._teardownScope()

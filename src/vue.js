@@ -28,14 +28,18 @@ extend(Vue, require('./api/global'))
  * Vue and every constructor that extends Vue has an
  * associated options object, which can be accessed during
  * compilation steps as `this.constructor.options`.
+ *
+ * These can be seen as the default options of every
+ * Vue instance.
  */
 
 Vue.options = {
-  directives : require('./directives'),
-  filters    : require('./filters'),
-  partials   : {},
-  effects    : {},
-  components : {}
+  directives    : require('./directives'),
+  filters       : require('./filters'),
+  partials      : {},
+  effects       : {},
+  components    : {},
+  inheritScope  : true
 }
 
 /**
