@@ -72,10 +72,7 @@ p._bind = function () {
     this.expression && this.update &&
     (!this.isLiteral || isDynamicLiteral)
   ) {
-    if (!this._checkExpFn())
-    // check if this is a function directive with an
-    // inline expression
-     {
+    if (!this._checkExpFn()) {
       this._watcher = new Watcher(
         this.vm,
         this.watcherExp,
@@ -137,9 +134,9 @@ p._checkExpFn = function () {
     !expParser.pathTestRE.test(expression)
   ) {
     var fn = expParser.parse(expression).get
-    var scope = this.vm.$scope
+    var vm = this.vm
     this.update(function () {
-      fn(scope)
+      fn.call(vm, vm.$scope)
     })
     return true
   }
