@@ -132,6 +132,11 @@ module.exports = function (grunt) {
   grunt.registerTask('cover', ['karma:phantom'])
   grunt.registerTask('bench', ['browserify:bench'])
   grunt.registerTask('watch', ['browserify:watch'])
-  grunt.registerTask('build', ['browserify:test', 'browserify:build', 'uglify:build'])
+  grunt.registerTask('build', [
+    'browserify:test',
+    'browserify:build',
+    'uglify:build',
+    'size'
+  ])
 
 }
