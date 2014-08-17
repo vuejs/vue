@@ -103,9 +103,9 @@ module.exports = function (grunt) {
           banner: banner,
           compress: {
             pure_funcs: [
-                '_.log',
-                '_.warn',
-                'enableDebug'
+              '_.log',
+              '_.warn',
+              'enableDebug'
             ]
           }
         },

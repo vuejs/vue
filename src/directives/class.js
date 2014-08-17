@@ -1,6 +1,5 @@
-var _ = require('../util')
 var hasClassList =
-  _.inBrowser &&
+  typeof document !== 'undefined' &&
   'classList' in document.documentElement
 
 /**

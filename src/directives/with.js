@@ -3,12 +3,11 @@ module.exports = {
   priority: 900,
 
   bind: function () {
-    if (this.arg) {
-      var self = this
-      this.vm.$watch(this.arg, function (val) {
-        self.set(val)
-      })
-    }
+    var self = this
+    var path = this.arg || '$data'
+    this.vm.$watch(path, function (val) {
+      self.set(val)
+    })
   },
 
   update: function (value) {
