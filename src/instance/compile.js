@@ -102,7 +102,9 @@ exports._compileAttrs = function (node) {
     if (attrName.indexOf(config.prefix) === 0) {
       dirName = attrName.slice(config.prefix.length)
       if (registry[dirName]) {
-        node.removeAttribute(attrName)
+        if (dirName !== 'cloak') {
+          node.removeAttribute(attrName)
+        }
         dirs.push({
           name: dirName,
           value: attr.value
