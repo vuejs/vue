@@ -17,7 +17,6 @@ directives.on         = require('./on')
 directives.model      = require('./model')
 
 // child vm directives
-directives.view       = require('./view')
 directives.component  = require('./component')
 directives.repeat     = require('./repeat')
 directives['if']      = require('./if')

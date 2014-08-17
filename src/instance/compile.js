@@ -180,9 +180,8 @@ exports._compileTextNode = function (node) {
 
 var priorityDirs = [
   'repeat',
-  'if',
-  'view',
-  'component'
+  'component',
+  'if'
 ]
 
 exports._checkPriorityDirs = function (node) {
@@ -194,7 +193,7 @@ exports._checkPriorityDirs = function (node) {
   for (var i = 0, l = priorityDirs.length; i < l; i++) {
     dir = priorityDirs[i]
     if (value = _.attr(node, dir)) {
-      this._bindDirective(dir, value)
+      this._bindDirective(dir, value, node)
       return true
     }
   }

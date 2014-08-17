@@ -63,19 +63,19 @@ p._initDef = function () {
  */
 
 p._bind = function () {
-  this.watcherExp = this.expression
-  var isDynamicLiteral = this._checkDynamicLiteral()
+  this._watcherExp = this.expression
+  this._checkDynamicLiteral()
   if (this.bind) {
     this.bind()
   }
   if (
     this.expression && this.update &&
-    (!this.isLiteral || isDynamicLiteral)
+    (!this.isLiteral || this._isDynamicLiteral)
   ) {
     if (!this._checkExpFn()) {
       this._watcher = new Watcher(
         this.vm,
-        this.watcherExp,
+        this._watcherExp,
         this._update, // callback
         this, // callback context
         this.filters,
@@ -91,8 +91,6 @@ p._bind = function () {
  * check if this is a dynamic literal binding.
  *
  * e.g. v-component="{{currentView}}"
- *
- * @return {Boolean}
  */
 
 p._checkDynamicLiteral = function () {
@@ -108,9 +106,10 @@ p._checkDynamicLiteral = function () {
           'in literal directives.'
         )
       } else {
-        this.watcherExp = tokens[0].value
-        this.expression = this.vm.$eval(expression)
-        return true
+        var exp = tokens[0].value
+        this.expression = this.vm.$get(exp)
+        this._watcherExp = exp
+        this._isDynamicLiteral = true
       }
     }
   }

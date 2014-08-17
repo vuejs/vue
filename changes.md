@@ -67,6 +67,18 @@ computed: {
 
 ## Directive changes
 
+### Dynamic literals
+
+Literal directives can now also be dynamic via bindings like this:
+
+``` html
+<div v-component="{{test}}"></div>
+```
+
+When `test` changes, the component used will change! This essentially replaces the old `v-view` directive.
+
+When authoring literal directives, you can now provide an `update()` function if you wish to handle it dynamically. If no `update()` is provided the directive will be treated as a static literal and only evaluated once.
+
 ### New options
 
 - `twoWay`: indicates the directive is two-way and may write back to the model. Allows the use of `this.set(value)` inside directive functions.
@@ -95,25 +107,7 @@ Vue.filter('format', {
 
 ## Block logic control
 
-``` html
-<!-- v-repeat="list" -->
-  <h2>{{title}}</h2>
-  <p>{{content}}</p>
-<!-- v-repeat-end -->
-```
-
-``` html
-<!-- v-if="showProfile" -->
-  <my-avatar></my-avatar>
-  <my-bio></my-bio>
-<!-- v-if-end -->
-```
-
-``` html
-<!-- v-partial="hello" -->
-```
-
-**Note** The old inline partial syntax `{{> partial}}` has been removed. This is to keep the semantics of interpolation tags purely for interpolation purposes; flow control and partials are now either used in the form of attribute directives or comment directives.
+Still open to suggestions. See details [here].
 
 ## Config API change
 
@@ -143,24 +137,25 @@ Vue.config.delimiters = ['(%', '%)']
 
 * Note you still cannot use `<` or `>` in delimiters because Vue uses DOM-based templating.
 
-## (Experimental) Validators
-
-This is largely write filters that accept a Boolean return value. Probably should live as a plugin.
-
-``` html
-  <input v-model="abc @ email">
-```
-
-``` js
-  Vue.validator('email', function (val) {
-    return val.match(...)
-  })
-  // this.$validation.abc // false
-  // this.$valid // false
-```
-
-## (Experimental) One time interpolations
+## One time interpolations
 
 ``` html
 <span>{{* hello }}</span>
 ```
+
+## `$watch` API change
+
+`vm.$watch` can now accept an expression:
+
+``` js
+vm.$watch('a + b', function (newVal, oldVal) {
+  // do something
+})
+```
+
+By default the callback only fires when the value changes. If you want it to be called immediately with the initial value, use the third optional `immediate` argument:
+
+``` js
+vm.$watch('a', callback, true)
+// callback is fired immediately with current value of `a`
+``` 

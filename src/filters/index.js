@@ -66,7 +66,7 @@ filters.currency = function (value, sign) {
  */
 
 filters.pluralize = function (value) {
-  var args = slice.call(arguments, 1)
+  var args = _.toArray(arguments, 1)
   return args.length > 1
     ? (args[value - 1] || args[args.length - 1])
     : (args[value - 1] || args[0] + 's')

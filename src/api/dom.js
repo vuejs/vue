@@ -58,9 +58,9 @@ exports.$before = function (target, cb) {
 exports.$after = function (target, cb) {
   target = query(target)
   if (target.nextSibling) {
-    this.$before(target.nextSibling)
+    this.$before(target.nextSibling, cb)
   } else {
-    this.$appendTo(target.parentNode)
+    this.$appendTo(target.parentNode, cb)
   }
 }
 

@@ -23,7 +23,6 @@ exports._objToArray = function (obj) {
     return
   }
   var res = []
-  var val, data
   for (var key in obj) {
     res.push({
       key: key,
@@ -59,7 +58,7 @@ exports.filterBy = function (arr, searchKey, delimiter, dataKey) {
   // get the optional dataKey
   dataKey =
     dataKey &&
-    (stripQuotes(dataKey) || this.$get(dataKey))
+    (_.stripQuotes(dataKey) || this.$get(dataKey))
   return arr.filter(function (item) {
     return dataKey
       ? contains(Path.get(item, dataKey), search)
