@@ -1,5 +1,5 @@
 var Emitter = require('../emitter')
-var mergeOptions = require('../util').mergeOptions
+var mergeOptions = require('../util/merge-option')
 
 /**
  * The main init sequence. This is called for every

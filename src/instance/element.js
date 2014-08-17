@@ -20,10 +20,10 @@ exports._initElement = function (el) {
   }
   if (el instanceof DocumentFragment) {
     this._initBlock(el)
+    this._initContent(el)
   } else {
     this.$el = el
     this._initTemplate()
-    this._initContent()
   }
   this.$el.__vue__ = this
 }
@@ -70,16 +70,17 @@ exports._initTemplate = function () {
           // the template contains multiple nodes
           // in this case the original `el` is simply
           // a placeholder.
-          this._blockNodes = _.toArray(frag.childNodes)
-          this.$el = document.createComment('vue-block')
+          this._initBlock(frag)
+          this._initContent(_.toArray(frag.children))
         } else {
           // 1 to 1 replace, we need to copy all the
           // attributes from the original el to the replacer
           this.$el = frag.firstChild
           _.copyAttributes(el, this.$el)
+          this._initContent(this.$el)
         }
         if (el.parentNode) {
-          _.before(this.$el, el)
+          this.$before(el)
           _.remove(el)
         }
       } else {
@@ -111,11 +112,13 @@ exports._collectRawContent = function () {
  * Resolve <content> insertion points mimicking the behavior
  * of the Shadow DOM spec:
  *
- *  http://w3c.github.io/webcomponents/spec/shadow/#insertion-points
+ *   http://w3c.github.io/webcomponents/spec/shadow/#insertion-points
+ *
+ * @param {Element|DocumentFragment} el
  */
 
-exports._initContent = function () {
-  var outlets = getOutlets(this.$el)
+exports._initContent = function (el) {
+  var outlets = getOutlets(el)
   var raw = this._rawContent
   var i = outlets.length
   var outlet, select, j, main
