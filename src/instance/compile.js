@@ -30,17 +30,11 @@ exports._compile = function () {
  */
 
 exports._compileNode = function (node) {
-  switch (node.nodeType) {
-    case 1: // element
-      if (node.tagName !== 'SCRIPT') {
-        this._compileElement(node)
-      }
-      break
-    case 3: // text
-      if (config.interpolate) {
-        this._compileTextNode(node)
-      }
-      break
+  var type = node.nodeType
+  if (type === 1 && node.tagName !== 'SCRIPT') {
+    this._compileElement(node)
+  } else if (type === 3 && config.interpolate) {
+    this._compileTextNode(node)
   }
 }
 

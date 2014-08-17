@@ -1,8 +1,7 @@
 var _ = require('../../../src/util')
+var merge = require('../../../src/util/merge-option')
 
 describe('Util - Option merging', function () {
-
-  var merge = _.mergeOptions
   
   it('default strat', function () {
     // child undefined
