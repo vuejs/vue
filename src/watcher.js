@@ -97,7 +97,7 @@ p.addDep = function (path) {
 p.get = function () {
   this.beforeGet()
   var value = this.getter.call(this.vm, this.vm.$scope)
-  value = _.applyFilters(value, this.readFilters)
+  value = _.applyFilters(value, this.readFilters, this.vm)
   this.afterGet()
   return value
 }
@@ -109,7 +109,7 @@ p.get = function () {
  */
 
 p.set = function (value) {
-  value = _.applyFilters(value, this.writeFilters)
+  value = _.applyFilters(value, this.writeFilters, this.vm)
   this.setter.call(this.vm, this.vm.$scope, value)
 }
 

@@ -105,7 +105,8 @@ exports.$eval = function (text) {
     return dir.filters
       ? _.applyFilters(
           this.$get(dir.expression),
-          _.resolveFilters(this, dir.filters).read
+          _.resolveFilters(this, dir.filters).read,
+          this
         )
       : this.$get(dir.expression)
   } else {

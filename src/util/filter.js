@@ -61,15 +61,16 @@ exports.resolveFilters = function (vm, filters, target) {
  *
  * @param {*} value
  * @param {Array} filters
+ * @param {Vue} vm
  * @return {*}
  */
 
-exports.applyFilters = function (value, filters) {
+exports.applyFilters = function (value, filters, vm) {
   if (!filters) {
     return value
   }
   for (var i = 0, l = filters.length; i < l; i++) {
-    value = filters[i](value)
+    value = filters[i].call(vm, value)
   }
   return value
 }

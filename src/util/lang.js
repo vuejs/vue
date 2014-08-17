@@ -49,6 +49,7 @@ exports.guardNumber = function (value) {
  *
  * @param {Function} fn
  * @param {Object} ctx
+ * @return {Function}
  */
 
 exports.bind = function (fn, ctx) {
@@ -62,6 +63,7 @@ exports.bind = function (fn, ctx) {
  *
  * @param {Array-like} list
  * @param {Number} [i] - start index
+ * @return {Array}
  */
 
 var slice = [].slice

@@ -1,5 +1,7 @@
 module.exports = {
 
+  priority: 900,
+
   bind: function () {
     if (this.arg) {
       var self = this

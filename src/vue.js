@@ -38,7 +38,7 @@ Vue.options = {
   directives    : require('./directives'),
   filters       : require('./filters'),
   partials      : {},
-  effects       : {},
+  transitions   : {},
   components    : {},
   inheritScope  : true
 }

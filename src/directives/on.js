@@ -4,6 +4,8 @@ module.exports = {
 
   isFn: true,
 
+  priority: 700,
+
   bind: function () {
     // deal with iframes
     if (
