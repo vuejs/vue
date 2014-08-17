@@ -1,4 +1,4 @@
-var _ = require('./')
+var _ = require('./index')
 var extend = _.extend
 
 /**
