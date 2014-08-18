@@ -64,4 +64,16 @@ describe('Text Parser', function () {
     expect(res1).toBe(res2)
   })
 
+  it('custom delimiters', function () {
+    config.delimiters = ['[%', '%]']
+    assertParse({
+      text: '[%* text %] and [[% html %]]',
+      expected: [
+        { tag: true, value: 'text', html: false, oneTime: true },
+        { value: ' and ' },
+        { tag: true, value: 'html', html: true, oneTime: false },
+      ]
+    })
+  })
+
 })

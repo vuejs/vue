@@ -14,7 +14,7 @@ var scopeEvents = ['set', 'mutate', 'add', 'delete']
 
 exports._initScope = function () {
   var parent = this.$parent
-  var inherit = parent && this.$options.inheritScope
+  var inherit = parent && !this.$options.isolated
   var data = this._data
   var scope = this.$scope = inherit
     ? Object.create(parent.$scope)

@@ -31,11 +31,11 @@ module.exports = function (grunt) {
         frameworks: ['jasmine', 'commonjs'],
         files: [
           'src/**/*.js',
-          'test/unit/specs/*.js'
+          'test/unit/specs/**/*.js'
         ],
         preprocessors: {
           'src/**/*.js': ['commonjs'],
-          'test/unit/specs/*.js': ['commonjs']
+          'test/unit/specs/**/*.js': ['commonjs']
         },
         singleRun: true
       },
@@ -51,7 +51,7 @@ module.exports = function (grunt) {
           reporters: ['progress', 'coverage'],
           preprocessors: {
             'src/**/*.js': ['commonjs', 'coverage'],
-            'test/unit/specs/*.js': ['commonjs']
+            'test/unit/specs/**/*.js': ['commonjs']
           },
           coverageReporter: {
             reporters: [

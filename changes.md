@@ -34,11 +34,11 @@ It's probably easy to understand why `el` and `parent` are instance only. But wh
 
 When events are used extensively for cross-vm communication, the ready hook can get kinda messy. The new `events` option is similar to its Backbone equivalent, where you can declaratiely register a bunch of event listeners.
 
-### new option: `inheritScope`.
+### new option: `isolated`.
 
-Default: `true`.
+Default: `false`.
 
-Whether to inherit parent scope data. Set it to `false` if you want to create a component that have an isolated scope of its own.
+Whether to inherit parent scope data. Set it to `true` if you want to create a component that have an isolated scope of its own. An isolated scope means you won't be able to bind to data on parent scopes in the component's template.
 
 ### removed options: `id`, `tagName`, `className`, `attributes`, `lazy`.
 
@@ -82,7 +82,6 @@ When authoring literal directives, you can now provide an `update()` function if
 ### New options
 
 - `twoWay`: indicates the directive is two-way and may write back to the model. Allows the use of `this.set(value)` inside directive functions.
-- `paramAttributes`: an Array of attribute names to extract as parameters for the directive. For example, given the option value `['my-param']` and markup `<input v-my-dir="msg" my-param="123">`, you can access `this.params['my-param']` with value `'123'` inside directive functions.
 
 ### Removed option: `isEmpty`
 

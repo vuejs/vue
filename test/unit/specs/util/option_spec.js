@@ -1,4 +1,5 @@
 var _ = require('../../../../src/util')
+var Vue = require('../../../../src/vue')
 var merge = require('../../../../src/util/merge-option')
 
 describe('Util - Option merging', function () {
@@ -109,6 +110,16 @@ describe('Util - Option merging', function () {
     // test prototypal inheritance
     var asset4 = vm.$parent.$options.directives.d = {}
     expect(res.d).toBe(asset4)
+  })
+
+  it('guard components', function () {
+    var res = merge({}, {
+      components: {
+        a: { template: 'hi' }
+      }
+    })
+    expect(typeof res.components.a).toBe('function')
+    expect(res.components.a.super).toBe(Vue)
   })
 
   it('ignore el, data & parent when inheriting', function () {

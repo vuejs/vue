@@ -27,42 +27,23 @@ function Directive (name, el, vm, descriptor) {
   this.arg = descriptor.arg
   this.expression = descriptor.expression
   this.filters = descriptor.filters
-
   // private
   this._locked = false
   this._bound = false
-  // init definition
-  this._initDef()
+  // init
   this._bind()
 }
 
 var p = Directive.prototype
 
 /**
- * Initialize the directive instance's definition.
- */
-
-p._initDef = function () {
-  var def = this.vm.$options.directives[this.name]
-  _.extend(this, def)
-  // init params
-  var el = this.el
-  var attrs = this.paramAttributes
-  if (attrs) {
-    var params = this.params = {}
-    attrs.forEach(function (p) {
-      params[p] = el.getAttribute(p)
-      el.removeAttribute(p)
-    })
-  }
-}
-
-/**
- * Initialize the directive, setup the watcher,
- * call definition bind() and update() if present.
+ * Initialize the directive, mixin definition properties,
+ * setup the watcher, call definition bind() and update()
+ * if present.
  */
 
 p._bind = function () {
+  _.extend(this, this.vm.$options.directives[this.name])
   this._watcherExp = this.expression
   this._checkDynamicLiteral()
   if (this.bind) {
@@ -186,7 +167,10 @@ p.set = function (value, lock) {
     }
     this._watcher.set(value)
     if (lock) {
-      _.nextTick(this._unlock, this)
+      var self = this
+      _.nextTick(function () {
+        self._locked = false        
+      })
     }
   }
 }
