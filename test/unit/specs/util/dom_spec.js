@@ -1,4 +1,4 @@
-var _ = require('../../../src/util')
+var _ = require('../../../../src/util')
 
 if (_.inBrowser) {
 

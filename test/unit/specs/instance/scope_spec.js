@@ -3,8 +3,8 @@
  * data event propagation and data sync
  */
 
-var Vue = require('../../../src/vue')
-var Observer = require('../../../src/observe/observer')
+var Vue = require('../../../../src/vue')
+var Observer = require('../../../../src/observe/observer')
 var u = undefined
 Observer.pathDelimiter = '.'
 

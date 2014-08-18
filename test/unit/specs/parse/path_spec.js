@@ -1,5 +1,5 @@
-var Path = require('../../../src/parse/path')
-var Observer = require('../../../src/observe/observer')
+var Path = require('../../../../src/parse/path')
+var Observer = require('../../../../src/observe/observer')
 
 function assertPath (str, expected) {
   var path = Path.parse(str)

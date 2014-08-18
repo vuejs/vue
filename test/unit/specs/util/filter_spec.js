@@ -1,8 +1,8 @@
-var _ = require('../../../src/util')
+var _ = require('../../../../src/util')
 
 describe('Util - Filter', function () {
 
-  var debug = require('../../../src/util/debug')
+  var debug = require('../../../../src/util/debug')
   beforeEach(function () {
     spyOn(debug, 'warn')
   })

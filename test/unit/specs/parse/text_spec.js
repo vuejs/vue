@@ -1,5 +1,5 @@
-var textParser = require('../../../src/parse/text')
-var config = require('../../../src/config')
+var textParser = require('../../../../src/parse/text')
+var config = require('../../../../src/config')
 
 var testCases = [
   {

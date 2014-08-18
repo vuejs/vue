@@ -1,5 +1,5 @@
-var _ = require('../../../src/util')
-var merge = require('../../../src/util/merge-option')
+var _ = require('../../../../src/util')
+var merge = require('../../../../src/util/merge-option')
 
 describe('Util - Option merging', function () {
   
