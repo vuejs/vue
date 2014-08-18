@@ -92,7 +92,7 @@ module.exports = function (grunt) {
         dest: 'benchmarks/browser.js'
       },
       test: {
-        src: ['test/unit/specs/*.js'],
+        src: ['test/unit/specs/**/*.js'],
         dest: 'test/unit/specs.js'
       }
     },
