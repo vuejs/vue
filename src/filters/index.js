@@ -2,6 +2,16 @@ var _ = require('../util')
 var filters = module.exports = Object.create(null)
 
 /**
+ * Stringify value.
+ *
+ * @param {Number} indent
+ */
+
+filters.json = function (value, indent) {
+  return JSON.stringify(value, null, indent || 2)
+}
+
+/**
  * 'abc' => 'Abc'
  */
 
@@ -68,8 +78,8 @@ filters.currency = function (value, sign) {
 filters.pluralize = function (value) {
   var args = _.toArray(arguments, 1)
   return args.length > 1
-    ? (args[value - 1] || args[args.length - 1])
-    : (args[value - 1] || args[0] + 's')
+    ? (args[value % 10 - 1] || args[args.length - 1])
+    : (args[0] + (value === 1 ? '' : 's'))
 }
 
 /**

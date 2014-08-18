@@ -121,7 +121,7 @@ exports.parse = function (s) {
       // an object literal or a ternary expression.
       if (argRE.test(arg)) {
         argIndex = i + 1
-        dir.arg = _.stripQuotes(arg)
+        dir.arg = _.stripQuotes(arg) || arg
       }
     } else if (
       c === 0x7C && // pipe

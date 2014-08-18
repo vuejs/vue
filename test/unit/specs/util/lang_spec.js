@@ -17,6 +17,12 @@ describe('Util - Language Enhancement', function () {
     expect(_.guardNumber('hello')).toBe('hello')
   })
 
+  it('strip quotes', function () {
+    expect(_.stripQuotes('"123"')).toBe('123')
+    expect(_.stripQuotes("'fff'")).toBe('fff')
+    expect(_.stripQuotes("'fff")).toBe(false)
+  })
+
   it('bind', function () {
     var original = function (a) {
       return this.a + a

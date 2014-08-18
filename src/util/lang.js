@@ -13,21 +13,6 @@ exports.guard = function (value) {
 }
 
 /**
- * Strip quotes from a string
- *
- * @param {String} str
- * @return {String}
- */
-
-exports.stripQuotes = function (str) {
-  var a = str.charCodeAt(0)
-  var b = str.charCodeAt(str.length - 1)
-  return a === b && (a === 0x22 || a === 0x27)
-    ? str.slice(1, -1)
-    : str
-}
-
-/**
  * Check and convert possible numeric numbers before
  * setting back to data
  *
@@ -42,6 +27,21 @@ exports.guardNumber = function (value) {
     typeof value === 'boolean'
   ) ? value
     : Number(value)
+}
+
+/**
+ * Strip quotes from a string
+ *
+ * @param {String} str
+ * @return {String | false}
+ */
+
+exports.stripQuotes = function (str) {
+  var a = str.charCodeAt(0)
+  var b = str.charCodeAt(str.length - 1)
+  return a === b && (a === 0x22 || a === 0x27)
+    ? str.slice(1, -1)
+    : false
 }
 
 /**
