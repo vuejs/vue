@@ -131,7 +131,7 @@ function guardComponents (components) {
  *                     an instantiation merge.
  */
 
-module.exports = function (parent, child, vm) {
+module.exports = function mergeOptions (parent, child, vm) {
   guardComponents(child.components)
   var options = {}
   var key

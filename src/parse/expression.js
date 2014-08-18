@@ -119,10 +119,11 @@ function compileExpFns (exp, needSet) {
   var getter = makeGetter(body)
   if (getter) {
     return {
-      get   : getter,
-      body  : body,
-      paths : paths,
-      set   : needSet
+      computed : true,
+      get      : getter,
+      body     : body,
+      paths    : paths,
+      set      : needSet
         ? makeSetter(body)
         : null
     }
