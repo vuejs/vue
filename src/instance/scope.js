@@ -15,17 +15,26 @@ var scopeEvents = ['set', 'mutate', 'add', 'delete']
 exports._initScope = function () {
   var parent = this.$parent
   var inherit = parent && this.$options.inheritScope
+  var data = this._data
   var scope = this.$scope = inherit
     ? Object.create(parent.$scope)
     : {}
+  // copy initial data into scope
+  for (var key in data) {
+    // use defineProperty so we can shadow parent accessors
+    _.define(scope, key, data[key], true)
+  }
   // create scope observer
   this.$observer = Observer.create(scope, {
     callbackContext: this,
     doNotAlterProto: true
   })
+  // setup sync between data and the scope
+  this._syncData()
 
-  if (!inherit) return
-
+  if (!inherit) {
+    return
+  }
   // relay change events that sent down from
   // the scope prototype chain.
   var ob = this.$observer
@@ -64,45 +73,31 @@ exports._teardownScope = function () {
 }
 
 /**
- * Setup the instances data object.
+ * Called when swapping the $data object.
  *
- * Properties are copied into the scope object to take
- * advantage of prototypal inheritance.
- *
- * If the `syncData` option is true, Vue will maintain
- * property syncing between the scope and the original data
- * object, so that any changes to the scope are synced back
- * to the passed in object. This is useful internally when
- * e.g. creating v-repeat instances with no alias.
- *
- * If swapping data object with the `$data` accessor,
- * teardown previous sync listeners and delete keys not
- * present in new data.
+ * Old properties that are not present in new data are
+ * deleted from the scope, and new data properties not
+ * already on the scope are added. Teardown old data sync
+ * listeners and setup new ones.
  *
  * @param {Object} data
- * @param {Boolean} init - if not ture, indicates its a
- *                         `$data` swap.
  */
 
-exports._initData = function (data, init) {
+exports._setData = function (data) {
   var scope = this.$scope
   var key
-
-  if (!init) {
-    // teardown old sync listeners
-    this._unsyncData()
-    // delete keys not present in the new data
-    for (key in scope) {
-      if (
-        key.charCodeAt(0) !== 0x24 && // $
-        scope.hasOwnProperty(key) &&
-        !(key in data)
-      ) {
-        scope.$delete(key)
-      }
+  // teardown old sync listeners
+  this._unsyncData()
+  // delete keys not present in the new data
+  for (key in scope) {
+    if (
+      key.charCodeAt(0) !== 0x24 && // $
+      scope.hasOwnProperty(key) &&
+      !(key in data)
+    ) {
+      scope.$delete(key)
     }
   }
-
   // copy properties into scope
   for (key in data) {
     if (scope.hasOwnProperty(key)) {
@@ -113,10 +108,8 @@ exports._initData = function (data, init) {
       scope.$add(key, data[key])
     }
   }
-
   // setup sync between scope and new data
   this._data = data
-  this._dataObserver = Observer.create(data)
   this._syncData()
 }
 
@@ -251,6 +244,7 @@ exports._syncData = function () {
     .on('add:self', listeners.data.add)
     .on('delete:self', listeners.data.delete)
 
+  this._dataObserver = Observer.create(data)
   this._dataObserver
     .on('set:self', listeners.scope.set)
     .on('add:self', listeners.scope.add)

@@ -60,9 +60,6 @@ exports._init = function (options) {
   // @creates this.$scope
   this._initScope()
 
-  // setup initial data.
-  this._initData(this._data, true)
-
   // setup property proxying
   this._initProxy()
 

@@ -73,7 +73,7 @@ Object.defineProperty(p, '$data', {
     return this._data
   },
   set: function (newData) {
-    this._initData(newData)
+    this._setData(newData)
   }
 })
 
