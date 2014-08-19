@@ -23,7 +23,9 @@ exports._objToArray = function (obj) {
     return
   }
   var res = []
-  for (var key in obj) {
+  var keys = Object.keys(obj)
+  for (var i = 0, l = keys.length, key; i < l; i++) {
+    key = keys[i]
     res.push({
       key: key,
       value: obj[key]

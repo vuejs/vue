@@ -19,8 +19,13 @@ var arrayAugmentations = Object.create(Array.prototype)
   var original = Array.prototype[method]
   // define wrapped method
   _.define(arrayAugmentations, method, function () {
-    
-    var args = _.toArray(arguments)
+    // avoid leaking arguments:
+    // http://jsperf.com/closure-with-arguments
+    var l = arguments.length
+    var args = new Array(l)
+    for (var i = 0; i < l; i++) {
+      args[i] = arguments[i]
+    }
     var result = original.apply(this, args)
     var ob = this.$observer
     var inserted, removed, index

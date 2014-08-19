@@ -62,13 +62,18 @@ exports.bind = function (fn, ctx) {
  * Convert an Array-like object to a real Array.
  *
  * @param {Array-like} list
- * @param {Number} [i] - start index
+ * @param {Number} [start] - start index
  * @return {Array}
  */
 
-var slice = [].slice
-exports.toArray = function (list, i) {
-  return slice.call(list, i || 0)
+exports.toArray = function (list, start) {
+  start = start || 0
+  var l = list.length
+  var ret = new Array(l - start)
+  for (var i = start; i < l; i++) {
+    ret[i - start] = list[i]
+  }
+  return ret
 }
 
 /**
