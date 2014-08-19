@@ -9,7 +9,7 @@ module.exports = {
   },
 
   update: function (value) {
-    this.el[this.attr] = _.guard(value)
+    this.el[this.attr] = _.toString(value)
   }
   
 }

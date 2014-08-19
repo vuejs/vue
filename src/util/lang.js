@@ -6,10 +6,11 @@
  * @return {String}
  */
 
-exports.guard = function (value) {
-  return value === undefined
+exports.toString = function (value) {
+  /* jshint eqeqeq:false */
+  return value == null
     ? ''
-    : value
+    : value.toString()
 }
 
 /**
@@ -20,7 +21,7 @@ exports.guard = function (value) {
  * @return {*|Number}
  */
 
-exports.guardNumber = function (value) {
+exports.toNumber = function (value) {
   return (
     isNaN(value) ||
     value === null ||

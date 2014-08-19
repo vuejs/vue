@@ -13,7 +13,7 @@ module.exports = {
   },
 
   update: function (value) {
-    value = _.guard(value)
+    value = _.toString(value)
     if (this.nodes) {
       this.swap(value)
     } else {

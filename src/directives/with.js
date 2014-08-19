@@ -1,3 +1,5 @@
+var _ = require('../util')
+
 module.exports = {
 
   priority: 900,
@@ -6,7 +8,7 @@ module.exports = {
     var self = this
     var path = this.arg || '$data'
     this.vm.$watch(path, function (val) {
-      self.set(val)
+      self.set(_.toNumber(val))
     })
   },
 

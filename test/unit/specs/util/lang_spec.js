@@ -2,19 +2,20 @@ var _ = require('../../../../src/util')
 
 describe('Util - Language Enhancement', function () {
 
-  it('guard', function () {
-    expect(_.guard(1)).toBe(1)
-    expect(_.guard(null)).toBe(null)
-    expect(_.guard(undefined)).toBe('')
+  it('toString', function () {
+    expect(_.toString('hi')).toBe('hi')
+    expect(_.toString(1.234)).toBe('1.234')
+    expect(_.toString(null)).toBe('')
+    expect(_.toString(undefined)).toBe('')
   })
 
-  it('guardNumber', function () {
-    expect(_.guardNumber('12')).toBe(12)
-    expect(_.guardNumber('1e5')).toBe(1e5)
-    expect(_.guardNumber('0x2F')).toBe(0x2F)
-    expect(_.guardNumber(null)).toBe(null)
-    expect(_.guardNumber(true)).toBe(true)
-    expect(_.guardNumber('hello')).toBe('hello')
+  it('toNumber', function () {
+    expect(_.toNumber('12')).toBe(12)
+    expect(_.toNumber('1e5')).toBe(1e5)
+    expect(_.toNumber('0x2F')).toBe(0x2F)
+    expect(_.toNumber(null)).toBe(null)
+    expect(_.toNumber(true)).toBe(true)
+    expect(_.toNumber('hello')).toBe('hello')
   })
 
   it('strip quotes', function () {
