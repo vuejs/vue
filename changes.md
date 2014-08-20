@@ -87,7 +87,7 @@ When authoring literal directives, you can now provide an `update()` function if
 
 ## Interpolation
 
-Text bindings will no longer automatically stringify objects. Use the new `json` filter which gives more flexibility in formatting. Also, `null` will now be printed as is; only `undefined` will yield empty string.
+Text bindings will no longer automatically stringify objects. Use the new `json` filter which gives more flexibility in formatting.
 
 ## Two Way filters
 
