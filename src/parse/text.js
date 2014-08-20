@@ -69,7 +69,7 @@ exports.parse = function (text) {
   }
   var tokens = []
   var lastIndex = tagRE.lastIndex = 0
-  var match, index, value, oneTime
+  var match, index, value, first, oneTime, partial
   /* jshint boss:true */
   while (match = tagRE.exec(text)) {
     index = match.index
@@ -80,15 +80,18 @@ exports.parse = function (text) {
       })
     }
     // tag token
-    oneTime = match[1].charCodeAt(0) === 0x2A // *
-    value = oneTime
+    first = match[1].charCodeAt(0)
+    oneTime = first === 0x2A // *
+    partial = first === 0x3E // >
+    value = (oneTime || partial)
       ? match[1].slice(1)
       : match[1]
     tokens.push({
       tag: true,
       value: value.trim(),
       html: htmlRE.test(match[0]),
-      oneTime: oneTime
+      oneTime: oneTime,
+      partial: partial
     })
     lastIndex = index + match[0].length
   }
