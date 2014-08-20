@@ -8,6 +8,7 @@ var _ = require('./util')
  */
 
 function Emitter (ctx) {
+  this._cancelled = false
   this._ctx = ctx || this
 }
 
@@ -114,6 +115,7 @@ p.emit = function (event, a, b, c) {
  */
 
 p.applyEmit = function (event) {
+  this._cancelled = false
   this._cbs = this._cbs || {}
   var callbacks = this._cbs[event]
   if (callbacks) {
@@ -127,7 +129,9 @@ p.applyEmit = function (event) {
     }
     callbacks = _.toArray(callbacks)
     for (i = 0, l = callbacks.length; i < l; i++) {
-      callbacks[i].apply(this._ctx, args)
+      if (callbacks[i].apply(this._ctx, args) === false) {
+        this._cancelled = true
+      }
     }
   }
   return this
