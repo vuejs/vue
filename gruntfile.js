@@ -132,11 +132,8 @@ module.exports = function (grunt) {
   grunt.registerTask('cover', ['karma:phantom'])
   grunt.registerTask('bench', ['browserify:bench'])
   grunt.registerTask('watch', ['browserify:watch'])
-  grunt.registerTask('build', [
-    'browserify:test',
-    'browserify:build',
-    'uglify:build',
-    'size'
-  ])
+  grunt.registerTask('build', ['component', 'browserify:build', 'uglify:build', 'size'])
+  grunt.registerTask('test', ['unit', 'cover'])
+  grunt.registerTask('default', ['jshint', 'test', 'build'])
 
 }
