@@ -62,4 +62,15 @@ describe('Emitter', function () {
     expect(spy).toHaveBeenCalledWith(1, 2, 3, 4, 5)
   })
 
+  it('apply emit cancel', function () {
+    expect(e._cancelled).toBe(false)
+    e.on('test', function () {
+      return false
+    })
+    e.applyEmit('test')
+    expect(e._cancelled).toBe(true)
+    e.applyEmit('other')
+    expect(e._cancelled).toBe(false)
+  })
+
 })
