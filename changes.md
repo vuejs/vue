@@ -106,7 +106,45 @@ Vue.filter('format', {
 
 ## Block logic control
 
-Still open to suggestions. See details [here].
+One limitation of flow control direcitves like `v-repeat` and `v-if` is that they can only be used on a single element. Now you can use them to manage a block of content by using them on a `<template>` element that wraps the content you want managed:
+
+``` js
+items: [
+  {
+    title: 'title-1',
+    subtitle: 'subtitle-1',
+    content: 'content-1'
+  },
+  {
+    title: 'title-2',
+    subtitle: 'subtitle-2',
+    content: 'content-2'
+  }
+]
+```
+
+``` html
+<template v-repeat="item:items">
+  <h2>{{item.title}}</h2>
+  <p>{{item.subtitle}}</p>
+  <p>{{item.content}}</p>
+</template>
+```
+
+Rendered result:
+
+``` html
+<!--v-block-start-->
+<h2>title-1</h2>
+<p>subtitle-1</p>
+<p>content-1</p>
+<!--v-block-end-->
+<!--v-block-start-->
+<h2>title-2</h2>
+<p>subtitle-2</p>
+<p>content-2</p>
+<!--v-block-end-->
+```
 
 ## Config API change
 
