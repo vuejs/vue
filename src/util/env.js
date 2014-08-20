@@ -44,7 +44,7 @@ exports.isIE9 =
  * Sniff transition/animation events
  */
 
-if (inBrowser) {
+if (inBrowser && !exports.isIE9) {
   if (
     window.ontransitionend === undefined &&
     window.onwebkittransitionend !== undefined

@@ -81,17 +81,18 @@ var apply = exports.apply = function (el, direction, op, vm) {
     op()
     vm._callHook(direction > 0 ? 'attached' : 'detached')
   }
-  // if the vm is being manipulated by a parent directive
-  // during the parent's compilation phase, we skip the
-  // animation.
-  if (vm.$parent && !vm.$parent._isCompiled) {
-    applyOp()
-    return
+  var transData = el.__v_trans
+  if (
+    !transData ||
+    // if the vm is being manipulated by a parent directive
+    // during the parent's compilation phase, skip the
+    // animation.
+    (vm.$parent && !vm.$parent._isCompiled)
+  ) {
+    return applyOp()
   }
   // determine the transition type on the element
-  var transData = el.__v_trans
-  var registry = vm.$options.transitions
-  var jsTransition = transData && registry[transData.id]
+  var jsTransition = vm.$options.transitions[transData.id]
   if (jsTransition) {
     // js
     applyJSTransition(
@@ -101,7 +102,7 @@ var apply = exports.apply = function (el, direction, op, vm) {
       transData,
       jsTransition
     )
-  } else if (transData && _.transitionEndEvent) {
+  } else if (_.transitionEndEvent) {
     // css
     applyCSSTransition(
       el,
