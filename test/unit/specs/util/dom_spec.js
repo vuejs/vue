@@ -63,6 +63,12 @@ if (_.inBrowser) {
       expect(parent.firstChild).toBe(target)
     })
 
+    it('replace', function () {
+      _.replace(child, target)
+      expect(parent.childNodes.length).toBe(1)
+      expect(parent.firstChild).toBe(target)
+    })
+
     it('copyAttributes', function () {
       parent.setAttribute('test1', 1)
       parent.setAttribute('test2', 2)

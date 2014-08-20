@@ -18,8 +18,7 @@ module.exports = {
     if (el.nodeType === 8) {
       // keep a ref for the partial's content nodes
       var nodes = _.toArray(partial.childNodes)
-      _.before(partial, el)
-      _.remove(el)
+      _.replace(el, partial)
       // compile partial after appending, because its
       // children's parentNode will change from the fragment
       // to the correct parentNode. This could affect

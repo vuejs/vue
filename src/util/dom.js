@@ -68,6 +68,19 @@ exports.prepend = function (el, target) {
 }
 
 /**
+ * Replace target with el
+ *
+ * @param {Element} target
+ * @param {Element} el
+ */
+
+exports.replace = function (target, el) {
+  var parent = target.parentNode
+  parent.insertBefore(el, target)
+  parent.removeChild(target)
+}
+
+/**
  * Copy attributes from one element to another.
  *
  * @param {Element} from

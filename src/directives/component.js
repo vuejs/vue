@@ -25,8 +25,7 @@ module.exports = {
     if (!this.el.__vue__) {
       // create a ref anchor
       this.ref = document.createComment('v-component')
-      _.before(this.ref, this.el)
-      _.remove(this.el)
+      _.replace(this.el, this.ref)
       // check v-if conditionals
       this.checkIf()
       // check keep-alive options
