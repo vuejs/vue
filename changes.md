@@ -172,3 +172,32 @@ With `v-transition="my-transition"`, Vue will:
 2. If no custom JavaScript transition is found, it will automatically sniff whether the target element has CSS transitions or CSS animations applied, and add/remove the classes as before.
 
 3. If no transitions/animations are detected, the DOM manipulation is executed immediately instead of hung up waiting for an event.
+
+### JavaScript transitions API change
+
+Now more similar to Angular:
+
+``` js
+Vue.transition('fade', {
+  enter: function (el, done) {
+    // element is already inserted into the DOM
+    // call done when animation finishes.
+    $(el)
+      .css('opacity', 0)
+      .animate({ opacity: 1 }, 1000, done)
+    // optionally return a "cancel" function
+    // to clean up if the animation is cancelled
+    return function () {
+      $(el).stop()
+    }
+  },
+  leave: function (el, done) {
+    // same as enter
+    $(el)
+      .animate({ opacity: 0 }, 1000, done)
+    return function () {
+      $(el).stop()
+    }
+  }
+})
+```
