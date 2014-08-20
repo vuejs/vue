@@ -1,7 +1,5 @@
 /**
- * Are we in a browser or in Node?
- * Calling toString on window has inconsistent results in
- * browsers so we do it on the document instead.
+ * Indicates we have a window
  *
  * @type {Boolean}
  */
@@ -43,30 +41,29 @@ exports.isIE9 =
   navigator.userAgent.indexOf('MSIE 9.0') > 0
 
 /**
- * Detect transition and animation end events.
+ * Sniff transition/animation events
  */
 
-var testElement = inBrowser
-  ? document.createElement('div')
-  : undefined
-
-exports.transitionEndEvent = (function () {
-  if (inBrowser) {
-    var map = {
-      'webkitTransition' : 'webkitTransitionEnd',
-      'transition'       : 'transitionend',
-      'mozTransition'    : 'transitionend'
-    }
-    for (var prop in map) {
-      if (testElement.style[prop] !== undefined) {
-        return map[prop]
-      }
-    }
+if (inBrowser) {
+  if (
+    window.ontransitionend === undefined &&
+    window.onwebkittransitionend !== undefined
+  ) {
+    exports.transitionProp = 'WebkitTransition'
+    exports.transitionEndEvent = 'webkitTransitionEnd'
+  } else {
+    exports.transitionProp = 'transition'
+    exports.transitionEndEvent = 'transitionend'
   }
-})()
 
-exports.animationEndEvent = inBrowser
-  ? testElement.style.animation !== undefined
-    ? 'animationend'
-    : 'webkitAnimationEnd'
-  : undefined
+  if (
+    window.onanimationend === undefined &&
+    window.onwebkitanimationend !== undefined
+  ) {
+    exports.animationProp = 'WebkitAnimation'
+    exports.animationEndEvent = 'webkitAnimationEnd'
+  } else {
+    exports.animationProp = 'animation'
+    exports.animationEndEvent = 'animationend'
+  }
+}

@@ -53,4 +53,13 @@ describe('Batcher', function () {
     })
   })
 
+  it('preFlush hook', function (done) {
+    batcher._preFlush = spy
+    batcher.push({ run: function () {}})
+    nextTick(function () {
+      expect(spy.calls.count()).toBe(1)
+      done()
+    })
+  })
+
 })

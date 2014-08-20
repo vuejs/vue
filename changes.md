@@ -157,4 +157,18 @@ By default the callback only fires when the value changes. If you want it to be 
 ``` js
 vm.$watch('a', callback, true)
 // callback is fired immediately with current value of `a`
-``` 
+```
+
+## Simplified Transition API
+
+- no more distinctions between `v-transition`, `v-animation` or `v-effect`;
+- no more configuring enter/leave classes in `Vue.config`;
+- `Vue.effect` has been replaced with `Vue.transition`, the `effects` option has also been replaced by `transitions`.
+
+With `v-transition="my-transition"`, Vue will:
+
+1. Try to find a transition definition object registered either through `Vue.transition(id, def)` or passed in with the `transitions` option, with the id `"my-transition"`. If it finds it, it will use that definition object to perform the custom JavaScript based transition.
+
+2. If no custom JavaScript transition is found, it will automatically sniff whether the target element has CSS transitions or CSS animations applied, and add/remove the classes as before.
+
+3. If no transitions/animations are detected, the DOM manipulation is executed immediately instead of hung up waiting for an event.

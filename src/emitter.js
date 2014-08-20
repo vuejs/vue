@@ -115,7 +115,7 @@ p.emit = function (event, a, b, c) {
 
 p.applyEmit = function (event) {
   this._cbs = this._cbs || {}
-  var callbacks = this._cbs[event], args
+  var callbacks = this._cbs[event]
   if (callbacks) {
     // avoid leaking arguments:
     // http://jsperf.com/closure-with-arguments

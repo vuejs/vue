@@ -71,10 +71,11 @@ p.initDeps = function (res) {
   this.isComputed = true
   this.value = this.get()
   var computed = this.vm.$options.computed
+  var exp = this.expression
   this.isComputed =
     this.filters || // filters may access instance data
     res.computed || // inline expression
-    (computed && computed[expression]) // computed property
+    (computed && computed[exp]) // computed property
 }
 
 /**

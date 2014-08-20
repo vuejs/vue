@@ -22,7 +22,7 @@ module.exports = function (grunt) {
         src: 'src/**/*.js'
       },
       test: {
-        src: 'test/**/*.js'
+        src: ['test/unit/specs/**/*.js']
       }
     },
 

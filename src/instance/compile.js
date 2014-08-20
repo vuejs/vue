@@ -39,7 +39,7 @@ exports._compileNode = function (node) {
 }
 
 /**
- * Compile an Element
+ * Compile an Element.
  *
  * @param {Element} node
  */
@@ -79,7 +79,10 @@ exports._compileElement = function (node) {
 }
 
 /**
- * Compile attribtues on an Element
+ * Compile attribtues on an Element.
+ * Collect directives, sort them by priority,
+ * then bind them. Also check normal directives for
+ * param attributes and interpolation bindings.
  *
  * @param {Element} node
  */
@@ -124,7 +127,13 @@ exports._compileAttrs = function (node) {
 }
 
 /**
- * Compile a TextNode
+ * Compile a TextNode.
+ * Possible interpolations include:
+ *
+ * - normal text binding,    e.g. {{text}}
+ * - unescaped html binding, e.g. {{{html}}}
+ * - one-time text binding,  e.g. {{*text}}
+ * - one-time html binding,  e.g. {{{*html}}}
  *
  * @param {TextNode} node
  */
@@ -166,7 +175,12 @@ exports._compileTextNode = function (node) {
 
 /**
  * Check for priority directives that would potentially
- * skip other directives.
+ * skip other directives. Each priority directive, once
+ * detected, will cause the compilation to skip the rest
+ * and let that directive handle the rest. This allows,
+ * for example, "v-repeat" to handle how it should handle
+ * the situation when "v-component" is also present, and
+ * "v-component" won't have to worry about that.
  *
  * @param {Element} node
  * @return {Boolean}
@@ -212,7 +226,11 @@ exports._bindDirective = function (name, value, node) {
 }
 
 /**
- * Check an attribute for potential bindings.
+ * Check a normal attribute for bindings.
+ * A normal attribute could potentially be:
+ *
+ * - a param attribute (only on root nodes)
+ * - an interpolated attribute, e.g. attr="{{data}}"
  */
 
 exports._bindAttr = function (node, attr) {

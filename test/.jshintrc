@@ -4,12 +4,13 @@
   "asi": true,
   "multistr": true,
   "undef": true,
-  "unused": true,
+  "unused": false,
   "trailing": true,
   "sub": true,
   "node": true,
   "laxbreak": true,
   "evil": true,
+  "proto": true,
   "globals": {
     "console": true,
     "it": true,
@@ -17,12 +18,13 @@
     "beforeEach": true,
     "afterEach": true,
     "expect": true,
-    "mock": true,
+    "jasmine": true,
+    "spyOn": true,
     "Vue": true,
-    "$": true,
     "mockHTMLEvent": true,
     "mockMouseEvent": true,
     "mockKeyEvent": true,
-    "casper": true
+    "casper": true,
+    "DocumentFragment": true
   }
 }

@@ -1,5 +1,4 @@
 var Emitter = require('../../../src/emitter')
-var u = undefined
 
 describe('Emitter', function () {
 
@@ -41,7 +40,7 @@ describe('Emitter', function () {
     e.emit('test1', 1)
     e.emit('test2', 2)
     expect(spy.calls.count()).toBe(1)
-    expect(spy).toHaveBeenCalledWith(2, u, u)
+    expect(spy).toHaveBeenCalledWith(2, undefined, undefined)
   })
 
   it('off event + fn', function () {

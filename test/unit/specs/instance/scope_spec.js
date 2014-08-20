@@ -5,7 +5,6 @@
 
 var Vue = require('../../../../src/vue')
 var Observer = require('../../../../src/observe/observer')
-var u = undefined
 Observer.pathDelimiter = '.'
 
 describe('Scope', function () {
@@ -38,12 +37,12 @@ describe('Scope', function () {
       // set on scope
       vm.$scope.a = 2
       expect(spy.calls.count()).toBe(1)
-      expect(spy).toHaveBeenCalledWith('a', 2, u)
+      expect(spy).toHaveBeenCalledWith('a', 2, undefined)
 
       // set on vm
       vm.b.c = 3
       expect(spy.calls.count()).toBe(2)
-      expect(spy).toHaveBeenCalledWith('b.c', 3, u)
+      expect(spy).toHaveBeenCalledWith('b.c', 3, undefined)
     })
 
     it('should trigger add/delete events', function () {
@@ -55,12 +54,12 @@ describe('Scope', function () {
       // add on scope
       vm.$scope.$add('c', 123)
       expect(spy.calls.count()).toBe(1)
-      expect(spy).toHaveBeenCalledWith('c', 123, u)
+      expect(spy).toHaveBeenCalledWith('c', 123, undefined)
 
       // delete on scope
       vm.$scope.$delete('c')
       expect(spy.calls.count()).toBe(2)
-      expect(spy).toHaveBeenCalledWith('c', u, u)
+      expect(spy).toHaveBeenCalledWith('c', undefined, undefined)
 
       // vm $add/$delete are tested in the api suite
     })
@@ -162,19 +161,19 @@ describe('Scope', function () {
       child.$observer.on('set', spy)
       parent.c = 'c changed'
       expect(spy.calls.count()).toBe(1)
-      expect(spy).toHaveBeenCalledWith('c', 'c changed', u)
+      expect(spy).toHaveBeenCalledWith('c', 'c changed', undefined)
 
       spy = jasmine.createSpy('inheritance')
       child.$observer.on('add', spy)
       parent.$scope.$add('e', 123)
       expect(spy.calls.count()).toBe(1)
-      expect(spy).toHaveBeenCalledWith('e', 123, u)
+      expect(spy).toHaveBeenCalledWith('e', 123, undefined)
 
       spy = jasmine.createSpy('inheritance')
       child.$observer.on('delete', spy)
       parent.$scope.$delete('e')
       expect(spy.calls.count()).toBe(1)
-      expect(spy).toHaveBeenCalledWith('e', u, u)
+      expect(spy).toHaveBeenCalledWith('e', undefined, undefined)
 
       spy = jasmine.createSpy('inheritance')
       child.$observer.on('mutate', spy)
@@ -221,11 +220,11 @@ describe('Scope', function () {
       expect(parent.arr[0].a).toBe(3)
 
       expect(parentSpy.calls.count()).toBe(1)
-      expect(parentSpy).toHaveBeenCalledWith('arr.0.a', 3, u)
+      expect(parentSpy).toHaveBeenCalledWith('arr.0.a', 3, undefined)
 
       expect(childSpy.calls.count()).toBe(2)
-      expect(childSpy).toHaveBeenCalledWith('a', 3, u)
-      expect(childSpy).toHaveBeenCalledWith('arr.0.a', 3, u)
+      expect(childSpy).toHaveBeenCalledWith('a', 3, undefined)
+      expect(childSpy).toHaveBeenCalledWith('arr.0.a', 3, undefined)
     })
 
   })
@@ -250,8 +249,8 @@ describe('Scope', function () {
       expect(vm._data).toBe(newData)
       expect(vm.a).toBe(2)
       expect(vm.b).toBe(3)
-      expect(vmSpy).toHaveBeenCalledWith('a', 2, u)
-      expect(vmAddSpy).toHaveBeenCalledWith('b', 3, u)
+      expect(vmSpy).toHaveBeenCalledWith('a', 2, undefined)
+      expect(vmAddSpy).toHaveBeenCalledWith('b', 3, undefined)
     })
 
     it('should unsync old data', function () {

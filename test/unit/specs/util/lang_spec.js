@@ -135,7 +135,7 @@ describe('Util - Language Enhancement', function () {
 
     _.define(obj, 'test2', 123, true)
     expect(obj.test2).toBe(123)
-    var desc = Object.getOwnPropertyDescriptor(obj, 'test2')
+    desc = Object.getOwnPropertyDescriptor(obj, 'test2')
     expect(desc.enumerable).toBe(true)
   })
 

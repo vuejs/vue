@@ -9,7 +9,7 @@ describe('Util - Option merging', function () {
     var res = merge({replace:true}, {}).replace
     expect(res).toBe(true)
     // child overwrite
-    var res = merge({replace:true}, {replace:false}).replace
+    res = merge({replace:true}, {replace:false}).replace
     expect(res).toBe(false)
   })
 
