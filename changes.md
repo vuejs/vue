@@ -201,3 +201,31 @@ Vue.transition('fade', {
   }
 })
 ```
+
+## Events API
+
+Now if an event handler return `false`, it will stop event propagation for `$dispatch` and stop broadcasting to children for `$broadcast`.
+
+``` js
+var a = new Vue()
+var b = new Vue({
+  parent: a
+})
+var c = new Vue({
+  parent: b
+})
+
+a.$on('test', function () {
+  console.log('a')
+})
+b.$on('test', function () {
+  console.log('b')
+  return false
+})
+c.$on('test', function () {
+  console.log('c')
+})
+c.$dispatch('test')
+// -> 'c'
+// -> 'b'
+```
