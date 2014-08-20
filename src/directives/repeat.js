@@ -3,6 +3,10 @@ var uid = 0
 
 module.exports = {
 
+  /**
+   * Setup.
+   */
+
   bind: function () {
     // uid as a cache identifier
     this.id = '__v_repeat_' + (++uid)
@@ -15,8 +19,7 @@ module.exports = {
     }
     this.filters.unshift('_objectToArray')
     // check v-ref
-    var childId = _.attr(this.el, 'ref')
-    this.childId = this.vm.$interpolate(childId)
+    this.checkRef()
     // setup ref node
     this.ref = document.createComment('v-repeat')
     _.replace(this.el, this.ref)
@@ -24,18 +27,101 @@ module.exports = {
     this.data = this.vms = this.oldData = this.oldVms = null
   },
 
+  /**
+   * Check if v-ref is also present. If yes, evaluate it and
+   * locate the first non-anonymous parent as the owner vm.
+   */
+
+  checkRef: function () {
+    var childId = _.attr(this.el, 'ref')
+    this.childId = childId
+      ? this.vm.$interpolate(childId)
+      : null
+    if (this.childId) {
+      var owner = this.vm.$parent
+      while (owner._isAnonymous) {
+        owner = owner.$parent
+      }
+      this.owner = owner
+    }
+  },
+
+  /**
+   * Update.
+   * This is called whenever the Array mutates.
+   *
+   * @param {Array} data
+   */
+
   update: function (data) {
-    if (!_.isArray(data)) {
-      _.warn('v-repeat expects an Array or Object value.')
+    if (data && !_.isArray(data)) {
+      _.warn(
+        'Invalid value for v-repeat:' + data +
+        '\nExpects Object or Array.'
+      )
       return
     }
     this.oldVms = this.vms
     this.oldData = this.data
-    // TODO
+    this.data = data || []
+    this.vms = this.oldData
+      ? this.diff()
+      : this.init()
+    // update v-ref
+    if (this.childId) {
+      this.owner.$[this.childId] = this.vms
+    }
   },
 
-  unbind: function () {
+  /**
+   * Only called on initial update, build up the first
+   * batch of instances.
+   */
+
+  init: function () {
     
+  },
+
+  /**
+   * Diff, based on new data and old data, determine the
+   * minimum amount of DOM manipulations needed to make the
+   * DOM reflect the new data Array.
+   */
+
+  diff: function () {
+    
+  },
+
+  /**
+   * Build a new instance and cache it.
+   *
+   * @param {Object} data
+   */
+
+  build: function (data) {
+    // TODO: resolve constructor dynamically based on
+    // passed in data. may need to modify vm.$interpolate
+    // also, vm.$value should always point to the actual
+    // data in the user Array/Object.
+  },
+
+  /**
+   * Unbind, teardown everything
+   */
+
+  unbind: function () {
+    if (this.childId) {
+      delete this.owner.$[this.childId]
+    }
+    if (this.vms) {
+      var i = this.vms.length
+      var vm
+      while (i--) {
+        vm = this.vms[i]
+        this.deleteInstance(vm.$value)
+        vm.$destroy()
+      }
+    }
   },
 
   /**
