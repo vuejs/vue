@@ -156,9 +156,13 @@ exports._compileTextNode = function (node) {
       } else {
         value = token.value
         if (token.html) {
-          el = document.createComment('vue-html')
+          el = document.createComment('v-html')
           _.before(el, node)
           this._bindDirective('html', value, el)
+        } else if (token.partial) {
+          el = document.createComment('v-partial')
+          _.before(el, node)
+          this._bindDirective('partial', value, el)
         } else {
           el = document.createTextNode('')
           _.before(el, node)
