@@ -26,13 +26,13 @@ module.exports = {
     this.checkIf()
     this.checkRef()
     this.checkComponent()
+    // setup ref node
+    this.ref = document.createComment('v-repeat')
+    _.replace(this.el, this.ref)
     // check if this is a block repeat
     if (this.el.tagName === 'TEMPLATE') {
       this.el = templateParser.parse(this.el)
     }
-    // setup ref node
-    this.ref = document.createComment('v-repeat')
-    _.replace(this.el, this.ref)
     // instance holders
     this.data = this.vms = this.oldData = this.oldVms = null
   },
