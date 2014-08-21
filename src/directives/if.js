@@ -7,8 +7,7 @@ module.exports = {
     var el = this.el
     if (!el.__vue__) {
       this.ref = document.createComment('v-if')
-      _.after(this.ref, el)
-      _.remove(el)
+      _.replace(el, this.ref)
       this.inserted = false
       if (el.tagName === 'TEMPLATE') {
         this.el = templateParser.parse(el)

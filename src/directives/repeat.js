@@ -1,4 +1,7 @@
 var _ = require('../util')
+var textParser = require('../parse/text')
+var expParser = require('../parse/expression')
+var templateParser = require('../parse/template')
 var uid = 0
 
 module.exports = {
@@ -17,14 +20,34 @@ module.exports = {
     if (!this.filters) {
       this.filters = []
     }
-    this.filters.unshift('_objectToArray')
-    // check v-ref
+    this.filters.unshift({ name: '_objToArray' })
+    // check other directives that need to be handled
+    // at v-repeat level
+    this.checkIf()
     this.checkRef()
+    this.checkComponent()
+    // check if this is a block repeat
+    if (this.el.tagName === 'TEMPLATE') {
+      this.el = templateParser.parse(this.el)
+    }
     // setup ref node
     this.ref = document.createComment('v-repeat')
     _.replace(this.el, this.ref)
     // instance holders
     this.data = this.vms = this.oldData = this.oldVms = null
+  },
+
+  /**
+   * Warn against v-if usage.
+   */
+
+  checkIf: function () {
+    if (_.attr(this.el, 'if') !== null) {
+      _.warn(
+        'Don\'t use v-if with v-repeat. ' +
+        'Use v-show or the "filterBy" filter instead.'
+      )
+    }
   },
 
   /**
@@ -47,6 +70,38 @@ module.exports = {
   },
 
   /**
+   * Check the component constructor to use for repeated
+   * instances. If static we resolve it now, otherwise it
+   * needs to be resolved at build time with actual data.
+   */
+
+  checkComponent: function () {
+    var id = _.attr(this.el, 'component')
+    if (!id) {
+      this.Ctor = _.Vue // default constructor
+    } else {
+      var tokens = textParser.parse(id)
+      if (!tokens.length) { // static component
+        this.Ctor = this.vm.$options.components[id]
+        if (!this.Ctor) {
+          _.warn('Failed to resolve component: ' + id)
+          this.Ctor = _.Vue
+        }
+      } else if (tokens.length === 1) {
+        // to be resolved later
+        this.CtorExp = tokens[0].value
+      } else {
+        _.warn(
+          'Invalid attribute binding: "' +
+           'component="' + id + '"' +
+          '\nDon\'t mix binding tags with plain text ' +
+          'in attribute bindings.'
+        )
+      }
+    }
+  },
+
+  /**
    * Update.
    * This is called whenever the Array mutates.
    *
@@ -61,6 +116,9 @@ module.exports = {
       )
       return
     }
+    // converted = true means the Array was converted
+    // from an Object
+    this.converted = data._converted
     this.oldVms = this.vms
     this.oldData = this.data
     this.data = data || []
@@ -79,7 +137,17 @@ module.exports = {
    */
 
   init: function () {
-    
+    var data = this.data
+    var i = 0
+    var l = data.length
+    var vms = new Array(l)
+    var vm
+    for (; i < l; i++) {
+      vm = this.build(data[i], i)
+      vms[i] = vm
+      vm.$before(this.ref)
+    }
+    return vms
   },
 
   /**
@@ -89,20 +157,70 @@ module.exports = {
    */
 
   diff: function () {
-    
+    // TODO
+    console.log('diffing...')
   },
 
   /**
    * Build a new instance and cache it.
    *
    * @param {Object} data
+   * @param {Number} index
    */
 
-  build: function (data) {
-    // TODO: resolve constructor dynamically based on
-    // passed in data. may need to modify vm.$interpolate
-    // also, vm.$value should always point to the actual
-    // data in the user Array/Object.
+  build: function (data, index) {
+    var original = data
+    var raw = this.converted
+      ? data.value
+      : data
+    var isObject = raw && typeof raw === 'object'
+    var hasAlias = !isObject || this.arg
+    // wrap the raw data with alias
+    data = hasAlias ? {} : raw
+    // resolve constructor
+    var Ctor = this.Ctor || this.resolveCtor(data)
+    var vm = new Ctor({
+      el: this.el.cloneNode(true),
+      data: data,
+      parent: this.vm
+    })
+    // define alias
+    if (hasAlias) {
+      var alias = this.arg || '$value'
+      vm.$add(alias, raw)
+    }
+    // define key
+    if (this.converted) {
+      vm.$add('$key', original.key)
+    }
+    // define index
+    vm.$add('$index', index)
+    // cache instance
+    if (isObject) {
+      this.cacheInstance(raw, vm)
+    }
+    return vm
+  },
+
+  /**
+   * Resolve a contructor to use for an instance.
+   * The tricky part here is that there could be dynamic
+   * components depending on instance data.
+   *
+   * @param {Object} data
+   * @return {Function}
+   */
+
+  resolveCtor: function (data) {
+    var getter = expParser.parse(this.CtorExp).get
+    var context = Object.create(this.vm.$scope)
+    _.extend(context, data)
+    var id = getter(context)
+    var Ctor = this.vm.$options.components[id]
+    if (!Ctor) {
+      _.warn('Failed to resolve component: ' + id)
+    }
+    return Ctor
   },
 
   /**
