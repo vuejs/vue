@@ -134,7 +134,7 @@ module.exports = {
    * hidden reference to an owner vm instance on previously
    * seen data. This allows us to achieve O(n) which is
    * better than a levenshtein distance based algorithm,
-   * which is O(n * l).
+   * which is O(m * n).
    *
    * @param {Array} data
    * @param {Array} oldVms
@@ -174,7 +174,7 @@ module.exports = {
       return vms
     }
     // Second pass, go through the old vm instances and
-    // destroy those who are not reused (and remove then
+    // destroy those who are not reused (and remove them
     // from cache)
     for (i = 0, l = oldVms.length; i < l; i++) {
       vm = oldVms[i]
