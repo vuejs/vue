@@ -9,7 +9,7 @@ var map = {
     2,
     '<table><tbody></tbody><colgroup>',
     '</colgroup></table>'
-  ],
+  ]
 }
 
 map.td =

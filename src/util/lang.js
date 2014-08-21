@@ -91,21 +91,6 @@ exports.extend = function (to, from) {
 }
 
 /**
- * Mixin including non-enumerables, and copy property
- * descriptors.
- *
- * @param {Object} to
- * @param {Object} from
- */
-
-exports.deepMixin = function (to, from) {
-  Object.getOwnPropertyNames(from).forEach(function (key) {
-    var desc =Object.getOwnPropertyDescriptor(from, key)
-    Object.defineProperty(to, key, desc)
-  })
-}
-
-/**
  * Proxy a property on one object to another.
  *
  * @param {Object} to
@@ -172,14 +157,20 @@ exports.define = function (obj, key, val, enumerable) {
 /**
  * Augment an target Object or Array by either
  * intercepting the prototype chain using __proto__,
- * or copy over property descriptors
+ * or copy over properties with defineProperty.
  *
  * @param {Object|Array} target
  * @param {Object} proto
  */
 
-exports.augment = '__proto__' in {}
+var define = exports.define
+var hasProto = exports.hasProto = '__proto__' in {}
+exports.augment = hasProto
   ? function (target, proto) {
       target.__proto__ = proto
     }
-  : exports.deepMixin
+  : function (target, proto) {
+      for (var key in proto) {
+        define(target, key, proto[key])
+      }
+    }

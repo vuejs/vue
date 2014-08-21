@@ -44,7 +44,8 @@ function Observer (value, type, options) {
       this.link(value)
     } else if (type === OBJECT) {
       if (options && options.doNotAlterProto) {
-        _.deepMixin(value, objectAugmentations)
+        _.define(value, '$add', objectAugmentations.$add)
+        _.define(value, '$delete', objectAugmentations.$delete)
       } else {
         _.augment(value, objectAugmentations)
       }
