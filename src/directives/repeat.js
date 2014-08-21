@@ -79,7 +79,7 @@ module.exports = {
       this.Ctor = _.Vue // default constructor
     } else {
       var tokens = textParser.parse(id)
-      if (!tokens.length) { // static component
+      if (!tokens) { // static component
         this.Ctor = this.vm.$options.components[id]
         if (!this.Ctor) {
           _.warn('Failed to resolve component: ' + id)
