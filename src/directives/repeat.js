@@ -33,8 +33,6 @@ module.exports = {
     if (this.el.tagName === 'TEMPLATE') {
       this.el = templateParser.parse(this.el)
     }
-    // instance holders
-    this.data = this.vms = this.oldData = this.oldVms = null
   },
 
   /**
@@ -116,15 +114,11 @@ module.exports = {
       )
       return
     }
-    // converted = true means the Array was converted
-    // from an Object
-    this.converted = data._converted
-    this.oldVms = this.vms
-    this.oldData = this.data
-    this.data = data || []
-    this.vms = this.oldData
-      ? this.diff()
-      : this.init()
+    this.vms = this.diff(
+      data || [],
+      this.vms,
+      data._converted
+    )
     // update v-ref
     if (this.childId) {
       this.owner.$[this.childId] = this.vms
@@ -132,33 +126,96 @@ module.exports = {
   },
 
   /**
-   * Only called on initial update, build up the first
-   * batch of instances.
-   */
-
-  init: function () {
-    var data = this.data
-    var i = 0
-    var l = data.length
-    var vms = new Array(l)
-    var vm
-    for (; i < l; i++) {
-      vm = this.build(data[i], i)
-      vms[i] = vm
-      vm.$before(this.ref)
-    }
-    return vms
-  },
-
-  /**
    * Diff, based on new data and old data, determine the
    * minimum amount of DOM manipulations needed to make the
    * DOM reflect the new data Array.
+   *
+   * The algorithm diffs the new data Array by storing a
+   * hidden reference to an owner vm instance on previously
+   * seen data. This allows us to achieve O(n) which is
+   * better than a levenshtein distance based algorithm,
+   * which is O(n * l).
+   *
+   * @param {Array} data
+   * @param {Array} oldVms
+   * @param {Boolean} converted - converted from an Object?
+   * @return {Array}
    */
 
-  diff: function () {
-    // TODO
-    console.log('diffing...')
+  diff: function (data, oldVms, converted) {
+    var vms = new Array(data.length)
+    var ref = this.ref
+    var obj, raw, vm, i, l
+    // First pass, go through the new Array and fill up
+    // the new vms array. If a piece of data has a cached
+    // instance for it, we reuse it. Otherwise build a new
+    // instance.
+    for (i = 0, l = data.length; i < l; i++) {
+      obj = data[i]
+      raw = converted ? obj.value : obj
+      vm = this.getVm(raw)
+      if (vm) { // reusable instance
+        vm._reused = true
+        vm.$index = i // update $index
+        if (converted) {
+          vm.$key = obj.key // update $key
+        }
+      } else { // new instance
+        vm = this.build(obj, i)
+      }
+      vms[i] = vm
+      // insert if this is first run
+      if (!oldVms) {
+        vm.$before(ref)
+      }
+    }
+    // if this is the first run, we're done.
+    if (!oldVms) {
+      return vms
+    }
+    // Second pass, go through the old vm instances and
+    // destroy those who are not reused (and remove then
+    // from cache)
+    for (i = 0, l = oldVms.length; i < l; i++) {
+      vm = oldVms[i]
+      if (!vm._reused) {
+        this.uncacheVm(vm)
+        vm.$destroy(true)
+      }
+    }
+    // final pass, move/insert new instances into the
+    // right place. We're going in reverse here because
+    // insertBefore relies on the next sibling to be
+    // resolved.
+    var targetNext, currentNext, nextEl
+    i = vms.length
+    while (i--) {
+      vm = vms[i]
+      // this is the vm that we should be in front of
+      targetNext = vms[i + 1]
+      if (!targetNext) {
+        // This is the last item, just insert before the
+        // ref node. However we only want animation for
+        // newly created instances.
+        vm.$before(ref, null, !vm._reused)
+      } else {
+        if (vm._reused) {
+          // this is the vm we are actually in front of
+          currentNext = findNextVm(vm, ref)
+          // we only need to move if we are not in the right
+          // place already.
+          if (currentNext !== targetNext) {
+            nextEl = findNextInDOMVmEl(targetNext, vms, ref)
+            vm.$before(nextEl, null, false)
+          }
+        } else {
+          // new instance, insert to existing next
+          vm.$before(targetNext.$el)
+        }
+      }
+      vm._reused = false
+    }
+    return vms
   },
 
   /**
@@ -197,7 +254,7 @@ module.exports = {
     vm.$add('$index', index)
     // cache instance
     if (isObject) {
-      this.cacheInstance(raw, vm)
+      this.cacheVm(raw, vm)
     }
     return vm
   },
@@ -236,7 +293,7 @@ module.exports = {
       var vm
       while (i--) {
         vm = this.vms[i]
-        this.deleteInstance(vm.$value)
+        this.uncacheVm(vm)
         vm.$destroy()
       }
     }
@@ -251,12 +308,13 @@ module.exports = {
    * @param {Vue} vm
    */
 
-  cacheInstance: function (data, vm) {
+  cacheVm: function (data, vm) {
     if (data[this.id] !== undefined) {
       data[this.id] = vm
     } else {
       _.define(data, this.id, vm)
     }
+    vm._raw = data
   },
 
   /**
@@ -266,19 +324,65 @@ module.exports = {
    * @return {Vue|undefined}
    */
 
-  getInstance: function (data) {
+  getVm: function (data) {
     return data[this.id]
   },
 
   /**
-   * Delete the saved reference on a data object.
+   * Delete a cached vm instance.
    * This assumes the data already has a vm cached on it.
    *
-   * @param {Object} data
+   * @param {Vue} vm
    */
 
-  deleteInstance: function (data) {
-    data[this.id] = null
+  uncacheVm: function (vm) {
+    if (vm._raw) {
+      vm._raw[this.id] = null
+      vm._raw = null
+    }
   }
 
+}
+
+/**
+ * Helper to find the next element that is an instance
+ * root node. This is necessary because a destroyed vm's
+ * element could still be lingering in the DOM before its
+ * leaving transition finishes, but its __vue__ reference
+ * should have been removed so we can skip them.
+ *
+ * @param {Vue} vm
+ * @param {CommentNode} ref
+ * @return {Vue}
+ */
+
+function findNextVm (vm, ref) {
+  var el = (vm._isBlock
+    ? vm._blockEnd
+    : vm.$el).nextSibling
+  while (!el.__vue__ && el !== ref) {
+    el = el.nextSibling
+  }
+  return el.__vue__
+}
+
+/**
+ * Helper to find the next vm that is already in the DOM
+ * and return its $el. This is necessary because newly
+ * inserted vms might not be in the DOM yet due to entering
+ * transitions.
+ *
+ * @param {Vue} next
+ * @param {Array} vms
+ * @param {CommentNode} ref
+ * @return {Element}
+ */
+
+function findNextInDOMVmEl (next, vms, ref) {
+  var el = next.$el
+  while (!el.parentNode) {
+    next = vms[next.$index + 1]
+    el = next ? next.$el : ref
+  }
+  return el
 }

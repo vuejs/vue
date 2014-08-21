@@ -1,3 +1,4 @@
+var _ = require('../util')
 var transition = require('../transition')
 
 /**
@@ -5,14 +6,21 @@ var transition = require('../transition')
  *
  * @param {Node} target
  * @param {Function} [cb]
+ * @param {Boolean} [withTransition]
  */
 
-exports.$appendTo = function (target, cb) {
+exports.$appendTo = function (target, cb, withTransition) {
   target = query(target)
+  var op = withTransition === false
+    ? _.append
+    : transition.append
   if (this._isBlock) {
-    blockOp(this, target, transition.append, cb)
+    blockOp(this, target, op, cb)
   } else {
-    transition.append(this.$el, target, cb, this)
+    op(this.$el, target, cb, this)
+  }
+  if (cb && !withTransition) {
+    cb()
   }
 }
 
@@ -21,14 +29,15 @@ exports.$appendTo = function (target, cb) {
  *
  * @param {Node} target
  * @param {Function} [cb]
+ * @param {Boolean} [withTransition]
  */
 
-exports.$prependTo = function (target, cb) {
+exports.$prependTo = function (target, cb, withTransition) {
   target = query(target)
   if (target.hasChildNodes()) {
-    this.$before(target.firstChild, cb)
+    this.$before(target.firstChild, cb, withTransition)
   } else {
-    this.$appendTo(target, cb)
+    this.$appendTo(target, cb, withTransition)
   }
 }
 
@@ -37,14 +46,21 @@ exports.$prependTo = function (target, cb) {
  *
  * @param {Node} target
  * @param {Function} [cb]
+ * @param {Boolean} [withTransition]
  */
 
-exports.$before = function (target, cb) {
+exports.$before = function (target, cb, withTransition) {
   target = query(target)
+  var op = withTransition === false
+    ? _.before
+    : transition.before 
   if (this._isBlock) {
-    blockOp(this, target, transition.before, cb)
+    blockOp(this, target, op, cb)
   } else {
-    transition.before(this.$el, target, cb, this)
+    op(this.$el, target, cb, this)
+  }
+  if (cb && !withTransition) {
+    cb()
   }
 }
 
@@ -53,14 +69,15 @@ exports.$before = function (target, cb) {
  *
  * @param {Node} target
  * @param {Function} [cb]
+ * @param {Boolean} [withTransition]
  */
 
-exports.$after = function (target, cb) {
+exports.$after = function (target, cb, withTransition) {
   target = query(target)
   if (target.nextSibling) {
-    this.$before(target.nextSibling, cb)
+    this.$before(target.nextSibling, cb, withTransition)
   } else {
-    this.$appendTo(target.parentNode, cb)
+    this.$appendTo(target.parentNode, cb, withTransition)
   }
 }
 
@@ -68,21 +85,24 @@ exports.$after = function (target, cb) {
  * Remove instance from DOM
  *
  * @param {Function} [cb]
+ * @param {Boolean} [withTransition]
  */
 
-exports.$remove = function (cb) {
+exports.$remove = function (cb, withTransition) {
+  var op
   if (
     this._isBlock &&
     !this._blockFragment.hasChildNodes()
   ) {
-    blockOp(
-      this,
-      this._blockFragment,
-      transition.removeThenAppend,
-      cb
-    )
+    op = withTransition === false
+      ? _.append
+      : transition.removeThenAppend 
+    blockOp(this, this._blockFragment, op, cb)
   } else if (this.$el.parentNode) {
-    transition.remove(this.$el, cb, this)
+    op = withTransition === false
+      ? _.remove
+      : transition.remove
+    op(this.$el, cb, this)
   }
 }
 
