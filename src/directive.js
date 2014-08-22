@@ -145,7 +145,9 @@ p._teardown = function () {
     if (this.unbind) {
       this.unbind()
     }
-    this._watcher.teardown()
+    if (this._watcher) {
+      this._watcher.teardown()
+    }
     this._bound = false
   }
 }
