@@ -1,3 +1,5 @@
+var inDoc = require('../util').inDoc
+
 /**
  * Setup the instance's option events.
  * If the value is a string, we pull it from the
@@ -20,6 +22,32 @@ exports._initEvents = function () {
       }
     }
   }
+}
+
+/**
+ * Setup recursive attached/detached calls
+ */
+
+exports._initDOMHooks = function () {
+  var children = this._children
+  this.$on('hook:attached', function () {
+    this._isAttached = true
+    for (var i = 0, l = children.length; i < l; i++) {
+      var child = children[i]
+      if (!child._isAttached && inDoc(child.$el)) {
+        child._callHook('attached')
+      }
+    }
+  })
+  this.$on('hook:detached', function () {
+    this._isAttached = false
+    for (var i = 0, l = children.length; i < l; i++) {
+      var child = children[i]
+      if (child._isAttached && !inDoc(child.$el)) {
+        child._callHook('detached')
+      }
+    }
+  })
 }
 
 /**

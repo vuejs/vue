@@ -86,6 +86,7 @@ extend(p, require('./instance/scope'))
 extend(p, require('./instance/bindings'))
 extend(p, require('./instance/element'))
 extend(p, require('./instance/compile'))
+extend(p, require('./instance/misc'))
 
 /**
  * Mixin public API methods

@@ -1,5 +1,3 @@
-var _ = require('./debug')
-
 /**
  * Resolve read & write filters for a vm instance. The
  * filters descriptor Array comes from the directive parser.

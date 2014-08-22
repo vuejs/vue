@@ -10,18 +10,10 @@ var transition = require('../transition')
  */
 
 exports.$appendTo = function (target, cb, withTransition) {
-  target = query(target)
   var op = withTransition === false
     ? _.append
     : transition.append
-  if (this._isBlock) {
-    blockOp(this, target, op, cb)
-  } else {
-    op(this.$el, target, cb, this)
-  }
-  if (cb && !withTransition) {
-    cb()
-  }
+  insert(this, target, op, cb, withTransition)
 }
 
 /**
@@ -50,18 +42,10 @@ exports.$prependTo = function (target, cb, withTransition) {
  */
 
 exports.$before = function (target, cb, withTransition) {
-  target = query(target)
   var op = withTransition === false
     ? _.before
-    : transition.before 
-  if (this._isBlock) {
-    blockOp(this, target, op, cb)
-  } else {
-    op(this.$el, target, cb, this)
-  }
-  if (cb && !withTransition) {
-    cb()
-  }
+    : transition.before
+  insert(this, target, op, cb, withTransition)
 }
 
 /**
@@ -90,6 +74,14 @@ exports.$after = function (target, cb, withTransition) {
 
 exports.$remove = function (cb, withTransition) {
   var op
+  var shouldCallHook = this._isAttached && _.inDoc(this.$el)
+  var self = this
+  var realCb = function () {
+    if (shouldCallHook) {
+      self._callHook('detached')
+    }
+    if (cb) cb()
+  }
   if (
     this._isBlock &&
     !this._blockFragment.hasChildNodes()
@@ -97,12 +89,44 @@ exports.$remove = function (cb, withTransition) {
     op = withTransition === false
       ? _.append
       : transition.removeThenAppend 
-    blockOp(this, this._blockFragment, op, cb)
+    blockOp(this, this._blockFragment, op, realCb)
   } else if (this.$el.parentNode) {
     op = withTransition === false
       ? _.remove
       : transition.remove
-    op(this.$el, cb, this)
+    op(this.$el, realCb, this)
+  }
+}
+
+/**
+ * Shared DOM insertion function.
+ *
+ * @param {Vue} vm
+ * @param {Element} target
+ * @param {Function} op
+ * @param {Function} [cb]
+ * @param {Boolean} [withTransition]
+ */
+
+function insert (vm, target, op, cb, withTransition) {
+  target = query(target)
+  var shouldCallHook =
+    !vm._isAttached &&
+    !_.inDoc(vm.$el) &&
+    _.inDoc(target)
+  var realCb = function () {
+    if (shouldCallHook) {
+      vm._callHook('attached')
+    }
+    if (cb) cb()
+  }
+  if (vm._isBlock) {
+    blockOp(vm, target, op, realCb)
+  } else {
+    op(vm.$el, target, realCb, vm)
+  }
+  if (withTransition === false) {
+    realCb()
   }
 }
 

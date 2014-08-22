@@ -6,34 +6,6 @@ var dirParser = require('../parse/directive')
 var templateParser = require('../parse/template')
 
 /**
- * Retrive an asset by type and id.
- * Search order:
- *   -> instance options
- *   -> constructor options
- *   -> recursive parent search
- *
- * @param {String} type
- * @param {String} id
- */
-
-exports._asset = function (type, id) {
-  var own = this.$options[type]
-  var ctor = this.constructor.options[type]
-  var parent = this.$parent
-  var asset =
-    (own && own[id]) ||
-    (ctor && ctor[id]) ||
-    (parent && parent._asset(type, id))
-  if (!asset) {
-    _.warn(
-      'Failed to locate ' +
-      type.slice(0, -1) + ': ' + id
-    )
-  }
-  return asset
-}
-
-/**
  * The main entrance to the compilation process.
  * Calling this function requires the instance's `$el` to
  * be already set up, and it should be called only once
@@ -47,7 +19,6 @@ exports._compile = function () {
   } else {
     this._compileNode(this.$el)
   }
-  this._isCompiled = true
 }
 
 /**

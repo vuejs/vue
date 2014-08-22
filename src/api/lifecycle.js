@@ -1,3 +1,5 @@
+var _ = require('../util')
+
 /**
  * Set instance target element and kick off the compilation
  * process. The passed in `el` can be a selector string, an
@@ -9,10 +11,24 @@
  */
 
 exports.$mount = function (el) {
-  this._callHook('beforeMount')
+  if (this._isCompiled) {
+    _.warn('$mount() should be called only once.')
+    return
+  }
+  this._callHook('beforeCompile')
   this._initElement(el)
   this._compile()
-  this._callHook('ready')
+  this._isCompiled = true
+  this._callHook('compiled')
+  this.$once('hook:attached', function () {
+    this._isAttached = true
+    this._isReady = true
+    this._callHook('ready')
+    this._initDOMHooks()
+  })
+  if (_.inDoc(this.$el)) {
+    this._callHook('attached')
+  }
 }
 
 /**

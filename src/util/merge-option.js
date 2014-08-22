@@ -23,9 +23,10 @@ strats.created =
 strats.ready =
 strats.attached =
 strats.detached =
-strats.beforeMount =
+strats.beforeCompile =
+strats.compiled =
 strats.beforeDestroy =
-strats.afterDestroy =
+strats.destroyed =
 strats.paramAttributes = function (parentVal, childVal) {
   return (parentVal || []).concat(childVal || [])
 }

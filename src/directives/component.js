@@ -136,7 +136,9 @@ module.exports = {
         el: this.el.cloneNode(true),
         parent: this.vm
       })
-      this.cache[this.id] = this.childVM
+      if (this.keepAlive) {
+        this.cache[this.id] = this.childVM
+      }
       this.childVM.$before(this.ref)
     }
   },

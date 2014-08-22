@@ -1,6 +1,21 @@
 var config = require('../config')
 
 /**
+ * Check if a node is in the document.
+ *
+ * @param {Node} node
+ * @return {Boolean}
+ */
+
+var doc =
+  typeof document !== 'undefined' &&
+  document.documentElement
+
+exports.inDoc = function (node) {
+  return doc && doc.contains(node)
+}
+
+/**
  * Extract an attribute from a node.
  *
  * @param {Node} node

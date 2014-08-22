@@ -46,6 +46,7 @@
     "src/instance/element.js",
     "src/instance/events.js",
     "src/instance/init.js",
+    "src/instance/misc.js",
     "src/instance/scope.js",
     "src/observe/array-augmentations.js",
     "src/observe/object-augmentations.js",

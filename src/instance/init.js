@@ -33,6 +33,8 @@ exports._init = function (options) {
   // lifecycle state
   this._isCompiled  = false
   this._isDestroyed = false
+  this._isReady     = false
+  this._isAttached  = false
 
   // anonymous instances are created by flow-control
   // directives such as v-if and v-repeat

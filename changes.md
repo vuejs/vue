@@ -42,15 +42,23 @@ Whether to inherit parent scope data. Set it to `true` if you want to create a c
 
 ### removed options: `id`, `tagName`, `className`, `attributes`, `lazy`.
 
-Since now a vm must always be provided the `el` option or explicitly mounted to an existing element, the element creation releated options have been removed for simplicity. If you need to modify your element's attributes, simply do so in the new `beforeMount` hook.
+Since now a vm must always be provided the `el` option or explicitly mounted to an existing element, the element creation releated options have been removed for simplicity. If you need to modify your element's attributes, simply do so in the new `beforeCompile` hook.
 
 The `lazy` option is removed because this does not belong at the vm level. Users should be able to configure individual `v-model` instances to be lazy or not.
 
 ## Hook changes
 
-### new hook: `beforeMount`
+### new hook: `beforeCompile`
 
 This new hook is introduced to accompany the separation of instantiation and DOM mounting. It is called right before the DOM compilation starts and `this.$el` is available, so you can do some pre-processing on the element here.
+
+### new hook: `compiled` & redesigned hook: `ready`
+
+The `compiled` hook indicates the element has been fully compiled based on initial data. However this doesn't indicate if the element has been inserted into the DOM yet. This is essentially the old `ready` hook.
+
+The new `ready` hook now is only fired after the instance is compiled and **inserted into the document for the first time**.
+
+### renamed hook: `afterDestroy` -> `destroyed`
 
 ## Computed Properties
 
