@@ -109,10 +109,7 @@ module.exports = {
       this.Ctor = _.Vue
     } else {
       this.id = id
-      this.Ctor = this.vm.$options.components[id]
-      if (!this.Ctor) {
-        _.warn('Failed to resolve component: ' + id)
-      }
+      this.Ctor = this.vm._asset('components', id)
     }
   },
 

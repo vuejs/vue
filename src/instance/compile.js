@@ -6,6 +6,34 @@ var dirParser = require('../parse/directive')
 var templateParser = require('../parse/template')
 
 /**
+ * Retrive an asset by type and id.
+ * Search order:
+ *   -> instance options
+ *   -> constructor options
+ *   -> recursive parent search
+ *
+ * @param {String} type
+ * @param {String} id
+ */
+
+exports._asset = function (type, id) {
+  var own = this.$options[type]
+  var ctor = this.constructor.options[type]
+  var parent = this.$parent
+  var asset =
+    (own && own[id]) ||
+    (ctor && ctor[id]) ||
+    (parent && parent._asset(type, id))
+  if (!asset) {
+    _.warn(
+      'Failed to locate ' +
+      type.slice(0, -1) + ': ' + id
+    )
+  }
+  return asset
+}
+
+/**
  * The main entrance to the compilation process.
  * Calling this function requires the instance's `$el` to
  * be already set up, and it should be called only once
@@ -90,40 +118,49 @@ exports._compileElement = function (node) {
 exports._compileAttrs = function (node) {
   var attrs = _.toArray(node.attributes)
   var i = attrs.length
-  var registry = this.$options.directives
+  // var registry = this.$options.directives
   var dirs = []
-  var attr, attrName, dir, dirName
+  var attr, attrName, dir, dirName, dirDef
   while (i--) {
     attr = attrs[i]
     attrName = attr.name
     if (attrName.indexOf(config.prefix) === 0) {
       dirName = attrName.slice(config.prefix.length)
-      if (registry[dirName]) {
+      dirDef = this._asset('directives', dirName)
+      if (dirDef) {
         if (dirName !== 'cloak') {
           node.removeAttribute(attrName)
         }
         dirs.push({
           name: dirName,
-          value: attr.value
+          value: attr.value,
+          def: dirDef
         })
-      } else {
-        _.warn('Failed to resolve directive: ' + dirName)
       }
     } else if (config.interpolate) {
       this._bindAttr(node, attr)
     }
   }
   // sort the directives by priority, low to high
-  dirs.sort(function (a, b) {
-    a = registry[a.name].priority || 0
-    b = registry[b.name].priority || 0
-    return a > b ? 1 : -1
-  })
+  dirs.sort(directiveComparator)
   i = dirs.length
   while (i--) {
     dir = dirs[i]
-    this._bindDirective(dir.name, dir.value, node)
+    this._bindDirective(dir.name, dir.value, node, dir.def)
   }
+}
+
+/**
+ * Directive priority sort comparator
+ *
+ * @param {Object} a
+ * @param {Object} b
+ */
+
+function directiveComparator (a, b) {
+  a = a.def.priority || 0
+  b = b.def.priority || 0
+  return a > b ? 1 : -1
 }
 
 /**
@@ -217,14 +254,16 @@ exports._checkPriorityDirs = function (node) {
  * @param {String} name
  * @param {String} value
  * @param {Element} node
+ * @param {Object} [def]
  */
 
-exports._bindDirective = function (name, value, node) {
+exports._bindDirective = function (name, value, node, def) {
   var descriptors = dirParser.parse(value)
   var dirs = this._directives
+  def = def || this._asset('directives', name)
   for (var i = 0, l = descriptors.length; i < l; i++) {
     dirs.push(
-      new Direcitve(name, node, this, descriptors[i])
+      new Direcitve(name, node, this, descriptors[i], def)
     )
   }
 }

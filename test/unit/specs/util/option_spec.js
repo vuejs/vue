@@ -89,27 +89,21 @@ describe('Util - Option merging', function () {
     var asset1 = {}
     var asset2 = {}
     var asset3 = {}
-    // mock vm
-    var vm = {
-      $parent: {
-        $options: {
-          directives: {
-            c: asset3
-          }
-        }
-      }
-    }
     var res = merge(
       { directives: { a: asset1 }},
-      { directives: { b: asset2 }},
-      vm
+      { directives: { b: asset2 }}
     ).directives
     expect(res.a).toBe(asset1)
     expect(res.b).toBe(asset2)
-    expect(res.c).toBe(asset3)
-    // test prototypal inheritance
-    var asset4 = vm.$parent.$options.directives.d = {}
-    expect(res.d).toBe(asset4)
+    // vm asset merge should just return instance value
+    // for speed optimization
+    res = merge(
+      { directives: { a: asset1 }},
+      { directives: { b: asset2 }},
+      {} // just mock something for vm here
+    ).directives
+    expect(res.a).toBeUndefined()
+    expect(res.b).toBe(asset2)
   })
 
   it('guard components', function () {

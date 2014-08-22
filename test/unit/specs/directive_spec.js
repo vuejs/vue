@@ -33,7 +33,7 @@ describe('Directive', function () {
       expression: 'a',
       arg: 'someArg',
       filters: [{name:'test'}]
-    })
+    }, def)
     // properties
     expect(d.el).toBe(el)
     expect(d.name).toBe('test')
@@ -61,7 +61,7 @@ describe('Directive', function () {
     def.isLiteral = true
     var d = new Directive('test', el, vm, {
       expression: 'a'
-    })
+    }, def)
     expect(d._watcher).toBeUndefined()
     expect(d.expression).toBe('a')
     expect(d.bind).toHaveBeenCalled()
@@ -73,7 +73,7 @@ describe('Directive', function () {
     delete def.update
     var d = new Directive('test', el, vm, {
       expression: '{{a}}'
-    })
+    }, def)
     expect(d._watcher).toBeUndefined()
     expect(d.expression).toBe(1)
     expect(d.bind).toHaveBeenCalled()
@@ -83,7 +83,7 @@ describe('Directive', function () {
     def.isLiteral = true
     var d = new Directive('test', el, vm, {
       expression: '{{a}}'
-    })
+    }, def)
     expect(d._watcher).toBeDefined()
     expect(d.expression).toBe(1)
     expect(def.bind).toHaveBeenCalled()
@@ -99,7 +99,7 @@ describe('Directive', function () {
     def.isFn = true
     var d = new Directive('test', el, vm, {
       expression: 'a++'
-    })
+    }, def)
     expect(d._watcher).toBeUndefined()
     expect(d.bind).toHaveBeenCalled()
     var wrappedFn = d.update.calls.argsFor(0)[0]
@@ -119,7 +119,7 @@ describe('Directive', function () {
     var d = new Directive('test', el, vm, {
       expression: 'a',
       filters: [{name:'test'}]
-    })
+    }, def)
     d.set(2)
     expect(vm.a).toBe(6)
     nextTick(function () {
@@ -142,7 +142,7 @@ describe('Directive', function () {
     def.isLiteral = true
     new Directive('test', el, vm, {
       expression: 'abc {{a}}'
-    })
+    }, def)
     expect(_.warn).toHaveBeenCalled()
   })
 

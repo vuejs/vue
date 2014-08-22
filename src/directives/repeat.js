@@ -80,11 +80,8 @@ module.exports = {
     } else {
       var tokens = textParser.parse(id)
       if (!tokens) { // static component
-        this.Ctor = this.vm.$options.components[id]
-        if (!this.Ctor) {
-          _.warn('Failed to resolve component: ' + id)
-          this.Ctor = _.Vue
-        }
+        this.Ctor =
+          this.vm._asset('components', id) || _.Vue
       } else if (tokens.length === 1) {
         // to be resolved later
         this.CtorExp = tokens[0].value
@@ -273,11 +270,7 @@ module.exports = {
     var context = Object.create(this.vm.$scope)
     _.extend(context, data)
     var id = getter(context)
-    var Ctor = this.vm.$options.components[id]
-    if (!Ctor) {
-      _.warn('Failed to resolve component: ' + id)
-    }
-    return Ctor
+    return this.vm._asset('components', id) || _.Vue
   },
 
   /**

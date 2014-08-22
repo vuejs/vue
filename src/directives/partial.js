@@ -7,7 +7,7 @@ module.exports = {
 
   bind: function () {
     var id = this.expression
-    var partial = this.vm.$options.partials[id]
+    var partial = this.vm._asset('partials', id)
     if (!partial) {
       return
     }

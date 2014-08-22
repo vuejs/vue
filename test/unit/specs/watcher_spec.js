@@ -8,6 +8,7 @@ describe('Watcher', function () {
 
   beforeEach(function () {
     vm = new Vue({
+      filters: {},
       data: {
         a: 1,
         b: {
