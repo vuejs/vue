@@ -61,7 +61,7 @@ strats.components = function (parentVal, childVal, vm) {
  */
 
 strats.events = function (parentVal, childVal) {
-  var ret = Object.create(null)
+  var ret = {}
   extend(ret, parentVal)
   for (var key in childVal) {
     var parent = ret[key]

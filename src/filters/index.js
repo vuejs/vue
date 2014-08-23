@@ -1,5 +1,4 @@
 var _ = require('../util')
-var filters = module.exports = Object.create(null)
 
 /**
  * Stringify value.
@@ -7,7 +6,7 @@ var filters = module.exports = Object.create(null)
  * @param {Number} indent
  */
 
-filters.json = function (value, indent) {
+exports.json = function (value, indent) {
   return JSON.stringify(value, null, indent || 2)
 }
 
@@ -15,7 +14,7 @@ filters.json = function (value, indent) {
  * 'abc' => 'Abc'
  */
 
-filters.capitalize = function (value) {
+exports.capitalize = function (value) {
   if (!value && value !== 0) return ''
   value = value.toString()
   return value.charAt(0).toUpperCase() + value.slice(1)
@@ -25,7 +24,7 @@ filters.capitalize = function (value) {
  * 'abc' => 'ABC'
  */
 
-filters.uppercase = function (value) {
+exports.uppercase = function (value) {
   return (value || value === 0)
     ? value.toString().toUpperCase()
     : ''
@@ -35,7 +34,7 @@ filters.uppercase = function (value) {
  * 'AbC' => 'abc'
  */
 
-filters.lowercase = function (value) {
+exports.lowercase = function (value) {
   return (value || value === 0)
     ? value.toString().toLowerCase()
     : ''
@@ -49,7 +48,7 @@ filters.lowercase = function (value) {
 
 var digitsRE = /(\d{3})(?=\d)/g
 
-filters.currency = function (value, sign) {
+exports.currency = function (value, sign) {
   value = parseFloat(value)
   if (!value && value !== 0) return ''
   sign = sign || '$'
@@ -75,7 +74,7 @@ filters.currency = function (value, sign) {
  *  e.g. ['single', 'double', 'triple', 'multiple']
  */
 
-filters.pluralize = function (value) {
+exports.pluralize = function (value) {
   var args = _.toArray(arguments, 1)
   return args.length > 1
     ? (args[value % 10 - 1] || args[args.length - 1])
@@ -101,7 +100,7 @@ var keyCodes = {
   esc      : 27
 }
 
-filters.key = function (handler, key) {
+exports.key = function (handler, key) {
   if (!handler) return
   var code = keyCodes[key]
   if (!code) {
@@ -118,4 +117,4 @@ filters.key = function (handler, key) {
  * Install special array filters
  */
 
-_.extend(filters, require('./array-filters'))
+_.extend(exports, require('./array-filters'))

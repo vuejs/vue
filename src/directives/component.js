@@ -93,7 +93,7 @@ module.exports = {
     // check keep-alive flag
     this.keepAlive = this.el.hasAttribute('keep-alive')
     if (this.keepAlive) {
-      this.cache = Object.create(null)
+      this.cache = {}
     }
   },
 

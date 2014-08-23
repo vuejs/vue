@@ -228,9 +228,13 @@ module.exports = {
       ? data.value
       : data
     var isObject = raw && typeof raw === 'object'
-    var hasAlias = !isObject || this.arg
+    var alias = this.arg
+    var hasAlias = !isObject || alias
     // wrap the raw data with alias
     data = hasAlias ? {} : raw
+    if (alias) {
+      data[alias] = raw
+    }
     // resolve constructor
     var Ctor = this.Ctor || this.resolveCtor(data)
     var vm = new Ctor({
@@ -239,9 +243,8 @@ module.exports = {
       parent: this.vm
     })
     // define alias
-    if (hasAlias) {
-      var alias = this.arg || '$value'
-      vm.$add(alias, raw)
+    if (hasAlias && !alias) {
+      vm.$add('$value', raw)
     }
     // define key
     if (this.converted) {

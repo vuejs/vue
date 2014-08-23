@@ -37,6 +37,7 @@ function Observer (value, type, options) {
   this.value = value
   this.type = type
   this.parents = null
+  this.parentsHash = null
   if (value) {
     _.define(value, '$observer', this)
     if (type === ARRAY) {
@@ -89,7 +90,7 @@ Observer.create = function (value, options) {
       value.hasOwnProperty('$observer') &&
       value.$observer instanceof Observer) {
     return value.$observer
-  } if (_.isArray(value)) {
+  } else if (_.isArray(value)) {
     return new Observer(value, ARRAY, options)
   } else if (
     _.isObject(value) &&
@@ -167,17 +168,21 @@ p.observe = function (key, val) {
   if (ob) {
     // register self as a parent of the child observer.
     var parents = ob.parents
+    var keys = ob.parentKeys
     if (!parents) {
-      ob.parents = parents = Object.create(null)
+      ob.parents = parents = []
+      ob.parentsHash = hash = {}
     }
-    if (parents[this.id]) {
+    if (hash[this.id]) {
       _.warn('Observing duplicate key: ' + key)
       return
     }
-    parents[this.id] = {
+    var p = {
       ob: this,
       key: key
     }
+    parents.push(p)
+    hash[this.id] = p
   }
 }
 
@@ -190,7 +195,14 @@ p.observe = function (key, val) {
 
 p.unobserve = function (val) {
   if (val && val.$observer) {
-    val.$observer.parents[this.id] = null
+    val.$observer.parentsHash[this.id] = null
+    var parents = val.$observer.parents
+    for (var i = 0, l = parents.length; i < l; i++) {
+      if (parents[i].ob === this) {
+        parents.splice(i, 1)
+        break
+      }
+    }
   }
 }
 
@@ -235,12 +247,13 @@ p.convert = function (key, val) {
 
 p.propagate = function (event, path, val, mutation) {
   this.emit(event, path, val, mutation)
-  if (!this.parents) return
-  for (var id in this.parents) {
-    var parent = this.parents[id]
-    if (!parent) continue
-    var key = parent.key
-    var parentPath = path
+  var parents = this.parents
+  var parent, key, parentPath
+  if (!parents) return
+  for (var i = 0, l = parents.length; i < l; i++) {
+    parent = parents[i]
+    key = parent.key
+    parentPath = path
       ? key + Observer.pathDelimiter + path
       : key
     parent.ob.propagate(event, parentPath, val, mutation)
@@ -259,7 +272,7 @@ p.updateIndices = function () {
   while (i--) {
     ob = arr[i] && arr[i].$observer
     if (ob) {
-      ob.parents[this.id].key = i
+      ob.parentsHash[this.id].key = i
     }
   }
 }
