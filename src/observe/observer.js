@@ -168,7 +168,7 @@ p.observe = function (key, val) {
   if (ob) {
     // register self as a parent of the child observer.
     var parents = ob.parents
-    var keys = ob.parentKeys
+    var hash = ob.parentsHash
     if (!parents) {
       ob.parents = parents = []
       ob.parentsHash = hash = {}
