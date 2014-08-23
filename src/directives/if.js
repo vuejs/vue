@@ -41,7 +41,8 @@ module.exports = {
     this.childVM = new _.Vue({
       el: this.el,
       parent: this.vm,
-      anonymous: true
+      anonymous: true,
+      _noSync: true
     })
   },
 

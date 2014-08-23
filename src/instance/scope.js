@@ -69,6 +69,7 @@ exports._teardownScope = function () {
     scopeEvents.forEach(function (event) {
       pob.off(event, listeners[event])
     })
+    this._scopeListeners = null
   }
 }
 
@@ -84,10 +85,14 @@ exports._teardownScope = function () {
  */
 
 exports._setData = function (data) {
+  this._data = data
   var scope = this.$scope
+  var noSync = this.$options._noSync
   var key
   // teardown old sync listeners
-  this._unsyncData()
+  if (!noSync) {
+    this._unsyncData()
+  }
   // delete keys not present in the new data
   for (key in scope) {
     if (
@@ -109,8 +114,9 @@ exports._setData = function (data) {
     }
   }
   // setup sync between scope and new data
-  this._data = data
-  this._syncData()
+  if (!noSync) {
+    this._syncData()
+  }
 }
 
 /**
@@ -281,12 +287,13 @@ exports._syncData = function () {
 
 exports._unsyncData = function () {
   var listeners = this._syncListeners
-
+  if (!listeners) {
+    return
+  }
   this.$observer
     .off('set:self', listeners.data.set)
     .off('add:self', listeners.data.add)
     .off('delete:self', listeners.data.delete)
-
   this._dataObserver
     .off('set:self', listeners.scope.set)
     .off('add:self', listeners.scope.add)

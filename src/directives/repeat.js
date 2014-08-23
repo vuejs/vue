@@ -240,7 +240,8 @@ module.exports = {
     var vm = new Ctor({
       el: this.el.cloneNode(true),
       data: data,
-      parent: this.vm
+      parent: this.vm,
+      _noSync: hasAlias
     })
     // define alias
     if (hasAlias && !alias) {
