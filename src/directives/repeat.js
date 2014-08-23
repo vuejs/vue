@@ -111,11 +111,8 @@ module.exports = {
       )
       return
     }
-    this.vms = this.diff(
-      data || [],
-      this.vms,
-      data._converted
-    )
+    this.converted = data._converted
+    this.vms = this.diff(data || [], this.vms)
     // update v-ref
     if (this.childId) {
       this.owner.$[this.childId] = this.vms
@@ -135,11 +132,11 @@ module.exports = {
    *
    * @param {Array} data
    * @param {Array} oldVms
-   * @param {Boolean} converted - converted from an Object?
    * @return {Array}
    */
 
-  diff: function (data, oldVms, converted) {
+  diff: function (data, oldVms) {
+    var converted = this.converted
     var vms = new Array(data.length)
     var ref = this.ref
     var obj, raw, vm, i, l
@@ -223,10 +220,12 @@ module.exports = {
    */
 
   build: function (data, index) {
+    console.log(data)
     var original = data
     var raw = this.converted
       ? data.value
       : data
+    console.log(raw)
     var isObject = raw && typeof raw === 'object'
     var alias = this.arg
     var hasAlias = !isObject || alias
