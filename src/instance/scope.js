@@ -62,6 +62,7 @@ exports._initScope = function () {
 exports._teardownScope = function () {
   this.$observer.off()
   this._unsyncData()
+  this._data = null
   this.$scope = null
   if (this.$parent) {
     var pob = this.$parent.$observer
@@ -87,12 +88,9 @@ exports._teardownScope = function () {
 exports._setData = function (data) {
   this._data = data
   var scope = this.$scope
-  var noSync = this.$options._noSync
   var key
   // teardown old sync listeners
-  if (!noSync) {
-    this._unsyncData()
-  }
+  this._unsyncData()
   // delete keys not present in the new data
   for (key in scope) {
     if (
@@ -114,7 +112,7 @@ exports._setData = function (data) {
     }
   }
   // setup sync between scope and new data
-  if (!noSync) {
+  if (!this.$options._noSync) {
     this._syncData()
   }
 }
@@ -218,7 +216,6 @@ exports._syncData = function () {
   var data = this._data
   var scope = this.$scope
   var locked = false
-
   var listeners = this._syncListeners = {
     data: {
       set: guard(function (key, val) {
@@ -243,7 +240,6 @@ exports._syncData = function () {
       })
     }
   }
-
   // sync scope and original data.
   this.$observer
     .on('set:self', listeners.data.set)
@@ -298,4 +294,5 @@ exports._unsyncData = function () {
     .off('set:self', listeners.scope.set)
     .off('add:self', listeners.scope.add)
     .off('delete:self', listeners.scope.delete)
+  this._syncListeners = null
 }

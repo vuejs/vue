@@ -43,7 +43,6 @@ exports.$destroy = function (remove) {
   if (this._isDestroyed) {
     return
   }
-  this._isDestroyed = true
   this._callHook('beforeDestroy')
   // remove DOM element
   if (remove) {
@@ -53,8 +52,6 @@ exports.$destroy = function (remove) {
       this.$remove()
     }
   }
-  this.$el.__vue__ = null
-  this.$el = null
   var i
   // remove self from parent. only necessary
   // if this is called by the user.
@@ -79,5 +76,16 @@ exports.$destroy = function (remove) {
   while (i--) {
     this._directives[i]._teardown()
   }
+  // clean up
+  this._children =
+  this._watchers =
+  this._activeWatcher =
+  this.$el =
+  this.$el.__vue__ =
+  this._directives = null
+  // call the last hook...
+  this._isDestroyed = true
   this._callHook('afterDestroy')
+  // turn off all instance listeners.
+  this._emitter.off()
 }
