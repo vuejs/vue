@@ -27,12 +27,12 @@ describe('Observer', function () {
     ob.on('get', spy)
 
     var t = obj.a
-    expect(spy).toHaveBeenCalledWith('a', undefined, undefined)
+    expect(spy).toHaveBeenCalledWith('a', undefined, undefined, undefined)
     expect(spy.calls.count()).toBe(1)
 
     t = obj.b.c
-    expect(spy).toHaveBeenCalledWith('b', undefined, undefined)
-    expect(spy).toHaveBeenCalledWith('b.c', undefined, undefined)
+    expect(spy).toHaveBeenCalledWith('b', undefined, undefined, undefined)
+    expect(spy).toHaveBeenCalledWith('b.c', undefined, undefined, undefined)
     expect(spy.calls.count()).toBe(3)
 
     Observer.emitGet = false
@@ -49,17 +49,17 @@ describe('Observer', function () {
     ob.on('set', spy)
 
     obj.a = 3
-    expect(spy).toHaveBeenCalledWith('a', 3, undefined)
+    expect(spy).toHaveBeenCalledWith('a', 3, undefined, undefined)
     expect(spy.calls.count()).toBe(1)
 
     obj.b.c = 4
-    expect(spy).toHaveBeenCalledWith('b.c', 4, undefined)
+    expect(spy).toHaveBeenCalledWith('b.c', 4, undefined, undefined)
     expect(spy.calls.count()).toBe(2)
 
     // swap set
     var newB = { c: 5 }
     obj.b = newB
-    expect(spy).toHaveBeenCalledWith('b', newB, undefined)
+    expect(spy).toHaveBeenCalledWith('b', newB, undefined, undefined)
     expect(spy.calls.count()).toBe(3)
 
     // same value set should not emit events
@@ -113,8 +113,8 @@ describe('Observer', function () {
     ob.on('get', spy)
 
     var t = obj.arr[0].a
-    expect(spy).toHaveBeenCalledWith('arr', undefined, undefined)
-    expect(spy).toHaveBeenCalledWith('arr.0.a', undefined, undefined)
+    expect(spy).toHaveBeenCalledWith('arr', undefined, undefined, undefined)
+    expect(spy).toHaveBeenCalledWith('arr.0.a', undefined, undefined, undefined)
     expect(spy.calls.count()).toBe(2)
 
     Observer.emitGet = false
@@ -128,12 +128,12 @@ describe('Observer', function () {
     ob.on('set', spy)
 
     obj.arr[0].a = 2
-    expect(spy).toHaveBeenCalledWith('arr.0.a', 2, undefined)
+    expect(spy).toHaveBeenCalledWith('arr.0.a', 2, undefined, undefined)
 
     // set events after mutation
     obj.arr.reverse()
     obj.arr[0].a = 3
-    expect(spy).toHaveBeenCalledWith('arr.0.a', 3, undefined)
+    expect(spy).toHaveBeenCalledWith('arr.0.a', 3, undefined, undefined)
   })
 
   it('array push', function () {
@@ -153,7 +153,7 @@ describe('Observer', function () {
     // test index update after mutation
     ob.on('set', spy)
     arr[2].a = 4
-    expect(spy).toHaveBeenCalledWith('2.a', 4, undefined)
+    expect(spy).toHaveBeenCalledWith('2.a', 4, undefined, undefined)
   })
 
   it('array pop', function () {
@@ -191,7 +191,7 @@ describe('Observer', function () {
     // test index update after mutation
     ob.on('set', spy)
     arr[0].a = 4
-    expect(spy).toHaveBeenCalledWith('0.a', 4, undefined)
+    expect(spy).toHaveBeenCalledWith('0.a', 4, undefined, undefined)
   })
 
   it('array unshift', function () {
@@ -212,7 +212,7 @@ describe('Observer', function () {
     // test index update after mutation
     ob.on('set', spy)
     arr[1].a = 4
-    expect(spy).toHaveBeenCalledWith('1.a', 4, undefined)
+    expect(spy).toHaveBeenCalledWith('1.a', 4, undefined, undefined)
   })
 
   it('array splice', function () {
@@ -235,7 +235,7 @@ describe('Observer', function () {
     // test index update after mutation
     ob.on('set', spy)
     arr[1].a = 4
-    expect(spy).toHaveBeenCalledWith('1.a', 4, undefined)
+    expect(spy).toHaveBeenCalledWith('1.a', 4, undefined, undefined)
   })
 
   it('array sort', function () {
@@ -256,7 +256,7 @@ describe('Observer', function () {
     // test index update after mutation
     ob.on('set', spy)
     arr[1].a = 4
-    expect(spy).toHaveBeenCalledWith('1.a', 4, undefined)
+    expect(spy).toHaveBeenCalledWith('1.a', 4, undefined, undefined)
   })
 
   it('array reverse', function () {
@@ -275,7 +275,7 @@ describe('Observer', function () {
     // test index update after mutation
     ob.on('set', spy)
     arr[1].a = 4
-    expect(spy).toHaveBeenCalledWith('1.a', 4, undefined)
+    expect(spy).toHaveBeenCalledWith('1.a', 4, undefined, undefined)
   })
 
   it('object.$add', function () {
@@ -290,12 +290,12 @@ describe('Observer', function () {
     // add event
     var add = {d:2}
     obj.a.$add('c', add)
-    expect(spy).toHaveBeenCalledWith('a.c', add, undefined)
+    expect(spy).toHaveBeenCalledWith('a.c', add, undefined, undefined)
 
     // check if add object is properly observed
     ob.on('set', spy)
     obj.a.c.d = 3
-    expect(spy).toHaveBeenCalledWith('a.c.d', 3, undefined)
+    expect(spy).toHaveBeenCalledWith('a.c.d', 3, undefined, undefined)
   })
 
   it('object.$delete', function () {
@@ -308,7 +308,7 @@ describe('Observer', function () {
     expect(spy.calls.count()).toBe(0)
 
     obj.a.$delete('b')
-    expect(spy).toHaveBeenCalledWith('a.b', undefined, undefined)
+    expect(spy).toHaveBeenCalledWith('a.b', undefined, undefined, undefined)
   })
 
   it('array.$set', function () {
@@ -332,7 +332,7 @@ describe('Observer', function () {
 
     ob.on('set', spy)
     arr[1].a = 4
-    expect(spy).toHaveBeenCalledWith('1.a', 4, undefined)
+    expect(spy).toHaveBeenCalledWith('1.a', 4, undefined, undefined)
   })
 
   it('array.$set with out of bound length', function () {
@@ -363,7 +363,7 @@ describe('Observer', function () {
 
     ob.on('set', spy)
     arr[0].a = 3
-    expect(spy).toHaveBeenCalledWith('0.a', 3, undefined)
+    expect(spy).toHaveBeenCalledWith('0.a', 3, undefined, undefined)
   })
 
   it('array.$remove object', function () {
@@ -384,7 +384,7 @@ describe('Observer', function () {
 
     ob.on('set', spy)
     arr[0].a = 3
-    expect(spy).toHaveBeenCalledWith('0.a', 3, undefined)
+    expect(spy).toHaveBeenCalledWith('0.a', 3, undefined, undefined)
   })
 
   it('shared observe', function () {
@@ -397,14 +397,14 @@ describe('Observer', function () {
     obB.on('set', spy)
     obj.a = 2
     expect(spy.calls.count()).toBe(2)
-    expect(spy).toHaveBeenCalledWith('child1.a', 2, undefined)
-    expect(spy).toHaveBeenCalledWith('child2.a', 2, undefined)
+    expect(spy).toHaveBeenCalledWith('child1.a', 2, undefined, undefined)
+    expect(spy).toHaveBeenCalledWith('child2.a', 2, undefined, undefined)
     // test unobserve
     parentA.child1 = null
     obj.a = 3
     expect(spy.calls.count()).toBe(4)
-    expect(spy).toHaveBeenCalledWith('child1', null, undefined)
-    expect(spy).toHaveBeenCalledWith('child2.a', 3, undefined)
+    expect(spy).toHaveBeenCalledWith('child1', null, undefined, undefined)
+    expect(spy).toHaveBeenCalledWith('child2.a', 3, undefined, undefined)
   })
 
 })

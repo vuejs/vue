@@ -73,11 +73,17 @@ exports._createBindingAt = function (path) {
  * Trigger update for the binding at given path.
  *
  * @param {String} path
+ * @param {String} k - unused
+ * @param {*} v - unused
+ * @param {Boolean} fromScope
  */
 
-exports._updateBindingAt = function (path) {
-  // root binding updates on any change
-  this._rootBinding._notify()
+exports._updateBindingAt = function (path, k, v, fromScope) {
+  // root binding updates on any change,
+  // but only if the change is not from parent scopes
+  if (!fromScope) {
+    this._rootBinding._notify()
+  }
   var binding = this._getBindingAt(path, true)
   if (binding) {
     binding._notify()

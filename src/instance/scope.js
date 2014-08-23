@@ -46,7 +46,7 @@ exports._initScope = function () {
       // we only emit them if we don't have the same keys
       // shadowing them in current scope.
       if (!scope.hasOwnProperty(key)) {
-        ob.emit(event, key, a, b)
+        ob.emit(event, key, a, b, true)
       }
     }
     pob.on(event, cb)

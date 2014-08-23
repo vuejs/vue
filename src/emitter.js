@@ -94,13 +94,13 @@ p.off = function (event, fn) {
  * @return {Emitter}
  */
 
-p.emit = function (event, a, b, c) {
+p.emit = function (event, a, b, c, d) {
   this._cbs = this._cbs || {}
   var callbacks = this._cbs[event]
   if (callbacks) {
     callbacks = _.toArray(callbacks)
     for (var i = 0, l = callbacks.length; i < l; i++) {
-      callbacks[i].call(this._ctx, a, b, c)
+      callbacks[i].call(this._ctx, a, b, c, d)
     }
   }
   return this
