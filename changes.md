@@ -48,15 +48,21 @@ The `lazy` option is removed because this does not belong at the vm level. Users
 
 ## Hook changes
 
+### hook usage change: `created`
+
+This is now called before anything happens to the instance, with only `this.$data` being available, but **not observed** yet. In the past you can do `this.something = 1` to define default data, but it required some weird hack to make it work. Now you should just explicitly do `this.$data.something = 1` to define your instance default data.
+
+### hook usage change: `ready`
+
+The new `ready` hook now is only fired after the instance is compiled and **inserted into the document for the first time**. For a equivalence of the old `ready` hook, use the new `compiled` hook.
+
 ### new hook: `beforeCompile`
 
 This new hook is introduced to accompany the separation of instantiation and DOM mounting. It is called right before the DOM compilation starts and `this.$el` is available, so you can do some pre-processing on the element here.
 
-### new hook: `compiled` & redesigned hook: `ready`
+### new hook: `compiled`
 
 The `compiled` hook indicates the element has been fully compiled based on initial data. However this doesn't indicate if the element has been inserted into the DOM yet. This is essentially the old `ready` hook.
-
-The new `ready` hook now is only fired after the instance is compiled and **inserted into the document for the first time**.
 
 ### renamed hook: `afterDestroy` -> `destroyed`
 
