@@ -49,20 +49,6 @@ Vue.options = {
 var p = Vue.prototype
 
 /**
- * The $root recursively points to the root instance.
- *
- * @readonly
- */
-
-Object.defineProperty(p, '$root', {
-  get: function () {
-    return this.$parent
-      ? this.$parent.$root
-      : this
-  }
-})
-
-/**
  * $data has a setter which does a bunch of
  * teardown/setup work
  */

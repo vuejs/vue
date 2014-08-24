@@ -20,8 +20,10 @@ exports._initScope = function () {
     ? Object.create(parent.$scope)
     : {}
   // copy initial data into scope
-  for (var key in data) {
+  var keys = Object.keys(data)
+  for (var key, i = 0, l = keys.length; i < l; i++) {
     // use defineProperty so we can shadow parent accessors
+    key = keys[i]
     _.define(scope, key, data[key], true)
   }
   // create scope observer
@@ -138,10 +140,9 @@ exports._initProxy = function () {
   // scope --> vm
 
   // proxy scope data on vm
-  for (var key in scope) {
-    if (scope.hasOwnProperty(key)) {
-      _.proxy(this, scope, key)
-    }
+  var keys = Object.keys(scope)
+  for (var i = 0, l = keys.length; i < l; i++) {
+    _.proxy(this, scope, keys[i])
   }
   // keep proxying up-to-date with added/deleted keys.
   this.$observer
@@ -154,9 +155,10 @@ exports._initProxy = function () {
 
   // vm --> scope
 
-  // proxy vm parent & root on scope
-  _.proxy(scope, this, '$parent')
-  _.proxy(scope, this, '$root')
+  // $parent & $root are read-only on $scope
+  scope.$parent = this.$parent
+  scope.$root = this.$root
+  // proxy $data
   _.proxy(scope, this, '$data')
 }
 

@@ -45,6 +45,11 @@ exports._init = function (options) {
   this._children = []
   if (this.$parent) {
     this.$parent._children.push(this)
+    var root = this.$parent
+    while (root.$parent) {
+      root = root.$parent
+    }
+    this.$root = root
   }
 
   // merge options.
