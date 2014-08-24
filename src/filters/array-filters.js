@@ -22,14 +22,15 @@ exports._objToArray = function (obj) {
     )
     return
   }
-  var res = []
   var keys = Object.keys(obj)
-  for (var i = 0, l = keys.length, key; i < l; i++) {
+  var i = keys.length
+  var res = new Array(i)
+  while (i--) {
     key = keys[i]
-    res.push({
+    res[i] = {
       key: key,
       value: obj[key]
-    })
+    }
   }
   res._converted = true
   return res

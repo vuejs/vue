@@ -21,9 +21,9 @@ var arrayAugmentations = Object.create(Array.prototype)
   function mutator () {
     // avoid leaking arguments:
     // http://jsperf.com/closure-with-arguments
-    var l = arguments.length
-    var args = new Array(l)
-    for (var i = 0; i < l; i++) {
+    var i = arguments.length
+    var args = new Array(i)
+    while (i--) {
       args[i] = arguments[i]
     }
     var result = original.apply(this, args)

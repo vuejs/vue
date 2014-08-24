@@ -9,7 +9,7 @@ var _ = require('./util')
 
 function Emitter (ctx) {
   this._cancelled = false
-  this._ctx = ctx || this
+  this._ctx = ctx || null
 }
 
 var p = Emitter.prototype
@@ -25,7 +25,7 @@ var p = Emitter.prototype
 p.on = function (event, fn) {
   this._cbs = this._cbs || {}
   ;(this._cbs[event] || (this._cbs[event] = []))
-    .push(fn)
+    .unshift(fn)
   return this
 }
 
@@ -76,7 +76,8 @@ p.off = function (event, fn) {
   }
   // remove specific handler
   var cb
-  for (var i = 0; i < callbacks.length; i++) {
+  var i = callbacks.length
+  while (i--) {
     cb = callbacks[i]
     if (cb === fn || cb.fn === fn) {
       callbacks.splice(i, 1)
@@ -99,8 +100,10 @@ p.emit = function (event, a, b, c, d) {
   var callbacks = this._cbs[event]
   if (callbacks) {
     callbacks = _.toArray(callbacks)
-    for (var i = 0, l = callbacks.length; i < l; i++) {
-      callbacks[i].call(this._ctx, a, b, c, d)
+    var i = callbacks.length
+    var ctx = this._ctx
+    while (i--) {
+      callbacks[i].call(ctx, a, b, c, d)
     }
   }
   return this
@@ -121,14 +124,14 @@ p.applyEmit = function (event) {
   if (callbacks) {
     // avoid leaking arguments:
     // http://jsperf.com/closure-with-arguments
-    var i
-    var l = arguments.length
-    var args = new Array(l - 1)
-    for (i = 1; i < l; i++) {
-      args[i - 1] = arguments[i]
+    var i = arguments.length - 1
+    var args = new Array(i)
+    while (i--) {
+      args[i] = arguments[i + 1]
     }
     callbacks = _.toArray(callbacks)
-    for (i = 0, l = callbacks.length; i < l; i++) {
+    i = callbacks.length
+    while (i--) {
       if (callbacks[i].apply(this._ctx, args) === false) {
         this._cancelled = true
       }

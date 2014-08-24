@@ -132,7 +132,8 @@ p.walk = function (obj) {
 
 p.link = function (items, index) {
   index = index || 0
-  for (var i = 0, l = items.length; i < l; i++) {
+  var i = items.length
+  while (i--) {
     this.observe(i + index, items[i])
   }
 }
@@ -144,7 +145,8 @@ p.link = function (items, index) {
  */
 
 p.unlink = function (items) {
-  for (var i = 0, l = items.length; i < l; i++) {
+  var i = items.length
+  while (i--) {
     this.unobserve(items[i])
   }
 }
@@ -192,7 +194,8 @@ p.unobserve = function (val) {
   if (val && val.$observer) {
     val.$observer.parentsHash[this.id] = null
     var parents = val.$observer.parents
-    for (var i = 0, l = parents.length; i < l; i++) {
+    var i = parents.length
+    while (i--) {
       if (parents[i].ob === this) {
         parents.splice(i, 1)
         break
@@ -243,9 +246,12 @@ p.convert = function (key, val) {
 p.propagate = function (event, path, val, mutation) {
   this.emit(event, path, val, mutation)
   var parents = this.parents
+  if (!parents) {
+    return
+  }
   var parent, key, parentPath
-  if (!parents) return
-  for (var i = 0, l = parents.length; i < l; i++) {
+  var i = parents.length
+  while (i--) {
     parent = parents[i]
     key = parent.key
     parentPath = path

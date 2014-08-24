@@ -35,7 +35,7 @@ p._addChild = function (key, child) {
  */
 
 p._addSub = function (sub) {
-  this._subs.push(sub)
+  this._subs.unshift(sub)
 }
 
 /**
@@ -53,7 +53,8 @@ p._removeSub = function (sub) {
  */
 
 p._notify = function () {
-  for (var i = 0, l = this._subs.length; i < l; i++) {
+  var i = this._subs.length
+  while (i--) {
     this._subs[i].update()
   }
 }

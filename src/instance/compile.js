@@ -210,7 +210,7 @@ exports._checkPriorityDirs = function (node) {
   }
   var value, dir
   /* jshint boss: true */
-  for (var i = 0, l = priorityDirs.length; i < l; i++) {
+  for (var i = 0; i < 3; i++) {
     dir = priorityDirs[i]
     if (value = _.attr(node, dir)) {
       this._bindDirective(dir, value, node)

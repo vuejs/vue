@@ -69,10 +69,10 @@ exports.bind = function (fn, ctx) {
 
 exports.toArray = function (list, start) {
   start = start || 0
-  var l = list.length
-  var ret = new Array(l - start)
-  for (var i = start; i < l; i++) {
-    ret[i - start] = list[i]
+  var i = list.length - start
+  var ret = new Array(i)
+  while (i--) {
+    ret[i] = list[i + start]
   }
   return ret
 }
