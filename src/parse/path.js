@@ -273,21 +273,6 @@ exports.get = function (obj, path) {
 }
 
 /**
- * Get from an object from an array
- *
- * @param {Object} obj
- * @param {Array} path
- */
-
-exports.getFromArray = function (obj, path) {
-  for (var i = 0, l = path.length; i < l; i++) {
-    if (obj == null) return
-    obj = obj[path[i]]
-  }
-  return obj
-}
-
-/**
  * Get from an object from an Observer-delimitered path.
  * e.g. "a\bb\bc"
  *
