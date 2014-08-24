@@ -220,12 +220,10 @@ module.exports = {
    */
 
   build: function (data, index) {
-    console.log(data)
     var original = data
     var raw = this.converted
       ? data.value
       : data
-    console.log(raw)
     var isObject = raw && typeof raw === 'object'
     var alias = this.arg
     var hasAlias = !isObject || alias
