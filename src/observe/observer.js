@@ -110,18 +110,13 @@ Observer.create = function (value, options) {
  */
 
 p.walk = function (obj) {
-  var key, val, descriptor, prefix
-  for (key in obj) {
+  var keys = Object.keys(obj)
+  var i = keys.length
+  var key, val, prefix
+  while (i--) {
+    key = keys[i]
     prefix = key.charCodeAt(0)
-    if (
-      prefix === 0x24 || // $
-      prefix === 0x5F    // _
-    ) {
-      continue
-    }
-    descriptor = Object.getOwnPropertyDescriptor(obj, key)
-    // only process own non-accessor properties
-    if (descriptor && !descriptor.get) {
+    if (prefix !== 0x24 && prefix !== 0x5F) { // skip $ or _
       val = obj[key]
       this.observe(key, val)
       this.convert(key, val)

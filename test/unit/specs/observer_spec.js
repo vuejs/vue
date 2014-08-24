@@ -79,18 +79,6 @@ describe('Observer', function () {
     expect(spy.calls.count()).toBe(0)
   })
 
-  it('ignore accessors', function () {
-    var obj = {
-      a: 123,
-      get b () {
-        return this.a
-      }
-    }
-    var ob = Observer.create(obj)
-    obj.a = 234
-    expect(obj.b).toBe(234)
-  })
-
   it('warn duplicate value', function () {
     spyOn(_, 'warn')
     var obj = {

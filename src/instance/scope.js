@@ -21,7 +21,8 @@ exports._initScope = function () {
     : {}
   // copy initial data into scope
   var keys = Object.keys(data)
-  for (var key, i = 0, l = keys.length; i < l; i++) {
+  var i = keys.length
+  while (i--) {
     // use defineProperty so we can shadow parent accessors
     key = keys[i]
     _.define(scope, key, data[key], true)
@@ -141,7 +142,8 @@ exports._initProxy = function () {
 
   // proxy scope data on vm
   var keys = Object.keys(scope)
-  for (var i = 0, l = keys.length; i < l; i++) {
+  var i = keys.length
+  while (i--) {
     _.proxy(this, scope, keys[i])
   }
   // keep proxying up-to-date with added/deleted keys.
