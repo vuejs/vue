@@ -119,7 +119,7 @@ p._checkExpFn = function () {
     var fn = expParser.parse(expression).get
     var vm = this.vm
     this.update(function () {
-      fn.call(vm)
+      fn.call(vm, vm)
     })
     return true
   }

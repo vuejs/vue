@@ -173,7 +173,7 @@ exports._setData = function (newData) {
     } else {
       // new property
       this._proxy(key)
-      ob.emit('add', key)
+      ob.emit('add', key, newData[key])
     }
   }
   // teardown/setup data proxies
@@ -236,9 +236,16 @@ exports._initComputed = function () {
       var def = computed[key]
       if (typeof def === 'function') {
         def = {
-          get: def,
+          get: _.bind(def, this),
           set: noop
         }
+      } else {
+        def.get = def.get
+          ? _.bind(def.get, this)
+          : noop
+        def.set = def.set
+          ? _.bind(def.set, this)
+          : noop
       }
       def.enumerable = true
       def.configurable = true

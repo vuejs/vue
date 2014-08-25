@@ -20,26 +20,19 @@ describe('Scope', function () {
       }
     })
 
-    it('should copy over data properties', function () {
-      expect(vm.$scope.a).toBe(vm.$data.a)
-      expect(vm.$scope.b).toBe(vm.$data.b)
-    })
-
-    it('should proxy these properties', function () {
-      expect(vm.a).toBe(vm.$scope.a)
-      expect(vm.b).toBe(vm.$scope.b)
+    it('should proxy data properties', function () {
+      expect(vm.a).toBe(vm.$data.a)
+      expect(vm.b).toBe(vm.$data.b)
     })
 
     it('should trigger set events', function () {
       var spy = jasmine.createSpy('basic')
       vm.$observer.on('set', spy)
-
-      // set on scope
-      vm.$scope.a = 2
+      // simple
+      vm.a = 2
       expect(spy.calls.count()).toBe(1)
       expect(spy).toHaveBeenCalledWith('a', 2, undefined, undefined)
-
-      // set on vm
+      // nested path
       vm.b.c = 3
       expect(spy.calls.count()).toBe(2)
       expect(spy).toHaveBeenCalledWith('b.c', 3, undefined, undefined)
@@ -50,18 +43,18 @@ describe('Scope', function () {
       vm.$observer
         .on('add', spy)
         .on('delete', spy)
-
-      // add on scope
-      vm.$scope.$add('c', 123)
+      // add
+      vm.$add('c', 123)
       expect(spy.calls.count()).toBe(1)
       expect(spy).toHaveBeenCalledWith('c', 123, undefined, undefined)
-
-      // delete on scope
-      vm.$scope.$delete('c')
+      // delete
+      vm.$delete('c')
       expect(spy.calls.count()).toBe(2)
       expect(spy).toHaveBeenCalledWith('c', undefined, undefined, undefined)
-
-      // vm $add/$delete are tested in the api suite
+      // meta
+      vm._defineMeta('$index', 1)
+      expect(spy.calls.count()).toBe(3)
+      expect(spy).toHaveBeenCalledWith('$index', 1, undefined, undefined)
     })
 
   })
@@ -89,27 +82,24 @@ describe('Scope', function () {
       expect(data.a).toBe(2)
       // data -> vm
       data.b = {d:3}
-      expect(vm.$scope.b).toBe(data.b)
       expect(vm.b).toBe(data.b)
     })
 
     it('should sync add', function () {
       // vm -> data
-      vm.$scope.$add('c', 123)
+      vm.$add('c', 123)
       expect(data.c).toBe(123)
       // data -> vm
       data.$add('d', 456)
-      expect(vm.$scope.d).toBe(456)
       expect(vm.d).toBe(456)
     })
 
     it('should sync delete', function () {
       // vm -> data
-      vm.$scope.$delete('d')
+      vm.$delete('d')
       expect(data.hasOwnProperty('d')).toBe(false)
       // data -> vm
       data.$delete('c')
-      expect(vm.$scope.hasOwnProperty('c')).toBe(false)
       expect(vm.hasOwnProperty('c')).toBe(false)
     })
 
@@ -126,31 +116,24 @@ describe('Scope', function () {
       }
     })
 
-    var child = new Vue({
-      parent: parent,
+    var child = parent._addChild({
       data: {
         a: 'child a'
       }
     })
 
     it('child should inherit parent data on scope', function () {
-      expect(child.$scope.b).toBe(parent.b) // object
-      expect(child.$scope.c).toBe(parent.c) // primitive value
-    })
-
-    it('child should not ineherit data on instance', function () {
-      expect(child.b).toBeUndefined()
-      expect(child.c).toBeUndefined()
+      expect(child.b).toBe(parent.b) // object
+      expect(child.c).toBe(parent.c) // primitive value
     })
 
     it('child should shadow parent property with same key', function () {
       expect(parent.a).toBe('parent a')
-      expect(child.$scope.a).toBe('child a')
       expect(child.a).toBe('child a')
     })
 
     it('setting scope properties on child should affect parent', function () {
-      child.$scope.c = 'modified by child'
+      child.c = 'modified by child'
       expect(parent.c).toBe('modified by child')
     })
 
@@ -165,13 +148,13 @@ describe('Scope', function () {
 
       spy = jasmine.createSpy('inheritance')
       child.$observer.on('add', spy)
-      parent.$scope.$add('e', 123)
+      parent.$add('e', 123)
       expect(spy.calls.count()).toBe(1)
       expect(spy).toHaveBeenCalledWith('e', 123, undefined, true)
 
       spy = jasmine.createSpy('inheritance')
       child.$observer.on('delete', spy)
-      parent.$scope.$delete('e')
+      parent.$delete('e')
       expect(spy.calls.count()).toBe(1)
       expect(spy).toHaveBeenCalledWith('e', undefined, undefined, true)
 
@@ -203,8 +186,7 @@ describe('Scope', function () {
       }
     })
 
-    var child = new Vue({
-      parent: parent,
+    var child = parent._addChild({
       data: parent.arr[0]
     })
 
@@ -241,7 +223,7 @@ describe('Scope', function () {
     var oldDataSpy = jasmine.createSpy('oldData')
     vm.$observer.on('set', vmSpy)
     vm.$observer.on('add', vmAddSpy)
-    oldData.$observer.on('set', oldDataSpy)
+    oldData.__ob__.on('set', oldDataSpy)
 
     vm.$data = newData
 
@@ -279,7 +261,7 @@ describe('Scope', function () {
       child._teardownScope()
       parent.a = 234
       expect(spy.calls.count()).toBe(0)
-      expect(child.$scope).toBeNull()
+      expect(child._data).toBeNull()
     })
   })
 
@@ -325,18 +307,18 @@ describe('Scope', function () {
     })
 
     it('inherit', function () {
-      var child = new Vue({ parent: vm })
-      expect(child.$scope.c).toBe('cd')
+      var child = vm._addChild()
+      expect(child.c).toBe('cd')
 
-      child.$scope.d = 'e f'
+      child.d = 'e f'
       expect(vm.a).toBe('e')
       expect(vm.b).toBe('f')
       expect(vm.c).toBe('ef')
       expect(vm.d).toBe('ef')
-      expect(child.$scope.a).toBe('e')
-      expect(child.$scope.b).toBe('f')
-      expect(child.$scope.c).toBe('ef')
-      expect(child.$scope.d).toBe('ef')
+      expect(child.a).toBe('e')
+      expect(child.b).toBe('f')
+      expect(child.c).toBe('ef')
+      expect(child.d).toBe('ef')
     })
 
   })
@@ -356,7 +338,9 @@ describe('Scope', function () {
         }
       })
       expect(vm.test()).toBe(1)
-      expect(vm.$scope.test()).toBe(1)
+
+      var child = vm._addChild()
+      expect(child.test()).toBe(1)
     })
 
   })

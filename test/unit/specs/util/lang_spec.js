@@ -58,29 +58,6 @@ describe('Util - Language Enhancement', function () {
     expect(to.b).toBe(from.b)
   })
 
-  it('proxy', function () {
-    var to = { test2: 'to' }
-    var from = { test2: 'from' }
-    var val = '123'
-    Object.defineProperty(from, 'test', {
-      get: function () {
-        return val
-      },
-      set: function (v) {
-        val = v
-      }
-    })
-    _.proxy(to, from, 'test')
-    expect(to.test).toBe(val)
-    to.test = '234'
-    expect(val).toBe('234')
-    expect(to.test).toBe(val)
-    // should not overwrite existing property
-    _.proxy(to, from, 'test2')
-    expect(to.test2).toBe('to')
-
-  })
-
   it('isObject', function () {
     expect(_.isObject({})).toBe(true)
     expect(_.isObject([])).toBe(false)
