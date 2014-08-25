@@ -319,10 +319,6 @@ exports._addChild = function (opts, BaseCtor) {
  */
 
 exports._defineMeta = function (key, value) {
-  if (this.hasOwnProperty('key')) {
-    this[key] = value
-    return
-  }
   var ob = this.$observer
   Object.defineProperty(this, key, {
     enumerable: true,
