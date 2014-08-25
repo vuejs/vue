@@ -25,6 +25,7 @@ exports._objToArray = function (obj) {
   var keys = Object.keys(obj)
   var i = keys.length
   var res = new Array(i)
+  var key
   while (i--) {
     key = keys[i]
     res[i] = {

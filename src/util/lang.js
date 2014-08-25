@@ -1,4 +1,16 @@
 /**
+ * Check is a string starts with $ or _
+ *
+ * @param {String} str
+ * @return {Boolean}
+ */
+
+exports.isReserved = function (str) {
+  var c = str.charCodeAt(0)
+  return c === 0x24 || c === 0x5F
+}
+
+/**
  * Guard text output, make sure undefined outputs
  * empty string
  *
@@ -88,28 +100,6 @@ exports.extend = function (to, from) {
   for (var key in from) {
     to[key] = from[key]
   }
-}
-
-/**
- * Proxy a property on one object to another.
- *
- * @param {Object} to
- * @param {Object} from
- * @param {String} key
- */
-
-exports.proxy = function (to, from, key) {
-  if (to.hasOwnProperty(key)) return
-  Object.defineProperty(to, key, {
-    enumerable: true,
-    configurable: true,
-    get: function () {
-      return from[key]
-    },
-    set: function (val) {
-      from[key] = val
-    }
-  })
 }
 
 /**

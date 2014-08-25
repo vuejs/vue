@@ -132,11 +132,11 @@ module.exports = {
       }
     }
     if (this.Ctor && !this.childVM) {
-      this.childVM = new this.Ctor({
+      this.childVM = this.vm._addChild({
         el: this.el.cloneNode(true),
         parent: this.vm,
         _noSync: true
-      })
+      }, this.Ctor)
       if (this.keepAlive) {
         this.cache[this.id] = this.childVM
       }

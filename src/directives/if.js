@@ -38,7 +38,7 @@ module.exports = {
   },
 
   build: function () {
-    this.childVM = new _.Vue({
+    this.childVM = this.vm._addChild({
       el: this.el,
       parent: this.vm,
       anonymous: true,

@@ -11,6 +11,15 @@ exports.config     = require('../config')
 exports.transition = require('../transition')
 
 /**
+ * Each instance constructor, including Vue, has a unique
+ * cid. This enables us to create wrapped "child
+ * constructors" for prototypal inheritance and cache them.
+ */
+
+exports.cid = 0
+var cid = 1
+
+/**
  * Class inehritance
  *
  * @param {Object} extendOptions
@@ -19,10 +28,11 @@ exports.transition = require('../transition')
 exports.extend = function (extendOptions) {
   var Super = this
   var Sub = function (instanceOptions) {
-    Super.call(this, instanceOptions)
+    _.Vue.call(this, instanceOptions)
   }
   Sub.prototype = Object.create(Super.prototype)
-  _.define(Sub.prototype, 'constructor', Sub)
+  Sub.prototype.constructor = Sub
+  Sub.cid = cid++
   Sub.options = mergeOptions(Super.options, extendOptions)
   Sub.super = Super
   // allow further extension

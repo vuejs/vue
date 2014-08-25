@@ -18,6 +18,7 @@ exports._init = function (options) {
 
   this.$el          = null
   this.$            = {}
+  this.$root        = this.$root || this
   this._data        = options.data || {}
   this._rawContent  = null
   this._emitter     = new Emitter(this)
@@ -40,18 +41,6 @@ exports._init = function (options) {
   // directives such as v-if and v-repeat
   this._isAnonymous = options.anonymous
 
-  // setup parent relationship
-  this.$parent = options.parent
-  this._children = []
-  if (this.$parent) {
-    this.$parent._children.push(this)
-    var root = this.$parent
-    while (root.$parent) {
-      root = root.$parent
-    }
-    this.$root = root
-  }
-
   // merge options.
   this.$options = mergeOptions(
     this.constructor.options,
@@ -63,18 +52,8 @@ exports._init = function (options) {
   // have been set up & before data observation happens.
   this._callHook('created')
 
-  // create scope.
-  // @creates this.$scope
+  // initialize data observation and scope inheritance
   this._initScope()
-
-  // setup property proxying
-  this._initProxy()
-
-  // setup computed properties
-  this._initComputed()
-
-  // setup instance methods
-  this._initMethods()
 
   // setup binding tree.
   // @creates this._rootBinding

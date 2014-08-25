@@ -107,8 +107,9 @@ p.get = function () {
   if (this.isComputed) {
     this.beforeGet()
   }
-  var value = this.getter.call(this.vm, this.vm.$scope)
-  value = _.applyFilters(value, this.readFilters, this.vm)
+  var vm = this.vm
+  var value = this.getter.call(vm, vm)
+  value = _.applyFilters(value, this.readFilters, vm)
   if (this.isComputed) {
     this.afterGet()
   }
@@ -122,8 +123,9 @@ p.get = function () {
  */
 
 p.set = function (value) {
-  value = _.applyFilters(value, this.writeFilters, this.vm)
-  this.setter.call(this.vm, this.vm.$scope, value)
+  var vm = this.vm
+  value = _.applyFilters(value, this.writeFilters, vm)
+  this.setter.call(vm, vm, value)
 }
 
 /**

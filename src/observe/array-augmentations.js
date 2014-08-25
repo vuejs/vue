@@ -27,7 +27,7 @@ var arrayAugmentations = Object.create(Array.prototype)
       args[i] = arguments[i]
     }
     var result = original.apply(this, args)
-    var ob = this.$observer
+    var ob = this.__ob__
     var inserted, removed, index
 
     switch (method) {

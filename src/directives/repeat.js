@@ -234,22 +234,22 @@ module.exports = {
     }
     // resolve constructor
     var Ctor = this.Ctor || this.resolveCtor(data)
-    var vm = new Ctor({
+    var vm = this.vm._addChild({
       el: this.el.cloneNode(true),
       data: data,
       parent: this.vm,
       _noSync: hasAlias
-    })
+    }, Ctor)
     // define alias
     if (hasAlias && !alias) {
-      vm.$add('$value', raw)
+      vm._defineMeta('$value', raw)
     }
     // define key
     if (this.converted) {
-      vm.$add('$key', original.key)
+      vm._defineMeta('$key', original.key)
     }
     // define index
-    vm.$add('$index', index)
+    vm._defineMeta('$index', index)
     // cache instance
     if (isObject) {
       this.cacheVm(raw, vm)

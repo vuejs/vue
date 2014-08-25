@@ -24,7 +24,7 @@ exports.$mount = function (el) {
     this._isAttached = true
     this._isReady = true
     this._callHook('ready')
-    this._initDOMHooks()
+    // this._initDOMHooks()
   })
   if (_.inDoc(this.$el)) {
     this._callHook('attached')
@@ -61,9 +61,11 @@ exports.$destroy = function (remove) {
     parent._children.splice(i)
   }
   // destroy all children.
-  i = this._children.length
-  while (i--) {
-    this._children[i].$destroy()
+  if (this._children) {
+    i = this._children.length
+    while (i--) {
+      this._children[i].$destroy()
+    }
   }
   // teardown data/scope
   this._teardownScope()

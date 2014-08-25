@@ -1,54 +1,120 @@
 var _ = require('../util')
+var Emitter = require('../emitter')
 var Observer = require('../observe/observer')
 var scopeEvents = ['set', 'mutate', 'add', 'delete']
+var allEvents = ['get', 'set', 'mutate', 'add', 'delete', 'add:self', 'delete:self']
 
 /**
- * Setup instance scope.
- * The scope is reponsible for prototypal inheritance of
- * parent instance propertiesm abd all binding paths and
- * expressions of the current instance are evaluated against
- * its scope.
+ * Setup the data scope of an instance.
  *
- * This should only be called once during _init().
+ * We need to setup the instance $observer, which emits
+ * data change events. The $observer relays events from
+ * the $data's observer, because $data might be swapped
+ * and the data observer might change.
+ *
+ * If the instance has a parent and is not isolated, we
+ * also need to listen to parent scope events and propagate
+ * changes down here.
  */
 
 exports._initScope = function () {
-  var parent = this.$parent
-  var inherit = parent && !this.$options.isolated
+  this._children = null
+  this._childCtors = null
+  this._initObserver()
+  this._initData()
+  this._initComputed()
+  this._initMethods()
+  // listen to parent scope events
+  if (this.$parent && !this.$options.isolated) {
+    this._linkScope()
+  }
+}
+
+/**
+ * Teardown the scope.
+ */
+
+exports._teardownScope = function () {
+  // turn of instance observer
+  this.$observer.off()
+  // stop relaying data events
+  var dataOb = this._data.__ob__
+  var proxies = this._dataProxies
+  var i = allEvents.length
+  var event
+  while (i--) {
+    event = allEvents[i]
+    dataOb.off(event, proxies[event])
+  }
+  // unset data reference
+  this._data = null
+  // stop propagating parent scope changes
+  if (this._scopeListeners) {
+    this._unlinkScope()
+  }
+}
+
+/**
+ * Setup the observer and data proxy handlers.
+ */
+
+exports._initObserver = function () {
+  // create observer
+  var ob = this.$observer = new Emitter(this)
+  // setup data proxy handlers
+  var proxies = this._dataProxies = {}
+  allEvents.forEach(function (event) {
+    proxies[event] = function (a, b, c) {
+      ob.emit(event, a, b, c)
+    }
+  })
+  var self = this
+  proxies['add:self'] = function (key) {
+    self._proxy(key)
+  }
+  proxies['delete:self'] = function (key) {
+    self._unproxy(key)
+  }
+}
+
+/**
+ * Initialize the data. 
+ */
+
+exports._initData = function () {
+  // proxy data on instance
   var data = this._data
-  var scope = this.$scope = inherit
-    ? Object.create(parent.$scope)
-    : {}
-  // copy initial data into scope
   var keys = Object.keys(data)
   var i = keys.length
   while (i--) {
-    // use defineProperty so we can shadow parent accessors
-    key = keys[i]
-    _.define(scope, key, data[key], true)
+    this._proxy(keys[i])
   }
-  // create scope observer
-  this.$observer = Observer.create(scope, {
-    callbackContext: this,
-    doNotAlterProto: true
-  })
-  // setup sync between data and the scope
-  this._syncData()
+  // relay data changes
+  var ob = Observer.create(data)
+  var proxies = this._dataProxies
+  var event
+  i = allEvents.length
+  while (i--) {
+    event = allEvents[i]
+    ob.on(event, proxies[event])
+  }
+}
 
-  if (!inherit) {
-    return
-  }
-  // relay change events that sent down from
-  // the scope prototype chain.
+/**
+ * Listen to parent scope's events
+ */
+
+exports._linkScope = function () {
+  var self = this
   var ob = this.$observer
-  var pob = parent.$observer
+  var pob = this.$parent.$observer
   var listeners = this._scopeListeners = {}
   scopeEvents.forEach(function (event) {
     var cb = listeners[event] = function (key, a, b) {
       // since these events come from upstream,
       // we only emit them if we don't have the same keys
       // shadowing them in current scope.
-      if (!scope.hasOwnProperty(key)) {
+      if (!self.hasOwnProperty(key)) {
         ob.emit(event, key, a, b, true)
       }
     }
@@ -57,125 +123,114 @@ exports._initScope = function () {
 }
 
 /**
- * Teardown scope, unsync data, and remove all listeners
- * including ones attached to parent's observer.
- * Only called once during $destroy().
+ * Stop listening to parent scope events
  */
 
-exports._teardownScope = function () {
-  this.$observer.off()
-  this._unsyncData()
-  this._data = null
-  this.$scope = null
-  if (this.$parent) {
-    var pob = this.$parent.$observer
-    var listeners = this._scopeListeners
-    scopeEvents.forEach(function (event) {
-      pob.off(event, listeners[event])
-    })
-    this._scopeListeners = null
+exports._unlinkScope = function () {
+  var pob = this.$parent.$observer
+  var listeners = this._scopeListeners
+  var i = scopeEvents.length
+  var event
+  while (i--) {
+    event = scopeEvents[i]
+    pob.off(event, listeners[event])
   }
+  this._scopeListeners = null
 }
 
 /**
- * Called when swapping the $data object.
+ * Swap the isntance's $data. Called in $data's setter.
  *
- * Old properties that are not present in new data are
- * deleted from the scope, and new data properties not
- * already on the scope are added. Teardown old data sync
- * listeners and setup new ones.
- *
- * @param {Object} data
+ * @param {Object} newData
  */
 
-exports._setData = function (data) {
-  this._data = data
-  var scope = this.$scope
-  var key
-  // teardown old sync listeners
-  this._unsyncData()
-  // delete keys not present in the new data
-  for (key in scope) {
-    if (
-      key.charCodeAt(0) !== 0x24 && // $
-      scope.hasOwnProperty(key) &&
-      !(key in data)
-    ) {
-      scope.$delete(key)
+exports._setData = function (newData) {
+  var ob = this.$observer
+  var oldData = this._data
+  this._data = newData
+  var keys, key, i
+  // unproxy keys not present in new data
+  keys = Object.keys(oldData)
+  i = keys.length
+  while (i--) {
+    key = keys[i]
+    if (!_.isReserved(key) && !(key in newData)) {
+      this._unproxy(key)
+      ob.emit('delete', key)
     }
   }
-  // copy properties into scope
-  for (key in data) {
-    if (scope.hasOwnProperty(key)) {
-      // existing property, trigger set
-      scope[key] = data[key]
+  // proxy keys not already proxied,
+  // and trigger change for changed values
+  keys = Object.keys(newData)
+  i = keys.length
+  while (i--) {
+    key = keys[i]
+    if (this.hasOwnProperty(key)) {
+      // existing property, emit set if different
+      if (newData[key] !== oldData[key]) {
+        ob.emit('set', key, newData[key])
+      }
     } else {
       // new property
-      scope.$add(key, data[key])
+      this._proxy(key)
+      ob.emit('add', key)
     }
   }
-  // setup sync between scope and new data
-  if (!this.$options._noSync) {
-    this._syncData()
+  // teardown/setup data proxies
+  var newOb = Observer.create(newData)
+  var oldOb = oldData.__ob__
+  var proxies = this._dataProxies
+  var event, proxy
+  i = allEvents.length
+  while (i--) {
+    event = allEvents[i]
+    proxy = proxies[event]
+    newOb.on(event, proxy)
+    oldOb.off(event, proxy)
   }
 }
 
 /**
- * Proxy the scope properties on the instance itself,
- * so that vm.a === vm.$scope.a.
+ * Proxy a property, so that
+ * vm.prop === vm._data.prop
  *
- * Note this only proxies *local* scope properties. We want
- * to prevent child instances accidentally modifying
- * properties with the same name up in the scope chain
- * because scope perperties are all getter/setters.
- *
- * To access parent properties through prototypal fall
- * through, access it on the instance's $scope.
- *
- * This should only be called once during _init().
+ * @param {String} key
  */
 
-exports._initProxy = function () {
-  var scope = this.$scope
-
-  // scope --> vm
-
-  // proxy scope data on vm
-  var keys = Object.keys(scope)
-  var i = keys.length
-  while (i--) {
-    _.proxy(this, scope, keys[i])
+exports._proxy = function (key) {
+  if (!_.isReserved(key)) {
+    var self = this
+    Object.defineProperty(self, key, {
+      configurable: true,
+      enumerable: true,
+      get: function () {
+        return self._data[key]
+      },
+      set: function (val) {
+        self._data[key] = val
+      }
+    })
   }
-  // keep proxying up-to-date with added/deleted keys.
-  this.$observer
-    .on('add:self', function (key) {
-      _.proxy(this, scope, key)
-    })
-    .on('delete:self', function (key) {
-      delete this[key]
-    })
-
-  // vm --> scope
-
-  // $parent & $root are read-only on $scope
-  scope.$parent = this.$parent
-  scope.$root = this.$root
-  // proxy $data
-  _.proxy(scope, this, '$data')
 }
 
 /**
- * Setup computed properties.
- * All computed properties are proxied onto the scope.
- * Because they are accessors their `this` context will
- * be the instance instead of the scope.
+ * Unproxy a property.
+ *
+ * @param {String} key
+ */
+
+exports._unproxy = function (key) {
+  delete this[key]
+}
+
+/**
+ * Setup computed properties. They are essentially
+ * special getter/setters
  */
 
 function noop () {}
-
 exports._initComputed = function () {
   var computed = this.$options.computed
-  var scope = this.$scope
   if (computed) {
     for (var key in computed) {
       var def = computed[key]
@@ -188,115 +243,95 @@ exports._initComputed = function () {
       def.enumerable = true
       def.configurable = true
       Object.defineProperty(this, key, def)
-      _.proxy(scope, this, key)
     }
   }
 }
 
 /**
- * Setup instance methods.
- * Methods are also copied into scope, but they must
- * be bound to the instance.
+ * Setup instance methods. Methods must be bound to the
+ * instance since they might be called by children
+ * inheriting them.
  */
 
 exports._initMethods = function () {
   var methods = this.$options.methods
-  var scope = this.$scope
   if (methods) {
     for (var key in methods) {
-      var method = methods[key]
-      this[key] = method
-      scope[key] = _.bind(method, this)
+      this[key] = _.bind(methods[key], this)
     }
   }
 }
 
 /**
- * Setup two-way sync between the instance scope and
- * the original data. Requires teardown.
+ * Create a child instance that prototypally inehrits
+ * data on parent. To achieve that we create an intermediate
+ * constructor with its prototype pointing to parent.
+ *
+ * @param {Object} opts
+ * @param {Function} [BaseCtor]
  */
 
-exports._syncData = function () {
-  var data = this._data
-  var scope = this.$scope
-  var locked = false
-  var listeners = this._syncListeners = {
-    data: {
-      set: guard(function (key, val) {
-        data[key] = val
-      }),
-      add: guard(function (key, val) {
-        data.$add(key, val)
-      }),
-      delete: guard(function (key) {
-        data.$delete(key)
-      })
-    },
-    scope: {
-      set: guard(function (key, val) {
-        scope[key] = val
-      }),
-      add: guard(function (key, val) {
-        scope.$add(key, val)
-      }),
-      delete: guard(function (key) {
-        scope.$delete(key)
-      })
+exports._addChild = function (opts, BaseCtor) {
+  BaseCtor = BaseCtor || _.Vue
+  var ChildVue
+  if (BaseCtor.options.isolated) {
+    ChildVue = BaseCtor
+  } else {
+    var parent = this
+    var ctors = parent._childCtors
+    if (!ctors) {
+      ctors = parent._childCtors = {}
+    }
+    ChildVue = ctors[BaseCtor.cid]
+    if (!ChildVue) {
+      ChildVue = function (options) {
+        this.$parent = parent
+        this.$root = parent.$root || parent
+        this.constructor = ChildVue
+        _.Vue.call(this, options)
+      }
+      ChildVue.options = BaseCtor.options
+      ChildVue.prototype = this
+      ctors[BaseCtor.cid] = ChildVue
     }
   }
-  // sync scope and original data.
-  this.$observer
-    .on('set:self', listeners.data.set)
-    .on('add:self', listeners.data.add)
-    .on('delete:self', listeners.data.delete)
-
-  this._dataObserver = Observer.create(data)
-  this._dataObserver
-    .on('set:self', listeners.scope.set)
-    .on('add:self', listeners.scope.add)
-    .on('delete:self', listeners.scope.delete)
-
-  /**
-   * The guard function prevents infinite loop
-   * when syncing between two observers. Also
-   * filters out properties prefixed with $ or _.
-   *
-   * @param {Function} fn
-   * @return {Function}
-   */
-
-  function guard (fn) {
-    return function (key, val) {
-      if (locked) {
-        return
-      }
-      var c = key.charCodeAt(0)
-      if (c === 0x24 || c === 0x5F) { // $ and _
-        return
-      }
-      locked = true
-      fn(key, val)
-      locked = false
-    }
+  var child = new ChildVue(opts)
+  if (!this._children) {
+    this._children = []
   }
+  this._children.push(child)
+  return child
 }
 
 /**
- * Teardown the sync between scope and previous data object.
+ * Define a meta property, e.g $index, $key, $value
+ * which only exists on the vm instance but not in $data.
+ *
+ * @param {String} key
+ * @param {*} value
  */
 
-exports._unsyncData = function () {
-  var listeners = this._syncListeners
-  if (!listeners) {
+exports._defineMeta = function (key, value) {
+  if (this.hasOwnProperty('key')) {
+    this[key] = value
     return
   }
-  this.$observer
-    .off('set:self', listeners.data.set)
-    .off('add:self', listeners.data.add)
-    .off('delete:self', listeners.data.delete)
-  this._dataObserver
-    .off('set:self', listeners.scope.set)
-    .off('add:self', listeners.scope.add)
-    .off('delete:self', listeners.scope.delete)
-  this._syncListeners = null
+  var ob = this.$observer
+  Object.defineProperty(this, key, {
+    enumerable: true,
+    configurable: true,
+    get: function () {
+      if (Observer.emitGet) {
+        ob.emit('get', key)
+      }
+      return value
+    },
+    set: function (val) {
+      if (val !== value) {
+        value = val
+        ob.emit('set', key, val)
+      }
+    }
+  })
+  ob.emit('add', key, value)
 }

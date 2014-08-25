@@ -26,30 +26,22 @@ var OBJECT = 1
  * @extends Emitter
  * @param {Array|Object} value
  * @param {Number} type
- * @param {Object} [options]
- *                 - doNotAlterProto
- *                 - callbackContext
  */
 
-function Observer (value, type, options) {
-  Emitter.call(this, options && options.callbackContext)
+function Observer (value, type) {
+  Emitter.call(this)
   this.id = ++uid
   this.value = value
   this.type = type
   this.parents = null
   this.parentsHash = null
   if (value) {
-    _.define(value, '$observer', this)
+    _.define(value, '__ob__', this)
     if (type === ARRAY) {
       _.augment(value, arrayAugmentations)
       this.link(value)
     } else if (type === OBJECT) {
-      if (options && options.doNotAlterProto) {
-        _.define(value, '$add', objectAugmentations.$add)
-        _.define(value, '$delete', objectAugmentations.$delete)
-      } else {
-        _.augment(value, objectAugmentations)
-      }
+      _.augment(value, objectAugmentations)
       this.walk(value)
     }
   }
@@ -86,10 +78,8 @@ Observer.emitGet = false
  */
 
 Observer.create = function (value, options) {
-  if (value &&
-      value.hasOwnProperty('$observer') &&
-      value.$observer instanceof Observer) {
-    return value.$observer
+  if (value && value.hasOwnProperty('__ob__')) {
+    return value.__ob__
   } else if (_.isArray(value)) {
     return new Observer(value, ARRAY, options)
   } else if (
@@ -167,19 +157,19 @@ p.observe = function (key, val) {
     var parents = ob.parents
     var hash = ob.parentsHash
     if (!parents) {
-      ob.parents = parents = []
-      ob.parentsHash = hash = {}
+      parents = ob.parents = []
+      hash = ob.parentsHash = {}
     }
-    if (hash[this.id]) {
+    if (!hash[this.id]) {
+      var p = {
+        ob: this,
+        key: key
+      }
+      parents.push(p)
+      hash[this.id] = p
+    } else {
       _.warn('Observing duplicate key: ' + key)
-      return
     }
-    var p = {
-      ob: this,
-      key: key
-    }
-    parents.push(p)
-    hash[this.id] = p
   }
 }
 
@@ -191,9 +181,9 @@ p.observe = function (key, val) {
  */
 
 p.unobserve = function (val) {
-  if (val && val.$observer) {
-    val.$observer.parentsHash[this.id] = null
-    var parents = val.$observer.parents
+  if (val && val.__ob__) {
+    val.__ob__.parentsHash[this.id] = null
+    var parents = val.__ob__.parents
     var i = parents.length
     while (i--) {
       if (parents[i].ob === this) {
@@ -228,7 +218,6 @@ p.convert = function (key, val) {
       ob.unobserve(val)
       val = newVal
       ob.observe(key, newVal)
-      ob.emit('set:self', key, newVal)
       ob.propagate('set', key, newVal)
     }
   })
@@ -271,7 +260,7 @@ p.updateIndices = function () {
   var i = arr.length
   var ob
   while (i--) {
-    ob = arr[i] && arr[i].$observer
+    ob = arr[i] && arr[i].__ob__
     if (ob) {
       ob.parentsHash[this.id].key = i
     }

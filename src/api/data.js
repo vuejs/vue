@@ -15,7 +15,7 @@ var filterRE = /[^|]\|[^|]/
 exports.$get = function (exp) {
   var res = expParser.parse(exp)
   if (res) {
-    return res.get.call(this, this.$scope)
+    return res.get.call(this, this)
   }
 }
 
@@ -31,7 +31,7 @@ exports.$get = function (exp) {
 exports.$set = function (exp, val) {
   var res = expParser.parse(exp, true)
   if (res && res.set) {
-    res.set.call(this, this.$scope, val)
+    res.set.call(this, this, val)
   }
 }
 
@@ -44,7 +44,9 @@ exports.$set = function (exp, val) {
  */
 
 exports.$add = function (key, val) {
-  this.$scope.$add(key, val)
+  if (!_.isReserved(key)) {
+    this._data.$add(key, val)
+  }
 }
 
 /**
@@ -55,7 +57,9 @@ exports.$add = function (key, val) {
  */
 
 exports.$delete = function (key) {
-  this.$scope.$delete(key)
+  if (!_.isReserved(key)) {
+    this._data.$delete(key)
+  }
 }
 
 /**
