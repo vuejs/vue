@@ -237,8 +237,7 @@ module.exports = {
     var vm = this.vm._addChild({
       el: this.el.cloneNode(true),
       data: data,
-      parent: this.vm,
-      _noSync: hasAlias
+      parent: this.vm
     }, Ctor)
     // define alias
     if (hasAlias && !alias) {

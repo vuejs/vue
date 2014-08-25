@@ -134,8 +134,7 @@ module.exports = {
     if (this.Ctor && !this.childVM) {
       this.childVM = this.vm._addChild({
         el: this.el.cloneNode(true),
-        parent: this.vm,
-        _noSync: true
+        parent: this.vm
       }, this.Ctor)
       if (this.keepAlive) {
         this.cache[this.id] = this.childVM

@@ -41,8 +41,7 @@ module.exports = {
     this.childVM = this.vm._addChild({
       el: this.el,
       parent: this.vm,
-      anonymous: true,
-      _noSync: true
+      anonymous: true
     })
   },
 
