@@ -33,12 +33,12 @@ module.exports = {
     }
     this.reset()
     var vm = this.vm
-    var rootScope = vm.$root.$scope
+    var root = vm.$root
     this.handler = function (e) {
       e.targetVM = vm
-      rootScope.$event = e
+      root.$event = e
       var res = handler(e)
-      rootScope.$event = null
+      root.$event = null
       return res
     }
     if (this.iframeBind) {

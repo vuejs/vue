@@ -37,7 +37,6 @@ exports.$set = function (exp, val) {
 
 /**
  * Add a property on the VM
- * (and also on $scope and $data)
  *
  * @param {String} key
  * @param {*} val
@@ -51,7 +50,6 @@ exports.$add = function (key, val) {
 
 /**
  * Delete a property on the VM
- * (and also on $scope and $data)
  *
  * @param {String} key
  */

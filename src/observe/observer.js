@@ -84,7 +84,7 @@ Observer.create = function (value, options) {
     return new Observer(value, ARRAY, options)
   } else if (
     _.isObject(value) &&
-    !value.$scope // avoid Vue instance
+    !value.$observer // avoid Vue instance
   ) {
     return new Observer(value, OBJECT, options)
   }

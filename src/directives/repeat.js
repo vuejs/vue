@@ -268,8 +268,12 @@ module.exports = {
 
   resolveCtor: function (data) {
     var getter = expParser.parse(this.CtorExp).get
-    var context = Object.create(this.vm.$scope)
-    _.extend(context, data)
+    var context = Object.create(this.vm)
+    for (var key in data) {
+      // use _.define to avoid accidentally
+      // overwriting scope properties
+      _.define(context, key, data[key])
+    }
     var id = getter(context)
     return this.vm._asset('components', id) || _.Vue
   },
