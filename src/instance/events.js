@@ -29,9 +29,10 @@ exports._initEvents = function () {
  */
 
 exports._initDOMHooks = function () {
-  var children = this._children
   this.$on('hook:attached', function () {
     this._isAttached = true
+    var children = this._children
+    if (!children) return
     for (var i = 0, l = children.length; i < l; i++) {
       var child = children[i]
       if (!child._isAttached && inDoc(child.$el)) {
@@ -41,6 +42,8 @@ exports._initDOMHooks = function () {
   })
   this.$on('hook:detached', function () {
     this._isAttached = false
+    var children = this._children
+    if (!children) return
     for (var i = 0, l = children.length; i < l; i++) {
       var child = children[i]
       if (child._isAttached && !inDoc(child.$el)) {

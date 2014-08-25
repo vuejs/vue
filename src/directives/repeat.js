@@ -306,7 +306,7 @@ module.exports = {
    */
 
   cacheVm: function (data, vm) {
-    if (data[this.id] !== undefined) {
+    if (data.hasOwnProperty(this.id)) {
       data[this.id] = vm
     } else {
       _.define(data, this.id, vm)

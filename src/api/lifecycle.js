@@ -24,7 +24,7 @@ exports.$mount = function (el) {
     this._isAttached = true
     this._isReady = true
     this._callHook('ready')
-    // this._initDOMHooks()
+    this._initDOMHooks()
   })
   if (_.inDoc(this.$el)) {
     this._callHook('attached')

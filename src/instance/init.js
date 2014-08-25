@@ -20,22 +20,26 @@ exports._init = function (options) {
   this.$            = {}
   this.$root        = this.$root || this
   this._data        = options.data || {}
-  this._rawContent  = null
   this._emitter     = new Emitter(this)
   this._watchers    = {}
-  this._activeWatcher = null
   this._directives  = []
+  this._rawContent  = null
+  this._activeWatcher = null
 
   // block instance properties
-  this._isBlock     = false
-  this._blockStart  = null
+  this._blockStart  =
   this._blockEnd    = null
+  this._isBlock     = false
 
   // lifecycle state
-  this._isCompiled  = false
-  this._isDestroyed = false
-  this._isReady     = false
+  this._isCompiled  =
+  this._isDestroyed =
+  this._isReady     =
   this._isAttached  = false
+
+  // children
+  this._children =
+  this._childCtors = null
 
   // anonymous instances are created by flow-control
   // directives such as v-if and v-repeat

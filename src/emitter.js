@@ -25,7 +25,7 @@ var p = Emitter.prototype
 p.on = function (event, fn) {
   this._cbs = this._cbs || {}
   ;(this._cbs[event] || (this._cbs[event] = []))
-    .unshift(fn)
+    .push(fn)
   return this
 }
 
@@ -100,9 +100,8 @@ p.emit = function (event, a, b, c, d) {
   var callbacks = this._cbs[event]
   if (callbacks) {
     callbacks = _.toArray(callbacks)
-    var i = callbacks.length
     var ctx = this._ctx
-    while (i--) {
+    for (var i = 0, l = callbacks.length; i < l; i++) {
       callbacks[i].call(ctx, a, b, c, d)
     }
   }
@@ -130,8 +129,8 @@ p.applyEmit = function (event) {
       args[i] = arguments[i + 1]
     }
     callbacks = _.toArray(callbacks)
-    i = callbacks.length
-    while (i--) {
+    i = 0
+    for (var l = callbacks.length; i < l; i++) {
       if (callbacks[i].apply(this._ctx, args) === false) {
         this._cancelled = true
       }

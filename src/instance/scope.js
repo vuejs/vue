@@ -18,8 +18,6 @@ var allEvents = ['get', 'set', 'mutate', 'add', 'delete', 'add:self', 'delete:se
  */
 
 exports._initScope = function () {
-  this._children = null
-  this._childCtors = null
   this._initObserver()
   this._initData()
   this._initComputed()
