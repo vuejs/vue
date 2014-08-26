@@ -92,7 +92,7 @@ p.addDep = function (path) {
     newDeps[path] = true
     if (!oldDeps[path]) {
       var binding =
-        vm._getBindingAt(path) ||
+        vm._bindings[path] ||
         vm._createBindingAt(path)
       binding._addSub(this)
     }
@@ -186,7 +186,7 @@ p.teardown = function () {
     this.active = false
     var vm = this.vm
     for (var path in this.deps) {
-      vm._getBindingAt(path)._removeSub(this)
+      vm._bindings[path]._removeSub(this)
     }
   }
 }
