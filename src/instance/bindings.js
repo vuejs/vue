@@ -13,7 +13,7 @@ var Observer = require('../observe/observer')
 
 exports._initBindings = function () {
   this._bindings = Object.create(null)
-  this._createBindingAt('$data')
+  this._bindings.$data = new Binding()
   // setup observer events
   this.$observer
     // simple updates
@@ -24,18 +24,6 @@ exports._initBindings = function () {
     .on('add', updateAdd)
     // collect dependency
     .on('get', collectDep)
-}
-
-/**
- * Create a binding at a given path. Will also create
- * all bindings that do not exist yet along the way.
- *
- * @param {String} path
- * @return {Binding}
- */
-
-exports._createBindingAt = function (path) {
-  return this._bindings[path] = new Binding()
 }
 
 /**
