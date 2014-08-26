@@ -233,20 +233,21 @@ p.convert = function (key, val) {
  */
 
 p.propagate = function (event, path, val, mutation) {
-  this.emit(event, path, val, mutation)
+  if (this._cbs) {
+    this.emit(event, path, val, mutation)
+  }
   var parents = this.parents
   if (!parents) {
     return
   }
-  var parent, key, parentPath
+  if (path) {
+    path = Observer.pathDelimiter + path
+  }
   var i = parents.length
+  var parent
   while (i--) {
     parent = parents[i]
-    key = parent.key
-    parentPath = path
-      ? key + Observer.pathDelimiter + path
-      : key
-    parent.ob.propagate(event, parentPath, val, mutation)
+    parent.ob.propagate(event, parent.key + path, val, mutation)
   }
 }
 
