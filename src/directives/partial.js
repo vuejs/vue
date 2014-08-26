@@ -7,7 +7,8 @@ module.exports = {
 
   bind: function () {
     var id = this.expression
-    var partial = this.vm._asset('partials', id)
+    var partial = this.vm.$options.partials[id]
+    _.assertAsset(partial, 'partial', id)
     if (!partial) {
       return
     }

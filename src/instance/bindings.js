@@ -1,5 +1,4 @@
 var Binding = require('../binding')
-var Path = require('../parse/path')
 var Observer = require('../observe/observer')
 
 /**

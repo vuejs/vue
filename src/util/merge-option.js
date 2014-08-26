@@ -43,14 +43,20 @@ strats.directives =
 strats.filters =
 strats.partials =
 strats.transitions =
-strats.components = function (parentVal, childVal, vm) {
-  if (vm) {
-    return childVal
-  } else {
-    var ret = Object.create(parentVal || null)
-    extend(ret, childVal)
-    return ret
+strats.components = function (parentVal, childVal, vm, key) {
+  var ret = Object.create(parentVal || null)
+  extend(ret, childVal)
+  if (vm && vm.$parent) {
+    var scopeVal = vm.$parent.$options[key]
+    var keys = Object.keys(scopeVal)
+    var i = keys.length
+    var field
+    while (i--) {
+      field = keys[i]
+      ret[field] = scopeVal[field]
+    }
   }
+  return ret
 }
 
 /**
@@ -153,7 +159,7 @@ module.exports = function mergeOptions (parent, child, vm) {
       return
     }
     var strat = strats[key] || defaultStrat
-    options[key] = strat(parent[key], child[key], vm)
+    options[key] = strat(parent[key], child[key], vm, key)
   }
   return options
 }

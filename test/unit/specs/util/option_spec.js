@@ -95,15 +95,22 @@ describe('Util - Option merging', function () {
     ).directives
     expect(res.a).toBe(asset1)
     expect(res.b).toBe(asset2)
-    // vm asset merge should just return instance value
-    // for speed optimization
+    // vm asset merge should do tree-way merge
     res = merge(
       { directives: { a: asset1 }},
       { directives: { b: asset2 }},
-      {} // just mock something for vm here
+      {
+        $parent: {
+          $options: {
+            directives: { c: asset3 }
+          }
+        }
+      },
+      'directives'
     ).directives
-    expect(res.a).toBeUndefined()
+    expect(res.a).toBe(asset1)
     expect(res.b).toBe(asset2)
+    expect(res.c).toBe(asset3)
   })
 
   it('guard components', function () {

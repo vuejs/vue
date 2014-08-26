@@ -89,7 +89,7 @@ var apply = exports.apply = function (el, direction, op, vm) {
     return op()
   }
   // determine the transition type on the element
-  var jsTransition = vm._asset('transitions', transData.id)
+  var jsTransition = vm.$options.transitions[transData.id]
   if (jsTransition) {
     // js
     applyJSTransition(

@@ -105,6 +105,7 @@ module.exports = function (grunt) {
             pure_funcs: [
               '_.log',
               '_.warn',
+              '_.assertAsset',
               'enableDebug'
             ]
           }

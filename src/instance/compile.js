@@ -44,11 +44,11 @@ exports._compileNode = function (node) {
  */
 
 exports._compileElement = function (node) {
-  var tag = node.tagName
+  var tag = node.tagName.toLowerCase()
   // textarea is pretty annoying
   // because its value creates childNodes which
   // we don't want to compile.
-  if (tag === 'TEXTAREA' && node.value) {
+  if (tag === 'textarea' && node.value) {
       node.value = this.$interpolate(node.value)
   }
   var hasAttributes = node.hasAttributes()
@@ -97,7 +97,8 @@ exports._compileAttrs = function (node) {
     attrName = attr.name
     if (attrName.indexOf(config.prefix) === 0) {
       dirName = attrName.slice(config.prefix.length)
-      dirDef = this._asset('directives', dirName)
+      dirDef = this.$options.directives[dirName]
+      _.assertAsset(dirDef, 'directive', dirName)
       if (dirDef) {
         if (dirName !== 'cloak') {
           node.removeAttribute(attrName)
@@ -231,7 +232,7 @@ exports._checkPriorityDirs = function (node) {
 exports._bindDirective = function (name, value, node, def) {
   var descriptors = dirParser.parse(value)
   var dirs = this._directives
-  def = def || this._asset('directives', name)
+  def = def || this.$options.directives[name]
   for (var i = 0, l = descriptors.length; i < l; i++) {
     dirs.push(
       new Direcitve(name, node, this, descriptors[i], def)

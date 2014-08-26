@@ -109,7 +109,8 @@ module.exports = {
       this.Ctor = _.Vue
     } else {
       this.id = id
-      this.Ctor = this.vm._asset('components', id)
+      this.Ctor = this.vm.$options.components[id]
+      _.assertAsset(this.Ctor, 'component', id)
     }
   },
 

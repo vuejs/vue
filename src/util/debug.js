@@ -37,4 +37,14 @@ function enableDebug () {
       }
     }
   }
+
+  /**
+   * Assert asset exists
+   */
+
+  exports.assertAsset = function (val, type, id) {
+    if (!val) {
+      exports.warn('Failed to resolve ' + type + ': ' + id)
+    }
+  }
 }

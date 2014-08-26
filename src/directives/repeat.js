@@ -80,8 +80,8 @@ module.exports = {
     } else {
       var tokens = textParser.parse(id)
       if (!tokens) { // static component
-        this.Ctor =
-          this.vm._asset('components', id) || _.Vue
+        this.Ctor = this.vm.$options.components[id]
+        _.assertAsset(this.Ctor, 'component', id)
       } else if (tokens.length === 1) {
         // to be resolved later
         this.CtorExp = tokens[0].value
@@ -274,7 +274,9 @@ module.exports = {
       _.define(context, key, data[key])
     }
     var id = getter(context)
-    return this.vm._asset('components', id) || _.Vue
+    var Ctor = this.vm.$options.components[id]
+    _.assertAsset(Ctor, 'component', id)
+    return Ctor
   },
 
   /**

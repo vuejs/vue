@@ -1,3 +1,5 @@
+var _ = require('./debug')
+
 /**
  * Resolve read & write filters for a vm instance. The
  * filters descriptor Array comes from the directive parser.
@@ -18,7 +20,8 @@ exports.resolveFilters = function (vm, filters, target) {
   var res = target || {}
   // var registry = vm.$options.filters
   filters.forEach(function (f) {
-    var def = vm._asset('filters', f.name)
+    var def = vm.$options.filters[f.name]
+    _.assertAsset(def, 'filter', f.name)
     if (!def) {
       return
     }
