@@ -2,6 +2,8 @@ var _ = require('../util')
 var textParser = require('../parse/text')
 var expParser = require('../parse/expression')
 var templateParser = require('../parse/template')
+var compile = require('../compile/compile')
+var transclude = require('../compile/transclude')
 var uid = 0
 
 module.exports = {
@@ -93,6 +95,12 @@ module.exports = {
           'in attribute bindings.'
         )
       }
+    }
+    // pre-compile if we have determined Ctor
+    var Ctor = this.Ctor
+    if (Ctor) {
+      this.el = transclude(this.el, Ctor.options)
+      this._linker = compile(this.el, Ctor.options)
     }
   },
 
@@ -236,6 +244,7 @@ module.exports = {
     var Ctor = this.Ctor || this.resolveCtor(data)
     var vm = this.vm._addChild({
       el: this.el.cloneNode(true),
+      _linker: this._linker,
       data: data,
       parent: this.vm
     }, Ctor)
