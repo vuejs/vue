@@ -171,7 +171,10 @@ function compilePathFns (exp) {
 
 function makeGetter (body) {
   try {
-    return new Function('scope', 'return ' + body + ';')
+    return new Function(
+      'scope',
+      'try{return ' + body + '}catch(e){};'
+    )
   } catch (e) {
     _.warn(
       'Invalid expression. ' + 

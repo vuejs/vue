@@ -84,18 +84,6 @@ describe('Path', function () {
     expect(Path.get(obj, 'a.c')).toBeUndefined()
   })
 
-  it('get from observer delimited path', function () {
-    var delim = Observer.pathDelimiter
-    var path = ['a','b','0'].join(delim)
-    var obj = {
-      a: {
-        b: [123]
-      }
-    }
-    expect(Path.getFromObserver(obj, path)).toBe(123)
-    expect(Path.getFromObserver(obj, ['a','c'].join(delim))).toBeUndefined()
-  })
-
   it('set', function () {
     var path = 'a.b.c'
     var obj = {

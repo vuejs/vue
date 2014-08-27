@@ -225,17 +225,10 @@ function formatAccessor(key) {
  */
 
 exports.compileGetter = function (path) {
-  var body = 'if (o != null'
-  var pathString = 'o'
-  var key
-  for (var i = 0, l = path.length - 1; i < l; i++) {
-    key = path[i]
-    pathString += formatAccessor(key)
-    body += ' && ' + pathString + ' != null'
-  }
-  key = path[i]
-  pathString += formatAccessor(key)
-  body += ') return ' + pathString
+  var body =
+    'try{return o' +
+    path.map(formatAccessor).join('') +
+    '}catch(e){};'
   return new Function('o', body)
 }
 
@@ -270,24 +263,6 @@ exports.get = function (obj, path) {
   if (path) {
     return path.get(obj)
   }
-}
-
-/**
- * Get from an object from an Observer-delimitered path.
- * e.g. "a\bb\bc"
- *
- * @param {Object} obj
- * @param {String} path
- */
-
-exports.getFromObserver = function (obj, path) {
-  var hit = pathCache.get(path)
-  if (!hit) {
-    hit = path.split(Observer.pathDelimiter)
-    hit.get = exports.compileGetter(hit)
-    pathCache.put(path, hit)
-  }
-  return hit.get(obj)
 }
 
 /**
