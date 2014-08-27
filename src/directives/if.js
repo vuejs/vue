@@ -13,14 +13,16 @@ module.exports = {
         this.el = templateParser.parse(el)
       }
     } else {
+      this.invalid = true
       _.warn(
-        'v-if ' + this.expression + ' cannot be ' +
+        'v-if="' + this.expression + '" cannot be ' +
         'used on an already mounted instance.'
       )
     }
   },
 
   update: function (value) {
+    if (this.invalid) return
     if (value) {
       if (!this.inserted) {
         if (!this.childVM) {

@@ -21,7 +21,6 @@ function noop () {}
  */
 
 var compile = module.exports = function (el, options) {
-  el = transclude(el, options)
   var nodeLinkFn = el instanceof DocumentFragment
     ? null
     : compileNode(el, options)
@@ -183,7 +182,7 @@ function makeTextNodeLinkFn (tokens, frag) {
     var fragClone = frag.cloneNode(true)
     var childNodes = _.toArray(fragClone.childNodes)
     var dirs = vm._directives
-    var token, value, node, type
+    var token, value, node
     for (var i = 0, l = tokens.length; i < l; i++) {
       token = tokens[i]
       value = token.value
@@ -218,15 +217,14 @@ function makeTextNodeLinkFn (tokens, frag) {
 
 function compileNodeList (nodeList, options) {
   var linkFns = []
-  var nodeLinkFn, childLinkFn
+  var nodeLinkFn, childLinkFn, node
   for (var i = 0, l = nodeList.length; i < l; i++) {
-    // always refer to nodeList[i] because it might be
-    // replaced during tranclusion
-    nodeLinkFn = compileNode(nodeList[i], options)
+    node = nodeList[i]
+    nodeLinkFn = compileNode(node, options)
     childLinkFn =
       (!nodeLinkFn || !nodeLinkFn.terminal) &&
-      nodeList[i].hasChildNodes()
-        ? compileNodeList(nodeList[i].childNodes, options)
+      node.hasChildNodes()
+        ? compileNodeList(node.childNodes, options)
         : null
     linkFns.push(nodeLinkFn, childLinkFn)
   }
@@ -380,32 +378,6 @@ function checkTerminalDirectives (el, options) {
 function makeTeriminalLinkFn (el, dirName, value, options) {
   var descriptor = dirParser.parse(value)[0]
   var def = options.directives[dirName]
-  // we can transclude and compile the child block here
-  // only when there's no dynamic component involved.
-  var dynamicComponent = false
-  var componentId, subOptions
-  if (dirName === 'repeat') {
-    componentId = el.getAttribute(config.prefix + 'component')
-  } else if (dirName === 'component') {
-    componentId = value
-  }
-  if (componentId) {
-    if (textParser.parse(componentId)) {
-      dynamicComponent = true
-    } else {
-      var Ctor = options.components[componentId]
-      _.assertAsset(Ctor, 'component', componentId)
-      if (Ctor) {
-        subOptions = Ctor.options
-      }
-    }
-  }
-  if (!dynamicComponent) {
-    subOptions = subOptions
-      ? mergeOptions(options, subOptions)
-      : _.Vue.options
-    descriptor.linkFn = compile(el, subOptions)
-  }
   return function terminalLinkFn (vm, el) {
     vm._directives.push(
       new Direcitve(dirName, el, vm, descriptor, def)

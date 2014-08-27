@@ -1,4 +1,6 @@
 var _ = require('../util')
+var compile = require('../compile/compile')
+var transclude = require('../compile/transclude')
 
 /**
  * Set instance target element and kick off the compilation
@@ -16,19 +18,36 @@ exports.$mount = function (el) {
     return
   }
   this._callHook('beforeCompile')
-  this._initElement(el)
-  this._compile()
-  this._isCompiled = true
+  var options = this.$options
+  if (options._linker) {
+    // pre-compiled linker. this means the element has
+    // been trancluded and compiled. just link it.
+    this._initElement(el)
+    options._linker(this, el)
+  } else {
+    el = transclude(el, options)
+    this._initElement(el)
+    var linker = compile(el, options)
+    linker(this, el)
+  }
   this._callHook('compiled')
-  this.$once('hook:attached', function () {
-    this._isAttached = true
-    this._isReady = true
-    this._callHook('ready')
-    this._initDOMHooks()
-  })
   if (_.inDoc(this.$el)) {
     this._callHook('attached')
+    ready.call(this)
+  } else {
+    this._emitter.once('hook:attached', ready)
   }
+}
+
+/**
+ * Mark an instance as ready.
+ */
+
+function ready () {
+  this._isAttached = true
+  this._isReady = true
+  this._callHook('ready')
+  this._initDOMHooks()
 }
 
 /**

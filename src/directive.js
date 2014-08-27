@@ -17,10 +17,11 @@ var expParser = require('./parse/expression')
  *                 - {String} [arg]
  *                 - {Array<Object>} [filters]
  * @param {Object} def
+ * @param {Function} [linker]
  * @constructor
  */
 
-function Directive (name, el, vm, descriptor, def) {
+function Directive (name, el, vm, descriptor, def, linker) {
   // public
   this.name = name
   this.el = el
@@ -28,6 +29,7 @@ function Directive (name, el, vm, descriptor, def) {
   // copy descriptor props
   _.extend(this, descriptor)
   // private
+  this._linker = linker
   this._locked = false
   this._bound = false
   // init

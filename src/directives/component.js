@@ -37,7 +37,7 @@ module.exports = {
       }
     } else {
       _.warn(
-        'v-component ' + this.expression + ' cannot be ' +
+        'v-component="' + this.expression + '" cannot be ' +
         'used on an already mounted instance.'
       )
     }
@@ -135,6 +135,7 @@ module.exports = {
     if (this.Ctor && !this.childVM) {
       this.childVM = this.vm._addChild({
         el: this.el.cloneNode(true),
+        _linker: this._linker,
         parent: this.vm
       }, this.Ctor)
       if (this.keepAlive) {

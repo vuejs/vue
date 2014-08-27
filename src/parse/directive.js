@@ -27,6 +27,7 @@ var arg
  */
 
 function pushDir () {
+  dir.raw = str.slice(begin, i).trim()
   if (dir.expression === undefined) {
     dir.expression = str.slice(argIndex, i).trim()
   } else if (lastFilterIndex !== begin) {

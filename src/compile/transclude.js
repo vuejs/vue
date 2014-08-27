@@ -13,7 +13,7 @@ var templateParser = require('../parse/template')
  * @return {Element|DocumentFragment}
  */
 
-module.exports = function transclude (el, options) {
+var transclude = module.exports = function (el, options) {
   if (typeof el === 'string') {
     var selector = el
     el = document.querySelector(el)
@@ -23,6 +23,12 @@ module.exports = function transclude (el, options) {
   }
   if (el instanceof DocumentFragment) {
     return transcludeBlock(el)
+  } else if (el.tagName === 'TEMPLATE') {
+    if (el.content instanceof DocumentFragment) {
+      return transclude(el.content)
+    } else {
+      return transclude(templateParser.parse(el))
+    }
   } else if (options.template) {
     return transcludeTemplate(el, options)
   } else {

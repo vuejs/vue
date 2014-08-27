@@ -152,8 +152,8 @@ module.exports = function mergeOptions (parent, child, vm) {
       (key === 'el' || key === 'data' || key === 'parent')
     ) {
       _.warn(
-        'The "' + key + '" option can only be used as an' +
-        'instantiation option and will be ignored in' +
+        'The "' + key + '" option can only be used as an ' +
+        'instantiation option and will be ignored in ' +
         'Vue.extend().'
       )
       return
