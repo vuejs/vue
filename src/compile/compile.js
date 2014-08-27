@@ -60,33 +60,6 @@ function compileNode (node, options) {
 }
 
 /**
- * Compile a node list and return a childLinkFn.
- *
- * @param {NodeList} nodeList
- * @param {Object} options
- * @return {Function|undefined}
- */
-
-function compileNodeList (nodeList, options) {
-  var linkFns = []
-  var nodeLinkFn, childLinkFn
-  for (var i = 0, l = nodeList.length; i < l; i++) {
-    // always refer to nodeList[i] because it might be
-    // replaced during tranclusion
-    nodeLinkFn = compileNode(nodeList[i], options)
-    childLinkFn =
-      (!nodeLinkFn || !nodeLinkFn.terminal) &&
-      nodeList[i].hasChildNodes()
-        ? compileNodeList(nodeList[i].childNodes, options)
-        : null
-    linkFns.push(nodeLinkFn, childLinkFn)
-  }
-  return linkFns.length
-    ? makeChildLinkFn(linkFns)
-    : null
-}
-
-/**
  * Compile an element and return a nodeLinkFn.
  *
  * @param {Element} el
@@ -125,6 +98,32 @@ function compileElement (el, options) {
 }
 
 /**
+ * Build a multi-directive link function.
+ *
+ * @param {Array} directives
+ * @return {Function} directivesLinkFn
+ */
+
+function makeDirectivesLinkFn (directives) {
+  return function directivesLinkFn (vm, el) {
+    // reverse apply because it's sorted low to high
+    var i = directives.length
+    var vmDirs = vm._directives
+    var dir, j
+    while (i--) {
+      dir = directives[i]
+      j = dir.descriptors.length
+      while (j--) {
+        vmDirs.push(
+          new Direcitve(dir.name, el, vm,
+                        dir.descriptors[j], dir.def)
+        )
+      }
+    }
+  }
+}
+
+/**
  * Compile a textNode and return a nodeLinkFn.
  *
  * @param {TextNode} node
@@ -138,6 +137,7 @@ function compileTextNode (node, options) {
     return null
   }
   var frag = document.createDocumentFragment()
+  var dirs = options.directives
   var el, token, value
   for (var i = 0, l = tokens.length; i < l; i++) {
     token = tokens[i]
@@ -148,15 +148,18 @@ function compileTextNode (node, options) {
       } else {
         if (token.html) {
           el = document.createComment('v-html')
-          token.def = options.directives.html
+          token.type = 'html'
+          token.def = dirs.html
           token.descriptor = dirParser.parse(value)[0]
         } else if (token.partial) {
           el = document.createComment('v-partial')
-          token.def = options.directives.partial
+          token.type = 'partial'
+          token.def = dirs.partial
           token.descriptor = dirParser.parse(value)[0]
         } else {
           el = document.createTextNode('')
-          token.def = options.directives.text
+          token.type = 'text'
+          token.def = dirs.text
           token.descriptor = dirParser.parse(value)[0]
         }
       }
@@ -166,6 +169,96 @@ function compileTextNode (node, options) {
     frag.appendChild(el)
   }
   return makeTextNodeLinkFn(tokens, frag, options)
+}
+
+/**
+ * Build a function that processes a textNode.
+ *
+ * @param {Array<Object>} tokens
+ * @param {DocumentFragment} frag
+ */
+
+function makeTextNodeLinkFn (tokens, frag) {
+  return function textNodeLinkFn (vm, el) {
+    var fragClone = frag.cloneNode(true)
+    var childNodes = _.toArray(fragClone.childNodes)
+    var dirs = vm._directives
+    var token, value, node, type
+    for (var i = 0, l = tokens.length; i < l; i++) {
+      token = tokens[i]
+      value = token.value
+      if (token.tag) {
+        node = childNodes[i]
+        if (token.oneTime) {
+          value = vm.$get(value)
+          if (token.html) {
+            _.replace(node, templateParser.parse(value, true))
+          } else {
+            node.nodeValue = value
+          }
+        } else {
+          dirs.push(
+            new Direcitve(token.type, node, vm,
+                          token.descriptor, token.def)
+          )
+        }
+      }
+    }
+    _.replace(el, fragClone)
+  }
+}
+
+/**
+ * Compile a node list and return a childLinkFn.
+ *
+ * @param {NodeList} nodeList
+ * @param {Object} options
+ * @return {Function|undefined}
+ */
+
+function compileNodeList (nodeList, options) {
+  var linkFns = []
+  var nodeLinkFn, childLinkFn
+  for (var i = 0, l = nodeList.length; i < l; i++) {
+    // always refer to nodeList[i] because it might be
+    // replaced during tranclusion
+    nodeLinkFn = compileNode(nodeList[i], options)
+    childLinkFn =
+      (!nodeLinkFn || !nodeLinkFn.terminal) &&
+      nodeList[i].hasChildNodes()
+        ? compileNodeList(nodeList[i].childNodes, options)
+        : null
+    linkFns.push(nodeLinkFn, childLinkFn)
+  }
+  return linkFns.length
+    ? makeChildLinkFn(linkFns)
+    : null
+}
+
+/**
+ * Make a child link function for a node's childNodes.
+ *
+ * @param {Array<Function>} linkFns
+ * @return {Function} childLinkFn
+ */
+
+function makeChildLinkFn (linkFns) {
+  return function childLinkFn (vm, nodes) {
+    // stablize nodes
+    nodes = _.toArray(nodes)
+    var node, nodeLinkFn, childrenLinkFn
+    for (var i = 0, n = 0, l = linkFns.length; i < l; n++) {
+      node = nodes[n]
+      nodeLinkFn = linkFns[i++]
+      childrenLinkFn = linkFns[i++]
+      if (nodeLinkFn) {
+        nodeLinkFn(vm, node)
+      }
+      if (childrenLinkFn) {
+        childrenLinkFn(vm, node.childNodes)
+      }
+    }
+  }
 }
 
 /**
@@ -212,6 +305,40 @@ function compileParamAttributes (el, attrs, options) {
 }
 
 /**
+ * Build a function that applies param attributes to a vm.
+ *
+ * @param {Array} params
+ * @param {Object} options
+ * @return {Function} paramsLinkFn
+ */
+
+function makeParamsLinkFn (params, options) {
+  var def = options.directives.with
+  return function paramsLinkFn (vm, el) {
+    var i = params.length
+    var param
+    while (i--) {
+      param = params[i]
+      if (param.dynamic) {
+        // dynamic param attribtues are bound as v-with.
+        // we can directly fake the descriptor here beacuse
+        // param attributes cannot use expressions or
+        // filters.
+        vm._directives.push(
+          new Direcitve('with', el, vm, {
+            arg: param.name,
+            expression: param.value
+          }, def)
+        )
+      } else {
+        // just set once
+        vm.$set(param.name, param.value)
+      }
+    }
+  }
+}
+
+/**
  * Check an element for terminal directives in fixed order.
  * If it finds one, return a terminal link function.
  *
@@ -236,121 +363,6 @@ function checkTerminalDirectives (el, options) {
     dirName = terminalDirecitves[i]
     if (value = _.attr(el, dirName)) {
       return makeTeriminalLinkFn(el, dirName, value, options)
-    }
-  }
-}
-
-/**
- * Collect the directives on an element.
- *
- * @param {Element} el
- * @param {Object} options
- * @return {Array}
- */
-
-function collectDirectives (el, options) {
-  var attrs = _.toArray(el.attributes)
-  var i = attrs.length
-  var dirs = []
-  var attr, attrName, dir, dirName, dirDef
-  while (i--) {
-    attr = attrs[i]
-    attrName = attr.name
-    if (attrName.indexOf(config.prefix) === 0) {
-      dirName = attrName.slice(config.prefix.length)
-      dirDef = options.directives[dirName]
-      _.assertAsset(dirDef, 'directive', dirName)
-      if (dirDef) {
-        if (dirName !== 'cloak') {
-          el.removeAttribute(attrName)
-        }
-        dirs.push({
-          name: dirName,
-          descriptors: dirParser.parse(attr.value),
-          def: dirDef
-        })
-      }
-    } else if (config.interpolate) {
-      dir = collectAttrDirective(el, attrName, attr.value,
-                                 options)
-      if (dir) {
-        dirs.push(dir)
-      }
-    }
-  }
-  // sort by priority, LOW to HIGH
-  dirs.sort(directiveComparator)
-  return dirs
-}
-
-/**
- * Directive priority sort comparator
- *
- * @param {Object} a
- * @param {Object} b
- */
-
-function directiveComparator (a, b) {
-  a = a.def.priority || 0
-  b = b.def.priority || 0
-  return a > b ? 1 : -1
-}
-
-/**
- * Check an attribute for potential dynamic bindings,
- * and return a directive object.
- *
- * @param {Element} el
- * @param {String} name
- * @param {String} value
- * @param {Object} options
- * @return {Object}
- */
-
-function collectAttrDirective (el, name, value, options) {
-  var tokens = textParser.parse(value)
-  if (tokens) {
-    if (tokens.length > 1) {
-      _.warn(
-        'Invalid attribute binding: "' +
-        name + '="' + value + '"' +
-        '\nDon\'t mix binding tags with plain text ' +
-        'in attribute bindings.'
-      )
-    } else {
-      var descriptor = dirParser.parse(tokens[0].value)
-      descriptor.arg = name
-      return {
-        name: 'attr',
-        def: options.directives.attr,
-        descriptors: [descriptor]
-      }
-    }
-  }
-}
-
-/**
- * Make a child link function for a node's childNodes.
- *
- * @param {Array<Function>} linkFns
- * @return {Function} childLinkFn
- */
-
-function makeChildLinkFn (linkFns) {
-  return function childLinkFn (vm, nodes) {
-    // stablize nodes
-    nodes = _.toArray(nodes)
-    var node, nodeLinkFn, childrenLinkFn
-    for (var i = 0, n = 0, l = linkFns.length; i < l; n++) {
-      node = nodes[n]
-      nodeLinkFn = linkFns[i++]
-      childrenLinkFn = linkFns[i++]
-      if (nodeLinkFn) {
-        nodeLinkFn(vm, node)
-      }
-      if (childrenLinkFn) {
-        childrenLinkFn(vm, node.childNodes)
-      }
     }
   }
 }
@@ -402,111 +414,90 @@ function makeTeriminalLinkFn (el, dirName, value, options) {
 }
 
 /**
- * Build a multi-directive link function.
+ * Collect the directives on an element.
  *
- * @param {Array} directives
- * @return {Function} directivesLinkFn
- */
-
-function makeDirectivesLinkFn (directives) {
-  return function directivesLinkFn (vm, el) {
-    // reverse apply because it's sorted low to high
-    var i = directives.length
-    var vmDirs = vm._directives
-    var dir, j
-    while (i--) {
-      dir = directives[i]
-      j = dir.descriptors.length
-      while (j--) {
-        vmDirs.push(
-          new Direcitve(dir.name, el, vm,
-                        dir.descriptors[j], dir.def)
-        )
-      }
-    }
-  }
-}
-
-/**
- * Build a function that processes a textNode.
- *
- * @param {Array<Object>} tokens
- * @param {DocumentFragment} frag
- */
-
-function makeTextNodeLinkFn (tokens, frag) {
-  return function textNodeLinkFn (vm, el) {
-    var fragClone = frag.cloneNode(true)
-    var childNodes = _.toArray(fragClone.childNodes)
-    var dirs = vm._directives
-    var token, value, node
-    for (var i = 0, l = tokens.length; i < l; i++) {
-      token = tokens[i]
-      value = token.value
-      if (token.tag) {
-        node = childNodes[i]
-        if (token.oneTime) {
-          value = vm.$get(value)
-          if (token.html) {
-            var htmlFrag = templateParser.parse(value, true)
-            _.replace(node, htmlFrag)
-          } else {
-            node.nodeValue = value
-          }
-        } else {
-          if (token.html) {
-            dirs.push(
-              new Direcitve('html', node, vm,
-                            token.descriptor, token.def)
-            )
-          } else if (token.partial) {
-            dirs.push(
-              new Direcitve('partial', node, vm,
-                            token.descriptor, token.def)
-            )
-          } else {
-            dirs.push(
-              new Direcitve('text', node, vm,
-                            token.descriptor, token.def)
-            )
-          }
-        }
-      }
-    }
-    _.replace(el, fragClone)
-  }
-}
-
-/**
- * Build a function that applies param attributes to a vm.
- *
- * @param {Array} params
+ * @param {Element} el
  * @param {Object} options
- * @return {Function} paramsLinkFn
+ * @return {Array}
  */
 
-function makeParamsLinkFn (params, options) {
-  var def = options.directives.with
-  return function paramsLinkFn (vm, el) {
-    var i = params.length
-    var param
-    while (i--) {
-      param = params[i]
-      if (param.dynamic) {
-        // dynamic param attribtues are bound as v-with.
-        // we can directly fake the descriptor here beacuse
-        // param attributes cannot use expressions or
-        // filters.
-        vm._directives.push(
-          new Direcitve('with', el, vm, {
-            arg: param.name,
-            expression: param.value
-          }, def)
-        )
-      } else {
-        // just set once
-        vm.$set(param.name, param.value)
+function collectDirectives (el, options) {
+  var attrs = _.toArray(el.attributes)
+  var i = attrs.length
+  var dirs = []
+  var attr, attrName, dir, dirName, dirDef
+  while (i--) {
+    attr = attrs[i]
+    attrName = attr.name
+    if (attrName.indexOf(config.prefix) === 0) {
+      dirName = attrName.slice(config.prefix.length)
+      dirDef = options.directives[dirName]
+      _.assertAsset(dirDef, 'directive', dirName)
+      if (dirDef) {
+        if (dirName !== 'cloak') {
+          el.removeAttribute(attrName)
+        }
+        dirs.push({
+          name: dirName,
+          descriptors: dirParser.parse(attr.value),
+          def: dirDef
+        })
+      }
+    } else if (config.interpolate) {
+      dir = collectAttrDirective(el, attrName, attr.value,
+                                 options)
+      if (dir) {
+        dirs.push(dir)
       }
     }
   }
+  // sort by priority, LOW to HIGH
+  dirs.sort(directiveComparator)
+  return dirs
+}
+
+/**
+ * Check an attribute for potential dynamic bindings,
+ * and return a directive object.
+ *
+ * @param {Element} el
+ * @param {String} name
+ * @param {String} value
+ * @param {Object} options
+ * @return {Object}
+ */
+
+function collectAttrDirective (el, name, value, options) {
+  var tokens = textParser.parse(value)
+  if (tokens) {
+    if (tokens.length > 1) {
+      _.warn(
+        'Invalid attribute binding: "' +
+        name + '="' + value + '"' +
+        '\nDon\'t mix binding tags with plain text ' +
+        'in attribute bindings.'
+      )
+    } else {
+      var descriptors = dirParser.parse(tokens[0].value)
+      descriptors[0].arg = name
+      return {
+        name: 'attr',
+        def: options.directives.attr,
+        descriptors: descriptors
+      }
+    }
+  }
+}
+
+/**
+ * Directive priority sort comparator
+ *
+ * @param {Object} a
+ * @param {Object} b
+ */
+
+function directiveComparator (a, b) {
+  a = a.def.priority || 0
+  b = b.def.priority || 0
+  return a > b ? 1 : -1
 }
