@@ -107,7 +107,7 @@ function collectRawContent (el) {
 
 function transcludeContent (el) {
   var outlets = getOutlets(el)
-  var i = outles.length
+  var i = outlets.length
   if (!i) return
   var outlet, select, j, main
   // first pass, collect corresponding content
