@@ -25,9 +25,8 @@ function Directive (name, el, vm, descriptor, def) {
   this.name = name
   this.el = el
   this.vm = vm
-  this.arg = descriptor.arg
-  this.expression = descriptor.expression
-  this.filters = descriptor.filters
+  // copy descriptor props
+  _.extend(this, descriptor)
   // private
   this._locked = false
   this._bound = false

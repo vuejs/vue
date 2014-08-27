@@ -1,16 +1,19 @@
 var _ = require('../util')
 var config = require('../config')
+var transclude = require('./transclude')
 var Direcitve = require('../directive')
 var textParser = require('../parse/text')
 var dirParser = require('../parse/directive')
 var templateParser = require('../parse/template')
+var mergeOptions = require('../util/merge-option')
 
 function noop () {}
 
 /**
  * Compile a template and return a reusable composite link
  * function, which recursively contains more link functions
- * inside.
+ * inside. This top level compile function should only be
+ * called on instance root nodes.
  *
  * @param {Element|DocumentFragment} el
  * @param {Object} options
@@ -18,6 +21,7 @@ function noop () {}
  */
 
 module.exports = function compile (el, options) {
+  el = transclude(el, options)
   var nodeLinkFn = el instanceof DocumentFragment
     ? null
     : compileNode(el, options)
@@ -67,12 +71,13 @@ function compileNodeList (nodeList, options) {
   var linkFns = []
   var node, nodeLinkFn, childLinkFn
   for (var i = 0, l = nodeList.length; i < l; i++) {
-    node = nodeList[i]
-    nodeLinkFn = compileNode(node, options)
+    // always refer to nodeList[i] because it might be
+    // replaced during tranclusion
+    nodeLinkFn = compileNode(nodeList[i], options)
     childLinkFn =
       (!nodeLinkFn || !nodeLinkFn.terminal) &&
-      node.hasChildNodes()
-        ? compileNodeList(node.childNodes, options)
+      nodeList[i].hasChildNodes()
+        ? compileNodeList(nodeList[i].childNodes, options)
         : null
     linkFns.push(nodeLinkFn, childLinkFn)
   }
@@ -86,7 +91,7 @@ function compileNodeList (nodeList, options) {
  *
  * @param {Element} el
  * @param {Object} options
- * @return {Function|undefined}
+ * @return {Function|null}
  */
 
 function compileElement (el, options) {
@@ -108,7 +113,7 @@ function compileElement (el, options) {
     tag.indexOf('-') > 0 &&
     options.components[tag]
   if (component) {
-    return makeTeriminalLinkFn('component', tag, options)
+    return makeTeriminalLinkFn(el, 'component', tag, options)
   }
   // check other directives
   if (hasAttributes) {
@@ -124,12 +129,28 @@ function compileElement (el, options) {
  *
  * @param {TextNode} node
  * @param {Object} options
- * @return {Function|undefined}
+ * @return {Function|null}
  */
 
 function compileTextNode (node, options) {
-  return function textNodeLinkFn (vm, node) {
-    
+  var tokens = textParser.parse(node.nodeValue)
+  if (!tokens) {
+    return null
+  }
+  // TODO
+  // create a fragment of sliced nodes
+  // and a parallel array of directives
+  // the return linkFn reaplces textNode with fragment clone
+  // and then applies the directives in order
+  var dirs = []
+  var el, token, value, dir
+  for (var i = 0, l = tokens.length; i < l; i++) {
+    token = tokens[i]
+    if (token.tag) {
+
+    } else {
+      el = document.createTextNode()
+    }
   }
 }
 
@@ -200,7 +221,7 @@ function checkTerminalDirectives (el, options) {
   for (var i = 0; i < 3; i++) {
     dirName = terminalDirecitves[i]
     if (value = _.attr(el, dirName)) {
-      return makeTeriminalLinkFn(dirName, value, options)
+      return makeTeriminalLinkFn(el, dirName, value, options)
     }
   }
 }
@@ -323,15 +344,42 @@ function makeChildLinkFn (linkFns) {
 /**
  * Build a link function for a terminal directive.
  *
+ * @param {Element} el
  * @param {String} dirName
  * @param {String} value
  * @param {Object} options
  * @return {Function} terminalLinkFn
  */
 
-function makeTeriminalLinkFn (dirName, value, options) {
+function makeTeriminalLinkFn (el, dirName, value, options) {
   var descriptor = dirParser.parse(value)[0]
   var def = options.directives[dirName]
+  // we can transclude and compile the child block here
+  // only when there's no dynamic component involved.
+  var dynamicComponent = false
+  var componentId, subOptions
+  if (dirName === 'repeat') {
+    componentId = el.getAttribute(config.prefix + 'component')
+  } else if (dirName === 'component') {
+    componentId = value
+  }
+  if (componentId) {
+    if (textParser.parse(componentId)) {
+      dynamicComponent = true
+    } else {
+      var Ctor = options.components[componentId]
+      _.assertAsset(Ctor, 'component', componentId)
+      if (Ctor) {
+        subOptions = Ctor.options
+      }
+    }
+  }
+  if (!dynamicComponent) {
+    subOptions = subOptions
+      ? mergeOptions(options, subOptions)
+      : _.Vue.options
+    descriptor.linkFn = compile(el, subOptions)
+  }
   return function terminalLinkFn (vm, el) {
     vm._directives.push(
       new Direcitve(dirName, el, vm, descriptor, def)
