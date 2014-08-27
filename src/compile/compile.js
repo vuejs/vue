@@ -20,7 +20,7 @@ function noop () {}
  * @return {Function}
  */
 
-module.exports = function compile (el, options) {
+var compile = module.exports = function (el, options) {
   el = transclude(el, options)
   var nodeLinkFn = el instanceof DocumentFragment
     ? null
@@ -69,7 +69,7 @@ function compileNode (node, options) {
 
 function compileNodeList (nodeList, options) {
   var linkFns = []
-  var node, nodeLinkFn, childLinkFn
+  var nodeLinkFn, childLinkFn
   for (var i = 0, l = nodeList.length; i < l; i++) {
     // always refer to nodeList[i] because it might be
     // replaced during tranclusion
@@ -129,7 +129,7 @@ function compileElement (el, options) {
  *
  * @param {TextNode} node
  * @param {Object} options
- * @return {Function|null}
+ * @return {Function|null} textNodeLinkFn
  */
 
 function compileTextNode (node, options) {
@@ -137,21 +137,35 @@ function compileTextNode (node, options) {
   if (!tokens) {
     return null
   }
-  // TODO
-  // create a fragment of sliced nodes
-  // and a parallel array of directives
-  // the return linkFn reaplces textNode with fragment clone
-  // and then applies the directives in order
-  var dirs = []
-  var el, token, value, dir
+  var frag = document.createDocumentFragment()
+  var el, token, value
   for (var i = 0, l = tokens.length; i < l; i++) {
     token = tokens[i]
+    value = token.value
     if (token.tag) {
-
+      if (token.oneTime) {
+        el = document.createTextNode(value)
+      } else {
+        if (token.html) {
+          el = document.createComment('v-html')
+          token.def = options.directives.html
+          token.descriptor = dirParser.parse(value)[0]
+        } else if (token.partial) {
+          el = document.createComment('v-partial')
+          token.def = options.directives.partial
+          token.descriptor = dirParser.parse(value)[0]
+        } else {
+          el = document.createTextNode('')
+          token.def = options.directives.text
+          token.descriptor = dirParser.parse(value)[0]
+        }
+      }
     } else {
-      el = document.createTextNode()
+      el = document.createTextNode(value)
     }
+    frag.appendChild(el)
   }
+  return makeTextNodeLinkFn(tokens, frag, options)
 }
 
 /**
@@ -410,6 +424,56 @@ function makeDirectivesLinkFn (directives) {
         )
       }
     }
+  }
+}
+
+/**
+ * Build a function that processes a textNode.
+ *
+ * @param {Array<Object>} tokens
+ * @param {DocumentFragment} frag
+ */
+
+function makeTextNodeLinkFn (tokens, frag) {
+  return function textNodeLinkFn (vm, el) {
+    var fragClone = frag.cloneNode(true)
+    var childNodes = _.toArray(fragClone.childNodes)
+    var dirs = vm._directives
+    var token, value, node
+    for (var i = 0, l = tokens.length; i < l; i++) {
+      token = tokens[i]
+      value = token.value
+      if (token.tag) {
+        node = childNodes[i]
+        if (token.oneTime) {
+          value = vm.$get(value)
+          if (token.html) {
+            var htmlFrag = templateParser.parse(value, true)
+            _.replace(node, htmlFrag)
+          } else {
+            node.nodeValue = value
+          }
+        } else {
+          if (token.html) {
+            dirs.push(
+              new Direcitve('html', node, vm,
+                            token.descriptor, token.def)
+            )
+          } else if (token.partial) {
+            dirs.push(
+              new Direcitve('partial', node, vm,
+                            token.descriptor, token.def)
+            )
+          } else {
+            dirs.push(
+              new Direcitve('text', node, vm,
+                            token.descriptor, token.def)
+            )
+          }
+        }
+      }
+    }
+    _.replace(el, fragClone)
   }
 }
 
