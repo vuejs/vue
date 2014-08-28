@@ -117,7 +117,7 @@ module.exports = {
       )
       return
     }
-    this.converted = data._converted
+    this.converted = data && data._converted
     this.vms = this.diff(data || [], this.vms)
     // update v-ref
     if (this.childId) {
