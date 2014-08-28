@@ -82,8 +82,12 @@ module.exports = {
     } else {
       var tokens = textParser.parse(id)
       if (!tokens) { // static component
-        this.Ctor = this.vm.$options.components[id]
-        _.assertAsset(this.Ctor, 'component', id)
+        var Ctor = this.Ctor = this.vm.$options.components[id]
+        _.assertAsset(Ctor, 'component', id)
+        if (Ctor) {
+          this.el = transclude(this.el, Ctor.options)
+          this._linker = compile(this.el, Ctor.options)
+        }
       } else if (tokens.length === 1) {
         // to be resolved later
         this.CtorExp = tokens[0].value
@@ -95,12 +99,6 @@ module.exports = {
           'in attribute bindings.'
         )
       }
-    }
-    // pre-compile if we have determined Ctor
-    var Ctor = this.Ctor
-    if (Ctor) {
-      this.el = transclude(this.el, Ctor.options)
-      this._linker = compile(this.el, Ctor.options)
     }
   },
 

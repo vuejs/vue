@@ -1,11 +1,9 @@
 var _ = require('../util')
 var config = require('../config')
-var transclude = require('./transclude')
 var Direcitve = require('../directive')
 var textParser = require('../parse/text')
 var dirParser = require('../parse/directive')
 var templateParser = require('../parse/template')
-var mergeOptions = require('../util/merge-option')
 
 function noop () {}
 
@@ -378,9 +376,16 @@ function checkTerminalDirectives (el, options) {
 function makeTeriminalLinkFn (el, dirName, value, options) {
   var descriptor = dirParser.parse(value)[0]
   var def = options.directives[dirName]
+  if (
+    dirName === 'repeat' &&
+    !el.hasAttribute(config.prefix + 'component')
+  ) {
+    // optimize for simple repeats
+    var linker = compile(el, options)
+  }
   return function terminalLinkFn (vm, el) {
     vm._directives.push(
-      new Direcitve(dirName, el, vm, descriptor, def)
+      new Direcitve(dirName, el, vm, descriptor, def, linker)
     )
   }
 }
