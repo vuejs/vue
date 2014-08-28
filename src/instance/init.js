@@ -43,7 +43,7 @@ exports._init = function (options) {
 
   // anonymous instances are created by flow-control
   // directives such as v-if and v-repeat
-  this._isAnonymous = options.anonymous
+  this._isAnonymous = options._anonymous
 
   // merge options.
   this.$options = mergeOptions(

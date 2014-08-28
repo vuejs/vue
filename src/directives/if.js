@@ -43,7 +43,7 @@ module.exports = {
     this.childVM = this.vm.$addChild({
       el: this.el,
       parent: this.vm,
-      anonymous: true
+      _anonymous: true
     })
   },
 
