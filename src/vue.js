@@ -70,6 +70,8 @@ extend(p, require('./instance/init'))
 extend(p, require('./instance/events'))
 extend(p, require('./instance/scope'))
 extend(p, require('./instance/bindings'))
+extend(p, require('./instance/children'))
+extend(p, require('./instance/lifecycle'))
 
 /**
  * Mixin public API methods
@@ -78,6 +80,5 @@ extend(p, require('./instance/bindings'))
 extend(p, require('./api/data'))
 extend(p, require('./api/dom'))
 extend(p, require('./api/events'))
-extend(p, require('./api/lifecycle'))
 
 module.exports = _.Vue = Vue

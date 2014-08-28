@@ -14,11 +14,12 @@ exports._initBindings = function () {
   this._bindings = Object.create(null)
   this._bindings.$data = new Binding()
   // setup observer events
+  var update = this._updateBindingAt
   this.$observer
     // simple updates
-    .on('set', updateBindingAt)
-    .on('mutate', updateBindingAt)
-    .on('delete', updateBindingAt)
+    .on('set', update)
+    .on('mutate', update)
+    .on('delete', update)
     // adding properties is a bit different
     .on('add', updateAdd)
     // collect dependency
@@ -29,21 +30,34 @@ exports._initBindings = function () {
  * Trigger update for the binding at given path.
  *
  * @param {String} path
- * @param {String} k - unused
- * @param {*} v - unused
+ * @param {*} v - unused value
+ * @param {*} m - unused mutation
  * @param {Boolean} fromScope
  */
 
-function updateBindingAt (path, k, v, fromScope) {
-  // the '$data' binding updates on any change,
-  // but only if the change is not from parent scopes
+exports._updateBindingAt = function (path, v, m, fromScope) {
   if (!fromScope) {
+    // the '$data' binding updates on any change,
+    // but only if the change is not from parent scopes
     this._bindings.$data._notify()
   }
   var binding = this._bindings[path]
   if (binding) {
-    binding._notify()
+    if (fromScope) {
+      // changes coming from scope upstream, only update
+      // if we don't have a property shadowing it.
+      var i = path.indexOf(Observer.pathDelimiter)
+      var baseKey = i > 0
+        ? path.slice(0, i)
+        : path
+      if (!this.hasOwnProperty(baseKey)) {
+        binding._notify()
+      }
+    } else {
+      binding._notify()
+    }
   }
+  this._notifyChildren(path)
 }
 
 /**
@@ -60,7 +74,7 @@ function updateBindingAt (path, k, v, fromScope) {
 function updateAdd (path) {
   var index = path.lastIndexOf(Observer.pathDelimiter)
   if (index > -1) path = path.slice(0, index)
-  updateBindingAt.call(this, path)
+  this._updateBindingAt(path)
 }
 
 /**

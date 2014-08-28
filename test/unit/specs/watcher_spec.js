@@ -180,7 +180,7 @@ describe('Watcher', function () {
   })
 
   it('watching parent scope properties', function (done) {
-    var child = vm._addChild()
+    var child = vm.$addChild()
     var spy2 = jasmine.createSpy('watch')
     var watcher1 = new Watcher(child, '$data', spy)
     var watcher2 = new Watcher(child, 'a', spy2)

@@ -240,7 +240,7 @@ module.exports = {
     }
     // resolve constructor
     var Ctor = this.Ctor || this.resolveCtor(data)
-    var vm = this.vm._addChild({
+    var vm = this.vm.$addChild({
       el: this.el.cloneNode(true),
       _linker: this._linker,
       data: data,

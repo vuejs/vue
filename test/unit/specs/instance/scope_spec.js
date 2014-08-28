@@ -7,6 +7,12 @@ var Vue = require('../../../../src/vue')
 var Observer = require('../../../../src/observe/observer')
 Observer.pathDelimiter = '.'
 
+function mockBinding () {
+  return {
+    _notify: jasmine.createSpy('binding')
+  }
+}
+
 describe('Scope', function () {
   
   describe('basic', function () {
@@ -116,7 +122,7 @@ describe('Scope', function () {
       }
     })
 
-    var child = parent._addChild({
+    var child = parent.$addChild({
       data: {
         a: 'child a'
       }
@@ -137,43 +143,31 @@ describe('Scope', function () {
       expect(parent.c).toBe('modified by child')
     })
 
-    it('events on parent should propagate down to child', function () {
-      // when a shadowed property changed on parent scope,
-      // the event should NOT be propagated down
-      var spy = jasmine.createSpy('inheritance')
-      child.$observer.on('set', spy)
-      parent.c = 'c changed'
-      expect(spy.calls.count()).toBe(1)
-      expect(spy).toHaveBeenCalledWith('c', 'c changed', undefined, true)
-
-      spy = jasmine.createSpy('inheritance')
-      child.$observer.on('add', spy)
+    it('parent event should propagate when child has same binding', function () {
+      // object path
+      var b = child._bindings['b.c'] = mockBinding()
+      parent.b.c = 3
+      expect(b._notify).toHaveBeenCalled()
+      // array path
+      b = child._bindings['arr.0.a'] = mockBinding()
+      parent.arr[0].a = 2
+      expect(b._notify).toHaveBeenCalled()
+      // add
+      b = child._bindings['e'] = mockBinding()
       parent.$add('e', 123)
-      expect(spy.calls.count()).toBe(1)
-      expect(spy).toHaveBeenCalledWith('e', 123, undefined, true)
-
-      spy = jasmine.createSpy('inheritance')
-      child.$observer.on('delete', spy)
+      expect(b._notify).toHaveBeenCalled()
+      // delete
+      b = child._bindings['e'] = mockBinding()
       parent.$delete('e')
-      expect(spy.calls.count()).toBe(1)
-      expect(spy).toHaveBeenCalledWith('e', undefined, undefined, true)
-
-      spy = jasmine.createSpy('inheritance')
-      child.$observer.on('mutate', spy)
-      parent.arr.reverse()
-      expect(spy.calls.mostRecent().args[0]).toBe('arr')
-      expect(spy.calls.mostRecent().args[1]).toBe(parent.arr)
-      expect(spy.calls.mostRecent().args[2].method).toBe('reverse')
-
+      expect(b._notify).toHaveBeenCalled()
     })
 
-    it('shadowed properties change on parent should not propagate down', function () {
-      // when a shadowed property changed on parent scope,
-      // the event should NOT be propagated down
-      var spy = jasmine.createSpy('inheritance')
-      child.$observer.on('set', spy)
-      parent.a = 'a changed'
-      expect(spy.calls.count()).toBe(0)
+    it('parent event should not propagate when child has shadowing key', function () {
+      var b = child._bindings['c'] = mockBinding()
+      child.$add('c', 123)
+      expect(b._notify.calls.count()).toBe(1)
+      parent.c = 456
+      expect(b._notify.calls.count()).toBe(1)
     })
 
   })
@@ -186,27 +180,23 @@ describe('Scope', function () {
       }
     })
 
-    var child = parent._addChild({
+    var child = parent.$addChild({
       data: parent.arr[0]
     })
 
     it('should trigger proper events', function () {
       
-      var parentSpy = jasmine.createSpy('parent')
-      var childSpy = jasmine.createSpy('child')
-      parent.$observer.on('set', parentSpy)
-      child.$observer.on('set', childSpy)
+      var parentSpy = parent._bindings['arr.0.a'] = mockBinding()
+      var childSpy = child._bindings['arr.0.a'] = mockBinding()
+      var childSpy2 = child._bindings['a'] = mockBinding()
       child.a = 3
 
       // make sure data sync is working
       expect(parent.arr[0].a).toBe(3)
 
-      expect(parentSpy.calls.count()).toBe(1)
-      expect(parentSpy).toHaveBeenCalledWith('arr.0.a', 3, undefined, undefined)
-
-      expect(childSpy.calls.count()).toBe(2)
-      expect(childSpy).toHaveBeenCalledWith('a', 3, undefined, undefined)
-      expect(childSpy).toHaveBeenCalledWith('arr.0.a', 3, undefined, true)
+      expect(parentSpy._notify).toHaveBeenCalled()
+      expect(childSpy._notify).toHaveBeenCalled()
+      expect(childSpy2._notify).toHaveBeenCalled()
     })
 
   })
@@ -307,7 +297,7 @@ describe('Scope', function () {
     })
 
     it('inherit', function () {
-      var child = vm._addChild()
+      var child = vm.$addChild()
       expect(child.c).toBe('cd')
 
       child.d = 'e f'
@@ -339,7 +329,7 @@ describe('Scope', function () {
       })
       expect(vm.test()).toBe(1)
 
-      var child = vm._addChild()
+      var child = vm.$addChild()
       expect(child.test()).toBe(1)
     })
 

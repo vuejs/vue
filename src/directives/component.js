@@ -133,7 +133,7 @@ module.exports = {
       }
     }
     if (this.Ctor && !this.childVM) {
-      this.childVM = this.vm._addChild({
+      this.childVM = this.vm.$addChild({
         el: this.el.cloneNode(true),
         _linker: this._linker,
         parent: this.vm

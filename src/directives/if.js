@@ -40,7 +40,7 @@ module.exports = {
   },
 
   build: function () {
-    this.childVM = this.vm._addChild({
+    this.childVM = this.vm.$addChild({
       el: this.el,
       parent: this.vm,
       anonymous: true

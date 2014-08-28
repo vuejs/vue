@@ -40,6 +40,25 @@ exports.$mount = function (el) {
 }
 
 /**
+ * Initialize instance element. Called in the public
+ * $mount() method.
+ *
+ * @param {Element} el
+ */
+
+exports._initElement = function (el) {
+  if (el instanceof DocumentFragment) {
+    this._isBlock = true
+    this.$el = this._blockStart = el.firstChild
+    this._blockEnd = el.lastChild
+    this._blockFragment = el
+  } else {
+    this.$el = el
+  }
+  this.$el.__vue__ = this
+}
+
+/**
  * Mark an instance as ready.
  */
 
