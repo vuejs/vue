@@ -28,15 +28,19 @@ strats.compiled =
 strats.beforeDestroy =
 strats.destroyed =
 strats.paramAttributes = function (parentVal, childVal) {
-  return (parentVal || []).concat(childVal || [])
+  return childVal
+    ? parentVal
+      ? parentVal.concat(childVal)
+      : [childVal]
+    : parentVal
 }
 
 /**
  * Assets
  *
- * When a vm is present (instance creation), we skip the
- * merge here because it is faster to resolve assets
- * dynamically only when needed.
+ * When a vm is present (instance creation), we need to do
+ * a three-way merge between constructor options, instance
+ * options and parent options.
  */
 
 strats.directives =
@@ -67,6 +71,8 @@ strats.components = function (parentVal, childVal, vm, key) {
  */
 
 strats.events = function (parentVal, childVal) {
+  if (!childVal) return parentVal
+  if (!parentVal) return childVal
   var ret = {}
   extend(ret, parentVal)
   for (var key in childVal) {
@@ -85,7 +91,9 @@ strats.events = function (parentVal, childVal) {
 
 strats.methods =
 strats.computed = function (parentVal, childVal) {
-  var ret = Object.create(parentVal || null)
+  if (!childVal) return parentVal
+  if (!parentVal) return childVal
+  var ret = Object.create(parentVal)
   extend(ret, childVal)
   return ret
 }
