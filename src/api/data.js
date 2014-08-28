@@ -62,35 +62,41 @@ exports.$delete = function (key) {
 
 /**
  * Watch an expression, trigger callback when its
- * value changes. Returns the created watcher's
- * id so it can be teardown later.
+ * value changes.
  *
  * @param {String} exp
  * @param {Function} cb
  * @param {Boolean} [immediate]
- * @return {Number}
  */
 
 exports.$watch = function (exp, cb, immediate) {
-  var watcher = new Watcher(this, exp, cb, this)
-  this._watchers[watcher.id] = watcher
+  var watcher = this._userWatchers[exp]
+  if (!watcher) {
+    watcher =
+    this._userWatchers[exp] =
+      new Watcher(this, exp, cb, this)
+  } else {
+    watcher.addCb(cb, this)
+  }
   if (immediate) {
     cb.call(this, watcher.value)
   }
-  return watcher.id
 }
 
 /**
  * Teardown a watcher with given id.
  *
- * @param {Number} id
+ * @param {String} exp
+ * @param {Function} cb
  */
 
-exports.$unwatch = function (id) {
-  var watcher = this._watchers[id]
+exports.$unwatch = function (exp, cb) {
+  var watcher = this._userWatchers[exp]
   if (watcher) {
-    watcher.teardown()
-    this._watchers[id] = null
+    watcher.removeCb(cb)
+    if (!watcher.active) {
+      this._userWatchers[exp] = null
+    }
   }
 }
 

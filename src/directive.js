@@ -47,7 +47,11 @@ var p = Directive.prototype
  */
 
 p._bind = function (def) {
-  _.extend(this, def)
+  if (typeof def === 'function') {
+    this.update = def
+  } else {
+    _.extend(this, def)
+  }
   this._watcherExp = this.expression
   this._checkDynamicLiteral()
   if (this.bind) {
@@ -58,15 +62,22 @@ p._bind = function (def) {
     (!this.isLiteral || this._isDynamicLiteral)
   ) {
     if (!this._checkExpFn()) {
-      this._watcher = new Watcher(
-        this.vm,
-        this._watcherExp,
-        this._update, // callback
-        this, // callback context
-        this.filters,
-        this.twoWay // need setter
-      )
-      this.update(this._watcher.value)
+      var exp = this._watcherExp
+      var wathcer = this.vm._watchers[exp]
+      if (!wathcer) {
+        watcher = this.vm._watchers[exp] = new Watcher(
+          this.vm,
+          exp,
+          this._update, // callback
+          this, // callback context
+          this.filters,
+          this.twoWay // need setter
+        )
+      } else {
+        watcher.addCb(this._update, this)
+      }
+      this._watcher = watcher
+      this.update(watcher.value)
     }
   }
   this._bound = true
@@ -149,10 +160,15 @@ p._teardown = function () {
     if (this.unbind) {
       this.unbind()
     }
-    if (this._watcher) {
-      this._watcher.teardown()
+    var watcher = this._watcher
+    if (watcher) {
+      watcher.removeCb(this._update)
+      if (!watcher.active) {
+        this.vm._watchers[this.expression] = null
+      }
     }
     this._bound = false
+    this.vm = this.el = null
   }
 }
 

@@ -16,14 +16,15 @@ exports._init = function (options) {
 
   options = options || {}
 
-  this.$el          = null
-  this.$            = {}
-  this.$root        = this.$root || this
-  this._data        = options.data || {}
-  this._emitter     = new Emitter(this)
-  this._watchers    = {}
-  this._directives  = []
-  this._rawContent  = null
+  this.$el            = null
+  this.$              = {}
+  this.$root          = this.$root || this
+  this._data          = options.data || {}
+  this._emitter       = new Emitter(this)
+  this._watchers      = {}
+  this._userWatchers  = {}
+  this._directives    = []
+  this._rawContent    = null
   this._activeWatcher = null
 
   // block instance properties

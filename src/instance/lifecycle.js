@@ -107,9 +107,12 @@ exports.$destroy = function (remove) {
   }
   // teardown data/scope
   this._teardownScope()
-  // teardown all user watchers
-  for (var id in this._watchers) {
-    this.$unwatch(id)
+  // teardown all watchers
+  for (i in this._watchers) {
+    this._watchers[i].teardown()
+  }
+  for (i in this._userWatchers) {
+    this._userWatchers[i].teardown()
   }
   // teardown all directives
   i = this._directives.length
@@ -119,6 +122,7 @@ exports.$destroy = function (remove) {
   // clean up
   this._children =
   this._watchers =
+  this._userWatchers =
   this._activeWatcher =
   this.$el =
   this.$el.__vue__ =

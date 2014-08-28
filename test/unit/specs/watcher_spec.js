@@ -265,12 +265,54 @@ describe('Watcher', function () {
     })
   })
 
+  it('add callback', function (done) {
+    var ctx1 = {}
+    var ctx2 = {}
+    var watcher = new Watcher(vm, 'a', function () {
+      this.called = 1
+    }, ctx1)
+    watcher.addCb(function () {
+      this.called = 2
+    }, ctx2)
+    vm.a = 99
+    nextTick(function () {
+      expect(ctx1.called).toBe(1)
+      expect(ctx2.called).toBe(2)
+      done()
+    })
+  })
+
+  it('remove callback', function (done) {
+    // single, should equal teardown
+    var fn = function () {}
+    var watcher = new Watcher(vm, 'a', fn)
+    watcher.removeCb(fn)
+    expect(watcher.active).toBe(false)
+    expect(watcher.vm).toBe(null)
+    expect(watcher.cbs).toBe(null)
+    expect(watcher.ctxs).toBe(null)
+    // multiple
+    watcher = new Watcher(vm, 'a', spy)
+    var spy2 = jasmine.createSpy()
+    watcher.addCb(spy2)
+    watcher.removeCb(spy)
+    vm.a = 234
+    nextTick(function () {
+      expect(spy.calls.count()).toBe(0)
+      expect(spy2).toHaveBeenCalledWith(234, 1)
+      done()
+    })
+  })
+
   it('teardown', function (done) {
     var watcher = new Watcher(vm, 'b.c', spy)
     watcher.teardown()
     vm.b.c = 3
     nextTick(function () {
       expect(watcher.active).toBe(false)
+      expect(watcher.vm).toBe(null)
+      expect(watcher.cbs).toBe(null)
+      expect(watcher.ctxs).toBe(null)
       expect(spy.calls.count()).toBe(0)
       done()
     })
