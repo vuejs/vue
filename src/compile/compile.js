@@ -19,6 +19,13 @@ function noop () {}
  */
 
 var compile = module.exports = function (el, options) {
+  // for template tags, what we want is its content as
+  // a documentFragment (for block instances)
+  if (el.tagName === 'TEMPLATE') {
+    el = el.content instanceof DocumentFragment
+      ? el.content
+      : templateParser.parse(el.innerHTML)
+  }
   var nodeLinkFn = el instanceof DocumentFragment
     ? null
     : compileNode(el, options)

@@ -23,12 +23,6 @@ var transclude = module.exports = function (el, options) {
   }
   if (el instanceof DocumentFragment) {
     return transcludeBlock(el)
-  } else if (el.tagName === 'TEMPLATE') {
-    if (el.content instanceof DocumentFragment) {
-      return transclude(el.content)
-    } else {
-      return transclude(templateParser.parse(el))
-    }
   } else if (options.template) {
     return transcludeTemplate(el, options)
   } else {
