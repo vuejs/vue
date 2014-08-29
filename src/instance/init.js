@@ -24,7 +24,6 @@ exports._init = function (options) {
   this._watchers      = {}
   this._userWatchers  = {}
   this._directives    = []
-  this._rawContent    = null
   this._activeWatcher = null
 
   // block instance properties
@@ -61,7 +60,7 @@ exports._init = function (options) {
   this._initScope()
 
   // setup binding tree.
-  // @creates this._rootBinding
+  // @creates this._bindings
   this._initBindings()
 
   // setup event system and option events

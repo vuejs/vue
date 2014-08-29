@@ -35,6 +35,7 @@ function Observer (value, type) {
   this.type = type
   this.parents = null
   this.parentsHash = null
+  this.vmOwnerCount = 0
   if (value) {
     _.define(value, '__ob__', this)
     if (type === ARRAY) {
@@ -78,7 +79,11 @@ Observer.emitGet = false
  */
 
 Observer.create = function (value, options) {
-  if (value && value.hasOwnProperty('__ob__')) {
+  if (
+    value &&
+    value.hasOwnProperty('__ob__') &&
+    value.__ob__ instanceof Observer
+  ) {
     return value.__ob__
   } else if (_.isArray(value)) {
     return new Observer(value, ARRAY, options)
@@ -181,9 +186,10 @@ p.observe = function (key, val) {
  */
 
 p.unobserve = function (val) {
-  if (val && val.__ob__) {
-    val.__ob__.parentsHash[this.id] = null
-    var parents = val.__ob__.parents
+  var ob = val && val.__ob__
+  if (ob) {
+    ob.parentsHash[this.id] = null
+    var parents = ob.parents
     var i = parents.length
     while (i--) {
       if (parents[i].ob === this) {
@@ -191,6 +197,7 @@ p.unobserve = function (val) {
         break
       }
     }
+    ob.tryRelease()
   }
 }
 
@@ -264,6 +271,43 @@ p.updateIndices = function () {
     ob = arr[i] && arr[i].__ob__
     if (ob) {
       ob.parentsHash[this.id].key = i
+    }
+  }
+}
+
+/**
+ * Attempt to teardown the observer if the value is no
+ * longer needed. Two requirements have to be met:
+ *
+ * 1. The observer has no parent obervers depending on it.
+ * 2. The observer is not being used as the root $data by
+ *    by a vm instance.
+ *
+ * This is important because each observer holds strong
+ * reference to all its parents and if we don't do this
+ * those parents can be leaked when a vm is destroyed.
+ */
+
+p.tryRelease = function () {
+  if (
+    (!this.parents || !this.parents.length) &&
+    !this.vmOwnerCount
+  ) {
+    var value = this.value
+    value.__ob__ = null
+    this.parents =
+    this.parentsHash =
+    this._cbs =
+    this.value = null
+    if (_.isArray(value)) {
+      this.unlink(value)
+    } else {
+      for (var key in value) {
+        var val = value[key]
+        this.unobserve(val)
+        // release the getter/setter closures
+        _.define(value, key, val, true)
+      }
     }
   }
 }

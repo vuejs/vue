@@ -213,12 +213,12 @@ p.removeCb = function (cb) {
 
 p.teardown = function () {
   if (this.active) {
-    this.active = false
     var vm = this.vm
     for (var path in this.deps) {
       vm._bindings[path]._removeSub(this)
     }
-    this.vm = this.cbs = null
+    this.active = false
+    this.vm = this.cbs = this.value = null
   }
 }
 

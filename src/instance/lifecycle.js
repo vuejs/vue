@@ -118,16 +118,21 @@ exports.$destroy = function (remove) {
     this._directives[i]._teardown()
   }
   // clean up
-  this._children =
+  this._data =
   this._watchers =
   this._userWatchers =
   this._activeWatcher =
   this.$el =
   this.$el.__vue__ =
+  this.$parent =
+  this.$observer =
+  this._children =
+  this._bindings =
   this._directives = null
   // call the last hook...
   this._isDestroyed = true
   this._callHook('afterDestroy')
   // turn off all instance listeners.
   this._emitter.off()
+  this._emitter = null
 }

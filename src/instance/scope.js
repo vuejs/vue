@@ -47,8 +47,10 @@ exports._teardownScope = function () {
     event = dataEvents[i]
     dataOb.off(event, proxies[event])
   }
+  dataOb.vmOwnerCount--
+  dataOb.tryRelease()
   // unset data reference
-  this._data = null
+  this._data = this._dataProxies = null
 }
 
 /**
@@ -88,6 +90,7 @@ exports._initData = function () {
   }
   // relay data changes
   var ob = Observer.create(data)
+  ob.vmOwnerCount++
   var proxies = this._dataProxies
   var event
   i = dataEvents.length
@@ -147,6 +150,10 @@ exports._setData = function (newData) {
     newOb.on(event, proxy)
     oldOb.off(event, proxy)
   }
+  newOb.vmOwnerCount++
+  oldOb.vmOwnerCount--
+  // memory managment, important!
+  oldOb.tryRelease()
 }
 
 /**
