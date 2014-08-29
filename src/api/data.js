@@ -67,35 +67,28 @@ exports.$delete = function (key) {
  * @param {String} exp
  * @param {Function} cb
  * @param {Boolean} [immediate]
+ * @return {Function} - unwatchFn
  */
 
 exports.$watch = function (exp, cb, immediate) {
-  var watcher = this._userWatchers[exp]
+  var vm = this
+  var watcher = vm._userWatchers[exp]
+  var wrappedCb = function (val, oldVal) {
+    cb.call(vm, val, oldVal)
+  }
   if (!watcher) {
-    watcher =
-    this._userWatchers[exp] =
-      new Watcher(this, exp, cb, this)
+    watcher = vm._userWatchers[exp] =
+      new Watcher(vm, exp, wrappedCb)
   } else {
-    watcher.addCb(cb, this)
+    watcher.addCb(wrappedCb)
   }
   if (immediate) {
-    cb.call(this, watcher.value)
+    wrappedCb(watcher.value)
   }
-}
-
-/**
- * Teardown a watcher with given id.
- *
- * @param {String} exp
- * @param {Function} cb
- */
-
-exports.$unwatch = function (exp, cb) {
-  var watcher = this._userWatchers[exp]
-  if (watcher) {
-    watcher.removeCb(cb)
+  return function unwatchFn () {
+    watcher.removeCb(wrappedCb)
     if (!watcher.active) {
-      this._userWatchers[exp] = null
+      vm._userWatchers[exp] = null
     }
   }
 }

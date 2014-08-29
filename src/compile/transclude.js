@@ -13,7 +13,7 @@ var templateParser = require('../parse/template')
  * @return {Element|DocumentFragment}
  */
 
-var transclude = module.exports = function (el, options) {
+module.exports = function transclude (el, options) {
   if (typeof el === 'string') {
     var selector = el
     el = document.querySelector(el)

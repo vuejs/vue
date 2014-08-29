@@ -195,19 +195,6 @@ describe('Watcher', function () {
     })
   })
 
-  it('callback context', function (done) {
-    var context = {}
-    var watcher = new Watcher(vm, 'b.c', function () {
-      spy.apply(this, arguments)
-      expect(this).toBe(context)
-    }, context)
-    vm.b.c = 3
-    nextTick(function () {
-      expect(spy).toHaveBeenCalledWith(3, 2)
-      done()
-    })
-  })
-
   it('filters', function (done) {
     vm.$options.filters.test = function (val, multi) {
       return val * multi
@@ -215,7 +202,7 @@ describe('Watcher', function () {
     vm.$options.filters.test2 = function (val, str) {
       return val + str
     }
-    var watcher = new Watcher(vm, 'b.c', spy, null, [
+    var watcher = new Watcher(vm, 'b.c', spy, [
       { name: 'test', args: [3] },
       { name: 'test2', args: ['yo']}
     ])
@@ -234,7 +221,7 @@ describe('Watcher', function () {
         return val > arg ? val : oldVal
       }
     }
-    var watcher = new Watcher(vm, 'b["c"]', spy, null, [
+    var watcher = new Watcher(vm, 'b["c"]', spy, [
       { name: 'test', args: [5] }
     ], true)
     expect(watcher.value).toBe(2)
@@ -266,18 +253,13 @@ describe('Watcher', function () {
   })
 
   it('add callback', function (done) {
-    var ctx1 = {}
-    var ctx2 = {}
-    var watcher = new Watcher(vm, 'a', function () {
-      this.called = 1
-    }, ctx1)
-    watcher.addCb(function () {
-      this.called = 2
-    }, ctx2)
+    var watcher = new Watcher(vm, 'a', spy)
+    var spy2 = jasmine.createSpy()
+    watcher.addCb(spy2)
     vm.a = 99
     nextTick(function () {
-      expect(ctx1.called).toBe(1)
-      expect(ctx2.called).toBe(2)
+      expect(spy).toHaveBeenCalledWith(99, 1)
+      expect(spy2).toHaveBeenCalledWith(99, 1)
       done()
     })
   })
@@ -290,7 +272,6 @@ describe('Watcher', function () {
     expect(watcher.active).toBe(false)
     expect(watcher.vm).toBe(null)
     expect(watcher.cbs).toBe(null)
-    expect(watcher.ctxs).toBe(null)
     // multiple
     watcher = new Watcher(vm, 'a', spy)
     var spy2 = jasmine.createSpy()
@@ -312,7 +293,6 @@ describe('Watcher', function () {
       expect(watcher.active).toBe(false)
       expect(watcher.vm).toBe(null)
       expect(watcher.cbs).toBe(null)
-      expect(watcher.ctxs).toBe(null)
       expect(spy.calls.count()).toBe(0)
       done()
     })

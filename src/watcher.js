@@ -15,17 +15,15 @@ var uid = 0
  * @param {Vue} vm
  * @param {String} expression
  * @param {Function} cb
- * @oaram {Object} ctx
  * @param {Array} [filters]
  * @param {Boolean} [needSet]
  * @constructor
  */
 
-function Watcher (vm, expression, cb, ctx, filters, needSet) {
+function Watcher (vm, expression, cb, filters, needSet) {
   this.vm = vm
   this.expression = expression
   this.cbs = [cb]
-  this.ctxs = [ctx]
   this.id = ++uid // uid for batching
   this.value = undefined
   this.active = true
@@ -174,9 +172,8 @@ p.run = function () {
       var oldValue = this.value
       this.value = value
       var cbs = this.cbs
-      var ctxs = this.ctxs
       for (var i = 0, l = cbs.length; i < l; i++) {
-        cbs[i].call(ctxs[i], value, oldValue)
+        cbs[i](value, oldValue)
       }
     }
   }
@@ -186,12 +183,10 @@ p.run = function () {
  * Add a callback.
  *
  * @param {Function} cb
- * @param {Object} ctx
  */
 
-p.addCb = function (cb, ctx) {
+p.addCb = function (cb) {
   this.cbs.push(cb)
-  this.ctxs.push(ctx)
 }
 
 /**
@@ -206,7 +201,6 @@ p.removeCb = function (cb) {
     var i = cbs.indexOf(cb)
     if (i > -1) {
       cbs.splice(i, 1)
-      this.ctxs.splice(i, 1)
     }
   } else if (cb === cbs[0]) {
     this.teardown()
@@ -224,7 +218,7 @@ p.teardown = function () {
     for (var path in this.deps) {
       vm._bindings[path]._removeSub(this)
     }
-    this.vm = this.cbs = this.ctxs = null
+    this.vm = this.cbs = null
   }
 }
 

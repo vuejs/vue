@@ -63,18 +63,24 @@ p._bind = function (def) {
   ) {
     if (!this._checkExpFn()) {
       var exp = this._watcherExp
-      var wathcer = this.vm._watchers[exp]
-      if (!wathcer) {
+      var watcher = this.vm._watchers[exp]
+      // wrapped updater for context
+      var dir = this
+      var update = this._update = function (val, oldVal) {
+        if (!dir._locked) {
+          dir.update(val, oldVal)
+        }
+      }
+      if (!watcher) {
         watcher = this.vm._watchers[exp] = new Watcher(
           this.vm,
           exp,
-          this._update, // callback
-          this, // callback context
+          update, // callback
           this.filters,
           this.twoWay // need setter
         )
       } else {
-        watcher.addCb(this._update, this)
+        watcher.addCb(update)
       }
       this._watcher = watcher
       this.update(watcher.value)
@@ -134,20 +140,6 @@ p._checkExpFn = function () {
       fn.call(vm, vm)
     })
     return true
-  }
-}
-
-/**
- * Callback for the watcher.
- * Check locked or not before calling definition update.
- *
- * @param {*} value
- * @param {*} oldValue
- */
-
-p._update = function (value, oldValue) {
-  if (!this._locked) {
-    this.update(value, oldValue)
   }
 }
 
