@@ -107,14 +107,12 @@ exports.$destroy = function (remove) {
   }
   // teardown data/scope
   this._teardownScope()
-  // teardown all watchers
-  for (i in this._watchers) {
-    this._watchers[i].teardown()
-  }
+  // teardown all user watchers.
   for (i in this._userWatchers) {
     this._userWatchers[i].teardown()
   }
-  // teardown all directives
+  // teardown all directives. this also tearsdown all
+  // directive-owned watchers.
   i = this._directives.length
   while (i--) {
     this._directives[i]._teardown()

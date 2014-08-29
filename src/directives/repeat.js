@@ -1,4 +1,5 @@
 var _ = require('../util')
+var isObject = _.isObject
 var textParser = require('../parse/text')
 var expParser = require('../parse/expression')
 var templateParser = require('../parse/template')
@@ -30,6 +31,8 @@ module.exports = {
     this.checkComponent()
     // setup ref node
     this.ref = document.createComment('v-repeat')
+    // cache for primitive value instances
+    this.cache = Object.create(null)
     _.replace(this.el, this.ref)
     // check if this is a block repeat
     if (this.el.tagName === 'TEMPLATE') {
@@ -143,6 +146,7 @@ module.exports = {
 
   diff: function (data, oldVms) {
     var converted = this.converted
+    var init = !oldVms
     var vms = new Array(data.length)
     var ref = this.ref
     var obj, raw, vm, i, l
@@ -153,7 +157,7 @@ module.exports = {
     for (i = 0, l = data.length; i < l; i++) {
       obj = data[i]
       raw = converted ? obj.value : obj
-      vm = this.getVm(raw)
+      vm = !init && this.getVm(raw)
       if (vm) { // reusable instance
         vm._reused = true
         vm.$index = i // update $index
@@ -165,12 +169,12 @@ module.exports = {
       }
       vms[i] = vm
       // insert if this is first run
-      if (!oldVms) {
+      if (init) {
         vm.$before(ref)
       }
     }
     // if this is the first run, we're done.
-    if (!oldVms) {
+    if (init) {
       return vms
     }
     // Second pass, go through the old vm instances and
@@ -230,9 +234,8 @@ module.exports = {
     var raw = this.converted
       ? data.value
       : data
-    var isObject = raw && typeof raw === 'object'
     var alias = this.arg
-    var hasAlias = !isObject || alias
+    var hasAlias = !isObject(raw) || alias
     // wrap the raw data with alias
     data = hasAlias ? {} : raw
     if (alias) {
@@ -257,9 +260,7 @@ module.exports = {
     // define index
     vm._defineMeta('$index', index)
     // cache instance
-    if (isObject) {
-      this.cacheVm(raw, vm)
-    }
+    this.cacheVm(raw, vm)
     return vm
   },
 
@@ -306,19 +307,38 @@ module.exports = {
   },
 
   /**
-   * Save a vm's reference on a data object as a hidden
-   * property. This mimics a Map that allows us to determine
-   * a data object's owner instance during the diff phase.
+   * Cache a vm instance based on its data.
+   *
+   * If the data is an object, we save the vm's reference on
+   * the data object as a hidden property. Otherwise we
+   * cache them in an object and for each primitive value
+   * there is an array in case there are duplicates.
    *
    * @param {Object} data
    * @param {Vue} vm
    */
 
   cacheVm: function (data, vm) {
-    if (data.hasOwnProperty(this.id)) {
-      data[this.id] = vm
+    if (isObject(data)) {
+      var id = this.id
+      if (data.hasOwnProperty(id)) {
+        if (data[id] === null) {
+          data[id] = vm
+        } else {
+          _.warn(
+            'Duplicate objects are not supported in v-repeat.'
+          )
+        }
+      } else {
+        _.define(data, this.id, vm)
+      }
     } else {
-      _.define(data, this.id, vm)
+      var cache = this.cache
+      if (!cache[data]) {
+        cache[data] = [vm]
+      } else {
+        cache[data].push(vm)
+      }
     }
     vm._raw = data
   },
@@ -331,20 +351,37 @@ module.exports = {
    */
 
   getVm: function (data) {
-    return data[this.id]
+    if (isObject(data)) {
+      return data[this.id]
+    } else {
+      var cached = this.cache[data]
+      if (cached) {
+        var i = 0
+        var vm = cached[i]
+        // since duplicated vm instances might be reused
+        // already, we need to return the first non-reused
+        // instance.
+        while (vm && vm._reused) {
+          vm = cached[++i]
+        }
+        return vm
+      }
+    }
   },
 
   /**
    * Delete a cached vm instance.
-   * This assumes the data already has a vm cached on it.
    *
    * @param {Vue} vm
    */
 
   uncacheVm: function (vm) {
-    if (vm._raw) {
-      vm._raw[this.id] = null
+    var data = vm._raw
+    if (isObject(data)) {
+      data[this.id] = null
       vm._raw = null
+    } else {
+      this.cache[data].pop()
     }
   }
 

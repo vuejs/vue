@@ -103,7 +103,20 @@ exports.extend = function (to, from) {
 }
 
 /**
- * Object type check. Only returns true
+ * Quick object check - this is primarily used to tell
+ * Objects from primitive values when we know the value
+ * is a JSON-compliant type.
+ *
+ * @param {*} obj
+ * @return {Boolean}
+ */
+
+exports.isObject = function (obj) {
+  return obj && typeof obj === 'object'
+}
+
+/**
+ * Strict object type check. Only returns true
  * for plain JavaScript objects.
  *
  * @param {*} obj
@@ -111,7 +124,7 @@ exports.extend = function (to, from) {
  */
 
 var toString = Object.prototype.toString
-exports.isObject = function (obj) {
+exports.isPlainObject = function (obj) {
   return toString.call(obj) === '[object Object]'
 }
 

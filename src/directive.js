@@ -16,8 +16,8 @@ var expParser = require('./parse/expression')
  *                 - {String} expression
  *                 - {String} [arg]
  *                 - {Array<Object>} [filters]
- * @param {Object} def
- * @param {Function} [linker]
+ * @param {Object} def - directive definition object
+ * @param {Function} [linker] - pre-compiled linker function
  * @constructor
  */
 
@@ -152,14 +152,14 @@ p._teardown = function () {
       this.unbind()
     }
     var watcher = this._watcher
-    if (watcher) {
+    if (watcher && watcher.active) {
       watcher.removeCb(this._update)
       if (!watcher.active) {
         this.vm._watchers[this.expression] = null
       }
     }
     this._bound = false
-    this.vm = this.el = null
+    this.vm = this.el = this._watcher = null
   }
 }
 

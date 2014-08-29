@@ -52,7 +52,7 @@ describe('Directive', function () {
       d._teardown()
       expect(def.unbind).toHaveBeenCalled()
       expect(d._bound).toBe(false)
-      expect(d._watcher.active).toBe(false)
+      expect(d._watcher).toBe(null)
       done()
     })
   })

@@ -1,3 +1,4 @@
+var _ = require('../util')
 var Cache = require('../cache')
 var pathCache = new Cache(1000)
 var identRE = /^[$_a-zA-Z]+[\w$]*$/
@@ -276,7 +277,7 @@ exports.set = function (obj, path, val) {
   if (typeof path === 'string') {
     path = exports.parse(path)
   }
-  if (!path || !isSettable(obj)) {
+  if (!path || !_.isObject(obj)) {
     return false
   }
   var last, key
@@ -284,7 +285,7 @@ exports.set = function (obj, path, val) {
     last = obj
     key = path[i]
     obj = obj[key]
-    if (!isSettable(obj)) {
+    if (!_.isObject(obj)) {
       obj = {}
       add(last, key, obj)
     }
@@ -296,18 +297,6 @@ exports.set = function (obj, path, val) {
     add(obj, key, val)
   }
   return true
-}
-
-/**
- * Check if a value is an object that can have values
- * set on it. Slightly faster than _.isObject.
- *
- * @param {*} val
- * @return {Boolean}
- */
-
-function isSettable (val) {
-  return val && typeof val === 'object'
 }
 
 /**

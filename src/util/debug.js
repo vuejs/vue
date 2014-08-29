@@ -14,24 +14,24 @@ function enableDebug () {
   /**
    * Log a message.
    *
-   * @param {*...}
+   * @param {String} msg
    */
 
-  exports.log = function () {
+  exports.log = function (msg) {
     if (hasConsole && config.debug) {
-      console.log.apply(console, arguments)
+      console.log('[Vue info]: ' + msg)
     }
   }
 
   /**
    * We've got a problem here.
    *
-   * @param {*...}
+   * @param {String} msg
    */
 
-  exports.warn = function () {
+  exports.warn = function (msg) {
     if (hasConsole && !config.silent) {
-      console.warn.apply(console, arguments)
+      console.warn('[Vue warn]: ' + msg)
       if (config.debug && console.trace) {
         console.trace()
       }

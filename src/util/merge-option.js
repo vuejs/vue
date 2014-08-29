@@ -125,7 +125,7 @@ function guardComponents (components) {
     var def
     for (var key in components) {
       def = components[key]
-      if (_.isObject(def)) {
+      if (_.isPlainObject(def)) {
         components[key] = _.Vue.extend(def)
       }
     }

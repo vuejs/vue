@@ -60,10 +60,27 @@ describe('Util - Language Enhancement', function () {
 
   it('isObject', function () {
     expect(_.isObject({})).toBe(true)
-    expect(_.isObject([])).toBe(false)
-    expect(_.isObject(null)).toBe(false)
+    expect(_.isObject([])).toBe(true)
+    expect(_.isObject(null)).toBeFalsy()
+    expect(_.isObject(123)).toBeFalsy()
+    expect(_.isObject(true)).toBeFalsy()
+    expect(_.isObject('hi')).toBeFalsy()
+    expect(_.isObject(undefined)).toBeFalsy()
+    expect(_.isObject(function(){})).toBeFalsy()
+  })
+
+  it('isPlainObject', function () {
+    expect(_.isPlainObject({})).toBe(true)
+    expect(_.isPlainObject([])).toBe(false)
+    expect(_.isPlainObject(null)).toBe(false)
+    expect(_.isPlainObject(null)).toBeFalsy()
+    expect(_.isPlainObject(123)).toBeFalsy()
+    expect(_.isPlainObject(true)).toBeFalsy()
+    expect(_.isPlainObject('hi')).toBeFalsy()
+    expect(_.isPlainObject(undefined)).toBeFalsy()
+    expect(_.isPlainObject(function(){})).toBe(false)
     if (_.inBrowser) {
-      expect(_.isObject(window)).toBe(false)
+      expect(_.isPlainObject(window)).toBe(false)
     }
   })
 

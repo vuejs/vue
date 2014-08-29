@@ -104,7 +104,7 @@ function createAssetRegisters (Constructor) {
    */
 
   Constructor.component = function (id, definition) {
-    if (_.isObject(definition)) {
+    if (_.isPlainObject(definition)) {
       definition = _.Vue.extend(definition)
     }
     this.options.components[id] = definition
