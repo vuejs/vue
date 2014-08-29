@@ -59,32 +59,31 @@ p._bind = function (def) {
   }
   if (
     this.expression && this.update &&
-    (!this.isLiteral || this._isDynamicLiteral)
+    (!this.isLiteral || this._isDynamicLiteral) &&
+    !this._checkExpFn()
   ) {
-    if (!this._checkExpFn()) {
-      var exp = this._watcherExp
-      var watcher = this.vm._watchers[exp]
-      // wrapped updater for context
-      var dir = this
-      var update = this._update = function (val, oldVal) {
-        if (!dir._locked) {
-          dir.update(val, oldVal)
-        }
+    var exp = this._watcherExp
+    var watcher = this.vm._watchers[exp]
+    // wrapped updater for context
+    var dir = this
+    var update = this._update = function (val, oldVal) {
+      if (!dir._locked) {
+        dir.update(val, oldVal)
       }
-      if (!watcher) {
-        watcher = this.vm._watchers[exp] = new Watcher(
-          this.vm,
-          exp,
-          update, // callback
-          this.filters,
-          this.twoWay // need setter
-        )
-      } else {
-        watcher.addCb(update)
-      }
-      this._watcher = watcher
-      this.update(watcher.value)
     }
+    if (!watcher) {
+      watcher = this.vm._watchers[exp] = new Watcher(
+        this.vm,
+        exp,
+        update, // callback
+        this.filters,
+        this.twoWay // need setter
+      )
+    } else {
+      watcher.addCb(update)
+    }
+    this._watcher = watcher
+    this.update(watcher.value)
   }
   this._bound = true
 }
