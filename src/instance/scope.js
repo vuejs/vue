@@ -29,6 +29,7 @@ exports._initScope = function () {
   this._initData()
   this._initComputed()
   this._initMethods()
+  this._initMeta()
 }
 
 /**
@@ -165,6 +166,9 @@ exports._setData = function (newData) {
 
 exports._proxy = function (key) {
   if (!_.isReserved(key)) {
+    // need to store ref to self here
+    // because these getter/setters might
+    // be called by child instances!
     var self = this
     Object.defineProperty(self, key, {
       configurable: true,
@@ -231,6 +235,19 @@ exports._initMethods = function () {
   if (methods) {
     for (var key in methods) {
       this[key] = _.bind(methods[key], this)
+    }
+  }
+}
+
+/**
+ * Initialize meta information like $index, $key & $value.
+ */
+
+exports._initMeta = function () {
+  var metas = this.$options._meta
+  if (metas) {
+    for (var key in metas) {
+      this._defineMeta(key, metas[key])
     }
   }
 }

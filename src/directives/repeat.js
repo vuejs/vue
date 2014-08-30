@@ -231,34 +231,29 @@ module.exports = {
 
   build: function (data, index) {
     var original = data
-    var raw = this.converted
-      ? data.value
-      : data
+    var meta = { $index: index }
+    if (this.converted) {
+      meta.$key = original.key
+    }
+    var raw = this.converted ? data.value : data
     var alias = this.arg
     var hasAlias = !isObject(raw) || alias
     // wrap the raw data with alias
     data = hasAlias ? {} : raw
     if (alias) {
       data[alias] = raw
+    } else if (hasAlias) {
+      meta.$value = raw
     }
     // resolve constructor
     var Ctor = this.Ctor || this.resolveCtor(data)
     var vm = this.vm.$addChild({
       el: this.el.cloneNode(true),
       _linker: this._linker,
+      _meta: meta,
       data: data,
       parent: this.vm
     }, Ctor)
-    // define alias
-    if (hasAlias && !alias) {
-      vm._defineMeta('$value', raw)
-    }
-    // define key
-    if (this.converted) {
-      vm._defineMeta('$key', original.key)
-    }
-    // define index
-    vm._defineMeta('$index', index)
     // cache instance
     this.cacheVm(raw, vm)
     return vm
