@@ -462,12 +462,32 @@ function collectAttrDirective (el, name, value, options) {
         'in attribute bindings.'
       )
     } else {
-      var descriptors = dirParser.parse(tokens[0].value)
-      descriptors[0].arg = name
-      return {
-        name: 'attr',
-        def: options.directives.attr,
-        descriptors: descriptors
+      value = tokens[0].value
+      var descriptors
+      if (
+        name === 'value' ||
+        name === 'selected' ||
+        name === 'checked'
+      ) {
+        // special input attributes are bound as v-model
+        descriptors = dirParser.parse(value)
+        // remove attribute so v-model uses vm data as
+        // initial value
+        el.removeAttribute(name)
+        return {
+          name: 'model',
+          def: options.directives.model,
+          descriptors: descriptors
+        }
+      } else {
+        // normal attribute.
+        value = name + ':' + value
+        descriptors = dirParser.parse(value)
+        return {
+          name: 'attr',
+          def: options.directives.attr,
+          descriptors: descriptors
+        }
       }
     }
   }
