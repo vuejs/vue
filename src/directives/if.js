@@ -26,7 +26,11 @@ module.exports = {
     if (value) {
       if (!this.inserted) {
         if (!this.childVM) {
-          this.build()
+          this.childVM = this.vm.$addChild({
+            el: this.el,
+            parent: this.vm,
+            _anonymous: true
+          })
         }
         this.childVM.$before(this.ref)
         this.inserted = true
@@ -37,14 +41,6 @@ module.exports = {
         this.inserted = false
       }
     }
-  },
-
-  build: function () {
-    this.childVM = this.vm.$addChild({
-      el: this.el,
-      parent: this.vm,
-      _anonymous: true
-    })
   },
 
   unbind: function () {
