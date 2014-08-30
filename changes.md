@@ -1,4 +1,21 @@
-If you happen to see this - note that most of these are just planned but subject to change at any moment. Feedback is welcome though.
+> Live doc. Subject to change anytime before 0.11 release.
+
+**Table of Contents**
+
+- [Instantiation](#instantiation)
+- [New Scope Inheritance Model](#new-scope-inheritance-model)
+- [Option changes](#option-changes)
+- [Hook changes](#hook-changes)
+- [Computed Properties](#computed-properties)
+- [Directive changes](#directive-changes)
+- [Interpolation changes](#interpolation-changes)
+- [Two Way filters](#two-way-filters)
+- [Block logic control](#block-logic-control)
+- [Config API change](#config-api-change)
+- [One time interpolations](#one-time-interpolations)
+- [`$watch` API change](#$watch-api-change)
+- [Simplified Transition API](#simplified-transition-api)
+- [Events API](#events-api)
 
 ## Instantiation
 
@@ -24,11 +41,11 @@ You can also pass in `isolated: true` to avoid inheriting a parent scope, which 
 
 ## Option changes
 
-### `el` and `data` for component definitions
+- #### `el` and `data` for component definitions
 
-When used in component definitions and in `Vue.extend()`, the `el`, and `data` options now only accept a function that returns the per-instance value. For example:
+  When used in component definitions and in `Vue.extend()`, the `el`, and `data` options now only accept a function that returns the per-instance value. For example:
 
-``` js
+  ``` js
 var MyComponent = Vue.extend({
   el: function () {
     var el = document.createElement('p')
@@ -47,45 +64,54 @@ var MyComponent = Vue.extend({
     }
   }
 })
-```
+  ```
 
-### new option: `events`.
+- #### new option: `events`.
 
-When events are used extensively for cross-vm communication, the ready hook can get kinda messy. The new `events` option is similar to its Backbone equivalent, where you can declaratiely register a bunch of event listeners.
+  When events are used extensively for cross-vm communication, the ready hook can get kinda messy. The new `events` option is similar to its Backbone equivalent, where you can declaratiely register a bunch of event listeners.
 
-### new option: `isolated`.
+- #### new option: `isolated`.
 
-Default: `false`.
+  Default: `false`.
 
-Whether to inherit parent scope data. Set it to `true` if you want to create a component that have an isolated scope of its own. An isolated scope means you won't be able to bind to data on parent scopes in the component's template.
+  Whether to inherit parent scope data. Set it to `true` if you want to create a component that have an isolated scope of its own. An isolated scope means you won't be able to bind to data on parent scopes in the component's template.
 
-### removed options: `parent`, `id`, `tagName`, `className`, `attributes`, `lazy`.
+- #### removed options:
 
-`parent` option has been removed. To create a child instance that inherits parent scope, use `var child = parent.$addChild(options, [contructor])`.
+  - `parent`
 
-Since now a vm must always be provided the `el` option or explicitly mounted to an existing element, the element creation releated options have been removed for simplicity. If you need to modify your element's attributes, simply do so in the new `beforeCompile` hook.
+    This option has been removed. To create a child instance that inherits parent scope, use `var child = parent.$addChild(options, [contructor])`.
 
-The `lazy` option is removed because this does not belong at the vm level. Users should be able to configure individual `v-model` instances to be lazy or not.
+  - `lazy`
+
+    The `lazy` option is removed because this does not belong at the vm level. Users should be able to configure individual `v-model` instances to be lazy or not.
+
+  The following are also removed, use `el` with a function instead:
+
+  - `id`
+  - `tagName`
+  - `className`
+  - `attributes`
 
 ## Hook changes
 
-### hook usage change: `created`
+- #### hook usage change: `created`
 
-This is now called before anything happens to the instance, with only `this.$data` being available, but **not observed** yet. In the past you can do `this.something = 1` to define default data, but it required some weird hack to make it work. Now you should just explicitly do `this.$data.something = 1` to define your instance default data.
+  This is now called before anything happens to the instance, with only `this.$data` being available, but **not observed** yet. In the past you can do `this.something = 1` to define default data, but it required some weird hack to make it work. Now you should just explicitly do `this.$data.something = 1` to define your instance default data.
 
-### hook usage change: `ready`
+- #### hook usage change: `ready`
 
-The new `ready` hook now is only fired after the instance is compiled and **inserted into the document for the first time**. For a equivalence of the old `ready` hook, use the new `compiled` hook.
+  The new `ready` hook now is only fired after the instance is compiled and **inserted into the document for the first time**. For a equivalence of the old `ready` hook, use the new `compiled` hook.
 
-### new hook: `beforeCompile`
+- #### new hook: `beforeCompile`
 
-This new hook is introduced to accompany the separation of instantiation and DOM mounting. It is called right before the DOM compilation starts and `this.$el` is available, so you can do some pre-processing on the element here.
+  This new hook is introduced to accompany the separation of instantiation and DOM mounting. It is called right before the DOM compilation starts and `this.$el` is available, so you can do some pre-processing on the element here.
 
-### new hook: `compiled`
+- #### new hook: `compiled`
 
-The `compiled` hook indicates the element has been fully compiled based on initial data. However this doesn't indicate if the element has been inserted into the DOM yet. This is essentially the old `ready` hook.
+  The `compiled` hook indicates the element has been fully compiled based on initial data. However this doesn't indicate if the element has been inserted into the DOM yet. This is essentially the old `ready` hook.
 
-### renamed hook: `afterDestroy` -> `destroyed`
+- #### renamed hook: `afterDestroy` -> `destroyed`
 
 ## Computed Properties
 
@@ -102,27 +128,33 @@ computed: {
 
 ## Directive changes
 
-### Dynamic literals
+- #### Dynamic literals
 
-Literal directives can now also be dynamic via bindings like this:
+  Literal directives can now also be dynamic via bindings like this:
 
-``` html
+  ``` html
 <div v-component="{{test}}"></div>
-```
+  ```
 
-When `test` changes, the component used will change! This essentially replaces the old `v-view` directive.
+  When `test` changes, the component used will change! This essentially replaces the old `v-view` directive.
 
-When authoring literal directives, you can now provide an `update()` function if you wish to handle it dynamically. If no `update()` is provided the directive will be treated as a static literal and only evaluated once.
+  When authoring literal directives, you can now provide an `update()` function if you wish to handle it dynamically. If no `update()` is provided the directive will be treated as a static literal and only evaluated once.
 
-### New options
+- #### New directive option: `twoWay`
 
-- `twoWay`: indicates the directive is two-way and may write back to the model. Allows the use of `this.set(value)` inside directive functions.
+  This option indicates the directive is two-way and may write back to the model. Allows the use of `this.set(value)` inside directive functions.
 
-### Removed option: `isEmpty`
+- #### Removed directive option: `isEmpty`
 
-## Interpolation
+## Interpolation changes
 
-Text bindings will no longer automatically stringify objects. Use the new `json` filter which gives more flexibility in formatting.
+- Text bindings will no longer automatically stringify objects. Use the new `json` filter which gives more flexibility in formatting.
+
+- **New feature**: One time interpolations. They do not need to set up watchers and can improve initial rendering performance. If you know something's not going to change, make sure to use this new feature. Example:
+
+  ``` html
+<span>{{* hello }}</span>
+  ```
 
 ## Two Way filters
 
@@ -193,27 +225,21 @@ Instead of the old `Vue.config()` with a heavily overloaded API, the config obje
 Vue.config.debug = true
 ```
 
-## Prefix
+- #### `config.prefix` change
 
-Config prefix now should include the hyphen: so the default is now `v-` and if you want to change it make sure to include the hyphen as well. e.g. `Vue.config.prefix = "data-"`.
+  Config prefix now should include the hyphen: so the default is now `v-` and if you want to change it make sure to include the hyphen as well. e.g. `Vue.config.prefix = "data-"`.
 
-## Interpolation Delimiters
+- #### `config.delimiters` change
 
-In the old version the interpolation delimiters are limited to the same base character (i.e. `['{','}']` translates into `{{}}` for text and `{{{}}}` for HTML). Now you can set them to whatever you like (*almost), and to indicate HTML interpolation, simply wrap the tag with one extra outer most character on each end. Example:
+  In the old version the interpolation delimiters are limited to the same base character (i.e. `['{','}']` translates into `{{}}` for text and `{{{}}}` for HTML). Now you can set them to whatever you like (*almost), and to indicate HTML interpolation, simply wrap the tag with one extra outer most character on each end. Example:
 
-``` js
-Vue.config.delimiters = ['(%', '%)']
-// tags now are (% %) for text
-// and ((% %)) for HTML
-```
+  ``` js
+  Vue.config.delimiters = ['(%', '%)']
+  // tags now are (% %) for text
+  // and ((% %)) for HTML
+  ```
 
-* Note you still cannot use `<` or `>` in delimiters because Vue uses DOM-based templating.
-
-## One time interpolations
-
-``` html
-<span>{{* hello }}</span>
-```
+  * Note you still cannot use `<` or `>` in delimiters because Vue uses DOM-based templating.
 
 ## `$watch` API change
 
@@ -232,6 +258,14 @@ vm.$watch('a', callback, true)
 // callback is fired immediately with current value of `a`
 ```
 
+`$watch` now also returns an unregister function (`$unwatch` has been removed):
+
+``` js
+var unwatch = vm.$watch('a', cb)
+// later, teardown the watcher
+unwatch()
+```
+
 ## Simplified Transition API
 
 - no more distinctions between `v-transition`, `v-animation` or `v-effect`;
@@ -246,11 +280,11 @@ With `v-transition="my-transition"`, Vue will:
 
 3. If no transitions/animations are detected, the DOM manipulation is executed immediately instead of hung up waiting for an event.
 
-### JavaScript transitions API change
+- #### JavaScript transitions API change
 
-Now more similar to Angular:
+  Now more similar to Angular:
 
-``` js
+  ``` js
 Vue.transition('fade', {
   enter: function (el, done) {
     // element is already inserted into the DOM
@@ -273,7 +307,7 @@ Vue.transition('fade', {
     }
   }
 })
-```
+  ```
 
 ## Events API
 
