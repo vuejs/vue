@@ -10,6 +10,7 @@ var dataEvents = [
   'add:self',
   'delete:self'
 ]
+var proxyEvents = dataEvents.slice(0, 5)
 
 /**
  * Setup the data scope of an instance.
@@ -63,16 +64,16 @@ exports._initObserver = function () {
   var ob = this.$observer = new Emitter(this)
   // setup data proxy handlers
   var proxies = this._dataProxies = {}
-  dataEvents.forEach(function (event) {
-    proxies[event] = function (a, b, c) {
+  proxyEvents.forEach(function (event) {
+    proxies[event] = function dataProxyFn (a, b, c) {
       ob.emit(event, a, b, c)
     }
   })
   var self = this
-  proxies['add:self'] = function (key) {
+  proxies['add:self'] = function dataProxyFn (key) {
     self._proxy(key)
   }
-  proxies['delete:self'] = function (key) {
+  proxies['delete:self'] = function dataProxyFn (key) {
     self._unproxy(key)
   }
 }
@@ -173,10 +174,10 @@ exports._proxy = function (key) {
     Object.defineProperty(self, key, {
       configurable: true,
       enumerable: true,
-      get: function () {
+      get: function proxyGetter () {
         return self._data[key]
       },
-      set: function (val) {
+      set: function proxySetter (val) {
         self._data[key] = val
       }
     })
@@ -265,13 +266,13 @@ exports._defineMeta = function (key, value) {
   Object.defineProperty(this, key, {
     enumerable: true,
     configurable: true,
-    get: function () {
+    get: function metaGetter () {
       if (Observer.emitGet) {
         ob.emit('get', key)
       }
       return value
     },
-    set: function (val) {
+    set: function metaSetter (val) {
       if (val !== value) {
         value = val
         ob.emit('set', key, val)

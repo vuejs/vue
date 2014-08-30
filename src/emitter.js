@@ -89,7 +89,9 @@ p.off = function (event, fn) {
 
 /**
  * The internal, faster emit with fixed amount of arguments
- * using Function.call.
+ * using Function.call. This emit assumes that callbacks
+ * triggered will not modify the callback list being
+ * iterated through.
  *
  * @param {Object} event
  * @return {Emitter}
@@ -99,7 +101,6 @@ p.emit = function (event, a, b, c, d) {
   this._cbs = this._cbs || {}
   var callbacks = this._cbs[event]
   if (callbacks) {
-    callbacks = _.toArray(callbacks)
     var ctx = this._ctx
     for (var i = 0, l = callbacks.length; i < l; i++) {
       callbacks[i].call(ctx, a, b, c, d)

@@ -35,7 +35,7 @@ p._addChild = function (key, child) {
  */
 
 p._addSub = function (sub) {
-  this._subs.unshift(sub)
+  this._subs.push(sub)
 }
 
 /**

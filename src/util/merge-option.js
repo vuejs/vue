@@ -77,7 +77,7 @@ strats.partials =
 strats.transitions =
 strats.components = function (parentVal, childVal, vm, key) {
   var ret = Object.create(parentVal || null)
-  extend(ret, childVal)
+  if (childVal) extend(ret, childVal)
   if (vm && vm.$parent) {
     var scopeVal = vm.$parent.$options[key]
     var keys = Object.keys(scopeVal)
