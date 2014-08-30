@@ -71,7 +71,7 @@ p.off = function (event, fn) {
   if (!callbacks) return this
   // remove all handlers
   if (arguments.length === 1) {
-    delete this._cbs[event]
+    this._cbs[event] = null
     return this
   }
   // remove specific handler

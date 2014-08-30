@@ -20,10 +20,10 @@ exports._init = function (options) {
   this.$              = {}
   this.$root          = this.$root || this
   this._emitter       = new Emitter(this)
-  this._watchers      = {}
-  this._userWatchers  = {}
+  this._watchers      = Object.create(null)
+  this._userWatchers  = Object.create(null)
+  this._bindings      = Object.create(null)
   this._directives    = []
-  this._activeWatcher = null
 
   // block instance properties
   this._blockStart  =
@@ -58,14 +58,13 @@ exports._init = function (options) {
   // have been set up & before data observation happens.
   this._callHook('created')
 
-  // initialize data observation and scope inheritance
+  // initialize data observation and scope inheritance.
   this._initScope()
 
-  // setup binding tree.
-  // @creates this._bindings
+  // setup bindings to react to data change.
   this._initBindings()
 
-  // setup event system and option events
+  // setup event system and option events.
   this._initEvents()
 
   // if `el` option is passed, start compilation.

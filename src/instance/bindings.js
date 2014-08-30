@@ -11,7 +11,6 @@ var Observer = require('../observe/observer')
  */
 
 exports._initBindings = function () {
-  this._bindings = Object.create(null)
   this._bindings.$data = new Binding()
   // setup observer events
   var update = this._updateBindingAt
@@ -22,8 +21,6 @@ exports._initBindings = function () {
     .on('delete', update)
     // adding properties is a bit different
     .on('add', updateAdd)
-    // collect dependency
-    .on('get', collectDep)
 }
 
 /**
@@ -75,20 +72,4 @@ function updateAdd (path) {
   var index = path.lastIndexOf(Observer.pathDelimiter)
   if (index > -1) path = path.slice(0, index)
   this._updateBindingAt(path)
-}
-
-/**
- * Collect dependency for the target directive being
- * evaluated.
- *
- * @param {String} path
- */
-
-function collectDep (path) {
-  var watcher = this._activeWatcher
-  // the get event might have come from a child vm's watcher
-  // so this._activeWatcher is not guarunteed to be defined
-  if (watcher) {
-    watcher.addDep(path)
-  }
 }

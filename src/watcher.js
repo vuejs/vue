@@ -8,6 +8,24 @@ var batcher = new Batcher()
 var uid = 0
 
 /**
+ * Only one watcher will be collecting dependency at
+ * any time.
+ */
+
+var activeWatcher = null
+
+/**
+ * Collect dependency for the target directive being
+ * evaluated. This is called on the active watcher's vm
+ *
+ * @param {String} path
+ */
+
+function collectDep (path) {
+  activeWatcher.addDep(path)
+}
+
+/**
  * A watcher parses an expression, collects dependencies,
  * and fires callback when the expression value changes.
  * This is used for both the $watch() api and directives.
@@ -27,8 +45,8 @@ function Watcher (vm, expression, cb, filters, needSet) {
   this.id = ++uid // uid for batching
   this.value = undefined
   this.active = true
-  this.deps = {}
-  this.newDeps = {}
+  this.deps = Object.create(null)
+  this.newDeps = Object.create(null)
   // setup filters if any.
   // We delegate directive filters here to the watcher
   // because they need to be included in the dependency
@@ -133,7 +151,8 @@ p.set = function (value) {
 
 p.beforeGet = function () {
   Observer.emitGet = true
-  this.vm._activeWatcher = this
+  this.vm.$observer.on('get', collectDep)
+  activeWatcher = this
   this.newDeps = {}
 }
 
@@ -142,8 +161,9 @@ p.beforeGet = function () {
  */
 
 p.afterGet = function () {
-  this.vm._activeWatcher = null
   Observer.emitGet = false
+  this.vm.$observer.off('get')
+  activeWatcher = null
   _.extend(this.newDeps, this.deps)
   this.deps = this.newDeps
 }
