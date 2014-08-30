@@ -123,16 +123,28 @@ describe('Util - Option merging', function () {
     expect(res.components.a.super).toBe(Vue)
   })
 
-  it('ignore el, data & parent when inheriting', function () {
-    var res = merge({}, {el:1, data:2, parent:3})
+  it('should ignore el & data in class merge', function () {
+    var res = merge({}, {el:1, data:2})
     expect(res.el).toBeUndefined()
     expect(res.data).toBeUndefined()
-    expect(res.parent).toBeUndefined()
+  })
 
-    res = merge({}, {el:1, data:2, parent:3}, {})
-    expect(res.el).toBe(1)
-    expect(res.data).toBe(2)
-    expect(res.parent).toBe(3)
+  it('data merge with default data function', function () {
+    var res = merge(
+      // component default
+      { data: function () {
+        return {
+          a: 1,
+          b: 2
+        }
+      }},
+      // instance data
+      { data: { a: 2 }},
+      // mock vm presence
+      {}
+    )
+    expect(res.data.a).toBe(2)
+    expect(res.data.b).toBe(2)
   })
 
 })

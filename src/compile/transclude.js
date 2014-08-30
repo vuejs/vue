@@ -14,12 +14,15 @@ var templateParser = require('../parse/template')
  */
 
 module.exports = function transclude (el, options) {
-  if (typeof el === 'string') {
+  var type = typeof el
+  if (type === 'string') {
     var selector = el
     el = document.querySelector(el)
     if (!el) {
       _.warn('Cannot find element: ' + selector)
     }
+  } else if (type === 'function') {
+    el = el()
   }
   if (el instanceof DocumentFragment) {
     return transcludeBlock(el)

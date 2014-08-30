@@ -16,6 +16,34 @@ var extend = _.extend
 var strats = {}
 
 /**
+ * Data
+ */
+
+strats.data = function (parentVal, childVal, vm) {
+  if (!childVal) return parentVal
+  if (!parentVal || !vm) {
+    return childVal
+  }
+  // instance option is a function, just call it here.
+  if (typeof childVal === 'function') {
+    childVal = childVal()
+  }
+  // the special case where parent data is a function,
+  // and instance also has passed-in data. we need to mix
+  // the default data returned from the function into the
+  // passed-in one.
+  if (typeof parentVal === 'function') {
+    var defaultData = parentVal()
+    for (var key in defaultData) {
+      if (!childVal.hasOwnProperty(key)) {
+        childVal[key] = defaultData[key]
+      }
+    }
+  }
+  return childVal
+}
+
+/**
  * Hooks and param attributes are merged as arrays.
  */
 
@@ -100,11 +128,6 @@ strats.computed = function (parentVal, childVal) {
 
 /**
  * Default strategy.
- * Applies to:
- * - data
- * - el
- * - parent
- * - replace
  */
 
 var defaultStrat = function (parentVal, childVal) {
@@ -157,17 +180,17 @@ module.exports = function mergeOptions (parent, child, vm) {
   function merge (key) {
     if (
       !vm &&
-      (key === 'el' || key === 'data' || key === 'parent')
-    ) {
+      (key === 'el' || key === 'data') &&
+      typeof child[key] !== 'function') {
       _.warn(
-        'The "' + key + '" option can only be used as an ' +
-        'instantiation option and will be ignored in ' +
-        'Vue.extend().'
+        'The "' + key + '" option should be a function ' +
+        'that returns a per-instance value in component ' +
+        'definitions.'
       )
-      return
+    } else {
+      var strat = strats[key] || defaultStrat
+      options[key] = strat(parent[key], child[key], vm, key)
     }
-    var strat = strats[key] || defaultStrat
-    options[key] = strat(parent[key], child[key], vm, key)
   }
   return options
 }

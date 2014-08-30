@@ -19,7 +19,6 @@ exports._init = function (options) {
   this.$el            = null
   this.$              = {}
   this.$root          = this.$root || this
-  this._data          = options.data || {}
   this._emitter       = new Emitter(this)
   this._watchers      = {}
   this._userWatchers  = {}
@@ -46,11 +45,14 @@ exports._init = function (options) {
   this._isAnonymous = options._anonymous
 
   // merge options.
-  this.$options = mergeOptions(
+  options = this.$options = mergeOptions(
     this.constructor.options,
     options,
     this
   )
+
+  // set data after merge.
+  this._data = options.data || {}
 
   // the `created` hook is called after basic properties
   // have been set up & before data observation happens.

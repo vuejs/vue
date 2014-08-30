@@ -24,11 +24,30 @@ You can also pass in `isolated: true` to avoid inheriting a parent scope, which 
 
 ## Option changes
 
-### instance-only options
+### `el` and `data` for component definitions
 
-`el`, `parent` and `data` are now instance-only options - that means they should not be used and will be ignored in `Vue.extend()`.
+When used in component definitions and in `Vue.extend()`, the `el`, and `data` options now only accept a function that returns the per-instance value. For example:
 
-It's probably easy to understand why `el` and `parent` are instance only. But why `data`? Because it's really easy to shoot yourself in the foot when you use `data` in `Vue.extend()`. Non-primitive values will be shared by reference across all instances created from that constructor, and changing it from one instance will affect the state of all the others! It's a bit like shared properties on the prototype. In vanilla javascript, the proper way to initialize instance data is to do so in the constructor: `this.someData = {}`. Similarly in Vue, you can do so in the `created` hook by setting `this.$data.someData = {}`.
+``` js
+var MyComponent = Vue.extend({
+  el: function () {
+    var el = document.createElement('p')
+    // you can initialize your element here.
+    // you can even return a documentFragment to create
+    // a block instance.
+    el.className = 'content'
+    return el
+  },
+  data: function () {
+    // similar to ReactComponent.getInitialState
+    return {
+      a: {
+        b: 123
+      }
+    }
+  }
+})
+```
 
 ### new option: `events`.
 
@@ -40,7 +59,9 @@ Default: `false`.
 
 Whether to inherit parent scope data. Set it to `true` if you want to create a component that have an isolated scope of its own. An isolated scope means you won't be able to bind to data on parent scopes in the component's template.
 
-### removed options: `id`, `tagName`, `className`, `attributes`, `lazy`.
+### removed options: `parent`, `id`, `tagName`, `className`, `attributes`, `lazy`.
+
+`parent` option has been removed. To create a child instance that inherits parent scope, use `var child = parent.$addChild(options, [contructor])`.
 
 Since now a vm must always be provided the `el` option or explicitly mounted to an existing element, the element creation releated options have been removed for simplicity. If you need to modify your element's attributes, simply do so in the new `beforeCompile` hook.
 
