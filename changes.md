@@ -248,7 +248,29 @@ computed: {
 
     `v-model` now will check `lazy` attribute for lazy model update, and will check `number` attribute to know if it needs to convert the value into Numbers before writing back to the model.
 
-    When used on a `<select>` element, `v-model` will check for an `options` attribute, which should be an keypath/expression that points to an Array of strings to use as its options.
+    When used on a `<select>` element, `v-model` will check for an `options` attribute, which should be an keypath/expression that points to an Array to use as its options. The Array can contain plain strings, or contain objects for `<optgroups>`:
+
+    ``` js
+    [
+      { label: 'A', options: ['a', 'b']},
+      { label: 'B', options: ['c', 'd']}
+    ]
+    ```
+
+    Will render:
+
+    ``` html
+    <select>
+      <optgroup label="A">
+        <option>a</option>
+        <option>b</option>
+      </optgroup>
+      <optgroup label="B">
+        <option>c</option>
+        <option>d</option>
+      </optgroup>
+    </select>
+    ```
 
   - `v-component`
 
