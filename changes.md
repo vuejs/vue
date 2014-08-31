@@ -82,12 +82,21 @@ You can also pass in `isolated: true` to avoid inheriting a parent scope, which 
       },
       greeting: function (msg) {
         console.log(msg)
+      },
+      // can also use a string for methods
+      bye: 'sayGoodbye'
+    },
+    methods: {
+      sayGoodbye: function () {
+        console.log('goodbye!')
       }
     }
   })
   // -> created!
   vm.$emit('greeting', 'hi!')
   // -> hi!
+  vm.$emit('bye')
+  // -> goodbye!
   ```
 
 - #### new option: `isolated`.
