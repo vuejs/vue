@@ -14,6 +14,7 @@
 - [Events API change](#events-api-change)
 - [Two Way filters](#two-way-filters)
 - [Block logic control](#block-logic-control)
+- [Misc](#misc)
 
 ## Instantiation process
 
@@ -430,3 +431,7 @@ Rendered result:
 <p>content-2</p>
 <!--v-block-end-->
 ```
+
+## Misc
+
+- When there are inline values on input elements bound with `v-model`, e.g. `<input value="hi" v-model="msg">`, the **inline value** will be used as the inital value. If the vm comes with default data, it **will be overwritten** by the inline value. Same for `selected` attribute on `<option>` elements.
