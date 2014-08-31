@@ -6,6 +6,8 @@ var namespaces = {
 
 module.exports = {
 
+  priority: 850,
+
   bind: function () {
     var name = this.arg
     var colonIndex = name.indexOf(':')

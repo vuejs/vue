@@ -35,9 +35,8 @@ module.exports = {
     // the input with the filtered value.
     this.listener = function textInputListener () {
       if (cpLocked) return
-      try {
-        var cursorPos = el.selectionStart
-      } catch (e) {}
+      var cursorPos
+      try { cursorPos = el.selectionStart } catch (e) {}
       self.set(
         number
           ? _.toNumber(el.value)
@@ -52,11 +51,21 @@ module.exports = {
     _.on(el, this.event, this.listener)
     // IE9 doesn't fire input event on backspace/del/cut
     if (!lazy && _.isIE9) {
-      shimIE9(this)
+      this.onCut = function () {
+        _.nextTick(self.listener)
+      }
+      this.onDel = function (e) {
+        if (e.keyCode === 46 || e.keyCode === 8) {
+          self.listener()
+        }
+      }
+      _.on(el, 'cut', this.onCut)
+      _.on(el, 'keyup', this.onDel)
     }
     // set initial value if present
     if (el.value) {
-      this.set(el.value, true)
+      // watcher is not set up yet
+      this.vm.$set(this.expression, el.value)
     }
   },
 
@@ -75,24 +84,4 @@ module.exports = {
     }
   }
 
-}
-
-/**
- * IE9 doesn't fire input event on backspace/del/cut,
- * so we have to shim it by adding some additoinal listners.
- *
- * @param {Directive} dir
- */
-
-function shimIE9 (dir) {
-  dir.onCut = function () {
-    _.nextTick(dir.listener)
-  }
-  dir.onDel = function (e) {
-    if (e.keyCode === 46 || e.keyCode === 8) {
-      dir.listener()
-    }
-  }
-  _.on(el, 'cut', dir.onCut)
-  _.on(el, 'keyup', dir.onDel)
 }

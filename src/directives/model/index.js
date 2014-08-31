@@ -28,6 +28,7 @@ module.exports = {
   bind: function () {
     var el = this.el
     var tag = el.tagName
+    var handler
     if (tag === 'INPUT') {
       handler = handlers[el.type] || handlers.text
     } else if (tag === 'SELECT') {
