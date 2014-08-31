@@ -52,11 +52,13 @@ module.exports = {
   checkIf: function () {
     var condition = _.attr(this.el, 'if')
     if (condition !== null) {
+      var self = this
       this.ifWatcher = new Watcher(
         this.vm,
         condition,
-        this.ifCallback,
-        this
+        function (value) {
+          self.toggleIf(value)
+        }
       )
       this.active = this.ifWatcher.value
     } else {
@@ -71,7 +73,7 @@ module.exports = {
    * @param {*} value
    */
 
-  ifCallback: function (value) {
+  toggleIf: function (value) {
     if (value) {
       this.active = true
       this.build()

@@ -1,10 +1,17 @@
 var _ = require('../../util')
+var Watcher = require('../../watcher')
 
 module.exports = {
 
   bind: function () {
     var self = this
     var el = this.el
+    // check options param
+    var optionsParam = el.getAttribute('options')
+    if (optionsParam) {
+      el.removeAttribute('options')
+      initOptions.call(this, optionsParam)
+    }
     this.multiple = el.hasAttribute('multiple')
     this.listener = function () {
       var value = self.multiple
@@ -34,8 +41,58 @@ module.exports = {
 
   unbind: function () {
     _.off(this.el, 'change', this.listener)
+    if (this.optionWatcher) {
+      this.optionWatcher.teardown()
+    }
   }
 
+}
+
+/**
+ * Initialize the option list from the param.
+ *
+ * @param {String} expression
+ */
+
+function initOptions (expression) {
+  var self = this
+  function optionUpdateWatcher (value) {
+    if (_.isArray(value)) {
+      self.el.innerHTML = value.map(formatOption)
+      if (self._watcher) {
+        self.update(self._watcher.value)
+      }
+    } else {
+      _.warn('Invalid options value for v-model: ' + value)
+    }
+  }
+  this.optionWatcher = new Watcher(
+    this.vm,
+    expression,
+    optionUpdateWatcher
+  )
+  // update with initial value
+  optionUpdateWatcher(this.optionWatcher.value)
+}
+
+/**
+ * Format an option element from the "options" param.
+ * An object indicates an <optgroup> which should include:
+ *
+ * - label: a string for the label attribute
+ * - options: an array of option strings
+ *
+ * @param {Object|String} op
+ */
+
+function formatOption (op) {
+  if (typeof op !== 'string') {
+    return '<optgroup label="' + op.label + '">' +
+      op.options.map(formatOption) +
+      '</optgroup>'
+  } else {
+    return '<option>' + op + '</option>'
+  }
 }
 
 /**
