@@ -346,6 +346,11 @@ With `v-transition="my-transition"`, Vue will:
 
   ``` js
   Vue.transition('fade', {
+    beforeEnter: function (el) {
+      // a synchronous function called right before the
+      // element is inserted into the document.
+      // you can do some pre-styling here to avoid FOC.
+    },
     enter: function (el, done) {
       // element is already inserted into the DOM
       // call done when animation finishes.

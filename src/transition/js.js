@@ -13,18 +13,19 @@ module.exports = function (el, direction, op, data, def) {
     data.cancel()
     data.cancel = null
   }
-  var enter = def.enter
-  var leave = def.leave
   if (direction > 0) { // enter
+    if (def.beforeEnter) {
+      def.beforeEnter(el)
+    }
     op()
-    if (enter) {
-      data.cancel = enter(el, function () {
+    if (def.enter) {
+      data.cancel = def.enter(el, function () {
         data.cancel = null
       })
     }
   } else { // leave
-    if (leave) {
-      data.cancel = leave(el, function () {
+    if (def.leave) {
+      data.cancel = def.leave(el, function () {
         op()
         data.cancel = null
       })
