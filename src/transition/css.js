@@ -49,7 +49,7 @@ module.exports = function (el, direction, op, data) {
   var leaveClass = prefix + '-leave'
   // clean up potential previously running transitions
   if (data.callback) {
-    el.removeEventListener(data.event, callback)
+    _.off(el, data.event, callback)
     classList.remove(enterClass)
     classList.remove(leaveClass)
     data.event = data.callback = null
@@ -82,12 +82,12 @@ module.exports = function (el, direction, op, data) {
       endEvent = data.event = _.animationEndEvent
       onEnd = data.callback = function (e) {
         if (e.target === el) {
-          el.removeEventListener(endEvent, onEnd)
+          _.off(el, endEvent, onEnd)
           data.event = data.callback = null
           classList.remove(enterClass)
         }
       }
-      el.addEventListener(endEvent, onEnd)
+      _.on(el, endEvent, onEnd)
     }
 
   } else { // leave
@@ -112,14 +112,14 @@ module.exports = function (el, direction, op, data) {
         : _.animationEndEvent
       onEnd = data.callback = function (e) {
         if (e.target === el) {
-          el.removeEventListener(endEvent, onEnd)
+          _.off(el, endEvent, onEnd)
           data.event = data.callback = null
           // actually remove node here
           op()
           classList.remove(leaveClass)
         }
       }
-      el.addEventListener(endEvent, onEnd)
+      _.on(el, endEvent, onEnd)
     } else {
       op()
     }

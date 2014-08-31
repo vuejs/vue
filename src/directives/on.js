@@ -3,7 +3,6 @@ var _ = require('../util')
 module.exports = {
 
   isFn: true,
-
   priority: 700,
 
   bind: function () {
@@ -14,12 +13,9 @@ module.exports = {
     ) {
       var self = this
       this.iframeBind = function () {
-        self.el.contentWindow.addEventListener(
-          self.arg,
-          self.handler
-        )
+        _.on(self.el.contentWindow, self.arg, self.handler)
       }
-      this.el.addEventListener('load', this.iframeBind)
+      _.on(this.el, 'load', this.iframeBind)
     }
   },
 
@@ -44,7 +40,7 @@ module.exports = {
     if (this.iframeBind) {
       this.iframeBind()
     } else {
-      this.el.addEventListener(this.arg, this.handler)
+      _.on(this.el, this.arg, this.handler)
     }
   },
 
@@ -53,12 +49,12 @@ module.exports = {
       ? this.el.contentWindow
       : this.el
     if (this.handler) {
-      el.removeEventListener(this.arg, this.handler)
+      _.off(el, this.arg, this.handler)
     }
   },
 
   unbind: function () {
     this.reset()
-    this.el.removeEventListener('load', this.iframeBind)
+    _.off(this.el, 'load', this.iframeBind)
   }
 }

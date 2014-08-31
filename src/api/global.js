@@ -91,7 +91,11 @@ function createAssetRegisters (Constructor) {
 
   assetTypes.forEach(function (type) {
     Constructor[type] = function (id, definition) {
-      this.options[type + 's'][id] = definition
+      if (!definition) {
+        return this.options[type + 's'][id]
+      } else {
+        this.options[type + 's'][id] = definition
+      }
     }
   })
 
@@ -104,10 +108,14 @@ function createAssetRegisters (Constructor) {
    */
 
   Constructor.component = function (id, definition) {
-    if (_.isPlainObject(definition)) {
-      definition = _.Vue.extend(definition)
+    if (!definition) {
+      return this.options.components[id]
+    } else {
+      if (_.isPlainObject(definition)) {
+        definition = _.Vue.extend(definition)
+      }
+      this.options.components[id] = definition
     }
-    this.options.components[id] = definition
   }
 }
 
