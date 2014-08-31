@@ -116,12 +116,20 @@ function makeDirectivesLinkFn (directives) {
     var dir, j
     while (i--) {
       dir = directives[i]
-      j = dir.descriptors.length
-      while (j--) {
-        vmDirs.push(
-          new Direcitve(dir.name, el, vm,
-                        dir.descriptors[j], dir.def)
+      if (dir.oneTime) {
+        // one time attr interpolation
+        el.setAttribute(
+          dir.name,
+          vm.$eval(dir.value)
         )
+      } else {
+        j = dir.descriptors.length
+        while (j--) {
+          vmDirs.push(
+            new Direcitve(dir.name, el, vm,
+                          dir.descriptors[j], dir.def)
+          )
+        }
       }
     }
   }
@@ -194,7 +202,7 @@ function makeTextNodeLinkFn (tokens, frag) {
       if (token.tag) {
         node = childNodes[i]
         if (token.oneTime) {
-          value = vm.$get(value)
+          value = vm.$eval(value)
           if (token.html) {
             _.replace(node, templateParser.parse(value, true))
           } else {
@@ -462,12 +470,20 @@ function collectAttrDirective (el, name, value, options) {
         'in attribute bindings.'
       )
     } else {
-      value = name + ':' + tokens[0].value
-      return {
-        name: 'attr',
-        def: options.directives.attr,
-        descriptors: dirParser.parse(value),
-        oneTime: tokens[0].oneTime
+      if (tokens[0].oneTime) {
+        return {
+          name: name,
+          value: tokens[0].value,
+          def: options.directives.attr,
+          oneTime: true
+        }
+      } else {
+        value = name + ':' + tokens[0].value
+        return {
+          name: 'attr',
+          def: options.directives.attr,
+          descriptors: dirParser.parse(value)
+        }
       }
     }
   }
