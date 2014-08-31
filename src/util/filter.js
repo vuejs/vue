@@ -9,7 +9,7 @@ var _ = require('./debug')
  *
  * @param {Vue} vm
  * @param {Array<Object>} filters
- * @param {Watcher} [target]
+ * @param {Object} [target]
  * @return {Object}
  */
 
@@ -22,9 +22,7 @@ exports.resolveFilters = function (vm, filters, target) {
   filters.forEach(function (f) {
     var def = vm.$options.filters[f.name]
     _.assertAsset(def, 'filter', f.name)
-    if (!def) {
-      return
-    }
+    if (!def) return
     var args = f.args
     var reader, writer
     if (typeof def === 'function') {
@@ -34,24 +32,19 @@ exports.resolveFilters = function (vm, filters, target) {
       writer = def.write
     }
     if (reader) {
-      if (!res.read) {
-        res.read = []
-      }
+      if (!res.read) res.read = []
       res.read.push(function (value) {
         return args
           ? reader.apply(vm, [value].concat(args))
           : reader.call(vm, value)
       })
     }
-    // only watchers needs write filters
-    if (target && writer) {
-      if (!res.write) {
-        res.write = []
-      }
-      res.write.push(function (value) {
+    if (writer) {
+      if (!res.write) res.write = []
+      res.write.push(function (value, oldVal) {
         return args
-          ? writer.apply(vm, [value, res.value].concat(args))
-          : writer.call(vm, value, res.value)
+          ? writer.apply(vm, [value, oldVal].concat(args))
+          : writer.call(vm, value, oldVal)
       })
     }
   })
@@ -64,15 +57,16 @@ exports.resolveFilters = function (vm, filters, target) {
  * @param {*} value
  * @param {Array} filters
  * @param {Vue} vm
+ * @param {*} oldVal
  * @return {*}
  */
 
-exports.applyFilters = function (value, filters, vm) {
+exports.applyFilters = function (value, filters, vm, oldVal) {
   if (!filters) {
     return value
   }
   for (var i = 0, l = filters.length; i < l; i++) {
-    value = filters[i].call(vm, value)
+    value = filters[i].call(vm, value, oldVal)
   }
   return value
 }

@@ -16,7 +16,6 @@ module.exports = {
 
   update: function (value) {
     var prop = this.prop
-    /* jshint eqeqeq: true */
     // cast possible numbers/booleans into strings
     if (value != null) {
       value += ''

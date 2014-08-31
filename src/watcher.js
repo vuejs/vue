@@ -45,17 +45,17 @@ function Watcher (vm, expression, cb, filters, needSet) {
   this.id = ++uid // uid for batching
   this.value = undefined
   this.active = true
+  this.force = false
   this.deps = Object.create(null)
   this.newDeps = Object.create(null)
   // setup filters if any.
   // We delegate directive filters here to the watcher
   // because they need to be included in the dependency
   // collection process.
-  var res = _.resolveFilters(vm, filters, this)
-  this.readFilters = res && res.read
-  this.writeFilters = res && res.write
+  this.readFilters = filters && filters.read
+  this.writeFilters = filters && filters.write
   // parse expression for getter/setter
-  res = expParser.parse(expression, needSet)
+  var res = expParser.parse(expression, needSet)
   this.getter = res.get
   this.setter = res.set
   this.initDeps(res)
@@ -141,7 +141,9 @@ p.get = function () {
 
 p.set = function (value) {
   var vm = this.vm
-  value = _.applyFilters(value, this.writeFilters, vm)
+  value = _.applyFilters(
+    value, this.writeFilters, vm, this.value
+  )
   this.setter.call(vm, vm, value)
 }
 

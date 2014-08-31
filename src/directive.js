@@ -27,7 +27,10 @@ function Directive (name, el, vm, descriptor, def, linker) {
   this.el = el
   this.vm = vm
   // copy descriptor props
-  _.extend(this, descriptor)
+  this.raw = descriptor.raw
+  this.expression = descriptor.expression
+  this.arg = descriptor.arg
+  this.filters = _.resolveFilters(vm, descriptor.filters)
   // private
   this._linker = linker
   this._locked = false
@@ -62,8 +65,9 @@ p._bind = function (def) {
     (!this.isLiteral || this._isDynamicLiteral) &&
     !this._checkExpFn()
   ) {
-    var exp = this._watcherExp
-    var watcher = this.vm._watchers[exp]
+    // use raw expression as identifier because filters
+    // make them different watchers
+    var watcher = this.vm._watchers[this.raw]
     // wrapped updater for context
     var dir = this
     var update = this._update = function (val, oldVal) {
@@ -72,9 +76,9 @@ p._bind = function (def) {
       }
     }
     if (!watcher) {
-      watcher = this.vm._watchers[exp] = new Watcher(
+      watcher = this.vm._watchers[this.raw] = new Watcher(
         this.vm,
-        exp,
+        this._watcherExp,
         update, // callback
         this.filters,
         this.twoWay // need setter

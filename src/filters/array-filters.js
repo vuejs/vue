@@ -111,7 +111,6 @@ exports.orderBy = function (arr, sortKey, reverseKey) {
  */
 
 function contains (val, search) {
-  /* jshint eqeqeq: false */
   if (_.isObject(val)) {
     for (var key in val) {
       if (contains(val[key], search)) {

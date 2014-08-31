@@ -1,6 +1,7 @@
 var Vue = require('../../../src/vue')
 var nextTick = Vue.nextTick
 var Watcher = require('../../../src/watcher')
+var _ = Vue.util
 
 describe('Watcher', function () {
 
@@ -202,10 +203,11 @@ describe('Watcher', function () {
     vm.$options.filters.test2 = function (val, str) {
       return val + str
     }
-    var watcher = new Watcher(vm, 'b.c', spy, [
+    var filters = _.resolveFilters(vm, [
       { name: 'test', args: [3] },
       { name: 'test2', args: ['yo']}
     ])
+    var watcher = new Watcher(vm, 'b.c', spy, filters)
     expect(watcher.value).toBe('6yo')
     vm.b.c = 3
     nextTick(function () {
@@ -221,9 +223,10 @@ describe('Watcher', function () {
         return val > arg ? val : oldVal
       }
     }
-    var watcher = new Watcher(vm, 'b["c"]', spy, [
+    var filters = _.resolveFilters(vm, [
       { name: 'test', args: [5] }
-    ], true)
+    ])
+    var watcher = new Watcher(vm, 'b["c"]', spy, filters, true)
     expect(watcher.value).toBe(2)
     watcher.set(4) // shoud not change the value
     nextTick(function () {

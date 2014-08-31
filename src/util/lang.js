@@ -19,7 +19,6 @@ exports.isReserved = function (str) {
  */
 
 exports.toString = function (value) {
-  /* jshint eqeqeq:false */
   return value == null
     ? ''
     : value.toString()

@@ -54,6 +54,9 @@ exports._init = function (options) {
   // set data after merge.
   this._data = options.data || {}
 
+  // setup event system and option events.
+  this._initEvents()
+
   // the `created` hook is called after basic properties
   // have been set up & before data observation happens.
   this._callHook('created')
@@ -63,9 +66,6 @@ exports._init = function (options) {
 
   // setup bindings to react to data change.
   this._initBindings()
-
-  // setup event system and option events.
-  this._initEvents()
 
   // if `el` option is passed, start compilation.
   if (options.el) {

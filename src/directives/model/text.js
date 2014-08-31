@@ -5,6 +5,7 @@ module.exports = {
   bind: function () {
     var self = this
     var el = this.el
+
     // check params
     // - lazy: update model on "change" instead of "input"
     var lazy = el.hasAttribute('lazy')
@@ -18,7 +19,7 @@ module.exports = {
     if (number) {
       el.removeAttribute('number')
     }
-    this.event = lazy ? 'change' : 'input'
+
     // handle composition events.
     // http://blog.evanyou.me/2014/01/03/composition-event/
     var cpLocked = false
@@ -30,25 +31,47 @@ module.exports = {
     }
     _.on(el,'compositionstart', this.cpLock)
     _.on(el,'compositionend', this.cpUnlock)
-    // if the directive has read filters, we need to
+
+    // shared setter
+    function set () {
+      self.set(
+        number ? _.toNumber(el.value) : el.value,
+        true
+      )
+    }
+
+    // if the directive has filters, we need to
     // record cursor position and restore it after updating
     // the input with the filtered value.
-    this.listener = function textInputListener () {
-      if (cpLocked) return
-      var cursorPos
-      try { cursorPos = el.selectionStart } catch (e) {}
-      self.set(
-        number
-          ? _.toNumber(el.value)
-          : el.value
-      )
-      if (cursorPos) {
+    if (this.filters) {
+      this.listener = function textInputListener () {
+        if (cpLocked) return
+        var cursorPos
+        // some HTML5 input types throw error here
+        try { cursorPos = el.selectionStart } catch (e) {}
+        set()
+        // force a value update, because in
+        // certain cases the write filters output the same
+        // result for different input values, and the Observer
+        // set events won't be triggered.
         _.nextTick(function () {
+          var newVal = self._watcher.value
+          self.update(newVal)
+          if (cursorPos == null) {
+            cursorPos = newVal.toString().length
+          }
           el.setSelectionRange(cursorPos, cursorPos)
         })
       }
+    } else {
+      this.listener = function textInputListener () {
+        if (cpLocked) return
+        set()
+      }
     }
+    this.event = lazy ? 'change' : 'input'
     _.on(el, this.event, this.listener)
+
     // IE9 doesn't fire input event on backspace/del/cut
     if (!lazy && _.isIE9) {
       this.onCut = function () {
@@ -62,6 +85,7 @@ module.exports = {
       _.on(el, 'cut', this.onCut)
       _.on(el, 'keyup', this.onDel)
     }
+
     // set initial value if present
     if (el.value) {
       // watcher is not set up yet
@@ -70,6 +94,7 @@ module.exports = {
   },
 
   update: function (value) {
+    console.log(value)
     this.el.value = value
   },
 
