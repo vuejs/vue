@@ -20,20 +20,23 @@
     "test": "grunt ci"
   },
   "devDependencies": {
-    "browserify": "^4.2.0",
+    "browserify": "^5.11.0",
+    "component-builder": "^1.1.10",
+    "component-resolver": "^1.1.8",
     "grunt": "^0.4.5",
-    "grunt-browserify": "^2.1.3",
     "grunt-contrib-jshint": "^0.10.0",
-    "grunt-contrib-uglify": "^0.5.1",
+    "grunt-contrib-watch": "^0.6.1",
     "grunt-karma": "^0.8.3",
     "jshint-stylish": "^0.3.0",
     "karma": "^0.12.16",
-    "karma-browserify": "^0.2.1",
     "karma-chrome-launcher": "^0.1.4",
     "karma-commonjs": "^0.0.10",
     "karma-coverage": "^0.2.5",
     "karma-firefox-launcher": "^0.1.3",
     "karma-jasmine": "^0.2.2",
     "karma-phantomjs-launcher": "^0.1.4"
+  },
+  "dependencies": {
+    "uglify-js": "^2.4.15"
   }
 }

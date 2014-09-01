@@ -88,7 +88,6 @@ describe('Text Parser', function () {
 
   it('tokens to expression', function () {
     var tokens = textParser.parse('view-{{test}}-test-{{ok}}')
-    console.log(tokens)
     var exp = textParser.tokensToExp(tokens)
     expect(exp).toBe('"view-"+test+"-test-"+ok')
   })

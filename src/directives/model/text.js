@@ -94,7 +94,6 @@ module.exports = {
   },
 
   update: function (value) {
-    console.log(value)
     this.el.value = value
   },
 
