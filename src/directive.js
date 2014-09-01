@@ -103,19 +103,10 @@ p._checkDynamicLiteral = function () {
   if (expression && this.isLiteral) {
     var tokens = textParser.parse(expression)
     if (tokens) {
-      if (tokens.length > 1) {
-        _.warn(
-          'Invalid literal directive: ' +
-          this.name + '="' + expression + '"' +
-          '\nDon\'t mix binding tags with plain text ' +
-          'in literal directives.'
-        )
-      } else {
-        var exp = tokens[0].value
-        this.expression = this.vm.$get(exp)
-        this._watcherExp = exp
-        this._isDynamicLiteral = true
-      }
+      var exp = textParser.tokensToExp(tokens)
+      this.expression = this.vm.$get(exp)
+      this._watcherExp = exp
+      this._isDynamicLiteral = true
     }
   }
 }

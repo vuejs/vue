@@ -136,14 +136,4 @@ describe('Directive', function () {
     })
   })
 
-  it('invalid dynamic literal', function () {
-    var _ = Vue.util
-    spyOn(_, 'warn')    
-    def.isLiteral = true
-    new Directive('test', el, vm, {
-      expression: 'abc {{a}}'
-    }, def)
-    expect(_.warn).toHaveBeenCalled()
-  })
-
 })

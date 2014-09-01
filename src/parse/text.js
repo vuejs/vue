@@ -103,3 +103,22 @@ exports.parse = function (text) {
   cache.put(text, tokens)
   return tokens
 }
+
+/**
+ * Format a list of tokens into an expression.
+ *
+ * @param {Array} tokens
+ * @return {String}
+ */
+
+exports.tokensToExp = function (tokens) {
+  return tokens.length > 1
+    ? tokens.map(formatToken).join('+')
+    : formatToken(tokens[0])
+}
+
+function formatToken (token) {
+  return token.tag
+    ? token.value
+    : '"' + token.value + '"'
+}

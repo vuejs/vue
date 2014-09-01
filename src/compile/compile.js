@@ -299,10 +299,10 @@ function compileParamAttributes (el, attrs, options) {
       if (tokens) {
         if (tokens.length > 1) {
           _.warn(
-            'Invalid attribute binding: "' +
+            'Invalid param attribute binding: "' +
             name + '="' + value + '"' +
             '\nDon\'t mix binding tags with plain text ' +
-            'in attribute bindings.'
+            'in param attribute bindings.'
           )
         } else {
           param.dynamic = true
@@ -462,28 +462,19 @@ function collectDirectives (el, options) {
 function collectAttrDirective (el, name, value, options) {
   var tokens = textParser.parse(value)
   if (tokens) {
-    if (tokens.length > 1) {
-      _.warn(
-        'Invalid attribute binding: "' +
-        name + '="' + value + '"' +
-        '\nDon\'t mix binding tags with plain text ' +
-        'in attribute bindings.'
-      )
+    if (tokens.length === 1 && tokens[0].oneTime) {
+      return {
+        name: name,
+        value: tokens[0].value,
+        def: options.directives.attr,
+        oneTime: true
+      }
     } else {
-      if (tokens[0].oneTime) {
-        return {
-          name: name,
-          value: tokens[0].value,
-          def: options.directives.attr,
-          oneTime: true
-        }
-      } else {
-        value = name + ':' + tokens[0].value
-        return {
-          name: 'attr',
-          def: options.directives.attr,
-          descriptors: dirParser.parse(value)
-        }
+      value = textParser.tokensToExp(tokens)
+      return {
+        name: 'attr',
+        def: options.directives.attr,
+        descriptors: dirParser.parse(name + ':' + value)
       }
     }
   }
