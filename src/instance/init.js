@@ -24,6 +24,7 @@ exports._init = function (options) {
   this._userWatchers      = Object.create(null)
   this._bindings          = Object.create(null)
   this._childBindingCount = Object.create(null)
+  this._activeWatcher     = null
   this._directives        = []
 
   // block instance properties

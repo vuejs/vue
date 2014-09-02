@@ -20,7 +20,8 @@ exports._initBindings = function () {
     .on('mutate', update)
     .on('delete', update)
     // adding properties is a bit different
-    .on('add', updateAdd)
+    .on('add', this._updateAdd)
+    .on('get', this._collectDep)
 }
 
 /**
@@ -132,8 +133,22 @@ exports._teardownBindingAt = function (path) {
  * @param {String} path
  */
 
-function updateAdd (path) {
+exports._updateAdd = function (path) {
   var index = path.lastIndexOf(Observer.pathDelimiter)
   if (index > -1) path = path.slice(0, index)
   this._updateBindingAt(path)
+}
+
+/**
+ * Collect a path as a dependency, adding it to the current
+ * active watcher whose getter is being evaluated.
+ *
+ * @param {String} path
+ */
+
+exports._collectDep = function(path) {
+  var watcher = this._activeWatcher
+  if (watcher) {
+    watcher.addDep(path)
+  }
 }

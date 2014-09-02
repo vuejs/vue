@@ -7,24 +7,6 @@ var batcher = new Batcher()
 var uid = 0
 
 /**
- * Only one watcher will be collecting dependency at
- * any time.
- */
-
-var activeWatcher = null
-
-/**
- * Collect dependency for the target directive being
- * evaluated. This is called on the active watcher's vm
- *
- * @param {String} path
- */
-
-function collectDep (path) {
-  activeWatcher.addDep(path)
-}
-
-/**
  * A watcher parses an expression, collects dependencies,
  * and fires callback when the expression value changes.
  * This is used for both the $watch() api and directives.
@@ -46,7 +28,6 @@ function Watcher (vm, expression, cb, filters, needSet) {
   this.active = true
   this.force = false
   this.deps = Object.create(null)
-  this.newDeps = Object.create(null)
   // setup filters if any.
   // We delegate directive filters here to the watcher
   // because they need to be included in the dependency
@@ -101,17 +82,12 @@ p.initDeps = function (res) {
  */
 
 p.addDep = function (path) {
-  var vm = this.vm
-  var newDeps = this.newDeps
-  var oldDeps = this.deps
-  if (!newDeps[path]) {
-    newDeps[path] = true
-    if (!oldDeps[path]) {
-      var binding =
-        vm._bindings[path] ||
-        vm._createBindingAt(path)
-      binding._addSub(this)
-    }
+  if (!this.deps[path]) {
+    this.deps[path] = true
+    var binding =
+      this.vm._bindings[path] ||
+      this.vm._createBindingAt(path)
+    binding._addSub(this)
   }
 }
 
@@ -152,8 +128,7 @@ p.set = function (value) {
 
 p.beforeGet = function () {
   Observer.emitGet = true
-  this.vm.$observer.on('get', collectDep)
-  activeWatcher = this
+  this.vm._activeWatcher = this
   this.newDeps = {}
 }
 
@@ -163,9 +138,7 @@ p.beforeGet = function () {
 
 p.afterGet = function () {
   Observer.emitGet = false
-  this.vm.$observer.off('get')
-  activeWatcher = null
-  _.extend(this.newDeps, this.deps)
+  this.vm._activeWatcher = null
   this.deps = this.newDeps
 }
 
