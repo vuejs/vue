@@ -35,7 +35,7 @@ exports.$mount = function (el) {
     this._callHook('attached')
     ready.call(this)
   } else {
-    this._emitter.once('hook:attached', ready)
+    this.$once('hook:attached', ready)
   }
 }
 
@@ -133,6 +133,5 @@ exports.$destroy = function (remove) {
   this._isDestroyed = true
   this._callHook('afterDestroy')
   // turn off all instance listeners.
-  this._emitter.off()
-  this._emitter = null
+  this.$off()
 }

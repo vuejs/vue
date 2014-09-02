@@ -18,10 +18,9 @@ var OBJECT = 1
  * object's property keys into getter/setters that
  * collect dependencies and dispatches updates.
  *
- * @constructor
- * @extends Emitter
  * @param {Array|Object} value
  * @param {Number} type
+ * @constructor
  */
 
 function Observer (value, type) {
@@ -190,7 +189,6 @@ p.convert = function (key, val) {
       binding.notify()
     }
   })
-  return binding
 }
 
 /**
@@ -209,8 +207,8 @@ p.convert = function (key, val) {
 p.tryRelease = function () {
   if (!this.parentCount && !this.vmCount) {
     var value = this.value
-    value.__ob__ = null
     if (_.isArray(value)) {
+      value.__ob__.bindings = null
       this.unobserveArray(value)
     } else {
       for (var key in value) {
@@ -220,6 +218,7 @@ p.tryRelease = function () {
         _.define(value, key, val, true)
       }
     }
+    value.__ob__ = null
   }
 }
 

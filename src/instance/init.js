@@ -1,4 +1,3 @@
-var Emitter = require('../emitter')
 var mergeOptions = require('../util/merge-option')
 
 /**
@@ -17,12 +16,16 @@ exports._init = function (options) {
   options = options || {}
 
   this.$el           = null
-  this.$             = {}
   this.$root         = this.$root || this
-  this._emitter      = new Emitter(this)
-  this._watchers     = Object.create(null)
-  this._userWatchers = Object.create(null)
+  this.$             = {}
+  this._watchers     = {}
+  this._userWatchers = {}
   this._directives   = []
+
+  // events bookkeeping
+  this._events         = {}
+  this._eventsCount    = {}
+  this._eventCancelled = false
 
   // block instance properties
   this._blockStart  =

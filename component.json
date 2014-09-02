@@ -45,7 +45,6 @@
     "src/directives/text.js",
     "src/directives/transition.js",
     "src/directives/with.js",
-    "src/emitter.js",
     "src/filters/array-filters.js",
     "src/filters/index.js",
     "src/instance/events.js",

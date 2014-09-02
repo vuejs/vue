@@ -8,7 +8,6 @@ var inDoc = require('../util').inDoc
 
 exports._initEvents = function () {
   var options = this.$options
-  var emitter = this._emitter
   var events = options.events
   var methods = options.methods
   if (events) {
@@ -19,7 +18,7 @@ exports._initEvents = function () {
         var handler = typeof handlers[i] === 'string'
           ? methods && methods[handlers[i]]
           : handlers[i]
-        emitter.on(e, handler)
+        this.$on(e, handler)
       }
     }
   }
@@ -30,8 +29,7 @@ exports._initEvents = function () {
  */
 
 exports._initDOMHooks = function () {
-  var emitter = this._emitter
-  emitter.on('hook:attached', function () {
+  this.$on('hook:attached', function () {
     this._isAttached = true
     var children = this._children
     if (!children) return
@@ -42,7 +40,7 @@ exports._initDOMHooks = function () {
       }
     }
   })
-  emitter.on('hook:detached', function () {
+  this.$on('hook:detached', function () {
     this._isAttached = false
     var children = this._children
     if (!children) return
@@ -68,5 +66,5 @@ exports._callHook = function (hook) {
       handlers[i].call(this)
     }
   }
-  this._emitter.emit('hook:' + hook)
+  this.$emit('hook:' + hook)
 }
