@@ -1,15 +1,6 @@
 var expParser = require('../../../../src/parse/expression')
 var _ = require('../../../../src/util')
 
-function assertExp (testCase) {
-  var res = expParser.parse(testCase.exp)
-  expect(res.get(testCase.scope)).toEqual(testCase.expected)
-  expect(res.paths.length).toBe(testCase.paths.length)
-  res.paths.forEach(function (p, i) {
-    expect(p).toBe(testCase.paths[i])
-  })
-}
-
 var testCases = [
   {
     // simple path that doesn't exist
@@ -190,7 +181,10 @@ var testCases = [
 describe('Expression Parser', function () {
   
   it('parse getter', function () {
-    testCases.forEach(assertExp)
+    testCases.forEach(function assertExp (testCase) {
+      var res = expParser.parse(testCase.exp, true)
+      expect(res.get(testCase.scope)).toEqual(testCase.expected)
+    })
   })
 
   it('dynamic setter', function () {
