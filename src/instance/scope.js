@@ -24,18 +24,6 @@ exports._initScope = function () {
 }
 
 /**
- * Teardown the scope.
- */
-
-exports._teardownScope = function () {
-  var dataOb = this._data.__ob__
-  dataOb.vmCount--
-  dataOb.tryRelease()
-  // unset data reference
-  this._data = null
-}
-
-/**
  * Initialize the data. 
  */
 
@@ -48,8 +36,7 @@ exports._initData = function () {
     this._proxy(keys[i])
   }
   // observe data
-  var ob = Observer.create(data)
-  ob.vmCount++
+  Observer.create(data)
 }
 
 /**
@@ -82,20 +69,8 @@ exports._setData = function (newData) {
       this._proxy(key)
     }
   }
-  // observe new / teardown old
-  var newOb = Observer.create(newData)
-  var oldOb = oldData.__ob__
-  newOb.vmCount++
-  oldOb.vmCount--
-  // memory managment, important!
-  oldOb.tryRelease()
-  // update ALL watchers
-  for (key in this._watchers) {
-    this._watchers[key].update()
-  }
-  for (key in this._userWatchers) {
-    this._userWatchers[key].update()
-  }
+  Observer.create(newData)
+  this._digest()
 }
 
 /**
@@ -132,6 +107,23 @@ exports._proxy = function (key) {
 
 exports._unproxy = function (key) {
   delete this[key]
+}
+
+/**
+ * Force update on every watcher in scope.
+ */
+
+exports._digest = function () {
+  var i = this._watcherList.length
+  while (i--) {
+    this._watcherList[i].update()
+  }
+  if (this._children) {
+    i = this._children.length
+    while (i--) {
+      this._children[i]._digest()
+    }
+  }
 }
 
 /**

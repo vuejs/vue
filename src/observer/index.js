@@ -27,13 +27,12 @@ function Observer (value, type) {
   this.id = ++uid
   this.value = value
   this.type = type
-  this.parentCount = 0
-  this.vmCount = 0
+  this.active = true
+  this.binding = new Binding()
   if (value) {
     _.define(value, '__ob__', this)
     if (type === ARRAY) {
       _.augment(value, arrayAugmentations)
-      this.bindings = []
       this.observeArray(value)
     } else if (type === OBJECT) {
       _.augment(value, objectAugmentations)
@@ -100,35 +99,13 @@ p.walk = function (obj) {
  * and if value is array, link binding to the array.
  *
  * @param {*} val
- * @param {Binding} [binding]
  */
 
-p.observe = function (val, binding) {
+p.observe = function (val) {
   var ob = Observer.create(val)
   if (ob) {
-    ob.parentCount++
-    if (binding && ob.type === ARRAY) {
-      ob.bindings.push(binding)
-    }
-  }
-}
-
-/**
- * Unobserve a value.
- *
- * @param {*} val
- * @param {Binding} [binding]
- */
-
-p.unobserve = function (val, binding) {
-  var ob = val && val.__ob__
-  if (ob) {
-    ob.parentCount--
-    if (binding && ob.type === ARRAY) {
-      var i = ob.bindings.indexOf(binding)
-      if (i > -1) ob.bindings.splice()
-    }
-    ob.tryRelease()
+    // ob.parentCount++
+    return ob.binding
   }
 }
 
@@ -146,19 +123,6 @@ p.observeArray = function (items) {
 }
 
 /**
- * Unobserve a list of Array items.
- *
- * @param {Array} items
- */
-
-p.unobserveArray = function (items) {
-  var i = items.length
-  while (i--) {
-    this.unobserve(items[i])
-  }
-}
-
-/**
  * Convert a property into getter/setter so we can emit
  * the events when the property is accessed/changed.
  *
@@ -168,58 +132,31 @@ p.unobserveArray = function (items) {
 
 p.convert = function (key, val) {
   var ob = this
-  var binding = new Binding()
-  ob.observe(val, binding)
+  var binding = ob.observe(val) || new Binding()
   Object.defineProperty(ob.value, key, {
     enumerable: true,
     configurable: true,
     get: function () {
       // Observer.target is a watcher whose getter is
       // currently being evaluated.
-      if (Observer.target) {
+      if (ob.active && Observer.target) {
         Observer.target.addDep(binding)
       }
       return val
     },
     set: function (newVal) {
       if (newVal === val) return
-      ob.unobserve(val, binding)
-      ob.observe(newVal, binding)
       val = newVal
+      var newBinding = ob.observe(newVal)
+      if (newBinding) {
+        // handle over binding
+        newBinding.subs = binding.subs
+        binding.subs = []
+        binding = newBinding
+      }
       binding.notify()
     }
   })
-}
-
-/**
- * Attempt to teardown the observer if the value is no
- * longer needed. Two requirements have to be met:
- *
- * 1. The observer has no parent obervers depending on it.
- * 2. The observer is not being used as the root $data by
- *    by a vm instance.
- *
- * This is important because each observer holds strong
- * reference to all its parents and if we don't do this
- * those parents can be leaked when a vm is destroyed.
- */
-
-p.tryRelease = function () {
-  if (!this.parentCount && !this.vmCount) {
-    var value = this.value
-    if (_.isArray(value)) {
-      value.__ob__.bindings = null
-      this.unobserveArray(value)
-    } else {
-      for (var key in value) {
-        var val = value[key]
-        this.unobserve(val)
-        // release closure
-        _.define(value, key, val, true)
-      }
-    }
-    value.__ob__ = null
-  }
 }
 
 module.exports = Observer

@@ -167,16 +167,12 @@ describe('Watcher', function () {
     var oldData = vm.$data
     var watcher = new Watcher(vm, '$data', spy)
     expect(watcher.value).toBe(oldData)
-    vm.a = 2
-    nextTick(function () {
-      expect(spy).toHaveBeenCalledWith(oldData, oldData)
-      var newData = {}
-      vm.$data = newData
-      nextTick(function() {
-        expect(spy).toHaveBeenCalledWith(newData, oldData)
-        expect(watcher.value).toBe(newData)
-        done()
-      })
+    var newData = {}
+    vm.$data = newData
+    nextTick(function() {
+      expect(spy).toHaveBeenCalledWith(newData, oldData)
+      expect(watcher.value).toBe(newData)
+      done()
     })
   })
 

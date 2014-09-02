@@ -115,8 +115,6 @@ exports.$destroy = function (remove) {
   for (i in this._userWatchers) {
     this._userWatchers[i].teardown()
   }
-  // teardown data/scope
-  this._teardownScope()
   // clean up
   this._data =
   this._watchers =

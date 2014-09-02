@@ -18,6 +18,7 @@ exports._init = function (options) {
   this.$el           = null
   this.$root         = this.$root || this
   this.$             = {}
+  this._watcherList  = []
   this._watchers     = {}
   this._userWatchers = {}
   this._directives   = []

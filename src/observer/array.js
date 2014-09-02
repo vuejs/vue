@@ -28,8 +28,7 @@ var arrayAugmentations = Object.create(Array.prototype)
     }
     var result = original.apply(this, args)
     var ob = this.__ob__
-    var inserted, removed
-
+    var inserted
     switch (method) {
       case 'push':
         inserted = args
@@ -37,28 +36,13 @@ var arrayAugmentations = Object.create(Array.prototype)
       case 'unshift':
         inserted = args
         break
-      case 'pop':
-        removed = [result]
-        break
-      case 'shift':
-        removed = [result]
-        break
       case 'splice':
         inserted = args.slice(2)
-        removed = result
         break
     }
-
-    // link/unlink added/removed elements
     if (inserted) ob.observeArray(inserted)
-    if (removed) ob.unobserveArray(removed)
-
-    // notify bindings
-    i = ob.bindings.length
-    while (i--) {
-      ob.bindings[i].notify()
-    }
-
+    // notify change
+    ob.binding.notify()
     return result
   }
   // define wrapped method

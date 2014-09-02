@@ -21,6 +21,7 @@ var uid = 0
 
 function Watcher (vm, expression, cb, filters, needSet) {
   this.vm = vm
+  vm._watcherList.push(this)
   this.expression = expression
   this.cbs = [cb]
   this.id = ++uid // uid for batching
@@ -173,6 +174,8 @@ p.removeCb = function (cb) {
 
 p.teardown = function () {
   if (this.active) {
+    var list = this.vm._watcherList
+    list.splice(list.indexOf(this))
     for (var id in this.deps) {
       this.deps[id].removeSub(this)
     }

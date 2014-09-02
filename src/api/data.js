@@ -46,6 +46,7 @@ exports.$add = function (key, val) {
   if (!_.isReserved(key)) {
     this._data.$add(key, val)
     this._proxy(key)
+    this._digest()
   }
 }
 
@@ -59,6 +60,7 @@ exports.$delete = function (key) {
   if (!_.isReserved(key)) {
     this._data.$delete(key)
     this._unproxy(key)
+    this._digest()
   }
 }
 
