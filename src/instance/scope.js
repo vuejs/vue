@@ -1,16 +1,6 @@
 var _ = require('../util')
-var Emitter = require('../emitter')
-var Observer = require('../observe/observer')
-var dataEvents = [
-  'get',
-  'set',
-  'mutate',
-  'add',
-  'delete',
-  'add:self',
-  'delete:self'
-]
-var proxyEvents = dataEvents.slice(0, 5)
+var Observer = require('../observer')
+var Binding = require('../binding')
 
 /**
  * Setup the data scope of an instance.
@@ -26,7 +16,7 @@ var proxyEvents = dataEvents.slice(0, 5)
  */
 
 exports._initScope = function () {
-  this._initObserver()
+  // this._initObserver()
   this._initData()
   this._initComputed()
   this._initMethods()
@@ -38,44 +28,11 @@ exports._initScope = function () {
  */
 
 exports._teardownScope = function () {
-  // turn of instance observer
-  this.$observer.off()
-  // stop relaying data events
   var dataOb = this._data.__ob__
-  var proxies = this._dataProxies
-  var i = dataEvents.length
-  var event
-  while (i--) {
-    event = dataEvents[i]
-    dataOb.off(event, proxies[event])
-  }
-  dataOb.vmOwnerCount--
+  dataOb.vmCount--
   dataOb.tryRelease()
   // unset data reference
-  this._data = this._dataProxies = null
-}
-
-/**
- * Setup the observer and data proxy handlers.
- */
-
-exports._initObserver = function () {
-  // create observer
-  var ob = this.$observer = new Emitter(this)
-  // setup data proxy handlers
-  var proxies = this._dataProxies = {}
-  proxyEvents.forEach(function (event) {
-    proxies[event] = function dataProxyFn (a, b, c) {
-      ob.emit(event, a, b, c)
-    }
-  })
-  var self = this
-  proxies['add:self'] = function dataProxyFn (key) {
-    self._proxy(key)
-  }
-  proxies['delete:self'] = function dataProxyFn (key) {
-    self._unproxy(key)
-  }
+  this._data = null
 }
 
 /**
@@ -90,16 +47,9 @@ exports._initData = function () {
   while (i--) {
     this._proxy(keys[i])
   }
-  // relay data changes
+  // observe data
   var ob = Observer.create(data)
-  ob.vmOwnerCount++
-  var proxies = this._dataProxies
-  var event
-  i = dataEvents.length
-  while (i--) {
-    event = dataEvents[i]
-    ob.on(event, proxies[event])
-  }
+  ob.vmCount++
 }
 
 /**
@@ -109,7 +59,6 @@ exports._initData = function () {
  */
 
 exports._setData = function (newData) {
-  var ob = this.$observer
   var oldData = this._data
   this._data = newData
   var keys, key, i
@@ -120,7 +69,6 @@ exports._setData = function (newData) {
     key = keys[i]
     if (!_.isReserved(key) && !(key in newData)) {
       this._unproxy(key)
-      ob.emit('delete', key)
     }
   }
   // proxy keys not already proxied,
@@ -129,33 +77,25 @@ exports._setData = function (newData) {
   i = keys.length
   while (i--) {
     key = keys[i]
-    if (this.hasOwnProperty(key)) {
-      // existing property, emit set if different
-      if (newData[key] !== oldData[key]) {
-        ob.emit('set', key, newData[key])
-      }
-    } else {
+    if (!this.hasOwnProperty(key) && !_.isReserved(key)) {
       // new property
       this._proxy(key)
-      ob.emit('add', key, newData[key])
     }
   }
-  // teardown/setup data proxies
+  // observe new / teardown old
   var newOb = Observer.create(newData)
   var oldOb = oldData.__ob__
-  var proxies = this._dataProxies
-  var event, proxy
-  i = dataEvents.length
-  while (i--) {
-    event = dataEvents[i]
-    proxy = proxies[event]
-    newOb.on(event, proxy)
-    oldOb.off(event, proxy)
-  }
-  newOb.vmOwnerCount++
-  oldOb.vmOwnerCount--
+  newOb.vmCount++
+  oldOb.vmCount--
   // memory managment, important!
   oldOb.tryRelease()
+  // update ALL watchers
+  for (key in this._watchers) {
+    this._watchers[key].update()
+  }
+  for (key in this._userWatchers) {
+    this._userWatchers[key].update()
+  }
 }
 
 /**
@@ -262,22 +202,21 @@ exports._initMeta = function () {
  */
 
 exports._defineMeta = function (key, value) {
-  var ob = this.$observer
+  var binding = new Binding()
   Object.defineProperty(this, key, {
     enumerable: true,
     configurable: true,
     get: function metaGetter () {
-      if (Observer.emitGet) {
-        ob.emit('get', key)
+      if (Observer.target) {
+        Observer.target.addDep(binding)
       }
       return value
     },
     set: function metaSetter (val) {
       if (val !== value) {
         value = val
-        ob.emit('set', key, val)
+        binding.notify()
       }
     }
   })
-  ob.emit('add', key, value)
 }

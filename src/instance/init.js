@@ -16,16 +16,13 @@ exports._init = function (options) {
 
   options = options || {}
 
-  this.$el                = null
-  this.$                  = {}
-  this.$root              = this.$root || this
-  this._emitter           = new Emitter(this)
-  this._watchers          = Object.create(null)
-  this._userWatchers      = Object.create(null)
-  this._bindings          = Object.create(null)
-  this._childBindingCount = Object.create(null)
-  this._activeWatcher     = null
-  this._directives        = []
+  this.$el           = null
+  this.$             = {}
+  this.$root         = this.$root || this
+  this._emitter      = new Emitter(this)
+  this._watchers     = Object.create(null)
+  this._userWatchers = Object.create(null)
+  this._directives   = []
 
   // block instance properties
   this._blockStart  =
@@ -65,9 +62,6 @@ exports._init = function (options) {
 
   // initialize data observation and scope inheritance.
   this._initScope()
-
-  // setup bindings to react to data change.
-  this._initBindings()
 
   // if `el` option is passed, start compilation.
   if (options.el) {

@@ -21,9 +21,6 @@ var restoreRE = /"(\d+)"/g
 var pathTestRE = /^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\])*$/
 var pathReplaceRE = /[^\w$\.]([A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\])*)/g
 var keywordsRE = new RegExp('^(' + keywords.replace(/,/g, '\\b|') + '\\b)')
-var rootPathRE = /^[\w$]+/ // this is only used on valid
-                           // paths so no need to exclude
-                           // number for first char
 
 /**
  * Save / Rewrite / Restore
@@ -36,8 +33,6 @@ var rootPathRE = /^[\w$]+/ // this is only used on valid
  */
 
 var saved = []
-var paths = []
-var has = null
 
 /**
  * Save replacer
@@ -68,15 +63,6 @@ function rewrite (raw) {
     path = path.indexOf('"') > -1
       ? path.replace(restoreRE, restore)
       : path
-    // we store root level paths e.g. "a"
-    // so that the owner directive can add
-    // them as default dependencies.
-    var match = path.match(rootPathRE)
-    var rootPath = match && match[0]
-    if (rootPath && !has[rootPath]) {
-      paths.push(rootPath)
-      has[rootPath] = true
-    }
     return c + 'scope.' + path
   }
 }
@@ -105,8 +91,6 @@ function restore (str, i) {
 function compileExpFns (exp, needSet) {
   // reset state
   saved.length = 0
-  paths = []
-  has = {}
   // save strings and object literal keys
   var body = exp
     .replace(saveRE, save)
@@ -122,7 +106,6 @@ function compileExpFns (exp, needSet) {
       computed : true,
       get      : getter,
       body     : body,
-      paths    : paths,
       set      : needSet
         ? makeSetter(body)
         : null
@@ -153,9 +136,7 @@ function compilePathFns (exp) {
     // always generate setter for simple paths
     set: function (obj, val) {
       Path.set(obj, path, val)
-    },
-    // save root path segment
-    paths: [exp.match(rootPathRE)[0]]
+    }
   }
 }
 

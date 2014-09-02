@@ -1,5 +1,5 @@
 var _ = require('./util')
-var Observer = require('./observe/observer')
+var Observer = require('./observer')
 var expParser = require('./parse/expression')
 var Batcher = require('./batcher')
 
@@ -24,9 +24,7 @@ function Watcher (vm, expression, cb, filters, needSet) {
   this.expression = expression
   this.cbs = [cb]
   this.id = ++uid // uid for batching
-  this.value = undefined
   this.active = true
-  this.force = false
   this.deps = Object.create(null)
   // setup filters if any.
   // We delegate directive filters here to the watcher
@@ -38,56 +36,25 @@ function Watcher (vm, expression, cb, filters, needSet) {
   var res = expParser.parse(expression, needSet)
   this.getter = res.get
   this.setter = res.set
-  this.initDeps(res)
+  this.value = this.get()
 }
 
 var p = Watcher.prototype
 
 /**
- * Initialize the value and dependencies.
- *
- * Here we need to add root level path as dependencies.
- * This is specifically for the case where the expression
- * references a non-existing root level path, and later
- * that path is created with `vm.$add`.
- *
- * e.g. in "a && a.b", if `a` is not present at compilation,
- * the directive will end up with no dependency at all and
- * never gets updated.
- *
- * @param {Object} res - expression parser result object
- */
-
-p.initDeps = function (res) {
-  var i = res.paths.length
-  while (i--) {
-    this.addDep(res.paths[i])
-  }
-  // temporarily set computed to true
-  // to force dep collection on first evaluation
-  this.isComputed = true
-  this.value = this.get()
-  var computed = this.vm.$options.computed
-  var exp = this.expression
-  this.isComputed =
-    this.filters || // filters may access instance data
-    res.computed || // inline expression
-    (computed && computed[exp]) // computed property
-}
-
-/**
  * Add a binding dependency to this directive.
  *
- * @param {String} path
+ * @param {Binding} binding
  */
 
-p.addDep = function (path) {
-  if (!this.deps[path]) {
-    this.deps[path] = true
-    var binding =
-      this.vm._bindings[path] ||
-      this.vm._createBindingAt(path)
-    binding._addSub(this)
+p.addDep = function (binding) {
+  var id = binding.id
+  if (!this.newDeps[id]) {
+    this.newDeps[id] = binding
+    if (!this.deps[id]) {
+      this.deps[id] = binding
+      binding.addSub(this)
+    }
   }
 }
 
@@ -96,15 +63,11 @@ p.addDep = function (path) {
  */
 
 p.get = function () {
-  if (this.isComputed) {
-    this.beforeGet()
-  }
+  this.beforeGet()
   var vm = this.vm
   var value = this.getter.call(vm, vm)
   value = _.applyFilters(value, this.readFilters, vm)
-  if (this.isComputed) {
-    this.afterGet()
-  }
+  this.afterGet()
   return value
 }
 
@@ -127,8 +90,7 @@ p.set = function (value) {
  */
 
 p.beforeGet = function () {
-  Observer.emitGet = true
-  this.vm._activeWatcher = this
+  Observer.target = this
   this.newDeps = {}
 }
 
@@ -137,8 +99,12 @@ p.beforeGet = function () {
  */
 
 p.afterGet = function () {
-  Observer.emitGet = false
-  this.vm._activeWatcher = null
+  Observer.target = null
+  for (var id in this.deps) {
+    if (!this.newDeps[id]) {
+      this.deps[id].removeSub(this)
+    }
+  }
   this.deps = this.newDeps
 }
 
@@ -207,9 +173,8 @@ p.removeCb = function (cb) {
 
 p.teardown = function () {
   if (this.active) {
-    var vm = this.vm
-    for (var path in this.deps) {
-      vm._bindings[path]._removeSub(this)
+    for (var id in this.deps) {
+      this.deps[id].removeSub(this)
     }
     this.active = false
     this.vm = this.cbs = this.value = null
