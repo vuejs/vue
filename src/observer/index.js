@@ -14,13 +14,9 @@ var OBJECT = 1
 
 /**
  * Observer class that are attached to each observed
- * object. Observers can connect to each other like nodes
- * to map the hierarchy of data objects. Once connected,
- * detected change events can propagate up the nested chain.
- *
- * The constructor can be invoked without arguments to
- * create a value-less observer that simply listens to
- * other observers.
+ * object. Once attached, the observer converts target
+ * object's property keys into getter/setters that
+ * collect dependencies and dispatches updates.
  *
  * @constructor
  * @extends Emitter
@@ -39,7 +35,7 @@ function Observer (value, type) {
     if (type === ARRAY) {
       _.augment(value, arrayAugmentations)
       this.bindings = []
-      this.link(value)
+      this.observeArray(value)
     } else if (type === OBJECT) {
       _.augment(value, objectAugmentations)
       this.walk(value)
@@ -79,8 +75,8 @@ Observer.create = function (value) {
 }
 
 /**
- * Walk through each property, converting them and adding
- * them as child. This method should only be called when
+ * Walk through each property and convert them into
+ * getter/setters. This method should only be called when
  * value type is Object. Properties prefixed with `$` or `_`
  * and accessor properties are ignored.
  *
@@ -100,6 +96,14 @@ p.walk = function (obj) {
   }
 }
 
+/**
+ * Try to carete an observer for a child value,
+ * and if value is array, link binding to the array.
+ *
+ * @param {*} val
+ * @param {Binding} [binding]
+ */
+
 p.observe = function (val, binding) {
   var ob = Observer.create(val)
   if (ob) {
@@ -109,6 +113,13 @@ p.observe = function (val, binding) {
     }
   }
 }
+
+/**
+ * Unobserve a value.
+ *
+ * @param {*} val
+ * @param {Binding} [binding]
+ */
 
 p.unobserve = function (val, binding) {
   var ob = val && val.__ob__
@@ -123,12 +134,12 @@ p.unobserve = function (val, binding) {
 }
 
 /**
- * Link a list of Array items to the observer.
+ * Observe a list of Array items.
  *
  * @param {Array} items
  */
 
-p.link = function (items) {
+p.observeArray = function (items) {
   var i = items.length
   while (i--) {
     this.observe(items[i])
@@ -136,12 +147,12 @@ p.link = function (items) {
 }
 
 /**
- * Unlink a list of Array items from the observer.
+ * Unobserve a list of Array items.
  *
  * @param {Array} items
  */
 
-p.unlink = function (items) {
+p.unobserveArray = function (items) {
   var i = items.length
   while (i--) {
     this.unobserve(items[i])
@@ -200,7 +211,7 @@ p.tryRelease = function () {
     var value = this.value
     value.__ob__ = null
     if (_.isArray(value)) {
-      this.unlink(value)
+      this.unobserveArray(value)
     } else {
       for (var key in value) {
         var val = value[key]

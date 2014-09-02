@@ -50,8 +50,8 @@ var arrayAugmentations = Object.create(Array.prototype)
     }
 
     // link/unlink added/removed elements
-    if (inserted) ob.link(inserted)
-    if (removed) ob.unlink(removed)
+    if (inserted) ob.observeArray(inserted)
+    if (removed) ob.unobserveArray(removed)
 
     // notify bindings
     i = ob.bindings.length
