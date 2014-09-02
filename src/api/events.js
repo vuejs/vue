@@ -88,8 +88,10 @@ exports.$emit = function (event) {
     while (i--) {
       args[i] = arguments[i + 1]
     }
-    cbs = _.toArray(cbs)
     i = 0
+    cbs = cbs.length > 1
+      ? _.toArray(cbs)
+      : cbs
     for (var l = cbs.length; i < l; i++) {
       if (cbs[i].apply(this, args) === false) {
         this._eventCancelled = true
@@ -114,7 +116,9 @@ exports.$broadcast = function (event) {
     for (var i = 0, l = children.length; i < l; i++) {
       var child = children[i]
       child.$emit.apply(child, arguments)
-      child.$broadcast.apply(child, arguments)
+      if (!child._eventCancelled) {
+        child.$broadcast.apply(child, arguments)
+      }
     }
   }
 }
@@ -130,6 +134,8 @@ exports.$dispatch = function () {
   var parent = this.$parent
   while (parent) {
     parent.$emit.apply(parent, arguments)
-    parent = parent.$parent
+    parent = parent._eventCancelled
+      ? null
+      : parent.$parent
   }
 }
