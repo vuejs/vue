@@ -78,7 +78,7 @@ exports.$off = function (event, fn) {
  */
 
 exports.$emit = function (event) {
-  this._cancelled = false
+  this._eventCancelled = false
   var cbs = this._events[event]
   if (cbs) {
     // avoid leaking arguments:
