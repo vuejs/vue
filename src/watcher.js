@@ -1,7 +1,6 @@
 var _ = require('./util')
 var Observer = require('./observe/observer')
 var expParser = require('./parse/expression')
-var Binding = require('./binding')
 var Batcher = require('./batcher')
 
 var batcher = new Batcher()
@@ -110,7 +109,7 @@ p.addDep = function (path) {
     if (!oldDeps[path]) {
       var binding =
         vm._bindings[path] ||
-        (vm._bindings[path] = new Binding())
+        vm._createBindingAt(path)
       binding._addSub(this)
     }
   }

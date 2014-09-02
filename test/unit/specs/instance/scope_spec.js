@@ -7,12 +7,6 @@ var Vue = require('../../../../src/vue')
 var Observer = require('../../../../src/observe/observer')
 Observer.pathDelimiter = '.'
 
-function mockBinding () {
-  return {
-    _notify: jasmine.createSpy('binding')
-  }
-}
-
 describe('Scope', function () {
   
   describe('basic', function () {
@@ -145,29 +139,42 @@ describe('Scope', function () {
 
     it('parent event should propagate when child has same binding', function () {
       // object path
-      var b = child._bindings['b.c'] = mockBinding()
+      var b = child._createBindingAt('b.c')
+      b._notify = jasmine.createSpy('binding')
       parent.b.c = 3
       expect(b._notify).toHaveBeenCalled()
       // array path
-      b = child._bindings['arr.0.a'] = mockBinding()
+      var b = child._createBindingAt('arr.0.a')
+      b._notify = jasmine.createSpy('binding')
       parent.arr[0].a = 2
       expect(b._notify).toHaveBeenCalled()
       // add
-      b = child._bindings['e'] = mockBinding()
+      var b = child._createBindingAt('e')
+      b._notify = jasmine.createSpy('binding')
       parent.$add('e', 123)
       expect(b._notify).toHaveBeenCalled()
       // delete
-      b = child._bindings['e'] = mockBinding()
       parent.$delete('e')
-      expect(b._notify).toHaveBeenCalled()
+      expect(b._notify.calls.count()).toBe(2)
     })
 
     it('parent event should not propagate when child has shadowing key', function () {
-      var b = child._bindings['c'] = mockBinding()
+      var b = child._createBindingAt('c')
+      b._notify = jasmine.createSpy('binding')
       child.$add('c', 123)
       expect(b._notify.calls.count()).toBe(1)
       parent.c = 456
       expect(b._notify.calls.count()).toBe(1)
+    })
+
+    it('parent event should not even traverse if child doesn\'t have changed binding', function () {
+      parent._notifyChildren = jasmine.createSpy()
+      parent.c = 123
+      expect(parent._notifyChildren.calls.count()).toBe(1)
+      // should not be called after binding teardown
+      child._teardownBindingAt('c')
+      parent.c = 234
+      expect(parent._notifyChildren.calls.count()).toBe(1)
     })
 
   })
@@ -185,10 +192,12 @@ describe('Scope', function () {
     })
 
     it('should trigger proper events', function () {
-      
-      var parentSpy = parent._bindings['arr.0.a'] = mockBinding()
-      var childSpy = child._bindings['arr.0.a'] = mockBinding()
-      var childSpy2 = child._bindings['a'] = mockBinding()
+      var parentSpy = parent._createBindingAt('arr.0.a')
+      parentSpy._notify = jasmine.createSpy('binding')
+      var childSpy = child._createBindingAt('arr.0.a')
+      childSpy._notify = jasmine.createSpy('binding')
+      var childSpy2 = child._createBindingAt('a')
+      childSpy2._notify = jasmine.createSpy('binding')
       child.a = 3
 
       // make sure data sync is working

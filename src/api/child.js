@@ -42,24 +42,3 @@ exports.$addChild = function (opts, BaseCtor) {
   this._children.push(child)
   return child
 }
-
-/**
- * Propagate a path update down the scope chain, notifying
- * all non-isolated child instances.
- *
- * @param {String} path
- */
-
-exports._notifyChildren = function (path) {
-  var children = this._children
-  if (children) {
-    var i = children.length
-    var child
-    while (i--) {
-      child = children[i]
-      if (!child.$options.isolated) {
-        child._updateBindingAt(path, null, null, true)
-      }
-    }
-  }
-}

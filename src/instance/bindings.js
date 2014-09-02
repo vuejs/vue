@@ -54,7 +54,71 @@ exports._updateBindingAt = function (path, v, m, fromScope) {
       binding._notify()
     }
   }
-  this._notifyChildren(path)
+  // only broadcast if there are children actually listening
+  // on this path
+  if (this._childBindingCount[path]) {
+    this._notifyChildren(path)
+  }
+}
+
+/**
+ * Propagate a path update down the scope chain, notifying
+ * all non-isolated child instances.
+ *
+ * @param {String} path
+ */
+
+exports._notifyChildren = function (path) {
+  var children = this._children
+  if (children) {
+    var i = children.length
+    var child
+    while (i--) {
+      child = children[i]
+      if (!child.$options.isolated) {
+        child._updateBindingAt(path, null, null, true)
+      }
+    }
+  }
+}
+
+/**
+ * Create a binding at a given path, and goes up the scope
+ * chain to increase each parent's binding count at this
+ * path by 1. This allows us to easily determine whether we
+ * need to traverse down the scope to broadcast a data
+ * change. A similar technique is used in Angular's
+ * $broadcast implementation.
+ *
+ * @param {String} path
+ * @return {Binding}
+ */
+
+exports._createBindingAt = function (path) {
+  var binding = this._bindings[path] = new Binding()
+  var parent = this.$parent
+  var count
+  while (parent) {
+    count = parent._childBindingCount
+    count[path] = (count[path] || 0) + 1
+    parent = parent.$parent
+  }
+  return binding
+}
+
+/**
+ * Teardown a binding.
+ *
+ * @param {String} path
+ */
+
+exports._teardownBindingAt = function (path) {
+  this._bindings[path]._subs.length = 0
+  var parent = this.$parent
+  while (parent) {
+    parent._childBindingCount[path]--
+    parent = parent.$parent
+  }
 }
 
 /**

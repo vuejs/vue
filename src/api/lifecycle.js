@@ -107,15 +107,21 @@ exports.$destroy = function (remove) {
   }
   // teardown data/scope
   this._teardownScope()
-  // teardown all user watchers.
-  for (i in this._userWatchers) {
-    this._userWatchers[i].teardown()
+  // teardown bindings.
+  // this sets all binding's sub count to 0 so only user
+  // watchers will need to do a splice() in teardown
+  for (i in this._bindings) {
+    this._teardownBindingAt(i)
   }
   // teardown all directives. this also tearsdown all
   // directive-owned watchers.
   i = this._directives.length
   while (i--) {
     this._directives[i]._teardown()
+  }
+  // teardown all user watchers.
+  for (i in this._userWatchers) {
+    this._userWatchers[i].teardown()
   }
   // clean up
   this._data =

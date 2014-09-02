@@ -45,7 +45,9 @@ p._addSub = function (sub) {
  */
 
 p._removeSub = function (sub) {
-  this._subs.splice(this._subs.indexOf(sub), 1)
+  if (this._subs.length) {
+    this._subs.splice(this._subs.indexOf(sub), 1)
+  }
 }
 
 /**
