@@ -7,9 +7,12 @@ var _ = require('../util')
  * @param {Function} fn
  */
 
+var hookRE = /^hook:/
 exports.$on = function (event, fn) {
   (this._events[event] || (this._events[event] = []))
     .push(fn)
+  // hooks do not get broadcasted so we can skip them
+  if (hookRE.test(event)) return
   // increment all parent event count by 1.
   // pay a small cost here to optimize for $broadcast.
   var parent = this.$parent
