@@ -118,10 +118,15 @@ exports._digest = function () {
   while (i--) {
     this._watcherList[i].update()
   }
-  if (this._children) {
-    i = this._children.length
+  var children = this._children
+  var child
+  if (children) {
+    i = children.length
     while (i--) {
-      this._children[i]._digest()
+      child = children[i]
+      if (!child.$options.isolated) {
+        child._digest()
+      }
     }
   }
 }
