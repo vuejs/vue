@@ -7,7 +7,7 @@ var _ = require('../util')
  */
 
 exports.json = function (value, indent) {
-  return JSON.stringify(value, null, indent || 2)
+  return JSON.stringify(value, null, Number(indent) || 2)
 }
 
 /**
