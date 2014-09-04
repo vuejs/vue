@@ -279,6 +279,28 @@ computed: {
 
     When used as a dynamic component, it will check for the `keep-alive` attribute. When `keep-alive` is present, already instantiated components will be cached. This is useful when you have large, nested view components and want to maintain the state when switching views.
 
+  - `v-repeat`
+
+    One of the questions I've asked about is how `v-repeat` does the array diffing and what happens if we swap the array with a fresh array grabbed from an API end point. In 0.10 because the objects are different, all instances have to been re-created. In 0.11 we introduce the `trackby` attribute param. If each of your data objects in the array has a unique id, we can use that id to reuse existing instances when the array is swapped.
+
+    For example, if we have the data in the following format:
+
+    ``` js
+    items: [
+      { _id: 1, ... },
+      { _id: 2, ... },
+      { _id: 3, ... }
+    ]
+    ```
+
+    In your template you can do:
+
+    ``` html
+    <li v-repeat="items" trackby="_id">...</li>
+    ```
+
+    Later on when you swap `items` with a different array, even if the objects it contains are new, as long as they have the same trackby id we can still efficiently reuse existing instances.
+
 - #### Usage change for `v-with`
 
   In 0.10 and earlier, `v-with` creates a two-way binding between the parent and child instance. In 0.11, it no longer creates a two-way binding but rather facilitates a unidirectional data flow from parent to child.
