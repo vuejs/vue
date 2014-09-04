@@ -72,7 +72,11 @@ describe('Events API', function () {
   it('$broadcast optimization', function () {
     var child = vm.$addChild()
     var child2 = child.$addChild()
+    // hooks should not incurr the bookkeeping cost
+    child.$on('hook:created', function () {})
+    expect(vm._eventsCount['hook:created']).toBeUndefined()
     child.$on('test', spy)
+    expect(vm._eventsCount['test']).toBe(1)
     // child2's $emit & $broadcast
     // shouldn't get called if no child listens to the event
     child2.$emit = spy

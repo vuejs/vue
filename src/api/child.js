@@ -26,7 +26,7 @@ exports.$addChild = function (opts, BaseCtor) {
     if (!ChildVue) {
       ChildVue = function (options) {
         this.$parent = parent
-        this.$root = parent.$root || parent
+        this.$root = parent.$root
         this.constructor = ChildVue
         _.Vue.call(this, options)
       }

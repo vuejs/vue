@@ -37,6 +37,13 @@ describe('Util - Option merging', function () {
 
   it('events', function () {
 
+    // no parent
+    res = merge({}, {events:1})
+    expect(res.events).toBe(1)
+    // no child
+    res = merge({events:1}, {})
+    expect(res.events).toBe(1)
+
     var fn1 = function () {}
     var fn2 = function () {}
     var fn3 = function () {}
@@ -65,7 +72,6 @@ describe('Util - Option merging', function () {
         expect(res[i]).toBe(expected[i])
       }
     }
-
   })
 
   it('normal object hashes', function () {
@@ -123,13 +129,53 @@ describe('Util - Option merging', function () {
     expect(res.components.a.super).toBe(Vue)
   })
 
-  it('should ignore el & data in class merge', function () {
+  it('should ignore non-function el & data in class merge', function () {
     var res = merge({}, {el:1, data:2})
     expect(res.el).toBeUndefined()
     expect(res.data).toBeUndefined()
   })
 
-  it('data merge with default data function', function () {
+  it('class data/el merge', function () {
+    function fn1 () {}
+    function fn2 () {}
+    var res = merge({data:fn1, el:fn1}, {data:fn2})
+    expect(res.data).toBe(fn2)
+    expect(res.el).toBe(fn1)
+  })
+
+  it('instanace el merge', function () {
+    function fn1 () {
+      return 1
+    }
+    function fn2 () {
+      return 2
+    }
+    // both functions
+    var res = merge({el:fn1}, {el:fn2}, {})
+    expect(res.el).toBe(2)
+    // direct instance el
+    res = merge({el:fn1}, {el:2}, {})
+    expect(res.el).toBe(2)
+    // no parent
+    res = merge({}, {el:2}, {})
+    expect(res.el).toBe(2)
+    // no child
+    res = merge({el:fn1}, {}, {})
+    expect(res.el).toBe(1)
+  })
+
+  it('instance data merge with no instance data', function () {
+    var res = merge(
+      {data: function () {
+        return { a: 1}
+      }},
+      {}, // no instance data
+      {} // mock vm presence
+    )
+    expect(res.data.a).toBe(1)
+  })
+
+  it('instance data merge with default data function', function () {
     var res = merge(
       // component default
       { data: function () {
@@ -138,10 +184,8 @@ describe('Util - Option merging', function () {
           b: 2
         }
       }},
-      // instance data
-      { data: { a: 2 }},
-      // mock vm presence
-      {}
+      { data: { a: 2 }}, // instance data
+      {} // mock vm presence
     )
     expect(res.data.a).toBe(2)
     expect(res.data.b).toBe(2)

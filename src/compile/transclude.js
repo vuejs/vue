@@ -21,8 +21,6 @@ module.exports = function transclude (el, options) {
     if (!el) {
       _.warn('Cannot find element: ' + selector)
     }
-  } else if (type === 'function') {
-    el = el()
   }
   if (el instanceof DocumentFragment) {
     return transcludeBlock(el)

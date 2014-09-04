@@ -114,11 +114,25 @@ describe('Watcher', function () {
     var watcher2 = new Watcher(vm, 'b.e', spy)
     expect(watcher.value).toBeUndefined()
     expect(watcher2.value).toBeUndefined()
+    // check $add affecting children
+    var child = vm.$addChild()
+    var watcher3 = new Watcher(child, 'd.e', spy)
+    var watcher4 = new Watcher(child, 'b.e', spy)
+    // check $add should not affect isolated children
+    var child2 = vm.$addChild({
+      isolated: true
+    })
+    var watcher5 = new Watcher(child2, 'd.e', spy)
+    expect(watcher5.value).toBeUndefined()
     vm.$add('d', { e: 123 })
     vm.b.$add('e', 234)
     nextTick(function () {
       expect(watcher.value).toBe(123)
       expect(watcher2.value).toBe(234)
+      expect(watcher3.value).toBe(123)
+      expect(watcher4.value).toBe(234)
+      expect(watcher5.value).toBeUndefined()
+      expect(spy.calls.count()).toBe(4)
       expect(spy).toHaveBeenCalledWith(123, undefined)
       expect(spy).toHaveBeenCalledWith(234, undefined)
       done()
@@ -137,12 +151,19 @@ describe('Watcher', function () {
   })
 
   it('swapping $data', function (done) {
+    // existing path
     var watcher = new Watcher(vm, 'b.c', spy)
+    var spy2 = jasmine.createSpy()
+    // non-existing path
+    var watcher2 = new Watcher(vm, 'e', spy2)
     expect(watcher.value).toBe(2)
-    vm.$data = { b: { c: 3}}
+    expect(watcher2.value).toBeUndefined()
+    vm.$data = { b: { c: 3}, e: 4 }
     nextTick(function () {
       expect(watcher.value).toBe(3)
+      expect(watcher2.value).toBe(4)
       expect(spy).toHaveBeenCalledWith(3, 2)
+      expect(spy2).toHaveBeenCalledWith(4, undefined)
       done()
     })
   })

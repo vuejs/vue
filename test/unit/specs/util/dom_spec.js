@@ -17,6 +17,14 @@ if (_.inBrowser) {
       parent.appendChild(child) 
     })
 
+    it('inDoc', function () {
+      expect(_.inDoc(target)).toBe(false)
+      document.body.appendChild(target)
+      expect(_.inDoc(target)).toBe(true)
+      document.body.removeChild(target)
+      expect(_.inDoc(target)).toBe(false)
+    })
+
     it('attr', function () {
       target.setAttribute('v-test', 'ok')
       var val = _.attr(target, 'test')
@@ -76,6 +84,19 @@ if (_.inBrowser) {
       expect(target.attributes.length).toBe(2)
       expect(target.getAttribute('test1')).toBe('1')
       expect(target.getAttribute('test2')).toBe('2')
+    })
+
+    it('on/off', function () {
+      var spy = jasmine.createSpy()
+      _.on(target, 'click', spy)
+      var e = document.createEvent('HTMLEvents')
+      e.initEvent('click', true, true)
+      target.dispatchEvent(e)
+      expect(spy.calls.count()).toBe(1)
+      expect(spy).toHaveBeenCalledWith(e)
+      _.off(target, 'click', spy)
+      target.dispatchEvent(e)
+      expect(spy.calls.count()).toBe(1)
     })
   })
 }

@@ -20,27 +20,56 @@ var strats = {}
  */
 
 strats.data = function (parentVal, childVal, vm) {
-  if (!childVal) return parentVal
-  if (!parentVal || !vm) {
-    return childVal
+  // in a class merge, both should be functions
+  // so we just return child if it exists
+  if (!vm) {
+    if (childVal && typeof childVal !== 'function') {
+      _.warn(
+        'The "data" option should be a function ' +
+        'that returns a per-instance value in component ' +
+        'definitions.'
+      )
+      return
+    }
+    return childVal || parentVal
   }
-  // instance option is a function, just call it here.
-  if (typeof childVal === 'function') {
-    childVal = childVal()
-  }
-  // the special case where parent data is a function,
-  // and instance also has passed-in data. we need to mix
-  // the default data returned from the function into the
-  // passed-in one.
-  if (typeof parentVal === 'function') {
-    var defaultData = parentVal()
+  var instanceData = typeof childVal === 'function'
+    ? childVal()
+    : childVal
+  var defaultData = typeof parentVal === 'function'
+    ? parentVal()
+    : undefined
+  if (instanceData) {
+    // mix default data into instance data
     for (var key in defaultData) {
-      if (!childVal.hasOwnProperty(key)) {
-        childVal[key] = defaultData[key]
+      if (!instanceData.hasOwnProperty(key)) {
+        instanceData[key] = defaultData[key]
       }
     }
+    return instanceData
+  } else {
+    return defaultData
   }
-  return childVal
+}
+
+/**
+ * El
+ */
+
+strats.el = function (parentVal, childVal, vm) {
+  if (!vm && childVal && typeof childVal !== 'function') {
+    _.warn(
+      'The "el" option should be a function ' +
+      'that returns a per-instance value in component ' +
+      'definitions.'
+    )
+    return
+  }
+  var ret = childVal || parentVal
+  // invoke the element factory if this is instance merge
+  return vm && typeof ret === 'function'
+    ? ret()
+    : ret
 }
 
 /**
@@ -178,19 +207,8 @@ module.exports = function mergeOptions (parent, child, vm) {
     }
   }
   function merge (key) {
-    if (
-      !vm &&
-      (key === 'el' || key === 'data') &&
-      typeof child[key] !== 'function') {
-      _.warn(
-        'The "' + key + '" option should be a function ' +
-        'that returns a per-instance value in component ' +
-        'definitions.'
-      )
-    } else {
-      var strat = strats[key] || defaultStrat
-      options[key] = strat(parent[key], child[key], vm, key)
-    }
+    var strat = strats[key] || defaultStrat
+    options[key] = strat(parent[key], child[key], vm, key)
   }
   return options
 }
