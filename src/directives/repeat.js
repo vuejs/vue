@@ -82,6 +82,7 @@ module.exports = {
     var id = _.attr(this.el, 'component')
     if (!id) {
       this.Ctor = _.Vue // default constructor
+      this.inherit = true // inline repeats should inherit
     } else {
       var tokens = textParser.parse(id)
       if (!tokens) { // static component
@@ -252,7 +253,7 @@ module.exports = {
       _linker: this._linker,
       _meta: meta,
       data: data,
-      parent: this.vm
+      inherit: this.inherit
     }, Ctor)
     // cache instance
     this.cacheVm(raw, vm)

@@ -73,7 +73,9 @@ describe('Instance Scope', function () {
     })
 
     it('inherit', function () {
-      var child = vm.$addChild()
+      var child = vm.$addChild({
+        inherit: true
+      })
       expect(child.c).toBe('cd')
 
       child.d = 'e f'
@@ -105,7 +107,9 @@ describe('Instance Scope', function () {
       })
       expect(vm.test()).toBe(1)
 
-      var child = vm.$addChild()
+      var child = vm.$addChild({
+        inherit: true
+      })
       expect(child.test()).toBe(1)
     })
 

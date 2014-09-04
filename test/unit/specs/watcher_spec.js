@@ -126,13 +126,13 @@ describe('Watcher', function () {
     expect(watcher.value).toBeUndefined()
     expect(watcher2.value).toBeUndefined()
     // check $add affecting children
-    var child = vm.$addChild()
+    var child = vm.$addChild({
+      inherit: true
+    })
     var watcher3 = new Watcher(child, 'd.e', spy)
     var watcher4 = new Watcher(child, 'b.e', spy)
     // check $add should not affect isolated children
-    var child2 = vm.$addChild({
-      isolated: true
-    })
+    var child2 = vm.$addChild()
     var watcher5 = new Watcher(child2, 'd.e', spy)
     expect(watcher5.value).toBeUndefined()
     vm.$add('d', { e: 123 })
@@ -209,7 +209,9 @@ describe('Watcher', function () {
   })
 
   it('watching parent scope properties', function (done) {
-    var child = vm.$addChild()
+    var child = vm.$addChild({
+      inherit: true
+    })
     var spy2 = jasmine.createSpy('watch')
     var watcher1 = new Watcher(child, '$data', spy)
     var watcher2 = new Watcher(child, 'a', spy2)

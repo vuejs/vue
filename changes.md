@@ -36,11 +36,11 @@ var vm = new Vue({ el: '#app', data: {a: 1} })
 
 In the previous version, nested Vue instances do not have prototypal inheritance of their data scope. Although you can access parent data properties in templates, you need to explicitly travel up the scope chain with `this.$parent` in JavaScript code or use `this.$get()` to get a property on the scope chain. The expression parser also needs to do a lot of dirty work to determine the correct scope the variables belong to.
 
-In the new model, we provide a scope inehritance system similar to Angular, in which you can directly access properties that exist on parent scopes. The major difference is that setting a primitive value property on a child scope WILL affect that on the parent scope! This is one of the major gotchas in Angular. If you are somewhat familiar with how prototype inehritance works, you might be surprised how this is possible. Well, the reason is that all data properties in Vue are getter/setters, and invoking a setter will not cause the child scope shadowing parent scopes. See the example [here](http://jsfiddle.net/yyx990803/Px2n6/).
+In the new model, we provide a scope inehritance system similar to Angular, in which you can directly access properties that exist on parent scopes. The major difference is that setting a primitive value property on a child scope WILL affect that on the parent scope! Because all data properties in Vue are getter/setters, so setting a property with the same key as parent on a child will not cause the child scope to create a new property shadowing the parent one, but rather it will just invoke the parent's setter function. See the example [here](http://jsfiddle.net/yyx990803/Px2n6/).
 
 The result of this model is a much cleaner expression evaluation implementation. All expressions can simply be evaluated against the vm.
 
-You can also pass in `isolated: true` to avoid inheriting a parent scope, which can provide encapsulation for reusable components and improve performance.
+By default, all child components **DO NOT** inherit the parent scope. Only anonymous instances created in `v-repeat` and `v-if` inherit parent scope by default. This avoids accidentally falling through to parent properties when you didn't mean to. If you want your component to explicitly inherit parent scope, use the `inherit:true` option.
 
 ## Instance Option changes
 
@@ -100,11 +100,14 @@ You can also pass in `isolated: true` to avoid inheriting a parent scope, which 
   // -> goodbye!
   ```
 
-- #### new option: `isolated`.
+- #### new option: `inherit`.
 
   Default: `false`.
 
-  Whether to inherit parent scope data. Set it to `true` if you want to create a component that have an isolated scope of its own. An isolated scope means you won't be able to bind to data on parent scopes in the component's template.
+  Whether to inherit parent scope data. Set it to `true` if you want to create a component that inherits parent scope. By default, inside a component's template you won't be able to bind to data on parent scopes. When this is set to `true`, you will be able to:
+
+  1. bind to parent scope properties in the component template
+  2. directly access parent properties on the component instance itself, via prototypal inheritance.
 
 - #### removed options:
 

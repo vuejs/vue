@@ -13,11 +13,13 @@ var _ = require('../util')
 
 exports.$addChild = function (opts, BaseCtor) {
   BaseCtor = BaseCtor || _.Vue
+  opts = opts || {}
+  var parent = this
   var ChildVue
-  if (BaseCtor.options.isolated) {
-    ChildVue = BaseCtor
-  } else {
-    var parent = this
+  var inherit = opts.inherit !== undefined
+    ? opts.inherit
+    : BaseCtor.options.inherit
+  if (inherit) {
     var ctors = parent._childCtors
     if (!ctors) {
       ctors = parent._childCtors = {}
@@ -25,8 +27,6 @@ exports.$addChild = function (opts, BaseCtor) {
     ChildVue = ctors[BaseCtor.cid]
     if (!ChildVue) {
       ChildVue = function (options) {
-        this.$parent = parent
-        this.$root = parent.$root
         this.constructor = ChildVue
         _.Vue.call(this, options)
       }
@@ -34,7 +34,11 @@ exports.$addChild = function (opts, BaseCtor) {
       ChildVue.prototype = this
       ctors[BaseCtor.cid] = ChildVue
     }
+  } else {
+    ChildVue = BaseCtor
   }
+  opts._parent = parent
+  opts._root = parent.$root
   var child = new ChildVue(opts)
   if (!this._children) {
     this._children = []

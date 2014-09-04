@@ -16,7 +16,8 @@ exports._init = function (options) {
   options = options || {}
 
   this.$el           = null
-  this.$root         = this.$root || this
+  this.$parent       = options._parent
+  this.$root         = options._root || this
   this.$             = {}
   this._watcherList  = []
   this._watchers     = {}
