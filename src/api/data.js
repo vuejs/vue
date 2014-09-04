@@ -47,6 +47,8 @@ exports.$add = function (key, val) {
     this._data.$add(key, val)
     this._proxy(key)
     this._digest()
+  } else {
+    _.warn('Refused to $add reserved key: ' + key)
   }
 }
 
@@ -61,6 +63,8 @@ exports.$delete = function (key) {
     this._data.$delete(key)
     this._unproxy(key)
     this._digest()
+  } else {
+    _.warn('Refused to $delete reserved key: ' + key)
   }
 }
 
@@ -156,6 +160,6 @@ exports.$interpolate = function (text) {
  */
 
 exports.$log = function (key) {
-  var data = this[key || '$data']
+  var data = this[key || '_data']
   console.log(JSON.parse(JSON.stringify(data)))
 }
