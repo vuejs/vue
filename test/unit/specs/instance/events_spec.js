@@ -2,12 +2,13 @@ var Vue = require('../../../../src/vue')
 
 describe('Instance Events', function () {
 
-  describe('events', function () {
+  var spy, spy2
+  beforeEach(function () {
+    spy = jasmine.createSpy()
+    spy2 = jasmine.createSpy()
+  })
 
-    var spy
-    beforeEach(function () {
-      spy = jasmine.createSpy()
-    })
+  describe('events', function () {
 
     it('normal events', function () {
       var vm = new Vue({
@@ -47,11 +48,6 @@ describe('Instance Events', function () {
   })
 
   describe('hooks', function () {
-
-    var spy
-    beforeEach(function () {
-      spy = jasmine.createSpy()
-    })
     
     it('created', function () {
       var ctx
@@ -141,7 +137,6 @@ describe('Instance Events', function () {
         // try mounting on something already in dom
         el = document.createElement('div')
         document.body.appendChild(el)
-        var spy2 = jasmine.createSpy()
         vm = new Vue({
           el: el,
           ready: spy2
@@ -153,15 +148,68 @@ describe('Instance Events', function () {
       describe('attached/detached', function () {
 
         it('in DOM', function () {
-          // body...
+          var el = document.createElement('div')
+          var childEl = document.createElement('div')
+          el.appendChild(childEl)
+          document.body.appendChild(el)
+          var parentVm = new Vue({
+            el: el,
+            attached: spy,
+            detached: spy2
+          })
+          var childVm = parentVm.$addChild({
+            el: childEl,
+            attached: spy,
+            detached: spy2
+          })
+          expect(spy.calls.count()).toBe(2)
+          parentVm.$remove()
+          expect(spy2.calls.count()).toBe(2)
+          // child should be already detached
+          // so the hook should not fire again
+          childVm.$remove()
+          expect(spy2.calls.count()).toBe(2)
         })
 
         it('create then attach', function () {
-          // body...
+          var el = document.createElement('div')
+          var childEl = document.createElement('div')
+          el.appendChild(childEl)
+          var parentVm = new Vue({
+            el: el,
+            attached: spy,
+            detached: spy2
+          })
+          var childVm = parentVm.$addChild({
+            el: childEl,
+            attached: spy,
+            detached: spy2
+          })
+          parentVm.$appendTo(document.body)
+          expect(spy.calls.count()).toBe(2)
+          // detach child first
+          childVm.$remove()
+          expect(spy2.calls.count()).toBe(1)
+          // should only fire parent detach
+          parentVm.$remove()
+          expect(spy2.calls.count()).toBe(2)
         })
 
         it('should not fire on detached child', function () {
-          // body...
+          var el = document.createElement('div')
+          var childEl = document.createElement('div')
+          var parentVm = new Vue({
+            el: el,
+            attached: spy
+          })
+          var childVm = parentVm.$addChild({
+            el: childEl,
+            attached: spy
+          })
+          parentVm.$appendTo(document.body)
+          expect(spy.calls.count()).toBe(1)
+          childVm.$appendTo(el)
+          expect(spy.calls.count()).toBe(2)
         })
 
       })

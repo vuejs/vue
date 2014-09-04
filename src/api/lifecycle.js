@@ -34,8 +34,10 @@ exports.$mount = function (el) {
   this._callHook('compiled')
   if (_.inDoc(this.$el)) {
     this._callHook('attached')
+    this._initDOMHooks()
     ready.call(this)
   } else {
+    this._initDOMHooks()
     this.$once('hook:attached', ready)
   }
 }
@@ -67,7 +69,6 @@ function ready () {
   this._isAttached = true
   this._isReady = true
   this._callHook('ready')
-  this._initDOMHooks()
 }
 
 /**

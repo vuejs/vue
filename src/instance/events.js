@@ -57,28 +57,40 @@ function register (vm, event, handler, methods) {
  */
 
 exports._initDOMHooks = function () {
-  this.$on('hook:attached', function () {
-    this._isAttached = true
-    var children = this._children
-    if (!children) return
-    for (var i = 0, l = children.length; i < l; i++) {
-      var child = children[i]
-      if (!child._isAttached && inDoc(child.$el)) {
-        child._callHook('attached')
-      }
+  this.$on('hook:attached', onAttached)
+  this.$on('hook:detached', onDetached)
+}
+
+/**
+ * Callback to recursively call attached hook on children
+ */
+
+function onAttached () {
+  this._isAttached = true
+  var children = this._children
+  if (!children) return
+  for (var i = 0, l = children.length; i < l; i++) {
+    var child = children[i]
+    if (!child._isAttached && inDoc(child.$el)) {
+      child._callHook('attached')
     }
-  })
-  this.$on('hook:detached', function () {
-    this._isAttached = false
-    var children = this._children
-    if (!children) return
-    for (var i = 0, l = children.length; i < l; i++) {
-      var child = children[i]
-      if (child._isAttached && !inDoc(child.$el)) {
-        child._callHook('detached')
-      }
+  }
+}
+
+/**
+ * Callback to recursively call detached hook on children
+ */
+
+function onDetached () {
+  this._isAttached = false
+  var children = this._children
+  if (!children) return
+  for (var i = 0, l = children.length; i < l; i++) {
+    var child = children[i]
+    if (child._isAttached && !inDoc(child.$el)) {
+      child._callHook('detached')
     }
-  })
+  }
 }
 
 /**
