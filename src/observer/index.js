@@ -26,18 +26,15 @@ var OBJECT = 1
 function Observer (value, type) {
   this.id = ++uid
   this.value = value
-  this.type = type
   this.active = true
   this.binding = new Binding()
-  if (value) {
-    _.define(value, '__ob__', this)
-    if (type === ARRAY) {
-      _.augment(value, arrayAugmentations)
-      this.observeArray(value)
-    } else if (type === OBJECT) {
-      _.augment(value, objectAugmentations)
-      this.walk(value)
-    }
+  _.define(value, '__ob__', this)
+  if (type === ARRAY) {
+    _.augment(value, arrayAugmentations)
+    this.observeArray(value)
+  } else if (type === OBJECT) {
+    _.augment(value, objectAugmentations)
+    this.walk(value)
   }
 }
 
@@ -66,7 +63,7 @@ Observer.create = function (value) {
     return new Observer(value, ARRAY)
   } else if (
     _.isPlainObject(value) &&
-    !value.$observer // avoid Vue instance
+    !value._isVue // avoid Vue instance
   ) {
     return new Observer(value, OBJECT)
   }
@@ -99,14 +96,12 @@ p.walk = function (obj) {
  * and if value is array, link binding to the array.
  *
  * @param {*} val
+ * @return {Binding|undefined}
  */
 
 p.observe = function (val) {
   var ob = Observer.create(val)
-  if (ob) {
-    // ob.parentCount++
-    return ob.binding
-  }
+  if (ob) return ob.binding
 }
 
 /**

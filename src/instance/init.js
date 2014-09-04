@@ -23,6 +23,9 @@ exports._init = function (options) {
   this._userWatchers = {}
   this._directives   = []
 
+  // a flag to avoid this being observed
+  this._isVue = true
+
   // events bookkeeping
   this._events         = {}
   this._eventsCount    = {}

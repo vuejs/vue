@@ -16,7 +16,6 @@ var Binding = require('../binding')
  */
 
 exports._initScope = function () {
-  // this._initObserver()
   this._initData()
   this._initComputed()
   this._initMethods()
