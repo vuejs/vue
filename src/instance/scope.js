@@ -3,16 +3,11 @@ var Observer = require('../observer')
 var Binding = require('../binding')
 
 /**
- * Setup the data scope of an instance.
- *
- * We need to setup the instance $observer, which emits
- * data change events. The $observer relays events from
- * the $data's observer, because $data might be swapped
- * and the data observer might change.
- *
- * If the instance has a parent and is not isolated, we
- * also need to listen to parent scope events and propagate
- * changes down here.
+ * Setup the scope of an instance, which contains:
+ * - observed data
+ * - computed properties
+ * - user methods
+ * - meta properties
  */
 
 exports._initScope = function () {
@@ -31,8 +26,12 @@ exports._initData = function () {
   var data = this._data
   var keys = Object.keys(data)
   var i = keys.length
+  var key
   while (i--) {
-    this._proxy(keys[i])
+    key = keys[i]
+    if (!_.isReserved(key)) {
+      this._proxy(key)
+    }
   }
   // observe data
   Observer.create(data)
@@ -80,22 +79,20 @@ exports._setData = function (newData) {
  */
 
 exports._proxy = function (key) {
-  if (!_.isReserved(key)) {
-    // need to store ref to self here
-    // because these getter/setters might
-    // be called by child instances!
-    var self = this
-    Object.defineProperty(self, key, {
-      configurable: true,
-      enumerable: true,
-      get: function proxyGetter () {
-        return self._data[key]
-      },
-      set: function proxySetter (val) {
-        self._data[key] = val
-      }
-    })
-  }
+  // need to store ref to self here
+  // because these getter/setters might
+  // be called by child instances!
+  var self = this
+  Object.defineProperty(self, key, {
+    configurable: true,
+    enumerable: true,
+    get: function proxyGetter () {
+      return self._data[key]
+    },
+    set: function proxySetter (val) {
+      self._data[key] = val
+    }
+  })
 }
 
 /**

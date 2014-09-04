@@ -17,16 +17,17 @@ exports.$mount = function (el) {
     _.warn('$mount() should be called only once.')
     return
   }
-  this._callHook('beforeCompile')
   var options = this.$options
   if (options._linker) {
     // pre-compiled linker. this means the element has
     // been trancluded and compiled. just link it.
     this._initElement(el)
+    this._callHook('beforeCompile')
     options._linker(this, el)
   } else {
     el = transclude(el, options)
     this._initElement(el)
+    this._callHook('beforeCompile')
     var linker = compile(el, options)
     linker(this, el)
   }
@@ -83,7 +84,7 @@ exports.$destroy = function (remove) {
   }
   this._callHook('beforeDestroy')
   // remove DOM element
-  if (remove) {
+  if (remove && this.$el) {
     if (this.$el === document.body) {
       this.$el.innerHTML = ''
     } else {
@@ -116,20 +117,21 @@ exports.$destroy = function (remove) {
     this._userWatchers[i].teardown()
   }
   // clean up
+  if (this.$el) {
+    this.$el.__vue__ = null
+  }
   this._data =
   this._watchers =
   this._userWatchers =
   this._activeWatcher =
   this.$el =
-  this.$el.__vue__ =
   this.$parent =
-  this.$observer =
   this._children =
   this._bindings =
   this._directives = null
   // call the last hook...
   this._isDestroyed = true
-  this._callHook('afterDestroy')
+  this._callHook('destroyed')
   // turn off all instance listeners.
   this.$off()
 }

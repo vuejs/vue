@@ -109,6 +109,17 @@ describe('Watcher', function () {
     })
   })
 
+  it('meta properties', function (done) {
+    vm._defineMeta('$index', 1)
+    var watcher = new Watcher(vm, '$index + 1', spy)
+    expect(watcher.value).toBe(2)
+    vm.$index = 2
+    nextTick(function () {
+      expect(watcher.value).toBe(3)
+      done()
+    })
+  })
+
   it('non-existent path, $add later', function (done) {
     var watcher = new Watcher(vm, 'd.e', spy)
     var watcher2 = new Watcher(vm, 'b.e', spy)
@@ -206,7 +217,7 @@ describe('Watcher', function () {
     nextTick(function () {
       // $data should only be called on self data change
       expect(watcher1.value).toBe(child.$data)
-      expect(spy.calls.count()).toBe(0)
+      expect(spy).not.toHaveBeenCalled()
       expect(watcher2.value).toBe(123)
       expect(spy2).toHaveBeenCalledWith(123, 1)
       done()
@@ -249,7 +260,7 @@ describe('Watcher', function () {
     nextTick(function () {
       expect(vm.b.c).toBe(2)
       expect(watcher.value).toBe(2)
-      expect(spy.calls.count()).toBe(0)
+      expect(spy).not.toHaveBeenCalled()
       watcher.set(6)
       nextTick(function () {
         expect(vm.b.c).toBe(6)
@@ -299,7 +310,7 @@ describe('Watcher', function () {
     watcher.removeCb(spy)
     vm.a = 234
     nextTick(function () {
-      expect(spy.calls.count()).toBe(0)
+      expect(spy).not.toHaveBeenCalled()
       expect(spy2).toHaveBeenCalledWith(234, 1)
       done()
     })
@@ -313,7 +324,7 @@ describe('Watcher', function () {
       expect(watcher.active).toBe(false)
       expect(watcher.vm).toBe(null)
       expect(watcher.cbs).toBe(null)
-      expect(spy.calls.count()).toBe(0)
+      expect(spy).not.toHaveBeenCalled()
       done()
     })
   })

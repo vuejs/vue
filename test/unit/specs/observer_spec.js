@@ -23,7 +23,7 @@ describe('Observer', function () {
       a: {},
       b: {}
     }
-    ob = Observer.create(obj)
+    var ob = Observer.create(obj)
     expect(ob instanceof Observer).toBe(true)
     expect(ob.active).toBe(true)
     expect(ob.value).toBe(obj)
@@ -39,7 +39,7 @@ describe('Observer', function () {
   it('create on array', function () {
     // on object
     var arr = [{}, {}]
-    ob = Observer.create(arr)
+    var ob = Observer.create(arr)
     expect(ob instanceof Observer).toBe(true)
     expect(ob.active).toBe(true)
     expect(ob.value).toBe(arr)
@@ -61,12 +61,13 @@ describe('Observer', function () {
       },
       update: jasmine.createSpy()
     }
+    var dump
     // collect dep
     Observer.target = watcher
-    obj.a.b
+    dump = obj.a.b
     Observer.target = null
     expect(watcher.deps.length).toBe(2)
-    obj.a.b = 3
+    dump = obj.a.b = 3
     expect(watcher.update.calls.count()).toBe(1)
     // swap object
     obj.a = { b: 4 }
@@ -75,7 +76,7 @@ describe('Observer', function () {
     var oldDeps = watcher.deps
     watcher.deps = []
     Observer.target = watcher
-    obj.a.b
+    dump = obj.a.b
     Observer.target = null
     expect(watcher.deps.length).toBe(2)
     // make sure we picked up the new bindings

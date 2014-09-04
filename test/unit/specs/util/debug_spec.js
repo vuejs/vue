@@ -25,7 +25,7 @@ if (typeof console !== 'undefined') {
     it('not log when debug is false', function () {
       config.debug = false
       _.log('bye')
-      expect(console.log.calls.count()).toBe(0)
+      expect(console.log).not.toHaveBeenCalled()
     })
 
     it('warn when silent is false', function () {
@@ -37,7 +37,7 @@ if (typeof console !== 'undefined') {
     it('not warn when silent is ture', function () {
       config.silent = true
       _.warn('oops')
-      expect(console.warn.calls.count()).toBe(0)
+      expect(console.warn).not.toHaveBeenCalled()
     })
 
     if (console.trace) {

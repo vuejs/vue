@@ -131,7 +131,7 @@ You can also pass in `isolated: true` to avoid inheriting a parent scope, which 
 
   - #### hook usage change: `created`
 
-    This is now called before anything happens to the instance, with only `this.$data` being available, but **not observed** yet. In the past you can do `this.something = 1` to define default data, but it required some weird hack to make it work. Now you should just explicitly do `this.$data.something = 1` to define your instance default data.
+    In the past, you could do `this.something = 1` inside the `created` hook to add observed data to the instance. Now the hook is called after the data observation, so if you wish to add additional data to the instance you should use the new `$add` and `$delete` API methods.
 
   - #### hook usage change: `ready`
 

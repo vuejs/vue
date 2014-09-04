@@ -1,15 +1,35 @@
-/**
- * Test property proxy, scope inheritance,
- * data event propagation and data sync
- */
-
 var Vue = require('../../../../src/vue')
-var Observer = require('../../../../src/observer')
-Observer.pathDelimiter = '.'
 
-describe('Scope', function () {
-  
-  // TODO
+describe('Instance Scope', function () {
+
+  describe('data proxy', function () {
+
+    var data = {
+      a: 0,
+      b: 0
+    }
+    var vm = new Vue({
+      data: data
+    })
+
+    it('initial', function () {
+      expect(vm.a).toBe(data.a)
+      expect(vm.b).toBe(data.b)
+    })
+
+    it('vm => data', function () {
+      vm.a = 1
+      expect(data.a).toBe(1)
+      expect(vm.a).toBe(data.a)
+    })
+
+    it('data => vm', function () {
+      data.b = 2
+      expect(vm.b).toBe(2)
+      expect(vm.b).toBe(data.b)
+    })
+
+  })
 
   describe('computed', function () {
     
@@ -87,6 +107,24 @@ describe('Scope', function () {
 
       var child = vm.$addChild()
       expect(child.test()).toBe(1)
+    })
+
+  })
+
+  describe('meta', function () {
+
+    var vm = new Vue({
+      _meta: {
+        $index: 0,
+        $value: 'test'
+      }
+    })
+
+    it('should define metas only on vm', function () {
+      expect(vm.$index).toBe(0)
+      expect(vm.$value).toBe('test')
+      expect('$index' in vm.$data).toBe(false)
+      expect('$value' in vm.$data).toBe(false)
     })
 
   })

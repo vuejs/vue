@@ -46,8 +46,7 @@ exports._init = function (options) {
   this._children =
   this._childCtors = null
 
-  // anonymous instances are created by flow-control
-  // directives such as v-if and v-repeat
+  // anonymous instances are created by v-if
   this._isAnonymous = options._anonymous
 
   // merge options.
@@ -63,12 +62,11 @@ exports._init = function (options) {
   // setup event system and option events.
   this._initEvents()
 
-  // the `created` hook is called after basic properties
-  // have been set up & before data observation happens.
-  this._callHook('created')
-
   // initialize data observation and scope inheritance.
   this._initScope()
+
+  // call created hook
+  this._callHook('created')
 
   // if `el` option is passed, start compilation.
   if (options.el) {

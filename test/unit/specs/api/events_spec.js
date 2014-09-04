@@ -33,7 +33,7 @@ describe('Events API', function () {
     vm.$off()
     vm.$emit('test1')
     vm.$emit('test2')
-    expect(spy.calls.count()).toBe(0)
+    expect(spy).not.toHaveBeenCalled()
   })
 
   it('$off event', function () {
@@ -53,7 +53,7 @@ describe('Events API', function () {
     vm.$on('test', spy2)
     vm.$off('test', spy)
     vm.$emit('test', 1, 2, 3)
-    expect(spy.calls.count()).toBe(0)
+    expect(spy).not.toHaveBeenCalled()
     expect(spy2.calls.count()).toBe(1)
     expect(spy2).toHaveBeenCalledWith(1, 2, 3)
   })
@@ -93,7 +93,7 @@ describe('Events API', function () {
     })
     child2.$on('test', spy)
     vm.$broadcast('test')
-    expect(spy.calls.count()).toBe(0)
+    expect(spy).not.toHaveBeenCalled()
   })
 
   it('$dispatch', function () {
@@ -113,7 +113,7 @@ describe('Events API', function () {
     })
     vm.$on('test', spy)
     child2.$dispatch('test')
-    expect(spy.calls.count()).toBe(0)
+    expect(spy).not.toHaveBeenCalled()
   })
 
 })

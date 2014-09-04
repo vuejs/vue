@@ -1,4 +1,5 @@
-var inDoc = require('../util').inDoc
+var _ = require('../util')
+var inDoc = _.inDoc
 
 /**
  * Setup the instance's option events.
@@ -14,12 +15,39 @@ exports._initEvents = function () {
     var handlers, e, i, j
     for (e in events) {
       handlers = events[e]
-      for (i = 0, j = handlers.length; i < j; i++) {
-        var handler = typeof handlers[i] === 'string'
-          ? methods && methods[handlers[i]]
-          : handlers[i]
-        this.$on(e, handler)
+      if (_.isArray(handlers)) {
+        for (i = 0, j = handlers.length; i < j; i++) {
+          register(this, e, handlers[i], methods)
+        }
+      } else {
+        register(this, e, handlers, methods)
       }
+    }
+  }
+}
+
+/**
+ * Helper to register an event.
+ *
+ * @param {Vue} vm
+ * @param {String} event
+ * @param {*} handler
+ * @param {Object|undefined} methods
+ */
+
+function register (vm, event, handler, methods) {
+  var type = typeof handler
+  if (type === 'function') {
+    vm.$on(event, handler)
+  } else if (type === 'string') {
+    var method = methods && methods[handler]
+    if (method) {
+      vm.$on(event, method)
+    } else {
+      _.warn(
+        'Unknown method: "' + handler + '" when ' +
+        'registering callback for event: "' + event + '".'
+      )
     }
   }
 }

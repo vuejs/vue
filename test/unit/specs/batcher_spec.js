@@ -47,7 +47,7 @@ describe('Batcher', function () {
       override: true
     })
     nextTick(function () {
-      expect(spy.calls.count()).toBe(0)
+      expect(spy).not.toHaveBeenCalled()
       expect(spy2.calls.count()).toBe(1)
       done()
     })
