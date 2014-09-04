@@ -144,12 +144,16 @@ p.convert = function (key, val) {
       val = newVal
       var newBinding = ob.observe(newVal)
       if (newBinding) {
-        // handle over binding
-        newBinding.subs = binding.subs
-        binding.subs = []
+        // swap binding, then call notify on old binding.
+        // this ensures all subscribers of the old binding
+        // gets re-evaluated, picks up the new binding and
+        // unregister from old binding.
+        var oldBinding = binding
         binding = newBinding
+        oldBinding.notify()
+      } else {
+        binding.notify()
       }
-      binding.notify()
     }
   })
 }
