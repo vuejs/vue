@@ -103,9 +103,9 @@ function compileExpFns (exp, needSet) {
   var getter = makeGetter(body)
   if (getter) {
     return {
-      get      : getter,
-      body     : body,
-      set      : needSet
+      get: getter,
+      body: body,
+      set: needSet
         ? makeSetter(body)
         : null
     }
@@ -153,7 +153,7 @@ function makeGetter (body) {
   try {
     return new Function(
       'scope',
-      'try{return ' + body + '}catch(e){};'
+      '"use strict";try{return ' + body + '}catch(e){};'
     )
   } catch (e) {
     _.warn(
@@ -182,7 +182,7 @@ function makeSetter (body) {
     return new Function(
       'scope',
       'value',
-      body + ' = value;'
+      '"use strict";' + body + ' = value;'
     )
   } catch (e) {
     _.warn('Invalid setter function body: ' + body)
