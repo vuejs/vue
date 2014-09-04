@@ -29,6 +29,7 @@ module.exports = {
     this.checkIf()
     this.checkRef()
     this.checkComponent()
+    this.checkTrackById()
     // setup ref node
     this.ref = document.createComment('v-repeat')
     // cache for primitive value instances
@@ -107,6 +108,19 @@ module.exports = {
   },
 
   /**
+   * Check for a track-by ID, which allows us to identify
+   * a piece of data and its associated instance by its
+   * unique id.
+   */
+
+  checkTrackById: function () {
+    this.idKey = this.el.getAttribute('trackby')
+    if (this.idKey !== null) {
+      this.el.removeAttribute('trackby')
+    }
+  },
+
+  /**
    * Update.
    * This is called whenever the Array mutates.
    *
@@ -146,10 +160,12 @@ module.exports = {
    */
 
   diff: function (data, oldVms) {
+    var idKey = this.idKey
     var converted = this.converted
+    var ref = this.ref
+    var alias = this.arg
     var init = !oldVms
     var vms = new Array(data.length)
-    var ref = this.ref
     var obj, raw, vm, i, l
     // First pass, go through the new Array and fill up
     // the new vms array. If a piece of data has a cached
@@ -164,6 +180,14 @@ module.exports = {
         vm.$index = i // update $index
         if (converted) {
           vm.$key = obj.key // update $key
+        }
+        if (idKey) { // swap track by id data
+          if (alias) {
+            console.log('reusing...')
+            vm[alias] = raw
+          } else {
+            vm._setData(raw)
+          }
         }
       } else { // new instance
         vm = this.build(obj, i)
@@ -315,7 +339,16 @@ module.exports = {
    */
 
   cacheVm: function (data, vm) {
-    if (isObject(data)) {
+    var idKey = this.idKey
+    var cache = this.cache
+    if (idKey) {
+      var id = data[idKey]
+      if (!cache[id]) {
+        cache[id] = vm
+      } else {
+        _.warn('Duplicate ID in v-repeat: ' + id)
+      }
+    } else if (isObject(data)) {
       var id = this.id
       if (data.hasOwnProperty(id)) {
         if (data[id] === null) {
@@ -329,7 +362,6 @@ module.exports = {
         _.define(data, this.id, vm)
       }
     } else {
-      var cache = this.cache
       if (!cache[data]) {
         cache[data] = [vm]
       } else {
@@ -347,7 +379,9 @@ module.exports = {
    */
 
   getVm: function (data) {
-    if (isObject(data)) {
+    if (this.idKey) {
+      return this.cache[data[this.idKey]]
+    } else if (isObject(data)) {
       return data[this.id]
     } else {
       var cached = this.cache[data]
@@ -373,7 +407,9 @@ module.exports = {
 
   uncacheVm: function (vm) {
     var data = vm._raw
-    if (isObject(data)) {
+    if (this.idKey) {
+      this.cache[data[this.idKey]] = null
+    } else if (isObject(data)) {
       data[this.id] = null
       vm._raw = null
     } else {
