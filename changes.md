@@ -279,6 +279,18 @@ computed: {
 
     When used as a dynamic component, it will check for the `keep-alive` attribute. When `keep-alive` is present, already instantiated components will be cached. This is useful when you have large, nested view components and want to maintain the state when switching views.
 
+- #### Usage change for `v-with`
+
+  In 0.10 and earlier, `v-with` creates a two-way binding between the parent and child instance. In 0.11, it no longer creates a two-way binding but rather facilitates a unidirectional data flow from parent to child.
+
+  For example:
+
+  ``` html
+  <div v-component="test" v-with="childKey:parentKey">{{childKey}}</div>
+  ```
+
+  Here when you do `this.a = 123` in the child, the child's view will update, but the parent's scope will remain unaffected. When `parent.parentKey` changes again, it will overwrite `child.childKey`.
+
 - #### New directive option: `twoWay`
 
   This option indicates the directive is two-way and may write back to the model. Allows the use of `this.set(value)` inside directive functions.
