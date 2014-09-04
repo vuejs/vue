@@ -1,4 +1,5 @@
 var Vue = require('../../../../src/vue')
+var _ = require('../../../../src/util')
 
 describe('Instance Events', function () {
 
@@ -6,6 +7,7 @@ describe('Instance Events', function () {
   beforeEach(function () {
     spy = jasmine.createSpy()
     spy2 = jasmine.createSpy()
+    spyOn(_, 'warn')
   })
 
   describe('events', function () {
@@ -35,7 +37,8 @@ describe('Instance Events', function () {
     it('method name strings', function () {
       var vm = new Vue({
         events: {
-          'test': 'doSomething'
+          test: 'doSomething',
+          test2: 'doSomethingElse'
         },
         methods: {
           doSomething: spy
@@ -43,6 +46,8 @@ describe('Instance Events', function () {
       })
       vm.$emit('test', 123)
       expect(spy).toHaveBeenCalledWith(123)
+      vm.$emit('test2')
+      expect(_.warn).toHaveBeenCalled()
     })
 
   })
