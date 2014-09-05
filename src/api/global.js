@@ -8,7 +8,6 @@ var mergeOptions = require('../util/merge-option')
 exports.util       = _
 exports.nextTick   = _.nextTick
 exports.config     = require('../config')
-exports.transition = require('../transition')
 
 /**
  * Each instance constructor, including Vue, has a unique
@@ -33,7 +32,10 @@ exports.extend = function (extendOptions) {
   Sub.prototype = Object.create(Super.prototype)
   Sub.prototype.constructor = Sub
   Sub.cid = cid++
-  Sub.options = mergeOptions(Super.options, extendOptions)
+  Sub.options = mergeOptions(
+    Super.options,
+    extendOptions || {}
+  )
   Sub.super = Super
   // allow further extension
   Sub.extend = Super.extend
@@ -46,17 +48,10 @@ exports.extend = function (extendOptions) {
 /**
  * Plugin system
  *
- * @param {String|Object} plugin
+ * @param {Object} plugin
  */
 
 exports.use = function (plugin) {
-  if (typeof plugin === 'string') {
-    try {
-      plugin = require(plugin)
-    } catch (e) {
-      _.warn('Cannot load plugin: ' + plugin)
-    }
-  }
   // additional parameters
   var args = _.toArray(arguments, 1)
   args.unshift(this)
