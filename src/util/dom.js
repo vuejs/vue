@@ -91,8 +91,7 @@ exports.prepend = function (el, target) {
 
 exports.replace = function (target, el) {
   var parent = target.parentNode
-  parent.insertBefore(el, target)
-  parent.removeChild(target)
+  parent.replaceChild(el, target)
 }
 
 /**
