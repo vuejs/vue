@@ -9,8 +9,9 @@ var _ = require('../../../../src/util')
 if (_.inBrowser) {
   describe('DOM API', function () {
 
-    var vm1, vm2, parent, target, sibling, empty
+    var vm1, vm2, parent, target, sibling, empty, spy
     beforeEach(function () {
+      spy = jasmine.createSpy('dom')
       parent = document.createElement('div')
       target = document.createElement('div')
       sibling = document.createElement('div')
@@ -31,18 +32,20 @@ if (_.inBrowser) {
     describe('$appendTo', function () {
       
       it('normal instance', function () {
-        vm.$appendTo(parent)
+        vm.$appendTo(parent, spy)
         expect(parent.childNodes.length).toBe(3)
         expect(parent.lastChild).toBe(vm.$el)
+        expect(spy.calls.count()).toBe(1)
       })
 
       it('block instance', function () {
-        vm2.$appendTo(parent)
+        vm2.$appendTo(parent, spy)
         expect(parent.childNodes.length).toBe(6)
         expect(parent.childNodes[2]).toBe(vm2.$el)
         expect(parent.childNodes[3].tagName).toBe('P')
         expect(parent.childNodes[4].tagName).toBe('SPAN')
         expect(parent.lastChild).toBe(vm2._blockEnd)
+        expect(spy.calls.count()).toBe(1)
       })
 
     })
@@ -50,28 +53,32 @@ if (_.inBrowser) {
     describe('$prependTo', function () {
       
       it('normal instance', function () {
-        vm.$prependTo(parent)
+        vm.$prependTo(parent, spy)
         expect(parent.childNodes.length).toBe(3)
         expect(parent.firstChild).toBe(vm.$el)
-        vm.$prependTo(empty)
+        expect(spy.calls.count()).toBe(1)
+        vm.$prependTo(empty, spy)
         expect(empty.childNodes.length).toBe(1)
         expect(empty.firstChild).toBe(vm.$el)
+        expect(spy.calls.count()).toBe(2)
       })
 
       it('block instance', function () {
-        vm2.$prependTo(parent)
+        vm2.$prependTo(parent, spy)
         expect(parent.childNodes.length).toBe(6)
         expect(parent.childNodes[0]).toBe(vm2.$el)
         expect(parent.childNodes[1].tagName).toBe('P')
         expect(parent.childNodes[2].tagName).toBe('SPAN')
         expect(parent.childNodes[3]).toBe(vm2._blockEnd)
+        expect(spy.calls.count()).toBe(1)
         // empty
-        vm2.$prependTo(empty)
+        vm2.$prependTo(empty, spy)
         expect(empty.childNodes.length).toBe(4)
         expect(empty.childNodes[0]).toBe(vm2.$el)
         expect(empty.childNodes[1].tagName).toBe('P')
         expect(empty.childNodes[2].tagName).toBe('SPAN')
         expect(empty.childNodes[3]).toBe(vm2._blockEnd)
+        expect(spy.calls.count()).toBe(2)
       })
 
     })
@@ -79,18 +86,20 @@ if (_.inBrowser) {
     describe('$before', function () {
       
       it('normal instance', function () {
-        vm.$before(sibling)
+        vm.$before(sibling, spy)
         expect(parent.childNodes.length).toBe(3)
         expect(parent.childNodes[1]).toBe(vm.$el)
+        expect(spy.calls.count()).toBe(1)
       })
 
       it('block instance', function () {
-        vm2.$before(sibling)
+        vm2.$before(sibling, spy)
         expect(parent.childNodes.length).toBe(6)
         expect(parent.childNodes[1]).toBe(vm2.$el)
         expect(parent.childNodes[2].tagName).toBe('P')
         expect(parent.childNodes[3].tagName).toBe('SPAN')
         expect(parent.childNodes[4]).toBe(vm2._blockEnd)
+        expect(spy.calls.count()).toBe(1)
       })
 
     })
@@ -98,18 +107,37 @@ if (_.inBrowser) {
     describe('$after', function () {
       
       it('normal instance', function () {
-        vm.$after(target)
+        vm.$after(target, spy)
         expect(parent.childNodes.length).toBe(3)
         expect(parent.childNodes[1]).toBe(vm.$el)
+        expect(spy.calls.count()).toBe(1)
+      })
+
+      it('normal instance no next sibling', function () {
+        vm.$after(sibling, spy)
+        expect(parent.childNodes.length).toBe(3)
+        expect(parent.lastChild).toBe(vm.$el)
+        expect(spy.calls.count()).toBe(1)
       })
 
       it('block instance', function () {
-        vm2.$after(target)
+        vm2.$after(target, spy)
         expect(parent.childNodes.length).toBe(6)
         expect(parent.childNodes[1]).toBe(vm2.$el)
         expect(parent.childNodes[2].tagName).toBe('P')
         expect(parent.childNodes[3].tagName).toBe('SPAN')
         expect(parent.childNodes[4]).toBe(vm2._blockEnd)
+        expect(spy.calls.count()).toBe(1)
+      })
+
+      it('block instance no next sibling', function () {
+        vm2.$after(sibling, spy)
+        expect(parent.childNodes.length).toBe(6)
+        expect(parent.childNodes[2]).toBe(vm2.$el)
+        expect(parent.childNodes[3].tagName).toBe('P')
+        expect(parent.childNodes[4].tagName).toBe('SPAN')
+        expect(parent.childNodes[5]).toBe(vm2._blockEnd)
+        expect(spy.calls.count()).toBe(1)
       })
 
     })
@@ -120,10 +148,11 @@ if (_.inBrowser) {
         vm.$before(sibling)
         expect(parent.childNodes.length).toBe(3)
         expect(parent.childNodes[1]).toBe(vm.$el)
-        vm.$remove()
+        vm.$remove(spy)
         expect(parent.childNodes.length).toBe(2)
         expect(parent.childNodes[0]).toBe(target)
         expect(parent.childNodes[1]).toBe(sibling)
+        expect(spy.calls.count()).toBe(1)
       })
 
       it('block instance', function () {
@@ -133,10 +162,11 @@ if (_.inBrowser) {
         expect(parent.childNodes[2].tagName).toBe('P')
         expect(parent.childNodes[3].tagName).toBe('SPAN')
         expect(parent.childNodes[4]).toBe(vm2._blockEnd)
-        vm2.$remove()
+        vm2.$remove(spy)
         expect(parent.childNodes.length).toBe(2)
         expect(parent.childNodes[0]).toBe(target)
         expect(parent.childNodes[1]).toBe(sibling)
+        expect(spy.calls.count()).toBe(1)
       })
 
     })

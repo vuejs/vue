@@ -58,12 +58,6 @@ if (_.inBrowser) {
       expect(parent.childNodes.length).toBe(0)
     })
 
-    it('append', function () {
-      _.append(target, parent)
-      expect(target.parentNode).toBe(parent)
-      expect(parent.lastChild).toBe(target)
-    })
-
     it('prepend', function () {
       _.prepend(target, parent)
       expect(target.parentNode).toBe(parent)

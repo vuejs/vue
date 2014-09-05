@@ -10,10 +10,11 @@ var transition = require('../transition')
  */
 
 exports.$appendTo = function (target, cb, withTransition) {
-  var op = withTransition === false
-    ? _.append
+  var targetIsDetached = !_.inDoc(target)
+  var op = withTransition === false || targetIsDetached
+    ? append
     : transition.append
-  insert(this, target, op, cb, withTransition)
+  insert(this, target, op, targetIsDetached, cb)
 }
 
 /**
@@ -42,10 +43,11 @@ exports.$prependTo = function (target, cb, withTransition) {
  */
 
 exports.$before = function (target, cb, withTransition) {
-  var op = withTransition === false
-    ? _.before
+  var targetIsDetached = !_.inDoc(target)
+  var op = withTransition === false || targetIsDetached
+    ? before
     : transition.before
-  insert(this, target, op, cb, withTransition)
+  insert(this, target, op, targetIsDetached, cb)
 }
 
 /**
@@ -88,12 +90,12 @@ exports.$remove = function (cb, withTransition) {
     !this._blockFragment.hasChildNodes()
   ) {
     op = withTransition === false
-      ? _.append
+      ? append
       : transition.removeThenAppend 
     blockOp(this, this._blockFragment, op, realCb)
   } else {
     op = withTransition === false
-      ? _.remove
+      ? remove
       : transition.remove
     op(this.$el, realCb, this)
   }
@@ -105,29 +107,24 @@ exports.$remove = function (cb, withTransition) {
  * @param {Vue} vm
  * @param {Element} target
  * @param {Function} op
+ * @param {Boolean} targetIsDetached
  * @param {Function} [cb]
- * @param {Boolean} [withTransition] - defaults to true
  */
 
-function insert (vm, target, op, cb, withTransition) {
+function insert (vm, target, op, targetIsDetached, cb) {
   target = query(target)
   var shouldCallHook =
+    !targetIsDetached &&
     !vm._isAttached &&
-    !_.inDoc(vm.$el) &&
-    _.inDoc(target)
+    !_.inDoc(vm.$el)
   var realCb = function () {
-    if (shouldCallHook) {
-      vm._callHook('attached')
-    }
+    if (shouldCallHook) vm._callHook('attached')
     if (cb) cb()
   }
   if (vm._isBlock) {
     blockOp(vm, target, op, realCb)
   } else {
     op(vm.$el, target, realCb, vm)
-  }
-  if (withTransition === false) {
-    realCb()
   }
 }
 
@@ -163,4 +160,42 @@ function query (el) {
   return typeof el === 'string'
     ? document.querySelector(el)
     : el
+}
+
+/**
+ * Append operation that takes a callback.
+ *
+ * @param {Node} el
+ * @param {Node} target
+ * @param {Function} cb
+ */
+
+function append (el, target, cb) {
+  target.appendChild(el)
+  if (cb) cb()
+}
+
+/**
+ * InsertBefore operation that takes a callback.
+ *
+ * @param {Node} el
+ * @param {Node} target
+ * @param {Function} cb
+ */
+
+function before (el, target, cb) {
+  _.before(el, target)
+  if (cb) cb()
+}
+
+/**
+ * Remove operation that takes a callback.
+ *
+ * @param {Node} el
+ * @param {Function} cb
+ */
+
+function remove (el, cb) {
+  _.remove(el)
+  if (cb) cb()
 }
