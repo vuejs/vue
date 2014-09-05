@@ -22,7 +22,7 @@ function pathMatch (a, b) {
   return true
 }
 
-describe('Path', function () {
+describe('Path Parser', function () {
   
   it('parse', function () {
     assertPath('', [])

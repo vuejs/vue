@@ -35,6 +35,10 @@ module.exports = function (grunt) {
       dev: {
         files: ['src/**/*.js'],
         tasks: ['dev']
+      },
+      test: {
+        files: ['test/unit/specs/**/*.js'],
+        tasks: ['build-test']
       }
     },
 

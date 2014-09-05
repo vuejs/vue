@@ -6,7 +6,7 @@ var transition = require('../transition')
  *
  * @param {Node} target
  * @param {Function} [cb]
- * @param {Boolean} [withTransition]
+ * @param {Boolean} [withTransition] - defaults to true
  */
 
 exports.$appendTo = function (target, cb, withTransition) {
@@ -21,7 +21,7 @@ exports.$appendTo = function (target, cb, withTransition) {
  *
  * @param {Node} target
  * @param {Function} [cb]
- * @param {Boolean} [withTransition]
+ * @param {Boolean} [withTransition] - defaults to true
  */
 
 exports.$prependTo = function (target, cb, withTransition) {
@@ -38,7 +38,7 @@ exports.$prependTo = function (target, cb, withTransition) {
  *
  * @param {Node} target
  * @param {Function} [cb]
- * @param {Boolean} [withTransition]
+ * @param {Boolean} [withTransition] - defaults to true
  */
 
 exports.$before = function (target, cb, withTransition) {
@@ -53,7 +53,7 @@ exports.$before = function (target, cb, withTransition) {
  *
  * @param {Node} target
  * @param {Function} [cb]
- * @param {Boolean} [withTransition]
+ * @param {Boolean} [withTransition] - defaults to true
  */
 
 exports.$after = function (target, cb, withTransition) {
@@ -69,19 +69,18 @@ exports.$after = function (target, cb, withTransition) {
  * Remove instance from DOM
  *
  * @param {Function} [cb]
- * @param {Boolean} [withTransition]
+ * @param {Boolean} [withTransition] - defaults to true
  */
 
 exports.$remove = function (cb, withTransition) {
-  var canRemove = this._isAttached && _.inDoc(this.$el)
-  if (!canRemove) {
-    if (cb) cb()
-    return
-  }
+  var inDoc = this._isAttached && _.inDoc(this.$el)
+  // if we are not in document, no need to check
+  // for transitions
+  if (!inDoc) withTransition = false
   var op
   var self = this
   var realCb = function () {
-    self._callHook('detached')
+    if (inDoc) self._callHook('detached')
     if (cb) cb()
   }
   if (
@@ -107,7 +106,7 @@ exports.$remove = function (cb, withTransition) {
  * @param {Element} target
  * @param {Function} op
  * @param {Function} [cb]
- * @param {Boolean} [withTransition]
+ * @param {Boolean} [withTransition] - defaults to true
  */
 
 function insert (vm, target, op, cb, withTransition) {

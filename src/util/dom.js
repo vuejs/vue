@@ -32,6 +32,17 @@ exports.attr = function (node, attr) {
 }
 
 /**
+ * Append child to target
+ *
+ * @param {Element} el
+ * @param {Element} target
+ */
+
+exports.append = function (el, target) {
+  target.appendChild(el)
+}
+
+/**
  * Insert el before target
  *
  * @param {Element} el
