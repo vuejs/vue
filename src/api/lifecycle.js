@@ -20,7 +20,7 @@ exports.$mount = function (el) {
   var options = this.$options
   if (options._linker) {
     // pre-compiled linker. this means the element has
-    // been trancluded and compiled. just link it.
+    // been transcluded and compiled. just link it.
     this._initElement(el)
     this._callHook('beforeCompile')
     options._linker(this, el)
@@ -85,19 +85,16 @@ exports.$destroy = function (remove) {
     return
   }
   this._callHook('beforeDestroy')
+  this._isBeingDestroyed = true
   // remove DOM element
   if (remove && this.$el) {
-    if (this.$el === document.body) {
-      this.$el.innerHTML = ''
-    } else {
-      this.$remove()
-    }
+    this.$remove()
   }
   var i
   // remove self from parent. only necessary
-  // if this is called by the user.
+  // if parent is not being destroyed as well.
   var parent = this.$parent
-  if (parent && !parent._isDestroyed) {
+  if (parent && !parent._isBeingDestroyed) {
     i = parent._children.indexOf(this)
     parent._children.splice(i)
   }
@@ -125,9 +122,10 @@ exports.$destroy = function (remove) {
   this._data =
   this._watchers =
   this._userWatchers =
-  this._activeWatcher =
+  this._watcherList =
   this.$el =
   this.$parent =
+  this.$root =
   this._children =
   this._bindings =
   this._directives = null

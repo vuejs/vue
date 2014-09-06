@@ -174,8 +174,13 @@ p.removeCb = function (cb) {
 
 p.teardown = function () {
   if (this.active) {
-    var list = this.vm._watcherList
-    list.splice(list.indexOf(this))
+    // remove self from vm's watcher list
+    // we can skip this if the vm if being destroyed
+    // which can improve teardown performance.
+    if (!this.vm._isBeingDestroyed) {
+      var list = this.vm._watcherList
+      list.splice(list.indexOf(this))
+    }
     for (var id in this.deps) {
       this.deps[id].removeSub(this)
     }

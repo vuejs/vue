@@ -41,7 +41,8 @@ exports._init = function (options) {
   this._isCompiled  =
   this._isDestroyed =
   this._isReady     =
-  this._isAttached  = false
+  this._isAttached  =
+  this._isBeingDestroyed = false
 
   // children
   this._children =

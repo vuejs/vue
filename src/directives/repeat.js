@@ -341,15 +341,16 @@ module.exports = {
   cacheVm: function (data, vm) {
     var idKey = this.idKey
     var cache = this.cache
+    var id
     if (idKey) {
-      var id = data[idKey]
+      id = data[idKey]
       if (!cache[id]) {
         cache[id] = vm
       } else {
         _.warn('Duplicate ID in v-repeat: ' + id)
       }
     } else if (isObject(data)) {
-      var id = this.id
+      id = this.id
       if (data.hasOwnProperty(id)) {
         if (data[id] === null) {
           data[id] = vm
