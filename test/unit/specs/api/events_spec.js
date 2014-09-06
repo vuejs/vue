@@ -86,13 +86,17 @@ describe('Events API', function () {
     // check $off bookkeeping
     child.$off('test', spy)
     expect(vm._eventsCount['test']).toBe(0)
-    child.$on('test', spy)
-    expect(vm._eventsCount['test']).toBe(1)
+    function noop () {}
+    child.$on('test', noop)
+    child2.$on('test', noop)
+    expect(vm._eventsCount['test']).toBe(2)
     child.$off('test')
-    expect(vm._eventsCount['test']).toBe(0)
-    child.$on('test', spy)
     expect(vm._eventsCount['test']).toBe(1)
+    child.$on('test', noop)
+    child2.$on('test', noop)
+    expect(vm._eventsCount['test']).toBe(3)
     child.$off()
+    child2.$off()
     expect(vm._eventsCount['test']).toBe(0)
   })
 
