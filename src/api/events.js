@@ -7,20 +7,10 @@ var _ = require('../util')
  * @param {Function} fn
  */
 
-var hookRE = /^hook:/
 exports.$on = function (event, fn) {
   (this._events[event] || (this._events[event] = []))
     .push(fn)
-  // hooks do not get broadcasted so we can skip them
-  if (hookRE.test(event)) return
-  // increment all parent event count by 1.
-  // pay a small cost here to optimize for $broadcast.
-  var parent = this.$parent
-  while (parent) {
-    parent._eventsCount[event] =
-      (parent._eventsCount[event] || 0) + 1
-    parent = parent.$parent
-  }
+  modifyListenerCount(this, event, 1)
 }
 
 /**
@@ -50,15 +40,25 @@ exports.$once = function (event, fn) {
  */
 
 exports.$off = function (event, fn) {
+  var cbs
   // all
   if (!arguments.length) {
+    if (this.$parent) {
+      for (event in this._events) {
+        cbs = this._events[event]
+        if (cbs) {
+          modifyListenerCount(this, event, -cbs.length)
+        }
+      }
+    }
     this._events = {}
     return
   }
   // specific event
-  var cbs = this._events[event]
+  cbs = this._events[event]
   if (!cbs) return
   if (arguments.length === 1) {
+    modifyListenerCount(this, event, -cbs.length)
     this._events[event] = null
     return
   }
@@ -68,6 +68,7 @@ exports.$off = function (event, fn) {
   while (i--) {
     cb = cbs[i]
     if (cb === fn || cb.fn === fn) {
+      modifyListenerCount(this, event, -1)
       cbs.splice(i, 1)
       break
     }
@@ -140,5 +141,28 @@ exports.$dispatch = function () {
     parent = parent._eventCancelled
       ? null
       : parent.$parent
+  }
+}
+
+/**
+ * Modify the listener counts on all parents.
+ * This bookkeeping allows $broadcast to return early when
+ * no child has listened to a certain event.
+ *
+ * @param {Vue} vm
+ * @param {String} event
+ * @param {Number} count
+ */
+
+var hookRE = /^hook:/
+function modifyListenerCount (vm, event, count) {
+  var parent = vm.$parent
+  // hooks do not get broadcasted so no need
+  // to do bookkeeping for them
+  if (!parent || !count || hookRE.test(event)) return
+  while (parent) {
+    parent._eventsCount[event] =
+      (parent._eventsCount[event] || 0) + count
+    parent = parent.$parent
   }
 }
