@@ -81,6 +81,7 @@ var apply = exports.apply = function (el, direction, op, vm) {
   var transData = el.__v_trans
   if (
     !transData ||
+    !vm._isCompiled ||
     // if the vm is being manipulated by a parent directive
     // during the parent's compilation phase, skip the
     // animation.

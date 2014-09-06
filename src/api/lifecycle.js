@@ -31,6 +31,7 @@ exports.$mount = function (el) {
     var linker = compile(el, options)
     linker(this, el)
   }
+  this._isCompiled = true
   this._callHook('compiled')
   if (_.inDoc(this.$el)) {
     this._callHook('attached')
