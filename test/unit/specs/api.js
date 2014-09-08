@@ -418,7 +418,7 @@ describe('API', function () {
                     }
                 }
             })
-            assert.strictEqual(Child.super, Parent)
+            assert.strictEqual(Child._super, Parent)
             var child = new Child({
                 data: {
                     test3: {
@@ -437,7 +437,7 @@ describe('API', function () {
             var testId = 'sub-private'
             var Sub = Vue.extend({})
             Sub.component(testId, {})
-            assert.strictEqual(Sub.options.components[testId].super, Vue)
+            assert.strictEqual(Sub.options.components[testId]._super, Vue)
             Sub.partial(testId, '123')
             assert.ok(Sub.options.partials[testId] instanceof window.DocumentFragment)
 
