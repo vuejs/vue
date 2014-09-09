@@ -324,7 +324,7 @@ function compileParamAttributes (el, attrs, options) {
  */
 
 function makeParamsLinkFn (params, options) {
-  var def = options.directives.with
+  var def = options.directives['with']
   return function paramsLinkFn (vm, el) {
     var i = params.length
     var param

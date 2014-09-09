@@ -36,7 +36,7 @@ exports.extend = function (extendOptions) {
     Super.options,
     extendOptions || {}
   )
-  Sub.super = Super
+  Sub['super'] = Super
   // allow further extension
   Sub.extend = Super.extend
   // create asset registers, so extended classes
