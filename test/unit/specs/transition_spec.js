@@ -95,6 +95,8 @@ if (_.inBrowser && !_.isIE9) {
 
     describe('CSS transitions', function () {
 
+      var duration = '50ms'
+
       // insert a test css
       function insertCSS (text) {
         var cssEl = document.createElement('style')
@@ -102,15 +104,19 @@ if (_.inBrowser && !_.isIE9) {
         document.head.appendChild(cssEl)
       }
 
-      insertCSS('.test {transition: opacity 16ms ease; -webkit-transition: opacity 20ms ease;}')
+      insertCSS(
+        '.test {\
+          transition: opacity ' + duration + ' ease;\
+          -webkit-transition: opacity ' + duration + ' ease;}'
+      )
       insertCSS('.test-enter, .test-leave { opacity: 0; }')
       insertCSS(
         '.test-anim-enter {\
-          animation: test-enter 16ms;\
-          -webkit-animation: test-enter 16ms;}\
+          animation: test-enter ' + duration + ';\
+          -webkit-animation: test-enter ' + duration + ';}\
         .test-anim-leave {\
-          animation: test-leave 16ms;\
-          -webkit-animation: test-leave 16ms;}\
+          animation: test-leave ' + duration + ';\
+          -webkit-animation: test-leave ' + duration + ';}\
         @keyframes test-enter {\
           from { opacity: 0 }\
           to { opacity: 1 }}\
@@ -173,7 +179,7 @@ if (_.inBrowser && !_.isIE9) {
         el.__v_trans.id = 'test'
         // inline style
         el.style.transition =
-        el.style.WebkitTransition = 'opacity 16ms ease'
+        el.style.WebkitTransition = 'opacity ' + duration + ' ease'
         transition.apply(el, 1, function () {
           document.body.appendChild(el)
           op()
@@ -234,7 +240,7 @@ if (_.inBrowser && !_.isIE9) {
         })
       })
 
-      it('clean up unfinished callback', function (done) {
+      it('clean up unfinished callback', function () {
         el.__v_trans.id = 'test'
         el.classList.add('test')
         transition.apply(el, -1, function () {
@@ -242,15 +248,13 @@ if (_.inBrowser && !_.isIE9) {
         }, vm, cb)
         expect(el.__v_trans.callback).toBeTruthy()
         expect(el.classList.contains('test-leave')).toBe(true)
-        _.nextTick(function () {
-          transition.apply(el, 1, function () {
-            document.body.appendChild(el)
-          }, vm)
-          expect(cb).not.toHaveBeenCalled()
-          expect(el.classList.contains('test-leave')).toBe(false)
-          expect(el.__v_trans.callback).toBeNull()
-          done()
-        })
+        // cancel early
+        transition.apply(el, 1, function () {
+          document.body.appendChild(el)
+        }, vm)
+        expect(cb).not.toHaveBeenCalled()
+        expect(el.classList.contains('test-leave')).toBe(false)
+        expect(el.__v_trans.callback).toBeNull()
       })
 
     })
