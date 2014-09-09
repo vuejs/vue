@@ -97,7 +97,7 @@ exports.$remove = function (cb, withTransition) {
     op = withTransition === false
       ? remove
       : transition.remove
-    op(this.$el, realCb, this)
+    op(this.$el, this, realCb)
   }
 }
 
@@ -117,14 +117,13 @@ function insert (vm, target, op, targetIsDetached, cb) {
     !targetIsDetached &&
     !vm._isAttached &&
     !_.inDoc(vm.$el)
-  var realCb = function () {
-    if (shouldCallHook) vm._callHook('attached')
-    if (cb) cb()
-  }
   if (vm._isBlock) {
-    blockOp(vm, target, op, realCb)
+    blockOp(vm, target, op, cb)
   } else {
-    op(vm.$el, target, realCb, vm)
+    op(vm.$el, target, vm, cb)
+  }
+  if (shouldCallHook) {
+    vm._callHook('attached')
   }
 }
 
@@ -144,10 +143,10 @@ function blockOp (vm, target, op, cb) {
   var next
   while (next !== end) {
     next = current.nextSibling
-    op(current, target, null, vm)
+    op(current, target, vm)
     current = next
   }
-  op(end, target, cb, vm)
+  op(end, target, vm, cb)
 }
 
 /**
@@ -167,10 +166,11 @@ function query (el) {
  *
  * @param {Node} el
  * @param {Node} target
- * @param {Function} cb
+ * @param {Vue} vm - unused
+ * @param {Function} [cb]
  */
 
-function append (el, target, cb) {
+function append (el, target, vm, cb) {
   target.appendChild(el)
   if (cb) cb()
 }
@@ -180,10 +180,11 @@ function append (el, target, cb) {
  *
  * @param {Node} el
  * @param {Node} target
- * @param {Function} cb
+ * @param {Vue} vm - unused
+ * @param {Function} [cb]
  */
 
-function before (el, target, cb) {
+function before (el, target, vm, cb) {
   _.before(el, target)
   if (cb) cb()
 }
@@ -192,10 +193,11 @@ function before (el, target, cb) {
  * Remove operation that takes a callback.
  *
  * @param {Node} el
- * @param {Function} cb
+ * @param {Vue} vm - unused
+ * @param {Function} [cb]
  */
 
-function remove (el, cb) {
+function remove (el, vm, cb) {
   _.remove(el)
   if (cb) cb()
 }

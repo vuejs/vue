@@ -6,9 +6,10 @@
  * @param {Function} op - the actual DOM operation
  * @param {Object} data - target element's transition data
  * @param {Object} def - transition definition object
+ * @param {Function} [cb]
  */
 
-module.exports = function (el, direction, op, data, def) {
+module.exports = function (el, direction, op, data, def, cb) {
   if (data.cancel) {
     data.cancel()
     data.cancel = null
@@ -21,16 +22,21 @@ module.exports = function (el, direction, op, data, def) {
     if (def.enter) {
       data.cancel = def.enter(el, function () {
         data.cancel = null
+        if (cb) cb()
       })
+    } else if (cb) {
+      cb()
     }
   } else { // leave
     if (def.leave) {
       data.cancel = def.leave(el, function () {
-        op()
         data.cancel = null
+        op()
+        if (cb) cb()
       })
     } else {
       op()
+      if (cb) cb()
     }
   }
 }
