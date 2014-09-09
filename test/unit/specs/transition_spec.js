@@ -169,11 +169,15 @@ if (_.inBrowser && !_.isIE9) {
       })
 
       it('transition enter', function (done) {
+        document.body.removeChild(el)
         el.__v_trans.id = 'test'
         // inline style
         el.style.transition =
-        el.style.WebkitTransition = 'opacity .2s ease'
-        transition.apply(el, 1, op, vm, cb)
+        el.style.WebkitTransition = 'opacity 16ms ease'
+        transition.apply(el, 1, function () {
+          document.body.appendChild(el)
+          op()
+        }, vm, cb)
         expect(op).toHaveBeenCalled()
         expect(cb).not.toHaveBeenCalled()
         expect(el.classList.contains('test-enter')).toBe(false)
@@ -200,8 +204,12 @@ if (_.inBrowser && !_.isIE9) {
       })
 
       it('animation enter', function (done) {
+        document.body.removeChild(el)
         el.__v_trans.id = 'test-anim'
-        transition.apply(el, 1, op, vm, cb)
+        transition.apply(el, 1, function () {
+          document.body.appendChild(el)
+          op()
+        }, vm, cb)
         expect(op).toHaveBeenCalled()
         expect(cb).not.toHaveBeenCalled()
         expect(el.classList.contains('test-anim-enter')).toBe(true)
@@ -229,11 +237,15 @@ if (_.inBrowser && !_.isIE9) {
       it('clean up unfinished callback', function (done) {
         el.__v_trans.id = 'test'
         el.classList.add('test')
-        transition.apply(el, -1, op, vm, cb)
+        transition.apply(el, -1, function () {
+          document.body.removeChild(el)
+        }, vm, cb)
         expect(el.__v_trans.callback).toBeTruthy()
         expect(el.classList.contains('test-leave')).toBe(true)
         _.nextTick(function () {
-          transition.apply(el, 1, op, vm)
+          transition.apply(el, 1, function () {
+            document.body.appendChild(el)
+          }, vm)
           expect(cb).not.toHaveBeenCalled()
           expect(el.classList.contains('test-leave')).toBe(false)
           expect(el.__v_trans.callback).toBeNull()
