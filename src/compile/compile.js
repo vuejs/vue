@@ -169,7 +169,10 @@ function compileTextNode (node, options) {
           token.def = dirs.partial
           token.descriptor = dirParser.parse(value)[0]
         } else {
-          el = document.createTextNode('')
+          // IE will clean up empty textNodes during
+          // frag.cloneNode(true), so we have to give it
+          // something here...
+          el = document.createTextNode(' ')
           token.type = 'text'
           token.def = dirs.text
           token.descriptor = dirParser.parse(value)[0]

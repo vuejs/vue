@@ -87,6 +87,8 @@ if (_.inBrowser) {
     })
 
     it('on/off', function () {
+      // IE requires element to be in document to fire events
+      document.body.appendChild(target)
       var spy = jasmine.createSpy()
       _.on(target, 'click', spy)
       var e = document.createEvent('HTMLEvents')
@@ -97,6 +99,7 @@ if (_.inBrowser) {
       _.off(target, 'click', spy)
       target.dispatchEvent(e)
       expect(spy.calls.count()).toBe(1)
+      document.body.removeChild(target)
     })
   })
 }
