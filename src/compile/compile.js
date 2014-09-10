@@ -116,12 +116,9 @@ function makeDirectivesLinkFn (directives) {
     var dir, j
     while (i--) {
       dir = directives[i]
-      if (dir.oneTime) {
-        // one time attr interpolation
-        el.setAttribute(
-          dir.name,
-          vm.$eval(dir.value)
-        )
+      if (dir._link) {
+        // custom link fn
+        dir._link(vm, el)
       } else {
         j = dir.descriptors.length
         while (j--) {
@@ -465,20 +462,28 @@ function collectDirectives (el, options) {
 function collectAttrDirective (el, name, value, options) {
   var tokens = textParser.parse(value)
   if (tokens) {
-    if (tokens.length === 1 && tokens[0].oneTime) {
-      return {
-        name: name,
-        value: tokens[0].value,
-        def: options.directives.attr,
-        oneTime: true
+    var def = options.directives.attr
+    var i = tokens.length
+    var allOneTime = true
+    while (i--) {
+      var token = tokens[i]
+      if (token.tag && !token.oneTime) {
+        allOneTime = false
       }
-    } else {
-      value = textParser.tokensToExp(tokens)
-      return {
-        name: 'attr',
-        def: options.directives.attr,
-        descriptors: dirParser.parse(name + ':' + value)
-      }
+    }
+    return {
+      def: def,
+      _link: allOneTime
+        ? function (vm, el) {
+            el.setAttribute(name, vm.$interpolate(value))
+          }
+        : function (vm, el) {
+            var value = textParser.tokensToExp(tokens, vm)
+            var desc = dirParser.parse(name + ':' + value)[0]
+            vm._directives.push(
+              new Direcitve('attr', el, vm, desc, def)
+            )
+          }
     }
   }
 }

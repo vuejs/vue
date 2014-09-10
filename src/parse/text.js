@@ -108,17 +108,30 @@ exports.parse = function (text) {
  * Format a list of tokens into an expression.
  *
  * @param {Array} tokens
+ * @param {Vue} [vm]
  * @return {String}
  */
 
-exports.tokensToExp = function (tokens) {
+exports.tokensToExp = function (tokens, vm) {
   return tokens.length > 1
-    ? tokens.map(formatToken).join('+')
-    : formatToken(tokens[0])
+    ? tokens.map(function (token) {
+      return formatToken(token, vm)
+    }).join('+')
+    : formatToken(tokens[0], vm)
 }
 
-function formatToken (token) {
+/**
+ * Format a single token.
+ *
+ * @param {Object} token
+ * @param {Vue} [vm]
+ * @return {String}
+ */
+
+function formatToken (token, vm) {
   return token.tag
-    ? token.value
+    ? token.oneTime
+      ? '"' + vm.$get(token.value) + '"'
+      : token.value
     : '"' + token.value + '"'
 }

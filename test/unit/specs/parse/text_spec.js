@@ -1,5 +1,6 @@
 var textParser = require('../../../../src/parse/text')
 var config = require('../../../../src/config')
+var Vue = require('../../../../src/vue')
 
 var testCases = [
   {
@@ -90,6 +91,15 @@ describe('Text Parser', function () {
     var tokens = textParser.parse('view-{{test}}-test-{{ok}}')
     var exp = textParser.tokensToExp(tokens)
     expect(exp).toBe('"view-"+test+"-test-"+ok')
+  })
+
+  it('tokens to expression with oneTime tags & vm', function () {
+    var vm = new Vue({
+      data: { test: 'a', ok: 'b' }
+    })
+    var tokens = textParser.parse('view-{{*test}}-test-{{ok}}')
+    var exp = textParser.tokensToExp(tokens, vm)
+    expect(exp).toBe('"view-"+"a"+"-test-"+ok')
   })
 
 })
