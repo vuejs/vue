@@ -1,22 +1,16 @@
 var _ = require('../util')
+var Batcher = require('../batcher')
+var batcher = new Batcher()
 var transDurationProp = _.transitionProp + 'Duration'
 var animDurationProp = _.animationProp + 'Duration'
 
 /**
- * Force layout before triggering transitions/animations.
- * This function ensures we only do it once per event loop.
+ * Force layout before triggering transitions/animations
  */
 
-var forcedLayout = false
-function forceLayout () {
-  if (!forcedLayout) {
-    /* jshint unused: false */
-    var f = document.documentElement.offsetHeight
-    forcedLayout = true
-    _.nextTick(function () {
-      forcedLayout = false
-    })
-  }
+batcher._preFlush = function () {
+  /* jshint unused: false */
+  var f = document.documentElement.offsetHeight
 }
 
 /**
@@ -24,27 +18,36 @@ function forceLayout () {
  * calculated styles
  *
  * @param {Element} el
+ * @param {Object} data
+ * @param {String} className
  * @return {Number}
  *         1 - transition
  *         2 - animation
  */
 
-function getTransitionType (el) {
+function getTransitionType (el, data, className) {
+  var type = data.cache && data.cache[className]
+  if (type) return type
   var inlineStyles = el.style
   var computedStyles = window.getComputedStyle(el)
   var transDuration =
     inlineStyles[transDurationProp] ||
     computedStyles[transDurationProp]
   if (transDuration && transDuration !== '0s') {
-    return 1
+    type = 1
   } else {
     var animDuration =
       inlineStyles[animDurationProp] ||
       computedStyles[animDurationProp]
     if (animDuration && animDuration !== '0s') {
-      return 2
+      type = 2
     }
   }
+  if (type) {
+    if (!data.cache) data.cache = {}
+    data.cache[className] = type
+  }
+  return type
 }
 
 /**
@@ -73,10 +76,13 @@ module.exports = function (el, direction, op, data, cb) {
     // Enter Transition
     classList.add(enterClass)
     op()
-    transitionType = getTransitionType(el)
+    transitionType = getTransitionType(el, data, enterClass)
     if (transitionType === 1) {
-      forceLayout()
-      classList.remove(enterClass)
+      batcher.push({
+        run: function () {
+          classList.remove(enterClass)
+        }
+      })
       // only listen for transition end if user has sent
       // in a callback
       if (cb) {
@@ -114,14 +120,17 @@ module.exports = function (el, direction, op, data, cb) {
 
   } else { // leave
 
-    // we need to add the class here before we can sniff
-    // the transition type, and before that we need to
-    // force a layout so the element picks up all transition
-    // css rules.
-    forceLayout()
     classList.add(leaveClass)
-    transitionType = getTransitionType(el)
+    transitionType = getTransitionType(el, data, leaveClass)
     if (transitionType) {
+      if (transitionType === 1) {
+        classList.remove(leaveClass)
+        batcher.push({
+          run: function () {
+            classList.add(leaveClass)
+          }
+        })
+      }
       endEvent = data.event = transitionType === 1
         ? _.transitionEndEvent
         : _.animationEndEvent

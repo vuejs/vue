@@ -6,6 +6,7 @@ var _ = require('./util')
  */
 
 function Batcher () {
+  this._preFlush = null
   this.reset()
 }
 
@@ -41,9 +42,14 @@ p.push = function (job) {
 
 /**
  * Flush the queue and run the jobs.
+ * Will call a preFlush hook if has one.
  */
 
 p.flush = function () {
+  // before flush hook
+  if (this._preFlush) {
+    this._preFlush()
+  }
   // do not cache length because more jobs might be pushed
   // as we run existing jobs
   for (var i = 0; i < this.queue.length; i++) {
