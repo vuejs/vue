@@ -142,6 +142,7 @@ if (_.inBrowser && !_.isIE9) {
         // !IMPORTANT!
         // this ensures we force a layout for every test.
         _.nextTick(done)
+        spyOn(window, 'getComputedStyle').and.callThrough()
       })
 
       afterEach(function () {
@@ -263,6 +264,15 @@ if (_.inBrowser && !_.isIE9) {
           expect(el.__v_trans.callback).toBeNull()
           done()
         })
+      })
+
+      it('cache transition sniff results', function () {
+        el.__v_trans.id = 'test'
+        el.classList.add('test')
+        transition.apply(el, 1, op, vm)
+        expect(window.getComputedStyle.calls.count()).toBe(1)
+        transition.apply(el, 1, op, vm)
+        expect(window.getComputedStyle.calls.count()).toBe(1)
       })
 
     })
