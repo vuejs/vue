@@ -186,10 +186,12 @@ if (_.inBrowser && !_.isIE9) {
         }, vm, cb)
         expect(op).toHaveBeenCalled()
         expect(cb).not.toHaveBeenCalled()
-        expect(el.classList.contains('test-enter')).toBe(false)
-        _.on(el, _.transitionEndEvent, function () {
-          expect(cb).toHaveBeenCalled()
-          done()
+        _.nextTick(function () {
+          expect(el.classList.contains('test-enter')).toBe(false)
+          _.on(el, _.transitionEndEvent, function () {
+            expect(cb).toHaveBeenCalled()
+            done()
+          })
         })
       })
 
@@ -200,12 +202,15 @@ if (_.inBrowser && !_.isIE9) {
         transition.apply(el, -1, op, vm, cb)
         expect(op).not.toHaveBeenCalled()
         expect(cb).not.toHaveBeenCalled()
-        expect(el.classList.contains('test-leave')).toBe(true)
-        _.on(el, _.transitionEndEvent, function () {
-          expect(op).toHaveBeenCalled()
-          expect(cb).toHaveBeenCalled()
-          expect(el.classList.contains('test-leave')).toBe(false)
-          done()
+        expect(el.classList.contains('test-leave')).toBe(false)
+        _.nextTick(function () {
+          expect(el.classList.contains('test-leave')).toBe(true)
+          _.on(el, _.transitionEndEvent, function () {
+            expect(op).toHaveBeenCalled()
+            expect(cb).toHaveBeenCalled()
+            expect(el.classList.contains('test-leave')).toBe(false)
+            done()
+          })
         })
       })
 
@@ -240,21 +245,24 @@ if (_.inBrowser && !_.isIE9) {
         })
       })
 
-      it('clean up unfinished callback', function () {
+      it('clean up unfinished callback', function (done) {
         el.__v_trans.id = 'test'
         el.classList.add('test')
         transition.apply(el, -1, function () {
           document.body.removeChild(el)
         }, vm, cb)
         expect(el.__v_trans.callback).toBeTruthy()
-        expect(el.classList.contains('test-leave')).toBe(true)
         // cancel early
-        transition.apply(el, 1, function () {
-          document.body.appendChild(el)
-        }, vm)
-        expect(cb).not.toHaveBeenCalled()
-        expect(el.classList.contains('test-leave')).toBe(false)
-        expect(el.__v_trans.callback).toBeNull()
+        _.nextTick(function () {
+          expect(el.classList.contains('test-leave')).toBe(true)
+          transition.apply(el, 1, function () {
+            document.body.appendChild(el)
+          }, vm)
+          expect(cb).not.toHaveBeenCalled()
+          expect(el.classList.contains('test-leave')).toBe(false)
+          expect(el.__v_trans.callback).toBeNull()
+          done()
+        })
       })
 
     })
