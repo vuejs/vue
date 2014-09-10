@@ -191,4 +191,20 @@ describe('Util - Option merging', function () {
     expect(res.data.b).toBe(2)
   })
 
+  it('mixins', function () {
+    var a = {}, b = {}, c = {}, d = {}
+    var mixinA = { a: 1, directives: { a: a } }
+    var mixinB = { b: 1, directives: { b: b } }
+    var res = merge(
+      { a: 2, directives: { c: c } },
+      { directives: { d: d }, mixins: [mixinA, mixinB] }
+    )
+    expect(res.a).toBe(1)
+    expect(res.b).toBe(1)
+    expect(res.directives.a).toBe(a)
+    expect(res.directives.b).toBe(b)
+    expect(res.directives.c).toBe(c)
+    expect(res.directives.d).toBe(d)
+  })
+
 })

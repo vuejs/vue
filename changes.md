@@ -109,6 +109,22 @@ By default, all child components **DO NOT** inherit the parent scope. Only anony
   1. bind to parent scope properties in the component template
   2. directly access parent properties on the component instance itself, via prototypal inheritance.
 
+- #### new option: `mixins`.
+
+  The `mixins` option accepts an array of mixin objects. These mixin objects can contain instance options just like normal instance objects, and they will be merged against the eventual options using the same merge logic in `Vue.extend`. e.g. If your mixin contains a `created` hook and the component itself also has one, both functions will be called.
+
+  ``` js
+  var mixin = {
+    created: function () { console.log(2) }
+  }
+  var vm = new Vue({
+    created: function () { console.log(1) },
+    mixins: [mixin]
+  })
+  // -> 1
+  // -> 2
+  ```
+
 - #### removed options:
 
   > Breaking
