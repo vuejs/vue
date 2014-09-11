@@ -17,7 +17,7 @@ function noop () {}
  * @return {Function}
  */
 
-var compile = module.exports = function (el, options) {
+module.exports = function compile (el, options) {
   // for template tags, what we want is its content as
   // a documentFragment (for block instances)
   if (el.tagName === 'TEMPLATE') {
@@ -382,15 +382,8 @@ function checkTerminalDirectives (el, options) {
 function makeTeriminalLinkFn (el, dirName, value, options) {
   var descriptor = dirParser.parse(value)[0]
   var def = options.directives[dirName]
-  if (
-    dirName === 'repeat' &&
-    !el.hasAttribute(config.prefix + 'component')
-  ) {
-    // optimize for simple repeats
-    var linker = compile(el, options)
-  }
   return function terminalLinkFn (vm, el) {
-    vm._bindDir(dirName, el, descriptor, def, linker)
+    vm._bindDir(dirName, el, descriptor, def)
   }
 }
 

@@ -28,8 +28,8 @@ module.exports = {
     // at v-repeat level
     this.checkIf()
     this.checkRef()
-    this.checkComponent()
     this.checkTrackById()
+    this.checkComponent()
     // setup ref node
     this.ref = document.createComment('v-repeat')
     // cache for primitive value instances
@@ -55,8 +55,8 @@ module.exports = {
   },
 
   /**
-   * Check if v-ref is also present. If yes, evaluate it and
-   * locate the first non-anonymous parent as the owner vm.
+   * Check if v-ref/ v-el is also present. If yes, evaluate
+   * them and locate owner.
    */
 
   checkRef: function () {
@@ -64,12 +64,25 @@ module.exports = {
     this.childId = childId
       ? this.vm.$interpolate(childId)
       : null
-    if (this.childId) {
-      var owner = this.vm.$parent
-      while (owner._isAnonymous) {
-        owner = owner.$parent
-      }
-      this.owner = owner
+    var elId = _.attr(this.el, 'el')
+    this.elId = elId
+      ? this.vm.$interpolate(elId)
+      : null
+    if (this.childId || this.elId) {
+      this.owner = this.vm._owner || this.vm
+    }
+  },
+
+  /**
+   * Check for a track-by ID, which allows us to identify
+   * a piece of data and its associated instance by its
+   * unique id.
+   */
+
+  checkTrackById: function () {
+    this.idKey = this.el.getAttribute('trackby')
+    if (this.idKey !== null) {
+      this.el.removeAttribute('trackby')
     }
   },
 
@@ -84,6 +97,7 @@ module.exports = {
     if (!id) {
       this.Ctor = _.Vue // default constructor
       this.inherit = true // inline repeats should inherit
+      this._linker = compile(this.el, _.Vue.options)
     } else {
       var tokens = textParser.parse(id)
       if (!tokens) { // static component
@@ -108,19 +122,6 @@ module.exports = {
   },
 
   /**
-   * Check for a track-by ID, which allows us to identify
-   * a piece of data and its associated instance by its
-   * unique id.
-   */
-
-  checkTrackById: function () {
-    this.idKey = this.el.getAttribute('trackby')
-    if (this.idKey !== null) {
-      this.el.removeAttribute('trackby')
-    }
-  },
-
-  /**
    * Update.
    * This is called whenever the Array mutates.
    *
@@ -140,6 +141,11 @@ module.exports = {
     // update v-ref
     if (this.childId) {
       this.owner.$[this.childId] = this.vms
+    }
+    if (this.elId) {
+      this.owner.$$[this.elId] = this.vms.map(function (vm) {
+        return vm.$el
+      })
     }
   },
 
