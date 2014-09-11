@@ -18,24 +18,25 @@ exports._init = function (options) {
   this.$el           = null
   this.$parent       = options._parent
   this.$root         = options._root || this
-  this.$             = {}
-  this._watcherList  = []
-  this._watchers     = {}
-  this._userWatchers = {}
-  this._directives   = []
+  this.$             = {} // child vm references
+  this.$$            = {} // element references
+  this._watcherList  = [] // all watchers as an array
+  this._watchers     = {} // internal watchers as a hash
+  this._userWatchers = {} // user watchers as a hash
+  this._directives   = [] // all directives
 
   // a flag to avoid this being observed
   this._isVue = true
 
   // events bookkeeping
-  this._events         = {}
-  this._eventsCount    = {}
-  this._eventCancelled = false
+  this._events         = {}    // registered callbacks
+  this._eventsCount    = {}    // for $broadcast optimization
+  this._eventCancelled = false // for event cancellation
 
   // block instance properties
-  this._blockStart  =
-  this._blockEnd    = null
   this._isBlock     = false
+  this._blockStart  =          // @type {CommentNode}
+  this._blockEnd    = null     // @type {CommentNode}
 
   // lifecycle state
   this._isCompiled  =
@@ -45,8 +46,9 @@ exports._init = function (options) {
   this._isBeingDestroyed = false
 
   // children
-  this._children =
-  this._childCtors = null
+  this._children =         // @type {Array}
+  this._childCtors = null  // @type {Object} - hash to cache
+                           // child constructors
 
   // anonymous instances are created by v-if
   this._isAnonymous = options._anonymous

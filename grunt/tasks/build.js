@@ -26,6 +26,7 @@ module.exports = function (grunt) {
         fromString: true,
         compress: {
           pure_funcs: [
+            'require',
             '_.log',
             '_.warn',
             '_.assertAsset',
