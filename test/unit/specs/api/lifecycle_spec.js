@@ -46,6 +46,23 @@ if (_.inBrowser) {
         vm.$mount('#none-exist')
         expect(_.warn).toHaveBeenCalled()
       })
+
+      it('replace', function () {
+        el.className = 'replace-test'
+        document.body.appendChild(el)
+        var vm = new Vue({
+          replace: true,
+          data: { test: 'hi!' },
+          template: '<div>{{test}}</div>'
+        })
+        vm.$mount(el)
+        expect(vm.$el).not.toBe(el)
+        expect(vm.$el.textContent).toBe('hi!')
+        expect(document.body.contains(el)).toBe(false)
+        expect(document.body.lastChild).toBe(vm.$el)
+        expect(vm.$el.className).toBe('replace-test')
+        document.body.removeChild(vm.$el)
+      })
       
       it('precompiled linker', function () {
         var linker = compile(el, Vue.options)
@@ -69,6 +86,22 @@ if (_.inBrowser) {
         expect(vm.$el).toBe(vm._blockStart)
         expect(vm._blockFragment).toBe(frag)
         expect(vm.$el.nextSibling.textContent).toBe('frag')
+      })
+
+      it('replace fragment', function () {
+        document.body.appendChild(el)
+        var vm = new Vue({
+          replace: true,
+          data: { test: 'hi!' },
+          template: '<div>{{test}}</div><div>{{test}}</div>'
+        })
+        vm.$mount(el)
+        expect(vm.$el).not.toBe(el)
+        expect(vm.$el.nextSibling.textContent).toBe('hi!')
+        expect(vm.$el.nextSibling.nextSibling.textContent).toBe('hi!')
+        expect(document.body.contains(el)).toBe(false)
+        expect(document.body.lastChild).toBe(vm._blockEnd)
+        vm.$remove()
       })
 
       it('hooks', function () {

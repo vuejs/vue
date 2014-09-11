@@ -1,3 +1,4 @@
+var _ = require('../util')
 var Directive = require('../directive')
 var compile = require('../compile/compile')
 var transclude = require('../compile/transclude')
@@ -12,6 +13,7 @@ var transclude = require('../compile/transclude')
  * Otherwise we need to call transclude/compile/link here.
  *
  * @param {Element} el
+ * @return {Element}
  */
 
 exports._compile = function (el) {
@@ -20,11 +22,16 @@ exports._compile = function (el) {
     this._initElement(el)
     options._linker(this, el)
   } else {
+    var raw = el
     el = transclude(el, options)
     this._initElement(el)
     var linker = compile(el, options)
     linker(this, el)
+    if (options.replace) {
+      _.replace(raw, el)
+    }
   }
+  return el
 }
 
 /**

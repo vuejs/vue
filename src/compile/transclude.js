@@ -66,6 +66,7 @@ function transcludeTemplate (el, options) {
       }
     } else {
       el.appendChild(frag)
+      transcludeContent(el)
       return el
     }
   }

@@ -345,7 +345,7 @@ if (_.inBrowser && !_.isIE9) {
         var cleanupSpy = jasmine.createSpy('js cleanup')
         var leaveSpy = jasmine.createSpy('js leave')
         def.enter = function (el, done) {
-          var to = setTimeout(done, 10)
+          var to = setTimeout(done, 30)
           return function () {
             clearTimeout(to)
             cleanupSpy()
@@ -363,8 +363,8 @@ if (_.inBrowser && !_.isIE9) {
           setTimeout(function () {
             expect(cb).not.toHaveBeenCalled()
             done()
-          }, 10)
-        }, 1)
+          }, 30)
+        }, 15)
       })
 
     })
