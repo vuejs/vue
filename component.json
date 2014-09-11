@@ -47,6 +47,7 @@
     "src/directives/with.js",
     "src/filters/array-filters.js",
     "src/filters/index.js",
+    "src/instance/compile.js",
     "src/instance/events.js",
     "src/instance/init.js",
     "src/instance/scope.js",

@@ -1,6 +1,5 @@
 var _ = require('../util')
 var config = require('../config')
-var Direcitve = require('../directive')
 var textParser = require('../parse/text')
 var dirParser = require('../parse/directive')
 var templateParser = require('../parse/template')
@@ -112,7 +111,6 @@ function makeDirectivesLinkFn (directives) {
   return function directivesLinkFn (vm, el) {
     // reverse apply because it's sorted low to high
     var i = directives.length
-    var vmDirs = vm._directives
     var dir, j
     while (i--) {
       dir = directives[i]
@@ -122,10 +120,8 @@ function makeDirectivesLinkFn (directives) {
       } else {
         j = dir.descriptors.length
         while (j--) {
-          vmDirs.push(
-            new Direcitve(dir.name, el, vm,
-                          dir.descriptors[j], dir.def)
-          )
+          vm._bindDir(dir.name, el,
+                      dir.descriptors[j], dir.def)
         }
       }
     }
@@ -194,7 +190,6 @@ function makeTextNodeLinkFn (tokens, frag) {
   return function textNodeLinkFn (vm, el) {
     var fragClone = frag.cloneNode(true)
     var childNodes = _.toArray(fragClone.childNodes)
-    var dirs = vm._directives
     var token, value, node
     for (var i = 0, l = tokens.length; i < l; i++) {
       token = tokens[i]
@@ -209,10 +204,8 @@ function makeTextNodeLinkFn (tokens, frag) {
             node.nodeValue = value
           }
         } else {
-          dirs.push(
-            new Direcitve(token.type, node, vm,
-                          token.descriptor, token.def)
-          )
+          vm._bindDir(token.type, node,
+                      token.descriptor, token.def)
         }
       }
     }
@@ -335,12 +328,10 @@ function makeParamsLinkFn (params, options) {
         // we can directly fake the descriptor here beacuse
         // param attributes cannot use expressions or
         // filters.
-        vm._directives.push(
-          new Direcitve('with', el, vm, {
-            arg: param.name,
-            expression: param.value
-          }, def)
-        )
+        vm._bindDir('with', el, {
+          arg: param.name,
+          expression: param.value
+        }, def)
       } else {
         // just set once
         vm.$set(param.name, param.value)
@@ -358,7 +349,7 @@ function makeParamsLinkFn (params, options) {
  * @return {Function} terminalLinkFn
  */
 
-var terminalDirecitves = [
+var terminalDirectives = [
   'repeat',
   'component',
   'if'
@@ -371,7 +362,7 @@ function checkTerminalDirectives (el, options) {
   var value, dirName
   /* jshint boss: true */
   for (var i = 0; i < 3; i++) {
-    dirName = terminalDirecitves[i]
+    dirName = terminalDirectives[i]
     if (value = _.attr(el, dirName)) {
       return makeTeriminalLinkFn(el, dirName, value, options)
     }
@@ -399,9 +390,7 @@ function makeTeriminalLinkFn (el, dirName, value, options) {
     var linker = compile(el, options)
   }
   return function terminalLinkFn (vm, el) {
-    vm._directives.push(
-      new Direcitve(dirName, el, vm, descriptor, def, linker)
-    )
+    vm._bindDir(dirName, el, descriptor, def, linker)
   }
 }
 
@@ -480,9 +469,7 @@ function collectAttrDirective (el, name, value, options) {
         : function (vm, el) {
             var value = textParser.tokensToExp(tokens, vm)
             var desc = dirParser.parse(name + ':' + value)[0]
-            vm._directives.push(
-              new Direcitve('attr', el, vm, desc, def)
-            )
+            vm._bindDir('attr', el, desc, def)
           }
     }
   }

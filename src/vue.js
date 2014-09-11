@@ -69,6 +69,7 @@ Object.defineProperty(p, '$data', {
 extend(p, require('./instance/init'))
 extend(p, require('./instance/events'))
 extend(p, require('./instance/scope'))
+extend(p, require('./instance/compile'))
 
 /**
  * Mixin public API methods
