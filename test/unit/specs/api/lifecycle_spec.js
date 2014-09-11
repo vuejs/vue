@@ -27,6 +27,25 @@ if (_.inBrowser) {
         expect(el.__vue__).toBe(vm)
         expect(el.textContent).toBe('hi!')
       })
+
+      it('selector', function () {
+        el.id = 'mount-test'
+        document.body.appendChild(el)
+        var vm = new Vue({
+          data: { test: 'hi!' }
+        })
+        vm.$mount('#mount-test')
+        expect(vm.$el).toBe(el)
+        expect(el.__vue__).toBe(vm)
+        expect(el.textContent).toBe('hi!')
+        document.body.removeChild(el)
+      })
+
+      it('warn invalid selector', function () {
+        var vm = new Vue()
+        vm.$mount('#none-exist')
+        expect(_.warn).toHaveBeenCalled()
+      })
       
       it('precompiled linker', function () {
         var linker = compile(el, Vue.options)
