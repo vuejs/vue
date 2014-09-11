@@ -329,11 +329,15 @@ computed: {
 
   Here when you do `this.a = 123` in the child, the child's view will update, but the parent's scope will remain unaffected. When `parent.parentKey` changes again, it will overwrite `child.childKey`.
 
+- #### New directive: `v-el`
+
+  Similar to `v-ref`, but instead stores a reference to a DOM Node in `vm.$$`. For the reasoning behind the addition see [this thread](https://github.com/yyx990803/vue/issues/404#issuecomment-53566116).
+
 - #### New directive option: `twoWay`
 
   This option indicates the directive is two-way and may write back to the model. Allows the use of `this.set(value)` inside directive functions.
 
-- #### (Breaking) Removed directive option: `isEmpty`
+- #### Removed directive option: `isEmpty`
 
 ## Interpolation change
 
