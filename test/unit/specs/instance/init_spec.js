@@ -15,7 +15,10 @@ describe('Instance Init', function () {
   var options = {
     a: 2,
     _anonymous: true,
-    _parent: {},
+    _parent: {
+      _isAnonymous: true,
+      $parent: {}
+    },
     el: {}
   }
 
@@ -40,7 +43,7 @@ describe('Instance Init', function () {
   })
 
   it('should locate owner', function () {
-    expect(stub._owner).toBe(options._parent)
+    expect(stub._owner).toBe(options._parent.$parent)
   })
 
   it('should call other init methods', function () {
