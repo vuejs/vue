@@ -18,13 +18,10 @@ function noop () {}
  */
 
 module.exports = function compile (el, options) {
-  // for template tags, what we want is its content as
-  // a documentFragment (for block instances)
-  if (el.tagName === 'TEMPLATE') {
-    el = el.content instanceof DocumentFragment
-      ? el.content
-      : templateParser.parse(el.innerHTML)
-  }
+  var params = options.paramAttributes
+  var paramsLinkFn = params
+    ? compileParamAttributes(el, params, options)
+    : null
   var nodeLinkFn = el instanceof DocumentFragment
     ? null
     : compileNode(el, options)
@@ -33,10 +30,6 @@ module.exports = function compile (el, options) {
     el.hasChildNodes()
       ? compileNodeList(el.childNodes, options)
       : null
-  var params = options.paramAttributes
-  var paramsLinkFn = params
-    ? compileParamAttributes(el, params, options)
-    : null
   return function link (vm, el) {
     if (paramsLinkFn) paramsLinkFn(vm, el)
     if (nodeLinkFn) nodeLinkFn(vm, el)
@@ -297,6 +290,7 @@ function compileParamAttributes (el, attrs, options) {
             '\nDon\'t mix binding tags with plain text ' +
             'in param attribute bindings.'
           )
+          continue
         } else {
           param.dynamic = true
           param.value = tokens[0].value
@@ -325,7 +319,7 @@ function makeParamsLinkFn (params, options) {
       param = params[i]
       if (param.dynamic) {
         // dynamic param attribtues are bound as v-with.
-        // we can directly fake the descriptor here beacuse
+        // we can directly duck the descriptor here beacuse
         // param attributes cannot use expressions or
         // filters.
         vm._bindDir('with', el, {

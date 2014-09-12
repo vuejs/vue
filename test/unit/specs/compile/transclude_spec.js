@@ -49,6 +49,17 @@ if (_.inBrowser) {
       expect(res.childNodes.length).toBe(3)
       expect(res.firstChild.nodeType).toBe(8)
       expect(res.lastChild.nodeType).toBe(8)
+      expect(res.childNodes[1]).toBe(el)
+    })
+
+    it('template element', function () {
+      var tpl = document.createElement('template')
+      tpl.innerHTML = '<div>123</div>'
+      var res = transclude(tpl, options)
+      expect(res.childNodes.length).toBe(3)
+      expect(res.firstChild.nodeType).toBe(8)
+      expect(res.lastChild.nodeType).toBe(8)
+      expect(res.childNodes[1].textContent).toBe('123')
     })
 
     it('content transclusion', function () {

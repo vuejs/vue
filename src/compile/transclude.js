@@ -14,6 +14,11 @@ var templateParser = require('../parse/template')
  */
 
 module.exports = function transclude (el, options) {
+  // for template tags, what we want is its content as
+  // a documentFragment (for block instances)
+  if (el.tagName === 'TEMPLATE') {
+    el = templateParser.parse(el)
+  }
   if (el instanceof DocumentFragment) {
     return transcludeBlock(el)
   } else if (options.template) {

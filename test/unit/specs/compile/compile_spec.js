@@ -20,12 +20,12 @@ if (_.inBrowser) {
           return data[value]
         },
         $interpolate: function (value) {
-          value = value.replace(/\{|\}/g, '')
           return data[value]
         }
       }
       spyOn(vm, '$eval').and.callThrough()
       spyOn(vm, '$interpolate').and.callThrough()
+      spyOn(_, 'warn')
     })
 
     it('normal directives', function () {
@@ -102,7 +102,9 @@ if (_.inBrowser) {
     })
 
     it('terminal directives', function () {
-      el.innerHTML = '<div v-repeat="items"><p v-a="b"></p></div>'
+      el.innerHTML =
+        '<div v-repeat="items"><p v-a="b"></p></div>' + // v-repeat
+        '<div v-pre><p v-a="b"></p></div>' // v-pre
       var def = Vue.options.directives.repeat
       var descriptor = dirParser.parse('items')[0]
       var linker = compile(el, Vue.options)
@@ -114,23 +116,68 @@ if (_.inBrowser) {
     })
 
     it('custom element components', function () {
-      // body...
+      var options = merge(Vue.options, {
+        components: {
+          'my-component': {}
+        }
+      })
+      el.innerHTML = '<my-component><div v-a="b"></div></my-component>'
+      var def = Vue.options.directives.component
+      var descriptor = dirParser.parse('my-component')[0]
+      var linker = compile(el, options)
+      linker(vm, el)
+      expect(vm._bindDir.calls.count()).toBe(1)
+      expect(vm._bindDir).toHaveBeenCalledWith('component', el.firstChild, descriptor, def)
     })
 
     it('attribute interpolation', function () {
-      // body...
+      data['{{*b}}'] = 'B'
+      el.innerHTML = '<div a="{{a}}" b="{{*b}}"></div>'
+      var def = Vue.options.directives.attr
+      var descriptor = dirParser.parse('a:a')[0]
+      var linker = compile(el, Vue.options)
+      linker(vm, el)
+      expect(vm._bindDir.calls.count()).toBe(1)
+      expect(vm._bindDir).toHaveBeenCalledWith('attr', el.firstChild, descriptor, def)
+      expect(el.firstChild.getAttribute('b')).toBe('B')
     })
 
     it('param attributes', function () {
-      // body...
+      var options = merge(Vue.options, {
+        paramAttributes: ['a', 'b', 'c']
+      })
+      var def = Vue.options.directives['with']
+      el.setAttribute('a', '1')
+      el.setAttribute('b', '{{a}}')
+      el.setAttribute('c', 'a {{b}} c') // invalid
+      var linker = compile(el, options)
+      linker(vm, el)
+      // should skip literal & invliad
+      expect(vm._bindDir.calls.count()).toBe(1)
+      var args = vm._bindDir.calls.argsFor(0)
+      expect(args[0]).toBe('with')
+      expect(args[1]).toBe(el)
+      // skipping descriptor because it's ducked inline
+      expect(args[3]).toBe(def)
+      // invalid should've warn
+      expect(_.warn).toHaveBeenCalled()
+      // literal should've called vm.$set
+      expect(vm.$set).toHaveBeenCalledWith('a', '1')
     })
 
     it('DocumentFragment', function () {
-      // body...
-    })
-
-    it('template elements', function () {
-      // body...
+      var frag = document.createDocumentFragment()
+      frag.appendChild(el)
+      var el2 = document.createElement('div')
+      frag.appendChild(el2)
+      el.innerHTML = '{{*a}}'
+      el2.innerHTML = '{{*b}}'
+      data.a = 'A'
+      data.b = 'B'
+      var linker = compile(frag, Vue.options)
+      linker(vm, frag)
+      expect(el.innerHTML).toBe('A')
+      expect(el2.innerHTML).toBe('B')
     })
 
   })

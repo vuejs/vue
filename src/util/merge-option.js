@@ -88,7 +88,9 @@ strats.paramAttributes = function (parentVal, childVal) {
   return childVal
     ? parentVal
       ? parentVal.concat(childVal)
-      : [childVal]
+      : _.isArray(childVal)
+        ? childVal
+        : [childVal]
     : parentVal
 }
 
