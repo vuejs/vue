@@ -34,6 +34,9 @@ map.tfoot = [1, '<table>', '</table>']
 
 map.g =
 map.defs =
+map.symbol =
+map.use =
+map.image =
 map.text =
 map.circle =
 map.ellipse =
