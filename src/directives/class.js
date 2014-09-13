@@ -1,3 +1,4 @@
+var _ = require('../util')
 var hasClassList =
   typeof document !== 'undefined' &&
   'classList' in document.documentElement
@@ -9,16 +10,11 @@ var hasClassList =
  * @param {Strong} cls
  */
 
-function addClass (el, cls) {
-  if (hasClassList) {
-    el.classList.add(cls)
-  } else {
-    var cur = ' ' + el.className + ' '
-    if (cur.indexOf(' ' + cls + ' ') < 0) {
-      el.className = (cur + cls).trim()
+var addClass = hasClassList
+  ? function (el, cls) {
+      el.classList.add(cls)
     }
-  }
-}
+  : _.addClass
 
 /**
  * remove class for IE9
@@ -27,18 +23,11 @@ function addClass (el, cls) {
  * @param {Strong} cls
  */
 
-function removeClass (el, cls) {
-  if (hasClassList) {
-    el.classList.remove(cls)
-  } else {
-    var cur = ' ' + el.className + ' '
-    var tar = ' ' + cls + ' '
-    while (cur.indexOf(tar) >= 0) {
-      cur = cur.replace(tar, ' ')
+var removeClass = hasClassList
+  ? function (el, cls) {
+      el.classList.remove(cls)
     }
-    el.className = cur.trim()
-  }
-}
+  : _.removeClass
 
 module.exports = function (value) {
   if (this.arg) {

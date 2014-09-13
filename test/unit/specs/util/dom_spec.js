@@ -101,5 +101,18 @@ if (_.inBrowser) {
       expect(spy.calls.count()).toBe(1)
       document.body.removeChild(target)
     })
+
+    it('addClass/removeClass', function () {
+      var el = document.createElement('div')
+      el.className = 'aa bb cc'
+      _.removeClass(el, 'bb')
+      expect(el.className).toBe('aa cc')
+      _.removeClass(el, 'aa')
+      expect(el.className).toBe('cc')
+      _.addClass(el, 'bb')
+      expect(el.className).toBe('cc bb')
+      _.addClass(el, 'bb')
+      expect(el.className).toBe('cc bb')
+    })
   })
 }
