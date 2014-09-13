@@ -1,8 +1,6 @@
-// SVG xml namespaces
-var namespaces = {
-  xlink: 'http://www.w3.org/1999/xlink',
-  ev: 'http://www.w3.org/2001/xml-events'
-}
+// xlink
+var xlinkNS = 'http://www.w3.org/1999/xlink'
+var xlinkRE = /^xlink:/
 
 module.exports = {
 
@@ -10,15 +8,9 @@ module.exports = {
 
   bind: function () {
     var name = this.arg
-    var colonIndex = name.indexOf(':')
-    // check namespaced attributes
-    if (colonIndex > 0) {
-      this.localName = name.slice(colonIndex + 1)
-      this.namespace = namespaces[name.slice(0, colonIndex)]
-      this.update = namespaceHandler
-    } else {
-      this.update = defaultHandler
-    }
+    this.update = xlinkRE.test(name)
+      ? xlinkHandler
+      : defaultHandler
   }
 
 }
@@ -31,11 +23,10 @@ function defaultHandler (value) {
   }
 }
 
-function namespaceHandler (value) {
-  var ns = this.namespace
+function xlinkHandler (value) {
   if (value != null) {
-    this.el.setAttributeNS(ns, this.arg, value)
+    this.el.setAttributeNS(xlinkNS, this.arg, value)
   } else {
-    this.el.removeAttributeNS(ns, this.localName)
+    this.el.removeAttributeNS(xlinkNS, 'href')
   }
 }
