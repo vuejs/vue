@@ -103,16 +103,4 @@ describe('Util - Language Enhancement', function () {
     expect(desc.enumerable).toBe(true)
   })
 
-  it('augment', function () {
-    var target = {}
-    var proto = { a: 1 }
-    _.augment(target, proto)
-    if ('__proto__' in {}) {
-      expect(target.__proto__).toBe(proto)
-    } else {
-      expect(Object.keys(target).length).toBe(0)
-      expect(target.a).toBe(1)
-    }
-  })
-
 })

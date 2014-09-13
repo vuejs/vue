@@ -1,4 +1,5 @@
 var Observer = require('../../../src/observer')
+var config = require('../../../src/config')
 var _ = require('../../../src/util')
 
 describe('Observer', function () {
@@ -162,6 +163,28 @@ describe('Observer', function () {
     arr.$remove(obj2)
     expect(arr.length).toBe(0)
     expect(binding.notify.calls.count()).toBe(2)
+  })
+
+  it('no proto', function () {
+    config.proto = false
+    // object
+    var obj = {a:1}
+    var ob = Observer.create(obj)
+    expect(obj.$add).toBeTruthy()
+    expect(obj.$delete).toBeTruthy()
+    spyOn(ob.binding, 'notify')
+    obj.$add('b', 2)
+    expect(ob.binding.notify).toHaveBeenCalled()
+    // array
+    var arr = [1, 2, 3]
+    var ob2 = Observer.create(arr)
+    expect(arr.$set).toBeTruthy()
+    expect(arr.$remove).toBeTruthy()
+    expect(arr.push).not.toBe([].push)
+    spyOn(ob2.binding, 'notify')
+    arr.push(1)
+    expect(ob2.binding.notify).toHaveBeenCalled()
+    config.proto = true
   })
 
 })

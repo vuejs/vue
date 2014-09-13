@@ -1,7 +1,10 @@
 var _ = require('../util')
+var config = require('../config')
 var Binding = require('../binding')
 var arrayAugmentations = require('./array')
 var objectAugmentations = require('./object')
+var arrayKeys = Object.getOwnPropertyNames(arrayAugmentations)
+var objectKeys = Object.getOwnPropertyNames(objectAugmentations)
 
 var uid = 0
 
@@ -11,6 +14,35 @@ var uid = 0
 
 var ARRAY  = 0
 var OBJECT = 1
+
+/**
+ * Augment an target Object or Array by intercepting
+ * the prototype chain using __proto__
+ *
+ * @param {Object|Array} target
+ * @param {Object} proto
+ */
+
+function protoAugment (target, src) {
+  target.__proto__ = src
+}
+
+/**
+ * Augment an target Object or Array by defining
+ * hidden properties.
+ *
+ * @param {Object|Array} target
+ * @param {Object} proto
+ */
+
+function copyAugment (target, src, keys) {
+  var i = keys.length
+  var key
+  while (i--) {
+    key = keys[i]
+    _.define(target, key, src[key])
+  }
+}
 
 /**
  * Observer class that are attached to each observed
@@ -29,11 +61,14 @@ function Observer (value, type) {
   this.active = true
   this.binding = new Binding()
   _.define(value, '__ob__', this)
+  var augment = config.proto && _.hasProto
+    ? protoAugment
+    : copyAugment
   if (type === ARRAY) {
-    _.augment(value, arrayAugmentations)
+    augment(value, arrayAugmentations, arrayKeys)
     this.observeArray(value)
   } else if (type === OBJECT) {
-    _.augment(value, objectAugmentations)
+    augment(value, objectAugmentations, objectKeys)
     this.walk(value)
   }
 }

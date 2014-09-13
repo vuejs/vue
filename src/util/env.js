@@ -1,4 +1,12 @@
 /**
+ * Can we use __proto__?
+ *
+ * @type {Boolean}
+ */
+
+exports.hasProto = '__proto__' in {}
+
+/**
  * Indicates we have a window
  *
  * @type {Boolean}

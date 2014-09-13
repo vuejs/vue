@@ -26,6 +26,15 @@ module.exports = {
   silent: false,
 
   /**
+   * Whether allow observer to alter data objects'
+   * __proto__.
+   *
+   * @type {Boolean}
+   */
+
+  proto: true,
+
+  /**
    * Whether to parse mustache tags in templates.
    *
    * @type {Boolean}

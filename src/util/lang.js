@@ -155,24 +155,3 @@ exports.define = function (obj, key, val, enumerable) {
     configurable : true
   })
 }
-
-/**
- * Augment an target Object or Array by either
- * intercepting the prototype chain using __proto__,
- * or copy over properties with defineProperty.
- *
- * @param {Object|Array} target
- * @param {Object} proto
- */
-
-var define = exports.define
-var hasProto = exports.hasProto = '__proto__' in {}
-exports.augment = hasProto
-  ? function (target, proto) {
-      target.__proto__ = proto
-    }
-  : function (target, proto) {
-      for (var key in proto) {
-        define(target, key, proto[key])
-      }
-    }

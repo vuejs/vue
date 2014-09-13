@@ -17,8 +17,7 @@ var arrayAugmentations = Object.create(Array.prototype)
 .forEach(function (method) {
   // cache original method
   var original = Array.prototype[method]
-
-  function mutator () {
+  _.define(arrayAugmentations, method, function mutator () {
     // avoid leaking arguments:
     // http://jsperf.com/closure-with-arguments
     var i = arguments.length
@@ -44,13 +43,7 @@ var arrayAugmentations = Object.create(Array.prototype)
     // notify change
     ob.binding.notify()
     return result
-  }
-  // define wrapped method
-  if (_.hasProto) {
-    _.define(arrayAugmentations, method, mutator)
-  } else {
-    arrayAugmentations[method] = mutator
-  }
+  })
 })
 
 /**
@@ -62,12 +55,16 @@ var arrayAugmentations = Object.create(Array.prototype)
  * @return {*} - replaced element
  */
 
-function $set (index, val) {
-  if (index >= this.length) {
-    this.length = index + 1
+_.define(
+  arrayAugmentations,
+  '$set',
+  function $set (index, val) {
+    if (index >= this.length) {
+      this.length = index + 1
+    }
+    return this.splice(index, 1, val)[0]
   }
-  return this.splice(index, 1, val)[0]
-}
+)
 
 /**
  * Convenience method to remove the element at given index.
@@ -76,21 +73,17 @@ function $set (index, val) {
  * @param {*} val
  */
 
-function $remove (index) {
-  if (typeof index !== 'number') {
-    index = this.indexOf(index)
+_.define(
+  arrayAugmentations,
+  '$remove',
+  function $remove (index) {
+    if (typeof index !== 'number') {
+      index = this.indexOf(index)
+    }
+    if (index > -1) {
+      return this.splice(index, 1)[0]
+    }
   }
-  if (index > -1) {
-    return this.splice(index, 1)[0]
-  }
-}
-
-if (_.hasProto) {
-  _.define(arrayAugmentations, '$set', $set)
-  _.define(arrayAugmentations, '$remove', $remove)
-} else {
-  arrayAugmentations.$set = $set
-  arrayAugmentations.$remove = $remove
-}
+)
 
 module.exports = arrayAugmentations
