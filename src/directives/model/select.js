@@ -87,9 +87,15 @@ function initOptions (expression) {
 
 function formatOption (op) {
   if (typeof op !== 'string') {
-    return '<optgroup label="' + op.label + '">' +
-      op.options.map(formatOption) +
+    if (op.value) {
+      return '<option value="' + op.value + '">' +
+        op.label +
+      '</option>'
+    } else if (op.options) {
+      return '<optgroup label="' + op.label + '">' +
+        op.options.map(formatOption) +
       '</optgroup>'
+    }
   } else {
     return '<option>' + op + '</option>'
   }
