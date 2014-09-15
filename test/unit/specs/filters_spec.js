@@ -78,23 +78,6 @@ describe('Filters', function () {
     expect(spy).toHaveBeenCalled()
   })
 
-  it('objToArray', function () {
-    var filter = filters._objToArray
-    var res = filter({a:1, b:2})
-    expect(res._converted).toBe(true)
-    expect(res[0].key).toBe('a')
-    expect(res[0].value).toBe(1)
-    expect(res[1].key).toBe('b')
-    expect(res[1].value).toBe(2)
-    // array
-    var arr = []
-    expect(filter(arr)).toBe(arr)
-    // non object/array
-    spyOn(Vue.util, 'warn')
-    expect(filter(123)).toBeUndefined()
-    expect(Vue.util.warn).toHaveBeenCalled()
-  })
-
   it('filterBy', function () {
     var filter = filters.filterBy
     var arr = [

@@ -2,42 +2,6 @@ var _ = require('../util')
 var Path = require('../parse/path')
 
 /**
- * Attempt to convert non-Array objects to array.
- * This is the default filter installed to every v-repeat
- * directive.
- *
- * @param {*} obj
- * @return {Array}
- * @private
- */
-
-exports._objToArray = function (obj) {
-  if (_.isArray(obj)) {
-    return obj
-  }
-  if (!_.isPlainObject(obj)) {
-    _.warn(
-      'Invalid value for v-repeat: ' + obj +
-      '\nOnly Arrays and Objects are allowed.'
-    )
-    return
-  }
-  var keys = Object.keys(obj)
-  var i = keys.length
-  var res = new Array(i)
-  var key
-  while (i--) {
-    key = keys[i]
-    res[i] = {
-      key: key,
-      value: obj[key]
-    }
-  }
-  res._converted = true
-  return res
-}
-
-/**
  * Filter filter for v-repeat
  *
  * @param {String} searchKey

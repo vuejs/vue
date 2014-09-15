@@ -16,14 +16,16 @@ module.exports = {
   bind: function () {
     // uid as a cache identifier
     this.id = '__v_repeat_' + (++uid)
-    // put in the default filter to guard Object values
-    // this filter needs to always be the first one. We
-    // can do this in bind because the watcher is not
-    // created yet.
+    // we need to insert the objToArray converter
+    // as the first read filter.
     if (!this.filters) {
-      this.filters = []
+      this.filters = {}
     }
-    this.filters.unshift({ name: '_objToArray' })
+    if (!this.filters.read) {
+      this.filters.read = [objToArray]
+    } else {
+      this.filters.read.unshift(objToArray)
+    }
     // check other directives that need to be handled
     // at v-repeat level
     this.checkIf()
@@ -467,4 +469,40 @@ function findNextInDOMVmEl (next, vms, ref) {
     el = next ? next.$el : ref
   }
   return el
+}
+
+/**
+ * Attempt to convert non-Array objects to array.
+ * This is the default filter installed to every v-repeat
+ * directive.
+ *
+ * @param {*} obj
+ * @return {Array}
+ * @private
+ */
+
+function objToArray (obj) {
+  if (_.isArray(obj)) {
+    return obj
+  }
+  if (!_.isPlainObject(obj)) {
+    _.warn(
+      'Invalid value for v-repeat: ' + obj +
+      '\nOnly Arrays and Objects are allowed.'
+    )
+    return
+  }
+  var keys = Object.keys(obj)
+  var i = keys.length
+  var res = new Array(i)
+  var key
+  while (i--) {
+    key = keys[i]
+    res[i] = {
+      key: key,
+      value: obj[key]
+    }
+  }
+  res._converted = true
+  return res
 }
