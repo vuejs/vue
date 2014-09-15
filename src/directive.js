@@ -130,9 +130,17 @@ p._checkExpFn = function () {
   ) {
     var fn = expParser.parse(expression).get
     var vm = this.vm
-    this.update(function () {
+    var handler = function () {
       fn.call(vm, vm)
-    })
+    }
+    if (this.filters) {
+      handler = _.applyFilters(
+        handler,
+        this.filters.read,
+        vm
+      )
+    }
+    this.update(handler)
     return true
   }
 }

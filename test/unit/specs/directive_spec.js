@@ -97,8 +97,18 @@ describe('Directive', function () {
 
   it('expression function', function () {
     def.isFn = true
+    var spy = jasmine.createSpy()
+    vm.$options.filters.test = function (fn) {
+      spy()
+      return function () {
+        // call it twice
+        fn()
+        fn()
+      }
+    }
     var d = new Directive('test', el, vm, {
-      expression: 'a++'
+      expression: 'a++',
+      filters: [{name:'test'}]
     }, def)
     expect(d._watcher).toBeUndefined()
     expect(d.bind).toHaveBeenCalled()
@@ -106,7 +116,7 @@ describe('Directive', function () {
     expect(typeof wrappedFn).toBe('function')
     // test invoke the wrapped fn
     wrappedFn()
-    expect(vm.a).toBe(2)
+    expect(vm.a).toBe(3)
   })
 
   it('two-way', function (done) {
