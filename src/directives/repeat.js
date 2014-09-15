@@ -5,6 +5,7 @@ var expParser = require('../parse/expression')
 var templateParser = require('../parse/template')
 var compile = require('../compile/compile')
 var transclude = require('../compile/transclude')
+var mergeOptions = require('../util/merge-option')
 var uid = 0
 
 module.exports = {
@@ -99,15 +100,22 @@ module.exports = {
     if (!id) {
       this.Ctor = _.Vue // default constructor
       this.inherit = true // inline repeats should inherit
-      this._linker = compile(this.el, _.Vue.options)
+      this._linker = compile(this.el, this.vm.$options)
     } else {
       var tokens = textParser.parse(id)
       if (!tokens) { // static component
         var Ctor = this.Ctor = this.vm.$options.components[id]
         _.assertAsset(Ctor, 'component', id)
         if (Ctor) {
-          this.el = transclude(this.el, Ctor.options)
-          this._linker = compile(this.el, Ctor.options)
+          // merge an empty object with owner vm as parent
+          // so child vms can access parent assets.
+          var merged = mergeOptions(
+            Ctor.options,
+            {},
+            { $parent: this.vm }
+          )
+          this.el = transclude(this.el, merged)
+          this._linker = compile(this.el, merged)
         }
       } else if (tokens.length === 1) {
         // to be resolved later
