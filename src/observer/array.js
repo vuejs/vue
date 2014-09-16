@@ -41,7 +41,7 @@ var arrayAugmentations = Object.create(Array.prototype)
     }
     if (inserted) ob.observeArray(inserted)
     // notify change
-    ob.binding.notify()
+    ob.notify()
     return result
   })
 })

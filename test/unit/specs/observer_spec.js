@@ -1,5 +1,6 @@
 var Observer = require('../../../src/observer')
 var config = require('../../../src/config')
+var Binding = require('../../../src/binding')
 var _ = require('../../../src/util')
 
 describe('Observer', function () {
@@ -71,8 +72,11 @@ describe('Observer', function () {
     dump = obj.a.b = 3
     expect(watcher.update.calls.count()).toBe(1)
     // swap object
+    var oldA = obj.a
     obj.a = { b: 4 }
     expect(watcher.update.calls.count()).toBe(2)
+    expect(oldA.__ob__.bindings.length).toBe(0)
+    expect(obj.a.__ob__.bindings.length).toBe(1)
     // recollect dep
     var oldDeps = watcher.deps
     watcher.deps = []
@@ -80,9 +84,6 @@ describe('Observer', function () {
     dump = obj.a.b
     Observer.target = null
     expect(watcher.deps.length).toBe(2)
-    // make sure we picked up the new bindings
-    expect(watcher.deps[0]).not.toBe(oldDeps[0])
-    expect(watcher.deps[1]).not.toBe(oldDeps[1])
     // set on the swapped object
     obj.a.b = 5
     expect(watcher.update.calls.count()).toBe(3)
@@ -91,7 +92,8 @@ describe('Observer', function () {
   it('observing $add/$delete', function () {
     var obj = { a: 1 }
     var ob = Observer.create(obj)
-    var binding = ob.binding
+    var binding = new Binding()
+    ob.bindings.push(binding)
     spyOn(binding, 'notify')
     obj.$add('b', 2)
     expect(obj.b).toBe(2)
@@ -111,7 +113,8 @@ describe('Observer', function () {
   it('observing array mutation', function () {
     var arr = []
     var ob = Observer.create(arr)
-    var binding = ob.binding
+    var binding = new Binding()
+    ob.bindings.push(binding)
     spyOn(binding, 'notify')
     var objs = [{}, {}, {}]
     arr.push(objs[0])
@@ -131,7 +134,8 @@ describe('Observer', function () {
   it('array $set', function () {
     var arr = [1]
     var ob = Observer.create(arr)
-    var binding = ob.binding
+    var binding = new Binding()
+    ob.bindings.push(binding)
     spyOn(binding, 'notify')
     arr.$set(0, 2)
     expect(arr[0]).toBe(2)
@@ -147,7 +151,8 @@ describe('Observer', function () {
     var obj1 = arr[0]
     var obj2 = arr[1]
     var ob = Observer.create(arr)
-    var binding = ob.binding
+    var binding = new Binding()
+    ob.bindings.push(binding)
     spyOn(binding, 'notify')
     // remove by index
     arr.$remove(0)
@@ -172,18 +177,22 @@ describe('Observer', function () {
     var ob = Observer.create(obj)
     expect(obj.$add).toBeTruthy()
     expect(obj.$delete).toBeTruthy()
-    spyOn(ob.binding, 'notify')
+    var binding = new Binding()
+    ob.bindings.push(binding)
+    spyOn(binding, 'notify')
     obj.$add('b', 2)
-    expect(ob.binding.notify).toHaveBeenCalled()
+    expect(binding.notify).toHaveBeenCalled()
     // array
     var arr = [1, 2, 3]
     var ob2 = Observer.create(arr)
     expect(arr.$set).toBeTruthy()
     expect(arr.$remove).toBeTruthy()
     expect(arr.push).not.toBe([].push)
-    spyOn(ob2.binding, 'notify')
+    var binding2 = new Binding()
+    ob2.bindings.push(binding2)
+    spyOn(binding2, 'notify')
     arr.push(1)
-    expect(ob2.binding.notify).toHaveBeenCalled()
+    expect(binding2.notify).toHaveBeenCalled()
     config.proto = true
   })
 

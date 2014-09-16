@@ -59,7 +59,7 @@ function Observer (value, type) {
   this.id = ++uid
   this.value = value
   this.active = true
-  this.binding = new Binding()
+  this.bindings = []
   _.define(value, '__ob__', this)
   var augment = config.proto && _.hasProto
     ? protoAugment
@@ -135,8 +135,7 @@ p.walk = function (obj) {
  */
 
 p.observe = function (val) {
-  var ob = Observer.create(val)
-  if (ob) return ob.binding
+  return Observer.create(val)
 }
 
 /**
@@ -162,7 +161,11 @@ p.observeArray = function (items) {
 
 p.convert = function (key, val) {
   var ob = this
-  var binding = ob.observe(val) || new Binding()
+  var childOb = ob.observe(val)
+  var binding = new Binding()
+  if (childOb) {
+    childOb.bindings.push(binding)
+  }
   Object.defineProperty(ob.value, key, {
     enumerable: true,
     configurable: true,
@@ -176,21 +179,35 @@ p.convert = function (key, val) {
     },
     set: function (newVal) {
       if (newVal === val) return
-      val = newVal
-      var newBinding = ob.observe(newVal)
-      if (newBinding) {
-        // swap binding, then call notify on old binding.
-        // this ensures all subscribers of the old binding
-        // gets re-evaluated, picks up the new binding and
-        // unregister from old binding.
-        var oldBinding = binding
-        binding = newBinding
-        oldBinding.notify()
-      } else {
-        binding.notify()
+      // remove binding from old value
+      var oldChildOb = val && val.__ob__
+      if (oldChildOb) {
+        var oldBindings = oldChildOb.bindings
+        oldBindings.splice(oldBindings.indexOf(binding))
       }
+      val = newVal
+      // add binding to new value
+      var newChildOb = ob.observe(newVal)
+      if (newChildOb) {
+        newChildOb.bindings.push(binding)
+      }
+      binding.notify()
     }
   })
+}
+
+/**
+ * Notify change on all self bindings on an observer.
+ * This is called when a mutable value mutates. e.g.
+ * when an Array's mutating methods are called, or an
+ * Object's $add/$delete are called.
+ */
+
+p.notify = function () {
+  var bindings = this.bindings
+  for (var i = 0, l = bindings.length; i < l; i++) {
+    bindings[i].notify()
+  }
 }
 
 module.exports = Observer

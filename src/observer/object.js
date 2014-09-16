@@ -16,7 +16,7 @@ _.define(
   function $add (key, val) {
     if (this.hasOwnProperty(key)) return
     this.__ob__.convert(key, val)
-    this.__ob__.binding.notify()
+    this.__ob__.notify()
   }
 )
 
@@ -34,7 +34,7 @@ _.define(
   function $delete (key) {
     if (!this.hasOwnProperty(key)) return
     delete this[key]
-    this.__ob__.binding.notify()
+    this.__ob__.notify()
   }
 )
 
