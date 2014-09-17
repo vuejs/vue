@@ -14,11 +14,12 @@ function noop () {}
  *
  * @param {Element|DocumentFragment} el
  * @param {Object} options
+ * @param {Boolean} partial
  * @return {Function}
  */
 
-module.exports = function compile (el, options) {
-  var params = options.paramAttributes
+module.exports = function compile (el, options, partial) {
+  var params = !partial && options.paramAttributes
   var paramsLinkFn = params
     ? compileParamAttributes(el, params, options)
     : null
