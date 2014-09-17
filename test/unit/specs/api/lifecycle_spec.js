@@ -143,7 +143,10 @@ if (_.inBrowser) {
       it('normal', function () {
         var vm = new Vue()
         expect(vm._isDestroyed).toBe(false)
+        var data = vm._data
+        expect(data.__ob__.vms.length).toBe(1)
         vm.$destroy()
+        expect(data.__ob__.vms.length).toBe(0)
         expect(vm._isDestroyed).toBe(true)
         expect(vm._watchers).toBeNull()
         expect(vm._userWatchers).toBeNull()

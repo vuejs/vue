@@ -93,6 +93,8 @@ exports.$destroy = function (remove) {
   if (this.$el) {
     this.$el.__vue__ = null
   }
+  // remove reference from data ob
+  this._data.__ob__.removeVm(this)
   this._data =
   this._watchers =
   this._userWatchers =
