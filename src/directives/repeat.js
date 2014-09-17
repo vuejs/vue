@@ -199,7 +199,6 @@ module.exports = {
         }
         if (idKey) { // swap track by id data
           if (alias) {
-            console.log('reusing...')
             vm[alias] = raw
           } else {
             vm._setData(raw)
