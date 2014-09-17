@@ -10,7 +10,7 @@ module.exports = {
       _.replace(el, this.ref)
       this.inserted = false
       if (el.tagName === 'TEMPLATE') {
-        this.el = templateParser.parse(el)
+        this.el = templateParser.parse(el, true)
       }
     } else {
       this.invalid = true
