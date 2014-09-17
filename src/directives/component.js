@@ -95,25 +95,20 @@ module.exports = {
     // check keep-alive flag
     this.keepAlive = this.el.hasAttribute('keep-alive')
     if (this.keepAlive) {
+      this.el.removeAttribute('keep-alive')
       this.cache = {}
     }
   },
 
   /**
    * Resolve the component constructor to use when creating
-   * the child vm. If the component id is empty string, the
-   * default 'Vue' constructor will be used.
+   * the child vm.
    */
 
   resolveCtor: function (id) {
-    if (id === '') {
-      this.id = '__vue__'
-      this.Ctor = _.Vue
-    } else {
-      this.id = id
-      this.Ctor = this.vm.$options.components[id]
-      _.assertAsset(this.Ctor, 'component', id)
-    }
+    this.ctorId = id
+    this.Ctor = this.vm.$options.components[id]
+    _.assertAsset(this.Ctor, 'component', id)
   },
 
   /**
@@ -127,7 +122,7 @@ module.exports = {
       return
     }
     if (this.keepAlive) {
-      var vm = this.cache[this.id]
+      var vm = this.cache[this.ctorId]
       if (vm) {
         this.childVM = vm
         vm.$before(this.ref)
@@ -136,11 +131,10 @@ module.exports = {
     }
     if (this.Ctor && !this.childVM) {
       this.childVM = this.vm.$addChild({
-        el: this.el.cloneNode(true),
-        _linker: this._linker
+        el: this.el.cloneNode(true)
       }, this.Ctor)
       if (this.keepAlive) {
-        this.cache[this.id] = this.childVM
+        this.cache[this.ctorId] = this.childVM
       }
       this.childVM.$before(this.ref)
     }
