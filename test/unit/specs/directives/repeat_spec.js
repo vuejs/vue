@@ -111,7 +111,20 @@ if (_.inBrowser) {
     })
 
     it('v-component', function () {
-      // body...
+      var vm = new Vue({
+        el: el,
+        data: {
+          items: [{a:1}, {a:2}, {a:3}]
+        },
+        template: '<div v-repeat="items" v-component="test"></div>',
+        components: {
+          test: {
+            template: '<p>{{$index}} {{a}}</p>',
+            replace: true
+          }
+        }
+      })
+      expect(el.innerHTML).toBe('<p>0 1</p><p>1 2</p><p>2 3</p><!--v-repeat-->')
     })
 
     it('nested repeats', function () {

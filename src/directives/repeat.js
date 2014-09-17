@@ -27,17 +27,17 @@ module.exports = {
     } else {
       this.filters.read.unshift(objToArray)
     }
+    // setup ref node
+    this.ref = document.createComment('v-repeat')
+    _.replace(this.el, this.ref)
     // check other directives that need to be handled
     // at v-repeat level
     this.checkIf()
     this.checkRef()
     this.checkTrackById()
     this.checkComponent()
-    // setup ref node
-    this.ref = document.createComment('v-repeat')
     // cache for primitive value instances
     this.cache = Object.create(null)
-    _.replace(this.el, this.ref)
     // check if this is a block repeat
     if (this.el.tagName === 'TEMPLATE') {
       this.el = templateParser.parse(this.el)
