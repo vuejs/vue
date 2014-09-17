@@ -121,7 +121,7 @@ exports._digest = function () {
     i = children.length
     while (i--) {
       child = children[i]
-      if (!child.$options.isolated) {
+      if (child.$options.inherit) {
         child._digest()
       }
     }
