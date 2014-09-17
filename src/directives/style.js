@@ -1,5 +1,5 @@
 var prefixes = ['-webkit-', '-moz-', '-ms-']
-var importantRE = /!important$/
+var importantRE = /!important;?$/
 
 module.exports = {
 
@@ -25,13 +25,17 @@ module.exports = {
         ? 'important'
         : ''
       if (isImportant) {
-        value = value.slice(0, -10).trim()
+        value = value.replace(importantRE, '').trim()
       }
       this.el.style.setProperty(prop, value, isImportant)
       if (this.prefixed) {
         var i = prefixes.length
         while (i--) {
-          this.el.style.setProperty(prefixes[i] + prop, value, isImportant)
+          this.el.style.setProperty(
+            prefixes[i] + prop,
+            value,
+            isImportant
+          )
         }
       }
     } else {
