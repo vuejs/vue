@@ -20,12 +20,21 @@ module.exports = {
       this.watcher = new Watcher(
         vm.$parent,
         this.expression,
-        function (val) {
-          vm.$set(key, val)
-        }
+        key
+          ? function (val) {
+              vm.$set(key, val)
+            }
+          : function (val) {
+              vm.$data = val
+            }
       )
       // initial set
-      vm.$set(key, this.watcher.value)
+      var initialVal = this.watcher.value
+      if (key) {
+        vm.$set(key, initialVal)
+      } else {
+        vm.$data = initialVal
+      }
     }
   },
 
