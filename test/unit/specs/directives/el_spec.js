@@ -1,0 +1,52 @@
+var _ = require('../../../../src/util')
+var Vue = require('../../../../src/vue')
+
+if (_.inBrowser) {
+  describe('v-el', function () {
+
+    var el
+    beforeEach(function () {
+      el = document.createElement('div')
+      spyOn(_, 'warn')
+    })
+
+    it('normal', function () {
+      var vm = new Vue({
+        el: el,
+        template: '<div v-el="test" id="test"></div>'
+      })
+      expect(vm.$$.test).toBeTruthy()
+      expect(vm.$$.test.id).toBe('test')
+    })
+
+    it('with v-repeat', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: { items: [1,2,3,4,5] },
+        template: '<div v-repeat="items" v-el="test">{{$value}}</div>'
+      })
+      expect(vm.$$.test).toBeTruthy()
+      expect(Array.isArray(vm.$$.test)).toBe(true)
+      expect(vm.$$.test[0].textContent).toBe('1')
+      expect(vm.$$.test[4].textContent).toBe('5')
+      vm.items = []
+      _.nextTick(function () {
+        expect(vm.$$.test.length).toBe(0)
+        done()
+      })
+    })
+
+    it('inside v-if', function () {
+      var vm = new Vue({
+        el: el,
+        data: { test: true },
+        template: '<div v-if="test"><div id="test" v-el="test"></div></div>'
+      })
+      expect(vm.$$.test).toBeTruthy()
+      expect(vm.$$.test.id).toBe('test')
+      vm._children[0].$destroy()
+      expect(vm.$$.test).toBeNull()
+    })
+
+  })
+}

@@ -58,7 +58,7 @@ exports._init = function (options) {
   while (parent && parent._isAnonymous) {
     parent = parent.$parent
   }
-  this._owner = parent
+  this._owner = parent || this
 
   // merge options.
   options = this.$options = mergeOptions(
