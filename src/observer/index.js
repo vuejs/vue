@@ -210,4 +210,28 @@ p.notify = function () {
   }
 }
 
+/**
+ * Add an owner vm, so that when $add/$delete mutations
+ * happen we can notify owner vms to proxy the keys and
+ * digest the watchers. This is only called when the object
+ * is observed as an instance's root $data.
+ *
+ * @param {Vue} vm
+ */
+
+p.addVm = function (vm) {
+  (this.vms = this.vms || []).push(vm)
+}
+
+/**
+ * Remove an owner vm. This is called when the object is
+ * swapped out as an instance's $data object.
+ *
+ * @param {Vue} vm
+ */
+
+p.removeVm = function (vm) {
+  this.vms.splice(this.vms.indexOf(vm), 1)
+}
+
 module.exports = Observer

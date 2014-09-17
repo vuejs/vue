@@ -14,9 +14,23 @@ _.define(
   objectAgumentations,
   '$add',
   function $add (key, val) {
+    if (_.isReserved(key)) {
+      _.warn('Refused to $add reserved key: ' + key)
+      return
+    }
     if (this.hasOwnProperty(key)) return
-    this.__ob__.convert(key, val)
-    this.__ob__.notify()
+    var ob = this.__ob__
+    ob.convert(key, val)
+    if (ob.vms) {
+      var i = ob.vms.length
+      while (i--) {
+        var vm = ob.vms[i]
+        vm._proxy(key)
+        vm._digest()
+      }
+    } else {
+      ob.notify()
+    }
   }
 )
 
@@ -32,9 +46,23 @@ _.define(
   objectAgumentations,
   '$delete',
   function $delete (key) {
+    if (_.isReserved(key)) {
+      _.warn('Refused to $add reserved key: ' + key)
+      return
+    }
     if (!this.hasOwnProperty(key)) return
     delete this[key]
-    this.__ob__.notify()
+    var ob = this.__ob__
+    if (ob.vms) {
+      var i = ob.vms.length
+      while (i--) {
+        var vm = ob.vms[i]
+        vm._unproxy(key)
+        vm._digest()
+      }
+    } else {
+      ob.notify()
+    }
   }
 )
 

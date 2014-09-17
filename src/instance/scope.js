@@ -34,7 +34,7 @@ exports._initData = function () {
     }
   }
   // observe data
-  Observer.create(data)
+  Observer.create(data).addVm(this)
 }
 
 /**
@@ -67,7 +67,8 @@ exports._setData = function (newData) {
       this._proxy(key)
     }
   }
-  Observer.create(newData)
+  oldData.__ob__.removeVm(this)
+  Observer.create(newData).addVm(this)
   this._digest()
 }
 
