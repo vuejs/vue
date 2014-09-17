@@ -80,7 +80,24 @@ if (_.inBrowser) {
     })
 
     it('iframe', function () {
-      // TODO
+      // iframes only gets contentWindow when inserted
+      // into the document
+      document.body.appendChild(el)
+      var spy = jasmine.createSpy()
+      var vm = new Vue({
+        el: el,
+        template: '<iframe v-on="click:test"></iframe>',
+        methods: {
+          test: spy
+        }
+      })
+      var iframeDoc = el.firstChild.contentDocument
+      trigger(iframeDoc, 'click')
+      expect(spy.calls.count()).toBe(1)
+      vm.$destroy()
+      trigger(iframeDoc, 'click')
+      expect(spy.calls.count()).toBe(1)
+      document.body.removeChild(el)
     })
 
   })
