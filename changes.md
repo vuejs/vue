@@ -176,20 +176,34 @@ By default, all child components **DO NOT** inherit the parent scope. Only anony
   })
   ```
 
-  By default the callback only fires when the value changes. If you want it to be called immediately with the initial value, use the third optional `immediate` argument:
+  - **Deep watching**
 
-  ``` js
-  vm.$watch('a', callback, true)
-  // callback is fired immediately with current value of `a`
-  ```
+    (Breaking) A change from 0.11 is that `$watch` now by default only fires when the identity of the watched value changes. If you want the watcher to also fire the callback when a nested value changes, pass in the third optional `deep` argument:
 
-- (Breaking) `$unwatch` has been removed. `$watch` now also returns an unregister function:
+    ``` js
+    vm.$watch('someObject', callback, true)
+    vm.someObject.nestedValue = 123
+    // callback is fired
+    ```
 
-  ``` js
-  var unwatch = vm.$watch('a', cb)
-  // later, teardown the watcher
-  unwatch()
-  ```
+  - **Immediate invocation**
+
+    By default the callback only fires when the value changes. If you want it to be called immediately with the initial value, use the fourth optional `immediate` argument:
+
+    ``` js
+    vm.$watch('a', callback, false, true)
+    // callback is fired immediately with current value of `a`
+    ```
+
+  - **Unwatching**
+
+    (Breaking) `$unwatch` has been removed. `$watch` now also returns an unregister function:
+
+    ``` js
+    var unwatch = vm.$watch('a', cb)
+    // later, teardown the watcher
+    unwatch()
+    ```
 
 - `vm.$get` now accepts expressions:
 

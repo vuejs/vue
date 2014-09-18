@@ -62,19 +62,21 @@ exports.$delete = function (key) {
  *
  * @param {String} exp
  * @param {Function} cb
+ * @param {Boolean} [deep]
  * @param {Boolean} [immediate]
  * @return {Function} - unwatchFn
  */
 
-exports.$watch = function (exp, cb, immediate) {
+exports.$watch = function (exp, cb, deep, immediate) {
   var vm = this
-  var watcher = vm._userWatchers[exp]
+  var key = deep ? exp + '**deep**' : exp
+  var watcher = vm._userWatchers[key]
   var wrappedCb = function (val, oldVal) {
     cb.call(vm, val, oldVal)
   }
   if (!watcher) {
-    watcher = vm._userWatchers[exp] =
-      new Watcher(vm, exp, wrappedCb)
+    watcher = vm._userWatchers[key] =
+      new Watcher(vm, exp, wrappedCb, null, false, deep)
   } else {
     watcher.addCb(wrappedCb)
   }
@@ -84,7 +86,7 @@ exports.$watch = function (exp, cb, immediate) {
   return function unwatchFn () {
     watcher.removeCb(wrappedCb)
     if (!watcher.active) {
-      vm._userWatchers[exp] = null
+      vm._userWatchers[key] = null
     }
   }
 }

@@ -16,16 +16,18 @@ var uid = 0
  * @param {Function} cb
  * @param {Array} [filters]
  * @param {Boolean} [needSet]
+ * @param {Boolean} [deep]
  * @constructor
  */
 
-function Watcher (vm, expression, cb, filters, needSet) {
+function Watcher (vm, expression, cb, filters, needSet, deep) {
   this.vm = vm
   vm._watcherList.push(this)
   this.expression = expression
   this.cbs = [cb]
   this.id = ++uid // uid for batching
   this.active = true
+  this.deep = deep
   this.deps = Object.create(null)
   // setup filters if any.
   // We delegate directive filters here to the watcher
@@ -67,6 +69,10 @@ p.get = function () {
   this.beforeGet()
   var vm = this.vm
   var value = this.getter.call(vm, vm)
+  // use JSON.stringify to "touch" every property
+  // so they are all tracked as dependencies for
+  // deep watching
+  if (this.deep) JSON.stringify(value)
   value = _.applyFilters(value, this.readFilters, vm)
   this.afterGet()
   return value

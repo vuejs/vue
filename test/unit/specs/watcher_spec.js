@@ -285,6 +285,21 @@ describe('Watcher', function () {
     })
   })
 
+  it('deep watch', function (done) {
+    var watcher = new Watcher(vm, 'b', spy, null, false, true)
+    vm.b.c = 3
+    nextTick(function () {
+      expect(spy).toHaveBeenCalledWith(vm.b, vm.b)
+      var oldB = vm.b
+      vm.b = { c: 4 }
+      nextTick(function () {
+        expect(spy).toHaveBeenCalledWith(vm.b, oldB)
+        expect(spy.calls.count()).toBe(2)
+        done()
+      })
+    })
+  })
+
   it('add callback', function (done) {
     var watcher = new Watcher(vm, 'a', spy)
     var spy2 = jasmine.createSpy()
