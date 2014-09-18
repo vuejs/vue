@@ -41,6 +41,8 @@ if (_.inBrowser) {
       vm.items = []
       _.nextTick(function () {
         expect(vm.$.test.length).toBe(0)
+        vm._directives[0].unbind()
+        expect(vm.$.test).toBeUndefined()
         done()
       })
     })

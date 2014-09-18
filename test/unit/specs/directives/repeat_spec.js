@@ -191,12 +191,134 @@ if (_.inBrowser) {
       expect(el.innerHTML).toBe(markup + '<!--v-repeat-->')
     })
 
-    it('array filters', function () {
-      // body...
+    it('array filters', function (done) {
+      var vm = new Vue({
+        el: el,
+        template: '<div v-repeat="list | filterBy filterKey | orderBy sortKey -1">{{id}}</div>',
+        data: {
+          filterKey: 'hi!',
+          sortKey: 'id',
+          list: [
+            { id: 1, id2: 4, msg: 'hi!' },
+            { id: 2, id2: 3, msg: 'na' },
+            { id: 3, id2: 2, msg: 'hi!' },
+            { id: 4, id2: 1, msg: 'na' }
+          ]
+        }
+      })
+      assertMarkup()
+
+      go(
+        function () {
+          vm.filterKey = 'na'
+        }, assertMarkup
+      )
+      .then(
+        function () {
+          vm.sortKey = 'id2'
+        }, assertMarkup
+      )
+      .then(
+        function () {
+          vm.list[0].id2 = 0
+        }, assertMarkup
+      )
+      .then(
+        function () {
+          vm.list.push({ id: 0, id2: 4, msg: 'na' })
+        }, assertMarkup
+      )
+      .then(
+        function () {
+          vm.list = [
+            { id: 33, id2: 4, msg: 'hi!' },
+            { id: 44, id2: 3, msg: 'na' }
+          ]
+        }, assertMarkup
+      )
+      .run(done)
+
+      function assertMarkup () {
+        var markup = vm.list
+          .filter(function (item) {
+            return item.msg === vm.filterKey
+          })
+          .sort(function (a, b) {
+            return a[vm.sortKey] > b[vm.sortKey] ? -1 : 1
+          })
+          .map(function (item) {
+            return '<div>' + item.id + '</div>'
+          }).join('')
+        expect(el.innerHTML).toBe(markup + '<!--v-repeat-->')
+      }
     })
 
-    it('trackby id', function () {
-      // body...
+    it('trackby id', function (done) {
+
+      assertTrackBy('<div v-repeat="list" trackby="id">{{msg}}</div>', function () {
+        assertTrackBy('<div v-repeat="item:list" trackby="id">{{item.msg}}</div>', done)
+      })
+      
+      function assertTrackBy (template, next) {
+        var vm = new Vue({
+          el: el,
+          template: template,
+          data: {
+            list: [
+              { id: 1, msg: 'hi' },
+              { id: 2, msg: 'ha' },
+              { id: 3, msg: 'ho' }
+            ]
+          }
+        })
+        assertMarkup()
+        var oldVms = vm._children.slice()
+        // swap the data with different objects, but with
+        // the same ID!
+        vm.list = [
+          { id: 1, msg: 'wa' },
+          { id: 2, msg: 'wo' }
+        ]
+        _.nextTick(function () {
+          assertMarkup()
+          // should reuse old vms!
+          var i = 2
+          while (i--) {
+            expect(vm._children[i]).toBe(oldVms[i])
+          }
+          next()
+        })
+
+        function assertMarkup () {
+          var markup = vm.list.map(function (item) {
+            return '<div>' + item.msg + '</div>'
+          }).join('')
+          expect(el.innerHTML).toBe(markup + '<!--v-repeat-->')
+        }
+      }
+    })
+
+    it('warn duplicate objects', function () {
+      var obj = {}
+      var vm = new Vue({
+        el: el,
+        template: '<div v-repeat="items"></div>',
+        data: {
+          items: [obj, obj]
+        }
+      })
+      expect(_.warn).toHaveBeenCalled()
+    })
+
+    it('warn duplicate trackby id', function () {
+      var vm = new Vue({
+        el: el,
+        template: '<div v-repeat="items" trackby="id"></div>',
+        data: {
+          items: [{id:1}, {id:1}]
+        }
+      })
+      expect(_.warn).toHaveBeenCalled()
     })
 
     it('warn invalid data type', function () {
@@ -208,6 +330,42 @@ if (_.inBrowser) {
         }
       })
       expect(_.warn).toHaveBeenCalled()
+    })
+
+    it('warn v-if', function () {
+      var vm = new Vue({
+        el: el,
+        template: '<div v-repeat="items" v-if="aaa"></div>',
+        data: {
+          items: []
+        }
+      })
+      expect(_.warn).toHaveBeenCalled()
+    })
+
+    it('falsy value', function () {
+      var vm = new Vue({
+        el: el,
+        template: '<div v-repeat="items"></div>',
+        data: {}
+      })
+      expect(_.warn).not.toHaveBeenCalled()
+    })
+
+    it('teardown', function () {
+      var vm = new Vue({
+        el: el,
+        template: '<div v-repeat="items">{{a}}</div>',
+        data: {
+          items: [{a:1}, {a:2}]
+        }
+      })
+      vm._directives[0].unbind()
+      expect(vm._children.length).toBe(0)
+    })
+
+    it('with transition', function () {
+      // body...
     })
 
   })
@@ -247,6 +405,7 @@ function go (fn, cb) {
 
 function assertMutations (vm, el, done) {
   assertMarkup()
+  var poppedItem
   go(
     function () {
       vm.items.push({a:3})
@@ -267,13 +426,13 @@ function assertMutations (vm, el, done) {
   )
   .then(
     function () {
-      vm.items.pop()
+      poppedItem = vm.items.pop()
     },
     assertMarkup
   )
   .then(
     function () {
-      vm.items.unshift({a:4})
+      vm.items.unshift(poppedItem)
     },
     assertMarkup
   )

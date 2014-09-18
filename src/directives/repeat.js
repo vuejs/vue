@@ -479,6 +479,7 @@ function objToArray (obj) {
   if (_.isArray(obj)) {
     return obj
   }
+  if (obj == null) return
   if (!_.isPlainObject(obj)) {
     _.warn(
       'Invalid value for v-repeat: ' + obj +
