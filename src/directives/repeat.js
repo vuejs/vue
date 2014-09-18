@@ -30,6 +30,10 @@ module.exports = {
     // setup ref node
     this.ref = document.createComment('v-repeat')
     _.replace(this.el, this.ref)
+    // check if this is a block repeat
+    this.template = this.el.tagName === 'TEMPLATE'
+      ? templateParser.parse(this.el, true)
+      : this.el
     // check other directives that need to be handled
     // at v-repeat level
     this.checkIf()
@@ -38,10 +42,6 @@ module.exports = {
     this.checkComponent()
     // cache for primitive value instances
     this.cache = Object.create(null)
-    // check if this is a block repeat
-    if (this.el.tagName === 'TEMPLATE') {
-      this.el = templateParser.parse(this.el)
-    }
   },
 
   /**
@@ -100,7 +100,7 @@ module.exports = {
     if (!id) {
       this.Ctor = _.Vue // default constructor
       this.inherit = true // inline repeats should inherit
-      this._linker = compile(this.el, this.vm.$options)
+      this._linker = compile(this.template, this.vm.$options)
     } else {
       var tokens = textParser.parse(id)
       if (!tokens) { // static component
@@ -114,19 +114,13 @@ module.exports = {
             {},
             { $parent: this.vm }
           )
-          this.el = transclude(this.el, merged)
-          this._linker = compile(this.el, merged)
+          this.template = transclude(this.template, merged)
+          this._linker = compile(this.template, merged)
         }
-      } else if (tokens.length === 1) {
-        // to be resolved later
-        this.CtorExp = tokens[0].value
       } else {
-        _.warn(
-          'Invalid attribute binding: "' +
-           'component="' + id + '"' +
-          '\nDon\'t mix binding tags with plain text ' +
-          'in attribute bindings.'
-        )
+        // to be resolved later
+        var ctorExp = textParser.tokensToExp(tokens)
+        this.ctorGetter = expParser.parse(ctorExp).get
       }
     }
   },
@@ -139,13 +133,7 @@ module.exports = {
    */
 
   update: function (data) {
-    if (data && !_.isArray(data)) {
-      _.warn(
-        'Invalid value for v-repeat:' + data +
-        '\nExpects Object or Array.'
-      )
-      return
-    }
+    if (!data) return
     this.converted = data && data._converted
     this.vms = this.diff(data || [], this.vms)
     // update v-ref
@@ -288,7 +276,7 @@ module.exports = {
     // resolve constructor
     var Ctor = this.Ctor || this.resolveCtor(data)
     var vm = this.vm.$addChild({
-      el: this.el.cloneNode(true),
+      el: this.template.cloneNode(true),
       _linker: this._linker,
       _meta: meta,
       data: data,
@@ -309,14 +297,13 @@ module.exports = {
    */
 
   resolveCtor: function (data) {
-    var getter = expParser.parse(this.CtorExp).get
     var context = Object.create(this.vm)
     for (var key in data) {
       // use _.define to avoid accidentally
       // overwriting scope properties
       _.define(context, key, data[key])
     }
-    var id = getter(context)
+    var id = this.ctorGetter.call(context, context)
     var Ctor = this.vm.$options.components[id]
     _.assertAsset(Ctor, 'component', id)
     return Ctor

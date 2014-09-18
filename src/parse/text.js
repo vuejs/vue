@@ -130,7 +130,7 @@ exports.tokensToExp = function (tokens, vm) {
 
 function formatToken (token, vm) {
   return token.tag
-    ? token.oneTime
+    ? vm && token.oneTime
       ? '"' + vm.$get(token.value) + '"'
       : token.value
     : '"' + token.value + '"'

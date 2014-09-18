@@ -51,7 +51,7 @@ if (_.inBrowser) {
       expect(vm._children).toBeNull()
       vm.test = true
       _.nextTick(function () {
-        expect(el.innerHTML).toBe('<!--v-block-start--><p>A</p><p>B</p><!--v-block-end--><!--v-if-->')
+        expect(el.innerHTML).toBe('<p>A</p><p>B</p><!--v-if-->')
         expect(vm._children.length).toBe(1)
         vm.test = false
         _.nextTick(function () {

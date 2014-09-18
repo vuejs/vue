@@ -57,7 +57,7 @@ if (_.inBrowser) {
           }
         }
       })
-      expect(el.innerHTML).toBe('<!--v-block-start--><p>123</p><p>234</p><!--v-block-end--><!--v-component-->')
+      expect(el.innerHTML).toBe('<p>123</p><p>234</p><!--v-component-->')
     })
 
     it('dynamic', function (done) {

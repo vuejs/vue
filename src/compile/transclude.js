@@ -19,27 +19,11 @@ module.exports = function transclude (el, options) {
   if (el.tagName === 'TEMPLATE') {
     el = templateParser.parse(el)
   }
-  if (el instanceof DocumentFragment) {
-    return transcludeBlock(el)
-  } else if (options.template) {
+  if (options.template) {
     return transcludeTemplate(el, options)
   } else {
     return el
   }
-}
-
-/**
- * Mark a block fragment that manages a group of nodes
- * instead of one element. The group is denoted by
- * a starting node and an ending node.
- *
- * @param {DocumentFragment} frag
- */
-
-function transcludeBlock (frag) {
-  _.prepend(document.createComment('v-block-start'), frag)
-  frag.appendChild(document.createComment('v-block-end'))
-  return frag
 }
 
 /**
@@ -60,7 +44,6 @@ function transcludeTemplate (el, options) {
     collectRawContent(el)
     if (options.replace) {
       if (frag.childNodes.length > 1) {
-        transcludeBlock(frag)
         transcludeContent(_.toArray(frag.childNodes))
         return frag
       } else {

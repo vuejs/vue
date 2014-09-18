@@ -128,7 +128,67 @@ if (_.inBrowser) {
     })
 
     it('nested repeats', function () {
-      // body...
+      var vm = new Vue({
+        el: el,
+        data: {
+          items: [
+            { items: [{a:1}, {a:2}], a: 1 },
+            { items: [{a:3}, {a:4}], a: 2 }
+          ]
+        },
+        template: '<div v-repeat="items">' +
+            '<p v-repeat="items">{{$index}} {{a}} {{$parent.$index}} {{$parent.a}}</p>' +
+          '</div>'
+      })
+      expect(el.innerHTML).toBe(
+        '<div><p>0 1 0 1</p><p>1 2 0 1</p><!--v-repeat--></div>' +
+        '<div><p>0 3 1 2</p><p>1 4 1 2</p><!--v-repeat--></div>' +
+        '<!--v-repeat-->'
+      )
+    })
+
+    it('dynamic component type based on instance data', function () {
+      var vm = new Vue({
+        el: el,
+        template: '<div v-repeat="list" v-component="view-{{type}}"></div>',
+        data: {
+          list: [
+            { type: 'a' },
+            { type: 'b' },
+            { type: 'c' }
+          ]
+        },
+        components: {
+          'view-a': {
+            template: 'AAA'
+          },
+          'view-b': {
+            template: 'BBB'
+          },
+          'view-c': {
+            template: 'CCC'
+          }
+        }
+      })
+      expect(el.innerHTML).toBe('<div>AAA</div><div>BBB</div><div>CCC</div><!--v-repeat-->')
+    })
+
+    it('block repeat', function () {
+      var vm = new Vue({
+        el: el,
+        template: '<template v-repeat="list"><p>{{a}}</p><p>{{a + 1}}</p></template>',
+        data: {
+          list: [
+            { a: 1 },
+            { a: 2 },
+            { a: 3 }
+          ]
+        }
+      })
+      var markup = vm.list.map(function (item) {
+        return '<p>' + item.a + '</p><p>' + (item.a + 1) + '</p>'
+      }).join('')
+      expect(el.innerHTML).toBe(markup + '<!--v-repeat-->')
     })
 
     it('array filters', function () {
@@ -139,8 +199,15 @@ if (_.inBrowser) {
       // body...
     })
 
-    it('warn invalid type', function () {
-      // body...
+    it('warn invalid data type', function () {
+      var vm = new Vue({
+        el: el,
+        template: '<div v-repeat="items"></div>',
+        data: {
+          items: 1234
+        }
+      })
+      expect(_.warn).toHaveBeenCalled()
     })
 
   })
