@@ -168,13 +168,17 @@ By default, all child components **DO NOT** inherit the parent scope. Only anony
 
 ## Instance methods change
 
-- `vm.$watch` can now accept an expression:
+- #### `vm.$watch`
 
-  ``` js
-  vm.$watch('a + b', function (newVal, oldVal) {
-    // do something
-  })
-  ```
+  - **Expression watching**
+
+    `vm.$watch` can now accept an expression:
+
+    ``` js
+    vm.$watch('a + b', function (newVal, oldVal) {
+      // do something
+    })
+    ```
 
   - **Deep watching**
 
@@ -205,7 +209,9 @@ By default, all child components **DO NOT** inherit the parent scope. Only anony
     unwatch()
     ```
 
-- `vm.$get` now accepts expressions:
+- #### `vm.$get`
+
+  `vm.$get` now accepts expressions:
 
   ``` js
   var value = vm.$get('a + b')
