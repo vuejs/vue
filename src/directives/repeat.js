@@ -219,17 +219,20 @@ module.exports = {
     // right place. We're going in reverse here because
     // insertBefore relies on the next sibling to be
     // resolved.
-    var targetNext, currentNext, nextEl
+    var targetNext, currentNext
     i = vms.length
     while (i--) {
       vm = vms[i]
       // this is the vm that we should be in front of
       targetNext = vms[i + 1]
       if (!targetNext) {
-        // This is the last item, just insert before the
-        // ref node. However we only want animation for
-        // newly created instances.
-        vm.$before(ref, null, !vm._reused)
+        // This is the last item. If it's reused then
+        // everything else will eventually be in the right
+        // place, so no need to touch it. Otherwise, insert
+        // it.
+        if (!vm._reused) {
+          vm.$before(ref)
+        }
       } else {
         if (vm._reused) {
           // this is the vm we are actually in front of
@@ -237,8 +240,7 @@ module.exports = {
           // we only need to move if we are not in the right
           // place already.
           if (currentNext !== targetNext) {
-            nextEl = findNextInDOMVmEl(targetNext, vms, ref)
-            vm.$before(nextEl, null, false)
+            vm.$before(targetNext.$el, null, false)
           }
         } else {
           // new instance, insert to existing next
@@ -435,34 +437,11 @@ module.exports = {
  */
 
 function findNextVm (vm, ref) {
-  var el = (vm._isBlock
-    ? vm._blockEnd
-    : vm.$el).nextSibling
+  var el = (vm._blockEnd || vm.$el).nextSibling
   while (!el.__vue__ && el !== ref) {
     el = el.nextSibling
   }
   return el.__vue__
-}
-
-/**
- * Helper to find the next vm that is already in the DOM
- * and return its $el. This is necessary because newly
- * inserted vms might not be in the DOM yet due to entering
- * transitions.
- *
- * @param {Vue} next
- * @param {Array} vms
- * @param {CommentNode} ref
- * @return {Element}
- */
-
-function findNextInDOMVmEl (next, vms, ref) {
-  var el = next.$el
-  while (!el.parentNode) {
-    next = vms[next.$index + 1]
-    el = next ? next.$el : ref
-  }
-  return el
 }
 
 /**

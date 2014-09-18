@@ -364,8 +364,37 @@ if (_.inBrowser) {
       expect(vm._children.length).toBe(0)
     })
 
-    it('with transition', function () {
-      // body...
+    it('with transition', function (done) {
+      // === IMPORTANT ===
+      // PhantomJS always returns false when calling
+      // Element.contains() on a comment node. This causes
+      // transitions to be skipped. Monkey patching here
+      // isn't ideal but does the job...
+      var inDoc = _.inDoc
+      _.inDoc = function () {
+        return true
+      }
+      var vm = new Vue({
+        el: el,
+        template: '<div v-repeat="items" v-transition="test">{{a}}</div>',
+        data: {
+          items: [{a:1}, {a:2}, {a:3}]
+        },
+        transitions: {
+          test: {
+            leave: function (el, done) {
+              setTimeout(done, 1)
+            }
+          }
+        }
+      })
+      vm.items.splice(1, 1, {a:4})
+      setTimeout(function () {
+        expect(el.innerHTML).toBe('<div>1</div><div>4</div><div>3</div><!--v-repeat-->')
+        // clean up
+        _.inDoc = inDoc
+        done()
+      }, 30)
     })
 
   })
