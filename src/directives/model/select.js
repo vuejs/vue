@@ -58,7 +58,7 @@ function initOptions (expression) {
   var self = this
   function optionUpdateWatcher (value) {
     if (_.isArray(value)) {
-      self.el.innerHTML = value.map(formatOption)
+      self.el.innerHTML = value.map(formatOption).join('')
       if (self._watcher) {
         self.update(self._watcher.value)
       }
@@ -93,7 +93,7 @@ function formatOption (op) {
       '</option>'
     } else if (op.options) {
       return '<optgroup label="' + op.label + '">' +
-        op.options.map(formatOption) +
+        op.options.map(formatOption).join('') +
       '</optgroup>'
     }
   } else {
@@ -108,9 +108,8 @@ function formatOption (op) {
 function checkInitialValue () {
   var initValue
   var options = this.el.options
-  var i = options.length
-  while (i--) {
-    if (options[i].selected) {
+  for (var i = 0, l = options.length; i < l; i++) {
+    if (options[i].hasAttribute('selected')) {
       if (this.multiple) {
         (initValue || (initValue = []))
           .push(options[i].value)

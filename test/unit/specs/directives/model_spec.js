@@ -91,12 +91,168 @@ if (_.inBrowser) {
       expect(vm.test).toBe(true)
     })
 
-    it('select', function () {
-      
+    it('select', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          test: 'b'
+        },
+        template:
+          '<select v-model="test">' +
+            '<option>a</option>' +
+            '<option>b</option>' +
+            '<option>c</option>' +
+          '</select>'
+      })
+      expect(vm.test).toBe('b')
+      expect(el.firstChild.value).toBe('b')
+      expect(el.firstChild.childNodes[1].selected).toBe(true)
+      vm.test = 'c'
+      _.nextTick(function () {
+        expect(el.firstChild.value).toBe('c')
+        expect(el.firstChild.childNodes[2].selected).toBe(true)
+        el.firstChild.value = 'a'
+        trigger(el.firstChild, 'change')
+        expect(vm.test).toBe('a')
+        done()
+      })
     })
 
-    it('select + options', function () {
-      
+    it('select default value', function () {
+      var vm = new Vue({
+        el: el,
+        data: {
+          test: 'a'
+        },
+        template:
+          '<select v-model="test">' +
+            '<option>a</option>' +
+            '<option selected>b</option>' +
+          '</select>'
+      })
+      expect(vm.test).toBe('b')
+      expect(el.firstChild.value).toBe('b')
+      expect(el.firstChild.childNodes[1].selected).toBe(true)
+    })
+
+    it('select + multiple', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          test: ['b']
+        },
+        template:
+          '<select v-model="test" multiple>' +
+            '<option>a</option>' +
+            '<option>b</option>' +
+            '<option>c</option>' +
+          '</select>'
+      })
+      var opts = el.firstChild.options
+      expect(opts[0].selected).toBe(false)
+      expect(opts[1].selected).toBe(true)
+      expect(opts[2].selected).toBe(false)
+      vm.test = ['a', 'c']
+      _.nextTick(function () {
+        expect(opts[0].selected).toBe(true)
+        expect(opts[1].selected).toBe(false)
+        expect(opts[2].selected).toBe(true)
+        opts[0].selected = false
+        opts[1].selected = true
+        trigger(el.firstChild, 'change')
+        expect(vm.test[0]).toBe('b')
+        expect(vm.test[1]).toBe('c')
+        done()
+      })
+    })
+
+    it('select + multiple default value', function () {
+      var vm = new Vue({
+        el: el,
+        data: {},
+        template:
+          '<select v-model="test" multiple>' +
+            '<option>a</option>' +
+            '<option selected>b</option>' +
+            '<option selected>c</option>' +
+          '</select>'
+      })
+      expect(vm.test[0]).toBe('b')
+      expect(vm.test[1]).toBe('c')
+    })
+
+    it('select + options', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          test: 'b',
+          opts: ['a', 'b', 'c']
+        },
+        template: '<select v-model="test" options="opts"></select>'
+      })
+      var opts = el.firstChild.options
+      expect(opts.length).toBe(3)
+      expect(opts[0].selected).toBe(false)
+      expect(opts[1].selected).toBe(true)
+      expect(opts[2].selected).toBe(false)
+      vm.opts = ['b', 'c']
+      _.nextTick(function () {
+        expect(opts.length).toBe(2)
+        expect(opts[0].selected).toBe(true)
+        expect(opts[1].selected).toBe(false)
+        // should teardown option watcher when unbind
+        expect(vm._watcherList.length).toBe(2)
+        vm._directives[0].unbind()
+        expect(vm._watcherList.length).toBe(0)
+        done()
+      })
+    })
+
+    it('select + options + label', function () {
+      var vm = new Vue({
+        el: el,
+        data: {
+          test: 'b',
+          opts: [
+            { label: 'A', value: 'a' },
+            { label: 'B', value: 'b' }
+          ]
+        },
+        template: '<select v-model="test" options="opts"></select>'
+      })
+      expect(el.firstChild.innerHTML).toBe(
+        '<option value="a">A</option>' +
+        '<option value="b">B</option>'
+      )
+      var opts = el.firstChild.options
+      expect(opts[0].selected).toBe(false)
+      expect(opts[1].selected).toBe(true)
+    })
+
+    it('select + options + optgroup', function () {
+      var vm = new Vue({
+        el: el,
+        data: {
+          test: 'b',
+          opts: [
+            { label: 'A', options: ['a','b'] },
+            { label: 'B', options: ['c'] }
+          ]
+        },
+        template: '<select v-model="test" options="opts"></select>'
+      })
+      expect(el.firstChild.innerHTML).toBe(
+        '<optgroup label="A">' +
+          '<option>a</option><option>b</option>' +
+        '</optgroup>' +
+        '<optgroup label="B">' +
+          '<option>c</option>' +
+        '</optgroup>'
+      )
+      var opts = el.firstChild.options
+      expect(opts[0].selected).toBe(false)
+      expect(opts[1].selected).toBe(true)
+      expect(opts[2].selected).toBe(false)
     })
 
     it('text', function () {
@@ -111,10 +267,19 @@ if (_.inBrowser) {
       
     })
 
-    it('warn invalid', function () {
+    it('warn invalid tag', function () {
       var vm = new Vue({
         el: el,
-        template: '<div v-model="test"></div<'
+        template: '<div v-model="test"></div>'
+      })
+      expect(_.warn).toHaveBeenCalled()
+    })
+
+    it('warn invalid option value', function () {
+      var vm = new Vue({
+        el: el,
+        data: { a: 123 },
+        template: '<select v-model="test" options="a"></select>'
       })
       expect(_.warn).toHaveBeenCalled()
     })
