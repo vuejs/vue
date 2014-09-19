@@ -1,5 +1,5 @@
 var dirId           = 1,
-    ARG_RE          = /^[\w\$-]+$/,
+    ARG_RE          = /^[^\{\?]+$/,
     FILTER_TOKEN_RE = /[^\s'"]+|'[^']+'|"[^"]+"/g,
     NESTING_RE      = /^\$(parent|root)\./,
     SINGLE_VAR_RE   = /^[\w\.$]+$/,
