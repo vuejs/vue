@@ -321,17 +321,6 @@ if (_.inBrowser) {
       expect(_.warn).toHaveBeenCalled()
     })
 
-    it('warn invalid data type', function () {
-      var vm = new Vue({
-        el: el,
-        template: '<div v-repeat="items"></div>',
-        data: {
-          items: 1234
-        }
-      })
-      expect(_.warn).toHaveBeenCalled()
-    })
-
     it('warn v-if', function () {
       var vm = new Vue({
         el: el,
@@ -343,13 +332,20 @@ if (_.inBrowser) {
       expect(_.warn).toHaveBeenCalled()
     })
 
-    it('falsy value', function () {
+    it('repeat number', function () {
       var vm = new Vue({
         el: el,
-        template: '<div v-repeat="items"></div>',
-        data: {}
+        template: '<div v-repeat="3">{{$index}} {{$value}}</div>'
       })
-      expect(_.warn).not.toHaveBeenCalled()
+      expect(el.innerHTML).toBe('<div>0 0</div><div>1 1</div><div>2 2</div><!--v-repeat-->')
+    })
+
+    it('repeat string', function () {
+      var vm = new Vue({
+        el: el,
+        template: '<div v-repeat="\'vue\'">{{$index}} {{$value}}</div>'
+      })
+      expect(el.innerHTML).toBe('<div>0 v</div><div>1 u</div><div>2 e</div><!--v-repeat-->')
     })
 
     it('teardown', function () {

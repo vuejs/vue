@@ -133,7 +133,9 @@ module.exports = {
    */
 
   update: function (data) {
-    if (!data) return
+    if (typeof data === 'number') {
+      data = range(data)
+    }
     this.converted = data && data._converted
     this.vms = this.diff(data || [], this.vms)
     // update v-ref
@@ -455,16 +457,8 @@ function findNextVm (vm, ref) {
  */
 
 function objToArray (obj) {
-  if (_.isArray(obj)) {
-    return obj
-  }
-  if (obj == null) return
   if (!_.isPlainObject(obj)) {
-    _.warn(
-      'Invalid value for v-repeat: ' + obj +
-      '\nOnly Arrays and Objects are allowed.'
-    )
-    return
+    return obj
   }
   var keys = Object.keys(obj)
   var i = keys.length
@@ -479,4 +473,13 @@ function objToArray (obj) {
   }
   res._converted = true
   return res
+}
+
+function range (n) {
+  var i = -1
+  var ret = new Array(n)
+  while (++i < n) {
+    ret[i] = i
+  }
+  return ret
 }
