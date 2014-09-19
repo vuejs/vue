@@ -104,6 +104,15 @@ describe('Directive Parser', function () {
     expect(res[2].expression).toBe('{a:1,b:2}')
   })
 
+  it('arguments with non-indentifier chars', function () {
+    var res = parse('show.bs.collapse:test, a@b%c:test')
+    expect(res.length).toBe(2)
+    expect(res[0].arg).toBe('show.bs.collapse')
+    expect(res[0].expression).toBe('test')
+    expect(res[1].arg).toBe('a@b%c')
+    expect(res[1].expression).toBe('test')
+  })
+
   it('quoted arguments', function () {
     var res = parse('"xlink:href":a?"fsef":ff')
     expect(res.length).toBe(1)

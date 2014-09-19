@@ -1,7 +1,7 @@
 var _ = require('../util')
 var Cache = require('../cache')
 var cache = new Cache(1000)
-var argRE = /^[\w\$-]+$|^'[^']*'$|^"[^"]*"$/
+var argRE = /^[^\{\?]+$|^'[^']*'$|^"[^"]*"$/
 var filterTokenRE = /[^\s'"]+|'[^']+'|"[^"]+"/g
 
 /**
