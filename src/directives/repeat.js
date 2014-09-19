@@ -475,6 +475,13 @@ function objToArray (obj) {
   return res
 }
 
+/**
+ * Create a range array from given number.
+ *
+ * @param {Number} n
+ * @return {Array}
+ */
+
 function range (n) {
   var i = -1
   var ret = new Array(n)
