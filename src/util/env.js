@@ -53,25 +53,22 @@ exports.isIE9 =
  */
 
 if (inBrowser && !exports.isIE9) {
-  if (
+  var isWebkitTrans =
     window.ontransitionend === undefined &&
     window.onwebkittransitionend !== undefined
-  ) {
-    exports.transitionProp = 'WebkitTransition'
-    exports.transitionEndEvent = 'webkitTransitionEnd'
-  } else {
-    exports.transitionProp = 'transition'
-    exports.transitionEndEvent = 'transitionend'
-  }
-
-  if (
+  var isWebkitAnim =
     window.onanimationend === undefined &&
     window.onwebkitanimationend !== undefined
-  ) {
-    exports.animationProp = 'WebkitAnimation'
-    exports.animationEndEvent = 'webkitAnimationEnd'
-  } else {
-    exports.animationProp = 'animation'
-    exports.animationEndEvent = 'animationend'
-  }
+  exports.transitionProp = isWebkitTrans
+    ? 'WebkitTransition'
+    : 'transition'
+  exports.transitionEndEvent = isWebkitTrans
+    ? 'webkitTransitionEnd'
+    : 'transitionend'
+  exports.animationProp = isWebkitAnim
+    ? 'WebkitAnimation'
+    : 'animation'
+  exports.animationEndEvent = isWebkitAnim
+    ? 'webkitAnimationEnd'
+    : 'animationend'
 }
