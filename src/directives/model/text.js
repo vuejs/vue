@@ -61,10 +61,9 @@ module.exports = {
         _.nextTick(function () {
           var newVal = self._watcher.value
           self.update(newVal)
-          if (cursorPos == null) {
-            cursorPos = newVal.toString().length
+          if (cursorPos != null) {
+            el.setSelectionRange(cursorPos, cursorPos)
           }
-          el.setSelectionRange(cursorPos, cursorPos)
         })
       }
     } else {

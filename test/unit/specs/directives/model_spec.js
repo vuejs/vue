@@ -14,6 +14,7 @@ if (_.inBrowser) {
     var el
     beforeEach(function () {
       el = document.createElement('div')
+      el.style.display = 'none'
       document.body.appendChild(el)
       spyOn(_, 'warn')
     })
@@ -255,16 +256,167 @@ if (_.inBrowser) {
       expect(opts[2].selected).toBe(false)
     })
 
-    it('text', function () {
-      
+    it('text', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          test: 'b'
+        },
+        template: '<input v-model="test">'
+      })
+      expect(el.firstChild.value).toBe('b')
+      vm.test = 'a'
+      _.nextTick(function () {
+        expect(el.firstChild.value).toBe('a')
+        el.firstChild.value = 'c'
+        trigger(el.firstChild, 'input')
+        expect(vm.test).toBe('c')
+        vm._directives[0].unbind()
+        el.firstChild.value = 'd'
+        trigger(el.firstChild, 'input')
+        expect(vm.test).toBe('c')
+        done()
+      })
     })
 
-    it('text with filters', function () {
-      
+    it('text default value', function () {
+      var vm = new Vue({
+        el: el,
+        data: {
+          test: 'b'
+        },
+        template: '<input v-model="test" value="a">'
+      })
+      expect(vm.test).toBe('a')
+      expect(el.firstChild.value).toBe('a')
+    })
+
+    it('text lazy', function () {
+      var vm = new Vue({
+        el: el,
+        data: {
+          test: 'b'
+        },
+        template: '<input v-model="test" lazy>'
+      })
+      expect(el.firstChild.value).toBe('b')
+      expect(vm.test).toBe('b')
+      el.firstChild.value = 'c'
+      trigger(el.firstChild, 'input')
+      expect(vm.test).toBe('b')
+      trigger(el.firstChild, 'change')
+      expect(vm.test).toBe('c')
+    })
+
+    it('text with filters', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          test: 'b'
+        },
+        filters: {
+          test: {
+            write: function (val) {
+              return val.toUpperCase()
+            }
+          }
+        },
+        template: '<input v-model="test | uppercase | test">'
+      })
+      expect(el.firstChild.value).toBe('B')
+      el.firstChild.value = 'cc'
+      trigger(el.firstChild, 'input')
+      _.nextTick(function () {
+        expect(el.firstChild.value).toBe('CC')
+        expect(vm.test).toBe('CC')
+        done()
+      })
+    })
+
+    it('number', function () {
+      var vm = new Vue({
+        el: el,
+        data: {
+          test: 1
+        },
+        template: '<input v-model="test" number>'
+      })
+      el.firstChild.value = 2
+      trigger(el.firstChild, 'input')
+      expect(vm.test).toBe(2)
+    })
+
+    it('IE9 cut and delete', function (done) {
+      var ie9 = _.isIE9
+      _.isIE9 = true
+      var vm = new Vue({
+        el: el,
+        data: {
+          test: 'aaa'
+        },
+        template: '<input v-model="test">'
+      })
+      var input = el.firstChild
+      input.value = 'aa'
+      trigger(input, 'cut')
+      _.nextTick(function () {
+        expect(vm.test).toBe('aa')
+        input.value = 'a'
+        trigger(input, 'keyup', function (e) {
+          e.keyCode = 8
+        })
+        expect(vm.test).toBe('a')
+        // teardown
+        vm._directives[0].unbind()
+        input.value = 'bbb'
+        trigger(input, 'keyup', function (e) {
+          e.keyCode = 8
+        })
+        expect(vm.test).toBe('a')
+        _.isIE9 = ie9
+        done()
+      })
     })
 
     it('text + compositionevents', function () {
-      
+      var vm = new Vue({
+        el: el,
+        data: {
+          test: 'aaa',
+          test2: 'bbb'
+        },
+        template: '<input v-model="test"><input v-model="test2 | uppsercase">'
+      })
+      var input = el.firstChild
+      var input2 = el.childNodes[1]
+      trigger(input, 'compositionstart')
+      trigger(input2, 'compositionstart')
+      input.value = input2.value = 'ccc'
+      // input before composition unlock should not call set
+      trigger(input, 'input')
+      trigger(input2, 'input')
+      expect(vm.test).toBe('aaa')
+      expect(vm.test2).toBe('bbb')
+      // after composition unlock it should work
+      trigger(input, 'compositionend')
+      trigger(input2, 'compositionend')
+      trigger(input, 'input')
+      trigger(input2, 'input')
+      expect(vm.test).toBe('ccc')
+      expect(vm.test2).toBe('ccc')
+    })
+
+    it('textarea', function () {
+      var vm = new Vue({
+        el: el,
+        data: {
+          test: 'b',
+          b: 'BB'
+        },
+        template: '<textarea v-model="test">a {{b}} c</textarea>'
+      })
+      expect(vm.test).toBe('a BB c')
+      expect(el.firstChild.value).toBe('a BB c')
     })
 
     it('warn invalid tag', function () {
