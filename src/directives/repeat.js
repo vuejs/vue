@@ -58,11 +58,11 @@ module.exports = {
   },
 
   /**
-   * Check if v-ref/ v-el is also present. If yes, evaluate
-   * them and locate owner.
+   * Check if v-ref/ v-el is also present.
    */
 
   checkRef: function () {
+    this.owner = this.vm._owner
     var childId = _.attr(this.el, 'ref')
     this.childId = childId
       ? this.vm.$interpolate(childId)
@@ -71,9 +71,6 @@ module.exports = {
     this.elId = elId
       ? this.vm.$interpolate(elId)
       : null
-    if (this.childId || this.elId) {
-      this.owner = this.vm._owner || this.vm
-    }
   },
 
   /**
