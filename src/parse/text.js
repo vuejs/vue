@@ -95,7 +95,7 @@ exports.parse = function (text) {
     })
     lastIndex = index + match[0].length
   }
-  if (lastIndex < text.length - 1) {
+  if (lastIndex < text.length) {
     tokens.push({
       value: text.slice(lastIndex)
     })
