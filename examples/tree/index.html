@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Vue.js tree-view demo</title>
+    <style>
+      body {
+        font-family: monospace;
+      }
+      .item {
+        cursor: pointer;
+      }
+      ul {
+        padding-left: 1em;
+        list-style-type: dot;
+      }
+    </style>
+    <script src="../../dist/vue.js"></script>
+  </head>
+  <body>
+
+    <!-- item template -->
+    <script type="text/x-template" id="item-template">
+      <div v-style="color: isFolder ? '#333' : '#999'"
+        v-on="click: toggle, dblclick: changeType">
+        {{model.name}}
+        <span v-if="isFolder">[{{open ? '-' : '+'}}]</span>
+      </div>
+      <ul v-show="open" v-if="isFolder">
+        <li class="item"
+          v-repeat="model: model.children | sortByChildren"
+          v-component="item">
+        </li>
+        <li v-on="click: addChild">+</li>
+      </ul>
+    </script>
+
+    <p>(You can double click on an item to turn it into a folder.)</p>
+
+    <!-- the demo root element -->
+    <ul id="demo">
+      <li class="item"
+        v-component="item"
+        v-with="model: treeData">
+      </li>
+    </ul>
+
+    <!-- demo code -->
+    <script src="tree.js"></script>
+  </body>
+</html>
