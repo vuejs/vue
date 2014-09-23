@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Todo</title>
+        <meta charset="utf-8">
+        <link rel="stylesheet" type="text/css" href="bower_components/todomvc-common/base.css">
+        <style> [v-cloak] { display: none; } </style>
+    </head>
+    <body>
+        <section id="todoapp">
+            <header id="header">
+                <h1>todos</h1>
+                <input
+                    id="new-todo"
+                    autofocus
+                    autocomplete="off"
+                    placeholder="What needs to be done?"
+                    v-model="newTodo"
+                    v-on="keyup:addTodo | key enter"
+                >
+            </header>
+            <section id="main" v-show="todos.length" v-cloak>
+                <input
+                    id="toggle-all"
+                    type="checkbox"
+                    v-model="allDone"
+                >
+                <ul id="todo-list">
+                    <li
+                        class="todo"
+                        v-repeat="todos | filterTodos"
+                        v-class="
+                            completed : completed,
+                            editing   : this == editedTodo
+                        "
+                    >
+                        <div class="view">
+                            <input
+                                class="toggle"
+                                type="checkbox"
+                                v-model="completed"
+                            >
+                            <label v-text="title" v-on="dblclick: editTodo(this)"></label>
+                            <button class="destroy" v-on="click: removeTodo(this)"></button>
+                        </div>
+                        <input
+                            class="edit"
+                            type="text"
+                            v-model="title"
+                            v-todo-focus="this == editedTodo"
+                            v-on="
+                                blur  : doneEdit(this),
+                                keyup : doneEdit(this) | key enter,
+                                keyup : cancelEdit(this) | key esc
+                            "
+                        >
+                    </li>
+                </ul>
+            </section>
+            <footer id="footer" v-show="todos.length" v-cloak>
+                <span id="todo-count">
+                    <strong v-text="remaining"></strong> {{remaining | pluralize item}} left
+                </span>
+                <ul id="filters">
+                    <li><a href="#/all" v-class="selected: activeFilter == 'all'">All</a></li>
+                    <li><a href="#/active" v-class="selected: activeFilter == 'active'">Active</a></li>
+                    <li><a href="#/completed" v-class="selected: activeFilter == 'completed'">Completed</a></li>
+                </ul>
+                <button id="clear-completed" v-on="click:removeCompleted" v-show="todos.length > remaining">
+                    Clear completed ({{todos.length - remaining}})
+                </button>
+            </footer>
+        </section>
+        <footer id="info">
+            <p>Double-click to edit a todo</p>
+            <p>Powered by <a href="http://vuejs.org">Vue.js</a></p>
+            <p>Created by <a href="http://evanyou.me">Evan You</a></p>
+        </footer>
+
+        <!-- testing/benchmark only -->
+        <script>
+            if (navigator.userAgent.indexOf('PhantomJS') > -1) {
+                localStorage.clear()
+            }
+            var now = window.performance && window.performance.now
+                ? function () { return window.performance.now() }
+                : Date.now
+            var metrics = { beforeLoad: now() }
+        </script>
+        <!-- end testing/bench -->
+
+        <script src="../../dist/vue.js"></script>
+        <script>metrics.afterLoad = now()</script>
+        <script src="bower_components/director/director.js"></script>
+        <script src="js/store.js"></script>
+        <script>metrics.beforeRender = now()</script>
+        <script src="js/app.js"></script>
+        <script src="js/routes.js"></script>
+        <script>metrics.afterRender = now()</script>
+        <script src="js/perf.js"></script>
+
+    </body>
+</html>
