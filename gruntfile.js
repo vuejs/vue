@@ -24,7 +24,7 @@ module.exports = function (grunt) {
         src: 'src/**/*.js'
       },
       test: {
-        src: ['test/unit/specs/**/*.js']
+        src: ['test/unit/specs/**/*.js', 'test/e2e/*.js']
       }
     },
 
@@ -93,7 +93,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('unit', ['karma:browsers'])
   grunt.registerTask('cover', ['karma:phantom'])
-  grunt.registerTask('test', ['unit', 'cover'])
+  grunt.registerTask('test', ['unit', 'cover', 'casper'])
   grunt.registerTask('default', ['jshint', 'test', 'build'])
 
 }

@@ -112,7 +112,6 @@ strats.components = function (parentVal, childVal, vm, key) {
       ? vm.$parent.$options[key]
       : _.Vue.options[key]
   )
-  if (childVal) extend(ret, childVal)
   if (parentVal) {
     var keys = Object.keys(parentVal)
     var i = keys.length
@@ -122,6 +121,7 @@ strats.components = function (parentVal, childVal, vm, key) {
       ret[field] = parentVal[field]
     }
   }
+  if (childVal) extend(ret, childVal)
   return ret
 }
 

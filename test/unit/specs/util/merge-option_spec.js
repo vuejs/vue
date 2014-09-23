@@ -101,6 +101,8 @@ describe('Util - Option merging', function () {
     var asset1 = {}
     var asset2 = {}
     var asset3 = {}
+    var asset4 = {}
+    var asset5 = {}
     var res = merge(
       { directives: { a: asset1 }},
       { directives: { b: asset2 }}
@@ -108,8 +110,12 @@ describe('Util - Option merging', function () {
     expect(res.a).toBe(asset1)
     expect(res.b).toBe(asset2)
     // vm asset merge should do tree-way merge
+    var proto = { d: asset5 }
+    var parent = { directives: Object.create(proto) }
+    parent.directives.a = asset1
+    parent.directives.b = asset4
     res = merge(
-      { directives: { a: asset1 }},
+      parent,
       { directives: { b: asset2 }},
       {
         $parent: {
@@ -121,8 +127,11 @@ describe('Util - Option merging', function () {
       'directives'
     ).directives
     expect(res.a).toBe(asset1)
+    // child should overwrite parent
     expect(res.b).toBe(asset2)
     expect(res.c).toBe(asset3)
+    // should not copy parent prototype properties
+    expect(res.d).toBeUndefined()
   })
 
   it('guard components', function () {
