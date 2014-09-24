@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Vue.js SVG example</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="../../dist/vue.js"></script>
+  </head>
+  <body>
+
+    <!-- template for the polygraph component. -->
+    <script type="text/x-template" id="polygraph-template">
+      <svg width="200" height="200">
+        <polygon v-attr="points: points"></polygon>
+        <circle cx="100" cy="100" r="80"></circle>
+        <text v-component="axis-label" v-repeat="stats" v-attr="x:x, y:y">
+          {{label}}
+        </text>
+      </svg>
+    </script>
+
+    <!-- demo root element -->
+    <div id="demo">
+      <!-- Use the component -->
+      <svg v-component="polygraph" v-with="stats:stats"></svg>
+      <!-- controls -->
+      <div v-repeat="stats">
+        <label>{{label}}</label>
+        <input type="range" v-model="value" min="0" max="100">
+        <span>{{value}}</span>
+        <button v-on="click:remove(this)">X</button>
+      </div>
+      <input v-model="newLabel"> <button v-on="click:add">Add a Stat</button>
+      <pre id="raw">{{stats | json}}</pre>
+    </div>
+      
+    <p style="font-size:12px">* input[type="range"] requires IE10 or above.</p>
+
+    <script src="svg.js"></script>
+
+  </body>
+</html>
