@@ -1,11 +1,32 @@
 var _ = require('../../../../src/util')
 var Vue = require('../../../../src/vue')
 
+/**
+ * Mock event helper
+ */
+
 function trigger (target, event, process) {
   var e = document.createEvent('HTMLEvents')
   e.initEvent(event, true, true)
   if (process) process(e)
   target.dispatchEvent(e)
+}
+
+/**
+ * setting <select>'s value in IE9 doesn't work
+ * we have to manually loop through the options
+ */
+
+function updateSelect (el, value) {
+  /* jshint eqeqeq: false */
+  var options = el.options
+  var i = options.length
+  while (i--) {
+    if (options[i].value == value) {
+        options[i].selected = true
+        break
+    }
+  }
 }
 
 if (_.inBrowser) {
@@ -112,7 +133,7 @@ if (_.inBrowser) {
       _.nextTick(function () {
         expect(el.firstChild.value).toBe('c')
         expect(el.firstChild.childNodes[2].selected).toBe(true)
-        el.firstChild.value = 'a'
+        updateSelect(el.firstChild, 'a')
         trigger(el.firstChild, 'change')
         expect(vm.test).toBe('a')
         done()
@@ -209,14 +230,14 @@ if (_.inBrowser) {
       })
     })
 
-    it('select + options + label', function () {
+    it('select + options + text', function () {
       var vm = new Vue({
         el: el,
         data: {
           test: 'b',
           opts: [
-            { label: 'A', value: 'a' },
-            { label: 'B', value: 'b' }
+            { text: 'A', value: 'a' },
+            { text: 'B', value: 'b' }
           ]
         },
         template: '<select v-model="test" options="opts"></select>'
@@ -244,10 +265,10 @@ if (_.inBrowser) {
       })
       expect(el.firstChild.innerHTML).toBe(
         '<optgroup label="A">' +
-          '<option>a</option><option>b</option>' +
+          '<option value="a">a</option><option value="b">b</option>' +
         '</optgroup>' +
         '<optgroup label="B">' +
-          '<option>c</option>' +
+          '<option value="c">c</option>' +
         '</optgroup>'
       )
       var opts = el.firstChild.options
@@ -378,7 +399,7 @@ if (_.inBrowser) {
       })
     })
 
-    it('text + compositionevents', function () {
+    it('text + compositionevents', function (done) {
       var vm = new Vue({
         el: el,
         data: {
@@ -404,6 +425,11 @@ if (_.inBrowser) {
       trigger(input2, 'input')
       expect(vm.test).toBe('ccc')
       expect(vm.test2).toBe('ccc')
+      // IE complains about "unspecified error" when calling
+      // setSelectionRange() on an input element that's been
+      // removed from the DOM, so we wait until the
+      // selection range callback has fired to end this test.
+      _.nextTick(done)
     })
 
     it('textarea', function () {

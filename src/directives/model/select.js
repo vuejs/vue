@@ -58,7 +58,8 @@ function initOptions (expression) {
   var self = this
   function optionUpdateWatcher (value) {
     if (_.isArray(value)) {
-      self.el.innerHTML = value.map(formatOption).join('')
+      self.el.innerHTML = ''
+      buildOptions(self.el, value)
       if (self._watcher) {
         self.update(self._watcher.value)
       }
@@ -76,28 +77,32 @@ function initOptions (expression) {
 }
 
 /**
- * Format an option element from the "options" param.
- * An object indicates an <optgroup> which should include:
+ * Build up option elements. IE9 doesn't create options
+ * when setting innerHTML on <select> elements, so we have
+ * to use DOM API here.
  *
- * - label: a string for the label attribute
- * - options: an array of option strings
- *
- * @param {Object|String} op
+ * @param {Element} parent - a <select> or an <optgroup>
+ * @param {Array} options
  */
 
-function formatOption (op) {
-  if (typeof op !== 'string') {
-    if (op.value) {
-      return '<option value="' + op.value + '">' +
-        op.label +
-      '</option>'
-    } else if (op.options) {
-      return '<optgroup label="' + op.label + '">' +
-        op.options.map(formatOption).join('') +
-      '</optgroup>'
+function buildOptions (parent, options) {
+  var op, el
+  for (var i = 0, l = options.length; i < l; i++) {
+    op = options[i]
+    if (!op.options) {
+      el = document.createElement('option')
+      if (typeof op === 'string') {
+        el.text = el.value = op
+      } else {
+        el.text = op.text
+        el.value = op.value
+      }
+    } else {
+      el = document.createElement('optgroup')
+      el.label = op.label
+      buildOptions(el, op.options)
     }
-  } else {
-    return '<option>' + op + '</option>'
+    parent.appendChild(el)
   }
 }
 
