@@ -97,16 +97,25 @@ describe('Path Parser', function () {
     expect(obj.a.b.c).toBe(12345)
   })
 
+  it('set non-existent', function () {
+    var target = {}
+    var res = Path.set(target, 'a.b.c', 123)
+    expect(res).toBe(true)
+    expect(target.a.b.c).toBe(123)
+  })
+
+  it('set on prototype chain', function () {
+    var parent = { a: {} }
+    var target = Object.create(parent)
+    var res = Path.set(target, 'a.b.c', 123)
+    expect(res).toBe(true)
+    expect(target.hasOwnProperty('a')).toBe(false)
+    expect(parent.a.b.c).toBe(123)
+  })
+
   it('set invalid', function () {
     var res = Path.set({}, 'ab[c]d', 123)
     expect(res).toBe(false)
-  })
-
-  it('force set', function () {
-    var target = {}
-    var res = Path.set(target, 'a.b.c', 123, true)
-    expect(res).toBe(true)
-    expect(target.a.b.c).toBe(123)
   })
 
 })

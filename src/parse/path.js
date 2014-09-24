@@ -291,7 +291,7 @@ exports.set = function (obj, path, val) {
     }
   }
   key = path[i]
-  if (obj.hasOwnProperty(key)) {
+  if (key in obj) {
     obj[key] = val
   } else {
     add(obj, key, val)
