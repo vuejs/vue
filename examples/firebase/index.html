@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title></title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script src='https://cdn.firebase.com/js/client/1.0.23/firebase.js'></script>
+    <script src="../../dist/vue.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <ul>
+        <li class="user" v-repeat="users" v-transition>
+          <span>{{name}} - {{email}}</span>
+          <button v-on="click:removeUser(this)">X</button>
+        </li>
+      </ul>
+      <form id="form" v-on="submit:addUser">
+        <input v-model="newUser.name | nameValidator | capitalize">
+        <input v-model="newUser.email | emailValidator">
+        <input type="submit" value="Add User">
+      </form>
+      <ul class="errors">
+        <li v-show="!validation.name">Name cannot be empty.</li>
+        <li v-show="!validation.email">Please provide a valid email address.</li>
+      </ul>
+    </div>
+    <script src="app.js"></script>
+  </body>
+</html>
