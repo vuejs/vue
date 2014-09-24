@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Vue.js commits example</title>
+    <style>
+      #demo {
+        font-family: 'Helvetica', Arial, sans-serif;
+      }
+      a {
+        text-decoration: none;
+        color: #f66;
+      }
+      li {
+        line-height: 1.5em;
+        margin-bottom: 20px;
+      }
+      .author, .date {
+        font-weight: bold;
+      }
+    </style>
+    <script src="../../dist/vue.js"></script>
+  </head>
+  <body>
+    <div id="demo">
+      <h1>Latest Vue.js Commits</h1>
+        <template v-repeat="b:branches">
+          <input type="radio"
+            name="branch"
+            id="{{*b}}"
+            value="{{*b}}"
+            v-model="currentBranch">
+          <label for="{{*b}}">{{*b}}</label>
+        </template>
+      <ul>
+        <li v-repeat="commits">
+          <a href="{{html_url}}" target="_blank" class="commit">{{sha.slice(0, 7)}}</a>
+          - <span class="message">{{commit.message | truncate}}</span><br>
+          by <span class="author">{{commit.author.name}}</span>
+          at <span class="date">{{commit.author.date | formatDate}}</span>
+        </li>
+      </ul>
+    </div>
+    <script src="app.js"></script>
+  </body>
+</html>
