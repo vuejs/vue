@@ -28,7 +28,7 @@
       </div>
       <ul v-show="open" v-if="isFolder">
         <li class="item"
-          v-repeat="model: model.children | sortByChildren"
+          v-repeat="model: model.children"
           v-component="item">
         </li>
         <li v-on="click: addChild">+</li>

@@ -42,15 +42,6 @@ Vue.component('item', {
         this.model.children.length
     }
   },
-  filters: {
-    sortByChildren: function (list) {
-      return list.slice().sort(function (a, b) {
-        var alen = a.children ? 1 : 0
-        var blen = b.children ? 1 : 0
-        return alen > blen ? 1 : -1
-      })
-    }
-  },
   methods: {
     toggle: function () {
       if (this.isFolder) {
