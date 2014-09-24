@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Vue.js grid component example</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="../../dist/vue.js"></script>
+    </head>
+  <body>
+
+    <!-- component template -->
+    <script type="text/x-template" id="grid-template">
+      <table>
+        <thead>
+          <tr>
+            <th v-repeat="key: columns"
+              v-on="click:sortBy(key)"
+              v-class="active: sortKey == key">
+              {{key | capitalize}}
+              <span class="arrow"
+                v-class="reversed[key] ? 'dsc' : 'asc'">
+              </span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-repeat="
+            entry: data
+            | filterBy filterKey
+            | orderBy sortKey reversed[sortKey]">
+            <td v-repeat="key: columns">
+              {{entry[key]}}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </script>
+
+    <!-- demo root element -->
+    <div id="demo">
+      Search <input v-model="search">
+      <demo-grid v-with="data:gridData, filterKey:search"></demo-grid>
+    </div>
+
+    <script src="grid.js"></script>
+
+  </body>
+</html>
