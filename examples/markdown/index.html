@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Vue.js markdown editor example</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="../../dist/vue.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/marked/0.3.2/marked.min.js"></script>
+  </head>
+  <body>
+
+    <div id="editor">
+      <textarea v-model="input"></textarea>
+      <div v-html="input | marked"></div>
+    </div>
+
+    <script>
+      new Vue({
+        el: '#editor',
+        data: {
+          input: '# hello'
+        },
+        filters: {
+          marked: marked
+        }
+      })
+    </script>
+
+  </body>
+</html>
