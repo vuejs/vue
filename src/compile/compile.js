@@ -288,13 +288,13 @@ function compileParamAttributes (el, attrs, options) {
     name = attrs[i]
     value = el.getAttribute(name)
     if (value !== null) {
-      el.removeAttribute(name)
       param = {
         name: name,
         value: value
       }
       var tokens = textParser.parse(value)
       if (tokens) {
+        el.removeAttribute(name)
         if (tokens.length > 1) {
           _.warn(
             'Invalid param attribute binding: "' +
