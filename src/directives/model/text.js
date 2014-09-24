@@ -90,7 +90,10 @@ module.exports = {
     }
 
     // set initial value if present
-    if (el.value) {
+    if (
+      el.hasAttribute('value') ||
+      el.tagName === 'TEXTAREA'
+    ) {
       // watcher is not set up yet
       this.vm.$set(this.expression, el.value)
     }
