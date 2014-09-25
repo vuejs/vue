@@ -66,7 +66,8 @@ new Vue({
     stats: stats
   },
   methods: {
-    add: function () {
+    add: function (e) {
+      e.preventDefault()
       if (!this.newLabel) return
       this.stats.push({
         label: this.newLabel,
@@ -77,6 +78,8 @@ new Vue({
     remove: function (stat) {
       if (this.stats.length > 3) {
         this.stats.$remove(stat.$data)
+      } else {
+        alert('Can\'t delete more!')
       }
     }
   }

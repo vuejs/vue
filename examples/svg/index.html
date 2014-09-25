@@ -30,7 +30,10 @@
         <span>{{value}}</span>
         <button v-on="click:remove(this)">X</button>
       </div>
-      <input v-model="newLabel"> <button v-on="click:add">Add a Stat</button>
+      <form id="add">
+        <input name="newlabel" v-model="newLabel">
+        <button v-on="click:add">Add a Stat</button>
+      </form>
       <pre id="raw">{{stats | json}}</pre>
     </div>
       
