@@ -10,14 +10,12 @@ Vue.component('demo-grid', {
       reversed: {}
     }
   },
-  ready: function () {
-    // assuming all data entries have the same keys
-    // extract the column headers
-    this.columns = Object.keys(this.data[0])
-    // initialize column reverse state
+  compiled: function () {
+    // initialize reverse state
+    var self = this
     this.columns.forEach(function (key) {
-      this.reversed.$add(key, false)
-    }.bind(this))
+      self.reversed.$add(key, false)
+    })
   },
   methods: {
     sortBy: function (key) {
@@ -32,6 +30,7 @@ var demo = new Vue({
   el: '#demo',
   data: {
     search: '',
+    gridColumns: ['name', 'power'],
     gridData: [
       { name: 'Chuck Norris', power: Infinity },
       { name: 'Bruce Lee', power: 9000 },

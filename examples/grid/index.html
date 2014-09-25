@@ -38,8 +38,14 @@
 
     <!-- demo root element -->
     <div id="demo">
-      Search <input v-model="search">
-      <demo-grid v-with="data:gridData, filterKey:search"></demo-grid>
+      <form id="search">
+        Search <input name="query" v-model="searchQuery">
+      </form>
+      <demo-grid v-with="
+        data      : gridData,
+        columns   : gridColumns,
+        filterKey : searchQuery
+      "></demo-grid>
     </div>
 
     <script src="grid.js"></script>
