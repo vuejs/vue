@@ -10,19 +10,19 @@
 
     <!-- template for the polygraph component. -->
     <script type="text/x-template" id="polygraph-template">
-      <svg width="200" height="200">
-        <polygon v-attr="points: points"></polygon>
-        <circle cx="100" cy="100" r="80"></circle>
-        <text v-component="axis-label" v-repeat="stats" v-attr="x:x, y:y">
-          {{label}}
-        </text>
-      </svg>
+      <polygon v-attr="points:points"></polygon>
+      <circle cx="100" cy="100" r="80"></circle>
+      <text v-repeat="stats" v-component="axis-label" v-attr="x:x, y:y">
+        {{label}}
+      </text>
     </script>
 
     <!-- demo root element -->
     <div id="demo">
       <!-- Use the component -->
-      <svg v-component="polygraph" v-with="stats:stats"></svg>
+      <svg width="200" height="200">
+        <g v-component="polygraph" v-with="stats:stats"></g>
+      </svg>
       <!-- controls -->
       <div v-repeat="stats">
         <label>{{label}}</label>

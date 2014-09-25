@@ -11,7 +11,6 @@ var stats = [
 // A resusable polygon graph component
 Vue.component('polygraph', {
   template: '#polygraph-template',
-  replace: true,
   computed: {
     // a computed property for the polygon's points
     points: function () {
