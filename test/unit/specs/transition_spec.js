@@ -200,17 +200,22 @@ if (_.inBrowser && !_.isIE9) {
         el.__v_trans.id = 'test'
         // cascaded class style
         el.classList.add('test')
-        transition.apply(el, -1, op, vm, cb)
-        expect(op).not.toHaveBeenCalled()
-        expect(cb).not.toHaveBeenCalled()
-        expect(el.classList.contains('test-leave')).toBe(false)
+        // wait a frame: Chrome Android 37 doesn't trigger
+        // transition if we apply the leave class in the
+        // same frame.
         _.nextTick(function () {
-          expect(el.classList.contains('test-leave')).toBe(true)
-          _.on(el, _.transitionEndEvent, function () {
-            expect(op).toHaveBeenCalled()
-            expect(cb).toHaveBeenCalled()
-            expect(el.classList.contains('test-leave')).toBe(false)
-            done()
+          transition.apply(el, -1, op, vm, cb)
+          expect(op).not.toHaveBeenCalled()
+          expect(cb).not.toHaveBeenCalled()
+          expect(el.classList.contains('test-leave')).toBe(false)
+          _.nextTick(function () {
+            expect(el.classList.contains('test-leave')).toBe(true)
+            _.on(el, _.transitionEndEvent, function () {
+              expect(op).toHaveBeenCalled()
+              expect(cb).toHaveBeenCalled()
+              expect(el.classList.contains('test-leave')).toBe(false)
+              done()
+            })
           })
         })
       })
