@@ -88,6 +88,13 @@ module.exports = function (grunt) {
       sauce3: {
         options: sauceConfig.batch3
       }
+    },
+
+    coveralls: {
+      options: {
+        coverage_dir: 'coverage/',
+        force: true
+      }
     }
 
   })
@@ -96,6 +103,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-jshint')
   grunt.loadNpmTasks('grunt-contrib-watch')
   grunt.loadNpmTasks('grunt-karma')
+  grunt.loadNpmTasks('grunt-karma-coveralls')
 
   // load custom tasks
   grunt.file.recurse('grunt/tasks', function (path) {
@@ -106,7 +114,7 @@ module.exports = function (grunt) {
   grunt.registerTask('cover', ['karma:coverage'])
   grunt.registerTask('test', ['unit', 'cover', 'casper'])
   grunt.registerTask('sauce', ['karma:sauce1', 'karma:sauce2', 'karma:sauce3'])
-  grunt.registerTask('ci', ['jshint', 'test', 'sauce'])
+  grunt.registerTask('ci', ['jshint', 'test', 'coveralls', 'sauce'])
   grunt.registerTask('default', ['jshint', 'test', 'build'])
 
 }
