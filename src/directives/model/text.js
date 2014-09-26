@@ -92,7 +92,7 @@ module.exports = {
     // set initial value if present
     if (
       el.hasAttribute('value') ||
-      el.tagName === 'TEXTAREA'
+      (el.tagName === 'TEXTAREA' && el.value.trim())
     ) {
       // watcher is not set up yet
       this.vm.$set(this.expression, el.value)
