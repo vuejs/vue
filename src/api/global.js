@@ -25,16 +25,15 @@ var cid = 1
  */
 
 exports.extend = function (extendOptions) {
+  extendOptions = extendOptions || {}
   var Super = this
-  var Sub = function (instanceOptions) {
-    _.Vue.call(this, instanceOptions)
-  }
+  var Sub = createClass(extendOptions.id || 'VueComponent')
   Sub.prototype = Object.create(Super.prototype)
   Sub.prototype.constructor = Sub
   Sub.cid = cid++
   Sub.options = mergeOptions(
     Super.options,
-    extendOptions || {}
+    extendOptions
   )
   Sub['super'] = Super
   // allow further extension
@@ -43,6 +42,23 @@ exports.extend = function (extendOptions) {
   // can have their private assets too.
   createAssetRegisters(Sub)
   return Sub
+}
+
+/**
+ * A function that returns a sub-class constructor with the
+ * given name. This gives us much nicer output when
+ * logging instances in the console.
+ *
+ * @param {String} name
+ * @return {Function}
+ */
+
+function createClass (name) {
+  return new Function(
+    'Vue',
+    'return function ' + _.camelize(name) +
+    ' (options) { Vue.call(this, options) }'
+  )(_.Vue)
 }
 
 /**
@@ -107,6 +123,7 @@ function createAssetRegisters (Constructor) {
       return this.options.components[id]
     } else {
       if (_.isPlainObject(definition)) {
+        definition.id = id
         definition = _.Vue.extend(definition)
       }
       this.options.components[id] = definition

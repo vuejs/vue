@@ -141,6 +141,7 @@ describe('Util - Option merging', function () {
       }
     })
     expect(typeof res.components.a).toBe('function')
+    expect(res.components.a.options.id).toBe('a')
     expect(res.components.a.super).toBe(Vue)
   })
 

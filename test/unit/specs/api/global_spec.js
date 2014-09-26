@@ -12,12 +12,14 @@ describe('Global API', function () {
 
   it('extend', function () {
     var Test = Vue.extend({
+      id: 'test',
       a: 1,
       b: 2
     })
     expect(Test.options.a).toBe(1)
     expect(Test.options.b).toBe(2)
     expect(Test.super).toBe(Vue)
+    expect(Test.name).toBe('Test')
     var t = new Test({
       a: 2
     })
@@ -81,6 +83,7 @@ describe('Global API', function () {
       expect(typeof component).toBe('function')
       expect(component.super).toBe(Vue)
       expect(component.options.a).toBe(1)
+      expect(component.options.id).toBe('test')
       expect(Test.component('test')).toBe(component)
       // already extended
       Test.component('test2', component)

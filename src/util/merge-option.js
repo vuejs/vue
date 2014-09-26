@@ -183,6 +183,7 @@ function guardComponents (components) {
     for (var key in components) {
       def = components[key]
       if (_.isPlainObject(def)) {
+        def.id = key
         components[key] = _.Vue.extend(def)
       }
     }

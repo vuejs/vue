@@ -57,6 +57,20 @@ exports.stripQuotes = function (str) {
 }
 
 /**
+ * Camelize a hyphen-delmited string.
+ *
+ * @param {String} str
+ * @return {String}
+ */
+
+var camelRE = /(?:^|[-_])(\w)/g
+exports.camelize = function (str) {
+  return str.replace (camelRE, function (_, c) {
+    return c ? c.toUpperCase () : '';
+  })
+}
+
+/**
  * Simple bind, faster than native
  *
  * @param {Function} fn
