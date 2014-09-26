@@ -27,7 +27,7 @@ var cid = 1
 exports.extend = function (extendOptions) {
   extendOptions = extendOptions || {}
   var Super = this
-  var Sub = createClass(extendOptions.id || 'VueComponent')
+  var Sub = createClass(extendOptions.name || 'VueComponent')
   Sub.prototype = Object.create(Super.prototype)
   Sub.prototype.constructor = Sub
   Sub.cid = cid++
@@ -123,7 +123,7 @@ function createAssetRegisters (Constructor) {
       return this.options.components[id]
     } else {
       if (_.isPlainObject(definition)) {
-        definition.id = id
+        definition.name = id
         definition = _.Vue.extend(definition)
       }
       this.options.components[id] = definition

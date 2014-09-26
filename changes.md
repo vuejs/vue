@@ -125,6 +125,22 @@ By default, all child components **DO NOT** inherit the parent scope. Only anony
   // -> 2
   ```
 
+- #### new options: `name`.
+
+  This option, when used with `Vue.extend`, gives your returned constructor a more descriptive name rather than the generic `VueComponent`. This makes debugging easier when you log instances in the console. For example:
+
+  ``` js
+  var SubClass = Vue.extend({
+    name: 'MyComponent'
+  })
+  var instance = new SubClass()
+  console.log(instance) // -> MyComponent { $el: ... }
+  ```
+
+  When you use `Vue.component`, the component ID is automatically camelized and used as the constructor name, so `"my-component"` will have a constructor name of `MyComponent`.
+
+  This option is ignored as an instance option.
+
 - #### removed options:
 
   > Breaking
