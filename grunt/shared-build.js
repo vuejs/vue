@@ -2,7 +2,6 @@
  * Shared build function
  */
 
-var fs = require('fs')
 var resolve = require('component-resolver')
 var build = require('component-builder')
 

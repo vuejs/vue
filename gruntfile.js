@@ -1,3 +1,5 @@
+var sauceConfig = require('./grunt/sauce')
+
 module.exports = function (grunt) {
 
   var version = grunt.file.readJSON('package.json').version
@@ -61,7 +63,7 @@ module.exports = function (grunt) {
           reporters: ['progress']
         }
       },
-      phantom: {
+      coverage: {
         options: {
           browsers: ['PhantomJS'],
           reporters: ['progress', 'coverage'],
@@ -76,6 +78,15 @@ module.exports = function (grunt) {
             ]
           }
         }
+      },
+      sauce1: {
+        options: sauceConfig.batch1
+      },
+      sauce2: {
+        options: sauceConfig.batch2
+      },
+      sauce3: {
+        options: sauceConfig.batch3
       }
     }
 
@@ -92,8 +103,10 @@ module.exports = function (grunt) {
   })
 
   grunt.registerTask('unit', ['karma:browsers'])
-  grunt.registerTask('cover', ['karma:phantom'])
+  grunt.registerTask('cover', ['karma:coverage'])
   grunt.registerTask('test', ['unit', 'cover', 'casper'])
+  grunt.registerTask('sauce', ['karma:sauce1', 'karma:sauce2', 'karma:sauce3'])
+  grunt.registerTask('ci', ['jshint', 'test', 'sauce'])
   grunt.registerTask('default', ['jshint', 'test', 'build'])
 
 }
