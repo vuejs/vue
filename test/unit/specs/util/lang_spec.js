@@ -24,6 +24,12 @@ describe('Util - Language Enhancement', function () {
     expect(_.stripQuotes("'fff")).toBe(false)
   })
 
+  it('camelize', function () {
+    expect(_.camelize('abc')).toBe('Abc')
+    expect(_.camelize('some-long-name')).toBe('SomeLongName')
+    expect(_.camelize('what_about_this')).toBe('WhatAboutThis')
+  })
+
   it('bind', function () {
     var original = function (a) {
       return this.a + a
