@@ -19,7 +19,8 @@ describe('Global API', function () {
     expect(Test.options.a).toBe(1)
     expect(Test.options.b).toBe(2)
     expect(Test.super).toBe(Vue)
-    expect(Test.name).toBe('Test')
+    // function.name is not available in IE
+    expect(Test.toString().match(/^function Test\s?\(/)).toBeTruthy()
     var t = new Test({
       a: 2
     })

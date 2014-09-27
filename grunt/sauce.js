@@ -64,7 +64,7 @@ var batches = [
       base: 'SauceLabs',
       browserName: 'android',
       platform: 'Linux',
-      version: '4.4'
+      version: '4.2'
     }
   }
 ]
@@ -72,7 +72,9 @@ var batches = [
 for (var i = 0; i < 3; i++) {
   exports['batch' + (i+1)] = {
     sauceLabs: sauceConfig,
-    captureTimeout: 600000,
+    // mobile emulators are really slow
+    captureTimeout: 300000,
+    browserNoActivityTimeout: 300000,
     customLaunchers: batches[i],
     browsers: Object.keys(batches[i]),
     reporters: ['progress', 'saucelabs']
