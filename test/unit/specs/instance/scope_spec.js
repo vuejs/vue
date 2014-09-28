@@ -33,11 +33,7 @@ describe('Instance Scope', function () {
 
   describe('computed', function () {
     
-    var vm = new Vue({
-      data: {
-        a: 'a',
-        b: 'b'
-      },
+    var Test = Vue.extend({
       computed: {
         c: function () {
           expect(this).toBe(vm)
@@ -55,6 +51,13 @@ describe('Instance Scope', function () {
             this.b = vals[1]
           }
         }
+      }
+    })
+
+    var vm = new Test({
+      data: {
+        a: 'a',
+        b: 'b'
       }
     })
 
@@ -87,6 +90,22 @@ describe('Instance Scope', function () {
       expect(child.b).toBe('f')
       expect(child.c).toBe('ef')
       expect(child.d).toBe('ef')
+    })
+
+    it('same definition object bound to different instance', function () {
+      vm = new Test({
+        data: {
+          a: 'A',
+          b: 'B'
+        }
+      })
+      expect(vm.c).toBe('AB')
+      expect(vm.d).toBe('AB')
+      vm.d = 'C D'
+      expect(vm.a).toBe('C')
+      expect(vm.b).toBe('D')
+      expect(vm.c).toBe('CD')
+      expect(vm.d).toBe('CD')
     })
 
   })

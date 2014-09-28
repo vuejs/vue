@@ -138,22 +138,22 @@ exports._initComputed = function () {
   var computed = this.$options.computed
   if (computed) {
     for (var key in computed) {
-      var def = computed[key]
-      if (typeof def === 'function') {
-        def = {
-          get: _.bind(def, this),
-          set: noop
-        }
+      var userDef = computed[key]
+      var def = {
+        enumerable: true,
+        configurable: true
+      }
+      if (typeof userDef === 'function') {
+        def.get = _.bind(userDef, this)
+        def.set = noop
       } else {
-        def.get = def.get
-          ? _.bind(def.get, this)
+        def.get = userDef.get
+          ? _.bind(userDef.get, this)
           : noop
-        def.set = def.set
-          ? _.bind(def.set, this)
+        def.set = userDef.set
+          ? _.bind(userDef.set, this)
           : noop
       }
-      def.enumerable = true
-      def.configurable = true
       Object.defineProperty(this, key, def)
     }
   }
