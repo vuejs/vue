@@ -193,6 +193,7 @@ module.exports = {
         }
       } else { // new instance
         vm = this.build(obj, i)
+        vm._new = true
       }
       vms[i] = vm
       // insert if this is first run
@@ -246,6 +247,7 @@ module.exports = {
           vm.$before(targetNext.$el)
         }
       }
+      vm._new = false
       vm._reused = false
     }
     return vms
@@ -392,10 +394,10 @@ module.exports = {
       if (cached) {
         var i = 0
         var vm = cached[i]
-        // since duplicated vm instances might be reused
-        // already, we need to return the first non-reused
-        // instance.
-        while (vm && vm._reused) {
+        // since duplicated vm instances might be a reused
+        // one OR a newly created one, we need to return the
+        // first instance that is neither of these.
+        while (vm && (vm._reused || vm._new)) {
           vm = cached[++i]
         }
         return vm

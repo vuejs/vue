@@ -25,7 +25,7 @@ if (_.inBrowser) {
       var vm = new Vue({
         el: el,
         data: {
-          items: [1, 2]
+          items: [2, 1, 2]
         },
         template: '<div v-repeat="items">{{$index}} {{$value}}</div>'
       })
@@ -47,7 +47,7 @@ if (_.inBrowser) {
       var vm = new Vue({
         el: el,
         data: {
-          items: [1, 2]
+          items: [2, 1, 2]
         },
         template: '<div v-repeat="item:items">{{$index}} {{item}}</div>'
       })
@@ -502,7 +502,7 @@ function assertPrimitiveMutations (vm, el, done) {
   go(
     function () {
       // check duplicate
-      vm.items.push(2, 3)
+      vm.items.push(2, 2, 3)
     },
     assertMarkup
   )
