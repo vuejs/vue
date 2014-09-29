@@ -16,7 +16,7 @@ module.exports = {
 }
 
 function defaultHandler (value) {
-  if (value != null) {
+  if (value || value === 0) {
     this.el.setAttribute(this.arg, value)
   } else {
     this.el.removeAttribute(this.arg)

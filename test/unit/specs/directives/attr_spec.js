@@ -22,6 +22,10 @@ if (_.inBrowser) {
       expect(el.getAttribute('test')).toBe('again')
       dir.update(null)
       expect(el.hasAttribute('test')).toBe(false)
+      dir.update(false)
+      expect(el.hasAttribute('test')).toBe(false)
+      dir.update(0)
+      expect(el.getAttribute('test')).toBe('0')
     })
 
     it('xlink', function () {
