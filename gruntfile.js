@@ -2,17 +2,9 @@ var sauceConfig = require('./grunt/sauce')
 
 module.exports = function (grunt) {
 
-  var version = grunt.file.readJSON('package.json').version
-  var banner =
-    '/**\n' +
-    ' * Vue.js v' + version + '\n' +
-    ' * (c) ' + new Date().getFullYear() + ' Evan You\n' +
-    ' * Released under the MIT License.\n' +
-    ' */\n'
-
   grunt.initConfig({
 
-    banner: banner,
+    version: grunt.file.readJSON('package.json').version,
 
     jshint: {
       options: {

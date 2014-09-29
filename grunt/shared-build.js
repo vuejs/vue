@@ -6,7 +6,14 @@ var resolve = require('component-resolver')
 var build = require('component-builder')
 
 module.exports = function (grunt, cb) {
-  var banner = grunt.config.get('banner')
+
+  var license =
+    '/**\n' +
+    ' * Vue.js v' + grunt.config.get('version') + '\n' +
+    ' * (c) ' + new Date().getFullYear() + ' Evan You\n' +
+    ' * Released under the MIT License.\n' +
+    ' */\n'
+
   // build with component-builder
   resolve(process.cwd(), {}, function (err, tree) {
     build.scripts(tree)
@@ -16,8 +23,8 @@ module.exports = function (grunt, cb) {
         js = umd(js)
         // replace require paths with numbers for file size
         js = shortenPaths(js)
-        // add banner
-        js = banner + js
+        // add license
+        js = license + js
         // done
         cb(js)
       })
