@@ -11,6 +11,7 @@ exports.$on = function (event, fn) {
   (this._events[event] || (this._events[event] = []))
     .push(fn)
   modifyListenerCount(this, event, 1)
+  return this
 }
 
 /**
@@ -29,6 +30,7 @@ exports.$once = function (event, fn) {
   }
   on.fn = fn
   this.$on(event, on)
+  return this
 }
 
 /**
@@ -52,15 +54,17 @@ exports.$off = function (event, fn) {
       }
     }
     this._events = {}
-    return
+    return this
   }
   // specific event
   cbs = this._events[event]
-  if (!cbs) return
+  if (!cbs) {
+    return this
+  }
   if (arguments.length === 1) {
     modifyListenerCount(this, event, -cbs.length)
     this._events[event] = null
-    return
+    return this
   }
   // specific handler
   var cb
@@ -73,6 +77,7 @@ exports.$off = function (event, fn) {
       break
     }
   }
+  return this
 }
 
 /**
@@ -102,6 +107,7 @@ exports.$emit = function (event) {
       }
     }
   }
+  return this
 }
 
 /**
@@ -125,6 +131,7 @@ exports.$broadcast = function (event) {
       }
     }
   }
+  return this
 }
 
 /**
@@ -142,6 +149,7 @@ exports.$dispatch = function () {
       ? null
       : parent.$parent
   }
+  return this
 }
 
 /**

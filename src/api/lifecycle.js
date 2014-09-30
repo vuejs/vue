@@ -36,6 +36,7 @@ exports.$mount = function (el) {
     this._initDOMHooks()
     this.$once('hook:attached', ready)
   }
+  return this
 }
 
 /**

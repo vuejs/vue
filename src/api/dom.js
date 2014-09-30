@@ -16,6 +16,7 @@ exports.$appendTo = function (target, cb, withTransition) {
     ? append
     : transition.append
   insert(this, target, op, targetIsDetached, cb)
+  return this
 }
 
 /**
@@ -33,6 +34,7 @@ exports.$prependTo = function (target, cb, withTransition) {
   } else {
     this.$appendTo(target, cb, withTransition)
   }
+  return this
 }
 
 /**
@@ -50,6 +52,7 @@ exports.$before = function (target, cb, withTransition) {
     ? before
     : transition.before
   insert(this, target, op, targetIsDetached, cb)
+  return this
 }
 
 /**
@@ -67,6 +70,7 @@ exports.$after = function (target, cb, withTransition) {
   } else {
     this.$appendTo(target.parentNode, cb, withTransition)
   }
+  return this
 }
 
 /**
@@ -101,6 +105,7 @@ exports.$remove = function (cb, withTransition) {
       : transition.remove
     op(this.$el, this, realCb)
   }
+  return this
 }
 
 /**
