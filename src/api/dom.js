@@ -10,6 +10,7 @@ var transition = require('../transition')
  */
 
 exports.$appendTo = function (target, cb, withTransition) {
+  target = query(target)
   var targetIsDetached = !_.inDoc(target)
   var op = withTransition === false || targetIsDetached
     ? append
@@ -43,6 +44,7 @@ exports.$prependTo = function (target, cb, withTransition) {
  */
 
 exports.$before = function (target, cb, withTransition) {
+  target = query(target)
   var targetIsDetached = !_.inDoc(target)
   var op = withTransition === false || targetIsDetached
     ? before
@@ -112,7 +114,6 @@ exports.$remove = function (cb, withTransition) {
  */
 
 function insert (vm, target, op, targetIsDetached, cb) {
-  target = query(target)
   var shouldCallHook =
     !targetIsDetached &&
     !vm._isAttached &&
