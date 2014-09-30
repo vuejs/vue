@@ -31,12 +31,6 @@ Vue.component('polygraph', {
             this.$index,
             this.$parent.stats.length
           )
-        },
-        x: function () {
-          return this.point.x - 4
-        },
-        y: function () {
-          return this.point.y + 4
         }
       }
     }
