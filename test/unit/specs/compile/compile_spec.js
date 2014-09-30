@@ -128,6 +128,7 @@ if (_.inBrowser) {
       linker(vm, el)
       expect(vm._bindDir.calls.count()).toBe(1)
       expect(vm._bindDir).toHaveBeenCalledWith('component', el.firstChild, descriptor, def)
+      expect(_.warn).not.toHaveBeenCalled()
     })
 
     it('attribute interpolation', function () {

@@ -65,33 +65,27 @@ function compileNode (node, options) {
  */
 
 function compileElement (el, options) {
-  var hasAttributes = el.hasAttributes()
-  var tag = el.tagName.toLowerCase()
-  if (hasAttributes) {
-    // check terminal direcitves
-    var terminalLinkFn
-    for (var i = 0; i < 3; i++) {
-      terminalLinkFn = checkTerminalDirectives(el, options)
-      if (terminalLinkFn) {
-        terminalLinkFn.terminal = true
-        return terminalLinkFn
-      }
+  var linkFn, tag, component
+  // check custom element component, but only on non-root
+  if (!el.__vue__) {
+    tag = el.tagName.toLowerCase()
+    component =
+      tag.indexOf('-') > 0 &&
+      options.components[tag]
+    if (component) {
+      el.setAttribute(config.prefix + 'component', tag)
     }
   }
-  // check custom element component
-  var component =
-    tag.indexOf('-') > 0 &&
-    options.components[tag]
-  if (component) {
-    return makeTeriminalLinkFn(el, 'component', tag, options)
-  }
-  // check other directives
-  var linkFn
-  if (hasAttributes) {
-    var directives = collectDirectives(el, options)
-    linkFn = directives.length
-      ? makeDirectivesLinkFn(directives)
-      : null
+  if (component || el.hasAttributes()) {
+    // check terminal direcitves
+    linkFn = checkTerminalDirectives(el, options)
+    // if not terminal, build normal link function
+    if (!linkFn) {
+      var directives = collectDirectives(el, options)
+      linkFn = directives.length
+        ? makeDirectivesLinkFn(directives)
+        : null
+    }
   }
   // if the element is a textarea, we need to interpolate
   // its content on initial render.
@@ -101,6 +95,7 @@ function compileElement (el, options) {
       el.value = vm.$interpolate(el.value)
       if (realLinkFn) realLinkFn(vm, el)      
     }
+    linkFn.terminal = true
   }
   return linkFn
 }
@@ -388,9 +383,11 @@ function checkTerminalDirectives (el, options) {
 function makeTeriminalLinkFn (el, dirName, value, options) {
   var descriptor = dirParser.parse(value)[0]
   var def = options.directives[dirName]
-  return function terminalLinkFn (vm, el) {
+  var terminalLinkFn = function (vm, el) {
     vm._bindDir(dirName, el, descriptor, def)
   }
+  terminalLinkFn.terminal = true
+  return terminalLinkFn
 }
 
 /**
