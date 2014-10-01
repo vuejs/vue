@@ -25,10 +25,11 @@ It's really really easy to get started. Seriously, it's so easy:
 
 ``` js
 var demo = new Vue({
+  el: '#demo',
   data: {
     message: 'Hello Vue.js!'
   }
-}).$mount('#demo')
+})
 ```
 
 To check out the live demo, guides and API reference, visit [vuejs.org](http://vuejs.org).
