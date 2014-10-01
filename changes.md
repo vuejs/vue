@@ -30,6 +30,8 @@ vm.$mount('#app') // actually compile the DOM
 var vm = new Vue({ el: '#app', data: {a: 1} })
 ```
 
+If `$mount()` is called with no argument, an empty `<div>` will then be created.
+
 ## New Scope Inheritance Model
 
 > Breaking
@@ -577,5 +579,7 @@ Rendered result:
 ```
 
 ## Misc
+
+- `$destroy()` now by default leaves `$el` intact. If you want to remove it (and trigger transitions), call `$destroy(true)`.
 
 - When there are inline values on input elements bound with `v-model`, e.g. `<input value="hi" v-model="msg">`, the **inline value** will be used as the inital value. If the vm comes with default data, it **will be overwritten** by the inline value. Same for `selected` attribute on `<option>` elements.
