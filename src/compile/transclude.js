@@ -44,7 +44,7 @@ function transcludeTemplate (el, options) {
     collectRawContent(el)
     if (options.replace) {
       if (frag.childNodes.length > 1) {
-        transcludeContent(_.toArray(frag.childNodes))
+        transcludeContent(frag)
         return frag
       } else {
         var replacer = frag.firstChild
@@ -133,7 +133,7 @@ var concat = [].concat
 function getOutlets (el) {
   return _.isArray(el)
     ? concat.apply([], el.map(getOutlets))
-    : el.nodeType === 1
+    : el.querySelectorAll
       ? _.toArray(el.querySelectorAll('content'))
       : []
 }

@@ -87,6 +87,7 @@ if (_.inBrowser) {
     it('block instance content transclusion', function () {
       el.innerHTML = '<p>hi</p><span>ho</span>'
       options.template = '<div></div><content select="p"></content><content select="span"></content>'
+      options.replace = true
       var res = transclude(el, options)
       expect(res.firstChild.tagName).toBe('DIV')
       expect(res.childNodes[1].tagName).toBe('P')
