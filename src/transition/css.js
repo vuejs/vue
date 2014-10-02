@@ -2,22 +2,122 @@ var _ = require('../util')
 var transDurationProp = _.transitionProp + 'Duration'
 var animDurationProp = _.animationProp + 'Duration'
 
+var queue = []
+var queued = false
+
 /**
- * Force layout before triggering transitions/animations
+ * Push a job into the transition queue, which is to be
+ * executed on next frame.
+ *
+ * @param {Element} el    - target element
+ * @param {Number} dir    - 1: enter, -1: leave
+ * @param {Function} op   - the actual dom operation
+ * @param {String} cls    - the className to remove when the
+ *                          transition is done.
+ * @param {Function} [cb] - user supplied callback.
  */
 
-var justReflowed = false
-
-function reflow () {
-  if (justReflowed) return
-  justReflowed = true
-  /* jshint unused: false */
-  var f = document.documentElement.offsetHeight
-  _.nextTick(unlock)
+function push (el, dir, op, cls, cb) {
+  queue.push({
+    el  : el,
+    dir : dir,
+    cb  : cb,
+    cls : cls,
+    op  : op
+  })
+  if (!queued) {
+    queued = true
+    _.nextTick(flush)
+  }
 }
 
-function unlock () {
-  justReflowed = false
+/**
+ * Flush the queue, and do one forced reflow before
+ * triggering transitions.
+ */
+
+function flush () {
+  /* jshint unused: false */
+  var f = document.documentElement.offsetHeight
+  queue.forEach(run)
+  queue = []
+  queued = false
+}
+
+/**
+ * Run a transition job.
+ *
+ * @param {Object} job
+ */
+
+function run (job) {
+
+  var el = job.el
+  var classList = el.classList
+  var data = el.__v_trans
+  var cls = job.cls
+  var cb = job.cb
+  var op = job.op
+  var transitionType = getTransitionType(el, data, cls)
+
+  if (job.dir > 0) { // ENTER
+    if (transitionType === 1) {
+      // trigger transition by removing enter class
+      classList.remove(cls)
+      // only need to listen for transitionend if there's
+      // a user callback
+      if (cb) setupTransitionCb(_.transitionEndEvent)
+    } else if (transitionType === 2) {
+      // animations are triggered when class is added
+      // so we just listen for animationend to remove it.
+      setupTransitionCb(_.animationEndEvent, function () {
+        classList.remove(cls)
+      })
+    } else {
+      // no transition applicable
+      classList.remove(cls)
+      if (cb) cb()
+    }
+  } else { // LEAVE
+    if (transitionType) {
+      // leave transitions/animations are both triggered
+      // by adding the class, just remove it on end event.
+      var event = transitionType === 1
+        ? _.transitionEndEvent
+        : _.animationEndEvent
+      setupTransitionCb(event, function () {
+        op()
+        classList.remove(cls)
+      })
+    } else {
+      op()
+      classList.remove(cls)
+      if (cb) cb()
+    }
+  }
+
+  /**
+   * Set up a transition end callback, store the callback
+   * on the element's __v_trans data object, so we can
+   * clean it up if another transition is triggered before
+   * the callback is fired.
+   *
+   * @param {String} event
+   * @param {Function} [cleanupFn]
+   */
+
+  function setupTransitionCb (event, cleanupFn) {
+    data.event = event
+    var onEnd = data.callback = function transitionCb (e) {
+      if (e.target === el) {
+        _.off(el, event, onEnd)
+        data.event = data.callback = null
+        if (cleanupFn) cleanupFn()
+        if (cb) cb()
+      }
+    }
+    _.on(el, event, onEnd)
+  }
 }
 
 /**
@@ -78,74 +178,12 @@ module.exports = function (el, direction, op, data, cb) {
     classList.remove(leaveClass)
     data.event = data.callback = null
   }
-  var transitionType, onEnd, endEvent
   if (direction > 0) { // enter
-    // Enter Transition
     classList.add(enterClass)
     op()
-    transitionType = getTransitionType(el, data, enterClass)
-    if (transitionType === 1) {
-      reflow()
-      classList.remove(enterClass)
-      // only listen for transition end if user has sent
-      // in a callback
-      if (cb) {
-        endEvent = data.event = _.transitionEndEvent
-        onEnd = data.callback = function transitionCb (e) {
-          if (e.target === el) {
-            _.off(el, endEvent, onEnd)
-            data.event = data.callback = null
-            cb()
-          }
-        }
-        _.on(el, endEvent, onEnd)
-      }
-    } else if (transitionType === 2) {
-      // Enter Animation
-      //
-      // Animations are triggered automatically as the
-      // element is inserted into the DOM, so we just
-      // listen for the animationend event.
-      endEvent = data.event = _.animationEndEvent
-      onEnd = data.callback = function transitionCb (e) {
-        if (e.target === el) {
-          _.off(el, endEvent, onEnd)
-          data.event = data.callback = null
-          classList.remove(enterClass)
-          if (cb) cb()
-        }
-      }
-      _.on(el, endEvent, onEnd)
-    } else {
-      // no transition applicable
-      classList.remove(enterClass)
-      if (cb) cb()
-    }
-
+    push(el, direction, null, enterClass, cb)
   } else { // leave
-
     classList.add(leaveClass)
-    transitionType = getTransitionType(el, data, leaveClass)
-    if (transitionType) {
-      endEvent = data.event = transitionType === 1
-        ? _.transitionEndEvent
-        : _.animationEndEvent
-      onEnd = data.callback = function transitionCb (e) {
-        if (e.target === el) {
-          _.off(el, endEvent, onEnd)
-          data.event = data.callback = null
-          // actually remove node here
-          op()
-          classList.remove(leaveClass)
-          if (cb) cb()
-        }
-      }
-      _.on(el, endEvent, onEnd)
-    } else {
-      op()
-      classList.remove(leaveClass)
-      if (cb) cb()
-    }
-
+    push(el, direction, op, leaveClass, cb)
   }
 }

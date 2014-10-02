@@ -149,30 +149,40 @@ if (_.inBrowser && !_.isIE9) {
         document.body.removeChild(el)
       })
 
-      it('skip on 0s duration', function () {
+      it('skip on 0s duration (execute right at next frame)', function (done) {
         el.__v_trans.id = 'test'
         el.style.transition =
         el.style.WebkitTransition = 'opacity 0s ease'
         transition.apply(el, 1, op, vm, cb)
-        expect(op).toHaveBeenCalled()
-        expect(cb).toHaveBeenCalled()
-        expect(el.classList.contains('test-enter')).toBe(false)
-        transition.apply(el, -1, op, vm, cb)
-        expect(op.calls.count()).toBe(2)
-        expect(cb.calls.count()).toBe(2)
-        expect(el.classList.contains('test-leave')).toBe(false)
+        _.nextTick(function () {
+          expect(op).toHaveBeenCalled()
+          expect(cb).toHaveBeenCalled()
+          expect(el.classList.contains('test-enter')).toBe(false)
+          transition.apply(el, -1, op, vm, cb)
+          _.nextTick(function () {
+            expect(op.calls.count()).toBe(2)
+            expect(cb.calls.count()).toBe(2)
+            expect(el.classList.contains('test-leave')).toBe(false)
+            done()
+          })
+        })
       })
 
-      it('skip when no transition available', function () {
+      it('skip when no transition available', function (done) {
         el.__v_trans.id = 'test-no-trans'
         transition.apply(el, 1, op, vm, cb)
-        expect(op).toHaveBeenCalled()
-        expect(cb).toHaveBeenCalled()
-        expect(el.classList.contains('test-no-trans-enter')).toBe(false)
-        transition.apply(el, -1, op, vm, cb)
-        expect(op.calls.count()).toBe(2)
-        expect(cb.calls.count()).toBe(2)
-        expect(el.classList.contains('test-no-trans-leave')).toBe(false)
+        _.nextTick(function () {
+          expect(op).toHaveBeenCalled()
+          expect(cb).toHaveBeenCalled()
+          expect(el.classList.contains('test-no-trans-enter')).toBe(false)
+          transition.apply(el, -1, op, vm, cb)
+          _.nextTick(function () {
+            expect(op.calls.count()).toBe(2)
+            expect(cb.calls.count()).toBe(2)
+            expect(el.classList.contains('test-no-trans-leave')).toBe(false)
+            done()
+          })
+        })
       })
 
       it('transition enter', function (done) {
@@ -200,19 +210,21 @@ if (_.inBrowser && !_.isIE9) {
         el.__v_trans.id = 'test'
         // cascaded class style
         el.classList.add('test')
-        // wait a frame: Chrome Android 37 doesn't trigger
-        // transition if we apply the leave class in the
-        // same frame.
+        // wait a tick before applying the transition
+        // because doing so in the same frame won't trigger
+        // transition
         _.nextTick(function () {
           transition.apply(el, -1, op, vm, cb)
-          expect(op).not.toHaveBeenCalled()
-          expect(cb).not.toHaveBeenCalled()
-          expect(el.classList.contains('test-leave')).toBe(true)
-          _.on(el, _.transitionEndEvent, function () {
-            expect(op).toHaveBeenCalled()
-            expect(cb).toHaveBeenCalled()
-            expect(el.classList.contains('test-leave')).toBe(false)
-            done()
+          _.nextTick(function () {
+            expect(op).not.toHaveBeenCalled()
+            expect(cb).not.toHaveBeenCalled()
+            expect(el.classList.contains('test-leave')).toBe(true)
+            _.on(el, _.transitionEndEvent, function () {
+              expect(op).toHaveBeenCalled()
+              expect(cb).toHaveBeenCalled()
+              expect(el.classList.contains('test-leave')).toBe(false)
+              done()
+            })
           })
         })
       })
@@ -224,27 +236,31 @@ if (_.inBrowser && !_.isIE9) {
           document.body.appendChild(el)
           op()
         }, vm, cb)
-        expect(op).toHaveBeenCalled()
-        expect(cb).not.toHaveBeenCalled()
-        expect(el.classList.contains('test-anim-enter')).toBe(true)
-        _.on(el, _.animationEndEvent, function () {
-          expect(el.classList.contains('test-anim-enter')).toBe(false)
-          expect(cb).toHaveBeenCalled()
-          done()
+        _.nextTick(function () {
+          expect(op).toHaveBeenCalled()
+          expect(cb).not.toHaveBeenCalled()
+          expect(el.classList.contains('test-anim-enter')).toBe(true)
+          _.on(el, _.animationEndEvent, function () {
+            expect(el.classList.contains('test-anim-enter')).toBe(false)
+            expect(cb).toHaveBeenCalled()
+            done()
+          })
         })
       })
 
       it('animation leave', function (done) {
         el.__v_trans.id = 'test-anim'
         transition.apply(el, -1, op, vm, cb)
-        expect(op).not.toHaveBeenCalled()
-        expect(cb).not.toHaveBeenCalled()
-        expect(el.classList.contains('test-anim-leave')).toBe(true)
-        _.on(el, _.animationEndEvent, function () {
-          expect(op).toHaveBeenCalled()
-          expect(cb).toHaveBeenCalled()
-          expect(el.classList.contains('test-anim-leave')).toBe(false)
-          done()
+        _.nextTick(function () {
+          expect(op).not.toHaveBeenCalled()
+          expect(cb).not.toHaveBeenCalled()
+          expect(el.classList.contains('test-anim-leave')).toBe(true)
+          _.on(el, _.animationEndEvent, function () {
+            expect(op).toHaveBeenCalled()
+            expect(cb).toHaveBeenCalled()
+            expect(el.classList.contains('test-anim-leave')).toBe(false)
+            done()
+          })
         })
       })
 
@@ -254,9 +270,9 @@ if (_.inBrowser && !_.isIE9) {
         transition.apply(el, -1, function () {
           document.body.removeChild(el)
         }, vm, cb)
-        expect(el.__v_trans.callback).toBeTruthy()
         // cancel early
         _.nextTick(function () {
+          expect(el.__v_trans.callback).toBeTruthy()
           expect(el.classList.contains('test-leave')).toBe(true)
           transition.apply(el, 1, function () {
             document.body.appendChild(el)
@@ -264,17 +280,25 @@ if (_.inBrowser && !_.isIE9) {
           expect(cb).not.toHaveBeenCalled()
           expect(el.classList.contains('test-leave')).toBe(false)
           expect(el.__v_trans.callback).toBeNull()
-          done()
+          // IMPORTANT
+          // Let the queue flush finish before enter the next
+          // test. Don't remove the nextTick.
+          _.nextTick(done)
         })
       })
 
-      it('cache transition sniff results', function () {
+      it('cache transition sniff results', function (done) {
         el.__v_trans.id = 'test'
         el.classList.add('test')
         transition.apply(el, 1, op, vm)
-        expect(window.getComputedStyle.calls.count()).toBe(1)
-        transition.apply(el, 1, op, vm)
-        expect(window.getComputedStyle.calls.count()).toBe(1)
+        _.nextTick(function () {
+          expect(window.getComputedStyle.calls.count()).toBe(1)
+          transition.apply(el, 1, op, vm)
+          _.nextTick(function () {
+            expect(window.getComputedStyle.calls.count()).toBe(1)
+            done()
+          })
+        })
       })
 
     })
