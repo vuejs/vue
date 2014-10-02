@@ -207,15 +207,12 @@ if (_.inBrowser && !_.isIE9) {
           transition.apply(el, -1, op, vm, cb)
           expect(op).not.toHaveBeenCalled()
           expect(cb).not.toHaveBeenCalled()
-          expect(el.classList.contains('test-leave')).toBe(false)
-          _.nextTick(function () {
-            expect(el.classList.contains('test-leave')).toBe(true)
-            _.on(el, _.transitionEndEvent, function () {
-              expect(op).toHaveBeenCalled()
-              expect(cb).toHaveBeenCalled()
-              expect(el.classList.contains('test-leave')).toBe(false)
-              done()
-            })
+          expect(el.classList.contains('test-leave')).toBe(true)
+          _.on(el, _.transitionEndEvent, function () {
+            expect(op).toHaveBeenCalled()
+            expect(cb).toHaveBeenCalled()
+            expect(el.classList.contains('test-leave')).toBe(false)
+            done()
           })
         })
       })

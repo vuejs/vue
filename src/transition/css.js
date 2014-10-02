@@ -1,6 +1,4 @@
 var _ = require('../util')
-var Batcher = require('../batcher')
-var batcher = new Batcher()
 var transDurationProp = _.transitionProp + 'Duration'
 var animDurationProp = _.animationProp + 'Duration'
 
@@ -8,9 +6,18 @@ var animDurationProp = _.animationProp + 'Duration'
  * Force layout before triggering transitions/animations
  */
 
-batcher._preFlush = function () {
+var justReflowed = false
+
+function reflow () {
+  if (justReflowed) return
+  justReflowed = true
   /* jshint unused: false */
   var f = document.documentElement.offsetHeight
+  _.nextTick(unlock)
+}
+
+function unlock () {
+  justReflowed = false
 }
 
 /**
@@ -78,11 +85,8 @@ module.exports = function (el, direction, op, data, cb) {
     op()
     transitionType = getTransitionType(el, data, enterClass)
     if (transitionType === 1) {
-      batcher.push({
-        run: function () {
-          classList.remove(enterClass)
-        }
-      })
+      reflow()
+      classList.remove(enterClass)
       // only listen for transition end if user has sent
       // in a callback
       if (cb) {
@@ -123,14 +127,6 @@ module.exports = function (el, direction, op, data, cb) {
     classList.add(leaveClass)
     transitionType = getTransitionType(el, data, leaveClass)
     if (transitionType) {
-      if (transitionType === 1) {
-        classList.remove(leaveClass)
-        batcher.push({
-          run: function () {
-            classList.add(leaveClass)
-          }
-        })
-      }
       endEvent = data.event = transitionType === 1
         ? _.transitionEndEvent
         : _.animationEndEvent
