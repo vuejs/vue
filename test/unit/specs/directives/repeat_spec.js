@@ -171,6 +171,26 @@ if (_.inBrowser) {
         }
       })
       expect(el.innerHTML).toBe('<div>AAA</div><div>BBB</div><div>CCC</div><!--v-repeat-->')
+      // #458 meta properties
+      var vm = new Vue({
+        el: el,
+        template: '<div v-repeat="list" v-component="view-{{$value}}"></div>',
+        data: {
+          list: ['a', 'b', 'c']
+        },
+        components: {
+          'view-a': {
+            template: 'AAA'
+          },
+          'view-b': {
+            template: 'BBB'
+          },
+          'view-c': {
+            template: 'CCC'
+          }
+        }
+      })
+      expect(el.innerHTML).toBe('<div>AAA</div><div>BBB</div><div>CCC</div><!--v-repeat-->')
     })
 
     it('block repeat', function () {
