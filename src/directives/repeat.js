@@ -306,10 +306,11 @@ module.exports = {
     // use _.define to avoid accidentally overwriting scope
     // properties.
     var context = Object.create(this.vm)
-    for (var key in data) {
+    var key
+    for (key in data) {
       _.define(context, key, data[key])
     }
-    for (var key in meta) {
+    for (key in meta) {
       _.define(context, key, meta[key])
     }
     var id = this.ctorGetter.call(context, context)
