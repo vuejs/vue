@@ -1,5 +1,5 @@
 var _ = require('../util')
-var objectAgumentations = Object.create(Object.prototype)
+var objProto = Object.prototype
 
 /**
  * Add a new property to an observed object
@@ -11,15 +11,19 @@ var objectAgumentations = Object.create(Object.prototype)
  */
 
 _.define(
-  objectAgumentations,
+  objProto,
   '$add',
   function $add (key, val) {
+    var ob = this.__ob__
+    if (!ob) {
+      this[key] = val
+      return
+    }
     if (_.isReserved(key)) {
       _.warn('Refused to $add reserved key: ' + key)
       return
     }
     if (this.hasOwnProperty(key)) return
-    var ob = this.__ob__
     ob.convert(key, val)
     if (ob.vms) {
       var i = ob.vms.length
@@ -43,16 +47,20 @@ _.define(
  */
 
 _.define(
-  objectAgumentations,
+  objProto,
   '$delete',
   function $delete (key) {
+    var ob = this.__ob__
+    if (!ob) {
+      delete this[key]
+      return
+    }
     if (_.isReserved(key)) {
       _.warn('Refused to $add reserved key: ' + key)
       return
     }
     if (!this.hasOwnProperty(key)) return
     delete this[key]
-    var ob = this.__ob__
     if (ob.vms) {
       var i = ob.vms.length
       while (i--) {
@@ -65,5 +73,3 @@ _.define(
     }
   }
 )
-
-module.exports = objectAgumentations

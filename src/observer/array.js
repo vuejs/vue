@@ -1,5 +1,6 @@
 var _ = require('../util')
-var arrayAugmentations = Object.create(Array.prototype)
+var arrayProto = Array.prototype
+var arrayMethods = Object.create(arrayProto)
 
 /**
  * Intercept mutating methods and emit events
@@ -16,8 +17,8 @@ var arrayAugmentations = Object.create(Array.prototype)
 ]
 .forEach(function (method) {
   // cache original method
-  var original = Array.prototype[method]
-  _.define(arrayAugmentations, method, function mutator () {
+  var original = arrayProto[method]
+  _.define(arrayMethods, method, function mutator () {
     // avoid leaking arguments:
     // http://jsperf.com/closure-with-arguments
     var i = arguments.length
@@ -56,7 +57,7 @@ var arrayAugmentations = Object.create(Array.prototype)
  */
 
 _.define(
-  arrayAugmentations,
+  arrayProto,
   '$set',
   function $set (index, val) {
     if (index >= this.length) {
@@ -74,7 +75,7 @@ _.define(
  */
 
 _.define(
-  arrayAugmentations,
+  arrayProto,
   '$remove',
   function $remove (index) {
     if (typeof index !== 'number') {
@@ -86,4 +87,4 @@ _.define(
   }
 )
 
-module.exports = arrayAugmentations
+module.exports = arrayMethods

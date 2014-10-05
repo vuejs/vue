@@ -287,31 +287,14 @@ exports.set = function (obj, path, val) {
     obj = obj[key]
     if (!_.isObject(obj)) {
       obj = {}
-      add(last, key, obj)
+      last.$add(key, obj)
     }
   }
   key = path[i]
   if (key in obj) {
     obj[key] = val
   } else {
-    add(obj, key, val)
+    obj.$add(key, val)
   }
   return true
-}
-
-/**
- * Add a property to an object, using $add if target
- * has been augmented by Vue's observer.
- *
- * @param {Object} obj
- * @param {String} key
- * @param {*} val
- */
-
-function add (obj, key, val) {
-  if (obj.$add) {
-    obj.$add(key, val)
-  } else {
-    obj[key] = val
-  }
 }

@@ -441,7 +441,7 @@ Vue.config.debug = true
 
 - #### New config option: `proto`
 
-  Be default, Vue.js alters observed data objects' `__proto__` when available for faster method interception/augmentation. This is perfectly fine when your data objects are plain JSON-derived objects. However if you want to use Vue's observation on object created with custom prototypes (e.g. from constructors), you can set `Vue.config.proto = false` to prohibit this behavior.
+  Be default, Vue.js alters the `__proto__` of observed Arrays when available for faster method interception/augmentation. This would only cause issue in the rare case when you are observing a subclass of the native Array. In that case, you can set `Vue.config.proto = false` to prohibit this behavior.
 
 ## Transition API Change
 

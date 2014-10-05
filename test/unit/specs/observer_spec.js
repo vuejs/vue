@@ -108,6 +108,10 @@ describe('Observer', function () {
     // should ignore deleting non-existing key
     obj.$delete('a')
     expect(binding.notify.calls.count()).toBe(2)
+    // should work on non-observed objects
+    var obj2 = { a: 1 }
+    obj2.$delete('a')
+    expect(obj2.hasOwnProperty('a')).toBe(false)
   })
 
   it('observing array mutation', function () {

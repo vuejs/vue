@@ -1,10 +1,9 @@
 var _ = require('../util')
 var config = require('../config')
 var Binding = require('../binding')
-var arrayAugmentations = require('./array')
-var objectAugmentations = require('./object')
-var arrayKeys = Object.getOwnPropertyNames(arrayAugmentations)
-var objectKeys = Object.getOwnPropertyNames(objectAugmentations)
+var arrayMethods = require('./array')
+var arrayKeys = Object.getOwnPropertyNames(arrayMethods)
+require('./object')
 
 var uid = 0
 
@@ -61,14 +60,13 @@ function Observer (value, type) {
   this.active = true
   this.bindings = []
   _.define(value, '__ob__', this)
-  var augment = config.proto && _.hasProto
-    ? protoAugment
-    : copyAugment
   if (type === ARRAY) {
-    augment(value, arrayAugmentations, arrayKeys)
+    var augment = config.proto && _.hasProto
+      ? protoAugment
+      : copyAugment
+    augment(value, arrayMethods, arrayKeys)
     this.observeArray(value)
   } else if (type === OBJECT) {
-    augment(value, objectAugmentations, objectKeys)
     this.walk(value)
   }
 }
