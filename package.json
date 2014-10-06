@@ -20,9 +20,6 @@
     "test": "grunt ci"
   },
   "devDependencies": {
-    "browserify": "^5.11.0",
-    "component-builder": "^1.1.10",
-    "component-resolver": "^1.1.8",
     "grunt": "^0.4.5",
     "grunt-contrib-jshint": "^0.10.0",
     "grunt-contrib-watch": "^0.6.1",
@@ -37,6 +34,7 @@
     "karma-jasmine": "^0.2.2",
     "karma-phantomjs-launcher": "^0.1.4",
     "karma-sauce-launcher": "^0.2.10",
-    "uglify-js": "^2.4.15"
+    "uglify-js": "^2.4.15",
+    "webpack": "^1.4.4"
   }
 }

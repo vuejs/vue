@@ -1,7 +1,10 @@
-var path = require('path')
+/**
+ * Run e2e tests with CasperJS.
+ */
 
 module.exports = function (grunt) {
   grunt.registerTask( 'casper', function (id) {
+    var path = require('path')
     var done = this.async()
     var file = id ? id + '.js' : ''
     grunt.util.spawn({

@@ -1,11 +1,9 @@
+/**
+ * Simple development build to be run with grunt watch.
+ */
+
 module.exports = function (grunt) {
   grunt.registerTask('dev', function () {
-    var done = this.async()
-    var fs = require('fs')
-    var build = require('../shared-build')
-    build(grunt, function (js) {
-      fs.writeFileSync('dist/vue.js', js)
-      done()
-    })
+    require('../shared-build')(grunt, this.async())
   })
 }

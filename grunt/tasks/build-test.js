@@ -1,15 +1,21 @@
+/**
+ * Build `test/unit/specs.js` which is used in
+ * `test/unit/runner.html`
+ */
+
 module.exports = function (grunt) {
   grunt.registerTask('build-test', function () {
-    var done = this.async()
-    var fs = require('fs')
-    var browserify = require('browserify')
+    var webpack = require('webpack')
     var files = grunt.file.expand(['test/unit/specs/**/*.js'])
       .map(function (file) {
         return './' + file
       })
-    browserify(files)
-      .bundle()
-      .pipe(fs.createWriteStream('test/unit/specs.js'))
-      .on('close', done)
+    webpack({
+      entry: files,
+      output: {
+        path: './test/unit',
+        filename: 'specs.js'
+      }
+    }, this.async())
   })
 }

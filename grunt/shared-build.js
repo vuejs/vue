@@ -2,67 +2,27 @@
  * Shared build function
  */
 
-var resolve = require('component-resolver')
-var build = require('component-builder')
-
 module.exports = function (grunt, cb) {
 
-  var license =
+  var webpack = require('webpack')
+  var banner =
     '/**\n' +
     ' * Vue.js v' + grunt.config.get('version') + '\n' +
     ' * (c) ' + new Date().getFullYear() + ' Evan You\n' +
     ' * Released under the MIT License.\n' +
     ' */\n'
 
-  // build with component-builder
-  resolve(process.cwd(), {}, function (err, tree) {
-    build.scripts(tree)
-      .use('scripts', build.plugins.js())
-      .end(function (err, js) {
-        // wrap with umd
-        js = umd(js)
-        // replace require paths with numbers for file size
-        js = shortenPaths(js)
-        // add license
-        js = license + js
-        // done
-        cb(js)
-      })
-  })
-}
+  webpack({
+    entry: './src/vue',
+    output: {
+      path: './dist',
+      filename: 'vue.js',
+      library: 'Vue',
+      libraryTarget: 'umd'
+    },
+    plugins: [
+      new webpack.BannerPlugin(banner, { raw: true })
+    ]
+  }, cb)
 
-/**
- * component's umd wrapper throws error in strict mode
- * so we have to roll our own
- */
-
-function umd (js) {
-  return '\n;(function(){\n\n'
-    + '"use strict"\n\n'
-    + build.scripts.require
-    + js
-    + 'if (typeof exports == "object") {\n'
-    + '  module.exports = require("vue");\n'
-    + '} else if (typeof define == "function" && define.amd) {\n'
-    +'  define([], function(){ return require("vue"); });\n'
-    + '} else {\n'
-    + '  window.Vue = require("vue");\n'
-    + '}\n'
-    + '})()\n';
-}
-
-/**
- * Shorten require() paths for smaller file size
- */
-
-function shortenPaths (js) {
-  var seen = {}
-  var count = 0
-  return js.replace(/'vue\/src\/(.+?)'|"vue\/src\/(.+?)"/g, function (path) {
-    path = path.slice(1, -1)
-    if (!seen[path]) {
-      seen[path] = ++count
-    }
-    return seen[path]
-  })
 }
