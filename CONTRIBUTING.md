@@ -36,11 +36,11 @@ Hi! I’m really excited that you are interested in contributing to Vue.js. Befo
 - When in doubt, read the source code.
 - Break long ternary conditionals like this:
 
-``` js
-var a = superLongConditionalStatement
-  ? 'yep'
-  : 'nope'
-```
+  ``` js
+  var a = superLongConditionalStatement
+    ? 'yep'
+    : 'nope'
+  ```
 
 ## Development Setup
 
