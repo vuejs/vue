@@ -43,7 +43,7 @@ strats.data = function (parentVal, childVal, vm) {
     // mix default data into instance data
     for (var key in defaultData) {
       if (!instanceData.hasOwnProperty(key)) {
-        instanceData[key] = defaultData[key]
+        instanceData.$add(key, defaultData[key])
       }
     }
     return instanceData

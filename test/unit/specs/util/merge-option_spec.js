@@ -207,6 +207,25 @@ describe('Util - Option merging', function () {
     expect(res.data.b).toBe(2)
   })
 
+  it('already observed instance data merge with default data', function () {
+    var Observer = require('../../../../src/observer')
+    var instanceData = { a: 123 }
+    // observe it
+    Observer.create(instanceData)
+    var res = merge(
+      {
+        data: function () { return { b: 234} }
+      },
+      {
+        data: instanceData
+      },
+      {}
+    )
+    expect(res.data.a).toBe(123)
+    expect(res.data.b).toBe(234)
+    expect(Object.getOwnPropertyDescriptor(res.data, 'b').get).toBeTruthy()
+  })
+
   it('mixins', function () {
     var a = {}, b = {}, c = {}, d = {}
     var mixinA = { a: 1, directives: { a: a } }
