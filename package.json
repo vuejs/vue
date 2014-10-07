@@ -34,6 +34,8 @@
     "karma-jasmine": "^0.2.2",
     "karma-phantomjs-launcher": "^0.1.4",
     "karma-sauce-launcher": "^0.2.10",
+    "semver": "^4.0.3",
+    "shell-task": "^1.0.0",
     "uglify-js": "^2.4.15",
     "webpack": "^1.4.4"
   }
