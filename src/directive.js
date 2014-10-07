@@ -61,7 +61,7 @@ p._bind = function (def) {
     this.bind()
   }
   if (
-    this.expression && this.update &&
+    this.update && this._watcherExp &&
     (!this.isLiteral || this._isDynamicLiteral) &&
     !this._checkExpFn()
   ) {

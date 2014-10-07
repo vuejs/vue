@@ -80,17 +80,19 @@ describe('Directive', function () {
   })
 
   it('dynamic literal', function (done) {
+    vm.a = '' // #468 dynamic literals with falsy initial
+              // should still create the watcher.
     def.isLiteral = true
     var d = new Directive('test', el, vm, {
       expression: '{{a}}'
     }, def)
     expect(d._watcher).toBeDefined()
-    expect(d.expression).toBe(1)
+    expect(d.expression).toBe('')
     expect(def.bind).toHaveBeenCalled()
-    expect(def.update).toHaveBeenCalledWith(1)
-    vm.a = 2
+    expect(def.update).toHaveBeenCalledWith('')
+    vm.a = 'aa'
     nextTick(function () {
-      expect(def.update).toHaveBeenCalledWith(2, 1)
+      expect(def.update).toHaveBeenCalledWith('aa', '')
       done()
     })
   })
