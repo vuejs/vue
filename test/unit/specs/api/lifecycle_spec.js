@@ -201,8 +201,11 @@ if (_.inBrowser) {
       it('parent', function () {
         var parent = new Vue()
         var child = parent.$addChild()
-        expect(parent._children.length).toBe(1)
+        var child2 = parent.$addChild()
+        expect(parent._children.length).toBe(2)
         child.$destroy()
+        expect(parent._children.length).toBe(1)
+        child2.$destroy()
         expect(parent._children.length).toBe(0)
       })
 

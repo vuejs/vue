@@ -73,7 +73,7 @@ exports.$destroy = function (remove) {
   var parent = this.$parent
   if (parent && !parent._isBeingDestroyed) {
     i = parent._children.indexOf(this)
-    parent._children.splice(i)
+    parent._children.splice(i, 1)
   }
   // destroy all children.
   if (this._children) {
