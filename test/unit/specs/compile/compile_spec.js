@@ -135,7 +135,7 @@ if (_.inBrowser) {
       data['{{*b}}'] = 'B'
       el.innerHTML = '<div a="{{a}}" b="{{*b}}"></div>'
       var def = Vue.options.directives.attr
-      var descriptor = dirParser.parse('a:a')[0]
+      var descriptor = dirParser.parse('a:(a)')[0]
       var linker = compile(el, Vue.options)
       linker(vm, el)
       expect(vm._bindDir.calls.count()).toBe(1)
