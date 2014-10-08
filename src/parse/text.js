@@ -132,6 +132,6 @@ function formatToken (token, vm) {
   return token.tag
     ? vm && token.oneTime
       ? '"' + vm.$get(token.value) + '"'
-      : token.value
+      : '(' + token.value + ')'
     : '"' + token.value + '"'
 }

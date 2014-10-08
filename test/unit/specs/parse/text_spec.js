@@ -96,9 +96,9 @@ describe('Text Parser', function () {
   })
 
   it('tokens to expression', function () {
-    var tokens = textParser.parse('view-{{test}}-test-{{ok}}')
+    var tokens = textParser.parse('view-{{test + 1}}-test-{{ok}}')
     var exp = textParser.tokensToExp(tokens)
-    expect(exp).toBe('"view-"+test+"-test-"+ok')
+    expect(exp).toBe('"view-"+(test + 1)+"-test-"+(ok)')
   })
 
   it('tokens to expression with oneTime tags & vm', function () {
@@ -107,7 +107,7 @@ describe('Text Parser', function () {
     })
     var tokens = textParser.parse('view-{{*test}}-test-{{ok}}')
     var exp = textParser.tokensToExp(tokens, vm)
-    expect(exp).toBe('"view-"+"a"+"-test-"+ok')
+    expect(exp).toBe('"view-"+"a"+"-test-"+(ok)')
   })
 
 })
