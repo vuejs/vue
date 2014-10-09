@@ -2,6 +2,7 @@ var Vue = require('../../../src/vue')
 var nextTick = Vue.nextTick
 var Watcher = require('../../../src/watcher')
 var _ = Vue.util
+var config = Vue.config
 
 describe('Watcher', function () {
 
@@ -20,6 +21,7 @@ describe('Watcher', function () {
       }
     })
     spy = jasmine.createSpy('watcher')
+    spyOn(_, 'warn')
   })
   
   it('simple path', function (done) {

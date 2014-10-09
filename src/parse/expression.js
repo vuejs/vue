@@ -151,10 +151,7 @@ function compilePathFns (exp) {
 
 function makeGetter (body) {
   try {
-    return new Function(
-      'scope',
-      '"use strict";try{return ' + body + '}catch(e){};'
-    )
+    return new Function('scope', 'return ' + body + ';')
   } catch (e) {
     _.warn(
       'Invalid expression. ' + 
@@ -179,11 +176,7 @@ function makeGetter (body) {
 
 function makeSetter (body) {
   try {
-    return new Function(
-      'scope',
-      'value',
-      '"use strict";' + body + ' = value;'
-    )
+    return new Function('scope', 'value', body + '=value;')
   } catch (e) {
     _.warn('Invalid setter function body: ' + body)
   }

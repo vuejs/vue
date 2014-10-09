@@ -68,7 +68,10 @@ p.addDep = function (binding) {
 p.get = function () {
   this.beforeGet()
   var vm = this.vm
-  var value = this.getter.call(vm, vm)
+  var value
+  try {
+    value = this.getter.call(vm, vm)
+  } catch (e) {}
   // use JSON.stringify to "touch" every property
   // so they are all tracked as dependencies for
   // deep watching
@@ -89,7 +92,9 @@ p.set = function (value) {
   value = _.applyFilters(
     value, this.writeFilters, vm, this.value
   )
-  this.setter.call(vm, vm, value)
+  try {
+    this.setter.call(vm, vm, value)
+  } catch (e) {}
 }
 
 /**
