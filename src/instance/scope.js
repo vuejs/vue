@@ -44,6 +44,7 @@ exports._initData = function () {
  */
 
 exports._setData = function (newData) {
+  newData = newData || {}
   var oldData = this._data
   this._data = newData
   var keys, key, i
