@@ -111,15 +111,15 @@ function makeDirectivesLinkFn (directives) {
   return function directivesLinkFn (vm, el) {
     // reverse apply because it's sorted low to high
     var i = directives.length
-    var dir, j
+    var dir, j, k
     while (i--) {
       dir = directives[i]
       if (dir._link) {
         // custom link fn
         dir._link(vm, el)
       } else {
-        j = dir.descriptors.length
-        while (j--) {
+        k = dir.descriptors.length
+        for (j = 0; j < k; j++) {
           vm._bindDir(dir.name, el,
                       dir.descriptors[j], dir.def)
         }
