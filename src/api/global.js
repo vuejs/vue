@@ -55,10 +55,9 @@ exports.extend = function (extendOptions) {
 
 function createClass (name) {
   return new Function(
-    'Vue',
     'return function ' + _.camelize(name) +
-    ' (options) { Vue.call(this, options) }'
-  )(_.Vue)
+    ' (options) { this._init(options) }'
+  )()
 }
 
 /**
