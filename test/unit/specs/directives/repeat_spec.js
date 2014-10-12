@@ -110,6 +110,20 @@ if (_.inBrowser) {
       assertObjectPrimitiveMutations(vm, el, done)
     })
 
+    it('repeating object with filter', function () {
+      var vm = new Vue({
+        el: el,
+        data: {
+          items: {
+            a: { msg: 'aaa' },
+            b: { msg: 'bbb' }
+          }
+        },
+        template: '<div v-repeat="items | filterBy \'aaa\'">{{msg}}</div>'
+      })
+      expect(el.innerHTML).toBe('<div>aaa</div><!--v-repeat-->')
+    })
+
     it('v-component', function () {
       var vm = new Vue({
         el: el,

@@ -22,10 +22,12 @@ module.exports = {
     if (!this.filters) {
       this.filters = {}
     }
+    // add the object -> array convert filter
+    var objectConverter = _.bind(objToArray, this)
     if (!this.filters.read) {
-      this.filters.read = [objToArray]
+      this.filters.read = [objectConverter]
     } else {
-      this.filters.read.unshift(objToArray)
+      this.filters.read.unshift(objectConverter)
     }
     // setup ref node
     this.ref = document.createComment('v-repeat')
@@ -133,7 +135,6 @@ module.exports = {
     if (typeof data === 'number') {
       data = range(data)
     }
-    this.converted = data && data._converted
     this.vms = this.diff(data || [], this.vms)
     // update v-ref
     if (this.childId) {
@@ -457,6 +458,10 @@ function findNextVm (vm, ref) {
  * This is the default filter installed to every v-repeat
  * directive.
  *
+ * It will be called with **the directive** as `this`
+ * context so that we can mark the repeat array as converted
+ * from an object.
+ *
  * @param {*} obj
  * @return {Array}
  * @private
@@ -477,7 +482,8 @@ function objToArray (obj) {
       value: obj[key]
     }
   }
-  res._converted = true
+  // `this` points to the repeat directive instance
+  this.converted = true
   return res
 }
 
