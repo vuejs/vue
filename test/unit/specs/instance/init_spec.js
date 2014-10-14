@@ -16,8 +16,7 @@ describe('Instance Init', function () {
     a: 2,
     _anonymous: true,
     _parent: {
-      _isAnonymous: true,
-      $parent: {}
+      _owner: {}
     },
     el: {}
   }
@@ -34,7 +33,6 @@ describe('Instance Init', function () {
     expect(stub._directives).toBeTruthy()
     expect(stub._events).toBeTruthy()
     expect(stub._eventsCount).toBeTruthy()
-    expect(stub._isAnonymous).toBe(true)
   })
 
   it('should merge options', function () {
@@ -43,7 +41,7 @@ describe('Instance Init', function () {
   })
 
   it('should locate owner', function () {
-    expect(stub._owner).toBe(options._parent.$parent)
+    expect(stub._owner).toBe(options._parent._owner)
   })
 
   it('should call other init methods', function () {

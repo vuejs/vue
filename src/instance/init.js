@@ -51,14 +51,12 @@ exports._init = function (options) {
                            // child constructors
 
   // anonymous instances are created by v-if
-  // we need to walk along the parent chain to locate the
-  // first non-anonymous instance as the owner.
-  this._isAnonymous = options._anonymous
-  var parent = this.$parent
-  while (parent && parent._isAnonymous) {
-    parent = parent.$parent
-  }
-  this._owner = parent || this
+  // if an instance is anonymous, its owner will be the
+  // first non-anonymous parent; otherwise its owner will
+  // be itself.
+  this._owner = options._anonymous
+    ? this.$parent._owner
+    : this
 
   // merge options.
   options = this.$options = mergeOptions(

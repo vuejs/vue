@@ -60,6 +60,18 @@ if (_.inBrowser) {
       expect(vm.$.test).toBeNull()
     })
 
+    it('nested v-repeat', function () {
+      var vm = new Vue({
+        el: el,
+        template: '<div v-component="c1" v-ref="c1"><div v-repeat="2" v-ref="c2"></div></div>',
+        components: { c1: {} }
+      })
+      expect(vm.$.c1 instanceof Vue).toBe(true)
+      expect(vm.$.c2).toBeUndefined()
+      expect(Array.isArray(vm.$.c1.$.c2)).toBe(true)
+      expect(vm.$.c1.$.c2.length).toBe(2)
+    })
+
     it('warn on non-root', function () {
       var vm = new Vue({
         el: el,

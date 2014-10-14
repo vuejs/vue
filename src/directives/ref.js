@@ -11,11 +11,12 @@ module.exports = {
       )
       return
     }
-    this.vm._owner.$[this.expression] = this.vm
+    this.owner = this.vm.$parent._owner
+    this.owner.$[this.expression] = this.vm
   },
 
   unbind: function () {
-    this.vm._owner.$[this.expression] = null
+    this.owner.$[this.expression] = null
   }
   
 }
