@@ -50,9 +50,13 @@ module.exports = {
     if (this.filters) {
       this.listener = function textInputListener () {
         if (cpLocked) return
-        var cursorPos
+        var charsOffset
         // some HTML5 input types throw error here
-        try { cursorPos = el.selectionStart } catch (e) {}
+        try {
+          // record how many chars from the end of input
+          // the cursor was at
+          charsOffset = el.value.length - el.selectionStart
+        } catch (e) {}
         set()
         // force a value update, because in
         // certain cases the write filters output the same
@@ -61,7 +65,8 @@ module.exports = {
         _.nextTick(function () {
           var newVal = self._watcher.value
           self.update(newVal)
-          if (cursorPos != null) {
+          if (charsOffset != null) {
+            var cursorPos = newVal.length - charsOffset
             el.setSelectionRange(cursorPos, cursorPos)
           }
         })
