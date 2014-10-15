@@ -28,6 +28,7 @@ module.exports = {
         if (!this.childVM) {
           this.childVM = this.vm.$addChild({
             el: this.el,
+            data: this.vm._data,
             inherit: true,
             _anonymous: true
           })

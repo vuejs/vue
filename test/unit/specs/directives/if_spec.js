@@ -14,7 +14,7 @@ if (_.inBrowser) {
       var vm = new Vue({
         el: el,
         data: { test: false, a: 'A' },
-        template: '<div v-if="test">{{a}}</div>'
+        template: '<div v-if="test">{{$data.a}}</div>'
       })
       // lazy instantitation
       expect(el.innerHTML).toBe('<!--v-if-->')
