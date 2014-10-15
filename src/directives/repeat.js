@@ -280,7 +280,7 @@ module.exports = {
     // resolve constructor
     var Ctor = this.Ctor || this.resolveCtor(data, meta)
     var vm = this.vm.$addChild({
-      el: this.template.cloneNode(true),
+      el: templateParser.clone(this.template),
       _linker: this._linker,
       _meta: meta,
       data: data,

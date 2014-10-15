@@ -1,6 +1,17 @@
 var Cache = require('../cache')
 var templateCache = new Cache(100)
 
+/**
+ * Test for the presence of the Safari template cloning bug
+ * https://bugs.webkit.org/show_bug.cgi?id=137755
+ */
+
+var hasBrokenTemplate = (function () {
+  var a = document.createElement('div')
+  a.innerHTML = '<template>1</template>'
+  return !a.cloneNode(true).firstChild.innerHTML
+})()
+
 var map = {
   _default : [0, '', ''],
   legend   : [1, '<fieldset>', '</fieldset>'],
@@ -128,6 +139,32 @@ function nodeToFragment (node) {
 }
 
 /**
+ * Deal with Safari cloning nested <template> bug by
+ * manually cloning all template instances.
+ *
+ * @param {Element|DocumentFragment} node
+ * @return {Element|DocumentFragment}
+ */
+
+exports.clone = function (node) {
+  var res = node.cloneNode(true)
+  if (hasBrokenTemplate) {
+    var templates = node.querySelectorAll('template')
+    if (templates.length) {
+      var cloned = res.querySelectorAll('template')
+      var i = cloned.length
+      while (i--) {
+        cloned[i].parentNode.replaceChild(
+          templates[i].cloneNode(true),
+          cloned[i]
+        )
+      }
+    }
+  }
+  return res
+}
+
+/**
  * Process the template option and normalizes it into a
  * a DocumentFragment that can be used as a partial or a
  * instance template.
@@ -176,6 +213,6 @@ exports.parse = function (template, clone) {
   }
 
   return frag && clone
-    ? frag.cloneNode(true)
+    ? exports.clone(frag)
     : frag
 }

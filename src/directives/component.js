@@ -1,5 +1,6 @@
 var _ = require('../util')
 var Watcher = require('../watcher')
+var templateParser = require('../parse/template')
 
 module.exports = {
 
@@ -131,7 +132,7 @@ module.exports = {
     }
     if (this.Ctor && !this.childVM) {
       this.childVM = this.vm.$addChild({
-        el: this.el.cloneNode(true)
+        el: templateParser.clone(this.el)
       }, this.Ctor)
       if (this.keepAlive) {
         this.cache[this.ctorId] = this.childVM
