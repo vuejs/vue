@@ -1,4 +1,23 @@
 var apiURL = 'https://api.github.com/repos/yyx990803/vue/commits?per_page=3&sha='
+var isPhantom = true//navigator.userAgent.indexOf('PhantomJS') > -1
+
+/**
+ * Test mocks
+ */
+
+var mocks = {
+  master: [{sha:'111111111111', commit: {message:'one', author:{name:'Evan',date:'2014-10-15T13:52:58Z'}}},{sha:'111111111111', commit: {message:'hi', author:{name:'Evan',date:'2014-10-15T13:52:58Z'}}},{sha:'111111111111', commit: {message:'hi', author:{name:'Evan',date:'2014-10-15T13:52:58Z'}}}],
+  dev: [{sha:'222222222222', commit: {message:'two', author:{name:'Evan',date:'2014-10-15T13:52:58Z'}}},{sha:'111111111111', commit: {message:'hi', author:{name:'Evan',date:'2014-10-15T13:52:58Z'}}},{sha:'111111111111', commit: {message:'hi', author:{name:'Evan',date:'2014-10-15T13:52:58Z'}}}],
+  next: [{sha:'333333333333', commit: {message:'three', author:{name:'Evan',date:'2014-10-15T13:52:58Z'}}},{sha:'111111111111', commit: {message:'hi', author:{name:'Evan',date:'2014-10-15T13:52:58Z'}}},{sha:'111111111111', commit: {message:'hi', author:{name:'Evan',date:'2014-10-15T13:52:58Z'}}}]
+}
+
+function mockData () {
+  this.commits = mocks[this.currentBranch]
+}
+
+/**
+ * Actual demo
+ */
 
 var demo = new Vue({
 
@@ -29,6 +48,11 @@ var demo = new Vue({
 
   methods: {
     fetchData: function () {
+      // CasperJS fails at cross-domain XHR even with
+      // --web-security=no, have to mock data here.
+      if (isPhantom) {
+        return mockData.call(this)
+      }
       var xhr = new XMLHttpRequest()
       var self = this
       xhr.open('GET', apiURL + self.currentBranch)
