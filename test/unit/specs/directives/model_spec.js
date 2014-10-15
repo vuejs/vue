@@ -161,20 +161,20 @@ if (_.inBrowser) {
       var vm = new Vue({
         el: el,
         data: {
-          test: ['b']
+          test: [2] // test number soft equal
         },
         template:
           '<select v-model="test" multiple>' +
-            '<option>a</option>' +
-            '<option>b</option>' +
-            '<option>c</option>' +
+            '<option>1</option>' +
+            '<option>2</option>' +
+            '<option>3</option>' +
           '</select>'
       })
       var opts = el.firstChild.options
       expect(opts[0].selected).toBe(false)
       expect(opts[1].selected).toBe(true)
       expect(opts[2].selected).toBe(false)
-      vm.test = ['a', 'c']
+      vm.test = [1, '3'] // mix of number/string
       _.nextTick(function () {
         expect(opts[0].selected).toBe(true)
         expect(opts[1].selected).toBe(false)
@@ -182,8 +182,8 @@ if (_.inBrowser) {
         opts[0].selected = false
         opts[1].selected = true
         trigger(el.firstChild, 'change')
-        expect(vm.test[0]).toBe('b')
-        expect(vm.test[1]).toBe('c')
+        expect(vm.test[0]).toBe('2')
+        expect(vm.test[1]).toBe('3')
         done()
       })
     })

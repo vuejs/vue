@@ -34,7 +34,7 @@ module.exports = {
     while (i--) {
       option = options[i]
       option.selected = multi
-        ? value.indexOf(option.value) > -1
+        ? indexOf(value, option.value) > -1
         : value == option.value
     }
   },
@@ -147,4 +147,21 @@ function filterSelected (op) {
 
 function getOptionValue (op) {
   return op.value || op.text
+}
+
+/**
+ * Native Array.indexOf uses strict equal, but in this
+ * case we need to match string/numbers with soft equal.
+ *
+ * @param {Array} arr
+ * @param {*} val
+ */
+
+function indexOf (arr, val) {
+  /* jshint eqeqeq: false */
+  var i = arr.length
+  while (i--) {
+    if (arr[i] == val) return i
+  }
+  return -1
 }
