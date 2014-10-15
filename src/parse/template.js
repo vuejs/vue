@@ -148,6 +148,7 @@ function nodeToFragment (node) {
 
 exports.clone = function (node) {
   var res = node.cloneNode(true)
+  /* istanbul ignore if */
   if (hasBrokenTemplate) {
     var templates = node.querySelectorAll('template')
     if (templates.length) {
