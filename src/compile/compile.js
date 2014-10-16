@@ -4,8 +4,6 @@ var textParser = require('../parse/text')
 var dirParser = require('../parse/directive')
 var templateParser = require('../parse/template')
 
-function noop () {}
-
 /**
  * Compile a template and return a reusable composite link
  * function, which recursively contains more link functions
@@ -356,9 +354,12 @@ var terminalDirectives = [
   'if'
 ]
 
+function skip () {}
+skip.terminal = true
+
 function checkTerminalDirectives (el, options) {
   if (_.attr(el, 'pre') !== null) {
-    return noop
+    return skip
   }
   var value, dirName
   /* jshint boss: true */
