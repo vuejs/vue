@@ -34,10 +34,10 @@ strats.data = function (parentVal, childVal, vm) {
     return childVal || parentVal
   }
   var instanceData = typeof childVal === 'function'
-    ? childVal()
+    ? childVal.call(vm)
     : childVal
   var defaultData = typeof parentVal === 'function'
-    ? parentVal()
+    ? parentVal.call(vm)
     : undefined
   if (instanceData) {
     // mix default data into instance data
@@ -68,7 +68,7 @@ strats.el = function (parentVal, childVal, vm) {
   var ret = childVal || parentVal
   // invoke the element factory if this is instance merge
   return vm && typeof ret === 'function'
-    ? ret()
+    ? ret.call(vm)
     : ret
 }
 

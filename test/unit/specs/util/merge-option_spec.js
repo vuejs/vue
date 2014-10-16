@@ -160,23 +160,26 @@ describe('Util - Option merging', function () {
   })
 
   it('instanace el merge', function () {
+    var vm = {} // mock vm presence
     function fn1 () {
+      expect(this).toBe(vm)
       return 1
     }
     function fn2 () {
+      expect(this).toBe(vm)
       return 2
     }
     // both functions
-    var res = merge({el:fn1}, {el:fn2}, {})
+    var res = merge({el:fn1}, {el:fn2}, vm)
     expect(res.el).toBe(2)
     // direct instance el
-    res = merge({el:fn1}, {el:2}, {})
+    res = merge({el:fn1}, {el:2}, vm)
     expect(res.el).toBe(2)
     // no parent
-    res = merge({}, {el:2}, {})
+    res = merge({}, {el:2}, vm)
     expect(res.el).toBe(2)
     // no child
-    res = merge({el:fn1}, {}, {})
+    res = merge({el:fn1}, {}, vm)
     expect(res.el).toBe(1)
   })
 
@@ -192,16 +195,18 @@ describe('Util - Option merging', function () {
   })
 
   it('instance data merge with default data function', function () {
+    var vm = {} // mock vm presence
     var res = merge(
       // component default
       { data: function () {
+        expect(this).toBe(vm)
         return {
           a: 1,
           b: 2
         }
       }},
       { data: { a: 2 }}, // instance data
-      {} // mock vm presence
+      vm
     )
     expect(res.data.a).toBe(2)
     expect(res.data.b).toBe(2)
