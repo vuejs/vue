@@ -13,7 +13,7 @@ var extend = _.extend
  * @param {Vue} [vm]
  */
 
-var strats = {}
+var strats = Object.create(null)
 
 /**
  * Data
