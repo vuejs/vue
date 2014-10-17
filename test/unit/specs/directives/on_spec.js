@@ -6,6 +6,7 @@ function trigger (target, event, process) {
   e.initEvent(event, true, true)
   if (process) process(e)
   target.dispatchEvent(e)
+  return e
 }
 
 if (_.inBrowser) {
@@ -98,6 +99,35 @@ if (_.inBrowser) {
       trigger(iframeDoc, 'click')
       expect(spy.calls.count()).toBe(1)
       document.body.removeChild(el)
+    })
+
+    it('passing $event', function () {
+      var test = jasmine.createSpy()
+      var vm = new Vue({
+        el: el,
+        template: '<a v-on="click:test($event)"></a>',
+        methods: {
+          test: test
+        }
+      })
+      var e = trigger(el.firstChild, 'click')
+      expect(test).toHaveBeenCalledWith(e)
+    })
+
+    it('passing $event on a nested instance', function () {
+      var test = jasmine.createSpy()
+      var parent = new Vue({
+        methods: {
+          test: test
+        }
+      })
+      var child = parent.$addChild({
+        el: el,
+        inherit: true,
+        template: '<a v-on="click:test($event)"></a>'
+      })
+      var e = trigger(el.firstChild, 'click')
+      expect(test).toHaveBeenCalledWith(e)
     })
 
   })
