@@ -578,6 +578,18 @@ Rendered result:
 <!--v-block-end-->
 ```
 
+Additionally, you can also use `v-partial` with `<template>` for a block partial:
+
+``` html
+<template v-partial="abc"></template>
+```
+
+Which is the equivalance of `{{>abc}}`. However, the `<template>` syntax allows you to bind a **dynamic block partial**:
+
+``` html
+<template v-partial="{{partialId}}"></template>
+```
+
 ## Misc
 
 - `$destroy()` now by default leaves `$el` intact. If you want to remove it (and trigger transitions), call `$destroy(true)`.
