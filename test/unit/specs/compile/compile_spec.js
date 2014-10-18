@@ -7,14 +7,20 @@ var compile = require('../../../../src/compile/compile')
 if (_.inBrowser) {
   describe('Compile', function () {
 
-    var vm, el, data
+    var vm, el, data, directiveTeardown
     beforeEach(function () {
       // We mock vms here so we can assert what the generated
       // linker functions do.
       el = document.createElement('div')
       data = {}
+      directiveTeardown = jasmine.createSpy()
       vm = {
-        _bindDir: jasmine.createSpy(),
+        _directives: [],
+        _bindDir: function () {
+          this._directives.push({
+            _teardown: directiveTeardown
+          })
+        },
         $set: jasmine.createSpy(),
         $eval: function (value) {
           return data[value]
@@ -23,6 +29,7 @@ if (_.inBrowser) {
           return data[value]
         }
       }
+      spyOn(vm, '_bindDir').and.callThrough()
       spyOn(vm, '$eval').and.callThrough()
       spyOn(vm, '$interpolate').and.callThrough()
       spyOn(_, 'warn')
@@ -179,6 +186,16 @@ if (_.inBrowser) {
       linker(vm, frag)
       expect(el.innerHTML).toBe('A')
       expect(el2.innerHTML).toBe('B')
+    })
+
+    it('partial compilation', function () {
+      el.innerHTML = '<div v-attr="test:abc">{{bcd}}<p v-show="ok"></p></div>'
+      var linker = compile(el, Vue.options, true)
+      var decompile = linker(vm, el)
+      expect(vm._directives.length).toBe(3)
+      decompile()
+      expect(directiveTeardown.calls.count()).toBe(3)
+      expect(vm._directives.length).toBe(0)
     })
 
   })

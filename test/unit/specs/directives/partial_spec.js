@@ -48,5 +48,43 @@ if (_.inBrowser) {
       expect(el.innerHTML).toBe('<div><!--v-partial--></div>')
     })
 
+    it('dynamic partial', function (done) {
+      var vm = new Vue({
+        el: el,
+        template: '<div v-partial="{{partial}}"></div>',
+        data: {
+          msg: 'hello',
+          partial: 'p1'
+        },
+        partials: {
+          p1: '{{msg}}',
+          p2: '<div v-component="child"></div>'
+        },
+        components: {
+          child: {
+            data: function () {
+              return {a:123}
+            },
+            template: '{{a}}'
+          }
+        }
+      })
+      expect(el.firstChild.innerHTML).toBe('hello')
+      expect(vm._directives.length).toBe(2)
+      vm.partial = 'p2'
+      _.nextTick(function () {
+        expect(el.firstChild.innerHTML).toBe('<div>123</div><!--v-component-->')
+        expect(vm._directives.length).toBe(2)
+        expect(vm._children.length).toBe(1)
+        vm.partial = 'p1'
+        _.nextTick(function () {
+          expect(el.firstChild.innerHTML).toBe('hello')
+          expect(vm._directives.length).toBe(2)
+          expect(vm._children.length).toBe(0)
+          done()
+        })
+      })
+    })
+
   })
 }

@@ -29,10 +29,41 @@ module.exports = function compile (el, options, partial) {
     el.hasChildNodes()
       ? compileNodeList(el.childNodes, options)
       : null
+
+  /**
+   * A linker function to be called on a already compiled
+   * piece of DOM, which instantiates all directive
+   * instances.
+   *
+   * @param {Vue} vm
+   * @param {Element|DocumentFragment} el
+   * @return {Function|undefined}
+   */
+
   return function link (vm, el) {
+    var originalDirCount = vm._directives.length
     if (paramsLinkFn) paramsLinkFn(vm, el)
     if (nodeLinkFn) nodeLinkFn(vm, el)
     if (childLinkFn) childLinkFn(vm, el.childNodes)
+
+    /**
+     * If this is a partial compile, the linker function
+     * returns an unlink function that tearsdown all
+     * directives instances generated during the partial
+     * linking.
+     */
+
+    if (partial) {
+      var dirs = vm._directives.slice(originalDirCount)
+      return function unlink () {
+        var i = dirs.length
+        while (i--) {
+          dirs[i]._teardown()
+        }
+        i = vm._directives.indexOf(dirs[0])
+        vm._directives.splice(i, dirs.length)
+      }
+    }
   }
 }
 
