@@ -6,6 +6,14 @@ module.exports = {
   isLiteral: true,
 
   bind: function () {
+    var el = this.el
+    if (el.nodeType !== 8) {
+      el.innerHTML = ''
+    }
+    if (el.tagName === 'TEMPLATE') {
+      this.el = document.createComment('v-partial')
+      _.replace(el, this.el)
+    }
     if (!this._isDynamicLiteral) {
       this.compile(this.expression)
     } 
@@ -25,16 +33,28 @@ module.exports = {
     partial = templateParser.parse(partial, true)
     var el = this.el
     var vm = this.vm
+    var decompile = vm.$compile(partial)
     if (el.nodeType === 8) {
       // comment ref node means inline partial
-      // which can only be static
-      vm.$compile(partial)
-      _.replace(el, partial)
+      var blockStart = partial.firstChild
+      this.decompile = function () {
+        decompile()
+        var node = blockStart
+        var next
+        while (node !== el) {
+          next = node.nextSibling
+          _.remove(node)
+          node = next
+        }
+      }
+      _.before(partial, el)
     } else {
-      // just set innerHTML...
-      el.innerHTML = ''
+      // just append to container
+      this.decompile = function () {
+        decompile()
+        el.innerHTML = ''
+      }
       el.appendChild(partial)
-      this.decompile = vm.$compile(el)
     }
   },
 

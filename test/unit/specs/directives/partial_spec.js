@@ -37,7 +37,7 @@ if (_.inBrowser) {
           b: 'B'
         }
       })
-      expect(el.innerHTML).toBe('<div><p>A</p><p>B</p></div>')
+      expect(el.innerHTML).toBe('<div><p>A</p><p>B</p><!--v-partial--></div>')
     })
 
     it('not found', function () {
@@ -83,6 +83,27 @@ if (_.inBrowser) {
           expect(vm._children.length).toBe(0)
           done()
         })
+      })
+    })
+
+    it('template block partial', function (done) {
+      var vm = new Vue({
+        el: el,
+        template: '<template v-partial="{{test}}"></template>',
+        data: {
+          test: 'p1',
+          msg: 'b'
+        },
+        partials: {
+          p1: 'a {{msg}} c',
+          p2: '<span>1</span><a>2</a>'
+        }
+      })
+      expect(el.innerHTML).toBe('a b c<!--v-partial-->')
+      vm.test = 'p2'
+      _.nextTick(function () {
+        expect(el.innerHTML).toBe('<span>1</span><a>2</a><!--v-partial-->')
+        done()
       })
     })
 

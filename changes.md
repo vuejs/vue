@@ -295,7 +295,7 @@ computed: {
 
   When authoring literal directives, you can now provide an `update()` function if you wish to handle it dynamically. If no `update()` is provided the directive will be treated as a static literal and only evaluated once.
 
-  Note that `v-component` is the only directive that supports this.
+  Note that `v-component` and `v-partial` are the only directives that support this.
 
 - #### Directive params
 
