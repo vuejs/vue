@@ -2,7 +2,7 @@ var _ = require('../util')
 
 module.exports = {
 
-  isFn: true,
+  acceptStatement: true,
   priority: 700,
 
   bind: function () {

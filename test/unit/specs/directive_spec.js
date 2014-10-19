@@ -97,8 +97,8 @@ describe('Directive', function () {
     })
   })
 
-  it('expression function', function () {
-    def.isFn = true
+  it('inline statement', function () {
+    def.acceptStatement = true
     var spy = jasmine.createSpy()
     vm.$options.filters.test = function (fn) {
       spy()

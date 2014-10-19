@@ -63,7 +63,7 @@ p._bind = function (def) {
   if (
     this.update && this._watcherExp &&
     (!this.isLiteral || this._isDynamicLiteral) &&
-    !this._checkExpFn()
+    !this._checkStatement()
   ) {
     // use raw expression as identifier because filters
     // make them different watchers
@@ -122,10 +122,10 @@ p._checkDynamicLiteral = function () {
  * @return {Boolean}
  */
 
-p._checkExpFn = function () {
+p._checkStatement = function () {
   var expression = this.expression
   if (
-    expression && this.isFn &&
+    expression && this.acceptStatement &&
     !expParser.pathTestRE.test(expression)
   ) {
     var fn = expParser.parse(expression).get

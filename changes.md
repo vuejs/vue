@@ -395,7 +395,17 @@ computed: {
 
   This option indicates the directive is two-way and may write back to the model. Allows the use of `this.set(value)` inside directive functions.
 
-- #### Removed directive option: `isEmpty`
+- #### New directive option: `acceptStatement`
+
+  This option indicates the directive accepts inline statements like `v-on` does:
+
+  ``` html
+  <a v-on="click: a++"></a>
+  ```
+
+  The statement will be wrapped up as a function and passed as the argument to the directive's `update` function.
+
+- #### Removed directive option: `isEmpty`, `isFn`
 
 ## Interpolation change
 
