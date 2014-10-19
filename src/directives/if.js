@@ -1,5 +1,7 @@
 var _ = require('../util')
+var compile = require('../compile/compile')
 var templateParser = require('../parse/template')
+var transition = require('../transition')
 
 module.exports = {
 
@@ -8,10 +10,16 @@ module.exports = {
     if (!el.__vue__) {
       this.ref = document.createComment('v-if')
       _.replace(el, this.ref)
-      this.inserted = false
-      if (el.tagName === 'TEMPLATE') {
-        this.el = templateParser.parse(el, true)
-      }
+      this.isBlock = el.tagName === 'TEMPLATE'
+      this.template = this.isBlock
+        ? templateParser.parse(el, true)
+        : el
+      // compile the nested partial
+      this.linker = compile(
+        this.template,
+        this.vm.$options,
+        true
+      )
     } else {
       this.invalid = true
       _.warn(
@@ -24,29 +32,42 @@ module.exports = {
   update: function (value) {
     if (this.invalid) return
     if (value) {
-      if (!this.inserted) {
-        if (!this.childVM) {
-          this.childVM = this.vm.$addChild({
-            el: this.el,
-            data: this.vm._data,
-            inherit: true,
-            _anonymous: true
-          })
-        }
-        this.childVM.$before(this.ref)
-        this.inserted = true
-      }
+      this.insert()
     } else {
-      if (this.inserted) {
-        this.childVM.$remove()
-        this.inserted = false
-      }
+      this.unbind()
     }
   },
 
+  insert: function () {
+    var vm = this.vm
+    var el = templateParser.clone(this.template)
+    var ref = this.ref
+    var decompile = this.linker(vm, el)
+    if (this.isBlock) {
+      var blockStart = el.firstChild
+      this.decompile = function () {
+        decompile()
+        var node = blockStart
+        var next
+        while (node !== ref) {
+          next = node.nextSibling
+          transition.remove(node, vm)
+          node = next
+        }
+      }
+    } else {
+      this.decompile = function () {
+        decompile()
+        transition.remove(el, vm)
+      }
+    }
+    transition.before(el, ref, vm)
+  },
+
   unbind: function () {
-    if (this.childVM) {
-      this.childVM.$destroy()
+    if (this.decompile) {
+      this.decompile()
+      this.decompile = null
     }
   }
 

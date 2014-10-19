@@ -3,11 +3,11 @@ module.exports = {
   isLiteral: true,
 
   bind: function () {
-    this.vm._owner.$$[this.expression] = this.el
+    this.vm.$$[this.expression] = this.el
   },
 
   unbind: function () {
-    this.vm._owner.$$[this.expression] = null
+    delete this.vm.$$[this.expression]
   }
   
 }

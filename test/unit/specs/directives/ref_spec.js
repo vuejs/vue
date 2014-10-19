@@ -25,7 +25,7 @@ if (_.inBrowser) {
       expect(vm.$.test).toBeTruthy()
       expect(vm.$.test.$options.id).toBe('test')
       vm.$.test.$destroy()
-      expect(vm.$.test).toBeNull()
+      expect(vm.$.test).toBeUndefined()
     })
 
     it('with v-repeat', function (done) {
@@ -45,19 +45,6 @@ if (_.inBrowser) {
         expect(vm.$.test).toBeUndefined()
         done()
       })
-    })
-
-    it('inside v-if', function () {
-      var vm = new Vue({
-        el: el,
-        data: { test: true },
-        components: components,
-        template: '<div v-if="test"><div v-component="test" v-ref="test"></div></div>'
-      })
-      expect(vm.$.test).toBeTruthy()
-      expect(vm.$.test.$options.id).toBe('test')
-      vm.$.test.$destroy()
-      expect(vm.$.test).toBeNull()
     })
 
     it('nested v-repeat', function () {

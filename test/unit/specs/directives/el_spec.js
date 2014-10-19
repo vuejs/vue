@@ -17,6 +17,8 @@ if (_.inBrowser) {
       })
       expect(vm.$$.test).toBeTruthy()
       expect(vm.$$.test.id).toBe('test')
+      vm._directives[0]._teardown()
+      expect(vm.$$.test).toBeUndefined()
     })
 
     it('with v-repeat', function (done) {
@@ -34,18 +36,6 @@ if (_.inBrowser) {
         expect(vm.$$.test.length).toBe(0)
         done()
       })
-    })
-
-    it('inside v-if', function () {
-      var vm = new Vue({
-        el: el,
-        data: { test: true },
-        template: '<div v-if="test"><div id="test" v-el="test"></div></div>'
-      })
-      expect(vm.$$.test).toBeTruthy()
-      expect(vm.$$.test.id).toBe('test')
-      vm._children[0].$destroy()
-      expect(vm.$$.test).toBeNull()
     })
 
   })

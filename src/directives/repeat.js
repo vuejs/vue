@@ -64,7 +64,6 @@ module.exports = {
    */
 
   checkRef: function () {
-    this.owner = this.vm._owner
     var childId = _.attr(this.el, 'ref')
     this.childId = childId
       ? this.vm.$interpolate(childId)
@@ -138,10 +137,10 @@ module.exports = {
     this.vms = this.diff(data || [], this.vms)
     // update v-ref
     if (this.childId) {
-      this.owner.$[this.childId] = this.vms
+      this.vm.$[this.childId] = this.vms
     }
     if (this.elId) {
-      this.owner.$$[this.elId] = this.vms.map(function (vm) {
+      this.vm.$$[this.elId] = this.vms.map(function (vm) {
         return vm.$el
       })
     }
@@ -326,7 +325,7 @@ module.exports = {
 
   unbind: function () {
     if (this.childId) {
-      delete this.owner.$[this.childId]
+      delete this.vm.$[this.childId]
     }
     if (this.vms) {
       var i = this.vms.length

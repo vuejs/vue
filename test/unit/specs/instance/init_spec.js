@@ -15,9 +15,6 @@ describe('Instance Init', function () {
   var options = {
     a: 2,
     _anonymous: true,
-    _parent: {
-      _owner: {}
-    },
     el: {}
   }
 
@@ -38,10 +35,6 @@ describe('Instance Init', function () {
   it('should merge options', function () {
     expect(stub.$options.a).toBe(2)
     expect(stub.$options.b).toBe(2)
-  })
-
-  it('should locate owner', function () {
-    expect(stub._owner).toBe(options._parent._owner)
   })
 
   it('should call other init methods', function () {
