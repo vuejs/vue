@@ -2,51 +2,63 @@ var _ = require('../util')
 var inDoc = _.inDoc
 
 /**
- * Setup the instance's option events.
+ * Setup the instance's option events & watchers.
  * If the value is a string, we pull it from the
  * instance's methods by name.
  */
 
 exports._initEvents = function () {
   var options = this.$options
-  var events = options.events
-  var methods = options.methods
-  if (events) {
-    var handlers, e, i, j
-    for (e in events) {
-      handlers = events[e]
-      if (_.isArray(handlers)) {
-        for (i = 0, j = handlers.length; i < j; i++) {
-          register(this, e, handlers[i], methods)
-        }
-      } else {
-        register(this, e, handlers, methods)
+  registerCallbacks(this, '$on', options.events)
+  registerCallbacks(this, '$watch', options.watch)
+}
+
+/**
+ * Register callbacks for option events and watchers.
+ *
+ * @param {Vue} vm
+ * @param {String} action
+ * @param {Object} hash
+ */
+
+function registerCallbacks (vm, action, hash) {
+  if (!hash) return
+  var handlers, key, i, j
+  for (key in hash) {
+    handlers = hash[key]
+    if (_.isArray(handlers)) {
+      for (i = 0, j = handlers.length; i < j; i++) {
+        register(vm, action, key, handlers[i])
       }
+    } else {
+      register(vm, action, key, handlers)
     }
   }
 }
 
 /**
- * Helper to register an event.
+ * Helper to register an event/watch callback.
  *
  * @param {Vue} vm
- * @param {String} event
+ * @param {String} action
+ * @param {String} key
  * @param {*} handler
- * @param {Object|undefined} methods
  */
 
-function register (vm, event, handler, methods) {
+function register (vm, action, key, handler) {
   var type = typeof handler
   if (type === 'function') {
-    vm.$on(event, handler)
+    vm[action](key, handler)
   } else if (type === 'string') {
+    var methods = vm.$options.methods
     var method = methods && methods[handler]
     if (method) {
-      vm.$on(event, method)
+      vm[action](key, method)
     } else {
       _.warn(
         'Unknown method: "' + handler + '" when ' +
-        'registering callback for event: "' + event + '".'
+        'registering callback for ' + action +
+        ': "' + key + '".'
       )
     }
   }

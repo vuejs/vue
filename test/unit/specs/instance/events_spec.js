@@ -10,7 +10,7 @@ describe('Instance Events', function () {
     spyOn(_, 'warn')
   })
 
-  describe('events', function () {
+  describe('option events', function () {
 
     it('normal events', function () {
       var vm = new Vue({
@@ -48,6 +48,56 @@ describe('Instance Events', function () {
       expect(spy).toHaveBeenCalledWith(123)
       vm.$emit('test2')
       expect(_.warn).toHaveBeenCalled()
+    })
+
+  })
+
+  describe('option watchers', function () {
+
+    it('normal', function (done) {
+      var spyA = jasmine.createSpy()
+      var spyB = jasmine.createSpy()
+      var vm = new Vue({
+        watch: {
+          'a.b.c': spyA,
+          'b + c': spyB
+        },
+        data: {
+          a: {
+            b: { c: 1 }
+          },
+          b: 1,
+          c: 2
+        }
+      })
+      vm.a.b.c = 2
+      vm.b = 3
+      vm.c = 4
+      _.nextTick(function () {
+        expect(spyA).toHaveBeenCalledWith(2, 1)
+        expect(spyB).toHaveBeenCalledWith(7, 3)
+        done()
+      })
+    })
+
+    it('method name strings', function (done) {
+      var spy = jasmine.createSpy()
+      var vm = new Vue({
+        watch: {
+          'a': 'test'
+        },
+        data: {
+          a: 1
+        },
+        methods: {
+          test: spy
+        }
+      })
+      vm.a = 2
+      _.nextTick(function () {
+        expect(spy).toHaveBeenCalledWith(2, 1)
+        done()
+      })
     })
 
   })

@@ -126,12 +126,13 @@ strats.components = function (parentVal, childVal, vm, key) {
 }
 
 /**
- * Events
+ * Events & Watchers.
  *
- * Events should not overwrite one another, so we merge
- * them as arrays.
+ * Events & watchers hashes should not overwrite one
+ * another, so we merge them as arrays.
  */
 
+strats.watch =
 strats.events = function (parentVal, childVal) {
   if (!childVal) return parentVal
   if (!parentVal) return childVal

@@ -102,6 +102,10 @@ By default, all child components **DO NOT** inherit the parent scope. Only anony
   // -> goodbye!
   ```
 
+- #### new option: `watch`.
+
+  Similar to the new `events` option, the `watch` option accepts an object of expression/callback pairs. The instance will automatically call `$watch` for each entry in the object. You can also use a method name string instead of a callback.
+
 - #### new option: `inherit`.
 
   Default: `false`.
