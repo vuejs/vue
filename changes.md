@@ -270,6 +270,10 @@ By default, all child components **DO NOT** inherit the parent scope. Only anony
     vm.$log('item') // logs vm.item
     ```
 
+  - `vm.$compile`
+
+    Partially compile a piece of DOM (Element or DocumentFragment). Returns a "decompile" function that tearsdown the directives created during the process. Note the decompile function does not remove the DOM. This method is exposed primarily for writing advanced custom directives.
+
 ## Computed Properties API Change
 
 > Breaking

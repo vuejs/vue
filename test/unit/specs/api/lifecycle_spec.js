@@ -257,5 +257,34 @@ if (_.inBrowser) {
 
     })
 
+    describe('$compile', function () {
+
+      it('should partial compile and teardown stuff', function (done) {
+        var el = document.createElement('div')
+        var vm = new Vue({
+          el: el,
+          template: '{{a}}',
+          data: {
+            a: 'hi'
+          }
+        })
+        expect(vm._directives.length).toBe(1)
+        var partial = document.createElement('span')
+        partial.textContent = '{{a}}'
+        var decompile = vm.$compile(partial)
+        expect(partial.textContent).toBe('hi')
+        expect(vm._directives.length).toBe(2)
+        decompile()
+        expect(vm._directives.length).toBe(1)
+        vm.a = 'ha'
+        _.nextTick(function () {
+          expect(el.textContent).toBe('ha')
+          expect(partial.textContent).toBe('hi')
+          done()
+        })
+      })
+
+    })
+
   })
 }
