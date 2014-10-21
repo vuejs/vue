@@ -20,7 +20,7 @@ module.exports = {
   },
 
   update: function (id) {
-    this.unbind()
+    this.teardown()
     this.compile(id)
   },
 
@@ -58,7 +58,7 @@ module.exports = {
     }
   },
 
-  unbind: function () {
+  teardown: function () {
     if (this.decompile) {
       this.decompile()
       this.decompile = null

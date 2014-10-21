@@ -34,7 +34,7 @@ module.exports = {
     if (value) {
       this.insert()
     } else {
-      this.unbind()
+      this.teardown()
     }
   },
 
@@ -64,7 +64,7 @@ module.exports = {
     transition.before(el, ref, vm)
   },
 
-  unbind: function () {
+  teardown: function () {
     if (this.decompile) {
       this.decompile()
       this.decompile = null
