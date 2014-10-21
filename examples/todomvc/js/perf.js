@@ -1,4 +1,6 @@
 setTimeout(function () {
+
+    if (window.isPhantom) return
     
     // Initial load & render metrics
 

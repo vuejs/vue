@@ -62,6 +62,23 @@ exports.removeThenAppend = function (el, target, vm, cb) {
   }, vm, cb)
 }
 
+exports.blockAppend = function (block, target, vm) {
+  var nodes = _.toArray(block.childNodes)
+  for (var i = 0, l = nodes.length; i < l; i++) {
+    exports.before(nodes[i], target, vm)
+  }
+}
+
+exports.blockRemove = function (start, end, vm) {
+  var node = start.nextSibling
+  var next
+  while (node !== end) {
+    next = node.nextSibling
+    exports.remove(node, vm)
+    node = next
+  }
+}
+
 /**
  * Apply transitions with an operation callback.
  *

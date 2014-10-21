@@ -220,7 +220,7 @@ if (_.inBrowser) {
         }
       })
       var markup = vm.list.map(function (item) {
-        return '<p>' + item.a + '</p><p>' + (item.a + 1) + '</p>'
+        return '<!--v-start--><p>' + item.a + '</p><p>' + (item.a + 1) + '</p><!--v-end-->'
       }).join('')
       expect(el.innerHTML).toBe(markup + '<!--v-repeat-->')
     })

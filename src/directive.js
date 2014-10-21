@@ -158,7 +158,7 @@ p._teardown = function () {
     if (watcher && watcher.active) {
       watcher.removeCb(this._update)
       if (!watcher.active) {
-        this.vm._watchers[this.expression] = null
+        this.vm._watchers[this.raw] = null
       }
     }
     this._bound = false

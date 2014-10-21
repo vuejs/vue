@@ -46,6 +46,10 @@ if (_.inBrowser) {
       frag.appendChild(el)
       var res = transclude(frag, options)
       expect(res).toBe(frag)
+      expect(res.childNodes.length).toBe(3)
+      expect(res.childNodes[0].nodeType).toBe(8)
+      expect(res.childNodes[1]).toBe(el)
+      expect(res.childNodes[2].nodeType).toBe(8)
     })
 
     it('template element', function () {
@@ -53,8 +57,10 @@ if (_.inBrowser) {
       tpl.innerHTML = '<div>123</div>'
       var res = transclude(tpl, options)
       expect(res instanceof DocumentFragment).toBe(true)
-      expect(res.childNodes.length).toBe(1)
-      expect(res.childNodes[0].textContent).toBe('123')
+      expect(res.childNodes.length).toBe(3)
+      expect(res.childNodes[0].nodeType).toBe(8)
+      expect(res.childNodes[1].textContent).toBe('123')
+      expect(res.childNodes[2].nodeType).toBe(8)
     })
 
     it('content transclusion', function () {
@@ -89,9 +95,9 @@ if (_.inBrowser) {
       options.template = '<div></div><content select="p"></content><content select="span"></content>'
       options.replace = true
       var res = transclude(el, options)
-      expect(res.firstChild.tagName).toBe('DIV')
-      expect(res.childNodes[1].tagName).toBe('P')
-      expect(res.childNodes[2].tagName).toBe('SPAN')
+      expect(res.childNodes[1].tagName).toBe('DIV')
+      expect(res.childNodes[2].tagName).toBe('P')
+      expect(res.childNodes[3].tagName).toBe('SPAN')
     })
 
   })

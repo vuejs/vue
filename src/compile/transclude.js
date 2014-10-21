@@ -19,11 +19,14 @@ module.exports = function transclude (el, options) {
   if (el.tagName === 'TEMPLATE') {
     el = templateParser.parse(el)
   }
-  if (options.template) {
-    return transcludeTemplate(el, options)
-  } else {
-    return el
+  if (options && options.template) {
+    el = transcludeTemplate(el, options)
   }
+  if (el instanceof DocumentFragment) {
+    _.prepend(document.createComment('v-start'), el)
+    el.appendChild(document.createComment('v-end'))
+  }
+  return el
 }
 
 /**

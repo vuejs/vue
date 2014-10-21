@@ -1,5 +1,5 @@
 var apiURL = 'https://api.github.com/repos/yyx990803/vue/commits?per_page=3&sha='
-var isPhantom = true//navigator.userAgent.indexOf('PhantomJS') > -1
+var isPhantom = navigator.userAgent.indexOf('PhantomJS') > -1
 
 /**
  * Test mocks

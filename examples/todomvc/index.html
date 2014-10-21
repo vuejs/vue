@@ -79,13 +79,15 @@
 
         <!-- testing/benchmark only -->
         <script>
-            if (navigator.userAgent.indexOf('PhantomJS') > -1) {
+            var isPhantom = navigator.userAgent.indexOf('PhantomJS') > -1
+            if (isPhantom) {
                 localStorage.clear()
+            } else {
+                var now = window.performance && window.performance.now
+                    ? function () { return window.performance.now() }
+                    : Date.now
+                var metrics = { beforeLoad: now() }
             }
-            var now = window.performance && window.performance.now
-                ? function () { return window.performance.now() }
-                : Date.now
-            var metrics = { beforeLoad: now() }
         </script>
         <!-- end testing/bench -->
 

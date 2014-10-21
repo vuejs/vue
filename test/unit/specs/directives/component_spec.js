@@ -57,7 +57,7 @@ if (_.inBrowser) {
           }
         }
       })
-      expect(el.innerHTML).toBe('<p>123</p><p>234</p><!--v-component-->')
+      expect(el.innerHTML).toBe('<!--v-start--><p>123</p><p>234</p><!--v-end--><!--v-component-->')
     })
 
     it('dynamic', function (done) {
@@ -87,82 +87,6 @@ if (_.inBrowser) {
       _.nextTick(function () {
         expect(el.innerHTML).toBe('<div view="b">BBB</div><!--v-component-->')
         done()
-      })
-    })
-
-    it('static v-if', function (done) {
-      var vm = new Vue({
-        el: el,
-        data: { ok: false },
-        template: '<div v-component="test" v-if="ok"></div>',
-        components: {
-          test: {
-            data: function () {
-              return { a: 123 }
-            },
-            template: '{{a}}'
-          }
-        }
-      })
-      expect(el.innerHTML).toBe('<!--v-component-->')
-      expect(vm._children).toBeNull()
-      vm.ok = true
-      _.nextTick(function () {
-        expect(el.innerHTML).toBe('<div>123</div><!--v-component-->')
-        expect(vm._children.length).toBe(1)
-        vm.ok = false
-        _.nextTick(function () {
-          expect(el.innerHTML).toBe('<!--v-component-->')
-          expect(vm._children.length).toBe(0)
-          done()
-        })
-      })
-    })
-
-    it('dynamic v-if', function (done) {
-      var vm = new Vue({
-        el: el,
-        data: {
-          ok: false,
-          view: 'a'
-        },
-        template: '<div v-component="{{view}}" v-if="ok"></div>',
-        components: {
-          a: {
-            template: 'AAA'
-          },
-          b: {
-            template: 'BBB'
-          }
-        }
-      })
-      expect(el.innerHTML).toBe('<!--v-component-->')
-      expect(vm._children).toBeNull()
-      // toggle if with lazy instantiation
-      vm.ok = true
-      _.nextTick(function () {
-        expect(el.innerHTML).toBe('<div>AAA</div><!--v-component-->')
-        expect(vm._children.length).toBe(1)
-        // switch view when if=true
-        vm.view = 'b'
-        _.nextTick(function () {
-          expect(el.innerHTML).toBe('<div>BBB</div><!--v-component-->')
-          expect(vm._children.length).toBe(1)
-          // toggle if when already instantiated
-          vm.ok = false
-          _.nextTick(function () {
-            expect(el.innerHTML).toBe('<!--v-component-->')
-            expect(vm._children.length).toBe(0)
-            // toggle if and switch view at the same time
-            vm.view = 'a'
-            vm.ok = true
-            _.nextTick(function () {
-              expect(el.innerHTML).toBe('<div>AAA</div><!--v-component-->')
-              expect(vm._children.length).toBe(1)
-              done()
-            })
-          })
-        })
       })
     })
 

@@ -1,5 +1,6 @@
 var _ = require('../util')
 var templateParser = require('../parse/template')
+var transition = require('../transition')
 
 module.exports = {
 
@@ -7,16 +8,20 @@ module.exports = {
 
   bind: function () {
     var el = this.el
+    this.start = document.createComment('v-partial-start')
+    this.end = document.createComment('v-partial-end')
     if (el.nodeType !== 8) {
       el.innerHTML = ''
     }
-    if (el.tagName === 'TEMPLATE') {
-      this.el = document.createComment('v-partial')
-      _.replace(el, this.el)
+    if (el.tagName === 'TEMPLATE' || el.nodeType === 8) {
+      _.replace(el, this.end)
+    } else {
+      el.appendChild(this.end)
     }
+    _.before(this.start, this.end)
     if (!this._isDynamicLiteral) {
       this.compile(this.expression)
-    } 
+    }
   },
 
   update: function (id) {
@@ -30,32 +35,14 @@ module.exports = {
     if (!partial) {
       return
     }
-    partial = templateParser.parse(partial, true)
-    var el = this.el
     var vm = this.vm
-    var decompile = vm.$compile(partial)
-    if (el.nodeType === 8) {
-      // comment ref node means inline partial
-      var blockStart = partial.firstChild
-      this.decompile = function () {
-        decompile()
-        var node = blockStart
-        var next
-        while (node !== el) {
-          next = node.nextSibling
-          _.remove(node)
-          node = next
-        }
-      }
-      _.before(partial, el)
-    } else {
-      // just append to container
-      this.decompile = function () {
-        decompile()
-        el.innerHTML = ''
-      }
-      el.appendChild(partial)
+    var frag = templateParser.parse(partial, true)
+    var decompile = vm.$compile(frag)
+    this.decompile = function () {
+      decompile()
+      transition.blockRemove(this.start, this.end, vm)
     }
+    transition.blockAppend(frag, this.end, vm)
   },
 
   teardown: function () {

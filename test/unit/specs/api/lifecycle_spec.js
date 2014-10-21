@@ -98,7 +98,7 @@ if (_.inBrowser) {
         vm.$mount(frag)
         expect(vm.$el).toBe(vm._blockStart)
         expect(vm._blockFragment).toBe(frag)
-        expect(vm.$el.textContent).toBe('frag')
+        expect(vm.$el.nextSibling.textContent).toBe('frag')
       })
 
       it('replace fragment', function () {
@@ -109,9 +109,9 @@ if (_.inBrowser) {
           template: '<div>{{test}}</div><div>{{test}}</div>'
         })
         vm.$mount(el)
-        expect(vm.$el).not.toBe(el)
-        expect(vm.$el.textContent).toBe('hi!')
+        expect(vm.$el.nextSibling).not.toBe(el)
         expect(vm.$el.nextSibling.textContent).toBe('hi!')
+        expect(vm.$el.nextSibling.nextSibling.textContent).toBe('hi!')
         expect(document.body.contains(el)).toBe(false)
         expect(document.body.lastChild).toBe(vm._blockEnd)
         vm.$remove()

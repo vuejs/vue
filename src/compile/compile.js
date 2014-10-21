@@ -381,8 +381,8 @@ function makeParamsLinkFn (params, options) {
 
 var terminalDirectives = [
   'repeat',
-  'component',
-  'if'
+  'if',
+  'component'
 ]
 
 function skip () {}

@@ -1,5 +1,4 @@
 var _ = require('../util')
-var Watcher = require('../watcher')
 var templateParser = require('../parse/template')
 
 module.exports = {
@@ -7,19 +6,13 @@ module.exports = {
   isLiteral: true,
 
   /**
-   * Setup. Need to check a few possible permutations:
+   * Setup. Two possible usages:
    *
-   * - literal:
+   * - static:
    *   v-component="comp"
    *
    * - dynamic:
    *   v-component="{{currentView}}"
-   *
-   * - conditional:
-   *   v-component="comp" v-if="abc"
-   *
-   * - dynamic + conditional:
-   *   v-component="{{currentView}}" v-if="abc"
    */
 
   bind: function () {
@@ -27,8 +20,6 @@ module.exports = {
       // create a ref anchor
       this.ref = document.createComment('v-component')
       _.replace(this.el, this.ref)
-      // check v-if conditionals
-      this.checkIf()
       // check keep-alive options
       this.checkKeepAlive()
       // if static, build right now.
@@ -41,46 +32,6 @@ module.exports = {
         'v-component="' + this.expression + '" cannot be ' +
         'used on an already mounted instance.'
       )
-    }
-  },
-
-  /**
-   * Check if v-component is being used together with v-if.
-   * If yes, we created a watcher for the v-if value and
-   * react to its value change in `this.ifCallback`.
-   */
-
-  checkIf: function () {
-    var condition = _.attr(this.el, 'if')
-    if (condition !== null) {
-      var self = this
-      this.ifWatcher = new Watcher(
-        this.vm,
-        condition,
-        function (value) {
-          self.toggleIf(value)
-        }
-      )
-      this.active = this.ifWatcher.value
-    } else {
-      this.active = true
-    }
-  },
-
-  /**
-   * Callback when v-if value changes.
-   * Marks the active flag.
-   *
-   * @param {*} value
-   */
-
-  toggleIf: function (value) {
-    if (value) {
-      this.active = true
-      this.build()
-    } else {
-      this.active = false
-      this.unbuild(true)
     }
   },
 
@@ -119,9 +70,6 @@ module.exports = {
    */
 
   build: function () {
-    if (!this.active) {
-      return
-    }
     if (this.keepAlive) {
       var vm = this.cache[this.ctorId]
       if (vm) {
@@ -178,16 +126,12 @@ module.exports = {
   /**
    * Unbind.
    * Make sure keepAlive is set to false so that the
-   * instance is always destroyed. Teardown v-if watcher
-   * if present.
+   * instance is always destroyed.
    */
 
   unbind: function () {
     this.keepAlive = false
     this.unbuild()
-    if (this.ifWatcher) {
-      this.ifWatcher.teardown()
-    }
   }
 
 }

@@ -10,6 +10,10 @@ if (_.inBrowser) {
       spyOn(_, 'warn')
     })
 
+    function wrap (content) {
+      return '<!--v-partial-start-->' + content + '<!--v-partial-end-->'
+    }
+
     it('element', function () {
       var vm = new Vue({
         el: el,
@@ -22,7 +26,7 @@ if (_.inBrowser) {
           b: 'B'
         }
       })
-      expect(el.innerHTML).toBe('<div><p>A</p><p>B</p></div>')
+      expect(el.innerHTML).toBe('<div>' + wrap('<p>A</p><p>B</p>') + '</div>')
     })
 
     it('inline', function () {
@@ -37,7 +41,7 @@ if (_.inBrowser) {
           b: 'B'
         }
       })
-      expect(el.innerHTML).toBe('<div><p>A</p><p>B</p><!--v-partial--></div>')
+      expect(el.innerHTML).toBe('<div>' + wrap('<p>A</p><p>B</p>') + '</div>')
     })
 
     it('not found', function () {
@@ -45,7 +49,7 @@ if (_.inBrowser) {
         el: el,
         template: '<div>{{>test}}</div>'
       })
-      expect(el.innerHTML).toBe('<div><!--v-partial--></div>')
+      expect(el.innerHTML).toBe('<div>' + wrap('') + '</div>')
     })
 
     it('dynamic partial', function (done) {
@@ -69,16 +73,16 @@ if (_.inBrowser) {
           }
         }
       })
-      expect(el.firstChild.innerHTML).toBe('hello')
+      expect(el.firstChild.innerHTML).toBe(wrap('hello'))
       expect(vm._directives.length).toBe(2)
       vm.partial = 'p2'
       _.nextTick(function () {
-        expect(el.firstChild.innerHTML).toBe('<div>123</div><!--v-component-->')
+        expect(el.firstChild.innerHTML).toBe(wrap('<div>123</div><!--v-component-->'))
         expect(vm._directives.length).toBe(2)
         expect(vm._children.length).toBe(1)
         vm.partial = 'p1'
         _.nextTick(function () {
-          expect(el.firstChild.innerHTML).toBe('hello')
+          expect(el.firstChild.innerHTML).toBe(wrap('hello'))
           expect(vm._directives.length).toBe(2)
           expect(vm._children.length).toBe(0)
           done()
@@ -99,10 +103,10 @@ if (_.inBrowser) {
           p2: '<span>1</span><a>2</a>'
         }
       })
-      expect(el.innerHTML).toBe('a b c<!--v-partial-->')
+      expect(el.innerHTML).toBe(wrap('a b c'))
       vm.test = 'p2'
       _.nextTick(function () {
-        expect(el.innerHTML).toBe('<span>1</span><a>2</a><!--v-partial-->')
+        expect(el.innerHTML).toBe(wrap('<span>1</span><a>2</a>'))
         done()
       })
     })

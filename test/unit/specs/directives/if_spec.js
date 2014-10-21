@@ -10,6 +10,10 @@ if (_.inBrowser) {
       spyOn(_, 'warn')
     })
 
+    function wrap (content) {
+      return '<!--v-if-start-->' + content + '<!--v-if-end-->'
+    }
+
     it('normal', function (done) {
       var vm = new Vue({
         el: el,
@@ -23,19 +27,19 @@ if (_.inBrowser) {
         }
       })
       // lazy instantitation
-      expect(el.innerHTML).toBe('<!--v-if-->')
+      expect(el.innerHTML).toBe(wrap(''))
       expect(vm._children).toBeNull()
       vm.test = true
       _.nextTick(function () {
-        expect(el.innerHTML).toBe('<div><div>A</div><!--v-component--></div><!--v-if-->')
+        expect(el.innerHTML).toBe(wrap('<div><div>A</div><!--v-component--></div>'))
         expect(vm._children.length).toBe(1)
         vm.test = false
         _.nextTick(function () {
-          expect(el.innerHTML).toBe('<!--v-if-->')
+          expect(el.innerHTML).toBe(wrap(''))
           expect(vm._children.length).toBe(0)
           vm.test = true
           _.nextTick(function () {
-            expect(el.innerHTML).toBe('<div><div>A</div><!--v-component--></div><!--v-if-->')
+            expect(el.innerHTML).toBe(wrap('<div><div>A</div><!--v-component--></div>'))
             expect(vm._children.length).toBe(1)
             var child = vm._children[0]
             vm.$destroy()
@@ -53,14 +57,90 @@ if (_.inBrowser) {
         template: '<template v-if="test"><p>{{a}}</p><p>{{b}}</p></template>'
       })
       // lazy instantitation
-      expect(el.innerHTML).toBe('<!--v-if-->')
+      expect(el.innerHTML).toBe(wrap(''))
       vm.test = true
       _.nextTick(function () {
-        expect(el.innerHTML).toBe('<p>A</p><p>B</p><!--v-if-->')
+        expect(el.innerHTML).toBe(wrap('<p>A</p><p>B</p>'))
         vm.test = false
         _.nextTick(function () {
-          expect(el.innerHTML).toBe('<!--v-if-->')
+          expect(el.innerHTML).toBe(wrap(''))
           done()
+        })
+      })
+    })
+
+    it('v-if + v-component', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: { ok: false },
+        template: '<div v-component="test" v-if="ok"></div>',
+        components: {
+          test: {
+            data: function () {
+              return { a: 123 }
+            },
+            template: '{{a}}'
+          }
+        }
+      })
+      expect(el.innerHTML).toBe(wrap(''))
+      expect(vm._children).toBeNull()
+      vm.ok = true
+      _.nextTick(function () {
+        expect(el.innerHTML).toBe(wrap('<div>123</div><!--v-component-->'))
+        expect(vm._children.length).toBe(1)
+        vm.ok = false
+        _.nextTick(function () {
+          expect(el.innerHTML).toBe(wrap(''))
+          expect(vm._children.length).toBe(0)
+          done()
+        })
+      })
+    })
+
+    it('v-if + dynamic component', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          ok: false,
+          view: 'a'
+        },
+        template: '<div v-component="{{view}}" v-if="ok"></div>',
+        components: {
+          a: {
+            template: 'AAA'
+          },
+          b: {
+            template: 'BBB'
+          }
+        }
+      })
+      expect(el.innerHTML).toBe(wrap(''))
+      expect(vm._children).toBeNull()
+      // toggle if with lazy instantiation
+      vm.ok = true
+      _.nextTick(function () {
+        expect(el.innerHTML).toBe(wrap('<div>AAA</div><!--v-component-->'))
+        expect(vm._children.length).toBe(1)
+        // switch view when if=true
+        vm.view = 'b'
+        _.nextTick(function () {
+          expect(el.innerHTML).toBe(wrap('<div>BBB</div><!--v-component-->'))
+          expect(vm._children.length).toBe(1)
+          // toggle if when already instantiated
+          vm.ok = false
+          _.nextTick(function () {
+            expect(el.innerHTML).toBe(wrap(''))
+            expect(vm._children.length).toBe(0)
+            // toggle if and switch view at the same time
+            vm.view = 'a'
+            vm.ok = true
+            _.nextTick(function () {
+              expect(el.innerHTML).toBe(wrap('<div>AAA</div><!--v-component-->'))
+              expect(vm._children.length).toBe(1)
+              done()
+            })
+          })
         })
       })
     })

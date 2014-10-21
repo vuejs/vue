@@ -8,12 +8,16 @@ module.exports = {
   bind: function () {
     var el = this.el
     if (!el.__vue__) {
-      this.ref = document.createComment('v-if')
-      _.replace(el, this.ref)
-      this.isBlock = el.tagName === 'TEMPLATE'
-      this.template = this.isBlock
-        ? templateParser.parse(el, true)
-        : el
+      this.start = document.createComment('v-if-start')
+      this.end = document.createComment('v-if-end')
+      _.replace(el, this.end)
+      _.before(this.start, this.end)
+      if (el.tagName === 'TEMPLATE') {
+        this.template = templateParser.parse(el, true)
+      } else {
+        this.template = document.createDocumentFragment()
+        this.template.appendChild(el)
+      }
       // compile the nested partial
       this.linker = compile(
         this.template,
@@ -40,28 +44,13 @@ module.exports = {
 
   insert: function () {
     var vm = this.vm
-    var el = templateParser.clone(this.template)
-    var ref = this.ref
-    var decompile = this.linker(vm, el)
-    if (this.isBlock) {
-      var blockStart = el.firstChild
-      this.decompile = function () {
-        decompile()
-        var node = blockStart
-        var next
-        while (node !== ref) {
-          next = node.nextSibling
-          transition.remove(node, vm)
-          node = next
-        }
-      }
-    } else {
-      this.decompile = function () {
-        decompile()
-        transition.remove(el, vm)
-      }
+    var frag = templateParser.clone(this.template)
+    var decompile = this.linker(vm, frag)
+    this.decompile = function () {
+      decompile()
+      transition.blockRemove(this.start, this.end, vm)
     }
-    transition.before(el, ref, vm)
+    transition.blockAppend(frag, this.end, vm)
   },
 
   teardown: function () {
