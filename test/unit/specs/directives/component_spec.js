@@ -134,6 +134,23 @@ if (_.inBrowser) {
       })
     })
 
+    it('should compile parent template directives in parent scope', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: { ok: false },
+        template: '<div v-component="test" v-show="ok"></div>',
+        components: {
+          test: {}
+        }
+      })
+      expect(el.firstChild.style.display).toBe('none')
+      vm.ok = true
+      _.nextTick(function () {
+        expect(el.firstChild.style.display).toBe('')
+        done()
+      })
+    })
+
     it('teardown', function () {
       var vm = new Vue({
         el: el,

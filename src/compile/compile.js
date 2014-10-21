@@ -415,6 +415,16 @@ function checkTerminalDirectives (el, options) {
 function makeTeriminalLinkFn (el, dirName, value, options) {
   var descriptor = dirParser.parse(value)[0]
   var def = options.directives[dirName]
+  // special case: we need to collect directives found
+  // on a component root node, but defined in the parent
+  // template. These directives need to be compiled in
+  // the parent scope.
+  if (dirName === 'component') {
+    var dirs = collectDirectives(el, options, true)
+    el._parentLinker = dirs.length
+      ? makeDirectivesLinkFn(dirs)
+      : null
+  }
   var terminalLinkFn = function (vm, el) {
     vm._bindDir(dirName, el, descriptor, def)
   }
@@ -427,10 +437,11 @@ function makeTeriminalLinkFn (el, dirName, value, options) {
  *
  * @param {Element} el
  * @param {Object} options
+ * @param {Boolean} asParent
  * @return {Array}
  */
 
-function collectDirectives (el, options) {
+function collectDirectives (el, options, asParent) {
   var attrs = _.toArray(el.attributes)
   var i = attrs.length
   var dirs = []
@@ -440,6 +451,12 @@ function collectDirectives (el, options) {
     attrName = attr.name
     if (attrName.indexOf(config.prefix) === 0) {
       dirName = attrName.slice(config.prefix.length)
+      if (
+        asParent &&
+        (dirName === 'with' || dirName === 'ref')
+      ) {
+        continue
+      }
       dirDef = options.directives[dirName]
       _.assertAsset(dirDef, 'directive', dirName)
       if (dirDef) {

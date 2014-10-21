@@ -22,6 +22,8 @@ module.exports = {
       _.replace(this.el, this.ref)
       // check keep-alive options
       this.checkKeepAlive()
+      // check parent directives
+      this.parentLinker = this.el._parentLinker
       // if static, build right now.
       if (!this._isDynamicLiteral) {
         this.resolveCtor(this.expression)
@@ -71,17 +73,26 @@ module.exports = {
 
   build: function () {
     if (this.keepAlive) {
-      var vm = this.cache[this.ctorId]
-      if (vm) {
-        this.childVM = vm
-        vm.$before(this.ref)
+      var cached = this.cache[this.ctorId]
+      if (cached) {
+        this.childVM = cached
+        cached.$before(this.ref)
         return
       }
     }
+    var vm = this.vm
     if (this.Ctor && !this.childVM) {
-      this.childVM = this.vm.$addChild({
+      this.childVM = vm.$addChild({
         el: templateParser.clone(this.el)
       }, this.Ctor)
+      if (this.parentLinker) {
+        var dirCount = vm._directives.length
+        var targetVM = this.childVM.$options.inherit
+          ? this.childVM
+          : vm
+        this.parentLinker(targetVM, this.childVM.$el)
+        this.parentDirs = vm._directives.slice(dirCount)
+      }
       if (this.keepAlive) {
         this.cache[this.ctorId] = this.childVM
       }
@@ -106,6 +117,12 @@ module.exports = {
       }
     } else {
       this.childVM.$destroy(remove)
+      if (this.parentDirs) {
+        var i = this.parentDirs.length
+        while (i--) {
+          this.parentDirs[i]._teardown()
+        }
+      }
     }
     this.childVM = null
   },
