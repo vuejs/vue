@@ -50,10 +50,6 @@ if (_.inBrowser) {
       })
       var linker = compile(el, options)
       expect(typeof linker).toBe('function')
-      // should remove attributes
-      expect(el.attributes.length).toBe(0)
-      expect(el.firstChild.attributes.length).toBe(0)
-      expect(el.lastChild.attributes.length).toBe(0)
       linker(vm, el)
       expect(vm._bindDir.calls.count()).toBe(4)
       expect(vm._bindDir).toHaveBeenCalledWith('a', el, descriptorB, defA)

@@ -460,9 +460,6 @@ function collectDirectives (el, options, asParent) {
       dirDef = options.directives[dirName]
       _.assertAsset(dirDef, 'directive', dirName)
       if (dirDef) {
-        if (dirName !== 'cloak') {
-          el.removeAttribute(attrName)
-        }
         dirs.push({
           name: dirName,
           descriptors: dirParser.parse(attr.value),

@@ -1,4 +1,5 @@
 var _ = require('./util')
+var config = require('./config')
 var Watcher = require('./watcher')
 var textParser = require('./parse/text')
 var expParser = require('./parse/expression')
@@ -50,6 +51,9 @@ var p = Directive.prototype
  */
 
 p._bind = function (def) {
+  if (this.name !== 'cloak' && this.el.removeAttribute) {
+    this.el.removeAttribute(config.prefix + this.name)
+  }
   if (typeof def === 'function') {
     this.update = def
   } else {
