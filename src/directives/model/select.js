@@ -124,7 +124,7 @@ function checkInitialValue () {
     }
   }
   if (initValue) {
-    this.vm.$set(this.expression, initValue)
+    this._initValue = initValue
   }
 }
 

@@ -91,7 +91,11 @@ p._bind = function (def) {
       watcher.addCb(update)
     }
     this._watcher = watcher
-    this.update(watcher.value)
+    if (this._initValue != null) {
+      watcher.set(this._initValue)
+    } else {
+      this.update(watcher.value)
+    }
   }
   this._bound = true
 }

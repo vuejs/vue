@@ -99,8 +99,7 @@ module.exports = {
       el.hasAttribute('value') ||
       (el.tagName === 'TEXTAREA' && el.value.trim())
     ) {
-      // watcher is not set up yet
-      this.vm.$set(this.expression, el.value)
+      this._initValue = el.value
     }
   },
 

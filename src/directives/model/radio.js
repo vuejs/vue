@@ -10,8 +10,7 @@ module.exports = {
     }
     _.on(el, 'change', this.listener)
     if (el.checked) {
-      // watcher is not set up yet
-      this.vm.$set(this.expression, el.value)
+      this._initValue = el.value
     }
   },
 
