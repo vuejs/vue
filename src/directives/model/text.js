@@ -47,35 +47,29 @@ module.exports = {
     // if the directive has filters, we need to
     // record cursor position and restore it after updating
     // the input with the filtered value.
-    if (this.filters) {
-      this.listener = function textInputListener () {
-        if (cpLocked) return
-        var charsOffset
-        // some HTML5 input types throw error here
-        try {
-          // record how many chars from the end of input
-          // the cursor was at
-          charsOffset = el.value.length - el.selectionStart
-        } catch (e) {}
-        set()
-        // force a value update, because in
-        // certain cases the write filters output the same
-        // result for different input values, and the Observer
-        // set events won't be triggered.
-        _.nextTick(function () {
-          var newVal = self._watcher.value
-          self.update(newVal)
-          if (charsOffset != null) {
-            var cursorPos = newVal.length - charsOffset
-            el.setSelectionRange(cursorPos, cursorPos)
-          }
-        })
-      }
-    } else {
-      this.listener = function textInputListener () {
-        if (cpLocked) return
-        set()
-      }
+    this.listener = function textInputListener () {
+      if (cpLocked) return
+      var charsOffset
+      // some HTML5 input types throw error here
+      try {
+        // record how many chars from the end of input
+        // the cursor was at
+        charsOffset = el.value.length - el.selectionStart
+      } catch (e) {}
+      set()
+      // force a value update, because in
+      // certain cases the write filters output the same
+      // result for different input values, and the Observer
+      // set events won't be triggered.
+      _.nextTick(function () {
+        var newVal = self._watcher.value
+        self.update(newVal)
+        if (charsOffset != null) {
+          var cursorPos =
+            _.toString(newVal).length - charsOffset
+          el.setSelectionRange(cursorPos, cursorPos)
+        }
+      })
     }
     this.event = lazy ? 'change' : 'input'
     _.on(el, this.event, this.listener)
