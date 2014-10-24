@@ -348,4 +348,15 @@ describe('Watcher', function () {
     })
   })
 
+  it('synchronous updates', function () {
+    config.async = false
+    var watcher = new Watcher(vm, 'a', spy)
+    vm.a = 2
+    vm.a = 3
+    expect(spy.calls.count()).toBe(2)
+    expect(spy).toHaveBeenCalledWith(2, 1)
+    expect(spy).toHaveBeenCalledWith(3, 2)
+    config.async = true
+  })
+
 })

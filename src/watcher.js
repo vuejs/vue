@@ -1,4 +1,5 @@
 var _ = require('./util')
+var config = require('./config')
 var Observer = require('./observer')
 var expParser = require('./parse/expression')
 var Batcher = require('./batcher')
@@ -126,7 +127,11 @@ p.afterGet = function () {
  */
 
 p.update = function () {
-  batcher.push(this)
+  if (config.async) {
+    batcher.push(this)
+  } else {
+    this.run()
+  }
 }
 
 /**

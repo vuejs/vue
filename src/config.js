@@ -43,6 +43,12 @@ module.exports = {
   interpolate: true,
 
   /**
+   * Whether to use async rendering.
+   */
+
+  async: true,
+
+  /**
    * Internal flag to indicate the delimiters have been
    * changed.
    *
