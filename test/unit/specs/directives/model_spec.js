@@ -306,9 +306,19 @@ if (_.inBrowser) {
         data: {
           test: 'b'
         },
-        template: '<input v-model="test" value="a">'
+        template: '<input v-model="test | test" value="a">',
+        filters: {
+          test: {
+            read: function (v) {
+              return v.slice(0, -1)
+            },
+            write: function (v) {
+              return v + 'c'
+            }
+          }
+        }
       })
-      expect(vm.test).toBe('a')
+      expect(vm.test).toBe('ac')
       expect(el.firstChild.value).toBe('a')
     })
 
