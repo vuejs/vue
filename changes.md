@@ -459,7 +459,11 @@ Vue.config.debug = true
 
 - #### New config option: `proto`
 
-  Be default, Vue.js alters the `__proto__` of observed Arrays when available for faster method interception/augmentation. This would only cause issue in the rare case when you are observing a subclass of the native Array. In that case, you can set `Vue.config.proto = false` to prohibit this behavior.
+  By default, Vue.js alters the `__proto__` of observed Arrays when available for faster method interception/augmentation. This would only cause issue in the rare case when you are observing a subclass of the native Array. In that case, you can set `Vue.config.proto = false` to prohibit this behavior.
+
+- #### New config option: `async`
+
+  By default Vue.js uses batched async updates for watchers and DOM updates. This strategy ensures minimal calls to directive and watcher functions, but in some situations also makes things harder to reason about. It is now possible to force synchronous updates by setting `Vue.config.async = false`.
 
 ## Transition API Change
 
