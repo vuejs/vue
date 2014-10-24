@@ -346,25 +346,31 @@ function compileParamAttributes (el, attrs, options) {
  * @return {Function} paramsLinkFn
  */
 
+var dataAttrRE = /^data-/
+
 function makeParamsLinkFn (params, options) {
   var def = options.directives['with']
   return function paramsLinkFn (vm, el) {
     var i = params.length
-    var param
+    var param, path
     while (i--) {
       param = params[i]
+      // params could contain dashes, which will be
+      // interpreted as minus calculations by the parser
+      // so we need to wrap the path here
+      path = _.camelize(param.name.replace(dataAttrRE, ''))
       if (param.dynamic) {
         // dynamic param attribtues are bound as v-with.
         // we can directly duck the descriptor here beacuse
         // param attributes cannot use expressions or
         // filters.
         vm._bindDir('with', el, {
-          arg: param.name,
+          arg: path,
           expression: param.value
         }, def)
       } else {
         // just set once
-        vm.$set(param.name, param.value)
+        vm.$set(path, param.value)
       }
     }
   }

@@ -63,9 +63,12 @@ exports.stripQuotes = function (str) {
  * @return {String}
  */
 
-var camelRE = /(?:^|[-_])(\w)/g
-exports.camelize = function (str) {
-  return str.replace (camelRE, function (_, c) {
+var camelRE = /[-_](\w)/g
+var capitalCamelRE = /(?:^|[-_])(\w)/g
+
+exports.camelize = function (str, cap) {
+  var RE = cap ? capitalCamelRE : camelRE
+  return str.replace(RE, function (_, c) {
     return c ? c.toUpperCase () : '';
   })
 }

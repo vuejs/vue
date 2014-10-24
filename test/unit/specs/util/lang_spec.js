@@ -25,9 +25,12 @@ describe('Util - Language Enhancement', function () {
   })
 
   it('camelize', function () {
-    expect(_.camelize('abc')).toBe('Abc')
-    expect(_.camelize('some-long-name')).toBe('SomeLongName')
-    expect(_.camelize('what_about_this')).toBe('WhatAboutThis')
+    expect(_.camelize('abc')).toBe('abc')
+    expect(_.camelize('some-long-name')).toBe('someLongName')
+    expect(_.camelize('what_about_this')).toBe('whatAboutThis')
+    expect(_.camelize('abc', true)).toBe('Abc')
+    expect(_.camelize('some-long-name', true)).toBe('SomeLongName')
+    expect(_.camelize('what_about_this', true)).toBe('WhatAboutThis')
   })
 
   it('bind', function () {

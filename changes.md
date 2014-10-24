@@ -73,6 +73,15 @@ By default, all child components **DO NOT** inherit the parent scope. Only anony
   })
   ```
 
+- #### `paramAttributes` change
+
+  `paramAttributes` now behaves a little differently when the attribute name contains dashes:
+
+  1. If the attribute is a data attribute, the `data-` prefix will be auto stripped;
+  2. If the attribute still contains dashes, it will be camelized. The reason is because it's inconvenient to access top level properties containing dashes in templates: the expression `my-param` will be parsed as a minus expression unless you use the awkward `this['my-param']` syntax.
+
+  This means a param attribute `data-hello` will be set on the vm as `vm.hello`; And `my-param` will be set as `vm.myParam`.
+
 - #### new option: `events`.
 
   When events are used extensively for cross-vm communication, the ready hook can get kinda messy. The new `events` option is similar to its Backbone equivalent, where you can declaratiely register a bunch of event listeners. You can also use it to register hook listeners.
@@ -131,7 +140,7 @@ By default, all child components **DO NOT** inherit the parent scope. Only anony
   // -> 2
   ```
 
-- #### new options: `name`.
+- #### new option: `name`.
 
   This option, when used with `Vue.extend`, gives your returned constructor a more descriptive name rather than the generic `VueComponent`. This makes debugging easier when you log instances in the console. For example:
 

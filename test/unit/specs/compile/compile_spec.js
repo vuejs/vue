@@ -148,12 +148,13 @@ if (_.inBrowser) {
 
     it('param attributes', function () {
       var options = merge(Vue.options, {
-        paramAttributes: ['a', 'b', 'c']
+        paramAttributes: ['a', 'data-some-attr', 'some-other-attr', 'invalid']
       })
       var def = Vue.options.directives['with']
       el.setAttribute('a', '1')
-      el.setAttribute('b', '{{a}}')
-      el.setAttribute('c', 'a {{b}} c') // invalid
+      el.setAttribute('data-some-attr', '{{a}}')
+      el.setAttribute('some-other-attr', '2')
+      el.setAttribute('invalid', 'a {{b}} c') // invalid
       var linker = compile(el, options)
       linker(vm, el)
       // should skip literal & invliad
@@ -161,12 +162,13 @@ if (_.inBrowser) {
       var args = vm._bindDir.calls.argsFor(0)
       expect(args[0]).toBe('with')
       expect(args[1]).toBe(el)
-      // skipping descriptor because it's ducked inline
+      expect(args[2].arg).toBe('someAttr')
       expect(args[3]).toBe(def)
       // invalid should've warn
       expect(_.warn).toHaveBeenCalled()
       // literal should've called vm.$set
       expect(vm.$set).toHaveBeenCalledWith('a', '1')
+      expect(vm.$set).toHaveBeenCalledWith('someOtherAttr', '2')
     })
 
     it('DocumentFragment', function () {
