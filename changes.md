@@ -291,6 +291,10 @@ computed: {
 
 ## Directive API change
 
+- #### Directive Priority
+
+  Now each directive can optionally have a `priority` value which determines the order it gets compiled among all directives on the same element. Priorities for some built-in directives will be available in the API reference after 0.11 is released.
+
 - #### Dynamic literals
 
   Literal directives can now also be dynamic via bindings like this:
