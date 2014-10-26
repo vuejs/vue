@@ -181,7 +181,7 @@ p.convert = function (key, val) {
       var oldChildOb = val && val.__ob__
       if (oldChildOb) {
         var oldBindings = oldChildOb.bindings
-        oldBindings.splice(oldBindings.indexOf(binding))
+        oldBindings.splice(oldBindings.indexOf(binding),1)
       }
       val = newVal
       // add binding to new value
