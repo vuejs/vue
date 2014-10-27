@@ -473,5 +473,18 @@ if (_.inBrowser) {
       expect(_.warn).toHaveBeenCalled()
     })
 
+    it('warn read-only filters', function () {
+      var vm = new Vue({
+        el: el,
+        template: '<input v-model="abc | test">',
+        filters: {
+          test: function (v) {
+            return v
+          }
+        }
+      })
+      expect(_.warn).toHaveBeenCalled()
+    })
+
   })
 }

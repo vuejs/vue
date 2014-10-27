@@ -26,6 +26,15 @@ module.exports = {
    */
 
   bind: function () {
+    // friendly warning...
+    var filters = this.filters
+    if (filters && filters.read && !filters.write) {
+      _.warn(
+        'It seems you are using a read-only filter with ' +
+        'v-model. You might want to use a two-way filter ' +
+        'to ensure correct behavior.'
+      )
+    }
     var el = this.el
     var tag = el.tagName
     var handler
