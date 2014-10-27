@@ -42,8 +42,7 @@ p.removeSub = function (sub) {
  */
 
 p.notify = function () {
-  var i = this.subs.length
-  while (i--) {
+  for (var i = 0, l = this.subs.length; i < l; i++) {
     this.subs[i].update()
   }
 }
