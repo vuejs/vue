@@ -35,20 +35,19 @@ describe('Batcher', function () {
     })
   })
 
-  it('override', function (done) {
-    var spy2 = jasmine.createSpy('batcher')
+  it('allow diplicate when flushing', function (done) {
     batcher.push({
       id: 1,
-      run: spy
-    })
-    batcher.push({
-      id: 1,
-      run: spy2,
-      override: true
+      run: function () {
+        spy()
+        batcher.push({
+          id: 1,
+          run: spy
+        })
+      }
     })
     nextTick(function () {
-      expect(spy).not.toHaveBeenCalled()
-      expect(spy2.calls.count()).toBe(1)
+      expect(spy.calls.count()).toBe(2)
       done()
     })
   })

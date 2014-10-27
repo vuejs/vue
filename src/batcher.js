@@ -13,29 +13,23 @@ var p = Batcher.prototype
 
 /**
  * Push a job into the job queue.
- * Jobs with duplicate IDs will be skipped, however we can
- * use the `override` option to override existing jobs.
+ * Jobs with duplicate IDs will be skipped unless it's
+ * pushed when the queue is being flushed.
  *
  * @param {Object} job
  *   properties:
  *   - {String|Number} id
- *   - {Boolean}       override
  *   - {Function}      run
  */
 
 p.push = function (job) {
-  if (!job.id || !this.has[job.id]) {
+  if (!job.id || !this.has[job.id] || this.flushing) {
     this.queue.push(job)
     this.has[job.id] = job
     if (!this.waiting) {
       this.waiting = true
       _.nextTick(this.flush, this)
     }
-  } else if (job.override) {
-    var oldJob = this.has[job.id]
-    oldJob.cancelled = true
-    this.queue.push(job)
-    this.has[job.id] = job
   }
 }
 
@@ -45,6 +39,7 @@ p.push = function (job) {
  */
 
 p.flush = function () {
+  this.flushing = true
   // do not cache length because more jobs might be pushed
   // as we run existing jobs
   for (var i = 0; i < this.queue.length; i++) {
@@ -64,6 +59,7 @@ p.reset = function () {
   this.has = {}
   this.queue = []
   this.waiting = false
+  this.flushing = false
 }
 
 module.exports = Batcher
