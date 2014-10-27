@@ -96,9 +96,9 @@ describe('Text Parser', function () {
   })
 
   it('tokens to expression', function () {
-    var tokens = textParser.parse('view-{{test + 1}}-test-{{ok}}')
+    var tokens = textParser.parse('view-{{test + 1}}-test-{{ok + "|"}}')
     var exp = textParser.tokensToExp(tokens)
-    expect(exp).toBe('"view-"+(test + 1)+"-test-"+(ok)')
+    expect(exp).toBe('"view-"+(test + 1)+"-test-"+(ok + "|")')
   })
 
   it('tokens to expression with oneTime tags & vm', function () {
@@ -108,6 +108,18 @@ describe('Text Parser', function () {
     var tokens = textParser.parse('view-{{*test}}-test-{{ok}}')
     var exp = textParser.tokensToExp(tokens, vm)
     expect(exp).toBe('"view-"+"a"+"-test-"+(ok)')
+  })
+
+  it('tokens to expression with filters, single expression', function () {
+    var tokens = textParser.parse('{{test | abc}}')
+    var exp = textParser.tokensToExp(tokens)
+    expect(exp).toBe('test | abc')
+  })
+
+  it('tokens to expression with filters, multiple expressions', function () {
+    var tokens = textParser.parse('a {{b | c d}} e')
+    var exp = textParser.tokensToExp(tokens)
+    expect(exp).toBe('"a "+this.$options.filters["c"].apply(this,[b,"d"])+" e"')
   })
 
 })

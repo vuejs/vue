@@ -1,5 +1,6 @@
 var Cache = require('../cache')
 var config = require('../config')
+var dirParser = require('./directive')
 var regexEscapeRE = /[-.*+?^${}()|[\]\/\\]/g
 var cache, tagRE, htmlRE, firstChar, lastChar
 
@@ -106,6 +107,8 @@ exports.parse = function (text) {
 
 /**
  * Format a list of tokens into an expression.
+ * e.g. tokens parsed from 'a {{b}} c' can be serialized
+ * into one single expression as '"a " + b + " c"'.
  *
  * @param {Array} tokens
  * @param {Vue} [vm]
@@ -115,9 +118,9 @@ exports.parse = function (text) {
 exports.tokensToExp = function (tokens, vm) {
   return tokens.length > 1
     ? tokens.map(function (token) {
-      return formatToken(token, vm)
-    }).join('+')
-    : formatToken(tokens[0], vm)
+        return formatToken(token, vm)
+      }).join('+')
+    : formatToken(tokens[0], vm, true)
 }
 
 /**
@@ -125,13 +128,51 @@ exports.tokensToExp = function (tokens, vm) {
  *
  * @param {Object} token
  * @param {Vue} [vm]
+ * @param {Boolean} single
  * @return {String}
  */
 
-function formatToken (token, vm) {
+function formatToken (token, vm, single) {
   return token.tag
     ? vm && token.oneTime
-      ? '"' + vm.$get(token.value) + '"'
-      : '(' + token.value + ')'
+      ? '"' + vm.$eval(token.value) + '"'
+      : single
+        ? token.value
+        : inlineFilters(token.value)
     : '"' + token.value + '"'
+}
+
+/**
+ * For an attribute with multiple interpolation tags,
+ * e.g. attr="some-{{thing | filter}}", in order to combine
+ * the whole thing into a single watchable expression, we
+ * have to inline those filters. This function does exactly
+ * that. This is a bit hacky but it avoids heavy changes
+ * to directive parser and watcher mechanism.
+ *
+ * @param {String} exp
+ * @return {String}
+ */
+
+var filterRE = /[^|]\|[^|]/
+function inlineFilters (exp) {
+  if (!filterRE.test(exp)) {
+    return '(' + exp + ')'
+  } else {
+    var dir = dirParser.parse(exp)[0]
+    if (!dir.filters) {
+      return '(' + exp + ')'
+    } else {
+      exp = dir.expression
+      for (var i = 0, l = dir.filters.length; i < l; i++) {
+        var filter = dir.filters[i]
+        var args = filter.args
+          ? ',"' + filter.args.join('","') + '"'
+          : ''
+        exp = 'this.$options.filters["' + filter.name + '"]' +
+          '.apply(this,[' + exp + args + '])'
+      }
+      return exp
+    }
+  }
 }
