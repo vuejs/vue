@@ -1,7 +1,7 @@
 var _ = require('../../util')
 
 var handlers = {
-  text: require('./text'),
+  _default: require('./default'),
   radio: require('./radio'),
   select: require('./select'),
   checkbox: require('./checkbox')
@@ -30,11 +30,11 @@ module.exports = {
     var tag = el.tagName
     var handler
     if (tag === 'INPUT') {
-      handler = handlers[el.type] || handlers.text
+      handler = handlers[el.type] || handlers._default
     } else if (tag === 'SELECT') {
       handler = handlers.select
     } else if (tag === 'TEXTAREA') {
-      handler = handlers.text
+      handler = handlers._default
     } else {
       _.warn("v-model doesn't support element type: " + tag)
       return
