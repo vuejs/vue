@@ -370,11 +370,12 @@ if (_.inBrowser) {
         data: {
           test: 1
         },
-        template: '<input v-model="test" number>'
+        template: '<input v-model="test" value="2" number>'
       })
-      el.firstChild.value = 2
-      trigger(el.firstChild, 'input')
       expect(vm.test).toBe(2)
+      el.firstChild.value = 3
+      trigger(el.firstChild, 'input')
+      expect(vm.test).toBe(3)
     })
 
     it('IE9 cut and delete', function (done) {

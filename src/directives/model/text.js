@@ -93,7 +93,9 @@ module.exports = {
       el.hasAttribute('value') ||
       (el.tagName === 'TEXTAREA' && el.value.trim())
     ) {
-      this._initValue = el.value
+      this._initValue = number
+        ? _.toNumber(el.value)
+        : el.value
     }
   },
 
