@@ -151,6 +151,13 @@ p.run = function () {
       var cbs = this.cbs
       for (var i = 0, l = cbs.length; i < l; i++) {
         cbs[i](value, oldValue)
+        // if a callback also removed other callbacks,
+        // we need to adjust the loop accordingly.
+        var removed = l - cbs.length
+        if (removed) {
+          i -= removed
+          l -= removed
+        }
       }
     }
   }

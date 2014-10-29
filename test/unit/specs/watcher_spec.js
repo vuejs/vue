@@ -359,4 +359,19 @@ describe('Watcher', function () {
     config.async = true
   })
 
+  it('handle a cb that triggers removeCb', function () {
+    var watcher = new Watcher(vm, 'a', spy)
+    watcher.addCb(function () {
+      watcher.removeCb(spy)
+    })
+    watcher.addCb(function () {})
+    config.async = false
+    expect(function () {
+      vm.a = 2
+    }).not.toThrow()
+    config.async = true
+    expect(spy).toHaveBeenCalled()
+    expect(watcher.cbs.length).toBe(2)
+  })
+
 })
