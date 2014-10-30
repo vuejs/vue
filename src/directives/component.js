@@ -108,20 +108,29 @@ module.exports = {
    */
 
   unbuild: function (remove) {
-    if (!this.childVM) {
+    var child = this.childVM
+    if (!child) {
       return
     }
     if (this.keepAlive) {
       if (remove) {
-        this.childVM.$remove()
+        child.$remove()
       }
     } else {
-      this.childVM.$destroy(remove)
-      if (this.parentDirs) {
-        var i = this.parentDirs.length
-        while (i--) {
-          this.parentDirs[i]._teardown()
+      var parentDirs = this.parentDirs
+      var destroy = function () {
+        child.$destroy()
+        if (parentDirs) {
+          var i = parentDirs.length
+          while (i--) {
+            parentDirs[i]._teardown()
+          }
         }
+      }
+      if (remove) {
+        child.$remove(destroy)
+      } else {
+        destroy()
       }
     }
     this.childVM = null
