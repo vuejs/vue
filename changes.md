@@ -496,7 +496,7 @@ With `v-transition="my-transition"`, Vue will:
 
 - #### JavaScript transitions API change
 
-  Now more similar to Angular:
+  Now more similar to Angular, and all hooks are called with `this` set to the vm owning the transitioned element:
 
   ``` js
   Vue.transition('fade', {
