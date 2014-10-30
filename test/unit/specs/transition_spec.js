@@ -327,9 +327,12 @@ if (_.inBrowser && !_.isIE9) {
       })
 
       it('beforeEnter', function () {
-        def.beforeEnter = jasmine.createSpy('js transition beforeEnter')
+        var spy = jasmine.createSpy('js transition beforeEnter')
+        def.beforeEnter = function (el) {
+          spy(this, el)
+        }
         transition.apply(el, 1, op, vm, cb)
-        expect(def.beforeEnter).toHaveBeenCalledWith(el)
+        expect(spy).toHaveBeenCalledWith(vm, el)
       })
 
       it('enter', function () {
@@ -339,10 +342,10 @@ if (_.inBrowser && !_.isIE9) {
           expect(op).toHaveBeenCalled()
           done()
           expect(cb).toHaveBeenCalled()
-          spy()
+          spy(this)
         }
         transition.apply(el, 1, op, vm, cb)
-        expect(spy).toHaveBeenCalled()
+        expect(spy).toHaveBeenCalledWith(vm)
       })
 
       it('leave', function () {
@@ -352,10 +355,10 @@ if (_.inBrowser && !_.isIE9) {
           done()
           expect(op).toHaveBeenCalled()
           expect(cb).toHaveBeenCalled()
-          spy()
+          spy(this)
         }
         transition.apply(el, -1, op, vm, cb)
-        expect(spy).toHaveBeenCalled()
+        expect(spy).toHaveBeenCalledWith(vm)
       })
 
       it('no def', function () {

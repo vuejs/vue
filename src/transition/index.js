@@ -131,6 +131,7 @@ var apply = exports.apply = function (el, direction, op, vm, cb) {
       op,
       transData,
       jsTransition,
+      vm,
       cb
     )
   } else if (_.transitionEndEvent) {
