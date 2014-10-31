@@ -256,34 +256,41 @@ var utils = module.exports = {
     },
 
     /**
-     *  add class for IE9
+     *  add class for IE
      *  uses classList if available
      */
     addClass: function (el, cls) {
         if (el.classList) {
             el.classList.add(cls)
         } else {
-            var cur = ' ' + el.className + ' '
+            var cur = ' ' + utils.getClassName(el) + ' '
             if (cur.indexOf(' ' + cls + ' ') < 0) {
-                el.className = (cur + cls).trim()
+                el.setAttribute('class', (cur + cls).trim())
             }
         }
     },
 
     /**
-     *  remove class for IE9
+     *  remove class for IE
      */
     removeClass: function (el, cls) {
         if (el.classList) {
             el.classList.remove(cls)
         } else {
-            var cur = ' ' + el.className + ' ',
+            var cur = ' ' + utils.getClassName(el) + ' ',
                 tar = ' ' + cls + ' '
             while (cur.indexOf(tar) >= 0) {
                 cur = cur.replace(tar, ' ')
             }
-            el.className = cur.trim()
+            el.setAttribute('class', cur.trim())
         }
+    },
+
+    /**
+     *  get class name for IE
+     */
+    getClassName: function(el) {
+      return (el.className instanceof SVGAnimatedString ? el.className.baseVal : el.className)
     },
 
     /**
