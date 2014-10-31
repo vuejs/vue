@@ -1,5 +1,6 @@
 var endEvents  = sniffEndEvents(),
     config     = require('./config'),
+    utils      = require('./utils'),
     // batch enter animations so we only force the layout once
     Batcher    = require('./batcher'),
     batcher    = new Batcher(),
@@ -79,10 +80,7 @@ function applyTransitionClass (el, stage, changeState, hasAnimation) {
         return codes.CSS_SKIP
     }
 
-    // if the browser supports transition,
-    // it must have classList...
     var onEnd,
-        classList        = el.classList,
         existingCallback = el.vue_trans_cb,
         enterClass       = config.enterClass,
         leaveClass       = config.leaveClass,
@@ -91,22 +89,22 @@ function applyTransitionClass (el, stage, changeState, hasAnimation) {
     // cancel unfinished callbacks and jobs
     if (existingCallback) {
         el.removeEventListener(endEvent, existingCallback)
-        classList.remove(enterClass)
-        classList.remove(leaveClass)
+        utils.removeClass(el, enterClass)
+        utils.removeClass(el, leaveClass)
         el.vue_trans_cb = null
     }
 
     if (stage > 0) { // enter
 
         // set to enter state before appending
-        classList.add(enterClass)
+        utils.addClass(el, enterClass)
         // append
         changeState()
         // trigger transition
         if (!hasAnimation) {
             batcher.push({
                 execute: function () {
-                    classList.remove(enterClass)
+                    utils.removeClass(el, enterClass)
                 }
             })
         } else {
@@ -114,7 +112,7 @@ function applyTransitionClass (el, stage, changeState, hasAnimation) {
                 if (e.target === el) {
                     el.removeEventListener(endEvent, onEnd)
                     el.vue_trans_cb = null
-                    classList.remove(enterClass)
+                    utils.removeClass(el, enterClass)
                 }
             }
             el.addEventListener(endEvent, onEnd)
@@ -128,7 +126,7 @@ function applyTransitionClass (el, stage, changeState, hasAnimation) {
             // trigger hide transition
             batcher.push({
                 execute: function () {
-                    classList.add(leaveClass)
+                    utils.addClass(el, leaveClass)
                 }
             })
             onEnd = function (e) {
@@ -137,7 +135,7 @@ function applyTransitionClass (el, stage, changeState, hasAnimation) {
                     el.vue_trans_cb = null
                     // actually remove node here
                     changeState()
-                    classList.remove(leaveClass)
+                    utils.removeClass(el, leaveClass)
                 }
             }
             // attach transition end listener
@@ -148,7 +146,7 @@ function applyTransitionClass (el, stage, changeState, hasAnimation) {
             changeState()
         }
         return codes.CSS_L
-        
+
     }
 
 }
