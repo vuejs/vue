@@ -7,7 +7,6 @@ var config       = require('./config'),
     THIS_RE      = /[^\w]this[^\w]/,
     BRACKET_RE_S = /\['([^']+)'\]/g,
     BRACKET_RE_D = /\["([^"]+)"\]/g,
-    hasClassList = 'classList' in document.documentElement,
     ViewModel // late def
 
 var defer =
@@ -261,7 +260,7 @@ var utils = module.exports = {
      *  uses classList if available
      */
     addClass: function (el, cls) {
-        if (hasClassList) {
+        if (el.classList) {
             el.classList.add(cls)
         } else {
             var cur = ' ' + el.className + ' '
@@ -275,7 +274,7 @@ var utils = module.exports = {
      *  remove class for IE9
      */
     removeClass: function (el, cls) {
-        if (hasClassList) {
+        if (el.classList) {
             el.classList.remove(cls)
         } else {
             var cur = ' ' + el.className + ' ',
