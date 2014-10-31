@@ -290,7 +290,7 @@ var utils = module.exports = {
      *  get class name for IE
      */
     getClassName: function(el) {
-      return (el.className instanceof SVGAnimatedString ? el.className.baseVal : el.className)
+        return (el.className instanceof SVGAnimatedString ? el.className.baseVal : el.className)
     },
 
     /**
