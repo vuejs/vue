@@ -79,6 +79,15 @@ if (_.inBrowser) {
       expect(res.firstChild.textContent).toBe('fallback')
     })
 
+    it('fallback content with multiple select', function () {
+      el.innerHTML = '<p class="b">select b</p>'
+      options.template = '<content select=".a"><p>fallback a</p></content><content select=".b">fallback b</content>'
+      var res = transclude(el, options)
+      expect(res.childNodes.length).toBe(2)
+      expect(res.firstChild.textContent).toBe('fallback a')
+      expect(res.lastChild.textContent).toBe('select b')
+    })
+
     it('content transclusion with replace', function () {
       el.innerHTML = '<p>hi</p>'
       options.template = '<div><div><content></content></div></div>'

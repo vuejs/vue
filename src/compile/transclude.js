@@ -94,7 +94,7 @@ function transcludeContent (el) {
   var outlets = getOutlets(el)
   var i = outlets.length
   if (!i) return
-  var outlet, select, j, main
+  var outlet, select, selected, j, main
   // first pass, collect corresponding content
   // for each outlet.
   while (i--) {
@@ -102,8 +102,11 @@ function transcludeContent (el) {
     if (rawContent) {
       select = outlet.getAttribute('select')
       if (select) {  // select content
+        selected = rawContent.querySelectorAll(select)
         outlet.content = _.toArray(
-          rawContent.querySelectorAll(select)
+          selected.length
+            ? selected
+            : outlet.childNodes
         )
       } else { // default content
         main = outlet
