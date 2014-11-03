@@ -145,6 +145,22 @@ if (_.inBrowser) {
       })
     })
 
+    it('v-if with different truthy values', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          a: 1
+        },
+        template: '<div v-if="a">{{a}}</div>'
+      })
+      expect(el.innerHTML).toBe(wrap('<div>1</div>'))
+      vm.a = 2
+      _.nextTick(function () {
+        expect(el.innerHTML).toBe(wrap('<div>2</div>'))
+        done()
+      })
+    })
+
     it('invalid warn', function () {
       el.setAttribute('v-if', 'test')
       var vm = new Vue({

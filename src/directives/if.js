@@ -43,6 +43,11 @@ module.exports = {
   },
 
   insert: function () {
+    // avoid duplicate inserts, since update() can be
+    // called with different truthy values
+    if (this.decompile) {
+      return
+    }
     var vm = this.vm
     var frag = templateParser.clone(this.template)
     var decompile = this.linker(vm, frag)
