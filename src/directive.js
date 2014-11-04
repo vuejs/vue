@@ -75,7 +75,7 @@ p._bind = function (def) {
     // wrapped updater for context
     var dir = this
     var update = this._update = function (val, oldVal) {
-      if (!dir._locked) {
+      if (!dir._locked && !dir.vm._isBeingDestroyed) {
         dir.update(val, oldVal)
       }
     }

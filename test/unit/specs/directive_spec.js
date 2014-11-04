@@ -177,4 +177,17 @@ describe('Directive', function () {
     })
   })
 
+  it('avoid update when vm is being destroyed', function (done) {
+    var d = new Directive('test', el, vm, {
+      expression: 'a',
+    }, def)
+    expect(def.update.calls.count()).toBe(1)
+    vm._isBeingDestroyed = true
+    vm.a = 2
+    nextTick(function () {
+      expect(def.update.calls.count()).toBe(1)
+      done()
+    })
+  })
+
 })

@@ -128,6 +128,10 @@ module.exports = {
         }
       }
       if (remove) {
+        // setting the "being destroyed" flag before
+        // removing to avoid content being changed during
+        // transitions
+        child._isBeingDestroyed = true
         child.$remove(destroy)
       } else {
         destroy()
