@@ -1,3 +1,4 @@
+var _ = require('../util')
 var Cache = require('../cache')
 var templateCache = new Cache(100)
 
@@ -6,11 +7,13 @@ var templateCache = new Cache(100)
  * https://bugs.webkit.org/show_bug.cgi?id=137755
  */
 
-var hasBrokenTemplate = (function () {
-  var a = document.createElement('div')
-  a.innerHTML = '<template>1</template>'
-  return !a.cloneNode(true).firstChild.innerHTML
-})()
+var hasBrokenTemplate = _.inBrowser
+  ? (function () {
+      var a = document.createElement('div')
+      a.innerHTML = '<template>1</template>'
+      return !a.cloneNode(true).firstChild.innerHTML
+    })()
+  : false
 
 var map = {
   _default : [0, '', ''],
