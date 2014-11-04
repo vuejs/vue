@@ -8,6 +8,7 @@ module.exports = {
     this.listener = function () {
       self.set(el.checked, true)
     }
+    _.on(el, 'click', this.listener)
     _.on(el, 'change', this.listener)
     if (el.checked) {
       this._initValue = el.checked
@@ -19,6 +20,7 @@ module.exports = {
   },
 
   unbind: function () {
+    _.off(this.el, 'click', this.listener)
     _.off(this.el, 'change', this.listener)
   }
 
