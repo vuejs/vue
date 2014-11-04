@@ -16,7 +16,9 @@ module.exports = {
   },
 
   unbind: function () {
-    delete this.owner.$[this.expression]
+    if (this.owner.$[this.expression] === this.vm) {
+      delete this.owner.$[this.expression]
+    }
   }
   
 }
