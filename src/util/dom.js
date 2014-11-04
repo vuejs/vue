@@ -138,31 +138,39 @@ exports.off = function (el, event, cb) {
 }
 
 /**
- * Compatibility add class for IE9
+ * Add class with compatibility for IE & SVG
  *
  * @param {Element} el
  * @param {Strong} cls
  */
 
 exports.addClass = function (el, cls) {
-  var cur = ' ' + el.className + ' '
-  if (cur.indexOf(' ' + cls + ' ') < 0) {
-    el.className = (cur + cls).trim()
+  if (el.classList) {
+    el.classList.add(cls)
+  } else {
+    var cur = ' ' + (el.getAttribute('class') || '') + ' '
+    if (cur.indexOf(' ' + cls + ' ') < 0) {
+      el.setAttribute('class', (cur + cls).trim())
+    }
   }
 }
 
 /**
- * Compatibility remove class for IE9
+ * Remove class with compatibility for IE & SVG
  *
  * @param {Element} el
  * @param {Strong} cls
  */
 
 exports.removeClass = function (el, cls) {
-  var cur = ' ' + el.className + ' '
-  var tar = ' ' + cls + ' '
-  while (cur.indexOf(tar) >= 0) {
-    cur = cur.replace(tar, ' ')
+  if (el.classList) {
+    el.classList.remove(cls)
+  } else {
+    var cur = ' ' + (el.getAttribute('class') || '') + ' '
+    var tar = ' ' + cls + ' '
+    while (cur.indexOf(tar) >= 0) {
+      cur = cur.replace(tar, ' ')
+    }
+    el.setAttribute('class', cur.trim())
   }
-  el.className = cur.trim()
 }

@@ -114,5 +114,18 @@ if (_.inBrowser) {
       _.addClass(el, 'bb')
       expect(el.className).toBe('cc bb')
     })
+
+    it('addClass/removeClass for SVG/IE9', function () {
+      var el = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
+      el.setAttribute('class', 'aa bb cc')
+      _.removeClass(el, 'bb')
+      expect(el.getAttribute('class')).toBe('aa cc')
+      _.removeClass(el, 'aa')
+      expect(el.getAttribute('class')).toBe('cc')
+      _.addClass(el, 'bb')
+      expect(el.getAttribute('class')).toBe('cc bb')
+      _.addClass(el, 'bb')
+      expect(el.getAttribute('class')).toBe('cc bb')
+    })
   })
 }

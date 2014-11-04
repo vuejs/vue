@@ -1,4 +1,6 @@
 var _ = require('../util')
+var addClass = _.addClass
+var removeClass = _.removeClass
 var transDurationProp = _.transitionProp + 'Duration'
 var animDurationProp = _.animationProp + 'Duration'
 
@@ -53,7 +55,6 @@ function flush () {
 function run (job) {
 
   var el = job.el
-  var classList = el.classList
   var data = el.__v_trans
   var cls = job.cls
   var cb = job.cb
@@ -63,7 +64,7 @@ function run (job) {
   if (job.dir > 0) { // ENTER
     if (transitionType === 1) {
       // trigger transition by removing enter class
-      classList.remove(cls)
+      removeClass(el, cls)
       // only need to listen for transitionend if there's
       // a user callback
       if (cb) setupTransitionCb(_.transitionEndEvent)
@@ -71,11 +72,11 @@ function run (job) {
       // animations are triggered when class is added
       // so we just listen for animationend to remove it.
       setupTransitionCb(_.animationEndEvent, function () {
-        classList.remove(cls)
+        removeClass(el, cls)
       })
     } else {
       // no transition applicable
-      classList.remove(cls)
+      removeClass(el, cls)
       if (cb) cb()
     }
   } else { // LEAVE
@@ -87,11 +88,11 @@ function run (job) {
         : _.animationEndEvent
       setupTransitionCb(event, function () {
         op()
-        classList.remove(cls)
+        removeClass(el, cls)
       })
     } else {
       op()
-      classList.remove(cls)
+      removeClass(el, cls)
       if (cb) cb()
     }
   }
@@ -167,23 +168,22 @@ function getTransitionType (el, data, className) {
  */
 
 module.exports = function (el, direction, op, data, cb) {
-  var classList = el.classList
   var prefix = data.id || 'v'
   var enterClass = prefix + '-enter'
   var leaveClass = prefix + '-leave'
   // clean up potential previous unfinished transition
   if (data.callback) {
     _.off(el, data.event, data.callback)
-    classList.remove(enterClass)
-    classList.remove(leaveClass)
+    removeClass(el, enterClass)
+    removeClass(el, leaveClass)
     data.event = data.callback = null
   }
   if (direction > 0) { // enter
-    classList.add(enterClass)
+    addClass(el, enterClass)
     op()
     push(el, direction, null, enterClass, cb)
   } else { // leave
-    classList.add(leaveClass)
+    addClass(el, leaveClass)
     push(el, direction, op, leaveClass, cb)
   }
 }
