@@ -117,24 +117,13 @@ module.exports = {
         child.$remove()
       }
     } else {
+      child.$destroy(remove)
       var parentDirs = this.parentDirs
-      var destroy = function () {
-        child.$destroy()
-        if (parentDirs) {
-          var i = parentDirs.length
-          while (i--) {
-            parentDirs[i]._teardown()
-          }
+      if (parentDirs) {
+        var i = parentDirs.length
+        while (i--) {
+          parentDirs[i]._teardown()
         }
-      }
-      if (remove) {
-        // setting the "being destroyed" flag before
-        // removing to avoid content being changed during
-        // transitions
-        child._isBeingDestroyed = true
-        child.$remove(destroy)
-      } else {
-        destroy()
       }
     }
     this.childVM = null

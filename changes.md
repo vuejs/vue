@@ -197,6 +197,8 @@ By default, all child components **DO NOT** inherit the parent scope. Only anony
 
   - #### renamed hook: `afterDestroy` -> `destroyed`
 
+    Additionally, if there is a leaving transition, `beforeDestroy` is called before the transition starts, and `destroyed` will be called **after** the transition has finished (right after `detached`).
+
 ## Instance methods change
 
 - #### `vm.$watch`

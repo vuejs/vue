@@ -64,10 +64,6 @@ exports.$destroy = function (remove) {
   }
   this._callHook('beforeDestroy')
   this._isBeingDestroyed = true
-  // remove DOM element
-  if (remove && this.$el) {
-    this.$remove()
-  }
   var i
   // remove self from parent. only necessary
   // if parent is not being destroyed as well.
@@ -93,27 +89,47 @@ exports.$destroy = function (remove) {
   for (i in this._userWatchers) {
     this._userWatchers[i].teardown()
   }
-  // clean up
+  // remove reference to self on $el
   if (this.$el) {
     this.$el.__vue__ = null
   }
+  // remove DOM element
+  var self = this
+  if (remove && this.$el) {
+    this.$remove(function () {
+      cleanup(self)
+    })
+  } else {
+    cleanup(self)
+  }
+}
+
+/**
+ * Clean up to ensure garbage collection.
+ * This is called after the leave transition if there
+ * is any.
+ *
+ * @param {Vue} vm
+ */
+
+function cleanup (vm) {
   // remove reference from data ob
-  this._data.__ob__.removeVm(this)
-  this._data =
-  this._watchers =
-  this._userWatchers =
-  this._watcherList =
-  this.$el =
-  this.$parent =
-  this.$root =
-  this._children =
-  this._bindings =
-  this._directives = null
+  vm._data.__ob__.removeVm(vm)
+  vm._data =
+  vm._watchers =
+  vm._userWatchers =
+  vm._watcherList =
+  vm.$el =
+  vm.$parent =
+  vm.$root =
+  vm._children =
+  vm._bindings =
+  vm._directives = null
   // call the last hook...
-  this._isDestroyed = true
-  this._callHook('destroyed')
+  vm._isDestroyed = true
+  vm._callHook('destroyed')
   // turn off all instance listeners.
-  this.$off()
+  vm.$off() 
 }
 
 /**
