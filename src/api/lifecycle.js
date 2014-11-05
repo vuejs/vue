@@ -59,7 +59,7 @@ function ready () {
  */
 
 exports.$destroy = function (remove) {
-  if (this._isDestroyed) {
+  if (this._isBeingDestroyed) {
     return
   }
   this._callHook('beforeDestroy')
