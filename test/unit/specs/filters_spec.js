@@ -58,6 +58,10 @@ describe('Filters', function () {
     expect(filter(false)).toBe('')
     expect(filter(null)).toBe('')
     expect(filter(undefined)).toBe('')
+    // negative numbers
+    expect(filter(-50)).toBe('-$50.00')
+    expect(filter(-150.43)).toBe('-$150.43')
+    expect(filter(-1500.4343434)).toBe('-$1,500.43')
   })
 
   it('key', function () {

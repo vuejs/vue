@@ -52,13 +52,14 @@ exports.currency = function (value, sign) {
   value = parseFloat(value)
   if (!value && value !== 0) return ''
   sign = sign || '$'
-  var s = Math.floor(value).toString(),
+  var s = Math.floor(Math.abs(value)).toString(),
     i = s.length % 3,
     h = i > 0
       ? (s.slice(0, i) + (s.length > 3 ? ',' : ''))
       : '',
     f = '.' + value.toFixed(2).slice(-2)
-  return sign + h + s.slice(i).replace(digitsRE, '$1,') + f
+  return (value < 0 ? '-' : '') +
+    sign + h + s.slice(i).replace(digitsRE, '$1,') + f
 }
 
 /**
