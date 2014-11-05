@@ -7,10 +7,9 @@
   "license": "MIT",
   "ignore": [
     ".*",
-    "benchmarks",
     "examples",
     "test",
-    "tasks",
+    "grunt",
     "gruntfile.js",
     "*.json",
     "*.md"
