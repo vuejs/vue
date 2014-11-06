@@ -1,5 +1,6 @@
 var _ = require('../util')
 var Watcher = require('../watcher')
+var Path = require('../parse/path')
 var textParser = require('../parse/text')
 var dirParser = require('../parse/directive')
 var expParser = require('../parse/expression')
@@ -146,10 +147,12 @@ exports.$interpolate = function (text) {
  * so that it is easier to inspect in console.
  * This method assumes console is available.
  *
- * @param {String} [key]
+ * @param {String} [path]
  */
 
-exports.$log = function (key) {
-  var data = this[key || '_data']
+exports.$log = function (path) {
+  var data = path
+    ? Path.get(this, path)
+    : this._data
   console.log(JSON.parse(JSON.stringify(data)))
 }
