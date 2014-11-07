@@ -65,8 +65,8 @@ module.exports = function (grunt) {
         grunt.config.set('version', next)
         grunt.task.run([
           'default',
-          'version:' + next
-          // 'git:' + next
+          'version:' + next,
+          'git:' + next
         ])
       }
       done()
