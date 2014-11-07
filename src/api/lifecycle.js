@@ -129,7 +129,7 @@ function cleanup (vm) {
   vm._isDestroyed = true
   vm._callHook('destroyed')
   // turn off all instance listeners.
-  vm.$off() 
+  vm.$off()
 }
 
 /**

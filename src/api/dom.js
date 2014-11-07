@@ -97,7 +97,7 @@ exports.$remove = function (cb, withTransition) {
   ) {
     op = withTransition === false
       ? append
-      : transition.removeThenAppend 
+      : transition.removeThenAppend
     blockOp(this, this._blockFragment, op, realCb)
   } else {
     op = withTransition === false

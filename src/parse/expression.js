@@ -154,7 +154,7 @@ function makeGetter (body) {
     return new Function('scope', 'return ' + body + ';')
   } catch (e) {
     _.warn(
-      'Invalid expression. ' + 
+      'Invalid expression. ' +
       'Generated function body: ' + body
     )
   }

@@ -122,7 +122,7 @@ function compileElement (el, options) {
     var realLinkFn = linkFn
     linkFn = function (vm, el) {
       el.value = vm.$interpolate(el.value)
-      if (realLinkFn) realLinkFn(vm, el)      
+      if (realLinkFn) realLinkFn(vm, el)
     }
     linkFn.terminal = true
   }

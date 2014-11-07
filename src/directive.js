@@ -193,7 +193,7 @@ p.set = function (value, lock) {
     if (lock) {
       var self = this
       _.nextTick(function () {
-        self._locked = false        
+        self._locked = false
       })
     }
   }
