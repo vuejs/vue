@@ -10,13 +10,10 @@ var transition = require('../transition')
  */
 
 exports.$appendTo = function (target, cb, withTransition) {
-  target = query(target)
-  var targetIsDetached = !_.inDoc(target)
-  var op = withTransition === false || targetIsDetached
-    ? append
-    : transition.append
-  insert(this, target, op, targetIsDetached, cb)
-  return this
+  return insert(
+    this, target, cb, withTransition,
+    append, transition.append
+  )
 }
 
 /**
@@ -46,13 +43,10 @@ exports.$prependTo = function (target, cb, withTransition) {
  */
 
 exports.$before = function (target, cb, withTransition) {
-  target = query(target)
-  var targetIsDetached = !_.inDoc(target)
-  var op = withTransition === false || targetIsDetached
-    ? before
-    : transition.before
-  insert(this, target, op, targetIsDetached, cb)
-  return this
+  return insert(
+    this, target, cb, withTransition,
+    before, transition.before
+  )
 }
 
 /**
@@ -113,12 +107,19 @@ exports.$remove = function (cb, withTransition) {
  *
  * @param {Vue} vm
  * @param {Element} target
- * @param {Function} op
- * @param {Boolean} targetIsDetached
  * @param {Function} [cb]
+ * @param {Boolean} [withTransition]
+ * @param {Function} op1 - op for non-transition insert
+ * @param {Function} op2 - op for transition insert
+ * @return vm
  */
 
-function insert (vm, target, op, targetIsDetached, cb) {
+function insert (vm, target, cb, withTransition, op1, op2) {
+  target = query(target)
+  var targetIsDetached = !_.inDoc(target)
+  var op = withTransition === false || targetIsDetached
+    ? op1
+    : op2
   var shouldCallHook =
     !targetIsDetached &&
     !vm._isAttached &&
@@ -131,6 +132,7 @@ function insert (vm, target, op, targetIsDetached, cb) {
   if (shouldCallHook) {
     vm._callHook('attached')
   }
+  return vm
 }
 
 /**
