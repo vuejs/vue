@@ -171,41 +171,50 @@ function compileTextNode (node, options) {
     return null
   }
   var frag = document.createDocumentFragment()
-  var dirs = options.directives
-  var el, token, value
+  var el, token
   for (var i = 0, l = tokens.length; i < l; i++) {
     token = tokens[i]
-    value = token.value
-    if (token.tag) {
-      if (token.oneTime) {
-        el = document.createTextNode(value)
-      } else {
-        if (token.html) {
-          el = document.createComment('v-html')
-          token.type = 'html'
-          token.def = dirs.html
-          token.descriptor = dirParser.parse(value)[0]
-        } else if (token.partial) {
-          el = document.createComment('v-partial')
-          token.type = 'partial'
-          token.def = dirs.partial
-          token.descriptor = dirParser.parse(value)[0]
-        } else {
-          // IE will clean up empty textNodes during
-          // frag.cloneNode(true), so we have to give it
-          // something here...
-          el = document.createTextNode(' ')
-          token.type = 'text'
-          token.def = dirs.text
-          token.descriptor = dirParser.parse(value)[0]
-        }
-      }
-    } else {
-      el = document.createTextNode(value)
-    }
+    el = token.tag
+      ? processTextToken(token, options)
+      : document.createTextNode(token.value)
     frag.appendChild(el)
   }
   return makeTextNodeLinkFn(tokens, frag, options)
+}
+
+/**
+ * Process a single text token.
+ *
+ * @param {Object} token
+ * @param {Object} options
+ * @return {Node}
+ */
+
+function processTextToken (token, options) {
+  var el
+  if (token.oneTime) {
+    el = document.createTextNode(token.value)
+  } else {
+    if (token.html) {
+      el = document.createComment('v-html')
+      setTokenType('html')
+    } else if (token.partial) {
+      el = document.createComment('v-partial')
+      setTokenType('partial')
+    } else {
+      // IE will clean up empty textNodes during
+      // frag.cloneNode(true), so we have to give it
+      // something here...
+      el = document.createTextNode(' ')
+      setTokenType('text')
+    }
+  }
+  function setTokenType (type) {
+    token.type = type
+    token.def = options.directives[type]
+    token.descriptor = dirParser.parse(token.value)[0]
+  }
+  return el
 }
 
 /**
