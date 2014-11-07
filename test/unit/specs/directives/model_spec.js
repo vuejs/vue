@@ -40,10 +40,6 @@ if (_.inBrowser) {
       spyOn(_, 'warn')
     })
 
-    afterEach(function () {
-      document.body.removeChild(el)
-    })
-
     it('radio buttons', function (done) {
       var vm = new Vue({
         el: el,
