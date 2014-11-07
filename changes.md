@@ -436,11 +436,11 @@ computed: {
 
 - #### One time interpolations
 
+  One time interpolations do not need to set up watchers and can improve initial rendering performance. If you know something's not going to change, make sure to use this new feature. Example:
+
   ``` html
   <span>{{* hello }}</span>
   ```
-
-  One time interpolations do not need to set up watchers and can improve initial rendering performance. If you know something's not going to change, make sure to use this new feature. Example:
 
 ## Config API change
 
