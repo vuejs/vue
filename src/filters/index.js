@@ -114,6 +114,9 @@ exports.key = function (handler, key) {
   }
 }
 
+// expose keycode hash
+exports.key.keyCodes = keyCodes
+
 /**
  * Install special array filters
  */
