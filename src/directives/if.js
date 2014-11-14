@@ -45,24 +45,43 @@ module.exports = {
   insert: function () {
     // avoid duplicate inserts, since update() can be
     // called with different truthy values
-    if (this.decompile) {
-      return
+    if (!this.unlink) {
+      this.compile(this.template) 
     }
+  },
+
+  compile: function (template) {
     var vm = this.vm
-    var frag = templateParser.clone(this.template)
-    var decompile = this.linker(vm, frag)
-    this.decompile = function () {
-      decompile()
-      transition.blockRemove(this.start, this.end, vm)
-    }
+    var frag = templateParser.clone(template)
+    var originalChildLength = vm._children
+      ? vm._children.length
+      : 0
+    this.unlink = this.linker
+      ? this.linker(vm, frag)
+      : vm.$compile(frag)
     transition.blockAppend(frag, this.end, vm)
+    this.children = vm._children
+      ? vm._children.slice(originalChildLength)
+      : null
+    if (this.children && _.inDoc(vm.$el)) {
+      this.children.forEach(function (child) {
+        child._callHook('attached')
+      })
+    }
   },
 
   teardown: function () {
-    if (this.decompile) {
-      this.decompile()
-      this.decompile = null
+    if (!this.unlink) return
+    transition.blockRemove(this.start, this.end, this.vm)
+    if (this.children && _.inDoc(this.vm.$el)) {
+      this.children.forEach(function (child) {
+        if (!child._isDestroyed) {
+          child._callHook('detached')
+        }
+      })
     }
+    this.unlink()
+    this.unlink = null
   }
 
 }

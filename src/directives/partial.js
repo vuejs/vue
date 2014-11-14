@@ -1,10 +1,14 @@
 var _ = require('../util')
 var templateParser = require('../parse/template')
-var transition = require('../transition')
+var vIf = require('./if')
 
 module.exports = {
 
   isLiteral: true,
+
+  // same logic reuse from v-if
+  compile: vIf.compile,
+  teardown: vIf.teardown,
 
   bind: function () {
     var el = this.el
@@ -20,35 +24,20 @@ module.exports = {
     }
     _.before(this.start, this.end)
     if (!this._isDynamicLiteral) {
-      this.compile(this.expression)
+      this.insert(this.expression)
     }
   },
 
   update: function (id) {
     this.teardown()
-    this.compile(id)
+    this.insert(id)
   },
 
-  compile: function (id) {
+  insert: function (id) {
     var partial = this.vm.$options.partials[id]
     _.assertAsset(partial, 'partial', id)
-    if (!partial) {
-      return
-    }
-    var vm = this.vm
-    var frag = templateParser.parse(partial, true)
-    var decompile = vm.$compile(frag)
-    this.decompile = function () {
-      decompile()
-      transition.blockRemove(this.start, this.end, vm)
-    }
-    transition.blockAppend(frag, this.end, vm)
-  },
-
-  teardown: function () {
-    if (this.decompile) {
-      this.decompile()
-      this.decompile = null
+    if (partial) {
+      this.compile(templateParser.parse(partial))
     }
   }
 

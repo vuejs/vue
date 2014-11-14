@@ -70,6 +70,9 @@ if (_.inBrowser) {
     })
 
     it('v-if + v-component', function (done) {
+      var attachSpy = jasmine.createSpy()
+      var detachSpy = jasmine.createSpy()
+      var readySpy = jasmine.createSpy()
       var vm = new Vue({
         el: el,
         data: { ok: false },
@@ -79,20 +82,28 @@ if (_.inBrowser) {
             data: function () {
               return { a: 123 }
             },
-            template: '{{a}}'
+            template: '{{a}}',
+            ready: readySpy,
+            attached: attachSpy,
+            detached: detachSpy
           }
         }
       })
+      vm.$appendTo(document.body)
       expect(el.innerHTML).toBe(wrap(''))
       expect(vm._children).toBeNull()
       vm.ok = true
       _.nextTick(function () {
         expect(el.innerHTML).toBe(wrap('<div>123</div><!--v-component-->'))
         expect(vm._children.length).toBe(1)
+        expect(attachSpy).toHaveBeenCalled()
+        expect(readySpy).toHaveBeenCalled()
         vm.ok = false
         _.nextTick(function () {
+          expect(detachSpy).toHaveBeenCalled()
           expect(el.innerHTML).toBe(wrap(''))
           expect(vm._children.length).toBe(0)
+          vm.$remove()
           done()
         })
       })
