@@ -138,36 +138,40 @@ exports.off = function (el, event, cb) {
 }
 
 /**
- * Add class with compatibility for IE & SVG
+ * Add class(es) with compatibility for IE & SVG
  *
  * @param {Element} el
- * @param {Strong} cls
+ * @param {String} classList
  */
 
-exports.addClass = function (el, cls) {
+exports.addClass = function (el, classList) {
   if (el.classList) {
-    el.classList.add(cls)
+    classList.trim().split(' ').forEach(function(cls) {
+      el.classList.add(cls);
+    });
   } else {
     var cur = ' ' + (el.getAttribute('class') || '') + ' '
-    if (cur.indexOf(' ' + cls + ' ') < 0) {
-      el.setAttribute('class', (cur + cls).trim())
+    if (cur.indexOf(' ' + classList + ' ') < 0) {
+      el.setAttribute('class', (cur + classList).trim())
     }
   }
 }
 
 /**
- * Remove class with compatibility for IE & SVG
+ * Remove class(es) with compatibility for IE & SVG
  *
  * @param {Element} el
- * @param {Strong} cls
+ * @param {String} classList
  */
 
-exports.removeClass = function (el, cls) {
+exports.removeClass = function (el, classList) {
   if (el.classList) {
-    el.classList.remove(cls)
+    classList.trim().split(' ').forEach(function(cls) {
+      el.classList.remove(cls);
+    });
   } else {
     var cur = ' ' + (el.getAttribute('class') || '') + ' '
-    var tar = ' ' + cls + ' '
+    var tar = ' ' + classList + ' '
     while (cur.indexOf(tar) >= 0) {
       cur = cur.replace(tar, ' ')
     }
