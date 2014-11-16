@@ -211,9 +211,9 @@ function formatAccessor(key) {
   if (identRE.test(key)) { // identifier
     return '.' + key
   } else if (+key === key >>> 0) { // bracket index
-    return '[' + key + ']';
+    return '[' + key + ']'
   } else { // bracket string
-    return '["' + key.replace(/"/g, '\\"') + '"]';
+    return '["' + key.replace(/"/g, '\\"') + '"]'
   }
 }
 
