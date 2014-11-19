@@ -72,7 +72,9 @@ p.get = function () {
   var value
   try {
     value = this.getter.call(vm, vm)
-  } catch (e) {}
+  } catch (e) {
+    _.warn(e)
+  }
   // use JSON.stringify to "touch" every property
   // so they are all tracked as dependencies for
   // deep watching

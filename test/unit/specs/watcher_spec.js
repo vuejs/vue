@@ -374,4 +374,9 @@ describe('Watcher', function () {
     expect(watcher.cbs.length).toBe(2)
   })
 
+  it('warn getter errors', function () {
+    var watcher = new Watcher(vm, 'd.e + c', spy)
+    expect(_.warn).toHaveBeenCalled()
+  })
+
 })
