@@ -25,7 +25,8 @@ module.exports = function compile (el, options, partial) {
     ? null
     : compileNode(el, options)
   var childLinkFn =
-    (!nodeLinkFn || !nodeLinkFn.terminal) &&
+    !(nodeLinkFn && nodeLinkFn.terminal) &&
+    el.tagName !== 'SCRIPT' &&
     el.hasChildNodes()
       ? compileNodeList(el.childNodes, options)
       : null
@@ -266,7 +267,8 @@ function compileNodeList (nodeList, options) {
     node = nodeList[i]
     nodeLinkFn = compileNode(node, options)
     childLinkFn =
-      (!nodeLinkFn || !nodeLinkFn.terminal) &&
+      !(nodeLinkFn && nodeLinkFn.terminal) &&
+      node.tagName !== 'SCRIPT' &&
       node.hasChildNodes()
         ? compileNodeList(node.childNodes, options)
         : null

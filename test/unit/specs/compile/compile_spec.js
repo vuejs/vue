@@ -196,5 +196,12 @@ if (_.inBrowser) {
       expect(vm._directives.length).toBe(0)
     })
 
+    it('skip script tags', function () {
+      el.innerHTML = '<script type="x/template">{{test}}</script>'
+      var linker = compile(el, Vue.options)
+      linker(vm, el)
+      expect(vm._bindDir.calls.count()).toBe(0)
+    })
+
   })
 }
