@@ -468,11 +468,12 @@ function collectDirectives (el, options, asParent) {
     attrName = attr.name
     if (attrName.indexOf(config.prefix) === 0) {
       dirName = attrName.slice(config.prefix.length)
-      if (
-        asParent &&
-        (dirName === 'with' || dirName === 'ref')
-      ) {
-        continue
+      if (asParent) {
+        if (dirName === 'with' || dirName === 'ref') {
+          continue
+        } else {
+          el.removeAttribute(attrName)
+        }
       }
       dirDef = options.directives[dirName]
       _.assertAsset(dirDef, 'directive', dirName)
