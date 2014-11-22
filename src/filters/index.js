@@ -6,8 +6,17 @@ var _ = require('../util')
  * @param {Number} indent
  */
 
-exports.json = function (value, indent) {
-  return JSON.stringify(value, null, Number(indent) || 2)
+exports.json = {
+  read: function (value, indent) {
+    return JSON.stringify(value, null, Number(indent) || 2)
+  },
+  write: function (value, oldValue) {
+    try {
+      return JSON.parse(value)
+    } catch (e) {
+      return oldValue
+    }
+  }
 }
 
 /**

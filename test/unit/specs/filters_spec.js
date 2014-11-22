@@ -3,11 +3,17 @@ var filters = require('../../../src/filters')
 
 describe('Filters', function () {
 
-  it('json', function () {
-    var filter = filters.json
+  it('reads json', function () {
+    var filter = filters.json.read
     var obj = {a:{b:2}}
     expect(filter(obj)).toBe(JSON.stringify(obj, null, 2))
     expect(filter(obj, 4)).toBe(JSON.stringify(obj, null, 4))
+  })
+
+  it('writes json', function () {
+    var filter = filters.json.write
+    var obj = '{"a":{"b":2}}'
+    expect(filter(obj)).toBe(JSON.parse(obj))
   })
   
   it('capitalize', function () {
