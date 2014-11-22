@@ -1,4 +1,4 @@
-> Live doc. Subject to change anytime before 0.11 release.
+# 0.10 -> 0.11 Migration Guide
 
 **Table of Contents**
 
@@ -325,6 +325,8 @@ computed: {
   Some built-in directives now checks for additional attribute params to trigger special behavior.
 
   - `v-model`
+
+    **BREAKING** `v-model` no longer works on arbitrary elements with `contenteditable`. It is now recommended to wrap a library that specifically deals with `contenteditable` inside a custom directive.
 
     `v-model` now will check `lazy` attribute for lazy model update, and will check `number` attribute to know if it needs to convert the value into Numbers before writing back to the model.
 
