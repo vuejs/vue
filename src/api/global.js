@@ -5,9 +5,22 @@ var mergeOptions = require('../util/merge-option')
  * Expose useful internals
  */
 
-exports.util       = _
-exports.nextTick   = _.nextTick
-exports.config     = require('../config')
+exports.util = _
+exports.nextTick = _.nextTick
+exports.config = require('../config')
+
+exports.compiler = {
+  compile: require('../compiler/compile'),
+  transclude: require('../compiler/transclude')
+}
+
+exports.parsers = {
+  path: require('../parsers/path'),
+  text: require('../parsers/text'),
+  template: require('../parsers/template'),
+  directive: require('../parsers/directive'),
+  expression: require('../parsers/expression')
+}
 
 /**
  * Each instance constructor, including Vue, has a unique
