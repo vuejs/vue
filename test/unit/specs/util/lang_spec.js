@@ -62,9 +62,10 @@ describe('Util - Language Enhancement', function () {
   it('extend', function () {
     var from = {a:1,b:2}
     var to = {}
-    _.extend(to, from)
+    var res = _.extend(to, from)
     expect(to.a).toBe(from.a)
     expect(to.b).toBe(from.b)
+    expect(res).toBe(to)
   })
 
   it('isObject', function () {
