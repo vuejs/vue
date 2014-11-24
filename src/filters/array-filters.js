@@ -22,7 +22,7 @@ exports.filterBy = function (arr, searchKey, delimiter, dataKey) {
   if (!search) {
     return arr
   }
-  search = search.toLowerCase()
+  search = ('' + search).toLowerCase()
   // get the optional dataKey
   dataKey =
     dataKey &&

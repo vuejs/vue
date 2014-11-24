@@ -97,14 +97,15 @@ describe('Filters', function () {
     var filter = filters.filterBy
     var arr = [
       { a: 1, b: { c: 'hello' }},
-      { a: 1, b: 'hello'},
-      { a: 1, b: 2 }
+      { a: 2, b: 'hello'},
+      { a: 3, b: 2 }
     ]
     var vm = new Vue({
       data: {
         search: {
           key: 'hello',
-          datakey: 'b.c'
+          datakey: 'b.c',
+          n: 2
         }
       }
     })
@@ -129,6 +130,9 @@ describe('Filters', function () {
     // no search key
     res = filter.call(vm, arr, 'abc')
     expect(res).toBe(arr)
+    // number search key
+    res = filter.call(vm, arr, 'search.n')
+    expect(res[0]).toBe(arr[1])
   })
 
   it('orderBy', function () {
