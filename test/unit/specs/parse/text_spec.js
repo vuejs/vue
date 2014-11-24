@@ -1,4 +1,4 @@
-var textParser = require('../../../../src/parse/text')
+var textParser = require('../../../../src/parsers/text')
 var config = require('../../../../src/config')
 var Vue = require('../../../../src/vue')
 

@@ -1,8 +1,8 @@
 var Vue = require('../../../../src/vue')
 var _ = require('../../../../src/util')
-var dirParser = require('../../../../src/parse/directive')
+var dirParser = require('../../../../src/parsers/directive')
 var merge = require('../../../../src/util/merge-option')
-var compile = require('../../../../src/compile/compile')
+var compile = require('../../../../src/compiler/compile')
 
 if (_.inBrowser) {
   describe('Compile', function () {

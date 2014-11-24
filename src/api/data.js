@@ -1,9 +1,9 @@
 var _ = require('../util')
 var Watcher = require('../watcher')
-var Path = require('../parse/path')
-var textParser = require('../parse/text')
-var dirParser = require('../parse/directive')
-var expParser = require('../parse/expression')
+var Path = require('../parsers/path')
+var textParser = require('../parsers/text')
+var dirParser = require('../parsers/directive')
+var expParser = require('../parsers/expression')
 var filterRE = /[^|]\|[^|]/
 
 /**

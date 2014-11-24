@@ -1,5 +1,5 @@
 var _ = require('../util')
-var templateParser = require('../parse/template')
+var templateParser = require('../parsers/template')
 
 module.exports = {
 

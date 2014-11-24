@@ -1,5 +1,5 @@
 var _ = require('../../../../src/util')
-var templateParser = require('../../../../src/parse/template')
+var templateParser = require('../../../../src/parsers/template')
 var parse = templateParser.parse
 var testString = '<div>hello</div><p class="test">world</p>'
 

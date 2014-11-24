@@ -1,5 +1,5 @@
 var _ = require('../util')
-var compile = require('../compile/compile')
+var compile = require('../compiler/compile')
 
 /**
  * Set instance target element and kick off the compilation

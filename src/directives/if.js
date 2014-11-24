@@ -1,6 +1,6 @@
 var _ = require('../util')
-var compile = require('../compile/compile')
-var templateParser = require('../parse/template')
+var compile = require('../compiler/compile')
+var templateParser = require('../parsers/template')
 var transition = require('../transition')
 
 module.exports = {

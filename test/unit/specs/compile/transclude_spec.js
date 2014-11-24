@@ -1,4 +1,4 @@
-var transclude = require('../../../../src/compile/transclude')
+var transclude = require('../../../../src/compiler/transclude')
 var _ = require('../../../../src/util')
 
 if (_.inBrowser) {

@@ -1,8 +1,8 @@
 var _ = require('./util')
 var config = require('./config')
 var Watcher = require('./watcher')
-var textParser = require('./parse/text')
-var expParser = require('./parse/expression')
+var textParser = require('./parsers/text')
+var expParser = require('./parsers/expression')
 
 /**
  * A directive links a DOM element with a piece of data,

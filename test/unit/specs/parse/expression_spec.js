@@ -1,4 +1,4 @@
-var expParser = require('../../../../src/parse/expression')
+var expParser = require('../../../../src/parsers/expression')
 var _ = require('../../../../src/util')
 
 var testCases = [

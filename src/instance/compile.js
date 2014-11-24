@@ -1,7 +1,7 @@
 var _ = require('../util')
 var Directive = require('../directive')
-var compile = require('../compile/compile')
-var transclude = require('../compile/transclude')
+var compile = require('../compiler/compile')
+var transclude = require('../compiler/transclude')
 
 /**
  * Transclude, compile and link element.

@@ -1,8 +1,8 @@
 var _ = require('../util')
 var config = require('../config')
-var textParser = require('../parse/text')
-var dirParser = require('../parse/directive')
-var templateParser = require('../parse/template')
+var textParser = require('../parsers/text')
+var dirParser = require('../parsers/directive')
+var templateParser = require('../parsers/template')
 
 /**
  * Compile a template and return a reusable composite link

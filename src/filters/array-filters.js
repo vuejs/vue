@@ -1,5 +1,5 @@
 var _ = require('../util')
-var Path = require('../parse/path')
+var Path = require('../parsers/path')
 
 /**
  * Filter filter for v-repeat

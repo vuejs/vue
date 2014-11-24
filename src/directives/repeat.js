@@ -1,10 +1,10 @@
 var _ = require('../util')
 var isObject = _.isObject
-var textParser = require('../parse/text')
-var expParser = require('../parse/expression')
-var templateParser = require('../parse/template')
-var compile = require('../compile/compile')
-var transclude = require('../compile/transclude')
+var textParser = require('../parsers/text')
+var expParser = require('../parsers/expression')
+var templateParser = require('../parsers/template')
+var compile = require('../compiler/compile')
+var transclude = require('../compiler/transclude')
 var mergeOptions = require('../util/merge-option')
 var uid = 0
 

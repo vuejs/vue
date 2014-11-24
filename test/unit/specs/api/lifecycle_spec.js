@@ -1,6 +1,6 @@
 var Vue = require('../../../../src/vue')
 var _ = require('../../../../src/util')
-var compile = require('../../../../src/compile/compile')
+var compile = require('../../../../src/compiler/compile')
 
 if (_.inBrowser) {
   describe('Lifecycle API', function () {
