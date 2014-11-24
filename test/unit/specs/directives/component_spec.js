@@ -134,19 +134,63 @@ if (_.inBrowser) {
       })
     })
 
-    it('should compile parent template directives in parent scope', function (done) {
+    it('should compile parent template directives & content in parent scope', function (done) {
       var vm = new Vue({
         el: el,
-        data: { ok: false },
-        template: '<div v-component="test" v-show="ok"></div>',
+        data: {
+          ok: false,
+          message: 'hello'
+        },
+        template: '<div v-component="test" v-show="ok">{{message}}</div>',
         components: {
-          test: {}
+          test: {
+            template: '<content></content> {{message}}',
+            data: function () {
+              return {
+                message: 'world'
+              }
+            }
+          }
         }
       })
       expect(el.firstChild.style.display).toBe('none')
+      expect(el.firstChild.textContent).toBe('hello world')
       vm.ok = true
+      vm.message = 'bye'
       _.nextTick(function () {
         expect(el.firstChild.style.display).toBe('')
+        expect(el.firstChild.textContent).toBe('bye world')
+        done()
+      })
+    })
+
+    it('parent content + v-if', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          ok: false,
+          message: 'hello'
+        },
+        template: '<div v-component="test" v-if="ok">{{message}}</div>',
+        components: {
+          test: {
+            template: '<content></content> {{message}}',
+            data: function () {
+              return {
+                message: 'world'
+              }
+            }
+          }
+        }
+      })
+      expect(el.textContent).toBe('')
+      expect(vm._children).toBeNull()
+      expect(vm._directives.length).toBe(1) // v-if
+      vm.ok = true
+      _.nextTick(function () {
+        expect(vm._children.length).toBe(1)
+        expect(vm._directives.length).toBe(3) // v-if, v-component, v-text
+        expect(el.textContent).toBe('hello world')
         done()
       })
     })

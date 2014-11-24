@@ -50,8 +50,12 @@ if (_.inBrowser) {
     it('nested v-repeat', function () {
       var vm = new Vue({
         el: el,
-        template: '<div v-component="c1" v-ref="c1"><div v-repeat="2" v-ref="c2"></div></div>',
-        components: { c1: {} }
+        template: '<div v-component="c1" v-ref="c1"></div>',
+        components: {
+          c1: {
+            template: '<div v-repeat="2" v-ref="c2"></div>'
+          }
+        }
       })
       expect(vm.$.c1 instanceof Vue).toBe(true)
       expect(vm.$.c2).toBeUndefined()

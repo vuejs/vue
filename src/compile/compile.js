@@ -10,20 +10,27 @@ var templateParser = require('../parse/template')
  * inside. This top level compile function should only be
  * called on instance root nodes.
  *
+ * When the `asParent` flag is true, this means we are doing
+ * a partial compile for a component's parent scope markup
+ * (See #502). This could **only** be triggered during
+ * compilation of `v-component`, and we need to skip v-with,
+ * v-ref & v-component in this situation.
+ *
  * @param {Element|DocumentFragment} el
  * @param {Object} options
  * @param {Boolean} partial
+ * @param {Boolean} asParent
  * @return {Function}
  */
 
-module.exports = function compile (el, options, partial) {
+module.exports = function compile (el, options, partial, asParent) {
   var params = !partial && options.paramAttributes
   var paramsLinkFn = params
     ? compileParamAttributes(el, params, options)
     : null
   var nodeLinkFn = el instanceof DocumentFragment
     ? null
-    : compileNode(el, options)
+    : compileNode(el, options, asParent)
   var childLinkFn =
     !(nodeLinkFn && nodeLinkFn.terminal) &&
     el.tagName !== 'SCRIPT' &&
@@ -74,13 +81,14 @@ module.exports = function compile (el, options, partial) {
  *
  * @param {Node} node
  * @param {Object} options
+ * @param {Boolean} asParent
  * @return {Function|undefined}
  */
 
-function compileNode (node, options) {
+function compileNode (node, options, asParent) {
   var type = node.nodeType
   if (type === 1 && node.tagName !== 'SCRIPT') {
-    return compileElement(node, options)
+    return compileElement(node, options, asParent)
   } else if (type === 3 && config.interpolate) {
     return compileTextNode(node, options)
   }
@@ -91,13 +99,14 @@ function compileNode (node, options) {
  *
  * @param {Element} el
  * @param {Object} options
+ * @param {Boolean} asParent
  * @return {Function|null}
  */
 
-function compileElement (el, options) {
+function compileElement (el, options, asParent) {
   var linkFn, tag, component
   // check custom element component, but only on non-root
-  if (!el.__vue__) {
+  if (!asParent && !el.__vue__) {
     tag = el.tagName.toLowerCase()
     component =
       tag.indexOf('-') > 0 &&
@@ -108,12 +117,14 @@ function compileElement (el, options) {
   }
   if (component || el.hasAttributes()) {
     // check terminal direcitves
-    linkFn = checkTerminalDirectives(el, options)
+    if (!asParent) {
+      linkFn = checkTerminalDirectives(el, options)
+    }
     // if not terminal, build normal link function
     if (!linkFn) {
-      var directives = collectDirectives(el, options)
-      linkFn = directives.length
-        ? makeDirectivesLinkFn(directives)
+      var dirs = collectDirectives(el, options, asParent)
+      linkFn = dirs.length
+        ? makeDirectivesLinkFn(dirs)
         : null
     }
   }
@@ -432,16 +443,6 @@ function checkTerminalDirectives (el, options) {
 function makeTeriminalLinkFn (el, dirName, value, options) {
   var descriptor = dirParser.parse(value)[0]
   var def = options.directives[dirName]
-  // special case: we need to collect directives found
-  // on a component root node, but defined in the parent
-  // template. These directives need to be compiled in
-  // the parent scope.
-  if (dirName === 'component') {
-    var dirs = collectDirectives(el, options, true)
-    el._parentLinker = dirs.length
-      ? makeDirectivesLinkFn(dirs)
-      : null
-  }
   var terminalLinkFn = function (vm, el) {
     vm._bindDir(dirName, el, descriptor, def)
   }
@@ -468,12 +469,11 @@ function collectDirectives (el, options, asParent) {
     attrName = attr.name
     if (attrName.indexOf(config.prefix) === 0) {
       dirName = attrName.slice(config.prefix.length)
-      if (asParent) {
-        if (dirName === 'with' || dirName === 'ref') {
-          continue
-        } else {
-          el.removeAttribute(attrName)
-        }
+      if (asParent &&
+          (dirName === 'with' ||
+           dirName === 'ref' ||
+           dirName === 'component')) {
+        continue
       }
       dirDef = options.directives[dirName]
       _.assertAsset(dirDef, 'directive', dirName)

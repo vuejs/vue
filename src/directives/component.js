@@ -1,4 +1,5 @@
 var _ = require('../util')
+var compile = require('../compile/compile')
 var templateParser = require('../parse/template')
 
 module.exports = {
@@ -22,8 +23,12 @@ module.exports = {
       _.replace(this.el, this.ref)
       // check keep-alive options
       this.checkKeepAlive()
-      // check parent directives
-      this.parentLinker = this.el._parentLinker
+      // compile parent scope content
+      this.parentLinkFn = compile(
+        this.el, this.vm.$options,
+        true, // partial
+        true  // asParent
+      )
       // if static, build right now.
       if (!this._isDynamicLiteral) {
         this.resolveCtor(this.expression)
@@ -81,18 +86,14 @@ module.exports = {
       }
     }
     var vm = this.vm
+    var el = templateParser.clone(this.el)
     if (this.Ctor && !this.childVM) {
-      this.childVM = vm.$addChild({
-        el: templateParser.clone(this.el)
-      }, this.Ctor)
-      if (this.parentLinker) {
-        var dirCount = vm._directives.length
-        var targetVM = this.childVM.$options.inherit
-          ? this.childVM
-          : vm
-        this.parentLinker(targetVM, this.childVM.$el)
-        this.parentDirs = vm._directives.slice(dirCount)
+      if (this.parentLinkFn) {
+        this.parentUnlinkFn = this.parentLinkFn(vm, el)
       }
+      this.childVM = vm.$addChild({
+        el: el
+      }, this.Ctor)
       if (this.keepAlive) {
         this.cache[this.ctorId] = this.childVM
       }
@@ -118,12 +119,8 @@ module.exports = {
       }
     } else {
       child.$destroy(remove)
-      var parentDirs = this.parentDirs
-      if (parentDirs) {
-        var i = parentDirs.length
-        while (i--) {
-          parentDirs[i]._teardown()
-        }
+      if (this.parentUnlinkFn) {
+        this.parentUnlinkFn()
       }
     }
     this.childVM = null
