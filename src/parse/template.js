@@ -2,19 +2,6 @@ var _ = require('../util')
 var Cache = require('../cache')
 var templateCache = new Cache(100)
 
-/**
- * Test for the presence of the Safari template cloning bug
- * https://bugs.webkit.org/show_bug.cgi?id=137755
- */
-
-var hasBrokenTemplate = _.inBrowser
-  ? (function () {
-      var a = document.createElement('div')
-      a.innerHTML = '<template>1</template>'
-      return !a.cloneNode(true).firstChild.innerHTML
-    })()
-  : false
-
 var map = {
   _default : [0, '', ''],
   legend   : [1, '<fieldset>', '</fieldset>'],
@@ -141,9 +128,30 @@ function nodeToFragment (node) {
     : stringToFragment(node.innerHTML)
 }
 
+// Test for the presence of the Safari template cloning bug
+// https://bugs.webkit.org/show_bug.cgi?id=137755
+var hasBrokenTemplate = _.inBrowser
+  ? (function () {
+      var a = document.createElement('div')
+      a.innerHTML = '<template>1</template>'
+      return !a.cloneNode(true).firstChild.innerHTML
+    })()
+  : false
+
+// Test for IE10/11 textarea placeholder clone bug
+var hasTextareaCloneBug = _.inBrowser
+  ? (function () {
+      var t = document.createElement('textarea')
+      t.placeholder = 't'
+      return t.cloneNode(true).value === 't'
+    })()
+  : false
+
 /**
- * Deal with Safari cloning nested <template> bug by
- * manually cloning all template instances.
+ * 1. Deal with Safari cloning nested <template> bug by
+ *    manually cloning all template instances.
+ * 2. Deal with IE10/11 textarea placeholder bug by setting
+ *    the correct value after cloning.
  *
  * @param {Element|DocumentFragment} node
  * @return {Element|DocumentFragment}
@@ -151,17 +159,33 @@ function nodeToFragment (node) {
 
 exports.clone = function (node) {
   var res = node.cloneNode(true)
+  var i, original, cloned
   /* istanbul ignore if */
   if (hasBrokenTemplate) {
-    var templates = node.querySelectorAll('template')
-    if (templates.length) {
-      var cloned = res.querySelectorAll('template')
-      var i = cloned.length
+    original = node.querySelectorAll('template')
+    if (original.length) {
+      cloned = res.querySelectorAll('template')
+      i = cloned.length
       while (i--) {
         cloned[i].parentNode.replaceChild(
-          templates[i].cloneNode(true),
+          original[i].cloneNode(true),
           cloned[i]
         )
+      }
+    }
+  }
+  /* istanbul ignore if */
+  if (hasTextareaCloneBug) {
+    if (node.tagName === 'TEXTAREA') {
+      res.value = node.value
+    } else {
+      original = node.querySelectorAll('textarea')
+      if (original.length) {
+        cloned = res.querySelectorAll('textarea')
+        i = cloned.length
+        while (i--) {
+          cloned[i].value = original[i].value
+        }
       }
     }
   }
