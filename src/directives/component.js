@@ -32,7 +32,11 @@ module.exports = {
       // if static, build right now.
       if (!this._isDynamicLiteral) {
         this.resolveCtor(this.expression)
-        this.build()
+        this.childVM = this.build()
+        this.childVM.$before(this.ref)
+      } else {
+        this.readyEvent = this.el.getAttribute('ready-event')
+        this.transMode = this.el.getAttribute('transition-mode')
       }
     } else {
       _.warn(
@@ -80,24 +84,24 @@ module.exports = {
     if (this.keepAlive) {
       var cached = this.cache[this.ctorId]
       if (cached) {
-        this.childVM = cached
-        cached.$before(this.ref)
-        return
+        return cached
       }
     }
     var vm = this.vm
     var el = templateParser.clone(this.el)
-    if (this.Ctor && !this.childVM) {
+    if (this.Ctor) {
+      var parentUnlinkFn
       if (this.parentLinkFn) {
-        this.parentUnlinkFn = this.parentLinkFn(vm, el)
+        parentUnlinkFn = this.parentLinkFn(vm, el)
       }
-      this.childVM = vm.$addChild({
+      var child = vm.$addChild({
         el: el
       }, this.Ctor)
+      child._parentUnlinkFn = parentUnlinkFn
       if (this.keepAlive) {
-        this.cache[this.ctorId] = this.childVM
+        this.cache[this.ctorId] = child
       }
-      this.childVM.$before(this.ref)
+      return child
     }
   },
 
@@ -108,22 +112,22 @@ module.exports = {
    * @param {Boolean} remove
    */
 
-  unbuild: function (remove) {
+  unbuild: function (remove, cb) {
     var child = this.childVM
     if (!child) {
+      if (cb) cb()
       return
     }
     if (this.keepAlive) {
       if (remove) {
-        child.$remove()
+        child.$remove(cb)
       }
     } else {
-      child.$destroy(remove)
-      if (this.parentUnlinkFn) {
-        this.parentUnlinkFn()
+      if (child._parentUnlinkFn) {
+        child._parentUnlinkFn()
       }
+      child.$destroy(remove, cb)
     }
-    this.childVM = null
   },
 
   /**
@@ -132,11 +136,46 @@ module.exports = {
    */
 
   update: function (value) {
-    this.unbuild(true)
-    if (value) {
+    if (!value) {
+      this.unbuild(true)
+      this.childVM = null
+    } else {
       this.resolveCtor(value)
-      this.build()
+      var child = this.build()
+      var self = this
+      if (this.readyEvent) {
+        child.$on(this.readyEvent, function () {
+          self.swapTo(child)
+        })
+      } else {
+        this.swapTo(child)
+      }
     }
+  },
+
+  /**
+   * Actually swap the components, depending on the
+   * transition mode. Defaults to simultaneous.
+   */
+
+  swapTo: function (child) {
+    var self = this
+    switch (self.transMode) {
+      case 'in-out':
+        child.$before(self.ref, function () {
+          self.unbuild(true)
+        })
+        break
+      case 'out-in':
+        self.unbuild(true, function () {
+          child.$before(self.ref)
+        })
+        break
+      default:
+        self.unbuild(true)
+        child.$before(self.ref)
+    }
+    self.childVM = child
   },
 
   /**
@@ -148,6 +187,16 @@ module.exports = {
   unbind: function () {
     this.keepAlive = false
     this.unbuild()
+    // destroy all cached instances
+    if (this.cache) {
+      for (var key in this.cache) {
+        var child = this.cache[key]
+        if (child._parentUnlinkFn) {
+          child._parentUnlinkFn()
+        }
+        child.$destroy()
+      }
+    }
   }
 
 }

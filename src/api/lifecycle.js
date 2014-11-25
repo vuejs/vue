@@ -55,10 +55,11 @@ function ready () {
  * directives, turn off all the event listeners, etc.
  *
  * @param {Boolean} remove - whether to remove the DOM node.
+ * @param {Function} cb
  * @public
  */
 
-exports.$destroy = function (remove) {
+exports.$destroy = function (remove, cb) {
   if (this._isBeingDestroyed) {
     return
   }
@@ -98,9 +99,11 @@ exports.$destroy = function (remove) {
   if (remove && this.$el) {
     this.$remove(function () {
       cleanup(self)
+      if (cb) cb()
     })
   } else {
     cleanup(self)
+    if (cb) cb()
   }
 }
 
