@@ -16,39 +16,63 @@ var extend = _.extend
 var strats = Object.create(null)
 
 /**
+ * Helper that merges two data objects together
+ */
+
+function mergeData (to, from) {
+  for (var key in from) {
+    if (!to.hasOwnProperty(key)) {
+      to.$add(key, from[key])
+    }
+  }
+  return to
+}
+
+/**
  * Data
  */
 
 strats.data = function (parentVal, childVal, vm) {
-  // in a class merge, both should be functions
-  // so we just return child if it exists
   if (!vm) {
-    if (childVal && typeof childVal !== 'function') {
+    // in a Vue.extend merge, both should be functions
+    if (!childVal) {
+      return parentVal
+    }
+    if (typeof childVal !== 'function') {
       _.warn(
         'The "data" option should be a function ' +
         'that returns a per-instance value in component ' +
         'definitions.'
       )
-      return
+      return parentVal
     }
-    return childVal || parentVal
-  }
-  var instanceData = typeof childVal === 'function'
-    ? childVal.call(vm)
-    : childVal
-  var defaultData = typeof parentVal === 'function'
-    ? parentVal.call(vm)
-    : undefined
-  if (instanceData) {
-    // mix default data into instance data
-    for (var key in defaultData) {
-      if (!instanceData.hasOwnProperty(key)) {
-        instanceData.$add(key, defaultData[key])
-      }
+    if (!parentVal) {
+      return childVal
     }
-    return instanceData
+    // when parentVal & childVal are both present,
+    // we need to return a function that returns the
+    // merged result of both functions... no need to
+    // check if parentVal is a function here because
+    // it has to be a function to pass previous merges.
+    return function mergedDataFn () {
+      return mergeData(
+        childVal.call(this),
+        parentVal.call(this)
+      )
+    }
   } else {
-    return defaultData
+    // instance merge, return raw object
+    var instanceData = typeof childVal === 'function'
+      ? childVal.call(vm)
+      : childVal
+    var defaultData = typeof parentVal === 'function'
+      ? parentVal.call(vm)
+      : undefined
+    if (instanceData) {
+      return mergeData(instanceData, defaultData)
+    } else {
+      return defaultData
+    }
   }
 }
 
