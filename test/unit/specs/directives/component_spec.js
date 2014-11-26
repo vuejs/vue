@@ -219,7 +219,8 @@ if (_.inBrowser) {
       vm.view = 'b'
       _.nextTick(function () {
         expect(el.textContent).toBe('AAA')
-        vm._children[1].$emit('ok')
+        // old vm is already removed, this is the new vm
+        vm._children[0].$emit('ok')
         expect(el.textContent).toBe('BBB')
         done()
       })

@@ -55,11 +55,12 @@ function ready () {
  * directives, turn off all the event listeners, etc.
  *
  * @param {Boolean} remove - whether to remove the DOM node.
- * @param {Function} cb
+ * @param {Boolean} deferCleanup - if true, defer cleanup to
+ *                                 be called later
  * @public
  */
 
-exports.$destroy = function (remove, cb) {
+exports.$destroy = function (remove, deferCleanup) {
   if (this._isBeingDestroyed) {
     return
   }
@@ -98,11 +99,10 @@ exports.$destroy = function (remove, cb) {
   var self = this
   if (remove && this.$el) {
     this.$remove(function () {
-      cleanup(self)
-      if (cb) cb()
+      self._cleanup()
     })
-  } else {
-    cleanup(self)
+  } else if (!deferCleanup) {
+    this._cleanup()
   }
 }
 
@@ -110,27 +110,25 @@ exports.$destroy = function (remove, cb) {
  * Clean up to ensure garbage collection.
  * This is called after the leave transition if there
  * is any.
- *
- * @param {Vue} vm
  */
 
-function cleanup (vm) {
+exports._cleanup = function () {
   // remove reference from data ob
-  vm._data.__ob__.removeVm(vm)
-  vm._data =
-  vm._watchers =
-  vm._userWatchers =
-  vm._watcherList =
-  vm.$el =
-  vm.$parent =
-  vm.$root =
-  vm._children =
-  vm._directives = null
+  this._data.__ob__.removeVm(this)
+  this._data =
+  this._watchers =
+  this._userWatchers =
+  this._watcherList =
+  this.$el =
+  this.$parent =
+  this.$root =
+  this._children =
+  this._directives = null
   // call the last hook...
-  vm._isDestroyed = true
-  vm._callHook('destroyed')
+  this._isDestroyed = true
+  this._callHook('destroyed')
   // turn off all instance listeners.
-  vm.$off()
+  this.$off()
 }
 
 /**

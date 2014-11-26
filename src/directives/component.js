@@ -99,28 +99,41 @@ module.exports = {
   },
 
   /**
-   * Teardown the active vm.
-   * If keep alive, simply remove it; otherwise destroy it.
+   * Teardown the current child, but defers cleanup so
+   * that we can separate the destroy and removal steps.
+   */
+
+  unbuild: function () {
+    var child = this.childVM
+    if (!child || this.keepAlive) {
+      return
+    }
+    if (child._parentUnlinkFn) {
+      child._parentUnlinkFn()
+    }
+    // the sole purpose of `deferCleanup` is so that we can
+    // "deactivate" the vm right now and perform DOM removal
+    // later.
+    child.$destroy(false, true)
+  },
+
+  /**
+   * Remove current destroyed child and manually do
+   * the cleanup after removal.
    *
-   * @param {Boolean} remove
    * @param {Function} cb
    */
 
-  unbuild: function (remove, cb) {
+  removeCurrent: function (cb) {
     var child = this.childVM
-    if (!child) {
-      if (cb) cb()
-      return
-    }
-    if (this.keepAlive) {
-      if (remove) {
-        child.$remove(cb)
-      }
-    } else {
-      if (child._parentUnlinkFn) {
-        child._parentUnlinkFn()
-      }
-      child.$destroy(remove, cb)
+    var keepAlive = this.keepAlive
+    if (child) {
+      child.$remove(function () {
+        if (!keepAlive) child._cleanup()
+        if (cb) cb()
+      })
+    } else if (cb) {
+      cb()
     }
   },
 
@@ -131,18 +144,21 @@ module.exports = {
 
   update: function (value) {
     if (!value) {
-      this.unbuild(true)
+      // just destroy and remove current
+      this.unbuild()
+      this.removeCurrent()
       this.childVM = null
     } else {
       this.resolveCtor(value)
-      var child = this.build()
+      this.unbuild()
+      var newComponent = this.build()
       var self = this
       if (this.readyEvent) {
-        child.$once(this.readyEvent, function () {
-          self.swapTo(child)
+        newComponent.$once(this.readyEvent, function () {
+          self.swapTo(newComponent)
         })
       } else {
-        this.swapTo(child)
+        this.swapTo(newComponent)
       }
     }
   },
@@ -151,41 +167,38 @@ module.exports = {
    * Actually swap the components, depending on the
    * transition mode. Defaults to simultaneous.
    *
-   * @param {Vue} child - target to swap to
+   * @param {Vue} target
    */
 
-  swapTo: function (child) {
+  swapTo: function (target) {
     var self = this
     switch (self.transMode) {
       case 'in-out':
-        child.$before(self.ref, function () {
-          self.unbuild(true)
-          self.childVM = child
+        target.$before(self.ref, function () {
+          self.removeCurrent()
+          self.childVM = target
         })
         break
       case 'out-in':
-        self.unbuild(true, function () {
-          child.$before(self.ref)
-          self.childVM = child
+        self.removeCurrent(function () {
+          target.$before(self.ref)
+          self.childVM = target
         })
         break
       default:
-        self.unbuild(true)
-        child.$before(self.ref)
-        self.childVM = child
+        self.removeCurrent()
+        target.$before(self.ref)
+        self.childVM = target
     }
   },
 
   /**
    * Unbind.
-   * Make sure keepAlive is set to false so that the
-   * instance is always destroyed.
    */
 
   unbind: function () {
-    this.keepAlive = false
     this.unbuild()
-    // destroy all cached instances
+    // destroy all keep-alive cached instances
     if (this.cache) {
       for (var key in this.cache) {
         var child = this.cache[key]
