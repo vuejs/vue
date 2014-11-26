@@ -21,8 +21,15 @@ module.exports = {
       // create a ref anchor
       this.ref = document.createComment('v-component')
       _.replace(this.el, this.ref)
-      // check keep-alive options
-      this.checkKeepAlive()
+      // check keep-alive options.
+      // If yes, instead of destroying the active vm when
+      // hiding (v-if) or switching (dynamic literal) it,
+      // we simply remove it from the DOM and save it in a
+      // cache object, with its constructor id as the key.
+      this.keepAlive = this._checkParam('keep-alive') != null
+      if (this.keepAlive) {
+        this.cache = {}
+      }
       // compile parent scope content
       this.parentLinkFn = compile(
         this.el, this.vm.$options,
@@ -44,23 +51,6 @@ module.exports = {
         'v-component="' + this.expression + '" cannot be ' +
         'used on an already mounted instance.'
       )
-    }
-  },
-
-  /**
-   * Check if the "keep-alive" flag is present.
-   * If yes, instead of destroying the active vm when
-   * hiding (v-if) or switching (dynamic literal) it,
-   * we simply remove it from the DOM and save it in a
-   * cache object, with its constructor id as the key.
-   */
-
-  checkKeepAlive: function () {
-    // check keep-alive flag
-    this.keepAlive = this.el.hasAttribute('keep-alive')
-    if (this.keepAlive) {
-      this.el.removeAttribute('keep-alive')
-      this.cache = {}
     }
   },
 

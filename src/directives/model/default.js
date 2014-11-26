@@ -8,15 +8,9 @@ module.exports = {
 
     // check params
     // - lazy: update model on "change" instead of "input"
-    var lazy = el.hasAttribute('lazy')
-    if (lazy) {
-      el.removeAttribute('lazy')
-    }
+    var lazy = this._checkParam('lazy') != null
     // - number: cast value into number when updating model.
-    var number = el.hasAttribute('number')
-    if (number) {
-      el.removeAttribute('number')
-    }
+    var number = this._checkParam('number') != null
 
     // handle composition events.
     // http://blog.evanyou.me/2014/01/03/composition-event/
