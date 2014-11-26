@@ -1,18 +1,18 @@
 var uid = 0
 
 /**
- * A binding is an observable that can have multiple
+ * A dep is an observable that can have multiple
  * directives subscribing to it.
  *
  * @constructor
  */
 
-function Binding () {
+function Dep () {
   this.id = ++uid
   this.subs = []
 }
 
-var p = Binding.prototype
+var p = Dep.prototype
 
 /**
  * Add a directive subscriber.
@@ -47,4 +47,4 @@ p.notify = function () {
   }
 }
 
-module.exports = Binding
+module.exports = Dep

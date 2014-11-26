@@ -46,18 +46,18 @@ function Watcher (vm, expression, cb, filters, needSet, deep) {
 var p = Watcher.prototype
 
 /**
- * Add a binding dependency to this directive.
+ * Add a dependency to this directive.
  *
- * @param {Binding} binding
+ * @param {Dep} dep
  */
 
-p.addDep = function (binding) {
-  var id = binding.id
+p.addDep = function (dep) {
+  var id = dep.id
   if (!this.newDeps[id]) {
-    this.newDeps[id] = binding
+    this.newDeps[id] = dep
     if (!this.deps[id]) {
-      this.deps[id] = binding
-      binding.addSub(this)
+      this.deps[id] = dep
+      dep.addSub(this)
     }
   }
 }

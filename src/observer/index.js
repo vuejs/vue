@@ -1,6 +1,6 @@
 var _ = require('../util')
 var config = require('../config')
-var Binding = require('../binding')
+var Dep = require('./dep')
 var arrayMethods = require('./array')
 var arrayKeys = Object.getOwnPropertyNames(arrayMethods)
 require('./object')
@@ -58,7 +58,7 @@ function Observer (value, type) {
   this.id = ++uid
   this.value = value
   this.active = true
-  this.bindings = []
+  this.deps = []
   _.define(value, '__ob__', this)
   if (type === ARRAY) {
     var augment = config.proto && _.hasProto
@@ -126,10 +126,10 @@ p.walk = function (obj) {
 
 /**
  * Try to carete an observer for a child value,
- * and if value is array, link binding to the array.
+ * and if value is array, link dep to the array.
  *
  * @param {*} val
- * @return {Binding|undefined}
+ * @return {Dep|undefined}
  */
 
 p.observe = function (val) {
@@ -160,9 +160,9 @@ p.observeArray = function (items) {
 p.convert = function (key, val) {
   var ob = this
   var childOb = ob.observe(val)
-  var binding = new Binding()
+  var dep = new Dep()
   if (childOb) {
-    childOb.bindings.push(binding)
+    childOb.deps.push(dep)
   }
   Object.defineProperty(ob.value, key, {
     enumerable: true,
@@ -171,40 +171,40 @@ p.convert = function (key, val) {
       // Observer.target is a watcher whose getter is
       // currently being evaluated.
       if (ob.active && Observer.target) {
-        Observer.target.addDep(binding)
+        Observer.target.addDep(dep)
       }
       return val
     },
     set: function (newVal) {
       if (newVal === val) return
-      // remove binding from old value
+      // remove dep from old value
       var oldChildOb = val && val.__ob__
       if (oldChildOb) {
-        var oldBindings = oldChildOb.bindings
-        oldBindings.splice(oldBindings.indexOf(binding), 1)
+        var oldDeps = oldChildOb.deps
+        oldDeps.splice(oldDeps.indexOf(dep), 1)
       }
       val = newVal
-      // add binding to new value
+      // add dep to new value
       var newChildOb = ob.observe(newVal)
       if (newChildOb) {
-        newChildOb.bindings.push(binding)
+        newChildOb.deps.push(dep)
       }
-      binding.notify()
+      dep.notify()
     }
   })
 }
 
 /**
- * Notify change on all self bindings on an observer.
+ * Notify change on all self deps on an observer.
  * This is called when a mutable value mutates. e.g.
  * when an Array's mutating methods are called, or an
  * Object's $add/$delete are called.
  */
 
 p.notify = function () {
-  var bindings = this.bindings
-  for (var i = 0, l = bindings.length; i < l; i++) {
-    bindings[i].notify()
+  var deps = this.deps
+  for (var i = 0, l = deps.length; i < l; i++) {
+    deps[i].notify()
   }
 }
 

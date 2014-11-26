@@ -1,5 +1,5 @@
-var Vue = require('../../../src/vue')
-var filters = require('../../../src/filters')
+var Vue = require('../../../../src/vue')
+var filters = require('../../../../src/filters')
 
 describe('Filters', function () {
 

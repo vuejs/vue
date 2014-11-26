@@ -1,7 +1,7 @@
-var Observer = require('../../../src/observer')
-var config = require('../../../src/config')
-var Binding = require('../../../src/binding')
-var _ = require('../../../src/util')
+var Observer = require('../../../../src/observer')
+var config = require('../../../../src/config')
+var Dep = require('../../../../src/observer/dep')
+var _ = require('../../../../src/util')
 
 describe('Observer', function () {
 
@@ -57,9 +57,9 @@ describe('Observer', function () {
     // mock a watcher!
     var watcher = {
       deps: [],
-      addDep: function (binding) {
-        this.deps.push(binding)
-        binding.addSub(this)
+      addDep: function (dep) {
+        this.deps.push(dep)
+        dep.addSub(this)
       },
       update: jasmine.createSpy()
     }
@@ -75,8 +75,8 @@ describe('Observer', function () {
     var oldA = obj.a
     obj.a = { b: 4 }
     expect(watcher.update.calls.count()).toBe(2)
-    expect(oldA.__ob__.bindings.length).toBe(0)
-    expect(obj.a.__ob__.bindings.length).toBe(1)
+    expect(oldA.__ob__.deps.length).toBe(0)
+    expect(obj.a.__ob__.deps.length).toBe(1)
     // recollect dep
     var oldDeps = watcher.deps
     watcher.deps = []
@@ -92,22 +92,22 @@ describe('Observer', function () {
   it('observing $add/$delete', function () {
     var obj = { a: 1 }
     var ob = Observer.create(obj)
-    var binding = new Binding()
-    ob.bindings.push(binding)
-    spyOn(binding, 'notify')
+    var dep = new Dep()
+    ob.deps.push(dep)
+    spyOn(dep, 'notify')
     obj.$add('b', 2)
     expect(obj.b).toBe(2)
-    expect(binding.notify.calls.count()).toBe(1)
+    expect(dep.notify.calls.count()).toBe(1)
     obj.$delete('a')
     expect(obj.hasOwnProperty('a')).toBe(false)
-    expect(binding.notify.calls.count()).toBe(2)
+    expect(dep.notify.calls.count()).toBe(2)
     // should ignore adding an existing key
     obj.$add('b', 3)
     expect(obj.b).toBe(2)
-    expect(binding.notify.calls.count()).toBe(2)
+    expect(dep.notify.calls.count()).toBe(2)
     // should ignore deleting non-existing key
     obj.$delete('a')
-    expect(binding.notify.calls.count()).toBe(2)
+    expect(dep.notify.calls.count()).toBe(2)
     // should work on non-observed objects
     var obj2 = { a: 1 }
     obj2.$delete('a')
@@ -117,9 +117,9 @@ describe('Observer', function () {
   it('observing array mutation', function () {
     var arr = []
     var ob = Observer.create(arr)
-    var binding = new Binding()
-    ob.bindings.push(binding)
-    spyOn(binding, 'notify')
+    var dep = new Dep()
+    ob.deps.push(dep)
+    spyOn(dep, 'notify')
     var objs = [{}, {}, {}]
     arr.push(objs[0])
     arr.pop()
@@ -128,7 +128,7 @@ describe('Observer', function () {
     arr.splice(0, 0, objs[2])
     arr.sort()
     arr.reverse()
-    expect(binding.notify.calls.count()).toBe(7)
+    expect(dep.notify.calls.count()).toBe(7)
     // inserted elements should be observed
     objs.forEach(function (obj) {
       expect(obj.__ob__ instanceof Observer).toBe(true)
@@ -138,16 +138,16 @@ describe('Observer', function () {
   it('array $set', function () {
     var arr = [1]
     var ob = Observer.create(arr)
-    var binding = new Binding()
-    ob.bindings.push(binding)
-    spyOn(binding, 'notify')
+    var dep = new Dep()
+    ob.deps.push(dep)
+    spyOn(dep, 'notify')
     arr.$set(0, 2)
     expect(arr[0]).toBe(2)
-    expect(binding.notify.calls.count()).toBe(1)
+    expect(dep.notify.calls.count()).toBe(1)
     // setting out of bound index
     arr.$set(2, 3)
     expect(arr[2]).toBe(3)
-    expect(binding.notify.calls.count()).toBe(2)
+    expect(dep.notify.calls.count()).toBe(2)
   })
 
   it('array $remove', function () {
@@ -155,23 +155,23 @@ describe('Observer', function () {
     var obj1 = arr[0]
     var obj2 = arr[1]
     var ob = Observer.create(arr)
-    var binding = new Binding()
-    ob.bindings.push(binding)
-    spyOn(binding, 'notify')
+    var dep = new Dep()
+    ob.deps.push(dep)
+    spyOn(dep, 'notify')
     // remove by index
     arr.$remove(0)
     expect(arr.length).toBe(1)
     expect(arr[0]).toBe(obj2)
-    expect(binding.notify.calls.count()).toBe(1)
+    expect(dep.notify.calls.count()).toBe(1)
     // remove by identity, not in array
     arr.$remove(obj1)
     expect(arr.length).toBe(1)
     expect(arr[0]).toBe(obj2)
-    expect(binding.notify.calls.count()).toBe(1)
+    expect(dep.notify.calls.count()).toBe(1)
     // remove by identity, in array
     arr.$remove(obj2)
     expect(arr.length).toBe(0)
-    expect(binding.notify.calls.count()).toBe(2)
+    expect(dep.notify.calls.count()).toBe(2)
   })
 
   it('no proto', function () {
@@ -181,22 +181,22 @@ describe('Observer', function () {
     var ob = Observer.create(obj)
     expect(obj.$add).toBeTruthy()
     expect(obj.$delete).toBeTruthy()
-    var binding = new Binding()
-    ob.bindings.push(binding)
-    spyOn(binding, 'notify')
+    var dep = new Dep()
+    ob.deps.push(dep)
+    spyOn(dep, 'notify')
     obj.$add('b', 2)
-    expect(binding.notify).toHaveBeenCalled()
+    expect(dep.notify).toHaveBeenCalled()
     // array
     var arr = [1, 2, 3]
     var ob2 = Observer.create(arr)
     expect(arr.$set).toBeTruthy()
     expect(arr.$remove).toBeTruthy()
     expect(arr.push).not.toBe([].push)
-    var binding2 = new Binding()
-    ob2.bindings.push(binding2)
-    spyOn(binding2, 'notify')
+    var dep2 = new Dep()
+    ob2.deps.push(dep2)
+    spyOn(dep2, 'notify')
     arr.push(1)
-    expect(binding2.notify).toHaveBeenCalled()
+    expect(dep2.notify).toHaveBeenCalled()
     config.proto = true
   })
 

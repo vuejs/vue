@@ -1,6 +1,6 @@
 var _ = require('../util')
 var Observer = require('../observer')
-var Binding = require('../binding')
+var Dep = require('../observer/dep')
 
 /**
  * Setup the scope of an instance, which contains:
@@ -197,20 +197,20 @@ exports._initMeta = function () {
  */
 
 exports._defineMeta = function (key, value) {
-  var binding = new Binding()
+  var dep = new Dep()
   Object.defineProperty(this, key, {
     enumerable: true,
     configurable: true,
     get: function metaGetter () {
       if (Observer.target) {
-        Observer.target.addDep(binding)
+        Observer.target.addDep(dep)
       }
       return value
     },
     set: function metaSetter (val) {
       if (val !== value) {
         value = val
-        binding.notify()
+        dep.notify()
       }
     }
   })

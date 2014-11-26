@@ -125,7 +125,6 @@ function cleanup (vm) {
   vm.$parent =
   vm.$root =
   vm._children =
-  vm._bindings =
   vm._directives = null
   // call the last hook...
   vm._isDestroyed = true
