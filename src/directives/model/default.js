@@ -13,9 +13,7 @@ module.exports = {
       el.removeAttribute('lazy')
     }
     // - number: cast value into number when updating model.
-    var number =
-      el.hasAttribute('number') ||
-      el.type === 'number'
+    var number = el.hasAttribute('number')
     if (number) {
       el.removeAttribute('number')
     }
@@ -47,7 +45,9 @@ module.exports = {
     // if the directive has filters, we need to
     // record cursor position and restore it after updating
     // the input with the filtered value.
-    this.listener = this.filters
+    // also force update for type="range" inputs to enable
+    // "lock in range" (see #506)
+    this.listener = this.filters || el.type === 'range'
       ? function textInputListener () {
           if (cpLocked) return
           var charsOffset
