@@ -78,6 +78,8 @@ module.exports = {
    * Instantiate/insert a new child vm.
    * If keep alive and has cached instance, insert that
    * instance; otherwise build a new one and cache it.
+   *
+   * @return {Vue} - the created instance
    */
 
   build: function () {
@@ -110,6 +112,7 @@ module.exports = {
    * If keep alive, simply remove it; otherwise destroy it.
    *
    * @param {Boolean} remove
+   * @param {Function} cb
    */
 
   unbuild: function (remove, cb) {
@@ -156,6 +159,8 @@ module.exports = {
   /**
    * Actually swap the components, depending on the
    * transition mode. Defaults to simultaneous.
+   *
+   * @param {Vue} child - target to swap to
    */
 
   swapTo: function (child) {
