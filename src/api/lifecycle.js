@@ -103,7 +103,6 @@ exports.$destroy = function (remove, cb) {
     })
   } else {
     cleanup(self)
-    if (cb) cb()
   }
 }
 

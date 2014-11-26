@@ -7,9 +7,8 @@ module.exports = {
     var self = this
     var el = this.el
     // check options param
-    var optionsParam = el.getAttribute('options')
+    var optionsParam = this._checkParam('options')
     if (optionsParam) {
-      el.removeAttribute('options')
       initOptions.call(this, optionsParam)
     }
     this.multiple = el.hasAttribute('multiple')

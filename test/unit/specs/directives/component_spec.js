@@ -86,7 +86,11 @@ if (_.inBrowser) {
       vm.view = 'b'
       _.nextTick(function () {
         expect(el.innerHTML).toBe('<div view="b">BBB</div><!--v-component-->')
-        done()
+        vm.view = ''
+        _.nextTick(function () {
+          expect(el.innerHTML).toBe('<!--v-component-->')
+          done()
+        })
       })
     })
 
@@ -195,19 +199,153 @@ if (_.inBrowser) {
       })
     })
 
-    it('teardown', function () {
+    it('wait-for', function (done) {
       var vm = new Vue({
         el: el,
-        data: { ok: true },
-        template: '<div v-component="test" v-if="ok"></div>',
+        data: {
+          view: 'a'
+        },
+        template: '<div v-component="{{view}}" wait-for="ok"></div>',
         components: {
-          test: {}
+          a: {
+            template: 'AAA'
+          },
+          b: {
+            template: 'BBB'
+          }
         }
       })
-      var child = vm._children[0]
-      vm._directives[0].unbind()
-      expect(vm._children.length).toBe(0)
-      expect(child._isDestroyed).toBe(true)
+      vm._children[0].$emit('ok')
+      vm.view = 'b'
+      _.nextTick(function () {
+        expect(el.textContent).toBe('AAA')
+        vm._children[1].$emit('ok')
+        expect(el.textContent).toBe('BBB')
+        done()
+      })
+    })
+
+    it('transition-mode: in-out', function (done) {
+      var spy1 = jasmine.createSpy('enter')
+      var spy2 = jasmine.createSpy('leave')
+      var next
+      // === IMPORTANT ===
+      // PhantomJS always returns false when calling
+      // Element.contains() on a comment node. This causes
+      // transitions to be skipped. Monkey patching here
+      // isn't ideal but does the job...
+      var inDoc = _.inDoc
+      _.inDoc = function () {
+        return true
+      }
+      var vm = new Vue({
+        el: el,
+        data: {
+          view: 'a'
+        },
+        template: '<div v-component="{{view}}" v-transition="test" transition-mode="in-out"></div>',
+        components: {
+          a: { template: 'AAA' },
+          b: { template: 'BBB' }
+        },
+        transitions: {
+          test: {
+            enter: function (el, done) {
+              spy1()
+              next = done
+            },
+            leave: function (el, done) {
+              spy2()
+              done()
+            }
+          }
+        }
+      })
+      expect(el.textContent).toBe('AAA')
+      vm.view = 'b'
+      _.nextTick(function () {
+        expect(spy1).toHaveBeenCalled()
+        expect(spy2).not.toHaveBeenCalled()
+        expect(el.textContent).toBe('AAABBB')
+        next()
+        expect(spy2).toHaveBeenCalled()
+        expect(el.textContent).toBe('BBB')
+        // clean up
+        _.inDoc = inDoc
+        done()
+      })
+    })
+
+    it('transition-mode: out-in', function (done) {
+      var spy1 = jasmine.createSpy('enter')
+      var spy2 = jasmine.createSpy('leave')
+      var next
+      var inDoc = _.inDoc
+      _.inDoc = function () {
+        return true
+      }
+      var vm = new Vue({
+        el: el,
+        data: {
+          view: 'a'
+        },
+        template: '<div v-component="{{view}}" v-transition="test" transition-mode="out-in"></div>',
+        components: {
+          a: { template: 'AAA' },
+          b: { template: 'BBB' }
+        },
+        transitions: {
+          test: {
+            enter: function (el, done) {
+              spy2()
+              done()
+            },
+            leave: function (el, done) {
+              spy1()
+              next = done
+            }
+          }
+        }
+      })
+      expect(el.textContent).toBe('AAA')
+      vm.view = 'b'
+      _.nextTick(function () {
+        expect(spy1).toHaveBeenCalled()
+        expect(spy2).not.toHaveBeenCalled()
+        expect(el.textContent).toBe('AAA')
+        next()
+        expect(spy2).toHaveBeenCalled()
+        expect(el.textContent).toBe('BBB')
+        // clean up
+        _.inDoc = inDoc
+        done()
+      })
+    })
+
+    it('teardown', function (done) {
+      var vm = new Vue({
+        el: el,
+        template: '<div v-component="{{view}}" keep-alive></div>',
+        data: {
+          view: 'test'
+        },
+        components: {
+          test: {},
+          test2: {}
+        }
+      })
+      vm.view = 'test2'
+      _.nextTick(function () {
+        expect(vm._children.length).toBe(2)
+        var child = vm._children[0]
+        var child2 = vm._children[1]
+        vm._directives[0].unbind()
+        expect(vm._directives[0].cache).toBeNull()
+        expect(vm._children.length).toBe(0)
+        expect(child._isDestroyed).toBe(true)
+        expect(child2._isDestroyed).toBe(true)
+        done()
+      })
     })
 
     it('already mounted warn', function () {

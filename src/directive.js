@@ -154,6 +154,21 @@ p._checkStatement = function () {
 }
 
 /**
+ * Check for an attribute directive param, e.g. lazy
+ *
+ * @param {String} name
+ * @return {String}
+ */
+
+p._checkParam = function (name) {
+  var param = this.el.getAttribute(name)
+  if (param !== null) {
+    this.el.removeAttribute(name)
+  }
+  return param
+}
+
+/**
  * Teardown the watcher and call unbind.
  */
 

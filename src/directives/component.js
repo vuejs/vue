@@ -35,8 +35,9 @@ module.exports = {
         this.childVM = this.build()
         this.childVM.$before(this.ref)
       } else {
-        this.readyEvent = this.el.getAttribute('ready-event')
-        this.transMode = this.el.getAttribute('transition-mode')
+        // check dynamic component params
+        this.readyEvent = this._checkParam('wait-for')
+        this.transMode = this._checkParam('transition-mode')
       }
     } else {
       _.warn(
@@ -147,7 +148,7 @@ module.exports = {
       var child = this.build()
       var self = this
       if (this.readyEvent) {
-        child.$on(this.readyEvent, function () {
+        child.$once(this.readyEvent, function () {
           self.swapTo(child)
         })
       } else {
@@ -169,18 +170,20 @@ module.exports = {
       case 'in-out':
         child.$before(self.ref, function () {
           self.unbuild(true)
+          self.childVM = child
         })
         break
       case 'out-in':
         self.unbuild(true, function () {
           child.$before(self.ref)
+          self.childVM = child
         })
         break
       default:
         self.unbuild(true)
         child.$before(self.ref)
+        self.childVM = child
     }
-    self.childVM = child
   },
 
   /**
@@ -201,6 +204,7 @@ module.exports = {
         }
         child.$destroy()
       }
+      this.cache = null
     }
   }
 

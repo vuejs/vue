@@ -40,8 +40,9 @@ module.exports = {
     // at v-repeat level
     this.checkIf()
     this.checkRef()
-    this.checkTrackById()
     this.checkComponent()
+    // check for trackby param
+    this.idKey = this._checkParam('trackby')
     // cache for primitive value instances
     this.cache = Object.create(null)
   },
@@ -72,19 +73,6 @@ module.exports = {
     this.elId = elId
       ? this.vm.$interpolate(elId)
       : null
-  },
-
-  /**
-   * Check for a track-by ID, which allows us to identify
-   * a piece of data and its associated instance by its
-   * unique id.
-   */
-
-  checkTrackById: function () {
-    this.idKey = this.el.getAttribute('trackby')
-    if (this.idKey !== null) {
-      this.el.removeAttribute('trackby')
-    }
   },
 
   /**
