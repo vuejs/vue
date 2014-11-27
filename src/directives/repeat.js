@@ -42,7 +42,9 @@ module.exports = {
     this.checkRef()
     this.checkComponent()
     // check for trackby param
-    this.idKey = this._checkParam('trackby')
+    this.idKey =
+      this._checkParam('track-by') ||
+      this._checkParam('trackby') // 0.11.0 compat
     // cache for primitive value instances
     this.cache = Object.create(null)
   },

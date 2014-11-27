@@ -287,10 +287,10 @@ if (_.inBrowser) {
       }
     })
 
-    it('trackby id', function (done) {
+    it('track by id', function (done) {
 
-      assertTrackBy('<div v-repeat="list" trackby="id">{{msg}}</div>', function () {
-        assertTrackBy('<div v-repeat="item:list" trackby="id">{{item.msg}}</div>', done)
+      assertTrackBy('<div v-repeat="list" track-by="id">{{msg}}</div>', function () {
+        assertTrackBy('<div v-repeat="item:list" track-by="id">{{item.msg}}</div>', done)
       })
       
       function assertTrackBy (template, next) {
