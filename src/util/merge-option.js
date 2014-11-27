@@ -16,13 +16,18 @@ var extend = _.extend
 var strats = Object.create(null)
 
 /**
- * Helper that merges two data objects together
+ * Helper that recursively merges two data objects together.
  */
 
 function mergeData (to, from) {
-  for (var key in from) {
+  var key, toVal, fromVal
+  for (key in from) {
+    toVal = to[key]
+    fromVal = from[key]
     if (!to.hasOwnProperty(key)) {
-      to.$add(key, from[key])
+      to.$add(key, fromVal)
+    } else if (_.isObject(toVal) && _.isObject(fromVal)) {
+      mergeData(toVal, fromVal)
     }
   }
   return to

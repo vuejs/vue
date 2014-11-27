@@ -160,21 +160,25 @@ describe('Util - Option merging', function () {
 
   it('class data merge', function () {
     function fn1 () {
-      return { a: 1, c: 4 }
+      return { a: 1, c: 4, d: { e: 1 } }
     }
     function fn2 () {
-      return { a: 2, b: 3 }
+      return { a: 2, b: 3, d: { f: 2 } }
     }
     // both present
     var res = merge({data:fn1}, {data:fn2}).data()
     expect(res.a).toBe(2)
     expect(res.b).toBe(3)
     expect(res.c).toBe(4)
+    expect(res.d.e).toBe(1)
+    expect(res.d.f).toBe(2)
     // only parent
     res = merge({data:fn1}, {}).data()
     expect(res.a).toBe(1)
     expect(res.b).toBeUndefined()
     expect(res.c).toBe(4)
+    expect(res.d.e).toBe(1)
+    expect(res.d.f).toBeUndefined()
   })
 
   it('instanace el merge', function () {
