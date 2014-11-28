@@ -45,10 +45,10 @@ Read the [contributing guide](https://github.com/yyx990803/vue/blob/master/CONTR
 ## Get in Touch
 
 - For latest releases and announcements, follow on Twitter: [@vuejs](https://twitter.com/vuejs)
+- Live discussion: [![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/yyx990803/vue)
 - Bugs reports: first read the [issue checklist](https://github.com/yyx990803/vue/blob/master/CONTRIBUTING.md#issue-reporting-checklist), then [open an issue](https://github.com/yyx990803/vue/issues).
 - Questions, suggestions, feature requests: open an issue at [vuejs/Discussion](https://github.com/vuejs/Discussion/issues).
 - If you have a Vue-related project/component/tool, add it to [this list](https://github.com/yyx990803/vue/wiki/User-Contributed-Components-&-Tools)!
-- freenode IRC Channel: #vuejs
 
 ## Changelog
 
