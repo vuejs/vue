@@ -15,7 +15,8 @@ describe('Directive', function () {
     }
     vm = new Vue({
       data:{
-        a:1
+        a:1,
+        b: { c: 2 }
       },
       filters: {
         test: function (v) {
@@ -145,6 +146,18 @@ describe('Directive', function () {
         expect(def.update.calls.count()).toBe(2)
         done()
       })
+    })
+  })
+
+  it('deep', function (done) {
+    def.deep = true
+    var d = new Directive('test', el, vm, {
+      expression: 'b'
+    }, def)
+    vm.b.c = 3
+    nextTick(function () {
+      expect(def.update.calls.count()).toBe(2)
+      done()
     })
   })
 
