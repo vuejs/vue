@@ -152,7 +152,10 @@ exports.$interpolate = function (text) {
 
 exports.$log = function (path) {
   var data = path
-    ? Path.get(this, path)
+    ? Path.get(this._data, path)
     : this._data
-  console.log(JSON.parse(JSON.stringify(data)))
+  if (data) {
+    data = JSON.parse(JSON.stringify(data))
+  }
+  console.log(data)
 }
