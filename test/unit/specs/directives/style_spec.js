@@ -1,5 +1,6 @@
 var _ = require('../../../../src/util')
 var def = require('../../../../src/directives/style')
+var Vue = require('../../../../src/vue')
 
 if (_.inBrowser) {
   describe('v-style', function () {
@@ -59,6 +60,19 @@ if (_.inBrowser) {
       expect(spy).toHaveBeenCalledWith('-ms-transform', scale, '')
       expect(spy).toHaveBeenCalledWith('-moz-transform', scale, '')
       expect(spy).toHaveBeenCalledWith('-webkit-transform', scale, '')
+    })
+
+    it('updates object deep', function () {
+      el.setAttribute('v-style', 'divStyling')
+      var vm = new Vue({
+        el: el,
+        data: {divStyling: { display: 'none'}}
+      })
+      expect(el.style.display).toBe('none')
+      vm.divStyling.display = 'block'
+      _.nextTick(function () {
+        expect(el.style.display).toBe('block')
+      })
     })
 
   })

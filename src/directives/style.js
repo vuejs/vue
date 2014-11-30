@@ -3,6 +3,8 @@ var importantRE = /!important;?$/
 
 module.exports = {
 
+  deep: true,
+
   bind: function () {
     var prop = this.arg
     if (!prop) return
@@ -18,7 +20,6 @@ module.exports = {
           this.setCssProperty(prop, value[prop])
         }
       } else {
-        // TODO: is there a use case for this?
         this.el.style.cssText = value
       }
     }
