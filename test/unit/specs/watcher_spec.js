@@ -289,15 +289,20 @@ describe('Watcher', function () {
 
   it('deep watch', function (done) {
     var watcher = new Watcher(vm, 'b', spy, null, false, true)
-    vm.b.c = 3
+    vm.b.c = { d: 4 }
     nextTick(function () {
       expect(spy).toHaveBeenCalledWith(vm.b, vm.b)
       var oldB = vm.b
-      vm.b = { c: 4 }
+      vm.b = { c: [{a:1}] }
       nextTick(function () {
         expect(spy).toHaveBeenCalledWith(vm.b, oldB)
         expect(spy.calls.count()).toBe(2)
-        done()
+        vm.b.c[0].a = 2
+        nextTick(function () {
+          expect(spy).toHaveBeenCalledWith(vm.b, vm.b)
+          expect(spy.calls.count()).toBe(3)
+          done()
+        })
       })
     })
   })

@@ -225,10 +225,13 @@ p.teardown = function () {
  */
 
 function traverse (obj) {
-  var key, val
+  var key, val, i
   for (key in obj) {
     val = obj[key]
-    if (_.isObject(val)) {
+    if (_.isArray(val)) {
+      i = val.length
+      while (i--) traverse(val[i])
+    } else if (_.isObject(val)) {
       traverse(val)
     }
   }
