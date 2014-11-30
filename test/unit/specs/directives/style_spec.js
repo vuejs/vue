@@ -43,5 +43,12 @@ if (_.inBrowser) {
       expect(spy).toHaveBeenCalledWith('-webkit-transform', val, '')
     })
 
+    it('object styling', function () {
+      dir.bind()
+      dir.update({color: 'red', 'float': 'right'})
+      expect(el.style.color).toBe('red')
+      expect(el.style.float).toBe('right')
+    })
+
   })
 }

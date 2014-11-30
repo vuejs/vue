@@ -16,11 +16,11 @@ module.exports = {
 
   update: function (value) {
     var prop = this.prop
-    // cast possible numbers/booleans into strings
-    if (value != null) {
-      value += ''
-    }
     if (prop) {
+      // cast possible numbers/booleans into strings
+      if (value != null) {
+        value += ''
+      }
       var isImportant = importantRE.test(value)
         ? 'important'
         : ''
@@ -39,7 +39,13 @@ module.exports = {
         }
       }
     } else {
-      this.el.style.cssText = value
+      if (typeof value === 'object') {
+        for(var key in value) {
+          this.el.style[key] = value[key];
+        }
+      } else {
+        this.el.style.cssText = value
+      }
     }
   }
 
