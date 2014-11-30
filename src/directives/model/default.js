@@ -51,6 +51,12 @@ module.exports = {
             // the cursor was at
             charsOffset = el.value.length - el.selectionStart
           } catch (e) {}
+          // Fix IE10/11 infinite update cycle
+          // https://github.com/yyx990803/vue/issues/592
+          /* istanbul ignore if */
+          if (charsOffset < 0) {
+            return
+          }
           set()
           _.nextTick(function () {
             // force a value update, because in
