@@ -40,8 +40,8 @@ module.exports = {
       }
     } else {
       if (typeof value === 'object') {
-        for(var key in value) {
-          this.el.style[key] = value[key];
+        for (var key in value) {
+          this.el.style[key] = value[key]
         }
       } else {
         this.el.style.cssText = value
