@@ -43,5 +43,23 @@ if (_.inBrowser) {
       expect(spy).toHaveBeenCalledWith('-webkit-transform', val, '')
     })
 
+    it('update with object', function () {
+      dir.bind()
+      dir.update({color: 'red', 'margin-right': '30px'})
+      expect(el.style.getPropertyValue('color')).toBe('red')
+      expect(el.style.getPropertyValue('margin-right')).toBe('30px')
+    })
+
+    it('update with object and auto prefix', function () {
+      var spy = el.style.setProperty = jasmine.createSpy()
+      dir.bind()
+      var scale = 'scale(0.5)';
+      dir.update({'$transform': scale})
+      expect(spy).toHaveBeenCalledWith('transform', scale, '')
+      expect(spy).toHaveBeenCalledWith('-ms-transform', scale, '')
+      expect(spy).toHaveBeenCalledWith('-moz-transform', scale, '')
+      expect(spy).toHaveBeenCalledWith('-webkit-transform', scale, '')
+    })
+
   })
 }
