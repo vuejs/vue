@@ -75,10 +75,11 @@ p.get = function () {
   } catch (e) {
     _.warn(e)
   }
-  // use JSON.stringify to "touch" every property
-  // so they are all tracked as dependencies for
-  // deep watching
-  if (this.deep) JSON.stringify(value)
+  // "touch" every property so they are all tracked as
+  // dependencies for deep watching
+  if (this.deep) {
+    traverse(value)
+  }
   value = _.applyFilters(value, this.readFilters, vm)
   this.afterGet()
   return value
@@ -211,6 +212,25 @@ p.teardown = function () {
     }
     this.active = false
     this.vm = this.cbs = this.value = null
+  }
+}
+
+
+/**
+ * Recrusively traverse an object to evoke all converted
+ * getters, so that every nested property inside the object
+ * is collected as a "deep" dependency.
+ *
+ * @param {Object} obj
+ */
+
+function traverse (obj) {
+  var key, val
+  for (key in obj) {
+    val = obj[key]
+    if (_.isObject(val)) {
+      traverse(val)
+    }
   }
 }
 
