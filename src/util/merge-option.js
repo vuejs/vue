@@ -234,25 +234,22 @@ module.exports = function mergeOptions (parent, child, vm) {
   guardComponents(child.components)
   var options = {}
   var key
+  if (child.mixins) {
+    for (var i = 0, l = child.mixins.length; i < l; i++) {
+      parent = mergeOptions(parent, child.mixins[i], vm)
+    }
+  }
   for (key in parent) {
-    merge(parent[key], child[key], key)
+    merge(key)
   }
   for (key in child) {
     if (!(parent.hasOwnProperty(key))) {
-      merge(parent[key], child[key], key)
+      merge(key)
     }
   }
-  var mixins = child.mixins
-  if (mixins) {
-    for (var i = 0, l = mixins.length; i < l; i++) {
-      for (key in mixins[i]) {
-        merge(options[key], mixins[i][key], key)
-      }
-    }
-  }
-  function merge (parentVal, childVal, key) {
+  function merge (key) {
     var strat = strats[key] || defaultStrat
-    options[key] = strat(parentVal, childVal, vm, key)
+    options[key] = strat(parent[key], child[key], vm, key)
   }
   return options
 }

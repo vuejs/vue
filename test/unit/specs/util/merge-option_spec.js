@@ -255,11 +255,15 @@ describe('Util - Option merging', function () {
 
   it('mixins', function () {
     var a = {}, b = {}, c = {}, d = {}
-    var mixinA = { a: 1, directives: { a: a } }
-    var mixinB = { b: 1, directives: { b: b } }
+    var f1 = function () {}
+    var f2 = function () {}
+    var f3 = function () {}
+    var f4 = function () {}
+    var mixinA = { a: 1, directives: { a: a }, created: f2 }
+    var mixinB = { b: 1, directives: { b: b }, created: f3 }
     var res = merge(
-      { a: 2, directives: { c: c } },
-      { directives: { d: d }, mixins: [mixinA, mixinB] }
+      { a: 2, directives: { c: c }, created: [f1] },
+      { directives: { d: d }, mixins: [mixinA, mixinB], created: f4 }
     )
     expect(res.a).toBe(1)
     expect(res.b).toBe(1)
@@ -267,6 +271,10 @@ describe('Util - Option merging', function () {
     expect(res.directives.b).toBe(b)
     expect(res.directives.c).toBe(c)
     expect(res.directives.d).toBe(d)
+    expect(res.created[0]).toBe(f1)
+    expect(res.created[1]).toBe(f2)
+    expect(res.created[2]).toBe(f3)
+    expect(res.created[3]).toBe(f4)
   })
 
 })
