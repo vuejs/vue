@@ -82,9 +82,10 @@ exports.$destroy = function (remove, deferCleanup) {
     }
   }
   // teardown all directives. this also tearsdown all
-  // directive-owned watchers.
-  i = this._directives.length
-  while (i--) {
+  // directive-owned watchers. intentionally check for
+  // directives array length on every loop since directives
+  // that manages partial compilation can splice ones out
+  for (i = 0; i < this._directives.length; i++) {
     this._directives[i]._teardown()
   }
   // teardown all user watchers.

@@ -254,6 +254,23 @@ if (_.inBrowser) {
         expect(spy.calls.count()).toBe(1)
       })
 
+      it('safely teardown partial compilation', function () {
+        var vm = new Vue({
+          template: '<div v-component="dialog"><div v-partial="hello"></div></div>',
+          partials: {
+            hello: 'Hello {{name}}'
+          },
+          components: {
+            dialog: {
+              template: '<content>'
+            }
+          }
+        }).$mount()
+        expect(function () {
+          vm.$destroy()
+        }).not.toThrow()
+      })
+
     })
 
     describe('$compile', function () {
