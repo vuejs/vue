@@ -1,4 +1,6 @@
-# 0.10 -> 0.11 Migration Guide
+# 0.10 -> 0.11.0 Migration Guide
+
+**Note** This document only captures the changeset upgrading from 0.10.x to 0.11.0. For changes in releases after 0.11.0, please refer to the [Releases](https://github.com/yyx990803/vue/releases) page.
 
 **Table of Contents**
 
