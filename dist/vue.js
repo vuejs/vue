@@ -1,5 +1,5 @@
 /**
- * Vue.js v0.11.0
+ * Vue.js v0.11.1
  * (c) 2014 Evan You
  * Released under the MIT License.
  */
@@ -169,9 +169,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Expose useful internals
 	 */
 
-	exports.util       = _
-	exports.nextTick   = _.nextTick
-	exports.config     = __webpack_require__(20)
+	exports.util = _
+	exports.nextTick = _.nextTick
+	exports.config = __webpack_require__(20)
+
+	exports.compiler = {
+	  compile: __webpack_require__(41),
+	  transclude: __webpack_require__(42)
+	}
+
+	exports.parsers = {
+	  path: __webpack_require__(43),
+	  text: __webpack_require__(44),
+	  template: __webpack_require__(45),
+	  directive: __webpack_require__(46),
+	  expression: __webpack_require__(47)
+	}
 
 	/**
 	 * Each instance constructor, including Vue, has a unique
@@ -302,10 +315,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _ = __webpack_require__(1)
 	var Watcher = __webpack_require__(21)
-	var Path = __webpack_require__(41)
-	var textParser = __webpack_require__(42)
-	var dirParser = __webpack_require__(43)
-	var expParser = __webpack_require__(44)
+	var Path = __webpack_require__(43)
+	var textParser = __webpack_require__(44)
+	var dirParser = __webpack_require__(46)
+	var expParser = __webpack_require__(47)
 	var filterRE = /[^|]\|[^|]/
 
 	/**
@@ -454,9 +467,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	exports.$log = function (path) {
 	  var data = path
-	    ? Path.get(this, path)
+	    ? Path.get(this._data, path)
 	    : this._data
-	  console.log(JSON.parse(JSON.stringify(data)))
+	  if (data) {
+	    data = JSON.parse(JSON.stringify(data))
+	  }
+	  console.log(data)
 	}
 
 /***/ },
@@ -464,7 +480,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var transition = __webpack_require__(45)
+	var transition = __webpack_require__(48)
 
 	/**
 	 * Append instance to target
@@ -475,13 +491,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	exports.$appendTo = function (target, cb, withTransition) {
-	  target = query(target)
-	  var targetIsDetached = !_.inDoc(target)
-	  var op = withTransition === false || targetIsDetached
-	    ? append
-	    : transition.append
-	  insert(this, target, op, targetIsDetached, cb)
-	  return this
+	  return insert(
+	    this, target, cb, withTransition,
+	    append, transition.append
+	  )
 	}
 
 	/**
@@ -511,13 +524,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	exports.$before = function (target, cb, withTransition) {
-	  target = query(target)
-	  var targetIsDetached = !_.inDoc(target)
-	  var op = withTransition === false || targetIsDetached
-	    ? before
-	    : transition.before
-	  insert(this, target, op, targetIsDetached, cb)
-	  return this
+	  return insert(
+	    this, target, cb, withTransition,
+	    before, transition.before
+	  )
 	}
 
 	/**
@@ -562,7 +572,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  ) {
 	    op = withTransition === false
 	      ? append
-	      : transition.removeThenAppend 
+	      : transition.removeThenAppend
 	    blockOp(this, this._blockFragment, op, realCb)
 	  } else {
 	    op = withTransition === false
@@ -578,12 +588,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *
 	 * @param {Vue} vm
 	 * @param {Element} target
-	 * @param {Function} op
-	 * @param {Boolean} targetIsDetached
 	 * @param {Function} [cb]
+	 * @param {Boolean} [withTransition]
+	 * @param {Function} op1 - op for non-transition insert
+	 * @param {Function} op2 - op for transition insert
+	 * @return vm
 	 */
 
-	function insert (vm, target, op, targetIsDetached, cb) {
+	function insert (vm, target, cb, withTransition, op1, op2) {
+	  target = query(target)
+	  var targetIsDetached = !_.inDoc(target)
+	  var op = withTransition === false || targetIsDetached
+	    ? op1
+	    : op2
 	  var shouldCallHook =
 	    !targetIsDetached &&
 	    !vm._isAttached &&
@@ -596,6 +613,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (shouldCallHook) {
 	    vm._callHook('attached')
 	  }
+	  return vm
 	}
 
 	/**
@@ -917,7 +935,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var compile = __webpack_require__(46)
+	var compile = __webpack_require__(41)
 
 	/**
 	 * Set instance target element and kick off the compilation
@@ -973,10 +991,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * directives, turn off all the event listeners, etc.
 	 *
 	 * @param {Boolean} remove - whether to remove the DOM node.
+	 * @param {Boolean} deferCleanup - if true, defer cleanup to
+	 *                                 be called later
 	 * @public
 	 */
 
-	exports.$destroy = function (remove) {
+	exports.$destroy = function (remove, deferCleanup) {
 	  if (this._isBeingDestroyed) {
 	    return
 	  }
@@ -1015,10 +1035,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var self = this
 	  if (remove && this.$el) {
 	    this.$remove(function () {
-	      cleanup(self)
+	      self._cleanup()
 	    })
-	  } else {
-	    cleanup(self)
+	  } else if (!deferCleanup) {
+	    this._cleanup()
 	  }
 	}
 
@@ -1026,28 +1046,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Clean up to ensure garbage collection.
 	 * This is called after the leave transition if there
 	 * is any.
-	 *
-	 * @param {Vue} vm
 	 */
 
-	function cleanup (vm) {
+	exports._cleanup = function () {
 	  // remove reference from data ob
-	  vm._data.__ob__.removeVm(vm)
-	  vm._data =
-	  vm._watchers =
-	  vm._userWatchers =
-	  vm._watcherList =
-	  vm.$el =
-	  vm.$parent =
-	  vm.$root =
-	  vm._children =
-	  vm._bindings =
-	  vm._directives = null
+	  this._data.__ob__.removeVm(this)
+	  this._data =
+	  this._watchers =
+	  this._userWatchers =
+	  this._watcherList =
+	  this.$el =
+	  this.$parent =
+	  this.$root =
+	  this._children =
+	  this._directives = null
 	  // call the last hook...
-	  vm._isDestroyed = true
-	  vm._callHook('destroyed')
+	  this._isDestroyed = true
+	  this._callHook('destroyed')
 	  // turn off all instance listeners.
-	  vm.$off() 
+	  this.$off()
 	}
 
 	/**
@@ -1081,7 +1098,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	// event listener directives
 	exports.on         = __webpack_require__(33)
-	exports.model      = __webpack_require__(48)
+	exports.model      = __webpack_require__(49)
 
 	// child vm directives
 	exports.component  = __webpack_require__(34)
@@ -1101,8 +1118,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Number} indent
 	 */
 
-	exports.json = function (value, indent) {
-	  return JSON.stringify(value, null, Number(indent) || 2)
+	exports.json = {
+	  read: function (value, indent) {
+	    return typeof value === 'string'
+	      ? value
+	      : JSON.stringify(value, null, Number(indent) || 2)
+	  },
+	  write: function (value) {
+	    try {
+	      return JSON.parse(value)
+	    } catch (e) {
+	      return value
+	    }
+	  }
 	}
 
 	/**
@@ -1208,6 +1236,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }
 	}
+
+	// expose keycode hash
+	exports.key.keyCodes = keyCodes
 
 	/**
 	 * Install special array filters
@@ -1428,8 +1459,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var Observer = __webpack_require__(49)
-	var Binding = __webpack_require__(39)
+	var Observer = __webpack_require__(50)
+	var Dep = __webpack_require__(39)
 
 	/**
 	 * Setup the scope of an instance, which contains:
@@ -1626,20 +1657,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	exports._defineMeta = function (key, value) {
-	  var binding = new Binding()
+	  var dep = new Dep()
 	  Object.defineProperty(this, key, {
 	    enumerable: true,
 	    configurable: true,
 	    get: function metaGetter () {
 	      if (Observer.target) {
-	        Observer.target.addDep(binding)
+	        Observer.target.addDep(dep)
 	      }
 	      return value
 	    },
 	    set: function metaSetter (val) {
 	      if (val !== value) {
 	        value = val
-	        binding.notify()
+	        dep.notify()
 	      }
 	    }
 	  })
@@ -1651,8 +1682,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _ = __webpack_require__(1)
 	var Directive = __webpack_require__(40)
-	var compile = __webpack_require__(46)
-	var transclude = __webpack_require__(47)
+	var compile = __webpack_require__(41)
+	var transclude = __webpack_require__(42)
 
 	/**
 	 * Transclude, compile and link element.
@@ -1796,7 +1827,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.camelize = function (str, cap) {
 	  var RE = cap ? capitalCamelRE : camelRE
 	  return str.replace(RE, function (_, c) {
-	    return c ? c.toUpperCase () : '';
+	    return c ? c.toUpperCase () : ''
 	  })
 	}
 
@@ -1843,6 +1874,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  for (var key in from) {
 	    to[key] = from[key]
 	  }
+	  return to
 	}
 
 	/**
@@ -2314,39 +2346,68 @@ return /******/ (function(modules) { // webpackBootstrap
 	var strats = Object.create(null)
 
 	/**
+	 * Helper that recursively merges two data objects together.
+	 */
+
+	function mergeData (to, from) {
+	  var key, toVal, fromVal
+	  for (key in from) {
+	    toVal = to[key]
+	    fromVal = from[key]
+	    if (!to.hasOwnProperty(key)) {
+	      to.$add(key, fromVal)
+	    } else if (_.isObject(toVal) && _.isObject(fromVal)) {
+	      mergeData(toVal, fromVal)
+	    }
+	  }
+	  return to
+	}
+
+	/**
 	 * Data
 	 */
 
 	strats.data = function (parentVal, childVal, vm) {
-	  // in a class merge, both should be functions
-	  // so we just return child if it exists
 	  if (!vm) {
-	    if (childVal && typeof childVal !== 'function') {
+	    // in a Vue.extend merge, both should be functions
+	    if (!childVal) {
+	      return parentVal
+	    }
+	    if (typeof childVal !== 'function') {
 	      _.warn(
 	        'The "data" option should be a function ' +
 	        'that returns a per-instance value in component ' +
 	        'definitions.'
 	      )
-	      return
+	      return parentVal
 	    }
-	    return childVal || parentVal
-	  }
-	  var instanceData = typeof childVal === 'function'
-	    ? childVal.call(vm)
-	    : childVal
-	  var defaultData = typeof parentVal === 'function'
-	    ? parentVal.call(vm)
-	    : undefined
-	  if (instanceData) {
-	    // mix default data into instance data
-	    for (var key in defaultData) {
-	      if (!instanceData.hasOwnProperty(key)) {
-	        instanceData.$add(key, defaultData[key])
-	      }
+	    if (!parentVal) {
+	      return childVal
 	    }
-	    return instanceData
+	    // when parentVal & childVal are both present,
+	    // we need to return a function that returns the
+	    // merged result of both functions... no need to
+	    // check if parentVal is a function here because
+	    // it has to be a function to pass previous merges.
+	    return function mergedDataFn () {
+	      return mergeData(
+	        childVal.call(this),
+	        parentVal.call(this)
+	      )
+	    }
 	  } else {
-	    return defaultData
+	    // instance merge, return raw object
+	    var instanceData = typeof childVal === 'function'
+	      ? childVal.call(vm)
+	      : childVal
+	    var defaultData = typeof parentVal === 'function'
+	      ? parentVal.call(vm)
+	      : undefined
+	    if (instanceData) {
+	      return mergeData(instanceData, defaultData)
+	    } else {
+	      return defaultData
+	    }
 	  }
 	}
 
@@ -2616,9 +2677,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _ = __webpack_require__(1)
 	var config = __webpack_require__(20)
-	var Observer = __webpack_require__(49)
-	var expParser = __webpack_require__(44)
-	var Batcher = __webpack_require__(50)
+	var Observer = __webpack_require__(50)
+	var expParser = __webpack_require__(47)
+	var Batcher = __webpack_require__(51)
 
 	var batcher = new Batcher()
 	var uid = 0
@@ -2662,18 +2723,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	var p = Watcher.prototype
 
 	/**
-	 * Add a binding dependency to this directive.
+	 * Add a dependency to this directive.
 	 *
-	 * @param {Binding} binding
+	 * @param {Dep} dep
 	 */
 
-	p.addDep = function (binding) {
-	  var id = binding.id
+	p.addDep = function (dep) {
+	  var id = dep.id
 	  if (!this.newDeps[id]) {
-	    this.newDeps[id] = binding
+	    this.newDeps[id] = dep
 	    if (!this.deps[id]) {
-	      this.deps[id] = binding
-	      binding.addSub(this)
+	      this.deps[id] = dep
+	      dep.addSub(this)
 	    }
 	  }
 	}
@@ -2688,11 +2749,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var value
 	  try {
 	    value = this.getter.call(vm, vm)
-	  } catch (e) {}
-	  // use JSON.stringify to "touch" every property
-	  // so they are all tracked as dependencies for
-	  // deep watching
-	  if (this.deep) JSON.stringify(value)
+	  } catch (e) {
+	    _.warn(e)
+	  }
+	  // "touch" every property so they are all tracked as
+	  // dependencies for deep watching
+	  if (this.deep) {
+	    traverse(value)
+	  }
 	  value = _.applyFilters(value, this.readFilters, vm)
 	  this.afterGet()
 	  return value
@@ -2828,6 +2892,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	}
 
+
+	/**
+	 * Recrusively traverse an object to evoke all converted
+	 * getters, so that every nested property inside the object
+	 * is collected as a "deep" dependency.
+	 *
+	 * @param {Object} obj
+	 */
+
+	function traverse (obj) {
+	  var key, val, i
+	  for (key in obj) {
+	    val = obj[key]
+	    if (_.isArray(val)) {
+	      i = val.length
+	      while (i--) traverse(val[i])
+	    } else if (_.isObject(val)) {
+	      traverse(val)
+	    }
+	  }
+	}
+
 	module.exports = Watcher
 
 /***/ },
@@ -2855,7 +2941,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var templateParser = __webpack_require__(51)
+	var templateParser = __webpack_require__(45)
 
 	module.exports = {
 
@@ -2933,7 +3019,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var transition = __webpack_require__(45)
+	var transition = __webpack_require__(48)
 
 	module.exports = function (value) {
 	  var el = this.el
@@ -3038,43 +3124,55 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	module.exports = {
 
+	  deep: true,
+
 	  bind: function () {
 	    var prop = this.arg
 	    if (!prop) return
-	    if (prop.charAt(0) === '$') {
-	      // properties that start with $ will be auto-prefixed
-	      prop = prop.slice(1)
-	      this.prefixed = true
-	    }
 	    this.prop = prop
 	  },
 
 	  update: function (value) {
-	    var prop = this.prop
+	    if (this.prop) {
+	      this.setCssProperty(this.prop, value)
+	    } else {
+	      if (typeof value === 'object') {
+	        for (var prop in value) {
+	          this.setCssProperty(prop, value[prop])
+	        }
+	      } else {
+	        this.el.style.cssText = value
+	      }
+	    }
+	  },
+
+	  setCssProperty: function (prop, value) {
+	    var prefixed = false
+	    if (prop.charAt(0) === '$') {
+	      // properties that start with $ will be auto-prefixed
+	      prop = prop.slice(1)
+	      prefixed = true
+	    }
 	    // cast possible numbers/booleans into strings
 	    if (value != null) {
 	      value += ''
 	    }
-	    if (prop) {
-	      var isImportant = importantRE.test(value)
-	        ? 'important'
-	        : ''
-	      if (isImportant) {
-	        value = value.replace(importantRE, '').trim()
+	    var isImportant = importantRE.test(value)
+	      ? 'important'
+	      : ''
+	    if (isImportant) {
+	      value = value.replace(importantRE, '').trim()
+	    }
+	    this.el.style.setProperty(prop, value, isImportant)
+	    if (prefixed) {
+	      var i = prefixes.length
+	      while (i--) {
+	        this.el.style.setProperty(
+	          prefixes[i] + prop,
+	          value,
+	          isImportant
+	        )
 	      }
-	      this.el.style.setProperty(prop, value, isImportant)
-	      if (this.prefixed) {
-	        var i = prefixes.length
-	        while (i--) {
-	          this.el.style.setProperty(
-	            prefixes[i] + prop,
-	            value,
-	            isImportant
-	          )
-	        }
-	      }
-	    } else {
-	      this.el.style.cssText = value
 	    }
 	  }
 
@@ -3085,12 +3183,16 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var templateParser = __webpack_require__(51)
-	var transition = __webpack_require__(45)
+	var templateParser = __webpack_require__(45)
+	var vIf = __webpack_require__(36)
 
 	module.exports = {
 
 	  isLiteral: true,
+
+	  // same logic reuse from v-if
+	  compile: vIf.compile,
+	  teardown: vIf.teardown,
 
 	  bind: function () {
 	    var el = this.el
@@ -3106,35 +3208,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    _.before(this.start, this.end)
 	    if (!this._isDynamicLiteral) {
-	      this.compile(this.expression)
+	      this.insert(this.expression)
 	    }
 	  },
 
 	  update: function (id) {
 	    this.teardown()
-	    this.compile(id)
+	    this.insert(id)
 	  },
 
-	  compile: function (id) {
+	  insert: function (id) {
 	    var partial = this.vm.$options.partials[id]
 	    _.assertAsset(partial, 'partial', id)
-	    if (!partial) {
-	      return
-	    }
-	    var vm = this.vm
-	    var frag = templateParser.parse(partial, true)
-	    var decompile = vm.$compile(frag)
-	    this.decompile = function () {
-	      decompile()
-	      transition.blockRemove(this.start, this.end, vm)
-	    }
-	    transition.blockAppend(frag, this.end, vm)
-	  },
-
-	  teardown: function () {
-	    if (this.decompile) {
-	      this.decompile()
-	      this.decompile = null
+	    if (partial) {
+	      this.compile(templateParser.parse(partial))
 	    }
 	  }
 
@@ -3226,7 +3313,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var templateParser = __webpack_require__(51)
+	var compile = __webpack_require__(41)
+	var templateParser = __webpack_require__(45)
 
 	module.exports = {
 
@@ -3247,37 +3335,36 @@ return /******/ (function(modules) { // webpackBootstrap
 	      // create a ref anchor
 	      this.ref = document.createComment('v-component')
 	      _.replace(this.el, this.ref)
-	      // check keep-alive options
-	      this.checkKeepAlive()
-	      // check parent directives
-	      this.parentLinker = this.el._parentLinker
+	      // check keep-alive options.
+	      // If yes, instead of destroying the active vm when
+	      // hiding (v-if) or switching (dynamic literal) it,
+	      // we simply remove it from the DOM and save it in a
+	      // cache object, with its constructor id as the key.
+	      this.keepAlive = this._checkParam('keep-alive') != null
+	      if (this.keepAlive) {
+	        this.cache = {}
+	      }
+	      // compile parent scope content
+	      this.parentLinkFn = compile(
+	        this.el, this.vm.$options,
+	        true, // partial
+	        true  // asParent
+	      )
 	      // if static, build right now.
 	      if (!this._isDynamicLiteral) {
 	        this.resolveCtor(this.expression)
-	        this.build()
+	        this.childVM = this.build()
+	        this.childVM.$before(this.ref)
+	      } else {
+	        // check dynamic component params
+	        this.readyEvent = this._checkParam('wait-for')
+	        this.transMode = this._checkParam('transition-mode')
 	      }
 	    } else {
 	      _.warn(
 	        'v-component="' + this.expression + '" cannot be ' +
 	        'used on an already mounted instance.'
 	      )
-	    }
-	  },
-
-	  /**
-	   * Check if the "keep-alive" flag is present.
-	   * If yes, instead of destroying the active vm when
-	   * hiding (v-if) or switching (dynamic literal) it,
-	   * we simply remove it from the DOM and save it in a
-	   * cache object, with its constructor id as the key.
-	   */
-
-	  checkKeepAlive: function () {
-	    // check keep-alive flag
-	    this.keepAlive = this.el.hasAttribute('keep-alive')
-	    if (this.keepAlive) {
-	      this.el.removeAttribute('keep-alive')
-	      this.cache = {}
 	    }
 	  },
 
@@ -3296,64 +3383,72 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * Instantiate/insert a new child vm.
 	   * If keep alive and has cached instance, insert that
 	   * instance; otherwise build a new one and cache it.
+	   *
+	   * @return {Vue} - the created instance
 	   */
 
 	  build: function () {
 	    if (this.keepAlive) {
 	      var cached = this.cache[this.ctorId]
 	      if (cached) {
-	        this.childVM = cached
-	        cached.$before(this.ref)
-	        return
+	        return cached
 	      }
 	    }
 	    var vm = this.vm
-	    if (this.Ctor && !this.childVM) {
-	      this.childVM = vm.$addChild({
-	        el: templateParser.clone(this.el)
+	    var el = templateParser.clone(this.el)
+	    if (this.Ctor) {
+	      var parentUnlinkFn
+	      if (this.parentLinkFn) {
+	        parentUnlinkFn = this.parentLinkFn(vm, el)
+	      }
+	      var child = vm.$addChild({
+	        el: el
 	      }, this.Ctor)
-	      if (this.parentLinker) {
-	        var dirCount = vm._directives.length
-	        var targetVM = this.childVM.$options.inherit
-	          ? this.childVM
-	          : vm
-	        this.parentLinker(targetVM, this.childVM.$el)
-	        this.parentDirs = vm._directives.slice(dirCount)
-	      }
+	      child._parentUnlinkFn = parentUnlinkFn
 	      if (this.keepAlive) {
-	        this.cache[this.ctorId] = this.childVM
+	        this.cache[this.ctorId] = child
 	      }
-	      this.childVM.$before(this.ref)
+	      return child
 	    }
 	  },
 
 	  /**
-	   * Teardown the active vm.
-	   * If keep alive, simply remove it; otherwise destroy it.
-	   *
-	   * @param {Boolean} remove
+	   * Teardown the current child, but defers cleanup so
+	   * that we can separate the destroy and removal steps.
 	   */
 
-	  unbuild: function (remove) {
+	  unbuild: function () {
 	    var child = this.childVM
-	    if (!child) {
+	    if (!child || this.keepAlive) {
 	      return
 	    }
-	    if (this.keepAlive) {
-	      if (remove) {
-	        child.$remove()
-	      }
-	    } else {
-	      child.$destroy(remove)
-	      var parentDirs = this.parentDirs
-	      if (parentDirs) {
-	        var i = parentDirs.length
-	        while (i--) {
-	          parentDirs[i]._teardown()
-	        }
-	      }
+	    if (child._parentUnlinkFn) {
+	      child._parentUnlinkFn()
 	    }
-	    this.childVM = null
+	    // the sole purpose of `deferCleanup` is so that we can
+	    // "deactivate" the vm right now and perform DOM removal
+	    // later.
+	    child.$destroy(false, true)
+	  },
+
+	  /**
+	   * Remove current destroyed child and manually do
+	   * the cleanup after removal.
+	   *
+	   * @param {Function} cb
+	   */
+
+	  removeCurrent: function (cb) {
+	    var child = this.childVM
+	    var keepAlive = this.keepAlive
+	    if (child) {
+	      child.$remove(function () {
+	        if (!keepAlive) child._cleanup()
+	        if (cb) cb()
+	      })
+	    } else if (cb) {
+	      cb()
+	    }
 	  },
 
 	  /**
@@ -3362,22 +3457,72 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 
 	  update: function (value) {
-	    this.unbuild(true)
-	    if (value) {
+	    if (!value) {
+	      // just destroy and remove current
+	      this.unbuild()
+	      this.removeCurrent()
+	      this.childVM = null
+	    } else {
 	      this.resolveCtor(value)
-	      this.build()
+	      this.unbuild()
+	      var newComponent = this.build()
+	      var self = this
+	      if (this.readyEvent) {
+	        newComponent.$once(this.readyEvent, function () {
+	          self.swapTo(newComponent)
+	        })
+	      } else {
+	        this.swapTo(newComponent)
+	      }
+	    }
+	  },
+
+	  /**
+	   * Actually swap the components, depending on the
+	   * transition mode. Defaults to simultaneous.
+	   *
+	   * @param {Vue} target
+	   */
+
+	  swapTo: function (target) {
+	    var self = this
+	    switch (self.transMode) {
+	      case 'in-out':
+	        target.$before(self.ref, function () {
+	          self.removeCurrent()
+	          self.childVM = target
+	        })
+	        break
+	      case 'out-in':
+	        self.removeCurrent(function () {
+	          target.$before(self.ref)
+	          self.childVM = target
+	        })
+	        break
+	      default:
+	        self.removeCurrent()
+	        target.$before(self.ref)
+	        self.childVM = target
 	    }
 	  },
 
 	  /**
 	   * Unbind.
-	   * Make sure keepAlive is set to false so that the
-	   * instance is always destroyed.
 	   */
 
 	  unbind: function () {
-	    this.keepAlive = false
 	    this.unbuild()
+	    // destroy all keep-alive cached instances
+	    if (this.cache) {
+	      for (var key in this.cache) {
+	        var child = this.cache[key]
+	        if (child._parentUnlinkFn) {
+	          child._parentUnlinkFn()
+	        }
+	        child.$destroy()
+	      }
+	      this.cache = null
+	    }
 	  }
 
 	}
@@ -3388,11 +3533,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _ = __webpack_require__(1)
 	var isObject = _.isObject
-	var textParser = __webpack_require__(42)
-	var expParser = __webpack_require__(44)
-	var templateParser = __webpack_require__(51)
-	var compile = __webpack_require__(46)
-	var transclude = __webpack_require__(47)
+	var textParser = __webpack_require__(44)
+	var expParser = __webpack_require__(47)
+	var templateParser = __webpack_require__(45)
+	var compile = __webpack_require__(41)
+	var transclude = __webpack_require__(42)
 	var mergeOptions = __webpack_require__(19)
 	var uid = 0
 
@@ -3428,8 +3573,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // at v-repeat level
 	    this.checkIf()
 	    this.checkRef()
-	    this.checkTrackById()
 	    this.checkComponent()
+	    // check for trackby param
+	    this.idKey =
+	      this._checkParam('track-by') ||
+	      this._checkParam('trackby') // 0.11.0 compat
 	    // cache for primitive value instances
 	    this.cache = Object.create(null)
 	  },
@@ -3460,19 +3608,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.elId = elId
 	      ? this.vm.$interpolate(elId)
 	      : null
-	  },
-
-	  /**
-	   * Check for a track-by ID, which allows us to identify
-	   * a piece of data and its associated instance by its
-	   * unique id.
-	   */
-
-	  checkTrackById: function () {
-	    this.idKey = this.el.getAttribute('trackby')
-	    if (this.idKey !== null) {
-	      this.el.removeAttribute('trackby')
-	    }
 	  },
 
 	  /**
@@ -3899,9 +4034,9 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var compile = __webpack_require__(46)
-	var templateParser = __webpack_require__(51)
-	var transition = __webpack_require__(45)
+	var compile = __webpack_require__(41)
+	var templateParser = __webpack_require__(45)
+	var transition = __webpack_require__(48)
 
 	module.exports = {
 
@@ -3945,24 +4080,43 @@ return /******/ (function(modules) { // webpackBootstrap
 	  insert: function () {
 	    // avoid duplicate inserts, since update() can be
 	    // called with different truthy values
-	    if (this.decompile) {
-	      return
+	    if (!this.unlink) {
+	      this.compile(this.template) 
 	    }
+	  },
+
+	  compile: function (template) {
 	    var vm = this.vm
-	    var frag = templateParser.clone(this.template)
-	    var decompile = this.linker(vm, frag)
-	    this.decompile = function () {
-	      decompile()
-	      transition.blockRemove(this.start, this.end, vm)
-	    }
+	    var frag = templateParser.clone(template)
+	    var originalChildLength = vm._children
+	      ? vm._children.length
+	      : 0
+	    this.unlink = this.linker
+	      ? this.linker(vm, frag)
+	      : vm.$compile(frag)
 	    transition.blockAppend(frag, this.end, vm)
+	    this.children = vm._children
+	      ? vm._children.slice(originalChildLength)
+	      : null
+	    if (this.children && _.inDoc(vm.$el)) {
+	      this.children.forEach(function (child) {
+	        child._callHook('attached')
+	      })
+	    }
 	  },
 
 	  teardown: function () {
-	    if (this.decompile) {
-	      this.decompile()
-	      this.decompile = null
+	    if (!this.unlink) return
+	    transition.blockRemove(this.start, this.end, this.vm)
+	    if (this.children && _.inDoc(this.vm.$el)) {
+	      this.children.forEach(function (child) {
+	        if (!child._isDestroyed) {
+	          child._callHook('detached')
+	        }
+	      })
 	    }
+	    this.unlink()
+	    this.unlink = null
 	  }
 
 	}
@@ -4024,7 +4178,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var Path = __webpack_require__(41)
+	var Path = __webpack_require__(43)
 
 	/**
 	 * Filter filter for v-repeat
@@ -4047,7 +4201,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (!search) {
 	    return arr
 	  }
-	  search = search.toLowerCase()
+	  search = ('' + search).toLowerCase()
 	  // get the optional dataKey
 	  dataKey =
 	    dataKey &&
@@ -4118,18 +4272,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	var uid = 0
 
 	/**
-	 * A binding is an observable that can have multiple
+	 * A dep is an observable that can have multiple
 	 * directives subscribing to it.
 	 *
 	 * @constructor
 	 */
 
-	function Binding () {
+	function Dep () {
 	  this.id = ++uid
 	  this.subs = []
 	}
 
-	var p = Binding.prototype
+	var p = Dep.prototype
 
 	/**
 	 * Add a directive subscriber.
@@ -4164,7 +4318,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	}
 
-	module.exports = Binding
+	module.exports = Dep
 
 /***/ },
 /* 40 */
@@ -4173,8 +4327,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _ = __webpack_require__(1)
 	var config = __webpack_require__(20)
 	var Watcher = __webpack_require__(21)
-	var textParser = __webpack_require__(42)
-	var expParser = __webpack_require__(44)
+	var textParser = __webpack_require__(44)
+	var expParser = __webpack_require__(47)
 
 	/**
 	 * A directive links a DOM element with a piece of data,
@@ -4257,7 +4411,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this._watcherExp,
 	        update, // callback
 	        this.filters,
-	        this.twoWay // need setter
+	        this.twoWay, // need setter,
+	        this.deep
 	      )
 	    } else {
 	      watcher.addCb(update)
@@ -4326,6 +4481,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
+	 * Check for an attribute directive param, e.g. lazy
+	 *
+	 * @param {String} name
+	 * @return {String}
+	 */
+
+	p._checkParam = function (name) {
+	  var param = this.el.getAttribute(name)
+	  if (param !== null) {
+	    this.el.removeAttribute(name)
+	  }
+	  return param
+	}
+
+	/**
 	 * Teardown the watcher and call unbind.
 	 */
 
@@ -4365,7 +4535,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (lock) {
 	      var self = this
 	      _.nextTick(function () {
-	        self._locked = false        
+	        self._locked = false
 	      })
 	    }
 	  }
@@ -4375,6 +4545,728 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 41 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var _ = __webpack_require__(1)
+	var config = __webpack_require__(20)
+	var textParser = __webpack_require__(44)
+	var dirParser = __webpack_require__(46)
+	var templateParser = __webpack_require__(45)
+
+	/**
+	 * Compile a template and return a reusable composite link
+	 * function, which recursively contains more link functions
+	 * inside. This top level compile function should only be
+	 * called on instance root nodes.
+	 *
+	 * When the `asParent` flag is true, this means we are doing
+	 * a partial compile for a component's parent scope markup
+	 * (See #502). This could **only** be triggered during
+	 * compilation of `v-component`, and we need to skip v-with,
+	 * v-ref & v-component in this situation.
+	 *
+	 * @param {Element|DocumentFragment} el
+	 * @param {Object} options
+	 * @param {Boolean} partial
+	 * @param {Boolean} asParent
+	 * @return {Function}
+	 */
+
+	module.exports = function compile (el, options, partial, asParent) {
+	  var params = !partial && options.paramAttributes
+	  var paramsLinkFn = params
+	    ? compileParamAttributes(el, params, options)
+	    : null
+	  var nodeLinkFn = el instanceof DocumentFragment
+	    ? null
+	    : compileNode(el, options, asParent)
+	  var childLinkFn =
+	    !(nodeLinkFn && nodeLinkFn.terminal) &&
+	    el.tagName !== 'SCRIPT' &&
+	    el.hasChildNodes()
+	      ? compileNodeList(el.childNodes, options)
+	      : null
+
+	  /**
+	   * A linker function to be called on a already compiled
+	   * piece of DOM, which instantiates all directive
+	   * instances.
+	   *
+	   * @param {Vue} vm
+	   * @param {Element|DocumentFragment} el
+	   * @return {Function|undefined}
+	   */
+
+	  return function link (vm, el) {
+	    var originalDirCount = vm._directives.length
+	    if (paramsLinkFn) paramsLinkFn(vm, el)
+	    if (nodeLinkFn) nodeLinkFn(vm, el)
+	    if (childLinkFn) childLinkFn(vm, el.childNodes)
+
+	    /**
+	     * If this is a partial compile, the linker function
+	     * returns an unlink function that tearsdown all
+	     * directives instances generated during the partial
+	     * linking.
+	     */
+
+	    if (partial) {
+	      var dirs = vm._directives.slice(originalDirCount)
+	      return function unlink () {
+	        var i = dirs.length
+	        while (i--) {
+	          dirs[i]._teardown()
+	        }
+	        i = vm._directives.indexOf(dirs[0])
+	        vm._directives.splice(i, dirs.length)
+	      }
+	    }
+	  }
+	}
+
+	/**
+	 * Compile a node and return a nodeLinkFn based on the
+	 * node type.
+	 *
+	 * @param {Node} node
+	 * @param {Object} options
+	 * @param {Boolean} asParent
+	 * @return {Function|undefined}
+	 */
+
+	function compileNode (node, options, asParent) {
+	  var type = node.nodeType
+	  if (type === 1 && node.tagName !== 'SCRIPT') {
+	    return compileElement(node, options, asParent)
+	  } else if (type === 3 && config.interpolate) {
+	    return compileTextNode(node, options)
+	  }
+	}
+
+	/**
+	 * Compile an element and return a nodeLinkFn.
+	 *
+	 * @param {Element} el
+	 * @param {Object} options
+	 * @param {Boolean} asParent
+	 * @return {Function|null}
+	 */
+
+	function compileElement (el, options, asParent) {
+	  var linkFn, tag, component
+	  // check custom element component, but only on non-root
+	  if (!asParent && !el.__vue__) {
+	    tag = el.tagName.toLowerCase()
+	    component =
+	      tag.indexOf('-') > 0 &&
+	      options.components[tag]
+	    if (component) {
+	      el.setAttribute(config.prefix + 'component', tag)
+	    }
+	  }
+	  if (component || el.hasAttributes()) {
+	    // check terminal direcitves
+	    if (!asParent) {
+	      linkFn = checkTerminalDirectives(el, options)
+	    }
+	    // if not terminal, build normal link function
+	    if (!linkFn) {
+	      var dirs = collectDirectives(el, options, asParent)
+	      linkFn = dirs.length
+	        ? makeDirectivesLinkFn(dirs)
+	        : null
+	    }
+	  }
+	  // if the element is a textarea, we need to interpolate
+	  // its content on initial render.
+	  if (el.tagName === 'TEXTAREA') {
+	    var realLinkFn = linkFn
+	    linkFn = function (vm, el) {
+	      el.value = vm.$interpolate(el.value)
+	      if (realLinkFn) realLinkFn(vm, el)
+	    }
+	    linkFn.terminal = true
+	  }
+	  return linkFn
+	}
+
+	/**
+	 * Build a multi-directive link function.
+	 *
+	 * @param {Array} directives
+	 * @return {Function} directivesLinkFn
+	 */
+
+	function makeDirectivesLinkFn (directives) {
+	  return function directivesLinkFn (vm, el) {
+	    // reverse apply because it's sorted low to high
+	    var i = directives.length
+	    var dir, j, k
+	    while (i--) {
+	      dir = directives[i]
+	      if (dir._link) {
+	        // custom link fn
+	        dir._link(vm, el)
+	      } else {
+	        k = dir.descriptors.length
+	        for (j = 0; j < k; j++) {
+	          vm._bindDir(dir.name, el,
+	                      dir.descriptors[j], dir.def)
+	        }
+	      }
+	    }
+	  }
+	}
+
+	/**
+	 * Compile a textNode and return a nodeLinkFn.
+	 *
+	 * @param {TextNode} node
+	 * @param {Object} options
+	 * @return {Function|null} textNodeLinkFn
+	 */
+
+	function compileTextNode (node, options) {
+	  var tokens = textParser.parse(node.nodeValue)
+	  if (!tokens) {
+	    return null
+	  }
+	  var frag = document.createDocumentFragment()
+	  var el, token
+	  for (var i = 0, l = tokens.length; i < l; i++) {
+	    token = tokens[i]
+	    el = token.tag
+	      ? processTextToken(token, options)
+	      : document.createTextNode(token.value)
+	    frag.appendChild(el)
+	  }
+	  return makeTextNodeLinkFn(tokens, frag, options)
+	}
+
+	/**
+	 * Process a single text token.
+	 *
+	 * @param {Object} token
+	 * @param {Object} options
+	 * @return {Node}
+	 */
+
+	function processTextToken (token, options) {
+	  var el
+	  if (token.oneTime) {
+	    el = document.createTextNode(token.value)
+	  } else {
+	    if (token.html) {
+	      el = document.createComment('v-html')
+	      setTokenType('html')
+	    } else if (token.partial) {
+	      el = document.createComment('v-partial')
+	      setTokenType('partial')
+	    } else {
+	      // IE will clean up empty textNodes during
+	      // frag.cloneNode(true), so we have to give it
+	      // something here...
+	      el = document.createTextNode(' ')
+	      setTokenType('text')
+	    }
+	  }
+	  function setTokenType (type) {
+	    token.type = type
+	    token.def = options.directives[type]
+	    token.descriptor = dirParser.parse(token.value)[0]
+	  }
+	  return el
+	}
+
+	/**
+	 * Build a function that processes a textNode.
+	 *
+	 * @param {Array<Object>} tokens
+	 * @param {DocumentFragment} frag
+	 */
+
+	function makeTextNodeLinkFn (tokens, frag) {
+	  return function textNodeLinkFn (vm, el) {
+	    var fragClone = frag.cloneNode(true)
+	    var childNodes = _.toArray(fragClone.childNodes)
+	    var token, value, node
+	    for (var i = 0, l = tokens.length; i < l; i++) {
+	      token = tokens[i]
+	      value = token.value
+	      if (token.tag) {
+	        node = childNodes[i]
+	        if (token.oneTime) {
+	          value = vm.$eval(value)
+	          if (token.html) {
+	            _.replace(node, templateParser.parse(value, true))
+	          } else {
+	            node.nodeValue = value
+	          }
+	        } else {
+	          vm._bindDir(token.type, node,
+	                      token.descriptor, token.def)
+	        }
+	      }
+	    }
+	    _.replace(el, fragClone)
+	  }
+	}
+
+	/**
+	 * Compile a node list and return a childLinkFn.
+	 *
+	 * @param {NodeList} nodeList
+	 * @param {Object} options
+	 * @return {Function|undefined}
+	 */
+
+	function compileNodeList (nodeList, options) {
+	  var linkFns = []
+	  var nodeLinkFn, childLinkFn, node
+	  for (var i = 0, l = nodeList.length; i < l; i++) {
+	    node = nodeList[i]
+	    nodeLinkFn = compileNode(node, options)
+	    childLinkFn =
+	      !(nodeLinkFn && nodeLinkFn.terminal) &&
+	      node.tagName !== 'SCRIPT' &&
+	      node.hasChildNodes()
+	        ? compileNodeList(node.childNodes, options)
+	        : null
+	    linkFns.push(nodeLinkFn, childLinkFn)
+	  }
+	  return linkFns.length
+	    ? makeChildLinkFn(linkFns)
+	    : null
+	}
+
+	/**
+	 * Make a child link function for a node's childNodes.
+	 *
+	 * @param {Array<Function>} linkFns
+	 * @return {Function} childLinkFn
+	 */
+
+	function makeChildLinkFn (linkFns) {
+	  return function childLinkFn (vm, nodes) {
+	    // stablize nodes
+	    nodes = _.toArray(nodes)
+	    var node, nodeLinkFn, childrenLinkFn
+	    for (var i = 0, n = 0, l = linkFns.length; i < l; n++) {
+	      node = nodes[n]
+	      nodeLinkFn = linkFns[i++]
+	      childrenLinkFn = linkFns[i++]
+	      if (nodeLinkFn) {
+	        nodeLinkFn(vm, node)
+	      }
+	      if (childrenLinkFn) {
+	        childrenLinkFn(vm, node.childNodes)
+	      }
+	    }
+	  }
+	}
+
+	/**
+	 * Compile param attributes on a root element and return
+	 * a paramAttributes link function.
+	 *
+	 * @param {Element} el
+	 * @param {Array} attrs
+	 * @param {Object} options
+	 * @return {Function} paramsLinkFn
+	 */
+
+	function compileParamAttributes (el, attrs, options) {
+	  var params = []
+	  var i = attrs.length
+	  var name, value, param
+	  while (i--) {
+	    name = attrs[i]
+	    value = el.getAttribute(name)
+	    if (value !== null) {
+	      param = {
+	        name: name,
+	        value: value
+	      }
+	      var tokens = textParser.parse(value)
+	      if (tokens) {
+	        el.removeAttribute(name)
+	        if (tokens.length > 1) {
+	          _.warn(
+	            'Invalid param attribute binding: "' +
+	            name + '="' + value + '"' +
+	            '\nDon\'t mix binding tags with plain text ' +
+	            'in param attribute bindings.'
+	          )
+	          continue
+	        } else {
+	          param.dynamic = true
+	          param.value = tokens[0].value
+	        }
+	      }
+	      params.push(param)
+	    }
+	  }
+	  return makeParamsLinkFn(params, options)
+	}
+
+	/**
+	 * Build a function that applies param attributes to a vm.
+	 *
+	 * @param {Array} params
+	 * @param {Object} options
+	 * @return {Function} paramsLinkFn
+	 */
+
+	var dataAttrRE = /^data-/
+
+	function makeParamsLinkFn (params, options) {
+	  var def = options.directives['with']
+	  return function paramsLinkFn (vm, el) {
+	    var i = params.length
+	    var param, path
+	    while (i--) {
+	      param = params[i]
+	      // params could contain dashes, which will be
+	      // interpreted as minus calculations by the parser
+	      // so we need to wrap the path here
+	      path = _.camelize(param.name.replace(dataAttrRE, ''))
+	      if (param.dynamic) {
+	        // dynamic param attribtues are bound as v-with.
+	        // we can directly duck the descriptor here beacuse
+	        // param attributes cannot use expressions or
+	        // filters.
+	        vm._bindDir('with', el, {
+	          arg: path,
+	          expression: param.value
+	        }, def)
+	      } else {
+	        // just set once
+	        vm.$set(path, param.value)
+	      }
+	    }
+	  }
+	}
+
+	/**
+	 * Check an element for terminal directives in fixed order.
+	 * If it finds one, return a terminal link function.
+	 *
+	 * @param {Element} el
+	 * @param {Object} options
+	 * @return {Function} terminalLinkFn
+	 */
+
+	var terminalDirectives = [
+	  'repeat',
+	  'if',
+	  'component'
+	]
+
+	function skip () {}
+	skip.terminal = true
+
+	function checkTerminalDirectives (el, options) {
+	  if (_.attr(el, 'pre') !== null) {
+	    return skip
+	  }
+	  var value, dirName
+	  /* jshint boss: true */
+	  for (var i = 0; i < 3; i++) {
+	    dirName = terminalDirectives[i]
+	    if (value = _.attr(el, dirName)) {
+	      return makeTeriminalLinkFn(el, dirName, value, options)
+	    }
+	  }
+	}
+
+	/**
+	 * Build a link function for a terminal directive.
+	 *
+	 * @param {Element} el
+	 * @param {String} dirName
+	 * @param {String} value
+	 * @param {Object} options
+	 * @return {Function} terminalLinkFn
+	 */
+
+	function makeTeriminalLinkFn (el, dirName, value, options) {
+	  var descriptor = dirParser.parse(value)[0]
+	  var def = options.directives[dirName]
+	  var terminalLinkFn = function (vm, el) {
+	    vm._bindDir(dirName, el, descriptor, def)
+	  }
+	  terminalLinkFn.terminal = true
+	  return terminalLinkFn
+	}
+
+	/**
+	 * Collect the directives on an element.
+	 *
+	 * @param {Element} el
+	 * @param {Object} options
+	 * @param {Boolean} asParent
+	 * @return {Array}
+	 */
+
+	function collectDirectives (el, options, asParent) {
+	  var attrs = _.toArray(el.attributes)
+	  var i = attrs.length
+	  var dirs = []
+	  var attr, attrName, dir, dirName, dirDef
+	  while (i--) {
+	    attr = attrs[i]
+	    attrName = attr.name
+	    if (attrName.indexOf(config.prefix) === 0) {
+	      dirName = attrName.slice(config.prefix.length)
+	      if (asParent &&
+	          (dirName === 'with' ||
+	           dirName === 'ref' ||
+	           dirName === 'component')) {
+	        continue
+	      }
+	      dirDef = options.directives[dirName]
+	      _.assertAsset(dirDef, 'directive', dirName)
+	      if (dirDef) {
+	        dirs.push({
+	          name: dirName,
+	          descriptors: dirParser.parse(attr.value),
+	          def: dirDef
+	        })
+	      }
+	    } else if (config.interpolate) {
+	      dir = collectAttrDirective(el, attrName, attr.value,
+	                                 options)
+	      if (dir) {
+	        dirs.push(dir)
+	      }
+	    }
+	  }
+	  // sort by priority, LOW to HIGH
+	  dirs.sort(directiveComparator)
+	  return dirs
+	}
+
+	/**
+	 * Check an attribute for potential dynamic bindings,
+	 * and return a directive object.
+	 *
+	 * @param {Element} el
+	 * @param {String} name
+	 * @param {String} value
+	 * @param {Object} options
+	 * @return {Object}
+	 */
+
+	function collectAttrDirective (el, name, value, options) {
+	  var tokens = textParser.parse(value)
+	  if (tokens) {
+	    var def = options.directives.attr
+	    var i = tokens.length
+	    var allOneTime = true
+	    while (i--) {
+	      var token = tokens[i]
+	      if (token.tag && !token.oneTime) {
+	        allOneTime = false
+	      }
+	    }
+	    return {
+	      def: def,
+	      _link: allOneTime
+	        ? function (vm, el) {
+	            el.setAttribute(name, vm.$interpolate(value))
+	          }
+	        : function (vm, el) {
+	            var value = textParser.tokensToExp(tokens, vm)
+	            var desc = dirParser.parse(name + ':' + value)[0]
+	            vm._bindDir('attr', el, desc, def)
+	          }
+	    }
+	  }
+	}
+
+	/**
+	 * Directive priority sort comparator
+	 *
+	 * @param {Object} a
+	 * @param {Object} b
+	 */
+
+	function directiveComparator (a, b) {
+	  a = a.def.priority || 0
+	  b = b.def.priority || 0
+	  return a > b ? 1 : -1
+	}
+
+/***/ },
+/* 42 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var _ = __webpack_require__(1)
+	var templateParser = __webpack_require__(45)
+
+	/**
+	 * Process an element or a DocumentFragment based on a
+	 * instance option object. This allows us to transclude
+	 * a template node/fragment before the instance is created,
+	 * so the processed fragment can then be cloned and reused
+	 * in v-repeat.
+	 *
+	 * @param {Element} el
+	 * @param {Object} options
+	 * @return {Element|DocumentFragment}
+	 */
+
+	module.exports = function transclude (el, options) {
+	  // for template tags, what we want is its content as
+	  // a documentFragment (for block instances)
+	  if (el.tagName === 'TEMPLATE') {
+	    el = templateParser.parse(el)
+	  }
+	  if (options && options.template) {
+	    el = transcludeTemplate(el, options)
+	  }
+	  if (el instanceof DocumentFragment) {
+	    _.prepend(document.createComment('v-start'), el)
+	    el.appendChild(document.createComment('v-end'))
+	  }
+	  return el
+	}
+
+	/**
+	 * Process the template option.
+	 * If the replace option is true this will swap the $el.
+	 *
+	 * @param {Element} el
+	 * @param {Object} options
+	 * @return {Element|DocumentFragment}
+	 */
+
+	function transcludeTemplate (el, options) {
+	  var template = options.template
+	  var frag = templateParser.parse(template, true)
+	  if (!frag) {
+	    _.warn('Invalid template option: ' + template)
+	  } else {
+	    collectRawContent(el)
+	    if (options.replace) {
+	      if (frag.childNodes.length > 1) {
+	        transcludeContent(frag)
+	        return frag
+	      } else {
+	        var replacer = frag.firstChild
+	        _.copyAttributes(el, replacer)
+	        transcludeContent(replacer)
+	        return replacer
+	      }
+	    } else {
+	      el.appendChild(frag)
+	      transcludeContent(el)
+	      return el
+	    }
+	  }
+	}
+
+	/**
+	 * Collect raw content inside $el before they are
+	 * replaced by template content.
+	 */
+
+	var rawContent
+	function collectRawContent (el) {
+	  var child
+	  rawContent = null
+	  if (el.hasChildNodes()) {
+	    rawContent = document.createElement('div')
+	    /* jshint boss:true */
+	    while (child = el.firstChild) {
+	      rawContent.appendChild(child)
+	    }
+	  }
+	}
+
+	/**
+	 * Resolve <content> insertion points mimicking the behavior
+	 * of the Shadow DOM spec:
+	 *
+	 *   http://w3c.github.io/webcomponents/spec/shadow/#insertion-points
+	 *
+	 * @param {Element|DocumentFragment} el
+	 */
+
+	function transcludeContent (el) {
+	  var outlets = getOutlets(el)
+	  var i = outlets.length
+	  if (!i) return
+	  var outlet, select, selected, j, main
+	  // first pass, collect corresponding content
+	  // for each outlet.
+	  while (i--) {
+	    outlet = outlets[i]
+	    if (rawContent) {
+	      select = outlet.getAttribute('select')
+	      if (select) {  // select content
+	        selected = rawContent.querySelectorAll(select)
+	        outlet.content = _.toArray(
+	          selected.length
+	            ? selected
+	            : outlet.childNodes
+	        )
+	      } else { // default content
+	        main = outlet
+	      }
+	    } else { // fallback content
+	      outlet.content = _.toArray(outlet.childNodes)
+	    }
+	  }
+	  // second pass, actually insert the contents
+	  for (i = 0, j = outlets.length; i < j; i++) {
+	    outlet = outlets[i]
+	    if (outlet !== main) {
+	      insertContentAt(outlet, outlet.content)
+	    }
+	  }
+	  // finally insert the main content
+	  if (main) {
+	    insertContentAt(main, _.toArray(rawContent.childNodes))
+	  }
+	}
+
+	/**
+	 * Get <content> outlets from the element/list
+	 *
+	 * @param {Element|Array} el
+	 * @return {Array}
+	 */
+
+	var concat = [].concat
+	function getOutlets (el) {
+	  return _.isArray(el)
+	    ? concat.apply([], el.map(getOutlets))
+	    : el.querySelectorAll
+	      ? _.toArray(el.querySelectorAll('content'))
+	      : []
+	}
+
+	/**
+	 * Insert an array of nodes at outlet,
+	 * then remove the outlet.
+	 *
+	 * @param {Element} outlet
+	 * @param {Array} contents
+	 */
+
+	function insertContentAt (outlet, contents) {
+	  // not using util DOM methods here because
+	  // parentNode can be cached
+	  var parent = outlet.parentNode
+	  for (var i = 0, j = contents.length; i < j; i++) {
+	    parent.insertBefore(contents[i], outlet)
+	  }
+	  parent.removeChild(outlet)
+	}
+
+/***/ },
+/* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
@@ -4590,9 +5482,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (identRE.test(key)) { // identifier
 	    return '.' + key
 	  } else if (+key === key >>> 0) { // bracket index
-	    return '[' + key + ']';
+	    return '[' + key + ']'
 	  } else { // bracket string
-	    return '["' + key.replace(/"/g, '\\"') + '"]';
+	    return '["' + key.replace(/"/g, '\\"') + '"]'
 	  }
 	}
 
@@ -4679,12 +5571,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 42 */
+/* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Cache = __webpack_require__(52)
 	var config = __webpack_require__(20)
-	var dirParser = __webpack_require__(43)
+	var dirParser = __webpack_require__(46)
 	var regexEscapeRE = /[-.*+?^${}()|[\]\/\\]/g
 	var cache, tagRE, htmlRE, firstChar, lastChar
 
@@ -4862,7 +5754,258 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 43 */
+/* 45 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var _ = __webpack_require__(1)
+	var Cache = __webpack_require__(52)
+	var templateCache = new Cache(100)
+
+	var map = {
+	  _default : [0, '', ''],
+	  legend   : [1, '<fieldset>', '</fieldset>'],
+	  tr       : [2, '<table><tbody>', '</tbody></table>'],
+	  col      : [
+	    2,
+	    '<table><tbody></tbody><colgroup>',
+	    '</colgroup></table>'
+	  ]
+	}
+
+	map.td =
+	map.th = [
+	  3,
+	  '<table><tbody><tr>',
+	  '</tr></tbody></table>'
+	]
+
+	map.option =
+	map.optgroup = [
+	  1,
+	  '<select multiple="multiple">',
+	  '</select>'
+	]
+
+	map.thead =
+	map.tbody =
+	map.colgroup =
+	map.caption =
+	map.tfoot = [1, '<table>', '</table>']
+
+	map.g =
+	map.defs =
+	map.symbol =
+	map.use =
+	map.image =
+	map.text =
+	map.circle =
+	map.ellipse =
+	map.line =
+	map.path =
+	map.polygon =
+	map.polyline =
+	map.rect = [
+	  1,
+	  '<svg ' +
+	    'xmlns="http://www.w3.org/2000/svg" ' +
+	    'xmlns:xlink="http://www.w3.org/1999/xlink" ' +
+	    'xmlns:ev="http://www.w3.org/2001/xml-events"' +
+	    'version="1.1">',
+	  '</svg>'
+	]
+
+	var TAG_RE = /<([\w:]+)/
+
+	/**
+	 * Convert a string template to a DocumentFragment.
+	 * Determines correct wrapping by tag types. Wrapping
+	 * strategy found in jQuery & component/domify.
+	 *
+	 * @param {String} templateString
+	 * @return {DocumentFragment}
+	 */
+
+	function stringToFragment (templateString) {
+	  // try a cache hit first
+	  var hit = templateCache.get(templateString)
+	  if (hit) {
+	    return hit
+	  }
+
+	  var frag = document.createDocumentFragment()
+	  var tagMatch = TAG_RE.exec(templateString)
+
+	  if (!tagMatch) {
+	    // text only, return a single text node.
+	    frag.appendChild(
+	      document.createTextNode(templateString)
+	    )
+	  } else {
+
+	    var tag    = tagMatch[1]
+	    var wrap   = map[tag] || map._default
+	    var depth  = wrap[0]
+	    var prefix = wrap[1]
+	    var suffix = wrap[2]
+	    var node   = document.createElement('div')
+
+	    node.innerHTML = prefix + templateString.trim() + suffix
+	    while (depth--) {
+	      node = node.lastChild
+	    }
+
+	    var child
+	    /* jshint boss:true */
+	    while (child = node.firstChild) {
+	      frag.appendChild(child)
+	    }
+	  }
+
+	  templateCache.put(templateString, frag)
+	  return frag
+	}
+
+	/**
+	 * Convert a template node to a DocumentFragment.
+	 *
+	 * @param {Node} node
+	 * @return {DocumentFragment}
+	 */
+
+	function nodeToFragment (node) {
+	  var tag = node.tagName
+	  // if its a template tag and the browser supports it,
+	  // its content is already a document fragment.
+	  if (
+	    tag === 'TEMPLATE' &&
+	    node.content instanceof DocumentFragment
+	  ) {
+	    return node.content
+	  }
+	  return tag === 'SCRIPT'
+	    ? stringToFragment(node.textContent)
+	    : stringToFragment(node.innerHTML)
+	}
+
+	// Test for the presence of the Safari template cloning bug
+	// https://bugs.webkit.org/show_bug.cgi?id=137755
+	var hasBrokenTemplate = _.inBrowser
+	  ? (function () {
+	      var a = document.createElement('div')
+	      a.innerHTML = '<template>1</template>'
+	      return !a.cloneNode(true).firstChild.innerHTML
+	    })()
+	  : false
+
+	// Test for IE10/11 textarea placeholder clone bug
+	var hasTextareaCloneBug = _.inBrowser
+	  ? (function () {
+	      var t = document.createElement('textarea')
+	      t.placeholder = 't'
+	      return t.cloneNode(true).value === 't'
+	    })()
+	  : false
+
+	/**
+	 * 1. Deal with Safari cloning nested <template> bug by
+	 *    manually cloning all template instances.
+	 * 2. Deal with IE10/11 textarea placeholder bug by setting
+	 *    the correct value after cloning.
+	 *
+	 * @param {Element|DocumentFragment} node
+	 * @return {Element|DocumentFragment}
+	 */
+
+	exports.clone = function (node) {
+	  var res = node.cloneNode(true)
+	  var i, original, cloned
+	  /* istanbul ignore if */
+	  if (hasBrokenTemplate) {
+	    original = node.querySelectorAll('template')
+	    if (original.length) {
+	      cloned = res.querySelectorAll('template')
+	      i = cloned.length
+	      while (i--) {
+	        cloned[i].parentNode.replaceChild(
+	          original[i].cloneNode(true),
+	          cloned[i]
+	        )
+	      }
+	    }
+	  }
+	  /* istanbul ignore if */
+	  if (hasTextareaCloneBug) {
+	    if (node.tagName === 'TEXTAREA') {
+	      res.value = node.value
+	    } else {
+	      original = node.querySelectorAll('textarea')
+	      if (original.length) {
+	        cloned = res.querySelectorAll('textarea')
+	        i = cloned.length
+	        while (i--) {
+	          cloned[i].value = original[i].value
+	        }
+	      }
+	    }
+	  }
+	  return res
+	}
+
+	/**
+	 * Process the template option and normalizes it into a
+	 * a DocumentFragment that can be used as a partial or a
+	 * instance template.
+	 *
+	 * @param {*} template
+	 *    Possible values include:
+	 *    - DocumentFragment object
+	 *    - Node object of type Template
+	 *    - id selector: '#some-template-id'
+	 *    - template string: '<div><span>{{msg}}</span></div>'
+	 * @param {Boolean} clone
+	 * @return {DocumentFragment|undefined}
+	 */
+
+	exports.parse = function (template, clone) {
+	  var node, frag
+
+	  // if the template is already a document fragment,
+	  // do nothing
+	  if (template instanceof DocumentFragment) {
+	    return clone
+	      ? template.cloneNode(true)
+	      : template
+	  }
+
+	  if (typeof template === 'string') {
+	    // id selector
+	    if (template.charAt(0) === '#') {
+	      // id selector can be cached too
+	      frag = templateCache.get(template)
+	      if (!frag) {
+	        node = document.getElementById(template.slice(1))
+	        if (node) {
+	          frag = nodeToFragment(node)
+	          // save selector to cache
+	          templateCache.put(template, frag)
+	        }
+	      }
+	    } else {
+	      // normal string template
+	      frag = stringToFragment(template)
+	    }
+	  } else if (template.nodeType) {
+	    // a direct node
+	    frag = nodeToFragment(template)
+	  }
+
+	  return frag && clone
+	    ? exports.clone(frag)
+	    : frag
+	}
+
+/***/ },
+/* 46 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
@@ -5026,11 +6169,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 44 */
+/* 47 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var Path = __webpack_require__(41)
+	var Path = __webpack_require__(43)
 	var Cache = __webpack_require__(52)
 	var expressionCache = new Cache(1000)
 
@@ -5049,7 +6192,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var newlineRE = /\n/g
 	var saveRE = /[\{,]\s*[\w\$_]+\s*:|'[^']*'|"[^"]*"/g
 	var restoreRE = /"(\d+)"/g
-	var pathTestRE = /^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\])*$/
+	var pathTestRE = /^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\]|\[\d+\])*$/
 	var pathReplaceRE = /[^\w$\.]([A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\])*)/g
 	var keywordsRE = new RegExp('^(' + keywords.replace(/,/g, '\\b|') + '\\b)')
 
@@ -5185,7 +6328,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return new Function('scope', 'return ' + body + ';')
 	  } catch (e) {
 	    _.warn(
-	      'Invalid expression. ' + 
+	      'Invalid expression. ' +
 	      'Generated function body: ' + body
 	    )
 	  }
@@ -5257,7 +6400,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.pathTestRE = pathTestRE
 
 /***/ },
-/* 45 */
+/* 48 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
@@ -5413,717 +6556,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 46 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var _ = __webpack_require__(1)
-	var config = __webpack_require__(20)
-	var textParser = __webpack_require__(42)
-	var dirParser = __webpack_require__(43)
-	var templateParser = __webpack_require__(51)
-
-	/**
-	 * Compile a template and return a reusable composite link
-	 * function, which recursively contains more link functions
-	 * inside. This top level compile function should only be
-	 * called on instance root nodes.
-	 *
-	 * @param {Element|DocumentFragment} el
-	 * @param {Object} options
-	 * @param {Boolean} partial
-	 * @return {Function}
-	 */
-
-	module.exports = function compile (el, options, partial) {
-	  var params = !partial && options.paramAttributes
-	  var paramsLinkFn = params
-	    ? compileParamAttributes(el, params, options)
-	    : null
-	  var nodeLinkFn = el instanceof DocumentFragment
-	    ? null
-	    : compileNode(el, options)
-	  var childLinkFn =
-	    (!nodeLinkFn || !nodeLinkFn.terminal) &&
-	    el.hasChildNodes()
-	      ? compileNodeList(el.childNodes, options)
-	      : null
-
-	  /**
-	   * A linker function to be called on a already compiled
-	   * piece of DOM, which instantiates all directive
-	   * instances.
-	   *
-	   * @param {Vue} vm
-	   * @param {Element|DocumentFragment} el
-	   * @return {Function|undefined}
-	   */
-
-	  return function link (vm, el) {
-	    var originalDirCount = vm._directives.length
-	    if (paramsLinkFn) paramsLinkFn(vm, el)
-	    if (nodeLinkFn) nodeLinkFn(vm, el)
-	    if (childLinkFn) childLinkFn(vm, el.childNodes)
-
-	    /**
-	     * If this is a partial compile, the linker function
-	     * returns an unlink function that tearsdown all
-	     * directives instances generated during the partial
-	     * linking.
-	     */
-
-	    if (partial) {
-	      var dirs = vm._directives.slice(originalDirCount)
-	      return function unlink () {
-	        var i = dirs.length
-	        while (i--) {
-	          dirs[i]._teardown()
-	        }
-	        i = vm._directives.indexOf(dirs[0])
-	        vm._directives.splice(i, dirs.length)
-	      }
-	    }
-	  }
-	}
-
-	/**
-	 * Compile a node and return a nodeLinkFn based on the
-	 * node type.
-	 *
-	 * @param {Node} node
-	 * @param {Object} options
-	 * @return {Function|undefined}
-	 */
-
-	function compileNode (node, options) {
-	  var type = node.nodeType
-	  if (type === 1 && node.tagName !== 'SCRIPT') {
-	    return compileElement(node, options)
-	  } else if (type === 3 && config.interpolate) {
-	    return compileTextNode(node, options)
-	  }
-	}
-
-	/**
-	 * Compile an element and return a nodeLinkFn.
-	 *
-	 * @param {Element} el
-	 * @param {Object} options
-	 * @return {Function|null}
-	 */
-
-	function compileElement (el, options) {
-	  var linkFn, tag, component
-	  // check custom element component, but only on non-root
-	  if (!el.__vue__) {
-	    tag = el.tagName.toLowerCase()
-	    component =
-	      tag.indexOf('-') > 0 &&
-	      options.components[tag]
-	    if (component) {
-	      el.setAttribute(config.prefix + 'component', tag)
-	    }
-	  }
-	  if (component || el.hasAttributes()) {
-	    // check terminal direcitves
-	    linkFn = checkTerminalDirectives(el, options)
-	    // if not terminal, build normal link function
-	    if (!linkFn) {
-	      var directives = collectDirectives(el, options)
-	      linkFn = directives.length
-	        ? makeDirectivesLinkFn(directives)
-	        : null
-	    }
-	  }
-	  // if the element is a textarea, we need to interpolate
-	  // its content on initial render.
-	  if (el.tagName === 'TEXTAREA') {
-	    var realLinkFn = linkFn
-	    linkFn = function (vm, el) {
-	      el.value = vm.$interpolate(el.value)
-	      if (realLinkFn) realLinkFn(vm, el)      
-	    }
-	    linkFn.terminal = true
-	  }
-	  return linkFn
-	}
-
-	/**
-	 * Build a multi-directive link function.
-	 *
-	 * @param {Array} directives
-	 * @return {Function} directivesLinkFn
-	 */
-
-	function makeDirectivesLinkFn (directives) {
-	  return function directivesLinkFn (vm, el) {
-	    // reverse apply because it's sorted low to high
-	    var i = directives.length
-	    var dir, j, k
-	    while (i--) {
-	      dir = directives[i]
-	      if (dir._link) {
-	        // custom link fn
-	        dir._link(vm, el)
-	      } else {
-	        k = dir.descriptors.length
-	        for (j = 0; j < k; j++) {
-	          vm._bindDir(dir.name, el,
-	                      dir.descriptors[j], dir.def)
-	        }
-	      }
-	    }
-	  }
-	}
-
-	/**
-	 * Compile a textNode and return a nodeLinkFn.
-	 *
-	 * @param {TextNode} node
-	 * @param {Object} options
-	 * @return {Function|null} textNodeLinkFn
-	 */
-
-	function compileTextNode (node, options) {
-	  var tokens = textParser.parse(node.nodeValue)
-	  if (!tokens) {
-	    return null
-	  }
-	  var frag = document.createDocumentFragment()
-	  var dirs = options.directives
-	  var el, token, value
-	  for (var i = 0, l = tokens.length; i < l; i++) {
-	    token = tokens[i]
-	    value = token.value
-	    if (token.tag) {
-	      if (token.oneTime) {
-	        el = document.createTextNode(value)
-	      } else {
-	        if (token.html) {
-	          el = document.createComment('v-html')
-	          token.type = 'html'
-	          token.def = dirs.html
-	          token.descriptor = dirParser.parse(value)[0]
-	        } else if (token.partial) {
-	          el = document.createComment('v-partial')
-	          token.type = 'partial'
-	          token.def = dirs.partial
-	          token.descriptor = dirParser.parse(value)[0]
-	        } else {
-	          // IE will clean up empty textNodes during
-	          // frag.cloneNode(true), so we have to give it
-	          // something here...
-	          el = document.createTextNode(' ')
-	          token.type = 'text'
-	          token.def = dirs.text
-	          token.descriptor = dirParser.parse(value)[0]
-	        }
-	      }
-	    } else {
-	      el = document.createTextNode(value)
-	    }
-	    frag.appendChild(el)
-	  }
-	  return makeTextNodeLinkFn(tokens, frag, options)
-	}
-
-	/**
-	 * Build a function that processes a textNode.
-	 *
-	 * @param {Array<Object>} tokens
-	 * @param {DocumentFragment} frag
-	 */
-
-	function makeTextNodeLinkFn (tokens, frag) {
-	  return function textNodeLinkFn (vm, el) {
-	    var fragClone = frag.cloneNode(true)
-	    var childNodes = _.toArray(fragClone.childNodes)
-	    var token, value, node
-	    for (var i = 0, l = tokens.length; i < l; i++) {
-	      token = tokens[i]
-	      value = token.value
-	      if (token.tag) {
-	        node = childNodes[i]
-	        if (token.oneTime) {
-	          value = vm.$eval(value)
-	          if (token.html) {
-	            _.replace(node, templateParser.parse(value, true))
-	          } else {
-	            node.nodeValue = value
-	          }
-	        } else {
-	          vm._bindDir(token.type, node,
-	                      token.descriptor, token.def)
-	        }
-	      }
-	    }
-	    _.replace(el, fragClone)
-	  }
-	}
-
-	/**
-	 * Compile a node list and return a childLinkFn.
-	 *
-	 * @param {NodeList} nodeList
-	 * @param {Object} options
-	 * @return {Function|undefined}
-	 */
-
-	function compileNodeList (nodeList, options) {
-	  var linkFns = []
-	  var nodeLinkFn, childLinkFn, node
-	  for (var i = 0, l = nodeList.length; i < l; i++) {
-	    node = nodeList[i]
-	    nodeLinkFn = compileNode(node, options)
-	    childLinkFn =
-	      (!nodeLinkFn || !nodeLinkFn.terminal) &&
-	      node.hasChildNodes()
-	        ? compileNodeList(node.childNodes, options)
-	        : null
-	    linkFns.push(nodeLinkFn, childLinkFn)
-	  }
-	  return linkFns.length
-	    ? makeChildLinkFn(linkFns)
-	    : null
-	}
-
-	/**
-	 * Make a child link function for a node's childNodes.
-	 *
-	 * @param {Array<Function>} linkFns
-	 * @return {Function} childLinkFn
-	 */
-
-	function makeChildLinkFn (linkFns) {
-	  return function childLinkFn (vm, nodes) {
-	    // stablize nodes
-	    nodes = _.toArray(nodes)
-	    var node, nodeLinkFn, childrenLinkFn
-	    for (var i = 0, n = 0, l = linkFns.length; i < l; n++) {
-	      node = nodes[n]
-	      nodeLinkFn = linkFns[i++]
-	      childrenLinkFn = linkFns[i++]
-	      if (nodeLinkFn) {
-	        nodeLinkFn(vm, node)
-	      }
-	      if (childrenLinkFn) {
-	        childrenLinkFn(vm, node.childNodes)
-	      }
-	    }
-	  }
-	}
-
-	/**
-	 * Compile param attributes on a root element and return
-	 * a paramAttributes link function.
-	 *
-	 * @param {Element} el
-	 * @param {Array} attrs
-	 * @param {Object} options
-	 * @return {Function} paramsLinkFn
-	 */
-
-	function compileParamAttributes (el, attrs, options) {
-	  var params = []
-	  var i = attrs.length
-	  var name, value, param
-	  while (i--) {
-	    name = attrs[i]
-	    value = el.getAttribute(name)
-	    if (value !== null) {
-	      param = {
-	        name: name,
-	        value: value
-	      }
-	      var tokens = textParser.parse(value)
-	      if (tokens) {
-	        el.removeAttribute(name)
-	        if (tokens.length > 1) {
-	          _.warn(
-	            'Invalid param attribute binding: "' +
-	            name + '="' + value + '"' +
-	            '\nDon\'t mix binding tags with plain text ' +
-	            'in param attribute bindings.'
-	          )
-	          continue
-	        } else {
-	          param.dynamic = true
-	          param.value = tokens[0].value
-	        }
-	      }
-	      params.push(param)
-	    }
-	  }
-	  return makeParamsLinkFn(params, options)
-	}
-
-	/**
-	 * Build a function that applies param attributes to a vm.
-	 *
-	 * @param {Array} params
-	 * @param {Object} options
-	 * @return {Function} paramsLinkFn
-	 */
-
-	var dataAttrRE = /^data-/
-
-	function makeParamsLinkFn (params, options) {
-	  var def = options.directives['with']
-	  return function paramsLinkFn (vm, el) {
-	    var i = params.length
-	    var param, path
-	    while (i--) {
-	      param = params[i]
-	      // params could contain dashes, which will be
-	      // interpreted as minus calculations by the parser
-	      // so we need to wrap the path here
-	      path = _.camelize(param.name.replace(dataAttrRE, ''))
-	      if (param.dynamic) {
-	        // dynamic param attribtues are bound as v-with.
-	        // we can directly duck the descriptor here beacuse
-	        // param attributes cannot use expressions or
-	        // filters.
-	        vm._bindDir('with', el, {
-	          arg: path,
-	          expression: param.value
-	        }, def)
-	      } else {
-	        // just set once
-	        vm.$set(path, param.value)
-	      }
-	    }
-	  }
-	}
-
-	/**
-	 * Check an element for terminal directives in fixed order.
-	 * If it finds one, return a terminal link function.
-	 *
-	 * @param {Element} el
-	 * @param {Object} options
-	 * @return {Function} terminalLinkFn
-	 */
-
-	var terminalDirectives = [
-	  'repeat',
-	  'if',
-	  'component'
-	]
-
-	function skip () {}
-	skip.terminal = true
-
-	function checkTerminalDirectives (el, options) {
-	  if (_.attr(el, 'pre') !== null) {
-	    return skip
-	  }
-	  var value, dirName
-	  /* jshint boss: true */
-	  for (var i = 0; i < 3; i++) {
-	    dirName = terminalDirectives[i]
-	    if (value = _.attr(el, dirName)) {
-	      return makeTeriminalLinkFn(el, dirName, value, options)
-	    }
-	  }
-	}
-
-	/**
-	 * Build a link function for a terminal directive.
-	 *
-	 * @param {Element} el
-	 * @param {String} dirName
-	 * @param {String} value
-	 * @param {Object} options
-	 * @return {Function} terminalLinkFn
-	 */
-
-	function makeTeriminalLinkFn (el, dirName, value, options) {
-	  var descriptor = dirParser.parse(value)[0]
-	  var def = options.directives[dirName]
-	  // special case: we need to collect directives found
-	  // on a component root node, but defined in the parent
-	  // template. These directives need to be compiled in
-	  // the parent scope.
-	  if (dirName === 'component') {
-	    var dirs = collectDirectives(el, options, true)
-	    el._parentLinker = dirs.length
-	      ? makeDirectivesLinkFn(dirs)
-	      : null
-	  }
-	  var terminalLinkFn = function (vm, el) {
-	    vm._bindDir(dirName, el, descriptor, def)
-	  }
-	  terminalLinkFn.terminal = true
-	  return terminalLinkFn
-	}
-
-	/**
-	 * Collect the directives on an element.
-	 *
-	 * @param {Element} el
-	 * @param {Object} options
-	 * @param {Boolean} asParent
-	 * @return {Array}
-	 */
-
-	function collectDirectives (el, options, asParent) {
-	  var attrs = _.toArray(el.attributes)
-	  var i = attrs.length
-	  var dirs = []
-	  var attr, attrName, dir, dirName, dirDef
-	  while (i--) {
-	    attr = attrs[i]
-	    attrName = attr.name
-	    if (attrName.indexOf(config.prefix) === 0) {
-	      dirName = attrName.slice(config.prefix.length)
-	      if (
-	        asParent &&
-	        (dirName === 'with' || dirName === 'ref')
-	      ) {
-	        continue
-	      }
-	      dirDef = options.directives[dirName]
-	      _.assertAsset(dirDef, 'directive', dirName)
-	      if (dirDef) {
-	        dirs.push({
-	          name: dirName,
-	          descriptors: dirParser.parse(attr.value),
-	          def: dirDef
-	        })
-	      }
-	    } else if (config.interpolate) {
-	      dir = collectAttrDirective(el, attrName, attr.value,
-	                                 options)
-	      if (dir) {
-	        dirs.push(dir)
-	      }
-	    }
-	  }
-	  // sort by priority, LOW to HIGH
-	  dirs.sort(directiveComparator)
-	  return dirs
-	}
-
-	/**
-	 * Check an attribute for potential dynamic bindings,
-	 * and return a directive object.
-	 *
-	 * @param {Element} el
-	 * @param {String} name
-	 * @param {String} value
-	 * @param {Object} options
-	 * @return {Object}
-	 */
-
-	function collectAttrDirective (el, name, value, options) {
-	  var tokens = textParser.parse(value)
-	  if (tokens) {
-	    var def = options.directives.attr
-	    var i = tokens.length
-	    var allOneTime = true
-	    while (i--) {
-	      var token = tokens[i]
-	      if (token.tag && !token.oneTime) {
-	        allOneTime = false
-	      }
-	    }
-	    return {
-	      def: def,
-	      _link: allOneTime
-	        ? function (vm, el) {
-	            el.setAttribute(name, vm.$interpolate(value))
-	          }
-	        : function (vm, el) {
-	            var value = textParser.tokensToExp(tokens, vm)
-	            var desc = dirParser.parse(name + ':' + value)[0]
-	            vm._bindDir('attr', el, desc, def)
-	          }
-	    }
-	  }
-	}
-
-	/**
-	 * Directive priority sort comparator
-	 *
-	 * @param {Object} a
-	 * @param {Object} b
-	 */
-
-	function directiveComparator (a, b) {
-	  a = a.def.priority || 0
-	  b = b.def.priority || 0
-	  return a > b ? 1 : -1
-	}
-
-/***/ },
-/* 47 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var _ = __webpack_require__(1)
-	var templateParser = __webpack_require__(51)
-
-	/**
-	 * Process an element or a DocumentFragment based on a
-	 * instance option object. This allows us to transclude
-	 * a template node/fragment before the instance is created,
-	 * so the processed fragment can then be cloned and reused
-	 * in v-repeat.
-	 *
-	 * @param {Element} el
-	 * @param {Object} options
-	 * @return {Element|DocumentFragment}
-	 */
-
-	module.exports = function transclude (el, options) {
-	  // for template tags, what we want is its content as
-	  // a documentFragment (for block instances)
-	  if (el.tagName === 'TEMPLATE') {
-	    el = templateParser.parse(el)
-	  }
-	  if (options && options.template) {
-	    el = transcludeTemplate(el, options)
-	  }
-	  if (el instanceof DocumentFragment) {
-	    _.prepend(document.createComment('v-start'), el)
-	    el.appendChild(document.createComment('v-end'))
-	  }
-	  return el
-	}
-
-	/**
-	 * Process the template option.
-	 * If the replace option is true this will swap the $el.
-	 *
-	 * @param {Element} el
-	 * @param {Object} options
-	 * @return {Element|DocumentFragment}
-	 */
-
-	function transcludeTemplate (el, options) {
-	  var template = options.template
-	  var frag = templateParser.parse(template, true)
-	  if (!frag) {
-	    _.warn('Invalid template option: ' + template)
-	  } else {
-	    collectRawContent(el)
-	    if (options.replace) {
-	      if (frag.childNodes.length > 1) {
-	        transcludeContent(frag)
-	        return frag
-	      } else {
-	        var replacer = frag.firstChild
-	        _.copyAttributes(el, replacer)
-	        transcludeContent(replacer)
-	        return replacer
-	      }
-	    } else {
-	      el.appendChild(frag)
-	      transcludeContent(el)
-	      return el
-	    }
-	  }
-	}
-
-	/**
-	 * Collect raw content inside $el before they are
-	 * replaced by template content.
-	 */
-
-	var rawContent
-	function collectRawContent (el) {
-	  var child
-	  rawContent = null
-	  if (el.hasChildNodes()) {
-	    rawContent = document.createElement('div')
-	    /* jshint boss:true */
-	    while (child = el.firstChild) {
-	      rawContent.appendChild(child)
-	    }
-	  }
-	}
-
-	/**
-	 * Resolve <content> insertion points mimicking the behavior
-	 * of the Shadow DOM spec:
-	 *
-	 *   http://w3c.github.io/webcomponents/spec/shadow/#insertion-points
-	 *
-	 * @param {Element|DocumentFragment} el
-	 */
-
-	function transcludeContent (el) {
-	  var outlets = getOutlets(el)
-	  var i = outlets.length
-	  if (!i) return
-	  var outlet, select, selected, j, main
-	  // first pass, collect corresponding content
-	  // for each outlet.
-	  while (i--) {
-	    outlet = outlets[i]
-	    if (rawContent) {
-	      select = outlet.getAttribute('select')
-	      if (select) {  // select content
-	        selected = rawContent.querySelectorAll(select)
-	        outlet.content = _.toArray(
-	          selected.length
-	            ? selected
-	            : outlet.childNodes
-	        )
-	      } else { // default content
-	        main = outlet
-	      }
-	    } else { // fallback content
-	      outlet.content = _.toArray(outlet.childNodes)
-	    }
-	  }
-	  // second pass, actually insert the contents
-	  for (i = 0, j = outlets.length; i < j; i++) {
-	    outlet = outlets[i]
-	    if (outlet !== main) {
-	      insertContentAt(outlet, outlet.content)
-	    }
-	  }
-	  // finally insert the main content
-	  if (main) {
-	    insertContentAt(main, _.toArray(rawContent.childNodes))
-	  }
-	}
-
-	/**
-	 * Get <content> outlets from the element/list
-	 *
-	 * @param {Element|Array} el
-	 * @return {Array}
-	 */
-
-	var concat = [].concat
-	function getOutlets (el) {
-	  return _.isArray(el)
-	    ? concat.apply([], el.map(getOutlets))
-	    : el.querySelectorAll
-	      ? _.toArray(el.querySelectorAll('content'))
-	      : []
-	}
-
-	/**
-	 * Insert an array of nodes at outlet,
-	 * then remove the outlet.
-	 *
-	 * @param {Element} outlet
-	 * @param {Array} contents
-	 */
-
-	function insertContentAt (outlet, contents) {
-	  // not using util DOM methods here because
-	  // parentNode can be cached
-	  var parent = outlet.parentNode
-	  for (var i = 0, j = contents.length; i < j; i++) {
-	    parent.insertBefore(contents[i], outlet)
-	  }
-	  parent.removeChild(outlet)
-	}
-
-/***/ },
-/* 48 */
+/* 49 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
@@ -6184,12 +6617,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 49 */
+/* 50 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
 	var config = __webpack_require__(20)
-	var Binding = __webpack_require__(39)
+	var Dep = __webpack_require__(39)
 	var arrayMethods = __webpack_require__(59)
 	var arrayKeys = Object.getOwnPropertyNames(arrayMethods)
 	__webpack_require__(60)
@@ -6247,7 +6680,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this.id = ++uid
 	  this.value = value
 	  this.active = true
-	  this.bindings = []
+	  this.deps = []
 	  _.define(value, '__ob__', this)
 	  if (type === ARRAY) {
 	    var augment = config.proto && _.hasProto
@@ -6315,10 +6748,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/**
 	 * Try to carete an observer for a child value,
-	 * and if value is array, link binding to the array.
+	 * and if value is array, link dep to the array.
 	 *
 	 * @param {*} val
-	 * @return {Binding|undefined}
+	 * @return {Dep|undefined}
 	 */
 
 	p.observe = function (val) {
@@ -6349,9 +6782,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	p.convert = function (key, val) {
 	  var ob = this
 	  var childOb = ob.observe(val)
-	  var binding = new Binding()
+	  var dep = new Dep()
 	  if (childOb) {
-	    childOb.bindings.push(binding)
+	    childOb.deps.push(dep)
 	  }
 	  Object.defineProperty(ob.value, key, {
 	    enumerable: true,
@@ -6360,40 +6793,40 @@ return /******/ (function(modules) { // webpackBootstrap
 	      // Observer.target is a watcher whose getter is
 	      // currently being evaluated.
 	      if (ob.active && Observer.target) {
-	        Observer.target.addDep(binding)
+	        Observer.target.addDep(dep)
 	      }
 	      return val
 	    },
 	    set: function (newVal) {
 	      if (newVal === val) return
-	      // remove binding from old value
+	      // remove dep from old value
 	      var oldChildOb = val && val.__ob__
 	      if (oldChildOb) {
-	        var oldBindings = oldChildOb.bindings
-	        oldBindings.splice(oldBindings.indexOf(binding), 1)
+	        var oldDeps = oldChildOb.deps
+	        oldDeps.splice(oldDeps.indexOf(dep), 1)
 	      }
 	      val = newVal
-	      // add binding to new value
+	      // add dep to new value
 	      var newChildOb = ob.observe(newVal)
 	      if (newChildOb) {
-	        newChildOb.bindings.push(binding)
+	        newChildOb.deps.push(dep)
 	      }
-	      binding.notify()
+	      dep.notify()
 	    }
 	  })
 	}
 
 	/**
-	 * Notify change on all self bindings on an observer.
+	 * Notify change on all self deps on an observer.
 	 * This is called when a mutable value mutates. e.g.
 	 * when an Array's mutating methods are called, or an
 	 * Object's $add/$delete are called.
 	 */
 
 	p.notify = function () {
-	  var bindings = this.bindings
-	  for (var i = 0, l = bindings.length; i < l; i++) {
-	    bindings[i].notify()
+	  var deps = this.deps
+	  for (var i = 0, l = deps.length; i < l; i++) {
+	    deps[i].notify()
 	  }
 	}
 
@@ -6425,7 +6858,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 50 */
+/* 51 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
@@ -6493,233 +6926,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	module.exports = Batcher
-
-/***/ },
-/* 51 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var _ = __webpack_require__(1)
-	var Cache = __webpack_require__(52)
-	var templateCache = new Cache(100)
-
-	/**
-	 * Test for the presence of the Safari template cloning bug
-	 * https://bugs.webkit.org/show_bug.cgi?id=137755
-	 */
-
-	var hasBrokenTemplate = _.inBrowser
-	  ? (function () {
-	      var a = document.createElement('div')
-	      a.innerHTML = '<template>1</template>'
-	      return !a.cloneNode(true).firstChild.innerHTML
-	    })()
-	  : false
-
-	var map = {
-	  _default : [0, '', ''],
-	  legend   : [1, '<fieldset>', '</fieldset>'],
-	  tr       : [2, '<table><tbody>', '</tbody></table>'],
-	  col      : [
-	    2,
-	    '<table><tbody></tbody><colgroup>',
-	    '</colgroup></table>'
-	  ]
-	}
-
-	map.td =
-	map.th = [
-	  3,
-	  '<table><tbody><tr>',
-	  '</tr></tbody></table>'
-	]
-
-	map.option =
-	map.optgroup = [
-	  1,
-	  '<select multiple="multiple">',
-	  '</select>'
-	]
-
-	map.thead =
-	map.tbody =
-	map.colgroup =
-	map.caption =
-	map.tfoot = [1, '<table>', '</table>']
-
-	map.g =
-	map.defs =
-	map.symbol =
-	map.use =
-	map.image =
-	map.text =
-	map.circle =
-	map.ellipse =
-	map.line =
-	map.path =
-	map.polygon =
-	map.polyline =
-	map.rect = [
-	  1,
-	  '<svg ' +
-	    'xmlns="http://www.w3.org/2000/svg" ' +
-	    'xmlns:xlink="http://www.w3.org/1999/xlink" ' +
-	    'xmlns:ev="http://www.w3.org/2001/xml-events"' +
-	    'version="1.1">',
-	  '</svg>'
-	]
-
-	var TAG_RE = /<([\w:]+)/
-
-	/**
-	 * Convert a string template to a DocumentFragment.
-	 * Determines correct wrapping by tag types. Wrapping
-	 * strategy found in jQuery & component/domify.
-	 *
-	 * @param {String} templateString
-	 * @return {DocumentFragment}
-	 */
-
-	function stringToFragment (templateString) {
-	  // try a cache hit first
-	  var hit = templateCache.get(templateString)
-	  if (hit) {
-	    return hit
-	  }
-
-	  var frag = document.createDocumentFragment()
-	  var tagMatch = TAG_RE.exec(templateString)
-
-	  if (!tagMatch) {
-	    // text only, return a single text node.
-	    frag.appendChild(
-	      document.createTextNode(templateString)
-	    )
-	  } else {
-
-	    var tag    = tagMatch[1]
-	    var wrap   = map[tag] || map._default
-	    var depth  = wrap[0]
-	    var prefix = wrap[1]
-	    var suffix = wrap[2]
-	    var node   = document.createElement('div')
-
-	    node.innerHTML = prefix + templateString.trim() + suffix
-	    while (depth--) {
-	      node = node.lastChild
-	    }
-
-	    var child
-	    /* jshint boss:true */
-	    while (child = node.firstChild) {
-	      frag.appendChild(child)
-	    }
-	  }
-
-	  templateCache.put(templateString, frag)
-	  return frag
-	}
-
-	/**
-	 * Convert a template node to a DocumentFragment.
-	 *
-	 * @param {Node} node
-	 * @return {DocumentFragment}
-	 */
-
-	function nodeToFragment (node) {
-	  var tag = node.tagName
-	  // if its a template tag and the browser supports it,
-	  // its content is already a document fragment.
-	  if (
-	    tag === 'TEMPLATE' &&
-	    node.content instanceof DocumentFragment
-	  ) {
-	    return node.content
-	  }
-	  return tag === 'SCRIPT'
-	    ? stringToFragment(node.textContent)
-	    : stringToFragment(node.innerHTML)
-	}
-
-	/**
-	 * Deal with Safari cloning nested <template> bug by
-	 * manually cloning all template instances.
-	 *
-	 * @param {Element|DocumentFragment} node
-	 * @return {Element|DocumentFragment}
-	 */
-
-	exports.clone = function (node) {
-	  var res = node.cloneNode(true)
-	  /* istanbul ignore if */
-	  if (hasBrokenTemplate) {
-	    var templates = node.querySelectorAll('template')
-	    if (templates.length) {
-	      var cloned = res.querySelectorAll('template')
-	      var i = cloned.length
-	      while (i--) {
-	        cloned[i].parentNode.replaceChild(
-	          templates[i].cloneNode(true),
-	          cloned[i]
-	        )
-	      }
-	    }
-	  }
-	  return res
-	}
-
-	/**
-	 * Process the template option and normalizes it into a
-	 * a DocumentFragment that can be used as a partial or a
-	 * instance template.
-	 *
-	 * @param {*} template
-	 *    Possible values include:
-	 *    - DocumentFragment object
-	 *    - Node object of type Template
-	 *    - id selector: '#some-template-id'
-	 *    - template string: '<div><span>{{msg}}</span></div>'
-	 * @param {Boolean} clone
-	 * @return {DocumentFragment|undefined}
-	 */
-
-	exports.parse = function (template, clone) {
-	  var node, frag
-
-	  // if the template is already a document fragment,
-	  // do nothing
-	  if (template instanceof DocumentFragment) {
-	    return clone
-	      ? template.cloneNode(true)
-	      : template
-	  }
-
-	  if (typeof template === 'string') {
-	    // id selector
-	    if (template.charAt(0) === '#') {
-	      // id selector can be cached too
-	      frag = templateCache.get(template)
-	      if (!frag) {
-	        node = document.getElementById(template.slice(1))
-	        if (node) {
-	          frag = nodeToFragment(node)
-	          // save selector to cache
-	          templateCache.put(template, frag)
-	        }
-	      }
-	    } else {
-	      // normal string template
-	      frag = stringToFragment(template)
-	    }
-	  } else if (template.nodeType) {
-	    // a direct node
-	    frag = nodeToFragment(template)
-	  }
-
-	  return frag && clone
-	    ? exports.clone(frag)
-	    : frag
-	}
 
 /***/ },
 /* 52 */
@@ -7094,17 +7300,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    // check params
 	    // - lazy: update model on "change" instead of "input"
-	    var lazy = el.hasAttribute('lazy')
-	    if (lazy) {
-	      el.removeAttribute('lazy')
-	    }
+	    var lazy = this._checkParam('lazy') != null
 	    // - number: cast value into number when updating model.
-	    var number =
-	      el.hasAttribute('number') ||
-	      el.type === 'number'
-	    if (number) {
-	      el.removeAttribute('number')
-	    }
+	    var number = this._checkParam('number') != null
 
 	    // handle composition events.
 	    // http://blog.evanyou.me/2014/01/03/composition-event/
@@ -7133,30 +7331,44 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // if the directive has filters, we need to
 	    // record cursor position and restore it after updating
 	    // the input with the filtered value.
-	    this.listener = function textInputListener () {
-	      if (cpLocked) return
-	      var charsOffset
-	      // some HTML5 input types throw error here
-	      try {
-	        // record how many chars from the end of input
-	        // the cursor was at
-	        charsOffset = el.value.length - el.selectionStart
-	      } catch (e) {}
-	      set()
-	      // force a value update, because in
-	      // certain cases the write filters output the same
-	      // result for different input values, and the Observer
-	      // set events won't be triggered.
-	      _.nextTick(function () {
-	        var newVal = self._watcher.value
-	        self.update(newVal)
-	        if (charsOffset != null) {
-	          var cursorPos =
-	            _.toString(newVal).length - charsOffset
-	          el.setSelectionRange(cursorPos, cursorPos)
+	    // also force update for type="range" inputs to enable
+	    // "lock in range" (see #506)
+	    this.listener = this.filters || el.type === 'range'
+	      ? function textInputListener () {
+	          if (cpLocked) return
+	          var charsOffset
+	          // some HTML5 input types throw error here
+	          try {
+	            // record how many chars from the end of input
+	            // the cursor was at
+	            charsOffset = el.value.length - el.selectionStart
+	          } catch (e) {}
+	          // Fix IE10/11 infinite update cycle
+	          // https://github.com/yyx990803/vue/issues/592
+	          /* istanbul ignore if */
+	          if (charsOffset < 0) {
+	            return
+	          }
+	          set()
+	          _.nextTick(function () {
+	            // force a value update, because in
+	            // certain cases the write filters output the
+	            // same result for different input values, and
+	            // the Observer set events won't be triggered.
+	            var newVal = self._watcher.value
+	            self.update(newVal)
+	            if (charsOffset != null) {
+	              var cursorPos =
+	                _.toString(newVal).length - charsOffset
+	              el.setSelectionRange(cursorPos, cursorPos)
+	            }
+	          })
 	        }
-	      })
-	    }
+	      : function textInputListener () {
+	          if (cpLocked) return
+	          set()
+	        }
+
 	    this.event = lazy ? 'change' : 'input'
 	    _.on(el, this.event, this.listener)
 
@@ -7246,9 +7458,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var self = this
 	    var el = this.el
 	    // check options param
-	    var optionsParam = el.getAttribute('options')
+	    var optionsParam = this._checkParam('options')
 	    if (optionsParam) {
-	      el.removeAttribute('options')
 	      initOptions.call(this, optionsParam)
 	    }
 	    this.multiple = el.hasAttribute('multiple')
