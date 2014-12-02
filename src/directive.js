@@ -18,11 +18,10 @@ var expParser = require('./parsers/expression')
  *                 - {String} [arg]
  *                 - {Array<Object>} [filters]
  * @param {Object} def - directive definition object
- * @param {Function} [linker] - pre-compiled linker function
  * @constructor
  */
 
-function Directive (name, el, vm, descriptor, def, linker) {
+function Directive (name, el, vm, descriptor, def) {
   // public
   this.name = name
   this.el = el
@@ -33,7 +32,6 @@ function Directive (name, el, vm, descriptor, def, linker) {
   this.arg = descriptor.arg
   this.filters = _.resolveFilters(vm, descriptor.filters)
   // private
-  this._linker = linker
   this._locked = false
   this._bound = false
   // init

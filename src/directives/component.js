@@ -1,5 +1,4 @@
 var _ = require('../util')
-var compile = require('../compiler/compile')
 var templateParser = require('../parsers/template')
 
 module.exports = {
@@ -30,12 +29,6 @@ module.exports = {
       if (this.keepAlive) {
         this.cache = {}
       }
-      // compile parent scope content
-      this.parentLinkFn = compile(
-        this.el, this.vm.$options,
-        true, // partial
-        true  // asParent
-      )
       // if static, build right now.
       if (!this._isDynamicLiteral) {
         this.resolveCtor(this.expression)
@@ -83,14 +76,10 @@ module.exports = {
     var vm = this.vm
     var el = templateParser.clone(this.el)
     if (this.Ctor) {
-      var parentUnlinkFn
-      if (this.parentLinkFn) {
-        parentUnlinkFn = this.parentLinkFn(vm, el)
-      }
       var child = vm.$addChild({
-        el: el
+        el: el,
+        _asComponent: true
       }, this.Ctor)
-      child._parentUnlinkFn = parentUnlinkFn
       if (this.keepAlive) {
         this.cache[this.ctorId] = child
       }
@@ -107,9 +96,6 @@ module.exports = {
     var child = this.childVM
     if (!child || this.keepAlive) {
       return
-    }
-    if (child._parentUnlinkFn) {
-      child._parentUnlinkFn()
     }
     // the sole purpose of `deferCleanup` is so that we can
     // "deactivate" the vm right now and perform DOM removal
@@ -201,11 +187,7 @@ module.exports = {
     // destroy all keep-alive cached instances
     if (this.cache) {
       for (var key in this.cache) {
-        var child = this.cache[key]
-        if (child._parentUnlinkFn) {
-          child._parentUnlinkFn()
-        }
-        child.$destroy()
+        this.cache[key].$destroy()
       }
       this.cache = null
     }

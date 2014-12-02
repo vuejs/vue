@@ -44,39 +44,21 @@ function transcludeTemplate (el, options) {
   if (!frag) {
     _.warn('Invalid template option: ' + template)
   } else {
-    collectRawContent(el)
+    var rawContent = options._content || _.extractContent(el)
     if (options.replace) {
       if (frag.childNodes.length > 1) {
-        transcludeContent(frag)
+        transcludeContent(frag, rawContent)
         return frag
       } else {
         var replacer = frag.firstChild
         _.copyAttributes(el, replacer)
-        transcludeContent(replacer)
+        transcludeContent(replacer, rawContent)
         return replacer
       }
     } else {
       el.appendChild(frag)
-      transcludeContent(el)
+      transcludeContent(el, rawContent)
       return el
-    }
-  }
-}
-
-/**
- * Collect raw content inside $el before they are
- * replaced by template content.
- */
-
-var rawContent
-function collectRawContent (el) {
-  var child
-  rawContent = null
-  if (el.hasChildNodes()) {
-    rawContent = document.createElement('div')
-    /* jshint boss:true */
-    while (child = el.firstChild) {
-      rawContent.appendChild(child)
     }
   }
 }
@@ -88,9 +70,10 @@ function collectRawContent (el) {
  *   http://w3c.github.io/webcomponents/spec/shadow/#insertion-points
  *
  * @param {Element|DocumentFragment} el
+ * @param {Element} raw
  */
 
-function transcludeContent (el) {
+function transcludeContent (el, raw) {
   var outlets = getOutlets(el)
   var i = outlets.length
   if (!i) return
@@ -99,10 +82,10 @@ function transcludeContent (el) {
   // for each outlet.
   while (i--) {
     outlet = outlets[i]
-    if (rawContent) {
+    if (raw) {
       select = outlet.getAttribute('select')
       if (select) {  // select content
-        selected = rawContent.querySelectorAll(select)
+        selected = raw.querySelectorAll(select)
         outlet.content = _.toArray(
           selected.length
             ? selected
@@ -124,7 +107,7 @@ function transcludeContent (el) {
   }
   // finally insert the main content
   if (main) {
-    insertContentAt(main, _.toArray(rawContent.childNodes))
+    insertContentAt(main, _.toArray(raw.childNodes))
   }
 }
 

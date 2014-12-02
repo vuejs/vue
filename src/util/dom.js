@@ -174,3 +174,24 @@ exports.removeClass = function (el, cls) {
     el.setAttribute('class', cur.trim())
   }
 }
+
+/**
+ * Extract raw content inside an element into a temporary
+ * container div
+ *
+ * @param {Element} el
+ * @return {Element}
+ */
+
+exports.extractContent = function (el) {
+  var child
+  var rawContent
+  if (el.hasChildNodes()) {
+    rawContent = document.createElement('div')
+    /* jshint boss:true */
+    while (child = el.firstChild) {
+      rawContent.appendChild(child)
+    }
+  }
+  return rawContent
+}
