@@ -65,10 +65,9 @@ describe('Data API', function () {
     expect(vm.c).toBe(1)
     expect(vm._data.c).toBe(1)
     expect(vm._digest).toHaveBeenCalled()
-    // reserved key should warn
+    // reserved key should not be proxied
     vm.$add('_c', 1)
     expect(vm._c).toBeUndefined()
-    expect(_.warn).toHaveBeenCalled()
   })
 
   it('$delete', function () {
@@ -77,10 +76,9 @@ describe('Data API', function () {
     expect(vm.hasOwnProperty('a')).toBe(false)
     expect(vm._data.hasOwnProperty('a')).toBe(false)
     expect(vm._digest).toHaveBeenCalled()
-    // reserved key should warn
+    // reserved key should not be deleted
     vm.$delete('_data')
     expect(vm._data).toBeTruthy()
-    expect(_.warn).toHaveBeenCalled()
   })
 
   it('$watch', function (done) {
