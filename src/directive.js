@@ -67,9 +67,6 @@ p._bind = function (def) {
     (!this.isLiteral || this._isDynamicLiteral) &&
     !this._checkStatement()
   ) {
-    // use raw expression as identifier because filters
-    // make them different watchers
-    var watcher = this.vm._watchers[this.raw]
     // wrapped updater for context
     var dir = this
     var update = this._update = function (val, oldVal) {
@@ -77,7 +74,13 @@ p._bind = function (def) {
         dir.update(val, oldVal)
       }
     }
-    if (!watcher) {
+    // use raw expression as identifier because filters
+    // make them different watchers
+    var watcher = this.vm._watchers[this.raw]
+    // v-repeat always creates a new watcher because it has
+    // a special filter that's bound to its directive
+    // instance.
+    if (!watcher || this.name === 'repeat') {
       watcher = this.vm._watchers[this.raw] = new Watcher(
         this.vm,
         this._watcherExp,

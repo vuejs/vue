@@ -18,7 +18,8 @@ module.exports = {
     // uid as a cache identifier
     this.id = '__v_repeat_' + (++uid)
     // we need to insert the objToArray converter
-    // as the first read filter.
+    // as the first read filter, because it has to be invoked
+    // before any user filters. (can't do it in `update`)
     if (!this.filters) {
       this.filters = {}
     }
