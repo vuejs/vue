@@ -148,7 +148,8 @@ if (_.inBrowser) {
         template: '<div v-component="test" v-show="ok">{{message}}</div>',
         components: {
           test: {
-            template: '<content></content> {{message}}',
+            template: '<div><content></content> {{message}}</div>',
+            replace: true,
             data: function () {
               return {
                 message: 'world'
