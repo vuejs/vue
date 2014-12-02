@@ -112,7 +112,7 @@ module.exports = {
             $parent: this.vm
           })
           this.template = transclude(this.template, merged)
-          this._linkFn = compile(this.template, merged)
+          this._linkFn = compile(this.template, merged, false, true)
         }
       } else {
         // to be resolved later
