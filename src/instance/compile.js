@@ -18,6 +18,7 @@ var transclude = require('../compiler/transclude')
 
 exports._compile = function (el) {
   var options = this.$options
+  var parent = options._parent
   if (options._linkFn) {
     this._initElement(el)
     options._linkFn(this, el)
@@ -27,20 +28,26 @@ exports._compile = function (el) {
       // separate container element and content
       var content = options._content = _.extractContent(raw)
       // create two separate linekrs for container and content
+      var parentOptions = parent.$options
+      
+      // hack: we need to skip the paramAttributes for this
+      // child instance when compiling its parent container
+      // linker. there could be a better way to do this.
+      parentOptions._skipAttrs = options.paramAttributes
       var containerLinkFn =
-        compile(raw, options, true, true)
+        compile(raw, parentOptions, true, true)
+      parentOptions._skipAttrs = null
+
       if (content) {
         var contentLinkFn =
-          compile(content, options, true, true)
+          compile(content, parentOptions, true)
         // call content linker now, before transclusion
-        this._contentUnlinkFn =
-          contentLinkFn(options._parent, content)
+        this._contentUnlinkFn = contentLinkFn(parent, content)
       }
       // tranclude, this possibly replaces original
       el = transclude(el, options)
       // now call the container linker on the resolved el
-      this._containerUnlinkFn =
-        containerLinkFn(options._parent, el)
+      this._containerUnlinkFn = containerLinkFn(parent, el)
     } else {
       // simply transclude
       el = transclude(el, options)

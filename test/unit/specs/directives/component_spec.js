@@ -200,6 +200,23 @@ if (_.inBrowser) {
       })
     })
 
+    it('paramAttributes', function () {
+      var vm = new Vue({
+        el: el,
+        data: {
+          list: [{a:1}, {a:2}]
+        },
+        template: '<ul v-component="test" collection="{{list}}"></ul>',
+        components: {
+          test: {
+            template: '<li v-repeat="collection">{{a}}</li>',
+            paramAttributes: ['collection']
+          }
+        }
+      })
+      expect(el.innerHTML).toBe('<ul><li>1</li><li>2</li><!--v-repeat--></ul><!--v-component-->')
+    })
+
     it('wait-for', function (done) {
       var vm = new Vue({
         el: el,

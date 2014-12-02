@@ -19,7 +19,8 @@ var templateParser = require('../parsers/template')
  * @param {Element|DocumentFragment} el
  * @param {Object} options
  * @param {Boolean} partial
- * @param {Boolean} asParent
+ * @param {Boolean} asParent - compiling a component
+ *                             container as its parent.
  * @return {Function}
  */
 
@@ -509,6 +510,10 @@ function collectDirectives (el, options, asParent) {
  */
 
 function collectAttrDirective (el, name, value, options) {
+  if (options._skipAttrs &&
+      options._skipAttrs.indexOf(name) > -1) {
+    return
+  }
   var tokens = textParser.parse(value)
   if (tokens) {
     var def = options.directives.attr
