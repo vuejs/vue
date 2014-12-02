@@ -1,6 +1,7 @@
 var _ = require('../util')
 var Cache = require('../cache')
-var templateCache = new Cache(100)
+var templateCache = new Cache(1000)
+var idSelectorCache = new Cache(1000)
 
 var map = {
   _default : [0, '', ''],
@@ -204,10 +205,11 @@ exports.clone = function (node) {
  *    - id selector: '#some-template-id'
  *    - template string: '<div><span>{{msg}}</span></div>'
  * @param {Boolean} clone
+ * @param {Boolean} noSelector
  * @return {DocumentFragment|undefined}
  */
 
-exports.parse = function (template, clone) {
+exports.parse = function (template, clone, noSelector) {
   var node, frag
 
   // if the template is already a document fragment,
@@ -220,15 +222,15 @@ exports.parse = function (template, clone) {
 
   if (typeof template === 'string') {
     // id selector
-    if (template.charAt(0) === '#') {
+    if (!noSelector && template.charAt(0) === '#') {
       // id selector can be cached too
-      frag = templateCache.get(template)
+      frag = idSelectorCache.get(template)
       if (!frag) {
         node = document.getElementById(template.slice(1))
         if (node) {
           frag = nodeToFragment(node)
           // save selector to cache
-          templateCache.put(template, frag)
+          idSelectorCache.put(template, frag)
         }
       }
     } else {

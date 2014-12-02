@@ -117,6 +117,12 @@ if (_.inBrowser) {
       document.head.removeChild(node)
     })
 
+    it('should be able to not use id selectors', function () {
+      var res = parse('#hi', false, true)
+      expect(res instanceof DocumentFragment).toBeTruthy()
+      expect(res.firstChild.nodeValue).toBe('#hi')
+    })
+
     it('should deal with Safari template clone bug', function () {
       var a = document.createElement('div')
       a.innerHTML = '<template>1</template>'
