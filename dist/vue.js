@@ -1,5 +1,5 @@
 /**
- * Vue.js v0.11.1
+ * Vue.js v0.11.2
  * (c) 2014 Evan You
  * Released under the MIT License.
  */
@@ -987,84 +987,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
-	 * Teardown an instance, unobserves the data, unbind all the
-	 * directives, turn off all the event listeners, etc.
-	 *
-	 * @param {Boolean} remove - whether to remove the DOM node.
-	 * @param {Boolean} deferCleanup - if true, defer cleanup to
-	 *                                 be called later
-	 * @public
+	 * Teardown the instance, simply delegate to the internal
+	 * _destroy.
 	 */
 
 	exports.$destroy = function (remove, deferCleanup) {
-	  if (this._isBeingDestroyed) {
-	    return
-	  }
-	  this._callHook('beforeDestroy')
-	  this._isBeingDestroyed = true
-	  var i
-	  // remove self from parent. only necessary
-	  // if parent is not being destroyed as well.
-	  var parent = this.$parent
-	  if (parent && !parent._isBeingDestroyed) {
-	    i = parent._children.indexOf(this)
-	    parent._children.splice(i, 1)
-	  }
-	  // destroy all children.
-	  if (this._children) {
-	    i = this._children.length
-	    while (i--) {
-	      this._children[i].$destroy()
-	    }
-	  }
-	  // teardown all directives. this also tearsdown all
-	  // directive-owned watchers.
-	  i = this._directives.length
-	  while (i--) {
-	    this._directives[i]._teardown()
-	  }
-	  // teardown all user watchers.
-	  for (i in this._userWatchers) {
-	    this._userWatchers[i].teardown()
-	  }
-	  // remove reference to self on $el
-	  if (this.$el) {
-	    this.$el.__vue__ = null
-	  }
-	  // remove DOM element
-	  var self = this
-	  if (remove && this.$el) {
-	    this.$remove(function () {
-	      self._cleanup()
-	    })
-	  } else if (!deferCleanup) {
-	    this._cleanup()
-	  }
-	}
-
-	/**
-	 * Clean up to ensure garbage collection.
-	 * This is called after the leave transition if there
-	 * is any.
-	 */
-
-	exports._cleanup = function () {
-	  // remove reference from data ob
-	  this._data.__ob__.removeVm(this)
-	  this._data =
-	  this._watchers =
-	  this._userWatchers =
-	  this._watcherList =
-	  this.$el =
-	  this.$parent =
-	  this.$root =
-	  this._children =
-	  this._directives = null
-	  // call the last hook...
-	  this._isDestroyed = true
-	  this._callHook('destroyed')
-	  // turn off all instance listeners.
-	  this.$off()
+	  this._destroy(remove, deferCleanup)
 	}
 
 	/**
@@ -1700,15 +1628,36 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	exports._compile = function (el) {
 	  var options = this.$options
-	  if (options._linker) {
+	  if (options._linkFn) {
 	    this._initElement(el)
-	    options._linker(this, el)
+	    options._linkFn(this, el)
 	  } else {
 	    var raw = el
-	    el = transclude(el, options)
+	    if (options._asComponent) {
+	      // separate container element and content
+	      var content = options._content = _.extractContent(raw)
+	      // create two separate linekrs for container and content
+	      var containerLinkFn =
+	        compile(raw, options, true, true)
+	      if (content) {
+	        var contentLinkFn =
+	          compile(content, options, true, true)
+	        // call content linker now, before transclusion
+	        this._contentUnlinkFn =
+	          contentLinkFn(options._parent, content)
+	      }
+	      // tranclude, this possibly replaces original
+	      el = transclude(el, options)
+	      // now call the container linker on the resolved el
+	      this._containerUnlinkFn =
+	        containerLinkFn(options._parent, el)
+	    } else {
+	      // simply transclude
+	      el = transclude(el, options)
+	    }
 	    this._initElement(el)
-	    var linker = compile(el, options)
-	    linker(this, el)
+	    var linkFn = compile(el, options)
+	    linkFn(this, el)
 	    if (options.replace) {
 	      _.replace(raw, el)
 	    }
@@ -1743,13 +1692,100 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Node} node   - target node
 	 * @param {Object} desc - parsed directive descriptor
 	 * @param {Object} def  - directive definition object
-	 * @param {Function} [linker] - pre-compiled linker fn
 	 */
 
-	exports._bindDir = function (name, node, desc, def, linker) {
+	exports._bindDir = function (name, node, desc, def) {
 	  this._directives.push(
-	    new Directive(name, node, this, desc, def, linker)
+	    new Directive(name, node, this, desc, def)
 	  )
+	}
+
+	/**
+	 * Teardown an instance, unobserves the data, unbind all the
+	 * directives, turn off all the event listeners, etc.
+	 *
+	 * @param {Boolean} remove - whether to remove the DOM node.
+	 * @param {Boolean} deferCleanup - if true, defer cleanup to
+	 *                                 be called later
+	 */
+
+	exports._destroy = function (remove, deferCleanup) {
+	  if (this._isBeingDestroyed) {
+	    return
+	  }
+	  this._callHook('beforeDestroy')
+	  this._isBeingDestroyed = true
+	  var i
+	  // remove self from parent. only necessary
+	  // if parent is not being destroyed as well.
+	  var parent = this.$parent
+	  if (parent && !parent._isBeingDestroyed) {
+	    i = parent._children.indexOf(this)
+	    parent._children.splice(i, 1)
+	  }
+	  // destroy all children.
+	  if (this._children) {
+	    i = this._children.length
+	    while (i--) {
+	      this._children[i].$destroy()
+	    }
+	  }
+	  // teardown parent linkers
+	  if (this._containerUnlinkFn) {
+	    this._containerUnlinkFn()
+	  }
+	  if (this._contentUnlinkFn) {
+	    this._contentUnlinkFn()
+	  }
+	  // teardown all directives. this also tearsdown all
+	  // directive-owned watchers. intentionally check for
+	  // directives array length on every loop since directives
+	  // that manages partial compilation can splice ones out
+	  for (i = 0; i < this._directives.length; i++) {
+	    this._directives[i]._teardown()
+	  }
+	  // teardown all user watchers.
+	  for (i in this._userWatchers) {
+	    this._userWatchers[i].teardown()
+	  }
+	  // remove reference to self on $el
+	  if (this.$el) {
+	    this.$el.__vue__ = null
+	  }
+	  // remove DOM element
+	  var self = this
+	  if (remove && this.$el) {
+	    this.$remove(function () {
+	      self._cleanup()
+	    })
+	  } else if (!deferCleanup) {
+	    this._cleanup()
+	  }
+	}
+
+	/**
+	 * Clean up to ensure garbage collection.
+	 * This is called after the leave transition if there
+	 * is any.
+	 */
+
+	exports._cleanup = function () {
+	  // remove reference from data ob
+	  this._data.__ob__.removeVm(this)
+	  this._data =
+	  this._watchers =
+	  this._userWatchers =
+	  this._watcherList =
+	  this.$el =
+	  this.$parent =
+	  this.$root =
+	  this._children =
+	  this._directives = null
+	  // call the last hook...
+	  this._isDestroyed = true
+	  this._callHook('destroyed')
+	  // turn off all instance listeners.
+	  this.$off()
 	}
 
 /***/ },
@@ -2192,6 +2228,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	}
 
+	/**
+	 * Extract raw content inside an element into a temporary
+	 * container div
+	 *
+	 * @param {Element} el
+	 * @return {Element}
+	 */
+
+	exports.extractContent = function (el) {
+	  var child
+	  var rawContent
+	  if (el.hasChildNodes()) {
+	    rawContent = document.createElement('div')
+	    /* jshint boss:true */
+	    while (child = el.firstChild) {
+	      rawContent.appendChild(child)
+	    }
+	  }
+	  return rawContent
+	}
+
 /***/ },
 /* 17 */
 /***/ function(module, exports, __webpack_require__) {
@@ -2564,25 +2621,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	  guardComponents(child.components)
 	  var options = {}
 	  var key
+	  if (child.mixins) {
+	    for (var i = 0, l = child.mixins.length; i < l; i++) {
+	      parent = mergeOptions(parent, child.mixins[i], vm)
+	    }
+	  }
 	  for (key in parent) {
-	    merge(parent[key], child[key], key)
+	    merge(key)
 	  }
 	  for (key in child) {
 	    if (!(parent.hasOwnProperty(key))) {
-	      merge(parent[key], child[key], key)
+	      merge(key)
 	    }
 	  }
-	  var mixins = child.mixins
-	  if (mixins) {
-	    for (var i = 0, l = mixins.length; i < l; i++) {
-	      for (key in mixins[i]) {
-	        merge(options[key], mixins[i][key], key)
-	      }
-	    }
-	  }
-	  function merge (parentVal, childVal, key) {
+	  function merge (key) {
 	    var strat = strats[key] || defaultStrat
-	    options[key] = strat(parentVal, childVal, vm, key)
+	    options[key] = strat(parent[key], child[key], vm, key)
 	  }
 	  return options
 	}
@@ -2970,7 +3024,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      _.remove(this.nodes[i])
 	    }
 	    // convert new value to a fragment
-	    var frag = templateParser.parse(value, true)
+	    // do not attempt to retrieve from id selector
+	    var frag = templateParser.parse(value, true, true)
 	    // save a reference to these nodes so we can remove later
 	    this.nodes = _.toArray(frag.childNodes)
 	    _.before(frag, this.el)
@@ -3313,7 +3368,6 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var compile = __webpack_require__(41)
 	var templateParser = __webpack_require__(45)
 
 	module.exports = {
@@ -3344,12 +3398,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (this.keepAlive) {
 	        this.cache = {}
 	      }
-	      // compile parent scope content
-	      this.parentLinkFn = compile(
-	        this.el, this.vm.$options,
-	        true, // partial
-	        true  // asParent
-	      )
 	      // if static, build right now.
 	      if (!this._isDynamicLiteral) {
 	        this.resolveCtor(this.expression)
@@ -3397,14 +3445,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var vm = this.vm
 	    var el = templateParser.clone(this.el)
 	    if (this.Ctor) {
-	      var parentUnlinkFn
-	      if (this.parentLinkFn) {
-	        parentUnlinkFn = this.parentLinkFn(vm, el)
-	      }
 	      var child = vm.$addChild({
-	        el: el
+	        el: el,
+	        _asComponent: true
 	      }, this.Ctor)
-	      child._parentUnlinkFn = parentUnlinkFn
 	      if (this.keepAlive) {
 	        this.cache[this.ctorId] = child
 	      }
@@ -3421,9 +3465,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var child = this.childVM
 	    if (!child || this.keepAlive) {
 	      return
-	    }
-	    if (child._parentUnlinkFn) {
-	      child._parentUnlinkFn()
 	    }
 	    // the sole purpose of `deferCleanup` is so that we can
 	    // "deactivate" the vm right now and perform DOM removal
@@ -3515,11 +3556,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // destroy all keep-alive cached instances
 	    if (this.cache) {
 	      for (var key in this.cache) {
-	        var child = this.cache[key]
-	        if (child._parentUnlinkFn) {
-	          child._parentUnlinkFn()
-	        }
-	        child.$destroy()
+	        this.cache[key].$destroy()
 	      }
 	      this.cache = null
 	    }
@@ -3551,7 +3588,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // uid as a cache identifier
 	    this.id = '__v_repeat_' + (++uid)
 	    // we need to insert the objToArray converter
-	    // as the first read filter.
+	    // as the first read filter, because it has to be invoked
+	    // before any user filters. (can't do it in `update`)
 	    if (!this.filters) {
 	      this.filters = {}
 	    }
@@ -3625,22 +3663,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	      // important: transclude with no options, just
 	      // to ensure block start and block end
 	      this.template = transclude(this.template)
-	      this._linker = compile(this.template, options)
+	      this._linkFn = compile(this.template, options)
 	    } else {
+	      this._asComponent = true
 	      var tokens = textParser.parse(id)
 	      if (!tokens) { // static component
 	        var Ctor = this.Ctor = options.components[id]
 	        _.assertAsset(Ctor, 'component', id)
-	        if (Ctor) {
+	        // If there's no parent scope directives and no
+	        // content to be transcluded, we can optimize the
+	        // rendering by pre-transcluding + compiling here
+	        // and provide a link function to every instance.
+	        if (!this.el.hasChildNodes() &&
+	            !this.el.hasAttributes()) {
 	          // merge an empty object with owner vm as parent
 	          // so child vms can access parent assets.
-	          var merged = mergeOptions(
-	            Ctor.options,
-	            {},
-	            { $parent: this.vm }
-	          )
+	          var merged = mergeOptions(Ctor.options, {}, {
+	            $parent: this.vm
+	          })
 	          this.template = transclude(this.template, merged)
-	          this._linker = compile(this.template, merged)
+	          this._linkFn = compile(this.template, merged)
 	        }
 	      } else {
 	        // to be resolved later
@@ -3807,7 +3849,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var Ctor = this.Ctor || this.resolveCtor(data, meta)
 	    var vm = this.vm.$addChild({
 	      el: templateParser.clone(this.template),
-	      _linker: this._linker,
+	      _asComponent: this._asComponent,
+	      _linkFn: this._linkFn,
 	      _meta: meta,
 	      data: data,
 	      inherit: this.inherit
@@ -4344,11 +4387,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *                 - {String} [arg]
 	 *                 - {Array<Object>} [filters]
 	 * @param {Object} def - directive definition object
-	 * @param {Function} [linker] - pre-compiled linker function
 	 * @constructor
 	 */
 
-	function Directive (name, el, vm, descriptor, def, linker) {
+	function Directive (name, el, vm, descriptor, def) {
 	  // public
 	  this.name = name
 	  this.el = el
@@ -4359,7 +4401,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this.arg = descriptor.arg
 	  this.filters = _.resolveFilters(vm, descriptor.filters)
 	  // private
-	  this._linker = linker
 	  this._locked = false
 	  this._bound = false
 	  // init
@@ -4395,9 +4436,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    (!this.isLiteral || this._isDynamicLiteral) &&
 	    !this._checkStatement()
 	  ) {
-	    // use raw expression as identifier because filters
-	    // make them different watchers
-	    var watcher = this.vm._watchers[this.raw]
 	    // wrapped updater for context
 	    var dir = this
 	    var update = this._update = function (val, oldVal) {
@@ -4405,7 +4443,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	        dir.update(val, oldVal)
 	      }
 	    }
-	    if (!watcher) {
+	    // use raw expression as identifier because filters
+	    // make them different watchers
+	    var watcher = this.vm._watchers[this.raw]
+	    // v-repeat always creates a new watcher because it has
+	    // a special filter that's bound to its directive
+	    // instance.
+	    if (!watcher || this.name === 'repeat') {
 	      watcher = this.vm._watchers[this.raw] = new Watcher(
 	        this.vm,
 	        this._watcherExp,
@@ -5147,39 +5191,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (!frag) {
 	    _.warn('Invalid template option: ' + template)
 	  } else {
-	    collectRawContent(el)
+	    var rawContent = options._content || _.extractContent(el)
 	    if (options.replace) {
 	      if (frag.childNodes.length > 1) {
-	        transcludeContent(frag)
+	        transcludeContent(frag, rawContent)
 	        return frag
 	      } else {
 	        var replacer = frag.firstChild
 	        _.copyAttributes(el, replacer)
-	        transcludeContent(replacer)
+	        transcludeContent(replacer, rawContent)
 	        return replacer
 	      }
 	    } else {
 	      el.appendChild(frag)
-	      transcludeContent(el)
+	      transcludeContent(el, rawContent)
 	      return el
-	    }
-	  }
-	}
-
-	/**
-	 * Collect raw content inside $el before they are
-	 * replaced by template content.
-	 */
-
-	var rawContent
-	function collectRawContent (el) {
-	  var child
-	  rawContent = null
-	  if (el.hasChildNodes()) {
-	    rawContent = document.createElement('div')
-	    /* jshint boss:true */
-	    while (child = el.firstChild) {
-	      rawContent.appendChild(child)
 	    }
 	  }
 	}
@@ -5191,9 +5217,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *   http://w3c.github.io/webcomponents/spec/shadow/#insertion-points
 	 *
 	 * @param {Element|DocumentFragment} el
+	 * @param {Element} raw
 	 */
 
-	function transcludeContent (el) {
+	function transcludeContent (el, raw) {
 	  var outlets = getOutlets(el)
 	  var i = outlets.length
 	  if (!i) return
@@ -5202,10 +5229,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // for each outlet.
 	  while (i--) {
 	    outlet = outlets[i]
-	    if (rawContent) {
+	    if (raw) {
 	      select = outlet.getAttribute('select')
 	      if (select) {  // select content
-	        selected = rawContent.querySelectorAll(select)
+	        selected = raw.querySelectorAll(select)
 	        outlet.content = _.toArray(
 	          selected.length
 	            ? selected
@@ -5227,7 +5254,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  // finally insert the main content
 	  if (main) {
-	    insertContentAt(main, _.toArray(rawContent.childNodes))
+	    insertContentAt(main, _.toArray(raw.childNodes))
 	  }
 	}
 
@@ -5759,7 +5786,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _ = __webpack_require__(1)
 	var Cache = __webpack_require__(52)
-	var templateCache = new Cache(100)
+	var templateCache = new Cache(1000)
+	var idSelectorCache = new Cache(1000)
 
 	var map = {
 	  _default : [0, '', ''],
@@ -5963,10 +5991,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *    - id selector: '#some-template-id'
 	 *    - template string: '<div><span>{{msg}}</span></div>'
 	 * @param {Boolean} clone
+	 * @param {Boolean} noSelector
 	 * @return {DocumentFragment|undefined}
 	 */
 
-	exports.parse = function (template, clone) {
+	exports.parse = function (template, clone, noSelector) {
 	  var node, frag
 
 	  // if the template is already a document fragment,
@@ -5979,15 +6008,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  if (typeof template === 'string') {
 	    // id selector
-	    if (template.charAt(0) === '#') {
+	    if (!noSelector && template.charAt(0) === '#') {
 	      // id selector can be cached too
-	      frag = templateCache.get(template)
+	      frag = idSelectorCache.get(template)
 	      if (!frag) {
 	        node = document.getElementById(template.slice(1))
 	        if (node) {
 	          frag = nodeToFragment(node)
 	          // save selector to cache
-	          templateCache.put(template, frag)
+	          idSelectorCache.put(template, frag)
 	        }
 	      }
 	    } else {
@@ -7761,16 +7790,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  objProto,
 	  '$add',
 	  function $add (key, val) {
+	    if (this.hasOwnProperty(key)) return
 	    var ob = this.__ob__
-	    if (!ob) {
+	    if (!ob || _.isReserved(key)) {
 	      this[key] = val
 	      return
 	    }
-	    if (_.isReserved(key)) {
-	      _.warn('Refused to $add reserved key: ' + key)
-	      return
-	    }
-	    if (this.hasOwnProperty(key)) return
 	    ob.convert(key, val)
 	    if (ob.vms) {
 	      var i = ob.vms.length
@@ -7797,17 +7822,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  objProto,
 	  '$delete',
 	  function $delete (key) {
-	    var ob = this.__ob__
-	    if (!ob) {
-	      delete this[key]
-	      return
-	    }
-	    if (_.isReserved(key)) {
-	      _.warn('Refused to $add reserved key: ' + key)
-	      return
-	    }
 	    if (!this.hasOwnProperty(key)) return
 	    delete this[key]
+	    var ob = this.__ob__
+	    if (!ob || _.isReserved(key)) {
+	      return
+	    }
 	    if (ob.vms) {
 	      var i = ob.vms.length
 	      while (i--) {
