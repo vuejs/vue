@@ -37,6 +37,13 @@ if (_.inBrowser) {
       expect(res.firstChild.nodeType).toBe(3) // Text node
     })
 
+    it('should handle string that contains html entities', function () {
+      var res = parse('hi&lt;hi')
+      expect(res instanceof DocumentFragment).toBeTruthy()
+      expect(res.childNodes.length).toBe(1)
+      expect(res.firstChild.nodeValue).toBe('hi<hi')
+    })
+
     it('should parse textContent if argument is a script node', function () {
       var node = document.createElement('script')
       node.textContent = testString

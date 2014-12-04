@@ -56,7 +56,8 @@ map.rect = [
   '</svg>'
 ]
 
-var TAG_RE = /<([\w:]+)/
+var tagRE = /<([\w:]+)/
+var entityRE = /&\w+;/
 
 /**
  * Convert a string template to a DocumentFragment.
@@ -75,16 +76,17 @@ function stringToFragment (templateString) {
   }
 
   var frag = document.createDocumentFragment()
-  var tagMatch = TAG_RE.exec(templateString)
+  var tagMatch = templateString.match(tagRE)
+  var entityMatch = entityRE.test(templateString)
 
-  if (!tagMatch) {
+  if (!tagMatch && !entityMatch) {
     // text only, return a single text node.
     frag.appendChild(
       document.createTextNode(templateString)
     )
   } else {
 
-    var tag    = tagMatch[1]
+    var tag    = tagMatch && tagMatch[1]
     var wrap   = map[tag] || map._default
     var depth  = wrap[0]
     var prefix = wrap[1]
