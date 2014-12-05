@@ -31,7 +31,7 @@ Vue.component('demo-grid', {
 var demo = new Vue({
   el: '#demo',
   data: {
-    search: '',
+    searchQuery: '',
     gridColumns: ['name', 'power'],
     gridData: [
       { name: 'Chuck Norris', power: Infinity },
