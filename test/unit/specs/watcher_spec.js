@@ -239,7 +239,9 @@ describe('Watcher', function () {
       { name: 'test', args: [3] },
       { name: 'test2', args: ['yo']}
     ])
-    var watcher = new Watcher(vm, 'b.c', spy, filters)
+    var watcher = new Watcher(vm, 'b.c', spy, {
+      filters: filters
+    })
     expect(watcher.value).toBe('6yo')
     vm.b.c = 3
     nextTick(function () {
@@ -258,7 +260,10 @@ describe('Watcher', function () {
     var filters = _.resolveFilters(vm, [
       { name: 'test', args: [5] }
     ])
-    var watcher = new Watcher(vm, 'b["c"]', spy, filters, true)
+    var watcher = new Watcher(vm, 'b["c"]', spy, {
+      filters: filters,
+      twoWay: true
+    })
     expect(watcher.value).toBe(2)
     watcher.set(4) // shoud not change the value
     nextTick(function () {
@@ -288,7 +293,9 @@ describe('Watcher', function () {
   })
 
   it('deep watch', function (done) {
-    var watcher = new Watcher(vm, 'b', spy, null, false, true)
+    var watcher = new Watcher(vm, 'b', spy, {
+      deep: true
+    })
     vm.b.c = { d: 4 }
     nextTick(function () {
       expect(spy).toHaveBeenCalledWith(vm.b, vm.b)

@@ -85,9 +85,11 @@ p._bind = function (def) {
         this.vm,
         this._watcherExp,
         update, // callback
-        this.filters,
-        this.twoWay, // need setter,
-        this.deep
+        {
+          filters: this.filters,
+          twoWay: this.twoWay,
+          deep: this.deep
+        }
       )
     } else {
       watcher.addCb(update)

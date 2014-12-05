@@ -15,29 +15,35 @@ var uid = 0
  * @param {Vue} vm
  * @param {String} expression
  * @param {Function} cb
- * @param {Array} [filters]
- * @param {Boolean} [needSet]
- * @param {Boolean} [deep]
+ * @param {Object} options
+ *                 - {Array} filters
+ *                 - {Boolean} twoWay
+ *                 - {Boolean} deep
+ *                 - {Boolean} user
  * @constructor
  */
 
-function Watcher (vm, expression, cb, filters, needSet, deep) {
+function Watcher (vm, expression, cb, options) {
   this.vm = vm
   vm._watcherList.push(this)
   this.expression = expression
   this.cbs = [cb]
   this.id = ++uid // uid for batching
   this.active = true
-  this.deep = deep
+  options = options || {}
+  this.deep = options.deep
+  this.user = options.user
   this.deps = Object.create(null)
   // setup filters if any.
   // We delegate directive filters here to the watcher
   // because they need to be included in the dependency
   // collection process.
-  this.readFilters = filters && filters.read
-  this.writeFilters = filters && filters.write
+  if (options.filters) {
+    this.readFilters = options.filters.read
+    this.writeFilters = options.filters.write
+  }
   // parse expression for getter/setter
-  var res = expParser.parse(expression, needSet)
+  var res = expParser.parse(expression, options.twoWay)
   this.getter = res.get
   this.setter = res.set
   this.value = this.get()
