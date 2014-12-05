@@ -2,9 +2,7 @@ var _ = require('./util')
 var config = require('./config')
 var Observer = require('./observer')
 var expParser = require('./parsers/expression')
-var Batcher = require('./batcher')
-
-var batcher = new Batcher()
+var batcher = require('./batcher')
 var uid = 0
 
 /**
