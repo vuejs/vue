@@ -2,7 +2,21 @@ var _ = require('./util')
 
 /**
  * The Batcher maintains a job queue to be run
- * async on the next event loop.
+ * async on the next event loop. A "job" can be any object
+ * that implements the following interface:
+ * 
+ *   {
+ *     id: {Number} - optional
+ *     run: {Function}
+ *     user: {Boolean} - optional
+ *   }
+ *
+ * The `id` property is used to prevent duplication of jobs,
+ * while jobs with `user:true` need to be processed after
+ * all internal jobs have been processed first.
+ *
+ * In most cases a job will actually be a Watcher instance
+ * which implements the above interface.
  */
 
 function Batcher () {
@@ -68,8 +82,8 @@ p.push = function (job) {
 
 p.flush = function () {
   this.flushing = true
-  this.run(this.queue)
-  this.run(this.userQueue)
+  run(this.queue)
+  run(this.userQueue)
   this.reset()
 }
 
@@ -79,14 +93,11 @@ p.flush = function () {
  * @param {Array} queue
  */
 
-p.run = function (queue) {
+function run (queue) {
   // do not cache length because more jobs might be pushed
   // as we run existing jobs
   for (var i = 0; i < queue.length; i++) {
-    var job = queue[i]
-    if (!job.cancelled) {
-      job.run()
-    }
+    queue[i].run()
   }
 }
 
