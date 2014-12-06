@@ -46,13 +46,14 @@ exports._compile = function (el) {
       }
       // tranclude, this possibly replaces original
       el = transclude(el, options)
+      this._initElement(el)
       // now call the container linker on the resolved el
       this._containerUnlinkFn = containerLinkFn(parent, el)
     } else {
       // simply transclude
       el = transclude(el, options)
+      this._initElement(el)
     }
-    this._initElement(el)
     var linkFn = compile(el, options)
     linkFn(this, el)
     if (options.replace) {

@@ -204,13 +204,13 @@ if (_.inBrowser) {
       expect(vm._bindDir.calls.count()).toBe(0)
     })
 
-    it('component parent scope compilation should skip v-ref, v-with & v-component', function () {
-      el.innerHTML = '<div v-component v-ref="test" v-with="test"></div>'
+    it('component parent scope compilation should skip v-with & v-component', function () {
+      el.innerHTML = '<div v-component v-with="test"></div>'
       el = el.firstChild
       var linker = compile(el, Vue.options, true, true)
       linker(vm, el)
       expect(vm._directives.length).toBe(0)
-      expect(el.attributes.length).toBe(3)
+      expect(el.attributes.length).toBe(2)
     })
 
   })

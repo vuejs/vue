@@ -472,7 +472,6 @@ function collectDirectives (el, options, asParent) {
       dirName = attrName.slice(config.prefix.length)
       if (asParent &&
           (dirName === 'with' ||
-           dirName === 'ref' ||
            dirName === 'component')) {
         continue
       }

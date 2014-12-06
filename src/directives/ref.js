@@ -5,19 +5,26 @@ module.exports = {
   isLiteral: true,
 
   bind: function () {
-    if (this.el !== this.vm.$el) {
+    var child = this.el.__vue__
+    if (!child) {
       _.warn(
         'v-ref should only be used on instance root nodes.'
       )
       return
     }
-    this.owner = this.vm.$parent
-    this.owner.$[this.expression] = this.vm
+    if (this.vm !== child.$parent) {
+      _.warn(
+        'v-ref should be used from the parent template,' +
+        ' not the component\'s.'
+      )
+      return
+    }
+    this.vm.$[this.expression] = child
   },
 
   unbind: function () {
-    if (this.owner.$[this.expression] === this.vm) {
-      delete this.owner.$[this.expression]
+    if (this.vm.$[this.expression] === this.el.__vue__) {
+      delete this.vm.$[this.expression]
     }
   }
   
