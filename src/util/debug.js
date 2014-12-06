@@ -32,8 +32,14 @@ function enableDebug () {
   exports.warn = function (msg) {
     if (hasConsole && !config.silent) {
       console.warn('[Vue warn]: ' + msg)
-      if (config.debug && console.trace) {
-        console.trace()
+      /* istanbul ignore if */
+      if (config.debug) {
+        /* jshint debug: true */
+        debugger
+      } else {
+        console.log(
+          'Set `Vue.config.debug = true` to enable debug mode.'
+        )
       }
     }
   }

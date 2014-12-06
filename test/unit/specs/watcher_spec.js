@@ -391,4 +391,10 @@ describe('Watcher', function () {
     expect(_.warn).toHaveBeenCalled()
   })
 
+  it('warn setter errors', function () {
+    var watcher = new Watcher(vm, 'a + b', spy)
+    watcher.set(123)
+    expect(_.warn).toHaveBeenCalled()
+  })
+
 })

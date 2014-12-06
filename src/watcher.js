@@ -77,7 +77,10 @@ p.get = function () {
   try {
     value = this.getter.call(vm, vm)
   } catch (e) {
-    _.warn(e)
+    _.warn(
+      'Error when evaluating expression "' +
+      this.expression + '":\n   ' + e
+    )
   }
   // "touch" every property so they are all tracked as
   // dependencies for deep watching
@@ -102,7 +105,12 @@ p.set = function (value) {
   )
   try {
     this.setter.call(vm, vm, value)
-  } catch (e) {}
+  } catch (e) {
+    _.warn(
+      'Error when evaluating setter "' +
+      this.expression + '":\n   ' + e
+    )
+  }
 }
 
 /**
@@ -134,10 +142,10 @@ p.afterGet = function () {
  */
 
 p.update = function () {
-  if (config.async) {
-    batcher.push(this)
-  } else {
+  if (!config.async || config.debug) {
     this.run()
+  } else {
+    batcher.push(this)
   }
 }
 

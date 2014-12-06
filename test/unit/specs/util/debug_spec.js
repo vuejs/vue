@@ -40,15 +40,5 @@ if (typeof console !== 'undefined') {
       expect(console.warn).not.toHaveBeenCalled()
     })
 
-    if (console.trace) {
-      it('trace when not silent and debugging', function () {
-        config.debug = true
-        config.silent = false
-        _.warn('haha')
-        expect(console.trace).toHaveBeenCalled()
-        config.debug = false
-        config.silent = true
-      })
-    }
   })
 }
