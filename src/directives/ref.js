@@ -6,16 +6,10 @@ module.exports = {
 
   bind: function () {
     var child = this.el.__vue__
-    if (!child) {
+    if (!child || this.vm !== child.$parent) {
       _.warn(
-        'v-ref should only be used on instance root nodes.'
-      )
-      return
-    }
-    if (this.vm !== child.$parent) {
-      _.warn(
-        'v-ref should be used from the parent template,' +
-        ' not the component\'s.'
+        'v-ref should only be used on a child component ' +
+        'from the parent template.'
       )
       return
     }

@@ -63,10 +63,24 @@ if (_.inBrowser) {
       expect(vm.$.c1.$.c2.length).toBe(2)
     })
 
-    it('warn on non-root', function () {
+    it('should warn on non-root', function () {
       var vm = new Vue({
         el: el,
         template: '<div v-ref="test"></div>'
+      })
+      expect(_.warn).toHaveBeenCalled()
+    })
+
+    it('should warn when used in child template', function () {
+      var vm = new Vue({
+        el: el,
+        template: '<div v-component="test"></div>',
+        components: {
+          test: {
+            template: '<div v-ref="test"></div>',
+            replace: true
+          }
+        }
       })
       expect(_.warn).toHaveBeenCalled()
     })

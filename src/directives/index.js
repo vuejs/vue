@@ -19,4 +19,7 @@ exports.model      = require('./model')
 exports.component  = require('./component')
 exports.repeat     = require('./repeat')
 exports['if']      = require('./if')
+
+// child vm communication directives
 exports['with']    = require('./with')
+exports.events     = require('./events')
