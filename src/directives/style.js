@@ -15,6 +15,8 @@ module.exports = {
       this.setProp(this.arg, value)
     } else {
       if (typeof value === 'object') {
+        // cache object styles so that only changed props
+        // are actually updated.
         if (!this.cache) this.cache = {}
         for (var prop in value) {
           this.setProp(prop, value[prop])
@@ -32,6 +34,7 @@ module.exports = {
 
   setProp: function (prop, value) {
     prop = normalize(prop)
+    if (!prop) return // unsupported prop
     // cast possible numbers/booleans into strings
     if (value != null) value += ''
     if (value) {
@@ -49,6 +52,16 @@ module.exports = {
 
 }
 
+/**
+ * Normalize a CSS property name.
+ * - cache result
+ * - auto prefix
+ * - camelCase -> dash-case
+ *
+ * @param {String} prop
+ * @return {String}
+ */
+
 function normalize (prop) {
   if (propCache[prop]) {
     return propCache[prop]
@@ -57,6 +70,14 @@ function normalize (prop) {
   propCache[prop] = propCache[res] = res
   return res
 }
+
+/**
+ * Auto detect the appropriate prefix for a CSS property.
+ * https://gist.github.com/paulirish/523692
+ *
+ * @param {String} prop
+ * @return {String}
+ */
 
 function prefix (prop) {
   prop = prop.replace(camelRE, '$1-$2').toLowerCase()
