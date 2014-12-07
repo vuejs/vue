@@ -2,6 +2,21 @@ var _ = require('../../../../src/util')
 var def = require('../../../../src/directives/style')
 var Vue = require('../../../../src/vue')
 
+function checkPrefixedProp (prop) {
+  var el = document.createElement('div')
+  var upper = prop.charAt(0).toUpperCase() + prop.slice(1)
+  if (!(prop in el.style)) {
+    var prefixes = ['Webkit', 'Moz', 'ms']
+    var i = prefixes.length
+    while (i--) {
+      if ((prefixes[i] + upper) in el.style) {
+        prop = prefixes[i] + upper
+      }
+    }  
+  }
+  return prop
+}
+
 if (_.inBrowser) {
   describe('v-style', function () {
 
@@ -14,52 +29,53 @@ if (_.inBrowser) {
 
     it('normal with arg', function () {
       dir.arg = 'color'
-      dir.bind()
       dir.update('red')
       expect(el.style.color).toBe('red')
     })
 
     it('normal no arg', function () {
-      dir.bind()
       dir.update('color:red;')
       expect(el.style.cssText.replace(/\s/g, '')).toBe('color:red;')
     })
 
     it('!important', function () {
       dir.arg = 'color'
-      dir.bind()
       dir.update('red !important;')
       expect(el.style.getPropertyPriority('color')).toBe('important')
     })
 
+    it('camel case', function () {
+      dir.arg = 'marginLeft'
+      dir.update('30px')
+      expect(el.style.marginLeft).toBe('30px')
+    })
+
+    it('remove on falsy value', function () {
+      el.style.color = 'red'
+      dir.arg = 'color'
+      dir.update(null)
+      expect(el.style.color).toBe('')
+    })
+
     it('auto prefixing', function () {
-      var spy = el.style.setProperty = jasmine.createSpy()
-      dir.arg = '$transform'
-      dir.bind()
+      var prop = checkPrefixedProp('transform')
+      dir.arg = 'transform'
       var val = 'scale(0.5)'
       dir.update(val)
-      expect(spy).toHaveBeenCalledWith('transform', val, '')
-      expect(spy).toHaveBeenCalledWith('-ms-transform', val, '')
-      expect(spy).toHaveBeenCalledWith('-moz-transform', val, '')
-      expect(spy).toHaveBeenCalledWith('-webkit-transform', val, '')
+      expect(el.style[prop]).toBe(val)
     })
 
     it('update with object', function () {
-      dir.bind()
-      dir.update({color: 'red', 'margin-right': '30px'})
+      dir.update({color: 'red', marginRight: '30px'})
       expect(el.style.getPropertyValue('color')).toBe('red')
       expect(el.style.getPropertyValue('margin-right')).toBe('30px')
     })
 
     it('update with object and auto prefix', function () {
-      var spy = el.style.setProperty = jasmine.createSpy()
-      dir.bind()
-      var scale = 'scale(0.5)';
-      dir.update({'$transform': scale})
-      expect(spy).toHaveBeenCalledWith('transform', scale, '')
-      expect(spy).toHaveBeenCalledWith('-ms-transform', scale, '')
-      expect(spy).toHaveBeenCalledWith('-moz-transform', scale, '')
-      expect(spy).toHaveBeenCalledWith('-webkit-transform', scale, '')
+      var prop = checkPrefixedProp('transform')
+      var val = 'scale(0.5)';
+      dir.update({transform: val})
+      expect(el.style[prop]).toBe(val)
     })
 
     it('updates object deep', function (done) {

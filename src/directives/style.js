@@ -1,23 +1,28 @@
+var _ = require('../util')
 var prefixes = ['-webkit-', '-moz-', '-ms-']
+var camelPrefixes = ['Webkit', 'Moz', 'ms']
 var importantRE = /!important;?$/
+var camelRE = /([a-z])([A-Z])/g
+var testEl = null
+var propCache = {}
 
 module.exports = {
 
   deep: true,
 
-  bind: function () {
-    var prop = this.arg
-    if (!prop) return
-    this.prop = prop
-  },
-
   update: function (value) {
-    if (this.prop) {
-      this.setCssProperty(this.prop, value)
+    if (this.arg) {
+      this.setProp(this.arg, value)
     } else {
       if (typeof value === 'object') {
+        if (!this.cache) this.cache = {}
         for (var prop in value) {
-          this.setCssProperty(prop, value[prop])
+          this.setProp(prop, value[prop])
+          /* jshint eqeqeq: false */
+          if (value[prop] != this.cache[prop]) {
+            this.cache[prop] = value[prop]
+            this.setProp(prop, value[prop])
+          }
         }
       } else {
         this.el.style.cssText = value
@@ -25,34 +30,50 @@ module.exports = {
     }
   },
 
-  setCssProperty: function (prop, value) {
-    var prefixed = false
-    if (prop.charAt(0) === '$') {
-      // properties that start with $ will be auto-prefixed
-      prop = prop.slice(1)
-      prefixed = true
-    }
+  setProp: function (prop, value) {
+    prop = normalize(prop)
     // cast possible numbers/booleans into strings
-    if (value != null) {
-      value += ''
-    }
-    var isImportant = importantRE.test(value)
-      ? 'important'
-      : ''
-    if (isImportant) {
-      value = value.replace(importantRE, '').trim()
-    }
-    this.el.style.setProperty(prop, value, isImportant)
-    if (prefixed) {
-      var i = prefixes.length
-      while (i--) {
-        this.el.style.setProperty(
-          prefixes[i] + prop,
-          value,
-          isImportant
-        )
+    if (value != null) value += ''
+    if (value) {
+      var isImportant = importantRE.test(value)
+        ? 'important'
+        : ''
+      if (isImportant) {
+        value = value.replace(importantRE, '').trim()
       }
+      this.el.style.setProperty(prop, value, isImportant)
+    } else {
+      this.el.style.removeProperty(prop)
     }
   }
 
+}
+
+function normalize (prop) {
+  if (propCache[prop]) {
+    return propCache[prop]
+  }
+  var res = prefix(prop)
+  propCache[prop] = propCache[res] = res
+  return res
+}
+
+function prefix (prop) {
+  prop = prop.replace(camelRE, '$1-$2').toLowerCase()
+  var camel = _.camelize(prop)
+  var upper = camel.charAt(0).toUpperCase() + camel.slice(1)
+  if (!testEl) {
+    testEl = document.createElement('div')
+  }
+  if (camel in testEl.style) {
+    return prop
+  }
+  var i = prefixes.length
+  var prefixed
+  while (i--) {
+    prefixed = camelPrefixes[i] + upper
+    if (prefixed in testEl.style) {
+      return prefixes[i] + prop
+    }
+  }
 }
