@@ -215,7 +215,8 @@ exports.parse = function (exp, needSet) {
   // we do a simple path check to optimize for them.
   // the check fails valid paths with unusal whitespaces,
   // but that's too rare and we don't care.
-  var res = pathTestRE.test(exp)
+  // also skip paths that start with global "Math"
+  var res = pathTestRE.test(exp) && exp.slice(0, 5) !== 'Math.'
     ? compilePathFns(exp)
     : compileExpFns(exp, needSet)
   expressionCache.put(exp, res)

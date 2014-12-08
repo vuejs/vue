@@ -175,6 +175,22 @@ var testCases = [
     },
     expected: 8,
     paths: ['$a', 'b', 'c', 'e']
+  },
+  {
+    // Math global, simple path
+    exp: 'Math.PI',
+    scope: {},
+    expected: Math.PI,
+    paths: []
+  },
+  {
+    // Math global, exp
+    exp: 'Math.sin(a)',
+    scope: {
+      a: 1
+    },
+    expected: Math.sin(1),
+    paths: ['a']
   }
 ]
 
