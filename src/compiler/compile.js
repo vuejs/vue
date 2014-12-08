@@ -333,6 +333,15 @@ function compileParamAttributes (el, attrs, options) {
   var name, value, param
   while (i--) {
     name = attrs[i]
+    if (/[A-Z]/.test(name)) {
+      _.warn(
+        'You seem to be using camelCase for a paramAttribute, ' +
+        'but HTML doesn\'t differentiate between upper and ' +
+        'lower case. You should use hyphen-delimited ' +
+        'attribute names. For more info see ' +
+        'http://vuejs.org/api/options.html#paramAttributes'
+      )
+    }
     value = el.getAttribute(name)
     if (value !== null) {
       param = {
