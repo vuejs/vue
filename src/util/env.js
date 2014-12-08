@@ -18,7 +18,15 @@ var inBrowser = exports.inBrowser =
   toString.call(window) !== '[object Object]'
 
 /**
- * Defer a task to the start of the next event loop
+ * Defer a task to execute it asynchronously. Ideally this
+ * should be executed as a microtask, so we leverage
+ * MutationObserver if it's available.
+ * 
+ * If the user has included a setImmediate polyfill, we can
+ * also use that. In Node we actually prefer setImmediate to
+ * process.nextTick so we don't block the I/O.
+ * 
+ * Finally, fallback to setTimeout(0) if nothing else works.
  *
  * @param {Function} cb
  * @param {Object} ctx
