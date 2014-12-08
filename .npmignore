@@ -1,9 +1,9 @@
 .*
 *.md
-benchmarks
 coverage
+grunt
+dist/vue.min.js.gz
 explorations
-tasks
 test
 examples
 bower.json
