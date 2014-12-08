@@ -37,11 +37,7 @@ if (typeof WebkitMutationObserver !== 'undefined') {
 if (typeof setImmediate !== 'undefined') {
   defer = setImmediate
 } else {
-  defer = inBrowser
-    ? (window.requestAnimationFrame ||
-      window.webkitRequestAnimationFrame ||
-      setTimeout)
-    : setTimeout
+  defer = setTimeout
 }
 
 /* istanbul ignore next */
