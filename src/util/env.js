@@ -24,11 +24,43 @@ var inBrowser = exports.inBrowser =
  * @param {Object} ctx
  */
 
-var defer = inBrowser
-  ? (window.requestAnimationFrame ||
-    window.webkitRequestAnimationFrame ||
-    setTimeout)
-  : setTimeout
+var defer
+/* istanbul ignore if */
+if (typeof MutationObserver !== 'undefined') {
+  defer = deferFromMutationObserver(MutationObserver)
+} else
+/* istanbul ignore if */
+if (typeof WebkitMutationObserver !== 'undefined') {
+  defer = deferFromMutationObserver(WebkitMutationObserver)
+} else
+/* istanbul ignore if */
+if (typeof setImmediate !== 'undefined') {
+  defer = setImmediate
+} else {
+  defer = inBrowser
+    ? (window.requestAnimationFrame ||
+      window.webkitRequestAnimationFrame ||
+      setTimeout)
+    : setTimeout
+}
+
+/* istanbul ignore next */
+function deferFromMutationObserver (Observer) {
+  var queue = []
+  var node = document.createTextNode('0')
+  var i = 0
+  new Observer(function () {
+    var l = queue.length
+    for (var i = 0; i < l; i++) {
+      queue[i]()
+    }
+    queue = queue.slice(l)
+  }).observe(node, { characterData: true })
+  return function mutationObserverDefer (cb) {
+    queue.push(cb)
+    node.nodeValue = (i = ++i % 2)
+  }
+}
 
 exports.nextTick = function (cb, ctx) {
   if (ctx) {

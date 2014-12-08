@@ -210,10 +210,10 @@ if (_.inBrowser && !_.isIE9) {
         el.__v_trans.id = 'test'
         // cascaded class style
         el.classList.add('test')
-        // wait a tick before applying the transition
+        // wait a frame before applying the transition
         // because doing so in the same frame won't trigger
         // transition
-        _.nextTick(function () {
+        setTimeout(function () {
           transition.apply(el, -1, op, vm, cb)
           _.nextTick(function () {
             expect(op).not.toHaveBeenCalled()
@@ -226,7 +226,7 @@ if (_.inBrowser && !_.isIE9) {
               done()
             })
           })
-        })
+        }, 0)
       })
 
       it('animation enter', function (done) {

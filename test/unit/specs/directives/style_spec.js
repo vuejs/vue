@@ -57,6 +57,12 @@ if (_.inBrowser) {
       expect(el.style.color).toBe('')
     })
 
+    it('ignore unsupported property', function () {
+      dir.arg = 'unsupported'
+      dir.update('test')
+      expect(el.style.unsupported).not.toBe('test')
+    })
+
     it('auto prefixing', function () {
       var prop = checkPrefixedProp('transform')
       dir.arg = 'transform'
