@@ -305,18 +305,13 @@ if (_.inBrowser && !_.isIE9) {
       var el, vm, op, cb, def, emitter
       beforeEach(function () {
         emitter = {}
+        def = {}
         el = document.createElement('div')
-        el.__v_trans = { id: 'test' }
+        el.__v_trans = { id: 'test', fns: def }
         document.body.appendChild(el)
         op = jasmine.createSpy('js transition op')
         cb = jasmine.createSpy('js transition cb')
-        def = {}
-        vm = new Vue({
-          el: el,
-          transitions: {
-            test: def
-          }
-        })
+        vm = new Vue({ el: el })
       })
 
       afterEach(function () {

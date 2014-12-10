@@ -5,7 +5,9 @@ module.exports = {
 
   bind: function () {
     this.el.__v_trans = {
-      id: this.expression
+      id: this.expression,
+      // resolve the custom transition functions now
+      fns: this.vm.$options.transitions[this.expression]
     }
   }
 
