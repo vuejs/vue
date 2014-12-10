@@ -1,5 +1,6 @@
 var _ = require('../util')
 var isObject = _.isObject
+var isPlainObject = _.isPlainObject
 var textParser = require('../parsers/text')
 var expParser = require('../parsers/expression')
 var templateParser = require('../parsers/template')
@@ -267,7 +268,7 @@ module.exports = {
     }
     var raw = this.converted ? data.value : data
     var alias = this.arg
-    var hasAlias = !isObject(raw) || alias
+    var hasAlias = !isPlainObject(raw) || alias
     // wrap the raw data with alias
     data = hasAlias ? {} : raw
     if (alias) {
@@ -467,7 +468,7 @@ function findNextVm (vm, ref) {
  */
 
 function objToArray (obj) {
-  if (!_.isPlainObject(obj)) {
+  if (!isPlainObject(obj)) {
     return obj
   }
   var keys = Object.keys(obj)
