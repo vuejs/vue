@@ -53,7 +53,7 @@ if (_.inBrowser) {
             a: 'A'
           }
         },
-        template: '<div v-component="test" v-with="testt:test,bb:b"></div>',
+        template: '<div v-component="test" v-with="testt:test,bb:b" v-ref="child"></div>',
         components: {
           test: {
             template: '{{testt.a}} {{bb}}'
@@ -76,7 +76,16 @@ if (_.inBrowser) {
           }
           _.nextTick(function () {
             expect(el.firstChild.textContent).toBe('AAAA BBB')
-            done()
+            // test two-way
+            vm.$.child.bb = 'B'
+            vm.$.child.testt = { a: 'A' }
+            _.nextTick(function () {
+              expect(el.firstChild.textContent).toBe('A B')
+              expect(vm.test.a).toBe('A')
+              expect(vm.test).toBe(vm.$.child.testt)
+              expect(vm.b).toBe('B')
+              done()
+            })
           })
         })
       })
