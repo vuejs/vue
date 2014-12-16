@@ -9,6 +9,7 @@ var config = require('../config')
 enableDebug()
 
 function enableDebug () {
+
   var hasConsole = typeof console !== 'undefined'
   
   /**
@@ -29,17 +30,20 @@ function enableDebug () {
    * @param {String} msg
    */
 
+  var warned = false
   exports.warn = function (msg) {
-    if (hasConsole && !config.silent) {
+    if (hasConsole && (!config.silent || config.debug)) {
+      if (!config.debug && !warned) {
+        warned = true
+        console.log(
+          'Set `Vue.config.debug = true` to enable debug mode.'
+        )
+      }
       console.warn('[Vue warn]: ' + msg)
       /* istanbul ignore if */
       if (config.debug) {
         /* jshint debug: true */
         debugger
-      } else {
-        console.log(
-          'Set `Vue.config.debug = true` to enable debug mode.'
-        )
       }
     }
   }

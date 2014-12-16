@@ -49,6 +49,13 @@ module.exports = {
   async: true,
 
   /**
+   * Whether to warn against errors caught when evaluating
+   * expressions.
+   */
+
+  warnExpressionErrors: true,
+
+  /**
    * Internal flag to indicate the delimiters have been
    * changed.
    *

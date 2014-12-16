@@ -3,16 +3,7 @@ var _ = require('../../../../src/util')
 
 var testCases = [
   {
-    // simple path that doesn't exist
-    exp: 'a.b.c',
-    scope: {
-      a: {}
-    },
-    expected: undefined,
-    paths: ['a']
-  },
-  {
-    // simple path that exists
+    // simple path
     exp: 'a.b.d',
     scope: {
       a:{b:{d:123}}
