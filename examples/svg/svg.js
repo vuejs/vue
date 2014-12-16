@@ -24,6 +24,8 @@ Vue.component('polygraph', {
   components: {
     // a sub component for the labels
     'axis-label': {
+      template: '#axis-label-template',
+      replace: true,
       computed: {
         point: function () {
           return valueToPoint(
