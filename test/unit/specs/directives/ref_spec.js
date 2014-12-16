@@ -13,6 +13,9 @@ if (_.inBrowser) {
     var components = {
       test: {
         id: 'test'
+      },
+      test2: {
+        id: 'test2'
       }
     }
 
@@ -24,8 +27,52 @@ if (_.inBrowser) {
       })
       expect(vm.$.test).toBeTruthy()
       expect(vm.$.test.$options.id).toBe('test')
-      vm.$.test.$destroy()
-      expect(vm.$.test).toBeUndefined()
+    })
+
+    it('with dynamic v-component', function (done) {
+      var vm = new Vue({
+        el: el,
+        components: components,
+        data: { test: 'test' },
+        template: '<div v-component="{{test}}" v-ref="test"></div>'
+      })
+      expect(vm.$.test.$options.id).toBe('test')
+      vm.test = 'test2'
+      _.nextTick(function () {
+        expect(vm.$.test.$options.id).toBe('test2')
+        vm.test = ''
+        _.nextTick(function () {
+          expect(vm.$.test).toBeNull()
+          done()          
+        })
+      })
+    })
+
+    it('should also work in child template', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: { view: 'test1' },
+        template: '<div v-component="{{view}}"></div>',
+        components: {
+          test1: {
+            id: 'test1',
+            template: '<div v-ref="test1"></div>',
+            replace: true
+          },
+          test2: {
+            id: 'test2',
+            template: '<div v-ref="test2"></div>',
+            replace: true
+          }
+        }
+      })
+      expect(vm.$.test1.$options.id).toBe('test1')
+      vm.view = 'test2'
+      _.nextTick(function () {
+        expect(vm.$.test1).toBeNull()
+        expect(vm.$.test2.$options.id).toBe('test2')
+        done()
+      })
     })
 
     it('with v-repeat', function (done) {
@@ -42,7 +89,7 @@ if (_.inBrowser) {
       _.nextTick(function () {
         expect(vm.$.test.length).toBe(0)
         vm._directives[0].unbind()
-        expect(vm.$.test).toBeUndefined()
+        expect(vm.$.test).toBeNull()
         done()
       })
     })
@@ -67,20 +114,6 @@ if (_.inBrowser) {
       var vm = new Vue({
         el: el,
         template: '<div v-ref="test"></div>'
-      })
-      expect(_.warn).toHaveBeenCalled()
-    })
-
-    it('should warn when used in child template', function () {
-      var vm = new Vue({
-        el: el,
-        template: '<div v-component="test"></div>',
-        components: {
-          test: {
-            template: '<div v-ref="test"></div>',
-            replace: true
-          }
-        }
       })
       expect(_.warn).toHaveBeenCalled()
     })

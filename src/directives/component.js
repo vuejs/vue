@@ -26,6 +26,8 @@ module.exports = {
       // we simply remove it from the DOM and save it in a
       // cache object, with its constructor id as the key.
       this.keepAlive = this._checkParam('keep-alive') != null
+      // check ref
+      this.refID = _.attr(this.el, 'ref')
       if (this.keepAlive) {
         this.cache = {}
       }
@@ -83,6 +85,10 @@ module.exports = {
       if (this.keepAlive) {
         this.cache[this.ctorId] = child
       }
+      var refID = child._refID || this.refID
+      if (refID) {
+        vm.$[refID] = child
+      }
       return child
     }
   },
@@ -94,6 +100,10 @@ module.exports = {
 
   unbuild: function () {
     var child = this.childVM
+    var refID = (child && child._refID) || this.refID
+    if (refID) {
+      this.vm.$[refID] = null
+    }
     if (!child || this.keepAlive) {
       return
     }
