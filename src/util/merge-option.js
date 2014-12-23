@@ -170,6 +170,9 @@ strats.events = function (parentVal, childVal) {
   for (var key in childVal) {
     var parent = ret[key]
     var child = childVal[key]
+    if (!_.isArray(parent)) {
+      parent = [parent]
+    }
     ret[key] = parent
       ? parent.concat(child)
       : [child]
