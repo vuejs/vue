@@ -11,11 +11,15 @@ module.exports = {
     if (optionsParam) {
       initOptions.call(this, optionsParam)
     }
+    this.number = this._checkParam('number') != null
     this.multiple = el.hasAttribute('multiple')
     this.listener = function () {
       var value = self.multiple
         ? getMultiValue(el)
         : el.value
+      value = self.number
+        ? _.toNumber(value)
+        : value
       self.set(value, true)
     }
     _.on(el, 'change', this.listener)
@@ -124,7 +128,9 @@ function checkInitialValue () {
     }
   }
   if (initValue) {
-    this._initValue = initValue
+    this._initValue = this.number
+      ? _.toNumber(initValue)
+      : initValue
   }
 }
 

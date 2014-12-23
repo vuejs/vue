@@ -273,6 +273,30 @@ if (_.inBrowser) {
       expect(opts[2].selected).toBe(false)
     })
 
+    it('select + number', function () {
+      var vm = new Vue({
+        el: el,
+        data: {
+          test: '1'
+        },
+        template: '<select v-model="test" number><option value="1">1</option></select>'
+      })
+      expect(vm.test).toBe('1')
+      trigger(vm.$el.firstChild, 'change')
+      expect(vm.test).toBe(1)
+    })
+
+    it('select + number initial value', function () {
+      var vm = new Vue({
+        el: el,
+        data: {
+          test: '1'
+        },
+        template: '<select v-model="test" number><option value="1" selected>1</option></select>'
+      })
+      expect(vm.test).toBe(1)
+    })
+
     it('text', function (done) {
       var vm = new Vue({
         el: el,
