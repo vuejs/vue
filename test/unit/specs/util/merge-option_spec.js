@@ -56,18 +56,19 @@ describe('Util - Option merging', function () {
     var parent = {
       events: {
         'fn1': [fn1, fn2],
-        'fn2': [fn2]
+        'fn2': fn2
       }
     }
     var child = {
       events: {
         'fn1': fn3,
+        'fn2': fn3,
         'fn3': fn3
       }
     }
     var res = merge(parent, child).events
     assertRes(res.fn1, [fn1, fn2, fn3])
-    assertRes(res.fn2, [fn2])
+    assertRes(res.fn2, [fn2, fn3])
     assertRes(res.fn3, [fn3])
     
     function assertRes (res, expected) {
