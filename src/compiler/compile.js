@@ -52,8 +52,10 @@ module.exports = function compile (el, options, partial, asParent) {
   return function link (vm, el) {
     var originalDirCount = vm._directives.length
     if (paramsLinkFn) paramsLinkFn(vm, el)
+    // cache childNodes before linking parent, fix #657
+    var childNodes = _.toArray(el.childNodes)
     if (nodeLinkFn) nodeLinkFn(vm, el)
-    if (childLinkFn) childLinkFn(vm, el.childNodes)
+    if (childLinkFn) childLinkFn(vm, childNodes)
 
     /**
      * If this is a partial compile, the linker function
@@ -300,18 +302,18 @@ function compileNodeList (nodeList, options) {
 
 function makeChildLinkFn (linkFns) {
   return function childLinkFn (vm, nodes) {
-    // stablize nodes
-    nodes = _.toArray(nodes)
     var node, nodeLinkFn, childrenLinkFn
     for (var i = 0, n = 0, l = linkFns.length; i < l; n++) {
       node = nodes[n]
       nodeLinkFn = linkFns[i++]
       childrenLinkFn = linkFns[i++]
+      // cache childNodes before linking parent, fix #657
+      var childNodes = _.toArray(node.childNodes)
       if (nodeLinkFn) {
         nodeLinkFn(vm, node)
       }
       if (childrenLinkFn) {
-        childrenLinkFn(vm, node.childNodes)
+        childrenLinkFn(vm, childNodes)
       }
     }
   }
