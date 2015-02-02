@@ -1,3 +1,5 @@
+// patch inDoc
+require('../../lib/indoc_patch')
 var _ = require('../../../../src/util')
 var Vue = require('../../../../src/vue')
 
@@ -7,7 +9,12 @@ if (_.inBrowser) {
     var el
     beforeEach(function () {
       el = document.createElement('div')
+      document.body.appendChild(el)
       spyOn(_, 'warn')
+    })
+
+    afterEach(function () {
+      document.body.removeChild(el)
     })
 
     it('static', function () {
@@ -248,15 +255,6 @@ if (_.inBrowser) {
       var spy1 = jasmine.createSpy('enter')
       var spy2 = jasmine.createSpy('leave')
       var next
-      // === IMPORTANT ===
-      // PhantomJS always returns false when calling
-      // Element.contains() on a comment node. This causes
-      // transitions to be skipped. Monkey patching here
-      // isn't ideal but does the job...
-      var inDoc = _.inDoc
-      _.inDoc = function () {
-        return true
-      }
       var vm = new Vue({
         el: el,
         data: {
@@ -289,8 +287,6 @@ if (_.inBrowser) {
         next()
         expect(spy2).toHaveBeenCalled()
         expect(el.textContent).toBe('BBB')
-        // clean up
-        _.inDoc = inDoc
         done()
       })
     })
@@ -299,10 +295,6 @@ if (_.inBrowser) {
       var spy1 = jasmine.createSpy('enter')
       var spy2 = jasmine.createSpy('leave')
       var next
-      var inDoc = _.inDoc
-      _.inDoc = function () {
-        return true
-      }
       var vm = new Vue({
         el: el,
         data: {
@@ -335,8 +327,6 @@ if (_.inBrowser) {
         next()
         expect(spy2).toHaveBeenCalled()
         expect(el.textContent).toBe('BBB')
-        // clean up
-        _.inDoc = inDoc
         done()
       })
     })

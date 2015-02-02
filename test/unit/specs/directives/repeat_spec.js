@@ -1,3 +1,5 @@
+// patch inDoc
+require('../../lib/indoc_patch')
 var _ = require('../../../../src/util')
 var Vue = require('../../../../src/vue')
 
@@ -456,15 +458,7 @@ if (_.inBrowser) {
     })
 
     it('with transition', function (done) {
-      // === IMPORTANT ===
-      // PhantomJS always returns false when calling
-      // Element.contains() on a comment node. This causes
-      // transitions to be skipped. Monkey patching here
-      // isn't ideal but does the job...
-      var inDoc = _.inDoc
-      _.inDoc = function () {
-        return true
-      }
+      document.body.appendChild(el)
       var vm = new Vue({
         el: el,
         template: '<div v-repeat="items" v-transition="test">{{a}}</div>',
@@ -482,8 +476,7 @@ if (_.inBrowser) {
       vm.items.splice(1, 1, {a:4})
       setTimeout(function () {
         expect(el.innerHTML).toBe('<div>1</div><div>4</div><div>3</div><!--v-repeat-->')
-        // clean up
-        _.inDoc = inDoc
+        document.body.removeChild(el)
         done()
       }, 30)
     })
