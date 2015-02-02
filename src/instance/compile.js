@@ -122,11 +122,9 @@ exports._destroy = function (remove, deferCleanup) {
     parent._children.splice(i, 1)
   }
   // destroy all children.
-  if (this._children) {
-    i = this._children.length
-    while (i--) {
-      this._children[i].$destroy()
-    }
+  i = this._children.length
+  while (i--) {
+    this._children[i].$destroy()
   }
   // teardown parent linkers
   if (this._containerUnlinkFn) {

@@ -53,17 +53,13 @@ module.exports = {
   compile: function (template) {
     var vm = this.vm
     var frag = templateParser.clone(template)
-    var originalChildLength = vm._children
-      ? vm._children.length
-      : 0
+    var originalChildLength = vm._children.length
     this.unlink = this.linker
       ? this.linker(vm, frag)
       : vm.$compile(frag)
     transition.blockAppend(frag, this.end, vm)
-    this.children = vm._children
-      ? vm._children.slice(originalChildLength)
-      : null
-    if (this.children && _.inDoc(vm.$el)) {
+    this.children = vm._children.slice(originalChildLength)
+    if (this.children.length && _.inDoc(vm.$el)) {
       this.children.forEach(function (child) {
         child._callHook('attached')
       })

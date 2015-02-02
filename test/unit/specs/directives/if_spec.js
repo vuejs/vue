@@ -28,7 +28,7 @@ if (_.inBrowser) {
       })
       // lazy instantitation
       expect(el.innerHTML).toBe(wrap(''))
-      expect(vm._children).toBeNull()
+      expect(vm._children.length).toBe(0)
       vm.test = true
       _.nextTick(function () {
         expect(el.innerHTML).toBe(wrap('<div><div>A</div><!--v-component--></div>'))
@@ -91,7 +91,7 @@ if (_.inBrowser) {
       })
       vm.$appendTo(document.body)
       expect(el.innerHTML).toBe(wrap(''))
-      expect(vm._children).toBeNull()
+      expect(vm._children.length).toBe(0)
       vm.ok = true
       _.nextTick(function () {
         expect(el.innerHTML).toBe(wrap('<div>123</div><!--v-component-->'))
@@ -127,7 +127,7 @@ if (_.inBrowser) {
         }
       })
       expect(el.innerHTML).toBe(wrap(''))
-      expect(vm._children).toBeNull()
+      expect(vm._children.length).toBe(0)
       // toggle if with lazy instantiation
       vm.ok = true
       _.nextTick(function () {

@@ -117,14 +117,11 @@ exports._digest = function () {
     this._watcherList[i].update()
   }
   var children = this._children
-  var child
-  if (children) {
-    i = children.length
-    while (i--) {
-      child = children[i]
-      if (child.$options.inherit) {
-        child._digest()
-      }
+  i = children.length
+  while (i--) {
+    var child = children[i]
+    if (child.$options.inherit) {
+      child._digest()
     }
   }
 }

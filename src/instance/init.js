@@ -46,9 +46,8 @@ exports._init = function (options) {
   this._isBeingDestroyed = false
 
   // children
-  this._children =         // @type {Array}
-  this._childCtors = null  // @type {Object} - hash to cache
-                           // child constructors
+  this._children = []
+  this._childCtors = {}
 
   // merge options.
   options = this.$options = mergeOptions(

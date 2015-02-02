@@ -80,7 +80,6 @@ exports._initDOMHooks = function () {
 function onAttached () {
   this._isAttached = true
   var children = this._children
-  if (!children) return
   for (var i = 0, l = children.length; i < l; i++) {
     var child = children[i]
     if (!child._isAttached && inDoc(child.$el)) {
@@ -96,7 +95,6 @@ function onAttached () {
 function onDetached () {
   this._isAttached = false
   var children = this._children
-  if (!children) return
   for (var i = 0, l = children.length; i < l; i++) {
     var child = children[i]
     if (child._isAttached && !inDoc(child.$el)) {

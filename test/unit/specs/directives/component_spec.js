@@ -189,7 +189,7 @@ if (_.inBrowser) {
         }
       })
       expect(el.textContent).toBe('')
-      expect(vm._children).toBeNull()
+      expect(vm._children.length).toBe(0)
       expect(vm._directives.length).toBe(1) // v-if
       vm.ok = true
       _.nextTick(function () {
