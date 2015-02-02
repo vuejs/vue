@@ -40,10 +40,6 @@ if (typeof MutationObserver !== 'undefined') {
 /* istanbul ignore if */
 if (typeof WebkitMutationObserver !== 'undefined') {
   defer = deferFromMutationObserver(WebkitMutationObserver)
-} else
-/* istanbul ignore if */
-if (typeof setImmediate !== 'undefined') {
-  defer = setImmediate
 } else {
   defer = setTimeout
 }
