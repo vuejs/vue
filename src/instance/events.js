@@ -79,12 +79,21 @@ exports._initDOMHooks = function () {
 
 function onAttached () {
   this._isAttached = true
-  var children = this._children
-  for (var i = 0, l = children.length; i < l; i++) {
-    var child = children[i]
-    if (!child._isAttached && inDoc(child.$el)) {
-      child._callHook('attached')
-    }
+  this._children.forEach(callAttach)
+  if (this._transCpnts) {
+    this._transCpnts.forEach(callAttach)
+  }
+}
+
+/**
+ * Iterator to call attached hook
+ * 
+ * @param {Vue} child
+ */
+
+function callAttach (child) {
+  if (!child._isAttached && inDoc(child.$el)) {
+    child._callHook('attached')
   }
 }
 
@@ -94,12 +103,21 @@ function onAttached () {
 
 function onDetached () {
   this._isAttached = false
-  var children = this._children
-  for (var i = 0, l = children.length; i < l; i++) {
-    var child = children[i]
-    if (child._isAttached && !inDoc(child.$el)) {
-      child._callHook('detached')
-    }
+  this._children.forEach(callDetach)
+  if (this._transCpnts) {
+    this._transCpnts.forEach(callDetach)
+  }
+}
+
+/**
+ * Iterator to call detached hook
+ * 
+ * @param {Vue} child
+ */
+
+function callDetach (child) {
+  if (child._isAttached && !inDoc(child.$el)) {
+    child._callHook('detached')
   }
 }
 

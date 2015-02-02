@@ -48,6 +48,8 @@ exports._init = function (options) {
   // children
   this._children = []
   this._childCtors = {}
+  // transcluded components that belong to the parent
+  this._transCpnts = null
 
   // merge options.
   options = this.$options = mergeOptions(

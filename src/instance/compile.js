@@ -39,10 +39,12 @@ exports._compile = function (el) {
       parentOptions._skipAttrs = null
 
       if (content) {
+        var ol = parent._children.length
         var contentLinkFn =
           compile(content, parentOptions, true)
         // call content linker now, before transclusion
         this._contentUnlinkFn = contentLinkFn(parent, content)
+        this._transCpnts = parent._children.slice(ol)
       }
       // tranclude, this possibly replaces original
       el = transclude(el, options)
@@ -176,6 +178,7 @@ exports._cleanup = function () {
   this.$parent =
   this.$root =
   this._children =
+  this._transCpnts =
   this._directives = null
   // call the last hook...
   this._isDestroyed = true
