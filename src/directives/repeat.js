@@ -268,7 +268,7 @@ module.exports = {
     }
     var raw = this.converted ? data.value : data
     var alias = this.arg
-    var hasAlias = !isPlainObject(raw) || alias
+    var hasAlias = !isObject(raw) || !isPlainObject(data) || alias
     // wrap the raw data with alias
     data = hasAlias ? {} : raw
     if (alias) {
