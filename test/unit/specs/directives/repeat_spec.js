@@ -194,6 +194,28 @@ if (_.inBrowser) {
       )
     })
 
+    it('nested repeats on object', function(){
+      var vm = new Vue({
+        el: el,
+        data: {
+          listHash: {
+            listA: [{a: 1},{a: 2}],
+            listB: [{a: 1},{a: 2}]
+          }
+        },
+        template: '<div v-repeat="listHash">{{$key}}' +
+            '<p v-repeat="$data">{{a}}</p>' +
+            '</div>'
+      })
+      function output(key){
+        var key1 = key === 'listA' ? 'listB' : 'listA'
+        return  '<div>'+ key +'<p>1</p><p>2</p><!--v-repeat--></div>' +
+                '<div>'+ key1 +'<p>1</p><p>2</p><!--v-repeat--></div>' +
+                '<!--v-repeat-->'
+      }
+      expect(el.innerHTML === output('listA') || el.innerHTML === output('listB')).toBeTruthy()
+    })
+
     it('dynamic component type based on instance data', function () {
       var vm = new Vue({
         el: el,
