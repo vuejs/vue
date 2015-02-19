@@ -143,8 +143,12 @@ exports._destroy = function (remove, deferCleanup) {
     this._directives[i]._teardown()
   }
   // teardown all user watchers.
+  var watcher
   for (i in this._userWatchers) {
-    this._userWatchers[i].teardown()
+    watcher = this._userWatchers[i]
+    if (watcher) {
+      watcher.teardown()
+    }
   }
   // remove reference to self on $el
   if (this.$el) {
