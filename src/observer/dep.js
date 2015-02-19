@@ -1,4 +1,5 @@
 var uid = 0
+var _ = require('../util')
 
 /**
  * A dep is an observable that can have multiple
@@ -42,7 +43,9 @@ p.removeSub = function (sub) {
  */
 
 p.notify = function () {
-  for (var i = 0, subs = this.subs; i < subs.length; i++) {
+  // stablize the subscriber list first
+  var subs = _.toArray(this.subs)
+  for (var i = 0, l = subs.length; i < l; i++) {
     subs[i].update()
   }
 }
