@@ -18,7 +18,9 @@ module.exports = {
         ? getMultiValue(el)
         : el.value
       value = self.number
-        ? _.toNumber(value)
+        ? _.isArray(value)
+          ? value.map(_.toNumber)
+          : _.toNumber(value)
         : value
       self.set(value, true)
     }

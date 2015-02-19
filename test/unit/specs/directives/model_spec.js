@@ -286,6 +286,22 @@ if (_.inBrowser) {
       expect(vm.test).toBe(1)
     })
 
+    it('select + number + multiple', function () {
+      var vm = new Vue({
+        el: el,
+        data: {
+          test: []
+        },
+        template: '<select v-model="test" multiple number><option>1</option><option>2</option></select>'
+      })
+      ;[].forEach.call(el.querySelectorAll('option'), function (o) {
+        o.selected = true
+      })
+      trigger(el.firstChild, 'change')
+      expect(vm.test[0]).toBe(1)
+      expect(vm.test[1]).toBe(2)
+    })
+
     it('select + number initial value', function () {
       var vm = new Vue({
         el: el,
