@@ -68,7 +68,7 @@ exports.currency = function (value, sign) {
     h = i > 0
       ? (s.slice(0, i) + (s.length > 3 ? ',' : ''))
       : '',
-	v = Math.abs(parseInt((value * 100) % 100, 10)),
+    v = Math.abs(parseInt((value * 100) % 100, 10)),
     f = '.' + (v < 10 ? ('0' + v) : v)
   return (value < 0 ? '-' : '') +
     sign + h + s.slice(i).replace(digitsRE, '$1,') + f
