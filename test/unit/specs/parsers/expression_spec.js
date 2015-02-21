@@ -63,6 +63,12 @@ var testCases = [
     paths: ['a']
   },
   {
+    //multiline expressions
+    exp: "{\n a: '35',\n b: c}",
+    scope:{c:32},
+    expected: { a : '35', b : 32 }
+  },
+  {
     // dollar signs and underscore
     exp: "_a + ' ' + $b",
     scope: {
