@@ -37,6 +37,13 @@ var saved = []
 /**
  * Save replacer
  *
+ * The save regex can match two possible cases:
+ * 1. An opening object literal
+ * 2. A string
+ * If matched as a plain string, we need to escape its
+ * newlines, since the string needs to be preserved when
+ * generating the function body.
+ *
  * @param {String} str
  * @param {String} isString - str if matched as a string
  * @return {String} - placeholder with index
@@ -46,7 +53,7 @@ function save (str, isString) {
   var i = saved.length
   saved[i] = isString
     ? str.replace(newlineRE, '\\n')
-    : str.replace(wsRE,'')
+    : str
   return '"' + i + '"'
 }
 
