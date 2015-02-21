@@ -16,7 +16,7 @@ var keywords =
 
 var wsRE = /\s/g
 var newlineRE = /\n/g
-var saveRE = /[\{,]\s*[\w\$_]+\s*:|'[^']*'|"[^"]*"/g
+var saveRE = /[\{,]\s*[\w\$_]+\s*:|('[^']*'|"[^"]*")/g
 var restoreRE = /"(\d+)"/g
 var pathTestRE = /^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\]|\[\d+\])*$/
 var pathReplaceRE = /[^\w$\.]([A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\])*)/g
@@ -38,12 +38,15 @@ var saved = []
  * Save replacer
  *
  * @param {String} str
+ * @param {String} isString - str if matched as a string
  * @return {String} - placeholder with index
  */
 
-function save (str) {
+function save (str, isString) {
   var i = saved.length
-  saved[i] = str.replace(newlineRE, '\\n')
+  saved[i] = isString
+    ? str.replace(newlineRE, '\\n')
+    : str.replace(wsRE,'')
   return '"' + i + '"'
 }
 
