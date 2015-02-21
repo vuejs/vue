@@ -1,5 +1,6 @@
 var _ = require('../../util')
 var Watcher = require('../../watcher')
+var dirParser = require('../../parsers/directive')
 
 module.exports = {
 
@@ -61,6 +62,7 @@ module.exports = {
 
 function initOptions (expression) {
   var self = this
+  var descriptor = dirParser.parse(expression)[0]
   function optionUpdateWatcher (value) {
     if (_.isArray(value)) {
       self.el.innerHTML = ''
@@ -74,9 +76,12 @@ function initOptions (expression) {
   }
   this.optionWatcher = new Watcher(
     this.vm,
-    expression,
+    descriptor.expression,
     optionUpdateWatcher,
-    { deep: true }
+    {
+      deep: true,
+      filters: _.resolveFilters(this.vm, descriptor.filters)
+    }
   )
   // update with initial value
   optionUpdateWatcher(this.optionWatcher.value)

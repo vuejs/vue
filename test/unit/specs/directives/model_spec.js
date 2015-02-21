@@ -313,6 +313,27 @@ if (_.inBrowser) {
       expect(vm.test).toBe(1)
     })
 
+    it('select + options + filter', function () {
+      var vm = new Vue({
+        el: el,
+        data: {
+          opts: ['a','b']
+        },
+        filters: {
+          aFilter: function (opts){
+            return opts.map(function (val,i){
+              return val + i
+            })
+          }
+        },
+        template: '<select v-model="test" options="opts | aFilter"></select>'
+      })
+      expect(el.firstChild.innerHTML).toBe(
+          '<option value="a0">a0</option>' +
+          '<option value="b1">b1</option>'
+      )
+    })
+
     it('text', function (done) {
       var vm = new Vue({
         el: el,
