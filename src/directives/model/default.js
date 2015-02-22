@@ -41,7 +41,8 @@ module.exports = {
     // the input with the filtered value.
     // also force update for type="range" inputs to enable
     // "lock in range" (see #506)
-    this.listener = this.filters || el.type === 'range'
+    var hasReadFilter = this.filters && this.filters.read
+    this.listener = hasReadFilter || el.type === 'range'
       ? function textInputListener () {
           if (cpLocked) return
           var charsOffset

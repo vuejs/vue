@@ -405,7 +405,7 @@ if (_.inBrowser) {
         filters: {
           test: {
             write: function (val) {
-              return val.toUpperCase()
+              return val.toLowerCase()
             }
           }
         },
@@ -416,6 +416,32 @@ if (_.inBrowser) {
       trigger(el.firstChild, 'input')
       _.nextTick(function () {
         expect(el.firstChild.value).toBe('CC')
+        expect(vm.test).toBe('cc')
+        done()
+      })
+    })
+
+    // when there's only write filter, should allow
+    // out of sync between the input field and actual data
+    it('text with only write filter', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          test: 'b'
+        },
+        filters: {
+          test: {
+            write: function (val) {
+              return val.toUpperCase()
+            }
+          }
+        },
+        template: '<input v-model="test | test">'
+      })
+      el.firstChild.value = 'cc'
+      trigger(el.firstChild, 'input')
+      _.nextTick(function () {
+        expect(el.firstChild.value).toBe('cc')
         expect(vm.test).toBe('CC')
         done()
       })
@@ -474,7 +500,7 @@ if (_.inBrowser) {
           test: 'aaa',
           test2: 'bbb'
         },
-        template: '<input v-model="test"><input v-model="test2 | uppsercase">'
+        template: '<input v-model="test"><input v-model="test2 | uppercase">'
       })
       var input = el.firstChild
       var input2 = el.childNodes[1]
