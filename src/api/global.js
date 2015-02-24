@@ -40,7 +40,11 @@ var cid = 1
 exports.extend = function (extendOptions) {
   extendOptions = extendOptions || {}
   var Super = this
-  var Sub = createClass(extendOptions.name || 'VueComponent')
+  var Sub = createClass(
+    extendOptions.name ||
+    Super.options.name ||
+    'VueComponent'
+  )
   Sub.prototype = Object.create(Super.prototype)
   Sub.prototype.constructor = Sub
   Sub.cid = cid++
