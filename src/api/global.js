@@ -72,7 +72,7 @@ exports.extend = function (extendOptions) {
 
 function createClass (name) {
   return new Function(
-    'return function ' + _.camelize(name, true) +
+    'return function ' + _.classify(name) +
     ' (options) { this._init(options) }'
   )()
 }

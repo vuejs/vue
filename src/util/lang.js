@@ -57,20 +57,43 @@ exports.stripQuotes = function (str) {
 }
 
 /**
+ * Replace helper
+ *
+ * @param {String} _ - matched delimiter
+ * @param {String} c - matched char
+ * @return {String}
+ */
+function toUpper (_, c) {
+  return c ? c.toUpperCase () : ''
+}
+
+/**
  * Camelize a hyphen-delmited string.
  *
  * @param {String} str
  * @return {String}
  */
 
-var camelRE = /[-_](\w)/g
-var capitalCamelRE = /(?:^|[-_])(\w)/g
+var camelRE = /-(\w)/g
+exports.camelize = function (str) {
+  return str.replace(camelRE, toUpper)
+}
 
-exports.camelize = function (str, cap) {
-  var RE = cap ? capitalCamelRE : camelRE
-  return str.replace(RE, function (_, c) {
-    return c ? c.toUpperCase () : ''
-  })
+/**
+ * Converts hyphen/underscore/slash delimitered names into
+ * camelized classNames.
+ *
+ * e.g. my-component => MyComponent
+ *      some_else    => SomeElse
+ *      some/comp    => SomeComp
+ *
+ * @param {String} str
+ * @return {String}
+ */
+
+var classifyRE = /(?:^|[-_\/])(\w)/g
+exports.classify = function (str) {
+  return str.replace(classifyRE, toUpper)
 }
 
 /**

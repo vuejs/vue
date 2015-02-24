@@ -25,7 +25,7 @@ exports.$addChild = function (opts, BaseCtor) {
     if (!ChildVue) {
       var optionName = BaseCtor.options.name
       var className = optionName
-        ? _.camelize(optionName, true)
+        ? _.classify(optionName)
         : 'VueComponent'
       ChildVue = new Function(
         'return function ' + className + ' (options) {' +
