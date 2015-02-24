@@ -25,11 +25,17 @@ var templateParser = require('../parsers/template')
  */
 
 module.exports = function compile (el, options, partial, asParent) {
+  var isBlock = el.nodeType === 11
   var params = !partial && options.paramAttributes
+  // if el is a fragment, this is a block instance
+  // and paramAttributes will be stored on the first
+  // element in the template. (excluding the _blockStart
+  // comment node)
+  var paramsEl = isBlock ? el.childNodes[1] : el
   var paramsLinkFn = params
-    ? compileParamAttributes(el, params, options)
+    ? compileParamAttributes(paramsEl, params, options)
     : null
-  var nodeLinkFn = el instanceof DocumentFragment
+  var nodeLinkFn = isBlock
     ? null
     : compileNode(el, options, asParent)
   var childLinkFn =
@@ -51,7 +57,10 @@ module.exports = function compile (el, options, partial, asParent) {
 
   return function link (vm, el) {
     var originalDirCount = vm._directives.length
-    if (paramsLinkFn) paramsLinkFn(vm, el)
+    if (paramsLinkFn) {
+      var paramsEl = isBlock ? el.childNodes[1] : el
+      paramsLinkFn(vm, paramsEl)
+    }
     // cache childNodes before linking parent, fix #657
     var childNodes = _.toArray(el.childNodes)
     if (nodeLinkFn) nodeLinkFn(vm, el)

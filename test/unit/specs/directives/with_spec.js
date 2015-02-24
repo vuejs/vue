@@ -133,5 +133,24 @@ if (_.inBrowser) {
       expect(_.warn).toHaveBeenCalled()
     })
 
+    it('block instance with replace:true', function () {
+      var vm = new Vue({
+        el: el,
+        template: '<div v-component="test" v-with="b:a" c="{{d}}"></div>',
+        data: {
+          a: 'AAA',
+          d: 'DDD'
+        },
+        components: {
+          test: {
+            paramAttributes: ['c'],
+            template: '<p>{{b}}</p><p>{{c}}</p>',
+            replace: true
+          }
+        }
+      })
+      expect(el.innerHTML).toBe('<!--v-start--><p>AAA</p><p>DDD</p><!--v-end--><!--v-component-->')
+    })
+
   })
 }

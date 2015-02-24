@@ -75,7 +75,8 @@ exports._compile = function (el) {
 exports._initElement = function (el) {
   if (el instanceof DocumentFragment) {
     this._isBlock = true
-    this.$el = this._blockStart = el.firstChild
+    this._blockStart = el.firstChild
+    this.$el = el.childNodes[1]
     this._blockEnd = el.lastChild
     this._blockFragment = el
   } else {

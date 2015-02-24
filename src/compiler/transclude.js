@@ -48,9 +48,7 @@ function transcludeTemplate (el, options) {
     if (options.replace) {
       if (frag.childNodes.length > 1) {
         transcludeContent(frag, rawContent)
-        // TODO: store directives on placeholder node
-        // and compile it somehow
-        // probably only check for v-with, v-ref & paramAttributes
+        _.copyAttributes(el, frag.firstChild)
         return frag
       } else {
         var replacer = frag.firstChild
