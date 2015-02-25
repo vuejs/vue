@@ -80,6 +80,9 @@ module.exports = {
 
     this.event = lazy ? 'change' : 'input'
     _.on(el, this.event, this.listener)
+    if (typeof(jQuery) === 'function') {
+      jQuery(el).on('change', this.listener)
+    }
 
     // IE9 doesn't fire input event on backspace/del/cut
     if (!lazy && _.isIE9) {
