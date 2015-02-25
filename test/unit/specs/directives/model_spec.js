@@ -569,5 +569,28 @@ if (_.inBrowser) {
       expect(_.warn).toHaveBeenCalled()
     })
 
+    it('support jQuery change event', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          test: 'b'
+        },
+        template: '<input v-model="test">'
+      })
+      expect(el.firstChild.value).toBe('b')
+      vm.test = 'a'
+      _.nextTick(function () {
+        expect(el.firstChild.value).toBe('a')
+        el.firstChild.value = 'c'
+        jQuery(el.firstChild).trigger('change')
+        expect(vm.test).toBe('c')
+        vm._directives[0].unbind()
+        el.firstChild.value = 'd'
+        jQuery(el.firstChild).trigger('change')
+        expect(vm.test).toBe('c')
+        done()
+      })
+    })
+
   })
 }

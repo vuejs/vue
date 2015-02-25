@@ -15,6 +15,7 @@
   "globals": {
     "console": true,
     "DocumentFragment": true,
-    "WebkitMutationObserver": true
+    "WebkitMutationObserver": true,
+    "jQuery": true
   }
 }

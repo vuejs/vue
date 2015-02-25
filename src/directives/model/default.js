@@ -1,4 +1,5 @@
 var _ = require('../../util')
+var hasjQuery = typeof jQuery === 'function'
 
 module.exports = {
 
@@ -80,7 +81,10 @@ module.exports = {
 
     this.event = lazy ? 'change' : 'input'
     _.on(el, this.event, this.listener)
-    if (typeof(jQuery) === 'function') {
+
+    // support jQuery change event, jQuery.trigger() doesn't
+    // trigger native change event in some cases
+    if (hasjQuery) {
       jQuery(el).on('change', this.listener)
     }
 
@@ -116,6 +120,9 @@ module.exports = {
   unbind: function () {
     var el = this.el
     _.off(el, this.event, this.listener)
+    if (hasjQuery) {
+      jQuery(el).off('change', this.listener)
+    }
     _.off(el,'compositionstart', this.cpLock)
     _.off(el,'compositionend', this.cpUnlock)
     if (this.onCut) {

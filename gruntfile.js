@@ -40,6 +40,7 @@ module.exports = function (grunt) {
       options: {
         frameworks: ['jasmine', 'commonjs'],
         files: [
+          'test/unit/lib/jquery.js',
           'src/**/*.js',
           'test/unit/lib/indoc_patch.js',
           'test/unit/specs/**/*.js'
