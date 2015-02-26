@@ -25,6 +25,7 @@
     "mockMouseEvent": true,
     "mockKeyEvent": true,
     "casper": true,
-    "DocumentFragment": true
+    "DocumentFragment": true,
+    "jQuery": true
   }
 }
