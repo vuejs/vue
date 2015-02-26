@@ -12,6 +12,8 @@ module.exports = {
     var lazy = this._checkParam('lazy') != null
     // - number: cast value into number when updating model.
     var number = this._checkParam('number') != null
+    // - debounce: debounce the input listener
+    var debounce = parseInt(this._checkParam('debounce'), 10)
 
     // handle composition events.
     // http://blog.evanyou.me/2014/01/03/composition-event/
@@ -79,6 +81,9 @@ module.exports = {
           set()
         }
 
+    if (debounce) {
+      this.listener = _.debounce(this.listener, debounce)
+    }
     this.event = lazy ? 'change' : 'input'
     _.on(el, this.event, this.listener)
 

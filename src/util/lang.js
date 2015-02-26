@@ -196,3 +196,35 @@ exports.define = function (obj, key, val, enumerable) {
     configurable : true
   })
 }
+
+/**
+ * Debounce a function so it only gets called after the
+ * input stops arriving after the given wait period.
+ *
+ * @param {Function} func
+ * @param {Number} wait
+ * @return {Function} - the debounced function
+ */
+
+exports.debounce = function(func, wait) {
+  var timeout, args, context, timestamp, result
+  var later = function() {
+    var last = Date.now() - timestamp
+    if (last < wait && last >= 0) {
+      timeout = setTimeout(later, wait - last)
+    } else {
+      timeout = null
+      result = func.apply(context, args)
+      if (!timeout) context = args = null
+    }
+  }
+  return function() {
+    context = this
+    args = arguments
+    timestamp = Date.now()
+    if (!timeout) {
+      timeout = setTimeout(later, wait)
+    }
+    return result
+  }
+}
