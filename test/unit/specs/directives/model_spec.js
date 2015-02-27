@@ -592,5 +592,38 @@ if (_.inBrowser) {
       })
     })
 
+    it('support debounce', function (done) {
+      var spy = jasmine.createSpy()
+      var vm = new Vue({
+        el: el,
+        data: {
+          test: 'a'
+        },
+        watch: {
+          test: spy
+        },
+        template: '<input v-model="test" debounce="100">'
+      })
+      el.firstChild.value = 'b'
+      trigger(el.firstChild, 'input')
+      setTimeout(function () {
+        el.firstChild.value = 'c'
+        trigger(el.firstChild, 'input')
+      }, 10)
+      setTimeout(function () {
+        el.firstChild.value = 'd'
+        trigger(el.firstChild, 'input')
+      }, 20)
+      setTimeout(function () {
+        expect(spy.calls.count()).toBe(0)
+        expect(vm.test).toBe('a')
+      }, 30)
+      setTimeout(function () {
+        expect(spy.calls.count()).toBe(1)
+        expect(vm.test).toBe('d')
+        done()
+      }, 200)
+    })
+
   })
 }
