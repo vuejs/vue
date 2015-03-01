@@ -59,10 +59,23 @@ exports.orderBy = function (arr, sortKey, reverseKey) {
       order = this.$get(reverseKey) ? -1 : 1
     }
   }
+  function getOrderable (data) {
+    if (_.isPlainObject(data)) {
+      if (key === '$key') {
+        return data['key']
+      } else if (key === '$value' && !_.isPlainObject(data['value'])) {
+        return data['value']
+      } else {
+        return Path.get(data, key)
+      }
+    } else {
+      return data
+    }
+  }
   // sort on a copy to avoid mutating original array
   return arr.slice().sort(function (a, b) {
-    a = Path.get(a, key)
-    b = Path.get(b, key)
+    a = getOrderable(a)
+    b = getOrderable(b)
     return a === b ? 0 : a > b ? order : -order
   })
 }

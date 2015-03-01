@@ -144,6 +144,15 @@ describe('Filters', function () {
       { a: { b: 2 }, c: 'c'},
       { a: { b: 1 }, c: 'a'}
     ]
+    var primitiveArray = [
+      'b', 'a', 'c', 'd'
+    ]
+    var primitiveObject = {
+      b: 2,
+      c: 1,
+      d: 3,
+      a: 4
+    }
     var res
     // sort key
     res = filter.call(new Vue({
@@ -180,6 +189,34 @@ describe('Filters', function () {
     // no sort key
     res = filter.call(new Vue(), arr, 'abc')
     expect(res).toBe(arr)
+    // primitive array sort by $value
+    res = filter.call(new Vue({
+      data: { sortby: '$value' }
+    }), primitiveArray, 'sortby')
+    expect(res.length).toBe(4)
+    expect(res[0]).toBe('a')
+    expect(res[1]).toBe('b')
+    expect(res[2]).toBe('c')
+    expect(res[3]).toBe('d')
+    // primitive object sort by $key
+    var convertedObject = objToArray(primitiveObject)
+    res = filter.call(new Vue({
+      data: { sortby: '$key' }
+    }), convertedObject, 'sortby')
+    expect(res.length).toBe(4)
+    expect(res[0]).toBe(convertedObject[3])
+    expect(res[1]).toBe(convertedObject[0])
+    expect(res[2]).toBe(convertedObject[1])
+    expect(res[3]).toBe(convertedObject[2])
+    // primitive object sort by $value
+    res = filter.call(new Vue({
+      data: { sortby: '$value' }
+    }), convertedObject, 'sortby')
+    expect(res.length).toBe(4)
+    expect(res[0]).toBe(convertedObject[1])
+    expect(res[1]).toBe(convertedObject[0])
+    expect(res[2]).toBe(convertedObject[2])
+    expect(res[3]).toBe(convertedObject[3])
   })
 })
 
@@ -190,4 +227,19 @@ function assertNumberAndFalsy (filter) {
   expect(filter(undefined)).toBe('')
   expect(filter(null)).toBe('')
   expect(filter(false)).toBe('')
+}
+
+function objToArray (obj) {
+  var keys = Object.keys(obj)
+  var i = keys.length
+  var ret = new Array(i)
+  var key
+  while (i--) {
+    key = keys[i]
+    ret[i] = {
+      key: key,
+      value: obj[key]
+    }
+  }
+  return ret
 }
