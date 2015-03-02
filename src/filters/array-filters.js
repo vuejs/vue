@@ -61,8 +61,8 @@ exports.orderBy = function (arr, sortKey, reverseKey) {
   }
   // sort on a copy to avoid mutating original array
   return arr.slice().sort(function (a, b) {
-    a = Path.get(a, key)
-    b = Path.get(b, key)
+    a = _.isObject(a) ? Path.get(a, key) : a
+    b = _.isObject(b) ? Path.get(b, key) : b
     return a === b ? 0 : a > b ? order : -order
   })
 }

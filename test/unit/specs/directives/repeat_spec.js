@@ -372,6 +372,38 @@ if (_.inBrowser) {
       }
     })
 
+    it('orderBy supporting $key for object repeaters', function (done) {
+      var vm = new Vue({
+        el: el,
+        template: '<div v-repeat="obj | orderBy sortKey">{{$value}}</div>',
+        data: {
+          sortKey: '$key',
+          obj: {
+            c: 1,
+            a: 3,
+            b: 2
+          }
+        }
+      })
+      expect(el.innerHTML).toBe('<div>3</div><div>2</div><div>1</div><!--v-repeat-->')
+      vm.sortKey = '$value'
+      _.nextTick(function () {
+        expect(el.innerHTML).toBe('<div>1</div><div>2</div><div>3</div><!--v-repeat-->')
+        done()
+      })
+    })
+
+    it('orderBy supporting $value for primitive arrays', function () {
+      var vm = new Vue({
+        el: el,
+        template: '<div v-repeat="list | orderBy \'$value\'">{{$value}}</div>',
+        data: {
+          list: [3, 2, 1]
+        }
+      })
+      expect(el.innerHTML).toBe('<div>1</div><div>2</div><div>3</div><!--v-repeat-->')
+    })
+
     it('track by id', function (done) {
 
       assertTrackBy('<div v-repeat="list" track-by="id">{{msg}}</div>', function () {
