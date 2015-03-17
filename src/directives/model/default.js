@@ -87,10 +87,10 @@ module.exports = {
     this.event = lazy ? 'change' : 'input'
     _.on(el, this.event, this.listener)
 
-    // support jQuery change event, jQuery.trigger() doesn't
-    // trigger native change event in some cases
+    // support jQuery input/change event, jQuery.trigger() doesn't
+    // trigger native input/change events in some cases
     if (hasjQuery) {
-      jQuery(el).on('change', this.listener)
+      jQuery(el).on(this.event, this.listener)
     }
 
     // IE9 doesn't fire input event on backspace/del/cut
