@@ -140,21 +140,58 @@ if (_.inBrowser) {
       expect(el.innerHTML).toBe('<div>aaa</div><!--v-repeat-->')
     })
 
-    it('v-component', function () {
+    it('v-component', function (done) {
       var vm = new Vue({
         el: el,
         data: {
-          items: [{a:1}, {a:2}, {a:3}]
+          items: [{a:1}, {a:2}]
         },
-        template: '<div v-repeat="items" v-component="test"></div>',
+        template: '<p v-repeat="items" v-component="test"></p>',
         components: {
           test: {
-            template: '<p>{{$index}} {{a}}</p>',
+            template: '<div>{{$index}} {{a}}</div>',
             replace: true
           }
         }
       })
-      expect(el.innerHTML).toBe('<p>0 1</p><p>1 2</p><p>2 3</p><!--v-repeat-->')
+      assertMutations(vm, el, done)
+    })
+
+    it('v-component with primitive values', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          items: [2, 1, 2]
+        },
+        template: '<p v-repeat="items" v-component="test"></p>',
+        components: {
+          test: {
+            template: '<div>{{$index}} {{$value}}</div>',
+            replace: true
+          }
+        }
+      })
+      assertPrimitiveMutations(vm, el, done)
+    })
+
+    it('v-component with object of objects', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          items: {
+            a: {a:1},
+            b: {a:2}
+          }
+        },
+        template: '<p v-repeat="items" v-component="test"></p>',
+        components: {
+          test: {
+            template: '<div>{{$index}} {{$key}} {{a}}</div>',
+            replace: true
+          }
+        }
+      })
+      assertObjectMutations(vm, el, done)
     })
 
     it('custom element component', function () {
@@ -406,11 +443,11 @@ if (_.inBrowser) {
 
     it('track by id', function (done) {
 
-      assertTrackBy('<div v-repeat="list" track-by="id">{{msg}}</div>', function () {
-        assertTrackBy('<div v-repeat="item:list" track-by="id">{{item.msg}}</div>', done)
+      assertTrackBy('<div v-repeat="list" v-component="test" track-by="id"></div>', '{{msg}}', function () {
+        assertTrackBy('<div v-repeat="item:list" v-component="test" track-by="id"></div>', '{{item.msg}}', done)
       })
       
-      function assertTrackBy (template, next) {
+      function assertTrackBy (template, componentTemplate, next) {
         var vm = new Vue({
           el: el,
           template: template,
@@ -420,6 +457,11 @@ if (_.inBrowser) {
               { id: 2, msg: 'ha' },
               { id: 3, msg: 'ho' }
             ]
+          },
+          components: {
+            test: {
+              template: componentTemplate
+            }
           }
         })
         assertMarkup()
@@ -453,9 +495,12 @@ if (_.inBrowser) {
       var obj = {}
       var vm = new Vue({
         el: el,
-        template: '<div v-repeat="items"></div>',
+        template: '<div v-repeat="items" v-component="test"></div>',
         data: {
           items: [obj, obj]
+        },
+        components: {
+          test: {}
         }
       })
       expect(_.warn).toHaveBeenCalled()
@@ -464,9 +509,12 @@ if (_.inBrowser) {
     it('warn duplicate trackby id', function () {
       var vm = new Vue({
         el: el,
-        template: '<div v-repeat="items" trackby="id"></div>',
+        template: '<div v-repeat="items" v-component="test" track-by="id"></div>',
         data: {
           items: [{id:1}, {id:1}]
+        },
+        components: {
+          test: {}
         }
       })
       expect(_.warn).toHaveBeenCalled()
@@ -502,9 +550,12 @@ if (_.inBrowser) {
     it('teardown', function () {
       var vm = new Vue({
         el: el,
-        template: '<div v-repeat="items">{{a}}</div>',
+        template: '<div v-repeat="items" v-component="test"></div>',
         data: {
           items: [{a:1}, {a:2}]
+        },
+        components: {
+          test: {}
         }
       })
       vm._directives[0].unbind()
