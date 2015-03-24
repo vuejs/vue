@@ -38,6 +38,27 @@ describe('Observer', function () {
     expect(ob2).toBe(ob)
   })
 
+  it('data define support getter settter', function () {
+    var defaultValue = 1
+    var a  = {
+      value: defaultValue,
+      get: function(val) {
+        return val * 10
+      },
+      set: function(val) {
+        return val + 10
+      }
+    }
+    var obj = {
+      a: a
+    }
+    var ob = Observer.create(obj)
+    expect(obj.a).toBe(10)
+    var newA = 2
+    obj.a = newA 
+    expect(obj.a).toBe(120)
+  })
+
   it('create on array', function () {
     // on object
     var arr = [{}, {}]
