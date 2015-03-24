@@ -164,6 +164,20 @@ p.convert = function (key, val) {
   if (childOb) {
     childOb.deps.push(dep)
   }
+
+  var isFunc = function(fn) {
+    return typeof fn === 'function'
+  }
+
+  var getter, setter
+  if(typeof val === 'object' && val.hasOwnProperty('value')) {
+    if(isFunc(val.get) || isFunc(val.set)) {
+      getter = val.get
+      setter = val.set
+      val = val.value
+    }
+  }
+
   Object.defineProperty(ob.value, key, {
     enumerable: true,
     configurable: true,
@@ -173,9 +187,12 @@ p.convert = function (key, val) {
       if (ob.active && Observer.target) {
         Observer.target.addDep(dep)
       }
-      return val
+      return getter ? getter(val) : val
     },
     set: function (newVal) {
+      if(setter) {
+        newVal = setter(newVal)
+      }
       if (newVal === val) return
       // remove dep from old value
       var oldChildOb = val && val.__ob__
