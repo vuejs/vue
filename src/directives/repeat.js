@@ -99,6 +99,11 @@ module.exports = {
       this._linkFn = compile(this.template, options)
     } else {
       this.asComponent = true
+      // check inline-template
+      if (this._checkParam('inline-template') !== null) {
+        // extract inline template as a DocumentFragment
+        this.inlineTempalte = _.extractContent(this.el, true)
+      }
       var tokens = textParser.parse(id)
       if (!tokens) { // static component
         var Ctor = this.Ctor = options.components[id]
@@ -114,6 +119,7 @@ module.exports = {
           var merged = mergeOptions(Ctor.options, {}, {
             $parent: this.vm
           })
+          merged.template = this.inlineTempalte || merged.template
           this.template = transclude(this.template, merged)
           this._linkFn = compile(this.template, merged, false, true)
         }
@@ -337,7 +343,8 @@ module.exports = {
       _linkFn: this._linkFn,
       _meta: meta,
       data: data,
-      inherit: this.inherit
+      inherit: this.inherit,
+      template: this.inlineTempalte
     }, Ctor)
     // flag this instance as a repeat instance
     // so that we can skip it in vm._digest

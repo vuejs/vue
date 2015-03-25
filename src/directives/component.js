@@ -31,6 +31,11 @@ module.exports = {
       if (this.keepAlive) {
         this.cache = {}
       }
+      // check inline-template
+      if (this._checkParam('inline-template') !== null) {
+        // extract inline template as a DocumentFragment
+        this.template = _.extractContent(this.el, true)
+      }
       // if static, build right now.
       if (!this._isDynamicLiteral) {
         this.resolveCtor(this.expression)
@@ -81,6 +86,7 @@ module.exports = {
     if (this.Ctor) {
       var child = vm.$addChild({
         el: el,
+        template: this.template,
         _asComponent: true
       }, this.Ctor)
       if (this.keepAlive) {

@@ -180,14 +180,17 @@ exports.removeClass = function (el, cls) {
  * container div
  *
  * @param {Element} el
+ * @param {Boolean} asFragment
  * @return {Element}
  */
 
-exports.extractContent = function (el) {
+exports.extractContent = function (el, asFragment) {
   var child
   var rawContent
   if (el.hasChildNodes()) {
-    rawContent = document.createElement('div')
+    rawContent = asFragment
+      ? document.createDocumentFragment()
+      : document.createElement('div')
     /* jshint boss:true */
     while (child = el.firstChild) {
       rawContent.appendChild(child)

@@ -157,6 +157,23 @@ if (_.inBrowser) {
       assertMutations(vm, el, done)
     })
 
+    it('v-component with inline-template', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          items: [{a:1}, {a:2}]
+        },
+        template:
+          '<div v-repeat="items" v-component="test" inline-template>' +
+            '{{$index}} {{a}}' +
+          '</div>',
+        components: {
+          test: {}
+        }
+      })
+      assertMutations(vm, el, done)
+    })
+
     it('v-component with primitive values', function (done) {
       var vm = new Vue({
         el: el,
