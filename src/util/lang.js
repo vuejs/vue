@@ -228,3 +228,17 @@ exports.debounce = function(func, wait) {
     return result
   }
 }
+
+/**
+ * Binding first parameter to func
+ * @param  {Function} func
+ * @param  {Object} firstParam
+ * @return {Function} 
+ */
+exports.methodize = function(func, firstParam) {
+  return function() {
+    var slice = Array.prototype.slice
+    var args = [firstParam].concat(slice.call(arguments))
+    func.apply(this, args)
+  }
+}

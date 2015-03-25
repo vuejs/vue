@@ -42,17 +42,32 @@ function registerCallbacks (vm, action, hash) {
  * @param {Vue} vm
  * @param {String} action
  * @param {String} key
+ * @param {Boolean} needBindKeyToHandler
  * @param {*} handler
  */
 
-function register (vm, action, key, handler) {
+function register (vm, action, key, handler, needBindKeyToHandler) {
+  if (key === '*' && action === '$watch'){
+    var keys = Object.keys(vm.$data)
+   
+    return keys.forEach(function (key) {
+      register(vm, action, key, handler, true)
+    })
+  }
+
   var type = typeof handler
   if (type === 'function') {
+    if (needBindKeyToHandler) {
+      handler = _.methodize(handler, key)
+    }
     vm[action](key, handler)
   } else if (type === 'string') {
     var methods = vm.$options.methods
     var method = methods && methods[handler]
     if (method) {
+      if (needBindKeyToHandler) {
+        handler = _.methodize(handler, key)
+      }
       vm[action](key, method)
     } else {
       _.warn(
