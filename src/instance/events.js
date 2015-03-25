@@ -11,6 +11,7 @@ exports._initEvents = function () {
   var options = this.$options
   registerCallbacks(this, '$on', options.events)
   registerCallbacks(this, '$watch', options.watch)
+  registerCallbacks(this, '$guard', options.guard)
 }
 
 /**

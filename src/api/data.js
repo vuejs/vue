@@ -95,6 +95,35 @@ exports.$watch = function (exp, cb, deep, immediate) {
   }
 }
 
+exports.$guard = function (path, cb) {
+  var pathes, prop, obj, guards
+
+  pathes = Path.parse(path)
+  if (pathes.length === 1) {
+    prop = path
+    obj = this._data
+  } else if (pathes.length > 1) {
+    prop = pathes.pop()
+    obj = Path.get(this._data, pathes.join('.'))
+  }
+
+
+  if (!obj || !obj.hasOwnProperty(prop)) {
+    return
+  }
+
+  if (!obj.hasOwnProperty('__guards__')) {
+    _.define(obj, '__guards__', {}, false)
+  }
+
+  guards = obj.__guards__[prop]
+  if (!guards) {
+    guards = obj.__guards__[prop] = []
+  } 
+
+  guards.push(cb.bind(this))
+}
+
 /**
  * Evaluate a text directive, including filters.
  *
