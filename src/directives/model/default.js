@@ -1,5 +1,4 @@
 var _ = require('../../util')
-var hasjQuery = typeof jQuery === 'function'
 
 module.exports = {
 
@@ -85,12 +84,21 @@ module.exports = {
       this.listener = _.debounce(this.listener, debounce)
     }
     this.event = lazy ? 'change' : 'input'
-    _.on(el, this.event, this.listener)
-
-    // support jQuery change event, jQuery.trigger() doesn't
-    // trigger native change event in some cases
-    if (hasjQuery) {
-      jQuery(el).on('change', this.listener)
+    // Support jQuery events, since jQuery.trigger() doesn't
+    // trigger native events in some cases and some plugins
+    // rely on $.trigger()
+    // 
+    // We want to make sure if a listener is attached using
+    // jQuery, it is also removed with jQuery, that's why
+    // we do the check for each directive instance and
+    // store that check result on itself. This also allows
+    // easier test coverage control by unsetting the global
+    // jQuery variable in tests.
+    this.hasjQuery = typeof jQuery === 'function'
+    if (this.hasjQuery) {
+      jQuery(el).on(this.event, this.listener)
+    } else {
+      _.on(el, this.event, this.listener)
     }
 
     // IE9 doesn't fire input event on backspace/del/cut
@@ -124,9 +132,10 @@ module.exports = {
 
   unbind: function () {
     var el = this.el
-    _.off(el, this.event, this.listener)
-    if (hasjQuery) {
-      jQuery(el).off('change', this.listener)
+    if (this.hasjQuery) {
+      jQuery(el).off(this.event, this.listener)
+    } else {
+      _.off(el, this.event, this.listener)
     }
     _.off(el,'compositionstart', this.cpLock)
     _.off(el,'compositionend', this.cpUnlock)

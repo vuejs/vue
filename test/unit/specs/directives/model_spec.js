@@ -1,6 +1,9 @@
 var _ = require('../../../../src/util')
 var Vue = require('../../../../src/vue')
 
+// unset jQuery to bypass jQuery check for normal test cases
+jQuery = null
+
 /**
  * Mock event helper
  */
@@ -570,12 +573,14 @@ if (_.inBrowser) {
     })
 
     it('support jQuery change event', function (done) {
+      // restore jQuery
+      jQuery = $
       var vm = new Vue({
         el: el,
         data: {
           test: 'b'
         },
-        template: '<input v-model="test">'
+        template: '<input v-model="test" lazy>'
       })
       expect(el.firstChild.value).toBe('b')
       vm.test = 'a'
@@ -588,6 +593,8 @@ if (_.inBrowser) {
         el.firstChild.value = 'd'
         jQuery(el.firstChild).trigger('change')
         expect(vm.test).toBe('c')
+        // unset jQuery
+        jQuery = null
         done()
       })
     })
