@@ -48,6 +48,15 @@ _.define(
   function $delete (key) {
     if (!this.hasOwnProperty(key)) return
     delete this[key]
+
+    // delete guards of this[key]
+    if (this.hasOwnProperty('__guards__')) {
+      var guards = this.__guards__
+      if (guards && guards[key]) {
+        delete guards[key]
+      }
+    }
+
     var ob = this.__ob__
     if (!ob || _.isReserved(key)) {
       return
