@@ -102,6 +102,36 @@ describe('Instance Events', function () {
 
   })
 
+  describe('option guard', function () {
+
+    it('normal', function (done) {
+      var spy = jasmine.createSpy()
+      var vm = new Vue({
+        guard: {
+          a: spy,
+          "b.c.d": spy
+        },
+        data: {
+          a: 1,
+          b: {
+            c: {
+              d: 1
+            }
+          }
+        }
+      })
+      vm.a = 2
+      vm.b.c.d = 3
+
+      _.nextTick(function () {
+        expect(spy).toHaveBeenCalledWith(2, 1)
+        expect(spy).toHaveBeenCalledWith(3, 1)
+        done()
+      })
+    })
+
+  })
+
   describe('hooks', function () {
     
     it('created', function () {
