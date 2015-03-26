@@ -9,7 +9,7 @@ function registerWatcher (vm, key, handler) {
   }
 
   if (typeof handler === 'function') {
-    vm.$watch(key, _.methodize(handler, key))
+    vm.$watch(key, _.methodize(handler, key), true)
   }
 
   if (_.isArray(handler)) {
