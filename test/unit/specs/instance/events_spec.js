@@ -100,6 +100,31 @@ describe('Instance Events', function () {
       })
     })
 
+    it('use * watch all', function (done) {
+      var spy = jasmine.createSpy()
+
+      var vm = new Vue({
+        watch: {
+          '*': spy
+        },
+        data: {
+          a: 1,
+          b: 2
+        }
+      })
+
+      vm.a = 4
+      vm.b = 4
+      vm.$add('d', 1)
+      vm.d = 4
+
+      _.nextTick(function () {
+        expect(spy).toHaveBeenCalledWith('a', 4, 1)
+        expect(spy).toHaveBeenCalledWith('b', 4, 2)
+        expect(spy).toHaveBeenCalledWith('d', 4, 1)
+        done()
+      })
+    })
   })
 
   describe('hooks', function () {

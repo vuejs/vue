@@ -25,15 +25,65 @@ function registerCallbacks (vm, action, hash) {
   if (!hash) return
   var handlers, key, i, j
   for (key in hash) {
+    var isWatchAll = action === '$watch'
+              && (key === '*' || (/.\.\*$/).test(key))
+
     handlers = hash[key]
     if (_.isArray(handlers)) {
       for (i = 0, j = handlers.length; i < j; i++) {
-        register(vm, action, key, handlers[i])
+        if (isWatchAll) {
+          watchAll(vm, key, handlers[i])
+        } else {
+          register(vm, action, key, handlers[i])
+        }
       }
     } else {
-      register(vm, action, key, handlers)
+      if (isWatchAll) {
+        watchAll(vm, key, handlers)
+      } else {
+        register(vm, action, key, handlers)
+      }
     }
   }
+}
+
+function getMethod (vm, action, key, handler) {
+  var name = handler
+  var methods = vm.$options.methods
+  handler = methods && methods[name]
+  if (!handler) {
+    _.warn(
+      'Unknown method: "' + handler + '" when ' +
+      'registering callback for ' + action +
+      ': "' + key + '".'
+    )
+  }
+  return handler
+}
+
+function watchAll (vm, exp, handler) {
+  var prefix = ''
+  var obj
+  if (exp === '*') {
+    obj = vm.$data
+  } else {
+    var path = exp.substr(0, exp.length - '.*'.length)
+    obj = vm.$get(path)
+    if (!obj) return
+    prefix = path + '.'
+  }
+
+  var keys = Object.keys(obj) 
+  return keys.forEach(function (aKey) {
+    if (typeof handler === 'string') {
+      handler = getMethod(vm, '$watch', aKey, handler)
+    }
+    if (handler) {
+      (function (handler, aKey) {
+        vm.$watch(aKey, handler)
+      })(_.methodize(handler, aKey), prefix + aKey)
+    }
+  })
 }
 
 /**
@@ -46,21 +96,11 @@ function registerCallbacks (vm, action, hash) {
  */
 
 function register (vm, action, key, handler) {
-  var type = typeof handler
-  if (type === 'function') {
+  if (typeof handler === 'string') {
+    handler = getMethod(vm, action, key, handler)
+  }
+  if (handler) {
     vm[action](key, handler)
-  } else if (type === 'string') {
-    var methods = vm.$options.methods
-    var method = methods && methods[handler]
-    if (method) {
-      vm[action](key, method)
-    } else {
-      _.warn(
-        'Unknown method: "' + handler + '" when ' +
-        'registering callback for ' + action +
-        ': "' + key + '".'
-      )
-    }
   }
 }
 
