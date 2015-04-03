@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Vue.js nested demo</title>
+    <script src="../../dist/vue.js"></script>
+  </head>
+  <body>
+
+    <!-- item template -->
+    <script type="text/x-template" id="child-template">
+      <span class="three" v-text="state.created"></span>
+      <span class="four" v-text="state.ready"></span>
+    </script>
+
+    <!-- the demo root element -->
+    <div id="demo">
+      <span class="one" v-text="state.created"></span>
+      <span class="two" v-text="state.ready"></span>
+
+      <div v-component="child">
+      </div>
+    </div>
+
+    <!-- demo code -->
+    <script src="nested.js"></script>
+  </body>
+</html>
