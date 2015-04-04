@@ -188,13 +188,22 @@ var testCases = [
     },
     expected: Math.sin(1),
     paths: ['a']
+  },
+  {
+    // boolean literal
+    exp: 'true',
+    scope: {
+      true: false
+    },
+    expected: true,
+    paths: []
   }
 ]
 
 describe('Expression Parser', function () {
-  
-  it('parse getter', function () {
-    testCases.forEach(function assertExp (testCase) {
+
+  testCases.forEach(function (testCase) {
+    it('parse getter: ' + testCase.exp, function () {
       var res = expParser.parse(testCase.exp, true)
       expect(res.get(testCase.scope)).toEqual(testCase.expected)
     })
