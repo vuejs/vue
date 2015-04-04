@@ -26,6 +26,7 @@
     "mockKeyEvent": true,
     "casper": true,
     "DocumentFragment": true,
-    "jQuery": true
+    "jQuery": true,
+    "$": true
   }
 }
