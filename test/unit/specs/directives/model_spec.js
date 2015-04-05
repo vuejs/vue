@@ -156,6 +156,16 @@ if (_.inBrowser) {
       expect(el.firstChild.childNodes[1].selected).toBe(true)
     })
 
+    it('select + empty default value', function () {
+      var vm = new Vue({
+        el: el,
+        template: '<select v-model="test"><option value="" selected>null</option><<option value="1">1</option></select>'
+      })
+      expect(vm.test).toBe('')
+      trigger(vm.$el.firstChild, 'change')
+      expect(vm.test).toBe('')
+    })
+
     it('select + multiple', function (done) {
       var vm = new Vue({
         el: el,

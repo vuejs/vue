@@ -134,7 +134,7 @@ function checkInitialValue () {
       }
     }
   }
-  if (initValue) {
+  if (typeof initValue !== 'undefined') {
     this._initValue = this.number
       ? _.toNumber(initValue)
       : initValue
