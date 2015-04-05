@@ -603,6 +603,27 @@ if (_.inBrowser) {
       }, 30)
     })
 
+    it('sync $value changes back to original array/object', function (done) {
+      var vm = new Vue({
+        el: el,
+        template:
+          '<div v-repeat="items">{{$value}}</div>' +
+          '<div v-repeat="obj">{{$value}}</div>',
+        data: {
+          items: ['a', 'b'],
+          obj: { foo: 'a', bar: 'b' }
+        }
+      })
+      vm._children[0].$value = 'c'
+      var key = vm._children[2].$key
+      vm._children[2].$value = 'd'
+      _.nextTick(function () {
+        expect(vm.items[0]).toBe('c')
+        expect(vm.obj[key]).toBe('d')
+        done()
+      })
+    })
+
   })
 }
 

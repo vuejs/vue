@@ -353,6 +353,16 @@ module.exports = {
     if (needCache) {
       this.cacheVm(raw, vm)
     }
+    // sync back changes for $value, particularly for
+    // two-way bindings of primitive values
+    var self = this
+    vm.$watch('$value', function (val) {
+      if (self.converted) {
+        self.rawValue[vm.$key] = val
+      } else {
+        self.rawValue.$set(vm.$index, val)
+      }
+    })
     return vm
   },
 
@@ -537,6 +547,8 @@ function findNextVm (vm, ref) {
  */
 
 function objToArray (obj) {
+  // regardless of type, store the un-filtered raw value.
+  this.rawValue = obj
   if (!isPlainObject(obj)) {
     return obj
   }
