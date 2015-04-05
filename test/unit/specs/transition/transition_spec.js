@@ -340,6 +340,20 @@ if (_.inBrowser && !_.isIE9) {
         expect(spy).toHaveBeenCalledWith(vm)
       })
 
+      it('this context set to el instance', function () {
+        var spy = jasmine.createSpy('js enter this')
+        var vm2 = el.__vue__ = {}
+        def.enter = function (e, done) {
+          expect(e).toBe(el)
+          expect(op).toHaveBeenCalled()
+          done()
+          expect(cb).toHaveBeenCalled()
+          spy(this)
+        }
+        transition.apply(el, 1, op, vm, cb)
+        expect(spy).toHaveBeenCalledWith(vm2)
+      })
+
       it('leave', function () {
         var spy = jasmine.createSpy('js leave')
         def.leave = function (e, done) {

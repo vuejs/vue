@@ -11,6 +11,9 @@
  */
 
 module.exports = function (el, direction, op, data, def, vm, cb) {
+  // if the element is the root of an instance,
+  // use that instance as the transition function context
+  vm = el.__vue__ || vm
   if (data.cancel) {
     data.cancel()
     data.cancel = null
