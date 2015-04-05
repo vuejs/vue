@@ -2,6 +2,8 @@ var config = require('../config')
 
 /**
  * Check if a node is in the document.
+ * Note: document.documentElement.contains should work here but doesn't seem to
+ * work properly in phantom.js making unit testing difficult.
  *
  * @param {Node} node
  * @return {Boolean}
@@ -12,7 +14,13 @@ var doc =
   document.documentElement
 
 exports.inDoc = function (node) {
-  return doc && doc.contains(node)
+  var adown = doc.nodeType === 9 ? doc.documentElement : doc
+  var bup = node && node.parentNode
+  return doc === bup || !!( bup && bup.nodeType === 1 && (
+    adown.contains
+      ? adown.contains( bup )
+      : doc.compareDocumentPosition && doc.compareDocumentPosition( bup ) & 16
+    ));
 }
 
 /**
@@ -35,7 +43,7 @@ exports.attr = function (node, attr) {
  * Insert el before target
  *
  * @param {Element} el
- * @param {Element} target 
+ * @param {Element} target
  */
 
 exports.before = function (el, target) {
@@ -46,7 +54,7 @@ exports.before = function (el, target) {
  * Insert el after target
  *
  * @param {Element} el
- * @param {Element} target 
+ * @param {Element} target
  */
 
 exports.after = function (el, target) {
@@ -71,7 +79,7 @@ exports.remove = function (el) {
  * Prepend el to target
  *
  * @param {Element} el
- * @param {Element} target 
+ * @param {Element} target
  */
 
 exports.prepend = function (el, target) {
