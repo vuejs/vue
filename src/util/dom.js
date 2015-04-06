@@ -2,8 +2,11 @@ var config = require('../config')
 
 /**
  * Check if a node is in the document.
- * Note: document.documentElement.contains should work here but doesn't seem to
- * work properly in phantom.js making unit testing difficult.
+ * Note: document.documentElement.contains should work here
+ * but always returns false for comment nodes in phantomjs,
+ * making unit tests difficult. This is fixed byy doing the
+ * contains() check on the node's parentNode instead of
+ * the node itself.
  *
  * @param {Node} node
  * @return {Boolean}
@@ -14,13 +17,10 @@ var doc =
   document.documentElement
 
 exports.inDoc = function (node) {
-  var adown = doc.nodeType === 9 ? doc.documentElement : doc
-  var bup = node && node.parentNode
-  return doc === bup || !!( bup && bup.nodeType === 1 && (
-    adown.contains
-      ? adown.contains( bup )
-      : doc.compareDocumentPosition && doc.compareDocumentPosition( bup ) & 16
-    ));
+  var parent = node && node.parentNode
+  return doc === node ||
+    doc === parent ||
+    !!(parent && parent.nodeType === 1 && (doc.contains(parent)))
 }
 
 /**

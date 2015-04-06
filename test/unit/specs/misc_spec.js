@@ -1,5 +1,3 @@
-// patch inDoc
-require('../lib/indoc_patch')
 // test cases for edge cases & bug fixes
 var Vue = require('../../../src/vue')
 

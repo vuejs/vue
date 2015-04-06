@@ -1,5 +1,3 @@
-// patch inDoc
-require('../../lib/indoc_patch')
 var _ = require('../../../../src/util')
 var Vue = require('../../../../src/vue')
 

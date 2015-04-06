@@ -42,12 +42,10 @@ module.exports = function (grunt) {
         files: [
           'test/unit/lib/jquery.js',
           'src/**/*.js',
-          'test/unit/lib/indoc_patch.js',
           'test/unit/specs/**/*.js'
         ],
         preprocessors: {
           'src/**/*.js': ['commonjs'],
-          'test/unit/lib/indoc_patch.js': ['commonjs'],
           'test/unit/specs/**/*.js': ['commonjs']
         },
         singleRun: true
@@ -64,7 +62,6 @@ module.exports = function (grunt) {
           reporters: ['progress', 'coverage'],
           preprocessors: {
             'src/**/*.js': ['commonjs', 'coverage'],
-            'test/unit/lib/indoc_patch.js': ['commonjs'],
             'test/unit/specs/**/*.js': ['commonjs']
           },
           coverageReporter: {
