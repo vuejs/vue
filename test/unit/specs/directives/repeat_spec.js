@@ -622,6 +622,60 @@ if (_.inBrowser) {
       })
     })
 
+    it('nested track by', function (done) {
+      assertTrackBy('<div v-repeat="list" track-by="id">{{msg}}<div v-repeat="list" track-by="id">{{msg}}</div></div>', function () {
+        assertTrackBy('<div v-transition v-repeat="list" track-by="id">{{msg}}<div v-transition v-repeat="list" track-by="id">{{msg}}</div></div>', done)
+      })
+
+      function assertTrackBy(template, next) {
+        var vm = new Vue({
+          el: el,
+          data: {
+            list: [
+              { id: 1, msg: 'hi', list: [
+                { id: 1, msg: 'hi foo' }
+              ] },
+              { id: 2, msg: 'ha', list: [] },
+              { id: 3, msg: 'ho', list: [] }
+            ]
+          },
+          template: template
+        })
+        assertMarkup()
+
+        var oldVms = vm._children.slice()
+
+        vm.list = [
+          { id: 1, msg: 'wa', list: [
+            { id: 1, msg: 'hi foo' },
+            { id: 2, msg: 'hi bar' }
+          ] },
+          { id: 2, msg: 'wo', list: [] }
+        ]
+
+        _.nextTick(function () {
+          assertMarkup()
+          // should reuse old vms!
+          var i = 2
+          while (i--) {
+            expect(vm._children[i]).toBe(oldVms[i])
+          }
+          expect(vm._children[0]._children[0]).toBe(oldVms[0]._children[0])
+          next()
+        })
+
+        function assertMarkup () {
+          var markup = vm.list.map(function (item) {
+            var sublist = item.list.map(function (item) {
+              return '<div>' + item.msg + '</div>'
+            }).join('') + '<!--v-repeat-->'
+            return '<div>' + item.msg + sublist + '</div>'
+          }).join('') + '<!--v-repeat-->'
+          expect(el.innerHTML).toBe(markup)
+        }
+      }
+    })
+
   })
 }
 
