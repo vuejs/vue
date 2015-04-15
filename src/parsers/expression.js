@@ -4,7 +4,7 @@ var Cache = require('../cache')
 var expressionCache = new Cache(1000)
 
 var keywords =
-  'Math,break,case,catch,continue,debugger,default,' +
+  'Math,Date,break,case,catch,continue,debugger,default,' +
   'delete,do,else,false,finally,for,function,if,in,' +
   'instanceof,new,null,return,switch,this,throw,true,try,' +
   'typeof,var,void,while,with,undefined,abstract,boolean,' +
@@ -16,7 +16,7 @@ var keywords =
 
 var wsRE = /\s/g
 var newlineRE = /\n/g
-var saveRE = /[\{,]\s*[\w\$_]+\s*:|('[^']*'|"[^"]*")/g
+var saveRE = /[\{,]\s*[\w\$_]+\s*:|('[^']*'|"[^"]*")|new /g
 var restoreRE = /"(\d+)"/g
 var pathTestRE = /^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\]|\[\d+\])*$/
 var pathReplaceRE = /[^\w$\.]([A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\])*)/g
