@@ -48,9 +48,8 @@ module.exports = {
     this.idKey =
       this._checkParam('track-by') ||
       this._checkParam('trackby') // 0.11.0 compat
-    this.hasTransition =
-      this.el.hasAttribute(config.prefix + 'transition')
     this.cache = Object.create(null)
+    this.checkUpdateStrategy()
   },
 
   /**
@@ -132,6 +131,30 @@ module.exports = {
   },
 
   /**
+   * Check what strategy to use for updates.
+   * 
+   * If the repeat is simple enough we can use in-place
+   * updates which simply overwrites existing instances'
+   * data. This strategy reuses DOM nodes and instances
+   * as much as possible.
+   * 
+   * There are two situations where we have to use the
+   * more complex but more accurate diff algorithm:
+   * 1. We are using components with or inside v-repeat.
+   *    The components could have private state that needs
+   *    to be preserved across updates.
+   * 2. We have transitions on the list, which requires
+   *    precise DOM re-positioning.
+   */
+
+  checkUpdateStrategy: function () {
+    this.needDiff =
+      this.asComponent ||
+      this.el.hasAttribute(config.prefix + 'transition') ||
+      this.template.querySelector('[' + config.prefix + 'component]')
+  },
+
+  /**
    * Update.
    * This is called whenever the Array mutates.
    *
@@ -146,14 +169,7 @@ module.exports = {
     } else if (type === 'string') {
       data = _.toArray(data)
     }
-    // There are two situations where we have to use the
-    // more complex but more accurate diff algorithm:
-    // 1. We are using components with v-repeat - the
-    //    components could have additional state outside
-    //    of v-repeat data.
-    // 2. We have transitions on the list, which requires
-    //    precise DOM re-positioning.
-    this.vms = this.asComponent || this.hasTransition
+    this.vms = this.needDiff
       ? this.diff(data, this.vms)
       : this.inplaceUpdate(data, this.vms)
     // update v-ref
@@ -404,13 +420,12 @@ module.exports = {
     if (this.refID) {
       this.vm.$[this.refID] = null
     }
-    var needUncache = this.asComponent || this.hasTransition
     if (this.vms) {
       var i = this.vms.length
       var vm
       while (i--) {
         vm = this.vms[i]
-        if (needUncache) {
+        if (this.needDiff) {
           this.uncacheVm(vm)
         }
         vm.$destroy()
