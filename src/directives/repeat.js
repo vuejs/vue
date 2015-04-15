@@ -252,6 +252,7 @@ module.exports = {
       } else { // new instance
         vm = this.build(obj, i, true)
         vm._new = true
+        vm._reused = false
       }
       vms[i] = vm
       // insert if this is first run
