@@ -79,6 +79,11 @@ function transcludeContent (el, raw) {
   var i = outlets.length
   if (!i) return
   var outlet, select, selected, j, main
+
+  function isDirectChild (node) {
+    return node.parentNode === raw
+  }
+
   // first pass, collect corresponding content
   // for each outlet.
   while (i--) {
@@ -88,9 +93,10 @@ function transcludeContent (el, raw) {
       if (select) {  // select content
         selected = raw.querySelectorAll(select)
         if (selected.length) {
-          selected = _.toArray(selected).filter(function(node) {
-            return node.parentNode === raw
-          })
+          // according to Shadow DOM spec, `select` can
+          // only select direct children of the host node.
+          // enforcing this also fixes #786.
+          selected = [].filter.call(selected, isDirectChild)
         }
         outlet.content = selected.length
           ? selected
