@@ -109,5 +109,15 @@ if (_.inBrowser) {
       expect(res.childNodes[3].tagName).toBe('SPAN')
     })
 
+    it('select should only match children', function () {
+      el.innerHTML = '<p class="b">select b</p><span><p class="b">nested b</p></span><span><p class="c">nested c</p></span>'
+      options.template = '<content select=".a"><p>fallback a</p></content><content select=".b">fallback b</content><content select=".c">fallback c</content>'
+      var res = transclude(el, options)
+      expect(res.childNodes.length).toBe(3)
+      expect(res.firstChild.textContent).toBe('fallback a')
+      expect(res.childNodes[1].textContent).toBe('select b')
+      expect(res.lastChild.textContent).toBe('fallback c')
+    })
+
   })
 }
