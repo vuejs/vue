@@ -48,7 +48,14 @@ exports._init = function (options) {
   // children
   this._children = []
   this._childCtors = {}
-  // transcluded components that belong to the parent
+
+  // transclusion unlink functions
+  this._containerUnlinkFn =
+  this._contentUnlinkFn = null
+
+  // transcluded components that belong to the parent.
+  // need to keep track of them so that we can call
+  // attached/detached hooks on them.
   this._transCpnts = null
 
   // merge options.
