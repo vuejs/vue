@@ -88,12 +88,13 @@ function transcludeContent (el, raw) {
       if (select) {  // select content
         selected = raw.querySelectorAll(select)
         if (selected.length) {
-          outlet.content = _.toArray(selected).filter(function(element) {
-            return element.parentNode === raw
+          selected = _.toArray(selected).filter(function(node) {
+            return node.parentNode === raw
           })
-        } else {
-          outlet.content = _.toArray(outlet.childNodes)
         }
+        outlet.content = selected.length
+          ? selected
+          : _.toArray(outlet.childNodes)
       } else { // default content
         main = outlet
       }
