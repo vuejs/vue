@@ -180,5 +180,37 @@ if (_.inBrowser) {
       expect(_.warn).toHaveBeenCalled()
     })
 
+    it('v-if with content transclusion', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          a: 1,
+          show: true
+        },
+        template: '<div v-component="test" show="{{show}}">{{a}}</div>',
+        components: {
+          test: {
+            paramAttributes: ['show'],
+            template: '<div v-if="show"><content></cotent></div>'
+          }
+        }
+      })
+      expect(el.textContent).toBe('1')
+      vm.a = 2
+      _.nextTick(function () {
+        expect(el.textContent).toBe('2')
+        vm.show = false
+        _.nextTick(function () {
+          expect(el.textContent).toBe('')
+          vm.show = true
+          vm.a = 3
+          _.nextTick(function () {
+            expect(el.textContent).toBe('3')
+            done()
+          })
+        })
+      })
+    })
+
   })
 }

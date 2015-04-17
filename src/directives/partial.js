@@ -37,7 +37,7 @@ module.exports = {
     var partial = this.vm.$options.partials[id]
     _.assertAsset(partial, 'partial', id)
     if (partial) {
-      this.compile(templateParser.parse(partial))
+      this.compile(templateParser.parse(partial, true))
     }
   }
 

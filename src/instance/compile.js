@@ -44,6 +44,13 @@ exports._compile = function (el) {
           compile(content, parentOptions, true)
         // call content linker now, before transclusion
         this._contentUnlinkFn = contentLinkFn(parent, content)
+        // mark all compiled nodes as transcluded, so that
+        // directives that do partial compilation, e.g. v-if
+        // and v-partial can detect them and persist them
+        // through re-compilations.
+        for (var i = 0; i < content.childNodes.length; i++) {
+          content.childNodes[i]._isContent = true
+        }
         this._transCpnts = parent._children.slice(ol)
       }
       // tranclude, this possibly replaces original
