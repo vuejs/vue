@@ -29,8 +29,8 @@ function Watcher (vm, expression, cb, options) {
   this.id = ++uid // uid for batching
   this.active = true
   options = options || {}
-  this.deep = options.deep
-  this.user = options.user
+  this.deep = !!options.deep
+  this.user = !!options.user
   this.deps = Object.create(null)
   // setup filters if any.
   // We delegate directive filters here to the watcher
