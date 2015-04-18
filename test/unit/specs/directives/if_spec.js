@@ -212,5 +212,32 @@ if (_.inBrowser) {
       })
     })
 
+    it('call attach/detach for transcluded components', function (done) {
+      document.body.appendChild(el)
+      var attachSpy = jasmine.createSpy('attached')
+      var detachSpy = jasmine.createSpy('detached')
+      var vm = new Vue({
+        el: el,
+        data: { show: true },
+        template: '<div v-component="outer"><div v-component="transcluded"></div></div>',
+        components: {
+          outer: {
+            template: '<div v-if="$parent.show"><content></content></div>'
+          },
+          transcluded: {
+            template: 'transcluded',
+            attached: attachSpy,
+            detached: detachSpy
+          }
+        }
+      })
+      expect(attachSpy).toHaveBeenCalled()
+      vm.show = false
+      _.nextTick(function () {
+        expect(detachSpy).toHaveBeenCalled()
+        done()
+      })
+    })
+
   })
 }

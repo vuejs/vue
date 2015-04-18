@@ -53,6 +53,14 @@ module.exports = {
         ;(this.contentPositions = this.contentPositions || []).push(i)
       }
     }
+    // keep track of any transcluded components contained within
+    // the conditional block. we need to call attach/detach hooks
+    // for them.
+    this.transCpnts =
+      this.vm._transCpnts &&
+      this.vm._transCpnts.filter(function (c) {
+        return el.contains(c.$el)
+      })
   },
 
   update: function (value) {
@@ -87,6 +95,9 @@ module.exports = {
       : vm.$compile(frag)
     transition.blockAppend(frag, this.end, vm)
     this.children = vm._children.slice(originalChildLength)
+    if (this.transCpnts) {
+      this.children = this.children.concat(this.transCpnts)
+    }
     if (this.children.length && _.inDoc(vm.$el)) {
       this.children.forEach(function (child) {
         child._callHook('attached')
