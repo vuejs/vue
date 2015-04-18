@@ -98,6 +98,7 @@ exports.prepend = function (el, target) {
  */
 
 exports.replace = function (target, el) {
+  if(!target) return;
   var parent = target.parentNode
   if (parent) {
     parent.replaceChild(el, target)
