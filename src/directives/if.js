@@ -107,6 +107,11 @@ module.exports = {
     }
     this.unlink()
     this.unlink = null
+  },
+
+  // NOTE: this function is shared in v-partial
+  unbind: function () {
+    if (this.unlink) this.unlink()
   }
 
 }

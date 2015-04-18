@@ -9,6 +9,7 @@ module.exports = {
   // same logic reuse from v-if
   compile: vIf.compile,
   teardown: vIf.teardown,
+  unbind: vIf.unbind,
 
   bind: function () {
     var el = this.el
