@@ -39,6 +39,9 @@ module.exports = {
     this.template = this.el.tagName === 'TEMPLATE'
       ? templateParser.parse(this.el, true)
       : this.el
+    // check if we need to use diff instead of inplace
+    // updates
+    this.checkUpdateStrategy()
     // check other directives that need to be handled
     // at v-repeat level
     this.checkIf()
@@ -49,7 +52,38 @@ module.exports = {
       this._checkParam('track-by') ||
       this._checkParam('trackby') // 0.11.0 compat
     this.cache = Object.create(null)
-    this.checkUpdateStrategy()
+  },
+
+  /**
+   * Check what strategy to use for updates.
+   * 
+   * If the repeat is simple enough we can use in-place
+   * updates which simply overwrites existing instances'
+   * data. This strategy reuses DOM nodes and instances
+   * as much as possible.
+   * 
+   * There are two situations where we have to use the
+   * more complex but more accurate diff algorithm:
+   * 1. We are using components with or inside v-repeat.
+   *    The components could have private state that needs
+   *    to be preserved across updates.
+   * 2. We have transitions on the list, which requires
+   *    precise DOM re-positioning.
+   */
+
+  checkUpdateStrategy: function () {
+    var components = Object.keys(this.vm.$options.components)
+    var matcher
+    if (components.length) {
+      matcher = new RegExp(
+        components.map(function (name) {
+          return '<' + name + '(>|\\s)'
+        }).join('|') + '|' + config.prefix + 'component'
+      )
+    }
+    this.needDiff =
+      (matcher && matcher.test(this.template.outerHTML)) ||
+      this.el.hasAttribute(config.prefix + 'transition')
   },
 
   /**
@@ -90,8 +124,10 @@ module.exports = {
     var id = _.attr(this.el, 'component')
     var options = this.vm.$options
     if (!id) {
-      this.Ctor = _.Vue // default constructor
-      this.inherit = true // inline repeats should inherit
+      // default constructor
+      this.Ctor = _.Vue
+      // inline repeats should inherit
+      this.inherit = true
       // important: transclude with no options, just
       // to ensure block start and block end
       this.template = transclude(this.template)
@@ -128,30 +164,6 @@ module.exports = {
         this.ctorGetter = expParser.parse(ctorExp).get
       }
     }
-  },
-
-  /**
-   * Check what strategy to use for updates.
-   * 
-   * If the repeat is simple enough we can use in-place
-   * updates which simply overwrites existing instances'
-   * data. This strategy reuses DOM nodes and instances
-   * as much as possible.
-   * 
-   * There are two situations where we have to use the
-   * more complex but more accurate diff algorithm:
-   * 1. We are using components with or inside v-repeat.
-   *    The components could have private state that needs
-   *    to be preserved across updates.
-   * 2. We have transitions on the list, which requires
-   *    precise DOM re-positioning.
-   */
-
-  checkUpdateStrategy: function () {
-    this.needDiff =
-      this.asComponent ||
-      this.el.hasAttribute(config.prefix + 'transition') ||
-      this.template.querySelector('[' + config.prefix + 'component]')
   },
 
   /**
