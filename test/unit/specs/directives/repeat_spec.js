@@ -314,7 +314,7 @@ if (_.inBrowser) {
       expect(el.innerHTML).toBe('<div>AAA</div><div>BBB</div><div>CCC</div><!--v-repeat-->')
     })
 
-    it('block repeat', function () {
+    it('block repeat', function (done) {
       var vm = new Vue({
         el: el,
         template: '<template v-repeat="list"><p>{{a}}</p><p>{{a + 1}}</p></template>',
@@ -326,10 +326,52 @@ if (_.inBrowser) {
           ]
         }
       })
-      var markup = vm.list.map(function (item) {
-        return '<!--v-start--><p>' + item.a + '</p><p>' + (item.a + 1) + '</p><!--v-end-->'
-      }).join('')
-      expect(el.innerHTML).toBe(markup + '<!--v-repeat-->')
+      assertMarkup()
+      vm.list.reverse()
+      _.nextTick(function () {
+        assertMarkup()
+        done()
+      })
+
+      function assertMarkup () {
+        var markup = vm.list.map(function (item) {
+          return '<!--v-start--><p>' + item.a + '</p><p>' + (item.a + 1) + '</p><!--v-end-->'
+        }).join('')
+        expect(el.innerHTML).toBe(markup + '<!--v-repeat-->')
+      }
+    })
+
+    // added for #799
+    it('block repeat with diff', function (done) {
+      var vm = new Vue({
+        el: el,
+        template: '<template v-repeat="list" v-component="test"></template>',
+        data: {
+          list: [
+            { a: 1 },
+            { a: 2 },
+            { a: 3 }
+          ]
+        },
+        components: {
+          test: {
+            template: '<p>{{a}}</p><p>{{a + 1}}</p>'
+          }
+        }
+      })
+      assertMarkup()
+      vm.list.reverse()
+      _.nextTick(function () {
+        assertMarkup()
+        done()
+      })
+
+      function assertMarkup () {
+        var markup = vm.list.map(function (item) {
+          return '<!--v-start--><p>' + item.a + '</p><p>' + (item.a + 1) + '</p><!--v-end-->'
+        }).join('')
+        expect(el.innerHTML).toBe(markup + '<!--v-repeat-->')
+      }
     })
 
     it('component + parent directive + transclusion', function (done) {
