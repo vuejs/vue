@@ -1,5 +1,4 @@
 var _ = require('../util')
-var config = require('../config')
 var isObject = _.isObject
 var isPlainObject = _.isPlainObject
 var textParser = require('../parsers/text')
@@ -39,9 +38,6 @@ module.exports = {
     this.template = this.el.tagName === 'TEMPLATE'
       ? templateParser.parse(this.el, true)
       : this.el
-    // check if we need to use diff instead of inplace
-    // updates
-    this.checkUpdateStrategy()
     // check other directives that need to be handled
     // at v-repeat level
     this.checkIf()
@@ -52,38 +48,6 @@ module.exports = {
       this._checkParam('track-by') ||
       this._checkParam('trackby') // 0.11.0 compat
     this.cache = Object.create(null)
-  },
-
-  /**
-   * Check what strategy to use for updates.
-   * 
-   * If the repeat is simple enough we can use in-place
-   * updates which simply overwrites existing instances'
-   * data. This strategy reuses DOM nodes and instances
-   * as much as possible.
-   * 
-   * There are two situations where we have to use the
-   * more complex but more accurate diff algorithm:
-   * 1. We are using components with or inside v-repeat.
-   *    The components could have private state that needs
-   *    to be preserved across updates.
-   * 2. We have transitions on the list, which requires
-   *    precise DOM re-positioning.
-   */
-
-  checkUpdateStrategy: function () {
-    var components = Object.keys(this.vm.$options.components)
-    var matcher
-    if (components.length) {
-      matcher = new RegExp(
-        components.map(function (name) {
-          return '<' + name + '(>|\\s)'
-        }).join('|') + '|' + config.prefix + 'component'
-      )
-    }
-    this.needDiff =
-      (matcher && matcher.test(this.template.outerHTML)) ||
-      this.el.hasAttribute(config.prefix + 'transition')
   },
 
   /**
@@ -181,9 +145,7 @@ module.exports = {
     } else if (type === 'string') {
       data = _.toArray(data)
     }
-    this.vms = this.needDiff
-      ? this.diff(data, this.vms)
-      : this.inplaceUpdate(data, this.vms)
+    this.vms = this.diff(data, this.vms)
     // update v-ref
     if (this.refID) {
       this.vm.$[this.refID] = this.vms
@@ -193,43 +155,6 @@ module.exports = {
         return vm.$el
       })
     }
-  },
-
-  /**
-   * Inplace update that maximally reuses existing vm
-   * instances and DOM nodes by simply swapping data into
-   * existing vms.
-   *
-   * @param {Array} data
-   * @param {Array} oldVms
-   * @return {Array}
-   */
-
-  inplaceUpdate: function (data, oldVms) {
-    oldVms = oldVms || []
-    var vms
-    var dir = this
-    var alias = dir.arg
-    var converted = dir.converted
-    if (data.length < oldVms.length) {
-      oldVms.slice(data.length).forEach(function (vm) {
-        vm.$destroy(true)
-      })
-      vms = oldVms.slice(0, data.length)
-      overwrite(data, vms, alias, converted)
-    } else if (data.length > oldVms.length) {
-      var newVms = data.slice(oldVms.length).map(function (data, i) {
-        var vm = dir.build(data, i + oldVms.length)
-        vm.$before(dir.ref)
-        return vm
-      })
-      overwrite(data.slice(0, oldVms.length), oldVms, alias, converted)
-      vms = oldVms.concat(newVms)
-    } else {
-      overwrite(data, oldVms, alias, converted)
-      vms = oldVms
-    }
-    return vms
   },
 
   /**
@@ -440,9 +365,7 @@ module.exports = {
       var vm
       while (i--) {
         vm = this.vms[i]
-        if (this.needDiff) {
-          this.uncacheVm(vm)
-        }
+        this.uncacheVm(vm)
         vm.$destroy()
       }
     }
@@ -613,33 +536,4 @@ function range (n) {
     ret[i] = i
   }
   return ret
-}
-
-/**
- * Helper function to overwrite new data Array on to
- * existing vms. Used in `inplaceUpdate`.
- *
- * @param {Array} arr
- * @param {Array} vms
- * @param {String|undefined} alias
- * @param {Boolean} converted
- */
-
-function overwrite (arr, vms, alias, converted) {
-  var vm, data, raw
-  for (var i = 0, l = arr.length; i < l; i++) {
-    vm = vms[i]
-    data = raw = arr[i]
-    if (converted) {
-      vm.$key = data.$key
-      raw = data.$value
-    }
-    if (alias) {
-      vm[alias] = raw
-    } else if (!isObject(raw)) {
-      vm.$value = raw
-    } else {
-      vm._setData(raw)
-    }
-  }
 }

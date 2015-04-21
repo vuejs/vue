@@ -718,45 +718,6 @@ if (_.inBrowser) {
       }
     })
 
-    it('should use diff when block contains component', function (done) {
-      var spy = jasmine.createSpy()
-      var obj = { a: 1, b: 2 }
-      var vm = new Vue({
-        el: el,
-        template:
-          '<div v-repeat="list">' +
-            '<test-foo v-with="foo: parentFoo"></test-foo>' +
-            '<div v-component="test-foo" v-with="foo: parentFoo"></div>' +
-          '</div>',
-        data: {
-          list: [1,2]
-        },
-        compiled: function () {
-          this.$set('parentFoo', obj)
-        },
-        components: {
-          'test-foo': {
-            template: '{{foo.a}}',
-            watch: {
-              foo: spy
-            }
-          }
-        }
-      })
-
-      _.nextTick(function () {
-        expect(spy).toHaveBeenCalledWith(obj, undefined)
-        expect(spy.calls.count()).toBe(4)
-        expect(el.innerHTML).toBe([1,2].map(function () {
-          return '<div>' +
-              '<test-foo>1</test-foo><!--v-component-->' +
-              '<div>1</div><!--v-component-->' +
-            '</div>'
-        }).join('') + '<!--v-repeat-->')
-        done()
-      })
-    })
-
   })
 }
 
