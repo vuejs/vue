@@ -56,7 +56,16 @@ exports._init = function (options) {
   // transcluded components that belong to the parent.
   // need to keep track of them so that we can call
   // attached/detached hooks on them.
-  this._transCpnts = null
+  this._transCpnts = []
+  this._host = options._host
+
+  // push self into parent / transclusion host
+  if (this.$parent) {
+    this.$parent._children.push(this)
+  }
+  if (this._host) {
+    this._host._transCpnts.push(this)
+  }
 
   // props used in v-repeat diffing
   this._new = true

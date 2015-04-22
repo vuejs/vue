@@ -297,6 +297,7 @@ module.exports = {
     var vm = this.vm.$addChild({
       el: templateParser.clone(this.template),
       _asComponent: this.asComponent,
+      _host: this._host,
       _linkFn: this._linkFn,
       _meta: meta,
       data: data,

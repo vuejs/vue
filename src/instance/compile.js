@@ -89,11 +89,12 @@ exports._initElement = function (el) {
  * @param {Node} node   - target node
  * @param {Object} desc - parsed directive descriptor
  * @param {Object} def  - directive definition object
+ * @param {Vue|undefined} host - transclusion host component
  */
 
-exports._bindDir = function (name, node, desc, def) {
+exports._bindDir = function (name, node, desc, def, host) {
   this._directives.push(
-    new Directive(name, node, this, desc, def)
+    new Directive(name, node, this, desc, def, host)
   )
 }
 
@@ -119,6 +120,12 @@ exports._destroy = function (remove, deferCleanup) {
   if (parent && !parent._isBeingDestroyed) {
     i = parent._children.indexOf(this)
     parent._children.splice(i, 1)
+  }
+  // same for transclusion host.
+  var host = this._host
+  if (host && !host._isBeingDestroyed) {
+    i = host._transCpnts.indexOf(this)
+    host._transCpnts.splice(i, 1)
   }
   // destroy all children.
   i = this._children.length

@@ -80,7 +80,7 @@ exports._initDOMHooks = function () {
 function onAttached () {
   this._isAttached = true
   this._children.forEach(callAttach)
-  if (this._transCpnts) {
+  if (this._transCpnts.length) {
     this._transCpnts.forEach(callAttach)
   }
 }
@@ -104,7 +104,7 @@ function callAttach (child) {
 function onDetached () {
   this._isAttached = false
   this._children.forEach(callDetach)
-  if (this._transCpnts) {
+  if (this._transCpnts.length) {
     this._transCpnts.forEach(callDetach)
   }
 }

@@ -42,6 +42,5 @@ exports.$addChild = function (opts, BaseCtor) {
   opts._parent = parent
   opts._root = parent.$root
   var child = new ChildVue(opts)
-  this._children.push(child)
   return child
 }

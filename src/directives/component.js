@@ -87,7 +87,8 @@ module.exports = {
       var child = vm.$addChild({
         el: el,
         template: this.template,
-        _asComponent: true
+        _asComponent: true,
+        _host: this._host
       }, this.Ctor)
       if (this.keepAlive) {
         this.cache[this.ctorId] = child

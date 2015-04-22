@@ -60,10 +60,13 @@ function compile (el, options, partial, transcluded) {
     }
     // cache childNodes before linking parent, fix #657
     var childNodes = _.toArray(el.childNodes)
-    // if transcluded, link in parent scope
-    if (transcluded) vm = vm.$parent
-    if (nodeLinkFn) nodeLinkFn(vm, el)
-    if (childLinkFn) childLinkFn(vm, childNodes)
+    // if this is a transcluded compile, linkers need to be
+    // called in source scope, and the host needs to be
+    // passed down.
+    var source = transcluded ? vm.$parent : vm
+    var host = transcluded ? vm : undefined
+    if (nodeLinkFn) nodeLinkFn(source, el, host)
+    if (childLinkFn) childLinkFn(source, childNodes, host)
 
     /**
      * If this is a partial compile, the linker function
@@ -150,7 +153,7 @@ function compileElement (el, options) {
     if (!linkFn) {
       var dirs = collectDirectives(el, options)
       linkFn = dirs.length
-        ? makeDirectivesLinkFn(dirs)
+        ? makeNodeLinkFn(dirs)
         : null
     }
   }
@@ -168,14 +171,14 @@ function compileElement (el, options) {
 }
 
 /**
- * Build a multi-directive link function.
+ * Build a link function for all directives on a single node.
  *
  * @param {Array} directives
  * @return {Function} directivesLinkFn
  */
 
-function makeDirectivesLinkFn (directives) {
-  return function directivesLinkFn (vm, el) {
+function makeNodeLinkFn (directives) {
+  return function nodeLinkFn (vm, el, host) {
     // reverse apply because it's sorted low to high
     var i = directives.length
     var dir, j, k, target
@@ -193,7 +196,7 @@ function makeDirectivesLinkFn (directives) {
         k = dir.descriptors.length
         for (j = 0; j < k; j++) {
           target._bindDir(dir.name, el,
-                      dir.descriptors[j], dir.def)
+            dir.descriptors[j], dir.def, host)
         }
       }
     }
@@ -465,13 +468,16 @@ function checkTerminalDirectives (el, options) {
   for (var i = 0; i < 3; i++) {
     dirName = terminalDirectives[i]
     if (value = _.attr(el, dirName)) {
-      return makeTeriminalLinkFn(el, dirName, value, options)
+      return makeTerminalNodeLinkFn(el, dirName, value, options)
     }
   }
 }
 
 /**
- * Build a link function for a terminal directive.
+ * Build a node link function for a terminal directive.
+ * A terminal link function terminates the current
+ * compilation recursion and handles compilation of the
+ * subtree in the directive.
  *
  * @param {Element} el
  * @param {String} dirName
@@ -480,14 +486,14 @@ function checkTerminalDirectives (el, options) {
  * @return {Function} terminalLinkFn
  */
 
-function makeTeriminalLinkFn (el, dirName, value, options) {
+function makeTerminalNodeLinkFn (el, dirName, value, options) {
   var descriptor = dirParser.parse(value)[0]
   var def = options.directives[dirName]
-  var terminalLinkFn = function (vm, el) {
-    vm._bindDir(dirName, el, descriptor, def)
+  var fn = function terminalNodeLinkFn (vm, el, host) {
+    vm._bindDir(dirName, el, descriptor, def, host)
   }
-  terminalLinkFn.terminal = true
-  return terminalLinkFn
+  fn.terminal = true
+  return fn
 }
 
 /**
