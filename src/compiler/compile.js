@@ -94,15 +94,17 @@ module.exports = function compile (el, options, partial, asParent) {
  * @param {Node} node
  * @param {Object} options
  * @param {Boolean} asParent
- * @return {Function|undefined}
+ * @return {Function|null}
  */
 
 function compileNode (node, options, asParent) {
   var type = node.nodeType
   if (type === 1 && node.tagName !== 'SCRIPT') {
     return compileElement(node, options, asParent)
-  } else if (type === 3 && config.interpolate) {
+  } else if (type === 3 && config.interpolate && node.data.trim()) {
     return compileTextNode(node, options)
+  } else {
+    return null
   }
 }
 
@@ -190,7 +192,7 @@ function makeDirectivesLinkFn (directives) {
  */
 
 function compileTextNode (node, options) {
-  var tokens = textParser.parse(node.nodeValue)
+  var tokens = textParser.parse(node.data)
   if (!tokens) {
     return null
   }
@@ -263,7 +265,7 @@ function makeTextNodeLinkFn (tokens, frag) {
           if (token.html) {
             _.replace(node, templateParser.parse(value, true))
           } else {
-            node.nodeValue = value
+            node.data = value
           }
         } else {
           vm._bindDir(token.type, node,
