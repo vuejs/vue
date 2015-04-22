@@ -4,27 +4,22 @@ var textParser = require('../parsers/text')
 var dirParser = require('../parsers/directive')
 var templateParser = require('../parsers/template')
 
+module.exports = compile
+
 /**
  * Compile a template and return a reusable composite link
  * function, which recursively contains more link functions
  * inside. This top level compile function should only be
  * called on instance root nodes.
  *
- * When the `asParent` flag is true, this means we are doing
- * a partial compile for a component's parent scope markup
- * (See #502). This could **only** be triggered during
- * compilation of `v-component`, and we need to skip v-with,
- * v-ref & v-component in this situation.
- *
  * @param {Element|DocumentFragment} el
  * @param {Object} options
  * @param {Boolean} partial
- * @param {Boolean} asParent - compiling a component
- *                             container as its parent.
+ * @param {Boolean} transcluded
  * @return {Function}
  */
 
-module.exports = function compile (el, options, partial, asParent) {
+function compile (el, options, partial, transcluded) {
   var isBlock = el.nodeType === 11
   var params = !partial && options.paramAttributes
   // if el is a fragment, this is a block instance
@@ -37,7 +32,7 @@ module.exports = function compile (el, options, partial, asParent) {
     : null
   var nodeLinkFn = isBlock
     ? null
-    : compileNode(el, options, asParent)
+    : compileNode(el, options)
   var childLinkFn =
     !(nodeLinkFn && nodeLinkFn.terminal) &&
     el.tagName !== 'SCRIPT' &&
@@ -57,12 +52,16 @@ module.exports = function compile (el, options, partial, asParent) {
 
   return function link (vm, el) {
     var originalDirCount = vm._directives.length
+    var parentOriginalDirCount =
+      vm.$parent && vm.$parent._directives.length
     if (paramsLinkFn) {
       var paramsEl = isBlock ? el.childNodes[1] : el
       paramsLinkFn(vm, paramsEl)
     }
     // cache childNodes before linking parent, fix #657
     var childNodes = _.toArray(el.childNodes)
+    // if transcluded, link in parent scope
+    if (transcluded) vm = vm.$parent
     if (nodeLinkFn) nodeLinkFn(vm, el)
     if (childLinkFn) childLinkFn(vm, childNodes)
 
@@ -73,15 +72,25 @@ module.exports = function compile (el, options, partial, asParent) {
      * linking.
      */
 
-    if (partial) {
-      var dirs = vm._directives.slice(originalDirCount)
-      return function unlink () {
+    if (partial && !transcluded) {
+      var selfDirs = vm._directives.slice(originalDirCount)
+      var parentDirs = vm.$parent &&
+        vm.$parent._directives.slice(parentOriginalDirCount)
+
+      var teardownDirs = function (vm, dirs) {
         var i = dirs.length
         while (i--) {
           dirs[i]._teardown()
         }
         i = vm._directives.indexOf(dirs[0])
         vm._directives.splice(i, dirs.length)
+      }
+
+      return function unlink () {
+        teardownDirs(vm, selfDirs)
+        if (parentDirs) {
+          teardownDirs(vm.$parent, parentDirs)
+        }
       }
     }
   }
@@ -93,14 +102,13 @@ module.exports = function compile (el, options, partial, asParent) {
  *
  * @param {Node} node
  * @param {Object} options
- * @param {Boolean} asParent
  * @return {Function|null}
  */
 
-function compileNode (node, options, asParent) {
+function compileNode (node, options) {
   var type = node.nodeType
   if (type === 1 && node.tagName !== 'SCRIPT') {
-    return compileElement(node, options, asParent)
+    return compileElement(node, options)
   } else if (type === 3 && config.interpolate && node.data.trim()) {
     return compileTextNode(node, options)
   } else {
@@ -113,14 +121,20 @@ function compileNode (node, options, asParent) {
  *
  * @param {Element} el
  * @param {Object} options
- * @param {Boolean} asParent
  * @return {Function|null}
  */
 
-function compileElement (el, options, asParent) {
+function compileElement (el, options) {
+  if (checkTransclusion(el)) {
+    // unwrap textNode
+    if (el.hasAttribute('__vue__wrap')) {
+      el = el.firstChild
+    }
+    return compile(el, options._parent.$options, true, true)
+  }
   var linkFn, tag, component
   // check custom element component, but only on non-root
-  if (!asParent && !el.__vue__) {
+  if (!el.__vue__) {
     tag = el.tagName.toLowerCase()
     component =
       tag.indexOf('-') > 0 &&
@@ -131,12 +145,10 @@ function compileElement (el, options, asParent) {
   }
   if (component || el.hasAttributes()) {
     // check terminal direcitves
-    if (!asParent) {
-      linkFn = checkTerminalDirectives(el, options)
-    }
+    linkFn = checkTerminalDirectives(el, options)
     // if not terminal, build normal link function
     if (!linkFn) {
-      var dirs = collectDirectives(el, options, asParent)
+      var dirs = collectDirectives(el, options)
       linkFn = dirs.length
         ? makeDirectivesLinkFn(dirs)
         : null
@@ -166,16 +178,21 @@ function makeDirectivesLinkFn (directives) {
   return function directivesLinkFn (vm, el) {
     // reverse apply because it's sorted low to high
     var i = directives.length
-    var dir, j, k
+    var dir, j, k, target
     while (i--) {
       dir = directives[i]
+      // a directive can be transcluded if it's written
+      // on a component's container in its parent tempalte.
+      target = dir.transcluded
+        ? vm.$parent
+        : vm
       if (dir._link) {
         // custom link fn
-        dir._link(vm, el)
+        dir._link(target, el)
       } else {
         k = dir.descriptors.length
         for (j = 0; j < k; j++) {
-          vm._bindDir(dir.name, el,
+          target._bindDir(dir.name, el,
                       dir.descriptors[j], dir.def)
         }
       }
@@ -478,38 +495,37 @@ function makeTeriminalLinkFn (el, dirName, value, options) {
  *
  * @param {Element} el
  * @param {Object} options
- * @param {Boolean} asParent
  * @return {Array}
  */
 
-function collectDirectives (el, options, asParent) {
+function collectDirectives (el, options) {
   var attrs = _.toArray(el.attributes)
   var i = attrs.length
   var dirs = []
-  var attr, attrName, dir, dirName, dirDef
+  var attr, attrName, dir, dirName, dirDef, transcluded
   while (i--) {
     attr = attrs[i]
     attrName = attr.name
+    transcluded =
+      options._transcludedAttrs &&
+      options._transcludedAttrs[attrName]
     if (attrName.indexOf(config.prefix) === 0) {
       dirName = attrName.slice(config.prefix.length)
-      if (asParent &&
-          (dirName === 'with' ||
-           dirName === 'component')) {
-        continue
-      }
       dirDef = options.directives[dirName]
       _.assertAsset(dirDef, 'directive', dirName)
       if (dirDef) {
         dirs.push({
           name: dirName,
           descriptors: dirParser.parse(attr.value),
-          def: dirDef
+          def: dirDef,
+          transcluded: transcluded
         })
       }
     } else if (config.interpolate) {
       dir = collectAttrDirective(el, attrName, attr.value,
                                  options)
       if (dir) {
+        dir.transcluded = transcluded
         dirs.push(dir)
       }
     }
@@ -531,10 +547,6 @@ function collectDirectives (el, options, asParent) {
  */
 
 function collectAttrDirective (el, name, value, options) {
-  if (options._skipAttrs &&
-      options._skipAttrs.indexOf(name) > -1) {
-    return
-  }
   var tokens = textParser.parse(value)
   if (tokens) {
     var def = options.directives.attr
@@ -572,4 +584,19 @@ function directiveComparator (a, b) {
   a = a.def.priority || 0
   b = b.def.priority || 0
   return a > b ? 1 : -1
+}
+
+/**
+ * Check whether an element is transcluded
+ *
+ * @param {Element} el
+ * @return {Boolean}
+ */
+
+var transcludedFlagAttr = '__vue__transcluded'
+function checkTransclusion (el) {
+  if (el.nodeType === 1 && el.hasAttribute(transcludedFlagAttr)) {
+    el.removeAttribute(transcludedFlagAttr)
+    return true
+  }
 }

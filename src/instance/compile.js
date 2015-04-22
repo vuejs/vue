@@ -1,7 +1,9 @@
 var _ = require('../util')
+var config = require('../config')
 var Directive = require('../directive')
 var compile = require('../compiler/compile')
 var transclude = require('../compiler/transclude')
+var transcludedFlagAttr = '__vue__transcluded'
 
 /**
  * Transclude, compile and link element.
@@ -18,55 +20,42 @@ var transclude = require('../compiler/transclude')
 
 exports._compile = function (el) {
   var options = this.$options
-  var parent = options._parent
   if (options._linkFn) {
     this._initElement(el)
     options._linkFn(this, el)
   } else {
-    var raw = el
     if (options._asComponent) {
-      // separate container element and content
-      var content = options._content = _.extractContent(raw)
-      // create two separate linekrs for container and content
-      var parentOptions = parent.$options
-      
-      // hack: we need to skip the paramAttributes for this
-      // child instance when compiling its parent container
-      // linker. there could be a better way to do this.
-      parentOptions._skipAttrs = options.paramAttributes
-      var containerLinkFn =
-        compile(raw, parentOptions, true, true)
-      parentOptions._skipAttrs = null
-
-      if (content) {
-        var ol = parent._children.length
-        var contentLinkFn =
-          compile(content, parentOptions, true)
-        // call content linker now, before transclusion
-        this._contentUnlinkFn = contentLinkFn(parent, content)
-        // mark all compiled nodes as transcluded, so that
-        // directives that do partial compilation, e.g. v-if
-        // and v-partial can detect them and persist them
-        // through re-compilations.
-        for (var i = 0; i < content.childNodes.length; i++) {
-          content.childNodes[i]._isContent = true
+      // Mark content nodes and attrs so that the compiler
+      // knows they should be compiled in parent scope.
+      options._transcludedAttrs = extractAttrs(el.attributes)
+      var i = el.childNodes.length
+      while (i--) {
+        var node = el.childNodes[i]
+        if (node.nodeType === 1) {
+          node.setAttribute(transcludedFlagAttr, '')
+        } else if (node.nodeType === 3 && node.data.trim()) {
+          // wrap transcluded textNodes in spans, because
+          // raw textNodes can't be persisted through clones
+          // by attaching attributes.
+          var wrapper = document.createElement('span')
+          wrapper.textContent = node.data
+          wrapper.setAttribute('__vue__wrap', '')
+          wrapper.setAttribute(transcludedFlagAttr, '')
+          el.replaceChild(wrapper, node)
         }
-        this._transCpnts = parent._children.slice(ol)
       }
-      // tranclude, this possibly replaces original
-      el = transclude(el, options)
-      this._initElement(el)
-      // now call the container linker on the resolved el
-      this._containerUnlinkFn = containerLinkFn(parent, el)
-    } else {
-      // simply transclude
-      el = transclude(el, options)
-      this._initElement(el)
     }
-    var linkFn = compile(el, options)
-    linkFn(this, el)
+    // transclude and init element
+    // transclude can potentially replace original
+    // so we need to keep reference
+    var original = el
+    el = transclude(el, options)
+    this._initElement(el)
+    // compile and link the rest
+    compile(el, options)(this, el)
+    // finally replace original
     if (options.replace) {
-      _.replace(raw, el)
+      _.replace(original, el)
     }
   }
   return el
@@ -136,13 +125,6 @@ exports._destroy = function (remove, deferCleanup) {
   while (i--) {
     this._children[i].$destroy()
   }
-  // teardown parent linkers
-  if (this._containerUnlinkFn) {
-    this._containerUnlinkFn()
-  }
-  if (this._contentUnlinkFn) {
-    this._contentUnlinkFn()
-  }
   // teardown all directives. this also tearsdown all
   // directive-owned watchers. intentionally check for
   // directives array length on every loop since directives
@@ -197,4 +179,24 @@ exports._cleanup = function () {
   this._callHook('destroyed')
   // turn off all instance listeners.
   this.$off()
+}
+
+/**
+ * Helper to extract a component container's attribute names
+ * into a map, and filtering out `v-with` in the process.
+ * The resulting map will be used in compiler/compile to
+ * determine whether an attribute is transcluded.
+ *
+ * @param {NameNodeMap} attrs
+ */
+
+function extractAttrs (attrs) {
+  var res = {}
+  var vwith = config.prefix + 'with'
+  var i = attrs.length
+  while (i--) {
+    var name = attrs[i].name
+    if (name !== vwith) res[name] = true
+  }
+  return res
 }

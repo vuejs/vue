@@ -120,7 +120,7 @@ module.exports = {
           })
           merged.template = this.inlineTempalte || merged.template
           this.template = transclude(this.template, merged)
-          this._linkFn = compile(this.template, merged, false, true)
+          this._linkFn = compile(this.template, merged)
         }
       } else {
         // to be resolved later
