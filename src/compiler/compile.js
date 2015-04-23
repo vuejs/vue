@@ -341,7 +341,7 @@ function compileNodeList (nodeList, options) {
  */
 
 function makeChildLinkFn (linkFns) {
-  return function childLinkFn (vm, nodes) {
+  return function childLinkFn (vm, nodes, host) {
     var node, nodeLinkFn, childrenLinkFn
     for (var i = 0, n = 0, l = linkFns.length; i < l; n++) {
       node = nodes[n]
@@ -350,10 +350,10 @@ function makeChildLinkFn (linkFns) {
       // cache childNodes before linking parent, fix #657
       var childNodes = _.toArray(node.childNodes)
       if (nodeLinkFn) {
-        nodeLinkFn(vm, node)
+        nodeLinkFn(vm, node, host)
       }
       if (childrenLinkFn) {
-        childrenLinkFn(vm, childNodes)
+        childrenLinkFn(vm, childNodes, host)
       }
     }
   }

@@ -9,6 +9,7 @@ module.exports = {
   // same logic reuse from v-if
   compile: vIf.compile,
   teardown: vIf.teardown,
+  getContainedComponents: vIf.getContainedComponents,
   unbind: vIf.unbind,
 
   bind: function () {

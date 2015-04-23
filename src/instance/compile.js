@@ -1,9 +1,7 @@
 var _ = require('../util')
-var config = require('../config')
 var Directive = require('../directive')
 var compile = require('../compiler/compile')
 var transclude = require('../compiler/transclude')
-var transcludedFlagAttr = '__vue__transcluded'
 
 /**
  * Transclude, compile and link element.
@@ -21,30 +19,10 @@ var transcludedFlagAttr = '__vue__transcluded'
 exports._compile = function (el) {
   var options = this.$options
   if (options._linkFn) {
+    // pre-transcluded with linker, just use it
     this._initElement(el)
     options._linkFn(this, el)
   } else {
-    if (options._asComponent) {
-      // Mark content nodes and attrs so that the compiler
-      // knows they should be compiled in parent scope.
-      options._transcludedAttrs = extractAttrs(el.attributes)
-      var i = el.childNodes.length
-      while (i--) {
-        var node = el.childNodes[i]
-        if (node.nodeType === 1) {
-          node.setAttribute(transcludedFlagAttr, '')
-        } else if (node.nodeType === 3 && node.data.trim()) {
-          // wrap transcluded textNodes in spans, because
-          // raw textNodes can't be persisted through clones
-          // by attaching attributes.
-          var wrapper = document.createElement('span')
-          wrapper.textContent = node.data
-          wrapper.setAttribute('__vue__wrap', '')
-          wrapper.setAttribute(transcludedFlagAttr, '')
-          el.replaceChild(wrapper, node)
-        }
-      }
-    }
     // transclude and init element
     // transclude can potentially replace original
     // so we need to keep reference
@@ -186,24 +164,4 @@ exports._cleanup = function () {
   this._callHook('destroyed')
   // turn off all instance listeners.
   this.$off()
-}
-
-/**
- * Helper to extract a component container's attribute names
- * into a map, and filtering out `v-with` in the process.
- * The resulting map will be used in compiler/compile to
- * determine whether an attribute is transcluded.
- *
- * @param {NameNodeMap} attrs
- */
-
-function extractAttrs (attrs) {
-  var res = {}
-  var vwith = config.prefix + 'with'
-  var i = attrs.length
-  while (i--) {
-    var name = attrs[i].name
-    if (name !== vwith) res[name] = true
-  }
-  return res
 }

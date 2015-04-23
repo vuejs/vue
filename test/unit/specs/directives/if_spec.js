@@ -235,8 +235,83 @@ if (_.inBrowser) {
       vm.show = false
       _.nextTick(function () {
         expect(detachSpy).toHaveBeenCalled()
+        document.body.removeChild(el)
         done()
       })
+    })
+
+    it('call attach/detach for dynamicly created components inside if block', function (done) {
+      document.body.appendChild(el)
+      var attachSpy = jasmine.createSpy('attached')
+      var detachSpy = jasmine.createSpy('detached')
+      var vm = new Vue({
+        el: el,
+        data: {
+          show: true,
+          list: [{a:0}]
+        },
+        template:
+          '<div v-component="outer">' +
+            '<div>' + // an extra layer to test components deep inside the tree
+              '<div v-repeat="list" v-component="transcluded"></div>' +
+            '</div>' +
+          '</div>',
+        components: {
+          outer: {
+            template:
+              '<div v-if="$parent.show">' +
+                '<content></content>' +
+              '</div>' +
+              // this is to test that compnents that are not in the if block
+              // should not fire attach/detach when v-if toggles
+              '<div v-component="transcluded"></div>'
+          },
+          transcluded: {
+            template: '{{a}}',
+            attached: attachSpy,
+            detached: detachSpy
+          }
+        }
+      })
+      assertMarkup()
+      expect(attachSpy.calls.count()).toBe(2)
+      vm.show = false
+      _.nextTick(function () {
+        assertMarkup()
+        expect(detachSpy.calls.count()).toBe(1)
+        vm.list.push({a:1})
+        vm.show = true
+        _.nextTick(function () {
+          assertMarkup()
+          expect(attachSpy.calls.count()).toBe(2 + 2)
+          vm.list.push({a:2})
+          vm.show = false
+          _.nextTick(function () {
+            assertMarkup()
+            expect(attachSpy.calls.count()).toBe(2 + 2 + 1)
+            expect(detachSpy.calls.count()).toBe(1 + 3)
+            document.body.removeChild(el)
+            done()
+          })
+        })
+      })
+
+      function assertMarkup () {
+        var showBlock = vm.show
+          ? '<div><div>' +
+              vm.list.map(function (o) {
+                return '<div>' + o.a + '</div>'
+              }).join('') + '<!--v-repeat-->' +
+            '</div></div>'
+          : ''
+        var markup = '<div>' +
+          '<!--v-if-start-->' +
+            showBlock +
+          '<!--v-if-end-->' +
+          '<div></div><!--v-component-->' +
+        '</div><!--v-component-->'
+        expect(el.innerHTML).toBe(markup)
+      }
     })
 
   })
