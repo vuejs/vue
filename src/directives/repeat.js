@@ -1,5 +1,6 @@
 var _ = require('../util')
 var isObject = _.isObject
+var isPlainObject = _.isPlainObject
 var textParser = require('../parsers/text')
 var expParser = require('../parsers/expression')
 var templateParser = require('../parsers/template')
@@ -46,7 +47,6 @@ module.exports = {
     this.idKey =
       this._checkParam('track-by') ||
       this._checkParam('trackby') // 0.11.0 compat
-    // cache for primitive value instances
     this.cache = Object.create(null)
   },
 
@@ -68,9 +68,9 @@ module.exports = {
    */
 
   checkRef: function () {
-    var childId = _.attr(this.el, 'ref')
-    this.childId = childId
-      ? this.vm.$interpolate(childId)
+    var refID = _.attr(this.el, 'ref')
+    this.refID = refID
+      ? this.vm.$interpolate(refID)
       : null
     var elId = _.attr(this.el, 'el')
     this.elId = elId
@@ -88,14 +88,21 @@ module.exports = {
     var id = _.attr(this.el, 'component')
     var options = this.vm.$options
     if (!id) {
-      this.Ctor = _.Vue // default constructor
-      this.inherit = true // inline repeats should inherit
+      // default constructor
+      this.Ctor = _.Vue
+      // inline repeats should inherit
+      this.inherit = true
       // important: transclude with no options, just
       // to ensure block start and block end
       this.template = transclude(this.template)
       this._linkFn = compile(this.template, options)
     } else {
-      this._asComponent = true
+      this.asComponent = true
+      // check inline-template
+      if (this._checkParam('inline-template') !== null) {
+        // extract inline template as a DocumentFragment
+        this.inlineTempalte = _.extractContent(this.el, true)
+      }
       var tokens = textParser.parse(id)
       if (!tokens) { // static component
         var Ctor = this.Ctor = options.components[id]
@@ -111,6 +118,7 @@ module.exports = {
           var merged = mergeOptions(Ctor.options, {}, {
             $parent: this.vm
           })
+          merged.template = this.inlineTempalte || merged.template
           this.template = transclude(this.template, merged)
           this._linkFn = compile(this.template, merged, false, true)
         }
@@ -126,17 +134,21 @@ module.exports = {
    * Update.
    * This is called whenever the Array mutates.
    *
-   * @param {Array} data
+   * @param {Array|Number|String} data
    */
 
   update: function (data) {
-    if (typeof data === 'number') {
+    data = data || []
+    var type = typeof data
+    if (type === 'number') {
       data = range(data)
+    } else if (type === 'string') {
+      data = _.toArray(data)
     }
-    this.vms = this.diff(data || [], this.vms)
+    this.vms = this.diff(data, this.vms)
     // update v-ref
-    if (this.childId) {
-      this.vm.$[this.childId] = this.vms
+    if (this.refID) {
+      this.vm.$[this.refID] = this.vms
     }
     if (this.elId) {
       this.vm.$$[this.elId] = this.vms.map(function (vm) {
@@ -175,13 +187,13 @@ module.exports = {
     // instance.
     for (i = 0, l = data.length; i < l; i++) {
       obj = data[i]
-      raw = converted ? obj.value : obj
+      raw = converted ? obj.$value : obj
       vm = !init && this.getVm(raw)
       if (vm) { // reusable instance
         vm._reused = true
         vm.$index = i // update $index
         if (converted) {
-          vm.$key = obj.key // update $key
+          vm.$key = obj.$key // update $key
         }
         if (idKey) { // swap track by id data
           if (alias) {
@@ -191,8 +203,9 @@ module.exports = {
           }
         }
       } else { // new instance
-        vm = this.build(obj, i)
+        vm = this.build(obj, i, true)
         vm._new = true
+        vm._reused = false
       }
       vms[i] = vm
       // insert if this is first run
@@ -233,17 +246,20 @@ module.exports = {
           vm.$before(ref)
         }
       } else {
+        // make sure to insert before the comment node if
+        // the vms are block instances
+        var nextEl = targetNext._blockStart || targetNext.$el
         if (vm._reused) {
           // this is the vm we are actually in front of
           currentNext = findNextVm(vm, ref)
           // we only need to move if we are not in the right
           // place already.
           if (currentNext !== targetNext) {
-            vm.$before(targetNext.$el, null, false)
+            vm.$before(nextEl, null, false)
           }
         } else {
           // new instance, insert to existing next
-          vm.$before(targetNext.$el)
+          vm.$before(nextEl)
         }
       }
       vm._new = false
@@ -257,17 +273,18 @@ module.exports = {
    *
    * @param {Object} data
    * @param {Number} index
+   * @param {Boolean} needCache
    */
 
-  build: function (data, index) {
+  build: function (data, index, needCache) {
     var original = data
     var meta = { $index: index }
     if (this.converted) {
-      meta.$key = original.key
+      meta.$key = original.$key
     }
-    var raw = this.converted ? data.value : data
+    var raw = this.converted ? data.$value : data
     var alias = this.arg
-    var hasAlias = !isObject(raw) || alias
+    var hasAlias = !isObject(raw) || !isPlainObject(data) || alias
     // wrap the raw data with alias
     data = hasAlias ? {} : raw
     if (alias) {
@@ -279,14 +296,30 @@ module.exports = {
     var Ctor = this.Ctor || this.resolveCtor(data, meta)
     var vm = this.vm.$addChild({
       el: templateParser.clone(this.template),
-      _asComponent: this._asComponent,
+      _asComponent: this.asComponent,
       _linkFn: this._linkFn,
       _meta: meta,
       data: data,
-      inherit: this.inherit
+      inherit: this.inherit,
+      template: this.inlineTempalte
     }, Ctor)
+    // flag this instance as a repeat instance
+    // so that we can skip it in vm._digest
+    vm._repeat = true
     // cache instance
-    this.cacheVm(raw, vm)
+    if (needCache) {
+      this.cacheVm(raw, vm)
+    }
+    // sync back changes for $value, particularly for
+    // two-way bindings of primitive values
+    var self = this
+    vm.$watch('$value', function (val) {
+      if (self.converted) {
+        self.rawValue[vm.$key] = val
+      } else {
+        self.rawValue.$set(vm.$index, val)
+      }
+    })
     return vm
   },
 
@@ -324,8 +357,8 @@ module.exports = {
    */
 
   unbind: function () {
-    if (this.childId) {
-      delete this.vm.$[this.childId]
+    if (this.refID) {
+      this.vm.$[this.refID] = null
     }
     if (this.vms) {
       var i = this.vms.length
@@ -359,7 +392,7 @@ module.exports = {
       if (!cache[id]) {
         cache[id] = vm
       } else {
-        _.warn('Duplicate ID in v-repeat: ' + id)
+        _.warn('Duplicate track-by key in v-repeat: ' + id)
       }
     } else if (isObject(data)) {
       id = this.id
@@ -368,7 +401,8 @@ module.exports = {
           data[id] = vm
         } else {
           _.warn(
-            'Duplicate objects are not supported in v-repeat.'
+            'Duplicate objects are not supported in v-repeat ' +
+            'when using components or transitions.'
           )
         }
       } else {
@@ -467,7 +501,9 @@ function findNextVm (vm, ref) {
  */
 
 function objToArray (obj) {
-  if (!_.isPlainObject(obj)) {
+  // regardless of type, store the un-filtered raw value.
+  this.rawValue = obj
+  if (!isPlainObject(obj)) {
     return obj
   }
   var keys = Object.keys(obj)
@@ -477,8 +513,8 @@ function objToArray (obj) {
   while (i--) {
     key = keys[i]
     res[i] = {
-      key: key,
-      value: obj[key]
+      $key: key,
+      $value: obj[key]
     }
   }
   // `this` points to the repeat directive instance

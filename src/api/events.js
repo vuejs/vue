@@ -122,13 +122,11 @@ exports.$broadcast = function (event) {
   // then there's no need to broadcast.
   if (!this._eventsCount[event]) return
   var children = this._children
-  if (children) {
-    for (var i = 0, l = children.length; i < l; i++) {
-      var child = children[i]
-      child.$emit.apply(child, arguments)
-      if (!child._eventCancelled) {
-        child.$broadcast.apply(child, arguments)
-      }
+  for (var i = 0, l = children.length; i < l; i++) {
+    var child = children[i]
+    child.$emit.apply(child, arguments)
+    if (!child._eventCancelled) {
+      child.$broadcast.apply(child, arguments)
     }
   }
   return this

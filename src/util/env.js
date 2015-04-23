@@ -18,25 +18,52 @@ var inBrowser = exports.inBrowser =
   toString.call(window) !== '[object Object]'
 
 /**
- * Defer a task to the start of the next event loop
+ * Defer a task to execute it asynchronously. Ideally this
+ * should be executed as a microtask, so we leverage
+ * MutationObserver if it's available, and fallback to
+ * setTimeout(0).
  *
  * @param {Function} cb
  * @param {Object} ctx
  */
 
-var defer = inBrowser
-  ? (window.requestAnimationFrame ||
-    window.webkitRequestAnimationFrame ||
-    setTimeout)
-  : setTimeout
-
-exports.nextTick = function (cb, ctx) {
-  if (ctx) {
-    defer(function () { cb.call(ctx) }, 0)
-  } else {
-    defer(cb, 0)
+exports.nextTick = (function () {
+  var callbacks = []
+  var pending = false
+  var timerFunc
+  function handle () {
+    pending = false
+    var copies = callbacks.slice(0)
+    callbacks = []
+    for (var i = 0; i < copies.length; i++) {
+      copies[i]()
+    }
   }
-}
+  /* istanbul ignore if */
+  if (typeof MutationObserver !== 'undefined') {
+    var counter = 1
+    var observer = new MutationObserver(handle)
+    var textNode = document.createTextNode(counter)
+    observer.observe(textNode, {
+      characterData: true
+    })
+    timerFunc = function () {
+      counter = (counter + 1) % 2
+      textNode.data = counter
+    }
+  } else {
+    timerFunc = setTimeout
+  }
+  return function (cb, ctx) {
+    var func = ctx
+      ? function () { cb.call(ctx) }
+      : cb
+    callbacks.push(func)
+    if (pending) return
+    pending = true
+    timerFunc(handle, 0)
+  }
+})()
 
 /**
  * Detect if we are in IE9...

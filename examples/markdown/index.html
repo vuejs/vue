@@ -10,7 +10,7 @@
   <body>
 
     <div id="editor">
-      <textarea v-model="input"></textarea>
+      <textarea v-model="input" debounce="300"></textarea>
       <div v-html="input | marked"></div>
     </div>
 

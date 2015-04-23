@@ -6,7 +6,7 @@
  */
 
 exports.isReserved = function (str) {
-  var c = str.charCodeAt(0)
+  var c = (str + '').charCodeAt(0)
   return c === 0x24 || c === 0x5F
 }
 
@@ -57,20 +57,43 @@ exports.stripQuotes = function (str) {
 }
 
 /**
+ * Replace helper
+ *
+ * @param {String} _ - matched delimiter
+ * @param {String} c - matched char
+ * @return {String}
+ */
+function toUpper (_, c) {
+  return c ? c.toUpperCase () : ''
+}
+
+/**
  * Camelize a hyphen-delmited string.
  *
  * @param {String} str
  * @return {String}
  */
 
-var camelRE = /[-_](\w)/g
-var capitalCamelRE = /(?:^|[-_])(\w)/g
+var camelRE = /-(\w)/g
+exports.camelize = function (str) {
+  return str.replace(camelRE, toUpper)
+}
 
-exports.camelize = function (str, cap) {
-  var RE = cap ? capitalCamelRE : camelRE
-  return str.replace(RE, function (_, c) {
-    return c ? c.toUpperCase () : ''
-  })
+/**
+ * Converts hyphen/underscore/slash delimitered names into
+ * camelized classNames.
+ *
+ * e.g. my-component => MyComponent
+ *      some_else    => SomeElse
+ *      some/comp    => SomeComp
+ *
+ * @param {String} str
+ * @return {String}
+ */
+
+var classifyRE = /(?:^|[-_\/])(\w)/g
+exports.classify = function (str) {
+  return str.replace(classifyRE, toUpper)
 }
 
 /**
@@ -172,4 +195,36 @@ exports.define = function (obj, key, val, enumerable) {
     writable     : true,
     configurable : true
   })
+}
+
+/**
+ * Debounce a function so it only gets called after the
+ * input stops arriving after the given wait period.
+ *
+ * @param {Function} func
+ * @param {Number} wait
+ * @return {Function} - the debounced function
+ */
+
+exports.debounce = function(func, wait) {
+  var timeout, args, context, timestamp, result
+  var later = function() {
+    var last = Date.now() - timestamp
+    if (last < wait && last >= 0) {
+      timeout = setTimeout(later, wait - last)
+    } else {
+      timeout = null
+      result = func.apply(context, args)
+      if (!timeout) context = args = null
+    }
+  }
+  return function() {
+    context = this
+    args = arguments
+    timestamp = Date.now()
+    if (!timeout) {
+      timeout = setTimeout(later, wait)
+    }
+    return result
+  }
 }

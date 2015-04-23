@@ -3,16 +3,7 @@ var _ = require('../../../../src/util')
 
 var testCases = [
   {
-    // simple path that doesn't exist
-    exp: 'a.b.c',
-    scope: {
-      a: {}
-    },
-    expected: undefined,
-    paths: ['a']
-  },
-  {
-    // simple path that exists
+    // simple path
     exp: 'a.b.d',
     scope: {
       a:{b:{d:123}}
@@ -70,6 +61,12 @@ var testCases = [
     },
     expected: 'inline hel\nlo',
     paths: ['a']
+  },
+  {
+    //multiline expressions
+    exp: "{\n a: '35',\n b: c}",
+    scope:{c:32},
+    expected: { a : '35', b : 32 }
   },
   {
     // dollar signs and underscore
@@ -175,13 +172,45 @@ var testCases = [
     },
     expected: 8,
     paths: ['$a', 'b', 'c', 'e']
+  },
+  {
+    // Math global, simple path
+    exp: 'Math.PI',
+    scope: {},
+    expected: Math.PI,
+    paths: []
+  },
+  {
+    // Math global, exp
+    exp: 'Math.sin(a)',
+    scope: {
+      a: 1
+    },
+    expected: Math.sin(1),
+    paths: ['a']
+  },
+  {
+    // boolean literal
+    exp: 'true',
+    scope: {
+      true: false
+    },
+    expected: true,
+    paths: []
+  },
+  {
+    // Date global
+    exp: 'Date.now() > new Date("2000-01-01")',
+    scope: {},
+    expected: true,
+    paths: []
   }
 ]
 
 describe('Expression Parser', function () {
-  
-  it('parse getter', function () {
-    testCases.forEach(function assertExp (testCase) {
+
+  testCases.forEach(function (testCase) {
+    it('parse getter: ' + testCase.exp, function () {
       var res = expParser.parse(testCase.exp, true)
       expect(res.get(testCase.scope)).toEqual(testCase.expected)
     })

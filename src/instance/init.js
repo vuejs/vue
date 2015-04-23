@@ -46,9 +46,21 @@ exports._init = function (options) {
   this._isBeingDestroyed = false
 
   // children
-  this._children =         // @type {Array}
-  this._childCtors = null  // @type {Object} - hash to cache
-                           // child constructors
+  this._children = []
+  this._childCtors = {}
+
+  // transclusion unlink functions
+  this._containerUnlinkFn =
+  this._contentUnlinkFn = null
+
+  // transcluded components that belong to the parent.
+  // need to keep track of them so that we can call
+  // attached/detached hooks on them.
+  this._transCpnts = null
+
+  // props used in v-repeat diffing
+  this._new = true
+  this._reused = false
 
   // merge options.
   options = this.$options = mergeOptions(

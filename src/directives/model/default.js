@@ -11,6 +11,8 @@ module.exports = {
     var lazy = this._checkParam('lazy') != null
     // - number: cast value into number when updating model.
     var number = this._checkParam('number') != null
+    // - debounce: debounce the input listener
+    var debounce = parseInt(this._checkParam('debounce'), 10)
 
     // handle composition events.
     // http://blog.evanyou.me/2014/01/03/composition-event/
@@ -41,7 +43,8 @@ module.exports = {
     // the input with the filtered value.
     // also force update for type="range" inputs to enable
     // "lock in range" (see #506)
-    this.listener = this.filters || el.type === 'range'
+    var hasReadFilter = this.filters && this.filters.read
+    this.listener = hasReadFilter || el.type === 'range'
       ? function textInputListener () {
           if (cpLocked) return
           var charsOffset
@@ -77,8 +80,26 @@ module.exports = {
           set()
         }
 
+    if (debounce) {
+      this.listener = _.debounce(this.listener, debounce)
+    }
     this.event = lazy ? 'change' : 'input'
-    _.on(el, this.event, this.listener)
+    // Support jQuery events, since jQuery.trigger() doesn't
+    // trigger native events in some cases and some plugins
+    // rely on $.trigger()
+    // 
+    // We want to make sure if a listener is attached using
+    // jQuery, it is also removed with jQuery, that's why
+    // we do the check for each directive instance and
+    // store that check result on itself. This also allows
+    // easier test coverage control by unsetting the global
+    // jQuery variable in tests.
+    this.hasjQuery = typeof jQuery === 'function'
+    if (this.hasjQuery) {
+      jQuery(el).on(this.event, this.listener)
+    } else {
+      _.on(el, this.event, this.listener)
+    }
 
     // IE9 doesn't fire input event on backspace/del/cut
     if (!lazy && _.isIE9) {
@@ -111,7 +132,11 @@ module.exports = {
 
   unbind: function () {
     var el = this.el
-    _.off(el, this.event, this.listener)
+    if (this.hasjQuery) {
+      jQuery(el).off(this.event, this.listener)
+    } else {
+      _.off(el, this.event, this.listener)
+    }
     _.off(el,'compositionstart', this.cpLock)
     _.off(el,'compositionend', this.cpUnlock)
     if (this.onCut) {

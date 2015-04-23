@@ -126,9 +126,19 @@ function nodeToFragment (node) {
   ) {
     return node.content
   }
-  return tag === 'SCRIPT'
-    ? stringToFragment(node.textContent)
-    : stringToFragment(node.innerHTML)
+  // script template
+  if (tag === 'SCRIPT') {
+    return stringToFragment(node.textContent)
+  }
+  // normal node, clone it to avoid mutating the original
+  var clone = exports.clone(node)
+  var frag = document.createDocumentFragment()
+  var child
+  /* jshint boss:true */
+  while (child = clone.firstChild) {
+    frag.appendChild(child)
+  }
+  return frag
 }
 
 // Test for the presence of the Safari template cloning bug

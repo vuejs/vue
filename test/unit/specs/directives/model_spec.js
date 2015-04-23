@@ -1,6 +1,9 @@
 var _ = require('../../../../src/util')
 var Vue = require('../../../../src/vue')
 
+// unset jQuery to bypass jQuery check for normal test cases
+jQuery = null
+
 /**
  * Mock event helper
  */
@@ -153,6 +156,16 @@ if (_.inBrowser) {
       expect(el.firstChild.childNodes[1].selected).toBe(true)
     })
 
+    it('select + empty default value', function () {
+      var vm = new Vue({
+        el: el,
+        template: '<select v-model="test"><option value="" selected>null</option><<option value="1">1</option></select>'
+      })
+      expect(vm.test).toBe('')
+      trigger(vm.$el.firstChild, 'change')
+      expect(vm.test).toBe('')
+    })
+
     it('select + multiple', function (done) {
       var vm = new Vue({
         el: el,
@@ -273,6 +286,67 @@ if (_.inBrowser) {
       expect(opts[2].selected).toBe(false)
     })
 
+    it('select + number', function () {
+      var vm = new Vue({
+        el: el,
+        data: {
+          test: '1'
+        },
+        template: '<select v-model="test" number><option value="1">1</option></select>'
+      })
+      expect(vm.test).toBe('1')
+      trigger(vm.$el.firstChild, 'change')
+      expect(vm.test).toBe(1)
+    })
+
+    it('select + number + multiple', function () {
+      var vm = new Vue({
+        el: el,
+        data: {
+          test: []
+        },
+        template: '<select v-model="test" multiple number><option>1</option><option>2</option></select>'
+      })
+      ;[].forEach.call(el.querySelectorAll('option'), function (o) {
+        o.selected = true
+      })
+      trigger(el.firstChild, 'change')
+      expect(vm.test[0]).toBe(1)
+      expect(vm.test[1]).toBe(2)
+    })
+
+    it('select + number initial value', function () {
+      var vm = new Vue({
+        el: el,
+        data: {
+          test: '1'
+        },
+        template: '<select v-model="test" number><option value="1" selected>1</option></select>'
+      })
+      expect(vm.test).toBe(1)
+    })
+
+    it('select + options + filter', function () {
+      var vm = new Vue({
+        el: el,
+        data: {
+          opts: ['a','b']
+        },
+        filters: {
+          aFilter: function (opts){
+            return opts.map(function (val,i){
+              return val + i
+            })
+          }
+        },
+        template: '<select v-model="test" options="opts | aFilter"></select>'
+      })
+      expect(el.firstChild.innerHTML).toBe(
+          '<option value="a0">a0</option>' +
+          '<option value="b1">b1</option>'
+      )
+    })
+
     it('text', function (done) {
       var vm = new Vue({
         el: el,
@@ -344,7 +418,7 @@ if (_.inBrowser) {
         filters: {
           test: {
             write: function (val) {
-              return val.toUpperCase()
+              return val.toLowerCase()
             }
           }
         },
@@ -355,6 +429,32 @@ if (_.inBrowser) {
       trigger(el.firstChild, 'input')
       _.nextTick(function () {
         expect(el.firstChild.value).toBe('CC')
+        expect(vm.test).toBe('cc')
+        done()
+      })
+    })
+
+    // when there's only write filter, should allow
+    // out of sync between the input field and actual data
+    it('text with only write filter', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          test: 'b'
+        },
+        filters: {
+          test: {
+            write: function (val) {
+              return val.toUpperCase()
+            }
+          }
+        },
+        template: '<input v-model="test | test">'
+      })
+      el.firstChild.value = 'cc'
+      trigger(el.firstChild, 'input')
+      _.nextTick(function () {
+        expect(el.firstChild.value).toBe('cc')
         expect(vm.test).toBe('CC')
         done()
       })
@@ -413,7 +513,7 @@ if (_.inBrowser) {
           test: 'aaa',
           test2: 'bbb'
         },
-        template: '<input v-model="test"><input v-model="test2 | uppsercase">'
+        template: '<input v-model="test"><input v-model="test2 | uppercase">'
       })
       var input = el.firstChild
       var input2 = el.childNodes[1]
@@ -480,6 +580,66 @@ if (_.inBrowser) {
         }
       })
       expect(_.warn).toHaveBeenCalled()
+    })
+
+    it('support jQuery change event', function (done) {
+      // restore jQuery
+      jQuery = $
+      var vm = new Vue({
+        el: el,
+        data: {
+          test: 'b'
+        },
+        template: '<input v-model="test" lazy>'
+      })
+      expect(el.firstChild.value).toBe('b')
+      vm.test = 'a'
+      _.nextTick(function () {
+        expect(el.firstChild.value).toBe('a')
+        el.firstChild.value = 'c'
+        jQuery(el.firstChild).trigger('change')
+        expect(vm.test).toBe('c')
+        vm._directives[0].unbind()
+        el.firstChild.value = 'd'
+        jQuery(el.firstChild).trigger('change')
+        expect(vm.test).toBe('c')
+        // unset jQuery
+        jQuery = null
+        done()
+      })
+    })
+
+    it('support debounce', function (done) {
+      var spy = jasmine.createSpy()
+      var vm = new Vue({
+        el: el,
+        data: {
+          test: 'a'
+        },
+        watch: {
+          test: spy
+        },
+        template: '<input v-model="test" debounce="100">'
+      })
+      el.firstChild.value = 'b'
+      trigger(el.firstChild, 'input')
+      setTimeout(function () {
+        el.firstChild.value = 'c'
+        trigger(el.firstChild, 'input')
+      }, 10)
+      setTimeout(function () {
+        el.firstChild.value = 'd'
+        trigger(el.firstChild, 'input')
+      }, 20)
+      setTimeout(function () {
+        expect(spy.calls.count()).toBe(0)
+        expect(vm.test).toBe('a')
+      }, 30)
+      setTimeout(function () {
+        expect(spy.calls.count()).toBe(1)
+        expect(vm.test).toBe('d')
+        done()
+      }, 200)
     })
 
   })

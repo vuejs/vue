@@ -29,8 +29,8 @@ function Watcher (vm, expression, cb, options) {
   this.id = ++uid // uid for batching
   this.active = true
   options = options || {}
-  this.deep = options.deep
-  this.user = options.user
+  this.deep = !!options.deep
+  this.user = !!options.user
   this.deps = Object.create(null)
   // setup filters if any.
   // We delegate directive filters here to the watcher
@@ -77,10 +77,12 @@ p.get = function () {
   try {
     value = this.getter.call(vm, vm)
   } catch (e) {
-    _.warn(
-      'Error when evaluating expression "' +
-      this.expression + '":\n   ' + e
-    )
+    if (config.warnExpressionErrors) {
+      _.warn(
+        'Error when evaluating expression "' +
+        this.expression + '":\n   ' + e
+      )
+    }
   }
   // "touch" every property so they are all tracked as
   // dependencies for deep watching
@@ -106,10 +108,12 @@ p.set = function (value) {
   try {
     this.setter.call(vm, vm, value)
   } catch (e) {
-    _.warn(
-      'Error when evaluating setter "' +
-      this.expression + '":\n   ' + e
-    )
+    if (config.warnExpressionErrors) {
+      _.warn(
+        'Error when evaluating setter "' +
+        this.expression + '":\n   ' + e
+      )
+    }
   }
 }
 
@@ -158,8 +162,9 @@ p.run = function () {
   if (this.active) {
     var value = this.get()
     if (
-      (typeof value === 'object' && value !== null) ||
-      value !== this.value
+      value !== this.value ||
+      Array.isArray(value) ||
+      this.deep
     ) {
       var oldValue = this.value
       this.value = value

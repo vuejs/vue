@@ -9,6 +9,7 @@ module.exports = {
   // same logic reuse from v-if
   compile: vIf.compile,
   teardown: vIf.teardown,
+  unbind: vIf.unbind,
 
   bind: function () {
     var el = this.el
@@ -37,7 +38,7 @@ module.exports = {
     var partial = this.vm.$options.partials[id]
     _.assertAsset(partial, 'partial', id)
     if (partial) {
-      this.compile(templateParser.parse(partial))
+      this.compile(templateParser.parse(partial, true))
     }
   }
 

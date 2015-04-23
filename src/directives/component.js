@@ -26,14 +26,22 @@ module.exports = {
       // we simply remove it from the DOM and save it in a
       // cache object, with its constructor id as the key.
       this.keepAlive = this._checkParam('keep-alive') != null
+      // check ref
+      this.refID = _.attr(this.el, 'ref')
       if (this.keepAlive) {
         this.cache = {}
+      }
+      // check inline-template
+      if (this._checkParam('inline-template') !== null) {
+        // extract inline template as a DocumentFragment
+        this.template = _.extractContent(this.el, true)
       }
       // if static, build right now.
       if (!this._isDynamicLiteral) {
         this.resolveCtor(this.expression)
-        this.childVM = this.build()
-        this.childVM.$before(this.ref)
+        var child = this.build()
+        child.$before(this.ref)
+        this.setCurrent(child)
       } else {
         // check dynamic component params
         this.readyEvent = this._checkParam('wait-for')
@@ -78,6 +86,7 @@ module.exports = {
     if (this.Ctor) {
       var child = vm.$addChild({
         el: el,
+        template: this.template,
         _asComponent: true
       }, this.Ctor)
       if (this.keepAlive) {
@@ -110,8 +119,7 @@ module.exports = {
    * @param {Function} cb
    */
 
-  removeCurrent: function (cb) {
-    var child = this.childVM
+  remove: function (child, cb) {
     var keepAlive = this.keepAlive
     if (child) {
       child.$remove(function () {
@@ -132,8 +140,8 @@ module.exports = {
     if (!value) {
       // just destroy and remove current
       this.unbuild()
-      this.removeCurrent()
-      this.childVM = null
+      this.remove(this.childVM)
+      this.unsetCurrent()
     } else {
       this.resolveCtor(value)
       this.unbuild()
@@ -158,23 +166,48 @@ module.exports = {
 
   swapTo: function (target) {
     var self = this
+    var current = this.childVM
+    this.unsetCurrent()
+    this.setCurrent(target)
     switch (self.transMode) {
       case 'in-out':
         target.$before(self.ref, function () {
-          self.removeCurrent()
-          self.childVM = target
+          self.remove(current)
         })
         break
       case 'out-in':
-        self.removeCurrent(function () {
+        self.remove(current, function () {
           target.$before(self.ref)
-          self.childVM = target
         })
         break
       default:
-        self.removeCurrent()
+        self.remove(current)
         target.$before(self.ref)
-        self.childVM = target
+    }
+  },
+
+  /**
+   * Set childVM and parent ref
+   */
+  
+  setCurrent: function (child) {
+    this.childVM = child
+    var refID = child._refID || this.refID
+    if (refID) {
+      this.vm.$[refID] = child
+    }
+  },
+
+  /**
+   * Unset childVM and parent ref
+   */
+
+  unsetCurrent: function () {
+    var child = this.childVM
+    this.childVM = null
+    var refID = (child && child._refID) || this.refID
+    if (refID) {
+      this.vm.$[refID] = null
     }
   },
 

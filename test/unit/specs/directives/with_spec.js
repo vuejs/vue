@@ -53,7 +53,7 @@ if (_.inBrowser) {
             a: 'A'
           }
         },
-        template: '<div v-component="test" v-with="testt:test,bb:b"></div>',
+        template: '<div v-component="test" v-with="testt:test,bb:b" v-ref="child"></div>',
         components: {
           test: {
             template: '{{testt.a}} {{bb}}'
@@ -76,7 +76,16 @@ if (_.inBrowser) {
           }
           _.nextTick(function () {
             expect(el.firstChild.textContent).toBe('AAAA BBB')
-            done()
+            // test two-way
+            vm.$.child.bb = 'B'
+            vm.$.child.testt = { a: 'A' }
+            _.nextTick(function () {
+              expect(el.firstChild.textContent).toBe('A B')
+              expect(vm.test.a).toBe('A')
+              expect(vm.test).toBe(vm.$.child.testt)
+              expect(vm.b).toBe('B')
+              done()
+            })
           })
         })
       })
@@ -122,6 +131,25 @@ if (_.inBrowser) {
         el: el
       })
       expect(_.warn).toHaveBeenCalled()
+    })
+
+    it('block instance with replace:true', function () {
+      var vm = new Vue({
+        el: el,
+        template: '<div v-component="test" v-with="b:a" c="{{d}}"></div>',
+        data: {
+          a: 'AAA',
+          d: 'DDD'
+        },
+        components: {
+          test: {
+            paramAttributes: ['c'],
+            template: '<p>{{b}}</p><p>{{c}}</p>',
+            replace: true
+          }
+        }
+      })
+      expect(el.innerHTML).toBe('<!--v-start--><p>AAA</p><p>DDD</p><!--v-end--><!--v-component-->')
     })
 
   })

@@ -16,7 +16,9 @@ var filterRE = /[^|]\|[^|]/
 exports.$get = function (exp) {
   var res = expParser.parse(exp)
   if (res) {
-    return res.get.call(this, this)
+    try {
+      return res.get.call(this, this)
+    } catch (e) {}
   }
 }
 

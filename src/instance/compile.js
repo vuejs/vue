@@ -39,10 +39,19 @@ exports._compile = function (el) {
       parentOptions._skipAttrs = null
 
       if (content) {
+        var ol = parent._children.length
         var contentLinkFn =
           compile(content, parentOptions, true)
         // call content linker now, before transclusion
         this._contentUnlinkFn = contentLinkFn(parent, content)
+        // mark all compiled nodes as transcluded, so that
+        // directives that do partial compilation, e.g. v-if
+        // and v-partial can detect them and persist them
+        // through re-compilations.
+        for (var i = 0; i < content.childNodes.length; i++) {
+          content.childNodes[i]._isContent = true
+        }
+        this._transCpnts = parent._children.slice(ol)
       }
       // tranclude, this possibly replaces original
       el = transclude(el, options)
@@ -73,7 +82,8 @@ exports._compile = function (el) {
 exports._initElement = function (el) {
   if (el instanceof DocumentFragment) {
     this._isBlock = true
-    this.$el = this._blockStart = el.firstChild
+    this._blockStart = el.firstChild
+    this.$el = el.childNodes[1]
     this._blockEnd = el.lastChild
     this._blockFragment = el
   } else {
@@ -122,11 +132,9 @@ exports._destroy = function (remove, deferCleanup) {
     parent._children.splice(i, 1)
   }
   // destroy all children.
-  if (this._children) {
-    i = this._children.length
-    while (i--) {
-      this._children[i].$destroy()
-    }
+  i = this._children.length
+  while (i--) {
+    this._children[i].$destroy()
   }
   // teardown parent linkers
   if (this._containerUnlinkFn) {
@@ -143,8 +151,12 @@ exports._destroy = function (remove, deferCleanup) {
     this._directives[i]._teardown()
   }
   // teardown all user watchers.
+  var watcher
   for (i in this._userWatchers) {
-    this._userWatchers[i].teardown()
+    watcher = this._userWatchers[i]
+    if (watcher) {
+      watcher.teardown()
+    }
   }
   // remove reference to self on $el
   if (this.$el) {
@@ -178,6 +190,7 @@ exports._cleanup = function () {
   this.$parent =
   this.$root =
   this._children =
+  this._transCpnts =
   this._directives = null
   // call the last hook...
   this._isDestroyed = true

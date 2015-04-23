@@ -6,41 +6,67 @@ module.exports = {
   priority: 900,
 
   bind: function () {
-    var vm = this.vm
-    if (this.el !== vm.$el) {
+
+    var child = this.vm
+    var parent = child.$parent
+    var childKey = this.arg || '$data'
+    var parentKey = this.expression
+
+    if (this.el !== child.$el) {
       _.warn(
         'v-with can only be used on instance root elements.'
       )
-    } else if (!vm.$parent) {
+    } else if (!parent) {
       _.warn(
         'v-with must be used on an instance with a parent.'
       )
     } else {
-      var key = this.arg
-      this.watcher = new Watcher(
-        vm.$parent,
-        this.expression,
-        key
-          ? function (val) {
-              vm.$set(key, val)
-            }
-          : function (val) {
-              vm.$data = val
-            }
-      )
-      // initial set
-      var initialVal = this.watcher.value
-      if (key) {
-        vm.$set(key, initialVal)
-      } else {
-        vm.$data = initialVal
+
+      // simple lock to avoid circular updates.
+      // without this it would stabilize too, but this makes
+      // sure it doesn't cause other watchers to re-evaluate.
+      var locked = false
+      var lock = function () {
+        locked = true
+        _.nextTick(unlock)
       }
+      var unlock = function () {
+        locked = false
+      }
+
+      this.parentWatcher = new Watcher(
+        parent,
+        parentKey,
+        function (val) {
+          if (!locked) {
+            lock()
+            child.$set(childKey, val)
+          }
+        }
+      )
+      
+      // set the child initial value first, before setting
+      // up the child watcher to avoid triggering it
+      // immediately.
+      child.$set(childKey, this.parentWatcher.value)
+
+      this.childWatcher = new Watcher(
+        child,
+        childKey,
+        function (val) {
+          if (!locked) {
+            lock()
+            parent.$set(parentKey, val)
+          }
+        }
+      )
     }
   },
 
   unbind: function () {
-    if (this.watcher) {
-      this.watcher.teardown()
+    if (this.parentWatcher) {
+      this.parentWatcher.teardown()
+      this.childWatcher.teardown()
     }
   }
 

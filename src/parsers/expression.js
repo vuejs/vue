@@ -4,7 +4,7 @@ var Cache = require('../cache')
 var expressionCache = new Cache(1000)
 
 var keywords =
-  'Math,break,case,catch,continue,debugger,default,' +
+  'Math,Date,break,case,catch,continue,debugger,default,' +
   'delete,do,else,false,finally,for,function,if,in,' +
   'instanceof,new,null,return,switch,this,throw,true,try,' +
   'typeof,var,void,while,with,undefined,abstract,boolean,' +
@@ -16,11 +16,12 @@ var keywords =
 
 var wsRE = /\s/g
 var newlineRE = /\n/g
-var saveRE = /[\{,]\s*[\w\$_]+\s*:|'[^']*'|"[^"]*"/g
+var saveRE = /[\{,]\s*[\w\$_]+\s*:|('[^']*'|"[^"]*")|new /g
 var restoreRE = /"(\d+)"/g
 var pathTestRE = /^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\]|\[\d+\])*$/
 var pathReplaceRE = /[^\w$\.]([A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\])*)/g
 var keywordsRE = new RegExp('^(' + keywords.replace(/,/g, '\\b|') + '\\b)')
+var booleanLiteralRE = /^(true|false)$/
 
 /**
  * Save / Rewrite / Restore
@@ -37,13 +38,23 @@ var saved = []
 /**
  * Save replacer
  *
+ * The save regex can match two possible cases:
+ * 1. An opening object literal
+ * 2. A string
+ * If matched as a plain string, we need to escape its
+ * newlines, since the string needs to be preserved when
+ * generating the function body.
+ *
  * @param {String} str
+ * @param {String} isString - str if matched as a string
  * @return {String} - placeholder with index
  */
 
-function save (str) {
+function save (str, isString) {
   var i = saved.length
-  saved[i] = str.replace(newlineRE, '\\n')
+  saved[i] = isString
+    ? str.replace(newlineRE, '\\n')
+    : str
   return '"' + i + '"'
 }
 
@@ -215,9 +226,14 @@ exports.parse = function (exp, needSet) {
   // we do a simple path check to optimize for them.
   // the check fails valid paths with unusal whitespaces,
   // but that's too rare and we don't care.
-  var res = pathTestRE.test(exp)
-    ? compilePathFns(exp)
-    : compileExpFns(exp, needSet)
+  // also skip boolean literals and paths that start with
+  // global "Math"
+  var res =
+    pathTestRE.test(exp) &&
+    !booleanLiteralRE.test(exp) &&
+    exp.slice(0, 5) !== 'Math.'
+      ? compilePathFns(exp)
+      : compileExpFns(exp, needSet)
   expressionCache.put(exp, res)
   return res
 }

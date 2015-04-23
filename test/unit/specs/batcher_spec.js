@@ -1,3 +1,4 @@
+var _ = require('../../../src/util')
 var batcher = require('../../../src/batcher')
 var nextTick = require('../../../src/util').nextTick
 
@@ -7,6 +8,7 @@ describe('Batcher', function () {
 
   beforeEach(function () {
     spy = jasmine.createSpy('batcher')
+    spyOn(_, 'warn')
   })
   
   it('push', function (done) {
@@ -76,6 +78,23 @@ describe('Batcher', function () {
       expect(vals[0]).toBe(1)
       expect(vals[1]).toBe(2)
       expect(vals[2]).toBe(3)
+      done()
+    })
+  })
+
+  it('warn against infinite update loops', function (done) {
+    var count = 0
+    var job = {
+      id: 1,
+      run: function () {
+        count++
+        batcher.push(job)
+      }
+    }
+    batcher.push(job)
+    nextTick(function () {
+      expect(count).not.toBe(0)
+      expect(_.warn).toHaveBeenCalled()
       done()
     })
   })

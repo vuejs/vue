@@ -7,7 +7,12 @@ if (_.inBrowser) {
     var el
     beforeEach(function () {
       el = document.createElement('div')
+      document.body.appendChild(el)
       spyOn(_, 'warn')
+    })
+
+    afterEach(function () {
+      document.body.removeChild(el)
     })
 
     it('static', function () {
@@ -41,6 +46,25 @@ if (_.inBrowser) {
         }
       })
       expect(el.innerHTML).toBe('<p>123</p><!--v-component-->')
+    })
+
+    it('inline-template', function () {
+      var vm = new Vue({
+        el: el,
+        template: '<div v-component="test" inline-template>{{a}}</div>',
+        data: {
+          a: 'parent'
+        },
+        components: {
+          test: {
+            data: function () {
+              return { a: 'child' }
+            },
+            template: 'child option template'
+          }
+        }
+      })
+      expect(el.innerHTML).toBe('<div>child</div><!--v-component-->')
     })
 
     it('block replace', function () {
@@ -189,7 +213,7 @@ if (_.inBrowser) {
         }
       })
       expect(el.textContent).toBe('')
-      expect(vm._children).toBeNull()
+      expect(vm._children.length).toBe(0)
       expect(vm._directives.length).toBe(1) // v-if
       vm.ok = true
       _.nextTick(function () {
@@ -248,15 +272,6 @@ if (_.inBrowser) {
       var spy1 = jasmine.createSpy('enter')
       var spy2 = jasmine.createSpy('leave')
       var next
-      // === IMPORTANT ===
-      // PhantomJS always returns false when calling
-      // Element.contains() on a comment node. This causes
-      // transitions to be skipped. Monkey patching here
-      // isn't ideal but does the job...
-      var inDoc = _.inDoc
-      _.inDoc = function () {
-        return true
-      }
       var vm = new Vue({
         el: el,
         data: {
@@ -289,8 +304,6 @@ if (_.inBrowser) {
         next()
         expect(spy2).toHaveBeenCalled()
         expect(el.textContent).toBe('BBB')
-        // clean up
-        _.inDoc = inDoc
         done()
       })
     })
@@ -299,10 +312,6 @@ if (_.inBrowser) {
       var spy1 = jasmine.createSpy('enter')
       var spy2 = jasmine.createSpy('leave')
       var next
-      var inDoc = _.inDoc
-      _.inDoc = function () {
-        return true
-      }
       var vm = new Vue({
         el: el,
         data: {
@@ -335,8 +344,6 @@ if (_.inBrowser) {
         next()
         expect(spy2).toHaveBeenCalled()
         expect(el.textContent).toBe('BBB')
-        // clean up
-        _.inDoc = inDoc
         done()
       })
     })

@@ -48,6 +48,7 @@ function transcludeTemplate (el, options) {
     if (options.replace) {
       if (frag.childNodes.length > 1) {
         transcludeContent(frag, rawContent)
+        _.copyAttributes(el, frag.firstChild)
         return frag
       } else {
         var replacer = frag.firstChild
@@ -78,6 +79,11 @@ function transcludeContent (el, raw) {
   var i = outlets.length
   if (!i) return
   var outlet, select, selected, j, main
+
+  function isDirectChild (node) {
+    return node.parentNode === raw
+  }
+
   // first pass, collect corresponding content
   // for each outlet.
   while (i--) {
@@ -86,11 +92,15 @@ function transcludeContent (el, raw) {
       select = outlet.getAttribute('select')
       if (select) {  // select content
         selected = raw.querySelectorAll(select)
-        outlet.content = _.toArray(
-          selected.length
-            ? selected
-            : outlet.childNodes
-        )
+        if (selected.length) {
+          // according to Shadow DOM spec, `select` can
+          // only select direct children of the host node.
+          // enforcing this also fixes #786.
+          selected = [].filter.call(selected, isDirectChild)
+        }
+        outlet.content = selected.length
+          ? selected
+          : _.toArray(outlet.childNodes)
       } else { // default content
         main = outlet
       }

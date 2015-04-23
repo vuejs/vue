@@ -1,5 +1,6 @@
 var _ = require('../../util')
 var Watcher = require('../../watcher')
+var dirParser = require('../../parsers/directive')
 
 module.exports = {
 
@@ -11,11 +12,17 @@ module.exports = {
     if (optionsParam) {
       initOptions.call(this, optionsParam)
     }
+    this.number = this._checkParam('number') != null
     this.multiple = el.hasAttribute('multiple')
     this.listener = function () {
       var value = self.multiple
         ? getMultiValue(el)
         : el.value
+      value = self.number
+        ? _.isArray(value)
+          ? value.map(_.toNumber)
+          : _.toNumber(value)
+        : value
       self.set(value, true)
     }
     _.on(el, 'change', this.listener)
@@ -55,6 +62,7 @@ module.exports = {
 
 function initOptions (expression) {
   var self = this
+  var descriptor = dirParser.parse(expression)[0]
   function optionUpdateWatcher (value) {
     if (_.isArray(value)) {
       self.el.innerHTML = ''
@@ -68,9 +76,12 @@ function initOptions (expression) {
   }
   this.optionWatcher = new Watcher(
     this.vm,
-    expression,
+    descriptor.expression,
     optionUpdateWatcher,
-    { deep: true }
+    {
+      deep: true,
+      filters: _.resolveFilters(this.vm, descriptor.filters)
+    }
   )
   // update with initial value
   optionUpdateWatcher(this.optionWatcher.value)
@@ -123,8 +134,10 @@ function checkInitialValue () {
       }
     }
   }
-  if (initValue) {
-    this._initValue = initValue
+  if (typeof initValue !== 'undefined') {
+    this._initValue = this.number
+      ? _.toNumber(initValue)
+      : initValue
   }
 }
 

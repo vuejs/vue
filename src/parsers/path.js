@@ -225,10 +225,7 @@ function formatAccessor(key) {
  */
 
 exports.compileGetter = function (path) {
-  var body =
-    'try{return o' +
-    path.map(formatAccessor).join('') +
-    '}catch(e){};'
+  var body = 'return o' + path.map(formatAccessor).join('')
   return new Function('o', body)
 }
 

@@ -119,7 +119,7 @@ describe('Text Parser', function () {
   it('tokens to expression with filters, multiple expressions', function () {
     var tokens = textParser.parse('a {{b | c d}} e')
     var exp = textParser.tokensToExp(tokens)
-    expect(exp).toBe('"a "+this.$options.filters["c"].apply(this,[b,"d"])+" e"')
+    expect(exp).toBe('"a "+(this.$options.filters["c"].read||this.$options.filters["c"]).apply(this,[b,"d"])+" e"')
   })
 
 })

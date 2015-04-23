@@ -210,21 +210,18 @@ if (_.inBrowser && !_.isIE9) {
         el.__v_trans.id = 'test'
         // cascaded class style
         el.classList.add('test')
-        // wait a tick before applying the transition
-        // because doing so in the same frame won't trigger
-        // transition
+        // force a layout here so the transition can be triggered
+        var f = el.offsetHeight
+        transition.apply(el, -1, op, vm, cb)
         _.nextTick(function () {
-          transition.apply(el, -1, op, vm, cb)
-          _.nextTick(function () {
-            expect(op).not.toHaveBeenCalled()
-            expect(cb).not.toHaveBeenCalled()
-            expect(el.classList.contains('test-leave')).toBe(true)
-            _.on(el, _.transitionEndEvent, function () {
-              expect(op).toHaveBeenCalled()
-              expect(cb).toHaveBeenCalled()
-              expect(el.classList.contains('test-leave')).toBe(false)
-              done()
-            })
+          expect(op).not.toHaveBeenCalled()
+          expect(cb).not.toHaveBeenCalled()
+          expect(el.classList.contains('test-leave')).toBe(true)
+          _.on(el, _.transitionEndEvent, function () {
+            expect(op).toHaveBeenCalled()
+            expect(cb).toHaveBeenCalled()
+            expect(el.classList.contains('test-leave')).toBe(false)
+            done()
           })
         })
       })
@@ -308,18 +305,13 @@ if (_.inBrowser && !_.isIE9) {
       var el, vm, op, cb, def, emitter
       beforeEach(function () {
         emitter = {}
+        def = {}
         el = document.createElement('div')
-        el.__v_trans = { id: 'test' }
+        el.__v_trans = { id: 'test', fns: def }
         document.body.appendChild(el)
         op = jasmine.createSpy('js transition op')
         cb = jasmine.createSpy('js transition cb')
-        def = {}
-        vm = new Vue({
-          el: el,
-          transitions: {
-            test: def
-          }
-        })
+        vm = new Vue({ el: el })
       })
 
       afterEach(function () {
@@ -346,6 +338,20 @@ if (_.inBrowser && !_.isIE9) {
         }
         transition.apply(el, 1, op, vm, cb)
         expect(spy).toHaveBeenCalledWith(vm)
+      })
+
+      it('this context set to el instance', function () {
+        var spy = jasmine.createSpy('js enter this')
+        var vm2 = el.__vue__ = {}
+        def.enter = function (e, done) {
+          expect(e).toBe(el)
+          expect(op).toHaveBeenCalled()
+          done()
+          expect(cb).toHaveBeenCalled()
+          spy(this)
+        }
+        transition.apply(el, 1, op, vm, cb)
+        expect(spy).toHaveBeenCalledWith(vm2)
       })
 
       it('leave', function () {

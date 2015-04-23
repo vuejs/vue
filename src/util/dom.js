@@ -2,6 +2,11 @@ var config = require('../config')
 
 /**
  * Check if a node is in the document.
+ * Note: document.documentElement.contains should work here
+ * but always returns false for comment nodes in phantomjs,
+ * making unit tests difficult. This is fixed byy doing the
+ * contains() check on the node's parentNode instead of
+ * the node itself.
  *
  * @param {Node} node
  * @return {Boolean}
@@ -12,7 +17,10 @@ var doc =
   document.documentElement
 
 exports.inDoc = function (node) {
-  return doc && doc.contains(node)
+  var parent = node && node.parentNode
+  return doc === node ||
+    doc === parent ||
+    !!(parent && parent.nodeType === 1 && (doc.contains(parent)))
 }
 
 /**
@@ -35,7 +43,7 @@ exports.attr = function (node, attr) {
  * Insert el before target
  *
  * @param {Element} el
- * @param {Element} target 
+ * @param {Element} target
  */
 
 exports.before = function (el, target) {
@@ -46,7 +54,7 @@ exports.before = function (el, target) {
  * Insert el after target
  *
  * @param {Element} el
- * @param {Element} target 
+ * @param {Element} target
  */
 
 exports.after = function (el, target) {
@@ -71,7 +79,7 @@ exports.remove = function (el) {
  * Prepend el to target
  *
  * @param {Element} el
- * @param {Element} target 
+ * @param {Element} target
  */
 
 exports.prepend = function (el, target) {
@@ -180,14 +188,17 @@ exports.removeClass = function (el, cls) {
  * container div
  *
  * @param {Element} el
+ * @param {Boolean} asFragment
  * @return {Element}
  */
 
-exports.extractContent = function (el) {
+exports.extractContent = function (el, asFragment) {
   var child
   var rawContent
   if (el.hasChildNodes()) {
-    rawContent = document.createElement('div')
+    rawContent = asFragment
+      ? document.createDocumentFragment()
+      : document.createElement('div')
     /* jshint boss:true */
     while (child = el.firstChild) {
       rawContent.appendChild(child)

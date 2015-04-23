@@ -27,10 +27,13 @@ describe('Util - Language Enhancement', function () {
   it('camelize', function () {
     expect(_.camelize('abc')).toBe('abc')
     expect(_.camelize('some-long-name')).toBe('someLongName')
-    expect(_.camelize('what_about_this')).toBe('whatAboutThis')
-    expect(_.camelize('abc', true)).toBe('Abc')
-    expect(_.camelize('some-long-name', true)).toBe('SomeLongName')
-    expect(_.camelize('what_about_this', true)).toBe('WhatAboutThis')
+  })
+
+  it('classify', function () {
+    expect(_.classify('abc')).toBe('Abc')
+    expect(_.classify('some-long-name')).toBe('SomeLongName')
+    expect(_.classify('what_about_this')).toBe('WhatAboutThis')
+    expect(_.classify('how/about/that')).toBe('HowAboutThat')
   })
 
   it('bind', function () {
@@ -113,4 +116,20 @@ describe('Util - Language Enhancement', function () {
     expect(desc.enumerable).toBe(true)
   })
 
+  it('debounce', function (done) {
+    var count = 0
+    var fn = _.debounce(function () {
+      count++
+    }, 100)
+    fn()
+    setTimeout(fn, 10)
+    setTimeout(fn, 20)
+    setTimeout(function () {
+      expect(count).toBe(0)
+    }, 30)
+    setTimeout(function () {
+      expect(count).toBe(1)
+      done()
+    }, 200)
+  })
 })

@@ -28,7 +28,7 @@ if (_.inBrowser) {
       })
       // lazy instantitation
       expect(el.innerHTML).toBe(wrap(''))
-      expect(vm._children).toBeNull()
+      expect(vm._children.length).toBe(0)
       vm.test = true
       _.nextTick(function () {
         expect(el.innerHTML).toBe(wrap('<div><div>A</div><!--v-component--></div>'))
@@ -91,7 +91,7 @@ if (_.inBrowser) {
       })
       vm.$appendTo(document.body)
       expect(el.innerHTML).toBe(wrap(''))
-      expect(vm._children).toBeNull()
+      expect(vm._children.length).toBe(0)
       vm.ok = true
       _.nextTick(function () {
         expect(el.innerHTML).toBe(wrap('<div>123</div><!--v-component-->'))
@@ -127,7 +127,7 @@ if (_.inBrowser) {
         }
       })
       expect(el.innerHTML).toBe(wrap(''))
-      expect(vm._children).toBeNull()
+      expect(vm._children.length).toBe(0)
       // toggle if with lazy instantiation
       vm.ok = true
       _.nextTick(function () {
@@ -178,6 +178,65 @@ if (_.inBrowser) {
         el: el
       })
       expect(_.warn).toHaveBeenCalled()
+    })
+
+    it('v-if with content transclusion', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          a: 1,
+          show: true
+        },
+        template: '<div v-component="test" show="{{show}}">{{a}}</div>',
+        components: {
+          test: {
+            paramAttributes: ['show'],
+            template: '<div v-if="show"><content></cotent></div>'
+          }
+        }
+      })
+      expect(el.textContent).toBe('1')
+      vm.a = 2
+      _.nextTick(function () {
+        expect(el.textContent).toBe('2')
+        vm.show = false
+        _.nextTick(function () {
+          expect(el.textContent).toBe('')
+          vm.show = true
+          vm.a = 3
+          _.nextTick(function () {
+            expect(el.textContent).toBe('3')
+            done()
+          })
+        })
+      })
+    })
+
+    it('call attach/detach for transcluded components', function (done) {
+      document.body.appendChild(el)
+      var attachSpy = jasmine.createSpy('attached')
+      var detachSpy = jasmine.createSpy('detached')
+      var vm = new Vue({
+        el: el,
+        data: { show: true },
+        template: '<div v-component="outer"><div v-component="transcluded"></div></div>',
+        components: {
+          outer: {
+            template: '<div v-if="$parent.show"><content></content></div>'
+          },
+          transcluded: {
+            template: 'transcluded',
+            attached: attachSpy,
+            detached: detachSpy
+          }
+        }
+      })
+      expect(attachSpy).toHaveBeenCalled()
+      vm.show = false
+      _.nextTick(function () {
+        expect(detachSpy).toHaveBeenCalled()
+        done()
+      })
     })
 
   })

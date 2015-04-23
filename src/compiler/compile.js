@@ -25,11 +25,17 @@ var templateParser = require('../parsers/template')
  */
 
 module.exports = function compile (el, options, partial, asParent) {
+  var isBlock = el.nodeType === 11
   var params = !partial && options.paramAttributes
+  // if el is a fragment, this is a block instance
+  // and paramAttributes will be stored on the first
+  // element in the template. (excluding the _blockStart
+  // comment node)
+  var paramsEl = isBlock ? el.childNodes[1] : el
   var paramsLinkFn = params
-    ? compileParamAttributes(el, params, options)
+    ? compileParamAttributes(paramsEl, params, options)
     : null
-  var nodeLinkFn = el instanceof DocumentFragment
+  var nodeLinkFn = isBlock
     ? null
     : compileNode(el, options, asParent)
   var childLinkFn =
@@ -51,9 +57,14 @@ module.exports = function compile (el, options, partial, asParent) {
 
   return function link (vm, el) {
     var originalDirCount = vm._directives.length
-    if (paramsLinkFn) paramsLinkFn(vm, el)
+    if (paramsLinkFn) {
+      var paramsEl = isBlock ? el.childNodes[1] : el
+      paramsLinkFn(vm, paramsEl)
+    }
+    // cache childNodes before linking parent, fix #657
+    var childNodes = _.toArray(el.childNodes)
     if (nodeLinkFn) nodeLinkFn(vm, el)
-    if (childLinkFn) childLinkFn(vm, el.childNodes)
+    if (childLinkFn) childLinkFn(vm, childNodes)
 
     /**
      * If this is a partial compile, the linker function
@@ -300,18 +311,18 @@ function compileNodeList (nodeList, options) {
 
 function makeChildLinkFn (linkFns) {
   return function childLinkFn (vm, nodes) {
-    // stablize nodes
-    nodes = _.toArray(nodes)
     var node, nodeLinkFn, childrenLinkFn
     for (var i = 0, n = 0, l = linkFns.length; i < l; n++) {
       node = nodes[n]
       nodeLinkFn = linkFns[i++]
       childrenLinkFn = linkFns[i++]
+      // cache childNodes before linking parent, fix #657
+      var childNodes = _.toArray(node.childNodes)
       if (nodeLinkFn) {
         nodeLinkFn(vm, node)
       }
       if (childrenLinkFn) {
-        childrenLinkFn(vm, node.childNodes)
+        childrenLinkFn(vm, childNodes)
       }
     }
   }
@@ -333,6 +344,15 @@ function compileParamAttributes (el, attrs, options) {
   var name, value, param
   while (i--) {
     name = attrs[i]
+    if (/[A-Z]/.test(name)) {
+      _.warn(
+        'You seem to be using camelCase for a paramAttribute, ' +
+        'but HTML doesn\'t differentiate between upper and ' +
+        'lower case. You should use hyphen-delimited ' +
+        'attribute names. For more info see ' +
+        'http://vuejs.org/api/options.html#paramAttributes'
+      )
+    }
     value = el.getAttribute(name)
     if (value !== null) {
       param = {

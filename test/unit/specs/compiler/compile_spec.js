@@ -149,7 +149,7 @@ if (_.inBrowser) {
 
     it('param attributes', function () {
       var options = merge(Vue.options, {
-        paramAttributes: ['a', 'data-some-attr', 'some-other-attr', 'invalid']
+        paramAttributes: ['a', 'data-some-attr', 'some-other-attr', 'invalid', 'camelCase']
       })
       var def = Vue.options.directives['with']
       el.setAttribute('a', '1')
@@ -165,8 +165,8 @@ if (_.inBrowser) {
       expect(args[1]).toBe(el)
       expect(args[2].arg).toBe('someAttr')
       expect(args[3]).toBe(def)
-      // invalid should've warn
-      expect(_.warn).toHaveBeenCalled()
+      // invalid and camelCase should've warn
+      expect(_.warn.calls.count()).toBe(2)
       // literal should've called vm.$set
       expect(vm.$set).toHaveBeenCalledWith('a', '1')
       expect(vm.$set).toHaveBeenCalledWith('someOtherAttr', '2')

@@ -169,7 +169,8 @@ function inlineFilters (exp) {
         var args = filter.args
           ? ',"' + filter.args.join('","') + '"'
           : ''
-        exp = 'this.$options.filters["' + filter.name + '"]' +
+        filter = 'this.$options.filters["' + filter.name + '"]'
+        exp = '(' + filter + '.read||' + filter + ')' +
           '.apply(this,[' + exp + args + '])'
       }
       return exp

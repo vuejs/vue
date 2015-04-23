@@ -12,9 +12,12 @@
     <script type="text/x-template" id="polygraph-template">
       <polygon v-attr="points:points"></polygon>
       <circle cx="100" cy="100" r="80"></circle>
-      <text v-repeat="stats" v-component="axis-label" v-attr="x:point.x, y:point.y">
-        {{label}}
-      </text>
+      <text v-repeat="stats" v-component="axis-label"></text>
+    </script>
+
+    <!-- template for the axis label component. -->
+    <script type="text/x-template" id="axis-label-template">
+      <text v-attr="x:point.x, y:point.y">{{label}}</text>
     </script>
 
     <!-- demo root element -->
