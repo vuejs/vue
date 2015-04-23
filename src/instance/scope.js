@@ -120,7 +120,7 @@ exports._digest = function () {
   i = children.length
   while (i--) {
     var child = children[i]
-    if (!child._repeat && child.$options.inherit) {
+    if (child.$options.inherit) {
       child._digest()
     }
   }
