@@ -204,5 +204,40 @@ if (_.inBrowser) {
       expect(vm._bindDir.calls.count()).toBe(0)
     })
 
+    it('should handle nested transclusions', function (done) {
+      vm = new Vue({
+        el: el,
+        template:
+          '<div v-component="a">' +
+            '<div v-component="b">' +
+              '<div v-repeat="list">{{$value}}</div>' +
+            '</div>' +
+          '</div>',
+        data: {
+          list: [1,2]
+        },
+        components: {
+          a: { template: '<content></content>' },
+          b: { template: '<content></content>' }
+        }
+      })
+      expect(el.innerHTML).toBe(
+        '<div><div>' +
+          '<div>1</div><div>2</div><!--v-repeat-->' +
+        '</div><!--v-component-->' +
+        '</div><!--v-component-->'
+      )
+      vm.list.push(3)
+      _.nextTick(function () {
+        expect(el.innerHTML).toBe(
+          '<div><div>' +
+            '<div>1</div><div>2</div><div>3</div><!--v-repeat-->' +
+          '</div><!--v-component-->' +
+          '</div><!--v-component-->'
+        )
+        done()
+      })
+    })
+
   })
 }

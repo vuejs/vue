@@ -50,7 +50,7 @@ function compile (el, options, partial, transcluded) {
    * @return {Function|undefined}
    */
 
-  return function link (vm, el) {
+  function linkFn (vm, el) {
     var originalDirCount = vm._directives.length
     var parentOriginalDirCount =
       vm.$parent && vm.$parent._directives.length
@@ -65,6 +65,7 @@ function compile (el, options, partial, transcluded) {
     // passed down.
     var source = transcluded ? vm.$parent : vm
     var host = transcluded ? vm : undefined
+    // link
     if (nodeLinkFn) nodeLinkFn(source, el, host)
     if (childLinkFn) childLinkFn(source, childNodes, host)
 
@@ -97,6 +98,14 @@ function compile (el, options, partial, transcluded) {
       }
     }
   }
+
+  // transcluded linkFns are terminal, because it takes
+  // over the entire sub-tree.
+  if (transcluded) {
+    linkFn.terminal = true
+  }
+
+  return linkFn
 }
 
 /**
