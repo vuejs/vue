@@ -188,6 +188,7 @@ function insertContentAt (outlet, contents) {
  */
 
 function extractAttrs (attrs) {
+  if (!attrs) return null
   var res = {}
   var vwith = config.prefix + 'with'
   var i = attrs.length

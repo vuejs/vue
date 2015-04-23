@@ -107,21 +107,14 @@ module.exports = {
       if (!tokens) { // static component
         var Ctor = this.Ctor = options.components[id]
         _.assertAsset(Ctor, 'component', id)
-        // If there's no parent scope directives and no
-        // content to be transcluded, we can optimize the
-        // rendering by pre-transcluding + compiling here
-        // and provide a link function to every instance.
-        if (!this.el.hasChildNodes() &&
-            !this.el.hasAttributes()) {
-          // merge an empty object with owner vm as parent
-          // so child vms can access parent assets.
-          var merged = mergeOptions(Ctor.options, {}, {
-            $parent: this.vm
-          })
-          merged.template = this.inlineTempalte || merged.template
-          this.template = transclude(this.template, merged)
-          this._linkFn = compile(this.template, merged)
-        }
+        var merged = mergeOptions(Ctor.options, {}, {
+          $parent: this.vm
+        })
+        merged.template = this.inlineTempalte || merged.template
+        merged._asComponent = true
+        merged._parent = this.vm
+        this.template = transclude(this.template, merged)
+        this._linkFn = compile(this.template, merged)
       } else {
         // to be resolved later
         var ctorExp = textParser.tokensToExp(tokens)
