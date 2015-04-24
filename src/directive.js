@@ -51,7 +51,7 @@ var p = Directive.prototype
  */
 
 p._bind = function (def) {
-  if (this.name !== 'cloak' && this.el.removeAttribute) {
+  if (this.name !== 'cloak' && this.el && this.el.removeAttribute) {
     this.el.removeAttribute(config.prefix + this.name)
   }
   if (typeof def === 'function') {

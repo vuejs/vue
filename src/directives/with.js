@@ -12,7 +12,7 @@ module.exports = {
     var childKey = this.arg || '$data'
     var parentKey = this.expression
 
-    if (this.el !== child.$el) {
+    if (this.el && this.el !== child.$el) {
       _.warn(
         'v-with can only be used on instance root elements.'
       )

@@ -17,9 +17,11 @@ var transcludedFlagAttr = '__vue__transcluded'
 
 module.exports = function transclude (el, options) {
   if (options && options._asComponent) {
+    // mutating the options object here assuming the same
+    // object will be used for compile right after this
+    options._transcludedAttrs = extractAttrs(el.attributes)
     // Mark content nodes and attrs so that the compiler
     // knows they should be compiled in parent scope.
-    options._transcludedAttrs = extractAttrs(el.attributes)
     var i = el.childNodes.length
     while (i--) {
       var node = el.childNodes[i]
@@ -70,8 +72,20 @@ function transcludeTemplate (el, options) {
     var rawContent = options._content || _.extractContent(el)
     if (options.replace) {
       if (frag.childNodes.length > 1) {
+        // this is a block instance which has no root node.
+        // however, the container in the parent template
+        // (which is replaced here) may contain v-with and
+        // paramAttributes that still need to be compiled
+        // for the child. we store all the container
+        // attributes on the options object and pass it down
+        // to the compiler.
+        var containerAttrs = options._containerAttrs = {}
+        var i = el.attributes.length
+        while (i--) {
+          var attr = el.attributes[i]
+          containerAttrs[attr.name] = attr.value
+        }
         transcludeContent(frag, rawContent)
-        _.copyAttributes(el, frag.firstChild)
         return frag
       } else {
         var replacer = frag.firstChild

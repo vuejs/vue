@@ -21,18 +21,19 @@ module.exports = compile
 
 function compile (el, options, partial, transcluded) {
   var isBlock = el.nodeType === 11
-  var params = !partial && options.paramAttributes
-  // if el is a fragment, this is a block instance
-  // and paramAttributes will be stored on the first
-  // element in the template. (excluding the _blockStart
-  // comment node)
-  var paramsEl = isBlock ? el.childNodes[1] : el
-  var paramsLinkFn = params
-    ? compileParamAttributes(paramsEl, params, options)
+  // link function for param attributes.
+  var params = options.paramAttributes
+  var paramsLinkFn = params && !partial && !transcluded && !isBlock
+    ? compileParamAttributes(el, params, options)
     : null
+  // link function for the node itself.
+  // if this is a block instance, we return a link function
+  // for the attributes found on the container, if any.
+  // options._containerAttrs are collected during transclusion.
   var nodeLinkFn = isBlock
-    ? null
+    ? compileBlockContainer(options._containerAttrs, params, options)
     : compileNode(el, options)
+  // link function for the childNodes
   var childLinkFn =
     !(nodeLinkFn && nodeLinkFn.terminal) &&
     el.tagName !== 'SCRIPT' &&
@@ -41,8 +42,8 @@ function compile (el, options, partial, transcluded) {
       : null
 
   /**
-   * A linker function to be called on a already compiled
-   * piece of DOM, which instantiates all directive
+   * A composite linker function to be called on a already
+   * compiled piece of DOM, which instantiates all directive
    * instances.
    *
    * @param {Vue} vm
@@ -50,13 +51,12 @@ function compile (el, options, partial, transcluded) {
    * @return {Function|undefined}
    */
 
-  function linkFn (vm, el) {
+  function compositeLinkFn (vm, el) {
     var originalDirCount = vm._directives.length
     var parentOriginalDirCount =
       vm.$parent && vm.$parent._directives.length
     if (paramsLinkFn) {
-      var paramsEl = isBlock ? el.childNodes[1] : el
-      paramsLinkFn(vm, paramsEl)
+      paramsLinkFn(vm, el)
     }
     // cache childNodes before linking parent, fix #657
     var childNodes = _.toArray(el.childNodes)
@@ -102,10 +102,44 @@ function compile (el, options, partial, transcluded) {
   // transcluded linkFns are terminal, because it takes
   // over the entire sub-tree.
   if (transcluded) {
-    linkFn.terminal = true
+    compositeLinkFn.terminal = true
   }
 
-  return linkFn
+  return compositeLinkFn
+}
+
+/**
+ * Compile the attributes found on a "block container" -
+ * i.e. the container node in the parent tempate of a block
+ * instance. We are only concerned with v-with and
+ * paramAttributes here.
+ *
+ * @param {Object} attrs - a map of attr name/value pairs
+ * @param {Array} params - param attributes list
+ * @param {Object} options
+ * @return {Function}
+ */
+
+function compileBlockContainer (attrs, params, options) {
+  if (!attrs) return null
+  var paramsLinkFn = params
+    ? compileParamAttributes(attrs, params, options)
+    : null
+  var withVal = attrs[config.prefix + 'with']
+  var withLinkFn = null
+  if (withVal) {
+    var descriptor = dirParser.parse(withVal)[0]
+    var def = options.directives['with']
+    withLinkFn = function (vm, el) {
+      vm._bindDir('with', el, descriptor, def)   
+    }
+  }
+  return function blockContainerLinkFn (vm) {
+    // explicitly passing null to the linkers
+    // since v-with doesn't need a real element
+    if (paramsLinkFn) paramsLinkFn(vm, null)
+    if (withLinkFn) withLinkFn(vm, null)
+  }
 }
 
 /**
@@ -363,7 +397,7 @@ function makeChildLinkFn (linkFns) {
  * Compile param attributes on a root element and return
  * a paramAttributes link function.
  *
- * @param {Element} el
+ * @param {Element|Object} el
  * @param {Array} attrs
  * @param {Object} options
  * @return {Function} paramsLinkFn
@@ -371,6 +405,7 @@ function makeChildLinkFn (linkFns) {
 
 function compileParamAttributes (el, attrs, options) {
   var params = []
+  var isEl = el.nodeType
   var i = attrs.length
   var name, value, param
   while (i--) {
@@ -384,7 +419,7 @@ function compileParamAttributes (el, attrs, options) {
         'http://vuejs.org/api/options.html#paramAttributes'
       )
     }
-    value = el.getAttribute(name)
+    value = isEl ? el.getAttribute(name) : el[name]
     if (value !== null) {
       param = {
         name: name,
@@ -392,7 +427,7 @@ function compileParamAttributes (el, attrs, options) {
       }
       var tokens = textParser.parse(value)
       if (tokens) {
-        el.removeAttribute(name)
+        if (isEl) el.removeAttribute(name)
         if (tokens.length > 1) {
           _.warn(
             'Invalid param attribute binding: "' +

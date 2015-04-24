@@ -239,9 +239,7 @@ module.exports = {
           vm.$before(ref)
         }
       } else {
-        // make sure to insert before the comment node if
-        // the vms are block instances
-        var nextEl = targetNext._blockStart || targetNext.$el
+        var nextEl = targetNext.$el
         if (vm._reused) {
           // this is the vm we are actually in front of
           currentNext = findNextVm(vm, ref)
