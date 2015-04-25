@@ -222,7 +222,10 @@ p.teardown = function () {
     // which can improve teardown performance.
     if (!this.vm._isBeingDestroyed) {
       var list = this.vm._watcherList
-      list.splice(list.indexOf(this))
+      var i = list.indexOf(this)
+      if (i > -1) {
+        list.splice(i, 1)
+      }
     }
     for (var id in this.deps) {
       this.deps[id].removeSub(this)

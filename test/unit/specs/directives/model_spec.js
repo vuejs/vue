@@ -233,7 +233,7 @@ if (_.inBrowser) {
         expect(opts[1].selected).toBe(false)
         // should teardown option watcher when unbind
         expect(vm._watcherList.length).toBe(2)
-        vm._directives[0].unbind()
+        vm._directives[0]._teardown()
         expect(vm._watcherList.length).toBe(0)
         done()
       })
