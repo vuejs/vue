@@ -39,6 +39,10 @@ module.exports = {
     var partial = this.vm.$options.partials[id]
     _.assertAsset(partial, 'partial', id)
     if (partial) {
+      var filters = this.filters && this.filters.read
+      if (filters) {
+        partial = _.applyFilters(partial, filters, this.vm)
+      }
       this.compile(templateParser.parse(partial, true))
     }
   }

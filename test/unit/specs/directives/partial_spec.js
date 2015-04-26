@@ -111,5 +111,25 @@ if (_.inBrowser) {
       })
     })
 
+    it('partial with filters', function () {
+      var vm = new Vue({
+        el: el,
+        template: '<div>{{>test | replace}}</div>',
+        partials: {
+          test: '{{a}}'
+        },
+        data: {
+          a: 'A',
+          b: 'B'
+        },
+        filters: {
+          replace: function () {
+            return '{{b}}'
+          }
+        }
+      })
+      expect(el.innerHTML).toBe('<div>' + wrap('B') + '</div>')
+    })
+
   })
 }
