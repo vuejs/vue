@@ -30,15 +30,8 @@ function enableDebug () {
    * @param {String} msg
    */
 
-  var warned = false
   exports.warn = function (msg) {
     if (hasConsole && (!config.silent || config.debug)) {
-      if (!config.debug && !warned) {
-        warned = true
-        console.log(
-          'Set `Vue.config.debug = true` to enable debug mode.'
-        )
-      }
       console.warn('[Vue warn]: ' + msg)
       /* istanbul ignore if */
       if (config.debug) {

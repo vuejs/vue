@@ -3,24 +3,29 @@ var Path = require('./path')
 var Cache = require('../cache')
 var expressionCache = new Cache(1000)
 
-var keywords =
-  'Math,Date,break,case,catch,continue,debugger,default,' +
-  'delete,do,else,false,finally,for,function,if,in,' +
-  'instanceof,new,null,return,switch,this,throw,true,try,' +
-  'typeof,var,void,while,with,undefined,abstract,boolean,' +
-  'byte,char,class,const,double,enum,export,extends,' +
-  'final,float,goto,implements,import,int,interface,long,' +
-  'native,package,private,protected,public,short,static,' +
-  'super,synchronized,throws,transient,volatile,' +
-  'arguments,let,yield'
+var allowedKeywords =
+  'Math,Date,this,true,false,null,undefined,Infinity,NaN,' +
+  'isNaN,isFinite,decodeURI,decodeURIComponent,encodeURI,' +
+  'encodeURIComponent,parseInt,parseFloat'
+var allowedKeywordsRE =
+  new RegExp('^(' + allowedKeywords.replace(/,/g, '\\b|') + '\\b)')
+
+// keywords that don't make sense inside expressions
+var imporperKeywords =
+  'break,case,class,catch,const,continue,debugger,default,' +
+  'delete,do,else,export,extends,finally,for,function,if,' +
+  'import,in,instanceof,let,return,super,switch,throw,try,' +
+  'var,while,with,yield,enum,await,implements,package,' +
+  'proctected,static,interface,private,public'
+var imporoperKeywordsRE =
+  new RegExp('^(' + imporperKeywords.replace(/,/g, '\\b|') + '\\b)')
 
 var wsRE = /\s/g
 var newlineRE = /\n/g
-var saveRE = /[\{,]\s*[\w\$_]+\s*:|('[^']*'|"[^"]*")|new /g
+var saveRE = /[\{,]\s*[\w\$_]+\s*:|('[^']*'|"[^"]*")|new |typeof |void /g
 var restoreRE = /"(\d+)"/g
 var pathTestRE = /^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\]|\[\d+\])*$/
 var pathReplaceRE = /[^\w$\.]([A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\])*)/g
-var keywordsRE = new RegExp('^(' + keywords.replace(/,/g, '\\b|') + '\\b)')
 var booleanLiteralRE = /^(true|false)$/
 
 /**
@@ -68,7 +73,7 @@ function save (str, isString) {
 function rewrite (raw) {
   var c = raw.charAt(0)
   var path = raw.slice(1)
-  if (keywordsRE.test(path)) {
+  if (allowedKeywordsRE.test(path)) {
     return raw
   } else {
     path = path.indexOf('"') > -1
@@ -100,6 +105,12 @@ function restore (str, i) {
  */
 
 function compileExpFns (exp, needSet) {
+  if (imporoperKeywordsRE.test(exp)) {
+    _.warn(
+      'Avoid using reserved keywords in expression: '
+      + exp
+    )
+  }
   // reset state
   saved.length = 0
   // save strings and object literal keys
@@ -230,7 +241,9 @@ exports.parse = function (exp, needSet) {
   // global "Math"
   var res =
     pathTestRE.test(exp) &&
+    // don't treat true/false as paths
     !booleanLiteralRE.test(exp) &&
+    // Math constants e.g. Math.PI, Math.E etc.
     exp.slice(0, 5) !== 'Math.'
       ? compilePathFns(exp)
       : compileExpFns(exp, needSet)

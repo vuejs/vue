@@ -204,6 +204,27 @@ var testCases = [
     scope: {},
     expected: true,
     paths: []
+  },
+  // typeof operator
+  {
+    exp: 'typeof test === "string"',
+    scope: { test: "123" },
+    expected: true,
+    paths: ['test']
+  },
+  // isNaN
+  {
+    exp: 'isNaN(a)',
+    scope: { a: 2 },
+    expected: false,
+    paths: ['a']
+  },
+  // parseFloat & parseInt
+  {
+    exp: 'parseInt(a, 10) + parseFloat(b)',
+    scope: { a: 2.33, b: '3.45' },
+    expected: 5.45,
+    paths: ['a', 'b']
   }
 ]
 
@@ -253,16 +274,24 @@ describe('Expression Parser', function () {
     })
 
     it('should warn on invalid expression', function () {
+      expect(_.warn).not.toHaveBeenCalled()
       var res = expParser.parse('a--b"ffff')
       expect(_.warn).toHaveBeenCalled()
     })
 
     if (leftHandThrows()) {
       it('should warn on invalid left hand expression for setter', function () {
+        expect(_.warn).not.toHaveBeenCalled()
         var res = expParser.parse('a+b', true)
         expect(_.warn).toHaveBeenCalled()
       })
     }
+
+    it('should warn if expression contains improper reserved keywords', function () {
+      expect(_.warn).not.toHaveBeenCalled()
+      var res = expParser.parse('break + 1')
+      expect(_.warn).toHaveBeenCalled()
+    })
   })
 })
 
