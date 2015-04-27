@@ -1,6 +1,8 @@
 var _ = require('../util')
 
-module.exports = { 
+module.exports = {
+
+  acceptStatement: true,
 
   bind: function () {
     var child = this.el.__vue__
@@ -11,14 +13,21 @@ module.exports = {
       )
       return
     }
-    var method = this.vm[this.expression]
-    if (!method) {
+  },
+
+  update: function (handler, oldHandler) {
+    if (typeof handler !== 'function') {
       _.warn(
-        '`v-events` cannot find method "' + this.expression +
-        '" on the parent instance.'
+        'Directive "v-events:' + this.expression + '" ' +
+        'expects a function value.'
       )
+      return
     }
-    child.$on(this.arg, method)
+    var child = this.el.__vue__
+    if (oldHandler) {
+      child.$off(this.arg, oldHandler)
+    }
+    child.$on(this.arg, handler)
   }
 
   // when child is destroyed, all events are turned off,
