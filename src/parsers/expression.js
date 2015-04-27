@@ -11,14 +11,14 @@ var allowedKeywordsRE =
   new RegExp('^(' + allowedKeywords.replace(/,/g, '\\b|') + '\\b)')
 
 // keywords that don't make sense inside expressions
-var imporperKeywords =
+var improperKeywords =
   'break,case,class,catch,const,continue,debugger,default,' +
   'delete,do,else,export,extends,finally,for,function,if,' +
   'import,in,instanceof,let,return,super,switch,throw,try,' +
   'var,while,with,yield,enum,await,implements,package,' +
   'proctected,static,interface,private,public'
-var imporoperKeywordsRE =
-  new RegExp('^(' + imporperKeywords.replace(/,/g, '\\b|') + '\\b)')
+var improperKeywordsRE =
+  new RegExp('^(' + improperKeywords.replace(/,/g, '\\b|') + '\\b)')
 
 var wsRE = /\s/g
 var newlineRE = /\n/g
@@ -105,7 +105,7 @@ function restore (str, i) {
  */
 
 function compileExpFns (exp, needSet) {
-  if (imporoperKeywordsRE.test(exp)) {
+  if (improperKeywordsRE.test(exp)) {
     _.warn(
       'Avoid using reserved keywords in expression: '
       + exp
