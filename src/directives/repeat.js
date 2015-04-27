@@ -268,20 +268,22 @@ module.exports = {
    */
 
   build: function (data, index, needCache) {
-    var original = data
     var meta = { $index: index }
     if (this.converted) {
-      meta.$key = original.$key
+      meta.$key = data.$key
     }
     var raw = this.converted ? data.$value : data
     var alias = this.arg
-    var hasAlias = !isObject(raw) || !isPlainObject(data) || alias
-    // wrap the raw data with alias
-    data = hasAlias ? {} : raw
     if (alias) {
+      data = {}
       data[alias] = raw
-    } else if (hasAlias) {
+    } else if (!isPlainObject(raw)) {
+      // non-object values
+      data = {}
       meta.$value = raw
+    } else {
+      // default
+      data = raw
     }
     // resolve constructor
     var Ctor = this.Ctor || this.resolveCtor(data, meta)

@@ -256,7 +256,7 @@ if (_.inBrowser) {
           }
         },
         template: '<div v-repeat="listHash">{{$key}}' +
-            '<p v-repeat="$data">{{a}}</p>' +
+            '<p v-repeat="$value">{{a}}</p>' +
             '</div>'
       })
       function output(key){
