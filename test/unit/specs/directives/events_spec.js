@@ -90,5 +90,39 @@ if (_.inBrowser) {
       })
     })
 
+    it('should be able to switch handlers if not a method', function (done) {
+      var a = 0
+      var b = 0
+      var vm = new Vue({
+        el: el,
+        data: {
+          handle: function () {
+            a++
+          }
+        },
+        template: '<div v-component="test" v-events="test:handle"></div>',
+        components: {
+          test: {
+            compiled: function () {
+              this.$emit('test')
+            }
+          }
+        }
+      })
+      _.nextTick(function () {
+        expect(a).toBe(1)
+        expect(b).toBe(0)
+        vm.handle = function () {
+          b++
+        }
+        _.nextTick(function () {
+          vm._children[0].$emit('test')
+          expect(a).toBe(1)
+          expect(b).toBe(1)
+          done()
+        })
+      })
+    })
+
   })
 }
