@@ -152,5 +152,35 @@ if (_.inBrowser) {
       expect(el.innerHTML).toBe('<!--v-start--><p>AAA</p><p>DDD</p><!--v-end--><!--v-component-->')
     })
 
+    it('bind literal values should not trigger setter warning', function (done) {
+      var vm = new Vue({
+        el: el,
+        template: '<div v-component="test" v-with="a:\'test\'"></div>',
+        components: {
+          test: {
+            template: '{{a}}'
+          }
+        }
+      })
+      expect(el.firstChild.innerHTML).toBe('test')
+      vm._children[0].a = 'changed'
+      _.nextTick(function () {
+        expect(el.firstChild.innerHTML).toBe('changed')
+        expect(_.warn).not.toHaveBeenCalled()
+        done()
+      })
+    })
+
+    it('should warn when binding literal value without childKey', function () {
+      var vm = new Vue({
+        el: el,
+        template: '<div v-component="test" v-with="\'test\'"></div>',
+        components: {
+          test: {}
+        }
+      })
+      expect(_.warn).toHaveBeenCalled()
+    })
+
   })
 }
