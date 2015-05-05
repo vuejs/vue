@@ -1,6 +1,7 @@
 var _ = require('../util')
 var applyCSSTransition = require('./css')
 var applyJSTransition = require('./js')
+var doc = typeof document === 'undefined' ? null : document
 
 /**
  * Append with transition.
@@ -134,7 +135,15 @@ var apply = exports.apply = function (el, direction, op, vm, cb) {
       vm,
       cb
     )
-  } else if (_.transitionEndEvent) {
+  } else if (
+    _.transitionEndEvent &&
+    // skip CSS transitions if page is not visible -
+    // this solves the issue of transitionend events not
+    // firing until the page is visible again.
+    // pageVisibility API is supported in IE10+, same as
+    // CSS transitions.
+    !(doc && doc.hidden)
+  ) {
     // css
     applyCSSTransition(
       el,
