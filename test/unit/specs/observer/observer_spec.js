@@ -89,7 +89,7 @@ describe('Observer', function () {
     expect(watcher.update.calls.count()).toBe(3)
   })
 
-  it('observing $add/$delete', function () {
+  it('observing $add/$set/$delete', function () {
     var obj = { a: 1 }
     var ob = Observer.create(obj)
     var dep = new Dep()
@@ -105,9 +105,18 @@ describe('Observer', function () {
     obj.$add('b', 3)
     expect(obj.b).toBe(2)
     expect(dep.notify.calls.count()).toBe(2)
+    // set existing key, should be a plain set and not
+    // trigger own ob's notify
+    obj.$set('b', 3)
+    expect(obj.b).toBe(3)
+    expect(dep.notify.calls.count()).toBe(2)
+    // set non-existing key
+    obj.$set('c', 1)
+    expect(obj.c).toBe(1)
+    expect(dep.notify.calls.count()).toBe(3)
     // should ignore deleting non-existing key
     obj.$delete('a')
-    expect(dep.notify.calls.count()).toBe(2)
+    expect(dep.notify.calls.count()).toBe(3)
     // should work on non-observed objects
     var obj2 = { a: 1 }
     obj2.$delete('a')

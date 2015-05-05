@@ -35,6 +35,24 @@ _.define(
 )
 
 /**
+ * Set a property on an observed object, calling add to
+ * ensure the property is observed.
+ *
+ * @param {String} key
+ * @param {*} val
+ * @public
+ */
+
+_.define(
+  objProto,
+  '$set',
+  function $set (key, val) {
+    this.$add(key, val)
+    this[key] = val
+  }
+)
+
+/**
  * Deletes a property from an observed object
  * and emits corresponding event
  *
