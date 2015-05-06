@@ -1,5 +1,5 @@
 /**
- * Vue.js v0.11.8
+ * Vue.js v0.11.9
  * (c) 2015 Evan You
  * Released under the MIT License.
  */
@@ -362,7 +362,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // transcluded components that belong to the parent.
 	  // need to keep track of them so that we can call
 	  // attached/detached hooks on them.
-	  this._transCpnts = null
+	  this._transCpnts = []
+	  this._host = options._host
+
+	  // push self into parent / transclusion host
+	  if (this.$parent) {
+	    this.$parent._children.push(this)
+	  }
+	  if (this._host) {
+	    this._host._transCpnts.push(this)
+	  }
 
 	  // props used in v-repeat diffing
 	  this._new = true
@@ -479,7 +488,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	function onAttached () {
 	  this._isAttached = true
 	  this._children.forEach(callAttach)
-	  if (this._transCpnts) {
+	  if (this._transCpnts.length) {
 	    this._transCpnts.forEach(callAttach)
 	  }
 	}
@@ -503,7 +512,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	function onDetached () {
 	  this._isAttached = false
 	  this._children.forEach(callDetach)
-	  if (this._transCpnts) {
+	  if (this._transCpnts.length) {
 	    this._transCpnts.forEach(callDetach)
 	  }
 	}
@@ -662,7 +671,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  i = children.length
 	  while (i--) {
 	    var child = children[i]
-	    if (!child._repeat && child.$options.inherit) {
+	    if (child.$options.inherit) {
 	      child._digest()
 	    }
 	  }
@@ -779,55 +788,22 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	exports._compile = function (el) {
 	  var options = this.$options
-	  var parent = options._parent
 	  if (options._linkFn) {
+	    // pre-transcluded with linker, just use it
 	    this._initElement(el)
 	    options._linkFn(this, el)
 	  } else {
-	    var raw = el
-	    if (options._asComponent) {
-	      // separate container element and content
-	      var content = options._content = _.extractContent(raw)
-	      // create two separate linekrs for container and content
-	      var parentOptions = parent.$options
-	      
-	      // hack: we need to skip the paramAttributes for this
-	      // child instance when compiling its parent container
-	      // linker. there could be a better way to do this.
-	      parentOptions._skipAttrs = options.paramAttributes
-	      var containerLinkFn =
-	        compile(raw, parentOptions, true, true)
-	      parentOptions._skipAttrs = null
-
-	      if (content) {
-	        var ol = parent._children.length
-	        var contentLinkFn =
-	          compile(content, parentOptions, true)
-	        // call content linker now, before transclusion
-	        this._contentUnlinkFn = contentLinkFn(parent, content)
-	        // mark all compiled nodes as transcluded, so that
-	        // directives that do partial compilation, e.g. v-if
-	        // and v-partial can detect them and persist them
-	        // through re-compilations.
-	        for (var i = 0; i < content.childNodes.length; i++) {
-	          content.childNodes[i]._isContent = true
-	        }
-	        this._transCpnts = parent._children.slice(ol)
-	      }
-	      // tranclude, this possibly replaces original
-	      el = transclude(el, options)
-	      this._initElement(el)
-	      // now call the container linker on the resolved el
-	      this._containerUnlinkFn = containerLinkFn(parent, el)
-	    } else {
-	      // simply transclude
-	      el = transclude(el, options)
-	      this._initElement(el)
-	    }
-	    var linkFn = compile(el, options)
-	    linkFn(this, el)
+	    // transclude and init element
+	    // transclude can potentially replace original
+	    // so we need to keep reference
+	    var original = el
+	    el = transclude(el, options)
+	    this._initElement(el)
+	    // compile and link the rest
+	    compile(el, options)(this, el)
+	    // finally replace original
 	    if (options.replace) {
-	      _.replace(raw, el)
+	      _.replace(original, el)
 	    }
 	  }
 	  return el
@@ -843,8 +819,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports._initElement = function (el) {
 	  if (el instanceof DocumentFragment) {
 	    this._isBlock = true
-	    this._blockStart = el.firstChild
-	    this.$el = el.childNodes[1]
+	    this.$el = this._blockStart = el.firstChild
 	    this._blockEnd = el.lastChild
 	    this._blockFragment = el
 	  } else {
@@ -861,11 +836,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Node} node   - target node
 	 * @param {Object} desc - parsed directive descriptor
 	 * @param {Object} def  - directive definition object
+	 * @param {Vue|undefined} host - transclusion host component
 	 */
 
-	exports._bindDir = function (name, node, desc, def) {
+	exports._bindDir = function (name, node, desc, def, host) {
 	  this._directives.push(
-	    new Directive(name, node, this, desc, def)
+	    new Directive(name, node, this, desc, def, host)
 	  )
 	}
 
@@ -892,17 +868,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	    i = parent._children.indexOf(this)
 	    parent._children.splice(i, 1)
 	  }
+	  // same for transclusion host.
+	  var host = this._host
+	  if (host && !host._isBeingDestroyed) {
+	    i = host._transCpnts.indexOf(this)
+	    host._transCpnts.splice(i, 1)
+	  }
 	  // destroy all children.
 	  i = this._children.length
 	  while (i--) {
 	    this._children[i].$destroy()
-	  }
-	  // teardown parent linkers
-	  if (this._containerUnlinkFn) {
-	    this._containerUnlinkFn()
-	  }
-	  if (this._contentUnlinkFn) {
-	    this._contentUnlinkFn()
 	  }
 	  // teardown all directives. this also tearsdown all
 	  // directive-owned watchers. intentionally check for
@@ -1574,7 +1549,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  opts._parent = parent
 	  opts._root = parent.$root
 	  var child = new ChildVue(opts)
-	  this._children.push(child)
 	  return child
 	}
 
@@ -2204,40 +2178,36 @@ return /******/ (function(modules) { // webpackBootstrap
 	var dirParser = __webpack_require__(21)
 	var templateParser = __webpack_require__(20)
 
+	module.exports = compile
+
 	/**
 	 * Compile a template and return a reusable composite link
 	 * function, which recursively contains more link functions
 	 * inside. This top level compile function should only be
 	 * called on instance root nodes.
 	 *
-	 * When the `asParent` flag is true, this means we are doing
-	 * a partial compile for a component's parent scope markup
-	 * (See #502). This could **only** be triggered during
-	 * compilation of `v-component`, and we need to skip v-with,
-	 * v-ref & v-component in this situation.
-	 *
 	 * @param {Element|DocumentFragment} el
 	 * @param {Object} options
 	 * @param {Boolean} partial
-	 * @param {Boolean} asParent - compiling a component
-	 *                             container as its parent.
+	 * @param {Boolean} transcluded
 	 * @return {Function}
 	 */
 
-	module.exports = function compile (el, options, partial, asParent) {
+	function compile (el, options, partial, transcluded) {
 	  var isBlock = el.nodeType === 11
-	  var params = !partial && options.paramAttributes
-	  // if el is a fragment, this is a block instance
-	  // and paramAttributes will be stored on the first
-	  // element in the template. (excluding the _blockStart
-	  // comment node)
-	  var paramsEl = isBlock ? el.childNodes[1] : el
-	  var paramsLinkFn = params
-	    ? compileParamAttributes(paramsEl, params, options)
+	  // link function for param attributes.
+	  var params = options.paramAttributes
+	  var paramsLinkFn = params && !partial && !transcluded && !isBlock
+	    ? compileParamAttributes(el, params, options)
 	    : null
+	  // link function for the node itself.
+	  // if this is a block instance, we return a link function
+	  // for the attributes found on the container, if any.
+	  // options._containerAttrs are collected during transclusion.
 	  var nodeLinkFn = isBlock
-	    ? null
-	    : compileNode(el, options, asParent)
+	    ? compileBlockContainer(options._containerAttrs, params, options)
+	    : compileNode(el, options)
+	  // link function for the childNodes
 	  var childLinkFn =
 	    !(nodeLinkFn && nodeLinkFn.terminal) &&
 	    el.tagName !== 'SCRIPT' &&
@@ -2246,8 +2216,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      : null
 
 	  /**
-	   * A linker function to be called on a already compiled
-	   * piece of DOM, which instantiates all directive
+	   * A composite linker function to be called on a already
+	   * compiled piece of DOM, which instantiates all directive
 	   * instances.
 	   *
 	   * @param {Vue} vm
@@ -2255,16 +2225,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @return {Function|undefined}
 	   */
 
-	  return function link (vm, el) {
+	  function compositeLinkFn (vm, el) {
 	    var originalDirCount = vm._directives.length
+	    var parentOriginalDirCount =
+	      vm.$parent && vm.$parent._directives.length
 	    if (paramsLinkFn) {
-	      var paramsEl = isBlock ? el.childNodes[1] : el
-	      paramsLinkFn(vm, paramsEl)
+	      paramsLinkFn(vm, el)
 	    }
 	    // cache childNodes before linking parent, fix #657
 	    var childNodes = _.toArray(el.childNodes)
-	    if (nodeLinkFn) nodeLinkFn(vm, el)
-	    if (childLinkFn) childLinkFn(vm, childNodes)
+	    // if this is a transcluded compile, linkers need to be
+	    // called in source scope, and the host needs to be
+	    // passed down.
+	    var source = transcluded ? vm.$parent : vm
+	    var host = transcluded ? vm : undefined
+	    // link
+	    if (nodeLinkFn) nodeLinkFn(source, el, host)
+	    if (childLinkFn) childLinkFn(source, childNodes, host)
 
 	    /**
 	     * If this is a partial compile, the linker function
@@ -2273,9 +2250,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * linking.
 	     */
 
-	    if (partial) {
-	      var dirs = vm._directives.slice(originalDirCount)
-	      return function unlink () {
+	    if (partial && !transcluded) {
+	      var selfDirs = vm._directives.slice(originalDirCount)
+	      var parentDirs = vm.$parent &&
+	        vm.$parent._directives.slice(parentOriginalDirCount)
+
+	      var teardownDirs = function (vm, dirs) {
 	        var i = dirs.length
 	        while (i--) {
 	          dirs[i]._teardown()
@@ -2283,7 +2263,56 @@ return /******/ (function(modules) { // webpackBootstrap
 	        i = vm._directives.indexOf(dirs[0])
 	        vm._directives.splice(i, dirs.length)
 	      }
+
+	      return function unlink () {
+	        teardownDirs(vm, selfDirs)
+	        if (parentDirs) {
+	          teardownDirs(vm.$parent, parentDirs)
+	        }
+	      }
 	    }
+	  }
+
+	  // transcluded linkFns are terminal, because it takes
+	  // over the entire sub-tree.
+	  if (transcluded) {
+	    compositeLinkFn.terminal = true
+	  }
+
+	  return compositeLinkFn
+	}
+
+	/**
+	 * Compile the attributes found on a "block container" -
+	 * i.e. the container node in the parent tempate of a block
+	 * instance. We are only concerned with v-with and
+	 * paramAttributes here.
+	 *
+	 * @param {Object} attrs - a map of attr name/value pairs
+	 * @param {Array} params - param attributes list
+	 * @param {Object} options
+	 * @return {Function}
+	 */
+
+	function compileBlockContainer (attrs, params, options) {
+	  if (!attrs) return null
+	  var paramsLinkFn = params
+	    ? compileParamAttributes(attrs, params, options)
+	    : null
+	  var withVal = attrs[config.prefix + 'with']
+	  var withLinkFn = null
+	  if (withVal) {
+	    var descriptor = dirParser.parse(withVal)[0]
+	    var def = options.directives['with']
+	    withLinkFn = function (vm, el) {
+	      vm._bindDir('with', el, descriptor, def)   
+	    }
+	  }
+	  return function blockContainerLinkFn (vm) {
+	    // explicitly passing null to the linkers
+	    // since v-with doesn't need a real element
+	    if (paramsLinkFn) paramsLinkFn(vm, null)
+	    if (withLinkFn) withLinkFn(vm, null)
 	  }
 	}
 
@@ -2293,16 +2322,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *
 	 * @param {Node} node
 	 * @param {Object} options
-	 * @param {Boolean} asParent
-	 * @return {Function|undefined}
+	 * @return {Function|null}
 	 */
 
-	function compileNode (node, options, asParent) {
+	function compileNode (node, options) {
 	  var type = node.nodeType
 	  if (type === 1 && node.tagName !== 'SCRIPT') {
-	    return compileElement(node, options, asParent)
-	  } else if (type === 3 && config.interpolate) {
+	    return compileElement(node, options)
+	  } else if (type === 3 && config.interpolate && node.data.trim()) {
 	    return compileTextNode(node, options)
+	  } else {
+	    return null
 	  }
 	}
 
@@ -2311,14 +2341,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *
 	 * @param {Element} el
 	 * @param {Object} options
-	 * @param {Boolean} asParent
 	 * @return {Function|null}
 	 */
 
-	function compileElement (el, options, asParent) {
+	function compileElement (el, options) {
+	  if (checkTransclusion(el)) {
+	    // unwrap textNode
+	    if (el.hasAttribute('__vue__wrap')) {
+	      el = el.firstChild
+	    }
+	    return compile(el, options._parent.$options, true, true)
+	  }
 	  var linkFn, tag, component
 	  // check custom element component, but only on non-root
-	  if (!asParent && !el.__vue__) {
+	  if (!el.__vue__) {
 	    tag = el.tagName.toLowerCase()
 	    component =
 	      tag.indexOf('-') > 0 &&
@@ -2329,14 +2365,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  if (component || el.hasAttributes()) {
 	    // check terminal direcitves
-	    if (!asParent) {
-	      linkFn = checkTerminalDirectives(el, options)
-	    }
+	    linkFn = checkTerminalDirectives(el, options)
 	    // if not terminal, build normal link function
 	    if (!linkFn) {
-	      var dirs = collectDirectives(el, options, asParent)
+	      var dirs = collectDirectives(el, options)
 	      linkFn = dirs.length
-	        ? makeDirectivesLinkFn(dirs)
+	        ? makeNodeLinkFn(dirs)
 	        : null
 	    }
 	  }
@@ -2354,27 +2388,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
-	 * Build a multi-directive link function.
+	 * Build a link function for all directives on a single node.
 	 *
 	 * @param {Array} directives
 	 * @return {Function} directivesLinkFn
 	 */
 
-	function makeDirectivesLinkFn (directives) {
-	  return function directivesLinkFn (vm, el) {
+	function makeNodeLinkFn (directives) {
+	  return function nodeLinkFn (vm, el, host) {
 	    // reverse apply because it's sorted low to high
 	    var i = directives.length
-	    var dir, j, k
+	    var dir, j, k, target
 	    while (i--) {
 	      dir = directives[i]
+	      // a directive can be transcluded if it's written
+	      // on a component's container in its parent tempalte.
+	      target = dir.transcluded
+	        ? vm.$parent
+	        : vm
 	      if (dir._link) {
 	        // custom link fn
-	        dir._link(vm, el)
+	        dir._link(target, el)
 	      } else {
 	        k = dir.descriptors.length
 	        for (j = 0; j < k; j++) {
-	          vm._bindDir(dir.name, el,
-	                      dir.descriptors[j], dir.def)
+	          target._bindDir(dir.name, el,
+	            dir.descriptors[j], dir.def, host)
 	        }
 	      }
 	    }
@@ -2390,7 +2429,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	function compileTextNode (node, options) {
-	  var tokens = textParser.parse(node.nodeValue)
+	  var tokens = textParser.parse(node.data)
 	  if (!tokens) {
 	    return null
 	  }
@@ -2463,7 +2502,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          if (token.html) {
 	            _.replace(node, templateParser.parse(value, true))
 	          } else {
-	            node.nodeValue = value
+	            node.data = value
 	          }
 	        } else {
 	          vm._bindDir(token.type, node,
@@ -2510,7 +2549,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	function makeChildLinkFn (linkFns) {
-	  return function childLinkFn (vm, nodes) {
+	  return function childLinkFn (vm, nodes, host) {
 	    var node, nodeLinkFn, childrenLinkFn
 	    for (var i = 0, n = 0, l = linkFns.length; i < l; n++) {
 	      node = nodes[n]
@@ -2519,10 +2558,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      // cache childNodes before linking parent, fix #657
 	      var childNodes = _.toArray(node.childNodes)
 	      if (nodeLinkFn) {
-	        nodeLinkFn(vm, node)
+	        nodeLinkFn(vm, node, host)
 	      }
 	      if (childrenLinkFn) {
-	        childrenLinkFn(vm, childNodes)
+	        childrenLinkFn(vm, childNodes, host)
 	      }
 	    }
 	  }
@@ -2532,7 +2571,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Compile param attributes on a root element and return
 	 * a paramAttributes link function.
 	 *
-	 * @param {Element} el
+	 * @param {Element|Object} el
 	 * @param {Array} attrs
 	 * @param {Object} options
 	 * @return {Function} paramsLinkFn
@@ -2540,6 +2579,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function compileParamAttributes (el, attrs, options) {
 	  var params = []
+	  var isEl = el.nodeType
 	  var i = attrs.length
 	  var name, value, param
 	  while (i--) {
@@ -2553,7 +2593,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        'http://vuejs.org/api/options.html#paramAttributes'
 	      )
 	    }
-	    value = el.getAttribute(name)
+	    value = isEl ? el.getAttribute(name) : el[name]
 	    if (value !== null) {
 	      param = {
 	        name: name,
@@ -2561,7 +2601,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	      var tokens = textParser.parse(value)
 	      if (tokens) {
-	        el.removeAttribute(name)
+	        if (isEl) el.removeAttribute(name)
 	        if (tokens.length > 1) {
 	          _.warn(
 	            'Invalid param attribute binding: "' +
@@ -2646,13 +2686,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	  for (var i = 0; i < 3; i++) {
 	    dirName = terminalDirectives[i]
 	    if (value = _.attr(el, dirName)) {
-	      return makeTeriminalLinkFn(el, dirName, value, options)
+	      return makeTerminalNodeLinkFn(el, dirName, value, options)
 	    }
 	  }
 	}
 
 	/**
-	 * Build a link function for a terminal directive.
+	 * Build a node link function for a terminal directive.
+	 * A terminal link function terminates the current
+	 * compilation recursion and handles compilation of the
+	 * subtree in the directive.
 	 *
 	 * @param {Element} el
 	 * @param {String} dirName
@@ -2661,14 +2704,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @return {Function} terminalLinkFn
 	 */
 
-	function makeTeriminalLinkFn (el, dirName, value, options) {
+	function makeTerminalNodeLinkFn (el, dirName, value, options) {
 	  var descriptor = dirParser.parse(value)[0]
 	  var def = options.directives[dirName]
-	  var terminalLinkFn = function (vm, el) {
-	    vm._bindDir(dirName, el, descriptor, def)
+	  var fn = function terminalNodeLinkFn (vm, el, host) {
+	    vm._bindDir(dirName, el, descriptor, def, host)
 	  }
-	  terminalLinkFn.terminal = true
-	  return terminalLinkFn
+	  fn.terminal = true
+	  return fn
 	}
 
 	/**
@@ -2676,38 +2719,37 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *
 	 * @param {Element} el
 	 * @param {Object} options
-	 * @param {Boolean} asParent
 	 * @return {Array}
 	 */
 
-	function collectDirectives (el, options, asParent) {
+	function collectDirectives (el, options) {
 	  var attrs = _.toArray(el.attributes)
 	  var i = attrs.length
 	  var dirs = []
-	  var attr, attrName, dir, dirName, dirDef
+	  var attr, attrName, dir, dirName, dirDef, transcluded
 	  while (i--) {
 	    attr = attrs[i]
 	    attrName = attr.name
+	    transcluded =
+	      options._transcludedAttrs &&
+	      options._transcludedAttrs[attrName]
 	    if (attrName.indexOf(config.prefix) === 0) {
 	      dirName = attrName.slice(config.prefix.length)
-	      if (asParent &&
-	          (dirName === 'with' ||
-	           dirName === 'component')) {
-	        continue
-	      }
 	      dirDef = options.directives[dirName]
 	      _.assertAsset(dirDef, 'directive', dirName)
 	      if (dirDef) {
 	        dirs.push({
 	          name: dirName,
 	          descriptors: dirParser.parse(attr.value),
-	          def: dirDef
+	          def: dirDef,
+	          transcluded: transcluded
 	        })
 	      }
 	    } else if (config.interpolate) {
 	      dir = collectAttrDirective(el, attrName, attr.value,
 	                                 options)
 	      if (dir) {
+	        dir.transcluded = transcluded
 	        dirs.push(dir)
 	      }
 	    }
@@ -2729,10 +2771,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	function collectAttrDirective (el, name, value, options) {
-	  if (options._skipAttrs &&
-	      options._skipAttrs.indexOf(name) > -1) {
-	    return
-	  }
 	  var tokens = textParser.parse(value)
 	  if (tokens) {
 	    var def = options.directives.attr
@@ -2772,12 +2810,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return a > b ? 1 : -1
 	}
 
+	/**
+	 * Check whether an element is transcluded
+	 *
+	 * @param {Element} el
+	 * @return {Boolean}
+	 */
+
+	var transcludedFlagAttr = '__vue__transcluded'
+	function checkTransclusion (el) {
+	  if (el.nodeType === 1 && el.hasAttribute(transcludedFlagAttr)) {
+	    el.removeAttribute(transcludedFlagAttr)
+	    return true
+	  }
+	}
+
 /***/ },
 /* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(11)
+	var config = __webpack_require__(15)
 	var templateParser = __webpack_require__(20)
+	var transcludedFlagAttr = '__vue__transcluded'
 
 	/**
 	 * Process an element or a DocumentFragment based on a
@@ -2792,6 +2847,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	module.exports = function transclude (el, options) {
+	  if (options && options._asComponent) {
+	    // mutating the options object here assuming the same
+	    // object will be used for compile right after this
+	    options._transcludedAttrs = extractAttrs(el.attributes)
+	    // Mark content nodes and attrs so that the compiler
+	    // knows they should be compiled in parent scope.
+	    var i = el.childNodes.length
+	    while (i--) {
+	      var node = el.childNodes[i]
+	      if (node.nodeType === 1) {
+	        node.setAttribute(transcludedFlagAttr, '')
+	      } else if (node.nodeType === 3 && node.data.trim()) {
+	        // wrap transcluded textNodes in spans, because
+	        // raw textNodes can't be persisted through clones
+	        // by attaching attributes.
+	        var wrapper = document.createElement('span')
+	        wrapper.textContent = node.data
+	        wrapper.setAttribute('__vue__wrap', '')
+	        wrapper.setAttribute(transcludedFlagAttr, '')
+	        el.replaceChild(wrapper, node)
+	      }
+	    }
+	  }
 	  // for template tags, what we want is its content as
 	  // a documentFragment (for block instances)
 	  if (el.tagName === 'TEMPLATE') {
@@ -2825,8 +2903,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var rawContent = options._content || _.extractContent(el)
 	    if (options.replace) {
 	      if (frag.childNodes.length > 1) {
+	        // this is a block instance which has no root node.
+	        // however, the container in the parent template
+	        // (which is replaced here) may contain v-with and
+	        // paramAttributes that still need to be compiled
+	        // for the child. we store all the container
+	        // attributes on the options object and pass it down
+	        // to the compiler.
+	        var containerAttrs = options._containerAttrs = {}
+	        var i = el.attributes.length
+	        while (i--) {
+	          var attr = el.attributes[i]
+	          containerAttrs[attr.name] = attr.value
+	        }
 	        transcludeContent(frag, rawContent)
-	        _.copyAttributes(el, frag.firstChild)
 	        return frag
 	      } else {
 	        var replacer = frag.firstChild
@@ -2931,6 +3021,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	    parent.insertBefore(contents[i], outlet)
 	  }
 	  parent.removeChild(outlet)
+	}
+
+	/**
+	 * Helper to extract a component container's attribute names
+	 * into a map, and filtering out `v-with` in the process.
+	 * The resulting map will be used in compiler/compile to
+	 * determine whether an attribute is transcluded.
+	 *
+	 * @param {NameNodeMap} attrs
+	 */
+
+	function extractAttrs (attrs) {
+	  if (!attrs) return null
+	  var res = {}
+	  var vwith = config.prefix + 'with'
+	  var i = attrs.length
+	  while (i--) {
+	    var name = attrs[i].name
+	    if (name !== vwith) res[name] = true
+	  }
+	  return res
 	}
 
 /***/ },
@@ -3857,24 +3968,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Cache = __webpack_require__(52)
 	var expressionCache = new Cache(1000)
 
-	var keywords =
-	  'Math,Date,break,case,catch,continue,debugger,default,' +
-	  'delete,do,else,false,finally,for,function,if,in,' +
-	  'instanceof,new,null,return,switch,this,throw,true,try,' +
-	  'typeof,var,void,while,with,undefined,abstract,boolean,' +
-	  'byte,char,class,const,double,enum,export,extends,' +
-	  'final,float,goto,implements,import,int,interface,long,' +
-	  'native,package,private,protected,public,short,static,' +
-	  'super,synchronized,throws,transient,volatile,' +
-	  'arguments,let,yield'
+	var allowedKeywords =
+	  'Math,Date,this,true,false,null,undefined,Infinity,NaN,' +
+	  'isNaN,isFinite,decodeURI,decodeURIComponent,encodeURI,' +
+	  'encodeURIComponent,parseInt,parseFloat'
+	var allowedKeywordsRE =
+	  new RegExp('^(' + allowedKeywords.replace(/,/g, '\\b|') + '\\b)')
+
+	// keywords that don't make sense inside expressions
+	var improperKeywords =
+	  'break,case,class,catch,const,continue,debugger,default,' +
+	  'delete,do,else,export,extends,finally,for,function,if,' +
+	  'import,in,instanceof,let,return,super,switch,throw,try,' +
+	  'var,while,with,yield,enum,await,implements,package,' +
+	  'proctected,static,interface,private,public'
+	var improperKeywordsRE =
+	  new RegExp('^(' + improperKeywords.replace(/,/g, '\\b|') + '\\b)')
 
 	var wsRE = /\s/g
 	var newlineRE = /\n/g
-	var saveRE = /[\{,]\s*[\w\$_]+\s*:|('[^']*'|"[^"]*")|new /g
+	var saveRE = /[\{,]\s*[\w\$_]+\s*:|('[^']*'|"[^"]*")|new |typeof |void /g
 	var restoreRE = /"(\d+)"/g
 	var pathTestRE = /^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\]|\[\d+\])*$/
 	var pathReplaceRE = /[^\w$\.]([A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\])*)/g
-	var keywordsRE = new RegExp('^(' + keywords.replace(/,/g, '\\b|') + '\\b)')
 	var booleanLiteralRE = /^(true|false)$/
 
 	/**
@@ -3922,7 +4038,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	function rewrite (raw) {
 	  var c = raw.charAt(0)
 	  var path = raw.slice(1)
-	  if (keywordsRE.test(path)) {
+	  if (allowedKeywordsRE.test(path)) {
 	    return raw
 	  } else {
 	    path = path.indexOf('"') > -1
@@ -3954,6 +4070,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	function compileExpFns (exp, needSet) {
+	  if (improperKeywordsRE.test(exp)) {
+	    _.warn(
+	      'Avoid using reserved keywords in expression: '
+	      + exp
+	    )
+	  }
 	  // reset state
 	  saved.length = 0
 	  // save strings and object literal keys
@@ -4084,7 +4206,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // global "Math"
 	  var res =
 	    pathTestRE.test(exp) &&
+	    // don't treat true/false as paths
 	    !booleanLiteralRE.test(exp) &&
+	    // Math constants e.g. Math.PI, Math.E etc.
 	    exp.slice(0, 5) !== 'Math.'
 	      ? compilePathFns(exp)
 	      : compileExpFns(exp, needSet)
@@ -4177,10 +4301,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *                 - {String} [arg]
 	 *                 - {Array<Object>} [filters]
 	 * @param {Object} def - directive definition object
+	 * @param {Vue|undefined} host - transclusion host target
 	 * @constructor
 	 */
 
-	function Directive (name, el, vm, descriptor, def) {
+	function Directive (name, el, vm, descriptor, def, host) {
 	  // public
 	  this.name = name
 	  this.el = el
@@ -4191,6 +4316,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this.arg = descriptor.arg
 	  this.filters = _.resolveFilters(vm, descriptor.filters)
 	  // private
+	  this._host = host
 	  this._locked = false
 	  this._bound = false
 	  // init
@@ -4208,7 +4334,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	p._bind = function (def) {
-	  if (this.name !== 'cloak' && this.el.removeAttribute) {
+	  if (this.name !== 'cloak' && this.el && this.el.removeAttribute) {
 	    this.el.removeAttribute(config.prefix + this.name)
 	  }
 	  if (typeof def === 'function') {
@@ -4608,7 +4734,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // which can improve teardown performance.
 	    if (!this.vm._isBeingDestroyed) {
 	      var list = this.vm._watcherList
-	      list.splice(list.indexOf(this))
+	      var i = list.indexOf(this)
+	      if (i > -1) {
+	        list.splice(i, 1)
+	      }
 	    }
 	    for (var id in this.deps) {
 	      this.deps[id].removeSub(this)
@@ -5310,15 +5439,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @param {String} msg
 	   */
 
-	  var warned = false
 	  exports.warn = function (msg) {
 	    if (hasConsole && (!config.silent || config.debug)) {
-	      if (!config.debug && !warned) {
-	        warned = true
-	        console.log(
-	          'Set `Vue.config.debug = true` to enable debug mode.'
-	        )
-	      }
 	      console.warn('[Vue warn]: ' + msg)
 	      /* istanbul ignore if */
 	      if (config.debug) {
@@ -5658,6 +5780,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // same logic reuse from v-if
 	  compile: vIf.compile,
 	  teardown: vIf.teardown,
+	  getContainedComponents: vIf.getContainedComponents,
 	  unbind: vIf.unbind,
 
 	  bind: function () {
@@ -5687,6 +5810,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var partial = this.vm.$options.partials[id]
 	    _.assertAsset(partial, 'partial', id)
 	    if (partial) {
+	      var filters = this.filters && this.filters.read
+	      if (filters) {
+	        partial = _.applyFilters(partial, filters, this.vm)
+	      }
 	      this.compile(templateParser.parse(partial, true))
 	    }
 	  }
@@ -5703,10 +5830,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	  isLiteral: true,
 
 	  bind: function () {
+	    if (!this._isDynamicLiteral) {
+	      this.update(this.expression)
+	    }
+	  },
+
+	  update: function (id) {
+	    var vm = this.el.__vue__ || this.vm
 	    this.el.__v_trans = {
-	      id: this.expression,
+	      id: id,
 	      // resolve the custom transition functions now
-	      fns: this.vm.$options.transitions[this.expression]
+	      // so the transition module knows this is a
+	      // javascript transition without having to check
+	      // computed CSS.
+	      fns: vm.$options.transitions[id]
 	    }
 	  }
 
@@ -5869,7 +6006,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var child = vm.$addChild({
 	        el: el,
 	        template: this.template,
-	        _asComponent: true
+	        _asComponent: true,
+	        _host: this._host
 	      }, this.Ctor)
 	      if (this.keepAlive) {
 	        this.cache[this.ctorId] = child
@@ -6123,21 +6261,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (!tokens) { // static component
 	        var Ctor = this.Ctor = options.components[id]
 	        _.assertAsset(Ctor, 'component', id)
-	        // If there's no parent scope directives and no
-	        // content to be transcluded, we can optimize the
-	        // rendering by pre-transcluding + compiling here
-	        // and provide a link function to every instance.
-	        if (!this.el.hasChildNodes() &&
-	            !this.el.hasAttributes()) {
-	          // merge an empty object with owner vm as parent
-	          // so child vms can access parent assets.
-	          var merged = mergeOptions(Ctor.options, {}, {
-	            $parent: this.vm
-	          })
-	          merged.template = this.inlineTempalte || merged.template
-	          this.template = transclude(this.template, merged)
-	          this._linkFn = compile(this.template, merged, false, true)
-	        }
+	        var merged = mergeOptions(Ctor.options, {}, {
+	          $parent: this.vm
+	        })
+	        merged.template = this.inlineTempalte || merged.template
+	        merged._asComponent = true
+	        merged._parent = this.vm
+	        this.template = transclude(this.template, merged)
+	        this._linkFn = compile(this.template, merged)
 	      } else {
 	        // to be resolved later
 	        var ctorExp = textParser.tokensToExp(tokens)
@@ -6262,9 +6393,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          vm.$before(ref)
 	        }
 	      } else {
-	        // make sure to insert before the comment node if
-	        // the vms are block instances
-	        var nextEl = targetNext._blockStart || targetNext.$el
+	        var nextEl = targetNext.$el
 	        if (vm._reused) {
 	          // this is the vm we are actually in front of
 	          currentNext = findNextVm(vm, ref)
@@ -6293,26 +6422,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 
 	  build: function (data, index, needCache) {
-	    var original = data
 	    var meta = { $index: index }
 	    if (this.converted) {
-	      meta.$key = original.$key
+	      meta.$key = data.$key
 	    }
 	    var raw = this.converted ? data.$value : data
 	    var alias = this.arg
-	    var hasAlias = !isObject(raw) || !isPlainObject(data) || alias
-	    // wrap the raw data with alias
-	    data = hasAlias ? {} : raw
 	    if (alias) {
+	      data = {}
 	      data[alias] = raw
-	    } else if (hasAlias) {
+	    } else if (!isPlainObject(raw)) {
+	      // non-object values
+	      data = {}
 	      meta.$value = raw
+	    } else {
+	      // default
+	      data = raw
 	    }
 	    // resolve constructor
 	    var Ctor = this.Ctor || this.resolveCtor(data, meta)
 	    var vm = this.vm.$addChild({
 	      el: templateParser.clone(this.template),
 	      _asComponent: this.asComponent,
+	      _host: this._host,
 	      _linkFn: this._linkFn,
 	      _meta: meta,
 	      data: data,
@@ -6572,15 +6704,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      this.end = document.createComment('v-if-end')
 	      _.replace(el, this.end)
 	      _.before(this.start, this.end)
-
-	      // Note: content transclusion is not available for
-	      // <template> blocks
 	      if (el.tagName === 'TEMPLATE') {
 	        this.template = templateParser.parse(el, true)
 	      } else {
 	        this.template = document.createDocumentFragment()
 	        this.template.appendChild(templateParser.clone(el))
-	        this.checkContent()
 	      }
 	      // compile the nested partial
 	      this.linker = compile(
@@ -6597,32 +6725,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  },
 
-	  // check if there are any content nodes from parent.
-	  // these nodes are compiled by the parent and should
-	  // not be cloned during a re-compilation - otherwise the
-	  // parent directives bound to them will no longer work.
-	  // (see #736)
-	  checkContent: function () {
-	    var el = this.el
-	    for (var i = 0; i < el.childNodes.length; i++) {
-	      var node = el.childNodes[i]
-	      // _isContent is a flag set in instance/compile
-	      // after the raw content has been compiled by parent
-	      if (node._isContent) {
-	        ;(this.contentNodes = this.contentNodes || []).push(node)
-	        ;(this.contentPositions = this.contentPositions || []).push(i)
-	      }
-	    }
-	    // keep track of any transcluded components contained within
-	    // the conditional block. we need to call attach/detach hooks
-	    // for them.
-	    this.transCpnts =
-	      this.vm._transCpnts &&
-	      this.vm._transCpnts.filter(function (c) {
-	        return el.contains(c.$el)
-	      })
-	  },
-
 	  update: function (value) {
 	    if (this.invalid) return
 	    if (value) {
@@ -6630,15 +6732,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	      // called with different truthy values
 	      if (!this.unlink) {
 	        var frag = templateParser.clone(this.template)
-	        // persist content nodes from parent.
-	        if (this.contentNodes) {
-	          var el = frag.childNodes[0]
-	          for (var i = 0, l = this.contentNodes.length; i < l; i++) {
-	            var node = this.contentNodes[i]
-	            var j = this.contentPositions[i]
-	            el.replaceChild(node, el.childNodes[j])
-	          }
-	        }
 	        this.compile(frag)
 	      }
 	    } else {
@@ -6649,35 +6742,64 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // NOTE: this function is shared in v-partial
 	  compile: function (frag) {
 	    var vm = this.vm
-	    var originalChildLength = vm._children.length
+	    // the linker is not guaranteed to be present because
+	    // this function might get called by v-partial 
 	    this.unlink = this.linker
 	      ? this.linker(vm, frag)
 	      : vm.$compile(frag)
 	    transition.blockAppend(frag, this.end, vm)
-	    this.children = vm._children.slice(originalChildLength)
-	    if (this.transCpnts) {
-	      this.children = this.children.concat(this.transCpnts)
-	    }
-	    if (this.children.length && _.inDoc(vm.$el)) {
-	      this.children.forEach(function (child) {
-	        child._callHook('attached')
-	      })
+	    // call attached for all the child components created
+	    // during the compilation
+	    if (_.inDoc(vm.$el)) {
+	      var children = this.getContainedComponents()
+	      if (children) children.forEach(callAttach)
 	    }
 	  },
 
 	  // NOTE: this function is shared in v-partial
 	  teardown: function () {
 	    if (!this.unlink) return
-	    transition.blockRemove(this.start, this.end, this.vm)
-	    if (this.children && _.inDoc(this.vm.$el)) {
-	      this.children.forEach(function (child) {
-	        if (!child._isDestroyed) {
-	          child._callHook('detached')
-	        }
-	      })
+	    // collect children beforehand
+	    var children
+	    if (_.inDoc(this.vm.$el)) {
+	      children = this.getContainedComponents()
 	    }
+	    transition.blockRemove(this.start, this.end, this.vm)
+	    if (children) children.forEach(callDetach)
 	    this.unlink()
 	    this.unlink = null
+	  },
+
+	  // NOTE: this function is shared in v-partial
+	  getContainedComponents: function () {
+	    var vm = this.vm
+	    var start = this.start.nextSibling
+	    var end = this.end
+	    var selfCompoents =
+	      vm._children.length &&
+	      vm._children.filter(contains)
+	    var transComponents =
+	      vm._transCpnts &&
+	      vm._transCpnts.filter(contains)
+
+	    function contains (c) {
+	      var cur = start
+	      var next
+	      while (next !== end) {
+	        next = cur.nextSibling
+	        if (cur.contains(c.$el)) {
+	          return true
+	        }
+	        cur = next
+	      }
+	      return false
+	    }
+
+	    return selfCompoents
+	      ? transComponents
+	        ? selfCompoents.concat(transComponents)
+	        : selfCompoents
+	      : transComponents
 	  },
 
 	  // NOTE: this function is shared in v-partial
@@ -6687,12 +6809,26 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	}
 
+	function callAttach (child) {
+	  if (!child._isAttached) {
+	    child._callHook('attached')
+	  }
+	}
+
+	function callDetach (child) {
+	  if (child._isAttached) {
+	    child._callHook('detached')
+	  }
+	}
+
 /***/ },
 /* 46 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(11)
 	var Watcher = __webpack_require__(25)
+	var expParser = __webpack_require__(22)
+	var literalRE = /^(true|false|\s?('[^']*'|"[^"]")\s?)$/
 
 	module.exports = {
 
@@ -6705,7 +6841,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var childKey = this.arg || '$data'
 	    var parentKey = this.expression
 
-	    if (this.el !== child.$el) {
+	    if (this.el && this.el !== child.$el) {
 	      _.warn(
 	        'v-with can only be used on instance root elements.'
 	      )
@@ -6713,6 +6849,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	      _.warn(
 	        'v-with must be used on an instance with a parent.'
 	      )
+	    } else if (literalRE.test(parentKey)) {
+	      // no need to setup watchers for literal bindings
+	      if (!this.arg) {
+	        _.warn(
+	          'v-with cannot bind literal value as $data: ' +
+	          parentKey
+	        )
+	      } else {
+	        var value = expParser.parse(parentKey).get()
+	        child.$set(childKey, value)
+	      }
 	    } else {
 
 	      // simple lock to avoid circular updates.
@@ -6771,7 +6918,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _ = __webpack_require__(11)
 
-	module.exports = { 
+	module.exports = {
+
+	  acceptStatement: true,
 
 	  bind: function () {
 	    var child = this.el.__vue__
@@ -6782,14 +6931,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	      )
 	      return
 	    }
-	    var method = this.vm[this.expression]
-	    if (!method) {
+	  },
+
+	  update: function (handler, oldHandler) {
+	    if (typeof handler !== 'function') {
 	      _.warn(
-	        '`v-events` cannot find method "' + this.expression +
-	        '" on the parent instance.'
+	        'Directive "v-events:' + this.expression + '" ' +
+	        'expects a function value.'
 	      )
+	      return
 	    }
-	    child.$on(this.arg, method)
+	    var child = this.el.__vue__
+	    if (oldHandler) {
+	      child.$off(this.arg, oldHandler)
+	    }
+	    child.$on(this.arg, handler)
 	  }
 
 	  // when child is destroyed, all events are turned off,
@@ -7137,6 +7293,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _ = __webpack_require__(11)
 	var applyCSSTransition = __webpack_require__(56)
 	var applyJSTransition = __webpack_require__(57)
+	var doc = typeof document === 'undefined' ? null : document
 
 	/**
 	 * Append with transition.
@@ -7270,7 +7427,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	      vm,
 	      cb
 	    )
-	  } else if (_.transitionEndEvent) {
+	  } else if (
+	    _.transitionEndEvent &&
+	    // skip CSS transitions if page is not visible -
+	    // this solves the issue of transitionend events not
+	    // firing until the page is visible again.
+	    // pageVisibility API is supported in IE10+, same as
+	    // CSS transitions.
+	    !(doc && doc.hidden)
+	  ) {
 	    // css
 	    applyCSSTransition(
 	      el,
@@ -7695,6 +7860,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	    } else {
 	      ob.notify()
 	    }
+	  }
+	)
+
+	/**
+	 * Set a property on an observed object, calling add to
+	 * ensure the property is observed.
+	 *
+	 * @param {String} key
+	 * @param {*} val
+	 * @public
+	 */
+
+	_.define(
+	  objProto,
+	  '$set',
+	  function $set (key, val) {
+	    this.$add(key, val)
+	    this[key] = val
 	  }
 	)
 
