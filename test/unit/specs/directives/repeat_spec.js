@@ -218,6 +218,27 @@ if (_.inBrowser) {
         template: '<test-component v-repeat="items"></test-component>',
         components: {
           'test-component': {
+            template: '{{$index}} {{a}}'
+          }
+        }
+      })
+      expect(el.innerHTML).toBe(
+        '<test-component>0 1</test-component>' +
+        '<test-component>1 2</test-component>' +
+        '<test-component>2 3</test-component>' +
+        '<!--v-repeat-->'
+      )
+    })
+
+    it('custom element component with replace:true', function () {
+      var vm = new Vue({
+        el: el,
+        data: {
+          items: [{a:1}, {a:2}, {a:3}]
+        },
+        template: '<test-component v-repeat="items"></test-component>',
+        components: {
+          'test-component': {
             template: '<p>{{$index}} {{a}}</p>',
             replace: true
           }
