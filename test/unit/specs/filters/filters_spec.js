@@ -181,6 +181,35 @@ describe('Filters', function () {
     res = filter.call(new Vue(), arr, 'abc')
     expect(res).toBe(arr)
   })
+
+  it('orderBy on Object-converted array', function () {
+    // object converted
+    var filter = filters.orderBy
+    var vm = new Vue()
+    var arr = [
+      { $key: 'a', $value: 3 },
+      { $key: 'c', $value: 1 },
+      { $key: 'b', $value: 2 }
+    ]
+    var res = filter.call(vm, arr, '"$key"')
+    expect(res[0].$value).toBe(3)
+    expect(res[1].$value).toBe(2)
+    expect(res[2].$value).toBe(1)
+    res = filter.call(vm, arr, '"$value"')
+    expect(res[0].$value).toBe(1)
+    expect(res[1].$value).toBe(2)
+    expect(res[2].$value).toBe(3)
+    // normal keys
+    arr = [
+      { $key: 'a', $value: { v: 3 } },
+      { $key: 'c', $value: { v: 1 } },
+      { $key: 'b', $value: { v: 2 } }
+    ]
+    res = filter.call(vm, arr, '"v"')
+    expect(res[0].$value.v).toBe(1)
+    expect(res[1].$value.v).toBe(2)
+    expect(res[2].$value.v).toBe(3)
+  })
 })
 
 function assertNumberAndFalsy (filter) {
