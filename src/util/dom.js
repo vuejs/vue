@@ -105,23 +105,6 @@ exports.replace = function (target, el) {
 }
 
 /**
- * Copy attributes from one element to another.
- *
- * @param {Element} from
- * @param {Element} to
- */
-
-exports.copyAttributes = function (from, to) {
-  if (from.hasAttributes()) {
-    var attrs = from.attributes
-    for (var i = 0, l = attrs.length; i < l; i++) {
-      var attr = attrs[i]
-      to.setAttribute(attr.name, attr.value)
-    }
-  }
-}
-
-/**
  * Add event listener shorthand.
  *
  * @param {Element} el

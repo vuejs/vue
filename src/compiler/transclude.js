@@ -89,7 +89,7 @@ function transcludeTemplate (el, options) {
         return frag
       } else {
         var replacer = frag.firstChild
-        _.copyAttributes(el, replacer)
+        copyAttrs(el, replacer, options)
         transcludeContent(replacer, rawContent)
         return replacer
       }
@@ -211,4 +211,32 @@ function extractAttrs (attrs) {
     if (name !== vwith) res[name] = true
   }
   return res
+}
+
+/**
+ * Copy attributes from one element to another.
+ *
+ * @param {Element} from
+ * @param {Element} to
+ * @param {Object} options
+ */
+
+function copyAttrs (from, to, options) {
+  if (from.hasAttributes()) {
+    var attrs = from.attributes
+    for (var i = 0, l = attrs.length; i < l; i++) {
+      var attr = attrs[i]
+      var name = attr.name
+      var value = attr.value
+      // do not overwrite
+      if (!to.hasAttribute(name)) {
+        to.setAttribute(name, value)
+      } else if (options._transcludedAttrs) {
+        // a parent container attribute is replaced by
+        // the replacer's attribute, we need to remove it
+        // from the list of transcluded attributes.
+        options._transcludedAttrs[name] = false
+      }
+    }
+  }
 }

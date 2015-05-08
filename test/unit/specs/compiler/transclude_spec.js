@@ -119,5 +119,15 @@ if (_.inBrowser) {
       expect(res.lastChild.textContent).toBe('fallback c')
     })
 
+    it('replacer attr should overwrite container attr of same name', function () {
+      el.setAttribute('class', 'test')
+      options.template = '<div class="other"></div>'
+      options.replace = true
+      options._asComponent = true
+      var res = transclude(el, options)
+      expect(res.getAttribute('class')).toBe('other')
+      expect(options._transcludedAttrs['class']).toBe(false)
+    })
+
   })
 }

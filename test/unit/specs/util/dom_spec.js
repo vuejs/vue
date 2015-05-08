@@ -77,15 +77,6 @@ if (_.inBrowser) {
       expect(parent.firstChild).toBe(target)
     })
 
-    it('copyAttributes', function () {
-      parent.setAttribute('test1', 1)
-      parent.setAttribute('test2', 2)
-      _.copyAttributes(parent, target)
-      expect(target.attributes.length).toBe(2)
-      expect(target.getAttribute('test1')).toBe('1')
-      expect(target.getAttribute('test2')).toBe('2')
-    })
-
     it('on/off', function () {
       // IE requires element to be in document to fire events
       document.body.appendChild(target)
