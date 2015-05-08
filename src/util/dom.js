@@ -195,6 +195,13 @@ exports.removeClass = function (el, cls) {
 exports.extractContent = function (el, asFragment) {
   var child
   var rawContent
+  /* istanbul ignore if */
+  if (
+    el.tagName === 'TEMPLATE' &&
+    el.content instanceof DocumentFragment
+  ) {
+    el = el.content
+  }
   if (el.hasChildNodes()) {
     rawContent = asFragment
       ? document.createDocumentFragment()

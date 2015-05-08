@@ -172,6 +172,23 @@ if (_.inBrowser) {
       assertMutations(vm, el, done)
     })
 
+    it('v-component with inline-template on <template>', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          items: [{a:1}, {a:2}]
+        },
+        template:
+          '<template v-repeat="items" v-component="test" inline-template>' +
+            '<div>{{$index}} {{a}}</div>' +
+          '</template>',
+        components: {
+          test: {}
+        }
+      })
+      assertMutations(vm, el, done, true)
+    })
+
     it('v-component with primitive values', function (done) {
       var vm = new Vue({
         el: el,
@@ -774,7 +791,7 @@ function go (fn, cb) {
  * an Array of Objects
  */
 
-function assertMutations (vm, el, done) {
+function assertMutations (vm, el, done, isBlock) {
   assertMarkup()
   var poppedItem
   go(
@@ -832,7 +849,9 @@ function assertMutations (vm, el, done) {
 
   function assertMarkup () {
     var markup = vm.items.map(function (item, i) {
-      return '<div>' + i + ' ' + item.a + '</div>'
+      var el = '<div>' + i + ' ' + item.a + '</div>'
+      if (isBlock) el = '<!--v-start-->' + el + '<!--v-end-->'
+      return el
     }).join('')
     expect(el.innerHTML).toBe(markup + '<!--v-repeat-->')
   }
