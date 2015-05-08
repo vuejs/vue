@@ -219,6 +219,7 @@ function formatAccessor(key) {
 
 /**
  * Compiles a getter function with a fixed path.
+ * The fixed path getter supresses errors.
  *
  * @param {Array} path
  * @return {Function}
@@ -226,7 +227,7 @@ function formatAccessor(key) {
 
 exports.compileGetter = function (path) {
   var body = 'return o' + path.map(formatAccessor).join('')
-  return new Function('o', body)
+  return new Function('o', 'try {' + body + '} catch (e) {}')
 }
 
 /**
