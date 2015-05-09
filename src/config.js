@@ -62,7 +62,18 @@ module.exports = {
    * @type {Boolean}
    */
 
-  _delimitersChanged: true
+  _delimitersChanged: true,
+
+  /**
+   * List of directives that are "terminal", i.e. handles
+   * the compilation of its own content
+   */
+
+  _terminalDirectives: [
+    'repeat',
+    'if',
+    'component'
+  ]
 
 }
 

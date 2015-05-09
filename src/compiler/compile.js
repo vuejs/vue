@@ -494,28 +494,23 @@ function makeParamsLinkFn (params, options) {
  * @return {Function} terminalLinkFn
  */
 
-var terminalDirectives = [
-  'repeat',
-  'if',
-  'component'
-]
-
-function skip () {}
-skip.terminal = true
-
 function checkTerminalDirectives (el, options) {
   if (_.attr(el, 'pre') !== null) {
     return skip
   }
   var value, dirName
+  var dirs = config._terminalDirectives
   /* jshint boss: true */
-  for (var i = 0; i < 3; i++) {
-    dirName = terminalDirectives[i]
-    if (value = _.attr(el, dirName)) {
+  for (var i = 0, l = dirs.length; i < l; i++) {
+    dirName = dirs[i]
+    if ((value = _.attr(el, dirName)) !== null) {
       return makeTerminalNodeLinkFn(el, dirName, value, options)
     }
   }
 }
+
+function skip () {}
+skip.terminal = true
 
 /**
  * Build a node link function for a terminal directive.
