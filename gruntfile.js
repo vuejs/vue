@@ -84,10 +84,11 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-karma-coveralls')
 
   // load custom tasks
-  grunt.file.recurse('build/grunt-tasks', function (path) {
-    require('./' + path)(grunt)
-  })
+  require('./build/grunt-tasks/build')(grunt)
+  require('./build/grunt-tasks/casper')(grunt)
+  require('./build/grunt-tasks/release')(grunt)
 
+  // register composite tasks
   grunt.registerTask('unit', ['karma:browsers'])
   grunt.registerTask('cover', ['karma:coverage'])
   grunt.registerTask('test', ['unit', 'cover', 'casper'])
