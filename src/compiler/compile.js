@@ -20,18 +20,9 @@ module.exports = compile
  */
 
 function compile (el, options, partial, transcluded) {
-  var isBlock = el.nodeType === 11
-  // link function for param attributes.
-  var params = options.paramAttributes
-  var paramsLinkFn = params && !partial && !transcluded && !isBlock
-    ? compileParamAttributes(el, params, options)
-    : null
   // link function for the node itself.
-  // if this is a block instance, we return a link function
-  // for the attributes found on the container, if any.
-  // options._containerAttrs are collected during transclusion.
-  var nodeLinkFn = isBlock
-    ? compileBlockContainer(options._containerAttrs, params, options)
+  var nodeLinkFn = options._asComponent && !partial
+    ? compileRoot(el, options)
     : compileNode(el, options)
   // link function for the childNodes
   var childLinkFn =
@@ -52,12 +43,12 @@ function compile (el, options, partial, transcluded) {
    */
 
   function compositeLinkFn (vm, el) {
+    // save original directive count before linking
+    // so we can capture the directives created during a
+    // partial compilation.
     var originalDirCount = vm._directives.length
     var parentOriginalDirCount =
       vm.$parent && vm.$parent._directives.length
-    if (paramsLinkFn) {
-      paramsLinkFn(vm, el)
-    }
     // cache childNodes before linking parent, fix #657
     var childNodes = _.toArray(el.childNodes)
     // if this is a transcluded compile, linkers need to be
@@ -109,36 +100,61 @@ function compile (el, options, partial, transcluded) {
 }
 
 /**
- * Compile the attributes found on a "block container" -
- * i.e. the container node in the parent tempate of a block
- * instance. We are only concerned with v-with and
- * paramAttributes here.
+ * Compile the root element of a component. There are
+ * 4 types of things to process here:
+ * 
+ * 1. paramAttributes on parent container (child scope)
+ * 2. v-with on parent container (child scope)
+ * 3. other attrs on parent container (parent scope)
+ * 4. attrs on the component template root node, if
+ *    replace:true (child scope)
  *
- * @param {Object} attrs - a map of attr name/value pairs
- * @param {Array} params - param attributes list
+ * Also, if this is a block instance, we only need to
+ * compile 1 & 2 here.
+ *
+ * @param {Element} el
  * @param {Object} options
  * @return {Function}
  */
 
-function compileBlockContainer (attrs, params, options) {
-  if (!attrs) return null
-  var paramsLinkFn = params
-    ? compileParamAttributes(attrs, params, options)
+function compileRoot (el, options) {
+  var isBlock = el.nodeType === 11 // DocumentFragment
+  var containerAttrs = options._containerAttrs
+  var replacerAttrs = options._replacerAttrs
+  var params = options.paramAttributes
+  var paramsLinkFn, withLinkFn, parentLinkFn, replacerLinkFn
+  // 1. paramAttributes
+  paramsLinkFn = params
+    ? compileParamAttributes(el, containerAttrs, params, options)
     : null
-  var withVal = attrs[config.prefix + 'with']
-  var withLinkFn = null
+  // 2. v-with
+  var withName = config.prefix + 'with'
+  var withVal = containerAttrs && containerAttrs[withName]
   if (withVal) {
-    var descriptor = dirParser.parse(withVal)[0]
-    var def = options.directives['with']
-    withLinkFn = function (vm, el) {
-      vm._bindDir('with', el, descriptor, def)   
+    containerAttrs[withName] = null
+    withLinkFn = makeNodeLinkFn([{
+      name: 'with',
+      descriptors: dirParser.parse(withVal),
+      def: options.directives['with']
+    }])
+  }
+  if (!isBlock) {
+    // 3. container attributes
+    if (containerAttrs) {
+      parentLinkFn = compileDirectives(containerAttrs, options)
+    }
+    if (replacerAttrs) {
+      // 4. replacer attributes
+      replacerLinkFn = compileDirectives(replacerAttrs, options)
     }
   }
-  return function blockContainerLinkFn (vm) {
-    // explicitly passing null to the linkers
-    // since v-with doesn't need a real element
+  return function rootLinkFn (vm, el, host) {
+    // explicitly passing null to paramAttributes and v-with
+    // linkers because they don't need a real element
     if (paramsLinkFn) paramsLinkFn(vm, null)
     if (withLinkFn) withLinkFn(vm, null)
+    if (parentLinkFn) parentLinkFn(vm.$parent, el, host)
+    if (replacerLinkFn) replacerLinkFn(vm, el, host)
   }
 }
 
@@ -194,10 +210,7 @@ function compileElement (el, options) {
     linkFn = checkTerminalDirectives(el, options)
     // if not terminal, build normal link function
     if (!linkFn) {
-      var dirs = collectDirectives(el, options)
-      linkFn = dirs.length
-        ? makeNodeLinkFn(dirs)
-        : null
+      linkFn = compileDirectives(el, options)
     }
   }
   // if the element is a textarea, we need to interpolate
@@ -211,39 +224,6 @@ function compileElement (el, options) {
     linkFn.terminal = true
   }
   return linkFn
-}
-
-/**
- * Build a link function for all directives on a single node.
- *
- * @param {Array} directives
- * @return {Function} directivesLinkFn
- */
-
-function makeNodeLinkFn (directives) {
-  return function nodeLinkFn (vm, el, host) {
-    // reverse apply because it's sorted low to high
-    var i = directives.length
-    var dir, j, k, target
-    while (i--) {
-      dir = directives[i]
-      // a directive can be transcluded if it's written
-      // on a component's container in its parent tempalte.
-      target = dir.transcluded
-        ? vm.$parent
-        : vm
-      if (dir._link) {
-        // custom link fn
-        dir._link(target, el)
-      } else {
-        k = dir.descriptors.length
-        for (j = 0; j < k; j++) {
-          target._bindDir(dir.name, el,
-            dir.descriptors[j], dir.def, host)
-        }
-      }
-    }
-  }
 }
 
 /**
@@ -397,19 +377,19 @@ function makeChildLinkFn (linkFns) {
  * Compile param attributes on a root element and return
  * a paramAttributes link function.
  *
- * @param {Element|Object} el
- * @param {Array} attrs
+ * @param {Element|DocumentFragment} el
+ * @param {Object} attrs
+ * @param {Array} paramNames
  * @param {Object} options
  * @return {Function} paramsLinkFn
  */
 
-function compileParamAttributes (el, attrs, options) {
+function compileParamAttributes (el, attrs, paramNames, options) {
   var params = []
-  var isEl = el.nodeType
-  var i = attrs.length
+  var i = paramNames.length
   var name, value, param
   while (i--) {
-    name = attrs[i]
+    name = paramNames[i]
     if (/[A-Z]/.test(name)) {
       _.warn(
         'You seem to be using camelCase for a paramAttribute, ' +
@@ -419,7 +399,7 @@ function compileParamAttributes (el, attrs, options) {
         'http://vuejs.org/api/options.html#paramAttributes'
       )
     }
-    value = isEl ? el.getAttribute(name) : el[name]
+    value = attrs[name]
     if (value !== null) {
       param = {
         name: name,
@@ -427,7 +407,10 @@ function compileParamAttributes (el, attrs, options) {
       }
       var tokens = textParser.parse(value)
       if (tokens) {
-        if (isEl) el.removeAttribute(name)
+        if (el && el.nodeType === 1) {
+          el.removeAttribute(name)
+        }
+        attrs[name] = null
         if (tokens.length > 1) {
           _.warn(
             'Invalid param attribute binding: "' +
@@ -536,62 +519,109 @@ function makeTerminalNodeLinkFn (el, dirName, value, options) {
 }
 
 /**
- * Collect the directives on an element.
+ * Compile the directives on an element and return a linker.
  *
- * @param {Element} el
+ * @param {Element|Object} elOrAttrs
+ *        - could be an object of already-extracted
+ *          container attributes.
  * @param {Object} options
- * @return {Array}
+ * @return {Function}
  */
 
-function collectDirectives (el, options) {
-  var attrs = _.toArray(el.attributes)
+function compileDirectives (elOrAttrs, options) {
+  var attrs = _.isPlainObject(elOrAttrs)
+    ? mapToList(elOrAttrs)
+    : elOrAttrs.attributes
   var i = attrs.length
   var dirs = []
-  var attr, attrName, dir, dirName, dirDef, transcluded
+  var attr, name, value, dir, dirName, dirDef
   while (i--) {
     attr = attrs[i]
-    attrName = attr.name
-    transcluded =
-      options._transcludedAttrs &&
-      options._transcludedAttrs[attrName]
-    if (attrName.indexOf(config.prefix) === 0) {
-      dirName = attrName.slice(config.prefix.length)
+    name = attr.name
+    value = attr.value
+    if (value === null) continue
+    if (name.indexOf(config.prefix) === 0) {
+      dirName = name.slice(config.prefix.length)
       dirDef = options.directives[dirName]
       _.assertAsset(dirDef, 'directive', dirName)
       if (dirDef) {
         dirs.push({
           name: dirName,
-          descriptors: dirParser.parse(attr.value),
-          def: dirDef,
-          transcluded: transcluded
+          descriptors: dirParser.parse(value),
+          def: dirDef
         })
       }
     } else if (config.interpolate) {
-      dir = collectAttrDirective(el, attrName, attr.value,
-                                 options)
+      dir = collectAttrDirective(name, value, options)
       if (dir) {
-        dir.transcluded = transcluded
         dirs.push(dir)
       }
     }
   }
   // sort by priority, LOW to HIGH
-  dirs.sort(directiveComparator)
-  return dirs
+  if (dirs.length) {
+    dirs.sort(directiveComparator)
+    return makeNodeLinkFn(dirs)
+  }
+}
+
+/**
+ * Convert a map (Object) of attributes to an Array.
+ *
+ * @param {Object} map
+ * @return {Array}
+ */
+
+function mapToList (map) {
+  var list = []
+  for (var key in map) {
+    list.push({
+      name: key,
+      value: map[key]
+    })
+  }
+  return list
+}
+
+/**
+ * Build a link function for all directives on a single node.
+ *
+ * @param {Array} directives
+ * @return {Function} directivesLinkFn
+ */
+
+function makeNodeLinkFn (directives) {
+  return function nodeLinkFn (vm, el, host) {
+    // reverse apply because it's sorted low to high
+    var i = directives.length
+    var dir, j, k
+    while (i--) {
+      dir = directives[i]
+      if (dir._link) {
+        // custom link fn
+        dir._link(vm, el)
+      } else {
+        k = dir.descriptors.length
+        for (j = 0; j < k; j++) {
+          vm._bindDir(dir.name, el,
+            dir.descriptors[j], dir.def, host)
+        }
+      }
+    }
+  }
 }
 
 /**
  * Check an attribute for potential dynamic bindings,
  * and return a directive object.
  *
- * @param {Element} el
  * @param {String} name
  * @param {String} value
  * @param {Object} options
  * @return {Object}
  */
 
-function collectAttrDirective (el, name, value, options) {
+function collectAttrDirective (name, value, options) {
   var tokens = textParser.parse(value)
   if (tokens) {
     var def = options.directives.attr

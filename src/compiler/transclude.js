@@ -1,5 +1,4 @@
 var _ = require('../util')
-var config = require('../config')
 var templateParser = require('../parsers/template')
 var transcludedFlagAttr = '__vue__transcluded'
 
@@ -17,9 +16,12 @@ var transcludedFlagAttr = '__vue__transcluded'
 
 module.exports = function transclude (el, options) {
   if (options && options._asComponent) {
-    // mutating the options object here assuming the same
-    // object will be used for compile right after this
-    options._transcludedAttrs = extractAttrs(el.attributes)
+    // extract container attributes to pass them down
+    // to compiler, because they need to be compiled in
+    // parent scope. we are mutating the options object here
+    // assuming the same object will be used for compile
+    // right after this.
+    options._containerAttrs = extractAttrs(el)
     // Mark content nodes and attrs so that the compiler
     // knows they should be compiled in parent scope.
     var i = el.childNodes.length
@@ -72,24 +74,12 @@ function transcludeTemplate (el, options) {
     var rawContent = options._content || _.extractContent(el)
     if (options.replace) {
       if (frag.childNodes.length > 1) {
-        // this is a block instance which has no root node.
-        // however, the container in the parent template
-        // (which is replaced here) may contain v-with and
-        // paramAttributes that still need to be compiled
-        // for the child. we store all the container
-        // attributes on the options object and pass it down
-        // to the compiler.
-        var containerAttrs = options._containerAttrs = {}
-        var i = el.attributes.length
-        while (i--) {
-          var attr = el.attributes[i]
-          containerAttrs[attr.name] = attr.value
-        }
         transcludeContent(frag, rawContent)
         return frag
       } else {
         var replacer = frag.firstChild
-        copyAttrs(el, replacer, options)
+        options._replacerAttrs = extractAttrs(replacer)
+        mergeAttrs(el, replacer)
         transcludeContent(replacer, rawContent)
         return replacer
       }
@@ -194,49 +184,42 @@ function insertContentAt (outlet, contents) {
 
 /**
  * Helper to extract a component container's attribute names
- * into a map, and filtering out `v-with` in the process.
- * The resulting map will be used in compiler/compile to
+ * into a map. The resulting map will be used in compiler to
  * determine whether an attribute is transcluded.
  *
- * @param {NameNodeMap} attrs
+ * @param {Element} el
  */
 
-function extractAttrs (attrs) {
-  if (!attrs) return null
+function extractAttrs (el) {
+  var attrs = el.attributes
+  if (!attrs) return
   var res = {}
-  var vwith = config.prefix + 'with'
   var i = attrs.length
   while (i--) {
-    var name = attrs[i].name
-    if (name !== vwith) res[name] = true
+    res[attrs[i].name] = attrs[i].value
   }
   return res
 }
 
 /**
- * Copy attributes from one element to another.
+ * Merge the attributes of two elements, and make sure
+ * the class names are merged properly.
  *
  * @param {Element} from
  * @param {Element} to
- * @param {Object} options
  */
 
-function copyAttrs (from, to, options) {
-  if (from.hasAttributes()) {
-    var attrs = from.attributes
-    for (var i = 0, l = attrs.length; i < l; i++) {
-      var attr = attrs[i]
-      var name = attr.name
-      var value = attr.value
-      // do not overwrite
-      if (!to.hasAttribute(name)) {
-        to.setAttribute(name, value)
-      } else if (options._transcludedAttrs) {
-        // a parent container attribute is replaced by
-        // the replacer's attribute, we need to remove it
-        // from the list of transcluded attributes.
-        options._transcludedAttrs[name] = false
-      }
+function mergeAttrs (from, to) {
+  var attrs = from.attributes
+  var i = attrs.length
+  var name, value
+  while (i--) {
+    name = attrs[i].name
+    value = attrs[i].value
+    if (!to.hasAttribute(name)) {
+      to.setAttribute(name, value)
+    } else if (name === 'class') {
+      to.className = to.className + ' ' + value
     }
   }
 }

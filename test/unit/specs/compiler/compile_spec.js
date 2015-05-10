@@ -3,6 +3,7 @@ var _ = require('../../../../src/util')
 var dirParser = require('../../../../src/parsers/directive')
 var merge = require('../../../../src/util/merge-option')
 var compile = require('../../../../src/compiler/compile')
+var transclude = require('../../../../src/compiler/transclude')
 
 if (_.inBrowser) {
   describe('Compile', function () {
@@ -149,6 +150,7 @@ if (_.inBrowser) {
 
     it('param attributes', function () {
       var options = merge(Vue.options, {
+        _asComponent: true,
         paramAttributes: ['a', 'data-some-attr', 'some-other-attr', 'invalid', 'camelCase']
       })
       var def = Vue.options.directives['with']
@@ -156,13 +158,14 @@ if (_.inBrowser) {
       el.setAttribute('data-some-attr', '{{a}}')
       el.setAttribute('some-other-attr', '2')
       el.setAttribute('invalid', 'a {{b}} c') // invalid
+      transclude(el, options)
       var linker = compile(el, options)
       linker(vm, el)
       // should skip literal & invliad
       expect(vm._bindDir.calls.count()).toBe(1)
       var args = vm._bindDir.calls.argsFor(0)
       expect(args[0]).toBe('with')
-      expect(args[1]).toBe(el)
+      expect(args[1]).toBe(null)
       expect(args[2].arg).toBe('someAttr')
       expect(args[3]).toBe(def)
       // invalid and camelCase should've warn

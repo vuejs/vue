@@ -119,14 +119,15 @@ if (_.inBrowser) {
       expect(res.lastChild.textContent).toBe('fallback c')
     })
 
-    it('replacer attr should overwrite container attr of same name', function () {
+    it('replacer attr should overwrite container attr of same name, except class should be merged', function () {
       el.setAttribute('class', 'test')
-      options.template = '<div class="other"></div>'
+      el.setAttribute('title', 'parent')
+      options.template = '<div class="other" title="child"></div>'
       options.replace = true
       options._asComponent = true
       var res = transclude(el, options)
-      expect(res.getAttribute('class')).toBe('other')
-      expect(options._transcludedAttrs['class']).toBe(false)
+      expect(res.getAttribute('class')).toBe('other test')
+      expect(res.getAttribute('title')).toBe('child')
     })
 
   })

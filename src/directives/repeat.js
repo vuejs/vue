@@ -95,7 +95,9 @@ module.exports = {
       // important: transclude with no options, just
       // to ensure block start and block end
       this.template = transclude(this.template)
-      this._linkFn = compile(this.template, options)
+      var copy = _.extend({}, options)
+      copy._asComponent = false
+      this._linkFn = compile(this.template, copy)
     } else {
       this.asComponent = true
       // check inline-template
