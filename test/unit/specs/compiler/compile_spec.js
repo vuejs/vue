@@ -242,5 +242,33 @@ if (_.inBrowser) {
       })
     })
 
+    it('should handle container/replacer directives with same name', function () {
+      var parentSpy = jasmine.createSpy()
+      var childSpy = jasmine.createSpy()
+      vm = new Vue({
+        el: el,
+        template:
+          '<div v-component="a" class="a" v-on="click:test(1)"></div>',
+        methods: {
+          test: parentSpy
+        },
+        components: {
+          a: {
+            template: '<div class="b" v-on="click:test(2)"></div>',
+            replace: true,
+            methods: {
+              test: childSpy
+            }
+          }
+        }
+      })
+      expect(vm.$el.firstChild.className).toBe('b a')
+      var e = document.createEvent('HTMLEvents')
+      e.initEvent('click', true, true)
+      vm.$el.firstChild.dispatchEvent(e)
+      expect(parentSpy).toHaveBeenCalledWith(1)
+      expect(childSpy).toHaveBeenCalledWith(2)
+    })
+
   })
 }
