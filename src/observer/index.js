@@ -180,8 +180,7 @@ p.convert = function (key, val) {
       // remove dep from old value
       var oldChildOb = val && val.__ob__
       if (oldChildOb) {
-        var oldDeps = oldChildOb.deps
-        oldDeps.splice(oldDeps.indexOf(dep), 1)
+        oldChildOb.deps.$remove(dep)
       }
       val = newVal
       // add dep to new value
@@ -229,7 +228,7 @@ p.addVm = function (vm) {
  */
 
 p.removeVm = function (vm) {
-  this.vms.splice(this.vms.indexOf(vm), 1)
+  this.vms.$remove(vm)
 }
 
 module.exports = Observer

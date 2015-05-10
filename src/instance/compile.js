@@ -95,14 +95,12 @@ exports._destroy = function (remove, deferCleanup) {
   // if parent is not being destroyed as well.
   var parent = this.$parent
   if (parent && !parent._isBeingDestroyed) {
-    i = parent._children.indexOf(this)
-    parent._children.splice(i, 1)
+    parent._children.$remove(this)
   }
   // same for transclusion host.
   var host = this._host
   if (host && !host._isBeingDestroyed) {
-    i = host._transCpnts.indexOf(this)
-    host._transCpnts.splice(i, 1)
+    host._transCpnts.$remove(this)
   }
   // destroy all children.
   i = this._children.length

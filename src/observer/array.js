@@ -78,11 +78,12 @@ _.define(
   arrayProto,
   '$remove',
   function $remove (index) {
+    if (!this.length) return
     if (typeof index !== 'number') {
       index = this.indexOf(index)
     }
     if (index > -1) {
-      return this.splice(index, 1)[0]
+      this.splice(index, 1)
     }
   }
 )

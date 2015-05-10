@@ -98,10 +98,7 @@ function teardownDirs (vm, dirs) {
   var i = dirs.length
   while (i--) {
     dirs[i]._teardown()
-  }
-  i = vm._directives.indexOf(dirs[0])
-  if (i > -1) {
-    vm._directives.splice(i, dirs.length)
+    vm._directives.$remove(dirs[i])
   }
 }
 

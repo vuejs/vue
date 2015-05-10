@@ -32,10 +32,7 @@ p.addSub = function (sub) {
  */
 
 p.removeSub = function (sub) {
-  if (this.subs.length) {
-    var i = this.subs.indexOf(sub)
-    if (i > -1) this.subs.splice(i, 1)
-  }
+  this.subs.$remove(sub)
 }
 
 /**

@@ -202,10 +202,7 @@ p.addCb = function (cb) {
 p.removeCb = function (cb) {
   var cbs = this.cbs
   if (cbs.length > 1) {
-    var i = cbs.indexOf(cb)
-    if (i > -1) {
-      cbs.splice(i, 1)
-    }
+    cbs.$remove(cb)
   } else if (cb === cbs[0]) {
     this.teardown()
   }
@@ -221,11 +218,7 @@ p.teardown = function () {
     // we can skip this if the vm if being destroyed
     // which can improve teardown performance.
     if (!this.vm._isBeingDestroyed) {
-      var list = this.vm._watcherList
-      var i = list.indexOf(this)
-      if (i > -1) {
-        list.splice(i, 1)
-      }
+      this.vm._watcherList.$remove(this)
     }
     for (var id in this.deps) {
       this.deps[id].removeSub(this)
