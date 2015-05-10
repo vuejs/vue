@@ -21,7 +21,7 @@ exports._compile = function (el) {
   if (options._linkFn) {
     // pre-transcluded with linker, just use it
     this._initElement(el)
-    options._linkFn(this, el)
+    this._unlinkFn = options._linkFn(this, el)
   } else {
     // transclude and init element
     // transclude can potentially replace original
@@ -30,7 +30,7 @@ exports._compile = function (el) {
     el = transclude(el, options)
     this._initElement(el)
     // compile and link the rest
-    compile(el, options)(this, el)
+    this._unlinkFn = compile(el, options)(this, el)
     // finally replace original
     if (options.replace) {
       _.replace(original, el)
@@ -110,11 +110,9 @@ exports._destroy = function (remove, deferCleanup) {
     this._children[i].$destroy()
   }
   // teardown all directives. this also tearsdown all
-  // directive-owned watchers. intentionally check for
-  // directives array length on every loop since directives
-  // that manages partial compilation can splice ones out
-  for (i = 0; i < this._directives.length; i++) {
-    this._directives[i]._teardown()
+  // directive-owned watchers.
+  if (this._unlinkFn) {
+    this._unlinkFn()
   }
   // teardown all user watchers.
   var watcher

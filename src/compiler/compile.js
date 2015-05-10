@@ -61,31 +61,19 @@ function compile (el, options, partial, transcluded) {
     if (childLinkFn) childLinkFn(source, childNodes, host)
 
     /**
-     * If this is a partial compile, the linker function
-     * returns an unlink function that tearsdown all
-     * directives instances generated during the partial
-     * linking.
+     * The linker function returns an unlink function that
+     * tearsdown all directives instances generated during
+     * the process.
      */
 
-    if (partial && !transcluded) {
-      var selfDirs = vm._directives.slice(originalDirCount)
-      var parentDirs = vm.$parent &&
-        vm.$parent._directives.slice(parentOriginalDirCount)
+    var selfDirs = vm._directives.slice(originalDirCount)
+    var parentDirs = vm.$parent &&
+      vm.$parent._directives.slice(parentOriginalDirCount)
 
-      var teardownDirs = function (vm, dirs) {
-        var i = dirs.length
-        while (i--) {
-          dirs[i]._teardown()
-        }
-        i = vm._directives.indexOf(dirs[0])
-        vm._directives.splice(i, dirs.length)
-      }
-
-      return function unlink () {
-        teardownDirs(vm, selfDirs)
-        if (parentDirs) {
-          teardownDirs(vm.$parent, parentDirs)
-        }
+    return function unlink () {
+      teardownDirs(vm, selfDirs)
+      if (parentDirs) {
+        teardownDirs(vm.$parent, parentDirs)
       }
     }
   }
@@ -97,6 +85,24 @@ function compile (el, options, partial, transcluded) {
   }
 
   return compositeLinkFn
+}
+
+/**
+ * Teardown a subset of directives on a vm.
+ *
+ * @param {Vue} vm
+ * @param {Array} dirs
+ */
+
+function teardownDirs (vm, dirs) {
+  var i = dirs.length
+  while (i--) {
+    dirs[i]._teardown()
+  }
+  i = vm._directives.indexOf(dirs[0])
+  if (i > -1) {
+    vm._directives.splice(i, dirs.length)
+  }
 }
 
 /**

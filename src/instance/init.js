@@ -44,14 +44,11 @@ exports._init = function (options) {
   this._isReady     =
   this._isAttached  =
   this._isBeingDestroyed = false
+  this._unlinkFn    = null
 
   // children
   this._children = []
   this._childCtors = {}
-
-  // transclusion unlink functions
-  this._containerUnlinkFn =
-  this._contentUnlinkFn = null
 
   // transcluded components that belong to the parent.
   // need to keep track of them so that we can call
