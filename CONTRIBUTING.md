@@ -55,7 +55,7 @@ $ npm install
 To watch and auto-build `dist/vue.js` during development:
 
 ``` bash
-$ grunt watch
+$ npm run dev
 ```
 
 To lint:
