@@ -1,4 +1,4 @@
-var sauceConfig = require('./grunt/sauce')
+var sauceConfig = require('./build/saucelabs-config')
 
 module.exports = function (grunt) {
 
@@ -19,20 +19,6 @@ module.exports = function (grunt) {
       },
       test: {
         src: ['test/unit/specs/**/*.js', 'test/e2e/*.js']
-      }
-    },
-
-    watch: {
-      options: {
-        nospawn: true
-      },
-      dev: {
-        files: ['src/**/*.js'],
-        tasks: ['dev']
-      },
-      test: {
-        files: ['src/**/*.js', 'test/unit/specs/**/*.js'],
-        tasks: ['build-test']
       }
     },
 
@@ -94,12 +80,11 @@ module.exports = function (grunt) {
   
   // load npm tasks
   grunt.loadNpmTasks('grunt-contrib-jshint')
-  grunt.loadNpmTasks('grunt-contrib-watch')
   grunt.loadNpmTasks('grunt-karma')
   grunt.loadNpmTasks('grunt-karma-coveralls')
 
   // load custom tasks
-  grunt.file.recurse('grunt/tasks', function (path) {
+  grunt.file.recurse('build/grunt-tasks', function (path) {
     require('./' + path)(grunt)
   })
 

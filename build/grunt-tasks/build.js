@@ -8,8 +8,15 @@ module.exports = function (grunt) {
     var done = this.async()
     var fs = require('fs')
     var zlib = require('zlib')
-    var build = require('../shared-build')
+    var webpack = require('webpack')
     var uglifyjs = require('uglify-js')
+
+    var banner =
+        '/**\n' +
+        ' * Vue.js v' + grunt.config.get('version') + '\n' +
+        ' * (c) ' + new Date().getFullYear() + ' Evan You\n' +
+        ' * Released under the MIT License.\n' +
+        ' */\n'
     
     // update component.json first
     var jsRE = /\.js$/
@@ -22,9 +29,24 @@ module.exports = function (grunt) {
     })
     grunt.file.write('component.json', JSON.stringify(component, null, 2))
 
-    // then build
-    build(grunt, function (err) {
+    // build
+    webpack({
+      entry: './src/vue',
+      output: {
+        path: './dist',
+        filename: 'vue.js',
+        library: 'Vue',
+        libraryTarget: 'umd'
+      },
+      plugins: [
+        new webpack.BannerPlugin(banner, { raw: true })
+      ]
+    }, function (err, stats) {
       if (err) return done(err)
+      minify()
+    })
+
+    function minify () {
       var js = fs.readFileSync('dist/vue.js', 'utf-8')
       report('dist/vue.js', js)
       // uglify
@@ -50,7 +72,7 @@ module.exports = function (grunt) {
         write('dist/vue.min.js.gz', buf)
         done(err)
       })
-    })
+    }
 
     function write (path, file) {
       fs.writeFileSync(path, file)

@@ -1,5 +1,7 @@
+dist/vue.js.map
 dist/vue.min.js.gz
 test/unit/specs.js
+test/unit/specs.js.map
 explorations
 node_modules
 .DS_Store

@@ -17,12 +17,12 @@
   "bugs": "https://github.com/yyx990803/vue/issues",
   "homepage": "http://vuejs.org",
   "scripts": {
-    "test": "grunt ci"
+    "test": "grunt ci",
+    "dev": "webpack --watch --config build/webpack-dev-config.js & webpack --watch --config build/webpack-test-config.js"
   },
   "devDependencies": {
     "grunt": "^0.4.5",
     "grunt-contrib-jshint": "^0.10.0",
-    "grunt-contrib-watch": "^0.6.1",
     "grunt-karma": "^0.8.3",
     "grunt-karma-coveralls": "^2.5.3",
     "jshint-stylish": "^0.3.0",
