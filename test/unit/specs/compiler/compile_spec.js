@@ -270,7 +270,29 @@ if (_.inBrowser) {
       expect(childSpy).toHaveBeenCalledWith(2)
     })
 
-    it('should remove transcluded directives from parent when unlinking', function (done) {
+    it('should remove transcluded directives from parent when unlinking (v-component)', function () {
+      var vm = new Vue({
+        el: el,
+        template:
+          '<div v-component="test">{{test}}</div>',
+        data: {
+          test: 'parent'
+        },
+        components: {
+          test: {
+            template: '<content></content>'
+          }
+        }
+      })
+      expect(vm.$el.textContent).toBe('parent')
+      expect(vm._directives.length).toBe(2)
+      expect(vm._children.length).toBe(1)
+      vm._children[0].$destroy()
+      expect(vm._directives.length).toBe(1)
+      expect(vm._children.length).toBe(0)
+    })
+
+    it('should remove transcluded directives from parent when unlinking (v-if + v-component)', function (done) {
       var vm = new Vue({
         el: el,
         template:
@@ -289,10 +311,12 @@ if (_.inBrowser) {
       })
       expect(vm.$el.textContent).toBe('parent')
       expect(vm._directives.length).toBe(3)
+      expect(vm._children.length).toBe(1)
       vm.ok = false
       _.nextTick(function () {
         expect(vm.$el.textContent).toBe('')
         expect(vm._directives.length).toBe(1)
+        expect(vm._children.length).toBe(0)
         done()
       })
     })
