@@ -60,18 +60,19 @@ function compile (el, options, partial, transcluded) {
     if (nodeLinkFn) nodeLinkFn(source, el, host)
     if (childLinkFn) childLinkFn(source, childNodes, host)
 
-    /**
-     * The linker function returns an unlink function that
-     * tearsdown all directives instances generated during
-     * the process.
-     */
-
     var selfDirs = vm._directives.slice(originalDirCount)
     var parentDirs = vm.$parent &&
       vm.$parent._directives.slice(parentOriginalDirCount)
 
-    return function unlink () {
-      teardownDirs(vm, selfDirs)
+    /**
+     * The linker function returns an unlink function that
+     * tearsdown all directives instances generated during
+     * the process.
+     *
+     * @param {Boolean} destroying
+     */
+    return function unlink (destroying) {
+      teardownDirs(vm, selfDirs, destroying)
       if (parentDirs) {
         teardownDirs(vm.$parent, parentDirs)
       }
@@ -92,13 +93,16 @@ function compile (el, options, partial, transcluded) {
  *
  * @param {Vue} vm
  * @param {Array} dirs
+ * @param {Boolean} destroying
  */
 
-function teardownDirs (vm, dirs) {
+function teardownDirs (vm, dirs, destroying) {
   var i = dirs.length
   while (i--) {
     dirs[i]._teardown()
-    vm._directives.$remove(dirs[i])
+    if (!destroying) {
+      vm._directives.$remove(dirs[i])
+    }
   }
 }
 

@@ -110,7 +110,9 @@ exports._destroy = function (remove, deferCleanup) {
   // teardown all directives. this also tearsdown all
   // directive-owned watchers.
   if (this._unlinkFn) {
-    this._unlinkFn()
+    // passing destroying: true to avoid searching and
+    // splicing the directives
+    this._unlinkFn(true)
   }
   // teardown all user watchers.
   var watcher

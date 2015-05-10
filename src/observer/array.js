@@ -78,6 +78,7 @@ _.define(
   arrayProto,
   '$remove',
   function $remove (index) {
+    /* istanbul ignore if */
     if (!this.length) return
     if (typeof index !== 'number') {
       index = this.indexOf(index)
