@@ -43,6 +43,9 @@ module.exports = {
         var child = this.build()
         child.$before(this.ref)
         this.setCurrent(child)
+        // for cleaner dom tree.
+        _.remove(this.ref)
+        this.ref = null
       } else {
         // check dynamic component params
         this.readyEvent = this._checkParam('wait-for')
