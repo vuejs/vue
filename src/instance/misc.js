@@ -17,6 +17,17 @@ exports._applyFilter = function (id, args) {
   return (filter.read || filter).apply(this, args)
 }
 
+/**
+ * Resolve a component, depending on whether the component
+ * is defined normally or using an async factory function.
+ * Resolves synchronously if already resolved, otherwise
+ * resolves asynchronously and replaces the factory with
+ * the resolved component.
+ *
+ * @param {String} id
+ * @param {Function} cb
+ */
+
 exports._resolveComponent = function (id, cb) {
   var registry = this.$options.components
   var raw = registry[id]

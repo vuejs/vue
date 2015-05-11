@@ -36,6 +36,8 @@ module.exports = {
         // extract inline template as a DocumentFragment
         this.template = _.extractContent(this.el, true)
       }
+      // pending callback for async component resolution
+      this._pendingCb = null
       // if static, build right now.
       if (!this._isDynamicLiteral) {
         this.resolveCtor(this.expression, _.bind(function () {
@@ -63,13 +65,27 @@ module.exports = {
 
   resolveCtor: function (id, cb) {
     var self = this
-    // TODO handle update/teardown before the component
-    // is actually resolved
-    this.vm._resolveComponent(id, function (ctor) {
-      self.ctorId = id
-      self.Ctor = ctor
-      cb()
-    })
+    var pendingCb = this._pendingCb = function (ctor) {
+      if (!pendingCb.invalidated) {
+        self.ctorId = id
+        self.Ctor = ctor
+        cb()
+      }
+    }
+    this.vm._resolveComponent(id, pendingCb)
+  },
+
+  /**
+   * When the component changes or unbinds before an async
+   * constructor is resolved, we need to invalidate its
+   * pending callback.
+   */
+
+  invalidatePending: function () {
+    if (this._pendingCb) {
+      this._pendingCb.invalidated = true
+      this._pendingCb = null
+    }
   },
 
   /**
@@ -144,9 +160,9 @@ module.exports = {
    */
 
   update: function (value) {
+    this.invalidatePending()
     if (!value) {
       // just remove current
-      this.unbuild()
       this.remove(this.childVM)
       this.unsetCurrent()
     } else {
@@ -224,6 +240,7 @@ module.exports = {
    */
 
   unbind: function () {
+    this.invalidatePending()
     this.unbuild()
     // destroy all keep-alive cached instances
     if (this.cache) {
