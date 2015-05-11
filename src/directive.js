@@ -141,7 +141,7 @@ p._checkStatement = function () {
   var expression = this.expression
   if (
     expression && this.acceptStatement &&
-    !expParser.pathTestRE.test(expression)
+    !expParser.isSimplePath(expression)
   ) {
     var fn = expParser.parse(expression).get
     var vm = this.vm

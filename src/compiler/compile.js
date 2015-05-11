@@ -418,18 +418,9 @@ function compileParamAttributes (el, attrs, paramNames, options) {
           el.removeAttribute(name)
         }
         attrs[name] = null
-        if (tokens.length > 1) {
-          _.warn(
-            'Invalid param attribute binding: "' +
-            name + '="' + value + '"' +
-            '\nDon\'t mix binding tags with plain text ' +
-            'in param attribute bindings.'
-          )
-          continue
-        } else {
-          param.dynamic = true
-          param.value = tokens[0].value
-        }
+        param.dynamic = true
+        param.value = textParser.tokensToExp(tokens)
+        param.oneTime = tokens.length === 1 && tokens[0].oneTime
       }
       params.push(param)
     }
@@ -459,14 +450,18 @@ function makeParamsLinkFn (params, options) {
       // so we need to wrap the path here
       path = _.camelize(param.name.replace(dataAttrRE, ''))
       if (param.dynamic) {
-        // dynamic param attribtues are bound as v-with.
-        // we can directly duck the descriptor here beacuse
-        // param attributes cannot use expressions or
-        // filters.
-        vm._bindDir('with', el, {
-          arg: path,
-          expression: param.value
-        }, def)
+        if (param.oneTime) {
+          vm.$set(path, vm.$parent.$get(param.value))
+        } else {
+          // dynamic param attribtues are bound as v-with.
+          // we can directly duck the descriptor here beacuse
+          // param attributes cannot use expressions or
+          // filters.
+          vm._bindDir('with', el, {
+            arg: path,
+            expression: param.value
+          }, def)
+        }
       } else {
         // just set once
         vm.$set(path, param.value)

@@ -239,17 +239,24 @@ exports.parse = function (exp, needSet) {
   // but that's too rare and we don't care.
   // also skip boolean literals and paths that start with
   // global "Math"
-  var res =
-    pathTestRE.test(exp) &&
-    // don't treat true/false as paths
-    !booleanLiteralRE.test(exp) &&
-    // Math constants e.g. Math.PI, Math.E etc.
-    exp.slice(0, 5) !== 'Math.'
-      ? compilePathFns(exp)
-      : compileExpFns(exp, needSet)
+  var res = exports.isSimplePath(exp)
+    ? compilePathFns(exp)
+    : compileExpFns(exp, needSet)
   expressionCache.put(exp, res)
   return res
 }
 
-// Export the pathRegex for external use
-exports.pathTestRE = pathTestRE
+/**
+ * Check if an expression is a simple path.
+ *
+ * @param {String} exp
+ * @return {Boolean}
+ */
+
+exports.isSimplePath = function (exp) {
+  return pathTestRE.test(exp) &&
+    // don't treat true/false as paths
+    !booleanLiteralRE.test(exp) &&
+    // Math constants e.g. Math.PI, Math.E etc.
+    exp.slice(0, 5) !== 'Math.'
+}

@@ -136,9 +136,7 @@ function formatToken (token, vm, single) {
   return token.tag
     ? vm && token.oneTime
       ? '"' + vm.$eval(token.value) + '"'
-      : single
-        ? token.value
-        : inlineFilters(token.value)
+      : inlineFilters(token.value, single)
     : '"' + token.value + '"'
 }
 
@@ -151,13 +149,16 @@ function formatToken (token, vm, single) {
  * to directive parser and watcher mechanism.
  *
  * @param {String} exp
+ * @param {Boolean} single
  * @return {String}
  */
 
 var filterRE = /[^|]\|[^|]/
-function inlineFilters (exp) {
+function inlineFilters (exp, single) {
   if (!filterRE.test(exp)) {
-    return '(' + exp + ')'
+    return single
+      ? exp
+      : '(' + exp + ')'
   } else {
     var dir = dirParser.parse(exp)[0]
     if (!dir.filters) {
@@ -169,9 +170,7 @@ function inlineFilters (exp) {
         var args = filter.args
           ? ',"' + filter.args.join('","') + '"'
           : ''
-        filter = 'this.$options.filters["' + filter.name + '"]'
-        exp = '(' + filter + '.read||' + filter + ')' +
-          '.apply(this,[' + exp + args + '])'
+        exp = 'this._applyFilter("' + filter.name + '",[' + exp + args + '])'
       }
       return exp
     }

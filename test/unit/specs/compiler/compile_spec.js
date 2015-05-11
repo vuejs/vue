@@ -29,6 +29,12 @@ if (_.inBrowser) {
         },
         $interpolate: function (value) {
           return data[value]
+        },
+        $parent: {
+          _directives: [],
+          $get: function (v) {
+            return 'from parent: ' + v
+          }
         }
       }
       spyOn(vm, '_bindDir').and.callThrough()
@@ -151,27 +157,54 @@ if (_.inBrowser) {
     it('param attributes', function () {
       var options = merge(Vue.options, {
         _asComponent: true,
-        paramAttributes: ['a', 'data-some-attr', 'some-other-attr', 'invalid', 'camelCase']
+        paramAttributes: [
+          'a',
+          'data-some-attr',
+          'some-other-attr',
+          'multiple-attrs',
+          'onetime',
+          'with-filter',
+          'camelCase'
+        ]
       })
       var def = Vue.options.directives['with']
       el.setAttribute('a', '1')
       el.setAttribute('data-some-attr', '{{a}}')
       el.setAttribute('some-other-attr', '2')
-      el.setAttribute('invalid', 'a {{b}} c') // invalid
+      el.setAttribute('multiple-attrs', 'a {{b}} c')
+      el.setAttribute('onetime', '{{*a}}')
+      el.setAttribute('with-filter', '{{a | filter}}')
       transclude(el, options)
       var linker = compile(el, options)
       linker(vm, el)
-      // should skip literal & invliad
-      expect(vm._bindDir.calls.count()).toBe(1)
+      // should skip literals and one-time bindings
+      expect(vm._bindDir.calls.count()).toBe(3)
+      // data-some-attr
       var args = vm._bindDir.calls.argsFor(0)
       expect(args[0]).toBe('with')
       expect(args[1]).toBe(null)
       expect(args[2].arg).toBe('someAttr')
+      expect(args[2].expression).toBe('a')
       expect(args[3]).toBe(def)
-      // invalid and camelCase should've warn
-      expect(_.warn.calls.count()).toBe(2)
-      // literal should've called vm.$set
+      // multiple-attrs
+      args = vm._bindDir.calls.argsFor(1)
+      expect(args[0]).toBe('with')
+      expect(args[1]).toBe(null)
+      expect(args[2].arg).toBe('multipleAttrs')
+      expect(args[2].expression).toBe('"a "+(b)+" c"')
+      expect(args[3]).toBe(def)
+      // with-filter
+      args = vm._bindDir.calls.argsFor(2)
+      expect(args[0]).toBe('with')
+      expect(args[1]).toBe(null)
+      expect(args[2].arg).toBe('withFilter')
+      expect(args[2].expression).toBe('this._applyFilter("filter",[a])')
+      expect(args[3]).toBe(def) 
+      // camelCase should've warn
+      expect(_.warn.calls.count()).toBe(1)
+      // literal and one time should've called vm.$set
       expect(vm.$set).toHaveBeenCalledWith('a', '1')
+      expect(vm.$set).toHaveBeenCalledWith('onetime', 'from parent: a')
       expect(vm.$set).toHaveBeenCalledWith('someOtherAttr', '2')
     })
 

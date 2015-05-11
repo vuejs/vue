@@ -63,16 +63,20 @@ module.exports = {
       // immediately.
       child.$set(childKey, this.parentWatcher.value)
 
-      this.childWatcher = new Watcher(
-        child,
-        childKey,
-        function (val) {
-          if (!locked) {
-            lock()
-            parent.$set(parentKey, val)
+      // only setup two-way binding if the parentKey is
+      // a "settable" simple path.
+      if (expParser.isSimplePath(parentKey)) {
+        this.childWatcher = new Watcher(
+          child,
+          childKey,
+          function (val) {
+            if (!locked) {
+              lock()
+              parent.$set(parentKey, val)
+            }
           }
-        }
-      )
+        )
+      }
     }
   },
 

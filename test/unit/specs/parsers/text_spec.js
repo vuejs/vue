@@ -101,6 +101,14 @@ describe('Text Parser', function () {
     expect(exp).toBe('"view-"+(test + 1)+"-test-"+(ok + "|")')
   })
 
+  it('tokens to expression, single expression', function () {
+    var tokens = textParser.parse('{{test}}')
+    var exp = textParser.tokensToExp(tokens)
+    // should not have parens so it can be treated as a
+    // simple path by the expression parser
+    expect(exp).toBe('test')
+  })
+
   it('tokens to expression with oneTime tags & vm', function () {
     var vm = new Vue({
       data: { test: 'a', ok: 'b' }
@@ -110,16 +118,10 @@ describe('Text Parser', function () {
     expect(exp).toBe('"view-"+"a"+"-test-"+(ok)')
   })
 
-  it('tokens to expression with filters, single expression', function () {
-    var tokens = textParser.parse('{{test | abc}}')
-    var exp = textParser.tokensToExp(tokens)
-    expect(exp).toBe('test | abc')
-  })
-
   it('tokens to expression with filters, multiple expressions', function () {
-    var tokens = textParser.parse('a {{b | c d}} e')
+    var tokens = textParser.parse('a {{b | c d | f}} e')
     var exp = textParser.tokensToExp(tokens)
-    expect(exp).toBe('"a "+(this.$options.filters["c"].read||this.$options.filters["c"]).apply(this,[b,"d"])+" e"')
+    expect(exp).toBe('"a "+this._applyFilter("f",[this._applyFilter("c",[b,"d"])])+" e"')
   })
 
 })
