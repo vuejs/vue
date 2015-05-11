@@ -176,6 +176,12 @@ module.exports = {
     var id = this.ctorGetter.call(context, context)
     var Ctor = this.vm.$options.components[id]
     _.assertAsset(Ctor, 'component', id)
+    if (!Ctor.options) {
+      _.warn(
+        'Async resolution is not supported for v-repeat ' +
+        '+ dynamic component. (component: ' + id + ')'
+      )
+    }
     return Ctor
   },
 
