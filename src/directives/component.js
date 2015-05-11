@@ -94,7 +94,7 @@ module.exports = {
       if (this.keepAlive) {
         this.cache[this.ctorId] = child
       }
-      if (config.nameConvenience && !child._isBlock) {
+      if (config.classConvenience && !child._isBlock) {
         _.addClass(child.$el, this.ctorId)
       }
       return child
