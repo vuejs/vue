@@ -26,6 +26,13 @@ module.exports = {
   silent: false,
 
   /**
+   * Wheter to add `v-component` value as class name on element.
+   *
+   * @type {Boolean}
+   */
+  classConvenience: true,
+
+  /**
    * Whether allow observer to alter data objects'
    * __proto__.
    *

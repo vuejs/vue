@@ -1,4 +1,5 @@
 var _ = require('../util')
+var config = require('../config')
 var templateParser = require('../parsers/template')
 
 module.exports = {
@@ -92,6 +93,9 @@ module.exports = {
       }, this.Ctor)
       if (this.keepAlive) {
         this.cache[this.ctorId] = child
+      }
+      if (config.nameConvenience && !child._isBlock) {
+        _.addClass(child.$el, this.ctorId)
       }
       return child
     }
