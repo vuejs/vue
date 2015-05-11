@@ -38,10 +38,11 @@ module.exports = {
       }
       // if static, build right now.
       if (!this._isDynamicLiteral) {
-        this.resolveCtor(this.expression)
-        var child = this.build()
-        child.$before(this.ref)
-        this.setCurrent(child)
+        this.resolveCtor(this.expression, _.bind(function () {
+          var child = this.build()
+          child.$before(this.ref)
+          this.setCurrent(child)
+        }, this))
       } else {
         // check dynamic component params
         this.readyEvent = this._checkParam('wait-for')
@@ -60,10 +61,15 @@ module.exports = {
    * the child vm.
    */
 
-  resolveCtor: function (id) {
-    this.ctorId = id
-    this.Ctor = this.vm.$options.components[id]
-    _.assertAsset(this.Ctor, 'component', id)
+  resolveCtor: function (id, cb) {
+    var self = this
+    // TODO handle update/teardown before the component
+    // is actually resolved
+    this.vm._resolveComponent(id, function (ctor) {
+      self.ctorId = id
+      self.Ctor = ctor
+      cb()
+    })
   },
 
   /**
@@ -139,22 +145,23 @@ module.exports = {
 
   update: function (value) {
     if (!value) {
-      // just destroy and remove current
+      // just remove current
       this.unbuild()
       this.remove(this.childVM)
       this.unsetCurrent()
     } else {
-      this.resolveCtor(value)
-      this.unbuild()
-      var newComponent = this.build()
-      var self = this
-      if (this.readyEvent) {
-        newComponent.$once(this.readyEvent, function () {
-          self.swapTo(newComponent)
-        })
-      } else {
-        this.swapTo(newComponent)
-      }
+      this.resolveCtor(value, _.bind(function () {
+        this.unbuild()
+        var newComponent = this.build()
+        var self = this
+        if (this.readyEvent) {
+          newComponent.$once(this.readyEvent, function () {
+            self.swapTo(newComponent)
+          })
+        } else {
+          this.swapTo(newComponent)
+        }
+      }, this))
     }
   },
 
