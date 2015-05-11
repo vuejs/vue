@@ -9,6 +9,12 @@ var transclude = require('../compiler/transclude')
 var mergeOptions = require('../util/merge-option')
 var uid = 0
 
+// async component resolution states
+var UNRESOLVED = 0
+var PENDING = 1
+var RESOLVED = 2
+var ABORTED = 3
+
 module.exports = {
 
   /**
@@ -85,6 +91,7 @@ module.exports = {
    */
 
   checkComponent: function () {
+    this.componentState = UNRESOLVED
     var id = _.attr(this.el, 'component')
     var options = this.vm.$options
     if (!id) {
@@ -106,37 +113,105 @@ module.exports = {
         this.inlineTempalte = _.extractContent(this.el, true)
       }
       var tokens = textParser.parse(id)
-      if (!tokens) { // static component
-        var Ctor = this.Ctor = options.components[id]
-        _.assertAsset(Ctor, 'component', id)
-        var merged = mergeOptions(Ctor.options, {}, {
-          $parent: this.vm
-        })
-        merged.template = this.inlineTempalte || merged.template
-        merged._asComponent = true
-        merged._parent = this.vm
-        this.template = transclude(this.template, merged)
-        // Important: mark the template as a root node so that
-        // custom element components don't get compiled twice.
-        // fixes #822
-        this.template.__vue__ = true
-        this._linkFn = compile(this.template, merged)
-      } else {
-        // to be resolved later
+      if (tokens) {
+        // dynamic component to be resolved later
         var ctorExp = textParser.tokensToExp(tokens)
         this.ctorGetter = expParser.parse(ctorExp).get
+      } else {
+        // static
+        this.componentId = id
+        this.pendingData = null
       }
     }
   },
 
+  resolveComponent: function () {
+    this.componentState = PENDING
+    this.vm._resolveComponent(this.componentId, _.bind(function (Ctor) {
+      if (this.componentState === ABORTED) {
+        return
+      }
+      this.Ctor = Ctor
+      var merged = mergeOptions(Ctor.options, {}, {
+        $parent: this.vm
+      })
+      merged.template = this.inlineTempalte || merged.template
+      merged._asComponent = true
+      merged._parent = this.vm
+      this.template = transclude(this.template, merged)
+      // Important: mark the template as a root node so that
+      // custom element components don't get compiled twice.
+      // fixes #822
+      this.template.__vue__ = true
+      this._linkFn = compile(this.template, merged)
+      this.componentState = RESOLVED
+      this.realUpdate(this.pendingData)
+      this.pendingData = null
+    }, this))
+  },
+
+    /**
+   * Resolve a dynamic component to use for an instance.
+   * The tricky part here is that there could be dynamic
+   * components depending on instance data.
+   *
+   * @param {Object} data
+   * @param {Object} meta
+   * @return {Function}
+   */
+
+  resolveDynamicComponent: function (data, meta) {
+    // create a temporary context object and copy data
+    // and meta properties onto it.
+    // use _.define to avoid accidentally overwriting scope
+    // properties.
+    var context = Object.create(this.vm)
+    var key
+    for (key in data) {
+      _.define(context, key, data[key])
+    }
+    for (key in meta) {
+      _.define(context, key, meta[key])
+    }
+    var id = this.ctorGetter.call(context, context)
+    var Ctor = this.vm.$options.components[id]
+    _.assertAsset(Ctor, 'component', id)
+    return Ctor
+  },
+
   /**
    * Update.
-   * This is called whenever the Array mutates.
+   * This is called whenever the Array mutates. If we have
+   * a component, we might need to wait for it to resolve
+   * asynchronously.
    *
    * @param {Array|Number|String} data
    */
 
   update: function (data) {
+    if (this.componentId) {
+      var state = this.componentState
+      if (state === UNRESOLVED) {
+        this.pendingData = data
+        // once resolved, it will call realUpdate
+        this.resolveComponent()
+      } else if (state === PENDING) {
+        this.pendingData = data
+      } else if (state === RESOLVED) {
+        this.realUpdate(data)
+      }
+    } else {
+      this.realUpdate(data)
+    }
+  },
+
+  /**
+   * The real update that actually modifies the DOM.
+   *
+   * @param {Array|Number|String} data
+   */
+
+  realUpdate: function (data) {
     data = data || []
     var type = typeof data
     if (type === 'number') {
@@ -292,7 +367,7 @@ module.exports = {
       data = raw
     }
     // resolve constructor
-    var Ctor = this.Ctor || this.resolveCtor(data, meta)
+    var Ctor = this.Ctor || this.resolveDynamicComponent(data, meta)
     var vm = this.vm.$addChild({
       el: templateParser.clone(this.template),
       _asComponent: this.asComponent,
@@ -324,39 +399,11 @@ module.exports = {
   },
 
   /**
-   * Resolve a contructor to use for an instance.
-   * The tricky part here is that there could be dynamic
-   * components depending on instance data.
-   *
-   * @param {Object} data
-   * @param {Object} meta
-   * @return {Function}
-   */
-
-  resolveCtor: function (data, meta) {
-    // create a temporary context object and copy data
-    // and meta properties onto it.
-    // use _.define to avoid accidentally overwriting scope
-    // properties.
-    var context = Object.create(this.vm)
-    var key
-    for (key in data) {
-      _.define(context, key, data[key])
-    }
-    for (key in meta) {
-      _.define(context, key, meta[key])
-    }
-    var id = this.ctorGetter.call(context, context)
-    var Ctor = this.vm.$options.components[id]
-    _.assertAsset(Ctor, 'component', id)
-    return Ctor
-  },
-
-  /**
    * Unbind, teardown everything
    */
 
   unbind: function () {
+    this.componentState = ABORTED
     if (this.refID) {
       this.vm.$[this.refID] = null
     }
