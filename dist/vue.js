@@ -698,7 +698,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			_.warn(
 				'cannot find service "' + name + '" which is required by "' + vm.$options.name + '".'
 			)
-			return;
+			return
 		}
 		return set.call(vm, services[name], name)
 	}
@@ -746,12 +746,11 @@ return /******/ (function(modules) { // webpackBootstrap
 			for (var i = 0, l = context.length; i < l; ++i) {
 				var ctx = context[i]
 				var name = ctx.name
-				if (!childContext[name]) {
+				this[name] = ctx.set.call(this, childContext[name], name)
+				if (this[name] === undefined) {
 					_.warn(
-						'cannot find context "' + name + '" in childContext of parent vm'
+						'cannot resolve context "' + name + '" for vm "' + this.constructor.name + '".'
 					)
-				} else { // We don't need to bind it, because it is bound on parent vm.
-					this[name] = ctx.set.call(this, childContext[name], name)
 				}
 			}
 		}
@@ -1664,29 +1663,29 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	// manipulation directives
 	exports.text       = __webpack_require__(34)
-	exports.html       = __webpack_require__(40)
-	exports.attr       = __webpack_require__(35)
-	exports.show       = __webpack_require__(36)
-	exports['class']   = __webpack_require__(37)
-	exports.el         = __webpack_require__(38)
-	exports.ref        = __webpack_require__(39)
+	exports.html       = __webpack_require__(35)
+	exports.attr       = __webpack_require__(36)
+	exports.show       = __webpack_require__(37)
+	exports['class']   = __webpack_require__(38)
+	exports.el         = __webpack_require__(39)
+	exports.ref        = __webpack_require__(40)
 	exports.cloak      = __webpack_require__(41)
 	exports.style      = __webpack_require__(42)
 	exports.partial    = __webpack_require__(33)
-	exports.transition = __webpack_require__(43)
+	exports.transition = __webpack_require__(44)
 
 	// event listener directives
-	exports.on         = __webpack_require__(44)
+	exports.on         = __webpack_require__(43)
 	exports.model      = __webpack_require__(53)
 
 	// child vm directives
 	exports.component  = __webpack_require__(45)
 	exports.repeat     = __webpack_require__(46)
-	exports['if']      = __webpack_require__(49)
+	exports['if']      = __webpack_require__(47)
 
 	// child vm communication directives
-	exports['with']    = __webpack_require__(47)
-	exports.events     = __webpack_require__(48)
+	exports['with']    = __webpack_require__(48)
+	exports.events     = __webpack_require__(49)
 
 /***/ },
 /* 15 */
@@ -5674,7 +5673,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _ = __webpack_require__(13)
 	var templateParser = __webpack_require__(22)
-	var vIf = __webpack_require__(49)
+	var vIf = __webpack_require__(47)
 
 	module.exports = {
 
@@ -5747,125 +5746,6 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
-	// xlink
-	var xlinkNS = 'http://www.w3.org/1999/xlink'
-	var xlinkRE = /^xlink:/
-
-	module.exports = {
-
-	  priority: 850,
-
-	  bind: function () {
-	    var name = this.arg
-	    this.update = xlinkRE.test(name)
-	      ? xlinkHandler
-	      : defaultHandler
-	  }
-
-	}
-
-	function defaultHandler (value) {
-	  if (value || value === 0) {
-	    this.el.setAttribute(this.arg, value)
-	  } else {
-	    this.el.removeAttribute(this.arg)
-	  }
-	}
-
-	function xlinkHandler (value) {
-	  if (value != null) {
-	    this.el.setAttributeNS(xlinkNS, this.arg, value)
-	  } else {
-	    this.el.removeAttributeNS(xlinkNS, 'href')
-	  }
-	}
-
-/***/ },
-/* 36 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var transition = __webpack_require__(52)
-
-	module.exports = function (value) {
-	  var el = this.el
-	  transition.apply(el, value ? 1 : -1, function () {
-	    el.style.display = value ? '' : 'none'
-	  }, this.vm)
-	}
-
-/***/ },
-/* 37 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var _ = __webpack_require__(13)
-	var addClass = _.addClass
-	var removeClass = _.removeClass
-
-	module.exports = function (value) {
-	  if (this.arg) {
-	    var method = value ? addClass : removeClass
-	    method(this.el, this.arg)
-	  } else {
-	    if (this.lastVal) {
-	      removeClass(this.el, this.lastVal)
-	    }
-	    if (value) {
-	      addClass(this.el, value)
-	      this.lastVal = value
-	    }
-	  }
-	}
-
-/***/ },
-/* 38 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = {
-
-	  isLiteral: true,
-
-	  bind: function () {
-	    this.vm.$$[this.expression] = this.el
-	  },
-
-	  unbind: function () {
-	    delete this.vm.$$[this.expression]
-	  }
-	  
-	}
-
-/***/ },
-/* 39 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var _ = __webpack_require__(13)
-
-	module.exports = {
-
-	  isLiteral: true,
-
-	  bind: function () {
-	    var vm = this.el.__vue__
-	    if (!vm) {
-	      _.warn(
-	        'v-ref should only be used on a component root element.'
-	      )
-	      return
-	    }
-	    // If we get here, it means this is a `v-ref` on a
-	    // child, because parent scope `v-ref` is stripped in
-	    // `v-component` already. So we just record our own ref
-	    // here - it will overwrite parent ref in `v-component`,
-	    // if any.
-	    vm._refID = this.expression
-	  }
-	  
-	}
-
-/***/ },
-/* 40 */
-/***/ function(module, exports, __webpack_require__) {
-
 	var _ = __webpack_require__(13)
 	var templateParser = __webpack_require__(22)
 
@@ -5903,6 +5783,125 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _.before(frag, this.el)
 	  }
 
+	}
+
+/***/ },
+/* 36 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// xlink
+	var xlinkNS = 'http://www.w3.org/1999/xlink'
+	var xlinkRE = /^xlink:/
+
+	module.exports = {
+
+	  priority: 850,
+
+	  bind: function () {
+	    var name = this.arg
+	    this.update = xlinkRE.test(name)
+	      ? xlinkHandler
+	      : defaultHandler
+	  }
+
+	}
+
+	function defaultHandler (value) {
+	  if (value || value === 0) {
+	    this.el.setAttribute(this.arg, value)
+	  } else {
+	    this.el.removeAttribute(this.arg)
+	  }
+	}
+
+	function xlinkHandler (value) {
+	  if (value != null) {
+	    this.el.setAttributeNS(xlinkNS, this.arg, value)
+	  } else {
+	    this.el.removeAttributeNS(xlinkNS, 'href')
+	  }
+	}
+
+/***/ },
+/* 37 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var transition = __webpack_require__(52)
+
+	module.exports = function (value) {
+	  var el = this.el
+	  transition.apply(el, value ? 1 : -1, function () {
+	    el.style.display = value ? '' : 'none'
+	  }, this.vm)
+	}
+
+/***/ },
+/* 38 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var _ = __webpack_require__(13)
+	var addClass = _.addClass
+	var removeClass = _.removeClass
+
+	module.exports = function (value) {
+	  if (this.arg) {
+	    var method = value ? addClass : removeClass
+	    method(this.el, this.arg)
+	  } else {
+	    if (this.lastVal) {
+	      removeClass(this.el, this.lastVal)
+	    }
+	    if (value) {
+	      addClass(this.el, value)
+	      this.lastVal = value
+	    }
+	  }
+	}
+
+/***/ },
+/* 39 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = {
+
+	  isLiteral: true,
+
+	  bind: function () {
+	    this.vm.$$[this.expression] = this.el
+	  },
+
+	  unbind: function () {
+	    delete this.vm.$$[this.expression]
+	  }
+	  
+	}
+
+/***/ },
+/* 40 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var _ = __webpack_require__(13)
+
+	module.exports = {
+
+	  isLiteral: true,
+
+	  bind: function () {
+	    var vm = this.el.__vue__
+	    if (!vm) {
+	      _.warn(
+	        'v-ref should only be used on a component root element.'
+	      )
+	      return
+	    }
+	    // If we get here, it means this is a `v-ref` on a
+	    // child, because parent scope `v-ref` is stripped in
+	    // `v-component` already. So we just record our own ref
+	    // here - it will overwrite parent ref in `v-component`,
+	    // if any.
+	    vm._refID = this.expression
+	  }
+	  
 	}
 
 /***/ },
@@ -6031,35 +6030,6 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {
-
-	  priority: 1000,
-	  isLiteral: true,
-
-	  bind: function () {
-	    if (!this._isDynamicLiteral) {
-	      this.update(this.expression)
-	    }
-	  },
-
-	  update: function (id) {
-	    var vm = this.el.__vue__ || this.vm
-	    this.el.__v_trans = {
-	      id: id,
-	      // resolve the custom transition functions now
-	      // so the transition module knows this is a
-	      // javascript transition without having to check
-	      // computed CSS.
-	      fns: vm.$options.transitions[id]
-	    }
-	  }
-
-	}
-
-/***/ },
-/* 44 */
-/***/ function(module, exports, __webpack_require__) {
-
 	var _ = __webpack_require__(13)
 
 	module.exports = {
@@ -6118,6 +6088,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.reset()
 	    _.off(this.el, 'load', this.iframeBind)
 	  }
+	}
+
+/***/ },
+/* 44 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = {
+
+	  priority: 1000,
+	  isLiteral: true,
+
+	  bind: function () {
+	    if (!this._isDynamicLiteral) {
+	      this.update(this.expression)
+	    }
+	  },
+
+	  update: function (id) {
+	    var vm = this.el.__vue__ || this.vm
+	    this.el.__v_trans = {
+	      id: id,
+	      // resolve the custom transition functions now
+	      // so the transition module knows this is a
+	      // javascript transition without having to check
+	      // computed CSS.
+	      fns: vm.$options.transitions[id]
+	    }
+	  }
+
 	}
 
 /***/ },
@@ -6909,138 +6908,6 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(13)
-	var Watcher = __webpack_require__(27)
-	var expParser = __webpack_require__(24)
-	var literalRE = /^(true|false|\s?('[^']*'|"[^"]")\s?)$/
-
-	module.exports = {
-
-	  priority: 900,
-
-	  bind: function () {
-
-	    var child = this.vm
-	    var parent = child.$parent
-	    var childKey = this.arg || '$data'
-	    var parentKey = this.expression
-
-	    if (this.el && this.el !== child.$el) {
-	      _.warn(
-	        'v-with can only be used on instance root elements.'
-	      )
-	    } else if (!parent) {
-	      _.warn(
-	        'v-with must be used on an instance with a parent.'
-	      )
-	    } else if (literalRE.test(parentKey)) {
-	      // no need to setup watchers for literal bindings
-	      if (!this.arg) {
-	        _.warn(
-	          'v-with cannot bind literal value as $data: ' +
-	          parentKey
-	        )
-	      } else {
-	        var value = expParser.parse(parentKey).get()
-	        child.$set(childKey, value)
-	      }
-	    } else {
-
-	      // simple lock to avoid circular updates.
-	      // without this it would stabilize too, but this makes
-	      // sure it doesn't cause other watchers to re-evaluate.
-	      var locked = false
-	      var lock = function () {
-	        locked = true
-	        _.nextTick(unlock)
-	      }
-	      var unlock = function () {
-	        locked = false
-	      }
-
-	      this.parentWatcher = new Watcher(
-	        parent,
-	        parentKey,
-	        function (val) {
-	          if (!locked) {
-	            lock()
-	            child.$set(childKey, val)
-	          }
-	        }
-	      )
-	      
-	      // set the child initial value first, before setting
-	      // up the child watcher to avoid triggering it
-	      // immediately.
-	      child.$set(childKey, this.parentWatcher.value)
-
-	      this.childWatcher = new Watcher(
-	        child,
-	        childKey,
-	        function (val) {
-	          if (!locked) {
-	            lock()
-	            parent.$set(parentKey, val)
-	          }
-	        }
-	      )
-	    }
-	  },
-
-	  unbind: function () {
-	    if (this.parentWatcher) {
-	      this.parentWatcher.teardown()
-	      this.childWatcher.teardown()
-	    }
-	  }
-
-	}
-
-/***/ },
-/* 48 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var _ = __webpack_require__(13)
-
-	module.exports = {
-
-	  acceptStatement: true,
-
-	  bind: function () {
-	    var child = this.el.__vue__
-	    if (!child || this.vm !== child.$parent) {
-	      _.warn(
-	        '`v-events` should only be used on a child component ' +
-	        'from the parent template.'
-	      )
-	      return
-	    }
-	  },
-
-	  update: function (handler, oldHandler) {
-	    if (typeof handler !== 'function') {
-	      _.warn(
-	        'Directive "v-events:' + this.expression + '" ' +
-	        'expects a function value.'
-	      )
-	      return
-	    }
-	    var child = this.el.__vue__
-	    if (oldHandler) {
-	      child.$off(this.arg, oldHandler)
-	    }
-	    child.$on(this.arg, handler)
-	  }
-
-	  // when child is destroyed, all events are turned off,
-	  // so no need for unbind here.
-
-	}
-
-/***/ },
-/* 49 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var _ = __webpack_require__(13)
 	var compile = __webpack_require__(19)
 	var templateParser = __webpack_require__(22)
 	var transition = __webpack_require__(52)
@@ -7172,6 +7039,138 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
+/* 48 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var _ = __webpack_require__(13)
+	var Watcher = __webpack_require__(27)
+	var expParser = __webpack_require__(24)
+	var literalRE = /^(true|false|\s?('[^']*'|"[^"]")\s?)$/
+
+	module.exports = {
+
+	  priority: 900,
+
+	  bind: function () {
+
+	    var child = this.vm
+	    var parent = child.$parent
+	    var childKey = this.arg || '$data'
+	    var parentKey = this.expression
+
+	    if (this.el && this.el !== child.$el) {
+	      _.warn(
+	        'v-with can only be used on instance root elements.'
+	      )
+	    } else if (!parent) {
+	      _.warn(
+	        'v-with must be used on an instance with a parent.'
+	      )
+	    } else if (literalRE.test(parentKey)) {
+	      // no need to setup watchers for literal bindings
+	      if (!this.arg) {
+	        _.warn(
+	          'v-with cannot bind literal value as $data: ' +
+	          parentKey
+	        )
+	      } else {
+	        var value = expParser.parse(parentKey).get()
+	        child.$set(childKey, value)
+	      }
+	    } else {
+
+	      // simple lock to avoid circular updates.
+	      // without this it would stabilize too, but this makes
+	      // sure it doesn't cause other watchers to re-evaluate.
+	      var locked = false
+	      var lock = function () {
+	        locked = true
+	        _.nextTick(unlock)
+	      }
+	      var unlock = function () {
+	        locked = false
+	      }
+
+	      this.parentWatcher = new Watcher(
+	        parent,
+	        parentKey,
+	        function (val) {
+	          if (!locked) {
+	            lock()
+	            child.$set(childKey, val)
+	          }
+	        }
+	      )
+	      
+	      // set the child initial value first, before setting
+	      // up the child watcher to avoid triggering it
+	      // immediately.
+	      child.$set(childKey, this.parentWatcher.value)
+
+	      this.childWatcher = new Watcher(
+	        child,
+	        childKey,
+	        function (val) {
+	          if (!locked) {
+	            lock()
+	            parent.$set(parentKey, val)
+	          }
+	        }
+	      )
+	    }
+	  },
+
+	  unbind: function () {
+	    if (this.parentWatcher) {
+	      this.parentWatcher.teardown()
+	      this.childWatcher.teardown()
+	    }
+	  }
+
+	}
+
+/***/ },
+/* 49 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var _ = __webpack_require__(13)
+
+	module.exports = {
+
+	  acceptStatement: true,
+
+	  bind: function () {
+	    var child = this.el.__vue__
+	    if (!child || this.vm !== child.$parent) {
+	      _.warn(
+	        '`v-events` should only be used on a child component ' +
+	        'from the parent template.'
+	      )
+	      return
+	    }
+	  },
+
+	  update: function (handler, oldHandler) {
+	    if (typeof handler !== 'function') {
+	      _.warn(
+	        'Directive "v-events:' + this.expression + '" ' +
+	        'expects a function value.'
+	      )
+	      return
+	    }
+	    var child = this.el.__vue__
+	    if (oldHandler) {
+	      child.$off(this.arg, oldHandler)
+	    }
+	    child.$on(this.arg, handler)
+	  }
+
+	  // when child is destroyed, all events are turned off,
+	  // so no need for unbind here.
+
+	}
+
+/***/ },
 /* 50 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -7270,9 +7269,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _ = __webpack_require__(13)
 	var config = __webpack_require__(18)
 	var Dep = __webpack_require__(25)
-	var arrayMethods = __webpack_require__(56)
+	var arrayMethods = __webpack_require__(57)
 	var arrayKeys = Object.getOwnPropertyNames(arrayMethods)
-	__webpack_require__(57)
+	__webpack_require__(56)
 
 	var uid = 0
 
@@ -7678,8 +7677,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	var handlers = {
 	  _default: __webpack_require__(60),
 	  radio: __webpack_require__(61),
-	  select: __webpack_require__(62),
-	  checkbox: __webpack_require__(63)
+	  select: __webpack_require__(63),
+	  checkbox: __webpack_require__(62)
 	}
 
 	module.exports = {
@@ -7951,6 +7950,95 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(13)
+	var objProto = Object.prototype
+
+	/**
+	 * Add a new property to an observed object
+	 * and emits corresponding event
+	 *
+	 * @param {String} key
+	 * @param {*} val
+	 * @public
+	 */
+
+	_.define(
+	  objProto,
+	  '$add',
+	  function $add (key, val) {
+	    if (this.hasOwnProperty(key)) return
+	    var ob = this.__ob__
+	    if (!ob || _.isReserved(key)) {
+	      this[key] = val
+	      return
+	    }
+	    ob.convert(key, val)
+	    if (ob.vms) {
+	      var i = ob.vms.length
+	      while (i--) {
+	        var vm = ob.vms[i]
+	        vm._proxy(key)
+	        vm._digest()
+	      }
+	    } else {
+	      ob.notify()
+	    }
+	  }
+	)
+
+	/**
+	 * Set a property on an observed object, calling add to
+	 * ensure the property is observed.
+	 *
+	 * @param {String} key
+	 * @param {*} val
+	 * @public
+	 */
+
+	_.define(
+	  objProto,
+	  '$set',
+	  function $set (key, val) {
+	    this.$add(key, val)
+	    this[key] = val
+	  }
+	)
+
+	/**
+	 * Deletes a property from an observed object
+	 * and emits corresponding event
+	 *
+	 * @param {String} key
+	 * @public
+	 */
+
+	_.define(
+	  objProto,
+	  '$delete',
+	  function $delete (key) {
+	    if (!this.hasOwnProperty(key)) return
+	    delete this[key]
+	    var ob = this.__ob__
+	    if (!ob || _.isReserved(key)) {
+	      return
+	    }
+	    if (ob.vms) {
+	      var i = ob.vms.length
+	      while (i--) {
+	        var vm = ob.vms[i]
+	        vm._unproxy(key)
+	        vm._digest()
+	      }
+	    } else {
+	      ob.notify()
+	    }
+	  }
+	)
+
+/***/ },
+/* 57 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var _ = __webpack_require__(13)
 	var arrayProto = Array.prototype
 	var arrayMethods = Object.create(arrayProto)
 
@@ -8040,95 +8128,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	)
 
 	module.exports = arrayMethods
-
-/***/ },
-/* 57 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var _ = __webpack_require__(13)
-	var objProto = Object.prototype
-
-	/**
-	 * Add a new property to an observed object
-	 * and emits corresponding event
-	 *
-	 * @param {String} key
-	 * @param {*} val
-	 * @public
-	 */
-
-	_.define(
-	  objProto,
-	  '$add',
-	  function $add (key, val) {
-	    if (this.hasOwnProperty(key)) return
-	    var ob = this.__ob__
-	    if (!ob || _.isReserved(key)) {
-	      this[key] = val
-	      return
-	    }
-	    ob.convert(key, val)
-	    if (ob.vms) {
-	      var i = ob.vms.length
-	      while (i--) {
-	        var vm = ob.vms[i]
-	        vm._proxy(key)
-	        vm._digest()
-	      }
-	    } else {
-	      ob.notify()
-	    }
-	  }
-	)
-
-	/**
-	 * Set a property on an observed object, calling add to
-	 * ensure the property is observed.
-	 *
-	 * @param {String} key
-	 * @param {*} val
-	 * @public
-	 */
-
-	_.define(
-	  objProto,
-	  '$set',
-	  function $set (key, val) {
-	    this.$add(key, val)
-	    this[key] = val
-	  }
-	)
-
-	/**
-	 * Deletes a property from an observed object
-	 * and emits corresponding event
-	 *
-	 * @param {String} key
-	 * @public
-	 */
-
-	_.define(
-	  objProto,
-	  '$delete',
-	  function $delete (key) {
-	    if (!this.hasOwnProperty(key)) return
-	    delete this[key]
-	    var ob = this.__ob__
-	    if (!ob || _.isReserved(key)) {
-	      return
-	    }
-	    if (ob.vms) {
-	      var i = ob.vms.length
-	      while (i--) {
-	        var vm = ob.vms[i]
-	        vm._unproxy(key)
-	        vm._digest()
-	      }
-	    } else {
-	      ob.notify()
-	    }
-	  }
-	)
 
 /***/ },
 /* 58 */
@@ -8564,6 +8563,36 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(13)
+
+	module.exports = {
+
+	  bind: function () {
+	    var self = this
+	    var el = this.el
+	    this.listener = function () {
+	      self.set(el.checked, true)
+	    }
+	    _.on(el, 'change', this.listener)
+	    if (el.checked) {
+	      this._initValue = el.checked
+	    }
+	  },
+
+	  update: function (value) {
+	    this.el.checked = !!value
+	  },
+
+	  unbind: function () {
+	    _.off(this.el, 'change', this.listener)
+	  }
+
+	}
+
+/***/ },
+/* 63 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var _ = __webpack_require__(13)
 	var Watcher = __webpack_require__(27)
 	var dirParser = __webpack_require__(23)
 
@@ -8742,36 +8771,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (arr[i] == val) return i
 	  }
 	  return -1
-	}
-
-/***/ },
-/* 63 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var _ = __webpack_require__(13)
-
-	module.exports = {
-
-	  bind: function () {
-	    var self = this
-	    var el = this.el
-	    this.listener = function () {
-	      self.set(el.checked, true)
-	    }
-	    _.on(el, 'change', this.listener)
-	    if (el.checked) {
-	      this._initValue = el.checked
-	    }
-	  },
-
-	  update: function (value) {
-	    this.el.checked = !!value
-	  },
-
-	  unbind: function () {
-	    _.off(this.el, 'change', this.listener)
-	  }
-
 	}
 
 /***/ }

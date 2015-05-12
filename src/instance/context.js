@@ -22,12 +22,11 @@ exports._initContext = function () {
 		for (var i = 0, l = context.length; i < l; ++i) {
 			var ctx = context[i]
 			var name = ctx.name
-			if (!childContext[name]) {
+			this[name] = ctx.set.call(this, childContext[name], name)
+			if (this[name] === undefined) {
 				_.warn(
-					'cannot find context "' + name + '" in childContext of parent vm'
+					'cannot resolve context "' + name + '" for vm "' + this.constructor.name + '".'
 				)
-			} else { // We don't need to bind it, because it is bound on parent vm.
-				this[name] = ctx.set.call(this, childContext[name], name)
 			}
 		}
 	}
