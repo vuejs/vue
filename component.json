@@ -49,6 +49,8 @@
     "src/filters/array-filters.js",
     "src/filters/index.js",
     "src/instance/compile.js",
+    "src/instance/context.js",
+    "src/instance/dependencies.js",
     "src/instance/events.js",
     "src/instance/init.js",
     "src/instance/misc.js",

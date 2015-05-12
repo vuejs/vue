@@ -258,18 +258,16 @@ if (_.inBrowser) {
         }
       })
       expect(el.innerHTML).toBe(
-        '<div><div>' +
+        '<div class="a"><div class="b">' +
           '<div>1</div><div>2</div><!--v-repeat-->' +
-        '</div><!--v-component-->' +
-        '</div><!--v-component-->'
+        '</div></div>'
       )
       vm.list.push(3)
       _.nextTick(function () {
         expect(el.innerHTML).toBe(
-          '<div><div>' +
+          '<div class="a"><div class="b">' +
             '<div>1</div><div>2</div><div>3</div><!--v-repeat-->' +
-          '</div><!--v-component-->' +
-          '</div><!--v-component-->'
+          '</div></div>'
         )
         done()
       })

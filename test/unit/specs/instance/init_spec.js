@@ -9,6 +9,8 @@ describe('Instance Init', function () {
     _initEvents: jasmine.createSpy(),
     _callHook: jasmine.createSpy(),
     _initScope: jasmine.createSpy(),
+    _initDependencies: jasmine.createSpy(),
+    _initContext: jasmine.createSpy(),
     $mount: jasmine.createSpy()
   }
 
@@ -40,6 +42,8 @@ describe('Instance Init', function () {
   it('should call other init methods', function () {
     expect(stub._initEvents).toHaveBeenCalled()
     expect(stub._initScope).toHaveBeenCalled()
+    expect(stub._initDependencies).toHaveBeenCalled()
+    expect(stub._initContext).toHaveBeenCalled()
   })
 
   it('should call created hook', function () {

@@ -39,7 +39,8 @@ Vue.options = {
   filters     : require('./filters'),
   partials    : {},
   transitions : {},
-  components  : {}
+  components  : {},
+  services    : {}
 }
 
 /**
@@ -69,6 +70,8 @@ Object.defineProperty(p, '$data', {
 extend(p, require('./instance/init'))
 extend(p, require('./instance/events'))
 extend(p, require('./instance/scope'))
+extend(p, require('./instance/dependencies'))
+extend(p, require('./instance/context'))
 extend(p, require('./instance/compile'))
 extend(p, require('./instance/misc'))
 

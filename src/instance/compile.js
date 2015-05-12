@@ -153,8 +153,10 @@ exports._cleanup = function () {
   this.$el =
   this.$parent =
   this.$root =
+  this.$services =
   this._children =
   this._transCpnts =
+  this._childContext =
   this._directives = null
   // call the last hook...
   this._isDestroyed = true

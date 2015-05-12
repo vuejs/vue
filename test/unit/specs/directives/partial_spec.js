@@ -77,7 +77,7 @@ if (_.inBrowser) {
       expect(vm._directives.length).toBe(2)
       vm.partial = 'p2'
       _.nextTick(function () {
-        expect(el.firstChild.innerHTML).toBe(wrap('<div>123</div><!--v-component-->'))
+        expect(el.firstChild.innerHTML).toBe(wrap('<div class="child">123</div>'))
         expect(vm._directives.length).toBe(2)
         expect(vm._children.length).toBe(1)
         vm.partial = 'p1'
