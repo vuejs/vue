@@ -406,7 +406,7 @@ module.exports = {
           )
         }
       } else {
-        _.define(data, this.id, vm)
+        _.define(data, id, vm)
       }
     } else {
       if (!cache[data]) {

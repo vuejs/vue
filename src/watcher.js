@@ -31,7 +31,8 @@ function Watcher (vm, expression, cb, options) {
   options = options || {}
   this.deep = !!options.deep
   this.user = !!options.user
-  this.deps = Object.create(null)
+  this.deps = []
+  this.newDeps = []
   // setup filters if any.
   // We delegate directive filters here to the watcher
   // because they need to be included in the dependency
@@ -56,12 +57,15 @@ var p = Watcher.prototype
  */
 
 p.addDep = function (dep) {
-  var id = dep.id
-  if (!this.newDeps[id]) {
-    this.newDeps[id] = dep
-    if (!this.deps[id]) {
-      this.deps[id] = dep
+  var newDeps = this.newDeps
+  var old = this.deps
+  if (_.indexOf(newDeps, dep) < 0) {
+    newDeps.push(dep)
+    var i = _.indexOf(old, dep)
+    if (i < 0) {
       dep.addSub(this)
+    } else {
+      old[i] = null
     }
   }
 }
@@ -123,7 +127,6 @@ p.set = function (value) {
 
 p.beforeGet = function () {
   Observer.target = this
-  this.newDeps = {}
 }
 
 /**
@@ -132,12 +135,15 @@ p.beforeGet = function () {
 
 p.afterGet = function () {
   Observer.target = null
-  for (var id in this.deps) {
-    if (!this.newDeps[id]) {
-      this.deps[id].removeSub(this)
+  var i = this.deps.length
+  while (i--) {
+    var dep = this.deps[i]
+    if (dep) {
+      dep.removeSub(this)
     }
   }
   this.deps = this.newDeps
+  this.newDeps = []
 }
 
 /**
@@ -220,8 +226,9 @@ p.teardown = function () {
     if (!this.vm._isBeingDestroyed) {
       this.vm._watcherList.$remove(this)
     }
-    for (var id in this.deps) {
-      this.deps[id].removeSub(this)
+    var i = this.deps.length
+    while (i--) {
+      this.deps[i].removeSub(this)
     }
     this.active = false
     this.vm = this.cbs = this.value = null

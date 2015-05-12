@@ -1,4 +1,3 @@
-var uid = 0
 var _ = require('../util')
 
 /**
@@ -9,7 +8,6 @@ var _ = require('../util')
  */
 
 function Dep () {
-  this.id = ++uid
   this.subs = []
 }
 

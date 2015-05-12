@@ -105,8 +105,13 @@ exports.classify = function (str) {
  */
 
 exports.bind = function (fn, ctx) {
-  return function () {
-    return fn.apply(ctx, arguments)
+  return function (a) {
+    var l = arguments.length
+    return l
+      ? l > 1
+        ? fn.apply(ctx, arguments)
+        : fn.call(ctx, a)
+      : fn.call(ctx)
   }
 }
 
@@ -227,4 +232,19 @@ exports.debounce = function(func, wait) {
     }
     return result
   }
+}
+
+/**
+ * Manual indexOf because it's slightly faster than
+ * native.
+ *
+ * @param {Array} arr
+ * @param {*} obj
+ */
+
+exports.indexOf = function (arr, obj) {
+  for (var i = 0, l = arr.length; i < l; i++) {
+    if (arr[i] === obj) return i
+  }
+  return -1
 }
