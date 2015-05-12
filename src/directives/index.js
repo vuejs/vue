@@ -23,3 +23,4 @@ exports['if']      = require('./if')
 // child vm communication directives
 exports['with']    = require('./with')
 exports.events     = require('./events')
+exports.context    = require('./context')

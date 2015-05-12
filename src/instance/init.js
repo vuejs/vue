@@ -89,7 +89,7 @@ exports._init = function (options) {
   this._initEvents()
 
   // setup context.
-  this._childContext = null
+  this._childContext = this.$context = null
   this._initContext()
 
   // call created hook

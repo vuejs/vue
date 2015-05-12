@@ -304,7 +304,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this._initEvents()
 
 	  // setup context.
-	  this._childContext = null
+	  this._childContext = this.$context = null
 	  this._initContext()
 
 	  // call created hook
@@ -743,11 +743,12 @@ return /******/ (function(modules) { // webpackBootstrap
 				)
 				return
 			}
+			var $context = this.$context = {}
 			for (var i = 0, l = context.length; i < l; ++i) {
 				var ctx = context[i]
 				var name = ctx.name
-				this[name] = ctx.set.call(this, childContext[name], name)
-				if (this[name] === undefined) {
+				$context[name] = ctx.set.call(this, childContext[name], name)
+				if ($context[name] === undefined) {
 					_.warn(
 						'cannot resolve context "' + name + '" for vm "' + this.constructor.name + '".'
 					)
@@ -782,7 +783,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(13)
-	var Directive = __webpack_require__(26)
+	var Directive = __webpack_require__(27)
 	var compile = __webpack_require__(19)
 	var transclude = __webpack_require__(20)
 
@@ -939,6 +940,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this.$parent =
 	  this.$root =
 	  this.$services =
+	  this.$context =
 	  this._children =
 	  this._transCpnts =
 	  this._childContext =
@@ -955,7 +957,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(13)
-	var Watcher = __webpack_require__(27)
+	var Watcher = __webpack_require__(26)
 	var Path = __webpack_require__(16)
 	var textParser = __webpack_require__(21)
 	var dirParser = __webpack_require__(23)
@@ -1662,20 +1664,20 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	// manipulation directives
-	exports.text       = __webpack_require__(34)
-	exports.html       = __webpack_require__(35)
-	exports.attr       = __webpack_require__(36)
-	exports.show       = __webpack_require__(37)
-	exports['class']   = __webpack_require__(38)
-	exports.el         = __webpack_require__(39)
-	exports.ref        = __webpack_require__(40)
-	exports.cloak      = __webpack_require__(41)
-	exports.style      = __webpack_require__(42)
-	exports.partial    = __webpack_require__(33)
-	exports.transition = __webpack_require__(44)
+	exports.text       = __webpack_require__(33)
+	exports.html       = __webpack_require__(34)
+	exports.attr       = __webpack_require__(35)
+	exports.show       = __webpack_require__(36)
+	exports['class']   = __webpack_require__(37)
+	exports.el         = __webpack_require__(38)
+	exports.ref        = __webpack_require__(39)
+	exports.cloak      = __webpack_require__(40)
+	exports.style      = __webpack_require__(41)
+	exports.partial    = __webpack_require__(42)
+	exports.transition = __webpack_require__(43)
 
 	// event listener directives
-	exports.on         = __webpack_require__(43)
+	exports.on         = __webpack_require__(44)
 	exports.model      = __webpack_require__(53)
 
 	// child vm directives
@@ -1686,6 +1688,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	// child vm communication directives
 	exports['with']    = __webpack_require__(48)
 	exports.events     = __webpack_require__(49)
+	exports.context    = __webpack_require__(50)
 
 /***/ },
 /* 15 */
@@ -1826,7 +1829,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Install special array filters
 	 */
 
-	_.extend(exports, __webpack_require__(50))
+	_.extend(exports, __webpack_require__(54))
 
 
 /***/ },
@@ -1834,7 +1837,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(13)
-	var Cache = __webpack_require__(54)
+	var Cache = __webpack_require__(55)
 	var pathCache = new Cache(1000)
 	var identRE = /^[$_a-zA-Z]+[\w$]*$/
 
@@ -3459,7 +3462,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Cache = __webpack_require__(54)
+	var Cache = __webpack_require__(55)
 	var config = __webpack_require__(18)
 	var dirParser = __webpack_require__(23)
 	var regexEscapeRE = /[-.*+?^${}()|[\]\/\\]/g
@@ -3644,7 +3647,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(13)
-	var Cache = __webpack_require__(54)
+	var Cache = __webpack_require__(55)
 	var templateCache = new Cache(1000)
 	var idSelectorCache = new Cache(1000)
 
@@ -3909,7 +3912,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(13)
-	var Cache = __webpack_require__(54)
+	var Cache = __webpack_require__(55)
 	var cache = new Cache(1000)
 	var argRE = /^[^\{\?]+$|^'[^']*'$|^"[^"]*"$/
 	var filterTokenRE = /[^\s'"]+|'[^']+'|"[^"]+"/g
@@ -4074,7 +4077,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _ = __webpack_require__(13)
 	var Path = __webpack_require__(16)
-	var Cache = __webpack_require__(54)
+	var Cache = __webpack_require__(55)
 	var expressionCache = new Cache(1000)
 
 	var allowedKeywords =
@@ -4392,238 +4395,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _ = __webpack_require__(13)
 	var config = __webpack_require__(18)
-	var Watcher = __webpack_require__(27)
-	var textParser = __webpack_require__(21)
-	var expParser = __webpack_require__(24)
-
-	/**
-	 * A directive links a DOM element with a piece of data,
-	 * which is the result of evaluating an expression.
-	 * It registers a watcher with the expression and calls
-	 * the DOM update function when a change is triggered.
-	 *
-	 * @param {String} name
-	 * @param {Node} el
-	 * @param {Vue} vm
-	 * @param {Object} descriptor
-	 *                 - {String} expression
-	 *                 - {String} [arg]
-	 *                 - {Array<Object>} [filters]
-	 * @param {Object} def - directive definition object
-	 * @param {Vue|undefined} host - transclusion host target
-	 * @constructor
-	 */
-
-	function Directive (name, el, vm, descriptor, def, host) {
-	  // public
-	  this.name = name
-	  this.el = el
-	  this.vm = vm
-	  // copy descriptor props
-	  this.raw = descriptor.raw
-	  this.expression = descriptor.expression
-	  this.arg = descriptor.arg
-	  this.filters = _.resolveFilters(vm, descriptor.filters)
-	  // private
-	  this._host = host
-	  this._locked = false
-	  this._bound = false
-	  // init
-	  this._bind(def)
-	}
-
-	var p = Directive.prototype
-
-	/**
-	 * Initialize the directive, mixin definition properties,
-	 * setup the watcher, call definition bind() and update()
-	 * if present.
-	 *
-	 * @param {Object} def
-	 */
-
-	p._bind = function (def) {
-	  if (this.name !== 'cloak' && this.el && this.el.removeAttribute) {
-	    this.el.removeAttribute(config.prefix + this.name)
-	  }
-	  if (typeof def === 'function') {
-	    this.update = def
-	  } else {
-	    _.extend(this, def)
-	  }
-	  this._watcherExp = this.expression
-	  this._checkDynamicLiteral()
-	  if (this.bind) {
-	    this.bind()
-	  }
-	  if (this._watcherExp &&
-	      (this.update || this.twoWay) &&
-	      (!this.isLiteral || this._isDynamicLiteral) &&
-	      !this._checkStatement()) {
-	    // wrapped updater for context
-	    var dir = this
-	    var update = this._update = this.update
-	      ? function (val, oldVal) {
-	          if (!dir._locked) {
-	            dir.update(val, oldVal)
-	          }
-	        }
-	      : function () {} // noop if no update is provided
-	    // use raw expression as identifier because filters
-	    // make them different watchers
-	    var watcher = this.vm._watchers[this.raw]
-	    // v-repeat always creates a new watcher because it has
-	    // a special filter that's bound to its directive
-	    // instance.
-	    if (!watcher || this.name === 'repeat') {
-	      watcher = this.vm._watchers[this.raw] = new Watcher(
-	        this.vm,
-	        this._watcherExp,
-	        update, // callback
-	        {
-	          filters: this.filters,
-	          twoWay: this.twoWay,
-	          deep: this.deep
-	        }
-	      )
-	    } else {
-	      watcher.addCb(update)
-	    }
-	    this._watcher = watcher
-	    if (this._initValue != null) {
-	      watcher.set(this._initValue)
-	    } else if (this.update) {
-	      this.update(watcher.value)
-	    }
-	  }
-	  this._bound = true
-	}
-
-	/**
-	 * check if this is a dynamic literal binding.
-	 *
-	 * e.g. v-component="{{currentView}}"
-	 */
-
-	p._checkDynamicLiteral = function () {
-	  var expression = this.expression
-	  if (expression && this.isLiteral) {
-	    var tokens = textParser.parse(expression)
-	    if (tokens) {
-	      var exp = textParser.tokensToExp(tokens)
-	      this.expression = this.vm.$get(exp)
-	      this._watcherExp = exp
-	      this._isDynamicLiteral = true
-	    }
-	  }
-	}
-
-	/**
-	 * Check if the directive is a function caller
-	 * and if the expression is a callable one. If both true,
-	 * we wrap up the expression and use it as the event
-	 * handler.
-	 *
-	 * e.g. v-on="click: a++"
-	 *
-	 * @return {Boolean}
-	 */
-
-	p._checkStatement = function () {
-	  var expression = this.expression
-	  if (
-	    expression && this.acceptStatement &&
-	    !expParser.pathTestRE.test(expression)
-	  ) {
-	    var fn = expParser.parse(expression).get
-	    var vm = this.vm
-	    var handler = function () {
-	      fn.call(vm, vm)
-	    }
-	    if (this.filters) {
-	      handler = _.applyFilters(
-	        handler,
-	        this.filters.read,
-	        vm
-	      )
-	    }
-	    this.update(handler)
-	    return true
-	  }
-	}
-
-	/**
-	 * Check for an attribute directive param, e.g. lazy
-	 *
-	 * @param {String} name
-	 * @return {String}
-	 */
-
-	p._checkParam = function (name) {
-	  var param = this.el.getAttribute(name)
-	  if (param !== null) {
-	    this.el.removeAttribute(name)
-	  }
-	  return param
-	}
-
-	/**
-	 * Teardown the watcher and call unbind.
-	 */
-
-	p._teardown = function () {
-	  if (this._bound) {
-	    if (this.unbind) {
-	      this.unbind()
-	    }
-	    var watcher = this._watcher
-	    if (watcher && watcher.active) {
-	      watcher.removeCb(this._update)
-	      if (!watcher.active) {
-	        this.vm._watchers[this.raw] = null
-	      }
-	    }
-	    this._bound = false
-	    this.vm = this.el = this._watcher = null
-	  }
-	}
-
-	/**
-	 * Set the corresponding value with the setter.
-	 * This should only be used in two-way directives
-	 * e.g. v-model.
-	 *
-	 * @param {*} value
-	 * @param {Boolean} lock - prevent wrtie triggering update.
-	 * @public
-	 */
-
-	p.set = function (value, lock) {
-	  if (this.twoWay) {
-	    if (lock) {
-	      this._locked = true
-	    }
-	    this._watcher.set(value)
-	    if (lock) {
-	      var self = this
-	      _.nextTick(function () {
-	        self._locked = false
-	      })
-	    }
-	  }
-	}
-
-	module.exports = Directive
-
-/***/ },
-/* 27 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var _ = __webpack_require__(13)
-	var config = __webpack_require__(18)
 	var Observer = __webpack_require__(51)
 	var expParser = __webpack_require__(24)
-	var batcher = __webpack_require__(55)
+	var batcher = __webpack_require__(56)
 	var uid = 0
 
 	/**
@@ -4879,6 +4653,235 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	module.exports = Watcher
+
+/***/ },
+/* 27 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var _ = __webpack_require__(13)
+	var config = __webpack_require__(18)
+	var Watcher = __webpack_require__(26)
+	var textParser = __webpack_require__(21)
+	var expParser = __webpack_require__(24)
+
+	/**
+	 * A directive links a DOM element with a piece of data,
+	 * which is the result of evaluating an expression.
+	 * It registers a watcher with the expression and calls
+	 * the DOM update function when a change is triggered.
+	 *
+	 * @param {String} name
+	 * @param {Node} el
+	 * @param {Vue} vm
+	 * @param {Object} descriptor
+	 *                 - {String} expression
+	 *                 - {String} [arg]
+	 *                 - {Array<Object>} [filters]
+	 * @param {Object} def - directive definition object
+	 * @param {Vue|undefined} host - transclusion host target
+	 * @constructor
+	 */
+
+	function Directive (name, el, vm, descriptor, def, host) {
+	  // public
+	  this.name = name
+	  this.el = el
+	  this.vm = vm
+	  // copy descriptor props
+	  this.raw = descriptor.raw
+	  this.expression = descriptor.expression
+	  this.arg = descriptor.arg
+	  this.filters = _.resolveFilters(vm, descriptor.filters)
+	  // private
+	  this._host = host
+	  this._locked = false
+	  this._bound = false
+	  // init
+	  this._bind(def)
+	}
+
+	var p = Directive.prototype
+
+	/**
+	 * Initialize the directive, mixin definition properties,
+	 * setup the watcher, call definition bind() and update()
+	 * if present.
+	 *
+	 * @param {Object} def
+	 */
+
+	p._bind = function (def) {
+	  if (this.name !== 'cloak' && this.el && this.el.removeAttribute) {
+	    this.el.removeAttribute(config.prefix + this.name)
+	  }
+	  if (typeof def === 'function') {
+	    this.update = def
+	  } else {
+	    _.extend(this, def)
+	  }
+	  this._watcherExp = this.expression
+	  this._checkDynamicLiteral()
+	  if (this.bind) {
+	    this.bind()
+	  }
+	  if (this._watcherExp &&
+	      (this.update || this.twoWay) &&
+	      (!this.isLiteral || this._isDynamicLiteral) &&
+	      !this._checkStatement()) {
+	    // wrapped updater for context
+	    var dir = this
+	    var update = this._update = this.update
+	      ? function (val, oldVal) {
+	          if (!dir._locked) {
+	            dir.update(val, oldVal)
+	          }
+	        }
+	      : function () {} // noop if no update is provided
+	    // use raw expression as identifier because filters
+	    // make them different watchers
+	    var watcher = this.vm._watchers[this.raw]
+	    // v-repeat always creates a new watcher because it has
+	    // a special filter that's bound to its directive
+	    // instance.
+	    if (!watcher || this.name === 'repeat') {
+	      watcher = this.vm._watchers[this.raw] = new Watcher(
+	        this.vm,
+	        this._watcherExp,
+	        update, // callback
+	        {
+	          filters: this.filters,
+	          twoWay: this.twoWay,
+	          deep: this.deep
+	        }
+	      )
+	    } else {
+	      watcher.addCb(update)
+	    }
+	    this._watcher = watcher
+	    if (this._initValue != null) {
+	      watcher.set(this._initValue)
+	    } else if (this.update) {
+	      this.update(watcher.value)
+	    }
+	  }
+	  this._bound = true
+	}
+
+	/**
+	 * check if this is a dynamic literal binding.
+	 *
+	 * e.g. v-component="{{currentView}}"
+	 */
+
+	p._checkDynamicLiteral = function () {
+	  var expression = this.expression
+	  if (expression && this.isLiteral) {
+	    var tokens = textParser.parse(expression)
+	    if (tokens) {
+	      var exp = textParser.tokensToExp(tokens)
+	      this.expression = this.vm.$get(exp)
+	      this._watcherExp = exp
+	      this._isDynamicLiteral = true
+	    }
+	  }
+	}
+
+	/**
+	 * Check if the directive is a function caller
+	 * and if the expression is a callable one. If both true,
+	 * we wrap up the expression and use it as the event
+	 * handler.
+	 *
+	 * e.g. v-on="click: a++"
+	 *
+	 * @return {Boolean}
+	 */
+
+	p._checkStatement = function () {
+	  var expression = this.expression
+	  if (
+	    expression && this.acceptStatement &&
+	    !expParser.pathTestRE.test(expression)
+	  ) {
+	    var fn = expParser.parse(expression).get
+	    var vm = this.vm
+	    var handler = function () {
+	      fn.call(vm, vm)
+	    }
+	    if (this.filters) {
+	      handler = _.applyFilters(
+	        handler,
+	        this.filters.read,
+	        vm
+	      )
+	    }
+	    this.update(handler)
+	    return true
+	  }
+	}
+
+	/**
+	 * Check for an attribute directive param, e.g. lazy
+	 *
+	 * @param {String} name
+	 * @return {String}
+	 */
+
+	p._checkParam = function (name) {
+	  var param = this.el.getAttribute(name)
+	  if (param !== null) {
+	    this.el.removeAttribute(name)
+	  }
+	  return param
+	}
+
+	/**
+	 * Teardown the watcher and call unbind.
+	 */
+
+	p._teardown = function () {
+	  if (this._bound) {
+	    if (this.unbind) {
+	      this.unbind()
+	    }
+	    var watcher = this._watcher
+	    if (watcher && watcher.active) {
+	      watcher.removeCb(this._update)
+	      if (!watcher.active) {
+	        this.vm._watchers[this.raw] = null
+	      }
+	    }
+	    this._bound = false
+	    this.vm = this.el = this._watcher = null
+	  }
+	}
+
+	/**
+	 * Set the corresponding value with the setter.
+	 * This should only be used in two-way directives
+	 * e.g. v-model.
+	 *
+	 * @param {*} value
+	 * @param {Boolean} lock - prevent wrtie triggering update.
+	 * @public
+	 */
+
+	p.set = function (value, lock) {
+	  if (this.twoWay) {
+	    if (lock) {
+	      this._locked = true
+	    }
+	    this._watcher.set(value)
+	    if (lock) {
+	      var self = this
+	      _.nextTick(function () {
+	        self._locked = false
+	      })
+	    }
+	  }
+	}
+
+	module.exports = Directive
 
 /***/ },
 /* 28 */
@@ -5672,61 +5675,6 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(13)
-	var templateParser = __webpack_require__(22)
-	var vIf = __webpack_require__(47)
-
-	module.exports = {
-
-	  isLiteral: true,
-
-	  // same logic reuse from v-if
-	  compile: vIf.compile,
-	  teardown: vIf.teardown,
-	  getContainedComponents: vIf.getContainedComponents,
-	  unbind: vIf.unbind,
-
-	  bind: function () {
-	    var el = this.el
-	    this.start = document.createComment('v-partial-start')
-	    this.end = document.createComment('v-partial-end')
-	    if (el.nodeType !== 8) {
-	      el.innerHTML = ''
-	    }
-	    if (el.tagName === 'TEMPLATE' || el.nodeType === 8) {
-	      _.replace(el, this.end)
-	    } else {
-	      el.appendChild(this.end)
-	    }
-	    _.before(this.start, this.end)
-	    if (!this._isDynamicLiteral) {
-	      this.insert(this.expression)
-	    }
-	  },
-
-	  update: function (id) {
-	    this.teardown()
-	    this.insert(id)
-	  },
-
-	  insert: function (id) {
-	    var partial = this.vm.$options.partials[id]
-	    _.assertAsset(partial, 'partial', id)
-	    if (partial) {
-	      var filters = this.filters && this.filters.read
-	      if (filters) {
-	        partial = _.applyFilters(partial, filters, this.vm)
-	      }
-	      this.compile(templateParser.parse(partial, true))
-	    }
-	  }
-
-	}
-
-/***/ },
-/* 34 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var _ = __webpack_require__(13)
 
 	module.exports = {
 
@@ -5743,7 +5691,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 35 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(13)
@@ -5786,7 +5734,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 36 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// xlink
@@ -5823,7 +5771,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 37 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var transition = __webpack_require__(52)
@@ -5836,7 +5784,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 38 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(13)
@@ -5859,7 +5807,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 39 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = {
@@ -5877,7 +5825,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 40 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(13)
@@ -5905,7 +5853,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 41 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var config = __webpack_require__(18)
@@ -5922,7 +5870,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 42 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(13)
@@ -6027,7 +5975,91 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
+/* 42 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var _ = __webpack_require__(13)
+	var templateParser = __webpack_require__(22)
+	var vIf = __webpack_require__(47)
+
+	module.exports = {
+
+	  isLiteral: true,
+
+	  // same logic reuse from v-if
+	  compile: vIf.compile,
+	  teardown: vIf.teardown,
+	  getContainedComponents: vIf.getContainedComponents,
+	  unbind: vIf.unbind,
+
+	  bind: function () {
+	    var el = this.el
+	    this.start = document.createComment('v-partial-start')
+	    this.end = document.createComment('v-partial-end')
+	    if (el.nodeType !== 8) {
+	      el.innerHTML = ''
+	    }
+	    if (el.tagName === 'TEMPLATE' || el.nodeType === 8) {
+	      _.replace(el, this.end)
+	    } else {
+	      el.appendChild(this.end)
+	    }
+	    _.before(this.start, this.end)
+	    if (!this._isDynamicLiteral) {
+	      this.insert(this.expression)
+	    }
+	  },
+
+	  update: function (id) {
+	    this.teardown()
+	    this.insert(id)
+	  },
+
+	  insert: function (id) {
+	    var partial = this.vm.$options.partials[id]
+	    _.assertAsset(partial, 'partial', id)
+	    if (partial) {
+	      var filters = this.filters && this.filters.read
+	      if (filters) {
+	        partial = _.applyFilters(partial, filters, this.vm)
+	      }
+	      this.compile(templateParser.parse(partial, true))
+	    }
+	  }
+
+	}
+
+/***/ },
 /* 43 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = {
+
+	  priority: 1000,
+	  isLiteral: true,
+
+	  bind: function () {
+	    if (!this._isDynamicLiteral) {
+	      this.update(this.expression)
+	    }
+	  },
+
+	  update: function (id) {
+	    var vm = this.el.__vue__ || this.vm
+	    this.el.__v_trans = {
+	      id: id,
+	      // resolve the custom transition functions now
+	      // so the transition module knows this is a
+	      // javascript transition without having to check
+	      // computed CSS.
+	      fns: vm.$options.transitions[id]
+	    }
+	  }
+
+	}
+
+/***/ },
+/* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(13)
@@ -6088,35 +6120,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.reset()
 	    _.off(this.el, 'load', this.iframeBind)
 	  }
-	}
-
-/***/ },
-/* 44 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = {
-
-	  priority: 1000,
-	  isLiteral: true,
-
-	  bind: function () {
-	    if (!this._isDynamicLiteral) {
-	      this.update(this.expression)
-	    }
-	  },
-
-	  update: function (id) {
-	    var vm = this.el.__vue__ || this.vm
-	    this.el.__v_trans = {
-	      id: id,
-	      // resolve the custom transition functions now
-	      // so the transition module knows this is a
-	      // javascript transition without having to check
-	      // computed CSS.
-	      fns: vm.$options.transitions[id]
-	    }
-	  }
-
 	}
 
 /***/ },
@@ -7043,7 +7046,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(13)
-	var Watcher = __webpack_require__(27)
+	var Watcher = __webpack_require__(26)
 	var expParser = __webpack_require__(24)
 	var literalRE = /^(true|false|\s?('[^']*'|"[^"]")\s?)$/
 
@@ -7175,90 +7178,49 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(13)
-	var Path = __webpack_require__(16)
 
-	/**
-	 * Filter filter for v-repeat
-	 *
-	 * @param {String} searchKey
-	 * @param {String} [delimiter]
-	 * @param {String} dataKey
-	 */
+	module.exports = {
 
-	exports.filterBy = function (arr, searchKey, delimiter, dataKey) {
-	  // allow optional `in` delimiter
-	  // because why not
-	  if (delimiter && delimiter !== 'in') {
-	    dataKey = delimiter
-	  }
-	  // get the search string
-	  var search =
-	    _.stripQuotes(searchKey) ||
-	    this.$get(searchKey)
-	  if (!search) {
-	    return arr
-	  }
-	  search = ('' + search).toLowerCase()
-	  // get the optional dataKey
-	  dataKey =
-	    dataKey &&
-	    (_.stripQuotes(dataKey) || this.$get(dataKey))
-	  return arr.filter(function (item) {
-	    return dataKey
-	      ? contains(Path.get(item, dataKey), search)
-	      : contains(item, search)
-	  })
-	}
+	  acceptStatement: true,
 
-	/**
-	 * Filter filter for v-repeat
-	 *
-	 * @param {String} sortKey
-	 * @param {String} reverseKey
-	 */
-
-	exports.orderBy = function (arr, sortKey, reverseKey) {
-	  var key =
-	    _.stripQuotes(sortKey) ||
-	    this.$get(sortKey)
-	  if (!key) {
-	    return arr
-	  }
-	  var order = 1
-	  if (reverseKey) {
-	    if (reverseKey === '-1') {
-	      order = -1
-	    } else if (reverseKey.charCodeAt(0) === 0x21) { // !
-	      reverseKey = reverseKey.slice(1)
-	      order = this.$get(reverseKey) ? 1 : -1
-	    } else {
-	      order = this.$get(reverseKey) ? -1 : 1
+	  bind: function () {
+	    var child = this.el.__vue__
+	    if (!child || this.vm !== child.$parent) {
+	      _.warn(
+	        '`v-events` should only be used on a child component ' +
+	        'from the parent template.'
+	      )
+	      return
 	    }
-	  }
-	  // sort on a copy to avoid mutating original array
-	  return arr.slice().sort(function (a, b) {
-	    a = _.isObject(a) ? Path.get(a, key) : a
-	    b = _.isObject(b) ? Path.get(b, key) : b
-	    return a === b ? 0 : a > b ? order : -order
-	  })
-	}
+	    this.handlerSet = false
+	  },
 
-	/**
-	 * String contain helper
-	 *
-	 * @param {*} val
-	 * @param {String} search
-	 */
-
-	function contains (val, search) {
-	  if (_.isObject(val)) {
-	    for (var key in val) {
-	      if (contains(val[key], search)) {
-	        return true
-	      }
+	  update: function (handler) {
+	    if (typeof handler !== 'function') {
+	      _.warn(
+	        'Directive "v-context:' + this.expression + '" ' +
+	        'expects a function value.'
+	      )
+	      return
 	    }
-	  } else if (val != null) {
-	    return val.toString().toLowerCase().indexOf(search) > -1
+
+	    this.reset()
+	    var child = this.el.__vue__
+	    this.oldHandler = child.$context[this.arg]
+	    child.$context[this.arg] = handler
+	    this.handlerSet = true
+	  },
+
+	  reset: function () {
+	    var child = this.el.__vue__
+	    if (this.handlerSet) {
+	      child.$context[this.arg] = this.oldHandler
+	    }
+	    child.$context = child.$context || {}
+	  },
+
+	  unbind: function () {
+	    this.reset()
 	  }
 	}
 
@@ -7271,7 +7233,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Dep = __webpack_require__(25)
 	var arrayMethods = __webpack_require__(57)
 	var arrayKeys = Object.getOwnPropertyNames(arrayMethods)
-	__webpack_require__(56)
+	__webpack_require__(58)
 
 	var uid = 0
 
@@ -7508,8 +7470,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(13)
-	var applyCSSTransition = __webpack_require__(58)
-	var applyJSTransition = __webpack_require__(59)
+	var applyCSSTransition = __webpack_require__(59)
+	var applyJSTransition = __webpack_require__(60)
 	var doc = typeof document === 'undefined' ? null : document
 
 	/**
@@ -7675,10 +7637,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _ = __webpack_require__(13)
 
 	var handlers = {
-	  _default: __webpack_require__(60),
-	  radio: __webpack_require__(61),
+	  _default: __webpack_require__(61),
+	  radio: __webpack_require__(62),
 	  select: __webpack_require__(63),
-	  checkbox: __webpack_require__(62)
+	  checkbox: __webpack_require__(64)
 	}
 
 	module.exports = {
@@ -7731,6 +7693,98 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 54 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var _ = __webpack_require__(13)
+	var Path = __webpack_require__(16)
+
+	/**
+	 * Filter filter for v-repeat
+	 *
+	 * @param {String} searchKey
+	 * @param {String} [delimiter]
+	 * @param {String} dataKey
+	 */
+
+	exports.filterBy = function (arr, searchKey, delimiter, dataKey) {
+	  // allow optional `in` delimiter
+	  // because why not
+	  if (delimiter && delimiter !== 'in') {
+	    dataKey = delimiter
+	  }
+	  // get the search string
+	  var search =
+	    _.stripQuotes(searchKey) ||
+	    this.$get(searchKey)
+	  if (!search) {
+	    return arr
+	  }
+	  search = ('' + search).toLowerCase()
+	  // get the optional dataKey
+	  dataKey =
+	    dataKey &&
+	    (_.stripQuotes(dataKey) || this.$get(dataKey))
+	  return arr.filter(function (item) {
+	    return dataKey
+	      ? contains(Path.get(item, dataKey), search)
+	      : contains(item, search)
+	  })
+	}
+
+	/**
+	 * Filter filter for v-repeat
+	 *
+	 * @param {String} sortKey
+	 * @param {String} reverseKey
+	 */
+
+	exports.orderBy = function (arr, sortKey, reverseKey) {
+	  var key =
+	    _.stripQuotes(sortKey) ||
+	    this.$get(sortKey)
+	  if (!key) {
+	    return arr
+	  }
+	  var order = 1
+	  if (reverseKey) {
+	    if (reverseKey === '-1') {
+	      order = -1
+	    } else if (reverseKey.charCodeAt(0) === 0x21) { // !
+	      reverseKey = reverseKey.slice(1)
+	      order = this.$get(reverseKey) ? 1 : -1
+	    } else {
+	      order = this.$get(reverseKey) ? -1 : 1
+	    }
+	  }
+	  // sort on a copy to avoid mutating original array
+	  return arr.slice().sort(function (a, b) {
+	    a = _.isObject(a) ? Path.get(a, key) : a
+	    b = _.isObject(b) ? Path.get(b, key) : b
+	    return a === b ? 0 : a > b ? order : -order
+	  })
+	}
+
+	/**
+	 * String contain helper
+	 *
+	 * @param {*} val
+	 * @param {String} search
+	 */
+
+	function contains (val, search) {
+	  if (_.isObject(val)) {
+	    for (var key in val) {
+	      if (contains(val[key], search)) {
+	        return true
+	      }
+	    }
+	  } else if (val != null) {
+	    return val.toString().toLowerCase().indexOf(search) > -1
+	  }
+	}
+
+/***/ },
+/* 55 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -7847,7 +7901,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Cache
 
 /***/ },
-/* 55 */
+/* 56 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(13)
@@ -7946,95 +8000,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 56 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var _ = __webpack_require__(13)
-	var objProto = Object.prototype
-
-	/**
-	 * Add a new property to an observed object
-	 * and emits corresponding event
-	 *
-	 * @param {String} key
-	 * @param {*} val
-	 * @public
-	 */
-
-	_.define(
-	  objProto,
-	  '$add',
-	  function $add (key, val) {
-	    if (this.hasOwnProperty(key)) return
-	    var ob = this.__ob__
-	    if (!ob || _.isReserved(key)) {
-	      this[key] = val
-	      return
-	    }
-	    ob.convert(key, val)
-	    if (ob.vms) {
-	      var i = ob.vms.length
-	      while (i--) {
-	        var vm = ob.vms[i]
-	        vm._proxy(key)
-	        vm._digest()
-	      }
-	    } else {
-	      ob.notify()
-	    }
-	  }
-	)
-
-	/**
-	 * Set a property on an observed object, calling add to
-	 * ensure the property is observed.
-	 *
-	 * @param {String} key
-	 * @param {*} val
-	 * @public
-	 */
-
-	_.define(
-	  objProto,
-	  '$set',
-	  function $set (key, val) {
-	    this.$add(key, val)
-	    this[key] = val
-	  }
-	)
-
-	/**
-	 * Deletes a property from an observed object
-	 * and emits corresponding event
-	 *
-	 * @param {String} key
-	 * @public
-	 */
-
-	_.define(
-	  objProto,
-	  '$delete',
-	  function $delete (key) {
-	    if (!this.hasOwnProperty(key)) return
-	    delete this[key]
-	    var ob = this.__ob__
-	    if (!ob || _.isReserved(key)) {
-	      return
-	    }
-	    if (ob.vms) {
-	      var i = ob.vms.length
-	      while (i--) {
-	        var vm = ob.vms[i]
-	        vm._unproxy(key)
-	        vm._digest()
-	      }
-	    } else {
-	      ob.notify()
-	    }
-	  }
-	)
-
-/***/ },
 /* 57 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -8131,6 +8096,95 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 58 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var _ = __webpack_require__(13)
+	var objProto = Object.prototype
+
+	/**
+	 * Add a new property to an observed object
+	 * and emits corresponding event
+	 *
+	 * @param {String} key
+	 * @param {*} val
+	 * @public
+	 */
+
+	_.define(
+	  objProto,
+	  '$add',
+	  function $add (key, val) {
+	    if (this.hasOwnProperty(key)) return
+	    var ob = this.__ob__
+	    if (!ob || _.isReserved(key)) {
+	      this[key] = val
+	      return
+	    }
+	    ob.convert(key, val)
+	    if (ob.vms) {
+	      var i = ob.vms.length
+	      while (i--) {
+	        var vm = ob.vms[i]
+	        vm._proxy(key)
+	        vm._digest()
+	      }
+	    } else {
+	      ob.notify()
+	    }
+	  }
+	)
+
+	/**
+	 * Set a property on an observed object, calling add to
+	 * ensure the property is observed.
+	 *
+	 * @param {String} key
+	 * @param {*} val
+	 * @public
+	 */
+
+	_.define(
+	  objProto,
+	  '$set',
+	  function $set (key, val) {
+	    this.$add(key, val)
+	    this[key] = val
+	  }
+	)
+
+	/**
+	 * Deletes a property from an observed object
+	 * and emits corresponding event
+	 *
+	 * @param {String} key
+	 * @public
+	 */
+
+	_.define(
+	  objProto,
+	  '$delete',
+	  function $delete (key) {
+	    if (!this.hasOwnProperty(key)) return
+	    delete this[key]
+	    var ob = this.__ob__
+	    if (!ob || _.isReserved(key)) {
+	      return
+	    }
+	    if (ob.vms) {
+	      var i = ob.vms.length
+	      while (i--) {
+	        var vm = ob.vms[i]
+	        vm._unproxy(key)
+	        vm._digest()
+	      }
+	    } else {
+	      ob.notify()
+	    }
+	  }
+	)
+
+/***/ },
+/* 59 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(13)
@@ -8324,7 +8378,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 59 */
+/* 60 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -8375,7 +8429,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 60 */
+/* 61 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(13)
@@ -8528,7 +8582,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 61 */
+/* 62 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(13)
@@ -8559,41 +8613,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 62 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var _ = __webpack_require__(13)
-
-	module.exports = {
-
-	  bind: function () {
-	    var self = this
-	    var el = this.el
-	    this.listener = function () {
-	      self.set(el.checked, true)
-	    }
-	    _.on(el, 'change', this.listener)
-	    if (el.checked) {
-	      this._initValue = el.checked
-	    }
-	  },
-
-	  update: function (value) {
-	    this.el.checked = !!value
-	  },
-
-	  unbind: function () {
-	    _.off(this.el, 'change', this.listener)
-	  }
-
-	}
-
-/***/ },
 /* 63 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(13)
-	var Watcher = __webpack_require__(27)
+	var Watcher = __webpack_require__(26)
 	var dirParser = __webpack_require__(23)
 
 	module.exports = {
@@ -8771,6 +8795,36 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (arr[i] == val) return i
 	  }
 	  return -1
+	}
+
+/***/ },
+/* 64 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var _ = __webpack_require__(13)
+
+	module.exports = {
+
+	  bind: function () {
+	    var self = this
+	    var el = this.el
+	    this.listener = function () {
+	      self.set(el.checked, true)
+	    }
+	    _.on(el, 'change', this.listener)
+	    if (el.checked) {
+	      this._initValue = el.checked
+	    }
+	  },
+
+	  update: function (value) {
+	    this.el.checked = !!value
+	  },
+
+	  unbind: function () {
+	    _.off(this.el, 'change', this.listener)
+	  }
+
 	}
 
 /***/ }

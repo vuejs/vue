@@ -154,6 +154,7 @@ exports._cleanup = function () {
   this.$parent =
   this.$root =
   this.$services =
+  this.$context =
   this._children =
   this._transCpnts =
   this._childContext =

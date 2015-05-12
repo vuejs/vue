@@ -19,11 +19,12 @@ exports._initContext = function () {
 			)
 			return
 		}
+		var $context = this.$context = {}
 		for (var i = 0, l = context.length; i < l; ++i) {
 			var ctx = context[i]
 			var name = ctx.name
-			this[name] = ctx.set.call(this, childContext[name], name)
-			if (this[name] === undefined) {
+			$context[name] = ctx.set.call(this, childContext[name], name)
+			if ($context[name] === undefined) {
 				_.warn(
 					'cannot resolve context "' + name + '" for vm "' + this.constructor.name + '".'
 				)

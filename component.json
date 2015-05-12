@@ -27,6 +27,7 @@
     "src/directives/class.js",
     "src/directives/cloak.js",
     "src/directives/component.js",
+    "src/directives/context.js",
     "src/directives/el.js",
     "src/directives/events.js",
     "src/directives/html.js",
