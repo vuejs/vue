@@ -14,7 +14,7 @@ function lookupService (name, set, services, vm) {
 		_.warn(
 			'cannot find service "' + name + '" which is required by "' + vm.$options.name + '".'
 		)
-		return;
+		return
 	}
 	return set.call(vm, services[name], name)
 }
