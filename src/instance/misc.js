@@ -30,25 +30,33 @@ exports._applyFilter = function (id, args) {
 
 exports._resolveComponent = function (id, cb) {
   var registry = this.$options.components
-  var raw = registry[id]
-  _.assertAsset(raw, 'component', id)
+  var factory = registry[id]
+  _.assertAsset(factory, 'component', id)
   // async component factory
-  if (!raw.options) {
-    if (raw.resolved) {
+  if (!factory.options) {
+    if (factory.resolved) {
       // cached
-      cb(raw.resolved)
+      cb(factory.resolved)
+    } else if (factory.pending) {
+      factory.pendingCallbacks.push(cb)
     } else {
-      raw(function resolve (res) {
+      factory.pending = true
+      var cbs = factory.pendingCallbacks = [cb]
+      factory(function resolve (res) {
         if (_.isPlainObject(res)) {
           res = _.Vue.extend(res)
         }
         // cache resolved
-        raw.resolved = res
-        cb(res)
+        factory.resolved = res
+        factory.pending = false
+        // invoke callbacks
+        for (var i = 0, l = cbs.length; i < l; i++) {
+          cbs[i](res)
+        }
       })
     }
   } else {
     // normal component
-    cb(raw)
+    cb(factory)
   }
 }
