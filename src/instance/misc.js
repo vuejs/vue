@@ -37,10 +37,10 @@ exports._resolveComponent = function (id, cb) {
     if (factory.resolved) {
       // cached
       cb(factory.resolved)
-    } else if (factory.pending) {
+    } else if (factory.requested) {
       factory.pendingCallbacks.push(cb)
     } else {
-      factory.pending = true
+      factory.requested = true
       var cbs = factory.pendingCallbacks = [cb]
       factory(function resolve (res) {
         if (_.isPlainObject(res)) {
@@ -48,7 +48,6 @@ exports._resolveComponent = function (id, cb) {
         }
         // cache resolved
         factory.resolved = res
-        factory.pending = false
         // invoke callbacks
         for (var i = 0, l = cbs.length; i < l; i++) {
           cbs[i](res)

@@ -106,6 +106,7 @@ module.exports = {
       copy._asComponent = false
       this._linkFn = compile(this.template, copy)
     } else {
+      this.Ctor = null
       this.asComponent = true
       // check inline-template
       if (this._checkParam('inline-template') !== null) {
@@ -181,6 +182,7 @@ module.exports = {
         'Async resolution is not supported for v-repeat ' +
         '+ dynamic component. (component: ' + id + ')'
       )
+      return _.Vue
     }
     return Ctor
   },

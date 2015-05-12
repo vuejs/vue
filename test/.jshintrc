@@ -27,6 +27,7 @@
     "casper": true,
     "DocumentFragment": true,
     "jQuery": true,
-    "$": true
+    "$": true,
+    "hasWarned": true
   }
 }

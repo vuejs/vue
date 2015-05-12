@@ -36,8 +36,10 @@ module.exports = {
         // extract inline template as a DocumentFragment
         this.template = _.extractContent(this.el, true)
       }
-      // pending callback for async component resolution
-      this._pendingCb = null
+      // component resolution related state
+      this._pendingCb =
+      this.ctorId =
+      this.Ctor = null
       // if static, build right now.
       if (!this._isDynamicLiteral) {
         this.resolveCtor(this.expression, _.bind(function () {
