@@ -557,7 +557,7 @@ if (_.inBrowser) {
         el: el,
         template: '<div v-model="test"></div>'
       })
-      expect(_.warn).toHaveBeenCalled()
+      expect(hasWarned(_, 'does not support element type')).toBe(true)
     })
 
     it('warn invalid option value', function () {
@@ -566,7 +566,7 @@ if (_.inBrowser) {
         data: { a: 123 },
         template: '<select v-model="test" options="a"></select>'
       })
-      expect(_.warn).toHaveBeenCalled()
+      expect(hasWarned(_, 'Invalid options value')).toBe(true)
     })
 
     it('warn read-only filters', function () {
@@ -579,7 +579,7 @@ if (_.inBrowser) {
           }
         }
       })
-      expect(_.warn).toHaveBeenCalled()
+      expect(hasWarned(_, 'read-only filter')).toBe(true)
     })
 
     it('support jQuery change event', function (done) {

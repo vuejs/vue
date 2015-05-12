@@ -115,7 +115,7 @@ if (_.inBrowser) {
         el: el,
         template: '<div v-ref="test"></div>'
       })
-      expect(_.warn).toHaveBeenCalled()
+      expect(hasWarned(_, 'should only be used on a component root element')).toBe(true)
     })
 
   })

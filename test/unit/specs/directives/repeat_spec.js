@@ -598,7 +598,7 @@ if (_.inBrowser) {
           test: {}
         }
       })
-      expect(_.warn).toHaveBeenCalled()
+      expect(hasWarned(_, 'Duplicate objects')).toBe(true)
     })
 
     it('warn duplicate trackby id', function () {
@@ -612,7 +612,7 @@ if (_.inBrowser) {
           test: {}
         }
       })
-      expect(_.warn).toHaveBeenCalled()
+      expect(hasWarned(_, 'Duplicate track-by key')).toBe(true)
     })
 
     it('warn v-if', function () {
@@ -623,7 +623,7 @@ if (_.inBrowser) {
           items: []
         }
       })
-      expect(_.warn).toHaveBeenCalled()
+      expect(hasWarned(_, 'Don\'t use v-if')).toBe(true)
     })
 
     it('repeat number', function () {

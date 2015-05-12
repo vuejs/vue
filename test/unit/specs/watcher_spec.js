@@ -388,13 +388,13 @@ describe('Watcher', function () {
 
   it('warn getter errors', function () {
     var watcher = new Watcher(vm, 'd.e + c', spy)
-    expect(_.warn).toHaveBeenCalled()
+    expect(hasWarned(_, 'Error when evaluating expression')).toBe(true)
   })
 
   it('warn setter errors', function () {
     var watcher = new Watcher(vm, 'a + b', spy)
     watcher.set(123)
-    expect(_.warn).toHaveBeenCalled()
+    expect(hasWarned(_, 'Error when evaluating setter')).toBe(true)
   })
 
 })

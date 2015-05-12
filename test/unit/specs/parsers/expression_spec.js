@@ -276,21 +276,21 @@ describe('Expression Parser', function () {
     it('should warn on invalid expression', function () {
       expect(_.warn).not.toHaveBeenCalled()
       var res = expParser.parse('a--b"ffff')
-      expect(_.warn).toHaveBeenCalled()
+      expect(hasWarned(_, 'Invalid expression')).toBe(true)
     })
 
     if (leftHandThrows()) {
       it('should warn on invalid left hand expression for setter', function () {
         expect(_.warn).not.toHaveBeenCalled()
         var res = expParser.parse('a+b', true)
-        expect(_.warn).toHaveBeenCalled()
+        expect(hasWarned(_, 'Invalid setter function body')).toBe(true)
       })
     }
 
     it('should warn if expression contains improper reserved keywords', function () {
       expect(_.warn).not.toHaveBeenCalled()
       var res = expParser.parse('break + 1')
-      expect(_.warn).toHaveBeenCalled()
+      expect(hasWarned(_, 'Avoid using reserved keywords')).toBe(true)
     })
   })
 })

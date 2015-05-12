@@ -34,7 +34,9 @@ if (_.inBrowser) {
         el: el,
         template: '<div v-events="test:test"></div>'
       })
-      expect(_.warn).toHaveBeenCalled()
+      expect(hasWarned(_,
+        'should only be used on a child component ' +
+        'from the parent template')).toBe(true)
     })
 
     it('should warn when used on child component root', function () {
@@ -55,7 +57,9 @@ if (_.inBrowser) {
           }
         }
       })
-      expect(_.warn).toHaveBeenCalled()
+      expect(hasWarned(_,
+        'should only be used on a child component ' +
+        'from the parent template')).toBe(true)
       expect(spy).not.toHaveBeenCalled()
     })
 
@@ -68,7 +72,7 @@ if (_.inBrowser) {
           test: {}
         }
       })
-      expect(_.warn).toHaveBeenCalled()
+      expect(hasWarned(_, 'expects a function value')).toBe(true)
     })
 
     it('should accept inline statement', function (done) {

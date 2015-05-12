@@ -94,7 +94,7 @@ describe('Batcher', function () {
     batcher.push(job)
     nextTick(function () {
       expect(count).not.toBe(0)
-      expect(_.warn).toHaveBeenCalled()
+      expect(hasWarned(_, 'infinite update loop')).toBe(true)
       done()
     })
   })

@@ -47,7 +47,7 @@ describe('Instance Events', function () {
       vm.$emit('test', 123)
       expect(spy).toHaveBeenCalledWith(123)
       vm.$emit('test2')
-      expect(_.warn).toHaveBeenCalled()
+      expect(hasWarned(_, 'Unknown method')).toBe(true)
     })
 
   })

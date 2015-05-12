@@ -379,7 +379,7 @@ if (_.inBrowser) {
       var vm = new Vue({
         el: el
       })
-      expect(_.warn).toHaveBeenCalled()
+      expect(hasWarned(_, 'already mounted instance')).toBe(true)
     })
 
   })

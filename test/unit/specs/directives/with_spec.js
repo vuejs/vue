@@ -122,7 +122,7 @@ if (_.inBrowser) {
         el: el,
         template: '<div v-with="test"></div>'
       })
-      expect(_.warn).toHaveBeenCalled()
+      expect(hasWarned(_, 'can only be used on instance root elements')).toBe(true)
     })
 
     it('no-parent warning', function () {
@@ -130,7 +130,7 @@ if (_.inBrowser) {
       var vm = new Vue({
         el: el
       })
-      expect(_.warn).toHaveBeenCalled()
+      expect(hasWarned(_, 'must be used on an instance with a parent')).toBe(true)
     })
 
     it('block instance with replace:true', function () {
@@ -179,7 +179,7 @@ if (_.inBrowser) {
           test: {}
         }
       })
-      expect(_.warn).toHaveBeenCalled()
+      expect(hasWarned(_, 'cannot bind literal value as $data')).toBe(true)
     })
 
   })

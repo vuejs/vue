@@ -27,7 +27,7 @@ if (_.inBrowser) {
       options.template = '#non-existent-stuff'
       var res = transclude(el, options)
       expect(res).toBeUndefined()
-      expect(_.warn).toHaveBeenCalled()
+      expect(hasWarned(_, 'Invalid template option')).toBe(true)
     })
 
     it('template replace', function () {

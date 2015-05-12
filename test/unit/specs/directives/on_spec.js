@@ -77,7 +77,7 @@ if (_.inBrowser) {
         data: { test: 123 },
         template: '<a v-on="keyup:test"></a>'
       })
-      expect(_.warn).toHaveBeenCalled()
+      expect(hasWarned(_, 'expects a function value')).toBe(true)
     })
 
     it('iframe', function () {

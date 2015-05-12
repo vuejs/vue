@@ -45,7 +45,7 @@ module.exports = {
     } else if (tag === 'TEXTAREA') {
       handler = handlers._default
     } else {
-      _.warn("v-model doesn't support element type: " + tag)
+      _.warn('v-model does not support element type: ' + tag)
       return
     }
     handler.bind.call(this)

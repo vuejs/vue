@@ -29,7 +29,7 @@ describe('Data API', function () {
     expect(vm.$get('c')).toBeUndefined()
     // invalid, should warn
     vm.$get('a(')
-    expect(_.warn).toHaveBeenCalled()
+    expect(hasWarned(_, 'Invalid expression')).toBe(true)
   })
 
   it('$set', function () {
@@ -46,7 +46,7 @@ describe('Data API', function () {
       // expression throws, the exp parser will catch the 
       // error and warn.
       vm.$set('c + d', 1)
-      expect(_.warn).toHaveBeenCalled()
+      expect(hasWarned(_, 'Invalid setter function body')).toBe(true)
     } else {
       // otherwise it will throw when calling the setter.
       expect(function () {

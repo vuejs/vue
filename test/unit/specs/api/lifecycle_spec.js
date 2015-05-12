@@ -57,7 +57,7 @@ if (_.inBrowser) {
       it('warn invalid selector', function () {
         var vm = new Vue()
         vm.$mount('#none-exist')
-        expect(_.warn).toHaveBeenCalled()
+        expect(hasWarned(_, 'Cannot find element')).toBe(true)
       })
 
       it('replace', function () {
@@ -145,7 +145,7 @@ if (_.inBrowser) {
           el: el
         })
         vm.$mount(el)
-        expect(_.warn).toHaveBeenCalled()
+        expect(hasWarned(_, '$mount() should be called only once')).toBe(true)
       })
 
     })
