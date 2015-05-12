@@ -21,8 +21,8 @@ exports._applyFilter = function (id, args) {
  * Resolve a component, depending on whether the component
  * is defined normally or using an async factory function.
  * Resolves synchronously if already resolved, otherwise
- * resolves asynchronously and replaces the factory with
- * the resolved component.
+ * resolves asynchronously and caches the resolved
+ * constructor on the factory.
  *
  * @param {String} id
  * @param {Function} cb
@@ -34,14 +34,21 @@ exports._resolveComponent = function (id, cb) {
   _.assertAsset(raw, 'component', id)
   // async component factory
   if (!raw.options) {
-    raw(function resolve (res) {
-      if (_.isPlainObject(res)) {
-        res = _.Vue.extend(res)
-      }
-      registry[id] = res
-      cb(res)
-    })
+    if (raw.resolved) {
+      // cached
+      cb(raw.resolved)
+    } else {
+      raw(function resolve (res) {
+        if (_.isPlainObject(res)) {
+          res = _.Vue.extend(res)
+        }
+        // cache resolved
+        raw.resolved = res
+        cb(res)
+      })
+    }
   } else {
+    // normal component
     cb(raw)
   }
 }
