@@ -13,7 +13,7 @@ if (_.inBrowser) {
       el = document.createElement('div')
     })
 
-    it('should inject context method', function () {
+    it('inject context method', function () {
       var vm = new Vue({
         el: el,
         template: '<div v-component="test" v-ref="test" v-context="test:test, test2:test"></div>',
@@ -21,14 +21,39 @@ if (_.inBrowser) {
           test: jasmine.createSpy()
         },
         components: {
-          test: {}
+          test: {
+            context: ['test', 'test2']
+          }
         }
       })
       expect(vm.$.test.$context.test).toEqual(vm.test)
       expect(vm.$.test.$context.test2).toEqual(vm.test)
     })
 
-    it('should warn when used on non-root node', function () {
+    it('transform context', function () {
+      var spy = jasmine.createSpy()
+      var vm = new Vue({
+        el: el,
+        template: '<div v-component="test" v-ref="test" v-context="test:test"></div>',
+        methods: {
+          test: jasmine.createSpy()
+        },
+        components: {
+          test: {
+            context: {
+              test: function (fn) {
+                return spy
+              }
+            }
+          }
+        }
+      })
+      vm.$.test.$context.test(1, 2, 3)
+      expect(vm.$.test.$context.test).toEqual(spy)
+      expect(spy).toHaveBeenCalledWith(1, 2, 3)
+    })
+
+    it('warn when used on non-root node', function () {
       new Vue({
         el: el,
         template: '<div v-context="test:test"></div>'
@@ -36,7 +61,7 @@ if (_.inBrowser) {
       expect(_.warn).toHaveBeenCalled()
     })
 
-    it('should warn when used on child component root', function () {
+    it('warn when used on child component root', function () {
       var vm = new Vue({
         el: el,
         template: '<div v-ref="test" v-component="test"></div>',
@@ -54,7 +79,7 @@ if (_.inBrowser) {
       expect(vm.$.test.$context).toBe(null)
     })
 
-    it('should warn on non-function values', function () {
+    it('warn on non-function values', function () {
       var vm = new Vue({
         el: el,
         data: { test: 123 },
@@ -66,20 +91,36 @@ if (_.inBrowser) {
       expect(_.warn).toHaveBeenCalled()
     })
 
-    it('should accept inline statement', function () {
+    it('warn on no declared context', function () {
+      var vm = new Vue({
+        el: el,
+        template: '<div v-component="test" v-context="test:test"></div>',
+        components: {
+          test: {}
+        },
+        methods: {
+          test: jasmine.createSpy()
+        }
+      })
+      expect(_.warn).toHaveBeenCalled()
+    })
+
+    it('accept inline statement', function () {
       var vm = new Vue({
         el: el,
         data: {a:1},
         template: '<div v-ref="test" v-component="test" v-context="test:a++"></div>',
         components: {
-          test: {}
+          test: {
+            context: ['test']
+          }
         }
       })
       vm.$.test.$context.test()
       expect(vm.a).toBe(2)
     })
 
-    it('should be able to switch handlers if not a method', function (done) {
+    it('be able to switch handlers if not a method', function (done) {
       var a = 0
       var b = 0
       var vm = new Vue({
@@ -91,7 +132,9 @@ if (_.inBrowser) {
         },
         template: '<div v-ref="test" v-component="test" v-context="test:handle"></div>',
         components: {
-          test: {}
+          test: {
+            context: ['test']
+          }
         }
       })
 
@@ -110,23 +153,16 @@ if (_.inBrowser) {
 
     })
 
-    it('should be able to override original context', function () {
+    it('be able to override original context', function () {
       var a = 0
       var b = 0
-      var c = 0
-      var d = 0
       var vm = new Vue({
         el: el,
-        template: '<div v-ref="test" v-component="test" v-context="test:test,test2:test3"></div>',
-        childContext: ['test2'],
+        template: '<div v-ref="test" v-component="test" v-context="test:test2"></div>',
+        childContext: ['test'],
         components: {
           test: {
-            context: ['test2'],
-            methods: {
-              test: function () {
-                b++
-              }
-            }
+            context: ['test']
           }
         },
         methods: {
@@ -134,20 +170,16 @@ if (_.inBrowser) {
             a++
           },
           test2: function () {
-            c++
-          },
-          test3: function () {
-            d++
+            b++
           }
         }
       })
 
       vm.$.test.$context.test()
-      vm.$.test.$context.test2()
-      expect(a).toBe(1)
-      expect(b).toBe(0)
-      expect(c).toBe(0)
-      expect(d).toBe(1)
+      expect(a).toBe(0)
+      expect(b).toBe(1)
     })
+
+
   })
 }
