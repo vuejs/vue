@@ -116,8 +116,10 @@ exports._digest = function () {
   var watcher
   
   while (i--) {
-    watcher = this._watcherList[i - 1]
-    watcher && watcher.update()
+    watcher = this._watcherList[i]
+    if (watcher) {
+      watcher.update()
+    }
   }
   var children = this._children
   i = children.length
