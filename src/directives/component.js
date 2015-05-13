@@ -1,4 +1,5 @@
 var _ = require('../util')
+var config = require('../config')
 var templateParser = require('../parsers/template')
 
 module.exports = {
@@ -42,6 +43,9 @@ module.exports = {
         var child = this.build()
         child.$before(this.ref)
         this.setCurrent(child)
+        // for cleaner dom tree.
+        _.remove(this.ref)
+        this.ref = null
       } else {
         // check dynamic component params
         this.readyEvent = this._checkParam('wait-for')
@@ -92,6 +96,9 @@ module.exports = {
       }, this.Ctor)
       if (this.keepAlive) {
         this.cache[this.ctorId] = child
+      }
+      if (config.classConvenience && !child._isBlock) {
+        _.addClass(child.$el, this.ctorId)
       }
       return child
     }

@@ -78,6 +78,14 @@ exports._init = function (options) {
   // set data after merge.
   this._data = options.data || {}
 
+  // initialize dependencies.
+  this.$services = null
+  this._initDependencies()
+
+  // initialize context.
+  this.$context = null
+  this._initContext()
+
   // initialize data observation and scope inheritance.
   this._initScope()
 

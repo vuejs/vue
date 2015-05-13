@@ -60,7 +60,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
+	var _ = __webpack_require__(13)
 	var extend = _.extend
 
 	/**
@@ -85,7 +85,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Mixin global API
 	 */
 
-	extend(Vue, __webpack_require__(1))
+	extend(Vue, __webpack_require__(32))
 
 	/**
 	 * Vue and every constructor that extends Vue has an
@@ -97,11 +97,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	Vue.options = {
-	  directives  : __webpack_require__(12),
-	  filters     : __webpack_require__(13),
+	  directives  : __webpack_require__(14),
+	  filters     : __webpack_require__(15),
 	  partials    : {},
 	  transitions : {},
-	  components  : {}
+	  components  : {},
+	  services    : {}
 	}
 
 	/**
@@ -132,16 +133,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	extend(p, __webpack_require__(3))
 	extend(p, __webpack_require__(4))
 	extend(p, __webpack_require__(5))
+	extend(p, __webpack_require__(6))
+	extend(p, __webpack_require__(7))
 
 	/**
 	 * Mixin public API methods
 	 */
 
-	extend(p, __webpack_require__(6))
-	extend(p, __webpack_require__(7))
 	extend(p, __webpack_require__(8))
 	extend(p, __webpack_require__(9))
 	extend(p, __webpack_require__(10))
+	extend(p, __webpack_require__(11))
+	extend(p, __webpack_require__(12))
 
 	module.exports = _.Vue = Vue
 
@@ -149,162 +152,65 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
-	var mergeOptions = __webpack_require__(14)
+	var config = __webpack_require__(18)
 
 	/**
-	 * Expose useful internals
+	 * Enable debug utilities. The enableDebug() function and
+	 * all _.log() & _.warn() calls will be dropped in the
+	 * minified production build.
 	 */
 
-	exports.util = _
-	exports.nextTick = _.nextTick
-	exports.config = __webpack_require__(15)
+	enableDebug()
 
-	exports.compiler = {
-	  compile: __webpack_require__(16),
-	  transclude: __webpack_require__(17)
-	}
+	function enableDebug () {
 
-	exports.parsers = {
-	  path: __webpack_require__(18),
-	  text: __webpack_require__(19),
-	  template: __webpack_require__(20),
-	  directive: __webpack_require__(21),
-	  expression: __webpack_require__(22)
-	}
-
-	/**
-	 * Each instance constructor, including Vue, has a unique
-	 * cid. This enables us to create wrapped "child
-	 * constructors" for prototypal inheritance and cache them.
-	 */
-
-	exports.cid = 0
-	var cid = 1
-
-	/**
-	 * Class inehritance
-	 *
-	 * @param {Object} extendOptions
-	 */
-
-	exports.extend = function (extendOptions) {
-	  extendOptions = extendOptions || {}
-	  var Super = this
-	  var Sub = createClass(
-	    extendOptions.name ||
-	    Super.options.name ||
-	    'VueComponent'
-	  )
-	  Sub.prototype = Object.create(Super.prototype)
-	  Sub.prototype.constructor = Sub
-	  Sub.cid = cid++
-	  Sub.options = mergeOptions(
-	    Super.options,
-	    extendOptions
-	  )
-	  Sub['super'] = Super
-	  // allow further extension
-	  Sub.extend = Super.extend
-	  // create asset registers, so extended classes
-	  // can have their private assets too.
-	  createAssetRegisters(Sub)
-	  return Sub
-	}
-
-	/**
-	 * A function that returns a sub-class constructor with the
-	 * given name. This gives us much nicer output when
-	 * logging instances in the console.
-	 *
-	 * @param {String} name
-	 * @return {Function}
-	 */
-
-	function createClass (name) {
-	  return new Function(
-	    'return function ' + _.classify(name) +
-	    ' (options) { this._init(options) }'
-	  )()
-	}
-
-	/**
-	 * Plugin system
-	 *
-	 * @param {Object} plugin
-	 */
-
-	exports.use = function (plugin) {
-	  // additional parameters
-	  var args = _.toArray(arguments, 1)
-	  args.unshift(this)
-	  if (typeof plugin.install === 'function') {
-	    plugin.install.apply(plugin, args)
-	  } else {
-	    plugin.apply(null, args)
-	  }
-	  return this
-	}
-
-	/**
-	 * Define asset registration methods on a constructor.
-	 *
-	 * @param {Function} Constructor
-	 */
-
-	var assetTypes = [
-	  'directive',
-	  'filter',
-	  'partial',
-	  'transition'
-	]
-
-	function createAssetRegisters (Constructor) {
-
-	  /* Asset registration methods share the same signature:
+	  var hasConsole = typeof console !== 'undefined'
+	  
+	  /**
+	   * Log a message.
 	   *
-	   * @param {String} id
-	   * @param {*} definition
+	   * @param {String} msg
 	   */
 
-	  assetTypes.forEach(function (type) {
-	    Constructor[type] = function (id, definition) {
-	      if (!definition) {
-	        return this.options[type + 's'][id]
-	      } else {
-	        this.options[type + 's'][id] = definition
-	      }
+	  exports.log = function (msg) {
+	    if (hasConsole && config.debug) {
+	      console.log('[Vue info]: ' + msg)
 	    }
-	  })
+	  }
 
 	  /**
-	   * Component registration needs to automatically invoke
-	   * Vue.extend on object values.
+	   * We've got a problem here.
 	   *
-	   * @param {String} id
-	   * @param {Object|Function} definition
+	   * @param {String} msg
 	   */
 
-	  Constructor.component = function (id, definition) {
-	    if (!definition) {
-	      return this.options.components[id]
-	    } else {
-	      if (_.isPlainObject(definition)) {
-	        definition.name = id
-	        definition = _.Vue.extend(definition)
+	  exports.warn = function (msg) {
+	    if (hasConsole && (!config.silent || config.debug)) {
+	      console.warn('[Vue warn]: ' + msg)
+	      /* istanbul ignore if */
+	      if (config.debug) {
+	        /* jshint debug: true */
+	        debugger
 	      }
-	      this.options.components[id] = definition
+	    }
+	  }
+
+	  /**
+	   * Assert asset exists
+	   */
+
+	  exports.assertAsset = function (val, type, id) {
+	    if (!val) {
+	      exports.warn('Failed to resolve ' + type + ': ' + id)
 	    }
 	  }
 	}
-
-	createAssetRegisters(exports)
 
 /***/ },
 /* 2 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var mergeOptions = __webpack_require__(14)
+	var mergeOptions = __webpack_require__(17)
 
 	/**
 	 * The main init sequence. This is called for every
@@ -387,6 +293,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // set data after merge.
 	  this._data = options.data || {}
 
+	  // initialize dependencies.
+	  this.$services = null
+	  this._initDependencies()
+
+	  // initialize context.
+	  this.$context = null
+	  this._initContext()
+
 	  // initialize data observation and scope inheritance.
 	  this._initScope()
 
@@ -406,7 +320,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
+	var _ = __webpack_require__(13)
 	var inDoc = _.inDoc
 
 	/**
@@ -549,9 +463,9 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
-	var Observer = __webpack_require__(49)
-	var Dep = __webpack_require__(23)
+	var _ = __webpack_require__(13)
+	var Observer = __webpack_require__(52)
+	var Dep = __webpack_require__(25)
 
 	/**
 	 * Setup the scope of an instance, which contains:
@@ -768,10 +682,96 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
-	var Directive = __webpack_require__(24)
-	var compile = __webpack_require__(16)
-	var transclude = __webpack_require__(17)
+	var _ = __webpack_require__(13)
+
+	/**
+	 * Look up the service and transform it by setter.
+	 *
+	 * @param {String} name
+	 * @param {Object} services
+	 * @param {Vue} vm
+	 * @returns {*}
+	 */
+	function lookupService (name, services, vm) {
+		if (!services || !services[name]) {
+			_.warn(
+				'required service `' + name + '` was not specified in `' + vm.constructor.name + '`.'
+			)
+			return
+		}
+		return services[name]
+	}
+
+	/**
+	 * Initialize the dependencies.
+	 */
+	exports._initDependencies = function () {
+		if (this.$options.dependencies) {
+			var dependencies = this.$options.dependencies
+			var services = this.$options.services
+			var $services = this.$services = {}
+			for (var i = 0, l = dependencies.length; i < l; ++i) {
+				var dep = dependencies[i]
+				$services[dep] = lookupService(dep, services, this)
+			}
+		}
+	}
+
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var _ = __webpack_require__(13)
+
+	/**
+	 * Initialize the context.
+	 */
+	exports._initContext = function () {
+		if (this.$options.getChildContext) {
+			this.getChildContext = _.bind(this.$options.getChildContext, this)
+		}
+
+		if (this.$options.context) {
+			var context = this.$options.context
+			if (!this.$parent) {
+				_.warn(
+					'required parent vm was not specified when initializing context in `' +
+					this.constructor.name + '`.'
+				)
+				return
+			}
+
+			var childContext = this.$parent.getChildContext() || {}
+			var $context = this.$context = {}
+			for (var i = 0, l = context.length; i < l; ++i) {
+				var name = context[i]
+				var fn = childContext[name]
+				if (fn == null || typeof fn !== 'function') {
+					_.warn(
+						'required type function for context `' + name + '` in `' +
+						this.constructor.name + '`.'
+					)
+					continue
+				}
+				$context[name] = fn
+			}
+		}
+	}
+
+	/**
+	 * The default behavior to get child context.
+	 *
+	 */
+	exports.getChildContext = function () { }
+
+/***/ },
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var _ = __webpack_require__(13)
+	var Directive = __webpack_require__(26)
+	var compile = __webpack_require__(20)
+	var transclude = __webpack_require__(21)
 
 	/**
 	 * Transclude, compile and link element.
@@ -925,6 +925,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this.$el =
 	  this.$parent =
 	  this.$root =
+	  this.$services =
+	  this.$context =
 	  this._children =
 	  this._transCpnts =
 	  this._directives = null
@@ -936,15 +938,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 6 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
-	var Watcher = __webpack_require__(25)
-	var Path = __webpack_require__(18)
+	var _ = __webpack_require__(13)
+	var Watcher = __webpack_require__(27)
+	var Path = __webpack_require__(16)
 	var textParser = __webpack_require__(19)
-	var dirParser = __webpack_require__(21)
-	var expParser = __webpack_require__(22)
+	var dirParser = __webpack_require__(23)
+	var expParser = __webpack_require__(24)
 	var filterRE = /[^|]\|[^|]/
 
 	/**
@@ -1107,11 +1109,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 7 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
-	var transition = __webpack_require__(50)
+	var _ = __webpack_require__(13)
+	var transition = __webpack_require__(53)
 
 	/**
 	 * Append instance to target
@@ -1323,10 +1325,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 8 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
+	var _ = __webpack_require__(13)
 
 	/**
 	 * Listen on the given `event` with `fn`.
@@ -1502,10 +1504,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 9 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
+	var _ = __webpack_require__(13)
 
 	/**
 	 * Create a child instance that prototypally inehrits
@@ -1553,11 +1555,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 10 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
-	var compile = __webpack_require__(16)
+	var _ = __webpack_require__(13)
+	var compile = __webpack_require__(20)
 
 	/**
 	 * Set instance target element and kick off the compilation
@@ -1630,53 +1632,54 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 11 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var lang   = __webpack_require__(26)
-	var extend = lang.extend
-
-	extend(exports, lang)
-	extend(exports, __webpack_require__(27))
-	extend(exports, __webpack_require__(28))
-	extend(exports, __webpack_require__(29))
-	extend(exports, __webpack_require__(30))
-
-/***/ },
-/* 12 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// manipulation directives
-	exports.text       = __webpack_require__(31)
-	exports.html       = __webpack_require__(32)
-	exports.attr       = __webpack_require__(33)
-	exports.show       = __webpack_require__(34)
-	exports['class']   = __webpack_require__(35)
-	exports.el         = __webpack_require__(36)
-	exports.ref        = __webpack_require__(37)
-	exports.cloak      = __webpack_require__(38)
-	exports.style      = __webpack_require__(39)
-	exports.partial    = __webpack_require__(40)
-	exports.transition = __webpack_require__(41)
-
-	// event listener directives
-	exports.on         = __webpack_require__(42)
-	exports.model      = __webpack_require__(51)
-
-	// child vm directives
-	exports.component  = __webpack_require__(43)
-	exports.repeat     = __webpack_require__(44)
-	exports['if']      = __webpack_require__(45)
-
-	// child vm communication directives
-	exports['with']    = __webpack_require__(46)
-	exports.events     = __webpack_require__(47)
-
-/***/ },
 /* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
+	var lang   = __webpack_require__(28)
+	var extend = lang.extend
+
+	extend(exports, lang)
+	extend(exports, __webpack_require__(29))
+	extend(exports, __webpack_require__(30))
+	extend(exports, __webpack_require__(31))
+	extend(exports, __webpack_require__(1))
+
+/***/ },
+/* 14 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// manipulation directives
+	exports.text       = __webpack_require__(33)
+	exports.html       = __webpack_require__(34)
+	exports.attr       = __webpack_require__(35)
+	exports.show       = __webpack_require__(36)
+	exports['class']   = __webpack_require__(37)
+	exports.el         = __webpack_require__(38)
+	exports.ref        = __webpack_require__(39)
+	exports.cloak      = __webpack_require__(40)
+	exports.style      = __webpack_require__(41)
+	exports.partial    = __webpack_require__(42)
+	exports.transition = __webpack_require__(43)
+
+	// event listener directives
+	exports.on         = __webpack_require__(44)
+	exports.model      = __webpack_require__(54)
+
+	// child vm directives
+	exports.component  = __webpack_require__(45)
+	exports.repeat     = __webpack_require__(46)
+	exports['if']      = __webpack_require__(47)
+
+	// child vm communication directives
+	exports['with']    = __webpack_require__(48)
+	exports.events     = __webpack_require__(49)
+	exports.context    = __webpack_require__(50)
+
+/***/ },
+/* 15 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var _ = __webpack_require__(13)
 
 	/**
 	 * Stringify value.
@@ -1811,14 +1814,316 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Install special array filters
 	 */
 
-	_.extend(exports, __webpack_require__(48))
+	_.extend(exports, __webpack_require__(51))
 
 
 /***/ },
-/* 14 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
+	var _ = __webpack_require__(13)
+	var Cache = __webpack_require__(55)
+	var pathCache = new Cache(1000)
+	var identRE = /^[$_a-zA-Z]+[\w$]*$/
+
+	/**
+	 * Path-parsing algorithm scooped from Polymer/observe-js
+	 */
+
+	var pathStateMachine = {
+	  'beforePath': {
+	    'ws': ['beforePath'],
+	    'ident': ['inIdent', 'append'],
+	    '[': ['beforeElement'],
+	    'eof': ['afterPath']
+	  },
+
+	  'inPath': {
+	    'ws': ['inPath'],
+	    '.': ['beforeIdent'],
+	    '[': ['beforeElement'],
+	    'eof': ['afterPath']
+	  },
+
+	  'beforeIdent': {
+	    'ws': ['beforeIdent'],
+	    'ident': ['inIdent', 'append']
+	  },
+
+	  'inIdent': {
+	    'ident': ['inIdent', 'append'],
+	    '0': ['inIdent', 'append'],
+	    'number': ['inIdent', 'append'],
+	    'ws': ['inPath', 'push'],
+	    '.': ['beforeIdent', 'push'],
+	    '[': ['beforeElement', 'push'],
+	    'eof': ['afterPath', 'push']
+	  },
+
+	  'beforeElement': {
+	    'ws': ['beforeElement'],
+	    '0': ['afterZero', 'append'],
+	    'number': ['inIndex', 'append'],
+	    "'": ['inSingleQuote', 'append', ''],
+	    '"': ['inDoubleQuote', 'append', '']
+	  },
+
+	  'afterZero': {
+	    'ws': ['afterElement', 'push'],
+	    ']': ['inPath', 'push']
+	  },
+
+	  'inIndex': {
+	    '0': ['inIndex', 'append'],
+	    'number': ['inIndex', 'append'],
+	    'ws': ['afterElement'],
+	    ']': ['inPath', 'push']
+	  },
+
+	  'inSingleQuote': {
+	    "'": ['afterElement'],
+	    'eof': 'error',
+	    'else': ['inSingleQuote', 'append']
+	  },
+
+	  'inDoubleQuote': {
+	    '"': ['afterElement'],
+	    'eof': 'error',
+	    'else': ['inDoubleQuote', 'append']
+	  },
+
+	  'afterElement': {
+	    'ws': ['afterElement'],
+	    ']': ['inPath', 'push']
+	  }
+	}
+
+	function noop () {}
+
+	/**
+	 * Determine the type of a character in a keypath.
+	 *
+	 * @param {Char} char
+	 * @return {String} type
+	 */
+
+	function getPathCharType (char) {
+	  if (char === undefined) {
+	    return 'eof'
+	  }
+
+	  var code = char.charCodeAt(0)
+
+	  switch(code) {
+	    case 0x5B: // [
+	    case 0x5D: // ]
+	    case 0x2E: // .
+	    case 0x22: // "
+	    case 0x27: // '
+	    case 0x30: // 0
+	      return char
+
+	    case 0x5F: // _
+	    case 0x24: // $
+	      return 'ident'
+
+	    case 0x20: // Space
+	    case 0x09: // Tab
+	    case 0x0A: // Newline
+	    case 0x0D: // Return
+	    case 0xA0:  // No-break space
+	    case 0xFEFF:  // Byte Order Mark
+	    case 0x2028:  // Line Separator
+	    case 0x2029:  // Paragraph Separator
+	      return 'ws'
+	  }
+
+	  // a-z, A-Z
+	  if ((0x61 <= code && code <= 0x7A) ||
+	      (0x41 <= code && code <= 0x5A)) {
+	    return 'ident'
+	  }
+
+	  // 1-9
+	  if (0x31 <= code && code <= 0x39) {
+	    return 'number'
+	  }
+
+	  return 'else'
+	}
+
+	/**
+	 * Parse a string path into an array of segments
+	 * Todo implement cache
+	 *
+	 * @param {String} path
+	 * @return {Array|undefined}
+	 */
+
+	function parsePath (path) {
+	  var keys = []
+	  var index = -1
+	  var mode = 'beforePath'
+	  var c, newChar, key, type, transition, action, typeMap
+
+	  var actions = {
+	    push: function() {
+	      if (key === undefined) {
+	        return
+	      }
+	      keys.push(key)
+	      key = undefined
+	    },
+	    append: function() {
+	      if (key === undefined) {
+	        key = newChar
+	      } else {
+	        key += newChar
+	      }
+	    }
+	  }
+
+	  function maybeUnescapeQuote () {
+	    var nextChar = path[index + 1]
+	    if ((mode === 'inSingleQuote' && nextChar === "'") ||
+	        (mode === 'inDoubleQuote' && nextChar === '"')) {
+	      index++
+	      newChar = nextChar
+	      actions.append()
+	      return true
+	    }
+	  }
+
+	  while (mode) {
+	    index++
+	    c = path[index]
+
+	    if (c === '\\' && maybeUnescapeQuote()) {
+	      continue
+	    }
+
+	    type = getPathCharType(c)
+	    typeMap = pathStateMachine[mode]
+	    transition = typeMap[type] || typeMap['else'] || 'error'
+
+	    if (transition === 'error') {
+	      return // parse error
+	    }
+
+	    mode = transition[0]
+	    action = actions[transition[1]] || noop
+	    newChar = transition[2] === undefined
+	      ? c
+	      : transition[2]
+	    action()
+
+	    if (mode === 'afterPath') {
+	      return keys
+	    }
+	  }
+	}
+
+	/**
+	 * Format a accessor segment based on its type.
+	 *
+	 * @param {String} key
+	 * @return {Boolean}
+	 */
+
+	function formatAccessor(key) {
+	  if (identRE.test(key)) { // identifier
+	    return '.' + key
+	  } else if (+key === key >>> 0) { // bracket index
+	    return '[' + key + ']'
+	  } else { // bracket string
+	    return '["' + key.replace(/"/g, '\\"') + '"]'
+	  }
+	}
+
+	/**
+	 * Compiles a getter function with a fixed path.
+	 *
+	 * @param {Array} path
+	 * @return {Function}
+	 */
+
+	exports.compileGetter = function (path) {
+	  var body = 'return o' + path.map(formatAccessor).join('')
+	  return new Function('o', body)
+	}
+
+	/**
+	 * External parse that check for a cache hit first
+	 *
+	 * @param {String} path
+	 * @return {Array|undefined}
+	 */
+
+	exports.parse = function (path) {
+	  var hit = pathCache.get(path)
+	  if (!hit) {
+	    hit = parsePath(path)
+	    if (hit) {
+	      hit.get = exports.compileGetter(hit)
+	      pathCache.put(path, hit)
+	    }
+	  }
+	  return hit
+	}
+
+	/**
+	 * Get from an object from a path string
+	 *
+	 * @param {Object} obj
+	 * @param {String} path
+	 */
+
+	exports.get = function (obj, path) {
+	  path = exports.parse(path)
+	  if (path) {
+	    return path.get(obj)
+	  }
+	}
+
+	/**
+	 * Set on an object from a path
+	 *
+	 * @param {Object} obj
+	 * @param {String | Array} path
+	 * @param {*} val
+	 */
+
+	exports.set = function (obj, path, val) {
+	  if (typeof path === 'string') {
+	    path = exports.parse(path)
+	  }
+	  if (!path || !_.isObject(obj)) {
+	    return false
+	  }
+	  var last, key
+	  for (var i = 0, l = path.length - 1; i < l; i++) {
+	    last = obj
+	    key = path[i]
+	    obj = obj[key]
+	    if (!_.isObject(obj)) {
+	      obj = {}
+	      last.$add(key, obj)
+	    }
+	  }
+	  key = path[i]
+	  if (key in obj) {
+	    obj[key] = val
+	  } else {
+	    obj.$add(key, val)
+	  }
+	  return true
+	}
+
+/***/ },
+/* 17 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var _ = __webpack_require__(13)
 	var extend = _.extend
 
 	/**
@@ -1925,6 +2230,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Hooks and param attributes are merged as arrays.
 	 */
 
+	strats.context =
+	strats.dependencies =
 	strats.created =
 	strats.ready =
 	strats.attached =
@@ -1955,6 +2262,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	strats.filters =
 	strats.partials =
 	strats.transitions =
+	strats.services =
 	strats.components = function (parentVal, childVal, vm, key) {
 	  var ret = Object.create(
 	    vm && vm.$parent
@@ -2011,6 +2319,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var ret = Object.create(parentVal)
 	  extend(ret, childVal)
 	  return ret
+	}
+
+	strats.getChildContext = function (parentVal, childVal) {
+	  if (!childVal) return parentVal
+	  if (!parentVal) return childVal
+	    return chainChildContext(parentVal, childVal)
+	}
+
+	function chainChildContext(f1, f2) {
+	  return function () {
+	    var ret1 = f1.call(this)
+	    var ret2 = f2.call(this)
+	    if (!ret1) return ret2
+	    if (!ret2) return ret1
+	    var ret = Object.create(ret1)
+	    extend(ret, ret2)
+	    return ret
+	  }
 	}
 
 	/**
@@ -2078,7 +2404,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 15 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = {
@@ -2107,6 +2433,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 
 	  silent: false,
+
+	  /**
+	   * Wheter to add `v-component` value as class name on element.
+	   *
+	   * @type {Boolean}
+	   */
+	  classConvenience: true,
 
 	  /**
 	   * Whether allow observer to alter data objects'
@@ -2169,14 +2502,198 @@ return /******/ (function(modules) { // webpackBootstrap
 	})
 
 /***/ },
-/* 16 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
-	var config = __webpack_require__(15)
+	var Cache = __webpack_require__(55)
+	var config = __webpack_require__(18)
+	var dirParser = __webpack_require__(23)
+	var regexEscapeRE = /[-.*+?^${}()|[\]\/\\]/g
+	var cache, tagRE, htmlRE, firstChar, lastChar
+
+	/**
+	 * Escape a string so it can be used in a RegExp
+	 * constructor.
+	 *
+	 * @param {String} str
+	 */
+
+	function escapeRegex (str) {
+	  return str.replace(regexEscapeRE, '\\$&')
+	}
+
+	/**
+	 * Compile the interpolation tag regex.
+	 *
+	 * @return {RegExp}
+	 */
+
+	function compileRegex () {
+	  config._delimitersChanged = false
+	  var open = config.delimiters[0]
+	  var close = config.delimiters[1]
+	  firstChar = open.charAt(0)
+	  lastChar = close.charAt(close.length - 1)
+	  var firstCharRE = escapeRegex(firstChar)
+	  var lastCharRE = escapeRegex(lastChar)
+	  var openRE = escapeRegex(open)
+	  var closeRE = escapeRegex(close)
+	  tagRE = new RegExp(
+	    firstCharRE + '?' + openRE +
+	    '(.+?)' +
+	    closeRE + lastCharRE + '?',
+	    'g'
+	  )
+	  htmlRE = new RegExp(
+	    '^' + firstCharRE + openRE +
+	    '.*' +
+	    closeRE + lastCharRE + '$'
+	  )
+	  // reset cache
+	  cache = new Cache(1000)
+	}
+
+	/**
+	 * Parse a template text string into an array of tokens.
+	 *
+	 * @param {String} text
+	 * @return {Array<Object> | null}
+	 *               - {String} type
+	 *               - {String} value
+	 *               - {Boolean} [html]
+	 *               - {Boolean} [oneTime]
+	 */
+
+	exports.parse = function (text) {
+	  if (config._delimitersChanged) {
+	    compileRegex()
+	  }
+	  var hit = cache.get(text)
+	  if (hit) {
+	    return hit
+	  }
+	  if (!tagRE.test(text)) {
+	    return null
+	  }
+	  var tokens = []
+	  var lastIndex = tagRE.lastIndex = 0
+	  var match, index, value, first, oneTime, partial
+	  /* jshint boss:true */
+	  while (match = tagRE.exec(text)) {
+	    index = match.index
+	    // push text token
+	    if (index > lastIndex) {
+	      tokens.push({
+	        value: text.slice(lastIndex, index)
+	      })
+	    }
+	    // tag token
+	    first = match[1].charCodeAt(0)
+	    oneTime = first === 0x2A // *
+	    partial = first === 0x3E // >
+	    value = (oneTime || partial)
+	      ? match[1].slice(1)
+	      : match[1]
+	    tokens.push({
+	      tag: true,
+	      value: value.trim(),
+	      html: htmlRE.test(match[0]),
+	      oneTime: oneTime,
+	      partial: partial
+	    })
+	    lastIndex = index + match[0].length
+	  }
+	  if (lastIndex < text.length) {
+	    tokens.push({
+	      value: text.slice(lastIndex)
+	    })
+	  }
+	  cache.put(text, tokens)
+	  return tokens
+	}
+
+	/**
+	 * Format a list of tokens into an expression.
+	 * e.g. tokens parsed from 'a {{b}} c' can be serialized
+	 * into one single expression as '"a " + b + " c"'.
+	 *
+	 * @param {Array} tokens
+	 * @param {Vue} [vm]
+	 * @return {String}
+	 */
+
+	exports.tokensToExp = function (tokens, vm) {
+	  return tokens.length > 1
+	    ? tokens.map(function (token) {
+	        return formatToken(token, vm)
+	      }).join('+')
+	    : formatToken(tokens[0], vm, true)
+	}
+
+	/**
+	 * Format a single token.
+	 *
+	 * @param {Object} token
+	 * @param {Vue} [vm]
+	 * @param {Boolean} single
+	 * @return {String}
+	 */
+
+	function formatToken (token, vm, single) {
+	  return token.tag
+	    ? vm && token.oneTime
+	      ? '"' + vm.$eval(token.value) + '"'
+	      : single
+	        ? token.value
+	        : inlineFilters(token.value)
+	    : '"' + token.value + '"'
+	}
+
+	/**
+	 * For an attribute with multiple interpolation tags,
+	 * e.g. attr="some-{{thing | filter}}", in order to combine
+	 * the whole thing into a single watchable expression, we
+	 * have to inline those filters. This function does exactly
+	 * that. This is a bit hacky but it avoids heavy changes
+	 * to directive parser and watcher mechanism.
+	 *
+	 * @param {String} exp
+	 * @return {String}
+	 */
+
+	var filterRE = /[^|]\|[^|]/
+	function inlineFilters (exp) {
+	  if (!filterRE.test(exp)) {
+	    return '(' + exp + ')'
+	  } else {
+	    var dir = dirParser.parse(exp)[0]
+	    if (!dir.filters) {
+	      return '(' + exp + ')'
+	    } else {
+	      exp = dir.expression
+	      for (var i = 0, l = dir.filters.length; i < l; i++) {
+	        var filter = dir.filters[i]
+	        var args = filter.args
+	          ? ',"' + filter.args.join('","') + '"'
+	          : ''
+	        filter = 'this.$options.filters["' + filter.name + '"]'
+	        exp = '(' + filter + '.read||' + filter + ')' +
+	          '.apply(this,[' + exp + args + '])'
+	      }
+	      return exp
+	    }
+	  }
+	}
+
+/***/ },
+/* 20 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var _ = __webpack_require__(13)
+	var config = __webpack_require__(18)
 	var textParser = __webpack_require__(19)
-	var dirParser = __webpack_require__(21)
-	var templateParser = __webpack_require__(20)
+	var dirParser = __webpack_require__(23)
+	var templateParser = __webpack_require__(22)
 
 	module.exports = compile
 
@@ -2826,12 +3343,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 17 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
-	var config = __webpack_require__(15)
-	var templateParser = __webpack_require__(20)
+	var _ = __webpack_require__(13)
+	var config = __webpack_require__(18)
+	var templateParser = __webpack_require__(22)
 	var transcludedFlagAttr = '__vue__transcluded'
 
 	/**
@@ -3045,497 +3562,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 18 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
-	var Cache = __webpack_require__(52)
-	var pathCache = new Cache(1000)
-	var identRE = /^[$_a-zA-Z]+[\w$]*$/
-
-	/**
-	 * Path-parsing algorithm scooped from Polymer/observe-js
-	 */
-
-	var pathStateMachine = {
-	  'beforePath': {
-	    'ws': ['beforePath'],
-	    'ident': ['inIdent', 'append'],
-	    '[': ['beforeElement'],
-	    'eof': ['afterPath']
-	  },
-
-	  'inPath': {
-	    'ws': ['inPath'],
-	    '.': ['beforeIdent'],
-	    '[': ['beforeElement'],
-	    'eof': ['afterPath']
-	  },
-
-	  'beforeIdent': {
-	    'ws': ['beforeIdent'],
-	    'ident': ['inIdent', 'append']
-	  },
-
-	  'inIdent': {
-	    'ident': ['inIdent', 'append'],
-	    '0': ['inIdent', 'append'],
-	    'number': ['inIdent', 'append'],
-	    'ws': ['inPath', 'push'],
-	    '.': ['beforeIdent', 'push'],
-	    '[': ['beforeElement', 'push'],
-	    'eof': ['afterPath', 'push']
-	  },
-
-	  'beforeElement': {
-	    'ws': ['beforeElement'],
-	    '0': ['afterZero', 'append'],
-	    'number': ['inIndex', 'append'],
-	    "'": ['inSingleQuote', 'append', ''],
-	    '"': ['inDoubleQuote', 'append', '']
-	  },
-
-	  'afterZero': {
-	    'ws': ['afterElement', 'push'],
-	    ']': ['inPath', 'push']
-	  },
-
-	  'inIndex': {
-	    '0': ['inIndex', 'append'],
-	    'number': ['inIndex', 'append'],
-	    'ws': ['afterElement'],
-	    ']': ['inPath', 'push']
-	  },
-
-	  'inSingleQuote': {
-	    "'": ['afterElement'],
-	    'eof': 'error',
-	    'else': ['inSingleQuote', 'append']
-	  },
-
-	  'inDoubleQuote': {
-	    '"': ['afterElement'],
-	    'eof': 'error',
-	    'else': ['inDoubleQuote', 'append']
-	  },
-
-	  'afterElement': {
-	    'ws': ['afterElement'],
-	    ']': ['inPath', 'push']
-	  }
-	}
-
-	function noop () {}
-
-	/**
-	 * Determine the type of a character in a keypath.
-	 *
-	 * @param {Char} char
-	 * @return {String} type
-	 */
-
-	function getPathCharType (char) {
-	  if (char === undefined) {
-	    return 'eof'
-	  }
-
-	  var code = char.charCodeAt(0)
-
-	  switch(code) {
-	    case 0x5B: // [
-	    case 0x5D: // ]
-	    case 0x2E: // .
-	    case 0x22: // "
-	    case 0x27: // '
-	    case 0x30: // 0
-	      return char
-
-	    case 0x5F: // _
-	    case 0x24: // $
-	      return 'ident'
-
-	    case 0x20: // Space
-	    case 0x09: // Tab
-	    case 0x0A: // Newline
-	    case 0x0D: // Return
-	    case 0xA0:  // No-break space
-	    case 0xFEFF:  // Byte Order Mark
-	    case 0x2028:  // Line Separator
-	    case 0x2029:  // Paragraph Separator
-	      return 'ws'
-	  }
-
-	  // a-z, A-Z
-	  if ((0x61 <= code && code <= 0x7A) ||
-	      (0x41 <= code && code <= 0x5A)) {
-	    return 'ident'
-	  }
-
-	  // 1-9
-	  if (0x31 <= code && code <= 0x39) {
-	    return 'number'
-	  }
-
-	  return 'else'
-	}
-
-	/**
-	 * Parse a string path into an array of segments
-	 * Todo implement cache
-	 *
-	 * @param {String} path
-	 * @return {Array|undefined}
-	 */
-
-	function parsePath (path) {
-	  var keys = []
-	  var index = -1
-	  var mode = 'beforePath'
-	  var c, newChar, key, type, transition, action, typeMap
-
-	  var actions = {
-	    push: function() {
-	      if (key === undefined) {
-	        return
-	      }
-	      keys.push(key)
-	      key = undefined
-	    },
-	    append: function() {
-	      if (key === undefined) {
-	        key = newChar
-	      } else {
-	        key += newChar
-	      }
-	    }
-	  }
-
-	  function maybeUnescapeQuote () {
-	    var nextChar = path[index + 1]
-	    if ((mode === 'inSingleQuote' && nextChar === "'") ||
-	        (mode === 'inDoubleQuote' && nextChar === '"')) {
-	      index++
-	      newChar = nextChar
-	      actions.append()
-	      return true
-	    }
-	  }
-
-	  while (mode) {
-	    index++
-	    c = path[index]
-
-	    if (c === '\\' && maybeUnescapeQuote()) {
-	      continue
-	    }
-
-	    type = getPathCharType(c)
-	    typeMap = pathStateMachine[mode]
-	    transition = typeMap[type] || typeMap['else'] || 'error'
-
-	    if (transition === 'error') {
-	      return // parse error
-	    }
-
-	    mode = transition[0]
-	    action = actions[transition[1]] || noop
-	    newChar = transition[2] === undefined
-	      ? c
-	      : transition[2]
-	    action()
-
-	    if (mode === 'afterPath') {
-	      return keys
-	    }
-	  }
-	}
-
-	/**
-	 * Format a accessor segment based on its type.
-	 *
-	 * @param {String} key
-	 * @return {Boolean}
-	 */
-
-	function formatAccessor(key) {
-	  if (identRE.test(key)) { // identifier
-	    return '.' + key
-	  } else if (+key === key >>> 0) { // bracket index
-	    return '[' + key + ']'
-	  } else { // bracket string
-	    return '["' + key.replace(/"/g, '\\"') + '"]'
-	  }
-	}
-
-	/**
-	 * Compiles a getter function with a fixed path.
-	 *
-	 * @param {Array} path
-	 * @return {Function}
-	 */
-
-	exports.compileGetter = function (path) {
-	  var body = 'return o' + path.map(formatAccessor).join('')
-	  return new Function('o', body)
-	}
-
-	/**
-	 * External parse that check for a cache hit first
-	 *
-	 * @param {String} path
-	 * @return {Array|undefined}
-	 */
-
-	exports.parse = function (path) {
-	  var hit = pathCache.get(path)
-	  if (!hit) {
-	    hit = parsePath(path)
-	    if (hit) {
-	      hit.get = exports.compileGetter(hit)
-	      pathCache.put(path, hit)
-	    }
-	  }
-	  return hit
-	}
-
-	/**
-	 * Get from an object from a path string
-	 *
-	 * @param {Object} obj
-	 * @param {String} path
-	 */
-
-	exports.get = function (obj, path) {
-	  path = exports.parse(path)
-	  if (path) {
-	    return path.get(obj)
-	  }
-	}
-
-	/**
-	 * Set on an object from a path
-	 *
-	 * @param {Object} obj
-	 * @param {String | Array} path
-	 * @param {*} val
-	 */
-
-	exports.set = function (obj, path, val) {
-	  if (typeof path === 'string') {
-	    path = exports.parse(path)
-	  }
-	  if (!path || !_.isObject(obj)) {
-	    return false
-	  }
-	  var last, key
-	  for (var i = 0, l = path.length - 1; i < l; i++) {
-	    last = obj
-	    key = path[i]
-	    obj = obj[key]
-	    if (!_.isObject(obj)) {
-	      obj = {}
-	      last.$add(key, obj)
-	    }
-	  }
-	  key = path[i]
-	  if (key in obj) {
-	    obj[key] = val
-	  } else {
-	    obj.$add(key, val)
-	  }
-	  return true
-	}
-
-/***/ },
-/* 19 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Cache = __webpack_require__(52)
-	var config = __webpack_require__(15)
-	var dirParser = __webpack_require__(21)
-	var regexEscapeRE = /[-.*+?^${}()|[\]\/\\]/g
-	var cache, tagRE, htmlRE, firstChar, lastChar
-
-	/**
-	 * Escape a string so it can be used in a RegExp
-	 * constructor.
-	 *
-	 * @param {String} str
-	 */
-
-	function escapeRegex (str) {
-	  return str.replace(regexEscapeRE, '\\$&')
-	}
-
-	/**
-	 * Compile the interpolation tag regex.
-	 *
-	 * @return {RegExp}
-	 */
-
-	function compileRegex () {
-	  config._delimitersChanged = false
-	  var open = config.delimiters[0]
-	  var close = config.delimiters[1]
-	  firstChar = open.charAt(0)
-	  lastChar = close.charAt(close.length - 1)
-	  var firstCharRE = escapeRegex(firstChar)
-	  var lastCharRE = escapeRegex(lastChar)
-	  var openRE = escapeRegex(open)
-	  var closeRE = escapeRegex(close)
-	  tagRE = new RegExp(
-	    firstCharRE + '?' + openRE +
-	    '(.+?)' +
-	    closeRE + lastCharRE + '?',
-	    'g'
-	  )
-	  htmlRE = new RegExp(
-	    '^' + firstCharRE + openRE +
-	    '.*' +
-	    closeRE + lastCharRE + '$'
-	  )
-	  // reset cache
-	  cache = new Cache(1000)
-	}
-
-	/**
-	 * Parse a template text string into an array of tokens.
-	 *
-	 * @param {String} text
-	 * @return {Array<Object> | null}
-	 *               - {String} type
-	 *               - {String} value
-	 *               - {Boolean} [html]
-	 *               - {Boolean} [oneTime]
-	 */
-
-	exports.parse = function (text) {
-	  if (config._delimitersChanged) {
-	    compileRegex()
-	  }
-	  var hit = cache.get(text)
-	  if (hit) {
-	    return hit
-	  }
-	  if (!tagRE.test(text)) {
-	    return null
-	  }
-	  var tokens = []
-	  var lastIndex = tagRE.lastIndex = 0
-	  var match, index, value, first, oneTime, partial
-	  /* jshint boss:true */
-	  while (match = tagRE.exec(text)) {
-	    index = match.index
-	    // push text token
-	    if (index > lastIndex) {
-	      tokens.push({
-	        value: text.slice(lastIndex, index)
-	      })
-	    }
-	    // tag token
-	    first = match[1].charCodeAt(0)
-	    oneTime = first === 0x2A // *
-	    partial = first === 0x3E // >
-	    value = (oneTime || partial)
-	      ? match[1].slice(1)
-	      : match[1]
-	    tokens.push({
-	      tag: true,
-	      value: value.trim(),
-	      html: htmlRE.test(match[0]),
-	      oneTime: oneTime,
-	      partial: partial
-	    })
-	    lastIndex = index + match[0].length
-	  }
-	  if (lastIndex < text.length) {
-	    tokens.push({
-	      value: text.slice(lastIndex)
-	    })
-	  }
-	  cache.put(text, tokens)
-	  return tokens
-	}
-
-	/**
-	 * Format a list of tokens into an expression.
-	 * e.g. tokens parsed from 'a {{b}} c' can be serialized
-	 * into one single expression as '"a " + b + " c"'.
-	 *
-	 * @param {Array} tokens
-	 * @param {Vue} [vm]
-	 * @return {String}
-	 */
-
-	exports.tokensToExp = function (tokens, vm) {
-	  return tokens.length > 1
-	    ? tokens.map(function (token) {
-	        return formatToken(token, vm)
-	      }).join('+')
-	    : formatToken(tokens[0], vm, true)
-	}
-
-	/**
-	 * Format a single token.
-	 *
-	 * @param {Object} token
-	 * @param {Vue} [vm]
-	 * @param {Boolean} single
-	 * @return {String}
-	 */
-
-	function formatToken (token, vm, single) {
-	  return token.tag
-	    ? vm && token.oneTime
-	      ? '"' + vm.$eval(token.value) + '"'
-	      : single
-	        ? token.value
-	        : inlineFilters(token.value)
-	    : '"' + token.value + '"'
-	}
-
-	/**
-	 * For an attribute with multiple interpolation tags,
-	 * e.g. attr="some-{{thing | filter}}", in order to combine
-	 * the whole thing into a single watchable expression, we
-	 * have to inline those filters. This function does exactly
-	 * that. This is a bit hacky but it avoids heavy changes
-	 * to directive parser and watcher mechanism.
-	 *
-	 * @param {String} exp
-	 * @return {String}
-	 */
-
-	var filterRE = /[^|]\|[^|]/
-	function inlineFilters (exp) {
-	  if (!filterRE.test(exp)) {
-	    return '(' + exp + ')'
-	  } else {
-	    var dir = dirParser.parse(exp)[0]
-	    if (!dir.filters) {
-	      return '(' + exp + ')'
-	    } else {
-	      exp = dir.expression
-	      for (var i = 0, l = dir.filters.length; i < l; i++) {
-	        var filter = dir.filters[i]
-	        var args = filter.args
-	          ? ',"' + filter.args.join('","') + '"'
-	          : ''
-	        filter = 'this.$options.filters["' + filter.name + '"]'
-	        exp = '(' + filter + '.read||' + filter + ')' +
-	          '.apply(this,[' + exp + args + '])'
-	      }
-	      return exp
-	    }
-	  }
-	}
-
-/***/ },
-/* 20 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var _ = __webpack_require__(11)
-	var Cache = __webpack_require__(52)
+	var _ = __webpack_require__(13)
+	var Cache = __webpack_require__(55)
 	var templateCache = new Cache(1000)
 	var idSelectorCache = new Cache(1000)
 
@@ -3796,11 +3827,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 21 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
-	var Cache = __webpack_require__(52)
+	var _ = __webpack_require__(13)
+	var Cache = __webpack_require__(55)
 	var cache = new Cache(1000)
 	var argRE = /^[^\{\?]+$|^'[^']*'$|^"[^"]*"$/
 	var filterTokenRE = /[^\s'"]+|'[^']+'|"[^"]+"/g
@@ -3960,12 +3991,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 22 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
-	var Path = __webpack_require__(18)
-	var Cache = __webpack_require__(52)
+	var _ = __webpack_require__(13)
+	var Path = __webpack_require__(16)
+	var Cache = __webpack_require__(55)
 	var expressionCache = new Cache(1000)
 
 	var allowedKeywords =
@@ -4220,11 +4251,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.pathTestRE = pathTestRE
 
 /***/ },
-/* 23 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var uid = 0
-	var _ = __webpack_require__(11)
+	var _ = __webpack_require__(13)
 
 	/**
 	 * A dep is an observable that can have multiple
@@ -4278,14 +4309,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Dep
 
 /***/ },
-/* 24 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
-	var config = __webpack_require__(15)
-	var Watcher = __webpack_require__(25)
+	var _ = __webpack_require__(13)
+	var config = __webpack_require__(18)
+	var Watcher = __webpack_require__(27)
 	var textParser = __webpack_require__(19)
-	var expParser = __webpack_require__(22)
+	var expParser = __webpack_require__(24)
 
 	/**
 	 * A directive links a DOM element with a piece of data,
@@ -4507,14 +4538,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Directive
 
 /***/ },
-/* 25 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
-	var config = __webpack_require__(15)
-	var Observer = __webpack_require__(49)
-	var expParser = __webpack_require__(22)
-	var batcher = __webpack_require__(53)
+	var _ = __webpack_require__(13)
+	var config = __webpack_require__(18)
+	var Observer = __webpack_require__(52)
+	var expParser = __webpack_require__(24)
+	var batcher = __webpack_require__(56)
 	var uid = 0
 
 	/**
@@ -4772,7 +4803,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Watcher
 
 /***/ },
-/* 26 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -5007,7 +5038,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 27 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -5113,10 +5144,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 28 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var config = __webpack_require__(15)
+	var config = __webpack_require__(18)
 
 	/**
 	 * Check if a node is in the document.
@@ -5327,10 +5358,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 29 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(30)
+	var _ = __webpack_require__(1)
 
 	/**
 	 * Resolve read & write filters for a vm instance. The
@@ -5404,68 +5435,165 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 30 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var config = __webpack_require__(15)
+	var _ = __webpack_require__(13)
+	var mergeOptions = __webpack_require__(17)
 
 	/**
-	 * Enable debug utilities. The enableDebug() function and
-	 * all _.log() & _.warn() calls will be dropped in the
-	 * minified production build.
+	 * Expose useful internals
 	 */
 
-	enableDebug()
+	exports.util = _
+	exports.nextTick = _.nextTick
+	exports.config = __webpack_require__(18)
 
-	function enableDebug () {
+	exports.compiler = {
+	  compile: __webpack_require__(20),
+	  transclude: __webpack_require__(21)
+	}
 
-	  var hasConsole = typeof console !== 'undefined'
-	  
-	  /**
-	   * Log a message.
-	   *
-	   * @param {String} msg
-	   */
+	exports.parsers = {
+	  path: __webpack_require__(16),
+	  text: __webpack_require__(19),
+	  template: __webpack_require__(22),
+	  directive: __webpack_require__(23),
+	  expression: __webpack_require__(24)
+	}
 
-	  exports.log = function (msg) {
-	    if (hasConsole && config.debug) {
-	      console.log('[Vue info]: ' + msg)
-	    }
+	/**
+	 * Each instance constructor, including Vue, has a unique
+	 * cid. This enables us to create wrapped "child
+	 * constructors" for prototypal inheritance and cache them.
+	 */
+
+	exports.cid = 0
+	var cid = 1
+
+	/**
+	 * Class inehritance
+	 *
+	 * @param {Object} extendOptions
+	 */
+
+	exports.extend = function (extendOptions) {
+	  extendOptions = extendOptions || {}
+	  var Super = this
+	  var Sub = createClass(
+	    extendOptions.name ||
+	    Super.options.name ||
+	    'VueComponent'
+	  )
+	  Sub.prototype = Object.create(Super.prototype)
+	  Sub.prototype.constructor = Sub
+	  Sub.cid = cid++
+	  Sub.options = mergeOptions(
+	    Super.options,
+	    extendOptions
+	  )
+	  Sub['super'] = Super
+	  // allow further extension
+	  Sub.extend = Super.extend
+	  // create asset registers, so extended classes
+	  // can have their private assets too.
+	  createAssetRegisters(Sub)
+	  return Sub
+	}
+
+	/**
+	 * A function that returns a sub-class constructor with the
+	 * given name. This gives us much nicer output when
+	 * logging instances in the console.
+	 *
+	 * @param {String} name
+	 * @return {Function}
+	 */
+
+	function createClass (name) {
+	  return new Function(
+	    'return function ' + _.classify(name) +
+	    ' (options) { this._init(options) }'
+	  )()
+	}
+
+	/**
+	 * Plugin system
+	 *
+	 * @param {Object} plugin
+	 */
+
+	exports.use = function (plugin) {
+	  // additional parameters
+	  var args = _.toArray(arguments, 1)
+	  args.unshift(this)
+	  if (typeof plugin.install === 'function') {
+	    plugin.install.apply(plugin, args)
+	  } else {
+	    plugin.apply(null, args)
 	  }
+	  return this
+	}
 
-	  /**
-	   * We've got a problem here.
+	/**
+	 * Define asset registration methods on a constructor.
+	 *
+	 * @param {Function} Constructor
+	 */
+
+	var assetTypes = [
+	  'directive',
+	  'filter',
+	  'partial',
+	  'transition'
+	]
+
+	function createAssetRegisters (Constructor) {
+
+	  /* Asset registration methods share the same signature:
 	   *
-	   * @param {String} msg
+	   * @param {String} id
+	   * @param {*} definition
 	   */
 
-	  exports.warn = function (msg) {
-	    if (hasConsole && (!config.silent || config.debug)) {
-	      console.warn('[Vue warn]: ' + msg)
-	      /* istanbul ignore if */
-	      if (config.debug) {
-	        /* jshint debug: true */
-	        debugger
+	  assetTypes.forEach(function (type) {
+	    Constructor[type] = function (id, definition) {
+	      if (!definition) {
+	        return this.options[type + 's'][id]
+	      } else {
+	        this.options[type + 's'][id] = definition
 	      }
 	    }
-	  }
+	  })
 
 	  /**
-	   * Assert asset exists
+	   * Component registration needs to automatically invoke
+	   * Vue.extend on object values.
+	   *
+	   * @param {String} id
+	   * @param {Object|Function} definition
 	   */
 
-	  exports.assertAsset = function (val, type, id) {
-	    if (!val) {
-	      exports.warn('Failed to resolve ' + type + ': ' + id)
+	  Constructor.component = function (id, definition) {
+	    if (!definition) {
+	      return this.options.components[id]
+	    } else {
+	      if (_.isPlainObject(definition)) {
+	        definition.name = id
+	        definition = _.Vue.extend(definition)
+	      }
+	      this.options.components[id] = definition
 	    }
 	  }
 	}
 
+	createAssetRegisters(exports)
+
 /***/ },
-/* 31 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
+	var _ = __webpack_require__(13)
 
 	module.exports = {
 
@@ -5482,11 +5610,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 32 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
-	var templateParser = __webpack_require__(20)
+	var _ = __webpack_require__(13)
+	var templateParser = __webpack_require__(22)
 
 	module.exports = {
 
@@ -5525,7 +5653,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 33 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// xlink
@@ -5562,10 +5690,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 34 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var transition = __webpack_require__(50)
+	var transition = __webpack_require__(53)
 
 	module.exports = function (value) {
 	  var el = this.el
@@ -5575,10 +5703,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 35 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
+	var _ = __webpack_require__(13)
 	var addClass = _.addClass
 	var removeClass = _.removeClass
 
@@ -5598,7 +5726,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 36 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = {
@@ -5616,10 +5744,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 37 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
+	var _ = __webpack_require__(13)
 
 	module.exports = {
 
@@ -5644,10 +5772,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 38 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var config = __webpack_require__(15)
+	var config = __webpack_require__(18)
 
 	module.exports = {
 
@@ -5661,10 +5789,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 39 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
+	var _ = __webpack_require__(13)
 	var prefixes = ['-webkit-', '-moz-', '-ms-']
 	var camelPrefixes = ['Webkit', 'Moz', 'ms']
 	var importantRE = /!important;?$/
@@ -5766,12 +5894,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 40 */
+/* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
-	var templateParser = __webpack_require__(20)
-	var vIf = __webpack_require__(45)
+	var _ = __webpack_require__(13)
+	var templateParser = __webpack_require__(22)
+	var vIf = __webpack_require__(47)
 
 	module.exports = {
 
@@ -5821,7 +5949,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 41 */
+/* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = {
@@ -5850,10 +5978,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 42 */
+/* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
+	var _ = __webpack_require__(13)
 
 	module.exports = {
 
@@ -5914,11 +6042,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 43 */
+/* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
-	var templateParser = __webpack_require__(20)
+	var _ = __webpack_require__(13)
+	var config = __webpack_require__(18)
+	var templateParser = __webpack_require__(22)
 
 	module.exports = {
 
@@ -5961,6 +6090,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var child = this.build()
 	        child.$before(this.ref)
 	        this.setCurrent(child)
+	        // for cleaner dom tree.
+	        _.remove(this.ref)
+	        this.ref = null
 	      } else {
 	        // check dynamic component params
 	        this.readyEvent = this._checkParam('wait-for')
@@ -6011,6 +6143,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }, this.Ctor)
 	      if (this.keepAlive) {
 	        this.cache[this.ctorId] = child
+	      }
+	      if (config.classConvenience && !child._isBlock) {
+	        _.addClass(child.$el, this.ctorId)
 	      }
 	      return child
 	    }
@@ -6149,18 +6284,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 44 */
+/* 46 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
+	var _ = __webpack_require__(13)
 	var isObject = _.isObject
 	var isPlainObject = _.isPlainObject
 	var textParser = __webpack_require__(19)
-	var expParser = __webpack_require__(22)
-	var templateParser = __webpack_require__(20)
-	var compile = __webpack_require__(16)
-	var transclude = __webpack_require__(17)
-	var mergeOptions = __webpack_require__(14)
+	var expParser = __webpack_require__(24)
+	var templateParser = __webpack_require__(22)
+	var compile = __webpack_require__(20)
+	var transclude = __webpack_require__(21)
+	var mergeOptions = __webpack_require__(17)
 	var uid = 0
 
 	module.exports = {
@@ -6691,13 +6826,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 45 */
+/* 47 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
-	var compile = __webpack_require__(16)
-	var templateParser = __webpack_require__(20)
-	var transition = __webpack_require__(50)
+	var _ = __webpack_require__(13)
+	var compile = __webpack_require__(20)
+	var templateParser = __webpack_require__(22)
+	var transition = __webpack_require__(53)
 
 	module.exports = {
 
@@ -6826,12 +6961,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 46 */
+/* 48 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
-	var Watcher = __webpack_require__(25)
-	var expParser = __webpack_require__(22)
+	var _ = __webpack_require__(13)
+	var Watcher = __webpack_require__(27)
+	var expParser = __webpack_require__(24)
 	var literalRE = /^(true|false|\s?('[^']*'|"[^"]")\s?)$/
 
 	module.exports = {
@@ -6917,10 +7052,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 47 */
+/* 49 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
+	var _ = __webpack_require__(13)
 
 	module.exports = {
 
@@ -6958,11 +7093,64 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 48 */
+/* 50 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
-	var Path = __webpack_require__(18)
+	var _ = __webpack_require__(13)
+
+	module.exports = {
+
+	  acceptStatement: true,
+
+	  bind: function () {
+	    var child = this.el.__vue__
+	    if (!child || this.vm !== child.$parent) {
+	      _.warn(
+	        '`v-context` should only be used on a child component ' +
+	        'from the parent template.'
+	      )
+	      return
+	    }
+
+	    if (!child.$context) {
+	      _.warn(
+	        '`v-context` should only be used on a component whose declared context.'
+	      )
+	    }
+	  },
+
+	  update: function (handler) {
+	    if (typeof handler !== 'function') {
+	      _.warn(
+	        'Directive "v-context:' + this.expression + '" ' +
+	        'expects a function value.'
+	      )
+	      return
+	    }
+
+	    var child = this.el.__vue__
+	    var arg = this.arg
+	    if (!child.$options.context || -1 === child.$options.context.indexOf(arg)) {
+	      _.warn(
+	        'update failed due to no declared context `' + arg +
+	        '` found in `' + child.constructor.name + '`.'
+	      )
+	      return
+	    }
+
+	    child.$context[arg] = handler
+	  }
+
+	  // when child is destroyed, `$context` are set to null,
+	  // so no need for unbind here.
+	}
+
+/***/ },
+/* 51 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var _ = __webpack_require__(13)
+	var Path = __webpack_require__(16)
 
 	/**
 	 * Filter filter for v-repeat
@@ -7050,15 +7238,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 49 */
+/* 52 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
-	var config = __webpack_require__(15)
-	var Dep = __webpack_require__(23)
-	var arrayMethods = __webpack_require__(54)
+	var _ = __webpack_require__(13)
+	var config = __webpack_require__(18)
+	var Dep = __webpack_require__(25)
+	var arrayMethods = __webpack_require__(57)
 	var arrayKeys = Object.getOwnPropertyNames(arrayMethods)
-	__webpack_require__(55)
+	__webpack_require__(58)
 
 	var uid = 0
 
@@ -7291,12 +7479,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 50 */
+/* 53 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
-	var applyCSSTransition = __webpack_require__(56)
-	var applyJSTransition = __webpack_require__(57)
+	var _ = __webpack_require__(13)
+	var applyCSSTransition = __webpack_require__(59)
+	var applyJSTransition = __webpack_require__(60)
 	var doc = typeof document === 'undefined' ? null : document
 
 	/**
@@ -7456,16 +7644,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 51 */
+/* 54 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
+	var _ = __webpack_require__(13)
 
 	var handlers = {
-	  _default: __webpack_require__(58),
-	  radio: __webpack_require__(59),
-	  select: __webpack_require__(60),
-	  checkbox: __webpack_require__(61)
+	  _default: __webpack_require__(61),
+	  radio: __webpack_require__(62),
+	  select: __webpack_require__(63),
+	  checkbox: __webpack_require__(64)
 	}
 
 	module.exports = {
@@ -7517,7 +7705,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 52 */
+/* 55 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -7634,10 +7822,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Cache
 
 /***/ },
-/* 53 */
+/* 56 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
+	var _ = __webpack_require__(13)
 	var MAX_UPDATE_COUNT = 10
 
 	// we have two separate queues: one for directive updates
@@ -7733,10 +7921,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 54 */
+/* 57 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
+	var _ = __webpack_require__(13)
 	var arrayProto = Array.prototype
 	var arrayMethods = Object.create(arrayProto)
 
@@ -7828,10 +8016,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = arrayMethods
 
 /***/ },
-/* 55 */
+/* 58 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
+	var _ = __webpack_require__(13)
 	var objProto = Object.prototype
 
 	/**
@@ -7917,10 +8105,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	)
 
 /***/ },
-/* 56 */
+/* 59 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
+	var _ = __webpack_require__(13)
 	var addClass = _.addClass
 	var removeClass = _.removeClass
 	var transDurationProp = _.transitionProp + 'Duration'
@@ -8111,7 +8299,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 57 */
+/* 60 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -8162,10 +8350,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 58 */
+/* 61 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
+	var _ = __webpack_require__(13)
 
 	module.exports = {
 
@@ -8315,10 +8503,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 59 */
+/* 62 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
+	var _ = __webpack_require__(13)
 
 	module.exports = {
 
@@ -8346,12 +8534,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 60 */
+/* 63 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
-	var Watcher = __webpack_require__(25)
-	var dirParser = __webpack_require__(21)
+	var _ = __webpack_require__(13)
+	var Watcher = __webpack_require__(27)
+	var dirParser = __webpack_require__(23)
 
 	module.exports = {
 
@@ -8531,10 +8719,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 61 */
+/* 64 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(11)
+	var _ = __webpack_require__(13)
 
 	module.exports = {
 

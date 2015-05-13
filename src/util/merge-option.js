@@ -105,6 +105,8 @@ strats.el = function (parentVal, childVal, vm) {
  * Hooks and param attributes are merged as arrays.
  */
 
+strats.context =
+strats.dependencies =
 strats.created =
 strats.ready =
 strats.attached =
@@ -135,6 +137,7 @@ strats.directives =
 strats.filters =
 strats.partials =
 strats.transitions =
+strats.services =
 strats.components = function (parentVal, childVal, vm, key) {
   var ret = Object.create(
     vm && vm.$parent
@@ -191,6 +194,24 @@ strats.computed = function (parentVal, childVal) {
   var ret = Object.create(parentVal)
   extend(ret, childVal)
   return ret
+}
+
+strats.getChildContext = function (parentVal, childVal) {
+  if (!childVal) return parentVal
+  if (!parentVal) return childVal
+    return chainChildContext(parentVal, childVal)
+}
+
+function chainChildContext(f1, f2) {
+  return function () {
+    var ret1 = f1.call(this)
+    var ret2 = f2.call(this)
+    if (!ret1) return ret2
+    if (!ret2) return ret1
+    var ret = Object.create(ret1)
+    extend(ret, ret2)
+    return ret
+  }
 }
 
 /**

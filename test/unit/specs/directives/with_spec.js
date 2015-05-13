@@ -149,7 +149,7 @@ if (_.inBrowser) {
           }
         }
       })
-      expect(el.innerHTML).toBe('<!--v-start--><p>AAA</p><p>DDD</p><!--v-end--><!--v-component-->')
+      expect(el.innerHTML).toBe('<!--v-start--><p>AAA</p><p>DDD</p><!--v-end-->')
     })
 
     it('bind literal values should not trigger setter warning', function (done) {

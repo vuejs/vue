@@ -31,7 +31,7 @@ if (_.inBrowser) {
       expect(vm._children.length).toBe(0)
       vm.test = true
       _.nextTick(function () {
-        expect(el.innerHTML).toBe(wrap('<div><div>A</div><!--v-component--></div>'))
+        expect(el.innerHTML).toBe(wrap('<div><div class="test">A</div></div>'))
         expect(vm._children.length).toBe(1)
         vm.test = false
         _.nextTick(function () {
@@ -39,7 +39,7 @@ if (_.inBrowser) {
           expect(vm._children.length).toBe(0)
           vm.test = true
           _.nextTick(function () {
-            expect(el.innerHTML).toBe(wrap('<div><div>A</div><!--v-component--></div>'))
+            expect(el.innerHTML).toBe(wrap('<div><div class="test">A</div></div>'))
             expect(vm._children.length).toBe(1)
             var child = vm._children[0]
             vm.$destroy()
@@ -94,7 +94,7 @@ if (_.inBrowser) {
       expect(vm._children.length).toBe(0)
       vm.ok = true
       _.nextTick(function () {
-        expect(el.innerHTML).toBe(wrap('<div>123</div><!--v-component-->'))
+        expect(el.innerHTML).toBe(wrap('<div class="test">123</div>'))
         expect(vm._children.length).toBe(1)
         expect(attachSpy).toHaveBeenCalled()
         expect(readySpy).toHaveBeenCalled()
@@ -131,12 +131,12 @@ if (_.inBrowser) {
       // toggle if with lazy instantiation
       vm.ok = true
       _.nextTick(function () {
-        expect(el.innerHTML).toBe(wrap('<div>AAA</div><!--v-component-->'))
+        expect(el.innerHTML).toBe(wrap('<div class="a">AAA</div><!--v-component-->'))
         expect(vm._children.length).toBe(1)
         // switch view when if=true
         vm.view = 'b'
         _.nextTick(function () {
-          expect(el.innerHTML).toBe(wrap('<div>BBB</div><!--v-component-->'))
+          expect(el.innerHTML).toBe(wrap('<div class="b">BBB</div><!--v-component-->'))
           expect(vm._children.length).toBe(1)
           // toggle if when already instantiated
           vm.ok = false
@@ -147,7 +147,7 @@ if (_.inBrowser) {
             vm.view = 'a'
             vm.ok = true
             _.nextTick(function () {
-              expect(el.innerHTML).toBe(wrap('<div>AAA</div><!--v-component-->'))
+              expect(el.innerHTML).toBe(wrap('<div class="a">AAA</div><!--v-component-->'))
               expect(vm._children.length).toBe(1)
               done()
             })
@@ -304,12 +304,11 @@ if (_.inBrowser) {
               }).join('') + '<!--v-repeat-->' +
             '</div></div>'
           : ''
-        var markup = '<div>' +
+        var markup = '<div class="outer">' +
           '<!--v-if-start-->' +
             showBlock +
           '<!--v-if-end-->' +
-          '<div></div><!--v-component-->' +
-        '</div><!--v-component-->'
+          '<div class="transcluded"></div></div>'
         expect(el.innerHTML).toBe(markup)
       }
     })
