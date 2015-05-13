@@ -1,55 +1,42 @@
 var _ = require('../util')
 
 /**
- * Initialize the dependencies.
+ * Initialize the context.
  */
 exports._initContext = function () {
+	if (this.$options.getChildContext) {
+		this.getChildContext = _.bind(this.$options.getChildContext, this)
+	}
+
 	if (this.$options.context) {
 		var context = this.$options.context
 		if (!this.$parent) {
 			_.warn(
-				'cannot resolve any context due to empty parent vm.'
+				'required parent vm was not specified when initializing context in `' +
+				this.constructor.name + '`.'
 			)
 			return
 		}
-		var childContext = this.$parent._getChildContext()
-		if (!childContext) {
-			_.warn(
-				'cannot resolve any context due to no "childContext" supplied by parent vm.'
-			)
-			return
-		}
+
+		var childContext = this.$parent.getChildContext() || {}
 		var $context = this.$context = {}
 		for (var i = 0, l = context.length; i < l; ++i) {
-			var ctx = context[i]
-			var name = ctx.name
-			$context[name] = ctx.set.call(this, childContext[name], name)
-			if ($context[name] === undefined) {
+			var name = context[i]
+			var fn = childContext[name]
+			if (typeof fn !== 'function') {
 				_.warn(
-					'cannot resolve context "' + name + '" for vm "' + this.constructor.name + '".'
+					'required type function for context `' + name + '` in `' +
+					this.constructor.name + '`.'
 				)
+				continue
 			}
+			$context[name] = fn
 		}
 	}
 }
 
 /**
- * Get the child context.
+ * The default behavior to get child context.
  *
- * @returns {Object}
  */
-exports._getChildContext = function () {
-	if (!this.$options.childContext) return null
-	if (this._childContext) return this._childContext
-	var childContext = this.$options.childContext
-	var ret = this._childContext = {}
-	for (var key in childContext) {
-		var val = childContext[key]
-		if (typeof val === 'function') {
-			ret[key] = val.call(this, key)
-		} else {
-			ret[key] = this[val || key]
-		}
-	}
-	return ret
-}
+exports.getChildContext = function () { }

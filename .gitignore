@@ -6,6 +6,6 @@ explorations
 node_modules
 .DS_Store
 .idea
-.log
+*.log
 benchmarks/browser.js
 coverage

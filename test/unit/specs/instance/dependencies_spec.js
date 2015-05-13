@@ -25,47 +25,6 @@ describe('Instance Dependencies', function () {
       expect(vm.$services.dep2).toEqual(234)
     })
 
-    it('object', function () {
-      var vm = new Vue({
-        services: {
-          'dep1': 123,
-          'dep2': 234,
-          'dep3': 456
-        },
-        dependencies: {
-          dep1: null,
-          dep2: function (dep2) {
-            return 2 * dep2
-          },
-          dep3: spy
-        }
-      })
-      expect(vm.$services).toBeDefined()
-      expect(vm.$services.dep1).toEqual(123)
-      expect(vm.$services.dep2).toEqual(468)
-      expect(spy).toHaveBeenCalledWith(456, 'dep3')
-    })
-
-    it('transform', function () {
-      var vm = new Vue({
-        services: {
-          'dep1': 123,
-          'dep2': 234
-        },
-        dependencies: {
-          dep1: function (dep1) {
-            return 3 * dep1;
-          },
-          dep2: function (dep2) {
-            return 2 * dep2
-          }
-        }
-      })
-      expect(vm.$services).toBeDefined()
-      expect(vm.$services.dep1).toEqual(369)
-      expect(vm.$services.dep2).toEqual(468)
-    })
-
     it('incompleted services', function () {
       var vm = new Vue({
         services: {

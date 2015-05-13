@@ -105,6 +105,8 @@ strats.el = function (parentVal, childVal, vm) {
  * Hooks and param attributes are merged as arrays.
  */
 
+strats.context =
+strats.dependencies =
 strats.created =
 strats.ready =
 strats.attached =
@@ -194,29 +196,22 @@ strats.computed = function (parentVal, childVal) {
   return ret
 }
 
-/**
- * Merge as array and make sure options get converted.
- */
-
-strats.context =
-strats.dependencies = function (parentVal, childVal) {
-  return childVal
-          ? parentVal
-            ? parentVal.concat(guardSetter(childVal))
-            : guardSetter(childVal)
-          : parentVal
+strats.getChildContext = function (parentVal, childVal) {
+  if (!childVal) return parentVal
+  if (!parentVal) return childVal
+    return chainChildContext(parentVal, childVal)
 }
 
-/**
- * Merge child context and make sure it is hashed.
- */
-
-strats.childContext = function (parentVal, childVal) {
-  if (!childVal) return parentVal
-  if (!parentVal) return guardChildContext(childVal)
-  var ret = Object.create(parentVal)
-  extend(ret, guardChildContext(childVal))
-  return ret
+function chainChildContext(f1, f2) {
+  return function () {
+    var ret1 = f1.call(this)
+    var ret2 = f2.call(this)
+    if (!ret1) return ret2
+    if (!ret2) return ret1
+    var ret = Object.create(ret1)
+    extend(ret, ret2)
+    return ret
+  }
 }
 
 /**
@@ -227,67 +222,6 @@ var defaultStrat = function (parentVal, childVal) {
   return childVal === undefined
     ? parentVal
     : childVal
-}
-
-/**
- * Return param itself.
- *
- * @param {*} x
- * @returns {*} x
- */
-
-function identity(x) {
-  return x;
-}
-
-/**
- * Make sure the context hashed.
- *
- * @param {Object|Array} context
- * @returns {Object}
- */
-
-function guardChildContext(context) {
-  if (!context) return null
-  if (Array.isArray(context)) {
-    var ret = Object.create(null)
-    for (var i = 0, l = context.length; i < l; ++i) {
-      var val = context[i]
-      ret[val] = val
-    }
-    return ret
-  }
-  return context
-}
-
-/**
- * Make sure options get converted to function which transform the service.
- *
- * @param {Object} obj
- * @returns {Array}
- */
-
-function guardSetter (obj) {
-  if (!obj) return null
-  var ret = []
-  if (Array.isArray(obj)) {
-    for (var i = 0, l = obj.length; i < l; ++i) {
-      ret.push({
-        name: obj[i],
-        set: identity
-      })
-    }
-  } else {
-      for (var key in obj) {
-        if (obj.hasOwnProperty(key)) {
-          ret.push({
-            name: key,
-            set: obj[key] || identity
-          })
-        }
-      }
-  }
-  return ret
 }
 
 /**

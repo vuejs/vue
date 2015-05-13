@@ -82,15 +82,15 @@ exports._init = function (options) {
   this.$services = null
   this._initDependencies()
 
+  // initialize context.
+  this.$context = null
+  this._initContext()
+
   // initialize data observation and scope inheritance.
   this._initScope()
 
   // setup event system and option events.
   this._initEvents()
-
-  // setup context.
-  this._childContext = this.$context = null
-  this._initContext()
 
   // call created hook
   this._callHook('created')

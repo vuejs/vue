@@ -30,29 +30,6 @@ if (_.inBrowser) {
       expect(vm.$.test.$context.test2).toEqual(vm.test)
     })
 
-    it('transform context', function () {
-      var spy = jasmine.createSpy()
-      var vm = new Vue({
-        el: el,
-        template: '<div v-component="test" v-ref="test" v-context="test:test"></div>',
-        methods: {
-          test: jasmine.createSpy()
-        },
-        components: {
-          test: {
-            context: {
-              test: function (fn) {
-                return spy
-              }
-            }
-          }
-        }
-      })
-      vm.$.test.$context.test(1, 2, 3)
-      expect(vm.$.test.$context.test).toEqual(spy)
-      expect(spy).toHaveBeenCalledWith(1, 2, 3)
-    })
-
     it('warn when used on non-root node', function () {
       new Vue({
         el: el,
@@ -159,7 +136,7 @@ if (_.inBrowser) {
       var vm = new Vue({
         el: el,
         template: '<div v-ref="test" v-component="test" v-context="test:test2"></div>',
-        childContext: ['test'],
+        getChildContext: function () { return { test: this.test } },
         components: {
           test: {
             context: ['test']
