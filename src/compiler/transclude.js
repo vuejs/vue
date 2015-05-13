@@ -1,4 +1,5 @@
 var _ = require('../util')
+var config = require('../config')
 var templateParser = require('../parsers/template')
 var transcludedFlagAttr = '__vue__transcluded'
 
@@ -73,7 +74,13 @@ function transcludeTemplate (el, options) {
   } else {
     var rawContent = options._content || _.extractContent(el)
     if (options.replace) {
-      if (frag.childNodes.length > 1) {
+      if (
+        frag.childNodes.length > 1 ||
+        // when root node has v-repeat, the instance ends up
+        // having multiple top-level nodes, thus becoming a
+        // block instance. (#835)
+        frag.firstChild.hasAttribute(config.prefix + 'repeat')
+      ) {
         transcludeContent(frag, rawContent)
         return frag
       } else {

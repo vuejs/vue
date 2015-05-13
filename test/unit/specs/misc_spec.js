@@ -47,4 +47,26 @@ describe('Misc', function () {
     expect(spy2).toHaveBeenCalled()
   })
 
+  it('v-repeat on component root node with replace:true', function () {
+    var el = document.createElement('div')
+    var vm = new Vue({
+      el: el,
+      template: '<div v-component="test"></div>',
+      components: {
+        test: {
+          data: function () {
+            return { list: [1, 2, 3] }
+          },
+          template: '<div v-repeat="list">{{$value}}</div>',
+          replace: true
+        }
+      }
+    })
+    expect(vm.$el.innerHTML).toBe(
+      '<!--v-start-->' +
+      '<div>1</div><div>2</div><div>3</div><!--v-repeat-->' +
+      '<!--v-end--><!--v-component-->'
+    )
+  })
+
 })
