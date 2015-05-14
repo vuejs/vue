@@ -8,7 +8,6 @@ exports.el         = require('./el')
 exports.ref        = require('./ref')
 exports.cloak      = require('./cloak')
 exports.style      = require('./style')
-exports.partial    = require('./partial')
 exports.transition = require('./transition')
 
 // event listener directives

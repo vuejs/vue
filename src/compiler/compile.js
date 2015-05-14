@@ -274,9 +274,6 @@ function processTextToken (token, options) {
     if (token.html) {
       el = document.createComment('v-html')
       setTokenType('html')
-    } else if (token.partial) {
-      el = document.createComment('v-partial')
-      setTokenType('partial')
     } else {
       // IE will clean up empty textNodes during
       // frag.cloneNode(true), so we have to give it

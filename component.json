@@ -38,7 +38,6 @@
     "src/directives/model/radio.js",
     "src/directives/model/select.js",
     "src/directives/on.js",
-    "src/directives/partial.js",
     "src/directives/ref.js",
     "src/directives/repeat.js",
     "src/directives/show.js",

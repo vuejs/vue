@@ -89,27 +89,20 @@ if (_.inBrowser) {
       expect(el.innerHTML).toBe('  and yeah')
     })
 
-    it('inline html and partial', function () {
-      data.html = 'yoyoyo'
-      el.innerHTML = '{{{html}}} {{{*html}}} {{>partial}}'
+    it('inline html', function () {
+      data.html = '<div>yoyoyo</div>'
+      el.innerHTML = '{{{html}}} {{{*html}}}'
       var htmlDef = Vue.options.directives.html
-      var partialDef = Vue.options.directives.partial
       var htmlDesc = dirParser.parse('html')[0]
-      var partialDesc = dirParser.parse('partial')[0]
       var linker = compile(el, Vue.options)
       linker(vm, el)
-      expect(vm._bindDir.calls.count()).toBe(2)
+      expect(vm._bindDir.calls.count()).toBe(1)
       var htmlArgs = vm._bindDir.calls.argsFor(0)
       expect(htmlArgs[0]).toBe('html')
       expect(htmlArgs[2]).toBe(htmlDesc)
       expect(htmlArgs[3]).toBe(htmlDef)
-      var partialArgs = vm._bindDir.calls.argsFor(1)
-      expect(partialArgs[0]).toBe('partial')
-      expect(partialArgs[2]).toBe(partialDesc)
-      expect(partialArgs[3]).toBe(partialDef)
-      expect(vm.$eval).toHaveBeenCalledWith('html')
       // with placeholder comments & interpolated one-time html
-      expect(el.innerHTML).toBe('<!--v-html--> yoyoyo <!--v-partial-->')
+      expect(el.innerHTML).toBe('<!--v-html--> <div>yoyoyo</div>')
     })
 
     it('terminal directives', function () {

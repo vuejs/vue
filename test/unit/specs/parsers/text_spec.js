@@ -36,15 +36,6 @@ var testCases = [
     ]
   },
   {
-    // partial
-    text: '{{> hello }} and {{>hello}}',
-    expected: [
-      { tag: true, value: 'hello', html: false, oneTime: false, partial: true },
-      { value: ' and ' },
-      { tag: true, value: 'hello', html: false, oneTime: false, partial: true }
-    ]
-  },
-  {
     text: '[{{abc}}]',
     expected: [
       { value: '[' },

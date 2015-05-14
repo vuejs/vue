@@ -39,22 +39,19 @@ module.exports = {
       // avoid duplicate compiles, since update() can be
       // called with different truthy values
       if (!this.unlink) {
-        var frag = templateParser.clone(this.template)
-        this.compile(frag)
+        this.compile()
       }
     } else {
       this.teardown()
     }
   },
 
-  // NOTE: this function is shared in v-partial
-  compile: function (frag) {
+  compile: function () {
     var vm = this.vm
+    var frag = templateParser.clone(this.template)
     // the linker is not guaranteed to be present because
     // this function might get called by v-partial 
-    this.unlink = this.linker
-      ? this.linker(vm, frag)
-      : vm.$compile(frag)
+    this.unlink = this.linker(vm, frag)
     transition.blockAppend(frag, this.end, vm)
     // call attached for all the child components created
     // during the compilation
@@ -64,7 +61,6 @@ module.exports = {
     }
   },
 
-  // NOTE: this function is shared in v-partial
   teardown: function () {
     if (!this.unlink) return
     // collect children beforehand
@@ -78,7 +74,6 @@ module.exports = {
     this.unlink = null
   },
 
-  // NOTE: this function is shared in v-partial
   getContainedComponents: function () {
     var vm = this.vm
     var start = this.start.nextSibling
@@ -110,7 +105,6 @@ module.exports = {
       : transComponents
   },
 
-  // NOTE: this function is shared in v-partial
   unbind: function () {
     if (this.unlink) this.unlink()
   }
