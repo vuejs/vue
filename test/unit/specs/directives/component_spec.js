@@ -224,7 +224,7 @@ if (_.inBrowser) {
       })
     })
 
-    it('paramAttributes', function () {
+    it('props', function () {
       var vm = new Vue({
         el: el,
         data: {
@@ -234,7 +234,7 @@ if (_.inBrowser) {
         components: {
           test: {
             template: '<li v-repeat="collection">{{a}}</li>',
-            paramAttributes: ['collection']
+            props: ['collection']
           }
         }
       })

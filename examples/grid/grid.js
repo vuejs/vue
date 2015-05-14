@@ -2,7 +2,7 @@
 Vue.component('demo-grid', {
   template: '#grid-template',
   replace: true,
-  paramAttributes: ['data', 'columns', 'filter-key'],
+  props: ['data', 'columns', 'filter-key'],
   data: function () {
     return {
       data: null,

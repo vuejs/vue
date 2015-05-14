@@ -113,7 +113,7 @@ strats.beforeCompile =
 strats.compiled =
 strats.beforeDestroy =
 strats.destroyed =
-strats.paramAttributes = function (parentVal, childVal) {
+strats.props = function (parentVal, childVal) {
   return childVal
     ? parentVal
       ? parentVal.concat(childVal)

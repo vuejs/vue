@@ -25,8 +25,8 @@ exports._initData = function () {
   // proxy data on instance
   var data = this._data
   var i, key
-  // make sure all paramAttributes properties are observed
-  var params = this.$options.paramAttributes
+  // make sure all props properties are observed
+  var params = this.$options.props
   if (params) {
     i = params.length
     while (i--) {

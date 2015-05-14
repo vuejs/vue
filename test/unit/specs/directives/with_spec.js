@@ -143,7 +143,7 @@ if (_.inBrowser) {
         },
         components: {
           test: {
-            paramAttributes: ['c'],
+            props: ['c'],
             template: '<p>{{b}}</p><p>{{c}}</p>',
             replace: true
           }

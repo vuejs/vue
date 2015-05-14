@@ -13,7 +13,7 @@ describe('Util - Option merging', function () {
     expect(res).toBe(false)
   })
 
-  it('hooks & paramAttributes', function () {
+  it('hooks & props', function () {
     var fn1 = function () {}
     var fn2 = function () {}
     var res
@@ -34,7 +34,7 @@ describe('Util - Option merging', function () {
     expect(res[0]).toBe(fn1)
     expect(res[1]).toBe(fn2)
     // both arrays
-    res = merge({paramAttributes: [1]}, {paramAttributes: [2]}).paramAttributes
+    res = merge({props: [1]}, {props: [2]}).props
     expect(Array.isArray(res)).toBe(true)
     expect(res.length).toBe(2)
     expect(res[0]).toBe(1)

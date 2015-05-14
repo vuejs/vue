@@ -157,7 +157,7 @@ if (_.inBrowser) {
     it('param attributes', function () {
       var options = merge(Vue.options, {
         _asComponent: true,
-        paramAttributes: [
+        props: [
           'a',
           'data-some-attr',
           'some-other-attr',

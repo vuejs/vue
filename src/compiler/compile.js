@@ -110,7 +110,7 @@ function teardownDirs (vm, dirs, destroying) {
  * Compile the root element of a component. There are
  * 4 types of things to process here:
  * 
- * 1. paramAttributes on parent container (child scope)
+ * 1. props on parent container (child scope)
  * 2. v-with on parent container (child scope)
  * 3. other attrs on parent container (parent scope)
  * 4. attrs on the component template root node, if
@@ -128,11 +128,11 @@ function compileRoot (el, options) {
   var isBlock = el.nodeType === 11 // DocumentFragment
   var containerAttrs = options._containerAttrs
   var replacerAttrs = options._replacerAttrs
-  var params = options.paramAttributes
-  var paramsLinkFn, withLinkFn, parentLinkFn, replacerLinkFn
-  // 1. paramAttributes
-  paramsLinkFn = params
-    ? compileParamAttributes(el, containerAttrs, params, options)
+  var props = options.props
+  var propsLinkFn, withLinkFn, parentLinkFn, replacerLinkFn
+  // 1. props
+  propsLinkFn = props
+    ? compileProps(el, containerAttrs, props, options)
     : null
   // 2. v-with
   var withName = config.prefix + 'with'
@@ -156,9 +156,9 @@ function compileRoot (el, options) {
     }
   }
   return function rootLinkFn (vm, el, host) {
-    // explicitly passing null to paramAttributes and v-with
+    // explicitly passing null to props and v-with
     // linkers because they don't need a real element
-    if (paramsLinkFn) paramsLinkFn(vm, null)
+    if (propsLinkFn) propsLinkFn(vm, null)
     if (withLinkFn) withLinkFn(vm, null)
     if (parentLinkFn) parentLinkFn(vm.$parent, el, host)
     if (replacerLinkFn) replacerLinkFn(vm, el, host)
@@ -382,28 +382,28 @@ function makeChildLinkFn (linkFns) {
 
 /**
  * Compile param attributes on a root element and return
- * a paramAttributes link function.
+ * a props link function.
  *
  * @param {Element|DocumentFragment} el
  * @param {Object} attrs
- * @param {Array} paramNames
+ * @param {Array} propNames
  * @param {Object} options
- * @return {Function} paramsLinkFn
+ * @return {Function} propsLinkFn
  */
 
-function compileParamAttributes (el, attrs, paramNames, options) {
-  var params = []
-  var i = paramNames.length
+function compileProps (el, attrs, propNames, options) {
+  var props = []
+  var i = propNames.length
   var name, value, param
   while (i--) {
-    name = paramNames[i]
+    name = propNames[i]
     if (/[A-Z]/.test(name)) {
       _.warn(
-        'You seem to be using camelCase for a paramAttribute, ' +
+        'You seem to be using camelCase for a component prop, ' +
         'but HTML doesn\'t differentiate between upper and ' +
         'lower case. You should use hyphen-delimited ' +
         'attribute names. For more info see ' +
-        'http://vuejs.org/api/options.html#paramAttributes'
+        'http://vuejs.org/api/options.html#props'
       )
     }
     value = attrs[name]
@@ -422,30 +422,30 @@ function compileParamAttributes (el, attrs, paramNames, options) {
         param.value = textParser.tokensToExp(tokens)
         param.oneTime = tokens.length === 1 && tokens[0].oneTime
       }
-      params.push(param)
+      props.push(param)
     }
   }
-  return makeParamsLinkFn(params, options)
+  return makeParamsLinkFn(props, options)
 }
 
 /**
  * Build a function that applies param attributes to a vm.
  *
- * @param {Array} params
+ * @param {Array} props
  * @param {Object} options
- * @return {Function} paramsLinkFn
+ * @return {Function} propsLinkFn
  */
 
 var dataAttrRE = /^data-/
 
-function makeParamsLinkFn (params, options) {
+function makeParamsLinkFn (props, options) {
   var def = options.directives['with']
-  return function paramsLinkFn (vm, el) {
-    var i = params.length
+  return function propsLinkFn (vm, el) {
+    var i = props.length
     var param, path
     while (i--) {
-      param = params[i]
-      // params could contain dashes, which will be
+      param = props[i]
+      // props could contain dashes, which will be
       // interpreted as minus calculations by the parser
       // so we need to wrap the path here
       path = _.camelize(param.name.replace(dataAttrRE, ''))

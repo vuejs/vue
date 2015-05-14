@@ -190,7 +190,7 @@ if (_.inBrowser) {
         template: '<div v-component="test" show="{{show}}">{{a}}</div>',
         components: {
           test: {
-            paramAttributes: ['show'],
+            props: ['show'],
             template: '<div v-if="show"><content></cotent></div>'
           }
         }
