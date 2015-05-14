@@ -33,6 +33,7 @@ function Directive (name, el, vm, descriptor, def, host) {
   this.arg = descriptor.arg
   this.filters = _.resolveFilters(vm, descriptor.filters)
   // private
+  this._descriptor = descriptor
   this._host = host
   this._locked = false
   this._bound = false

@@ -147,7 +147,7 @@ if (_.inBrowser) {
       expect(el.firstChild.getAttribute('b')).toBe('B')
     })
 
-    it('param attributes', function () {
+    it('props', function () {
       var options = merge(Vue.options, {
         _asComponent: true,
         props: [
@@ -155,49 +155,56 @@ if (_.inBrowser) {
           'data-some-attr',
           'some-other-attr',
           'multiple-attrs',
-          'onetime',
+          'oneway',
           'with-filter',
           'camelCase'
         ]
       })
-      var def = Vue.options.directives['with']
+      var def = Vue.options.directives._prop
       el.setAttribute('a', '1')
       el.setAttribute('data-some-attr', '{{a}}')
       el.setAttribute('some-other-attr', '2')
       el.setAttribute('multiple-attrs', 'a {{b}} c')
-      el.setAttribute('onetime', '{{*a}}')
+      el.setAttribute('oneway', '{{*a}}')
       el.setAttribute('with-filter', '{{a | filter}}')
       transclude(el, options)
       var linker = compile(el, options)
       linker(vm, el)
       // should skip literals and one-time bindings
-      expect(vm._bindDir.calls.count()).toBe(3)
+      expect(vm._bindDir.calls.count()).toBe(4)
       // data-some-attr
       var args = vm._bindDir.calls.argsFor(0)
-      expect(args[0]).toBe('with')
+      expect(args[0]).toBe('prop')
       expect(args[1]).toBe(null)
       expect(args[2].arg).toBe('someAttr')
       expect(args[2].expression).toBe('a')
       expect(args[3]).toBe(def)
       // multiple-attrs
       args = vm._bindDir.calls.argsFor(1)
-      expect(args[0]).toBe('with')
+      expect(args[0]).toBe('prop')
       expect(args[1]).toBe(null)
       expect(args[2].arg).toBe('multipleAttrs')
       expect(args[2].expression).toBe('"a "+(b)+" c"')
       expect(args[3]).toBe(def)
-      // with-filter
+      // oneway
       args = vm._bindDir.calls.argsFor(2)
-      expect(args[0]).toBe('with')
+      expect(args[0]).toBe('prop')
+      expect(args[1]).toBe(null)
+      expect(args[2].arg).toBe('oneway')
+      expect(args[2].oneWay).toBe(true)
+      expect(args[2].expression).toBe('a')
+      expect(args[3]).toBe(def)
+      // with-filter
+      args = vm._bindDir.calls.argsFor(3)
+      expect(args[0]).toBe('prop')
       expect(args[1]).toBe(null)
       expect(args[2].arg).toBe('withFilter')
       expect(args[2].expression).toBe('this._applyFilter("filter",[a])')
-      expect(args[3]).toBe(def) 
+      expect(args[3]).toBe(def)
       // camelCase should've warn
       expect(_.warn.calls.count()).toBe(1)
       // literal and one time should've called vm.$set
       expect(vm.$set).toHaveBeenCalledWith('a', '1')
-      expect(vm.$set).toHaveBeenCalledWith('onetime', 'from parent: a')
       expect(vm.$set).toHaveBeenCalledWith('someOtherAttr', '2')
     })
 

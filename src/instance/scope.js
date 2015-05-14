@@ -26,11 +26,11 @@ exports._initData = function () {
   var data = this._data
   var i, key
   // make sure all props properties are observed
-  var params = this.$options.props
-  if (params) {
-    i = params.length
+  var props = this.$options.props
+  if (props) {
+    i = props.length
     while (i--) {
-      key = _.camelize(params[i])
+      key = _.camelize(props[i])
       if (!(key in data)) {
         data[key] = null
       }

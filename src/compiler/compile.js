@@ -4,6 +4,10 @@ var textParser = require('../parsers/text')
 var dirParser = require('../parsers/directive')
 var templateParser = require('../parsers/template')
 
+// internal directives
+var propDef = require('../directives/prop')
+// var componentDef = require('../directives/component')
+
 module.exports = compile
 
 /**
@@ -108,12 +112,11 @@ function teardownDirs (vm, dirs, destroying) {
 
 /**
  * Compile the root element of a component. There are
- * 4 types of things to process here:
+ * 3 types of things to process here:
  * 
  * 1. props on parent container (child scope)
- * 2. v-with on parent container (child scope)
- * 3. other attrs on parent container (parent scope)
- * 4. attrs on the component template root node, if
+ * 2. other attrs on parent container (parent scope)
+ * 3. attrs on the component template root node, if
  *    replace:true (child scope)
  *
  * Also, if this is a block instance, we only need to
@@ -129,37 +132,25 @@ function compileRoot (el, options) {
   var containerAttrs = options._containerAttrs
   var replacerAttrs = options._replacerAttrs
   var props = options.props
-  var propsLinkFn, withLinkFn, parentLinkFn, replacerLinkFn
+  var propsLinkFn, parentLinkFn, replacerLinkFn
   // 1. props
   propsLinkFn = props
-    ? compileProps(el, containerAttrs, props, options)
+    ? compileProps(el, containerAttrs, props)
     : null
-  // 2. v-with
-  var withName = config.prefix + 'with'
-  var withVal = containerAttrs && containerAttrs[withName]
-  if (withVal) {
-    containerAttrs[withName] = null
-    withLinkFn = makeNodeLinkFn([{
-      name: 'with',
-      descriptors: dirParser.parse(withVal),
-      def: options.directives['with']
-    }])
-  }
   if (!isBlock) {
-    // 3. container attributes
+    // 2. container attributes
     if (containerAttrs) {
       parentLinkFn = compileDirectives(containerAttrs, options)
     }
     if (replacerAttrs) {
-      // 4. replacer attributes
+      // 3. replacer attributes
       replacerLinkFn = compileDirectives(replacerAttrs, options)
     }
   }
   return function rootLinkFn (vm, el, host) {
-    // explicitly passing null to props and v-with
+    // explicitly passing null to props
     // linkers because they don't need a real element
     if (propsLinkFn) propsLinkFn(vm, null)
-    if (withLinkFn) withLinkFn(vm, null)
     if (parentLinkFn) parentLinkFn(vm.$parent, el, host)
     if (replacerLinkFn) replacerLinkFn(vm, el, host)
   }
@@ -384,14 +375,13 @@ function makeChildLinkFn (linkFns) {
  * @param {Element|DocumentFragment} el
  * @param {Object} attrs
  * @param {Array} propNames
- * @param {Object} options
  * @return {Function} propsLinkFn
  */
 
-function compileProps (el, attrs, propNames, options) {
+function compileProps (el, attrs, propNames) {
   var props = []
   var i = propNames.length
-  var name, value, param
+  var name, value, prop
   while (i--) {
     name = propNames[i]
     if (/[A-Z]/.test(name)) {
@@ -404,8 +394,9 @@ function compileProps (el, attrs, propNames, options) {
       )
     }
     value = attrs[name]
-    if (value !== null) {
-      param = {
+    /* jshint eqeqeq:false */
+    if (value != null) {
+      prop = {
         name: name,
         value: value
       }
@@ -415,53 +406,44 @@ function compileProps (el, attrs, propNames, options) {
           el.removeAttribute(name)
         }
         attrs[name] = null
-        param.dynamic = true
-        param.value = textParser.tokensToExp(tokens)
-        param.oneTime = tokens.length === 1 && tokens[0].oneTime
+        prop.dynamic = true
+        prop.value = textParser.tokensToExp(tokens)
+        prop.oneTime = tokens.length === 1 && tokens[0].oneTime
       }
-      props.push(param)
+      props.push(prop)
     }
   }
-  return makeParamsLinkFn(props, options)
+  return makePropsLinkFn(props)
 }
 
 /**
- * Build a function that applies param attributes to a vm.
+ * Build a function that applies props to a vm.
  *
  * @param {Array} props
- * @param {Object} options
  * @return {Function} propsLinkFn
  */
 
 var dataAttrRE = /^data-/
 
-function makeParamsLinkFn (props, options) {
-  var def = options.directives['with']
+function makePropsLinkFn (props) {
   return function propsLinkFn (vm, el) {
     var i = props.length
-    var param, path
+    var prop, path
     while (i--) {
-      param = props[i]
+      prop = props[i]
       // props could contain dashes, which will be
       // interpreted as minus calculations by the parser
       // so we need to wrap the path here
-      path = _.camelize(param.name.replace(dataAttrRE, ''))
-      if (param.dynamic) {
-        if (param.oneTime) {
-          vm.$set(path, vm.$parent.$get(param.value))
-        } else {
-          // dynamic param attribtues are bound as v-with.
-          // we can directly duck the descriptor here beacuse
-          // param attributes cannot use expressions or
-          // filters.
-          vm._bindDir('with', el, {
-            arg: path,
-            expression: param.value
-          }, def)
-        }
+      path = _.camelize(prop.name.replace(dataAttrRE, ''))
+      if (prop.dynamic) {
+        vm._bindDir('prop', el, {
+          arg: path,
+          expression: prop.value,
+          oneWay: prop.oneTime
+        }, propDef)
       } else {
         // just set once
-        vm.$set(path, param.value)
+        vm.$set(path, prop.value)
       }
     }
   }
