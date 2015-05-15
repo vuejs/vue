@@ -133,9 +133,9 @@ strats.props = function (parentVal, childVal) {
 
 strats.directives =
 strats.filters =
-strats.partials =
 strats.transitions =
-strats.components = function (parentVal, childVal, vm, key) {
+strats.components =
+strats.elementDirectives = function (parentVal, childVal, vm, key) {
   var ret = Object.create(
     vm && vm.$parent
       ? vm.$parent.$options[key]

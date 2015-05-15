@@ -103,8 +103,8 @@ exports.use = function (plugin) {
 
 var assetTypes = [
   'directive',
+  'elementDirective',
   'filter',
-  'partial',
   'transition'
 ]
 

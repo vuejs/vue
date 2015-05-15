@@ -4,8 +4,6 @@ var expParser = require('../parsers/expression')
 
 module.exports = {
 
-  _internal: true,
-
   bind: function () {
 
     var child = this.vm

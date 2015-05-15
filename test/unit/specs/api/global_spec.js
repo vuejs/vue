@@ -61,11 +61,11 @@ describe('Global API', function () {
 
     var Test = Vue.extend()
     
-    it('directive / filter / partial / transition', function () {
+    it('directive / elementDirective / filter / transition', function () {
       [
         'directive',
+        'elementDirective',
         'filter',
-        'partial',
         'transition'
       ].forEach(function (type) {
         var def = {}

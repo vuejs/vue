@@ -352,5 +352,21 @@ if (_.inBrowser) {
       })
     })
 
+    it('element directive', function () {
+      var vm = new Vue({
+        el: el,
+        template: '<test>{{a}}</test>',
+        elementDirectives: {
+          test: {
+            bind: function () {
+              this.el.setAttribute('test', '1')
+            }
+          }
+        }
+      })
+      // should be terminal
+      expect(el.innerHTML).toBe('<test test="1">{{a}}</test>')
+    })
+
   })
 }

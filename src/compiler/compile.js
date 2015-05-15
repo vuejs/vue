@@ -194,8 +194,10 @@ function compileElement (el, options) {
   }
   var linkFn
   var hasAttrs = el.hasAttributes()
+  // check element directives
+  linkFn = checkElementDirectives(el, options)
   // check terminal direcitves (repeat & if)
-  if (hasAttrs) {
+  if (!linkFn && hasAttrs) {
     linkFn = checkTerminalDirectives(el, options)
   }
   // check component
@@ -445,6 +447,22 @@ function makePropsLinkFn (props) {
 }
 
 /**
+ * Check for element directives (custom elements that should
+ * be resovled as terminal directives).
+ *
+ * @param {Element} el
+ * @param {Object} options
+ */
+
+function checkElementDirectives (el, options) {
+  var tag = el.tagName.toLowerCase()
+  var def = options.elementDirectives[tag]
+  if (def) {
+    return makeTerminalNodeLinkFn(el, tag, '', options, def)
+  }
+}
+
+/**
  * Check if an element is a component. If yes, return
  * a component link function.
  *
@@ -503,12 +521,13 @@ skip.terminal = true
  * @param {String} dirName
  * @param {String} value
  * @param {Object} options
+ * @param {Object} [def]
  * @return {Function} terminalLinkFn
  */
 
-function makeTerminalNodeLinkFn (el, dirName, value, options) {
+function makeTerminalNodeLinkFn (el, dirName, value, options, def) {
   var descriptor = dirParser.parse(value)[0]
-  var def = options.directives[dirName]
+  def = def || options.directives[dirName]
   var fn = function terminalNodeLinkFn (vm, el, host) {
     vm._bindDir(dirName, el, descriptor, def, host)
   }

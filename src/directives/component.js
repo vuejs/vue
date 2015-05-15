@@ -3,7 +3,6 @@ var templateParser = require('../parsers/template')
 
 module.exports = {
 
-  _internal: true,
   isLiteral: true,
 
   /**
