@@ -18,7 +18,7 @@ if (_.inBrowser) {
     it('static', function () {
       var vm = new Vue({
         el: el,
-        template: '<div v-component="test"></div>',
+        template: '<test></test>',
         components: {
           test: {
             data: function () {
@@ -28,13 +28,13 @@ if (_.inBrowser) {
           }
         }
       })
-      expect(el.innerHTML).toBe('<div>123</div><!--v-component-->')
+      expect(el.innerHTML).toBe('<test>123</test><!--v-component-->')
     })
 
     it('replace', function () {
       var vm = new Vue({
         el: el,
-        template: '<div v-component="test"></div>',
+        template: '<test></test>',
         components: {
           test: {
             replace: true,
@@ -51,7 +51,7 @@ if (_.inBrowser) {
     it('inline-template', function () {
       var vm = new Vue({
         el: el,
-        template: '<div v-component="test" inline-template>{{a}}</div>',
+        template: '<test inline-template>{{a}}</test>',
         data: {
           a: 'parent'
         },
@@ -64,13 +64,13 @@ if (_.inBrowser) {
           }
         }
       })
-      expect(el.innerHTML).toBe('<div>child</div><!--v-component-->')
+      expect(el.innerHTML).toBe('<test>child</test><!--v-component-->')
     })
 
     it('block replace', function () {
       var vm = new Vue({
         el: el,
-        template: '<div v-component="test"></div>',
+        template: '<test></test>',
         components: {
           test: {
             replace: true,
@@ -87,19 +87,21 @@ if (_.inBrowser) {
     it('dynamic', function (done) {
       var vm = new Vue({
         el: el,
-        template: '<div v-component="{{view}}" v-attr="view:view"></div>',
+        template: '<component type="{{view}}" v-attr="view:view"></component>',
         data: {
           view: 'a'
         },
         components: {
           a: {
-            template: 'AAA',
+            template: '<div>AAA</div>',
+            replace: true,
             data: function () {
               return { view: 'a' }
             }
           },
           b: {
-            template: 'BBB',
+            template: '<div>BBB</div>',
+            replace: true,
             data: function () {
               return { view: 'b' }
             }
@@ -123,18 +125,20 @@ if (_.inBrowser) {
       var spyB = jasmine.createSpy()
       var vm = new Vue({
         el: el,
-        template: '<div v-component="{{view}}" keep-alive></div>',
+        template: '<component type="{{view}}" keep-alive></component>',
         data: {
           view: 'a'
         },
         components: {
           a: {
             created: spyA,
-            template: 'AAA'
+            template: '<div>AAA</div>',
+            replace: true
           },
           b: {
             created: spyB,
-            template: 'BBB'
+            template: '<div>BBB</div>',
+            replace: true
           }
         }
       })
@@ -169,7 +173,7 @@ if (_.inBrowser) {
           ok: false,
           message: 'hello'
         },
-        template: '<div v-component="test" v-show="ok">{{message}}</div>',
+        template: '<test v-show="ok">{{message}}</test>',
         components: {
           test: {
             template: '<div><content></content> {{message}}</div>',
@@ -200,7 +204,7 @@ if (_.inBrowser) {
           ok: false,
           message: 'hello'
         },
-        template: '<div v-component="test" v-if="ok">{{message}}</div>',
+        template: '<test v-if="ok">{{message}}</test>',
         components: {
           test: {
             template: '<content></content> {{message}}',
@@ -230,10 +234,11 @@ if (_.inBrowser) {
         data: {
           list: [{a:1}, {a:2}]
         },
-        template: '<ul v-component="test" collection="{{list}}"></ul>',
+        template: '<test collection="{{list}}"></test>',
         components: {
           test: {
-            template: '<li v-repeat="collection">{{a}}</li>',
+            template: '<ul><li v-repeat="collection">{{a}}</li></ul>',
+            replace: true,
             props: ['collection']
           }
         }
@@ -247,7 +252,7 @@ if (_.inBrowser) {
         data: {
           view: 'a'
         },
-        template: '<div v-component="{{view}}" wait-for="ok"></div>',
+        template: '<component type="{{view}}" wait-for="ok"></component>',
         components: {
           a: {
             template: 'AAA'
@@ -277,7 +282,7 @@ if (_.inBrowser) {
         data: {
           view: 'a'
         },
-        template: '<div v-component="{{view}}" v-transition="test" transition-mode="in-out"></div>',
+        template: '<component type="{{view}}" v-transition="test" transition-mode="in-out"></component>',
         components: {
           a: { template: 'AAA' },
           b: { template: 'BBB' }
@@ -317,7 +322,7 @@ if (_.inBrowser) {
         data: {
           view: 'a'
         },
-        template: '<div v-component="{{view}}" v-transition="test" transition-mode="out-in"></div>',
+        template: '<component type="{{view}}" v-transition="test" transition-mode="out-in"></component>',
         components: {
           a: { template: 'AAA' },
           b: { template: 'BBB' }
@@ -351,7 +356,7 @@ if (_.inBrowser) {
     it('teardown', function (done) {
       var vm = new Vue({
         el: el,
-        template: '<div v-component="{{view}}" keep-alive></div>',
+        template: '<component type="{{view}}" keep-alive></component>',
         data: {
           view: 'test'
         },
@@ -375,7 +380,7 @@ if (_.inBrowser) {
     })
 
     it('already mounted warn', function () {
-      el.setAttribute('v-component', 'test')
+      el.setAttribute('v-_component', 'test')
       var vm = new Vue({
         el: el
       })

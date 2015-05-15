@@ -32,6 +32,7 @@ var data = {
 Vue.component('item', {
   props: ['model'],
   template: '#item-template',
+  replace: true,
   data: function () {
     return {
       open: false

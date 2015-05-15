@@ -71,8 +71,7 @@ module.exports = {
 
   _terminalDirectives: [
     'repeat',
-    'if',
-    'component'
+    'if'
   ]
 
 }

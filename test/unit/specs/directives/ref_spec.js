@@ -23,7 +23,7 @@ if (_.inBrowser) {
       var vm = new Vue({
         el: el,
         components: components,
-        template: '<div v-component="test" v-ref="test"></div>'
+        template: '<test v-ref="test"></test>'
       })
       expect(vm.$.test).toBeTruthy()
       expect(vm.$.test.$options.id).toBe('test')
@@ -34,7 +34,7 @@ if (_.inBrowser) {
         el: el,
         components: components,
         data: { test: 'test' },
-        template: '<div v-component="{{test}}" v-ref="test"></div>'
+        template: '<component type="{{test}}" v-ref="test"></component>'
       })
       expect(vm.$.test.$options.id).toBe('test')
       vm.test = 'test2'
@@ -52,7 +52,7 @@ if (_.inBrowser) {
       var vm = new Vue({
         el: el,
         data: { view: 'test1' },
-        template: '<div v-component="{{view}}"></div>',
+        template: '<component type="{{view}}"></component>',
         components: {
           test1: {
             id: 'test1',
@@ -97,7 +97,7 @@ if (_.inBrowser) {
     it('nested v-repeat', function () {
       var vm = new Vue({
         el: el,
-        template: '<div v-component="c1" v-ref="c1"></div>',
+        template: '<c1 v-ref="c1"></c1>',
         components: {
           c1: {
             template: '<div v-repeat="2" v-ref="c2"></div>'

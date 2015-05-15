@@ -126,12 +126,10 @@ if (_.inBrowser) {
         }
       })
       el.innerHTML = '<my-component><div v-a="b"></div></my-component>'
-      var def = Vue.options.directives.component
-      var descriptor = dirParser.parse('my-component')[0]
       var linker = compile(el, options)
       linker(vm, el)
       expect(vm._bindDir.calls.count()).toBe(1)
-      expect(vm._bindDir).toHaveBeenCalledWith('component', el.firstChild, descriptor, def, undefined)
+      expect(vm._bindDir.calls.argsFor(0)[0]).toBe('component')
       expect(_.warn).not.toHaveBeenCalled()
     })
 
@@ -244,32 +242,32 @@ if (_.inBrowser) {
       vm = new Vue({
         el: el,
         template:
-          '<div v-component="a">' +
-            '<div v-component="b">' +
+          '<testa>' +
+            '<testb>' +
               '<div v-repeat="list">{{$value}}</div>' +
-            '</div>' +
-          '</div>',
+            '</testb>' +
+          '</testa>',
         data: {
           list: [1,2]
         },
         components: {
-          a: { template: '<content></content>' },
-          b: { template: '<content></content>' }
+          testa: { template: '<content></content>' },
+          testb: { template: '<content></content>' }
         }
       })
       expect(el.innerHTML).toBe(
-        '<div><div>' +
+        '<testa><testb>' +
           '<div>1</div><div>2</div><!--v-repeat-->' +
-        '</div><!--v-component-->' +
-        '</div><!--v-component-->'
+        '</testb><!--v-component-->' +
+        '</testa><!--v-component-->'
       )
       vm.list.push(3)
       _.nextTick(function () {
         expect(el.innerHTML).toBe(
-          '<div><div>' +
+          '<testa><testb>' +
             '<div>1</div><div>2</div><div>3</div><!--v-repeat-->' +
-          '</div><!--v-component-->' +
-          '</div><!--v-component-->'
+          '</testb><!--v-component-->' +
+          '</testa><!--v-component-->'
         )
         done()
       })
@@ -281,12 +279,12 @@ if (_.inBrowser) {
       vm = new Vue({
         el: el,
         template:
-          '<div v-component="a" class="a" v-on="click:test(1)"></div>',
+          '<test class="a" v-on="click:test(1)"></test>',
         methods: {
           test: parentSpy
         },
         components: {
-          a: {
+          test: {
             template: '<div class="b" v-on="click:test(2)"></div>',
             replace: true,
             methods: {
@@ -307,7 +305,7 @@ if (_.inBrowser) {
       var vm = new Vue({
         el: el,
         template:
-          '<div v-component="test">{{test}}</div>',
+          '<test>{{test}}</test>',
         data: {
           test: 'parent'
         },
@@ -330,7 +328,7 @@ if (_.inBrowser) {
         el: el,
         template:
           '<div v-if="ok">' +
-            '<div v-component="test">{{test}}</div>' +
+            '<test>{{test}}</test>' +
           '</div>',
         data: {
           test: 'parent',

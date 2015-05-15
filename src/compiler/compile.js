@@ -6,7 +6,7 @@ var templateParser = require('../parsers/template')
 
 // internal directives
 var propDef = require('../directives/prop')
-// var componentDef = require('../directives/component')
+var componentDef = require('../directives/component')
 
 module.exports = compile
 
@@ -192,24 +192,19 @@ function compileElement (el, options) {
     }
     return compile(el, options._parent.$options, true, true)
   }
-  var linkFn, tag, component
-  // check custom element component, but only on non-root
-  if (!el.__vue__) {
-    tag = el.tagName.toLowerCase()
-    component =
-      tag.indexOf('-') > 0 &&
-      options.components[tag]
-    if (component) {
-      el.setAttribute(config.prefix + 'component', tag)
-    }
-  }
-  if (component || el.hasAttributes()) {
-    // check terminal direcitves
+  var linkFn
+  var hasAttrs = el.hasAttributes()
+  // check terminal direcitves (repeat & if)
+  if (hasAttrs) {
     linkFn = checkTerminalDirectives(el, options)
-    // if not terminal, build normal link function
-    if (!linkFn) {
-      linkFn = compileDirectives(el, options)
-    }
+  }
+  // check component
+  if (!linkFn) {
+    linkFn = checkComponent(el, options)
+  }
+  // normal directives
+  if (!linkFn && hasAttrs) {
+    linkFn = compileDirectives(el, options)
   }
   // if the element is a textarea, we need to interpolate
   // its content on initial render.
@@ -446,6 +441,28 @@ function makePropsLinkFn (props) {
         vm.$set(path, prop.value)
       }
     }
+  }
+}
+
+/**
+ * Check if an element is a component. If yes, return
+ * a component link function.
+ *
+ * @param {Element} el
+ * @param {Object} options
+ * @return {Function|undefined}
+ */
+
+function checkComponent (el, options) {
+  var componentId = _.checkComponent(el, options)
+  if (componentId) {
+    var componentLinkFn = function (vm, el, host) {
+      vm._bindDir('component', el, {
+        expression: componentId
+      }, componentDef, host)
+    }
+    componentLinkFn.terminal = true
+    return componentLinkFn
   }
 }
 

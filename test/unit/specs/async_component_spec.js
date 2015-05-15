@@ -19,7 +19,7 @@ describe('Async components', function () {
     it('normal', function (done) {
       var vm = new Vue({
         el: el,
-        template: '<div v-component="test"></div>',
+        template: '<test></test>',
         components: {
           test: function (resolve) {
             setTimeout(function () {
@@ -40,7 +40,7 @@ describe('Async components', function () {
     it('dynamic', function (done) {
       var vm = new Vue({
         el: el,
-        template: '<div v-component="{{view}}"></div>',
+        template: '<component type="{{view}}"></component>',
         data: {
           view: 'a'
         },
@@ -84,7 +84,7 @@ describe('Async components', function () {
     it('invalidate pending on dynamic switch', function (done) {
       var vm = new Vue({
         el: el,
-        template: '<div v-component="{{view}}"></div>',
+        template: '<component type="{{view}}"></component>',
         data: {
           view: 'a'
         },
@@ -124,12 +124,12 @@ describe('Async components', function () {
     it('invalidate pending on teardown', function (done) {
       var vm = new Vue({
         el: el,
-        template: '<div v-component="a"></div>',
+        template: '<test></test>',
         data: {
           view: 'a'
         },
         components: {
-          a: function (resolve) {
+          test: function (resolve) {
             setTimeout(function () {
               resolve({
                 template: 'A'
@@ -157,10 +157,10 @@ describe('Async components', function () {
       var vm = new Vue({
         el: el,
         template:
-          '<div v-component="a"></div>' +
-          '<div v-component="a"></div>',
+          '<test></test>' +
+          '<test></test>',
         components: {
-          a: factory
+          test: factory
         }
       })
       function factory (resolve) {
@@ -192,7 +192,7 @@ describe('Async components', function () {
     it('normal', function (done) {
       var vm = new Vue({
         el: el,
-        template: '<div v-repeat="list" v-component="test"></div>',
+        template: '<test v-repeat="list"></test>',
         data: {
           list: [1, 2, 3]
         },
@@ -216,7 +216,7 @@ describe('Async components', function () {
     it('only resolve once', function (done) {
       var vm = new Vue({
         el: el,
-        template: '<div v-repeat="list" v-component="test"></div>',
+        template: '<test v-repeat="list"></test>',
         data: {
           list: [1, 2, 3]
         },
@@ -250,7 +250,7 @@ describe('Async components', function () {
     it('invalidate on teardown', function (done) {
       var vm = new Vue({
         el: el,
-        template: '<div v-repeat="list" v-component="test"></div>',
+        template: '<test v-repeat="list"></test>',
         data: {
           list: [1, 2, 3]
         },
@@ -277,7 +277,7 @@ describe('Async components', function () {
     it('warn when used with dynamic v-repeat', function () {
       var vm = new Vue({
         el: el,
-        template: '<div v-repeat="list" v-component="{{c}}"></div>',
+        template: '<component v-repeat="list" type="{{c}}"></component>',
         data: {
           list: [1, 2, 3],
           c: 'test'

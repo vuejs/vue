@@ -19,7 +19,7 @@ if (_.inBrowser) {
             a: 'A'
           }
         },
-        template: '<div v-component="test" testt="{{test}}" bb="{{b}}" v-ref="child"></div>',
+        template: '<test testt="{{test}}" bb="{{b}}" v-ref="child"></test>',
         components: {
           test: {
             props: ['testt', 'bb'],
@@ -64,7 +64,7 @@ if (_.inBrowser) {
         data: {
           b: 'B'
         },
-        template: '<div v-component="test" bb="{{b}}"></div>',
+        template: '<test bb="{{b}}"></test>',
         components: {
           test: {
             props: ['bb'],
@@ -88,7 +88,7 @@ if (_.inBrowser) {
     it('block instance with replace:true', function () {
       var vm = new Vue({
         el: el,
-        template: '<div v-component="test" b="{{a}}" c="{{d}}"></div>',
+        template: '<test b="{{a}}" c="{{d}}"></test>',
         data: {
           a: 'AAA',
           d: 'DDD'

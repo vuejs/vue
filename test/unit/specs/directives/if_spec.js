@@ -18,7 +18,7 @@ if (_.inBrowser) {
       var vm = new Vue({
         el: el,
         data: { test: false, a: 'A' },
-        template: '<div v-if="test"><div v-component="test"></div></div>',
+        template: '<div v-if="test"><test></test></div>',
         components: {
           test: {
             inherit: true,
@@ -31,7 +31,7 @@ if (_.inBrowser) {
       expect(vm._children.length).toBe(0)
       vm.test = true
       _.nextTick(function () {
-        expect(el.innerHTML).toBe(wrap('<div><div>A</div><!--v-component--></div>'))
+        expect(el.innerHTML).toBe(wrap('<div><test>A</test><!--v-component--></div>'))
         expect(vm._children.length).toBe(1)
         vm.test = false
         _.nextTick(function () {
@@ -39,7 +39,7 @@ if (_.inBrowser) {
           expect(vm._children.length).toBe(0)
           vm.test = true
           _.nextTick(function () {
-            expect(el.innerHTML).toBe(wrap('<div><div>A</div><!--v-component--></div>'))
+            expect(el.innerHTML).toBe(wrap('<div><test>A</test><!--v-component--></div>'))
             expect(vm._children.length).toBe(1)
             var child = vm._children[0]
             vm.$destroy()
@@ -76,7 +76,7 @@ if (_.inBrowser) {
       var vm = new Vue({
         el: el,
         data: { ok: false },
-        template: '<div v-component="test" v-if="ok"></div>',
+        template: '<test v-if="ok"></test>',
         components: {
           test: {
             data: function () {
@@ -94,7 +94,7 @@ if (_.inBrowser) {
       expect(vm._children.length).toBe(0)
       vm.ok = true
       _.nextTick(function () {
-        expect(el.innerHTML).toBe(wrap('<div>123</div><!--v-component-->'))
+        expect(el.innerHTML).toBe(wrap('<test>123</test><!--v-component-->'))
         expect(vm._children.length).toBe(1)
         expect(attachSpy).toHaveBeenCalled()
         expect(readySpy).toHaveBeenCalled()
@@ -116,7 +116,7 @@ if (_.inBrowser) {
           ok: false,
           view: 'a'
         },
-        template: '<div v-component="{{view}}" v-if="ok"></div>',
+        template: '<component type="{{view}}" v-if="ok"></component>',
         components: {
           a: {
             template: 'AAA'
@@ -131,12 +131,12 @@ if (_.inBrowser) {
       // toggle if with lazy instantiation
       vm.ok = true
       _.nextTick(function () {
-        expect(el.innerHTML).toBe(wrap('<div>AAA</div><!--v-component-->'))
+        expect(el.innerHTML).toBe(wrap('<component>AAA</component><!--v-component-->'))
         expect(vm._children.length).toBe(1)
         // switch view when if=true
         vm.view = 'b'
         _.nextTick(function () {
-          expect(el.innerHTML).toBe(wrap('<div>BBB</div><!--v-component-->'))
+          expect(el.innerHTML).toBe(wrap('<component>BBB</component><!--v-component-->'))
           expect(vm._children.length).toBe(1)
           // toggle if when already instantiated
           vm.ok = false
@@ -147,7 +147,7 @@ if (_.inBrowser) {
             vm.view = 'a'
             vm.ok = true
             _.nextTick(function () {
-              expect(el.innerHTML).toBe(wrap('<div>AAA</div><!--v-component-->'))
+              expect(el.innerHTML).toBe(wrap('<component>AAA</component><!--v-component-->'))
               expect(vm._children.length).toBe(1)
               done()
             })
@@ -187,7 +187,7 @@ if (_.inBrowser) {
           a: 1,
           show: true
         },
-        template: '<div v-component="test" show="{{show}}">{{a}}</div>',
+        template: '<test show="{{show}}">{{a}}</test>',
         components: {
           test: {
             props: ['show'],
@@ -219,7 +219,7 @@ if (_.inBrowser) {
       var vm = new Vue({
         el: el,
         data: { show: true },
-        template: '<div v-component="outer"><div v-component="transcluded"></div></div>',
+        template: '<outer><transcluded></transcluded></outer>',
         components: {
           outer: {
             template: '<div v-if="$parent.show"><content></content></div>'
@@ -251,11 +251,11 @@ if (_.inBrowser) {
           list: [{a:0}]
         },
         template:
-          '<div v-component="outer">' +
+          '<outer>' +
             '<div>' + // an extra layer to test components deep inside the tree
-              '<div v-repeat="list" v-component="transcluded"></div>' +
+              '<transcluded v-repeat="list"></transcluded>' +
             '</div>' +
-          '</div>',
+          '</outer>',
         components: {
           outer: {
             template:
@@ -264,7 +264,7 @@ if (_.inBrowser) {
               '</div>' +
               // this is to test that compnents that are not in the if block
               // should not fire attach/detach when v-if toggles
-              '<div v-component="transcluded"></div>'
+              '<transcluded></transcluded>'
           },
           transcluded: {
             template: '{{a}}',
@@ -300,16 +300,16 @@ if (_.inBrowser) {
         var showBlock = vm.show
           ? '<div><div>' +
               vm.list.map(function (o) {
-                return '<div>' + o.a + '</div>'
+                return '<transcluded>' + o.a + '</transcluded>'
               }).join('') + '<!--v-repeat-->' +
             '</div></div>'
           : ''
-        var markup = '<div>' +
+        var markup = '<outer>' +
           '<!--v-if-start-->' +
             showBlock +
           '<!--v-if-end-->' +
-          '<div></div><!--v-component-->' +
-        '</div><!--v-component-->'
+          '<transcluded></transcluded><!--v-component-->' +
+        '</outer><!--v-component-->'
         expect(el.innerHTML).toBe(markup)
       }
     })

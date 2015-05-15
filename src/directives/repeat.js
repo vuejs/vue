@@ -92,8 +92,8 @@ module.exports = {
 
   checkComponent: function () {
     this.componentState = UNRESOLVED
-    var id = _.attr(this.el, 'component')
     var options = this.vm.$options
+    var id = _.checkComponent(this.el, options)
     if (!id) {
       // default constructor
       this.Ctor = _.Vue

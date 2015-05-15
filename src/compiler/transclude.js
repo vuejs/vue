@@ -73,18 +73,19 @@ function transcludeTemplate (el, options) {
     _.warn('Invalid template option: ' + template)
   } else {
     var rawContent = options._content || _.extractContent(el)
+    var replacer = frag.firstChild
     if (options.replace) {
       if (
         frag.childNodes.length > 1 ||
+        replacer.nodeType !== 1 ||
         // when root node has v-repeat, the instance ends up
         // having multiple top-level nodes, thus becoming a
         // block instance. (#835)
-        frag.firstChild.hasAttribute(config.prefix + 'repeat')
+        replacer.hasAttribute(config.prefix + 'repeat')
       ) {
         transcludeContent(frag, rawContent)
         return frag
       } else {
-        var replacer = frag.firstChild
         options._replacerAttrs = extractAttrs(replacer)
         mergeAttrs(el, replacer)
         transcludeContent(replacer, rawContent)
@@ -199,7 +200,6 @@ function insertContentAt (outlet, contents) {
 
 function extractAttrs (el) {
   var attrs = el.attributes
-  if (!attrs) return
   var res = {}
   var i = attrs.length
   while (i--) {

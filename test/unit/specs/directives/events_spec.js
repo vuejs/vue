@@ -14,7 +14,7 @@ if (_.inBrowser) {
       var spy = jasmine.createSpy('v-events')
       new Vue({
         el: el,
-        template: '<div v-component="test" v-events="test:test"></div>',
+        template: '<test v-events="test:test"></test>',
         methods: {
           test: spy
         },
@@ -43,7 +43,7 @@ if (_.inBrowser) {
       var spy = jasmine.createSpy('v-events')
       new Vue({
         el: el,
-        template: '<div v-component="test"></div>',
+        template: '<test></test>',
         methods: {
           test: spy
         },
@@ -67,7 +67,7 @@ if (_.inBrowser) {
       var vm = new Vue({
         el: el,
         data: { test: 123 },
-        template: '<div v-component="test" v-events="test:test"></div>',
+        template: '<test v-events="test:test"></test>',
         components: {
           test: {}
         }
@@ -79,7 +79,7 @@ if (_.inBrowser) {
       var vm = new Vue({
         el: el,
         data: {a:1},
-        template: '<div v-component="test" v-events="test:a++"></div>',
+        template: '<test v-events="test:a++"></test>',
         components: {
           test: {
             compiled: function () {
@@ -104,7 +104,7 @@ if (_.inBrowser) {
             a++
           }
         },
-        template: '<div v-component="test" v-events="test:handle"></div>',
+        template: '<test v-events="test:handle"></test>',
         components: {
           test: {
             compiled: function () {

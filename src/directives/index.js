@@ -23,5 +23,5 @@ exports.events     = require('./events')
 
 // internal directives that should not be used directly
 // but we still want to expose them for advanced usage.
-exports.component = require('./component')
+exports._component = require('./component')
 exports._prop      = require('./prop')

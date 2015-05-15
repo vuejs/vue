@@ -26,28 +26,28 @@
 
     <!-- item template -->
     <script type="text/x-template" id="item-template">
-      <div v-class="bold: isFolder"
-        v-on="click: toggle, dblclick: changeType">
-        {{model.name}}
-        <span v-if="isFolder">[{{open ? '-' : '+'}}]</span>
-      </div>
-      <ul v-show="open" v-if="isFolder">
-        <li class="item"
-          v-repeat="model: model.children"
-          v-component="item">
-        </li>
-        <li v-on="click: addChild">+</li>
-      </ul>
+      <li>
+        <div v-class="bold: isFolder"
+          v-on="click: toggle, dblclick: changeType">
+          {{model.name}}
+          <span v-if="isFolder">[{{open ? '-' : '+'}}]</span>
+        </div>
+        <ul v-show="open" v-if="isFolder">
+          <item class="item"
+            v-repeat="model: model.children">
+          </item>
+          <li v-on="click: addChild">+</li>
+        </ul>
+      </li>
     </script>
 
     <p>(You can double click on an item to turn it into a folder.)</p>
 
     <!-- the demo root element -->
     <ul id="demo">
-      <li class="item"
-        v-component="item"
+      <item class="item"
         model="{{treeData}}">
-      </li>
+      </item>
     </ul>
 
     <!-- demo code -->
