@@ -270,18 +270,20 @@ module.exports = {
     for (i = 0, l = data.length; i < l; i++) {
       obj = data[i]
       raw = converted ? obj.$value : obj
-      vm = !init && this.getVm(raw)
+      vm = !init && this.getVm(raw, converted ? obj.$key : null)
       if (vm) { // reusable instance
         vm._reused = true
         vm.$index = i // update $index
-        if (converted) {
-          vm.$key = obj.$key // update $key
-        }
-        if (idKey) { // swap track by id data
+        // update data for track-by or object repeat,
+        // since in these two cases the data is replaced
+        // rather than mutated.
+        if (idKey || converted) {
           if (alias) {
             vm[alias] = raw
+          } else if (_.isPlainObject(raw)) {
+            vm.$data = raw
           } else {
-            vm._setData(raw)
+            vm.$value = raw
           }
         }
       } else { // new instance
@@ -391,7 +393,7 @@ module.exports = {
     vm._repeat = true
     // cache instance
     if (needCache) {
-      this.cacheVm(raw, vm)
+      this.cacheVm(raw, vm, this.converted ? meta.$key : null)
     }
     // sync back changes for $value, particularly for
     // two-way bindings of primitive values
@@ -436,14 +438,15 @@ module.exports = {
    *
    * @param {Object} data
    * @param {Vue} vm
+   * @param {String} [key]
    */
 
-  cacheVm: function (data, vm) {
+  cacheVm: function (data, vm, key) {
     var idKey = this.idKey
     var cache = this.cache
     var id
-    if (idKey) {
-      id = data[idKey]
+    if (key || idKey) {
+      id = idKey ? data[idKey] : key
       if (!cache[id]) {
         cache[id] = vm
       } else {
@@ -477,12 +480,15 @@ module.exports = {
    * Try to get a cached instance from a piece of data.
    *
    * @param {Object} data
+   * @param {String} [key]
    * @return {Vue|undefined}
    */
 
-  getVm: function (data) {
-    if (this.idKey) {
-      return this.cache[data[this.idKey]]
+  getVm: function (data, key) {
+    var idKey = this.idKey
+    if (key || idKey) {
+      var id = idKey ? data[idKey] : key
+      return this.cache[id]
     } else if (isObject(data)) {
       return data[this.id]
     } else {
@@ -509,8 +515,10 @@ module.exports = {
 
   uncacheVm: function (vm) {
     var data = vm._raw
-    if (this.idKey) {
-      this.cache[data[this.idKey]] = null
+    var idKey = this.idKey
+    if (idKey || this.converted) {
+      var id = idKey ? data[idKey] : vm.$key
+      this.cache[id] = null
     } else if (isObject(data)) {
       data[this.id] = null
       vm._raw = null

@@ -58,7 +58,9 @@ Object.defineProperty(p, '$data', {
     return this._data
   },
   set: function (newData) {
-    this._setData(newData)
+    if (newData !== this._data) {
+      this._setData(newData)
+    }
   }
 })
 
