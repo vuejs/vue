@@ -1,6 +1,5 @@
 var _ = require('../util')
 var Watcher = require('../watcher')
-var expParser = require('../parsers/expression')
 
 module.exports = {
 
@@ -40,11 +39,8 @@ module.exports = {
     child.$set(childKey, this.parentWatcher.value)
 
     // only setup two-way binding if this is not a one-way
-    // binding, and the parentKey is a "settable" simple path.
-    if (
-      !this._descriptor.oneWay &&
-      expParser.isSimplePath(parentKey)
-    ) {
+    // binding.
+    if (!this._descriptor.oneWay) {
       this.childWatcher = new Watcher(
         child,
         childKey,
