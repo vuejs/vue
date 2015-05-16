@@ -381,6 +381,10 @@ function makeChildLinkFn (linkFns) {
  * @return {Function} propsLinkFn
  */
 
+// regex to test if a path is "settable"
+// if not the prop binding is automatically one-way.
+var settablePathRE = /^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\[[^\[\]]\])*$/
+
 function compileProps (el, attrs, propNames) {
   var props = []
   var i = propNames.length
@@ -411,7 +415,10 @@ function compileProps (el, attrs, propNames) {
         attrs[name] = null
         prop.dynamic = true
         prop.value = textParser.tokensToExp(tokens)
-        prop.oneTime = tokens.length === 1 && tokens[0].oneTime
+        prop.oneTime =
+          tokens.length > 1 ||
+          tokens[0].oneTime ||
+          !settablePathRE.test(prop.value)
       }
       props.push(prop)
     }
