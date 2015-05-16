@@ -8,6 +8,12 @@ var templateParser = require('../parsers/template')
 var propDef = require('../directives/prop')
 var componentDef = require('../directives/component')
 
+// terminal directives
+var terminalDirectives = [
+  'repeat',
+  'if'
+]
+
 module.exports = compile
 
 /**
@@ -498,10 +504,9 @@ function checkTerminalDirectives (el, options) {
     return skip
   }
   var value, dirName
-  var dirs = config._terminalDirectives
   /* jshint boss: true */
-  for (var i = 0, l = dirs.length; i < l; i++) {
-    dirName = dirs[i]
+  for (var i = 0, l = terminalDirectives.length; i < l; i++) {
+    dirName = terminalDirectives[i]
     if ((value = _.attr(el, dirName)) !== null) {
       return makeTerminalNodeLinkFn(el, dirName, value, options)
     }
