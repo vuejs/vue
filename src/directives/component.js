@@ -61,6 +61,49 @@ module.exports = {
   },
 
   /**
+   * Public update, called by the watcher in the dynamic
+   * literal scenario, e.g. v-component="{{view}}"
+   */
+
+  update: function (value) {
+    this.realUpdate(value)
+  },
+
+  /**
+   * Switch dynamic components. May resolve the component
+   * asynchronously, and perform transition based on
+   * specified transition mode. Accepts an async callback
+   * which is called when the transition ends. (This is
+   * exposed for vue-router)
+   *
+   * @param {String} value
+   * @param {Function} [cb]
+   */
+
+  realUpdate: function (value, cb) {
+    this.invalidatePending()
+    if (!value) {
+      // just remove current
+      this.unbuild()
+      this.remove(this.childVM, cb)
+      this.unsetCurrent()
+    } else {
+      this.resolveCtor(value, _.bind(function () {
+        this.unbuild()
+        var newComponent = this.build()
+        var self = this
+        if (this.readyEvent) {
+          newComponent.$once(this.readyEvent, function () {
+            self.swapTo(newComponent, cb)
+          })
+        } else {
+          this.swapTo(newComponent, cb)
+        }
+      }, this))
+    }
+  },
+
+  /**
    * Resolve the component constructor to use when creating
    * the child vm.
    */
@@ -157,40 +200,14 @@ module.exports = {
   },
 
   /**
-   * Update callback for the dynamic literal scenario,
-   * e.g. v-component="{{view}}"
-   */
-
-  update: function (value) {
-    this.invalidatePending()
-    if (!value) {
-      // just remove current
-      this.remove(this.childVM)
-      this.unsetCurrent()
-    } else {
-      this.resolveCtor(value, _.bind(function () {
-        this.unbuild()
-        var newComponent = this.build()
-        var self = this
-        if (this.readyEvent) {
-          newComponent.$once(this.readyEvent, function () {
-            self.swapTo(newComponent)
-          })
-        } else {
-          this.swapTo(newComponent)
-        }
-      }, this))
-    }
-  },
-
-  /**
    * Actually swap the components, depending on the
    * transition mode. Defaults to simultaneous.
    *
    * @param {Vue} target
+   * @param {Function} [cb]
    */
 
-  swapTo: function (target) {
+  swapTo: function (target, cb) {
     var self = this
     var current = this.childVM
     this.unsetCurrent()
@@ -198,17 +215,17 @@ module.exports = {
     switch (self.transMode) {
       case 'in-out':
         target.$before(self.ref, function () {
-          self.remove(current)
+          self.remove(current, cb)
         })
         break
       case 'out-in':
         self.remove(current, function () {
-          target.$before(self.ref)
+          target.$before(self.ref, cb)
         })
         break
       default:
         self.remove(current)
-        target.$before(self.ref)
+        target.$before(self.ref, cb)
     }
   },
 
