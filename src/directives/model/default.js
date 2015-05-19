@@ -6,9 +6,12 @@ module.exports = {
     var self = this
     var el = this.el
 
+    // - type='file' passses the File array into the model
+    var file = el.type == "file"
+
     // check params
-    // - lazy: update model on "change" instead of "input"
-    var lazy = this._checkParam('lazy') != null
+    // - lazy: update model on "change" instead of "input". Also do this for type='file'.
+    var lazy = this._checkParam('lazy') != null || file
     // - number: cast value into number when updating model.
     var number = this._checkParam('number') != null
     // - debounce: debounce the input listener
@@ -33,7 +36,7 @@ module.exports = {
     // shared setter
     function set () {
       self.set(
-        number ? _.toNumber(el.value) : el.value,
+        file ? el.files : ( number ? _.toNumber(el.value) : el.value ),
         true
       )
     }
