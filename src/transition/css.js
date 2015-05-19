@@ -39,11 +39,12 @@ function push (el, dir, op, cls, cb) {
  */
 
 function flush () {
-  /* jshint unused: false */
   var f = document.documentElement.offsetHeight
   queue.forEach(run)
   queue = []
   queued = false
+  /* dummy return, so js linters don't complain about unused variable f */
+  return f
 }
 
 /**
