@@ -136,16 +136,9 @@ describe('Directive', function () {
     d.set(2)
     expect(vm.a).toBe(6)
     nextTick(function () {
-      expect(def.update.calls.count()).toBe(2)
-      expect(def.update).toHaveBeenCalledWith(6, 1)
-      // locked set
-      d.set(3, true)
-      expect(vm.a).toBe(9)
-      nextTick(function () {
-        // should have no update calls
-        expect(def.update.calls.count()).toBe(2)
-        done()
-      })
+      // should have no update calls
+      expect(def.update.calls.count()).toBe(1)
+      done()
     })
   })
 

@@ -6,7 +6,7 @@ module.exports = {
     var self = this
     var el = this.el
     this.listener = function () {
-      self.set(el.value, true)
+      self.set(el.value)
     }
     _.on(el, 'change', this.listener)
     if (el.checked) {

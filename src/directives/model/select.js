@@ -23,7 +23,7 @@ module.exports = {
           ? value.map(_.toNumber)
           : _.toNumber(value)
         : value
-      self.set(value, true)
+      self.set(value)
     }
     _.on(el, 'change', this.listener)
     checkInitialValue.call(this)

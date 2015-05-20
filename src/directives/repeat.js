@@ -288,7 +288,10 @@ module.exports = {
         }
       } else { // new instance
         vm = this.build(obj, i, true)
-        vm._new = true
+        // the _new flag is used in the second pass for
+        // vm cache retrival, but if this is the init phase
+        // the flag can just be set to false directly.
+        vm._new = !init
         vm._reused = false
       }
       vms[i] = vm
@@ -395,16 +398,20 @@ module.exports = {
     if (needCache) {
       this.cacheVm(raw, vm, this.converted ? meta.$key : null)
     }
-    // sync back changes for $value, particularly for
-    // two-way bindings of primitive values
-    var self = this
-    vm.$watch('$value', function (val) {
-      if (self.converted) {
-        self.rawValue[vm.$key] = val
-      } else {
-        self.rawValue.$set(vm.$index, val)
-      }
-    })
+    // sync back changes for two-way bindings of primitive values
+    var type = typeof raw
+    if (type === 'string' || type === 'number') {
+      var dir = this
+      vm.$watch(alias || '$value', function (val) {
+        dir._withLock(function () {
+          if (dir.converted) {
+            dir.rawValue[vm.$key] = val
+          } else {
+            dir.rawValue.$set(vm.$index, val)
+          }
+        })
+      })
+    }
     return vm
   },
 

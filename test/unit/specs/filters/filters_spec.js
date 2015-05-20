@@ -100,7 +100,7 @@ describe('Filters', function () {
     var arr = [
       { a: 1, b: { c: 'hello' }},
       { a: 2, b: 'hello'},
-      { a: 3, b: 2 }
+      { a: 3, b: ['yoyo'] }
     ]
     var vm = new Vue({
       data: {
@@ -135,6 +135,10 @@ describe('Filters', function () {
     // number search key
     res = filter.call(vm, arr, 'search.n')
     expect(res[0]).toBe(arr[1])
+    // search in sub array
+    res = filter.call(vm, arr, "'yoyo'")
+    expect(res.length).toBe(1)
+    expect(res[0]).toBe(arr[2])
   })
 
   it('orderBy', function () {

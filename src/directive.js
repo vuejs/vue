@@ -203,23 +203,31 @@ p._teardown = function () {
  * e.g. v-model.
  *
  * @param {*} value
- * @param {Boolean} lock - prevent wrtie triggering update.
  * @public
  */
 
-p.set = function (value, lock) {
+p.set = function (value) {
   if (this.twoWay) {
-    if (lock) {
-      this._locked = true
-    }
-    this._watcher.set(value)
-    if (lock) {
-      var self = this
-      _.nextTick(function () {
-        self._locked = false
-      })
-    }
+    this._withLock(function () {
+      this._watcher.set(value)
+    })
   }
+}
+
+/**
+ * Execute a function while preventing that function from
+ * triggering updates on this directive instance.
+ *
+ * @param {Function} fn
+ */
+
+p._withLock = function (fn) {
+  var self = this
+  self._locked = true
+  fn.call(self)
+  _.nextTick(function () {
+    self._locked = false
+  })
 }
 
 module.exports = Directive

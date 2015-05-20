@@ -79,9 +79,16 @@ exports.orderBy = function (arr, sortKey, reverseKey) {
  */
 
 function contains (val, search) {
-  if (_.isObject(val)) {
+  if (_.isPlainObject(val)) {
     for (var key in val) {
       if (contains(val[key], search)) {
+        return true
+      }
+    }
+  } else if (_.isArray(val)) {
+    var i = val.length
+    while (i--) {
+      if (contains(val[i], search)) {
         return true
       }
     }

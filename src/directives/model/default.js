@@ -32,10 +32,10 @@ module.exports = {
 
     // shared setter
     function set () {
-      self.set(
-        number ? _.toNumber(el.value) : el.value,
-        true
-      )
+      var val = number
+        ? _.toNumber(el.value)
+        : el.value
+      self.set(val)
     }
 
     // if the directive has filters, we need to
