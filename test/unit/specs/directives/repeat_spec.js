@@ -254,7 +254,7 @@ if (_.inBrowser) {
     it('dynamic component type based on instance data', function () {
       var vm = new Vue({
         el: el,
-        template: '<component v-repeat="list" type="view-{{type}}"></component>',
+        template: '<component v-repeat="list" is="view-{{type}}"></component>',
         data: {
           list: [
             { type: 'a' },
@@ -278,7 +278,7 @@ if (_.inBrowser) {
       // #458 meta properties
       vm = new Vue({
         el: el,
-        template: '<component v-repeat="list" type="view-{{$value}}"></component>',
+        template: '<component v-repeat="list" is="view-{{$value}}"></component>',
         data: {
           list: ['a', 'b', 'c']
         },

@@ -40,7 +40,7 @@ describe('Async components', function () {
     it('dynamic', function (done) {
       var vm = new Vue({
         el: el,
-        template: '<component type="{{view}}"></component>',
+        template: '<component is="{{view}}"></component>',
         data: {
           view: 'a'
         },
@@ -84,7 +84,7 @@ describe('Async components', function () {
     it('invalidate pending on dynamic switch', function (done) {
       var vm = new Vue({
         el: el,
-        template: '<component type="{{view}}"></component>',
+        template: '<component is="{{view}}"></component>',
         data: {
           view: 'a'
         },
@@ -277,7 +277,7 @@ describe('Async components', function () {
     it('warn when used with dynamic v-repeat', function () {
       var vm = new Vue({
         el: el,
-        template: '<component v-repeat="list" type="{{c}}"></component>',
+        template: '<component v-repeat="list" is="{{c}}"></component>',
         data: {
           list: [1, 2, 3],
           c: 'test'

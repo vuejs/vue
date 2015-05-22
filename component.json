@@ -71,6 +71,7 @@
     "src/util/index.js",
     "src/util/lang.js",
     "src/util/merge-option.js",
+    "src/util/misc.js",
     "src/vue.js",
     "src/watcher.js"
   ]

@@ -87,7 +87,7 @@ if (_.inBrowser) {
     it('dynamic', function (done) {
       var vm = new Vue({
         el: el,
-        template: '<component type="{{view}}" v-attr="view:view"></component>',
+        template: '<component is="{{view}}" v-attr="view:view"></component>',
         data: {
           view: 'a'
         },
@@ -125,7 +125,7 @@ if (_.inBrowser) {
       var spyB = jasmine.createSpy()
       var vm = new Vue({
         el: el,
-        template: '<component type="{{view}}" keep-alive></component>',
+        template: '<component is="{{view}}" keep-alive></component>',
         data: {
           view: 'a'
         },
@@ -252,7 +252,7 @@ if (_.inBrowser) {
         data: {
           view: 'a'
         },
-        template: '<component type="{{view}}" wait-for="ok"></component>',
+        template: '<component is="{{view}}" wait-for="ok"></component>',
         components: {
           a: {
             template: 'AAA'
@@ -282,7 +282,7 @@ if (_.inBrowser) {
         data: {
           view: 'a'
         },
-        template: '<component type="{{view}}" v-transition="test" transition-mode="in-out"></component>',
+        template: '<component is="{{view}}" v-transition="test" transition-mode="in-out"></component>',
         components: {
           a: { template: 'AAA' },
           b: { template: 'BBB' }
@@ -322,7 +322,7 @@ if (_.inBrowser) {
         data: {
           view: 'a'
         },
-        template: '<component type="{{view}}" v-transition="test" transition-mode="out-in"></component>',
+        template: '<component is="{{view}}" v-transition="test" transition-mode="out-in"></component>',
         components: {
           a: { template: 'AAA' },
           b: { template: 'BBB' }
@@ -356,7 +356,7 @@ if (_.inBrowser) {
     it('teardown', function (done) {
       var vm = new Vue({
         el: el,
-        template: '<component type="{{view}}" keep-alive></component>',
+        template: '<component is="{{view}}" keep-alive></component>',
         data: {
           view: 'test'
         },

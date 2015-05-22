@@ -116,7 +116,7 @@ if (_.inBrowser) {
           ok: false,
           view: 'a'
         },
-        template: '<component type="{{view}}" v-if="ok"></component>',
+        template: '<component is="{{view}}" v-if="ok"></component>',
         components: {
           a: {
             template: 'AAA'
