@@ -107,6 +107,9 @@ function buildOptions (parent, options) {
       } else {
         el.text = op.text
         el.value = op.value
+        if (op.disabled) {
+          el.disabled = true
+        }
       }
     } else {
       el = document.createElement('optgroup')

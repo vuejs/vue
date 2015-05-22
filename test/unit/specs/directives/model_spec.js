@@ -245,6 +245,7 @@ if (_.inBrowser) {
         data: {
           test: 'b',
           opts: [
+            { text: 'Select an option', value: null, disabled: true },
             { text: 'A', value: 'a' },
             { text: 'B', value: 'b' }
           ]
@@ -252,12 +253,15 @@ if (_.inBrowser) {
         template: '<select v-model="test" options="opts"></select>'
       })
       expect(el.firstChild.innerHTML).toBe(
+        '<option disabled="">Select an option</option>' +
         '<option value="a">A</option>' +
         '<option value="b">B</option>'
       )
       var opts = el.firstChild.options
+      expect(opts[0].disabled).toBe(true)
       expect(opts[0].selected).toBe(false)
-      expect(opts[1].selected).toBe(true)
+      expect(opts[1].selected).toBe(false)
+      expect(opts[2].selected).toBe(true)
     })
 
     it('select + options + optgroup', function () {
