@@ -105,8 +105,11 @@ function buildOptions (parent, options) {
       if (typeof op === 'string') {
         el.text = el.value = op
       } else {
-        el.text = op.text
-        el.value = op.value
+        /* jshint eqeqeq: false */
+        if (op.value != null) {
+          el.value = op.value
+        }
+        el.text = op.text || op.value || ''
         if (op.disabled) {
           el.disabled = true
         }
