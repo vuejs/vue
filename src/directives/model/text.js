@@ -15,23 +15,29 @@ module.exports = {
     var debounce = parseInt(this._checkParam('debounce'), 10)
 
     // handle composition events.
-    // http://blog.evanyou.me/2014/01/03/composition-event/
-    var cpLocked = false
-    this.cpLock = function () {
-      cpLocked = true
+    //   http://blog.evanyou.me/2014/01/03/composition-event/
+    // skip this for Android because it handles composition
+    // events quite differently. Android doesn't trigger
+    // composition events for language input methods e.g.
+    // Chinese, but instead triggers them for spelling
+    // suggestions... (see Discussion/#162)
+    var composing = false
+    if (!_.isAndroid) {
+      this.onComposeStart = function () {
+        composing = true
+      }
+      this.onComposeEnd = function () {
+        composing = false
+        // in IE11 the "compositionend" event fires AFTER
+        // the "input" event, so the input handler is blocked
+        // at the end... have to call it here.
+        self.listener()
+      }
+      _.on(el,'compositionstart', this.onComposeStart)
+      _.on(el,'compositionend', this.onComposeEnd)
     }
-    this.cpUnlock = function () {
-      cpLocked = false
-      // in IE11 the "compositionend" event fires AFTER
-      // the "input" event, so the input handler is blocked
-      // at the end... have to call it here.
-      set()
-    }
-    _.on(el,'compositionstart', this.cpLock)
-    _.on(el,'compositionend', this.cpUnlock)
 
-    // shared setter
-    function set () {
+    function syncToModel () {
       var val = number
         ? _.toNumber(el.value)
         : el.value
@@ -43,46 +49,50 @@ module.exports = {
     // the input with the filtered value.
     // also force update for type="range" inputs to enable
     // "lock in range" (see #506)
-    var hasReadFilter = this.filters && this.filters.read
-    this.listener = hasReadFilter || el.type === 'range'
-      ? function textInputListener () {
-          if (cpLocked) return
-          var charsOffset
-          // some HTML5 input types throw error here
-          try {
-            // record how many chars from the end of input
-            // the cursor was at
-            charsOffset = el.value.length - el.selectionStart
-          } catch (e) {}
-          // Fix IE10/11 infinite update cycle
-          // https://github.com/yyx990803/vue/issues/592
-          /* istanbul ignore if */
-          if (charsOffset < 0) {
-            return
+    if ((this.filters && this.filters.read) || el.type === 'range') {
+      this.listener = function () {
+        if (composing) return
+        var charsOffset
+        // some HTML5 input types throw error here
+        try {
+          // record how many chars from the end of input
+          // the cursor was at
+          charsOffset = el.value.length - el.selectionStart
+        } catch (e) {}
+        // Fix IE10/11 infinite update cycle
+        // https://github.com/yyx990803/vue/issues/592
+        /* istanbul ignore if */
+        if (charsOffset < 0) {
+          return
+        }
+        syncToModel()
+        _.nextTick(function () {
+          // force a value update, because in
+          // certain cases the write filters output the
+          // same result for different input values, and
+          // the Observer set events won't be triggered.
+          var newVal = self._watcher.value
+          self.update(newVal)
+          if (charsOffset != null) {
+            var cursorPos =
+              _.toString(newVal).length - charsOffset
+            el.setSelectionRange(cursorPos, cursorPos)
           }
-          set()
-          _.nextTick(function () {
-            // force a value update, because in
-            // certain cases the write filters output the
-            // same result for different input values, and
-            // the Observer set events won't be triggered.
-            var newVal = self._watcher.value
-            self.update(newVal)
-            if (charsOffset != null) {
-              var cursorPos =
-                _.toString(newVal).length - charsOffset
-              el.setSelectionRange(cursorPos, cursorPos)
-            }
-          })
-        }
-      : function textInputListener () {
-          if (cpLocked) return
-          set()
-        }
+        })
+      }
+    } else {
+      this.listener = function () {
+        if (composing) return
+        syncToModel()
+      }
+    }
 
     if (debounce) {
       this.listener = _.debounce(this.listener, debounce)
     }
+
+    // Now attach the main listener
+
     this.event = lazy ? 'change' : 'input'
     // Support jQuery events, since jQuery.trigger() doesn't
     // trigger native events in some cases and some plugins
@@ -137,8 +147,10 @@ module.exports = {
     } else {
       _.off(el, this.event, this.listener)
     }
-    _.off(el,'compositionstart', this.cpLock)
-    _.off(el,'compositionend', this.cpUnlock)
+    if (this.onComposeStart) {
+      _.off(el, 'compositionstart', this.onComposeStart)
+      _.off(el, 'compositionend', this.onComposeEnd)
+    }
     if (this.onCut) {
       _.off(el,'cut', this.onCut)
       _.off(el,'keyup', this.onDel)

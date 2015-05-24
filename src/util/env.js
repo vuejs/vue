@@ -1,21 +1,40 @@
-/**
- * Can we use __proto__?
- *
- * @type {Boolean}
- */
-
+// can we use __proto__?
 exports.hasProto = '__proto__' in {}
 
-/**
- * Indicates we have a window
- *
- * @type {Boolean}
- */
-
-var toString = Object.prototype.toString
+// Browser environment sniffing
 var inBrowser = exports.inBrowser =
   typeof window !== 'undefined' &&
-  toString.call(window) !== '[object Object]'
+  Object.prototype.toString.call(window) !== '[object Object]'
+
+exports.isIE9 =
+  inBrowser &&
+  navigator.userAgent.toLowerCase().indexOf('msie 9.0') > 0
+
+exports.isAndroid =
+  inBrowser &&
+  navigator.userAgent.toLowerCase().indexOf('android') > 0
+
+// Transition property/event sniffing
+if (inBrowser && !exports.isIE9) {
+  var isWebkitTrans =
+    window.ontransitionend === undefined &&
+    window.onwebkittransitionend !== undefined
+  var isWebkitAnim =
+    window.onanimationend === undefined &&
+    window.onwebkitanimationend !== undefined
+  exports.transitionProp = isWebkitTrans
+    ? 'WebkitTransition'
+    : 'transition'
+  exports.transitionEndEvent = isWebkitTrans
+    ? 'webkitTransitionEnd'
+    : 'transitionend'
+  exports.animationProp = isWebkitAnim
+    ? 'WebkitAnimation'
+    : 'animation'
+  exports.animationEndEvent = isWebkitAnim
+    ? 'webkitAnimationEnd'
+    : 'animationend'
+}
 
 /**
  * Defer a task to execute it asynchronously. Ideally this
@@ -64,38 +83,3 @@ exports.nextTick = (function () {
     timerFunc(handle, 0)
   }
 })()
-
-/**
- * Detect if we are in IE9...
- *
- * @type {Boolean}
- */
-
-exports.isIE9 =
-  inBrowser &&
-  navigator.userAgent.indexOf('MSIE 9.0') > 0
-
-/**
- * Sniff transition/animation events
- */
-
-if (inBrowser && !exports.isIE9) {
-  var isWebkitTrans =
-    window.ontransitionend === undefined &&
-    window.onwebkittransitionend !== undefined
-  var isWebkitAnim =
-    window.onanimationend === undefined &&
-    window.onwebkitanimationend !== undefined
-  exports.transitionProp = isWebkitTrans
-    ? 'WebkitTransition'
-    : 'transition'
-  exports.transitionEndEvent = isWebkitTrans
-    ? 'webkitTransitionEnd'
-    : 'transitionend'
-  exports.animationProp = isWebkitAnim
-    ? 'WebkitAnimation'
-    : 'animation'
-  exports.animationEndEvent = isWebkitAnim
-    ? 'webkitAnimationEnd'
-    : 'animationend'
-}
