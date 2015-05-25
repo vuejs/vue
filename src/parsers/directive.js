@@ -51,21 +51,30 @@ function pushFilter () {
     var tokens = exp.match(filterTokenRE)
     filter.name = tokens[0]
     if (tokens.length > 1) {
-      filter.args = tokens.slice(1).map(function (arg) {
-        var stripped = reservedArgRE.test(arg)
-          ? arg
-          : _.stripQuotes(arg)
-        return {
-          value: stripped || arg,
-          dynamic: !stripped
-        }
-      })
+      filter.args = tokens.slice(1).map(processFilterArg)
     }
   }
   if (filter) {
     (dir.filters = dir.filters || []).push(filter)
   }
   lastFilterIndex = i + 1
+}
+
+/**
+ * Check if an argument is dynamic and strip quotes.
+ *
+ * @param {String} arg
+ * @return {Object}
+ */
+
+function processFilterArg (arg) {
+  var stripped = reservedArgRE.test(arg)
+    ? arg
+    : _.stripQuotes(arg)
+  return {
+    value: stripped || arg,
+    dynamic: !stripped
+  }
 }
 
 /**
