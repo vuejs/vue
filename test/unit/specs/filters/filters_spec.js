@@ -102,41 +102,28 @@ describe('Filters', function () {
       { a: 2, b: 'hello'},
       { a: 3, b: ['yoyo'] }
     ]
-    var vm = new Vue({
-      data: {
-        search: {
-          key: 'hello',
-          datakey: 'b.c',
-          n: 2
-        }
-      }
-    })
     var res
     // normal
-    res = filter.call(vm, arr, 'search.key')
+    res = filter(arr, 'hello')
     expect(res.length).toBe(2)
     expect(res[0]).toBe(arr[0])
     expect(res[1]).toBe(arr[1])
     // data key
-    res = filter.call(vm, arr, 'search.key', 'search.datakey')
-    expect(res.length).toBe(1)
-    expect(res[0]).toBe(arr[0])
-    // quotes
-    res = filter.call(vm, arr, "'hello'", "'b.c'")
+    res = filter(arr, 'hello', 'b.c')
     expect(res.length).toBe(1)
     expect(res[0]).toBe(arr[0])
     // delimiter
-    res = filter.call(vm, arr, 'search.key', 'in', 'search.datakey')
+    res = filter(arr, 'hello', 'in', 'b.c')
     expect(res.length).toBe(1)
     expect(res[0]).toBe(arr[0])
     // no search key
-    res = filter.call(vm, arr, 'abc')
+    res = filter(arr, null)
     expect(res).toBe(arr)
     // number search key
-    res = filter.call(vm, arr, 'search.n')
+    res = filter(arr, 2)
     expect(res[0]).toBe(arr[1])
     // search in sub array
-    res = filter.call(vm, arr, "'yoyo'")
+    res = filter(arr, 'yoyo')
     expect(res.length).toBe(1)
     expect(res[0]).toBe(arr[2])
   })
@@ -150,56 +137,47 @@ describe('Filters', function () {
     ]
     var res
     // sort key
-    res = filter.call(new Vue({
-      data: {
-        sortby: 'a.b',
-      }
-    }), arr, 'sortby')
+    res = filter(arr, 'a.b')
     expect(res.length).toBe(3)
     expect(res[0].a.b).toBe(0)
     expect(res[1].a.b).toBe(1)
     expect(res[2].a.b).toBe(2)
     // reverse key
-    res = filter.call(new Vue({
-      data: { sortby: 'a.b', reverse: true }
-    }), arr, 'sortby', 'reverse')
+    res = filter(arr, 'a.b', true)
     expect(res.length).toBe(3)
     expect(res[0].a.b).toBe(2)
     expect(res[1].a.b).toBe(1)
     expect(res[2].a.b).toBe(0)
     // literal args
-    res = filter.call(new Vue(), arr, "'c'", '-1')
+    res = filter(arr, 'c', '-1')
     expect(res.length).toBe(3)
     expect(res[0].c).toBe('c')
     expect(res[1].c).toBe('b')
     expect(res[2].c).toBe('a')
     // negate reverse
-    res = filter.call(new Vue({
-      data: { reverse: true }
-    }), arr, "'c'", '!reverse')
+    res = filter(arr, 'c', false)
     expect(res.length).toBe(3)
     expect(res[0].c).toBe('a')
     expect(res[1].c).toBe('b')
     expect(res[2].c).toBe('c')
     // no sort key
-    res = filter.call(new Vue(), arr, 'abc')
+    res = filter(arr, null)
     expect(res).toBe(arr)
   })
 
   it('orderBy on Object-converted array', function () {
     // object converted
     var filter = filters.orderBy
-    var vm = new Vue()
     var arr = [
       { $key: 'a', $value: 3 },
       { $key: 'c', $value: 1 },
       { $key: 'b', $value: 2 }
     ]
-    var res = filter.call(vm, arr, '"$key"')
+    var res = filter(arr, '$key')
     expect(res[0].$value).toBe(3)
     expect(res[1].$value).toBe(2)
     expect(res[2].$value).toBe(1)
-    res = filter.call(vm, arr, '"$value"')
+    res = filter(arr, '$value')
     expect(res[0].$value).toBe(1)
     expect(res[1].$value).toBe(2)
     expect(res[2].$value).toBe(3)
@@ -209,7 +187,7 @@ describe('Filters', function () {
       { $key: 'c', $value: { v: 1 } },
       { $key: 'b', $value: { v: 2 } }
     ]
-    res = filter.call(vm, arr, '"v"')
+    res = filter(arr, 'v')
     expect(res[0].$value.v).toBe(1)
     expect(res[1].$value.v).toBe(2)
     expect(res[2].$value.v).toBe(3)

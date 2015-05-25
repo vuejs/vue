@@ -18,17 +18,20 @@ describe('Directive Parser', function () {
   })
 
   it('with filters', function () {
-    var res = parse(' arg : exp | abc de | bcd')
+    var res = parse(' arg : exp | abc de \'ok\' | bcd')
     expect(res.length).toBe(1)
     expect(res[0].expression).toBe('exp')
     expect(res[0].arg).toBe('arg')
-    expect(res[0].raw).toBe('arg : exp | abc de | bcd')
+    expect(res[0].raw).toBe('arg : exp | abc de \'ok\' | bcd')
     expect(res[0].filters.length).toBe(2)
     expect(res[0].filters[0].name).toBe('abc')
-    expect(res[0].filters[0].args.length).toBe(1)
-    expect(res[0].filters[0].args[0]).toBe('de')
+    expect(res[0].filters[0].args.length).toBe(2)
+    expect(res[0].filters[0].args[0].value).toBe('de')
+    expect(res[0].filters[0].args[0].dynamic).toBe(true)
+    expect(res[0].filters[0].args[1].value).toBe('ok')
+    expect(res[0].filters[0].args[1].dynamic).toBe(false)
     expect(res[0].filters[1].name).toBe('bcd')
-    expect(res[0].filters[1].args).toBeNull()
+    expect(res[0].filters[1].args).toBeUndefined()
   })
 
   it('double pipe', function () {
@@ -38,7 +41,7 @@ describe('Directive Parser', function () {
     expect(res[0].raw).toBe('a || b | c')
     expect(res[0].filters.length).toBe(1)
     expect(res[0].filters[0].name).toBe('c')
-    expect(res[0].filters[0].args).toBeNull()
+    expect(res[0].filters[0].args).toBeUndefined()
   })
 
   it('single quote + boolean', function () {
@@ -65,31 +68,34 @@ describe('Directive Parser', function () {
   })
 
   it('multiple complex clauses', function () {
-    var res = parse('a:b | c | j, d:e | f | k l, g:h | i')
+    var res = parse('a:b | c | j, d:e | f | k l, g:h | i "k"')
     expect(res.length).toBe(3)
 
     expect(res[0].arg).toBe('a')
     expect(res[0].expression).toBe('b')
     expect(res[0].filters.length).toBe(2)
     expect(res[0].filters[0].name).toBe('c')
-    expect(res[0].filters[0].args).toBeNull()
+    expect(res[0].filters[0].args).toBeUndefined()
     expect(res[0].filters[1].name).toBe('j')
-    expect(res[0].filters[1].args).toBeNull()
+    expect(res[0].filters[1].args).toBeUndefined()
 
     expect(res[1].arg).toBe('d')
     expect(res[1].expression).toBe('e')
     expect(res[1].filters.length).toBe(2)
     expect(res[1].filters[0].name).toBe('f')
-    expect(res[1].filters[0].args).toBeNull()
+    expect(res[1].filters[0].args).toBeUndefined()
     expect(res[1].filters[1].name).toBe('k')
     expect(res[1].filters[1].args.length).toBe(1)
-    expect(res[1].filters[1].args[0]).toBe('l')
+    expect(res[1].filters[1].args[0].value).toBe('l')
+    expect(res[1].filters[1].args[0].dynamic).toBe(true)
 
     expect(res[2].arg).toBe('g')
     expect(res[2].expression).toBe('h')
     expect(res[2].filters.length).toBe(1)
     expect(res[2].filters[0].name).toBe('i')
-    expect(res[2].filters[0].args).toBeNull()
+    expect(res[2].filters[0].args.length).toBe(1)
+    expect(res[2].filters[0].args[0].value).toBe('k')
+    expect(res[2].filters[0].args[0].dynamic).toBe(false)
   })
 
   it('nexted function calls + array/object literals', function () {

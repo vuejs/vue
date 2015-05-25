@@ -53,7 +53,7 @@ if (_.inBrowser) {
     it('with key filter', function (done) {
       var vm = new Vue({
         el: el,
-        template: '<a v-on="keyup:test | key enter">{{a}}</a>',
+        template: '<a v-on="keyup:test | key \'enter\'">{{a}}</a>',
         data: {a:1},
         methods: {
           test: function () {

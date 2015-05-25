@@ -166,7 +166,7 @@ function inlineFilters (exp, single) {
       for (var i = 0, l = dir.filters.length; i < l; i++) {
         var filter = dir.filters[i]
         var args = filter.args
-          ? ',"' + filter.args.join('","') + '"'
+          ? ',' + JSON.stringify(filter.args).slice(1, -1)
           : ''
         exp = 'this._applyFilter("' + filter.name + '",[' + exp + args + '])'
       }

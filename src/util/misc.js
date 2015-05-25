@@ -81,7 +81,7 @@ exports.resolveFilters = function (vm, filters, target) {
       if (!res.read) res.read = []
       res.read.push(function (value) {
         return args
-          ? reader.apply(vm, [value].concat(args))
+          ? reader.apply(vm, [value].concat(resolveArgs(vm, args)))
           : reader.call(vm, value)
       })
     }
@@ -89,12 +89,28 @@ exports.resolveFilters = function (vm, filters, target) {
       if (!res.write) res.write = []
       res.write.push(function (value, oldVal) {
         return args
-          ? writer.apply(vm, [value, oldVal].concat(args))
+          ? writer.apply(vm, [value, oldVal].concat(resolveArgs(vm, args)))
           : writer.call(vm, value, oldVal)
       })
     }
   })
   return res
+}
+
+/**
+ * Resolve arguments into static values
+ *
+ * @param {Vue} vm
+ * @param {Array} args
+ * @return {Array}
+ */
+
+function resolveArgs (vm, args) {
+  return args.map(function (arg) {
+    return arg.dynamic
+      ? vm.$get(arg.value)
+      : arg.value
+  })
 }
 
 /**

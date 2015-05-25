@@ -17,7 +17,8 @@ describe('Watcher', function () {
           c: 2,
           d: 4
         },
-        c: 'c'
+        c: 'c',
+        msg: 'yo'
       }
     })
     spy = jasmine.createSpy('watcher')
@@ -236,8 +237,8 @@ describe('Watcher', function () {
       return val + str
     }
     var filters = _.resolveFilters(vm, [
-      { name: 'test', args: [3] },
-      { name: 'test2', args: ['yo']}
+      { name: 'test', args: [{value:3, dynamic:false}] },
+      { name: 'test2', args: [{value:'msg', dynamic:true}]}
     ])
     var watcher = new Watcher(vm, 'b.c', spy, {
       filters: filters
@@ -258,7 +259,7 @@ describe('Watcher', function () {
       }
     }
     var filters = _.resolveFilters(vm, [
-      { name: 'test', args: [5] }
+      { name: 'test', args: [{value:5, dynamic:false}] }
     ])
     var watcher = new Watcher(vm, 'b["c"]', spy, {
       filters: filters,

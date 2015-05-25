@@ -16,7 +16,7 @@
                     autocomplete="off"
                     placeholder="What needs to be done?"
                     v-model="newTodo"
-                    v-on="keyup:addTodo | key enter"
+                    v-on="keyup:addTodo | key 'enter'"
                 >
             </header>
             <section id="main" v-show="todos.length" v-cloak>
@@ -50,8 +50,8 @@
                             v-todo-focus="this == editedTodo"
                             v-on="
                                 blur  : doneEdit(this),
-                                keyup : doneEdit(this) | key enter,
-                                keyup : cancelEdit(this) | key esc
+                                keyup : doneEdit(this) | key 'enter',
+                                keyup : cancelEdit(this) | key 'esc'
                             "
                         >
                     </li>

@@ -112,7 +112,10 @@ describe('Text Parser', function () {
   it('tokens to expression with filters, multiple expressions', function () {
     var tokens = textParser.parse('a {{b | c d | f}} e')
     var exp = textParser.tokensToExp(tokens)
-    expect(exp).toBe('"a "+this._applyFilter("f",[this._applyFilter("c",[b,"d"])])+" e"')
+    expect(exp).toBe(
+      '"a "+this._applyFilter("f",[this._applyFilter("c",[b,' +
+        JSON.stringify({value:'d',dynamic:true}) +
+      '])])+" e"')
   })
 
 })
