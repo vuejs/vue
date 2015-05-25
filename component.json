@@ -67,7 +67,6 @@
     "src/util/debug.js",
     "src/util/dom.js",
     "src/util/env.js",
-    "src/util/filter.js",
     "src/util/index.js",
     "src/util/lang.js",
     "src/util/merge-option.js",
