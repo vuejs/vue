@@ -62,11 +62,7 @@ describe('Misc', function () {
         }
       }
     })
-    expect(vm.$el.innerHTML).toBe(
-      '<!--v-start-->' +
-      '<div>1</div><div>2</div><div>3</div><!--v-repeat-->' +
-      '<!--v-end--><!--v-component-->'
-    )
+    expect(vm.$el.innerHTML).toBe('<div>1</div><div>2</div><div>3</div>')
   })
 
 })

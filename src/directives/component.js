@@ -18,8 +18,8 @@ module.exports = {
   bind: function () {
     if (!this.el.__vue__) {
       // create a ref anchor
-      this.ref = document.createComment('v-component')
-      _.replace(this.el, this.ref)
+      this.anchor = _.createAnchor('v-component')
+      _.replace(this.el, this.anchor)
       // check keep-alive options.
       // If yes, instead of destroying the active vm when
       // hiding (v-if) or switching (dynamic literal) it,
@@ -44,7 +44,7 @@ module.exports = {
       if (!this._isDynamicLiteral) {
         this.resolveCtor(this.expression, _.bind(function () {
           var child = this.build()
-          child.$before(this.ref)
+          child.$before(this.anchor)
           this.setCurrent(child)
         }, this))
       } else {
@@ -214,18 +214,18 @@ module.exports = {
     this.setCurrent(target)
     switch (self.transMode) {
       case 'in-out':
-        target.$before(self.ref, function () {
+        target.$before(self.anchor, function () {
           self.remove(current, cb)
         })
         break
       case 'out-in':
         self.remove(current, function () {
-          target.$before(self.ref, cb)
+          target.$before(self.anchor, cb)
         })
         break
       default:
         self.remove(current)
-        target.$before(self.ref, cb)
+        target.$before(self.anchor, cb)
     }
   },
 

@@ -257,17 +257,15 @@ if (_.inBrowser) {
       })
       expect(el.innerHTML).toBe(
         '<testa><testb>' +
-          '<div>1</div><div>2</div><!--v-repeat-->' +
-        '</testb><!--v-component-->' +
-        '</testa><!--v-component-->'
+          '<div>1</div><div>2</div>' +
+        '</testb></testa>'
       )
       vm.list.push(3)
       _.nextTick(function () {
         expect(el.innerHTML).toBe(
           '<testa><testb>' +
-            '<div>1</div><div>2</div><div>3</div><!--v-repeat-->' +
-          '</testb><!--v-component-->' +
-          '</testa><!--v-component-->'
+            '<div>1</div><div>2</div><div>3</div>' +
+          '</testb></testa>'
         )
         done()
       })

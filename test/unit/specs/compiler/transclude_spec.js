@@ -47,9 +47,9 @@ if (_.inBrowser) {
       var res = transclude(frag, options)
       expect(res).toBe(frag)
       expect(res.childNodes.length).toBe(3)
-      expect(res.childNodes[0].nodeType).toBe(8)
+      expect(res.childNodes[0].nodeType).toBe(3)
       expect(res.childNodes[1]).toBe(el)
-      expect(res.childNodes[2].nodeType).toBe(8)
+      expect(res.childNodes[2].nodeType).toBe(3)
     })
 
     it('template element', function () {
@@ -58,9 +58,9 @@ if (_.inBrowser) {
       var res = transclude(tpl, options)
       expect(res instanceof DocumentFragment).toBe(true)
       expect(res.childNodes.length).toBe(3)
-      expect(res.childNodes[0].nodeType).toBe(8)
+      expect(res.childNodes[0].nodeType).toBe(3)
       expect(res.childNodes[1].textContent).toBe('123')
-      expect(res.childNodes[2].nodeType).toBe(8)
+      expect(res.childNodes[2].nodeType).toBe(3)
     })
 
     it('content transclusion', function () {

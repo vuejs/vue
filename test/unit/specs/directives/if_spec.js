@@ -10,10 +10,6 @@ if (_.inBrowser) {
       spyOn(_, 'warn')
     })
 
-    function wrap (content) {
-      return '<!--v-if-start-->' + content + '<!--v-if-end-->'
-    }
-
     it('normal', function (done) {
       var vm = new Vue({
         el: el,
@@ -27,19 +23,19 @@ if (_.inBrowser) {
         }
       })
       // lazy instantitation
-      expect(el.innerHTML).toBe(wrap(''))
+      expect(el.innerHTML).toBe('')
       expect(vm._children.length).toBe(0)
       vm.test = true
       _.nextTick(function () {
-        expect(el.innerHTML).toBe(wrap('<div><test>A</test><!--v-component--></div>'))
+        expect(el.innerHTML).toBe('<div><test>A</test></div>')
         expect(vm._children.length).toBe(1)
         vm.test = false
         _.nextTick(function () {
-          expect(el.innerHTML).toBe(wrap(''))
+          expect(el.innerHTML).toBe('')
           expect(vm._children.length).toBe(0)
           vm.test = true
           _.nextTick(function () {
-            expect(el.innerHTML).toBe(wrap('<div><test>A</test><!--v-component--></div>'))
+            expect(el.innerHTML).toBe('<div><test>A</test></div>')
             expect(vm._children.length).toBe(1)
             var child = vm._children[0]
             vm.$destroy()
@@ -57,13 +53,13 @@ if (_.inBrowser) {
         template: '<template v-if="test"><p>{{a}}</p><p>{{b}}</p></template>'
       })
       // lazy instantitation
-      expect(el.innerHTML).toBe(wrap(''))
+      expect(el.innerHTML).toBe('')
       vm.test = true
       _.nextTick(function () {
-        expect(el.innerHTML).toBe(wrap('<p>A</p><p>B</p>'))
+        expect(el.innerHTML).toBe('<p>A</p><p>B</p>')
         vm.test = false
         _.nextTick(function () {
-          expect(el.innerHTML).toBe(wrap(''))
+          expect(el.innerHTML).toBe('')
           done()
         })
       })
@@ -90,18 +86,18 @@ if (_.inBrowser) {
         }
       })
       vm.$appendTo(document.body)
-      expect(el.innerHTML).toBe(wrap(''))
+      expect(el.innerHTML).toBe('')
       expect(vm._children.length).toBe(0)
       vm.ok = true
       _.nextTick(function () {
-        expect(el.innerHTML).toBe(wrap('<test>123</test><!--v-component-->'))
+        expect(el.innerHTML).toBe('<test>123</test>')
         expect(vm._children.length).toBe(1)
         expect(attachSpy).toHaveBeenCalled()
         expect(readySpy).toHaveBeenCalled()
         vm.ok = false
         _.nextTick(function () {
           expect(detachSpy).toHaveBeenCalled()
-          expect(el.innerHTML).toBe(wrap(''))
+          expect(el.innerHTML).toBe('')
           expect(vm._children.length).toBe(0)
           vm.$remove()
           done()
@@ -126,28 +122,28 @@ if (_.inBrowser) {
           }
         }
       })
-      expect(el.innerHTML).toBe(wrap(''))
+      expect(el.innerHTML).toBe('')
       expect(vm._children.length).toBe(0)
       // toggle if with lazy instantiation
       vm.ok = true
       _.nextTick(function () {
-        expect(el.innerHTML).toBe(wrap('<component>AAA</component><!--v-component-->'))
+        expect(el.innerHTML).toBe('<component>AAA</component>')
         expect(vm._children.length).toBe(1)
         // switch view when if=true
         vm.view = 'b'
         _.nextTick(function () {
-          expect(el.innerHTML).toBe(wrap('<component>BBB</component><!--v-component-->'))
+          expect(el.innerHTML).toBe('<component>BBB</component>')
           expect(vm._children.length).toBe(1)
           // toggle if when already instantiated
           vm.ok = false
           _.nextTick(function () {
-            expect(el.innerHTML).toBe(wrap(''))
+            expect(el.innerHTML).toBe('')
             expect(vm._children.length).toBe(0)
             // toggle if and switch view at the same time
             vm.view = 'a'
             vm.ok = true
             _.nextTick(function () {
-              expect(el.innerHTML).toBe(wrap('<component>AAA</component><!--v-component-->'))
+              expect(el.innerHTML).toBe('<component>AAA</component>')
               expect(vm._children.length).toBe(1)
               done()
             })
@@ -164,10 +160,10 @@ if (_.inBrowser) {
         },
         template: '<div v-if="a">{{a}}</div>'
       })
-      expect(el.innerHTML).toBe(wrap('<div>1</div>'))
+      expect(el.innerHTML).toBe('<div>1</div>')
       vm.a = 2
       _.nextTick(function () {
-        expect(el.innerHTML).toBe(wrap('<div>2</div>'))
+        expect(el.innerHTML).toBe('<div>2</div>')
         done()
       })
     })
@@ -301,15 +297,14 @@ if (_.inBrowser) {
           ? '<div><div>' +
               vm.list.map(function (o) {
                 return '<transcluded>' + o.a + '</transcluded>'
-              }).join('') + '<!--v-repeat-->' +
+              }).join('') +
             '</div></div>'
           : ''
-        var markup = '<outer>' +
-          '<!--v-if-start-->' +
-            showBlock +
-          '<!--v-if-end-->' +
-          '<transcluded></transcluded><!--v-component-->' +
-        '</outer><!--v-component-->'
+        var markup =
+          '<outer>' +
+              showBlock +
+            '<transcluded></transcluded>' +
+          '</outer>'
         expect(el.innerHTML).toBe(markup)
       }
     })

@@ -101,7 +101,7 @@ if (_.inBrowser) {
           }
         }
       })
-      expect(el.innerHTML).toBe('<!--v-start--><p>AAA</p><p>DDD</p><!--v-end--><!--v-component-->')
+      expect(el.innerHTML).toBe('<p>AAA</p><p>DDD</p>')
     })
 
   })

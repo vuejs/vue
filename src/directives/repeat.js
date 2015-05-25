@@ -37,9 +37,9 @@ module.exports = {
     } else {
       this.filters.read.unshift(objectConverter)
     }
-    // setup ref node
-    this.ref = document.createComment('v-repeat')
-    _.replace(this.el, this.ref)
+    // setup anchor node
+    this.anchor = _.createAnchor('v-repeat')
+    _.replace(this.el, this.anchor)
     // check if this is a block repeat
     this.template = this.el.tagName === 'TEMPLATE'
       ? templateParser.parse(this.el, true)
@@ -258,7 +258,7 @@ module.exports = {
   diff: function (data, oldVms) {
     var idKey = this.idKey
     var converted = this.converted
-    var ref = this.ref
+    var anchor = this.anchor
     var alias = this.arg
     var init = !oldVms
     var vms = new Array(data.length)
@@ -297,7 +297,7 @@ module.exports = {
       vms[i] = vm
       // insert if this is first run
       if (init) {
-        vm.$before(ref)
+        vm.$before(anchor)
       }
     }
     // if this is the first run, we're done.
@@ -330,13 +330,13 @@ module.exports = {
         // place, so no need to touch it. Otherwise, insert
         // it.
         if (!vm._reused) {
-          vm.$before(ref)
+          vm.$before(anchor)
         }
       } else {
         var nextEl = targetNext.$el
         if (vm._reused) {
           // this is the vm we are actually in front of
-          currentNext = findNextVm(vm, ref)
+          currentNext = findNextVm(vm, anchor)
           // we only need to move if we are not in the right
           // place already.
           if (currentNext !== targetNext) {
@@ -544,13 +544,13 @@ module.exports = {
  * should have been removed so we can skip them.
  *
  * @param {Vue} vm
- * @param {CommentNode} ref
+ * @param {Comment|Text} anchor
  * @return {Vue}
  */
 
-function findNextVm (vm, ref) {
+function findNextVm (vm, anchor) {
   var el = (vm._blockEnd || vm.$el).nextSibling
-  while (!el.__vue__ && el !== ref) {
+  while (!el.__vue__ && el !== anchor) {
     el = el.nextSibling
   }
   return el.__vue__

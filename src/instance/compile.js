@@ -51,6 +51,10 @@ exports._initElement = function (el) {
     this._isBlock = true
     this.$el = this._blockStart = el.firstChild
     this._blockEnd = el.lastChild
+    // set persisted text anchors to empty
+    if (this._blockStart.nodeType === 3) {
+      this._blockStart.data = this._blockEnd.data = ''
+    }
     this._blockFragment = el
   } else {
     this.$el = el

@@ -8,8 +8,8 @@ module.exports = {
   bind: function () {
     var el = this.el
     if (!el.__vue__) {
-      this.start = document.createComment('v-if-start')
-      this.end = document.createComment('v-if-end')
+      this.start = _.createAnchor('v-if-start')
+      this.end = _.createAnchor('v-if-end')
       _.replace(el, this.end)
       _.before(this.start, this.end)
       if (el.tagName === 'TEMPLATE') {

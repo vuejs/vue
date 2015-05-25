@@ -28,7 +28,7 @@ if (_.inBrowser) {
           }
         }
       })
-      expect(el.innerHTML).toBe('<test>123</test><!--v-component-->')
+      expect(el.innerHTML).toBe('<test>123</test>')
     })
 
     it('replace', function () {
@@ -45,7 +45,7 @@ if (_.inBrowser) {
           }
         }
       })
-      expect(el.innerHTML).toBe('<p>123</p><!--v-component-->')
+      expect(el.innerHTML).toBe('<p>123</p>')
     })
 
     it('inline-template', function () {
@@ -64,7 +64,7 @@ if (_.inBrowser) {
           }
         }
       })
-      expect(el.innerHTML).toBe('<test>child</test><!--v-component-->')
+      expect(el.innerHTML).toBe('<test>child</test>')
     })
 
     it('block replace', function () {
@@ -81,7 +81,7 @@ if (_.inBrowser) {
           }
         }
       })
-      expect(el.innerHTML).toBe('<!--v-start--><p>123</p><p>234</p><!--v-end--><!--v-component-->')
+      expect(el.innerHTML).toBe('<p>123</p><p>234</p>')
     })
 
     it('dynamic', function (done) {
@@ -108,13 +108,13 @@ if (_.inBrowser) {
           }
         }
       })
-      expect(el.innerHTML).toBe('<div view="a">AAA</div><!--v-component-->')
+      expect(el.innerHTML).toBe('<div view="a">AAA</div>')
       vm.view = 'b'
       _.nextTick(function () {
-        expect(el.innerHTML).toBe('<div view="b">BBB</div><!--v-component-->')
+        expect(el.innerHTML).toBe('<div view="b">BBB</div>')
         vm.view = ''
         _.nextTick(function () {
-          expect(el.innerHTML).toBe('<!--v-component-->')
+          expect(el.innerHTML).toBe('')
           done()
         })
       })
@@ -142,22 +142,22 @@ if (_.inBrowser) {
           }
         }
       })
-      expect(el.innerHTML).toBe('<div>AAA</div><!--v-component-->')
+      expect(el.innerHTML).toBe('<div>AAA</div>')
       expect(spyA.calls.count()).toBe(1)
       expect(spyB.calls.count()).toBe(0)
       vm.view = 'b'
       _.nextTick(function () {
-        expect(el.innerHTML).toBe('<div>BBB</div><!--v-component-->')
+        expect(el.innerHTML).toBe('<div>BBB</div>')
         expect(spyA.calls.count()).toBe(1)
         expect(spyB.calls.count()).toBe(1)
         vm.view = 'a'
         _.nextTick(function () {
-          expect(el.innerHTML).toBe('<div>AAA</div><!--v-component-->')
+          expect(el.innerHTML).toBe('<div>AAA</div>')
           expect(spyA.calls.count()).toBe(1)
           expect(spyB.calls.count()).toBe(1)
           vm.view = 'b'
           _.nextTick(function () {
-            expect(el.innerHTML).toBe('<div>BBB</div><!--v-component-->')
+            expect(el.innerHTML).toBe('<div>BBB</div>')
             expect(spyA.calls.count()).toBe(1)
             expect(spyB.calls.count()).toBe(1)
             done()
@@ -243,7 +243,7 @@ if (_.inBrowser) {
           }
         }
       })
-      expect(el.innerHTML).toBe('<ul><li>1</li><li>2</li><!--v-repeat--></ul><!--v-component-->')
+      expect(el.innerHTML).toBe('<ul><li>1</li><li>2</li></ul>')
     })
 
     it('wait-for', function (done) {

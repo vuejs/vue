@@ -9,6 +9,9 @@ module.exports = {
     if (this.el.nodeType === 8) {
       // hold nodes
       this.nodes = []
+      // replace the placeholder with proper anchor
+      this.anchor = _.createAnchor('v-html')
+      _.replace(this.el, this.anchor)
     }
   },
 
@@ -32,7 +35,7 @@ module.exports = {
     var frag = templateParser.parse(value, true, true)
     // save a reference to these nodes so we can remove later
     this.nodes = _.toArray(frag.childNodes)
-    _.before(frag, this.el)
+    _.before(frag, this.anchor)
   }
 
 }

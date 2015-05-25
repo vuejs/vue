@@ -51,8 +51,11 @@ module.exports = function transclude (el, options) {
     el = transcludeTemplate(el, options)
   }
   if (el instanceof DocumentFragment) {
-    _.prepend(document.createComment('v-start'), el)
-    el.appendChild(document.createComment('v-end'))
+    // anchors for block instance
+    // passing in `persist: true` to avoid them being
+    // discarded by IE during template cloning
+    _.prepend(_.createAnchor('v-start', true), el)
+    el.appendChild(_.createAnchor('v-end', true))
   }
   return el
 }
