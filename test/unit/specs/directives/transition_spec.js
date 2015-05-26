@@ -23,6 +23,11 @@ if (_.inBrowser) {
       dir.bind()
       expect(dir.el.__v_trans.id).toBe('test')
       expect(dir.el.__v_trans.fns).toBe(fns)
+      expect(dir.el.className === 'test-transition')
+      dir.update('lol', 'test')
+      expect(dir.el.__v_trans.id).toBe('lol')
+      expect(dir.el.__v_trans.fns).toBeUndefined()
+      expect(dir.el.className === 'lol-transition')
     })
 
     it('dynamic transitions', function (done) {

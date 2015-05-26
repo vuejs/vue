@@ -4,6 +4,9 @@ var removeClass = _.removeClass
 var transDurationProp = _.transitionProp + 'Duration'
 var animDurationProp = _.animationProp + 'Duration'
 
+var TYPE_TRANSITION = 1
+var TYPE_ANIMATION = 2
+
 var queue = []
 var queued = false
 
@@ -43,7 +46,8 @@ function flush () {
   queue.forEach(run)
   queue = []
   queued = false
-  /* dummy return, so js linters don't complain about unused variable f */
+  // dummy return, so js linters don't complain about unused
+  // variable f
   return f
 }
 
@@ -63,13 +67,13 @@ function run (job) {
   var transitionType = getTransitionType(el, data, cls)
 
   if (job.dir > 0) { // ENTER
-    if (transitionType === 1) {
+    if (transitionType === TYPE_TRANSITION) {
       // trigger transition by removing enter class
       removeClass(el, cls)
       // only need to listen for transitionend if there's
       // a user callback
       if (cb) setupTransitionCb(_.transitionEndEvent)
-    } else if (transitionType === 2) {
+    } else if (transitionType === TYPE_ANIMATION) {
       // animations are triggered when class is added
       // so we just listen for animationend to remove it.
       setupTransitionCb(_.animationEndEvent, function () {
@@ -84,7 +88,7 @@ function run (job) {
     if (transitionType) {
       // leave transitions/animations are both triggered
       // by adding the class, just remove it on end event.
-      var event = transitionType === 1
+      var event = transitionType === TYPE_TRANSITION
         ? _.transitionEndEvent
         : _.animationEndEvent
       setupTransitionCb(event, function () {
@@ -130,8 +134,6 @@ function run (job) {
  * @param {Object} data
  * @param {String} className
  * @return {Number}
- *         1 - transition
- *         2 - animation
  */
 
 function getTransitionType (el, data, className) {
@@ -143,13 +145,13 @@ function getTransitionType (el, data, className) {
     inlineStyles[transDurationProp] ||
     computedStyles[transDurationProp]
   if (transDuration && transDuration !== '0s') {
-    type = 1
+    type = TYPE_TRANSITION
   } else {
     var animDuration =
       inlineStyles[animDurationProp] ||
       computedStyles[animDurationProp]
     if (animDuration && animDuration !== '0s') {
-      type = 2
+      type = TYPE_ANIMATION
     }
   }
   if (type) {

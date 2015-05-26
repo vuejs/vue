@@ -585,7 +585,11 @@ if (_.inBrowser) {
       })
       vm.items.splice(1, 1, {a:4})
       setTimeout(function () {
-        expect(el.innerHTML).toBe('<div>1</div><div>4</div><div>3</div>')
+        expect(el.innerHTML).toBe(
+          '<div class="test-transition">1</div>' +
+          '<div class="test-transition">4</div>' +
+          '<div class="test-transition">3</div>'
+        )
         document.body.removeChild(el)
         done()
       }, 100)
@@ -614,7 +618,7 @@ if (_.inBrowser) {
 
     it('nested track by', function (done) {
       assertTrackBy('<div v-repeat="list" track-by="id">{{msg}}<div v-repeat="list" track-by="id">{{msg}}</div></div>', function () {
-        assertTrackBy('<div v-transition v-repeat="list" track-by="id">{{msg}}<div v-transition v-repeat="list" track-by="id">{{msg}}</div></div>', done)
+        assertTrackBy('<div v-repeat="list" track-by="id">{{msg}}<div v-repeat="list" track-by="id">{{msg}}</div></div>', done)
       })
 
       function assertTrackBy(template, next) {

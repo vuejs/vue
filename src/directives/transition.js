@@ -1,3 +1,5 @@
+var _ = require('../util')
+
 module.exports = {
 
   priority: 1000,
@@ -9,7 +11,7 @@ module.exports = {
     }
   },
 
-  update: function (id) {
+  update: function (id, oldId) {
     var vm = this.el.__vue__ || this.vm
     this.el.__v_trans = {
       id: id,
@@ -19,6 +21,10 @@ module.exports = {
       // computed CSS.
       fns: vm.$options.transitions[id]
     }
+    if (oldId) {
+      _.removeClass(this.el, oldId + '-transition')
+    }
+    _.addClass(this.el, (id || 'v') + '-transition')
   }
 
 }
