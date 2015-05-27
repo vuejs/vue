@@ -1,5 +1,6 @@
-var _ = require('./debug')
+var _ = require('./index')
 var config = require('../config')
+var commonTagRE = /^(div|p|span|img|a|br|ul|ol|li|h1|h2|h3|h4|h5|table|tbody|tr|td|pre)$/
 
 /**
  * Check if an element is a component, if yes return its
@@ -17,7 +18,10 @@ exports.checkComponent = function (el, options) {
     var exp = el.getAttribute('is')
     el.removeAttribute('is')
     return exp
-  } else if (options.components[tag]) {
+  } else if (
+    !commonTagRE.test(tag) &&
+    _.resolveAsset(options, 'components', tag)
+  ) {
     return tag
   }
 }
@@ -66,7 +70,7 @@ exports.resolveFilters = function (vm, filters, target) {
   var res = target || {}
   // var registry = vm.$options.filters
   filters.forEach(function (f) {
-    var def = vm.$options.filters[f.name]
+    var def = _.resolveAsset(vm.$options, 'filters', f.name)
     _.assertAsset(def, 'filter', f.name)
     if (!def) return
     var args = f.args

@@ -1,5 +1,5 @@
 var _ = require('../util')
-var mergeOptions = require('../util/merge-option')
+var config = require('../config')
 
 /**
  * Expose useful internals
@@ -48,7 +48,7 @@ exports.extend = function (extendOptions) {
   Sub.prototype = Object.create(Super.prototype)
   Sub.prototype.constructor = Sub
   Sub.cid = cid++
-  Sub.options = mergeOptions(
+  Sub.options = _.mergeOptions(
     Super.options,
     extendOptions
   )
@@ -101,13 +101,6 @@ exports.use = function (plugin) {
  * @param {Function} Constructor
  */
 
-var assetTypes = [
-  'directive',
-  'elementDirective',
-  'filter',
-  'transition'
-]
-
 function createAssetRegisters (Constructor) {
 
   /* Asset registration methods share the same signature:
@@ -116,7 +109,7 @@ function createAssetRegisters (Constructor) {
    * @param {*} definition
    */
 
-  assetTypes.forEach(function (type) {
+  config._assetTypes.forEach(function (type) {
     Constructor[type] = function (id, definition) {
       if (!definition) {
         return this.options[type + 's'][id]

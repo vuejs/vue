@@ -3,6 +3,7 @@ var config = require('../config')
 var textParser = require('../parsers/text')
 var dirParser = require('../parsers/directive')
 var templateParser = require('../parsers/template')
+var resolveAsset = _.resolveAsset
 
 // internal directives
 var propDef = require('../directives/prop')
@@ -278,7 +279,7 @@ function processTextToken (token, options) {
   }
   function setTokenType (type) {
     token.type = type
-    token.def = options.directives[type]
+    token.def = resolveAsset(options, 'directives', type)
     token.descriptor = dirParser.parse(token.value)[0]
   }
   return el
@@ -469,7 +470,7 @@ function makePropsLinkFn (props) {
 
 function checkElementDirectives (el, options) {
   var tag = el.tagName.toLowerCase()
-  var def = options.elementDirectives[tag]
+  var def = resolveAsset(options, 'elementDirectives', tag)
   if (def) {
     return makeTerminalNodeLinkFn(el, tag, '', options, def)
   }
@@ -539,6 +540,8 @@ skip.terminal = true
 
 function makeTerminalNodeLinkFn (el, dirName, value, options, def) {
   var descriptor = dirParser.parse(value)[0]
+  // no need to call resolveAsset since terminal directives
+  // are always internal
   def = def || options.directives[dirName]
   var fn = function terminalNodeLinkFn (vm, el, host) {
     vm._bindDir(dirName, el, descriptor, def, host)
@@ -571,7 +574,7 @@ function compileDirectives (elOrAttrs, options) {
     if (value === null) continue
     if (name.indexOf(config.prefix) === 0) {
       dirName = name.slice(config.prefix.length)
-      dirDef = options.directives[dirName]
+      dirDef = resolveAsset(options, 'directives', dirName)
       _.assertAsset(dirDef, 'directive', dirName)
       if (dirDef) {
         dirs.push({

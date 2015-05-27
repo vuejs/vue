@@ -135,23 +135,11 @@ strats.directives =
 strats.filters =
 strats.transitions =
 strats.components =
-strats.elementDirectives = function (parentVal, childVal, vm, key) {
-  var ret = Object.create(
-    vm && vm.$parent
-      ? vm.$parent.$options[key]
-      : _.Vue.options[key]
-  )
-  if (parentVal) {
-    var keys = Object.keys(parentVal)
-    var i = keys.length
-    var field
-    while (i--) {
-      field = keys[i]
-      ret[field] = parentVal[field]
-    }
-  }
-  if (childVal) extend(ret, childVal)
-  return ret
+strats.elementDirectives = function (parentVal, childVal) {
+  var res = Object.create(parentVal)
+  return childVal
+    ? extend(res, childVal)
+    : res
 }
 
 /**
@@ -233,26 +221,45 @@ function guardComponents (components) {
  *                     an instantiation merge.
  */
 
-module.exports = function mergeOptions (parent, child, vm) {
+exports.mergeOptions = function merge (parent, child, vm) {
   guardComponents(child.components)
   var options = {}
   var key
   if (child.mixins) {
     for (var i = 0, l = child.mixins.length; i < l; i++) {
-      parent = mergeOptions(parent, child.mixins[i], vm)
+      parent = merge(parent, child.mixins[i], vm)
     }
   }
   for (key in parent) {
-    merge(key)
+    mergeField(key)
   }
   for (key in child) {
     if (!(parent.hasOwnProperty(key))) {
-      merge(key)
+      mergeField(key)
     }
   }
-  function merge (key) {
+  function mergeField (key) {
     var strat = strats[key] || defaultStrat
     options[key] = strat(parent[key], child[key], vm, key)
   }
   return options
+}
+
+/**
+ * Resolve an asset.
+ * This function is used because child instances need access
+ * to assets defined in its ancestor chain.
+ *
+ * @param {Object} options
+ * @param {String} type
+ * @param {String} id
+ * @return {Object|Function}
+ */
+
+exports.resolveAsset = function resolve (options, type, id) {
+  return options[type][id] || (
+    options._parent
+      ? resolve(options._parent.$options, type, id)
+      : null
+  )
 }

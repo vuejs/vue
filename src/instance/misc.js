@@ -11,8 +11,7 @@ var _ = require('../util')
  */
 
 exports._applyFilter = function (id, args) {
-  var registry = this.$options.filters
-  var filter = registry[id]
+  var filter = _.resolveAsset(this.$options, 'filters', id)
   _.assertAsset(filter, 'filter', id)
   return (filter.read || filter).apply(this, args)
 }
@@ -29,8 +28,7 @@ exports._applyFilter = function (id, args) {
  */
 
 exports._resolveComponent = function (id, cb) {
-  var registry = this.$options.components
-  var factory = registry[id]
+  var factory = _.resolveAsset(this.$options, 'components', id)
   _.assertAsset(factory, 'component', id)
   // async component factory
   if (!factory.options) {

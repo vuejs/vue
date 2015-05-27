@@ -1,6 +1,6 @@
 var _ = require('../../../../src/util')
 var Vue = require('../../../../src/vue')
-var merge = require('../../../../src/util/merge-option')
+var merge = _.mergeOptions
 
 describe('Util - Option merging', function () {
   
@@ -101,42 +101,18 @@ describe('Util - Option merging', function () {
   it('assets', function () {
     var asset1 = {}
     var asset2 = {}
-    var asset3 = {}
-    var asset4 = {}
-    var asset5 = {}
     var res = merge(
       { directives: { a: asset1 }},
       { directives: { b: asset2 }}
     ).directives
     expect(res.a).toBe(asset1)
     expect(res.b).toBe(asset2)
-    // vm asset merge should do tree-way merge
-    var proto = { d: asset5 }
-    var parent = { directives: Object.create(proto) }
-    parent.directives.a = asset1
-    parent.directives.b = asset4
-    res = merge(
-      parent,
-      { directives: { b: asset2 }},
-      {
-        $parent: {
-          $options: {
-            directives: { c: asset3 }
-          }
-        }
-      },
-      'directives'
-    ).directives
-    expect(res.a).toBe(asset1)
-    // child should overwrite parent
-    expect(res.b).toBe(asset2)
-    expect(res.c).toBe(asset3)
-    // should not copy parent prototype properties
-    expect(res.d).toBeUndefined()
   })
 
   it('guard components', function () {
-    var res = merge({}, {
+    var res = merge({
+      components: null
+    }, {
       components: {
         a: { template: 'hi' }
       }

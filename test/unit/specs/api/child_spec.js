@@ -1,4 +1,5 @@
 var Vue = require('../../../../src/vue')
+var _ = Vue.util
 
 describe('Child API', function () {
 
@@ -22,7 +23,7 @@ describe('Child API', function () {
     expect(child.$parent).toBe(vm)
     expect(child.$root).toBe(vm)
     expect(vm._children.indexOf(child)).toBe(0)
-    expect(child.$options.directives.test).toBeTruthy()
+    expect(_.resolveAsset(child.$options, 'directives', 'test')).toBeTruthy()
   })
 
   it('inherit scope', function () {

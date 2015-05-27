@@ -1,7 +1,6 @@
 var Vue = require('../../../../src/vue')
 var _ = require('../../../../src/util')
 var dirParser = require('../../../../src/parsers/directive')
-var merge = require('../../../../src/util/merge-option')
 var compile = require('../../../../src/compiler/compile')
 var transclude = require('../../../../src/compiler/transclude')
 
@@ -50,7 +49,7 @@ if (_.inBrowser) {
       var defB = { priority: 2 }
       var descriptorA = dirParser.parse('a')[0]
       var descriptorB = dirParser.parse('b')[0]
-      var options = merge(Vue.options, {
+      var options = _.mergeOptions(Vue.options, {
         directives: {
           a: defA,
           b: defB
@@ -120,7 +119,7 @@ if (_.inBrowser) {
     })
 
     it('custom element components', function () {
-      var options = merge(Vue.options, {
+      var options = _.mergeOptions(Vue.options, {
         components: {
           'my-component': {}
         }
@@ -146,7 +145,7 @@ if (_.inBrowser) {
     })
 
     it('props', function () {
-      var options = merge(Vue.options, {
+      var options = _.mergeOptions(Vue.options, {
         _asComponent: true,
         props: [
           'a',

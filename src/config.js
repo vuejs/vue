@@ -62,7 +62,20 @@ module.exports = {
    * @type {Boolean}
    */
 
-  _delimitersChanged: true
+  _delimitersChanged: true,
+
+  /**
+   * List of asset types that a component can own.
+   *
+   * @type {Array}
+   */
+
+  _assetTypes: [
+    'directive',
+    'elementDirective',
+    'filter',
+    'transition'
+  ]
 
 }
 

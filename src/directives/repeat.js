@@ -6,7 +6,6 @@ var expParser = require('../parsers/expression')
 var templateParser = require('../parsers/template')
 var compile = require('../compiler/compile')
 var transclude = require('../compiler/transclude')
-var mergeOptions = require('../util/merge-option')
 var uid = 0
 
 // async component resolution states
@@ -133,7 +132,7 @@ module.exports = {
         return
       }
       this.Ctor = Ctor
-      var merged = mergeOptions(Ctor.options, {}, {
+      var merged = _.mergeOptions(Ctor.options, {}, {
         $parent: this.vm
       })
       merged.template = this.inlineTempalte || merged.template
@@ -175,7 +174,7 @@ module.exports = {
       _.define(context, key, meta[key])
     }
     var id = this.ctorGetter.call(context, context)
-    var Ctor = this.vm.$options.components[id]
+    var Ctor = _.resolveAsset(this.vm.$options, 'components', id)
     _.assertAsset(Ctor, 'component', id)
     if (!Ctor.options) {
       _.warn(

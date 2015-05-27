@@ -69,8 +69,8 @@
     "src/util/env.js",
     "src/util/index.js",
     "src/util/lang.js",
-    "src/util/merge-option.js",
     "src/util/misc.js",
+    "src/util/options.js",
     "src/vue.js",
     "src/watcher.js"
   ]

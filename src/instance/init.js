@@ -1,4 +1,4 @@
-var mergeOptions = require('../util/merge-option')
+var mergeOptions = require('../util').mergeOptions
 
 /**
  * The main init sequence. This is called for every

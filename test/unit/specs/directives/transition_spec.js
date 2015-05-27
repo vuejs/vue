@@ -26,7 +26,7 @@ if (_.inBrowser) {
       expect(dir.el.className === 'test-transition')
       dir.update('lol', 'test')
       expect(dir.el.__v_trans.id).toBe('lol')
-      expect(dir.el.__v_trans.fns).toBeUndefined()
+      expect(dir.el.__v_trans.fns).toBeNull()
       expect(dir.el.className === 'lol-transition')
     })
 
