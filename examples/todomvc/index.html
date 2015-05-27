@@ -59,7 +59,7 @@
             </section>
             <footer id="footer" v-show="todos.length" v-cloak>
                 <span id="todo-count">
-                    <strong v-text="remaining"></strong> {{remaining | pluralize item}} left
+                    <strong v-text="remaining"></strong> {{remaining | pluralize 'item'}} left
                 </span>
                 <ul id="filters">
                     <li><a href="#/all" v-class="selected: activeFilter == 'all'">All</a></li>
