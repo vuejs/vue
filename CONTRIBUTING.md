@@ -44,11 +44,10 @@ Hi! I’m really excited that you are interested in contributing to Vue.js. Befo
 
 ## Development Setup
 
-You will need [Node](http://nodejs.org), [Grunt](http://gruntjs.com), [PhantomJS](http://phantomjs.org) and [CasperJS](http://casperjs.org).
+You will need [Node.js](http://nodejs.org) & [Grunt](http://gruntjs.com).
 
 ``` bash
-# in case you don’t already these:
-# npm install -g grunt-cli phantomjs casperjs
+# npm install -g grunt-cli
 $ npm install
 ```
 
@@ -61,7 +60,7 @@ $ npm run dev
 To lint:
 
 ``` bash
-grunt jshint
+$ grunt jshint
 ```
 
 To build:
@@ -73,13 +72,11 @@ $ grunt build
 To test:
 
 ``` bash
-# if you don’t have these yet:
-# npm install -g phantomjs casperjs
 $ grunt test
 ```
 
-The unit tests are written with Jasmine and run with Karma. The functional tests are written for and run with CasperJS.
+The default task (by simply running `grunt`) will do the following: lint -> build -> unit tests -> e2e tests. It is required to have this pass successfully for a PR to be considered.
 
-**If you are not using a Mac**
+The unit tests are written with Jasmine and run with Karma. The e2e tests are written for and run with CasperJS.
 
-You can modify the Gruntfile to only run Karma tests in browsers that are available on your system. Just make sure don’t check in the Gruntfile for the commit.
+Note that the unit tests will automatically be run in Chrome, Firefox and Safari. If you are not on a Mac, or don't have one of the browsers installed on your system, you can modify the [karma config in gruntfile.js](https://github.com/yyx990803/vue/blob/dev/gruntfile.js#L42) to only run Karma tests in browsers that are available on your system. Just make sure don’t check in the gruntfile changes for the commit.

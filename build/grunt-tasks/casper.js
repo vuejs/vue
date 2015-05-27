@@ -8,7 +8,7 @@ module.exports = function (grunt) {
     var done = this.async()
     var file = id ? id + '.js' : ''
     grunt.util.spawn({
-      cmd: 'casperjs',
+      cmd: '../../node_modules/.bin/casperjs',
       args: ['test', '--concise', './' + file],
       opts: {
         stdio: ['ignore', process.stdout, 'ignore'],
