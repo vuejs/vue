@@ -670,6 +670,32 @@ if (_.inBrowser) {
       }
     })
 
+    it('switch between object-converted & array mode', function (done) {
+      var obj = {
+        a: { msg: 'AA' },
+        b: { msg: 'BB' }
+      }
+      var arr = [obj.b, obj.a]
+      var vm = new Vue({
+        el: el,
+        template: '<div v-repeat="obj">{{msg}}</div>',
+        data: {
+          obj: obj
+        }
+      })
+      expect(el.innerHTML).toBe(Object.keys(obj).map(function (key) {
+        return '<div>' + obj[key].msg + '</div>'
+      }).join(''))
+      vm.obj = arr
+      _.nextTick(function () {
+        expect(el.innerHTML).toBe('<div>BB</div><div>AA</div>')
+        // make sure it cleared the cache
+        expect(vm._directives[0].cache.a).toBeNull()
+        expect(vm._directives[0].cache.b).toBeNull()
+        done()
+      })
+    })
+
   })
 }
 

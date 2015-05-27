@@ -522,8 +522,9 @@ module.exports = {
   uncacheVm: function (vm) {
     var data = vm._raw
     var idKey = this.idKey
-    if (idKey || this.converted) {
-      var id = idKey ? data[idKey] : vm.$key
+    var convertedKey = vm.$key
+    if (idKey || convertedKey) {
+      var id = idKey ? data[idKey] : convertedKey
       this.cache[id] = null
     } else if (isObject(data)) {
       data[this.id] = null
@@ -573,6 +574,7 @@ function objToArray (obj) {
   // regardless of type, store the un-filtered raw value.
   this.rawValue = obj
   if (!isPlainObject(obj)) {
+    this.converted = false
     return obj
   }
   var keys = Object.keys(obj)
