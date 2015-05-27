@@ -123,9 +123,9 @@ exports._unproxy = function (key) {
  */
 
 exports._digest = function () {
-  var i = this._watcherList.length
+  var i = this._watchers.length
   while (i--) {
-    this._watcherList[i].update()
+    this._watchers[i].update()
   }
   var children = this._children
   i = children.length

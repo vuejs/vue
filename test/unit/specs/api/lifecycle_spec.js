@@ -161,8 +161,6 @@ if (_.inBrowser) {
         expect(data.__ob__.vms.length).toBe(0)
         expect(vm._isDestroyed).toBe(true)
         expect(vm._watchers).toBeNull()
-        expect(vm._userWatchers).toBeNull()
-        expect(vm._watcherList).toBeNull()
         expect(vm.$el).toBeNull()
         expect(vm.$parent).toBeNull()
         expect(vm.$root).toBeNull()
@@ -236,8 +234,8 @@ if (_.inBrowser) {
           data: { a: 1 }
         })
         vm.$watch('a', function () {})
-        var dirWatcher = vm._watcherList[0]
-        var userWatcher = vm._watcherList[1]
+        var dirWatcher = vm._watchers[0]
+        var userWatcher = vm._watchers[1]
         vm.$destroy()
         expect(dirWatcher.active).toBe(false)
         expect(userWatcher.active).toBe(false)

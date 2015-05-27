@@ -162,25 +162,4 @@ describe('Directive', function () {
     expect(def.update).toHaveBeenCalled()
   })
 
-  it('reuse the same watcher', function (done) {
-    var d = new Directive('test', el, vm, {
-      expression: 'a',
-    }, def)
-    var d2 = new Directive('test', el, vm, {
-      expression: 'a',
-    }, def)
-    expect(vm._watcherList.length).toBe(1)
-    expect(d._watcher).toBe(d2._watcher)
-    d2._teardown()
-    expect(d2._watcher).toBeNull()
-    expect(vm._watcherList.length).toBe(1)
-    vm.a = 2
-    nextTick(function () {
-      expect(def.update).toHaveBeenCalledWith(2, 1)
-      d._teardown()
-      expect(vm._watcherList.length).toBe(0)
-      done()
-    })
-  })
-
 })

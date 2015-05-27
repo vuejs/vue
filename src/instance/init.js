@@ -20,9 +20,7 @@ exports._init = function (options) {
   this.$root         = options._root || this
   this.$             = {} // child vm references
   this.$$            = {} // element references
-  this._watcherList  = [] // all watchers as an array
-  this._watchers     = {} // internal watchers as a hash
-  this._userWatchers = {} // user watchers as a hash
+  this._watchers     = [] // all watchers as an array
   this._directives   = [] // all directives
 
   // a flag to avoid this being observed

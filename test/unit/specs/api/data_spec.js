@@ -89,23 +89,12 @@ describe('Data API', function () {
     vm.a = 2
     nextTick(function () {
       expect(spy).toHaveBeenCalledWith(4, 3)
-      // reuse same watcher
-      var spy2 = jasmine.createSpy()
-      var unwatch2 = vm.$watch('a + b.c', spy2)
-      expect(vm._watcherList.length).toBe(1)
-      vm.b = { c: 3 }
+      // unwatch
+      unwatch()
+      vm.a = 3
       nextTick(function () {
-        expect(spy).toHaveBeenCalledWith(5, 4)
-        expect(spy2).toHaveBeenCalledWith(5, 4)
-        // unwatch
-        unwatch()
-        unwatch2()
-        vm.a = 3
-        nextTick(function () {
-          expect(spy.calls.count()).toBe(3)
-          expect(spy2.calls.count()).toBe(1)
-          done()
-        })
+        expect(spy.calls.count()).toBe(2)
+        done()
       })
     })
   })

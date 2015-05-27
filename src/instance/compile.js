@@ -118,13 +118,9 @@ exports._destroy = function (remove, deferCleanup) {
     // splicing the directives
     this._unlinkFn(true)
   }
-  // teardown all user watchers.
-  var watcher
-  for (i in this._userWatchers) {
-    watcher = this._userWatchers[i]
-    if (watcher) {
-      watcher.teardown()
-    }
+  i = this._watchers.length
+  while (i--) {
+    this._watchers[i].teardown()
   }
   // remove reference to self on $el
   if (this.$el) {
@@ -152,8 +148,6 @@ exports._cleanup = function () {
   this._data.__ob__.removeVm(this)
   this._data =
   this._watchers =
-  this._userWatchers =
-  this._watcherList =
   this.$el =
   this.$parent =
   this.$root =

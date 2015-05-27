@@ -78,27 +78,16 @@ p._bind = function (def) {
           }
         }
       : function () {} // noop if no update is provided
-    // use raw expression as identifier because filters
-    // make them different watchers
-    var watcher = this.vm._watchers[this.raw]
-    // v-repeat always creates a new watcher because it has
-    // a special filter that's bound to its directive
-    // instance.
-    if (!watcher || this.name === 'repeat') {
-      watcher = this.vm._watchers[this.raw] = new Watcher(
-        this.vm,
-        this._watcherExp,
-        update, // callback
-        {
-          filters: this.filters,
-          twoWay: this.twoWay,
-          deep: this.deep
-        }
-      )
-    } else {
-      watcher.addCb(update)
-    }
-    this._watcher = watcher
+    var watcher = this._watcher = new Watcher(
+      this.vm,
+      this._watcherExp,
+      update, // callback
+      {
+        filters: this.filters,
+        twoWay: this.twoWay,
+        deep: this.deep
+      }
+    )
     if (this._initValue != null) {
       watcher.set(this._initValue)
     } else if (this.update) {
@@ -182,17 +171,13 @@ p._checkParam = function (name) {
 
 p._teardown = function () {
   if (this._bound) {
+    this._bound = false
     if (this.unbind) {
       this.unbind()
     }
-    var watcher = this._watcher
-    if (watcher && watcher.active) {
-      watcher.removeCb(this._update)
-      if (!watcher.active) {
-        this.vm._watchers[this.raw] = null
-      }
+    if (this._watcher) {
+      this._watcher.teardown()
     }
-    this._bound = false
     this.vm = this.el = this._watcher = null
   }
 }
