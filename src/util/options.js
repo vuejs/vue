@@ -257,9 +257,10 @@ exports.mergeOptions = function merge (parent, child, vm) {
  */
 
 exports.resolveAsset = function resolve (options, type, id) {
-  return options[type][id] || (
-    options._parent
-      ? resolve(options._parent.$options, type, id)
-      : null
-  )
+  var asset = options[type][id]
+  while (!asset && options._parent) {
+    options = options._parent.$options
+    asset = options[type][id]
+  }
+  return asset
 }
