@@ -1,11 +1,11 @@
 language: node_js
 node_js:
-- '0.10'
+- "iojs"
 branches:
   only:
   - master
 before_install:
-- npm install -g grunt-cli phantomjs casperjs
+- npm install -g grunt-cli
 env:
   global:
   - secure: Ce9jxsESszOnGyj3A6wILO5W412El9iD/HCHiFgbr8/cSXa4Yt0ZOEZysZeyaBX6IFUCjHtQPLasVgCxijDHrhi7/drmyCE+ksruk/6LJWn9C46PZK6nI+N04iYA2TRnocFllhGbyttpbpxY04smCmGWqXwLppu9nb+VIDkKGmE=
