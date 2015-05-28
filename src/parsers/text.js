@@ -162,15 +162,11 @@ function inlineFilters (exp, single) {
     if (!dir.filters) {
       return '(' + exp + ')'
     } else {
-      exp = dir.expression
-      for (var i = 0, l = dir.filters.length; i < l; i++) {
-        var filter = dir.filters[i]
-        var args = filter.args
-          ? ',' + JSON.stringify(filter.args).slice(1, -1)
-          : ''
-        exp = 'this._applyFilter("' + filter.name + '",[' + exp + args + '])'
-      }
-      return exp
+      return 'this._applyFilters(' +
+        dir.expression + // value
+        ',null,' +       // oldValue (null for read)
+        JSON.stringify(dir.filters) + // filter descriptors
+        ',false)'        // write?
     }
   }
 }

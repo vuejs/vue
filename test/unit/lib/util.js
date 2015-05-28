@@ -3,5 +3,6 @@ var scope = typeof window === 'undefined'
   : window
 
 scope.hasWarned = function (_, msg) {
-  return _.warn.calls.argsFor(0)[0].indexOf(msg) > -1
+  var args = _.warn.calls.argsFor(0)
+  return !!(args[0] && args[0].indexOf(msg) > -1)
 }

@@ -31,7 +31,7 @@ function Directive (name, el, vm, descriptor, def, host) {
   this.raw = descriptor.raw
   this.expression = descriptor.expression
   this.arg = descriptor.arg
-  this.filters = _.resolveFilters(vm, descriptor.filters)
+  this.filters = descriptor.filters
   // private
   this._descriptor = descriptor
   this._host = host
@@ -78,6 +78,11 @@ p._bind = function (def) {
           }
         }
       : function () {} // noop if no update is provided
+    // pre-process hook called before the value is piped
+    // through the filters. used in v-repeat.
+    var preProcess = this._preProcess
+      ? _.bind(this._preProcess, this)
+      : null
     var watcher = this._watcher = new Watcher(
       this.vm,
       this._watcherExp,
@@ -85,7 +90,8 @@ p._bind = function (def) {
       {
         filters: this.filters,
         twoWay: this.twoWay,
-        deep: this.deep
+        deep: this.deep,
+        preProcess: preProcess
       }
     )
     if (this._initValue != null) {
@@ -139,11 +145,7 @@ p._checkStatement = function () {
       fn.call(vm, vm)
     }
     if (this.filters) {
-      handler = _.applyFilters(
-        handler,
-        this.filters.read,
-        vm
-      )
+      handler = vm._applyFilters(handler, null, this.filters)
     }
     this.update(handler)
     return true

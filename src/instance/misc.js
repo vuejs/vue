@@ -1,19 +1,40 @@
 var _ = require('../util')
 
 /**
- * Apply a filter to a list of arguments.
- * This is only used internally inside expressions with
- * inlined filters.
+ * Apply a list of filter (descriptors) to a value.
+ * Using plain for loops here because this will be called in
+ * the getter of any watcher with filters so it is very
+ * performance sensitive.
  *
- * @param {String} id
- * @param {Array} args
+ * @param {*} value
+ * @param {*} [oldValue]
+ * @param {Array} filters
+ * @param {Boolean} write
  * @return {*}
  */
 
-exports._applyFilter = function (id, args) {
-  var filter = _.resolveAsset(this.$options, 'filters', id)
-  _.assertAsset(filter, 'filter', id)
-  return (filter.read || filter).apply(this, args)
+exports._applyFilters = function (value, oldValue, filters, write) {
+  var filter, fn, args, arg, offset, i, l, j, k
+  for (i = 0, l = filters.length; i < l; i++) {
+    filter = filters[i]
+    fn = _.resolveAsset(this.$options, 'filters', filter.name)
+    _.assertAsset(fn, 'filter', filter.name)
+    if (!fn) continue
+    fn = write ? fn.write : (fn.read || fn)
+    if (typeof fn !== 'function') continue
+    args = write ? [value, oldValue] : [value]
+    offset = write ? 2 : 1
+    if (filter.args) {
+      for (j = 0, k = filter.args.length; j < k; j++) {
+        arg = filter.args[j]
+        args[j + offset] = arg.dynamic
+          ? this.$get(arg.value)
+          : arg.value
+      }
+    }
+    value = fn.apply(this, args)
+  }
+  return value
 }
 
 /**

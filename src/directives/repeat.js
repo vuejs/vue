@@ -23,19 +23,6 @@ module.exports = {
   bind: function () {
     // uid as a cache identifier
     this.id = '__v_repeat_' + (++uid)
-    // we need to insert the objToArray converter
-    // as the first read filter, because it has to be invoked
-    // before any user filters. (can't do it in `update`)
-    if (!this.filters) {
-      this.filters = {}
-    }
-    // add the object -> array convert filter
-    var objectConverter = _.bind(objToArray, this)
-    if (!this.filters.read) {
-      this.filters.read = [objectConverter]
-    } else {
-      this.filters.read.unshift(objectConverter)
-    }
     // setup anchor node
     this.anchor = _.createAnchor('v-repeat')
     _.replace(this.el, this.anchor)
@@ -219,13 +206,6 @@ module.exports = {
    */
 
   realUpdate: function (data) {
-    data = data || []
-    var type = typeof data
-    if (type === 'number') {
-      data = range(data)
-    } else if (type === 'string') {
-      data = _.toArray(data)
-    }
     this.vms = this.diff(data, this.vms)
     // update v-ref
     if (this.refID) {
@@ -399,8 +379,11 @@ module.exports = {
     }
     // sync back changes for two-way bindings of primitive values
     var type = typeof raw
-    if (type === 'string' || type === 'number') {
-      var dir = this
+    var dir = this
+    if (
+      this.rawType === 'object' &&
+      (type === 'string' || type === 'number')
+    ) {
       vm.$watch(alias || '$value', function (val) {
         dir._withLock(function () {
           if (dir.converted) {
@@ -532,6 +515,48 @@ module.exports = {
     } else {
       this.cache[data].pop()
     }
+  },
+
+  /**
+   * Pre-process the value before piping it through the
+   * filters, and convert non-Array objects to arrays.
+   *
+   * This function will be bound to this directive instance
+   * and passed into the watcher.
+   *
+   * @param {*} value
+   * @return {Array}
+   * @private
+   */
+
+  _preProcess: function (value) {
+    // regardless of type, store the un-filtered raw value.
+    this.rawValue = value
+    var type = this.rawType = typeof value
+    if (!isPlainObject(value)) {
+      this.converted = false
+      if (type === 'number') {
+        value = range(value)
+      } else if (type === 'string') {
+        value = _.toArray(value)
+      }
+      return value || []
+    } else {
+      // convert plain object to array.
+      var keys = Object.keys(value)
+      var i = keys.length
+      var res = new Array(i)
+      var key
+      while (i--) {
+        key = keys[i]
+        res[i] = {
+          $key: key,
+          $value: value[key]
+        }
+      }
+      this.converted = true
+      return res
+    }
   }
 
 }
@@ -554,43 +579,6 @@ function findNextVm (vm, anchor) {
     el = el.nextSibling
   }
   return el.__vue__
-}
-
-/**
- * Attempt to convert non-Array objects to array.
- * This is the default filter installed to every v-repeat
- * directive.
- *
- * It will be called with **the directive** as `this`
- * context so that we can mark the repeat array as converted
- * from an object.
- *
- * @param {*} obj
- * @return {Array}
- * @private
- */
-
-function objToArray (obj) {
-  // regardless of type, store the un-filtered raw value.
-  this.rawValue = obj
-  if (!isPlainObject(obj)) {
-    this.converted = false
-    return obj
-  }
-  var keys = Object.keys(obj)
-  var i = keys.length
-  var res = new Array(i)
-  var key
-  while (i--) {
-    key = keys[i]
-    res[i] = {
-      $key: key,
-      $value: obj[key]
-    }
-  }
-  // `this` points to the repeat directive instance
-  this.converted = true
-  return res
 }
 
 /**

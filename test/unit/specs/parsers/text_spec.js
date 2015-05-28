@@ -1,4 +1,5 @@
 var textParser = require('../../../../src/parsers/text')
+var dirParser = require('../../../../src/parsers/directive')
 var config = require('../../../../src/config')
 var Vue = require('../../../../src/vue')
 
@@ -112,10 +113,11 @@ describe('Text Parser', function () {
   it('tokens to expression with filters, multiple expressions', function () {
     var tokens = textParser.parse('a {{b | c d | f}} e')
     var exp = textParser.tokensToExp(tokens)
+    var filters = dirParser.parse('b | c d | f')[0].filters
     expect(exp).toBe(
-      '"a "+this._applyFilter("f",[this._applyFilter("c",[b,' +
-        JSON.stringify({value:'d',dynamic:true}) +
-      '])])+" e"')
+      '"a "+this._applyFilters(b,null,' +
+        JSON.stringify(filters) +
+      ',false)+" e"')
   })
 
 })

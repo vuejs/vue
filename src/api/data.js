@@ -1,4 +1,3 @@
-var _ = require('../util')
 var Watcher = require('../watcher')
 var Path = require('../parsers/path')
 var textParser = require('../parsers/text')
@@ -99,13 +98,10 @@ exports.$eval = function (text) {
     // the filter regex check might give false positive
     // for pipes inside strings, so it's possible that
     // we don't get any filters here
+    var val = this.$get(dir.expression)
     return dir.filters
-      ? _.applyFilters(
-          this.$get(dir.expression),
-          _.resolveFilters(this, dir.filters).read,
-          this
-        )
-      : this.$get(dir.expression)
+      ? this._applyFilters(val, null, dir.filters)
+      : val
   } else {
     // no filter
     return this.$get(text)

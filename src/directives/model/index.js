@@ -27,8 +27,8 @@ module.exports = {
 
   bind: function () {
     // friendly warning...
-    var filters = this.filters
-    if (filters && filters.read && !filters.write) {
+    this.checkFilters()
+    if (this.hasRead && !this.hasWrite) {
       _.warn(
         'It seems you are using a read-only filter with ' +
         'v-model. You might want to use a two-way filter ' +
@@ -51,6 +51,24 @@ module.exports = {
     handler.bind.call(this)
     this.update = handler.update
     this.unbind = handler.unbind
+  },
+
+  /**
+   * Check read/write filter stats.
+   */
+
+  checkFilters: function () {
+    var filters = this.filters
+    if (!filters) return
+    var i = filters.length
+    while (i--) {
+      var filter = _.resolveAsset(this.vm.$options, 'filters', filters[i].name)
+      if (typeof filter === 'function' || filter.read) {
+        this.hasRead = true
+      } else if (filter.write) {
+        this.hasWrite = true
+      }
+    }
   }
 
 }

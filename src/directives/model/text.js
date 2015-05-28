@@ -49,7 +49,7 @@ module.exports = {
     // the input with the filtered value.
     // also force update for type="range" inputs to enable
     // "lock in range" (see #506)
-    if ((this.filters && this.filters.read) || el.type === 'range') {
+    if (this.hasRead || el.type === 'range') {
       this.listener = function () {
         if (composing) return
         var charsOffset
@@ -156,5 +156,4 @@ module.exports = {
       _.off(el,'keyup', this.onDel)
     }
   }
-
 }

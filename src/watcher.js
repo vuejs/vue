@@ -18,6 +18,7 @@ var uid = 0
  *                 - {Boolean} twoWay
  *                 - {Boolean} deep
  *                 - {Boolean} user
+ *                 - {Function} [preProcess]
  * @constructor
  */
 
@@ -32,16 +33,10 @@ function Watcher (vm, expression, cb, options) {
   this.deep = !!options.deep
   this.user = !!options.user
   this.twoWay = !!options.twoWay
+  this.filters = options.filters
+  this.preProcess = options.preProcess
   this.deps = []
   this.newDeps = []
-  // setup filters if any.
-  // We delegate directive filters here to the watcher
-  // because they need to be included in the dependency
-  // collection process.
-  if (options.filters) {
-    this.readFilters = options.filters.read
-    this.writeFilters = options.filters.write
-  }
   // parse expression for getter/setter
   var res = expParser.parse(expression, options.twoWay)
   this.getter = res.get
@@ -94,7 +89,12 @@ p.get = function () {
   if (this.deep) {
     traverse(value)
   }
-  value = _.applyFilters(value, this.readFilters, vm)
+  if (this.preProcess) {
+    value = this.preProcess(value)
+  }
+  if (this.filters) {
+    value = vm._applyFilters(value, null, this.filters, false)
+  }
   this.afterGet()
   return value
 }
@@ -107,9 +107,10 @@ p.get = function () {
 
 p.set = function (value) {
   var vm = this.vm
-  value = _.applyFilters(
-    value, this.writeFilters, vm, this.value
-  )
+  if (this.filters) {
+    value = vm._applyFilters(
+      value, this.value, this.filters, true)
+  }
   try {
     this.setter.call(vm, vm, value)
   } catch (e) {

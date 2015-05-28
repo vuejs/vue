@@ -80,7 +80,7 @@ function initOptions (expression) {
     optionUpdateWatcher,
     {
       deep: true,
-      filters: _.resolveFilters(this.vm, descriptor.filters)
+      filters: descriptor.filters
     }
   )
   // update with initial value

@@ -236,12 +236,11 @@ describe('Watcher', function () {
     vm.$options.filters.test2 = function (val, str) {
       return val + str
     }
-    var filters = _.resolveFilters(vm, [
-      { name: 'test', args: [{value:3, dynamic:false}] },
-      { name: 'test2', args: [{value:'msg', dynamic:true}]}
-    ])
     var watcher = new Watcher(vm, 'b.c', spy, {
-      filters: filters
+      filters: [
+        { name: 'test', args: [{value:3, dynamic:false}]},
+        { name: 'test2', args: [{value:'msg', dynamic:true}]}
+      ]
     })
     expect(watcher.value).toBe('6yo')
     vm.b.c = 3
@@ -258,11 +257,10 @@ describe('Watcher', function () {
         return val > arg ? val : oldVal
       }
     }
-    var filters = _.resolveFilters(vm, [
-      { name: 'test', args: [{value:5, dynamic:false}] }
-    ])
     var watcher = new Watcher(vm, 'b["c"]', spy, {
-      filters: filters,
+      filters: [
+        { name: 'test', args: [{value:5, dynamic:false}] }
+      ],
       twoWay: true
     })
     expect(watcher.value).toBe(2)

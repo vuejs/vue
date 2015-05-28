@@ -1,22 +1,61 @@
 var Vue = require('../../../../src/vue')
+var _ = require('../../../../src/util/debug')
 
 describe('misc', function () {
 
-  it('_applyFilter', function () {
+  describe('_applyFilters', function () {
+
+    var readSpy = jasmine.createSpy()
+    var readSpy2 = jasmine.createSpy()
+    var writeSpy = jasmine.createSpy()
+
     var vm = new Vue({
+      data: {
+        msg: 'BBB'
+      },
       filters: {
-        a: {
-          read: function (a, b) {
-            return a + b
+        read: function (v, arg) {
+          return v + ' read:' + arg
+        },
+        read2: {
+          read: function (v, arg) {
+            return v + ' read2:' + arg
           }
         },
-        b: function (a, b) {
-          return a - b
+        write: {
+          write: function (v, oldV) {
+            return v + ' ' + oldV
+          }
         }
       }
     })
-    expect(vm._applyFilter('a', [1, 1])).toBe(2)
-    expect(vm._applyFilter('b', [1, 1])).toBe(0)
+
+    beforeEach(function () {
+      spyOn(_, 'warn')
+    })
+
+    it('read', function () {
+      var filters = [
+        { name: 'read', args: [{dynamic:false,value:'AAA'}] },
+        { name: 'read2', args: [{dynamic:true, value:'msg'}] }
+      ]
+      var val = vm._applyFilters('test', null, filters, false)
+      expect(val).toBe('test read:AAA read2:BBB')
+    })
+
+    it('write', function () {
+      var filters = [
+        { name: 'write' }
+      ]
+      var val = vm._applyFilters('test', 'oldTest', filters, true)
+      expect(val).toBe('test oldTest')
+    })
+
+    it('warn not found', function () {
+      vm._applyFilters('what', null, [{name:'what the fuck'}])
+      expect(hasWarned(_, 'Failed to resolve filter')).toBe(true)
+    })
+
   })
 
 })

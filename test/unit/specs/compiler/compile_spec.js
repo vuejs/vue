@@ -196,7 +196,7 @@ if (_.inBrowser) {
       expect(args[0]).toBe('prop')
       expect(args[1]).toBe(null)
       expect(args[2].arg).toBe('withFilter')
-      expect(args[2].expression).toBe('this._applyFilter("filter",[a])')
+      expect(args[2].expression).toBe('this._applyFilters(a,null,[{"name":"filter"}],false)')
       expect(args[3]).toBe(def)
       // camelCase should've warn
       expect(_.warn.calls.count()).toBe(1)
