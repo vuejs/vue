@@ -3,6 +3,7 @@ var addClass = _.addClass
 var removeClass = _.removeClass
 var transDurationProp = _.transitionProp + 'Duration'
 var animDurationProp = _.animationProp + 'Duration'
+var doc = typeof document === 'undefined' ? null : document
 
 var TYPE_TRANSITION = 1
 var TYPE_ANIMATION = 2
@@ -19,15 +20,17 @@ var queued = false
  * @param {Function} op   - the actual dom operation
  * @param {String} cls    - the className to remove when the
  *                          transition is done.
+ * @param {Vue} vm
  * @param {Function} [cb] - user supplied callback.
  */
 
-function push (el, dir, op, cls, cb) {
+function push (el, dir, op, cls, vm, cb) {
   queue.push({
     el  : el,
     dir : dir,
     cb  : cb,
     cls : cls,
+    vm  : vm,
     op  : op
   })
   if (!queued) {
@@ -61,44 +64,69 @@ function run (job) {
 
   var el = job.el
   var data = el.__v_trans
+  var hooks = data.hooks
   var cls = job.cls
   var cb = job.cb
   var op = job.op
+  var vm = job.vm
   var transitionType = getTransitionType(el, data, cls)
 
   if (job.dir > 0) { // ENTER
+
+    // call javascript enter hook
+    if (hooks && hooks.enter) {
+      var expectsCb = hooks.enter.length > 1
+      if (expectsCb) {
+        data.hookCb = function () {
+          data.hookCancel = data.hookCb = null
+          if (hooks.afterEnter) {
+            hooks.afterEnter.call(vm, el)
+          }
+          if (cb) cb()
+        }
+      }
+      data.hookCancel = hooks.enter.call(vm, el, data.hookCb)
+    }
+
     if (transitionType === TYPE_TRANSITION) {
       // trigger transition by removing enter class
       removeClass(el, cls)
-      // only need to listen for transitionend if there's
-      // a user callback
-      if (cb) setupTransitionCb(_.transitionEndEvent)
+      setupTransitionCb(_.transitionEndEvent)
     } else if (transitionType === TYPE_ANIMATION) {
       // animations are triggered when class is added
       // so we just listen for animationend to remove it.
       setupTransitionCb(_.animationEndEvent, function () {
         removeClass(el, cls)
       })
-    } else {
+    } else if (!data.hookCb) {
       // no transition applicable
       removeClass(el, cls)
-      if (cb) cb()
+      if (hooks && hooks.afterEnter) {
+        hooks.afterEnter.call(vm, el)
+      }
+      if (cb) {
+        cb()
+      }
     }
+
   } else { // LEAVE
-    if (transitionType) {
-      // leave transitions/animations are both triggered
-      // by adding the class, just remove it on end event.
-      var event = transitionType === TYPE_TRANSITION
-        ? _.transitionEndEvent
-        : _.animationEndEvent
-      setupTransitionCb(event, function () {
+    // only need to handle leave if there's no hook callback
+    if (!data.hookCb) {
+      if (transitionType) {
+        // leave transitions/animations are both triggered
+        // by adding the class, just remove it on end event.
+        var event = transitionType === TYPE_TRANSITION
+          ? _.transitionEndEvent
+          : _.animationEndEvent
+        setupTransitionCb(event, function () {
+          op()
+          removeClass(el, cls)
+        })
+      } else {
         op()
         removeClass(el, cls)
-      })
-    } else {
-      op()
-      removeClass(el, cls)
-      if (cb) cb()
+        if (cb) cb()
+      }
     }
   }
 
@@ -119,7 +147,17 @@ function run (job) {
         _.off(el, event, onEnd)
         data.event = data.callback = null
         if (cleanupFn) cleanupFn()
-        if (cb) cb()
+        if (!data.hookCb) {
+          if (job.dir > 0 && hooks && hooks.afterEnter) {
+            hooks.afterEnter.call(vm, el)
+          }
+          if (job.dir < 0 && hooks && hooks.afterLeave) {
+            hooks.afterLeave.call(vm, el)
+          }
+          if (cb) {
+            cb()
+          }
+        }
       }
     }
     _.on(el, event, onEnd)
@@ -137,6 +175,14 @@ function run (job) {
  */
 
 function getTransitionType (el, data, className) {
+  // skip CSS transitions if page is not visible -
+  // this solves the issue of transitionend events not
+  // firing until the page is visible again.
+  // pageVisibility API is supported in IE10+, same as
+  // CSS transitions.
+  if (!_.transitionEndEvent || (doc && doc.hidden)) {
+    return
+  }
   var type = data.cache && data.cache[className]
   if (type) return type
   var inlineStyles = el.style
@@ -168,9 +214,13 @@ function getTransitionType (el, data, className) {
  * @param {Number} direction - 1: enter, -1: leave
  * @param {Function} op - the actual DOM operation
  * @param {Object} data - target element's transition data
+ * @param {Vue} vm
+ * @param {Function} cb
  */
 
-module.exports = function (el, direction, op, data, cb) {
+module.exports = function (el, direction, op, data, vm, cb) {
+  vm = el.__vue__ || vm
+  var hooks = data.hooks
   var prefix = data.id || 'v'
   var enterClass = prefix + '-enter'
   var leaveClass = prefix + '-leave'
@@ -181,12 +231,42 @@ module.exports = function (el, direction, op, data, cb) {
     removeClass(el, leaveClass)
     data.event = data.callback = null
   }
+  // cancel function from js hooks
+  if (data.hookCancel) {
+    data.hookCancel()
+    data.hookCancel = null
+  }
   if (direction > 0) { // enter
+    // enter class
     addClass(el, enterClass)
+    // js hook
+    if (hooks && hooks.beforeEnter) {
+      hooks.beforeEnter.call(vm, el)
+    }
     op()
-    push(el, direction, null, enterClass, cb)
+    push(el, direction, null, enterClass, vm, cb)
   } else { // leave
+    if (hooks && hooks.beforeLeave) {
+      hooks.beforeLeave.call(vm, el)
+    }
+    // add leave class
     addClass(el, leaveClass)
-    push(el, direction, op, leaveClass, cb)
+    // execute js leave hook
+    if (hooks && hooks.leave) {
+      var expectsCb = hooks.leave.length > 1
+      if (expectsCb) {
+        data.hookCb = function () {
+          data.hookCancel = data.hookCb = null
+          op()
+          removeClass(el, leaveClass)
+          if (hooks && hooks.afterLeave) {
+            hooks.afterLeave.call(vm, el)
+          }
+          if (cb) cb()
+        }
+      }
+      data.hookCancel = hooks.leave.call(vm, el, data.hookCb)
+    }
+    push(el, direction, op, leaveClass, vm, cb)
   }
 }

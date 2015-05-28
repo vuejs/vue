@@ -19,7 +19,7 @@ module.exports = {
       // so the transition module knows this is a
       // javascript transition without having to check
       // computed CSS.
-      fns: _.resolveAsset(vm.$options, 'transitions', id)
+      hooks: _.resolveAsset(vm.$options, 'transitions', id)
     }
     if (oldId) {
       _.removeClass(this.el, oldId + '-transition')
