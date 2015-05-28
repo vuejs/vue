@@ -21,6 +21,7 @@ _.define(
       return
     }
     ob.convert(key, val)
+    ob.notify()
     if (ob.vms) {
       var i = ob.vms.length
       while (i--) {
@@ -28,8 +29,6 @@ _.define(
         vm._proxy(key)
         vm._digest()
       }
-    } else {
-      ob.notify()
     }
   }
 )
@@ -70,6 +69,7 @@ _.define(
     if (!ob || _.isReserved(key)) {
       return
     }
+    ob.notify()
     if (ob.vms) {
       var i = ob.vms.length
       while (i--) {
@@ -77,8 +77,6 @@ _.define(
         vm._unproxy(key)
         vm._digest()
       }
-    } else {
-      ob.notify()
     }
   }
 )
