@@ -2,6 +2,12 @@ var _ = require('../util')
 var queue = []
 var queued = false
 
+/**
+ * Push a job into the queue.
+ *
+ * @param {Function} job
+ */
+
 exports.push = function (job) {
   queue.push(job)
   if (!queued) {

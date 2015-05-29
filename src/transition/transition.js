@@ -11,6 +11,16 @@ var doc = typeof document === 'undefined' ? null : document
 var TYPE_TRANSITION = 1
 var TYPE_ANIMATION = 2
 
+/**
+ * A Transition object that encapsulates the state and logic
+ * of the transition.
+ *
+ * @param {Element} el
+ * @param {String} id
+ * @param {Object} hooks
+ * @param {Vue} vm
+ */
+
 function Transition (el, id, hooks, vm) {
   this.el = el
   this.enterClass = id + '-enter'
@@ -35,6 +45,13 @@ function Transition (el, id, hooks, vm) {
 
 var p = Transition.prototype
 
+/**
+ * Start an entering transition.
+ *
+ * @param {Function} op - insert/show the element
+ * @param {Function} [cb]
+ */
+
 p.enter = function (op, cb) {
   this.cancelPending()
   this.callHook('beforeEnter')
@@ -43,6 +60,12 @@ p.enter = function (op, cb) {
   op()
   queue.push(this.nextEnter)
 }
+
+/**
+ * The "nextTick" phase of an entering transition, which is
+ * to be pushed into a queue and executed after a reflow so
+ * that removing the class can trigger a CSS transition.
+ */
 
 p.nextEnter = function () {
   var enterHook = this.hooks && this.hooks.enter
@@ -67,12 +90,23 @@ p.nextEnter = function () {
   }
 }
 
+/**
+ * The "cleanup" phase of an entering transition.
+ */
+
 p.afterEnter = function () {
   this.jsCancel = this.pendingJsCb = null
   removeClass(this.el, this.enterClass)
   this.callHook('afterEnter')
   if (this.cb) this.cb()
 }
+
+/**
+ * Start a leaving transition.
+ *
+ * @param {Function} op - remove/hide the element
+ * @param {Function} [cb]
+ */
 
 p.leave = function (op, cb) {
   this.cancelPending()
@@ -95,6 +129,10 @@ p.leave = function (op, cb) {
   }
 }
 
+/**
+ * The "nextTick" phase of a leaving transition.
+ */
+
 p.nextLeave = function () {
   var type = this.getCssTransitionType(this.leaveClass)
   if (type) {
@@ -107,12 +145,21 @@ p.nextLeave = function () {
   }
 }
 
+/**
+ * The "cleanup" phase of a leaving transition.
+ */
+
 p.afterLeave = function () {
   this.op()
   removeClass(this.el, this.leaveClass)
   this.callHook('afterLeave')
   if (this.cb) this.cb()
 }
+
+/**
+ * Cancel any pending callbacks from a previously running
+ * but not finished transition.
+ */
 
 p.cancelPending = function () {
   this.op = this.cb = null
@@ -137,11 +184,25 @@ p.cancelPending = function () {
   }
 }
 
+/**
+ * Call a user-provided hook function.
+ *
+ * @param {String} type
+ */
+
 p.callHook = function (type) {
   if (this.hooks && this.hooks[type]) {
     this.hooks[type].call(this.vm, this.el)
   }
 }
+
+/**
+ * Get an element's transition type based on the
+ * calculated styles.
+ *
+ * @param {String} className
+ * @return {Number}
+ */
 
 p.getCssTransitionType = function (className) {
   // skip CSS transitions if page is not visible -
@@ -174,6 +235,13 @@ p.getCssTransitionType = function (className) {
   }
   return type
 }
+
+/**
+ * Setup a CSS transitionend/animationend callback.
+ *
+ * @param {String} event
+ * @param {Function} cb
+ */
 
 p.setupCssCb = function (event, cb) {
   this.pendingCssEvent = event
