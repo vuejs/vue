@@ -28,11 +28,26 @@ if (_.inBrowser) {
       expect(transition.leaveClass).toBe('test-leave')
       expect(dir.el.className === 'test-transition')
       dir.update('lol', 'test')
-      var transition = dir.el.__v_trans
+      transition = dir.el.__v_trans
       expect(transition.enterClass).toBe('lol-enter')
       expect(transition.leaveClass).toBe('lol-leave')
       expect(transition.fns).toBeUndefined()
       expect(dir.el.className === 'lol-transition')
+    })
+
+    it('should bind the transition to closest vm', function () {
+      var vm1 = new Vue()
+      var vm2 = new Vue()
+      var dir = {
+        el: document.createElement('div'),
+        expression: 'test',
+        bind: def.bind,
+        update: def.update,
+        vm: vm1
+      }
+      dir.el.__vue__ = vm2
+      dir.bind()
+      expect(dir.el.__v_trans.vm).toBe(vm2)
     })
 
     it('dynamic transitions', function (done) {
