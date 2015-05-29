@@ -5,7 +5,7 @@ var def = require('../../../../src/directives/transition')
 if (_.inBrowser) {
   describe('v-transition', function () {
 
-    it('should save the transition id and custom functions as data', function () {
+    it('should instantiate a transition object with correct args', function () {
       var fns = {}
       var dir = {
         el: document.createElement('div'),
@@ -21,12 +21,17 @@ if (_.inBrowser) {
         }
       }
       dir.bind()
-      expect(dir.el.__v_trans.id).toBe('test')
-      expect(dir.el.__v_trans.fns).toBe(fns)
+      var transition = dir.el.__v_trans
+      expect(transition.el).toBe(dir.el)
+      expect(transition.hooks).toBe(fns)
+      expect(transition.enterClass).toBe('test-enter')
+      expect(transition.leaveClass).toBe('test-leave')
       expect(dir.el.className === 'test-transition')
       dir.update('lol', 'test')
-      expect(dir.el.__v_trans.id).toBe('lol')
-      expect(dir.el.__v_trans.fns).toBeUndefined()
+      var transition = dir.el.__v_trans
+      expect(transition.enterClass).toBe('lol-enter')
+      expect(transition.leaveClass).toBe('lol-leave')
+      expect(transition.fns).toBeUndefined()
       expect(dir.el.className === 'lol-transition')
     })
 

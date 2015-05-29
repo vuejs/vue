@@ -37,7 +37,7 @@ function Transition (el, id, hooks, vm) {
   this.typeCache = {}
   // bind
   var self = this
-  ;['nextEnter', 'afterEnter', 'nextLeave', 'afterLeave']
+  ;['enterNextTick', 'enterDone', 'leaveNextTick', 'leaveDone']
     .forEach(function (m) {
       self[m] = _.bind(self[m], self)
     })
@@ -58,7 +58,7 @@ p.enter = function (op, cb) {
   this.cb = cb
   addClass(this.el, this.enterClass)
   op()
-  queue.push(this.nextEnter)
+  this.callHookWithCb('enter')
 }
 
 /**
@@ -67,26 +67,17 @@ p.enter = function (op, cb) {
  * that removing the class can trigger a CSS transition.
  */
 
-p.nextEnter = function () {
-  var enterHook = this.hooks && this.hooks.enter
-  var afterEnter = this.afterEnter
-  var expectsCb
-  if (enterHook) {
-    expectsCb = enterHook.length > 1
-    if (expectsCb) {
-      this.pendingJsCb = _.cancellable(afterEnter)
-    }
-    this.jsCancel = enterHook.call(this.vm, this.el, this.pendingJsCb)
-  }
+p.enterNextTick = function () {
   var type = this.getCssTransitionType(this.enterClass)
+  var enterDone = this.enterDone
   if (type === TYPE_TRANSITION) {
     // trigger transition by removing enter class now
     removeClass(this.el, this.enterClass)
-    this.setupCssCb(transitionEndEvent, afterEnter)
+    this.setupCssCb(transitionEndEvent, enterDone)
   } else if (type === TYPE_ANIMATION) {
-    this.setupCssCb(animationEndEvent, afterEnter)
-  } else if (!expectsCb) {
-    afterEnter()
+    this.setupCssCb(animationEndEvent, enterDone)
+  } else {
+    enterDone()
   }
 }
 
@@ -94,10 +85,10 @@ p.nextEnter = function () {
  * The "cleanup" phase of an entering transition.
  */
 
-p.afterEnter = function () {
+p.enterDone = function () {
   this.jsCancel = this.pendingJsCb = null
   removeClass(this.el, this.enterClass)
-  this.callHook('afterEnter')
+  this.callHook('enterDone')
   if (this.cb) this.cb()
 }
 
@@ -114,34 +105,22 @@ p.leave = function (op, cb) {
   this.op = op
   this.cb = cb
   addClass(this.el, this.leaveClass)
-  var leaveHook = this.hooks && this.hooks.leave
-  var expectsCb
-  if (leaveHook) {
-    expectsCb = leaveHook.length > 1
-    if (expectsCb) {
-      this.pendingJsCb = _.cancellable(this.afterLeave)
-    }
-    this.jsCancel = leaveHook.call(this.vm, this.el, this.pendingJsCb)
-  }
-  // only need to handle leave cb if no js cb is provided
-  if (!expectsCb) {
-    queue.push(this.nextLeave)
-  }
+  this.callHookWithCb('leave')
 }
 
 /**
  * The "nextTick" phase of a leaving transition.
  */
 
-p.nextLeave = function () {
+p.leaveNextTick = function () {
   var type = this.getCssTransitionType(this.leaveClass)
   if (type) {
     var event = type === TYPE_TRANSITION
       ? transitionEndEvent
       : animationEndEvent
-    this.setupCssCb(event, this.afterLeave)
+    this.setupCssCb(event, this.leaveDone)
   } else {
-    this.afterLeave()
+    this.leaveDone()
   }
 }
 
@@ -149,10 +128,10 @@ p.nextLeave = function () {
  * The "cleanup" phase of a leaving transition.
  */
 
-p.afterLeave = function () {
+p.leaveDone = function () {
   this.op()
   removeClass(this.el, this.leaveClass)
-  this.callHook('afterLeave')
+  this.callHook('leaveDone')
   if (this.cb) this.cb()
 }
 
@@ -185,7 +164,7 @@ p.cancelPending = function () {
 }
 
 /**
- * Call a user-provided hook function.
+ * Call a user-provided synchronous hook function.
  *
  * @param {String} type
  */
@@ -193,6 +172,31 @@ p.cancelPending = function () {
 p.callHook = function (type) {
   if (this.hooks && this.hooks[type]) {
     this.hooks[type].call(this.vm, this.el)
+  }
+}
+
+/**
+ * Call a user-provided, potentially-async hook function.
+ * We check for the length of arguments to see if the hook
+ * expects a `done` callback. If true, the transition's end
+ * will be determined by when the user calls that callback;
+ * otherwise, the end is determined by the CSS transition or
+ * animation.
+ *
+ * @param {String} type
+ */
+
+p.callHookWithCb = function (type) {
+  var hook = this.hooks && this.hooks[type]
+  if (hook) {
+    if (hook.length > 1) {
+      this.pendingJsCb = _.cancellable(this[type + 'Done'])
+    }
+    this.jsCancel = hook.call(this.vm, this.el, this.pendingJsCb)
+  }
+  // only need to handle nextTick stuff if no js cb is provided
+  if (!this.pendingJsCb) {
+    queue.push(this[type + 'NextTick'])
   }
 }
 
