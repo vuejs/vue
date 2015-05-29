@@ -2,6 +2,18 @@ var _ = require('../util')
 var transition = require('../transition')
 
 /**
+ * Convenience on-instance nextTick. The callback is
+ * auto-bound to the instance, and this avoids component
+ * modules having to rely on the global Vue.
+ *
+ * @param {Function} fn
+ */
+
+exports.$nextTick = function (fn) {
+  _.nextTick(fn, this)
+}
+
+/**
  * Append instance to target
  *
  * @param {Node} target
