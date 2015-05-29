@@ -1,4 +1,5 @@
 var _ = require('../util')
+var Transition = require('../transition/transition')
 
 module.exports = {
 
@@ -12,19 +13,15 @@ module.exports = {
   },
 
   update: function (id, oldId) {
+    var el = this.el
     var vm = this.el.__vue__ || this.vm
-    this.el.__v_trans = {
-      id: id,
-      // resolve the custom transition functions now
-      // so the transition module knows this is a
-      // javascript transition without having to check
-      // computed CSS.
-      hooks: _.resolveAsset(vm.$options, 'transitions', id)
-    }
+    var hooks = _.resolveAsset(vm.$options, 'transitions', id)
+    id = id || 'v'
+    el.__v_trans = new Transition(el, id, hooks, vm)
     if (oldId) {
-      _.removeClass(this.el, oldId + '-transition')
+      _.removeClass(el, oldId + '-transition')
     }
-    _.addClass(this.el, (id || 'v') + '-transition')
+    _.addClass(el, id + '-transition')
   }
 
 }

@@ -248,3 +248,22 @@ exports.indexOf = function (arr, obj) {
   }
   return -1
 }
+
+/**
+ * Make a cancellable version of an async callback.
+ *
+ * @param {Function} fn
+ * @return {Function}
+ */
+
+exports.cancellable = function (fn) {
+  var cb = function () {
+    if (!cb.cancelled) {
+      return fn.apply(this, arguments)
+    }
+  }
+  cb.cancel = function () {
+    cb.cancelled = true
+  }
+  return cb
+}

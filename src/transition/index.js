@@ -1,5 +1,4 @@
 var _ = require('../util')
-var applyTransition = require('./apply')
 
 /**
  * Append with transition.
@@ -107,9 +106,9 @@ exports.blockRemove = function (start, end, vm) {
  */
 
 var apply = exports.apply = function (el, direction, op, vm, cb) {
-  var transData = el.__v_trans
+  var transition = el.__v_trans
   if (
-    !transData ||
+    !transition ||
     !vm._isCompiled ||
     // if the vm is being manipulated by a parent directive
     // during the parent's compilation phase, skip the
@@ -120,5 +119,6 @@ var apply = exports.apply = function (el, direction, op, vm, cb) {
     if (cb) cb()
     return
   }
-  applyTransition(el, direction, op, transData, vm, cb)
+  var action = direction > 0 ? 'enter' : 'leave'
+  transition[action](op, cb)
 }
