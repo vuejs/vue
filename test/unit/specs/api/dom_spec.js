@@ -178,5 +178,24 @@ if (_.inBrowser) {
 
     })
 
+    describe('$nextTick', function () {
+
+      it('should work', function (done) {
+        var context
+        var called = false
+        vm.$nextTick(function () {
+          called = true
+          context = this
+        })
+        expect(called).toBe(false)
+        _.nextTick(function () {
+          expect(called).toBe(true)
+          expect(context).toBe(vm)
+          done()
+        })
+      })
+
+    })
+
   })
 }
