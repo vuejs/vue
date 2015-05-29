@@ -47,7 +47,7 @@ p.enter = function (op, cb) {
 p.nextEnter = function () {
   var enterHook = this.hooks && this.hooks.enter
   var afterEnter = this.afterEnter
-  var pendingJsCb, expectsCb
+  var expectsCb
   if (enterHook) {
     expectsCb = enterHook.length > 1
     if (expectsCb) {
@@ -81,7 +81,7 @@ p.leave = function (op, cb) {
   this.cb = cb
   addClass(this.el, this.leaveClass)
   var leaveHook = this.hooks && this.hooks.leave
-  var pendingJsCb, expectsCb
+  var expectsCb
   if (leaveHook) {
     expectsCb = leaveHook.length > 1
     if (expectsCb) {
