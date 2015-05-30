@@ -110,14 +110,12 @@ module.exports = {
 
   resolveCtor: function (id, cb) {
     var self = this
-    var pendingCb = this._pendingCb = function (ctor) {
-      if (!pendingCb.invalidated) {
-        self.ctorId = id
-        self.Ctor = ctor
-        cb()
-      }
-    }
-    this.vm._resolveComponent(id, pendingCb)
+    this._pendingCb = _.cancellable(function (ctor) {
+      self.ctorId = id
+      self.Ctor = ctor
+      cb()
+    })
+    this.vm._resolveComponent(id, this._pendingCb)
   },
 
   /**
@@ -128,7 +126,7 @@ module.exports = {
 
   invalidatePending: function () {
     if (this._pendingCb) {
-      this._pendingCb.invalidated = true
+      this._pendingCb.cancel()
       this._pendingCb = null
     }
   },
