@@ -2,57 +2,35 @@
 
 # Vue.js [![Build Status](https://travis-ci.org/yyx990803/vue.svg?branch=master)](https://travis-ci.org/yyx990803/vue) [![Selenium Test Status](https://saucelabs.com/buildstatus/vuejs)](https://saucelabs.com/u/vuejs) [![Coverage Status](https://img.shields.io/coveralls/yyx990803/vue.svg)](https://coveralls.io/r/yyx990803/vue?branch=master)
 
-> MVVM made simple.
+## Intro
 
-## Introduction
+Vue.js is a library for building interactive web interfaces. It provides data-reactive components with a simple and flexible API. Core features include:
 
-Vue.js is a library for building interactive web interfaces. It provides the benefits of MVVM data binding and a composable component system with a simple and flexible API. You should try it out if you like:
+- Two-way data binding
+- Plain JavaScript objects as reactive models
+- Component-oriented development style
 
-- Intuitive API that simply makes sense
-- Extendable Data bindings
-- Plain JavaScript objects as models
-- Building interface by composing reusable components
-- Flexibility to mix & match the view layer with other libraries
+Note that Vue.js only supports IE9 or above. To check out live examples and docs, visit [vuejs.org](http://vuejs.org).
 
-It's really really easy to get started. Seriously, it's so easy:
+## Questions
 
-``` html
-<div id="demo">
-  {{message}}
-  <input v-model="message">
-</div>
-```
+For questions and support please use the Gitter room: [![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/yyx990803/vue) or submit issues at [vuejs/Discussion](https://github.com/vuejs/Discussion/issues). The issue list of this repo is **exclusively** for bug reports and feature requests.
 
-``` js
-var demo = new Vue({
-  el: '#demo',
-  data: {
-    message: 'Hello Vue.js!'
-  }
-})
-```
+## Issues
 
-To check out the live demo, guides and API reference, visit [vuejs.org](http://vuejs.org).
-
-## Browser Support
-
-Vue.js supports [most ECMAScript 5 compliant browsers](https://saucelabs.com/u/vuejs), essentially IE9+. IE8 and below are not supported.
+Please make sure to read the [Issue Reporting Checklist](https://github.com/yyx990803/vue/blob/master/CONTRIBUTING.md#issue-reporting-checklist) before opening an issue. Issues not conforming to the guidelines may be closed immediately.
 
 ## Contribution
 
-Read the [contributing guide](https://github.com/yyx990803/vue/blob/master/CONTRIBUTING.md).
-
-## Get in Touch
-
-- For latest releases and announcements, follow on Twitter: [@vuejs](https://twitter.com/vuejs)
-- Live discussion: [![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/yyx990803/vue)
-- Bugs reports: first read the [issue checklist](https://github.com/yyx990803/vue/blob/master/CONTRIBUTING.md#issue-reporting-checklist), then [open an issue](https://github.com/yyx990803/vue/issues).
-- Questions, suggestions, feature requests: open an issue at [vuejs/Discussion](https://github.com/vuejs/Discussion/issues).
-- If you have a Vue-related project/component/tool, add it to [this list](https://github.com/yyx990803/vue/wiki/User-Contributed-Components-&-Tools)!
+Please make sure to read the [Contributing Guide](https://github.com/yyx990803/vue/blob/master/CONTRIBUTING.md) before making a pull request. If you have a Vue-related project/component/tool, add it to [this list](https://github.com/yyx990803/vue/wiki/User-Contributed-Components-&-Tools)!
 
 ## Changelog
 
 Details changes for each release are documented in the [release notes](https://github.com/yyx990803/vue/releases).
+
+## Stay In Touch
+
+- For latest releases and announcements, follow on Twitter: [@vuejs](https://twitter.com/vuejs)
 
 ## License
 
