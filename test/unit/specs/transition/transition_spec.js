@@ -289,7 +289,20 @@ if (_.inBrowser && !_.isIE9) {
         transition.apply(el, 1, op, vm)
         _.nextTick(function () {
           expect(el.__v_trans.typeCache['test-enter']).not.toBeUndefined()
-          done()
+          // for some reason window.getComputedStyle cannot be spied on in
+          // phantomjs after the refactor...
+          var calls = 0
+          Object.defineProperty(el.__v_trans.typeCache, 'test-enter', {
+            get: function () {
+              calls++
+              return 1
+            }
+          })
+          transition.apply(el, 1, op, vm)
+          _.nextTick(function () {
+            expect(calls).toBe(1)
+            done()
+          })
         })
       })
 

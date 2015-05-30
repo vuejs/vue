@@ -214,6 +214,7 @@ p.getCssTransitionType = function (className) {
   // firing until the page is visible again.
   // pageVisibility API is supported in IE10+, same as
   // CSS transitions.
+  /* istanbul ignore if */
   if (!transitionEndEvent || (doc && doc.hidden)) {
     return
   }
