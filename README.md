@@ -18,11 +18,11 @@ For questions and support please use the Gitter room: [![Gitter](https://badges.
 
 ## Issues
 
-Please make sure to read the [Issue Reporting Checklist](https://github.com/yyx990803/vue/blob/master/CONTRIBUTING.md#issue-reporting-checklist) before opening an issue. Issues not conforming to the guidelines may be closed immediately.
+Please make sure to read the [Issue Reporting Checklist](https://github.com/yyx990803/vue/blob/dev/CONTRIBUTING.md#issue-reporting-guidelines) before opening an issue. Issues not conforming to the guidelines may be closed immediately.
 
 ## Contribution
 
-Please make sure to read the [Contributing Guide](https://github.com/yyx990803/vue/blob/master/CONTRIBUTING.md) before making a pull request. If you have a Vue-related project/component/tool, add it to [this list](https://github.com/yyx990803/vue/wiki/User-Contributed-Components-&-Tools)!
+Please make sure to read the [Contributing Guide](https://github.com/yyx990803/vue/blob/dev/CONTRIBUTING.md) before making a pull request. If you have a Vue-related project/component/tool, add it to [this list](https://github.com/yyx990803/vue/wiki/User-Contributed-Components-&-Tools)!
 
 ## Changelog
 

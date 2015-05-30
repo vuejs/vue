@@ -2,7 +2,7 @@
 
 Hi! I’m really excited that you are interested in contributing to Vue.js. Before submitting your contribution though, please make sure to take a moment and read through the following guidelines.
 
-## Issue Reporting Checklist
+## Issue Reporting Guidelines
 
 - The issue list of this repo is **exclusively** for bug reports and feature requests. For simple questions, please use either [Gitter](https://gitter.im/yyx990803/vue) or [vuejs/Discussion](https://github.com/vuejs/Discussion/issues).
 - Try to search for your issue, it may have already been answered or even fixed in the development branch.
@@ -11,7 +11,7 @@ Hi! I’m really excited that you are interested in contributing to Vue.js. Befo
 - It is recommended that you make a JSFiddle to demonstrate your issue. You could start with [this template](http://jsfiddle.net/5sH6A/) that already includes the latest version of Vue.
 - If your issue is resolved but still open, don’t hesitate to close it. In case you found a solution by yourself, it could be helpful to explain how you fixed it.
 
-## Pull Request Checklist
+## Pull Request Guidelines
 
 - Checkout a topic branch from `dev` and merge back against `dev`.
 - Work in the `src` folder and **DO NOT** checkin `dist` in the commits.
