@@ -6,6 +6,41 @@ var Transition = require('../../../../src/transition/transition')
 if (_.inBrowser && !_.isIE9) {
   describe('Transition', function () {
 
+    // insert a test css
+    function insertCSS (text) {
+      var cssEl = document.createElement('style')
+      cssEl.textContent = text
+      document.head.appendChild(cssEl)
+    }
+
+    var duration = '50ms'
+    insertCSS(
+      '.test {\
+        transition: opacity ' + duration + ' ease;\
+        -webkit-transition: opacity ' + duration + ' ease;}'
+    )
+    insertCSS('.test-enter, .test-leave { opacity: 0; }')
+    insertCSS(
+      '.test-anim-enter {\
+        animation: test-enter ' + duration + ';\
+        -webkit-animation: test-enter ' + duration + ';}\
+      .test-anim-leave {\
+        animation: test-leave ' + duration + ';\
+        -webkit-animation: test-leave ' + duration + ';}\
+      @keyframes test-enter {\
+        from { opacity: 0 }\
+        to { opacity: 1 }}\
+      @-webkit-keyframes test-enter {\
+        from { opacity: 0 }\
+        to { opacity: 1 }}\
+      @keyframes test-leave {\
+        from { opacity: 1 }\
+        to { opacity: 0 }}\
+      @-webkit-keyframes test-leave {\
+        from { opacity: 1 }\
+        to { opacity: 0 }}'
+    )
+
     describe('Wrapper methods', function () {
       
       var spy, el, target, parent, vm
@@ -96,49 +131,21 @@ if (_.inBrowser && !_.isIE9) {
 
     describe('CSS transitions', function () {
 
-      var duration = '50ms'
-
-      // insert a test css
-      function insertCSS (text) {
-        var cssEl = document.createElement('style')
-        cssEl.textContent = text
-        document.head.appendChild(cssEl)
-      }
-
-      insertCSS(
-        '.test {\
-          transition: opacity ' + duration + ' ease;\
-          -webkit-transition: opacity ' + duration + ' ease;}'
-      )
-      insertCSS('.test-enter, .test-leave { opacity: 0; }')
-      insertCSS(
-        '.test-anim-enter {\
-          animation: test-enter ' + duration + ';\
-          -webkit-animation: test-enter ' + duration + ';}\
-        .test-anim-leave {\
-          animation: test-leave ' + duration + ';\
-          -webkit-animation: test-leave ' + duration + ';}\
-        @keyframes test-enter {\
-          from { opacity: 0 }\
-          to { opacity: 1 }}\
-        @-webkit-keyframes test-enter {\
-          from { opacity: 0 }\
-          to { opacity: 1 }}\
-        @keyframes test-leave {\
-          from { opacity: 1 }\
-          to { opacity: 0 }}\
-        @-webkit-keyframes test-leave {\
-          from { opacity: 1 }\
-          to { opacity: 0 }}'
-      )
-
-      var vm, el, op, cb
+      var vm, el, op, cb, hooks
       beforeEach(function (done) {
         el = document.createElement('div')
         vm = new Vue({ el: el })
         op = jasmine.createSpy('css op')
         cb = jasmine.createSpy('css cb')
         document.body.appendChild(el)
+        hooks = {
+          beforeEnter: jasmine.createSpy('beforeEnter'),
+          enter: jasmine.createSpy('enter'),
+          afterEnter: jasmine.createSpy('afterEnter'),
+          beforeLeave: jasmine.createSpy('beforeLeave'),
+          leave: jasmine.createSpy('leave'),
+          afterLeave: jasmine.createSpy('afterLeave')
+        }
         // !IMPORTANT!
         // this ensures we force a layout for every test.
         _.nextTick(done)
@@ -149,18 +156,24 @@ if (_.inBrowser && !_.isIE9) {
       })
 
       it('skip on 0s duration (execute right at next frame)', function (done) {
-        el.__v_trans = new Transition(el, 'test', null, vm)
+        el.__v_trans = new Transition(el, 'test', hooks, vm)
         el.style.transition =
         el.style.WebkitTransition = 'opacity 0s ease'
         transition.apply(el, 1, op, vm, cb)
+        expect(hooks.beforeEnter).toHaveBeenCalled()
+        expect(hooks.enter).toHaveBeenCalled()
         _.nextTick(function () {
           expect(op).toHaveBeenCalled()
           expect(cb).toHaveBeenCalled()
+          expect(hooks.afterEnter).toHaveBeenCalled()
           expect(el.classList.contains('test-enter')).toBe(false)
           transition.apply(el, -1, op, vm, cb)
+          expect(hooks.beforeLeave).toHaveBeenCalled()
+          expect(hooks.leave).toHaveBeenCalled()
           _.nextTick(function () {
             expect(op.calls.count()).toBe(2)
             expect(cb.calls.count()).toBe(2)
+            expect(hooks.afterLeave).toHaveBeenCalled()
             expect(el.classList.contains('test-leave')).toBe(false)
             done()
           })
@@ -168,16 +181,22 @@ if (_.inBrowser && !_.isIE9) {
       })
 
       it('skip when no transition available', function (done) {
-        el.__v_trans = new Transition(el, 'test-no-trans', null, vm)
+        el.__v_trans = new Transition(el, 'test-no-trans', hooks, vm)
         transition.apply(el, 1, op, vm, cb)
+        expect(hooks.beforeEnter).toHaveBeenCalled()
+        expect(hooks.enter).toHaveBeenCalled()
         _.nextTick(function () {
           expect(op).toHaveBeenCalled()
           expect(cb).toHaveBeenCalled()
+          expect(hooks.afterEnter).toHaveBeenCalled()
           expect(el.classList.contains('test-no-trans-enter')).toBe(false)
           transition.apply(el, -1, op, vm, cb)
+          expect(hooks.beforeLeave).toHaveBeenCalled()
+          expect(hooks.leave).toHaveBeenCalled()
           _.nextTick(function () {
             expect(op.calls.count()).toBe(2)
             expect(cb.calls.count()).toBe(2)
+            expect(hooks.afterLeave).toHaveBeenCalled()
             expect(el.classList.contains('test-no-trans-leave')).toBe(false)
             done()
           })
@@ -186,7 +205,7 @@ if (_.inBrowser && !_.isIE9) {
 
       it('transition enter', function (done) {
         document.body.removeChild(el)
-        el.__v_trans = new Transition(el, 'test', null, vm)
+        el.__v_trans = new Transition(el, 'test', hooks, vm)
         // inline style
         el.style.transition =
         el.style.WebkitTransition = 'opacity ' + duration + ' ease'
@@ -194,32 +213,40 @@ if (_.inBrowser && !_.isIE9) {
           document.body.appendChild(el)
           op()
         }, vm, cb)
+        expect(hooks.beforeEnter).toHaveBeenCalled()
+        expect(hooks.enter).toHaveBeenCalled()
         expect(op).toHaveBeenCalled()
         expect(cb).not.toHaveBeenCalled()
         _.nextTick(function () {
           expect(el.classList.contains('test-enter')).toBe(false)
+          expect(hooks.afterEnter).not.toHaveBeenCalled()
           _.on(el, _.transitionEndEvent, function () {
             expect(cb).toHaveBeenCalled()
+            expect(hooks.afterEnter).toHaveBeenCalled()
             done()
           })
         })
       })
 
       it('transition leave', function (done) {
-        el.__v_trans = new Transition(el, 'test', null, vm)
+        el.__v_trans = new Transition(el, 'test', hooks, vm)
         // cascaded class style
         el.classList.add('test')
         // force a layout here so the transition can be triggered
         var f = el.offsetHeight
         transition.apply(el, -1, op, vm, cb)
+        expect(hooks.beforeLeave).toHaveBeenCalled()
+        expect(hooks.leave).toHaveBeenCalled()
         _.nextTick(function () {
           expect(op).not.toHaveBeenCalled()
           expect(cb).not.toHaveBeenCalled()
+          expect(hooks.afterLeave).not.toHaveBeenCalled()
           expect(el.classList.contains('test-leave')).toBe(true)
           _.on(el, _.transitionEndEvent, function () {
             expect(op).toHaveBeenCalled()
             expect(cb).toHaveBeenCalled()
             expect(el.classList.contains('test-leave')).toBe(false)
+            expect(hooks.afterLeave).toHaveBeenCalled()
             done()
           })
         })
@@ -227,37 +254,88 @@ if (_.inBrowser && !_.isIE9) {
 
       it('animation enter', function (done) {
         document.body.removeChild(el)
-        el.__v_trans = new Transition(el, 'test-anim', null, vm)
+        el.__v_trans = new Transition(el, 'test-anim', hooks, vm)
         transition.apply(el, 1, function () {
           document.body.appendChild(el)
           op()
         }, vm, cb)
+        expect(hooks.beforeEnter).toHaveBeenCalled()
+        expect(hooks.enter).toHaveBeenCalled()
         _.nextTick(function () {
           expect(op).toHaveBeenCalled()
           expect(cb).not.toHaveBeenCalled()
           expect(el.classList.contains('test-anim-enter')).toBe(true)
+          expect(hooks.afterEnter).not.toHaveBeenCalled()
           _.on(el, _.animationEndEvent, function () {
             expect(el.classList.contains('test-anim-enter')).toBe(false)
             expect(cb).toHaveBeenCalled()
+            expect(hooks.afterEnter).toHaveBeenCalled()
             done()
           })
         })
       })
 
       it('animation leave', function (done) {
-        el.__v_trans = new Transition(el, 'test-anim', null, vm)
+        el.__v_trans = new Transition(el, 'test-anim', hooks, vm)
         transition.apply(el, -1, op, vm, cb)
+        expect(hooks.beforeLeave).toHaveBeenCalled()
+        expect(hooks.leave).toHaveBeenCalled()
         _.nextTick(function () {
           expect(op).not.toHaveBeenCalled()
           expect(cb).not.toHaveBeenCalled()
           expect(el.classList.contains('test-anim-leave')).toBe(true)
+          expect(hooks.afterLeave).not.toHaveBeenCalled()
           _.on(el, _.animationEndEvent, function () {
             expect(op).toHaveBeenCalled()
             expect(cb).toHaveBeenCalled()
             expect(el.classList.contains('test-anim-leave')).toBe(false)
+            expect(hooks.afterLeave).toHaveBeenCalled()
             done()
           })
         })
+      })
+
+      it('css + js hook with callback', function (done) {
+        document.body.removeChild(el)
+        el.classList.add('test')
+
+        // enter hook that expects a second argument
+        // indicates the user wants to control when the
+        // transition ends.
+        var enterCalled = false
+        hooks.enter = function (el, enterDone) {
+          enterCalled = true
+          setTimeout(function () {
+            enterDone()
+            testDone()
+          }, 100)
+        }
+
+        el.__v_trans = new Transition(el, 'test', hooks, vm)
+        transition.apply(el, 1, function () {
+          document.body.appendChild(el)
+          op()
+        }, vm, cb)
+        expect(hooks.beforeEnter).toHaveBeenCalled()
+        expect(op).toHaveBeenCalled()
+        expect(cb).not.toHaveBeenCalled()
+        expect(enterCalled).toBe(true)
+        _.nextTick(function () {
+          expect(el.classList.contains('test-enter')).toBe(false)
+          expect(hooks.afterEnter).not.toHaveBeenCalled()
+          _.on(el, _.transitionEndEvent, function () {
+            // should wait until js callback is called!
+            expect(cb).not.toHaveBeenCalled()
+            expect(hooks.afterEnter).not.toHaveBeenCalled()
+          })
+        })
+
+        // this is called by the enter hook
+        function testDone () {
+          expect(cb).toHaveBeenCalled()
+          expect(hooks.afterEnter).toHaveBeenCalled()
+          done()
+        }
       })
 
       it('clean up unfinished css callback', function (done) {
@@ -308,7 +386,7 @@ if (_.inBrowser && !_.isIE9) {
 
     })
 
-    describe('JavaScript transitions', function () {
+    describe('JavaScript only transitions', function () {
 
       var el, vm, op, cb, hooks, emitter
       beforeEach(function () {
@@ -404,8 +482,6 @@ if (_.inBrowser && !_.isIE9) {
           }, 30)
         }, 15)
       })
-
     })
-
   })
 }

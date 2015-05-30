@@ -59,6 +59,7 @@ p.enter = function (op, cb) {
   addClass(this.el, this.enterClass)
   op()
   this.callHookWithCb('enter')
+  queue.push(this.enterNextTick)
 }
 
 /**
@@ -76,7 +77,7 @@ p.enterNextTick = function () {
     this.setupCssCb(transitionEndEvent, enterDone)
   } else if (type === TYPE_ANIMATION) {
     this.setupCssCb(animationEndEvent, enterDone)
-  } else {
+  } else if (!this.pendingJsCb) {
     enterDone()
   }
 }
@@ -88,7 +89,7 @@ p.enterNextTick = function () {
 p.enterDone = function () {
   this.jsCancel = this.pendingJsCb = null
   removeClass(this.el, this.enterClass)
-  this.callHook('enterDone')
+  this.callHook('afterEnter')
   if (this.cb) this.cb()
 }
 
@@ -106,6 +107,11 @@ p.leave = function (op, cb) {
   this.cb = cb
   addClass(this.el, this.leaveClass)
   this.callHookWithCb('leave')
+  // only need to do leaveNextTick if there's no explicit
+  // js callback
+  if (!this.pendingJsCb) {
+    queue.push(this.leaveNextTick)
+  }
 }
 
 /**
@@ -131,7 +137,7 @@ p.leaveNextTick = function () {
 p.leaveDone = function () {
   this.op()
   removeClass(this.el, this.leaveClass)
-  this.callHook('leaveDone')
+  this.callHook('afterLeave')
   if (this.cb) this.cb()
 }
 
@@ -193,10 +199,6 @@ p.callHookWithCb = function (type) {
       this.pendingJsCb = _.cancellable(this[type + 'Done'])
     }
     this.jsCancel = hook.call(this.vm, this.el, this.pendingJsCb)
-  }
-  // only need to handle nextTick stuff if no js cb is provided
-  if (!this.pendingJsCb) {
-    queue.push(this[type + 'NextTick'])
   }
 }
 

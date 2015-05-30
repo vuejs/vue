@@ -295,7 +295,7 @@ if (_.inBrowser) {
             },
             leave: function (el, done) {
               spy2()
-              done()
+              _.nextTick(done)
             }
           }
         }
@@ -307,9 +307,13 @@ if (_.inBrowser) {
         expect(spy2).not.toHaveBeenCalled()
         expect(el.textContent).toBe('AAABBB')
         next()
-        expect(spy2).toHaveBeenCalled()
-        expect(el.textContent).toBe('BBB')
-        done()
+        _.nextTick(function () {
+          expect(spy2).toHaveBeenCalled()
+          _.nextTick(function () {
+            expect(el.textContent).toBe('BBB')
+            done()
+          })
+        })
       })
     })
 
@@ -331,7 +335,7 @@ if (_.inBrowser) {
           test: {
             enter: function (el, done) {
               spy2()
-              done()
+              _.nextTick(done)
             },
             leave: function (el, done) {
               spy1()
