@@ -436,7 +436,7 @@ module.exports = {
     var cache = this.cache
     var id
     if (key || idKey) {
-      var id = idKey
+      id = idKey
         ? idKey === '$index'
           ? index
           : data[idKey]

@@ -32,7 +32,7 @@ module.exports = compile
 
 function compile (el, options, partial, transcluded) {
   // link function for the node itself.
-  var nodeLinkFn = options._asComponent && !partial
+  var nodeLinkFn = !partial
     ? compileRoot(el, options)
     : compileNode(el, options)
   // link function for the childNodes
@@ -118,7 +118,7 @@ function teardownDirs (vm, dirs, destroying) {
 }
 
 /**
- * Compile the root element of a component. There are
+ * Compile the root element of an instance. There are
  * 3 types of things to process here:
  * 
  * 1. props on parent container (child scope)
@@ -135,23 +135,31 @@ function teardownDirs (vm, dirs, destroying) {
  */
 
 function compileRoot (el, options) {
-  var isBlock = el.nodeType === 11 // DocumentFragment
   var containerAttrs = options._containerAttrs
   var replacerAttrs = options._replacerAttrs
   var props = options.props
   var propsLinkFn, parentLinkFn, replacerLinkFn
   // 1. props
-  propsLinkFn = props
+  propsLinkFn = props && containerAttrs
     ? compileProps(el, containerAttrs, props)
     : null
-  if (!isBlock) {
-    // 2. container attributes
-    if (containerAttrs) {
-      parentLinkFn = compileDirectives(containerAttrs, options)
-    }
-    if (replacerAttrs) {
-      // 3. replacer attributes
-      replacerLinkFn = compileDirectives(replacerAttrs, options)
+  // only need to compile other attributes for
+  // non-block instances
+  if (el.nodeType !== 11) {
+    // for components, container and replacer need to be
+    // compiled separately and linked in different scopes.
+    if (options._asComponent) {
+      // 2. container attributes
+      if (containerAttrs) {
+        parentLinkFn = compileDirectives(containerAttrs, options)
+      }
+      if (replacerAttrs) {
+        // 3. replacer attributes
+        replacerLinkFn = compileDirectives(replacerAttrs, options)
+      }
+    } else {
+      // non-component, just compile as a normal element.
+      replacerLinkFn = compileDirectives(el, options)
     }
   }
   return function rootLinkFn (vm, el, host) {
@@ -192,17 +200,16 @@ function compileNode (node, options) {
  */
 
 function compileElement (el, options) {
-  if (checkTransclusion(el)) {
+  var hasAttrs = el.hasAttributes()
+  if (hasAttrs && checkTransclusion(el)) {
     // unwrap textNode
     if (el.hasAttribute('__vue__wrap')) {
       el = el.firstChild
     }
     return compile(el, options._parent.$options, true, true)
   }
-  var linkFn
-  var hasAttrs = el.hasAttributes()
   // check element directives
-  linkFn = checkElementDirectives(el, options)
+  var linkFn = checkElementDirectives(el, options)
   // check terminal direcitves (repeat & if)
   if (!linkFn && hasAttrs) {
     linkFn = checkTerminalDirectives(el, options)
@@ -406,7 +413,7 @@ function compileProps (el, attrs, propNames) {
     if (value != null) {
       prop = {
         name: name,
-        value: value
+        raw: value
       }
       var tokens = textParser.parse(value)
       if (tokens) {
@@ -447,14 +454,22 @@ function makePropsLinkFn (props) {
       // so we need to wrap the path here
       path = _.camelize(prop.name.replace(dataAttrRE, ''))
       if (prop.dynamic) {
-        vm._bindDir('prop', el, {
-          arg: path,
-          expression: prop.value,
-          oneWay: prop.oneTime
-        }, propDef)
+        if (vm.$parent) {
+          vm._bindDir('prop', el, {
+            arg: path,
+            expression: prop.value,
+            oneWay: prop.oneTime
+          }, propDef)
+        } else {
+          _.warn(
+            'Cannot bind dynamic prop on a root instance' +
+            ' with no parent: ' + prop.name + '="' +
+            prop.raw + '"'
+          )
+        }
       } else {
         // just set once
-        vm.$set(path, prop.value)
+        vm.$set(path, prop.raw)
       }
     }
   }

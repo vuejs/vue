@@ -199,10 +199,30 @@ if (_.inBrowser) {
       expect(args[2].expression).toBe('this._applyFilters(a,null,[{"name":"filter"}],false)')
       expect(args[3]).toBe(def)
       // camelCase should've warn
-      expect(_.warn.calls.count()).toBe(1)
+      expect(hasWarned(_, 'using camelCase')).toBe(true)
       // literal and one time should've called vm.$set
       expect(vm.$set).toHaveBeenCalledWith('a', '1')
       expect(vm.$set).toHaveBeenCalledWith('someOtherAttr', '2')
+    })
+
+    it('props on root instance', function () {
+      // temporarily remove vm.$parent
+      var parent = vm.$parent
+      vm.$parent = null
+      var options = _.mergeOptions(Vue.options, {
+        props: ['a', 'b']
+      })
+      var def = Vue.options.directives._prop
+      el.setAttribute('a', 'hi')
+      el.setAttribute('b', '{{hi}}')
+      transclude(el, options)
+      var linker = compile(el, options)
+      linker(vm, el)
+      expect(vm._bindDir.calls.count()).toBe(0)
+      expect(vm.$set).toHaveBeenCalledWith('a', 'hi')
+      expect(hasWarned(_, 'Cannot bind dynamic prop on a root')).toBe(true)
+      // restore parent mock
+      vm.$parent = parent
     })
 
     it('DocumentFragment', function () {

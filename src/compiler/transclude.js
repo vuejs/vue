@@ -16,15 +16,17 @@ var transcludedFlagAttr = '__vue__transcluded'
  */
 
 module.exports = function transclude (el, options) {
-  if (options && options._asComponent) {
-    // extract container attributes to pass them down
-    // to compiler, because they need to be compiled in
-    // parent scope. we are mutating the options object here
-    // assuming the same object will be used for compile
-    // right after this.
+  // extract container attributes to pass them down
+  // to compiler, because they need to be compiled in
+  // parent scope. we are mutating the options object here
+  // assuming the same object will be used for compile
+  // right after this.
+  if (options) {
     options._containerAttrs = extractAttrs(el)
-    // Mark content nodes and attrs so that the compiler
-    // knows they should be compiled in parent scope.
+  }
+  // Mark content nodes and attrs so that the compiler
+  // knows they should be compiled in parent scope.
+  if (options && options._asComponent) {
     var i = el.childNodes.length
     while (i--) {
       var node = el.childNodes[i]
@@ -199,16 +201,19 @@ function insertContentAt (outlet, contents) {
  * determine whether an attribute is transcluded.
  *
  * @param {Element} el
+ * @return {Object}
  */
 
 function extractAttrs (el) {
-  var attrs = el.attributes
-  var res = {}
-  var i = attrs.length
-  while (i--) {
-    res[attrs[i].name] = attrs[i].value
+  if (el.nodeType === 1 && el.hasAttributes()) {
+    var attrs = el.attributes
+    var res = {}
+    var i = attrs.length
+    while (i--) {
+      res[attrs[i].name] = attrs[i].value
+    }
+    return res
   }
-  return res
 }
 
 /**
