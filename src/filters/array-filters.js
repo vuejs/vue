@@ -38,24 +38,72 @@ exports.orderBy = function (arr, sortKey, reverse) {
   if (!sortKey) {
     return arr
   }
-  var order = 1
+  var asc = true
   if (arguments.length > 2) {
     if (reverse === '-1') {
-      order = -1
+      asc = false
     } else {
-      order = reverse ? -1 : 1
+      asc = !reverse
     }
   }
-  // sort on a copy to avoid mutating original array
-  return arr.slice().sort(function (a, b) {
+  
+  var getKey = function(item) {
     if (sortKey !== '$key' && sortKey !== '$value') {
-      if (a && '$value' in a) a = a.$value
-      if (b && '$value' in b) b = b.$value
+      if (item && '$value' in item) item = item.$value
     }
-    a = _.isObject(a) ? Path.get(a, sortKey) : a
-    b = _.isObject(b) ? Path.get(b, sortKey) : b
-    return a === b ? 0 : a > b ? order : -order
-  })
+    return _.isObject(item) ? Path.get(item, sortKey) : item
+  }
+
+  var merge = function(left, right) {
+    var result = []
+    while ((left.length > 0) && (right.length > 0)) {
+      if (asc) {
+        if (noTilde(getKey(left[0])) < noTilde(getKey(right[0]))) {
+          result.push(left.shift())
+        } else {
+          result.push(right.shift())
+        }
+      } else {
+        if (noTilde(getKey(left[0])) > noTilde(getKey(right[0]))) {
+          result.push(left.shift())
+        } else {
+          result.push(right.shift())
+        }    
+      }
+    }
+    return result.concat(left, right)
+  }
+
+  var sort = function(array) {
+    var len = array.length
+    if (len < 2) {
+      return array
+    }
+    var pivot = Math.ceil(len / 2)
+    return merge(sort(array.slice(0, pivot)), sort(array.slice(pivot)))
+  }
+  return sort(arr)
+}
+
+/**
+ * String unicode normalizer helper
+ *
+ * @param {*} s
+ */
+
+function noTilde(s) {
+  if (!!s) {
+    if (typeof s === "number") {
+      return s
+    } else {
+      if (typeof s.normalize !== "undefined") {
+        s = s.normalize("NFKD")
+      }
+      return s.replace(/[\u0300-\u036F]/g, "")
+    }
+  } else {
+    return ""
+  }
 }
 
 /**
