@@ -34,7 +34,8 @@ var pathStateMachine = {
     'ws': ['inPath', 'push'],
     '.': ['beforeIdent', 'push'],
     '[': ['beforeElement', 'push'],
-    'eof': ['afterPath', 'push']
+    'eof': ['afterPath', 'push'],
+    ']': ['inPath', 'push']
   },
 
   'beforeElement': {
@@ -42,7 +43,8 @@ var pathStateMachine = {
     '0': ['afterZero', 'append'],
     'number': ['inIndex', 'append'],
     "'": ['inSingleQuote', 'append', ''],
-    '"': ['inDoubleQuote', 'append', '']
+    '"': ['inDoubleQuote', 'append', ''],
+    "ident": ['inIdent', 'append', '*']
   },
 
   'afterZero': {
@@ -189,9 +191,12 @@ function parsePath (path) {
 
     mode = transition[0]
     action = actions[transition[1]] || noop
-    newChar = transition[2] === undefined
+    newChar = transition[2]
+    newChar = newChar === undefined
       ? c
-      : transition[2]
+      : newChar === '*'
+        ? newChar + c
+        : newChar
     action()
 
     if (mode === 'afterPath') {
@@ -207,11 +212,13 @@ function parsePath (path) {
  * @return {Boolean}
  */
 
-function formatAccessor(key) {
+function formatAccessor (key) {
   if (identRE.test(key)) { // identifier
     return '.' + key
   } else if (+key === key >>> 0) { // bracket index
     return '[' + key + ']'
+  } else if (key.charAt(0) === '*') {
+    return '[o' + formatAccessor(key.slice(1)) + ']'
   } else { // bracket string
     return '["' + key.replace(/"/g, '\\"') + '"]'
   }
@@ -272,6 +279,7 @@ exports.get = function (obj, path) {
  */
 
 exports.set = function (obj, path, val) {
+  var original = obj
   if (typeof path === 'string') {
     path = exports.parse(path)
   }
@@ -279,20 +287,25 @@ exports.set = function (obj, path, val) {
     return false
   }
   var last, key
-  for (var i = 0, l = path.length - 1; i < l; i++) {
+  for (var i = 0, l = path.length; i < l; i++) {
     last = obj
     key = path[i]
-    obj = obj[key]
-    if (!_.isObject(obj)) {
-      obj = {}
-      last.$add(key, obj)
+    if (key.charAt(0) === '*') {
+      key = original[key.slice(1)]
     }
-  }
-  key = path[i]
-  if (key in obj) {
-    obj[key] = val
-  } else {
-    obj.$add(key, val)
+    if (i < l - 1) {
+      obj = obj[key]
+      if (!_.isObject(obj)) {
+        obj = {}
+        last.$add(key, obj)
+      }
+    } else {
+      if (key in obj) {
+        obj[key] = val
+      } else {
+        obj.$add(key, val)
+      }
+    }
   }
   return true
 }

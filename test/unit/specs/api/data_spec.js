@@ -40,6 +40,11 @@ describe('Data API', function () {
     // setting unexisting
     vm.$set('c.d', 2)
     expect(vm.c.d).toBe(2)
+    // warn against setting unexisting
+    expect(hasWarned(_, 'Consider pre-initializing')).toBe(true)
+  })
+
+  it('$set invalid', function () {
     // invalid, should throw
     if (leftHandThrows()) {
       // if creating a function with invalid left hand
