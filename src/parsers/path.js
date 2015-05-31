@@ -200,6 +200,7 @@ function parsePath (path) {
     action()
 
     if (mode === 'afterPath') {
+      keys.raw = path
       return keys
     }
   }
@@ -298,14 +299,25 @@ exports.set = function (obj, path, val) {
       if (!_.isObject(obj)) {
         obj = {}
         last.$add(key, obj)
+        warnNonExistent(path)
       }
     } else {
       if (key in obj) {
         obj[key] = val
       } else {
         obj.$add(key, val)
+        warnNonExistent(path)
       }
     }
   }
   return true
+}
+
+function warnNonExistent (path) {
+  _.warn(
+    'You are setting a non-existent path "' + path.raw + '" ' +
+    'on a vm instance. Consider pre-initializing the property ' +
+    'with the "data" option for more reliable reactivity ' +
+    'and better performance.'
+  )
 }

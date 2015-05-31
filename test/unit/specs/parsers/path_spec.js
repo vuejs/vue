@@ -44,6 +44,7 @@ describe('Path Parser', function () {
     assertPath('foo["baz"]', ['foo', 'baz'])
     assertPath('foo["b\\"az"]', ['foo', 'b"az'])
     assertPath("foo['b\\'az']", ['foo', "b'az"])
+    assertPath('a[b][c]', ['a', '*b', '*c'])
   })
 
   it('handle invalid paths', function () {
@@ -64,6 +65,7 @@ describe('Path Parser', function () {
     assertInvalidPath('  42   ')
     assertInvalidPath('foo["bar]')
     assertInvalidPath("foo['bar]")
+    assertInvalidPath('foo[bar + boo]')
   })
 
   it('caching', function () {
@@ -102,6 +104,16 @@ describe('Path Parser', function () {
     var res = Path.set(target, 'a.b.c', 123)
     expect(res).toBe(true)
     expect(target.a.b.c).toBe(123)
+  })
+
+  it('set dynamic non-existent', function () {
+    var target = {
+      key: 'what',
+      obj: {}
+    }
+    var res = Path.set(target, 'obj[key]', 123)
+    expect(res).toBe(true)
+    expect(target.obj.what).toBe(123)
   })
 
   it('set on prototype chain', function () {

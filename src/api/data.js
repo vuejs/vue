@@ -44,12 +44,6 @@ exports.$set = function (exp, val) {
  */
 
 exports.$add = function (key, val) {
-  _.warn(
-    'You are dynamically adding a property "' + key + '" to ' +
-    'a vm instance. Consider pre-initializing the property ' +
-    'with the "data" option for more reliable reactivity ' +
-    'and better performance.'
-  )
   this._data.$add(key, val)
 }
 
