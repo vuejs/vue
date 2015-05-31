@@ -249,7 +249,7 @@ module.exports = {
     for (i = 0, l = data.length; i < l; i++) {
       obj = data[i]
       raw = converted ? obj.$value : obj
-      vm = !init && this.getVm(raw, converted ? obj.$key : null)
+      vm = !init && this.getVm(raw, i, converted ? obj.$key : null)
       if (vm) { // reusable instance
         vm._reused = true
         vm.$index = i // update $index
@@ -375,7 +375,7 @@ module.exports = {
     vm._repeat = true
     // cache instance
     if (needCache) {
-      this.cacheVm(raw, vm, this.converted ? meta.$key : null)
+      this.cacheVm(raw, vm, index, this.converted ? meta.$key : null)
     }
     // sync back changes for two-way bindings of primitive values
     var type = typeof raw
@@ -427,15 +427,20 @@ module.exports = {
    *
    * @param {Object} data
    * @param {Vue} vm
+   * @param {Number} index
    * @param {String} [key]
    */
 
-  cacheVm: function (data, vm, key) {
+  cacheVm: function (data, vm, index, key) {
     var idKey = this.idKey
     var cache = this.cache
     var id
     if (key || idKey) {
-      id = idKey ? data[idKey] : key
+      var id = idKey
+        ? idKey === '$index'
+          ? index
+          : data[idKey]
+        : key
       if (!cache[id]) {
         cache[id] = vm
       } else {
@@ -469,14 +474,19 @@ module.exports = {
    * Try to get a cached instance from a piece of data.
    *
    * @param {Object} data
+   * @param {Number} index
    * @param {String} [key]
    * @return {Vue|undefined}
    */
 
-  getVm: function (data, key) {
+  getVm: function (data, index, key) {
     var idKey = this.idKey
     if (key || idKey) {
-      var id = idKey ? data[idKey] : key
+      var id = idKey
+        ? idKey === '$index'
+          ? index
+          : data[idKey]
+        : key
       return this.cache[id]
     } else if (isObject(data)) {
       return data[this.id]
@@ -507,7 +517,11 @@ module.exports = {
     var idKey = this.idKey
     var convertedKey = vm.$key
     if (idKey || convertedKey) {
-      var id = idKey ? data[idKey] : convertedKey
+      var id = idKey
+        ? idKey === '$index'
+          ? vm.$index
+          : data[idKey]
+        : convertedKey
       this.cache[id] = null
     } else if (isObject(data)) {
       data[this.id] = null

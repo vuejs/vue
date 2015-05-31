@@ -496,6 +496,34 @@ if (_.inBrowser) {
       }
     })
 
+    it('track by $index', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          items: [{a:1}, {a:2}]
+        },
+        template: '<div v-repeat="items" track-by="$index">{{$index}} {{a}}</div>'
+      })
+
+      assertMarkup()
+      var el1 = el.children[0]
+      var el2 = el.children[1]
+      vm.items = [{a:3}, {a:2}, {a:1}]
+      _.nextTick(function () {
+        assertMarkup()
+        // should mutate the DOM in-place
+        expect(el.children[0]).toBe(el1)
+        expect(el.children[1]).toBe(el2)
+        done()
+      })
+
+      function assertMarkup () {
+        expect(el.innerHTML).toBe(vm.items.map(function (item, i) {
+          return '<div>' + i + ' ' + item.a + '</div>'
+        }).join(''))
+      }
+    })
+
     it('warn duplicate objects', function () {
       var obj = {}
       var vm = new Vue({
