@@ -124,6 +124,18 @@ strats.props = function (parentVal, childVal) {
 }
 
 /**
+ * 0.11 deprecation warning
+ */
+
+strats.paramAttributes = function () {
+  /* istanbul ignore next */
+  _.warn(
+    '"paramAttributes" option has been deprecated in 0.12. ' +
+    'Use "props" instead.'
+  )
+}
+
+/**
  * Assets
  *
  * When a vm is present (instance creation), we need to do
