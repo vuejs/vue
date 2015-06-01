@@ -510,38 +510,40 @@ if (_.inBrowser) {
       })
     })
 
-    it('text + compositionevents', function (done) {
-      var vm = new Vue({
-        el: el,
-        data: {
-          test: 'aaa',
-          test2: 'bbb'
-        },
-        template: '<input v-model="test"><input v-model="test2 | uppercase">'
+    if (!_.isAndroid) {
+      it('text + compositionevents', function (done) {
+        var vm = new Vue({
+          el: el,
+          data: {
+            test: 'aaa',
+            test2: 'bbb'
+          },
+          template: '<input v-model="test"><input v-model="test2 | uppercase">'
+        })
+        var input = el.firstChild
+        var input2 = el.childNodes[1]
+        trigger(input, 'compositionstart')
+        trigger(input2, 'compositionstart')
+        input.value = input2.value = 'ccc'
+        // input before composition unlock should not call set
+        trigger(input, 'input')
+        trigger(input2, 'input')
+        expect(vm.test).toBe('aaa')
+        expect(vm.test2).toBe('bbb')
+        // after composition unlock it should work
+        trigger(input, 'compositionend')
+        trigger(input2, 'compositionend')
+        trigger(input, 'input')
+        trigger(input2, 'input')
+        expect(vm.test).toBe('ccc')
+        expect(vm.test2).toBe('ccc')
+        // IE complains about "unspecified error" when calling
+        // setSelectionRange() on an input element that's been
+        // removed from the DOM, so we wait until the
+        // selection range callback has fired to end this test.
+        _.nextTick(done)
       })
-      var input = el.firstChild
-      var input2 = el.childNodes[1]
-      trigger(input, 'compositionstart')
-      trigger(input2, 'compositionstart')
-      input.value = input2.value = 'ccc'
-      // input before composition unlock should not call set
-      trigger(input, 'input')
-      trigger(input2, 'input')
-      expect(vm.test).toBe('aaa')
-      expect(vm.test2).toBe('bbb')
-      // after composition unlock it should work
-      trigger(input, 'compositionend')
-      trigger(input2, 'compositionend')
-      trigger(input, 'input')
-      trigger(input2, 'input')
-      expect(vm.test).toBe('ccc')
-      expect(vm.test2).toBe('ccc')
-      // IE complains about "unspecified error" when calling
-      // setSelectionRange() on an input element that's been
-      // removed from the DOM, so we wait until the
-      // selection range callback has fired to end this test.
-      _.nextTick(done)
-    })
+    }
 
     it('textarea', function () {
       var vm = new Vue({
