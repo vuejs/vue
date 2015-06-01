@@ -68,7 +68,7 @@ if (_.inBrowser) {
           }
         }
       })
-      expect(hasWarned(_, 'Invalid prop key'))
+      expect(hasWarned(_, 'Invalid prop key')).toBe(true)
     })
 
     it('teardown', function (done) {
