@@ -85,6 +85,17 @@ describe('Path Parser', function () {
     expect(Path.get(obj, 'a.c')).toBeUndefined()
   })
 
+  it('get dynamic', function () {
+    var path = 'a[b]'
+    var obj = {
+      a: {
+        key: 123
+      },
+      b: 'key'
+    }
+    expect(Path.get(obj, path)).toBe(123)
+  })
+
   it('set', function () {
     var path = 'a.b.c'
     var obj = {

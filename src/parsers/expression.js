@@ -146,6 +146,7 @@ function compilePathFns (exp) {
   if (exp.indexOf('[') < 0) {
     // really simple path
     path = exp.split('.')
+    path.raw = exp
     getter = Path.compileGetter(path)
   } else {
     // do the real parsing

@@ -1,4 +1,3 @@
-var _ = require('../util')
 var Watcher = require('../watcher')
 var Path = require('../parsers/path')
 var textParser = require('../parsers/text')
