@@ -58,6 +58,19 @@ if (_.inBrowser) {
       })
     })
 
+    it('warn invalid keys', function () {
+      var vm = new Vue({
+        el: el,
+        template: '<test a.b.c="{{test}}"></test>',
+        components: {
+          test: {
+            props: ['a.b.c']
+          }
+        }
+      })
+      expect(hasWarned(_, 'Invalid prop key'))
+    })
+
     it('teardown', function (done) {
       var vm = new Vue({
         el: el,

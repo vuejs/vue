@@ -1,5 +1,6 @@
 var _ = require('../util')
 var Watcher = require('../watcher')
+var identRE = require('../parsers/path').identRE
 
 module.exports = {
 
@@ -9,6 +10,13 @@ module.exports = {
     var parent = child.$parent
     var childKey = this.arg
     var parentKey = this.expression
+
+    if (!identRE.test(childKey)) {
+      _.warn(
+        'Invalid prop key: "' + childKey + '". Prop keys ' +
+        'must be valid identifiers.'
+      )
+    }
 
     // simple lock to avoid circular updates.
     // without this it would stabilize too, but this makes
@@ -28,7 +36,8 @@ module.exports = {
       function (val) {
         if (!locked) {
           lock()
-          child.$set(childKey, val)
+          // all props have been initialized already
+          child[childKey] = val
         }
       }
     )

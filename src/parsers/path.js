@@ -1,7 +1,7 @@
 var _ = require('../util')
 var Cache = require('../cache')
 var pathCache = new Cache(1000)
-var identRE = /^[$_a-zA-Z]+[\w$]*$/
+var identRE = exports.identRE = /^[$_a-zA-Z]+[\w$]*$/
 
 /**
  * Path-parsing algorithm scooped from Polymer/observe-js
