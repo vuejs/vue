@@ -31,6 +31,32 @@ describe('Instance Scope', function () {
 
   })
 
+  describe('$data', function () {
+
+    var vm = new Vue({
+      props: ['c'],
+      data: {
+        a: 1
+      }
+    })
+
+    it('should initialize props', function () {
+      expect(vm.hasOwnProperty('c')).toBe(true)
+    })
+
+    it('replace $data', function () {
+      vm.c = 3
+      vm.$data = { b: 2 }
+      // proxy new key
+      expect(vm.b).toBe(2)
+      // unproxy old key that's no longer present
+      expect(vm.hasOwnProperty('a')).toBe(false)
+      // should copy props
+      expect(vm.c).toBe(3)
+    })
+
+  })
+
   describe('computed', function () {
     
     var Test = Vue.extend({

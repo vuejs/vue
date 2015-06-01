@@ -59,6 +59,15 @@ exports._setData = function (newData) {
   var oldData = this._data
   this._data = newData
   var keys, key, i
+  // copy props
+  var props = this.$options.props
+  if (props) {
+    i = props.length
+    while (i--) {
+      key = props[i]
+      newData.$set(key, oldData[key])
+    }
+  }
   // unproxy keys not present in new data
   keys = Object.keys(oldData)
   i = keys.length
