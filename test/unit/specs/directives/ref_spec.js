@@ -94,6 +94,31 @@ if (_.inBrowser) {
       })
     })
 
+    it('object v-repeat', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          items: {
+            a: 1,
+            b: 2
+          }
+        },
+        template: '<div v-repeat="items" v-ref="test"></div>'
+      })
+      expect(vm.$.test).toBeTruthy()
+      expect(_.isPlainObject(vm.$.test)).toBe(true)
+      expect(vm.$.test.a.$value).toBe(1)
+      expect(vm.$.test.b.$value).toBe(2)
+      vm.items = { c: 3 }
+      _.nextTick(function () {
+        expect(Object.keys(vm.$.test).length).toBe(1)
+        expect(vm.$.test.c.$value).toBe(3)
+        vm._directives[0].unbind()
+        expect(vm.$.test).toBeNull()
+        done()
+      })
+    })
+
     it('nested v-repeat', function () {
       var vm = new Vue({
         el: el,

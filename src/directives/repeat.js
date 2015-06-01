@@ -209,7 +209,9 @@ module.exports = {
     this.vms = this.diff(data, this.vms)
     // update v-ref
     if (this.refID) {
-      this.vm.$[this.refID] = this.vms
+      this.vm.$[this.refID] = this.converted
+        ? toRefObject(this.vms)
+        : this.vms
     }
     if (this.elId) {
       this.vm.$$[this.elId] = this.vms.map(function (vm) {
@@ -609,4 +611,20 @@ function range (n) {
     ret[i] = i
   }
   return ret
+}
+
+/**
+ * Convert a vms array to an object ref for v-ref on an
+ * Object value.
+ *
+ * @param {Array} vms
+ * @return {Object}
+ */
+
+function toRefObject (vms) {
+  var ref = {}
+  for (var i = 0, l = vms.length; i < l; i++) {
+    ref[vms[i].$key] = vms[i]
+  }
+  return ref
 }
