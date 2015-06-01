@@ -11,11 +11,10 @@ if (_.inBrowser) {
 
     it('with className', function () {
       el.className = 'haha'
-      var dir = {
+      var dir = _.extend({
         el: el,
-        arg: 'test',
-        update: def
-      }
+        arg: 'test'
+      }, def)
       dir.update(true)
       expect(el.className).toBe('haha test')
       dir.update(false)
@@ -24,16 +23,29 @@ if (_.inBrowser) {
 
     it('without className', function () {
       el.className = 'haha'
-      var dir = {
-        el: el,
-        update: def
-      }
+      var dir = _.extend({ el: el }, def)
       dir.update('test')
       expect(el.className).toBe('haha test')
       dir.update('what')
       expect(el.className).toBe('haha what')
       dir.update()
       expect(el.className).toBe('haha')
+    })
+
+    it('object value', function () {
+      el.className = 'hoho'
+      var dir = _.extend({ el: el }, def)
+      dir.update({
+        a: true,
+        b: false
+      })
+      expect(el.className).toBe('hoho a')
+      dir.update({
+        b: true
+      })
+      expect(el.className).toBe('hoho b')
+      dir.update(null)
+      expect(el.className).toBe('hoho')
     })
 
   })
