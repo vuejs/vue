@@ -65,7 +65,8 @@ module.exports = {
       var filter = _.resolveAsset(this.vm.$options, 'filters', filters[i].name)
       if (typeof filter === 'function' || filter.read) {
         this.hasRead = true
-      } else if (filter.write) {
+      }
+      if (filter.write) {
         this.hasWrite = true
       }
     }
