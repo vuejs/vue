@@ -648,7 +648,7 @@ if (_.inBrowser) {
       })
     })
 
-    it('warn $value sync with filters', function () {
+    it('warn $value sync with filters', function (done) {
       var vm = new Vue({
         el: el,
         template: '<div v-repeat="items | orderBy \'$value\'"></div>',
@@ -659,6 +659,7 @@ if (_.inBrowser) {
       vm._children[0].$value = 'c'
       _.nextTick(function () {
         expect(hasWarned(_, 'use an Array of Objects instead')).toBe(true)
+        done()
       })
     })
 
