@@ -30,13 +30,13 @@ function enableDebug () {
    * @param {String} msg
    */
 
-  exports.warn = function (msg) {
+  exports.warn = function (msg, e) {
     if (hasConsole && (!config.silent || config.debug)) {
       console.warn('[Vue warn]: ' + msg)
       /* istanbul ignore if */
       if (config.debug) {
         /* jshint debug: true */
-        console.warn((new Error()).stack)
+        console.warn((e || new Error()).stack)
       }
     }
   }

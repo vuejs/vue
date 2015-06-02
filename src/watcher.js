@@ -80,7 +80,7 @@ p.get = function () {
     if (config.warnExpressionErrors) {
       _.warn(
         'Error when evaluating expression "' +
-        this.expression + '":\n   ' + e
+        this.expression + '"', e
       )
     }
   }
@@ -117,7 +117,7 @@ p.set = function (value) {
     if (config.warnExpressionErrors) {
       _.warn(
         'Error when evaluating setter "' +
-        this.expression + '":\n   ' + e
+        this.expression + '"', e
       )
     }
   }
