@@ -29,7 +29,7 @@ function Transition (el, id, hooks, vm) {
   // async state
   this.pendingCssEvent =
   this.pendingCssCb =
-  this.jsCancel =
+  this.cancel =
   this.pendingJsCb =
   this.op =
   this.cb = null
@@ -76,6 +76,7 @@ p.enter = function (op, cb) {
   addClass(this.el, this.enterClass)
   op()
   this.callHookWithCb('enter')
+  this.cancel = this.hooks && this.hooks.enterCancelled
   queue.push(this.enterNextTick)
 }
 
@@ -104,7 +105,7 @@ p.enterNextTick = function () {
  */
 
 p.enterDone = function () {
-  this.jsCancel = this.pendingJsCb = null
+  this.cancel = this.pendingJsCb = null
   removeClass(this.el, this.enterClass)
   this.callHook('afterEnter')
   if (this.cb) this.cb()
@@ -138,6 +139,7 @@ p.leave = function (op, cb) {
   this.cb = cb
   addClass(this.el, this.leaveClass)
   this.callHookWithCb('leave')
+  this.cancel = this.hooks && this.hooks.enterCancelled
   // only need to do leaveNextTick if there's no explicit
   // js callback
   if (!this.pendingJsCb) {
@@ -166,6 +168,7 @@ p.leaveNextTick = function () {
  */
 
 p.leaveDone = function () {
+  this.cancel = this.pendingJsCb = null
   this.op()
   removeClass(this.el, this.leaveClass)
   this.callHook('afterLeave')
@@ -194,9 +197,9 @@ p.cancelPending = function () {
     removeClass(this.el, this.enterClass)
     removeClass(this.el, this.leaveClass)
   }
-  if (this.jsCancel) {
-    this.jsCancel.call(null)
-    this.jsCancel = null
+  if (this.cancel) {
+    this.cancel.call(this.vm, this.el)
+    this.cancel = null
   }
 }
 
@@ -229,7 +232,7 @@ p.callHookWithCb = function (type) {
     if (hook.length > 1) {
       this.pendingJsCb = _.cancellable(this[type + 'Done'])
     }
-    this.jsCancel = hook.call(this.vm, this.el, this.pendingJsCb)
+    hook.call(this.vm, this.el, this.pendingJsCb)
   }
 }
 

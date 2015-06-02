@@ -456,15 +456,16 @@ if (_.inBrowser && !_.isIE9) {
         })
       })
 
-      it('optional cleanup callback', function (done) {
+      it('cancel hook', function (done) {
         var cleanupSpy = jasmine.createSpy('js cleanup')
         var leaveSpy = jasmine.createSpy('js leave')
+        var timeout
         hooks.enter = function (el, done) {
-          var to = setTimeout(done, 30)
-          return function () {
-            clearTimeout(to)
-            cleanupSpy()
-          }
+          timeout = setTimeout(done, 30)
+        }
+        hooks.enterCancelled = function () {
+          clearTimeout(timeout)
+          cleanupSpy()
         }
         hooks.leave = function (el, done) {
           expect(cleanupSpy).toHaveBeenCalled()
