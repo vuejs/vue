@@ -384,6 +384,16 @@ module.exports = {
       (type === 'string' || type === 'number')
     ) {
       vm.$watch(alias || '$value', function (val) {
+        if (dir.filters) {
+          _.warn(
+            'You seem to be mutating the $value reference of ' +
+            'a v-repeat instance (likely through v-model) ' +
+            'and filtering the v-repeat at the same time. ' +
+            'This will not work properly with an Array of ' +
+            'primitive values. Please use an Array of ' +
+            'Objects instead.'
+          )
+        }
         dir._withLock(function () {
           if (dir.converted) {
             dir.rawValue[vm.$key] = val

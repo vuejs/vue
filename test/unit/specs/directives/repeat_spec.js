@@ -623,24 +623,42 @@ if (_.inBrowser) {
       }, 100)
     })
 
-    it('sync $value changes back to original array/object', function (done) {
+    it('sync $value/alias changes back to original array/object', function (done) {
       var vm = new Vue({
         el: el,
         template:
           '<div v-repeat="items">{{$value}}</div>' +
-          '<div v-repeat="obj">{{$value}}</div>',
+          '<div v-repeat="obj">{{$value}}</div>' +
+          '<div v-repeat="val:vals">{{val}}</div>',
         data: {
           items: ['a', 'b'],
-          obj: { foo: 'a', bar: 'b' }
+          obj: { foo: 'a', bar: 'b' },
+          vals: [1, 2]
         }
       })
       vm._children[0].$value = 'c'
       var key = vm._children[2].$key
       vm._children[2].$value = 'd'
+      vm._children[4].val = 3
       _.nextTick(function () {
         expect(vm.items[0]).toBe('c')
         expect(vm.obj[key]).toBe('d')
+        expect(vm.vals[0]).toBe(3)
         done()
+      })
+    })
+
+    it('warn $value sync with filters', function () {
+      var vm = new Vue({
+        el: el,
+        template: '<div v-repeat="items | orderBy \'$value\'"></div>',
+        data: {
+          items: ['a', 'b']
+        }
+      })
+      vm._children[0].$value = 'c'
+      _.nextTick(function () {
+        expect(hasWarned(_, 'use an Array of Objects instead')).toBe(true)
       })
     })
 
