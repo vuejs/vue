@@ -302,7 +302,9 @@ exports.set = function (obj, path, val) {
         warnNonExistent(path)
       }
     } else {
-      if (key in obj) {
+      if (_.isArray(obj)) {
+        obj.$set(key, val)
+      } else if (key in obj) {
         obj[key] = val
       } else {
         obj.$add(key, val)
