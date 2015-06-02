@@ -182,6 +182,19 @@ describe('Async components', function () {
         done()
       }
     })
+
+    it('warn reject', function () {
+      var vm = new Vue({
+        el: el,
+        template: '<test></test>',
+        components: {
+          test: function (resolve, reject) {
+            reject('nooooo')
+          }
+        }
+      })
+      expect(hasWarned(_, 'Reason: nooooo')).toBe(true)
+    })
   })
 
   describe('v-repeat', function () {

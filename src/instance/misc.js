@@ -57,6 +57,7 @@ exports._resolveComponent = function (id, cb) {
       // cached
       cb(factory.resolved)
     } else if (factory.requested) {
+      // pool callbacks
       factory.pendingCallbacks.push(cb)
     } else {
       factory.requested = true
@@ -71,6 +72,11 @@ exports._resolveComponent = function (id, cb) {
         for (var i = 0, l = cbs.length; i < l; i++) {
           cbs[i](res)
         }
+      }, function reject (reason) {
+        _.warn(
+          'Failed to resolve async component: ' + id + '. ' +
+          (reason ? '\nReason: ' + reason : '')
+        )
       })
     }
   } else {
