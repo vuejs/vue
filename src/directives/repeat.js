@@ -244,7 +244,7 @@ module.exports = {
     var alias = this.arg
     var init = !oldVms
     var vms = new Array(data.length)
-    var obj, raw, vm, i, l
+    var obj, raw, vm, i, l, primitive
     // First pass, go through the new Array and fill up
     // the new vms array. If a piece of data has a cached
     // instance for it, we reuse it. Otherwise build a new
@@ -252,6 +252,7 @@ module.exports = {
     for (i = 0, l = data.length; i < l; i++) {
       obj = data[i]
       raw = converted ? obj.$value : obj
+      primitive = !isObject(raw)
       vm = !init && this.getVm(raw, i, converted ? obj.$key : null)
       if (vm) { // reusable instance
         vm._reused = true
@@ -259,7 +260,7 @@ module.exports = {
         // update data for track-by or object repeat,
         // since in these two cases the data is replaced
         // rather than mutated.
-        if (idKey || converted) {
+        if (idKey || converted || primitive) {
           if (alias) {
             vm[alias] = raw
           } else if (_.isPlainObject(raw)) {
@@ -440,19 +441,20 @@ module.exports = {
   cacheVm: function (data, vm, index, key) {
     var idKey = this.idKey
     var cache = this.cache
+    var primitive = !isObject(data)
     var id
-    if (key || idKey) {
+    if (key || idKey || primitive) {
       id = idKey
         ? idKey === '$index'
           ? index
           : data[idKey]
-        : key
+        : (key || index)
       if (!cache[id]) {
         cache[id] = vm
-      } else {
+      } else if (!primitive && idKey !== '$index') {
         _.warn('Duplicate track-by key in v-repeat: ' + id)
       }
-    } else if (isObject(data)) {
+    } else {
       id = this.id
       if (data.hasOwnProperty(id)) {
         if (data[id] === null) {
@@ -465,12 +467,6 @@ module.exports = {
         }
       } else {
         _.define(data, id, vm)
-      }
-    } else {
-      if (!cache[data]) {
-        cache[data] = [vm]
-      } else {
-        cache[data].push(vm)
       }
     }
     vm._raw = data
@@ -487,28 +483,16 @@ module.exports = {
 
   getVm: function (data, index, key) {
     var idKey = this.idKey
-    if (key || idKey) {
+    var primitive = !isObject(data)
+    if (key || idKey || primitive) {
       var id = idKey
         ? idKey === '$index'
           ? index
           : data[idKey]
-        : key
+        : (key || index)
       return this.cache[id]
-    } else if (isObject(data)) {
-      return data[this.id]
     } else {
-      var cached = this.cache[data]
-      if (cached) {
-        var i = 0
-        var vm = cached[i]
-        // since duplicated vm instances might be a reused
-        // one OR a newly created one, we need to return the
-        // first instance that is neither of these.
-        while (vm && (vm._reused || vm._new)) {
-          vm = cached[++i]
-        }
-        return vm
-      }
+      return data[this.id]
     }
   },
 
@@ -521,19 +505,19 @@ module.exports = {
   uncacheVm: function (vm) {
     var data = vm._raw
     var idKey = this.idKey
-    var convertedKey = vm.$key
-    if (idKey || convertedKey) {
+    var index = vm.$index
+    var key = vm.$key
+    var primitive = !isObject(data)
+    if (idKey || key || primitive) {
       var id = idKey
         ? idKey === '$index'
-          ? vm.$index
+          ? index
           : data[idKey]
-        : convertedKey
+        : (key || index)
       this.cache[id] = null
-    } else if (isObject(data)) {
+    } else {
       data[this.id] = null
       vm._raw = null
-    } else {
-      this.cache[data].pop()
     }
   },
 
