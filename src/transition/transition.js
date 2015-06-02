@@ -6,7 +6,6 @@ var transitionEndEvent = _.transitionEndEvent
 var animationEndEvent = _.animationEndEvent
 var transDurationProp = _.transitionProp + 'Duration'
 var animDurationProp = _.animationProp + 'Duration'
-var doc = typeof document === 'undefined' ? null : document
 
 var TYPE_TRANSITION = 1
 var TYPE_ANIMATION = 2
@@ -249,7 +248,7 @@ p.getCssTransitionType = function (className) {
   // pageVisibility API is supported in IE10+, same as
   // CSS transitions.
   /* istanbul ignore if */
-  if (!transitionEndEvent || (doc && doc.hidden)) {
+  if (!transitionEndEvent || document.hidden) {
     return
   }
   var type = this.typeCache[className]

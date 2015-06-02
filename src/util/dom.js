@@ -12,11 +12,8 @@ var config = require('../config')
  * @return {Boolean}
  */
 
-var doc =
-  typeof document !== 'undefined' &&
-  document.documentElement
-
 exports.inDoc = function (node) {
+  var doc = document.documentElement
   var parent = node && node.parentNode
   return doc === node ||
     doc === parent ||
