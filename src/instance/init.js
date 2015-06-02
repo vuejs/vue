@@ -63,7 +63,6 @@ exports._init = function (options) {
   }
 
   // props used in v-repeat diffing
-  this._new = true
   this._reused = false
 
   // merge options.

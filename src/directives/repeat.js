@@ -271,10 +271,6 @@ module.exports = {
         }
       } else { // new instance
         vm = this.build(obj, i, true)
-        // the _new flag is used in the second pass for
-        // vm cache retrival, but if this is the init phase
-        // the flag can just be set to false directly.
-        vm._new = !init
         vm._reused = false
       }
       vms[i] = vm
@@ -330,7 +326,6 @@ module.exports = {
           vm.$before(nextEl)
         }
       }
-      vm._new = false
       vm._reused = false
     }
     if (activeElement) {
@@ -377,9 +372,6 @@ module.exports = {
       inherit: this.inherit,
       template: this.inlineTempalte
     }, Ctor)
-    // flag this instance as a repeat instance
-    // so that we can skip it in vm._digest
-    vm._repeat = true
     // cache instance
     if (needCache) {
       this.cacheVm(raw, vm, index, this.converted ? meta.$key : null)
