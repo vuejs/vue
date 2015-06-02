@@ -136,6 +136,16 @@ describe('Path Parser', function () {
     expect(parent.a.b.c).toBe(123)
   })
 
+  it('set array', function () {
+    var target = {
+      a: []
+    }
+    target.a.$set = jasmine.createSpy('Array.$set')
+    var res = Path.set(target, 'a[1]', 123)
+    expect(res).toBe(true)
+    expect(target.a.$set).toHaveBeenCalledWith('1', 123)
+  })
+
   it('set invalid', function () {
     var res = Path.set({}, 'ab[c]d', 123)
     expect(res).toBe(false)
