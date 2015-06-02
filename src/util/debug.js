@@ -36,7 +36,7 @@ function enableDebug () {
       /* istanbul ignore if */
       if (config.debug) {
         /* jshint debug: true */
-        debugger
+        console.warn((new Error()).stack)
       }
     }
   }
