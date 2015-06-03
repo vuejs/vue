@@ -237,7 +237,6 @@ module.exports = {
    */
 
   diff: function (data, oldVms) {
-    var activeElement = document.activeElement
     var idKey = this.idKey
     var converted = this.converted
     var anchor = this.anchor
@@ -327,9 +326,6 @@ module.exports = {
         }
       }
       vm._reused = false
-    }
-    if (activeElement) {
-      activeElement.focus()
     }
     return vms
   },
