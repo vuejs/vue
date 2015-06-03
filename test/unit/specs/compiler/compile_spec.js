@@ -154,7 +154,8 @@ if (_.inBrowser) {
           'multiple-attrs',
           'oneway',
           'with-filter',
-          'camelCase'
+          'camelCase',
+          'boolean-literal'
         ]
       })
       var def = Vue.options.directives._prop
@@ -164,11 +165,12 @@ if (_.inBrowser) {
       el.setAttribute('multiple-attrs', 'a {{b}} c')
       el.setAttribute('oneway', '{{*a}}')
       el.setAttribute('with-filter', '{{a | filter}}')
+      el.setAttribute('boolean-literal', '{{true}}')
       transclude(el, options)
       var linker = compile(el, options)
       linker(vm, el)
       // should skip literals and one-time bindings
-      expect(vm._bindDir.calls.count()).toBe(4)
+      expect(vm._bindDir.calls.count()).toBe(5)
       // data-some-attr
       var args = vm._bindDir.calls.argsFor(0)
       expect(args[0]).toBe('prop')
@@ -198,11 +200,19 @@ if (_.inBrowser) {
       expect(args[2].arg).toBe('withFilter')
       expect(args[2].expression).toBe('this._applyFilters(a,null,[{"name":"filter"}],false)')
       expect(args[3]).toBe(def)
+      // boolean-literal
+      args = vm._bindDir.calls.argsFor(4)
+      expect(args[0]).toBe('prop')
+      expect(args[1]).toBe(null)
+      expect(args[2].arg).toBe('booleanLiteral')
+      expect(args[2].expression).toBe('true')
+      expect(args[2].oneWay).toBe(true)
       // camelCase should've warn
       expect(hasWarned(_, 'using camelCase')).toBe(true)
       // literal and one time should've called vm.$set
-      expect(vm.$set).toHaveBeenCalledWith('a', '1')
-      expect(vm.$set).toHaveBeenCalledWith('someOtherAttr', '2')
+      // and numbers should be casted
+      expect(vm.$set).toHaveBeenCalledWith('a', 1)
+      expect(vm.$set).toHaveBeenCalledWith('someOtherAttr', 2)
     })
 
     it('props on root instance', function () {
