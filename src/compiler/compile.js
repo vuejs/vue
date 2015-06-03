@@ -120,7 +120,7 @@ function teardownDirs (vm, dirs, destroying) {
 /**
  * Compile the root element of an instance. There are
  * 3 types of things to process here:
- * 
+ *
  * 1. props on parent container (child scope)
  * 2. other attrs on parent container (parent scope)
  * 3. attrs on the component template root node, if
@@ -391,7 +391,7 @@ function makeChildLinkFn (linkFns) {
 
 // regex to test if a path is "settable"
 // if not the prop binding is automatically one-way.
-var settablePathRE = /^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\[[^\[\]]\])*$/
+var settablePathRE = /^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\[[^\[\]]+\])*$/
 
 function compileProps (el, attrs, propNames) {
   var props = []
