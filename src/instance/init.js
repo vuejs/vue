@@ -64,6 +64,7 @@ exports._init = function (options) {
 
   // props used in v-repeat diffing
   this._reused = false
+  this._staggerOp = null
 
   // merge options.
   options = this.$options = mergeOptions(
