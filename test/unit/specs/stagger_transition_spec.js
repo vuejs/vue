@@ -86,7 +86,7 @@ describe('Staggering Transitions', function () {
         // should have only one
         expect(el.innerHTML).toBe('<div class="stagger-transition">1</div>')
         done()
-      }, amount + 10)
+      }, amount * 2)
     })
   })
 
@@ -108,19 +108,20 @@ describe('Staggering Transitions', function () {
         }
       }
     })
-    vm.list = [{a: 1}, {a: 2}]
+    vm.list = [{a: 1}, {a: 2}, {a: 3}]
     expect(el.innerHTML).toBe('')
     _.nextTick(function () {
       expect(el.innerHTML).toBe('<div class="stagger-transition stagger-enter">1</div>')
-      vm.list = [vm.list[1], vm.list[0]] // reorder
+      vm.list = [vm.list[2], vm.list[1], vm.list[0]] // reorder
       setTimeout(function () {
         // should have correct order
         expect(el.innerHTML).toBe(
+          '<div class="stagger-transition">3</div>' +
           '<div class="stagger-transition">2</div>' +
           '<div class="stagger-transition">1</div>'
         )
         done()
-      }, amount + 10)
+      }, amount * 3)
     })
   })
 
@@ -147,10 +148,10 @@ describe('Staggering Transitions', function () {
               setTimeout(function () {
                 expect(el.innerHTML).toBe('')
                 done()
-              }, amount + 10)
+              }, amount * 2)
             })
           })
-        }, amount + 10)
+        }, amount * 2)
       })
     })
   }
