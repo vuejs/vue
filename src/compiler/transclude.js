@@ -1,7 +1,6 @@
 var _ = require('../util')
 var config = require('../config')
 var templateParser = require('../parsers/template')
-var transcludedFlagAttr = '__vue__transcluded'
 
 /**
  * Process an element or a DocumentFragment based on a
@@ -23,26 +22,6 @@ module.exports = function transclude (el, options) {
   // right after this.
   if (options) {
     options._containerAttrs = extractAttrs(el)
-  }
-  // Mark content nodes and attrs so that the compiler
-  // knows they should be compiled in parent scope.
-  if (options && options._asComponent) {
-    var i = el.childNodes.length
-    while (i--) {
-      var node = el.childNodes[i]
-      if (node.nodeType === 1) {
-        node.setAttribute(transcludedFlagAttr, '')
-      } else if (node.nodeType === 3 && node.data.trim()) {
-        // wrap transcluded textNodes in spans, because
-        // raw textNodes can't be persisted through clones
-        // by attaching attributes.
-        var wrapper = document.createElement('span')
-        wrapper.textContent = node.data
-        wrapper.setAttribute('__vue__wrap', '')
-        wrapper.setAttribute(transcludedFlagAttr, '')
-        el.replaceChild(wrapper, node)
-      }
-    }
   }
   // for template tags, what we want is its content as
   // a documentFragment (for block instances)
@@ -77,7 +56,7 @@ function transcludeTemplate (el, options) {
   if (!frag) {
     _.warn('Invalid template option: ' + template)
   } else {
-    var rawContent = options._content || _.extractContent(el)
+    options._content = _.extractContent(el)
     var replacer = frag.firstChild
     if (options.replace) {
       if (
@@ -88,117 +67,22 @@ function transcludeTemplate (el, options) {
         // block instance. (#835)
         replacer.hasAttribute(config.prefix + 'repeat')
       ) {
-        transcludeContent(frag, rawContent)
         return frag
       } else {
         options._replacerAttrs = extractAttrs(replacer)
         mergeAttrs(el, replacer)
-        transcludeContent(replacer, rawContent)
         return replacer
       }
     } else {
       el.appendChild(frag)
-      transcludeContent(el, rawContent)
       return el
     }
   }
 }
 
 /**
- * Resolve <content> insertion points mimicking the behavior
- * of the Shadow DOM spec:
- *
- *   http://w3c.github.io/webcomponents/spec/shadow/#insertion-points
- *
- * @param {Element|DocumentFragment} el
- * @param {Element} raw
- */
-
-function transcludeContent (el, raw) {
-  var outlets = getOutlets(el)
-  var i = outlets.length
-  if (!i) return
-  var outlet, select, selected, j, main
-
-  function isDirectChild (node) {
-    return node.parentNode === raw
-  }
-
-  // first pass, collect corresponding content
-  // for each outlet.
-  while (i--) {
-    outlet = outlets[i]
-    if (raw) {
-      select = outlet.getAttribute('select')
-      if (select) {  // select content
-        selected = raw.querySelectorAll(select)
-        if (selected.length) {
-          // according to Shadow DOM spec, `select` can
-          // only select direct children of the host node.
-          // enforcing this also fixes #786.
-          selected = [].filter.call(selected, isDirectChild)
-        }
-        outlet.content = selected.length
-          ? selected
-          : _.toArray(outlet.childNodes)
-      } else { // default content
-        main = outlet
-      }
-    } else { // fallback content
-      outlet.content = _.toArray(outlet.childNodes)
-    }
-  }
-  // second pass, actually insert the contents
-  for (i = 0, j = outlets.length; i < j; i++) {
-    outlet = outlets[i]
-    if (outlet !== main) {
-      insertContentAt(outlet, outlet.content)
-    }
-  }
-  // finally insert the main content
-  if (main) {
-    insertContentAt(main, _.toArray(raw.childNodes))
-  }
-}
-
-/**
- * Get <content> outlets from the element/list
- *
- * @param {Element|Array} el
- * @return {Array}
- */
-
-var concat = [].concat
-function getOutlets (el) {
-  return _.isArray(el)
-    ? concat.apply([], el.map(getOutlets))
-    : el.querySelectorAll
-      ? _.toArray(el.querySelectorAll('content'))
-      : []
-}
-
-/**
- * Insert an array of nodes at outlet,
- * then remove the outlet.
- *
- * @param {Element} outlet
- * @param {Array} contents
- */
-
-function insertContentAt (outlet, contents) {
-  // not using util DOM methods here because
-  // parentNode can be cached
-  var parent = outlet.parentNode
-  for (var i = 0, j = contents.length; i < j; i++) {
-    parent.insertBefore(contents[i], outlet)
-  }
-  parent.removeChild(outlet)
-}
-
-/**
  * Helper to extract a component container's attribute names
- * into a map. The resulting map will be used in compiler to
- * determine whether an attribute is transcluded.
+ * into a map.
  *
  * @param {Element} el
  * @return {Object}

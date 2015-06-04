@@ -63,62 +63,6 @@ if (_.inBrowser) {
       expect(res.childNodes[2].nodeType).toBe(3)
     })
 
-    it('content transclusion', function () {
-      el.innerHTML = '<p>hi</p>'
-      options.template = '<div><content></content></div>'
-      var res = transclude(el, options)
-      expect(res.firstChild.tagName).toBe('DIV')
-      expect(res.firstChild.firstChild.tagName).toBe('P')
-      expect(res.firstChild.firstChild.textContent).toBe('hi')
-    })
-
-    it('fallback content', function () {
-      options.template = '<content><p>fallback</p></content>'
-      var res = transclude(el, options)
-      expect(res.firstChild.tagName).toBe('P')
-      expect(res.firstChild.textContent).toBe('fallback')
-    })
-
-    it('fallback content with multiple select', function () {
-      el.innerHTML = '<p class="b">select b</p>'
-      options.template = '<content select=".a"><p>fallback a</p></content><content select=".b">fallback b</content>'
-      var res = transclude(el, options)
-      expect(res.childNodes.length).toBe(2)
-      expect(res.firstChild.textContent).toBe('fallback a')
-      expect(res.lastChild.textContent).toBe('select b')
-    })
-
-    it('content transclusion with replace', function () {
-      el.innerHTML = '<p>hi</p>'
-      options.template = '<div><div><content></content></div></div>'
-      options.replace = true
-      var res = transclude(el, options)
-      expect(res).not.toBe(el)
-      expect(res.firstChild.tagName).toBe('DIV')
-      expect(res.firstChild.firstChild.tagName).toBe('P')
-      expect(res.firstChild.firstChild.textContent).toBe('hi')
-    })
-
-    it('block instance content transclusion', function () {
-      el.innerHTML = '<p>hi</p><span>ho</span>'
-      options.template = '<div></div><content select="p"></content><content select="span"></content>'
-      options.replace = true
-      var res = transclude(el, options)
-      expect(res.childNodes[1].tagName).toBe('DIV')
-      expect(res.childNodes[2].tagName).toBe('P')
-      expect(res.childNodes[3].tagName).toBe('SPAN')
-    })
-
-    it('select should only match children', function () {
-      el.innerHTML = '<p class="b">select b</p><span><p class="b">nested b</p></span><span><p class="c">nested c</p></span>'
-      options.template = '<content select=".a"><p>fallback a</p></content><content select=".b">fallback b</content><content select=".c">fallback c</content>'
-      var res = transclude(el, options)
-      expect(res.childNodes.length).toBe(3)
-      expect(res.firstChild.textContent).toBe('fallback a')
-      expect(res.childNodes[1].textContent).toBe('select b')
-      expect(res.lastChild.textContent).toBe('fallback c')
-    })
-
     it('replacer attr should overwrite container attr of same name, except class should be merged', function () {
       el.setAttribute('class', 'test')
       el.setAttribute('title', 'parent')

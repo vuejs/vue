@@ -14,7 +14,6 @@ describe('Instance Init', function () {
 
   var options = {
     a: 2,
-    _anonymous: true,
     el: {}
   }
 

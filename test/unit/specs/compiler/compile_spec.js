@@ -267,39 +267,6 @@ if (_.inBrowser) {
       expect(vm._bindDir.calls.count()).toBe(0)
     })
 
-    it('should handle nested transclusions', function (done) {
-      vm = new Vue({
-        el: el,
-        template:
-          '<testa>' +
-            '<testb>' +
-              '<div v-repeat="list">{{$value}}</div>' +
-            '</testb>' +
-          '</testa>',
-        data: {
-          list: [1,2]
-        },
-        components: {
-          testa: { template: '<content></content>' },
-          testb: { template: '<content></content>' }
-        }
-      })
-      expect(el.innerHTML).toBe(
-        '<testa><testb>' +
-          '<div>1</div><div>2</div>' +
-        '</testb></testa>'
-      )
-      vm.list.push(3)
-      _.nextTick(function () {
-        expect(el.innerHTML).toBe(
-          '<testa><testb>' +
-            '<div>1</div><div>2</div><div>3</div>' +
-          '</testb></testa>'
-        )
-        done()
-      })
-    })
-
     it('should handle container/replacer directives with same name', function () {
       var parentSpy = jasmine.createSpy()
       var childSpy = jasmine.createSpy()

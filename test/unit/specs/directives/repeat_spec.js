@@ -322,36 +322,6 @@ if (_.inBrowser) {
       }
     })
 
-    it('component + parent directive + transclusion', function (done) {
-      var vm = new Vue({
-        el: el,
-        template: '<test v-repeat="list" v-class="cls">{{msg}}</test>',
-        data: {
-          cls: 'parent',
-          msg: 'hi',
-          list: [{a:1},{a:2},{a:3}]
-        },
-        components: {
-          test: {
-            replace: true,
-            template: '<div class="child">{{a}} <content></content></div>'
-          }
-        }
-      })
-      var markup = vm.list.map(function (item) {
-        return '<div class="child parent">' + item.a + ' hi</div>'
-      }).join('')
-      expect(el.innerHTML).toBe(markup)
-      vm.msg = 'ho'
-      markup = vm.list.map(function (item) {
-        return '<div class="child parent">' + item.a + ' ho</div>'
-      }).join('')
-      _.nextTick(function () {
-        expect(el.innerHTML).toBe(markup)
-        done()
-      })
-    })
-
     it('array filters', function (done) {
       var vm = new Vue({
         el: el,

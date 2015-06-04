@@ -176,38 +176,6 @@ if (_.inBrowser) {
       expect(hasWarned(_, 'already mounted instance')).toBe(true)
     })
 
-    it('v-if with content transclusion', function (done) {
-      var vm = new Vue({
-        el: el,
-        data: {
-          a: 1,
-          show: true
-        },
-        template: '<test show="{{show}}">{{a}}</test>',
-        components: {
-          test: {
-            props: ['show'],
-            template: '<div v-if="show"><content></cotent></div>'
-          }
-        }
-      })
-      expect(el.textContent).toBe('1')
-      vm.a = 2
-      _.nextTick(function () {
-        expect(el.textContent).toBe('2')
-        vm.show = false
-        _.nextTick(function () {
-          expect(el.textContent).toBe('')
-          vm.show = true
-          vm.a = 3
-          _.nextTick(function () {
-            expect(el.textContent).toBe('3')
-            done()
-          })
-        })
-      })
-    })
-
     it('call attach/detach for transcluded components', function (done) {
       document.body.appendChild(el)
       var attachSpy = jasmine.createSpy('attached')

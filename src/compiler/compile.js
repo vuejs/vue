@@ -26,11 +26,11 @@ module.exports = compile
  * @param {Element|DocumentFragment} el
  * @param {Object} options
  * @param {Boolean} partial
- * @param {Boolean} transcluded
+ * @param {Vue} [host] - host vm of transcluded content
  * @return {Function}
  */
 
-function compile (el, options, partial, transcluded) {
+function compile (el, options, partial, host) {
   // link function for the node itself.
   var nodeLinkFn = !partial
     ? compileRoot(el, options)
@@ -53,27 +53,17 @@ function compile (el, options, partial, transcluded) {
    * @return {Function|undefined}
    */
 
-  function compositeLinkFn (vm, el) {
+  return function compositeLinkFn (vm, el) {
     // save original directive count before linking
     // so we can capture the directives created during a
     // partial compilation.
     var originalDirCount = vm._directives.length
-    var parentOriginalDirCount =
-      vm.$parent && vm.$parent._directives.length
     // cache childNodes before linking parent, fix #657
     var childNodes = _.toArray(el.childNodes)
-    // if this is a transcluded compile, linkers need to be
-    // called in source scope, and the host needs to be
-    // passed down.
-    var source = transcluded ? vm.$parent : vm
-    var host = transcluded ? vm : undefined
     // link
-    if (nodeLinkFn) nodeLinkFn(source, el, host)
-    if (childLinkFn) childLinkFn(source, childNodes, host)
-
-    var selfDirs = vm._directives.slice(originalDirCount)
-    var parentDirs = vm.$parent &&
-      vm.$parent._directives.slice(parentOriginalDirCount)
+    if (nodeLinkFn) nodeLinkFn(vm, el, host)
+    if (childLinkFn) childLinkFn(vm, childNodes, host)
+    var dirs = vm._directives.slice(originalDirCount)
 
     /**
      * The linker function returns an unlink function that
@@ -83,36 +73,13 @@ function compile (el, options, partial, transcluded) {
      * @param {Boolean} destroying
      */
     return function unlink (destroying) {
-      teardownDirs(vm, selfDirs, destroying)
-      if (parentDirs) {
-        teardownDirs(vm.$parent, parentDirs)
+      var i = dirs.length
+      while (i--) {
+        dirs[i]._teardown()
+        if (!destroying) {
+          vm._directives.$remove(dirs[i])
+        }
       }
-    }
-  }
-
-  // transcluded linkFns are terminal, because it takes
-  // over the entire sub-tree.
-  if (transcluded) {
-    compositeLinkFn.terminal = true
-  }
-
-  return compositeLinkFn
-}
-
-/**
- * Teardown a subset of directives on a vm.
- *
- * @param {Vue} vm
- * @param {Array} dirs
- * @param {Boolean} destroying
- */
-
-function teardownDirs (vm, dirs, destroying) {
-  var i = dirs.length
-  while (i--) {
-    dirs[i]._teardown()
-    if (!destroying) {
-      vm._directives.$remove(dirs[i])
     }
   }
 }
@@ -201,13 +168,6 @@ function compileNode (node, options) {
 
 function compileElement (el, options) {
   var hasAttrs = el.hasAttributes()
-  if (hasAttrs && checkTransclusion(el)) {
-    // unwrap textNode
-    if (el.hasAttribute('__vue__wrap')) {
-      el = el.firstChild
-    }
-    return compile(el, options._parent.$options, true, true)
-  }
   // check element directives
   var linkFn = checkElementDirectives(el, options)
   // check terminal direcitves (repeat & if)
@@ -708,19 +668,4 @@ function directiveComparator (a, b) {
   a = a.def.priority || 0
   b = b.def.priority || 0
   return a > b ? 1 : -1
-}
-
-/**
- * Check whether an element is transcluded
- *
- * @param {Element} el
- * @return {Boolean}
- */
-
-var transcludedFlagAttr = '__vue__transcluded'
-function checkTransclusion (el) {
-  if (el.nodeType === 1 && el.hasAttribute(transcludedFlagAttr)) {
-    el.removeAttribute(transcludedFlagAttr)
-    return true
-  }
 }

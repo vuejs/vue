@@ -132,6 +132,7 @@ module.exports = {
       merged._asComponent = true
       merged._parent = this.vm
       this.template = transclude(this.template, merged)
+      this.content = merged._content
       // Important: mark the template as a root node so that
       // custom element components don't get compiled twice.
       // fixes #822
@@ -365,6 +366,8 @@ module.exports = {
       _host: this._host,
       _linkFn: this._linkFn,
       _meta: meta,
+      _content: this.content,
+      _repeat: this.inherit,
       data: data,
       inherit: this.inherit,
       template: this.inlineTempalte
