@@ -276,6 +276,56 @@ if (_.inBrowser) {
         expect(el.innerHTML).toBe(markup)
       }
     })
+    
+    // #893 in IE textNodes do not have `contains` method
+    it('call attach/detach: comparing textNodes in IE', function (done) {
+      document.body.appendChild(el)
+      var attachSpy = jasmine.createSpy('attached')
+      var detachSpy = jasmine.createSpy('detached')
+      var vm = new Vue({
+        el: el,
+        data: {
+          show: true
+        },
+        template: '<template v-if="show"><test></test></template>',
+        components: {
+          test: {
+            template: 'hi',
+            replace: true,
+            attached: attachSpy,
+            detached: detachSpy
+          }
+        }
+      })
+      assertMarkup()
+      assertCalls(1, 0)
+      vm.show = false
+      _.nextTick(function () {
+        assertMarkup()
+        assertCalls(1, 1)
+        vm.show = true
+        _.nextTick(function () {
+          assertMarkup()
+          assertCalls(2, 1)
+          vm.show = false
+          _.nextTick(function () {
+            assertMarkup()
+            assertCalls(2, 2)
+            document.body.removeChild(el)
+            done()
+          })
+        })
+      })
+
+      function assertMarkup () {
+        expect(el.innerHTML).toBe(vm.show ? 'hi' : '')
+      }
+
+      function assertCalls (attach, detach) {
+        expect(attachSpy.calls.count()).toBe(attach)
+        expect(detachSpy.calls.count()).toBe(detach)
+      }
+    })
 
   })
 }
