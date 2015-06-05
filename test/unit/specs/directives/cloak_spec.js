@@ -1,5 +1,5 @@
 var _ = require('../../../../src/util')
-var compile = require('../../../../src/compiler/compile')
+var compile = require('../../../../src/compiler').compile
 var Vue = require('../../../../src/vue')
 
 if (_.inBrowser) {

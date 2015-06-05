@@ -1,6 +1,6 @@
 var Vue = require('../../../../src/vue')
 var _ = require('../../../../src/util')
-var compile = require('../../../../src/compiler/compile')
+var compiler = require('../../../../src/compiler')
 
 if (_.inBrowser) {
   describe('Lifecycle API', function () {
@@ -78,7 +78,7 @@ if (_.inBrowser) {
       })
       
       it('precompiled linker', function () {
-        var linker = compile(el, Vue.options)
+        var linker = compiler.compile(el, Vue.options)
         var vm = new Vue({
           _linker: linker,
           data: {

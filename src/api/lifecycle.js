@@ -1,5 +1,5 @@
 var _ = require('../util')
-var compile = require('../compiler/compile')
+var compiler = require('../compiler')
 
 /**
  * Set instance target element and kick off the compilation
@@ -69,5 +69,5 @@ exports.$destroy = function (remove, deferCleanup) {
  */
 
 exports.$compile = function (el, host) {
-  return compile(el, this.$options, true, host)(this, el)
+  return compiler.compile(el, this.$options, true, host)(this, el)
 }

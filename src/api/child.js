@@ -33,6 +33,7 @@ exports.$addChild = function (opts, BaseCtor) {
         'this._init(options) }'
       )()
       ChildVue.options = BaseCtor.options
+      ChildVue.linker = BaseCtor.linker
       ChildVue.prototype = this
       ctors[BaseCtor.cid] = ChildVue
     }

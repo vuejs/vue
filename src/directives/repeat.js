@@ -4,8 +4,7 @@ var isPlainObject = _.isPlainObject
 var textParser = require('../parsers/text')
 var expParser = require('../parsers/expression')
 var templateParser = require('../parsers/template')
-var compile = require('../compiler/compile')
-var transclude = require('../compiler/transclude')
+var compiler = require('../compiler')
 var uid = 0
 
 // async component resolution states
@@ -93,10 +92,10 @@ module.exports = {
       this.inherit = true
       // important: transclude with no options, just
       // to ensure block start and block end
-      this.template = transclude(this.template)
+      this.template = compiler.transclude(this.template)
       var copy = _.extend({}, options)
       copy._asComponent = false
-      this._linkFn = compile(this.template, copy)
+      this._linkFn = compiler.compile(this.template, copy)
     } else {
       this.Ctor = null
       this.asComponent = true
@@ -125,19 +124,6 @@ module.exports = {
         return
       }
       this.Ctor = Ctor
-      var merged = _.mergeOptions(Ctor.options, {}, {
-        $parent: this.vm
-      })
-      merged.template = this.inlineTempalte || merged.template
-      merged._asComponent = true
-      merged._parent = this.vm
-      this.template = transclude(this.template, merged)
-      this.content = merged._content
-      // Important: mark the template as a root node so that
-      // custom element components don't get compiled twice.
-      // fixes #822
-      this.template.__vue__ = true
-      this._linkFn = compile(this.template, merged)
       this.componentState = RESOLVED
       this.realUpdate(this.pendingData)
       this.pendingData = null
@@ -362,15 +348,21 @@ module.exports = {
     var Ctor = this.Ctor || this.resolveDynamicComponent(data, meta)
     var vm = this.vm.$addChild({
       el: templateParser.clone(this.template),
-      _asComponent: this.asComponent,
-      _host: this._host,
-      _linkFn: this._linkFn,
-      _meta: meta,
-      _content: this.content,
-      _repeat: this.inherit,
       data: data,
       inherit: this.inherit,
-      template: this.inlineTempalte
+      template: this.inlineTempalte,
+      // repeater meta, e.g. $index, $key
+      _meta: meta,
+      // mark this as an inline-repeat instance
+      _repeat: this.inherit,
+      // is this a component?
+      _asComponent: this.asComponent,
+      // linker cachable if no inline-template
+      _linkerCachable: !this.inlineTempalte,
+      // transclusion host
+      _host: this._host,
+      // pre-compiled linker for simple repeats
+      _linkFn: this._linkFn,
     }, Ctor)
     // cache instance
     if (needCache) {

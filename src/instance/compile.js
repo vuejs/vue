@@ -1,7 +1,6 @@
 var _ = require('../util')
 var Directive = require('../directive')
-var compile = require('../compiler/compile')
-var transclude = require('../compiler/transclude')
+var compiler = require('../compiler')
 
 /**
  * Transclude, compile and link element.
@@ -18,19 +17,47 @@ var transclude = require('../compiler/transclude')
 
 exports._compile = function (el) {
   var options = this.$options
+  var host = this._host
   if (options._linkFn) {
     // pre-transcluded with linker, just use it
     this._initElement(el)
-    this._unlinkFn = options._linkFn(this, el)
+    this._unlinkFn = options._linkFn(this, el, host)
   } else {
     // transclude and init element
     // transclude can potentially replace original
-    // so we need to keep reference
+    // so we need to keep reference; this step also injects
+    // the template and caches the original attributes
+    // on the container node and replacer node.
     var original = el
-    el = transclude(el, options)
+    el = compiler.transclude(el, options)
     this._initElement(el)
+
+    // root is always compiled per-instance, because
+    // container attrs and props can be different every time.
+    var rootUnlinkFn = compiler.compileRoot(this, el, options)
+
     // compile and link the rest
-    this._unlinkFn = compile(el, options)(this, el)
+    var linker
+    var ctor = this.constructor
+    // component compilation can be cached
+    // as long as it's not using inline-template
+    if (options._linkerCachable) {
+      linker = ctor.linker
+      if (!linker) {
+        linker = ctor.linker = compiler.compile(el, options)
+      }
+    }
+    var contentUnlinkFn = linker
+      ? linker(this, el)
+      : compiler.compile(el, options)(this, el, host)
+
+    this._unlinkFn = function () {
+      rootUnlinkFn()
+      // passing destroying: true to avoid searching and
+      // splicing the directives
+      contentUnlinkFn(true)
+    }
+
     // finally replace original
     if (options.replace) {
       _.replace(original, el)
@@ -114,9 +141,7 @@ exports._destroy = function (remove, deferCleanup) {
   // teardown all directives. this also tearsdown all
   // directive-owned watchers.
   if (this._unlinkFn) {
-    // passing destroying: true to avoid searching and
-    // splicing the directives
-    this._unlinkFn(true)
+    this._unlinkFn()
   }
   i = this._watchers.length
   while (i--) {

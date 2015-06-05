@@ -14,7 +14,7 @@ var templateParser = require('../parsers/template')
  * @return {Element|DocumentFragment}
  */
 
-module.exports = function transclude (el, options) {
+exports.transclude = function (el, options) {
   // extract container attributes to pass them down
   // to compiler, because they need to be compiled in
   // parent scope. we are mutating the options object here

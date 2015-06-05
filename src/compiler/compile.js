@@ -15,8 +15,6 @@ var terminalDirectives = [
   'if'
 ]
 
-module.exports = compile
-
 /**
  * Compile a template and return a reusable composite link
  * function, which recursively contains more link functions
@@ -30,11 +28,11 @@ module.exports = compile
  * @return {Function}
  */
 
-function compile (el, options, partial, host) {
+exports.compile = function (el, options, partial, host) {
   // link function for the node itself.
-  var nodeLinkFn = !partial
-    ? compileRoot(el, options)
-    : compileNode(el, options)
+  var nodeLinkFn = partial || !options._asComponent
+    ? compileNode(el, options)
+    : null
   // link function for the childNodes
   var childLinkFn =
     !(nodeLinkFn && nodeLinkFn.terminal) &&
@@ -73,13 +71,25 @@ function compile (el, options, partial, host) {
      * @param {Boolean} destroying
      */
     return function unlink (destroying) {
-      var i = dirs.length
-      while (i--) {
-        dirs[i]._teardown()
-        if (!destroying) {
-          vm._directives.$remove(dirs[i])
-        }
-      }
+      teardownDirs(vm, dirs, destroying)
+    }
+  }
+}
+
+/**
+ * Teardown partial linked directives.
+ *
+ * @param {Vue} vm
+ * @param {Array} dirs
+ * @param {Boolean} destroying
+ */
+
+function teardownDirs (vm, dirs, destroying) {
+  var i = dirs.length
+  while (i--) {
+    dirs[i]._teardown()
+    if (!destroying) {
+      vm._directives.$remove(dirs[i])
     }
   }
 }
@@ -96,12 +106,18 @@ function compile (el, options, partial, host) {
  * Also, if this is a block instance, we only need to
  * compile 1 & 2 here.
  *
+ * This function does compile and link at the same time,
+ * since root linkers can not be reused. It returns the
+ * unlink function for potential parent directives on the
+ * container.
+ *
+ * @param {Vue} vm
  * @param {Element} el
  * @param {Object} options
  * @return {Function}
  */
 
-function compileRoot (el, options) {
+ exports.compileRoot = function (vm, el, options) {
   var containerAttrs = options._containerAttrs
   var replacerAttrs = options._replacerAttrs
   var props = options.props
@@ -129,12 +145,34 @@ function compileRoot (el, options) {
       replacerLinkFn = compileDirectives(el, options)
     }
   }
-  return function rootLinkFn (vm, el, host) {
+
+  // link props
+  if (propsLinkFn) {
     // explicitly passing null to props
     // linkers because they don't need a real element
-    if (propsLinkFn) propsLinkFn(vm, null)
-    if (parentLinkFn) parentLinkFn(vm.$parent, el, host)
-    if (replacerLinkFn) replacerLinkFn(vm, el, host)
+    propsLinkFn(vm, null)
+  }
+
+  // link parent dirs
+  var parentDirs
+  var parent = vm.$parent
+  if (parent && parentLinkFn) {
+    var originalParentDirCount = parent._directives.length
+    parentLinkFn(parent, el)
+    parentDirs = parent._directives.slice(originalParentDirCount)
+  }
+
+  // link self
+  if (replacerLinkFn) {
+    replacerLinkFn(vm, el)
+  }
+
+  // return the unlink function that tearsdown parent
+  // container directives.
+  return function rootUnlinkFn () {
+    if (parentDirs) {
+      teardownDirs(parent, parentDirs)
+    }
   }
 }
 

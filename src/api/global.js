@@ -8,11 +8,7 @@ var config = require('../config')
 exports.util = _
 exports.nextTick = _.nextTick
 exports.config = require('../config')
-
-exports.compiler = {
-  compile: require('../compiler/compile'),
-  transclude: require('../compiler/transclude')
-}
+exports.compiler = require('../compiler')
 
 exports.parsers = {
   path: require('../parsers/path'),

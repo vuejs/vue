@@ -21,6 +21,7 @@
     "src/cache.js",
     "src/compiler/compile.js",
     "src/compiler/content.js",
+    "src/compiler/index.js",
     "src/compiler/transclude.js",
     "src/config.js",
     "src/directive.js",

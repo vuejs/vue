@@ -1,5 +1,5 @@
 var _ = require('../util')
-var compile = require('../compiler/compile')
+var compiler = require('../compiler')
 var templateParser = require('../parsers/template')
 var transition = require('../transition')
 
@@ -19,7 +19,7 @@ module.exports = {
         this.template.appendChild(templateParser.clone(el))
       }
       // compile the nested partial
-      this.linker = compile(
+      this.linker = compiler.compile(
         this.template,
         this.vm.$options,
         true

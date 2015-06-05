@@ -1,8 +1,9 @@
 var Vue = require('../../../../src/vue')
 var _ = require('../../../../src/util')
 var dirParser = require('../../../../src/parsers/directive')
-var compile = require('../../../../src/compiler/compile')
-var transclude = require('../../../../src/compiler/transclude')
+var compiler = require('../../../../src/compiler')
+var compile = compiler.compile
+var transclude = compiler.transclude
 
 if (_.inBrowser) {
   describe('Compile', function () {
@@ -167,8 +168,7 @@ if (_.inBrowser) {
       el.setAttribute('with-filter', '{{a | filter}}')
       el.setAttribute('boolean-literal', '{{true}}')
       transclude(el, options)
-      var linker = compile(el, options)
-      linker(vm, el)
+      compiler.compileRoot(vm, el, options)
       // should skip literals and one-time bindings
       expect(vm._bindDir.calls.count()).toBe(5)
       // data-some-attr
@@ -226,8 +226,7 @@ if (_.inBrowser) {
       el.setAttribute('a', 'hi')
       el.setAttribute('b', '{{hi}}')
       transclude(el, options)
-      var linker = compile(el, options)
-      linker(vm, el)
+      compiler.compileRoot(vm, el, options)
       expect(vm._bindDir.calls.count()).toBe(0)
       expect(vm.$set).toHaveBeenCalledWith('a', 'hi')
       expect(hasWarned(_, 'Cannot bind dynamic prop on a root')).toBe(true)
@@ -295,7 +294,29 @@ if (_.inBrowser) {
       expect(childSpy).toHaveBeenCalledWith(2)
     })
 
-    it('should remove transcluded directives from parent when unlinking (v-component)', function () {
+    it('should remove parent container directives from parent when unlinking', function () {
+      var vm = new Vue({
+        el: el,
+        template:
+          '<test v-show="ok"></test>',
+        data: {
+          ok: true
+        },
+        components: {
+          test: {
+            template: 'hi'
+          }
+        }
+      })
+      expect(el.firstChild.style.display).toBe('')
+      expect(vm._directives.length).toBe(2)
+      expect(vm._children.length).toBe(1)
+      vm._children[0].$destroy()
+      expect(vm._directives.length).toBe(1)
+      expect(vm._children.length).toBe(0)
+    })
+
+    it('should remove transcluded directives from parent when unlinking (component)', function () {
       var vm = new Vue({
         el: el,
         template:
@@ -317,7 +338,7 @@ if (_.inBrowser) {
       expect(vm._children.length).toBe(0)
     })
 
-    it('should remove transcluded directives from parent when unlinking (v-if + v-component)', function (done) {
+    it('should remove transcluded directives from parent when unlinking (v-if + component)', function (done) {
       var vm = new Vue({
         el: el,
         template:
