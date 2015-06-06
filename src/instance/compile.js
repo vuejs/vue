@@ -140,6 +140,9 @@ exports._destroy = function (remove, deferCleanup) {
   }
   // teardown all directives. this also tearsdown all
   // directive-owned watchers.
+  for (i = 0; i < this._directives.length; i++) {
+    this._directives[i]._teardown()
+  }
   if (this._unlinkFn) {
     this._unlinkFn()
   }
