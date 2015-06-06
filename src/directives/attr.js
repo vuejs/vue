@@ -6,27 +6,43 @@ module.exports = {
 
   priority: 850,
 
-  bind: function () {
-    var name = this.arg
-    this.update = xlinkRE.test(name)
-      ? xlinkHandler
-      : defaultHandler
+  update: function (value) {
+    if (this.arg) {
+      this.setAttr(this.arg, value)
+    } else if (typeof value === 'object') {
+      this.objectHandler(value)
+    }
+  },
+
+  objectHandler: function (value) {
+    // cache object attrs so that only changed attrs
+    // are actually updated.
+    var cache = this.cache || (this.cache = {})
+    var attr, val
+    for (attr in cache) {
+      if (!(attr in value))
+        this.setAttr(attr, null)
+        delete cache[attr]
+    }
+    for (attr in value) {
+      val = value[attr]
+      if (val !== cache[attr]) {
+        cache[attr] = val
+        this.setAttr(attr, val)
+      }
+    }
+  },
+
+  setAttr: function (attr, value) {
+    if (value || value === 0) {
+      if (xlinkRE.test(attr)) {
+        this.el.setAttributeNS(xlinkNS, attr, value)
+      } else {
+        this.el.setAttribute(attr, value)
+      }
+    } else {
+      this.el.removeAttribute(attr)
+    }
   }
 
-}
-
-function defaultHandler (value) {
-  if (value || value === 0) {
-    this.el.setAttribute(this.arg, value)
-  } else {
-    this.el.removeAttribute(this.arg)
-  }
-}
-
-function xlinkHandler (value) {
-  if (value != null) {
-    this.el.setAttributeNS(xlinkNS, this.arg, value)
-  } else {
-    this.el.removeAttributeNS(xlinkNS, 'href')
-  }
 }
