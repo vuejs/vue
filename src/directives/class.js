@@ -12,7 +12,7 @@ module.exports = {
     } else {
       this.cleanup()
       if (value && typeof value === 'string') {
-        // raw CSSText
+        // raw class text
         addClass(this.el, value)
         this.lastVal = value
       } else if (_.isPlainObject(value)) {

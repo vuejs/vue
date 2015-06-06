@@ -75,6 +75,9 @@ if (_.inBrowser) {
       dir.update({color: 'red', marginRight: '30px'})
       expect(el.style.getPropertyValue('color')).toBe('red')
       expect(el.style.getPropertyValue('margin-right')).toBe('30px')
+      dir.update({color: 'blue'})
+      expect(el.style.getPropertyValue('color')).toBe('blue')
+      expect(el.style.getPropertyValue('margin-right')).toBeFalsy()
     })
 
     it('update with object and auto prefix', function () {

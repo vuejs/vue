@@ -17,13 +17,20 @@ module.exports = {
       if (typeof value === 'object') {
         // cache object styles so that only changed props
         // are actually updated.
-        if (!this.cache) this.cache = {}
-        for (var prop in value) {
-          this.setProp(prop, value[prop])
+        var cache = this.cache || (this.cache = {})
+        var prop, val
+        for (prop in cache) {
+          if (!value[prop]) {
+            this.setProp(prop, null)
+            delete cache[prop]
+          }
+        }
+        for (prop in value) {
           /* jshint eqeqeq: false */
-          if (value[prop] != this.cache[prop]) {
-            this.cache[prop] = value[prop]
-            this.setProp(prop, value[prop])
+          val = value[prop]
+          if (val && val != cache[prop]) {
+            cache[prop] = val
+            this.setProp(prop, val)
           }
         }
       } else {
