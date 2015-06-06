@@ -168,7 +168,7 @@ if (_.inBrowser) {
       el.setAttribute('with-filter', '{{a | filter}}')
       el.setAttribute('boolean-literal', '{{true}}')
       transclude(el, options)
-      compiler.compileRoot(vm, el, options)
+      compiler.compileAndLinkRoot(vm, el, options)
       // should skip literals and one-time bindings
       expect(vm._bindDir.calls.count()).toBe(5)
       // data-some-attr
@@ -226,7 +226,7 @@ if (_.inBrowser) {
       el.setAttribute('a', 'hi')
       el.setAttribute('b', '{{hi}}')
       transclude(el, options)
-      compiler.compileRoot(vm, el, options)
+      compiler.compileAndLinkRoot(vm, el, options)
       expect(vm._bindDir.calls.count()).toBe(0)
       expect(vm.$set).toHaveBeenCalledWith('a', 'hi')
       expect(hasWarned(_, 'Cannot bind dynamic prop on a root')).toBe(true)
@@ -292,6 +292,30 @@ if (_.inBrowser) {
       vm.$el.firstChild.dispatchEvent(e)
       expect(parentSpy).toHaveBeenCalledWith(1)
       expect(childSpy).toHaveBeenCalledWith(2)
+    })
+
+    it('should teardown props and replacer directives when unlinking', function () {
+      var vm = new Vue({
+        el: el,
+        template: '<test prop="{{msg}}"></test>',
+        data: {
+          msg: 'hi'
+        },
+        components: {
+          test: {
+            props: ['prop'],
+            template: '<div v-show="true"></div>',
+            replace: true
+          }
+        }
+      })
+      var dirs = vm._children[0]._directives
+      expect(dirs.length).toBe(2)
+      vm._children[0].$destroy()
+      var i = dirs.length
+      while (i--) {
+        expect(dirs[i]._bound).toBe(false)
+      }
     })
 
     it('should remove parent container directives from parent when unlinking', function () {

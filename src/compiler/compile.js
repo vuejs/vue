@@ -52,16 +52,13 @@ exports.compile = function (el, options, partial, host) {
    */
 
   return function compositeLinkFn (vm, el) {
-    // save original directive count before linking
-    // so we can capture the directives created during a
-    // partial compilation.
-    var originalDirCount = vm._directives.length
     // cache childNodes before linking parent, fix #657
     var childNodes = _.toArray(el.childNodes)
     // link
-    if (nodeLinkFn) nodeLinkFn(vm, el, host)
-    if (childLinkFn) childLinkFn(vm, childNodes, host)
-    var dirs = vm._directives.slice(originalDirCount)
+    var dirs = linkAndCapture(function () {
+      if (nodeLinkFn) nodeLinkFn(vm, el, host)
+      if (childLinkFn) childLinkFn(vm, childNodes, host)
+    }, vm)
 
     /**
      * The linker function returns an unlink function that
@@ -77,6 +74,20 @@ exports.compile = function (el, options, partial, host) {
 }
 
 /**
+ * Apply a linker to a vm/element pair and capture the
+ * directives created during the process.
+ *
+ * @param {Function} linker
+ * @param {Vue} vm
+ */
+
+function linkAndCapture (linker, vm) {
+  var originalDirCount = vm._directives.length
+  linker()
+  return vm._directives.slice(originalDirCount)
+}
+
+/**
  * Teardown partial linked directives.
  *
  * @param {Vue} vm
@@ -85,6 +96,7 @@ exports.compile = function (el, options, partial, host) {
  */
 
 function teardownDirs (vm, dirs, destroying) {
+  if (!dirs) return
   var i = dirs.length
   while (i--) {
     dirs[i]._teardown()
@@ -117,15 +129,17 @@ function teardownDirs (vm, dirs, destroying) {
  * @return {Function}
  */
 
- exports.compileRoot = function (vm, el, options) {
+ exports.compileAndLinkRoot = function (vm, el, options) {
   var containerAttrs = options._containerAttrs
   var replacerAttrs = options._replacerAttrs
   var props = options.props
   var propsLinkFn, parentLinkFn, replacerLinkFn
+
   // 1. props
   propsLinkFn = props && containerAttrs
     ? compileProps(el, containerAttrs, props)
     : null
+
   // only need to compile other attributes for
   // non-block instances
   if (el.nodeType !== 11) {
@@ -146,33 +160,26 @@ function teardownDirs (vm, dirs, destroying) {
     }
   }
 
-  // link props
-  if (propsLinkFn) {
-    // explicitly passing null to props
-    // linkers because they don't need a real element
-    propsLinkFn(vm, null)
-  }
-
   // link parent dirs
-  var parentDirs
   var parent = vm.$parent
+  var parentDirs
   if (parent && parentLinkFn) {
-    var originalParentDirCount = parent._directives.length
-    parentLinkFn(parent, el)
-    parentDirs = parent._directives.slice(originalParentDirCount)
+    parentDirs = linkAndCapture(function () {
+      parentLinkFn(parent, el)
+    }, parent)
   }
 
   // link self
-  if (replacerLinkFn) {
-    replacerLinkFn(vm, el)
-  }
+  var selfDirs = linkAndCapture(function () {
+    if (propsLinkFn) propsLinkFn(vm, null)
+    if (replacerLinkFn) replacerLinkFn(vm, el)
+  }, vm)
 
   // return the unlink function that tearsdown parent
   // container directives.
   return function rootUnlinkFn () {
-    if (parentDirs) {
-      teardownDirs(parent, parentDirs)
-    }
+    teardownDirs(parent, parentDirs)
+    teardownDirs(vm, selfDirs)
   }
 }
 
