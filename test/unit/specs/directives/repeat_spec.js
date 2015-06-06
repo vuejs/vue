@@ -713,6 +713,34 @@ if (_.inBrowser) {
       })
     })
 
+    it('should teardown unused portion', function (done) {
+      var vm = new Vue({
+        el: el,
+        template: '<ul><component is="item" v-repeat="items" count="{{count}}"></component></ul>',
+        data: {
+            count: 0,
+            items:  [1, 2]
+        },
+        components: {
+          item: {
+            replace: true,
+            props: ['count'],
+            template: '<li>{{ $value }}{{ count }}</li>',
+          }
+        }
+      })
+      vm.items = [1]
+      _.nextTick(function () {
+        expect(function () {
+          vm.count = 1
+        }).not.toThrow()
+        _.nextTick(function () {
+          expect(el.innerHTML).toBe('<ul><li>11</li></ul>')
+          done()
+        })
+      })
+    })
+
   })
 }
 
