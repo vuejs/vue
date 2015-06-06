@@ -20,9 +20,10 @@ module.exports = {
     var cache = this.cache || (this.cache = {})
     var attr, val
     for (attr in cache) {
-      if (!(attr in value))
+      if (!(attr in value)) {
         this.setAttr(attr, null)
         delete cache[attr]
+      }
     }
     for (attr in value) {
       val = value[attr]
