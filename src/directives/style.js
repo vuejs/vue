@@ -20,15 +20,14 @@ module.exports = {
         var cache = this.cache || (this.cache = {})
         var prop, val
         for (prop in cache) {
-          if (!value[prop]) {
+          if (!(prop in value)) {
             this.setProp(prop, null)
             delete cache[prop]
           }
         }
         for (prop in value) {
-          /* jshint eqeqeq: false */
           val = value[prop]
-          if (val && val != cache[prop]) {
+          if (val !== cache[prop]) {
             cache[prop] = val
             this.setProp(prop, val)
           }
