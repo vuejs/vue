@@ -217,7 +217,7 @@ p.notify = function () {
  */
 
 p.addVm = function (vm) {
-  (this.vms = this.vms || []).push(vm)
+  (this.vms || (this.vms = [])).push(vm)
 }
 
 /**
