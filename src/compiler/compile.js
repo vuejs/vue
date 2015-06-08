@@ -215,7 +215,7 @@ function compileElement (el, options) {
   var hasAttrs = el.hasAttributes()
   // check element directives
   var linkFn = checkElementDirectives(el, options)
-  // check terminal direcitves (repeat & if)
+  // check terminal directives (repeat & if)
   if (!linkFn && hasAttrs) {
     linkFn = checkTerminalDirectives(el, options)
   }
