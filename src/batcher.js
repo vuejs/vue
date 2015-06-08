@@ -12,6 +12,7 @@ var userQueue = []
 var has = {}
 var waiting = false
 var flushing = false
+var internalQueueDepleted = false
 
 /**
  * Reset the batcher's state.
@@ -21,8 +22,7 @@ function reset () {
   queue = []
   userQueue = []
   has = {}
-  waiting = false
-  flushing = false
+  waiting = flushing = internalQueueDepleted = false
 }
 
 /**
@@ -32,6 +32,7 @@ function reset () {
 function flush () {
   flushing = true
   run(queue)
+  internalQueueDepleted = true
   run(userQueue)
   reset()
 }
@@ -81,7 +82,7 @@ exports.push = function (job) {
     // directive update during the flushing; at that time
     // the directive queue would already have been run, so
     // we call that update immediately as it is pushed.
-    if (flushing && !job.user) {
+    if (flushing && !job.user && internalQueueDepleted) {
       job.run()
       return
     }
