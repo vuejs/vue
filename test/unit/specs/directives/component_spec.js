@@ -48,6 +48,23 @@ if (_.inBrowser) {
       expect(el.innerHTML).toBe('<p>123</p>')
     })
 
+    it('allow v-component on table elements', function () {
+      var vm = new Vue({
+        el: el,
+        template: '<table><tbody><tr v-component="test"></tr></tbody></table>',
+        components: {
+          test: {
+            data: function () {
+              return { a: 123 }
+            },
+            template: '<td>{{a}}</td>'
+          }
+        }
+      })
+      expect(el.innerHTML).toBe(vm.$options.template.replace(/<tr.*\/tr>/, '<tr><td>123</td></tr>'))
+      expect(_.warn).not.toHaveBeenCalled()
+    })
+
     it('inline-template', function () {
       var vm = new Vue({
         el: el,

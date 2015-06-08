@@ -50,14 +50,14 @@ function enableDebug () {
     if (type === 'directive') {
       if (id === 'component') {
         exports.warn(
-          'v-component has been deprecated in 0.12. ' +
-          'Use custom element syntax instead.'
+          'v-component can only be used on table elements ' +
+          'in ^0.12.0. Use custom element syntax instead.'
         )
         return
       }
       if (id === 'with') {
         exports.warn(
-          'v-with has been deprecated in 0.12. ' +
+          'v-with has been deprecated in ^0.12.0. ' +
           'Use props instead.'
         )
         return

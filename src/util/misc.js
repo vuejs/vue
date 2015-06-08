@@ -1,6 +1,7 @@
 var _ = require('./index')
 var config = require('../config')
-var commonTagRE = /^(div|p|span|img|a|br|ul|ol|li|h1|h2|h3|h4|h5|table|tbody|tr|td|pre)$/
+var commonTagRE = /^(div|p|span|img|a|br|ul|ol|li|h1|h2|h3|h4|h5|code|pre)$/
+var tableElementsRE = /^caption|colgroup|thead|tfoot|tbody|tr|td|th$/
 
 /**
  * Check if an element is a component, if yes return its
@@ -21,6 +22,11 @@ exports.checkComponent = function (el, options) {
   } else if (
     !commonTagRE.test(tag) &&
     _.resolveAsset(options, 'components', tag)
+  ) {
+    return tag
+  } else if (
+    tableElementsRE.test(tag) &&
+    (tag = _.attr(el, 'component'))
   ) {
     return tag
   }
