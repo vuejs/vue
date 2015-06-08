@@ -62,6 +62,13 @@ function enableDebug () {
         )
         return
       }
+      if (id === 'events') {
+        exports.warn(
+          'v-events has been deprecated in ^0.12.0. ' +
+          'Use v-callbacks instead.'
+        )
+        return
+      }
     }
     if (!val) {
       exports.warn('Failed to resolve ' + type + ': ' + id)

@@ -2,7 +2,7 @@ var _ = require('../../../../src/util')
 var Vue = require('../../../../src/vue')
 
 if (_.inBrowser) {
-  describe('v-events', function () {
+  describe('v-callbacks', function () {
 
     var el
     beforeEach(function () {
@@ -11,10 +11,10 @@ if (_.inBrowser) {
     })
 
     it('should register events', function () {
-      var spy = jasmine.createSpy('v-events')
+      var spy = jasmine.createSpy('v-callbacks')
       new Vue({
         el: el,
-        template: '<test v-events="test:test"></test>',
+        template: '<test v-callbacks="test:test"></test>',
         methods: {
           test: spy
         },
@@ -32,7 +32,7 @@ if (_.inBrowser) {
     it('should warn when used on non-root node', function () {
       new Vue({
         el: el,
-        template: '<div v-events="test:test"></div>'
+        template: '<div v-callbacks="test:test"></div>'
       })
       expect(hasWarned(_,
         'should only be used on a child component ' +
@@ -40,7 +40,7 @@ if (_.inBrowser) {
     })
 
     it('should warn when used on child component root', function () {
-      var spy = jasmine.createSpy('v-events')
+      var spy = jasmine.createSpy('v-callbacks')
       new Vue({
         el: el,
         template: '<test></test>',
@@ -50,7 +50,7 @@ if (_.inBrowser) {
         components: {
           test: {
             replace: true,
-            template: '<div v-events="test:test"></div>',
+            template: '<div v-callbacks="test:test"></div>',
             compiled: function () {
               this.$emit('test')
             }
@@ -67,7 +67,7 @@ if (_.inBrowser) {
       var vm = new Vue({
         el: el,
         data: { test: 123 },
-        template: '<test v-events="test:test"></test>',
+        template: '<test v-callbacks="test:test"></test>',
         components: {
           test: {}
         }
@@ -79,7 +79,7 @@ if (_.inBrowser) {
       var vm = new Vue({
         el: el,
         data: {a:1},
-        template: '<test v-events="test:a++"></test>',
+        template: '<test v-callbacks="test:a++"></test>',
         components: {
           test: {
             compiled: function () {
@@ -104,7 +104,7 @@ if (_.inBrowser) {
             a++
           }
         },
-        template: '<test v-events="test:handle"></test>',
+        template: '<test v-callbacks="test:handle"></test>',
         components: {
           test: {
             compiled: function () {

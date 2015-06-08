@@ -8,8 +8,8 @@ module.exports = {
     var child = this.el.__vue__
     if (!child || this.vm !== child.$parent) {
       _.warn(
-        '`v-events` should only be used on a child component ' +
-        'from the parent template.'
+        '`v-callbacks` should only be used on a child ' +
+        'component from the parent template.'
       )
       return
     }
@@ -18,7 +18,7 @@ module.exports = {
   update: function (handler, oldHandler) {
     if (typeof handler !== 'function') {
       _.warn(
-        'Directive "v-events:' + this.expression + '" ' +
+        'Directive "v-callbacks:' + this.expression + '" ' +
         'expects a function value.'
       )
       return
