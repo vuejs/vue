@@ -26,7 +26,6 @@
     "src/config.js",
     "src/directive.js",
     "src/directives/attr.js",
-    "src/directives/callbacks.js",
     "src/directives/class.js",
     "src/directives/cloak.js",
     "src/directives/component.js",

@@ -65,7 +65,7 @@ function enableDebug () {
       if (id === 'events') {
         exports.warn(
           'v-events has been deprecated in ^0.12.0. ' +
-          'Use v-callbacks instead.'
+          'Pass down methods as callback props instead.'
         )
         return
       }
