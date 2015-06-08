@@ -58,6 +58,30 @@ if (_.inBrowser) {
       })
     })
 
+    it('$data as prop', function (done) {
+      var vm = new Vue({
+        el: el,
+        template: '<test $data="{{ok}}"></test>',
+        data: {
+          ok: {
+            msg: 'hihi'
+          }
+        },
+        components: {
+          test: {
+            props: ['$data'],
+            template: '{{msg}}'
+          }
+        }
+      })
+      expect(el.innerHTML).toBe('<test>hihi</test>')
+      vm.ok = { msg: 'what' }
+      _.nextTick(function () {
+        expect(el.innerHTML).toBe('<test>what</test>')
+        done()
+      })
+    })
+
     it('warn invalid keys', function () {
       var vm = new Vue({
         el: el,
