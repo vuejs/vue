@@ -10,7 +10,7 @@ Vue.js is a library for building interactive web interfaces. It provides data-re
 - Plain JavaScript objects as reactive models
 - Component-oriented development style
 
-Note that Vue.js only supports IE9 or above. To check out live examples and docs, visit [vuejs.org](http://vuejs.org). You can also start with this excellent screencast series on [Laracasts](https://laracasts.com/series/learning-vuejs).
+Note that Vue.js only supports [ES5-compliant browsers](http://kangax.github.io/compat-table/es5/) (IE8 and below are not supported). To check out live examples and docs, visit [vuejs.org](http://vuejs.org). You can also start with this excellent screencast series on [Laracasts](https://laracasts.com/series/learning-vuejs).
 
 ## Questions
 
