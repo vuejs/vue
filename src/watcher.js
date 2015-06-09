@@ -154,7 +154,7 @@ p.afterGet = function () {
  */
 
 p.update = function () {
-  if (!config.async || config.debug) {
+  if (!config.async) {
     this.run()
   } else {
     batcher.push(this)
