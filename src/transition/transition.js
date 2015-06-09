@@ -245,13 +245,18 @@ p.callHookWithCb = function (type) {
  */
 
 p.getCssTransitionType = function (className) {
-  // skip CSS transitions if page is not visible -
-  // this solves the issue of transitionend events not
-  // firing until the page is visible again.
-  // pageVisibility API is supported in IE10+, same as
-  // CSS transitions.
   /* istanbul ignore if */
-  if (!transitionEndEvent || document.hidden) {
+  if (
+    !transitionEndEvent ||
+    // skip CSS transitions if page is not visible -
+    // this solves the issue of transitionend events not
+    // firing until the page is visible again.
+    // pageVisibility API is supported in IE10+, same as
+    // CSS transitions.
+    document.hidden ||
+    // explicit js-only transition
+    (this.hooks && this.hooks.css === false)
+  ) {
     return
   }
   var type = this.typeCache[className]
