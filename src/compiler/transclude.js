@@ -25,7 +25,7 @@ exports.transclude = function (el, options) {
   }
   // for template tags, what we want is its content as
   // a documentFragment (for block instances)
-  if (el.tagName === 'TEMPLATE') {
+  if (_.isTemplate(el)) {
     el = templateParser.parse(el)
   }
   if (options && options.template) {

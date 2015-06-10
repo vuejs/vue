@@ -12,7 +12,7 @@ module.exports = {
       this.end = _.createAnchor('v-if-end')
       _.replace(el, this.end)
       _.before(this.start, this.end)
-      if (el.tagName === 'TEMPLATE') {
+      if (_.isTemplate(el)) {
         this.template = templateParser.parse(el, true)
       } else {
         this.template = document.createDocumentFragment()

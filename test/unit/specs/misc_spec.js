@@ -65,4 +65,17 @@ describe('Misc', function () {
     expect(vm.$el.innerHTML).toBe('<div>1</div><div>2</div><div>3</div>')
   })
 
+  // #922
+  it('template repeat inside svg', function () {
+    var el = document.createElement('div')
+    var vm = new Vue({
+      el: el,
+      template: '<svg><template v-repeat="list"><text>{{$value}}</text></template></svg>',
+      data: {
+        list: [1, 2, 3]
+      }
+    })
+    expect(el.innerHTML).toBe('<svg><text>1</text><text>2</text><text>3</text></svg>')
+  })
+
 })

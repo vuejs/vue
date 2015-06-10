@@ -117,17 +117,16 @@ function stringToFragment (templateString) {
  */
 
 function nodeToFragment (node) {
-  var tag = node.tagName
   // if its a template tag and the browser supports it,
   // its content is already a document fragment.
   if (
-    tag === 'TEMPLATE' &&
+    _.isTemplate(node) &&
     node.content instanceof DocumentFragment
   ) {
     return node.content
   }
   // script template
-  if (tag === 'SCRIPT') {
+  if (node.tagName === 'SCRIPT') {
     return stringToFragment(node.textContent)
   }
   // normal node, clone it to avoid mutating the original

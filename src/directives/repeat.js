@@ -28,7 +28,7 @@ module.exports = {
     _.replace(this.el, this.end)
     _.before(this.start, this.end)
     // check if this is a block repeat
-    this.template = this.el.tagName === 'TEMPLATE'
+    this.template = _.isTemplate(this.el)
       ? templateParser.parse(this.el, true)
       : this.el
     // check other directives that need to be handled
