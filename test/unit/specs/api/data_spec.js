@@ -89,7 +89,9 @@ describe('Data API', function () {
   it('$watch', function (done) {
     var spy = jasmine.createSpy()
     // test immediate invoke
-    var unwatch = vm.$watch('a + b.c', spy, false, true)
+    var unwatch = vm.$watch('a + b.c', spy, {
+      immediate: true
+    })
     expect(spy).toHaveBeenCalledWith(3, undefined)
     vm.a = 2
     nextTick(function () {
@@ -109,7 +111,7 @@ describe('Data API', function () {
     // test immediate invoke
     var unwatch = vm.$watch(function () {
       return this.a + this.b.c
-    }, spy, false, true)
+    }, spy, { immediate: true })
     expect(spy).toHaveBeenCalledWith(3, undefined)
     vm.a = 2
     nextTick(function () {
@@ -127,7 +129,9 @@ describe('Data API', function () {
   it('deep $watch', function (done) {
     var oldB = vm.b
     var spy = jasmine.createSpy()
-    vm.$watch('b', spy, true)
+    vm.$watch('b', spy, {
+      deep: true
+    })
     vm.b.c = 3
     nextTick(function () {
       expect(spy).toHaveBeenCalledWith(oldB, oldB)
