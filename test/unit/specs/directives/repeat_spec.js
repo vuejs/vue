@@ -311,12 +311,61 @@ if (_.inBrowser) {
       vm.list.reverse()
       _.nextTick(function () {
         assertMarkup()
-        done()
+        vm.list.splice(1, 1)
+        _.nextTick(function () {
+          assertMarkup()
+          vm.list.splice(1, 0, { a: 2 })
+          _.nextTick(function () {
+            assertMarkup()
+            done()
+          })
+        })
       })
 
       function assertMarkup () {
         var markup = vm.list.map(function (item) {
           return '<p>' + item.a + '</p><p>' + (item.a + 1) + '</p>'
+        }).join('')
+        expect(el.innerHTML).toBe(markup)
+      }
+    })
+
+    it('block repeat with component', function (done) {
+      var vm = new Vue({
+        el: el,
+        template: '<template v-repeat="list"><test a="{{a}}"></test></template>',
+        data: {
+          list: [
+            { a: 1 },
+            { a: 2 },
+            { a: 3 }
+          ]
+        },
+        components: {
+          test: {
+            props: ['a'],
+            template: '{{a}}'
+          }
+        }
+      })
+      assertMarkup()
+      vm.list.reverse()
+      _.nextTick(function () {
+        assertMarkup()
+        vm.list.splice(1, 1)
+        _.nextTick(function () {
+          assertMarkup()
+          vm.list.splice(1, 0, { a: 2 })
+          _.nextTick(function () {
+            assertMarkup()
+            done()
+          })
+        })
+      })
+
+      function assertMarkup () {
+        var markup = vm.list.map(function (item) {
+          return '<test>' + item.a + '</test>'
         }).join('')
         expect(el.innerHTML).toBe(markup)
       }
