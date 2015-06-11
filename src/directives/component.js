@@ -66,38 +66,41 @@ module.exports = {
    */
 
   update: function (value) {
-    this.realUpdate(value)
+    this.setComponent(value)
   },
 
   /**
    * Switch dynamic components. May resolve the component
    * asynchronously, and perform transition based on
-   * specified transition mode. Accepts an async callback
-   * which is called when the transition ends. (This is
-   * exposed for vue-router)
+   * specified transition mode. Accepts a few additional
+   * arguments specifically for vue-router.
    *
    * @param {String} value
-   * @param {Function} [cb]
+   * @param {Object} data
+   * @param {Function} afterBuild
+   * @param {Function} afterTransition
    */
 
-  realUpdate: function (value, cb) {
+  setComponent: function (value, data, afterBuild, afterTransition) {
     this.invalidatePending()
     if (!value) {
       // just remove current
       this.unbuild()
-      this.remove(this.childVM, cb)
+      this.remove(this.childVM, afterTransition)
       this.unsetCurrent()
     } else {
       this.resolveCtor(value, _.bind(function () {
         this.unbuild()
-        var newComponent = this.build()
+        var newComponent = this.build(data)
+        /* istanbul ignore if */
+        if (afterBuild) afterBuild(newComponent)
         var self = this
         if (this.readyEvent) {
           newComponent.$once(this.readyEvent, function () {
-            self.swapTo(newComponent, cb)
+            self.transition(newComponent, afterTransition)
           })
         } else {
-          this.swapTo(newComponent, cb)
+          this.transition(newComponent, afterTransition)
         }
       }, this))
     }
@@ -136,10 +139,11 @@ module.exports = {
    * If keep alive and has cached instance, insert that
    * instance; otherwise build a new one and cache it.
    *
+   * @param {Object} [data]
    * @return {Vue} - the created instance
    */
 
-  build: function () {
+  build: function (data) {
     if (this.keepAlive) {
       var cached = this.cache[this.ctorId]
       if (cached) {
@@ -151,12 +155,14 @@ module.exports = {
     if (this.Ctor) {
       var child = vm.$addChild({
         el: el,
+        data: data,
         template: this.template,
         // if no inline-template, then the compiled
         // linker can be cached for better performance.
         _linkerCachable: !this.template,
         _asComponent: true,
-        _host: this._host
+        _host: this._host,
+        _isRouterView: this._isRouterView
       }, this.Ctor)
       if (this.keepAlive) {
         this.cache[this.ctorId] = child
@@ -208,7 +214,7 @@ module.exports = {
    * @param {Function} [cb]
    */
 
-  swapTo: function (target, cb) {
+  transition: function (target, cb) {
     var self = this
     var current = this.childVM
     this.unsetCurrent()
