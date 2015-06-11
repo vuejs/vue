@@ -22,10 +22,11 @@ var uid = 0
  * @constructor
  */
 
-function Watcher (vm, expression, cb, options) {
+function Watcher (vm, expOrFn, cb, options) {
+  var isFn = typeof expOrFn === 'function'
   this.vm = vm
   vm._watchers.push(this)
-  this.expression = expression
+  this.expression = isFn ? '' : expOrFn
   this.cb = cb
   this.id = ++uid // uid for batching
   this.active = true
@@ -38,9 +39,14 @@ function Watcher (vm, expression, cb, options) {
   this.deps = []
   this.newDeps = []
   // parse expression for getter/setter
-  var res = expParser.parse(expression, options.twoWay)
-  this.getter = res.get
-  this.setter = res.set
+  if (isFn) {
+    this.getter = expOrFn
+    this.setter = undefined
+  } else {
+    var res = expParser.parse(expOrFn, options.twoWay)
+    this.getter = res.get
+    this.setter = res.set
+  }
   this.value = this.get()
 }
 

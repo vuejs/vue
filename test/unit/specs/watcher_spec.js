@@ -313,6 +313,22 @@ describe('Watcher', function () {
     })
   })
 
+  it('watch function', function (done) {
+    var watcher = new Watcher(vm, function () {
+      return this.a + this.b.d
+    }, spy)
+    expect(watcher.value).toBe(5)
+    vm.a = 2
+    nextTick(function () {
+      expect(spy).toHaveBeenCalledWith(6, 5)
+      vm.b = { d: 2 }
+      nextTick(function () {
+        expect(spy).toHaveBeenCalledWith(4, 6)
+        done()
+      })
+    })
+  })
+
   it('teardown', function (done) {
     var watcher = new Watcher(vm, 'b.c', spy)
     watcher.teardown()

@@ -104,6 +104,26 @@ describe('Data API', function () {
     })
   })
 
+  it('function $watch', function (done) {
+    var spy = jasmine.createSpy()
+    // test immediate invoke
+    var unwatch = vm.$watch(function () {
+      return this.a + this.b.c
+    }, spy, false, true)
+    expect(spy).toHaveBeenCalledWith(3, undefined)
+    vm.a = 2
+    nextTick(function () {
+      expect(spy).toHaveBeenCalledWith(4, 3)
+      // unwatch
+      unwatch()
+      vm.a = 3
+      nextTick(function () {
+        expect(spy.calls.count()).toBe(2)
+        done()
+      })
+    })
+  })
+
   it('deep $watch', function (done) {
     var oldB = vm.b
     var spy = jasmine.createSpy()
