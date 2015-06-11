@@ -227,7 +227,9 @@ module.exports = {
         break
       case 'out-in':
         self.remove(current, function () {
-          target.$before(self.anchor, cb)
+          if (!target._isDestroyed) {
+            target.$before(self.anchor, cb)
+          }
         })
         break
       default:

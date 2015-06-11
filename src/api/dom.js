@@ -87,6 +87,9 @@ exports.$after = function (target, cb, withTransition) {
  */
 
 exports.$remove = function (cb, withTransition) {
+  if (!this.$el.parentNode) {
+    return cb && cb()
+  }
   var inDoc = this._isAttached && _.inDoc(this.$el)
   // if we are not in document, no need to check
   // for transitions

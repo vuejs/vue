@@ -176,6 +176,11 @@ if (_.inBrowser) {
         expect(spy.calls.count()).toBe(1)
       })
 
+      it('detached', function () {
+        vm.$remove(spy)
+        expect(spy.calls.count()).toBe(1)
+      })
+
     })
 
     describe('$nextTick', function () {
