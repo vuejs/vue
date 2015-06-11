@@ -15,7 +15,8 @@ exports.filterBy = function (arr, search, delimiter, dataKey) {
   if (delimiter && delimiter !== 'in') {
     dataKey = delimiter
   }
-  if (!search) {
+  /* jshint eqeqeq: false */
+  if (search == null) {
     return arr
   }
   // cast to lowercase string

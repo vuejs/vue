@@ -126,6 +126,10 @@ describe('Filters', function () {
     res = filter(arr, 'yoyo')
     expect(res.length).toBe(1)
     expect(res[0]).toBe(arr[2])
+    // filter by false (#928)
+    res = filter([{a:false},{b:true}], false)
+    expect(res.length).toBe(1)
+    expect(res[0].a).toBe(false)
   })
 
   it('orderBy', function () {
