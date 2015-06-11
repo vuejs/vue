@@ -17,17 +17,6 @@ module.exports = function (grunt) {
         ' * (c) ' + new Date().getFullYear() + ' Evan You\n' +
         ' * Released under the MIT License.\n' +
         ' */\n'
-    
-    // update component.json first
-    var jsRE = /\.js$/
-    var component = grunt.file.readJSON('component.json')
-    component.scripts = []
-    grunt.file.recurse('src', function (file) {
-      if (jsRE.test(file)) {
-        component.scripts.push(file)
-      }
-    })
-    grunt.file.write('component.json', JSON.stringify(component, null, 2))
 
     // build
     webpack({
