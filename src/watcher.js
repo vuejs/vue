@@ -128,7 +128,7 @@ p.set = function (value) {
  */
 
 p.beforeGet = function () {
-  Observer.target = this
+  Observer.setTarget(this)
 }
 
 /**
@@ -136,7 +136,7 @@ p.beforeGet = function () {
  */
 
 p.afterGet = function () {
-  Observer.target = null
+  Observer.setTarget(null)
   var i = this.deps.length
   while (i--) {
     var dep = this.deps[i]

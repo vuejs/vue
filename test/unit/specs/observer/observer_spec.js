@@ -65,9 +65,9 @@ describe('Observer', function () {
     }
     var dump
     // collect dep
-    Observer.target = watcher
+    Observer.setTarget(watcher)
     dump = obj.a.b
-    Observer.target = null
+    Observer.setTarget(null)
     expect(watcher.deps.length).toBe(2)
     dump = obj.a.b = 3
     expect(watcher.update.calls.count()).toBe(1)
@@ -80,9 +80,9 @@ describe('Observer', function () {
     // recollect dep
     var oldDeps = watcher.deps
     watcher.deps = []
-    Observer.target = watcher
+    Observer.setTarget(watcher)
     dump = obj.a.b
-    Observer.target = null
+    Observer.setTarget(null)
     expect(watcher.deps.length).toBe(2)
     // set on the swapped object
     obj.a.b = 5

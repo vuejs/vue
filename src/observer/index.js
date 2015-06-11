@@ -15,35 +15,6 @@ var ARRAY  = 0
 var OBJECT = 1
 
 /**
- * Augment an target Object or Array by intercepting
- * the prototype chain using __proto__
- *
- * @param {Object|Array} target
- * @param {Object} proto
- */
-
-function protoAugment (target, src) {
-  target.__proto__ = src
-}
-
-/**
- * Augment an target Object or Array by defining
- * hidden properties.
- *
- * @param {Object|Array} target
- * @param {Object} proto
- */
-
-function copyAugment (target, src, keys) {
-  var i = keys.length
-  var key
-  while (i--) {
-    key = keys[i]
-    _.define(target, key, src[key])
-  }
-}
-
-/**
  * Observer class that are attached to each observed
  * object. Once attached, the observer converts target
  * object's property keys into getter/setters that
@@ -71,9 +42,7 @@ function Observer (value, type) {
   }
 }
 
-Observer.target = null
-
-var p = Observer.prototype
+// Static methods
 
 /**
  * Attempt to create an observer instance for a value,
@@ -101,6 +70,20 @@ Observer.create = function (value) {
     return new Observer(value, OBJECT)
   }
 }
+
+/**
+ * Set the target watcher that is currently being evaluated.
+ *
+ * @param {Watcher} watcher
+ */
+
+Observer.setTarget = function (watcher) {
+  Dep.target = watcher
+}
+
+// Instance methods
+
+var p = Observer.prototype
 
 /**
  * Walk through each property and convert them into
@@ -168,10 +151,8 @@ p.convert = function (key, val) {
     enumerable: true,
     configurable: true,
     get: function () {
-      // Observer.target is a watcher whose getter is
-      // currently being evaluated.
-      if (ob.active && Observer.target) {
-        Observer.target.addDep(dep)
+      if (ob.active) {
+        dep.depend()
       }
       return val
     },
@@ -229,6 +210,37 @@ p.addVm = function (vm) {
 
 p.removeVm = function (vm) {
   this.vms.$remove(vm)
+}
+
+// helpers
+
+/**
+ * Augment an target Object or Array by intercepting
+ * the prototype chain using __proto__
+ *
+ * @param {Object|Array} target
+ * @param {Object} proto
+ */
+
+function protoAugment (target, src) {
+  target.__proto__ = src
+}
+
+/**
+ * Augment an target Object or Array by defining
+ * hidden properties.
+ *
+ * @param {Object|Array} target
+ * @param {Object} proto
+ */
+
+function copyAugment (target, src, keys) {
+  var i = keys.length
+  var key
+  while (i--) {
+    key = keys[i]
+    _.define(target, key, src[key])
+  }
 }
 
 module.exports = Observer

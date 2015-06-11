@@ -221,9 +221,7 @@ exports._defineMeta = function (key, value) {
     enumerable: true,
     configurable: true,
     get: function metaGetter () {
-      if (Observer.target) {
-        Observer.target.addDep(dep)
-      }
+      dep.depend()
       return value
     },
     set: function metaSetter (val) {

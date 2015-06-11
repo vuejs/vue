@@ -11,6 +11,11 @@ function Dep () {
   this.subs = []
 }
 
+// the current target watcher being evaluated.
+// this is globally unique because there could be only one
+// watcher being evaluated at any time.
+Dep.target = null
+
 var p = Dep.prototype
 
 /**
@@ -31,6 +36,16 @@ p.addSub = function (sub) {
 
 p.removeSub = function (sub) {
   this.subs.$remove(sub)
+}
+
+/**
+ * Add self as a dependency to the target watcher.
+ */
+
+p.depend = function () {
+  if (Dep.target) {
+    Dep.target.addDep(this)
+  }
 }
 
 /**
