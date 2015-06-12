@@ -1,3 +1,9 @@
+# CSP compliant build
+
+This is the CSP-compliant build of Vue.js that does not use `new Function()` for expression evaluation. Note there's an additional limitation compared to the normal build: you cannot use any globals in expressions (e.g. `Date`, `parseInt` etc.).
+
+---
+
 <p align="center"><a href="http://vuejs.org" target="_blank"><img width="100"src="http://vuejs.org/images/logo.png"></a></p>
 
 # Vue.js [![Build Status](https://travis-ci.org/yyx990803/vue.svg?branch=master)](https://travis-ci.org/yyx990803/vue) [![Selenium Test Status](https://saucelabs.com/buildstatus/vuejs)](https://saucelabs.com/u/vuejs) [![Coverage Status](https://img.shields.io/coveralls/yyx990803/vue.svg)](https://coveralls.io/r/yyx990803/vue?branch=master)
