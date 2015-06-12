@@ -33,26 +33,86 @@ describe('Instance Scope', function () {
 
   describe('$data', function () {
 
-    var vm = new Vue({
-      props: ['c'],
-      data: {
-        a: 1
-      }
-    })
-
     it('should initialize props', function () {
+      var vm = new Vue({
+        props: ['c'],
+        data: {
+          a: 1
+        }
+      })
       expect(vm.hasOwnProperty('c')).toBe(true)
     })
 
     it('replace $data', function () {
-      vm.c = 3
+      var vm = new Vue({
+        data: {
+          a: 1
+        }
+      })
       vm.$data = { b: 2 }
       // proxy new key
       expect(vm.b).toBe(2)
       // unproxy old key that's no longer present
       expect(vm.hasOwnProperty('a')).toBe(false)
-      // should copy props
+    })
+
+    it('replace $data and handle props', function () {
+      var el = document.createElement('div')
+      var vm = new Vue({
+        el: el,
+        template: '<test a="{{a}}" b="{{*b}}" c="{{<c}}" d="{{>d}}"></test>',
+        data: {
+          a: 1,
+          b: 2,
+          c: 3,
+          d: 0
+        },
+        components: {
+          test: {
+            props: ['a', 'b', 'c', 'd'],
+            data: function () {
+              return {
+                d: 4
+              }
+            }
+          }
+        }
+      })
+      var child = vm._children[0]
+      expect(child.a).toBe(1)
+      expect(child.b).toBe(2)
+      expect(child.c).toBe(3)
+      expect(vm.d).toBe(4)
+      expect(child.d).toBe(4)
+
+      // test new data without prop fields:
+      // should just copy
+      child.$data = {}
+      expect(child.a).toBe(1)
+      expect(child.b).toBe(2)
+      expect(child.c).toBe(3)
+      expect(vm.d).toBe(4)
+      expect(child.d).toBe(4)
+
+      // test new data with value:
+      child.$data = {
+        a: 2, // two-way
+        b: 3, // one-time
+        c: 4, // one-way-down
+        d: 5  // one-way-up
+      }
+      // two-way
+      expect(child.a).toBe(2)
+      expect(vm.a).toBe(2)
+      // one-time
+      expect(child.b).toBe(3)
+      expect(vm.b).toBe(2)
+      // one-way down
+      expect(child.c).toBe(4)
       expect(vm.c).toBe(3)
+      // one-way up
+      expect(vm.d).toBe(5)
+      expect(child.d).toBe(5)
     })
 
   })

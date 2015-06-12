@@ -59,13 +59,15 @@ exports._setData = function (newData) {
   var oldData = this._data
   this._data = newData
   var keys, key, i
-  // copy props
+  // copy props.
+  // this should only happen during a v-repeat of component
+  // that also happens to have compiled props.
   var props = this.$options.props
   if (props) {
     i = props.length
     while (i--) {
       key = props[i]
-      if (key !== '$data') {
+      if (key !== '$data' && !newData.hasOwnProperty(key)) {
         newData.$set(key, oldData[key])
       }
     }
