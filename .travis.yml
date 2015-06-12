@@ -1,6 +1,6 @@
 language: node_js
 node_js:
-- "iojs"
+- "iojs-v2.0.1"
 branches:
   only:
   - master
