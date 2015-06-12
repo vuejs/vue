@@ -1,4 +1,3 @@
-var _ = require('../util')
 var Watcher = require('../watcher')
 
 module.exports = {
@@ -16,13 +15,6 @@ module.exports = {
     // without this it would stabilize too, but this makes
     // sure it doesn't cause other watchers to re-evaluate.
     var locked = false
-    var lock = function () {
-      locked = true
-      _.nextTick(unlock)
-    }
-    var unlock = function () {
-      locked = false
-    }
 
     if (!prop.oneWayUp) {
       this.parentWatcher = new Watcher(
@@ -30,11 +22,13 @@ module.exports = {
         parentKey,
         function (val) {
           if (!locked) {
-            lock()
+            locked = true
             // all props have been initialized already
             child[childKey] = val
+            locked = false
           }
-        }
+        },
+        { sync: true }
       )
       
       // set the child initial value first, before setting
@@ -51,10 +45,12 @@ module.exports = {
         childKey,
         function (val) {
           if (!locked) {
-            lock()
+            locked = true
             parent.$set(parentKey, val)
+            locked = false
           }
-        }
+        },
+        { sync: true }
       )
 
       // set initial value for one-way up binding
