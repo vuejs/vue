@@ -18,8 +18,13 @@ var terminalDirectives = [
 /**
  * Compile a template and return a reusable composite link
  * function, which recursively contains more link functions
- * inside. This top level compile function should only be
- * called on instance root nodes.
+ * inside. This top level compile function would normally
+ * be called on instance root nodes, but can also be used
+ * for partial compilation if the partial argument is true.
+ *
+ * The returned composite link function, when called, will
+ * return an unlink function that tearsdown all directives
+ * created during the linking phase.
  *
  * @param {Element|DocumentFragment} el
  * @param {Object} options
