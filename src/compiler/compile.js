@@ -399,17 +399,21 @@ function makeChildLinkFn (linkFns) {
  * @return {Function} propsLinkFn
  */
 
-// regex to test if a path is "settable"
-// if not the prop binding is automatically one-way.
+var dataAttrRE = /^data-/
 var settablePathRE = /^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\[[^\[\]]+\])*$/
 var literalValueRE = /^true|false|\d+$/
+var identRE = require('../parsers/path').identRE
 
 function compileProps (el, attrs, propNames) {
   var props = []
   var i = propNames.length
-  var name, value, prop
+  var name, value, path, prop, settable, single
   while (i--) {
     name = propNames[i]
+    // props could contain dashes, which will be
+    // interpreted as minus calculations by the parser
+    // so we need to camelize the path here
+    path = _.camelize(name.replace(dataAttrRE, ''))
     if (/[A-Z]/.test(name)) {
       _.warn(
         'You seem to be using camelCase for a component prop, ' +
@@ -419,26 +423,48 @@ function compileProps (el, attrs, propNames) {
         'http://vuejs.org/api/options.html#props'
       )
     }
+    if (!identRE.test(path)) {
+      _.warn(
+        'Invalid prop key: "' + name + '". Prop keys ' +
+        'must be valid identifiers.'
+      )
+    }
     value = attrs[name]
     /* jshint eqeqeq:false */
     if (value != null) {
       prop = {
         name: name,
-        raw: value
+        raw: value,
+        path: path
       }
       var tokens = textParser.parse(value)
       if (tokens) {
         if (el && el.nodeType === 1) {
           el.removeAttribute(name)
         }
+        // important so that this doesn't get compiled
+        // again as a normal attribute binding
         attrs[name] = null
         prop.dynamic = true
-        prop.value = textParser.tokensToExp(tokens)
+        prop.parentPath = textParser.tokensToExp(tokens)
+        // check prop binding type.
+        single = tokens.length === 1
+        settable =
+          settablePathRE.test(prop.parentPath) &&
+          !literalValueRE.test(prop.parentPath)
+        // one time: {{* prop}}
         prop.oneTime =
-          tokens.length > 1 ||
-          tokens[0].oneTime ||
-          !settablePathRE.test(prop.value) ||
-          literalValueRE.test(prop.value)
+          !single ||
+          !settable ||
+          tokens[0].oneTime
+        // one way down: {{> prop}}
+        prop.oneWayDown =
+          single &&
+          tokens[0].oneWay === 62 // >
+        // one way up: {{< prop}}
+        prop.oneWayUp =
+          tokens[0].oneWay === 60 && // <
+          settable
       }
       props.push(prop)
     }
@@ -453,25 +479,22 @@ function compileProps (el, attrs, propNames) {
  * @return {Function} propsLinkFn
  */
 
-var dataAttrRE = /^data-/
-
 function makePropsLinkFn (props) {
   return function propsLinkFn (vm, el) {
     var i = props.length
     var prop, path
     while (i--) {
       prop = props[i]
-      // props could contain dashes, which will be
-      // interpreted as minus calculations by the parser
-      // so we need to wrap the path here
-      path = _.camelize(prop.name.replace(dataAttrRE, ''))
+      path = prop.path
       if (prop.dynamic) {
         if (vm.$parent) {
-          vm._bindDir('prop', el, {
-            arg: path,
-            expression: prop.value,
-            oneWay: prop.oneTime
-          }, propDef)
+          if (prop.onetime) {
+            // one time binding
+            vm.$set(path, vm.$parent.$get(prop.parentPath))
+          } else {
+            // dynamic binding
+            vm._bindDir('prop', el, prop, propDef)
+          }
         } else {
           _.warn(
             'Cannot bind dynamic prop on a root instance' +
@@ -480,7 +503,7 @@ function makePropsLinkFn (props) {
           )
         }
       } else {
-        // just set once
+        // literal, just set once
         vm.$set(path, _.toNumber(prop.raw))
       }
     }

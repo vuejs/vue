@@ -1,6 +1,5 @@
 var _ = require('../util')
 var Watcher = require('../watcher')
-var identRE = require('../parsers/path').identRE
 
 module.exports = {
 
@@ -8,15 +7,10 @@ module.exports = {
 
     var child = this.vm
     var parent = child.$parent
-    var childKey = this.arg
-    var parentKey = this.expression
-
-    if (!identRE.test(childKey)) {
-      _.warn(
-        'Invalid prop key: "' + childKey + '". Prop keys ' +
-        'must be valid identifiers.'
-      )
-    }
+    // passed in from compiler directly
+    var prop = this._descriptor
+    var childKey = prop.path
+    var parentKey = prop.parentPath
 
     // simple lock to avoid circular updates.
     // without this it would stabilize too, but this makes
@@ -30,26 +24,28 @@ module.exports = {
       locked = false
     }
 
-    this.parentWatcher = new Watcher(
-      parent,
-      parentKey,
-      function (val) {
-        if (!locked) {
-          lock()
-          // all props have been initialized already
-          child[childKey] = val
+    if (!prop.oneWayUp) {
+      this.parentWatcher = new Watcher(
+        parent,
+        parentKey,
+        function (val) {
+          if (!locked) {
+            lock()
+            // all props have been initialized already
+            child[childKey] = val
+          }
         }
-      }
-    )
-    
-    // set the child initial value first, before setting
-    // up the child watcher to avoid triggering it
-    // immediately.
-    child.$set(childKey, this.parentWatcher.value)
+      )
+      
+      // set the child initial value first, before setting
+      // up the child watcher to avoid triggering it
+      // immediately.
+      child.$set(childKey, this.parentWatcher.value)
+    }
 
     // only setup two-way binding if this is not a one-way
     // binding.
-    if (!this._descriptor.oneWay) {
+    if (!prop.oneWayDown) {
       this.childWatcher = new Watcher(
         child,
         childKey,
@@ -60,6 +56,11 @@ module.exports = {
           }
         }
       )
+
+      // set initial value for one-way up binding
+      if (prop.oneWayUp) {
+        parent.$set(parentKey, this.childWatcher.value)
+      }
     }
   },
 
@@ -71,5 +72,4 @@ module.exports = {
       this.childWatcher.teardown()
     }
   }
-
 }
