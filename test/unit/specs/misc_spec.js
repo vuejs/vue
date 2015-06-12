@@ -75,7 +75,9 @@ describe('Misc', function () {
         list: [1, 2, 3]
       }
     })
-    expect(el.innerHTML).toBe('<svg><text>1</text><text>2</text><text>3</text></svg>')
+    // IE inlines svg namespace
+    var xmlns = /\s?xmlns=".*svg"/
+    expect(el.innerHTML.replace(xmlns, '')).toBe('<svg><text>1</text><text>2</text><text>3</text></svg>')
   })
 
 })
