@@ -23,7 +23,7 @@ if (_.inBrowser) {
             _teardown: directiveTeardown
           })
         },
-        $set: jasmine.createSpy(),
+        $set: jasmine.createSpy('vm.$set'),
         $eval: function (value) {
           return data[value]
         },
@@ -167,14 +167,14 @@ if (_.inBrowser) {
       el.setAttribute('some-other-attr', '2')
       el.setAttribute('multiple-attrs', 'a {{b}} c')
       el.setAttribute('onetime', '{{*a}}')
-      el.setAttribute('oneway-up', '{{<a}}')
-      el.setAttribute('oneway-down', '{{>a}}')
+      el.setAttribute('oneway-up', '{{>a}}')
+      el.setAttribute('oneway-down', '{{<a}}')
       el.setAttribute('with-filter', '{{a | filter}}')
       el.setAttribute('boolean-literal', '{{true}}')
       transclude(el, options)
       compiler.compileAndLinkRoot(vm, el, options)
       // should skip literals and one-time bindings
-      expect(vm._bindDir.calls.count()).toBe(7)
+      expect(vm._bindDir.calls.count()).toBe(5)
       // data-some-attr
       var args = vm._bindDir.calls.argsFor(0)
       expect(args[0]).toBe('prop')
@@ -189,16 +189,8 @@ if (_.inBrowser) {
       expect(args[2].path).toBe('multipleAttrs')
       expect(args[2].parentPath).toBe('"a "+(b)+" c"')
       expect(args[3]).toBe(def)
-      // one time
-      args = vm._bindDir.calls.argsFor(2)
-      expect(args[0]).toBe('prop')
-      expect(args[1]).toBe(null)
-      expect(args[2].path).toBe('onetime')
-      expect(args[2].oneTime).toBe(true)
-      expect(args[2].parentPath).toBe('a')
-      expect(args[3]).toBe(def)
       // one way up
-      args = vm._bindDir.calls.argsFor(3)
+      args = vm._bindDir.calls.argsFor(2)
       expect(args[0]).toBe('prop')
       expect(args[1]).toBe(null)
       expect(args[2].path).toBe('onewayUp')
@@ -207,7 +199,7 @@ if (_.inBrowser) {
       expect(args[2].parentPath).toBe('a')
       expect(args[3]).toBe(def)
       // one way down
-      args = vm._bindDir.calls.argsFor(4)
+      args = vm._bindDir.calls.argsFor(3)
       expect(args[0]).toBe('prop')
       expect(args[1]).toBe(null)
       expect(args[2].path).toBe('onewayDown')
@@ -216,25 +208,21 @@ if (_.inBrowser) {
       expect(args[2].parentPath).toBe('a')
       expect(args[3]).toBe(def)
       // with-filter
-      args = vm._bindDir.calls.argsFor(5)
+      args = vm._bindDir.calls.argsFor(4)
       expect(args[0]).toBe('prop')
       expect(args[1]).toBe(null)
       expect(args[2].path).toBe('withFilter')
       expect(args[2].parentPath).toBe('this._applyFilters(a,null,[{"name":"filter"}],false)')
       expect(args[3]).toBe(def)
-      // boolean-literal
-      args = vm._bindDir.calls.argsFor(6)
-      expect(args[0]).toBe('prop')
-      expect(args[1]).toBe(null)
-      expect(args[2].path).toBe('booleanLiteral')
-      expect(args[2].parentPath).toBe('true')
-      expect(args[2].oneTime).toBe(true)
       // camelCase should've warn
       expect(hasWarned(_, 'using camelCase')).toBe(true)
       // literal and one time should've called vm.$set
       // and numbers should be casted
+      expect(vm.$set.calls.count()).toBe(4)
       expect(vm.$set).toHaveBeenCalledWith('a', 1)
       expect(vm.$set).toHaveBeenCalledWith('someOtherAttr', 2)
+      expect(vm.$set).toHaveBeenCalledWith('onetime', 'from parent: a')
+      expect(vm.$set).toHaveBeenCalledWith('booleanLiteral', 'from parent: true')
     })
 
     it('props on root instance', function () {

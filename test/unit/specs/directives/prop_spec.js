@@ -82,6 +82,116 @@ if (_.inBrowser) {
       })
     })
 
+    it('auto one-way binding for non-settable parent path', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          b: 'B'
+        },
+        template: '<test b="{{b + \'B\'}}" v-ref="child"></test>',
+        components: {
+          test: {
+            props: ['b'],
+            template: '{{b}}'
+          }
+        }
+      })
+      expect(el.innerHTML).toBe('<test>BB</test>')
+      vm.b = 'BB'
+      _.nextTick(function () {
+        expect(el.innerHTML).toBe('<test>BBB</test>')
+        vm.$.child.b = 'hahaha'
+        _.nextTick(function () {
+          expect(vm.b).toBe('BB')
+          expect(el.innerHTML).toBe('<test>hahaha</test>')
+          done()
+        })
+      })
+    })
+
+    it('explicit one time binding', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          b: 'B'
+        },
+        template: '<test b="{{*b}}" v-ref="child"></test>',
+        components: {
+          test: {
+            props: ['b'],
+            template: '{{b}}'
+          }
+        }
+      })
+      expect(el.innerHTML).toBe('<test>B</test>')
+      vm.b = 'BB'
+      _.nextTick(function () {
+        expect(el.innerHTML).toBe('<test>B</test>')
+        done()
+      })
+    })
+
+    it('one way down binding', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          b: 'B'
+        },
+        template: '<test b="{{<b}}" v-ref="child"></test>',
+        components: {
+          test: {
+            props: ['b'],
+            template: '{{b}}'
+          }
+        }
+      })
+      expect(el.innerHTML).toBe('<test>B</test>')
+      vm.b = 'BB'
+      _.nextTick(function () {
+        expect(el.innerHTML).toBe('<test>BB</test>')
+        vm.$.child.b = 'BBB'
+        _.nextTick(function () {
+          expect(el.innerHTML).toBe('<test>BBB</test>')
+          expect(vm.b).toBe('BB')
+          done()
+        })
+      })
+    })
+
+    it('one way up binding', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          b: null
+        },
+        template: '<test b="{{>b}}" v-ref="child"></test>',
+        components: {
+          test: {
+            props: ['b'],
+            template: '{{b}}',
+            data: function () {
+              return {
+                b: 'B'
+              }
+            }
+          }
+        }
+      })
+      expect(el.innerHTML).toBe('<test>B</test>')
+      // initial set
+      expect(vm.b).toBe('B')
+      vm.b = 'BB'
+      _.nextTick(function () {
+        expect(el.innerHTML).toBe('<test>B</test>')
+        vm.$.child.b = 'BBB'
+        _.nextTick(function () {
+          expect(el.innerHTML).toBe('<test>BBB</test>')
+          expect(vm.b).toBe('BBB')
+          done()
+        })
+      })
+    })
+
     it('warn invalid keys', function () {
       var vm = new Vue({
         el: el,

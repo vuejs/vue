@@ -401,13 +401,13 @@ function makeChildLinkFn (linkFns) {
 
 var dataAttrRE = /^data-/
 var settablePathRE = /^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\[[^\[\]]+\])*$/
-var literalValueRE = /^true|false|\d+$/
+var literalValueRE = /^(true|false|\d+)$/
 var identRE = require('../parsers/path').identRE
 
 function compileProps (el, attrs, propNames) {
   var props = []
   var i = propNames.length
-  var name, value, path, prop, settable, single
+  var name, value, path, prop, settable, literal, single
   while (i--) {
     name = propNames[i]
     // props could contain dashes, which will be
@@ -449,22 +449,24 @@ function compileProps (el, attrs, propNames) {
         prop.parentPath = textParser.tokensToExp(tokens)
         // check prop binding type.
         single = tokens.length === 1
-        settable =
-          settablePathRE.test(prop.parentPath) &&
-          !literalValueRE.test(prop.parentPath)
+        literal = literalValueRE.test(prop.parentPath)
         // one time: {{* prop}}
         prop.oneTime =
-          !single ||
-          !settable ||
-          tokens[0].oneTime
-        // one way down: {{> prop}}
-        prop.oneWayDown =
-          single &&
-          tokens[0].oneWay === 62 // >
-        // one way up: {{< prop}}
-        prop.oneWayUp =
-          tokens[0].oneWay === 60 && // <
-          settable
+          literal ||
+          (single && tokens[0].oneTime)
+        // check one-way bindings
+        if (!prop.oneTime) {
+          settable = !literal && settablePathRE.test(prop.parentPath)
+          // one way down: {{> prop}}
+          prop.oneWayDown =
+            !settable ||
+            (single && tokens[0].oneWay === 60) // <
+          // one way up: {{< prop}}
+          prop.oneWayUp =
+            single &&
+            settable &&
+            tokens[0].oneWay === 62 // >
+        }
       }
       props.push(prop)
     }
@@ -488,7 +490,7 @@ function makePropsLinkFn (props) {
       path = prop.path
       if (prop.dynamic) {
         if (vm.$parent) {
-          if (prop.onetime) {
+          if (prop.oneTime) {
             // one time binding
             vm.$set(path, vm.$parent.$get(prop.parentPath))
           } else {
