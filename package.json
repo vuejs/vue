@@ -39,6 +39,6 @@
     "semver": "^4.2.0",
     "shell-task": "^1.0.0",
     "uglify-js": "^2.4.20",
-    "webpack": "^1.8.4"
+    "webpack": "^1.9.10"
   }
 }
