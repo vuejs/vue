@@ -47,10 +47,14 @@ module.exports = {
   },
 
   compile: function (content, owner, host) {
-    if (owner) {
+    if (content && owner) {
       this.unlink = owner.$compile(content, host)
     }
-    _.replace(this.el, content)
+    if (content) {
+      _.replace(this.el, content)
+    } else {
+      _.remove(this.el)
+    }
   },
 
   unbind: function () {

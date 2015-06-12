@@ -15,6 +15,12 @@ describe('Content Transclusion', function () {
     vm = new Vue(options)
   }
 
+  it('no content', function () {
+    options.template = '<div><content></content></div>'
+    mount()
+    expect(el.firstChild.childNodes.length).toBe(0)
+  })
+
   it('default content', function () {
     el.innerHTML = '<p>hi</p>'
     options.template = '<div><content></content></div>'
