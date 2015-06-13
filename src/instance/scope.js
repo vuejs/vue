@@ -11,10 +11,37 @@ var Dep = require('../observer/dep')
  */
 
 exports._initScope = function () {
+  this._initProps()
   this._initData()
   this._initComputed()
   this._initMethods()
   this._initMeta()
+}
+
+/**
+ * Initialize props.
+ */
+
+exports._initProps = function () {
+  // make sure all props properties are observed
+  var data = this._data
+  var props = this.$options.props
+  var prop, key, i
+  if (props) {
+    i = props.length
+    while (i--) {
+      prop = props[i]
+      // props can be strings or object descriptors
+      key = _.camelize(
+        typeof prop === 'string'
+          ? prop
+          : prop.name
+      )
+      if (!(key in data) && key !== '$data') {
+        data[key] = undefined
+      }
+    }
+  }
 }
 
 /**
@@ -24,19 +51,8 @@ exports._initScope = function () {
 exports._initData = function () {
   // proxy data on instance
   var data = this._data
-  var i, key
-  // make sure all props properties are observed
-  var props = this.$options.props
-  if (props) {
-    i = props.length
-    while (i--) {
-      key = _.camelize(props[i])
-      if (!(key in data) && key !== '$data') {
-        data[key] = undefined
-      }
-    }
-  }
   var keys = Object.keys(data)
+  var i, key
   i = keys.length
   while (i--) {
     key = keys[i]

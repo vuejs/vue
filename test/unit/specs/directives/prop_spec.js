@@ -10,7 +10,7 @@ if (_.inBrowser) {
       spyOn(_, 'warn')
     })
 
-    it('one way down binding', function (done) {
+    it('one way binding', function (done) {
       var vm = new Vue({
         el: el,
         data: {

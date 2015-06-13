@@ -42,6 +42,21 @@ exports.toNumber = function (value) {
 }
 
 /**
+ * Convert string boolean literals into real booleans.
+ *
+ * @param {*} value
+ * @return {*|Boolean}
+ */
+
+exports.toBoolean = function (value) {
+  return value === 'true'
+    ? true
+    : value === 'false'
+      ? false
+      : value
+}
+
+/**
  * Strip quotes from a string
  *
  * @param {String} str

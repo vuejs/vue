@@ -396,21 +396,29 @@ function makeChildLinkFn (linkFns) {
  *
  * @param {Element|DocumentFragment} el
  * @param {Object} attrs
- * @param {Array} propNames
+ * @param {Array} propDescriptors
  * @return {Function} propsLinkFn
  */
 
 var dataAttrRE = /^data-/
 var settablePathRE = /^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\[[^\[\]]+\])*$/
-var literalValueRE = /^(true|false|\d+)$/
+var literalValueRE = /^(true|false)$|\d.*/
 var identRE = require('../parsers/path').identRE
 
-function compileProps (el, attrs, propNames) {
+function compileProps (el, attrs, propDescriptors) {
   var props = []
-  var i = propNames.length
-  var name, value, path, prop, literal, single
+  var i = propDescriptors.length
+  var descriptor, name, assertions, value, path, prop, literal, single
   while (i--) {
-    name = propNames[i]
+    descriptor = propDescriptors[i]
+    // normalize prop string/descriptor
+    if (typeof descriptor === 'object') {
+      name = descriptor.name
+      assertions = descriptor.assertions
+    } else {
+      name = descriptor
+      assertions = null
+    }
     // props could contain dashes, which will be
     // interpreted as minus calculations by the parser
     // so we need to camelize the path here
@@ -437,6 +445,7 @@ function compileProps (el, attrs, propNames) {
         name: name,
         raw: value,
         path: path,
+        assertions: descriptor,
         mode: propBindingModes.ONE_WAY
       }
       var tokens = textParser.parse(value)
@@ -485,7 +494,7 @@ function compileProps (el, attrs, propNames) {
 function makePropsLinkFn (props) {
   return function propsLinkFn (vm, el) {
     var i = props.length
-    var prop, path
+    var prop, path, value
     while (i--) {
       prop = props[i]
       path = prop.path
@@ -493,7 +502,10 @@ function makePropsLinkFn (props) {
         if (vm.$parent) {
           if (prop.mode === propBindingModes.ONE_TIME) {
             // one time binding
-            vm.$set(path, vm.$parent.$get(prop.parentPath))
+            value = vm.$parent.$get(prop.parentPath)
+            if (_.assertProp(prop, value)) {
+              vm.$set(path, value)
+            }
           } else {
             // dynamic binding
             vm._bindDir('prop', el, prop, propDef)
@@ -506,8 +518,11 @@ function makePropsLinkFn (props) {
           )
         }
       } else {
-        // literal, just set once
-        vm.$set(path, _.toNumber(prop.raw))
+        // literal, cast it and just set once
+        value = _.toBoolean(_.toNumber(prop.raw))
+        if (_.assertProp(prop, value)) {
+          vm.$set(path, value)
+        }
       }
     }
   }
