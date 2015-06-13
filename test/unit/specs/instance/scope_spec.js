@@ -60,19 +60,18 @@ describe('Instance Scope', function () {
       var el = document.createElement('div')
       var vm = new Vue({
         el: el,
-        template: '<test a="{{a}}" b="{{*b}}" c="{{<c}}" d="{{>d}}"></test>',
+        template: '<test a="{{a}}" b="{{*b}}" c="{{@c}}"></test>',
         data: {
           a: 1,
           b: 2,
-          c: 3,
-          d: 0
+          c: 3
         },
         components: {
           test: {
             props: ['a', 'b', 'c', 'd'],
             data: function () {
               return {
-                d: 4
+                a: null // should be overwritten
               }
             }
           }
@@ -82,8 +81,6 @@ describe('Instance Scope', function () {
       expect(child.a).toBe(1)
       expect(child.b).toBe(2)
       expect(child.c).toBe(3)
-      expect(vm.d).toBe(4)
-      expect(child.d).toBe(4)
 
       // test new data without prop fields:
       // should just copy
@@ -91,28 +88,22 @@ describe('Instance Scope', function () {
       expect(child.a).toBe(1)
       expect(child.b).toBe(2)
       expect(child.c).toBe(3)
-      expect(vm.d).toBe(4)
-      expect(child.d).toBe(4)
 
       // test new data with value:
       child.$data = {
-        a: 2, // two-way
+        a: 2, // one-way
         b: 3, // one-time
-        c: 4, // one-way-down
-        d: 5  // one-way-up
+        c: 4  // two-way
       }
-      // two-way
+      // one-way
       expect(child.a).toBe(2)
-      expect(vm.a).toBe(2)
+      expect(vm.a).toBe(1)
       // one-time
       expect(child.b).toBe(3)
       expect(vm.b).toBe(2)
-      // one-way down
+      // two-way
       expect(child.c).toBe(4)
-      expect(vm.c).toBe(3)
-      // one-way up
-      expect(vm.d).toBe(5)
-      expect(child.d).toBe(5)
+      expect(vm.c).toBe(4)
     })
 
   })

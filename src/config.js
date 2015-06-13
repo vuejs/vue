@@ -75,7 +75,17 @@ module.exports = {
     'elementDirective',
     'filter',
     'transition'
-  ]
+  ],
+
+  /**
+   * prop binding modes
+   */
+
+  _propBindingModes: {
+    ONE_WAY: 0,
+    TWO_WAY: 1,
+    ONE_TIME: 2
+  }
 
 }
 

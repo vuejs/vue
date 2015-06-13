@@ -146,6 +146,7 @@ if (_.inBrowser) {
     })
 
     it('props', function () {
+      var bindingModes = Vue.config._propBindingModes
       var options = _.mergeOptions(Vue.options, {
         _asComponent: true,
         props: [
@@ -154,8 +155,7 @@ if (_.inBrowser) {
           'some-other-attr',
           'multiple-attrs',
           'onetime',
-          'oneway-up',
-          'oneway-down',
+          'twoway',
           'with-filter',
           'camelCase',
           'boolean-literal'
@@ -167,20 +167,20 @@ if (_.inBrowser) {
       el.setAttribute('some-other-attr', '2')
       el.setAttribute('multiple-attrs', 'a {{b}} c')
       el.setAttribute('onetime', '{{*a}}')
-      el.setAttribute('oneway-up', '{{>a}}')
-      el.setAttribute('oneway-down', '{{<a}}')
+      el.setAttribute('twoway', '{{@a}}')
       el.setAttribute('with-filter', '{{a | filter}}')
       el.setAttribute('boolean-literal', '{{true}}')
       transclude(el, options)
       compiler.compileAndLinkRoot(vm, el, options)
       // should skip literals and one-time bindings
-      expect(vm._bindDir.calls.count()).toBe(5)
+      expect(vm._bindDir.calls.count()).toBe(4)
       // data-some-attr
       var args = vm._bindDir.calls.argsFor(0)
       expect(args[0]).toBe('prop')
       expect(args[1]).toBe(null)
       expect(args[2].path).toBe('someAttr')
       expect(args[2].parentPath).toBe('a')
+      expect(args[2].mode).toBe(bindingModes.ONE_WAY)
       expect(args[3]).toBe(def)
       // multiple-attrs
       args = vm._bindDir.calls.argsFor(1)
@@ -188,31 +188,23 @@ if (_.inBrowser) {
       expect(args[1]).toBe(null)
       expect(args[2].path).toBe('multipleAttrs')
       expect(args[2].parentPath).toBe('"a "+(b)+" c"')
+      expect(args[2].mode).toBe(bindingModes.ONE_WAY)
       expect(args[3]).toBe(def)
-      // one way up
+      // two way
       args = vm._bindDir.calls.argsFor(2)
       expect(args[0]).toBe('prop')
       expect(args[1]).toBe(null)
-      expect(args[2].path).toBe('onewayUp')
-      expect(args[2].oneWayUp).toBe(true)
-      expect(args[2].oneWayDown).toBe(false)
-      expect(args[2].parentPath).toBe('a')
-      expect(args[3]).toBe(def)
-      // one way down
-      args = vm._bindDir.calls.argsFor(3)
-      expect(args[0]).toBe('prop')
-      expect(args[1]).toBe(null)
-      expect(args[2].path).toBe('onewayDown')
-      expect(args[2].oneWayUp).toBe(false)
-      expect(args[2].oneWayDown).toBe(true)
+      expect(args[2].path).toBe('twoway')
+      expect(args[2].mode).toBe(bindingModes.TWO_WAY)
       expect(args[2].parentPath).toBe('a')
       expect(args[3]).toBe(def)
       // with-filter
-      args = vm._bindDir.calls.argsFor(4)
+      args = vm._bindDir.calls.argsFor(3)
       expect(args[0]).toBe('prop')
       expect(args[1]).toBe(null)
       expect(args[2].path).toBe('withFilter')
       expect(args[2].parentPath).toBe('this._applyFilters(a,null,[{"name":"filter"}],false)')
+      expect(args[2].mode).toBe(bindingModes.ONE_WAY)
       expect(args[3]).toBe(def)
       // camelCase should've warn
       expect(hasWarned(_, 'using camelCase')).toBe(true)

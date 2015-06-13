@@ -10,7 +10,34 @@ if (_.inBrowser) {
       spyOn(_, 'warn')
     })
 
-    it('should work', function (done) {
+    it('one way down binding', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          b: 'B'
+        },
+        template: '<test b="{{b}}" v-ref="child"></test>',
+        components: {
+          test: {
+            props: ['b'],
+            template: '{{b}}'
+          }
+        }
+      })
+      expect(el.innerHTML).toBe('<test>B</test>')
+      vm.b = 'BB'
+      _.nextTick(function () {
+        expect(el.innerHTML).toBe('<test>BB</test>')
+        vm.$.child.b = 'BBB'
+        _.nextTick(function () {
+          expect(el.innerHTML).toBe('<test>BBB</test>')
+          expect(vm.b).toBe('BB')
+          done()
+        })
+      })
+    })
+
+    it('two-way binding', function (done) {
       var vm = new Vue({
         el: el,
         data: {
@@ -19,7 +46,7 @@ if (_.inBrowser) {
             a: 'A'
           }
         },
-        template: '<test testt="{{test}}" bb="{{b}}" v-ref="child"></test>',
+        template: '<test testt="{{@test}}" bb="{{@b}}" v-ref="child"></test>',
         components: {
           test: {
             props: ['testt', 'bb'],
@@ -82,33 +109,6 @@ if (_.inBrowser) {
       })
     })
 
-    it('auto one-way binding for non-settable parent path', function (done) {
-      var vm = new Vue({
-        el: el,
-        data: {
-          b: 'B'
-        },
-        template: '<test b="{{b + \'B\'}}" v-ref="child"></test>',
-        components: {
-          test: {
-            props: ['b'],
-            template: '{{b}}'
-          }
-        }
-      })
-      expect(el.innerHTML).toBe('<test>BB</test>')
-      vm.b = 'BB'
-      _.nextTick(function () {
-        expect(el.innerHTML).toBe('<test>BBB</test>')
-        vm.$.child.b = 'hahaha'
-        _.nextTick(function () {
-          expect(vm.b).toBe('BB')
-          expect(el.innerHTML).toBe('<test>hahaha</test>')
-          done()
-        })
-      })
-    })
-
     it('explicit one time binding', function (done) {
       var vm = new Vue({
         el: el,
@@ -131,13 +131,13 @@ if (_.inBrowser) {
       })
     })
 
-    it('one way down binding', function (done) {
+    it('non-settable parent path', function (done) {
       var vm = new Vue({
         el: el,
         data: {
           b: 'B'
         },
-        template: '<test b="{{<b}}" v-ref="child"></test>',
+        template: '<test b="{{@ b + \'B\' }}" v-ref="child"></test>',
         components: {
           test: {
             props: ['b'],
@@ -145,48 +145,15 @@ if (_.inBrowser) {
           }
         }
       })
-      expect(el.innerHTML).toBe('<test>B</test>')
+      expect(hasWarned(_, 'Cannot bind two-way prop with non-settable parent path')).toBe(true)
+      expect(el.innerHTML).toBe('<test>BB</test>')
       vm.b = 'BB'
       _.nextTick(function () {
-        expect(el.innerHTML).toBe('<test>BB</test>')
-        vm.$.child.b = 'BBB'
+        expect(el.innerHTML).toBe('<test>BBB</test>')
+        vm.$.child.b = 'hahaha'
         _.nextTick(function () {
-          expect(el.innerHTML).toBe('<test>BBB</test>')
           expect(vm.b).toBe('BB')
-          done()
-        })
-      })
-    })
-
-    it('one way up binding', function (done) {
-      var vm = new Vue({
-        el: el,
-        data: {
-          b: null
-        },
-        template: '<test b="{{>b}}" v-ref="child"></test>',
-        components: {
-          test: {
-            props: ['b'],
-            template: '{{b}}',
-            data: function () {
-              return {
-                b: 'B'
-              }
-            }
-          }
-        }
-      })
-      expect(el.innerHTML).toBe('<test>B</test>')
-      // initial set
-      expect(vm.b).toBe('B')
-      vm.b = 'BB'
-      _.nextTick(function () {
-        expect(el.innerHTML).toBe('<test>B</test>')
-        vm.$.child.b = 'BBB'
-        _.nextTick(function () {
-          expect(el.innerHTML).toBe('<test>BBB</test>')
-          expect(vm.b).toBe('BBB')
+          expect(el.innerHTML).toBe('<test>hahaha</test>')
           done()
         })
       })
@@ -209,24 +176,32 @@ if (_.inBrowser) {
       var vm = new Vue({
         el: el,
         data: {
+          a: 'A',
           b: 'B'
         },
-        template: '<test bb="{{b}}"></test>',
+        template: '<test aa="{{@a}}" bb="{{b}}"></test>',
         components: {
           test: {
-            props: ['bb'],
-            template: '{{bb}}'
+            props: ['aa', 'bb'],
+            template: '{{aa}} {{bb}}'
           }
         }
       })
-      expect(el.firstChild.textContent).toBe('B')
+      var child = vm._children[0]
+      expect(el.firstChild.textContent).toBe('A B')
+      child.aa = 'AA'
       vm.b = 'BB'
       _.nextTick(function () {
-        expect(el.firstChild.textContent).toBe('BB')
-        vm._children[0]._directives[0].unbind()
+        expect(el.firstChild.textContent).toBe('AA BB')
+        expect(vm.a).toBe('AA')
+        // unbind the two props
+        child._directives[0].unbind()
+        child._directives[1].unbind()
+        child.aa = 'AAA'
         vm.b = 'BBB'
         _.nextTick(function () {
-          expect(el.firstChild.textContent).toBe('BB')
+          expect(el.firstChild.textContent).toBe('AAA BB')
+          expect(vm.a).toBe('AA')
           done()
         })
       })

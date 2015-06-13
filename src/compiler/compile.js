@@ -4,6 +4,7 @@ var textParser = require('../parsers/text')
 var dirParser = require('../parsers/directive')
 var templateParser = require('../parsers/template')
 var resolveAsset = _.resolveAsset
+var propBindingModes = config._propBindingModes
 
 // internal directives
 var propDef = require('../directives/prop')
@@ -407,7 +408,7 @@ var identRE = require('../parsers/path').identRE
 function compileProps (el, attrs, propNames) {
   var props = []
   var i = propNames.length
-  var name, value, path, prop, settable, literal, single
+  var name, value, path, prop, literal, single
   while (i--) {
     name = propNames[i]
     // props could contain dashes, which will be
@@ -435,7 +436,8 @@ function compileProps (el, attrs, propNames) {
       prop = {
         name: name,
         raw: value,
-        path: path
+        path: path,
+        mode: propBindingModes.ONE_WAY
       }
       var tokens = textParser.parse(value)
       if (tokens) {
@@ -451,21 +453,20 @@ function compileProps (el, attrs, propNames) {
         single = tokens.length === 1
         literal = literalValueRE.test(prop.parentPath)
         // one time: {{* prop}}
-        prop.oneTime =
-          literal ||
-          (single && tokens[0].oneTime)
-        // check one-way bindings
-        if (!prop.oneTime) {
-          settable = !literal && settablePathRE.test(prop.parentPath)
-          // one way down: {{> prop}}
-          prop.oneWayDown =
-            !settable ||
-            (single && tokens[0].oneWay === 60) // <
-          // one way up: {{< prop}}
-          prop.oneWayUp =
-            single &&
-            settable &&
-            tokens[0].oneWay === 62 // >
+        if (literal || (single && tokens[0].oneTime)) {
+          prop.mode = propBindingModes.ONE_TIME
+        } else if (
+          !literal &&
+          (single && tokens[0].twoWay)
+        ) {
+          if (settablePathRE.test(prop.parentPath)) {
+            prop.mode = propBindingModes.TWO_WAY
+          } else {
+            _.warn(
+              'Cannot bind two-way prop with non-settable ' +
+              'parent path: ' + prop.parentPath
+            )
+          }
         }
       }
       props.push(prop)
@@ -490,7 +491,7 @@ function makePropsLinkFn (props) {
       path = prop.path
       if (prop.dynamic) {
         if (vm.$parent) {
-          if (prop.oneTime) {
+          if (prop.mode === propBindingModes.ONE_TIME) {
             // one time binding
             vm.$set(path, vm.$parent.$get(prop.parentPath))
           } else {

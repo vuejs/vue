@@ -1,4 +1,5 @@
 var Watcher = require('../watcher')
+var bindingModes = require('../config')._propBindingModes
 
 module.exports = {
 
@@ -16,30 +17,28 @@ module.exports = {
     // sure it doesn't cause other watchers to re-evaluate.
     var locked = false
 
-    if (!prop.oneWayUp) {
-      this.parentWatcher = new Watcher(
-        parent,
-        parentKey,
-        function (val) {
-          if (!locked) {
-            locked = true
-            // all props have been initialized already
-            child[childKey] = val
-            locked = false
-          }
-        },
-        { sync: true }
-      )
-      
-      // set the child initial value first, before setting
-      // up the child watcher to avoid triggering it
-      // immediately.
-      child.$set(childKey, this.parentWatcher.value)
-    }
+    this.parentWatcher = new Watcher(
+      parent,
+      parentKey,
+      function (val) {
+        if (!locked) {
+          locked = true
+          // all props have been initialized already
+          child[childKey] = val
+          locked = false
+        }
+      },
+      { sync: true }
+    )
+    
+    // set the child initial value first, before setting
+    // up the child watcher to avoid triggering it
+    // immediately.
+    child.$set(childKey, this.parentWatcher.value)
 
     // only setup two-way binding if this is not a one-way
     // binding.
-    if (!prop.oneWayDown) {
+    if (prop.mode === bindingModes.TWO_WAY) {
       this.childWatcher = new Watcher(
         child,
         childKey,
@@ -52,11 +51,6 @@ module.exports = {
         },
         { sync: true }
       )
-
-      // set initial value for one-way up binding
-      if (prop.oneWayUp) {
-        parent.$set(parentKey, this.childWatcher.value)
-      }
     }
   },
 
