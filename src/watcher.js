@@ -179,7 +179,7 @@ p.run = function () {
     var value = this.get()
     if (
       value !== this.value ||
-      Array.isArray(value) ||
+      _.isArray(value) ||
       this.deep
     ) {
       var oldValue = this.value
