@@ -142,8 +142,8 @@ function teardownDirs (vm, dirs, destroying) {
   var propsLinkFn, parentLinkFn, replacerLinkFn
 
   // 1. props
-  propsLinkFn = props && containerAttrs
-    ? compileProps(el, containerAttrs, props)
+  propsLinkFn = props
+    ? compileProps(el, containerAttrs || {}, props)
     : null
 
   // only need to compile other attributes for
@@ -414,7 +414,7 @@ function compileProps (el, attrs, propDescriptors) {
     // normalize prop string/descriptor
     if (typeof descriptor === 'object') {
       name = descriptor.name
-      assertions = descriptor.assertions
+      assertions = descriptor
     } else {
       name = descriptor
       assertions = null
@@ -445,7 +445,7 @@ function compileProps (el, attrs, propDescriptors) {
         name: name,
         raw: value,
         path: path,
-        assertions: descriptor,
+        assertions: assertions,
         mode: propBindingModes.ONE_WAY
       }
       var tokens = textParser.parse(value)
@@ -479,6 +479,10 @@ function compileProps (el, attrs, propDescriptors) {
         }
       }
       props.push(prop)
+    } else if (assertions && assertions.required) {
+      _.warn(
+        'Required prop missing: ' + name
+      )
     }
   }
   return makePropsLinkFn(props)
