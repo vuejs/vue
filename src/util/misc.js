@@ -43,7 +43,8 @@ exports.assertProp = function (prop, value) {
     _.warn(
       'Invalid prop: type check failed for ' +
       prop.path + '="' + prop.raw + '".' +
-      (expectedType ? ' Expected ' + expectedType + '.' : '')
+      ' Expected ' + formatType(expectedType) +
+      ', got ' + formatValue(value) + '.'
     )
     return false
   }
@@ -58,6 +59,16 @@ exports.assertProp = function (prop, value) {
     }
   }
   return true
+}
+
+function formatType (val) {
+  return val
+    ? val.charAt(0).toUpperCase() + val.slice(1)
+    : 'custom type'
+}
+
+function formatValue (val) {
+  return Object.prototype.toString.call(val).slice(8, -1)
 }
 
 /**

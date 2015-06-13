@@ -226,5 +226,123 @@ if (_.inBrowser) {
       expect(el.innerHTML).toBe('<p>AAA</p><p>DDD</p>')
     })
 
+    describe('assertions', function () {
+
+      function makeInstance (value, type, validator) {
+        return new Vue({
+          el: document.createElement('div'),
+          template: '<test prop="{{val}}"></test>',
+          data: {
+            val: value
+          },
+          components: {
+            test: {
+              props: [
+                {
+                  name: 'prop',
+                  type: type,
+                  validator: validator
+                }
+              ]
+            }
+          }
+        })
+      }
+
+      it('string', function () {
+        makeInstance('hello', String)
+        expect(_.warn).not.toHaveBeenCalled()
+        makeInstance(123, String)
+        expect(hasWarned(_, 'Expected String')).toBe(true)
+      })
+
+      it('number', function () {
+        makeInstance(123, Number)
+        expect(_.warn).not.toHaveBeenCalled()
+        makeInstance('123', Number)
+        expect(hasWarned(_, 'Expected Number')).toBe(true)
+      })
+
+      it('boolean', function () {
+        makeInstance(true, Boolean)
+        expect(_.warn).not.toHaveBeenCalled()
+        makeInstance('123', Boolean)
+        expect(hasWarned(_, 'Expected Boolean')).toBe(true)
+      })
+
+      it('function', function () {
+        makeInstance(function () {}, Function)
+        expect(_.warn).not.toHaveBeenCalled()
+        makeInstance(123, Function)
+        expect(hasWarned(_, 'Expected Function')).toBe(true)
+      })
+
+      it('object', function () {
+        makeInstance({}, Object)
+        expect(_.warn).not.toHaveBeenCalled()
+        makeInstance([], Object)
+        expect(hasWarned(_, 'Expected Object')).toBe(true)
+      })
+
+      it('array', function () {
+        makeInstance([], Array)
+        expect(_.warn).not.toHaveBeenCalled()
+        makeInstance({}, Array)
+        expect(hasWarned(_, 'Expected Array')).toBe(true)
+      })
+
+      it('custom constructor', function () {
+        function Class () {}
+        makeInstance(new Class(), Class)
+        expect(_.warn).not.toHaveBeenCalled()
+        makeInstance({}, Class)
+        expect(hasWarned(_, 'Expected custom type')).toBe(true)
+      })
+
+      it('custom validator', function () {
+        makeInstance(123, null, function (v) {
+          return v === 123
+        })
+        expect(_.warn).not.toHaveBeenCalled()
+        makeInstance(123, null, function (v) {
+          return v === 234
+        })
+        expect(hasWarned(_, 'custom validator check failed')).toBe(true)
+      })
+
+      it('type check + custom validator', function () {
+        makeInstance(123, Number, function (v) {
+          return v === 123
+        })
+        expect(_.warn).not.toHaveBeenCalled()
+        makeInstance(123, Number, function (v) {
+          return v === 234
+        })
+        expect(hasWarned(_, 'custom validator check failed')).toBe(true)
+        makeInstance(123, String, function (v) {
+          return v === 123
+        })
+        expect(hasWarned(_, 'Expected String')).toBe(true)
+      })
+
+      it('required', function () {
+        var vm = new Vue({
+          el: document.createElement('div'),
+          template: '<test></test>',
+          components: {
+            test: {
+              props: [
+                {
+                  name: 'prop',
+                  required: true
+                }
+              ]
+            }
+          }
+        })
+        expect(hasWarned(_, 'Missing required prop')).toBe(true)
+      })
+
+    })
   })
 }

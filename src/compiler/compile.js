@@ -481,7 +481,7 @@ function compileProps (el, attrs, propDescriptors) {
       props.push(prop)
     } else if (assertions && assertions.required) {
       _.warn(
-        'Required prop missing: ' + name
+        'Missing required prop: ' + name
       )
     }
   }

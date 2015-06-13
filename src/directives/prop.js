@@ -1,3 +1,4 @@
+var _ = require('../util')
 var Watcher = require('../watcher')
 var bindingModes = require('../config')._propBindingModes
 
@@ -24,7 +25,9 @@ module.exports = {
         if (!locked) {
           locked = true
           // all props have been initialized already
-          child[childKey] = val
+          if (_.assertProp(prop, val)) {
+            child[childKey] = val
+          }
           locked = false
         }
       },
@@ -34,7 +37,10 @@ module.exports = {
     // set the child initial value first, before setting
     // up the child watcher to avoid triggering it
     // immediately.
-    child.$set(childKey, this.parentWatcher.value)
+    var value = this.parentWatcher.value
+    if (_.assertProp(prop, value)) {
+      child.$set(childKey, value)
+    }
 
     // only setup two-way binding if this is not a one-way
     // binding.
