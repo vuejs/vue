@@ -65,6 +65,7 @@ exports.parse = function (text) {
   if (hit) {
     return hit
   }
+  text = text.replace(/\n/g, '')
   if (!tagRE.test(text)) {
     return null
   }

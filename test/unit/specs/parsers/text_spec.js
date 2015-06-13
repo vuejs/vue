@@ -43,6 +43,13 @@ var testCases = [
       { tag: true, value: 'abc', html: false, oneTime: false },
       { value: ']' }
     ]
+  },
+  // multiline
+  {
+    text: '{{\n  value  \n}}',
+    expected: [
+      { tag: true, value: 'value', html: false, oneTime: false }
+    ]
   }
 ]
 
