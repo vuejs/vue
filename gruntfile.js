@@ -93,7 +93,7 @@ module.exports = function (grunt) {
   grunt.registerTask('cover', ['karma:coverage'])
   grunt.registerTask('test', ['unit', 'cover', 'casper'])
   grunt.registerTask('sauce', ['karma:sauce1', 'karma:sauce2', 'karma:sauce3'])
-  grunt.registerTask('ci', ['jshint', 'cover', 'coveralls', 'build', 'casper', 'sauce'])
+  grunt.registerTask('ci', ['jshint', 'cover', /*'coveralls',*/ 'build', 'casper', 'sauce'])
   grunt.registerTask('default', ['jshint', 'build', 'test'])
 
   grunt.registerTask('debug', ['coveralls', 'build'])
