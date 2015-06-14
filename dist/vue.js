@@ -1,5 +1,5 @@
 /**
- * Vue.js v0.12.0
+ * Vue.js v0.12.1
  * (c) 2015 Evan You
  * Released under the MIT License.
  */
@@ -170,8 +170,76 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _ = __webpack_require__(1)
 	var config = __webpack_require__(3)
-	var commonTagRE = /^(div|p|span|img|a|br|ul|ol|li|h1|h2|h3|h4|h5|code|pre)$/
-	var tableElementsRE = /^caption|colgroup|thead|tfoot|tbody|tr|td|th$/
+
+	/**
+	 * Assert whether a prop is valid.
+	 *
+	 * @param {Object} prop
+	 * @param {*} value
+	 */
+
+	exports.assertProp = function (prop, value) {
+	  var assertions = prop.assertions
+	  if (!assertions) {
+	    return true
+	  }
+	  var type = assertions.type
+	  var valid = true
+	  var expectedType
+	  if (type) {
+	    if (type === String) {
+	      expectedType = 'string'
+	      valid = typeof value === expectedType
+	    } else if (type === Number) {
+	      expectedType = 'number'
+	      valid = typeof value === 'number'
+	    } else if (type === Boolean) {
+	      expectedType = 'boolean'
+	      valid = typeof value === 'boolean'
+	    } else if (type === Function) {
+	      expectedType = 'function'
+	      valid = typeof value === 'function'
+	    } else if (type === Object) {
+	      expectedType = 'object'
+	      valid = _.isPlainObject(value)
+	    } else if (type === Array) {
+	      expectedType = 'array'
+	      valid = _.isArray(value)
+	    } else {
+	      valid = value instanceof type
+	    }
+	  }
+	  if (!valid) {
+	    _.warn(
+	      'Invalid prop: type check failed for ' +
+	      prop.path + '="' + prop.raw + '".' +
+	      ' Expected ' + formatType(expectedType) +
+	      ', got ' + formatValue(value) + '.'
+	    )
+	    return false
+	  }
+	  var validator = assertions.validator
+	  if (validator) {
+	    if (!validator.call(null, value)) {
+	      _.warn(
+	        'Invalid prop: custom validator check failed for ' +
+	        prop.path + '="' + prop.raw + '"'
+	      )
+	      return false
+	    }
+	  }
+	  return true
+	}
+
+	function formatType (val) {
+	  return val
+	    ? val.charAt(0).toUpperCase() + val.slice(1)
+	    : 'custom type'
+	}
+
+	function formatValue (val) {
+	  return Object.prototype.toString.call(val).slice(8, -1)
+	}
 
 	/**
 	 * Check if an element is a component, if yes return its
@@ -181,6 +249,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Object} options
 	 * @return {String|undefined}
 	 */
+
+	var commonTagRE = /^(div|p|span|img|a|br|ul|ol|li|h1|h2|h3|h4|h5|code|pre)$/
+	var tableElementsRE = /^caption|colgroup|thead|tfoot|tbody|tr|td|th$/
 
 	exports.checkComponent = function (el, options) {
 	  var tag = el.tagName.toLowerCase()
@@ -308,7 +379,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    'elementDirective',
 	    'filter',
 	    'transition'
-	  ]
+	  ],
+
+	  /**
+	   * prop binding modes
+	   */
+
+	  _propBindingModes: {
+	    ONE_WAY: 0,
+	    TWO_WAY: 1,
+	    ONE_TIME: 2
+	  }
 
 	}
 
@@ -330,6 +411,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this._delimitersChanged = true
 	  }
 	})
+
 
 /***/ },
 /* 4 */
@@ -376,6 +458,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	    typeof value === 'boolean'
 	  ) ? value
 	    : Number(value)
+	}
+
+	/**
+	 * Convert string boolean literals into real booleans.
+	 *
+	 * @param {*} value
+	 * @return {*|Boolean}
+	 */
+
+	exports.toBoolean = function (value) {
+	  return value === 'true'
+	    ? true
+	    : value === 'false'
+	      ? false
+	      : value
 	}
 
 	/**
@@ -604,6 +701,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  return cb
 	}
+
 
 /***/ },
 /* 5 */
@@ -1437,6 +1535,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var dirParser = __webpack_require__(15)
 	var templateParser = __webpack_require__(12)
 	var resolveAsset = _.resolveAsset
+	var propBindingModes = config._propBindingModes
 
 	// internal directives
 	var propDef = __webpack_require__(16)
@@ -1574,8 +1673,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var propsLinkFn, parentLinkFn, replacerLinkFn
 
 	  // 1. props
-	  propsLinkFn = props && containerAttrs
-	    ? compileProps(el, containerAttrs, props)
+	  propsLinkFn = props
+	    ? compileProps(el, containerAttrs || {}, props)
 	    : null
 
 	  // only need to compile other attributes for
@@ -1828,21 +1927,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *
 	 * @param {Element|DocumentFragment} el
 	 * @param {Object} attrs
-	 * @param {Array} propNames
+	 * @param {Array} propDescriptors
 	 * @return {Function} propsLinkFn
 	 */
 
 	var dataAttrRE = /^data-/
 	var settablePathRE = /^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\[[^\[\]]+\])*$/
-	var literalValueRE = /^(true|false|\d+)$/
+	var literalValueRE = /^(true|false)$|\d.*/
 	var identRE = __webpack_require__(23).identRE
 
-	function compileProps (el, attrs, propNames) {
+	function compileProps (el, attrs, propDescriptors) {
 	  var props = []
-	  var i = propNames.length
-	  var name, value, path, prop, settable, literal, single
+	  var i = propDescriptors.length
+	  var descriptor, name, assertions, value, path, prop, literal, single
 	  while (i--) {
-	    name = propNames[i]
+	    descriptor = propDescriptors[i]
+	    // normalize prop string/descriptor
+	    if (typeof descriptor === 'object') {
+	      name = descriptor.name
+	      assertions = descriptor
+	    } else {
+	      name = descriptor
+	      assertions = null
+	    }
 	    // props could contain dashes, which will be
 	    // interpreted as minus calculations by the parser
 	    // so we need to camelize the path here
@@ -1868,7 +1975,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      prop = {
 	        name: name,
 	        raw: value,
-	        path: path
+	        path: path,
+	        assertions: assertions,
+	        mode: propBindingModes.ONE_WAY
 	      }
 	      var tokens = textParser.parse(value)
 	      if (tokens) {
@@ -1884,24 +1993,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	        single = tokens.length === 1
 	        literal = literalValueRE.test(prop.parentPath)
 	        // one time: {{* prop}}
-	        prop.oneTime =
-	          literal ||
-	          (single && tokens[0].oneTime)
-	        // check one-way bindings
-	        if (!prop.oneTime) {
-	          settable = !literal && settablePathRE.test(prop.parentPath)
-	          // one way down: {{> prop}}
-	          prop.oneWayDown =
-	            !settable ||
-	            (single && tokens[0].oneWay === 60) // <
-	          // one way up: {{< prop}}
-	          prop.oneWayUp =
-	            single &&
-	            settable &&
-	            tokens[0].oneWay === 62 // >
+	        if (literal || (single && tokens[0].oneTime)) {
+	          prop.mode = propBindingModes.ONE_TIME
+	        } else if (
+	          !literal &&
+	          (single && tokens[0].twoWay)
+	        ) {
+	          if (settablePathRE.test(prop.parentPath)) {
+	            prop.mode = propBindingModes.TWO_WAY
+	          } else {
+	            _.warn(
+	              'Cannot bind two-way prop with non-settable ' +
+	              'parent path: ' + prop.parentPath
+	            )
+	          }
 	        }
 	      }
 	      props.push(prop)
+	    } else if (assertions && assertions.required) {
+	      _.warn(
+	        'Missing required prop: ' + name
+	      )
 	    }
 	  }
 	  return makePropsLinkFn(props)
@@ -1917,15 +2029,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	function makePropsLinkFn (props) {
 	  return function propsLinkFn (vm, el) {
 	    var i = props.length
-	    var prop, path
+	    var prop, path, value
 	    while (i--) {
 	      prop = props[i]
 	      path = prop.path
 	      if (prop.dynamic) {
 	        if (vm.$parent) {
-	          if (prop.oneTime) {
+	          if (prop.mode === propBindingModes.ONE_TIME) {
 	            // one time binding
-	            vm.$set(path, vm.$parent.$get(prop.parentPath))
+	            value = vm.$parent.$get(prop.parentPath)
+	            if (_.assertProp(prop, value)) {
+	              vm.$set(path, value)
+	            }
 	          } else {
 	            // dynamic binding
 	            vm._bindDir('prop', el, prop, propDef)
@@ -1938,8 +2053,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	          )
 	        }
 	      } else {
-	        // literal, just set once
-	        vm.$set(path, _.toNumber(prop.raw))
+	        // literal, cast it and just set once
+	        value = _.toBoolean(_.toNumber(prop.raw))
+	        if (_.assertProp(prop, value)) {
+	          vm.$set(path, value)
+	        }
 	      }
 	    }
 	  }
@@ -2631,12 +2749,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (hit) {
 	    return hit
 	  }
+	  text = text.replace(/\n/g, '')
 	  if (!tagRE.test(text)) {
 	    return null
 	  }
 	  var tokens = []
 	  var lastIndex = tagRE.lastIndex = 0
-	  var match, index, value, first, oneTime, oneWay
+	  var match, index, value, first, oneTime, twoWay
 	  /* jshint boss:true */
 	  while (match = tagRE.exec(text)) {
 	    index = match.index
@@ -2648,9 +2767,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    // tag token
 	    first = match[1].charCodeAt(0)
-	    oneTime = first === 42    // *
-	    oneWay = first === 62 || first === 60 // > or <
-	    value = oneTime || oneWay
+	    oneTime = first === 42 // *
+	    twoWay = first === 64  // @
+	    value = oneTime || twoWay
 	      ? match[1].slice(1)
 	      : match[1]
 	    tokens.push({
@@ -2658,7 +2777,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      value: value.trim(),
 	      html: htmlRE.test(match[0]),
 	      oneTime: oneTime,
-	      oneWay: oneWay ? first : 0
+	      twoWay: twoWay
 	    })
 	    lastIndex = index + match[0].length
 	  }
@@ -2928,7 +3047,9 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
+	var _ = __webpack_require__(1)
 	var Watcher = __webpack_require__(17)
+	var bindingModes = __webpack_require__(3)._propBindingModes
 
 	module.exports = {
 
@@ -2946,30 +3067,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // sure it doesn't cause other watchers to re-evaluate.
 	    var locked = false
 
-	    if (!prop.oneWayUp) {
-	      this.parentWatcher = new Watcher(
-	        parent,
-	        parentKey,
-	        function (val) {
-	          if (!locked) {
-	            locked = true
-	            // all props have been initialized already
+	    this.parentWatcher = new Watcher(
+	      parent,
+	      parentKey,
+	      function (val) {
+	        if (!locked) {
+	          locked = true
+	          // all props have been initialized already
+	          if (_.assertProp(prop, val)) {
 	            child[childKey] = val
-	            locked = false
 	          }
-	        },
-	        { sync: true }
-	      )
-	      
-	      // set the child initial value first, before setting
-	      // up the child watcher to avoid triggering it
-	      // immediately.
-	      child.$set(childKey, this.parentWatcher.value)
+	          locked = false
+	        }
+	      },
+	      { sync: true }
+	    )
+	    
+	    // set the child initial value first, before setting
+	    // up the child watcher to avoid triggering it
+	    // immediately.
+	    var value = this.parentWatcher.value
+	    if (_.assertProp(prop, value)) {
+	      child.$set(childKey, value)
 	    }
 
 	    // only setup two-way binding if this is not a one-way
 	    // binding.
-	    if (!prop.oneWayDown) {
+	    if (prop.mode === bindingModes.TWO_WAY) {
 	      this.childWatcher = new Watcher(
 	        child,
 	        childKey,
@@ -2982,11 +3106,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        },
 	        { sync: true }
 	      )
-
-	      // set initial value for one-way up binding
-	      if (prop.oneWayUp) {
-	        parent.$set(parentKey, this.childWatcher.value)
-	      }
 	    }
 	  },
 
@@ -4768,8 +4887,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (_.isTemplate(el)) {
 	    el = templateParser.parse(el)
 	  }
-	  if (options && options.template) {
-	    el = transcludeTemplate(el, options)
+	  if (options) {
+	    if (options._asComponent && !options.template) {
+	      options.template = '<content></content>'
+	    }
+	    if (options.template) {
+	      options._content = _.extractContent(el)
+	      el = transcludeTemplate(el, options)
+	    }
 	  }
 	  if (el instanceof DocumentFragment) {
 	    // anchors for block instance
@@ -4796,7 +4921,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (!frag) {
 	    _.warn('Invalid template option: ' + template)
 	  } else {
-	    options._content = _.extractContent(el)
 	    var replacer = frag.firstChild
 	    if (options.replace) {
 	      if (
@@ -4862,6 +4986,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }
 	}
+
 
 /***/ },
 /* 27 */
@@ -6440,7 +6565,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      // check inline-template
 	      if (this._checkParam('inline-template') !== null) {
 	        // extract inline template as a DocumentFragment
-	        this.inlineTempalte = _.extractContent(this.el, true)
+	        this.inlineTemplate = _.extractContent(this.el, true)
 	      }
 	      var tokens = textParser.parse(id)
 	      if (tokens) {
@@ -6688,7 +6813,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      el: templateParser.clone(this.template),
 	      data: data,
 	      inherit: this.inherit,
-	      template: this.inlineTempalte,
+	      template: this.inlineTemplate,
 	      // repeater meta, e.g. $index, $key
 	      _meta: meta,
 	      // mark this as an inline-repeat instance
@@ -6696,7 +6821,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      // is this a component?
 	      _asComponent: this.asComponent,
 	      // linker cachable if no inline-template
-	      _linkerCachable: !this.inlineTempalte,
+	      _linkerCachable: !this.inlineTemplate,
 	      // transclusion host
 	      _host: this._host,
 	      // pre-compiled linker for simple repeats
@@ -7450,32 +7575,49 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var raw = contentOwner.$options._content
 	    var content
 	    if (!raw) {
-	      // fallback content
-	      // extract as a fragment
-	      content = _.extractContent(this.el, true)
-	      this.compile(content, vm)
+	      this.fallback()
 	      return
 	    }
 	    var parent = contentOwner.$parent
 	    var selector = this.el.getAttribute('select')
 	    if (!selector) {
-	      // default content
-	      // Importent: clone the rawContent before extracting
-	      // content because the <content> may be inside a v-if
-	      // and need to be compiled more than once.
-	      content = _.extractContent(raw.cloneNode(true), true)
-	      this.compile(content, parent, vm)
+	      // Default content
+	      var self = this
+	      var compileDefaultContent = function () {
+	        self.compile(
+	          extractFragment(raw.childNodes, raw, true),
+	          contentOwner.$parent,
+	          vm
+	        )
+	      }
+	      if (!contentOwner._isCompiled) {
+	        // defer until the end of instance compilation,
+	        // because the default outlet must wait until all
+	        // other possible outlets with selectors have picked
+	        // out their contents.
+	        contentOwner.$once('hook:compiled', compileDefaultContent)
+	      } else {
+	        compileDefaultContent()
+	      }
 	    } else {
 	      // select content
 	      selector = vm.$interpolate(selector)
-	      content = raw.querySelector(selector)
-	      // only allow top-level select
-	      if (content && content.parentNode === raw) {
-	        // same deal, clone the node for v-if
-	        content = content.cloneNode(true)
-	        this.compile(content, parent, vm)
+	      var nodes = raw.querySelectorAll(selector)
+	      if (nodes.length) {
+	        content = extractFragment(nodes, raw)
+	        if (content.hasChildNodes()) {
+	          this.compile(content, parent, vm)
+	        } else {
+	          this.fallback()
+	        }
+	      } else {
+	        this.fallback()
 	      }
 	    }
+	  },
+
+	  fallback: function () {
+	    this.compile(_.extractContent(this.el, true), this.vm)
 	  },
 
 	  compile: function (content, owner, host) {
@@ -7494,7 +7636,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	      this.unlink()
 	    } 
 	  }
+	}
 
+	/**
+	 * Extract qualified content nodes from a node list.
+	 *
+	 * @param {NodeList} nodes
+	 * @param {Element} parent
+	 * @param {Boolean} main
+	 * @return {DocumentFragment}
+	 */
+
+	function extractFragment (nodes, parent, main) {
+	  var frag = document.createDocumentFragment()
+	  for (var i = 0, l = nodes.length; i < l; i++) {
+	    var node = nodes[i]
+	    // if this is the main outlet, we want to skip all
+	    // previously selected nodes;
+	    // otherwise, we want to mark the node as selected.
+	    // clone the node so the original raw content remains
+	    // intact. this ensures proper re-compilation in cases
+	    // where the outlet is inside a conditional block
+	    if (main && !node.selected) {
+	      frag.appendChild(node.cloneNode(true))
+	    } else if (!main && node.parentNode === parent) {
+	      node.selected = true
+	      frag.appendChild(node.cloneNode(true))
+	    }
+	  }
+	  return frag
 	}
 
 
@@ -7594,6 +7764,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.$mount(options.el)
 	  }
 	}
+
 
 /***/ },
 /* 53 */
@@ -7755,10 +7926,37 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	exports._initScope = function () {
+	  this._initProps()
 	  this._initData()
 	  this._initComputed()
 	  this._initMethods()
 	  this._initMeta()
+	}
+
+	/**
+	 * Initialize props.
+	 */
+
+	exports._initProps = function () {
+	  // make sure all props properties are observed
+	  var data = this._data
+	  var props = this.$options.props
+	  var prop, key, i
+	  if (props) {
+	    i = props.length
+	    while (i--) {
+	      prop = props[i]
+	      // props can be strings or object descriptors
+	      key = _.camelize(
+	        typeof prop === 'string'
+	          ? prop
+	          : prop.name
+	      )
+	      if (!(key in data) && key !== '$data') {
+	        data[key] = undefined
+	      }
+	    }
+	  }
 	}
 
 	/**
@@ -7768,19 +7966,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports._initData = function () {
 	  // proxy data on instance
 	  var data = this._data
-	  var i, key
-	  // make sure all props properties are observed
-	  var props = this.$options.props
-	  if (props) {
-	    i = props.length
-	    while (i--) {
-	      key = _.camelize(props[i])
-	      if (!(key in data) && key !== '$data') {
-	        data[key] = undefined
-	      }
-	    }
-	  }
 	  var keys = Object.keys(data)
+	  var i, key
 	  i = keys.length
 	  while (i--) {
 	    key = keys[i]
