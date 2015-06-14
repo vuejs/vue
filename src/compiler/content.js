@@ -100,10 +100,10 @@ function extractFragment (nodes, parent, main) {
     // clone the node so the original raw content remains
     // intact. this ensures proper re-compilation in cases
     // where the outlet is inside a conditional block
-    if (main && !node.selected) {
+    if (main && !node.__v_selected) {
       frag.appendChild(node.cloneNode(true))
     } else if (!main && node.parentNode === parent) {
-      node.selected = true
+      node.__v_selected = true
       frag.appendChild(node.cloneNode(true))
     }
   }
