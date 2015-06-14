@@ -54,6 +54,13 @@ describe('Content Transclusion', function () {
     expect(el.lastChild.textContent).toBe('select b')
   })
 
+  it('selector matching multiple elements', function () {
+    el.innerHTML = '<p class="t">1</p><div></div><p class="t">2</p>'
+    options.template = '<content select=".t"></content>'
+    mount()
+    expect(el.innerHTML).toBe('<p class="t">1</p><p class="t">2</p>')
+  })
+
   it('content transclusion with replace', function () {
     el.innerHTML = '<p>hi</p>'
     options.template = '<div><div><content></content></div></div>'

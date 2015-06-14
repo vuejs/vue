@@ -36,12 +36,18 @@ module.exports = {
     } else {
       // select content
       selector = vm.$interpolate(selector)
-      content = raw.querySelector(selector)
-      // only allow top-level select
-      if (content && content.parentNode === raw) {
-        // same deal, clone the node for v-if
-        content = content.cloneNode(true)
-        this.compile(content, parent, vm)
+      var nodes = raw.querySelectorAll(selector)
+      if (nodes.length) {
+        content = document.createDocumentFragment()
+        for (var i = 0, l = nodes.length; i < l; i++) {
+          // only allow top-level select
+          if (nodes[i].parentNode === raw) {
+            content.appendChild(nodes[i].cloneNode(true))
+          }
+        }
+        if (content.hasChildNodes()) {
+          this.compile(content, parent, vm)
+        }
       }
     }
   },
