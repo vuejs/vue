@@ -30,6 +30,14 @@ describe('Content Transclusion', function () {
     expect(el.firstChild.firstChild.textContent).toBe('hi')
   })
 
+  it('no template auto content', function () {
+    el.innerHTML = '<p>hi</p>'
+    options._asComponent = true
+    mount()
+    expect(el.firstChild.tagName).toBe('P')
+    expect(el.firstChild.textContent).toBe('hi')
+  })
+
   it('fallback content', function () {
     options.template = '<content><p>fallback</p></content>'
     mount()

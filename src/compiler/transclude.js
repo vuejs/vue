@@ -28,8 +28,14 @@ exports.transclude = function (el, options) {
   if (_.isTemplate(el)) {
     el = templateParser.parse(el)
   }
-  if (options && options.template) {
-    el = transcludeTemplate(el, options)
+  if (options) {
+    if (options._asComponent && !options.template) {
+      options.template = '<content></content>'
+    }
+    if (options.template) {
+      options._content = _.extractContent(el)
+      el = transcludeTemplate(el, options)
+    }
   }
   if (el instanceof DocumentFragment) {
     // anchors for block instance
@@ -56,7 +62,6 @@ function transcludeTemplate (el, options) {
   if (!frag) {
     _.warn('Invalid template option: ' + template)
   } else {
-    options._content = _.extractContent(el)
     var replacer = frag.firstChild
     if (options.replace) {
       if (
