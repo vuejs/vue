@@ -1,6 +1,6 @@
 {
   "name": "vue",
-  "version": "0.12.1",
+  "version": "0.12.1-csp",
   "author": "Evan You <yyx990803@gmail.com>",
   "license": "MIT",
   "description": "Simple, Fast & Composable MVVM for building interative interfaces",
@@ -40,5 +40,8 @@
     "shell-task": "^1.0.0",
     "uglify-js": "^2.4.20",
     "webpack": "^1.9.10"
+  },
+  "dependencies": {
+    "notevil": "^1.0.0"
   }
 }
