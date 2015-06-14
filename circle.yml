@@ -1,0 +1,4 @@
+general:
+  branches:
+    only:
+      - master
