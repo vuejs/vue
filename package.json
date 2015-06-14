@@ -22,9 +22,9 @@
   },
   "devDependencies": {
     "casperjs": "^1.1.0-beta3",
+    "codecov.io": "^0.1.2",
     "grunt": "^0.4.5",
     "grunt-contrib-jshint": "^0.10.0",
-    "grunt-coveralls": "^1.0.0",
     "grunt-karma": "^0.8.3",
     "jshint-stylish": "^0.3.0",
     "karma": "^0.12.31",
