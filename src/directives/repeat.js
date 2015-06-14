@@ -102,7 +102,7 @@ module.exports = {
       // check inline-template
       if (this._checkParam('inline-template') !== null) {
         // extract inline template as a DocumentFragment
-        this.inlineTempalte = _.extractContent(this.el, true)
+        this.inlineTemplate = _.extractContent(this.el, true)
       }
       var tokens = textParser.parse(id)
       if (tokens) {
@@ -350,7 +350,7 @@ module.exports = {
       el: templateParser.clone(this.template),
       data: data,
       inherit: this.inherit,
-      template: this.inlineTempalte,
+      template: this.inlineTemplate,
       // repeater meta, e.g. $index, $key
       _meta: meta,
       // mark this as an inline-repeat instance
@@ -358,7 +358,7 @@ module.exports = {
       // is this a component?
       _asComponent: this.asComponent,
       // linker cachable if no inline-template
-      _linkerCachable: !this.inlineTempalte,
+      _linkerCachable: !this.inlineTemplate,
       // transclusion host
       _host: this._host,
       // pre-compiled linker for simple repeats
