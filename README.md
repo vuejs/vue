@@ -1,6 +1,6 @@
 <p align="center"><a href="http://vuejs.org" target="_blank"><img width="100"src="http://vuejs.org/images/logo.png"></a></p>
 
-# Vue.js [![Build Status](https://img.shields.io/circleci/project/yyx990803/vue/master.svg)](https://circleci.com/gh/yyx990803/vue) [![Coverage Status](https://img.shields.io/coveralls/yyx990803/vue.svg)](https://coveralls.io/r/yyx990803/vue?branch=master) [![Selenium Test Status](https://saucelabs.com/buildstatus/vuejs)](https://saucelabs.com/u/vuejs)
+# Vue.js [![Build Status](https://img.shields.io/circleci/project/yyx990803/vue/master.svg)](https://circleci.com/gh/yyx990803/vue) [![Coverage Status](https://img.shields.io/codecov/c/github/yyx990803/vue/master.svg)](https://codecov.io/github/yyx990803/vue?branch=master) [![Selenium Test Status](https://saucelabs.com/buildstatus/vuejs)](https://saucelabs.com/u/vuejs)
 
 ## Intro
 
