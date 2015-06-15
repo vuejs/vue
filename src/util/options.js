@@ -214,6 +214,12 @@ function guardComponents (components) {
   if (components) {
     var def
     for (var key in components) {
+      if (_.commonTagRE.test(key)) {
+        _.warn(
+          'Do not use built-in HTML elements as component ' +
+          'name: ' + key
+        )
+      }
       def = components[key]
       if (_.isPlainObject(def)) {
         def.name = key

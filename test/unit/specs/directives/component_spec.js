@@ -106,17 +106,17 @@ if (_.inBrowser) {
         el: el,
         template: '<component is="{{view}}" v-attr="view:view"></component>',
         data: {
-          view: 'a'
+          view: 'view-a'
         },
         components: {
-          a: {
+          'view-a': {
             template: '<div>AAA</div>',
             replace: true,
             data: function () {
               return { view: 'a' }
             }
           },
-          b: {
+          'view-b': {
             template: '<div>BBB</div>',
             replace: true,
             data: function () {
@@ -125,10 +125,10 @@ if (_.inBrowser) {
           }
         }
       })
-      expect(el.innerHTML).toBe('<div view="a">AAA</div>')
-      vm.view = 'b'
+      expect(el.innerHTML).toBe('<div view="view-a">AAA</div>')
+      vm.view = 'view-b'
       _.nextTick(function () {
-        expect(el.innerHTML).toBe('<div view="b">BBB</div>')
+        expect(el.innerHTML).toBe('<div view="view-b">BBB</div>')
         vm.view = ''
         _.nextTick(function () {
           expect(el.innerHTML).toBe('')
@@ -144,15 +144,15 @@ if (_.inBrowser) {
         el: el,
         template: '<component is="{{view}}" keep-alive></component>',
         data: {
-          view: 'a'
+          view: 'view-a'
         },
         components: {
-          a: {
+          'view-a': {
             created: spyA,
             template: '<div>AAA</div>',
             replace: true
           },
-          b: {
+          'view-b': {
             created: spyB,
             template: '<div>BBB</div>',
             replace: true
@@ -162,17 +162,17 @@ if (_.inBrowser) {
       expect(el.innerHTML).toBe('<div>AAA</div>')
       expect(spyA.calls.count()).toBe(1)
       expect(spyB.calls.count()).toBe(0)
-      vm.view = 'b'
+      vm.view = 'view-b'
       _.nextTick(function () {
         expect(el.innerHTML).toBe('<div>BBB</div>')
         expect(spyA.calls.count()).toBe(1)
         expect(spyB.calls.count()).toBe(1)
-        vm.view = 'a'
+        vm.view = 'view-a'
         _.nextTick(function () {
           expect(el.innerHTML).toBe('<div>AAA</div>')
           expect(spyA.calls.count()).toBe(1)
           expect(spyB.calls.count()).toBe(1)
-          vm.view = 'b'
+          vm.view = 'view-b'
           _.nextTick(function () {
             expect(el.innerHTML).toBe('<div>BBB</div>')
             expect(spyA.calls.count()).toBe(1)
@@ -267,20 +267,20 @@ if (_.inBrowser) {
       var vm = new Vue({
         el: el,
         data: {
-          view: 'a'
+          view: 'view-a'
         },
         template: '<component is="{{view}}" wait-for="ok"></component>',
         components: {
-          a: {
+          'view-a': {
             template: 'AAA'
           },
-          b: {
+          'view-b': {
             template: 'BBB'
           }
         }
       })
       vm._children[0].$emit('ok')
-      vm.view = 'b'
+      vm.view = 'view-b'
       _.nextTick(function () {
         expect(el.textContent).toBe('AAA')
         // old vm is already removed, this is the new vm
@@ -297,12 +297,12 @@ if (_.inBrowser) {
       var vm = new Vue({
         el: el,
         data: {
-          view: 'a'
+          view: 'view-a'
         },
         template: '<component is="{{view}}" v-transition="test" transition-mode="in-out"></component>',
         components: {
-          a: { template: 'AAA' },
-          b: { template: 'BBB' }
+          'view-a': { template: 'AAA' },
+          'view-b': { template: 'BBB' }
         },
         transitions: {
           test: {
@@ -318,7 +318,7 @@ if (_.inBrowser) {
         }
       })
       expect(el.textContent).toBe('AAA')
-      vm.view = 'b'
+      vm.view = 'view-b'
       _.nextTick(function () {
         expect(spy1).toHaveBeenCalled()
         expect(spy2).not.toHaveBeenCalled()
@@ -341,12 +341,12 @@ if (_.inBrowser) {
       var vm = new Vue({
         el: el,
         data: {
-          view: 'a'
+          view: 'view-a'
         },
         template: '<component is="{{view}}" v-transition="test" transition-mode="out-in"></component>',
         components: {
-          a: { template: 'AAA' },
-          b: { template: 'BBB' }
+          'view-a': { template: 'AAA' },
+          'view-b': { template: 'BBB' }
         },
         transitions: {
           test: {
@@ -362,7 +362,7 @@ if (_.inBrowser) {
         }
       })
       expect(el.textContent).toBe('AAA')
-      vm.view = 'b'
+      vm.view = 'view-b'
       _.nextTick(function () {
         expect(spy1).toHaveBeenCalled()
         expect(spy2).not.toHaveBeenCalled()

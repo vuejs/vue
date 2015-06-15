@@ -80,8 +80,8 @@ function formatValue (val) {
  * @return {String|undefined}
  */
 
-var commonTagRE = /^(div|p|span|img|a|br|ul|ol|li|h1|h2|h3|h4|h5|code|pre)$/
-var tableElementsRE = /^caption|colgroup|thead|tfoot|tbody|tr|td|th$/
+exports.commonTagRE = /^(div|p|span|img|a|br|ul|ol|li|h1|h2|h3|h4|h5|code|pre)$/
+exports.tableElementsRE = /^caption|colgroup|thead|tfoot|tbody|tr|td|th$/
 
 exports.checkComponent = function (el, options) {
   var tag = el.tagName.toLowerCase()
@@ -91,12 +91,12 @@ exports.checkComponent = function (el, options) {
     el.removeAttribute('is')
     return exp
   } else if (
-    !commonTagRE.test(tag) &&
+    !exports.commonTagRE.test(tag) &&
     _.resolveAsset(options, 'components', tag)
   ) {
     return tag
   } else if (
-    tableElementsRE.test(tag) &&
+    exports.tableElementsRE.test(tag) &&
     (tag = _.attr(el, 'component'))
   ) {
     return tag

@@ -3,6 +3,10 @@ var Vue = require('../../../../src/vue')
 var merge = _.mergeOptions
 
 describe('Util - Option merging', function () {
+
+  beforeEach(function () {
+    spyOn(_, 'warn')
+  })
   
   it('default strat', function () {
     // child undefined
@@ -114,12 +118,23 @@ describe('Util - Option merging', function () {
       components: null
     }, {
       components: {
+        test: { template: 'hi' }
+      }
+    })
+    expect(typeof res.components.test).toBe('function')
+    expect(res.components.test.options.name).toBe('test')
+    expect(res.components.test.super).toBe(Vue)
+  })
+
+  it('guard components warn built-in elements', function () {
+    var res = merge({
+      components: null
+    }, {
+      components: {
         a: { template: 'hi' }
       }
     })
-    expect(typeof res.components.a).toBe('function')
-    expect(res.components.a.options.name).toBe('a')
-    expect(res.components.a.super).toBe(Vue)
+    expect(hasWarned(_, 'Do not use built-in HTML elements')).toBe(true)
   })
 
   it('should ignore non-function el & data in class merge', function () {

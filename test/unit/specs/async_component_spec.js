@@ -42,10 +42,10 @@ describe('Async components', function () {
         el: el,
         template: '<component is="{{view}}"></component>',
         data: {
-          view: 'a'
+          view: 'view-a'
         },
         components: {
-          a: function (resolve) {
+          'view-a': function (resolve) {
             setTimeout(function () {
               resolve({
                 template: 'A'
@@ -53,7 +53,7 @@ describe('Async components', function () {
               step1()
             }, 0)
           },
-          b: function (resolve) {
+          'view-b': function (resolve) {
             setTimeout(function () {
               resolve({
                 template: 'B'
@@ -69,11 +69,11 @@ describe('Async components', function () {
         expect(aCalled).toBe(false)
         aCalled = true
         expect(el.textContent).toBe('A')
-        vm.view = 'b'
+        vm.view = 'view-b'
       }
       function step2 () {
         expect(el.textContent).toBe('B')
-        vm.view = 'a'
+        vm.view = 'view-a'
         _.nextTick(function () {
           expect(el.textContent).toBe('A')
           done()
@@ -86,10 +86,10 @@ describe('Async components', function () {
         el: el,
         template: '<component is="{{view}}"></component>',
         data: {
-          view: 'a'
+          view: 'view-a'
         },
         components: {
-          a: function (resolve) {
+          'view-a': function (resolve) {
             setTimeout(function () {
               resolve({
                 template: 'A'
@@ -97,7 +97,7 @@ describe('Async components', function () {
               step1()
             }, 100)
           },
-          b: function (resolve) {
+          'view-b': function (resolve) {
             setTimeout(function () {
               resolve({
                 template: 'B'
@@ -108,7 +108,7 @@ describe('Async components', function () {
         }
       })
       expect(el.textContent).toBe('')
-      vm.view = 'b'
+      vm.view = 'view-b'
       function step1 () {
         // called after A resolves, but A should have been
         // invalidated so not cotrId should be set
@@ -126,7 +126,7 @@ describe('Async components', function () {
         el: el,
         template: '<test></test>',
         data: {
-          view: 'a'
+          view: 'view-a'
         },
         components: {
           test: function (resolve) {
