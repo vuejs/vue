@@ -260,4 +260,19 @@ describe('Content Transclusion', function () {
     })
   })
 
+  it('single content outlet with replace: true', function () {
+    vm = new Vue({
+      el: el,
+      template:
+        '<test><p>1</p><p>2</p></test>',
+      components: {
+        test: {
+          template: '<content></content>',
+          replace: true
+        }
+      }
+    })
+    expect(el.innerHTML).toBe('<p>1</p><p>2</p>')
+  })
+
 })

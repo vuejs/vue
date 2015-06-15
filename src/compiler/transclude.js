@@ -67,9 +67,10 @@ function transcludeTemplate (el, options) {
       if (
         frag.childNodes.length > 1 ||
         replacer.nodeType !== 1 ||
-        // when root node has v-repeat, the instance ends up
-        // having multiple top-level nodes, thus becoming a
-        // block instance. (#835)
+        // when root node is <content> or has v-repeat, the
+        // instance could end up having multiple top-level
+        // nodes, thus becoming a block instance.
+        replacer.tagName.toLowerCase() === 'content' ||
         replacer.hasAttribute(config.prefix + 'repeat')
       ) {
         return frag
