@@ -1,11 +1,13 @@
 .*
 *.md
+*.yml
+build
 coverage
-grunt
 dist/vue.min.js.gz
-explorations
-test
 examples
+explorations
+perf
+test
 bower.json
 component.json
 gruntfile.js
