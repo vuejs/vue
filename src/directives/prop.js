@@ -30,8 +30,7 @@ module.exports = {
           }
           locked = false
         }
-      },
-      { sync: true }
+      }
     )
     
     // set the child initial value first, before setting
@@ -54,8 +53,7 @@ module.exports = {
             parent.$set(parentKey, val)
             locked = false
           }
-        },
-        { sync: true }
+        }
       )
     }
   },

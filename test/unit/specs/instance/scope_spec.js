@@ -56,7 +56,7 @@ describe('Instance Scope', function () {
       expect(vm.hasOwnProperty('a')).toBe(false)
     })
 
-    it('replace $data and handle props', function () {
+    it('replace $data and handle props', function (done) {
       var el = document.createElement('div')
       var vm = new Vue({
         el: el,
@@ -95,15 +95,19 @@ describe('Instance Scope', function () {
         b: 3, // one-time
         c: 4  // two-way
       }
-      // one-way
       expect(child.a).toBe(2)
-      expect(vm.a).toBe(1)
-      // one-time
       expect(child.b).toBe(3)
-      expect(vm.b).toBe(2)
-      // two-way
       expect(child.c).toBe(4)
-      expect(vm.c).toBe(4)
+      // assert parent state
+      Vue.nextTick(function () {
+        // one-way
+        expect(vm.a).toBe(1)
+        // one-time
+        expect(vm.b).toBe(2)
+        // two-way
+        expect(vm.c).toBe(4)
+        done()
+      })
     })
 
   })
