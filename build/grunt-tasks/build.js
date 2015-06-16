@@ -56,7 +56,8 @@ module.exports = function (grunt) {
       var result = uglifyjs.minify(js, {
         fromString: true,
         output: {
-          comments: /License/
+          comments: /License/,
+          ascii_only: true
         },
         compress: {
           pure_funcs: [
