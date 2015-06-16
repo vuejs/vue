@@ -3,6 +3,7 @@
 *.yml
 build
 coverage
+dist/vue.js.map
 dist/vue.min.js.gz
 examples
 explorations
