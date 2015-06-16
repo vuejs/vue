@@ -183,6 +183,8 @@ exports.extractContent = function (el, asFragment) {
     el = el.content
   }
   if (el.hasChildNodes()) {
+    trim(el, el.firstChild)
+    trim(el, el.lastChild)
     rawContent = asFragment
       ? document.createDocumentFragment()
       : document.createElement('div')
@@ -192,6 +194,12 @@ exports.extractContent = function (el, asFragment) {
     }
   }
   return rawContent
+}
+
+function trim (content, node) {
+  if (node && node.nodeType === 3 && !node.data.trim()) {
+    content.removeChild(node)
+  }
 }
 
 /**
