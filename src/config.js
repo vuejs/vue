@@ -85,7 +85,13 @@ module.exports = {
     ONE_WAY: 0,
     TWO_WAY: 1,
     ONE_TIME: 2
-  }
+  },
+
+  /**
+   * Max circular updates allowed in a batcher flush cycle.
+   */
+
+  _maxUpdateCount: 100
 
 }
 

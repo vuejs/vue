@@ -1,5 +1,5 @@
 var _ = require('./util')
-var MAX_UPDATE_COUNT = 10
+var config = require('./config')
 
 // we have two separate queues: one for directive updates
 // and one for user watcher registered via $watch().
@@ -70,7 +70,7 @@ exports.push = function (job) {
     } else {
       has[id]++
       // detect possible infinite update loops
-      if (has[id] > MAX_UPDATE_COUNT) {
+      if (has[id] > config._maxUpdateCount) {
         _.warn(
           'You may have an infinite update loop for the ' +
           'watcher with expression: "' + job.expression + '".'
