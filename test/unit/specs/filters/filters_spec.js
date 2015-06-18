@@ -62,7 +62,9 @@ describe('Filters', function () {
     expect(filter(1234)).toBe('$1,234.00')
     expect(filter(1234.45)).toBe('$1,234.45')
     expect(filter(123443434.4343434)).toBe('$123,443,434.43')
-    expect(filter(0.99999)).toBe('$0.99')
+    expect(filter(0.99)).toBe('$0.99')
+    expect(filter(0.99999)).toBe('$1.00')
+    expect(filter(0.76)).toBe('$0.76')
     // sign arg
     expect(filter(2134, '@')).toBe('@2,134.00')
     // falsy, infinity and 0
@@ -72,9 +74,9 @@ describe('Filters', function () {
     expect(filter(undefined)).toBe('')
     expect(filter(Infinity)).toBe('')
     // negative numbers
-    expect(filter(-50)).toBe('-$50.00')
-    expect(filter(-150.43)).toBe('-$150.43')
-    expect(filter(-1500.4343434)).toBe('-$1,500.43')
+    expect(filter(-50)).toBe('$-50.00')
+    expect(filter(-150.43)).toBe('$-150.43')
+    expect(filter(-1500.4343434)).toBe('$-1,500.43')
   })
 
   it('key', function () {
