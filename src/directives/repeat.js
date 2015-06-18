@@ -502,7 +502,9 @@ module.exports = {
     var data = vm._raw
     var idKey = this.idKey
     var index = vm.$index
-    var key = vm.$key
+    // fix #948: avoid accidentally fall through to
+    // a parent repeater which happens to have $key.
+    var key = vm.hasOwnProperty('$key') && vm.$key
     var primitive = !isObject(data)
     if (idKey || key || primitive) {
       var id = idKey
