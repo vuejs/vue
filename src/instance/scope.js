@@ -33,9 +33,9 @@ exports._initProps = function () {
       prop = props[i]
       // props can be strings or object descriptors
       key = _.camelize(
-        typeof prop === 'string'
+        (typeof prop === 'string'
           ? prop
-          : prop.name
+          : prop.name).replace(/^data-/, '')
       )
       if (!(key in data) && key !== '$data') {
         data[key] = undefined
