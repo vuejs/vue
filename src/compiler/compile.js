@@ -117,7 +117,6 @@ function makeUnlinkFn (vm, dirs, parent, parentDirs) {
  */
 
 function teardownDirs (vm, dirs, destroying) {
-  if (!dirs) return
   var i = dirs.length
   while (i--) {
     dirs[i]._teardown()
