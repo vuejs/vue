@@ -65,17 +65,8 @@ exports.compile = function (el, options, partial, host) {
       if (nodeLinkFn) nodeLinkFn(vm, el, host)
       if (childLinkFn) childLinkFn(vm, childNodes, host)
     }, vm)
-
-    /**
-     * The linker function returns an unlink function that
-     * tearsdown all directives instances generated during
-     * the process.
-     *
-     * @param {Boolean} destroying
-     */
-    return function unlink (destroying) {
-      teardownDirs(vm, dirs, destroying)
-    }
+    // 
+    return makeUnlinkFn(vm, dirs)
   }
 }
 
@@ -91,6 +82,30 @@ function linkAndCapture (linker, vm) {
   var originalDirCount = vm._directives.length
   linker()
   return vm._directives.slice(originalDirCount)
+}
+
+/**
+ * Linker functions return an unlink function that
+ * tearsdown all directives instances generated during
+ * the process.
+ * 
+ * We create unlink functions with only the necessary
+ * information to avoid retaining additional closures.
+ *
+ * @param {Vue} vm
+ * @param {Array} dirs
+ * @param {Vue} [parent]
+ * @param {Array} [parentDirs]
+ * @return {Function}
+ */
+
+function makeUnlinkFn (vm, dirs, parent, parentDirs) {
+  return function unlink (destroying) {
+    teardownDirs(vm, dirs, destroying)
+    if (parent && parentDirs) {
+      teardownDirs(parent, parentDirs)
+    }
+  }
 }
 
 /**
@@ -183,10 +198,7 @@ function teardownDirs (vm, dirs, destroying) {
 
   // return the unlink function that tearsdown parent
   // container directives.
-  return function rootUnlinkFn () {
-    teardownDirs(parent, parentDirs)
-    teardownDirs(vm, selfDirs)
-  }
+  return makeUnlinkFn(vm, selfDirs, parent, parentDirs)
 }
 
 /**
