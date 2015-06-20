@@ -75,7 +75,6 @@ module.exports = function (grunt) {
   // load npm tasks
   grunt.loadNpmTasks('grunt-contrib-jshint')
   grunt.loadNpmTasks('grunt-karma')
-  grunt.loadNpmTasks('grunt-coveralls')
 
   // load custom tasks
   require('./build/grunt-tasks/build')(grunt)
@@ -90,7 +89,5 @@ module.exports = function (grunt) {
   grunt.registerTask('sauce', ['karma:sauce1', 'karma:sauce2', 'karma:sauce3'])
   grunt.registerTask('ci', ['jshint', 'cover', 'codecov', 'build', 'casper', 'sauce'])
   grunt.registerTask('default', ['jshint', 'build', 'test'])
-
-  grunt.registerTask('debug', ['coveralls', 'build'])
 
 }
