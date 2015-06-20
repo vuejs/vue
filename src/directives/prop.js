@@ -17,20 +17,26 @@ module.exports = {
     // without this it would stabilize too, but this makes
     // sure it doesn't cause other watchers to re-evaluate.
     var locked = false
+    function withLock (fn) {
+      return function (val) {
+        if (!locked) {
+          locked = true
+          fn(val)
+          _.nextTick(function () {
+            locked = false
+          })
+        }
+      }
+    }
 
     this.parentWatcher = new Watcher(
       parent,
       parentKey,
-      function (val) {
-        if (!locked) {
-          locked = true
-          // all props have been initialized already
-          if (_.assertProp(prop, val)) {
-            child[childKey] = val
-          }
-          locked = false
+      withLock(function (val) {
+        if (_.assertProp(prop, val)) {
+          child[childKey] = val
         }
-      }
+      })
     )
     
     // set the child initial value first, before setting
@@ -47,13 +53,9 @@ module.exports = {
       this.childWatcher = new Watcher(
         child,
         childKey,
-        function (val) {
-          if (!locked) {
-            locked = true
-            parent.$set(parentKey, val)
-            locked = false
-          }
-        }
+        withLock(function (val) {
+          parent.$set(parentKey, val)
+        })
       )
     }
   },
