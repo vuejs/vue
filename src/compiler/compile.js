@@ -413,7 +413,7 @@ function makeChildLinkFn (linkFns) {
 
 var dataAttrRE = /^data-/
 var settablePathRE = /^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\[[^\[\]]+\])*$/
-var literalValueRE = /^(true|false)$|\d.*/
+var literalValueRE = /^(true|false)$|^\d.*/
 var identRE = require('../parsers/path').identRE
 
 function compileProps (el, attrs, propDescriptors) {
