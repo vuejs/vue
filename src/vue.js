@@ -35,6 +35,7 @@ extend(Vue, require('./api/global'))
  */
 
 Vue.options = {
+  replace: true,
   directives: require('./directives'),
   elementDirectives: require('./element-directives'),
   filters: require('./filters'),

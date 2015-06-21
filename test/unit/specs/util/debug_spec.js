@@ -2,7 +2,6 @@ var _ = require('../../../../src/util')
 var config = require('../../../../src/config')
 var infoPrefix = '[Vue info]: '
 var warnPrefix = '[Vue warn]: '
-config.silent = true
 
 if (typeof console !== 'undefined') {
 
