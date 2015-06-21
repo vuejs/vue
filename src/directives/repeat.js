@@ -358,7 +358,7 @@ module.exports = {
       // is this a component?
       _asComponent: this.asComponent,
       // linker cachable if no inline-template
-      _linkerCachable: !this.inlineTemplate,
+      _linkerCachable: !this.inlineTemplate && Ctor !== _.Vue,
       // transclusion host
       _host: this._host,
       // pre-compiled linker for simple repeats

@@ -63,14 +63,18 @@ function transcludeTemplate (el, options) {
     _.warn('Invalid template option: ' + template)
   } else {
     var replacer = frag.firstChild
+    var tag = replacer.tagName && replacer.tagName.toLowerCase()
     if (options.replace) {
       if (
+        // multi-children template
         frag.childNodes.length > 1 ||
+        // non-element template
         replacer.nodeType !== 1 ||
-        // when root node is <content> or has v-repeat, the
-        // instance could end up having multiple top-level
-        // nodes, thus becoming a block instance.
-        replacer.tagName.toLowerCase() === 'content' ||
+        // when root node is <content>, <partial> or has
+        // v-repeat, the instance could end up having
+        // multiple top-level nodes, thus becoming a block
+        // instance.
+        tag === 'content' || tag === 'partial' ||
         replacer.hasAttribute(config.prefix + 'repeat')
       ) {
         return frag
