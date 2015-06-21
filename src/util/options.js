@@ -149,6 +149,7 @@ strats.directives =
 strats.filters =
 strats.transitions =
 strats.components =
+strats.partials =
 strats.elementDirectives = function (parentVal, childVal) {
   var res = Object.create(parentVal)
   return childVal

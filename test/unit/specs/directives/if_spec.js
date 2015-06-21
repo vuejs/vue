@@ -173,7 +173,7 @@ if (_.inBrowser) {
       var vm = new Vue({
         el: el
       })
-      expect(hasWarned(_, 'already mounted instance')).toBe(true)
+      expect(hasWarned(_, 'cannot be used on an instance root element')).toBe(true)
     })
 
     it('call attach/detach for transcluded components', function (done) {
