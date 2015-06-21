@@ -1,4 +1,5 @@
 var _ = require('../util')
+var compiler = require('../compiler')
 var Observer = require('../observer')
 var Dep = require('../observer/dep')
 
@@ -12,10 +13,10 @@ var Dep = require('../observer/dep')
 
 exports._initScope = function () {
   this._initProps()
+  this._initMeta()
+  this._initMethods()
   this._initData()
   this._initComputed()
-  this._initMethods()
-  this._initMeta()
 }
 
 /**
@@ -23,24 +24,19 @@ exports._initScope = function () {
  */
 
 exports._initProps = function () {
-  // make sure all props properties are observed
-  var data = this._data
-  var props = this.$options.props
-  var prop, key, i
-  if (props) {
-    i = props.length
-    while (i--) {
-      prop = props[i]
-      // props can be strings or object descriptors
-      key = _.camelize(
-        (typeof prop === 'string'
-          ? prop
-          : prop.name).replace(/^data-/, '')
+  var options = this.$options
+  var el = options.el
+  var props = options.props
+  this._propsUnlinkFn = el && props
+    ? compiler.compileAndLinkProps(
+        this, el, props
       )
-      if (!(key in data) && key !== '$data') {
-        data[key] = undefined
-      }
-    }
+    : null
+  if (props && !el) {
+    _.warn(
+      'Props will not be compiled if no `el` option is ' +
+      'provided at instantiation.'
+    )
   }
 }
 
@@ -49,8 +45,14 @@ exports._initProps = function () {
  */
 
 exports._initData = function () {
-  // proxy data on instance
+  var propsData = this._data
+  var optionsDataFn = this.$options.data
+  var optionsData = optionsDataFn && optionsDataFn()
+  if (optionsData) {
+    this._data = _.extend(optionsData, propsData)
+  }
   var data = this._data
+  // proxy data on instance
   var keys = Object.keys(data)
   var i, key
   i = keys.length

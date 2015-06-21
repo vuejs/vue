@@ -33,16 +33,6 @@ describe('Instance Scope', function () {
 
   describe('$data', function () {
 
-    it('should initialize props', function () {
-      var vm = new Vue({
-        props: ['c'],
-        data: {
-          a: 1
-        }
-      })
-      expect(vm.hasOwnProperty('c')).toBe(true)
-    })
-
     it('replace $data', function () {
       var vm = new Vue({
         data: {

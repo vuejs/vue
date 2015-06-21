@@ -139,6 +139,10 @@ exports._destroy = function (remove, deferCleanup) {
   while (i--) {
     this._children[i].$destroy()
   }
+  // teardown props
+  if (this._propsUnlinkFn) {
+    this._propsUnlinkFn()
+  }
   // teardown all directives. this also tearsdown all
   // directive-owned watchers.
   if (this._unlinkFn) {

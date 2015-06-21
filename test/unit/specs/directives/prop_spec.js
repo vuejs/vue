@@ -172,6 +172,13 @@ if (_.inBrowser) {
       expect(hasWarned(_, 'Invalid prop key')).toBe(true)
     })
 
+    it('warn props with no el option', function () {
+      var vm = new Vue({
+        props: ['a']
+      })
+      expect(hasWarned(_, 'Props will not be compiled if no `el`')).toBe(true)
+    })
+
     it('teardown', function (done) {
       var vm = new Vue({
         el: el,

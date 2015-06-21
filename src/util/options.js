@@ -65,18 +65,20 @@ strats.data = function (parentVal, childVal, vm) {
         parentVal.call(this)
       )
     }
-  } else {
-    // instance merge, return raw object
-    var instanceData = typeof childVal === 'function'
-      ? childVal.call(vm)
-      : childVal
-    var defaultData = typeof parentVal === 'function'
-      ? parentVal.call(vm)
-      : undefined
-    if (instanceData) {
-      return mergeData(instanceData, defaultData)
-    } else {
-      return defaultData
+  } else if (parentVal || childVal) {
+    return function mergedInstanceDataFn () {
+      // instance merge
+      var instanceData = typeof childVal === 'function'
+        ? childVal.call(vm)
+        : childVal
+      var defaultData = typeof parentVal === 'function'
+        ? parentVal.call(vm)
+        : undefined
+      if (instanceData) {
+        return mergeData(instanceData, defaultData)
+      } else {
+        return defaultData
+      }
     }
   }
 }

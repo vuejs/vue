@@ -205,7 +205,7 @@ describe('Util - Option merging', function () {
       {}, // no instance data
       {} // mock vm presence
     )
-    expect(res.data.a).toBe(1)
+    expect(res.data().a).toBe(1)
   })
 
   it('instance data merge with default data function', function () {
@@ -222,8 +222,9 @@ describe('Util - Option merging', function () {
       { data: { a: 2 }}, // instance data
       vm
     )
-    expect(res.data.a).toBe(2)
-    expect(res.data.b).toBe(2)
+    var data = res.data()
+    expect(data.a).toBe(2)
+    expect(data.b).toBe(2)
   })
 
   it('already observed instance data merge with default data', function () {
@@ -240,9 +241,10 @@ describe('Util - Option merging', function () {
       },
       {}
     )
-    expect(res.data.a).toBe(123)
-    expect(res.data.b).toBe(234)
-    expect(Object.getOwnPropertyDescriptor(res.data, 'b').get).toBeTruthy()
+    var data = res.data()
+    expect(data.a).toBe(123)
+    expect(data.b).toBe(234)
+    expect(Object.getOwnPropertyDescriptor(data, 'b').get).toBeTruthy()
   })
 
   it('mixins', function () {

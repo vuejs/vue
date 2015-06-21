@@ -86,7 +86,11 @@ p.get = function () {
     if (config.warnExpressionErrors) {
       _.warn(
         'Error when evaluating expression "' +
-        this.expression + '"', e
+        this.expression + '". ' +
+        (config.debug
+          ? '' :
+          'Turn on debug mode to see stack trace.'
+        ), e
       )
     }
   }

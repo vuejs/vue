@@ -127,16 +127,30 @@ function teardownDirs (vm, dirs, destroying) {
 }
 
 /**
- * Compile the root element of an instance. There are
- * 3 types of things to process here:
+ * Compile link props on an instance.
  *
- * 1. props on parent container (child scope)
- * 2. other attrs on parent container (parent scope)
- * 3. attrs on the component template root node, if
+ * @param {Vue} vm
+ * @param {Element} el
+ * @param {Object} options
+ * @return {Function}
+ */
+
+exports.compileAndLinkProps = function (vm, el, props) {
+  var propsLinkFn = compileProps(el, props)
+  var propDirs = linkAndCapture(function () {
+    propsLinkFn(vm, null)
+  }, vm)
+  return makeUnlinkFn(vm, propDirs)
+}
+
+/**
+ * Compile the root element of an instance.
+ *
+ * 1. attrs on parent container (parent scope)
+ * 2. attrs on the component template root node, if
  *    replace:true (child scope)
  *
- * Also, if this is a block instance, we only need to
- * compile 1 & 2 here.
+ * If this is a block instance, we only need to compile 1.
  *
  * This function does compile and link at the same time,
  * since root linkers can not be reused. It returns the
@@ -152,13 +166,7 @@ function teardownDirs (vm, dirs, destroying) {
  exports.compileAndLinkRoot = function (vm, el, options) {
   var containerAttrs = options._containerAttrs
   var replacerAttrs = options._replacerAttrs
-  var props = options.props
-  var propsLinkFn, parentLinkFn, replacerLinkFn
-
-  // 1. props
-  propsLinkFn = props
-    ? compileProps(el, containerAttrs || {}, props)
-    : null
+  var parentLinkFn, replacerLinkFn
 
   // only need to compile other attributes for
   // non-block instances
@@ -191,7 +199,6 @@ function teardownDirs (vm, dirs, destroying) {
 
   // link self
   var selfDirs = linkAndCapture(function () {
-    if (propsLinkFn) propsLinkFn(vm, null)
     if (replacerLinkFn) replacerLinkFn(vm, el)
   }, vm)
 
@@ -406,7 +413,6 @@ function makeChildLinkFn (linkFns) {
  * a props link function.
  *
  * @param {Element|DocumentFragment} el
- * @param {Object} attrs
  * @param {Array} propDescriptors
  * @return {Function} propsLinkFn
  */
@@ -416,7 +422,7 @@ var settablePathRE = /^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\[[^\[\]]+\])*$/
 var literalValueRE = /^(true|false)$|^\d.*/
 var identRE = require('../parsers/path').identRE
 
-function compileProps (el, attrs, propDescriptors) {
+function compileProps (el, propDescriptors) {
   var props = []
   var i = propDescriptors.length
   var descriptor, name, assertions, value, path, prop, literal, single
@@ -449,9 +455,12 @@ function compileProps (el, attrs, propDescriptors) {
         'must be valid identifiers.'
       )
     }
-    value = attrs[name]
-    /* jshint eqeqeq:false */
-    if (value != null) {
+    value = el.getAttribute(name)
+    if (value !== null) {
+      // important so that this doesn't get compiled
+      // again as a normal attribute binding
+      el.removeAttribute(name)
+      // create a prop descriptor
       prop = {
         name: name,
         raw: value,
@@ -464,9 +473,6 @@ function compileProps (el, attrs, propDescriptors) {
         if (el && el.nodeType === 1) {
           el.removeAttribute(name)
         }
-        // important so that this doesn't get compiled
-        // again as a normal attribute binding
-        attrs[name] = null
         prop.dynamic = true
         prop.parentPath = textParser.tokensToExp(tokens)
         // check prop binding type.
@@ -491,9 +497,7 @@ function compileProps (el, attrs, propDescriptors) {
       }
       props.push(prop)
     } else if (assertions && assertions.required) {
-      _.warn(
-        'Missing required prop: ' + name
-      )
+      _.warn('Missing required prop: ' + name)
     }
   }
   return makePropsLinkFn(props)
@@ -514,6 +518,7 @@ function makePropsLinkFn (props) {
       prop = props[i]
       path = prop.path
       if (prop.dynamic) {
+        // dynamic prop
         if (vm.$parent) {
           if (prop.mode === propBindingModes.ONE_TIME) {
             // one time binding
@@ -654,7 +659,6 @@ function compileDirectives (elOrAttrs, options) {
     attr = attrs[i]
     name = attr.name
     value = attr.value
-    if (value === null) continue
     if (name.indexOf(config.prefix) === 0) {
       dirName = name.slice(config.prefix.length)
       dirDef = resolveAsset(options, 'directives', dirName)
