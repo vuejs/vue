@@ -52,9 +52,10 @@ describe('Instance Scope', function () {
       expect(vm.c).toBe(1)
     })
 
-    it('prop should overwrite default value', function () {
+    it('external prop should overwrite default value', function () {
       var el = document.createElement('div')
       el.setAttribute('c', '2')
+      el.textContent = '{{c}}'
       var vm = new Vue({
         el: el,
         props: ['c'],
@@ -63,6 +64,7 @@ describe('Instance Scope', function () {
         }
       })
       expect(vm.c).toBe(2)
+      expect(el.textContent).toBe('2')
     })
 
     it('props should be available in data() and create()', function () {
@@ -74,12 +76,16 @@ describe('Instance Scope', function () {
         data: function () {
           expect(this.c).toBe(2)
           expect(this._data.c).toBe(2)
+          return {
+            d: this.c + 1
+          }
         },
         created: function () {
           expect(this.c).toBe(2)
           expect(this._data.c).toBe(2)
         }
       })
+      expect(vm.d).toBe(3)
     })
 
     it('replace $data', function () {
