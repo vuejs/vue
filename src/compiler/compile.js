@@ -524,7 +524,7 @@ function makePropsLinkFn (props) {
             // one time binding
             value = vm.$parent.$get(prop.parentPath)
             if (_.assertProp(prop, value)) {
-              vm.$set(path, value)
+              vm._data[path] = value
             }
           } else {
             // dynamic binding
@@ -541,7 +541,7 @@ function makePropsLinkFn (props) {
         // literal, cast it and just set once
         value = _.toBoolean(_.toNumber(prop.raw))
         if (_.assertProp(prop, value)) {
-          vm.$set(path, value)
+          vm._data[path] = value
         }
       }
     }
