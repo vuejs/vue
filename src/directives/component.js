@@ -54,8 +54,10 @@ module.exports = {
       }
     } else {
       _.warn(
-        'v-component="' + this.expression + '" cannot be ' +
-        'used on an already mounted instance.'
+        'Do not create a component that only contains ' +
+        'a single other component - they will be mounted to ' +
+        'the same element and cause conflict. Wrap it with ' +
+        'an outer element.'
       )
     }
   },
@@ -278,5 +280,4 @@ module.exports = {
       this.cache = null
     }
   }
-
 }
