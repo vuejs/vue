@@ -33,6 +33,38 @@ describe('Instance Scope', function () {
 
   describe('$data', function () {
 
+    it('should initialize props', function () {
+      var vm = new Vue({
+        el: document.createElement('div'),
+        props: ['c']
+      })
+      expect(vm.hasOwnProperty('c')).toBe(true)
+    })
+
+    it('should use default prop value if prop not provided', function () {
+      var vm = new Vue({
+        el: document.createElement('div'),
+        props: ['c'],
+        data: {
+          c: 1
+        }
+      })
+      expect(vm.c).toBe(1)
+    })
+
+    it('prop should overwrite default value', function () {
+      var el = document.createElement('div')
+      el.setAttribute('c', '2')
+      var vm = new Vue({
+        el: el,
+        props: ['c'],
+        data: {
+          c: 1
+        }
+      })
+      expect(vm.c).toBe(2)
+    })
+
     it('replace $data', function () {
       var vm = new Vue({
         data: {

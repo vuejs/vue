@@ -204,11 +204,12 @@ if (_.inBrowser) {
       expect(args[3]).toBe(def)
       // literal and one time should've been set on the _data
       // and numbers should be casted
-      expect(Object.keys(vm._data).length).toBe(4)
+      expect(Object.keys(vm._data).length).toBe(5)
       expect(vm._data.a).toBe(1)
       expect(vm._data.someOtherAttr).toBe(2)
       expect(vm._data.onetime).toBe('from parent: a')
       expect(vm._data.booleanLiteral).toBe('from parent: true')
+      expect(vm._data.camelCase).toBeUndefined()
       // camelCase should've warn
       expect(hasWarned(_, 'using camelCase')).toBe(true)
     })

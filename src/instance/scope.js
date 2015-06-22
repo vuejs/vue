@@ -49,7 +49,15 @@ exports._initData = function () {
   var optionsDataFn = this.$options.data
   var optionsData = optionsDataFn && optionsDataFn()
   if (optionsData) {
-    this._data = _.extend(optionsData, propsData)
+    this._data = optionsData
+    for (var prop in propsData) {
+      if (
+        !optionsData.hasOwnProperty(prop) ||
+        propsData[prop] !== undefined
+      ) {
+        optionsData[prop] = propsData[prop]
+      }
+    }
   }
   var data = this._data
   // proxy data on instance

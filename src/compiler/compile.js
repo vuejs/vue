@@ -456,18 +456,18 @@ function compileProps (el, propDescriptors) {
       )
     }
     value = el.getAttribute(name)
+    // create a prop descriptor
+    prop = {
+      name: name,
+      raw: value,
+      path: path,
+      assertions: assertions,
+      mode: propBindingModes.ONE_WAY
+    }
     if (value !== null) {
       // important so that this doesn't get compiled
       // again as a normal attribute binding
       el.removeAttribute(name)
-      // create a prop descriptor
-      prop = {
-        name: name,
-        raw: value,
-        path: path,
-        assertions: assertions,
-        mode: propBindingModes.ONE_WAY
-      }
       var tokens = textParser.parse(value)
       if (tokens) {
         if (el && el.nodeType === 1) {
@@ -495,10 +495,10 @@ function compileProps (el, propDescriptors) {
           }
         }
       }
-      props.push(prop)
     } else if (assertions && assertions.required) {
       _.warn('Missing required prop: ' + name)
     }
+    props.push(prop)
   }
   return makePropsLinkFn(props)
 }
@@ -517,7 +517,10 @@ function makePropsLinkFn (props) {
     while (i--) {
       prop = props[i]
       path = prop.path
-      if (prop.dynamic) {
+      if (prop.raw === null) {
+        // initialize undefined prop
+        vm._data[path] = undefined
+      } else if (prop.dynamic) {
         // dynamic prop
         if (vm.$parent) {
           if (prop.mode === propBindingModes.ONE_TIME) {
