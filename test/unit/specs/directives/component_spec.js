@@ -405,7 +405,7 @@ if (_.inBrowser) {
       var vm = new Vue({
         el: el
       })
-      expect(hasWarned(_, 'already mounted instance')).toBe(true)
+      expect(hasWarned(_, 'Do not create a component that only contains a single other component')).toBe(true)
     })
 
   })

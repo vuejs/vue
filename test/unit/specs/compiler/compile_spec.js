@@ -24,7 +24,6 @@ if (_.inBrowser) {
             _teardown: directiveTeardown
           })
         },
-        $set: jasmine.createSpy('vm.$set'),
         $eval: function (value) {
           return data[value]
         },
@@ -203,13 +202,13 @@ if (_.inBrowser) {
       expect(args[2].parentPath).toBe('this._applyFilters(a,null,[{"name":"filter"}],false)')
       expect(args[2].mode).toBe(bindingModes.ONE_WAY)
       expect(args[3]).toBe(def)
-      // literal and one time should've called vm.$set
+      // literal and one time should've been set on the _data
       // and numbers should be casted
-      expect(vm.$set.calls.count()).toBe(4)
-      expect(vm.$set).toHaveBeenCalledWith('a', 1)
-      expect(vm.$set).toHaveBeenCalledWith('someOtherAttr', 2)
-      expect(vm.$set).toHaveBeenCalledWith('onetime', 'from parent: a')
-      expect(vm.$set).toHaveBeenCalledWith('booleanLiteral', 'from parent: true')
+      expect(Object.keys(vm._data).length).toBe(4)
+      expect(vm._data.a).toBe(1)
+      expect(vm._data.someOtherAttr).toBe(2)
+      expect(vm._data.onetime).toBe('from parent: a')
+      expect(vm._data.booleanLiteral).toBe('from parent: true')
       // camelCase should've warn
       expect(hasWarned(_, 'using camelCase')).toBe(true)
     })
@@ -223,7 +222,7 @@ if (_.inBrowser) {
       el.setAttribute('b', '{{hi}}')
       compiler.compileAndLinkProps(vm, el, ['a', 'b'])
       expect(vm._bindDir.calls.count()).toBe(0)
-      expect(vm.$set).toHaveBeenCalledWith('a', 'hi')
+      expect(vm._data.a).toBe('hi')
       expect(hasWarned(_, 'Cannot bind dynamic prop on a root')).toBe(true)
       // restore parent mock
       vm.$parent = parent
