@@ -82,16 +82,16 @@ function noop () {}
 /**
  * Determine the type of a character in a keypath.
  *
- * @param {Char} char
+ * @param {Char} ch
  * @return {String} type
  */
 
-function getPathCharType (char) {
-  if (char === undefined) {
+function getPathCharType (ch) {
+  if (ch === undefined) {
     return 'eof'
   }
 
-  var code = char.charCodeAt(0)
+  var code = ch.charCodeAt(0)
 
   switch(code) {
     case 0x5B: // [
@@ -100,7 +100,7 @@ function getPathCharType (char) {
     case 0x22: // "
     case 0x27: // '
     case 0x30: // 0
-      return char
+      return ch
 
     case 0x5F: // _
     case 0x24: // $
