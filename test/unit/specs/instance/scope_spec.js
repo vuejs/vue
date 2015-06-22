@@ -65,6 +65,23 @@ describe('Instance Scope', function () {
       expect(vm.c).toBe(2)
     })
 
+    it('props should be available in data() and create()', function () {
+      var el = document.createElement('div')
+      el.setAttribute('c', '2')
+      var vm = new Vue({
+        el: el,
+        props: ['c'],
+        data: function () {
+          expect(this.c).toBe(2)
+          expect(this._data.c).toBe(2)
+        },
+        created: function () {
+          expect(this.c).toBe(2)
+          expect(this._data.c).toBe(2)
+        }
+      })
+    })
+
     it('replace $data', function () {
       var vm = new Vue({
         data: {
