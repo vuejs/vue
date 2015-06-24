@@ -263,7 +263,22 @@ if (_.inBrowser) {
       expect(el.innerHTML).toBe('<ul><li>1</li><li>2</li></ul>')
     })
 
-    it('wait-for', function (done) {
+    it('wait-for for static component', function () {
+      var vm = new Vue({
+        el: el,
+        template: '<view-a wait-for="ok"></view-a>',
+        components: {
+          'view-a': {
+            template: 'AAA'
+          }
+        }
+      })
+      expect(el.textContent).toBe('')
+      vm._children[0].$emit('ok')
+      expect(el.textContent).toBe('AAA')
+    })
+
+    it('wait-for for dynamic components', function (done) {
       var vm = new Vue({
         el: el,
         data: {
