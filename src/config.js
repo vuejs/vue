@@ -71,6 +71,7 @@ module.exports = {
    */
 
   _assetTypes: [
+    'component',
     'directive',
     'elementDirective',
     'filter',

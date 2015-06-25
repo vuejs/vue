@@ -53,7 +53,9 @@ exports.extend = function (extendOptions) {
   Sub.extend = Super.extend
   // create asset registers, so extended classes
   // can have their private assets too.
-  createAssetRegisters(Sub)
+  config._assetTypes.forEach(function (type) {
+    Sub[type] = Super[type]
+  })
   return Sub
 }
 
@@ -92,48 +94,26 @@ exports.use = function (plugin) {
 }
 
 /**
- * Define asset registration methods on a constructor.
+ * Create asset registration methods with the following
+ * signature:
  *
- * @param {Function} Constructor
+ * @param {String} id
+ * @param {*} definition
  */
 
-function createAssetRegisters (Constructor) {
-
-  /* Asset registration methods share the same signature:
-   *
-   * @param {String} id
-   * @param {*} definition
-   */
-
-  config._assetTypes.forEach(function (type) {
-    Constructor[type] = function (id, definition) {
-      if (!definition) {
-        return this.options[type + 's'][id]
-      } else {
-        this.options[type + 's'][id] = definition
-      }
-    }
-  })
-
-  /**
-   * Component registration needs to automatically invoke
-   * Vue.extend on object values.
-   *
-   * @param {String} id
-   * @param {Object|Function} definition
-   */
-
-  Constructor.component = function (id, definition) {
+config._assetTypes.forEach(function (type) {
+  exports[type] = function (id, definition) {
     if (!definition) {
-      return this.options.components[id]
+      return this.options[type + 's'][id]
     } else {
-      if (_.isPlainObject(definition)) {
+      if (
+        type === 'component' &&
+        _.isPlainObject(definition)
+      ) {
         definition.name = id
         definition = _.Vue.extend(definition)
       }
-      this.options.components[id] = definition
+      this.options[type + 's'][id] = definition
     }
   }
-}
-
-createAssetRegisters(exports)
+})
