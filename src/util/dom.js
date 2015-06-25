@@ -1,4 +1,23 @@
+var _ = require('./index')
 var config = require('../config')
+
+/**
+ * Query an element selector if it's not an element already.
+ *
+ * @param {String|Element} el
+ * @return {Element}
+ */
+
+exports.query = function (el) {
+  if (typeof el === 'string') {
+    var selector = el
+    el = document.querySelector(el)
+    if (!el) {
+      _.warn('Cannot find element: ' + selector)
+    }
+  }
+  return el
+}
 
 /**
  * Check if a node is in the document.

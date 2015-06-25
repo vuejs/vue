@@ -27,17 +27,19 @@ exports._initProps = function () {
   var options = this.$options
   var el = options.el
   var props = options.props
-  this._propsUnlinkFn = el && props
-    ? compiler.compileAndLinkProps(
-        this, el, props
-      )
-    : null
   if (props && !el) {
     _.warn(
       'Props will not be compiled if no `el` option is ' +
       'provided at instantiation.'
     )
   }
+  // make sure to convert string selectors into element now
+  el = options.el = _.query(el)
+  this._propsUnlinkFn = el && props
+    ? compiler.compileAndLinkProps(
+        this, el, props
+      )
+    : null
 }
 
 /**
