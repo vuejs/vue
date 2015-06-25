@@ -74,7 +74,8 @@ module.exports = {
     'directive',
     'elementDirective',
     'filter',
-    'transition'
+    'transition',
+    'partial'
   ],
 
   /**
