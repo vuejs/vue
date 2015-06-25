@@ -48,13 +48,6 @@ function enableDebug () {
   exports.assertAsset = function (val, type, id) {
     /* istanbul ignore if */
     if (type === 'directive') {
-      if (id === 'component') {
-        exports.warn(
-          'v-component can only be used on table elements ' +
-          'in ^0.12.0. Use custom element syntax instead.'
-        )
-        return
-      }
       if (id === 'with') {
         exports.warn(
           'v-with has been deprecated in ^0.12.0. ' +

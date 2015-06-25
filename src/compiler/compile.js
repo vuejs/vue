@@ -245,7 +245,7 @@ function compileElement (el, options) {
   }
   // check component
   if (!linkFn) {
-    linkFn = checkComponent(el, options)
+    linkFn = checkComponent(el, options, hasAttrs)
   }
   // normal directives
   if (!linkFn && hasAttrs) {
@@ -573,11 +573,12 @@ function checkElementDirectives (el, options) {
  *
  * @param {Element} el
  * @param {Object} options
+ * @param {Boolean} hasAttrs
  * @return {Function|undefined}
  */
 
-function checkComponent (el, options) {
-  var componentId = _.checkComponent(el, options)
+function checkComponent (el, options, hasAttrs) {
+  var componentId = _.checkComponent(el, options, hasAttrs)
   if (componentId) {
     var componentLinkFn = function (vm, el, host) {
       vm._bindDir('component', el, {
