@@ -1,5 +1,5 @@
 /**
- * Vue.js v0.12.1
+ * Vue.js v0.12.2
  * (c) 2015 Evan You
  * Released under the MIT License.
  */
@@ -97,13 +97,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	Vue.options = {
+	  replace: true,
 	  directives: __webpack_require__(27),
-	  filters: __webpack_require__(49),
+	  elementDirectives: __webpack_require__(49),
+	  filters: __webpack_require__(52),
 	  transitions: {},
 	  components: {},
-	  elementDirectives: {
-	    content: __webpack_require__(51)
-	  }
+	  partials: {}
 	}
 
 	/**
@@ -132,23 +132,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Mixin internal instance methods
 	 */
 
-	extend(p, __webpack_require__(52))
-	extend(p, __webpack_require__(53))
 	extend(p, __webpack_require__(54))
 	extend(p, __webpack_require__(55))
+	extend(p, __webpack_require__(56))
 	extend(p, __webpack_require__(57))
+	extend(p, __webpack_require__(59))
 
 	/**
 	 * Mixin public API methods
 	 */
 
-	extend(p, __webpack_require__(58))
-	extend(p, __webpack_require__(59))
 	extend(p, __webpack_require__(60))
 	extend(p, __webpack_require__(61))
 	extend(p, __webpack_require__(62))
+	extend(p, __webpack_require__(63))
+	extend(p, __webpack_require__(64))
 
 	module.exports = _.Vue = Vue
+
 
 /***/ },
 /* 1 */
@@ -247,13 +248,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *
 	 * @param {Element} el
 	 * @param {Object} options
+	 * @param {Boolean} hasAttrs
 	 * @return {String|undefined}
 	 */
 
-	var commonTagRE = /^(div|p|span|img|a|br|ul|ol|li|h1|h2|h3|h4|h5|code|pre)$/
-	var tableElementsRE = /^caption|colgroup|thead|tfoot|tbody|tr|td|th$/
-
-	exports.checkComponent = function (el, options) {
+	exports.commonTagRE = /^(div|p|span|img|a|br|ul|ol|li|h1|h2|h3|h4|h5|code|pre)$/
+	exports.checkComponent = function (el, options, hasAttrs) {
 	  var tag = el.tagName.toLowerCase()
 	  if (tag === 'component') {
 	    // dynamic syntax
@@ -261,12 +261,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    el.removeAttribute('is')
 	    return exp
 	  } else if (
-	    !commonTagRE.test(tag) &&
+	    !exports.commonTagRE.test(tag) &&
 	    _.resolveAsset(options, 'components', tag)
 	  ) {
 	    return tag
 	  } else if (
-	    tableElementsRE.test(tag) &&
+	    hasAttrs &&
 	    (tag = _.attr(el, 'component'))
 	  ) {
 	    return tag
@@ -389,7 +389,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    ONE_WAY: 0,
 	    TWO_WAY: 1,
 	    ONE_TIME: 2
-	  }
+	  },
+
+	  /**
+	   * Max circular updates allowed in a batcher flush cycle.
+	   */
+
+	  _maxUpdateCount: 100
 
 	}
 
@@ -591,7 +597,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	exports.isObject = function (obj) {
-	  return obj && typeof obj === 'object'
+	  return obj !== null && typeof obj === 'object'
 	}
 
 	/**
@@ -614,9 +620,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @return {Boolean}
 	 */
 
-	exports.isArray = function (obj) {
-	  return Array.isArray(obj)
-	}
+	exports.isArray = Array.isArray
 
 	/**
 	 * Define a non-enumerable property
@@ -982,6 +986,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    el = el.content
 	  }
 	  if (el.hasChildNodes()) {
+	    trim(el, el.firstChild)
+	    trim(el, el.lastChild)
 	    rawContent = asFragment
 	      ? document.createDocumentFragment()
 	      : document.createElement('div')
@@ -991,6 +997,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }
 	  return rawContent
+	}
+
+	function trim (content, node) {
+	  if (node && node.nodeType === 3 && !node.data.trim()) {
+	    content.removeChild(node)
+	  }
 	}
 
 	/**
@@ -1005,6 +1017,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return el.tagName &&
 	    el.tagName.toLowerCase() === 'template'
 	}
+
 
 /***/ },
 /* 7 */
@@ -1060,13 +1073,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  exports.assertAsset = function (val, type, id) {
 	    /* istanbul ignore if */
 	    if (type === 'directive') {
-	      if (id === 'component') {
-	        exports.warn(
-	          'v-component can only be used on table elements ' +
-	          'in ^0.12.0. Use custom element syntax instead.'
-	        )
-	        return
-	      }
 	      if (id === 'with') {
 	        exports.warn(
 	          'v-with has been deprecated in ^0.12.0. ' +
@@ -1087,6 +1093,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }
 	}
+
 
 /***/ },
 /* 8 */
@@ -1159,18 +1166,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	        parentVal.call(this)
 	      )
 	    }
-	  } else {
-	    // instance merge, return raw object
-	    var instanceData = typeof childVal === 'function'
-	      ? childVal.call(vm)
-	      : childVal
-	    var defaultData = typeof parentVal === 'function'
-	      ? parentVal.call(vm)
-	      : undefined
-	    if (instanceData) {
-	      return mergeData(instanceData, defaultData)
-	    } else {
-	      return defaultData
+	  } else if (parentVal || childVal) {
+	    return function mergedInstanceDataFn () {
+	      // instance merge
+	      var instanceData = typeof childVal === 'function'
+	        ? childVal.call(vm)
+	        : childVal
+	      var defaultData = typeof parentVal === 'function'
+	        ? parentVal.call(vm)
+	        : undefined
+	      if (instanceData) {
+	        return mergeData(instanceData, defaultData)
+	      } else {
+	        return defaultData
+	      }
 	    }
 	  }
 	}
@@ -1241,6 +1250,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	strats.filters =
 	strats.transitions =
 	strats.components =
+	strats.partials =
 	strats.elementDirectives = function (parentVal, childVal) {
 	  var res = Object.create(parentVal)
 	  return childVal
@@ -1308,6 +1318,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (components) {
 	    var def
 	    for (var key in components) {
+	      if (_.commonTagRE.test(key)) {
+	        _.warn(
+	          'Do not use built-in HTML elements as component ' +
+	          'name: ' + key
+	        )
+	      }
 	      def = components[key]
 	      if (_.isPlainObject(def)) {
 	        def.name = key
@@ -1370,6 +1386,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  return asset
 	}
+
 
 /***/ },
 /* 9 */
@@ -1596,17 +1613,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (nodeLinkFn) nodeLinkFn(vm, el, host)
 	      if (childLinkFn) childLinkFn(vm, childNodes, host)
 	    }, vm)
-
-	    /**
-	     * The linker function returns an unlink function that
-	     * tearsdown all directives instances generated during
-	     * the process.
-	     *
-	     * @param {Boolean} destroying
-	     */
-	    return function unlink (destroying) {
-	      teardownDirs(vm, dirs, destroying)
-	    }
+	    // 
+	    return makeUnlinkFn(vm, dirs)
 	  }
 	}
 
@@ -1625,6 +1633,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
+	 * Linker functions return an unlink function that
+	 * tearsdown all directives instances generated during
+	 * the process.
+	 * 
+	 * We create unlink functions with only the necessary
+	 * information to avoid retaining additional closures.
+	 *
+	 * @param {Vue} vm
+	 * @param {Array} dirs
+	 * @param {Vue} [parent]
+	 * @param {Array} [parentDirs]
+	 * @return {Function}
+	 */
+
+	function makeUnlinkFn (vm, dirs, parent, parentDirs) {
+	  return function unlink (destroying) {
+	    teardownDirs(vm, dirs, destroying)
+	    if (parent && parentDirs) {
+	      teardownDirs(parent, parentDirs)
+	    }
+	  }
+	}
+
+	/**
 	 * Teardown partial linked directives.
 	 *
 	 * @param {Vue} vm
@@ -1633,7 +1665,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	function teardownDirs (vm, dirs, destroying) {
-	  if (!dirs) return
 	  var i = dirs.length
 	  while (i--) {
 	    dirs[i]._teardown()
@@ -1644,16 +1675,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
-	 * Compile the root element of an instance. There are
-	 * 3 types of things to process here:
+	 * Compile link props on an instance.
 	 *
-	 * 1. props on parent container (child scope)
-	 * 2. other attrs on parent container (parent scope)
-	 * 3. attrs on the component template root node, if
+	 * @param {Vue} vm
+	 * @param {Element} el
+	 * @param {Object} options
+	 * @return {Function}
+	 */
+
+	exports.compileAndLinkProps = function (vm, el, props) {
+	  var propsLinkFn = compileProps(el, props)
+	  var propDirs = linkAndCapture(function () {
+	    propsLinkFn(vm, null)
+	  }, vm)
+	  return makeUnlinkFn(vm, propDirs)
+	}
+
+	/**
+	 * Compile the root element of an instance.
+	 *
+	 * 1. attrs on parent container (parent scope)
+	 * 2. attrs on the component template root node, if
 	 *    replace:true (child scope)
 	 *
-	 * Also, if this is a block instance, we only need to
-	 * compile 1 & 2 here.
+	 * If this is a block instance, we only need to compile 1.
 	 *
 	 * This function does compile and link at the same time,
 	 * since root linkers can not be reused. It returns the
@@ -1669,13 +1714,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 exports.compileAndLinkRoot = function (vm, el, options) {
 	  var containerAttrs = options._containerAttrs
 	  var replacerAttrs = options._replacerAttrs
-	  var props = options.props
-	  var propsLinkFn, parentLinkFn, replacerLinkFn
-
-	  // 1. props
-	  propsLinkFn = props
-	    ? compileProps(el, containerAttrs || {}, props)
-	    : null
+	  var parentLinkFn, replacerLinkFn
 
 	  // only need to compile other attributes for
 	  // non-block instances
@@ -1708,16 +1747,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  // link self
 	  var selfDirs = linkAndCapture(function () {
-	    if (propsLinkFn) propsLinkFn(vm, null)
 	    if (replacerLinkFn) replacerLinkFn(vm, el)
 	  }, vm)
 
 	  // return the unlink function that tearsdown parent
 	  // container directives.
-	  return function rootUnlinkFn () {
-	    teardownDirs(parent, parentDirs)
-	    teardownDirs(vm, selfDirs)
-	  }
+	  return makeUnlinkFn(vm, selfDirs, parent, parentDirs)
 	}
 
 	/**
@@ -1758,7 +1793,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  // check component
 	  if (!linkFn) {
-	    linkFn = checkComponent(el, options)
+	    linkFn = checkComponent(el, options, hasAttrs)
 	  }
 	  // normal directives
 	  if (!linkFn && hasAttrs) {
@@ -1926,17 +1961,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * a props link function.
 	 *
 	 * @param {Element|DocumentFragment} el
-	 * @param {Object} attrs
 	 * @param {Array} propDescriptors
 	 * @return {Function} propsLinkFn
 	 */
 
 	var dataAttrRE = /^data-/
 	var settablePathRE = /^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\[[^\[\]]+\])*$/
-	var literalValueRE = /^(true|false)$|\d.*/
+	var literalValueRE = /^(true|false)$|^\d.*/
 	var identRE = __webpack_require__(23).identRE
 
-	function compileProps (el, attrs, propDescriptors) {
+	function compileProps (el, propDescriptors) {
 	  var props = []
 	  var i = propDescriptors.length
 	  var descriptor, name, assertions, value, path, prop, literal, single
@@ -1969,24 +2003,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	        'must be valid identifiers.'
 	      )
 	    }
-	    value = attrs[name]
-	    /* jshint eqeqeq:false */
-	    if (value != null) {
-	      prop = {
-	        name: name,
-	        raw: value,
-	        path: path,
-	        assertions: assertions,
-	        mode: propBindingModes.ONE_WAY
-	      }
+	    value = el.getAttribute(name)
+	    // create a prop descriptor
+	    prop = {
+	      name: name,
+	      raw: value,
+	      path: path,
+	      assertions: assertions,
+	      mode: propBindingModes.ONE_WAY
+	    }
+	    if (value !== null) {
+	      // important so that this doesn't get compiled
+	      // again as a normal attribute binding
+	      el.removeAttribute(name)
 	      var tokens = textParser.parse(value)
 	      if (tokens) {
 	        if (el && el.nodeType === 1) {
 	          el.removeAttribute(name)
 	        }
-	        // important so that this doesn't get compiled
-	        // again as a normal attribute binding
-	        attrs[name] = null
 	        prop.dynamic = true
 	        prop.parentPath = textParser.tokensToExp(tokens)
 	        // check prop binding type.
@@ -2009,12 +2043,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	          }
 	        }
 	      }
-	      props.push(prop)
 	    } else if (assertions && assertions.required) {
-	      _.warn(
-	        'Missing required prop: ' + name
-	      )
+	      _.warn('Missing required prop: ' + name)
 	    }
+	    props.push(prop)
 	  }
 	  return makePropsLinkFn(props)
 	}
@@ -2033,13 +2065,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    while (i--) {
 	      prop = props[i]
 	      path = prop.path
-	      if (prop.dynamic) {
+	      if (prop.raw === null) {
+	        // initialize undefined prop
+	        vm._data[path] = undefined
+	      } else if (prop.dynamic) {
+	        // dynamic prop
 	        if (vm.$parent) {
 	          if (prop.mode === propBindingModes.ONE_TIME) {
 	            // one time binding
 	            value = vm.$parent.$get(prop.parentPath)
 	            if (_.assertProp(prop, value)) {
-	              vm.$set(path, value)
+	              vm[path] = vm._data[path] = value
 	            }
 	          } else {
 	            // dynamic binding
@@ -2056,7 +2092,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        // literal, cast it and just set once
 	        value = _.toBoolean(_.toNumber(prop.raw))
 	        if (_.assertProp(prop, value)) {
-	          vm.$set(path, value)
+	          vm[path] = vm._data[path] = value
 	        }
 	      }
 	    }
@@ -2085,11 +2121,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *
 	 * @param {Element} el
 	 * @param {Object} options
+	 * @param {Boolean} hasAttrs
 	 * @return {Function|undefined}
 	 */
 
-	function checkComponent (el, options) {
-	  var componentId = _.checkComponent(el, options)
+	function checkComponent (el, options, hasAttrs) {
+	  var componentId = _.checkComponent(el, options, hasAttrs)
 	  if (componentId) {
 	    var componentLinkFn = function (vm, el, host) {
 	      vm._bindDir('component', el, {
@@ -2174,7 +2211,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    attr = attrs[i]
 	    name = attr.name
 	    value = attr.value
-	    if (value === null) continue
 	    if (name.indexOf(config.prefix) === 0) {
 	      dirName = name.slice(config.prefix.length)
 	      dirDef = resolveAsset(options, 'directives', dirName)
@@ -3047,6 +3083,11 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
+	// NOTE: the prop internal directive is compiled and linked
+	// during _initScope(), before the created hook is called.
+	// The purpose is to make the initial prop values available
+	// inside `created` hooks and `data` functions.
+
 	var _ = __webpack_require__(1)
 	var Watcher = __webpack_require__(17)
 	var bindingModes = __webpack_require__(3)._propBindingModes
@@ -3066,46 +3107,55 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // without this it would stabilize too, but this makes
 	    // sure it doesn't cause other watchers to re-evaluate.
 	    var locked = false
+	    function withLock (fn) {
+	      return function (val) {
+	        if (!locked) {
+	          locked = true
+	          fn(val)
+	          _.nextTick(function () {
+	            locked = false
+	          })
+	        }
+	      }
+	    }
 
 	    this.parentWatcher = new Watcher(
 	      parent,
 	      parentKey,
-	      function (val) {
-	        if (!locked) {
-	          locked = true
-	          // all props have been initialized already
-	          if (_.assertProp(prop, val)) {
-	            child[childKey] = val
-	          }
-	          locked = false
+	      withLock(function (val) {
+	        if (_.assertProp(prop, val)) {
+	          child[childKey] = val
 	        }
-	      },
-	      { sync: true }
+	      })
 	    )
-	    
-	    // set the child initial value first, before setting
-	    // up the child watcher to avoid triggering it
-	    // immediately.
+
+	    // set the child initial value.
+	    // !!! We need to set it also on raw data here, because
+	    // props are initialized before data is fully observed
 	    var value = this.parentWatcher.value
 	    if (_.assertProp(prop, value)) {
-	      child.$set(childKey, value)
+	      if (childKey === '$data') {
+	        child._data = value
+	      } else {
+	        child[childKey] = child._data[childKey] = value
+	      }
 	    }
 
 	    // only setup two-way binding if this is not a one-way
 	    // binding.
 	    if (prop.mode === bindingModes.TWO_WAY) {
-	      this.childWatcher = new Watcher(
-	        child,
-	        childKey,
-	        function (val) {
-	          if (!locked) {
-	            locked = true
-	            parent.$set(parentKey, val)
-	            locked = false
-	          }
-	        },
-	        { sync: true }
-	      )
+	      // important: defer the child watcher creation until
+	      // the created hook (after data observation)
+	      var self = this
+	      child.$once('hook:created', function () {
+	        self.childWatcher = new Watcher(
+	          child,
+	          childKey,
+	          withLock(function (val) {
+	            parent[parentKey] = val
+	          })
+	        )
+	      })
 	    }
 	  },
 
@@ -3144,7 +3194,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *                 - {Boolean} twoWay
 	 *                 - {Boolean} deep
 	 *                 - {Boolean} user
-	 *                 - {Boolean} sync
 	 *                 - {Function} [preProcess]
 	 * @constructor
 	 */
@@ -3161,7 +3210,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this.deep = !!options.deep
 	  this.user = !!options.user
 	  this.twoWay = !!options.twoWay
-	  this.sync = !!options.sync
 	  this.filters = options.filters
 	  this.preProcess = options.preProcess
 	  this.deps = []
@@ -3214,7 +3262,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (config.warnExpressionErrors) {
 	      _.warn(
 	        'Error when evaluating expression "' +
-	        this.expression + '"', e
+	        this.expression + '". ' +
+	        (config.debug
+	          ? '' :
+	          'Turn on debug mode to see stack trace.'
+	        ), e
 	      )
 	    }
 	  }
@@ -3288,7 +3340,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	p.update = function () {
-	  if (this.sync || !config.async) {
+	  if (!config.async) {
 	    this.run()
 	  } else {
 	    batcher.push(this)
@@ -3305,7 +3357,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var value = this.get()
 	    if (
 	      value !== this.value ||
-	      Array.isArray(value) ||
+	      _.isArray(value) ||
 	      this.deep
 	    ) {
 	      var oldValue = this.value
@@ -4222,16 +4274,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * Determine the type of a character in a keypath.
 	 *
-	 * @param {Char} char
+	 * @param {Char} ch
 	 * @return {String} type
 	 */
 
-	function getPathCharType (char) {
-	  if (char === undefined) {
+	function getPathCharType (ch) {
+	  if (ch === undefined) {
 	    return 'eof'
 	  }
 
-	  var code = char.charCodeAt(0)
+	  var code = ch.charCodeAt(0)
 
 	  switch(code) {
 	    case 0x5B: // [
@@ -4240,7 +4292,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    case 0x22: // "
 	    case 0x27: // '
 	    case 0x30: // 0
-	      return char
+	      return ch
 
 	    case 0x5F: // _
 	    case 0x24: // $
@@ -4470,7 +4522,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var MAX_UPDATE_COUNT = 10
+	var config = __webpack_require__(3)
 
 	// we have two separate queues: one for directive updates
 	// and one for user watcher registered via $watch().
@@ -4541,7 +4593,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    } else {
 	      has[id]++
 	      // detect possible infinite update loops
-	      if (has[id] > MAX_UPDATE_COUNT) {
+	      if (has[id] > config._maxUpdateCount) {
 	        _.warn(
 	          'You may have an infinite update loop for the ' +
 	          'watcher with expression: "' + job.expression + '".'
@@ -4564,6 +4616,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }
 	}
+
 
 /***/ },
 /* 25 */
@@ -4597,6 +4650,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      // we simply remove it from the DOM and save it in a
 	      // cache object, with its constructor id as the key.
 	      this.keepAlive = this._checkParam('keep-alive') != null
+	      // wait for event before insertion
+	      this.readyEvent = this._checkParam('wait-for')
 	      // check ref
 	      this.refID = _.attr(this.el, 'ref')
 	      if (this.keepAlive) {
@@ -4613,21 +4668,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	      this.Ctor = null
 	      // if static, build right now.
 	      if (!this._isDynamicLiteral) {
-	        this.resolveCtor(this.expression, _.bind(function () {
-	          var child = this.build()
-	          child.$before(this.anchor)
-	          this.setCurrent(child)
-	        }, this))
+	        this.resolveCtor(this.expression, _.bind(this.initStatic, this))
 	      } else {
 	        // check dynamic component params
-	        this.readyEvent = this._checkParam('wait-for')
 	        this.transMode = this._checkParam('transition-mode')
 	      }
 	    } else {
 	      _.warn(
-	        'v-component="' + this.expression + '" cannot be ' +
-	        'used on an already mounted instance.'
+	        'Do not create a component that only contains ' +
+	        'a single other component - they will be mounted to ' +
+	        'the same element and cause conflict. Wrap it with ' +
+	        'an outer element.'
 	      )
+	    }
+	  },
+
+	  /**
+	   * Initialize a static component.
+	   */
+
+	  initStatic: function () {
+	    var child = this.build()
+	    var anchor = this.anchor
+	    this.setCurrent(child)
+	    if (!this.readyEvent) {
+	      child.$before(anchor)
+	    } else {
+	      child.$once(this.readyEvent, function () {
+	        child.$before(anchor)
+	      })
 	    }
 	  },
 
@@ -4849,7 +4918,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	      this.cache = null
 	    }
 	  }
-
 	}
 
 
@@ -4922,13 +4990,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _.warn('Invalid template option: ' + template)
 	  } else {
 	    var replacer = frag.firstChild
+	    var tag = replacer.tagName && replacer.tagName.toLowerCase()
 	    if (options.replace) {
 	      if (
+	        // multi-children template
 	        frag.childNodes.length > 1 ||
+	        // non-element template
 	        replacer.nodeType !== 1 ||
-	        // when root node has v-repeat, the instance ends up
-	        // having multiple top-level nodes, thus becoming a
-	        // block instance. (#835)
+	        // when root node is <content>, <partial> or has
+	        // v-repeat, the instance could end up having
+	        // multiple top-level nodes, thus becoming a block
+	        // instance.
+	        tag === 'content' || tag === 'partial' ||
 	        replacer.hasAttribute(config.prefix + 'repeat')
 	      ) {
 	        return frag
@@ -6821,7 +6894,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      // is this a component?
 	      _asComponent: this.asComponent,
 	      // linker cachable if no inline-template
-	      _linkerCachable: !this.inlineTemplate,
+	      _linkerCachable: !this.inlineTemplate && Ctor !== _.Vue,
 	      // transclusion host
 	      _host: this._host,
 	      // pre-compiled linker for simple repeats
@@ -6965,7 +7038,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var data = vm._raw
 	    var idKey = this.idKey
 	    var index = vm.$index
-	    var key = vm.$key
+	    // fix #948: avoid accidentally fall through to
+	    // a parent repeater which happens to have $key.
+	    var key = vm.hasOwnProperty('$key') && vm.$key
 	    var primitive = !isObject(data)
 	    if (idKey || key || primitive) {
 	      var id = idKey
@@ -7219,7 +7294,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      this.invalid = true
 	      _.warn(
 	        'v-if="' + this.expression + '" cannot be ' +
-	        'used on an already mounted instance.'
+	        'used on an instance root element.'
 	      )
 	    }
 	  },
@@ -7230,19 +7305,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	      // avoid duplicate compiles, since update() can be
 	      // called with different truthy values
 	      if (!this.unlink) {
-	        this.compile()
+	        this.link(
+	          templateParser.clone(this.template),
+	          this.linker
+	        )
 	      }
 	    } else {
 	      this.teardown()
 	    }
 	  },
 
-	  compile: function () {
+	  link: function (frag, linker) {
 	    var vm = this.vm
-	    var frag = templateParser.clone(this.template)
-	    // the linker is not guaranteed to be present because
-	    // this function might get called by v-partial 
-	    this.unlink = this.linker(vm, frag)
+	    this.unlink = linker(vm, frag)
 	    transition.blockAppend(frag, this.end, vm)
 	    // call attached for all the child components created
 	    // during the compilation
@@ -7317,242 +7392,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	}
 
+
 /***/ },
 /* 49 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var _ = __webpack_require__(1)
-
-	/**
-	 * Stringify value.
-	 *
-	 * @param {Number} indent
-	 */
-
-	exports.json = {
-	  read: function (value, indent) {
-	    return typeof value === 'string'
-	      ? value
-	      : JSON.stringify(value, null, Number(indent) || 2)
-	  },
-	  write: function (value) {
-	    try {
-	      return JSON.parse(value)
-	    } catch (e) {
-	      return value
-	    }
-	  }
-	}
-
-	/**
-	 * 'abc' => 'Abc'
-	 */
-
-	exports.capitalize = function (value) {
-	  if (!value && value !== 0) return ''
-	  value = value.toString()
-	  return value.charAt(0).toUpperCase() + value.slice(1)
-	}
-
-	/**
-	 * 'abc' => 'ABC'
-	 */
-
-	exports.uppercase = function (value) {
-	  return (value || value === 0)
-	    ? value.toString().toUpperCase()
-	    : ''
-	}
-
-	/**
-	 * 'AbC' => 'abc'
-	 */
-
-	exports.lowercase = function (value) {
-	  return (value || value === 0)
-	    ? value.toString().toLowerCase()
-	    : ''
-	}
-
-	/**
-	 * 12345 => $12,345.00
-	 *
-	 * @param {String} sign
-	 */
-
-	var digitsRE = /(\d{3})(?=\d)/g
-
-	exports.currency = function (value, sign) {
-	  value = parseFloat(value)
-	  if (!isFinite(value) || (!value && value !== 0)) return ''
-	  sign = sign || '$'
-	  var s = Math.floor(Math.abs(value)).toString(),
-	    i = s.length % 3,
-	    h = i > 0
-	      ? (s.slice(0, i) + (s.length > 3 ? ',' : ''))
-	      : '',
-	    v = Math.abs(parseInt((value * 100) % 100, 10)),
-	    f = '.' + (v < 10 ? ('0' + v) : v)
-	  return (value < 0 ? '-' : '') +
-	    sign + h + s.slice(i).replace(digitsRE, '$1,') + f
-	}
-
-	/**
-	 * 'item' => 'items'
-	 *
-	 * @params
-	 *  an array of strings corresponding to
-	 *  the single, double, triple ... forms of the word to
-	 *  be pluralized. When the number to be pluralized
-	 *  exceeds the length of the args, it will use the last
-	 *  entry in the array.
-	 *
-	 *  e.g. ['single', 'double', 'triple', 'multiple']
-	 */
-
-	exports.pluralize = function (value) {
-	  var args = _.toArray(arguments, 1)
-	  return args.length > 1
-	    ? (args[value % 10 - 1] || args[args.length - 1])
-	    : (args[0] + (value === 1 ? '' : 's'))
-	}
-
-	/**
-	 * A special filter that takes a handler function,
-	 * wraps it so it only gets triggered on specific
-	 * keypresses. v-on only.
-	 *
-	 * @param {String} key
-	 */
-
-	var keyCodes = {
-	  enter    : 13,
-	  tab      : 9,
-	  'delete' : 46,
-	  up       : 38,
-	  left     : 37,
-	  right    : 39,
-	  down     : 40,
-	  esc      : 27
-	}
-
-	exports.key = function (handler, key) {
-	  if (!handler) return
-	  var code = keyCodes[key]
-	  if (!code) {
-	    code = parseInt(key, 10)
-	  }
-	  return function (e) {
-	    if (e.keyCode === code) {
-	      return handler.call(this, e)
-	    }
-	  }
-	}
-
-	// expose keycode hash
-	exports.key.keyCodes = keyCodes
-
-	/**
-	 * Install special array filters
-	 */
-
-	_.extend(exports, __webpack_require__(50))
+	exports.content = __webpack_require__(50)
+	exports.partial = __webpack_require__(51)
 
 
 /***/ },
 /* 50 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var _ = __webpack_require__(1)
-	var Path = __webpack_require__(23)
-
-	/**
-	 * Filter filter for v-repeat
-	 *
-	 * @param {String} searchKey
-	 * @param {String} [delimiter]
-	 * @param {String} dataKey
-	 */
-
-	exports.filterBy = function (arr, search, delimiter, dataKey) {
-	  // allow optional `in` delimiter
-	  // because why not
-	  if (delimiter && delimiter !== 'in') {
-	    dataKey = delimiter
-	  }
-	  /* jshint eqeqeq: false */
-	  if (search == null) {
-	    return arr
-	  }
-	  // cast to lowercase string
-	  search = ('' + search).toLowerCase()
-	  return arr.filter(function (item) {
-	    return dataKey
-	      ? contains(Path.get(item, dataKey), search)
-	      : contains(item, search)
-	  })
-	}
-
-	/**
-	 * Filter filter for v-repeat
-	 *
-	 * @param {String} sortKey
-	 * @param {String} reverse
-	 */
-
-	exports.orderBy = function (arr, sortKey, reverse) {
-	  if (!sortKey) {
-	    return arr
-	  }
-	  var order = 1
-	  if (arguments.length > 2) {
-	    if (reverse === '-1') {
-	      order = -1
-	    } else {
-	      order = reverse ? -1 : 1
-	    }
-	  }
-	  // sort on a copy to avoid mutating original array
-	  return arr.slice().sort(function (a, b) {
-	    if (sortKey !== '$key' && sortKey !== '$value') {
-	      if (a && '$value' in a) a = a.$value
-	      if (b && '$value' in b) b = b.$value
-	    }
-	    a = _.isObject(a) ? Path.get(a, sortKey) : a
-	    b = _.isObject(b) ? Path.get(b, sortKey) : b
-	    return a === b ? 0 : a > b ? order : -order
-	  })
-	}
-
-	/**
-	 * String contain helper
-	 *
-	 * @param {*} val
-	 * @param {String} search
-	 */
-
-	function contains (val, search) {
-	  if (_.isPlainObject(val)) {
-	    for (var key in val) {
-	      if (contains(val[key], search)) {
-	        return true
-	      }
-	    }
-	  } else if (_.isArray(val)) {
-	    var i = val.length
-	    while (i--) {
-	      if (contains(val[i], search)) {
-	        return true
-	      }
-	    }
-	  } else if (val != null) {
-	    return val.toString().toLowerCase().indexOf(search) > -1
-	  }
-	}
-
-
-/***/ },
-/* 51 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
@@ -7657,10 +7507,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // clone the node so the original raw content remains
 	    // intact. this ensures proper re-compilation in cases
 	    // where the outlet is inside a conditional block
-	    if (main && !node.selected) {
+	    if (main && !node.__v_selected) {
 	      frag.appendChild(node.cloneNode(true))
 	    } else if (!main && node.parentNode === parent) {
-	      node.selected = true
+	      node.__v_selected = true
 	      frag.appendChild(node.cloneNode(true))
 	    }
 	  }
@@ -7669,7 +7519,319 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
+/* 51 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var _ = __webpack_require__(1)
+	var templateParser = __webpack_require__(12)
+	var textParser = __webpack_require__(14)
+	var compiler = __webpack_require__(10)
+	var Cache = __webpack_require__(13)
+	var cache = new Cache(1000)
+
+	// v-partial reuses logic from v-if
+	var vIf = __webpack_require__(48)
+
+	module.exports = {
+
+	  link: vIf.link,
+	  teardown: vIf.teardown,
+	  getContainedComponents: vIf.getContainedComponents,
+
+	  bind: function () {
+	    var el = this.el
+	    this.start = _.createAnchor('v-partial-start')
+	    this.end = _.createAnchor('v-partial-end')
+	    _.replace(el, this.end)
+	    _.before(this.start, this.end)
+	    var id = el.getAttribute('name')
+	    var tokens = textParser.parse(id)
+	    if (tokens) {
+	      // dynamic partial
+	      this.setupDynamic(tokens)
+	    } else {
+	      // static partial
+	      this.insert(id)
+	    }
+	  },
+
+	  setupDynamic: function (tokens) {
+	    var self = this
+	    var exp = textParser.tokensToExp(tokens)
+	    this.unwatch = this.vm.$watch(exp, function (value) {
+	      self.teardown()
+	      self.insert(value)
+	    }, {
+	      immediate: true,
+	      user: false
+	    })
+	  },
+
+	  insert: function (id) {
+	    var partial = this.vm.$options.partials[id]
+	    _.assertAsset(partial, 'partial', id)
+	    if (partial) {
+	      var frag = templateParser.parse(partial, true)
+	      // cache partials based on constructor id.
+	      var cacheId = (this.vm.constructor.cid || '') + partial
+	      var linker = this.compile(frag, cacheId)
+	      // this is provided by v-if
+	      this.link(frag, linker)
+	    }
+	  },
+
+	  compile: function (frag, cacheId) {
+	    var hit = cache.get(cacheId)
+	    if (hit) return hit
+	    var linker = compiler.compile(frag, this.vm.$options, true)
+	    cache.put(cacheId, linker)
+	    return linker
+	  },
+
+	  unbind: function () {
+	    if (this.unlink) this.unlink()
+	    if (this.unwatch) this.unwatch()
+	  }
+	}
+
+
+/***/ },
 /* 52 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var _ = __webpack_require__(1)
+
+	/**
+	 * Stringify value.
+	 *
+	 * @param {Number} indent
+	 */
+
+	exports.json = {
+	  read: function (value, indent) {
+	    return typeof value === 'string'
+	      ? value
+	      : JSON.stringify(value, null, Number(indent) || 2)
+	  },
+	  write: function (value) {
+	    try {
+	      return JSON.parse(value)
+	    } catch (e) {
+	      return value
+	    }
+	  }
+	}
+
+	/**
+	 * 'abc' => 'Abc'
+	 */
+
+	exports.capitalize = function (value) {
+	  if (!value && value !== 0) return ''
+	  value = value.toString()
+	  return value.charAt(0).toUpperCase() + value.slice(1)
+	}
+
+	/**
+	 * 'abc' => 'ABC'
+	 */
+
+	exports.uppercase = function (value) {
+	  return (value || value === 0)
+	    ? value.toString().toUpperCase()
+	    : ''
+	}
+
+	/**
+	 * 'AbC' => 'abc'
+	 */
+
+	exports.lowercase = function (value) {
+	  return (value || value === 0)
+	    ? value.toString().toLowerCase()
+	    : ''
+	}
+
+	/**
+	 * 12345 => $12,345.00
+	 *
+	 * @param {String} sign
+	 */
+
+	var digitsRE = /(\d{3})(?=\d)/g
+	exports.currency = function (value, currency) {
+	  value = parseFloat(value)
+	  if (!isFinite(value) || (!value && value !== 0)) return ''
+	  currency = currency || '$'
+	  var stringified = Math.abs(value).toFixed(2)
+	  var _int = stringified.slice(0, -3)
+	  var i = _int.length % 3
+	  var head = i > 0
+	    ? (_int.slice(0, i) + (_int.length > 3 ? ',' : ''))
+	    : ''
+	  var _float = stringified.slice(-3)
+	  var sign = value < 0 ? '-' : ''
+	  return currency + sign + head +
+	    _int.slice(i).replace(digitsRE, '$1,') +
+	    _float
+	}
+
+	/**
+	 * 'item' => 'items'
+	 *
+	 * @params
+	 *  an array of strings corresponding to
+	 *  the single, double, triple ... forms of the word to
+	 *  be pluralized. When the number to be pluralized
+	 *  exceeds the length of the args, it will use the last
+	 *  entry in the array.
+	 *
+	 *  e.g. ['single', 'double', 'triple', 'multiple']
+	 */
+
+	exports.pluralize = function (value) {
+	  var args = _.toArray(arguments, 1)
+	  return args.length > 1
+	    ? (args[value % 10 - 1] || args[args.length - 1])
+	    : (args[0] + (value === 1 ? '' : 's'))
+	}
+
+	/**
+	 * A special filter that takes a handler function,
+	 * wraps it so it only gets triggered on specific
+	 * keypresses. v-on only.
+	 *
+	 * @param {String} key
+	 */
+
+	var keyCodes = {
+	  enter    : 13,
+	  tab      : 9,
+	  'delete' : 46,
+	  up       : 38,
+	  left     : 37,
+	  right    : 39,
+	  down     : 40,
+	  esc      : 27
+	}
+
+	exports.key = function (handler, key) {
+	  if (!handler) return
+	  var code = keyCodes[key]
+	  if (!code) {
+	    code = parseInt(key, 10)
+	  }
+	  return function (e) {
+	    if (e.keyCode === code) {
+	      return handler.call(this, e)
+	    }
+	  }
+	}
+
+	// expose keycode hash
+	exports.key.keyCodes = keyCodes
+
+	/**
+	 * Install special array filters
+	 */
+
+	_.extend(exports, __webpack_require__(53))
+
+
+/***/ },
+/* 53 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var _ = __webpack_require__(1)
+	var Path = __webpack_require__(23)
+
+	/**
+	 * Filter filter for v-repeat
+	 *
+	 * @param {String} searchKey
+	 * @param {String} [delimiter]
+	 * @param {String} dataKey
+	 */
+
+	exports.filterBy = function (arr, search, delimiter, dataKey) {
+	  // allow optional `in` delimiter
+	  // because why not
+	  if (delimiter && delimiter !== 'in') {
+	    dataKey = delimiter
+	  }
+	  /* jshint eqeqeq: false */
+	  if (search == null) {
+	    return arr
+	  }
+	  // cast to lowercase string
+	  search = ('' + search).toLowerCase()
+	  return arr.filter(function (item) {
+	    return dataKey
+	      ? contains(Path.get(item, dataKey), search)
+	      : contains(item, search)
+	  })
+	}
+
+	/**
+	 * Filter filter for v-repeat
+	 *
+	 * @param {String} sortKey
+	 * @param {String} reverse
+	 */
+
+	exports.orderBy = function (arr, sortKey, reverse) {
+	  if (!sortKey) {
+	    return arr
+	  }
+	  var order = 1
+	  if (arguments.length > 2) {
+	    if (reverse === '-1') {
+	      order = -1
+	    } else {
+	      order = reverse ? -1 : 1
+	    }
+	  }
+	  // sort on a copy to avoid mutating original array
+	  return arr.slice().sort(function (a, b) {
+	    if (sortKey !== '$key' && sortKey !== '$value') {
+	      if (a && '$value' in a) a = a.$value
+	      if (b && '$value' in b) b = b.$value
+	    }
+	    a = _.isObject(a) ? Path.get(a, sortKey) : a
+	    b = _.isObject(b) ? Path.get(b, sortKey) : b
+	    return a === b ? 0 : a > b ? order : -order
+	  })
+	}
+
+	/**
+	 * String contain helper
+	 *
+	 * @param {*} val
+	 * @param {String} search
+	 */
+
+	function contains (val, search) {
+	  if (_.isPlainObject(val)) {
+	    for (var key in val) {
+	      if (contains(val[key], search)) {
+	        return true
+	      }
+	    }
+	  } else if (_.isArray(val)) {
+	    var i = val.length
+	    while (i--) {
+	      if (contains(val[i], search)) {
+	        return true
+	      }
+	    }
+	  } else if (val != null) {
+	    return val.toString().toLowerCase().indexOf(search) > -1
+	  }
+	}
+
+
+/***/ },
+/* 54 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var mergeOptions = __webpack_require__(1).mergeOptions
@@ -7747,8 +7909,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this
 	  )
 
-	  // set data after merge.
-	  this._data = options.data || {}
+	  // initialize data as empty object.
+	  // it will be filled up in _initScope().
+	  this._data = {}
 
 	  // initialize data observation and scope inheritance.
 	  this._initScope()
@@ -7767,7 +7930,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 53 */
+/* 55 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
@@ -7910,10 +8073,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 54 */
+/* 56 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
+	var compiler = __webpack_require__(10)
 	var Observer = __webpack_require__(18)
 	var Dep = __webpack_require__(19)
 
@@ -7927,10 +8091,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	exports._initScope = function () {
 	  this._initProps()
+	  this._initMeta()
+	  this._initMethods()
 	  this._initData()
 	  this._initComputed()
-	  this._initMethods()
-	  this._initMeta()
 	}
 
 	/**
@@ -7938,24 +8102,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	exports._initProps = function () {
-	  // make sure all props properties are observed
-	  var data = this._data
-	  var props = this.$options.props
-	  var prop, key, i
-	  if (props) {
-	    i = props.length
-	    while (i--) {
-	      prop = props[i]
-	      // props can be strings or object descriptors
-	      key = _.camelize(
-	        typeof prop === 'string'
-	          ? prop
-	          : prop.name
+	  var options = this.$options
+	  var el = options.el
+	  var props = options.props
+	  this._propsUnlinkFn = el && props
+	    ? compiler.compileAndLinkProps(
+	        this, el, props
 	      )
-	      if (!(key in data) && key !== '$data') {
-	        data[key] = undefined
-	      }
-	    }
+	    : null
+	  if (props && !el) {
+	    _.warn(
+	      'Props will not be compiled if no `el` option is ' +
+	      'provided at instantiation.'
+	    )
 	  }
 	}
 
@@ -7964,8 +8123,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	exports._initData = function () {
-	  // proxy data on instance
+	  var propsData = this._data
+	  var optionsDataFn = this.$options.data
+	  var optionsData = optionsDataFn && optionsDataFn()
+	  if (optionsData) {
+	    this._data = optionsData
+	    for (var prop in propsData) {
+	      if (
+	        !optionsData.hasOwnProperty(prop) ||
+	        propsData[prop] !== undefined
+	      ) {
+	        optionsData[prop] = propsData[prop]
+	      }
+	    }
+	  }
 	  var data = this._data
+	  // proxy data on instance
 	  var keys = Object.keys(data)
 	  var i, key
 	  i = keys.length
@@ -8168,11 +8341,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 55 */
+/* 57 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var Directive = __webpack_require__(56)
+	var Directive = __webpack_require__(58)
 	var compiler = __webpack_require__(10)
 
 	/**
@@ -8312,6 +8485,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  while (i--) {
 	    this._children[i].$destroy()
 	  }
+	  // teardown props
+	  if (this._propsUnlinkFn) {
+	    this._propsUnlinkFn()
+	  }
 	  // teardown all directives. this also tearsdown all
 	  // directive-owned watchers.
 	  if (this._unlinkFn) {
@@ -8360,8 +8537,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this.$off()
 	}
 
+
 /***/ },
-/* 56 */
+/* 58 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
@@ -8586,7 +8764,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Directive
 
 /***/ },
-/* 57 */
+/* 59 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
@@ -8676,8 +8854,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	}
 
+
 /***/ },
-/* 58 */
+/* 60 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Watcher = __webpack_require__(17)
@@ -8837,7 +9016,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 59 */
+/* 61 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
@@ -9069,7 +9248,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 60 */
+/* 62 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
@@ -9248,7 +9427,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 61 */
+/* 63 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
@@ -9300,7 +9479,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 62 */
+/* 64 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
