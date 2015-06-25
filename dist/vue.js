@@ -1,5 +1,5 @@
 /**
- * Vue.js v0.12.2
+ * Vue.js v0.12.3
  * (c) 2015 Evan You
  * Released under the MIT License.
  */
@@ -3152,7 +3152,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          child,
 	          childKey,
 	          withLock(function (val) {
-	            parent[parentKey] = val
+	            parent.$set(parentKey, val)
 	          })
 	        )
 	      })
