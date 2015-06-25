@@ -67,7 +67,7 @@ module.exports = {
           child,
           childKey,
           withLock(function (val) {
-            parent[parentKey] = val
+            parent.$set(parentKey, val)
           })
         )
       })
