@@ -1,5 +1,5 @@
 /**
- * Vue.js v0.12.3
+ * Vue.js v0.12.4
  * (c) 2015 Evan You
  * Released under the MIT License.
  */
@@ -375,10 +375,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 
 	  _assetTypes: [
+	    'component',
 	    'directive',
 	    'elementDirective',
 	    'filter',
-	    'transition'
+	    'transition',
+	    'partial'
 	  ],
 
 	  /**
@@ -801,7 +803,26 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
+	var _ = __webpack_require__(1)
 	var config = __webpack_require__(3)
+
+	/**
+	 * Query an element selector if it's not an element already.
+	 *
+	 * @param {String|Element} el
+	 * @return {Element}
+	 */
+
+	exports.query = function (el) {
+	  if (typeof el === 'string') {
+	    var selector = el
+	    el = document.querySelector(el)
+	    if (!el) {
+	      _.warn('Cannot find element: ' + selector)
+	    }
+	  }
+	  return el
+	}
 
 	/**
 	 * Check if a node is in the document.
@@ -1447,7 +1468,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  Sub.extend = Super.extend
 	  // create asset registers, so extended classes
 	  // can have their private assets too.
-	  createAssetRegisters(Sub)
+	  config._assetTypes.forEach(function (type) {
+	    Sub[type] = Super[type]
+	  })
 	  return Sub
 	}
 
@@ -1486,51 +1509,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
-	 * Define asset registration methods on a constructor.
+	 * Create asset registration methods with the following
+	 * signature:
 	 *
-	 * @param {Function} Constructor
+	 * @param {String} id
+	 * @param {*} definition
 	 */
 
-	function createAssetRegisters (Constructor) {
-
-	  /* Asset registration methods share the same signature:
-	   *
-	   * @param {String} id
-	   * @param {*} definition
-	   */
-
-	  config._assetTypes.forEach(function (type) {
-	    Constructor[type] = function (id, definition) {
-	      if (!definition) {
-	        return this.options[type + 's'][id]
-	      } else {
-	        this.options[type + 's'][id] = definition
-	      }
-	    }
-	  })
-
-	  /**
-	   * Component registration needs to automatically invoke
-	   * Vue.extend on object values.
-	   *
-	   * @param {String} id
-	   * @param {Object|Function} definition
-	   */
-
-	  Constructor.component = function (id, definition) {
+	config._assetTypes.forEach(function (type) {
+	  exports[type] = function (id, definition) {
 	    if (!definition) {
-	      return this.options.components[id]
+	      return this.options[type + 's'][id]
 	    } else {
-	      if (_.isPlainObject(definition)) {
+	      if (
+	        type === 'component' &&
+	        _.isPlainObject(definition)
+	      ) {
 	        definition.name = id
 	        definition = _.Vue.extend(definition)
 	      }
-	      this.options.components[id] = definition
+	      this.options[type + 's'][id] = definition
 	    }
 	  }
-	}
-
-	createAssetRegisters(exports)
+	})
 
 
 /***/ },
@@ -2109,6 +2110,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function checkElementDirectives (el, options) {
 	  var tag = el.tagName.toLowerCase()
+	  if (_.commonTagRE.test(tag)) return
 	  var def = resolveAsset(options, 'elementDirectives', tag)
 	  if (def) {
 	    return makeTerminalNodeLinkFn(el, tag, '', options, def)
@@ -8105,17 +8107,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var options = this.$options
 	  var el = options.el
 	  var props = options.props
-	  this._propsUnlinkFn = el && props
-	    ? compiler.compileAndLinkProps(
-	        this, el, props
-	      )
-	    : null
 	  if (props && !el) {
 	    _.warn(
 	      'Props will not be compiled if no `el` option is ' +
 	      'provided at instantiation.'
 	    )
 	  }
+	  // make sure to convert string selectors into element now
+	  el = options.el = _.query(el)
+	  this._propsUnlinkFn = el && props
+	    ? compiler.compileAndLinkProps(
+	        this, el, props
+	      )
+	    : null
 	}
 
 	/**
@@ -9500,15 +9504,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _.warn('$mount() should be called only once.')
 	    return
 	  }
+	  el = _.query(el)
 	  if (!el) {
 	    el = document.createElement('div')
-	  } else if (typeof el === 'string') {
-	    var selector = el
-	    el = document.querySelector(el)
-	    if (!el) {
-	      _.warn('Cannot find element: ' + selector)
-	      return
-	    }
 	  }
 	  this._compile(el)
 	  this._isCompiled = true
@@ -9555,6 +9553,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.$compile = function (el, host) {
 	  return compiler.compile(el, this.$options, true, host)(this, el)
 	}
+
 
 /***/ }
 /******/ ])
