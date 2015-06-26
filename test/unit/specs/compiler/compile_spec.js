@@ -156,7 +156,11 @@ if (_.inBrowser) {
         'twoway',
         'with-filter',
         'camelCase',
-        'boolean-literal'
+        'boolean-literal',
+        {
+          name: 'default-value',
+          default: 123
+        }
       ]
       var def = Vue.options.directives._prop
       el.setAttribute('a', '1')
@@ -204,7 +208,7 @@ if (_.inBrowser) {
       expect(args[3]).toBe(def)
       // literal and one time should've been set on the _data
       // and numbers should be casted
-      expect(Object.keys(vm._data).length).toBe(5)
+      expect(Object.keys(vm._data).length).toBe(6)
       expect(vm.a).toBe(1)
       expect(vm._data.a).toBe(1)
       expect(vm.someOtherAttr).toBe(2)
@@ -214,6 +218,7 @@ if (_.inBrowser) {
       expect(vm.booleanLiteral).toBe('from parent: true')
       expect(vm._data.booleanLiteral).toBe('from parent: true')
       expect(vm._data.camelCase).toBeUndefined()
+      expect(vm._data.defaultValue).toBe(123)
       // camelCase should've warn
       expect(hasWarned(_, 'using camelCase')).toBe(true)
     })

@@ -425,16 +425,16 @@ var identRE = require('../parsers/path').identRE
 function compileProps (el, propDescriptors) {
   var props = []
   var i = propDescriptors.length
-  var descriptor, name, assertions, value, path, prop, literal, single
+  var descriptor, name, options, value, path, prop, literal, single
   while (i--) {
     descriptor = propDescriptors[i]
     // normalize prop string/descriptor
     if (typeof descriptor === 'object') {
       name = descriptor.name
-      assertions = descriptor
+      options = descriptor
     } else {
       name = descriptor
-      assertions = null
+      options = null
     }
     // props could contain dashes, which will be
     // interpreted as minus calculations by the parser
@@ -461,7 +461,7 @@ function compileProps (el, propDescriptors) {
       name: name,
       raw: value,
       path: path,
-      assertions: assertions,
+      options: options,
       mode: propBindingModes.ONE_WAY
     }
     if (value !== null) {
@@ -495,7 +495,7 @@ function compileProps (el, propDescriptors) {
           }
         }
       }
-    } else if (assertions && assertions.required) {
+    } else if (options && options.required) {
       _.warn('Missing required prop: ' + name)
     }
     props.push(prop)
@@ -519,7 +519,10 @@ function makePropsLinkFn (props) {
       path = prop.path
       if (prop.raw === null) {
         // initialize undefined prop
-        vm._data[path] = undefined
+        vm._data[path] = (
+          prop.options &&
+          prop.options.default
+        ) || undefined
       } else if (prop.dynamic) {
         // dynamic prop
         if (vm._context) {

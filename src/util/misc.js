@@ -9,11 +9,11 @@ var config = require('../config')
  */
 
 exports.assertProp = function (prop, value) {
-  var assertions = prop.assertions
-  if (!assertions) {
+  var options = prop.options
+  if (!options) {
     return true
   }
-  var type = assertions.type
+  var type = options.type
   var valid = true
   var expectedType
   if (type) {
@@ -48,7 +48,7 @@ exports.assertProp = function (prop, value) {
     )
     return false
   }
-  var validator = assertions.validator
+  var validator = options.validator
   if (validator) {
     if (!validator.call(null, value)) {
       _.warn(
