@@ -346,7 +346,8 @@ module.exports = {
     }
     // resolve constructor
     var Ctor = this.Ctor || this.resolveDynamicComponent(data, meta)
-    var vm = this.vm.$addChild({
+    var owner = this._host || this.vm
+    var vm = owner.$addChild({
       el: templateParser.clone(this.template),
       data: data,
       inherit: this.inherit,
@@ -359,8 +360,6 @@ module.exports = {
       _asComponent: this.asComponent,
       // linker cachable if no inline-template
       _linkerCachable: !this.inlineTemplate && Ctor !== _.Vue,
-      // transclusion host
-      _host: this._host,
       // pre-compiled linker for simple repeats
       _linkFn: this._linkFn,
       // identifier, shows that this vm belongs to this collection

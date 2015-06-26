@@ -78,12 +78,6 @@ module.exports = {
     var vm = this.vm
     var start = this.start.nextSibling
     var end = this.end
-    var selfCompoents =
-      vm.$children.length &&
-      vm.$children.filter(contains)
-    var transComponents =
-      vm._transCpnts &&
-      vm._transCpnts.filter(contains)
 
     function contains (c) {
       var cur = start
@@ -101,11 +95,8 @@ module.exports = {
       return false
     }
 
-    return selfCompoents
-      ? transComponents
-        ? selfCompoents.concat(transComponents)
-        : selfCompoents
-      : transComponents
+    return vm.$children.length &&
+      vm.$children.filter(contains)
   },
 
   unbind: function () {

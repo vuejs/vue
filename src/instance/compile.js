@@ -129,11 +129,6 @@ exports._destroy = function (remove, deferCleanup) {
   if (parent && !parent._isBeingDestroyed) {
     parent.$children.$remove(this)
   }
-  // same for transclusion host.
-  var host = this._host
-  if (host && !host._isBeingDestroyed) {
-    host._transCpnts.$remove(this)
-  }
   // destroy all children.
   i = this.$children.length
   while (i--) {
@@ -182,7 +177,6 @@ exports._cleanup = function () {
   this.$parent =
   this.$root =
   this.$children =
-  this._transCpnts =
   this._directives = null
   // call the last hook...
   this._isDestroyed = true

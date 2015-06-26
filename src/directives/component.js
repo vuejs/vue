@@ -166,7 +166,7 @@ module.exports = {
         return cached
       }
     }
-    var vm = this.vm
+    var vm = this._host || this.vm
     var el = templateParser.clone(this.el)
     if (this.Ctor) {
       var child = vm.$addChild({
@@ -177,7 +177,6 @@ module.exports = {
         // linker can be cached for better performance.
         _linkerCachable: !this.template,
         _asComponent: true,
-        _host: this._host,
         _isRouterView: this._isRouterView
       }, this.Ctor)
       if (this.keepAlive) {
