@@ -178,7 +178,7 @@ module.exports = {
         _linkerCachable: !this.template,
         _asComponent: true,
         _isRouterView: this._isRouterView,
-        _contentOwner: this.vm
+        _context: this.vm
       }, this.Ctor)
       if (this.keepAlive) {
         this.cache[this.ctorId] = child

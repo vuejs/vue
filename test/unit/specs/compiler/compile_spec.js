@@ -30,7 +30,7 @@ if (_.inBrowser) {
         $interpolate: function (value) {
           return data[value]
         },
-        $parent: {
+        _context: {
           _directives: [],
           $get: function (v) {
             return 'from parent: ' + v
@@ -220,8 +220,8 @@ if (_.inBrowser) {
 
     it('props on root instance', function () {
       // temporarily remove vm.$parent
-      var parent = vm.$parent
-      vm.$parent = null
+      var context = vm._context
+      vm._context = null
       var def = Vue.options.directives._prop
       el.setAttribute('a', 'hi')
       el.setAttribute('b', '{{hi}}')
@@ -230,7 +230,7 @@ if (_.inBrowser) {
       expect(vm._data.a).toBe('hi')
       expect(hasWarned(_, 'Cannot bind dynamic prop on a root')).toBe(true)
       // restore parent mock
-      vm.$parent = parent
+      vm._context = context
     })
 
     it('DocumentFragment', function () {

@@ -10,8 +10,8 @@ module.exports = {
   bind: function () {
     var vm = this.vm
     var host = vm
-    // we need find the content owner, which is the closest
-    // non-inline-repeater instance.
+    // we need find the content context, which is the
+    // closest non-inline-repeater instance.
     while (host.$options._repeat) {
       host = host.$parent
     }
@@ -21,9 +21,7 @@ module.exports = {
       this.fallback()
       return
     }
-    var owner =
-      host.$options._contentOwner ||
-      host.$parent
+    var context = host._context
     var selector = this.el.getAttribute('select')
     if (!selector) {
       // Default content
@@ -31,7 +29,7 @@ module.exports = {
       var compileDefaultContent = function () {
         self.compile(
           extractFragment(raw.childNodes, raw, true),
-          owner,
+          context,
           vm
         )
       }
@@ -51,7 +49,7 @@ module.exports = {
       if (nodes.length) {
         content = extractFragment(nodes, raw)
         if (content.hasChildNodes()) {
-          this.compile(content, owner, vm)
+          this.compile(content, context, vm)
         } else {
           this.fallback()
         }
@@ -65,9 +63,9 @@ module.exports = {
     this.compile(_.extractContent(this.el, true), this.vm)
   },
 
-  compile: function (content, owner, host) {
-    if (content && owner) {
-      this.unlink = owner.$compile(content, host)
+  compile: function (content, context, host) {
+    if (content && context) {
+      this.unlink = context.$compile(content, host)
     }
     if (content) {
       _.replace(this.el, content)

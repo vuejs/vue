@@ -18,10 +18,12 @@ exports._init = function (options) {
   this.$el           = null
   this.$parent       = options._parent
   this.$root         = options._root || this
+  this.$children     = []
   this.$             = {} // child vm references
   this.$$            = {} // element references
   this._watchers     = [] // all watchers as an array
   this._directives   = [] // all directives
+  this._childCtors   = {} // inherit:true constructors
 
   // a flag to avoid this being observed
   this._isVue = true
@@ -44,9 +46,12 @@ exports._init = function (options) {
   this._isBeingDestroyed = false
   this._unlinkFn    = null
 
-  // children
-  this.$children = []
-  this._childCtors = {}
+  // context: the scope in which the component was used,
+  // and the scope in which props and contents of this
+  // instance should be compiled in.
+  this._context =
+    options._context ||
+    options._parent
 
   // push self into parent / transclusion host
   if (this.$parent) {

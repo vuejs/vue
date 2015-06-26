@@ -365,7 +365,7 @@ module.exports = {
       // identifier, shows that this vm belongs to this collection
       _repeatId: this.id,
       // transclusion content owner
-      _contentOwner: this.vm
+      _context: this.vm
     }, Ctor)
     // cache instance
     if (needCache) {

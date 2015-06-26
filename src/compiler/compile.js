@@ -94,16 +94,16 @@ function linkAndCapture (linker, vm) {
  *
  * @param {Vue} vm
  * @param {Array} dirs
- * @param {Vue} [parent]
- * @param {Array} [parentDirs]
+ * @param {Vue} [context]
+ * @param {Array} [contextDirs]
  * @return {Function}
  */
 
-function makeUnlinkFn (vm, dirs, parent, parentDirs) {
+function makeUnlinkFn (vm, dirs, context, contextDirs) {
   return function unlink (destroying) {
     teardownDirs(vm, dirs, destroying)
-    if (parent && parentDirs) {
-      teardownDirs(parent, parentDirs)
+    if (context && contextDirs) {
+      teardownDirs(context, contextDirs)
     }
   }
 }
@@ -146,7 +146,7 @@ exports.compileAndLinkProps = function (vm, el, props) {
 /**
  * Compile the root element of an instance.
  *
- * 1. attrs on parent container (parent scope)
+ * 1. attrs on context container (context scope)
  * 2. attrs on the component template root node, if
  *    replace:true (child scope)
  *
@@ -154,7 +154,7 @@ exports.compileAndLinkProps = function (vm, el, props) {
  *
  * This function does compile and link at the same time,
  * since root linkers can not be reused. It returns the
- * unlink function for potential parent directives on the
+ * unlink function for potential context directives on the
  * container.
  *
  * @param {Vue} vm
@@ -166,7 +166,7 @@ exports.compileAndLinkProps = function (vm, el, props) {
  exports.compileAndLinkRoot = function (vm, el, options) {
   var containerAttrs = options._containerAttrs
   var replacerAttrs = options._replacerAttrs
-  var parentLinkFn, replacerLinkFn
+  var contextLinkFn, replacerLinkFn
 
   // only need to compile other attributes for
   // non-block instances
@@ -176,7 +176,7 @@ exports.compileAndLinkProps = function (vm, el, props) {
     if (options._asComponent) {
       // 2. container attributes
       if (containerAttrs) {
-        parentLinkFn = compileDirectives(containerAttrs, options)
+        contextLinkFn = compileDirectives(containerAttrs, options)
       }
       if (replacerAttrs) {
         // 3. replacer attributes
@@ -188,13 +188,13 @@ exports.compileAndLinkProps = function (vm, el, props) {
     }
   }
 
-  // link parent dirs
-  var parent = vm.$parent
-  var parentDirs
-  if (parent && parentLinkFn) {
-    parentDirs = linkAndCapture(function () {
-      parentLinkFn(parent, el)
-    }, parent)
+  // link context scope dirs
+  var context = vm._context
+  var contextDirs
+  if (context && contextLinkFn) {
+    contextDirs = linkAndCapture(function () {
+      contextLinkFn(context, el)
+    }, context)
   }
 
   // link self
@@ -202,9 +202,9 @@ exports.compileAndLinkProps = function (vm, el, props) {
     if (replacerLinkFn) replacerLinkFn(vm, el)
   }, vm)
 
-  // return the unlink function that tearsdown parent
+  // return the unlink function that tearsdown context
   // container directives.
-  return makeUnlinkFn(vm, selfDirs, parent, parentDirs)
+  return makeUnlinkFn(vm, selfDirs, context, contextDirs)
 }
 
 /**
@@ -522,10 +522,10 @@ function makePropsLinkFn (props) {
         vm._data[path] = undefined
       } else if (prop.dynamic) {
         // dynamic prop
-        if (vm.$parent) {
+        if (vm._context) {
           if (prop.mode === propBindingModes.ONE_TIME) {
             // one time binding
-            value = vm.$parent.$get(prop.parentPath)
+            value = vm._context.$get(prop.parentPath)
             if (_.assertProp(prop, value)) {
               vm[path] = vm._data[path] = value
             }
