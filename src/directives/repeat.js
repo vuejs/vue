@@ -346,8 +346,8 @@ module.exports = {
     }
     // resolve constructor
     var Ctor = this.Ctor || this.resolveDynamicComponent(data, meta)
-    var owner = this._host || this.vm
-    var vm = owner.$addChild({
+    var parent = this._host || this.vm
+    var vm = parent.$addChild({
       el: templateParser.clone(this.template),
       data: data,
       inherit: this.inherit,

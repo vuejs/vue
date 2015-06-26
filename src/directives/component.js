@@ -166,10 +166,10 @@ module.exports = {
         return cached
       }
     }
-    var owner = this._host || this.vm
-    var el = templateParser.clone(this.el)
     if (this.Ctor) {
-      var child = owner.$addChild({
+      var parent = this._host || this.vm
+      var el = templateParser.clone(this.el)
+      var child = parent.$addChild({
         el: el,
         data: data,
         template: this.template,
