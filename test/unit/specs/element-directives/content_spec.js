@@ -260,6 +260,33 @@ describe('Content Transclusion', function () {
     })
   })
 
+  it('nested transclusion, container dirs & props', function (done) {
+    vm = new Vue({
+      el: el,
+      template:
+        '<testa>' +
+          '<testb v-if="ok" prop="{{msg}}"></testb>' +
+        '</testa>',
+      data: {
+        ok: false,
+        msg: 'hello'
+      },
+      components: {
+        testa: { template: '<content></content>' },
+        testb: {
+          props: ['prop'],
+          template: '{{prop}}'
+        }
+      }
+    })
+    expect(el.innerHTML).toBe('<testa></testa>')
+    vm.ok = true
+    _.nextTick(function () {
+      expect(el.innerHTML).toBe('<testa><testb>hello</testb></testa>')
+      done()
+    })
+  })
+
   it('single content outlet with replace: true', function () {
     vm = new Vue({
       el: el,
