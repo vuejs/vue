@@ -489,7 +489,7 @@ if (_.inBrowser) {
           }
         })
         assertMarkup()
-        var oldVms = vm._children.slice()
+        var oldVms = vm.$children.slice()
         // swap the data with different objects, but with
         // the same ID!
         vm.list = [
@@ -501,7 +501,7 @@ if (_.inBrowser) {
           // should reuse old vms!
           var i = 2
           while (i--) {
-            expect(vm._children[i]).toBe(oldVms[i])
+            expect(vm.$children[i]).toBe(oldVms[i])
           }
           next()
         })
@@ -611,7 +611,7 @@ if (_.inBrowser) {
         }
       })
       vm._directives[0].unbind()
-      expect(vm._children.length).toBe(0)
+      expect(vm.$children.length).toBe(0)
     })
 
     it('with transition', function (done) {
@@ -655,10 +655,10 @@ if (_.inBrowser) {
           vals: [1, 2]
         }
       })
-      vm._children[0].$value = 'c'
-      var key = vm._children[2].$key
-      vm._children[2].$value = 'd'
-      vm._children[4].val = 3
+      vm.$children[0].$value = 'c'
+      var key = vm.$children[2].$key
+      vm.$children[2].$value = 'd'
+      vm.$children[4].val = 3
       _.nextTick(function () {
         expect(vm.items[0]).toBe('c')
         expect(vm.obj[key]).toBe('d')
@@ -675,7 +675,7 @@ if (_.inBrowser) {
           items: ['a', 'b']
         }
       })
-      vm._children[0].$value = 'c'
+      vm.$children[0].$value = 'c'
       _.nextTick(function () {
         expect(hasWarned(_, 'use an Array of Objects instead')).toBe(true)
         done()
@@ -703,7 +703,7 @@ if (_.inBrowser) {
         })
         assertMarkup()
 
-        var oldVms = vm._children.slice()
+        var oldVms = vm.$children.slice()
 
         vm.list = [
           { id: 1, msg: 'wa', list: [
@@ -718,9 +718,9 @@ if (_.inBrowser) {
           // should reuse old vms!
           var i = 2
           while (i--) {
-            expect(vm._children[i]).toBe(oldVms[i])
+            expect(vm.$children[i]).toBe(oldVms[i])
           }
-          expect(vm._children[0]._children[0]).toBe(oldVms[0]._children[0])
+          expect(vm.$children[0].$children[0]).toBe(oldVms[0].$children[0])
           next()
         })
 

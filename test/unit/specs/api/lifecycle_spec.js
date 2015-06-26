@@ -164,7 +164,7 @@ if (_.inBrowser) {
         expect(vm.$el).toBeNull()
         expect(vm.$parent).toBeNull()
         expect(vm.$root).toBeNull()
-        expect(vm._children).toBeNull()
+        expect(vm.$children).toBeNull()
         expect(vm._directives).toBeNull()
         expect(Object.keys(vm._events).length).toBe(0)
       })
@@ -198,11 +198,11 @@ if (_.inBrowser) {
         var parent = new Vue()
         var child = parent.$addChild()
         var child2 = parent.$addChild()
-        expect(parent._children.length).toBe(2)
+        expect(parent.$children.length).toBe(2)
         child.$destroy()
-        expect(parent._children.length).toBe(1)
+        expect(parent.$children.length).toBe(1)
         child2.$destroy()
-        expect(parent._children.length).toBe(0)
+        expect(parent.$children.length).toBe(0)
       })
 
       it('children', function () {

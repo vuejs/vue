@@ -168,7 +168,7 @@ exports._digest = function () {
   while (i--) {
     this._watchers[i].update()
   }
-  var children = this._children
+  var children = this.$children
   i = children.length
   while (i--) {
     var child = children[i]

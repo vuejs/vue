@@ -122,7 +122,7 @@ describe('Instance Scope', function () {
           }
         }
       })
-      var child = vm._children[0]
+      var child = vm.$children[0]
       expect(child.a).toBe(1)
       expect(child.b).toBe(2)
       expect(child.c).toBe(3)

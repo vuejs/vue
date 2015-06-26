@@ -24,20 +24,20 @@ if (_.inBrowser) {
       })
       // lazy instantitation
       expect(el.innerHTML).toBe('')
-      expect(vm._children.length).toBe(0)
+      expect(vm.$children.length).toBe(0)
       vm.test = true
       _.nextTick(function () {
         expect(el.innerHTML).toBe('<div><test>A</test></div>')
-        expect(vm._children.length).toBe(1)
+        expect(vm.$children.length).toBe(1)
         vm.test = false
         _.nextTick(function () {
           expect(el.innerHTML).toBe('')
-          expect(vm._children.length).toBe(0)
+          expect(vm.$children.length).toBe(0)
           vm.test = true
           _.nextTick(function () {
             expect(el.innerHTML).toBe('<div><test>A</test></div>')
-            expect(vm._children.length).toBe(1)
-            var child = vm._children[0]
+            expect(vm.$children.length).toBe(1)
+            var child = vm.$children[0]
             vm.$destroy()
             expect(child._isDestroyed).toBe(true)
             done()
@@ -87,18 +87,18 @@ if (_.inBrowser) {
       })
       vm.$appendTo(document.body)
       expect(el.innerHTML).toBe('')
-      expect(vm._children.length).toBe(0)
+      expect(vm.$children.length).toBe(0)
       vm.ok = true
       _.nextTick(function () {
         expect(el.innerHTML).toBe('<test>123</test>')
-        expect(vm._children.length).toBe(1)
+        expect(vm.$children.length).toBe(1)
         expect(attachSpy).toHaveBeenCalled()
         expect(readySpy).toHaveBeenCalled()
         vm.ok = false
         _.nextTick(function () {
           expect(detachSpy).toHaveBeenCalled()
           expect(el.innerHTML).toBe('')
-          expect(vm._children.length).toBe(0)
+          expect(vm.$children.length).toBe(0)
           vm.$remove()
           done()
         })
@@ -123,28 +123,28 @@ if (_.inBrowser) {
         }
       })
       expect(el.innerHTML).toBe('')
-      expect(vm._children.length).toBe(0)
+      expect(vm.$children.length).toBe(0)
       // toggle if with lazy instantiation
       vm.ok = true
       _.nextTick(function () {
         expect(el.innerHTML).toBe('<component>AAA</component>')
-        expect(vm._children.length).toBe(1)
+        expect(vm.$children.length).toBe(1)
         // switch view when if=true
         vm.view = 'view-b'
         _.nextTick(function () {
           expect(el.innerHTML).toBe('<component>BBB</component>')
-          expect(vm._children.length).toBe(1)
+          expect(vm.$children.length).toBe(1)
           // toggle if when already instantiated
           vm.ok = false
           _.nextTick(function () {
             expect(el.innerHTML).toBe('')
-            expect(vm._children.length).toBe(0)
+            expect(vm.$children.length).toBe(0)
             // toggle if and switch view at the same time
             vm.view = 'view-a'
             vm.ok = true
             _.nextTick(function () {
               expect(el.innerHTML).toBe('<component>AAA</component>')
-              expect(vm._children.length).toBe(1)
+              expect(vm.$children.length).toBe(1)
               done()
             })
           })

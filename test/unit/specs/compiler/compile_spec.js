@@ -308,9 +308,9 @@ if (_.inBrowser) {
           }
         }
       })
-      var dirs = vm._children[0]._directives
+      var dirs = vm.$children[0]._directives
       expect(dirs.length).toBe(2)
-      vm._children[0].$destroy()
+      vm.$children[0].$destroy()
       var i = dirs.length
       while (i--) {
         expect(dirs[i]._bound).toBe(false)
@@ -333,10 +333,10 @@ if (_.inBrowser) {
       })
       expect(el.firstChild.style.display).toBe('')
       expect(vm._directives.length).toBe(2)
-      expect(vm._children.length).toBe(1)
-      vm._children[0].$destroy()
+      expect(vm.$children.length).toBe(1)
+      vm.$children[0].$destroy()
       expect(vm._directives.length).toBe(1)
-      expect(vm._children.length).toBe(0)
+      expect(vm.$children.length).toBe(0)
     })
 
     it('should remove transcluded directives from parent when unlinking (component)', function () {
@@ -355,10 +355,10 @@ if (_.inBrowser) {
       })
       expect(vm.$el.textContent).toBe('parent')
       expect(vm._directives.length).toBe(2)
-      expect(vm._children.length).toBe(1)
-      vm._children[0].$destroy()
+      expect(vm.$children.length).toBe(1)
+      vm.$children[0].$destroy()
       expect(vm._directives.length).toBe(1)
-      expect(vm._children.length).toBe(0)
+      expect(vm.$children.length).toBe(0)
     })
 
     it('should remove transcluded directives from parent when unlinking (v-if + component)', function (done) {
@@ -380,12 +380,12 @@ if (_.inBrowser) {
       })
       expect(vm.$el.textContent).toBe('parent')
       expect(vm._directives.length).toBe(3)
-      expect(vm._children.length).toBe(1)
+      expect(vm.$children.length).toBe(1)
       vm.ok = false
       _.nextTick(function () {
         expect(vm.$el.textContent).toBe('')
         expect(vm._directives.length).toBe(1)
-        expect(vm._children.length).toBe(0)
+        expect(vm.$children.length).toBe(0)
         done()
       })
     })

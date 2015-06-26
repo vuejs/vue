@@ -199,7 +199,7 @@ if (_.inBrowser) {
           }
         }
       })
-      var child = vm._children[0]
+      var child = vm.$children[0]
       expect(el.firstChild.textContent).toBe('A B')
       child.aa = 'AA'
       vm.b = 'BB'

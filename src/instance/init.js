@@ -45,7 +45,7 @@ exports._init = function (options) {
   this._unlinkFn    = null
 
   // children
-  this._children = []
+  this.$children = []
   this._childCtors = {}
 
   // transcluded components that belong to the parent.
@@ -56,7 +56,7 @@ exports._init = function (options) {
 
   // push self into parent / transclusion host
   if (this.$parent) {
-    this.$parent._children.push(this)
+    this.$parent.$children.push(this)
   }
   if (this._host) {
     this._host._transCpnts.push(this)

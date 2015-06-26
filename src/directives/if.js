@@ -79,8 +79,8 @@ module.exports = {
     var start = this.start.nextSibling
     var end = this.end
     var selfCompoents =
-      vm._children.length &&
-      vm._children.filter(contains)
+      vm.$children.length &&
+      vm.$children.filter(contains)
     var transComponents =
       vm._transCpnts &&
       vm._transCpnts.filter(contains)
