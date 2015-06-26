@@ -9,19 +9,21 @@ module.exports = {
 
   bind: function () {
     var vm = this.vm
-    var contentOwner = vm
+    var host = vm
     // we need find the content owner, which is the closest
     // non-inline-repeater instance.
-    while (contentOwner.$options._repeat) {
-      contentOwner = contentOwner.$parent
+    while (host.$options._repeat) {
+      host = host.$parent
     }
-    var raw = contentOwner.$options._content
+    var raw = host.$options._content
     var content
     if (!raw) {
       this.fallback()
       return
     }
-    var parent = contentOwner.$parent
+    var owner =
+      host.$options._contentOwner ||
+      host.$parent
     var selector = this.el.getAttribute('select')
     if (!selector) {
       // Default content
@@ -29,16 +31,16 @@ module.exports = {
       var compileDefaultContent = function () {
         self.compile(
           extractFragment(raw.childNodes, raw, true),
-          contentOwner.$parent,
+          owner,
           vm
         )
       }
-      if (!contentOwner._isCompiled) {
+      if (!host._isCompiled) {
         // defer until the end of instance compilation,
         // because the default outlet must wait until all
         // other possible outlets with selectors have picked
         // out their contents.
-        contentOwner.$once('hook:compiled', compileDefaultContent)
+        host.$once('hook:compiled', compileDefaultContent)
       } else {
         compileDefaultContent()
       }
@@ -49,7 +51,7 @@ module.exports = {
       if (nodes.length) {
         content = extractFragment(nodes, raw)
         if (content.hasChildNodes()) {
-          this.compile(content, parent, vm)
+          this.compile(content, owner, vm)
         } else {
           this.fallback()
         }

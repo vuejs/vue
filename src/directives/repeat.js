@@ -363,7 +363,9 @@ module.exports = {
       // pre-compiled linker for simple repeats
       _linkFn: this._linkFn,
       // identifier, shows that this vm belongs to this collection
-      _repeatId: this.id
+      _repeatId: this.id,
+      // transclusion content owner
+      _contentOwner: this.vm
     }, Ctor)
     // cache instance
     if (needCache) {
