@@ -356,5 +356,33 @@ if (_.inBrowser) {
       })
 
     })
+
+    it('alternative syntax', function () {
+      var vm = new Vue({
+        el: el,
+        template: '<test b="{{a}}" c="{{d}}"></test>',
+        data: {
+          a: 'AAA',
+          d: 'DDD'
+        },
+        components: {
+          test: {
+            props: {
+              b: String,
+              c: {
+                type: Number
+              },
+              d: {
+                required: true
+              }
+            },
+            template: '<p>{{b}}</p><p>{{c}}</p>'
+          }
+        }
+      })
+      expect(hasWarned(_, 'Missing required prop')).toBe(true)
+      expect(hasWarned(_, 'Expected Number')).toBe(true)
+      expect(el.textContent).toBe('AAA')
+    })
   })
 }
