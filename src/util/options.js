@@ -232,6 +232,20 @@ function guardComponents (components) {
   }
 }
 
+function guardProps (child) {
+  var props = child.props
+  if (_.isPlainObject(props)) {
+    child.props = Object.keys(props).map(function (key) {
+      var val = props[key]
+      if (!_.isPlainObject(val)) {
+        val = { type: val }
+      }
+      val.name = key
+      return val
+    })
+  }
+}
+
 /**
  * Merge two option objects into a new one.
  * Core utility used in both instantiation and inheritance.
@@ -244,6 +258,7 @@ function guardComponents (components) {
 
 exports.mergeOptions = function merge (parent, child, vm) {
   guardComponents(child.components)
+  guardProps(child)
   var options = {}
   var key
   if (child.mixins) {
