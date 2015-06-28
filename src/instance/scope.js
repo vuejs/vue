@@ -57,7 +57,7 @@ exports._initData = function () {
         !optionsData.hasOwnProperty(prop) ||
         propsData[prop] !== undefined
       ) {
-        optionsData[prop] = propsData[prop]
+        optionsData.$set(prop, propsData[prop])
       }
     }
   }
