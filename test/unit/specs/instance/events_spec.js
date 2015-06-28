@@ -57,25 +57,40 @@ describe('Instance Events', function () {
     it('normal', function (done) {
       var spyA = jasmine.createSpy()
       var spyB = jasmine.createSpy()
+      var count = 0
+      var a = {
+        b: { c: 1 }
+      }
       var vm = new Vue({
         watch: {
           'a.b.c': spyA,
-          'b + c': spyB
+          'b + c': spyB,
+          a: {
+            deep: true,
+            immediate: true,
+            handler: 'test'
+          }
         },
         data: {
-          a: {
-            b: { c: 1 }
-          },
+          a: a,
           b: 1,
           c: 2
+        },
+        methods: {
+          test: function (val) {
+            count++
+            expect(val).toBe(a)
+          }
         }
       })
       vm.a.b.c = 2
       vm.b = 3
       vm.c = 4
+      expect(count).toBe(1)
       _.nextTick(function () {
         expect(spyA).toHaveBeenCalledWith(2, 1)
         expect(spyB).toHaveBeenCalledWith(7, 3)
+        expect(count).toBe(2)
         done()
       })
     })
