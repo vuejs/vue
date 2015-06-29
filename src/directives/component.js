@@ -286,6 +286,7 @@ module.exports = {
   unbind: function () {
     this.invalidatePending()
     this.unbuild()
+    this.unsetCurrent()
     // destroy all keep-alive cached instances
     if (this.cache) {
       for (var key in this.cache) {
