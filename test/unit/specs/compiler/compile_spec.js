@@ -160,11 +160,17 @@ if (_.inBrowser) {
         {
           name: 'default-value',
           default: 123
+        },
+        {
+          name: 'boolean',
+          type: Boolean
+        },
+        {
+          name: 'boolean-absent',
+          type: Boolean
         }
       ].map(function (p) {
-        return typeof p === 'string'
-          ? { name: p }
-          : p
+        return typeof p === 'string' ? { name: p } : p
       })
       var def = Vue.options.directives._prop
       el.setAttribute('a', '1')
@@ -175,6 +181,7 @@ if (_.inBrowser) {
       el.setAttribute('twoway', '{{@a}}')
       el.setAttribute('with-filter', '{{a | filter}}')
       el.setAttribute('boolean-literal', '{{true}}')
+      el.setAttribute('boolean', '')
       compiler.compileAndLinkProps(vm, el, props)
       // should skip literals and one-time bindings
       expect(vm._bindDir.calls.count()).toBe(4)
@@ -212,7 +219,7 @@ if (_.inBrowser) {
       expect(args[3]).toBe(def)
       // literal and one time should've been set on the _data
       // and numbers should be casted
-      expect(Object.keys(vm._data).length).toBe(6)
+      expect(Object.keys(vm._data).length).toBe(8)
       expect(vm.a).toBe(1)
       expect(vm._data.a).toBe(1)
       expect(vm.someOtherAttr).toBe(2)
@@ -223,6 +230,8 @@ if (_.inBrowser) {
       expect(vm._data.booleanLiteral).toBe('from parent: true')
       expect(vm._data.camelCase).toBeUndefined()
       expect(vm._data.defaultValue).toBe(123)
+      expect(vm._data.boolean).toBe(true)
+      expect(vm._data.booleanAbsent).toBe(false)
       // camelCase should've warn
       expect(hasWarned(_, 'using camelCase')).toBe(true)
     })

@@ -509,16 +509,18 @@ function compileProps (el, propOptions) {
 function makePropsLinkFn (props) {
   return function propsLinkFn (vm, el) {
     var i = props.length
-    var prop, path, value
+    var prop, path, options, value
     while (i--) {
       prop = props[i]
       path = prop.path
+      options = prop.options
       if (prop.raw === null) {
-        // initialize undefined prop
-        vm._data[path] = (
-          prop.options &&
-          prop.options.default
-        ) || undefined
+        // initialize absent prop
+        vm._data[path] = options.type === Boolean
+          ? false
+          : options.hasOwnProperty('default')
+            ? options.default
+            : undefined
       } else if (prop.dynamic) {
         // dynamic prop
         if (vm._context) {
@@ -541,7 +543,9 @@ function makePropsLinkFn (props) {
         }
       } else {
         // literal, cast it and just set once
-        value = _.toBoolean(_.toNumber(prop.raw))
+        value = options.type === Boolean && prop.raw === ''
+          ? true
+          : _.toBoolean(_.toNumber(prop.raw))
         if (_.assertProp(prop, value)) {
           vm[path] = vm._data[path] = value
         }
