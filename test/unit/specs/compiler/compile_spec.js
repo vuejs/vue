@@ -161,7 +161,11 @@ if (_.inBrowser) {
           name: 'default-value',
           default: 123
         }
-      ]
+      ].map(function (p) {
+        return typeof p === 'string'
+          ? { name: p }
+          : p
+      })
       var def = Vue.options.directives._prop
       el.setAttribute('a', '1')
       el.setAttribute('data-some-attr', '{{a}}')
@@ -230,7 +234,10 @@ if (_.inBrowser) {
       var def = Vue.options.directives._prop
       el.setAttribute('a', 'hi')
       el.setAttribute('b', '{{hi}}')
-      compiler.compileAndLinkProps(vm, el, ['a', 'b'])
+      compiler.compileAndLinkProps(vm, el, [
+        { name: 'a' },
+        { name: 'b' }
+      ])
       expect(vm._bindDir.calls.count()).toBe(0)
       expect(vm._data.a).toBe('hi')
       expect(hasWarned(_, 'Cannot bind dynamic prop on a root')).toBe(true)

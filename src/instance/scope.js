@@ -94,7 +94,7 @@ exports._setData = function (newData) {
   if (props) {
     i = props.length
     while (i--) {
-      key = props[i]
+      key = props[i].name
       if (key !== '$data' && !newData.hasOwnProperty(key)) {
         newData.$set(key, oldData[key])
       }

@@ -10,9 +10,6 @@ var config = require('../config')
 
 exports.assertProp = function (prop, value) {
   var options = prop.options
-  if (!options) {
-    return true
-  }
   var type = options.type
   var valid = true
   var expectedType

@@ -232,16 +232,29 @@ function guardComponents (components) {
   }
 }
 
-function guardProps (child) {
-  var props = child.props
+/**
+ * Ensure all props option syntax are normalized into the
+ * Object-based format.
+ *
+ * @param {Object} options
+ */
+
+function guardProps (options) {
+  var props = options.props
   if (_.isPlainObject(props)) {
-    child.props = Object.keys(props).map(function (key) {
+    options.props = Object.keys(props).map(function (key) {
       var val = props[key]
       if (!_.isPlainObject(val)) {
         val = { type: val }
       }
       val.name = key
       return val
+    })
+  } else if (_.isArray(props)) {
+    options.props = props.map(function (prop) {
+      return typeof prop === 'string'
+        ? { name: prop }
+        : prop
     })
   }
 }

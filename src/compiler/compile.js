@@ -416,7 +416,7 @@ function makeChildLinkFn (linkFns) {
  * a props link function.
  *
  * @param {Element|DocumentFragment} el
- * @param {Array} propDescriptors
+ * @param {Array} propOptions
  * @return {Function} propsLinkFn
  */
 
@@ -425,20 +425,13 @@ var settablePathRE = /^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\[[^\[\]]+\])*$/
 var literalValueRE = /^(true|false)$|^\d.*/
 var identRE = require('../parsers/path').identRE
 
-function compileProps (el, propDescriptors) {
+function compileProps (el, propOptions) {
   var props = []
-  var i = propDescriptors.length
-  var descriptor, name, options, value, path, prop, literal, single
+  var i = propOptions.length
+  var options, name, value, path, prop, literal, single
   while (i--) {
-    descriptor = propDescriptors[i]
-    // normalize prop string/descriptor
-    if (typeof descriptor === 'object') {
-      name = descriptor.name
-      options = descriptor
-    } else {
-      name = descriptor
-      options = null
-    }
+    options = propOptions[i]
+    name = options.name
     // props could contain dashes, which will be
     // interpreted as minus calculations by the parser
     // so we need to camelize the path here
