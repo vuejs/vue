@@ -236,12 +236,15 @@ function compileNode (node, options) {
  */
 
 function compileElement (el, options) {
+  var linkFn
   var hasAttrs = el.hasAttributes()
-  // check element directives
-  var linkFn = checkElementDirectives(el, options)
   // check terminal directives (repeat & if)
-  if (!linkFn && hasAttrs) {
+  if (hasAttrs) {
     linkFn = checkTerminalDirectives(el, options)
+  }
+  // check element directives
+  if (!linkFn) {
+    linkFn = checkElementDirectives(el, options)
   }
   // check component
   if (!linkFn) {
