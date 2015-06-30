@@ -81,6 +81,7 @@ module.exports = function (grunt) {
   require('./build/grunt-tasks/casper')(grunt)
   require('./build/grunt-tasks/codecov')(grunt)
   require('./build/grunt-tasks/release')(grunt)
+  require('./build/grunt-tasks/open')(grunt)
 
   // register composite tasks
   grunt.registerTask('unit', ['karma:browsers'])
