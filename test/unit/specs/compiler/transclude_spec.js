@@ -1,4 +1,5 @@
 var transclude = require('../../../../src/compiler').transclude
+var Vue = require('../../../../src/vue')
 var _ = require('../../../../src/util')
 
 if (_.inBrowser) {
@@ -7,7 +8,7 @@ if (_.inBrowser) {
     var el, options
     beforeEach(function () {
       el = document.createElement('div')
-      options = {}
+      options = _.extend({}, Vue.options)
       spyOn(_, 'warn')
     })
 

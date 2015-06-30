@@ -70,13 +70,12 @@ function transcludeTemplate (el, options) {
         frag.childNodes.length > 1 ||
         // non-element template
         replacer.nodeType !== 1 ||
-        // when root node is <content>, <partial>, <component>
-        // or has v-repeat, the instance could end up having
-        // multiple top-level nodes, thus becoming a block
-        // instance.
-        tag === 'content' ||
-        tag === 'partial' ||
+        // when root node is <component>, is an element
+        // directive, or has v-repeat, the instance could
+        // end up having multiple top-level nodes, thus
+        // becoming a block instance.
         tag === 'component' ||
+        _.resolveAsset(options, 'elementDirectives', tag) ||
         replacer.hasAttribute(config.prefix + 'repeat')
       ) {
         return frag
