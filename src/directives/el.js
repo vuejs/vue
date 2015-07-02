@@ -9,5 +9,4 @@ module.exports = {
   unbind: function () {
     delete this.vm.$$[this.expression]
   }
-  
 }

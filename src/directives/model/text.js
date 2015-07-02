@@ -33,8 +33,8 @@ module.exports = {
         // at the end... have to call it here.
         self.listener()
       }
-      _.on(el,'compositionstart', this.onComposeStart)
-      _.on(el,'compositionend', this.onComposeEnd)
+      _.on(el, 'compositionstart', this.onComposeStart)
+      _.on(el, 'compositionend', this.onComposeEnd)
     }
 
     function syncToModel () {
@@ -97,7 +97,7 @@ module.exports = {
     // Support jQuery events, since jQuery.trigger() doesn't
     // trigger native events in some cases and some plugins
     // rely on $.trigger()
-    // 
+    //
     // We want to make sure if a listener is attached using
     // jQuery, it is also removed with jQuery, that's why
     // we do the check for each directive instance and
@@ -152,8 +152,8 @@ module.exports = {
       _.off(el, 'compositionend', this.onComposeEnd)
     }
     if (this.onCut) {
-      _.off(el,'cut', this.onCut)
-      _.off(el,'keyup', this.onDel)
+      _.off(el, 'cut', this.onCut)
+      _.off(el, 'keyup', this.onDel)
     }
   }
 }

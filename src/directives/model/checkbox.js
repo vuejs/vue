@@ -21,5 +21,4 @@ module.exports = {
   unbind: function () {
     _.off(this.el, 'change', this.listener)
   }
-
 }

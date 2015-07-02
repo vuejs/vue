@@ -11,7 +11,7 @@ var uid = 0
  * Type enums
  */
 
-var ARRAY  = 0
+var ARRAY = 0
 var OBJECT = 1
 
 /**

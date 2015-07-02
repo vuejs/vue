@@ -4,10 +4,10 @@ var templateCache = new Cache(1000)
 var idSelectorCache = new Cache(1000)
 
 var map = {
-  _default : [0, '', ''],
-  legend   : [1, '<fieldset>', '</fieldset>'],
-  tr       : [2, '<table><tbody>', '</tbody></table>'],
-  col      : [
+  _default: [0, '', ''],
+  legend: [1, '<fieldset>', '</fieldset>'],
+  tr: [2, '<table><tbody>', '</tbody></table>'],
+  col: [
     2,
     '<table><tbody></tbody><colgroup>',
     '</colgroup></table>'
@@ -86,12 +86,12 @@ function stringToFragment (templateString) {
     )
   } else {
 
-    var tag    = tagMatch && tagMatch[1]
-    var wrap   = map[tag] || map._default
-    var depth  = wrap[0]
+    var tag = tagMatch && tagMatch[1]
+    var wrap = map[tag] || map._default
+    var depth = wrap[0]
     var prefix = wrap[1]
     var suffix = wrap[2]
-    var node   = document.createElement('div')
+    var node = document.createElement('div')
 
     node.innerHTML = prefix + templateString.trim() + suffix
     while (depth--) {
@@ -99,8 +99,9 @@ function stringToFragment (templateString) {
     }
 
     var child
-    /* jshint boss:true */
+    /* eslint-disable no-cond-assign */
     while (child = node.firstChild) {
+    /* eslint-enable no-cond-assign */
       frag.appendChild(child)
     }
   }
@@ -133,8 +134,9 @@ function nodeToFragment (node) {
   var clone = exports.clone(node)
   var frag = document.createDocumentFragment()
   var child
-  /* jshint boss:true */
+  /* eslint-disable no-cond-assign */
   while (child = clone.firstChild) {
+  /* eslint-enable no-cond-assign */
     frag.appendChild(child)
   }
   return frag

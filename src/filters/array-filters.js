@@ -15,7 +15,6 @@ exports.filterBy = function (arr, search, delimiter, dataKey) {
   if (delimiter && delimiter !== 'in') {
     dataKey = delimiter
   }
-  /* jshint eqeqeq: false */
   if (search == null) {
     return arr
   }

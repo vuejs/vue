@@ -107,8 +107,7 @@ function restore (str, i) {
 function compileExpFns (exp, needSet) {
   if (improperKeywordsRE.test(exp)) {
     _.warn(
-      'Avoid using reserved keywords in expression: '
-      + exp
+      'Avoid using reserved keywords in expression: ' + exp
     )
   }
   // reset state

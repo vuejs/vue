@@ -212,7 +212,6 @@ p.teardown = function () {
   }
 }
 
-
 /**
  * Recrusively traverse an object to evoke all converted
  * getters, so that every nested property inside the object

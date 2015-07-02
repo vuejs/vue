@@ -23,5 +23,4 @@ module.exports = {
     }
     _.addClass(el, id + '-transition')
   }
-
 }

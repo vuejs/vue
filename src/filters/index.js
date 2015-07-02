@@ -104,14 +104,14 @@ exports.pluralize = function (value) {
  */
 
 var keyCodes = {
-  enter    : 13,
-  tab      : 9,
-  'delete' : 46,
-  up       : 38,
-  left     : 37,
-  right    : 39,
-  down     : 40,
-  esc      : 27
+  esc: 27,
+  tab: 9,
+  enter: 13,
+  'delete': 46,
+  up: 38,
+  left: 37,
+  right: 39,
+  down: 40
 }
 
 exports.key = function (handler, key) {

@@ -11,7 +11,7 @@ enableDebug()
 function enableDebug () {
 
   var hasConsole = typeof console !== 'undefined'
-  
+
   /**
    * Log a message.
    *
@@ -35,7 +35,6 @@ function enableDebug () {
       console.warn('[Vue warn]: ' + msg)
       /* istanbul ignore if */
       if (config.debug) {
-        /* jshint debug: true */
         console.warn((e || new Error('Warning Stack Trace')).stack)
       }
     }

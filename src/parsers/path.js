@@ -44,7 +44,7 @@ var pathStateMachine = {
     'number': ['inIndex', 'append'],
     "'": ['inSingleQuote', 'append', ''],
     '"': ['inDoubleQuote', 'append', ''],
-    "ident": ['inIdent', 'append', '*']
+    'ident': ['inIdent', 'append', '*']
   },
 
   'afterZero': {
@@ -93,7 +93,7 @@ function getPathCharType (ch) {
 
   var code = ch.charCodeAt(0)
 
-  switch(code) {
+  switch (code) {
     case 0x5B: // [
     case 0x5D: // ]
     case 0x2E: // .
@@ -118,13 +118,15 @@ function getPathCharType (ch) {
   }
 
   // a-z, A-Z
-  if ((0x61 <= code && code <= 0x7A) ||
-      (0x41 <= code && code <= 0x5A)) {
+  if (
+    (code >= 0x61 && code <= 0x7A) ||
+    (code >= 0x41 && code <= 0x5A)
+  ) {
     return 'ident'
   }
 
   // 1-9
-  if (0x31 <= code && code <= 0x39) {
+  if (code >= 0x31 && code <= 0x39) {
     return 'number'
   }
 
@@ -146,14 +148,14 @@ function parsePath (path) {
   var c, newChar, key, type, transition, action, typeMap
 
   var actions = {
-    push: function() {
+    push: function () {
       if (key === undefined) {
         return
       }
       keys.push(key)
       key = undefined
     },
-    append: function() {
+    append: function () {
       if (key === undefined) {
         key = newChar
       } else {

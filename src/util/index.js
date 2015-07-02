@@ -1,4 +1,4 @@
-var lang   = require('./lang')
+var lang = require('./lang')
 var extend = lang.extend
 
 extend(exports, lang)

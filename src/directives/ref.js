@@ -19,5 +19,4 @@ module.exports = {
     // if any.
     vm._refID = this.expression
   }
-  
 }

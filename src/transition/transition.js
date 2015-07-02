@@ -123,7 +123,7 @@ p.enterDone = function () {
  *    - transition or animation:
  *        wait for end event, remove class, then done if
  *        there's no explicit js callback.
- *    - no css transition: 
+ *    - no css transition:
  *        done if there's no explicit js callback.
  * 7. wait for either done or js callback, then call
  *    afterLeave hook.

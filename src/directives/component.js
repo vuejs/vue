@@ -257,7 +257,7 @@ module.exports = {
   /**
    * Set childVM and parent ref
    */
-  
+
   setCurrent: function (child) {
     this.childVM = child
     var refID = child._refID || this.refID

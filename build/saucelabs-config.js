@@ -1,7 +1,7 @@
 var sauceConfig = {
   testName: 'Vue.js unit tests',
   recordScreenshots: false,
-  build: process.env.TRAVIS_JOB_ID || Date.now(),
+  build: process.env.TRAVIS_JOB_ID || Date.now()
 }
 
 /**
@@ -24,23 +24,23 @@ var batches = [
     },
     sl_mac_safari: {
       base: 'SauceLabs',
-      browserName: "safari",
-      platform: "OS X 10.10"
+      browserName: 'safari',
+      platform: 'OS X 10.10'
     }
   },
   // ie family
   {
     sl_ie_9: {
       base: 'SauceLabs',
-      browserName: "internet explorer",
-      platform: "Windows 7",
-      version: "9"
+      browserName: 'internet explorer',
+      platform: 'Windows 7',
+      version: '9'
     },
     sl_ie_10: {
       base: 'SauceLabs',
-      browserName: "internet explorer",
-      platform: "Windows 8",
-      version: "10"
+      browserName: 'internet explorer',
+      platform: 'Windows 8',
+      version: '10'
     },
     sl_ie_11: {
       base: 'SauceLabs',
@@ -67,7 +67,7 @@ var batches = [
 ]
 
 for (var i = 0; i < 3; i++) {
-  exports['batch' + (i+1)] = {
+  exports['batch' + (i + 1)] = {
     sauceLabs: sauceConfig,
     // mobile emulators are really slow
     captureTimeout: 300000,

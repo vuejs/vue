@@ -207,8 +207,9 @@ exports.extractContent = function (el, asFragment) {
     rawContent = asFragment
       ? document.createDocumentFragment()
       : document.createElement('div')
-    /* jshint boss:true */
+    /* eslint-disable no-cond-assign */
     while (child = el.firstChild) {
+    /* eslint-enable no-cond-assign */
       rawContent.appendChild(child)
     }
   }

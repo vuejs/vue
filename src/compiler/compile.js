@@ -65,7 +65,6 @@ exports.compile = function (el, options, partial, host) {
       if (nodeLinkFn) nodeLinkFn(vm, el, host)
       if (childLinkFn) childLinkFn(vm, childNodes, host)
     }, vm)
-    // 
     return makeUnlinkFn(vm, dirs)
   }
 }
@@ -88,7 +87,7 @@ function linkAndCapture (linker, vm) {
  * Linker functions return an unlink function that
  * tearsdown all directives instances generated during
  * the process.
- * 
+ *
  * We create unlink functions with only the necessary
  * information to avoid retaining additional closures.
  *
@@ -163,7 +162,7 @@ exports.compileAndLinkProps = function (vm, el, props) {
  * @return {Function}
  */
 
- exports.compileAndLinkRoot = function (vm, el, options) {
+exports.compileAndLinkRoot = function (vm, el, options) {
   var containerAttrs = options._containerAttrs
   var replacerAttrs = options._replacerAttrs
   var contextLinkFn, replacerLinkFn
@@ -608,7 +607,6 @@ function checkTerminalDirectives (el, options) {
     return skip
   }
   var value, dirName
-  /* jshint boss: true */
   for (var i = 0, l = terminalDirectives.length; i < l; i++) {
     dirName = terminalDirectives[i]
     if ((value = _.attr(el, dirName)) !== null) {

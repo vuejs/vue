@@ -3,7 +3,7 @@
  */
 
 module.exports = function (grunt) {
-  grunt.registerTask( 'casper', function (id) {
+  grunt.registerTask('casper', function (id) {
     var path = require('path')
     var done = this.async()
     var file = id ? id + '.js' : ''

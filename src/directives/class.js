@@ -3,7 +3,7 @@ var addClass = _.addClass
 var removeClass = _.removeClass
 
 module.exports = {
-  
+
   update: function (value) {
     if (this.arg) {
       // single toggle

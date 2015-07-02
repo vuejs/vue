@@ -87,7 +87,7 @@ function onAttached () {
 
 /**
  * Iterator to call attached hook
- * 
+ *
  * @param {Vue} child
  */
 
@@ -108,7 +108,7 @@ function onDetached () {
 
 /**
  * Iterator to call detached hook
- * 
+ *
  * @param {Vue} child
  */
 

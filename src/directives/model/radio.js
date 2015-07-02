@@ -15,12 +15,12 @@ module.exports = {
   },
 
   update: function (value) {
-    /* jshint eqeqeq: false */
+    /* eslint-disable eqeqeq */
     this.el.checked = value == this.el.value
+    /* eslint-enable eqeqeq */
   },
 
   unbind: function () {
     _.off(this.el, 'change', this.listener)
   }
-
 }

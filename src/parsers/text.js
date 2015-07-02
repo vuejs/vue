@@ -72,8 +72,9 @@ exports.parse = function (text) {
   var tokens = []
   var lastIndex = tagRE.lastIndex = 0
   var match, index, value, first, oneTime, twoWay
-  /* jshint boss:true */
+  /* eslint-disable no-cond-assign */
   while (match = tagRE.exec(text)) {
+  /* eslint-enable no-cond-assign */
     index = match.index
     // push text token
     if (index > lastIndex) {

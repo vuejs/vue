@@ -77,7 +77,7 @@ module.exports = {
   unbind: function () {
     if (this.unlink) {
       this.unlink()
-    } 
+    }
   }
 }
 

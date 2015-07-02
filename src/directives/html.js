@@ -37,5 +37,4 @@ module.exports = {
     this.nodes = _.toArray(frag.childNodes)
     _.before(frag, this.anchor)
   }
-
 }

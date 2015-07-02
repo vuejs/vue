@@ -30,7 +30,6 @@ module.exports = {
   },
 
   update: function (value) {
-    /* jshint eqeqeq: false */
     var el = this.el
     el.selectedIndex = -1
     var multi = this.multiple && _.isArray(value)
@@ -39,9 +38,11 @@ module.exports = {
     var option
     while (i--) {
       option = options[i]
+      /* eslint-disable eqeqeq */
       option.selected = multi
         ? indexOf(value, option.value) > -1
         : value == option.value
+      /* eslint-enable eqeqeq */
     }
   },
 
@@ -105,7 +106,6 @@ function buildOptions (parent, options) {
       if (typeof op === 'string') {
         el.text = el.value = op
       } else {
-        /* jshint eqeqeq: false */
         if (op.value != null) {
           el.value = op.value
         }
@@ -177,10 +177,11 @@ function getOptionValue (op) {
  */
 
 function indexOf (arr, val) {
-  /* jshint eqeqeq: false */
   var i = arr.length
   while (i--) {
+    /* eslint-disable eqeqeq */
     if (arr[i] == val) return i
+    /* eslint-enable eqeqeq */
   }
   return -1
 }

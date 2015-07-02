@@ -33,8 +33,8 @@ var p = Cache.prototype
 
 p.put = function (key, value) {
   var entry = {
-    key:key,
-    value:value
+    key: key,
+    value: value
   }
   this._keymap[key] = entry
   if (this.tail) {
