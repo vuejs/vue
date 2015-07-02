@@ -62,7 +62,7 @@ $ npm run dev
 To lint:
 
 ``` bash
-$ grunt jshint
+$ grunt eslint
 ```
 
 To build:
