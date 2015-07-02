@@ -64,7 +64,7 @@ module.exports = function (grunt) {
         console.log(blue('Releasing: ' + next))
         grunt.config.set('version', next)
         grunt.task.run([
-          'jshint',
+          'eslint',
           'cover',
           'build',
           'casper',
