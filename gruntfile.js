@@ -6,19 +6,15 @@ module.exports = function (grunt) {
 
     version: grunt.file.readJSON('package.json').version,
 
-    jshint: {
-      options: {
-        reporter: require('jshint-stylish'),
-        jshintrc: true
-      },
-      build: {
-        src: ['gruntfile.js', 'tasks/*.js']
-      },
+    eslint: {
       src: {
-        src: 'src/**/*.js'
+        src: ['src/**/*.js']
       },
       test: {
         src: ['test/unit/specs/**/*.js', 'test/e2e/*.js']
+      },
+      build: {
+        src: ['gruntfile.js', 'build/**/*.js']
       }
     },
 
@@ -73,7 +69,7 @@ module.exports = function (grunt) {
   })
 
   // load npm tasks
-  grunt.loadNpmTasks('grunt-contrib-jshint')
+  grunt.loadNpmTasks('grunt-eslint')
   grunt.loadNpmTasks('grunt-karma')
 
   // load custom tasks
@@ -88,7 +84,7 @@ module.exports = function (grunt) {
   grunt.registerTask('cover', ['karma:coverage'])
   grunt.registerTask('test', ['unit', 'cover', 'casper'])
   grunt.registerTask('sauce', ['karma:sauce1', 'karma:sauce2', 'karma:sauce3'])
-  grunt.registerTask('ci', ['jshint', 'cover', 'codecov', 'build', 'casper', 'sauce'])
-  grunt.registerTask('default', ['jshint', 'build', 'test'])
+  grunt.registerTask('ci', ['eslint', 'cover', 'codecov', 'build', 'casper', 'sauce'])
+  grunt.registerTask('default', ['eslint', 'build', 'test'])
 
 }
