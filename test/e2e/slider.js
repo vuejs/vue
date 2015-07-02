@@ -2,7 +2,7 @@
 // testing the content transclusion here
 
 casper.test.begin('slider', 2, function (test) {
-  
+
   casper
   .start('../../examples/slider/index.html')
   .then(function () {

@@ -1,7 +1,7 @@
 /* global stats, valueToPoint */
 
 casper.test.begin('svg', 18, function (test) {
-  
+
   casper
   .start('../../examples/svg/index.html')
   .then(function () {

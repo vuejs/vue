@@ -1,5 +1,5 @@
 casper.test.begin('tree', 22, function (test) {
-  
+
   casper
   .start('../../examples/tree/index.html')
   .then(function () {

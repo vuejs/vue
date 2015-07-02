@@ -1,5 +1,5 @@
 casper.test.begin('grid', 73, function (test) {
-  
+
   casper
   .start('../../examples/grid/index.html')
   .then(function () {
@@ -104,7 +104,7 @@ casper.test.begin('grid', 73, function (test) {
     for (var i = 0; i < data.length; i++) {
       for (var j = 0; j < columns.length; j++) {
         test.assertSelectorHasText(
-          'tr:nth-child(' + (i+1) + ') td:nth-child(' + (j+1) + ')',
+          'tr:nth-child(' + (i + 1) + ') td:nth-child(' + (j + 1) + ')',
           data[i][columns[j]]
         )
       }

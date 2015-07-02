@@ -1,7 +1,7 @@
 /* global __utils__ */
 
 casper.test.begin('todomvc', 69, function (test) {
-  
+
   casper
   .start('../../examples/todomvc/index.html')
   .then(function () {
@@ -36,7 +36,7 @@ casper.test.begin('todomvc', 69, function (test) {
     test.assertVisible('#main', '#main should now be visible')
     test.assertVisible('#footer', '#footer should now be visible')
     test.assertNotVisible('#clear-completed', '#clear-completed should be hidden')
-    test.assertField({type:'css',path:'#new-todo'}, '', 'new todo input should be reset')
+    test.assertField({type: 'css', path: '#new-todo'}, '', 'new todo input should be reset')
 
   })
 
@@ -244,7 +244,7 @@ casper.test.begin('todomvc', 69, function (test) {
     test.assertElementCount('.todo', 3, 'item should have been deleted')
   })
 
-  //test toggle all
+  // test toggle all
   .thenClick('#toggle-all', function () {
     test.assertElementCount('.todo.completed', 3, 'should toggle all items to completed')
   })
@@ -265,8 +265,8 @@ casper.test.begin('todomvc', 69, function (test) {
     }
     casper.evaluate(function () {
       // casper.mouseEvent can't set keyCode
-      var field = document.getElementById('new-todo'),
-        e = document.createEvent('HTMLEvents')
+      var field = document.getElementById('new-todo')
+      var e = document.createEvent('HTMLEvents')
       e.initEvent('keyup', true, true)
       e.keyCode = 13
       field.dispatchEvent(e)
@@ -275,8 +275,8 @@ casper.test.begin('todomvc', 69, function (test) {
 
   function doubleClick (selector) {
     casper.evaluate(function (selector) {
-      var el = document.querySelector(selector),
-        e = document.createEvent('MouseEvents')
+      var el = document.querySelector(selector)
+      var e = document.createEvent('MouseEvents')
       e.initMouseEvent('dblclick', true, true, null, 1, 0, 0, 0, 0, false, false, false, false, 0, null)
       el.dispatchEvent(e)
     }, selector)
@@ -284,8 +284,8 @@ casper.test.begin('todomvc', 69, function (test) {
 
   function keyUp (code) {
     casper.evaluate(function (code) {
-      var input = document.querySelector('.todo:nth-child(1) .edit'),
-        e = document.createEvent('HTMLEvents')
+      var input = document.querySelector('.todo:nth-child(1) .edit')
+      var e = document.createEvent('HTMLEvents')
       e.initEvent('keyup', true, true)
       e.keyCode = code
       input.dispatchEvent(e)

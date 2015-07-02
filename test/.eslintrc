@@ -14,7 +14,8 @@
     "beforeEach": true,
     "afterEach": true,
     "spyOn": true,
-    "hasWarned": true
+    "hasWarned": true,
+    "casper": true
   },
 
   "rules": {

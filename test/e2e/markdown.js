@@ -1,5 +1,5 @@
 casper.test.begin('markdown', 5, function (test) {
-  
+
   casper
   .start('../../examples/markdown/index.html')
   .then(function () {
@@ -31,8 +31,8 @@ casper.test.begin('markdown', 5, function (test) {
   .wait(300) // wait for debounce
   .then(function () {
     test.assertEval(function () {
-      return document.querySelector('textarea').value
-        === '## yo\n\n- test\n- hi\n\n# hello'
+      return document.querySelector('textarea').value ===
+        '## yo\n\n- test\n- hi\n\n# hello'
     })
     test.assertEval(function () {
       return document.querySelector('#editor div')
