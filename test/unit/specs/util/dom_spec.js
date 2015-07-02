@@ -14,7 +14,7 @@ if (_.inBrowser) {
       parent = div()
       child = div()
       target = div()
-      parent.appendChild(child) 
+      parent.appendChild(child)
     })
 
     it('inDoc', function () {
@@ -31,7 +31,7 @@ if (_.inBrowser) {
       expect(val).toBe('ok')
       expect(target.hasAttribute('v-test')).toBe(false)
     })
-    
+
     it('before', function () {
       _.before(target, child)
       expect(target.parentNode).toBe(parent)

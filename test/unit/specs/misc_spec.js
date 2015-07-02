@@ -68,7 +68,7 @@ describe('Misc', function () {
   // #922
   it('template repeat inside svg', function () {
     var el = document.createElement('div')
-    var vm = new Vue({
+    new Vue({
       el: el,
       template: '<svg><template v-repeat="list"><text>{{$value}}</text></template></svg>',
       data: {

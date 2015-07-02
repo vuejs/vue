@@ -20,6 +20,5 @@ if (_.inBrowser) {
       })
       expect(el.hasAttribute('v-cloak')).toBe(false)
     })
-
   })
 }

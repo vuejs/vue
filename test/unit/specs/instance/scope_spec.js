@@ -158,7 +158,7 @@ describe('Instance Scope', function () {
   })
 
   describe('computed', function () {
-    
+
     var Test = Vue.extend({
       computed: {
         c: function () {

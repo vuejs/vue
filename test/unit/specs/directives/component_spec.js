@@ -16,7 +16,7 @@ if (_.inBrowser) {
     })
 
     it('static', function () {
-      var vm = new Vue({
+      new Vue({
         el: el,
         template: '<test></test>',
         components: {
@@ -32,7 +32,7 @@ if (_.inBrowser) {
     })
 
     it('replace', function () {
-      var vm = new Vue({
+      new Vue({
         el: el,
         template: '<test></test>',
         components: {
@@ -66,7 +66,7 @@ if (_.inBrowser) {
     })
 
     it('inline-template', function () {
-      var vm = new Vue({
+      new Vue({
         el: el,
         template: '<test inline-template>{{a}}</test>',
         data: {
@@ -85,7 +85,7 @@ if (_.inBrowser) {
     })
 
     it('block replace', function () {
-      var vm = new Vue({
+      new Vue({
         el: el,
         template: '<test></test>',
         components: {
@@ -246,10 +246,10 @@ if (_.inBrowser) {
     })
 
     it('props', function () {
-      var vm = new Vue({
+      new Vue({
         el: el,
         data: {
-          list: [{a:1}, {a:2}]
+          list: [{a: 1}, {a: 2}]
         },
         template: '<test collection="{{list}}"></test>',
         components: {
@@ -417,7 +417,7 @@ if (_.inBrowser) {
 
     it('already mounted warn', function () {
       el.setAttribute('v-_component', 'test')
-      var vm = new Vue({
+      new Vue({
         el: el
       })
       expect(hasWarned(_, 'Do not create a component that only contains a single other component')).toBe(true)

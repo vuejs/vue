@@ -165,7 +165,7 @@ if (_.inBrowser) {
     })
 
     it('warn invalid keys', function () {
-      var vm = new Vue({
+      new Vue({
         el: el,
         template: '<test a.b.c="{{test}}"></test>',
         components: {
@@ -178,7 +178,7 @@ if (_.inBrowser) {
     })
 
     it('warn props with no el option', function () {
-      var vm = new Vue({
+      new Vue({
         props: ['a']
       })
       expect(hasWarned(_, 'Props will not be compiled if no `el`')).toBe(true)
@@ -220,7 +220,7 @@ if (_.inBrowser) {
     })
 
     it('block instance with replace:true', function () {
-      var vm = new Vue({
+      new Vue({
         el: el,
         template: '<test b="{{a}}" c="{{d}}"></test>',
         data: {
@@ -338,7 +338,7 @@ if (_.inBrowser) {
       })
 
       it('required', function () {
-        var vm = new Vue({
+        new Vue({
           el: document.createElement('div'),
           template: '<test></test>',
           components: {
@@ -358,7 +358,7 @@ if (_.inBrowser) {
     })
 
     it('alternative syntax', function () {
-      var vm = new Vue({
+      new Vue({
         el: el,
         template: '<test b="{{a}}" c="{{d}}"></test>',
         data: {

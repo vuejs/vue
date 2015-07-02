@@ -33,7 +33,7 @@ describe('Partial', function () {
       el: el,
       template: '<partial name="test-{{id}}"></partial>',
       data: {
-        id: 'a',
+        id: 'a'
       },
       partials: {
         'test-a': 'a {{id}}',
@@ -55,7 +55,7 @@ describe('Partial', function () {
       calls++
       return compile.apply(this, arguments)
     }
-    var vm = new Vue({
+    new Vue({
       el: el,
       template:
         '<partial name="cache-test"></partial> ' +
@@ -79,7 +79,7 @@ describe('Partial', function () {
       el: el,
       template: '<partial name="test-{{id}}"></partial>',
       data: {
-        id: 'a',
+        id: 'a'
       },
       partials: {
         'test-a': 'a {{id}}'

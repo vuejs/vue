@@ -60,7 +60,7 @@ describe('Global API', function () {
   describe('Asset registration', function () {
 
     var Test = Vue.extend()
-    
+
     it('directive / elementDirective / filter / transition', function () {
       [
         'directive',

@@ -14,7 +14,7 @@ if (typeof console !== 'undefined') {
         spyOn(console, 'trace')
       }
     })
-    
+
     it('log when debug is true', function () {
       config.debug = true
       _.log('hello')

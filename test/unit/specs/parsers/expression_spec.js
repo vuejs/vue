@@ -6,7 +6,7 @@ var testCases = [
     // simple path
     exp: 'a.b.d',
     scope: {
-      a:{b:{d:123}}
+      a: {b: {d: 123}}
     },
     expected: 123,
     paths: ['a']
@@ -15,7 +15,7 @@ var testCases = [
   {
     exp: 'a["b"].c',
     scope: {
-      a:{b:{c:234}}
+      a: {b: {c: 234}}
     },
     expected: 234,
     paths: ['a']
@@ -63,10 +63,10 @@ var testCases = [
     paths: ['a']
   },
   {
-    //multiline expressions
+    // multiline expressions
     exp: "{\n a: '35',\n b: c}",
-    scope:{c:32},
-    expected: { a : '35', b : 32 }
+    scope: {c: 32},
+    expected: { a: '35', b: 32 }
   },
   {
     // dollar signs and underscore
@@ -149,7 +149,7 @@ var testCases = [
     paths: ['a']
   },
   {
-    //keyowrd + keyword literal
+    // keyowrd + keyword literal
     exp: 'true && a.true',
     scope: {
       a: { 'true': false }
@@ -208,7 +208,7 @@ var testCases = [
   // typeof operator
   {
     exp: 'typeof test === "string"',
-    scope: { test: "123" },
+    scope: { test: '123' },
     expected: true,
     paths: ['test']
   },
@@ -256,7 +256,7 @@ describe('Expression Parser', function () {
     expect(function () {
       res.set(scope, 123)
     }).not.toThrow()
-    scope.a = {b:{c:0}}
+    scope.a = {b: {c: 0}}
     res.set(scope, 123)
     expect(scope.a.b.c).toBe(123)
   })
@@ -268,28 +268,28 @@ describe('Expression Parser', function () {
   })
 
   describe('invalid expression', function () {
-    
+
     beforeEach(function () {
       spyOn(_, 'warn')
     })
 
     it('should warn on invalid expression', function () {
       expect(_.warn).not.toHaveBeenCalled()
-      var res = expParser.parse('a--b"ffff')
+      expParser.parse('a--b"ffff')
       expect(hasWarned(_, 'Invalid expression')).toBe(true)
     })
 
     if (leftHandThrows()) {
       it('should warn on invalid left hand expression for setter', function () {
         expect(_.warn).not.toHaveBeenCalled()
-        var res = expParser.parse('a+b', true)
+        expParser.parse('a+b', true)
         expect(hasWarned(_, 'Invalid setter function body')).toBe(true)
       })
     }
 
     it('should warn if expression contains improper reserved keywords', function () {
       expect(_.warn).not.toHaveBeenCalled()
-      var res = expParser.parse('break + 1')
+      expParser.parse('break + 1')
       expect(hasWarned(_, 'Avoid using reserved keywords')).toBe(true)
     })
   })
@@ -302,7 +302,7 @@ describe('Expression Parser', function () {
 
 function leftHandThrows () {
   try {
-    var fn = new Function('a + b = 1')
+    new Function('a + b = 1')
   } catch (e) {
     return true
   }

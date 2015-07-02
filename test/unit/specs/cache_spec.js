@@ -22,7 +22,7 @@ function toString (cache) {
 describe('Cache', function () {
 
   var c = new Cache(4)
-  
+
   it('put', function () {
     c.put('adam', 29)
     c.put('john', 26)
@@ -50,5 +50,4 @@ describe('Cache', function () {
     expect(toString(c)).toBe('john:26 < bob:48 < angela:24 < ygwie:81')
     expect(c.get('adam')).toBeUndefined()
   })
-
 })

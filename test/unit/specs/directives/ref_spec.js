@@ -43,7 +43,7 @@ if (_.inBrowser) {
         vm.test = ''
         _.nextTick(function () {
           expect(vm.$.test).toBeNull()
-          done()          
+          done()
         })
       })
     })
@@ -78,7 +78,7 @@ if (_.inBrowser) {
     it('with v-repeat', function (done) {
       var vm = new Vue({
         el: el,
-        data: { items: [1,2,3,4,5] },
+        data: { items: [1, 2, 3, 4, 5] },
         template: '<div v-repeat="items" v-ref="test"></div>'
       })
       expect(vm.$.test).toBeTruthy()
@@ -136,12 +136,11 @@ if (_.inBrowser) {
     })
 
     it('should warn on non-root', function () {
-      var vm = new Vue({
+      new Vue({
         el: el,
         template: '<div v-ref="test"></div>'
       })
       expect(hasWarned(_, 'should only be used on a component root element')).toBe(true)
     })
-
   })
 }

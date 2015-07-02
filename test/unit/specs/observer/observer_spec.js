@@ -5,11 +5,6 @@ var _ = require('../../../../src/util')
 
 describe('Observer', function () {
 
-  var spy
-  beforeEach(function () {
-    spy = jasmine.createSpy('observer')
-  })
-
   it('create on non-observables', function () {
     // skip primitive value
     var ob = Observer.create(1)
@@ -63,13 +58,12 @@ describe('Observer', function () {
       },
       update: jasmine.createSpy()
     }
-    var dump
     // collect dep
     Observer.setTarget(watcher)
-    dump = obj.a.b
+    obj.a.b
     Observer.setTarget(null)
     expect(watcher.deps.length).toBe(2)
-    dump = obj.a.b = 3
+    obj.a.b = 3
     expect(watcher.update.calls.count()).toBe(1)
     // swap object
     var oldA = obj.a
@@ -77,11 +71,9 @@ describe('Observer', function () {
     expect(watcher.update.calls.count()).toBe(2)
     expect(oldA.__ob__.deps.length).toBe(0)
     expect(obj.a.__ob__.deps.length).toBe(1)
-    // recollect dep
-    var oldDeps = watcher.deps
     watcher.deps = []
     Observer.setTarget(watcher)
-    dump = obj.a.b
+    obj.a.b
     Observer.setTarget(null)
     expect(watcher.deps.length).toBe(2)
     // set on the swapped object
@@ -186,7 +178,7 @@ describe('Observer', function () {
   it('no proto', function () {
     config.proto = false
     // object
-    var obj = {a:1}
+    var obj = {a: 1}
     var ob = Observer.create(obj)
     expect(obj.$add).toBeTruthy()
     expect(obj.$delete).toBeTruthy()

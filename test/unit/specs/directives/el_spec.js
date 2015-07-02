@@ -24,7 +24,7 @@ if (_.inBrowser) {
     it('with v-repeat', function (done) {
       var vm = new Vue({
         el: el,
-        data: { items: [1,2,3,4,5] },
+        data: { items: [1, 2, 3, 4, 5] },
         template: '<div v-repeat="items" v-el="test">{{$value}}</div>'
       })
       expect(vm.$$.test).toBeTruthy()

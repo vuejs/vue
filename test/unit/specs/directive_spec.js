@@ -14,8 +14,8 @@ describe('Directive', function () {
       unbind: jasmine.createSpy('unbind')
     }
     vm = new Vue({
-      data:{
-        a:1,
+      data: {
+        a: 1,
         b: { c: { d: 2 }}
       },
       filters: {
@@ -33,7 +33,7 @@ describe('Directive', function () {
     var d = new Directive('test', el, vm, {
       expression: 'a',
       arg: 'someArg',
-      filters: [{name:'test'}]
+      filters: [{name: 'test'}]
     }, def)
     // properties
     expect(d.el).toBe(el)
@@ -111,7 +111,7 @@ describe('Directive', function () {
     }
     var d = new Directive('test', el, vm, {
       expression: 'a++',
-      filters: [{name:'test'}]
+      filters: [{name: 'test'}]
     }, def)
     expect(d._watcher).toBeUndefined()
     expect(d.bind).toHaveBeenCalled()
@@ -131,7 +131,7 @@ describe('Directive', function () {
     }
     var d = new Directive('test', el, vm, {
       expression: 'a',
-      filters: [{name:'test'}]
+      filters: [{name: 'test'}]
     }, def)
     d.set(2)
     expect(vm.a).toBe(6)
@@ -144,7 +144,7 @@ describe('Directive', function () {
 
   it('deep', function (done) {
     def.deep = true
-    var d = new Directive('test', el, vm, {
+    new Directive('test', el, vm, {
       expression: 'b'
     }, def)
     vm.b.c.d = 3
@@ -161,5 +161,4 @@ describe('Directive', function () {
     expect(d.update).toBe(def.update)
     expect(def.update).toHaveBeenCalled()
   })
-
 })

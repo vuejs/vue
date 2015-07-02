@@ -14,7 +14,5 @@ describe('Util - Environment', function () {
         done()
       })
     })
-
   })
-
 })

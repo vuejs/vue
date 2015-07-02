@@ -4,7 +4,7 @@ var compiler = require('../../../../src/compiler')
 
 if (_.inBrowser) {
   describe('Lifecycle API', function () {
-    
+
     describe('$mount', function () {
 
       var el, frag
@@ -76,7 +76,7 @@ if (_.inBrowser) {
         expect(vm.$el.className).toBe('replace-test')
         document.body.removeChild(vm.$el)
       })
-      
+
       it('precompiled linker', function () {
         var linker = compiler.compile(el, Vue.options)
         var vm = new Vue({
@@ -168,7 +168,7 @@ if (_.inBrowser) {
         expect(vm._directives).toBeNull()
         expect(Object.keys(vm._events).length).toBe(0)
       })
-      
+
       it('remove element', function () {
         var el = document.createElement('div')
         var parent = document.createElement('div')

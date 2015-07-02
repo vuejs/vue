@@ -27,6 +27,5 @@ if (_.inBrowser) {
       dir.update(123)
       expect(dir.el.nodeValue).toBe('123')
     })
-
   })
 }

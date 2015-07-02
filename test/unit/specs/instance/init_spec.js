@@ -46,5 +46,4 @@ describe('Instance Init', function () {
   it('should call $mount when options.el is present', function () {
     expect(stub.$mount).toHaveBeenCalledWith(stub.$options.el)
   })
-
 })

@@ -14,6 +14,5 @@ if (_.inBrowser) {
       })
       expect(vm.$el.firstChild.textContent).toBe('{{a}}')
     })
-
   })
 }

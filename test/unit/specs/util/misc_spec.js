@@ -23,5 +23,4 @@ describe('Util - Misc', function () {
     })
     expect(res).toBe('test')
   })
-
 })

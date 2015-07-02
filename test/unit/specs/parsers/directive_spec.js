@@ -130,5 +130,4 @@ describe('Directive Parser', function () {
     var res2 = parse('a || b | c')
     expect(res1).toBe(res2)
   })
-
 })

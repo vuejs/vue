@@ -149,7 +149,7 @@ describe('Content Transclusion', function () {
       done()
     })
   })
-  
+
   it('v-if with content transclusion', function (done) {
     var vm = new Vue({
       el: el,
@@ -184,7 +184,7 @@ describe('Content Transclusion', function () {
 
   it('inline v-repeat', function () {
     el.innerHTML = '<p>1</p><p>2</p><p>3</p>'
-    var vm = new Vue({
+    new Vue({
       el: el,
       template: '<div v-repeat="list"><content select="p:nth-child({{$index + 1}})"></content></div>',
       data: {
@@ -204,7 +204,7 @@ describe('Content Transclusion', function () {
       data: {
         cls: 'parent',
         msg: 'hi',
-        list: [{a:1},{a:2},{a:3}]
+        list: [{a: 1}, {a: 2}, {a: 3}]
       },
       components: {
         test: {
@@ -237,7 +237,7 @@ describe('Content Transclusion', function () {
           '</testb>' +
         '</testa>',
       data: {
-        list: [1,2]
+        list: [1, 2]
       },
       components: {
         testa: { template: '<content></content>' },

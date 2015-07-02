@@ -24,7 +24,7 @@ describe('Watcher', function () {
     spy = jasmine.createSpy('watcher')
     spyOn(_, 'warn')
   })
-  
+
   it('simple path', function (done) {
     var watcher = new Watcher(vm, 'b.c', spy)
     expect(watcher.value).toBe(2)
@@ -204,7 +204,7 @@ describe('Watcher', function () {
     expect(watcher.value).toBe(oldData)
     var newData = {}
     vm.$data = newData
-    nextTick(function() {
+    nextTick(function () {
       expect(spy).toHaveBeenCalledWith(newData, oldData)
       expect(watcher.value).toBe(newData)
       done()
@@ -238,8 +238,8 @@ describe('Watcher', function () {
     }
     var watcher = new Watcher(vm, 'b.c', spy, {
       filters: [
-        { name: 'test', args: [{value:3, dynamic:false}]},
-        { name: 'test2', args: [{value:'msg', dynamic:true}]}
+        { name: 'test', args: [{value: 3, dynamic: false}]},
+        { name: 'test2', args: [{value: 'msg', dynamic: true}]}
       ]
     })
     expect(watcher.value).toBe('6yo')
@@ -259,7 +259,7 @@ describe('Watcher', function () {
     }
     var watcher = new Watcher(vm, 'b["c"]', spy, {
       filters: [
-        { name: 'test', args: [{value:5, dynamic:false}] }
+        { name: 'test', args: [{value: 5, dynamic: false}] }
       ],
       twoWay: true
     })
@@ -292,14 +292,14 @@ describe('Watcher', function () {
   })
 
   it('deep watch', function (done) {
-    var watcher = new Watcher(vm, 'b', spy, {
+    new Watcher(vm, 'b', spy, {
       deep: true
     })
     vm.b.c = { d: 4 }
     nextTick(function () {
       expect(spy).toHaveBeenCalledWith(vm.b, vm.b)
       var oldB = vm.b
-      vm.b = { c: [{a:1}] }
+      vm.b = { c: [{a: 1}]}
       nextTick(function () {
         expect(spy).toHaveBeenCalledWith(vm.b, oldB)
         expect(spy.calls.count()).toBe(2)
@@ -344,7 +344,7 @@ describe('Watcher', function () {
 
   it('synchronous updates', function () {
     config.async = false
-    var watcher = new Watcher(vm, 'a', spy)
+    new Watcher(vm, 'a', spy)
     vm.a = 2
     vm.a = 3
     expect(spy.calls.count()).toBe(2)
@@ -354,7 +354,7 @@ describe('Watcher', function () {
   })
 
   it('warn getter errors', function () {
-    var watcher = new Watcher(vm, 'd.e + c', spy)
+    new Watcher(vm, 'd.e + c', spy)
     expect(hasWarned(_, 'Error when evaluating expression')).toBe(true)
   })
 

@@ -3,7 +3,6 @@ var _ = require('../../../../src/util')
 var dirParser = require('../../../../src/parsers/directive')
 var compiler = require('../../../../src/compiler')
 var compile = compiler.compile
-var transclude = compiler.transclude
 
 if (_.inBrowser) {
   describe('Compile', function () {
@@ -240,7 +239,6 @@ if (_.inBrowser) {
       // temporarily remove vm.$parent
       var context = vm._context
       vm._context = null
-      var def = Vue.options.directives._prop
       el.setAttribute('a', 'hi')
       el.setAttribute('b', '{{hi}}')
       compiler.compileAndLinkProps(vm, el, [
@@ -412,7 +410,7 @@ if (_.inBrowser) {
     })
 
     it('element directive', function () {
-      var vm = new Vue({
+      new Vue({
         el: el,
         template: '<test>{{a}}</test>',
         elementDirectives: {

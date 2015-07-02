@@ -7,21 +7,21 @@ describe('Events API', function () {
     vm = new Vue()
     spy = jasmine.createSpy('emitter')
   })
-  
+
   it('$on', function () {
     vm.$on('test', function () {
       // expect correct context
       expect(this).toBe(vm)
       spy.apply(this, arguments)
     })
-    vm.$emit('test', 1, 2 ,3, 4)
+    vm.$emit('test', 1, 2, 3, 4)
     expect(spy.calls.count()).toBe(1)
     expect(spy).toHaveBeenCalledWith(1, 2, 3, 4)
   })
 
   it('$once', function () {
     vm.$once('test', spy)
-    vm.$emit('test', 1, 2 ,3)
+    vm.$emit('test', 1, 2, 3)
     vm.$emit('test', 2, 3, 4)
     expect(spy.calls.count()).toBe(1)
     expect(spy).toHaveBeenCalledWith(1, 2, 3)

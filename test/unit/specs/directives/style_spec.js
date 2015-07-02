@@ -12,7 +12,7 @@ function checkPrefixedProp (prop) {
       if ((prefixes[i] + upper) in el.style) {
         prop = prefixes[i] + upper
       }
-    }  
+    }
   }
   return prop
 }
@@ -24,7 +24,7 @@ if (_.inBrowser) {
     beforeEach(function () {
       el = document.createElement('div')
       dir = { el: el }
-      _.extend(dir, def)      
+      _.extend(dir, def)
     })
 
     it('normal with arg', function () {
@@ -85,7 +85,7 @@ if (_.inBrowser) {
 
     it('update with object and auto prefix', function () {
       var prop = checkPrefixedProp('transform')
-      var val = 'scale(0.5)';
+      var val = 'scale(0.5)'
       dir.update({transform: val})
       expect(el.style[prop]).toBe(val)
     })

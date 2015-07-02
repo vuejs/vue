@@ -5,10 +5,6 @@ describe('misc', function () {
 
   describe('_applyFilters', function () {
 
-    var readSpy = jasmine.createSpy()
-    var readSpy2 = jasmine.createSpy()
-    var writeSpy = jasmine.createSpy()
-
     var vm = new Vue({
       data: {
         msg: 'BBB'
@@ -36,8 +32,8 @@ describe('misc', function () {
 
     it('read', function () {
       var filters = [
-        { name: 'read', args: [{dynamic:false,value:'AAA'}] },
-        { name: 'read2', args: [{dynamic:true, value:'msg'}] }
+        { name: 'read', args: [{dynamic: false, value: 'AAA'}] },
+        { name: 'read2', args: [{dynamic: true, value: 'msg'}] }
       ]
       var val = vm._applyFilters('test', null, filters, false)
       expect(val).toBe('test read:AAA read2:BBB')
@@ -52,10 +48,8 @@ describe('misc', function () {
     })
 
     it('warn not found', function () {
-      vm._applyFilters('what', null, [{name:'what the fuck'}])
+      vm._applyFilters('what', null, [{name: 'wtf'}])
       expect(hasWarned(_, 'Failed to resolve filter')).toBe(true)
     })
-
   })
-
 })

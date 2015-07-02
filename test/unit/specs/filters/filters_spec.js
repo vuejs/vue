@@ -1,11 +1,10 @@
-var Vue = require('../../../../src/vue')
 var filters = require('../../../../src/filters')
 
 describe('Filters', function () {
 
   it('json read', function () {
     var filter = filters.json.read
-    var obj = {a:{b:2}}
+    var obj = {a: {b: 2}}
     expect(filter(obj)).toBe(JSON.stringify(obj, null, 2))
     expect(filter(obj, 4)).toBe(JSON.stringify(obj, null, 4))
     // plain string
@@ -20,7 +19,7 @@ describe('Filters', function () {
     var invalidJSON = '{"a":}'
     expect(filter(invalidJSON)).toBe(invalidJSON)
   })
-  
+
   it('capitalize', function () {
     var filter = filters.capitalize
     var res = filter('fsefsfsef')
@@ -129,7 +128,7 @@ describe('Filters', function () {
     expect(res.length).toBe(1)
     expect(res[0]).toBe(arr[2])
     // filter by false (#928)
-    res = filter([{a:false},{b:true}], false)
+    res = filter([{a: false}, {b: true}], false)
     expect(res.length).toBe(1)
     expect(res[0].a).toBe(false)
   })

@@ -170,7 +170,7 @@ if (_.inBrowser) {
 
     it('invalid warn', function () {
       el.setAttribute('v-if', 'test')
-      var vm = new Vue({
+      new Vue({
         el: el
       })
       expect(hasWarned(_, 'cannot be used on an instance root element')).toBe(true)
@@ -212,7 +212,7 @@ if (_.inBrowser) {
         el: el,
         data: {
           show: true,
-          list: [{a:0}]
+          list: [{a: 0}]
         },
         template:
           '<outer>' +
@@ -243,12 +243,12 @@ if (_.inBrowser) {
       _.nextTick(function () {
         assertMarkup()
         expect(detachSpy.calls.count()).toBe(1)
-        vm.list.push({a:1})
+        vm.list.push({a: 1})
         vm.show = true
         _.nextTick(function () {
           assertMarkup()
           expect(attachSpy.calls.count()).toBe(2 + 2)
-          vm.list.push({a:2})
+          vm.list.push({a: 2})
           vm.show = false
           _.nextTick(function () {
             assertMarkup()
@@ -276,7 +276,7 @@ if (_.inBrowser) {
         expect(el.innerHTML).toBe(markup)
       }
     })
-    
+
     // #893 in IE textNodes do not have `contains` method
     it('call attach/detach: comparing textNodes in IE', function (done) {
       document.body.appendChild(el)

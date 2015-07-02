@@ -23,7 +23,7 @@ if (_.inBrowser) {
       var vm = new Vue({
         el: el,
         template: '<a v-on="click:test"></a>',
-        data: {a:1},
+        data: {a: 1},
         methods: {
           test: spy
         }
@@ -37,10 +37,10 @@ if (_.inBrowser) {
     })
 
     it('inline expression', function (done) {
-      var vm = new Vue({
+      new Vue({
         el: el,
         template: '<a v-on="click:a++">{{a}}</a>',
-        data: {a:1}
+        data: {a: 1}
       })
       var a = el.firstChild
       trigger(a, 'click')
@@ -51,10 +51,10 @@ if (_.inBrowser) {
     })
 
     it('with key filter', function (done) {
-      var vm = new Vue({
+      new Vue({
         el: el,
         template: '<a v-on="keyup:test | key \'enter\'">{{a}}</a>',
-        data: {a:1},
+        data: {a: 1},
         methods: {
           test: function () {
             this.a++
@@ -72,7 +72,7 @@ if (_.inBrowser) {
     })
 
     it('warn non-function values', function () {
-      var vm = new Vue({
+      new Vue({
         el: el,
         data: { test: 123 },
         template: '<a v-on="keyup:test"></a>'
@@ -103,7 +103,7 @@ if (_.inBrowser) {
 
     it('passing $event', function () {
       var test = jasmine.createSpy()
-      var vm = new Vue({
+      new Vue({
         el: el,
         template: '<a v-on="click:test($event)"></a>',
         methods: {
@@ -121,7 +121,7 @@ if (_.inBrowser) {
           test: test
         }
       })
-      var child = parent.$addChild({
+      parent.$addChild({
         el: el,
         inherit: true,
         template: '<a v-on="click:test($event)"></a>'

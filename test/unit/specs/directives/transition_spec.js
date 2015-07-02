@@ -116,8 +116,6 @@ if (_.inBrowser) {
         expect(calls.b.enter).toBe(c)
         expect(calls.b.leave).toBe(d)
       }
-
     })
-
   })
 }

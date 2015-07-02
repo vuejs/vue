@@ -17,7 +17,7 @@ describe('Async components', function () {
   describe('v-component', function () {
 
     it('normal', function (done) {
-      var vm = new Vue({
+      new Vue({
         el: el,
         template: '<test></test>',
         components: {
@@ -154,7 +154,7 @@ describe('Async components', function () {
     it('avoid duplicate requests', function (done) {
       var factoryCallCount = 0
       var instanceCount = 0
-      var vm = new Vue({
+      new Vue({
         el: el,
         template:
           '<test></test>' +
@@ -184,7 +184,7 @@ describe('Async components', function () {
     })
 
     it('warn reject', function () {
-      var vm = new Vue({
+      new Vue({
         el: el,
         template: '<test></test>',
         components: {
@@ -203,7 +203,7 @@ describe('Async components', function () {
     // - warn for dynamic
 
     it('normal', function (done) {
-      var vm = new Vue({
+      new Vue({
         el: el,
         template: '<test v-repeat="list"></test>',
         data: {
@@ -288,7 +288,7 @@ describe('Async components', function () {
     })
 
     it('warn when used with dynamic v-repeat', function () {
-      var vm = new Vue({
+      new Vue({
         el: el,
         template: '<component v-repeat="list" is="{{c}}"></component>',
         data: {

@@ -24,6 +24,5 @@ if (_.inBrowser) {
       expect(el.style.display).toBe('')
       expect(transition.apply).toHaveBeenCalled()
     })
-
   })
 }

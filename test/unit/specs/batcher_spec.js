@@ -10,7 +10,7 @@ describe('Batcher', function () {
     spy = jasmine.createSpy('batcher')
     spyOn(_, 'warn')
   })
-  
+
   it('push', function (done) {
     batcher.push({
       run: spy
@@ -98,5 +98,4 @@ describe('Batcher', function () {
       done()
     })
   })
-
 })

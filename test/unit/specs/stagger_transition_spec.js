@@ -126,7 +126,7 @@ describe('Staggering Transitions', function () {
   })
 
   function assertStagger (vm, done) {
-    vm.list = [{a:1}, {a:2}]
+    vm.list = [{a: 1}, {a: 2}]
     expect(el.innerHTML).toBe('')
     _.nextTick(function () {
       expect(el.innerHTML).toBe('<div class="stagger-transition stagger-enter">1</div>')
@@ -155,5 +155,4 @@ describe('Staggering Transitions', function () {
       })
     })
   }
-
 })

@@ -30,5 +30,4 @@ describe('Dep', function () {
     d.notify()
     expect(sub.update).toHaveBeenCalled()
   })
-
 })
