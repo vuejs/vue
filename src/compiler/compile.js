@@ -247,7 +247,7 @@ function compileElement (el, options) {
   }
   // check component
   if (!linkFn) {
-    linkFn = checkComponent(el, options, hasAttrs)
+    linkFn = checkComponent(el, options)
   }
   // normal directives
   if (!linkFn && hasAttrs) {

@@ -74,12 +74,11 @@ function formatValue (val) {
  *
  * @param {Element} el
  * @param {Object} options
- * @param {Boolean} hasAttrs
  * @return {String|undefined}
  */
 
 exports.commonTagRE = /^(div|p|span|img|a|br|ul|ol|li|h1|h2|h3|h4|h5|code|pre)$/
-exports.checkComponent = function (el, options, hasAttrs) {
+exports.checkComponent = function (el, options) {
   var tag = el.tagName.toLowerCase()
   if (tag === 'component') {
     // dynamic syntax
@@ -91,10 +90,9 @@ exports.checkComponent = function (el, options, hasAttrs) {
     _.resolveAsset(options, 'components', tag)
   ) {
     return tag
-  } else if (
-    hasAttrs &&
-    (tag = _.attr(el, 'component'))
-  ) {
+  /* eslint-disable no-cond-assign */
+  } else if (tag = _.attr(el, 'component')) {
+  /* eslint-enable no-cond-assign */
     return tag
   }
 }

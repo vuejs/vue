@@ -155,6 +155,23 @@ if (_.inBrowser) {
       assertMutations(vm, el, done)
     })
 
+    it('v-component', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          items: [{a: 1}, {a: 2}]
+        },
+        template: '<p v-repeat="items" v-component="test"></p>',
+        components: {
+          test: {
+            template: '<div>{{$index}} {{a}}</div>',
+            replace: true
+          }
+        }
+      })
+      assertMutations(vm, el, done)
+    })
+
     it('component with inline-template', function (done) {
       var vm = new Vue({
         el: el,
@@ -547,12 +564,9 @@ if (_.inBrowser) {
       var obj = {}
       new Vue({
         el: el,
-        template: '<div v-repeat="items" v-component="test"></div>',
+        template: '<div v-repeat="items"></div>',
         data: {
           items: [obj, obj]
-        },
-        components: {
-          test: {}
         }
       })
       expect(hasWarned(_, 'Duplicate objects')).toBe(true)
@@ -561,12 +575,9 @@ if (_.inBrowser) {
     it('warn duplicate trackby id', function () {
       new Vue({
         el: el,
-        template: '<div v-repeat="items" v-component="test" track-by="id"></div>',
+        template: '<div v-repeat="items" track-by="id"></div>',
         data: {
           items: [{id: 1}, {id: 1}]
-        },
-        components: {
-          test: {}
         }
       })
       expect(hasWarned(_, 'Duplicate track-by key')).toBe(true)
@@ -602,12 +613,9 @@ if (_.inBrowser) {
     it('teardown', function () {
       var vm = new Vue({
         el: el,
-        template: '<div v-repeat="items" v-component="test"></div>',
+        template: '<div v-repeat="items"></div>',
         data: {
           items: [{a: 1}, {a: 2}]
-        },
-        components: {
-          test: {}
         }
       })
       vm._directives[0].unbind()
