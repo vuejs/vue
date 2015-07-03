@@ -65,6 +65,14 @@ function transcludeTemplate (el, options) {
     var replacer = frag.firstChild
     var tag = replacer.tagName && replacer.tagName.toLowerCase()
     if (options.replace) {
+      /* istanbul ignore if */
+      if (el === document.body) {
+        _.warn(
+          'You are mounting an instance with a template to ' +
+          '<body>. This will replace <body> entirely. You ' +
+          'should probably use `replace: false` here.'
+        )
+      }
       if (
         // multi-children template
         frag.childNodes.length > 1 ||
