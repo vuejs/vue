@@ -81,8 +81,10 @@ exports._initDOMHooks = function () {
  */
 
 function onAttached () {
-  this._isAttached = true
-  this.$children.forEach(callAttach)
+  if (!this._isAttached) {
+    this._isAttached = true
+    this.$children.forEach(callAttach)
+  }
 }
 
 /**
@@ -102,8 +104,10 @@ function callAttach (child) {
  */
 
 function onDetached () {
-  this._isAttached = false
-  this.$children.forEach(callDetach)
+  if (this._isAttached) {
+    this._isAttached = false
+    this.$children.forEach(callDetach)
+  }
 }
 
 /**

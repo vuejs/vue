@@ -80,4 +80,38 @@ describe('Misc', function () {
     expect(el.innerHTML.replace(xmlns, '')).toBe('<svg><text>1</text><text>2</text><text>3</text></svg>')
   })
 
+  // #1005
+  it('call attach/ready/detach hook for child components', function () {
+    Vue.options.replace = true
+    var el = document.createElement('div')
+    var logs = []
+    function log (n) {
+      return function () {
+        logs.push(n)
+      }
+    }
+    document.body.appendChild(el)
+    var vm = new Vue({
+      el: el,
+      attached: log(0),
+      ready: log(1),
+      detached: log(2),
+      template: '<div><test></test><test></test></div>',
+      components: {
+        test: {
+          template: '<span>hi</span>',
+          attached: log(3),
+          ready: log(4),
+          detached: log(5)
+        }
+      }
+    })
+    expect(vm.$el.innerHTML).toBe('<span>hi</span><span>hi</span>')
+    expect(logs.join()).toBe('0,3,4,3,4,1')
+    logs = []
+    vm.$destroy(true)
+    expect(logs.join()).toBe('2,5,5')
+    Vue.options.replace = false
+  })
+
 })
