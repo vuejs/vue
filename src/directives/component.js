@@ -101,12 +101,12 @@ module.exports = {
     this.invalidatePending()
     if (!value) {
       // just remove current
-      this.unbuild()
+      this.unbuild(true)
       this.remove(this.childVM, afterTransition)
       this.unsetCurrent()
     } else {
       this.resolveCtor(value, _.bind(function () {
-        this.unbuild()
+        this.unbuild(true)
         var newComponent = this.build(data)
         /* istanbul ignore if */
         if (afterBuild) afterBuild(newComponent)
@@ -190,9 +190,11 @@ module.exports = {
   /**
    * Teardown the current child, but defers cleanup so
    * that we can separate the destroy and removal steps.
+   *
+   * @param {Boolean} defer
    */
 
-  unbuild: function () {
+  unbuild: function (defer) {
     var child = this.childVM
     if (!child || this.keepAlive) {
       return
@@ -200,7 +202,7 @@ module.exports = {
     // the sole purpose of `deferCleanup` is so that we can
     // "deactivate" the vm right now and perform DOM removal
     // later.
-    child.$destroy(false, true)
+    child.$destroy(false, defer)
   },
 
   /**
@@ -285,6 +287,7 @@ module.exports = {
 
   unbind: function () {
     this.invalidatePending()
+    // Do not defer cleanup when unbinding
     this.unbuild()
     this.unsetCurrent()
     // destroy all keep-alive cached instances

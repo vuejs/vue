@@ -81,7 +81,7 @@ describe('Misc', function () {
   })
 
   // #1005
-  it('call attach/ready/detach hook for child components', function () {
+  it('call lifecycle hooks for child components', function () {
     Vue.options.replace = true
     var el = document.createElement('div')
     var logs = []
@@ -96,22 +96,48 @@ describe('Misc', function () {
       attached: log(0),
       ready: log(1),
       detached: log(2),
+      beforeDestroy: log(3),
+      destroyed: log(4),
       template: '<div><test></test><test></test></div>',
       components: {
         test: {
           template: '<span>hi</span>',
-          attached: log(3),
-          ready: log(4),
-          detached: log(5)
+          attached: log(5),
+          ready: log(6),
+          detached: log(7),
+          beforeDestroy: log(8),
+          destroyed: log(9)
         }
       }
     })
     expect(vm.$el.innerHTML).toBe('<span>hi</span><span>hi</span>')
-    expect(logs.join()).toBe('0,3,4,3,4,1')
+    expect(logs.join()).toBe('0,5,6,5,6,1')
     logs = []
     vm.$destroy(true)
-    expect(logs.join()).toBe('2,5,5')
+    expect(logs.join()).toBe('3,8,9,8,9,2,7,7,4')
     Vue.options.replace = false
+  })
+
+  // #1006
+  it('destroyed hook for components inside v-if', function (done) {
+    var spy = jasmine.createSpy('v-if destroyed hook')
+    var vm = new Vue({
+      el: document.createElement('div'),
+      template: '<template v-if="ok"><test></test></template>',
+      data: {
+        ok: true
+      },
+      components: {
+        test: {
+          destroyed: spy
+        }
+      }
+    })
+    vm.ok = false
+    Vue.nextTick(function () {
+      expect(spy).toHaveBeenCalled()
+      done()
+    })
   })
 
 })
