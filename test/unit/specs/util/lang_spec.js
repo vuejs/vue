@@ -29,6 +29,12 @@ describe('Util - Language Enhancement', function () {
     expect(_.camelize('some-long-name')).toBe('someLongName')
   })
 
+  it('hyphenate', function () {
+    expect(_.hyphenate('whatsUp')).toBe('whats-up')
+    expect(_.hyphenate('a1BfC')).toBe('a1-bf-c')
+    expect(_.hyphenate('already-With-Hyphen')).toBe('already-with-hyphen')
+  })
+
   it('classify', function () {
     expect(_.classify('abc')).toBe('Abc')
     expect(_.classify('some-long-name')).toBe('SomeLongName')

@@ -179,6 +179,7 @@ if (_.inBrowser) {
       el.setAttribute('onetime', '{{*a}}')
       el.setAttribute('twoway', '{{@a}}')
       el.setAttribute('with-filter', '{{a | filter}}')
+      el.setAttribute('camel-case', 'hi')
       el.setAttribute('boolean-literal', '{{true}}')
       el.setAttribute('boolean', '')
       compiler.compileAndLinkProps(vm, el, props)
@@ -227,12 +228,10 @@ if (_.inBrowser) {
       expect(vm._data.onetime).toBe('from parent: a')
       expect(vm.booleanLiteral).toBe('from parent: true')
       expect(vm._data.booleanLiteral).toBe('from parent: true')
-      expect(vm._data.camelCase).toBeUndefined()
+      expect(vm._data.camelCase).toBe('hi')
       expect(vm._data.defaultValue).toBe(123)
       expect(vm._data.boolean).toBe(true)
       expect(vm._data.booleanAbsent).toBe(false)
-      // camelCase should've warn
-      expect(hasWarned(_, 'using camelCase')).toBe(true)
     })
 
     it('props on root instance', function () {

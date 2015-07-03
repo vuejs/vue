@@ -29,22 +29,13 @@ module.exports = function compileProps (el, propOptions) {
     // interpreted as minus calculations by the parser
     // so we need to camelize the path here
     path = _.camelize(name.replace(dataAttrRE, ''))
-    if (/[A-Z]/.test(name)) {
-      _.warn(
-        'You seem to be using camelCase for a component prop, ' +
-        'but HTML doesn\'t differentiate between upper and ' +
-        'lower case. You should use hyphen-delimited ' +
-        'attribute names. For more info see ' +
-        'http://vuejs.org/api/options.html#props'
-      )
-    }
     if (!identRE.test(path)) {
       _.warn(
         'Invalid prop key: "' + name + '". Prop keys ' +
         'must be valid identifiers.'
       )
     }
-    value = el.getAttribute(name)
+    value = el.getAttribute(_.hyphenate(name))
     // create a prop descriptor
     prop = {
       name: name,
