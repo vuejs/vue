@@ -4,7 +4,8 @@ var _ = Vue.util
 describe('Staggering Transitions', function () {
 
   var el
-  var amount = 50
+  var delayAmount = 50
+  var multiplier = 2.5 // the bigger the slower, but safer
   beforeEach(function () {
     el = document.createElement('div')
     document.body.appendChild(el)
@@ -17,7 +18,7 @@ describe('Staggering Transitions', function () {
   it('as attribute', function (done) {
     var vm = new Vue({
       el: el,
-      template: '<div v-repeat="list" v-transition="stagger" stagger="' + amount + '">{{a}}</div>',
+      template: '<div v-repeat="list" v-transition="stagger" stagger="' + delayAmount + '">{{a}}</div>',
       data: {
         list: []
       },
@@ -45,7 +46,7 @@ describe('Staggering Transitions', function () {
       transitions: {
         stagger: {
           stagger: function (i) {
-            return i * amount
+            return i * delayAmount
           },
           enter: function (el, done) {
             _.nextTick(done)
@@ -62,7 +63,7 @@ describe('Staggering Transitions', function () {
   it('remove while staggered', function (done) {
     var vm = new Vue({
       el: el,
-      template: '<div v-repeat="list" v-transition="stagger" stagger="' + amount + '">{{a}}</div>',
+      template: '<div v-repeat="list" v-transition="stagger" stagger="' + delayAmount + '">{{a}}</div>',
       data: {
         list: []
       },
@@ -86,14 +87,14 @@ describe('Staggering Transitions', function () {
         // should have only one
         expect(el.innerHTML).toBe('<div class="stagger-transition">1</div>')
         done()
-      }, amount * 2)
+      }, delayAmount * multiplier)
     })
   })
 
   it('reorder while staggered', function (done) {
     var vm = new Vue({
       el: el,
-      template: '<div v-repeat="list" v-transition="stagger" stagger="' + amount + '">{{a}}</div>',
+      template: '<div v-repeat="list" v-transition="stagger" stagger="' + delayAmount + '">{{a}}</div>',
       data: {
         list: []
       },
@@ -121,7 +122,7 @@ describe('Staggering Transitions', function () {
           '<div class="stagger-transition">1</div>'
         )
         done()
-      }, amount * 3)
+      }, delayAmount * 3)
     })
   })
 
@@ -148,10 +149,10 @@ describe('Staggering Transitions', function () {
               setTimeout(function () {
                 expect(el.innerHTML).toBe('')
                 done()
-              }, amount * 2)
+              }, delayAmount * multiplier)
             })
           })
-        }, amount * 2)
+        }, delayAmount * multiplier)
       })
     })
   }
