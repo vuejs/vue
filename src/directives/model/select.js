@@ -7,6 +7,12 @@ module.exports = {
   bind: function () {
     var self = this
     var el = this.el
+    // update DOM using latest value.
+    this.forceUpdate = function () {
+      if (self._watcher) {
+        self.update(self._watcher.get())
+      }
+    }
     // check options param
     var optionsParam = this._checkParam('options')
     if (optionsParam) {
@@ -27,6 +33,11 @@ module.exports = {
     }
     _.on(el, 'change', this.listener)
     checkInitialValue.call(this)
+    // All major browsers except Firefox resets
+    // selectedIndex with value -1 to 0 when the element
+    // is appended to a new parent, therefore we have to
+    // force a DOM update whenever that happens...
+    this.vm.$on('hook:attached', this.forceUpdate)
   },
 
   update: function (value) {
@@ -48,6 +59,7 @@ module.exports = {
 
   unbind: function () {
     _.off(this.el, 'change', this.listener)
+    this.vm.$off('hook:attached', this.forceUpdate)
     if (this.optionWatcher) {
       this.optionWatcher.teardown()
     }
@@ -68,9 +80,7 @@ function initOptions (expression) {
     if (_.isArray(value)) {
       self.el.innerHTML = ''
       buildOptions(self.el, value)
-      if (self._watcher) {
-        self.update(self._watcher.value)
-      }
+      self.forceUpdate()
     } else {
       _.warn('Invalid options value for v-model: ' + value)
     }

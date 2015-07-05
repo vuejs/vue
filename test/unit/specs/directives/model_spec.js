@@ -140,7 +140,29 @@ if (_.inBrowser) {
       })
     })
 
-    it('select default value', function () {
+    it('select persist non-selected on append', function () {
+      var vm = new Vue({
+        el: el,
+        data: {
+          test: null
+        },
+        replace: true,
+        template:
+          '<select v-model="test">' +
+            '<option>a</option>' +
+            '<option>b</option>' +
+            '<option>c</option>' +
+          '</select>'
+      })
+      expect(vm.$el.value).toBe('')
+      expect(vm.$el.selectedIndex).toBe(-1)
+      vm.$remove()
+      vm.$appendTo(document.body)
+      expect(vm.$el.value).toBe('')
+      expect(vm.$el.selectedIndex).toBe(-1)
+    })
+
+    it('select template default value', function () {
       var vm = new Vue({
         el: el,
         data: {
