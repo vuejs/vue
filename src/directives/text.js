@@ -4,7 +4,7 @@ module.exports = {
 
   bind: function () {
     this.attr = this.el.nodeType === 3
-      ? 'nodeValue'
+      ? 'data'
       : 'textContent'
   },
 
