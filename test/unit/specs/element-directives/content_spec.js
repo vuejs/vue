@@ -287,6 +287,36 @@ describe('Content Transclusion', function () {
     })
   })
 
+  // #1010
+  it('v-repeat inside transcluded content', function () {
+    vm = new Vue({
+      el: el,
+      template:
+        '<testa>' +
+          '{{inner}} {{outer}}' +
+          '<div v-repeat="list"> {{inner}} {{outer}}</div>' +
+        '</testa>',
+      data: {
+        outer: 'outer',
+        inner: 'parent-inner',
+        list: [
+          { inner: 'list-inner' }
+        ]
+      },
+      components: {
+        testa: {
+          data: function () {
+            return {
+              inner: 'component-inner'
+            }
+          },
+          template: '<content></content>'
+        }
+      }
+    })
+    expect(el.textContent).toBe('parent-inner outer list-inner outer')
+  })
+
   it('single content outlet with replace: true', function () {
     vm = new Vue({
       el: el,

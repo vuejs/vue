@@ -34,7 +34,9 @@ exports.$addChild = function (opts, BaseCtor) {
       )()
       ChildVue.options = BaseCtor.options
       ChildVue.linker = BaseCtor.linker
-      ChildVue.prototype = this
+      // important: transcluded inline repeaters should
+      // inherit from outer scope rather than host
+      ChildVue.prototype = opts._context || this
       ctors[BaseCtor.cid] = ChildVue
     }
   } else {
