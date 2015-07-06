@@ -12,6 +12,9 @@ describe('Observer', function () {
     // avoid vue instance
     ob = Observer.create(new _.Vue())
     expect(ob).toBeUndefined()
+    // avoid frozen objects
+    ob = Observer.create(Object.freeze({}))
+    expect(ob).toBeUndefined()
   })
 
   it('create on object', function () {

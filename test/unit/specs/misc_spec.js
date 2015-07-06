@@ -140,4 +140,40 @@ describe('Misc', function () {
     })
   })
 
+  it('frozen model, root', function (done) {
+    var vm = new Vue({
+      el: document.createElement('div'),
+      template: '{{msg}}',
+      data: Object.freeze({
+        msg: 'hi!'
+      })
+    })
+    expect(vm.$el.textContent).toBe('hi!')
+    vm.msg = 'ho!'
+    Vue.nextTick(function () {
+      expect(vm.$el.textContent).toBe('hi!')
+      done()
+    })
+  })
+
+  it('frozen model, non-root', function (done) {
+    var vm = new Vue({
+      el: document.createElement('div'),
+      template: '{{msg}} {{frozen.msg}}',
+      data: {
+        msg: 'hi',
+        frozen: Object.freeze({
+          msg: 'frozen'
+        })
+      }
+    })
+    expect(vm.$el.textContent).toBe('hi frozen')
+    vm.msg = 'ho'
+    vm.frozen.msg = 'changed'
+    Vue.nextTick(function () {
+      expect(vm.$el.textContent).toBe('ho frozen')
+      done()
+    })
+  })
+
 })

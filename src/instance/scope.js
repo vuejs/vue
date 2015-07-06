@@ -73,7 +73,7 @@ exports._initData = function () {
     }
   }
   // observe data
-  Observer.create(data).addVm(this)
+  Observer.create(data, this)
 }
 
 /**
@@ -121,7 +121,7 @@ exports._setData = function (newData) {
     }
   }
   oldData.__ob__.removeVm(this)
-  Observer.create(newData).addVm(this)
+  Observer.create(newData, this)
   this._digest()
 }
 

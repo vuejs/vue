@@ -5,15 +5,6 @@ var arrayMethods = require('./array')
 var arrayKeys = Object.getOwnPropertyNames(arrayMethods)
 require('./object')
 
-var uid = 0
-
-/**
- * Type enums
- */
-
-var ARRAY = 0
-var OBJECT = 1
-
 /**
  * Observer class that are attached to each observed
  * object. Once attached, the observer converts target
@@ -21,23 +12,21 @@ var OBJECT = 1
  * collect dependencies and dispatches updates.
  *
  * @param {Array|Object} value
- * @param {Number} type
  * @constructor
  */
 
-function Observer (value, type) {
-  this.id = ++uid
+function Observer (value) {
   this.value = value
   this.active = true
   this.deps = []
   _.define(value, '__ob__', this)
-  if (type === ARRAY) {
+  if (_.isArray(value)) {
     var augment = config.proto && _.hasProto
       ? protoAugment
       : copyAugment
     augment(value, arrayMethods, arrayKeys)
     this.observeArray(value)
-  } else if (type === OBJECT) {
+  } else {
     this.walk(value)
   }
 }
@@ -50,25 +39,30 @@ function Observer (value, type) {
  * or the existing observer if the value already has one.
  *
  * @param {*} value
+ * @param {Vue} [vm]
  * @return {Observer|undefined}
  * @static
  */
 
-Observer.create = function (value) {
+Observer.create = function (value, vm) {
+  var ob
   if (
     value &&
     value.hasOwnProperty('__ob__') &&
     value.__ob__ instanceof Observer
   ) {
-    return value.__ob__
-  } else if (_.isArray(value)) {
-    return new Observer(value, ARRAY)
+    ob = value.__ob__
   } else if (
-    _.isPlainObject(value) &&
-    !value._isVue // avoid Vue instance
+    _.isObject(value) &&
+    !Object.isFrozen(value) &&
+    !value._isVue
   ) {
-    return new Observer(value, OBJECT)
+    ob = new Observer(value)
   }
+  if (ob && vm) {
+    ob.addVm(vm)
+  }
+  return ob
 }
 
 /**
