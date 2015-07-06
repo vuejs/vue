@@ -48,12 +48,10 @@ module.exports = {
     // !!! We need to set it also on raw data here, because
     // props are initialized before data is fully observed
     var value = this.parentWatcher.value
-    if (_.assertProp(prop, value)) {
-      if (childKey === '$data') {
-        child._data = value
-      } else {
-        child[childKey] = child._data[childKey] = value
-      }
+    if (childKey === '$data') {
+      child._data = value
+    } else {
+      _.initProp(child, prop, value)
     }
 
     // only setup two-way binding if this is not a one-way

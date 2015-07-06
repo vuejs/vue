@@ -234,3 +234,27 @@ exports.isTemplate = function (el) {
   return el.tagName &&
     el.tagName.toLowerCase() === 'template'
 }
+
+/**
+ * Create an "anchor" for performing dom insertion/removals.
+ * This is used in a number of scenarios:
+ * - block instance
+ * - v-html
+ * - v-if
+ * - component
+ * - repeat
+ *
+ * @param {String} content
+ * @param {Boolean} persist - IE trashes empty textNodes on
+ *                            cloneNode(true), so in certain
+ *                            cases the anchor needs to be
+ *                            non-empty to be persisted in
+ *                            templates.
+ * @return {Comment|Text}
+ */
+
+exports.createAnchor = function (content, persist) {
+  return config.debug
+    ? document.createComment(content)
+    : document.createTextNode(persist ? ' ' : '')
+}

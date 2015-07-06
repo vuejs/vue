@@ -1,5 +1,55 @@
 var _ = require('./index')
-var config = require('../config')
+
+/**
+ * Check if an element is a component, if yes return its
+ * component id.
+ *
+ * @param {Element} el
+ * @param {Object} options
+ * @return {String|undefined}
+ */
+
+exports.commonTagRE = /^(div|p|span|img|a|br|ul|ol|li|h1|h2|h3|h4|h5|code|pre)$/
+exports.checkComponent = function (el, options) {
+  var tag = el.tagName.toLowerCase()
+  if (tag === 'component') {
+    // dynamic syntax
+    var exp = el.getAttribute('is')
+    el.removeAttribute('is')
+    return exp
+  } else if (
+    !exports.commonTagRE.test(tag) &&
+    _.resolveAsset(options, 'components', tag)
+  ) {
+    return tag
+  /* eslint-disable no-cond-assign */
+  } else if (tag = _.attr(el, 'component')) {
+  /* eslint-enable no-cond-assign */
+    return tag
+  }
+}
+
+/**
+ * Set a prop's initial value on a vm and its data object.
+ * The vm may have inherit:true so we need to make sure
+ * we don't accidentally overwrite parent value.
+ *
+ * @param {Vue} vm
+ * @param {Object} prop
+ * @param {*} value
+ */
+
+exports.initProp = function (vm, prop, value) {
+  if (exports.assertProp(prop, value)) {
+    var key = prop.path
+    if (key in vm) {
+      _.define(vm, key, value, true)
+    } else {
+      vm[key] = value
+    }
+    vm._data[key] = value
+  }
+}
 
 /**
  * Assert whether a prop is valid.
@@ -66,57 +116,4 @@ function formatType (val) {
 
 function formatValue (val) {
   return Object.prototype.toString.call(val).slice(8, -1)
-}
-
-/**
- * Check if an element is a component, if yes return its
- * component id.
- *
- * @param {Element} el
- * @param {Object} options
- * @return {String|undefined}
- */
-
-exports.commonTagRE = /^(div|p|span|img|a|br|ul|ol|li|h1|h2|h3|h4|h5|code|pre)$/
-exports.checkComponent = function (el, options) {
-  var tag = el.tagName.toLowerCase()
-  if (tag === 'component') {
-    // dynamic syntax
-    var exp = el.getAttribute('is')
-    el.removeAttribute('is')
-    return exp
-  } else if (
-    !exports.commonTagRE.test(tag) &&
-    _.resolveAsset(options, 'components', tag)
-  ) {
-    return tag
-  /* eslint-disable no-cond-assign */
-  } else if (tag = _.attr(el, 'component')) {
-  /* eslint-enable no-cond-assign */
-    return tag
-  }
-}
-
-/**
- * Create an "anchor" for performing dom insertion/removals.
- * This is used in a number of scenarios:
- * - block instance
- * - v-html
- * - v-if
- * - component
- * - repeat
- *
- * @param {String} content
- * @param {Boolean} persist - IE trashes empty textNodes on
- *                            cloneNode(true), so in certain
- *                            cases the anchor needs to be
- *                            non-empty to be persisted in
- *                            templates.
- * @return {Comment|Text}
- */
-
-exports.createAnchor = function (content, persist) {
-  return config.debug
-    ? document.createComment(content)
-    : document.createTextNode(persist ? ' ' : '')
 }

@@ -111,9 +111,7 @@ function makePropsLinkFn (props) {
           if (prop.mode === propBindingModes.ONE_TIME) {
             // one time binding
             value = vm._context.$get(prop.parentPath)
-            if (_.assertProp(prop, value)) {
-              vm[path] = vm._data[path] = value
-            }
+            _.initProp(vm, prop, value)
           } else {
             // dynamic binding
             vm._bindDir('prop', el, prop, propDef)
@@ -130,9 +128,7 @@ function makePropsLinkFn (props) {
         value = options.type === Boolean && prop.raw === ''
           ? true
           : _.toBoolean(_.toNumber(prop.raw))
-        if (_.assertProp(prop, value)) {
-          vm[path] = vm._data[path] = value
-        }
+        _.initProp(vm, prop, value)
       }
     }
   }

@@ -384,5 +384,24 @@ if (_.inBrowser) {
       expect(hasWarned(_, 'Expected Number')).toBe(true)
       expect(el.textContent).toBe('AAA')
     })
+
+    it('should not overwrite inherit:true properties', function () {
+      var vm = new Vue({
+        el: el,
+        data: {
+          msg: 'hi!'
+        },
+        template: '<test msg="ho!"></test>',
+        components: {
+          test: {
+            props: ['msg'],
+            inherit: true,
+            template: '{{msg}}'
+          }
+        }
+      })
+      expect(vm.msg).toBe('hi!')
+      expect(el.textContent).toBe('ho!')
+    })
   })
 }
