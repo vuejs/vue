@@ -170,8 +170,18 @@ exports._destroy = function (remove, deferCleanup) {
 
 exports._cleanup = function () {
   // remove reference from data ob
-  this._data.__ob__.removeVm(this)
-  this._data =
+  // frozen object may not have observer.
+  if (this._data.__ob__) {
+    this._data.__ob__.removeVm(this)
+  }
+  // Clean up references to private properties and other
+  // instances. preserve reference to _data so that proxy
+  // accessors still work. The only potential side effect
+  // here is that mutating the instance after it's destroyed
+  // may affect the state of other components that are still
+  // observing the same object, but that seems to be a
+  // reasonable responsibility for the user rather than
+  // always throwing an error on them.
   this._watchers =
   this.$el =
   this.$parent =

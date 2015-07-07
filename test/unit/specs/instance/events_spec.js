@@ -152,7 +152,6 @@ describe('Instance Events', function () {
         destroyed: function () {
           expect(this).toBe(vm)
           expect(this._isDestroyed).toBe(true)
-          expect(this._data).toBeNull()
           spy()
         }
       })
