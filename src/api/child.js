@@ -23,15 +23,10 @@ exports.$addChild = function (opts, BaseCtor) {
     var ctors = parent._childCtors
     ChildVue = ctors[BaseCtor.cid]
     if (!ChildVue) {
-      var optionName = BaseCtor.options.name
-      var className = optionName
-        ? _.classify(optionName)
-        : 'VueComponent'
-      ChildVue = new Function(
-        'return function ' + className + ' (options) {' +
-        'this.constructor = ' + className + ';' +
-        'this._init(options) }'
-      )()
+      ChildVue = function VueComponent (options) {
+        this.constructor = ChildVue
+        this._init(options)
+      }
       ChildVue.options = BaseCtor.options
       ChildVue.linker = BaseCtor.linker
       // important: transcluded inline repeaters should
