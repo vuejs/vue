@@ -92,11 +92,14 @@ module.exports = function compileProps (el, propOptions) {
 
 function makePropsLinkFn (props) {
   return function propsLinkFn (vm, el) {
+    // store resolved props info
+    vm._props = {}
     var i = props.length
     var prop, path, options, value
     while (i--) {
       prop = props[i]
       path = prop.path
+      vm._props[path] = prop
       options = prop.options
       if (prop.raw === null) {
         // initialize absent prop

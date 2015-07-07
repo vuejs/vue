@@ -182,11 +182,11 @@ exports._cleanup = function () {
   // observing the same object, but that seems to be a
   // reasonable responsibility for the user rather than
   // always throwing an error on them.
-  this._watchers =
   this.$el =
   this.$parent =
   this.$root =
   this.$children =
+  this._watchers =
   this._directives = null
   // call the last hook...
   this._isDestroyed = true
