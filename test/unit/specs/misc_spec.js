@@ -176,4 +176,49 @@ describe('Misc', function () {
     })
   })
 
+  it('should not trigger deep/Array watchers when digesting', function (done) {
+    var spy1 = jasmine.createSpy('deep')
+    var spy2 = jasmine.createSpy('Array')
+    var spy3 = jasmine.createSpy('test')
+    var spy4 = jasmine.createSpy('deep-mutated')
+    var vm = new Vue({
+      el: 'body',
+      data: {
+        obj: {},
+        arr: [],
+        obj2: {}
+      },
+      watch: {
+        obj: {
+            handler: spy1,
+            deep: true
+        },
+        arr: spy2,
+        // if the watcher is watching the added value,
+        // it should still trigger properly
+        test: {
+          handler: spy3,
+          deep: true
+        },
+        // if the object is in fact mutated, it should
+        // still trigger.
+        obj2: {
+          handler: spy4,
+          deep: true
+        }
+      }
+    })
+    var test = []
+    var obj2 = vm.obj2
+    vm.$add('test', test)
+    obj2.$add('test', 123)
+    Vue.nextTick(function () {
+      expect(spy1).not.toHaveBeenCalled()
+      expect(spy2).not.toHaveBeenCalled()
+      expect(spy3).toHaveBeenCalledWith(test, undefined)
+      expect(spy4).toHaveBeenCalledWith(obj2, obj2)
+      done()
+    })
+  })
+
 })

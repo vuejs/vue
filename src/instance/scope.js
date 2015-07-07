@@ -166,7 +166,7 @@ exports._unproxy = function (key) {
 exports._digest = function () {
   var i = this._watchers.length
   while (i--) {
-    this._watchers[i].update()
+    this._watchers[i].update(true) // shallow updates
   }
   var children = this.$children
   i = children.length
