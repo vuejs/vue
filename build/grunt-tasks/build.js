@@ -1,5 +1,5 @@
 /**
- * Build, update component.json, uglify, and report size.
+ * Build and report size.
  */
 
 module.exports = function (grunt) {
@@ -9,66 +9,34 @@ module.exports = function (grunt) {
     var fs = require('fs')
     var zlib = require('zlib')
     var webpack = require('webpack')
-    var uglifyjs = require('uglify-js')
+    var devConfig = require('../webpack.build.dev.config')
+    var prodConfig = require('../webpack.build.prod.config')
 
-    var banner =
-        '/**\n' +
-        ' * Vue.js v' + grunt.config.get('version') + '\n' +
-        ' * (c) ' + new Date().getFullYear() + ' Evan You\n' +
-        ' * Released under the MIT License.\n' +
-        ' */\n'
-
-    // build
-    webpack({
-      entry: './src/vue',
-      output: {
-        path: './dist',
-        filename: 'vue.js',
-        library: 'Vue',
-        libraryTarget: 'umd'
-      },
-      plugins: [
-        new webpack.BannerPlugin(banner, { raw: true })
-      ]
-    }, function (err, stats) {
+    webpack(devConfig, function (err, stats) {
       if (err) return done(err)
-      minify()
+      report('dist/vue.js')
+      webpack(prodConfig, function (err, stats) {
+        if (err) return done(err)
+        report('dist/vue.min.js')
+        zip()
+      })
     })
 
-    function minify () {
-      var js = fs.readFileSync('dist/vue.js', 'utf-8')
-      report('dist/vue.js', js)
-      // uglify
-      var result = uglifyjs.minify(js, {
-        fromString: true,
-        output: {
-          comments: /License/
-        },
-        compress: {
-          pure_funcs: [
-            'require',
-            '_.log',
-            '_.warn',
-            '_.assertAsset',
-            'enableDebug'
-          ]
-        }
+    function zip () {
+      fs.readFile('dist/vue.min.js', function (err, buf) {
+        if (err) return done(err)
+        zlib.gzip(buf, function (err, buf) {
+          if (err) return done(err)
+          report('dist/vue.min.js.gz', buf)
+          done()
+        })
       })
-      // var min = grunt.config.get('banner') + result.code
-      write('dist/vue.min.js', result.code)
-      // report gzip size
-      zlib.gzip(result.code, function (err, buf) {
-        write('dist/vue.min.js.gz', buf)
-        done(err)
-      })
-    }
-
-    function write (path, file) {
-      fs.writeFileSync(path, file)
-      report(path, file)
     }
 
     function report (path, file) {
+      if (!file) {
+        file = fs.readFileSync(path)
+      }
       console.log(
         blue(path + ': ') +
         (file.length / 1024).toFixed(2) + 'kb'

@@ -59,15 +59,13 @@ exports.transclude = function (el, options) {
 function transcludeTemplate (el, options) {
   var template = options.template
   var frag = templateParser.parse(template, true)
-  if (!frag) {
-    _.warn('Invalid template option: ' + template)
-  } else {
+  if (frag) {
     var replacer = frag.firstChild
     var tag = replacer.tagName && replacer.tagName.toLowerCase()
     if (options.replace) {
       /* istanbul ignore if */
       if (el === document.body) {
-        _.warn(
+        process.env.NODE_ENV !== 'production' && _.warn(
           'You are mounting an instance with a template to ' +
           '<body>. This will replace <body> entirely. You ' +
           'should probably use `replace: false` here.'
@@ -96,6 +94,10 @@ function transcludeTemplate (el, options) {
       el.appendChild(frag)
       return el
     }
+  } else {
+    process.env.NODE_ENV !== 'production' && _.warn(
+      'Invalid template option: ' + template
+    )
   }
 }
 

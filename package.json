@@ -18,7 +18,15 @@
   "homepage": "http://vuejs.org",
   "scripts": {
     "test": "grunt ci",
-    "dev": "webpack --watch --config build/webpack-dev-config.js & webpack --watch --config build/webpack-test-config.js"
+    "dev": "webpack --watch --config build/webpack.dev.config.js & webpack --watch --config build/webpack.test.config.js"
+  },
+  "dependencies": {
+    "envify": "^3.4.0"
+  },
+  "browserify": {
+    "transform": [
+      "envify"
+    ]
   },
   "devDependencies": {
     "casperjs": "^1.1.0-beta3",

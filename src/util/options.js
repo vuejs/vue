@@ -44,7 +44,7 @@ strats.data = function (parentVal, childVal, vm) {
       return parentVal
     }
     if (typeof childVal !== 'function') {
-      _.warn(
+      process.env.NODE_ENV !== 'production' && _.warn(
         'The "data" option should be a function ' +
         'that returns a per-instance value in component ' +
         'definitions.'
@@ -89,7 +89,7 @@ strats.data = function (parentVal, childVal, vm) {
 
 strats.el = function (parentVal, childVal, vm) {
   if (!vm && childVal && typeof childVal !== 'function') {
-    _.warn(
+    process.env.NODE_ENV !== 'production' && _.warn(
       'The "el" option should be a function ' +
       'that returns a per-instance value in component ' +
       'definitions.'
@@ -131,7 +131,7 @@ strats.props = function (parentVal, childVal) {
 
 strats.paramAttributes = function () {
   /* istanbul ignore next */
-  _.warn(
+  process.env.NODE_ENV !== 'production' && _.warn(
     '"paramAttributes" option has been deprecated in 0.12. ' +
     'Use "props" instead.'
   )
@@ -218,10 +218,11 @@ function guardComponents (components) {
     var def
     for (var key in components) {
       if (_.commonTagRE.test(key)) {
-        _.warn(
+        process.env.NODE_ENV !== 'production' && _.warn(
           'Do not use built-in HTML elements as component ' +
           'name: ' + key
         )
+        continue
       }
       def = components[key]
       if (_.isPlainObject(def)) {

@@ -13,7 +13,9 @@ var compiler = require('../compiler')
 
 exports.$mount = function (el) {
   if (this._isCompiled) {
-    _.warn('$mount() should be called only once.')
+    process.env.NODE_ENV !== 'production' && _.warn(
+      '$mount() should be called only once.'
+    )
     return
   }
   el = _.query(el)

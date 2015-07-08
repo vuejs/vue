@@ -56,7 +56,7 @@ function register (vm, action, key, handler, options) {
     if (method) {
       vm[action](key, method, options)
     } else {
-      _.warn(
+      process.env.NODE_ENV !== 'production' && _.warn(
         'Unknown method: "' + handler + '" when ' +
         'registering callback for ' + action +
         ': "' + key + '".'

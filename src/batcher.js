@@ -71,7 +71,7 @@ exports.push = function (job) {
       has[id]++
       // detect possible infinite update loops
       if (has[id] > config._maxUpdateCount) {
-        _.warn(
+        process.env.NODE_ENV !== 'production' && _.warn(
           'You may have an infinite update loop for the ' +
           'watcher with expression: "' + job.expression + '".'
         )

@@ -1,15 +1,10 @@
-var config = require('../config')
-
 /**
- * Enable debug utilities. The enableDebug() function and
- * all _.log() & _.warn() calls will be dropped in the
- * minified production build.
+ * Enable debug utilities.
  */
 
-enableDebug()
+if (process.env.NODE_ENV !== 'production') {
 
-function enableDebug () {
-
+  var config = require('../config')
   var hasConsole = typeof console !== 'undefined'
 
   /**

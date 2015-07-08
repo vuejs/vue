@@ -15,3 +15,9 @@ scope.hasWarned = function (_, msg) {
     return arg.indexOf(msg) > -1
   }
 }
+
+scope.process = {
+  env: {
+    NODE_ENV: 'development'
+  }
+}

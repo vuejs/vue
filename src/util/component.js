@@ -87,7 +87,7 @@ exports.assertProp = function (prop, value) {
     }
   }
   if (!valid) {
-    _.warn(
+    process.env.NODE_ENV !== 'production' && _.warn(
       'Invalid prop: type check failed for ' +
       prop.path + '="' + prop.raw + '".' +
       ' Expected ' + formatType(expectedType) +
@@ -98,7 +98,7 @@ exports.assertProp = function (prop, value) {
   var validator = options.validator
   if (validator) {
     if (!validator.call(null, value)) {
-      _.warn(
+      process.env.NODE_ENV !== 'production' && _.warn(
         'Invalid prop: custom validator check failed for ' +
         prop.path + '="' + prop.raw + '"'
       )

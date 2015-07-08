@@ -30,10 +30,11 @@ module.exports = function compileProps (el, propOptions) {
     // so we need to camelize the path here
     path = _.camelize(name.replace(dataAttrRE, ''))
     if (!identRE.test(path)) {
-      _.warn(
+      process.env.NODE_ENV !== 'production' && _.warn(
         'Invalid prop key: "' + name + '". Prop keys ' +
         'must be valid identifiers.'
       )
+      continue
     }
     value = el.getAttribute(_.hyphenate(name))
     // create a prop descriptor
@@ -68,7 +69,7 @@ module.exports = function compileProps (el, propOptions) {
           if (settablePathRE.test(prop.parentPath)) {
             prop.mode = propBindingModes.TWO_WAY
           } else {
-            _.warn(
+            process.env.NODE_ENV !== 'production' && _.warn(
               'Cannot bind two-way prop with non-settable ' +
               'parent path: ' + prop.parentPath
             )
@@ -76,7 +77,9 @@ module.exports = function compileProps (el, propOptions) {
         }
       }
     } else if (options && options.required) {
-      _.warn('Missing required prop: ' + name)
+      process.env.NODE_ENV !== 'production' && _.warn(
+        'Missing required prop: ' + name
+      )
     }
     props.push(prop)
   }
@@ -120,7 +123,7 @@ function makePropsLinkFn (props) {
             vm._bindDir('prop', el, prop, propDef)
           }
         } else {
-          _.warn(
+          process.env.NODE_ENV !== 'production' && _.warn(
             'Cannot bind dynamic prop on a root instance' +
             ' with no parent: ' + prop.name + '="' +
             prop.raw + '"'

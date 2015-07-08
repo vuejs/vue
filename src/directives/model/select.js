@@ -82,7 +82,9 @@ function initOptions (expression) {
       buildOptions(self.el, value)
       self.forceUpdate()
     } else {
-      _.warn('Invalid options value for v-model: ' + value)
+      process.env.NODE_ENV !== 'production' && _.warn(
+        'Invalid options value for v-model: ' + value
+      )
     }
   }
   this.optionWatcher = new Watcher(

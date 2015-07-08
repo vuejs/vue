@@ -25,11 +25,11 @@ module.exports = {
         true
       )
     } else {
-      this.invalid = true
-      _.warn(
+      process.env.NODE_ENV !== 'production' && _.warn(
         'v-if="' + this.expression + '" cannot be ' +
         'used on an instance root element.'
       )
+      this.invalid = true
     }
   },
 

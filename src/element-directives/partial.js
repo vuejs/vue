@@ -45,7 +45,9 @@ module.exports = {
 
   insert: function (id) {
     var partial = _.resolveAsset(this.vm.$options, 'partials', id)
-    _.assertAsset(partial, 'partial', id)
+    if (process.env.NODE_ENV !== 'production') {
+      _.assertAsset(partial, 'partial', id)
+    }
     if (partial) {
       var frag = templateParser.parse(partial, true)
       // cache partials based on constructor id.

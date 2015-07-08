@@ -299,9 +299,9 @@ exports.set = function (obj, path, val) {
     if (i < l - 1) {
       obj = obj[key]
       if (!_.isObject(obj)) {
+        warnNonExistent(path)
         obj = {}
         last.$add(key, obj)
-        warnNonExistent(path)
       }
     } else {
       if (_.isArray(obj)) {
@@ -309,8 +309,8 @@ exports.set = function (obj, path, val) {
       } else if (key in obj) {
         obj[key] = val
       } else {
-        obj.$add(key, val)
         warnNonExistent(path)
+        obj.$add(key, val)
       }
     }
   }
@@ -318,7 +318,7 @@ exports.set = function (obj, path, val) {
 }
 
 function warnNonExistent (path) {
-  _.warn(
+  process.env.NODE_ENV !== 'production' && _.warn(
     'You are setting a non-existent path "' + path.raw + '" ' +
     'on a vm instance. Consider pre-initializing the property ' +
     'with the "data" option for more reliable reactivity ' +

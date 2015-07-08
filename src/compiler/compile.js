@@ -522,7 +522,9 @@ function compileDirectives (elOrAttrs, options) {
     if (name.indexOf(config.prefix) === 0) {
       dirName = name.slice(config.prefix.length)
       dirDef = resolveAsset(options, 'directives', dirName)
-      _.assertAsset(dirDef, 'directive', dirName)
+      if (process.env.NODE_ENV !== 'production') {
+        _.assertAsset(dirDef, 'directive', dirName)
+      }
       if (dirDef) {
         dirs.push({
           name: dirName,

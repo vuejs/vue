@@ -86,7 +86,10 @@ p.get = function () {
   try {
     value = this.getter.call(vm, vm)
   } catch (e) {
-    if (config.warnExpressionErrors) {
+    if (
+      process.env.NODE_ENV !== 'production' &&
+      config.warnExpressionErrors
+    ) {
       _.warn(
         'Error when evaluating expression "' +
         this.expression + '". ' +
@@ -127,7 +130,10 @@ p.set = function (value) {
   try {
     this.setter.call(vm, vm, value)
   } catch (e) {
-    if (config.warnExpressionErrors) {
+    if (
+      process.env.NODE_ENV !== 'production' &&
+      config.warnExpressionErrors
+    ) {
       _.warn(
         'Error when evaluating setter "' +
         this.expression + '"', e

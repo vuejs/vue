@@ -29,7 +29,7 @@ module.exports = {
     // friendly warning...
     this.checkFilters()
     if (this.hasRead && !this.hasWrite) {
-      _.warn(
+      process.env.NODE_ENV !== 'production' && _.warn(
         'It seems you are using a read-only filter with ' +
         'v-model. You might want to use a two-way filter ' +
         'to ensure correct behavior.'
@@ -45,7 +45,9 @@ module.exports = {
     } else if (tag === 'TEXTAREA') {
       handler = handlers.text
     } else {
-      _.warn('v-model does not support element type: ' + tag)
+      process.env.NODE_ENV !== 'production' && _.warn(
+        'v-model does not support element type: ' + tag
+      )
       return
     }
     handler.bind.call(this)

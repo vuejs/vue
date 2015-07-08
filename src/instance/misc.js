@@ -18,7 +18,9 @@ exports._applyFilters = function (value, oldValue, filters, write) {
   for (i = 0, l = filters.length; i < l; i++) {
     filter = filters[i]
     fn = _.resolveAsset(this.$options, 'filters', filter.name)
-    _.assertAsset(fn, 'filter', filter.name)
+    if (process.env.NODE_ENV !== 'production') {
+      _.assertAsset(fn, 'filter', filter.name)
+    }
     if (!fn) continue
     fn = write ? fn.write : (fn.read || fn)
     if (typeof fn !== 'function') continue
@@ -50,7 +52,9 @@ exports._applyFilters = function (value, oldValue, filters, write) {
 
 exports._resolveComponent = function (id, cb) {
   var factory = _.resolveAsset(this.$options, 'components', id)
-  _.assertAsset(factory, 'component', id)
+  if (process.env.NODE_ENV !== 'production') {
+    _.assertAsset(factory, 'component', id)
+  }
   // async component factory
   if (!factory.options) {
     if (factory.resolved) {
@@ -73,7 +77,7 @@ exports._resolveComponent = function (id, cb) {
           cbs[i](res)
         }
       }, function reject (reason) {
-        _.warn(
+        process.env.NODE_ENV !== 'production' && _.warn(
           'Failed to resolve async component: ' + id + '. ' +
           (reason ? '\nReason: ' + reason : '')
         )

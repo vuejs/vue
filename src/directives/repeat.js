@@ -53,7 +53,7 @@ module.exports = {
 
   checkIf: function () {
     if (_.attr(this.el, 'if') !== null) {
-      _.warn(
+      process.env.NODE_ENV !== 'production' && _.warn(
         'Don\'t use v-if with v-repeat. ' +
         'Use v-show or the "filterBy" filter instead.'
       )
@@ -155,9 +155,11 @@ module.exports = {
     }
     var id = this.ctorGetter.call(context, context)
     var Ctor = _.resolveAsset(this.vm.$options, 'components', id)
-    _.assertAsset(Ctor, 'component', id)
+    if (process.env.NODE_ENV !== 'production') {
+      _.assertAsset(Ctor, 'component', id)
+    }
     if (!Ctor.options) {
-      _.warn(
+      process.env.NODE_ENV !== 'production' && _.warn(
         'Async resolution is not supported for v-repeat ' +
         '+ dynamic component. (component: ' + id + ')'
       )
@@ -380,7 +382,7 @@ module.exports = {
     ) {
       vm.$watch(alias || '$value', function (val) {
         if (dir.filters) {
-          _.warn(
+          process.env.NODE_ENV !== 'production' && _.warn(
             'You seem to be mutating the $value reference of ' +
             'a v-repeat instance (likely through v-model) ' +
             'and filtering the v-repeat at the same time. ' +
@@ -449,7 +451,9 @@ module.exports = {
       if (!cache[id]) {
         cache[id] = vm
       } else if (!primitive && idKey !== '$index') {
-        _.warn('Duplicate track-by key in v-repeat: ' + id)
+        process.env.NODE_ENV !== 'production' && _.warn(
+          'Duplicate track-by key in v-repeat: ' + id
+        )
       }
     } else {
       id = this.id
@@ -457,7 +461,7 @@ module.exports = {
         if (data[id] === null) {
           data[id] = vm
         } else {
-          _.warn(
+          process.env.NODE_ENV !== 'production' && _.warn(
             'Duplicate objects are not supported in v-repeat ' +
             'when using components or transitions.'
           )

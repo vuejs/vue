@@ -13,7 +13,9 @@ exports.query = function (el) {
     var selector = el
     el = document.querySelector(el)
     if (!el) {
-      _.warn('Cannot find element: ' + selector)
+      process.env.NODE_ENV !== 'production' && _.warn(
+        'Cannot find element: ' + selector
+      )
     }
   }
   return el

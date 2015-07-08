@@ -9,7 +9,7 @@ module.exports = function (grunt) {
    */
 
   grunt.registerTask('version', function (version) {
-    var manifests = ['package', 'bower', 'component']
+    var manifests = ['package', 'component']
     manifests.forEach(function (file) {
       file = file + '.json'
       var json = grunt.file.read(file)
@@ -62,7 +62,8 @@ module.exports = function (grunt) {
     }).question('Releasing version ' + next + '. Continue? (Y/n)', function (answer) {
       if (!answer || answer.toLowerCase() === 'y') {
         console.log(blue('Releasing: ' + next))
-        grunt.config.set('version', next)
+        // set version in env
+        process.env.VUE_VERSION = next
         grunt.task.run([
           'eslint',
           'cover',

@@ -1,4 +1,4 @@
-var sauceConfig = require('./build/saucelabs-config')
+var sauceConfig = require('./build/saucelabs.config.js')
 
 module.exports = function (grunt) {
 

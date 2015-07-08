@@ -106,7 +106,7 @@ function restore (str, i) {
 
 function compileExpFns (exp, needSet) {
   if (improperKeywordsRE.test(exp)) {
-    _.warn(
+    process.env.NODE_ENV !== 'production' && _.warn(
       'Avoid using reserved keywords in expression: ' + exp
     )
   }
@@ -175,7 +175,7 @@ function makeGetter (body) {
   try {
     return new Function('scope', 'return ' + body + ';')
   } catch (e) {
-    _.warn(
+    process.env.NODE_ENV !== 'production' && _.warn(
       'Invalid expression. ' +
       'Generated function body: ' + body
     )
@@ -200,7 +200,9 @@ function makeSetter (body) {
   try {
     return new Function('scope', 'value', body + '=value;')
   } catch (e) {
-    _.warn('Invalid setter function body: ' + body)
+    process.env.NODE_ENV !== 'production' && _.warn(
+      'Invalid setter function body: ' + body
+    )
   }
 }
 

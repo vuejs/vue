@@ -28,7 +28,7 @@ exports._initProps = function () {
   var el = options.el
   var props = options.props
   if (props && !el) {
-    _.warn(
+    process.env.NODE_ENV !== 'production' && _.warn(
       'Props will not be compiled if no `el` option is ' +
       'provided at instantiation.'
     )

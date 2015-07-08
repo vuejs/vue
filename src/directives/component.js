@@ -50,7 +50,7 @@ module.exports = {
         this.transMode = this._checkParam('transition-mode')
       }
     } else {
-      _.warn(
+      process.env.NODE_ENV !== 'production' && _.warn(
         'Do not create a component that only contains ' +
         'a single other component - they will be mounted to ' +
         'the same element and cause conflict. Wrap it with ' +
