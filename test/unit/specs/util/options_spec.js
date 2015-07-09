@@ -1,6 +1,7 @@
 var _ = require('../../../../src/util')
 var Vue = require('../../../../src/vue')
 var merge = _.mergeOptions
+var resolveAsset = _.resolveAsset
 
 describe('Util - Option merging', function () {
 
@@ -300,6 +301,30 @@ describe('Util - Option merging', function () {
     }
     merge(a, b)
     expect(hasWarned(_, 'must provide an id')).toBe(true)
+  })
+
+})
+
+describe('Util - Option resolveAsset', function () {
+
+  var vm
+  beforeEach(function () {
+    vm = new Vue({
+      data: {},
+      components: {
+        'hyphenated-component': {
+          template: 'hi'
+        },
+        camelCasedComponent: {
+          template: 'yo'
+        }
+      }
+    })
+  })
+
+  it('resolves', function () {
+    expect(resolveAsset(vm.$options, 'components', 'hyphenated-component')).toBeTruthy()
+    expect(resolveAsset(vm.$options, 'components', 'camel-cased-component')).toBeTruthy()
   })
 
 })
