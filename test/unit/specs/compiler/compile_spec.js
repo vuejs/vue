@@ -167,6 +167,15 @@ if (_.inBrowser) {
         {
           name: 'boolean-absent',
           type: Boolean
+        },
+        {
+          name: 'factory',
+          type: Object,
+          default: function () {
+            return {
+              a: 123
+            }
+          }
         }
       ].map(function (p) {
         return typeof p === 'string' ? { name: p } : p
@@ -219,7 +228,7 @@ if (_.inBrowser) {
       expect(args[3]).toBe(def)
       // literal and one time should've been set on the _data
       // and numbers should be casted
-      expect(Object.keys(vm._data).length).toBe(8)
+      expect(Object.keys(vm._data).length).toBe(9)
       expect(vm.a).toBe(1)
       expect(vm._data.a).toBe(1)
       expect(vm.someOtherAttr).toBe(2)
@@ -228,10 +237,16 @@ if (_.inBrowser) {
       expect(vm._data.onetime).toBe('from parent: a')
       expect(vm.booleanLiteral).toBe('from parent: true')
       expect(vm._data.booleanLiteral).toBe('from parent: true')
+      expect(vm.camelCase).toBe('hi')
       expect(vm._data.camelCase).toBe('hi')
+      expect(vm.defaultValue).toBe(123)
       expect(vm._data.defaultValue).toBe(123)
+      expect(vm.boolean).toBe(true)
       expect(vm._data.boolean).toBe(true)
+      expect(vm.booleanAbsent).toBe(false)
       expect(vm._data.booleanAbsent).toBe(false)
+      expect(vm.factory).toBe(vm._data.factory)
+      expect(vm.factory.a).toBe(123)
     })
 
     it('props on root instance', function () {

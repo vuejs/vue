@@ -184,6 +184,24 @@ if (_.inBrowser) {
       expect(hasWarned(_, 'Props will not be compiled if no `el`')).toBe(true)
     })
 
+    it('warn object/array default values', function () {
+      new Vue({
+        el: el,
+        props: {
+          arr: {
+            type: Array,
+            default: []
+          },
+          obj: {
+            type: Object,
+            default: {}
+          }
+        }
+      })
+      expect(hasWarned(_, 'Use a factory function to return the default value')).toBe(true)
+      expect(_.warn.calls.count()).toBe(2)
+    })
+
     it('teardown', function (done) {
       var vm = new Vue({
         el: el,

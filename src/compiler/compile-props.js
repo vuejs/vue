@@ -106,11 +106,7 @@ function makePropsLinkFn (props) {
       options = prop.options
       if (prop.raw === null) {
         // initialize absent prop
-        vm._data[path] = options.type === Boolean
-          ? false
-          : options.hasOwnProperty('default')
-            ? options.default
-            : undefined
+        _.initProp(vm, prop, getDefault(options))
       } else if (prop.dynamic) {
         // dynamic prop
         if (vm._context) {
@@ -138,4 +134,35 @@ function makePropsLinkFn (props) {
       }
     }
   }
+}
+
+/**
+ * Get the default value of a prop.
+ *
+ * @param {Object} options
+ * @return {*}
+ */
+
+function getDefault (options) {
+  // absent boolean value
+  if (options.type === Boolean) {
+    return false
+  }
+  // no default, return undefined
+  if (!options.hasOwnProperty('default')) {
+    return
+  }
+  var def = options.default
+  // warn against non-factory defaults for Object & Array
+  if (_.isObject(def)) {
+    process.env.NODE_ENV !== 'production' && _.warn(
+      'Object/Array as default prop values will be shared ' +
+      'across multiple instances. Use a factory function ' +
+      'to return the default value instead.'
+    )
+  }
+  // call factory function for non-Function types
+  return typeof def === 'function' && options.type !== Function
+    ? def()
+    : def
 }
