@@ -1,6 +1,7 @@
 var _ = require('../../../../src/util')
 var Vue = require('../../../../src/vue')
 var merge = _.mergeOptions
+var resolveAsset = _.resolveAsset
 
 describe('Util - Option merging', function () {
 
@@ -272,6 +273,30 @@ describe('Util - Option merging', function () {
     expect(res.created[1]).toBe(f2)
     expect(res.created[2]).toBe(f3)
     expect(res.created[3]).toBe(f4)
+  })
+
+})
+
+describe('Util - Option resolveAsset', function () {
+
+  var vm
+  beforeEach(function () {
+    vm = new Vue({
+      data: {},
+      components: {
+        'hyphenated-component': {
+          template: 'hi'
+        },
+        camelCasedComponent: {
+          template: 'yo'
+        }
+      }
+    })
+  })
+
+  it('resolves', function () {
+    expect(resolveAsset(vm.$options, 'components', 'hyphenated-component')).toBeTruthy()
+    expect(resolveAsset(vm.$options, 'components', 'camel-cased-component')).toBeTruthy()
   })
 
 })
