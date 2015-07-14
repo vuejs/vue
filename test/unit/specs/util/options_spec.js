@@ -122,7 +122,7 @@ describe('Util - Option merging', function () {
       }
     })
     expect(typeof res.components.test).toBe('function')
-    expect(res.components.test.options.name).toBe('test')
+    expect(res.components.test.options.id).toBe('test')
     expect(res.components.test.super).toBe(Vue)
   })
 
@@ -272,6 +272,34 @@ describe('Util - Option merging', function () {
     expect(res.created[1]).toBe(f2)
     expect(res.created[2]).toBe(f3)
     expect(res.created[3]).toBe(f4)
+  })
+
+  it('Array assets', function () {
+    var a = {
+      components: {
+        a: Vue.extend({})
+      }
+    }
+    var b = {
+      components: [{ id: 'b' }]
+    }
+    var res = merge(a, b)
+    expect(res.components.a).toBe(a.components.a)
+    // b.components is guarded and converted to object hash
+    expect(res.components.b).toBe(b.components.b)
+  })
+
+  it('warn Array assets without id', function () {
+    var a = {
+      components: {
+        a: Vue.extend({})
+      }
+    }
+    var b = {
+      components: [{}]
+    }
+    merge(a, b)
+    expect(hasWarned(_, 'must provide an id')).toBe(true)
   })
 
 })

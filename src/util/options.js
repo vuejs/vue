@@ -1,4 +1,5 @@
 var _ = require('./index')
+var config = require('../config')
 var extend = _.extend
 
 /**
@@ -145,17 +146,16 @@ strats.paramAttributes = function () {
  * options and parent options.
  */
 
-strats.directives =
-strats.filters =
-strats.transitions =
-strats.components =
-strats.partials =
-strats.elementDirectives = function (parentVal, childVal) {
+function mergeAssets (parentVal, childVal) {
   var res = Object.create(parentVal)
   return childVal
-    ? extend(res, childVal)
+    ? extend(res, guardArrayAssets(childVal))
     : res
 }
+
+config._assetTypes.forEach(function (type) {
+  strats[type + 's'] = mergeAssets
+})
 
 /**
  * Events & Watchers.
@@ -207,60 +207,6 @@ var defaultStrat = function (parentVal, childVal) {
 }
 
 /**
- * Make sure component options get converted to actual
- * constructors.
- *
- * @param {Object} components
- */
-
-function guardComponents (components) {
-  if (components) {
-    var def
-    for (var key in components) {
-      if (_.commonTagRE.test(key)) {
-        process.env.NODE_ENV !== 'production' && _.warn(
-          'Do not use built-in HTML elements as component ' +
-          'name: ' + key
-        )
-        continue
-      }
-      def = components[key]
-      if (_.isPlainObject(def)) {
-        def.name = key
-        components[key] = _.Vue.extend(def)
-      }
-    }
-  }
-}
-
-/**
- * Ensure all props option syntax are normalized into the
- * Object-based format.
- *
- * @param {Object} options
- */
-
-function guardProps (options) {
-  var props = options.props
-  if (_.isPlainObject(props)) {
-    options.props = Object.keys(props).map(function (key) {
-      var val = props[key]
-      if (!_.isPlainObject(val)) {
-        val = { type: val }
-      }
-      val.name = key
-      return val
-    })
-  } else if (_.isArray(props)) {
-    options.props = props.map(function (prop) {
-      return typeof prop === 'string'
-        ? { name: prop }
-        : prop
-    })
-  }
-}
-
-/**
  * Merge two option objects into a new one.
  * Core utility used in both instantiation and inheritance.
  *
@@ -271,7 +217,7 @@ function guardProps (options) {
  */
 
 exports.mergeOptions = function merge (parent, child, vm) {
-  guardComponents(child.components)
+  guardComponents(child)
   guardProps(child)
   var options = {}
   var key
@@ -313,4 +259,90 @@ exports.resolveAsset = function resolve (options, type, id) {
     asset = options[type][id]
   }
   return asset
+}
+
+/**
+ * Make sure component options get converted to actual
+ * constructors.
+ *
+ * @param {Object} options
+ */
+
+function guardComponents (options) {
+  if (options.components) {
+    var components = options.components =
+      guardArrayAssets(options.components)
+    var def
+    var ids = Object.keys(components)
+    for (var i = 0, l = ids.length; i < l; i++) {
+      var key = ids[i]
+      if (_.commonTagRE.test(key)) {
+        process.env.NODE_ENV !== 'production' && _.warn(
+          'Do not use built-in HTML elements as component ' +
+          'id: ' + key
+        )
+        continue
+      }
+      def = components[key]
+      if (_.isPlainObject(def)) {
+        def.id = def.id || key
+        components[key] = def._Ctor || (def._Ctor = _.Vue.extend(def))
+      }
+    }
+  }
+}
+
+/**
+ * Ensure all props option syntax are normalized into the
+ * Object-based format.
+ *
+ * @param {Object} options
+ */
+
+function guardProps (options) {
+  var props = options.props
+  if (_.isPlainObject(props)) {
+    options.props = Object.keys(props).map(function (key) {
+      var val = props[key]
+      if (!_.isPlainObject(val)) {
+        val = { type: val }
+      }
+      val.name = key
+      return val
+    })
+  } else if (_.isArray(props)) {
+    options.props = props.map(function (prop) {
+      return typeof prop === 'string'
+        ? { name: prop }
+        : prop
+    })
+  }
+}
+
+/**
+ * Guard an Array-format assets option and converted it
+ * into the key-value Object format.
+ *
+ * @param {Object|Array} assets
+ * @return {Object}
+ */
+
+function guardArrayAssets (assets) {
+  if (_.isArray(assets)) {
+    var res = {}
+    var i = assets.length
+    var asset
+    while (i--) {
+      asset = assets[i]
+      if (!asset.id) {
+        process.env.NODE_ENV !== 'production' && _.warn(
+          'Array-syntax assets must provide an id field.'
+        )
+      } else {
+        res[asset.id] = asset
+      }
+    }
+    return res
+  }
+  return assets
 }
