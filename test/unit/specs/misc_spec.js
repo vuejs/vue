@@ -1,7 +1,12 @@
 // test cases for edge cases & bug fixes
 var Vue = require('../../../src/vue')
+var _ = require('../../../src/util/debug')
 
 describe('Misc', function () {
+
+  beforeEach(function () {
+    spyOn(_, 'warn')
+  })
 
   it('should handle directive.bind() altering its childNode structure', function () {
     var vm = new Vue({
@@ -219,6 +224,24 @@ describe('Misc', function () {
       expect(spy4).toHaveBeenCalledWith(obj2, obj2)
       done()
     })
+  })
+
+  it('strict mode', function () {
+    Vue.config.strict = true
+    new Vue({
+      el: document.createElement('div'),
+      template: '<test></test>',
+      components: {
+        test: {
+          template: '<div v-strict>hi</div>'
+        }
+      },
+      directives: {
+        strict: function () {}
+      }
+    })
+    expect(hasWarned(_, 'Failed to resolve directive: strict')).toBe(true)
+    Vue.config.strict = false
   })
 
 })

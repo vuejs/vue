@@ -207,61 +207,6 @@ var defaultStrat = function (parentVal, childVal) {
 }
 
 /**
- * Merge two option objects into a new one.
- * Core utility used in both instantiation and inheritance.
- *
- * @param {Object} parent
- * @param {Object} child
- * @param {Vue} [vm] - if vm is present, indicates this is
- *                     an instantiation merge.
- */
-
-exports.mergeOptions = function merge (parent, child, vm) {
-  guardComponents(child)
-  guardProps(child)
-  var options = {}
-  var key
-  if (child.mixins) {
-    for (var i = 0, l = child.mixins.length; i < l; i++) {
-      parent = merge(parent, child.mixins[i], vm)
-    }
-  }
-  for (key in parent) {
-    mergeField(key)
-  }
-  for (key in child) {
-    if (!(parent.hasOwnProperty(key))) {
-      mergeField(key)
-    }
-  }
-  function mergeField (key) {
-    var strat = strats[key] || defaultStrat
-    options[key] = strat(parent[key], child[key], vm, key)
-  }
-  return options
-}
-
-/**
- * Resolve an asset.
- * This function is used because child instances need access
- * to assets defined in its ancestor chain.
- *
- * @param {Object} options
- * @param {String} type
- * @param {String} id
- * @return {Object|Function}
- */
-
-exports.resolveAsset = function resolve (options, type, id) {
-  var asset = options[type][id]
-  while (!asset && options._parent) {
-    options = options._parent.$options
-    asset = options[type][id]
-  }
-  return asset
-}
-
-/**
  * Make sure component options get converted to actual
  * constructors.
  *
@@ -345,4 +290,59 @@ function guardArrayAssets (assets) {
     return res
   }
   return assets
+}
+
+/**
+ * Merge two option objects into a new one.
+ * Core utility used in both instantiation and inheritance.
+ *
+ * @param {Object} parent
+ * @param {Object} child
+ * @param {Vue} [vm] - if vm is present, indicates this is
+ *                     an instantiation merge.
+ */
+
+exports.mergeOptions = function merge (parent, child, vm) {
+  guardComponents(child)
+  guardProps(child)
+  var options = {}
+  var key
+  if (child.mixins) {
+    for (var i = 0, l = child.mixins.length; i < l; i++) {
+      parent = merge(parent, child.mixins[i], vm)
+    }
+  }
+  for (key in parent) {
+    mergeField(key)
+  }
+  for (key in child) {
+    if (!(parent.hasOwnProperty(key))) {
+      mergeField(key)
+    }
+  }
+  function mergeField (key) {
+    var strat = strats[key] || defaultStrat
+    options[key] = strat(parent[key], child[key], vm, key)
+  }
+  return options
+}
+
+/**
+ * Resolve an asset.
+ * This function is used because child instances need access
+ * to assets defined in its ancestor chain.
+ *
+ * @param {Object} options
+ * @param {String} type
+ * @param {String} id
+ * @return {Object|Function}
+ */
+
+exports.resolveAsset = function resolve (options, type, id) {
+  var asset = options[type][id]
+  while (!config.strict && !asset && options._parent) {
+    options = options._parent.$options
+    asset = options[type][id]
+  }
+  return asset
 }
