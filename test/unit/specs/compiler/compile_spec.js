@@ -176,7 +176,8 @@ if (_.inBrowser) {
               a: 123
             }
           }
-        }
+        },
+        'withDataPrefix'
       ].map(function (p) {
         return typeof p === 'string' ? { name: p } : p
       })
@@ -191,6 +192,7 @@ if (_.inBrowser) {
       el.setAttribute('camel-case', 'hi')
       el.setAttribute('boolean-literal', '{{true}}')
       el.setAttribute('boolean', '')
+      el.setAttribute('data-with-data-prefix', '1')
       compiler.compileAndLinkProps(vm, el, props)
       // should skip literals and one-time bindings
       expect(vm._bindDir.calls.count()).toBe(4)
@@ -228,7 +230,7 @@ if (_.inBrowser) {
       expect(args[3]).toBe(def)
       // literal and one time should've been set on the _data
       // and numbers should be casted
-      expect(Object.keys(vm._data).length).toBe(9)
+      expect(Object.keys(vm._data).length).toBe(10)
       expect(vm.a).toBe(1)
       expect(vm._data.a).toBe(1)
       expect(vm.someOtherAttr).toBe(2)
@@ -247,6 +249,8 @@ if (_.inBrowser) {
       expect(vm._data.booleanAbsent).toBe(false)
       expect(vm.factory).toBe(vm._data.factory)
       expect(vm.factory.a).toBe(123)
+      expect(vm.withDataPrefix).toBe(1)
+      expect(vm._data.withDataPrefix).toBe(1)
     })
 
     it('props on root instance', function () {

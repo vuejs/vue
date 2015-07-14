@@ -21,7 +21,7 @@ var literalValueRE = /^(true|false)$|^\d.*/
 module.exports = function compileProps (el, propOptions) {
   var props = []
   var i = propOptions.length
-  var options, name, value, path, prop, literal, single
+  var options, name, attr, value, path, prop, literal, single
   while (i--) {
     options = propOptions[i]
     name = options.name
@@ -36,7 +36,12 @@ module.exports = function compileProps (el, propOptions) {
       )
       continue
     }
-    value = el.getAttribute(_.hyphenate(name))
+    attr = _.hyphenate(name)
+    value = el.getAttribute(attr)
+    if (value === null) {
+      attr = 'data-' + attr
+      value = el.getAttribute(attr)
+    }
     // create a prop descriptor
     prop = {
       name: name,
@@ -48,7 +53,7 @@ module.exports = function compileProps (el, propOptions) {
     if (value !== null) {
       // important so that this doesn't get compiled
       // again as a normal attribute binding
-      el.removeAttribute(name)
+      el.removeAttribute(attr)
       var tokens = textParser.parse(value)
       if (tokens) {
         if (el && el.nodeType === 1) {
