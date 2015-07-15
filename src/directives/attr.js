@@ -44,6 +44,9 @@ module.exports = {
     } else {
       this.el.removeAttribute(attr)
     }
+    if (attr in this.el) {
+      this.el[attr] = value
+    }
   }
 
 }

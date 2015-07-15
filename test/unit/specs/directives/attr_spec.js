@@ -26,6 +26,14 @@ if (_.inBrowser) {
       expect(el.getAttribute('test')).toBe('0')
     })
 
+    it('should set property', function () {
+      dir.el = document.createElement('input')
+      dir.arg = 'value'
+      dir.update('what')
+      expect(dir.el.getAttribute('value')).toBe('what')
+      expect(dir.el.value).toBe('what')
+    })
+
     it('xlink', function () {
       var xlinkNS = 'http://www.w3.org/1999/xlink'
       dir.arg = 'xlink:special'
