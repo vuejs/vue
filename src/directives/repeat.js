@@ -687,6 +687,7 @@ module.exports = {
 
 function findPrevVm (vm, anchor, id) {
   var el = vm.$el.previousSibling
+  if (!el) return
   while (
     (!el.__vue__ || el.__vue__.$options._repeatId !== id) &&
     el !== anchor
