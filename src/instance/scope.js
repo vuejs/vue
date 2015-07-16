@@ -248,7 +248,9 @@ exports._defineMeta = function (key, value) {
     enumerable: true,
     configurable: true,
     get: function metaGetter () {
-      dep.depend()
+      if (Dep.target) {
+        dep.depend()
+      }
       return value
     },
     set: function metaSetter (val) {

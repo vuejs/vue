@@ -17,7 +17,6 @@ require('./object')
 
 function Observer (value) {
   this.value = value
-  this.active = true
   this.dep = new Dep()
   _.define(value, '__ob__', this)
   if (_.isArray(value)) {
@@ -142,11 +141,17 @@ p.convert = function (key, val) {
     enumerable: true,
     configurable: true,
     get: function () {
-      if (ob.active) {
+      if (Dep.target) {
         dep.depend()
-      }
-      if (childOb) {
-        childOb.dep.depend()
+        if (childOb) {
+          childOb.dep.depend()
+        }
+        if (_.isArray(val)) {
+          for (var e, i = 0, l = val.length; i < l; i++) {
+            e = val[i]
+            e && e.__ob__ && e.__ob__.dep.depend()
+          }
+        }
       }
       return val
     },

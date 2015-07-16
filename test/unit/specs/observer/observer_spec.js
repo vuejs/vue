@@ -1,6 +1,5 @@
 var Observer = require('../../../../src/observer')
 var config = require('../../../../src/config')
-var Dep = require('../../../../src/observer/dep')
 var _ = require('../../../../src/util')
 
 describe('Observer', function () {
@@ -25,7 +24,6 @@ describe('Observer', function () {
     }
     var ob = Observer.create(obj)
     expect(ob instanceof Observer).toBe(true)
-    expect(ob.active).toBe(true)
     expect(ob.value).toBe(obj)
     expect(obj.__ob__).toBe(ob)
     // should've walked children
@@ -41,7 +39,6 @@ describe('Observer', function () {
     var arr = [{}, {}]
     var ob = Observer.create(arr)
     expect(ob instanceof Observer).toBe(true)
-    expect(ob.active).toBe(true)
     expect(ob.value).toBe(arr)
     expect(arr.__ob__).toBe(ob)
     // should've walked children
@@ -69,7 +66,6 @@ describe('Observer', function () {
     obj.a.b = 3
     expect(watcher.update.calls.count()).toBe(1)
     // swap object
-    var oldA = obj.a
     obj.a = { b: 4 }
     expect(watcher.update.calls.count()).toBe(2)
     watcher.deps = []

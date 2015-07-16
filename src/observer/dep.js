@@ -43,9 +43,7 @@ p.removeSub = function (sub) {
  */
 
 p.depend = function () {
-  if (Dep.target) {
-    Dep.target.addDep(this)
-  }
+  Dep.target.addDep(this)
 }
 
 /**
