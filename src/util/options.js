@@ -279,12 +279,13 @@ function guardArrayAssets (assets) {
     var asset
     while (i--) {
       asset = assets[i]
-      if (!asset.id) {
+      var id = asset.id || (asset.options && asset.options.id)
+      if (!id) {
         process.env.NODE_ENV !== 'production' && _.warn(
           'Array-syntax assets must provide an id field.'
         )
       } else {
-        res[asset.id] = asset
+        res[id] = asset
       }
     }
     return res
