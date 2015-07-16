@@ -42,7 +42,7 @@ var arrayMethods = Object.create(arrayProto)
     }
     if (inserted) ob.observeArray(inserted)
     // notify change
-    ob.notify()
+    ob.dep.notify()
     return result
   })
 })

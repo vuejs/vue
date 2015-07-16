@@ -65,20 +65,18 @@ describe('Observer', function () {
     Observer.setTarget(watcher)
     obj.a.b
     Observer.setTarget(null)
-    expect(watcher.deps.length).toBe(2)
+    expect(watcher.deps.length).toBe(3) // obj.a + a.b + b
     obj.a.b = 3
     expect(watcher.update.calls.count()).toBe(1)
     // swap object
     var oldA = obj.a
     obj.a = { b: 4 }
     expect(watcher.update.calls.count()).toBe(2)
-    expect(oldA.__ob__.deps.length).toBe(0)
-    expect(obj.a.__ob__.deps.length).toBe(1)
     watcher.deps = []
     Observer.setTarget(watcher)
     obj.a.b
     Observer.setTarget(null)
-    expect(watcher.deps.length).toBe(2)
+    expect(watcher.deps.length).toBe(3)
     // set on the swapped object
     obj.a.b = 5
     expect(watcher.update.calls.count()).toBe(3)
@@ -87,8 +85,7 @@ describe('Observer', function () {
   it('observing $add/$set/$delete', function () {
     var obj = { a: 1 }
     var ob = Observer.create(obj)
-    var dep = new Dep()
-    ob.deps.push(dep)
+    var dep = ob.dep
     spyOn(dep, 'notify')
     obj.$add('b', 2)
     expect(obj.b).toBe(2)
@@ -121,8 +118,7 @@ describe('Observer', function () {
   it('observing array mutation', function () {
     var arr = []
     var ob = Observer.create(arr)
-    var dep = new Dep()
-    ob.deps.push(dep)
+    var dep = ob.dep
     spyOn(dep, 'notify')
     var objs = [{}, {}, {}]
     arr.push(objs[0])
@@ -142,8 +138,7 @@ describe('Observer', function () {
   it('array $set', function () {
     var arr = [1]
     var ob = Observer.create(arr)
-    var dep = new Dep()
-    ob.deps.push(dep)
+    var dep = ob.dep
     spyOn(dep, 'notify')
     arr.$set(0, 2)
     expect(arr[0]).toBe(2)
@@ -159,8 +154,7 @@ describe('Observer', function () {
     var obj1 = arr[0]
     var obj2 = arr[1]
     var ob = Observer.create(arr)
-    var dep = new Dep()
-    ob.deps.push(dep)
+    var dep = ob.dep
     spyOn(dep, 'notify')
     // remove by index
     arr.$remove(0)
@@ -185,8 +179,7 @@ describe('Observer', function () {
     var ob = Observer.create(obj)
     expect(obj.$add).toBeTruthy()
     expect(obj.$delete).toBeTruthy()
-    var dep = new Dep()
-    ob.deps.push(dep)
+    var dep = ob.dep
     spyOn(dep, 'notify')
     obj.$add('b', 2)
     expect(dep.notify).toHaveBeenCalled()
@@ -196,8 +189,7 @@ describe('Observer', function () {
     expect(arr.$set).toBeTruthy()
     expect(arr.$remove).toBeTruthy()
     expect(arr.push).not.toBe([].push)
-    var dep2 = new Dep()
-    ob2.deps.push(dep2)
+    var dep2 = ob2.dep
     spyOn(dep2, 'notify')
     arr.push(1)
     expect(dep2.notify).toHaveBeenCalled()
