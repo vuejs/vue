@@ -27,6 +27,9 @@ function Directive (name, el, vm, descriptor, def, host) {
   this.name = name
   this.el = el
   this.vm = vm
+  if (def._guard) {
+    def._guard(descriptor)
+  }
   // copy descriptor props
   this.raw = descriptor.raw
   this.expression = descriptor.expression

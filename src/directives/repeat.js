@@ -525,48 +525,6 @@ module.exports = {
   },
 
   /**
-   * Pre-process the value before piping it through the
-   * filters, and convert non-Array objects to arrays.
-   *
-   * This function will be bound to this directive instance
-   * and passed into the watcher.
-   *
-   * @param {*} value
-   * @return {Array}
-   * @private
-   */
-
-  _preProcess: function (value) {
-    // regardless of type, store the un-filtered raw value.
-    this.rawValue = value
-    var type = this.rawType = typeof value
-    if (!isPlainObject(value)) {
-      this.converted = false
-      if (type === 'number') {
-        value = range(value)
-      } else if (type === 'string') {
-        value = _.toArray(value)
-      }
-      return value || []
-    } else {
-      // convert plain object to array.
-      var keys = Object.keys(value)
-      var i = keys.length
-      var res = new Array(i)
-      var key
-      while (i--) {
-        key = keys[i]
-        res[i] = {
-          $key: key,
-          $value: value[key]
-        }
-      }
-      this.converted = true
-      return res
-    }
-  },
-
-  /**
    * Insert an instance.
    *
    * @param {Vue} vm
@@ -666,6 +624,64 @@ module.exports = {
     return hook
       ? hook.call(vm, index, total)
       : index * this[type]
+  },
+
+  /**
+   * Pre-process the value before piping it through the
+   * filters, and convert non-Array objects to arrays.
+   *
+   * This function will be bound to this directive instance
+   * and passed into the watcher.
+   *
+   * @param {*} value
+   * @return {Array}
+   * @private
+   */
+
+  _preProcess: function (value) {
+    // regardless of type, store the un-filtered raw value.
+    this.rawValue = value
+    var type = this.rawType = typeof value
+    if (!isPlainObject(value)) {
+      this.converted = false
+      if (type === 'number') {
+        value = range(value)
+      } else if (type === 'string') {
+        value = _.toArray(value)
+      }
+      return value || []
+    } else {
+      // convert plain object to array.
+      var keys = Object.keys(value)
+      var i = keys.length
+      var res = new Array(i)
+      var key
+      while (i--) {
+        key = keys[i]
+        res[i] = {
+          $key: key,
+          $value: value[key]
+        }
+      }
+      this.converted = true
+      return res
+    }
+  },
+
+  /**
+   * Internal hook to do custom transform on the directive's
+   * descriptor so that it can support special syntax.
+   *
+   * @param {Object} descriptor
+   */
+
+  _guard: function (descriptor) {
+    var exp = descriptor.expression
+    var match = exp.trim().match(/(.*) in (.*)/)
+    if (match) {
+      descriptor.arg = match[1]
+      descriptor.expression = match[2]
+    }
   }
 
 }

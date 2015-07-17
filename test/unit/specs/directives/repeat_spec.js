@@ -43,6 +43,17 @@ if (_.inBrowser) {
       assertMutations(vm, el, done)
     })
 
+    it('item in list syntax', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          items: [{a: 1}, {a: 2}]
+        },
+        template: '<div v-repeat="item in items">{{$index}} {{item.a}}</div>'
+      })
+      assertMutations(vm, el, done)
+    })
+
     it('primitive with identifier', function (done) {
       var vm = new Vue({
         el: el,
