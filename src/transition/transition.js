@@ -139,7 +139,7 @@ p.leave = function (op, cb) {
   this.cb = cb
   addClass(this.el, this.leaveClass)
   this.callHookWithCb('leave')
-  this.cancel = this.hooks && this.hooks.enterCancelled
+  this.cancel = this.hooks && this.hooks.leaveCancelled
   // only need to do leaveNextTick if there's no explicit
   // js callback
   if (!this.pendingJsCb) {
