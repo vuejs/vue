@@ -20,6 +20,12 @@ module.exports = {
    */
 
   bind: function () {
+    // support for item in array syntax
+    var inMatch = this.expression.match(/(.*) in (.*)/)
+    if (inMatch) {
+      this.arg = inMatch[1]
+      this._watcherExp = inMatch[2]
+    }
     // uid as a cache identifier
     this.id = '__v_repeat_' + (++uid)
     // setup anchor nodes
@@ -678,24 +684,7 @@ module.exports = {
       this.converted = true
       return res
     }
-  },
-
-  /**
-   * Internal hook to do custom transform on the directive's
-   * descriptor so that it can support special syntax.
-   *
-   * @param {Object} descriptor
-   */
-
-  _guard: function (descriptor) {
-    var exp = descriptor.expression
-    var match = exp.trim().match(/(.*) in (.*)/)
-    if (match) {
-      descriptor.arg = match[1]
-      descriptor.expression = match[2]
-    }
   }
-
 }
 
 /**
