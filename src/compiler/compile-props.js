@@ -56,9 +56,6 @@ module.exports = function compileProps (el, propOptions) {
       el.removeAttribute(attr)
       var tokens = textParser.parse(value)
       if (tokens) {
-        if (el && el.nodeType === 1) {
-          el.removeAttribute(name)
-        }
         prop.dynamic = true
         prop.parentPath = textParser.tokensToExp(tokens)
         // check prop binding type.
