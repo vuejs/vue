@@ -45,6 +45,18 @@ module.exports = {
     this.enterStagger = +this._checkParam('enter-stagger') || stagger
     this.leaveStagger = +this._checkParam('leave-stagger') || stagger
     this.cache = Object.create(null)
+    // some helpful tips...
+    /* istanbul ignore if */
+    if (
+      process.env.NODE_ENV !== 'production' &&
+      this.el.tagName === 'OPTION'
+    ) {
+      _.warn(
+        'Don\'t use v-repeat for v-model options; ' +
+        'use the `options` param instead: ' +
+        'http://vuejs.org/guide/forms.html#Dynamic_Select_Options'
+      )
+    }
   },
 
   /**
