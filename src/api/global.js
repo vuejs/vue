@@ -6,8 +6,8 @@ var config = require('../config')
  */
 
 exports.util = _
+exports.config = config
 exports.nextTick = _.nextTick
-exports.config = require('../config')
 exports.compiler = require('../compiler')
 
 exports.parsers = {
@@ -28,7 +28,7 @@ exports.cid = 0
 var cid = 1
 
 /**
- * Class inehritance
+ * Class inheritance
  *
  * @param {Object} extendOptions
  */
