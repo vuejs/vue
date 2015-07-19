@@ -329,6 +329,27 @@ describe('Watcher', function () {
     })
   })
 
+  it('lazy mode', function (done) {
+    var watcher = new Watcher(vm, function () {
+      return this.a + this.b.d
+    }, null, { lazy: true })
+    expect(watcher.lazy).toBe(true)
+    expect(watcher.value).toBeUndefined()
+    expect(watcher.dirty).toBe(true)
+    watcher.evaluate()
+    expect(watcher.value).toBe(5)
+    expect(watcher.dirty).toBe(false)
+    vm.a = 2
+    nextTick(function () {
+      expect(watcher.value).toBe(5)
+      expect(watcher.dirty).toBe(true)
+      watcher.evaluate()
+      expect(watcher.value).toBe(6)
+      expect(watcher.dirty).toBe(false)
+      done()
+    })
+  })
+
   it('teardown', function (done) {
     var watcher = new Watcher(vm, 'b.c', spy)
     watcher.teardown()

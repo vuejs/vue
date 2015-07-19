@@ -1,4 +1,5 @@
 var Observer = require('../../../../src/observer')
+var Dep = require('../../../../src/observer/dep')
 var config = require('../../../../src/config')
 var _ = require('../../../../src/util')
 
@@ -59,9 +60,9 @@ describe('Observer', function () {
       update: jasmine.createSpy()
     }
     // collect dep
-    Observer.setTarget(watcher)
+    Dep.target = watcher
     obj.a.b
-    Observer.setTarget(null)
+    Dep.target = null
     expect(watcher.deps.length).toBe(3) // obj.a + a.b + b
     obj.a.b = 3
     expect(watcher.update.calls.count()).toBe(1)
@@ -69,9 +70,9 @@ describe('Observer', function () {
     obj.a = { b: 4 }
     expect(watcher.update.calls.count()).toBe(2)
     watcher.deps = []
-    Observer.setTarget(watcher)
+    Dep.target = watcher
     obj.a.b
-    Observer.setTarget(null)
+    Dep.target = null
     expect(watcher.deps.length).toBe(3)
     // set on the swapped object
     obj.a.b = 5

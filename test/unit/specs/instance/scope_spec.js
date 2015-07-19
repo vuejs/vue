@@ -162,24 +162,26 @@ describe('Instance Scope', function () {
     var Test = Vue.extend({
       computed: {
         c: function () {
-          expect(this).toBe(vm)
           return this.a + this.b
         },
         d: {
           get: function () {
-            expect(this).toBe(vm)
             return this.a + this.b
           },
           set: function (newVal) {
-            expect(this).toBe(vm)
             var vals = newVal.split(' ')
             this.a = vals[0]
             this.b = vals[1]
           }
+        },
+        // chained computed
+        e: function () {
+          return this.c + 'e'
         }
       }
     })
 
+    var spy = jasmine.createSpy()
     var vm = new Test({
       data: {
         a: 'a',
@@ -187,21 +189,29 @@ describe('Instance Scope', function () {
       }
     })
 
+    vm.$watch('e', spy)
+
     it('get', function () {
       expect(vm.c).toBe('ab')
       expect(vm.d).toBe('ab')
+      expect(vm.e).toBe('abe')
     })
 
-    it('set', function () {
+    it('set', function (done) {
       vm.c = 123 // should do nothing
       vm.d = 'c d'
       expect(vm.a).toBe('c')
       expect(vm.b).toBe('d')
       expect(vm.c).toBe('cd')
       expect(vm.d).toBe('cd')
+      expect(vm.e).toBe('cde')
+      Vue.nextTick(function () {
+        expect(spy).toHaveBeenCalledWith('cde', 'abe')
+        done()
+      })
     })
 
-    it('inherit', function () {
+    it('inherit', function (done) {
       var child = vm.$addChild({
         inherit: true
       })
@@ -212,10 +222,16 @@ describe('Instance Scope', function () {
       expect(vm.b).toBe('f')
       expect(vm.c).toBe('ef')
       expect(vm.d).toBe('ef')
+      expect(vm.e).toBe('efe')
       expect(child.a).toBe('e')
       expect(child.b).toBe('f')
       expect(child.c).toBe('ef')
       expect(child.d).toBe('ef')
+      expect(vm.e).toBe('efe')
+      Vue.nextTick(function () {
+        expect(spy).toHaveBeenCalledWith('efe', 'cde')
+        done()
+      })
     })
 
     it('same definition object bound to different instance', function () {
@@ -232,6 +248,7 @@ describe('Instance Scope', function () {
       expect(vm.b).toBe('D')
       expect(vm.c).toBe('CD')
       expect(vm.d).toBe('CD')
+      expect(vm.e).toBe('CDe')
     })
 
   })

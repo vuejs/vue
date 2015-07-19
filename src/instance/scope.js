@@ -2,6 +2,7 @@ var _ = require('../util')
 var compiler = require('../compiler')
 var Observer = require('../observer')
 var Dep = require('../observer/dep')
+var Watcher = require('../watcher')
 
 /**
  * Setup the scope of an instance, which contains:
@@ -191,11 +192,11 @@ exports._initComputed = function () {
         configurable: true
       }
       if (typeof userDef === 'function') {
-        def.get = _.bind(userDef, this)
+        def.get = makeComputedGetter(userDef, this)
         def.set = noop
       } else {
         def.get = userDef.get
-          ? _.bind(userDef.get, this)
+          ? makeComputedGetter(userDef.get, this)
           : noop
         def.set = userDef.set
           ? _.bind(userDef.set, this)
@@ -203,6 +204,21 @@ exports._initComputed = function () {
       }
       Object.defineProperty(this, key, def)
     }
+  }
+}
+
+function makeComputedGetter (getter, owner) {
+  var watcher = new Watcher(owner, getter, null, {
+    lazy: true
+  })
+  return function computedGetter () {
+    if (watcher.dirty) {
+      watcher.evaluate()
+    }
+    if (Dep.target) {
+      watcher.depend()
+    }
+    return watcher.value
   }
 }
 

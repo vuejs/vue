@@ -1,6 +1,6 @@
 var _ = require('./util')
 var config = require('./config')
-var Observer = require('./observer')
+var Dep = require('./observer/dep')
 var expParser = require('./parsers/expression')
 var batcher = require('./batcher')
 var uid = 0
@@ -18,6 +18,7 @@ var uid = 0
  *                 - {Boolean} twoWay
  *                 - {Boolean} deep
  *                 - {Boolean} user
+ *                 - {Boolean} lazy
  *                 - {Function} [preProcess]
  * @constructor
  */
@@ -34,10 +35,12 @@ function Watcher (vm, expOrFn, cb, options) {
   this.deep = !!options.deep
   this.user = !!options.user
   this.twoWay = !!options.twoWay
+  this.lazy = !!options.lazy
+  this.dirty = this.lazy
   this.filters = options.filters
   this.preProcess = options.preProcess
   this.deps = []
-  this.newDeps = []
+  this.newDeps = null
   // parse expression for getter/setter
   if (isFn) {
     this.getter = expOrFn
@@ -47,7 +50,9 @@ function Watcher (vm, expOrFn, cb, options) {
     this.getter = res.get
     this.setter = res.set
   }
-  this.value = this.get()
+  this.value = this.lazy
+    ? undefined
+    : this.get()
   // state for avoiding false triggers for deep and Array
   // watchers during vm._digest()
   this.queued = this.shallow = false
@@ -147,7 +152,8 @@ p.set = function (value) {
  */
 
 p.beforeGet = function () {
-  Observer.setTarget(this)
+  Dep.target = this
+  this.newDeps = []
 }
 
 /**
@@ -155,7 +161,7 @@ p.beforeGet = function () {
  */
 
 p.afterGet = function () {
-  Observer.setTarget(null)
+  Dep.target = null
   var i = this.deps.length
   while (i--) {
     var dep = this.deps[i]
@@ -164,7 +170,7 @@ p.afterGet = function () {
     }
   }
   this.deps = this.newDeps
-  this.newDeps = []
+  this.newDeps = null
 }
 
 /**
@@ -175,7 +181,9 @@ p.afterGet = function () {
  */
 
 p.update = function (shallow) {
-  if (!config.async) {
+  if (this.lazy) {
+    this.dirty = true
+  } else if (!config.async) {
     this.run()
   } else {
     // if queued, only overwrite shallow with non-shallow,
@@ -211,6 +219,31 @@ p.run = function () {
       this.cb(value, oldValue)
     }
     this.queued = this.shallow = false
+  }
+}
+
+/**
+ * Evaluate the value of the watcher.
+ * This only gets called for lazy watchers.
+ */
+
+p.evaluate = function () {
+  // avoid overwriting another watcher that is being
+  // collected.
+  var current = Dep.target
+  this.value = this.get()
+  this.dirty = false
+  Dep.target = current
+}
+
+/**
+ * Depend on all deps collected by this watcher.
+ */
+
+p.depend = function () {
+  var i = this.deps.length
+  while (i--) {
+    this.deps[i].depend()
   }
 }
 

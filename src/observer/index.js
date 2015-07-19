@@ -64,16 +64,6 @@ Observer.create = function (value, vm) {
   return ob
 }
 
-/**
- * Set the target watcher that is currently being evaluated.
- *
- * @param {Watcher} watcher
- */
-
-Observer.setTarget = function (watcher) {
-  Dep.target = watcher
-}
-
 // Instance methods
 
 var p = Observer.prototype
