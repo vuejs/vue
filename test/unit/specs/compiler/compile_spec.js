@@ -177,7 +177,11 @@ if (_.inBrowser) {
             }
           }
         },
-        'withDataPrefix'
+        'withDataPrefix',
+        {
+          name: 'forceTwoWay',
+          twoWay: true
+        }
       ].map(function (p) {
         return typeof p === 'string' ? { name: p } : p
       })
@@ -193,9 +197,10 @@ if (_.inBrowser) {
       el.setAttribute('boolean-literal', '{{true}}')
       el.setAttribute('boolean', '')
       el.setAttribute('data-with-data-prefix', '1')
+      el.setAttribute('force-two-way', '{{a}}')
       compiler.compileAndLinkProps(vm, el, props)
       // should skip literals and one-time bindings
-      expect(vm._bindDir.calls.count()).toBe(4)
+      expect(vm._bindDir.calls.count()).toBe(5)
       // data-some-attr
       var args = vm._bindDir.calls.argsFor(0)
       expect(args[0]).toBe('prop')
@@ -228,6 +233,8 @@ if (_.inBrowser) {
       expect(args[2].parentPath).toBe('this._applyFilters(a,null,[{"name":"filter"}],false)')
       expect(args[2].mode).toBe(bindingModes.ONE_WAY)
       expect(args[3]).toBe(def)
+      // warn when expecting two-way binding but not getting it
+      expect(hasWarned(_, 'expects a two-way binding type')).toBe(true)
       // literal and one time should've been set on the _data
       // and numbers should be casted
       expect(Object.keys(vm._data).length).toBe(10)

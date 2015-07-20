@@ -77,6 +77,15 @@ module.exports = function compileProps (el, propOptions) {
             )
           }
         }
+        if (
+          process.env.NODE_ENV !== 'production' &&
+          options.twoWay &&
+          prop.mode !== propBindingModes.TWO_WAY
+        ) {
+          _.warn(
+            'Prop "' + name + '" expects a two-way binding type.'
+          )
+        }
       }
     } else if (options && options.required) {
       process.env.NODE_ENV !== 'production' && _.warn(
