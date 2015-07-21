@@ -90,7 +90,7 @@ pathStateMachine[IN_SUB_PATH] = {
   'ident': [IN_SUB_PATH, APPEND],
   '0': [IN_SUB_PATH, APPEND],
   'number': [IN_SUB_PATH, APPEND],
-  'ws': [AFTER_ELEMENT, PUSH],
+  'ws': [AFTER_ELEMENT],
   ']': [IN_PATH, PUSH]
 }
 
@@ -98,8 +98,6 @@ pathStateMachine[AFTER_ELEMENT] = {
   'ws': [AFTER_ELEMENT],
   ']': [IN_PATH, PUSH]
 }
-
-function noop () {}
 
 /**
  * Determine the type of a character in a keypath.
@@ -213,14 +211,16 @@ function parsePath (path) {
     }
 
     mode = transition[0]
-    action = actions[transition[1]] || noop
-    newChar = transition[2]
-    newChar = newChar === undefined
-      ? c
-      : newChar === '*'
-        ? newChar + c
-        : newChar
-    action()
+    action = actions[transition[1]]
+    if (action) {
+      newChar = transition[2]
+      newChar = newChar === undefined
+        ? c
+        : newChar === '*'
+          ? newChar + c
+          : newChar
+      action()
+    }
 
     if (mode === AFTER_PATH) {
       keys.raw = path
