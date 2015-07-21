@@ -3,78 +3,100 @@ var Cache = require('../cache')
 var pathCache = new Cache(1000)
 var identRE = exports.identRE = /^[$_a-zA-Z]+[\w$]*$/
 
-/**
- * Path-parsing algorithm scooped from Polymer/observe-js
- */
+// actions
+var APPEND = 0
+var PUSH = 1
 
-var pathStateMachine = {
-  'beforePath': {
-    'ws': ['beforePath'],
-    'ident': ['inIdent', 'append'],
-    '[': ['beforeElement'],
-    'eof': ['afterPath']
-  },
+// states
+var BEFORE_PATH = 0
+var IN_PATH = 1
+var BEFORE_IDENT = 2
+var IN_IDENT = 3
+var BEFORE_ELEMENT = 4
+var AFTER_ZERO = 5
+var IN_INDEX = 6
+var IN_SINGLE_QUOTE = 7
+var IN_DOUBLE_QUOTE = 8
+var IN_SUB_PATH = 9
+var AFTER_ELEMENT = 10
+var AFTER_PATH = 11
+var ERROR = 12
 
-  'inPath': {
-    'ws': ['inPath'],
-    '.': ['beforeIdent'],
-    '[': ['beforeElement'],
-    'eof': ['afterPath']
-  },
+var pathStateMachine = []
 
-  'beforeIdent': {
-    'ws': ['beforeIdent'],
-    'ident': ['inIdent', 'append']
-  },
+pathStateMachine[BEFORE_PATH] = {
+  'ws': [BEFORE_PATH],
+  'ident': [IN_IDENT, APPEND],
+  '[': [BEFORE_ELEMENT],
+  'eof': [AFTER_PATH]
+}
 
-  'inIdent': {
-    'ident': ['inIdent', 'append'],
-    '0': ['inIdent', 'append'],
-    'number': ['inIdent', 'append'],
-    'ws': ['inPath', 'push'],
-    '.': ['beforeIdent', 'push'],
-    '[': ['beforeElement', 'push'],
-    'eof': ['afterPath', 'push'],
-    ']': ['inPath', 'push']
-  },
+pathStateMachine[IN_PATH] = {
+  'ws': [IN_PATH],
+  '.': [BEFORE_IDENT],
+  '[': [BEFORE_ELEMENT],
+  'eof': [AFTER_PATH]
+}
 
-  'beforeElement': {
-    'ws': ['beforeElement'],
-    '0': ['afterZero', 'append'],
-    'number': ['inIndex', 'append'],
-    "'": ['inSingleQuote', 'append', ''],
-    '"': ['inDoubleQuote', 'append', ''],
-    'ident': ['inIdent', 'append', '*']
-  },
+pathStateMachine[BEFORE_IDENT] = {
+  'ws': [BEFORE_IDENT],
+  'ident': [IN_IDENT, APPEND]
+}
 
-  'afterZero': {
-    'ws': ['afterElement', 'push'],
-    ']': ['inPath', 'push']
-  },
+pathStateMachine[IN_IDENT] = {
+  'ident': [IN_IDENT, APPEND],
+  '0': [IN_IDENT, APPEND],
+  'number': [IN_IDENT, APPEND],
+  'ws': [IN_PATH, PUSH],
+  '.': [BEFORE_IDENT, PUSH],
+  '[': [BEFORE_ELEMENT, PUSH],
+  'eof': [AFTER_PATH, PUSH]
+}
 
-  'inIndex': {
-    '0': ['inIndex', 'append'],
-    'number': ['inIndex', 'append'],
-    'ws': ['afterElement'],
-    ']': ['inPath', 'push']
-  },
+pathStateMachine[BEFORE_ELEMENT] = {
+  'ws': [BEFORE_ELEMENT],
+  '0': [AFTER_ZERO, APPEND],
+  'number': [IN_INDEX, APPEND],
+  "'": [IN_SINGLE_QUOTE, APPEND, ''],
+  '"': [IN_DOUBLE_QUOTE, APPEND, ''],
+  'ident': [IN_SUB_PATH, APPEND, '*']
+}
 
-  'inSingleQuote': {
-    "'": ['afterElement'],
-    'eof': 'error',
-    'else': ['inSingleQuote', 'append']
-  },
+pathStateMachine[AFTER_ZERO] = {
+  'ws': [AFTER_ELEMENT, PUSH],
+  ']': [IN_PATH, PUSH]
+}
 
-  'inDoubleQuote': {
-    '"': ['afterElement'],
-    'eof': 'error',
-    'else': ['inDoubleQuote', 'append']
-  },
+pathStateMachine[IN_INDEX] = {
+  '0': [IN_INDEX, APPEND],
+  'number': [IN_INDEX, APPEND],
+  'ws': [AFTER_ELEMENT],
+  ']': [IN_PATH, PUSH]
+}
 
-  'afterElement': {
-    'ws': ['afterElement'],
-    ']': ['inPath', 'push']
-  }
+pathStateMachine[IN_SINGLE_QUOTE] = {
+  "'": [AFTER_ELEMENT],
+  'eof': ERROR,
+  'else': [IN_SINGLE_QUOTE, APPEND]
+}
+
+pathStateMachine[IN_DOUBLE_QUOTE] = {
+  '"': [AFTER_ELEMENT],
+  'eof': ERROR,
+  'else': [IN_DOUBLE_QUOTE, APPEND]
+}
+
+pathStateMachine[IN_SUB_PATH] = {
+  'ident': [IN_SUB_PATH, APPEND],
+  '0': [IN_SUB_PATH, APPEND],
+  'number': [IN_SUB_PATH, APPEND],
+  'ws': [AFTER_ELEMENT, PUSH],
+  ']': [IN_PATH, PUSH]
+}
+
+pathStateMachine[AFTER_ELEMENT] = {
+  'ws': [AFTER_ELEMENT],
+  ']': [IN_PATH, PUSH]
 }
 
 function noop () {}
@@ -144,38 +166,37 @@ function getPathCharType (ch) {
 function parsePath (path) {
   var keys = []
   var index = -1
-  var mode = 'beforePath'
+  var mode = BEFORE_PATH
   var c, newChar, key, type, transition, action, typeMap
 
-  var actions = {
-    push: function () {
-      if (key === undefined) {
-        return
-      }
-      keys.push(key)
-      key = undefined
-    },
-    append: function () {
-      if (key === undefined) {
-        key = newChar
-      } else {
-        key += newChar
-      }
+  var actions = []
+  actions[PUSH] = function () {
+    if (key === undefined) {
+      return
+    }
+    keys.push(key)
+    key = undefined
+  }
+  actions[APPEND] = function () {
+    if (key === undefined) {
+      key = newChar
+    } else {
+      key += newChar
     }
   }
 
   function maybeUnescapeQuote () {
     var nextChar = path[index + 1]
-    if ((mode === 'inSingleQuote' && nextChar === "'") ||
-        (mode === 'inDoubleQuote' && nextChar === '"')) {
+    if ((mode === IN_SINGLE_QUOTE && nextChar === "'") ||
+        (mode === IN_DOUBLE_QUOTE && nextChar === '"')) {
       index++
       newChar = nextChar
-      actions.append()
+      actions[APPEND]()
       return true
     }
   }
 
-  while (mode) {
+  while (mode != null) {
     index++
     c = path[index]
 
@@ -185,9 +206,9 @@ function parsePath (path) {
 
     type = getPathCharType(c)
     typeMap = pathStateMachine[mode]
-    transition = typeMap[type] || typeMap['else'] || 'error'
+    transition = typeMap[type] || typeMap['else'] || ERROR
 
-    if (transition === 'error') {
+    if (transition === ERROR) {
       return // parse error
     }
 
@@ -201,7 +222,7 @@ function parsePath (path) {
         : newChar
     action()
 
-    if (mode === 'afterPath') {
+    if (mode === AFTER_PATH) {
       keys.raw = path
       return keys
     }

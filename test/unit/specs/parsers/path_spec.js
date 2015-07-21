@@ -66,6 +66,7 @@ describe('Path Parser', function () {
     assertInvalidPath('foo["bar]')
     assertInvalidPath("foo['bar]")
     assertInvalidPath('foo[bar + boo]')
+    assertInvalidPath('a]')
   })
 
   it('caching', function () {
