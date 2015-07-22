@@ -29,8 +29,6 @@ module.exports = {
     )
 
     // set the child initial value.
-    // !!! We need to set it also on raw data here, because
-    // props are initialized before data is fully observed
     var value = this.parentWatcher.value
     if (childKey === '$data') {
       child._data = value
@@ -38,8 +36,7 @@ module.exports = {
       _.initProp(child, prop, value)
     }
 
-    // only setup two-way binding if this is not a one-way
-    // binding.
+    // setup two-way binding
     if (prop.mode === bindingModes.TWO_WAY) {
       // important: defer the child watcher creation until
       // the created hook (after data observation)
@@ -57,9 +54,7 @@ module.exports = {
   },
 
   unbind: function () {
-    if (this.parentWatcher) {
-      this.parentWatcher.teardown()
-    }
+    this.parentWatcher.teardown()
     if (this.childWatcher) {
       this.childWatcher.teardown()
     }
