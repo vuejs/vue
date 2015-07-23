@@ -66,14 +66,4 @@ describe('Child API', function () {
     var child2 = vm.$addChild(null, Ctor)
     expect(child1.constructor).toBe(child2.constructor)
   })
-
-  it('Use proper constructor name with inherit', function () {
-    var Ctor = Vue.extend({
-      name: 'vue-test',
-      inherit: true
-    })
-    var child = vm.$addChild(null, Ctor)
-    expect(child.constructor.toString().match(/^function VueTest\s?\(/)).toBeTruthy()
-  })
-
 })
