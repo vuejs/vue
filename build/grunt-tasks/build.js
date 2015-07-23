@@ -28,7 +28,7 @@ module.exports = function (grunt) {
         zlib.gzip(buf, function (err, buf) {
           if (err) return done(err)
           report('dist/vue.min.js.gz', buf)
-          done()
+          fs.writeFile('dist/vue.min.js.gz', buf, done)
         })
       })
     }
