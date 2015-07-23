@@ -59,6 +59,11 @@ exports.initProp = function (vm, prop, value) {
  */
 
 exports.assertProp = function (prop, value) {
+  // if a prop is not provided and is not required,
+  // skip the check.
+  if (prop.raw === null && !prop.required) {
+    return true
+  }
   var options = prop.options
   var type = options.type
   var valid = true
