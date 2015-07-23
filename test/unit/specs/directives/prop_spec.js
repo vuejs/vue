@@ -442,6 +442,37 @@ if (_.inBrowser) {
       })
       expect(vm.$children[0].prop).toBe(true)
       expect(vm.$el.textContent).toBe('true')
+      expect(JSON.stringify(vm.$children[0].$data)).toBe(JSON.stringify({
+        prop: true
+      }))
+    })
+
+    it('should initialize with default value when not provided & has default data', function () {
+      var vm = new Vue({
+        el: el,
+        template: '<test></test>',
+        components: {
+          test: {
+            props: {
+              prop: {
+                type: String,
+                default: 'hello'
+              }
+            },
+            data: function () {
+              return {
+                other: 'world'
+              }
+            },
+            template: '{{prop}} {{other}}'
+          }
+        }
+      })
+      expect(vm.$el.textContent).toBe('hello world')
+      expect(JSON.stringify(vm.$children[0].$data)).toBe(JSON.stringify({
+        other: 'world',
+        prop: 'hello'
+      }))
     })
   })
 }

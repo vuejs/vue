@@ -54,7 +54,10 @@ exports._initData = function () {
   if (optionsData) {
     this._data = optionsData
     for (var prop in propsData) {
-      if (this._props[prop].raw !== null) {
+      if (
+        this._props[prop].raw !== null ||
+        !optionsData.hasOwnProperty(prop)
+      ) {
         optionsData.$set(prop, propsData[prop])
       }
     }
