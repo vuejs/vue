@@ -244,4 +244,33 @@ describe('Misc', function () {
     Vue.config.strict = false
   })
 
+  it('class interpolation and v-class should work together', function (done) {
+    var el = document.createElement('div')
+    el.setAttribute('class', 'a {{classB}}')
+    el.setAttribute('v-class', 'c: showC')
+    var vm = new Vue({
+      el: el,
+      data: {
+        classB: 'b',
+        showC: true
+      }
+    })
+    assertClasses(['a', 'b', 'c'])
+    vm.classB = 'bb'
+    vm.showC = false
+    Vue.nextTick(function () {
+      assertClasses(['a', 'bb'])
+      done()
+    })
+
+    function assertClasses (expectedClasses) {
+      var classes = el.className.trim().split(/\s+/)
+      expect(classes.length).toBe(expectedClasses.length)
+      var has = expectedClasses.every(function (cls) {
+        return classes.indexOf(cls) > -1
+      })
+      expect(has).toBe(true)
+    }
+  })
+
 })

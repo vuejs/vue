@@ -596,6 +596,10 @@ function makeNodeLinkFn (directives) {
  * Check an attribute for potential dynamic bindings,
  * and return a directive object.
  *
+ * Special case: class interpolations are translated into
+ * v-class instead v-attr, so that it can work with user
+ * provided v-class bindings.
+ *
  * @param {String} name
  * @param {String} value
  * @param {Object} options
@@ -604,8 +608,10 @@ function makeNodeLinkFn (directives) {
 
 function collectAttrDirective (name, value, options) {
   var tokens = textParser.parse(value)
+  var isClass = name === 'class'
   if (tokens) {
-    var def = options.directives.attr
+    var dirName = isClass ? 'class' : 'attr'
+    var def = options.directives[dirName]
     var i = tokens.length
     var allOneTime = true
     while (i--) {
@@ -621,9 +627,14 @@ function collectAttrDirective (name, value, options) {
             el.setAttribute(name, vm.$interpolate(value))
           }
         : function (vm, el) {
-            var value = textParser.tokensToExp(tokens, vm)
-            var desc = dirParser.parse(name + ':' + value)[0]
-            vm._bindDir('attr', el, desc, def)
+            var exp = textParser.tokensToExp(tokens, vm)
+            var desc = isClass
+              ? dirParser.parse(exp)[0]
+              : dirParser.parse(name + ':' + exp)[0]
+            if (isClass) {
+              desc._rawClass = value
+            }
+            vm._bindDir(dirName, el, desc, def)
           }
     }
   }
