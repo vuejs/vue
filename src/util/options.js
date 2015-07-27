@@ -340,13 +340,14 @@ exports.mergeOptions = function merge (parent, child, vm) {
  */
 
 exports.resolveAsset = function resolve (options, type, id) {
-  var asset = options[type][id]
+  var camelizedId = _.camelize(id)
+  var asset = options[type][id] || options[type][camelizedId]
   while (
     !asset && options._parent &&
     (!config.strict || options._repeat)
   ) {
     options = options._parent.$options
-    asset = options[type][id]
+    asset = options[type][id] || options[type][camelizedId]
   }
   return asset
 }
