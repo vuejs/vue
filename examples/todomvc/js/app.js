@@ -25,7 +25,7 @@
 		// the root element that will be compiled
 		el: '.todoapp',
 
-		// app state data
+		// app initial state
 		data: {
 			todos: todoStorage.fetch(),
 			newTodo: '',
@@ -33,25 +33,13 @@
 			visibility: 'all'
 		},
 
-		// ready hook, watch todos change for data persistence
-		ready: function () {
-			this.$watch('todos', function (todos) {
-				todoStorage.save(todos);
-			}, { deep: true });
-		},
-
-		// a custom directive to wait for the DOM to be updated
-		// before focusing on the input field.
-		// http://vuejs.org/guide/directives.html#Writing_a_Custom_Directive
-		directives: {
-			'todo-focus': function (value) {
-				if (!value) {
-					return;
-				}
-				var el = this.el;
-				setTimeout(function () {
-					el.focus();
-				}, 0);
+		// watch todos change for localStorage persistence
+		watch: {
+			todos: {
+				handler: function (todos) {
+				  todoStorage.save(todos);
+				},
+				deep: true
 			}
 		},
 
@@ -116,6 +104,21 @@
 
 			removeCompleted: function () {
 				this.todos = filters.active(this.todos);
+			}
+		},
+
+		// a custom directive to wait for the DOM to be updated
+		// before focusing on the input field.
+		// http://vuejs.org/guide/custom-directive.html
+		directives: {
+			'todo-focus': function (value) {
+				if (!value) {
+					return;
+				}
+				var el = this.el;
+				Vue.nextTick(function () {
+					el.focus();
+				});
 			}
 		}
 	});
