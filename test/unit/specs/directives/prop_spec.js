@@ -447,6 +447,25 @@ if (_.inBrowser) {
       }))
     })
 
+    it('should respect default value of a Boolean prop', function () {
+      var vm = new Vue({
+        el: el,
+        template: '<test></test>',
+        components: {
+          test: {
+            props: {
+              prop: {
+                type: Boolean,
+                default: true
+              }
+            },
+            template: '{{prop}}'
+          }
+        }
+      })
+      expect(vm.$el.textContent).toBe('true')
+    })
+
     it('should initialize with default value when not provided & has default data', function (done) {
       var vm = new Vue({
         el: el,

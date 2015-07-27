@@ -155,13 +155,12 @@ function makePropsLinkFn (props) {
  */
 
 function getDefault (options) {
-  // absent boolean value
-  if (options.type === Boolean) {
-    return false
-  }
   // no default, return undefined
   if (!options.hasOwnProperty('default')) {
-    return
+    // absent boolean value defaults to false
+    return options.type === Boolean
+      ? false
+      : undefined
   }
   var def = options.default
   // warn against non-factory defaults for Object & Array
