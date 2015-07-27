@@ -420,7 +420,7 @@ if (_.inBrowser) {
       new Vue({
         el: el
       })
-      expect(hasWarned(_, 'Do not create a component that only contains a single other component')).toBe(true)
+      expect(hasWarned(_, 'cannot mount component "test" on already mounted element')).toBe(true)
     })
 
   })

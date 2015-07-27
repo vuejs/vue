@@ -51,10 +51,8 @@ module.exports = {
       }
     } else {
       process.env.NODE_ENV !== 'production' && _.warn(
-        'Do not create a component that only contains ' +
-        'a single other component - they will be mounted to ' +
-        'the same element and cause conflict. Wrap it with ' +
-        'an outer element.'
+        'cannot mount component "' + this.expression + '" ' +
+        'on already mounted element: ' + this.el
       )
     }
   },

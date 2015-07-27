@@ -42,7 +42,49 @@ if (_.inBrowser) {
       expect(res.innerHTML).toBe('{{hi}}')
     })
 
-    it('block instance', function () {
+    it('template replace -> fragment instance', function () {
+      var res
+      options.replace = true
+
+      // multiple root
+      options.template = '<div></div><div></div>'
+      res = transclude(el, options)
+      expect(res instanceof DocumentFragment).toBe(true)
+
+      // non-element
+      options.template = '{{hi}}'
+      res = transclude(el, options)
+      expect(res instanceof DocumentFragment).toBe(true)
+
+      // single component: <component>
+      options.template = '<component is="{{hi}}"></component>'
+      res = transclude(el, options)
+      expect(res instanceof DocumentFragment).toBe(true)
+
+      // single component: custom element
+      options.template = '<test></test>'
+      options.components = { test: {}}
+      res = transclude(el, options)
+      expect(res instanceof DocumentFragment).toBe(true)
+
+      // single component: v-component
+      options.template = '<div v-component="test"></div>'
+      res = transclude(el, options)
+      expect(res instanceof DocumentFragment).toBe(true)
+
+      // element directive
+      options.template = '<el-dir></el-dir>'
+      options.elementDirectives = { 'el-dir': {}}
+      res = transclude(el, options)
+      expect(res instanceof DocumentFragment).toBe(true)
+
+      // v-repeat
+      options.template = '<div v-repeat="list"></div>'
+      res = transclude(el, options)
+      expect(res instanceof DocumentFragment).toBe(true)
+    })
+
+    it('direct fragment instance', function () {
       var frag = document.createDocumentFragment()
       frag.appendChild(el)
       var res = transclude(frag, options)

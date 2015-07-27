@@ -71,17 +71,21 @@ function transcludeTemplate (el, options) {
           'should probably use `replace: false` here.'
         )
       }
+      // there are many cases where the instance must
+      // become a fragment instance: basically anything that
+      // can create more than 1 root nodes.
       if (
         // multi-children template
         frag.childNodes.length > 1 ||
         // non-element template
         replacer.nodeType !== 1 ||
-        // when root node is <component>, is an element
-        // directive, or has v-repeat, the instance could
-        // end up having multiple top-level nodes, thus
-        // becoming a block instance.
+        // single nested component
         tag === 'component' ||
+        _.resolveAsset(options, 'components', tag) ||
+        replacer.hasAttribute(config.prefix + 'component') ||
+        // element directive
         _.resolveAsset(options, 'elementDirectives', tag) ||
+        // repeat block
         replacer.hasAttribute(config.prefix + 'repeat')
       ) {
         return frag
