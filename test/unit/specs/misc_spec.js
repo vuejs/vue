@@ -244,6 +244,25 @@ describe('Misc', function () {
     Vue.config.strict = false
   })
 
+  it('strict mode for repeat instances', function () {
+    Vue.config.strict = true
+    var vm = new Vue({
+      el: document.createElement('div'),
+      template: '<div v-repeat="list"><test></test></div>',
+      data: {
+        list: [1, 2]
+      },
+      components: {
+        test: {
+          template: 'hi'
+        }
+      }
+    })
+    expect(_.warn).not.toHaveBeenCalled()
+    expect(vm.$el.textContent).toBe('hihi')
+    Vue.config.strict = false
+  })
+
   it('class interpolation and v-class should work together', function (done) {
     var el = document.createElement('div')
     el.setAttribute('class', 'a {{classB}}')

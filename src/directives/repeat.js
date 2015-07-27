@@ -107,7 +107,7 @@ module.exports = {
       // default constructor
       this.Ctor = _.Vue
       // inline repeats should inherit
-      this.inherit = true
+      this.inline = true
       // important: transclude with no options, just
       // to ensure block start and block end
       this.template = compiler.transclude(this.template)
@@ -370,12 +370,12 @@ module.exports = {
     var vm = parent.$addChild({
       el: templateParser.clone(this.template),
       data: data,
-      inherit: this.inherit,
+      inherit: this.inline,
       template: this.inlineTemplate,
       // repeater meta, e.g. $index, $key
       _meta: meta,
       // mark this as an inline-repeat instance
-      _repeat: this.inherit,
+      _repeat: this.inline,
       // is this a component?
       _asComponent: this.asComponent,
       // linker cachable if no inline-template
