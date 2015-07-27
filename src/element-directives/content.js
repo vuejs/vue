@@ -22,7 +22,7 @@ module.exports = {
       return
     }
     var context = host._context
-    var selector = this.el.getAttribute('select')
+    var selector = this._checkParam('select')
     if (!selector) {
       // Default content
       var self = this
@@ -44,7 +44,6 @@ module.exports = {
       }
     } else {
       // select content
-      selector = vm.$interpolate(selector)
       var nodes = raw.querySelectorAll(selector)
       if (nodes.length) {
         content = extractFragment(nodes, raw)
