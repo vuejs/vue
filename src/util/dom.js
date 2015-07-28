@@ -240,7 +240,7 @@ exports.isTemplate = function (el) {
 /**
  * Create an "anchor" for performing dom insertion/removals.
  * This is used in a number of scenarios:
- * - block instance
+ * - fragment instance
  * - v-html
  * - v-if
  * - component

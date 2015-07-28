@@ -24,7 +24,7 @@ exports.transclude = function (el, options) {
     options._containerAttrs = extractAttrs(el)
   }
   // for template tags, what we want is its content as
-  // a documentFragment (for block instances)
+  // a documentFragment (for fragment instances)
   if (_.isTemplate(el)) {
     el = templateParser.parse(el)
   }
@@ -38,7 +38,7 @@ exports.transclude = function (el, options) {
     }
   }
   if (el instanceof DocumentFragment) {
-    // anchors for block instance
+    // anchors for fragment instance
     // passing in `persist: true` to avoid them being
     // discarded by IE during template cloning
     _.prepend(_.createAnchor('v-start', true), el)

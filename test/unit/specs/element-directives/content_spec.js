@@ -95,7 +95,7 @@ describe('Content Transclusion', function () {
     expect(getChild(3).tagName).toBe('SPAN')
 
     function getChild (n) {
-      var el = vm._blockStart
+      var el = vm._fragmentStart
       while (n--) {
         el = el.nextSibling
       }

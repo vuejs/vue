@@ -33,10 +33,10 @@ exports._init = function (options) {
   this._eventsCount = {}       // for $broadcast optimization
   this._eventCancelled = false // for event cancellation
 
-  // block instance properties
-  this._isBlock = false
-  this._blockStart =    // @type {CommentNode}
-  this._blockEnd = null // @type {CommentNode}
+  // fragment instance properties
+  this._isFragment = false
+  this._fragmentStart =    // @type {CommentNode}
+  this._fragmentEnd = null // @type {CommentNode}
 
   // lifecycle state
   this._isCompiled =

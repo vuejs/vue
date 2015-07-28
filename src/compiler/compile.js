@@ -146,7 +146,7 @@ exports.compileAndLinkProps = function (vm, el, props) {
  * 2. attrs on the component template root node, if
  *    replace:true (child scope)
  *
- * If this is a block instance, we only need to compile 1.
+ * If this is a fragment instance, we only need to compile 1.
  *
  * This function does compile and link at the same time,
  * since root linkers can not be reused. It returns the
@@ -165,7 +165,7 @@ exports.compileAndLinkRoot = function (vm, el, options) {
   var contextLinkFn, replacerLinkFn
 
   // only need to compile other attributes for
-  // non-block instances
+  // non-fragment instances
   if (el.nodeType !== 11) {
     // for components, container and replacer need to be
     // compiled separately and linked in different scopes.

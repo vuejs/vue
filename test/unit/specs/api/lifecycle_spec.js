@@ -112,7 +112,7 @@ if (_.inBrowser) {
         expect(vm.$el.nextSibling.textContent).toBe('hi!')
         expect(vm.$el.nextSibling.nextSibling.textContent).toBe('hi!!')
         expect(document.body.contains(el)).toBe(false)
-        expect(document.body.lastChild).toBe(vm._blockEnd)
+        expect(document.body.lastChild).toBe(vm._fragmentEnd)
         vm.$remove()
       })
 

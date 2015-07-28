@@ -315,7 +315,7 @@ module.exports = {
       prevEl = targetPrev
         ? targetPrev._staggerCb
           ? targetPrev._staggerAnchor
-          : targetPrev._blockEnd || targetPrev.$el
+          : targetPrev._fragmentEnd || targetPrev.$el
         : start
       if (vm._reused && !vm._staggerCb) {
         currentPrev = findPrevVm(vm, start, this.id)

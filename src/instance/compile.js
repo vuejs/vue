@@ -76,12 +76,12 @@ exports._compile = function (el) {
 
 exports._initElement = function (el) {
   if (el instanceof DocumentFragment) {
-    this._isBlock = true
-    this.$el = this._blockStart = el.firstChild
-    this._blockEnd = el.lastChild
+    this._isFragment = true
+    this.$el = this._fragmentStart = el.firstChild
+    this._fragmentEnd = el.lastChild
     // set persisted text anchors to empty
-    if (this._blockStart.nodeType === 3) {
-      this._blockStart.data = this._blockEnd.data = ''
+    if (this._fragmentStart.nodeType === 3) {
+      this._fragmentStart.data = this._fragmentEnd.data = ''
     }
     this._blockFragment = el
   } else {
