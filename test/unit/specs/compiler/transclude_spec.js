@@ -117,5 +117,15 @@ if (_.inBrowser) {
       expect(res.getAttribute('title')).toBe('child')
     })
 
+    it('class merge for svg elements', function () {
+      el.setAttribute('class', 'test')
+      options.template = '<circle class="other"></circle>'
+      options.replace = true
+      options._asComponent = true
+      var res = transclude(el, options)
+      expect(res.namespaceURI).toBe('http://www.w3.org/2000/svg')
+      expect(res.getAttribute('class')).toBe('other test')
+    })
+
   })
 }
