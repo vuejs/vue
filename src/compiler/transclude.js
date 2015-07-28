@@ -106,22 +106,16 @@ function transcludeTemplate (el, options) {
 }
 
 /**
- * Helper to extract a component container's attribute names
- * into a map.
+ * Helper to extract a component container's attributes
+ * into a plain object array.
  *
  * @param {Element} el
- * @return {Object}
+ * @return {Array}
  */
 
 function extractAttrs (el) {
   if (el.nodeType === 1 && el.hasAttributes()) {
-    var attrs = el.attributes
-    var res = {}
-    var i = attrs.length
-    while (i--) {
-      res[attrs[i].name] = attrs[i].value
-    }
-    return res
+    return _.toArray(el.attributes)
   }
 }
 

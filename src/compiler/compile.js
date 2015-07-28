@@ -180,7 +180,7 @@ exports.compileAndLinkRoot = function (vm, el, options) {
       }
     } else {
       // non-component, just compile as a normal element.
-      replacerLinkFn = compileDirectives(el, options)
+      replacerLinkFn = compileDirectives(el.attributes, options)
     }
   }
 
@@ -248,7 +248,7 @@ function compileElement (el, options) {
   }
   // normal directives
   if (!linkFn && hasAttrs) {
-    linkFn = compileDirectives(el, options)
+    linkFn = compileDirectives(el.attributes, options)
   }
   // if the element is a textarea, we need to interpolate
   // its content on initial render.
@@ -501,17 +501,12 @@ function makeTerminalNodeLinkFn (el, dirName, value, options, def) {
 /**
  * Compile the directives on an element and return a linker.
  *
- * @param {Element|Object} elOrAttrs
- *        - could be an object of already-extracted
- *          container attributes.
+ * @param {Array|NamedNodeMap} attrs
  * @param {Object} options
  * @return {Function}
  */
 
-function compileDirectives (elOrAttrs, options) {
-  var attrs = _.isPlainObject(elOrAttrs)
-    ? mapToList(elOrAttrs)
-    : elOrAttrs.attributes
+function compileDirectives (attrs, options) {
   var i = attrs.length
   var dirs = []
   var attr, name, value, dir, dirName, dirDef
@@ -544,24 +539,6 @@ function compileDirectives (elOrAttrs, options) {
     dirs.sort(directiveComparator)
     return makeNodeLinkFn(dirs)
   }
-}
-
-/**
- * Convert a map (Object) of attributes to an Array.
- *
- * @param {Object} map
- * @return {Array}
- */
-
-function mapToList (map) {
-  var list = []
-  for (var key in map) {
-    list.push({
-      name: key,
-      value: map[key]
-    })
-  }
-  return list
 }
 
 /**
