@@ -112,7 +112,7 @@ describe('Async components', function () {
       function step1 () {
         // called after A resolves, but A should have been
         // invalidated so not cotrId should be set
-        expect(vm._directives[0].ctorId).toBe(null)
+        expect(vm._directives[0].componentID).toBe(null)
       }
       function step2 () {
         // B should resolve successfully
@@ -146,7 +146,7 @@ describe('Async components', function () {
       function next () {
         // called after A resolves, but A should have been
         // invalidated so not cotrId should be set
-        expect(dir.ctorId).toBe(null)
+        expect(dir.componentID).toBe(null)
         done()
       }
     })
@@ -282,7 +282,7 @@ describe('Async components', function () {
       vm.$destroy()
       function next () {
         expect(el.textContent).toBe('')
-        expect(dir.Ctor).toBe(null)
+        expect(dir.Component).toBe(null)
         done()
       }
     })

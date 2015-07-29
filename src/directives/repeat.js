@@ -99,7 +99,7 @@ module.exports = {
     var id = _.checkComponent(this.el, options)
     if (!id) {
       // default constructor
-      this.Ctor = _.Vue
+      this.Component = _.Vue
       // inline repeats should inherit
       this.inline = true
       // important: transclude with no options, just
@@ -109,7 +109,7 @@ module.exports = {
       copy._asComponent = false
       this._linkFn = compiler.compile(this.template, copy)
     } else {
-      this.Ctor = null
+      this.Component = null
       this.asComponent = true
       // check inline-template
       if (this._checkParam('inline-template') !== null) {
@@ -119,8 +119,8 @@ module.exports = {
       var tokens = textParser.parse(id)
       if (tokens) {
         // dynamic component to be resolved later
-        var ctorExp = textParser.tokensToExp(tokens)
-        this.ctorGetter = expParser.parse(ctorExp).get
+        var componentExp = textParser.tokensToExp(tokens)
+        this.componentGetter = expParser.parse(componentExp).get
       } else {
         // static
         this.componentId = id
@@ -131,11 +131,11 @@ module.exports = {
 
   resolveComponent: function () {
     this.componentState = PENDING
-    this.vm._resolveComponent(this.componentId, _.bind(function (Ctor) {
+    this.vm._resolveComponent(this.componentId, _.bind(function (Component) {
       if (this.componentState === ABORTED) {
         return
       }
-      this.Ctor = Ctor
+      this.Component = Component
       this.componentState = RESOLVED
       this.realUpdate(this.pendingData)
       this.pendingData = null
@@ -165,19 +165,19 @@ module.exports = {
     for (key in meta) {
       _.define(context, key, meta[key])
     }
-    var id = this.ctorGetter.call(context, context)
-    var Ctor = _.resolveAsset(this.vm.$options, 'components', id)
+    var id = this.componentGetter.call(context, context)
+    var Component = _.resolveAsset(this.vm.$options, 'components', id)
     if (process.env.NODE_ENV !== 'production') {
-      _.assertAsset(Ctor, 'component', id)
+      _.assertAsset(Component, 'component', id)
     }
-    if (!Ctor.options) {
+    if (!Component.options) {
       process.env.NODE_ENV !== 'production' && _.warn(
         'Async resolution is not supported for v-repeat ' +
         '+ dynamic component. (component: ' + id + ')'
       )
       return _.Vue
     }
-    return Ctor
+    return Component
   },
 
   /**
@@ -359,7 +359,7 @@ module.exports = {
       data = raw
     }
     // resolve constructor
-    var Ctor = this.Ctor || this.resolveDynamicComponent(data, meta)
+    var Component = this.Component || this.resolveDynamicComponent(data, meta)
     var parent = this._host || this.vm
     var vm = parent.$addChild({
       el: templateParser.clone(this.template),
@@ -373,14 +373,14 @@ module.exports = {
       // is this a component?
       _asComponent: this.asComponent,
       // linker cachable if no inline-template
-      _linkerCachable: !this.inlineTemplate && Ctor !== _.Vue,
+      _linkerCachable: !this.inlineTemplate && Component !== _.Vue,
       // pre-compiled linker for simple repeats
       _linkFn: this._linkFn,
       // identifier, shows that this vm belongs to this collection
       _repeatId: this.id,
       // transclusion content owner
       _context: this.vm
-    }, Ctor)
+    }, Component)
     // cache instance
     if (needCache) {
       this.cacheVm(raw, vm, index, this.converted ? meta.$key : null)
