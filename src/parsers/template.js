@@ -173,6 +173,9 @@ var hasTextareaCloneBug = _.inBrowser
 
 exports.clone = function (node) {
   var res = node.cloneNode(true)
+  if (!node.querySelectorAll) {
+    return res
+  }
   var i, original, cloned
   /* istanbul ignore if */
   if (hasBrokenTemplate) {
@@ -182,7 +185,7 @@ exports.clone = function (node) {
       i = cloned.length
       while (i--) {
         cloned[i].parentNode.replaceChild(
-          original[i].cloneNode(true),
+          exports.clone(original[i]),
           cloned[i]
         )
       }
@@ -229,7 +232,7 @@ exports.parse = function (template, clone, noSelector) {
   // do nothing
   if (template instanceof DocumentFragment) {
     return clone
-      ? template.cloneNode(true)
+      ? exports.clone(template)
       : template
   }
 

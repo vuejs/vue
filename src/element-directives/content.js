@@ -1,4 +1,5 @@
 var _ = require('../util')
+var clone = require('../parsers/template').clone
 
 // This is the elementDirective that handles <content>
 // transclusions. It relies on the raw content of an
@@ -100,10 +101,10 @@ function extractFragment (nodes, parent, main) {
     // intact. this ensures proper re-compilation in cases
     // where the outlet is inside a conditional block
     if (main && !node.__v_selected) {
-      frag.appendChild(node.cloneNode(true))
+      frag.appendChild(clone(node))
     } else if (!main && node.parentNode === parent) {
       node.__v_selected = true
-      frag.appendChild(node.cloneNode(true))
+      frag.appendChild(clone(node))
     }
   }
   return frag
