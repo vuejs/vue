@@ -327,5 +327,33 @@ if (_.inBrowser) {
       }
     })
 
+    // #1097 v-if components not having correct parent
+    it('compile with correct transclusion host', function () {
+      var parentA
+      var parentB
+      new Vue({
+        el: el,
+        data: {
+          show: true
+        },
+        template: '<parent><child v-if="show"></child></parent>',
+        components: {
+          parent: {
+            template: '<content></content>',
+            created: function () {
+              parentA = this
+            }
+          },
+          child: {
+            created: function () {
+              parentB = this.$parent
+            }
+          }
+        }
+      })
+      expect(parentA).toBeTruthy()
+      expect(parentA).toBe(parentB)
+    })
+
   })
 }

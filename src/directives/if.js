@@ -27,7 +27,8 @@ module.exports = {
         this.linker = compiler.compile(
           this.template,
           this.vm.$options,
-          true
+          true, // partial
+          this._host // important
         )
         cache.put(cacheId, this.linker)
       }
