@@ -423,5 +423,14 @@ if (_.inBrowser) {
       expect(hasWarned(_, 'cannot mount component "test" on already mounted element')).toBe(true)
     })
 
+    it('not found component should not throw', function () {
+      expect(function () {
+        new Vue({
+          el: el,
+          template: '<div v-component="non-existent"></div>'
+        })
+      }).not.toThrow()
+    })
+
   })
 }

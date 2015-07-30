@@ -55,6 +55,9 @@ exports._resolveComponent = function (id, cb) {
   if (process.env.NODE_ENV !== 'production') {
     _.assertAsset(factory, 'component', id)
   }
+  if (!factory) {
+    return
+  }
   // async component factory
   if (!factory.options) {
     if (factory.resolved) {
