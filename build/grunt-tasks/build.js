@@ -3,7 +3,21 @@
  */
 
 module.exports = function (grunt) {
-  grunt.registerTask('build', function () {
+
+  grunt.registerTask('build-vendor', function () {
+    var webpack = require('webpack')
+    webpack({
+      entry: './node_modules/notevil/index.js',
+      output: {
+        path: './vendor',
+        filename: 'notevil.js',
+        library: 'notevil',
+        libraryTarget: 'commonjs2'
+      }
+    }, this.async())
+  })
+
+  grunt.registerTask('build-self', function () {
 
     var done = this.async()
     var fs = require('fs')
@@ -47,4 +61,6 @@ module.exports = function (grunt) {
       return '\x1b[1m\x1b[34m' + str + '\x1b[39m\x1b[22m'
     }
   })
+
+  grunt.registerTask('build', ['build-vendor', 'build-self'])
 }

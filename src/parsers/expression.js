@@ -1,6 +1,7 @@
 var _ = require('../util')
 var Path = require('./path')
 var Cache = require('../cache')
+var notevil = require('../../vendor/notevil')
 var expressionCache = new Cache(1000)
 
 var allowedKeywords =
@@ -173,7 +174,13 @@ function compilePathFns (exp) {
 
 function makeGetter (body) {
   try {
-    return new Function('scope', 'return ' + body + ';')
+    var fn = notevil.Function(
+      'scope', 'Math',
+      'return ' + body + ';'
+    )
+    return function (scope) {
+      return fn.call(this, scope, Math)
+    }
   } catch (e) {
     process.env.NODE_ENV !== 'production' && _.warn(
       'Invalid expression. ' +
@@ -198,7 +205,15 @@ function makeGetter (body) {
 
 function makeSetter (body) {
   try {
-    return new Function('scope', 'value', body + '=value;')
+    var fn = notevil.Function(
+      'scope', 'value', 'Math',
+      body + ' = value;'
+    )
+    return function (scope, value) {
+      try {
+        fn.call(this, scope, value, Math)
+      } catch (e) {}
+    }
   } catch (e) {
     process.env.NODE_ENV !== 'production' && _.warn(
       'Invalid setter function body: ' + body

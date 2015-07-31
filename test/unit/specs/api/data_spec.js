@@ -44,26 +44,6 @@ describe('Data API', function () {
     expect(hasWarned(_, 'Consider pre-initializing')).toBe(true)
   })
 
-  it('$set invalid', function () {
-    // invalid, should throw
-    if (leftHandThrows()) {
-      // if creating a function with invalid left hand
-      // expression throws, the exp parser will catch the
-      // error and warn.
-      vm.$set('c + d', 1)
-      expect(hasWarned(_, 'Invalid setter function body')).toBe(true)
-    } else {
-      // otherwise it will throw when calling the setter.
-      expect(function () {
-        try {
-          vm.$set('c + d', 1)
-        } catch (e) {
-          return true
-        }
-      }()).toBe(true)
-    }
-  })
-
   it('$add', function () {
     vm._digest = jasmine.createSpy()
     vm.$add('c', 1)
@@ -176,16 +156,3 @@ describe('Data API', function () {
   }
 
 })
-
-/**
- * check if creating a new Function with invalid left-hand
- * assignment would throw
- */
-
-function leftHandThrows () {
-  try {
-    new Function('a + b = 1')
-  } catch (e) {
-    return true
-  }
-}
