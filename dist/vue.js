@@ -1,5 +1,5 @@
 /*!
- * Vue.js v0.12.8
+ * Vue.js v0.12.9
  * (c) 2015 Evan You
  * Released under the MIT License.
  */
@@ -511,10 +511,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	exports.resolveAsset = function resolve (options, type, id) {
-	  var asset = options[type][id]
-	  while (!config.strict && !asset && options._parent) {
+	  var camelizedId = _.camelize(id)
+	  var asset = options[type][id] || options[type][camelizedId]
+	  while (
+	    !asset && options._parent &&
+	    (!config.strict || options._repeat)
+	  ) {
 	    options = options._parent.$options
-	    asset = options[type][id]
+	    asset = options[type][id] || options[type][camelizedId]
 	  }
 	  return asset
 	}
@@ -542,6 +546,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 
 	  debug: false,
+
+	  /**
+	   * Strict mode.
+	   * Disables asset lookup in the view parent chain.
+	   */
+
+	  strict: false,
 
 	  /**
 	   * Whether to suppress warnings.
@@ -674,20 +685,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
-	 * Check and convert possible numeric numbers before
-	 * setting back to data
+	 * Check and convert possible numeric strings to numbers
+	 * before setting back to data
 	 *
 	 * @param {*} value
 	 * @return {*|Number}
 	 */
 
 	exports.toNumber = function (value) {
-	  return (
-	    isNaN(value) ||
-	    value === null ||
-	    typeof value === 'boolean'
-	  ) ? value
-	    : Number(value)
+	  if (typeof value !== 'string') {
+	    return value
+	  } else {
+	    var parsed = Number(value)
+	    return isNaN(parsed)
+	      ? value
+	      : parsed
+	  }
 	}
 
 	/**
@@ -1273,7 +1286,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * Create an "anchor" for performing dom insertion/removals.
 	 * This is used in a number of scenarios:
-	 * - block instance
+	 * - fragment instance
 	 * - v-html
 	 * - v-if
 	 * - component
@@ -1823,7 +1836,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this.size = 0
 	  this.limit = limit
 	  this.head = this.tail = undefined
-	  this._keymap = {}
+	  this._keymap = Object.create(null)
 	}
 
 	var p = Cache.prototype
@@ -2267,7 +2280,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * 2. attrs on the component template root node, if
 	 *    replace:true (child scope)
 	 *
-	 * If this is a block instance, we only need to compile 1.
+	 * If this is a fragment instance, we only need to compile 1.
 	 *
 	 * This function does compile and link at the same time,
 	 * since root linkers can not be reused. It returns the
@@ -2286,7 +2299,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var contextLinkFn, replacerLinkFn
 
 	  // only need to compile other attributes for
-	  // non-block instances
+	  // non-fragment instances
 	  if (el.nodeType !== 11) {
 	    // for components, container and replacer need to be
 	    // compiled separately and linked in different scopes.
@@ -2301,7 +2314,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    } else {
 	      // non-component, just compile as a normal element.
-	      replacerLinkFn = compileDirectives(el, options)
+	      replacerLinkFn = compileDirectives(el.attributes, options)
 	    }
 	  }
 
@@ -2369,7 +2382,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  // normal directives
 	  if (!linkFn && hasAttrs) {
-	    linkFn = compileDirectives(el, options)
+	    linkFn = compileDirectives(el.attributes, options)
 	  }
 	  // if the element is a textarea, we need to interpolate
 	  // its content on initial render.
@@ -2622,17 +2635,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * Compile the directives on an element and return a linker.
 	 *
-	 * @param {Element|Object} elOrAttrs
-	 *        - could be an object of already-extracted
-	 *          container attributes.
+	 * @param {Array|NamedNodeMap} attrs
 	 * @param {Object} options
 	 * @return {Function}
 	 */
 
-	function compileDirectives (elOrAttrs, options) {
-	  var attrs = _.isPlainObject(elOrAttrs)
-	    ? mapToList(elOrAttrs)
-	    : elOrAttrs.attributes
+	function compileDirectives (attrs, options) {
 	  var i = attrs.length
 	  var dirs = []
 	  var attr, name, value, dir, dirName, dirDef
@@ -2665,24 +2673,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    dirs.sort(directiveComparator)
 	    return makeNodeLinkFn(dirs)
 	  }
-	}
-
-	/**
-	 * Convert a map (Object) of attributes to an Array.
-	 *
-	 * @param {Object} map
-	 * @return {Array}
-	 */
-
-	function mapToList (map) {
-	  var list = []
-	  for (var key in map) {
-	    list.push({
-	      name: key,
-	      value: map[key]
-	    })
-	  }
-	  return list
 	}
 
 	/**
@@ -2919,9 +2909,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	      } else {
 	        // literal, cast it and just set once
-	        value = options.type === Boolean && prop.raw === ''
+	        var raw = prop.raw
+	        value = options.type === Boolean && raw === ''
 	          ? true
-	          : _.toBoolean(_.toNumber(prop.raw))
+	          // do not cast emptry string.
+	          // _.toNumber casts empty string to 0.
+	          : raw.trim()
+	            ? _.toBoolean(_.toNumber(raw))
+	            : raw
 	        _.initProp(vm, prop, value)
 	      }
 	    }
@@ -2936,13 +2931,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	function getDefault (options) {
-	  // absent boolean value
-	  if (options.type === Boolean) {
-	    return false
-	  }
 	  // no default, return undefined
 	  if (!options.hasOwnProperty('default')) {
-	    return
+	    // absent boolean value defaults to false
+	    return options.type === Boolean
+	      ? false
+	      : undefined
 	  }
 	  var def = options.default
 	  // warn against non-factory defaults for Object & Array
@@ -3415,7 +3409,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var isFn = typeof expOrFn === 'function'
 	  this.vm = vm
 	  vm._watchers.push(this)
-	  this.expression = isFn ? '' : expOrFn
+	  this.expression = isFn ? expOrFn.toString() : expOrFn
 	  this.cb = cb
 	  this.id = ++uid // uid for batching
 	  this.active = true
@@ -4033,8 +4027,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	var queue = []
 	var userQueue = []
 	var has = {}
+	var circular = {}
 	var waiting = false
-	var flushing = false
 	var internalQueueDepleted = false
 
 	/**
@@ -4045,15 +4039,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	  queue = []
 	  userQueue = []
 	  has = {}
-	  waiting = flushing = internalQueueDepleted = false
+	  circular = {}
+	  waiting = internalQueueDepleted = false
 	}
 
 	/**
-	 * Flush both queues and run the jobs.
+	 * Flush both queues and run the watchers.
 	 */
 
 	function flush () {
-	  flushing = true
 	  run(queue)
 	  internalQueueDepleted = true
 	  run(userQueue)
@@ -4061,55 +4055,58 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
-	 * Run the jobs in a single queue.
+	 * Run the watchers in a single queue.
 	 *
 	 * @param {Array} queue
 	 */
 
 	function run (queue) {
-	  // do not cache length because more jobs might be pushed
-	  // as we run existing jobs
+	  // do not cache length because more watchers might be pushed
+	  // as we run existing watchers
 	  for (var i = 0; i < queue.length; i++) {
-	    queue[i].run()
+	    var watcher = queue[i]
+	    var id = watcher.id
+	    has[id] = null
+	    watcher.run()
+	    // in dev build, check and stop circular updates.
+	    if (("development") !== 'production' && has[id] != null) {
+	      circular[id] = (circular[id] || 0) + 1
+	      if (circular[id] > config._maxUpdateCount) {
+	        queue.splice(has[id], 1)
+	        _.warn(
+	          'You may have an infinite update loop for watcher ' +
+	          'with expression: ' + watcher.expression
+	        )
+	      }
+	    }
 	  }
 	}
 
 	/**
-	 * Push a job into the job queue.
+	 * Push a watcher into the watcher queue.
 	 * Jobs with duplicate IDs will be skipped unless it's
 	 * pushed when the queue is being flushed.
 	 *
-	 * @param {Object} job
+	 * @param {Watcher} watcher
 	 *   properties:
-	 *   - {String|Number} id
-	 *   - {Function}      run
+	 *   - {Number} id
+	 *   - {Function} run
 	 */
 
-	exports.push = function (job) {
-	  var id = job.id
-	  if (!id || !has[id] || flushing) {
-	    if (!has[id]) {
-	      has[id] = 1
-	    } else {
-	      has[id]++
-	      // detect possible infinite update loops
-	      if (has[id] > config._maxUpdateCount) {
-	        ("development") !== 'production' && _.warn(
-	          'You may have an infinite update loop for the ' +
-	          'watcher with expression: "' + job.expression + '".'
-	        )
-	        return
-	      }
-	    }
-	    // A user watcher callback could trigger another
-	    // directive update during the flushing; at that time
-	    // the directive queue would already have been run, so
-	    // we call that update immediately as it is pushed.
-	    if (flushing && !job.user && internalQueueDepleted) {
-	      job.run()
+	exports.push = function (watcher) {
+	  var id = watcher.id
+	  if (has[id] == null) {
+	    // if an internal watcher is pushed, but the internal
+	    // queue is already depleted, we run it immediately.
+	    if (internalQueueDepleted && !watcher.user) {
+	      watcher.run()
 	      return
 	    }
-	    ;(job.user ? userQueue : queue).push(job)
+	    // push watcher into appropriate queue
+	    var q = watcher.user ? userQueue : queue
+	    has[id] = q.length
+	    q.push(watcher)
+	    // queue the flush
 	    if (!waiting) {
 	      waiting = true
 	      _.nextTick(flush)
@@ -4297,6 +4294,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	exports.clone = function (node) {
 	  var res = node.cloneNode(true)
+	  if (!node.querySelectorAll) {
+	    return res
+	  }
 	  var i, original, cloned
 	  /* istanbul ignore if */
 	  if (hasBrokenTemplate) {
@@ -4306,7 +4306,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      i = cloned.length
 	      while (i--) {
 	        cloned[i].parentNode.replaceChild(
-	          original[i].cloneNode(true),
+	          exports.clone(original[i]),
 	          cloned[i]
 	        )
 	      }
@@ -4353,7 +4353,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // do nothing
 	  if (template instanceof DocumentFragment) {
 	    return clone
-	      ? template.cloneNode(true)
+	      ? exports.clone(template)
 	      : template
 	  }
 
@@ -4390,6 +4390,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
+	var config = __webpack_require__(3)
 	var templateParser = __webpack_require__(22)
 
 	module.exports = {
@@ -4420,7 +4421,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      // wait for event before insertion
 	      this.readyEvent = this._checkParam('wait-for')
 	      // check ref
-	      this.refID = _.attr(this.el, 'ref')
+	      this.refID = this._checkParam(config.prefix + 'ref')
 	      if (this.keepAlive) {
 	        this.cache = {}
 	      }
@@ -4431,21 +4432,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	      // component resolution related state
 	      this._pendingCb =
-	      this.ctorId =
-	      this.Ctor = null
+	      this.componentID =
+	      this.Component = null
 	      // if static, build right now.
 	      if (!this._isDynamicLiteral) {
-	        this.resolveCtor(this.expression, _.bind(this.initStatic, this))
+	        this.resolveComponent(this.expression, _.bind(this.initStatic, this))
 	      } else {
 	        // check dynamic component params
 	        this.transMode = this._checkParam('transition-mode')
 	      }
 	    } else {
 	      ("development") !== 'production' && _.warn(
-	        'Do not create a component that only contains ' +
-	        'a single other component - they will be mounted to ' +
-	        'the same element and cause conflict. Wrap it with ' +
-	        'an outer element.'
+	        'cannot mount component "' + this.expression + '" ' +
+	        'on already mounted element: ' + this.el
 	      )
 	    }
 	  },
@@ -4496,7 +4495,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      this.remove(this.childVM, afterTransition)
 	      this.unsetCurrent()
 	    } else {
-	      this.resolveCtor(value, _.bind(function () {
+	      this.resolveComponent(value, _.bind(function () {
 	        this.unbuild(true)
 	        var newComponent = this.build(data)
 	        /* istanbul ignore if */
@@ -4518,11 +4517,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * the child vm.
 	   */
 
-	  resolveCtor: function (id, cb) {
+	  resolveComponent: function (id, cb) {
 	    var self = this
-	    this._pendingCb = _.cancellable(function (ctor) {
-	      self.ctorId = id
-	      self.Ctor = ctor
+	    this._pendingCb = _.cancellable(function (component) {
+	      self.componentID = id
+	      self.Component = component
 	      cb()
 	    })
 	    this.vm._resolveComponent(id, this._pendingCb)
@@ -4552,12 +4551,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  build: function (data) {
 	    if (this.keepAlive) {
-	      var cached = this.cache[this.ctorId]
+	      var cached = this.cache[this.componentID]
 	      if (cached) {
 	        return cached
 	      }
 	    }
-	    if (this.Ctor) {
+	    if (this.Component) {
 	      var parent = this._host || this.vm
 	      var el = templateParser.clone(this.el)
 	      var child = parent.$addChild({
@@ -4570,9 +4569,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        _asComponent: true,
 	        _isRouterView: this._isRouterView,
 	        _context: this.vm
-	      }, this.Ctor)
+	      }, this.Component)
 	      if (this.keepAlive) {
-	        this.cache[this.ctorId] = child
+	        this.cache[this.componentID] = child
 	      }
 	      return child
 	    }
@@ -4722,7 +4721,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    options._containerAttrs = extractAttrs(el)
 	  }
 	  // for template tags, what we want is its content as
-	  // a documentFragment (for block instances)
+	  // a documentFragment (for fragment instances)
 	  if (_.isTemplate(el)) {
 	    el = templateParser.parse(el)
 	  }
@@ -4736,7 +4735,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }
 	  if (el instanceof DocumentFragment) {
-	    // anchors for block instance
+	    // anchors for fragment instance
 	    // passing in `persist: true` to avoid them being
 	    // discarded by IE during template cloning
 	    _.prepend(_.createAnchor('v-start', true), el)
@@ -4769,17 +4768,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	          'should probably use `replace: false` here.'
 	        )
 	      }
+	      // there are many cases where the instance must
+	      // become a fragment instance: basically anything that
+	      // can create more than 1 root nodes.
 	      if (
 	        // multi-children template
 	        frag.childNodes.length > 1 ||
 	        // non-element template
 	        replacer.nodeType !== 1 ||
-	        // when root node is <component>, is an element
-	        // directive, or has v-repeat, the instance could
-	        // end up having multiple top-level nodes, thus
-	        // becoming a block instance.
+	        // single nested component
 	        tag === 'component' ||
+	        _.resolveAsset(options, 'components', tag) ||
+	        replacer.hasAttribute(config.prefix + 'component') ||
+	        // element directive
 	        _.resolveAsset(options, 'elementDirectives', tag) ||
+	        // repeat block
 	        replacer.hasAttribute(config.prefix + 'repeat')
 	      ) {
 	        return frag
@@ -4800,22 +4803,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
-	 * Helper to extract a component container's attribute names
-	 * into a map.
+	 * Helper to extract a component container's attributes
+	 * into a plain object array.
 	 *
 	 * @param {Element} el
-	 * @return {Object}
+	 * @return {Array}
 	 */
 
 	function extractAttrs (el) {
 	  if (el.nodeType === 1 && el.hasAttributes()) {
-	    var attrs = el.attributes
-	    var res = {}
-	    var i = attrs.length
-	    while (i--) {
-	      res[attrs[i].name] = attrs[i].value
-	    }
-	    return res
+	    return _.toArray(el.attributes)
 	  }
 	}
 
@@ -4837,7 +4834,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (!to.hasAttribute(name)) {
 	      to.setAttribute(name, value)
 	    } else if (name === 'class') {
-	      to.className = to.className + ' ' + value
+	      value = to.getAttribute(name) + ' ' + value
+	      to.setAttribute(name, value)
 	    }
 	  }
 	}
@@ -5096,7 +5094,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 
 	  setAttr: function (attr, value) {
-	    if (value || value === 0) {
+	    if (value != null && value !== false) {
 	      if (xlinkRE.test(attr)) {
 	        this.el.setAttributeNS(xlinkNS, attr, value)
 	      } else {
@@ -5105,11 +5103,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    } else {
 	      this.el.removeAttribute(attr)
 	    }
-	    if (attr in this.el) {
-	      this.el[attr] = value
+	    if (attr === 'value' && 'value' in this.el) {
+	      this.el.value = value
 	    }
 	  }
-
 	}
 
 
@@ -6371,6 +6368,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
+	var config = __webpack_require__(3)
 	var isObject = _.isObject
 	var isPlainObject = _.isPlainObject
 	var textParser = __webpack_require__(10)
@@ -6400,29 +6398,37 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    // uid as a cache identifier
 	    this.id = '__v_repeat_' + (++uid)
+
 	    // setup anchor nodes
 	    this.start = _.createAnchor('v-repeat-start')
 	    this.end = _.createAnchor('v-repeat-end')
 	    _.replace(this.el, this.end)
 	    _.before(this.start, this.end)
+
 	    // check if this is a block repeat
 	    this.template = _.isTemplate(this.el)
 	      ? templateParser.parse(this.el, true)
 	      : this.el
-	    // check other directives that need to be handled
-	    // at v-repeat level
-	    this.checkIf()
-	    this.checkRef()
-	    this.checkComponent()
+
 	    // check for trackby param
-	    this.idKey =
-	      this._checkParam('track-by') ||
-	      this._checkParam('trackby') // 0.11.0 compat
+	    this.idKey = this._checkParam('track-by')
 	    // check for transition stagger
 	    var stagger = +this._checkParam('stagger')
 	    this.enterStagger = +this._checkParam('enter-stagger') || stagger
 	    this.leaveStagger = +this._checkParam('leave-stagger') || stagger
+
+	    // check for v-ref/v-el
+	    this.refID = this._checkParam(config.prefix + 'ref')
+	    this.elID = this._checkParam(config.prefix + 'el')
+
+	    // check other directives that need to be handled
+	    // at v-repeat level
+	    this.checkIf()
+	    this.checkComponent()
+
+	    // create cache object
 	    this.cache = Object.create(null)
+
 	    // some helpful tips...
 	    /* istanbul ignore if */
 	    if (
@@ -6451,21 +6457,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 
 	  /**
-	   * Check if v-ref/ v-el is also present.
-	   */
-
-	  checkRef: function () {
-	    var refID = _.attr(this.el, 'ref')
-	    this.refID = refID
-	      ? this.vm.$interpolate(refID)
-	      : null
-	    var elId = _.attr(this.el, 'el')
-	    this.elId = elId
-	      ? this.vm.$interpolate(elId)
-	      : null
-	  },
-
-	  /**
 	   * Check the component constructor to use for repeated
 	   * instances. If static we resolve it now, otherwise it
 	   * needs to be resolved at build time with actual data.
@@ -6477,9 +6468,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var id = _.checkComponent(this.el, options)
 	    if (!id) {
 	      // default constructor
-	      this.Ctor = _.Vue
+	      this.Component = _.Vue
 	      // inline repeats should inherit
-	      this.inherit = true
+	      this.inline = true
 	      // important: transclude with no options, just
 	      // to ensure block start and block end
 	      this.template = compiler.transclude(this.template)
@@ -6487,7 +6478,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      copy._asComponent = false
 	      this._linkFn = compiler.compile(this.template, copy)
 	    } else {
-	      this.Ctor = null
+	      this.Component = null
 	      this.asComponent = true
 	      // check inline-template
 	      if (this._checkParam('inline-template') !== null) {
@@ -6497,8 +6488,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var tokens = textParser.parse(id)
 	      if (tokens) {
 	        // dynamic component to be resolved later
-	        var ctorExp = textParser.tokensToExp(tokens)
-	        this.ctorGetter = expParser.parse(ctorExp).get
+	        var componentExp = textParser.tokensToExp(tokens)
+	        this.componentGetter = expParser.parse(componentExp).get
 	      } else {
 	        // static
 	        this.componentId = id
@@ -6509,11 +6500,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  resolveComponent: function () {
 	    this.componentState = PENDING
-	    this.vm._resolveComponent(this.componentId, _.bind(function (Ctor) {
+	    this.vm._resolveComponent(this.componentId, _.bind(function (Component) {
 	      if (this.componentState === ABORTED) {
 	        return
 	      }
-	      this.Ctor = Ctor
+	      this.Component = Component
 	      this.componentState = RESOLVED
 	      this.realUpdate(this.pendingData)
 	      this.pendingData = null
@@ -6543,19 +6534,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	    for (key in meta) {
 	      _.define(context, key, meta[key])
 	    }
-	    var id = this.ctorGetter.call(context, context)
-	    var Ctor = _.resolveAsset(this.vm.$options, 'components', id)
+	    var id = this.componentGetter.call(context, context)
+	    var Component = _.resolveAsset(this.vm.$options, 'components', id)
 	    if (true) {
-	      _.assertAsset(Ctor, 'component', id)
+	      _.assertAsset(Component, 'component', id)
 	    }
-	    if (!Ctor.options) {
+	    if (!Component.options) {
 	      ("development") !== 'production' && _.warn(
 	        'Async resolution is not supported for v-repeat ' +
 	        '+ dynamic component. (component: ' + id + ')'
 	      )
 	      return _.Vue
 	    }
-	    return Ctor
+	    return Component
 	  },
 
 	  /**
@@ -6598,8 +6589,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        ? toRefObject(this.vms)
 	        : this.vms
 	    }
-	    if (this.elId) {
-	      this.vm.$$[this.elId] = this.vms.map(function (vm) {
+	    if (this.elID) {
+	      this.vm.$$[this.elID] = this.vms.map(function (vm) {
 	        return vm.$el
 	      })
 	    }
@@ -6693,7 +6684,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      prevEl = targetPrev
 	        ? targetPrev._staggerCb
 	          ? targetPrev._staggerAnchor
-	          : targetPrev._blockEnd || targetPrev.$el
+	          : targetPrev._fragmentEnd || targetPrev.$el
 	        : start
 	      if (vm._reused && !vm._staggerCb) {
 	        currentPrev = findPrevVm(vm, start, this.id)
@@ -6737,39 +6728,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	      data = raw
 	    }
 	    // resolve constructor
-	    var Ctor = this.Ctor || this.resolveDynamicComponent(data, meta)
+	    var Component = this.Component || this.resolveDynamicComponent(data, meta)
 	    var parent = this._host || this.vm
 	    var vm = parent.$addChild({
 	      el: templateParser.clone(this.template),
 	      data: data,
-	      inherit: this.inherit,
+	      inherit: this.inline,
 	      template: this.inlineTemplate,
 	      // repeater meta, e.g. $index, $key
 	      _meta: meta,
 	      // mark this as an inline-repeat instance
-	      _repeat: this.inherit,
+	      _repeat: this.inline,
 	      // is this a component?
 	      _asComponent: this.asComponent,
 	      // linker cachable if no inline-template
-	      _linkerCachable: !this.inlineTemplate && Ctor !== _.Vue,
+	      _linkerCachable: !this.inlineTemplate && Component !== _.Vue,
 	      // pre-compiled linker for simple repeats
 	      _linkFn: this._linkFn,
 	      // identifier, shows that this vm belongs to this collection
 	      _repeatId: this.id,
 	      // transclusion content owner
 	      _context: this.vm
-	    }, Ctor)
+	    }, Component)
 	    // cache instance
 	    if (needCache) {
 	      this.cacheVm(raw, vm, index, this.converted ? meta.$key : null)
 	    }
 	    // sync back changes for two-way bindings of primitive values
-	    var type = typeof raw
 	    var dir = this
-	    if (
-	      this.rawType === 'object' &&
-	      (type === 'string' || type === 'number')
-	    ) {
+	    if (this.rawType === 'object' && isPrimitive(raw)) {
 	      vm.$watch(alias || '$value', function (val) {
 	        if (dir.filters) {
 	          ("development") !== 'production' && _.warn(
@@ -7119,6 +7106,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return ref
 	}
 
+	/**
+	 * Check if a value is a primitive one:
+	 * String, Number, Boolean, null or undefined.
+	 *
+	 * @param {*} value
+	 * @return {Boolean}
+	 */
+
+	function isPrimitive (value) {
+	  var type = typeof value
+	  return value == null ||
+	    type === 'string' ||
+	    type === 'number' ||
+	    type === 'boolean'
+	}
+
 
 /***/ },
 /* 46 */
@@ -7128,6 +7131,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	var compiler = __webpack_require__(13)
 	var templateParser = __webpack_require__(22)
 	var transition = __webpack_require__(31)
+	var Cache = __webpack_require__(11)
+	var cache = new Cache(1000)
 
 	module.exports = {
 
@@ -7145,11 +7150,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.template.appendChild(templateParser.clone(el))
 	      }
 	      // compile the nested partial
-	      this.linker = compiler.compile(
-	        this.template,
-	        this.vm.$options,
-	        true
-	      )
+	      var cacheId = (this.vm.constructor.cid || '') + el.outerHTML
+	      this.linker = cache.get(cacheId)
+	      if (!this.linker) {
+	        this.linker = compiler.compile(
+	          this.template,
+	          this.vm.$options,
+	          true, // partial
+	          this._host // important
+	        )
+	        cache.put(cacheId, this.linker)
+	      }
 	    } else {
 	      ("development") !== 'production' && _.warn(
 	        'v-if="' + this.expression + '" cannot be ' +
@@ -7257,6 +7268,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
+	var clone = __webpack_require__(22).clone
 
 	// This is the elementDirective that handles <content>
 	// transclusions. It relies on the raw content of an
@@ -7280,7 +7292,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return
 	    }
 	    var context = host._context
-	    var selector = this.el.getAttribute('select')
+	    var selector = this._checkParam('select')
 	    if (!selector) {
 	      // Default content
 	      var self = this
@@ -7302,7 +7314,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    } else {
 	      // select content
-	      selector = vm.$interpolate(selector)
 	      var nodes = raw.querySelectorAll(selector)
 	      if (nodes.length) {
 	        content = extractFragment(nodes, raw)
@@ -7359,10 +7370,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // intact. this ensures proper re-compilation in cases
 	    // where the outlet is inside a conditional block
 	    if (main && !node.__v_selected) {
-	      frag.appendChild(node.cloneNode(true))
+	      frag.appendChild(clone(node))
 	    } else if (!main && node.parentNode === parent) {
 	      node.__v_selected = true
-	      frag.appendChild(node.cloneNode(true))
+	      frag.appendChild(clone(node))
 	    }
 	  }
 	  return frag
@@ -7721,10 +7732,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this._eventsCount = {}       // for $broadcast optimization
 	  this._eventCancelled = false // for event cancellation
 
-	  // block instance properties
-	  this._isBlock = false
-	  this._blockStart =    // @type {CommentNode}
-	  this._blockEnd = null // @type {CommentNode}
+	  // fragment instance properties
+	  this._isFragment = false
+	  this._fragmentStart =    // @type {CommentNode}
+	  this._fragmentEnd = null // @type {CommentNode}
 
 	  // lifecycle state
 	  this._isCompiled =
@@ -8696,12 +8707,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	exports._initElement = function (el) {
 	  if (el instanceof DocumentFragment) {
-	    this._isBlock = true
-	    this.$el = this._blockStart = el.firstChild
-	    this._blockEnd = el.lastChild
+	    this._isFragment = true
+	    this.$el = this._fragmentStart = el.firstChild
+	    this._fragmentEnd = el.lastChild
 	    // set persisted text anchors to empty
-	    if (this._blockStart.nodeType === 3) {
-	      this._blockStart.data = this._blockEnd.data = ''
+	    if (this._fragmentStart.nodeType === 3) {
+	      this._fragmentStart.data = this._fragmentEnd.data = ''
 	    }
 	    this._blockFragment = el
 	  } else {
@@ -8988,6 +8999,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var param = this.el.getAttribute(name)
 	  if (param !== null) {
 	    this.el.removeAttribute(name)
+	    param = this.vm.$interpolate(param)
 	  }
 	  return param
 	}
@@ -9105,6 +9117,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var factory = _.resolveAsset(this.$options, 'components', id)
 	  if (true) {
 	    _.assertAsset(factory, 'component', id)
+	  }
+	  if (!factory) {
+	    return
 	  }
 	  // async component factory
 	  if (!factory.options) {
@@ -9408,7 +9423,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (cb) cb()
 	  }
 	  if (
-	    this._isBlock &&
+	    this._isFragment &&
 	    !this._blockFragment.hasChildNodes()
 	  ) {
 	    op = withTransition === false
@@ -9446,7 +9461,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    !targetIsDetached &&
 	    !vm._isAttached &&
 	    !_.inDoc(vm.$el)
-	  if (vm._isBlock) {
+	  if (vm._isFragment) {
 	    blockOp(vm, target, op, cb)
 	  } else {
 	    op(vm.$el, target, vm, cb)
@@ -9458,7 +9473,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
-	 * Execute a transition operation on a block instance,
+	 * Execute a transition operation on a fragment instance,
 	 * iterating through all its block nodes.
 	 *
 	 * @param {Vue} vm
@@ -9468,8 +9483,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	function blockOp (vm, target, op, cb) {
-	  var current = vm._blockStart
-	  var end = vm._blockEnd
+	  var current = vm._fragmentStart
+	  var end = vm._fragmentEnd
 	  var next
 	  while (next !== end) {
 	    next = current.nextSibling
