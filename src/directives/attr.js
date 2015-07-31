@@ -35,7 +35,7 @@ module.exports = {
   },
 
   setAttr: function (attr, value) {
-    if (value || value === 0) {
+    if (value != null && value !== false) {
       if (xlinkRE.test(attr)) {
         this.el.setAttributeNS(xlinkNS, attr, value)
       } else {
@@ -44,9 +44,8 @@ module.exports = {
     } else {
       this.el.removeAttribute(attr)
     }
-    if (attr in this.el) {
-      this.el[attr] = value
+    if (attr === 'value' && 'value' in this.el) {
+      this.el.value = value
     }
   }
-
 }

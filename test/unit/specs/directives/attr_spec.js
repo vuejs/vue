@@ -26,7 +26,7 @@ if (_.inBrowser) {
       expect(el.getAttribute('test')).toBe('0')
     })
 
-    it('should set property', function () {
+    it('should set property for input value', function () {
       dir.el = document.createElement('input')
       dir.arg = 'value'
       dir.update('what')
