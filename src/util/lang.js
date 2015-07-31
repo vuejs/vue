@@ -25,20 +25,22 @@ exports.toString = function (value) {
 }
 
 /**
- * Check and convert possible numeric numbers before
- * setting back to data
+ * Check and convert possible numeric strings to numbers
+ * before setting back to data
  *
  * @param {*} value
  * @return {*|Number}
  */
 
 exports.toNumber = function (value) {
-  return (
-    isNaN(value) ||
-    value === null ||
-    typeof value === 'boolean'
-  ) ? value
-    : Number(value)
+  if (typeof value !== 'string') {
+    return value
+  } else {
+    var parsed = Number(value)
+    return isNaN(parsed)
+      ? value
+      : parsed
+  }
 }
 
 /**

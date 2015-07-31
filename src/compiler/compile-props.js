@@ -138,9 +138,14 @@ function makePropsLinkFn (props) {
         }
       } else {
         // literal, cast it and just set once
-        value = options.type === Boolean && prop.raw === ''
+        var raw = prop.raw
+        value = options.type === Boolean && raw === ''
           ? true
-          : _.toBoolean(_.toNumber(prop.raw))
+          // do not cast emptry string.
+          // _.toNumber casts empty string to 0.
+          : raw.trim()
+            ? _.toBoolean(_.toNumber(raw))
+            : raw
         _.initProp(vm, prop, value)
       }
     }

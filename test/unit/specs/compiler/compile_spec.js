@@ -148,6 +148,7 @@ if (_.inBrowser) {
       var bindingModes = Vue.config._propBindingModes
       var props = [
         'a',
+        'empty',
         'data-some-attr',
         'some-other-attr',
         'multiple-attrs',
@@ -187,6 +188,7 @@ if (_.inBrowser) {
       })
       var def = Vue.options.directives._prop
       el.setAttribute('a', '1')
+      el.setAttribute('empty', '')
       el.setAttribute('data-some-attr', '{{a}}')
       el.setAttribute('some-other-attr', '2')
       el.setAttribute('multiple-attrs', 'a {{b}} c')
@@ -237,9 +239,11 @@ if (_.inBrowser) {
       expect(hasWarned(_, 'expects a two-way binding type')).toBe(true)
       // literal and one time should've been set on the _data
       // and numbers should be casted
-      expect(Object.keys(vm._data).length).toBe(10)
+      expect(Object.keys(vm._data).length).toBe(11)
       expect(vm.a).toBe(1)
       expect(vm._data.a).toBe(1)
+      expect(vm.empty).toBe('')
+      expect(vm._data.empty).toBe('')
       expect(vm.someOtherAttr).toBe(2)
       expect(vm._data.someOtherAttr).toBe(2)
       expect(vm.onetime).toBe('from parent: a')
