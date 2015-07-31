@@ -1,4 +1,5 @@
 var _ = require('../../../src/util')
+var config = require('../../../src/config')
 var batcher = require('../../../src/batcher')
 var nextTick = require('../../../src/util').nextTick
 
@@ -37,14 +38,15 @@ describe('Batcher', function () {
   })
 
   it('allow diplicate when flushing', function (done) {
-    batcher.push({
+    var job = {
       id: 1,
+      run: spy
+    }
+    batcher.push(job)
+    batcher.push({
+      id: 2,
       run: function () {
-        spy()
-        batcher.push({
-          id: 1,
-          run: spy
-        })
+        batcher.push(job)
       }
     })
     nextTick(function () {
@@ -93,7 +95,7 @@ describe('Batcher', function () {
     }
     batcher.push(job)
     nextTick(function () {
-      expect(count).not.toBe(0)
+      expect(count).toBe(config._maxUpdateCount + 1)
       expect(hasWarned(_, 'infinite update loop')).toBe(true)
       done()
     })

@@ -10,8 +10,8 @@ var config = require('./config')
 var queue = []
 var userQueue = []
 var has = {}
+var circular = {}
 var waiting = false
-var flushing = false
 var internalQueueDepleted = false
 
 /**
@@ -22,7 +22,8 @@ function reset () {
   queue = []
   userQueue = []
   has = {}
-  waiting = flushing = internalQueueDepleted = false
+  circular = {}
+  waiting = internalQueueDepleted = false
 }
 
 /**
@@ -30,7 +31,6 @@ function reset () {
  */
 
 function flush () {
-  flushing = true
   run(queue)
   internalQueueDepleted = true
   run(userQueue)
@@ -47,7 +47,20 @@ function run (queue) {
   // do not cache length because more jobs might be pushed
   // as we run existing jobs
   for (var i = 0; i < queue.length; i++) {
-    queue[i].run()
+    var job = queue[i]
+    var id = job.id
+    has[id] = null
+    job.run()
+    if (process.env.NODE_ENV !== 'production' && has[id] != null) {
+      circular[id] = (circular[id] || 0) + 1
+      if (circular[id] > config._maxUpdateCount) {
+        queue.splice(has[id], 1)
+        _.warn(
+          'You may have an infinite update loop for watcher ' +
+          'with expression: ' + job.expression
+        )
+      }
+    }
   }
 }
 
@@ -64,29 +77,14 @@ function run (queue) {
 
 exports.push = function (job) {
   var id = job.id
-  if (!id || !has[id] || flushing) {
-    if (!has[id]) {
-      has[id] = 1
-    } else {
-      has[id]++
-      // detect possible infinite update loops
-      if (has[id] > config._maxUpdateCount) {
-        process.env.NODE_ENV !== 'production' && _.warn(
-          'You may have an infinite update loop for the ' +
-          'watcher with expression: "' + job.expression + '".'
-        )
-        return
-      }
-    }
-    // A user watcher callback could trigger another
-    // directive update during the flushing; at that time
-    // the directive queue would already have been run, so
-    // we call that update immediately as it is pushed.
-    if (flushing && !job.user && internalQueueDepleted) {
+  if (has[id] == null) {
+    if (internalQueueDepleted && !job.user) {
       job.run()
       return
     }
-    ;(job.user ? userQueue : queue).push(job)
+    var q = job.user ? userQueue : queue
+    has[id] = q.length
+    q.push(job)
     if (!waiting) {
       waiting = true
       _.nextTick(flush)
