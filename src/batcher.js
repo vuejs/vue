@@ -27,7 +27,7 @@ function reset () {
 }
 
 /**
- * Flush both queues and run the jobs.
+ * Flush both queues and run the watchers.
  */
 
 function flush () {
@@ -38,26 +38,27 @@ function flush () {
 }
 
 /**
- * Run the jobs in a single queue.
+ * Run the watchers in a single queue.
  *
  * @param {Array} queue
  */
 
 function run (queue) {
-  // do not cache length because more jobs might be pushed
-  // as we run existing jobs
+  // do not cache length because more watchers might be pushed
+  // as we run existing watchers
   for (var i = 0; i < queue.length; i++) {
-    var job = queue[i]
-    var id = job.id
+    var watcher = queue[i]
+    var id = watcher.id
     has[id] = null
-    job.run()
+    watcher.run()
+    // in dev build, check and stop circular updates.
     if (process.env.NODE_ENV !== 'production' && has[id] != null) {
       circular[id] = (circular[id] || 0) + 1
       if (circular[id] > config._maxUpdateCount) {
         queue.splice(has[id], 1)
         _.warn(
           'You may have an infinite update loop for watcher ' +
-          'with expression: ' + job.expression
+          'with expression: ' + watcher.expression
         )
       }
     }
@@ -65,26 +66,30 @@ function run (queue) {
 }
 
 /**
- * Push a job into the job queue.
+ * Push a watcher into the watcher queue.
  * Jobs with duplicate IDs will be skipped unless it's
  * pushed when the queue is being flushed.
  *
- * @param {Object} job
+ * @param {Watcher} watcher
  *   properties:
- *   - {String|Number} id
- *   - {Function}      run
+ *   - {Number} id
+ *   - {Function} run
  */
 
-exports.push = function (job) {
-  var id = job.id
+exports.push = function (watcher) {
+  var id = watcher.id
   if (has[id] == null) {
-    if (internalQueueDepleted && !job.user) {
-      job.run()
+    // if an internal watcher is pushed, but the internal
+    // queue is already depleted, we run it immediately.
+    if (internalQueueDepleted && !watcher.user) {
+      watcher.run()
       return
     }
-    var q = job.user ? userQueue : queue
+    // push watcher into appropriate queue
+    var q = watcher.user ? userQueue : queue
     has[id] = q.length
-    q.push(job)
+    q.push(watcher)
+    // queue the flush
     if (!waiting) {
       waiting = true
       _.nextTick(flush)
