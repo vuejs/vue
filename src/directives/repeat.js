@@ -386,12 +386,8 @@ module.exports = {
       this.cacheVm(raw, vm, index, this.converted ? meta.$key : null)
     }
     // sync back changes for two-way bindings of primitive values
-    var type = typeof raw
     var dir = this
-    if (
-      this.rawType === 'object' &&
-      (type === 'string' || type === 'number')
-    ) {
+    if (this.rawType === 'object' && isPrimitive(raw)) {
       vm.$watch(alias || '$value', function (val) {
         if (dir.filters) {
           process.env.NODE_ENV !== 'production' && _.warn(
@@ -739,4 +735,20 @@ function toRefObject (vms) {
     ref[vms[i].$key] = vms[i]
   }
   return ref
+}
+
+/**
+ * Check if a value is a primitive one:
+ * String, Number, Boolean, null or undefined.
+ *
+ * @param {*} value
+ * @return {Boolean}
+ */
+
+function isPrimitive (value) {
+  var type = typeof value
+  return value == null ||
+    type === 'string' ||
+    type === 'number' ||
+    type === 'boolean'
 }

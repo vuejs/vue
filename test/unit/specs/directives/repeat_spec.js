@@ -669,19 +669,23 @@ if (_.inBrowser) {
           '<div v-repeat="obj">{{$value}}</div>' +
           '<div v-repeat="val:vals">{{val}}</div>',
         data: {
-          items: ['a', 'b'],
+          items: ['a', true],
           obj: { foo: 'a', bar: 'b' },
-          vals: [1, 2]
+          vals: [1, null]
         }
       })
       vm.$children[0].$value = 'c'
+      vm.$children[1].$value = 'd'
       var key = vm.$children[2].$key
-      vm.$children[2].$value = 'd'
+      vm.$children[2].$value = 'e'
       vm.$children[4].val = 3
+      vm.$children[5].val = 4
       _.nextTick(function () {
         expect(vm.items[0]).toBe('c')
-        expect(vm.obj[key]).toBe('d')
+        expect(vm.items[1]).toBe('d')
+        expect(vm.obj[key]).toBe('e')
         expect(vm.vals[0]).toBe(3)
+        expect(vm.vals[1]).toBe(4)
         done()
       })
     })
