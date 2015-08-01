@@ -30,7 +30,7 @@ if (_.inBrowser) {
       dir.el = document.createElement('input')
       dir.arg = 'value'
       dir.update('what')
-      expect(dir.el.getAttribute('value')).toBe('what')
+      expect(dir.el.hasAttribute('value')).toBe(false)
       expect(dir.el.value).toBe('what')
     })
 

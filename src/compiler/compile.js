@@ -232,6 +232,14 @@ function compileNode (node, options) {
  */
 
 function compileElement (el, options) {
+  // preprocess textareas.
+  // textarea treats its text content as the initial value.
+  // just bind it as a v-attr directive for value.
+  if (el.tagName === 'TEXTAREA') {
+    if (textParser.parse(el.value)) {
+      el.setAttribute('value', el.value)
+    }
+  }
   var linkFn
   var hasAttrs = el.hasAttributes()
   // check terminal directives (repeat & if)
@@ -249,16 +257,6 @@ function compileElement (el, options) {
   // normal directives
   if (!linkFn && hasAttrs) {
     linkFn = compileDirectives(el.attributes, options)
-  }
-  // if the element is a textarea, we need to interpolate
-  // its content on initial render.
-  if (el.tagName === 'TEXTAREA') {
-    var realLinkFn = linkFn
-    linkFn = function (vm, el) {
-      el.value = vm.$interpolate(el.value)
-      if (realLinkFn) realLinkFn(vm, el)
-    }
-    linkFn.terminal = true
   }
   return linkFn
 }
