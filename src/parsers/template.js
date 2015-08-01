@@ -124,6 +124,7 @@ function nodeToFragment (node) {
     _.isTemplate(node) &&
     node.content instanceof DocumentFragment
   ) {
+    _.trimNode(node.content)
     return node.content
   }
   // script template
@@ -139,6 +140,7 @@ function nodeToFragment (node) {
   /* eslint-enable no-cond-assign */
     frag.appendChild(child)
   }
+  _.trimNode(frag)
   return frag
 }
 
@@ -231,6 +233,7 @@ exports.parse = function (template, clone, noSelector) {
   // if the template is already a document fragment,
   // do nothing
   if (template instanceof DocumentFragment) {
+    _.trimNode(template)
     return clone
       ? exports.clone(template)
       : template

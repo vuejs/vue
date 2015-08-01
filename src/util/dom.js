@@ -204,8 +204,7 @@ exports.extractContent = function (el, asFragment) {
     el = el.content
   }
   if (el.hasChildNodes()) {
-    trim(el, el.firstChild)
-    trim(el, el.lastChild)
+    exports.trimNode(el)
     rawContent = asFragment
       ? document.createDocumentFragment()
       : document.createElement('div')
@@ -218,9 +217,20 @@ exports.extractContent = function (el, asFragment) {
   return rawContent
 }
 
-function trim (content, node) {
+/**
+ * Trim possible empty head/tail textNodes inside a parent.
+ *
+ * @param {Node} node
+ */
+
+exports.trimNode = function (node) {
+  trim(node, node.firstChild)
+  trim(node, node.lastChild)
+}
+
+function trim (parent, node) {
   if (node && node.nodeType === 3 && !node.data.trim()) {
-    content.removeChild(node)
+    parent.removeChild(node)
   }
 }
 
