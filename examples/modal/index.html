@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Vue.js Modal Example</title>
+    <script src="../../dist/vue.js"></script>
+    <link rel="stylesheet" href="modal.css">
+  </head>
+  <body>
+    <!-- template for the modal component -->
+    <template id="modal-template">
+      <div class="modal-mask" v-show="show" v-transition="modal">
+        <div class="modal-wrapper">
+          <div class="modal-container">
+            <content select=".modal-header">
+              <div class="modal-header">
+                default header
+              </div>
+            </content>
+            <content select=".modal-body">
+              <div class="modal-body">
+                default body
+              </div>
+            </content>
+            <content select=".modal-footer">
+              <div class="modal-footer">
+                default footer
+                <button class="modal-default-button"
+                  v-on="click: show = false">
+                  OK
+                </button>
+              </div>
+            </content>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <script>
+      // register modal component
+      Vue.component('modal', {
+        template: '#modal-template',
+        props: {
+          show: {
+            type: Boolean,
+            required: true,
+            twoWay: true    
+          }
+        }
+      })
+    </script>
+
+    <!-- app -->
+    <div id="app">
+      <button v-on="click: showModal = true">Show Modal</button>
+      <!-- use the modal component, pass in the prop -->
+      <modal show="{{@showModal}}">
+        <!--
+          you can use custom content here to overwrite
+          default content
+        -->
+        <div class="modal-header">
+          <h3>custom header</h3>
+        </div>
+      </modal>
+    </div>
+
+    <script>
+      // start app
+      new Vue({
+        el: '#app',
+        data: {
+          showModal: false
+        }
+      })
+    </script>
+  </body>
+</html>
