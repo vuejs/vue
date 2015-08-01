@@ -43,6 +43,12 @@ module.exports = {
   update: function (value) {
     var el = this.el
     el.selectedIndex = -1
+    if (!value) {
+      if (this.defaultOption) {
+        this.defaultOption.selected = true
+      }
+      return
+    }
     var multi = this.multiple && _.isArray(value)
     var options = el.options
     var i = options.length
@@ -75,11 +81,22 @@ module.exports = {
 
 function initOptions (expression) {
   var self = this
+  var el = self.el
+  var defaultOption = self.defaultOption = self.el.options[0]
   var descriptor = dirParser.parse(expression)[0]
   function optionUpdateWatcher (value) {
     if (_.isArray(value)) {
-      self.el.innerHTML = ''
-      buildOptions(self.el, value)
+      // clear old options.
+      // cannot reset innerHTML here because IE family get
+      // confused during compilation.
+      var i = el.options.length
+      while (i--) {
+        var option = el.options[i]
+        if (option !== defaultOption) {
+          el.removeChild(option)
+        }
+      }
+      buildOptions(el, value)
       self.forceUpdate()
     } else {
       process.env.NODE_ENV !== 'production' && _.warn(

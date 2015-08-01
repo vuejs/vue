@@ -369,9 +369,37 @@ if (_.inBrowser) {
         template: '<select v-model="test" options="opts | aFilter"></select>'
       })
       expect(el.firstChild.innerHTML).toBe(
-          '<option value="a0">a0</option>' +
-          '<option value="b1">b1</option>'
+        '<option value="a0">a0</option>' +
+        '<option value="b1">b1</option>'
       )
+    })
+
+    it('select + options + static option', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          opts: ['a', 'b']
+        },
+        template:
+          '<select v-model="test" options="opts">' +
+            '<option value="">default...</option>' +
+          '</select>'
+      })
+      expect(el.firstChild.innerHTML).toBe(
+        '<option value="">default...</option>' +
+        '<option value="a">a</option>' +
+        '<option value="b">b</option>'
+      )
+      expect(el.firstChild.options[0].selected).toBe(true)
+      vm.opts = ['c']
+      _.nextTick(function () {
+        expect(el.firstChild.innerHTML).toBe(
+          '<option value="">default...</option>' +
+          '<option value="c">c</option>'
+        )
+        expect(el.firstChild.options[0].selected).toBe(true)
+        done()
+      })
     })
 
     it('text', function (done) {
