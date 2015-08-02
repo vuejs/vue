@@ -9,12 +9,12 @@ var Users = new Firebase(baseURL + 'users')
 
 Users.on('child_added', function (snapshot) {
   var item = snapshot.val()
-  item.id = snapshot.name()
+  item.id = snapshot.key()
   app.users.push(item)
 })
 
 Users.on('child_removed', function (snapshot) {
-  var id = snapshot.name()
+  var id = snapshot.key()
   app.users.some(function (user) {
     if (user.id === id) {
       app.users.$remove(user)
@@ -38,52 +38,33 @@ var app = new Vue({
     newUser: {
       name: '',
       email: ''
-    },
-    validation: {
-      name: false,
-      email: false
-    }
-  },
-
-  // validation filters are "write only" filters
-  filters: {
-    nameValidator: {
-      write: function (val) {
-        this.validation.name = !!val
-        return val
-      }
-    },
-    emailValidator: {
-      write: function (val) {
-        this.validation.email = emailRE.test(val)
-        return val
-      }
     }
   },
 
   // computed property for form validation state
   computed: {
-    isValid: function () {
-      var valid = true
-      for (var key in this.validation) {
-        if (!this.validation[key]) {
-          valid = false
-        }
+    validation: function () {
+      return {
+        name: !!this.newUser.name.trim(),
+        email: emailRE.test(this.newUser.email)
       }
-      return valid
+    },
+    isValid: function () {
+      var validation = this.validation
+      return Object.keys(validation).every(function (key) {
+        return validation[key]
+      })
     }
   },
-  
+
   // methods
   methods: {
     addUser: function (e) {
       e.preventDefault()
       if (this.isValid) {
         Users.push(this.newUser)
-        this.newUser = {
-          name: '',
-          email: ''
-        }
+        this.newUser.name = ''
+        this.newUser.email = ''
       }
     },
     removeUser: function (user) {

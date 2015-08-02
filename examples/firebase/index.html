@@ -16,8 +16,8 @@
         </li>
       </ul>
       <form id="form" v-on="submit:addUser">
-        <input v-model="newUser.name | nameValidator | capitalize">
-        <input v-model="newUser.email | emailValidator">
+        <input v-model="newUser.name">
+        <input v-model="newUser.email">
         <input type="submit" value="Add User">
       </form>
       <ul class="errors">
