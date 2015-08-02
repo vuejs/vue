@@ -43,7 +43,7 @@ module.exports = {
   update: function (value) {
     var el = this.el
     el.selectedIndex = -1
-    if (!value) {
+    if (!value && value !== 0) {
       if (this.defaultOption) {
         this.defaultOption.selected = true
       }
