@@ -195,8 +195,8 @@ describe('Misc', function () {
       },
       watch: {
         obj: {
-            handler: spy1,
-            deep: true
+          handler: spy1,
+          deep: true
         },
         arr: spy2,
         // if the watcher is watching the added value,

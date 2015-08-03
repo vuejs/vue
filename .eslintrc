@@ -33,7 +33,7 @@
     "generator-star-spacing": [2, { "before": true, "after": true }],
     "guard-for-in": 0,
     "handle-callback-err": [2, "^(err|error)$" ],
-    "indent": [2, 2],
+    "indent": [2, 2, { "SwitchCase": 1 }],
     "key-spacing": [2, { "beforeColon": false, "afterColon": true }],
     "linebreak-style": 0,
     "lines-around-comment": 0,
