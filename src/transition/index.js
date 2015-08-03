@@ -3,7 +3,7 @@ var _ = require('../util')
 /**
  * Append with transition.
  *
- * @oaram {Element} el
+ * @param {Element} el
  * @param {Element} target
  * @param {Vue} vm
  * @param {Function} [cb]
@@ -18,7 +18,7 @@ exports.append = function (el, target, vm, cb) {
 /**
  * InsertBefore with transition.
  *
- * @oaram {Element} el
+ * @param {Element} el
  * @param {Element} target
  * @param {Vue} vm
  * @param {Function} [cb]
@@ -33,7 +33,7 @@ exports.before = function (el, target, vm, cb) {
 /**
  * Remove with transition.
  *
- * @oaram {Element} el
+ * @param {Element} el
  * @param {Vue} vm
  * @param {Function} [cb]
  */
@@ -48,7 +48,7 @@ exports.remove = function (el, vm, cb) {
  * Remove by appending to another parent with transition.
  * This is only used in block operations.
  *
- * @oaram {Element} el
+ * @param {Element} el
  * @param {Element} target
  * @param {Vue} vm
  * @param {Function} [cb]
@@ -96,7 +96,7 @@ exports.blockRemove = function (start, end, vm) {
 /**
  * Apply transitions with an operation callback.
  *
- * @oaram {Element} el
+ * @param {Element} el
  * @param {Number} direction
  *                  1: enter
  *                 -1: leave

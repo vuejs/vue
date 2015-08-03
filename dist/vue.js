@@ -5133,7 +5133,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * Append with transition.
 	 *
-	 * @oaram {Element} el
+	 * @param {Element} el
 	 * @param {Element} target
 	 * @param {Vue} vm
 	 * @param {Function} [cb]
@@ -5148,7 +5148,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * InsertBefore with transition.
 	 *
-	 * @oaram {Element} el
+	 * @param {Element} el
 	 * @param {Element} target
 	 * @param {Vue} vm
 	 * @param {Function} [cb]
@@ -5163,7 +5163,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * Remove with transition.
 	 *
-	 * @oaram {Element} el
+	 * @param {Element} el
 	 * @param {Vue} vm
 	 * @param {Function} [cb]
 	 */
@@ -5178,7 +5178,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Remove by appending to another parent with transition.
 	 * This is only used in block operations.
 	 *
-	 * @oaram {Element} el
+	 * @param {Element} el
 	 * @param {Element} target
 	 * @param {Vue} vm
 	 * @param {Function} [cb]
@@ -5226,7 +5226,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * Apply transitions with an operation callback.
 	 *
-	 * @oaram {Element} el
+	 * @param {Element} el
 	 * @param {Number} direction
 	 *                  1: enter
 	 *                 -1: leave
