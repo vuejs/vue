@@ -10,6 +10,8 @@ var animDurationProp = _.animationProp + 'Duration'
 var TYPE_TRANSITION = 1
 var TYPE_ANIMATION = 2
 
+var uid = 0
+
 /**
  * A Transition object that encapsulates the state and logic
  * of the transition.
@@ -21,6 +23,7 @@ var TYPE_ANIMATION = 2
  */
 
 function Transition (el, id, hooks, vm) {
+  this.id = uid++
   this.el = el
   this.enterClass = id + '-enter'
   this.leaveClass = id + '-leave'
@@ -33,6 +36,7 @@ function Transition (el, id, hooks, vm) {
   this.pendingJsCb =
   this.op =
   this.cb = null
+  this.justEntered = false
   this.typeCache = {}
   // bind
   var self = this
@@ -87,6 +91,10 @@ p.enter = function (op, cb) {
  */
 
 p.enterNextTick = function () {
+  this.justEntered = true
+  _.nextTick(function () {
+    this.justEntered = false
+  }, this)
   var type = this.getCssTransitionType(this.enterClass)
   var enterDone = this.enterDone
   if (type === TYPE_TRANSITION) {
@@ -140,10 +148,17 @@ p.leave = function (op, cb) {
   addClass(this.el, this.leaveClass)
   this.callHookWithCb('leave')
   this.cancel = this.hooks && this.hooks.leaveCancelled
-  // only need to do leaveNextTick if there's no explicit
+  // only need to handle leaveDone if there's no explicit
   // js callback
   if (!this.pendingJsCb) {
-    queue.push(this.leaveNextTick)
+    // if a CSS transition leaves immediately after enter,
+    // the transitionend event never fires. therefore we
+    // detect such cases and end the leave immediately.
+    if (this.justEntered) {
+      this.leaveDone()
+    } else {
+      queue.push(this.leaveNextTick)
+    }
   }
 }
 
