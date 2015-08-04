@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Vue.js custom directive integration example (select2)</title>
+    <script src="../../dist/vue.js"></script>
+    <script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <link href="http://cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet">
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
+    <style>
+      select {
+        min-width: 300px;
+      }
+    </style>
+  </head>
+  <body>
+
+    <div id="el">
+      <p>Selected: {{selected}}</p>
+      <select v-select="selected" options="options">
+        <option value="0">default</option>
+      </select>
+    </div>
+
+    <script>
+    Vue.directive('select', {
+      twoWay: true,
+      bind: function () {
+        var optionsData
+        var optionsExpression = this._checkParam('options')
+        if (optionsExpression) {
+          optionsData = this.vm.$eval(optionsExpression)
+        }
+        var self = this
+        $(this.el)
+          .select2({
+            data: optionsData
+          })
+          .on('change', function () {
+            self.set(this.value)
+          })
+      },
+      update: function (value) {
+        $(this.el).val(value).trigger('change')
+      },
+      unbind: function () {
+        $(this.el).off().select2('destroy')
+      }
+    })
+
+    var vm = new Vue({
+      el: '#el',
+      data: {
+        selected: 0,
+        options: [
+          { id: 1, text: 'hello' },
+          { id: 2, text: 'what' }
+        ]
+      }
+    })
+    </script>
+  </body>
+</html>
