@@ -8,7 +8,7 @@
   </head>
   <body>
     <!-- template for the modal component -->
-    <template id="modal-template">
+    <script type="x/template" id="modal-template">
       <div class="modal-mask" v-show="show" v-transition="modal">
         <div class="modal-wrapper">
           <div class="modal-container">
@@ -34,7 +34,7 @@
           </div>
         </div>
       </div>
-    </template>
+    </script>
 
     <script>
       // register modal component
@@ -52,7 +52,7 @@
 
     <!-- app -->
     <div id="app">
-      <button v-on="click: showModal = true">Show Modal</button>
+      <button id="show-modal" v-on="click: showModal = true">Show Modal</button>
       <!-- use the modal component, pass in the prop -->
       <modal show="{{@showModal}}">
         <!--
