@@ -50,7 +50,7 @@ module.exports = function (grunt) {
           coverageReporter: {
             reporters: [
               { type: 'lcov', subdir: '.' },
-              { type: 'text-summary' }
+              { type: 'text-summary', subdir: '.' }
             ]
           }
         }
