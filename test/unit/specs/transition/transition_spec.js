@@ -116,7 +116,7 @@ if (_.inBrowser && !_.isIE9) {
         expect(cb).toHaveBeenCalled()
       })
 
-      it('skip when no css transition is available', function () {
+      it('skip when css transition is not supported', function () {
         var e = _.transitionEndEvent
         _.transitionEndEvent = null
         el.__v_trans = new Transition(el, 'test', null, vm)
@@ -190,15 +190,18 @@ if (_.inBrowser && !_.isIE9) {
           expect(cb).toHaveBeenCalled()
           expect(hooks.afterEnter).toHaveBeenCalled()
           expect(el.classList.contains('test-no-trans-enter')).toBe(false)
-          transition.apply(el, -1, op, vm, cb)
-          expect(hooks.beforeLeave).toHaveBeenCalled()
-          expect(hooks.leave).toHaveBeenCalled()
+          // wait until transition.justEntered flag is off
           _.nextTick(function () {
-            expect(op.calls.count()).toBe(2)
-            expect(cb.calls.count()).toBe(2)
-            expect(hooks.afterLeave).toHaveBeenCalled()
-            expect(el.classList.contains('test-no-trans-leave')).toBe(false)
-            done()
+            transition.apply(el, -1, op, vm, cb)
+            expect(hooks.beforeLeave).toHaveBeenCalled()
+            expect(hooks.leave).toHaveBeenCalled()
+            _.nextTick(function () {
+              expect(op.calls.count()).toBe(2)
+              expect(cb.calls.count()).toBe(2)
+              expect(hooks.afterLeave).toHaveBeenCalled()
+              expect(el.classList.contains('test-no-trans-leave')).toBe(false)
+              done()
+            })
           })
         })
       })

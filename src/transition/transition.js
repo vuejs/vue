@@ -148,9 +148,11 @@ p.leave = function (op, cb) {
   addClass(this.el, this.leaveClass)
   this.callHookWithCb('leave')
   this.cancel = this.hooks && this.hooks.leaveCancelled
-  // only need to handle leaveDone if there's no explicit
-  // js callback
-  if (!this.pendingJsCb) {
+  // only need to handle leaveDone if
+  // 1. the transition is already done (synchronously called
+  //    by the user, which causes this.op set to null)
+  // 2. there's no explicit js callback
+  if (this.op && !this.pendingJsCb) {
     // if a CSS transition leaves immediately after enter,
     // the transitionend event never fires. therefore we
     // detect such cases and end the leave immediately.
@@ -188,6 +190,7 @@ p.leaveDone = function () {
   removeClass(this.el, this.leaveClass)
   this.callHook('afterLeave')
   if (this.cb) this.cb()
+  this.op = null
 }
 
 /**
