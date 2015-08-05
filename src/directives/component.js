@@ -50,6 +50,10 @@ module.exports = {
         // check dynamic component params
         this.transMode = this._checkParam('transition-mode')
       }
+
+      this.pendingRemovals = 0
+      this.pendingRemovalCb = null
+
     } else {
       process.env.NODE_ENV !== 'production' && _.warn(
         'cannot mount component "' + this.expression + '" ' +
@@ -214,9 +218,20 @@ module.exports = {
   remove: function (child, cb) {
     var keepAlive = this.keepAlive
     if (child) {
+      // we may have a component switch when a previous
+      // component is still being transitioned out.
+      // we want to trigger only one lastest insertion cb
+      // when the existing transition finishes.
+      this.pendingRemovals++
+      this.pendingRemovalCb = cb
+      var self = this
       child.$remove(function () {
+        self.pendingRemovals--
         if (!keepAlive) child._cleanup()
-        if (cb) cb()
+        if (!self.pendingRemovals && self.pendingRemovalCb) {
+          self.pendingRemovalCb()
+          self.pendingRemovalCb = null
+        }
       })
     } else if (cb) {
       cb()
@@ -244,9 +259,7 @@ module.exports = {
         break
       case 'out-in':
         self.remove(current, function () {
-          if (!target._isDestroyed) {
-            target.$before(self.anchor, cb)
-          }
+          target.$before(self.anchor, cb)
         })
         break
       default:
