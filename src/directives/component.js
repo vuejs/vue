@@ -40,9 +40,12 @@ module.exports = {
         this.template = _.extractContent(this.el, true)
       }
       // component resolution related state
-      this._pendingCb =
+      this.pendingComponentCb =
       this.componentID =
       this.Component = null
+      // transition related state
+      this.pendingRemovals = 0
+      this.pendingRemovalCb = null
       // if static, build right now.
       if (!this._isDynamicLiteral) {
         this.resolveComponent(this.expression, _.bind(this.initStatic, this))
@@ -50,10 +53,6 @@ module.exports = {
         // check dynamic component params
         this.transMode = this._checkParam('transition-mode')
       }
-
-      this.pendingRemovals = 0
-      this.pendingRemovalCb = null
-
     } else {
       process.env.NODE_ENV !== 'production' && _.warn(
         'cannot mount component "' + this.expression + '" ' +
@@ -132,12 +131,12 @@ module.exports = {
 
   resolveComponent: function (id, cb) {
     var self = this
-    this._pendingCb = _.cancellable(function (component) {
+    this.pendingComponentCb = _.cancellable(function (component) {
       self.componentID = id
       self.Component = component
       cb()
     })
-    this.vm._resolveComponent(id, this._pendingCb)
+    this.vm._resolveComponent(id, this.pendingComponentCb)
   },
 
   /**
@@ -147,9 +146,9 @@ module.exports = {
    */
 
   invalidatePending: function () {
-    if (this._pendingCb) {
-      this._pendingCb.cancel()
-      this._pendingCb = null
+    if (this.pendingComponentCb) {
+      this.pendingComponentCb.cancel()
+      this.pendingComponentCb = null
     }
   },
 
@@ -221,7 +220,7 @@ module.exports = {
       // we may have a component switch when a previous
       // component is still being transitioned out.
       // we want to trigger only one lastest insertion cb
-      // when the existing transition finishes.
+      // when the existing transition finishes. (#1119)
       this.pendingRemovals++
       this.pendingRemovalCb = cb
       var self = this
