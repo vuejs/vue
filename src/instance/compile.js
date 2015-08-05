@@ -34,24 +34,28 @@ exports._compile = function (el) {
 
     // root is always compiled per-instance, because
     // container attrs and props can be different every time.
-    var rootUnlinkFn =
-      compiler.compileAndLinkRoot(this, el, options)
+    var rootLinker = compiler.compileRoot(el, options)
 
     // compile and link the rest
-    var linker
+    var contentLinkFn
     var ctor = this.constructor
     // component compilation can be cached
     // as long as it's not using inline-template
     if (options._linkerCachable) {
-      linker = ctor.linker
-      if (!linker) {
-        linker = ctor.linker = compiler.compile(el, options)
+      contentLinkFn = ctor.linker
+      if (!contentLinkFn) {
+        contentLinkFn = ctor.linker = compiler.compile(el, options)
       }
     }
-    var contentUnlinkFn = linker
-      ? linker(this, el)
+
+    // link phase
+    var rootUnlinkFn = rootLinker(this, el)
+    var contentUnlinkFn = contentLinkFn
+      ? contentLinkFn(this, el)
       : compiler.compile(el, options)(this, el, host)
 
+    // register composite unlink function
+    // to be called during instance destruction
     this._unlinkFn = function () {
       rootUnlinkFn()
       // passing destroying: true to avoid searching and
