@@ -48,25 +48,25 @@ if (_.inBrowser) {
       var vm = new Vue({
         el: el,
         data: {
-          test: 'a'
+          test: '1'
         },
         template:
-          '<input type="radio" value="a" v-model="test" name="test">' +
-          '<input type="radio" value="b" v-model="test" name="test">'
+          '<input type="radio" value="1" v-model="test" name="test" number>' +
+          '<input type="radio" value="2" v-model="test" name="test">'
       })
       expect(el.childNodes[0].checked).toBe(true)
       expect(el.childNodes[1].checked).toBe(false)
-      vm.test = 'b'
+      vm.test = '2'
       _.nextTick(function () {
         expect(el.childNodes[0].checked).toBe(false)
         expect(el.childNodes[1].checked).toBe(true)
         el.childNodes[0].click()
         expect(el.childNodes[0].checked).toBe(true)
         expect(el.childNodes[1].checked).toBe(false)
-        expect(vm.test).toBe('a')
+        expect(vm.test).toBe(1)
         vm._directives[1].unbind()
         el.childNodes[1].click()
-        expect(vm.test).toBe('a')
+        expect(vm.test).toBe(1)
         done()
       })
     })

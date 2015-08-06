@@ -5,12 +5,18 @@ module.exports = {
   bind: function () {
     var self = this
     var el = this.el
+    var number = this._checkParam('number') != null
+    function getValue () {
+      return number
+        ? _.toNumber(el.value)
+        : el.value
+    }
     this.listener = function () {
-      self.set(el.value)
+      self.set(getValue())
     }
     _.on(el, 'change', this.listener)
     if (el.checked) {
-      this._initValue = el.value
+      this._initValue = getValue()
     }
   },
 
