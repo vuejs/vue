@@ -80,6 +80,34 @@ if (_.inBrowser) {
       expect(vm.test).toBe('a')
     })
 
+    fit('radio expression', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          test: false,
+          test2: 'string1',
+          expression1: 'string1',
+          expression2: 'string2'
+        },
+        template:
+          '<input type="radio" value="1" v-model="test" name="test" exp="true">' +
+          '<input type="radio" value="0" v-model="test" name="test" exp="false">' +
+          '<input type="radio" value="1" v-model="test2" name="test2" exp="expression1">' +
+          '<input type="radio" value="0" v-model="test2" name="test2" exp="expression2">'
+      })
+      expect(el.childNodes[0].checked).toBe(false)
+      expect(el.childNodes[1].checked).toBe(true)
+      expect(el.childNodes[2].checked).toBe(true)
+      expect(el.childNodes[3].checked).toBe(false)
+      _.nextTick(function () {
+        el.childNodes[0].click()
+        expect(vm.test).toBe(true)
+        el.childNodes[3].click()
+        expect(vm.test2).toBe('string2')
+        done()
+      })
+    })
+    
     it('checkbox', function (done) {
       var vm = new Vue({
         el: el,
