@@ -137,6 +137,13 @@ if (_.inBrowser) {
       expect(c.firstChild.innerHTML).toBe('1')
     })
 
+    it('should deal with Safari template clone bug even when nested', function () {
+      var a = document.createElement('div')
+      a.innerHTML = '<template><div>1</div><template>2</template></template>'
+      var c = templateParser.clone(a)
+      expect(c.firstChild.innerHTML).toBe('<div>1</div><template>2</template>')
+    })
+
     it('should deal with IE textarea clone bug', function () {
       var t = document.createElement('textarea')
       t.placeholder = 't'

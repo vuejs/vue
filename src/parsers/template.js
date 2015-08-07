@@ -56,6 +56,19 @@ map.rect = [
   '</svg>'
 ]
 
+/**
+ * Check if a node is a supported template node with a
+ * DocumentFragment content.
+ *
+ * @param {Node} node
+ * @return {Boolean}
+ */
+
+function isRealTemplate (node) {
+  return _.isTemplate(node) &&
+    node.content instanceof DocumentFragment
+}
+
 var tagRE = /<([\w:]+)/
 var entityRE = /&\w+;/
 
@@ -120,10 +133,7 @@ function stringToFragment (templateString) {
 function nodeToFragment (node) {
   // if its a template tag and the browser supports it,
   // its content is already a document fragment.
-  if (
-    _.isTemplate(node) &&
-    node.content instanceof DocumentFragment
-  ) {
+  if (isRealTemplate(node)) {
     _.trimNode(node.content)
     return node.content
   }
@@ -174,16 +184,21 @@ var hasTextareaCloneBug = _.inBrowser
  */
 
 exports.clone = function (node) {
-  var res = node.cloneNode(true)
   if (!node.querySelectorAll) {
-    return res
+    return node.cloneNode()
   }
+  var res = node.cloneNode(true)
   var i, original, cloned
   /* istanbul ignore if */
   if (hasBrokenTemplate) {
+    var clone = res
+    if (isRealTemplate(node)) {
+      node = node.content
+      clone = res.content
+    }
     original = node.querySelectorAll('template')
     if (original.length) {
-      cloned = res.querySelectorAll('template')
+      cloned = clone.querySelectorAll('template')
       i = cloned.length
       while (i--) {
         cloned[i].parentNode.replaceChild(
