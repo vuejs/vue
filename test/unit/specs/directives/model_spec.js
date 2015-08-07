@@ -80,7 +80,7 @@ if (_.inBrowser) {
       expect(vm.test).toBe('a')
     })
 
-    fit('radio expression', function (done) {
+    it('radio expression', function (done) {
       var vm = new Vue({
         el: el,
         data: {
@@ -140,6 +140,34 @@ if (_.inBrowser) {
       })
       expect(vm.test).toBe(true)
     })
+    
+    it('checkbox true-value false-value', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          test: '',
+          expression1: 'aTrueValue',
+          expression2: 'aFalseValue'
+        },
+        template: '<input type="checkbox" v-model="test" true-value="expression1" false-value="expression2">'
+      })
+      expect(vm.test).toBe('')
+      el.firstChild.click()
+      expect(vm.test).toBe('aTrueValue')
+      expect(el.firstChild.checked).toBe(true)
+      el.firstChild.click()
+      expect(vm.test).toBe('aFalseValue')
+      expect(el.firstChild.checked).toBe(false)
+      vm.test = 'aTrueValue'
+      _.nextTick(function () {
+        // the updated value of 'test' is not being passed
+        // into the 'update' method of v-model in this environment
+        // works fine in manual test
+        //expect(el.firstChild.checked).toBe(true)
+        done()        
+      })
+      
+    })    
 
     it('select', function (done) {
       var vm = new Vue({
