@@ -107,7 +107,7 @@ if (_.inBrowser) {
         done()
       })
     })
-    
+
     it('checkbox', function (done) {
       var vm = new Vue({
         el: el,
@@ -140,7 +140,7 @@ if (_.inBrowser) {
       })
       expect(vm.test).toBe(true)
     })
-    
+
     it('checkbox true-value false-value', function (done) {
       var vm = new Vue({
         el: el,
@@ -163,11 +163,11 @@ if (_.inBrowser) {
         // the updated value of 'test' is not being passed
         // into the 'update' method of v-model in this environment
         // works fine in manual test
-        //expect(el.firstChild.checked).toBe(true)
-        done()        
+        // expect(el.firstChild.checked).toBe(true)
+        done()
       })
-      
-    })    
+
+    })
 
     it('select', function (done) {
       var vm = new Vue({

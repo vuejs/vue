@@ -9,14 +9,14 @@ module.exports = {
     var expression = this._checkParam('exp')
     function getValue () {
       var val = el.value
-      if(number) {
+      if (number) {
         val = _.toNumber(val)
       } else if (expression !== null) {
         val = self.vm.$eval(expression)
       }
       return val
     }
-    this._getValue = getValue;
+    this._getValue = getValue
     this.listener = function () {
       self.set(getValue())
     }

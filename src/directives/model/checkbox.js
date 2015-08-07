@@ -7,37 +7,39 @@ module.exports = {
     var el = this.el
     var trueExp = this._checkParam('true-value')
     var falseExp = this._checkParam('false-value')
-    
+
     function getValue () {
       var val = el.checked
-      if(val && trueExp !== null) {
-        val = self.vm.$eval(trueExp);
+      if (val && trueExp !== null) {
+        val = self.vm.$eval(trueExp)
       }
-      if(!val && falseExp !== null) {
-        val = self.vm.$eval(falseExp);
+      if (!val && falseExp !== null) {
+        val = self.vm.$eval(falseExp)
       }
       return val
     }
     this._getValue = getValue
-    
+
     function matchValue (value) {
       var trueValue = true
       var falseValue = false
-            
-      if(trueExp !== null) {
-          trueValue = self.vm.$eval(trueExp);
-      } 
-      if(falseExp !== null) {
-          falseValue = self.vm.$eval(falseExp);
+
+      if (trueExp !== null) {
+        trueValue = self.vm.$eval(trueExp)
       }
-      if(trueValue == value) {
+      if (falseExp !== null) {
+        falseValue = self.vm.$eval(falseExp)
+      }
+      if (trueValue === value) {
         return true
-      } else {
+      } else if (falseValue === value) {
         return false
+      } else {
+        return null
       }
     }
     this._matchValue = matchValue
-    
+
     this.listener = function () {
       self.set(getValue())
     }
