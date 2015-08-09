@@ -278,6 +278,23 @@ if (_.inBrowser) {
       expect(el.textContent).toBe('AAA')
     })
 
+    it('sync wait-for inside compiled hook', function () {
+      new Vue({
+        el: el,
+        template: '<view-a wait-for="ok"></view-a>',
+        components: {
+          'view-a': {
+            template: 'AAA',
+            compiled: function () {
+              expect(el.textContent).toBe('')
+              this.$emit('ok')
+            }
+          }
+        }
+      })
+      expect(el.textContent).toBe('AAA')
+    })
+
     it('wait-for for dynamic components', function (done) {
       var vm = new Vue({
         el: el,
