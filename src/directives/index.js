@@ -2,6 +2,7 @@
 exports.text = require('./text')
 exports.html = require('./html')
 exports.attr = require('./attr')
+exports.hide = require('./hide')
 exports.show = require('./show')
 exports['class'] = require('./class')
 exports.el = require('./el')
