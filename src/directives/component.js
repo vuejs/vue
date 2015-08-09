@@ -41,7 +41,6 @@ module.exports = {
       }
       // component resolution related state
       this.pendingComponentCb =
-      this.componentID =
       this.Component = null
       // transition related state
       this.pendingRemovals = 0
@@ -145,9 +144,8 @@ module.exports = {
 
   resolveComponent: function (id, cb) {
     var self = this
-    this.pendingComponentCb = _.cancellable(function (component) {
-      self.componentID = id
-      self.Component = component
+    this.pendingComponentCb = _.cancellable(function (Component) {
+      self.Component = Component
       cb()
     })
     this.vm._resolveComponent(id, this.pendingComponentCb)
@@ -177,7 +175,7 @@ module.exports = {
 
   build: function (extraOptions) {
     if (this.keepAlive) {
-      var cached = this.cache[this.componentID]
+      var cached = this.cache[this.Component.cid]
       if (cached) {
         return cached
       }
@@ -201,7 +199,7 @@ module.exports = {
       var parent = this._host || this.vm
       var child = parent.$addChild(options, this.Component)
       if (this.keepAlive) {
-        this.cache[this.componentID] = child
+        this.cache[this.Component.cid] = child
       }
       return child
     }
