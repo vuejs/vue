@@ -130,6 +130,20 @@ exports.key = function (handler, key) {
 // expose keycode hash
 exports.key.keyCodes = keyCodes
 
+exports.debounce = function (handler, delay) {
+  if (!handler) return
+  if (!delay) {
+    delay = 300
+  }
+  var timeout = null
+  return function (e) {
+    if (timeout) {
+      clearTimeout(timeout)
+    }
+    timeout = setTimeout(handler, delay)
+  }
+}
+
 /**
  * Install special array filters
  */
