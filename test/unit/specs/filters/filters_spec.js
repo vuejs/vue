@@ -96,6 +96,17 @@ describe('Filters', function () {
     expect(spy).toHaveBeenCalled()
   })
 
+  it('debounce', function (done) {
+    var filter = filters.debounce
+    expect(filter(null)).toBeUndefined()
+    var spy = jasmine.createSpy('filter:debounce')
+    var handler = filter(spy)
+    handler()
+    expect(spy).not.toHaveBeenCalled()
+    handler = filter(function () { done() })
+    handler()
+  })
+
   it('filterBy', function () {
     var filter = filters.filterBy
     var arr = [
