@@ -135,13 +135,7 @@ exports.debounce = function (handler, delay) {
   if (!delay) {
     delay = 300
   }
-  var timeout = null
-  return function (e) {
-    if (timeout) {
-      clearTimeout(timeout)
-    }
-    timeout = setTimeout(handler, delay)
-  }
+  return _.debounce(handler, delay)
 }
 
 /**
