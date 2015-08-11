@@ -2,7 +2,7 @@ var _ = require('../util')
 var Cache = require('../cache')
 var cache = new Cache(1000)
 var argRE = /^[^\{\?]+$|^'[^']*'$|^"[^"]*"$/
-var filterTokenRE = /[^\s'"]+|'[^']+'|"[^"]+"/g
+var filterTokenRE = /[^\s'"]+|'[^']*'|"[^"]*"/g
 var reservedArgRE = /^in$|^-?\d+/
 
 /**
@@ -71,9 +71,10 @@ function processFilterArg (arg) {
   var stripped = reservedArgRE.test(arg)
     ? arg
     : _.stripQuotes(arg)
+  var dynamic = stripped === false
   return {
-    value: stripped || arg,
-    dynamic: !stripped
+    value: dynamic ? arg : stripped,
+    dynamic: dynamic
   }
 }
 
