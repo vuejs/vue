@@ -5,8 +5,8 @@ module.exports = {
   bind: function () {
     var self = this
     var el = this.el
-    var trueExp = this._checkParam('true-value')
-    var falseExp = this._checkParam('false-value')
+    var trueExp = this._checkParam('true-exp')
+    var falseExp = this._checkParam('false-exp')
 
     function getValue () {
       var val = el.checked
@@ -22,21 +22,10 @@ module.exports = {
 
     function matchValue (value) {
       var trueValue = true
-      var falseValue = false
-
       if (trueExp !== null) {
         trueValue = self.vm.$eval(trueExp)
       }
-      if (falseExp !== null) {
-        falseValue = self.vm.$eval(falseExp)
-      }
-      if (trueValue === value) {
-        return true
-      } else if (falseValue === value) {
-        return false
-      } else {
-        return null
-      }
+      return trueValue === value
     }
     this._matchValue = matchValue
 

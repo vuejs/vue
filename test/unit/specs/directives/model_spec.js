@@ -141,7 +141,7 @@ if (_.inBrowser) {
       expect(vm.test).toBe(true)
     })
 
-    it('checkbox true-value false-value', function (done) {
+    it('checkbox expression', function (done) {
       var vm = new Vue({
         el: el,
         data: {
@@ -149,7 +149,7 @@ if (_.inBrowser) {
           expression1: 'aTrueValue',
           expression2: 'aFalseValue'
         },
-        template: '<input type="checkbox" v-model="test" true-value="expression1" false-value="expression2">'
+        template: '<input type="checkbox" v-model="test" true-exp="expression1" false-exp="expression2">'
       })
       expect(vm.test).toBe('')
       el.firstChild.click()
