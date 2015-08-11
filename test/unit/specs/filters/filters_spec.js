@@ -98,6 +98,31 @@ describe('Filters', function () {
     expect(spy).toHaveBeenCalled()
   })
 
+  it('debounce', function (done) {
+    var filter = filters.debounce
+    expect(filter(null)).toBeUndefined()
+    var spy = jasmine.createSpy('filter:debounce')
+    var handler = filter(spy)
+    handler()
+    expect(spy).not.toHaveBeenCalled()
+    handler = filter(spy)
+    handler()
+    setTimeout(function () {
+      expect(spy).toHaveBeenCalled()
+    }, 400)
+    var spy2 = jasmine.createSpy('filter:debounce')
+    handler = filter(spy2, 450)
+    handler()
+    handler()
+    setTimeout(function () {
+      expect(spy2).not.toHaveBeenCalled()
+    }, 400)
+    setTimeout(function () {
+      expect(spy2.calls.count()).toBe(1)
+      done()
+    }, 500)
+  })
+
   it('filterBy', function () {
     var filter = filters.filterBy
     var arr = [
