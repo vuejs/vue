@@ -66,6 +66,8 @@ describe('Filters', function () {
     expect(filter(0.76)).toBe('$0.76')
     // sign arg
     expect(filter(2134, '@')).toBe('@2,134.00')
+    // no symbol
+    expect(filter(2134, '')).toBe('2,134.00')
     // falsy, infinity and 0
     expect(filter(0)).toBe('$0.00')
     expect(filter(false)).toBe('')

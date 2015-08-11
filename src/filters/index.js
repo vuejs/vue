@@ -61,7 +61,7 @@ var digitsRE = /(\d{3})(?=\d)/g
 exports.currency = function (value, currency) {
   value = parseFloat(value)
   if (!isFinite(value) || (!value && value !== 0)) return ''
-  currency = currency || '$'
+  currency = currency != null ? currency : '$'
   var stringified = Math.abs(value).toFixed(2)
   var _int = stringified.slice(0, -3)
   var i = _int.length % 3
