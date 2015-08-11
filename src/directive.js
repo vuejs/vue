@@ -198,10 +198,16 @@ p._teardown = function () {
  */
 
 p.set = function (value) {
+  /* istanbul ignore else */
   if (this.twoWay) {
     this._withLock(function () {
       this._watcher.set(value)
     })
+  } else if (process.env.NODE_ENV !== 'production') {
+    _.warn(
+      'Directive.set() can only be used inside twoWay' +
+      'directives.'
+    )
   }
 }
 

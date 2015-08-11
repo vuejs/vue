@@ -62,12 +62,8 @@ describe('Global API', function () {
     var Test = Vue.extend()
 
     it('directive / elementDirective / filter / transition', function () {
-      [
-        'directive',
-        'elementDirective',
-        'filter',
-        'transition'
-      ].forEach(function (type) {
+      var assets = ['directive', 'elementDirective', 'filter', 'transition']
+      assets.forEach(function (type) {
         var def = {}
         Test[type]('test', def)
         expect(Test.options[type + 's'].test).toBe(def)

@@ -111,8 +111,8 @@ describe('Async components', function () {
       vm.view = 'view-b'
       function step1 () {
         // called after A resolves, but A should have been
-        // invalidated so not cotrId should be set
-        expect(vm._directives[0].componentID).toBe(null)
+        // invalidated so no Ctor should be set
+        expect(vm._directives[0].Component).toBe(null)
       }
       function step2 () {
         // B should resolve successfully
@@ -145,8 +145,8 @@ describe('Async components', function () {
       vm.$destroy()
       function next () {
         // called after A resolves, but A should have been
-        // invalidated so not cotrId should be set
-        expect(dir.componentID).toBe(null)
+        // invalidated so no Ctor should be set
+        expect(dir.Component).toBe(null)
         done()
       }
     })

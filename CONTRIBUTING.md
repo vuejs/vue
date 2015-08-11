@@ -81,4 +81,4 @@ The default task (by simply running `grunt`) will do the following: lint -> buil
 
 The unit tests are written with Jasmine and run with Karma. The e2e tests are written for and run with CasperJS.
 
-Note that the unit tests will automatically be run in Chrome, Firefox and Safari. If you are not on a Mac, or don't have one of the browsers installed on your system, you can modify the [karma config in gruntfile.js](https://github.com/yyx990803/vue/blob/dev/gruntfile.js#L42) to only run Karma tests in browsers that are available on your system. Just make sure don’t check in the gruntfile changes for the commit.
+Note that the unit tests will automatically be run in Chrome, Firefox and Safari. If you are not on a Mac, or don't have one of the browsers installed on your system, you can modify the [karma config in gruntfile.js](https://github.com/yyx990803/vue/blob/dev/gruntfile.js#L38) to only run Karma tests in browsers that are available on your system. Just make sure don’t check in the gruntfile changes for the commit.

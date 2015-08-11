@@ -28,7 +28,7 @@ module.exports = {
       // cache object, with its constructor id as the key.
       this.keepAlive = this._checkParam('keep-alive') != null
       // wait for event before insertion
-      this.readyEvent = this._checkParam('wait-for')
+      this.waitForEvent = this._checkParam('wait-for')
       // check ref
       this.refID = this._checkParam(config.prefix + 'ref')
       if (this.keepAlive) {
@@ -41,7 +41,6 @@ module.exports = {
       }
       // component resolution related state
       this.pendingComponentCb =
-      this.componentID =
       this.Component = null
       // transition related state
       this.pendingRemovals = 0
@@ -66,15 +65,23 @@ module.exports = {
    */
 
   initStatic: function () {
-    var child = this.build()
+    // wait-for
     var anchor = this.anchor
+    var options
+    var waitFor = this.waitForEvent
+    if (waitFor) {
+      options = {
+        created: function () {
+          this.$once(waitFor, function () {
+            this.$before(anchor)
+          })
+        }
+      }
+    }
+    var child = this.build(options)
     this.setCurrent(child)
-    if (!this.readyEvent) {
+    if (!this.waitForEvent) {
       child.$before(anchor)
-    } else {
-      child.$once(this.readyEvent, function () {
-        child.$before(anchor)
-      })
     }
   },
 
@@ -93,32 +100,38 @@ module.exports = {
    * specified transition mode. Accepts a few additional
    * arguments specifically for vue-router.
    *
+   * The callback is called when the full transition is
+   * finished.
+   *
    * @param {String} value
-   * @param {Object} data
-   * @param {Function} afterBuild
-   * @param {Function} afterTransition
+   * @param {Function} [cb]
    */
 
-  setComponent: function (value, data, afterBuild, afterTransition) {
+  setComponent: function (value, cb) {
     this.invalidatePending()
     if (!value) {
       // just remove current
       this.unbuild(true)
-      this.remove(this.childVM, afterTransition)
+      this.remove(this.childVM, cb)
       this.unsetCurrent()
     } else {
       this.resolveComponent(value, _.bind(function () {
         this.unbuild(true)
-        var newComponent = this.build(data)
-        /* istanbul ignore if */
-        if (afterBuild) afterBuild(newComponent)
+        var options
         var self = this
-        if (this.readyEvent) {
-          newComponent.$once(this.readyEvent, function () {
-            self.transition(newComponent, afterTransition)
-          })
-        } else {
-          this.transition(newComponent, afterTransition)
+        var waitFor = this.waitForEvent
+        if (waitFor) {
+          options = {
+            created: function () {
+              this.$once(waitFor, function () {
+                self.transition(this, cb)
+              })
+            }
+          }
+        }
+        var newComponent = this.build(options)
+        if (!waitFor) {
+          this.transition(newComponent, cb)
         }
       }, this))
     }
@@ -131,9 +144,8 @@ module.exports = {
 
   resolveComponent: function (id, cb) {
     var self = this
-    this.pendingComponentCb = _.cancellable(function (component) {
-      self.componentID = id
-      self.Component = component
+    this.pendingComponentCb = _.cancellable(function (Component) {
+      self.Component = Component
       cb()
     })
     this.vm._resolveComponent(id, this.pendingComponentCb)
@@ -157,23 +169,21 @@ module.exports = {
    * If keep alive and has cached instance, insert that
    * instance; otherwise build a new one and cache it.
    *
-   * @param {Object} [data]
+   * @param {Object} [extraOptions]
    * @return {Vue} - the created instance
    */
 
-  build: function (data) {
+  build: function (extraOptions) {
     if (this.keepAlive) {
-      var cached = this.cache[this.componentID]
+      var cached = this.cache[this.Component.cid]
       if (cached) {
         return cached
       }
     }
     if (this.Component) {
-      var parent = this._host || this.vm
-      var el = templateParser.clone(this.el)
-      var child = parent.$addChild({
-        el: el,
-        data: data,
+      // default options
+      var options = {
+        el: templateParser.clone(this.el),
         template: this.template,
         // if no inline-template, then the compiled
         // linker can be cached for better performance.
@@ -181,9 +191,15 @@ module.exports = {
         _asComponent: true,
         _isRouterView: this._isRouterView,
         _context: this.vm
-      }, this.Component)
+      }
+      // extra options
+      if (extraOptions) {
+        _.extend(options, extraOptions)
+      }
+      var parent = this._host || this.vm
+      var child = parent.$addChild(options, this.Component)
       if (this.keepAlive) {
-        this.cache[this.componentID] = child
+        this.cache[this.Component.cid] = child
       }
       return child
     }

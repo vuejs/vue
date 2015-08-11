@@ -84,7 +84,12 @@ module.exports = function (grunt) {
   grunt.registerTask('cover', ['karma:coverage'])
   grunt.registerTask('test', ['unit', 'cover', 'casper'])
   grunt.registerTask('sauce', ['karma:sauce1', 'karma:sauce2', 'karma:sauce3'])
-  grunt.registerTask('ci', ['eslint', 'cover', 'codecov', 'build', 'casper', 'sauce'])
   grunt.registerTask('default', ['eslint', 'build', 'test'])
 
+  // CI
+  if (process.env.CI_PULL_REQUEST) {
+    grunt.registerTask('ci', ['eslint', 'cover', 'build', 'casper'])
+  } else {
+    grunt.registerTask('ci', ['eslint', 'cover', 'codecov', 'build', 'casper', 'sauce'])
+  }
 }

@@ -36,7 +36,7 @@ exports._initProps = function () {
   }
   // make sure to convert string selectors into element now
   el = options.el = _.query(el)
-  this._propsUnlinkFn = el && props
+  this._propsUnlinkFn = el && el.nodeType === 1 && props
     ? compiler.compileAndLinkProps(
         this, el, props
       )
