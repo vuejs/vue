@@ -480,17 +480,21 @@ if (_.inBrowser) {
         template: '<input v-model="test | uppercase | test">'
       })
       expect(el.firstChild.value).toBe('B')
+      trigger(el.firstChild, 'focus')
       el.firstChild.value = 'cc'
       trigger(el.firstChild, 'input')
       _.nextTick(function () {
-        expect(el.firstChild.value).toBe('CC')
+        expect(el.firstChild.value).toBe('cc')
         expect(vm.test).toBe('cc')
-        done()
+        trigger(el.firstChild, 'blur')
+        _.nextTick(function () {
+          expect(el.firstChild.value).toBe('CC')
+          expect(vm.test).toBe('cc')
+          done()
+        })
       })
     })
 
-    // when there's only write filter, should allow
-    // out of sync between the input field and actual data
     it('text with only write filter', function (done) {
       var vm = new Vue({
         el: el,
@@ -506,12 +510,18 @@ if (_.inBrowser) {
         },
         template: '<input v-model="test | test">'
       })
+      trigger(el.firstChild, 'focus')
       el.firstChild.value = 'cc'
       trigger(el.firstChild, 'input')
       _.nextTick(function () {
         expect(el.firstChild.value).toBe('cc')
         expect(vm.test).toBe('CC')
-        done()
+        trigger(el.firstChild, 'blur')
+        _.nextTick(function () {
+          expect(el.firstChild.value).toBe('CC')
+          expect(vm.test).toBe('CC')
+          done()
+        })
       })
     })
 
@@ -647,7 +657,7 @@ if (_.inBrowser) {
         data: {
           test: 'b'
         },
-        template: '<input v-model="test" lazy>'
+        template: '<input v-model="test">'
       })
       expect(el.firstChild.value).toBe('b')
       vm.test = 'a'
