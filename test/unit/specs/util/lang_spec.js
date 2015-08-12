@@ -138,4 +138,31 @@ describe('Util - Language Enhancement', function () {
       done()
     }, 200)
   })
+
+  it('throttle', function (done) {
+    var count = 0
+    var inc = function () {
+      count++
+    }
+    var fn = _.throttle(inc, 50, { trailing: false, leading: false})
+    fn()
+    setTimeout(fn, 10)
+    setTimeout(fn, 20)
+    setTimeout(fn, 70)
+    setTimeout(function () {
+      expect(count).toBe(0)
+    }, 30)
+    setTimeout(function () {
+      expect(count).toBe(1)
+      fn = _.throttle(inc, 50)
+      count = 0
+      fn()
+      expect(count).toBe(1)
+      setTimeout(fn, 20)
+      setTimeout(function () {
+        expect(count).toBe(2)
+        done()
+      }, 80)
+    }, 120)
+  })
 })
