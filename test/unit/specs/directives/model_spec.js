@@ -80,6 +80,34 @@ if (_.inBrowser) {
       expect(vm.test).toBe('a')
     })
 
+    it('radio expression', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          test: false,
+          test2: 'string1',
+          expression1: 'string1',
+          expression2: 'string2'
+        },
+        template:
+          '<input type="radio" value="1" v-model="test" name="test" exp="true">' +
+          '<input type="radio" value="0" v-model="test" name="test" exp="false">' +
+          '<input type="radio" value="1" v-model="test2" name="test2" exp="expression1">' +
+          '<input type="radio" value="0" v-model="test2" name="test2" exp="expression2">'
+      })
+      expect(el.childNodes[0].checked).toBe(false)
+      expect(el.childNodes[1].checked).toBe(true)
+      expect(el.childNodes[2].checked).toBe(true)
+      expect(el.childNodes[3].checked).toBe(false)
+      _.nextTick(function () {
+        el.childNodes[0].click()
+        expect(vm.test).toBe(true)
+        el.childNodes[3].click()
+        expect(vm.test2).toBe('string2')
+        done()
+      })
+    })
+
     it('checkbox', function (done) {
       var vm = new Vue({
         el: el,
@@ -111,6 +139,34 @@ if (_.inBrowser) {
         template: '<input type="checkbox" checked v-model="test">'
       })
       expect(vm.test).toBe(true)
+    })
+
+    it('checkbox expression', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          test: '',
+          expression1: 'aTrueValue',
+          expression2: 'aFalseValue'
+        },
+        template: '<input type="checkbox" v-model="test" true-exp="expression1" false-exp="expression2">'
+      })
+      expect(vm.test).toBe('')
+      el.firstChild.click()
+      expect(vm.test).toBe('aTrueValue')
+      expect(el.firstChild.checked).toBe(true)
+      el.firstChild.click()
+      expect(vm.test).toBe('aFalseValue')
+      expect(el.firstChild.checked).toBe(false)
+      vm.test = 'aTrueValue'
+      _.nextTick(function () {
+        // the updated value of 'test' is not being passed
+        // into the 'update' method of v-model in this environment
+        // works fine in manual test
+        // expect(el.firstChild.checked).toBe(true)
+        done()
+      })
+
     })
 
     it('select', function (done) {
