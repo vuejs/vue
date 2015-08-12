@@ -129,8 +129,9 @@ module.exports = {
             }
           }
         }
-        var newComponent = this.build(options)
-        if (!waitFor) {
+        var cached = this.getCached()
+        var newComponent = cached || this.build(options)
+        if (!waitFor || cached) {
           this.transition(newComponent, cb)
         }
       }, this))
@@ -174,11 +175,9 @@ module.exports = {
    */
 
   build: function (extraOptions) {
-    if (this.keepAlive) {
-      var cached = this.cache[this.Component.cid]
-      if (cached) {
-        return cached
-      }
+    var cached = this.getCached()
+    if (cached) {
+      return cached
     }
     if (this.Component) {
       // default options
@@ -203,6 +202,16 @@ module.exports = {
       }
       return child
     }
+  },
+
+  /**
+   * Try to get a cached instance of the current component.
+   *
+   * @return {Vue|undefined}
+   */
+
+  getCached: function () {
+    return this.keepAlive && this.cache[this.Component.cid]
   },
 
   /**
