@@ -312,13 +312,60 @@ if (_.inBrowser) {
         }
       })
       vm.$children[0].$emit('ok')
+      expect(el.textContent).toBe('AAA')
       vm.view = 'view-b'
       _.nextTick(function () {
         expect(el.textContent).toBe('AAA')
         // old vm is already removed, this is the new vm
+        expect(vm.$children.length).toBe(1)
         vm.$children[0].$emit('ok')
         expect(el.textContent).toBe('BBB')
-        done()
+        // ensure switching before ready event correctly
+        // cleans up the component being waited on.
+        // see #1152
+        vm.view = 'view-a'
+        _.nextTick(function () {
+          vm.view = 'view-b'
+          _.nextTick(function () {
+            expect(vm.$children.length).toBe(1)
+            expect(vm.$children[0].$el.textContent).toBe('BBB')
+            done()
+          })
+        })
+      })
+    })
+
+    // #1150
+    it('wait-for + keep-alive', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          view: 'view-a'
+        },
+        template: '<component is="{{view}}" wait-for="ok" keep-alive></component>',
+        components: {
+          'view-a': {
+            template: 'AAA'
+          },
+          'view-b': {
+            template: 'BBB'
+          }
+        }
+      })
+      vm.$children[0].$emit('ok')
+      expect(el.textContent).toBe('AAA')
+      vm.view = 'view-b'
+      _.nextTick(function () {
+        expect(vm.$children.length).toBe(2)
+        vm.$children[1].$emit('ok')
+        expect(el.textContent).toBe('BBB')
+        vm.view = 'view-a'
+        _.nextTick(function () {
+          // should switch without the need to emit
+          // because of keep-alive
+          expect(el.textContent).toBe('AAA')
+          done()
+        })
       })
     })
 

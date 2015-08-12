@@ -117,6 +117,10 @@ module.exports = {
     } else {
       this.resolveComponent(value, _.bind(function () {
         this.unbuild(true)
+        if (this.waitingFor) {
+          this.waitingFor.$destroy()
+          this.waitingFor = null
+        }
         var options
         var self = this
         var waitFor = this.waitForEvent
@@ -124,15 +128,18 @@ module.exports = {
           options = {
             created: function () {
               this.$once(waitFor, function () {
+                self.waitingFor = null
                 self.transition(this, cb)
               })
             }
           }
         }
         var cached = this.getCached()
-        var newComponent = cached || this.build(options)
+        var newComponent = this.build(options)
         if (!waitFor || cached) {
           this.transition(newComponent, cb)
+        } else {
+          this.waitingFor = newComponent
         }
       }, this))
     }
@@ -273,7 +280,6 @@ module.exports = {
   transition: function (target, cb) {
     var self = this
     var current = this.childVM
-    this.unsetCurrent()
     this.setCurrent(target)
     switch (self.transMode) {
       case 'in-out':
@@ -297,6 +303,7 @@ module.exports = {
    */
 
   setCurrent: function (child) {
+    this.unsetCurrent()
     this.childVM = child
     var refID = child._refID || this.refID
     if (refID) {
