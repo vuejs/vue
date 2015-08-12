@@ -1,6 +1,11 @@
 // xlink
 var xlinkNS = 'http://www.w3.org/1999/xlink'
 var xlinkRE = /^xlink:/
+var inputProps = {
+  value: 1,
+  checked: 1,
+  selected: 1
+}
 
 module.exports = {
 
@@ -35,12 +40,12 @@ module.exports = {
   },
 
   setAttr: function (attr, value) {
-    if (attr === 'value' && attr in this.el) {
+    if (inputProps[attr] && attr in this.el) {
       if (!this.valueRemoved) {
         this.el.removeAttribute(attr)
         this.valueRemoved = true
       }
-      this.el.value = value
+      this.el[attr] = value
     } else if (value != null && value !== false) {
       if (xlinkRE.test(attr)) {
         this.el.setAttributeNS(xlinkNS, attr, value)
