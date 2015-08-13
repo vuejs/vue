@@ -8,7 +8,7 @@ Vue.js is a library for building interactive web interfaces. It provides data-re
 
 - Dead simple, non-obtrusive reactivity using plain JavaScript objects.
 - Component-oriented development style
-- Lean and extendable core
+- Lean and extensible core
 - Flexible transition effect system
 - [Fast](http://vuejs.github.io/js-repaint-perfs/vue/)!
 
