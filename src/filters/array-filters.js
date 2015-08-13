@@ -9,20 +9,27 @@ var Path = require('../parsers/path')
  * @param {String} dataKey
  */
 
-exports.filterBy = function (arr, search, delimiter, dataKey) {
-  // allow optional `in` delimiter
-  // because why not
-  if (delimiter && delimiter !== 'in') {
-    dataKey = delimiter
-  }
+exports.filterBy = function (arr, search, delimiter /* ...dataKeys */) {
   if (search == null) {
     return arr
   }
+  if (typeof search === 'function') {
+    return arr.filter(search)
+  }
   // cast to lowercase string
   search = ('' + search).toLowerCase()
+  // allow optional `in` delimiter
+  // because why not
+  var n = delimiter === 'in' ? 3 : 2
+  // extract and flatten keys
+  var keys = _.toArray(arguments, n).reduce(function (prev, cur) {
+    return prev.concat(cur)
+  }, [])
   return arr.filter(function (item) {
-    return dataKey
-      ? contains(Path.get(item, dataKey), search)
+    return keys.length
+      ? keys.some(function (key) {
+          return contains(Path.get(item, key), search)
+        })
       : contains(item, search)
   })
 }
