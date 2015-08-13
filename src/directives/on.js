@@ -15,7 +15,7 @@ module.exports = {
       this.iframeBind = function () {
         _.on(self.el.contentWindow, self.arg, self.handler)
       }
-      _.on(this.el, 'load', this.iframeBind)
+      this.on('load', this.iframeBind)
     }
   },
 
@@ -55,6 +55,5 @@ module.exports = {
 
   unbind: function () {
     this.reset()
-    _.off(this.el, 'load', this.iframeBind)
   }
 }

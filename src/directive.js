@@ -37,6 +37,7 @@ function Directive (name, el, vm, descriptor, def, host) {
   this._host = host
   this._locked = false
   this._bound = false
+  this._listeners = null
   // init
   this._bind(def)
 }
@@ -172,23 +173,6 @@ p._checkParam = function (name) {
 }
 
 /**
- * Teardown the watcher and call unbind.
- */
-
-p._teardown = function () {
-  if (this._bound) {
-    this._bound = false
-    if (this.unbind) {
-      this.unbind()
-    }
-    if (this._watcher) {
-      this._watcher.teardown()
-    }
-    this.vm = this.el = this._watcher = null
-  }
-}
-
-/**
  * Set the corresponding value with the setter.
  * This should only be used in two-way directives
  * e.g. v-model.
@@ -225,6 +209,45 @@ p._withLock = function (fn) {
   _.nextTick(function () {
     self._locked = false
   })
+}
+
+/**
+ * Convenience method that attaches a DOM event listener
+ * to the directive element and autometically tears it down
+ * during unbind.
+ *
+ * @param {String} event
+ * @param {Function} handler
+ */
+
+p.on = function (event, handler) {
+  _.on(this.el, event, handler)
+  ;(this._listeners || (this._listeners = []))
+    .push([event, handler])
+}
+
+/**
+ * Teardown the watcher and call unbind.
+ */
+
+p._teardown = function () {
+  if (this._bound) {
+    this._bound = false
+    if (this.unbind) {
+      this.unbind()
+    }
+    if (this._watcher) {
+      this._watcher.teardown()
+    }
+    var listeners = this._listeners
+    if (listeners) {
+      for (var i = 0; i < listeners.length; i++) {
+        _.off(this.el, listeners[i][0], listeners[i][1])
+      }
+    }
+    this.vm = this.el =
+    this._watcher = this._listeners = null
+  }
 }
 
 module.exports = Directive

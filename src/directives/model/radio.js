@@ -7,7 +7,8 @@ module.exports = {
     var el = this.el
     var number = this._checkParam('number') != null
     var expression = this._checkParam('exp')
-    function getValue () {
+
+    this.getValue = function () {
       var val = el.value
       if (number) {
         val = _.toNumber(val)
@@ -16,23 +17,19 @@ module.exports = {
       }
       return val
     }
-    this._getValue = getValue
-    this.listener = function () {
-      self.set(getValue())
-    }
-    _.on(el, 'change', this.listener)
+
+    this.on('change', function () {
+      self.set(self.getValue())
+    })
+
     if (el.checked) {
-      this._initValue = getValue()
+      this._initValue = this.getValue()
     }
   },
 
   update: function (value) {
     /* eslint-disable eqeqeq */
-    this.el.checked = value == this._getValue()
+    this.el.checked = value == this.getValue()
     /* eslint-enable eqeqeq */
-  },
-
-  unbind: function () {
-    _.off(this.el, 'change', this.listener)
   }
 }

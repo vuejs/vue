@@ -64,7 +64,7 @@ if (_.inBrowser) {
         expect(el.childNodes[0].checked).toBe(true)
         expect(el.childNodes[1].checked).toBe(false)
         expect(vm.test).toBe(1)
-        vm._directives[1].unbind()
+        vm._directives[1]._teardown()
         el.childNodes[1].click()
         expect(vm.test).toBe(1)
         done()
@@ -124,7 +124,7 @@ if (_.inBrowser) {
         el.firstChild.click()
         expect(el.firstChild.checked).toBe(true)
         expect(vm.test).toBe(true)
-        vm._directives[0].unbind()
+        vm._directives[0]._teardown()
         el.firstChild.click()
         expect(el.firstChild.checked).toBe(false)
         expect(vm.test).toBe(true)
@@ -471,7 +471,7 @@ if (_.inBrowser) {
         el.firstChild.value = 'c'
         trigger(el.firstChild, 'input')
         expect(vm.test).toBe('c')
-        vm._directives[0].unbind()
+        vm._directives[0]._teardown()
         el.firstChild.value = 'd'
         trigger(el.firstChild, 'input')
         expect(vm.test).toBe('c')
@@ -614,7 +614,7 @@ if (_.inBrowser) {
         })
         expect(vm.test).toBe('a')
         // teardown
-        vm._directives[0].unbind()
+        vm._directives[0]._teardown()
         input.value = 'bbb'
         trigger(input, 'keyup', function (e) {
           e.keyCode = 8
@@ -720,7 +720,7 @@ if (_.inBrowser) {
         el.firstChild.value = 'c'
         jQuery(el.firstChild).trigger('change')
         expect(vm.test).toBe('c')
-        vm._directives[0].unbind()
+        vm._directives[0]._teardown()
         el.firstChild.value = 'd'
         jQuery(el.firstChild).trigger('change')
         expect(vm.test).toBe('c')

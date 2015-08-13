@@ -24,33 +24,29 @@ module.exports = {
     // suggestions... (see Discussion/#162)
     var composing = false
     if (!_.isAndroid && !isRange) {
-      this.onComposeStart = function () {
+      this.on('compositionstart', function () {
         composing = true
-      }
-      this.onComposeEnd = function () {
+      })
+      this.on('compositionend', function () {
         composing = false
         // in IE11 the "compositionend" event fires AFTER
         // the "input" event, so the input handler is blocked
         // at the end... have to call it here.
         self.listener()
-      }
-      _.on(el, 'compositionstart', this.onComposeStart)
-      _.on(el, 'compositionend', this.onComposeEnd)
+      })
     }
 
     // prevent messing with the input when user is typing,
     // and force update on blur.
     this.focused = false
     if (!isRange) {
-      this.onFocus = function () {
+      this.on('focus', function () {
         self.focused = true
-      }
-      this.onBlur = function () {
+      })
+      this.on('blur', function () {
         self.focused = false
         self.listener()
-      }
-      _.on(el, 'focus', this.onFocus)
-      _.on(el, 'blur', this.onBlur)
+      })
     }
 
     // Now attach the main listener
@@ -63,7 +59,9 @@ module.exports = {
       // force update here, because the watcher may not
       // run when the value is the same.
       _.nextTick(function () {
-        self.update(self._watcher.value)
+        if (self._bound) {
+          self.update(self._watcher.value)
+        }
       })
     }
     if (debounce) {
@@ -87,24 +85,22 @@ module.exports = {
         jQuery(el).on('input', this.listener)
       }
     } else {
-      _.on(el, 'change', this.listener)
+      this.on('change', this.listener)
       if (!lazy) {
-        _.on(el, 'input', this.listener)
+        this.on('input', this.listener)
       }
     }
 
     // IE9 doesn't fire input event on backspace/del/cut
     if (!lazy && _.isIE9) {
-      this.onCut = function () {
+      this.on('cut', function () {
         _.nextTick(self.listener)
-      }
-      this.onDel = function (e) {
+      })
+      this.on('keyup', function (e) {
         if (e.keyCode === 46 || e.keyCode === 8) {
           self.listener()
         }
-      }
-      _.on(el, 'cut', this.onCut)
-      _.on(el, 'keyup', this.onDel)
+      })
     }
 
     // set initial value if present
@@ -129,21 +125,6 @@ module.exports = {
     if (this.hasjQuery) {
       jQuery(el).off('change', this.listener)
       jQuery(el).off('input', this.listener)
-    } else {
-      _.off(el, 'change', this.listener)
-      _.off(el, 'input', this.listener)
-    }
-    if (this.onComposeStart) {
-      _.off(el, 'compositionstart', this.onComposeStart)
-      _.off(el, 'compositionend', this.onComposeEnd)
-    }
-    if (this.onCut) {
-      _.off(el, 'cut', this.onCut)
-      _.off(el, 'keyup', this.onDel)
-    }
-    if (this.onFocus) {
-      _.off(el, 'focus', this.onFocus)
-      _.off(el, 'blur', this.onBlur)
     }
   }
 }

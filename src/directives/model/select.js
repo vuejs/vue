@@ -20,7 +20,7 @@ module.exports = {
     }
     this.number = this._checkParam('number') != null
     this.multiple = el.hasAttribute('multiple')
-    this.listener = function () {
+    this.on('change', function () {
       var value = self.multiple
         ? getMultiValue(el)
         : el.value
@@ -30,8 +30,7 @@ module.exports = {
           : _.toNumber(value)
         : value
       self.set(value)
-    }
-    _.on(el, 'change', this.listener)
+    })
     checkInitialValue.call(this)
     // All major browsers except Firefox resets
     // selectedIndex with value -1 to 0 when the element
@@ -64,13 +63,11 @@ module.exports = {
   },
 
   unbind: function () {
-    _.off(this.el, 'change', this.listener)
     this.vm.$off('hook:attached', this.forceUpdate)
     if (this.optionWatcher) {
       this.optionWatcher.teardown()
     }
   }
-
 }
 
 /**
