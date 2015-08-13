@@ -7,12 +7,14 @@ module.exports = {
   bind: function () {
     var self = this
     var el = this.el
-    // update DOM using latest value.
+
+    // method to force update DOM using latest value.
     this.forceUpdate = function () {
       if (self._watcher) {
         self.update(self._watcher.get())
       }
     }
+
     // check options param
     var optionsParam = this._checkParam('options')
     if (optionsParam) {
@@ -20,6 +22,8 @@ module.exports = {
     }
     this.number = this._checkParam('number') != null
     this.multiple = el.hasAttribute('multiple')
+
+    // attach listener
     this.on('change', function () {
       var value = self.multiple
         ? getMultiValue(el)
@@ -31,7 +35,10 @@ module.exports = {
         : value
       self.set(value)
     })
+
+    // check initial value (inline selected attribute)
     checkInitialValue.call(this)
+
     // All major browsers except Firefox resets
     // selectedIndex with value -1 to 0 when the element
     // is appended to a new parent, therefore we have to
@@ -42,7 +49,7 @@ module.exports = {
   update: function (value) {
     var el = this.el
     el.selectedIndex = -1
-    if (!value && value !== 0) {
+    if (value == null) {
       if (this.defaultOption) {
         this.defaultOption.selected = true
       }
