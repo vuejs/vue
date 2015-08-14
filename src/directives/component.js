@@ -117,10 +117,6 @@ module.exports = {
     } else {
       this.resolveComponent(value, _.bind(function () {
         this.unbuild(true)
-        if (this.waitingFor) {
-          this.waitingFor.$destroy()
-          this.waitingFor = null
-        }
         var options
         var self = this
         var waitFor = this.waitForEvent
@@ -229,6 +225,10 @@ module.exports = {
    */
 
   unbuild: function (defer) {
+    if (this.waitingFor) {
+      this.waitingFor.$destroy()
+      this.waitingFor = null
+    }
     var child = this.childVM
     if (!child || this.keepAlive) {
       return
