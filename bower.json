@@ -7,10 +7,13 @@
   "ignore": [
     ".*",
     "examples",
+    "build",
+    "perf",
     "test",
     "grunt",
     "gruntfile.js",
     "*.json",
-    "*.md"
+    "*.md",
+    "*.yml"
   ]
 }
