@@ -8,6 +8,12 @@ if (process.env.NODE_ENV !== 'production') {
   var hasConsole = typeof console !== 'undefined'
 
   /**
+   * Load deprecation warning functions
+   */
+
+  exports.deprecations = require('../deprecations')
+
+  /**
    * Log a message.
    *
    * @param {String} msg
@@ -40,23 +46,6 @@ if (process.env.NODE_ENV !== 'production') {
    */
 
   exports.assertAsset = function (val, type, id) {
-    /* istanbul ignore if */
-    if (type === 'directive') {
-      if (id === 'with') {
-        exports.warn(
-          'v-with has been deprecated in ^0.12.0. ' +
-          'Use props instead.'
-        )
-        return
-      }
-      if (id === 'events') {
-        exports.warn(
-          'v-events has been deprecated in ^0.12.0. ' +
-          'Pass down methods as callback props instead.'
-        )
-        return
-      }
-    }
     if (!val) {
       exports.warn('Failed to resolve ' + type + ': ' + id)
     }

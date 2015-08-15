@@ -29,6 +29,13 @@ module.exports = {
       this.keepAlive = this._checkParam('keep-alive') != null
       // wait for event before insertion
       this.waitForEvent = this._checkParam('wait-for')
+
+      if (process.env.NODE_ENV !== 'production') {
+        if (this.waitForEvent) {
+          _.deprecation.WAIT_FOR()
+        }
+      }
+
       // check ref
       this.refID = this._checkParam(config.prefix + 'ref')
       if (this.keepAlive) {

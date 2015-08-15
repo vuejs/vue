@@ -44,6 +44,11 @@ module.exports = {
         compileDefaultContent()
       }
     } else {
+
+      if (process.env.NODE_ENV !== 'production') {
+        _.deprecation.CONTENT_SELECT()
+      }
+
       // select content
       var nodes = raw.querySelectorAll(selector)
       if (nodes.length) {
