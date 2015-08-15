@@ -18,6 +18,7 @@ var uid = 0
  *                 - {Boolean} twoWay
  *                 - {Boolean} deep
  *                 - {Boolean} user
+ *                 - {Boolean} sync
  *                 - {Boolean} lazy
  *                 - {Function} [preProcess]
  * @constructor
@@ -35,6 +36,7 @@ function Watcher (vm, expOrFn, cb, options) {
   this.deep = !!options.deep
   this.user = !!options.user
   this.twoWay = !!options.twoWay
+  this.sync = !!options.sync
   this.lazy = !!options.lazy
   this.dirty = this.lazy
   this.filters = options.filters
@@ -183,7 +185,7 @@ p.afterGet = function () {
 p.update = function (shallow) {
   if (this.lazy) {
     this.dirty = true
-  } else if (!config.async) {
+  } else if (this.sync || !config.async) {
     this.run()
   } else {
     // if queued, only overwrite shallow with non-shallow,

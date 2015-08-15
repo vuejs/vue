@@ -25,7 +25,7 @@ module.exports = {
         if (_.assertProp(prop, val)) {
           child[childKey] = val
         }
-      }
+      }, { sync: true }
     )
 
     // set the child initial value.
@@ -47,7 +47,7 @@ module.exports = {
           childKey,
           function (val) {
             parent.$set(parentKey, val)
-          }
+          }, { sync: true }
         )
       })
     }

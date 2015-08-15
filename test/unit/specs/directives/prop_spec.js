@@ -29,9 +29,9 @@ if (_.inBrowser) {
       _.nextTick(function () {
         expect(el.innerHTML).toBe('<test>BB</test>')
         vm.$.child.b = 'BBB'
+        expect(vm.b).toBe('BB')
         _.nextTick(function () {
           expect(el.innerHTML).toBe('<test>BBB</test>')
-          expect(vm.b).toBe('BB')
           done()
         })
       })
