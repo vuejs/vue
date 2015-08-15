@@ -14,6 +14,9 @@ _.define(
   objProto,
   '$add',
   function $add (key, val) {
+    if (process.env.NODE_ENV !== 'production') {
+      _.deprecation.ADD()
+    }
     if (this.hasOwnProperty(key)) return
     var ob = this.__ob__
     if (!ob || _.isReserved(key)) {
