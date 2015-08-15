@@ -344,6 +344,13 @@ exports.resolveAsset = function resolve (options, type, id) {
   var pascalizedId = camelizedId.charAt(0).toUpperCase() + camelizedId.slice(1)
   var assets = options[type]
   var asset = assets[id] || assets[camelizedId] || assets[pascalizedId]
+
+  if (process.env.NODE_ENV !== 'production') {
+    if (!asset && !config.strict) {
+      _.deprecation.STRICT_MODE()
+    }
+  }
+
   while (
     !asset &&
     options._parent &&
