@@ -25,6 +25,10 @@ var uid = 0
  */
 
 function Watcher (vm, expOrFn, cb, options) {
+  // mix in options
+  if (options) {
+    _.extend(this, options)
+  }
   var isFn = typeof expOrFn === 'function'
   this.vm = vm
   vm._watchers.push(this)
@@ -32,23 +36,16 @@ function Watcher (vm, expOrFn, cb, options) {
   this.cb = cb
   this.id = ++uid // uid for batching
   this.active = true
-  options = options || {}
-  this.deep = !!options.deep
-  this.user = !!options.user
-  this.twoWay = !!options.twoWay
-  this.sync = !!options.sync
-  this.lazy = !!options.lazy
-  this.dirty = this.lazy
-  this.filters = options.filters
-  this.preProcess = options.preProcess
+  this.dirty = this.lazy // for lazy watchers
   this.deps = []
   this.newDeps = null
+  this.prevError = null // for async error stacks
   // parse expression for getter/setter
   if (isFn) {
     this.getter = expOrFn
     this.setter = undefined
   } else {
-    var res = expParser.parse(expOrFn, options.twoWay)
+    var res = expParser.parse(expOrFn, this.twoWay)
     this.getter = res.get
     this.setter = res.set
   }
@@ -196,6 +193,11 @@ p.update = function (shallow) {
         : false
       : !!shallow
     this.queued = true
+    // record before-push error stack in debug mode
+    /* istanbul ignore if */
+    if (process.env.NODE_ENV !== 'production' && config.debug) {
+      this.prevError = new Error('[vue] async stack trace')
+    }
     batcher.push(this)
   }
 }
@@ -216,9 +218,28 @@ p.run = function () {
       // non-shallow update (caused by a vm digest).
       ((_.isArray(value) || this.deep) && !this.shallow)
     ) {
+      // set new value
       var oldValue = this.value
       this.value = value
-      this.cb(value, oldValue)
+      // in debug + async mode, when a watcher callbacks
+      // throws, we also throw the saved before-push error
+      // so the full cross-tick stack trace is available.
+      var prevError = this.prevError
+      /* istanbul ignore if */
+      if (process.env.NODE_ENV !== 'production' &&
+          config.debug && prevError) {
+        this.prevError = null
+        try {
+          this.cb.call(this.vm, value, oldValue)
+        } catch (e) {
+          _.nextTick(function () {
+            throw prevError
+          }, 0)
+          throw e
+        }
+      } else {
+        this.cb.call(this.vm, value, oldValue)
+      }
     }
     this.queued = this.shallow = false
   }

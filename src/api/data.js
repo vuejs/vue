@@ -73,15 +73,12 @@ exports.$delete = function (key) {
 
 exports.$watch = function (exp, cb, options) {
   var vm = this
-  var wrappedCb = function (val, oldVal) {
-    cb.call(vm, val, oldVal)
-  }
-  var watcher = new Watcher(vm, exp, wrappedCb, {
+  var watcher = new Watcher(vm, exp, cb, {
     deep: options && options.deep,
     user: !options || options.user !== false
   })
   if (options && options.immediate) {
-    wrappedCb(watcher.value)
+    cb.call(vm, watcher.value)
   }
   return function unwatchFn () {
     watcher.teardown()

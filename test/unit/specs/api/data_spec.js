@@ -92,7 +92,7 @@ describe('Data API', function () {
     var unwatch = vm.$watch('a + b.c', spy, {
       immediate: true
     })
-    expect(spy).toHaveBeenCalledWith(3, undefined)
+    expect(spy).toHaveBeenCalledWith(3)
     vm.a = 2
     nextTick(function () {
       expect(spy).toHaveBeenCalledWith(4, 3)
@@ -112,7 +112,7 @@ describe('Data API', function () {
     var unwatch = vm.$watch(function () {
       return this.a + this.b.c
     }, spy, { immediate: true })
-    expect(spy).toHaveBeenCalledWith(3, undefined)
+    expect(spy).toHaveBeenCalledWith(3)
     vm.a = 2
     nextTick(function () {
       expect(spy).toHaveBeenCalledWith(4, 3)
