@@ -142,7 +142,7 @@ module.exports = {
     }, this))
   },
 
-    /**
+  /**
    * Resolve a dynamic component to use for an instance.
    * The tricky part here is that there could be dynamic
    * components depending on instance data.
