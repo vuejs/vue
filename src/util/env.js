@@ -50,7 +50,7 @@ exports.nextTick = (function () {
   var callbacks = []
   var pending = false
   var timerFunc
-  function handle () {
+  function nextTickHandler () {
     pending = false
     var copies = callbacks.slice(0)
     callbacks = []
@@ -61,7 +61,7 @@ exports.nextTick = (function () {
   /* istanbul ignore if */
   if (typeof MutationObserver !== 'undefined') {
     var counter = 1
-    var observer = new MutationObserver(handle)
+    var observer = new MutationObserver(nextTickHandler)
     var textNode = document.createTextNode(counter)
     observer.observe(textNode, {
       characterData: true
@@ -80,6 +80,6 @@ exports.nextTick = (function () {
     callbacks.push(func)
     if (pending) return
     pending = true
-    timerFunc(handle, 0)
+    timerFunc(nextTickHandler, 0)
   }
 })()

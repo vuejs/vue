@@ -42,8 +42,6 @@ function Directive (name, el, vm, descriptor, def, host) {
   this._bind(def)
 }
 
-var p = Directive.prototype
-
 /**
  * Initialize the directive, mixin definition properties,
  * setup the watcher, call definition bind() and update()
@@ -52,7 +50,7 @@ var p = Directive.prototype
  * @param {Object} def
  */
 
-p._bind = function (def) {
+Directive.prototype._bind = function (def) {
   if (
     (this.name !== 'cloak' || this.vm._isCompiled) &&
     this.el && this.el.removeAttribute
@@ -113,7 +111,7 @@ p._bind = function (def) {
  * e.g. v-component="{{currentView}}"
  */
 
-p._checkDynamicLiteral = function () {
+Directive.prototype._checkDynamicLiteral = function () {
   var expression = this.expression
   if (expression && this.isLiteral) {
     var tokens = textParser.parse(expression)
@@ -137,7 +135,7 @@ p._checkDynamicLiteral = function () {
  * @return {Boolean}
  */
 
-p._checkStatement = function () {
+Directive.prototype._checkStatement = function () {
   var expression = this.expression
   if (
     expression && this.acceptStatement &&
@@ -163,7 +161,7 @@ p._checkStatement = function () {
  * @return {String}
  */
 
-p._checkParam = function (name) {
+Directive.prototype._checkParam = function (name) {
   var param = this.el.getAttribute(name)
   if (param !== null) {
     this.el.removeAttribute(name)
@@ -181,7 +179,7 @@ p._checkParam = function (name) {
  * @public
  */
 
-p.set = function (value) {
+Directive.prototype.set = function (value) {
   /* istanbul ignore else */
   if (this.twoWay) {
     this._withLock(function () {
@@ -202,7 +200,7 @@ p.set = function (value) {
  * @param {Function} fn
  */
 
-p._withLock = function (fn) {
+Directive.prototype._withLock = function (fn) {
   var self = this
   self._locked = true
   fn.call(self)
@@ -220,7 +218,7 @@ p._withLock = function (fn) {
  * @param {Function} handler
  */
 
-p.on = function (event, handler) {
+Directive.prototype.on = function (event, handler) {
   _.on(this.el, event, handler)
   ;(this._listeners || (this._listeners = []))
     .push([event, handler])
@@ -230,7 +228,7 @@ p.on = function (event, handler) {
  * Teardown the watcher and call unbind.
  */
 
-p._teardown = function () {
+Directive.prototype._teardown = function () {
   if (this._bound) {
     this._bound = false
     if (this.unbind) {

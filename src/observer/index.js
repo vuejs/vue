@@ -66,8 +66,6 @@ Observer.create = function (value, vm) {
 
 // Instance methods
 
-var p = Observer.prototype
-
 /**
  * Walk through each property and convert them into
  * getter/setters. This method should only be called when
@@ -77,7 +75,7 @@ var p = Observer.prototype
  * @param {Object} obj
  */
 
-p.walk = function (obj) {
+Observer.prototype.walk = function (obj) {
   var keys = Object.keys(obj)
   var i = keys.length
   var key, prefix
@@ -98,7 +96,7 @@ p.walk = function (obj) {
  * @return {Dep|undefined}
  */
 
-p.observe = function (val) {
+Observer.prototype.observe = function (val) {
   return Observer.create(val)
 }
 
@@ -108,7 +106,7 @@ p.observe = function (val) {
  * @param {Array} items
  */
 
-p.observeArray = function (items) {
+Observer.prototype.observeArray = function (items) {
   var i = items.length
   while (i--) {
     this.observe(items[i])
@@ -123,7 +121,7 @@ p.observeArray = function (items) {
  * @param {*} val
  */
 
-p.convert = function (key, val) {
+Observer.prototype.convert = function (key, val) {
   var ob = this
   var childOb = ob.observe(val)
   var dep = new Dep()
@@ -163,7 +161,7 @@ p.convert = function (key, val) {
  * @param {Vue} vm
  */
 
-p.addVm = function (vm) {
+Observer.prototype.addVm = function (vm) {
   (this.vms || (this.vms = [])).push(vm)
 }
 
@@ -174,7 +172,7 @@ p.addVm = function (vm) {
  * @param {Vue} vm
  */
 
-p.removeVm = function (vm) {
+Observer.prototype.removeVm = function (vm) {
   this.vms.$remove(vm)
 }
 

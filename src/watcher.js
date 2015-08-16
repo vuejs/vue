@@ -57,15 +57,13 @@ function Watcher (vm, expOrFn, cb, options) {
   this.queued = this.shallow = false
 }
 
-var p = Watcher.prototype
-
 /**
  * Add a dependency to this directive.
  *
  * @param {Dep} dep
  */
 
-p.addDep = function (dep) {
+Watcher.prototype.addDep = function (dep) {
   var newDeps = this.newDeps
   var old = this.deps
   if (_.indexOf(newDeps, dep) < 0) {
@@ -83,7 +81,7 @@ p.addDep = function (dep) {
  * Evaluate the getter, and re-collect dependencies.
  */
 
-p.get = function () {
+Watcher.prototype.get = function () {
   this.beforeGet()
   var vm = this.vm
   var value
@@ -125,7 +123,7 @@ p.get = function () {
  * @param {*} value
  */
 
-p.set = function (value) {
+Watcher.prototype.set = function (value) {
   var vm = this.vm
   if (this.filters) {
     value = vm._applyFilters(
@@ -150,7 +148,7 @@ p.set = function (value) {
  * Prepare for dependency collection.
  */
 
-p.beforeGet = function () {
+Watcher.prototype.beforeGet = function () {
   Dep.target = this
   this.newDeps = []
 }
@@ -159,7 +157,7 @@ p.beforeGet = function () {
  * Clean up for dependency collection.
  */
 
-p.afterGet = function () {
+Watcher.prototype.afterGet = function () {
   Dep.target = null
   var i = this.deps.length
   while (i--) {
@@ -179,7 +177,7 @@ p.afterGet = function () {
  * @param {Boolean} shallow
  */
 
-p.update = function (shallow) {
+Watcher.prototype.update = function (shallow) {
   if (this.lazy) {
     this.dirty = true
   } else if (this.sync || !config.async) {
@@ -207,7 +205,7 @@ p.update = function (shallow) {
  * Will be called by the batcher.
  */
 
-p.run = function () {
+Watcher.prototype.run = function () {
   if (this.active) {
     var value = this.get()
     if (
@@ -250,7 +248,7 @@ p.run = function () {
  * This only gets called for lazy watchers.
  */
 
-p.evaluate = function () {
+Watcher.prototype.evaluate = function () {
   // avoid overwriting another watcher that is being
   // collected.
   var current = Dep.target
@@ -263,7 +261,7 @@ p.evaluate = function () {
  * Depend on all deps collected by this watcher.
  */
 
-p.depend = function () {
+Watcher.prototype.depend = function () {
   var i = this.deps.length
   while (i--) {
     this.deps[i].depend()
@@ -274,7 +272,7 @@ p.depend = function () {
  * Remove self from all dependencies' subcriber list.
  */
 
-p.teardown = function () {
+Watcher.prototype.teardown = function () {
   if (this.active) {
     // remove self from vm's watcher list
     // we can skip this if the vm if being destroyed

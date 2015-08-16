@@ -18,7 +18,7 @@ var internalQueueDepleted = false
  * Reset the batcher's state.
  */
 
-function reset () {
+function resetBatcherState () {
   queue = []
   userQueue = []
   has = {}
@@ -30,11 +30,11 @@ function reset () {
  * Flush both queues and run the watchers.
  */
 
-function flush () {
-  run(queue)
+function flushBatcherQueue () {
+  runBatcherQueue(queue)
   internalQueueDepleted = true
-  run(userQueue)
-  reset()
+  runBatcherQueue(userQueue)
+  resetBatcherState()
 }
 
 /**
@@ -43,7 +43,7 @@ function flush () {
  * @param {Array} queue
  */
 
-function run (queue) {
+function runBatcherQueue (queue) {
   // do not cache length because more watchers might be pushed
   // as we run existing watchers
   for (var i = 0; i < queue.length; i++) {
@@ -92,7 +92,7 @@ exports.push = function (watcher) {
     // queue the flush
     if (!waiting) {
       waiting = true
-      _.nextTick(flush)
+      _.nextTick(flushBatcherQueue)
     }
   }
 }
