@@ -52,7 +52,7 @@ Vue.component('item', {
     },
     changeType: function () {
       if (!this.isFolder) {
-        this.model.$add('children', [])
+        this.model.$set('children', [])
         this.addChild()
         this.open = true
       }

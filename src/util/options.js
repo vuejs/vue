@@ -26,7 +26,7 @@ function mergeData (to, from) {
     toVal = to[key]
     fromVal = from[key]
     if (!to.hasOwnProperty(key)) {
-      to.$add(key, fromVal)
+      to.$set(key, fromVal)
     } else if (_.isObject(toVal) && _.isObject(fromVal)) {
       mergeData(toVal, fromVal)
     }
