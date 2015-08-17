@@ -24,7 +24,7 @@ if (process.env.NODE_ENV !== 'production') {
     },
 
     CONTENT_SELECT: function () {
-      warn('<content select="..."> will be deprecated in in 1.0.0. in favor of <content slot="...">.')
+      warn('<content select="..."> will be deprecated in in 1.0.0. in favor of <slot name="...">.')
     }
 
   }
