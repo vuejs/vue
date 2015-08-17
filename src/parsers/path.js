@@ -1,4 +1,5 @@
 var _ = require('../util')
+var add = require('../observer/object').add
 var Cache = require('../cache')
 var pathCache = new Cache(1000)
 var identRE = exports.identRE = /^[$_a-zA-Z]+[\w$]*$/
@@ -295,6 +296,22 @@ exports.get = function (obj, path) {
 }
 
 /**
+ * Warn against setting non-existent root path on a vm.
+ */
+
+var warnNonExistent
+if (process.env.NODE_ENV !== 'production') {
+  warnNonExistent = function (path) {
+    _.warn(
+      'You are setting a non-existent path "' + path.raw + '" ' +
+      'on a vm instance. Consider pre-initializing the property ' +
+      'with the "data" option for more reliable reactivity ' +
+      'and better performance.'
+    )
+  }
+}
+
+/**
  * Set on an object from a path
  *
  * @param {Object} obj
@@ -320,9 +337,11 @@ exports.set = function (obj, path, val) {
     if (i < l - 1) {
       obj = obj[key]
       if (!_.isObject(obj)) {
-        warnNonExistent(path)
         obj = {}
-        last.$add(key, obj)
+        if (process.env.NODE_ENV !== 'production' && last._isVue) {
+          warnNonExistent(path)
+        }
+        add(last, key, obj)
       }
     } else {
       if (_.isArray(obj)) {
@@ -330,19 +349,12 @@ exports.set = function (obj, path, val) {
       } else if (key in obj) {
         obj[key] = val
       } else {
-        warnNonExistent(path)
-        obj.$add(key, val)
+        if (process.env.NODE_ENV !== 'production' && obj._isVue) {
+          warnNonExistent(path)
+        }
+        add(obj, key, val)
       }
     }
   }
   return true
-}
-
-function warnNonExistent (path) {
-  process.env.NODE_ENV !== 'production' && _.warn(
-    'You are setting a non-existent path "' + path.raw + '" ' +
-    'on a vm instance. Consider pre-initializing the property ' +
-    'with the "data" option for more reliable reactivity ' +
-    'and better performance.'
-  )
 }
