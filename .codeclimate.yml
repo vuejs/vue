@@ -1,0 +1,15 @@
+engines:
+  eslint:
+    enabled: true
+
+ratings:
+  paths:
+  - src/**
+
+exclude_paths:
+  - build/**/*
+  - perf/**/*
+  - test/**/*
+  - examples/**/*
+  - dist/**/*
+  - gruntfile.js
