@@ -5,7 +5,8 @@
     "**/dist/**",
     "**/examples/**",
     "**/perf/**",
-    "gruntfile.js"
+    "gruntfile.js",
+    "**/test/unit/lib/**"
   ],
   "test": [
     "**/test/**"
