@@ -31,6 +31,7 @@
   "devDependencies": {
     "casperjs": "^1.1.0-beta3",
     "codecov.io": "^0.1.2",
+    "eslint": "^1.1.0",
     "grunt": "^0.4.5",
     "grunt-eslint": "^17.1.0",
     "grunt-karma": "^0.12.0",
