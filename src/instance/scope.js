@@ -264,8 +264,6 @@ exports._initMeta = function () {
 exports._defineMeta = function (key, value) {
   var dep = new Dep()
   Object.defineProperty(this, key, {
-    enumerable: true,
-    configurable: true,
     get: function metaGetter () {
       if (Dep.target) {
         dep.depend()
