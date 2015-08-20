@@ -317,6 +317,9 @@ describe('Util - Option resolveAsset', function () {
         },
         camelCasedComponent: {
           template: 'yo'
+        },
+        PascalCasedComponent: {
+          template: 'ho'
         }
       }
     })
@@ -325,6 +328,7 @@ describe('Util - Option resolveAsset', function () {
   it('resolves', function () {
     expect(resolveAsset(vm.$options, 'components', 'hyphenated-component')).toBeTruthy()
     expect(resolveAsset(vm.$options, 'components', 'camel-cased-component')).toBeTruthy()
+    expect(resolveAsset(vm.$options, 'components', 'pascal-cased-component')).toBeTruthy()
   })
 
 })
