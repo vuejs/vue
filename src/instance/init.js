@@ -1,4 +1,5 @@
 var mergeOptions = require('../util').mergeOptions
+var uid = 0
 
 /**
  * The main init sequence. This is called for every
@@ -24,6 +25,8 @@ exports._init = function (options) {
   this._watchers = []   // all watchers as an array
   this._directives = [] // all directives
   this._childCtors = {} // inherit:true constructors
+
+  this._uid = uid++
 
   // a flag to avoid this being observed
   this._isVue = true

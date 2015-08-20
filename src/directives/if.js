@@ -21,7 +21,11 @@ module.exports = {
         this.template.appendChild(templateParser.clone(el))
       }
       // compile the nested partial
-      var cacheId = (this.vm.constructor.cid || '') + el.outerHTML
+      var cacheId =
+        (this.vm.constructor.cid + '.' || '') +
+        // fix #1185: linker is host-sensitive
+        (this._host ? this._host._uid + '.' : '') +
+        el.outerHTML
       this.linker = cache.get(cacheId)
       if (!this.linker) {
         this.linker = compiler.compile(
