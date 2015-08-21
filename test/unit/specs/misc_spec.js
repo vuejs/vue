@@ -309,4 +309,27 @@ describe('Misc', function () {
     })
   })
 
+  it('resolveAsset for repeat instance inside content in strict mode', function () {
+    Vue.config.strict = true
+    var el = document.createElement('div')
+    el.innerHTML =
+      '<outer>' +
+        '<template v-repeat="item in items">' +
+          '<inner>{{item}}</inner>' +
+        '</template>' +
+      '</outer>'
+    new Vue({
+      el: el,
+      data: {
+        items: [1, 2, 3]
+      },
+      components: {
+        outer: { template: '<content></content>' },
+        inner: { template: '<content></content>' }
+      }
+    })
+    expect(el.textContent).toBe('123')
+    Vue.config.strict = false
+  })
+
 })
