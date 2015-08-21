@@ -155,6 +155,10 @@ describe('Instance Scope', function () {
 
   describe('computed', function () {
 
+    var spyE = jasmine.createSpy('computed e')
+    var spyF = jasmine.createSpy('cached computed f')
+    var spyCachedWatcher = jasmine.createSpy('cached computed watcher')
+
     var Test = Vue.extend({
       computed: {
         c: function () {
@@ -173,19 +177,41 @@ describe('Instance Scope', function () {
         // chained computed
         e: function () {
           return this.c + 'e'
+        },
+        // cached
+        f: {
+          cache: true,
+          get: function () {
+            spyF()
+            return this.ff
+          }
+        },
+        // chained cached
+        g: function () {
+          return this.f + 1
+        },
+        // another cached, for watcher test
+        h: {
+          cache: true,
+          get: function () {
+            return this.hh
+          }
         }
       }
     })
 
-    var spy = jasmine.createSpy()
     var vm = new Test({
       data: {
         a: 'a',
-        b: 'b'
+        b: 'b',
+        ff: 0,
+        hh: 0
+      },
+      watch: {
+        e: spyE,
+        h: spyCachedWatcher
       }
     })
-
-    vm.$watch('e', spy)
 
     it('get', function () {
       expect(vm.c).toBe('ab')
@@ -202,7 +228,7 @@ describe('Instance Scope', function () {
       expect(vm.d).toBe('cd')
       expect(vm.e).toBe('cde')
       Vue.nextTick(function () {
-        expect(spy).toHaveBeenCalledWith('cde', 'abe')
+        expect(spyE).toHaveBeenCalledWith('cde', 'abe')
         done()
       })
     })
@@ -225,13 +251,45 @@ describe('Instance Scope', function () {
       expect(child.d).toBe('ef')
       expect(vm.e).toBe('efe')
       Vue.nextTick(function () {
-        expect(spy).toHaveBeenCalledWith('efe', 'cde')
+        expect(spyE).toHaveBeenCalledWith('efe', 'cde')
+        done()
+      })
+    })
+
+    it('cached computed', function () {
+      expect(spyF).not.toHaveBeenCalled()
+      var f = vm.f
+      var g = vm.g
+      expect(spyF.calls.count()).toBe(1)
+      expect(f).toBe(0)
+      expect(g).toBe(1)
+      // get again
+      f = vm.f
+      g = vm.g
+      // should not be evaluated again
+      expect(spyF.calls.count()).toBe(1)
+      expect(f).toBe(0)
+      expect(g).toBe(1)
+      // update dep
+      vm.ff = 1
+      f = vm.f
+      g = vm.g
+      expect(spyF.calls.count()).toBe(2)
+      expect(f).toBe(1)
+      expect(g).toBe(2)
+    })
+
+    it('watching cached computed', function (done) {
+      expect(spyCachedWatcher).not.toHaveBeenCalled()
+      vm.hh = 2
+      Vue.nextTick(function () {
+        expect(spyCachedWatcher).toHaveBeenCalledWith(2, 0)
         done()
       })
     })
 
     it('same definition object bound to different instance', function () {
-      vm = new Test({
+      var vm = new Test({
         data: {
           a: 'A',
           b: 'B'

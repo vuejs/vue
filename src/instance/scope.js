@@ -195,11 +195,13 @@ exports._initComputed = function () {
         configurable: true
       }
       if (typeof userDef === 'function') {
-        def.get = makeComputedGetter(userDef, this)
+        def.get = _.bind(userDef, this)
         def.set = noop
       } else {
         def.get = userDef.get
-          ? makeComputedGetter(userDef.get, this)
+          ? userDef.cache
+            ? makeComputedGetter(userDef.get, this)
+            : _.bind(userDef.get, this)
           : noop
         def.set = userDef.set
           ? _.bind(userDef.set, this)
