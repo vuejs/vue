@@ -21,30 +21,32 @@ module.exports = {
       ? templateParser.parse(this.el, true)
       : this.el
     var linker = compiler.compile(template, vm.$options, true)
-
-    this.create = _.bind(function (data) {
+    var parentScope = this._scope || this.vm
+    var alias = this.arg
+    var host = this._host
+    this.create = function (data) {
       var el = templateParser.clone(template)
-      var scope = Object.create(this._scope || this.vm)
-      Object.defineProperty(scope, this.arg, {
+      var scope = Object.create(parentScope)
+      Object.defineProperty(scope, alias, {
         enumberable: true,
         configurable: true,
         value: data
       })
-      var unlink = linker(vm, el, this._host, scope)
+      var unlink = linker(vm, el, host, scope)
       var f = {
         el: el,
         unlink: unlink
       }
       return f
-    }, this)
+    }
   },
 
   update: function (list) {
     if (!list) debugger
     var anchor = this.end
-    this.frags = list.map(this.create)
-    this.frags.forEach(function (f) {
-      _.before(f.el, anchor)
+    var create = this.create
+    list.forEach(function (item) {
+      _.before(create(item).el, anchor)
     })
   }
 }
