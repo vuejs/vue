@@ -105,9 +105,9 @@ exports._initElement = function (el) {
  * @param {Vue|undefined} host - transclusion host component
  */
 
-exports._bindDir = function (name, node, desc, def, host) {
+exports._bindDir = function (name, node, desc, def, host, scope) {
   this._directives.push(
-    new Directive(name, node, this, desc, def, host)
+    new Directive(name, node, this, desc, def, host, scope)
   )
 }
 

@@ -84,10 +84,12 @@ Watcher.prototype.addDep = function (dep) {
 Watcher.prototype.get = function () {
   this.beforeGet()
   var vm = this.vm
+  var scope = this.scope || vm
   var value
   try {
-    value = this.getter.call(vm, vm)
+    value = this.getter.call(scope, scope)
   } catch (e) {
+    debugger
     if (
       process.env.NODE_ENV !== 'production' &&
       config.warnExpressionErrors
@@ -125,12 +127,13 @@ Watcher.prototype.get = function () {
 
 Watcher.prototype.set = function (value) {
   var vm = this.vm
+  var scope = this.scope || vm
   if (this.filters) {
     value = vm._applyFilters(
       value, this.value, this.filters, true)
   }
   try {
-    this.setter.call(vm, vm, value)
+    this.setter.call(scope, scope, value)
   } catch (e) {
     if (
       process.env.NODE_ENV !== 'production' &&
