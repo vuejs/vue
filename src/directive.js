@@ -22,7 +22,7 @@ var expParser = require('./parsers/expression')
  * @constructor
  */
 
-function Directive (name, el, vm, descriptor, def, host) {
+function Directive (name, el, vm, descriptor, def, host, scope) {
   // public
   this.name = name
   this.el = el
@@ -38,6 +38,7 @@ function Directive (name, el, vm, descriptor, def, host) {
   this._locked = false
   this._bound = false
   this._listeners = null
+  this._scope = scope
   // init
   this._bind(def)
 }
@@ -93,7 +94,8 @@ Directive.prototype._bind = function (def) {
         filters: this.filters,
         twoWay: this.twoWay,
         deep: this.deep,
-        preProcess: preProcess
+        preProcess: preProcess,
+        scope: this._scope
       }
     )
     if (this._initValue != null) {
