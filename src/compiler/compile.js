@@ -9,6 +9,7 @@ var componentDef = require('../directives/component')
 
 // terminal directives
 var terminalDirectives = [
+  'fast-repeat',
   'repeat',
   'if'
 ]
@@ -54,13 +55,13 @@ exports.compile = function (el, options, partial) {
    * @return {Function|undefined}
    */
 
-  return function compositeLinkFn (vm, el, host) {
+  return function compositeLinkFn (vm, el, host, scope) {
     // cache childNodes before linking parent, fix #657
     var childNodes = _.toArray(el.childNodes)
     // link
-    var dirs = linkAndCapture(function () {
-      if (nodeLinkFn) nodeLinkFn(vm, el, host)
-      if (childLinkFn) childLinkFn(vm, childNodes, host)
+    var dirs = linkAndCapture(function compositeLinkCapturer () {
+      if (nodeLinkFn) nodeLinkFn(vm, el, host, scope)
+      if (childLinkFn) childLinkFn(vm, childNodes, host, scope)
     }, vm)
     return makeUnlinkFn(vm, dirs)
   }
@@ -323,7 +324,7 @@ function processTextToken (token, options) {
  */
 
 function makeTextNodeLinkFn (tokens, frag) {
-  return function textNodeLinkFn (vm, el) {
+  return function textNodeLinkFn (vm, el, host, scope) {
     var fragClone = frag.cloneNode(true)
     var childNodes = _.toArray(fragClone.childNodes)
     var token, value, node
@@ -341,7 +342,7 @@ function makeTextNodeLinkFn (tokens, frag) {
           }
         } else {
           vm._bindDir(token.type, node,
-                      token.descriptor, token.def)
+                      token.descriptor, token.def, host, scope)
         }
       }
     }
@@ -384,7 +385,7 @@ function compileNodeList (nodeList, options) {
  */
 
 function makeChildLinkFn (linkFns) {
-  return function childLinkFn (vm, nodes, host) {
+  return function childLinkFn (vm, nodes, host, scope) {
     var node, nodeLinkFn, childrenLinkFn
     for (var i = 0, n = 0, l = linkFns.length; i < l; n++) {
       node = nodes[n]
@@ -393,10 +394,10 @@ function makeChildLinkFn (linkFns) {
       // cache childNodes before linking parent, fix #657
       var childNodes = _.toArray(node.childNodes)
       if (nodeLinkFn) {
-        nodeLinkFn(vm, node, host)
+        nodeLinkFn(vm, node, host, scope)
       }
       if (childrenLinkFn) {
-        childrenLinkFn(vm, childNodes, host)
+        childrenLinkFn(vm, childNodes, host, scope)
       }
     }
   }
@@ -432,10 +433,10 @@ function checkElementDirectives (el, options) {
 function checkComponent (el, options, hasAttrs) {
   var componentId = _.checkComponent(el, options, hasAttrs)
   if (componentId) {
-    var componentLinkFn = function (vm, el, host) {
+    var componentLinkFn = function (vm, el, host, scope) {
       vm._bindDir('component', el, {
         expression: componentId
-      }, componentDef, host)
+      }, componentDef, host, scope)
     }
     componentLinkFn.terminal = true
     return componentLinkFn
@@ -486,8 +487,8 @@ function makeTerminalNodeLinkFn (el, dirName, value, options, def) {
   // no need to call resolveAsset since terminal directives
   // are always internal
   def = def || options.directives[dirName]
-  var fn = function terminalNodeLinkFn (vm, el, host) {
-    vm._bindDir(dirName, el, descriptor, def, host)
+  var fn = function terminalNodeLinkFn (vm, el, host, scope) {
+    vm._bindDir(dirName, el, descriptor, def, host, scope)
   }
   fn.terminal = true
   return fn
@@ -544,7 +545,7 @@ function compileDirectives (attrs, options) {
  */
 
 function makeNodeLinkFn (directives) {
-  return function nodeLinkFn (vm, el, host) {
+  return function nodeLinkFn (vm, el, host, scope) {
     // reverse apply because it's sorted low to high
     var i = directives.length
     var dir, j, k
@@ -557,7 +558,7 @@ function makeNodeLinkFn (directives) {
         k = dir.descriptors.length
         for (j = 0; j < k; j++) {
           vm._bindDir(dir.name, el,
-            dir.descriptors[j], dir.def, host)
+            dir.descriptors[j], dir.def, host, scope)
         }
       }
     }
@@ -598,7 +599,7 @@ function collectAttrDirective (name, value, options) {
         ? function (vm, el) {
             el.setAttribute(name, vm.$interpolate(value))
           }
-        : function (vm, el) {
+        : function (vm, el, host, scope) {
             var exp = textParser.tokensToExp(tokens, vm)
             var desc = isClass
               ? dirParser.parse(exp)[0]
@@ -606,7 +607,7 @@ function collectAttrDirective (name, value, options) {
             if (isClass) {
               desc._rawClass = value
             }
-            vm._bindDir(dirName, el, desc, def)
+            vm._bindDir(dirName, el, desc, def, host, scope)
           }
     }
   }
