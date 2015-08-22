@@ -64,5 +64,5 @@ exports.$destroy = function (remove, deferCleanup) {
  */
 
 exports.$compile = function (el, host) {
-  return compiler.compile(el, this.$options, true, host)(this, el)
+  return compiler.compile(el, this.$options, true)(this, el, host)
 }

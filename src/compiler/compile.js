@@ -27,11 +27,10 @@ var terminalDirectives = [
  * @param {Element|DocumentFragment} el
  * @param {Object} options
  * @param {Boolean} partial
- * @param {Vue} [host] - host vm of transcluded content
  * @return {Function}
  */
 
-exports.compile = function (el, options, partial, host) {
+exports.compile = function (el, options, partial) {
   // link function for the node itself.
   var nodeLinkFn = partial || !options._asComponent
     ? compileNode(el, options)
@@ -51,10 +50,11 @@ exports.compile = function (el, options, partial, host) {
    *
    * @param {Vue} vm
    * @param {Element|DocumentFragment} el
+   * @param {Vue} [host] - host vm of transcluded content
    * @return {Function|undefined}
    */
 
-  return function compositeLinkFn (vm, el) {
+  return function compositeLinkFn (vm, el, host) {
     // cache childNodes before linking parent, fix #657
     var childNodes = _.toArray(el.childNodes)
     // link

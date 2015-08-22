@@ -21,18 +21,13 @@ module.exports = {
         this.template.appendChild(templateParser.clone(el))
       }
       // compile the nested partial
-      var cacheId =
-        (this.vm.constructor.cid + '.' || '') +
-        // fix #1185: linker is host-sensitive
-        (this._host ? this._host._uid + '.' : '') +
-        el.outerHTML
+      var cacheId = (this.vm.constructor.cid || '') + el.outerHTML
       this.linker = cache.get(cacheId)
       if (!this.linker) {
         this.linker = compiler.compile(
           this.template,
           this.vm.$options,
-          true, // partial
-          this._host // important
+          true // partial
         )
         cache.put(cacheId, this.linker)
       }
@@ -63,7 +58,7 @@ module.exports = {
 
   link: function (frag, linker) {
     var vm = this.vm
-    this.unlink = linker(vm, frag)
+    this.unlink = linker(vm, frag, this._host /* important */)
     transition.blockAppend(frag, this.end, vm)
     // call attached for all the child components created
     // during the compilation
