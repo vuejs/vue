@@ -16,6 +16,7 @@ exports.model = require('./model')
 
 // logic control directives
 exports.repeat = require('./repeat')
+exports['for'] = require('./for')
 exports['if'] = require('./if')
 
 // internal directives that should not be used directly
