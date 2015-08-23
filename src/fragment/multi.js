@@ -5,12 +5,18 @@ var _ = require('../util')
  *
  * @param {Node} node
  * @param {Function} unlink
+ * @param {Object} [scope]
+ * @param {String} [id] - v-for id
  */
 
-function MultiFragment (frag, unlink) {
-  this.start = _.createAnchor('fragment')
-  this.end = _.createAnchor('fragment')
+function MultiFragment (frag, unlink, scope, id) {
+  this.start = this.node = _.createAnchor('fragment-start')
+  this.end = _.createAnchor('fragment-end')
+  this.node.__vfrag__ = this
+  this.id = id
+  this.reused = false
   this.frag = frag
+  this.scope = scope
   this.unlink = unlink
 }
 
