@@ -9,8 +9,8 @@ module.exports = {
       this.arg = inMatch[1]
       this._watcherExp = inMatch[2]
     }
-    this.start = _.createAnchor('fast-repeat-start')
-    this.end = _.createAnchor('fast-repeat-end')
+    this.start = _.createAnchor('v-for-start')
+    this.end = _.createAnchor('v-for-end')
     _.replace(this.el, this.end)
     _.before(this.start, this.end)
     // fragment factory
