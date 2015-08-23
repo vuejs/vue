@@ -18,9 +18,6 @@ module.exports = {
 
   bind: function () {
     if (!this.el.__vue__) {
-      // create a ref anchor
-      this.anchor = _.createAnchor('v-component')
-      _.replace(this.el, this.anchor)
       // check keep-alive options.
       // If yes, instead of destroying the active vm when
       // hiding (v-if) or switching (dynamic literal) it,
@@ -57,6 +54,9 @@ module.exports = {
         this.resolveComponent(this.expression, _.bind(this.initStatic, this))
       } else {
         // check dynamic component params
+        // create a ref anchor
+        this.anchor = _.createAnchor('v-component')
+        _.replace(this.el, this.anchor)
         this.transMode = this._checkParam('transition-mode')
       }
     } else {
@@ -73,7 +73,7 @@ module.exports = {
 
   initStatic: function () {
     // wait-for
-    var anchor = this.anchor
+    var anchor = this.el
     var options
     var waitFor = this.waitForEvent
     if (waitFor) {
@@ -81,6 +81,7 @@ module.exports = {
         created: function () {
           this.$once(waitFor, function () {
             this.$before(anchor)
+            _.remove(anchor)
           })
         }
       }
@@ -89,6 +90,7 @@ module.exports = {
     this.setCurrent(child)
     if (!this.waitForEvent) {
       child.$before(anchor)
+      _.remove(anchor)
     }
   },
 
