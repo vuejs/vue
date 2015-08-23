@@ -6,10 +6,16 @@ var _ = require('../util')
  *
  * @param {Node} node
  * @param {Function} unlink
+ * @param {Object} [scope]
+ * @param {String} [id] - v-for id
  */
 
-function SingleFragment (node, unlink) {
+function SingleFragment (node, unlink, scope, id) {
+  this.reused = false
   this.node = node
+  node.__vfrag__ = this
+  this.id = id
+  this.scope = scope
   this.unlink = unlink
 }
 
