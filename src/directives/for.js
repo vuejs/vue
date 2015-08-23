@@ -83,7 +83,12 @@ module.exports = {
       frag = !init && this.getCachedFrag(value, i, key)
       if (frag) { // reusable fragment
         frag.reused = true
-        frag.scope.$index = i // update $index
+        // update $index
+        frag.scope.$index = i
+        // update $key
+        if (key) {
+          frag.scope.$key = key
+        }
         // update data for track-by, object repeat &
         // primitive values.
         if (idKey || converted || primitive) {
