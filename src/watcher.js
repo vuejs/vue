@@ -89,7 +89,6 @@ Watcher.prototype.get = function () {
   try {
     value = this.getter.call(scope, scope)
   } catch (e) {
-    debugger
     if (
       process.env.NODE_ENV !== 'production' &&
       config.warnExpressionErrors

@@ -25,7 +25,12 @@ module.exports = {
         if (_.assertProp(prop, val)) {
           child[childKey] = val
         }
-      }, { sync: true }
+      }, {
+        sync: true,
+        // important: props need to be observed on the
+        // repeat scope if present
+        scope: this._scope
+      }
     )
 
     // set the child initial value.

@@ -44,4 +44,4 @@ FragmentFactory.prototype.create = function (host, scope) {
   return new Fragment(el, unlink)
 }
 
-module.exports  = FragmentFactory
+module.exports = FragmentFactory
