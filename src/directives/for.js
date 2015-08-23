@@ -17,16 +17,17 @@ module.exports = {
     this.factory = new FragmentFactory(this.vm, this.el)
   },
 
-  create: function (data) {
+  create: function (data, index, key) {
     var host = this._host
+    // create iteration scope
     var parentScope = this._scope || this.vm
     var scope = Object.create(parentScope)
-    var alias = this.arg
-    Object.defineProperty(scope, alias, {
-      enumberable: true,
-      configurable: true,
-      value: data
-    })
+    // define scope properties
+    _.defineReactive(scope, this.arg, data)
+    _.defineReactive(scope, '$index', index)
+    if (key) {
+      _.defineReactive(scope, '$key', key)
+    }
     return this.factory.create(host, scope)
   },
 
@@ -38,8 +39,8 @@ module.exports = {
         f.destroy()
       })
     }
-    this.frags = list.map(function (data) {
-      return self.create(data)
+    this.frags = list.map(function (data, i) {
+      return self.create(data, i)
     })
     this.frags.forEach(function (f) {
       f.before(anchor)
