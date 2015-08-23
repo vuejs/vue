@@ -17,11 +17,10 @@ var compiler = require('../compiler')
 
 exports._compile = function (el) {
   var options = this.$options
-  var host = this._host
   if (options._linkFn) {
     // pre-transcluded with linker, just use it
     this._initElement(el)
-    this._unlinkFn = options._linkFn(this, el, host)
+    this._unlinkFn = options._linkFn(this, el)
   } else {
     // transclude and init element
     // transclude can potentially replace original
@@ -49,10 +48,11 @@ exports._compile = function (el) {
     }
 
     // link phase
-    var rootUnlinkFn = rootLinker(this, el)
+    // make sure to link root with prop scope!
+    var rootUnlinkFn = rootLinker(this, el, this._scope)
     var contentUnlinkFn = contentLinkFn
       ? contentLinkFn(this, el)
-      : compiler.compile(el, options)(this, el, host)
+      : compiler.compile(el, options)(this, el)
 
     // register composite unlink function
     // to be called during instance destruction

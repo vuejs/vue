@@ -59,10 +59,10 @@ if (_.inBrowser) {
       expect(typeof linker).toBe('function')
       linker(vm, el)
       expect(vm._bindDir.calls.count()).toBe(4)
-      expect(vm._bindDir).toHaveBeenCalledWith('a', el, descriptorB, defA, undefined)
-      expect(vm._bindDir).toHaveBeenCalledWith('a', el.firstChild, descriptorA, defA, undefined)
-      expect(vm._bindDir).toHaveBeenCalledWith('b', el.firstChild, descriptorB, defB, undefined)
-      expect(vm._bindDir).toHaveBeenCalledWith('b', el.lastChild, descriptorB, defB, undefined)
+      expect(vm._bindDir).toHaveBeenCalledWith('a', el, descriptorB, defA, undefined, undefined)
+      expect(vm._bindDir).toHaveBeenCalledWith('a', el.firstChild, descriptorA, defA, undefined, undefined)
+      expect(vm._bindDir).toHaveBeenCalledWith('b', el.firstChild, descriptorB, defB, undefined, undefined)
+      expect(vm._bindDir).toHaveBeenCalledWith('b', el.lastChild, descriptorB, defB, undefined, undefined)
       // check the priority sorting
       // the "b" on the firstNode should be called first!
       expect(vm._bindDir.calls.argsFor(1)[0]).toBe('b')
@@ -115,7 +115,7 @@ if (_.inBrowser) {
       // expect 1 call because terminal should return early and let
       // the directive handle the rest.
       expect(vm._bindDir.calls.count()).toBe(1)
-      expect(vm._bindDir).toHaveBeenCalledWith('repeat', el.firstChild, descriptor, def, undefined)
+      expect(vm._bindDir).toHaveBeenCalledWith('repeat', el.firstChild, descriptor, def, undefined, undefined)
     })
 
     it('custom element components', function () {
@@ -140,7 +140,7 @@ if (_.inBrowser) {
       var linker = compile(el, Vue.options)
       linker(vm, el)
       expect(vm._bindDir.calls.count()).toBe(1)
-      expect(vm._bindDir).toHaveBeenCalledWith('attr', el.firstChild, descriptor, def)
+      expect(vm._bindDir).toHaveBeenCalledWith('attr', el.firstChild, descriptor, def, undefined, undefined)
       expect(el.firstChild.getAttribute('b')).toBe('B')
     })
 

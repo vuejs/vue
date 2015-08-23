@@ -46,12 +46,18 @@ exports._init = function (options) {
   this._isBeingDestroyed = false
   this._unlinkFn = null
 
-  // context: the scope in which the component was used,
-  // and the scope in which props and contents of this
-  // instance should be compiled in.
-  this._context =
-    options._context ||
-    options._parent
+  // context:
+  // if this is a transcluded component, context
+  // will be the common parent vm of this instance
+  // and its host.
+  this._context = options._context || options._parent
+
+  // scope:
+  // if this is inside an inline v-repeat, the scope
+  // will be the intermediate scope created for this
+  // repeat fragment. this is used for linking props
+  // and container directives.
+  this._scope = options._scope
 
   // push self into parent / transclusion host
   if (this.$parent) {

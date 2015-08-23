@@ -199,7 +199,15 @@ module.exports = {
         _linkerCachable: !this.template,
         _asComponent: true,
         _isRouterView: this._isRouterView,
-        _context: this.vm
+        // if this is a transcluded component, context
+        // will be the common parent vm of this instance
+        // and its host.
+        _context: this.vm,
+        // if this is inside an inline v-repeat, the scope
+        // will be the intermediate scope created for this
+        // repeat fragment. this is used for linking props
+        // and container directives.
+        _scope: this._scope
       }
       // extra options
       if (extraOptions) {
