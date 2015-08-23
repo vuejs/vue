@@ -90,9 +90,6 @@ exports.after = function (el, target) {
  */
 
 exports.remove = function (el) {
-  if (!el.parentNode) {
-    debugger
-  }
   el.parentNode.removeChild(el)
 }
 
