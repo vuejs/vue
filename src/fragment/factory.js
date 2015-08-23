@@ -15,9 +15,14 @@ var linkerCache = new Cache(5000)
 
 function FragmentFactory (vm, el) {
   this.vm = vm
-  var template = this.template = _.isTemplate(el)
-    ? templateParser.parse(el, true)
-    : el
+  var template
+  if (!_.isTemplate(el)) {
+    template = document.createDocumentFragment()
+    template.appendChild(el)
+  } else {
+    template = templateParser.parse(el, true)
+  }
+  this.template = template
   // linker can be cached, but only for components
   var linker
   var cid = vm.constructor.cid
