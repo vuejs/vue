@@ -113,7 +113,7 @@ describe('Watcher', function () {
   })
 
   it('meta properties', function (done) {
-    vm._defineMeta('$index', 1)
+    _.defineReactive(vm, '$index', 1)
     var watcher = new Watcher(vm, '$index + 1', spy)
     expect(watcher.value).toBe(2)
     vm.$index = 2
