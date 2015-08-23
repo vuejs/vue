@@ -37,9 +37,8 @@ exports._initProps = function () {
   // make sure to convert string selectors into element now
   el = options.el = _.query(el)
   this._propsUnlinkFn = el && el.nodeType === 1 && props
-    ? compiler.compileAndLinkProps(
-        this, el, props
-      )
+    // props must be linked in proper scope if inside v-repeat
+    ? compiler.compileAndLinkProps(this, el, props, this._scope)
     : null
 }
 

@@ -1,6 +1,4 @@
 var _ = require('./util')
-var compiler = require('./compiler')
-var templateParser = require('./parsers/template')
 var FragmentFactory = require('./fragment/factory')
 
 module.exports = {

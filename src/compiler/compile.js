@@ -129,13 +129,14 @@ function teardownDirs (vm, dirs, destroying) {
  * @param {Vue} vm
  * @param {Element} el
  * @param {Object} options
+ * @param {Object} [scope]
  * @return {Function}
  */
 
-exports.compileAndLinkProps = function (vm, el, props) {
+exports.compileAndLinkProps = function (vm, el, props, scope) {
   var propsLinkFn = compileProps(el, props)
   var propDirs = linkAndCapture(function () {
-    propsLinkFn(vm, null)
+    propsLinkFn(vm, scope)
   }, vm)
   return makeUnlinkFn(vm, propDirs)
 }
@@ -180,13 +181,13 @@ exports.compileRoot = function (el, options) {
     }
   }
 
-  return function rootLinkFn (vm, el) {
+  return function rootLinkFn (vm, el, scope) {
     // link context scope dirs
     var context = vm._context
     var contextDirs
     if (context && contextLinkFn) {
       contextDirs = linkAndCapture(function () {
-        contextLinkFn(context, el)
+        contextLinkFn(context, el, null, scope)
       }, context)
     }
 

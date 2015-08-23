@@ -105,7 +105,7 @@ module.exports = function compileProps (el, propOptions) {
  */
 
 function makePropsLinkFn (props) {
-  return function propsLinkFn (vm, el) {
+  return function propsLinkFn (vm, scope) {
     // store resolved props info
     vm._props = {}
     var i = props.length
@@ -123,11 +123,12 @@ function makePropsLinkFn (props) {
         if (vm._context) {
           if (prop.mode === propBindingModes.ONE_TIME) {
             // one time binding
+            // TODO respect scope here
             value = vm._context.$get(prop.parentPath)
             _.initProp(vm, prop, value)
           } else {
             // dynamic binding
-            vm._bindDir('prop', el, prop, propDef)
+            vm._bindDir('prop', null, prop, propDef, null, scope)
           }
         } else {
           process.env.NODE_ENV !== 'production' && _.warn(
