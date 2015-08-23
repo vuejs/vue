@@ -58,7 +58,7 @@ module.exports = {
 
   link: function (frag, linker) {
     var vm = this.vm
-    this.unlink = linker(vm, frag, this._host /* important */)
+    this.unlink = linker(vm, frag, this._host, this._scope)
     transition.blockAppend(frag, this.end, vm)
     // call attached for all the child components created
     // during the compilation
