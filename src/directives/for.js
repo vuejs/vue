@@ -1,5 +1,6 @@
 var _ = require('../util')
 var FragmentFactory = require('../fragment/factory')
+var isObject = _.isObject
 var uid = 0
 
 // TODO: ref, el
@@ -20,7 +21,7 @@ module.exports = {
     }
 
     // uid as a cache identifier
-    this.id = ++uid
+    this.id = '__v-for__' + (++uid)
 
     // setup anchor nodes
     this.start = _.createAnchor('v-repeat-start')
@@ -37,24 +38,26 @@ module.exports = {
     this.leaveStagger = +this._checkParam('leave-stagger') || stagger
 
     // cache
-    this.cache = new FragmentCache()
+    this.cache = Object.create(null)
 
     // fragment factory
     this.factory = new FragmentFactory(this.vm, this.el)
   },
 
-  create: function (data, alias, index, key) {
+  create: function (value, alias, index, key) {
     var host = this._host
     // create iteration scope
     var parentScope = this._scope || this.vm
     var scope = Object.create(parentScope)
     // define scope properties
-    _.defineReactive(scope, alias, data)
+    _.defineReactive(scope, alias, value)
     _.defineReactive(scope, '$index', index)
     if (key) {
       _.defineReactive(scope, '$key', key)
     }
-    return this.factory.create(host, scope, this.id)
+    var frag = this.factory.create(host, scope, this.id)
+    this.cacheFrag(value, frag, index, key)
+    return frag
   },
 
   update: function (data) {
@@ -78,7 +81,7 @@ module.exports = {
       item = data[i]
       key = converted ? itme.$key : null
       value = converted ? item.$value : item
-      frag = !init && this.cache.get(value, i, key)
+      frag = !init && this.getCachedFrag(value, i, key)
       if (frag) { // reusable fragment
         frag.reused = true
         frag.scope.$index = i // update $index
@@ -109,7 +112,7 @@ module.exports = {
     for (i = 0, l = oldFrags.length; i < l; i++) {
       frag = oldFrags[i]
       if (!frag.reused) {
-        this.cache.delete(frag)
+        this.deleteCachedFrag(frag)
         frag.unlink()
         this.remove(frag, removalIndex++, totalRemoved, inDoc)
       }
@@ -196,6 +199,79 @@ module.exports = {
     frag.before(prevEl.nextSibling)
   },
 
+  cacheFrag: function (value, frag, index, key) {
+    var idKey = this.idKey
+    var cache = this.cache
+    var primitive = !isObject(value)
+    var id
+    if (key || idKey || primitive) {
+      id = idKey
+        ? idKey === '$index'
+          ? index
+          : value[idKey]
+        : (key || index)
+      if (!cache[id]) {
+        cache[id] = frag
+      } else if (!primitive && idKey !== '$index') {
+        process.env.NODE_ENV !== 'production' && _.warn(
+          'Duplicate track-by key in v-repeat: ' + id
+        )
+      }
+    } else {
+      id = this.id
+      if (value.hasOwnProperty(id)) {
+        if (value[id] === null) {
+          value[id] = frag
+        } else {
+          process.env.NODE_ENV !== 'production' && _.warn(
+            'Duplicate objects are not supported in v-repeat ' +
+            'when using components or transitions.'
+          )
+        }
+      } else {
+        _.define(value, id, frag)
+      }
+    }
+    frag.raw = value
+  },
+
+  getCachedFrag: function (value, index, key) {
+    var idKey = this.idKey
+    var primitive = !isObject(value)
+    if (key || idKey || primitive) {
+      var id = idKey
+        ? idKey === '$index'
+          ? index
+          : value[idKey]
+        : (key || index)
+      return this.cache[id]
+    } else {
+      return value[this.id]
+    }
+  },
+
+  deleteCachedFrag: function (frag) {
+    var value = frag.raw
+    var idKey = this.idKey
+    var scope = frag.scope
+    var index = scope.$index
+    // fix #948: avoid accidentally fall through to
+    // a parent repeater which happens to have $key.
+    var key = scope.hasOwnProperty('$key') && scope.$key
+    var primitive = !isObject(value)
+    if (idKey || key || primitive) {
+      var id = idKey
+        ? idKey === '$index'
+          ? index
+          : value[idKey]
+        : (key || index)
+      this.cache[id] = null
+    } else {
+      value[this.id] = null
+      frag.raw = null
+    }
+  },
+
   /**
    * Get the stagger amount for an insertion/removal.
    *
@@ -266,7 +342,7 @@ module.exports = {
  * should have been removed so we can skip them.
  *
  * If this is a block repeat, we want to make sure we only
- * return vm that is bound to this v-repeat. (see #929)
+ * return frag that is bound to this v-repeat. (see #929)
  *
  * @param {Fragment} frag
  * @param {Comment|Text} anchor
@@ -285,20 +361,4 @@ function findPrevFrag (frag, anchor, id) {
     el = el.previousSibling
   }
   return el.__vfrag__
-}
-
-function FragmentCache () {
-  this.cache = Object.create(null)
-}
-
-FragmentCache.prototype.get = function () {
-  
-}
-
-FragmentCache.prototype.set = function () {
-  
-}
-
-FragmentCache.prototype.delete = function () {
-  
 }
