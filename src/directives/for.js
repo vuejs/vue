@@ -61,7 +61,6 @@ module.exports = {
   },
 
   update: function (data) {
-    var self = this
     var idKey = this.idKey
     var converted = this.converted
     var oldFrags = this.frags
@@ -79,7 +78,7 @@ module.exports = {
     // instance.
     for (i = 0, l = data.length; i < l; i++) {
       item = data[i]
-      key = converted ? itme.$key : null
+      key = converted ? item.$key : null
       value = converted ? item.$value : item
       frag = !init && this.getCachedFrag(value, i, key)
       if (frag) { // reusable fragment
@@ -361,4 +360,20 @@ function findPrevFrag (frag, anchor, id) {
     el = el.previousSibling
   }
   return el.__vfrag__
+}
+
+/**
+ * Create a range array from given number.
+ *
+ * @param {Number} n
+ * @return {Array}
+ */
+
+function range (n) {
+  var i = -1
+  var ret = new Array(n)
+  while (++i < n) {
+    ret[i] = i
+  }
+  return ret
 }
