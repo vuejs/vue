@@ -86,6 +86,4 @@ extend(p, require('./api/events'))
 extend(p, require('./api/child'))
 extend(p, require('./api/lifecycle'))
 
-Vue.directive('fast-repeat', require('./fast-repeat'))
-
 module.exports = _.Vue = Vue

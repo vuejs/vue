@@ -1,5 +1,5 @@
-var _ = require('./util')
-var FragmentFactory = require('./fragment/factory')
+var _ = require('../util')
+var FragmentFactory = require('../fragment/factory')
 
 module.exports = {
 

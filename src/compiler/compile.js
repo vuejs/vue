@@ -9,8 +9,8 @@ var componentDef = require('../directives/component')
 
 // terminal directives
 var terminalDirectives = [
-  'fast-repeat',
   'repeat',
+  'for',
   'if'
 ]
 
