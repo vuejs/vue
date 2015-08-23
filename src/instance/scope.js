@@ -249,33 +249,7 @@ exports._initMeta = function () {
   var metas = this.$options._meta
   if (metas) {
     for (var key in metas) {
-      this._defineMeta(key, metas[key])
+      _.defineReactive(this, key, metas[key])
     }
   }
-}
-
-/**
- * Define a meta property, e.g $index, $key, $value
- * which only exists on the vm instance but not in $data.
- *
- * @param {String} key
- * @param {*} value
- */
-
-exports._defineMeta = function (key, value) {
-  var dep = new Dep()
-  Object.defineProperty(this, key, {
-    get: function metaGetter () {
-      if (Dep.target) {
-        dep.depend()
-      }
-      return value
-    },
-    set: function metaSetter (val) {
-      if (val !== value) {
-        value = val
-        dep.notify()
-      }
-    }
-  })
 }
