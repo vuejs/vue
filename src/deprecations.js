@@ -7,8 +7,11 @@ if (process.env.NODE_ENV !== 'production') {
 
   _.deprecation = {
 
-    REPEAT_ALIAS: function () {
-      warn('v-repeat alias (e.g. item in items) will be required in 1.0.0.')
+    REPEAT: function () {
+      warn(
+        'v-repeat will be deprecated in favor of v-for in 1.0.0. ' +
+        'See https://github.com/yyx990803/vue/issues/1200 for details.'
+      )
     },
 
     ADD: function () {
@@ -25,6 +28,18 @@ if (process.env.NODE_ENV !== 'production') {
 
     CONTENT_SELECT: function () {
       warn('<content select="..."> will be deprecated in in 1.0.0. in favor of <slot name="...">.')
+    },
+
+    DATA_AS_PROP: function () {
+      warn('$data will no longer be usable as a prop in 1.0.0.')
+    },
+
+    INHERIT: function () {
+      warn('The "inherit" option will be deprecated in 1.0.0.')
+    },
+
+    V_EL: function () {
+      warn('v-el will be deprecated in 1.0.0.')
     }
 
   }
