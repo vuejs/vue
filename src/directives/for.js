@@ -4,8 +4,6 @@ var FragmentFactory = require('../fragment/factory')
 var isObject = _.isObject
 var uid = 0
 
-// TODO: ref, el
-
 module.exports = {
 
   bind: function () {
@@ -50,32 +48,26 @@ module.exports = {
     this.factory = new FragmentFactory(this.vm, this.el)
   },
 
-  create: function (value, alias, index, key) {
-    var host = this._host
-    // create iteration scope
-    var parentScope = this._scope || this.vm
-    var scope = Object.create(parentScope)
-    // make sure point $parent to parent scope
-    scope.$parent = parentScope
-    scope.$alias = alias
-    // define scope properties
-    _.defineReactive(scope, alias, value)
-    _.defineReactive(scope, '$index', index)
-    if (key) {
-      _.defineReactive(scope, '$key', key)
-    }
-    var frag = this.factory.create(host, scope)
-    frag.forId = this.id
-    this.cacheFrag(value, frag, index, key)
-    return frag
-  },
-
   update: function (data) {
     this.diff(data)
     if (this.refId) {
       this.updateRef()
     }
   },
+
+  /**
+   * Diff, based on new data and old data, determine the
+   * minimum amount of DOM manipulations needed to make the
+   * DOM reflect the new data Array.
+   *
+   * The algorithm diffs the new data Array by storing a
+   * hidden reference to an owner vm instance on previously
+   * seen data. This allows us to achieve O(n) which is
+   * better than a levenshtein distance based algorithm,
+   * which is O(m * n).
+   *
+   * @param {Array} data
+   */
 
   diff: function (data) {
     var idKey = this.idKey
@@ -167,6 +159,40 @@ module.exports = {
     }
   },
 
+  /**
+   * Create a new fragment instance.
+   *
+   * @param {*} value
+   * @param {String} alias
+   * @param {Number} index
+   * @param {String} [key]
+   * @return {Fragment}
+   */
+
+  create: function (value, alias, index, key) {
+    var host = this._host
+    // create iteration scope
+    var parentScope = this._scope || this.vm
+    var scope = Object.create(parentScope)
+    // make sure point $parent to parent scope
+    scope.$parent = parentScope
+    scope.$alias = alias
+    // define scope properties
+    _.defineReactive(scope, alias, value)
+    _.defineReactive(scope, '$index', index)
+    if (key) {
+      _.defineReactive(scope, '$key', key)
+    }
+    var frag = this.factory.create(host, scope)
+    frag.forId = this.id
+    this.cacheFrag(value, frag, index, key)
+    return frag
+  },
+
+  /**
+   * Update the v-ref on owner vm.
+   */
+
   updateRef: function () {
     if (!this.converted) {
       this.vm.$[this.refId] = this.frags.map(findVmFromFrag)
@@ -177,6 +203,15 @@ module.exports = {
       })
     }
   },
+
+  /**
+   * Insert a fragment. Handles staggering.
+   *
+   * @param {Fragment} frag
+   * @param {Number} index
+   * @param {Node} prevEl
+   * @param {Boolean} inDoc
+   */
 
   insert: function (frag, index, prevEl, inDoc) {
     if (frag.staggerCb) {
@@ -205,6 +240,15 @@ module.exports = {
     }
   },
 
+  /**
+   * Remove a fragment. Handles staggering.
+   *
+   * @param {Fragment} frag
+   * @param {Number} index
+   * @param {Number} total
+   * @param {Boolean} inDoc
+   */
+
   remove: function (frag, index, total, inDoc) {
     if (frag.staggerCb) {
       frag.staggerCb.cancel()
@@ -228,9 +272,26 @@ module.exports = {
     }
   },
 
+  /**
+   * Move a fragment to a new position.
+   * Force no transition.
+   *
+   * @param {Fragment} frag
+   * @param {Node} prevEl
+   */
+
   move: function (frag, prevEl) {
     frag.before(prevEl.nextSibling, false)
   },
+
+  /**
+   * Cache a fragment using track-by or the object key.
+   *
+   * @param {*} value
+   * @param {Fragment} frag
+   * @param {Number} index
+   * @param {String} [key]
+   */
 
   cacheFrag: function (value, frag, index, key) {
     var idKey = this.idKey
@@ -268,6 +329,15 @@ module.exports = {
     frag.raw = value
   },
 
+  /**
+   * Get a cached fragment from the value/index/key
+   *
+   * @param {*} value
+   * @param {Number} index
+   * @param {String} key
+   * @return {Fragment}
+   */
+
   getCachedFrag: function (value, index, key) {
     var idKey = this.idKey
     var primitive = !isObject(value)
@@ -282,6 +352,12 @@ module.exports = {
       return value[this.id]
     }
   },
+
+  /**
+   * Delete a fragment from cache.
+   *
+   * @param {Fragment} frag
+   */
 
   deleteCachedFrag: function (frag) {
     var value = frag.raw
