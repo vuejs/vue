@@ -648,7 +648,7 @@ if (_.inBrowser) {
         el: el,
         template:
           '<div v-for="item in list" track-by="id" v-ref="outer">' +
-            '{{item.msg}}' + 
+            '{{item.msg}}' +
             '<div v-for="subItem in item.list" track-by="id" v-ref="inner{{$index}}">' +
               '{{subItem.msg}}' +
             '</div>' +
@@ -698,31 +698,31 @@ if (_.inBrowser) {
       }
     })
 
-    // it('switch between object-converted & array mode', function (done) {
-    //   var obj = {
-    //     a: { msg: 'AA' },
-    //     b: { msg: 'BB' }
-    //   }
-    //   var arr = [obj.b, obj.a]
-    //   var vm = new Vue({
-    //     el: el,
-    //     template: '<div v-repeat="obj">{{msg}}</div>',
-    //     data: {
-    //       obj: obj
-    //     }
-    //   })
-    //   expect(el.innerHTML).toBe(Object.keys(obj).map(function (key) {
-    //     return '<div>' + obj[key].msg + '</div>'
-    //   }).join(''))
-    //   vm.obj = arr
-    //   _.nextTick(function () {
-    //     expect(el.innerHTML).toBe('<div>BB</div><div>AA</div>')
-    //     // make sure it cleared the cache
-    //     expect(vm._directives[0].cache.a).toBeNull()
-    //     expect(vm._directives[0].cache.b).toBeNull()
-    //     done()
-    //   })
-    // })
+    it('switch between object-converted & array mode', function (done) {
+      var obj = {
+        a: { msg: 'AA' },
+        b: { msg: 'BB' }
+      }
+      var arr = [obj.b, obj.a]
+      var vm = new Vue({
+        el: el,
+        template: '<div v-for="item in obj">{{item.msg}}</div>',
+        data: {
+          obj: obj
+        }
+      })
+      expect(el.innerHTML).toBe(Object.keys(obj).map(function (key) {
+        return '<div>' + obj[key].msg + '</div>'
+      }).join(''))
+      vm.obj = arr
+      _.nextTick(function () {
+        expect(el.innerHTML).toBe('<div>BB</div><div>AA</div>')
+        // make sure it cleared the cache
+        expect(vm._directives[0].cache.a).toBeNull()
+        expect(vm._directives[0].cache.b).toBeNull()
+        done()
+      })
+    })
 
   })
 }
@@ -755,7 +755,7 @@ function go (fn, cb) {
 }
 
 /**
- * Assert mutation and markup correctness for v-repeat on
+ * Assert mutation and markup correctness for v-for on
  * an Array of Objects
  */
 
@@ -826,7 +826,7 @@ function assertMutations (vm, el, done) {
 }
 
 /**
- * Assert mutation and markup correctness for v-repeat on
+ * Assert mutation and markup correctness for v-for on
  * an Array of primitive values
  */
 
@@ -895,7 +895,7 @@ function assertPrimitiveMutations (vm, el, done) {
 }
 
 /**
- * Assert mutation and markup correctness for v-repeat on
+ * Assert mutation and markup correctness for v-for on
  * an Object of Objects
  */
 
@@ -933,7 +933,7 @@ function assertObjectMutations (vm, el, done) {
 }
 
 /**
- * Assert mutation and markup correctness for v-repeat on
+ * Assert mutation and markup correctness for v-for on
  * an Object of primitive values
  */
 
