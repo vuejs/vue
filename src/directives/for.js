@@ -84,6 +84,7 @@ module.exports = {
       item = data[i]
       key = converted ? item.$key : null
       value = converted ? item.$value : item
+      primitive = !isObject(value)
       frag = !init && this.getCachedFrag(value, i, key)
       if (frag) { // reusable fragment
         frag.reused = true
