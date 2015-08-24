@@ -3,7 +3,7 @@ var FragmentFactory = require('../fragment/factory')
 var isObject = _.isObject
 var uid = 0
 
-// TODO: ref, el
+// TODO: ref, el, transition, primitive v-model sync.
 
 module.exports = {
 
@@ -49,6 +49,8 @@ module.exports = {
     // create iteration scope
     var parentScope = this._scope || this.vm
     var scope = Object.create(parentScope)
+    // make sure point $parent to parent scope
+    scope.$parent = parentScope
     // define scope properties
     _.defineReactive(scope, alias, value)
     _.defineReactive(scope, '$index', index)
