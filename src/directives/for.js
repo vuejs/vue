@@ -450,7 +450,7 @@ module.exports = {
 
   unbind: function () {
     if (this.refId) {
-      this.vm.$[this.redId] = null
+      this.vm.$[this.refId] = null
     }
     if (this.frags) {
       var i = this.frags.length

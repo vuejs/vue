@@ -1,5 +1,5 @@
-var _ = require('../../../../src/util')
-var Vue = require('../../../../src/vue')
+var _ = require('../../../../../src/util')
+var Vue = require('../../../../../src/vue')
 
 if (_.inBrowser) {
   describe('v-for', function () {
