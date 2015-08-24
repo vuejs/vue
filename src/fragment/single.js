@@ -43,13 +43,4 @@ SingleFragment.prototype.remove = function () {
   this.inserted = false
 }
 
-/**
- * Destroy fragment.
- */
-
-SingleFragment.prototype.destroy = function () {
-  this.remove()
-  this.unlink()
-}
-
 module.exports = SingleFragment
