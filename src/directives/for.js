@@ -1,9 +1,10 @@
 var _ = require('../util')
+var config = require('../config')
 var FragmentFactory = require('../fragment/factory')
 var isObject = _.isObject
 var uid = 0
 
-// TODO: ref, el, primitive v-model sync.
+// TODO: ref, el
 
 module.exports = {
 
@@ -34,6 +35,9 @@ module.exports = {
     // check for trackby param
     this.idKey = this._checkParam('track-by')
 
+    // check v-ref
+    this.refId = this._checkParam(config.prefix + 'ref')
+
     // check for transition stagger
     var stagger = +this._checkParam('stagger')
     this.enterStagger = +this._checkParam('enter-stagger') || stagger
@@ -53,6 +57,7 @@ module.exports = {
     var scope = Object.create(parentScope)
     // make sure point $parent to parent scope
     scope.$parent = parentScope
+    scope.$alias = alias
     // define scope properties
     _.defineReactive(scope, alias, value)
     _.defineReactive(scope, '$index', index)
