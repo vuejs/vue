@@ -167,7 +167,7 @@ Directive.prototype._checkParam = function (name) {
   var param = this.el.getAttribute(name)
   if (param !== null) {
     this.el.removeAttribute(name)
-    param = this.vm.$interpolate(param)
+    param = (this._scope || this.vm).$interpolate(param)
   }
   return param
 }

@@ -55,9 +55,9 @@ exports.orderBy = function (arr, sortKey, reverse) {
   }
   // sort on a copy to avoid mutating original array
   return arr.slice().sort(function (a, b) {
-    if (sortKey !== '$key' && sortKey !== '$value') {
-      if (a && '$value' in a) a = a.$value
-      if (b && '$value' in b) b = b.$value
+    if (sortKey !== '$key') {
+      if (_.isObject(a) && '$value' in a) a = a.$value
+      if (_.isObject(b) && '$value' in b) b = b.$value
     }
     a = _.isObject(a) ? Path.get(a, sortKey) : a
     b = _.isObject(b) ? Path.get(b, sortKey) : b

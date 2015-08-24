@@ -335,7 +335,7 @@ function makeTextNodeLinkFn (tokens, frag) {
       if (token.tag) {
         node = childNodes[i]
         if (token.oneTime) {
-          value = vm.$eval(value)
+          value = vm.$eval(value, scope)
           if (token.html) {
             _.replace(node, templateParser.parse(value, true))
           } else {
