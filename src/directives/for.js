@@ -59,7 +59,8 @@ module.exports = {
     if (key) {
       _.defineReactive(scope, '$key', key)
     }
-    var frag = this.factory.create(host, scope, this.id)
+    var frag = this.factory.create(host, scope)
+    frag.forId = this.id
     this.cacheFrag(value, frag, index, key)
     return frag
   },
@@ -365,7 +366,7 @@ function findPrevFrag (frag, anchor, id) {
   if (!el) return
   var frag = el.__vfrag__
   while (
-    (!frag || frag.id !== id || !frag.inserted) &&
+    (!frag || frag.forId !== id || !frag.inserted) &&
     el !== anchor
   ) {
     el = el.previousSibling

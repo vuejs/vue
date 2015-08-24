@@ -7,14 +7,12 @@ var transition = require('../transition')
  * @param {Node} node
  * @param {Function} unlink
  * @param {Object} [scope]
- * @param {String} [id] - v-for id
  */
 
-function MultiFragment (frag, unlink, scope, id) {
+function MultiFragment (frag, unlink, scope) {
   this.start = this.node = _.createAnchor('fragment-start')
   this.end = _.createAnchor('fragment-end')
   this.node.__vfrag__ = this
-  this.id = id
   this.reused = false
   this.inserted = false
   this.nodes = _.toArray(frag.childNodes)
