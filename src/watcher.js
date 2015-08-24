@@ -145,21 +145,22 @@ Watcher.prototype.set = function (value) {
     }
   }
   // two-way sync for v-for alias
-  if (scope.$alias === this.expression) {
-    if (this.filters) {
+  var forContext = scope.$forContext
+  if (forContext && forContext.alias === this.expression) {
+    if (forContext.filters) {
       process.env.NODE_ENV !== 'production' && _.warn(
         'It seems you are using two-way binding on ' +
-        'a v-for alias, and the v-for is also filtered. ' +
-        'This will not work properly. Please use an ' +
-        'array of objects and bind to object properties ' +
-        'instead.'
+        'a v-for alias, and the v-for has filters. ' +
+        'This will not work properly. Either remove the ' +
+        'filters or use an array of objects and bind to ' +
+        'object properties instead.'
       )
       return
     }
     if (scope.$key) { // original is an object
-      scope.$source[scope.$key] = value
+      forContext.rawValue[scope.$key] = value
     } else {
-      scope.$source.$set(scope.$index, value)
+      forContext.rawValue.$set(scope.$index, value)
     }
   }
 }

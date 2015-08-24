@@ -7,14 +7,16 @@ var uid = 0
 module.exports = {
 
   bind: function () {
+    // determine alias
+    this.alias = this.arg
     // support "item in items" syntax
     var inMatch = this.expression.match(/(.*) in (.*)/)
     if (inMatch) {
-      this.arg = inMatch[1]
+      this.alias = inMatch[1]
       this._watcherExp = inMatch[2]
     }
 
-    if (!this.arg) {
+    if (!this.alias) {
       process.env.NODE_ENV !== 'production' && _.warn(
         'Alias is required in v-for.'
       )
@@ -74,7 +76,7 @@ module.exports = {
     var converted = this.converted
     var oldFrags = this.frags
     var frags = this.frags = new Array(data.length)
-    var alias = this.arg
+    var alias = this.alias
     var start = this.start
     var end = this.end
     var inDoc = _.inDoc(start)
@@ -176,8 +178,8 @@ module.exports = {
     var scope = Object.create(parentScope)
     // make sure point $parent to parent scope
     scope.$parent = parentScope
-    scope.$alias = alias
-    scope.$source = this.rawValue
+    // for two-way binding on alias
+    scope.$forContext = this
     // define scope properties
     _.defineReactive(scope, alias, value)
     _.defineReactive(scope, '$index', index)
