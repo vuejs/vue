@@ -7,10 +7,11 @@ module.exports = {
     var el = this.el
     var trueExp = this._checkParam('true-exp')
     var falseExp = this._checkParam('false-exp')
+    var scope = this._scope || this.vm
 
     this._matchValue = function (value) {
       if (trueExp !== null) {
-        return _.looseEqual(value, self.vm.$eval(trueExp))
+        return _.looseEqual(value, scope.$eval(trueExp))
       } else {
         return !!value
       }
@@ -19,10 +20,10 @@ module.exports = {
     function getValue () {
       var val = el.checked
       if (val && trueExp !== null) {
-        val = self.vm.$eval(trueExp)
+        val = scope.$eval(trueExp)
       }
       if (!val && falseExp !== null) {
-        val = self.vm.$eval(falseExp)
+        val = scope.$eval(falseExp)
       }
       return val
     }
