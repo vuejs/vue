@@ -144,6 +144,15 @@ Watcher.prototype.set = function (value) {
       )
     }
   }
+  if (process.env.NODE_ENV !== 'production' &&
+      scope.$alias === this.expression) {
+    _.warn(
+      'It seems you are using two-way binding on a v-for ' +
+      'alias. This will not affect the original array. ' +
+      'Use an array of objects and bind to an object ' +
+      'property instead.'
+    )
+  }
 }
 
 /**
