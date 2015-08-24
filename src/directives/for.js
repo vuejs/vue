@@ -177,11 +177,15 @@ module.exports = {
     // make sure point $parent to parent scope
     scope.$parent = parentScope
     scope.$alias = alias
+    scope.$source = this.rawValue
     // define scope properties
     _.defineReactive(scope, alias, value)
     _.defineReactive(scope, '$index', index)
     if (key) {
       _.defineReactive(scope, '$key', key)
+    } else if (scope.$key) {
+      // avoid accidental fallback
+      _.define(scope, '$key', null)
     }
     var frag = this.factory.create(host, scope)
     frag.forId = this.id

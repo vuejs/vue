@@ -144,14 +144,23 @@ Watcher.prototype.set = function (value) {
       )
     }
   }
-  if (process.env.NODE_ENV !== 'production' &&
-      scope.$alias === this.expression) {
-    _.warn(
-      'It seems you are using two-way binding on a v-for ' +
-      'alias. This will not affect the original array. ' +
-      'Use an array of objects and bind to an object ' +
-      'property instead.'
-    )
+  // two-way sync for v-for alias
+  if (scope.$alias === this.expression) {
+    if (this.filters) {
+      process.env.NODE_ENV !== 'production' && _.warn(
+        'It seems you are using two-way binding on ' +
+        'a v-for alias, and the v-for is also filtered. ' +
+        'This will not work properly. Please use an ' +
+        'array of objects and bind to object properties ' +
+        'instead.'
+      )
+      return
+    }
+    if (scope.$key) { // original is an object
+      scope.$source[scope.$key] = value
+    } else {
+      scope.$source.$set(scope.$index, value)
+    }
   }
 }
 
