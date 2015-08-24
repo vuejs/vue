@@ -71,6 +71,13 @@ module.exports = {
   },
 
   update: function (data) {
+    this.diff(data)
+    if (this.refId) {
+      this.updateRef()
+    }
+  },
+
+  diff: function (data) {
     var idKey = this.idKey
     var converted = this.converted
     var oldFrags = this.frags
@@ -157,6 +164,17 @@ module.exports = {
         this.insert(frag, insertionIndex++, prevEl, inDoc)
       }
       frag.reused = false
+    }
+  },
+
+  updateRef: function () {
+    if (!this.converted) {
+      this.vm.$[this.refId] = this.frags.map(findVmFromFrag)
+    } else {
+      var refs = this.vm.$[this.refId] = {}
+      this.frags.forEach(function (frag) {
+        refs[frag.scope.$key] = findVmFromFrag(frag)
+      })
     }
   },
 
@@ -346,6 +364,21 @@ module.exports = {
       this.converted = true
       return res
     }
+  },
+
+  unbind: function () {
+    if (this.refId) {
+      this.vm.$[this.redId] = null
+    }
+    if (this.frags) {
+      var i = this.frags.length
+      var frag
+      while (i--) {
+        frag = this.frags[i]
+        this.deleteCachedFrag(frag)
+        frag.unlink()
+      }
+    }
   }
 }
 
@@ -378,6 +411,17 @@ function findPrevFrag (frag, anchor, id) {
     frag = el.__vfrag__
   }
   return frag
+}
+
+/**
+ * Find a vm from a fragment.
+ *
+ * @param {Fragment} frag
+ * @return {Vue|undefined}
+ */
+
+function findVmFromFrag (frag) {
+  return frag.node.__vue__ || frag.node.nextSibling.__vue__
 }
 
 /**
