@@ -304,6 +304,13 @@ function guardArrayAssets (assets) {
  */
 
 exports.mergeOptions = function merge (parent, child, vm) {
+
+  if (process.env.NODE_ENV !== 'production') {
+    if (child.inherit) {
+      _.deprecation.INHERIT()
+    }
+  }
+
   guardComponents(child)
   guardProps(child)
   var options = {}
