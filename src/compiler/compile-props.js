@@ -25,6 +25,13 @@ module.exports = function compileProps (el, propOptions) {
   while (i--) {
     options = propOptions[i]
     name = options.name
+
+    if (process.env.NODE_ENV !== 'production') {
+      if (name === '$data') {
+        _.deprecation.DATA_AS_PROP()
+      }
+    }
+
     // props could contain dashes, which will be
     // interpreted as minus calculations by the parser
     // so we need to camelize the path here
