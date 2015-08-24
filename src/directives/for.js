@@ -153,7 +153,6 @@ module.exports = {
   },
 
   insert: function (frag, index, prevEl, inDoc) {
-    console.log('insert ' + frag.scope.item.a + ' at ' + index)
     if (frag.staggerCb) {
       frag.staggerCb.cancel()
       frag.staggerCb = null
@@ -181,7 +180,6 @@ module.exports = {
   },
 
   remove: function (frag, index, total, inDoc) {
-    console.log('removing ' + frag.scope.item.a)
     if (frag.staggerCb) {
       frag.staggerCb.cancel()
       frag.staggerCb = null
@@ -205,7 +203,6 @@ module.exports = {
   },
 
   move: function (frag, prevEl) {
-    console.log('moving ' + frag.scope.item.a)
     frag.before(prevEl.nextSibling, false)
   },
 
