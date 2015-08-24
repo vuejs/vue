@@ -1,4 +1,5 @@
 var _ = require('../util')
+var transition = require('../transition')
 
 /**
  * Multi-node fragment that has a start and an end node.
@@ -15,7 +16,8 @@ function MultiFragment (frag, unlink, scope, id) {
   this.node.__vfrag__ = this
   this.id = id
   this.reused = false
-  this.frag = frag
+  this.inserted = false
+  this.nodes = _.toArray(frag.childNodes)
   this.scope = scope
   this.unlink = unlink
 }
@@ -24,12 +26,21 @@ function MultiFragment (frag, unlink, scope, id) {
  * Insert fragment before target.
  *
  * @param {Node} target
+ * @param {Boolean} trans
  */
 
-MultiFragment.prototype.before = function (target) {
+MultiFragment.prototype.before = function (target, trans) {
   _.before(this.start, target)
-  _.before(this.frag, target)
+  var nodes = this.nodes
+  var scope = this.scope
+  var method = trans !== false
+    ? transition.before
+    : _.before
+  for (var i = 0, l = nodes.length; i < l; i++) {
+    method(nodes[i], target, scope)
+  }
   _.before(this.end, target)
+  this.inserted = true
 }
 
 /**
@@ -39,11 +50,18 @@ MultiFragment.prototype.before = function (target) {
 MultiFragment.prototype.remove = function () {
   var parent = this.start.parentNode
   var node = this.start.nextSibling
+  var nodes = this.nodes = []
+  var scope = this.scope
+  var next
   while (node !== this.end) {
-    this.frag.appendChild(node)
+    nodes.push(node)
+    next = node.nextSibling
+    transition.remove(node, scope)
+    node = next
   }
   parent.removeChild(this.start)
   parent.removeChild(this.end)
+  this.inserted = false
 }
 
 /**

@@ -3,7 +3,7 @@ var FragmentFactory = require('../fragment/factory')
 var isObject = _.isObject
 var uid = 0
 
-// TODO: ref, el, transition, primitive v-model sync.
+// TODO: ref, el, primitive v-model sync.
 
 module.exports = {
 
@@ -140,6 +140,7 @@ module.exports = {
       if (frag.reused && !frag.staggerCb) {
         currentPrev = findPrevFrag(frag, start, this.id)
         if (currentPrev !== targetPrev) {
+          debugger
           this.move(frag, prevEl)
         }
       } else {
@@ -152,6 +153,7 @@ module.exports = {
   },
 
   insert: function (frag, index, prevEl, inDoc) {
+    console.log('insert ' + frag.scope.item.a + ' at ' + index)
     if (frag.staggerCb) {
       frag.staggerCb.cancel()
       frag.staggerCb = null
@@ -179,6 +181,7 @@ module.exports = {
   },
 
   remove: function (frag, index, total, inDoc) {
+    console.log('removing ' + frag.scope.item.a)
     if (frag.staggerCb) {
       frag.staggerCb.cancel()
       frag.staggerCb = null
@@ -202,7 +205,8 @@ module.exports = {
   },
 
   move: function (frag, prevEl) {
-    frag.before(prevEl.nextSibling)
+    console.log('moving ' + frag.scope.item.a)
+    frag.before(prevEl.nextSibling, false)
   },
 
   cacheFrag: function (value, frag, index, key) {
@@ -344,8 +348,8 @@ module.exports = {
  * Helper to find the previous element that is a fragment
  * anchor. This is necessary because a destroyed frag's
  * element could still be lingering in the DOM before its
- * leaving transition finishes, but its __vue__ reference
- * should have been removed so we can skip them.
+ * leaving transition finishes, but its inserted flag
+ * should have been set to false so we can skip them.
  *
  * If this is a block repeat, we want to make sure we only
  * return frag that is bound to this v-repeat. (see #929)
@@ -360,13 +364,15 @@ function findPrevFrag (frag, anchor, id) {
   var el = frag.node.previousSibling
   /* istanbul ignore if */
   if (!el) return
+  var frag = el.__vfrag__
   while (
-    (!el.__vfrag__ || el.__vfrag__.id !== id) &&
+    (!frag || frag.id !== id || !frag.inserted) &&
     el !== anchor
   ) {
     el = el.previousSibling
+    frag = el.__vfrag__
   }
-  return el.__vfrag__
+  return frag
 }
 
 /**
