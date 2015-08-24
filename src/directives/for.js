@@ -11,9 +11,11 @@ module.exports = {
     // support "item in items" syntax
     var inMatch = this.expression.match(/(.*) in (.*)/)
     if (inMatch) {
-      this.alias = inMatch[1]
+      this.arg = inMatch[1]
       this._watcherExp = inMatch[2]
-    } else {
+    }
+
+    if (!this.arg) {
       process.env.NODE_ENV !== 'production' && _.warn(
         'Alias is required in v-for.'
       )
@@ -67,7 +69,7 @@ module.exports = {
     var converted = this.converted
     var oldFrags = this.frags
     var frags = this.frags = new Array(data.length)
-    var alias = this.alias
+    var alias = this.arg
     var start = this.start
     var end = this.end
     var inDoc = _.inDoc(start)
@@ -140,7 +142,6 @@ module.exports = {
       if (frag.reused && !frag.staggerCb) {
         currentPrev = findPrevFrag(frag, start, this.id)
         if (currentPrev !== targetPrev) {
-          debugger
           this.move(frag, prevEl)
         }
       } else {
