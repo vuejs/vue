@@ -271,441 +271,432 @@ if (_.inBrowser) {
       expect(el.innerHTML).toBe('<component>AAA</component><component>BBB</component><component>CCC</component>')
     })
 
-    // it('block repeat', function (done) {
-    //   var vm = new Vue({
-    //     el: el,
-    //     template: '<template v-repeat="list"><p>{{a}}</p><p>{{a + 1}}</p></template>',
-    //     data: {
-    //       list: [
-    //         { a: 1 },
-    //         { a: 2 },
-    //         { a: 3 }
-    //       ]
-    //     }
-    //   })
-    //   assertMarkup()
-    //   vm.list.reverse()
-    //   _.nextTick(function () {
-    //     assertMarkup()
-    //     vm.list.splice(1, 1)
-    //     _.nextTick(function () {
-    //       assertMarkup()
-    //       vm.list.splice(1, 0, { a: 2 })
-    //       _.nextTick(function () {
-    //         assertMarkup()
-    //         done()
-    //       })
-    //     })
-    //   })
+    it('fragment loop', function (done) {
+      var vm = new Vue({
+        el: el,
+        template: '<template v-for="item in list"><p>{{item.a}}</p><p>{{item.a + 1}}</p></template>',
+        data: {
+          list: [
+            { a: 1 },
+            { a: 2 },
+            { a: 3 }
+          ]
+        }
+      })
+      assertMarkup()
+      vm.list.reverse()
+      _.nextTick(function () {
+        assertMarkup()
+        vm.list.splice(1, 1)
+        _.nextTick(function () {
+          assertMarkup()
+          vm.list.splice(1, 0, { a: 2 })
+          _.nextTick(function () {
+            assertMarkup()
+            done()
+          })
+        })
+      })
 
-    //   function assertMarkup () {
-    //     var markup = vm.list.map(function (item) {
-    //       return '<p>' + item.a + '</p><p>' + (item.a + 1) + '</p>'
-    //     }).join('')
-    //     expect(el.innerHTML).toBe(markup)
-    //   }
-    // })
+      function assertMarkup () {
+        var markup = vm.list.map(function (item) {
+          return '<p>' + item.a + '</p><p>' + (item.a + 1) + '</p>'
+        }).join('')
+        expect(el.innerHTML).toBe(markup)
+      }
+    })
 
-    // it('block repeat with component', function (done) {
-    //   var vm = new Vue({
-    //     el: el,
-    //     template: '<template v-repeat="list"><test a="{{a}}"></test></template>',
-    //     data: {
-    //       list: [
-    //         { a: 1 },
-    //         { a: 2 },
-    //         { a: 3 }
-    //       ]
-    //     },
-    //     components: {
-    //       test: {
-    //         props: ['a'],
-    //         template: '{{a}}'
-    //       }
-    //     }
-    //   })
-    //   assertMarkup()
-    //   vm.list.reverse()
-    //   _.nextTick(function () {
-    //     assertMarkup()
-    //     vm.list.splice(1, 1)
-    //     _.nextTick(function () {
-    //       assertMarkup()
-    //       vm.list.splice(1, 0, { a: 2 })
-    //       _.nextTick(function () {
-    //         assertMarkup()
-    //         done()
-    //       })
-    //     })
-    //   })
+    it('fragment loop with component', function (done) {
+      var vm = new Vue({
+        el: el,
+        template: '<template v-for="item in list"><test a="{{item.a}}"></test></template>',
+        data: {
+          list: [
+            { a: 1 },
+            { a: 2 },
+            { a: 3 }
+          ]
+        },
+        components: {
+          test: {
+            props: ['a'],
+            template: '{{a}}'
+          }
+        }
+      })
+      assertMarkup()
+      vm.list.reverse()
+      _.nextTick(function () {
+        assertMarkup()
+        vm.list.splice(1, 1)
+        _.nextTick(function () {
+          assertMarkup()
+          vm.list.splice(1, 0, { a: 2 })
+          _.nextTick(function () {
+            assertMarkup()
+            done()
+          })
+        })
+      })
 
-    //   function assertMarkup () {
-    //     var markup = vm.list.map(function (item) {
-    //       return '<test>' + item.a + '</test>'
-    //     }).join('')
-    //     expect(el.innerHTML).toBe(markup)
-    //   }
-    // })
+      function assertMarkup () {
+        var markup = vm.list.map(function (item) {
+          return '<test>' + item.a + '</test>'
+        }).join('')
+        expect(el.innerHTML).toBe(markup)
+      }
+    })
 
-    // it('array filters', function (done) {
-    //   var vm = new Vue({
-    //     el: el,
-    //     template: '<div v-repeat="list | filterBy filterKey | orderBy sortKey -1">{{id}}</div>',
-    //     data: {
-    //       filterKey: 'hi!',
-    //       sortKey: 'id',
-    //       list: [
-    //         { id: 1, id2: 4, msg: 'hi!' },
-    //         { id: 2, id2: 3, msg: 'na' },
-    //         { id: 3, id2: 2, msg: 'hi!' },
-    //         { id: 4, id2: 1, msg: 'na' }
-    //       ]
-    //     }
-    //   })
-    //   assertMarkup()
+    it('array filters', function (done) {
+      var vm = new Vue({
+        el: el,
+        template: '<div v-for="item in list | filterBy filterKey | orderBy sortKey -1">{{item.id}}</div>',
+        data: {
+          filterKey: 'hi!',
+          sortKey: 'id',
+          list: [
+            { id: 1, id2: 4, msg: 'hi!' },
+            { id: 2, id2: 3, msg: 'na' },
+            { id: 3, id2: 2, msg: 'hi!' },
+            { id: 4, id2: 1, msg: 'na' }
+          ]
+        }
+      })
+      assertMarkup()
 
-    //   go(
-    //     function () {
-    //       vm.filterKey = 'na'
-    //     }, assertMarkup
-    //   )
-    //   .then(
-    //     function () {
-    //       vm.sortKey = 'id2'
-    //     }, assertMarkup
-    //   )
-    //   .then(
-    //     function () {
-    //       vm.list[0].id2 = 0
-    //     }, assertMarkup
-    //   )
-    //   .then(
-    //     function () {
-    //       vm.list.push({ id: 0, id2: 4, msg: 'na' })
-    //     }, assertMarkup
-    //   )
-    //   .then(
-    //     function () {
-    //       vm.list = [
-    //         { id: 33, id2: 4, msg: 'hi!' },
-    //         { id: 44, id2: 3, msg: 'na' }
-    //       ]
-    //     }, assertMarkup
-    //   )
-    //   .run(done)
+      go(
+        function () {
+          vm.filterKey = 'na'
+        }, assertMarkup
+      )
+      .then(
+        function () {
+          vm.sortKey = 'id2'
+        }, assertMarkup
+      )
+      .then(
+        function () {
+          vm.list[0].id2 = 0
+        }, assertMarkup
+      )
+      .then(
+        function () {
+          vm.list.push({ id: 0, id2: 4, msg: 'na' })
+        }, assertMarkup
+      )
+      .then(
+        function () {
+          vm.list = [
+            { id: 33, id2: 4, msg: 'hi!' },
+            { id: 44, id2: 3, msg: 'na' }
+          ]
+        }, assertMarkup
+      )
+      .run(done)
 
-    //   function assertMarkup () {
-    //     var markup = vm.list
-    //       .filter(function (item) {
-    //         return item.msg === vm.filterKey
-    //       })
-    //       .sort(function (a, b) {
-    //         return a[vm.sortKey] > b[vm.sortKey] ? -1 : 1
-    //       })
-    //       .map(function (item) {
-    //         return '<div>' + item.id + '</div>'
-    //       }).join('')
-    //     expect(el.innerHTML).toBe(markup)
-    //   }
-    // })
+      function assertMarkup () {
+        var markup = vm.list
+          .filter(function (item) {
+            return item.msg === vm.filterKey
+          })
+          .sort(function (a, b) {
+            return a[vm.sortKey] > b[vm.sortKey] ? -1 : 1
+          })
+          .map(function (item) {
+            return '<div>' + item.id + '</div>'
+          }).join('')
+        expect(el.innerHTML).toBe(markup)
+      }
+    })
 
-    // it('orderBy supporting $key for object repeaters', function (done) {
-    //   var vm = new Vue({
-    //     el: el,
-    //     template: '<div v-repeat="obj | orderBy sortKey">{{$value}}</div>',
-    //     data: {
-    //       sortKey: '$key',
-    //       obj: {
-    //         c: 1,
-    //         a: 3,
-    //         b: 2
-    //       }
-    //     }
-    //   })
-    //   expect(el.innerHTML).toBe('<div>3</div><div>2</div><div>1</div>')
-    //   vm.sortKey = '$value'
-    //   _.nextTick(function () {
-    //     expect(el.innerHTML).toBe('<div>1</div><div>2</div><div>3</div>')
-    //     done()
-    //   })
-    // })
+    it('orderBy supporting $key for object repeaters', function (done) {
+      var vm = new Vue({
+        el: el,
+        template: '<div v-for="val in obj | orderBy sortKey">{{val}}</div>',
+        data: {
+          sortKey: '$key',
+          obj: {
+            c: 1,
+            a: 3,
+            b: 2
+          }
+        }
+      })
+      expect(el.innerHTML).toBe('<div>3</div><div>2</div><div>1</div>')
+      vm.sortKey = 'val'
+      _.nextTick(function () {
+        expect(el.innerHTML).toBe('<div>1</div><div>2</div><div>3</div>')
+        done()
+      })
+    })
 
-    // it('orderBy supporting $value for primitive arrays', function () {
-    //   new Vue({
-    //     el: el,
-    //     template: '<div v-repeat="list | orderBy \'$value\'">{{$value}}</div>',
-    //     data: {
-    //       list: [3, 2, 1]
-    //     }
-    //   })
-    //   expect(el.innerHTML).toBe('<div>1</div><div>2</div><div>3</div>')
-    // })
+    it('orderBy supporting alias for primitive arrays', function () {
+      new Vue({
+        el: el,
+        template: '<div v-for="val in list | orderBy \'val\'">{{val}}</div>',
+        data: {
+          list: [3, 2, 1]
+        }
+      })
+      expect(el.innerHTML).toBe('<div>1</div><div>2</div><div>3</div>')
+    })
 
-    // it('track by id', function (done) {
+    it('track by id', function (done) {
 
-    //   assertTrackBy('<test v-repeat="list" track-by="id"></test>', '{{msg}}', function () {
-    //     assertTrackBy('<test v-repeat="item:list" track-by="id"></test>', '{{item.msg}}', done)
-    //   })
+      var vm = new Vue({
+        el: el,
+        template: '<test v-for="item in list" item="{{item}}" track-by="id"></test>',
+        data: {
+          list: [
+            { id: 1, msg: 'hi' },
+            { id: 2, msg: 'ha' },
+            { id: 3, msg: 'ho' }
+          ]
+        },
+        components: {
+          test: {
+            props: ['item'],
+            template: '{{item.msg}}'
+          }
+        }
+      })
+      assertMarkup()
+      var oldVms = vm.$children.slice()
+      // swap the data with different objects, but with
+      // the same ID!
+      vm.list = [
+        { id: 1, msg: 'wa' },
+        { id: 2, msg: 'wo' }
+      ]
+      _.nextTick(function () {
+        assertMarkup()
+        // should reuse old vms!
+        var i = 2
+        while (i--) {
+          expect(vm.$children[i]).toBe(oldVms[i])
+        }
+        done()
+      })
 
-    //   function assertTrackBy (template, componentTemplate, next) {
-    //     var vm = new Vue({
-    //       el: el,
-    //       template: template,
-    //       data: {
-    //         list: [
-    //           { id: 1, msg: 'hi' },
-    //           { id: 2, msg: 'ha' },
-    //           { id: 3, msg: 'ho' }
-    //         ]
-    //       },
-    //       components: {
-    //         test: {
-    //           template: componentTemplate
-    //         }
-    //       }
-    //     })
-    //     assertMarkup()
-    //     var oldVms = vm.$children.slice()
-    //     // swap the data with different objects, but with
-    //     // the same ID!
-    //     vm.list = [
-    //       { id: 1, msg: 'wa' },
-    //       { id: 2, msg: 'wo' }
-    //     ]
-    //     _.nextTick(function () {
-    //       assertMarkup()
-    //       // should reuse old vms!
-    //       var i = 2
-    //       while (i--) {
-    //         expect(vm.$children[i]).toBe(oldVms[i])
-    //       }
-    //       next()
-    //     })
+      function assertMarkup () {
+        var markup = vm.list.map(function (item) {
+          return '<test>' + item.msg + '</test>'
+        }).join('')
+        expect(el.innerHTML).toBe(markup)
+      }
+    })
 
-    //     function assertMarkup () {
-    //       var markup = vm.list.map(function (item) {
-    //         return '<test>' + item.msg + '</test>'
-    //       }).join('')
-    //       expect(el.innerHTML).toBe(markup)
-    //     }
-    //   }
-    // })
+    it('track by $index', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          items: [{a: 1}, {a: 2}]
+        },
+        template: '<div v-for="item in items" track-by="$index">{{$index}} {{item.a}}</div>'
+      })
 
-    // it('track by $index', function (done) {
-    //   var vm = new Vue({
-    //     el: el,
-    //     data: {
-    //       items: [{a: 1}, {a: 2}]
-    //     },
-    //     template: '<div v-repeat="items" track-by="$index">{{$index}} {{a}}</div>'
-    //   })
+      assertMarkup()
+      var el1 = el.children[0]
+      var el2 = el.children[1]
+      vm.items = [{a: 3}, {a: 2}, {a: 1}]
+      _.nextTick(function () {
+        assertMarkup()
+        // should mutate the DOM in-place
+        expect(el.children[0]).toBe(el1)
+        expect(el.children[1]).toBe(el2)
+        done()
+      })
 
-    //   assertMarkup()
-    //   var el1 = el.children[0]
-    //   var el2 = el.children[1]
-    //   vm.items = [{a: 3}, {a: 2}, {a: 1}]
-    //   _.nextTick(function () {
-    //     assertMarkup()
-    //     // should mutate the DOM in-place
-    //     expect(el.children[0]).toBe(el1)
-    //     expect(el.children[1]).toBe(el2)
-    //     done()
-    //   })
+      function assertMarkup () {
+        expect(el.innerHTML).toBe(vm.items.map(function (item, i) {
+          return '<div>' + i + ' ' + item.a + '</div>'
+        }).join(''))
+      }
+    })
 
-    //   function assertMarkup () {
-    //     expect(el.innerHTML).toBe(vm.items.map(function (item, i) {
-    //       return '<div>' + i + ' ' + item.a + '</div>'
-    //     }).join(''))
-    //   }
-    // })
+    it('warn missing alias', function () {
+      new Vue({
+        el: el,
+        template: '<div v-for="items"></div>'
+      })
+      expect(hasWarned(_, 'Alias is required in v-for')).toBe(true)
+    })
 
-    // it('warn duplicate objects', function () {
-    //   var obj = {}
-    //   new Vue({
-    //     el: el,
-    //     template: '<div v-repeat="items"></div>',
-    //     data: {
-    //       items: [obj, obj]
-    //     }
-    //   })
-    //   expect(hasWarned(_, 'Duplicate objects')).toBe(true)
-    // })
+    it('warn duplicate objects', function () {
+      var obj = {}
+      new Vue({
+        el: el,
+        template: '<div v-for="item in items"></div>',
+        data: {
+          items: [obj, obj]
+        }
+      })
+      expect(hasWarned(_, 'Duplicate objects')).toBe(true)
+    })
 
-    // it('warn duplicate trackby id', function () {
-    //   new Vue({
-    //     el: el,
-    //     template: '<div v-repeat="items" track-by="id"></div>',
-    //     data: {
-    //       items: [{id: 1}, {id: 1}]
-    //     }
-    //   })
-    //   expect(hasWarned(_, 'Duplicate track-by key')).toBe(true)
-    // })
+    it('warn duplicate trackby id', function () {
+      new Vue({
+        el: el,
+        template: '<div v-for="item in items" track-by="id"></div>',
+        data: {
+          items: [{id: 1}, {id: 1}]
+        }
+      })
+      expect(hasWarned(_, 'Duplicate track-by key')).toBe(true)
+    })
 
-    // it('warn v-if', function () {
-    //   new Vue({
-    //     el: el,
-    //     template: '<div v-repeat="items" v-if="aaa"></div>',
-    //     data: {
-    //       items: []
-    //     }
-    //   })
-    //   expect(hasWarned(_, 'Don\'t use v-if')).toBe(true)
-    // })
+    it('repeat number', function () {
+      new Vue({
+        el: el,
+        template: '<div v-for="n in 3">{{$index}} {{n}}</div>'
+      })
+      expect(el.innerHTML).toBe('<div>0 0</div><div>1 1</div><div>2 2</div>')
+    })
 
-    // it('repeat number', function () {
-    //   new Vue({
-    //     el: el,
-    //     template: '<div v-repeat="3">{{$index}} {{$value}}</div>'
-    //   })
-    //   expect(el.innerHTML).toBe('<div>0 0</div><div>1 1</div><div>2 2</div>')
-    // })
+    it('repeat string', function () {
+      new Vue({
+        el: el,
+        template: '<div v-for="letter in \'vue\'">{{$index}} {{letter}}</div>'
+      })
+      expect(el.innerHTML).toBe('<div>0 v</div><div>1 u</div><div>2 e</div>')
+    })
 
-    // it('repeat string', function () {
-    //   new Vue({
-    //     el: el,
-    //     template: '<div v-repeat="\'vue\'">{{$index}} {{$value}}</div>'
-    //   })
-    //   expect(el.innerHTML).toBe('<div>0 v</div><div>1 u</div><div>2 e</div>')
-    // })
+    it('teardown', function () {
+      var vm = new Vue({
+        el: el,
+        template: '<div v-for="item in items"></div>',
+        data: {
+          items: [{a: 1}, {a: 2}]
+        }
+      })
+      vm._directives[0].unbind()
+      expect(vm.$children.length).toBe(0)
+    })
 
-    // it('teardown', function () {
-    //   var vm = new Vue({
-    //     el: el,
-    //     template: '<div v-repeat="items"></div>',
-    //     data: {
-    //       items: [{a: 1}, {a: 2}]
-    //     }
-    //   })
-    //   vm._directives[0].unbind()
-    //   expect(vm.$children.length).toBe(0)
-    // })
+    it('with transition', function (done) {
+      document.body.appendChild(el)
+      var vm = new Vue({
+        el: el,
+        template: '<div v-for="item in items" v-transition="test">{{item.a}}</div>',
+        data: {
+          items: [{a: 1}, {a: 2}, {a: 3}]
+        },
+        transitions: {
+          test: {
+            leave: function (el, done) {
+              setTimeout(done, 0)
+            }
+          }
+        }
+      })
+      vm.items.splice(1, 1, {a: 4})
+      setTimeout(function () {
+        expect(el.innerHTML).toBe(
+          '<div class="test-transition">1</div>' +
+          '<div class="test-transition">4</div>' +
+          '<div class="test-transition">3</div>'
+        )
+        document.body.removeChild(el)
+        done()
+      }, 100)
+    })
 
-    // it('with transition', function (done) {
-    //   document.body.appendChild(el)
-    //   var vm = new Vue({
-    //     el: el,
-    //     template: '<div v-repeat="items" v-transition="test">{{a}}</div>',
-    //     data: {
-    //       items: [{a: 1}, {a: 2}, {a: 3}]
-    //     },
-    //     transitions: {
-    //       test: {
-    //         leave: function (el, done) {
-    //           setTimeout(done, 0)
-    //         }
-    //       }
-    //     }
-    //   })
-    //   vm.items.splice(1, 1, {a: 4})
-    //   setTimeout(function () {
-    //     expect(el.innerHTML).toBe(
-    //       '<div class="test-transition">1</div>' +
-    //       '<div class="test-transition">4</div>' +
-    //       '<div class="test-transition">3</div>'
-    //     )
-    //     document.body.removeChild(el)
-    //     done()
-    //   }, 100)
-    // })
+    it('v-model binding on alias', function () {
+      var vm = new Vue({
+        el: el,
+        template:
+          '<div v-for="val in items"><input v-model="val"></div>' +
+          '<div v-for="val in obj"><input v-model="val"></div>',
+        data: {
+          items: ['a'],
+          obj: { foo: 'a' }
+        }
+      })
 
-    // it('sync $value/alias changes back to original array/object', function (done) {
-    //   var vm = new Vue({
-    //     el: el,
-    //     template:
-    //       '<div v-repeat="items">{{$value}}</div>' +
-    //       '<div v-repeat="obj">{{$value}}</div>' +
-    //       '<div v-repeat="val:vals">{{val}}</div>',
-    //     data: {
-    //       items: ['a', true],
-    //       obj: { foo: 'a', bar: 'b' },
-    //       vals: [1, null]
-    //     }
-    //   })
-    //   vm.$children[0].$value = 'c'
-    //   vm.$children[1].$value = 'd'
-    //   var key = vm.$children[2].$key
-    //   vm.$children[2].$value = 'e'
-    //   vm.$children[4].val = 3
-    //   vm.$children[5].val = 4
-    //   _.nextTick(function () {
-    //     expect(vm.items[0]).toBe('c')
-    //     expect(vm.items[1]).toBe('d')
-    //     expect(vm.obj[key]).toBe('e')
-    //     expect(vm.vals[0]).toBe(3)
-    //     expect(vm.vals[1]).toBe(4)
-    //     done()
-    //   })
-    // })
+      var a = getInput(1)
+      a.value = 'b'
+      trigger(a, 'input')
+      expect(vm.items[0]).toBe('b')
 
-    // it('warn $value sync with filters', function (done) {
-    //   var vm = new Vue({
-    //     el: el,
-    //     template: '<div v-repeat="items | orderBy \'$value\'"></div>',
-    //     data: {
-    //       items: ['a', 'b']
-    //     }
-    //   })
-    //   vm.$children[0].$value = 'c'
-    //   _.nextTick(function () {
-    //     expect(hasWarned(_, 'use an Array of Objects instead')).toBe(true)
-    //     done()
-    //   })
-    // })
+      var b = getInput(2)
+      b.value = 'bar'
+      trigger(b, 'input')
+      expect(vm.obj.foo).toBe('bar')
 
-    // it('nested track by', function (done) {
-    //   assertTrackBy('<div v-repeat="list" track-by="id">{{msg}}<div v-repeat="list" track-by="id">{{msg}}</div></div>', function () {
-    //     assertTrackBy('<div v-repeat="list" track-by="id">{{msg}}<div v-repeat="list" track-by="id">{{msg}}</div></div>', done)
-    //   })
+      function getInput (x) {
+        return vm.$el.querySelector('div:nth-child(' + x + ') input')
+      }
+    })
 
-    //   function assertTrackBy (template, next) {
-    //     var vm = new Vue({
-    //       el: el,
-    //       data: {
-    //         list: [
-    //           { id: 1, msg: 'hi', list: [
-    //             { id: 1, msg: 'hi foo' }
-    //           ] },
-    //           { id: 2, msg: 'ha', list: [] },
-    //           { id: 3, msg: 'ho', list: [] }
-    //         ]
-    //       },
-    //       template: template
-    //     })
-    //     assertMarkup()
+    it('warn v-model on alias with filters', function () {
+      var vm = new Vue({
+        el: el,
+        template:
+          '<div v-for="item in items | orderBy \'item\'">' +
+            '<input v-model="item">' +
+          '</div>',
+        data: {
+          items: ['a', 'b']
+        }
+      })
+      trigger(vm.$el.querySelector('input'), 'input')
+      expect(hasWarned(_, 'It seems you are using two-way binding')).toBe(true)
+    })
 
-    //     var oldVms = vm.$children.slice()
+    it('nested track by', function (done) {
+      var vm = new Vue({
+        el: el,
+        template:
+          '<div v-for="item in list" track-by="id" v-ref="outer">' +
+            '{{item.msg}}' + 
+            '<div v-for="subItem in item.list" track-by="id" v-ref="inner{{$index}}">' +
+              '{{subItem.msg}}' +
+            '</div>' +
+          '</div>',
+        data: {
+          list: [
+            { id: 1, msg: 'hi', list: [
+              { id: 1, msg: 'hi foo' }
+            ] },
+            { id: 2, msg: 'ha', list: [] },
+            { id: 3, msg: 'ho', list: [] }
+          ]
+        }
+      })
+      assertMarkup()
 
-    //     vm.list = [
-    //       { id: 1, msg: 'wa', list: [
-    //         { id: 1, msg: 'hi foo' },
-    //         { id: 2, msg: 'hi bar' }
-    //       ] },
-    //       { id: 2, msg: 'wo', list: [] }
-    //     ]
+      var oldFrags = vm.$.outer
+      var oldInnerFrags = vm.$.inner0
 
-    //     _.nextTick(function () {
-    //       assertMarkup()
-    //       // should reuse old vms!
-    //       var i = 2
-    //       while (i--) {
-    //         expect(vm.$children[i]).toBe(oldVms[i])
-    //       }
-    //       expect(vm.$children[0].$children[0]).toBe(oldVms[0].$children[0])
-    //       next()
-    //     })
+      vm.list = [
+        { id: 1, msg: 'wa', list: [
+          { id: 1, msg: 'hi foo' },
+          { id: 2, msg: 'hi bar' }
+        ] },
+        { id: 2, msg: 'wo', list: [] }
+      ]
 
-    //     function assertMarkup () {
-    //       var markup = vm.list.map(function (item) {
-    //         var sublist = item.list.map(function (item) {
-    //           return '<div>' + item.msg + '</div>'
-    //         }).join('')
-    //         return '<div>' + item.msg + sublist + '</div>'
-    //       }).join('')
-    //       expect(el.innerHTML).toBe(markup)
-    //     }
-    //   }
-    // })
+      _.nextTick(function () {
+        assertMarkup()
+        // should reuse old frags!
+        var i = 2
+        while (i--) {
+          expect(vm.$.outer[i]).toBe(oldFrags[i])
+        }
+        expect(vm.$.inner0[0]).toBe(oldInnerFrags[0])
+        done()
+      })
+
+      function assertMarkup () {
+        var markup = vm.list.map(function (item) {
+          var sublist = item.list.map(function (item) {
+            return '<div>' + item.msg + '</div>'
+          }).join('')
+          return '<div>' + item.msg + sublist + '</div>'
+        }).join('')
+        expect(el.innerHTML).toBe(markup)
+      }
+    })
 
     // it('switch between object-converted & array mode', function (done) {
     //   var obj = {
@@ -977,4 +968,16 @@ function assertObjectPrimitiveMutations (vm, el, done) {
     }).join('')
     expect(el.innerHTML).toBe(markup)
   }
+}
+
+/**
+ * Helper for triggering events
+ */
+
+function trigger (target, event, process) {
+  var e = document.createEvent('HTMLEvents')
+  e.initEvent(event, true, true)
+  if (process) process(e)
+  target.dispatchEvent(e)
+  return e
 }
