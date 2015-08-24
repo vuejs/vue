@@ -7,13 +7,14 @@ module.exports = {
     var el = this.el
     var number = this._checkParam('number') != null
     var expression = this._checkParam('exp')
+    var scope = this._scope || this.vm
 
     this.getValue = function () {
       var val = el.value
       if (number) {
         val = _.toNumber(val)
       } else if (expression !== null) {
-        val = self.vm.$eval(expression)
+        val = scope.$eval(expression)
       }
       return val
     }

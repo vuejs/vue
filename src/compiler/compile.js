@@ -335,7 +335,7 @@ function makeTextNodeLinkFn (tokens, frag) {
       if (token.tag) {
         node = childNodes[i]
         if (token.oneTime) {
-          value = vm.$eval(value, scope)
+          value = (scope || vm).$eval(value)
           if (token.html) {
             _.replace(node, templateParser.parse(value, true))
           } else {
@@ -597,11 +597,11 @@ function collectAttrDirective (name, value, options) {
     return {
       def: def,
       _link: allOneTime
-        ? function (vm, el) {
-            el.setAttribute(name, vm.$interpolate(value))
+        ? function (vm, el, host, scope) {
+            el.setAttribute(name, (scope || vm).$interpolate(value))
           }
         : function (vm, el, host, scope) {
-            var exp = textParser.tokensToExp(tokens, vm)
+            var exp = textParser.tokensToExp(tokens, (scope || vm))
             var desc = isClass
               ? dirParser.parse(exp)[0]
               : dirParser.parse(name + ':' + exp)[0]
