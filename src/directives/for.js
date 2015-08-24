@@ -484,7 +484,7 @@ function findPrevFrag (frag, anchor, id) {
   var el = frag.node.previousSibling
   /* istanbul ignore if */
   if (!el) return
-  var frag = el.__vfrag__
+  frag = el.__vfrag__
   while (
     (!frag || frag.forId !== id || !frag.inserted) &&
     el !== anchor
