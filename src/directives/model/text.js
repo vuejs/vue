@@ -56,10 +56,10 @@ module.exports = {
         ? _.toNumber(el.value)
         : el.value
       self.set(val)
-      // force update here, because the watcher may not
-      // run when the value is the same.
+      // force update on next tick to avoid lock & same value
+      // also only update when user is not typing
       _.nextTick(function () {
-        if (self._bound) {
+        if (self._bound && !self.focused) {
           self.update(self._watcher.value)
         }
       })
@@ -115,9 +115,7 @@ module.exports = {
   },
 
   update: function (value) {
-    if (!this.focused) {
-      this.el.value = _.toString(value)
-    }
+    this.el.value = _.toString(value)
   },
 
   unbind: function () {
