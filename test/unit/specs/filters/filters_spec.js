@@ -123,6 +123,15 @@ describe('Filters', function () {
     }, 500)
   })
 
+  it('prevent', function (done) {
+    var filter = filters.prevent
+    expect(filter(null)).toBeUndefined()
+    var spy = jasmine.createSpy('filter:prevent')
+    var handler = filter(spy)
+    handler()
+    expect(spy).toHaveBeenCalled()
+  })
+
   it('filterBy', function () {
     var filter = filters.filterBy
     var arr = [
