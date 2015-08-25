@@ -20,7 +20,7 @@
 				<input class="toggle-all" type="checkbox" v-model="allDone">
 				<ul class="todo-list">
 					<li class="todo"
-						v-repeat="todo: filteredTodos"
+						v-for="todo in filteredTodos"
 						v-class="completed: todo.completed, editing: todo == editedTodo">
 						<div class="view">
 							<input class="toggle" type="checkbox" v-model="todo.completed">
