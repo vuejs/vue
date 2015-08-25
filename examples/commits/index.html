@@ -23,21 +23,21 @@
   <body>
     <div id="demo">
       <h1>Latest Vue.js Commits</h1>
-      <template v-repeat="b:branches">
+      <template v-for="branch in branches">
         <input type="radio"
           name="branch"
-          id="{{*b}}"
-          value="{{*b}}"
+          id="{{branch}}"
+          value="{{branch}}"
           v-model="currentBranch">
-        <label for="{{*b}}">{{*b}}</label>
+        <label for="{{branch}}">{{branch}}</label>
       </template>
       <p>yyx990803/vue@{{currentBranch}}</p>
       <ul>
-        <li v-repeat="commits">
-          <a href="{{html_url}}" target="_blank" class="commit">{{sha.slice(0, 7)}}</a>
-          - <span class="message">{{commit.message | truncate}}</span><br>
-          by <span class="author">{{commit.author.name}}</span>
-          at <span class="date">{{commit.author.date | formatDate}}</span>
+        <li v-for="record in commits">
+          <a href="{{record.html_url}}" target="_blank" class="commit">{{record.sha.slice(0, 7)}}</a>
+          - <span class="message">{{record.commit.message | truncate}}</span><br>
+          by <span class="author">{{record.commit.author.name}}</span>
+          at <span class="date">{{record.commit.author.date | formatDate}}</span>
         </li>
       </ul>
     </div>

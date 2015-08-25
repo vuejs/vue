@@ -13,13 +13,18 @@
       <g>
         <polygon v-attr="points:points"></polygon>
         <circle cx="100" cy="100" r="80"></circle>
-        <axis-label v-repeat="stats"></axis-label>
+        <axis-label
+          v-for="stat in stats"
+          stat="{{stat}}"
+          index="{{$index}}"
+          total="{{stats.length}}">
+        </axis-label>
       </g>
     </script>
 
     <!-- template for the axis label component. -->
     <script type="text/x-template" id="axis-label-template">
-      <text v-attr="x:point.x, y:point.y">{{label}}</text>
+      <text v-attr="x:point.x, y:point.y">{{stat.label}}</text>
     </script>
 
     <!-- demo root element -->
@@ -29,11 +34,11 @@
         <polygraph stats="{{stats}}"></polygraph>
       </svg>
       <!-- controls -->
-      <div v-repeat="stats">
-        <label>{{label}}</label>
-        <input type="range" v-model="value" min="0" max="100">
-        <span>{{value}}</span>
-        <button v-on="click:remove(this)">X</button>
+      <div v-for="stat in stats">
+        <label>{{stat.label}}</label>
+        <input type="range" v-model="stat.value" min="0" max="100">
+        <span>{{stat.value}}</span>
+        <button v-on="click:remove(stat)">X</button>
       </div>
       <form id="add">
         <input name="newlabel" v-model="newLabel">
