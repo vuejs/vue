@@ -123,6 +123,32 @@ describe('Filters', function () {
     }, 500)
   })
 
+  it('throttle', function (done) {
+    var filter = filters.throttle
+    expect(filter(null)).toBeUndefined()
+    var spy = jasmine.createSpy('filter:throttle')
+    var handler = filter(spy)
+    handler()
+    // expect(spy).toHaveBeenCalled()
+    handler()
+    handler()
+    setTimeout(handler, 120)
+    setTimeout(function () {
+      expect(spy.calls.count()).toBe(3)
+    }, 210)
+    var spy2 = jasmine.createSpy('filter:throttle')
+    handler = filter(spy2, 450)
+    handler()
+    handler()
+    setTimeout(function () {
+      expect(spy2).toHaveBeenCalled()
+    }, 400)
+    setTimeout(function () {
+      expect(spy2.calls.count()).toBe(2)
+      done()
+    }, 500)
+  })
+
   it('filterBy', function () {
     var filter = filters.filterBy
     var arr = [

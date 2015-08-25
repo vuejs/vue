@@ -138,6 +138,14 @@ exports.debounce = function (handler, delay) {
   return _.debounce(handler, delay)
 }
 
+exports.throttle = function (handler, delay) {
+  if (!handler) return
+  if (!delay) {
+    delay = 50
+  }
+  return _.throttle(handler, delay)
+}
+
 /**
  * Install special array filters
  */
