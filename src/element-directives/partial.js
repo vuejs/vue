@@ -1,25 +1,13 @@
 var _ = require('../util')
-var templateParser = require('../parsers/template')
-var textParser = require('../parsers/text')
-var compiler = require('../compiler')
-var Cache = require('../cache')
-var cache = new Cache(1000)
-
-// v-partial reuses logic from v-if
+var FragmentFactory = require('../fragment/factory')
 var vIf = require('../directives/if')
 
 module.exports = {
 
-  link: vIf.link,
-  teardown: vIf.teardown,
-  getContainedComponents: vIf.getContainedComponents,
-
   bind: function () {
     var el = this.el
-    this.start = _.createAnchor('v-partial-start')
-    this.end = _.createAnchor('v-partial-end')
-    _.replace(el, this.end)
-    _.before(this.start, this.end)
+    this.anchor = _.createAnchor('v-partial')
+    _.replace(el, this.anchor)
     var id = el.getAttribute('name')
     var tokens = textParser.parse(id)
     if (tokens) {
@@ -35,11 +23,12 @@ module.exports = {
     var self = this
     var exp = textParser.tokensToExp(tokens)
     this.unwatch = this.vm.$watch(exp, function (value) {
-      self.teardown()
+      vIf.remove.call(self)
       self.insert(value)
     }, {
       immediate: true,
-      user: false
+      user: false,
+      scope: this._scope
     })
   },
 
@@ -49,25 +38,13 @@ module.exports = {
       _.assertAsset(partial, 'partial', id)
     }
     if (partial) {
-      var frag = templateParser.parse(partial, true)
-      // cache partials based on constructor id.
-      var cacheId = (this.vm.constructor.cid || '') + partial
-      var linker = this.compile(frag, cacheId)
-      // this is provided by v-if
-      this.link(frag, linker)
+      this.factory = new FragmentFactory(this.vm, partial)
+      vIf.insert.call(this)
     }
   },
 
-  compile: function (frag, cacheId) {
-    var hit = cache.get(cacheId)
-    if (hit) return hit
-    var linker = compiler.compile(frag, this.vm.$options, true)
-    cache.put(cacheId, linker)
-    return linker
-  },
-
   unbind: function () {
-    if (this.unlink) this.unlink()
+    if (this.frag) this.frag.unlink()
     if (this.unwatch) this.unwatch()
   }
 }

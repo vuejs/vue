@@ -11,24 +11,25 @@ var linkerCache = new Cache(5000)
  * fragment. Caches the compiled linker if possible.
  *
  * @param {Vue} vm
- * @param {Element} el
+ * @param {Element|String} el
  */
 
 function FragmentFactory (vm, el) {
   this.vm = vm
   var template
-  if (!_.isTemplate(el)) {
+  var isString = typeof el === 'string'
+  if (isString || _.isTemplate(el)) {
+    template = templateParser.parse(el, true)
+  } else {
     template = document.createDocumentFragment()
     template.appendChild(el)
-  } else {
-    template = templateParser.parse(el, true)
   }
   this.template = template
   // linker can be cached, but only for components
   var linker
   var cid = vm.constructor.cid
   if (cid > 0) {
-    var cacheId = cid + el.outerHTML
+    var cacheId = cid + (isString ? el : el.outerHTML)
     linker = linkerCache.get(cacheId)
     if (!linker) {
       linker = compiler.compile(template, vm.$options, true)
