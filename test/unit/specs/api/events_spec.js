@@ -19,6 +19,15 @@ describe('Events API', function () {
     expect(spy).toHaveBeenCalledWith(1, 2, 3, 4)
   })
 
+  it('$on with namespace', function () {
+    vm.$on('test.name', spy)
+    vm.$emit('test', 1)
+    vm.$emit('test.name', 2)
+    vm.$emit('test.name.subname', 3)
+    expect(spy.calls.count()).toBe(2)
+    expect(spy).not.toHaveBeenCalledWith(1)
+  })
+
   it('$once', function () {
     vm.$once('test', spy)
     vm.$emit('test', 1, 2, 3)

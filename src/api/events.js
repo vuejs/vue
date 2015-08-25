@@ -114,7 +114,7 @@ exports.$emit = function (event) {
       }
     }
     event += '.' + this._eventNamespaces[names_i]
-  } while (++names_i < names_length)
+  } while (names_i++ < names_length)
 
   return this
 }
