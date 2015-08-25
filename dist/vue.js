@@ -1,5 +1,5 @@
 /*!
- * Vue.js v0.12.10
+ * Vue.js v0.12.11
  * (c) 2015 Evan You
  * Released under the MIT License.
  */
@@ -516,7 +516,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var callbacks = []
 	  var pending = false
 	  var timerFunc
-	  function handle () {
+	  function nextTickHandler () {
 	    pending = false
 	    var copies = callbacks.slice(0)
 	    callbacks = []
@@ -527,7 +527,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  /* istanbul ignore if */
 	  if (typeof MutationObserver !== 'undefined') {
 	    var counter = 1
-	    var observer = new MutationObserver(handle)
+	    var observer = new MutationObserver(nextTickHandler)
 	    var textNode = document.createTextNode(counter)
 	    observer.observe(textNode, {
 	      characterData: true
@@ -546,7 +546,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    callbacks.push(func)
 	    if (pending) return
 	    pending = true
-	    timerFunc(handle, 0)
+	    timerFunc(nextTickHandler, 0)
 	  }
 	})()
 
@@ -1306,13 +1306,17 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	exports.resolveAsset = function resolve (options, type, id) {
 	  var camelizedId = _.camelize(id)
-	  var asset = options[type][id] || options[type][camelizedId]
+	  var pascalizedId = camelizedId.charAt(0).toUpperCase() + camelizedId.slice(1)
+	  var assets = options[type]
+	  var asset = assets[id] || assets[camelizedId] || assets[pascalizedId]
 	  while (
-	    !asset && options._parent &&
+	    !asset &&
+	    options._parent &&
 	    (!config.strict || options._repeat)
 	  ) {
-	    options = options._parent.$options
-	    asset = options[type][id] || options[type][camelizedId]
+	    options = (options._context || options._parent).$options
+	    assets = options[type]
+	    asset = assets[id] || assets[camelizedId] || assets[pascalizedId]
 	  }
 	  return asset
 	}
@@ -1686,11 +1690,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Element|DocumentFragment} el
 	 * @param {Object} options
 	 * @param {Boolean} partial
-	 * @param {Vue} [host] - host vm of transcluded content
 	 * @return {Function}
 	 */
 
-	exports.compile = function (el, options, partial, host) {
+	exports.compile = function (el, options, partial) {
 	  // link function for the node itself.
 	  var nodeLinkFn = partial || !options._asComponent
 	    ? compileNode(el, options)
@@ -1710,10 +1713,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	   *
 	   * @param {Vue} vm
 	   * @param {Element|DocumentFragment} el
+	   * @param {Vue} [host] - host vm of transcluded content
 	   * @return {Function|undefined}
 	   */
 
-	  return function compositeLinkFn (vm, el) {
+	  return function compositeLinkFn (vm, el, host) {
 	    // cache childNodes before linking parent, fix #657
 	    var childNodes = _.toArray(el.childNodes)
 	    // link
@@ -2782,7 +2786,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Cache = __webpack_require__(14)
 	var cache = new Cache(1000)
 	var argRE = /^[^\{\?]+$|^'[^']*'$|^"[^"]*"$/
-	var filterTokenRE = /[^\s'"]+|'[^']+'|"[^"]+"/g
+	var filterTokenRE = /[^\s'"]+|'[^']*'|"[^"]*"/g
 	var reservedArgRE = /^in$|^-?\d+/
 
 	/**
@@ -2851,9 +2855,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var stripped = reservedArgRE.test(arg)
 	    ? arg
 	    : _.stripQuotes(arg)
+	  var dynamic = stripped === false
 	  return {
-	    value: stripped || arg,
-	    dynamic: !stripped
+	    value: dynamic ? arg : stripped,
+	    dynamic: dynamic
 	  }
 	}
 
@@ -2990,7 +2995,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (_.assertProp(prop, val)) {
 	          child[childKey] = val
 	        }
-	      }
+	      }, { sync: true }
 	    )
 
 	    // set the child initial value.
@@ -3012,7 +3017,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          childKey,
 	          function (val) {
 	            parent.$set(parentKey, val)
-	          }
+	          }, { sync: true }
 	        )
 	      })
 	    }
@@ -3051,12 +3056,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *                 - {Boolean} twoWay
 	 *                 - {Boolean} deep
 	 *                 - {Boolean} user
+	 *                 - {Boolean} sync
 	 *                 - {Boolean} lazy
 	 *                 - {Function} [preProcess]
 	 * @constructor
 	 */
 
 	function Watcher (vm, expOrFn, cb, options) {
+	  // mix in options
+	  if (options) {
+	    _.extend(this, options)
+	  }
 	  var isFn = typeof expOrFn === 'function'
 	  this.vm = vm
 	  vm._watchers.push(this)
@@ -3064,22 +3074,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this.cb = cb
 	  this.id = ++uid // uid for batching
 	  this.active = true
-	  options = options || {}
-	  this.deep = !!options.deep
-	  this.user = !!options.user
-	  this.twoWay = !!options.twoWay
-	  this.lazy = !!options.lazy
-	  this.dirty = this.lazy
-	  this.filters = options.filters
-	  this.preProcess = options.preProcess
+	  this.dirty = this.lazy // for lazy watchers
 	  this.deps = []
 	  this.newDeps = null
+	  this.prevError = null // for async error stacks
 	  // parse expression for getter/setter
 	  if (isFn) {
 	    this.getter = expOrFn
 	    this.setter = undefined
 	  } else {
-	    var res = expParser.parse(expOrFn, options.twoWay)
+	    var res = expParser.parse(expOrFn, this.twoWay)
 	    this.getter = res.get
 	    this.setter = res.set
 	  }
@@ -3091,15 +3095,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this.queued = this.shallow = false
 	}
 
-	var p = Watcher.prototype
-
 	/**
 	 * Add a dependency to this directive.
 	 *
 	 * @param {Dep} dep
 	 */
 
-	p.addDep = function (dep) {
+	Watcher.prototype.addDep = function (dep) {
 	  var newDeps = this.newDeps
 	  var old = this.deps
 	  if (_.indexOf(newDeps, dep) < 0) {
@@ -3117,7 +3119,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Evaluate the getter, and re-collect dependencies.
 	 */
 
-	p.get = function () {
+	Watcher.prototype.get = function () {
 	  this.beforeGet()
 	  var vm = this.vm
 	  var value
@@ -3159,7 +3161,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {*} value
 	 */
 
-	p.set = function (value) {
+	Watcher.prototype.set = function (value) {
 	  var vm = this.vm
 	  if (this.filters) {
 	    value = vm._applyFilters(
@@ -3184,7 +3186,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Prepare for dependency collection.
 	 */
 
-	p.beforeGet = function () {
+	Watcher.prototype.beforeGet = function () {
 	  Dep.target = this
 	  this.newDeps = []
 	}
@@ -3193,7 +3195,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Clean up for dependency collection.
 	 */
 
-	p.afterGet = function () {
+	Watcher.prototype.afterGet = function () {
 	  Dep.target = null
 	  var i = this.deps.length
 	  while (i--) {
@@ -3213,10 +3215,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Boolean} shallow
 	 */
 
-	p.update = function (shallow) {
+	Watcher.prototype.update = function (shallow) {
 	  if (this.lazy) {
 	    this.dirty = true
-	  } else if (!config.async) {
+	  } else if (this.sync || !config.async) {
 	    this.run()
 	  } else {
 	    // if queued, only overwrite shallow with non-shallow,
@@ -3227,6 +3229,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        : false
 	      : !!shallow
 	    this.queued = true
+	    // record before-push error stack in debug mode
+	    /* istanbul ignore if */
+	    if (("development") !== 'production' && config.debug) {
+	      this.prevError = new Error('[vue] async stack trace')
+	    }
 	    batcher.push(this)
 	  }
 	}
@@ -3236,7 +3243,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Will be called by the batcher.
 	 */
 
-	p.run = function () {
+	Watcher.prototype.run = function () {
 	  if (this.active) {
 	    var value = this.get()
 	    if (
@@ -3247,9 +3254,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	      // non-shallow update (caused by a vm digest).
 	      ((_.isArray(value) || this.deep) && !this.shallow)
 	    ) {
+	      // set new value
 	      var oldValue = this.value
 	      this.value = value
-	      this.cb(value, oldValue)
+	      // in debug + async mode, when a watcher callbacks
+	      // throws, we also throw the saved before-push error
+	      // so the full cross-tick stack trace is available.
+	      var prevError = this.prevError
+	      /* istanbul ignore if */
+	      if (("development") !== 'production' &&
+	          config.debug && prevError) {
+	        this.prevError = null
+	        try {
+	          this.cb.call(this.vm, value, oldValue)
+	        } catch (e) {
+	          _.nextTick(function () {
+	            throw prevError
+	          }, 0)
+	          throw e
+	        }
+	      } else {
+	        this.cb.call(this.vm, value, oldValue)
+	      }
 	    }
 	    this.queued = this.shallow = false
 	  }
@@ -3260,7 +3286,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * This only gets called for lazy watchers.
 	 */
 
-	p.evaluate = function () {
+	Watcher.prototype.evaluate = function () {
 	  // avoid overwriting another watcher that is being
 	  // collected.
 	  var current = Dep.target
@@ -3273,7 +3299,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Depend on all deps collected by this watcher.
 	 */
 
-	p.depend = function () {
+	Watcher.prototype.depend = function () {
 	  var i = this.deps.length
 	  while (i--) {
 	    this.deps[i].depend()
@@ -3284,7 +3310,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Remove self from all dependencies' subcriber list.
 	 */
 
-	p.teardown = function () {
+	Watcher.prototype.teardown = function () {
 	  if (this.active) {
 	    // remove self from vm's watcher list
 	    // we can skip this if the vm if being destroyed
@@ -3347,15 +3373,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	// watcher being evaluated at any time.
 	Dep.target = null
 
-	var p = Dep.prototype
-
 	/**
 	 * Add a directive subscriber.
 	 *
 	 * @param {Directive} sub
 	 */
 
-	p.addSub = function (sub) {
+	Dep.prototype.addSub = function (sub) {
 	  this.subs.push(sub)
 	}
 
@@ -3365,7 +3389,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Directive} sub
 	 */
 
-	p.removeSub = function (sub) {
+	Dep.prototype.removeSub = function (sub) {
 	  this.subs.$remove(sub)
 	}
 
@@ -3373,7 +3397,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Add self as a dependency to the target watcher.
 	 */
 
-	p.depend = function () {
+	Dep.prototype.depend = function () {
 	  Dep.target.addDep(this)
 	}
 
@@ -3381,7 +3405,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Notify all subscribers of a new value.
 	 */
 
-	p.notify = function () {
+	Dep.prototype.notify = function () {
 	  // stablize the subscriber list first
 	  var subs = _.toArray(this.subs)
 	  for (var i = 0, l = subs.length; i < l; i++) {
@@ -4040,7 +4064,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Reset the batcher's state.
 	 */
 
-	function reset () {
+	function resetBatcherState () {
 	  queue = []
 	  userQueue = []
 	  has = {}
@@ -4052,11 +4076,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Flush both queues and run the watchers.
 	 */
 
-	function flush () {
-	  run(queue)
+	function flushBatcherQueue () {
+	  runBatcherQueue(queue)
 	  internalQueueDepleted = true
-	  run(userQueue)
-	  reset()
+	  runBatcherQueue(userQueue)
+	  resetBatcherState()
 	}
 
 	/**
@@ -4065,7 +4089,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Array} queue
 	 */
 
-	function run (queue) {
+	function runBatcherQueue (queue) {
 	  // do not cache length because more watchers might be pushed
 	  // as we run existing watchers
 	  for (var i = 0; i < queue.length; i++) {
@@ -4114,7 +4138,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // queue the flush
 	    if (!waiting) {
 	      waiting = true
-	      _.nextTick(flush)
+	      _.nextTick(flushBatcherQueue)
 	    }
 	  }
 	}
@@ -4538,14 +4562,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	          options = {
 	            created: function () {
 	              this.$once(waitFor, function () {
+	                self.waitingFor = null
 	                self.transition(this, cb)
 	              })
 	            }
 	          }
 	        }
+	        var cached = this.getCached()
 	        var newComponent = this.build(options)
-	        if (!waitFor) {
+	        if (!waitFor || cached) {
 	          this.transition(newComponent, cb)
+	        } else {
+	          this.waitingFor = newComponent
 	        }
 	      }, this))
 	    }
@@ -4588,11 +4616,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 
 	  build: function (extraOptions) {
-	    if (this.keepAlive) {
-	      var cached = this.cache[this.Component.cid]
-	      if (cached) {
-	        return cached
-	      }
+	    var cached = this.getCached()
+	    if (cached) {
+	      return cached
 	    }
 	    if (this.Component) {
 	      // default options
@@ -4620,6 +4646,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 
 	  /**
+	   * Try to get a cached instance of the current component.
+	   *
+	   * @return {Vue|undefined}
+	   */
+
+	  getCached: function () {
+	    return this.keepAlive && this.cache[this.Component.cid]
+	  },
+
+	  /**
 	   * Teardown the current child, but defers cleanup so
 	   * that we can separate the destroy and removal steps.
 	   *
@@ -4627,6 +4663,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 
 	  unbuild: function (defer) {
+	    if (this.waitingFor) {
+	      this.waitingFor.$destroy()
+	      this.waitingFor = null
+	    }
 	    var child = this.childVM
 	    if (!child || this.keepAlive) {
 	      return
@@ -4678,7 +4718,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  transition: function (target, cb) {
 	    var self = this
 	    var current = this.childVM
-	    this.unsetCurrent()
 	    this.setCurrent(target)
 	    switch (self.transMode) {
 	      case 'in-out':
@@ -4702,6 +4741,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 
 	  setCurrent: function (child) {
+	    this.unsetCurrent()
 	    this.childVM = child
 	    var refID = child._refID || this.refID
 	    if (refID) {
@@ -4995,6 +5035,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	// xlink
 	var xlinkNS = 'http://www.w3.org/1999/xlink'
 	var xlinkRE = /^xlink:/
+	var inputProps = {
+	  value: 1,
+	  checked: 1,
+	  selected: 1
+	}
 
 	module.exports = {
 
@@ -5029,12 +5074,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 
 	  setAttr: function (attr, value) {
-	    if (attr === 'value' && attr in this.el) {
+	    if (inputProps[attr] && attr in this.el) {
 	      if (!this.valueRemoved) {
 	        this.el.removeAttribute(attr)
 	        this.valueRemoved = true
 	      }
-	      this.el.value = value
+	      this.el[attr] = value
 	    } else if (value != null && value !== false) {
 	      if (xlinkRE.test(attr)) {
 	        this.el.setAttributeNS(xlinkNS, attr, value)
@@ -5876,7 +5921,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      this.iframeBind = function () {
 	        _.on(self.el.contentWindow, self.arg, self.handler)
 	      }
-	      _.on(this.el, 'load', this.iframeBind)
+	      this.on('load', this.iframeBind)
 	    }
 	  },
 
@@ -5916,7 +5961,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  unbind: function () {
 	    this.reset()
-	    _.off(this.el, 'load', this.iframeBind)
 	  }
 	}
 
@@ -6014,6 +6058,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  bind: function () {
 	    var self = this
 	    var el = this.el
+	    var isRange = el.type === 'range'
 
 	    // check params
 	    // - lazy: update model on "change" instead of "input"
@@ -6031,78 +6076,51 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // Chinese, but instead triggers them for spelling
 	    // suggestions... (see Discussion/#162)
 	    var composing = false
-	    if (!_.isAndroid) {
-	      this.onComposeStart = function () {
+	    if (!_.isAndroid && !isRange) {
+	      this.on('compositionstart', function () {
 	        composing = true
-	      }
-	      this.onComposeEnd = function () {
+	      })
+	      this.on('compositionend', function () {
 	        composing = false
 	        // in IE11 the "compositionend" event fires AFTER
 	        // the "input" event, so the input handler is blocked
 	        // at the end... have to call it here.
 	        self.listener()
-	      }
-	      _.on(el, 'compositionstart', this.onComposeStart)
-	      _.on(el, 'compositionend', this.onComposeEnd)
+	      })
 	    }
 
-	    function syncToModel () {
-	      var val = number
+	    // prevent messing with the input when user is typing,
+	    // and force update on blur.
+	    this.focused = false
+	    if (!isRange) {
+	      this.on('focus', function () {
+	        self.focused = true
+	      })
+	      this.on('blur', function () {
+	        self.focused = false
+	        self.listener()
+	      })
+	    }
+
+	    // Now attach the main listener
+	    this.listener = function () {
+	      if (composing) return
+	      var val = number || isRange
 	        ? _.toNumber(el.value)
 	        : el.value
 	      self.set(val)
-	    }
-
-	    // if the directive has filters, we need to
-	    // record cursor position and restore it after updating
-	    // the input with the filtered value.
-	    // also force update for type="range" inputs to enable
-	    // "lock in range" (see #506)
-	    if (this.hasRead || el.type === 'range') {
-	      this.listener = function () {
-	        if (composing) return
-	        var charsOffset
-	        // some HTML5 input types throw error here
-	        try {
-	          // record how many chars from the end of input
-	          // the cursor was at
-	          charsOffset = el.value.length - el.selectionStart
-	        } catch (e) {}
-	        // Fix IE10/11 infinite update cycle
-	        // https://github.com/yyx990803/vue/issues/592
-	        /* istanbul ignore if */
-	        if (charsOffset < 0) {
-	          return
+	      // force update on next tick to avoid lock & same value
+	      // also only update when user is not typing
+	      _.nextTick(function () {
+	        if (self._bound && !self.focused) {
+	          self.update(self._watcher.value)
 	        }
-	        syncToModel()
-	        _.nextTick(function () {
-	          // force a value update, because in
-	          // certain cases the write filters output the
-	          // same result for different input values, and
-	          // the Observer set events won't be triggered.
-	          var newVal = self._watcher.value
-	          self.update(newVal)
-	          if (charsOffset != null) {
-	            var cursorPos =
-	              _.toString(newVal).length - charsOffset
-	            el.setSelectionRange(cursorPos, cursorPos)
-	          }
-	        })
-	      }
-	    } else {
-	      this.listener = function () {
-	        if (composing) return
-	        syncToModel()
-	      }
+	      })
 	    }
-
 	    if (debounce) {
 	      this.listener = _.debounce(this.listener, debounce)
 	    }
 
-	    // Now attach the main listener
-
-	    this.event = lazy ? 'change' : 'input'
 	    // Support jQuery events, since jQuery.trigger() doesn't
 	    // trigger native events in some cases and some plugins
 	    // rely on $.trigger()
@@ -6115,23 +6133,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // jQuery variable in tests.
 	    this.hasjQuery = typeof jQuery === 'function'
 	    if (this.hasjQuery) {
-	      jQuery(el).on(this.event, this.listener)
+	      jQuery(el).on('change', this.listener)
+	      if (!lazy) {
+	        jQuery(el).on('input', this.listener)
+	      }
 	    } else {
-	      _.on(el, this.event, this.listener)
+	      this.on('change', this.listener)
+	      if (!lazy) {
+	        this.on('input', this.listener)
+	      }
 	    }
 
 	    // IE9 doesn't fire input event on backspace/del/cut
 	    if (!lazy && _.isIE9) {
-	      this.onCut = function () {
+	      this.on('cut', function () {
 	        _.nextTick(self.listener)
-	      }
-	      this.onDel = function (e) {
+	      })
+	      this.on('keyup', function (e) {
 	        if (e.keyCode === 46 || e.keyCode === 8) {
 	          self.listener()
 	        }
-	      }
-	      _.on(el, 'cut', this.onCut)
-	      _.on(el, 'keyup', this.onDel)
+	      })
 	    }
 
 	    // set initial value if present
@@ -6152,17 +6174,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  unbind: function () {
 	    var el = this.el
 	    if (this.hasjQuery) {
-	      jQuery(el).off(this.event, this.listener)
-	    } else {
-	      _.off(el, this.event, this.listener)
-	    }
-	    if (this.onComposeStart) {
-	      _.off(el, 'compositionstart', this.onComposeStart)
-	      _.off(el, 'compositionend', this.onComposeEnd)
-	    }
-	    if (this.onCut) {
-	      _.off(el, 'cut', this.onCut)
-	      _.off(el, 'keyup', this.onDel)
+	      jQuery(el).off('change', this.listener)
+	      jQuery(el).off('input', this.listener)
 	    }
 	  }
 	}
@@ -6180,28 +6193,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var self = this
 	    var el = this.el
 	    var number = this._checkParam('number') != null
-	    function getValue () {
-	      return number
-	        ? _.toNumber(el.value)
-	        : el.value
+	    var expression = this._checkParam('exp')
+
+	    this.getValue = function () {
+	      var val = el.value
+	      if (number) {
+	        val = _.toNumber(val)
+	      } else if (expression !== null) {
+	        val = self.vm.$eval(expression)
+	      }
+	      return val
 	    }
-	    this.listener = function () {
-	      self.set(getValue())
-	    }
-	    _.on(el, 'change', this.listener)
+
+	    this.on('change', function () {
+	      self.set(self.getValue())
+	    })
+
 	    if (el.checked) {
-	      this._initValue = getValue()
+	      this._initValue = this.getValue()
 	    }
 	  },
 
 	  update: function (value) {
 	    /* eslint-disable eqeqeq */
-	    this.el.checked = value == this.el.value
+	    this.el.checked = value == this.getValue()
 	    /* eslint-enable eqeqeq */
-	  },
-
-	  unbind: function () {
-	    _.off(this.el, 'change', this.listener)
 	  }
 	}
 
@@ -6219,12 +6235,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  bind: function () {
 	    var self = this
 	    var el = this.el
-	    // update DOM using latest value.
+
+	    // method to force update DOM using latest value.
 	    this.forceUpdate = function () {
 	      if (self._watcher) {
 	        self.update(self._watcher.get())
 	      }
 	    }
+
 	    // check options param
 	    var optionsParam = this._checkParam('options')
 	    if (optionsParam) {
@@ -6232,19 +6250,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    this.number = this._checkParam('number') != null
 	    this.multiple = el.hasAttribute('multiple')
-	    this.listener = function () {
-	      var value = self.multiple
-	        ? getMultiValue(el)
-	        : el.value
+
+	    // attach listener
+	    this.on('change', function () {
+	      var value = getValue(el, self.multiple)
 	      value = self.number
 	        ? _.isArray(value)
 	          ? value.map(_.toNumber)
 	          : _.toNumber(value)
 	        : value
 	      self.set(value)
-	    }
-	    _.on(el, 'change', this.listener)
+	    })
+
+	    // check initial value (inline selected attribute)
 	    checkInitialValue.call(this)
+
 	    // All major browsers except Firefox resets
 	    // selectedIndex with value -1 to 0 when the element
 	    // is appended to a new parent, therefore we have to
@@ -6255,7 +6275,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  update: function (value) {
 	    var el = this.el
 	    el.selectedIndex = -1
-	    if (!value && value !== 0) {
+	    if (value == null) {
 	      if (this.defaultOption) {
 	        this.defaultOption.selected = true
 	      }
@@ -6264,25 +6284,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var multi = this.multiple && _.isArray(value)
 	    var options = el.options
 	    var i = options.length
-	    var option
+	    var op, val
 	    while (i--) {
-	      option = options[i]
+	      op = options[i]
+	      val = op.hasOwnProperty('_value')
+	        ? op._value
+	        : op.value
 	      /* eslint-disable eqeqeq */
-	      option.selected = multi
-	        ? indexOf(value, option.value) > -1
-	        : value == option.value
+	      op.selected = multi
+	        ? indexOf(value, val) > -1
+	        : equals(value, val)
 	      /* eslint-enable eqeqeq */
 	    }
 	  },
 
 	  unbind: function () {
-	    _.off(this.el, 'change', this.listener)
 	    this.vm.$off('hook:attached', this.forceUpdate)
 	    if (this.optionWatcher) {
 	      this.optionWatcher.teardown()
 	    }
 	  }
-
 	}
 
 	/**
@@ -6347,10 +6368,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (typeof op === 'string') {
 	        el.text = el.value = op
 	      } else {
-	        if (op.value != null) {
+	        if (op.value != null && !_.isObject(op.value)) {
 	          el.value = op.value
 	        }
-	        el.text = op.text || op.value || ''
+	        // object values gets serialized when set as value,
+	        // so we store the raw value as a different property
+	        el._value = op.value
+	        el.text = op.text || ''
 	        if (op.disabled) {
 	          el.disabled = true
 	        }
@@ -6389,29 +6413,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
-	 * Helper to extract a value array for select[multiple]
+	 * Get select value
 	 *
 	 * @param {SelectElement} el
-	 * @return {Array}
+	 * @param {Boolean} multi
+	 * @return {Array|*}
 	 */
 
-	function getMultiValue (el) {
-	  return Array.prototype.filter
-	    .call(el.options, filterSelected)
-	    .map(getOptionValue)
-	}
-
-	function filterSelected (op) {
-	  return op.selected
-	}
-
-	function getOptionValue (op) {
-	  return op.value || op.text
+	function getValue (el, multi) {
+	  var res = multi ? [] : null
+	  var op, val
+	  for (var i = 0, l = el.options.length; i < l; i++) {
+	    op = el.options[i]
+	    if (op.selected) {
+	      val = op.hasOwnProperty('_value')
+	        ? op._value
+	        : op.value
+	      if (multi) {
+	        res.push(val)
+	      } else {
+	        return val
+	      }
+	    }
+	  }
+	  return res
 	}
 
 	/**
 	 * Native Array.indexOf uses strict equal, but in this
-	 * case we need to match string/numbers with soft equal.
+	 * case we need to match string/numbers with custom equal.
 	 *
 	 * @param {Array} arr
 	 * @param {*} val
@@ -6420,40 +6450,68 @@ return /******/ (function(modules) { // webpackBootstrap
 	function indexOf (arr, val) {
 	  var i = arr.length
 	  while (i--) {
-	    /* eslint-disable eqeqeq */
-	    if (arr[i] == val) return i
-	    /* eslint-enable eqeqeq */
+	    if (equals(arr[i], val)) {
+	      return i
+	    }
 	  }
 	  return -1
+	}
+
+	/**
+	 * Check if two values are loosely equal. If two objects
+	 * have the same shape, they are considered equal too:
+	 *   equals({a: 1}, {a: 1}) => true
+	 */
+
+	function equals (a, b) {
+	  /* eslint-disable eqeqeq */
+	  return a == b || JSON.stringify(a) == JSON.stringify(b)
+	  /* eslint-enable eqeqeq */
 	}
 
 
 /***/ },
 /* 44 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var _ = __webpack_require__(1)
+/***/ function(module, exports) {
 
 	module.exports = {
 
 	  bind: function () {
 	    var self = this
 	    var el = this.el
-	    this.listener = function () {
-	      self.set(el.checked)
+	    var trueExp = this._checkParam('true-exp')
+	    var falseExp = this._checkParam('false-exp')
+
+	    this._matchValue = function (value) {
+	      var trueValue = true
+	      if (trueExp !== null) {
+	        trueValue = self.vm.$eval(trueExp)
+	      }
+	      return trueValue === value
 	    }
-	    _.on(el, 'change', this.listener)
+
+	    function getValue () {
+	      var val = el.checked
+	      if (val && trueExp !== null) {
+	        val = self.vm.$eval(trueExp)
+	      }
+	      if (!val && falseExp !== null) {
+	        val = self.vm.$eval(falseExp)
+	      }
+	      return val
+	    }
+
+	    this.on('change', function () {
+	      self.set(getValue())
+	    })
+
 	    if (el.checked) {
-	      this._initValue = el.checked
+	      this._initValue = getValue()
 	    }
 	  },
 
 	  update: function (value) {
-	    this.el.checked = !!value
-	  },
-
-	  unbind: function () {
-	    _.off(this.el, 'change', this.listener)
+	    this.el.checked = this._matchValue(value)
 	  }
 	}
 
@@ -6606,7 +6664,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, this))
 	  },
 
-	    /**
+	  /**
 	   * Resolve a dynamic component to use for an instance.
 	   * The tricky part here is that there could be dynamic
 	   * components depending on instance data.
@@ -7251,8 +7309,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.linker = compiler.compile(
 	          this.template,
 	          this.vm.$options,
-	          true, // partial
-	          this._host // important
+	          true // partial
 	        )
 	        cache.put(cacheId, this.linker)
 	      }
@@ -7283,7 +7340,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  link: function (frag, linker) {
 	    var vm = this.vm
-	    this.unlink = linker(vm, frag)
+	    this.unlink = linker(vm, frag, this._host /* important */)
 	    transition.blockAppend(frag, this.end, vm)
 	    // call attached for all the child components created
 	    // during the compilation
@@ -7621,7 +7678,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.currency = function (value, currency) {
 	  value = parseFloat(value)
 	  if (!isFinite(value) || (!value && value !== 0)) return ''
-	  currency = currency || '$'
+	  currency = currency != null ? currency : '$'
 	  var stringified = Math.abs(value).toFixed(2)
 	  var _int = stringified.slice(0, -3)
 	  var i = _int.length % 3
@@ -7690,6 +7747,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	// expose keycode hash
 	exports.key.keyCodes = keyCodes
 
+	exports.debounce = function (handler, delay) {
+	  if (!handler) return
+	  if (!delay) {
+	    delay = 300
+	  }
+	  return _.debounce(handler, delay)
+	}
+
 	/**
 	 * Install special array filters
 	 */
@@ -7712,20 +7777,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {String} dataKey
 	 */
 
-	exports.filterBy = function (arr, search, delimiter, dataKey) {
-	  // allow optional `in` delimiter
-	  // because why not
-	  if (delimiter && delimiter !== 'in') {
-	    dataKey = delimiter
-	  }
+	exports.filterBy = function (arr, search, delimiter /* ...dataKeys */) {
 	  if (search == null) {
 	    return arr
 	  }
+	  if (typeof search === 'function') {
+	    return arr.filter(search)
+	  }
 	  // cast to lowercase string
 	  search = ('' + search).toLowerCase()
+	  // allow optional `in` delimiter
+	  // because why not
+	  var n = delimiter === 'in' ? 3 : 2
+	  // extract and flatten keys
+	  var keys = _.toArray(arguments, n).reduce(function (prev, cur) {
+	    return prev.concat(cur)
+	  }, [])
 	  return arr.filter(function (item) {
-	    return dataKey
-	      ? contains(Path.get(item, dataKey), search)
+	    return keys.length
+	      ? keys.some(function (key) {
+	          return contains(Path.get(item, key), search)
+	        })
 	      : contains(item, search)
 	  })
 	}
@@ -8070,7 +8142,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  // make sure to convert string selectors into element now
 	  el = options.el = _.query(el)
-	  this._propsUnlinkFn = el && props
+	  this._propsUnlinkFn = el && el.nodeType === 1 && props
 	    ? compiler.compileAndLinkProps(
 	        this, el, props
 	      )
@@ -8233,7 +8305,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        def.set = noop
 	      } else {
 	        def.get = userDef.get
-	          ? makeComputedGetter(userDef.get, this)
+	          ? userDef.cache !== false
+	            ? makeComputedGetter(userDef.get, this)
+	            : _.bind(userDef.get, this)
 	          : noop
 	        def.set = userDef.set
 	          ? _.bind(userDef.set, this)
@@ -8298,8 +8372,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports._defineMeta = function (key, value) {
 	  var dep = new Dep()
 	  Object.defineProperty(this, key, {
-	    enumerable: true,
-	    configurable: true,
 	    get: function metaGetter () {
 	      if (Dep.target) {
 	        dep.depend()
@@ -8388,8 +8460,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	// Instance methods
 
-	var p = Observer.prototype
-
 	/**
 	 * Walk through each property and convert them into
 	 * getter/setters. This method should only be called when
@@ -8399,16 +8469,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Object} obj
 	 */
 
-	p.walk = function (obj) {
+	Observer.prototype.walk = function (obj) {
 	  var keys = Object.keys(obj)
 	  var i = keys.length
-	  var key, prefix
 	  while (i--) {
-	    key = keys[i]
-	    prefix = key.charCodeAt(0)
-	    if (prefix !== 0x24 && prefix !== 0x5F) { // skip $ or _
-	      this.convert(key, obj[key])
-	    }
+	    this.convert(keys[i], obj[keys[i]])
 	  }
 	}
 
@@ -8420,7 +8485,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @return {Dep|undefined}
 	 */
 
-	p.observe = function (val) {
+	Observer.prototype.observe = function (val) {
 	  return Observer.create(val)
 	}
 
@@ -8430,7 +8495,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Array} items
 	 */
 
-	p.observeArray = function (items) {
+	Observer.prototype.observeArray = function (items) {
 	  var i = items.length
 	  while (i--) {
 	    this.observe(items[i])
@@ -8445,7 +8510,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {*} val
 	 */
 
-	p.convert = function (key, val) {
+	Observer.prototype.convert = function (key, val) {
 	  var ob = this
 	  var childOb = ob.observe(val)
 	  var dep = new Dep()
@@ -8485,7 +8550,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Vue} vm
 	 */
 
-	p.addVm = function (vm) {
+	Observer.prototype.addVm = function (vm) {
 	  (this.vms || (this.vms = [])).push(vm)
 	}
 
@@ -8496,7 +8561,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Vue} vm
 	 */
 
-	p.removeVm = function (vm) {
+	Observer.prototype.removeVm = function (vm) {
 	  this.vms.$remove(vm)
 	}
 
@@ -8969,11 +9034,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this._host = host
 	  this._locked = false
 	  this._bound = false
+	  this._listeners = null
 	  // init
 	  this._bind(def)
 	}
-
-	var p = Directive.prototype
 
 	/**
 	 * Initialize the directive, mixin definition properties,
@@ -8983,7 +9047,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Object} def
 	 */
 
-	p._bind = function (def) {
+	Directive.prototype._bind = function (def) {
 	  if (
 	    (this.name !== 'cloak' || this.vm._isCompiled) &&
 	    this.el && this.el.removeAttribute
@@ -9044,7 +9108,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * e.g. v-component="{{currentView}}"
 	 */
 
-	p._checkDynamicLiteral = function () {
+	Directive.prototype._checkDynamicLiteral = function () {
 	  var expression = this.expression
 	  if (expression && this.isLiteral) {
 	    var tokens = textParser.parse(expression)
@@ -9068,7 +9132,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @return {Boolean}
 	 */
 
-	p._checkStatement = function () {
+	Directive.prototype._checkStatement = function () {
 	  var expression = this.expression
 	  if (
 	    expression && this.acceptStatement &&
@@ -9094,30 +9158,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @return {String}
 	 */
 
-	p._checkParam = function (name) {
+	Directive.prototype._checkParam = function (name) {
 	  var param = this.el.getAttribute(name)
 	  if (param !== null) {
 	    this.el.removeAttribute(name)
 	    param = this.vm.$interpolate(param)
 	  }
 	  return param
-	}
-
-	/**
-	 * Teardown the watcher and call unbind.
-	 */
-
-	p._teardown = function () {
-	  if (this._bound) {
-	    this._bound = false
-	    if (this.unbind) {
-	      this.unbind()
-	    }
-	    if (this._watcher) {
-	      this._watcher.teardown()
-	    }
-	    this.vm = this.el = this._watcher = null
-	  }
 	}
 
 	/**
@@ -9129,11 +9176,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @public
 	 */
 
-	p.set = function (value) {
+	Directive.prototype.set = function (value) {
+	  /* istanbul ignore else */
 	  if (this.twoWay) {
 	    this._withLock(function () {
 	      this._watcher.set(value)
 	    })
+	  } else if (true) {
+	    _.warn(
+	      'Directive.set() can only be used inside twoWay' +
+	      'directives.'
+	    )
 	  }
 	}
 
@@ -9144,13 +9197,52 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Function} fn
 	 */
 
-	p._withLock = function (fn) {
+	Directive.prototype._withLock = function (fn) {
 	  var self = this
 	  self._locked = true
 	  fn.call(self)
 	  _.nextTick(function () {
 	    self._locked = false
 	  })
+	}
+
+	/**
+	 * Convenience method that attaches a DOM event listener
+	 * to the directive element and autometically tears it down
+	 * during unbind.
+	 *
+	 * @param {String} event
+	 * @param {Function} handler
+	 */
+
+	Directive.prototype.on = function (event, handler) {
+	  _.on(this.el, event, handler)
+	  ;(this._listeners || (this._listeners = []))
+	    .push([event, handler])
+	}
+
+	/**
+	 * Teardown the watcher and call unbind.
+	 */
+
+	Directive.prototype._teardown = function () {
+	  if (this._bound) {
+	    this._bound = false
+	    if (this.unbind) {
+	      this.unbind()
+	    }
+	    if (this._watcher) {
+	      this._watcher.teardown()
+	    }
+	    var listeners = this._listeners
+	    if (listeners) {
+	      for (var i = 0; i < listeners.length; i++) {
+	        _.off(this.el, listeners[i][0], listeners[i][1])
+	      }
+	    }
+	    this.vm = this.el =
+	    this._watcher = this._listeners = null
+	  }
 	}
 
 	module.exports = Directive
@@ -9334,15 +9426,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	exports.$watch = function (exp, cb, options) {
 	  var vm = this
-	  var wrappedCb = function (val, oldVal) {
-	    cb.call(vm, val, oldVal)
-	  }
-	  var watcher = new Watcher(vm, exp, wrappedCb, {
+	  var watcher = new Watcher(vm, exp, cb, {
 	    deep: options && options.deep,
 	    user: !options || options.user !== false
 	  })
 	  if (options && options.immediate) {
-	    wrappedCb(watcher.value)
+	    cb.call(vm, watcher.value)
 	  }
 	  return function unwatchFn () {
 	    watcher.teardown()
@@ -9952,7 +10041,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	exports.$compile = function (el, host) {
-	  return compiler.compile(el, this.$options, true, host)(this, el)
+	  return compiler.compile(el, this.$options, true)(this, el, host)
 	}
 
 
