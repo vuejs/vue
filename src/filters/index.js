@@ -139,6 +139,17 @@ exports.debounce = function (handler, delay) {
 }
 
 /**
+ * Prevent event default behavior
+ */
+exports.prevent = function (handler) {
+  if (!handler) return;
+  return function (e) {
+    e.preventDefault()
+    return handler.call(this, e)
+  }
+}
+
+/**
  * Install special array filters
  */
 
