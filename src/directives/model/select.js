@@ -193,7 +193,6 @@ function checkInitialValue () {
  */
 
 function getValue (el, multi) {
-  var i = el.options.length
   var res = multi ? [] : null
   var op, val
   for (var i = 0, l = el.options.length; i < l; i++) {
@@ -237,5 +236,7 @@ function indexOf (arr, val) {
  */
 
 function equals (a, b) {
+  /* eslint-disable eqeqeq */
   return a == b || JSON.stringify(a) == JSON.stringify(b)
+  /* eslint-enable eqeqeq */
 }

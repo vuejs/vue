@@ -78,11 +78,8 @@ Observer.create = function (value, vm) {
 Observer.prototype.walk = function (obj) {
   var keys = Object.keys(obj)
   var i = keys.length
-  var key, prefix
   while (i--) {
-    key = keys[i]
-    prefix = key.charCodeAt(0)
-    this.convert(key, obj[key])
+    this.convert(keys[i], obj[keys[i]])
   }
 }
 
