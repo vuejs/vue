@@ -55,16 +55,19 @@ describe('Partial', function () {
       calls++
       return compile.apply(this, arguments)
     }
-    new Vue({
-      el: el,
+    // Note: caching only works on components, not native Vue
+    var Comp = Vue.extend({
       template:
         '<partial name="cache-test"></partial> ' +
         '<partial name="cache-test"></partial>',
-      data: {
-        msg: 'hi'
-      },
       partials: {
         'cache-test': 'cache-test {{msg}}'
+      }
+    })
+    new Comp({
+      el: el,
+      data: {
+        msg: 'hi'
       }
     })
     expect(el.textContent).toBe('cache-test hi cache-test hi')
