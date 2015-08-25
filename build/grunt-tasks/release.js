@@ -9,7 +9,7 @@ module.exports = function (grunt) {
    */
 
   grunt.registerTask('version', function (version) {
-    var manifests = ['package', 'component']
+    var manifests = ['package']
     manifests.forEach(function (file) {
       file = file + '.json'
       var json = grunt.file.read(file)
