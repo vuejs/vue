@@ -22,30 +22,30 @@ module.exports = {
     if (this.invalid) return
     if (value) {
       if (!this.frag) {
-        this.create()
+        this.insert()
       }
     } else {
-      this.teardown()
+      this.remove()
     }
   },
 
-  create: function () {
+  insert: function () {
     this.frag = this.factory.create(this._host, this._scope)
     this.frag.before(this.anchor)
     // call attached for all the child components created
     // during the compilation
     if (_.inDoc(this.vm.$el)) {
-      var children = this.getContainedComponents()
+      var children = getContainedComponents(this.vm, this.frag.node, this.anchor)
       if (children) children.forEach(callAttach)
     }
   },
 
-  teardown: function () {
+  remove: function () {
     if (!this.frag) return
     // collect children beforehand
     var children
     if (_.inDoc(this.vm.$el)) {
-      children = this.getContainedComponents()
+      children = getContainedComponents(this.vm, this.frag.node, this.anchor)
     }
     this.frag.remove()
     if (children) children.forEach(callDetach)
@@ -53,36 +53,29 @@ module.exports = {
     this.frag = null
   },
 
-  getContainedComponents: function () {
-    var vm = this.vm
-    var start = this.frag.node
-    var end = this.anchor
-
-    function contains (c) {
-      var cur = start
-      var next
-      while (next !== end) {
-        next = cur.nextSibling
-        if (
-          cur === c.$el ||
-          cur.contains && cur.contains(c.$el)
-        ) {
-          return true
-        }
-        cur = next
-      }
-      return false
-    }
-
-    return vm.$children.length &&
-      vm.$children.filter(contains)
-  },
-
   unbind: function () {
     if (this.frag) {
       this.frag.unlink()
     }
   }
+}
+
+function getContainedComponents (vm, start, end) {
+  return vm.$children.length && vm.$children.filter(function (c) {
+    var cur = start
+    var next
+    while (next !== end) {
+      next = cur.nextSibling
+      if (
+        cur === c.$el ||
+        cur.contains && cur.contains(c.$el)
+      ) {
+        return true
+      }
+      cur = next
+    }
+    return false
+  })
 }
 
 function callAttach (child) {
