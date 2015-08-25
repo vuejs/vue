@@ -13,7 +13,7 @@
       <table>
         <thead>
           <tr>
-            <th v-repeat="key: columns"
+            <th v-for="key in columns"
               v-on="click:sortBy(key)"
               v-class="active: sortKey == key">
               {{key | capitalize}}
@@ -24,11 +24,11 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-repeat="
-            entry: data
+          <tr v-for="
+            entry in data
             | filterBy filterKey
             | orderBy sortKey reversed[sortKey]">
-            <td v-repeat="key: columns">
+            <td v-for="key in columns">
               {{entry[key]}}
             </td>
           </tr>

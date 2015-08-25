@@ -33,8 +33,7 @@
           <span v-if="isFolder">[{{open ? '-' : '+'}}]</span>
         </div>
         <ul v-show="open" v-if="isFolder">
-          <item class="item"
-            v-repeat="model: model.children">
+          <item class="item" v-for="model in model.children" model="{{model}}">
           </item>
           <li v-on="click: addChild">+</li>
         </ul>

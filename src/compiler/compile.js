@@ -554,7 +554,7 @@ function makeNodeLinkFn (directives) {
       dir = directives[i]
       if (dir._link) {
         // custom link fn
-        dir._link(vm, el)
+        dir._link(vm, el, scope)
       } else {
         k = dir.descriptors.length
         for (j = 0; j < k; j++) {
@@ -597,10 +597,10 @@ function collectAttrDirective (name, value, options) {
     return {
       def: def,
       _link: allOneTime
-        ? function (vm, el, host, scope) {
+        ? function (vm, el, scope) {
             el.setAttribute(name, (scope || vm).$interpolate(value))
           }
-        : function (vm, el, host, scope) {
+        : function (vm, el, scope) {
             var exp = textParser.tokensToExp(tokens, (scope || vm))
             var desc = isClass
               ? dirParser.parse(exp)[0]
@@ -608,7 +608,7 @@ function collectAttrDirective (name, value, options) {
             if (isClass) {
               desc._rawClass = value
             }
-            vm._bindDir(dirName, el, desc, def, host, scope)
+            vm._bindDir(dirName, el, desc, def, null, scope)
           }
     }
   }
