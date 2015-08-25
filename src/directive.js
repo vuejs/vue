@@ -144,12 +144,12 @@ Directive.prototype._checkStatement = function () {
     !expParser.isSimplePath(expression)
   ) {
     var fn = expParser.parse(expression).get
-    var vm = this.vm
+    var scope = this._scope || this.vm
     var handler = function () {
-      fn.call(vm, vm)
+      fn.call(scope, scope)
     }
     if (this.filters) {
-      handler = vm._applyFilters(handler, null, this.filters)
+      handler = this.vm._applyFilters(handler, null, this.filters)
     }
     this.update(handler)
     return true

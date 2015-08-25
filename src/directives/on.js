@@ -29,12 +29,11 @@ module.exports = {
       return
     }
     this.reset()
-    var vm = this.vm
+    var scope = this._scope || this.vm
     this.handler = function (e) {
-      e.targetVM = vm
-      vm.$event = e
+      scope.$event = e
       var res = handler(e)
-      vm.$event = null
+      scope.$event = null
       return res
     }
     if (this.iframeBind) {
