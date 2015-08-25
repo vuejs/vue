@@ -608,7 +608,7 @@ function collectAttrDirective (name, value, options) {
             if (isClass) {
               desc._rawClass = value
             }
-            vm._bindDir(dirName, el, desc, def, null, scope)
+            vm._bindDir(dirName, el, desc, def, undefined, scope)
           }
     }
   }
