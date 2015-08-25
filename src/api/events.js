@@ -88,25 +88,34 @@ exports.$off = function (event, fn) {
 
 exports.$emit = function (event) {
   this._eventCancelled = false
-  var cbs = this._events[event]
-  if (cbs) {
-    // avoid leaking arguments:
-    // http://jsperf.com/closure-with-arguments
-    var i = arguments.length - 1
-    var args = new Array(i)
-    while (i--) {
-      args[i] = arguments[i + 1]
-    }
-    i = 0
-    cbs = cbs.length > 1
-      ? _.toArray(cbs)
-      : cbs
-    for (var l = cbs.length; i < l; i++) {
-      if (cbs[i].apply(this, args) === false) {
-        this._eventCancelled = true
+  this._eventNamespaces = event.split('.')
+  event = this._eventNamespaces.shift()
+  var cbs
+  var names_length = this._eventNamespaces.length
+  var names_i = 0
+  do {
+    cbs = this._events[event]
+    if (cbs) {
+      // avoid leaking arguments:
+      // http://jsperf.com/closure-with-arguments
+      var i = arguments.length - 1
+      var args = new Array(i)
+      while (i--) {
+        args[i] = arguments[i + 1]
+      }
+      i = 0
+      cbs = cbs.length > 1
+          ? _.toArray(cbs)
+          : cbs
+      for (var l = cbs.length; i < l; i++) {
+        if (cbs[i].apply(this, args) === false) {
+          this._eventCancelled = true
+        }
       }
     }
-  }
+    event += '.' + this._eventNamespaces[names_i]
+  } while (names_i++ < names_length)
+
   return this
 }
 
