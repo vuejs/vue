@@ -1,36 +1,14 @@
 var _ = require('../util')
-var compiler = require('../compiler')
-var templateParser = require('../parsers/template')
-var transition = require('../transition')
-var Cache = require('../cache')
-var cache = new Cache(1000)
+var FragmentFactory = require('../fragment/factory')
 
 module.exports = {
 
   bind: function () {
     var el = this.el
     if (!el.__vue__) {
-      this.start = _.createAnchor('v-if-start')
-      this.end = _.createAnchor('v-if-end')
-      _.replace(el, this.end)
-      _.before(this.start, this.end)
-      if (_.isTemplate(el)) {
-        this.template = templateParser.parse(el, true)
-      } else {
-        this.template = document.createDocumentFragment()
-        this.template.appendChild(templateParser.clone(el))
-      }
-      // compile the nested partial
-      var cacheId = (this.vm.constructor.cid || '') + el.outerHTML
-      this.linker = cache.get(cacheId)
-      if (!this.linker) {
-        this.linker = compiler.compile(
-          this.template,
-          this.vm.$options,
-          true // partial
-        )
-        cache.put(cacheId, this.linker)
-      }
+      this.anchor = _.createAnchor('v-if')
+      _.replace(el, this.anchor)
+      this.factory = new FragmentFactory(this.vm, el)
     } else {
       process.env.NODE_ENV !== 'production' && _.warn(
         'v-if="' + this.expression + '" cannot be ' +
@@ -43,48 +21,42 @@ module.exports = {
   update: function (value) {
     if (this.invalid) return
     if (value) {
-      // avoid duplicate compiles, since update() can be
-      // called with different truthy values
-      if (!this.unlink) {
-        this.link(
-          templateParser.clone(this.template),
-          this.linker
-        )
+      if (!this.frag) {
+        this.create()
       }
     } else {
       this.teardown()
     }
   },
 
-  link: function (frag, linker) {
-    var vm = this.vm
-    this.unlink = linker(vm, frag, this._host, this._scope)
-    transition.blockAppend(frag, this.end, vm)
+  create: function () {
+    this.frag = this.factory.create(this._host, this._scope)
+    this.frag.before(this.anchor)
     // call attached for all the child components created
     // during the compilation
-    if (_.inDoc(vm.$el)) {
+    if (_.inDoc(this.vm.$el)) {
       var children = this.getContainedComponents()
       if (children) children.forEach(callAttach)
     }
   },
 
   teardown: function () {
-    if (!this.unlink) return
+    if (!this.frag) return
     // collect children beforehand
     var children
     if (_.inDoc(this.vm.$el)) {
       children = this.getContainedComponents()
     }
-    transition.blockRemove(this.start, this.end, this.vm)
+    this.frag.remove()
     if (children) children.forEach(callDetach)
-    this.unlink()
-    this.unlink = null
+    this.frag.unlink()
+    this.frag = null
   },
 
   getContainedComponents: function () {
     var vm = this.vm
-    var start = this.start.nextSibling
-    var end = this.end
+    var start = this.frag.node
+    var end = this.anchor
 
     function contains (c) {
       var cur = start
@@ -107,9 +79,10 @@ module.exports = {
   },
 
   unbind: function () {
-    if (this.unlink) this.unlink()
+    if (this.frag) {
+      this.frag.unlink()
+    }
   }
-
 }
 
 function callAttach (child) {
