@@ -25,9 +25,7 @@ module.exports = {
 
     // attach listener
     this.on('change', function () {
-      var value = self.multiple
-        ? getMultiValue(el)
-        : el.value
+      var value = getValue(el, self.multiple)
       value = self.number
         ? _.isArray(value)
           ? value.map(_.toNumber)
@@ -58,13 +56,16 @@ module.exports = {
     var multi = this.multiple && _.isArray(value)
     var options = el.options
     var i = options.length
-    var option
+    var op, val
     while (i--) {
-      option = options[i]
+      op = options[i]
+      val = op.hasOwnProperty('_value')
+        ? op._value
+        : op.value
       /* eslint-disable eqeqeq */
-      option.selected = multi
-        ? indexOf(value, option.value) > -1
-        : value == option.value
+      op.selected = multi
+        ? indexOf(value, val) > -1
+        : equals(value, val)
       /* eslint-enable eqeqeq */
     }
   },
@@ -139,10 +140,13 @@ function buildOptions (parent, options) {
       if (typeof op === 'string') {
         el.text = el.value = op
       } else {
-        if (op.value != null) {
+        if (op.value != null && !_.isObject(op.value)) {
           el.value = op.value
         }
-        el.text = op.text || op.value || ''
+        // object values gets serialized when set as value,
+        // so we store the raw value as a different property
+        el._value = op.value
+        el.text = op.text || ''
         if (op.disabled) {
           el.disabled = true
         }
@@ -181,29 +185,36 @@ function checkInitialValue () {
 }
 
 /**
- * Helper to extract a value array for select[multiple]
+ * Get select value
  *
  * @param {SelectElement} el
- * @return {Array}
+ * @param {Boolean} multi
+ * @return {Array|*}
  */
 
-function getMultiValue (el) {
-  return Array.prototype.filter
-    .call(el.options, filterSelected)
-    .map(getOptionValue)
-}
-
-function filterSelected (op) {
-  return op.selected
-}
-
-function getOptionValue (op) {
-  return op.value || op.text
+function getValue (el, multi) {
+  var i = el.options.length
+  var res = multi ? [] : null
+  var op, val
+  for (var i = 0, l = el.options.length; i < l; i++) {
+    op = el.options[i]
+    if (op.selected) {
+      val = op.hasOwnProperty('_value')
+        ? op._value
+        : op.value
+      if (multi) {
+        res.push(val)
+      } else {
+        return val
+      }
+    }
+  }
+  return res
 }
 
 /**
  * Native Array.indexOf uses strict equal, but in this
- * case we need to match string/numbers with soft equal.
+ * case we need to match string/numbers with custom equal.
  *
  * @param {Array} arr
  * @param {*} val
@@ -212,9 +223,19 @@ function getOptionValue (op) {
 function indexOf (arr, val) {
   var i = arr.length
   while (i--) {
-    /* eslint-disable eqeqeq */
-    if (arr[i] == val) return i
-    /* eslint-enable eqeqeq */
+    if (equals(arr[i], val)) {
+      return i
+    }
   }
   return -1
+}
+
+/**
+ * Check if two values are loosely equal. If two objects
+ * have the same shape, they are considered equal too:
+ *   equals({a: 1}, {a: 1}) => true
+ */
+
+function equals (a, b) {
+  return a == b || JSON.stringify(a) == JSON.stringify(b)
 }

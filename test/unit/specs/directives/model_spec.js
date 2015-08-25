@@ -367,6 +367,72 @@ if (_.inBrowser) {
       expect(opts[2].selected).toBe(false)
     })
 
+    it('select + options with Object value', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          test: { msg: 'A' },
+          opts: [
+            { text: 'a', value: { msg: 'A' }},
+            { text: 'b', value: { msg: 'B' }}
+          ]
+        },
+        template: '<select v-model="test" options="opts"></select>'
+      })
+      var select = el.firstChild
+      var opts = select.options
+      expect(opts[0].selected).toBe(true)
+      expect(opts[1].selected).toBe(false)
+      expect(vm.test.msg).toBe('A')
+      opts[1].selected = true
+      trigger(select, 'change')
+      _.nextTick(function () {
+        expect(opts[0].selected).toBe(false)
+        expect(opts[1].selected).toBe(true)
+        expect(vm.test.msg).toBe('B')
+        vm.test = { msg: 'A' }
+        _.nextTick(function () {
+          expect(opts[0].selected).toBe(true)
+          expect(opts[1].selected).toBe(false)
+          done()
+        })
+      })
+    })
+
+    it('select + options + multiple + Object value', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          test: [{ msg: 'A' }, { msg: 'B'}],
+          opts: [
+            { text: 'a', value: { msg: 'A' }},
+            { text: 'b', value: { msg: 'B' }},
+            { text: 'c', value: { msg: 'C' }}
+          ]
+        },
+        template: '<select v-model="test" options="opts" multiple></select>'
+      })
+      var select = el.firstChild
+      var opts = select.options
+      expect(opts[0].selected).toBe(true)
+      expect(opts[1].selected).toBe(true)
+      expect(opts[2].selected).toBe(false)
+      vm.test = [{ msg: 'C' }]
+      _.nextTick(function () {
+        expect(opts[0].selected).toBe(false)
+        expect(opts[1].selected).toBe(false)
+        expect(opts[2].selected).toBe(true)
+        opts[1].selected = true
+        opts[2].selected = false
+        trigger(select, 'change')
+        _.nextTick(function () {
+          expect(vm.test.length).toBe(1)
+          expect(vm.test[0].msg).toBe('B')
+          done()
+        })
+      })
+    })
+
     it('select + number', function () {
       var vm = new Vue({
         el: el,
