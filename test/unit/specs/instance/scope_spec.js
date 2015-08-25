@@ -180,7 +180,6 @@ describe('Instance Scope', function () {
         },
         // cached
         f: {
-          cache: true,
           get: function () {
             spyF()
             return this.ff
@@ -192,7 +191,6 @@ describe('Instance Scope', function () {
         },
         // another cached, for watcher test
         h: {
-          cache: true,
           get: function () {
             return this.hh
           }
@@ -303,6 +301,26 @@ describe('Instance Scope', function () {
       expect(vm.c).toBe('CD')
       expect(vm.d).toBe('CD')
       expect(vm.e).toBe('CDe')
+    })
+
+    it('disable cache', function () {
+      var external = { b: 'B' }
+      var vm = new Vue({
+        data: {
+          a: 'A'
+        },
+        computed: {
+          test: {
+            cache: false,
+            get: function () {
+              return this.a + external.b
+            }
+          }
+        }
+      })
+      expect(vm.test).toBe('AB')
+      external.b = 'C'
+      expect(vm.test).toBe('AC')
     })
 
   })
