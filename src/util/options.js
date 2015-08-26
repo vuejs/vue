@@ -306,7 +306,7 @@ function guardArrayAssets (assets) {
 exports.mergeOptions = function merge (parent, child, vm) {
 
   if (process.env.NODE_ENV !== 'production') {
-    if (child.inherit) {
+    if (child.inherit && !child._repeat) {
       _.deprecation.INHERIT()
     }
   }

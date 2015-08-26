@@ -9,6 +9,12 @@ var clone = require('../parsers/template').clone
 module.exports = {
 
   bind: function () {
+
+    this.isSlot = this.el.tagName === 'SLOT'
+    if (process.env.NODE_ENV !== 'production' && !this.isSlot) {
+      _.deprecation.CONTENT()
+    }
+
     var vm = this.vm
     var host = vm
     // we need find the content context, which is the
@@ -22,8 +28,12 @@ module.exports = {
       this.fallback()
       return
     }
+
     var context = host._context
-    var selector = this._checkParam('select')
+    var selector = this.isSlot
+      ? this._checkParam('name')
+      : this._checkParam('select')
+
     if (!selector) {
       // Default content
       var self = this
@@ -44,12 +54,10 @@ module.exports = {
         compileDefaultContent()
       }
     } else {
-
-      if (process.env.NODE_ENV !== 'production') {
-        _.deprecation.CONTENT_SELECT()
-      }
-
       // select content
+      if (this.isSlot) {
+        selector = '[slot="' + selector + '"]'
+      }
       var nodes = raw.querySelectorAll(selector)
       if (nodes.length) {
         content = extractFragment(nodes, raw)
@@ -108,11 +116,19 @@ function extractFragment (nodes, parent, main) {
     // intact. this ensures proper re-compilation in cases
     // where the outlet is inside a conditional block
     if (main && !node.__v_selected) {
-      frag.appendChild(clone(node))
+      append(node)
     } else if (!main && node.parentNode === parent) {
       node.__v_selected = true
-      frag.appendChild(clone(node))
+      append(node)
     }
   }
   return frag
+
+  function append (node) {
+    node = clone(node)
+    if (node.attributes) {
+      node.removeAttribute('slot')
+    }
+    frag.appendChild(node)
+  }
 }
