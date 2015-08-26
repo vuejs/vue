@@ -30,9 +30,11 @@ var data = {
 
 // define the item component
 Vue.component('item', {
-  props: ['model'],
   template: '#item-template',
   replace: true,
+  props: {
+    model: Object
+  },
   data: function () {
     return {
       open: false

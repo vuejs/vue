@@ -53,10 +53,15 @@ exports._initData = function () {
   if (optionsData) {
     this._data = optionsData
     for (var prop in propsData) {
-      if (
-        this._props[prop].raw !== null ||
-        !optionsData.hasOwnProperty(prop)
-      ) {
+      if (process.env.NODE_ENV !== 'production' &&
+          optionsData.hasOwnProperty(prop)) {
+        _.warn(
+          'Data field "' + prop + '" is already defined ' +
+          'as a prop. Use prop default value instead.'
+        )
+      }
+      if (this._props[prop].raw !== null ||
+          !optionsData.hasOwnProperty(prop)) {
         optionsData.$set(prop, propsData[prop])
       }
     }
