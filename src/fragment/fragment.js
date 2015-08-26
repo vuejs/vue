@@ -37,6 +37,14 @@ function Fragment (linker, vm, frag, host, scope, parentFrag) {
   this.node.__vfrag__ = this
 }
 
+/**
+ * Call attach/detach for all components contained within
+ * this fragment. Also do so recursively for all child
+ * fragments.
+ *
+ * @param {Function} hook
+ */
+
 Fragment.prototype.callHook = function (hook) {
   var i, l
   for (i = 0, l = this.children.length; i < l; i++) {
@@ -134,11 +142,23 @@ function multiRemove () {
   }
 }
 
+/**
+ * Call attach hook for a Vue instance.
+ *
+ * @param {Vue} child
+ */
+
 function attach (child) {
   if (!child._isAttached) {
     child._callHook('attached')
   }
 }
+
+/**
+ * Call detach hook for a Vue instance.
+ *
+ * @param {Vue} child
+ */
 
 function detach (child) {
   if (child._isAttached) {
