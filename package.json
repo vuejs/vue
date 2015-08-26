@@ -45,6 +45,7 @@
     "karma-phantomjs-launcher": "^0.2.1",
     "karma-safari-launcher": "^0.1.1",
     "karma-sauce-launcher": "^0.2.14",
+    "notevil": "^1.0.0",
     "phantomjs": "^1.9.17",
     "semver": "^5.0.1",
     "shell-task": "^1.0.0",

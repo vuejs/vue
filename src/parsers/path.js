@@ -1,7 +1,7 @@
 var _ = require('../util')
 var Cache = require('../cache')
 var pathCache = new Cache(1000)
-var identRE = exports.identRE = /^[$_a-zA-Z]+[\w$]*$/
+exports.identRE = /^[$_a-zA-Z]+[\w$]*$/
 
 // actions
 var APPEND = 0
@@ -230,25 +230,6 @@ function parsePath (path) {
 }
 
 /**
- * Format a accessor segment based on its type.
- *
- * @param {String} key
- * @return {Boolean}
- */
-
-function formatAccessor (key) {
-  if (identRE.test(key)) { // identifier
-    return '.' + key
-  } else if (+key === key >>> 0) { // bracket index
-    return '[' + key + ']'
-  } else if (key.charAt(0) === '*') {
-    return '[o' + formatAccessor(key.slice(1)) + ']'
-  } else { // bracket string
-    return '["' + key.replace(/"/g, '\\"') + '"]'
-  }
-}
-
-/**
  * Compiles a getter function with a fixed path.
  * The fixed path getter supresses errors.
  *
@@ -257,8 +238,22 @@ function formatAccessor (key) {
  */
 
 exports.compileGetter = function (path) {
-  var body = 'return o' + path.map(formatAccessor).join('')
-  return new Function('o', body)
+  return function get (obj) {
+    var original = obj
+    var segment
+    for (var i = 0, l = path.length; i < l; i++) {
+      segment = path[i]
+      if (segment.charAt(0) === '*') {
+        segment = original[segment.slice(1)]
+      }
+      obj = obj[segment]
+      if (i === l - 1) {
+        return obj
+      } else if (!_.isObject(obj)) {
+        return
+      }
+    }
+  }
 }
 
 /**
