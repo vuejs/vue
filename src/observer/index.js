@@ -69,8 +69,7 @@ Observer.create = function (value, vm) {
 /**
  * Walk through each property and convert them into
  * getter/setters. This method should only be called when
- * value type is Object. Properties prefixed with `$` or `_`
- * and accessor properties are ignored.
+ * value type is Object.
  *
  * @param {Object} obj
  */
