@@ -12,7 +12,7 @@ var Watcher = require('../watcher')
  * - meta properties
  */
 
-exports._initScope = function () {
+exports._initState = function () {
   this._initProps()
   this._initMeta()
   this._initMethods()

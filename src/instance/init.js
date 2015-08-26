@@ -89,7 +89,7 @@ exports._init = function (options) {
   this._data = {}
 
   // initialize data observation and scope inheritance.
-  this._initScope()
+  this._initState()
 
   // setup event system and option events.
   this._initEvents()

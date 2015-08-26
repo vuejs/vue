@@ -72,8 +72,8 @@ Object.defineProperty(p, '$data', {
 
 extend(p, require('./instance/init'))
 extend(p, require('./instance/events'))
-extend(p, require('./instance/scope'))
-extend(p, require('./instance/compile'))
+extend(p, require('./instance/state'))
+extend(p, require('./instance/lifecycle'))
 extend(p, require('./instance/misc'))
 
 /**
