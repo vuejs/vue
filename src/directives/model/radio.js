@@ -28,8 +28,6 @@ module.exports = {
   },
 
   update: function (value) {
-    /* eslint-disable eqeqeq */
-    this.el.checked = value == this.getValue()
-    /* eslint-enable eqeqeq */
+    this.el.checked = _.looseEqual(value, this.getValue())
   }
 }

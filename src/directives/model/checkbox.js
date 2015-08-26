@@ -1,3 +1,5 @@
+var _ = require('../../util')
+
 module.exports = {
 
   bind: function () {
@@ -7,11 +9,11 @@ module.exports = {
     var falseExp = this._checkParam('false-exp')
 
     this._matchValue = function (value) {
-      var trueValue = true
       if (trueExp !== null) {
-        trueValue = self.vm.$eval(trueExp)
+        return _.looseEqual(value, self.vm.$eval(trueExp))
+      } else {
+        return !!value
       }
-      return trueValue === value
     }
 
     function getValue () {

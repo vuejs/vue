@@ -65,7 +65,7 @@ module.exports = {
       /* eslint-disable eqeqeq */
       op.selected = multi
         ? indexOf(value, val) > -1
-        : equals(value, val)
+        : _.looseEqual(value, val)
       /* eslint-enable eqeqeq */
     }
   },
@@ -222,21 +222,9 @@ function getValue (el, multi) {
 function indexOf (arr, val) {
   var i = arr.length
   while (i--) {
-    if (equals(arr[i], val)) {
+    if (_.looseEqual(arr[i], val)) {
       return i
     }
   }
   return -1
-}
-
-/**
- * Check if two values are loosely equal. If two objects
- * have the same shape, they are considered equal too:
- *   equals({a: 1}, {a: 1}) => true
- */
-
-function equals (a, b) {
-  /* eslint-disable eqeqeq */
-  return a == b || JSON.stringify(a) == JSON.stringify(b)
-  /* eslint-enable eqeqeq */
 }

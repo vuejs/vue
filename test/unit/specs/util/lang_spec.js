@@ -138,4 +138,12 @@ describe('Util - Language Enhancement', function () {
       done()
     }, 200)
   })
+
+  it('looseEqual', function () {
+    expect(_.looseEqual(1, '1')).toBe(true)
+    expect(_.looseEqual(null, undefined)).toBe(true)
+    expect(_.looseEqual({a: 1}, {a: 1})).toBe(true)
+    expect(_.looseEqual({a: 1}, {a: 2})).toBe(false)
+    expect(_.looseEqual({}, [])).toBe(false)
+  })
 })
