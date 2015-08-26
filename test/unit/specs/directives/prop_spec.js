@@ -495,6 +495,19 @@ if (_.inBrowser) {
       })
     })
 
+    it('should warn data fields already defined as a prop', function () {
+      new Vue({
+        el: el,
+        props: {
+          a: null
+        },
+        data: {
+          a: 1
+        }
+      })
+      expect(hasWarned(_, 'already defined as a prop')).toBe(true)
+    })
+
     it('should not warn for non-required, absent prop', function () {
       new Vue({
         el: el,
