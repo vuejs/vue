@@ -130,8 +130,7 @@ function makePropsLinkFn (props) {
         if (vm._context) {
           if (prop.mode === propBindingModes.ONE_TIME) {
             // one time binding
-            // TODO respect scope here
-            value = vm._context.$get(prop.parentPath)
+            value = (scope || vm._context).$get(prop.parentPath)
             _.initProp(vm, prop, value)
           } else {
             // dynamic binding
