@@ -277,6 +277,42 @@ if (_.inBrowser) {
       }
     })
 
+    it('call attach/detach for nested ifs', function (done) {
+      var attachSpy = jasmine.createSpy('attached')
+      var detachSpy = jasmine.createSpy('detached')
+      document.body.appendChild(el)
+      var vm = new Vue({
+        el: el,
+        data: {
+          showOuter: true,
+          showInner: false
+        },
+        template:
+          '<div v-if="showOuter">' +
+            '<div v-if="showInner">' +
+              '<test></test>' +
+            '</div>' +
+          '</div>',
+        components: {
+          test: {
+            attached: attachSpy,
+            detached: detachSpy
+          }
+        }
+      })
+      expect(attachSpy).not.toHaveBeenCalled()
+      vm.showInner = true
+      _.nextTick(function () {
+        expect(attachSpy.calls.count()).toBe(1)
+        vm.showOuter = false
+        _.nextTick(function () {
+          expect(detachSpy.calls.count()).toBe(1)
+          document.body.removeChild(el)
+          done()
+        })
+      })
+    })
+
     // #893 in IE textNodes do not have `contains` method
     it('call attach/detach: comparing textNodes in IE', function (done) {
       document.body.appendChild(el)
