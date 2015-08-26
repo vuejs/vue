@@ -24,10 +24,12 @@ module.exports = function (grunt) {
         files: [
           'test/unit/lib/util.js',
           'test/unit/lib/jquery.js',
+          'vendor/*.js',
           'src/**/*.js',
           'test/unit/specs/**/*.js'
         ],
         preprocessors: {
+          'vendor/*.js': ['commonjs'],
           'src/**/*.js': ['commonjs'],
           'test/unit/specs/**/*.js': ['commonjs']
         },
@@ -44,6 +46,7 @@ module.exports = function (grunt) {
           browsers: ['PhantomJS'],
           reporters: ['progress', 'coverage'],
           preprocessors: {
+            'vendor/*.js': ['commonjs'],
             'src/**/*.js': ['commonjs', 'coverage'],
             'test/unit/specs/**/*.js': ['commonjs']
           },
@@ -83,7 +86,7 @@ module.exports = function (grunt) {
   grunt.registerTask('unit', ['karma:browsers'])
   grunt.registerTask('cover', ['karma:coverage'])
   grunt.registerTask('test', ['unit', 'cover', 'casper'])
-  grunt.registerTask('sauce', ['karma:sauce1', 'karma:sauce2', 'karma:sauce3'])
+  grunt.registerTask('sauce', ['karma:sauce1']) // CSP: only need Chrome and Firefox
   grunt.registerTask('default', ['eslint', 'build', 'test'])
 
   // CI
