@@ -1,8 +1,7 @@
 var _ = require('../util')
 var compiler = require('../compiler')
 var templateParser = require('../parsers/template')
-var SingleFragment = require('./single')
-var MultiFragment = require('./multi')
+var Fragment = require('./fragment')
 var Cache = require('../cache')
 var linkerCache = new Cache(5000)
 
@@ -46,15 +45,11 @@ function FragmentFactory (vm, el) {
  *
  * @param {Vue} host
  * @param {Object} scope
- * @param {String} id - v-for id
  */
 
-FragmentFactory.prototype.create = function (host, scope, id) {
+FragmentFactory.prototype.create = function (host, scope) {
   var frag = templateParser.clone(this.template)
-  var unlink = this.linker(this.vm, frag, host, scope)
-  return frag.childNodes.length > 1
-    ? new MultiFragment(frag, unlink, scope, id)
-    : new SingleFragment(frag.childNodes[0], unlink, scope, id)
+  return new Fragment(this.linker, this.vm, frag, host, scope)
 }
 
 module.exports = FragmentFactory
