@@ -198,33 +198,12 @@ var testCases = [
     expected: true,
     paths: []
   },
-  {
-    // Date global
-    exp: 'Date.now() > new Date("2000-01-01")',
-    scope: {},
-    expected: true,
-    paths: []
-  },
   // typeof operator
   {
     exp: 'typeof test === "string"',
     scope: { test: '123' },
     expected: true,
     paths: ['test']
-  },
-  // isNaN
-  {
-    exp: 'isNaN(a)',
-    scope: { a: 2 },
-    expected: false,
-    paths: ['a']
-  },
-  // parseFloat & parseInt
-  {
-    exp: 'parseInt(a, 10) + parseFloat(b)',
-    scope: { a: 2.33, b: '3.45' },
-    expected: 5.45,
-    paths: ['a', 'b']
   }
 ]
 
