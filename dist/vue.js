@@ -1,5 +1,5 @@
 /*!
- * Vue.js v0.12.11
+ * Vue.js v0.12.12
  * (c) 2015 Evan You
  * Released under the MIT License.
  */
@@ -457,6 +457,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	    cb.cancelled = true
 	  }
 	  return cb
+	}
+
+	/**
+	 * Check if two values are loosely equal - that is,
+	 * if they are plain objects, do they have the same shape?
+	 *
+	 * @param {*} a
+	 * @param {*} b
+	 * @return {Boolean}
+	 */
+
+	exports.looseEqual = function (a, b) {
+	  /* eslint-disable eqeqeq */
+	  return a == b || (
+	    exports.isObject(a) && exports.isObject(b)
+	      ? JSON.stringify(a) === JSON.stringify(b)
+	      : false
+	  )
+	  /* eslint-enable eqeqeq */
 	}
 
 
@@ -6215,9 +6234,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 
 	  update: function (value) {
-	    /* eslint-disable eqeqeq */
-	    this.el.checked = value == this.getValue()
-	    /* eslint-enable eqeqeq */
+	    this.el.checked = _.looseEqual(value, this.getValue())
 	  }
 	}
 
@@ -6293,7 +6310,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      /* eslint-disable eqeqeq */
 	      op.selected = multi
 	        ? indexOf(value, val) > -1
-	        : equals(value, val)
+	        : _.looseEqual(value, val)
 	      /* eslint-enable eqeqeq */
 	    }
 	  },
@@ -6450,29 +6467,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	function indexOf (arr, val) {
 	  var i = arr.length
 	  while (i--) {
-	    if (equals(arr[i], val)) {
+	    if (_.looseEqual(arr[i], val)) {
 	      return i
 	    }
 	  }
 	  return -1
 	}
 
-	/**
-	 * Check if two values are loosely equal. If two objects
-	 * have the same shape, they are considered equal too:
-	 *   equals({a: 1}, {a: 1}) => true
-	 */
-
-	function equals (a, b) {
-	  /* eslint-disable eqeqeq */
-	  return a == b || JSON.stringify(a) == JSON.stringify(b)
-	  /* eslint-enable eqeqeq */
-	}
-
 
 /***/ },
 /* 44 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
+
+	var _ = __webpack_require__(1)
 
 	module.exports = {
 
@@ -6483,11 +6490,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var falseExp = this._checkParam('false-exp')
 
 	    this._matchValue = function (value) {
-	      var trueValue = true
 	      if (trueExp !== null) {
-	        trueValue = self.vm.$eval(trueExp)
+	        return _.looseEqual(value, self.vm.$eval(trueExp))
+	      } else {
+	        return !!value
 	      }
-	      return trueValue === value
 	    }
 
 	    function getValue () {
