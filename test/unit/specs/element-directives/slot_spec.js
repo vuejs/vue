@@ -332,4 +332,19 @@ describe('Slot Distribution', function () {
     expect(el.innerHTML).toBe('<p>1</p><p>2</p>')
   })
 
+  it('template slot', function () {
+    vm = new Vue({
+      el: el,
+      template:
+        '<test><template slot="test">hello</template></test>',
+      components: {
+        test: {
+          template: '<slot name="test"></slot> world',
+          replace: true
+        }
+      }
+    })
+    expect(el.innerHTML).toBe('hello world')
+  })
+
 })

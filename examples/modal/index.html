@@ -12,25 +12,28 @@
       <div class="modal-mask" v-show="show" v-transition="modal">
         <div class="modal-wrapper">
           <div class="modal-container">
-            <content select=".modal-header">
-              <div class="modal-header">
+
+            <div class="modal-header">
+              <slot name="header">
                 default header
-              </div>
-            </content>
-            <content select=".modal-body">
-              <div class="modal-body">
+              </slot>
+            </div>
+            
+            <div class="modal-body">
+              <slot name="body">
                 default body
-              </div>
-            </content>
-            <content select=".modal-footer">
-              <div class="modal-footer">
+              </slot>
+            </div>
+
+            <div class="modal-footer">
+              <slot name="footer">
                 default footer
                 <button class="modal-default-button"
                   v-on="click: show = false">
                   OK
                 </button>
-              </div>
-            </content>
+              </slot>
+            </div>
           </div>
         </div>
       </div>
@@ -59,9 +62,7 @@
           you can use custom content here to overwrite
           default content
         -->
-        <div class="modal-header">
-          <h3>custom header</h3>
-        </div>
+        <h3 slot="header">custom header</h3>
       </modal>
     </div>
 
