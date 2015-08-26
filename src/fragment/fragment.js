@@ -49,7 +49,7 @@ Fragment.prototype.callHook = function (hook) {
 
 Fragment.prototype.destroy = function () {
   if (this.parentFrag) {
-    this.parentFrag.$remove(this)
+    this.parentFrag.childFrags.$remove(this)
   }
   this.unlink()
 }
