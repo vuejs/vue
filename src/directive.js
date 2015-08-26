@@ -18,11 +18,13 @@ var expParser = require('./parsers/expression')
  *                 - {String} [arg]
  *                 - {Array<Object>} [filters]
  * @param {Object} def - directive definition object
- * @param {Vue|undefined} host - transclusion host target
+ * @param {Vue} [host] - transclusion host component
+ * @param {Object} [scope] - v-for scope
+ * @param {Fragment} [frag] - owner fragment
  * @constructor
  */
 
-function Directive (name, el, vm, descriptor, def, host, scope) {
+function Directive (name, el, vm, descriptor, def, host, scope, frag) {
   // public
   this.name = name
   this.el = el
@@ -34,11 +36,13 @@ function Directive (name, el, vm, descriptor, def, host, scope) {
   this.filters = descriptor.filters
   // private
   this._descriptor = descriptor
-  this._host = host
   this._locked = false
   this._bound = false
   this._listeners = null
+  // link context
+  this._host = host
   this._scope = scope
+  this._frag = frag
   // init
   this._bind(def)
 }

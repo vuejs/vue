@@ -129,7 +129,7 @@ module.exports = {
       frag = oldFrags[i]
       if (!frag.reused) {
         this.deleteCachedFrag(frag)
-        frag.unlink()
+        frag.destroy()
         this.remove(frag, removalIndex++, totalRemoved, inDoc)
       }
     }
@@ -189,7 +189,7 @@ module.exports = {
       // avoid accidental fallback
       _.define(scope, '$key', null)
     }
-    var frag = this.factory.create(host, scope)
+    var frag = this.factory.create(host, scope, this._frag)
     frag.forId = this.id
     this.cacheFrag(value, frag, index, key)
     return frag
@@ -458,7 +458,7 @@ module.exports = {
       while (i--) {
         frag = this.frags[i]
         this.deleteCachedFrag(frag)
-        frag.unlink()
+        frag.destroy()
       }
     }
   }

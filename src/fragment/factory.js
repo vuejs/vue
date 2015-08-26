@@ -45,11 +45,12 @@ function FragmentFactory (vm, el) {
  *
  * @param {Vue} host
  * @param {Object} scope
+ * @param {Fragment} parentFrag
  */
 
-FragmentFactory.prototype.create = function (host, scope) {
+FragmentFactory.prototype.create = function (host, scope, parentFrag) {
   var frag = templateParser.clone(this.template)
-  return new Fragment(this.linker, this.vm, frag, host, scope)
+  return new Fragment(this.linker, this.vm, frag, host, scope, parentFrag)
 }
 
 module.exports = FragmentFactory

@@ -63,6 +63,8 @@ exports.$destroy = function (remove, deferCleanup) {
  * @return {Function}
  */
 
-exports.$compile = function (el, host) {
-  return compiler.compile(el, this.$options, true)(this, el, host)
+exports.$compile = function (el, host, scope, frag) {
+  return compiler.compile(el, this.$options, true)(
+    this, el, host, scope, frag
+  )
 }

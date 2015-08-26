@@ -12,11 +12,16 @@ var transition = require('../transition')
  * @param {Object} [scope]
  */
 
-function Fragment (linker, vm, frag, host, scope) {
-  this.unlink = linker(vm, frag, host, scope, this)
+function Fragment (linker, vm, frag, host, scope, parentFrag) {
+  this.children = []
+  this.childFrags = []
   this.scope = scope
   this.inserted = false
-  this.children = []
+  this.parentFrag = parentFrag
+  if (parentFrag) {
+    parentFrag.childFrags.push(this)
+  }
+  this.unlink = linker(vm, frag, host, scope, this)
   var single = this.single = frag.childNodes.length === 1
   if (single) {
     this.node = frag.childNodes[0]
@@ -32,6 +37,23 @@ function Fragment (linker, vm, frag, host, scope) {
   this.node.__vfrag__ = this
 }
 
+Fragment.prototype.callHook = function (hook) {
+  var i, l
+  for (i = 0, l = this.children.length; i < l; i++) {
+    hook(this.children[i])
+  }
+  for (i = 0, l = this.childFrags.length; i < l; i++) {
+    this.childFrags[i].callHook(hook)
+  }
+}
+
+Fragment.prototype.destroy = function () {
+  if (this.parentFrag) {
+    this.parentFrag.$remove(this)
+  }
+  this.unlink()
+}
+
 /**
  * Insert fragment before target, single node version
  *
@@ -45,6 +67,9 @@ function singleBefore (target, trans) {
     : _.before
   method(this.node, target, this.scope)
   this.inserted = true
+  if (_.inDoc(this.node)) {
+    this.callHook(attach)
+  }
 }
 
 /**
@@ -52,8 +77,12 @@ function singleBefore (target, trans) {
  */
 
 function singleRemove () {
+  var shouldCallRemove = _.inDoc(this.node)
   transition.remove(this.node, this.scope)
   this.inserted = false
+  if (shouldCallRemove) {
+    this.callHook(detach)
+  }
 }
 
 /**
@@ -75,6 +104,9 @@ function multiBefore (target, trans) {
   }
   _.before(this.end, target)
   this.inserted = true
+  if (_.inDoc(this.node)) {
+    this.callHook(attach)
+  }
 }
 
 /**
@@ -82,6 +114,7 @@ function multiBefore (target, trans) {
  */
 
 function multiRemove () {
+  var shouldCallRemove = _.inDoc(this.node)
   var parent = this.node.parentNode
   var node = this.node.nextSibling
   var nodes = this.nodes = []
@@ -96,6 +129,21 @@ function multiRemove () {
   parent.removeChild(this.node)
   parent.removeChild(this.end)
   this.inserted = false
+  if (shouldCallRemove) {
+    this.callHook(detach)
+  }
+}
+
+function attach (child) {
+  if (!child._isAttached) {
+    child._callHook('attached')
+  }
+}
+
+function detach (child) {
+  if (child._isAttached) {
+    child._callHook('detached')
+  }
 }
 
 module.exports = Fragment

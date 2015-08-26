@@ -59,6 +59,15 @@ exports._init = function (options) {
   // and container directives.
   this._scope = options._scope
 
+  // fragment:
+  // if this instance is compiled inside a Fragment, it
+  // needs to reigster itself as a child of that fragment
+  // for attach/detach to work properly.
+  this._frag = options._frag
+  if (this._frag) {
+    this._frag.children.push(this)
+  }
+
   // push self into parent / transclusion host
   if (this.$parent) {
     this.$parent.$children.push(this)
