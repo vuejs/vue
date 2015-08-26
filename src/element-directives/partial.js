@@ -45,7 +45,7 @@ module.exports = {
   },
 
   unbind: function () {
-    if (this.frag) this.frag.unlink()
+    if (this.frag) this.frag.destroy()
     if (this.unwatch) this.unwatch()
   }
 }
