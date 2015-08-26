@@ -70,7 +70,9 @@ module.exports = {
 
   compile: function (content, context, host) {
     if (content && context) {
-      this.unlink = context.$compile(content, host)
+      this.unlink = context.$compile(
+        content, host, this._scope, this._frag
+      )
     }
     if (content) {
       _.replace(this.el, content)

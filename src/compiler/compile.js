@@ -52,16 +52,18 @@ exports.compile = function (el, options, partial) {
    * @param {Vue} vm
    * @param {Element|DocumentFragment} el
    * @param {Vue} [host] - host vm of transcluded content
+   * @param {Object} [scope] - v-for scope
+   * @param {Fragment} [frag] - link context fragment
    * @return {Function|undefined}
    */
 
-  return function compositeLinkFn (vm, el, host, scope) {
+  return function compositeLinkFn (vm, el, host, scope, frag) {
     // cache childNodes before linking parent, fix #657
     var childNodes = _.toArray(el.childNodes)
     // link
     var dirs = linkAndCapture(function compositeLinkCapturer () {
-      if (nodeLinkFn) nodeLinkFn(vm, el, host, scope)
-      if (childLinkFn) childLinkFn(vm, childNodes, host, scope)
+      if (nodeLinkFn) nodeLinkFn(vm, el, host, scope, frag)
+      if (childLinkFn) childLinkFn(vm, childNodes, host, scope, frag)
     }, vm)
     return makeUnlinkFn(vm, dirs)
   }
@@ -386,7 +388,7 @@ function compileNodeList (nodeList, options) {
  */
 
 function makeChildLinkFn (linkFns) {
-  return function childLinkFn (vm, nodes, host, scope) {
+  return function childLinkFn (vm, nodes, host, scope, frag) {
     var node, nodeLinkFn, childrenLinkFn
     for (var i = 0, n = 0, l = linkFns.length; i < l; n++) {
       node = nodes[n]
@@ -395,10 +397,10 @@ function makeChildLinkFn (linkFns) {
       // cache childNodes before linking parent, fix #657
       var childNodes = _.toArray(node.childNodes)
       if (nodeLinkFn) {
-        nodeLinkFn(vm, node, host, scope)
+        nodeLinkFn(vm, node, host, scope, frag)
       }
       if (childrenLinkFn) {
-        childrenLinkFn(vm, childNodes, host, scope)
+        childrenLinkFn(vm, childNodes, host, scope, frag)
       }
     }
   }
@@ -434,10 +436,10 @@ function checkElementDirectives (el, options) {
 function checkComponent (el, options, hasAttrs) {
   var componentId = _.checkComponent(el, options, hasAttrs)
   if (componentId) {
-    var componentLinkFn = function (vm, el, host, scope) {
+    var componentLinkFn = function (vm, el, host, scope, frag) {
       vm._bindDir('component', el, {
         expression: componentId
-      }, componentDef, host, scope)
+      }, componentDef, host, scope, frag)
     }
     componentLinkFn.terminal = true
     return componentLinkFn
@@ -488,8 +490,8 @@ function makeTerminalNodeLinkFn (el, dirName, value, options, def) {
   // no need to call resolveAsset since terminal directives
   // are always internal
   def = def || options.directives[dirName]
-  var fn = function terminalNodeLinkFn (vm, el, host, scope) {
-    vm._bindDir(dirName, el, descriptor, def, host, scope)
+  var fn = function terminalNodeLinkFn (vm, el, host, scope, frag) {
+    vm._bindDir(dirName, el, descriptor, def, host, scope, frag)
   }
   fn.terminal = true
   return fn
@@ -546,7 +548,7 @@ function compileDirectives (attrs, options) {
  */
 
 function makeNodeLinkFn (directives) {
-  return function nodeLinkFn (vm, el, host, scope) {
+  return function nodeLinkFn (vm, el, host, scope, frag) {
     // reverse apply because it's sorted low to high
     var i = directives.length
     var dir, j, k
@@ -559,7 +561,7 @@ function makeNodeLinkFn (directives) {
         k = dir.descriptors.length
         for (j = 0; j < k; j++) {
           vm._bindDir(dir.name, el,
-            dir.descriptors[j], dir.def, host, scope)
+            dir.descriptors[j], dir.def, host, scope, frag)
         }
       }
     }

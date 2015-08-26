@@ -102,12 +102,14 @@ exports._initElement = function (el) {
  * @param {Node} node   - target node
  * @param {Object} desc - parsed directive descriptor
  * @param {Object} def  - directive definition object
- * @param {Vue|undefined} host - transclusion host component
+ * @param {Vue} [host] - transclusion host component
+ * @param {Object} [scope] - v-for scope
+ * @param {Fragment} [frag] - owner fragment
  */
 
-exports._bindDir = function (name, node, desc, def, host, scope) {
+exports._bindDir = function (name, node, desc, def, host, scope, frag) {
   this._directives.push(
-    new Directive(name, node, this, desc, def, host, scope)
+    new Directive(name, node, this, desc, def, host, scope, frag)
   )
 }
 
@@ -132,6 +134,10 @@ exports._destroy = function (remove, deferCleanup) {
   var parent = this.$parent
   if (parent && !parent._isBeingDestroyed) {
     parent.$children.$remove(this)
+  }
+  // remove self from owner fragment
+  if (this._frag) {
+    this._frag.children.$remove(this)
   }
   // destroy all children.
   i = this.$children.length
