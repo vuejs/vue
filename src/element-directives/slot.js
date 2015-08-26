@@ -1,5 +1,6 @@
 var _ = require('../util')
-var clone = require('../parsers/template').clone
+var config = require('../config')
+var templateParser = require('../parsers/template')
 
 // This is the elementDirective that handles <content>
 // transclusions. It relies on the raw content of an
@@ -125,10 +126,28 @@ function extractFragment (nodes, parent, main) {
   return frag
 
   function append (node) {
-    node = clone(node)
+    if (_.isTemplate(node) &&
+        !hasDirecitve(node, 'if') &&
+        !hasDirecitve(node, 'for') &&
+        !hasDirecitve(node, 'repeat')) {
+      node = templateParser.parse(node)
+    }
+    node = templateParser.clone(node)
     if (node.attributes) {
       node.removeAttribute('slot')
     }
     frag.appendChild(node)
   }
+}
+
+/**
+ * Check if there is a flow control directive on a template
+ * element that is a slot.
+ *
+ * @param {Node} node
+ * @param {String} dir
+ */
+
+function hasDirecitve (node, dir) {
+  return node.hasAttribute(config.prefix + dir)
 }
