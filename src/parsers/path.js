@@ -156,7 +156,6 @@ function getPathCharType (ch) {
 
 /**
  * Parse a string path into an array of segments
- * Todo implement cache
  *
  * @param {String} path
  * @return {Array|undefined}
