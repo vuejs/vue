@@ -209,7 +209,12 @@ module.exports = {
         // will be the intermediate scope created for this
         // repeat fragment. this is used for linking props
         // and container directives.
-        _scope: this._scope
+        _scope: this._scope,
+        // pass in the owner fragment of this component.
+        // this is necessary so that the fragment can keep
+        // track of its contained components in order to
+        // call attach/detach hooks for them.
+        _frag: this._frag
       }
       // extra options
       if (extraOptions) {
