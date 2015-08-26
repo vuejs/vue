@@ -393,7 +393,9 @@ module.exports = {
       // identifier, shows that this vm belongs to this collection
       _repeatId: this.id,
       // transclusion content owner
-      _context: this.vm
+      _context: this.vm,
+      // cotnext fragment
+      _frag: this._frag
     }, Component)
     // cache instance
     if (needCache) {
