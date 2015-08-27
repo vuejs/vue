@@ -591,7 +591,7 @@ if (_.inBrowser) {
           items: [{id: 1}, {id: 1}]
         }
       })
-      expect(hasWarned(_, 'Duplicate track-by key')).toBe(true)
+      expect(hasWarned(_, 'Duplicate objects with the same track-by key')).toBe(true)
     })
 
     it('warn v-if', function () {
