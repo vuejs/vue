@@ -571,7 +571,7 @@ if (_.inBrowser) {
       }
     })
 
-    it('warn duplicate objects', function () {
+    it('warn duplicate objects on initial render', function () {
       var obj = {}
       new Vue({
         el: el,
@@ -581,6 +581,23 @@ if (_.inBrowser) {
         }
       })
       expect(hasWarned(_, 'Duplicate objects')).toBe(true)
+    })
+
+    it('warn duplicate objects on diff', function (done) {
+      var obj = {}
+      var vm = new Vue({
+        el: el,
+        template: '<div v-repeat="items"></div>',
+        data: {
+          items: [obj]
+        }
+      })
+      expect(_.warn).not.toHaveBeenCalled()
+      vm.items.push(obj)
+      _.nextTick(function () {
+        expect(hasWarned(_, 'Duplicate objects')).toBe(true)
+        done()
+      })
     })
 
     it('warn duplicate trackby id', function () {
