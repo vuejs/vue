@@ -71,6 +71,12 @@ module.exports = {
     this.refID = this._checkParam(config.prefix + 'ref')
     this.elID = this._checkParam(config.prefix + 'el')
 
+    if (process.env.NODE_ENV !== 'production') {
+      if (this.refID) _.deprecation.V_REF()
+      if (this.elID) _.deprecation.V_EL()
+    }
+    this.refID = this.refID || this._checkParam('ref')
+
     // check other directives that need to be handled
     // at v-repeat level
     this.checkIf()
