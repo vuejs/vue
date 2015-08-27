@@ -7,6 +7,10 @@ var templateParser = require('../parsers/template')
 var resolveAsset = _.resolveAsset
 var componentDef = require('../directives/component')
 
+var propRE = /^prop-/
+var bindRE = /^bind-/
+var onRE = /^on-/
+
 // terminal directives
 var terminalDirectives = [
   'repeat',
@@ -513,11 +517,25 @@ function compileDirectives (attrs, options) {
     attr = attrs[i]
     name = attr.name
     value = attr.value
+    // Core directive
     if (name.indexOf(config.prefix) === 0) {
       dirName = name.slice(config.prefix.length)
       dirDef = resolveAsset(options, 'directives', dirName)
       if (process.env.NODE_ENV !== 'production') {
         _.assertAsset(dirDef, 'directive', dirName)
+
+        if (dirName === 'transition') {
+          _.deprecation.V_TRANSITION()
+        } else if (dirName === 'class') {
+          _.deprecation.V_CLASS()
+        } else if (dirName === 'style') {
+          _.deprecation.V_STYLE()
+        } else if (dirName === 'on') {
+          _.deprecation.V_ON()
+        } else if (dirName === 'attr') {
+          _.deprecation.V_ATTR()
+        }
+
       }
       if (dirDef) {
         dirs.push({
@@ -526,7 +544,17 @@ function compileDirectives (attrs, options) {
           def: dirDef
         })
       }
-    } else if (config.interpolate) {
+    } else
+    // attribute bindings
+    if (bindRE.test(name)) {
+      // TODO handle bind
+    } else
+    // event handlers
+    if (onRE.test(name)) {
+      // TODO handle events
+    } else
+    // deprecated: mustache interpolations inside attribtues
+    if (config.interpolate) {
       dir = collectAttrDirective(name, value, options)
       if (dir) {
         dirs.push(dir)
@@ -586,6 +614,11 @@ function collectAttrDirective (name, value, options) {
   var tokens = textParser.parse(value)
   var isClass = name === 'class'
   if (tokens) {
+
+    if (process.env.NODE_ENV !== 'production') {
+      _.deprecation.ATTR_INTERPOLATION()
+    }
+
     var dirName = isClass ? 'class' : 'attr'
     var def = options.directives[dirName]
     var i = tokens.length

@@ -143,6 +143,11 @@ exports.parse = function (s) {
       if (argRE.test(arg)) {
         argIndex = i + 1
         dir.arg = _.stripQuotes(arg) || arg
+
+        if (process.env.NODE_ENV !== 'production') {
+          _.deprecation.DIR_ARGS()
+        }
+
       }
     } else if (
       c === 0x7C && // pipe
@@ -176,5 +181,10 @@ exports.parse = function (s) {
   }
 
   cache.put(s, dirs)
+
+  if (dirs.length > 1) {
+    _.deprecation.MUTI_CLAUSES()
+  }
+
   return dirs
 }

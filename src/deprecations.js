@@ -5,6 +5,8 @@ if (process.env.NODE_ENV !== 'production') {
     _.warn('{DEPRECATION} ' + msg)
   }
 
+  var newBindingSyntaxLink = ' See https://github.com/yyx990803/vue/issues/1173 for details.'
+
   _.deprecation = {
 
     REPEAT: function () {
@@ -61,6 +63,70 @@ if (process.env.NODE_ENV !== 'production') {
       warn(
         'v-el will be deprecated in 1.0.0. ' +
         'See https://github.com/yyx990803/vue/issues/1198 for details.'
+      )
+    },
+
+    DIR_ARGS: function () {
+      warn(
+        'Directives will no longer take arguments in 1.0.0. ' + newBindingSyntaxLink
+      )
+    },
+
+    MUTI_CLAUSES: function () {
+      warn(
+        'Directives will no longer support multiple clause syntax in 1.0.0.' +
+        newBindingSyntaxLink
+      )
+    },
+
+    V_TRANSITION: function () {
+      warn(
+        'v-transition will no longer be a directive in 1.0.0; It will become a ' +
+        'special attribute without the prefix. Ues "transition" instead.' +
+        newBindingSyntaxLink
+      )
+    },
+
+    V_REF: function () {
+      warn(
+        'v-ref will no longer be a directive in 1.0.0; It will become a ' +
+        'special attribute without the prefix. Ues "ref" instead.' +
+        newBindingSyntaxLink
+      )
+    },
+
+    V_CLASS: function () {
+      warn(
+        'v-class will no longer be a directive in 1.0.0; Use "bind-class" instead.' +
+        newBindingSyntaxLink
+      )
+    },
+
+    V_STYLE: function () {
+      warn(
+        'v-style will no longer be a directive in 1.0.0; Use "bind-style" instead.' +
+        newBindingSyntaxLink
+      )
+    },
+
+    V_ATTR: function () {
+      warn(
+        'v-attr will no longer be a directive in 1.0.0; Use the "bind-" syntax instead.' +
+        newBindingSyntaxLink
+      )
+    },
+
+    V_ON: function () {
+      warn(
+        'v-on will no longer be a directive in 1.0.0; Use the "on-" syntax instead.' +
+        newBindingSyntaxLink
+      )
+    },
+
+    ATTR_INTERPOLATION: function () {
+      warn(
+        'Mustache interpolations inside attributes will be deprecated in 1.0.0. ' +
+        'Use the "bind-" syntax instead.' + newBindingSyntaxLink
       )
     }
 
