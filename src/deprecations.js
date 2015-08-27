@@ -28,9 +28,10 @@ if (process.env.NODE_ENV !== 'production') {
       )
     },
 
-    STRICT_MODE: function () {
+    STRICT_MODE: function (type, id) {
       warn(
-        'Strict mode will default to `true` in 1.0.0. ' +
+        'Falling through to parent when resolving ' + type + ' with id "' + id +
+        '". Strict mode will default to `true` in 1.0.0. ' +
         'See https://github.com/yyx990803/vue/issues/1170 for details.'
       )
     },
@@ -72,7 +73,7 @@ if (process.env.NODE_ENV !== 'production') {
     _.deprecation[key] = function () {
       if (!warned[key]) {
         warned[key] = true
-        fn()
+        fn.apply(null, arguments)
       }
     }
   })
