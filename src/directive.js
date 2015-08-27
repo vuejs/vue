@@ -61,6 +61,14 @@ Directive.prototype._bind = function (def) {
     this.el && this.el.removeAttribute
   ) {
     this.el.removeAttribute(config.prefix + this.name)
+    // 1.0.0: remove bind/on
+    if (this.name === 'attr') {
+      this.el.removeAttribute('bind-' + this.arg)
+    } else if (this.name === 'class' || this.name === 'style') {
+      this.el.removeAttribute('bind-' + this.name)
+    } else if (this.name === 'on') {
+      this.el.removeAttribute('on-' + this.arg)
+    }
   }
   if (typeof def === 'function') {
     this.update = def
