@@ -17,13 +17,21 @@ exports.checkComponent = function (el, options) {
     var exp = el.getAttribute('is')
     el.removeAttribute('is')
     return exp
-  } else if (
-    !exports.commonTagRE.test(tag) &&
-    _.resolveAsset(options, 'components', tag)
-  ) {
-    return tag
+  } else if (!exports.commonTagRE.test(tag)) {
+    if (_.resolveAsset(options, 'components', tag)) {
+      return tag
+    } else if (process.env.NODE_ENV !== 'production') {
+      if (tag.indexOf('-') > -1 ||
+          /HTMLUnknownElement/.test(Object.prototype.toString.call(el))) {
+        _.warn(
+          'Unknown custom element: <' + tag + '> - did you ' +
+          'register the component correctly?'
+        )
+      }
+    }
+  }
   /* eslint-disable no-cond-assign */
-  } else if (tag = _.attr(el, 'component')) {
+  if (tag = _.attr(el, 'component')) {
   /* eslint-enable no-cond-assign */
     return tag
   }
