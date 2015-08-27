@@ -352,11 +352,8 @@ exports.resolveAsset = function resolve (options, type, id) {
   var assets = options[type]
   var asset = assets[id] || assets[camelizedId] || assets[pascalizedId]
 
-  if (process.env.NODE_ENV !== 'production') {
-    if (!asset && !config.strict) {
-      _.deprecation.STRICT_MODE()
-    }
-  }
+  // for deprecation check
+  var localAsset = asset
 
   while (
     !asset &&
@@ -367,5 +364,12 @@ exports.resolveAsset = function resolve (options, type, id) {
     assets = options[type]
     asset = assets[id] || assets[camelizedId] || assets[pascalizedId]
   }
+
+  if (process.env.NODE_ENV !== 'production') {
+    if (asset && !localAsset && !config.strict) {
+      _.deprecation.STRICT_MODE()
+    }
+  }
+
   return asset
 }

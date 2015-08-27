@@ -30,7 +30,7 @@ exports.transclude = function (el, options) {
   }
   if (options) {
     if (options._asComponent && !options.template) {
-      options.template = '<content></content>'
+      options.template = '<slot></slot>'
     }
     if (options.template) {
       options._content = _.extractContent(el)
