@@ -50,9 +50,10 @@ module.exports = {
       )
       return
     }
+    el.__v_model = this
     handler.bind.call(this)
     this.update = handler.update
-    this.unbind = handler.unbind
+    this._unbind = handler.unbind
   },
 
   /**
@@ -72,5 +73,10 @@ module.exports = {
         this.hasWrite = true
       }
     }
+  },
+
+  unbind: function () {
+    this.el.__v_model = null
+    this._unbind && this._unbind()
   }
 }

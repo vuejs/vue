@@ -21,6 +21,21 @@ module.exports = {
    */
 
   bind: function () {
+
+    // some helpful tips...
+    /* istanbul ignore if */
+    if (
+      process.env.NODE_ENV !== 'production' &&
+      this.el.tagName === 'OPTION' &&
+      this.el.parentNode && this.el.parentNode.__v_model
+    ) {
+      _.warn(
+        'Don\'t use v-repeat for v-model options; ' +
+        'use the `options` param instead: ' +
+        'http://vuejs.org/guide/forms.html#Dynamic_Select_Options'
+      )
+    }
+
     // support for item in array syntax
     var inMatch = this.expression.match(/(.*) in (.*)/)
     if (inMatch) {
@@ -59,19 +74,6 @@ module.exports = {
 
     // create cache object
     this.cache = Object.create(null)
-
-    // some helpful tips...
-    /* istanbul ignore if */
-    if (
-      process.env.NODE_ENV !== 'production' &&
-      this.el.tagName === 'OPTION'
-    ) {
-      _.warn(
-        'Don\'t use v-repeat for v-model options; ' +
-        'use the `options` param instead: ' +
-        'http://vuejs.org/guide/forms.html#Dynamic_Select_Options'
-      )
-    }
   },
 
   /**
