@@ -50,5 +50,16 @@ if (_.inBrowser) {
       expect(el.className).toBe('hoho')
     })
 
+    it('array value', function () {
+      el.className = 'a'
+      var dir = _.extend({ el: el }, def)
+      dir.update(['b', 'c'])
+      expect(el.className).toBe('a b c')
+      dir.update(['d', 'c'])
+      expect(el.className).toBe('a c d')
+      dir.update()
+      expect(el.className).toBe('a')
+    })
+
   })
 }

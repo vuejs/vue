@@ -1,6 +1,7 @@
 var Vue = require('../../../../src/vue')
 var _ = require('../../../../src/util')
 var dirParser = require('../../../../src/parsers/directive')
+var newDirParser = require('../../../../src/parsers/directive-new')
 var compiler = require('../../../../src/compiler')
 var compile = compiler.compile
 
@@ -66,6 +67,30 @@ if (_.inBrowser) {
       // check the priority sorting
       // the "b" on the firstNode should be called first!
       expect(vm._bindDir.calls.argsFor(1)[0]).toBe('b')
+    })
+
+    it('bind- syntax', function () {
+      el.setAttribute('bind-class', 'a')
+      el.setAttribute('bind-style', 'b')
+      el.setAttribute('bind-title', 'c')
+      var descA = newDirParser.parse('a')
+      var descB = newDirParser.parse('b')
+      var descC = newDirParser.parse('c')
+      var linker = compile(el, Vue.options)
+      linker(vm, el)
+      expect(vm._bindDir.calls.count()).toBe(3)
+      expect(vm._bindDir).toHaveBeenCalledWith('class', el, descA, Vue.options.directives.class, undefined, undefined, undefined)
+      expect(vm._bindDir).toHaveBeenCalledWith('style', el, descB, Vue.options.directives.style, undefined, undefined, undefined)
+      expect(vm._bindDir).toHaveBeenCalledWith('attr', el, descC, Vue.options.directives.attr, undefined, undefined, undefined)
+    })
+
+    it('on- syntax', function () {
+      el.setAttribute('on-click', 'a++')
+      var desc = newDirParser.parse('a++')
+      var linker = compile(el, Vue.options)
+      linker(vm, el)
+      expect(vm._bindDir.calls.count()).toBe(1)
+      expect(vm._bindDir).toHaveBeenCalledWith('on', el, desc, Vue.options.directives.on, undefined, undefined, undefined)
     })
 
     it('text interpolation', function () {

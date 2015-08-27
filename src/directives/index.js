@@ -1,3 +1,5 @@
+// TODO: only expose core in 1.0.0
+
 // manipulation directives
 exports.text = require('./text')
 exports.html = require('./html')
