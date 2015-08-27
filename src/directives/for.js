@@ -42,8 +42,8 @@ module.exports = {
     this.id = '__v-for__' + (++uid)
 
     // setup anchor nodes
-    this.start = _.createAnchor('v-repeat-start')
-    this.end = _.createAnchor('v-repeat-end')
+    this.start = _.createAnchor('v-for-start')
+    this.end = _.createAnchor('v-for-end')
     _.replace(this.el, this.end)
     _.before(this.start, this.end)
 
@@ -109,6 +109,14 @@ module.exports = {
       primitive = !isObject(value)
       frag = !init && this.getCachedFrag(value, i, key)
       if (frag) { // reusable fragment
+
+        if (process.env.NODE_ENV !== 'production' && frag.reused) {
+          _.warn(
+            'Duplicate objects found in v-for="' + this.expression + '": ' +
+            JSON.stringify(value)
+          )
+        }
+
         frag.reused = true
         // update $index
         frag.scope.$index = i
@@ -329,7 +337,7 @@ module.exports = {
         cache[id] = frag
       } else if (!primitive && idKey !== '$index') {
         process.env.NODE_ENV !== 'production' && _.warn(
-          'Duplicate track-by key in v-repeat: ' + id
+          'Duplicate objects with the same track-by key in v-for: ' + id
         )
       }
     } else {
@@ -339,8 +347,8 @@ module.exports = {
           value[id] = frag
         } else {
           process.env.NODE_ENV !== 'production' && _.warn(
-            'Duplicate objects are not supported in v-repeat ' +
-            'when using components or transitions.'
+            'Duplicate objects found in v-for="' + this.expression + '": ' +
+            JSON.stringify(value)
           )
         }
       } else {
@@ -487,7 +495,7 @@ module.exports = {
  * should have been set to false so we can skip them.
  *
  * If this is a block repeat, we want to make sure we only
- * return frag that is bound to this v-repeat. (see #929)
+ * return frag that is bound to this v-for. (see #929)
  *
  * @param {Fragment} frag
  * @param {Comment|Text} anchor
