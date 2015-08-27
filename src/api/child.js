@@ -14,13 +14,15 @@ var _ = require('../util')
 exports.$addChild = function (opts, BaseCtor) {
   BaseCtor = BaseCtor || _.Vue
   opts = opts || {}
-  var parent = this
   var ChildVue
+  var parent = this
+  // transclusion context
+  var context = opts._context || parent
   var inherit = opts.inherit !== undefined
     ? opts.inherit
     : BaseCtor.options.inherit
   if (inherit) {
-    var ctors = parent._childCtors
+    var ctors = context._childCtors
     ChildVue = ctors[BaseCtor.cid]
     if (!ChildVue) {
       var optionName = BaseCtor.options.name
@@ -34,9 +36,7 @@ exports.$addChild = function (opts, BaseCtor) {
       )()
       ChildVue.options = BaseCtor.options
       ChildVue.linker = BaseCtor.linker
-      // important: transcluded inline repeaters should
-      // inherit from outer scope rather than host
-      ChildVue.prototype = opts._context || this
+      ChildVue.prototype = context
       ctors[BaseCtor.cid] = ChildVue
     }
   } else {
