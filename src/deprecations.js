@@ -66,9 +66,10 @@ if (process.env.NODE_ENV !== 'production') {
       )
     },
 
-    DIR_ARGS: function () {
+    DIR_ARGS: function (exp) {
       warn(
-        'Directives will no longer take arguments in 1.0.0. ' + newBindingSyntaxLink
+        'Directives will no longer take arguments in 1.0.0. Found in directive ' +
+        '"' + exp + '"' + newBindingSyntaxLink
       )
     },
 
