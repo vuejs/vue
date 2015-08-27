@@ -107,9 +107,9 @@ exports._initElement = function (el) {
  * @param {Fragment} [frag] - owner fragment
  */
 
-exports._bindDir = function (name, node, desc, def, host, scope, frag) {
+exports._bindDir = function (name, node, desc, def, host, scope, frag, arg) {
   this._directives.push(
-    new Directive(name, node, this, desc, def, host, scope, frag)
+    new Directive(name, node, this, desc, def, host, scope, frag, arg)
   )
 }
 

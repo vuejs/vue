@@ -513,7 +513,7 @@ function makeTerminalNodeLinkFn (el, dirName, value, options, def) {
 function compileDirectives (attrs, options) {
   var i = attrs.length
   var dirs = []
-  var attr, name, value, dir, dirName, dirDef, descriptor
+  var attr, name, value, dir, dirName, dirDef, descriptor, arg
   while (i--) {
     attr = attrs[i]
     name = attr.name
@@ -556,10 +556,11 @@ function compileDirectives (attrs, options) {
         dirName = attributeName
       } else {
         dirName = 'attr'
-        descriptor.arg = attributeName
+        arg = attributeName
       }
       dirs.push({
         name: dirName,
+        arg: arg,
         descriptors: [descriptor],
         def: options.directives[dirName]
       })
@@ -568,9 +569,9 @@ function compileDirectives (attrs, options) {
     // event handlers
     if (onRE.test(name)) {
       descriptor = newDirParser.parse(value)
-      descriptor.arg = name.replace(onRE, '')
       dirs.push({
         name: 'on',
+        arg: name.replace(onRE, ''),
         descriptors: [descriptor],
         def: options.directives.on
       })
@@ -609,10 +610,13 @@ function makeNodeLinkFn (directives) {
         // custom link fn
         dir._link(vm, el, scope)
       } else {
+        // TODO: no need for loop here in 1.0.0
+        // also, we can just pass in the dir object to _bindDir,
+        // which is going to be much simpler.
         k = dir.descriptors.length
         for (j = 0; j < k; j++) {
           vm._bindDir(dir.name, el,
-            dir.descriptors[j], dir.def, host, scope, frag)
+            dir.descriptors[j], dir.def, host, scope, frag, dir.arg)
         }
       }
     }
