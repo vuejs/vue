@@ -265,6 +265,14 @@ module.exports = {
       primitive = !isObject(raw)
       vm = !init && this.getVm(raw, i, converted ? obj.$key : null)
       if (vm) { // reusable instance
+
+        if (process.env.NODE_ENV !== 'production' && vm._reused) {
+          _.warn(
+            'Duplicate objects found in v-repeat="' + this.expression + '": ' +
+            JSON.stringify(raw)
+          )
+        }
+
         vm._reused = true
         vm.$index = i // update $index
         // update data for track-by or object repeat,
@@ -462,7 +470,7 @@ module.exports = {
         cache[id] = vm
       } else if (!primitive && idKey !== '$index') {
         process.env.NODE_ENV !== 'production' && _.warn(
-          'Duplicate track-by key in v-repeat: ' + id
+          'Duplicate objects with the same track-by key in v-repeat: ' + id
         )
       }
     } else {
@@ -472,8 +480,8 @@ module.exports = {
           data[id] = vm
         } else {
           process.env.NODE_ENV !== 'production' && _.warn(
-            'Duplicate objects are not supported in v-repeat ' +
-            'when using components or transitions.'
+            'Duplicate objects found in v-repeat="' + this.expression + '": ' +
+            JSON.stringify(data)
           )
         }
       } else {
