@@ -367,7 +367,7 @@ exports.resolveAsset = function resolve (options, type, id) {
 
   if (process.env.NODE_ENV !== 'production') {
     if (asset && !localAsset && !config.strict) {
-      _.deprecation.STRICT_MODE()
+      _.deprecation.STRICT_MODE(type, id)
     }
   }
 

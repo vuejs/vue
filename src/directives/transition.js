@@ -14,10 +14,11 @@ module.exports = {
 
   update: function (id, oldId) {
     var el = this.el
-    var vm = this.el.__vue__ || this.vm
-    var hooks = _.resolveAsset(vm.$options, 'transitions', id)
+    // resolve on owner vm
+    var hooks = _.resolveAsset(this.vm.$options, 'transitions', id)
     id = id || 'v'
-    el.__v_trans = new Transition(el, id, hooks, vm)
+    // apply on closest vm
+    el.__v_trans = new Transition(el, id, hooks, this.el.__vue__ || this.vm)
     if (oldId) {
       _.removeClass(el, oldId + '-transition')
     }
