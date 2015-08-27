@@ -4,6 +4,8 @@ var removeClass = _.removeClass
 
 module.exports = {
 
+  // TODO: remove unnecessary logic in 1.0.0
+
   bind: function () {
     // interpolations like class="{{abc}}" are converted
     // to v-class, and we need to remove the raw,
@@ -27,6 +29,8 @@ module.exports = {
         this.handleObject(stringToObject(value))
       } else if (_.isPlainObject(value)) {
         this.handleObject(value)
+      } else if (_.isArray(value)) {
+        this.handleArray(value)
       } else {
         this.cleanup()
       }
@@ -46,12 +50,20 @@ module.exports = {
     }
   },
 
+  handleArray: function (value) {
+    this.cleanup(value)
+    for (var i = 0, l = value.length; i < l; i++) {
+      addClass(this.el, value[i])
+    }
+    this.prevKeys = value
+  },
+
   cleanup: function (value) {
     if (this.prevKeys) {
       var i = this.prevKeys.length
       while (i--) {
         var key = this.prevKeys[i]
-        if (!value || !value.hasOwnProperty(key)) {
+        if (!value || !contains(value, key)) {
           removeClass(this.el, key)
         }
       }
@@ -67,4 +79,10 @@ function stringToObject (value) {
     res[keys[i]] = true
   }
   return res
+}
+
+function contains (value, key) {
+  return _.isArray(value)
+    ? value.indexOf(key) > -1
+    : value.hasOwnProperty(key)
 }

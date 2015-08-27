@@ -3,6 +3,7 @@ var compileProps = require('./compile-props')
 var config = require('../config')
 var textParser = require('../parsers/text')
 var dirParser = require('../parsers/directive')
+var newDirParser = require('../parsers/directive-new')
 var templateParser = require('../parsers/template')
 var resolveAsset = _.resolveAsset
 var componentDef = require('../directives/component')
@@ -512,7 +513,7 @@ function makeTerminalNodeLinkFn (el, dirName, value, options, def) {
 function compileDirectives (attrs, options) {
   var i = attrs.length
   var dirs = []
-  var attr, name, value, dir, dirName, dirDef
+  var attr, name, value, dir, dirName, dirDef, descriptor
   while (i--) {
     attr = attrs[i]
     name = attr.name
@@ -524,6 +525,7 @@ function compileDirectives (attrs, options) {
       if (process.env.NODE_ENV !== 'production') {
         _.assertAsset(dirDef, 'directive', dirName)
 
+        // deprecations
         if (dirName === 'transition') {
           _.deprecation.V_TRANSITION()
         } else if (dirName === 'class') {
@@ -545,15 +547,36 @@ function compileDirectives (attrs, options) {
         })
       }
     } else
+
     // attribute bindings
     if (bindRE.test(name)) {
-      // TODO handle bind
+      descriptor = newDirParser.parse(value)
+      var attributeName = name.replace(bindRE, '')
+      if (attributeName === 'style' || attributeName === 'class') {
+        dirName = attributeName
+      } else {
+        dirName = 'attr'
+        descriptor.arg = attributeName
+      }
+      dirs.push({
+        name: dirName,
+        descriptors: [descriptor],
+        def: options.directives[dirName]
+      })
     } else
+
     // event handlers
     if (onRE.test(name)) {
-      // TODO handle events
+      descriptor = newDirParser.parse(value)
+      descriptor.arg = name.replace(onRE, '')
+      dirs.push({
+        name: 'on',
+        descriptors: [descriptor],
+        def: options.directives.on
+      })
     } else
-    // deprecated: mustache interpolations inside attribtues
+
+    // TODO: remove this in 1.0.0
     if (config.interpolate) {
       dir = collectAttrDirective(name, value, options)
       if (dir) {

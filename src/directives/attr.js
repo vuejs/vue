@@ -15,6 +15,7 @@ module.exports = {
     if (this.arg) {
       this.setAttr(this.arg, value)
     } else if (typeof value === 'object') {
+      // TODO no longer need to support object in 1.0.0
       this.objectHandler(value)
     }
   },
