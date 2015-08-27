@@ -82,7 +82,7 @@ if (process.env.NODE_ENV !== 'production') {
     V_TRANSITION: function () {
       warn(
         'v-transition will no longer be a directive in 1.0.0; It will become a ' +
-        'special attribute without the prefix. Ues "transition" instead.' +
+        'special attribute without the prefix. Use "transition" instead.' +
         newBindingSyntaxLink
       )
     },
@@ -90,7 +90,7 @@ if (process.env.NODE_ENV !== 'production') {
     V_REF: function () {
       warn(
         'v-ref will no longer be a directive in 1.0.0; It will become a ' +
-        'special attribute without the prefix. Ues "ref" instead.' +
+        'special attribute without the prefix. Use "ref" instead.' +
         newBindingSyntaxLink
       )
     },
