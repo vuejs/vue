@@ -1,11 +1,14 @@
 // test cases for edge cases & bug fixes
 var Vue = require('../../../src/vue')
+// spies on different objects
 var _ = require('../../../src/util/debug')
+var __ = Vue.util
 
 describe('Misc', function () {
 
   beforeEach(function () {
     spyOn(_, 'warn')
+    spyOn(__, 'warn')
   })
 
   it('should handle directive.bind() altering its childNode structure', function () {
@@ -332,4 +335,11 @@ describe('Misc', function () {
     Vue.config.strict = false
   })
 
+  it('warn unkown custom element', function () {
+    new Vue({
+      el: document.createElement('div'),
+      template: '<custom-stuff></custom-stuff>'
+    })
+    expect(hasWarned(__, 'Unknown custom element')).toBe(true)
+  })
 })
