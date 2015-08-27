@@ -513,7 +513,7 @@ function makeTerminalNodeLinkFn (el, dirName, value, options, def) {
 function compileDirectives (attrs, options) {
   var i = attrs.length
   var dirs = []
-  var attr, name, value, dir, dirName, dirDef, descriptor, arg
+  var attr, name, value, dir, dirName, dirDef, arg
   while (i--) {
     attr = attrs[i]
     name = attr.name
@@ -550,7 +550,6 @@ function compileDirectives (attrs, options) {
 
     // attribute bindings
     if (bindRE.test(name)) {
-      descriptor = newDirParser.parse(value)
       var attributeName = name.replace(bindRE, '')
       if (attributeName === 'style' || attributeName === 'class') {
         dirName = attributeName
@@ -561,19 +560,27 @@ function compileDirectives (attrs, options) {
       dirs.push({
         name: dirName,
         arg: arg,
-        descriptors: [descriptor],
+        descriptors: [newDirParser.parse(value)],
         def: options.directives[dirName]
       })
     } else
 
     // event handlers
     if (onRE.test(name)) {
-      descriptor = newDirParser.parse(value)
       dirs.push({
         name: 'on',
         arg: name.replace(onRE, ''),
-        descriptors: [descriptor],
+        descriptors: [newDirParser.parse(value)],
         def: options.directives.on
+      })
+    } else
+
+    // transition
+    if (name === 'transition') {
+      dirs.push({
+        name: 'transition',
+        descriptors: [newDirParser.parse(value)],
+        def: options.directives.transition
       })
     } else
 

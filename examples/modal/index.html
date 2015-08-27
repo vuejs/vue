@@ -9,7 +9,7 @@
   <body>
     <!-- template for the modal component -->
     <script type="x/template" id="modal-template">
-      <div class="modal-mask" v-show="show" v-transition="modal">
+      <div class="modal-mask" v-show="show" transition="modal">
         <div class="modal-wrapper">
           <div class="modal-container">
 
@@ -29,7 +29,7 @@
               <slot name="footer">
                 default footer
                 <button class="modal-default-button"
-                  v-on="click: show = false">
+                  on-click="show = false">
                   OK
                 </button>
               </slot>
@@ -55,7 +55,7 @@
 
     <!-- app -->
     <div id="app">
-      <button id="show-modal" v-on="click: showModal = true">Show Modal</button>
+      <button id="show-modal" on-click="showModal = true">Show Modal</button>
       <!-- use the modal component, pass in the prop -->
       <modal show="{{@showModal}}">
         <!--
