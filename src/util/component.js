@@ -9,7 +9,7 @@ var _ = require('./index')
  * @return {String|undefined}
  */
 
-exports.commonTagRE = /^(div|p|span|img|a|br|ul|ol|li|h1|h2|h3|h4|h5|code|pre)$/
+exports.commonTagRE = /^(div|p|span|img|a|b|i|br|ul|ol|li|h1|h2|h3|h4|h5|h6|code|pre|table|th|td|tr|form|label|input|select|option)$/
 exports.checkComponent = function (el, options) {
   var tag = el.tagName.toLowerCase()
   if (tag === 'component') {
