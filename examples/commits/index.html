@@ -26,15 +26,15 @@
       <template v-for="branch in branches">
         <input type="radio"
           name="branch"
-          id="{{branch}}"
-          value="{{branch}}"
+          bind-id="branch"
+          bind-value="branch"
           v-model="currentBranch">
-        <label for="{{branch}}">{{branch}}</label>
+        <label bind-for="branch">{{branch}}</label>
       </template>
       <p>yyx990803/vue@{{currentBranch}}</p>
       <ul>
         <li v-for="record in commits">
-          <a href="{{record.html_url}}" target="_blank" class="commit">{{record.sha.slice(0, 7)}}</a>
+          <a bind-href="record.html_url" target="_blank" class="commit">{{record.sha.slice(0, 7)}}</a>
           - <span class="message">{{record.commit.message | truncate}}</span><br>
           by <span class="author">{{record.commit.author.name}}</span>
           at <span class="date">{{record.commit.author.date | formatDate}}</span>

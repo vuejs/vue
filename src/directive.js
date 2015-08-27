@@ -24,7 +24,9 @@ var expParser = require('./parsers/expression')
  * @constructor
  */
 
-function Directive (name, el, vm, descriptor, def, host, scope, frag) {
+// TODO: 1.0.0 cleanup the arguments
+
+function Directive (name, el, vm, descriptor, def, host, scope, frag, arg) {
   // public
   this.name = name
   this.el = el
@@ -32,7 +34,7 @@ function Directive (name, el, vm, descriptor, def, host, scope, frag) {
   // copy descriptor props
   this.raw = descriptor.raw
   this.expression = descriptor.expression
-  this.arg = descriptor.arg
+  this.arg = arg || descriptor.arg
   this.filters = descriptor.filters
   // private
   this._descriptor = descriptor

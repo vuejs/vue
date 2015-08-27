@@ -12,7 +12,7 @@ casper.test.begin('commits', 26, function (test) {
     test.assertElementCount('label', 3)
     test.assertSelectorHasText('label[for="master"]', 'master')
     test.assertSelectorHasText('label[for="dev"]', 'dev')
-    test.assertSelectorHasText('label[for="next"]', 'next')
+    test.assertSelectorHasText('label[for="1.0.0-alpha"]', '1.0.0-alpha')
     // initial fetched commits
     test.assertField('branch', 'master')
     test.assertSelectorHasText('p', 'yyx990803/vue@master')
@@ -31,9 +31,9 @@ casper.test.begin('commits', 26, function (test) {
     test.assertSelectorHasText('li:first-child span.author', 'Evan')
     test.assertSelectorHasText('li:first-child span.date', '2014-10-15 13:52:58')
   })
-  .thenClick('input[value="next"]', function () {
-    test.assertField('branch', 'next')
-    test.assertSelectorHasText('p', 'yyx990803/vue@next')
+  .thenClick('input[value="1.0.0-alpha"]', function () {
+    test.assertField('branch', '1.0.0-alpha')
+    test.assertSelectorHasText('p', 'yyx990803/vue@1.0.0-alpha')
     test.assertElementCount('li', 3)
     test.assertSelectorHasText('li:first-child a.commit', '3333333')
     test.assertSelectorHasText('li:first-child span.message', 'three')
