@@ -50,8 +50,14 @@ module.exports = {
     // check for trackby param
     this.idKey = this._checkParam('track-by')
 
+    // TODO: only check ref in 1.0.0
     // check v-ref
-    this.refId = this._checkParam(config.prefix + 'ref')
+    var ref = this._checkParam(config.prefix + 'ref')
+    /* istanbul ignore if */
+    if (process.env.NODE_ENV !== 'production') {
+      if (this.refID) _.deprecation.V_REF()
+    }
+    this.ref = ref || this._checkParam('ref')
 
     // check for transition stagger
     var stagger = +this._checkParam('stagger')
@@ -67,7 +73,7 @@ module.exports = {
 
   update: function (data) {
     this.diff(data)
-    if (this.refId) {
+    if (this.ref) {
       this.updateRef()
     }
   },
@@ -224,9 +230,9 @@ module.exports = {
 
   updateRef: function () {
     if (!this.converted) {
-      this.vm.$[this.refId] = this.frags.map(findVmFromFrag)
+      this.vm.$[this.ref] = this.frags.map(findVmFromFrag)
     } else {
-      var refs = this.vm.$[this.refId] = {}
+      var refs = this.vm.$[this.ref] = {}
       this.frags.forEach(function (frag) {
         refs[frag.scope.$key] = findVmFromFrag(frag)
       })
@@ -472,8 +478,8 @@ module.exports = {
   },
 
   unbind: function () {
-    if (this.refId) {
-      this.vm.$[this.refId] = null
+    if (this.ref) {
+      this.vm.$[this.ref] = null
     }
     if (this.frags) {
       var i = this.frags.length
