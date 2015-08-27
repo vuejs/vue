@@ -11,7 +11,7 @@
     <!-- template for the polygraph component. -->
     <script type="text/x-template" id="polygraph-template">
       <g>
-        <polygon v-attr="points:points"></polygon>
+        <polygon bind-points="points"></polygon>
         <circle cx="100" cy="100" r="80"></circle>
         <axis-label
           v-for="stat in stats"
@@ -24,7 +24,7 @@
 
     <!-- template for the axis label component. -->
     <script type="text/x-template" id="axis-label-template">
-      <text v-attr="x:point.x, y:point.y">{{stat.label}}</text>
+      <text bind-x="point.x" bind-y="point.y">{{stat.label}}</text>
     </script>
 
     <!-- demo root element -->
@@ -38,11 +38,11 @@
         <label>{{stat.label}}</label>
         <input type="range" v-model="stat.value" min="0" max="100">
         <span>{{stat.value}}</span>
-        <button v-on="click:remove(stat)">X</button>
+        <button on-click="remove(stat)">X</button>
       </div>
       <form id="add">
         <input name="newlabel" v-model="newLabel">
-        <button v-on="click:add">Add a Stat</button>
+        <button on-click="add">Add a Stat</button>
       </form>
       <pre id="raw">{{stats | json}}</pre>
     </div>

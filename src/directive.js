@@ -58,18 +58,21 @@ function Directive (name, el, vm, descriptor, def, host, scope, frag, arg) {
  */
 
 Directive.prototype._bind = function (def) {
+  var name = this.name
   if (
-    (this.name !== 'cloak' || this.vm._isCompiled) &&
+    (name !== 'cloak' || this.vm._isCompiled) &&
     this.el && this.el.removeAttribute
   ) {
     this.el.removeAttribute(config.prefix + this.name)
     // 1.0.0: remove bind/on
-    if (this.name === 'attr') {
+    if (name === 'attr') {
       this.el.removeAttribute('bind-' + this.arg)
-    } else if (this.name === 'class' || this.name === 'style') {
-      this.el.removeAttribute('bind-' + this.name)
-    } else if (this.name === 'on') {
+    } else if (name === 'class' || name === 'style') {
+      this.el.removeAttribute('bind-' + name)
+    } else if (name === 'on') {
       this.el.removeAttribute('on-' + this.arg)
+    } else if (name === 'transition') {
+      this.el.removeAttribute(name)
     }
   }
   if (typeof def === 'function') {

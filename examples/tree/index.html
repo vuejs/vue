@@ -27,15 +27,17 @@
     <!-- item template -->
     <script type="text/x-template" id="item-template">
       <li>
-        <div v-class="bold: isFolder"
-          v-on="click: toggle, dblclick: changeType">
+        <div
+          bind-class="{bold: isFolder}"
+          on-click="toggle"
+          on-dblclick="changeType">
           {{model.name}}
           <span v-if="isFolder">[{{open ? '-' : '+'}}]</span>
         </div>
         <ul v-show="open" v-if="isFolder">
           <item class="item" v-for="model in model.children" model="{{model}}">
           </item>
-          <li v-on="click: addChild">+</li>
+          <li on-click="addChild">+</li>
         </ul>
       </li>
     </script>

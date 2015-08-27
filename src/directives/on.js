@@ -1,4 +1,5 @@
 var _ = require('../util')
+var keyFilter = require('../filters').key
 
 module.exports = {
 
@@ -6,6 +7,14 @@ module.exports = {
   priority: 700,
 
   bind: function () {
+    // 1.0.0 key filter
+    var rawArg = this.arg
+    var keyIndex = rawArg.indexOf(':')
+    if (keyIndex > -1) {
+      this.arg = rawArg.slice(0, keyIndex)
+      this.key = rawArg.slice(keyIndex + 1)
+    }
+
     // deal with iframes
     if (
       this.el.tagName === 'IFRAME' &&
@@ -28,6 +37,11 @@ module.exports = {
       )
       return
     }
+
+    if (this.key) {
+      handler = keyFilter(handler, this.key)
+    }
+
     this.reset()
     var scope = this._scope || this.vm
     this.handler = function (e) {
