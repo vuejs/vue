@@ -534,6 +534,23 @@ if (_.inBrowser) {
       expect(hasWarned(_, 'Duplicate objects')).toBe(true)
     })
 
+    it('warn duplicate objects on diff', function (done) {
+      var obj = {}
+      var vm = new Vue({
+        el: el,
+        template: '<div v-for="item in items"></div>',
+        data: {
+          items: [obj]
+        }
+      })
+      expect(_.warn).not.toHaveBeenCalled()
+      vm.items.push(obj)
+      _.nextTick(function () {
+        expect(hasWarned(_, 'Duplicate objects')).toBe(true)
+        done()
+      })
+    })
+
     it('warn duplicate trackby id', function () {
       new Vue({
         el: el,
@@ -542,7 +559,7 @@ if (_.inBrowser) {
           items: [{id: 1}, {id: 1}]
         }
       })
-      expect(hasWarned(_, 'Duplicate track-by key')).toBe(true)
+      expect(hasWarned(_, 'Duplicate objects with the same track-by key')).toBe(true)
     })
 
     it('repeat number', function () {

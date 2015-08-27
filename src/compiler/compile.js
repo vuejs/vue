@@ -7,7 +7,7 @@ var templateParser = require('../parsers/template')
 var resolveAsset = _.resolveAsset
 var componentDef = require('../directives/component')
 
-var propRE = /^prop-/
+// special binding prefixes
 var bindRE = /^bind-/
 var onRE = /^on-/
 
