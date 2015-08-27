@@ -145,7 +145,7 @@ exports.parse = function (s) {
         dir.arg = _.stripQuotes(arg) || arg
 
         if (process.env.NODE_ENV !== 'production') {
-          _.deprecation.DIR_ARGS()
+          _.deprecation.DIR_ARGS(str)
         }
 
       }
