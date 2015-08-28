@@ -378,7 +378,7 @@ if (_.inBrowser) {
         data: {
           view: 'view-a'
         },
-        template: '<component is="{{view}}" v-transition="test" transition-mode="in-out"></component>',
+        template: '<component is="{{view}}" transition="test" transition-mode="in-out"></component>',
         components: {
           'view-a': { template: 'AAA' },
           'view-b': { template: 'BBB' }
@@ -422,7 +422,7 @@ if (_.inBrowser) {
         data: {
           view: 'view-a'
         },
-        template: '<component is="{{view}}" v-transition="test" transition-mode="out-in"></component>',
+        template: '<component is="{{view}}" transition="test" transition-mode="out-in"></component>',
         components: {
           'view-a': { template: 'AAA' },
           'view-b': { template: 'BBB' }

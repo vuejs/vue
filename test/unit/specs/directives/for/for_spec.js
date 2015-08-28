@@ -594,7 +594,7 @@ if (_.inBrowser) {
       document.body.appendChild(el)
       var vm = new Vue({
         el: el,
-        template: '<div v-for="item in items" v-transition="test">{{item.a}}</div>',
+        template: '<div v-for="item in items" transition="test">{{item.a}}</div>',
         data: {
           items: [{a: 1}, {a: 2}, {a: 3}]
         },

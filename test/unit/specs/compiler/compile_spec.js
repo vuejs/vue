@@ -289,6 +289,46 @@ if (_.inBrowser) {
       expect(vm._data.withDataPrefix).toBe(1)
     })
 
+    it('new prop syntax', function () {
+      var bindingModes = Vue.config._propBindingModes
+      var props = [
+        { name: 'testNormal' },
+        { name: 'testLiteral' },
+        { name: 'testTwoWay' },
+        { name: 'twoWayWarn' },
+        { name: 'testOneTime' }
+      ]
+      el.setAttribute('prop-test-normal', 'a')
+      el.setAttribute('prop-test-literal', '1')
+      el.setAttribute('prop-test-two-way', '@a')
+      el.setAttribute('prop-two-way-warn', '@a + 1')
+      el.setAttribute('prop-test-one-time', '*a')
+      compiler.compileAndLinkProps(vm, el, props)
+      expect(vm._bindDir.calls.count()).toBe(3) // skip literal and one time
+      // literal
+      expect(vm.testLiteral).toBe('from parent: 1')
+      expect(vm._data.testLiteral).toBe('from parent: 1')
+      // one time
+      expect(vm.testOneTime).toBe('from parent: a')
+      expect(vm._data.testOneTime).toBe('from parent: a')
+      // normal
+      var args = vm._bindDir.calls.argsFor(0)
+      expect(args[0]).toBe('prop')
+      expect(args[1]).toBe(null)
+      expect(args[2].path).toBe('testNormal')
+      expect(args[2].parentPath).toBe('a')
+      expect(args[2].mode).toBe(bindingModes.ONE_WAY)
+      // two way
+      args = vm._bindDir.calls.argsFor(1)
+      expect(args[0]).toBe('prop')
+      expect(args[1]).toBe(null)
+      expect(args[2].path).toBe('testTwoWay')
+      expect(args[2].parentPath).toBe('a')
+      expect(args[2].mode).toBe(bindingModes.TWO_WAY)
+      // two way warn
+      expect(hasWarned(_, 'non-settable parent path')).toBe(true)
+    })
+
     it('props on root instance', function () {
       // temporarily remove vm.$parent
       var context = vm._context
