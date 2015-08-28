@@ -60,10 +60,10 @@ if (_.inBrowser) {
       expect(typeof linker).toBe('function')
       linker(vm, el)
       expect(vm._bindDir.calls.count()).toBe(4)
-      expect(vm._bindDir).toHaveBeenCalledWith('a', el, descriptorB, defA, undefined, undefined, undefined)
-      expect(vm._bindDir).toHaveBeenCalledWith('a', el.firstChild, descriptorA, defA, undefined, undefined, undefined)
-      expect(vm._bindDir).toHaveBeenCalledWith('b', el.firstChild, descriptorB, defB, undefined, undefined, undefined)
-      expect(vm._bindDir).toHaveBeenCalledWith('b', el.lastChild, descriptorB, defB, undefined, undefined, undefined)
+      expect(vm._bindDir).toHaveBeenCalledWith('a', el, descriptorB, defA, undefined, undefined, undefined, undefined)
+      expect(vm._bindDir).toHaveBeenCalledWith('a', el.firstChild, descriptorA, defA, undefined, undefined, undefined, undefined)
+      expect(vm._bindDir).toHaveBeenCalledWith('b', el.firstChild, descriptorB, defB, undefined, undefined, undefined, undefined)
+      expect(vm._bindDir).toHaveBeenCalledWith('b', el.lastChild, descriptorB, defB, undefined, undefined, undefined, undefined)
       // check the priority sorting
       // the "b" on the firstNode should be called first!
       expect(vm._bindDir.calls.argsFor(1)[0]).toBe('b')
@@ -79,9 +79,9 @@ if (_.inBrowser) {
       var linker = compile(el, Vue.options)
       linker(vm, el)
       expect(vm._bindDir.calls.count()).toBe(3)
-      expect(vm._bindDir).toHaveBeenCalledWith('class', el, descA, Vue.options.directives.class, undefined, undefined, undefined)
-      expect(vm._bindDir).toHaveBeenCalledWith('style', el, descB, Vue.options.directives.style, undefined, undefined, undefined)
-      expect(vm._bindDir).toHaveBeenCalledWith('attr', el, descC, Vue.options.directives.attr, undefined, undefined, undefined)
+      expect(vm._bindDir).toHaveBeenCalledWith('class', el, descA, Vue.options.directives.class, undefined, undefined, undefined, undefined)
+      expect(vm._bindDir).toHaveBeenCalledWith('style', el, descB, Vue.options.directives.style, undefined, undefined, undefined, undefined)
+      expect(vm._bindDir).toHaveBeenCalledWith('attr', el, descC, Vue.options.directives.attr, undefined, undefined, undefined, 'title')
     })
 
     it('on- syntax', function () {
@@ -90,7 +90,7 @@ if (_.inBrowser) {
       var linker = compile(el, Vue.options)
       linker(vm, el)
       expect(vm._bindDir.calls.count()).toBe(1)
-      expect(vm._bindDir).toHaveBeenCalledWith('on', el, desc, Vue.options.directives.on, undefined, undefined, undefined)
+      expect(vm._bindDir).toHaveBeenCalledWith('on', el, desc, Vue.options.directives.on, undefined, undefined, undefined, 'click')
     })
 
     it('text interpolation', function () {
