@@ -3,7 +3,7 @@ var Vue = _.Vue
 var def = require('../../../../src/directives/transition')
 
 if (_.inBrowser) {
-  describe('v-transition', function () {
+  describe('transition', function () {
 
     it('should instantiate a transition object with correct args', function () {
       var fns = {}
@@ -59,7 +59,7 @@ if (_.inBrowser) {
       }
       var vm = new Vue({
         el: el,
-        template: '<div v-show="show" v-transition="{{trans}}"></div>',
+        template: '<div v-show="show" transition="{{trans}}"></div>',
         data: {
           show: true,
           trans: 'a'

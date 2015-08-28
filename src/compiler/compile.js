@@ -587,6 +587,7 @@ function compileDirectives (attrs, options) {
     } else
 
     // should not see props here
+    /* istanbul ignore if */
     if (process.env.NODE_ENV !== 'production' && propRE.test(name)) {
       _.warn(
         name + '="' + value + '" is not compiled. The prop is either not declared ' +
