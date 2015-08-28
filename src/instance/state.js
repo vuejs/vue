@@ -199,11 +199,16 @@ exports._initComputed = function () {
         configurable: true
       }
       if (typeof userDef === 'function') {
-        def.get = makeComputedGetter(userDef, this)
+        def.get = _.bind(userDef, this)
         def.set = noop
       } else {
+
+        if (process.env.NODE_ENV !== 'production' && userDef.cache === false) {
+          _.deprecation.COMPUTED_CACHE(key)
+        }
+
         def.get = userDef.get
-          ? userDef.cache !== false
+          ? userDef.cache
             ? makeComputedGetter(userDef.get, this)
             : _.bind(userDef.get, this)
           : noop

@@ -138,6 +138,13 @@ if (process.env.NODE_ENV !== 'production') {
         'bound as expression in 1.0.0. ' +
         'For more details, see https://github.com/yyx990803/vue/issues/1173'
       )
+    },
+
+    COMPUTED_CACHE: function (name) {
+      warn(
+        'Computed property "' + name + '": computed properties are not cached by ' +
+        'default in 1.0.0. You only need to enable cache for particularly expensive ones.'
+      )
     }
 
   }
