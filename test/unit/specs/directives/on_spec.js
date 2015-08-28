@@ -10,7 +10,7 @@ function trigger (target, event, process) {
 }
 
 if (_.inBrowser) {
-  describe('v-on', function () {
+  describe('on-', function () {
 
     var el
     beforeEach(function () {
@@ -54,6 +54,27 @@ if (_.inBrowser) {
       new Vue({
         el: el,
         template: '<a v-on="keyup:test | key \'enter\'">{{a}}</a>',
+        data: {a: 1},
+        methods: {
+          test: function () {
+            this.a++
+          }
+        }
+      })
+      var a = el.firstChild
+      trigger(a, 'keyup', function (e) {
+        e.keyCode = 13
+      })
+      _.nextTick(function () {
+        expect(a.textContent).toBe('2')
+        done()
+      })
+    })
+
+    it('with new syntax key filter', function (done) {
+      new Vue({
+        el: el,
+        template: '<a on-keyup:enter="test">{{a}}</a>',
         data: {a: 1},
         methods: {
           test: function () {
