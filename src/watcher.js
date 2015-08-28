@@ -38,7 +38,7 @@ function Watcher (vm, expOrFn, cb, options) {
   this.active = true
   this.dirty = this.lazy // for lazy watchers
   this.deps = []
-  this.newDeps = null
+  this.newDeps = []
   this.prevError = null // for async error stacks
   // parse expression for getter/setter
   if (isFn) {
@@ -171,7 +171,6 @@ Watcher.prototype.set = function (value) {
 
 Watcher.prototype.beforeGet = function () {
   Dep.target = this
-  this.newDeps = []
 }
 
 /**
@@ -180,15 +179,17 @@ Watcher.prototype.beforeGet = function () {
 
 Watcher.prototype.afterGet = function () {
   Dep.target = null
-  var i = this.deps.length
+  var oldDeps = this.deps
+  var i = oldDeps.length
   while (i--) {
-    var dep = this.deps[i]
+    var dep = oldDeps[i]
     if (dep) {
       dep.removeSub(this)
     }
   }
   this.deps = this.newDeps
-  this.newDeps = null
+  this.newDeps = oldDeps
+  oldDeps.length = 0 // reuse old dep array
 }
 
 /**
