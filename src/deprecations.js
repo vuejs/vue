@@ -124,10 +124,19 @@ if (process.env.NODE_ENV !== 'production') {
       )
     },
 
-    ATTR_INTERPOLATION: function () {
+    ATTR_INTERPOLATION: function (name, value) {
       warn(
-        'Mustache interpolations inside attributes will be deprecated in 1.0.0. ' +
+        'Mustache interpolations inside attributes: ' + name + '="' + value + '". ' +
+        'This will be deprecated in 1.0.0. ' +
         'Use the "bind-" syntax instead.' + newBindingSyntaxLink
+      )
+    },
+
+    PROPS: function (attr, value) {
+      warn(
+        'Prop ' + attr + '="' + value + '" should be prefixed with "prop-" and ' +
+        'bound as expression in 1.0.0. ' +
+        'For more details, see https://github.com/yyx990803/vue/issues/1173'
       )
     }
 

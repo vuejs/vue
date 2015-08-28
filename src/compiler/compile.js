@@ -136,7 +136,7 @@ function teardownDirs (vm, dirs, destroying) {
  *
  * @param {Vue} vm
  * @param {Element} el
- * @param {Object} options
+ * @param {Object} props
  * @param {Object} [scope]
  * @return {Function}
  */
@@ -554,6 +554,7 @@ function compileDirectives (attrs, options) {
       var attributeName = name.replace(bindRE, '')
       if (attributeName === 'style' || attributeName === 'class') {
         dirName = attributeName
+        arg = undefined
       } else {
         dirName = 'attr'
         arg = attributeName
@@ -588,8 +589,8 @@ function compileDirectives (attrs, options) {
     // should not see props here
     if (process.env.NODE_ENV !== 'production' && propRE.test(name)) {
       _.warn(
-        name + '="' + value + '" is not compiled. It\'s either not declared ' +
-        'on the child component, or it\'s used on a non-component element.'
+        name + '="' + value + '" is not compiled. The prop is either not declared ' +
+        'on the child component, or is used on a non-component element.'
       )
     } else
 
@@ -659,7 +660,7 @@ function collectAttrDirective (name, value, options) {
   if (tokens) {
 
     if (process.env.NODE_ENV !== 'production') {
-      _.deprecation.ATTR_INTERPOLATION()
+      _.deprecation.ATTR_INTERPOLATION(name, value)
     }
 
     var dirName = isClass ? 'class' : 'attr'

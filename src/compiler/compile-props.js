@@ -10,13 +10,16 @@ var settablePathRE = /^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\[[^\[\]]+\])*$/
 var literalValueRE = /^(true|false)$|^\d.*/
 
 /**
- * Compile param attributes on a root element and return
+ * Compile props on a root element and return
  * a props link function.
  *
  * @param {Element|DocumentFragment} el
  * @param {Array} propOptions
  * @return {Function} propsLinkFn
  */
+
+// TODO: 1.0.0 we can just loop through el.attributes and
+// check for prop- prefixes.
 
 module.exports = function compileProps (el, propOptions) {
   var props = []
@@ -45,10 +48,21 @@ module.exports = function compileProps (el, propOptions) {
     }
     attr = _.hyphenate(name)
     value = el.getAttribute(attr)
-    if (value === null) {
-      attr = 'data-' + attr
-      value = el.getAttribute(attr)
+
+    if (value !== null && process.env.NODE_ENV !== 'production') {
+      _.deprecation.PROPS(attr, value)
     }
+
+    if (value === null) {
+      value = el.getAttribute('data-' + attr)
+      if (value !== null) {
+        attr = 'data-' + attr
+        if (process.env.NODE_ENV !== 'production') {
+          _.deprecation.PROPS(attr, value)
+        }
+      }
+    }
+
     // create a prop descriptor
     prop = {
       name: name,
@@ -84,21 +98,54 @@ module.exports = function compileProps (el, propOptions) {
             )
           }
         }
-        if (
-          process.env.NODE_ENV !== 'production' &&
-          options.twoWay &&
-          prop.mode !== propBindingModes.TWO_WAY
-        ) {
-          _.warn(
-            'Prop "' + name + '" expects a two-way binding type.'
-          )
+      }
+    } else {
+      // new prop- syntax
+      attr = 'prop-' + attr
+      value = prop.raw = el.getAttribute(attr)
+      if (value !== null) {
+        el.removeAttribute(attr)
+        // check binding type
+        if (literalValueRE.test(value)) {
+          prop.mode = propBindingModes.ONE_TIME
+        } else if (value.charAt(0) === '*') {
+          prop.mode = propBindingModes.ONE_TIME
+          value = value.slice(1)
+        } else if (value.charAt(0) === '@') {
+          value = value.slice(1)
+          if (settablePathRE.test(value)) {
+            prop.mode = propBindingModes.TWO_WAY
+          } else {
+            process.env.NODE_ENV !== 'production' && _.warn(
+              'Cannot bind two-way prop with non-settable ' +
+              'parent path: ' + value
+            )
+          }
         }
       }
-    } else if (options && options.required) {
+      prop.dynamic = true
+      prop.parentPath = value
+    }
+
+    // warn required two-way
+    if (
+      process.env.NODE_ENV !== 'production' &&
+      options.twoWay &&
+      prop.mode !== propBindingModes.TWO_WAY
+    ) {
+      _.warn(
+        'Prop "' + name + '" expects a two-way binding type.'
+      )
+    }
+
+    // warn missing required
+    if (value === null && options && options.required) {
       process.env.NODE_ENV !== 'production' && _.warn(
         'Missing required prop: ' + name
       )
     }
+
+    // push prop
     props.push(prop)
   }
   return makePropsLinkFn(props)

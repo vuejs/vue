@@ -15,9 +15,9 @@
         <circle cx="100" cy="100" r="80"></circle>
         <axis-label
           v-for="stat in stats"
-          stat="{{stat}}"
-          index="{{$index}}"
-          total="{{stats.length}}">
+          prop-stat="stat"
+          prop-index="$index"
+          prop-total="stats.length">
         </axis-label>
       </g>
     </script>
@@ -31,7 +31,7 @@
     <div id="demo">
       <!-- Use the component -->
       <svg width="200" height="200">
-        <polygraph stats="{{stats}}"></polygraph>
+        <polygraph prop-stats="stats"></polygraph>
       </svg>
       <!-- controls -->
       <div v-for="stat in stats">

@@ -35,7 +35,10 @@
           <span v-if="isFolder">[{{open ? '-' : '+'}}]</span>
         </div>
         <ul v-show="open" v-if="isFolder">
-          <item class="item" v-for="model in model.children" model="{{model}}">
+          <item
+            class="item"
+            v-for="model in model.children"
+            prop-model="model">
           </item>
           <li on-click="addChild">+</li>
         </ul>
@@ -46,8 +49,9 @@
 
     <!-- the demo root element -->
     <ul id="demo">
-      <item class="item"
-        model="{{treeData}}">
+      <item
+        class="item"
+        prop-model="treeData">
       </item>
     </ul>
 
