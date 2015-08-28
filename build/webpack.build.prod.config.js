@@ -1,5 +1,4 @@
 var webpack = require('webpack')
-var banner = require('./banner')
 
 module.exports = {
   entry: './src/vue',
@@ -10,7 +9,6 @@ module.exports = {
     libraryTarget: 'umd'
   },
   plugins: [
-    new webpack.BannerPlugin(banner),
     new webpack.DefinePlugin({
       'process.env': {
         NODE_ENV: '"production"'
