@@ -32,8 +32,8 @@ module.exports = {
 
     var context = host._context
     var selector = this.isSlot
-      ? this._checkParam('name')
-      : this._checkParam('select')
+      ? this.param('name')
+      : this.param('select')
 
     if (!selector) {
       // Default content

@@ -5,8 +5,8 @@ module.exports = {
   bind: function () {
     var self = this
     var el = this.el
-    var trueExp = this._checkParam('true-exp')
-    var falseExp = this._checkParam('false-exp')
+    var trueExp = this.param('true-exp')
+    var falseExp = this.param('false-exp')
     var scope = this._scope || this.vm
 
     this._matchValue = function (value) {

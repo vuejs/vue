@@ -48,21 +48,21 @@ module.exports = {
     _.before(this.start, this.end)
 
     // check for trackby param
-    this.idKey = this._checkParam('track-by')
+    this.idKey = this.param('track-by')
 
     // TODO: only check ref in 1.0.0
     // check v-ref
-    var ref = this._checkParam(config.prefix + 'ref')
+    var ref = this.param(config.prefix + 'ref')
     /* istanbul ignore if */
     if (process.env.NODE_ENV !== 'production') {
       if (this.refID) _.deprecation.V_REF()
     }
-    this.ref = ref || this._checkParam('ref')
+    this.ref = ref || this.param('ref')
 
     // check for transition stagger
-    var stagger = +this._checkParam('stagger')
-    this.enterStagger = +this._checkParam('enter-stagger') || stagger
-    this.leaveStagger = +this._checkParam('leave-stagger') || stagger
+    var stagger = +this.param('stagger')
+    this.enterStagger = +this.param('enter-stagger') || stagger
+    this.leaveStagger = +this.param('leave-stagger') || stagger
 
     // cache
     this.cache = Object.create(null)
