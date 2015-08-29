@@ -664,9 +664,9 @@ if (_.inBrowser) {
       var vm = new Vue({
         el: el,
         template:
-          '<div v-for="item in list" track-by="id" v-ref="outer">' +
+          '<div v-for="item in list" track-by="id" ref="outer">' +
             '{{item.msg}}' +
-            '<div v-for="subItem in item.list" track-by="id" v-ref="inner{{$index}}">' +
+            '<div v-for="subItem in item.list" track-by="id" bind-ref="\'inner\' + $index">' +
               '{{subItem.msg}}' +
             '</div>' +
           '</div>',
