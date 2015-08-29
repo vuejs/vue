@@ -10,8 +10,6 @@ var animDurationProp = _.animationProp + 'Duration'
 var TYPE_TRANSITION = 1
 var TYPE_ANIMATION = 2
 
-var uid = 0
-
 /**
  * A Transition object that encapsulates the state and logic
  * of the transition.
@@ -23,7 +21,7 @@ var uid = 0
  */
 
 function Transition (el, id, hooks, vm) {
-  this.id = uid++
+  this.id = id
   this.el = el
   this.enterClass = id + '-enter'
   this.leaveClass = id + '-leave'

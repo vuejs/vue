@@ -81,11 +81,13 @@ describe('v-for staggering transitions', function () {
     vm.list = [{a: 1}, {a: 2}]
     expect(el.innerHTML).toBe('')
     _.nextTick(function () {
-      expect(el.innerHTML).toBe('<div class="stagger-transition stagger-enter">1</div>')
+      expect(el.children.length).toBe(1)
+      expect(el.children[0].className).toBe('stagger-enter')
+      expect(el.children[0].textContent).toBe('1')
       vm.list = [vm.list[0]] // remove second
       setTimeout(function () {
         // should have only one
-        expect(el.innerHTML).toBe('<div class="stagger-transition">1</div>')
+        expect(el.innerHTML).toBe('<div transition="stagger">1</div>')
         done()
       }, delayAmount * multiplier)
     })
@@ -112,14 +114,16 @@ describe('v-for staggering transitions', function () {
     vm.list = [{a: 1}, {a: 2}, {a: 3}]
     expect(el.innerHTML).toBe('')
     _.nextTick(function () {
-      expect(el.innerHTML).toBe('<div class="stagger-transition stagger-enter">1</div>')
+      expect(el.children.length).toBe(1)
+      expect(el.children[0].className).toBe('stagger-enter')
+      expect(el.children[0].textContent).toBe('1')
       vm.list = [vm.list[2], vm.list[1], vm.list[0]] // reorder
       setTimeout(function () {
         // should have correct order
         expect(el.innerHTML).toBe(
-          '<div class="stagger-transition">3</div>' +
-          '<div class="stagger-transition">2</div>' +
-          '<div class="stagger-transition">1</div>'
+          '<div transition="stagger">3</div>' +
+          '<div transition="stagger">2</div>' +
+          '<div transition="stagger">1</div>'
         )
         done()
       }, delayAmount * 3)
@@ -130,22 +134,25 @@ describe('v-for staggering transitions', function () {
     vm.list = [{a: 1}, {a: 2}]
     expect(el.innerHTML).toBe('')
     _.nextTick(function () {
-      expect(el.innerHTML).toBe('<div class="stagger-transition stagger-enter">1</div>')
+      expect(el.children.length).toBe(1)
+      expect(el.children[0].className).toBe('stagger-enter')
+      expect(el.children[0].textContent).toBe('1')
       _.nextTick(function () {
-        expect(el.innerHTML).toBe('<div class="stagger-transition">1</div>')
+        expect(el.innerHTML).toBe('<div transition="stagger">1</div>')
         setTimeout(function () {
           expect(el.innerHTML).toBe(
-            '<div class="stagger-transition">1</div>' +
-            '<div class="stagger-transition">2</div>'
+            '<div transition="stagger">1</div>' +
+            '<div transition="stagger">2</div>'
           )
           vm.list = []
           _.nextTick(function () {
-            expect(el.innerHTML).toBe(
-              '<div class="stagger-transition stagger-leave">1</div>' +
-              '<div class="stagger-transition">2</div>'
-            )
+            expect(el.children.length).toBe(2)
+            expect(el.children[0].className).toBe('stagger-leave')
+            expect(el.children[0].textContent).toBe('1')
+            expect(el.children[1].className).toBe('')
+            expect(el.children[1].textContent).toBe('2')
             _.nextTick(function () {
-              expect(el.innerHTML).toBe('<div class="stagger-transition">2</div>')
+              expect(el.innerHTML).toBe('<div transition="stagger">2</div>')
               setTimeout(function () {
                 expect(el.innerHTML).toBe('')
                 done()
