@@ -184,9 +184,15 @@ Directive.prototype._checkStatement = function () {
 
 Directive.prototype.param = function (name) {
   var param = this.el.getAttribute(name)
-  if (param !== null) {
+  if (param != null) {
     this.el.removeAttribute(name)
     param = (this._scope || this.vm).$interpolate(param)
+  } else {
+    param = this.el.getAttribute('bind-' + name)
+    if (param != null) {
+      this.el.removeAttribute('bind-' + name)
+      param = (this._scope || this.vm).$eval(param)
+    }
   }
   return param
 }
