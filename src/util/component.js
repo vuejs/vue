@@ -15,7 +15,17 @@ exports.checkComponent = function (el, options) {
   if (tag === 'component') {
     // dynamic syntax
     var exp = el.getAttribute('is')
-    el.removeAttribute('is')
+    if (exp != null) {
+      el.removeAttribute('is')
+    } else {
+      exp = el.getAttribute('bind-is')
+      if (exp != null) {
+        // leverage literal dynamic for now.
+        // TODO: make this cleaner
+        exp = '{{' + exp + '}}'
+        el.removeAttribute('bind-is')
+      }
+    }
     return exp
   } else if (!exports.commonTagRE.test(tag)) {
     if (_.resolveAsset(options, 'components', tag)) {

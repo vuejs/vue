@@ -225,6 +225,15 @@ module.exports = {
       if (this.keepAlive) {
         this.cache[this.Component.cid] = child
       }
+      /* istanbul ignore if */
+      if (process.env.NODE_ENV !== 'production' &&
+          this.el.hasAttribute('transition') &&
+          child._isFragment) {
+        _.warn(
+          'Transitions will not work on a fragment instance. ' +
+          'Template: ' + child.$options.template
+        )
+      }
       return child
     }
   },
