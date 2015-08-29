@@ -577,15 +577,6 @@ function compileDirectives (attrs, options) {
       })
     } else
 
-    // transition
-    if (name === 'transition') {
-      dirs.push({
-        name: 'transition',
-        descriptors: [newDirParser.parse(value)],
-        def: options.directives.transition
-      })
-    } else
-
     // should not see props here
     /* istanbul ignore if */
     if (process.env.NODE_ENV !== 'production' && propRE.test(name)) {

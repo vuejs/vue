@@ -18,7 +18,7 @@ describe('Staggering Transitions', function () {
   it('as attribute', function (done) {
     var vm = new Vue({
       el: el,
-      template: '<div v-repeat="list" transition="stagger" stagger="' + delayAmount + '">{{a}}</div>',
+      template: '<div v-repeat="list" v-transition="stagger" stagger="' + delayAmount + '">{{a}}</div>',
       data: {
         list: []
       },
@@ -39,7 +39,7 @@ describe('Staggering Transitions', function () {
   it('as hook', function (done) {
     var vm = new Vue({
       el: el,
-      template: '<div v-repeat="list" transition="stagger">{{a}}</div>',
+      template: '<div v-repeat="list" v-transition="stagger">{{a}}</div>',
       data: {
         list: []
       },
@@ -63,7 +63,7 @@ describe('Staggering Transitions', function () {
   it('remove while staggered', function (done) {
     var vm = new Vue({
       el: el,
-      template: '<div v-repeat="list" transition="stagger" stagger="' + delayAmount + '">{{a}}</div>',
+      template: '<div v-repeat="list" v-transition="stagger" stagger="' + delayAmount + '">{{a}}</div>',
       data: {
         list: []
       },
@@ -94,7 +94,7 @@ describe('Staggering Transitions', function () {
   it('reorder while staggered', function (done) {
     var vm = new Vue({
       el: el,
-      template: '<div v-repeat="list" transition="stagger" stagger="' + delayAmount + '">{{a}}</div>',
+      template: '<div v-repeat="list" v-transition="stagger" stagger="' + delayAmount + '">{{a}}</div>',
       data: {
         list: []
       },

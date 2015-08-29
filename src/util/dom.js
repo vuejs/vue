@@ -182,6 +182,9 @@ exports.removeClass = function (el, cls) {
     }
     el.setAttribute('class', cur.trim())
   }
+  if (!el.className) {
+    el.removeAttribute('class')
+  }
 }
 
 /**
