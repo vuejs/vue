@@ -83,7 +83,11 @@ if (process.env.NODE_ENV !== 'production') {
     V_TRANSITION: function () {
       warn(
         'v-transition will no longer be a directive in 1.0.0; It will become a ' +
-        'special attribute without the prefix. Use "transition" instead.' +
+        'special attribute without the prefix. Use "transition" instead. Also, ' +
+        'it will no longer attach the .v-transition class, but instead leave ' +
+        'the transition attribute on the element. If you were using the ' +
+        '".name-transition" CSS selector before, you should now use the ' +
+        '"[transition="name"]" selector instead.' +
         newBindingSyntaxLink
       )
     },
