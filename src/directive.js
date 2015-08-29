@@ -32,7 +32,6 @@ function Directive (name, el, vm, descriptor, def, host, scope, frag, arg) {
   this.el = el
   this.vm = vm
   // copy descriptor props
-  this.raw = descriptor.raw
   this.expression = descriptor.expression
   this.arg = arg || descriptor.arg
   this.filters = descriptor.filters
