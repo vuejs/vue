@@ -137,6 +137,42 @@ if (_.inBrowser) {
       })
     })
 
+    it('dynamic (new syntax)', function (done) {
+      var vm = new Vue({
+        el: el,
+        template: '<component bind-is="view" bind-view="view"></component>',
+        data: {
+          view: 'view-a'
+        },
+        components: {
+          'view-a': {
+            template: '<div>AAA</div>',
+            replace: true,
+            data: function () {
+              return { view: 'a' }
+            }
+          },
+          'view-b': {
+            template: '<div>BBB</div>',
+            replace: true,
+            data: function () {
+              return { view: 'b' }
+            }
+          }
+        }
+      })
+      expect(el.innerHTML).toBe('<div view="view-a">AAA</div>')
+      vm.view = 'view-b'
+      _.nextTick(function () {
+        expect(el.innerHTML).toBe('<div view="view-b">BBB</div>')
+        vm.view = ''
+        _.nextTick(function () {
+          expect(el.innerHTML).toBe('')
+          done()
+        })
+      })
+    })
+
     it('keep-alive', function (done) {
       var spyA = jasmine.createSpy()
       var spyB = jasmine.createSpy()
