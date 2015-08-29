@@ -5,13 +5,11 @@ describe('New Directive Parser', function () {
   it('simple', function () {
     var res = parse('exp')
     expect(res.expression).toBe('exp')
-    expect(res.raw).toBe('exp')
   })
 
   it('with filters', function () {
     var res = parse('exp | abc de \'ok\' \'\' | bcd')
     expect(res.expression).toBe('exp')
-    expect(res.raw).toBe('exp | abc de \'ok\' \'\' | bcd')
     expect(res.filters.length).toBe(2)
     expect(res.filters[0].name).toBe('abc')
     expect(res.filters[0].args.length).toBe(3)
@@ -28,7 +26,6 @@ describe('New Directive Parser', function () {
   it('double pipe', function () {
     var res = parse('a || b | c')
     expect(res.expression).toBe('a || b')
-    expect(res.raw).toBe('a || b | c')
     expect(res.filters.length).toBe(1)
     expect(res.filters[0].name).toBe('c')
     expect(res.filters[0].args).toBeUndefined()
