@@ -65,6 +65,7 @@ Directive.prototype._bind = function (def) {
   ) {
     this.el.removeAttribute(config.prefix + this.name)
     // 1.0.0: remove bind/on
+    // TODO simplify this
     if (name === 'attr') {
       this.el.removeAttribute('bind-' + this.arg)
     } else if (name === 'class' || name === 'style') {
@@ -130,6 +131,7 @@ Directive.prototype._bind = function (def) {
  * e.g. v-component="{{currentView}}"
  */
 
+// TODO: we shouldn't need this in 1.0.0.
 Directive.prototype._checkDynamicLiteral = function () {
   var expression = this.expression
   if (expression && this.isLiteral) {
@@ -180,7 +182,7 @@ Directive.prototype._checkStatement = function () {
  * @return {String}
  */
 
-Directive.prototype._checkParam = function (name) {
+Directive.prototype.param = function (name) {
   var param = this.el.getAttribute(name)
   if (param !== null) {
     this.el.removeAttribute(name)

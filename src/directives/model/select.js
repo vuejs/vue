@@ -16,11 +16,11 @@ module.exports = {
     }
 
     // check options param
-    var optionsParam = this._checkParam('options')
+    var optionsParam = this.param('options')
     if (optionsParam) {
       initOptions.call(this, optionsParam)
     }
-    this.number = this._checkParam('number') != null
+    this.number = this.param('number') != null
     this.multiple = el.hasAttribute('multiple')
 
     // attach listener

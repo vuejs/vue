@@ -61,21 +61,21 @@ module.exports = {
       : this.el
 
     // check for trackby param
-    this.idKey = this._checkParam('track-by')
+    this.idKey = this.param('track-by')
     // check for transition stagger
-    var stagger = +this._checkParam('stagger')
-    this.enterStagger = +this._checkParam('enter-stagger') || stagger
-    this.leaveStagger = +this._checkParam('leave-stagger') || stagger
+    var stagger = +this.param('stagger')
+    this.enterStagger = +this.param('enter-stagger') || stagger
+    this.leaveStagger = +this.param('leave-stagger') || stagger
 
     // check for v-ref/v-el
-    this.refID = this._checkParam(config.prefix + 'ref')
-    this.elID = this._checkParam(config.prefix + 'el')
+    this.refID = this.param(config.prefix + 'ref')
+    this.elID = this.param(config.prefix + 'el')
 
     if (process.env.NODE_ENV !== 'production') {
       if (this.refID) _.deprecation.V_REF()
       if (this.elID) _.deprecation.V_EL()
     }
-    this.refID = this.refID || this._checkParam('ref')
+    this.refID = this.refID || this.param('ref')
 
     // check other directives that need to be handled
     // at v-repeat level
@@ -124,7 +124,7 @@ module.exports = {
       this.Component = null
       this.asComponent = true
       // check inline-template
-      if (this._checkParam('inline-template') !== null) {
+      if (this.param('inline-template') !== null) {
         // extract inline template as a DocumentFragment
         this.inlineTemplate = _.extractContent(this.el, true)
       }

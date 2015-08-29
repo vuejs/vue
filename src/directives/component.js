@@ -23,9 +23,9 @@ module.exports = {
       // hiding (v-if) or switching (dynamic literal) it,
       // we simply remove it from the DOM and save it in a
       // cache object, with its constructor id as the key.
-      this.keepAlive = this._checkParam('keep-alive') != null
+      this.keepAlive = this.param('keep-alive') != null
       // wait for event before insertion
-      this.waitForEvent = this._checkParam('wait-for')
+      this.waitForEvent = this.param('wait-for')
 
       if (process.env.NODE_ENV !== 'production') {
         if (this.waitForEvent) {
@@ -34,12 +34,12 @@ module.exports = {
       }
 
       // check ref
-      this.refID = this._checkParam(config.prefix + 'ref')
+      this.refID = this.param(config.prefix + 'ref')
       if (this.keepAlive) {
         this.cache = {}
       }
       // check inline-template
-      if (this._checkParam('inline-template') !== null) {
+      if (this.param('inline-template') !== null) {
         // extract inline template as a DocumentFragment
         this.template = _.extractContent(this.el, true)
       }
@@ -57,7 +57,7 @@ module.exports = {
         // create a ref anchor
         this.anchor = _.createAnchor('v-component')
         _.replace(this.el, this.anchor)
-        this.transMode = this._checkParam('transition-mode')
+        this.transMode = this.param('transition-mode')
       }
     } else {
       process.env.NODE_ENV !== 'production' && _.warn(
