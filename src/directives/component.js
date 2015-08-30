@@ -41,6 +41,9 @@ module.exports = {
         _.deprecation.V_REF()
       }
       this.ref = ref || this.param('ref')
+      if (this.ref) {
+        _.defineReactive((this._scope || this.vm).$, this.ref, null)
+      }
 
       if (this.keepAlive) {
         this.cache = {}
@@ -345,12 +348,7 @@ module.exports = {
     this.childVM = child
     var ref = child._refId || this.ref
     if (ref) {
-      var hash = (this._scope || this.vm).$
-      if (!hash.hasOwnProperty(ref)) {
-        _.defineReactive(hash, ref, child)
-      } else {
-        hash[ref] = child
-      }
+      (this._scope || this.vm).$[ref] = child
     }
   },
 
@@ -362,9 +360,8 @@ module.exports = {
     var child = this.childVM
     this.childVM = null
     var ref = (child && child._refId) || this.ref
-    var hash = (this._scope || this.vm).$
-    if (ref && hash.hasOwnProperty(ref)) {
-      hash[ref] = null
+    if (ref) {
+      (this._scope || this.vm).$[ref] = null
     }
   },
 

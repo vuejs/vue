@@ -8,19 +8,21 @@ var compile = compiler.compile
 if (_.inBrowser) {
   describe('Compile', function () {
 
-    var vm, el, data, directiveTeardown
+    var vm, el, data, directiveBind, directiveTeardown
     beforeEach(function () {
       // We mock vms here so we can assert what the generated
       // linker functions do.
       el = document.createElement('div')
       data = {}
-      directiveTeardown = jasmine.createSpy()
+      directiveBind = jasmine.createSpy('bind')
+      directiveTeardown = jasmine.createSpy('teardown')
       vm = {
         _data: {},
         _directives: [],
         _bindDir: function (name) {
           this._directives.push({
             name: name,
+            _bind: directiveBind,
             _teardown: directiveTeardown
           })
         },
@@ -59,6 +61,7 @@ if (_.inBrowser) {
       var linker = compile(el, options)
       expect(typeof linker).toBe('function')
       linker(vm, el)
+      expect(directiveBind.calls.count()).toBe(4)
       expect(vm._bindDir.calls.count()).toBe(4)
       expect(vm._bindDir).toHaveBeenCalledWith('a', el, descriptorB, defA, undefined, undefined, undefined, undefined)
       expect(vm._bindDir).toHaveBeenCalledWith('a', el.firstChild, descriptorA, defA, undefined, undefined, undefined, undefined)

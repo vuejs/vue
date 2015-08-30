@@ -86,7 +86,14 @@ exports.compile = function (el, options, partial) {
 function linkAndCapture (linker, vm) {
   var originalDirCount = vm._directives.length
   linker()
-  return vm._directives.slice(originalDirCount)
+  var dirs = vm._directives.slice(originalDirCount)
+  for (var i = 0, l = dirs.length; i < l; i++) {
+    if (dirs[i].name === 'component') dirs[i]._bind()
+  }
+  for (var i = 0, l = dirs.length; i < l; i++) {
+    if (dirs[i].name !== 'component') dirs[i]._bind()
+  }
+  return dirs
 }
 
 /**
