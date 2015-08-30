@@ -5,6 +5,10 @@ var _ = require('../../../../src/util')
 
 describe('Observer', function () {
 
+  beforeEach(function () {
+    spyOn(_, 'warn')
+  })
+
   it('create on non-observables', function () {
     // skip primitive value
     var ob = Observer.create(1)
@@ -191,6 +195,11 @@ describe('Observer', function () {
     arr.push(1)
     expect(dep2.notify).toHaveBeenCalled()
     config.proto = true
+  })
+
+  it('warn unobservable object', function () {
+    Observer.create(window)
+    expect(hasWarned(_, 'Unobservable object found in data')).toBe(true)
   })
 
 })

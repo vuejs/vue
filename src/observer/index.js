@@ -25,7 +25,7 @@ function Observer (value) {
       : copyAugment
     augment(value, arrayMethods, arrayKeys)
     this.observeArray(value)
-  } else if (_.isPlainObject(value)) {
+  } else {
     this.walk(value)
   }
 }
@@ -52,11 +52,18 @@ Observer.create = function (value, vm) {
   ) {
     ob = value.__ob__
   } else if (
-    _.isObject(value) &&
+    (_.isArray(value) || _.isPlainObject(value)) &&
     !Object.isFrozen(value) &&
     !value._isVue
   ) {
     ob = new Observer(value)
+  } else if (process.env.NODE_ENV !== 'production') {
+    if (_.isObject(value) && !_.isArray(value) && !_.isPlainObject(value)) {
+      _.warn(
+        'Unobservable object found in data: ' +
+        Object.prototype.toString.call(value)
+      )
+    }
   }
   if (ob && vm) {
     ob.addVm(vm)
