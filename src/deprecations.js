@@ -186,6 +186,13 @@ if (process.env.NODE_ENV !== 'production') {
         'handler explicitly returns true. See https://github.com/yyx990803/vue/issues/1175 ' +
         'for more details.'
       )
+    },
+
+    MODEL_EXP: function (exp) {
+      warn(
+        'Params "exp", "true-exp" and "false-exp" for v-model will be deprecated in 1.0.0. ' +
+        'Use "bind-value", "bind-true-value" and "bind-false-value" instead.'
+      )
     }
 
   }
