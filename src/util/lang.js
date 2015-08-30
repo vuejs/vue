@@ -191,8 +191,9 @@ exports.isObject = function (obj) {
  */
 
 var toString = Object.prototype.toString
+var OBJECT_STRING = '[object Object]'
 exports.isPlainObject = function (obj) {
-  return toString.call(obj) === '[object Object]'
+  return toString.call(obj) === OBJECT_STRING
 }
 
 /**

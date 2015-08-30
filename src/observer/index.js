@@ -25,7 +25,7 @@ function Observer (value) {
       : copyAugment
     augment(value, arrayMethods, arrayKeys)
     this.observeArray(value)
-  } else {
+  } else if (_.isPlainObject(value)) {
     this.walk(value)
   }
 }
