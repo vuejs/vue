@@ -107,6 +107,7 @@ var keyCodes = {
   esc: 27,
   tab: 9,
   enter: 13,
+  space: 32,
   'delete': 46,
   up: 38,
   left: 37,
