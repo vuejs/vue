@@ -61,7 +61,7 @@ if (process.env.NODE_ENV !== 'production') {
 
     V_EL: function () {
       warn(
-        'v-el will be deprecated in 1.0.0. ' +
+        'v-el will no longer be a directive in 1.0.0. Use the "el" special attribute instead. ' +
         'See https://github.com/yyx990803/vue/issues/1198 for details.'
       )
     },
