@@ -10,19 +10,28 @@ module.exports = {
     this.anchor = _.createAnchor('v-partial')
     _.replace(el, this.anchor)
     var id = el.getAttribute('name')
-    var tokens = textParser.parse(id)
-    if (tokens) {
-      // dynamic partial
-      this.setupDynamic(tokens)
+    if (id != null) {
+      var tokens = textParser.parse(id)
+      if (tokens) {
+        // dynamic partial
+        this.setupDynamic(textParser.tokensToExp(tokens))
+        if (process.env.NODE_ENV !== 'production') {
+          _.deprecation.PARTIAL_NAME(id)
+        }
+      } else {
+        // static partial
+        this.insert(id)
+      }
     } else {
-      // static partial
-      this.insert(id)
+      id = el.getAttribute('bind-name')
+      if (id) {
+        this.setupDynamic(id)
+      }
     }
   },
 
-  setupDynamic: function (tokens) {
+  setupDynamic: function (exp) {
     var self = this
-    var exp = textParser.tokensToExp(tokens)
     this.unwatch = this.vm.$watch(exp, function (value) {
       vIf.remove.call(self)
       self.insert(value)
