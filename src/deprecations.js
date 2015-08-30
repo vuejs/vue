@@ -156,6 +156,13 @@ if (process.env.NODE_ENV !== 'production') {
         '<component is="{{view}}"> syntax will be depreacted in 1.0.0. Use ' +
         '<component bind-is="view"> instead.'
       )
+    },
+
+    REF_IN_CHILD: function () {
+      warn(
+        'v-ref or ref can no longer be used on a component root in its own ' +
+        'template in 1.0.0. Use it in the parent template instead.'
+      )
     }
 
   }

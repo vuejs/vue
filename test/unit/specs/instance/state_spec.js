@@ -165,6 +165,7 @@ describe('Instance state initialization', function () {
           return this.a + this.b
         },
         d: {
+          cache: false, // for deprecation coverage. TODO: remove in 1.0.0
           get: function () {
             return this.a + this.b
           },

@@ -34,7 +34,14 @@ module.exports = {
       }
 
       // check ref
-      this.refID = this.param(config.prefix + 'ref')
+      // TODO: only check ref in 1.0.0
+      var ref = this.param(config.prefix + 'ref')
+      /* istanbul ignore if */
+      if (process.env.NODE_ENV !== 'production' && ref) {
+        _.deprecation.V_REF()
+      }
+      this.ref = ref || this.param('ref')
+
       if (this.keepAlive) {
         this.cache = {}
       }
@@ -336,9 +343,14 @@ module.exports = {
   setCurrent: function (child) {
     this.unsetCurrent()
     this.childVM = child
-    var refID = child._refID || this.refID
-    if (refID) {
-      this.vm.$[refID] = child
+    var ref = child._refId || this.ref
+    if (ref) {
+      var hash = (this._scope || this.vm).$
+      if (!hash.hasOwnProperty(ref)) {
+        _.defineReactive(hash, ref, child)
+      } else {
+        hash[ref] = child
+      }
     }
   },
 
@@ -349,9 +361,10 @@ module.exports = {
   unsetCurrent: function () {
     var child = this.childVM
     this.childVM = null
-    var refID = (child && child._refID) || this.refID
-    if (refID) {
-      this.vm.$[refID] = null
+    var ref = (child && child._refId) || this.ref
+    var hash = (this._scope || this.vm).$
+    if (ref && hash.hasOwnProperty(ref)) {
+      hash[ref] = null
     }
   },
 
