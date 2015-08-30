@@ -41,8 +41,9 @@ module.exports = {
         _.deprecation.V_REF()
       }
       this.ref = ref || this.param('ref')
-      if (this.ref) {
-        _.defineReactive((this._scope || this.vm).$, this.ref, null)
+      var refs = (this._scope || this.vm).$
+      if (this.ref && !refs.hasOwnProperty(this.ref)) {
+        _.defineReactive(refs, this.ref, null)
       }
 
       if (this.keepAlive) {

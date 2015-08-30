@@ -87,11 +87,25 @@ function linkAndCapture (linker, vm) {
   var originalDirCount = vm._directives.length
   linker()
   var dirs = vm._directives.slice(originalDirCount)
+  var dir
   for (var i = 0, l = dirs.length; i < l; i++) {
-    if (dirs[i].name === 'component') dirs[i]._bind()
+    dir = dirs[i]
+    if (dir.name === 'if' ||
+        dir.name === 'for' ||
+        dir.name === 'repeat') {
+      dir._bind()
+    }
   }
   for (var i = 0, l = dirs.length; i < l; i++) {
-    if (dirs[i].name !== 'component') dirs[i]._bind()
+    dir = dirs[i]
+    if (dir.name === 'component' ||
+        dir.name === 'el') {
+      dir._bind()
+    }
+  }
+  for (var i = 0, l = dirs.length; i < l; i++) {
+    dir = dirs[i]
+    if (!dir._bound) dir._bind()
   }
   return dirs
 }
@@ -544,6 +558,8 @@ function compileDirectives (attrs, options) {
           _.deprecation.V_ON()
         } else if (dirName === 'attr') {
           _.deprecation.V_ATTR()
+        } else if (dirName === 'el') {
+          _.deprecation.V_EL()
         }
 
       }
@@ -554,6 +570,16 @@ function compileDirectives (attrs, options) {
           def: dirDef
         })
       }
+    } else
+
+    // speical case for el
+    if (name === 'el' || name === 'bind-el') {
+      dirs.push({
+        name: 'el',
+        arg: bindRE.test(name),
+        descriptors: [newDirParser.parse(value)],
+        def: options.directives.el
+      })
     } else
 
     // attribute bindings
