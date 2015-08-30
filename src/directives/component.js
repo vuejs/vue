@@ -5,6 +5,7 @@ var templateParser = require('../parsers/template')
 module.exports = {
 
   isLiteral: true,
+  priority: 1500,
 
   /**
    * Setup. Two possible usages:

@@ -19,10 +19,13 @@ if (_.inBrowser) {
       vm = {
         _data: {},
         _directives: [],
-        _bindDir: function (name) {
+        _bindDir: function (name, node, desc, def) {
           this._directives.push({
             name: name,
-            _bind: directiveBind,
+            _def: def,
+            _bind: function () {
+              directiveBind(this.name)
+            },
             _teardown: directiveTeardown
           })
         },
@@ -68,8 +71,11 @@ if (_.inBrowser) {
       expect(vm._bindDir).toHaveBeenCalledWith('b', el.firstChild, descriptorB, defB, undefined, undefined, undefined, undefined)
       expect(vm._bindDir).toHaveBeenCalledWith('b', el.lastChild, descriptorB, defB, undefined, undefined, undefined, undefined)
       // check the priority sorting
-      // the "b" on the firstNode should be called first!
-      expect(vm._bindDir.calls.argsFor(1)[0]).toBe('b')
+      // the "b"s should be called first!
+      expect(directiveBind.calls.argsFor(0)[0]).toBe('b')
+      expect(directiveBind.calls.argsFor(1)[0]).toBe('b')
+      expect(directiveBind.calls.argsFor(2)[0]).toBe('a')
+      expect(directiveBind.calls.argsFor(3)[0]).toBe('a')
     })
 
     it('bind- syntax', function () {

@@ -87,27 +87,24 @@ function linkAndCapture (linker, vm) {
   var originalDirCount = vm._directives.length
   linker()
   var dirs = vm._directives.slice(originalDirCount)
-  var dir
+  dirs.sort(directiveComparator)
   for (var i = 0, l = dirs.length; i < l; i++) {
-    dir = dirs[i]
-    if (dir.name === 'if' ||
-        dir.name === 'for' ||
-        dir.name === 'repeat') {
-      dir._bind()
-    }
-  }
-  for (var i = 0, l = dirs.length; i < l; i++) {
-    dir = dirs[i]
-    if (dir.name === 'component' ||
-        dir.name === 'el') {
-      dir._bind()
-    }
-  }
-  for (var i = 0, l = dirs.length; i < l; i++) {
-    dir = dirs[i]
-    if (!dir._bound) dir._bind()
+    dirs[i]._bind()
   }
   return dirs
+}
+
+/**
+ * Directive priority sort comparator
+ *
+ * @param {Object} a
+ * @param {Object} b
+ */
+
+function directiveComparator (a, b) {
+  a = a._def.priority || 0
+  b = b._def.priority || 0
+  return a > b ? -1 : a === b ? 0 : 1
 }
 
 /**
@@ -264,8 +261,10 @@ function compileElement (el, options) {
   // textarea treats its text content as the initial value.
   // just bind it as a v-attr directive for value.
   if (el.tagName === 'TEXTAREA') {
-    if (textParser.parse(el.value)) {
-      el.setAttribute('value', el.value)
+    var tokens = textParser.parse(el.value)
+    if (tokens) {
+      el.setAttribute('bind-value', textParser.tokensToExp(tokens))
+      el.value = ''
     }
   }
   var linkFn
@@ -629,7 +628,6 @@ function compileDirectives (attrs, options) {
   }
   // sort by priority, LOW to HIGH
   if (dirs.length) {
-    dirs.sort(directiveComparator)
     return makeNodeLinkFn(dirs)
   }
 }
@@ -716,17 +714,4 @@ function collectAttrDirective (name, value, options) {
           }
     }
   }
-}
-
-/**
- * Directive priority sort comparator
- *
- * @param {Object} a
- * @param {Object} b
- */
-
-function directiveComparator (a, b) {
-  a = a.def.priority || 0
-  b = b.def.priority || 0
-  return a > b ? 1 : -1
 }

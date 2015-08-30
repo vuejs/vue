@@ -13,12 +13,33 @@ if (_.inBrowser) {
     it('normal', function () {
       var vm = new Vue({
         el: el,
-        template: '<div el="test" id="test"></div>'
+        template: '<div v-el="test" id="test"></div>'
       })
       expect(vm.$$.test).toBeTruthy()
       expect(vm.$$.test.id).toBe('test')
       vm._directives[0]._teardown()
       expect(vm.$$.test).toBeNull()
+    })
+
+    it('normal (new syntax)', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          ok: true
+        },
+        template: '<div v-if="ok" el="test" id="test"></div>'
+      })
+      expect(vm.$$.test).toBeTruthy()
+      expect(vm.$$.test.id).toBe('test')
+      vm.ok = false
+      _.nextTick(function () {
+        expect(vm.$$.test).toBeNull()
+        vm.ok = true
+        _.nextTick(function () {
+          expect(vm.$$.test.id).toBe('test')
+          done()
+        })
+      })
     })
 
     it('with v-repeat', function (done) {

@@ -9,6 +9,8 @@ var templateParser = require('../parsers/template')
 
 module.exports = {
 
+  priority: 1750,
+
   bind: function () {
 
     this.isSlot = this.el.tagName === 'SLOT'
