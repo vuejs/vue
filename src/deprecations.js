@@ -159,7 +159,7 @@ if (process.env.NODE_ENV !== 'production') {
     },
 
     PARTIAL_NAME: function (id) {
-      wanr(
+      warn(
         '<partial name="' + id + '">: mustache interpolations inside attributes ' +
         'will be deprecated in 1.0.0. Use bind-name="expression" instead.'
       )
