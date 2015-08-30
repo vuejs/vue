@@ -17,6 +17,8 @@ var ABORTED = 3
 
 module.exports = {
 
+  priority: 2000,
+
   /**
    * Setup.
    */

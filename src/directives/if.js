@@ -3,6 +3,8 @@ var FragmentFactory = require('../fragment/factory')
 
 module.exports = {
 
+  priority: 2000,
+
   bind: function () {
     var el = this.el
     if (!el.__vue__) {

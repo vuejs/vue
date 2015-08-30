@@ -3,7 +3,7 @@ var _ = require('../util')
 module.exports = {
 
   isLiteral: true,
-  priority: 1000,
+  priority: 1500,
 
   bind: function () {
     var scope = this._scope || this.vm

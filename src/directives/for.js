@@ -7,6 +7,8 @@ var uid = 0
 
 module.exports = {
 
+  priority: 2000,
+
   bind: function () {
 
     // some helpful tips...

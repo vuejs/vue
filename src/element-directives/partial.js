@@ -5,6 +5,8 @@ var vIf = require('../directives/if')
 
 module.exports = {
 
+  priority: 1750,
+
   bind: function () {
     var el = this.el
     this.anchor = _.createAnchor('v-partial')
