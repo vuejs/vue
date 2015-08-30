@@ -1,15 +1,24 @@
+var _ = require('../util')
+
 module.exports = {
 
   isLiteral: true,
+  priority: 1000,
 
   bind: function () {
-    if (process.env.NODE_ENV !== 'production') {
-      require('../util').deprecation.V_EL()
+    var scope = this._scope || this.vm
+    var refs = scope.$$
+    var id = this.id = this.arg // bind-el ?
+      ? scope.$eval(this.expression)
+      : this.expression
+    if (refs.hasOwnProperty(id)) {
+      refs[id] = this.el
+    } else {
+      _.defineReactive(refs, id, this.el)
     }
-    this.vm.$$[this.expression] = this.el
   },
 
   unbind: function () {
-    delete this.vm.$$[this.expression]
+    (this._scope || this.vm).$$[this.id] = null
   }
 }

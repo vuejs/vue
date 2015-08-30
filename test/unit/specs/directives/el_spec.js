@@ -13,12 +13,12 @@ if (_.inBrowser) {
     it('normal', function () {
       var vm = new Vue({
         el: el,
-        template: '<div v-el="test" id="test"></div>'
+        template: '<div el="test" id="test"></div>'
       })
       expect(vm.$$.test).toBeTruthy()
       expect(vm.$$.test.id).toBe('test')
       vm._directives[0]._teardown()
-      expect(vm.$$.test).toBeUndefined()
+      expect(vm.$$.test).toBeNull()
     })
 
     it('with v-repeat', function (done) {
