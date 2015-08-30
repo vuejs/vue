@@ -11,6 +11,14 @@ module.exports = {
     var id = this.id = this.arg // bind-el ?
       ? scope.$eval(this.expression)
       : this.expression
+
+    if (process.env.NODE_ENV !== 'production' && this.arg) {
+      _.log(
+        'You are using bind- syntax on "el", which is a special ' +
+        'attribute. It will be evaluated only once.'
+      )
+    }
+
     if (refs.hasOwnProperty(id)) {
       refs[id] = this.el
     } else {
