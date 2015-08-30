@@ -53,7 +53,7 @@ module.exports = {
       // check inline-template
       if (this.param('inline-template') !== null) {
         // extract inline template as a DocumentFragment
-        this.template = _.extractContent(this.el, true)
+        this.inlineTemplate = _.extractContent(this.el, true)
       }
       // component resolution related state
       this.pendingComponentCb =
@@ -207,10 +207,10 @@ module.exports = {
       // default options
       var options = {
         el: templateParser.clone(this.el),
-        template: this.template,
+        template: this.inlineTemplate,
         // if no inline-template, then the compiled
         // linker can be cached for better performance.
-        _linkerCachable: !this.template,
+        _linkerCachable: !this.inlineTemplate,
         _asComponent: true,
         _isRouterView: this._isRouterView,
         // if this is a transcluded component, context
