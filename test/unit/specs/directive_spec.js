@@ -35,6 +35,7 @@ describe('Directive', function () {
       arg: 'someArg',
       filters: [{name: 'test'}]
     }, def)
+    d._bind()
     // properties
     expect(d.el).toBe(el)
     expect(d.name).toBe('test')
@@ -63,6 +64,7 @@ describe('Directive', function () {
     var d = new Directive('test', el, vm, {
       expression: 'a'
     }, def)
+    d._bind()
     expect(d._watcher).toBeUndefined()
     expect(d.expression).toBe('a')
     expect(d.bind).toHaveBeenCalled()
@@ -75,6 +77,7 @@ describe('Directive', function () {
     var d = new Directive('test', el, vm, {
       expression: '{{a}}'
     }, def)
+    d._bind()
     expect(d._watcher).toBeUndefined()
     expect(d.expression).toBe(1)
     expect(d.bind).toHaveBeenCalled()
@@ -87,6 +90,7 @@ describe('Directive', function () {
     var d = new Directive('test', el, vm, {
       expression: '{{a}}'
     }, def)
+    d._bind()
     expect(d._watcher).toBeDefined()
     expect(d.expression).toBe('')
     expect(def.bind).toHaveBeenCalled()
@@ -113,6 +117,7 @@ describe('Directive', function () {
       expression: 'a++',
       filters: [{name: 'test'}]
     }, def)
+    d._bind()
     expect(d._watcher).toBeUndefined()
     expect(d.bind).toHaveBeenCalled()
     var wrappedFn = d.update.calls.argsFor(0)[0]
@@ -133,6 +138,7 @@ describe('Directive', function () {
       expression: 'a',
       filters: [{name: 'test'}]
     }, def)
+    d._bind()
     d.set(2)
     expect(vm.a).toBe(6)
     nextTick(function () {
@@ -144,9 +150,10 @@ describe('Directive', function () {
 
   it('deep', function (done) {
     def.deep = true
-    new Directive('test', el, vm, {
+    var d = new Directive('test', el, vm, {
       expression: 'b'
     }, def)
+    d._bind()
     vm.b.c.d = 3
     nextTick(function () {
       expect(def.update.calls.count()).toBe(2)
@@ -158,6 +165,7 @@ describe('Directive', function () {
     var d = new Directive('test', el, vm, {
       expression: 'a'
     }, def.update)
+    d._bind()
     expect(d.update).toBe(def.update)
     expect(def.update).toHaveBeenCalled()
   })

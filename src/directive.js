@@ -36,6 +36,7 @@ function Directive (name, el, vm, descriptor, def, host, scope, frag, arg) {
   this.arg = arg || descriptor.arg
   this.filters = descriptor.filters
   // private
+  this._def = def
   this._descriptor = descriptor
   this._locked = false
   this._bound = false
@@ -44,8 +45,6 @@ function Directive (name, el, vm, descriptor, def, host, scope, frag, arg) {
   this._host = host
   this._scope = scope
   this._frag = frag
-  // init
-  this._bind(def)
 }
 
 /**
@@ -56,7 +55,8 @@ function Directive (name, el, vm, descriptor, def, host, scope, frag, arg) {
  * @param {Object} def
  */
 
-Directive.prototype._bind = function (def) {
+Directive.prototype._bind = function () {
+  var def = this._def
   var name = this.name
   if (
     (name !== 'cloak' || this.vm._isCompiled) &&

@@ -53,11 +53,11 @@ if (_.inBrowser) {
       })
     })
 
-    it('should be reactive when bound by dynamic component', function (done) {
+    it('should be reactive when bound by dynamic component and hoisted', function (done) {
       var vm = new Vue({
         el: el,
         data: { view: 'one' },
-        template: '<component bind-is="view" ref="test"></component>{{$.test.value}}',
+        template: '{{$.test.value}}<component bind-is="view" ref="test"></component>',
         components: {
           one: {
             id: 'one',
