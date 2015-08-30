@@ -158,6 +158,13 @@ if (process.env.NODE_ENV !== 'production') {
       )
     },
 
+    PARTIAL_NAME: function (id) {
+      wanr(
+        '<partial name="' + id + '">: mustache interpolations inside attributes ' +
+        'will be deprecated in 1.0.0. Use bind-name="expression" instead.'
+      )
+    },
+
     REF_IN_CHILD: function () {
       warn(
         'v-ref or ref can no longer be used on a component root in its own ' +
