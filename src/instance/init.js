@@ -31,7 +31,7 @@ exports._init = function (options) {
   // events bookkeeping
   this._events = {}            // registered callbacks
   this._eventsCount = {}       // for $broadcast optimization
-  this._eventCancelled = false // for event cancellation
+  this._shouldPropagate = false // for event propagation
 
   // fragment instance properties
   this._isFragment = false

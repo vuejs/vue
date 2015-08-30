@@ -66,6 +66,20 @@ describe('Events API', function () {
     child2.$on('test', spy)
     child3.$on('test', spy)
     vm.$broadcast('test')
+    expect(spy.calls.count()).toBe(2) // should not propagate by default
+  })
+
+  it('$broadcast with propagation', function () {
+    var child1 = vm.$addChild()
+    var child2 = vm.$addChild()
+    var child3 = child1.$addChild()
+    child1.$on('test', function () {
+      spy()
+      return true
+    })
+    child2.$on('test', spy)
+    child3.$on('test', spy)
+    vm.$broadcast('test')
     expect(spy.calls.count()).toBe(3)
   })
 
@@ -75,7 +89,13 @@ describe('Events API', function () {
     // hooks should not incurr the bookkeeping cost
     child.$on('hook:created', function () {})
     expect(vm._eventsCount['hook:created']).toBeUndefined()
-    child.$on('test', spy)
+
+    function handler () {
+      spy()
+      return true
+    }
+
+    child.$on('test', handler)
     expect(vm._eventsCount['test']).toBe(1)
     // child2's $emit & $broadcast
     // shouldn't get called if no child listens to the event
@@ -84,7 +104,7 @@ describe('Events API', function () {
     vm.$broadcast('test')
     expect(spy.calls.count()).toBe(1)
     // check $off bookkeeping
-    child.$off('test', spy)
+    child.$off('test', handler)
     expect(vm._eventsCount['test']).toBe(0)
     function noop () {}
     child.$on('test', noop)
@@ -115,6 +135,18 @@ describe('Events API', function () {
     var child = vm.$addChild()
     var child2 = child.$addChild()
     child.$on('test', spy)
+    vm.$on('test', spy)
+    child2.$dispatch('test')
+    expect(spy.calls.count()).toBe(1) // should not propagate by default
+  })
+
+  it('$dispatch with propagation', function () {
+    var child = vm.$addChild()
+    var child2 = child.$addChild()
+    child.$on('test', function () {
+      spy()
+      return true
+    })
     vm.$on('test', spy)
     child2.$dispatch('test')
     expect(spy.calls.count()).toBe(2)
