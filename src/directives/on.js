@@ -15,6 +15,18 @@ module.exports = {
       this.key = rawArg.slice(keyIndex + 1)
     }
 
+    // warn old usage
+    if (process.env.NODE_ENV !== 'production') {
+      if (this.filters) {
+        var hasKeyFilter = this.filters.some(function (f) {
+          return f.name === 'key'
+        })
+        if (hasKeyFilter) {
+          _.deprecation.KEY_FILTER()
+        }
+      }
+    }
+
     // deal with iframes
     if (
       this.el.tagName === 'IFRAME' &&
