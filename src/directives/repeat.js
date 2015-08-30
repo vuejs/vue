@@ -69,14 +69,14 @@ module.exports = {
     this.leaveStagger = +this.param('leave-stagger') || stagger
 
     // check for v-ref/v-el
-    this.refID = this.param(config.prefix + 'ref')
+    this.refId = this.param(config.prefix + 'ref')
     this.elID = this.param(config.prefix + 'el')
 
     if (process.env.NODE_ENV !== 'production') {
-      if (this.refID) _.deprecation.V_REF()
+      if (this.refId) _.deprecation.V_REF()
       if (this.elID) _.deprecation.V_EL()
     }
-    this.refID = this.refID || this.param('ref')
+    this.refId = this.refId || this.param('ref')
 
     // check other directives that need to be handled
     // at v-repeat level
@@ -228,8 +228,8 @@ module.exports = {
   realUpdate: function (data) {
     this.vms = this.diff(data, this.vms)
     // update v-ref
-    if (this.refID) {
-      this.vm.$[this.refID] = this.converted
+    if (this.refId) {
+      this.vm.$[this.refId] = this.converted
         ? toRefObject(this.vms)
         : this.vms
     }
@@ -440,8 +440,8 @@ module.exports = {
 
   unbind: function () {
     this.componentState = ABORTED
-    if (this.refID) {
-      this.vm.$[this.refID] = null
+    if (this.refId) {
+      this.vm.$[this.refId] = null
     }
     if (this.vms) {
       var i = this.vms.length

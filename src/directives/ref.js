@@ -17,6 +17,10 @@ module.exports = {
     // `v-component` already. So we just record our own ref
     // here - it will overwrite parent ref in `v-component`,
     // if any.
-    vm._refID = this.expression
+    vm._refId = this.expression
+
+    if (process.env.NODE_ENV !== 'production') {
+      _.deprecation.REF_IN_CHILD()
+    }
   }
 }

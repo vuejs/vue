@@ -55,8 +55,8 @@ module.exports = {
     // check v-ref
     var ref = this.param(config.prefix + 'ref')
     /* istanbul ignore if */
-    if (process.env.NODE_ENV !== 'production') {
-      if (this.refID) _.deprecation.V_REF()
+    if (process.env.NODE_ENV !== 'production' && ref) {
+      _.deprecation.V_REF()
     }
     this.ref = ref || this.param('ref')
 
@@ -206,6 +206,8 @@ module.exports = {
     // create iteration scope
     var parentScope = this._scope || this.vm
     var scope = Object.create(parentScope)
+    // ref holder for the scope
+    scope.$ = {}
     // make sure point $parent to parent scope
     scope.$parent = parentScope
     // for two-way binding on alias
@@ -230,13 +232,21 @@ module.exports = {
    */
 
   updateRef: function () {
+    var ref = this.ref
+    var hash = (this._scope || this.vm).$
+    var refs
     if (!this.converted) {
-      this.vm.$[this.ref] = this.frags.map(findVmFromFrag)
+      refs = this.frags.map(findVmFromFrag)
     } else {
-      var refs = this.vm.$[this.ref] = {}
+      refs = {}
       this.frags.forEach(function (frag) {
         refs[frag.scope.$key] = findVmFromFrag(frag)
       })
+    }
+    if (!hash.hasOwnProperty(ref)) {
+      _.defineReactive(hash, ref, refs)
+    } else {
+      hash[ref] = refs
     }
   },
 
@@ -480,7 +490,7 @@ module.exports = {
 
   unbind: function () {
     if (this.ref) {
-      this.vm.$[this.ref] = null
+      (this._scope || this.vm).$[this.ref] = null
     }
     if (this.frags) {
       var i = this.frags.length

@@ -664,9 +664,9 @@ if (_.inBrowser) {
       var vm = new Vue({
         el: el,
         template:
-          '<div v-for="item in list" track-by="id" ref="outer">' +
+          '<div v-for="item in list" track-by="id">' +
             '{{item.msg}}' +
-            '<div v-for="subItem in item.list" track-by="id" bind-ref="\'inner\' + $index">' +
+            '<div v-for="subItem in item.list" track-by="id">' +
               '{{subItem.msg}}' +
             '</div>' +
           '</div>',
@@ -682,8 +682,8 @@ if (_.inBrowser) {
       })
       assertMarkup()
 
-      var oldFrags = vm.$.outer
-      var oldInnerFrags = vm.$.inner0
+      var oldNodes = el.children
+      var oldInnerNodes = el.children[0].children
 
       vm.list = [
         { id: 1, msg: 'wa', list: [
@@ -698,9 +698,9 @@ if (_.inBrowser) {
         // should reuse old frags!
         var i = 2
         while (i--) {
-          expect(vm.$.outer[i]).toBe(oldFrags[i])
+          expect(el.children[i]).toBe(oldNodes[i])
         }
-        expect(vm.$.inner0[0]).toBe(oldInnerFrags[0])
+        expect(el.children[0].children[0]).toBe(oldInnerNodes[0])
         done()
       })
 

@@ -2,7 +2,7 @@ var _ = require('../../../../src/util')
 var Vue = require('../../../../src/vue')
 
 if (_.inBrowser) {
-  describe('v-component', function () {
+  describe('Component', function () {
 
     var el
     beforeEach(function () {
@@ -531,6 +531,5 @@ if (_.inBrowser) {
         })
       }).not.toThrow()
     })
-
   })
 }
