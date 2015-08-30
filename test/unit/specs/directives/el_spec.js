@@ -8,6 +8,7 @@ if (_.inBrowser) {
     beforeEach(function () {
       el = document.createElement('div')
       spyOn(_, 'warn')
+      spyOn(_, 'log')
     })
 
     it('normal', function () {
@@ -40,6 +41,19 @@ if (_.inBrowser) {
           done()
         })
       })
+    })
+
+    it('bind-el', function () {
+      var vm = new Vue({
+        el: el,
+        data: {
+          id: 'test'
+        },
+        template: '<div bind-el="id" id="test"></div>'
+      })
+      expect(vm.$$.test).toBeTruthy()
+      expect(vm.$$.test.id).toBe('test')
+      expect(_.log).toHaveBeenCalled()
     })
 
     it('with v-repeat', function (done) {
