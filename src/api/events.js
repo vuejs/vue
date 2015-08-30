@@ -87,23 +87,20 @@ exports.$off = function (event, fn) {
  */
 
 exports.$emit = function (event) {
-  this._eventCancelled = false
+  this._shouldPropagate = false
   var cbs = this._events[event]
   if (cbs) {
-    // avoid leaking arguments:
-    // http://jsperf.com/closure-with-arguments
-    var i = arguments.length - 1
-    var args = new Array(i)
-    while (i--) {
-      args[i] = arguments[i + 1]
-    }
-    i = 0
     cbs = cbs.length > 1
       ? _.toArray(cbs)
       : cbs
-    for (var l = cbs.length; i < l; i++) {
-      if (cbs[i].apply(this, args) === false) {
-        this._eventCancelled = true
+    var args = _.toArray(arguments, 1)
+    for (var i = 0, l = cbs.length; i < l; i++) {
+      var res = cbs[i].apply(this, args)
+      if (res === true) {
+        this._shouldPropagate = true
+      }
+      if (process.env.NODE_ENV !== 'production' && res === false) {
+        _.deprecation.PROPAGATION(event)
       }
     }
   }
@@ -125,7 +122,7 @@ exports.$broadcast = function (event) {
   for (var i = 0, l = children.length; i < l; i++) {
     var child = children[i]
     child.$emit.apply(child, arguments)
-    if (!child._eventCancelled) {
+    if (child._shouldPropagate) {
       child.$broadcast.apply(child, arguments)
     }
   }
@@ -143,9 +140,9 @@ exports.$dispatch = function () {
   var parent = this.$parent
   while (parent) {
     parent.$emit.apply(parent, arguments)
-    parent = parent._eventCancelled
-      ? null
-      : parent.$parent
+    parent = parent._shouldPropagate
+      ? parent.$parent
+      : null
   }
   return this
 }
