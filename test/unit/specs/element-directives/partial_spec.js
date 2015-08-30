@@ -48,6 +48,26 @@ describe('Partial', function () {
     })
   })
 
+  it('dynamic (new syntax)', function (done) {
+    var vm = new Vue({
+      el: el,
+      template: '<partial bind-name="\'test-\' + id"></partial>',
+      data: {
+        id: 'a'
+      },
+      partials: {
+        'test-a': 'a {{id}}',
+        'test-b': 'b {{id}}'
+      }
+    })
+    expect(el.textContent).toBe('a a')
+    vm.id = 'b'
+    _.nextTick(function () {
+      expect(el.textContent).toBe('b b')
+      done()
+    })
+  })
+
   it('caching', function () {
     var calls = 0
     var compile = compiler.compile
