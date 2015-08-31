@@ -10,21 +10,6 @@ module.exports = {
   priority: 2000,
 
   bind: function () {
-
-    // some helpful tips...
-    /* istanbul ignore if */
-    if (
-      process.env.NODE_ENV !== 'production' &&
-      this.el.tagName === 'OPTION' &&
-      this.el.parentNode && this.el.parentNode.__v_model
-    ) {
-      _.warn(
-        'Don\'t use v-for for v-model options; ' +
-        'use the `options` param instead: ' +
-        'http://vuejs.org/guide/forms.html#Dynamic_Select_Options'
-      )
-    }
-
     // determine alias
     this.alias = this.arg
     // support "item in items" syntax
@@ -43,6 +28,17 @@ module.exports = {
 
     // uid as a cache identifier
     this.id = '__v-for__' + (++uid)
+
+    // check if this is an option list,
+    // so that we know if we need to update the <select>'s
+    // v-model when the option list has changed.
+    // because v-model has a lower priority than v-for,
+    // the v-model is not bound here yet, so we have to
+    // retrive it in the actual updateModel() function.
+    var tag = this.el.tagName
+    this.isOption =
+      (tag === 'OPTION' || tag === 'OPTGROUP') &&
+      this.el.parentNode.tagName === 'SELECT'
 
     // setup anchor nodes
     this.start = _.createAnchor('v-for-start')
@@ -76,9 +72,8 @@ module.exports = {
 
   update: function (data) {
     this.diff(data)
-    if (this.ref) {
-      this.updateRef()
-    }
+    this.updateRef()
+    this.updateModel()
   },
 
   /**
@@ -235,6 +230,7 @@ module.exports = {
 
   updateRef: function () {
     var ref = this.ref
+    if (!ref) return
     var hash = (this._scope || this.vm).$
     var refs
     if (!this.converted) {
@@ -249,6 +245,21 @@ module.exports = {
       _.defineReactive(hash, ref, refs)
     } else {
       hash[ref] = refs
+    }
+  },
+
+  /**
+   * For option lists, update the containing v-model on
+   * parent <select>.
+   */
+
+  updateModel: function () {
+    if (this.isOption) {
+      var parent = this.start.parentNode
+      var model = parent && parent.__v_model
+      if (model) {
+        model.forceUpdate()
+      }
     }
   },
 

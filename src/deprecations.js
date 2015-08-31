@@ -153,7 +153,7 @@ if (process.env.NODE_ENV !== 'production') {
 
     BIND_IS: function () {
       warn(
-        '<component is="{{view}}"> syntax will be depreacted in 1.0.0. Use ' +
+        '<component is="{{view}}"> syntax will be deprecated in 1.0.0. Use ' +
         '<component bind-is="view"> instead.'
       )
     },
@@ -192,6 +192,14 @@ if (process.env.NODE_ENV !== 'production') {
       warn(
         'Params "exp", "true-exp" and "false-exp" for v-model will be deprecated in 1.0.0. ' +
         'Use "bind-value", "bind-true-value" and "bind-false-value" instead.'
+      )
+    },
+
+    SELECT_OPTIONS: function () {
+      warn(
+        'The "options" param for <select v-model> will be deprecated in 1.0.0. ' +
+        'Use v-for to render the options. See https://github.com/yyx990803/vue/issues/1229 ' +
+        'for more details.'
       )
     }
 
