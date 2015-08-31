@@ -238,6 +238,11 @@ exports.compileRoot = function (el, options) {
  */
 
 function compileNode (node, options) {
+  /* istanbul ignore if */
+  if (process.env.NODE_ENV !== 'production' && !config.interpolate) {
+    _.deprecation.INTERPOLATE()
+  }
+
   var type = node.nodeType
   if (type === 1 && node.tagName !== 'SCRIPT') {
     return compileElement(node, options)
