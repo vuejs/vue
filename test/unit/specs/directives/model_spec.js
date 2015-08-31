@@ -576,6 +576,50 @@ if (_.inBrowser) {
       })
     })
 
+    it('select + v-for (1.0.0)', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          test: { msg: 'A' },
+          opts: [
+            { text: 'a', value: { msg: 'A' }},
+            { text: 'b', value: { msg: 'B' }}
+          ]
+        },
+        template:
+          '<select v-model="test">' +
+            '<option v-for="op in opts" bind-value="op.value">{{op.text}}</option>' +
+          '</select>'
+      })
+      var select = el.firstChild
+      var opts = select.options
+      expect(opts[0].selected).toBe(true)
+      expect(opts[1].selected).toBe(false)
+      expect(vm.test.msg).toBe('A')
+      opts[1].selected = true
+      trigger(select, 'change')
+      _.nextTick(function () {
+        expect(opts[0].selected).toBe(false)
+        expect(opts[1].selected).toBe(true)
+        expect(vm.test.msg).toBe('B')
+        vm.test = { msg: 'A' }
+        _.nextTick(function () {
+          expect(opts[0].selected).toBe(true)
+          expect(opts[1].selected).toBe(false)
+          vm.test = { msg: 'C' }
+          vm.opts.push({text: 'c', value: vm.test})
+          _.nextTick(function () {
+            // updating the opts array should force the
+            // v-model to update
+            expect(opts[0].selected).toBe(false)
+            expect(opts[1].selected).toBe(false)
+            expect(opts[2].selected).toBe(true)
+            done()
+          })
+        })
+      })
+    })
+
     it('text', function (done) {
       var vm = new Vue({
         el: el,

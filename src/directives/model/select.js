@@ -19,6 +19,9 @@ module.exports = {
     var optionsParam = this.param('options')
     if (optionsParam) {
       initOptions.call(this, optionsParam)
+      if (process.env.NODE_ENV !== 'production') {
+        _.deprecation.SELECT_OPTIONS()
+      }
     }
     this.number = this.param('number') != null
     this.multiple = el.hasAttribute('multiple')
