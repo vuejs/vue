@@ -88,20 +88,28 @@ module.exports = {
     var anchor = this.el
     var options
     var waitFor = this.waitForEvent
+    var activateHook = this.Component.options.activate
     if (waitFor) {
       options = {
         created: function () {
-          this.$once(waitFor, function () {
-            this.$before(anchor)
-            _.remove(anchor)
-          })
+          this.$once(waitFor, insert)
         }
       }
     }
     var child = this.build(options)
     this.setCurrent(child)
     if (!this.waitForEvent) {
-      child.$before(anchor)
+      if (activateHook) {
+        activateHook.call(child, insert)
+      } else {
+        child.$before(anchor)
+        _.remove(anchor)
+      }
+    }
+    function insert () {
+      // TODO: no need to fallback to this in 1.0.0
+      // once wait-for is removed
+      (child || this).$before(anchor)
       _.remove(anchor)
     }
   },
@@ -141,22 +149,30 @@ module.exports = {
         var options
         var self = this
         var waitFor = this.waitForEvent
+        var activateHook = this.Component.options.activate
         if (waitFor) {
           options = {
             created: function () {
-              this.$once(waitFor, function () {
-                self.waitingFor = null
-                self.transition(this, cb)
-              })
+              this.$once(waitFor, insert)
             }
           }
         }
         var cached = this.getCached()
         var newComponent = this.build(options)
-        if (!waitFor || cached) {
+        if ((!waitFor && !activateHook) || cached) {
           this.transition(newComponent, cb)
         } else {
           this.waitingFor = newComponent
+          if (activateHook) {
+            activateHook.call(newComponent, insert)
+          }
+        }
+
+        function insert () {
+          self.waitingFor = null
+          // TODO: no need to fallback to this in 1.0.0
+          // once wait-for is removed
+          self.transition((newComponent || this), cb)
         }
       }, this))
     }
