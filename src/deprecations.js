@@ -33,7 +33,7 @@ if (process.env.NODE_ENV !== 'production') {
     STRICT_MODE: function (type, id) {
       warn(
         'Falling through to parent when resolving ' + type + ' with id "' + id +
-        '". Strict mode will default to `true` in 1.0.0. ' +
+        '". Strict mode will be the default in 1.0.0. ' +
         'See https://github.com/yyx990803/vue/issues/1170 for details.'
       )
     },
@@ -200,6 +200,14 @@ if (process.env.NODE_ENV !== 'production') {
         'The "options" param for <select v-model> will be deprecated in 1.0.0. ' +
         'Use v-for to render the options. See https://github.com/yyx990803/vue/issues/1229 ' +
         'for more details.'
+      )
+    },
+
+    INTERPOLATE: function () {
+      /* istanbul ignore next */
+      warn(
+        'The global "interpolate" config will be deprecated in 1.0.0. Use "v-pre" ' +
+        'on elements that should be skipped by the template compiler.'
       )
     }
 
