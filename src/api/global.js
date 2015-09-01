@@ -83,6 +83,9 @@ function createClass (name) {
  */
 
 exports.use = function (plugin) {
+  if (plugin.installed) {
+    return
+  }
   // additional parameters
   var args = _.toArray(arguments, 1)
   args.unshift(this)
@@ -91,6 +94,7 @@ exports.use = function (plugin) {
   } else {
     plugin.apply(null, args)
   }
+  plugin.installed = true
   return this
 }
 
