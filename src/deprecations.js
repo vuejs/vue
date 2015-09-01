@@ -144,13 +144,6 @@ if (process.env.NODE_ENV !== 'production') {
       )
     },
 
-    COMPUTED_CACHE: function (name) {
-      warn(
-        'Computed property "' + name + '": computed properties are not cached by ' +
-        'default in 1.0.0. You only need to enable cache for particularly expensive ones.'
-      )
-    },
-
     BIND_IS: function () {
       warn(
         '<component is="{{view}}"> syntax will be deprecated in 1.0.0. Use ' +
