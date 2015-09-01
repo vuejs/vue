@@ -96,8 +96,7 @@ module.exports = {
         }
       }
     }
-    var child = this.build(options)
-    this.setCurrent(child)
+    var child = this.childVM = this.build(options)
     if (!this.waitForEvent) {
       if (activateHook) {
         activateHook.call(child, insert)
@@ -142,7 +141,7 @@ module.exports = {
       // just remove current
       this.unbuild(true)
       this.remove(this.childVM, cb)
-      this.unsetCurrent()
+      this.childVM = null
     } else {
       this.resolveComponent(value, _.bind(function () {
         this.unbuild(true)
@@ -227,6 +226,7 @@ module.exports = {
         // if no inline-template, then the compiled
         // linker can be cached for better performance.
         _linkerCachable: !this.inlineTemplate,
+        _ref: this.ref,
         _asComponent: true,
         _isRouterView: this._isRouterView,
         // if this is a transcluded component, context
@@ -339,7 +339,7 @@ module.exports = {
   transition: function (target, cb) {
     var self = this
     var current = this.childVM
-    this.setCurrent(target)
+    this.childVM = target
     switch (self.transMode) {
       case 'in-out':
         target.$before(self.anchor, function () {
@@ -358,32 +358,6 @@ module.exports = {
   },
 
   /**
-   * Set childVM and parent ref
-   */
-
-  setCurrent: function (child) {
-    this.unsetCurrent()
-    this.childVM = child
-    var ref = child._refId || this.ref
-    if (ref) {
-      (this._scope || this.vm).$[ref] = child
-    }
-  },
-
-  /**
-   * Unset childVM and parent ref
-   */
-
-  unsetCurrent: function () {
-    var child = this.childVM
-    this.childVM = null
-    var ref = (child && child._refId) || this.ref
-    if (ref) {
-      (this._scope || this.vm).$[ref] = null
-    }
-  },
-
-  /**
    * Unbind.
    */
 
@@ -391,7 +365,6 @@ module.exports = {
     this.invalidatePending()
     // Do not defer cleanup when unbinding
     this.unbuild()
-    this.unsetCurrent()
     // destroy all keep-alive cached instances
     if (this.cache) {
       for (var key in this.cache) {

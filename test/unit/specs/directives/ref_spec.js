@@ -89,6 +89,32 @@ if (_.inBrowser) {
         })
       })
     })
+  
+    // #1147
+    it('should be able to reference host via ref inside transclusion content', function (done) {
+      var vm = new Vue({
+        el: el,
+        template:
+          '<div>' +
+            '<comp ref="out">{{$.out.msg}}</comp>' +
+          '</div>',
+        components: {
+          comp: {
+            template: '<slot></slot>',
+            data: function () {
+              return { msg: 'hi' }
+            }
+          }
+        }
+      })
+      expect(_.warn).not.toHaveBeenCalled()
+      expect(vm.$el.textContent).toBe('hi')
+      vm.$children[0].msg = 'ho'
+      _.nextTick(function () {
+        expect(vm.$el.textContent).toBe('ho')
+        done()
+      })
+    })
 
     it('should also work in child template', function (done) {
       var vm = new Vue({

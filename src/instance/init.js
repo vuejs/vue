@@ -59,6 +59,11 @@ exports._init = function (options) {
   // and container directives.
   this._scope = options._scope
 
+  // set ref
+  if (options._ref) {
+    (this._scope || this._context).$[options._ref] = this
+  }
+
   // fragment:
   // if this instance is compiled inside a Fragment, it
   // needs to reigster itself as a child of that fragment

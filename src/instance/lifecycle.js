@@ -157,6 +157,14 @@ exports._destroy = function (remove, deferCleanup) {
   while (i--) {
     this._watchers[i].teardown()
   }
+  // unregister ref
+  var ref = this.$options._ref
+  if (ref) {
+    var scope = this._scope || this._context
+    if (scope.$[ref] === this) {
+      scope.$[ref] = null
+    }
+  }
   // remove reference to self on $el
   if (this.$el) {
     this.$el.__vue__ = null
@@ -197,6 +205,8 @@ exports._cleanup = function () {
   this.$root =
   this.$children =
   this._watchers =
+  this._context =
+  this._scope =
   this._directives = null
   // call the last hook...
   this._isDestroyed = true

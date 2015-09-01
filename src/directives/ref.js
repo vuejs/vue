@@ -14,13 +14,21 @@ module.exports = {
     }
     // If we get here, it means this is a `v-ref` on a
     // child, because parent scope `v-ref` is stripped in
-    // `v-component` already. So we just record our own ref
-    // here - it will overwrite parent ref in `v-component`,
-    // if any.
-    vm._refId = this.expression
+    // `v-component` already.
+    var ref = this.expression
+    var context = this.vm._scope || this.vm._context
+    context.$[ref] = this.vm
 
     if (process.env.NODE_ENV !== 'production') {
       _.deprecation.REF_IN_CHILD()
+    }
+  },
+
+  unbind: function () {
+    var ref = this.expression
+    var context = this.vm._scope || this.vm._context
+    if (context.$[ref] === this.vm) {
+      context.$[ref] = null
     }
   }
 }
