@@ -161,11 +161,15 @@ describe('Instance state initialization', function () {
 
     var Test = Vue.extend({
       computed: {
-        c: function () {
-          return this.a + this.b
+        // uncached
+        c: {
+          cache: false,
+          get: function () {
+            return this.a + this.b
+          }
         },
+        // with setter
         d: {
-          cache: false, // for deprecation coverage. TODO: remove in 1.0.0
           get: function () {
             return this.a + this.b
           },
@@ -181,7 +185,6 @@ describe('Instance state initialization', function () {
         },
         // cached
         f: {
-          cache: true,
           get: function () {
             spyF()
             return this.ff
@@ -193,7 +196,6 @@ describe('Instance state initialization', function () {
         },
         // another cached, for watcher test
         h: {
-          cache: true,
           get: function () {
             return this.hh
           }
