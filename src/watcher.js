@@ -83,8 +83,7 @@ Watcher.prototype.addDep = function (dep) {
 
 Watcher.prototype.get = function () {
   this.beforeGet()
-  var vm = this.vm
-  var scope = this.scope || vm
+  var scope = this.scope || this.vm
   var value
   try {
     value = this.getter.call(scope, scope)
@@ -112,7 +111,7 @@ Watcher.prototype.get = function () {
     value = this.preProcess(value)
   }
   if (this.filters) {
-    value = vm._applyFilters(value, null, this.filters, false)
+    value = scope._applyFilters(value, null, this.filters, false)
   }
   this.afterGet()
   return value
@@ -125,10 +124,9 @@ Watcher.prototype.get = function () {
  */
 
 Watcher.prototype.set = function (value) {
-  var vm = this.vm
-  var scope = this.scope || vm
+  var scope = this.scope || this.vm
   if (this.filters) {
-    value = vm._applyFilters(
+    value = scope._applyFilters(
       value, this.value, this.filters, true)
   }
   try {
