@@ -1,5 +1,5 @@
 /*!
- * Vue.js v1.0.0-alpha.1
+ * Vue.js v1.0.0-alpha.2
  * (c) 2015 Evan You
  * Released under the MIT License.
  */
@@ -1817,13 +1817,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	      )
 	    },
 
-	    COMPUTED_CACHE: function (name) {
-	      warn(
-	        'Computed property "' + name + '": computed properties are not cached by ' +
-	        'default in 1.0.0. You only need to enable cache for particularly expensive ones.'
-	      )
-	    },
-
 	    BIND_IS: function () {
 	      warn(
 	        '<component is="{{view}}"> syntax will be deprecated in 1.0.0. Use ' +
@@ -1989,6 +1982,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	exports.use = function (plugin) {
+	  /* istanbul ignore if */
+	  if (plugin.installed) {
+	    return
+	  }
 	  // additional parameters
 	  var args = _.toArray(arguments, 1)
 	  args.unshift(this)
@@ -1997,6 +1994,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  } else {
 	    plugin.apply(null, args)
 	  }
+	  plugin.installed = true
 	  return this
 	}
 
@@ -3665,8 +3663,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	Watcher.prototype.get = function () {
 	  this.beforeGet()
-	  var vm = this.vm
-	  var scope = this.scope || vm
+	  var scope = this.scope || this.vm
 	  var value
 	  try {
 	    value = this.getter.call(scope, scope)
@@ -3694,7 +3691,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value = this.preProcess(value)
 	  }
 	  if (this.filters) {
-	    value = vm._applyFilters(value, null, this.filters, false)
+	    value = scope._applyFilters(value, null, this.filters, false)
 	  }
 	  this.afterGet()
 	  return value
@@ -3707,10 +3704,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	Watcher.prototype.set = function (value) {
-	  var vm = this.vm
-	  var scope = this.scope || vm
+	  var scope = this.scope || this.vm
 	  if (this.filters) {
-	    value = vm._applyFilters(
+	    value = scope._applyFilters(
 	      value, this.value, this.filters, true)
 	  }
 	  try {
@@ -10035,16 +10031,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        configurable: true
 	      }
 	      if (typeof userDef === 'function') {
-	        def.get = _.bind(userDef, this)
+	        def.get = makeComputedGetter(userDef, this)
 	        def.set = noop
 	      } else {
-
-	        if (("development") !== 'production' && userDef.cache === false) {
-	          _.deprecation.COMPUTED_CACHE(key)
-	        }
-
 	        def.get = userDef.get
-	          ? userDef.cache
+	          ? userDef.cache !== false
 	            ? makeComputedGetter(userDef.get, this)
 	            : _.bind(userDef.get, this)
 	          : noop
