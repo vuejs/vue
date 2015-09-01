@@ -83,6 +83,7 @@ function createClass (name) {
  */
 
 exports.use = function (plugin) {
+  /* istanbul ignore if */
   if (plugin.installed) {
     return
   }
