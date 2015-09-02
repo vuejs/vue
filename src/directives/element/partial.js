@@ -13,17 +13,8 @@ module.exports = {
     _.replace(el, this.anchor)
     var id = el.getAttribute('name')
     if (id != null) {
-      var tokens = textParser.parse(id)
-      if (tokens) {
-        // dynamic partial
-        this.setupDynamic(textParser.tokensToExp(tokens))
-        if (process.env.NODE_ENV !== 'production') {
-          _.deprecation.PARTIAL_NAME(id)
-        }
-      } else {
-        // static partial
-        this.insert(id)
-      }
+      // static partial
+      this.insert(id)
     } else {
       id = el.getAttribute('bind-name')
       if (id) {
