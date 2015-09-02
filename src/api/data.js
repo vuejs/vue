@@ -84,7 +84,7 @@ exports.$watch = function (exp, cb, options) {
 exports.$eval = function (text) {
   // check for filters.
   if (filterRE.test(text)) {
-    var dir = dirParser.parse(text)[0]
+    var dir = dirParser.parse(text)
     // the filter regex check might give false positive
     // for pipes inside strings, so it's possible that
     // we don't get any filters here

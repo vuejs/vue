@@ -5,7 +5,6 @@ var compileProps = require('./compile-props')
 var config = require('../config')
 var textParser = require('../parsers/text')
 var dirParser = require('../parsers/directive')
-var newDirParser = require('../parsers/directive-new')
 var templateParser = require('../parsers/template')
 var resolveAsset = _.resolveAsset
 
@@ -339,7 +338,7 @@ function processTextToken (token, options) {
   function setTokenType (type) {
     token.type = type
     token.def = publicDirectives[type] // text or html
-    token.descriptor = dirParser.parse(token.value)[0]
+    token.descriptor = dirParser.parse(token.value)
   }
   return el
 }
@@ -511,7 +510,7 @@ skip.terminal = true
  */
 
 function makeTerminalNodeLinkFn (el, dirName, value, options, def) {
-  var descriptor = dirParser.parse(value)[0]
+  var descriptor = dirParser.parse(value)
   // either an element directive, or if/for
   def = def || publicDirectives[dirName]
   var fn = function terminalNodeLinkFn (vm, el, host, scope, frag) {
@@ -556,9 +555,14 @@ function compileDirectives (attrs, options) {
       if (dirDef) {
         dirs.push({
           name: dirName,
+<<<<<<< HEAD
           descriptors: dirParser.parse(value),
           def: dirDef,
           literal: isLiteral
+=======
+          descriptor: dirParser.parse(value),
+          def: dirDef
+>>>>>>> remove old directive parser
         })
       }
     } else
@@ -568,7 +572,7 @@ function compileDirectives (attrs, options) {
       dirs.push({
         name: 'el',
         arg: bindRE.test(name),
-        descriptors: [newDirParser.parse(value)],
+        descriptor: dirParser.parse(value),
         def: internalDirectives.el
       })
     } else
@@ -578,7 +582,7 @@ function compileDirectives (attrs, options) {
       dirs.push({
         name: 'transition',
         arg: bindRE.test(name),
-        descriptors: [newDirParser.parse(value)],
+        descriptor: dirParser.parse(value),
         def: internalDirectives.transition
       })
     } else
@@ -596,7 +600,7 @@ function compileDirectives (attrs, options) {
       dirs.push({
         name: dirName,
         arg: arg,
-        descriptors: [newDirParser.parse(value)],
+        descriptor: dirParser.parse(value),
         def: internalDirectives[dirName]
       })
     } else
@@ -606,7 +610,7 @@ function compileDirectives (attrs, options) {
       dirs.push({
         name: 'on',
         arg: name.replace(onRE, ''),
-        descriptors: [newDirParser.parse(value)],
+        descriptor: dirParser.parse(value),
         def: internalDirectives.on
       })
     } else
@@ -636,17 +640,10 @@ function makeNodeLinkFn (directives) {
   return function nodeLinkFn (vm, el, host, scope, frag) {
     // reverse apply because it's sorted low to high
     var i = directives.length
-    var dir, j, k
     while (i--) {
-      dir = directives[i]
-      // TODO: no need for loop here in 1.0.0
-      // also, we can just pass in the dir object to _bindDir,
-      // which is going to be much simpler.
-      k = dir.descriptors.length
-      for (j = 0; j < k; j++) {
-        vm._bindDir(dir.name, el,
-          dir.descriptors[j], dir.def, host, scope, frag, dir.arg, dir.literal)
-      }
+      var dir = directives[i]
+      vm._bindDir(dir.name, el,
+        dir.descriptor, dir.def, host, scope, frag, dir.arg, dir.literal)
     }
   }
 }

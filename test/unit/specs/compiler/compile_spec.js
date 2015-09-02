@@ -1,7 +1,6 @@
 var Vue = require('../../../../src/vue')
 var _ = require('../../../../src/util')
 var dirParser = require('../../../../src/parsers/directive')
-var newDirParser = require('../../../../src/parsers/directive-new')
 var compiler = require('../../../../src/compiler')
 var compile = compiler.compile
 var internalDirectives = require('../../../../src/directives/internal')
@@ -54,8 +53,8 @@ if (_.inBrowser) {
       el.innerHTML = '<p v-a="a" v-b="b">hello</p><div v-b:="b"></div>'
       var defA = { priority: 1 }
       var defB = { priority: 2 }
-      var descriptorA = dirParser.parse('a')[0]
-      var descriptorB = dirParser.parse('b')[0]
+      var descriptorA = dirParser.parse('a')
+      var descriptorB = dirParser.parse('b')
       var options = _.mergeOptions(Vue.options, {
         directives: {
           a: defA,
@@ -83,9 +82,9 @@ if (_.inBrowser) {
       el.setAttribute('bind-class', 'a')
       el.setAttribute('bind-style', 'b')
       el.setAttribute('bind-title', 'c')
-      var descA = newDirParser.parse('a')
-      var descB = newDirParser.parse('b')
-      var descC = newDirParser.parse('c')
+      var descA = dirParser.parse('a')
+      var descB = dirParser.parse('b')
+      var descC = dirParser.parse('c')
       var linker = compile(el, Vue.options)
       linker(vm, el)
       expect(vm._bindDir.calls.count()).toBe(3)
@@ -96,7 +95,7 @@ if (_.inBrowser) {
 
     it('on- syntax', function () {
       el.setAttribute('on-click', 'a++')
-      var desc = newDirParser.parse('a++')
+      var desc = dirParser.parse('a++')
       var linker = compile(el, Vue.options)
       linker(vm, el)
       expect(vm._bindDir.calls.count()).toBe(1)
@@ -114,7 +113,7 @@ if (_.inBrowser) {
       var args = vm._bindDir.calls.argsFor(0)
       expect(args[0]).toBe('text')
       // skip the node because it's generated in the linker fn via cloneNode
-      expect(args[2]).toBe(dirParser.parse('a')[0])
+      expect(args[2]).toBe(dirParser.parse('a'))
       expect(args[3]).toBe(def)
       // expect $eval to be called during onetime
       expect(vm.$eval).toHaveBeenCalledWith('b')
@@ -127,7 +126,7 @@ if (_.inBrowser) {
       data.html = '<div>yoyoyo</div>'
       el.innerHTML = '{{{html}}} {{{*html}}}'
       var htmlDef = Vue.options.directives.html
-      var htmlDesc = dirParser.parse('html')[0]
+      var htmlDesc = dirParser.parse('html')
       var linker = compile(el, Vue.options)
       linker(vm, el)
       expect(vm._bindDir.calls.count()).toBe(1)
@@ -144,7 +143,7 @@ if (_.inBrowser) {
         '<div v-for="item in items"><p v-a="b"></p></div>' + // v-for
         '<div v-pre><p v-a="b"></p></div>' // v-pre
       var def = Vue.options.directives.for
-      var descriptor = dirParser.parse('item in items')[0]
+      var descriptor = dirParser.parse('item in items')
       var linker = compile(el, Vue.options)
       linker(vm, el)
       // expect 1 call because terminal should return early and let

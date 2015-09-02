@@ -8,12 +8,6 @@ if (process.env.NODE_ENV !== 'production') {
   var hasConsole = typeof console !== 'undefined'
 
   /**
-   * Load deprecation warning functions
-   */
-
-  exports.deprecations = require('../deprecations')
-
-  /**
    * Log a message.
    *
    * @param {String} msg

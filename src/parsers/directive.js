@@ -1,7 +1,6 @@
 var _ = require('../util')
 var Cache = require('../cache')
 var cache = new Cache(1000)
-var argRE = /^[^\{\?]+$|^'[^']*'$|^"[^"]*"$/
 var filterTokenRE = /[^\s'"]+|'[^']*'|"[^"]*"/g
 var reservedArgRE = /^in$|^-?\d+/
 
@@ -9,35 +8,9 @@ var reservedArgRE = /^in$|^-?\d+/
  * Parser state
  */
 
-var str
-var c, i, l
-var inSingle
-var inDouble
-var curly
-var square
-var paren
-var begin
-var argIndex
-var dirs
-var dir
-var lastFilterIndex
-var arg
-
-/**
- * Push a directive object into the result Array
- */
-
-function pushDir () {
-  dir.raw = str.slice(begin, i).trim()
-  if (dir.expression === undefined) {
-    dir.expression = str.slice(argIndex, i).trim()
-  } else if (lastFilterIndex !== begin) {
-    pushFilter()
-  }
-  if (i === 0 || dir.expression) {
-    dirs.push(dir)
-  }
-}
+var str, dir
+var c, i, l, lastFilterIndex
+var inSingle, inDouble, curly, square, paren
 
 /**
  * Push a filter to the current directive object
@@ -79,22 +52,21 @@ function processFilterArg (arg) {
 }
 
 /**
- * Parse a directive string into an Array of AST-like
- * objects representing directives.
+ * Parse a directive value and extract the expression
+ * and its filters into a descriptor.
  *
  * Example:
  *
- * "click: a = a + 1 | uppercase" will yield:
+ * "a + 1 | uppercase" will yield:
  * {
- *   arg: 'click',
- *   expression: 'a = a + 1',
+ *   expression: 'a + 1',
  *   filters: [
  *     { name: 'uppercase', args: null }
  *   ]
  * }
  *
  * @param {String} str
- * @return {Array<Object>}
+ * @return {Object}
  */
 
 exports.parse = function (s) {
@@ -107,11 +79,9 @@ exports.parse = function (s) {
   // reset parser state
   str = s
   inSingle = inDouble = false
-  curly = square = paren = begin = argIndex = 0
+  curly = square = paren = 0
   lastFilterIndex = 0
-  dirs = []
   dir = {}
-  arg = null
 
   for (i = 0, l = str.length; i < l; i++) {
     c = str.charCodeAt(i)
@@ -122,42 +92,14 @@ exports.parse = function (s) {
       // check double quote
       if (c === 0x22) inDouble = !inDouble
     } else if (
-      c === 0x2C && // comma
-      !paren && !curly && !square
-    ) {
-      // reached the end of a directive
-      pushDir()
-      // reset & skip the comma
-      dir = {}
-      begin = argIndex = lastFilterIndex = i + 1
-    } else if (
-      c === 0x3A && // colon
-      !dir.expression &&
-      !dir.arg
-    ) {
-      // argument
-      arg = str.slice(begin, i).trim()
-      // test for valid argument here
-      // since we may have caught stuff like first half of
-      // an object literal or a ternary expression.
-      if (argRE.test(arg)) {
-        argIndex = i + 1
-        dir.arg = _.stripQuotes(arg) || arg
-
-        if (process.env.NODE_ENV !== 'production') {
-          _.deprecation.DIR_ARGS(str)
-        }
-
-      }
-    } else if (
       c === 0x7C && // pipe
       str.charCodeAt(i + 1) !== 0x7C &&
       str.charCodeAt(i - 1) !== 0x7C
     ) {
-      if (dir.expression === undefined) {
+      if (dir.expression == null) {
         // first filter, end of expression
         lastFilterIndex = i + 1
-        dir.expression = str.slice(argIndex, i).trim()
+        dir.expression = str.slice(0, i).trim()
       } else {
         // already has filter
         pushFilter()
@@ -176,15 +118,12 @@ exports.parse = function (s) {
     }
   }
 
-  if (i === 0 || begin !== i) {
-    pushDir()
+  if (dir.expression == null) {
+    dir.expression = str.slice(0, i).trim()
+  } else if (lastFilterIndex !== 0) {
+    pushFilter()
   }
 
-  cache.put(s, dirs)
-
-  if (dirs.length > 1) {
-    _.deprecation.MUTI_CLAUSES()
-  }
-
-  return dirs
+  cache.put(s, dir)
+  return dir
 }

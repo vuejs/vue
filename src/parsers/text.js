@@ -162,7 +162,7 @@ function inlineFilters (exp, single) {
       ? exp
       : '(' + exp + ')'
   } else {
-    var dir = dirParser.parse(exp)[0]
+    var dir = dirParser.parse(exp)
     if (!dir.filters) {
       return '(' + exp + ')'
     } else {
