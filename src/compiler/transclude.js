@@ -86,7 +86,9 @@ function transcludeTemplate (el, options) {
         // element directive
         _.resolveAsset(options, 'elementDirectives', tag) ||
         // repeat block
-        replacer.hasAttribute(config.prefix + 'repeat')
+        replacer.hasAttribute(config.prefix + 'repeat') ||
+        // for block
+        replacer.hasAttribute(config.prefix + 'for')
       ) {
         return frag
       } else {
