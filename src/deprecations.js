@@ -105,13 +105,6 @@ if (process.env.NODE_ENV !== 'production') {
       )
     },
 
-    BIND_IS: function () {
-      warn(
-        '<component bind-is="view"> syntax will be deprecated in 1.0.0. Use ' +
-        '<component bind-is="view"> instead.'
-      )
-    },
-
     PARTIAL_NAME: function (id) {
       warn(
         '<partial name="' + id + '">: mustache interpolations inside attributes ' +

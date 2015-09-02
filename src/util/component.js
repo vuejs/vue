@@ -16,9 +16,6 @@ exports.checkComponent = function (el, options) {
     // dynamic syntax
     var exp = el.getAttribute('is')
     if (exp != null) {
-      if (process.env.NODE_ENV !== 'production' && /{{.*}}/.test(exp)) {
-        _.deprecation.BIND_IS()
-      }
       el.removeAttribute('is')
     } else {
       exp = el.getAttribute('bind-is')
