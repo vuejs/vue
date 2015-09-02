@@ -208,6 +208,12 @@ if (_.inBrowser) {
       document.body.appendChild(el)
       var attachSpy = jasmine.createSpy('attached')
       var detachSpy = jasmine.createSpy('detached')
+      var transcluded = {
+        props: ['a'],
+        template: '{{a}}',
+        attached: attachSpy,
+        detached: detachSpy
+      }
       var vm = new Vue({
         el: el,
         data: {
@@ -228,14 +234,12 @@ if (_.inBrowser) {
               '</div>' +
               // this is to test that compnents that are not in the if block
               // should not fire attach/detach when v-if toggles
-              '<transcluded></transcluded>'
+              '<transcluded></transcluded>',
+            components: {
+              transcluded: transcluded
+            }
           },
-          transcluded: {
-            props: ['a'],
-            template: '{{a}}',
-            attached: attachSpy,
-            detached: detachSpy
-          }
+          transcluded: transcluded
         }
       })
       assertMarkup()

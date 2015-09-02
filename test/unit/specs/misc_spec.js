@@ -229,24 +229,6 @@ describe('Misc', function () {
     })
   })
 
-  it('strict mode', function () {
-    Vue.config.strict = true
-    new Vue({
-      el: document.createElement('div'),
-      template: '<test></test>',
-      components: {
-        test: {
-          template: '<div v-strict>hi</div>'
-        }
-      },
-      directives: {
-        strict: function () {}
-      }
-    })
-    expect(hasWarned(_, 'Failed to resolve directive: strict')).toBe(true)
-    Vue.config.strict = false
-  })
-
   it('class interpolation and v-class should work together', function (done) {
     var el = document.createElement('div')
     el.setAttribute('class', 'a {{classB}}')

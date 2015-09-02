@@ -18,13 +18,6 @@ module.exports = {
   debug: false,
 
   /**
-   * Strict mode.
-   * Disables asset lookup in the view parent chain.
-   */
-
-  strict: false,
-
-  /**
    * Whether to suppress warnings.
    *
    * @type {Boolean}

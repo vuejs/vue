@@ -23,7 +23,6 @@ describe('Child API', function () {
     expect(child.$parent).toBe(vm)
     expect(child.$root).toBe(vm)
     expect(vm.$children.indexOf(child)).toBe(0)
-    expect(_.resolveAsset(child.$options, 'directives', 'test')).toBeTruthy()
   })
 
   it('inherit scope', function () {

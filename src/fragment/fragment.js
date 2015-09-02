@@ -55,6 +55,10 @@ Fragment.prototype.callHook = function (hook) {
   }
 }
 
+/**
+ * Destroy the fragment.
+ */
+
 Fragment.prototype.destroy = function () {
   if (this.parentFrag) {
     this.parentFrag.childFrags.$remove(this)

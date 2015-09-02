@@ -350,26 +350,5 @@ exports.resolveAsset = function resolve (options, type, id) {
   var camelizedId = _.camelize(id)
   var pascalizedId = camelizedId.charAt(0).toUpperCase() + camelizedId.slice(1)
   var assets = options[type]
-  var asset = assets[id] || assets[camelizedId] || assets[pascalizedId]
-
-  // for deprecation check
-  var localAsset = asset
-
-  while (
-    !asset &&
-    options._parent &&
-    (!config.strict || options._repeat)
-  ) {
-    options = (options._context || options._parent).$options
-    assets = options[type]
-    asset = assets[id] || assets[camelizedId] || assets[pascalizedId]
-  }
-
-  if (process.env.NODE_ENV !== 'production') {
-    if (asset && !localAsset && !config.strict) {
-      _.deprecation.STRICT_MODE(type, id)
-    }
-  }
-
-  return asset
+  return assets[id] || assets[camelizedId] || assets[pascalizedId]
 }
