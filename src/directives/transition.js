@@ -9,8 +9,10 @@ module.exports = {
   isLiteral: true,
 
   bind: function () {
-    if (!this._isDynamicLiteral) {
+    if (!this._isDynamicLiteral && !this.arg) {
       this.update(this.expression)
+    } else if (this.arg) {
+      this._isDynamicLiteral = true
     }
   },
 

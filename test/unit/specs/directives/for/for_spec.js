@@ -609,9 +609,9 @@ if (_.inBrowser) {
       vm.items.splice(1, 1, {a: 4})
       setTimeout(function () {
         expect(el.innerHTML).toBe(
-          '<div transition="test">1</div>' +
-          '<div transition="test">4</div>' +
-          '<div transition="test">3</div>'
+          '<div class="test-transition">1</div>' +
+          '<div class="test-transition">4</div>' +
+          '<div class="test-transition">3</div>'
         )
         document.body.removeChild(el)
         done()

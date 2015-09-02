@@ -1,6 +1,5 @@
 var _ = require('../util')
 var config = require('../config')
-var transition = require('../transition')
 var FragmentFactory = require('../fragment/factory')
 var isObject = _.isObject
 var uid = 0
@@ -451,7 +450,7 @@ module.exports = {
 
   getStagger: function (frag, index, total, type) {
     type = type + 'Stagger'
-    var trans = transition.get(frag.node, this.vm)
+    var trans = frag.node.__v_trans
     var hooks = trans && trans.hooks
     var hook = hooks && (hooks[type] || hooks.stagger)
     return hook

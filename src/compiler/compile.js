@@ -576,7 +576,7 @@ function compileDirectives (attrs, options) {
       }
     } else
 
-    // speical case for el
+    // special case for el
     if (name === 'el' || name === 'bind-el') {
       dirs.push({
         name: 'el',
@@ -585,6 +585,16 @@ function compileDirectives (attrs, options) {
         def: options.directives.el
       })
     } else
+
+    // special case for transition
+    if (name === 'transition' || name === 'bind-transition') {
+      dirs.push({
+        name: 'transition',
+        arg: bindRE.test(name),
+        descriptors: [newDirParser.parse(value)],
+        def: options.directives.transition
+      })
+    }
 
     // attribute bindings
     if (bindRE.test(name)) {

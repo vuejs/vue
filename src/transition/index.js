@@ -1,5 +1,4 @@
 var _ = require('../util')
-var Transition = require('./transition')
 
 /**
  * Append with transition.
@@ -74,7 +73,7 @@ exports.removeThenAppend = function (el, target, vm, cb) {
  */
 
 var apply = exports.apply = function (el, direction, op, vm, cb) {
-  var transition = exports.get(el, vm)
+  var transition = el.__v_trans
   if (
     !transition ||
     // skip if there are no js hooks and CSS transition is
@@ -93,29 +92,4 @@ var apply = exports.apply = function (el, direction, op, vm, cb) {
   }
   var action = direction > 0 ? 'enter' : 'leave'
   transition[action](op, cb)
-}
-
-/**
- * Get the transition object from an element, will create
- * one if it has the "transition" attribute but doesn't have
- * a transition object, or if the current transition object's
- * id doesn't match the desired id.
- *
- * @param {Element} el
- * @param {Vue} vm
- * @return {Transition|undefined}
- */
-
-exports.get = function (el, vm) {
-  var transition = el.__v_trans
-  var id = el.getAttribute && el.getAttribute('transition')
-  // create new transition object if
-  // 1. element has "transition" attribute
-  // 2. current transition object's id doesn't match
-  if (id != null && (!transition || transition.id !== id)) {
-    var hooks = _.resolveAsset(vm.$options, 'transitions', id)
-    id = id || 'v'
-    transition = el.__v_trans = new Transition(el, id, hooks, el.__vue__ || vm)
-  }
-  return transition
 }

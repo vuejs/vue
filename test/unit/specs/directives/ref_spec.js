@@ -89,7 +89,7 @@ if (_.inBrowser) {
         })
       })
     })
-  
+
     // #1147
     it('should be able to reference host via ref inside transclusion content', function (done) {
       var vm = new Vue({

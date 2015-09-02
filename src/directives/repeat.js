@@ -2,7 +2,6 @@ var _ = require('../util')
 var config = require('../config')
 var isObject = _.isObject
 var isPlainObject = _.isPlainObject
-var transition = require('../transition')
 var textParser = require('../parsers/text')
 var expParser = require('../parsers/expression')
 var templateParser = require('../parsers/template')
@@ -649,7 +648,7 @@ module.exports = {
 
   getStagger: function (vm, index, total, type) {
     type = type + 'Stagger'
-    var trans = transition.get(vm.$el, vm)
+    var trans = vm.$el.__v_trans
     var hooks = trans && trans.hooks
     var hook = hooks && (hooks[type] || hooks.stagger)
     return hook
