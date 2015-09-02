@@ -96,40 +96,12 @@ exports.pluralize = function (value) {
 }
 
 /**
- * A special filter that takes a handler function,
- * wraps it so it only gets triggered on specific
- * keypresses. v-on only.
+ * Debounce a handler function.
  *
- * @param {String} key
+ * @param {Function} handler
+ * @param {Number} delay = 300
+ * @return {Function}
  */
-
-var keyCodes = {
-  esc: 27,
-  tab: 9,
-  enter: 13,
-  space: 32,
-  'delete': 46,
-  up: 38,
-  left: 37,
-  right: 39,
-  down: 40
-}
-
-exports.key = function (handler, key) {
-  if (!handler) return
-  var code = keyCodes[key]
-  if (!code) {
-    code = parseInt(key, 10)
-  }
-  return function (e) {
-    if (e.keyCode === code) {
-      return handler.call(this, e)
-    }
-  }
-}
-
-// expose keycode hash
-exports.key.keyCodes = keyCodes
 
 exports.debounce = function (handler, delay) {
   if (!handler) return

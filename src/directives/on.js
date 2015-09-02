@@ -1,5 +1,37 @@
 var _ = require('../util')
-var keyFilter = require('../filters').key
+
+var keyCodes = {
+  esc: 27,
+  tab: 9,
+  enter: 13,
+  space: 32,
+  'delete': 46,
+  up: 38,
+  left: 37,
+  right: 39,
+  down: 40
+}
+
+/**
+ * Wrap a handler function so that it only gets triggered on
+ * specified keypress events.
+ *
+ * @param {Function} handler
+ * @param {String|Number} key
+ * @return {Function}
+ */
+
+function keyFilter (handler, key) {
+  var code = keyCodes[key]
+  if (!code) {
+    code = parseInt(key, 10)
+  }
+  return function (e) {
+    if (e.keyCode === code) {
+      return handler.call(this, e)
+    }
+  }
+}
 
 module.exports = {
 
@@ -13,18 +45,6 @@ module.exports = {
     if (keyIndex > -1) {
       this.arg = rawArg.slice(0, keyIndex)
       this.key = rawArg.slice(keyIndex + 1)
-    }
-
-    // warn old usage
-    if (process.env.NODE_ENV !== 'production') {
-      if (this.filters) {
-        var hasKeyFilter = this.filters.some(function (f) {
-          return f.name === 'key'
-        })
-        if (hasKeyFilter) {
-          _.deprecation.KEY_FILTER()
-        }
-      }
     }
 
     // deal with iframes

@@ -80,24 +80,6 @@ describe('Filters', function () {
     expect(filter(-1500.4343434)).toBe('$-1,500.43')
   })
 
-  it('key', function () {
-    var filter = filters.key
-    expect(filter(null)).toBeUndefined()
-    var spy = jasmine.createSpy('filter:key')
-    var handler = filter(spy, 'enter')
-    handler({ keyCode: 0 })
-    expect(spy).not.toHaveBeenCalled()
-    handler({ keyCode: 13 })
-    expect(spy).toHaveBeenCalled()
-    // direct keycode
-    spy = jasmine.createSpy('filter:key')
-    handler = filter(spy, 13)
-    handler({ keyCode: 0 })
-    expect(spy).not.toHaveBeenCalled()
-    handler({ keyCode: 13 })
-    expect(spy).toHaveBeenCalled()
-  })
-
   it('debounce', function (done) {
     var filter = filters.debounce
     expect(filter(null)).toBeUndefined()

@@ -110,13 +110,6 @@ if (process.env.NODE_ENV !== 'production') {
         '<partial name="' + id + '">: mustache interpolations inside attributes ' +
         'will be deprecated in 1.0.0. Use bind-name="expression" instead.'
       )
-    },
-
-    KEY_FILTER: function () {
-      warn(
-        'The "key" filter will be deprecated in 1.0.0. Use the new ' +
-        'on-keyup:key="handler" syntax instead.'
-      )
     }
 
   }
