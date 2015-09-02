@@ -23,35 +23,7 @@ module.exports = {
   priority: 850,
 
   update: function (value) {
-    if (this.arg) {
-      this.setAttr(this.arg, value)
-    } else if (typeof value === 'object') {
-      // TODO no longer need to support object in 1.0.0
-      this.objectHandler(value)
-    }
-  },
-
-  objectHandler: function (value) {
-    // cache object attrs so that only changed attrs
-    // are actually updated.
-    var cache = this.cache || (this.cache = {})
-    var attr, val
-    for (attr in cache) {
-      if (!(attr in value)) {
-        this.setAttr(attr, null)
-        delete cache[attr]
-      }
-    }
-    for (attr in value) {
-      val = value[attr]
-      if (val !== cache[attr]) {
-        cache[attr] = val
-        this.setAttr(attr, val)
-      }
-    }
-  },
-
-  setAttr: function (attr, value) {
+    var attr = this.arg
     if (inputProps[attr] && attr in this.el) {
       if (!this.valueRemoved) {
         this.el.removeAttribute(attr)

@@ -51,24 +51,5 @@ if (_.inBrowser) {
       dir.update(null)
       expect(el.hasAttributeNS(xlinkNS, 'special')).toBe(false)
     })
-
-    it('object and xlink', function () {
-      var xlinkNS = 'http://www.w3.org/1999/xlink'
-      var obj1 = {special: 'ok', test: 'again'}
-      var obj2 = {'xlink:href': '#', test: 'ok', empty: null}
-      dir.update(obj2)
-      expect(el.getAttributeNS(xlinkNS, 'href')).toBe('#')
-      expect(el.getAttribute('test')).toBe('ok')
-      expect(el.hasAttribute('empty')).toBe(false)
-      dir.update(obj1)
-      expect(el.hasAttributeNS(xlinkNS, 'href')).toBe(false)
-      expect(el.getAttribute('special')).toBe('ok')
-      expect(el.getAttribute('test')).toBe('again')
-      obj1.test = null
-      dir.update(obj1)
-      expect(el.hasAttribute('test')).toBe(false)
-      dir.update(obj2)
-      expect(el.getAttributeNS(xlinkNS, 'href')).toBe('#')
-    })
   })
 }
