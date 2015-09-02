@@ -155,23 +155,6 @@ if (process.env.NODE_ENV !== 'production') {
         'Use v-for to render the options. See https://github.com/yyx990803/vue/issues/1229 ' +
         'for more details.'
       )
-    },
-
-    INTERPOLATE: function () {
-      /* istanbul ignore next */
-      warn(
-        'The global "interpolate" config will be deprecated in 1.0.0. Use "v-pre" ' +
-        'on elements that should be skipped by the template compiler.'
-      )
-    },
-
-    LITERAL_DIR: function (name) {
-      warn(
-        'Custom directive "' + name + '": It\'s no longer necessary to declare ' +
-        'literal directives in 1.0.0. Use the ":=" syntax to indicate a literal ' +
-        'value instead. For more details see ' +
-        'https://github.com/yyx990803/vue/issues/1173#issuecomment-137473650'
-      )
     }
 
   }

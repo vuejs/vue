@@ -236,15 +236,10 @@ exports.compileRoot = function (el, options) {
  */
 
 function compileNode (node, options) {
-  /* istanbul ignore if */
-  if (process.env.NODE_ENV !== 'production' && !config.interpolate) {
-    _.deprecation.INTERPOLATE()
-  }
-
   var type = node.nodeType
   if (type === 1 && node.tagName !== 'SCRIPT') {
     return compileElement(node, options)
-  } else if (type === 3 && config.interpolate && node.data.trim()) {
+  } else if (type === 3 && node.data.trim()) {
     return compileTextNode(node, options)
   } else {
     return null
@@ -633,7 +628,7 @@ function compileDirectives (attrs, options) {
     } else
 
     // TODO: remove this in 1.0.0
-    if (config.interpolate) {
+    {
       dir = collectAttrDirective(name, value, options)
       if (dir) {
         dirs.push(dir)

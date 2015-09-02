@@ -35,14 +35,6 @@ module.exports = {
   proto: true,
 
   /**
-   * Whether to parse mustache tags in templates.
-   *
-   * @type {Boolean}
-   */
-
-  interpolate: true,
-
-  /**
    * Whether to use async rendering.
    */
 
