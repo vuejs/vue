@@ -100,57 +100,6 @@ describe('Instance state initialization', function () {
       // unproxy old key that's no longer present
       expect(vm.hasOwnProperty('a')).toBe(false)
     })
-
-    it('replace $data and handle props', function () {
-      var el = document.createElement('div')
-      var vm = new Vue({
-        el: el,
-        template: '<test a="{{a}}" b="{{*b}}" c="{{@c}}"></test>',
-        data: {
-          a: 1,
-          b: 2,
-          c: 3
-        },
-        components: {
-          test: {
-            props: ['a', 'b', 'c', 'd'],
-            data: function () {
-              return {
-                a: null // should be overwritten
-              }
-            }
-          }
-        }
-      })
-      var child = vm.$children[0]
-      expect(child.a).toBe(1)
-      expect(child.b).toBe(2)
-      expect(child.c).toBe(3)
-
-      // test new data without prop fields:
-      // should just copy
-      child.$data = {}
-      expect(child.a).toBe(1)
-      expect(child.b).toBe(2)
-      expect(child.c).toBe(3)
-
-      // test new data with value:
-      child.$data = {
-        a: 2, // one-way
-        b: 3, // one-time
-        c: 4  // two-way
-      }
-      expect(child.a).toBe(2)
-      expect(child.b).toBe(3)
-      expect(child.c).toBe(4)
-      // assert parent state
-      // one-way
-      expect(vm.a).toBe(1)
-      // one-time
-      expect(vm.b).toBe(2)
-      // two-way
-      expect(vm.c).toBe(4)
-    })
   })
 
   describe('computed', function () {

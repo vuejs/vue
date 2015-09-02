@@ -106,7 +106,7 @@ Directive.prototype._bind = function () {
         }
       : function () {} // noop if no update is provided
     // pre-process hook called before the value is piped
-    // through the filters. used in v-repeat.
+    // through the filters. used in v-for.
     var preProcess = this._preProcess
       ? _.bind(this._preProcess, this)
       : null

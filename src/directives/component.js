@@ -233,7 +233,7 @@ module.exports = {
         // will be the common parent vm of this instance
         // and its host.
         _context: this.vm,
-        // if this is inside an inline v-repeat, the scope
+        // if this is inside an inline v-for, the scope
         // will be the intermediate scope created for this
         // repeat fragment. this is used for linking props
         // and container directives.

@@ -2,7 +2,7 @@ var _ = require('../../../../src/util')
 var Vue = require('../../../../src/vue')
 
 if (_.inBrowser) {
-  describe('v-el', function () {
+  describe('el', function () {
 
     var el
     beforeEach(function () {
@@ -11,18 +11,7 @@ if (_.inBrowser) {
       spyOn(_, 'log')
     })
 
-    it('normal', function () {
-      var vm = new Vue({
-        el: el,
-        template: '<div v-el="test" id="test"></div>'
-      })
-      expect(vm.$$.test).toBeTruthy()
-      expect(vm.$$.test.id).toBe('test')
-      vm._directives[0]._teardown()
-      expect(vm.$$.test).toBeNull()
-    })
-
-    it('normal (new syntax)', function (done) {
+    it('normal', function (done) {
       var vm = new Vue({
         el: el,
         data: {
@@ -56,21 +45,13 @@ if (_.inBrowser) {
       expect(_.log).toHaveBeenCalled()
     })
 
-    it('with v-repeat', function (done) {
+    it('inside v-for', function () {
       var vm = new Vue({
         el: el,
-        data: { items: [1, 2, 3, 4, 5] },
-        template: '<div v-repeat="items" v-el="test">{{$value}}</div>'
+        data: { items: [1, 2] },
+        template: '<div v-for="n in items"><p el="test">{{n}}</p>{{$$.test.textContent}}</div>'
       })
-      expect(vm.$$.test).toBeTruthy()
-      expect(Array.isArray(vm.$$.test)).toBe(true)
-      expect(vm.$$.test[0].textContent).toBe('1')
-      expect(vm.$$.test[4].textContent).toBe('5')
-      vm.items = []
-      _.nextTick(function () {
-        expect(vm.$$.test.length).toBe(0)
-        done()
-      })
+      expect(vm.$el.textContent).toBe('1122')
     })
 
   })

@@ -78,8 +78,8 @@ if (_.inBrowser) {
       res = transclude(el, options)
       expect(res instanceof DocumentFragment).toBe(true)
 
-      // v-repeat
-      options.template = '<div v-repeat="list"></div>'
+      // v-for
+      options.template = '<div v-for="item in list"></div>'
       res = transclude(el, options)
       expect(res instanceof DocumentFragment).toBe(true)
     })

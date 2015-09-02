@@ -182,11 +182,11 @@ describe('Slot Distribution', function () {
     })
   })
 
-  it('inline v-repeat', function () {
+  it('inline v-for', function () {
     el.innerHTML = '<p slot="1">1</p><p slot="2">2</p><p slot="3">3</p>'
     new Vue({
       el: el,
-      template: '<div v-repeat="list"><slot name="{{$index + 1}}"></slot></div>',
+      template: '<div v-for="n in list"><slot bind-name="$index + 1"></slot></div>',
       data: {
         list: 0
       },
@@ -197,10 +197,10 @@ describe('Slot Distribution', function () {
     expect(el.innerHTML).toBe('<div><p>1</p></div><div><p>2</p></div><div><p>3</p></div>')
   })
 
-  it('v-repeat + component + parent directive + transclusion', function (done) {
+  it('v-for + component + parent directive + transclusion', function (done) {
     var vm = new Vue({
       el: el,
-      template: '<test v-repeat="list" v-class="cls">{{msg}}</test>',
+      template: '<test v-for="n in list" bind-class="cls" prop-a="n.a">{{msg}}</test>',
       data: {
         cls: 'parent',
         msg: 'hi',
@@ -209,6 +209,7 @@ describe('Slot Distribution', function () {
       components: {
         test: {
           replace: true,
+          props: ['a'],
           template: '<div class="child">{{a}} <slot></slot></div>'
         }
       }
@@ -233,7 +234,7 @@ describe('Slot Distribution', function () {
       template:
         '<testa>' +
           '<testb>' +
-            '<div v-repeat="list">{{$value}}</div>' +
+            '<div v-for="n in list">{{n}}</div>' +
           '</testb>' +
         '</testa>',
       data: {

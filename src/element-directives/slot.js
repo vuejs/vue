@@ -18,13 +18,7 @@ module.exports = {
       _.deprecation.CONTENT()
     }
 
-    var vm = this.vm
-    var host = vm
-    // we need find the content context, which is the
-    // closest non-inline-repeater instance.
-    while (host.$options._repeat) {
-      host = host.$parent
-    }
+    var host = this.vm
     var raw = host.$options._content
     var content
     if (!raw) {
@@ -44,7 +38,7 @@ module.exports = {
         self.compile(
           extractFragment(raw.childNodes, raw, true),
           context,
-          vm
+          host
         )
       }
       if (!host._isCompiled) {
@@ -65,7 +59,7 @@ module.exports = {
       if (nodes.length) {
         content = extractFragment(nodes, raw)
         if (content.hasChildNodes()) {
-          this.compile(content, context, vm)
+          this.compile(content, context, host)
         } else {
           this.fallback()
         }
@@ -130,8 +124,7 @@ function extractFragment (nodes, parent, main) {
   function append (node) {
     if (_.isTemplate(node) &&
         !hasDirecitve(node, 'if') &&
-        !hasDirecitve(node, 'for') &&
-        !hasDirecitve(node, 'repeat')) {
+        !hasDirecitve(node, 'for')) {
       node = templateParser.parse(node)
     }
     node = templateParser.clone(node)

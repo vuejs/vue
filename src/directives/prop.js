@@ -28,7 +28,7 @@ module.exports = {
       }, {
         sync: true,
         // important: props need to be observed on the
-        // repeat scope if present
+        // v-for scope if present
         scope: this._scope
       }
     )

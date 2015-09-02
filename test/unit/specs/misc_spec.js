@@ -55,7 +55,7 @@ describe('Misc', function () {
     expect(spy2).toHaveBeenCalled()
   })
 
-  it('v-repeat on component root node with replace:true', function () {
+  it('v-for on component root node with replace:true', function () {
     var el = document.createElement('div')
     var vm = new Vue({
       el: el,
@@ -65,7 +65,7 @@ describe('Misc', function () {
           data: function () {
             return { list: [1, 2, 3] }
           },
-          template: '<div v-repeat="list">{{$value}}</div>',
+          template: '<div v-for="n in list">{{n}}</div>',
           replace: true
         }
       }
@@ -74,11 +74,11 @@ describe('Misc', function () {
   })
 
   // #922
-  it('template repeat inside svg', function () {
+  it('template v-for inside svg', function () {
     var el = document.createElement('div')
     new Vue({
       el: el,
-      template: '<svg><template v-repeat="list"><text>{{$value}}</text></template></svg>',
+      template: '<svg><template v-for="n in list"><text>{{n}}</text></template></svg>',
       data: {
         list: [1, 2, 3]
       }
@@ -247,25 +247,6 @@ describe('Misc', function () {
     Vue.config.strict = false
   })
 
-  it('strict mode for repeat instances', function () {
-    Vue.config.strict = true
-    var vm = new Vue({
-      el: document.createElement('div'),
-      template: '<div v-repeat="list"><test></test></div>',
-      data: {
-        list: [1, 2]
-      },
-      components: {
-        test: {
-          template: 'hi'
-        }
-      }
-    })
-    expect(_.warn).not.toHaveBeenCalled()
-    expect(vm.$el.textContent).toBe('hihi')
-    Vue.config.strict = false
-  })
-
   it('class interpolation and v-class should work together', function (done) {
     var el = document.createElement('div')
     el.setAttribute('class', 'a {{classB}}')
@@ -310,29 +291,6 @@ describe('Misc', function () {
       expect(el.innerHTML).toBe('<textarea>hello world</textarea>')
       done()
     })
-  })
-
-  it('resolveAsset for repeat instance inside content in strict mode', function () {
-    Vue.config.strict = true
-    var el = document.createElement('div')
-    el.innerHTML =
-      '<outer>' +
-        '<template v-repeat="item in items">' +
-          '<inner>{{item}}</inner>' +
-        '</template>' +
-      '</outer>'
-    new Vue({
-      el: el,
-      data: {
-        items: [1, 2, 3]
-      },
-      components: {
-        outer: { template: '<content></content>' },
-        inner: { template: '<content></content>' }
-      }
-    })
-    expect(el.textContent).toBe('123')
-    Vue.config.strict = false
   })
 
   it('nested object $set should trigger parent array notify', function (done) {

@@ -7,7 +7,7 @@ var templateParser = require('../parsers/template')
  * instance option object. This allows us to transclude
  * a template node/fragment before the instance is created,
  * so the processed fragment can then be cloned and reused
- * in v-repeat.
+ * in v-for.
  *
  * @param {Element} el
  * @param {Object} options
@@ -85,8 +85,6 @@ function transcludeTemplate (el, options) {
         replacer.hasAttribute(config.prefix + 'component') ||
         // element directive
         _.resolveAsset(options, 'elementDirectives', tag) ||
-        // repeat block
-        replacer.hasAttribute(config.prefix + 'repeat') ||
         // for block
         replacer.hasAttribute(config.prefix + 'for')
       ) {

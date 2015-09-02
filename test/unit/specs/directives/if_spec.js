@@ -217,7 +217,7 @@ if (_.inBrowser) {
         template:
           '<outer>' +
             '<div>' + // an extra layer to test components deep inside the tree
-              '<transcluded v-repeat="list"></transcluded>' +
+              '<transcluded v-for="item in list" prop-a="item.a"></transcluded>' +
             '</div>' +
           '</outer>',
         components: {
@@ -231,6 +231,7 @@ if (_.inBrowser) {
               '<transcluded></transcluded>'
           },
           transcluded: {
+            props: ['a'],
             template: '{{a}}',
             attached: attachSpy,
             detached: detachSpy

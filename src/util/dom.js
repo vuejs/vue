@@ -256,8 +256,8 @@ exports.isTemplate = function (el) {
  * - fragment instance
  * - v-html
  * - v-if
+ * - v-for
  * - component
- * - repeat
  *
  * @param {String} content
  * @param {Boolean} persist - IE trashes empty textNodes on

@@ -37,7 +37,7 @@ exports._initProps = function () {
   // make sure to convert string selectors into element now
   el = options.el = _.query(el)
   this._propsUnlinkFn = el && el.nodeType === 1 && props
-    // props must be linked in proper scope if inside v-repeat
+    // props must be linked in proper scope if inside v-for
     ? compiler.compileAndLinkProps(this, el, props, this._scope)
     : null
 }
@@ -92,19 +92,6 @@ exports._setData = function (newData) {
   var oldData = this._data
   this._data = newData
   var keys, key, i
-  // copy props.
-  // this should only happen during a v-repeat of component
-  // that also happens to have compiled props.
-  var props = this.$options.props
-  if (props) {
-    i = props.length
-    while (i--) {
-      key = props[i].name
-      if (key !== '$data' && !newData.hasOwnProperty(key)) {
-        newData.$set(key, oldData[key])
-      }
-    }
-  }
   // unproxy keys not present in new data
   keys = Object.keys(oldData)
   i = keys.length

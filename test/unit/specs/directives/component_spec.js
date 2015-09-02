@@ -287,10 +287,10 @@ if (_.inBrowser) {
         data: {
           list: [{a: 1}, {a: 2}]
         },
-        template: '<test collection="{{list}}"></test>',
+        template: '<test prop-collection="list"></test>',
         components: {
           test: {
-            template: '<ul><li v-repeat="collection">{{a}}</li></ul>',
+            template: '<ul><li v-for="item in collection">{{item.a}}</li></ul>',
             replace: true,
             props: ['collection']
           }

@@ -140,16 +140,16 @@ if (_.inBrowser) {
 
     it('terminal directives', function () {
       el.innerHTML =
-        '<div v-repeat="items"><p v-a="b"></p></div>' + // v-repeat
+        '<div v-for="item in items"><p v-a="b"></p></div>' + // v-for
         '<div v-pre><p v-a="b"></p></div>' // v-pre
-      var def = Vue.options.directives.repeat
-      var descriptor = dirParser.parse('items')[0]
+      var def = Vue.options.directives.for
+      var descriptor = dirParser.parse('item in items')[0]
       var linker = compile(el, Vue.options)
       linker(vm, el)
       // expect 1 call because terminal should return early and let
       // the directive handle the rest.
       expect(vm._bindDir.calls.count()).toBe(1)
-      expect(vm._bindDir).toHaveBeenCalledWith('repeat', el.firstChild, descriptor, def, undefined, undefined, undefined)
+      expect(vm._bindDir).toHaveBeenCalledWith('for', el.firstChild, descriptor, def, undefined, undefined, undefined)
     })
 
     it('custom element components', function () {

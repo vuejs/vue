@@ -53,7 +53,7 @@ exports._init = function (options) {
   this._context = options._context || options._parent
 
   // scope:
-  // if this is inside an inline v-repeat, the scope
+  // if this is inside an inline v-for, the scope
   // will be the intermediate scope created for this
   // repeat fragment. this is used for linking props
   // and container directives.
@@ -77,10 +77,6 @@ exports._init = function (options) {
   if (this.$parent) {
     this.$parent.$children.push(this)
   }
-
-  // props used in v-repeat diffing
-  this._reused = false
-  this._staggerOp = null
 
   // merge options.
   options = this.$options = mergeOptions(

@@ -2,7 +2,7 @@ var _ = require('../util')
 var Path = require('../parsers/path')
 
 /**
- * Filter filter for v-repeat
+ * Filter filter for arrays
  *
  * @param {String} searchKey
  * @param {String} [delimiter]
@@ -35,7 +35,7 @@ exports.filterBy = function (arr, search, delimiter /* ...dataKeys */) {
 }
 
 /**
- * Filter filter for v-repeat
+ * Filter filter for arrays
  *
  * @param {String} sortKey
  * @param {String} reverse

@@ -14,7 +14,6 @@ var onRE = /^on-/
 
 // terminal directives
 var terminalDirectives = [
-  'repeat',
   'for',
   'if'
 ]
@@ -273,7 +272,7 @@ function compileElement (el, options) {
   }
   var linkFn
   var hasAttrs = el.hasAttributes()
-  // check terminal directives (repeat & if)
+  // check terminal directives (for & if)
   if (hasAttrs) {
     linkFn = checkTerminalDirectives(el, options)
   }
