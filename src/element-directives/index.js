@@ -1,2 +1,2 @@
-exports.slot = exports.content = require('./slot')
+exports.slot = require('./slot')
 exports.partial = require('./partial')

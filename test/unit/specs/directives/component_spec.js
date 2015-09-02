@@ -229,7 +229,7 @@ if (_.inBrowser) {
         template: '<test v-show="ok">{{message}}</test>',
         components: {
           test: {
-            template: '<div><content></content> {{message}}</div>',
+            template: '<div><slot></slot> {{message}}</div>',
             replace: true,
             data: function () {
               return {
@@ -260,7 +260,7 @@ if (_.inBrowser) {
         template: '<test v-if="ok">{{message}}</test>',
         components: {
           test: {
-            template: '<content></content> {{message}}',
+            template: '<slot></slot> {{message}}',
             data: function () {
               return {
                 message: 'world'

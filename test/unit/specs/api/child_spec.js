@@ -1,5 +1,4 @@
 var Vue = require('../../../../src/vue')
-var _ = Vue.util
 
 describe('Child API', function () {
 

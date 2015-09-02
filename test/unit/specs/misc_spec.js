@@ -41,7 +41,7 @@ describe('Misc', function () {
       el: el,
       components: {
         outer: {
-          template: '<content></content>'
+          template: '<slot></slot>'
         },
         inner: {
           template: 'hi',

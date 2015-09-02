@@ -12,12 +12,6 @@ module.exports = {
   priority: 1750,
 
   bind: function () {
-
-    this.isSlot = this.el.tagName === 'SLOT'
-    if (process.env.NODE_ENV !== 'production' && !this.isSlot) {
-      _.deprecation.CONTENT()
-    }
-
     var host = this.vm
     var raw = host.$options._content
     var content
@@ -25,13 +19,9 @@ module.exports = {
       this.fallback()
       return
     }
-
     var context = host._context
-    var selector = this.isSlot
-      ? this.param('name')
-      : this.param('select')
-
-    if (!selector) {
+    var slotName = this.param('name')
+    if (!slotName) {
       // Default content
       var self = this
       var compileDefaultContent = function () {
@@ -51,10 +41,7 @@ module.exports = {
         compileDefaultContent()
       }
     } else {
-      // select content
-      if (this.isSlot) {
-        selector = '[slot="' + selector + '"]'
-      }
+      var selector = '[slot="' + slotName + '"]'
       var nodes = raw.querySelectorAll(selector)
       if (nodes.length) {
         content = extractFragment(nodes, raw)

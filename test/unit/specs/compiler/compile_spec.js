@@ -475,7 +475,7 @@ if (_.inBrowser) {
         },
         components: {
           test: {
-            template: '<content></content>'
+            template: '<slot></slot>'
           }
         }
       })
@@ -500,7 +500,7 @@ if (_.inBrowser) {
         },
         components: {
           test: {
-            template: '<content></content>'
+            template: '<slot></slot>'
           }
         }
       })

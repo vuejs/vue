@@ -259,7 +259,7 @@ if (_.inBrowser) {
           },
           components: {
             dialog: {
-              template: '<content>'
+              template: '<slot></slot>'
             }
           }
         }).$mount()

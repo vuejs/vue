@@ -186,7 +186,7 @@ if (_.inBrowser) {
         template: '<outer><transcluded></transcluded></outer>',
         components: {
           outer: {
-            template: '<div v-if="$parent.show"><content></content></div>'
+            template: '<div v-if="$parent.show"><slot></slot></div>'
           },
           transcluded: {
             template: 'transcluded',
@@ -230,7 +230,7 @@ if (_.inBrowser) {
           outer: {
             template:
               '<div v-if="$parent.show">' +
-                '<content></content>' +
+                '<slot></slot>' +
               '</div>' +
               // this is to test that compnents that are not in the if block
               // should not fire attach/detach when v-if toggles
@@ -380,7 +380,7 @@ if (_.inBrowser) {
         template: '<parent><child v-if="show"></child></parent>',
         components: {
           parent: {
-            template: '<content></content>',
+            template: '<slot></slot>',
             created: function () {
               parentA = this
             }
