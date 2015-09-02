@@ -108,15 +108,6 @@ describe('Text Parser', function () {
     expect(exp).toBe('test')
   })
 
-  it('tokens to expression with oneTime tags & vm', function () {
-    var vm = new Vue({
-      data: { test: 'a', ok: 'b' }
-    })
-    var tokens = textParser.parse('view-{{*test}}-test-{{ok}}')
-    var exp = textParser.tokensToExp(tokens, vm)
-    expect(exp).toBe('"view-"+"a"+"-test-"+(ok)')
-  })
-
   it('tokens to expression with filters, multiple expressions', function () {
     var tokens = textParser.parse('a {{b | c d | f}} e')
     var exp = textParser.tokensToExp(tokens)

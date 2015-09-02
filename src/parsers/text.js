@@ -113,32 +113,28 @@ exports.parse = function (text) {
  * into one single expression as '"a " + b + " c"'.
  *
  * @param {Array} tokens
- * @param {Vue} [vm]
  * @return {String}
  */
 
-exports.tokensToExp = function (tokens, vm) {
+exports.tokensToExp = function (tokens) {
   return tokens.length > 1
     ? tokens.map(function (token) {
-        return formatToken(token, vm)
+        return formatToken(token)
       }).join('+')
-    : formatToken(tokens[0], vm, true)
+    : formatToken(tokens[0], true)
 }
 
 /**
  * Format a single token.
  *
  * @param {Object} token
- * @param {Vue} [vm]
  * @param {Boolean} single
  * @return {String}
  */
 
-function formatToken (token, vm, single) {
+function formatToken (token, single) {
   return token.tag
-    ? vm && token.oneTime
-      ? '"' + vm.$eval(token.value) + '"'
-      : inlineFilters(token.value, single)
+    ? inlineFilters(token.value, single)
     : '"' + token.value + '"'
 }
 
