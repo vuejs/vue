@@ -935,7 +935,7 @@ function assertObjectMutations (vm, el, done) {
   )
   .then(
     function () {
-      vm.items.$add('a', {a: 3})
+      vm.items.$set('a', {a: 3})
     },
     assertMarkup
   )
@@ -973,7 +973,7 @@ function assertObjectPrimitiveMutations (vm, el, done) {
   )
   .then(
     function () {
-      vm.items.$add('a', 3)
+      vm.items.$set('a', 3)
     },
     assertMarkup
   )

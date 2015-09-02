@@ -218,8 +218,8 @@ describe('Misc', function () {
     })
     var test = []
     var obj2 = vm.obj2
-    vm.$add('test', test)
-    obj2.$add('test', 123)
+    vm.$set('test', test)
+    obj2.$set('test', 123)
     Vue.nextTick(function () {
       expect(spy1).not.toHaveBeenCalled()
       expect(spy2).not.toHaveBeenCalled()

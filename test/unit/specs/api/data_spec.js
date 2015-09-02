@@ -64,17 +64,6 @@ describe('Data API', function () {
     }
   })
 
-  it('$add', function () {
-    vm._digest = jasmine.createSpy()
-    vm.$add('c', 1)
-    expect(vm.c).toBe(1)
-    expect(vm._data.c).toBe(1)
-    expect(vm._digest).toHaveBeenCalled()
-    // reserved key should not be proxied
-    vm.$add('_c', 1)
-    expect(vm._c).toBeUndefined()
-  })
-
   it('$delete', function () {
     vm._digest = jasmine.createSpy()
     vm.$delete('a')

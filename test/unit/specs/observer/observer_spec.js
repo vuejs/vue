@@ -83,20 +83,16 @@ describe('Observer', function () {
     expect(watcher.update.calls.count()).toBe(3)
   })
 
-  it('observing $add/$set/$delete', function () {
+  it('observing $set/$delete', function () {
     var obj = { a: 1 }
     var ob = Observer.create(obj)
     var dep = ob.dep
     spyOn(dep, 'notify')
-    obj.$add('b', 2)
+    obj.$set('b', 2)
     expect(obj.b).toBe(2)
     expect(dep.notify.calls.count()).toBe(1)
     obj.$delete('a')
     expect(obj.hasOwnProperty('a')).toBe(false)
-    expect(dep.notify.calls.count()).toBe(2)
-    // should ignore adding an existing key
-    obj.$add('b', 3)
-    expect(obj.b).toBe(2)
     expect(dep.notify.calls.count()).toBe(2)
     // set existing key, should be a plain set and not
     // trigger own ob's notify
@@ -178,11 +174,11 @@ describe('Observer', function () {
     // object
     var obj = {a: 1}
     var ob = Observer.create(obj)
-    expect(obj.$add).toBeTruthy()
+    expect(obj.$set).toBeTruthy()
     expect(obj.$delete).toBeTruthy()
     var dep = ob.dep
     spyOn(dep, 'notify')
-    obj.$add('b', 2)
+    obj.$set('b', 2)
     expect(dep.notify).toHaveBeenCalled()
     // array
     var arr = [1, 2, 3]

@@ -183,7 +183,7 @@ Observer.prototype.convert = function (key, val) {
 }
 
 /**
- * Add an owner vm, so that when $add/$delete mutations
+ * Add an owner vm, so that when $set/$delete mutations
  * happen we can notify owner vms to proxy the keys and
  * digest the watchers. This is only called when the object
  * is observed as an instance's root $data.

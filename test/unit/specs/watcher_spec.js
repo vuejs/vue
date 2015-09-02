@@ -123,7 +123,7 @@ describe('Watcher', function () {
     })
   })
 
-  it('non-existent path, $add later', function (done) {
+  it('non-existent path, $set later', function (done) {
     var watcher = new Watcher(vm, 'd.e', spy)
     var watcher2 = new Watcher(vm, 'b.e', spy)
     expect(watcher.value).toBeUndefined()
@@ -138,8 +138,8 @@ describe('Watcher', function () {
     var child2 = vm.$addChild()
     var watcher5 = new Watcher(child2, 'd.e', spy)
     expect(watcher5.value).toBeUndefined()
-    vm.$add('d', { e: 123 })
-    vm.b.$add('e', 234)
+    vm.$set('d', { e: 123 })
+    vm.b.$set('e', 234)
     nextTick(function () {
       expect(watcher.value).toBe(123)
       expect(watcher2.value).toBe(234)

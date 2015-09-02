@@ -38,20 +38,6 @@ exports.$set = function (exp, val) {
 }
 
 /**
- * Add a property on the VM (deorecated)
- *
- * @param {String} key
- * @param {*} val
- */
-
-exports.$add = function (key, val) {
-  this._data.$set(key, val)
-  if (process.env.NODE_ENV !== 'production') {
-    require('../util').deprecation.ADD()
-  }
-}
-
-/**
  * Delete a property on the VM
  *
  * @param {String} key

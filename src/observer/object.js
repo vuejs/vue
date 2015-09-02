@@ -2,21 +2,6 @@ var _ = require('../util')
 var objProto = Object.prototype
 
 /**
- * $add deprecation warning
- */
-
-_.define(
-  objProto,
-  '$add',
-  function (key, val) {
-    if (process.env.NODE_ENV !== 'production') {
-      _.deprecation.ADD()
-    }
-    add(this, key, val)
-  }
-)
-
-/**
  * Add a new property to an observed object
  * and emits corresponding event. This is internal and
  * no longer exposed as of 1.0.
