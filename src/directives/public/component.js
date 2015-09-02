@@ -1,5 +1,4 @@
 var _ = require('../../util')
-var config = require('../../config')
 var templateParser = require('../../parsers/template')
 
 module.exports = {
@@ -11,10 +10,10 @@ module.exports = {
    * Setup. Two possible usages:
    *
    * - static:
-   *   v-component="comp"
+   *   <comp> or <div v-component="comp">
    *
    * - dynamic:
-   *   v-component="{{currentView}}"
+   *   <component bind-is="view">
    */
 
   bind: function () {
@@ -27,13 +26,7 @@ module.exports = {
       this.keepAlive = this.param('keep-alive') != null
 
       // check ref
-      // TODO: only check ref in 1.0.0
-      var ref = this.param(config.prefix + 'ref')
-      /* istanbul ignore if */
-      if (process.env.NODE_ENV !== 'production' && ref) {
-        _.deprecation.V_REF()
-      }
-      this.ref = ref || this.param('ref')
+      this.ref = this.param('ref')
       var refs = (this._scope || this.vm).$
       if (this.ref && !refs.hasOwnProperty(this.ref)) {
         _.defineReactive(refs, this.ref, null)
@@ -207,6 +200,8 @@ module.exports = {
         _frag: this._frag
       }
       // extra options
+      // in 1.0.0 this is used by vue-router only
+      /* istanbul ignore if */
       if (extraOptions) {
         _.extend(options, extraOptions)
       }

@@ -22,7 +22,6 @@ module.exports = {
    *     - checkbox
    *     - radio
    *     - number
-   *     - TODO: more types may be supplied as a plugin
    */
 
   bind: function () {

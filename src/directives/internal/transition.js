@@ -1,5 +1,3 @@
-// TODO: remove in 1.0.0
-
 var _ = require('../../util')
 var Transition = require('../../transition/transition')
 
