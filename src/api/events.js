@@ -99,9 +99,6 @@ exports.$emit = function (event) {
       if (res === true) {
         this._shouldPropagate = true
       }
-      if (process.env.NODE_ENV !== 'production' && res === false) {
-        _.deprecation.PROPAGATION(event)
-      }
     }
   }
   return this

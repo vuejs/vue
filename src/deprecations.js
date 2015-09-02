@@ -131,15 +131,6 @@ if (process.env.NODE_ENV !== 'production') {
         'The "key" filter will be deprecated in 1.0.0. Use the new ' +
         'on-keyup:key="handler" syntax instead.'
       )
-    },
-
-    PROPAGATION: function (event) {
-      warn(
-        'No need to return false in handler for event "' + event + '": events ' +
-        'no longer propagate beyond the first triggered handler unless the ' +
-        'handler explicitly returns true. See https://github.com/yyx990803/vue/issues/1175 ' +
-        'for more details.'
-      )
     }
 
   }
