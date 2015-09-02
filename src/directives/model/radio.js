@@ -6,12 +6,6 @@ module.exports = {
     var self = this
     var el = this.el
     var number = this.param('number') != null
-    var expression = this.param('exp')
-    var scope = this._scope || this.vm
-
-    if (process.env.NODE_ENV !== 'production' && expression) {
-      _.deprecation.MODEL_EXP(this.expression)
-    }
 
     this.getValue = function () {
       // value overwrite via bind-value
@@ -21,8 +15,6 @@ module.exports = {
       var val = el.value
       if (number) {
         val = _.toNumber(val)
-      } else if (expression !== null) {
-        val = scope.$eval(expression)
       }
       return val
     }

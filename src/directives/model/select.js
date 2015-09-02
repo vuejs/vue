@@ -58,10 +58,8 @@ module.exports = {
   },
 
   unbind: function () {
+    /* istanbul ignore next */
     this.vm.$off('hook:attached', this.forceUpdate)
-    if (this.optionWatcher) {
-      this.optionWatcher.teardown()
-    }
   }
 }
 
