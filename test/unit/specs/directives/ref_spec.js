@@ -2,7 +2,7 @@ var _ = require('../../../../src/util')
 var Vue = require('../../../../src/vue')
 
 if (_.inBrowser) {
-  describe('v-ref', function () {
+  describe('ref', function () {
 
     var el
     beforeEach(function () {
@@ -114,41 +114,6 @@ if (_.inBrowser) {
         expect(vm.$el.textContent).toBe('ho')
         done()
       })
-    })
-
-    it('should also work in child template', function (done) {
-      var vm = new Vue({
-        el: el,
-        data: { view: 'test1' },
-        template: '<component is="{{view}}"></component>',
-        components: {
-          test1: {
-            id: 'test1',
-            template: '<div v-ref="test1"></div>',
-            replace: true
-          },
-          test2: {
-            id: 'test2',
-            template: '<div v-ref="test2"></div>',
-            replace: true
-          }
-        }
-      })
-      expect(vm.$.test1.$options.id).toBe('test1')
-      vm.view = 'test2'
-      _.nextTick(function () {
-        expect(vm.$.test1).toBeNull()
-        expect(vm.$.test2.$options.id).toBe('test2')
-        done()
-      })
-    })
-
-    it('should warn on non-root', function () {
-      new Vue({
-        el: el,
-        template: '<div v-ref="test"></div>'
-      })
-      expect(hasWarned(_, 'should only be used on a component root element')).toBe(true)
     })
   })
 }

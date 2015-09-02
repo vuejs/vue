@@ -112,13 +112,6 @@ if (process.env.NODE_ENV !== 'production') {
       )
     },
 
-    REF_IN_CHILD: function () {
-      warn(
-        'v-ref or ref can no longer be used on a component root in its own ' +
-        'template in 1.0.0. Use it in the parent template instead.'
-      )
-    },
-
     KEY_FILTER: function () {
       warn(
         'The "key" filter will be deprecated in 1.0.0. Use the new ' +
