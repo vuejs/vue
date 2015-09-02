@@ -258,7 +258,7 @@ function compileNode (node, options) {
 function compileElement (el, options) {
   // preprocess textareas.
   // textarea treats its text content as the initial value.
-  // just bind it as a v-attr directive for value.
+  // just bind it as an attr directive for value.
   if (el.tagName === 'TEXTAREA') {
     var tokens = textParser.parse(el.value)
     if (tokens) {

@@ -167,7 +167,7 @@ Directive.prototype._checkDynamicLiteral = function () {
  * we wrap up the expression and use it as the event
  * handler.
  *
- * e.g. v-on="click: a++"
+ * e.g. on-click="a++"
  *
  * @return {Boolean}
  */

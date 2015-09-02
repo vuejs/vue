@@ -2,7 +2,7 @@ var _ = require('../../../../../src/util')
 var def = require('../../../../../src/directives/internal/class')
 
 if (_.inBrowser) {
-  describe('v-class', function () {
+  describe('bind-class', function () {
 
     var el
     beforeEach(function () {

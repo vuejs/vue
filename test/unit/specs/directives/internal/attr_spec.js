@@ -2,7 +2,7 @@ var _ = require('../../../../../src/util')
 var def = require('../../../../../src/directives/internal/attr')
 
 if (_.inBrowser) {
-  describe('v-attr', function () {
+  describe('attr', function () {
 
     var el, dir
     beforeEach(function () {

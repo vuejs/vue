@@ -4,18 +4,6 @@ var removeClass = _.removeClass
 
 module.exports = {
 
-  // TODO: remove unnecessary logic in 1.0.0
-
-  bind: function () {
-    // interpolations like class="{{abc}}" are converted
-    // to v-class, and we need to remove the raw,
-    // uninterpolated className at binding time.
-    var raw = this._descriptor._rawClass
-    if (raw) {
-      this.prevKeys = raw.trim().split(/\s+/)
-    }
-  },
-
   update: function (value) {
     if (this.arg) {
       // single toggle

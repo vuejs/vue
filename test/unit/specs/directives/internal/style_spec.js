@@ -18,7 +18,7 @@ function checkPrefixedProp (prop) {
 }
 
 if (_.inBrowser) {
-  describe('v-style', function () {
+  describe('bind-style', function () {
 
     var el, dir
     beforeEach(function () {

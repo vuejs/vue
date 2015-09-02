@@ -1,5 +1,4 @@
 var _ = require('../../util')
-var config = require('../../config')
 var FragmentFactory = require('../../fragment/factory')
 var isObject = _.isObject
 var uid = 0

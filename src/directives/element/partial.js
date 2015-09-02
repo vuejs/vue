@@ -1,5 +1,4 @@
 var _ = require('../../util')
-var textParser = require('../../parsers/text')
 var FragmentFactory = require('../../fragment/factory')
 var vIf = require('../public/if')
 
