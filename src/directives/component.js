@@ -25,14 +25,6 @@ module.exports = {
       // we simply remove it from the DOM and save it in a
       // cache object, with its constructor id as the key.
       this.keepAlive = this.param('keep-alive') != null
-      // wait for event before insertion
-      this.waitForEvent = this.param('wait-for')
-
-      if (process.env.NODE_ENV !== 'production') {
-        if (this.waitForEvent) {
-          _.deprecation.WAIT_FOR()
-        }
-      }
 
       // check ref
       // TODO: only check ref in 1.0.0
@@ -84,31 +76,16 @@ module.exports = {
    */
 
   initStatic: function () {
-    // wait-for
     var anchor = this.el
-    var options
-    var waitFor = this.waitForEvent
     var activateHook = this.Component.options.activate
-    if (waitFor) {
-      options = {
-        created: function () {
-          this.$once(waitFor, insert)
-        }
-      }
-    }
-    var child = this.childVM = this.build(options)
-    if (!this.waitForEvent) {
-      if (activateHook) {
-        activateHook.call(child, insert)
-      } else {
-        child.$before(anchor)
-        _.remove(anchor)
-      }
+    var child = this.childVM = this.build()
+    if (activateHook) {
+      activateHook.call(child, insert)
+    } else {
+      insert()
     }
     function insert () {
-      // TODO: no need to fallback to this in 1.0.0
-      // once wait-for is removed
-      (child || this).$before(anchor)
+      child.$before(anchor)
       _.remove(anchor)
     }
   },
@@ -145,33 +122,18 @@ module.exports = {
     } else {
       this.resolveComponent(value, _.bind(function () {
         this.unbuild(true)
-        var options
         var self = this
-        var waitFor = this.waitForEvent
         var activateHook = this.Component.options.activate
-        if (waitFor) {
-          options = {
-            created: function () {
-              this.$once(waitFor, insert)
-            }
-          }
-        }
         var cached = this.getCached()
-        var newComponent = this.build(options)
-        if ((!waitFor && !activateHook) || cached) {
-          this.transition(newComponent, cb)
-        } else {
+        var newComponent = this.build()
+        if (activateHook && !cached) {
           this.waitingFor = newComponent
-          if (activateHook) {
-            activateHook.call(newComponent, insert)
-          }
-        }
-
-        function insert () {
-          self.waitingFor = null
-          // TODO: no need to fallback to this in 1.0.0
-          // once wait-for is removed
-          self.transition((newComponent || this), cb)
+          activateHook.call(newComponent, function () {
+            self.waitingFor = null
+            self.transition(newComponent, cb)
+          })
+        } else {
+          this.transition(newComponent, cb)
         }
       }, this))
     }
