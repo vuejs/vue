@@ -90,7 +90,7 @@ if (_.inBrowser) {
       })
     })
 
-    it('$data as prop', function (done) {
+    it('$data as prop', function () {
       var vm = new Vue({
         el: el,
         template: '<test $data="{{ok}}"></test>',
@@ -106,12 +106,7 @@ if (_.inBrowser) {
           }
         }
       })
-      expect(el.innerHTML).toBe('<test>hihi</test>')
-      vm.ok = { msg: 'what' }
-      _.nextTick(function () {
-        expect(el.innerHTML).toBe('<test>what</test>')
-        done()
-      })
+      expect(hasWarned(_, 'Do not use $data as prop')).toBe(true)
     })
 
     it('explicit one time binding', function (done) {

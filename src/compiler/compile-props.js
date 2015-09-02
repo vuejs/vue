@@ -29,10 +29,12 @@ module.exports = function compileProps (el, propOptions) {
     options = propOptions[i]
     name = options.name
 
-    if (process.env.NODE_ENV !== 'production') {
-      if (name === '$data') {
-        _.deprecation.DATA_AS_PROP()
-      }
+    if (name === '$data') {
+      process.env.NODE_ENV !== 'production' && _.warn(
+        'Do not use $data as prop.'
+      )
+      el.removeAttribute(name)
+      continue
     }
 
     // props could contain dashes, which will be
