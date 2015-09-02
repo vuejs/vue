@@ -23,14 +23,6 @@ if (process.env.NODE_ENV !== 'production') {
       )
     },
 
-    V_REF: function () {
-      warn(
-        'v-ref will no longer be a directive in 1.0.0; It will become a ' +
-        'special attribute without the prefix. Use "ref" instead.' +
-        newBindingSyntaxLink
-      )
-    },
-
     PARTIAL_NAME: function (id) {
       warn(
         '<partial name="' + id + '">: mustache interpolations inside attributes ' +

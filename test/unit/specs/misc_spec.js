@@ -34,7 +34,7 @@ describe('Misc', function () {
     var spy1 = jasmine.createSpy('attached')
     var spy2 = jasmine.createSpy('detached')
     var el = document.createElement('div')
-    el.innerHTML = '<outer v-ref="outter"><inner></inner></outer>'
+    el.innerHTML = '<outer ref="outter"><inner></inner></outer>'
     document.body.appendChild(el)
 
     var vm = new Vue({
