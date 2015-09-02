@@ -1,6 +1,6 @@
 var _ = require('../util')
 var textParser = require('../parsers/text')
-var propDef = require('../directives/prop')
+var propDef = require('../directives/internal/prop')
 var propBindingModes = require('../config')._propBindingModes
 
 // regexes

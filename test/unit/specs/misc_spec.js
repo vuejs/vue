@@ -190,7 +190,7 @@ describe('Misc', function () {
     var spy3 = jasmine.createSpy('test')
     var spy4 = jasmine.createSpy('deep-mutated')
     var vm = new Vue({
-      el: 'body',
+      el: document.createElement('div'),
       data: {
         obj: {},
         arr: [],
@@ -227,35 +227,6 @@ describe('Misc', function () {
       expect(spy4).toHaveBeenCalledWith(obj2, obj2)
       done()
     })
-  })
-
-  it('class interpolation and v-class should work together', function (done) {
-    var el = document.createElement('div')
-    el.setAttribute('class', 'a {{classB}}')
-    el.setAttribute('v-class', 'c: showC')
-    var vm = new Vue({
-      el: el,
-      data: {
-        classB: 'b',
-        showC: true
-      }
-    })
-    assertClasses(['a', 'b', 'c'])
-    vm.classB = 'bb'
-    vm.showC = false
-    Vue.nextTick(function () {
-      assertClasses(['a', 'bb'])
-      done()
-    })
-
-    function assertClasses (expectedClasses) {
-      var classes = el.className.trim().split(/\s+/)
-      expect(classes.length).toBe(expectedClasses.length)
-      var has = expectedClasses.every(function (cls) {
-        return classes.indexOf(cls) > -1
-      })
-      expect(has).toBe(true)
-    }
   })
 
   it('handle interpolated textarea', function (done) {

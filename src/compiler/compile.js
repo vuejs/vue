@@ -1,4 +1,6 @@
 var _ = require('../util')
+var publicDirectives = require('../directives/public')
+var internalDirectives = require('../directives/internal')
 var compileProps = require('./compile-props')
 var config = require('../config')
 var textParser = require('../parsers/text')
@@ -6,7 +8,6 @@ var dirParser = require('../parsers/directive')
 var newDirParser = require('../parsers/directive-new')
 var templateParser = require('../parsers/template')
 var resolveAsset = _.resolveAsset
-var componentDef = require('../directives/component')
 
 // special binding prefixes
 var bindRE = /^bind-/
@@ -337,7 +338,7 @@ function processTextToken (token, options) {
   }
   function setTokenType (type) {
     token.type = type
-    token.def = resolveAsset(options, 'directives', type)
+    token.def = publicDirectives[type] // text or html
     token.descriptor = dirParser.parse(token.value)[0]
   }
   return el
@@ -463,7 +464,7 @@ function checkComponent (el, options, hasAttrs) {
     var componentLinkFn = function (vm, el, host, scope, frag) {
       vm._bindDir('component', el, {
         expression: componentId
-      }, componentDef, host, scope, frag)
+      }, publicDirectives.component, host, scope, frag)
     }
     componentLinkFn.terminal = true
     return componentLinkFn
@@ -511,9 +512,8 @@ skip.terminal = true
 
 function makeTerminalNodeLinkFn (el, dirName, value, options, def) {
   var descriptor = dirParser.parse(value)[0]
-  // no need to call resolveAsset since terminal directives
-  // are always internal
-  def = def || options.directives[dirName]
+  // either an element directive, or if/for
+  def = def || publicDirectives[dirName]
   var fn = function terminalNodeLinkFn (vm, el, host, scope, frag) {
     vm._bindDir(dirName, el, descriptor, def, host, scope, frag)
   }
@@ -532,7 +532,7 @@ function makeTerminalNodeLinkFn (el, dirName, value, options, def) {
 function compileDirectives (attrs, options) {
   var i = attrs.length
   var dirs = []
-  var attr, name, value, dir, dirName, dirDef, isLiteral, arg
+  var attr, name, value, dirName, dirDef, isLiteral, arg
   while (i--) {
     attr = attrs[i]
     name = attr.name
@@ -585,7 +585,7 @@ function compileDirectives (attrs, options) {
         name: 'el',
         arg: bindRE.test(name),
         descriptors: [newDirParser.parse(value)],
-        def: options.directives.el
+        def: internalDirectives.el
       })
     } else
 
@@ -595,9 +595,9 @@ function compileDirectives (attrs, options) {
         name: 'transition',
         arg: bindRE.test(name),
         descriptors: [newDirParser.parse(value)],
-        def: options.directives.transition
+        def: internalDirectives.transition
       })
-    }
+    } else
 
     // attribute bindings
     if (bindRE.test(name)) {
@@ -613,7 +613,7 @@ function compileDirectives (attrs, options) {
         name: dirName,
         arg: arg,
         descriptors: [newDirParser.parse(value)],
-        def: options.directives[dirName]
+        def: internalDirectives[dirName]
       })
     } else
 
@@ -623,7 +623,7 @@ function compileDirectives (attrs, options) {
         name: 'on',
         arg: name.replace(onRE, ''),
         descriptors: [newDirParser.parse(value)],
-        def: options.directives.on
+        def: internalDirectives.on
       })
     } else
 
@@ -668,59 +668,6 @@ function makeNodeLinkFn (directives) {
             dir.descriptors[j], dir.def, host, scope, frag, dir.arg, dir.literal)
         }
       }
-    }
-  }
-}
-
-/**
- * Check an attribute for potential dynamic bindings,
- * and return a directive object.
- *
- * Special case: class interpolations are translated into
- * v-class instead v-attr, so that it can work with user
- * provided v-class bindings.
- *
- * @param {String} name
- * @param {String} value
- * @param {Object} options
- * @return {Object}
- */
-
-function collectAttrDirective (name, value, options) {
-  var tokens = textParser.parse(value)
-  var isClass = name === 'class'
-  if (tokens) {
-
-    if (process.env.NODE_ENV !== 'production') {
-      _.deprecation.ATTR_INTERPOLATION(name, value)
-    }
-
-    var dirName = isClass ? 'class' : 'attr'
-    var def = options.directives[dirName]
-    var i = tokens.length
-    var allOneTime = true
-    while (i--) {
-      var token = tokens[i]
-      if (token.tag && !token.oneTime) {
-        allOneTime = false
-      }
-    }
-    return {
-      def: def,
-      _link: allOneTime
-        ? function (vm, el, scope) {
-            el.setAttribute(name, (scope || vm).$interpolate(value))
-          }
-        : function (vm, el, scope) {
-            var exp = textParser.tokensToExp(tokens, (scope || vm))
-            var desc = isClass
-              ? dirParser.parse(exp)[0]
-              : dirParser.parse(name + ':' + exp)[0]
-            if (isClass) {
-              desc._rawClass = value
-            }
-            vm._bindDir(dirName, el, desc, def, undefined, scope)
-          }
     }
   }
 }

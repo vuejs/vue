@@ -4,6 +4,7 @@ var dirParser = require('../../../../src/parsers/directive')
 var newDirParser = require('../../../../src/parsers/directive-new')
 var compiler = require('../../../../src/compiler')
 var compile = compiler.compile
+var internalDirectives = require('../../../../src/directives/internal')
 
 if (_.inBrowser) {
   describe('Compile', function () {
@@ -166,139 +167,7 @@ if (_.inBrowser) {
       expect(_.warn).not.toHaveBeenCalled()
     })
 
-    it('attribute interpolation', function () {
-      data['{{*b}}'] = 'B'
-      el.innerHTML = '<div a="{{a}}" b="{{*b}}"></div>'
-      var def = Vue.options.directives.attr
-      var descriptor = dirParser.parse('a:a')[0]
-      var linker = compile(el, Vue.options)
-      linker(vm, el)
-      expect(vm._bindDir.calls.count()).toBe(1)
-      expect(vm._bindDir).toHaveBeenCalledWith('attr', el.firstChild, descriptor, def, undefined, undefined)
-      expect(el.firstChild.getAttribute('b')).toBe('B')
-    })
-
     it('props', function () {
-      var bindingModes = Vue.config._propBindingModes
-      var props = [
-        'a',
-        'empty',
-        'data-some-attr',
-        'some-other-attr',
-        'multiple-attrs',
-        'onetime',
-        'twoway',
-        'with-filter',
-        'camelCase',
-        'boolean-literal',
-        {
-          name: 'default-value',
-          default: 123
-        },
-        {
-          name: 'boolean',
-          type: Boolean
-        },
-        {
-          name: 'boolean-absent',
-          type: Boolean
-        },
-        {
-          name: 'factory',
-          type: Object,
-          default: function () {
-            return {
-              a: 123
-            }
-          }
-        },
-        'withDataPrefix',
-        {
-          name: 'forceTwoWay',
-          twoWay: true
-        }
-      ].map(function (p) {
-        return typeof p === 'string' ? { name: p } : p
-      })
-      var def = Vue.options.directives._prop
-      el.setAttribute('a', '1')
-      el.setAttribute('empty', '')
-      el.setAttribute('data-some-attr', '{{a}}')
-      el.setAttribute('some-other-attr', '2')
-      el.setAttribute('multiple-attrs', 'a {{b}} c')
-      el.setAttribute('onetime', '{{*a}}')
-      el.setAttribute('twoway', '{{@a}}')
-      el.setAttribute('with-filter', '{{a | filter}}')
-      el.setAttribute('camel-case', 'hi')
-      el.setAttribute('boolean-literal', '{{true}}')
-      el.setAttribute('boolean', '')
-      el.setAttribute('data-with-data-prefix', '1')
-      el.setAttribute('force-two-way', '{{a}}')
-      compiler.compileAndLinkProps(vm, el, props)
-      // should skip literals and one-time bindings
-      expect(vm._bindDir.calls.count()).toBe(5)
-      // data-some-attr
-      var args = vm._bindDir.calls.argsFor(0)
-      expect(args[0]).toBe('prop')
-      expect(args[1]).toBe(null)
-      expect(args[2].path).toBe('someAttr')
-      expect(args[2].parentPath).toBe('a')
-      expect(args[2].mode).toBe(bindingModes.ONE_WAY)
-      expect(args[3]).toBe(def)
-      // multiple-attrs
-      args = vm._bindDir.calls.argsFor(1)
-      expect(args[0]).toBe('prop')
-      expect(args[1]).toBe(null)
-      expect(args[2].path).toBe('multipleAttrs')
-      expect(args[2].parentPath).toBe('"a "+(b)+" c"')
-      expect(args[2].mode).toBe(bindingModes.ONE_WAY)
-      expect(args[3]).toBe(def)
-      // two way
-      args = vm._bindDir.calls.argsFor(2)
-      expect(args[0]).toBe('prop')
-      expect(args[1]).toBe(null)
-      expect(args[2].path).toBe('twoway')
-      expect(args[2].mode).toBe(bindingModes.TWO_WAY)
-      expect(args[2].parentPath).toBe('a')
-      expect(args[3]).toBe(def)
-      // with-filter
-      args = vm._bindDir.calls.argsFor(3)
-      expect(args[0]).toBe('prop')
-      expect(args[1]).toBe(null)
-      expect(args[2].path).toBe('withFilter')
-      expect(args[2].parentPath).toBe('this._applyFilters(a,null,[{"name":"filter"}],false)')
-      expect(args[2].mode).toBe(bindingModes.ONE_WAY)
-      expect(args[3]).toBe(def)
-      // warn when expecting two-way binding but not getting it
-      expect(hasWarned(_, 'expects a two-way binding type')).toBe(true)
-      // literal and one time should've been set on the _data
-      // and numbers should be casted
-      expect(Object.keys(vm._data).length).toBe(11)
-      expect(vm.a).toBe(1)
-      expect(vm._data.a).toBe(1)
-      expect(vm.empty).toBe('')
-      expect(vm._data.empty).toBe('')
-      expect(vm.someOtherAttr).toBe(2)
-      expect(vm._data.someOtherAttr).toBe(2)
-      expect(vm.onetime).toBe('from parent: a')
-      expect(vm._data.onetime).toBe('from parent: a')
-      expect(vm.booleanLiteral).toBe('from parent: true')
-      expect(vm._data.booleanLiteral).toBe('from parent: true')
-      expect(vm.camelCase).toBe('hi')
-      expect(vm._data.camelCase).toBe('hi')
-      expect(vm.defaultValue).toBe(123)
-      expect(vm._data.defaultValue).toBe(123)
-      expect(vm.boolean).toBe(true)
-      expect(vm._data.boolean).toBe(true)
-      expect(vm.booleanAbsent).toBe(false)
-      expect(vm._data.booleanAbsent).toBe(false)
-      expect(vm.factory).toBe(vm._data.factory)
-      expect(vm.factory.a).toBe(123)
-      expect(vm.withDataPrefix).toBe(1)
-      expect(vm._data.withDataPrefix).toBe(1)
-    })
-
-    it('new prop syntax', function () {
       var bindingModes = Vue.config._propBindingModes
       var props = [
         { name: 'testNormal' },
@@ -375,7 +244,7 @@ if (_.inBrowser) {
     })
 
     it('partial compilation', function () {
-      el.innerHTML = '<div v-attr="test:abc">{{bcd}}<p v-show="ok"></p></div>'
+      el.innerHTML = '<div bind-test="abc">{{bcd}}<p v-show="ok"></p></div>'
       var linker = compile(el, Vue.options, true)
       var decompile = linker(vm, el)
       expect(vm._directives.length).toBe(3)
@@ -397,13 +266,13 @@ if (_.inBrowser) {
       vm = new Vue({
         el: el,
         template:
-          '<test class="a" v-on="click:test(1)"></test>',
+          '<test class="a" on-click="test(1)"></test>',
         methods: {
           test: parentSpy
         },
         components: {
           test: {
-            template: '<div class="b" v-on="click:test(2)"></div>',
+            template: '<div class="b" on-click="test(2)"></div>',
             replace: true,
             methods: {
               test: childSpy
