@@ -23,7 +23,6 @@ exports._init = function (options) {
   this.$$ = {}          // element references
   this._watchers = []   // all watchers as an array
   this._directives = [] // all directives
-  this._childCtors = {} // inherit:true constructors
 
   // a flag to avoid this being observed
   this._isVue = true
@@ -59,11 +58,6 @@ exports._init = function (options) {
   // and container directives.
   this._scope = options._scope
 
-  // set ref
-  if (options._ref) {
-    (this._scope || this._context).$[options._ref] = this
-  }
-
   // fragment:
   // if this instance is compiled inside a Fragment, it
   // needs to reigster itself as a child of that fragment
@@ -76,6 +70,11 @@ exports._init = function (options) {
   // push self into parent / transclusion host
   if (this.$parent) {
     this.$parent.$children.push(this)
+  }
+
+  // set ref
+  if (options._ref) {
+    (this._scope || this._context).$[options._ref] = this
   }
 
   // merge options.

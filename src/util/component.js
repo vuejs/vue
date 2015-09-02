@@ -52,8 +52,6 @@ exports.checkComponent = function (el, options) {
 
 /**
  * Set a prop's initial value on a vm and its data object.
- * The vm may have inherit:true so we need to make sure
- * we don't accidentally overwrite parent value.
  *
  * @param {Vue} vm
  * @param {Object} prop
@@ -63,12 +61,7 @@ exports.checkComponent = function (el, options) {
 exports.initProp = function (vm, prop, value) {
   if (exports.assertProp(prop, value)) {
     var key = prop.path
-    if (key in vm) {
-      _.define(vm, key, value, true)
-    } else {
-      vm[key] = value
-    }
-    vm._data[key] = value
+    vm[key] = vm._data[key] = value
   }
 }
 

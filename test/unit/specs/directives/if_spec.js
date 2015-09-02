@@ -14,10 +14,10 @@ if (_.inBrowser) {
       var vm = new Vue({
         el: el,
         data: { test: false, a: 'A' },
-        template: '<div v-if="test"><test></test></div>',
+        template: '<div v-if="test"><test prop-a="a"></test></div>',
         components: {
           test: {
-            inherit: true,
+            props: ['a'],
             template: '{{a}}'
           }
         }

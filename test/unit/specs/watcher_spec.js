@@ -128,25 +128,17 @@ describe('Watcher', function () {
     var watcher2 = new Watcher(vm, 'b.e', spy)
     expect(watcher.value).toBeUndefined()
     expect(watcher2.value).toBeUndefined()
-    // check $add affecting children
-    var child = vm.$addChild({
-      inherit: true
-    })
-    var watcher3 = new Watcher(child, 'd.e', spy)
-    var watcher4 = new Watcher(child, 'b.e', spy)
     // check $add should not affect isolated children
     var child2 = vm.$addChild()
-    var watcher5 = new Watcher(child2, 'd.e', spy)
-    expect(watcher5.value).toBeUndefined()
+    var watcher3 = new Watcher(child2, 'd.e', spy)
+    expect(watcher3.value).toBeUndefined()
     vm.$set('d', { e: 123 })
     vm.b.$set('e', 234)
     nextTick(function () {
       expect(watcher.value).toBe(123)
       expect(watcher2.value).toBe(234)
-      expect(watcher3.value).toBe(123)
-      expect(watcher4.value).toBe(234)
-      expect(watcher5.value).toBeUndefined()
-      expect(spy.calls.count()).toBe(4)
+      expect(watcher3.value).toBeUndefined()
+      expect(spy.calls.count()).toBe(2)
       expect(spy).toHaveBeenCalledWith(123, undefined)
       expect(spy).toHaveBeenCalledWith(234, undefined)
       done()
@@ -207,24 +199,6 @@ describe('Watcher', function () {
     nextTick(function () {
       expect(spy).toHaveBeenCalledWith(newData, oldData)
       expect(watcher.value).toBe(newData)
-      done()
-    })
-  })
-
-  it('watching parent scope properties', function (done) {
-    var child = vm.$addChild({
-      inherit: true
-    })
-    var spy2 = jasmine.createSpy('watch')
-    var watcher1 = new Watcher(child, '$data', spy)
-    var watcher2 = new Watcher(child, 'a', spy2)
-    vm.a = 123
-    nextTick(function () {
-      // $data should only be called on self data change
-      expect(watcher1.value).toBe(child.$data)
-      expect(spy).not.toHaveBeenCalled()
-      expect(watcher2.value).toBe(123)
-      expect(spy2).toHaveBeenCalledWith(123, 1)
       done()
     })
   })

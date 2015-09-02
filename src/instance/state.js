@@ -156,17 +156,8 @@ exports._unproxy = function (key) {
  */
 
 exports._digest = function () {
-  var i = this._watchers.length
-  while (i--) {
+  for (var i = 0, l = this._watchers.length; i < l; i++) {
     this._watchers[i].update(true) // shallow updates
-  }
-  var children = this.$children
-  i = children.length
-  while (i--) {
-    var child = children[i]
-    if (child.$options.inherit) {
-      child._digest()
-    }
   }
 }
 
@@ -220,8 +211,8 @@ function makeComputedGetter (getter, owner) {
 
 /**
  * Setup instance methods. Methods must be bound to the
- * instance since they might be called by children
- * inheriting them.
+ * instance since they might be passed down as a prop to
+ * child components.
  */
 
 exports._initMethods = function () {

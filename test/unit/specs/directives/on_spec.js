@@ -144,8 +144,7 @@ if (_.inBrowser) {
       })
       parent.$addChild({
         el: el,
-        inherit: true,
-        template: '<a v-on="click:test($event)"></a>'
+        template: '<a v-on="click:$parent.test($event)"></a>'
       })
       var e = trigger(el.firstChild, 'click')
       expect(test).toHaveBeenCalledWith(e)

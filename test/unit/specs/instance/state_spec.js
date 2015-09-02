@@ -185,29 +185,6 @@ describe('Instance state initialization', function () {
       })
     })
 
-    it('inherit', function (done) {
-      var child = vm.$addChild({
-        inherit: true
-      })
-      expect(child.c).toBe('cd')
-
-      child.d = 'e f'
-      expect(vm.a).toBe('e')
-      expect(vm.b).toBe('f')
-      expect(vm.c).toBe('ef')
-      expect(vm.d).toBe('ef')
-      expect(vm.e).toBe('efe')
-      expect(child.a).toBe('e')
-      expect(child.b).toBe('f')
-      expect(child.c).toBe('ef')
-      expect(child.d).toBe('ef')
-      expect(vm.e).toBe('efe')
-      Vue.nextTick(function () {
-        expect(spyE).toHaveBeenCalledWith('efe', 'cde')
-        done()
-      })
-    })
-
     it('cached computed', function () {
       expect(spyF).not.toHaveBeenCalled()
       var f = vm.f
@@ -273,11 +250,6 @@ describe('Instance state initialization', function () {
         }
       })
       expect(vm.test()).toBe(1)
-
-      var child = vm.$addChild({
-        inherit: true
-      })
-      expect(child.test()).toBe(1)
     })
 
   })

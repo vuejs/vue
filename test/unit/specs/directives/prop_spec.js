@@ -91,7 +91,7 @@ if (_.inBrowser) {
     })
 
     it('$data as prop', function () {
-      var vm = new Vue({
+      new Vue({
         el: el,
         template: '<test $data="{{ok}}"></test>',
         data: {
@@ -396,25 +396,6 @@ if (_.inBrowser) {
       expect(hasWarned(_, 'Missing required prop')).toBe(true)
       expect(hasWarned(_, 'Expected Number')).toBe(true)
       expect(el.textContent).toBe('AAA')
-    })
-
-    it('should not overwrite inherit:true properties', function () {
-      var vm = new Vue({
-        el: el,
-        data: {
-          msg: 'hi!'
-        },
-        template: '<test msg="ho!"></test>',
-        components: {
-          test: {
-            props: ['msg'],
-            inherit: true,
-            template: '{{msg}}'
-          }
-        }
-      })
-      expect(vm.msg).toBe('hi!')
-      expect(el.textContent).toBe('ho!')
     })
 
     it('should not overwrite default value for an absent Boolean prop', function () {
