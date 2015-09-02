@@ -9,63 +9,6 @@ if (process.env.NODE_ENV !== 'production') {
 
   _.deprecation = {
 
-    REPEAT: function () {
-      warn(
-        'v-repeat will be deprecated in favor of v-for in 1.0.0. ' +
-        'See https://github.com/yyx990803/vue/issues/1200 for details.'
-      )
-    },
-
-    ADD: function () {
-      warn(
-        '$add() will be deprecated in 1.0.0. Use $set() instead. ' +
-        'See https://github.com/yyx990803/vue/issues/1171 for details.'
-      )
-    },
-
-    WAIT_FOR: function () {
-      warn(
-        '"wait-for" will be deprecated in 1.0.0. Use `activate` hook instead. ' +
-        'See https://github.com/yyx990803/vue/issues/1169 for details.'
-      )
-    },
-
-    STRICT_MODE: function (type, id) {
-      warn(
-        'Falling through to parent when resolving ' + type + ' with id "' + id +
-        '". Strict mode will be the default in 1.0.0. ' +
-        'See https://github.com/yyx990803/vue/issues/1170 for details.'
-      )
-    },
-
-    CONTENT: function () {
-      warn(
-        '<content> insertion points will be deprecated in in 1.0.0. in favor of <slot>. ' +
-        'See https://github.com/yyx990803/vue/issues/1167 for details.'
-      )
-    },
-
-    DATA_AS_PROP: function () {
-      warn(
-        '$data will no longer be usable as a prop in 1.0.0. ' +
-        'See https://github.com/yyx990803/vue/issues/1198 for details.'
-      )
-    },
-
-    INHERIT: function () {
-      warn(
-        'The "inherit" option will be deprecated in 1.0.0. ' +
-        'See https://github.com/yyx990803/vue/issues/1198 for details.'
-      )
-    },
-
-    V_EL: function () {
-      warn(
-        'v-el will no longer be a directive in 1.0.0. Use the "el" special attribute instead. ' +
-        'See https://github.com/yyx990803/vue/issues/1198 for details.'
-      )
-    },
-
     DIR_ARGS: function (exp) {
       warn(
         'Directives will no longer take arguments in 1.0.0. Found in directive ' +
@@ -77,6 +20,13 @@ if (process.env.NODE_ENV !== 'production') {
       warn(
         'Directives will no longer support multiple clause syntax in 1.0.0.' +
         newBindingSyntaxLink
+      )
+    },
+
+    V_EL: function () {
+      warn(
+        'v-el will no longer be a directive in 1.0.0. Use the "el" special attribute instead. ' +
+        'See https://github.com/yyx990803/vue/issues/1198 for details.'
       )
     },
 
@@ -157,7 +107,7 @@ if (process.env.NODE_ENV !== 'production') {
 
     BIND_IS: function () {
       warn(
-        '<component is="{{view}}"> syntax will be deprecated in 1.0.0. Use ' +
+        '<component bind-is="view"> syntax will be deprecated in 1.0.0. Use ' +
         '<component bind-is="view"> instead.'
       )
     },
