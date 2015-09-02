@@ -215,8 +215,8 @@ if (_.inBrowser) {
       // temporarily remove vm.$parent
       var context = vm._context
       vm._context = null
-      el.setAttribute('a', 'hi')
-      el.setAttribute('b', '{{hi}}')
+      el.setAttribute('prop-a', '"hi"')
+      el.setAttribute('prop-b', 'hi')
       compiler.compileAndLinkProps(vm, el, [
         { name: 'a' },
         { name: 'b' }
@@ -291,13 +291,13 @@ if (_.inBrowser) {
     it('should teardown props and replacer directives when unlinking', function () {
       var vm = new Vue({
         el: el,
-        template: '<test prop="{{msg}}"></test>',
+        template: '<test prop-msg="msg"></test>',
         data: {
           msg: 'hi'
         },
         components: {
           test: {
-            props: ['prop'],
+            props: ['msg'],
             template: '<div v-show="true"></div>',
             replace: true
           }

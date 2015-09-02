@@ -157,7 +157,7 @@ describe('Slot Distribution', function () {
         a: 1,
         show: true
       },
-      template: '<test show="{{show}}">{{a}}</test>',
+      template: '<test prop-show="show">{{a}}</test>',
       components: {
         test: {
           props: ['show'],
@@ -266,7 +266,7 @@ describe('Slot Distribution', function () {
       el: el,
       template:
         '<testa>' +
-          '<testb v-if="ok" prop="{{msg}}"></testb>' +
+          '<testb v-if="ok" prop-msg="msg"></testb>' +
         '</testa>',
       data: {
         ok: false,
@@ -275,8 +275,8 @@ describe('Slot Distribution', function () {
       components: {
         testa: { template: '<slot></slot>' },
         testb: {
-          props: ['prop'],
-          template: '{{prop}}'
+          props: ['msg'],
+          template: '{{msg}}'
         }
       }
     })

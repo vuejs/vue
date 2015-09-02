@@ -1,7 +1,7 @@
 var Vue = require('../../../../../../src/vue')
 var _ = Vue.util
 
-describe('v-for + v-ref', function () {
+describe('v-for + ref', function () {
 
   var el
   beforeEach(function () {
@@ -12,7 +12,7 @@ describe('v-for + v-ref', function () {
     var vm = new Vue({
       el: el,
       data: { items: [1, 2, 3, 4, 5] },
-      template: '<test v-for="item in items" item="{{item}}" v-ref="test"></test>',
+      template: '<test v-for="item in items" prop-item="item" ref="test"></test>',
       components: {
         test: {
           props: ['item']
@@ -41,7 +41,7 @@ describe('v-for + v-ref', function () {
           b: 2
         }
       },
-      template: '<test v-for="item in items" item="{{item}}" v-ref="test"></test>',
+      template: '<test v-for="item in items" prop-item="item" ref="test"></test>',
       components: {
         test: {
           props: ['item']
@@ -65,10 +65,10 @@ describe('v-for + v-ref', function () {
   it('nested', function () {
     var vm = new Vue({
       el: el,
-      template: '<c1 v-ref="c1"></c1>',
+      template: '<c1 ref="c1"></c1>',
       components: {
         c1: {
-          template: '<div v-for="n in 2" v-ref="c2"></div>'
+          template: '<div v-for="n in 2" ref="c2"></div>'
         }
       }
     })

@@ -16,7 +16,7 @@ if (_.inBrowser) {
         data: {
           b: 'B'
         },
-        template: '<test b="{{b}}" v-ref="child"></test>',
+        template: '<test prop-b="b" ref="child"></test>',
         components: {
           test: {
             props: ['b'],
@@ -46,7 +46,7 @@ if (_.inBrowser) {
             a: 'A'
           }
         },
-        template: '<test testt="{{@test}}" bb="{{@b}}" a="{{@ test.a }}" v-ref="child"></test>',
+        template: '<test prop-testt="@test" prop-bb="@b" prop-a="@ test.a " ref="child"></test>',
         components: {
           test: {
             props: ['testt', 'bb', 'a'],
@@ -90,32 +90,13 @@ if (_.inBrowser) {
       })
     })
 
-    it('$data as prop', function () {
-      new Vue({
-        el: el,
-        template: '<test $data="{{ok}}"></test>',
-        data: {
-          ok: {
-            msg: 'hihi'
-          }
-        },
-        components: {
-          test: {
-            props: ['$data'],
-            template: '{{msg}}'
-          }
-        }
-      })
-      expect(hasWarned(_, 'Do not use $data as prop')).toBe(true)
-    })
-
     it('explicit one time binding', function (done) {
       var vm = new Vue({
         el: el,
         data: {
           b: 'B'
         },
-        template: '<test b="{{*b}}" v-ref="child"></test>',
+        template: '<test prop-b="*b" ref="child"></test>',
         components: {
           test: {
             props: ['b'],
@@ -131,13 +112,13 @@ if (_.inBrowser) {
       })
     })
 
-    it('non-settable parent path', function (done) {
+    it('warn non-settable parent path', function (done) {
       var vm = new Vue({
         el: el,
         data: {
           b: 'B'
         },
-        template: '<test b="{{@ b + \'B\' }}" v-ref="child"></test>',
+        template: '<test prop-b="@ b + \'B\'" ref="child"></test>',
         components: {
           test: {
             props: ['b'],
@@ -159,10 +140,46 @@ if (_.inBrowser) {
       })
     })
 
+    it('warn expect two-way', function () {
+      new Vue({
+        el: el,
+        template: '<test prop-test="ok"></test>',
+        data: {
+          ok: 'hi'
+        },
+        components: {
+          test: {
+            props: {
+              test: {
+                twoWay: true
+              }
+            }
+          }
+        }
+      })
+      expect(hasWarned(_, 'expects a two-way binding type')).toBe(true)
+    })
+
+    it('warn $data as prop', function () {
+      new Vue({
+        el: el,
+        template: '<test prop-$data="ok"></test>',
+        data: {
+          ok: 'hi'
+        },
+        components: {
+          test: {
+            props: ['$data']
+          }
+        }
+      })
+      expect(hasWarned(_, 'Do not use $data as prop')).toBe(true)
+    })
+
     it('warn invalid keys', function () {
       new Vue({
         el: el,
-        template: '<test a.b.c="{{test}}"></test>',
+        template: '<test prop-a.b.c="test"></test>',
         components: {
           test: {
             props: ['a.b.c']
@@ -204,7 +221,7 @@ if (_.inBrowser) {
           a: 'A',
           b: 'B'
         },
-        template: '<test aa="{{@a}}" bb="{{b}}"></test>',
+        template: '<test prop-aa="@a" prop-bb="b"></test>',
         components: {
           test: {
             props: ['aa', 'bb'],
@@ -235,7 +252,7 @@ if (_.inBrowser) {
     it('block instance with replace:true', function () {
       new Vue({
         el: el,
-        template: '<test b="{{a}}" c="{{d}}"></test>',
+        template: '<test prop-b="a" prop-c="d"></test>',
         data: {
           a: 'AAA',
           d: 'DDD'
@@ -256,7 +273,7 @@ if (_.inBrowser) {
       function makeInstance (value, type, validator) {
         return new Vue({
           el: document.createElement('div'),
-          template: '<test prop="{{val}}"></test>',
+          template: '<test prop-test="val"></test>',
           data: {
             val: value
           },
@@ -264,7 +281,7 @@ if (_.inBrowser) {
             test: {
               props: [
                 {
-                  name: 'prop',
+                  name: 'test',
                   type: type,
                   validator: validator
                 }
@@ -373,7 +390,7 @@ if (_.inBrowser) {
     it('alternative syntax', function () {
       new Vue({
         el: el,
-        template: '<test b="{{a}}" c="{{d}}"></test>',
+        template: '<test prop-b="a" prop-c="d"></test>',
         data: {
           a: 'AAA',
           d: 'DDD'

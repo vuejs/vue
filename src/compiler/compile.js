@@ -552,22 +552,6 @@ function compileDirectives (attrs, options) {
       dirDef = resolveAsset(options, 'directives', dirName)
       if (process.env.NODE_ENV !== 'production') {
         _.assertAsset(dirDef, 'directive', dirName)
-
-        // deprecations
-        if (dirName === 'transition') {
-          _.deprecation.V_TRANSITION()
-        } else if (dirName === 'class') {
-          _.deprecation.V_CLASS()
-        } else if (dirName === 'style') {
-          _.deprecation.V_STYLE()
-        } else if (dirName === 'on') {
-          _.deprecation.V_ON()
-        } else if (dirName === 'attr') {
-          _.deprecation.V_ATTR()
-        } else if (dirName === 'el') {
-          _.deprecation.V_EL()
-        }
-
       }
       if (dirDef) {
         dirs.push({
@@ -655,18 +639,13 @@ function makeNodeLinkFn (directives) {
     var dir, j, k
     while (i--) {
       dir = directives[i]
-      if (dir._link) {
-        // custom link fn
-        dir._link(vm, el, scope)
-      } else {
-        // TODO: no need for loop here in 1.0.0
-        // also, we can just pass in the dir object to _bindDir,
-        // which is going to be much simpler.
-        k = dir.descriptors.length
-        for (j = 0; j < k; j++) {
-          vm._bindDir(dir.name, el,
-            dir.descriptors[j], dir.def, host, scope, frag, dir.arg, dir.literal)
-        }
+      // TODO: no need for loop here in 1.0.0
+      // also, we can just pass in the dir object to _bindDir,
+      // which is going to be much simpler.
+      k = dir.descriptors.length
+      for (j = 0; j < k; j++) {
+        vm._bindDir(dir.name, el,
+          dir.descriptors[j], dir.def, host, scope, frag, dir.arg, dir.literal)
       }
     }
   }
