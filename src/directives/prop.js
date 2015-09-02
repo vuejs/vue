@@ -34,12 +34,7 @@ module.exports = {
     )
 
     // set the child initial value.
-    var value = this.parentWatcher.value
-    if (childKey === '$data') {
-      child._data = value
-    } else {
-      _.initProp(child, prop, value)
-    }
+    _.initProp(child, prop, this.parentWatcher.value)
 
     // setup two-way binding
     if (prop.mode === bindingModes.TWO_WAY) {

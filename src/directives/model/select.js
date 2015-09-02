@@ -1,6 +1,4 @@
 var _ = require('../../util')
-var Watcher = require('../../watcher')
-var dirParser = require('../../parsers/directive')
 
 module.exports = {
 
@@ -15,14 +13,6 @@ module.exports = {
       }
     }
 
-    // check options param
-    var optionsParam = this.param('options')
-    if (optionsParam) {
-      initOptions.call(this, optionsParam)
-      if (process.env.NODE_ENV !== 'production') {
-        _.deprecation.SELECT_OPTIONS()
-      }
-    }
     this.number = this.param('number') != null
     this.multiple = el.hasAttribute('multiple')
 
@@ -50,12 +40,6 @@ module.exports = {
   update: function (value) {
     var el = this.el
     el.selectedIndex = -1
-    if (value == null) {
-      if (this.defaultOption) {
-        this.defaultOption.selected = true
-      }
-      return
-    }
     var multi = this.multiple && _.isArray(value)
     var options = el.options
     var i = options.length
@@ -78,88 +62,6 @@ module.exports = {
     if (this.optionWatcher) {
       this.optionWatcher.teardown()
     }
-  }
-}
-
-/**
- * Initialize the option list from the param.
- *
- * @param {String} expression
- */
-
-function initOptions (expression) {
-  var self = this
-  var el = self.el
-  var defaultOption = self.defaultOption = self.el.options[0]
-  var descriptor = dirParser.parse(expression)[0]
-  function optionUpdateWatcher (value) {
-    if (_.isArray(value)) {
-      // clear old options.
-      // cannot reset innerHTML here because IE family get
-      // confused during compilation.
-      var i = el.options.length
-      while (i--) {
-        var option = el.options[i]
-        if (option !== defaultOption) {
-          el.removeChild(option)
-        }
-      }
-      buildOptions(el, value)
-      self.forceUpdate()
-    } else {
-      process.env.NODE_ENV !== 'production' && _.warn(
-        'Invalid options value for v-model: ' + value
-      )
-    }
-  }
-  this.optionWatcher = new Watcher(
-    this.vm,
-    descriptor.expression,
-    optionUpdateWatcher,
-    {
-      deep: true,
-      filters: descriptor.filters
-    }
-  )
-  // update with initial value
-  optionUpdateWatcher(this.optionWatcher.value)
-}
-
-/**
- * Build up option elements. IE9 doesn't create options
- * when setting innerHTML on <select> elements, so we have
- * to use DOM API here.
- *
- * @param {Element} parent - a <select> or an <optgroup>
- * @param {Array} options
- */
-
-function buildOptions (parent, options) {
-  var op, el
-  for (var i = 0, l = options.length; i < l; i++) {
-    op = options[i]
-    if (!op.options) {
-      el = document.createElement('option')
-      if (typeof op === 'string') {
-        el.text = el.value = op
-      } else {
-        if (op.value != null && !_.isObject(op.value)) {
-          el.value = op.value
-        }
-        // object values gets serialized when set as value,
-        // so we store the raw value as a different property
-        el._value = op.value
-        el.text = op.text || ''
-        if (op.disabled) {
-          el.disabled = true
-        }
-      }
-    } else {
-      el = document.createElement('optgroup')
-      el.label = op.label
-      buildOptions(el, op.options)
-    }
-    parent.appendChild(el)
   }
 }
 

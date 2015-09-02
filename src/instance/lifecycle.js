@@ -17,57 +17,53 @@ var compiler = require('../compiler')
 
 exports._compile = function (el) {
   var options = this.$options
-  if (options._linkFn) {
-    // pre-transcluded with linker, just use it
-    this._initElement(el)
-    this._unlinkFn = options._linkFn(this, el)
-  } else {
-    // transclude and init element
-    // transclude can potentially replace original
-    // so we need to keep reference; this step also injects
-    // the template and caches the original attributes
-    // on the container node and replacer node.
-    var original = el
-    el = compiler.transclude(el, options)
-    this._initElement(el)
 
-    // root is always compiled per-instance, because
-    // container attrs and props can be different every time.
-    var rootLinker = compiler.compileRoot(el, options)
+  // transclude and init element
+  // transclude can potentially replace original
+  // so we need to keep reference; this step also injects
+  // the template and caches the original attributes
+  // on the container node and replacer node.
+  var original = el
+  el = compiler.transclude(el, options)
+  this._initElement(el)
 
-    // compile and link the rest
-    var contentLinkFn
-    var ctor = this.constructor
-    // component compilation can be cached
-    // as long as it's not using inline-template
-    if (options._linkerCachable) {
-      contentLinkFn = ctor.linker
-      if (!contentLinkFn) {
-        contentLinkFn = ctor.linker = compiler.compile(el, options)
-      }
-    }
+  // root is always compiled per-instance, because
+  // container attrs and props can be different every time.
+  var rootLinker = compiler.compileRoot(el, options)
 
-    // link phase
-    // make sure to link root with prop scope!
-    var rootUnlinkFn = rootLinker(this, el, this._scope)
-    var contentUnlinkFn = contentLinkFn
-      ? contentLinkFn(this, el)
-      : compiler.compile(el, options)(this, el)
-
-    // register composite unlink function
-    // to be called during instance destruction
-    this._unlinkFn = function () {
-      rootUnlinkFn()
-      // passing destroying: true to avoid searching and
-      // splicing the directives
-      contentUnlinkFn(true)
-    }
-
-    // finally replace original
-    if (options.replace) {
-      _.replace(original, el)
+  // compile and link the rest
+  var contentLinkFn
+  var ctor = this.constructor
+  // component compilation can be cached
+  // as long as it's not using inline-template
+  if (options._linkerCachable) {
+    contentLinkFn = ctor.linker
+    if (!contentLinkFn) {
+      contentLinkFn = ctor.linker = compiler.compile(el, options)
     }
   }
+
+  // link phase
+  // make sure to link root with prop scope!
+  var rootUnlinkFn = rootLinker(this, el, this._scope)
+  var contentUnlinkFn = contentLinkFn
+    ? contentLinkFn(this, el)
+    : compiler.compile(el, options)(this, el)
+
+  // register composite unlink function
+  // to be called during instance destruction
+  this._unlinkFn = function () {
+    rootUnlinkFn()
+    // passing destroying: true to avoid searching and
+    // splicing the directives
+    contentUnlinkFn(true)
+  }
+
+  // finally replace original
+  if (options.replace) {
+    _.replace(original, el)
+  }
+
   return el
 }
 

@@ -149,12 +149,8 @@ if (process.env.NODE_ENV !== 'production') {
       )
     },
 
-    SELECT_OPTIONS: function () {
-      warn(
-        'The "options" param for <select v-model> will be deprecated in 1.0.0. ' +
-        'Use v-for to render the options. See https://github.com/yyx990803/vue/issues/1229 ' +
-        'for more details.'
-      )
+    CONTENT_SELECT: function () {
+      warn('<content select="..."> will be deprecated in in 1.0.0. in favor of <slot name="...">.')
     }
 
   }
