@@ -24,11 +24,10 @@ module.exports = function compileProps (el, propOptions) {
     options = propOptions[i]
     name = options.name
 
-    if (name === '$data') {
-      process.env.NODE_ENV !== 'production' && _.warn(
-        'Do not use $data as prop.'
-      )
-      el.removeAttribute(name)
+    if (process.env.NODE_ENV !== 'production' && name === '$data') {
+      _.warn('Do not use $data as prop.')
+      el.removeAttribute('$data')
+      el.removeAttribute('bind-$data')
       continue
     }
 
@@ -44,45 +43,55 @@ module.exports = function compileProps (el, propOptions) {
       continue
     }
 
-    attr = 'prop-' + _.hyphenate(name)
-    value = el.getAttribute(attr)
     prop = {
       name: name,
-      raw: value,
       path: path,
       options: options,
       mode: propBindingModes.ONE_WAY
     }
 
+    // first check literal version
+    attr = _.hyphenate(name)
+    value = prop.raw = el.getAttribute(attr)
     if (value !== null) {
       el.removeAttribute(attr)
-      value = value.trim()
-      // check binding type
-      if (literalValueRE.test(value)) {
-        prop.mode = propBindingModes.ONE_TIME
-      } else {
-        prop.dynamic = true
-        if (value.charAt(0) === '*') {
-          prop.mode = propBindingModes.ONE_TIME
-          value = value.slice(1).trim()
-        } else if (value.charAt(0) === '@') {
-          value = value.slice(1).trim()
-          if (settablePathRE.test(value)) {
-            prop.mode = propBindingModes.TWO_WAY
-          } else {
-            process.env.NODE_ENV !== 'production' && _.warn(
-              'Cannot bind two-way prop with non-settable ' +
-              'parent path: ' + value
-            )
+    } else {
+      // then check dynamic version
+      attr = 'bind-' + attr
+      value = prop.raw = el.getAttribute(attr)
+      if (value !== null) {
+        el.removeAttribute(attr)
+        value = value.trim()
+        // check binding type
+        if (literalValueRE.test(value)) {
+          // for bind- literals such as numbers and booleans,
+          // there's no need to setup a prop binding, so we
+          // can optimize them as a one-time set.
+          prop.optimizedLiteral = true
+        } else {
+          prop.dynamic = true
+          if (value.charAt(0) === '*') {
+            prop.mode = propBindingModes.ONE_TIME
+            value = value.slice(1).trim()
+          } else if (value.charAt(0) === '@') {
+            value = value.slice(1).trim()
+            if (settablePathRE.test(value)) {
+              prop.mode = propBindingModes.TWO_WAY
+            } else {
+              process.env.NODE_ENV !== 'production' && _.warn(
+                'Cannot bind two-way prop with non-settable ' +
+                'parent path: ' + value
+              )
+            }
           }
         }
+        prop.parentPath = value
+      } else if (options.required) {
+        // warn missing required
+        process.env.NODE_ENV !== 'production' && _.warn(
+          'Missing required prop: ' + name
+        )
       }
-      prop.parentPath = value
-    } else if (options.required) {
-      // warn missing required
-      process.env.NODE_ENV !== 'production' && _.warn(
-        'Missing required prop: ' + name
-      )
     }
 
     // warn required two-way
@@ -114,13 +123,14 @@ function makePropsLinkFn (props) {
     // store resolved props info
     vm._props = {}
     var i = props.length
-    var prop, path, options, value
+    var prop, path, options, value, raw
     while (i--) {
       prop = props[i]
+      raw = prop.raw
       path = prop.path
-      vm._props[path] = prop
       options = prop.options
-      if (prop.raw === null) {
+      vm._props[path] = prop
+      if (raw === null) {
         // initialize absent prop
         _.initProp(vm, prop, getDefault(options))
       } else if (prop.dynamic) {
@@ -138,19 +148,20 @@ function makePropsLinkFn (props) {
           process.env.NODE_ENV !== 'production' && _.warn(
             'Cannot bind dynamic prop on a root instance' +
             ' with no parent: ' + prop.name + '="' +
-            prop.raw + '"'
+            raw + '"'
           )
         }
+      } else if (prop.optimizedLiteral) {
+        // optimized literal, cast it and just set once
+        raw = _.stripQuotes(raw) || raw
+        value = _.toBoolean(_.toNumber(raw))
+        _.initProp(vm, prop, value)
       } else {
-        // literal, cast it and just set once
-        var raw = _.stripQuotes(prop.raw) || prop.raw
+        // string literal, but we need to cater for
+        // Boolean props with no value
         value = options.type === Boolean && raw === ''
           ? true
-          // do not cast emptry string.
-          // _.toNumber casts empty string to 0.
-          : raw.trim()
-            ? _.toBoolean(_.toNumber(raw))
-            : raw
+          : raw
         _.initProp(vm, prop, value)
       }
     }

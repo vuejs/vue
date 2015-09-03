@@ -197,7 +197,7 @@ describe('Async components', function () {
   it('v-for', function (done) {
     new Vue({
       el: el,
-      template: '<test v-for="n in list" prop-n="n"></test>',
+      template: '<test v-for="n in list" bind-n="n"></test>',
       data: {
         list: [1, 2, 3]
       },

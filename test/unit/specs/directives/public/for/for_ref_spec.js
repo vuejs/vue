@@ -12,7 +12,7 @@ describe('v-for + ref', function () {
     var vm = new Vue({
       el: el,
       data: { items: [1, 2, 3, 4, 5] },
-      template: '<test v-for="item in items" prop-item="item" ref="test"></test>',
+      template: '<test v-for="item in items" bind-item="item" ref="test"></test>',
       components: {
         test: {
           props: ['item']
@@ -41,7 +41,7 @@ describe('v-for + ref', function () {
           b: 2
         }
       },
-      template: '<test v-for="item in items" prop-item="item" ref="test"></test>',
+      template: '<test v-for="item in items" bind-item="item" ref="test"></test>',
       components: {
         test: {
           props: ['item']

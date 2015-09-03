@@ -157,7 +157,7 @@ describe('Slot Distribution', function () {
         a: 1,
         show: true
       },
-      template: '<test prop-show="show">{{a}}</test>',
+      template: '<test bind-show="show">{{a}}</test>',
       components: {
         test: {
           props: ['show'],
@@ -200,7 +200,7 @@ describe('Slot Distribution', function () {
   it('v-for + component + parent directive + transclusion', function (done) {
     var vm = new Vue({
       el: el,
-      template: '<test v-for="n in list" bind-class="cls" prop-a="n.a">{{msg}}</test>',
+      template: '<test v-for="n in list" bind-class="cls" bind-a="n.a">{{msg}}</test>',
       data: {
         cls: 'parent',
         msg: 'hi',
@@ -266,7 +266,7 @@ describe('Slot Distribution', function () {
       el: el,
       template:
         '<testa>' +
-          '<testb v-if="ok" prop-msg="msg"></testb>' +
+          '<testb v-if="ok" bind-msg="msg"></testb>' +
         '</testa>',
       data: {
         ok: false,

@@ -94,7 +94,7 @@ if (_.inBrowser) {
         data: {
           items: [{a: 1}, {a: 2}]
         },
-        template: '<test v-for="item in items" prop-index="$index" prop-item="item"></test>',
+        template: '<test v-for="item in items" bind-index="$index" bind-item="item"></test>',
         components: {
           test: {
             props: ['index', 'item'],
@@ -112,7 +112,7 @@ if (_.inBrowser) {
         data: {
           items: [{a: 1}, {a: 2}]
         },
-        template: '<p v-for="item in items" v-component="test" prop-index="$index" prop-item="item"></p>',
+        template: '<p v-for="item in items" v-component="test" bind-index="$index" bind-item="item"></p>',
         components: {
           test: {
             props: ['index', 'item'],
@@ -131,7 +131,7 @@ if (_.inBrowser) {
           items: [{a: 1}, {a: 2}]
         },
         template:
-          '<test v-for="item in items" prop-index="$index" prop-item="item" inline-template>' +
+          '<test v-for="item in items" bind-index="$index" bind-item="item" inline-template>' +
             '{{index}} {{item.a}}' +
           '</test>',
         components: {
@@ -149,7 +149,7 @@ if (_.inBrowser) {
         data: {
           items: [2, 1, 2]
         },
-        template: '<test v-for="item in items" prop-index="$index" prop-value="item"></test>',
+        template: '<test v-for="item in items" bind-index="$index" bind-value="item"></test>',
         components: {
           test: {
             props: ['index', 'value'],
@@ -170,7 +170,7 @@ if (_.inBrowser) {
             b: {a: 2}
           }
         },
-        template: '<test v-for="item in items" prop-key="$key" prop-index="$index" prop-value="item"></test>',
+        template: '<test v-for="item in items" bind-key="$key" bind-index="$index" bind-value="item"></test>',
         components: {
           test: {
             props: ['key', 'index', 'value'],
@@ -309,7 +309,7 @@ if (_.inBrowser) {
     it('fragment loop with component', function (done) {
       var vm = new Vue({
         el: el,
-        template: '<template v-for="item in list"><test prop-a="item.a"></test></template>',
+        template: '<template v-for="item in list"><test bind-a="item.a"></test></template>',
         data: {
           list: [
             { a: 1 },
@@ -445,7 +445,7 @@ if (_.inBrowser) {
 
       var vm = new Vue({
         el: el,
-        template: '<test v-for="item in list" prop-item="item" track-by="id"></test>',
+        template: '<test v-for="item in list" bind-item="item" track-by="id"></test>',
         data: {
           list: [
             { id: 1, msg: 'hi' },

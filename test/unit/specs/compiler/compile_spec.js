@@ -185,8 +185,8 @@ if (_.inBrowser) {
       compiler.compileAndLinkProps(vm, el, props)
       expect(vm._bindDir.calls.count()).toBe(3) // skip literal and one time
       // literal
-      expect(vm.testLiteral).toBe(1)
-      expect(vm._data.testLiteral).toBe(1)
+      expect(vm.testLiteral).toBe('1')
+      expect(vm._data.testLiteral).toBe('1')
       expect(vm.optimizeLiteral).toBe(1)
       expect(vm._data.optimizeLiteral).toBe(1)
       // one time
@@ -214,8 +214,8 @@ if (_.inBrowser) {
       // temporarily remove vm.$parent
       var context = vm._context
       vm._context = null
-      el.setAttribute('prop-a', '"hi"')
-      el.setAttribute('prop-b', 'hi')
+      el.setAttribute('bind-a', '"hi"')
+      el.setAttribute('bind-b', 'hi')
       compiler.compileAndLinkProps(vm, el, [
         { name: 'a' },
         { name: 'b' }
@@ -290,7 +290,7 @@ if (_.inBrowser) {
     it('should teardown props and replacer directives when unlinking', function () {
       var vm = new Vue({
         el: el,
-        template: '<test prop-msg="msg"></test>',
+        template: '<test bind-msg="msg"></test>',
         data: {
           msg: 'hi'
         },
