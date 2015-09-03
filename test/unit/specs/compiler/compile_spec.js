@@ -88,9 +88,9 @@ if (_.inBrowser) {
       var linker = compile(el, Vue.options)
       linker(vm, el)
       expect(vm._bindDir.calls.count()).toBe(3)
-      expect(vm._bindDir).toHaveBeenCalledWith('class', el, descA, Vue.options.directives.class, undefined, undefined, undefined, undefined, undefined)
-      expect(vm._bindDir).toHaveBeenCalledWith('style', el, descB, Vue.options.directives.style, undefined, undefined, undefined, undefined, undefined)
-      expect(vm._bindDir).toHaveBeenCalledWith('attr', el, descC, Vue.options.directives.attr, undefined, undefined, undefined, 'title', undefined)
+      expect(vm._bindDir).toHaveBeenCalledWith('class', el, descA, internalDirectives.class, undefined, undefined, undefined, undefined, undefined)
+      expect(vm._bindDir).toHaveBeenCalledWith('style', el, descB, internalDirectives.style, undefined, undefined, undefined, undefined, undefined)
+      expect(vm._bindDir).toHaveBeenCalledWith('attr', el, descC, internalDirectives.attr, undefined, undefined, undefined, 'title', undefined)
     })
 
     it('on- syntax', function () {
@@ -99,7 +99,7 @@ if (_.inBrowser) {
       var linker = compile(el, Vue.options)
       linker(vm, el)
       expect(vm._bindDir.calls.count()).toBe(1)
-      expect(vm._bindDir).toHaveBeenCalledWith('on', el, desc, Vue.options.directives.on, undefined, undefined, undefined, 'click', undefined)
+      expect(vm._bindDir).toHaveBeenCalledWith('on', el, desc, internalDirectives.on, undefined, undefined, undefined, 'click', undefined)
     })
 
     it('text interpolation', function () {

@@ -555,14 +555,9 @@ function compileDirectives (attrs, options) {
       if (dirDef) {
         dirs.push({
           name: dirName,
-<<<<<<< HEAD
-          descriptors: dirParser.parse(value),
+          descriptor: dirParser.parse(value),
           def: dirDef,
           literal: isLiteral
-=======
-          descriptor: dirParser.parse(value),
-          def: dirDef
->>>>>>> remove old directive parser
         })
       }
     } else
