@@ -305,18 +305,22 @@ if (_.inBrowser) {
         { name: 'testLiteral' },
         { name: 'testTwoWay' },
         { name: 'twoWayWarn' },
-        { name: 'testOneTime' }
+        { name: 'testOneTime' },
+        { name: 'optimizeLiteral' }
       ]
-      el.setAttribute('prop-test-normal', 'a')
-      el.setAttribute('prop-test-literal', '1')
-      el.setAttribute('prop-test-two-way', '@a')
-      el.setAttribute('prop-two-way-warn', '@a + 1')
-      el.setAttribute('prop-test-one-time', '*a')
+      el.setAttribute('bind-test-normal', 'a')
+      el.setAttribute('test-literal', '1')
+      el.setAttribute('bind-optimize-literal', '1')
+      el.setAttribute('bind-test-two-way', '@a')
+      el.setAttribute('bind-two-way-warn', '@a + 1')
+      el.setAttribute('bind-test-one-time', '*a')
       compiler.compileAndLinkProps(vm, el, props)
       expect(vm._bindDir.calls.count()).toBe(3) // skip literal and one time
       // literal
-      expect(vm.testLiteral).toBe('from parent: 1')
-      expect(vm._data.testLiteral).toBe('from parent: 1')
+      expect(vm.testLiteral).toBe(1)
+      expect(vm._data.testLiteral).toBe(1)
+      expect(vm.optimizeLiteral).toBe(1)
+      expect(vm._data.optimizeLiteral).toBe(1)
       // one time
       expect(vm.testOneTime).toBe('from parent: a')
       expect(vm._data.testOneTime).toBe('from parent: a')

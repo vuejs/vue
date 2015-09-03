@@ -134,9 +134,24 @@ if (process.env.NODE_ENV !== 'production') {
 
     PROPS: function (attr, value) {
       warn(
-        'Prop ' + attr + '="' + value + '" should be prefixed with "prop-" and ' +
-        'bound as expression in 1.0.0. ' +
-        'For more details, see https://github.com/yyx990803/vue/issues/1173'
+        'Prop ' + attr + '="' + value + '": props no longer use mustache tags ' +
+        'to indicate a dynamic binding. Use the "bind-" prefix instead.' +
+        newBindingSyntaxLink
+      )
+    },
+
+    DATA_PROPS: function (attr, value) {
+      warn(
+        'Prop ' + attr + '="' + value + '": props will no longer support the ' +
+        '"data-" prefix in 1.0.0.' + newBindingSyntaxLink
+      )
+    },
+
+    PROP_CASTING: function (attr, value) {
+      warn(
+        'Prop ' + attr + '="' + value + '": literal props will no longer be ' +
+        'auto-casted into booleans/numbers in 1.0.0 - they will all be treated ' +
+        'as literal strings. Use "bind-" syntax for boolean/number literals instead.'
       )
     },
 

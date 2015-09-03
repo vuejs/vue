@@ -49,16 +49,12 @@ module.exports = function compileProps (el, propOptions) {
     attr = _.hyphenate(name)
     value = el.getAttribute(attr)
 
-    if (value !== null && process.env.NODE_ENV !== 'production') {
-      _.deprecation.PROPS(attr, value)
-    }
-
     if (value === null) {
       value = el.getAttribute('data-' + attr)
       if (value !== null) {
         attr = 'data-' + attr
         if (process.env.NODE_ENV !== 'production') {
-          _.deprecation.PROPS(attr, value)
+          _.deprecation.DATA_PROPS(attr, value)
         }
       }
     }
@@ -77,6 +73,11 @@ module.exports = function compileProps (el, propOptions) {
       el.removeAttribute(attr)
       var tokens = textParser.parse(value)
       if (tokens) {
+
+        if (process.env.NODE_ENV !== 'production') {
+          _.deprecation.PROPS(attr, value)
+        }
+
         prop.dynamic = true
         prop.parentPath = textParser.tokensToExp(tokens)
         // check prop binding type.
@@ -100,30 +101,35 @@ module.exports = function compileProps (el, propOptions) {
         }
       }
     } else {
-      // new prop- syntax
-      attr = 'prop-' + attr
+      // new syntax
+      attr = 'bind-' + attr
       value = prop.raw = el.getAttribute(attr)
       if (value !== null) {
+        // mark it so we know this is a bind
+        prop.bindSyntax = true
         el.removeAttribute(attr)
+        value = value.trim()
         // check binding type
         if (literalValueRE.test(value)) {
           prop.mode = propBindingModes.ONE_TIME
-        } else if (value.charAt(0) === '*') {
-          prop.mode = propBindingModes.ONE_TIME
-          value = value.slice(1)
-        } else if (value.charAt(0) === '@') {
-          value = value.slice(1)
-          if (settablePathRE.test(value)) {
-            prop.mode = propBindingModes.TWO_WAY
-          } else {
-            process.env.NODE_ENV !== 'production' && _.warn(
-              'Cannot bind two-way prop with non-settable ' +
-              'parent path: ' + value
-            )
+        } else {
+          prop.dynamic = true
+          if (value.charAt(0) === '*') {
+            prop.mode = propBindingModes.ONE_TIME
+            value = value.slice(1).trim()
+          } else if (value.charAt(0) === '@') {
+            value = value.slice(1).trim()
+            if (settablePathRE.test(value)) {
+              prop.mode = propBindingModes.TWO_WAY
+            } else {
+              process.env.NODE_ENV !== 'production' && _.warn(
+                'Cannot bind two-way prop with non-settable ' +
+                'parent path: ' + value
+              )
+            }
           }
         }
       }
-      prop.dynamic = true
       prop.parentPath = value
     }
 
@@ -193,13 +199,18 @@ function makePropsLinkFn (props) {
       } else {
         // literal, cast it and just set once
         var raw = prop.raw
-        value = options.type === Boolean && raw === ''
-          ? true
-          // do not cast emptry string.
-          // _.toNumber casts empty string to 0.
-          : raw.trim()
-            ? _.toBoolean(_.toNumber(raw))
-            : raw
+        if (options.type === Boolean && raw === '') {
+          value = true
+        } else if (raw.trim()) {
+          value = _.toBoolean(_.toNumber(raw))
+          if (process.env.NODE_ENV !== 'production' &&
+              !prop.bindSyntax &&
+              value !== raw) {
+            _.deprecation.PROP_CASTING(prop.name, prop.raw)
+          }
+        } else {
+          value = raw
+        }
         _.initProp(vm, prop, value)
       }
     }
