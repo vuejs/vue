@@ -9,7 +9,6 @@ var resolveAsset = _.resolveAsset
 var componentDef = require('../directives/component')
 
 // special binding prefixes
-var propRE = /^prop-/
 var bindRE = /^bind-/
 var onRE = /^on-/
 
@@ -622,15 +621,6 @@ function compileDirectives (attrs, options) {
         descriptors: [newDirParser.parse(value)],
         def: options.directives.on
       })
-    } else
-
-    // should not see props here
-    /* istanbul ignore if */
-    if (process.env.NODE_ENV !== 'production' && propRE.test(name)) {
-      _.warn(
-        name + '="' + value + '" is not compiled. The prop is either not declared ' +
-        'on the child component, or is used on a non-component element.'
-      )
     } else
 
     // TODO: remove this in 1.0.0
