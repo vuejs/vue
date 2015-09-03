@@ -38,7 +38,7 @@
           <item
             class="item"
             v-for="model in model.children"
-            prop-model="model">
+            bind-model="model">
           </item>
           <li on-click="addChild">+</li>
         </ul>
@@ -51,7 +51,7 @@
     <ul id="demo">
       <item
         class="item"
-        prop-model="treeData">
+        bind-model="treeData">
       </item>
     </ul>
 
