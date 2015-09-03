@@ -95,16 +95,20 @@ p.enterNextTick = function () {
   _.nextTick(function () {
     this.justEntered = false
   }, this)
-  var type = this.getCssTransitionType(this.enterClass)
   var enterDone = this.enterDone
-  if (type === TYPE_TRANSITION) {
-    // trigger transition by removing enter class now
+  var type = this.getCssTransitionType(this.enterClass)
+  if (!this.pendingJsCb) {
+    if (type === TYPE_TRANSITION) {
+      // trigger transition by removing enter class now
+      removeClass(this.el, this.enterClass)
+      this.setupCssCb(transitionEndEvent, enterDone)
+    } else if (type === TYPE_ANIMATION) {
+      this.setupCssCb(animationEndEvent, enterDone)
+    } else {
+      enterDone()
+    }
+  } else if (type === TYPE_TRANSITION) {
     removeClass(this.el, this.enterClass)
-    this.setupCssCb(transitionEndEvent, enterDone)
-  } else if (type === TYPE_ANIMATION) {
-    this.setupCssCb(animationEndEvent, enterDone)
-  } else if (!this.pendingJsCb) {
-    enterDone()
   }
 }
 

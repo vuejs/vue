@@ -342,6 +342,50 @@ if (_.inBrowser && !_.isIE9) {
         }
       })
 
+      it('css + js hook with callback before transitionend', function (done) {
+        document.body.removeChild(el)
+        el.classList.add('test')
+
+        // enter hook that expects a second argument
+        // indicates the user wants to control when the
+        // transition ends.
+        var enterCalled = false
+        hooks.enter = function (el, enterDone) {
+          enterCalled = true
+          setTimeout(function () {
+            enterDone()
+            testDone()
+          }, 20)
+        }
+
+        el.__v_trans = new Transition(el, 'test', hooks, vm)
+        transition.apply(el, 1, function () {
+          document.body.appendChild(el)
+          op()
+        }, vm, cb)
+        expect(hooks.beforeEnter).toHaveBeenCalled()
+        expect(op).toHaveBeenCalled()
+        expect(cb).not.toHaveBeenCalled()
+        expect(enterCalled).toBe(true)
+        _.nextTick(function () {
+          expect(el.classList.contains('test-enter')).toBe(false)
+          expect(hooks.afterEnter).not.toHaveBeenCalled()
+          _.on(el, _.transitionEndEvent, function () {
+            // callback should have been called, but only once, by the js callback
+            expect(cb).toHaveBeenCalled()
+            expect(cb.calls.count()).toBe(1)
+            expect(hooks.afterEnter).toHaveBeenCalled()
+            done()
+          })
+        })
+
+        // this is called by the enter hook
+        function testDone () {
+          expect(cb).toHaveBeenCalled()
+          expect(hooks.afterEnter).toHaveBeenCalled()
+        }
+      })
+
       it('clean up unfinished css callback', function (done) {
         el.__v_trans = new Transition(el, 'test', null, vm)
         el.classList.add('test')
