@@ -613,14 +613,6 @@ function compileDirectives (attrs, options) {
         descriptor: dirParser.parse(value),
         def: internalDirectives.on
       })
-    } else
-
-    // TODO: remove this in 1.0.0
-    {
-      dir = collectAttrDirective(name, value, options)
-      if (dir) {
-        dirs.push(dir)
-      }
     }
   }
   // sort by priority, LOW to HIGH
