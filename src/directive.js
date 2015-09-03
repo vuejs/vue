@@ -141,6 +141,16 @@ Directive.prototype._bind = function () {
 Directive.prototype._checkDynamicLiteral = function () {
   var expression = this.expression
   if (expression && this.isLiteral) {
+
+    if (process.env.NODE_ENV !== 'production') {
+      if (this.name !== 'el' &&
+          this.name !== 'ref' &&
+          this.name !== 'transition' &&
+          this.name !== 'component') {
+        _.deprecation.LITERAL_DIR(this.name)
+      }
+    }
+
     var tokens = textParser.parse(expression)
     if (tokens) {
       var exp = textParser.tokensToExp(tokens)

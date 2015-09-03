@@ -169,4 +169,12 @@ describe('Directive', function () {
     expect(d.update).toBe(def.update)
     expect(def.update).toHaveBeenCalled()
   })
+
+  it('literal (new syntax)', function () {
+    var d = new Directive('test', el, vm, {
+      raw: 'a'
+    }, def.update, null, null, null, null, true)
+    d._bind()
+    expect(def.update).toHaveBeenCalledWith('a')
+  })
 })
