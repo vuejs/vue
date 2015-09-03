@@ -1,7 +1,6 @@
 var textParser = require('../../../../src/parsers/text')
 var dirParser = require('../../../../src/parsers/directive')
 var config = require('../../../../src/config')
-var Vue = require('../../../../src/vue')
 
 var testCases = [
   {
