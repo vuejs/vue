@@ -28,7 +28,7 @@ var arrayMethods = Object.create(arrayProto)
     }
     var result = original.apply(this, args)
     var ob = this.__ob__
-    var inserted
+    var inserted, removed
     switch (method) {
       case 'push':
         inserted = args
@@ -38,11 +38,17 @@ var arrayMethods = Object.create(arrayProto)
         break
       case 'splice':
         inserted = args.slice(2)
+        removed = result
+        break
+      case 'pop':
+      case 'shift':
+        removed = [result]
         break
     }
     if (inserted) ob.observeArray(inserted)
+    if (removed) ob.unobserveArray(removed)
     // notify change
-    ob.dep.notify()
+    ob.notify()
     return result
   })
 })

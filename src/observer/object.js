@@ -21,7 +21,7 @@ _.define(
       return
     }
     ob.convert(key, val)
-    ob.dep.notify()
+    ob.notify()
     if (ob.vms) {
       var i = ob.vms.length
       while (i--) {
@@ -69,7 +69,7 @@ _.define(
     if (!ob || _.isReserved(key)) {
       return
     }
-    ob.dep.notify()
+    ob.notify()
     if (ob.vms) {
       var i = ob.vms.length
       while (i--) {

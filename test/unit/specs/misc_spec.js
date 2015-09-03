@@ -332,4 +332,20 @@ describe('Misc', function () {
     Vue.config.strict = false
   })
 
+  it('nested object $set should trigger parent array notify', function (done) {
+    var vm = new Vue({
+      el: document.createElement('div'),
+      template: '{{items | json}}{{items[0].a}}',
+      data: {
+        items: [{}]
+      }
+    })
+    expect(vm.$el.textContent).toBe(JSON.stringify(vm.items, null, 2))
+    vm.items[0].$set('a', 123)
+    Vue.nextTick(function () {
+      expect(vm.$el.textContent).toBe(JSON.stringify(vm.items, null, 2) + '123')
+      done()
+    })
+  })
+
 })

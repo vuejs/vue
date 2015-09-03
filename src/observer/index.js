@@ -111,7 +111,42 @@ Observer.prototype.observe = function (val) {
 Observer.prototype.observeArray = function (items) {
   var i = items.length
   while (i--) {
-    this.observe(items[i])
+    var ob = this.observe(items[i])
+    if (ob) {
+      (ob.parents || (ob.parents = [])).push(this)
+    }
+  }
+}
+
+/**
+ * Remove self from the parent list of removed objects.
+ *
+ * @param {Array} items
+ */
+
+Observer.prototype.unobserveArray = function (items) {
+  var i = items.length
+  while (i--) {
+    var ob = items[i] && items[i].__ob__
+    if (ob) {
+      ob.parents.$remove(this)
+    }
+  }
+}
+
+/**
+ * Notify self dependency, and also parent Array dependency
+ * if any.
+ */
+
+Observer.prototype.notify = function () {
+  this.dep.notify()
+  var parents = this.parents
+  if (parents) {
+    var i = parents.length
+    while (i--) {
+      parents[i].notify()
+    }
   }
 }
 
@@ -135,12 +170,6 @@ Observer.prototype.convert = function (key, val) {
         dep.depend()
         if (childOb) {
           childOb.dep.depend()
-        }
-        if (_.isArray(val)) {
-          for (var e, i = 0, l = val.length; i < l; i++) {
-            e = val[i]
-            e && e.__ob__ && e.__ob__.dep.depend()
-          }
         }
       }
       return val
