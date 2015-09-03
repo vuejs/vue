@@ -264,7 +264,8 @@ exports.debounce = function (func, wait) {
  */
 
 exports.indexOf = function (arr, obj) {
-  for (var i = 0, l = arr.length; i < l; i++) {
+  var i = arr.length
+  while (i--) {
     if (arr[i] === obj) return i
   }
   return -1
