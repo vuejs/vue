@@ -538,7 +538,7 @@ function makeTerminalNodeLinkFn (el, dirName, value, options, def) {
 function compileDirectives (attrs, options) {
   var i = attrs.length
   var dirs = []
-  var attr, name, value, dir, dirName, dirDef, arg
+  var attr, name, value, dir, dirName, dirDef, isLiteral, arg
   while (i--) {
     attr = attrs[i]
     name = attr.name
@@ -546,6 +546,15 @@ function compileDirectives (attrs, options) {
     // Core directive
     if (name.indexOf(config.prefix) === 0) {
       dirName = name.slice(config.prefix.length)
+
+      // check literal directive
+      if (dirName.charAt(dirName.length - 1) === ':') {
+        dirName = dirName.slice(0, -1)
+        isLiteral = true
+      } else {
+        isLiteral = false
+      }
+
       dirDef = resolveAsset(options, 'directives', dirName)
       if (process.env.NODE_ENV !== 'production') {
         _.assertAsset(dirDef, 'directive', dirName)
@@ -570,7 +579,8 @@ function compileDirectives (attrs, options) {
         dirs.push({
           name: dirName,
           descriptors: dirParser.parse(value),
-          def: dirDef
+          def: dirDef,
+          literal: isLiteral
         })
       }
     } else
@@ -661,7 +671,7 @@ function makeNodeLinkFn (directives) {
         k = dir.descriptors.length
         for (j = 0; j < k; j++) {
           vm._bindDir(dir.name, el,
-            dir.descriptors[j], dir.def, host, scope, frag, dir.arg)
+            dir.descriptors[j], dir.def, host, scope, frag, dir.arg, dir.literal)
         }
       }
     }

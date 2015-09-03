@@ -26,7 +26,7 @@ var expParser = require('./parsers/expression')
 
 // TODO: 1.0.0 cleanup the arguments
 
-function Directive (name, el, vm, descriptor, def, host, scope, frag, arg) {
+function Directive (name, el, vm, descriptor, def, host, scope, frag, arg, literal) {
   // public
   this.name = name
   this.el = el
@@ -45,6 +45,8 @@ function Directive (name, el, vm, descriptor, def, host, scope, frag, arg) {
   this._host = host
   this._scope = scope
   this._frag = frag
+  // 1.0.0 literal
+  this._literal = literal
 }
 
 /**
@@ -62,7 +64,9 @@ Directive.prototype._bind = function () {
     (name !== 'cloak' || this.vm._isCompiled) &&
     this.el && this.el.removeAttribute
   ) {
-    this.el.removeAttribute(config.prefix + this.name)
+    this.el.removeAttribute(
+      config.prefix + this.name + (this._literal ? ':' : '')
+    )
     // 1.0.0: remove bind/on
     // TODO simplify this
     if (name === 'attr') {
@@ -85,7 +89,10 @@ Directive.prototype._bind = function () {
   if (this.bind) {
     this.bind()
   }
-  if (this._watcherExp &&
+
+  if (this._literal) {
+    this.update && this.update(this._descriptor.raw)
+  } else if (this._watcherExp &&
       (this.update || this.twoWay) &&
       (!this.isLiteral || this._isDynamicLiteral) &&
       !this._checkStatement()) {
