@@ -137,7 +137,7 @@
     "object-shorthand": 0,
     "one-var": [2, { "initialized": "never" }],
     "operator-assignment": 0,
-    "operator-linebreak": [2, "after"],
+    "operator-linebreak": [2, "after", { "overrides": { "?": "before", ":": "before" } }],
     "padded-blocks": 0,
     "prefer-const": 0,
     "quote-props": 0,

@@ -96,8 +96,8 @@ Watcher.prototype.get = function () {
         'Error when evaluating expression "' +
         this.expression + '". ' +
         (config.debug
-          ? '' :
-          'Turn on debug mode to see stack trace.'
+          ? ''
+          : 'Turn on debug mode to see stack trace.'
         ), e
       )
     }
