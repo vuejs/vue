@@ -38,7 +38,7 @@ describe('Async components', function () {
   it('dynamic', function (done) {
     var vm = new Vue({
       el: el,
-      template: '<component is="{{view}}"></component>',
+      template: '<component bind-is="view"></component>',
       data: {
         view: 'view-a'
       },
@@ -82,7 +82,7 @@ describe('Async components', function () {
   it('invalidate pending on dynamic switch', function (done) {
     var vm = new Vue({
       el: el,
-      template: '<component is="{{view}}"></component>',
+      template: '<component bind-is="view"></component>',
       data: {
         view: 'view-a'
       },

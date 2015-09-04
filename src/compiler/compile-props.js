@@ -146,7 +146,7 @@ function makePropsLinkFn (props) {
               name: 'prop',
               def: propDef,
               prop: prop
-            }, null, null, scope)
+            }, null /* el */, null /* host */ , scope)
           }
         } else {
           process.env.NODE_ENV !== 'production' && _.warn(

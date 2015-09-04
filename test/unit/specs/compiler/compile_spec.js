@@ -19,10 +19,10 @@ if (_.inBrowser) {
       vm = {
         _data: {},
         _directives: [],
-        _bindDir: function (name, node, desc, def) {
+        _bindDir: function (descriptor, node) {
           this._directives.push({
-            name: name,
-            _def: def,
+            name: descriptor.name,
+            descriptor: descriptor,
             _bind: function () {
               directiveBind(this.name)
             },
@@ -53,8 +53,6 @@ if (_.inBrowser) {
       el.innerHTML = '<p v-a="a" v-b="b">hello</p><div v-b:="b"></div>'
       var defA = { priority: 1 }
       var defB = { priority: 2 }
-      var descriptorA = dirParser.parse('a')
-      var descriptorB = dirParser.parse('b')
       var options = _.mergeOptions(Vue.options, {
         directives: {
           a: defA,
@@ -66,10 +64,31 @@ if (_.inBrowser) {
       linker(vm, el)
       expect(directiveBind.calls.count()).toBe(4)
       expect(vm._bindDir.calls.count()).toBe(4)
-      expect(vm._bindDir).toHaveBeenCalledWith('a', el, descriptorB, defA, undefined, undefined, undefined, undefined, false)
-      expect(vm._bindDir).toHaveBeenCalledWith('a', el.firstChild, descriptorA, defA, undefined, undefined, undefined, undefined, false)
-      expect(vm._bindDir).toHaveBeenCalledWith('b', el.firstChild, descriptorB, defB, undefined, undefined, undefined, undefined, false)
-      expect(vm._bindDir).toHaveBeenCalledWith('b', el.lastChild, descriptorB, defB, undefined, undefined, undefined, undefined, true)
+      // 1
+      var args = vm._bindDir.calls.argsFor(0)
+      expect(args[0].name).toBe('a')
+      expect(args[0].expression).toBe('b')
+      expect(args[0].def).toBe(defA)
+      expect(args[1]).toBe(el)
+      // 2
+      args = vm._bindDir.calls.argsFor(1)
+      expect(args[0].name).toBe('a')
+      expect(args[0].expression).toBe('a')
+      expect(args[0].def).toBe(defA)
+      expect(args[1]).toBe(el.firstChild)
+      // 3
+      args = vm._bindDir.calls.argsFor(2)
+      expect(args[0].name).toBe('b')
+      expect(args[0].expression).toBe('b')
+      expect(args[0].def).toBe(defB)
+      expect(args[1]).toBe(el.firstChild)
+      // 4
+      args = vm._bindDir.calls.argsFor(3)
+      expect(args[0].name).toBe('b')
+      expect(args[0].expression).toBe('b')
+      expect(args[0].def).toBe(defB)
+      expect(args[0].literal).toBe(true)
+      expect(args[1]).toBe(el.lastChild)
       // check the priority sorting
       // the "b"s should be called first!
       expect(directiveBind.calls.argsFor(0)[0]).toBe('b')
@@ -82,15 +101,28 @@ if (_.inBrowser) {
       el.setAttribute('bind-class', 'a')
       el.setAttribute('bind-style', 'b')
       el.setAttribute('bind-title', 'c')
-      var descA = dirParser.parse('a')
-      var descB = dirParser.parse('b')
-      var descC = dirParser.parse('c')
       var linker = compile(el, Vue.options)
       linker(vm, el)
       expect(vm._bindDir.calls.count()).toBe(3)
-      expect(vm._bindDir).toHaveBeenCalledWith('class', el, descA, internalDirectives.class, undefined, undefined, undefined, undefined, undefined)
-      expect(vm._bindDir).toHaveBeenCalledWith('style', el, descB, internalDirectives.style, undefined, undefined, undefined, undefined, undefined)
-      expect(vm._bindDir).toHaveBeenCalledWith('attr', el, descC, internalDirectives.attr, undefined, undefined, undefined, 'title', undefined)
+      // 1
+      var args = vm._bindDir.calls.argsFor(0)
+      expect(args[0].name).toBe('class')
+      expect(args[0].expression).toBe('a')
+      expect(args[0].def).toBe(internalDirectives.class)
+      expect(args[1]).toBe(el)
+      // 2
+      var args = vm._bindDir.calls.argsFor(1)
+      expect(args[0].name).toBe('style')
+      expect(args[0].expression).toBe('b')
+      expect(args[0].def).toBe(internalDirectives.style)
+      expect(args[1]).toBe(el)
+      // 3
+      var args = vm._bindDir.calls.argsFor(2)
+      expect(args[0].name).toBe('attr')
+      expect(args[0].expression).toBe('c')
+      expect(args[0].arg).toBe('title')
+      expect(args[0].def).toBe(internalDirectives.attr)
+      expect(args[1]).toBe(el)
     })
 
     it('on- syntax', function () {
@@ -99,7 +131,12 @@ if (_.inBrowser) {
       var linker = compile(el, Vue.options)
       linker(vm, el)
       expect(vm._bindDir.calls.count()).toBe(1)
-      expect(vm._bindDir).toHaveBeenCalledWith('on', el, desc, internalDirectives.on, undefined, undefined, undefined, 'click', undefined)
+      var args = vm._bindDir.calls.argsFor(0)
+      expect(args[0].name).toBe('on')
+      expect(args[0].expression).toBe('a++')
+      expect(args[0].arg).toBe('click')
+      expect(args[0].def).toBe(internalDirectives.on)
+      expect(args[1]).toBe(el)
     })
 
     it('text interpolation', function () {
@@ -111,10 +148,10 @@ if (_.inBrowser) {
       // expect 1 call because one-time bindings do not generate a directive.
       expect(vm._bindDir.calls.count()).toBe(1)
       var args = vm._bindDir.calls.argsFor(0)
-      expect(args[0]).toBe('text')
+      expect(args[0].name).toBe('text')
+      expect(args[0].expression).toBe('a')
+      expect(args[0].def).toBe(def)
       // skip the node because it's generated in the linker fn via cloneNode
-      expect(args[2]).toBe(dirParser.parse('a'))
-      expect(args[3]).toBe(def)
       // expect $eval to be called during onetime
       expect(vm.$eval).toHaveBeenCalledWith('b')
       // {{a}} is mocked so it's a space.
@@ -131,9 +168,9 @@ if (_.inBrowser) {
       linker(vm, el)
       expect(vm._bindDir.calls.count()).toBe(1)
       var htmlArgs = vm._bindDir.calls.argsFor(0)
-      expect(htmlArgs[0]).toBe('html')
-      expect(htmlArgs[2]).toBe(htmlDesc)
-      expect(htmlArgs[3]).toBe(htmlDef)
+      expect(htmlArgs[0].name).toBe('html')
+      expect(htmlArgs[0].expression).toBe('html')
+      expect(htmlArgs[0].def).toBe(htmlDef)
       // with placeholder comments & interpolated one-time html
       expect(el.innerHTML).toBe('<!--v-html--> <div>yoyoyo</div>')
     })
@@ -149,7 +186,11 @@ if (_.inBrowser) {
       // expect 1 call because terminal should return early and let
       // the directive handle the rest.
       expect(vm._bindDir.calls.count()).toBe(1)
-      expect(vm._bindDir).toHaveBeenCalledWith('for', el.firstChild, descriptor, def, undefined, undefined, undefined)
+      var args = vm._bindDir.calls.argsFor(0)
+      expect(args[0].name).toBe('for')
+      expect(args[0].expression).toBe('item in items')
+      expect(args[0].def).toBe(def)
+      expect(args[1]).toBe(el.firstChild)
     })
 
     it('custom element components', function () {
@@ -162,7 +203,11 @@ if (_.inBrowser) {
       var linker = compile(el, options)
       linker(vm, el)
       expect(vm._bindDir.calls.count()).toBe(1)
-      expect(vm._bindDir.calls.argsFor(0)[0]).toBe('component')
+      var args = vm._bindDir.calls.argsFor(0)
+      expect(args[0].name).toBe('component')
+      expect(args[0].expression).toBe('my-component')
+      expect(args[0].literal).toBe(true)
+      expect(args[0].def).toBe(Vue.options.directives.component)
       expect(_.warn).not.toHaveBeenCalled()
     })
 
@@ -194,18 +239,18 @@ if (_.inBrowser) {
       expect(vm._data.testOneTime).toBe('from parent: a')
       // normal
       var args = vm._bindDir.calls.argsFor(0)
-      expect(args[0]).toBe('prop')
-      expect(args[1]).toBe(null)
-      expect(args[2].path).toBe('testNormal')
-      expect(args[2].parentPath).toBe('a')
-      expect(args[2].mode).toBe(bindingModes.ONE_WAY)
+      var prop = args[0].prop
+      expect(args[0].name).toBe('prop')
+      expect(prop.path).toBe('testNormal')
+      expect(prop.parentPath).toBe('a')
+      expect(prop.mode).toBe(bindingModes.ONE_WAY)
       // two way
       args = vm._bindDir.calls.argsFor(1)
-      expect(args[0]).toBe('prop')
-      expect(args[1]).toBe(null)
-      expect(args[2].path).toBe('testTwoWay')
-      expect(args[2].parentPath).toBe('a')
-      expect(args[2].mode).toBe(bindingModes.TWO_WAY)
+      prop = args[0].prop
+      expect(args[0].name).toBe('prop')
+      expect(prop.path).toBe('testTwoWay')
+      expect(prop.parentPath).toBe('a')
+      expect(prop.mode).toBe(bindingModes.TWO_WAY)
       // two way warn
       expect(hasWarned(_, 'non-settable parent path')).toBe(true)
     })

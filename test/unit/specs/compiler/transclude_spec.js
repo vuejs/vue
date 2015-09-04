@@ -57,7 +57,7 @@ if (_.inBrowser) {
       expect(res instanceof DocumentFragment).toBe(true)
 
       // single component: <component>
-      options.template = '<component is="{{hi}}"></component>'
+      options.template = '<component bind-is="hi"></component>'
       res = transclude(el, options)
       expect(res instanceof DocumentFragment).toBe(true)
 
