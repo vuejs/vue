@@ -32,12 +32,12 @@ function Directive (name, el, vm, descriptor, def, host, scope, frag, arg, liter
   this.el = el
   this.vm = vm
   // copy descriptor props
+  this.descriptor = descriptor
   this.expression = descriptor.expression
   this.arg = arg || descriptor.arg
   this.filters = descriptor.filters
   // private
   this._def = def
-  this._descriptor = descriptor
   this._locked = false
   this._bound = false
   this._listeners = null

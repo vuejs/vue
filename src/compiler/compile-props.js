@@ -142,7 +142,11 @@ function makePropsLinkFn (props) {
             _.initProp(vm, prop, value)
           } else {
             // dynamic binding
-            vm._bindDir('prop', null, prop, propDef, null, scope)
+            vm._bindDir({
+              name: 'prop',
+              def: propDef,
+              prop: prop
+            }, null, null, scope)
           }
         } else {
           process.env.NODE_ENV !== 'production' && _.warn(

@@ -14,7 +14,7 @@ module.exports = {
     var child = this.vm
     var parent = child._context
     // passed in from compiler directly
-    var prop = this._descriptor
+    var prop = this.descriptor.prop
     var childKey = prop.path
     var parentKey = prop.parentPath
 

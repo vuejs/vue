@@ -336,9 +336,14 @@ function processTextToken (token, options) {
     }
   }
   function setTokenType (type) {
-    token.type = type
-    token.def = publicDirectives[type] // text or html
-    token.descriptor = dirParser.parse(token.value)
+    if (token.descriptor) return
+    var parsed = dirParser.parse(token.value)
+    token.descriptor = {
+      name: type,
+      def: publicDirectives[type],
+      expression: parsed.expression,
+      filters: parsed.filters
+    }
   }
   return el
 }
@@ -368,8 +373,7 @@ function makeTextNodeLinkFn (tokens, frag) {
             node.data = value
           }
         } else {
-          vm._bindDir(token.type, node,
-                      token.descriptor, token.def, host, scope)
+          vm._bindDir(token.descriptor, node, host, scope)
         }
       }
     }
@@ -458,12 +462,16 @@ function checkElementDirectives (el, options) {
  */
 
 function checkComponent (el, options, hasAttrs) {
+  // TODO handle literal/dynamic
   var componentId = _.checkComponent(el, options, hasAttrs)
+  var descriptor = {
+    name: 'component',
+    expression: componentId,
+    def: publicDirectives.component
+  }
   if (componentId) {
     var componentLinkFn = function (vm, el, host, scope, frag) {
-      vm._bindDir('component', el, {
-        expression: componentId
-      }, publicDirectives.component, host, scope, frag)
+      vm._bindDir(descriptor, el, host, scope, frag)
     }
     componentLinkFn.terminal = true
     return componentLinkFn
@@ -510,11 +518,16 @@ skip.terminal = true
  */
 
 function makeTerminalNodeLinkFn (el, dirName, value, options, def) {
-  var descriptor = dirParser.parse(value)
-  // either an element directive, or if/for
-  def = def || publicDirectives[dirName]
+  var parsed = dirParser.parse(value)
+  var descriptor = {
+    name: dirName,
+    expression: parsed.expression,
+    filters: parsed.filters,
+    // either an element directive, or if/for
+    def: def || publicDirectives[dirName]
+  }
   var fn = function terminalNodeLinkFn (vm, el, host, scope, frag) {
-    vm._bindDir(dirName, el, descriptor, def, host, scope, frag)
+    vm._bindDir(descriptor, el, host, scope, frag)
   }
   fn.terminal = true
   return fn
@@ -618,7 +631,6 @@ function compileDirectives (attrs, options) {
     dirs.push(dir)
   }
 
-  // sort by priority, LOW to HIGH
   if (dirs.length) {
     return makeNodeLinkFn(dirs)
   }
@@ -636,13 +648,7 @@ function makeNodeLinkFn (directives) {
     // reverse apply because it's sorted low to high
     var i = directives.length
     while (i--) {
-      var dir = directives[i]
-      var desc = {
-        expression: dir.expression,
-        filters: dir.filters
-      }
-      vm._bindDir(dir.name, el,
-        desc, dir.def, host, scope, frag, dir.arg, dir.literal)
+      vm._bindDir(directives[i], el, host, scope, frag)
     }
   }
 }
