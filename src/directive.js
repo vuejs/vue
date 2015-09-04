@@ -35,7 +35,6 @@ function Directive (descriptor, vm, el, host, scope, frag) {
   this.expression = descriptor.expression
   this.arg = descriptor.arg
   this.filters = descriptor.filters
-  this.literal = descriptor.literal
   // private
   this._locked = false
   this._bound = false
@@ -55,28 +54,36 @@ function Directive (descriptor, vm, el, host, scope, frag) {
  */
 
 Directive.prototype._bind = function () {
-  var def = this.descriptor.def
   var name = this.name
+  var descriptor = this.descriptor
+
+  // remove attribute
   if (
     (name !== 'cloak' || this.vm._isCompiled) &&
     this.el && this.el.removeAttribute
   ) {
-    var attr = this.descriptor.attr || (config.prefix + name)
+    var attr = descriptor.attr || (config.prefix + name)
     this.el.removeAttribute(attr)
   }
+
+  // copy def properties
+  var def = descriptor.def
   if (typeof def === 'function') {
     this.update = def
   } else {
     _.extend(this, def)
   }
+
   this._watcherExp = this.expression
   this._checkDynamicLiteral()
+
+  // initial bind
   if (this.bind) {
     this.bind()
   }
 
-  if (this.literal) {
-    this.update && this.update(this._descriptor.raw)
+  if (descriptor.literal) {
+    this.update && this.update(descriptor.raw)
   } else if (this._watcherExp &&
       (this.update || this.twoWay) &&
       (!this.isLiteral || this._isDynamicLiteral) &&
