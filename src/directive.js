@@ -26,18 +26,17 @@ var expParser = require('./parsers/expression')
 
 // TODO: 1.0.0 cleanup the arguments
 
-function Directive (name, el, vm, descriptor, def, host, scope, frag, arg, literal) {
-  // public
-  this.name = name
-  this.el = el
+function Directive (descriptor, vm, el, host, scope, frag) {
   this.vm = vm
-  // copy descriptor props
+  this.el = el
+  // copy descriptor properties
   this.descriptor = descriptor
+  this.name = descriptor.name
   this.expression = descriptor.expression
-  this.arg = arg || descriptor.arg
+  this.arg = descriptor.arg
   this.filters = descriptor.filters
   // private
-  this._def = def
+  this._def = descriptor.def
   this._locked = false
   this._bound = false
   this._listeners = null
@@ -46,7 +45,7 @@ function Directive (name, el, vm, descriptor, def, host, scope, frag, arg, liter
   this._scope = scope
   this._frag = frag
   // 1.0.0 literal
-  this._literal = literal
+  this._literal = descriptor.literal
 }
 
 /**
