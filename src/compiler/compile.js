@@ -100,8 +100,8 @@ function linkAndCapture (linker, vm) {
  */
 
 function directiveComparator (a, b) {
-  a = a._def.priority || 0
-  b = b._def.priority || 0
+  a = a.descriptor.def.priority || 0
+  b = b.descriptor.def.priority || 0
   return a > b ? -1 : a === b ? 0 : 1
 }
 

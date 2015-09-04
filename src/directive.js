@@ -35,8 +35,8 @@ function Directive (descriptor, vm, el, host, scope, frag) {
   this.expression = descriptor.expression
   this.arg = descriptor.arg
   this.filters = descriptor.filters
+  this.literal = descriptor.literal
   // private
-  this._def = descriptor.def
   this._locked = false
   this._bound = false
   this._listeners = null
@@ -44,8 +44,6 @@ function Directive (descriptor, vm, el, host, scope, frag) {
   this._host = host
   this._scope = scope
   this._frag = frag
-  // 1.0.0 literal
-  this._literal = descriptor.literal
 }
 
 /**
@@ -57,26 +55,14 @@ function Directive (descriptor, vm, el, host, scope, frag) {
  */
 
 Directive.prototype._bind = function () {
-  var def = this._def
+  var def = this.descriptor.def
   var name = this.name
   if (
     (name !== 'cloak' || this.vm._isCompiled) &&
     this.el && this.el.removeAttribute
   ) {
-    this.el.removeAttribute(
-      config.prefix + this.name + (this._literal ? ':' : '')
-    )
-    // 1.0.0: remove bind/on
-    // TODO simplify this
-    if (name === 'attr') {
-      this.el.removeAttribute('bind-' + this.arg)
-    } else if (name === 'class' || name === 'style') {
-      this.el.removeAttribute('bind-' + name)
-    } else if (name === 'on') {
-      this.el.removeAttribute('on-' + this.arg)
-    } else if (name === 'transition') {
-      this.el.removeAttribute(name)
-    }
+    var attr = this.descriptor.attr || (config.prefix + name)
+    this.el.removeAttribute(attr)
   }
   if (typeof def === 'function') {
     this.update = def
@@ -89,7 +75,7 @@ Directive.prototype._bind = function () {
     this.bind()
   }
 
-  if (this._literal) {
+  if (this.literal) {
     this.update && this.update(this._descriptor.raw)
   } else if (this._watcherExp &&
       (this.update || this.twoWay) &&
