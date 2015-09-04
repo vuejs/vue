@@ -40,21 +40,21 @@ module.exports = {
 
   bind: function () {
     // 1.0.0 key filter
-    var rawArg = this.arg
-    var keyIndex = rawArg.indexOf(':')
+    var rawEvent = this.event = this.descriptor.arg
+    var keyIndex = rawEvent.indexOf(':')
     if (keyIndex > -1) {
-      this.arg = rawArg.slice(0, keyIndex)
-      this.key = rawArg.slice(keyIndex + 1)
+      this.event = rawEvent.slice(0, keyIndex)
+      this.key = rawEvent.slice(keyIndex + 1)
     }
 
     // deal with iframes
     if (
       this.el.tagName === 'IFRAME' &&
-      this.arg !== 'load'
+      this.event !== 'load'
     ) {
       var self = this
       this.iframeBind = function () {
-        _.on(self.el.contentWindow, self.arg, self.handler)
+        _.on(self.el.contentWindow, self.event, self.handler)
       }
       this.on('load', this.iframeBind)
     }
@@ -63,7 +63,7 @@ module.exports = {
   update: function (handler) {
     if (typeof handler !== 'function') {
       process.env.NODE_ENV !== 'production' && _.warn(
-        'on-"' + this.arg + '="' +
+        'on-"' + this.event + '="' +
         this.expression + '" expects a function value, ' +
         'got ' + handler
       )
@@ -85,7 +85,7 @@ module.exports = {
     if (this.iframeBind) {
       this.iframeBind()
     } else {
-      _.on(this.el, this.arg, this.handler)
+      _.on(this.el, this.event, this.handler)
     }
   },
 
@@ -94,7 +94,7 @@ module.exports = {
       ? this.el.contentWindow
       : this.el
     if (this.handler) {
-      _.off(el, this.arg, this.handler)
+      _.off(el, this.event, this.handler)
     }
   },
 

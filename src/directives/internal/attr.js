@@ -23,7 +23,7 @@ module.exports = {
   priority: 850,
 
   update: function (value) {
-    var attr = this.arg
+    var attr = this.descriptor.arg
     if (inputProps[attr] && attr in this.el) {
       if (!this.valueRemoved) {
         this.el.removeAttribute(attr)

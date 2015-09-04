@@ -8,8 +8,6 @@ module.exports = {
   priority: 2000,
 
   bind: function () {
-    // determine alias
-    this.alias = this.arg
     // support "item in items" syntax
     var inMatch = this.expression.match(/(.*) in (.*)/)
     if (inMatch) {
