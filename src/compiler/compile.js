@@ -531,11 +531,12 @@ function makeTerminalNodeLinkFn (el, dirName, value, options, def) {
 function compileDirectives (attrs, options) {
   var i = attrs.length
   var dirs = []
-  var attr, name, value, dirName, dirDef, isLiteral, arg
+  var attr, name, value, dirName, dirDef, parsed, isLiteral, arg
   while (i--) {
     attr = attrs[i]
     name = attr.name
     value = attr.value
+    parsed = dirParser.parse(value)
     // Core directive
     if (name.indexOf(config.prefix) === 0) {
       dirName = name.slice(config.prefix.length)
@@ -549,14 +550,12 @@ function compileDirectives (attrs, options) {
       }
 
       dirDef = resolveAsset(options, 'directives', dirName)
+
       if (process.env.NODE_ENV !== 'production') {
         _.assertAsset(dirDef, 'directive', dirName)
       }
       if (dirDef) {
-        dirs.push({
-          name: dirName,
-          descriptor: dirParser.parse(value),
-          def: dirDef,
+        pushDir(dirName, dirDef, {
           literal: isLiteral
         })
       }
@@ -564,21 +563,15 @@ function compileDirectives (attrs, options) {
 
     // special case for el
     if (name === 'el' || name === 'bind-el') {
-      dirs.push({
-        name: 'el',
-        arg: bindRE.test(name),
-        descriptor: dirParser.parse(value),
-        def: internalDirectives.el
+      pushDir('el', internalDirectives.el, {
+        literal: bindRE.test(name)
       })
     } else
 
     // special case for transition
     if (name === 'transition' || name === 'bind-transition') {
-      dirs.push({
-        name: 'transition',
-        arg: bindRE.test(name),
-        descriptor: dirParser.parse(value),
-        def: internalDirectives.transition
+      pushDir('transition', internalDirectives.transition, {
+        literal: bindRE.test(name)
       })
     } else
 
@@ -586,30 +579,45 @@ function compileDirectives (attrs, options) {
     if (bindRE.test(name)) {
       var attributeName = name.replace(bindRE, '')
       if (attributeName === 'style' || attributeName === 'class') {
-        dirName = attributeName
-        arg = undefined
+        pushDir(attributeName, internalDirectives[attributeName])
       } else {
-        dirName = 'attr'
-        arg = attributeName
+        pushDir('attr', internalDirectives.attr, {
+          arg: attributeName
+        })
       }
-      dirs.push({
-        name: dirName,
-        arg: arg,
-        descriptor: dirParser.parse(value),
-        def: internalDirectives[dirName]
-      })
     } else
 
     // event handlers
     if (onRE.test(name)) {
-      dirs.push({
-        name: 'on',
-        arg: name.replace(onRE, ''),
-        descriptor: dirParser.parse(value),
-        def: internalDirectives.on
+      pushDir('on', internalDirectives.on, {
+        arg: name.replace(onRE, '')
       })
     }
   }
+
+  /**
+   * Push a directive.
+   *
+   * @param {String} dirName
+   * @param {Object|Function} def
+   * @param {Object} [opts]
+   */
+
+  function pushDir (dirName, def, opts) {
+    var dir = {
+      name: dirName,
+      attr: name,
+      raw: value,
+      def: def,
+      expression: parsed.expression,
+      filters: parsed.filters
+    }
+    if (opts) {
+      _.extend(dir, opts)
+    }
+    dirs.push(dir)
+  }
+
   // sort by priority, LOW to HIGH
   if (dirs.length) {
     return makeNodeLinkFn(dirs)
@@ -629,8 +637,12 @@ function makeNodeLinkFn (directives) {
     var i = directives.length
     while (i--) {
       var dir = directives[i]
+      var desc = {
+        expression: dir.expression,
+        filters: dir.filters
+      }
       vm._bindDir(dir.name, el,
-        dir.descriptor, dir.def, host, scope, frag, dir.arg, dir.literal)
+        desc, dir.def, host, scope, frag, dir.arg, dir.literal)
     }
   }
 }
