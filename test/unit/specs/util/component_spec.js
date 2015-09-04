@@ -1,26 +1,37 @@
 var _ = require('../../../../src/util')
 
-describe('Util - Misc', function () {
+describe('Util - component', function () {
 
   it('checkComponent', function () {
     var el = document.createElement('component')
+
     // <component> with no is attr
     var res = _.checkComponent(el)
-    expect(res).toBe(null)
-    // <component is="...">
-    el.setAttribute('is', '{{what}}')
+    expect(res).toBeUndefined()
+
+    // static <component is="...">
+    el.setAttribute('is', 'what')
     res = _.checkComponent(el)
-    expect(res).toBe('{{what}}')
+    expect(res.id).toBe('what')
+    expect(res.dynamic).toBeFalsy()
+
+    // <component bind-is="...">
+    el.setAttribute('bind-is', 'what')
+    res = _.checkComponent(el)
+    expect(res.id).toBe('what')
+    expect(res.dynamic).toBe(true)
+
     // custom element, not defined
     el = document.createElement('test')
     res = _.checkComponent(el, {
       components: {}
     })
     expect(res).toBeUndefined()
+
     // custom element, defined
     res = _.checkComponent(el, {
       components: { test: true }
     })
-    expect(res).toBe('test')
+    expect(res.id).toBe('test')
   })
 })

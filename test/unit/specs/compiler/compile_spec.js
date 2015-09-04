@@ -1,6 +1,5 @@
 var Vue = require('../../../../src/vue')
 var _ = require('../../../../src/util')
-var dirParser = require('../../../../src/parsers/directive')
 var compiler = require('../../../../src/compiler')
 var compile = compiler.compile
 var internalDirectives = require('../../../../src/directives/internal')
@@ -64,6 +63,11 @@ if (_.inBrowser) {
       linker(vm, el)
       expect(directiveBind.calls.count()).toBe(4)
       expect(vm._bindDir.calls.count()).toBe(4)
+
+      // check if we are in firefox, which has different
+      // attribute interation order
+      var isAttrReversed = el.firstChild.attributes[0].name === 'v-b'
+
       // 1
       var args = vm._bindDir.calls.argsFor(0)
       expect(args[0].name).toBe('a')
@@ -71,13 +75,13 @@ if (_.inBrowser) {
       expect(args[0].def).toBe(defA)
       expect(args[1]).toBe(el)
       // 2
-      args = vm._bindDir.calls.argsFor(1)
+      args = vm._bindDir.calls.argsFor(isAttrReversed ? 2 : 1)
       expect(args[0].name).toBe('a')
       expect(args[0].expression).toBe('a')
       expect(args[0].def).toBe(defA)
       expect(args[1]).toBe(el.firstChild)
       // 3
-      args = vm._bindDir.calls.argsFor(2)
+      args = vm._bindDir.calls.argsFor(isAttrReversed ? 1 : 2)
       expect(args[0].name).toBe('b')
       expect(args[0].expression).toBe('b')
       expect(args[0].def).toBe(defB)
@@ -111,13 +115,13 @@ if (_.inBrowser) {
       expect(args[0].def).toBe(internalDirectives.class)
       expect(args[1]).toBe(el)
       // 2
-      var args = vm._bindDir.calls.argsFor(1)
+      args = vm._bindDir.calls.argsFor(1)
       expect(args[0].name).toBe('style')
       expect(args[0].expression).toBe('b')
       expect(args[0].def).toBe(internalDirectives.style)
       expect(args[1]).toBe(el)
       // 3
-      var args = vm._bindDir.calls.argsFor(2)
+      args = vm._bindDir.calls.argsFor(2)
       expect(args[0].name).toBe('attr')
       expect(args[0].expression).toBe('c')
       expect(args[0].arg).toBe('title')
@@ -127,7 +131,6 @@ if (_.inBrowser) {
 
     it('on- syntax', function () {
       el.setAttribute('on-click', 'a++')
-      var desc = dirParser.parse('a++')
       var linker = compile(el, Vue.options)
       linker(vm, el)
       expect(vm._bindDir.calls.count()).toBe(1)
@@ -163,7 +166,6 @@ if (_.inBrowser) {
       data.html = '<div>yoyoyo</div>'
       el.innerHTML = '{{{html}}} {{{*html}}}'
       var htmlDef = Vue.options.directives.html
-      var htmlDesc = dirParser.parse('html')
       var linker = compile(el, Vue.options)
       linker(vm, el)
       expect(vm._bindDir.calls.count()).toBe(1)
@@ -180,7 +182,6 @@ if (_.inBrowser) {
         '<div v-for="item in items"><p v-a="b"></p></div>' + // v-for
         '<div v-pre><p v-a="b"></p></div>' // v-pre
       var def = Vue.options.directives.for
-      var descriptor = dirParser.parse('item in items')
       var linker = compile(el, Vue.options)
       linker(vm, el)
       // expect 1 call because terminal should return early and let
