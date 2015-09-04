@@ -4,20 +4,9 @@ module.exports = {
 
   priority: 1500,
 
-  bind: function () {
-    var scope = this._scope || this.vm
-    var refs = scope.$$
-    var id = this.id = this.arg // bind-el ?
-      ? scope.$eval(this.expression)
-      : this.expression
-
-    if (process.env.NODE_ENV !== 'production' && this.arg) {
-      _.log(
-        'You are using bind- syntax on "el", which is a special ' +
-        'attribute. It will be evaluated only once.'
-      )
-    }
-
+  update: function (id) {
+    this.id = id
+    var refs = (this._scope || this.vm).$$
     if (refs.hasOwnProperty(id)) {
       refs[id] = this.el
     } else {
@@ -26,6 +15,9 @@ module.exports = {
   },
 
   unbind: function () {
-    (this._scope || this.vm).$$[this.id] = null
+    var refs = (this._scope || this.vm).$$
+    if (refs[this.id] !== this.el) {
+      refs[this.id] = null
+    }
   }
 }

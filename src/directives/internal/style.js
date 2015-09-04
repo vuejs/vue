@@ -8,17 +8,11 @@ var propCache = {}
 
 module.exports = {
 
-  deep: true,
-
   update: function (value) {
-    if (this.arg) {
-      this.setProp(this.arg, value)
+    if (typeof value === 'object') {
+      this.objectHandler(value)
     } else {
-      if (typeof value === 'object') {
-        this.objectHandler(value)
-      } else {
-        this.el.style.cssText = value
-      }
+      this.el.style.cssText = value
     }
   },
 

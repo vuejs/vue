@@ -5,23 +5,14 @@ var removeClass = _.removeClass
 module.exports = {
 
   update: function (value) {
-    if (this.arg) {
-      // single toggle
-      if (value) {
-        addClass(this.el, this.arg)
-      } else {
-        removeClass(this.el, this.arg)
-      }
+    if (value && typeof value === 'string') {
+      this.handleObject(stringToObject(value))
+    } else if (_.isPlainObject(value)) {
+      this.handleObject(value)
+    } else if (_.isArray(value)) {
+      this.handleArray(value)
     } else {
-      if (value && typeof value === 'string') {
-        this.handleObject(stringToObject(value))
-      } else if (_.isPlainObject(value)) {
-        this.handleObject(value)
-      } else if (_.isArray(value)) {
-        this.handleArray(value)
-      } else {
-        this.cleanup()
-      }
+      this.cleanup()
     }
   },
 

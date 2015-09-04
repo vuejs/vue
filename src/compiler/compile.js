@@ -461,7 +461,6 @@ function checkElementDirectives (el, options) {
  */
 
 function checkComponent (el, options) {
-  // TODO handle literal/dynamic
   var component = _.checkComponent(el, options)
   if (component) {
     var descriptor = {

@@ -23,8 +23,6 @@ var expParser = require('./parsers/expression')
  * @constructor
  */
 
-// TODO: 1.0.0 cleanup the arguments
-
 function Directive (descriptor, vm, el, host, scope, frag) {
   this.vm = vm
   this.el = el
