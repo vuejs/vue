@@ -5,6 +5,9 @@ module.exports = {
   priority: 1500,
 
   update: function (id) {
+    if (this.id) {
+      this.unbind()
+    }
     this.id = id
     var refs = (this._scope || this.vm).$$
     if (refs.hasOwnProperty(id)) {
@@ -16,7 +19,7 @@ module.exports = {
 
   unbind: function () {
     var refs = (this._scope || this.vm).$$
-    if (refs[this.id] !== this.el) {
+    if (refs[this.id] === this.el) {
       refs[this.id] = null
     }
   }

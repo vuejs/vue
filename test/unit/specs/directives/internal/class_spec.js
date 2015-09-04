@@ -9,19 +9,7 @@ if (_.inBrowser) {
       el = document.createElement('div')
     })
 
-    it('with className', function () {
-      el.className = 'haha'
-      var dir = _.extend({
-        el: el,
-        arg: 'test'
-      }, def)
-      dir.update(true)
-      expect(el.className).toBe('haha test')
-      dir.update(false)
-      expect(el.className).toBe('haha')
-    })
-
-    it('without className', function () {
+    it('plain string', function () {
       el.className = 'haha'
       var dir = _.extend({ el: el }, def)
       dir.update('test')

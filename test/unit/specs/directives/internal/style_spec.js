@@ -27,67 +27,67 @@ if (_.inBrowser) {
       _.extend(dir, def)
     })
 
-    it('normal with arg', function () {
-      dir.arg = 'color'
-      dir.update('red')
-      expect(el.style.color).toBe('red')
-    })
-
-    it('normal no arg', function () {
+    it('plain CSS string', function () {
       dir.update('color:red;')
       expect(el.style.cssText.replace(/\s/g, '')).toBe('color:red;')
     })
 
     it('!important', function () {
-      dir.arg = 'color'
-      dir.update('red !important;')
+      dir.update({
+        color: 'red !important;'
+      })
       expect(el.style.getPropertyPriority('color')).toBe('important')
     })
 
     it('camel case', function () {
-      dir.arg = 'marginLeft'
-      dir.update('30px')
+      dir.update({
+        marginLeft: '30px'
+      })
       expect(el.style.marginLeft).toBe('30px')
     })
 
     it('remove on falsy value', function () {
       el.style.color = 'red'
-      dir.arg = 'color'
-      dir.update(null)
+      dir.update({
+        color: null
+      })
       expect(el.style.color).toBe('')
     })
 
     it('ignore unsupported property', function () {
-      dir.arg = 'unsupported'
-      dir.update('test')
+      dir.update({
+        unsupported: 'test'
+      })
       expect(el.style.unsupported).not.toBe('test')
     })
 
     it('auto prefixing', function () {
       var prop = checkPrefixedProp('transform')
-      dir.arg = 'transform'
       var val = 'scale(0.5)'
-      dir.update(val)
+      dir.update({
+        transform: val
+      })
       expect(el.style[prop]).toBe(val)
     })
 
-    it('update with object', function () {
+    it('object with multiple fields', function () {
       el.style.padding = '10px'
-      dir.update({color: 'red', marginRight: '30px'})
+
+      dir.update({
+        color: 'red',
+        marginRight: '30px'
+      })
       expect(el.style.getPropertyValue('color')).toBe('red')
       expect(el.style.getPropertyValue('margin-right')).toBe('30px')
       expect(el.style.getPropertyValue('padding')).toBe('10px')
-      dir.update({color: 'blue', padding: null })
+
+      dir.update({
+        color: 'blue',
+        padding: null
+      })
       expect(el.style.getPropertyValue('color')).toBe('blue')
       expect(el.style.getPropertyValue('margin-right')).toBeFalsy()
       expect(el.style.getPropertyValue('padding')).toBeFalsy()
-    })
-
-    it('update with object and auto prefix', function () {
-      var prop = checkPrefixedProp('transform')
-      var val = 'scale(0.5)'
-      dir.update({transform: val})
-      expect(el.style[prop]).toBe(val)
     })
 
     it('updates object deep', function (done) {

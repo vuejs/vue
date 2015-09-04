@@ -32,7 +32,7 @@ if (_.inBrowser) {
       })
     })
 
-    it('bind-el', function () {
+    it('bind-el', function (done) {
       var vm = new Vue({
         el: el,
         data: {
@@ -42,7 +42,13 @@ if (_.inBrowser) {
       })
       expect(vm.$$.test).toBeTruthy()
       expect(vm.$$.test.id).toBe('test')
-      expect(_.log).toHaveBeenCalled()
+      vm.id = 'changed'
+      _.nextTick(function () {
+        expect(vm.$$.test).toBeNull()
+        expect(vm.$$.changed).toBeTruthy()
+        expect(vm.$$.changed.id).toBe('test')
+        done()
+      })
     })
 
     it('inside v-for', function () {

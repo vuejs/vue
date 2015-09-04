@@ -8,6 +8,8 @@ var propCache = {}
 
 module.exports = {
 
+  deep: true,
+
   update: function (value) {
     if (typeof value === 'object') {
       this.objectHandler(value)
