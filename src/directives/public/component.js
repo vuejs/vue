@@ -3,7 +3,6 @@ var templateParser = require('../../parsers/template')
 
 module.exports = {
 
-  isLiteral: true,
   priority: 1500,
 
   /**
@@ -47,7 +46,7 @@ module.exports = {
       this.pendingRemovals = 0
       this.pendingRemovalCb = null
       // if static, build right now.
-      if (!this._isDynamicLiteral) {
+      if (this.literal) {
         this.resolveComponent(this.expression, _.bind(this.initStatic, this))
       } else {
         // check dynamic component params
@@ -85,11 +84,13 @@ module.exports = {
 
   /**
    * Public update, called by the watcher in the dynamic
-   * literal scenario, e.g. v-component="{{view}}"
+   * literal scenario, e.g. <component bind-is="view">
    */
 
   update: function (value) {
-    this.setComponent(value)
+    if (!this.literal) {
+      this.setComponent(value)
+    }
   },
 
   /**

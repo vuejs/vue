@@ -1,7 +1,6 @@
 var _ = require('./util')
 var config = require('./config')
 var Watcher = require('./watcher')
-var textParser = require('./parsers/text')
 var expParser = require('./parsers/expression')
 
 /**
@@ -35,6 +34,7 @@ function Directive (descriptor, vm, el, host, scope, frag) {
   this.expression = descriptor.expression
   this.arg = descriptor.arg
   this.filters = descriptor.filters
+  this.literal = descriptor.literal
   // private
   this._locked = false
   this._bound = false
@@ -74,20 +74,18 @@ Directive.prototype._bind = function () {
     _.extend(this, def)
   }
 
-  this._watcherExp = this.expression
-  this._checkDynamicLiteral()
-
   // initial bind
   if (this.bind) {
     this.bind()
   }
 
-  if (descriptor.literal) {
+  if (this.literal) {
     this.update && this.update(descriptor.raw)
-  } else if (this._watcherExp &&
-      (this.update || this.twoWay) &&
-      (!this.isLiteral || this._isDynamicLiteral) &&
-      !this._checkStatement()) {
+  } else if (
+    this.expression &&
+    (this.update || this.twoWay) &&
+    !this._checkStatement()
+  ) {
     // wrapped updater for context
     var dir = this
     var update = this._update = this.update
@@ -104,7 +102,7 @@ Directive.prototype._bind = function () {
       : null
     var watcher = this._watcher = new Watcher(
       this.vm,
-      this._watcherExp,
+      this.expression,
       update, // callback
       {
         filters: this.filters,
@@ -121,26 +119,6 @@ Directive.prototype._bind = function () {
     }
   }
   this._bound = true
-}
-
-/**
- * check if this is a dynamic literal binding.
- *
- * e.g. v-component="{{currentView}}"
- */
-
-// TODO: we shouldn't need this in 1.0.0.
-Directive.prototype._checkDynamicLiteral = function () {
-  var expression = this.expression
-  if (expression && this.isLiteral) {
-    var tokens = textParser.parse(expression)
-    if (tokens) {
-      var exp = textParser.tokensToExp(tokens)
-      this.expression = this.vm.$get(exp)
-      this._watcherExp = exp
-      this._isDynamicLiteral = true
-    }
-  }
 }
 
 /**

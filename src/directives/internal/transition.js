@@ -4,15 +4,6 @@ var Transition = require('../../transition/transition')
 module.exports = {
 
   priority: 1000,
-  isLiteral: true,
-
-  bind: function () {
-    if (!this._isDynamicLiteral && !this.arg) {
-      this.update(this.expression)
-    } else if (this.arg) {
-      this._isDynamicLiteral = true
-    }
-  },
 
   update: function (id, oldId) {
     var el = this.el

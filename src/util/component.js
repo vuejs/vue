@@ -6,7 +6,7 @@ var _ = require('./index')
  *
  * @param {Element} el
  * @param {Object} options
- * @return {String|undefined}
+ * @return {Object|undefined}
  */
 
 exports.commonTagRE = /^(div|p|span|img|a|b|i|br|ul|ol|li|h1|h2|h3|h4|h5|h6|code|pre|table|th|td|tr|form|label|input|select|option)$/
@@ -17,19 +17,17 @@ exports.checkComponent = function (el, options) {
     var exp = el.getAttribute('is')
     if (exp != null) {
       el.removeAttribute('is')
+      return { id: exp }
     } else {
       exp = el.getAttribute('bind-is')
       if (exp != null) {
-        // leverage literal dynamic for now.
-        // TODO: make this cleaner
-        exp = '{{' + exp + '}}'
         el.removeAttribute('bind-is')
+        return { id: exp, dynamic: true }
       }
     }
-    return exp
   } else if (!exports.commonTagRE.test(tag)) {
     if (_.resolveAsset(options, 'components', tag)) {
-      return tag
+      return { id: tag }
     } else if (process.env.NODE_ENV !== 'production') {
       if (tag.indexOf('-') > -1 ||
           /HTMLUnknownElement/.test(Object.prototype.toString.call(el))) {
@@ -43,7 +41,7 @@ exports.checkComponent = function (el, options) {
   /* eslint-disable no-cond-assign */
   if (tag = _.attr(el, 'component')) {
   /* eslint-enable no-cond-assign */
-    return tag
+    return { id: tag }
   }
 }
 

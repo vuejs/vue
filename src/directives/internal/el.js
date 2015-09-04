@@ -2,7 +2,6 @@ var _ = require('../../util')
 
 module.exports = {
 
-  isLiteral: true,
   priority: 1500,
 
   bind: function () {

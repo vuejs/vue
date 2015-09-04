@@ -14,7 +14,7 @@ module.exports = {
     var inMatch = this.expression.match(/(.*) in (.*)/)
     if (inMatch) {
       this.alias = inMatch[1]
-      this._watcherExp = inMatch[2]
+      this.expression = inMatch[2]
     }
 
     if (!this.alias) {

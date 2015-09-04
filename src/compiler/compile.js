@@ -457,19 +457,19 @@ function checkElementDirectives (el, options) {
  *
  * @param {Element} el
  * @param {Object} options
- * @param {Boolean} hasAttrs
  * @return {Function|undefined}
  */
 
-function checkComponent (el, options, hasAttrs) {
+function checkComponent (el, options) {
   // TODO handle literal/dynamic
-  var componentId = _.checkComponent(el, options, hasAttrs)
-  var descriptor = {
-    name: 'component',
-    expression: componentId,
-    def: publicDirectives.component
-  }
-  if (componentId) {
+  var component = _.checkComponent(el, options)
+  if (component) {
+    var descriptor = {
+      name: 'component',
+      expression: component.id,
+      literal: !component.dynamic,
+      def: publicDirectives.component
+    }
     var componentLinkFn = function (vm, el, host, scope, frag) {
       vm._bindDir(descriptor, el, host, scope, frag)
     }
@@ -544,7 +544,7 @@ function makeTerminalNodeLinkFn (el, dirName, value, options, def) {
 function compileDirectives (attrs, options) {
   var i = attrs.length
   var dirs = []
-  var attr, name, value, dirName, dirDef, parsed, isLiteral, arg
+  var attr, name, value, dirName, dirDef, parsed, isLiteral
   while (i--) {
     attr = attrs[i]
     name = attr.name
@@ -577,14 +577,14 @@ function compileDirectives (attrs, options) {
     // special case for el
     if (name === 'el' || name === 'bind-el') {
       pushDir('el', internalDirectives.el, {
-        literal: bindRE.test(name)
+        literal: !bindRE.test(name)
       })
     } else
 
     // special case for transition
     if (name === 'transition' || name === 'bind-transition') {
       pushDir('transition', internalDirectives.transition, {
-        literal: bindRE.test(name)
+        literal: !bindRE.test(name)
       })
     } else
 
