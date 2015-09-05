@@ -83,6 +83,18 @@ if (_.inBrowser) {
       expect(el.style.getPropertyValue('padding')).toBeFalsy()
     })
 
+    it('update with array of objects', function () {
+      el.style.padding = '10px'
+      dir.update([{color: 'red'}, {marginRight: '30px'}])
+      expect(el.style.getPropertyValue('color')).toBe('red')
+      expect(el.style.getPropertyValue('margin-right')).toBe('30px')
+      expect(el.style.getPropertyValue('padding')).toBe('10px')
+      dir.update([{color: 'blue'}, {padding: null}])
+      expect(el.style.getPropertyValue('color')).toBe('blue')
+      expect(el.style.getPropertyValue('margin-right')).toBeFalsy()
+      expect(el.style.getPropertyValue('padding')).toBeFalsy()
+    })
+
     it('update with object and auto prefix', function () {
       var prop = checkPrefixedProp('transform')
       var val = 'scale(0.5)'
