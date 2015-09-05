@@ -18,6 +18,11 @@ describe('Data API', function () {
         double: function (v) {
           return v * 2
         }
+      },
+      computed: {
+        d: function () {
+          return this.a + 1
+        }
       }
     })
   })
@@ -150,6 +155,7 @@ describe('Data API', function () {
       console.log = function (val) {
         expect(val.a).toBe(1)
         expect(val.b.c).toBe(2)
+        expect(val.d).toBe(2)
         spy()
       }
       vm.$log()

@@ -136,5 +136,11 @@ exports.$log = function (path) {
   if (data) {
     data = JSON.parse(JSON.stringify(data))
   }
+  // include computed fields
+  if (!path) {
+    for (var key in this.$options.computed) {
+      data[key] = this[key]
+    }
+  }
   console.log(data)
 }
