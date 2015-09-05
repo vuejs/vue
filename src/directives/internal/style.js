@@ -11,10 +11,12 @@ module.exports = {
   deep: true,
 
   update: function (value) {
-    if (typeof value === 'object') {
-      this.objectHandler(value)
-    } else {
+    if (typeof value === 'string') {
       this.el.style.cssText = value
+    } else if (_.isArray(value)) {
+      this.objectHandler(value.reduce(_.extend, {}))
+    } else {
+      this.objectHandler(value)
     }
   },
 

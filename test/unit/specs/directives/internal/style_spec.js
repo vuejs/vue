@@ -90,6 +90,20 @@ if (_.inBrowser) {
       expect(el.style.getPropertyValue('padding')).toBeFalsy()
     })
 
+    it('array of objects', function () {
+      el.style.padding = '10px'
+
+      dir.update([{color: 'red'}, {marginRight: '30px'}])
+      expect(el.style.getPropertyValue('color')).toBe('red')
+      expect(el.style.getPropertyValue('margin-right')).toBe('30px')
+      expect(el.style.getPropertyValue('padding')).toBe('10px')
+
+      dir.update([{color: 'blue'}, {padding: null}])
+      expect(el.style.getPropertyValue('color')).toBe('blue')
+      expect(el.style.getPropertyValue('margin-right')).toBeFalsy()
+      expect(el.style.getPropertyValue('padding')).toBeFalsy()
+    })
+
     it('updates object deep', function (done) {
       el.setAttribute('bind-style', 'divStyling')
       var vm = new Vue({
