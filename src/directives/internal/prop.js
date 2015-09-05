@@ -27,6 +27,7 @@ module.exports = {
         }
       }, {
         sync: true,
+        filters: prop.filters,
         // important: props need to be observed on the
         // v-for scope if present
         scope: this._scope

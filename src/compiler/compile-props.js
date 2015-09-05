@@ -1,4 +1,5 @@
 var _ = require('../util')
+var dirParser = require('../parsers/directive')
 var propDef = require('../directives/internal/prop')
 var propBindingModes = require('../config')._propBindingModes
 
@@ -19,7 +20,7 @@ var literalValueRE = /^(true|false)$|^\d.*|^'[^']*'$|^"[^"]*"$/
 module.exports = function compileProps (el, propOptions) {
   var props = []
   var i = propOptions.length
-  var options, name, attr, value, path, prop
+  var options, name, attr, value, path, parsed, prop
   while (i--) {
     options = propOptions[i]
     name = options.name
@@ -61,7 +62,9 @@ module.exports = function compileProps (el, propOptions) {
       value = prop.raw = el.getAttribute(attr)
       if (value !== null) {
         el.removeAttribute(attr)
-        value = value.trim()
+        parsed = dirParser.parse(value)
+        value = parsed.expression
+        prop.filters = parsed.filters
         // check binding type
         if (literalValueRE.test(value)) {
           // for bind- literals such as numbers and booleans,

@@ -37,6 +37,33 @@ if (_.inBrowser) {
       })
     })
 
+    it('with filters', function (done) {
+      var vm = new Vue({
+        el: el,
+        template: '<test name:="a | test"></test>',
+        data: {
+          a: 123
+        },
+        filters: {
+          test: function (v) {
+            return v * 2
+          }
+        },
+        components: {
+          test: {
+            props: ['name'],
+            template: '{{name}}'
+          }
+        }
+      })
+      expect(el.textContent).toBe('246')
+      vm.a = 234
+      _.nextTick(function () {
+        expect(el.textContent).toBe('468')
+        done()
+      })
+    })
+
     it('two-way binding', function (done) {
       var vm = new Vue({
         el: el,
