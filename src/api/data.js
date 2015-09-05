@@ -134,13 +134,25 @@ exports.$log = function (path) {
     ? Path.get(this._data, path)
     : this._data
   if (data) {
-    data = JSON.parse(JSON.stringify(data))
+    data = clean(data)
   }
   // include computed fields
   if (!path) {
     for (var key in this.$options.computed) {
-      data[key] = this[key]
+      data[key] = clean(this[key])
     }
   }
   console.log(data)
+}
+
+/**
+ * "clean" a getter/setter converted object into a plain
+ * object copy.
+ *
+ * @param {Object} - obj
+ * @return {Object}
+ */
+
+function clean (obj) {
+  return JSON.parse(JSON.stringify(obj))
 }
