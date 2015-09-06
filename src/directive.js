@@ -165,9 +165,8 @@ Directive.prototype.param = function (name) {
     this.el.removeAttribute(name)
     param = (this._scope || this.vm).$interpolate(param)
   } else {
-    param = this.el.getAttribute('bind-' + name)
+    param = _.getBindAttr(this.el, name)
     if (param != null) {
-      this.el.removeAttribute('bind-' + name)
       param = (this._scope || this.vm).$eval(param)
       process.env.NODE_ENV !== 'production' && _.log(
         'You are using bind- syntax on "' + name + '", which ' +

@@ -58,10 +58,8 @@ module.exports = function compileProps (el, propOptions) {
       el.removeAttribute(attr)
     } else {
       // then check dynamic version
-      attr = 'bind-' + attr
-      value = prop.raw = el.getAttribute(attr)
+      value = prop.raw = _.getBindAttr(el, attr)
       if (value !== null) {
-        el.removeAttribute(attr)
         parsed = dirParser.parse(value)
         value = parsed.expression
         prop.filters = parsed.filters

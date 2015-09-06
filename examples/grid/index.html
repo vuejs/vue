@@ -15,10 +15,10 @@
           <tr>
             <th v-for="key in columns"
               on-click="sortBy(key)"
-              bind-class="{active: sortKey == key}">
+              :class="{active: sortKey == key}">
               {{key | capitalize}}
               <span class="arrow"
-                bind-class="reversed[key] ? 'dsc' : 'asc'">
+                :class="reversed[key] ? 'dsc' : 'asc'">
               </span>
             </th>
           </tr>
@@ -42,9 +42,9 @@
         Search <input name="query" v-model="searchQuery">
       </form>
       <demo-grid
-        bind-data="gridData"
-        bind-columns="gridColumns"
-        bind-filter-key="searchQuery">
+        :data="gridData"
+        :columns="gridColumns"
+        :filter-key="searchQuery">
       </demo-grid>
     </div>
 

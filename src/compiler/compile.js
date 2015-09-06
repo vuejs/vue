@@ -11,6 +11,7 @@ var resolveAsset = _.resolveAsset
 // special binding prefixes
 var bindRE = /^bind-|^:/
 var onRE = /^on-/
+var specialAttrRE = /^(bind-|:)?(el|transition)$/
 
 // terminal directives
 var terminalDirectives = [
@@ -565,37 +566,31 @@ function compileDirectives (attrs, options) {
       }
     } else
 
-    // special case for el
-    if (name === 'el' || name === 'bind-el') {
-      pushDir('el', internalDirectives.el, {
-        literal: !bindRE.test(name)
+    // event handlers
+    if (onRE.test(name)) {
+      pushDir('on', internalDirectives.on, {
+        arg: name.replace(onRE, '')
       })
     } else
 
-    // special case for transition
-    if (name === 'transition' || name === 'bind-transition') {
-      pushDir('transition', internalDirectives.transition, {
+    // special attribtues: transition & el
+    if (specialAttrRE.test(name)) {
+      dirName = name.replace(bindRE, '')
+      pushDir(dirName, internalDirectives[dirName], {
         literal: !bindRE.test(name)
       })
     } else
 
     // attribute bindings
     if (bindRE.test(name)) {
-      var attributeName = name.replace(bindRE, '')
-      if (attributeName === 'style' || attributeName === 'class') {
-        pushDir(attributeName, internalDirectives[attributeName])
+      dirName = name.replace(bindRE, '')
+      if (dirName === 'style' || dirName === 'class') {
+        pushDir(dirName, internalDirectives[dirName])
       } else {
         pushDir('attr', internalDirectives.attr, {
-          arg: attributeName
+          arg: dirName
         })
       }
-    } else
-
-    // event handlers
-    if (onRE.test(name)) {
-      pushDir('on', internalDirectives.on, {
-        arg: name.replace(onRE, '')
-      })
     }
   }
 

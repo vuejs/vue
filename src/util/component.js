@@ -19,9 +19,8 @@ exports.checkComponent = function (el, options) {
       el.removeAttribute('is')
       return { id: exp }
     } else {
-      exp = el.getAttribute('bind-is')
+      exp = _.getBindAttr(el, 'is')
       if (exp != null) {
-        el.removeAttribute('bind-is')
         return { id: exp, dynamic: true }
       }
     }

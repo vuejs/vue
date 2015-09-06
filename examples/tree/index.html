@@ -28,7 +28,7 @@
     <script type="text/x-template" id="item-template">
       <li>
         <div
-          bind-class="{bold: isFolder}"
+          :class="{bold: isFolder}"
           on-click="toggle"
           on-dblclick="changeType">
           {{model.name}}
@@ -38,7 +38,7 @@
           <item
             class="item"
             v-for="model in model.children"
-            bind-model="model">
+            :model="model">
           </item>
           <li on-click="addChild">+</li>
         </ul>
@@ -51,7 +51,7 @@
     <ul id="demo">
       <item
         class="item"
-        bind-model="treeData">
+        :model="treeData">
       </item>
     </ul>
 
