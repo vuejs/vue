@@ -103,12 +103,10 @@ module.exports = function compileProps (el, propOptions) {
       }
     } else {
       // new syntax
-      attr = 'bind-' + attr
-      value = prop.raw = el.getAttribute(attr)
+      value = prop.raw = _.getBindAttr(el, attr)
       if (value !== null) {
         // mark it so we know this is a bind
         prop.bindSyntax = true
-        el.removeAttribute(attr)
         parsed = dirParser.parse(value)
         value = parsed.expression
         prop.filters = parsed.filters

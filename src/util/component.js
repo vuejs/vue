@@ -21,12 +21,11 @@ exports.checkComponent = function (el, options) {
       }
       el.removeAttribute('is')
     } else {
-      exp = el.getAttribute('bind-is')
+      exp = _.getBindAttr(el, 'is')
       if (exp != null) {
         // leverage literal dynamic for now.
         // TODO: make this cleaner
         exp = '{{' + exp + '}}'
-        el.removeAttribute('bind-is')
       }
     }
     return exp

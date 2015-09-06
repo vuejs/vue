@@ -25,7 +25,7 @@ module.exports = {
         this.insert(id)
       }
     } else {
-      id = el.getAttribute('bind-name')
+      id = el.getAttribute('bind-name') || el.getAttribute(':name')
       if (id) {
         this.setupDynamic(id)
       }

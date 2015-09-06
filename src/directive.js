@@ -67,12 +67,19 @@ Directive.prototype._bind = function () {
     // TODO simplify this
     if (name === 'attr') {
       this.el.removeAttribute('bind-' + this.arg)
+      this.el.removeAttribute(':' + this.arg)
     } else if (name === 'class' || name === 'style') {
       this.el.removeAttribute('bind-' + name)
+      this.el.removeAttribute(':' + name)
     } else if (name === 'on') {
       this.el.removeAttribute('on-' + this.arg)
     } else if (name === 'transition' || name === 'el') {
-      this.el.removeAttribute(this.arg ? 'bind-' + name : name)
+      if (this.arg) {
+        this.el.removeAttribute('bind-' + name)
+        this.el.removeAttribute(':' + name)
+      } else {
+        this.el.removeAttribute(name)
+      }
     }
   }
   if (typeof def === 'function') {
@@ -197,9 +204,8 @@ Directive.prototype.param = function (name) {
     this.el.removeAttribute(name)
     param = (this._scope || this.vm).$interpolate(param)
   } else {
-    param = this.el.getAttribute('bind-' + name)
+    param = _.getBindAttr(this.el, name)
     if (param != null) {
-      this.el.removeAttribute('bind-' + name)
       param = (this._scope || this.vm).$eval(param)
       process.env.NODE_ENV !== 'production' && _.log(
         'You are using bind- syntax on "' + name + '", which ' +

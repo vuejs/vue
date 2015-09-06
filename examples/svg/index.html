@@ -11,27 +11,27 @@
     <!-- template for the polygraph component. -->
     <script type="text/x-template" id="polygraph-template">
       <g>
-        <polygon bind-points="points"></polygon>
+        <polygon :points="points"></polygon>
         <circle cx="100" cy="100" r="80"></circle>
         <axis-label
           v-for="stat in stats"
-          bind-stat="stat"
-          bind-index="$index"
-          bind-total="stats.length">
+          :stat="stat"
+          :index="$index"
+          :total="stats.length">
         </axis-label>
       </g>
     </script>
 
     <!-- template for the axis label component. -->
     <script type="text/x-template" id="axis-label-template">
-      <text bind-x="point.x" bind-y="point.y">{{stat.label}}</text>
+      <text :x="point.x" :y="point.y">{{stat.label}}</text>
     </script>
 
     <!-- demo root element -->
     <div id="demo">
       <!-- Use the component -->
       <svg width="200" height="200">
-        <polygraph bind-stats="stats"></polygraph>
+        <polygraph :stats="stats"></polygraph>
       </svg>
       <!-- controls -->
       <div v-for="stat in stats">

@@ -9,7 +9,7 @@ var resolveAsset = _.resolveAsset
 var componentDef = require('../directives/component')
 
 // special binding prefixes
-var bindRE = /^bind-/
+var bindRE = /^bind-|^:/
 var onRE = /^on-/
 
 // terminal directives
@@ -586,7 +586,7 @@ function compileDirectives (attrs, options) {
     } else
 
     // special case for el
-    if (name === 'el' || name === 'bind-el') {
+    if (name === 'el' || name === 'bind-el' || name === ':el') {
       dirs.push({
         name: 'el',
         arg: bindRE.test(name),
@@ -596,7 +596,7 @@ function compileDirectives (attrs, options) {
     } else
 
     // special case for transition
-    if (name === 'transition' || name === 'bind-transition') {
+    if (name === 'transition' || name === 'bind-transition' || name === ':transition') {
       dirs.push({
         name: 'transition',
         arg: bindRE.test(name),

@@ -46,11 +46,33 @@ exports.inDoc = function (node) {
  *
  * @param {Node} node
  * @param {String} attr
+ * @return {String|null}
  */
 
 exports.attr = function (node, attr) {
   attr = config.prefix + attr
   var val = node.getAttribute(attr)
+  if (val !== null) {
+    node.removeAttribute(attr)
+  }
+  return val
+}
+
+/**
+ * Get an attribute with colon or bind- prefix.
+ *
+ * @param {Node} node
+ * @param {String} name
+ * @return {String|null}
+ */
+
+exports.getBindAttr = function (node, name) {
+  var attr = ':' + name
+  var val = node.getAttribute(attr)
+  if (val === null) {
+    attr = 'bind-' + name
+    val = node.getAttribute(attr)
+  }
   if (val !== null) {
     node.removeAttribute(attr)
   }
