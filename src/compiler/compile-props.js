@@ -6,7 +6,6 @@ var propBindingModes = require('../config')._propBindingModes
 // regexes
 var identRE = require('../parsers/path').identRE
 var settablePathRE = /^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\[[^\[\]]+\])*$/
-var literalValueRE = /^(true|false)$|^\d.*|^'[^']*'$|^"[^"]*"$/
 
 /**
  * Compile props on a root element and return
@@ -28,6 +27,7 @@ module.exports = function compileProps (el, propOptions) {
     if (process.env.NODE_ENV !== 'production' && name === '$data') {
       _.warn('Do not use $data as prop.')
       el.removeAttribute('$data')
+      el.removeAttribute(':$data')
       el.removeAttribute('bind-$data')
       continue
     }
@@ -66,7 +66,7 @@ module.exports = function compileProps (el, propOptions) {
         value = parsed.expression
         prop.filters = parsed.filters
         // check binding type
-        if (literalValueRE.test(value)) {
+        if (_.isLiteral(value)) {
           // for bind- literals such as numbers and booleans,
           // there's no need to setup a prop binding, so we
           // can optimize them as a one-time set.
@@ -160,7 +160,7 @@ function makePropsLinkFn (props) {
         }
       } else if (prop.optimizedLiteral) {
         // optimized literal, cast it and just set once
-        raw = _.stripQuotes(raw) || raw
+        raw = _.stripQuotes(raw)
         value = _.toBoolean(_.toNumber(raw))
         _.initProp(vm, prop, value)
       } else {

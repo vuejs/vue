@@ -1,6 +1,18 @@
 var Dep = require('../observer/dep')
 
 /**
+ * Check if an expression is a literal value.
+ *
+ * @param {String} exp
+ * @return {Boolean}
+ */
+
+var literalValueRE = /^\s?(true|false|[\d\.]+|'[^']*'|"[^"]*")\s?$/
+exports.isLiteral = function (exp) {
+  return literalValueRE.test(exp)
+}
+
+/**
  * Check is a string starts with $ or _
  *
  * @param {String} str
@@ -72,7 +84,7 @@ exports.stripQuotes = function (str) {
   var b = str.charCodeAt(str.length - 1)
   return a === b && (a === 0x22 || a === 0x27)
     ? str.slice(1, -1)
-    : false
+    : str
 }
 
 /**

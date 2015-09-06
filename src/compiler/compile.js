@@ -9,7 +9,7 @@ var templateParser = require('../parsers/template')
 var resolveAsset = _.resolveAsset
 
 // special binding prefixes
-var bindRE = /^bind-/
+var bindRE = /^bind-|^:/
 var onRE = /^on-/
 
 // terminal directives
@@ -552,21 +552,13 @@ function compileDirectives (attrs, options) {
     // Core directive
     if (name.indexOf(config.prefix) === 0) {
       dirName = name.slice(config.prefix.length)
-
-      // check literal directive
-      if (dirName.charAt(dirName.length - 1) === ':') {
-        dirName = dirName.slice(0, -1)
-        isLiteral = true
-      } else {
-        isLiteral = false
-      }
-
       dirDef = resolveAsset(options, 'directives', dirName)
-
       if (process.env.NODE_ENV !== 'production') {
         _.assertAsset(dirDef, 'directive', dirName)
       }
       if (dirDef) {
+        isLiteral = _.isLiteral(value)
+        if (isLiteral) value = _.stripQuotes(value)
         pushDir(dirName, dirDef, {
           literal: isLiteral
         })

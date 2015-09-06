@@ -2,6 +2,17 @@ var _ = require('../../../../src/util')
 
 describe('Util - Language Enhancement', function () {
 
+  it('isLiteral', function () {
+    expect(_.isLiteral('123')).toBe(true)
+    expect(_.isLiteral('12.3')).toBe(true)
+    expect(_.isLiteral('true')).toBe(true)
+    expect(_.isLiteral(' false ')).toBe(true)
+    expect(_.isLiteral('"hi"')).toBe(true)
+    expect(_.isLiteral(" 'whatt' ")).toBe(true)
+    expect(_.isLiteral('a.b.c')).toBe(false)
+    expect(_.isLiteral('1 + 1')).toBe(false)
+  })
+
   it('toString', function () {
     expect(_.toString('hi')).toBe('hi')
     expect(_.toString(1.234)).toBe('1.234')
@@ -21,7 +32,7 @@ describe('Util - Language Enhancement', function () {
   it('strip quotes', function () {
     expect(_.stripQuotes('"123"')).toBe('123')
     expect(_.stripQuotes("'fff'")).toBe('fff')
-    expect(_.stripQuotes("'fff")).toBe(false)
+    expect(_.stripQuotes("'fff")).toBe("'fff")
   })
 
   it('camelize', function () {

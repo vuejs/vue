@@ -44,7 +44,7 @@ function processFilterArg (arg) {
   var stripped = reservedArgRE.test(arg)
     ? arg
     : _.stripQuotes(arg)
-  var dynamic = stripped === false
+  var dynamic = stripped === arg
   return {
     value: dynamic ? arg : stripped,
     dynamic: dynamic

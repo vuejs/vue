@@ -49,7 +49,7 @@ if (_.inBrowser) {
 
     it('normal directives', function () {
       el.setAttribute('v-a', 'b')
-      el.innerHTML = '<p v-a="a" v-b="b">hello</p><div v-b:="b"></div>'
+      el.innerHTML = '<p v-a="a" v-b="b">hello</p><div v-b="1"></div>'
       var defA = { priority: 1 }
       var defB = { priority: 2 }
       var options = _.mergeOptions(Vue.options, {
@@ -89,7 +89,7 @@ if (_.inBrowser) {
       // 4
       args = vm._bindDir.calls.argsFor(3)
       expect(args[0].name).toBe('b')
-      expect(args[0].expression).toBe('b')
+      expect(args[0].expression).toBe('1')
       expect(args[0].def).toBe(defB)
       expect(args[0].literal).toBe(true)
       expect(args[1]).toBe(el.lastChild)
