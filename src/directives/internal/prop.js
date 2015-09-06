@@ -26,7 +26,6 @@ module.exports = {
           child[childKey] = val
         }
       }, {
-        sync: true,
         filters: prop.filters,
         // important: props need to be observed on the
         // v-for scope if present
@@ -48,7 +47,7 @@ module.exports = {
           childKey,
           function (val) {
             parent.$set(parentKey, val)
-          }, { sync: true }
+          }
         )
       })
     }
