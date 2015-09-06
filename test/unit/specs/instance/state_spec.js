@@ -101,7 +101,7 @@ describe('Instance state initialization', function () {
       expect(vm.hasOwnProperty('a')).toBe(false)
     })
 
-    it('replace $data and handle props', function () {
+    it('replace $data and handle props', function (done) {
       var el = document.createElement('div')
       var vm = new Vue({
         el: el,
@@ -143,13 +143,16 @@ describe('Instance state initialization', function () {
       expect(child.a).toBe(2)
       expect(child.b).toBe(3)
       expect(child.c).toBe(4)
-      // assert parent state
-      // one-way
-      expect(vm.a).toBe(1)
-      // one-time
-      expect(vm.b).toBe(2)
-      // two-way
-      expect(vm.c).toBe(4)
+      Vue.nextTick(function () {
+        // assert parent state
+        // one-way
+        expect(vm.a).toBe(1)
+        // one-time
+        expect(vm.b).toBe(2)
+        // two-way
+        expect(vm.c).toBe(4)
+        done()
+      })
     })
   })
 
