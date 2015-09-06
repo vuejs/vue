@@ -71,8 +71,8 @@ Directive.prototype._bind = function () {
       this.el.removeAttribute('bind-' + name)
     } else if (name === 'on') {
       this.el.removeAttribute('on-' + this.arg)
-    } else if (name === 'transition') {
-      this.el.removeAttribute(name)
+    } else if (name === 'transition' || name === 'el') {
+      this.el.removeAttribute(this.arg ? 'bind-' + name : name)
     }
   }
   if (typeof def === 'function') {
@@ -134,6 +134,16 @@ Directive.prototype._bind = function () {
 Directive.prototype._checkDynamicLiteral = function () {
   var expression = this.expression
   if (expression && this.isLiteral) {
+
+    if (process.env.NODE_ENV !== 'production') {
+      if (this.name !== 'el' &&
+          this.name !== 'ref' &&
+          this.name !== 'transition' &&
+          this.name !== 'component') {
+        _.deprecation.LITERAL()
+      }
+    }
+
     var tokens = textParser.parse(expression)
     if (tokens) {
       var exp = textParser.tokensToExp(tokens)

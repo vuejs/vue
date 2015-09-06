@@ -213,6 +213,13 @@ if (process.env.NODE_ENV !== 'production') {
         'The global "interpolate" config will be deprecated in 1.0.0. Use "v-pre" ' +
         'on elements that should be skipped by the template compiler.'
       )
+    },
+
+    LITERAL: function () {
+      warn(
+        'Literal directives will be deprecated in 1.0.0. Just add quotes if ' +
+        'you want to pass a literal string to the directive.'
+      )
     }
 
   }
