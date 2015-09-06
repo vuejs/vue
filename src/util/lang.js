@@ -1,7 +1,7 @@
 var Dep = require('../observer/dep')
 
 /**
- * Check is a string starts with $ or _
+ * Check if a string starts with $ or _
  *
  * @param {String} str
  * @return {Boolean}
