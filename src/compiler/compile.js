@@ -575,6 +575,16 @@ function compileDirectives (attrs, options) {
       }
     } else
 
+    // event handlers
+    if (onRE.test(name)) {
+      dirs.push({
+        name: 'on',
+        arg: name.replace(onRE, ''),
+        descriptors: [newDirParser.parse(value)],
+        def: options.directives.on
+      })
+    } else
+
     // special case for el
     if (name === 'el' || name === 'bind-el') {
       dirs.push({
@@ -593,7 +603,7 @@ function compileDirectives (attrs, options) {
         descriptors: [newDirParser.parse(value)],
         def: options.directives.transition
       })
-    }
+    } else
 
     // attribute bindings
     if (bindRE.test(name)) {
@@ -610,16 +620,6 @@ function compileDirectives (attrs, options) {
         arg: arg,
         descriptors: [newDirParser.parse(value)],
         def: options.directives[dirName]
-      })
-    } else
-
-    // event handlers
-    if (onRE.test(name)) {
-      dirs.push({
-        name: 'on',
-        arg: name.replace(onRE, ''),
-        descriptors: [newDirParser.parse(value)],
-        def: options.directives.on
       })
     } else
 
