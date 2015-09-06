@@ -40,7 +40,7 @@ if (_.inBrowser) {
     it('with filters', function (done) {
       var vm = new Vue({
         el: el,
-        template: '<test name:="a | test"></test>',
+        template: '<test bind-name="a | test"></test>',
         data: {
           a: 123
         },
