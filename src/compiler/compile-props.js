@@ -8,7 +8,7 @@ var propBindingModes = require('../config')._propBindingModes
 var identRE = require('../parsers/path').identRE
 var dataAttrRE = /^data-/
 var settablePathRE = /^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\[[^\[\]]+\])*$/
-var literalValueRE = /^(true|false)$|^\d.*/
+var literalValueRE = /^\s?(true|false|[\d\.]+|'[^']*'|"[^"]*")\s?$/
 
 /**
  * Compile props on a root element and return
