@@ -26,7 +26,7 @@ var expParser = require('./parsers/expression')
 
 // TODO: 1.0.0 cleanup the arguments
 
-function Directive (name, el, vm, descriptor, def, host, scope, frag, arg) {
+function Directive (name, el, vm, descriptor, def, host, scope, frag, arg, literal) {
   // public
   this.name = name
   this.el = el
@@ -45,6 +45,8 @@ function Directive (name, el, vm, descriptor, def, host, scope, frag, arg) {
   this._host = host
   this._scope = scope
   this._frag = frag
+  // literal
+  this._literal = literal
 }
 
 /**
@@ -92,10 +94,14 @@ Directive.prototype._bind = function () {
   if (this.bind) {
     this.bind()
   }
-  if (this._watcherExp &&
-      (this.update || this.twoWay) &&
-      (!this.isLiteral || this._isDynamicLiteral) &&
-      !this._checkStatement()) {
+  if (this._literal) {
+    this.update && this.update(this.expression)
+  } else if (
+    this._watcherExp &&
+    (this.update || this.twoWay) &&
+    (!this.isLiteral || this._isDynamicLiteral) &&
+    !this._checkStatement()
+  ) {
     // wrapped updater for context
     var dir = this
     var update = this._update = this.update

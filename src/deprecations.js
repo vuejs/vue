@@ -217,8 +217,8 @@ if (process.env.NODE_ENV !== 'production') {
 
     LITERAL: function () {
       warn(
-        'Literal directives will be deprecated in 1.0.0. Just add quotes if ' +
-        'you want to pass a literal string to the directive.'
+        'It is no longer necessary to declare literal directives in 1.0.0. Just ' +
+        'use the dot-equal syntax (v-dir.="string") to indicate a literal value.'
       )
     }
 

@@ -71,6 +71,17 @@ describe('Directive', function () {
     expect(d.update).not.toHaveBeenCalled()
   })
 
+  it('static literal (new syntax)', function () {
+    var d = new Directive('test', el, vm, {
+      expression: 'a'
+    }, def, null, null, null, null, true)
+    d._bind()
+    expect(d._watcher).toBeUndefined()
+    expect(d.expression).toBe('a')
+    expect(d.bind).toHaveBeenCalled()
+    expect(d.update).toHaveBeenCalledWith('a')
+  })
+
   it('static literal, interpolate with no update', function () {
     def.isLiteral = true
     delete def.update

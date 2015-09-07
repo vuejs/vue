@@ -50,7 +50,7 @@ if (_.inBrowser) {
 
     it('normal directives', function () {
       el.setAttribute('v-a', 'b')
-      el.innerHTML = '<p v-a="a" v-b="b">hello</p><div v-b="b"></div>'
+      el.innerHTML = '<p v-a="a" v-b="b">hello</p><div v-b.="b"></div>'
       var defA = { priority: 1 }
       var defB = { priority: 2 }
       var descriptorA = dirParser.parse('a')[0]
@@ -66,10 +66,10 @@ if (_.inBrowser) {
       linker(vm, el)
       expect(directiveBind.calls.count()).toBe(4)
       expect(vm._bindDir.calls.count()).toBe(4)
-      expect(vm._bindDir).toHaveBeenCalledWith('a', el, descriptorB, defA, undefined, undefined, undefined, undefined)
-      expect(vm._bindDir).toHaveBeenCalledWith('a', el.firstChild, descriptorA, defA, undefined, undefined, undefined, undefined)
-      expect(vm._bindDir).toHaveBeenCalledWith('b', el.firstChild, descriptorB, defB, undefined, undefined, undefined, undefined)
-      expect(vm._bindDir).toHaveBeenCalledWith('b', el.lastChild, descriptorB, defB, undefined, undefined, undefined, undefined)
+      expect(vm._bindDir).toHaveBeenCalledWith('a', el, descriptorB, defA, undefined, undefined, undefined, undefined, false)
+      expect(vm._bindDir).toHaveBeenCalledWith('a', el.firstChild, descriptorA, defA, undefined, undefined, undefined, undefined, false)
+      expect(vm._bindDir).toHaveBeenCalledWith('b', el.firstChild, descriptorB, defB, undefined, undefined, undefined, undefined, false)
+      expect(vm._bindDir).toHaveBeenCalledWith('b', el.lastChild, descriptorB, defB, undefined, undefined, undefined, undefined, true)
       // check the priority sorting
       // the "b"s should be called first!
       expect(directiveBind.calls.argsFor(0)[0]).toBe('b')
@@ -88,9 +88,9 @@ if (_.inBrowser) {
       var linker = compile(el, Vue.options)
       linker(vm, el)
       expect(vm._bindDir.calls.count()).toBe(3)
-      expect(vm._bindDir).toHaveBeenCalledWith('class', el, descA, Vue.options.directives.class, undefined, undefined, undefined, undefined)
-      expect(vm._bindDir).toHaveBeenCalledWith('style', el, descB, Vue.options.directives.style, undefined, undefined, undefined, undefined)
-      expect(vm._bindDir).toHaveBeenCalledWith('attr', el, descC, Vue.options.directives.attr, undefined, undefined, undefined, 'title')
+      expect(vm._bindDir).toHaveBeenCalledWith('class', el, descA, Vue.options.directives.class, undefined, undefined, undefined, undefined, undefined)
+      expect(vm._bindDir).toHaveBeenCalledWith('style', el, descB, Vue.options.directives.style, undefined, undefined, undefined, undefined, undefined)
+      expect(vm._bindDir).toHaveBeenCalledWith('attr', el, descC, Vue.options.directives.attr, undefined, undefined, undefined, 'title', undefined)
     })
 
     it('on- syntax', function () {
@@ -99,7 +99,7 @@ if (_.inBrowser) {
       var linker = compile(el, Vue.options)
       linker(vm, el)
       expect(vm._bindDir.calls.count()).toBe(1)
-      expect(vm._bindDir).toHaveBeenCalledWith('on', el, desc, Vue.options.directives.on, undefined, undefined, undefined, 'click')
+      expect(vm._bindDir).toHaveBeenCalledWith('on', el, desc, Vue.options.directives.on, undefined, undefined, undefined, 'click', undefined)
     })
 
     it('text interpolation', function () {
