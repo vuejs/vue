@@ -1,5 +1,5 @@
 /*!
- * Vue.js v1.0.0-alpha.2
+ * Vue.js v1.0.0-alpha.3
  * (c) 2015 Evan You
  * Released under the MIT License.
  */
@@ -464,7 +464,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	exports.indexOf = function (arr, obj) {
-	  for (var i = 0, l = arr.length; i < l; i++) {
+	  var i = arr.length
+	  while (i--) {
 	    if (arr[i] === obj) return i
 	  }
 	  return -1
@@ -717,11 +718,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *
 	 * @param {Node} node
 	 * @param {String} attr
+	 * @return {String|null}
 	 */
 
 	exports.attr = function (node, attr) {
 	  attr = config.prefix + attr
 	  var val = node.getAttribute(attr)
+	  if (val !== null) {
+	    node.removeAttribute(attr)
+	  }
+	  return val
+	}
+
+	/**
+	 * Get an attribute with colon or bind- prefix.
+	 *
+	 * @param {Node} node
+	 * @param {String} name
+	 * @return {String|null}
+	 */
+
+	exports.getBindAttr = function (node, name) {
+	  var attr = ':' + name
+	  var val = node.getAttribute(attr)
+	  if (val === null) {
+	    attr = 'bind-' + name
+	    val = node.getAttribute(attr)
+	  }
 	  if (val !== null) {
 	    node.removeAttribute(attr)
 	  }
@@ -1484,12 +1507,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	      el.removeAttribute('is')
 	    } else {
-	      exp = el.getAttribute('bind-is')
+	      exp = _.getBindAttr(el, 'is')
 	      if (exp != null) {
 	        // leverage literal dynamic for now.
 	        // TODO: make this cleaner
 	        exp = '{{' + exp + '}}'
-	        el.removeAttribute('bind-is')
 	      }
 	    }
 	    return exp
@@ -1756,11 +1778,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    V_TRANSITION: function () {
 	      warn(
 	        'v-transition will no longer be a directive in 1.0.0; It will become a ' +
-	        'special attribute without the prefix. Use "transition" instead. Also, ' +
-	        'it will no longer attach the .v-transition class, but instead leave ' +
-	        'the transition attribute on the element. If you were using the ' +
-	        '".name-transition" CSS selector before, you should now use the ' +
-	        '"[transition="name"]" selector instead.' +
+	        'special attribute without the prefix. Use "transition" instead.' +
 	        newBindingSyntaxLink
 	      )
 	    },
@@ -1811,9 +1829,24 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    PROPS: function (attr, value) {
 	      warn(
-	        'Prop ' + attr + '="' + value + '" should be prefixed with "prop-" and ' +
-	        'bound as expression in 1.0.0. ' +
-	        'For more details, see https://github.com/yyx990803/vue/issues/1173'
+	        'Prop ' + attr + '="' + value + '": props no longer use mustache tags ' +
+	        'to indicate a dynamic binding. Use the "bind-" prefix instead.' +
+	        newBindingSyntaxLink
+	      )
+	    },
+
+	    DATA_PROPS: function (attr, value) {
+	      warn(
+	        'Prop ' + attr + '="' + value + '": props will no longer support the ' +
+	        '"data-" prefix in 1.0.0.' + newBindingSyntaxLink
+	      )
+	    },
+
+	    PROP_CASTING: function (attr, value) {
+	      warn(
+	        'Prop ' + attr + '="' + value + '": literal props will no longer be ' +
+	        'auto-casted into booleans/numbers in 1.0.0 - they will all be treated ' +
+	        'as literal strings. Use "bind-" syntax for boolean/number literals instead.'
 	      )
 	    },
 
@@ -1841,7 +1874,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    KEY_FILTER: function () {
 	      warn(
 	        'The "key" filter will be deprecated in 1.0.0. Use the new ' +
-	        'on-keyup:key="handler" syntax instead.'
+	        'on-keyup-key="handler" syntax instead.'
 	      )
 	    },
 
@@ -1874,6 +1907,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	      warn(
 	        'The global "interpolate" config will be deprecated in 1.0.0. Use "v-pre" ' +
 	        'on elements that should be skipped by the template compiler.'
+	      )
+	    },
+
+	    LITERAL: function () {
+	      warn(
+	        'It is no longer necessary to declare literal directives in 1.0.0. Just ' +
+	        'use the dot-equal syntax (v-dir.="string") to indicate a literal value.'
 	      )
 	    }
 
@@ -1910,11 +1950,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.compiler = __webpack_require__(12)
 
 	exports.parsers = {
-	  path: __webpack_require__(21),
-	  text: __webpack_require__(15),
+	  path: __webpack_require__(22),
+	  text: __webpack_require__(17),
 	  template: __webpack_require__(25),
-	  directive: __webpack_require__(17),
-	  expression: __webpack_require__(20)
+	  directive: __webpack_require__(18),
+	  expression: __webpack_require__(21)
 	}
 
 	/**
@@ -2041,16 +2081,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _ = __webpack_require__(1)
 	var compileProps = __webpack_require__(14)
 	var config = __webpack_require__(6)
-	var textParser = __webpack_require__(15)
-	var dirParser = __webpack_require__(17)
-	var newDirParser = __webpack_require__(24)
+	var textParser = __webpack_require__(17)
+	var dirParser = __webpack_require__(18)
+	var newDirParser = __webpack_require__(15)
 	var templateParser = __webpack_require__(25)
 	var resolveAsset = _.resolveAsset
 	var componentDef = __webpack_require__(26)
 
 	// special binding prefixes
-	var propRE = /^prop-/
-	var bindRE = /^bind-/
+	var bindRE = /^bind-|^:/
 	var onRE = /^on-/
 
 	// terminal directives
@@ -2579,7 +2618,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	function compileDirectives (attrs, options) {
 	  var i = attrs.length
 	  var dirs = []
-	  var attr, name, value, dir, dirName, dirDef, arg
+	  var attr, name, value, dir, dirName, dirDef, isLiteral, arg
 	  while (i--) {
 	    attr = attrs[i]
 	    name = attr.name
@@ -2587,6 +2626,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // Core directive
 	    if (name.indexOf(config.prefix) === 0) {
 	      dirName = name.slice(config.prefix.length)
+
+	      // check literal
+	      if (dirName.charAt(dirName.length - 1) === '.') {
+	        isLiteral = true
+	        dirName = dirName.slice(0, -1)
+	      } else {
+	        isLiteral = false
+	      }
+
 	      dirDef = resolveAsset(options, 'directives', dirName)
 	      if (true) {
 	        _.assertAsset(dirDef, 'directive', dirName)
@@ -2611,18 +2659,39 @@ return /******/ (function(modules) { // webpackBootstrap
 	        dirs.push({
 	          name: dirName,
 	          descriptors: dirParser.parse(value),
-	          def: dirDef
+	          def: dirDef,
+	          literal: isLiteral
 	        })
 	      }
 	    } else
 
-	    // speical case for el
-	    if (name === 'el' || name === 'bind-el') {
+	    // event handlers
+	    if (onRE.test(name)) {
+	      dirs.push({
+	        name: 'on',
+	        arg: name.replace(onRE, ''),
+	        descriptors: [newDirParser.parse(value)],
+	        def: options.directives.on
+	      })
+	    } else
+
+	    // special case for el
+	    if (name === 'el' || name === 'bind-el' || name === ':el') {
 	      dirs.push({
 	        name: 'el',
 	        arg: bindRE.test(name),
 	        descriptors: [newDirParser.parse(value)],
 	        def: options.directives.el
+	      })
+	    } else
+
+	    // special case for transition
+	    if (name === 'transition' || name === 'bind-transition' || name === ':transition') {
+	      dirs.push({
+	        name: 'transition',
+	        arg: bindRE.test(name),
+	        descriptors: [newDirParser.parse(value)],
+	        def: options.directives.transition
 	      })
 	    } else
 
@@ -2642,25 +2711,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        descriptors: [newDirParser.parse(value)],
 	        def: options.directives[dirName]
 	      })
-	    } else
-
-	    // event handlers
-	    if (onRE.test(name)) {
-	      dirs.push({
-	        name: 'on',
-	        arg: name.replace(onRE, ''),
-	        descriptors: [newDirParser.parse(value)],
-	        def: options.directives.on
-	      })
-	    } else
-
-	    // should not see props here
-	    /* istanbul ignore if */
-	    if (("development") !== 'production' && propRE.test(name)) {
-	      _.warn(
-	        name + '="' + value + '" is not compiled. The prop is either not declared ' +
-	        'on the child component, or is used on a non-component element.'
-	      )
 	    } else
 
 	    // TODO: remove this in 1.0.0
@@ -2701,7 +2751,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        k = dir.descriptors.length
 	        for (j = 0; j < k; j++) {
 	          vm._bindDir(dir.name, el,
-	            dir.descriptors[j], dir.def, host, scope, frag, dir.arg)
+	            dir.descriptors[j], dir.def, host, scope, frag, dir.arg, dir.literal)
 	        }
 	      }
 	    }
@@ -2767,15 +2817,16 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var textParser = __webpack_require__(15)
-	var propDef = __webpack_require__(18)
+	var dirParser = __webpack_require__(15)
+	var textParser = __webpack_require__(17)
+	var propDef = __webpack_require__(19)
 	var propBindingModes = __webpack_require__(6)._propBindingModes
 
 	// regexes
-	var identRE = __webpack_require__(21).identRE
+	var identRE = __webpack_require__(22).identRE
 	var dataAttrRE = /^data-/
 	var settablePathRE = /^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\[[^\[\]]+\])*$/
-	var literalValueRE = /^(true|false)$|^\d.*/
+	var literalValueRE = /^\s?(true|false|[\d\.]+|'[^']*'|"[^"]*")\s?$/
 
 	/**
 	 * Compile props on a root element and return
@@ -2792,7 +2843,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = function compileProps (el, propOptions) {
 	  var props = []
 	  var i = propOptions.length
-	  var options, name, attr, value, path, prop, literal, single
+	  var options, name, attr, value, path, prop, literal, single, parsed
 	  while (i--) {
 	    options = propOptions[i]
 	    name = options.name
@@ -2817,16 +2868,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    attr = _.hyphenate(name)
 	    value = el.getAttribute(attr)
 
-	    if (value !== null && ("development") !== 'production') {
-	      _.deprecation.PROPS(attr, value)
-	    }
-
 	    if (value === null) {
 	      value = el.getAttribute('data-' + attr)
 	      if (value !== null) {
 	        attr = 'data-' + attr
 	        if (true) {
-	          _.deprecation.PROPS(attr, value)
+	          _.deprecation.DATA_PROPS(attr, value)
 	        }
 	      }
 	    }
@@ -2845,6 +2892,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      el.removeAttribute(attr)
 	      var tokens = textParser.parse(value)
 	      if (tokens) {
+
+	        if (true) {
+	          _.deprecation.PROPS(attr, value)
+	        }
+
 	        prop.dynamic = true
 	        prop.parentPath = textParser.tokensToExp(tokens)
 	        // check prop binding type.
@@ -2868,30 +2920,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	      }
 	    } else {
-	      // new prop- syntax
-	      attr = 'prop-' + attr
-	      value = prop.raw = el.getAttribute(attr)
+	      // new syntax
+	      value = prop.raw = _.getBindAttr(el, attr)
 	      if (value !== null) {
-	        el.removeAttribute(attr)
+	        // mark it so we know this is a bind
+	        prop.bindSyntax = true
+	        parsed = dirParser.parse(value)
+	        value = parsed.expression
+	        prop.filters = parsed.filters
 	        // check binding type
 	        if (literalValueRE.test(value)) {
 	          prop.mode = propBindingModes.ONE_TIME
-	        } else if (value.charAt(0) === '*') {
-	          prop.mode = propBindingModes.ONE_TIME
-	          value = value.slice(1)
-	        } else if (value.charAt(0) === '@') {
-	          value = value.slice(1)
-	          if (settablePathRE.test(value)) {
-	            prop.mode = propBindingModes.TWO_WAY
-	          } else {
-	            ("development") !== 'production' && _.warn(
-	              'Cannot bind two-way prop with non-settable ' +
-	              'parent path: ' + value
-	            )
+	        } else {
+	          prop.dynamic = true
+	          if (value.charAt(0) === '*') {
+	            prop.mode = propBindingModes.ONE_TIME
+	            value = value.slice(1).trim()
+	          } else if (value.charAt(0) === '@') {
+	            value = value.slice(1).trim()
+	            if (settablePathRE.test(value)) {
+	              prop.mode = propBindingModes.TWO_WAY
+	            } else {
+	              ("development") !== 'production' && _.warn(
+	                'Cannot bind two-way prop with non-settable ' +
+	                'parent path: ' + value
+	              )
+	            }
 	          }
 	        }
 	      }
-	      prop.dynamic = true
 	      prop.parentPath = value
 	    }
 
@@ -2961,13 +3018,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	      } else {
 	        // literal, cast it and just set once
 	        var raw = prop.raw
-	        value = options.type === Boolean && raw === ''
-	          ? true
-	          // do not cast emptry string.
-	          // _.toNumber casts empty string to 0.
-	          : raw.trim()
-	            ? _.toBoolean(_.toNumber(raw))
-	            : raw
+	        if (options.type === Boolean && raw === '') {
+	          value = true
+	        } else if (raw.trim()) {
+	          value = _.toBoolean(_.toNumber(raw))
+	          if (("development") !== 'production' &&
+	              !prop.bindSyntax &&
+	              value !== raw) {
+	            _.deprecation.PROP_CASTING(prop.name, prop.raw)
+	          }
+	        } else {
+	          value = raw
+	        }
 	        _.initProp(vm, prop, value)
 	      }
 	    }
@@ -3009,9 +3071,262 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
+	var _ = __webpack_require__(1)
+	var Cache = __webpack_require__(16)
+	var cache = new Cache(1000)
+	var filterTokenRE = /[^\s'"]+|'[^']*'|"[^"]*"/g
+	var reservedArgRE = /^in$|^-?\d+/
+
+	/**
+	 * Parser state
+	 */
+
+	var str, dir
+	var c, i, l, lastFilterIndex
+	var inSingle, inDouble, curly, square, paren
+
+	/**
+	 * Push a filter to the current directive object
+	 */
+
+	function pushFilter () {
+	  var exp = str.slice(lastFilterIndex, i).trim()
+	  var filter
+	  if (exp) {
+	    filter = {}
+	    var tokens = exp.match(filterTokenRE)
+	    filter.name = tokens[0]
+	    if (tokens.length > 1) {
+	      filter.args = tokens.slice(1).map(processFilterArg)
+	    }
+	  }
+	  if (filter) {
+	    (dir.filters = dir.filters || []).push(filter)
+	  }
+	  lastFilterIndex = i + 1
+	}
+
+	/**
+	 * Check if an argument is dynamic and strip quotes.
+	 *
+	 * @param {String} arg
+	 * @return {Object}
+	 */
+
+	function processFilterArg (arg) {
+	  var stripped = reservedArgRE.test(arg)
+	    ? arg
+	    : _.stripQuotes(arg)
+	  var dynamic = stripped === false
+	  return {
+	    value: dynamic ? arg : stripped,
+	    dynamic: dynamic
+	  }
+	}
+
+	/**
+	 * Parse a directive value and extract the expression
+	 * and its filters into a descriptor.
+	 *
+	 * Example:
+	 *
+	 * "a + 1 | uppercase" will yield:
+	 * {
+	 *   expression: 'a + 1',
+	 *   filters: [
+	 *     { name: 'uppercase', args: null }
+	 *   ]
+	 * }
+	 *
+	 * @param {String} str
+	 * @return {Object}
+	 */
+
+	exports.parse = function (s) {
+
+	  var hit = cache.get(s)
+	  if (hit) {
+	    return hit
+	  }
+
+	  // reset parser state
+	  str = s
+	  inSingle = inDouble = false
+	  curly = square = paren = 0
+	  lastFilterIndex = 0
+	  dir = {}
+
+	  for (i = 0, l = str.length; i < l; i++) {
+	    c = str.charCodeAt(i)
+	    if (inSingle) {
+	      // check single quote
+	      if (c === 0x27) inSingle = !inSingle
+	    } else if (inDouble) {
+	      // check double quote
+	      if (c === 0x22) inDouble = !inDouble
+	    } else if (
+	      c === 0x7C && // pipe
+	      str.charCodeAt(i + 1) !== 0x7C &&
+	      str.charCodeAt(i - 1) !== 0x7C
+	    ) {
+	      if (dir.expression == null) {
+	        // first filter, end of expression
+	        lastFilterIndex = i + 1
+	        dir.expression = str.slice(0, i).trim()
+	      } else {
+	        // already has filter
+	        pushFilter()
+	      }
+	    } else {
+	      switch (c) {
+	        case 0x22: inDouble = true; break // "
+	        case 0x27: inSingle = true; break // '
+	        case 0x28: paren++; break         // (
+	        case 0x29: paren--; break         // )
+	        case 0x5B: square++; break        // [
+	        case 0x5D: square--; break        // ]
+	        case 0x7B: curly++; break         // {
+	        case 0x7D: curly--; break         // }
+	      }
+	    }
+	  }
+
+	  if (dir.expression == null) {
+	    dir.expression = str.slice(0, i).trim()
+	  } else if (lastFilterIndex !== 0) {
+	    pushFilter()
+	  }
+
+	  cache.put(s, dir)
+	  return dir
+	}
+
+
+/***/ },
+/* 16 */
+/***/ function(module, exports) {
+
+	/**
+	 * A doubly linked list-based Least Recently Used (LRU)
+	 * cache. Will keep most recently used items while
+	 * discarding least recently used items when its limit is
+	 * reached. This is a bare-bone version of
+	 * Rasmus Andersson's js-lru:
+	 *
+	 *   https://github.com/rsms/js-lru
+	 *
+	 * @param {Number} limit
+	 * @constructor
+	 */
+
+	function Cache (limit) {
+	  this.size = 0
+	  this.limit = limit
+	  this.head = this.tail = undefined
+	  this._keymap = Object.create(null)
+	}
+
+	var p = Cache.prototype
+
+	/**
+	 * Put <value> into the cache associated with <key>.
+	 * Returns the entry which was removed to make room for
+	 * the new entry. Otherwise undefined is returned.
+	 * (i.e. if there was enough room already).
+	 *
+	 * @param {String} key
+	 * @param {*} value
+	 * @return {Entry|undefined}
+	 */
+
+	p.put = function (key, value) {
+	  var entry = {
+	    key: key,
+	    value: value
+	  }
+	  this._keymap[key] = entry
+	  if (this.tail) {
+	    this.tail.newer = entry
+	    entry.older = this.tail
+	  } else {
+	    this.head = entry
+	  }
+	  this.tail = entry
+	  if (this.size === this.limit) {
+	    return this.shift()
+	  } else {
+	    this.size++
+	  }
+	}
+
+	/**
+	 * Purge the least recently used (oldest) entry from the
+	 * cache. Returns the removed entry or undefined if the
+	 * cache was empty.
+	 */
+
+	p.shift = function () {
+	  var entry = this.head
+	  if (entry) {
+	    this.head = this.head.newer
+	    this.head.older = undefined
+	    entry.newer = entry.older = undefined
+	    this._keymap[entry.key] = undefined
+	  }
+	  return entry
+	}
+
+	/**
+	 * Get and register recent use of <key>. Returns the value
+	 * associated with <key> or undefined if not in cache.
+	 *
+	 * @param {String} key
+	 * @param {Boolean} returnEntry
+	 * @return {Entry|*}
+	 */
+
+	p.get = function (key, returnEntry) {
+	  var entry = this._keymap[key]
+	  if (entry === undefined) return
+	  if (entry === this.tail) {
+	    return returnEntry
+	      ? entry
+	      : entry.value
+	  }
+	  // HEAD--------------TAIL
+	  //   <.older   .newer>
+	  //  <--- add direction --
+	  //   A  B  C  <D>  E
+	  if (entry.newer) {
+	    if (entry === this.head) {
+	      this.head = entry.newer
+	    }
+	    entry.newer.older = entry.older // C <-- E.
+	  }
+	  if (entry.older) {
+	    entry.older.newer = entry.newer // C. --> E
+	  }
+	  entry.newer = undefined // D --x
+	  entry.older = this.tail // D. --> E
+	  if (this.tail) {
+	    this.tail.newer = entry // E. <-- D
+	  }
+	  this.tail = entry
+	  return returnEntry
+	    ? entry
+	    : entry.value
+	}
+
+	module.exports = Cache
+
+
+/***/ },
+/* 17 */
+/***/ function(module, exports, __webpack_require__) {
+
 	var Cache = __webpack_require__(16)
 	var config = __webpack_require__(6)
-	var dirParser = __webpack_require__(17)
+	var dirParser = __webpack_require__(18)
 	var regexEscapeRE = /[-.*+?^${}()|[\]\/\\]/g
 	var cache, tagRE, htmlRE, firstChar, lastChar
 
@@ -3188,125 +3503,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 16 */
-/***/ function(module, exports) {
-
-	/**
-	 * A doubly linked list-based Least Recently Used (LRU)
-	 * cache. Will keep most recently used items while
-	 * discarding least recently used items when its limit is
-	 * reached. This is a bare-bone version of
-	 * Rasmus Andersson's js-lru:
-	 *
-	 *   https://github.com/rsms/js-lru
-	 *
-	 * @param {Number} limit
-	 * @constructor
-	 */
-
-	function Cache (limit) {
-	  this.size = 0
-	  this.limit = limit
-	  this.head = this.tail = undefined
-	  this._keymap = Object.create(null)
-	}
-
-	var p = Cache.prototype
-
-	/**
-	 * Put <value> into the cache associated with <key>.
-	 * Returns the entry which was removed to make room for
-	 * the new entry. Otherwise undefined is returned.
-	 * (i.e. if there was enough room already).
-	 *
-	 * @param {String} key
-	 * @param {*} value
-	 * @return {Entry|undefined}
-	 */
-
-	p.put = function (key, value) {
-	  var entry = {
-	    key: key,
-	    value: value
-	  }
-	  this._keymap[key] = entry
-	  if (this.tail) {
-	    this.tail.newer = entry
-	    entry.older = this.tail
-	  } else {
-	    this.head = entry
-	  }
-	  this.tail = entry
-	  if (this.size === this.limit) {
-	    return this.shift()
-	  } else {
-	    this.size++
-	  }
-	}
-
-	/**
-	 * Purge the least recently used (oldest) entry from the
-	 * cache. Returns the removed entry or undefined if the
-	 * cache was empty.
-	 */
-
-	p.shift = function () {
-	  var entry = this.head
-	  if (entry) {
-	    this.head = this.head.newer
-	    this.head.older = undefined
-	    entry.newer = entry.older = undefined
-	    this._keymap[entry.key] = undefined
-	  }
-	  return entry
-	}
-
-	/**
-	 * Get and register recent use of <key>. Returns the value
-	 * associated with <key> or undefined if not in cache.
-	 *
-	 * @param {String} key
-	 * @param {Boolean} returnEntry
-	 * @return {Entry|*}
-	 */
-
-	p.get = function (key, returnEntry) {
-	  var entry = this._keymap[key]
-	  if (entry === undefined) return
-	  if (entry === this.tail) {
-	    return returnEntry
-	      ? entry
-	      : entry.value
-	  }
-	  // HEAD--------------TAIL
-	  //   <.older   .newer>
-	  //  <--- add direction --
-	  //   A  B  C  <D>  E
-	  if (entry.newer) {
-	    if (entry === this.head) {
-	      this.head = entry.newer
-	    }
-	    entry.newer.older = entry.older // C <-- E.
-	  }
-	  if (entry.older) {
-	    entry.older.newer = entry.newer // C. --> E
-	  }
-	  entry.newer = undefined // D --x
-	  entry.older = this.tail // D. --> E
-	  if (this.tail) {
-	    this.tail.newer = entry // E. <-- D
-	  }
-	  this.tail = entry
-	  return returnEntry
-	    ? entry
-	    : entry.value
-	}
-
-	module.exports = Cache
-
-
-/***/ },
-/* 17 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
@@ -3502,7 +3699,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 18 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// NOTE: the prop internal directive is compiled and linked
@@ -3511,7 +3708,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	// inside `created` hooks and `data` functions.
 
 	var _ = __webpack_require__(1)
-	var Watcher = __webpack_require__(19)
+	var Watcher = __webpack_require__(20)
 	var bindingModes = __webpack_require__(6)._propBindingModes
 
 	module.exports = {
@@ -3533,7 +3730,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          child[childKey] = val
 	        }
 	      }, {
-	        sync: true,
+	        filters: prop.filters,
 	        // important: props need to be observed on the
 	        // repeat scope if present
 	        scope: this._scope
@@ -3559,7 +3756,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          childKey,
 	          function (val) {
 	            parent.$set(parentKey, val)
-	          }, { sync: true }
+	          }
 	        )
 	      })
 	    }
@@ -3575,14 +3772,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 19 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
 	var config = __webpack_require__(6)
 	var Dep = __webpack_require__(3)
-	var expParser = __webpack_require__(20)
-	var batcher = __webpack_require__(23)
+	var expParser = __webpack_require__(21)
+	var batcher = __webpack_require__(24)
 	var uid = 0
 
 	/**
@@ -3676,8 +3873,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        'Error when evaluating expression "' +
 	        this.expression + '". ' +
 	        (config.debug
-	          ? '' :
-	          'Turn on debug mode to see stack trace.'
+	          ? ''
+	          : 'Turn on debug mode to see stack trace.'
 	        ), e
 	      )
 	    }
@@ -3914,11 +4111,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 20 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var Path = __webpack_require__(21)
+	var Path = __webpack_require__(22)
 	var Cache = __webpack_require__(16)
 	var expressionCache = new Cache(1000)
 
@@ -4184,11 +4381,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 21 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var add = __webpack_require__(22).add
+	var add = __webpack_require__(23).add
 	var Cache = __webpack_require__(16)
 	var pathCache = new Cache(1000)
 	var identRE = exports.identRE = /^[$_a-zA-Z]+[\w$]*$/
@@ -4549,7 +4746,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 22 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
@@ -4595,7 +4792,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return
 	  }
 	  ob.convert(key, val)
-	  ob.dep.notify()
+	  ob.notify()
 	  if (ob.vms) {
 	    var i = ob.vms.length
 	    while (i--) {
@@ -4642,7 +4839,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (!ob || _.isReserved(key)) {
 	      return
 	    }
-	    ob.dep.notify()
+	    ob.notify()
 	    if (ob.vms) {
 	      var i = ob.vms.length
 	      while (i--) {
@@ -4656,7 +4853,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 23 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
@@ -4756,141 +4953,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	      _.nextTick(flushBatcherQueue)
 	    }
 	  }
-	}
-
-
-/***/ },
-/* 24 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var _ = __webpack_require__(1)
-	var Cache = __webpack_require__(16)
-	var cache = new Cache(1000)
-	var filterTokenRE = /[^\s'"]+|'[^']*'|"[^"]*"/g
-	var reservedArgRE = /^in$|^-?\d+/
-
-	/**
-	 * Parser state
-	 */
-
-	var str, dir
-	var c, i, l, lastFilterIndex
-	var inSingle, inDouble, curly, square, paren
-
-	/**
-	 * Push a filter to the current directive object
-	 */
-
-	function pushFilter () {
-	  var exp = str.slice(lastFilterIndex, i).trim()
-	  var filter
-	  if (exp) {
-	    filter = {}
-	    var tokens = exp.match(filterTokenRE)
-	    filter.name = tokens[0]
-	    if (tokens.length > 1) {
-	      filter.args = tokens.slice(1).map(processFilterArg)
-	    }
-	  }
-	  if (filter) {
-	    (dir.filters = dir.filters || []).push(filter)
-	  }
-	  lastFilterIndex = i + 1
-	}
-
-	/**
-	 * Check if an argument is dynamic and strip quotes.
-	 *
-	 * @param {String} arg
-	 * @return {Object}
-	 */
-
-	function processFilterArg (arg) {
-	  var stripped = reservedArgRE.test(arg)
-	    ? arg
-	    : _.stripQuotes(arg)
-	  var dynamic = stripped === false
-	  return {
-	    value: dynamic ? arg : stripped,
-	    dynamic: dynamic
-	  }
-	}
-
-	/**
-	 * Parse a directive value and extract the expression
-	 * and its filters into a descriptor.
-	 *
-	 * Example:
-	 *
-	 * "a + 1 | uppercase" will yield:
-	 * {
-	 *   expression: 'a + 1',
-	 *   filters: [
-	 *     { name: 'uppercase', args: null }
-	 *   ]
-	 * }
-	 *
-	 * @param {String} str
-	 * @return {Object}
-	 */
-
-	exports.parse = function (s) {
-
-	  var hit = cache.get(s)
-	  if (hit) {
-	    return hit
-	  }
-
-	  // reset parser state
-	  str = s
-	  inSingle = inDouble = false
-	  curly = square = paren = 0
-	  lastFilterIndex = 0
-	  dir = {}
-
-	  for (i = 0, l = str.length; i < l; i++) {
-	    c = str.charCodeAt(i)
-	    if (inSingle) {
-	      // check single quote
-	      if (c === 0x27) inSingle = !inSingle
-	    } else if (inDouble) {
-	      // check double quote
-	      if (c === 0x22) inDouble = !inDouble
-	    } else if (
-	      c === 0x7C && // pipe
-	      str.charCodeAt(i + 1) !== 0x7C &&
-	      str.charCodeAt(i - 1) !== 0x7C
-	    ) {
-	      if (dir.expression == null) {
-	        // first filter, end of expression
-	        lastFilterIndex = i + 1
-	        dir.expression = str.slice(0, i).trim()
-	      } else {
-	        // already has filter
-	        pushFilter()
-	      }
-	    } else {
-	      switch (c) {
-	        case 0x22: inDouble = true; break // "
-	        case 0x27: inSingle = true; break // '
-	        case 0x28: paren++; break         // (
-	        case 0x29: paren--; break         // )
-	        case 0x5B: square++; break        // [
-	        case 0x5D: square--; break        // ]
-	        case 0x7B: curly++; break         // {
-	        case 0x7D: curly--; break         // }
-	      }
-	    }
-	  }
-
-	  if (dir.expression == null) {
-	    dir.expression = str.slice(0, i).trim()
-	  } else if (lastFilterIndex !== 0) {
-	    pushFilter()
-	  }
-
-	  cache.put(s, dir)
-	  return dir
 	}
 
 
@@ -5284,8 +5346,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	      }
 	    }
-	    var child = this.build(options)
-	    this.setCurrent(child)
+	    var child = this.childVM = this.build(options)
 	    if (!this.waitForEvent) {
 	      if (activateHook) {
 	        activateHook.call(child, insert)
@@ -5330,7 +5391,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      // just remove current
 	      this.unbuild(true)
 	      this.remove(this.childVM, cb)
-	      this.unsetCurrent()
+	      this.childVM = null
 	    } else {
 	      this.resolveComponent(value, _.bind(function () {
 	        this.unbuild(true)
@@ -5415,6 +5476,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        // if no inline-template, then the compiled
 	        // linker can be cached for better performance.
 	        _linkerCachable: !this.inlineTemplate,
+	        _ref: this.ref,
 	        _asComponent: true,
 	        _isRouterView: this._isRouterView,
 	        // if this is a transcluded component, context
@@ -5527,7 +5589,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  transition: function (target, cb) {
 	    var self = this
 	    var current = this.childVM
-	    this.setCurrent(target)
+	    this.childVM = target
 	    switch (self.transMode) {
 	      case 'in-out':
 	        target.$before(self.anchor, function () {
@@ -5546,32 +5608,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 
 	  /**
-	   * Set childVM and parent ref
-	   */
-
-	  setCurrent: function (child) {
-	    this.unsetCurrent()
-	    this.childVM = child
-	    var ref = child._refId || this.ref
-	    if (ref) {
-	      (this._scope || this.vm).$[ref] = child
-	    }
-	  },
-
-	  /**
-	   * Unset childVM and parent ref
-	   */
-
-	  unsetCurrent: function () {
-	    var child = this.childVM
-	    this.childVM = null
-	    var ref = (child && child._refId) || this.ref
-	    if (ref) {
-	      (this._scope || this.vm).$[ref] = null
-	    }
-	  },
-
-	  /**
 	   * Unbind.
 	   */
 
@@ -5579,7 +5615,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.invalidatePending()
 	    // Do not defer cleanup when unbinding
 	    this.unbuild()
-	    this.unsetCurrent()
 	    // destroy all keep-alive cached instances
 	    if (this.cache) {
 	      for (var key in this.cache) {
@@ -5683,7 +5718,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        // element directive
 	        _.resolveAsset(options, 'elementDirectives', tag) ||
 	        // repeat block
-	        replacer.hasAttribute(config.prefix + 'repeat')
+	        replacer.hasAttribute(config.prefix + 'repeat') ||
+	        // for block
+	        replacer.hasAttribute(config.prefix + 'for')
 	      ) {
 	        return frag
 	      } else {
@@ -5752,12 +5789,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.html = __webpack_require__(30)
 	exports.attr = __webpack_require__(31)
 	exports.show = __webpack_require__(32)
-	exports['class'] = __webpack_require__(36)
-	exports.el = __webpack_require__(37)
-	exports.ref = __webpack_require__(38)
-	exports.cloak = __webpack_require__(39)
-	exports.style = __webpack_require__(40)
-	exports.transition = __webpack_require__(41)
+	exports['class'] = __webpack_require__(34)
+	exports.el = __webpack_require__(35)
+	exports.ref = __webpack_require__(36)
+	exports.cloak = __webpack_require__(37)
+	exports.style = __webpack_require__(38)
+	exports.transition = __webpack_require__(39)
 
 	// event listener directives
 	exports.on = __webpack_require__(42)
@@ -5771,7 +5808,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	// internal directives that should not be used directly
 	// but we still want to expose them for advanced usage.
 	exports._component = __webpack_require__(26)
-	exports._prop = __webpack_require__(18)
+	exports._prop = __webpack_require__(19)
 
 
 /***/ },
@@ -5941,7 +5978,6 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var Transition = __webpack_require__(34)
 
 	/**
 	 * Append with transition.
@@ -6016,7 +6052,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	var apply = exports.apply = function (el, direction, op, vm, cb) {
-	  var transition = exports.get(el, vm)
+	  var transition = el.__v_trans
 	  if (
 	    !transition ||
 	    // skip if there are no js hooks and CSS transition is
@@ -6037,38 +6073,358 @@ return /******/ (function(modules) { // webpackBootstrap
 	  transition[action](op, cb)
 	}
 
-	/**
-	 * Get the transition object from an element, will create
-	 * one if it has the "transition" attribute but doesn't have
-	 * a transition object, or if the current transition object's
-	 * id doesn't match the desired id.
-	 *
-	 * @param {Element} el
-	 * @param {Vue} vm
-	 * @return {Transition|undefined}
-	 */
-
-	exports.get = function (el, vm) {
-	  var transition = el.__v_trans
-	  var id = el.getAttribute && el.getAttribute('transition')
-	  // create new transition object if
-	  // 1. element has "transition" attribute
-	  // 2. current transition object's id doesn't match
-	  if (id != null && (!transition || transition.id !== id)) {
-	    var hooks = _.resolveAsset(vm.$options, 'transitions', id)
-	    id = id || 'v'
-	    transition = el.__v_trans = new Transition(el, id, hooks, el.__vue__ || vm)
-	  }
-	  return transition
-	}
-
 
 /***/ },
 /* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var queue = __webpack_require__(35)
+	var addClass = _.addClass
+	var removeClass = _.removeClass
+
+	module.exports = {
+
+	  // TODO: remove unnecessary logic in 1.0.0
+
+	  bind: function () {
+	    // interpolations like class="{{abc}}" are converted
+	    // to v-class, and we need to remove the raw,
+	    // uninterpolated className at binding time.
+	    var raw = this._descriptor._rawClass
+	    if (raw) {
+	      this.prevKeys = raw.trim().split(/\s+/)
+	    }
+	  },
+
+	  update: function (value) {
+	    if (this.arg) {
+	      // single toggle
+	      if (value) {
+	        addClass(this.el, this.arg)
+	      } else {
+	        removeClass(this.el, this.arg)
+	      }
+	    } else {
+	      if (value && typeof value === 'string') {
+	        this.handleObject(stringToObject(value))
+	      } else if (_.isPlainObject(value)) {
+	        this.handleObject(value)
+	      } else if (_.isArray(value)) {
+	        this.handleArray(value)
+	      } else {
+	        this.cleanup()
+	      }
+	    }
+	  },
+
+	  handleObject: function (value) {
+	    this.cleanup(value)
+	    var keys = this.prevKeys = Object.keys(value)
+	    for (var i = 0, l = keys.length; i < l; i++) {
+	      var key = keys[i]
+	      if (value[key]) {
+	        addClass(this.el, key)
+	      } else {
+	        removeClass(this.el, key)
+	      }
+	    }
+	  },
+
+	  handleArray: function (value) {
+	    this.cleanup(value)
+	    for (var i = 0, l = value.length; i < l; i++) {
+	      addClass(this.el, value[i])
+	    }
+	    this.prevKeys = value
+	  },
+
+	  cleanup: function (value) {
+	    if (this.prevKeys) {
+	      var i = this.prevKeys.length
+	      while (i--) {
+	        var key = this.prevKeys[i]
+	        if (!value || !contains(value, key)) {
+	          removeClass(this.el, key)
+	        }
+	      }
+	    }
+	  }
+	}
+
+	function stringToObject (value) {
+	  var res = {}
+	  var keys = value.trim().split(/\s+/)
+	  var i = keys.length
+	  while (i--) {
+	    res[keys[i]] = true
+	  }
+	  return res
+	}
+
+	function contains (value, key) {
+	  return _.isArray(value)
+	    ? value.indexOf(key) > -1
+	    : value.hasOwnProperty(key)
+	}
+
+
+/***/ },
+/* 35 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var _ = __webpack_require__(1)
+
+	module.exports = {
+
+	  isLiteral: true,
+	  priority: 1500,
+
+	  bind: function () {
+	    if (this.arg) {
+	      this._isDynamicLiteral = true
+	    } else {
+	      this.update(this.expression)
+	    }
+	  },
+
+	  update: function (id) {
+	    if (this.id) {
+	      this.unbind()
+	    }
+	    this.id = id
+	    var refs = (this._scope || this.vm).$$
+	    if (refs.hasOwnProperty(id)) {
+	      refs[id] = this.el
+	    } else {
+	      _.defineReactive(refs, id, this.el)
+	    }
+	  },
+
+	  unbind: function () {
+	    var refs = (this._scope || this.vm).$$
+	    if (refs[this.id] === this.el) {
+	      refs[this.id] = null
+	    }
+	  }
+	}
+
+
+/***/ },
+/* 36 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var _ = __webpack_require__(1)
+
+	module.exports = {
+
+	  isLiteral: true,
+
+	  bind: function () {
+	    var vm = this.el.__vue__
+	    if (!vm) {
+	      ("development") !== 'production' && _.warn(
+	        'v-ref should only be used on a component root element.'
+	      )
+	      return
+	    }
+	    // If we get here, it means this is a `v-ref` on a
+	    // child, because parent scope `v-ref` is stripped in
+	    // `v-component` already.
+	    var ref = this.expression
+	    var context = this.vm._scope || this.vm._context
+	    context.$[ref] = this.vm
+
+	    if (true) {
+	      _.deprecation.REF_IN_CHILD()
+	    }
+	  },
+
+	  unbind: function () {
+	    var ref = this.expression
+	    var context = this.vm._scope || this.vm._context
+	    if (context.$[ref] === this.vm) {
+	      context.$[ref] = null
+	    }
+	  }
+	}
+
+
+/***/ },
+/* 37 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var config = __webpack_require__(6)
+
+	module.exports = {
+	  bind: function () {
+	    var el = this.el
+	    this.vm.$once('hook:compiled', function () {
+	      el.removeAttribute(config.prefix + 'cloak')
+	    })
+	  }
+	}
+
+
+/***/ },
+/* 38 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var _ = __webpack_require__(1)
+	var prefixes = ['-webkit-', '-moz-', '-ms-']
+	var camelPrefixes = ['Webkit', 'Moz', 'ms']
+	var importantRE = /!important;?$/
+	var camelRE = /([a-z])([A-Z])/g
+	var testEl = null
+	var propCache = {}
+
+	module.exports = {
+
+	  deep: true,
+
+	  update: function (value) {
+	    if (this.arg) {
+	      this.setProp(this.arg, value)
+	    } else {
+	      if (typeof value === 'string') {
+	        this.el.style.cssText = value
+	      } else if (_.isArray(value)) {
+	        this.objectHandler(value.reduce(_.extend, {}))
+	      } else {
+	        this.objectHandler(value)
+	      }
+	    }
+	  },
+
+	  objectHandler: function (value) {
+	    // cache object styles so that only changed props
+	    // are actually updated.
+	    var cache = this.cache || (this.cache = {})
+	    var prop, val
+	    for (prop in cache) {
+	      if (!(prop in value)) {
+	        this.setProp(prop, null)
+	        delete cache[prop]
+	      }
+	    }
+	    for (prop in value) {
+	      val = value[prop]
+	      if (val !== cache[prop]) {
+	        cache[prop] = val
+	        this.setProp(prop, val)
+	      }
+	    }
+	  },
+
+	  setProp: function (prop, value) {
+	    prop = normalize(prop)
+	    if (!prop) return // unsupported prop
+	    // cast possible numbers/booleans into strings
+	    if (value != null) value += ''
+	    if (value) {
+	      var isImportant = importantRE.test(value)
+	        ? 'important'
+	        : ''
+	      if (isImportant) {
+	        value = value.replace(importantRE, '').trim()
+	      }
+	      this.el.style.setProperty(prop, value, isImportant)
+	    } else {
+	      this.el.style.removeProperty(prop)
+	    }
+	  }
+	}
+
+	/**
+	 * Normalize a CSS property name.
+	 * - cache result
+	 * - auto prefix
+	 * - camelCase -> dash-case
+	 *
+	 * @param {String} prop
+	 * @return {String}
+	 */
+
+	function normalize (prop) {
+	  if (propCache[prop]) {
+	    return propCache[prop]
+	  }
+	  var res = prefix(prop)
+	  propCache[prop] = propCache[res] = res
+	  return res
+	}
+
+	/**
+	 * Auto detect the appropriate prefix for a CSS property.
+	 * https://gist.github.com/paulirish/523692
+	 *
+	 * @param {String} prop
+	 * @return {String}
+	 */
+
+	function prefix (prop) {
+	  prop = prop.replace(camelRE, '$1-$2').toLowerCase()
+	  var camel = _.camelize(prop)
+	  var upper = camel.charAt(0).toUpperCase() + camel.slice(1)
+	  if (!testEl) {
+	    testEl = document.createElement('div')
+	  }
+	  if (camel in testEl.style) {
+	    return prop
+	  }
+	  var i = prefixes.length
+	  var prefixed
+	  while (i--) {
+	    prefixed = camelPrefixes[i] + upper
+	    if (prefixed in testEl.style) {
+	      return prefixes[i] + prop
+	    }
+	  }
+	}
+
+
+/***/ },
+/* 39 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// TODO: remove in 1.0.0
+
+	var _ = __webpack_require__(1)
+	var Transition = __webpack_require__(40)
+
+	module.exports = {
+
+	  priority: 1000,
+	  isLiteral: true,
+
+	  bind: function () {
+	    if (!this._isDynamicLiteral && !this.arg) {
+	      this.update(this.expression)
+	    } else if (this.arg) {
+	      this._isDynamicLiteral = true
+	    }
+	  },
+
+	  update: function (id, oldId) {
+	    var el = this.el
+	    // resolve on owner vm
+	    var hooks = _.resolveAsset(this.vm.$options, 'transitions', id)
+	    id = id || 'v'
+	    // apply on closest vm
+	    el.__v_trans = new Transition(el, id, hooks, this.el.__vue__ || this.vm)
+	    if (oldId) {
+	      _.removeClass(el, oldId + '-transition')
+	    }
+	    _.addClass(el, id + '-transition')
+	  }
+	}
+
+
+/***/ },
+/* 40 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var _ = __webpack_require__(1)
+	var queue = __webpack_require__(41)
 	var addClass = _.addClass
 	var removeClass = _.removeClass
 	var transitionEndEvent = _.transitionEndEvent
@@ -6104,6 +6460,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this.op =
 	  this.cb = null
 	  this.justEntered = false
+	  this.entered = this.left = false
 	  this.typeCache = {}
 	  // bind
 	  var self = this
@@ -6146,7 +6503,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this.cb = cb
 	  addClass(this.el, this.enterClass)
 	  op()
+	  this.entered = false
 	  this.callHookWithCb('enter')
+	  if (this.entered) {
+	    return // user called done synchronously.
+	  }
 	  this.cancel = this.hooks && this.hooks.enterCancelled
 	  queue.push(this.enterNextTick)
 	}
@@ -6162,16 +6523,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	  _.nextTick(function () {
 	    this.justEntered = false
 	  }, this)
-	  var type = this.getCssTransitionType(this.enterClass)
 	  var enterDone = this.enterDone
-	  if (type === TYPE_TRANSITION) {
-	    // trigger transition by removing enter class now
+	  var type = this.getCssTransitionType(this.enterClass)
+	  if (!this.pendingJsCb) {
+	    if (type === TYPE_TRANSITION) {
+	      // trigger transition by removing enter class now
+	      removeClass(this.el, this.enterClass)
+	      this.setupCssCb(transitionEndEvent, enterDone)
+	    } else if (type === TYPE_ANIMATION) {
+	      this.setupCssCb(animationEndEvent, enterDone)
+	    } else {
+	      enterDone()
+	    }
+	  } else if (type === TYPE_TRANSITION) {
 	    removeClass(this.el, this.enterClass)
-	    this.setupCssCb(transitionEndEvent, enterDone)
-	  } else if (type === TYPE_ANIMATION) {
-	    this.setupCssCb(animationEndEvent, enterDone)
-	  } else if (!this.pendingJsCb) {
-	    enterDone()
 	  }
 	}
 
@@ -6180,6 +6545,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	p.enterDone = function () {
+	  this.entered = true
 	  this.cancel = this.pendingJsCb = null
 	  removeClass(this.el, this.enterClass)
 	  this.callHook('afterEnter')
@@ -6213,7 +6579,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this.op = op
 	  this.cb = cb
 	  addClass(this.el, this.leaveClass)
+	  this.left = false
 	  this.callHookWithCb('leave')
+	  if (this.left) {
+	    return // user called done synchronously.
+	  }
 	  this.cancel = this.hooks && this.hooks.leaveCancelled
 	  // only need to handle leaveDone if
 	  // 1. the transition is already done (synchronously called
@@ -6252,6 +6622,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	p.leaveDone = function () {
+	  this.left = true
 	  this.cancel = this.pendingJsCb = null
 	  this.op()
 	  removeClass(this.el, this.leaveClass)
@@ -6394,7 +6765,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 35 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
@@ -6435,337 +6806,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 36 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var _ = __webpack_require__(1)
-	var addClass = _.addClass
-	var removeClass = _.removeClass
-
-	module.exports = {
-
-	  // TODO: remove unnecessary logic in 1.0.0
-
-	  bind: function () {
-	    // interpolations like class="{{abc}}" are converted
-	    // to v-class, and we need to remove the raw,
-	    // uninterpolated className at binding time.
-	    var raw = this._descriptor._rawClass
-	    if (raw) {
-	      this.prevKeys = raw.trim().split(/\s+/)
-	    }
-	  },
-
-	  update: function (value) {
-	    if (this.arg) {
-	      // single toggle
-	      if (value) {
-	        addClass(this.el, this.arg)
-	      } else {
-	        removeClass(this.el, this.arg)
-	      }
-	    } else {
-	      if (value && typeof value === 'string') {
-	        this.handleObject(stringToObject(value))
-	      } else if (_.isPlainObject(value)) {
-	        this.handleObject(value)
-	      } else if (_.isArray(value)) {
-	        this.handleArray(value)
-	      } else {
-	        this.cleanup()
-	      }
-	    }
-	  },
-
-	  handleObject: function (value) {
-	    this.cleanup(value)
-	    var keys = this.prevKeys = Object.keys(value)
-	    for (var i = 0, l = keys.length; i < l; i++) {
-	      var key = keys[i]
-	      if (value[key]) {
-	        addClass(this.el, key)
-	      } else {
-	        removeClass(this.el, key)
-	      }
-	    }
-	  },
-
-	  handleArray: function (value) {
-	    this.cleanup(value)
-	    for (var i = 0, l = value.length; i < l; i++) {
-	      addClass(this.el, value[i])
-	    }
-	    this.prevKeys = value
-	  },
-
-	  cleanup: function (value) {
-	    if (this.prevKeys) {
-	      var i = this.prevKeys.length
-	      while (i--) {
-	        var key = this.prevKeys[i]
-	        if (!value || !contains(value, key)) {
-	          removeClass(this.el, key)
-	        }
-	      }
-	    }
-	  }
-	}
-
-	function stringToObject (value) {
-	  var res = {}
-	  var keys = value.trim().split(/\s+/)
-	  var i = keys.length
-	  while (i--) {
-	    res[keys[i]] = true
-	  }
-	  return res
-	}
-
-	function contains (value, key) {
-	  return _.isArray(value)
-	    ? value.indexOf(key) > -1
-	    : value.hasOwnProperty(key)
-	}
-
-
-/***/ },
-/* 37 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var _ = __webpack_require__(1)
-
-	module.exports = {
-
-	  isLiteral: true,
-	  priority: 1500,
-
-	  bind: function () {
-	    var scope = this._scope || this.vm
-	    var refs = scope.$$
-	    var id = this.id = this.arg // bind-el ?
-	      ? scope.$eval(this.expression)
-	      : this.expression
-
-	    if (("development") !== 'production' && this.arg) {
-	      _.log(
-	        'You are using bind- syntax on "el", which is a special ' +
-	        'attribute. It will be evaluated only once.'
-	      )
-	    }
-
-	    if (refs.hasOwnProperty(id)) {
-	      refs[id] = this.el
-	    } else {
-	      _.defineReactive(refs, id, this.el)
-	    }
-	  },
-
-	  unbind: function () {
-	    (this._scope || this.vm).$$[this.id] = null
-	  }
-	}
-
-
-/***/ },
-/* 38 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var _ = __webpack_require__(1)
-
-	module.exports = {
-
-	  isLiteral: true,
-
-	  bind: function () {
-	    var vm = this.el.__vue__
-	    if (!vm) {
-	      ("development") !== 'production' && _.warn(
-	        'v-ref should only be used on a component root element.'
-	      )
-	      return
-	    }
-	    // If we get here, it means this is a `v-ref` on a
-	    // child, because parent scope `v-ref` is stripped in
-	    // `v-component` already. So we just record our own ref
-	    // here - it will overwrite parent ref in `v-component`,
-	    // if any.
-	    vm._refId = this.expression
-
-	    if (true) {
-	      _.deprecation.REF_IN_CHILD()
-	    }
-	  }
-	}
-
-
-/***/ },
-/* 39 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var config = __webpack_require__(6)
-
-	module.exports = {
-	  bind: function () {
-	    var el = this.el
-	    this.vm.$once('hook:compiled', function () {
-	      el.removeAttribute(config.prefix + 'cloak')
-	    })
-	  }
-	}
-
-
-/***/ },
-/* 40 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var _ = __webpack_require__(1)
-	var prefixes = ['-webkit-', '-moz-', '-ms-']
-	var camelPrefixes = ['Webkit', 'Moz', 'ms']
-	var importantRE = /!important;?$/
-	var camelRE = /([a-z])([A-Z])/g
-	var testEl = null
-	var propCache = {}
-
-	module.exports = {
-
-	  deep: true,
-
-	  update: function (value) {
-	    if (this.arg) {
-	      this.setProp(this.arg, value)
-	    } else {
-	      if (typeof value === 'object') {
-	        this.objectHandler(value)
-	      } else {
-	        this.el.style.cssText = value
-	      }
-	    }
-	  },
-
-	  objectHandler: function (value) {
-	    // cache object styles so that only changed props
-	    // are actually updated.
-	    var cache = this.cache || (this.cache = {})
-	    var prop, val
-	    for (prop in cache) {
-	      if (!(prop in value)) {
-	        this.setProp(prop, null)
-	        delete cache[prop]
-	      }
-	    }
-	    for (prop in value) {
-	      val = value[prop]
-	      if (val !== cache[prop]) {
-	        cache[prop] = val
-	        this.setProp(prop, val)
-	      }
-	    }
-	  },
-
-	  setProp: function (prop, value) {
-	    prop = normalize(prop)
-	    if (!prop) return // unsupported prop
-	    // cast possible numbers/booleans into strings
-	    if (value != null) value += ''
-	    if (value) {
-	      var isImportant = importantRE.test(value)
-	        ? 'important'
-	        : ''
-	      if (isImportant) {
-	        value = value.replace(importantRE, '').trim()
-	      }
-	      this.el.style.setProperty(prop, value, isImportant)
-	    } else {
-	      this.el.style.removeProperty(prop)
-	    }
-	  }
-
-	}
-
-	/**
-	 * Normalize a CSS property name.
-	 * - cache result
-	 * - auto prefix
-	 * - camelCase -> dash-case
-	 *
-	 * @param {String} prop
-	 * @return {String}
-	 */
-
-	function normalize (prop) {
-	  if (propCache[prop]) {
-	    return propCache[prop]
-	  }
-	  var res = prefix(prop)
-	  propCache[prop] = propCache[res] = res
-	  return res
-	}
-
-	/**
-	 * Auto detect the appropriate prefix for a CSS property.
-	 * https://gist.github.com/paulirish/523692
-	 *
-	 * @param {String} prop
-	 * @return {String}
-	 */
-
-	function prefix (prop) {
-	  prop = prop.replace(camelRE, '$1-$2').toLowerCase()
-	  var camel = _.camelize(prop)
-	  var upper = camel.charAt(0).toUpperCase() + camel.slice(1)
-	  if (!testEl) {
-	    testEl = document.createElement('div')
-	  }
-	  if (camel in testEl.style) {
-	    return prop
-	  }
-	  var i = prefixes.length
-	  var prefixed
-	  while (i--) {
-	    prefixed = camelPrefixes[i] + upper
-	    if (prefixed in testEl.style) {
-	      return prefixes[i] + prop
-	    }
-	  }
-	}
-
-
-/***/ },
-/* 41 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// TODO: remove in 1.0.0
-
-	var _ = __webpack_require__(1)
-	var Transition = __webpack_require__(34)
-
-	module.exports = {
-
-	  priority: 1000,
-	  isLiteral: true,
-
-	  bind: function () {
-	    if (!this._isDynamicLiteral) {
-	      this.update(this.expression)
-	    }
-	  },
-
-	  update: function (id, oldId) {
-	    var el = this.el
-	    // resolve on owner vm
-	    var hooks = _.resolveAsset(this.vm.$options, 'transitions', id)
-	    id = id || 'v'
-	    // apply on closest vm
-	    el.__v_trans = new Transition(el, id, hooks, this.el.__vue__ || this.vm)
-	    if (oldId) {
-	      _.removeClass(el, oldId + '-transition')
-	    }
-	    _.addClass(el, id + '-transition')
-	  }
-	}
-
-
-/***/ },
 /* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -6780,7 +6820,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  bind: function () {
 	    // 1.0.0 key filter
 	    var rawArg = this.arg
-	    var keyIndex = rawArg.indexOf(':')
+	    var keyIndex = rawArg.indexOf('-')
 	    if (keyIndex > -1) {
 	      this.arg = rawArg.slice(0, keyIndex)
 	      this.key = rawArg.slice(keyIndex + 1)
@@ -7012,7 +7052,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var Path = __webpack_require__(21)
+	var Path = __webpack_require__(22)
 
 	/**
 	 * Filter filter for v-repeat
@@ -7380,8 +7420,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var Watcher = __webpack_require__(19)
-	var dirParser = __webpack_require__(17)
+	var Watcher = __webpack_require__(20)
+	var dirParser = __webpack_require__(18)
 
 	module.exports = {
 
@@ -7683,9 +7723,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	var config = __webpack_require__(6)
 	var isObject = _.isObject
 	var isPlainObject = _.isPlainObject
-	var transition = __webpack_require__(33)
-	var textParser = __webpack_require__(15)
-	var expParser = __webpack_require__(20)
+	var textParser = __webpack_require__(17)
+	var expParser = __webpack_require__(21)
 	var templateParser = __webpack_require__(25)
 	var compiler = __webpack_require__(12)
 	var uid = 0
@@ -7884,6 +7923,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 
 	  update: function (data) {
+	    if (("development") !== 'production' && !_.isArray(data)) {
+	      _.warn(
+	        'v-repeat pre-converts Objects into Arrays, and ' +
+	        'v-repeat filters should always return Arrays.'
+	      )
+	    }
 	    if (this.componentId) {
 	      var state = this.componentState
 	      if (state === UNRESOLVED) {
@@ -8330,7 +8375,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  getStagger: function (vm, index, total, type) {
 	    type = type + 'Stagger'
-	    var trans = transition.get(vm.$el, vm)
+	    var trans = vm.$el.__v_trans
 	    var hooks = trans && trans.hooks
 	    var hook = hooks && (hooks[type] || hooks.stagger)
 	    return hook
@@ -8464,7 +8509,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _ = __webpack_require__(1)
 	var config = __webpack_require__(6)
-	var transition = __webpack_require__(33)
 	var FragmentFactory = __webpack_require__(52)
 	var isObject = _.isObject
 	var uid = 0
@@ -8535,6 +8579,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 
 	  update: function (data) {
+	    if (("development") !== 'production' && !_.isArray(data)) {
+	      _.warn(
+	        'v-for pre-converts Objects into Arrays, and ' +
+	        'v-for filters should always return Arrays.'
+	      )
+	    }
 	    this.diff(data)
 	    this.updateRef()
 	    this.updateModel()
@@ -8915,7 +8965,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  getStagger: function (frag, index, total, type) {
 	    type = type + 'Stagger'
-	    var trans = transition.get(frag.node, this.vm)
+	    var trans = frag.node.__v_trans
 	    var hooks = trans && trans.hooks
 	    var hook = hooks && (hooks[type] || hooks.stagger)
 	    return hook
@@ -9508,7 +9558,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var textParser = __webpack_require__(15)
+	var textParser = __webpack_require__(17)
 	var FragmentFactory = __webpack_require__(52)
 	var vIf = __webpack_require__(54)
 
@@ -9534,7 +9584,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.insert(id)
 	      }
 	    } else {
-	      id = el.getAttribute('bind-name')
+	      id = el.getAttribute('bind-name') || el.getAttribute(':name')
 	      if (id) {
 	        this.setupDynamic(id)
 	      }
@@ -9635,6 +9685,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // repeat fragment. this is used for linking props
 	  // and container directives.
 	  this._scope = options._scope
+
+	  // set ref
+	  if (options._ref) {
+	    (this._scope || this._context).$[options._ref] = this
+	  }
 
 	  // fragment:
 	  // if this instance is compiled inside a Fragment, it
@@ -9834,7 +9889,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var compiler = __webpack_require__(12)
 	var Observer = __webpack_require__(61)
 	var Dep = __webpack_require__(3)
-	var Watcher = __webpack_require__(19)
+	var Watcher = __webpack_require__(20)
 
 	/**
 	 * Setup the scope of an instance, which contains:
@@ -10101,7 +10156,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Dep = __webpack_require__(3)
 	var arrayMethods = __webpack_require__(62)
 	var arrayKeys = Object.getOwnPropertyNames(arrayMethods)
-	__webpack_require__(22)
+	__webpack_require__(23)
 
 	/**
 	 * Observer class that are attached to each observed
@@ -10208,7 +10263,42 @@ return /******/ (function(modules) { // webpackBootstrap
 	Observer.prototype.observeArray = function (items) {
 	  var i = items.length
 	  while (i--) {
-	    this.observe(items[i])
+	    var ob = this.observe(items[i])
+	    if (ob) {
+	      (ob.parents || (ob.parents = [])).push(this)
+	    }
+	  }
+	}
+
+	/**
+	 * Remove self from the parent list of removed objects.
+	 *
+	 * @param {Array} items
+	 */
+
+	Observer.prototype.unobserveArray = function (items) {
+	  var i = items.length
+	  while (i--) {
+	    var ob = items[i] && items[i].__ob__
+	    if (ob) {
+	      ob.parents.$remove(this)
+	    }
+	  }
+	}
+
+	/**
+	 * Notify self dependency, and also parent Array dependency
+	 * if any.
+	 */
+
+	Observer.prototype.notify = function () {
+	  this.dep.notify()
+	  var parents = this.parents
+	  if (parents) {
+	    var i = parents.length
+	    while (i--) {
+	      parents[i].notify()
+	    }
 	  }
 	}
 
@@ -10232,12 +10322,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        dep.depend()
 	        if (childOb) {
 	          childOb.dep.depend()
-	        }
-	        if (_.isArray(val)) {
-	          for (var e, i = 0, l = val.length; i < l; i++) {
-	            e = val[i]
-	            e && e.__ob__ && e.__ob__.dep.depend()
-	          }
 	        }
 	      }
 	      return val
@@ -10343,7 +10427,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    var result = original.apply(this, args)
 	    var ob = this.__ob__
-	    var inserted
+	    var inserted, removed
 	    switch (method) {
 	      case 'push':
 	        inserted = args
@@ -10353,11 +10437,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	        break
 	      case 'splice':
 	        inserted = args.slice(2)
+	        removed = result
+	        break
+	      case 'pop':
+	      case 'shift':
+	        removed = [result]
 	        break
 	    }
 	    if (inserted) ob.observeArray(inserted)
+	    if (removed) ob.unobserveArray(removed)
 	    // notify change
-	    ob.dep.notify()
+	    ob.notify()
 	    return result
 	  })
 	})
@@ -10520,9 +10610,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Fragment} [frag] - owner fragment
 	 */
 
-	exports._bindDir = function (name, node, desc, def, host, scope, frag, arg) {
+	exports._bindDir = function (name, node, desc, def, host, scope, frag, arg, literal) {
 	  this._directives.push(
-	    new Directive(name, node, this, desc, def, host, scope, frag, arg)
+	    new Directive(name, node, this, desc, def, host, scope, frag, arg, literal)
 	  )
 	}
 
@@ -10570,6 +10660,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  while (i--) {
 	    this._watchers[i].teardown()
 	  }
+	  // unregister ref
+	  var ref = this.$options._ref
+	  if (ref) {
+	    var scope = this._scope || this._context
+	    if (scope.$[ref] === this) {
+	      scope.$[ref] = null
+	    }
+	  }
 	  // remove reference to self on $el
 	  if (this.$el) {
 	    this.$el.__vue__ = null
@@ -10610,6 +10708,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this.$root =
 	  this.$children =
 	  this._watchers =
+	  this._context =
+	  this._scope =
 	  this._directives = null
 	  // call the last hook...
 	  this._isDestroyed = true
@@ -10625,9 +10725,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _ = __webpack_require__(1)
 	var config = __webpack_require__(6)
-	var Watcher = __webpack_require__(19)
-	var textParser = __webpack_require__(15)
-	var expParser = __webpack_require__(20)
+	var Watcher = __webpack_require__(20)
+	var textParser = __webpack_require__(17)
+	var expParser = __webpack_require__(21)
 
 	/**
 	 * A directive links a DOM element with a piece of data,
@@ -10651,7 +10751,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	// TODO: 1.0.0 cleanup the arguments
 
-	function Directive (name, el, vm, descriptor, def, host, scope, frag, arg) {
+	function Directive (name, el, vm, descriptor, def, host, scope, frag, arg, literal) {
 	  // public
 	  this.name = name
 	  this.el = el
@@ -10670,6 +10770,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this._host = host
 	  this._scope = scope
 	  this._frag = frag
+	  // literal
+	  this._literal = literal
 	}
 
 	/**
@@ -10691,13 +10793,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // 1.0.0: remove bind/on
 	    // TODO simplify this
 	    if (name === 'attr') {
-	      this.el.removeAttribute('bind-' + this.arg)
+	      removeBindAttr(this.el, this.arg)
 	    } else if (name === 'class' || name === 'style') {
-	      this.el.removeAttribute('bind-' + name)
+	      removeBindAttr(this.el, name)
 	    } else if (name === 'on') {
 	      this.el.removeAttribute('on-' + this.arg)
-	    } else if (name === 'transition') {
-	      this.el.removeAttribute(name)
+	    } else if (name === 'transition' || name === 'el') {
+	      if (this.arg) {
+	        removeBindAttr(this.el, name)
+	      } else {
+	        this.el.removeAttribute(name)
+	      }
 	    }
 	  }
 	  if (typeof def === 'function') {
@@ -10710,10 +10816,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (this.bind) {
 	    this.bind()
 	  }
-	  if (this._watcherExp &&
-	      (this.update || this.twoWay) &&
-	      (!this.isLiteral || this._isDynamicLiteral) &&
-	      !this._checkStatement()) {
+	  if (this._literal) {
+	    this.update && this.update(this.expression)
+	  } else if (
+	    this._watcherExp &&
+	    (this.update || this.twoWay) &&
+	    (!this.isLiteral || this._isDynamicLiteral) &&
+	    !this._checkStatement()
+	  ) {
 	    // wrapped updater for context
 	    var dir = this
 	    var update = this._update = this.update
@@ -10759,6 +10869,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	Directive.prototype._checkDynamicLiteral = function () {
 	  var expression = this.expression
 	  if (expression && this.isLiteral) {
+
+	    if (true) {
+	      if (this.name !== 'el' &&
+	          this.name !== 'ref' &&
+	          this.name !== 'transition' &&
+	          this.name !== 'component') {
+	        _.deprecation.LITERAL()
+	      }
+	    }
+
 	    var tokens = textParser.parse(expression)
 	    if (tokens) {
 	      var exp = textParser.tokensToExp(tokens)
@@ -10812,9 +10932,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.el.removeAttribute(name)
 	    param = (this._scope || this.vm).$interpolate(param)
 	  } else {
-	    param = this.el.getAttribute('bind-' + name)
+	    param = _.getBindAttr(this.el, name)
 	    if (param != null) {
-	      this.el.removeAttribute('bind-' + name)
 	      param = (this._scope || this.vm).$eval(param)
 	      ("development") !== 'production' && _.log(
 	        'You are using bind- syntax on "' + name + '", which ' +
@@ -10901,6 +11020,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.vm = this.el =
 	    this._watcher = this._listeners = null
 	  }
+	}
+
+	/**
+	 * Check if the colon prefixed form exists before attempting
+	 * to remove it. This is necessary because IE will remove
+	 * the unprefixed attribute if the prefixed version is not
+	 * present.
+	 *
+	 * @param {Element} el
+	 * @param {String} name
+	 */
+
+	function removeBindAttr (el, name) {
+	  var attr = el.hasAttribute(':' + name)
+	    ? ':' + name
+	    : 'bind-' + name
+	  el.removeAttribute(attr)
 	}
 
 	module.exports = Directive
@@ -11009,11 +11145,11 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 66 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Watcher = __webpack_require__(19)
-	var Path = __webpack_require__(21)
-	var textParser = __webpack_require__(15)
-	var dirParser = __webpack_require__(17)
-	var expParser = __webpack_require__(20)
+	var Watcher = __webpack_require__(20)
+	var Path = __webpack_require__(22)
+	var textParser = __webpack_require__(17)
+	var dirParser = __webpack_require__(18)
+	var expParser = __webpack_require__(21)
 	var filterRE = /[^|]\|[^|]/
 
 	/**
@@ -11159,9 +11295,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	    ? Path.get(this._data, path)
 	    : this._data
 	  if (data) {
-	    data = JSON.parse(JSON.stringify(data))
+	    data = clean(data)
+	  }
+	  // include computed fields
+	  if (!path) {
+	    for (var key in this.$options.computed) {
+	      data[key] = clean(this[key])
+	    }
 	  }
 	  console.log(data)
+	}
+
+	/**
+	 * "clean" a getter/setter converted object into a plain
+	 * object copy.
+	 *
+	 * @param {Object} - obj
+	 * @return {Object}
+	 */
+
+	function clean (obj) {
+	  return JSON.parse(JSON.stringify(obj))
 	}
 
 
