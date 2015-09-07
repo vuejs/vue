@@ -802,6 +802,22 @@ if (_.inBrowser) {
       })
     })
 
+    it('warn filters that return non-Array values', function () {
+      new Vue({
+        el: el,
+        template: '<div v-repeat="items | test"></div>',
+        data: {
+          items: []
+        },
+        filters: {
+          test: function (val) {
+            return {}
+          }
+        }
+      })
+      expect(hasWarned(_, 'should always return Arrays')).toBe(true)
+    })
+
   })
 }
 

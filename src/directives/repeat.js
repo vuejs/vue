@@ -192,6 +192,12 @@ module.exports = {
    */
 
   update: function (data) {
+    if (process.env.NODE_ENV !== 'production' && !_.isArray(data)) {
+      _.warn(
+        'v-repeat pre-converts Objects into Arrays, and ' +
+        'v-repeat filters should always return Arrays.'
+      )
+    }
     if (this.componentId) {
       var state = this.componentState
       if (state === UNRESOLVED) {
