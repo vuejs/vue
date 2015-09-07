@@ -49,7 +49,7 @@ if (_.inBrowser) {
 
     it('normal directives', function () {
       el.setAttribute('v-a', 'b')
-      el.innerHTML = '<p v-a="a" v-b="b">hello</p><div v-b="1"></div>'
+      el.innerHTML = '<p v-a="a" v-b="1">hello</p><div v-b.="hi"></div>'
       var defA = { priority: 1 }
       var defB = { priority: 2 }
       var options = _.mergeOptions(Vue.options, {
@@ -80,16 +80,17 @@ if (_.inBrowser) {
       expect(args[0].expression).toBe('a')
       expect(args[0].def).toBe(defA)
       expect(args[1]).toBe(el.firstChild)
-      // 3
+      // 3 (expression literal)
       args = vm._bindDir.calls.argsFor(isAttrReversed ? 1 : 2)
       expect(args[0].name).toBe('b')
-      expect(args[0].expression).toBe('b')
+      expect(args[0].expression).toBe('1')
       expect(args[0].def).toBe(defB)
+      expect(args[0].literal).toBe(true)
       expect(args[1]).toBe(el.firstChild)
-      // 4
+      // 4 (explicit literal)
       args = vm._bindDir.calls.argsFor(3)
       expect(args[0].name).toBe('b')
-      expect(args[0].expression).toBe('1')
+      expect(args[0].expression).toBe('hi')
       expect(args[0].def).toBe(defB)
       expect(args[0].literal).toBe(true)
       expect(args[1]).toBe(el.lastChild)

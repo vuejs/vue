@@ -553,13 +553,24 @@ function compileDirectives (attrs, options) {
     // Core directive
     if (name.indexOf(config.prefix) === 0) {
       dirName = name.slice(config.prefix.length)
+
+      // check literal
+      if (dirName.charAt(dirName.length - 1) === '.') {
+        isLiteral = true
+        dirName = dirName.slice(0, -1)
+      } else {
+        isLiteral = false
+      }
+
       dirDef = resolveAsset(options, 'directives', dirName)
       if (process.env.NODE_ENV !== 'production') {
         _.assertAsset(dirDef, 'directive', dirName)
       }
       if (dirDef) {
-        isLiteral = _.isLiteral(value)
-        if (isLiteral) value = _.stripQuotes(value)
+        if (!isLiteral && _.isLiteral(value)) {
+          value = _.stripQuotes(value)
+          isLiteral = true
+        }
         pushDir(dirName, dirDef, {
           literal: isLiteral
         })
