@@ -68,17 +68,14 @@ Directive.prototype._bind = function () {
     // 1.0.0: remove bind/on
     // TODO simplify this
     if (name === 'attr') {
-      this.el.removeAttribute('bind-' + this.arg)
-      this.el.removeAttribute(':' + this.arg)
+      removeBindAttr(this.el, this.arg)
     } else if (name === 'class' || name === 'style') {
-      this.el.removeAttribute('bind-' + name)
-      this.el.removeAttribute(':' + name)
+      removeBindAttr(this.el, name)
     } else if (name === 'on') {
       this.el.removeAttribute('on-' + this.arg)
     } else if (name === 'transition' || name === 'el') {
       if (this.arg) {
-        this.el.removeAttribute('bind-' + name)
-        this.el.removeAttribute(':' + name)
+        removeBindAttr(this.el, name)
       } else {
         this.el.removeAttribute(name)
       }
@@ -298,6 +295,23 @@ Directive.prototype._teardown = function () {
     this.vm = this.el =
     this._watcher = this._listeners = null
   }
+}
+
+/**
+ * Check if the colon prefixed form exists before attempting
+ * to remove it. This is necessary because IE will remove
+ * the unprefixed attribute if the prefixed version is not
+ * present.
+ *
+ * @param {Element} el
+ * @param {String} name
+ */
+
+function removeBindAttr (el, name) {
+  var attr = el.hasAttribute(':' + name)
+    ? ':' + name
+    : 'bind-' + name
+  el.removeAttribute(attr)
 }
 
 module.exports = Directive
