@@ -37,6 +37,7 @@ function Transition (el, id, hooks, vm) {
   this.op =
   this.cb = null
   this.justEntered = false
+  this.entered = this.left = false
   this.typeCache = {}
   // bind
   var self = this
@@ -79,7 +80,11 @@ p.enter = function (op, cb) {
   this.cb = cb
   addClass(this.el, this.enterClass)
   op()
+  this.entered = false
   this.callHookWithCb('enter')
+  if (this.entered) {
+    return // user called done synchronously.
+  }
   this.cancel = this.hooks && this.hooks.enterCancelled
   queue.push(this.enterNextTick)
 }
@@ -117,6 +122,7 @@ p.enterNextTick = function () {
  */
 
 p.enterDone = function () {
+  this.entered = true
   this.cancel = this.pendingJsCb = null
   removeClass(this.el, this.enterClass)
   this.callHook('afterEnter')
@@ -150,7 +156,11 @@ p.leave = function (op, cb) {
   this.op = op
   this.cb = cb
   addClass(this.el, this.leaveClass)
+  this.left = false
   this.callHookWithCb('leave')
+  if (this.left) {
+    return // user called done synchronously.
+  }
   this.cancel = this.hooks && this.hooks.leaveCancelled
   // only need to handle leaveDone if
   // 1. the transition is already done (synchronously called
@@ -189,6 +199,7 @@ p.leaveNextTick = function () {
  */
 
 p.leaveDone = function () {
+  this.left = true
   this.cancel = this.pendingJsCb = null
   this.op()
   removeClass(this.el, this.leaveClass)
