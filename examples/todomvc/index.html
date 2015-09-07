@@ -14,7 +14,7 @@
 					autofocus autocomplete="off"
 					placeholder="What needs to be done?"
 					v-model="newTodo"
-					on-keyup:enter="addTodo">
+					on-keyup-enter="addTodo">
 			</header>
 			<section class="main" v-show="todos.length" v-cloak>
 				<input class="toggle-all" type="checkbox" v-model="allDone">
@@ -31,8 +31,8 @@
 							v-model="todo.title"
 							v-todo-focus="todo == editedTodo"
 							on-blur="doneEdit(todo)"
-							on-keyup:enter="doneEdit(todo)"
-							on-keyup:esc="cancelEdit(todo)">
+							on-keyup-enter="doneEdit(todo)"
+							on-keyup-esc="cancelEdit(todo)">
 					</li>
 				</ul>
 			</section>

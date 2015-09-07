@@ -53,7 +53,7 @@ if (_.inBrowser) {
     it('with key filter', function (done) {
       new Vue({
         el: el,
-        template: '<a on-keyup:enter="test">{{a}}</a>',
+        template: '<a on-keyup-enter="test">{{a}}</a>',
         data: {a: 1},
         methods: {
           test: function () {
@@ -74,7 +74,7 @@ if (_.inBrowser) {
     it('with key filter (keycode)', function (done) {
       new Vue({
         el: el,
-        template: '<a on-keyup:13="test">{{a}}</a>',
+        template: '<a on-keyup-13="test">{{a}}</a>',
         data: {a: 1},
         methods: {
           test: function () {
