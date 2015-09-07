@@ -61,6 +61,12 @@ module.exports = {
   },
 
   update: function (data) {
+    if (process.env.NODE_ENV !== 'production' && !_.isArray(data)) {
+      _.warn(
+        'v-for pre-converts Objects into Arrays, and ' +
+        'v-for filters should always return Arrays.'
+      )
+    }
     this.diff(data)
     this.updateRef()
     this.updateModel()
