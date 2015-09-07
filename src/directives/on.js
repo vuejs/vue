@@ -9,7 +9,7 @@ module.exports = {
   bind: function () {
     // 1.0.0 key filter
     var rawArg = this.arg
-    var keyIndex = rawArg.indexOf(':')
+    var keyIndex = rawArg.indexOf('-')
     if (keyIndex > -1) {
       this.arg = rawArg.slice(0, keyIndex)
       this.key = rawArg.slice(keyIndex + 1)

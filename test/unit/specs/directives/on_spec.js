@@ -71,10 +71,10 @@ if (_.inBrowser) {
       })
     })
 
-    it('with new syntax key filter', function (done) {
+    it('with key filter (new syntax)', function (done) {
       new Vue({
         el: el,
-        template: '<a on-keyup:enter="test">{{a}}</a>',
+        template: '<a on-keyup-enter="test">{{a}}</a>',
         data: {a: 1},
         methods: {
           test: function () {

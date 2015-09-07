@@ -179,7 +179,7 @@ if (process.env.NODE_ENV !== 'production') {
     KEY_FILTER: function () {
       warn(
         'The "key" filter will be deprecated in 1.0.0. Use the new ' +
-        'on-keyup:key="handler" syntax instead.'
+        'on-keyup-key="handler" syntax instead.'
       )
     },
 
