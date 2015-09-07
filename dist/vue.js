@@ -1,5 +1,5 @@
 /*!
- * Vue.js v0.12.12
+ * Vue.js v0.12.13
  * (c) 2015 Evan You
  * Released under the MIT License.
  */
@@ -362,8 +362,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	var toString = Object.prototype.toString
+	var OBJECT_STRING = '[object Object]'
 	exports.isPlainObject = function (obj) {
-	  return toString.call(obj) === '[object Object]'
+	  return toString.call(obj) === OBJECT_STRING
 	}
 
 	/**
@@ -434,7 +435,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	exports.indexOf = function (arr, obj) {
-	  for (var i = 0, l = arr.length; i < l; i++) {
+	  var i = arr.length
+	  while (i--) {
 	    if (arr[i] === obj) return i
 	  }
 	  return -1
@@ -3153,8 +3155,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        'Error when evaluating expression "' +
 	        this.expression + '". ' +
 	        (config.debug
-	          ? '' :
-	          'Turn on debug mode to see stack trace.'
+	          ? ''
+	          : 'Turn on debug mode to see stack trace.'
 	        ), e
 	      )
 	    }
@@ -5589,6 +5591,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this.op =
 	  this.cb = null
 	  this.justEntered = false
+	  this.entered = this.left = false
 	  this.typeCache = {}
 	  // bind
 	  var self = this
@@ -5631,7 +5634,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this.cb = cb
 	  addClass(this.el, this.enterClass)
 	  op()
+	  this.entered = false
 	  this.callHookWithCb('enter')
+	  if (this.entered) {
+	    return // user called done synchronously.
+	  }
 	  this.cancel = this.hooks && this.hooks.enterCancelled
 	  queue.push(this.enterNextTick)
 	}
@@ -5647,16 +5654,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	  _.nextTick(function () {
 	    this.justEntered = false
 	  }, this)
-	  var type = this.getCssTransitionType(this.enterClass)
 	  var enterDone = this.enterDone
-	  if (type === TYPE_TRANSITION) {
-	    // trigger transition by removing enter class now
+	  var type = this.getCssTransitionType(this.enterClass)
+	  if (!this.pendingJsCb) {
+	    if (type === TYPE_TRANSITION) {
+	      // trigger transition by removing enter class now
+	      removeClass(this.el, this.enterClass)
+	      this.setupCssCb(transitionEndEvent, enterDone)
+	    } else if (type === TYPE_ANIMATION) {
+	      this.setupCssCb(animationEndEvent, enterDone)
+	    } else {
+	      enterDone()
+	    }
+	  } else if (type === TYPE_TRANSITION) {
 	    removeClass(this.el, this.enterClass)
-	    this.setupCssCb(transitionEndEvent, enterDone)
-	  } else if (type === TYPE_ANIMATION) {
-	    this.setupCssCb(animationEndEvent, enterDone)
-	  } else if (!this.pendingJsCb) {
-	    enterDone()
 	  }
 	}
 
@@ -5665,6 +5676,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	p.enterDone = function () {
+	  this.entered = true
 	  this.cancel = this.pendingJsCb = null
 	  removeClass(this.el, this.enterClass)
 	  this.callHook('afterEnter')
@@ -5698,7 +5710,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this.op = op
 	  this.cb = cb
 	  addClass(this.el, this.leaveClass)
+	  this.left = false
 	  this.callHookWithCb('leave')
+	  if (this.left) {
+	    return // user called done synchronously.
+	  }
 	  this.cancel = this.hooks && this.hooks.leaveCancelled
 	  // only need to handle leaveDone if
 	  // 1. the transition is already done (synchronously called
@@ -5737,6 +5753,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	p.leaveDone = function () {
+	  this.left = true
 	  this.cancel = this.pendingJsCb = null
 	  this.op()
 	  removeClass(this.el, this.leaveClass)
@@ -6040,9 +6057,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      )
 	      return
 	    }
+	    el.__v_model = this
 	    handler.bind.call(this)
 	    this.update = handler.update
-	    this.unbind = handler.unbind
+	    this._unbind = handler.unbind
 	  },
 
 	  /**
@@ -6062,6 +6080,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.hasWrite = true
 	      }
 	    }
+	  },
+
+	  unbind: function () {
+	    this.el.__v_model = null
+	    this._unbind && this._unbind()
 	  }
 	}
 
@@ -6550,6 +6573,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 
 	  bind: function () {
+
+	    // some helpful tips...
+	    /* istanbul ignore if */
+	    if (
+	      ("development") !== 'production' &&
+	      this.el.tagName === 'OPTION' &&
+	      this.el.parentNode && this.el.parentNode.__v_model
+	    ) {
+	      _.warn(
+	        'Don\'t use v-repeat for v-model options; ' +
+	        'use the `options` param instead: ' +
+	        'http://vuejs.org/guide/forms.html#Dynamic_Select_Options'
+	      )
+	    }
+
 	    // support for item in array syntax
 	    var inMatch = this.expression.match(/(.*) in (.*)/)
 	    if (inMatch) {
@@ -6588,19 +6626,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    // create cache object
 	    this.cache = Object.create(null)
-
-	    // some helpful tips...
-	    /* istanbul ignore if */
-	    if (
-	      ("development") !== 'production' &&
-	      this.el.tagName === 'OPTION'
-	    ) {
-	      _.warn(
-	        'Don\'t use v-repeat for v-model options; ' +
-	        'use the `options` param instead: ' +
-	        'http://vuejs.org/guide/forms.html#Dynamic_Select_Options'
-	      )
-	    }
 	  },
 
 	  /**
@@ -6719,6 +6744,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 
 	  update: function (data) {
+	    if (("development") !== 'production' && !_.isArray(data)) {
+	      _.warn(
+	        'v-repeat pre-converts Objects into Arrays, and ' +
+	        'v-repeat filters should always return Arrays.'
+	      )
+	    }
 	    if (this.componentId) {
 	      var state = this.componentState
 	      if (state === UNRESOLVED) {
@@ -6792,6 +6823,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	      primitive = !isObject(raw)
 	      vm = !init && this.getVm(raw, i, converted ? obj.$key : null)
 	      if (vm) { // reusable instance
+
+	        if (("development") !== 'production' && vm._reused) {
+	          _.warn(
+	            'Duplicate objects found in v-repeat="' + this.expression + '": ' +
+	            JSON.stringify(raw)
+	          )
+	        }
+
 	        vm._reused = true
 	        vm.$index = i // update $index
 	        // update data for track-by or object repeat,
@@ -6989,7 +7028,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        cache[id] = vm
 	      } else if (!primitive && idKey !== '$index') {
 	        ("development") !== 'production' && _.warn(
-	          'Duplicate track-by key in v-repeat: ' + id
+	          'Duplicate objects with the same track-by key in v-repeat: ' + id
 	        )
 	      }
 	    } else {
@@ -6999,8 +7038,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	          data[id] = vm
 	        } else {
 	          ("development") !== 'production' && _.warn(
-	            'Duplicate objects are not supported in v-repeat ' +
-	            'when using components or transitions.'
+	            'Duplicate objects found in v-repeat="' + this.expression + '": ' +
+	            JSON.stringify(data)
 	          )
 	        }
 	      } else {
@@ -7731,6 +7770,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  esc: 27,
 	  tab: 9,
 	  enter: 13,
+	  space: 32,
 	  'delete': 46,
 	  up: 38,
 	  left: 37,
@@ -8453,11 +8493,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	  ) {
 	    ob = value.__ob__
 	  } else if (
-	    _.isObject(value) &&
+	    (_.isArray(value) || _.isPlainObject(value)) &&
 	    !Object.isFrozen(value) &&
 	    !value._isVue
 	  ) {
 	    ob = new Observer(value)
+	  } else if (true) {
+	    if (_.isObject(value) && !_.isArray(value) && !_.isPlainObject(value)) {
+	      _.warn(
+	        'Unobservable object found in data: ' +
+	        Object.prototype.toString.call(value)
+	      )
+	    }
 	  }
 	  if (ob && vm) {
 	    ob.addVm(vm)
@@ -8505,7 +8552,42 @@ return /******/ (function(modules) { // webpackBootstrap
 	Observer.prototype.observeArray = function (items) {
 	  var i = items.length
 	  while (i--) {
-	    this.observe(items[i])
+	    var ob = this.observe(items[i])
+	    if (ob) {
+	      (ob.parents || (ob.parents = [])).push(this)
+	    }
+	  }
+	}
+
+	/**
+	 * Remove self from the parent list of removed objects.
+	 *
+	 * @param {Array} items
+	 */
+
+	Observer.prototype.unobserveArray = function (items) {
+	  var i = items.length
+	  while (i--) {
+	    var ob = items[i] && items[i].__ob__
+	    if (ob) {
+	      ob.parents.$remove(this)
+	    }
+	  }
+	}
+
+	/**
+	 * Notify self dependency, and also parent Array dependency
+	 * if any.
+	 */
+
+	Observer.prototype.notify = function () {
+	  this.dep.notify()
+	  var parents = this.parents
+	  if (parents) {
+	    var i = parents.length
+	    while (i--) {
+	      parents[i].notify()
+	    }
 	  }
 	}
 
@@ -8529,12 +8611,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        dep.depend()
 	        if (childOb) {
 	          childOb.dep.depend()
-	        }
-	        if (_.isArray(val)) {
-	          for (var e, i = 0, l = val.length; i < l; i++) {
-	            e = val[i]
-	            e && e.__ob__ && e.__ob__.dep.depend()
-	          }
 	        }
 	      }
 	      return val
@@ -8640,7 +8716,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    var result = original.apply(this, args)
 	    var ob = this.__ob__
-	    var inserted
+	    var inserted, removed
 	    switch (method) {
 	      case 'push':
 	        inserted = args
@@ -8650,11 +8726,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	        break
 	      case 'splice':
 	        inserted = args.slice(2)
+	        removed = result
+	        break
+	      case 'pop':
+	      case 'shift':
+	        removed = [result]
 	        break
 	    }
 	    if (inserted) ob.observeArray(inserted)
+	    if (removed) ob.unobserveArray(removed)
 	    // notify change
-	    ob.dep.notify()
+	    ob.notify()
 	    return result
 	  })
 	})
@@ -8731,7 +8813,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return
 	    }
 	    ob.convert(key, val)
-	    ob.dep.notify()
+	    ob.notify()
 	    if (ob.vms) {
 	      var i = ob.vms.length
 	      while (i--) {
@@ -8779,7 +8861,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (!ob || _.isReserved(key)) {
 	      return
 	    }
-	    ob.dep.notify()
+	    ob.notify()
 	    if (ob.vms) {
 	      var i = ob.vms.length
 	      while (i--) {
@@ -9943,13 +10025,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.$addChild = function (opts, BaseCtor) {
 	  BaseCtor = BaseCtor || _.Vue
 	  opts = opts || {}
-	  var parent = this
 	  var ChildVue
+	  var parent = this
+	  // transclusion context
+	  var context = opts._context || parent
 	  var inherit = opts.inherit !== undefined
 	    ? opts.inherit
 	    : BaseCtor.options.inherit
 	  if (inherit) {
-	    var ctors = parent._childCtors
+	    var ctors = context._childCtors
 	    ChildVue = ctors[BaseCtor.cid]
 	    if (!ChildVue) {
 	      var optionName = BaseCtor.options.name
@@ -9963,9 +10047,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      )()
 	      ChildVue.options = BaseCtor.options
 	      ChildVue.linker = BaseCtor.linker
-	      // important: transcluded inline repeaters should
-	      // inherit from outer scope rather than host
-	      ChildVue.prototype = opts._context || this
+	      ChildVue.prototype = context
 	      ctors[BaseCtor.cid] = ChildVue
 	    }
 	  } else {
