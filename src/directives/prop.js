@@ -18,7 +18,7 @@ module.exports = {
     var childKey = prop.path
     var parentKey = prop.parentPath
 
-    this.parentWatcher = new Watcher(
+    var parentWatcher = this.parentWatcher = new Watcher(
       parent,
       parentKey,
       function (val) {
@@ -34,7 +34,7 @@ module.exports = {
     )
 
     // set the child initial value.
-    var value = this.parentWatcher.value
+    var value = parentWatcher.value
     if (childKey === '$data') {
       child._data = value
     } else {
@@ -51,7 +51,7 @@ module.exports = {
           child,
           childKey,
           function (val) {
-            parent.$set(parentKey, val)
+            parentWatcher.set(val)
           }
         )
       })
