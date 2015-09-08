@@ -348,7 +348,7 @@ describe('Slot Distribution', function () {
   })
 
   it('inside v-for', function () {
-    var vm = new Vue({
+    new Vue({
       el: el,
       template: '<comp v-for="item in items">{{item.value}}</comp>',
       data: {
