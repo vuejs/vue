@@ -18,7 +18,7 @@ module.exports = {
     var childKey = prop.path
     var parentKey = prop.parentPath
 
-    this.parentWatcher = new Watcher(
+    var parentWatcher = this.parentWatcher = new Watcher(
       parent,
       parentKey,
       function (val) {
@@ -34,7 +34,7 @@ module.exports = {
     )
 
     // set the child initial value.
-    _.initProp(child, prop, this.parentWatcher.value)
+    _.initProp(child, prop, parentWatcher.value)
 
     // setup two-way binding
     if (prop.mode === bindingModes.TWO_WAY) {
@@ -46,7 +46,7 @@ module.exports = {
           child,
           childKey,
           function (val) {
-            parent.$set(parentKey, val)
+            parentWatcher.set(val)
           }
         )
       })
