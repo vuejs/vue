@@ -347,4 +347,20 @@ describe('Slot Distribution', function () {
     expect(el.innerHTML).toBe('hello world')
   })
 
+  it('inside v-for', function () {
+    var vm = new Vue({
+      el: el,
+      template: '<comp v-for="item in items">{{item.value}}</comp>',
+      data: {
+        items: [{value: 123}, {value: 234}]
+      },
+      components: {
+        comp: {
+          tempalte: '<div><slot></slot></div>'
+        }
+      }
+    })
+    expect(el.textContent).toBe('123234')
+  })
+
 })
