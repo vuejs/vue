@@ -182,8 +182,8 @@ exports.parse = function (s) {
 
   cache.put(s, dirs)
 
-  if (dirs.length > 1) {
-    _.deprecation.MUTI_CLAUSES()
+  if (process.env.NODE_ENV !== 'production' && dirs.length > 1) {
+    _.deprecation.MULTI_CLAUSES()
   }
 
   return dirs

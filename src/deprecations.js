@@ -73,7 +73,7 @@ if (process.env.NODE_ENV !== 'production') {
       )
     },
 
-    MUTI_CLAUSES: function () {
+    MULTI_CLAUSES: function () {
       warn(
         'Directives will no longer support multiple clause syntax in 1.0.0.' +
         newBindingSyntaxLink
