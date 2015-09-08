@@ -14,7 +14,7 @@ var extend = _.extend
  * @param {Vue} [vm]
  */
 
-var strats = Object.create(null)
+var strats = config.optionMergeStrategies = Object.create(null)
 
 /**
  * Helper that recursively merges two data objects together.
