@@ -220,6 +220,13 @@ if (process.env.NODE_ENV !== 'production') {
         'It is no longer necessary to declare literal directives in 1.0.0. Just ' +
         'use the dot-equal syntax (v-dir.="string") to indicate a literal value.'
       )
+    },
+
+    PREFIX: function () {
+      warn(
+        'The "prefix" global config will be deprecated in 1.0.0. All directives ' +
+        'will consistently use the v- or v. prefixes.'
+      )
     }
 
   }

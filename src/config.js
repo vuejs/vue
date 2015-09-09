@@ -1,14 +1,6 @@
 module.exports = {
 
   /**
-   * The prefix to look for when parsing directives.
-   *
-   * @type {String}
-   */
-
-  prefix: 'v-',
-
-  /**
    * Whether to print debug messages.
    * Also enables stack trace for warnings.
    *
@@ -103,6 +95,25 @@ module.exports = {
   _maxUpdateCount: 100
 
 }
+
+/**
+ * The prefix to look for when parsing directives.
+ *
+ * @type {String}
+ */
+
+var prefix = 'v-'
+Object.defineProperty(module.exports, 'prefix', {
+  get: function () {
+    return prefix
+  },
+  set: function (val) {
+    prefix = val
+    if (process.env.NODE_ENV !== 'production') {
+      require('./util').deprecation.PREFIX()
+    }
+  }
+})
 
 /**
  * Interpolation delimiters.

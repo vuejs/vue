@@ -358,4 +358,17 @@ describe('Misc', function () {
     })
     expect(hasWarned(__, 'Unknown custom element')).toBe(true)
   })
+
+  it('changing prefix', function () {
+    Vue.config.prefix = 'lol-'
+    var vm = new Vue({
+      el: document.createElement('div'),
+      template: '<div lol-text="text"></div>',
+      data: {
+        text: 'hi'
+      }
+    })
+    expect(vm.$el.textContent).toBe('hi')
+    Vue.config.prefix = 'v-'
+  })
 })
