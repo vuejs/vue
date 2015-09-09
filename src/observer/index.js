@@ -57,13 +57,6 @@ Observer.create = function (value, vm) {
     !value._isVue
   ) {
     ob = new Observer(value)
-  } else if (process.env.NODE_ENV !== 'production') {
-    if (_.isObject(value) && !_.isArray(value) && !_.isPlainObject(value)) {
-      _.warn(
-        'Unobservable object found in data: ' +
-        Object.prototype.toString.call(value)
-      )
-    }
   }
   if (ob && vm) {
     ob.addVm(vm)

@@ -196,10 +196,4 @@ describe('Observer', function () {
     expect(dep2.notify).toHaveBeenCalled()
     config.proto = true
   })
-
-  it('warn unobservable object', function () {
-    Observer.create(window)
-    expect(hasWarned(_, 'Unobservable object found in data')).toBe(true)
-  })
-
 })
