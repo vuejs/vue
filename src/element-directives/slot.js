@@ -81,8 +81,11 @@ module.exports = {
 
   compile: function (content, context, host) {
     if (content && context) {
+      var scope = host
+        ? host._scope
+        : this._scope
       this.unlink = context.$compile(
-        content, host, this.vm._scope, this._frag
+        content, host, scope, this._frag
       )
     }
     if (content) {
