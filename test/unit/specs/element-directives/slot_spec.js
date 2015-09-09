@@ -60,7 +60,7 @@ describe('Slot Distribution', function () {
     el.innerHTML = '<p slot="t">1</p><div></div><p slot="t">2</p>'
     options.template = '<slot name="t"></slot>'
     mount()
-    expect(el.innerHTML).toBe('<p>1</p><p>2</p>')
+    expect(el.innerHTML).toBe('<p slot="t">1</p><p slot="t">2</p>')
   })
 
   it('default content should only render parts not selected', function () {
@@ -70,7 +70,7 @@ describe('Slot Distribution', function () {
       '<slot></slot>' +
       '<slot name="b"></slot>'
     mount()
-    expect(el.innerHTML).toBe('<p>1</p><div>hi</div><p>2</p>')
+    expect(el.innerHTML).toBe('<p slot="a">1</p><div>hi</div><p slot="b">2</p>')
   })
 
   it('content transclusion with replace', function () {
@@ -126,7 +126,7 @@ describe('Slot Distribution', function () {
       theName: 'two'
     }
     mount()
-    expect(el.innerHTML).toBe('<p>two</p>')
+    expect(el.innerHTML).toBe('<p slot="two">two</p>')
   })
 
   it('content should be dynamic and compiled in parent scope', function (done) {
@@ -194,7 +194,7 @@ describe('Slot Distribution', function () {
         this.list = this.$options._content.querySelectorAll('p').length
       }
     })
-    expect(el.innerHTML).toBe('<div><p>1</p></div><div><p>2</p></div><div><p>3</p></div>')
+    expect(el.innerHTML).toBe('<div><p slot="1">1</p></div><div><p slot="2">2</p></div><div><p slot="3">3</p></div>')
   })
 
   it('v-repeat + component + parent directive + transclusion', function (done) {
