@@ -115,9 +115,6 @@ function extractFragment (nodes, parent, main) {
       node = templateParser.parse(node)
     }
     node = templateParser.clone(node)
-    if (node.attributes) {
-      node.removeAttribute('slot')
-    }
     frag.appendChild(node)
   }
 }
