@@ -139,13 +139,7 @@ function makePropsLinkFn (props) {
       } else {
         // literal, cast it and just set once
         var raw = prop.raw
-        value = options.type === Boolean && raw === ''
-          ? true
-          // do not cast emptry string.
-          // _.toNumber casts empty string to 0.
-          : raw.trim()
-            ? _.toBoolean(_.toNumber(raw))
-            : raw
+        value = _.castProp(prop, raw)
         _.initProp(vm, prop, value)
       }
     }
@@ -160,12 +154,13 @@ function makePropsLinkFn (props) {
  */
 
 function getDefault (options) {
+  var types = _.normalizePropTypes(options.type)
   // no default, return undefined
   if (!options.hasOwnProperty('default')) {
     // absent boolean value defaults to false
-    return options.type === Boolean
-      ? false
-      : undefined
+    return types && types.length === 1 && types[0] === Boolean
+        ? false
+        : undefined
   }
   var def = options.default
   // warn against non-factory defaults for Object & Array
@@ -177,7 +172,7 @@ function getDefault (options) {
     )
   }
   // call factory function for non-Function types
-  return typeof def === 'function' && options.type !== Function
+  return typeof def === 'function' && !(types && types.length === 1 && types[0] === Function)
     ? def()
     : def
 }
