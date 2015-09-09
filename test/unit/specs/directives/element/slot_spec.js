@@ -7,7 +7,10 @@ describe('Slot Distribution', function () {
   beforeEach(function () {
     el = document.createElement('div')
     options = {
-      el: el
+      el: el,
+      data: {
+        msg: 'self'
+      }
     }
   })
 
@@ -39,10 +42,10 @@ describe('Slot Distribution', function () {
   })
 
   it('fallback content', function () {
-    options.template = '<slot><p>fallback</p></slot>'
+    options.template = '<slot><p>{{msg}}</p></slot>'
     mount()
     expect(el.firstChild.tagName).toBe('P')
-    expect(el.firstChild.textContent).toBe('fallback')
+    expect(el.firstChild.textContent).toBe('self')
   })
 
   it('fallback content with multiple named slots', function () {
@@ -362,6 +365,24 @@ describe('Slot Distribution', function () {
       }
     })
     expect(el.textContent).toBe('123234')
+  })
+
+  it('fallback inside v-for', function () {
+    new Vue({
+      el: el,
+      template: '<div v-for="n in 3"><comp></comp></div>',
+      components: {
+        comp: {
+          template: '<div><slot>{{something}}</slot></div>',
+          data: function () {
+            return {
+              something: 'hi'
+            }
+          }
+        }
+      }
+    })
+    expect(el.textContent).toBe('hihihi')
   })
 
 })
