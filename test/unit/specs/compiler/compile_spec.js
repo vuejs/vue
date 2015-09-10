@@ -49,7 +49,7 @@ if (_.inBrowser) {
 
     it('normal directives', function () {
       el.setAttribute('v-a', 'b')
-      el.innerHTML = '<p v-a="a" v-b="1">hello</p><div v-b.="hi"></div>'
+      el.innerHTML = '<p v-a="a" v-b="1">hello</p><div v-b#="hi"></div>'
       var defA = { priority: 1 }
       var defB = { priority: 2 }
       var options = _.mergeOptions(Vue.options, {
