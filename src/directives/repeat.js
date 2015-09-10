@@ -729,6 +729,7 @@ function findPrevVm (vm, anchor, id) {
     el !== anchor
   ) {
     el = el.previousSibling
+    if (!el) return
   }
   return el.__vue__
 }
