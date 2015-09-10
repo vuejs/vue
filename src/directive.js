@@ -73,12 +73,14 @@ Directive.prototype._bind = function () {
       removeBindAttr(this.el, name)
     } else if (name === 'on') {
       this.el.removeAttribute('on-' + this.arg)
-    } else if (name === 'transition' || name === 'el') {
+    } else if (name === 'transition') {
       if (this.arg) {
         removeBindAttr(this.el, name)
       } else {
         this.el.removeAttribute(name)
       }
+    } else if (name === 'el') {
+      this.el.removeAttribute('$$.' + this.expression)
     }
   }
   if (typeof def === 'function') {
