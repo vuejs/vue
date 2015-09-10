@@ -548,6 +548,7 @@ function findPrevFrag (frag, anchor, id) {
     el !== anchor
   ) {
     el = el.previousSibling
+    if (!el) return
     frag = el.__vfrag__
   }
   return frag
