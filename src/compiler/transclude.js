@@ -1,6 +1,7 @@
 var _ = require('../util')
 var config = require('../config')
 var templateParser = require('../parsers/template')
+var specialCharRE = /[#@\*\$\.]/
 
 /**
  * Process an element or a DocumentFragment based on a
@@ -134,7 +135,7 @@ function mergeAttrs (from, to) {
   while (i--) {
     name = attrs[i].name
     value = attrs[i].value
-    if (!to.hasAttribute(name)) {
+    if (!to.hasAttribute(name) && !specialCharRE.test(name)) {
       to.setAttribute(name, value)
     } else if (name === 'class') {
       value = to.getAttribute(name) + ' ' + value
