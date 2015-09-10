@@ -11,6 +11,7 @@ var componentDef = require('../directives/component')
 // special binding prefixes
 var bindRE = /^bind-|^:/
 var onRE = /^on-/
+var nodeRefRE = /^\$\$\./
 
 // terminal directives
 var terminalDirectives = [
@@ -595,12 +596,10 @@ function compileDirectives (attrs, options) {
       })
     } else
 
-    // special case for el
-    if (name === 'el' || name === 'bind-el' || name === ':el') {
+    if (nodeRefRE.test(name)) {
       dirs.push({
         name: 'el',
-        arg: bindRE.test(name),
-        descriptors: [newDirParser.parse(value)],
+        descriptors: [newDirParser.parse(name.replace(nodeRefRE, ''))],
         def: options.directives.el
       })
     } else

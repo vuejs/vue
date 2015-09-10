@@ -28,7 +28,7 @@ if (_.inBrowser) {
         data: {
           ok: true
         },
-        template: '<div v-if="ok" el="test" id="test"></div>'
+        template: '<div $$.test v-if="ok" id="test"></div>'
       })
       expect(vm.$$.test).toBeTruthy()
       expect(vm.$$.test.id).toBe('test')
@@ -40,25 +40,6 @@ if (_.inBrowser) {
           expect(vm.$$.test.id).toBe('test')
           done()
         })
-      })
-    })
-
-    it('bind-el', function (done) {
-      var vm = new Vue({
-        el: el,
-        data: {
-          id: 'test'
-        },
-        template: '<div bind-el="id" id="test"></div>'
-      })
-      expect(vm.$$.test).toBeTruthy()
-      expect(vm.$$.test.id).toBe('test')
-      vm.id = 'changed'
-      _.nextTick(function () {
-        expect(vm.$$.test).toBeNull()
-        expect(vm.$$.changed).toBeTruthy()
-        expect(vm.$$.changed.id).toBe('test')
-        done()
       })
     })
 
