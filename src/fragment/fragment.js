@@ -15,6 +15,7 @@ var transition = require('../transition')
 function Fragment (linker, vm, frag, host, scope, parentFrag) {
   this.children = []
   this.childFrags = []
+  this.vm = vm
   this.scope = scope
   this.inserted = false
   this.parentFrag = parentFrag
@@ -73,7 +74,7 @@ function singleBefore (target, trans) {
   var method = trans !== false
     ? transition.before
     : _.before
-  method(this.node, target, this.scope)
+  method(this.node, target, this.vm)
   this.inserted = true
   if (_.inDoc(this.node)) {
     this.callHook(attach)
@@ -86,7 +87,7 @@ function singleBefore (target, trans) {
 
 function singleRemove () {
   var shouldCallRemove = _.inDoc(this.node)
-  transition.remove(this.node, this.scope)
+  transition.remove(this.node, this.vm)
   this.inserted = false
   if (shouldCallRemove) {
     this.callHook(detach)
@@ -103,12 +104,12 @@ function singleRemove () {
 function multiBefore (target, trans) {
   _.before(this.node, target)
   var nodes = this.nodes
-  var scope = this.scope
+  var vm = this.vm
   var method = trans !== false
     ? transition.before
     : _.before
   for (var i = 0, l = nodes.length; i < l; i++) {
-    method(nodes[i], target, scope)
+    method(nodes[i], target, vm)
   }
   _.before(this.end, target)
   this.inserted = true
@@ -126,12 +127,12 @@ function multiRemove () {
   var parent = this.node.parentNode
   var node = this.node.nextSibling
   var nodes = this.nodes = []
-  var scope = this.scope
+  var vm = this.vm
   var next
   while (node !== this.end) {
     nodes.push(node)
     next = node.nextSibling
-    transition.remove(node, scope)
+    transition.remove(node, vm)
     node = next
   }
   parent.removeChild(this.node)
