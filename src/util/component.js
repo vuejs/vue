@@ -18,6 +18,7 @@ exports.checkComponent = function (el, options, hasAttrs) {
       return tag
     } else {
       var exp = hasAttrs && checkComponentAttribute(el)
+      /* istanbul ignore if */
       if (exp) return exp
       if (process.env.NODE_ENV !== 'production') {
         if (tag.indexOf('-') > -1 ||
