@@ -8,6 +8,13 @@ module.exports = {
   bind: function () {
     var el = this.el
     if (!el.__vue__) {
+      // check else block
+      var next = el.nextElementSibling
+      if (next && _.attr(next, 'else') !== null) {
+        _.remove(next)
+        this.elseFactory = new FragmentFactory(this.vm, next)
+      }
+      // check main block
       this.anchor = _.createAnchor('v-if')
       _.replace(el, this.anchor)
       this.factory = new FragmentFactory(this.vm, el)
@@ -32,15 +39,25 @@ module.exports = {
   },
 
   insert: function () {
+    if (this.elseFrag) {
+      this.elseFrag.remove()
+      this.elseFrag.destroy()
+      this.elseFrag = null
+    }
     this.frag = this.factory.create(this._host, this._scope, this._frag)
     this.frag.before(this.anchor)
   },
 
   remove: function () {
-    if (!this.frag) return
-    this.frag.remove()
-    this.frag.destroy()
-    this.frag = null
+    if (this.frag) {
+      this.frag.remove()
+      this.frag.destroy()
+      this.frag = null
+    }
+    if (this.elseFactory) {
+      this.elseFrag = this.elseFactory.create(this._host, this._scope, this._frag)
+      this.elseFrag.before(this.anchor)
+    }
   },
 
   unbind: function () {

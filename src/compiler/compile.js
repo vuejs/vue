@@ -488,7 +488,8 @@ function checkComponent (el, options) {
  */
 
 function checkTerminalDirectives (el, options) {
-  if (_.attr(el, 'pre') !== null) {
+  if (_.attr(el, 'pre') !== null ||
+      el.hasAttribute(config.prefix + 'else')) {
     return skip
   }
   var value, dirName

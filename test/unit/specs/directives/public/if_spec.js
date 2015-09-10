@@ -396,5 +396,23 @@ if (_.inBrowser) {
       expect(parentA).toBe(parentB)
     })
 
+    it('if + else', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: { test: false, a: 'A', b: 'B' },
+        template: '<div v-if="test">{{a}}</div><div v-else>{{b}}</div>'
+      })
+      expect(el.textContent).toBe('B')
+      vm.test = true
+      _.nextTick(function () {
+        expect(el.textContent).toBe('A')
+        vm.test = false
+        _.nextTick(function () {
+          expect(el.textContent).toBe('B')
+          done()
+        })
+      })
+    })
+
   })
 }
