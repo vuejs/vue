@@ -549,7 +549,7 @@ function compileDirectives (attrs, options) {
       dirName = name.slice(config.prefix.length)
 
       // check literal
-      if (dirName.charAt(dirName.length - 1) === '.') {
+      if (dirName.charAt(dirName.length - 1) === '#') {
         isLiteral = true
         dirName = dirName.slice(0, -1)
       } else {

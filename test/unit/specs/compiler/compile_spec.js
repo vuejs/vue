@@ -50,7 +50,7 @@ if (_.inBrowser) {
 
     it('normal directives', function () {
       el.setAttribute('v-a', 'b')
-      el.innerHTML = '<p v-a="a" v-b="b">hello</p><div v-b.="b"></div>'
+      el.innerHTML = '<p v-a="a" v-b="b">hello</p><div v-b#="b"></div>'
       var defA = { priority: 1 }
       var defB = { priority: 2 }
       var descriptorA = dirParser.parse('a')[0]
