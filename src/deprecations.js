@@ -226,6 +226,12 @@ if (process.env.NODE_ENV !== 'production') {
         'The "prefix" global config will be deprecated in 1.0.0. All directives ' +
         'will consistently use the v- or v. prefixes.'
       )
+    },
+
+    V_COMPONENT: function () {
+      warn(
+        'v-component will be deprecated in 1.0.0. Use "is" attribute instead.'
+      )
     }
 
   }

@@ -81,15 +81,11 @@ function transcludeTemplate (el, options) {
         // non-element template
         replacer.nodeType !== 1 ||
         // single nested component
-        tag === 'component' ||
         _.resolveAsset(options, 'components', tag) ||
-        replacer.hasAttribute(config.prefix + 'component') ||
         // element directive
         _.resolveAsset(options, 'elementDirectives', tag) ||
-        // repeat block
-        replacer.hasAttribute(config.prefix + 'repeat') ||
-        // for block
-        replacer.hasAttribute(config.prefix + 'for')
+        // attribue based fragment cases
+        isFragment(replacer)
       ) {
         return frag
       } else {
@@ -144,4 +140,28 @@ function mergeAttrs (from, to) {
       to.setAttribute(name, value)
     }
   }
+}
+
+/**
+ * Check if a replacer element needs to force the instance
+ * into fragment mode.
+ *
+ * @param {Element} el
+ * @return {Boolean}
+ */
+
+function isFragment (el) {
+  return el.hasAttributes() && (
+    // alternative component syntax
+    el.hasAttribute('is') ||
+    el.hasAttribute(':is') ||
+    el.hasAttribute('bind-is') ||
+    el.hasAttribute(config.prefix + 'component') ||
+    // repeat block
+    el.hasAttribute(config.prefix + 'repeat') ||
+    // for block
+    el.hasAttribute(config.prefix + 'for') ||
+    // if block
+    el.hasAttribute(config.prefix + 'if')
+  )
 }

@@ -108,7 +108,7 @@ module.exports = {
   checkComponent: function () {
     this.componentState = UNRESOLVED
     var options = this.vm.$options
-    var id = _.checkComponent(this.el, options)
+    var id = _.checkComponent(this.el, options, this.el.hasAttributes())
     if (!id) {
       // default constructor
       this.Component = _.Vue

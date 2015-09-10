@@ -1,15 +1,15 @@
 var _ = require('../../../../src/util')
 
-describe('Util - Misc', function () {
+describe('Util - Component', function () {
 
   it('checkComponent', function () {
     var el = document.createElement('component')
     // <component> with no is attr
     var res = _.checkComponent(el)
-    expect(res).toBe(null)
+    expect(res).toBeUndefined()
     // <component is="...">
     el.setAttribute('is', '{{what}}')
-    res = _.checkComponent(el)
+    res = _.checkComponent(el, {}, true)
     expect(res).toBe('{{what}}')
     // custom element, not defined
     el = document.createElement('test')

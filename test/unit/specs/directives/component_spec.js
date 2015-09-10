@@ -65,6 +65,23 @@ if (_.inBrowser) {
       expect(_.warn).not.toHaveBeenCalled()
     })
 
+    it('allow "is" attribute on normal elements', function () {
+      var vm = new Vue({
+        el: el,
+        template: '<table><tbody><tr is="test"></tr></tbody></table>',
+        components: {
+          test: {
+            data: function () {
+              return { a: 123 }
+            },
+            template: '<td>{{a}}</td>'
+          }
+        }
+      })
+      expect(el.innerHTML).toBe(vm.$options.template.replace(/<tr.*\/tr>/, '<tr><td>123</td></tr>'))
+      expect(_.warn).not.toHaveBeenCalled()
+    })
+
     it('inline-template', function () {
       new Vue({
         el: el,

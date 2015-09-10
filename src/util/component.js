@@ -10,43 +10,64 @@ var _ = require('./index')
  */
 
 exports.commonTagRE = /^(div|p|span|img|a|b|i|br|ul|ol|li|h1|h2|h3|h4|h5|h6|code|pre|table|th|td|tr|form|label|input|select|option|nav|article|section|header|footer)$/
-exports.checkComponent = function (el, options) {
+exports.checkComponent = function (el, options, hasAttrs) {
   var tag = el.tagName.toLowerCase()
-  if (tag === 'component') {
-    // dynamic syntax
-    var exp = el.getAttribute('is')
-    if (exp != null) {
-      if (process.env.NODE_ENV !== 'production' && /{{.*}}/.test(exp)) {
-        _.deprecation.BIND_IS()
-      }
-      el.removeAttribute('is')
+  if (!exports.commonTagRE.test(tag) && tag !== 'component') {
+    if (_.resolveAsset(options, 'components', tag)) {
+      // custom element component
+      return tag
     } else {
-      exp = _.getBindAttr(el, 'is')
-      if (exp != null) {
-        // leverage literal dynamic for now.
-        // TODO: make this cleaner
-        exp = '{{' + exp + '}}'
+      var exp = hasAttrs && checkComponentAttribute(el)
+      if (exp) return exp
+      if (process.env.NODE_ENV !== 'production') {
+        if (tag.indexOf('-') > -1 ||
+            /HTMLUnknownElement/.test(Object.prototype.toString.call(el))) {
+          _.warn(
+            'Unknown custom element: <' + tag + '> - did you ' +
+            'register the component correctly?'
+          )
+        }
       }
+    }
+  } else if (hasAttrs) {
+    return checkComponentAttribute(el)
+  }
+}
+
+/**
+ * Check possible component denoting attributes, e.g.
+ * is, bind-is and v-component.
+ *
+ * @param {Elemnent} el
+ * @return {String|null}
+ */
+
+function checkComponentAttribute (el) {
+  var exp
+  /* eslint-disable no-cond-assign */
+  if (exp = _.attr(el, 'component')) {
+  /* eslint-enable no-cond-assign */
+    if (process.env.NODE_ENV !== 'production') {
+      _.deprecation.V_COMPONENT()
     }
     return exp
-  } else if (!exports.commonTagRE.test(tag)) {
-    if (_.resolveAsset(options, 'components', tag)) {
-      return tag
-    } else if (process.env.NODE_ENV !== 'production') {
-      if (tag.indexOf('-') > -1 ||
-          /HTMLUnknownElement/.test(Object.prototype.toString.call(el))) {
-        _.warn(
-          'Unknown custom element: <' + tag + '> - did you ' +
-          'register the component correctly?'
-        )
-      }
+  }
+  // dynamic syntax
+  exp = el.getAttribute('is')
+  if (exp != null) {
+    if (process.env.NODE_ENV !== 'production' && /{{.*}}/.test(exp)) {
+      _.deprecation.BIND_IS()
+    }
+    el.removeAttribute('is')
+  } else {
+    exp = _.getBindAttr(el, 'is')
+    if (exp != null) {
+      // leverage literal dynamic for now.
+      // TODO: make this cleaner
+      exp = '{{' + exp + '}}'
     }
   }
-  /* eslint-disable no-cond-assign */
-  if (tag = _.attr(el, 'component')) {
-  /* eslint-enable no-cond-assign */
-    return tag
-  }
+  return exp
 }
 
 /**

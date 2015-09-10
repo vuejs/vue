@@ -61,6 +61,11 @@ if (_.inBrowser) {
       res = transclude(el, options)
       expect(res instanceof DocumentFragment).toBe(true)
 
+      // single component: is
+      options.template = '<div is="test"></div>'
+      res = transclude(el, options)
+      expect(res instanceof DocumentFragment).toBe(true)
+
       // single component: custom element
       options.template = '<test></test>'
       options.components = { test: {}}
