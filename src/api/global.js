@@ -9,6 +9,7 @@ exports.util = _
 exports.config = config
 exports.nextTick = _.nextTick
 exports.compiler = require('../compiler')
+exports.FragmentFactory = require('../fragment/factory')
 
 exports.parsers = {
   path: require('../parsers/path'),
