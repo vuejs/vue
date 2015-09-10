@@ -236,6 +236,7 @@ exports.define = function (obj, key, val, enumerable) {
 exports.defineReactive = function (obj, key, val) {
   var dep = new Dep()
   Object.defineProperty(obj, key, {
+    enumerable: true,
     get: function metaGetter () {
       if (Dep.target) {
         dep.depend()

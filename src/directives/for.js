@@ -55,7 +55,7 @@ module.exports = {
     if (process.env.NODE_ENV !== 'production' && ref) {
       _.deprecation.V_REF()
     }
-    this.ref = ref || this.param('ref')
+    this.ref = ref || _.findRef(this.el)
 
     // check for transition stagger
     var stagger = +this.param('stagger')

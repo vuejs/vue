@@ -75,7 +75,7 @@ module.exports = {
       if (this.refId) _.deprecation.V_REF()
       if (this.elID) _.deprecation.V_EL()
     }
-    this.refId = this.refId || this.param('ref')
+    this.refId = this.refId || _.findRef(this.el)
 
     // check other directives that need to be handled
     // at v-repeat level

@@ -41,7 +41,7 @@ module.exports = {
       if (process.env.NODE_ENV !== 'production' && ref) {
         _.deprecation.V_REF()
       }
-      this.ref = ref || this.param('ref')
+      this.ref = ref || _.findRef(this.el)
       var refs = (this._scope || this.vm).$
       if (this.ref && !refs.hasOwnProperty(this.ref)) {
         _.defineReactive(refs, this.ref, null)

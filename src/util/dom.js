@@ -79,6 +79,20 @@ exports.getBindAttr = function (node, name) {
   return val
 }
 
+var refRE = /^\$\./
+exports.findRef = function (node) {
+  if (node.hasAttributes()) {
+    var attrs = node.attributes
+    for (var i = 0, l = attrs.length; i < l; i++) {
+      var name = attrs[i].name
+      if (refRE.test(name)) {
+        node.removeAttribute(name)
+        return name.replace(refRE, '')
+      }
+    }
+  }
+}
+
 /**
  * Insert el before target
  *

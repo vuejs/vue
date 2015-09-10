@@ -6,9 +6,7 @@ module.exports = {
   priority: 1500,
 
   bind: function () {
-    if (this.arg) {
-      this._isDynamicLiteral = true
-    } else {
+    if (!this._isDynamicLiteral) {
       this.update(this.expression)
     }
   },

@@ -26,7 +26,7 @@ if (_.inBrowser) {
         data: {
           ref: 'test2'
         },
-        template: '<test ref="test"></test><test2 bind-ref="ref"></test2>'
+        template: '<test $.test></test><test2 v-ref="{{ref}}"></test2>'
       })
       expect(vm.$.test).toBeTruthy()
       expect(vm.$.test.$options.id).toBe('test')
@@ -39,7 +39,7 @@ if (_.inBrowser) {
         el: el,
         components: components,
         data: { test: 'test' },
-        template: '<component bind-is="test" ref="test"></component>'
+        template: '<component bind-is="test" $.test></component>'
       })
       expect(vm.$.test.$options.id).toBe('test')
       vm.test = 'test2'
@@ -57,7 +57,7 @@ if (_.inBrowser) {
       var vm = new Vue({
         el: el,
         data: { view: 'one' },
-        template: '{{$.test.value}}<component bind-is="view" ref="test"></component>',
+        template: '{{$.test.value}}<component bind-is="view" $.test></component>',
         components: {
           one: {
             id: 'one',
@@ -96,7 +96,7 @@ if (_.inBrowser) {
         el: el,
         template:
           '<div>' +
-            '<comp ref="out">{{$.out.msg}}</comp>' +
+            '<comp $.out>{{$.out.msg}}</comp>' +
           '</div>',
         components: {
           comp: {

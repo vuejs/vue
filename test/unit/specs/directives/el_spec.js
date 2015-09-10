@@ -22,6 +22,25 @@ if (_.inBrowser) {
       expect(vm.$$.test).toBeNull()
     })
 
+    it('dynamic', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          id: 'test'
+        },
+        template: '<div v-el="{{id}}" id="test"></div>'
+      })
+      expect(vm.$$.test).toBeTruthy()
+      expect(vm.$$.test.id).toBe('test')
+      vm.id = 'changed'
+      _.nextTick(function () {
+        expect(vm.$$.test).toBeNull()
+        expect(vm.$$.changed).toBeTruthy()
+        expect(vm.$$.changed.id).toBe('test')
+        done()
+      })
+    })
+
     it('normal (new syntax)', function (done) {
       var vm = new Vue({
         el: el,
