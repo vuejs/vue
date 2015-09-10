@@ -9057,6 +9057,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    el !== anchor
 	  ) {
 	    el = el.previousSibling
+	    if (!el) return
 	    frag = el.__vfrag__
 	  }
 	  return frag
