@@ -90,6 +90,59 @@ if (_.inBrowser) {
       })
     })
 
+    it('two-way binding (new syntax)', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          b: 'B',
+          test: {
+            a: 'A'
+          }
+        },
+        template: '<test bind-testt@="test" :bb@="b" :a@=" test.a " v-ref="child"></test>',
+        components: {
+          test: {
+            props: ['testt', 'bb', 'a'],
+            template: '{{testt.a}} {{bb}} {{a}}'
+          }
+        }
+      })
+      expect(el.firstChild.textContent).toBe('A B A')
+      vm.test.a = 'AA'
+      vm.b = 'BB'
+      _.nextTick(function () {
+        expect(el.firstChild.textContent).toBe('AA BB AA')
+        vm.test = { a: 'AAA' }
+        _.nextTick(function () {
+          expect(el.firstChild.textContent).toBe('AAA BB AAA')
+          vm.$data = {
+            b: 'BBB',
+            test: {
+              a: 'AAAA'
+            }
+          }
+          _.nextTick(function () {
+            expect(el.firstChild.textContent).toBe('AAAA BBB AAAA')
+            // test two-way
+            vm.$.child.bb = 'B'
+            vm.$.child.testt = { a: 'A' }
+            _.nextTick(function () {
+              expect(el.firstChild.textContent).toBe('A B A')
+              expect(vm.test.a).toBe('A')
+              expect(vm.test).toBe(vm.$.child.testt)
+              expect(vm.b).toBe('B')
+              vm.$.child.a = 'Oops'
+              _.nextTick(function () {
+                expect(el.firstChild.textContent).toBe('Oops B Oops')
+                expect(vm.test.a).toBe('Oops')
+                done()
+              })
+            })
+          })
+        })
+      })
+    })
+
     it('$data as prop', function (done) {
       var vm = new Vue({
         el: el,
@@ -136,6 +189,28 @@ if (_.inBrowser) {
       })
     })
 
+    it('explicit one time binding (new syntax)', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          b: 'B'
+        },
+        template: '<test $.child :b*="b"></test>',
+        components: {
+          test: {
+            props: ['b'],
+            template: '{{b}}'
+          }
+        }
+      })
+      expect(el.innerHTML).toBe('<test>B</test>')
+      vm.b = 'BB'
+      _.nextTick(function () {
+        expect(el.innerHTML).toBe('<test>B</test>')
+        done()
+      })
+    })
+
     it('non-settable parent path', function (done) {
       var vm = new Vue({
         el: el,
@@ -143,6 +218,34 @@ if (_.inBrowser) {
           b: 'B'
         },
         template: '<test b="{{@ b + \'B\' }}" v-ref="child"></test>',
+        components: {
+          test: {
+            props: ['b'],
+            template: '{{b}}'
+          }
+        }
+      })
+      expect(hasWarned(_, 'Cannot bind two-way prop with non-settable parent path')).toBe(true)
+      expect(el.innerHTML).toBe('<test>BB</test>')
+      vm.b = 'BB'
+      _.nextTick(function () {
+        expect(el.innerHTML).toBe('<test>BBB</test>')
+        vm.$.child.b = 'hahaha'
+        _.nextTick(function () {
+          expect(vm.b).toBe('BB')
+          expect(el.innerHTML).toBe('<test>hahaha</test>')
+          done()
+        })
+      })
+    })
+
+    it('non-settable parent path (new syntax)', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          b: 'B'
+        },
+        template: '<test :b@="b + \'B\'" v-ref="child"></test>',
         components: {
           test: {
             props: ['b'],

@@ -102,32 +102,35 @@ module.exports = function compileProps (el, propOptions) {
         }
       }
     } else {
-      // new syntax
-      value = prop.raw = _.getBindAttr(el, attr)
+      // new syntax, check binding type
+      if ((value = _.getBindAttr(el, attr)) === null) {
+        if ((value = _.getBindAttr(el, attr + '@')) !== null) {
+          prop.mode = propBindingModes.TWO_WAY
+        } else if ((value = _.getBindAttr(el, attr + '*')) !== null) {
+          prop.mode = propBindingModes.ONE_TIME
+        }
+      }
+      prop.raw = value
       if (value !== null) {
         // mark it so we know this is a bind
         prop.bindSyntax = true
         parsed = dirParser.parse(value)
         value = parsed.expression
         prop.filters = parsed.filters
-        // check binding type
+        // check literal
         if (literalValueRE.test(value)) {
           prop.mode = propBindingModes.ONE_TIME
         } else {
           prop.dynamic = true
-          if (value.charAt(0) === '*') {
-            prop.mode = propBindingModes.ONE_TIME
-            value = value.slice(1).trim()
-          } else if (value.charAt(0) === '@') {
-            value = value.slice(1).trim()
-            if (settablePathRE.test(value)) {
-              prop.mode = propBindingModes.TWO_WAY
-            } else {
-              process.env.NODE_ENV !== 'production' && _.warn(
-                'Cannot bind two-way prop with non-settable ' +
-                'parent path: ' + value
-              )
-            }
+          // check non-settable path for two-way bindings
+          if (process.env.NODE_ENV !== 'production' &&
+              prop.mode === propBindingModes.TWO_WAY &&
+              !settablePathRE.test(value)) {
+            prop.mode = propBindingModes.ONE_WAY
+            _.warn(
+              'Cannot bind two-way prop with non-settable ' +
+              'parent path: ' + value
+            )
           }
         }
       }
