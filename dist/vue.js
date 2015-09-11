@@ -1,5 +1,5 @@
 /*!
- * Vue.js v0.12.13
+ * Vue.js v0.12.14
  * (c) 2015 Evan You
  * Released under the MIT License.
  */
@@ -7,7 +7,7 @@
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
 	else if(typeof define === 'function' && define.amd)
-		define(factory);
+		define([], factory);
 	else if(typeof exports === 'object')
 		exports["Vue"] = factory();
 	else
@@ -170,7 +170,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports) {
 
 	/**
-	 * Check is a string starts with $ or _
+	 * Check if a string starts with $ or _
 	 *
 	 * @param {String} str
 	 * @return {Boolean}
@@ -6366,7 +6366,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	      while (i--) {
 	        var option = el.options[i]
 	        if (option !== defaultOption) {
-	          el.removeChild(option)
+	          var parentNode = option.parentNode
+	          if (parentNode === el) {
+	            parentNode.removeChild(option)
+	          } else {
+	            el.removeChild(parentNode)
+	            i = el.options.length
+	          }
 	        }
 	      }
 	      buildOptions(el, value)
@@ -7410,7 +7416,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 
 	  getContainedComponents: function () {
-	    var vm = this.vm
+	    var vm = this._host || this.vm
 	    var start = this.start.nextSibling
 	    var end = this.end
 
@@ -8498,13 +8504,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    !value._isVue
 	  ) {
 	    ob = new Observer(value)
-	  } else if (true) {
-	    if (_.isObject(value) && !_.isArray(value) && !_.isPlainObject(value)) {
-	      _.warn(
-	        'Unobservable object found in data: ' +
-	        Object.prototype.toString.call(value)
-	      )
-	    }
 	  }
 	  if (ob && vm) {
 	    ob.addVm(vm)
