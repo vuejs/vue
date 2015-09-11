@@ -217,7 +217,7 @@ if (process.env.NODE_ENV !== 'production') {
     LITERAL: function () {
       warn(
         'It is no longer necessary to declare literal directives in 1.0.0. Just ' +
-        'use the dot-equal syntax (v-dir.="string") to indicate a literal value.'
+        'use the new hash-equal syntax (v-dir#="string") to indicate a literal value.'
       )
     },
 
