@@ -468,7 +468,7 @@ function checkComponent (el, options) {
       name: 'component',
       expression: component.id,
       literal: !component.dynamic,
-      def: publicDirectives.component
+      def: internalDirectives.component
     }
     var componentLinkFn = function (vm, el, host, scope, frag) {
       vm._bindDir(descriptor, el, host, scope, frag)

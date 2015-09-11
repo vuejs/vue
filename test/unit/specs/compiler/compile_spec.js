@@ -209,7 +209,7 @@ if (_.inBrowser) {
       expect(args[0].name).toBe('component')
       expect(args[0].expression).toBe('my-component')
       expect(args[0].literal).toBe(true)
-      expect(args[0].def).toBe(Vue.options.directives.component)
+      expect(args[0].def).toBe(internalDirectives.component)
       expect(_.warn).not.toHaveBeenCalled()
     })
 

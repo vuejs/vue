@@ -12,6 +12,3 @@ exports.model = require('./model')
 
 // cloak
 exports.cloak = require('./cloak')
-
-// component
-exports.component = require('./component')
