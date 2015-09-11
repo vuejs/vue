@@ -82,8 +82,9 @@ describe('Text Parser', function () {
 
   it('custom delimiters', function () {
     config.delimiters = ['[%', '%]']
+    config.unsafeDelimiters = ['{!!', '!!}']
     assertParse({
-      text: '[%* text %] and [[% html %]]',
+      text: '[%* text %] and {!! html !!}',
       expected: [
         { tag: true, value: 'text', html: false, oneTime: true },
         { value: ' and ' },
@@ -91,6 +92,7 @@ describe('Text Parser', function () {
       ]
     })
     config.delimiters = ['{{', '}}']
+    config.unsafeDelimiters = ['{{{', '}}}']
   })
 
   it('tokens to expression', function () {
