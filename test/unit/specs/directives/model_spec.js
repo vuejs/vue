@@ -341,8 +341,8 @@ if (_.inBrowser) {
       expect(opts[2].selected).toBe(true)
     })
 
-    it('select + options + optgroup', function () {
-      new Vue({
+    it('select + options + optgroup', function (done) {
+      var vm = new Vue({
         el: el,
         data: {
           test: 'b',
@@ -365,6 +365,26 @@ if (_.inBrowser) {
       expect(opts[0].selected).toBe(false)
       expect(opts[1].selected).toBe(true)
       expect(opts[2].selected).toBe(false)
+      vm.opts = [
+        { label: 'X', options: ['x', 'y'] },
+        { label: 'Y', options: ['z'] }
+      ]
+      vm.test = 'y'
+      _.nextTick(function () {
+        expect(el.firstChild.innerHTML).toBe(
+          '<optgroup label="X">' +
+          '<option value="x">x</option><option value="y">y</option>' +
+          '</optgroup>' +
+          '<optgroup label="Y">' +
+          '<option value="z">z</option>' +
+          '</optgroup>'
+        )
+        var opts = el.firstChild.options
+        expect(opts[0].selected).toBe(false)
+        expect(opts[1].selected).toBe(true)
+        expect(opts[2].selected).toBe(false)
+        done()
+      })
     })
 
     it('select + options with Object value', function (done) {
