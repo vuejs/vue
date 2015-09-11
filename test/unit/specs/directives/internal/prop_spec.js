@@ -16,7 +16,7 @@ if (_.inBrowser) {
         data: {
           b: 'B'
         },
-        template: '<test bind-b="b" ref="child"></test>',
+        template: '<test bind-b="b" $.child></test>',
         components: {
           test: {
             props: ['b'],
@@ -73,7 +73,7 @@ if (_.inBrowser) {
             a: 'A'
           }
         },
-        template: '<test bind-testt@="test" bind-bb@="b" bind-a@=" test.a " ref="child"></test>',
+        template: '<test bind-testt@="test" bind-bb@="b" bind-a@=" test.a " $.child></test>',
         components: {
           test: {
             props: ['testt', 'bb', 'a'],
@@ -123,7 +123,7 @@ if (_.inBrowser) {
         data: {
           b: 'B'
         },
-        template: '<test bind-b*="b" ref="child"></test>',
+        template: '<test bind-b*="b" $.child></test>',
         components: {
           test: {
             props: ['b'],
@@ -145,7 +145,7 @@ if (_.inBrowser) {
         data: {
           b: 'B'
         },
-        template: '<test bind-b@=" b + \'B\'" ref="child"></test>',
+        template: '<test bind-b@=" b + \'B\'" $.child></test>',
         components: {
           test: {
             props: ['b'],

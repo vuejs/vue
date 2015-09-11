@@ -46,7 +46,7 @@ module.exports = {
     this.idKey = this.param('track-by')
 
     // check ref
-    this.ref = this.param('ref')
+    this.ref = _.findRef(this.el)
 
     // check for transition stagger
     var stagger = +this.param('stagger')

@@ -25,7 +25,7 @@ module.exports = {
       this.keepAlive = this.param('keep-alive') != null
 
       // check ref
-      this.ref = this.param('ref')
+      this.ref = _.findRef(this.el)
       var refs = (this._scope || this.vm).$
       if (this.ref && !refs.hasOwnProperty(this.ref)) {
         _.defineReactive(refs, this.ref, null)
