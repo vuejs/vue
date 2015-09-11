@@ -2,7 +2,7 @@ var Cache = require('../cache')
 var config = require('../config')
 var dirParser = require('./directive')
 var regexEscapeRE = /[-.*+?^${}()|[\]\/\\]/g
-var cache, tagRE, htmlRE, firstChar, lastChar
+var cache, tagRE, htmlRE
 
 /**
  * Escape a string so it can be used in a RegExp
@@ -15,32 +15,18 @@ function escapeRegex (str) {
   return str.replace(regexEscapeRE, '\\$&')
 }
 
-/**
- * Compile the interpolation tag regex.
- *
- * @return {RegExp}
- */
-
-function compileRegex () {
-  config._delimitersChanged = false
-  var open = config.delimiters[0]
-  var close = config.delimiters[1]
-  firstChar = open.charAt(0)
-  lastChar = close.charAt(close.length - 1)
-  var firstCharRE = escapeRegex(firstChar)
-  var lastCharRE = escapeRegex(lastChar)
-  var openRE = escapeRegex(open)
-  var closeRE = escapeRegex(close)
+exports.compileRegex = function () {
+  var open = escapeRegex(config.delimiters[0])
+  var close = escapeRegex(config.delimiters[1])
+  var unsafeOpen = escapeRegex(config.unsafeDelimiters[0])
+  var unsafeClose = escapeRegex(config.unsafeDelimiters[1])
   tagRE = new RegExp(
-    firstCharRE + '?' + openRE +
-    '(.+?)' +
-    closeRE + lastCharRE + '?',
+    unsafeOpen + '(.+?)' + unsafeClose + '|' +
+    open + '(.+?)' + close,
     'g'
   )
   htmlRE = new RegExp(
-    '^' + firstCharRE + openRE +
-    '.*' +
-    closeRE + lastCharRE + '$'
+    '^' + unsafeOpen + '.*' + unsafeClose + '$'
   )
   // reset cache
   cache = new Cache(1000)
@@ -58,8 +44,8 @@ function compileRegex () {
  */
 
 exports.parse = function (text) {
-  if (config._delimitersChanged) {
-    compileRegex()
+  if (!cache) {
+    exports.compileRegex()
   }
   var hit = cache.get(text)
   if (hit) {
@@ -71,7 +57,7 @@ exports.parse = function (text) {
   }
   var tokens = []
   var lastIndex = tagRE.lastIndex = 0
-  var match, index, value, first, oneTime, twoWay
+  var match, index, html, value, first, oneTime, twoWay
   /* eslint-disable no-cond-assign */
   while (match = tagRE.exec(text)) {
   /* eslint-enable no-cond-assign */
@@ -83,16 +69,18 @@ exports.parse = function (text) {
       })
     }
     // tag token
-    first = match[1].charCodeAt(0)
+    html = htmlRE.test(match[0])
+    value = html ? match[1] : match[2]
+    first = value.charCodeAt(0)
     oneTime = first === 42 // *
     twoWay = first === 64  // @
     value = oneTime || twoWay
-      ? match[1].slice(1)
-      : match[1]
+      ? value.slice(1)
+      : value
     tokens.push({
       tag: true,
       value: value.trim(),
-      html: htmlRE.test(match[0]),
+      html: html,
       oneTime: oneTime,
       twoWay: twoWay
     })
