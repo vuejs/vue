@@ -223,13 +223,14 @@ if (_.inBrowser) {
         { name: 'testOneTime' },
         { name: 'optimizeLiteral' }
       ]
-      el.setAttribute('bind-test-normal', 'a')
-      el.setAttribute('test-literal', '1')
-      el.setAttribute('bind-optimize-literal', '1')
-      el.setAttribute('bind-test-two-way', '@a')
-      el.setAttribute('bind-two-way-warn', '@a + 1')
-      el.setAttribute('bind-test-one-time', '*a')
-      compiler.compileAndLinkProps(vm, el, props)
+      el.innerHTML = '<div ' +
+        'bind-test-normal="a" ' +
+        'test-literal="1" ' +
+        'bind-optimize-literal="1" ' +
+        'bind-test-two-way@="a" ' +
+        'bind-two-way-warn@="a + 1" ' +
+        'bind-test-one-time*="a"></div>'
+      compiler.compileAndLinkProps(vm, el.firstChild, props)
       expect(vm._bindDir.calls.count()).toBe(3) // skip literal and one time
       // literal
       expect(vm.testLiteral).toBe('1')

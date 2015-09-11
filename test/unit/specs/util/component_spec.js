@@ -38,7 +38,7 @@ describe('Util - component', function () {
     el = document.createElement('test2')
     el.setAttribute('is', 'what')
     res = _.checkComponent(el, {
-        components: {}
+      components: {}
     })
     expect(res.id).toBe('what')
   })
