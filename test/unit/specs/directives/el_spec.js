@@ -47,16 +47,16 @@ if (_.inBrowser) {
         data: {
           ok: true
         },
-        template: '<div $$.test v-if="ok" id="test"></div>'
+        template: '<div $$.test-el v-if="ok" id="test"></div>'
       })
-      expect(vm.$$.test).toBeTruthy()
-      expect(vm.$$.test.id).toBe('test')
+      expect(vm.$$.testEl).toBeTruthy()
+      expect(vm.$$.testEl.id).toBe('test')
       vm.ok = false
       _.nextTick(function () {
-        expect(vm.$$.test).toBeNull()
+        expect(vm.$$.testEl).toBeNull()
         vm.ok = true
         _.nextTick(function () {
-          expect(vm.$$.test.id).toBe('test')
+          expect(vm.$$.testEl.id).toBe('test')
           done()
         })
       })

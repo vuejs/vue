@@ -26,10 +26,10 @@ if (_.inBrowser) {
         data: {
           ref: 'test2'
         },
-        template: '<test $.test></test><test2 v-ref="{{ref}}"></test2>'
+        template: '<test $.test-ref></test><test2 v-ref="{{ref}}"></test2>'
       })
-      expect(vm.$.test).toBeTruthy()
-      expect(vm.$.test.$options.id).toBe('test')
+      expect(vm.$.testRef).toBeTruthy()
+      expect(vm.$.testRef.$options.id).toBe('test')
       expect(vm.$.test2).toBeTruthy()
       expect(vm.$.test2.$options.id).toBe('test2')
     })

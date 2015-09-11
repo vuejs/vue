@@ -87,7 +87,7 @@ exports.findRef = function (node) {
       var name = attrs[i].name
       if (refRE.test(name)) {
         node.removeAttribute(name)
-        return name.replace(refRE, '')
+        return _.camelize(name.replace(refRE, ''))
       }
     }
   }

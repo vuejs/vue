@@ -598,9 +598,10 @@ function compileDirectives (attrs, options) {
     } else
 
     if (nodeRefRE.test(name)) {
+      value = _.camelize(name.replace(nodeRefRE, ''))
       dirs.push({
         name: 'el',
-        descriptors: [newDirParser.parse(name.replace(nodeRefRE, ''))],
+        descriptors: [newDirParser.parse(value)],
         def: options.directives.el
       })
     } else
