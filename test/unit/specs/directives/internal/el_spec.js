@@ -17,37 +17,18 @@ if (_.inBrowser) {
         data: {
           ok: true
         },
-        template: '<div v-if="ok" el="test" id="test"></div>'
+        template: '<div v-if="ok" $$.test-el id="test"></div>'
       })
-      expect(vm.$$.test).toBeTruthy()
-      expect(vm.$$.test.id).toBe('test')
+      expect(vm.$$.testEl).toBeTruthy()
+      expect(vm.$$.testEl.id).toBe('test')
       vm.ok = false
       _.nextTick(function () {
-        expect(vm.$$.test).toBeNull()
+        expect(vm.$$.testEl).toBeNull()
         vm.ok = true
         _.nextTick(function () {
-          expect(vm.$$.test.id).toBe('test')
+          expect(vm.$$.testEl.id).toBe('test')
           done()
         })
-      })
-    })
-
-    it('bind-el', function (done) {
-      var vm = new Vue({
-        el: el,
-        data: {
-          id: 'test'
-        },
-        template: '<div bind-el="id" id="test"></div>'
-      })
-      expect(vm.$$.test).toBeTruthy()
-      expect(vm.$$.test.id).toBe('test')
-      vm.id = 'changed'
-      _.nextTick(function () {
-        expect(vm.$$.test).toBeNull()
-        expect(vm.$$.changed).toBeTruthy()
-        expect(vm.$$.changed.id).toBe('test')
-        done()
       })
     })
 
@@ -55,7 +36,7 @@ if (_.inBrowser) {
       var vm = new Vue({
         el: el,
         data: { items: [1, 2] },
-        template: '<div v-for="n in items"><p el="test">{{n}}</p>{{$$.test.textContent}}</div>'
+        template: '<div v-for="n in items"><p $$.test>{{n}}</p>{{$$.test.textContent}}</div>'
       })
       expect(vm.$el.textContent).toBe('1122')
     })

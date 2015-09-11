@@ -11,7 +11,8 @@ var resolveAsset = _.resolveAsset
 // special binding prefixes
 var bindRE = /^bind-|^:/
 var onRE = /^on-/
-var specialAttrRE = /^(bind-|:)?(el|transition)$/
+var transitionRE = /^(bind-|:)?transition$/
+var nodeRefRE = /^\$\$\./
 
 // terminal directives
 var terminalDirectives = [
@@ -545,12 +546,11 @@ function makeTerminalNodeLinkFn (el, dirName, value, options, def) {
 function compileDirectives (attrs, options) {
   var i = attrs.length
   var dirs = []
-  var attr, name, value, dirName, dirDef, parsed, isLiteral
+  var attr, name, value, dirName, dirDef, isLiteral
   while (i--) {
     attr = attrs[i]
     name = attr.name
     value = attr.value
-    parsed = dirParser.parse(value)
     // Core directive
     if (name.indexOf(config.prefix) === 0) {
       dirName = name.slice(config.prefix.length)
@@ -585,11 +585,19 @@ function compileDirectives (attrs, options) {
       })
     } else
 
-    // special attribtues: transition & el
-    if (specialAttrRE.test(name)) {
+    // special attribute: transition
+    if (transitionRE.test(name)) {
       dirName = name.replace(bindRE, '')
       pushDir(dirName, internalDirectives[dirName], {
         literal: !bindRE.test(name)
+      })
+    } else
+
+    // node ref: $$.xxx
+    if (nodeRefRE.test(name)) {
+      value = _.camelize(name.replace(nodeRefRE, ''))
+      pushDir('el', internalDirectives.el, {
+        literal: true
       })
     } else
 
@@ -615,6 +623,7 @@ function compileDirectives (attrs, options) {
    */
 
   function pushDir (dirName, def, opts) {
+    var parsed = dirParser.parse(value)
     var dir = {
       name: dirName,
       attr: name,
