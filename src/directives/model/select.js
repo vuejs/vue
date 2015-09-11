@@ -103,6 +103,7 @@ function initOptions (expression) {
             parentNode.removeChild(option)
           } else {
             el.removeChild(parentNode)
+            i = el.options.length
           }
         }
       }

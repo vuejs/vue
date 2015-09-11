@@ -373,16 +373,43 @@ if (_.inBrowser) {
       _.nextTick(function () {
         expect(el.firstChild.innerHTML).toBe(
           '<optgroup label="X">' +
-          '<option value="x">x</option><option value="y">y</option>' +
+            '<option value="x">x</option><option value="y">y</option>' +
           '</optgroup>' +
           '<optgroup label="Y">' +
-          '<option value="z">z</option>' +
+            '<option value="z">z</option>' +
           '</optgroup>'
         )
         var opts = el.firstChild.options
         expect(opts[0].selected).toBe(false)
         expect(opts[1].selected).toBe(true)
         expect(opts[2].selected).toBe(false)
+        done()
+      })
+    })
+
+    it('select + options + optgroup + default option', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          test: '',
+          opts: [
+            { label: 'A', options: ['a', 'b'] },
+            { label: 'B', options: ['c'] }
+          ]
+        },
+        template: '<select v-model="test" options="opts"><option value=""></option></select>'
+      })
+      var opts = el.firstChild.options
+      expect(opts[0].selected).toBe(true)
+      expect(el.firstChild.value).toBe('')
+      vm.opts = [
+        { label: 'X', options: ['x', 'y'] },
+        { label: 'Y', options: ['z'] }
+      ]
+      _.nextTick(function () {
+        var opts = el.firstChild.options
+        expect(opts[0].selected).toBe(true)
+        expect(el.firstChild.value).toBe('')
         done()
       })
     })
