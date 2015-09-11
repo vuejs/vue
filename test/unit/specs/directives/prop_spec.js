@@ -329,6 +329,15 @@ if (_.inBrowser) {
         expect(hasWarned(_, 'Expected custom type')).toBe(true)
       })
 
+      it('number or boolean', function () {
+        makeInstance(123, [Number, Boolean])
+        expect(_.warn).not.toHaveBeenCalled()
+        makeInstance(true, [Number, Boolean])
+        expect(_.warn).not.toHaveBeenCalled()
+        makeInstance('123', [Number, Boolean])
+        expect(hasWarned(_, 'Expected one of Number, Boolean')).toBe(true)
+      })
+
       it('custom validator', function () {
         makeInstance(123, null, function (v) {
           return v === 123
@@ -422,77 +431,265 @@ if (_.inBrowser) {
       expect(el.textContent).toBe('ho!')
     })
 
-    it('should not overwrite default value for an absent Boolean prop', function () {
-      var vm = new Vue({
-        el: el,
-        template: '<test></test>',
-        components: {
-          test: {
-            props: {
-              prop: Boolean
-            },
-            data: function () {
-              return {
-                prop: true
+    describe('mixed type literal prop casting', function () {
+
+      function makeInstance (value, type) {
+        return new Vue({
+          el: el,
+          template: '<test prop="' + value + '"></test>',
+          components: {
+            test: {
+              props: {
+                prop: type
               }
-            },
-            template: '{{prop}}'
+            }
           }
-        }
+        })
+      }
+
+      it('number as string', function () {
+        var vm = makeInstance('123', String)
+        expect(vm.$children[0].prop).toBe('123')
       })
-      expect(vm.$children[0].prop).toBe(true)
-      expect(vm.$el.textContent).toBe('true')
-      expect(JSON.stringify(vm.$children[0].$data)).toBe(JSON.stringify({
-        prop: true
-      }))
+
+      it('boolean as string', function () {
+        var vm = makeInstance('true', String)
+        expect(vm.$children[0].prop).toBe('true')
+      })
+
+      it('boolean and string with boolean value', function () {
+        var vm = makeInstance('true', [String, Boolean])
+        expect(vm.$children[0].prop).toBe(true)
+      })
+
+      it('boolean and string with number value', function () {
+        var vm = makeInstance('123', [String, Boolean])
+        expect(vm.$children[0].prop).toBe('123')
+      })
+
+      it('number and string with number value', function () {
+        var vm = makeInstance('123', [String, Number])
+        expect(vm.$children[0].prop).toBe(123)
+      })
+
+      it('number and string with boolean value', function () {
+        var vm = makeInstance('true', [String, Number])
+        expect(vm.$children[0].prop).toBe('true')
+      })
+
+      it('number and boolean with number value', function () {
+        var vm = makeInstance('123', [Number, Boolean])
+        expect(vm.$children[0].prop).toBe(123)
+      })
+
+      it('number and boolean with boolean value', function () {
+        var vm = makeInstance('true', [Number, Boolean])
+        expect(vm.$children[0].prop).toBe(true)
+      })
+
+      it('number, boolean and string with boolean value', function () {
+        var vm = makeInstance('true', [Number, String, Boolean])
+        expect(vm.$children[0].prop).toBe(true)
+      })
+
+      it('number, boolean and string with number value', function () {
+        var vm = makeInstance('123', [Number, String, Boolean])
+        expect(vm.$children[0].prop).toBe(123)
+      })
+
+      it('number, boolean and string with string value', function () {
+        var vm = makeInstance('hello', [Number, String, Boolean])
+        expect(vm.$children[0].prop).toBe('hello')
+      })
+
+      it('number, boolean and string with empty value', function () {
+        var vm = makeInstance('', [Number, String, Boolean])
+        expect(vm.$children[0].prop).toBe(true)
+      })
+
+      it('number and boolean with empty value', function () {
+        var vm = makeInstance('', [Number, Boolean])
+        expect(vm.$children[0].prop).toBe(true)
+      })
+
+      it('number and string with empty value', function () {
+        var vm = makeInstance('', [Number, String])
+        expect(vm.$children[0].prop).toBe('')
+      })
+
+      it('string with empty value', function () {
+        var vm = makeInstance('', [String])
+        expect(vm.$children[0].prop).toBe('')
+      })
+
+      it('null type with empty value', function () {
+        var vm = makeInstance('', [])
+        expect(vm.$children[0].prop).toBe('')
+      })
+
+      it('null type with number value', function () {
+        var vm = makeInstance('123', [])
+        expect(vm.$children[0].prop).toBe(123)
+      })
+
+      it('null type with boolean value', function () {
+        var vm = makeInstance('true', [])
+        expect(vm.$children[0].prop).toBe(true)
+      })
+
+      it('null type with string value', function () {
+        var vm = makeInstance('hello', [])
+        expect(vm.$children[0].prop).toBe('hello')
+      })
+
     })
 
-    it('should respect default value of a Boolean prop', function () {
-      var vm = new Vue({
-        el: el,
-        template: '<test></test>',
-        components: {
-          test: {
-            props: {
-              prop: {
-                type: Boolean,
-                default: true
-              }
-            },
-            template: '{{prop}}'
-          }
-        }
-      })
-      expect(vm.$el.textContent).toBe('true')
-    })
+    describe('defaults', function () {
 
-    it('should initialize with default value when not provided & has default data', function (done) {
-      var vm = new Vue({
-        el: el,
-        template: '<test></test>',
-        components: {
-          test: {
-            props: {
-              prop: {
-                type: String,
-                default: 'hello'
-              }
-            },
-            data: function () {
-              return {
-                other: 'world'
-              }
-            },
-            template: '{{prop}} {{other}}'
-          }
+      function makeInstance (prop, data) {
+        var test = {
+          props: {
+            prop: prop
+          },
+          template: '{{prop}}'
         }
+
+        if (data) {
+          test.data = data
+        }
+
+        return new Vue({
+          el: el,
+          template: '<test></test>',
+          components: {
+            test: test
+          }
+        })
+      }
+
+      it('should not overwrite default value for an absent Boolean prop', function () {
+        var vm = makeInstance(Boolean, function () {
+          return {
+            prop: true
+          }
+        })
+
+        expect(vm.$children[0].prop).toBe(true)
+        expect(vm.$el.textContent).toBe('true')
+        expect(JSON.stringify(vm.$children[0].$data)).toBe(JSON.stringify({
+          prop: true
+        }))
       })
-      expect(vm.$el.textContent).toBe('hello world')
-      vm.$children[0].prop = 'bye'
-      _.nextTick(function () {
-        expect(vm.$el.textContent).toBe('bye world')
-        done()
+
+      it('should respect default value of a Boolean prop', function () {
+        var vm = makeInstance({
+          type: Boolean,
+          default: true
+        })
+
+        expect(vm.$el.textContent).toBe('true')
       })
+
+      it('should use false as default value of a Boolean prop if not specified', function () {
+        var vm = makeInstance({
+          type: [Boolean]
+        })
+
+        expect(vm.$children[0].prop).toBe(false)
+        expect(vm.$el.textContent).toBe('false')
+      })
+
+      it('should use undefined as default value of a mixed type prop if not specified', function () {
+        var vm = makeInstance({
+          type: [Boolean, Number]
+        })
+
+        expect(vm.$children[0].prop).toBe(undefined)
+        expect(vm.$el.textContent).toBe('')
+      })
+
+      it('should call default function if type is not Function', function () {
+        var called = false
+        var def = function () {
+          called = true
+          return true
+        }
+
+        var vm = makeInstance({
+          type: Boolean,
+          default: def
+        })
+
+        expect(vm.$children[0].prop).toBe(true)
+        expect(vm.$el.textContent).toBe('true')
+        expect(called).toBe(true)
+      })
+
+      it('should not call default function if type is Function', function () {
+        var called = false
+        function f () {
+          called = true
+          return 'hello'
+        }
+
+        var vm = makeInstance({
+          type: Function,
+          default: f
+        })
+
+        expect(called).toBe(false)
+        expect(vm.$children[0].prop()).toBe('hello')
+        expect(called).toBe(true)
+      })
+
+      it('should call default function if type is mixed and includes Function', function () {
+        var called = false
+        function f () {
+          called = true
+          return 'hello'
+        }
+
+        var vm = makeInstance({
+          type: [Function, String],
+          default: function () {
+            return f
+          }
+        })
+
+        expect(called).toBe(false)
+        expect(vm.$children[0].prop()).toBe('hello')
+        expect(called).toBe(true)
+      })
+
+      it('should initialize with default value when not provided & has default data', function (done) {
+        var vm = new Vue({
+          el: el,
+          template: '<test></test>',
+          components: {
+            test: {
+              props: {
+                prop: {
+                  type: String,
+                  default: 'hello'
+                }
+              },
+              data: function () {
+                return {
+                  other: 'world'
+                }
+              },
+              template: '{{prop}} {{other}}'
+            }
+          }
+        })
+        expect(vm.$el.textContent).toBe('hello world')
+        vm.$children[0].prop = 'bye'
+        _.nextTick(function () {
+          expect(vm.$el.textContent).toBe('bye world')
+          done()
+        })
+      })
+
     })
 
     it('should not warn for non-required, absent prop', function () {
