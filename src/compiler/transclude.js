@@ -83,11 +83,15 @@ function transcludeTemplate (el, options) {
         // single nested component
         tag === 'component' ||
         _.resolveAsset(options, 'components', tag) ||
-        replacer.hasAttribute(config.prefix + 'component') ||
+        replacer.hasAttribute('is') ||
+        replacer.hasAttribute(':is') ||
+        replacer.hasAttribute('bind-is') ||
         // element directive
         _.resolveAsset(options, 'elementDirectives', tag) ||
         // for block
-        replacer.hasAttribute(config.prefix + 'for')
+        replacer.hasAttribute(config.prefix + 'for') ||
+        // if block
+        replacer.hasAttribute(config.prefix + 'if')
       ) {
         return frag
       } else {

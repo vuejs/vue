@@ -12,35 +12,47 @@ var _ = require('./index')
 exports.commonTagRE = /^(div|p|span|img|a|b|i|br|ul|ol|li|h1|h2|h3|h4|h5|h6|code|pre|table|th|td|tr|form|label|input|select|option|nav|article|section|header|footer)$/
 exports.checkComponent = function (el, options) {
   var tag = el.tagName.toLowerCase()
-  if (tag === 'component') {
-    // dynamic syntax
-    var exp = el.getAttribute('is')
-    if (exp != null) {
-      el.removeAttribute('is')
-      return { id: exp }
-    } else {
-      exp = _.getBindAttr(el, 'is')
-      if (exp != null) {
-        return { id: exp, dynamic: true }
-      }
-    }
-  } else if (!exports.commonTagRE.test(tag)) {
+  var hasAttrs = el.hasAttributes()
+  if (!exports.commonTagRE.test(tag) && tag !== 'component') {
     if (_.resolveAsset(options, 'components', tag)) {
       return { id: tag }
-    } else if (process.env.NODE_ENV !== 'production') {
-      if (tag.indexOf('-') > -1 ||
-          /HTMLUnknownElement/.test(Object.prototype.toString.call(el))) {
-        _.warn(
-          'Unknown custom element: <' + tag + '> - did you ' +
-          'register the component correctly?'
-        )
+    } else {
+      var is = hasAttrs && getIsBinding(el)
+      if (is) {
+        return is
+      } else if (process.env.NODE_ENV !== 'production') {
+        if (tag.indexOf('-') > -1 ||
+            /HTMLUnknownElement/.test(Object.prototype.toString.call(el))) {
+          _.warn(
+            'Unknown custom element: <' + tag + '> - did you ' +
+            'register the component correctly?'
+          )
+        }
       }
     }
+  } else if (hasAttrs) {
+    return getIsBinding(el)
   }
-  /* eslint-disable no-cond-assign */
-  if (tag = _.attr(el, 'component')) {
-  /* eslint-enable no-cond-assign */
-    return { id: tag }
+}
+
+/**
+ * Get "is" binding from an element.
+ *
+ * @param {Element} el
+ * @return {Object|undefined}
+ */
+
+function getIsBinding (el) {
+  // dynamic syntax
+  var exp = el.getAttribute('is')
+  if (exp != null) {
+    el.removeAttribute('is')
+    return { id: exp }
+  } else {
+    exp = _.getBindAttr(el, 'is')
+    if (exp != null) {
+      return { id: exp, dynamic: true }
+    }
   }
 }
 

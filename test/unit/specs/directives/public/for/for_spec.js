@@ -106,13 +106,13 @@ if (_.inBrowser) {
       assertMutations(vm, el, done)
     })
 
-    it('v-component', function (done) {
+    it('is component', function (done) {
       var vm = new Vue({
         el: el,
         data: {
           items: [{a: 1}, {a: 2}]
         },
-        template: '<p v-for="item in items" v-component="test" bind-index="$index" bind-item="item"></p>',
+        template: '<p v-for="item in items" is="test" bind-index="$index" bind-item="item"></p>',
         components: {
           test: {
             props: ['index', 'item'],

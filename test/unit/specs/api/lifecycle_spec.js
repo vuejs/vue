@@ -253,12 +253,12 @@ if (_.inBrowser) {
 
       it('safely teardown partial compilation', function () {
         var vm = new Vue({
-          template: '<div v-component="dialog"><div v-partial="hello"></div></div>',
+          template: '<test><partial name="hello"></partial></test>',
           partials: {
             hello: 'Hello {{name}}'
           },
           components: {
-            dialog: {
+            test: {
               template: '<slot></slot>'
             }
           }

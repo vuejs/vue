@@ -67,8 +67,8 @@ if (_.inBrowser) {
       res = transclude(el, options)
       expect(res instanceof DocumentFragment).toBe(true)
 
-      // single component: v-component
-      options.template = '<div v-component="test"></div>'
+      // single component: is
+      options.template = '<div is="test"></div>'
       res = transclude(el, options)
       expect(res instanceof DocumentFragment).toBe(true)
 
@@ -80,6 +80,11 @@ if (_.inBrowser) {
 
       // v-for
       options.template = '<div v-for="item in list"></div>'
+      res = transclude(el, options)
+      expect(res instanceof DocumentFragment).toBe(true)
+
+      // v-if
+      options.template = '<div v-if="ok"></div>'
       res = transclude(el, options)
       expect(res instanceof DocumentFragment).toBe(true)
     })

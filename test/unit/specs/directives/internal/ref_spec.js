@@ -34,7 +34,7 @@ if (_.inBrowser) {
       expect(vm.$.test2.$options.id).toBe('test2')
     })
 
-    it('with dynamic v-component', function (done) {
+    it('with dynamic component', function (done) {
       var vm = new Vue({
         el: el,
         components: components,

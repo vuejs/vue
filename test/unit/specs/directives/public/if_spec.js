@@ -65,7 +65,7 @@ if (_.inBrowser) {
       })
     })
 
-    it('v-if + v-component', function (done) {
+    it('v-if + component', function (done) {
       var attachSpy = jasmine.createSpy()
       var detachSpy = jasmine.createSpy()
       var readySpy = jasmine.createSpy()

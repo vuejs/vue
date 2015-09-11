@@ -48,10 +48,10 @@ if (_.inBrowser) {
       expect(el.innerHTML).toBe('<p>123</p>')
     })
 
-    it('allow v-component on table elements', function () {
+    it('"is" on table elements', function () {
       var vm = new Vue({
         el: el,
-        template: '<table><tbody><tr v-component="test"></tr></tbody></table>',
+        template: '<table><tbody><tr is="test"></tr></tbody></table>',
         components: {
           test: {
             data: function () {
@@ -239,7 +239,7 @@ if (_.inBrowser) {
       vm.ok = true
       _.nextTick(function () {
         expect(vm.$children.length).toBe(1)
-        expect(vm._directives.length).toBe(3) // v-if, v-component, v-text
+        expect(vm._directives.length).toBe(3) // v-if, component, v-text
         expect(el.textContent).toBe('hello world')
         done()
       })
@@ -483,7 +483,7 @@ if (_.inBrowser) {
     })
 
     it('already mounted warn', function () {
-      el.setAttribute('v-component', 'test')
+      el.setAttribute('is', 'test')
       new Vue({
         el: el
       })
@@ -494,7 +494,7 @@ if (_.inBrowser) {
       expect(function () {
         new Vue({
           el: el,
-          template: '<div v-component="non-existent"></div>'
+          template: '<div is="non-existent"></div>'
         })
       }).not.toThrow()
     })
