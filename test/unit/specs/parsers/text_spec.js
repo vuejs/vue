@@ -81,6 +81,20 @@ describe('Text Parser', function () {
     expect(res1).toBe(res2)
   })
 
+  it('custom delimiters (0.12 compat)', function () {
+    config.delimiters = ['[%', '%]']
+    assertParse({
+      text: '[%* text %] and [[% html %]]',
+      expected: [
+        { tag: true, value: 'text', html: false, oneTime: true },
+        { value: ' and ' },
+        { tag: true, value: 'html', html: true, oneTime: false }
+      ]
+    })
+    config.delimiters = ['{{', '}}']
+    config.unsafeDelimiters = ['{{{', '}}}']
+  })
+
   it('custom delimiters', function () {
     config.delimiters = ['[%', '%]']
     config.unsafeDelimiters = ['{!!', '!!}']

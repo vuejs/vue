@@ -132,6 +132,16 @@ Object.defineProperty(module.exports, 'delimiters', {
   },
   set: function (val) {
     delimiters = val
+    var unsafeOpen = val[0].charAt(0) + val[0]
+    var unsafeClose = val[1] + val[1].slice(-1)
+    unsafeDelimiters = [unsafeOpen, unsafeClose]
+    if (process.env.NODE_ENV !== 'production') {
+      require('./util').log(
+        'Interpolation delimiters for unsafe HTML will ' +
+        'need to be configured separately as ' +
+        'Vue.config.unsafeDelimiters in 1.0.0.'
+      )
+    }
     textParser.compileRegex()
   }
 })
