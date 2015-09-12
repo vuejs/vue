@@ -6,10 +6,8 @@ coverage
 dist/vue.js.map
 dist/vue.min.js.gz
 examples
-explorations
 perf
 test
 bower.json
-component.json
 gruntfile.js
 sauce_connect.log
