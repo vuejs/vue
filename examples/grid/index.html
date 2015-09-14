@@ -14,11 +14,11 @@
         <thead>
           <tr>
             <th v-for="key in columns"
-              on-click="sortBy(key)"
-              :class="{active: sortKey == key}">
+              @click="sortBy(key)"
+              v-class="{active: sortKey == key}">
               {{key | capitalize}}
               <span class="arrow"
-                :class="reversed[key] ? 'dsc' : 'asc'">
+                v-class="reversed[key] ? 'dsc' : 'asc'">
               </span>
             </th>
           </tr>
