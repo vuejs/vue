@@ -104,7 +104,7 @@ module.exports = function compileProps (el, propOptions) {
     } else {
       // new syntax, check binding type
       if ((value = _.getBindAttr(el, attr)) === null) {
-        if ((value = _.getBindAttr(el, attr + '@')) !== null) {
+        if ((value = _.getBindAttr(el, attr + '&')) !== null) {
           prop.mode = propBindingModes.TWO_WAY
         } else if ((value = _.getBindAttr(el, attr + '*')) !== null) {
           prop.mode = propBindingModes.ONE_TIME

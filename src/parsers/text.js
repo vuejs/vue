@@ -73,7 +73,7 @@ exports.parse = function (text) {
     value = html ? match[1] : match[2]
     first = value.charCodeAt(0)
     oneTime = first === 42 // *
-    twoWay = first === 64  // @
+    twoWay = first === 38 || first === 64 // & or @
     value = oneTime || twoWay
       ? value.slice(1)
       : value

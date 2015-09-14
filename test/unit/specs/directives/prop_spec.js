@@ -99,7 +99,7 @@ if (_.inBrowser) {
             a: 'A'
           }
         },
-        template: '<test v-bind:testt@="test" :bb@="b" :a@=" test.a " v-ref="child"></test>',
+        template: '<test v-bind:testt&="test" :bb&="b" :a&=" test.a " v-ref="child"></test>',
         components: {
           test: {
             props: ['testt', 'bb', 'a'],
@@ -245,7 +245,7 @@ if (_.inBrowser) {
         data: {
           b: 'B'
         },
-        template: '<test :b@="b + \'B\'" v-ref="child"></test>',
+        template: '<test :b&="b + \'B\'" v-ref="child"></test>',
         components: {
           test: {
             props: ['b'],
