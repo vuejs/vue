@@ -9,8 +9,9 @@ var resolveAsset = _.resolveAsset
 var componentDef = require('../directives/component')
 
 // special binding prefixes
-var bindRE = /^bind-|^:/
-var onRE = /^on-/
+var bindRE = /^:/
+var onRE = /^@/
+var argRE = /:(.*)$/
 var nodeRefRE = /^\$\$\./
 
 // terminal directives
@@ -547,16 +548,19 @@ function compileDirectives (attrs, options) {
     value = attr.value
     // Core directive
     if (name.indexOf(config.prefix) === 0) {
-      dirName = name.slice(config.prefix.length)
-
       // check literal
-      if (dirName.charAt(dirName.length - 1) === '#') {
+      if (name.charAt(name.length - 1) === '#') {
         isLiteral = true
-        dirName = dirName.slice(0, -1)
+        name = name.slice(0, -1)
       } else {
         isLiteral = false
       }
-
+      // check argument
+      arg = (arg = name.match(argRE)) && arg[1]
+      // extract directive name
+      dirName = name
+        .slice(config.prefix.length)
+        .replace(argRE, '')
       dirDef = resolveAsset(options, 'directives', dirName)
       if (process.env.NODE_ENV !== 'production') {
         _.assertAsset(dirDef, 'directive', dirName)
@@ -564,12 +568,6 @@ function compileDirectives (attrs, options) {
         // deprecations
         if (dirName === 'transition') {
           _.deprecation.V_TRANSITION()
-        } else if (dirName === 'class') {
-          _.deprecation.V_CLASS()
-        } else if (dirName === 'style') {
-          _.deprecation.V_STYLE()
-        } else if (dirName === 'on') {
-          _.deprecation.V_ON()
         } else if (dirName === 'attr') {
           _.deprecation.V_ATTR()
         } else if (dirName === 'el') {
@@ -582,6 +580,7 @@ function compileDirectives (attrs, options) {
           name: dirName,
           descriptors: dirParser.parse(value),
           def: dirDef,
+          arg: arg,
           literal: isLiteral
         })
       }

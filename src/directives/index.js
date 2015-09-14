@@ -25,3 +25,6 @@ exports['if'] = require('./if')
 // but we still want to expose them for advanced usage.
 exports._component = require('./component')
 exports._prop = require('./prop')
+
+// 1.0.0 compat
+exports.bind = exports.attr

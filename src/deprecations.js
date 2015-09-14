@@ -68,8 +68,8 @@ if (process.env.NODE_ENV !== 'production') {
 
     DIR_ARGS: function (exp) {
       warn(
-        'Directives will no longer take arguments in 1.0.0. Found in directive ' +
-        '"' + exp + '"' + newBindingSyntaxLink
+        exp + ': Directive arguments will be moved into the attribute name in 1.0.0 - ' +
+        'use v-dirname:arg="expression" syntax instead.' + newBindingSyntaxLink
       )
     },
 
@@ -95,31 +95,10 @@ if (process.env.NODE_ENV !== 'production') {
       )
     },
 
-    V_CLASS: function () {
-      warn(
-        'v-class will no longer be a directive in 1.0.0; Use "bind-class" instead.' +
-        newBindingSyntaxLink
-      )
-    },
-
-    V_STYLE: function () {
-      warn(
-        'v-style will no longer be a directive in 1.0.0; Use "bind-style" instead.' +
-        newBindingSyntaxLink
-      )
-    },
-
     V_ATTR: function () {
       warn(
-        'v-attr will no longer be a directive in 1.0.0; Use the "bind-" syntax instead.' +
-        newBindingSyntaxLink
-      )
-    },
-
-    V_ON: function () {
-      warn(
-        'v-on will no longer be a directive in 1.0.0; Use the "on-" syntax instead.' +
-        newBindingSyntaxLink
+        'v-attr will be renamed to v-bind in 1.0.0. Also, use v-bind:attr="expression" ' +
+        'syntax instead.' + newBindingSyntaxLink
       )
     },
 
