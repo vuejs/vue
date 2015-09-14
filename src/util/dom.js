@@ -70,7 +70,7 @@ exports.getBindAttr = function (node, name) {
   var attr = ':' + name
   var val = node.getAttribute(attr)
   if (val === null) {
-    attr = 'bind-' + name
+    attr = config.prefix + 'bind:' + name
     val = node.getAttribute(attr)
   }
   if (val !== null) {

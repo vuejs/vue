@@ -9,7 +9,7 @@ var resolveAsset = _.resolveAsset
 var componentDef = require('../directives/component')
 
 // special binding prefixes
-var bindRE = /^:/
+var bindRE = /^:|^v-bind:/
 var onRE = /^@/
 var argRE = /:(.*)$/
 var nodeRefRE = /^\$\$\./
@@ -269,7 +269,7 @@ function compileElement (el, options) {
   if (el.tagName === 'TEXTAREA') {
     var tokens = textParser.parse(el.value)
     if (tokens) {
-      el.setAttribute('bind-value', textParser.tokensToExp(tokens))
+      el.setAttribute(':value', textParser.tokensToExp(tokens))
       el.value = ''
     }
   }
@@ -546,6 +546,21 @@ function compileDirectives (attrs, options) {
     attr = attrs[i]
     name = attr.name
     value = attr.value
+
+    // special case for transition
+    if (
+      name === 'transition' ||
+      name === ':transition' ||
+      name === (config.prefix + 'bind:transition')
+    ) {
+      dirs.push({
+        name: 'transition',
+        arg: bindRE.test(name),
+        descriptors: [newDirParser.parse(value)],
+        def: options.directives.transition
+      })
+    } else
+
     // Core directive
     if (name.indexOf(config.prefix) === 0) {
       // check literal
@@ -602,16 +617,6 @@ function compileDirectives (attrs, options) {
         name: 'el',
         descriptors: [newDirParser.parse(value)],
         def: options.directives.el
-      })
-    } else
-
-    // special case for transition
-    if (name === 'transition' || name === 'bind-transition' || name === ':transition') {
-      dirs.push({
-        name: 'transition',
-        arg: bindRE.test(name),
-        descriptors: [newDirParser.parse(value)],
-        def: options.directives.transition
       })
     } else
 

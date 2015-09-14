@@ -155,7 +155,7 @@ function isFragment (el) {
     // alternative component syntax
     el.hasAttribute('is') ||
     el.hasAttribute(':is') ||
-    el.hasAttribute('bind-is') ||
+    el.hasAttribute(config.prefix + 'bind:is') ||
     el.hasAttribute(config.prefix + 'component') ||
     // repeat block
     el.hasAttribute(config.prefix + 'repeat') ||

@@ -66,10 +66,10 @@ if (_.inBrowser) {
       linker(vm, el)
       expect(directiveBind.calls.count()).toBe(4)
       expect(vm._bindDir.calls.count()).toBe(4)
-      expect(vm._bindDir).toHaveBeenCalledWith('a', el, descriptorB, defA, undefined, undefined, undefined, undefined, false)
-      expect(vm._bindDir).toHaveBeenCalledWith('a', el.firstChild, descriptorA, defA, undefined, undefined, undefined, undefined, false)
-      expect(vm._bindDir).toHaveBeenCalledWith('b', el.firstChild, descriptorB, defB, undefined, undefined, undefined, undefined, false)
-      expect(vm._bindDir).toHaveBeenCalledWith('b', el.lastChild, descriptorB, defB, undefined, undefined, undefined, undefined, true)
+      expect(vm._bindDir).toHaveBeenCalledWith('a', el, descriptorB, defA, undefined, undefined, undefined, null, false)
+      expect(vm._bindDir).toHaveBeenCalledWith('a', el.firstChild, descriptorA, defA, undefined, undefined, undefined, null, false)
+      expect(vm._bindDir).toHaveBeenCalledWith('b', el.firstChild, descriptorB, defB, undefined, undefined, undefined, null, false)
+      expect(vm._bindDir).toHaveBeenCalledWith('b', el.lastChild, descriptorB, defB, undefined, undefined, undefined, null, true)
       // check the priority sorting
       // the "b"s should be called first!
       expect(directiveBind.calls.argsFor(0)[0]).toBe('b')
@@ -78,10 +78,10 @@ if (_.inBrowser) {
       expect(directiveBind.calls.argsFor(3)[0]).toBe('a')
     })
 
-    it('bind- syntax', function () {
-      el.setAttribute('bind-class', 'a')
-      el.setAttribute('bind-style', 'b')
-      el.setAttribute('bind-title', 'c')
+    it('v-bind shorthand', function () {
+      el.setAttribute(':class', 'a')
+      el.setAttribute(':style', 'b')
+      el.setAttribute(':title', 'c')
       var descA = newDirParser.parse('a')
       var descB = newDirParser.parse('b')
       var descC = newDirParser.parse('c')
@@ -93,8 +93,9 @@ if (_.inBrowser) {
       expect(vm._bindDir).toHaveBeenCalledWith('attr', el, descC, Vue.options.directives.attr, undefined, undefined, undefined, 'title', undefined)
     })
 
-    it('on- syntax', function () {
-      el.setAttribute('on-click', 'a++')
+    it('v-on shorthand', function () {
+      el.innerHTML = '<a @click="a++"></a>'
+      el = el.firstChild
       var desc = newDirParser.parse('a++')
       var linker = compile(el, Vue.options)
       linker(vm, el)
@@ -309,12 +310,12 @@ if (_.inBrowser) {
         { name: 'optimizeLiteral' }
       ]
       el.innerHTML = '<div ' +
-        'bind-test-normal="a" ' +
+        'v-bind:test-normal="a" ' +
         'test-literal="1" ' +
-        'bind-optimize-literal="1" ' +
-        'bind-test-two-way@="a" ' +
-        'bind-two-way-warn@="a + 1" ' +
-        'bind-test-one-time*="a"></div>'
+        ':optimize-literal="1" ' +
+        ':test-two-way@="a" ' +
+        ':two-way-warn@="a + 1" ' +
+        ':test-one-time*="a"></div>'
       compiler.compileAndLinkProps(vm, el.firstChild, props)
       expect(vm._bindDir.calls.count()).toBe(3) // skip literal and one time
       // literal

@@ -157,7 +157,7 @@ if (_.inBrowser) {
     it('dynamic (new syntax)', function (done) {
       var vm = new Vue({
         el: el,
-        template: '<component bind-is="view" bind-view="view"></component>',
+        template: '<component v-bind:is="view" :view="view"></component>',
         data: {
           view: 'view-a'
         },
@@ -415,7 +415,7 @@ if (_.inBrowser) {
         data: {
           view: 'view-a'
         },
-        template: '<component bind-is="view"></component>',
+        template: '<component :is="view"></component>',
         components: {
           'view-a': {
             template: 'AAA',
@@ -498,7 +498,7 @@ if (_.inBrowser) {
         data: {
           view: 'view-a'
         },
-        template: '<component bind-is="view" keep-alive></component>',
+        template: '<component :is="view" keep-alive></component>',
         components: {
           'view-a': {
             template: 'AAA',

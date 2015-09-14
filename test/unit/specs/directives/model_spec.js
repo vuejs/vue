@@ -118,10 +118,10 @@ if (_.inBrowser) {
           expression2: 'string2'
         },
         template:
-          '<input type="radio" value="1" v-model="test" name="test" bind-value="true">' +
-          '<input type="radio" value="0" v-model="test" name="test" bind-value="false">' +
-          '<input type="radio" value="1" v-model="test2" name="test2" bind-value="expression1">' +
-          '<input type="radio" value="0" v-model="test2" name="test2" bind-value="expression2">'
+          '<input type="radio" value="1" v-model="test" name="test" v-bind:value="true">' +
+          '<input type="radio" value="0" v-model="test" name="test" v-bind:value="false">' +
+          '<input type="radio" value="1" v-model="test2" name="test2" :value="expression1">' +
+          '<input type="radio" value="0" v-model="test2" name="test2" :value="expression2">'
       })
       expect(el.childNodes[0].checked).toBe(false)
       expect(el.childNodes[1].checked).toBe(true)
@@ -203,7 +203,7 @@ if (_.inBrowser) {
           expression1: 'aTrueValue',
           expression2: 'aFalseValue'
         },
-        template: '<input type="checkbox" v-model="test" bind-true-value="expression1" bind-false-value="expression2">'
+        template: '<input type="checkbox" v-model="test" v-bind:true-value="expression1" :false-value="expression2">'
       })
       expect(vm.test).toBe('')
       el.firstChild.click()
@@ -635,7 +635,7 @@ if (_.inBrowser) {
         },
         template:
           '<select v-model="test">' +
-            '<option v-for="op in opts" bind-value="op.value">{{op.text}}</option>' +
+            '<option v-for="op in opts" :value="op.value">{{op.text}}</option>' +
           '</select>'
       })
       var select = el.firstChild

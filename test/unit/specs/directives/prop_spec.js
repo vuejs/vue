@@ -99,7 +99,7 @@ if (_.inBrowser) {
             a: 'A'
           }
         },
-        template: '<test bind-testt@="test" :bb@="b" :a@=" test.a " v-ref="child"></test>',
+        template: '<test v-bind:testt@="test" :bb@="b" :a@=" test.a " v-ref="child"></test>',
         components: {
           test: {
             props: ['testt', 'bb', 'a'],
@@ -631,7 +631,7 @@ if (_.inBrowser) {
     it('new syntax with filters', function (done) {
       var vm = new Vue({
         el: el,
-        template: '<test bind-name="a | test"></test>',
+        template: '<test v-bind:name="a | test"></test>',
         data: {
           a: 123
         },

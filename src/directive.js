@@ -303,7 +303,7 @@ Directive.prototype._teardown = function () {
 function removeBindAttr (el, name) {
   var attr = el.hasAttribute(':' + name)
     ? ':' + name
-    : 'bind-' + name
+    : config.prefix + 'bind:' + name
   el.removeAttribute(attr)
 }
 
