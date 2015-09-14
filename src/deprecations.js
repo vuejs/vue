@@ -205,7 +205,7 @@ if (process.env.NODE_ENV !== 'production') {
     PREFIX: function () {
       warn(
         'The "prefix" global config will be deprecated in 1.0.0. All directives ' +
-        'will consistently use the v- or v. prefixes.'
+        'will consistently use the v- prefix.'
       )
     },
 
