@@ -106,15 +106,15 @@ if (process.env.NODE_ENV !== 'production') {
       warn(
         'Mustache interpolations inside attributes: ' + name + '="' + value + '". ' +
         'This will be deprecated in 1.0.0. ' +
-        'Use the "bind-" syntax instead.' + newBindingSyntaxLink
+        'Use v-bind:attr="expression" instead.' + newBindingSyntaxLink
       )
     },
 
     PROPS: function (attr, value) {
       warn(
         'Prop ' + attr + '="' + value + '": props no longer use mustache tags ' +
-        'to indicate a dynamic binding. Use the "bind-" prefix instead.' +
-        newBindingSyntaxLink
+        'to indicate a dynamic binding. Use the "v-bind:prop-name" or the colon ' +
+        'shorthand instead.' + newBindingSyntaxLink
       )
     },
 
@@ -129,21 +129,23 @@ if (process.env.NODE_ENV !== 'production') {
       warn(
         'Prop ' + attr + '="' + value + '": literal props will no longer be ' +
         'auto-casted into booleans/numbers in 1.0.0 - they will all be treated ' +
-        'as literal strings. Use "bind-" syntax for boolean/number literals instead.'
+        'as literal strings. Use "v-bind" or the colon shorthand for ' +
+        'boolean/number literals instead.'
       )
     },
 
     BIND_IS: function () {
       warn(
         '<component is="{{view}}"> syntax will be deprecated in 1.0.0. Use ' +
-        '<component bind-is="view"> instead.'
+        '<component v-bind:is="view"> or <component :is="view"> instead.'
       )
     },
 
     PARTIAL_NAME: function (id) {
       warn(
         '<partial name="' + id + '">: mustache interpolations inside attributes ' +
-        'will be deprecated in 1.0.0. Use bind-name="expression" instead.'
+        'will be deprecated in 1.0.0. Use v-bind:name="expression" or just ' +
+        ':name="expression" instead.'
       )
     },
 
@@ -173,7 +175,7 @@ if (process.env.NODE_ENV !== 'production') {
     MODEL_EXP: function (exp) {
       warn(
         'Params "exp", "true-exp" and "false-exp" for v-model will be deprecated in 1.0.0. ' +
-        'Use "bind-value", "bind-true-value" and "bind-false-value" instead.'
+        'Use "v-bind:value", "v-bind:true-value" and "v-bind:false-value" instead.'
       )
     },
 
