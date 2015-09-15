@@ -1,5 +1,6 @@
 var _ = require('../util')
 var inDoc = _.inDoc
+var eventRE = /^v-on:|^@/
 
 /**
  * Setup the instance's option events & watchers.
@@ -9,8 +10,31 @@ var inDoc = _.inDoc
 
 exports._initEvents = function () {
   var options = this.$options
+  if (options._asComponent) {
+    registerComponentEvents(this, options.el)
+  }
   registerCallbacks(this, '$on', options.events)
   registerCallbacks(this, '$watch', options.watch)
+}
+
+/**
+ * Register v-on events on a child component
+ *
+ * @param {Vue} vm
+ * @param {Element} el
+ */
+
+function registerComponentEvents (vm, el) {
+  var attrs = el.attributes
+  var name, handler
+  for (var i = 0, l = attrs.length; i < l; i++) {
+    name = attrs[i].name
+    if (eventRE.test(name)) {
+      name = name.replace(eventRE, '')
+      handler = (vm._scope || vm._context).$eval(attrs[i].value, true)
+      vm.$on(name.replace(eventRE), handler)
+    }
+  }
 }
 
 /**
