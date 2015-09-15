@@ -9,15 +9,23 @@ var filterRE = /[^|]\|[^|]/
  * Get the value from an expression on this vm.
  *
  * @param {String} exp
+ * @param {Boolean} [asStatement]
  * @return {*}
  */
 
-exports.$get = function (exp) {
+exports.$get = function (exp, asStatement) {
   var res = expParser.parse(exp)
   if (res) {
-    try {
-      return res.get.call(this, this)
-    } catch (e) {}
+    if (asStatement && !expParser.isSimplePath(exp)) {
+      var self = this
+      return function statementHandler () {
+        res.get.call(self, self)
+      }
+    } else {
+      try {
+        return res.get.call(this, this)
+      } catch (e) {}
+    }
   }
 }
 
@@ -78,23 +86,24 @@ exports.$watch = function (exp, cb, options) {
  * Evaluate a text directive, including filters.
  *
  * @param {String} text
+ * @param {Boolean} [asStatement]
  * @return {String}
  */
 
-exports.$eval = function (text) {
+exports.$eval = function (text, asStatement) {
   // check for filters.
   if (filterRE.test(text)) {
     var dir = dirParser.parse(text)
     // the filter regex check might give false positive
     // for pipes inside strings, so it's possible that
     // we don't get any filters here
-    var val = this.$get(dir.expression)
+    var val = this.$get(dir.expression, asStatement)
     return dir.filters
       ? this._applyFilters(val, null, dir.filters)
       : val
   } else {
     // no filter
-    return this.$get(text)
+    return this.$get(text, asStatement)
   }
 }
 
