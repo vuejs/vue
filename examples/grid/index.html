@@ -14,7 +14,7 @@
         <thead>
           <tr>
             <th v-for="key in columns"
-              on-click="sortBy(key)"
+              @click="sortBy(key)"
               :class="{active: sortKey == key}">
               {{key | capitalize}}
               <span class="arrow"

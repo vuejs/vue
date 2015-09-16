@@ -38,11 +38,11 @@
         <label>{{stat.label}}</label>
         <input type="range" v-model="stat.value" min="0" max="100">
         <span>{{stat.value}}</span>
-        <button on-click="remove(stat)">X</button>
+        <button @click="remove(stat)">X</button>
       </div>
       <form id="add">
         <input name="newlabel" v-model="newLabel">
-        <button on-click="add">Add a Stat</button>
+        <button @click="add">Add a Stat</button>
       </form>
       <pre id="raw">{{stats | json}}</pre>
     </div>

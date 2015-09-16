@@ -29,7 +29,7 @@
               <slot name="footer">
                 default footer
                 <button class="modal-default-button"
-                  on-click="show = false">
+                  @click="show = false">
                   OK
                 </button>
               </slot>
@@ -55,9 +55,9 @@
 
     <!-- app -->
     <div id="app">
-      <button id="show-modal" on-click="showModal = true">Show Modal</button>
+      <button id="show-modal" @click="showModal = true">Show Modal</button>
       <!-- use the modal component, pass in the prop -->
-      <modal bind-show@="showModal">
+      <modal :show@="showModal">
         <!--
           you can use custom content here to overwrite
           default content

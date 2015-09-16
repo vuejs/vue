@@ -29,8 +29,8 @@
       <li>
         <div
           :class="{bold: isFolder}"
-          on-click="toggle"
-          on-dblclick="changeType">
+          @click="toggle"
+          @dblclick="changeType">
           {{model.name}}
           <span v-if="isFolder">[{{open ? '-' : '+'}}]</span>
         </div>
@@ -40,7 +40,7 @@
             v-for="model in model.children"
             :model="model">
           </item>
-          <li on-click="addChild">+</li>
+          <li @click="addChild">+</li>
         </ul>
       </li>
     </script>

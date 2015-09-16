@@ -14,7 +14,7 @@
 					autofocus autocomplete="off"
 					placeholder="What needs to be done?"
 					v-model="newTodo"
-					on-keyup-enter="addTodo">
+					@keyup:enter="addTodo">
 			</header>
 			<section class="main" v-show="todos.length" v-cloak>
 				<input class="toggle-all" type="checkbox" v-model="allDone">
@@ -24,15 +24,15 @@
 						:class="{completed: todo.completed, editing: todo == editedTodo}">
 						<div class="view">
 							<input class="toggle" type="checkbox" v-model="todo.completed">
-							<label on-dblclick="editTodo(todo)">{{todo.title}}</label>
-							<button class="destroy" on-click="removeTodo(todo)"></button>
+							<label @dblclick="editTodo(todo)">{{todo.title}}</label>
+							<button class="destroy" @click="removeTodo(todo)"></button>
 						</div>
 						<input class="edit" type="text"
 							v-model="todo.title"
 							v-todo-focus="todo == editedTodo"
-							on-blur="doneEdit(todo)"
-							on-keyup-enter="doneEdit(todo)"
-							on-keyup-esc="cancelEdit(todo)">
+							@blur="doneEdit(todo)"
+							@keyup:enter="doneEdit(todo)"
+							@keyup:esc="cancelEdit(todo)">
 					</li>
 				</ul>
 			</section>
@@ -45,7 +45,7 @@
 					<li><a href="#/active" :class="{selected: visibility == 'active'}">Active</a></li>
 					<li><a href="#/completed" :class="{selected: visibility == 'completed'}">Completed</a></li>
 				</ul>
-				<button class="clear-completed" on-click="removeCompleted" v-show="todos.length > remaining">
+				<button class="clear-completed" @click="removeCompleted" v-show="todos.length > remaining">
 					Clear completed
 				</button>
 			</footer>
