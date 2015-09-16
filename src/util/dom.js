@@ -49,7 +49,7 @@ exports.inDoc = function (node) {
  */
 
 exports.attr = function (node, attr) {
-  attr = config.prefix + attr
+  attr = 'v-' + attr
   var val = node.getAttribute(attr)
   if (val !== null) {
     node.removeAttribute(attr)

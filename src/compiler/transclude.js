@@ -1,5 +1,4 @@
 var _ = require('../util')
-var config = require('../config')
 var templateParser = require('../parsers/template')
 var specialCharRE = /[#@\*\$\.]/
 
@@ -89,9 +88,9 @@ function transcludeTemplate (el, options) {
         // element directive
         _.resolveAsset(options, 'elementDirectives', tag) ||
         // for block
-        replacer.hasAttribute(config.prefix + 'for') ||
+        replacer.hasAttribute('v-for') ||
         // if block
-        replacer.hasAttribute(config.prefix + 'if')
+        replacer.hasAttribute('v-if')
       ) {
         return frag
       } else {

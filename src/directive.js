@@ -1,5 +1,4 @@
 var _ = require('./util')
-var config = require('./config')
 var Watcher = require('./watcher')
 var expParser = require('./parsers/expression')
 
@@ -63,7 +62,7 @@ Directive.prototype._bind = function () {
     (name !== 'cloak' || this.vm._isCompiled) &&
     this.el && this.el.removeAttribute
   ) {
-    var attr = descriptor.attr || (config.prefix + name)
+    var attr = descriptor.attr || ('v-' + name)
     this.el.removeAttribute(attr)
   }
 

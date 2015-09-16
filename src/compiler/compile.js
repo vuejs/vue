@@ -2,7 +2,6 @@ var _ = require('../util')
 var publicDirectives = require('../directives/public')
 var internalDirectives = require('../directives/internal')
 var compileProps = require('./compile-props')
-var config = require('../config')
 var textParser = require('../parsers/text')
 var dirParser = require('../parsers/directive')
 var templateParser = require('../parsers/template')
@@ -490,7 +489,7 @@ function checkComponent (el, options) {
 
 function checkTerminalDirectives (el, options) {
   if (_.attr(el, 'pre') !== null ||
-      el.hasAttribute(config.prefix + 'else')) {
+      el.hasAttribute('v-else')) {
     return skip
   }
   var value, dirName
@@ -552,8 +551,8 @@ function compileDirectives (attrs, options) {
     name = attr.name
     value = attr.value
     // Core directive
-    if (name.indexOf(config.prefix) === 0) {
-      dirName = name.slice(config.prefix.length)
+    if (name.indexOf('v-') === 0) {
+      dirName = name.slice(2)
 
       // check literal
       if (dirName.charAt(dirName.length - 1) === '#') {

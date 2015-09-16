@@ -1,14 +1,6 @@
 module.exports = {
 
   /**
-   * The prefix to look for when parsing directives.
-   *
-   * @type {String}
-   */
-
-  prefix: 'v-',
-
-  /**
    * Whether to print debug messages.
    * Also enables stack trace for warnings.
    *

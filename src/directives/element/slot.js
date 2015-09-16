@@ -1,5 +1,4 @@
 var _ = require('../../util')
-var config = require('../../config')
 var templateParser = require('../../parsers/template')
 
 // This is the elementDirective that handles <content>
@@ -113,23 +112,11 @@ function extractFragment (nodes, parent, main) {
 
   function append (node) {
     if (_.isTemplate(node) &&
-        !hasDirecitve(node, 'if') &&
-        !hasDirecitve(node, 'for')) {
+        !node.hasAttribute('v-if') &&
+        !node.hasAttribute('v-for')) {
       node = templateParser.parse(node)
     }
     node = templateParser.clone(node)
     frag.appendChild(node)
   }
-}
-
-/**
- * Check if there is a flow control directive on a template
- * element that is a slot.
- *
- * @param {Node} node
- * @param {String} dir
- */
-
-function hasDirecitve (node, dir) {
-  return node.hasAttribute(config.prefix + dir)
 }
