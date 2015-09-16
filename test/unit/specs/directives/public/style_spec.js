@@ -1,5 +1,5 @@
 var _ = require('../../../../../src/util')
-var def = require('../../../../../src/directives/internal/style')
+var def = require('../../../../../src/directives/public/style')
 var Vue = require('../../../../../src/vue')
 
 function checkPrefixedProp (prop) {
@@ -18,7 +18,7 @@ function checkPrefixedProp (prop) {
 }
 
 if (_.inBrowser) {
-  describe('bind-style', function () {
+  describe(':style', function () {
 
     var el, dir
     beforeEach(function () {
@@ -105,7 +105,7 @@ if (_.inBrowser) {
     })
 
     it('updates object deep', function (done) {
-      el.setAttribute('bind-style', 'divStyling')
+      el.setAttribute(':style', 'divStyling')
       var vm = new Vue({
         el: el,
         data: {divStyling: { display: 'none'}}

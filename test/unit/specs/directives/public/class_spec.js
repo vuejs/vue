@@ -1,8 +1,8 @@
 var _ = require('../../../../../src/util')
-var def = require('../../../../../src/directives/internal/class')
+var def = require('../../../../../src/directives/public/class')
 
 if (_.inBrowser) {
-  describe('bind-class', function () {
+  describe(':class', function () {
 
     var el
     beforeEach(function () {

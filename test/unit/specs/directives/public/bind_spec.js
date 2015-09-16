@@ -1,8 +1,8 @@
 var _ = require('../../../../../src/util')
-var def = require('../../../../../src/directives/internal/attr')
+var def = require('../../../../../src/directives/public/bind')
 
 if (_.inBrowser) {
-  describe('bind-attr', function () {
+  describe('v-bind', function () {
 
     var el, dir
     beforeEach(function () {
