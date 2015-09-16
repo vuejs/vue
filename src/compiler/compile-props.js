@@ -57,7 +57,7 @@ module.exports = function compileProps (el, propOptions) {
 
       // then check dynamic version
       if ((value = _.getBindAttr(el, attr)) === null) {
-        if ((value = _.getBindAttr(el, attr + '@')) !== null) {
+        if ((value = _.getBindAttr(el, attr + '&')) !== null) {
           prop.mode = propBindingModes.TWO_WAY
         } else if ((value = _.getBindAttr(el, attr + '*')) !== null) {
           prop.mode = propBindingModes.ONE_TIME

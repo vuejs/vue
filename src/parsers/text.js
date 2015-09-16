@@ -57,7 +57,7 @@ exports.parse = function (text) {
   }
   var tokens = []
   var lastIndex = tagRE.lastIndex = 0
-  var match, index, html, value, first, oneTime, twoWay
+  var match, index, html, value, first, oneTime
   /* eslint-disable no-cond-assign */
   while (match = tagRE.exec(text)) {
   /* eslint-enable no-cond-assign */
@@ -73,16 +73,14 @@ exports.parse = function (text) {
     value = html ? match[1] : match[2]
     first = value.charCodeAt(0)
     oneTime = first === 42 // *
-    twoWay = first === 64  // @
-    value = oneTime || twoWay
+    value = oneTime
       ? value.slice(1)
       : value
     tokens.push({
       tag: true,
       value: value.trim(),
       html: html,
-      oneTime: oneTime,
-      twoWay: twoWay
+      oneTime: oneTime
     })
     lastIndex = index + match[0].length
   }

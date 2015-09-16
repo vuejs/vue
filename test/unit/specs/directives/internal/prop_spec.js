@@ -73,7 +73,7 @@ if (_.inBrowser) {
             a: 'A'
           }
         },
-        template: '<test v-bind:testt@="test" :bb@="b" :a@=" test.a " $.child></test>',
+        template: '<test v-bind:testt&="test" :bb&="b" :a&=" test.a " $.child></test>',
         components: {
           test: {
             props: ['testt', 'bb', 'a'],
@@ -145,7 +145,7 @@ if (_.inBrowser) {
         data: {
           b: 'B'
         },
-        template: '<test :b@=" b + \'B\'" $.child></test>',
+        template: '<test :b&=" b + \'B\'" $.child></test>',
         components: {
           test: {
             props: ['b'],
@@ -248,7 +248,7 @@ if (_.inBrowser) {
           a: 'A',
           b: 'B'
         },
-        template: '<test :aa@="a" :bb="b"></test>',
+        template: '<test :aa&="a" :bb="b"></test>',
         components: {
           test: {
             props: ['aa', 'bb'],

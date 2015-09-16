@@ -230,8 +230,8 @@ if (_.inBrowser) {
         'v-bind:test-normal="a" ' +
         'test-literal="1" ' +
         ':optimize-literal="1" ' +
-        ':test-two-way@="a" ' +
-        ':two-way-warn@="a + 1" ' +
+        ':test-two-way&="a" ' +
+        ':two-way-warn&="a + 1" ' +
         ':test-one-time*="a"></div>'
       compiler.compileAndLinkProps(vm, el.firstChild, props)
       expect(vm._bindDir.calls.count()).toBe(3) // skip literal and one time
