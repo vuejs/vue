@@ -570,7 +570,7 @@ function compileDirectives (attrs, options) {
 
     // event handlers
     if (onRE.test(name)) {
-      pushDir('on', internalDirectives.on, {
+      pushDir('on', publicDirectives.on, {
         arg: name.replace(onRE, '')
       })
     } else
@@ -613,6 +613,7 @@ function compileDirectives (attrs, options) {
           isLiteral = true
         }
         pushDir(dirName, dirDef, {
+          arg: arg,
           literal: isLiteral
         })
       }

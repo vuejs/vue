@@ -15,8 +15,8 @@ describe('Util - component', function () {
     expect(res.id).toBe('what')
     expect(res.dynamic).toBeFalsy()
 
-    // <component bind-is="...">
-    el.setAttribute('bind-is', 'what')
+    // <component :is="...">
+    el.setAttribute(':is', 'what')
     res = _.checkComponent(el)
     expect(res.id).toBe('what')
     expect(res.dynamic).toBe(true)

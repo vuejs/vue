@@ -54,7 +54,7 @@ describe('Instance state initialization', function () {
 
     it('external prop should overwrite default value', function () {
       var el = document.createElement('div')
-      el.setAttribute('bind-c', '2')
+      el.setAttribute('v-bind:c', '2')
       el.textContent = '{{c}}'
       var vm = new Vue({
         el: el,
@@ -69,7 +69,7 @@ describe('Instance state initialization', function () {
 
     it('props should be available in data() and create()', function () {
       var el = document.createElement('div')
-      el.setAttribute('bind-c', '2')
+      el.setAttribute(':c', '2')
       var vm = new Vue({
         el: el,
         props: ['c'],

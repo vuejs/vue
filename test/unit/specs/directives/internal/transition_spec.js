@@ -59,7 +59,7 @@ if (_.inBrowser) {
       }
       var vm = new Vue({
         el: el,
-        template: '<div v-show="show" bind-transition="trans"></div>',
+        template: '<div v-show="show" :transition="trans"></div>',
         data: {
           show: true,
           trans: 'a'

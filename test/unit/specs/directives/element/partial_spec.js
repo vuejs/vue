@@ -31,7 +31,7 @@ describe('Partial', function () {
   it('dynamic', function (done) {
     var vm = new Vue({
       el: el,
-      template: '<partial bind-name="\'test-\' + id"></partial>',
+      template: '<partial :name="\'test-\' + id"></partial>',
       data: {
         id: 'a'
       },
@@ -80,7 +80,7 @@ describe('Partial', function () {
   it('teardown', function () {
     var vm = new Vue({
       el: el,
-      template: '<partial bind-name="\'test-\' + id"></partial>',
+      template: '<partial :name="\'test-\' + id"></partial>',
       data: {
         id: 'a'
       },

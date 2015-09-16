@@ -104,7 +104,7 @@ if (_.inBrowser) {
     it('dynamic', function (done) {
       var vm = new Vue({
         el: el,
-        template: '<component bind-is="view" bind-view="view"></component>',
+        template: '<component :is="view" :view="view"></component>',
         data: {
           view: 'view-a'
         },
@@ -142,7 +142,7 @@ if (_.inBrowser) {
       var spyB = jasmine.createSpy()
       var vm = new Vue({
         el: el,
-        template: '<component bind-is="view" keep-alive></component>',
+        template: '<component :is="view" keep-alive></component>',
         data: {
           view: 'view-a'
         },
@@ -251,7 +251,7 @@ if (_.inBrowser) {
         data: {
           list: [{a: 1}, {a: 2}]
         },
-        template: '<test bind-collection="list"></test>',
+        template: '<test :collection="list"></test>',
         components: {
           test: {
             template: '<ul><li v-for="item in collection">{{item.a}}</li></ul>',
@@ -290,7 +290,7 @@ if (_.inBrowser) {
         data: {
           view: 'view-a'
         },
-        template: '<component bind-is="view"></component>',
+        template: '<component :is="view"></component>',
         components: {
           'view-a': {
             template: 'AAA',
@@ -339,7 +339,7 @@ if (_.inBrowser) {
         data: {
           view: 'view-a'
         },
-        template: '<component bind-is="view" keep-alive></component>',
+        template: '<component :is="view" keep-alive></component>',
         components: {
           'view-a': {
             template: 'AAA',
@@ -381,7 +381,7 @@ if (_.inBrowser) {
         data: {
           view: 'view-a'
         },
-        template: '<component bind-is="view" transition="test" transition-mode="in-out"></component>',
+        template: '<component :is="view" transition="test" transition-mode="in-out"></component>',
         components: {
           'view-a': { template: 'AAA' },
           'view-b': { template: 'BBB' }
@@ -425,7 +425,7 @@ if (_.inBrowser) {
         data: {
           view: 'view-a'
         },
-        template: '<component bind-is="view" transition="test" transition-mode="out-in"></component>',
+        template: '<component :is="view" transition="test" transition-mode="out-in"></component>',
         components: {
           'view-a': { template: 'AAA' },
           'view-b': { template: 'BBB' }
@@ -459,7 +459,7 @@ if (_.inBrowser) {
     it('teardown', function (done) {
       var vm = new Vue({
         el: el,
-        template: '<component bind-is="view" keep-alive></component>',
+        template: '<component :is="view" keep-alive></component>',
         data: {
           view: 'test'
         },

@@ -163,6 +163,15 @@ Directive.prototype.param = function (name) {
   if (param != null) {
     this.el.removeAttribute(name)
     param = (this._scope || this.vm).$interpolate(param)
+  } else {
+    param = _.getBindAttr(this.el, name)
+    if (param != null) {
+      param = (this._scope || this.vm).$eval(param)
+      process.env.NODE_ENV !== 'production' && _.log(
+        'You are using bind- syntax on "' + name + '", which ' +
+        'is a directive param. It will be evaluated only once.'
+      )
+    }
   }
   return param
 }

@@ -50,7 +50,7 @@ if (_.inBrowser) {
 
     it('normal directives', function () {
       el.setAttribute('v-a', 'b')
-      el.innerHTML = '<p v-a="a" v-b="1">hello</p><div v-b#="hi"></div>'
+      el.innerHTML = '<p v-a:hello="a" v-b="1">hello</p><div v-b#="hi"></div>'
       var defA = { priority: 1 }
       var defB = { priority: 2 }
       var options = _.mergeOptions(Vue.options, {
@@ -80,6 +80,7 @@ if (_.inBrowser) {
       expect(args[0].name).toBe('a')
       expect(args[0].expression).toBe('a')
       expect(args[0].def).toBe(defA)
+      expect(args[0].arg).toBe('hello')
       expect(args[1]).toBe(el.firstChild)
       // 3 (expression literal)
       args = vm._bindDir.calls.argsFor(isAttrReversed ? 1 : 2)
@@ -141,7 +142,7 @@ if (_.inBrowser) {
       expect(args[0].name).toBe('on')
       expect(args[0].expression).toBe('a++')
       expect(args[0].arg).toBe('click')
-      expect(args[0].def).toBe(internalDirectives.on)
+      expect(args[0].def).toBe(publicDirectives.on)
       expect(args[1]).toBe(el)
     })
 
@@ -315,13 +316,13 @@ if (_.inBrowser) {
       vm = new Vue({
         el: el,
         template:
-          '<test class="a" on-click="test(1)"></test>',
+          '<test class="a" v-on:click="test(1)"></test>',
         methods: {
           test: parentSpy
         },
         components: {
           test: {
-            template: '<div class="b" on-click="test(2)"></div>',
+            template: '<div class="b" v-on:click="test(2)"></div>',
             replace: true,
             methods: {
               test: childSpy

@@ -14,7 +14,7 @@ if (_.inBrowser) {
       var vm = new Vue({
         el: el,
         data: { test: false, a: 'A' },
-        template: '<div v-if="test"><test bind-a="a"></test></div>',
+        template: '<div v-if="test"><test :a="a"></test></div>',
         components: {
           test: {
             props: ['a'],
@@ -112,7 +112,7 @@ if (_.inBrowser) {
           ok: false,
           view: 'view-a'
         },
-        template: '<component bind-is="view" v-if="ok"></component>',
+        template: '<component :is="view" v-if="ok"></component>',
         components: {
           'view-a': {
             template: 'AAA'
@@ -223,7 +223,7 @@ if (_.inBrowser) {
         template:
           '<outer>' +
             '<div>' + // an extra layer to test components deep inside the tree
-              '<transcluded v-for="item in list" bind-a="item.a"></transcluded>' +
+              '<transcluded v-for="item in list" :a="item.a"></transcluded>' +
             '</div>' +
           '</outer>',
         components: {

@@ -10,7 +10,7 @@ function trigger (target, event, process) {
 }
 
 if (_.inBrowser) {
-  describe('on-', function () {
+  describe('v-on', function () {
 
     var el
     beforeEach(function () {
@@ -22,7 +22,25 @@ if (_.inBrowser) {
       var spy = jasmine.createSpy()
       var vm = new Vue({
         el: el,
-        template: '<a on-click="test"></a>',
+        template: '<a v-on:click="test"></a>',
+        data: {a: 1},
+        methods: {
+          test: spy
+        }
+      })
+      var a = el.firstChild
+      trigger(a, 'click')
+      expect(spy.calls.count()).toBe(1)
+      vm.$destroy()
+      trigger(a, 'click')
+      expect(spy.calls.count()).toBe(1)
+    })
+
+    it('shorthand', function () {
+      var spy = jasmine.createSpy()
+      var vm = new Vue({
+        el: el,
+        template: '<a @click="test"></a>',
         data: {a: 1},
         methods: {
           test: spy
@@ -39,7 +57,7 @@ if (_.inBrowser) {
     it('inline expression', function (done) {
       new Vue({
         el: el,
-        template: '<a on-click="a++">{{a}}</a>',
+        template: '<a v-on:click="a++">{{a}}</a>',
         data: {a: 1}
       })
       var a = el.firstChild
@@ -53,7 +71,7 @@ if (_.inBrowser) {
     it('with key filter', function (done) {
       new Vue({
         el: el,
-        template: '<a on-keyup-enter="test">{{a}}</a>',
+        template: '<a v-on:keyup:enter="test">{{a}}</a>',
         data: {a: 1},
         methods: {
           test: function () {
@@ -74,7 +92,7 @@ if (_.inBrowser) {
     it('with key filter (keycode)', function (done) {
       new Vue({
         el: el,
-        template: '<a on-keyup-13="test">{{a}}</a>',
+        template: '<a v-on:keyup:13="test">{{a}}</a>',
         data: {a: 1},
         methods: {
           test: function () {
@@ -92,11 +110,11 @@ if (_.inBrowser) {
       })
     })
 
-    it('warn non-function values', function () {
+    it('warn nv-on:function values', function () {
       new Vue({
         el: el,
         data: { test: 123 },
-        template: '<a on-keyup="test"></a>'
+        template: '<a v-on:keyup="test"></a>'
       })
       expect(hasWarned(_, 'expects a function value')).toBe(true)
     })
@@ -108,7 +126,7 @@ if (_.inBrowser) {
       var spy = jasmine.createSpy()
       var vm = new Vue({
         el: el,
-        template: '<iframe on-click="test"></iframe>',
+        template: '<iframe v-on:click="test"></iframe>',
         methods: {
           test: spy
         }
@@ -126,7 +144,7 @@ if (_.inBrowser) {
       var test = jasmine.createSpy()
       new Vue({
         el: el,
-        template: '<a on-click="test($event)"></a>',
+        template: '<a v-on:click="test($event)"></a>',
         methods: {
           test: test
         }
@@ -144,7 +162,7 @@ if (_.inBrowser) {
       })
       parent.$addChild({
         el: el,
-        template: '<a on-click="$parent.test($event)"></a>'
+        template: '<a v-on:click="$parent.test($event)"></a>'
       })
       var e = trigger(el.firstChild, 'click')
       expect(test).toHaveBeenCalledWith(e)

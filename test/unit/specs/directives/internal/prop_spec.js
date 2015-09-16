@@ -16,7 +16,7 @@ if (_.inBrowser) {
         data: {
           b: 'B'
         },
-        template: '<test bind-b="b" $.child></test>',
+        template: '<test v-bind:b="b" $.child></test>',
         components: {
           test: {
             props: ['b'],
@@ -40,7 +40,7 @@ if (_.inBrowser) {
     it('with filters', function (done) {
       var vm = new Vue({
         el: el,
-        template: '<test bind-name="a | test"></test>',
+        template: '<test :name="a | test"></test>',
         data: {
           a: 123
         },
@@ -73,7 +73,7 @@ if (_.inBrowser) {
             a: 'A'
           }
         },
-        template: '<test bind-testt@="test" bind-bb@="b" bind-a@=" test.a " $.child></test>',
+        template: '<test v-bind:testt@="test" :bb@="b" :a@=" test.a " $.child></test>',
         components: {
           test: {
             props: ['testt', 'bb', 'a'],
@@ -123,7 +123,7 @@ if (_.inBrowser) {
         data: {
           b: 'B'
         },
-        template: '<test bind-b*="b" $.child></test>',
+        template: '<test :b*="b" $.child></test>',
         components: {
           test: {
             props: ['b'],
@@ -145,7 +145,7 @@ if (_.inBrowser) {
         data: {
           b: 'B'
         },
-        template: '<test bind-b@=" b + \'B\'" $.child></test>',
+        template: '<test :b@=" b + \'B\'" $.child></test>',
         components: {
           test: {
             props: ['b'],
@@ -170,7 +170,7 @@ if (_.inBrowser) {
     it('warn expect two-way', function () {
       new Vue({
         el: el,
-        template: '<test bind-test="ok"></test>',
+        template: '<test :test="ok"></test>',
         data: {
           ok: 'hi'
         },
@@ -190,7 +190,7 @@ if (_.inBrowser) {
     it('warn $data as prop', function () {
       new Vue({
         el: el,
-        template: '<test bind-$data="ok"></test>',
+        template: '<test></test>',
         data: {
           ok: 'hi'
         },
@@ -206,7 +206,7 @@ if (_.inBrowser) {
     it('warn invalid keys', function () {
       new Vue({
         el: el,
-        template: '<test bind-a.b.c="test"></test>',
+        template: '<test :a.b.c="test"></test>',
         components: {
           test: {
             props: ['a.b.c']
@@ -248,7 +248,7 @@ if (_.inBrowser) {
           a: 'A',
           b: 'B'
         },
-        template: '<test bind-aa@="a" bind-bb="b"></test>',
+        template: '<test :aa@="a" :bb="b"></test>',
         components: {
           test: {
             props: ['aa', 'bb'],
@@ -279,7 +279,7 @@ if (_.inBrowser) {
     it('block instance with replace:true', function () {
       new Vue({
         el: el,
-        template: '<test bind-b="a" bind-c="d"></test>',
+        template: '<test :b="a" :c="d"></test>',
         data: {
           a: 'AAA',
           d: 'DDD'
@@ -300,7 +300,7 @@ if (_.inBrowser) {
       function makeInstance (value, type, validator) {
         return new Vue({
           el: document.createElement('div'),
-          template: '<test bind-test="val"></test>',
+          template: '<test :test="val"></test>',
           data: {
             val: value
           },
@@ -417,7 +417,7 @@ if (_.inBrowser) {
     it('alternative syntax', function () {
       new Vue({
         el: el,
-        template: '<test bind-b="a" bind-c="d"></test>',
+        template: '<test :b="a" :c="d"></test>',
         data: {
           a: 'AAA',
           d: 'DDD'

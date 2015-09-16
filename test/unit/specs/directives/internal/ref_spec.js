@@ -39,7 +39,7 @@ if (_.inBrowser) {
         el: el,
         components: components,
         data: { test: 'test' },
-        template: '<component bind-is="test" $.test></component>'
+        template: '<component :is="test" $.test></component>'
       })
       expect(vm.$.test.$options.id).toBe('test')
       vm.test = 'test2'
@@ -57,7 +57,7 @@ if (_.inBrowser) {
       var vm = new Vue({
         el: el,
         data: { view: 'one' },
-        template: '{{$.test.value}}<component bind-is="view" $.test></component>',
+        template: '{{$.test.value}}<component :is="view" $.test></component>',
         components: {
           one: {
             id: 'one',
