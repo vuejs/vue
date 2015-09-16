@@ -2,6 +2,7 @@ var Vue = require('../../../../src/vue')
 var _ = require('../../../../src/util')
 var compiler = require('../../../../src/compiler')
 var compile = compiler.compile
+var publicDirectives = require('../../../../src/directives/public')
 var internalDirectives = require('../../../../src/directives/internal')
 
 if (_.inBrowser) {
@@ -102,10 +103,10 @@ if (_.inBrowser) {
       expect(directiveBind.calls.argsFor(3)[0]).toBe('a')
     })
 
-    it('bind- syntax', function () {
-      el.setAttribute('bind-class', 'a')
-      el.setAttribute('bind-style', 'b')
-      el.setAttribute('bind-title', 'c')
+    it('v-bind shorthand', function () {
+      el.setAttribute(':class', 'a')
+      el.setAttribute(':style', 'b')
+      el.setAttribute(':title', 'c')
       var linker = compile(el, Vue.options)
       linker(vm, el)
       expect(vm._bindDir.calls.count()).toBe(3)
@@ -113,25 +114,26 @@ if (_.inBrowser) {
       var args = vm._bindDir.calls.argsFor(0)
       expect(args[0].name).toBe('class')
       expect(args[0].expression).toBe('a')
-      expect(args[0].def).toBe(internalDirectives.class)
+      expect(args[0].def).toBe(publicDirectives.class)
       expect(args[1]).toBe(el)
       // 2
       args = vm._bindDir.calls.argsFor(1)
       expect(args[0].name).toBe('style')
       expect(args[0].expression).toBe('b')
-      expect(args[0].def).toBe(internalDirectives.style)
+      expect(args[0].def).toBe(publicDirectives.style)
       expect(args[1]).toBe(el)
       // 3
       args = vm._bindDir.calls.argsFor(2)
-      expect(args[0].name).toBe('attr')
+      expect(args[0].name).toBe('bind')
       expect(args[0].expression).toBe('c')
       expect(args[0].arg).toBe('title')
-      expect(args[0].def).toBe(internalDirectives.attr)
+      expect(args[0].def).toBe(publicDirectives.bind)
       expect(args[1]).toBe(el)
     })
 
-    it('on- syntax', function () {
-      el.setAttribute('on-click', 'a++')
+    it('v-on shorthand', function () {
+      el.innerHTML = '<div @click="a++"></div>'
+      el = el.firstChild
       var linker = compile(el, Vue.options)
       linker(vm, el)
       expect(vm._bindDir.calls.count()).toBe(1)
@@ -224,12 +226,12 @@ if (_.inBrowser) {
         { name: 'optimizeLiteral' }
       ]
       el.innerHTML = '<div ' +
-        'bind-test-normal="a" ' +
+        'v-bind:test-normal="a" ' +
         'test-literal="1" ' +
-        'bind-optimize-literal="1" ' +
-        'bind-test-two-way@="a" ' +
-        'bind-two-way-warn@="a + 1" ' +
-        'bind-test-one-time*="a"></div>'
+        ':optimize-literal="1" ' +
+        ':test-two-way@="a" ' +
+        ':two-way-warn@="a + 1" ' +
+        ':test-one-time*="a"></div>'
       compiler.compileAndLinkProps(vm, el.firstChild, props)
       expect(vm._bindDir.calls.count()).toBe(3) // skip literal and one time
       // literal
@@ -262,8 +264,8 @@ if (_.inBrowser) {
       // temporarily remove vm.$parent
       var context = vm._context
       vm._context = null
-      el.setAttribute('bind-a', '"hi"')
-      el.setAttribute('bind-b', 'hi')
+      el.setAttribute('v-bind:a', '"hi"')
+      el.setAttribute(':b', 'hi')
       compiler.compileAndLinkProps(vm, el, [
         { name: 'a' },
         { name: 'b' }
@@ -291,7 +293,7 @@ if (_.inBrowser) {
     })
 
     it('partial compilation', function () {
-      el.innerHTML = '<div bind-test="abc">{{bcd}}<p v-show="ok"></p></div>'
+      el.innerHTML = '<div v-bind:test="abc">{{bcd}}<p v-show="ok"></p></div>'
       var linker = compile(el, Vue.options, true)
       var decompile = linker(vm, el)
       expect(vm._directives.length).toBe(3)
@@ -338,7 +340,7 @@ if (_.inBrowser) {
     it('should teardown props and replacer directives when unlinking', function () {
       var vm = new Vue({
         el: el,
-        template: '<test bind-msg="msg"></test>',
+        template: '<test :msg="msg"></test>',
         data: {
           msg: 'hi'
         },

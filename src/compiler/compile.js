@@ -579,9 +579,9 @@ function compileDirectives (attrs, options) {
     if (bindRE.test(name)) {
       dirName = name.replace(bindRE, '')
       if (dirName === 'style' || dirName === 'class') {
-        pushDir(dirName, internalDirectives[dirName])
+        pushDir(dirName, publicDirectives[dirName])
       } else {
-        pushDir('attr', internalDirectives.attr, {
+        pushDir('bind', publicDirectives.bind, {
           arg: dirName
         })
       }
@@ -590,7 +590,7 @@ function compileDirectives (attrs, options) {
     // normal directives
     if (name.indexOf('v-') === 0) {
       // check literal
-      isLiteral = literalRE.test(dirName)
+      isLiteral = literalRE.test(name)
       if (isLiteral) {
         name = name.replace(literalRE, '')
       }

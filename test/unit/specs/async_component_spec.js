@@ -38,7 +38,7 @@ describe('Async components', function () {
   it('dynamic', function (done) {
     var vm = new Vue({
       el: el,
-      template: '<component bind-is="view"></component>',
+      template: '<component :is="view"></component>',
       data: {
         view: 'view-a'
       },
@@ -82,7 +82,7 @@ describe('Async components', function () {
   it('invalidate pending on dynamic switch', function (done) {
     var vm = new Vue({
       el: el,
-      template: '<component bind-is="view"></component>',
+      template: '<component :is="view"></component>',
       data: {
         view: 'view-a'
       },
@@ -197,7 +197,7 @@ describe('Async components', function () {
   it('v-for', function (done) {
     new Vue({
       el: el,
-      template: '<test v-for="n in list" bind-n="n"></test>',
+      template: '<test v-for="n in list" :n="n"></test>',
       data: {
         list: [1, 2, 3]
       },
