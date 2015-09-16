@@ -8,9 +8,11 @@ var templateParser = require('../parsers/template')
 var resolveAsset = _.resolveAsset
 
 // special binding prefixes
-var bindRE = /^bind-|^:/
-var onRE = /^on-/
-var transitionRE = /^(bind-|:)?transition$/
+var bindRE = /^v-bind:|^:/
+var onRE = /^v-on:|^@/
+var literalRE = /#$/
+var argRE = /:(.*)$/
+var transitionRE = /^(v-bind:|:)?transition$/
 var nodeRefRE = /^\$\$\./
 
 // terminal directives
@@ -262,7 +264,7 @@ function compileElement (el, options) {
   if (el.tagName === 'TEXTAREA') {
     var tokens = textParser.parse(el.value)
     if (tokens) {
-      el.setAttribute('bind-value', textParser.tokensToExp(tokens))
+      el.setAttribute(':value', textParser.tokensToExp(tokens))
       el.value = ''
     }
   }
@@ -545,49 +547,15 @@ function makeTerminalNodeLinkFn (el, dirName, value, options, def) {
 function compileDirectives (attrs, options) {
   var i = attrs.length
   var dirs = []
-  var attr, name, value, dirName, dirDef, isLiteral
+  var attr, name, value, dirName, arg, dirDef, isLiteral
   while (i--) {
     attr = attrs[i]
     name = attr.name
     value = attr.value
-    // Core directive
-    if (name.indexOf('v-') === 0) {
-      dirName = name.slice(2)
-
-      // check literal
-      if (dirName.charAt(dirName.length - 1) === '#') {
-        isLiteral = true
-        dirName = dirName.slice(0, -1)
-      } else {
-        isLiteral = false
-      }
-
-      dirDef = resolveAsset(options, 'directives', dirName)
-      if (process.env.NODE_ENV !== 'production') {
-        _.assertAsset(dirDef, 'directive', dirName)
-      }
-      if (dirDef) {
-        if (!isLiteral && _.isLiteral(value)) {
-          value = _.stripQuotes(value)
-          isLiteral = true
-        }
-        pushDir(dirName, dirDef, {
-          literal: isLiteral
-        })
-      }
-    } else
-
-    // event handlers
-    if (onRE.test(name)) {
-      pushDir('on', internalDirectives.on, {
-        arg: name.replace(onRE, '')
-      })
-    } else
 
     // special attribute: transition
     if (transitionRE.test(name)) {
-      dirName = name.replace(bindRE, '')
-      pushDir(dirName, internalDirectives[dirName], {
+      pushDir('transition', internalDirectives.transition, {
         literal: !bindRE.test(name)
       })
     } else
@@ -600,6 +568,13 @@ function compileDirectives (attrs, options) {
       })
     } else
 
+    // event handlers
+    if (onRE.test(name)) {
+      pushDir('on', internalDirectives.on, {
+        arg: name.replace(onRE, '')
+      })
+    } else
+
     // attribute bindings
     if (bindRE.test(name)) {
       dirName = name.replace(bindRE, '')
@@ -608,6 +583,37 @@ function compileDirectives (attrs, options) {
       } else {
         pushDir('attr', internalDirectives.attr, {
           arg: dirName
+        })
+      }
+    } else
+
+    // normal directives
+    if (name.indexOf('v-') === 0) {
+      // check literal
+      isLiteral = literalRE.test(dirName)
+      if (isLiteral) {
+        name = name.replace(literalRE, '')
+      }
+      // check arg
+      arg = (arg = name.match(argRE)) && arg[1]
+      if (arg) {
+        name = name.replace(argRE, '')
+      }
+      // extract directive name
+      dirName = name.slice(2)
+      dirDef = resolveAsset(options, 'directives', dirName)
+
+      if (process.env.NODE_ENV !== 'production') {
+        _.assertAsset(dirDef, 'directive', dirName)
+      }
+
+      if (dirDef) {
+        if (!isLiteral && _.isLiteral(value)) {
+          value = _.stripQuotes(value)
+          isLiteral = true
+        }
+        pushDir(dirName, dirDef, {
+          literal: isLiteral
         })
       }
     }

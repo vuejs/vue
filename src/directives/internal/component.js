@@ -12,7 +12,7 @@ module.exports = {
    *   <comp> or <div v-component="comp">
    *
    * - dynamic:
-   *   <component bind-is="view">
+   *   <component :is="view">
    */
 
   bind: function () {
@@ -84,7 +84,7 @@ module.exports = {
 
   /**
    * Public update, called by the watcher in the dynamic
-   * literal scenario, e.g. <component bind-is="view">
+   * literal scenario, e.g. <component :is="view">
    */
 
   update: function (value) {

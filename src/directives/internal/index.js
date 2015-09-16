@@ -1,8 +1,4 @@
-exports.attr = require('./attr')
-exports.class = require('./class')
 exports.el = require('./el')
-exports.on = require('./on')
 exports.prop = require('./prop')
-exports.style = require('./style')
 exports.transition = require('./transition')
 exports.component = require('./component')

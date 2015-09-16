@@ -84,7 +84,7 @@ function transcludeTemplate (el, options) {
         _.resolveAsset(options, 'components', tag) ||
         replacer.hasAttribute('is') ||
         replacer.hasAttribute(':is') ||
-        replacer.hasAttribute('bind-is') ||
+        replacer.hasAttribute('v-bind:is') ||
         // element directive
         _.resolveAsset(options, 'elementDirectives', tag) ||
         // for block

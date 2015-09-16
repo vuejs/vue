@@ -58,7 +58,7 @@ exports.attr = function (node, attr) {
 }
 
 /**
- * Get an attribute with colon or bind- prefix.
+ * Get an attribute with colon or v-bind: prefix.
  *
  * @param {Node} node
  * @param {String} name
@@ -69,7 +69,7 @@ exports.getBindAttr = function (node, name) {
   var attr = ':' + name
   var val = node.getAttribute(attr)
   if (val === null) {
-    attr = 'bind-' + name
+    attr = 'v-bind:' + name
     val = node.getAttribute(attr)
   }
   if (val !== null) {

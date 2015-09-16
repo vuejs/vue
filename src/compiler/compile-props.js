@@ -26,9 +26,6 @@ module.exports = function compileProps (el, propOptions) {
 
     if (process.env.NODE_ENV !== 'production' && name === '$data') {
       _.warn('Do not use $data as prop.')
-      el.removeAttribute('$data')
-      el.removeAttribute(':$data')
-      el.removeAttribute('bind-$data')
       continue
     }
 
@@ -73,9 +70,9 @@ module.exports = function compileProps (el, propOptions) {
         prop.filters = parsed.filters
         // check binding type
         if (_.isLiteral(value)) {
-          // for bind- literals such as numbers and booleans,
-          // there's no need to setup a prop binding, so we
-          // can optimize them as a one-time set.
+          // for expressions containing literal numbers and
+          // booleans, there's no need to setup a prop binding,
+          // so we can optimize them as a one-time set.
           prop.optimizedLiteral = true
         } else {
           prop.dynamic = true
