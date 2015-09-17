@@ -146,7 +146,7 @@ function buildOptions (parent, options) {
     op = options[i]
     if (!op.options) {
       el = document.createElement('option')
-      if (typeof op === 'string') {
+      if (typeof op === 'string' || typeof op === 'number') {
         el.text = el.value = op
       } else {
         if (op.value != null && !_.isObject(op.value)) {
