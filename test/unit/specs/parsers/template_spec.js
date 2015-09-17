@@ -42,6 +42,11 @@ if (_.inBrowser) {
       expect(res instanceof DocumentFragment).toBeTruthy()
       expect(res.childNodes.length).toBe(1)
       expect(res.firstChild.nodeValue).toBe('hi<hi')
+      // #1330
+      res = parse('hello &#x2F; hello')
+      expect(res instanceof DocumentFragment).toBeTruthy()
+      expect(res.childNodes.length).toBe(1)
+      expect(res.firstChild.nodeValue).toBe('hello / hello')
     })
 
     it('should parse textContent if argument is a script node', function () {

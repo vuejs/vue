@@ -70,7 +70,7 @@ function isRealTemplate (node) {
 }
 
 var tagRE = /<([\w:]+)/
-var entityRE = /&\w+;/
+var entityRE = /&\w+;|&#\d+;|&#x[\dA-F]+;/
 
 /**
  * Convert a string template to a DocumentFragment.
