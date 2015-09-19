@@ -83,8 +83,17 @@ if (process.env.NODE_ENV !== 'production') {
 
     V_REF: function () {
       warn(
-        'v-ref will no longer be a directive in 1.0.0; Use the "$.id" special ' +
-        'syntax instead. See https://github.com/yyx990803/vue/issues/1292 for details.'
+        'v-ref will no longer take an attribute value in 1.0.0. Use "v-ref:id" syntax ' +
+        'instead. Also, refs will be registered under vm.$refs instead of vm.$.' +
+        newBindingSyntaxLink
+      )
+    },
+
+    V_EL: function () {
+      warn(
+        'v-el will no longer take an attribute value in 1.0.0. Use "v-el:id" syntax ' +
+        'instead. Also, nodes will be registered under vm.$els instead of vm.$$.' +
+        newBindingSyntaxLink
       )
     },
 

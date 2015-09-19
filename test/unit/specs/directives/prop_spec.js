@@ -195,7 +195,7 @@ if (_.inBrowser) {
         data: {
           b: 'B'
         },
-        template: '<test $.child :b*="b"></test>',
+        template: '<test v-ref:child :b*="b"></test>',
         components: {
           test: {
             props: ['b'],

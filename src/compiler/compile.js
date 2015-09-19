@@ -12,7 +12,6 @@ var componentDef = require('../directives/component')
 var bindRE = /^:|^v-bind:/
 var onRE = /^@/
 var argRE = /:(.*)$/
-var nodeRefRE = /^\$\$\./
 
 // terminal directives
 var terminalDirectives = [
@@ -610,15 +609,6 @@ function compileDirectives (attrs, options) {
         arg: name.replace(onRE, ''),
         descriptors: [newDirParser.parse(value)],
         def: options.directives.on
-      })
-    } else
-
-    if (nodeRefRE.test(name)) {
-      value = _.camelize(name.replace(nodeRefRE, ''))
-      dirs.push({
-        name: 'el',
-        descriptors: [newDirParser.parse(value)],
-        def: options.directives.el
       })
     } else
 

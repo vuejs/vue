@@ -15,7 +15,7 @@ module.exports = {
     // If we get here, it means this is a `v-ref` on a
     // child, because parent scope `v-ref` is stripped in
     // `v-component` already.
-    var ref = this.expression
+    var ref = this.arg || this.expression
     var context = this.vm._scope || this.vm._context
     context.$[ref] = this.vm
 

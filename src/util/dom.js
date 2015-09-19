@@ -79,7 +79,7 @@ exports.getBindAttr = function (node, name) {
   return val
 }
 
-var refRE = /^\$\./
+var refRE = /^v-ref:/
 exports.findRef = function (node) {
   if (node.hasAttributes()) {
     var attrs = node.attributes

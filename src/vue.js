@@ -67,6 +67,22 @@ Object.defineProperty(p, '$data', {
 })
 
 /**
+ * 1.0.0-alpha for 0.12 compat
+ */
+
+Object.defineProperty(p, '$els', {
+  get: function () {
+    return this.$$
+  }
+})
+
+Object.defineProperty(p, '$refs', {
+  get: function () {
+    return this.$
+  }
+})
+
+/**
  * Mixin internal instance methods
  */
 

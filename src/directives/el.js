@@ -6,8 +6,15 @@ module.exports = {
   priority: 1500,
 
   bind: function () {
+    var id = this.arg
+      ? _.camelize(this.arg)
+      : this.expression
+    if (process.env.NODE_ENV !== 'production' &&
+        !this.arg && id) {
+      _.deprecation.V_EL()
+    }
     if (!this._isDynamicLiteral) {
-      this.update(this.expression)
+      this.update(id)
     }
   },
 
