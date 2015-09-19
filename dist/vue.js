@@ -1,5 +1,5 @@
 /*!
- * Vue.js v1.0.0-alpha.4
+ * Vue.js v1.0.0-alpha.5
  * (c) 2015 Evan You
  * Released under the MIT License.
  */
@@ -124,6 +124,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (newData !== this._data) {
 	      this._setData(newData)
 	    }
+	  }
+	})
+
+	/**
+	 * 1.0.0-alpha for 0.12 compat
+	 */
+
+	Object.defineProperty(p, '$els', {
+	  get: function () {
+	    return this.$$
+	  }
+	})
+
+	Object.defineProperty(p, '$refs', {
+	  get: function () {
+	    return this.$
 	  }
 	})
 
@@ -743,7 +759,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var attr = ':' + name
 	  var val = node.getAttribute(attr)
 	  if (val === null) {
-	    attr = 'bind-' + name
+	    attr = config.prefix + 'bind:' + name
 	    val = node.getAttribute(attr)
 	  }
 	  if (val !== null) {
@@ -752,7 +768,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return val
 	}
 
-	var refRE = /^\$\./
+	var refRE = /^v-ref:/
 	exports.findRef = function (node) {
 	  if (node.hasAttributes()) {
 	    var attrs = node.attributes
@@ -1226,7 +1242,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value = html ? match[1] : match[2]
 	    first = value.charCodeAt(0)
 	    oneTime = first === 42 // *
-	    twoWay = first === 64  // @
+	    twoWay = first === 38 || first === 64 // & or @
 	    value = oneTime || twoWay
 	      ? value.slice(1)
 	      : value
@@ -2254,7 +2270,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _.warn('{DEPRECATION} ' + msg)
 	  }
 
-	  var newBindingSyntaxLink = ' See https://github.com/yyx990803/vue/issues/1173 for details.'
+	  var newBindingSyntaxLink = ' See https://github.com/yyx990803/vue/issues/1325 for details.'
 
 	  _.deprecation = {
 
@@ -2308,17 +2324,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      )
 	    },
 
-	    V_EL: function () {
-	      warn(
-	        'v-el will no longer be a directive in 1.0.0. Use the "$$.id" special syntax instead. ' +
-	        'See https://github.com/yyx990803/vue/issues/1292 for details.'
-	      )
-	    },
-
 	    DIR_ARGS: function (exp) {
 	      warn(
-	        'Directives will no longer take arguments in 1.0.0. Found in directive ' +
-	        '"' + exp + '"' + newBindingSyntaxLink
+	        exp + ': Directive arguments will be moved into the attribute name in 1.0.0 - ' +
+	        'use v-dirname:arg="expression" syntax instead.' + newBindingSyntaxLink
 	      )
 	    },
 
@@ -2332,42 +2341,43 @@ return /******/ (function(modules) { // webpackBootstrap
 	    V_TRANSITION: function () {
 	      warn(
 	        'v-transition will no longer be a directive in 1.0.0; It will become a ' +
-	        'special attribute without the prefix. Use "transition" instead.' +
-	        newBindingSyntaxLink
+	        'special attribute without the prefix. Use "transition" instead.'
 	      )
 	    },
 
 	    V_REF: function () {
 	      warn(
-	        'v-ref will no longer be a directive in 1.0.0; Use the "$.id" special ' +
-	        'syntax instead. See https://github.com/yyx990803/vue/issues/1292 for details.'
+	        'v-ref will no longer take an attribute value in 1.0.0. Use "v-ref:id" syntax ' +
+	        'instead. Also, refs will be registered under vm.$refs instead of vm.$. ' +
+	        'See https://github.com/yyx990803/vue/issues/1292 for more details.'
+	      )
+	    },
+
+	    V_EL: function () {
+	      warn(
+	        'v-el will no longer take an attribute value in 1.0.0. Use "v-el:id" syntax ' +
+	        'instead. Also, nodes will be registered under vm.$els instead of vm.$$. ' +
+	        'See https://github.com/yyx990803/vue/issues/1292 for more details.'
+	      )
+	    },
+
+	    V_ATTR: function () {
+	      warn(
+	        'v-attr will be renamed to v-bind in 1.0.0. Also, use v-bind:attr="expression" ' +
+	        'syntax instead.' + newBindingSyntaxLink
 	      )
 	    },
 
 	    V_CLASS: function () {
 	      warn(
-	        'v-class will no longer be a directive in 1.0.0; Use "bind-class" instead.' +
+	        'v-class will be deprecated in 1.0.0. Use v-bind:class or just :class instead.' +
 	        newBindingSyntaxLink
 	      )
 	    },
 
 	    V_STYLE: function () {
 	      warn(
-	        'v-style will no longer be a directive in 1.0.0; Use "bind-style" instead.' +
-	        newBindingSyntaxLink
-	      )
-	    },
-
-	    V_ATTR: function () {
-	      warn(
-	        'v-attr will no longer be a directive in 1.0.0; Use the "bind-" syntax instead.' +
-	        newBindingSyntaxLink
-	      )
-	    },
-
-	    V_ON: function () {
-	      warn(
-	        'v-on will no longer be a directive in 1.0.0; Use the "on-" syntax instead.' +
+	        'v-style will be deprecated in 1.0.0. Use v-bind:style or just :style instead.' +
 	        newBindingSyntaxLink
 	      )
 	    },
@@ -2376,15 +2386,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	      warn(
 	        'Mustache interpolations inside attributes: ' + name + '="' + value + '". ' +
 	        'This will be deprecated in 1.0.0. ' +
-	        'Use the "bind-" syntax instead.' + newBindingSyntaxLink
+	        'Use v-bind:attr="expression" instead.' + newBindingSyntaxLink
 	      )
 	    },
 
 	    PROPS: function (attr, value) {
 	      warn(
 	        'Prop ' + attr + '="' + value + '": props no longer use mustache tags ' +
-	        'to indicate a dynamic binding. Use the "bind-" prefix instead.' +
-	        newBindingSyntaxLink
+	        'to indicate a dynamic binding. Use the "v-bind:prop-name" or the colon ' +
+	        'shorthand instead.' + newBindingSyntaxLink
 	      )
 	    },
 
@@ -2399,27 +2409,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	      warn(
 	        'Prop ' + attr + '="' + value + '": literal props will no longer be ' +
 	        'auto-casted into booleans/numbers in 1.0.0 - they will all be treated ' +
-	        'as literal strings. Use "bind-" syntax for boolean/number literals instead.'
+	        'as literal strings. Use "v-bind" or the colon shorthand for ' +
+	        'boolean/number literals instead.'
 	      )
 	    },
 
 	    BIND_IS: function () {
 	      warn(
 	        '<component is="{{view}}"> syntax will be deprecated in 1.0.0. Use ' +
-	        '<component bind-is="view"> instead.'
+	        '<component v-bind:is="view"> or <component :is="view"> instead.'
 	      )
 	    },
 
 	    PARTIAL_NAME: function (id) {
 	      warn(
 	        '<partial name="' + id + '">: mustache interpolations inside attributes ' +
-	        'will be deprecated in 1.0.0. Use bind-name="expression" instead.'
+	        'will be deprecated in 1.0.0. Use v-bind:name="expression" or just ' +
+	        ':name="expression" instead.'
 	      )
 	    },
 
 	    REF_IN_CHILD: function () {
 	      warn(
-	        'v-ref or ref can no longer be used on a component root in its own ' +
+	        'v-ref can no longer be used on a component root in its own ' +
 	        'template in 1.0.0. Use it in the parent template instead.'
 	      )
 	    },
@@ -2427,7 +2439,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    KEY_FILTER: function () {
 	      warn(
 	        'The "key" filter will be deprecated in 1.0.0. Use the new ' +
-	        'on-keyup-key="handler" syntax instead.'
+	        'v-on:keyup.key="handler" syntax instead.'
 	      )
 	    },
 
@@ -2443,7 +2455,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    MODEL_EXP: function (exp) {
 	      warn(
 	        'Params "exp", "true-exp" and "false-exp" for v-model will be deprecated in 1.0.0. ' +
-	        'Use "bind-value", "bind-true-value" and "bind-false-value" instead.'
+	        'Use "v-bind:value", "v-bind:true-value" and "v-bind:false-value" instead.'
 	      )
 	    },
 
@@ -2466,20 +2478,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	    LITERAL: function () {
 	      warn(
 	        'It is no longer necessary to declare literal directives in 1.0.0. Just ' +
-	        'use the new hash-equal syntax (v-dir#="string") to indicate a literal value.'
+	        'add the ".literal" modifier at the end (v-dir.literal="string") to ' +
+	        'pass a literal value.'
 	      )
 	    },
 
 	    PREFIX: function () {
 	      warn(
 	        'The "prefix" global config will be deprecated in 1.0.0. All directives ' +
-	        'will consistently use the v- or v. prefixes.'
+	        'will consistently use the v- prefix.'
 	      )
 	    },
 
 	    V_COMPONENT: function () {
 	      warn(
-	        'v-component will be deprecated in 1.0.0. Use "is" attribute instead.'
+	        'v-component will be deprecated in 1.0.0. Use "is" attribute instead. ' +
+	        'See https://github.com/yyx990803/vue/issues/1278 for more details.'
 	      )
 	    }
 
@@ -2656,9 +2670,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	var componentDef = __webpack_require__(26)
 
 	// special binding prefixes
-	var bindRE = /^bind-|^:/
-	var onRE = /^on-/
-	var nodeRefRE = /^\$\$\./
+	var bindRE = /^:|^v-bind:/
+	var onRE = /^@/
+	var argRE = /:(.*)$/
+	var literalRE = /\.literal$/
 
 	// terminal directives
 	var terminalDirectives = [
@@ -2915,7 +2930,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (el.tagName === 'TEXTAREA') {
 	    var tokens = textParser.parse(el.value)
 	    if (tokens) {
-	      el.setAttribute('bind-value', textParser.tokensToExp(tokens))
+	      el.setAttribute(':value', textParser.tokensToExp(tokens))
 	      el.value = ''
 	    }
 	  }
@@ -3192,46 +3207,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	    attr = attrs[i]
 	    name = attr.name
 	    value = attr.value
-	    // Core directive
-	    if (name.indexOf(config.prefix) === 0) {
-	      dirName = name.slice(config.prefix.length)
 
-	      // check literal
-	      if (dirName.charAt(dirName.length - 1) === '#') {
-	        isLiteral = true
-	        dirName = dirName.slice(0, -1)
-	      } else {
-	        isLiteral = false
-	      }
-
-	      dirDef = resolveAsset(options, 'directives', dirName)
-	      if (true) {
-	        _.assertAsset(dirDef, 'directive', dirName)
-
-	        // deprecations
-	        if (dirName === 'transition') {
-	          _.deprecation.V_TRANSITION()
-	        } else if (dirName === 'class') {
-	          _.deprecation.V_CLASS()
-	        } else if (dirName === 'style') {
-	          _.deprecation.V_STYLE()
-	        } else if (dirName === 'on') {
-	          _.deprecation.V_ON()
-	        } else if (dirName === 'attr') {
-	          _.deprecation.V_ATTR()
-	        } else if (dirName === 'el') {
-	          _.deprecation.V_EL()
-	        }
-
-	      }
-	      if (dirDef) {
-	        dirs.push({
-	          name: dirName,
-	          descriptors: dirParser.parse(value),
-	          def: dirDef,
-	          literal: isLiteral
-	        })
-	      }
+	    // special case for transition
+	    if (
+	      name === 'transition' ||
+	      name === ':transition' ||
+	      name === (config.prefix + 'bind:transition')
+	    ) {
+	      dirs.push({
+	        name: 'transition',
+	        arg: bindRE.test(name),
+	        descriptors: [newDirParser.parse(value)],
+	        def: options.directives.transition
+	      })
 	    } else
 
 	    // event handlers
@@ -3241,25 +3229,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        arg: name.replace(onRE, ''),
 	        descriptors: [newDirParser.parse(value)],
 	        def: options.directives.on
-	      })
-	    } else
-
-	    if (nodeRefRE.test(name)) {
-	      value = _.camelize(name.replace(nodeRefRE, ''))
-	      dirs.push({
-	        name: 'el',
-	        descriptors: [newDirParser.parse(value)],
-	        def: options.directives.el
-	      })
-	    } else
-
-	    // special case for transition
-	    if (name === 'transition' || name === 'bind-transition' || name === ':transition') {
-	      dirs.push({
-	        name: 'transition',
-	        arg: bindRE.test(name),
-	        descriptors: [newDirParser.parse(value)],
-	        def: options.directives.transition
 	      })
 	    } else
 
@@ -3279,6 +3248,48 @@ return /******/ (function(modules) { // webpackBootstrap
 	        descriptors: [newDirParser.parse(value)],
 	        def: options.directives[dirName]
 	      })
+	    } else
+
+	    // Core directive
+	    if (name.indexOf(config.prefix) === 0) {
+	      // check literal
+	      if (literalRE.test(name)) {
+	        isLiteral = true
+	        name = name.replace(literalRE, '')
+	      } else {
+	        isLiteral = false
+	      }
+	      // check argument
+	      arg = (arg = name.match(argRE)) && arg[1]
+	      // extract directive name
+	      dirName = name
+	        .slice(config.prefix.length)
+	        .replace(argRE, '')
+	      dirDef = resolveAsset(options, 'directives', dirName)
+	      if (true) {
+	        _.assertAsset(dirDef, 'directive', dirName)
+
+	        // deprecations
+	        if (dirName === 'transition') {
+	          _.deprecation.V_TRANSITION()
+	        } else if (dirName === 'attr') {
+	          _.deprecation.V_ATTR()
+	        } else if (dirName === 'class') {
+	          _.deprecation.V_CLASS()
+	        } else if (dirName === 'style') {
+	          _.deprecation.V_STYLE()
+	        }
+
+	      }
+	      if (dirDef) {
+	        dirs.push({
+	          name: dirName,
+	          descriptors: dirParser.parse(value),
+	          def: dirDef,
+	          arg: arg,
+	          literal: isLiteral
+	        })
+	      }
 	    } else
 
 	    // TODO: remove this in 1.0.0
@@ -3490,9 +3501,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    } else {
 	      // new syntax, check binding type
 	      if ((value = _.getBindAttr(el, attr)) === null) {
-	        if ((value = _.getBindAttr(el, attr + '@')) !== null) {
+	        if ((value = _.getBindAttr(el, attr + '.sync')) !== null) {
 	          prop.mode = propBindingModes.TWO_WAY
-	        } else if ((value = _.getBindAttr(el, attr + '*')) !== null) {
+	        } else if ((value = _.getBindAttr(el, attr + '.once')) !== null) {
 	          prop.mode = propBindingModes.ONE_TIME
 	        }
 	      }
@@ -5107,7 +5118,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	var tagRE = /<([\w:]+)/
-	var entityRE = /&\w+;/
+	var entityRE = /&\w+;|&#\d+;|&#x[\dA-F]+;/
 
 	/**
 	 * Convert a string template to a DocumentFragment.
@@ -5862,7 +5873,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // alternative component syntax
 	    el.hasAttribute('is') ||
 	    el.hasAttribute(':is') ||
-	    el.hasAttribute('bind-is') ||
+	    el.hasAttribute(config.prefix + 'bind:is') ||
 	    el.hasAttribute(config.prefix + 'component') ||
 	    // repeat block
 	    el.hasAttribute(config.prefix + 'repeat') ||
@@ -6245,6 +6256,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports._component = __webpack_require__(26)
 	exports._prop = __webpack_require__(19)
 
+	// 1.0.0 compat
+	exports.bind = exports.attr
+
 
 /***/ },
 /* 32 */
@@ -6514,8 +6528,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	  priority: 1500,
 
 	  bind: function () {
+	    var id = this.arg
+	      ? _.camelize(this.arg)
+	      : this.expression
+	    if (("development") !== 'production' &&
+	        !this.arg && id) {
+	      _.deprecation.V_EL()
+	    }
 	    if (!this._isDynamicLiteral) {
-	      this.update(this.expression)
+	      this.update(id)
 	    }
 	  },
 
@@ -6562,7 +6583,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // If we get here, it means this is a `v-ref` on a
 	    // child, because parent scope `v-ref` is stripped in
 	    // `v-component` already.
-	    var ref = this.expression
+	    var ref = this.arg || this.expression
 	    var context = this.vm._scope || this.vm._context
 	    context.$[ref] = this.vm
 
@@ -7043,7 +7064,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // CSS transitions.
 	    document.hidden ||
 	    // explicit js-only transition
-	    (this.hooks && this.hooks.css === false)
+	    (this.hooks && this.hooks.css === false) ||
+	    // element is hidden
+	    isHidden(this.el)
 	  ) {
 	    return
 	  }
@@ -7091,6 +7114,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }
 	  _.on(el, event, onEnd)
+	}
+
+	/**
+	 * Check if an element is hidden - in that case we can just
+	 * skip the transition alltogether.
+	 *
+	 * @param {Element} el
+	 * @return {Boolean}
+	 */
+
+	function isHidden (el) {
+	  return el.style.display === 'none' ||
+	    el.style.visibility === 'hidden' ||
+	    el.hidden
 	}
 
 	module.exports = Transition
@@ -7152,7 +7189,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  bind: function () {
 	    // 1.0.0 key filter
 	    var rawArg = this.arg
-	    var keyIndex = rawArg.indexOf('-')
+	    var keyIndex = rawArg.indexOf('.')
 	    if (keyIndex > -1) {
 	      this.arg = rawArg.slice(0, keyIndex)
 	      this.key = rawArg.slice(keyIndex + 1)
@@ -7603,7 +7640,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        // in IE11 the "compositionend" event fires AFTER
 	        // the "input" event, so the input handler is blocked
 	        // at the end... have to call it here.
-	        self.listener()
+	        //
+	        // #1327: in lazy mode this is unecessary.
+	        if (!lazy) {
+	          self.listener()
+	        }
 	      })
 	    }
 
@@ -7899,7 +7940,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    op = options[i]
 	    if (!op.options) {
 	      el = document.createElement('option')
-	      if (typeof op === 'string') {
+	      if (typeof op === 'string' || typeof op === 'number') {
 	        el.text = el.value = op
 	      } else {
 	        if (op.value != null && !_.isObject(op.value)) {
@@ -9862,6 +9903,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _ = __webpack_require__(1)
 	var inDoc = _.inDoc
+	var eventRE = /^v-on:|^@/
 
 	/**
 	 * Setup the instance's option events & watchers.
@@ -9871,8 +9913,31 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	exports._initEvents = function () {
 	  var options = this.$options
+	  if (options._asComponent) {
+	    registerComponentEvents(this, options.el)
+	  }
 	  registerCallbacks(this, '$on', options.events)
 	  registerCallbacks(this, '$watch', options.watch)
+	}
+
+	/**
+	 * Register v-on events on a child component
+	 *
+	 * @param {Vue} vm
+	 * @param {Element} el
+	 */
+
+	function registerComponentEvents (vm, el) {
+	  var attrs = el.attributes
+	  var name, handler
+	  for (var i = 0, l = attrs.length; i < l; i++) {
+	    name = attrs[i].name
+	    if (eventRE.test(name)) {
+	      name = name.replace(eventRE, '')
+	      handler = (vm._scope || vm._context).$eval(attrs[i].value, true)
+	      vm.$on(name.replace(eventRE), handler)
+	    }
+	  }
 	}
 
 	/**
@@ -11139,10 +11204,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	function removeBindAttr (el, name) {
-	  var attr = el.hasAttribute(':' + name)
-	    ? ':' + name
-	    : 'bind-' + name
-	  el.removeAttribute(attr)
+	  var attr = ':' + name
+	  if (el.hasAttribute(attr)) {
+	    el.removeAttribute(attr)
+	  }
+	  attr = config.prefix + 'bind:' + name
+	  if (el.hasAttribute(attr)) {
+	    el.removeAttribute(attr)
+	  }
 	}
 
 	module.exports = Directive
@@ -11262,15 +11331,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Get the value from an expression on this vm.
 	 *
 	 * @param {String} exp
+	 * @param {Boolean} [asStatement]
 	 * @return {*}
 	 */
 
-	exports.$get = function (exp) {
+	exports.$get = function (exp, asStatement) {
 	  var res = expParser.parse(exp)
 	  if (res) {
-	    try {
-	      return res.get.call(this, this)
-	    } catch (e) {}
+	    if (asStatement && !expParser.isSimplePath(exp)) {
+	      var self = this
+	      return function statementHandler () {
+	        res.get.call(self, self)
+	      }
+	    } else {
+	      try {
+	        return res.get.call(this, this)
+	      } catch (e) {}
+	    }
 	  }
 	}
 
@@ -11345,23 +11422,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Evaluate a text directive, including filters.
 	 *
 	 * @param {String} text
+	 * @param {Boolean} [asStatement]
 	 * @return {String}
 	 */
 
-	exports.$eval = function (text) {
+	exports.$eval = function (text, asStatement) {
 	  // check for filters.
 	  if (filterRE.test(text)) {
 	    var dir = dirParser.parse(text)[0]
 	    // the filter regex check might give false positive
 	    // for pipes inside strings, so it's possible that
 	    // we don't get any filters here
-	    var val = this.$get(dir.expression)
+	    var val = this.$get(dir.expression, asStatement)
 	    return dir.filters
 	      ? this._applyFilters(val, null, dir.filters)
 	      : val
 	  } else {
 	    // no filter
-	    return this.$get(text)
+	    return this.$get(text, asStatement)
 	  }
 	}
 
