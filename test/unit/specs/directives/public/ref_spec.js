@@ -115,5 +115,13 @@ if (_.inBrowser) {
         done()
       })
     })
+
+    it('warn when used on non-component node', function () {
+      new Vue({
+        el: el,
+        template: '<div v-ref:test></div>'
+      })
+      expect(hasWarned(_, 'must be used on a child component')).toBe(true)
+    })
   })
 }
