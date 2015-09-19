@@ -30,7 +30,7 @@
                 default footer
                 <button
                   class="modal-default-button"
-                  @click="show = false">
+                  v-on:click="show = false">
                   OK
                 </button>
               </slot>
@@ -56,9 +56,9 @@
 
     <!-- app -->
     <div id="app">
-      <button id="show-modal" @click="showModal = true">Show Modal</button>
+      <button id="show-modal" v-on:click="showModal = true">Show Modal</button>
       <!-- use the modal component, pass in the prop -->
-      <modal :show&="showModal">
+      <modal :show.sync="showModal">
         <!--
           you can use custom content here to overwrite
           default content

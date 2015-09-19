@@ -28,7 +28,7 @@
     <script type="text/x-template" id="item-template">
       <li>
         <div
-          v-class="{bold: isFolder}"
+          v-bind:class="{bold: isFolder}"
           v-on:click="toggle"
           v-on:dblclick="changeType">
           {{model.name}}
@@ -40,7 +40,7 @@
             v-for="model in model.children"
             :model="model">
           </item>
-          <li @click="addChild">+</li>
+          <li v-on:click="addChild">+</li>
         </ul>
       </li>
     </script>
