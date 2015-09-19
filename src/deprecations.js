@@ -76,24 +76,23 @@ if (process.env.NODE_ENV !== 'production') {
     V_TRANSITION: function () {
       warn(
         'v-transition will no longer be a directive in 1.0.0; It will become a ' +
-        'special attribute without the prefix. Use "transition" instead.' +
-        newBindingSyntaxLink
+        'special attribute without the prefix. Use "transition" instead.'
       )
     },
 
     V_REF: function () {
       warn(
         'v-ref will no longer take an attribute value in 1.0.0. Use "v-ref:id" syntax ' +
-        'instead. Also, refs will be registered under vm.$refs instead of vm.$.' +
-        newBindingSyntaxLink
+        'instead. Also, refs will be registered under vm.$refs instead of vm.$. ' +
+        'See https://github.com/yyx990803/vue/issues/1292 for more details.'
       )
     },
 
     V_EL: function () {
       warn(
         'v-el will no longer take an attribute value in 1.0.0. Use "v-el:id" syntax ' +
-        'instead. Also, nodes will be registered under vm.$els instead of vm.$$.' +
-        newBindingSyntaxLink
+        'instead. Also, nodes will be registered under vm.$els instead of vm.$$. ' +
+        'See https://github.com/yyx990803/vue/issues/1292 for more details.'
       )
     },
 
@@ -167,7 +166,7 @@ if (process.env.NODE_ENV !== 'production') {
 
     REF_IN_CHILD: function () {
       warn(
-        'v-ref or ref can no longer be used on a component root in its own ' +
+        'v-ref can no longer be used on a component root in its own ' +
         'template in 1.0.0. Use it in the parent template instead.'
       )
     },
@@ -175,7 +174,7 @@ if (process.env.NODE_ENV !== 'production') {
     KEY_FILTER: function () {
       warn(
         'The "key" filter will be deprecated in 1.0.0. Use the new ' +
-        'on-keyup-key="handler" syntax instead.'
+        'v-on:keyup.key="handler" syntax instead.'
       )
     },
 
@@ -214,7 +213,8 @@ if (process.env.NODE_ENV !== 'production') {
     LITERAL: function () {
       warn(
         'It is no longer necessary to declare literal directives in 1.0.0. Just ' +
-        'use the new hash-equal syntax (v-dir#="string") to indicate a literal value.'
+        'add the ".literal" modifier at the end (v-dir.literal="string") to ' +
+        'pass a literal value.'
       )
     },
 
@@ -227,7 +227,8 @@ if (process.env.NODE_ENV !== 'production') {
 
     V_COMPONENT: function () {
       warn(
-        'v-component will be deprecated in 1.0.0. Use "is" attribute instead.'
+        'v-component will be deprecated in 1.0.0. Use "is" attribute instead. ' +
+        'See https://github.com/yyx990803/vue/issues/1278 for more details.'
       )
     }
 
