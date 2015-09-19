@@ -561,6 +561,34 @@ function compileDirectives (attrs, options) {
       })
     } else
 
+    // event handlers
+    if (onRE.test(name)) {
+      dirs.push({
+        name: 'on',
+        arg: name.replace(onRE, ''),
+        descriptors: [newDirParser.parse(value)],
+        def: options.directives.on
+      })
+    } else
+
+    // attribute bindings
+    if (bindRE.test(name)) {
+      var attributeName = name.replace(bindRE, '')
+      if (attributeName === 'style' || attributeName === 'class') {
+        dirName = attributeName
+        arg = undefined
+      } else {
+        dirName = 'attr'
+        arg = attributeName
+      }
+      dirs.push({
+        name: dirName,
+        arg: arg,
+        descriptors: [newDirParser.parse(value)],
+        def: options.directives[dirName]
+      })
+    } else
+
     // Core directive
     if (name.indexOf(config.prefix) === 0) {
       // check literal
@@ -601,34 +629,6 @@ function compileDirectives (attrs, options) {
           literal: isLiteral
         })
       }
-    } else
-
-    // event handlers
-    if (onRE.test(name)) {
-      dirs.push({
-        name: 'on',
-        arg: name.replace(onRE, ''),
-        descriptors: [newDirParser.parse(value)],
-        def: options.directives.on
-      })
-    } else
-
-    // attribute bindings
-    if (bindRE.test(name)) {
-      var attributeName = name.replace(bindRE, '')
-      if (attributeName === 'style' || attributeName === 'class') {
-        dirName = attributeName
-        arg = undefined
-      } else {
-        dirName = 'attr'
-        arg = attributeName
-      }
-      dirs.push({
-        name: dirName,
-        arg: arg,
-        descriptors: [newDirParser.parse(value)],
-        def: options.directives[dirName]
-      })
     } else
 
     // TODO: remove this in 1.0.0
