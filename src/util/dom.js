@@ -302,7 +302,7 @@ exports.createAnchor = function (content, persist) {
  * @return {String|undefined}
  */
 
-var refRE = /^\$\./
+var refRE = /^v-ref:/
 exports.findRef = function (node) {
   if (node.hasAttributes()) {
     var attrs = node.attributes

@@ -17,16 +17,16 @@ if (_.inBrowser) {
         data: {
           ok: true
         },
-        template: '<div v-if="ok" $$.test-el id="test"></div>'
+        template: '<div v-if="ok" v-el:test-el id="test"></div>'
       })
-      expect(vm.$$.testEl).toBeTruthy()
-      expect(vm.$$.testEl.id).toBe('test')
+      expect(vm.$els.testEl).toBeTruthy()
+      expect(vm.$els.testEl.id).toBe('test')
       vm.ok = false
       _.nextTick(function () {
-        expect(vm.$$.testEl).toBeNull()
+        expect(vm.$els.testEl).toBeNull()
         vm.ok = true
         _.nextTick(function () {
-          expect(vm.$$.testEl.id).toBe('test')
+          expect(vm.$els.testEl.id).toBe('test')
           done()
         })
       })
@@ -36,7 +36,7 @@ if (_.inBrowser) {
       var vm = new Vue({
         el: el,
         data: { items: [1, 2] },
-        template: '<div v-for="n in items"><p $$.test>{{n}}</p>{{$$.test.textContent}}</div>'
+        template: '<div v-for="n in items"><p v-el:test>{{n}}</p>{{$els.test.textContent}}</div>'
       })
       expect(vm.$el.textContent).toBe('1122')
     })

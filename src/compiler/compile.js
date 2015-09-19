@@ -13,7 +13,6 @@ var onRE = /^v-on:|^@/
 var literalRE = /#$/
 var argRE = /:(.*)$/
 var transitionRE = /^(v-bind:|:)?transition$/
-var nodeRefRE = /^\$\$\./
 
 // terminal directives
 var terminalDirectives = [
@@ -560,14 +559,6 @@ function compileDirectives (attrs, options) {
       })
     } else
 
-    // node ref: $$.xxx
-    if (nodeRefRE.test(name)) {
-      value = _.camelize(name.replace(nodeRefRE, ''))
-      pushDir('el', internalDirectives.el, {
-        literal: true
-      })
-    } else
-
     // event handlers
     if (onRE.test(name)) {
       pushDir('on', publicDirectives.on, {
@@ -579,7 +570,7 @@ function compileDirectives (attrs, options) {
     if (bindRE.test(name)) {
       dirName = name.replace(bindRE, '')
       if (dirName === 'style' || dirName === 'class') {
-        pushDir(dirName, publicDirectives[dirName])
+        pushDir(dirName, internalDirectives[dirName])
       } else {
         pushDir('bind', publicDirectives.bind, {
           arg: dirName

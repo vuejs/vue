@@ -157,8 +157,8 @@ exports._destroy = function (remove, deferCleanup) {
   var ref = this.$options._ref
   if (ref) {
     var scope = this._scope || this._context
-    if (scope.$[ref] === this) {
-      scope.$[ref] = null
+    if (scope.$refs[ref] === this) {
+      scope.$refs[ref] = null
     }
   }
   // remove reference to self on $el

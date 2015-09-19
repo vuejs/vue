@@ -26,12 +26,12 @@ if (_.inBrowser) {
         data: {
           ref: 'test2'
         },
-        template: '<test $.test></test><test2 $.test-case></test2>'
+        template: '<test v-ref:test></test><test2 v-ref:test-case></test2>'
       })
-      expect(vm.$.test).toBeTruthy()
-      expect(vm.$.test.$options.id).toBe('test')
-      expect(vm.$.testCase).toBeTruthy()
-      expect(vm.$.testCase.$options.id).toBe('test2')
+      expect(vm.$refs.test).toBeTruthy()
+      expect(vm.$refs.test.$options.id).toBe('test')
+      expect(vm.$refs.testCase).toBeTruthy()
+      expect(vm.$refs.testCase.$options.id).toBe('test2')
     })
 
     it('with dynamic component', function (done) {
@@ -39,15 +39,15 @@ if (_.inBrowser) {
         el: el,
         components: components,
         data: { test: 'test' },
-        template: '<component :is="test" $.test></component>'
+        template: '<component :is="test" v-ref:test></component>'
       })
-      expect(vm.$.test.$options.id).toBe('test')
+      expect(vm.$refs.test.$options.id).toBe('test')
       vm.test = 'test2'
       _.nextTick(function () {
-        expect(vm.$.test.$options.id).toBe('test2')
+        expect(vm.$refs.test.$options.id).toBe('test2')
         vm.test = ''
         _.nextTick(function () {
-          expect(vm.$.test).toBeNull()
+          expect(vm.$refs.test).toBeNull()
           done()
         })
       })
@@ -57,7 +57,7 @@ if (_.inBrowser) {
       var vm = new Vue({
         el: el,
         data: { view: 'one' },
-        template: '{{$.test.value}}<component :is="view" $.test></component>',
+        template: '{{$refs.test.value}}<component :is="view" v-ref:test></component>',
         components: {
           one: {
             id: 'one',
@@ -75,15 +75,15 @@ if (_.inBrowser) {
           }
         }
       })
-      expect(vm.$.test.$options.id).toBe('one')
+      expect(vm.$refs.test.$options.id).toBe('one')
       expect(el.textContent).toBe('1')
       vm.view = 'two'
       _.nextTick(function () {
-        expect(vm.$.test.$options.id).toBe('two')
+        expect(vm.$refs.test.$options.id).toBe('two')
         expect(el.textContent).toBe('2')
         vm.view = ''
         _.nextTick(function () {
-          expect(vm.$.test).toBeNull()
+          expect(vm.$refs.test).toBeNull()
           expect(el.textContent).toBe('')
           done()
         })
@@ -96,7 +96,7 @@ if (_.inBrowser) {
         el: el,
         template:
           '<div>' +
-            '<comp $.out>{{$.out.msg}}</comp>' +
+            '<comp v-ref:out>{{$refs.out.msg}}</comp>' +
           '</div>',
         components: {
           comp: {

@@ -22,7 +22,8 @@ describe('Instance Init', function () {
   it('should setup properties', function () {
     expect(stub.$el).toBe(null)
     expect(stub.$root).toBe(stub)
-    expect(stub.$).toBeTruthy()
+    expect(stub.$refs).toBeTruthy()
+    expect(stub.$els).toBeTruthy()
     expect(stub._watchers).toBeTruthy()
     expect(stub._directives).toBeTruthy()
     expect(stub._events).toBeTruthy()

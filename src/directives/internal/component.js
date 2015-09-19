@@ -26,7 +26,7 @@ module.exports = {
 
       // check ref
       this.ref = _.findRef(this.el)
-      var refs = (this._scope || this.vm).$
+      var refs = (this._scope || this.vm).$refs
       if (this.ref && !refs.hasOwnProperty(this.ref)) {
         _.defineReactive(refs, this.ref, null)
       }

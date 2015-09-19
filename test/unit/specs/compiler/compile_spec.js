@@ -115,13 +115,13 @@ if (_.inBrowser) {
       var args = vm._bindDir.calls.argsFor(0)
       expect(args[0].name).toBe('class')
       expect(args[0].expression).toBe('a')
-      expect(args[0].def).toBe(publicDirectives.class)
+      expect(args[0].def).toBe(internalDirectives.class)
       expect(args[1]).toBe(el)
       // 2
       args = vm._bindDir.calls.argsFor(1)
       expect(args[0].name).toBe('style')
       expect(args[0].expression).toBe('b')
-      expect(args[0].def).toBe(publicDirectives.style)
+      expect(args[0].def).toBe(internalDirectives.style)
       expect(args[1]).toBe(el)
       // 3
       args = vm._bindDir.calls.argsFor(2)

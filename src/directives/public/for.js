@@ -200,7 +200,8 @@ module.exports = {
     var parentScope = this._scope || this.vm
     var scope = Object.create(parentScope)
     // ref holder for the scope
-    scope.$ = {}
+    scope.$refs = {}
+    scope.$els = {}
     // make sure point $parent to parent scope
     scope.$parent = parentScope
     // for two-way binding on alias
@@ -227,7 +228,7 @@ module.exports = {
   updateRef: function () {
     var ref = this.ref
     if (!ref) return
-    var hash = (this._scope || this.vm).$
+    var hash = (this._scope || this.vm).$refs
     var refs
     if (!this.converted) {
       refs = this.frags.map(findVmFromFrag)
@@ -499,7 +500,7 @@ module.exports = {
 
   unbind: function () {
     if (this.ref) {
-      (this._scope || this.vm).$[this.ref] = null
+      (this._scope || this.vm).$refs[this.ref] = null
     }
     if (this.frags) {
       var i = this.frags.length

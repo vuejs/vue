@@ -12,10 +12,7 @@ if (_.inBrowser) {
     })
 
     it('normal attr', function () {
-      dir.descriptor = {
-        arg: 'test'
-      }
-
+      dir.arg = 'test'
       dir.update('ok')
       expect(el.getAttribute('test')).toBe('ok')
       dir.update('again')
@@ -30,17 +27,13 @@ if (_.inBrowser) {
 
     it('should set property for input value', function () {
       dir.el = document.createElement('input')
-      dir.descriptor = {
-        arg: 'value'
-      }
+      dir.arg = 'value'
       dir.update('what')
       expect(dir.el.hasAttribute('value')).toBe(false)
       expect(dir.el.value).toBe('what')
       dir.el = document.createElement('input')
       dir.el.type = 'checkbox'
-      dir.descriptor = {
-        arg: 'checked'
-      }
+      dir.arg = 'checked'
       expect(dir.el.checked).toBe(false)
       dir.update(true)
       expect(dir.el.checked).toBe(true)
@@ -48,9 +41,7 @@ if (_.inBrowser) {
 
     it('xlink', function () {
       var xlinkNS = 'http://www.w3.org/1999/xlink'
-      dir.descriptor = {
-        arg: 'xlink:special'
-      }
+      dir.arg = 'xlink:special'
       dir.update('ok')
       expect(el.getAttributeNS(xlinkNS, 'special')).toBe('ok')
       dir.update('again')

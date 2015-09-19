@@ -1,5 +1,5 @@
 var _ = require('../../../../../src/util')
-var def = require('../../../../../src/directives/public/style')
+var def = require('../../../../../src/directives/internal/style')
 var Vue = require('../../../../../src/vue')
 
 function checkPrefixedProp (prop) {

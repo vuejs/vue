@@ -19,8 +19,8 @@ exports._init = function (options) {
   this.$parent = options._parent
   this.$root = options._root || this
   this.$children = []
-  this.$ = {}           // child vm references
-  this.$$ = {}          // element references
+  this.$refs = {}       // child vm references
+  this.$els = {}        // element references
   this._watchers = []   // all watchers as an array
   this._directives = [] // all directives
 
@@ -74,7 +74,7 @@ exports._init = function (options) {
 
   // set ref
   if (options._ref) {
-    (this._scope || this._context).$[options._ref] = this
+    (this._scope || this._context).$refs[options._ref] = this
   }
 
   // merge options.

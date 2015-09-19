@@ -16,7 +16,7 @@ if (_.inBrowser) {
         data: {
           b: 'B'
         },
-        template: '<test v-bind:b="b" $.child></test>',
+        template: '<test v-bind:b="b" v-ref:child></test>',
         components: {
           test: {
             props: ['b'],
@@ -28,7 +28,7 @@ if (_.inBrowser) {
       vm.b = 'BB'
       _.nextTick(function () {
         expect(el.innerHTML).toBe('<test>BB</test>')
-        vm.$.child.b = 'BBB'
+        vm.$refs.child.b = 'BBB'
         expect(vm.b).toBe('BB')
         _.nextTick(function () {
           expect(el.innerHTML).toBe('<test>BBB</test>')
@@ -73,7 +73,7 @@ if (_.inBrowser) {
             a: 'A'
           }
         },
-        template: '<test v-bind:testt&="test" :bb&="b" :a&=" test.a " $.child></test>',
+        template: '<test v-bind:testt&="test" :bb&="b" :a&=" test.a " v-ref:child></test>',
         components: {
           test: {
             props: ['testt', 'bb', 'a'],
@@ -98,14 +98,14 @@ if (_.inBrowser) {
           _.nextTick(function () {
             expect(el.firstChild.textContent).toBe('AAAA BBB AAAA')
             // test two-way
-            vm.$.child.bb = 'B'
-            vm.$.child.testt = { a: 'A' }
+            vm.$refs.child.bb = 'B'
+            vm.$refs.child.testt = { a: 'A' }
             _.nextTick(function () {
               expect(el.firstChild.textContent).toBe('A B A')
               expect(vm.test.a).toBe('A')
-              expect(vm.test).toBe(vm.$.child.testt)
+              expect(vm.test).toBe(vm.$refs.child.testt)
               expect(vm.b).toBe('B')
-              vm.$.child.a = 'Oops'
+              vm.$refs.child.a = 'Oops'
               _.nextTick(function () {
                 expect(el.firstChild.textContent).toBe('Oops B Oops')
                 expect(vm.test.a).toBe('Oops')
@@ -123,7 +123,7 @@ if (_.inBrowser) {
         data: {
           b: 'B'
         },
-        template: '<test :b*="b" $.child></test>',
+        template: '<test :b*="b" v-ref:child></test>',
         components: {
           test: {
             props: ['b'],
@@ -145,7 +145,7 @@ if (_.inBrowser) {
         data: {
           b: 'B'
         },
-        template: '<test :b&=" b + \'B\'" $.child></test>',
+        template: '<test :b&=" b + \'B\'" v-ref:child></test>',
         components: {
           test: {
             props: ['b'],
@@ -158,7 +158,7 @@ if (_.inBrowser) {
       vm.b = 'BB'
       _.nextTick(function () {
         expect(el.innerHTML).toBe('<test>BBB</test>')
-        vm.$.child.b = 'hahaha'
+        vm.$refs.child.b = 'hahaha'
         _.nextTick(function () {
           expect(vm.b).toBe('BB')
           expect(el.innerHTML).toBe('<test>hahaha</test>')

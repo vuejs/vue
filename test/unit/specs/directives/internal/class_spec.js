@@ -1,5 +1,5 @@
 var _ = require('../../../../../src/util')
-var def = require('../../../../../src/directives/public/class')
+var def = require('../../../../../src/directives/internal/class')
 
 if (_.inBrowser) {
   describe(':class', function () {

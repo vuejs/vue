@@ -33,6 +33,7 @@ function Directive (descriptor, vm, el, host, scope, frag) {
   this.descriptor = descriptor
   this.name = descriptor.name
   this.expression = descriptor.expression
+  this.arg = descriptor.arg
   this.filters = descriptor.filters
   this.literal = descriptor.literal
   // private

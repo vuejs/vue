@@ -15,8 +15,10 @@ exports.on = require('./on')
 
 // attributes
 exports.bind = require('./bind')
-exports['class'] = require('./class')
-exports.style = require('./style')
+
+// ref & el
+exports.el = require('./el')
+exports.ref = require('./ref')
 
 // cloak
 exports.cloak = require('./cloak')
