@@ -301,10 +301,14 @@ Directive.prototype._teardown = function () {
  */
 
 function removeBindAttr (el, name) {
-  var attr = el.hasAttribute(':' + name)
-    ? ':' + name
-    : config.prefix + 'bind:' + name
-  el.removeAttribute(attr)
+  var attr = ':' + name
+  if (el.hasAttribute(attr)) {
+    el.removeAttribute(attr)
+  }
+  attr = config.prefix + 'bind:' + name
+  if (el.hasAttribute(attr)) {
+    el.removeAttribute(attr)
+  }
 }
 
 module.exports = Directive
