@@ -585,8 +585,10 @@ function compileDirectives (attrs, options) {
           _.deprecation.V_TRANSITION()
         } else if (dirName === 'attr') {
           _.deprecation.V_ATTR()
-        } else if (dirName === 'el') {
-          _.deprecation.V_EL()
+        } else if (dirName === 'class') {
+          _.deprecation.V_CLASS()
+        } else if (dirName === 'style') {
+          _.deprecation.V_STYLE()
         }
 
       }

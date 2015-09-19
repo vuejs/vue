@@ -5,7 +5,7 @@ if (process.env.NODE_ENV !== 'production') {
     _.warn('{DEPRECATION} ' + msg)
   }
 
-  var newBindingSyntaxLink = ' See https://github.com/yyx990803/vue/issues/1173 for details.'
+  var newBindingSyntaxLink = ' See https://github.com/yyx990803/vue/issues/1325 for details.'
 
   _.deprecation = {
 
@@ -59,13 +59,6 @@ if (process.env.NODE_ENV !== 'production') {
       )
     },
 
-    V_EL: function () {
-      warn(
-        'v-el will no longer be a directive in 1.0.0. Use the "$$.id" special syntax instead. ' +
-        'See https://github.com/yyx990803/vue/issues/1292 for details.'
-      )
-    },
-
     DIR_ARGS: function (exp) {
       warn(
         exp + ': Directive arguments will be moved into the attribute name in 1.0.0 - ' +
@@ -99,6 +92,20 @@ if (process.env.NODE_ENV !== 'production') {
       warn(
         'v-attr will be renamed to v-bind in 1.0.0. Also, use v-bind:attr="expression" ' +
         'syntax instead.' + newBindingSyntaxLink
+      )
+    },
+
+    V_CLASS: function () {
+      warn(
+        'v-class will be deprecated in 1.0.0. Use v-bind:class or just :class instead.' +
+        newBindingSyntaxLink
+      )
+    },
+
+    V_STYLE: function () {
+      warn(
+        'v-style will be deprecated in 1.0.0. Use v-bind:style or just :style instead.' +
+        newBindingSyntaxLink
       )
     },
 
