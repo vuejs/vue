@@ -12,6 +12,7 @@ var componentDef = require('../directives/component')
 var bindRE = /^:|^v-bind:/
 var onRE = /^@/
 var argRE = /:(.*)$/
+var literalRE = /\.literal$/
 
 // terminal directives
 var terminalDirectives = [
@@ -563,9 +564,9 @@ function compileDirectives (attrs, options) {
     // Core directive
     if (name.indexOf(config.prefix) === 0) {
       // check literal
-      if (name.charAt(name.length - 1) === '#') {
+      if (literalRE.test(name)) {
         isLiteral = true
-        name = name.slice(0, -1)
+        name = name.replace(literalRE, '')
       } else {
         isLiteral = false
       }
