@@ -57,9 +57,9 @@ module.exports = function compileProps (el, propOptions) {
 
       // then check dynamic version
       if ((value = _.getBindAttr(el, attr)) === null) {
-        if ((value = _.getBindAttr(el, attr + '&')) !== null) {
+        if ((value = _.getBindAttr(el, attr + '.sync')) !== null) {
           prop.mode = propBindingModes.TWO_WAY
-        } else if ((value = _.getBindAttr(el, attr + '*')) !== null) {
+        } else if ((value = _.getBindAttr(el, attr + '.once')) !== null) {
           prop.mode = propBindingModes.ONE_TIME
         }
       }

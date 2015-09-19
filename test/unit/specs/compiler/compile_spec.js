@@ -50,7 +50,7 @@ if (_.inBrowser) {
 
     it('normal directives', function () {
       el.setAttribute('v-a', 'b')
-      el.innerHTML = '<p v-a:hello="a" v-b="1">hello</p><div v-b#="hi"></div>'
+      el.innerHTML = '<p v-a:hello="a" v-b="1">hello</p><div v-b.literal="hi"></div>'
       var defA = { priority: 1 }
       var defB = { priority: 2 }
       var options = _.mergeOptions(Vue.options, {
@@ -230,9 +230,9 @@ if (_.inBrowser) {
         'v-bind:test-normal="a" ' +
         'test-literal="1" ' +
         ':optimize-literal="1" ' +
-        ':test-two-way&="a" ' +
-        ':two-way-warn&="a + 1" ' +
-        ':test-one-time*="a"></div>'
+        ':test-two-way.sync="a" ' +
+        ':two-way-warn.sync="a + 1" ' +
+        ':test-one-time.once="a"></div>'
       compiler.compileAndLinkProps(vm, el.firstChild, props)
       expect(vm._bindDir.calls.count()).toBe(3) // skip literal and one time
       // literal

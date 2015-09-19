@@ -10,7 +10,7 @@ var resolveAsset = _.resolveAsset
 // special binding prefixes
 var bindRE = /^v-bind:|^:/
 var onRE = /^v-on:|^@/
-var literalRE = /#$/
+var literalRE = /\.literal$/
 var argRE = /:(.*)$/
 var transitionRE = /^(v-bind:|:)?transition$/
 

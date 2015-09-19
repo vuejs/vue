@@ -73,7 +73,7 @@ if (_.inBrowser) {
             a: 'A'
           }
         },
-        template: '<test v-bind:testt&="test" :bb&="b" :a&=" test.a " v-ref:child></test>',
+        template: '<test v-bind:testt.sync="test" :bb.sync="b" :a.sync=" test.a " v-ref:child></test>',
         components: {
           test: {
             props: ['testt', 'bb', 'a'],
@@ -123,7 +123,7 @@ if (_.inBrowser) {
         data: {
           b: 'B'
         },
-        template: '<test :b*="b" v-ref:child></test>',
+        template: '<test :b.once="b" v-ref:child></test>',
         components: {
           test: {
             props: ['b'],
@@ -145,7 +145,7 @@ if (_.inBrowser) {
         data: {
           b: 'B'
         },
-        template: '<test :b&=" b + \'B\'" v-ref:child></test>',
+        template: '<test :b.sync=" b + \'B\'" v-ref:child></test>',
         components: {
           test: {
             props: ['b'],
@@ -248,7 +248,7 @@ if (_.inBrowser) {
           a: 'A',
           b: 'B'
         },
-        template: '<test :aa&="a" :bb="b"></test>',
+        template: '<test :aa.sync="a" :bb="b"></test>',
         components: {
           test: {
             props: ['aa', 'bb'],

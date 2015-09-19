@@ -41,7 +41,7 @@ module.exports = {
   bind: function () {
     // 1.0.0 key filter
     var rawEvent = this.event = this.arg
-    var keyIndex = rawEvent.indexOf(':')
+    var keyIndex = rawEvent.indexOf('.')
     if (keyIndex > -1) {
       this.event = rawEvent.slice(0, keyIndex)
       this.key = rawEvent.slice(keyIndex + 1)
