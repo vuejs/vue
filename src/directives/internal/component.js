@@ -45,40 +45,20 @@ module.exports = {
       // transition related state
       this.pendingRemovals = 0
       this.pendingRemovalCb = null
+      // check dynamic component params
+        // create a ref anchor
+      this.anchor = _.createAnchor('v-component')
+      _.replace(this.el, this.anchor)
+      this.transMode = this.param('transition-mode')
       // if static, build right now.
       if (this.literal) {
-        this.resolveComponent(this.expression, _.bind(this.initStatic, this))
-      } else {
-        // check dynamic component params
-        // create a ref anchor
-        this.anchor = _.createAnchor('v-component')
-        _.replace(this.el, this.anchor)
-        this.transMode = this.param('transition-mode')
+        this.setComponent(this.expression)
       }
     } else {
       process.env.NODE_ENV !== 'production' && _.warn(
         'cannot mount component "' + this.expression + '" ' +
         'on already mounted element: ' + this.el
       )
-    }
-  },
-
-  /**
-   * Initialize a static component.
-   */
-
-  initStatic: function () {
-    var anchor = this.el
-    var activateHook = this.Component.options.activate
-    var child = this.childVM = this.build()
-    if (activateHook) {
-      activateHook.call(child, insert)
-    } else {
-      insert()
-    }
-    function insert () {
-      child.$before(anchor)
-      _.remove(anchor)
     }
   },
 
@@ -114,22 +94,10 @@ module.exports = {
       this.remove(this.childVM, cb)
       this.childVM = null
     } else {
-      this.resolveComponent(value, _.bind(function () {
-        this.unbuild(true)
-        var self = this
-        var activateHook = this.Component.options.activate
-        var cached = this.getCached()
-        var newComponent = this.build()
-        if (activateHook && !cached) {
-          this.waitingFor = newComponent
-          activateHook.call(newComponent, function () {
-            self.waitingFor = null
-            self.transition(newComponent, cb)
-          })
-        } else {
-          this.transition(newComponent, cb)
-        }
-      }, this))
+      var self = this
+      this.resolveComponent(value, function () {
+        self.mountComponent(cb)
+      })
     }
   },
 
@@ -145,6 +113,33 @@ module.exports = {
       cb()
     })
     this.vm._resolveComponent(id, this.pendingComponentCb)
+  },
+
+  /**
+   * Create a new instance using the current constructor and
+   * replace the existing instance. This method doesn't care
+   * whether the new component and the old one are actually
+   * the same.
+   *
+   * @param {Function} [cb]
+   */
+
+  mountComponent: function (cb) {
+    // actual mount
+    this.unbuild(true)
+    var self = this
+    var activateHook = this.Component.options.activate
+    var cached = this.getCached()
+    var newComponent = this.build()
+    if (activateHook && !cached) {
+      this.waitingFor = newComponent
+      activateHook.call(newComponent, function () {
+        self.waitingFor = null
+        self.transition(newComponent, cb)
+      })
+    } else {
+      this.transition(newComponent, cb)
+    }
   },
 
   /**
