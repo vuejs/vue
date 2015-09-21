@@ -17,9 +17,9 @@ Here are some links you may find helpful:
 
 Get help from other Vue.js users:
 
+* [Vue.js official forum](http://forum.vuejs.org)
 * [Vue.js on Twitter](https://twitter.com/vuejs)
 * [Vue.js on Gitter](https://gitter.im/yyx990803/vue)
-* [Vue.js discussion repo](https://github.com/vuejs/Discussion/issues)
 
 _If you have other helpful links to share, or find any of the links above no longer work, please [let us know](https://github.com/tastejs/todomvc/issues)._
 

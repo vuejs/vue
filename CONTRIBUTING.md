@@ -4,23 +4,34 @@ Hi! I’m really excited that you are interested in contributing to Vue.js. Befo
 
 ## Issue Reporting Guidelines
 
-- The issue list of this repo is **exclusively** for bug reports and feature requests. For simple questions, please use either [Gitter](https://gitter.im/yyx990803/vue) or [vuejs/Discussion](https://github.com/vuejs/Discussion/issues).
+- The issue list of this repo is **exclusively** for bug reports and feature requests. For simple questions, please use either [Gitter](https://gitter.im/yyx990803/vue) or [the official forum](http://forum.vuejs.org/).
+
 - Try to search for your issue, it may have already been answered or even fixed in the development branch.
+
 - Check if the issue is reproducible with the latest stable version of Vue. If you are using a pre-release, please indicate the specific version you are using.
+
 - It is **required** that you clearly describe the steps necessary to reproduce the issue you are running into. Issues with no clear repro steps will not be triaged. If an issue labeled "need repro" receives no further input from the issue author for more than 5 days, it will be closed.
+
 - It is recommended that you make a JSFiddle to demonstrate your issue. You could start with [this template](http://jsfiddle.net/5sH6A/) that already includes the latest version of Vue.
+
 - If your issue is resolved but still open, don’t hesitate to close it. In case you found a solution by yourself, it could be helpful to explain how you fixed it.
 
 ## Pull Request Guidelines
 
 - Checkout a topic branch from `dev` and merge back against `dev`.
+
 - Work in the `src` folder and **DO NOT** checkin `dist` in the commits.
+
 - Squash the commit if there are too many small ones.
+
 - Follow the [code style](#code-style).
+
 - Make sure the default grunt task passes. (see [development setup](#development-setup))
+
 - If adding new feature:
     - Add accompanying test case.
     - Provide convincing reason to add this feature. Ideally you should open a suggestion issue first and have it greenlighted before working on it.
+
 - If fixing a bug:
     - Provide detailed description of the bug in the PR. Live demo preferred.
     - Add appropriate test coverage if applicable.
