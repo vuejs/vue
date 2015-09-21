@@ -108,28 +108,46 @@ if (_.inBrowser) {
       el.setAttribute(':class', 'a')
       el.setAttribute(':style', 'b')
       el.setAttribute(':title', 'c')
+
+      // The order of setAttribute is not guaranteed to be the same with
+      // the order of attribute enumberation, therefore we need to save
+      // it here!
+      var descriptors = {
+        ':class': {
+          name: 'class',
+          attr: ':class',
+          expression: 'a',
+          def: internalDirectives.class
+        },
+        ':style': {
+          name: 'style',
+          attr: ':style',
+          expression: 'b',
+          def: internalDirectives.style
+        },
+        ':title': {
+          name: 'bind',
+          attr: ':title',
+          expression: 'c',
+          arg: 'title',
+          def: publicDirectives.bind
+        }
+      }
+      var expects = [].map.call(el.attributes, function (attr) {
+        return descriptors[attr.name]
+      })
+
       var linker = compile(el, Vue.options)
       linker(vm, el)
       expect(vm._bindDir.calls.count()).toBe(3)
-      // 1
-      var args = vm._bindDir.calls.argsFor(0)
-      expect(args[0].name).toBe('class')
-      expect(args[0].expression).toBe('a')
-      expect(args[0].def).toBe(internalDirectives.class)
-      expect(args[1]).toBe(el)
-      // 2
-      args = vm._bindDir.calls.argsFor(1)
-      expect(args[0].name).toBe('style')
-      expect(args[0].expression).toBe('b')
-      expect(args[0].def).toBe(internalDirectives.style)
-      expect(args[1]).toBe(el)
-      // 3
-      args = vm._bindDir.calls.argsFor(2)
-      expect(args[0].name).toBe('bind')
-      expect(args[0].expression).toBe('c')
-      expect(args[0].arg).toBe('title')
-      expect(args[0].def).toBe(publicDirectives.bind)
-      expect(args[1]).toBe(el)
+
+      expects.forEach(function (e, i) {
+        var args = vm._bindDir.calls.argsFor(i)
+        for (var key in e) {
+          expect(args[0][key]).toBe(e[key])
+        }
+        expect(args[1]).toBe(el)
+      })
     })
 
     it('v-on shorthand', function () {
