@@ -23,7 +23,7 @@ Note that Vue.js only supports [ES5-compliant browsers](http://kangax.github.io/
 
 ## Questions
 
-For questions and support please use the [Gitter chat room](https://gitter.im/yyx990803/vue) or submit issues at [vuejs/Discussion](https://github.com/vuejs/Discussion/issues). The issue list of this repo is **exclusively** for bug reports and feature requests.
+For questions and support please use the [Gitter chat room](https://gitter.im/yyx990803/vue) or [the official forum](http://forum.vuejs.org). The issue list of this repo is **exclusively** for bug reports and feature requests.
 
 ## Issues
 
