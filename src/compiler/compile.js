@@ -488,16 +488,25 @@ function checkComponent (el, options, hasAttrs) {
  */
 
 function checkTerminalDirectives (el, options) {
-  if (_.attr(el, 'pre') !== null ||
-      el.hasAttribute(config.prefix + 'else')) {
+  // skip v-pre
+  if (_.attr(el, 'pre') !== null) {
     return skip
+  }
+  // skip v-else block, but only if following v-if
+  if (el.hasAttribute(config.prefix + 'else')) {
+    var prev = el.previousElementSibling
+    if (prev && prev.hasAttribute(config.prefix + 'if')) {
+      return skip
+    }
   }
   var value, dirName
   for (var i = 0, l = terminalDirectives.length; i < l; i++) {
     dirName = terminalDirectives[i]
-    if ((value = _.attr(el, dirName)) !== null) {
+    /* eslint-disable no-cond-assign */
+    if (value = el.getAttribute(config.prefix + dirName)) {
       return makeTerminalNodeLinkFn(el, dirName, value, options)
     }
+    /* eslint-enable no-cond-assign */
   }
 }
 
@@ -604,6 +613,12 @@ function compileDirectives (attrs, options) {
       dirName = name
         .slice(config.prefix.length)
         .replace(argRE, '')
+
+      // skip v-else (when used with v-show)
+      if (dirName === 'else') {
+        continue
+      }
+
       dirDef = resolveAsset(options, 'directives', dirName)
       if (process.env.NODE_ENV !== 'production') {
         _.assertAsset(dirDef, 'directive', dirName)
