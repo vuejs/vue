@@ -8,9 +8,14 @@ var config = require('../config')
 exports.util = _
 exports.config = config
 exports.nextTick = _.nextTick
+
+/**
+ * The following are exposed for advanced usage / plugins
+ */
+
 exports.compiler = require('../compiler')
 exports.FragmentFactory = require('../fragment/factory')
-
+exports.internalDirectives = require('../directives/internal')
 exports.parsers = {
   path: require('../parsers/path'),
   text: require('../parsers/text'),
