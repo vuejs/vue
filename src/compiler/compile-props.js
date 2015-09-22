@@ -50,11 +50,8 @@ module.exports = function compileProps (el, propOptions) {
 
     // first check literal version
     attr = _.hyphenate(name)
-    value = prop.raw = el.getAttribute(attr)
-    if (value !== null) {
-      el.removeAttribute(attr)
-    } else {
-
+    value = prop.raw = _.attr(el, attr)
+    if (value === null) {
       // then check dynamic version
       if ((value = _.getBindAttr(el, attr)) === null) {
         if ((value = _.getBindAttr(el, attr + '.sync')) !== null) {

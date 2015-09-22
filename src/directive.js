@@ -160,9 +160,8 @@ Directive.prototype._checkStatement = function () {
  */
 
 Directive.prototype.param = function (name) {
-  var param = this.el.getAttribute(name)
+  var param = _.attr(this.el, name)
   if (param != null) {
-    this.el.removeAttribute(name)
     param = (this._scope || this.vm).$interpolate(param)
   } else {
     param = _.getBindAttr(this.el, name)

@@ -44,9 +44,8 @@ exports.checkComponent = function (el, options) {
 
 function getIsBinding (el) {
   // dynamic syntax
-  var exp = el.getAttribute('is')
+  var exp = _.attr(el, 'is')
   if (exp != null) {
-    el.removeAttribute('is')
     return { id: exp }
   } else {
     exp = _.getBindAttr(el, 'is')

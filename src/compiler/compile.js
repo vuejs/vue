@@ -490,7 +490,7 @@ function checkComponent (el, options) {
 
 function checkTerminalDirectives (el, options) {
   // skip v-pre
-  if (_.attr(el, 'pre') !== null) {
+  if (_.attr(el, 'v-pre') !== null) {
     return skip
   }
   // skip v-else block, but only if following v-if

@@ -10,7 +10,7 @@ module.exports = {
     if (!el.__vue__) {
       // check else block
       var next = el.nextElementSibling
-      if (next && _.attr(next, 'else') !== null) {
+      if (next && _.attr(next, 'v-else') !== null) {
         _.remove(next)
         this.elseFactory = new FragmentFactory(this.vm, next)
       }

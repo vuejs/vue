@@ -42,14 +42,13 @@ exports.inDoc = function (node) {
 }
 
 /**
- * Extract an attribute from a node.
+ * Get and remove an attribute from a node.
  *
  * @param {Node} node
  * @param {String} attr
  */
 
 exports.attr = function (node, attr) {
-  attr = 'v-' + attr
   var val = node.getAttribute(attr)
   if (val !== null) {
     node.removeAttribute(attr)
@@ -66,14 +65,9 @@ exports.attr = function (node, attr) {
  */
 
 exports.getBindAttr = function (node, name) {
-  var attr = ':' + name
-  var val = node.getAttribute(attr)
+  var val = exports.attr(node, ':' + name)
   if (val === null) {
-    attr = 'v-bind:' + name
-    val = node.getAttribute(attr)
-  }
-  if (val !== null) {
-    node.removeAttribute(attr)
+    val = exports.attr(node, 'v-bind:' + name)
   }
   return val
 }

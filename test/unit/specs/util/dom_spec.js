@@ -27,7 +27,7 @@ if (_.inBrowser) {
 
     it('attr', function () {
       target.setAttribute('v-test', 'ok')
-      var val = _.attr(target, 'test')
+      var val = _.attr(target, 'v-test')
       expect(val).toBe('ok')
       expect(target.hasAttribute('v-test')).toBe(false)
     })

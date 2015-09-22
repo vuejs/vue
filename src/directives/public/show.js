@@ -6,7 +6,7 @@ module.exports = {
   bind: function () {
     // check else block
     var next = this.el.nextElementSibling
-    if (next && _.attr(next, 'else') !== null) {
+    if (next && _.attr(next, 'v-else') !== null) {
       this.elseEl = next
     }
   },
