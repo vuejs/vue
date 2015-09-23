@@ -3,6 +3,7 @@ var config = require('./config')
 var Watcher = require('./watcher')
 var textParser = require('./parsers/text')
 var expParser = require('./parsers/expression')
+function noop () {}
 
 /**
  * A directive links a DOM element with a piece of data,
@@ -73,13 +74,15 @@ Directive.prototype._bind = function (def) {
       !this._checkStatement()) {
     // wrapped updater for context
     var dir = this
-    var update = this._update = this.update
-      ? function (val, oldVal) {
-          if (!dir._locked) {
-            dir.update(val, oldVal)
-          }
+    if (this.update) {
+      this._update = function (val, oldVal) {
+        if (!dir._locked) {
+          dir.update(val, oldVal)
         }
-      : function () {} // noop if no update is provided
+      }
+    } else {
+      this._update = noop
+    }
     // pre-process hook called before the value is piped
     // through the filters. used in v-repeat.
     var preProcess = this._preProcess
@@ -88,7 +91,7 @@ Directive.prototype._bind = function (def) {
     var watcher = this._watcher = new Watcher(
       this.vm,
       this._watcherExp,
-      update, // callback
+      this._update, // callback
       {
         filters: this.filters,
         twoWay: this.twoWay,

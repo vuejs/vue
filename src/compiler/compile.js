@@ -592,22 +592,26 @@ function collectAttrDirective (name, value, options) {
         allOneTime = false
       }
     }
+    var linker
+    if (allOneTime) {
+      linker = function (vm, el) {
+        el.setAttribute(name, vm.$interpolate(value))
+      }
+    } else {
+      linker = function (vm, el) {
+        var exp = textParser.tokensToExp(tokens, vm)
+        var desc = isClass
+          ? dirParser.parse(exp)[0]
+          : dirParser.parse(name + ':' + exp)[0]
+        if (isClass) {
+          desc._rawClass = value
+        }
+        vm._bindDir(dirName, el, desc, def)
+      }
+    }
     return {
       def: def,
-      _link: allOneTime
-        ? function (vm, el) {
-            el.setAttribute(name, vm.$interpolate(value))
-          }
-        : function (vm, el) {
-            var exp = textParser.tokensToExp(tokens, vm)
-            var desc = isClass
-              ? dirParser.parse(exp)[0]
-              : dirParser.parse(name + ':' + exp)[0]
-            if (isClass) {
-              desc._rawClass = value
-            }
-            vm._bindDir(dirName, el, desc, def)
-          }
+      _link: linker
     }
   }
 }

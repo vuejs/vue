@@ -120,13 +120,15 @@ exports.$interpolate = function (text) {
   var tokens = textParser.parse(text)
   var vm = this
   if (tokens) {
-    return tokens.length === 1
-      ? vm.$eval(tokens[0].value)
-      : tokens.map(function (token) {
-          return token.tag
-            ? vm.$eval(token.value)
-            : token.value
-        }).join('')
+    if (tokens.length === 1) {
+      return vm.$eval(tokens[0].value)
+    } else {
+      return tokens.map(function (token) {
+        return token.tag
+          ? vm.$eval(token.value)
+          : token.value
+      }).join('')
+    }
   } else {
     return text
   }

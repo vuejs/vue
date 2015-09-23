@@ -118,11 +118,13 @@ exports.parse = function (text) {
  */
 
 exports.tokensToExp = function (tokens, vm) {
-  return tokens.length > 1
-    ? tokens.map(function (token) {
-        return formatToken(token, vm)
-      }).join('+')
-    : formatToken(tokens[0], vm, true)
+  if (tokens.length > 1) {
+    return tokens.map(function (token) {
+      return formatToken(token, vm)
+    }).join('+')
+  } else {
+    return formatToken(tokens[0], vm, true)
+  }
 }
 
 /**

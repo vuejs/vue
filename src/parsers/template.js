@@ -156,22 +156,28 @@ function nodeToFragment (node) {
 
 // Test for the presence of the Safari template cloning bug
 // https://bugs.webkit.org/show_bug.cgi?id=137755
-var hasBrokenTemplate = _.inBrowser
-  ? (function () {
-      var a = document.createElement('div')
-      a.innerHTML = '<template>1</template>'
-      return !a.cloneNode(true).firstChild.innerHTML
-    })()
-  : false
+var hasBrokenTemplate = (function () {
+  /* istanbul ignore else */
+  if (_.inBrowser) {
+    var a = document.createElement('div')
+    a.innerHTML = '<template>1</template>'
+    return !a.cloneNode(true).firstChild.innerHTML
+  } else {
+    return false
+  }
+})()
 
 // Test for IE10/11 textarea placeholder clone bug
-var hasTextareaCloneBug = _.inBrowser
-  ? (function () {
-      var t = document.createElement('textarea')
-      t.placeholder = 't'
-      return t.cloneNode(true).value === 't'
-    })()
-  : false
+var hasTextareaCloneBug = (function () {
+  /* istanbul ignore else */
+  if (_.inBrowser) {
+    var t = document.createElement('textarea')
+    t.placeholder = 't'
+    return t.cloneNode(true).value === 't'
+  } else {
+    return false
+  }
+})()
 
 /**
  * 1. Deal with Safari cloning nested <template> bug by
