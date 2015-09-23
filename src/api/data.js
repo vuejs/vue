@@ -133,7 +133,7 @@ exports.$interpolate = function (text) {
   var vm = this
   if (tokens) {
     if (tokens.length === 1) {
-      return vm.$eval(tokens[0].value)
+      return vm.$eval(tokens[0].value) + ''
     } else {
       return tokens.map(function (token) {
         return token.tag
