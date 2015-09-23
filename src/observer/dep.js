@@ -1,4 +1,5 @@
 var _ = require('../util')
+var uid = 0
 
 /**
  * A dep is an observable that can have multiple
@@ -8,6 +9,7 @@ var _ = require('../util')
  */
 
 function Dep () {
+  this.id = uid++
   this.subs = []
 }
 

@@ -37,7 +37,7 @@ function Watcher (vm, expOrFn, cb, options) {
   this.id = ++uid // uid for batching
   this.active = true
   this.dirty = this.lazy // for lazy watchers
-  this.deps = []
+  this.deps = Object.create(null)
   this.newDeps = null
   this.prevError = null // for async error stacks
   // parse expression for getter/setter
@@ -64,15 +64,12 @@ function Watcher (vm, expOrFn, cb, options) {
  */
 
 Watcher.prototype.addDep = function (dep) {
-  var newDeps = this.newDeps
-  var old = this.deps
-  if (_.indexOf(newDeps, dep) < 0) {
-    newDeps.push(dep)
-    var i = _.indexOf(old, dep)
-    if (i < 0) {
+  var id = dep.id
+  if (!this.newDeps[id]) {
+    this.newDeps[id] = dep
+    if (!this.deps[id]) {
+      this.deps[id] = dep
       dep.addSub(this)
-    } else {
-      old[i] = null
     }
   }
 }
@@ -150,7 +147,7 @@ Watcher.prototype.set = function (value) {
 
 Watcher.prototype.beforeGet = function () {
   Dep.target = this
-  this.newDeps = []
+  this.newDeps = Object.create(null)
 }
 
 /**
@@ -159,15 +156,15 @@ Watcher.prototype.beforeGet = function () {
 
 Watcher.prototype.afterGet = function () {
   Dep.target = null
-  var i = this.deps.length
+  var ids = Object.keys(this.deps)
+  var i = ids.length
   while (i--) {
-    var dep = this.deps[i]
-    if (dep) {
-      dep.removeSub(this)
+    var id = ids[i]
+    if (!this.newDeps[id]) {
+      this.deps[id].removeSub(this)
     }
   }
   this.deps = this.newDeps
-  this.newDeps = null
 }
 
 /**
@@ -262,9 +259,10 @@ Watcher.prototype.evaluate = function () {
  */
 
 Watcher.prototype.depend = function () {
-  var i = this.deps.length
+  var depIds = Object.keys(this.deps)
+  var i = depIds.length
   while (i--) {
-    this.deps[i].depend()
+    this.deps[depIds[i]].depend()
   }
 }
 
@@ -280,9 +278,10 @@ Watcher.prototype.teardown = function () {
     if (!this.vm._isBeingDestroyed) {
       this.vm._watchers.$remove(this)
     }
-    var i = this.deps.length
+    var depIds = Object.keys(this.deps)
+    var i = depIds.length
     while (i--) {
-      this.deps[i].removeSub(this)
+      this.deps[depIds[i]].removeSub(this)
     }
     this.active = false
     this.vm = this.cb = this.value = null
