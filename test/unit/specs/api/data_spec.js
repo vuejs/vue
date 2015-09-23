@@ -151,6 +151,7 @@ describe('Data API', function () {
 
   it('$interpolate', function () {
     expect(vm.$interpolate('abc')).toBe('abc')
+    expect(vm.$interpolate('{{a}}')).toBe('1')
     expect(vm.$interpolate('{{a}} and {{a + b.c | double}}')).toBe('1 and 6')
   })
 
