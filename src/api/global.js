@@ -94,6 +94,16 @@ exports.use = function (plugin) {
 }
 
 /**
+ * Apply a global mixin by merging it into the default
+ * options.
+ */
+
+exports.mixin = function (mixin) {
+  var Vue = _.Vue
+  Vue.options = _.mergeOptions(Vue.options, mixin)
+}
+
+/**
  * Create asset registration methods with the following
  * signature:
  *
