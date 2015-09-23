@@ -103,11 +103,13 @@ exports.parse = function (text) {
  */
 
 exports.tokensToExp = function (tokens) {
-  return tokens.length > 1
-    ? tokens.map(function (token) {
-        return formatToken(token)
-      }).join('+')
-    : formatToken(tokens[0], true)
+  if (tokens.length > 1) {
+    return tokens.map(function (token) {
+      return formatToken(token)
+    }).join('+')
+  } else {
+    return formatToken(tokens[0], true)
+  }
 }
 
 /**

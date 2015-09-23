@@ -26,11 +26,13 @@ exports.filterBy = function (arr, search, delimiter /* ...dataKeys */) {
     return prev.concat(cur)
   }, [])
   return arr.filter(function (item) {
-    return keys.length
-      ? keys.some(function (key) {
-          return contains(Path.get(item, key), search)
-        })
-      : contains(item, search)
+    if (keys.length) {
+      return keys.some(function (key) {
+        return contains(Path.get(item, key), search)
+      })
+    } else {
+      return contains(item, search)
+    }
   })
 }
 
