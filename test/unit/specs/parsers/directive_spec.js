@@ -23,6 +23,19 @@ describe('New Directive Parser', function () {
     expect(res.filters[1].args).toBeUndefined()
   })
 
+  it('reserved filter args', function () {
+    var res = parse('arr | filterBy a in b')
+    expect(res.expression).toBe('arr')
+    expect(res.filters.length).toBe(1)
+    expect(res.filters[0].args.length).toBe(3)
+    expect(res.filters[0].args[0].value).toBe('a')
+    expect(res.filters[0].args[0].dynamic).toBe(true)
+    expect(res.filters[0].args[1].value).toBe('in')
+    expect(res.filters[0].args[1].dynamic).toBe(false)
+    expect(res.filters[0].args[2].value).toBe('b')
+    expect(res.filters[0].args[2].dynamic).toBe(true)
+  })
+
   it('double pipe', function () {
     var res = parse('a || b | c')
     expect(res.expression).toBe('a || b')

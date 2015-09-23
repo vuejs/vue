@@ -41,13 +41,18 @@ function pushFilter () {
  */
 
 function processFilterArg (arg) {
-  var stripped = reservedArgRE.test(arg)
-    ? arg
-    : _.stripQuotes(arg)
-  var dynamic = stripped === arg
-  return {
-    value: dynamic ? arg : stripped,
-    dynamic: dynamic
+  if (reservedArgRE.test(arg)) {
+    return {
+      value: arg,
+      dynamic: false
+    }
+  } else {
+    var stripped = _.stripQuotes(arg)
+    var dynamic = stripped === arg
+    return {
+      value: dynamic ? arg : stripped,
+      dynamic: dynamic
+    }
   }
 }
 
