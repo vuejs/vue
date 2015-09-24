@@ -73,7 +73,7 @@ exports.$delete = function (key) {
  * Watch an expression, trigger callback when its
  * value changes.
  *
- * @param {String} exp
+ * @param {String|Function} expOrFn
  * @param {Function} cb
  * @param {Object} [options]
  *                 - {Boolean} deep
@@ -82,11 +82,17 @@ exports.$delete = function (key) {
  * @return {Function} - unwatchFn
  */
 
-exports.$watch = function (exp, cb, options) {
+exports.$watch = function (expOrFn, cb, options) {
   var vm = this
-  var watcher = new Watcher(vm, exp, cb, {
+  var parsed
+  if (typeof expOrFn === 'string') {
+    parsed = dirParser.parse(expOrFn)[0]
+    expOrFn = parsed.expression
+  }
+  var watcher = new Watcher(vm, expOrFn, cb, {
     deep: options && options.deep,
-    user: !options || options.user !== false
+    user: !options || options.user !== false,
+    filters: parsed && parsed.filters
   })
   if (options && options.immediate) {
     cb.call(vm, watcher.value)
