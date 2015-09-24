@@ -143,6 +143,16 @@ describe('Data API', function () {
     })
   })
 
+  it('$watch with filters', function (done) {
+    var spy = jasmine.createSpy()
+    vm.$watch('a | double', spy)
+    vm.a = 2
+    nextTick(function () {
+      expect(spy).toHaveBeenCalledWith(4, 2)
+      done()
+    })
+  })
+
   it('$eval', function () {
     expect(vm.$eval('a')).toBe(1)
     expect(vm.$eval('b.c')).toBe(2)
