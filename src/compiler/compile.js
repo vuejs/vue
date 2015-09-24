@@ -555,11 +555,20 @@ function makeTerminalNodeLinkFn (el, dirName, value, options, def) {
 function compileDirectives (attrs, options) {
   var i = attrs.length
   var dirs = []
-  var attr, name, value, dirName, arg, dirDef, isLiteral
+  var attr, name, raw, value, dirName, arg, dirDef, isLiteral, tokens
   while (i--) {
     attr = attrs[i]
     name = attr.name
-    value = attr.value
+    raw = value = attr.value
+
+    // attribute interpolations
+    if (tokens = textParser.parse(value)) {
+      value = textParser.tokensToExp(tokens)
+      pushDir('bind', publicDirectives.bind, {
+        arg: name,
+        interp: true
+      })
+    } else
 
     // special attribute: transition
     if (transitionRE.test(name)) {
@@ -639,7 +648,7 @@ function compileDirectives (attrs, options) {
     var dir = {
       name: dirName,
       attr: name,
-      raw: value,
+      raw: raw,
       def: def,
       expression: parsed.expression,
       filters: parsed.filters

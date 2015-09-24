@@ -1,3 +1,5 @@
+var _ = require('../../util')
+
 // xlink
 var xlinkNS = 'http://www.w3.org/1999/xlink'
 var xlinkRE = /^xlink:/
@@ -23,6 +25,7 @@ module.exports = {
   priority: 850,
 
   update: function (value) {
+    if (this.invalid) return
     var attr = this.arg
     if (inputProps[attr] && attr in this.el) {
       if (!this.valueRemoved) {
@@ -43,6 +46,53 @@ module.exports = {
     var modelProp = modelProps[attr]
     if (modelProp) {
       this.el[modelProp] = value
+    }
+  }
+}
+
+if (process.env.NODE_ENV !== 'production') {
+  module.exports.bind = function () {
+    var attr = this.arg
+    // handle interpolation bindings
+    if (this.descriptor.interp) {
+      var raw = attr + '="' + this.descriptor.raw + '": '
+      // only allow binding on native attributes
+      if (
+        // data attributes are allowed
+        !(/^data-/.test(attr)) &&
+        // class is allowed
+        !(attr === 'class') &&
+        (
+          // label for
+          (attr === 'for' && !('htmlFor' in this.el)) ||
+          // other native attributes
+          !(_.camelize(attr) in this.el)
+        )
+      ) {
+        _.warn(
+          raw + 'attribute interpolation is allowed only ' +
+          'in valid native attributes. "' + attr + '" ' +
+          'is not a valid attribute on <' + this.el.tagName.toLowerCase() + '>.'
+        )
+        this.invalid = true
+      }
+
+      // warn src
+      if (attr === 'src') {
+        _.warn(
+          raw + 'interpolation in "src" attribute will cause ' +
+          'a 404 request. Use v-bind:src instead.'
+        )
+      }
+
+      // warn style
+      if (attr === 'style') {
+        _.warn(
+          raw + 'interpolation in "style" attribtue will cause ' +
+          'the attribtue to be discarded in Internet Explorer. ' +
+          'Use v-bind:style instead.'
+        )
+      }
     }
   }
 }
