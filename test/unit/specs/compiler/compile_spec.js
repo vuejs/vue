@@ -478,11 +478,13 @@ if (_.inBrowser) {
           c: 'ccc'
         }
       })
-      expect(el.innerHTML).toBe('<div id="aaa" class="b ccc d"></div>')
+      expect(el.firstChild.id).toBe('aaa')
+      expect(el.firstChild.className).toBe('b ccc d')
       vm.a = 'aa'
       vm.c = 'cc'
       _.nextTick(function () {
-        expect(el.innerHTML).toBe('<div id="aa" class="b cc d"></div>')
+        expect(el.firstChild.id).toBe('aa')
+        expect(el.firstChild.className).toBe('b cc d')
         done()
       })
     })
