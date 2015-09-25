@@ -1,3 +1,5 @@
+var _ = require('../util')
+
 // xlink
 var xlinkNS = 'http://www.w3.org/1999/xlink'
 var xlinkRE = /^xlink:/
@@ -24,6 +26,19 @@ module.exports = {
 
   update: function (value) {
     if (this.arg) {
+
+      if (process.env.NODE_ENV !== 'production') {
+        var attr = this.arg
+        if (!(
+          attr === 'class' ||
+          /^data-/.test(attr) ||
+          (attr === 'for' && 'htmlFor' in this.el) ||
+          _.camelize(attr) in this.el
+        )) {
+          _.deprecation.ATTR_INVALID(attr)
+        }
+      }
+
       this.setAttr(this.arg, value)
     } else if (typeof value === 'object') {
       // TODO no longer need to support object in 1.0.0

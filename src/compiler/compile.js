@@ -709,11 +709,6 @@ function collectAttrDirective (name, value, options) {
   var tokens = textParser.parse(value)
   var isClass = name === 'class'
   if (tokens) {
-
-    if (process.env.NODE_ENV !== 'production') {
-      _.deprecation.ATTR_INTERPOLATION(name, value)
-    }
-
     var dirName = isClass ? 'class' : 'attr'
     var def = options.directives[dirName]
     var i = tokens.length
@@ -722,6 +717,9 @@ function collectAttrDirective (name, value, options) {
       var token = tokens[i]
       if (token.tag && !token.oneTime) {
         allOneTime = false
+      } else if (token.tag) {
+        process.env.NODE_ENV !== 'production' &&
+        _.deprecation.ATTR_ONETIME(name, value)
       }
     }
     var linker
@@ -732,9 +730,15 @@ function collectAttrDirective (name, value, options) {
     } else {
       linker = function (vm, el, scope) {
         var exp = textParser.tokensToExp(tokens, (scope || vm))
+
+        // silence the argument deprecation warning
+        var silent = config.silent
+        config.silent = true
         var desc = isClass
           ? dirParser.parse(exp)[0]
           : dirParser.parse(name + ':' + exp)[0]
+        config.silent = silent
+
         if (isClass) {
           desc._rawClass = value
         }

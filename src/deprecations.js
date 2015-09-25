@@ -117,11 +117,18 @@ if (process.env.NODE_ENV !== 'production') {
       )
     },
 
-    ATTR_INTERPOLATION: function (name, value) {
+    ATTR_ONETIME: function (name, value) {
       warn(
-        'Mustache interpolations inside attributes: ' + name + '="' + value + '". ' +
-        'This will be deprecated in 1.0.0. ' +
-        'Use v-bind:attr="expression" instead.' + newBindingSyntaxLink
+        name + '="' + value + '": One-time interpolations inside attributes will ' +
+        'no longer be supported in 1.0.0.'
+      )
+    },
+
+    ATTR_INVALID: function (name) {
+      warn(
+        'Mustache interpolation found in non-native attribute "' + name + '": ' +
+        'attribute interpolation will be limited to native attributes only ' +
+        'in 1.0.0. Use v-bind for custom attributes and props.'
       )
     },
 
@@ -159,8 +166,8 @@ if (process.env.NODE_ENV !== 'production') {
     PARTIAL_NAME: function (id) {
       warn(
         '<partial name="' + id + '">: mustache interpolations inside attributes ' +
-        'will be deprecated in 1.0.0. Use v-bind:name="expression" or just ' +
-        ':name="expression" instead.'
+        'will only be allowed in native attributes in 1.0.0. ' +
+        'Use v-bind:name="expression" or just :name="expression" instead.'
       )
     },
 
