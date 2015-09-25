@@ -144,12 +144,13 @@ describe('Events API', function () {
   it('$dispatch with propagation', function () {
     var child = vm.$addChild()
     var child2 = child.$addChild()
+    var child3 = child2.$addChild()
     child.$on('test', function () {
       spy()
       return true
     })
     vm.$on('test', spy)
-    child2.$dispatch('test')
+    child3.$dispatch('test')
     expect(spy.calls.count()).toBe(2)
   })
 

@@ -87,8 +87,8 @@ exports.$off = function (event, fn) {
  */
 
 exports.$emit = function (event) {
-  this._shouldPropagate = false
   var cbs = this._events[event]
+  this._shouldPropagate = !cbs
   if (cbs) {
     cbs = cbs.length > 1
       ? _.toArray(cbs)
