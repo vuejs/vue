@@ -18,6 +18,7 @@
   "homepage": "http://vuejs.org",
   "scripts": {
     "test": "grunt ci",
+    "install-hook": "ln -s ../../build/git-hooks/pre-commit .git/hooks/pre-commit",
     "dev": "webpack --watch --config build/webpack.dev.config.js & webpack --watch --config build/webpack.test.config.js"
   },
   "dependencies": {
