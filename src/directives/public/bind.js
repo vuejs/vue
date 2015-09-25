@@ -45,9 +45,11 @@ module.exports = {
           'in valid native attributes. "' + attr + '" ' +
           'is not a valid attribute on <' + this.el.tagName.toLowerCase() + '>.'
         )
+        this.el.removeAttribute(attr)
         this.invalid = true
       }
 
+      /* istanbul ignore if */
       if (process.env.NODE_ENV !== 'production') {
         var raw = attr + '="' + this.descriptor.raw + '": '
         // warn src
@@ -71,7 +73,9 @@ module.exports = {
   },
 
   update: function (value) {
-    if (this.invalid) return
+    if (this.invalid) {
+      return
+    }
     var attr = this.arg
     if (inputProps[attr] && attr in this.el) {
       if (!this.valueRemoved) {

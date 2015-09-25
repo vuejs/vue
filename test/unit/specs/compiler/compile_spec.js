@@ -469,5 +469,48 @@ if (_.inBrowser) {
       expect(el.innerHTML).toBe('<test test="1">{{a}}</test>')
     })
 
+    it('attribute interpolation', function (done) {
+      var vm = new Vue({
+        el: el,
+        template: '<div id="{{a}}" class="b {{c}} d"></div>',
+        data: {
+          a: 'aaa',
+          c: 'ccc'
+        }
+      })
+      expect(el.innerHTML).toBe('<div id="aaa" class="b ccc d"></div>')
+      vm.a = 'aa'
+      vm.c = 'cc'
+      _.nextTick(function () {
+        expect(el.innerHTML).toBe('<div id="aa" class="b cc d"></div>')
+        done()
+      })
+    })
+
+    it('attribute interpolation: special cases', function () {
+      new Vue({
+        el: el,
+        template: '<label for="{{a}}" data-test="{{b}}"></label><form accept-charset="{{c}}"></form>',
+        data: {
+          a: 'aaa',
+          b: 'bbb',
+          c: 'UTF-8'
+        }
+      })
+      expect(el.innerHTML).toBe('<label for="aaa" data-test="bbb"></label><form accept-charset="UTF-8"></form>')
+    })
+
+    it('attribute interpolation: warn invalid', function () {
+      new Vue({
+        el: el,
+        template: '<div hello="{{a}}"></div>',
+        data: {
+          a: '123'
+        }
+      })
+      expect(el.innerHTML).toBe('<div></div>')
+      expect(hasWarned(_, 'attribute interpolation is allowed only in valid native attributes')).toBe(true)
+    })
+
   })
 }
