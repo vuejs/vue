@@ -1,5 +1,5 @@
 /*!
- * Vue.js v1.0.0-beta.1
+ * Vue.js v1.0.0-beta.2
  * (c) 2015 Evan You
  * Released under the MIT License.
  */
@@ -527,6 +527,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
+	var uid = 0
 
 	/**
 	 * A dep is an observable that can have multiple
@@ -536,6 +537,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	function Dep () {
+	  this.id = uid++
 	  this.subs = []
 	}
 
@@ -726,14 +728,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
-	 * Extract an attribute from a node.
+	 * Get and remove an attribute from a node.
 	 *
 	 * @param {Node} node
 	 * @param {String} attr
 	 */
 
 	exports.attr = function (node, attr) {
-	  attr = 'v-' + attr
 	  var val = node.getAttribute(attr)
 	  if (val !== null) {
 	    node.removeAttribute(attr)
@@ -750,14 +751,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	exports.getBindAttr = function (node, name) {
-	  var attr = ':' + name
-	  var val = node.getAttribute(attr)
+	  var val = exports.attr(node, ':' + name)
 	  if (val === null) {
-	    attr = 'v-bind:' + name
-	    val = node.getAttribute(attr)
-	  }
-	  if (val !== null) {
-	    node.removeAttribute(attr)
+	    val = exports.attr(node, 'v-bind:' + name)
 	  }
 	  return val
 	}
@@ -1229,11 +1225,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	exports.tokensToExp = function (tokens) {
-	  return tokens.length > 1
-	    ? tokens.map(function (token) {
-	        return formatToken(token)
-	      }).join('+')
-	    : formatToken(tokens[0], true)
+	  if (tokens.length > 1) {
+	    return tokens.map(function (token) {
+	      return formatToken(token)
+	    }).join('+')
+	  } else {
+	    return formatToken(tokens[0], true)
+	  }
 	}
 
 	/**
@@ -1449,13 +1447,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	function processFilterArg (arg) {
-	  var stripped = reservedArgRE.test(arg)
-	    ? arg
-	    : _.stripQuotes(arg)
-	  var dynamic = stripped === arg
-	  return {
-	    value: dynamic ? arg : stripped,
-	    dynamic: dynamic
+	  if (reservedArgRE.test(arg)) {
+	    return {
+	      value: arg,
+	      dynamic: false
+	    }
+	  } else {
+	    var stripped = _.stripQuotes(arg)
+	    var dynamic = stripped === arg
+	    return {
+	      value: dynamic ? arg : stripped,
+	      dynamic: dynamic
+	    }
 	  }
 	}
 
@@ -1940,9 +1943,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function getIsBinding (el) {
 	  // dynamic syntax
-	  var exp = el.getAttribute('is')
+	  var exp = _.attr(el, 'is')
 	  if (exp != null) {
-	    el.removeAttribute('is')
 	    return { id: exp }
 	  } else {
 	    exp = _.getBindAttr(el, 'is')
@@ -2107,9 +2109,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.util = _
 	exports.config = config
 	exports.nextTick = _.nextTick
+
+	/**
+	 * The following are exposed for advanced usage / plugins
+	 */
+
 	exports.compiler = __webpack_require__(14)
 	exports.FragmentFactory = __webpack_require__(21)
-
+	exports.internalDirectives = __webpack_require__(36)
 	exports.parsers = {
 	  path: __webpack_require__(43),
 	  text: __webpack_require__(7),
@@ -2197,6 +2204,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  plugin.installed = true
 	  return this
+	}
+
+	/**
+	 * Apply a global mixin by merging it into the default
+	 * options.
+	 */
+
+	exports.mixin = function (mixin) {
+	  var Vue = _.Vue
+	  Vue.options = _.mergeOptions(Vue.options, mixin)
 	}
 
 	/**
@@ -2730,16 +2747,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	function checkTerminalDirectives (el, options) {
-	  if (_.attr(el, 'pre') !== null ||
-	      el.hasAttribute('v-else')) {
+	  // skip v-pre
+	  if (_.attr(el, 'v-pre') !== null) {
 	    return skip
+	  }
+	  // skip v-else block, but only if following v-if
+	  if (el.hasAttribute('v-else')) {
+	    var prev = el.previousElementSibling
+	    if (prev && prev.hasAttribute('v-if')) {
+	      return skip
+	    }
 	  }
 	  var value, dirName
 	  for (var i = 0, l = terminalDirectives.length; i < l; i++) {
 	    dirName = terminalDirectives[i]
-	    if ((value = _.attr(el, dirName)) !== null) {
+	    /* eslint-disable no-cond-assign */
+	    if (value = el.getAttribute('v-' + dirName)) {
 	      return makeTerminalNodeLinkFn(el, dirName, value, options)
 	    }
+	    /* eslint-enable no-cond-assign */
 	  }
 	}
 
@@ -2787,11 +2813,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	function compileDirectives (attrs, options) {
 	  var i = attrs.length
 	  var dirs = []
-	  var attr, name, value, dirName, arg, dirDef, isLiteral
+	  var attr, name, raw, value, dirName, arg, dirDef, isLiteral, tokens
 	  while (i--) {
 	    attr = attrs[i]
 	    name = attr.name
-	    value = attr.value
+	    raw = value = attr.value
+	    tokens = textParser.parse(value)
+
+	    // attribute interpolations
+	    if (tokens) {
+	      value = textParser.tokensToExp(tokens)
+	      pushDir('bind', publicDirectives.bind, {
+	        arg: name,
+	        interp: true
+	      })
+	    } else
 
 	    // special attribute: transition
 	    if (transitionRE.test(name)) {
@@ -2833,6 +2869,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	      // extract directive name
 	      dirName = name.slice(2)
+
+	      // skip v-else (when used with v-show)
+	      if (dirName === 'else') {
+	        continue
+	      }
+
 	      dirDef = resolveAsset(options, 'directives', dirName)
 
 	      if (true) {
@@ -2865,7 +2907,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var dir = {
 	      name: dirName,
 	      attr: name,
-	      raw: value,
+	      raw: raw,
 	      def: def,
 	      expression: parsed.expression,
 	      filters: parsed.filters
@@ -3157,22 +3199,28 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	// Test for the presence of the Safari template cloning bug
 	// https://bugs.webkit.org/show_bug.cgi?id=137755
-	var hasBrokenTemplate = _.inBrowser
-	  ? (function () {
-	      var a = document.createElement('div')
-	      a.innerHTML = '<template>1</template>'
-	      return !a.cloneNode(true).firstChild.innerHTML
-	    })()
-	  : false
+	var hasBrokenTemplate = (function () {
+	  /* istanbul ignore else */
+	  if (_.inBrowser) {
+	    var a = document.createElement('div')
+	    a.innerHTML = '<template>1</template>'
+	    return !a.cloneNode(true).firstChild.innerHTML
+	  } else {
+	    return false
+	  }
+	})()
 
 	// Test for IE10/11 textarea placeholder clone bug
-	var hasTextareaCloneBug = _.inBrowser
-	  ? (function () {
-	      var t = document.createElement('textarea')
-	      t.placeholder = 't'
-	      return t.cloneNode(true).value === 't'
-	    })()
-	  : false
+	var hasTextareaCloneBug = (function () {
+	  /* istanbul ignore else */
+	  if (_.inBrowser) {
+	    var t = document.createElement('textarea')
+	    t.placeholder = 't'
+	    return t.cloneNode(true).value === 't'
+	  } else {
+	    return false
+	  }
+	})()
 
 	/**
 	 * 1. Deal with Safari cloning nested <template> bug by
@@ -4223,7 +4271,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (!el.__vue__) {
 	      // check else block
 	      var next = el.nextElementSibling
-	      if (next && _.attr(next, 'else') !== null) {
+	      if (next && _.attr(next, 'v-else') !== null) {
 	        _.remove(next)
 	        this.elseFactory = new FragmentFactory(this.vm, next)
 	      }
@@ -4285,13 +4333,31 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
+	var _ = __webpack_require__(1)
 	var transition = __webpack_require__(23)
 
-	module.exports = function (value) {
-	  var el = this.el
-	  transition.apply(el, value ? 1 : -1, function () {
-	    el.style.display = value ? '' : 'none'
-	  }, this.vm)
+	module.exports = {
+
+	  bind: function () {
+	    // check else block
+	    var next = this.el.nextElementSibling
+	    if (next && _.attr(next, 'v-else') !== null) {
+	      this.elseEl = next
+	    }
+	  },
+
+	  update: function (value) {
+	    var el = this.el
+	    transition.apply(el, value ? 1 : -1, function () {
+	      el.style.display = value ? '' : 'none'
+	    }, this.vm)
+	    var elseEl = this.elseEl
+	    if (elseEl) {
+	      transition.apply(elseEl, value ? -1 : 1, function () {
+	        elseEl.style.display = value ? 'none' : ''
+	      }, this.vm)
+	    }
+	  }
 	}
 
 
@@ -4857,7 +4923,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 32 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
+
+	var _ = __webpack_require__(1)
 
 	// xlink
 	var xlinkNS = 'http://www.w3.org/1999/xlink'
@@ -4883,7 +4951,58 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  priority: 850,
 
+	  bind: function () {
+	    var attr = this.arg
+	    // handle interpolation bindings
+	    if (this.descriptor.interp) {
+	      // only allow binding on native attributes
+	      if (!(
+	        // class is allowed globally
+	        attr === 'class' ||
+	        // data attributes are allowed globally
+	        /^data-/.test(attr) ||
+	        // for available
+	        (attr === 'for' && 'htmlFor' in this.el) ||
+	        // camelized prop available
+	        _.camelize(attr) in this.el
+	      )) {
+	        ("development") !== 'production' && _.warn(
+	          attr + '="' + this.descriptor.raw + '": ' +
+	          'attribute interpolation is allowed only ' +
+	          'in valid native attributes. "' + attr + '" ' +
+	          'is not a valid attribute on <' + this.el.tagName.toLowerCase() + '>.'
+	        )
+	        this.el.removeAttribute(attr)
+	        this.invalid = true
+	      }
+
+	      /* istanbul ignore if */
+	      if (true) {
+	        var raw = attr + '="' + this.descriptor.raw + '": '
+	        // warn src
+	        if (attr === 'src') {
+	          _.warn(
+	            raw + 'interpolation in "src" attribute will cause ' +
+	            'a 404 request. Use v-bind:src instead.'
+	          )
+	        }
+
+	        // warn style
+	        if (attr === 'style') {
+	          _.warn(
+	            raw + 'interpolation in "style" attribtue will cause ' +
+	            'the attribtue to be discarded in Internet Explorer. ' +
+	            'Use v-bind:style instead.'
+	          )
+	        }
+	      }
+	    }
+	  },
+
 	  update: function (value) {
+	    if (this.invalid) {
+	      return
+	    }
 	    var attr = this.arg
 	    if (inputProps[attr] && attr in this.el) {
 	      if (!this.valueRemoved) {
@@ -5616,8 +5735,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this.id = ++uid // uid for batching
 	  this.active = true
 	  this.dirty = this.lazy // for lazy watchers
-	  this.deps = []
-	  this.newDeps = []
+	  this.deps = Object.create(null)
+	  this.newDeps = null
 	  this.prevError = null // for async error stacks
 	  // parse expression for getter/setter
 	  if (isFn) {
@@ -5643,15 +5762,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	Watcher.prototype.addDep = function (dep) {
-	  var newDeps = this.newDeps
-	  var old = this.deps
-	  if (_.indexOf(newDeps, dep) < 0) {
-	    newDeps.push(dep)
-	    var i = _.indexOf(old, dep)
-	    if (i < 0) {
+	  var id = dep.id
+	  if (!this.newDeps[id]) {
+	    this.newDeps[id] = dep
+	    if (!this.deps[id]) {
+	      this.deps[id] = dep
 	      dep.addSub(this)
-	    } else {
-	      old[i] = null
 	    }
 	  }
 	}
@@ -5748,6 +5864,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	Watcher.prototype.beforeGet = function () {
 	  Dep.target = this
+	  this.newDeps = Object.create(null)
 	}
 
 	/**
@@ -5756,17 +5873,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	Watcher.prototype.afterGet = function () {
 	  Dep.target = null
-	  var oldDeps = this.deps
-	  var i = oldDeps.length
+	  var ids = Object.keys(this.deps)
+	  var i = ids.length
 	  while (i--) {
-	    var dep = oldDeps[i]
-	    if (dep) {
-	      dep.removeSub(this)
+	    var id = ids[i]
+	    if (!this.newDeps[id]) {
+	      this.deps[id].removeSub(this)
 	    }
 	  }
 	  this.deps = this.newDeps
-	  this.newDeps = oldDeps
-	  oldDeps.length = 0 // reuse old dep array
 	}
 
 	/**
@@ -5861,9 +5976,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	Watcher.prototype.depend = function () {
-	  var i = this.deps.length
+	  var depIds = Object.keys(this.deps)
+	  var i = depIds.length
 	  while (i--) {
-	    this.deps[i].depend()
+	    this.deps[depIds[i]].depend()
 	  }
 	}
 
@@ -5879,9 +5995,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (!this.vm._isBeingDestroyed) {
 	      this.vm._watchers.$remove(this)
 	    }
-	    var i = this.deps.length
+	    var depIds = Object.keys(this.deps)
+	    var i = depIds.length
 	    while (i--) {
-	      this.deps[i].removeSub(this)
+	      this.deps[depIds[i]].removeSub(this)
 	    }
 	    this.active = false
 	    this.vm = this.cb = this.value = null
@@ -7227,11 +7344,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    // first check literal version
 	    attr = _.hyphenate(name)
-	    value = prop.raw = el.getAttribute(attr)
-	    if (value !== null) {
-	      el.removeAttribute(attr)
-	    } else {
-
+	    value = prop.raw = _.attr(el, attr)
+	    if (value === null) {
 	      // then check dynamic version
 	      if ((value = _.getBindAttr(el, attr)) === null) {
 	        if ((value = _.getBindAttr(el, attr + '.sync')) !== null) {
@@ -7886,11 +8000,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return prev.concat(cur)
 	  }, [])
 	  return arr.filter(function (item) {
-	    return keys.length
-	      ? keys.some(function (key) {
-	          return contains(Path.get(item, key), search)
-	        })
-	      : contains(item, search)
+	    if (keys.length) {
+	      return keys.some(function (key) {
+	        return contains(Path.get(item, key), search)
+	      })
+	    } else {
+	      return contains(item, search)
+	    }
 	  })
 	}
 
@@ -7933,14 +8049,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	function contains (val, search) {
+	  var i
 	  if (_.isPlainObject(val)) {
-	    for (var key in val) {
-	      if (contains(val[key], search)) {
+	    var keys = Object.keys(val)
+	    i = keys.length
+	    while (i--) {
+	      if (contains(val[keys[i]], search)) {
 	        return true
 	      }
 	    }
 	  } else if (_.isArray(val)) {
-	    var i = val.length
+	    i = val.length
 	    while (i--) {
 	      if (contains(val[i], search)) {
 	        return true
@@ -9043,6 +9162,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _ = __webpack_require__(1)
 	var Watcher = __webpack_require__(41)
 	var expParser = __webpack_require__(42)
+	function noop () {}
 
 	/**
 	 * A directive links a DOM element with a piece of data,
@@ -9131,13 +9251,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	  ) {
 	    // wrapped updater for context
 	    var dir = this
-	    var update = this._update = this.update
-	      ? function (val, oldVal) {
-	          if (!dir._locked) {
-	            dir.update(val, oldVal)
-	          }
+	    if (this.update) {
+	      this._update = function (val, oldVal) {
+	        if (!dir._locked) {
+	          dir.update(val, oldVal)
 	        }
-	      : function () {} // noop if no update is provided
+	      }
+	    } else {
+	      this._update = noop
+	    }
 	    // pre-process hook called before the value is piped
 	    // through the filters. used in v-for.
 	    var preProcess = this._preProcess
@@ -9146,7 +9268,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var watcher = this._watcher = new Watcher(
 	      this.vm,
 	      this.expression,
-	      update, // callback
+	      this._update, // callback
 	      {
 	        filters: this.filters,
 	        twoWay: this.twoWay,
@@ -9202,9 +9324,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	Directive.prototype.param = function (name) {
-	  var param = this.el.getAttribute(name)
+	  var param = _.attr(this.el, name)
 	  if (param != null) {
-	    this.el.removeAttribute(name)
 	    param = (this._scope || this.vm).$interpolate(param)
 	  } else {
 	    param = _.getBindAttr(this.el, name)
@@ -9464,7 +9585,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Watch an expression, trigger callback when its
 	 * value changes.
 	 *
-	 * @param {String} exp
+	 * @param {String|Function} expOrFn
 	 * @param {Function} cb
 	 * @param {Object} [options]
 	 *                 - {Boolean} deep
@@ -9473,11 +9594,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @return {Function} - unwatchFn
 	 */
 
-	exports.$watch = function (exp, cb, options) {
+	exports.$watch = function (expOrFn, cb, options) {
 	  var vm = this
-	  var watcher = new Watcher(vm, exp, cb, {
+	  var parsed
+	  if (typeof expOrFn === 'string') {
+	    parsed = dirParser.parse(expOrFn)
+	    expOrFn = parsed.expression
+	  }
+	  var watcher = new Watcher(vm, expOrFn, cb, {
 	    deep: options && options.deep,
-	    user: !options || options.user !== false
+	    user: !options || options.user !== false,
+	    filters: parsed && parsed.filters
 	  })
 	  if (options && options.immediate) {
 	    cb.call(vm, watcher.value)
@@ -9523,13 +9650,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var tokens = textParser.parse(text)
 	  var vm = this
 	  if (tokens) {
-	    return tokens.length === 1
-	      ? vm.$eval(tokens[0].value)
-	      : tokens.map(function (token) {
-	          return token.tag
-	            ? vm.$eval(token.value)
-	            : token.value
-	        }).join('')
+	    if (tokens.length === 1) {
+	      return vm.$eval(tokens[0].value) + ''
+	    } else {
+	      return tokens.map(function (token) {
+	        return token.tag
+	          ? vm.$eval(token.value)
+	          : token.value
+	      }).join('')
+	    }
 	  } else {
 	    return text
 	  }
@@ -9897,8 +10026,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	exports.$emit = function (event) {
-	  this._shouldPropagate = false
 	  var cbs = this._events[event]
+	  this._shouldPropagate = !cbs
 	  if (cbs) {
 	    cbs = cbs.length > 1
 	      ? _.toArray(cbs)
