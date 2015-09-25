@@ -60,8 +60,10 @@ Hi! I’m really excited that you are interested in contributing to Vue.js. Befo
 You will need [Node.js](http://nodejs.org) & [Grunt](http://gruntjs.com).
 
 ``` bash
-# npm install -g grunt-cli
+$ npm install -g grunt-cli
 $ npm install
+# install pre-commit lint hook
+$ npm run install-hook
 ```
 
 To watch and auto-build `dist/vue.js` during development:
