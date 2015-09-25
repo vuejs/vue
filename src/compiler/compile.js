@@ -560,9 +560,10 @@ function compileDirectives (attrs, options) {
     attr = attrs[i]
     name = attr.name
     raw = value = attr.value
+    tokens = textParser.parse(value)
 
     // attribute interpolations
-    if (tokens = textParser.parse(value)) {
+    if (tokens) {
       value = textParser.tokensToExp(tokens)
       pushDir('bind', publicDirectives.bind, {
         arg: name,
