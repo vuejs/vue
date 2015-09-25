@@ -1,5 +1,5 @@
 /*!
- * Vue.js v0.12.15
+ * Vue.js v0.12.16
  * (c) 2015 Evan You
  * Released under the MIT License.
  */
@@ -1000,7 +1000,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Vue} [vm]
 	 */
 
-	var strats = Object.create(null)
+	var strats = config.optionMergeStrategies = Object.create(null)
 
 	/**
 	 * Helper that recursively merges two data objects together.
@@ -1643,6 +1643,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
+	 * Apply a global mixin by merging it into the default
+	 * options.
+	 */
+
+	exports.mixin = function (mixin) {
+	  var Vue = _.Vue
+	  Vue.options = _.mergeOptions(Vue.options, mixin)
+	}
+
+	/**
 	 * Create asset registration methods with the following
 	 * signature:
 	 *
@@ -2276,22 +2286,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	        allOneTime = false
 	      }
 	    }
+	    var linker
+	    if (allOneTime) {
+	      linker = function (vm, el) {
+	        el.setAttribute(name, vm.$interpolate(value))
+	      }
+	    } else {
+	      linker = function (vm, el) {
+	        var exp = textParser.tokensToExp(tokens, vm)
+	        var desc = isClass
+	          ? dirParser.parse(exp)[0]
+	          : dirParser.parse(name + ':' + exp)[0]
+	        if (isClass) {
+	          desc._rawClass = value
+	        }
+	        vm._bindDir(dirName, el, desc, def)
+	      }
+	    }
 	    return {
 	      def: def,
-	      _link: allOneTime
-	        ? function (vm, el) {
-	            el.setAttribute(name, vm.$interpolate(value))
-	          }
-	        : function (vm, el) {
-	            var exp = textParser.tokensToExp(tokens, vm)
-	            var desc = isClass
-	              ? dirParser.parse(exp)[0]
-	              : dirParser.parse(name + ':' + exp)[0]
-	            if (isClass) {
-	              desc._rawClass = value
-	            }
-	            vm._bindDir(dirName, el, desc, def)
-	          }
+	      _link: linker
 	    }
 	  }
 	}
@@ -2623,11 +2637,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	exports.tokensToExp = function (tokens, vm) {
-	  return tokens.length > 1
-	    ? tokens.map(function (token) {
-	        return formatToken(token, vm)
-	      }).join('+')
-	    : formatToken(tokens[0], vm, true)
+	  if (tokens.length > 1) {
+	    return tokens.map(function (token) {
+	      return formatToken(token, vm)
+	    }).join('+')
+	  } else {
+	    return formatToken(tokens[0], vm, true)
+	  }
 	}
 
 	/**
@@ -3096,7 +3112,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this.id = ++uid // uid for batching
 	  this.active = true
 	  this.dirty = this.lazy // for lazy watchers
-	  this.deps = []
+	  this.deps = Object.create(null)
 	  this.newDeps = null
 	  this.prevError = null // for async error stacks
 	  // parse expression for getter/setter
@@ -3123,15 +3139,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	Watcher.prototype.addDep = function (dep) {
-	  var newDeps = this.newDeps
-	  var old = this.deps
-	  if (_.indexOf(newDeps, dep) < 0) {
-	    newDeps.push(dep)
-	    var i = _.indexOf(old, dep)
-	    if (i < 0) {
+	  var id = dep.id
+	  if (!this.newDeps[id]) {
+	    this.newDeps[id] = dep
+	    if (!this.deps[id]) {
+	      this.deps[id] = dep
 	      dep.addSub(this)
-	    } else {
-	      old[i] = null
 	    }
 	  }
 	}
@@ -3209,7 +3222,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	Watcher.prototype.beforeGet = function () {
 	  Dep.target = this
-	  this.newDeps = []
+	  this.newDeps = Object.create(null)
 	}
 
 	/**
@@ -3218,15 +3231,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	Watcher.prototype.afterGet = function () {
 	  Dep.target = null
-	  var i = this.deps.length
+	  var ids = Object.keys(this.deps)
+	  var i = ids.length
 	  while (i--) {
-	    var dep = this.deps[i]
-	    if (dep) {
-	      dep.removeSub(this)
+	    var id = ids[i]
+	    if (!this.newDeps[id]) {
+	      this.deps[id].removeSub(this)
 	    }
 	  }
 	  this.deps = this.newDeps
-	  this.newDeps = null
 	}
 
 	/**
@@ -3321,9 +3334,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	Watcher.prototype.depend = function () {
-	  var i = this.deps.length
+	  var depIds = Object.keys(this.deps)
+	  var i = depIds.length
 	  while (i--) {
-	    this.deps[i].depend()
+	    this.deps[depIds[i]].depend()
 	  }
 	}
 
@@ -3339,9 +3353,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (!this.vm._isBeingDestroyed) {
 	      this.vm._watchers.$remove(this)
 	    }
-	    var i = this.deps.length
+	    var depIds = Object.keys(this.deps)
+	    var i = depIds.length
 	    while (i--) {
-	      this.deps[i].removeSub(this)
+	      this.deps[depIds[i]].removeSub(this)
 	    }
 	    this.active = false
 	    this.vm = this.cb = this.value = null
@@ -3377,6 +3392,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
+	var uid = 0
 
 	/**
 	 * A dep is an observable that can have multiple
@@ -3386,6 +3402,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	function Dep () {
+	  this.id = uid++
 	  this.subs = []
 	}
 
@@ -4327,22 +4344,28 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	// Test for the presence of the Safari template cloning bug
 	// https://bugs.webkit.org/show_bug.cgi?id=137755
-	var hasBrokenTemplate = _.inBrowser
-	  ? (function () {
-	      var a = document.createElement('div')
-	      a.innerHTML = '<template>1</template>'
-	      return !a.cloneNode(true).firstChild.innerHTML
-	    })()
-	  : false
+	var hasBrokenTemplate = (function () {
+	  /* istanbul ignore else */
+	  if (_.inBrowser) {
+	    var a = document.createElement('div')
+	    a.innerHTML = '<template>1</template>'
+	    return !a.cloneNode(true).firstChild.innerHTML
+	  } else {
+	    return false
+	  }
+	})()
 
 	// Test for IE10/11 textarea placeholder clone bug
-	var hasTextareaCloneBug = _.inBrowser
-	  ? (function () {
-	      var t = document.createElement('textarea')
-	      t.placeholder = 't'
-	      return t.cloneNode(true).value === 't'
-	    })()
-	  : false
+	var hasTextareaCloneBug = (function () {
+	  /* istanbul ignore else */
+	  if (_.inBrowser) {
+	    var t = document.createElement('textarea')
+	    t.placeholder = 't'
+	    return t.cloneNode(true).value === 't'
+	  } else {
+	    return false
+	  }
+	})()
 
 	/**
 	 * 1. Deal with Safari cloning nested <template> bug by
@@ -7867,11 +7890,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return prev.concat(cur)
 	  }, [])
 	  return arr.filter(function (item) {
-	    return keys.length
-	      ? keys.some(function (key) {
-	          return contains(Path.get(item, key), search)
-	        })
-	      : contains(item, search)
+	    if (keys.length) {
+	      return keys.some(function (key) {
+	        return contains(Path.get(item, key), search)
+	      })
+	    } else {
+	      return contains(item, search)
+	    }
 	  })
 	}
 
@@ -7914,14 +7939,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	function contains (val, search) {
+	  var i
 	  if (_.isPlainObject(val)) {
-	    for (var key in val) {
-	      if (contains(val[key], search)) {
+	    var keys = Object.keys(val)
+	    i = keys.length
+	    while (i--) {
+	      if (contains(val[keys[i]], search)) {
 	        return true
 	      }
 	    }
 	  } else if (_.isArray(val)) {
-	    var i = val.length
+	    i = val.length
 	    while (i--) {
 	      if (contains(val[i], search)) {
 	        return true
@@ -9108,6 +9136,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Watcher = __webpack_require__(17)
 	var textParser = __webpack_require__(13)
 	var expParser = __webpack_require__(19)
+	function noop () {}
 
 	/**
 	 * A directive links a DOM element with a piece of data,
@@ -9178,13 +9207,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	      !this._checkStatement()) {
 	    // wrapped updater for context
 	    var dir = this
-	    var update = this._update = this.update
-	      ? function (val, oldVal) {
-	          if (!dir._locked) {
-	            dir.update(val, oldVal)
-	          }
+	    if (this.update) {
+	      this._update = function (val, oldVal) {
+	        if (!dir._locked) {
+	          dir.update(val, oldVal)
 	        }
-	      : function () {} // noop if no update is provided
+	      }
+	    } else {
+	      this._update = noop
+	    }
 	    // pre-process hook called before the value is piped
 	    // through the filters. used in v-repeat.
 	    var preProcess = this._preProcess
@@ -9193,7 +9224,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var watcher = this._watcher = new Watcher(
 	      this.vm,
 	      this._watcherExp,
-	      update, // callback
+	      this._update, // callback
 	      {
 	        filters: this.filters,
 	        twoWay: this.twoWay,
@@ -9523,7 +9554,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Watch an expression, trigger callback when its
 	 * value changes.
 	 *
-	 * @param {String} exp
+	 * @param {String|Function} expOrFn
 	 * @param {Function} cb
 	 * @param {Object} [options]
 	 *                 - {Boolean} deep
@@ -9532,11 +9563,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @return {Function} - unwatchFn
 	 */
 
-	exports.$watch = function (exp, cb, options) {
+	exports.$watch = function (expOrFn, cb, options) {
 	  var vm = this
-	  var watcher = new Watcher(vm, exp, cb, {
+	  var parsed
+	  if (typeof expOrFn === 'string') {
+	    parsed = dirParser.parse(expOrFn)[0]
+	    expOrFn = parsed.expression
+	  }
+	  var watcher = new Watcher(vm, expOrFn, cb, {
 	    deep: options && options.deep,
-	    user: !options || options.user !== false
+	    user: !options || options.user !== false,
+	    filters: parsed && parsed.filters
 	  })
 	  if (options && options.immediate) {
 	    cb.call(vm, watcher.value)
@@ -9581,13 +9618,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var tokens = textParser.parse(text)
 	  var vm = this
 	  if (tokens) {
-	    return tokens.length === 1
-	      ? vm.$eval(tokens[0].value)
-	      : tokens.map(function (token) {
-	          return token.tag
-	            ? vm.$eval(token.value)
-	            : token.value
-	        }).join('')
+	    if (tokens.length === 1) {
+	      return vm.$eval(tokens[0].value) + ''
+	    } else {
+	      return tokens.map(function (token) {
+	        return token.tag
+	          ? vm.$eval(token.value)
+	          : token.value
+	      }).join('')
+	    }
 	  } else {
 	    return text
 	  }
