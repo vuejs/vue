@@ -1,5 +1,5 @@
 /*!
- * Vue.js v1.0.0-alpha.5
+ * Vue.js v1.0.0-alpha.6
  * (c) 2015 Evan You
  * Released under the MIT License.
  */
@@ -532,6 +532,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
+	var uid = 0
 
 	/**
 	 * A dep is an observable that can have multiple
@@ -541,6 +542,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	function Dep () {
+	  this.id = uid++
 	  this.subs = []
 	}
 
@@ -1275,11 +1277,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	exports.tokensToExp = function (tokens, vm) {
-	  return tokens.length > 1
-	    ? tokens.map(function (token) {
-	        return formatToken(token, vm)
-	      }).join('+')
-	    : formatToken(tokens[0], vm, true)
+	  if (tokens.length > 1) {
+	    return tokens.map(function (token) {
+	      return formatToken(token, vm)
+	    }).join('+')
+	  } else {
+	    return formatToken(tokens[0], vm, true)
+	  }
 	}
 
 	/**
@@ -2382,11 +2386,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	      )
 	    },
 
-	    ATTR_INTERPOLATION: function (name, value) {
+	    ATTR_ONETIME: function (name, value) {
 	      warn(
-	        'Mustache interpolations inside attributes: ' + name + '="' + value + '". ' +
-	        'This will be deprecated in 1.0.0. ' +
-	        'Use v-bind:attr="expression" instead.' + newBindingSyntaxLink
+	        name + '="' + value + '": One-time interpolations inside attributes will ' +
+	        'no longer be supported in 1.0.0.'
+	      )
+	    },
+
+	    ATTR_INVALID: function (name) {
+	      warn(
+	        'Mustache interpolation found in non-native attribute "' + name + '": ' +
+	        'attribute interpolation will be limited to native attributes only ' +
+	        'in 1.0.0. Use v-bind for custom attributes and props.'
 	      )
 	    },
 
@@ -2424,8 +2435,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    PARTIAL_NAME: function (id) {
 	      warn(
 	        '<partial name="' + id + '">: mustache interpolations inside attributes ' +
-	        'will be deprecated in 1.0.0. Use v-bind:name="expression" or just ' +
-	        ':name="expression" instead.'
+	        'will only be allowed in native attributes in 1.0.0. ' +
+	        'Use v-bind:name="expression" or just :name="expression" instead.'
 	      )
 	    },
 
@@ -2617,6 +2628,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  plugin.installed = true
 	  return this
+	}
+
+	/**
+	 * Apply a global mixin by merging it into the default
+	 * options.
+	 */
+
+	exports.mixin = function (mixin) {
+	  var Vue = _.Vue
+	  Vue.options = _.mergeOptions(Vue.options, mixin)
 	}
 
 	/**
@@ -3149,16 +3170,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	function checkTerminalDirectives (el, options) {
-	  if (_.attr(el, 'pre') !== null ||
-	      el.hasAttribute(config.prefix + 'else')) {
+	  // skip v-pre
+	  if (_.attr(el, 'pre') !== null) {
 	    return skip
+	  }
+	  // skip v-else block, but only if following v-if
+	  if (el.hasAttribute(config.prefix + 'else')) {
+	    var prev = el.previousElementSibling
+	    if (prev && prev.hasAttribute(config.prefix + 'if')) {
+	      return skip
+	    }
 	  }
 	  var value, dirName
 	  for (var i = 0, l = terminalDirectives.length; i < l; i++) {
 	    dirName = terminalDirectives[i]
-	    if ((value = _.attr(el, dirName)) !== null) {
+	    /* eslint-disable no-cond-assign */
+	    if (value = el.getAttribute(config.prefix + dirName)) {
 	      return makeTerminalNodeLinkFn(el, dirName, value, options)
 	    }
+	    /* eslint-enable no-cond-assign */
 	  }
 	}
 
@@ -3265,6 +3295,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	      dirName = name
 	        .slice(config.prefix.length)
 	        .replace(argRE, '')
+
+	      // skip v-else (when used with v-show)
+	      if (dirName === 'else') {
+	        continue
+	      }
+
 	      dirDef = resolveAsset(options, 'directives', dirName)
 	      if (true) {
 	        _.assertAsset(dirDef, 'directive', dirName)
@@ -3355,11 +3391,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var tokens = textParser.parse(value)
 	  var isClass = name === 'class'
 	  if (tokens) {
-
-	    if (true) {
-	      _.deprecation.ATTR_INTERPOLATION(name, value)
-	    }
-
 	    var dirName = isClass ? 'class' : 'attr'
 	    var def = options.directives[dirName]
 	    var i = tokens.length
@@ -3368,24 +3399,37 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var token = tokens[i]
 	      if (token.tag && !token.oneTime) {
 	        allOneTime = false
+	      } else if (token.tag) {
+	        ("development") !== 'production' &&
+	        _.deprecation.ATTR_ONETIME(name, value)
+	      }
+	    }
+	    var linker
+	    if (allOneTime) {
+	      linker = function (vm, el, scope) {
+	        el.setAttribute(name, (scope || vm).$interpolate(value))
+	      }
+	    } else {
+	      linker = function (vm, el, scope) {
+	        var exp = textParser.tokensToExp(tokens, (scope || vm))
+
+	        // silence the argument deprecation warning
+	        var silent = config.silent
+	        config.silent = true
+	        var desc = isClass
+	          ? dirParser.parse(exp)[0]
+	          : dirParser.parse(name + ':' + exp)[0]
+	        config.silent = silent
+
+	        if (isClass) {
+	          desc._rawClass = value
+	        }
+	        vm._bindDir(dirName, el, desc, def, undefined, scope)
 	      }
 	    }
 	    return {
 	      def: def,
-	      _link: allOneTime
-	        ? function (vm, el, scope) {
-	            el.setAttribute(name, (scope || vm).$interpolate(value))
-	          }
-	        : function (vm, el, scope) {
-	            var exp = textParser.tokensToExp(tokens, (scope || vm))
-	            var desc = isClass
-	              ? dirParser.parse(exp)[0]
-	              : dirParser.parse(name + ':' + exp)[0]
-	            if (isClass) {
-	              desc._rawClass = value
-	            }
-	            vm._bindDir(dirName, el, desc, def, undefined, scope)
-	          }
+	      _link: linker
 	    }
 	  }
 	}
@@ -3900,8 +3944,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this.id = ++uid // uid for batching
 	  this.active = true
 	  this.dirty = this.lazy // for lazy watchers
-	  this.deps = []
-	  this.newDeps = []
+	  this.deps = Object.create(null)
+	  this.newDeps = null
 	  this.prevError = null // for async error stacks
 	  // parse expression for getter/setter
 	  if (isFn) {
@@ -3927,15 +3971,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	Watcher.prototype.addDep = function (dep) {
-	  var newDeps = this.newDeps
-	  var old = this.deps
-	  if (_.indexOf(newDeps, dep) < 0) {
-	    newDeps.push(dep)
-	    var i = _.indexOf(old, dep)
-	    if (i < 0) {
+	  var id = dep.id
+	  if (!this.newDeps[id]) {
+	    this.newDeps[id] = dep
+	    if (!this.deps[id]) {
+	      this.deps[id] = dep
 	      dep.addSub(this)
-	    } else {
-	      old[i] = null
 	    }
 	  }
 	}
@@ -4032,6 +4073,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	Watcher.prototype.beforeGet = function () {
 	  Dep.target = this
+	  this.newDeps = Object.create(null)
 	}
 
 	/**
@@ -4040,17 +4082,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	Watcher.prototype.afterGet = function () {
 	  Dep.target = null
-	  var oldDeps = this.deps
-	  var i = oldDeps.length
+	  var ids = Object.keys(this.deps)
+	  var i = ids.length
 	  while (i--) {
-	    var dep = oldDeps[i]
-	    if (dep) {
-	      dep.removeSub(this)
+	    var id = ids[i]
+	    if (!this.newDeps[id]) {
+	      this.deps[id].removeSub(this)
 	    }
 	  }
 	  this.deps = this.newDeps
-	  this.newDeps = oldDeps
-	  oldDeps.length = 0 // reuse old dep array
 	}
 
 	/**
@@ -4145,9 +4185,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	Watcher.prototype.depend = function () {
-	  var i = this.deps.length
+	  var depIds = Object.keys(this.deps)
+	  var i = depIds.length
 	  while (i--) {
-	    this.deps[i].depend()
+	    this.deps[depIds[i]].depend()
 	  }
 	}
 
@@ -4163,9 +4204,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (!this.vm._isBeingDestroyed) {
 	      this.vm._watchers.$remove(this)
 	    }
-	    var i = this.deps.length
+	    var depIds = Object.keys(this.deps)
+	    var i = depIds.length
 	    while (i--) {
-	      this.deps[i].removeSub(this)
+	      this.deps[depIds[i]].removeSub(this)
 	    }
 	    this.active = false
 	    this.vm = this.cb = this.value = null
@@ -5204,22 +5246,28 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	// Test for the presence of the Safari template cloning bug
 	// https://bugs.webkit.org/show_bug.cgi?id=137755
-	var hasBrokenTemplate = _.inBrowser
-	  ? (function () {
-	      var a = document.createElement('div')
-	      a.innerHTML = '<template>1</template>'
-	      return !a.cloneNode(true).firstChild.innerHTML
-	    })()
-	  : false
+	var hasBrokenTemplate = (function () {
+	  /* istanbul ignore else */
+	  if (_.inBrowser) {
+	    var a = document.createElement('div')
+	    a.innerHTML = '<template>1</template>'
+	    return !a.cloneNode(true).firstChild.innerHTML
+	  } else {
+	    return false
+	  }
+	})()
 
 	// Test for IE10/11 textarea placeholder clone bug
-	var hasTextareaCloneBug = _.inBrowser
-	  ? (function () {
-	      var t = document.createElement('textarea')
-	      t.placeholder = 't'
-	      return t.cloneNode(true).value === 't'
-	    })()
-	  : false
+	var hasTextareaCloneBug = (function () {
+	  /* istanbul ignore else */
+	  if (_.inBrowser) {
+	    var t = document.createElement('textarea')
+	    t.placeholder = 't'
+	    return t.cloneNode(true).value === 't'
+	  } else {
+	    return false
+	  }
+	})()
 
 	/**
 	 * 1. Deal with Safari cloning nested <template> bug by
@@ -6328,7 +6376,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 34 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
+
+	var _ = __webpack_require__(1)
 
 	// xlink
 	var xlinkNS = 'http://www.w3.org/1999/xlink'
@@ -6356,6 +6406,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  update: function (value) {
 	    if (this.arg) {
+
+	      if (true) {
+	        var attr = this.arg
+	        if (!(
+	          attr === 'class' ||
+	          /^data-/.test(attr) ||
+	          (attr === 'for' && 'htmlFor' in this.el) ||
+	          _.camelize(attr) in this.el
+	        )) {
+	          _.deprecation.ATTR_INVALID(attr)
+	        }
+	      }
+
 	      this.setAttr(this.arg, value)
 	    } else if (typeof value === 'object') {
 	      // TODO no longer need to support object in 1.0.0
@@ -6412,13 +6475,31 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
+	var _ = __webpack_require__(1)
 	var transition = __webpack_require__(30)
 
-	module.exports = function (value) {
-	  var el = this.el
-	  transition.apply(el, value ? 1 : -1, function () {
-	    el.style.display = value ? '' : 'none'
-	  }, this.vm)
+	module.exports = {
+
+	  bind: function () {
+	    // check else block
+	    var next = this.el.nextElementSibling
+	    if (next && _.attr(next, 'else') !== null) {
+	      this.elseEl = next
+	    }
+	  },
+
+	  update: function (value) {
+	    var el = this.el
+	    transition.apply(el, value ? 1 : -1, function () {
+	      el.style.display = value ? '' : 'none'
+	    }, this.vm)
+	    var elseEl = this.elseEl
+	    if (elseEl) {
+	      transition.apply(elseEl, value ? -1 : 1, function () {
+	        elseEl.style.display = value ? 'none' : ''
+	      }, this.vm)
+	    }
+	  }
 	}
 
 
@@ -7448,11 +7529,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return prev.concat(cur)
 	  }, [])
 	  return arr.filter(function (item) {
-	    return keys.length
-	      ? keys.some(function (key) {
-	          return contains(Path.get(item, key), search)
-	        })
-	      : contains(item, search)
+	    if (keys.length) {
+	      return keys.some(function (key) {
+	        return contains(Path.get(item, key), search)
+	      })
+	    } else {
+	      return contains(item, search)
+	    }
 	  })
 	}
 
@@ -7495,14 +7578,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	function contains (val, search) {
+	  var i
 	  if (_.isPlainObject(val)) {
-	    for (var key in val) {
-	      if (contains(val[key], search)) {
+	    var keys = Object.keys(val)
+	    i = keys.length
+	    while (i--) {
+	      if (contains(val[keys[i]], search)) {
 	        return true
 	      }
 	    }
 	  } else if (_.isArray(val)) {
-	    var i = val.length
+	    i = val.length
 	    while (i--) {
 	      if (contains(val[i], search)) {
 	        return true
@@ -10906,6 +10992,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Watcher = __webpack_require__(20)
 	var textParser = __webpack_require__(7)
 	var expParser = __webpack_require__(21)
+	function noop () {}
 
 	/**
 	 * A directive links a DOM element with a piece of data,
@@ -11006,13 +11093,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	  ) {
 	    // wrapped updater for context
 	    var dir = this
-	    var update = this._update = this.update
-	      ? function (val, oldVal) {
-	          if (!dir._locked) {
-	            dir.update(val, oldVal)
-	          }
+	    if (this.update) {
+	      this._update = function (val, oldVal) {
+	        if (!dir._locked) {
+	          dir.update(val, oldVal)
 	        }
-	      : function () {} // noop if no update is provided
+	      }
+	    } else {
+	      this._update = noop
+	    }
 	    // pre-process hook called before the value is piped
 	    // through the filters. used in v-repeat.
 	    var preProcess = this._preProcess
@@ -11021,7 +11110,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var watcher = this._watcher = new Watcher(
 	      this.vm,
 	      this._watcherExp,
-	      update, // callback
+	      this._update, // callback
 	      {
 	        filters: this.filters,
 	        twoWay: this.twoWay,
@@ -11395,7 +11484,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Watch an expression, trigger callback when its
 	 * value changes.
 	 *
-	 * @param {String} exp
+	 * @param {String|Function} expOrFn
 	 * @param {Function} cb
 	 * @param {Object} [options]
 	 *                 - {Boolean} deep
@@ -11404,11 +11493,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @return {Function} - unwatchFn
 	 */
 
-	exports.$watch = function (exp, cb, options) {
+	exports.$watch = function (expOrFn, cb, options) {
 	  var vm = this
-	  var watcher = new Watcher(vm, exp, cb, {
+	  var parsed
+	  if (typeof expOrFn === 'string') {
+	    parsed = dirParser.parse(expOrFn)[0]
+	    expOrFn = parsed.expression
+	  }
+	  var watcher = new Watcher(vm, expOrFn, cb, {
 	    deep: options && options.deep,
-	    user: !options || options.user !== false
+	    user: !options || options.user !== false,
+	    filters: parsed && parsed.filters
 	  })
 	  if (options && options.immediate) {
 	    cb.call(vm, watcher.value)
@@ -11454,13 +11549,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var tokens = textParser.parse(text)
 	  var vm = this
 	  if (tokens) {
-	    return tokens.length === 1
-	      ? vm.$eval(tokens[0].value)
-	      : tokens.map(function (token) {
-	          return token.tag
-	            ? vm.$eval(token.value)
-	            : token.value
-	        }).join('')
+	    if (tokens.length === 1) {
+	      return vm.$eval(tokens[0].value) + ''
+	    } else {
+	      return tokens.map(function (token) {
+	        return token.tag
+	          ? vm.$eval(token.value)
+	          : token.value
+	      }).join('')
+	    }
 	  } else {
 	    return text
 	  }
