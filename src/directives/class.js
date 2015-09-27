@@ -53,7 +53,9 @@ module.exports = {
   handleArray: function (value) {
     this.cleanup(value)
     for (var i = 0, l = value.length; i < l; i++) {
-      addClass(this.el, value[i])
+      if (value[i]) {
+        addClass(this.el, value[i])
+      }
     }
     this.prevKeys = value
   },
