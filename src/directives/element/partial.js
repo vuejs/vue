@@ -1,6 +1,7 @@
 var _ = require('../../util')
 var FragmentFactory = require('../../fragment/factory')
 var vIf = require('../public/if')
+var Watcher = require('../../watcher')
 
 module.exports = {
 
@@ -24,14 +25,16 @@ module.exports = {
 
   setupDynamic: function (exp) {
     var self = this
-    this.unwatch = this.vm.$watch(exp, function (value) {
+    var onNameChange = function (value) {
       vIf.remove.call(self)
-      self.insert(value)
-    }, {
-      immediate: true,
-      user: false,
+      if (value) {
+        self.insert(value)
+      }
+    }
+    this.nameWatcher = new Watcher(this.vm, exp, onNameChange, {
       scope: this._scope
     })
+    onNameChange(this.nameWatcher.value)
   },
 
   insert: function (id) {
@@ -46,7 +49,11 @@ module.exports = {
   },
 
   unbind: function () {
-    if (this.frag) this.frag.destroy()
-    if (this.unwatch) this.unwatch()
+    if (this.frag) {
+      this.frag.destroy()
+    }
+    if (this.nameWatcher) {
+      this.nameWatcher.teardown()
+    }
   }
 }

@@ -48,6 +48,21 @@ describe('Partial', function () {
     })
   })
 
+  it('dynamic inside v-for', function () {
+    new Vue({
+      el: el,
+      template: '<div v-for="id in list"><partial v-bind:name="\'test-\' + id"></partial></div>',
+      data: {
+        list: ['a', 'b']
+      },
+      partials: {
+        'test-a': 'a {{id}}',
+        'test-b': 'b {{id}}'
+      }
+    })
+    expect(el.textContent).toBe('a ab b')
+  })
+
   it('caching', function () {
     var calls = 0
     var compile = compiler.compile
