@@ -37,7 +37,7 @@ exports.checkComponent = function (el, options, hasAttrs) {
 
 /**
  * Check possible component denoting attributes, e.g.
- * is, bind-is and v-component.
+ * is, v-bind:is and v-component.
  *
  * @param {Elemnent} el
  * @return {String|null}
