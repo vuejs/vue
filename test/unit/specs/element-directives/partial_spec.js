@@ -51,7 +51,7 @@ describe('Partial', function () {
   it('dynamic (new syntax)', function (done) {
     var vm = new Vue({
       el: el,
-      template: '<partial bind-name="\'test-\' + id"></partial>',
+      template: '<partial v-bind:name="\'test-\' + id"></partial>',
       data: {
         id: 'a'
       },
@@ -66,6 +66,21 @@ describe('Partial', function () {
       expect(el.textContent).toBe('b b')
       done()
     })
+  })
+
+  it('dynamic inside v-for', function () {
+    new Vue({
+      el: el,
+      template: '<div v-for="id in list"><partial v-bind:name="\'test-\' + id"></partial></div>',
+      data: {
+        list: ['a', 'b']
+      },
+      partials: {
+        'test-a': 'a {{id}}',
+        'test-b': 'b {{id}}'
+      }
+    })
+    expect(el.textContent).toBe('a ab b')
   })
 
   it('caching', function () {

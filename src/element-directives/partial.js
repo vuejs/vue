@@ -2,6 +2,7 @@ var _ = require('../util')
 var textParser = require('../parsers/text')
 var FragmentFactory = require('../fragment/factory')
 var vIf = require('../directives/if')
+var Watcher = require('../watcher')
 
 module.exports = {
 
@@ -25,7 +26,7 @@ module.exports = {
         this.insert(id)
       }
     } else {
-      id = el.getAttribute('bind-name') || el.getAttribute(':name')
+      id = _.getBindAttr(el, 'name')
       if (id) {
         this.setupDynamic(id)
       }
@@ -34,14 +35,16 @@ module.exports = {
 
   setupDynamic: function (exp) {
     var self = this
-    this.unwatch = this.vm.$watch(exp, function (value) {
+    var onNameChange = function (value) {
       vIf.remove.call(self)
-      self.insert(value)
-    }, {
-      immediate: true,
-      user: false,
+      if (value) {
+        self.insert(value)
+      }
+    }
+    this.nameWatcher = new Watcher(this.vm, exp, onNameChange, {
       scope: this._scope
     })
+    onNameChange(this.nameWatcher.value)
   },
 
   insert: function (id) {
@@ -56,7 +59,11 @@ module.exports = {
   },
 
   unbind: function () {
-    if (this.frag) this.frag.destroy()
-    if (this.unwatch) this.unwatch()
+    if (this.frag) {
+      this.frag.destroy()
+    }
+    if (this.nameWatcher) {
+      this.nameWatcher.teardown()
+    }
   }
 }

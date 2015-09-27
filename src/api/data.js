@@ -78,7 +78,6 @@ exports.$delete = function (key) {
  * @param {Object} [options]
  *                 - {Boolean} deep
  *                 - {Boolean} immediate
- *                 - {Boolean} user
  * @return {Function} - unwatchFn
  */
 
@@ -91,7 +90,6 @@ exports.$watch = function (expOrFn, cb, options) {
   }
   var watcher = new Watcher(vm, expOrFn, cb, {
     deep: options && options.deep,
-    user: !options || options.user !== false,
     filters: parsed && parsed.filters
   })
   if (options && options.immediate) {
