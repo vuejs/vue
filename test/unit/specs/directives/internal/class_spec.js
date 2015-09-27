@@ -47,6 +47,8 @@ if (_.inBrowser) {
       expect(el.className).toBe('a c d')
       dir.update()
       expect(el.className).toBe('a')
+      dir.update(['e', ''])
+      expect(el.className).toBe('a e')
     })
 
   })
