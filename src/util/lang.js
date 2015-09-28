@@ -1,5 +1,3 @@
-var Dep = require('../observer/dep')
-
 /**
  * Check if a string starts with $ or _
  *
@@ -222,33 +220,6 @@ exports.define = function (obj, key, val, enumerable) {
     enumerable: !!enumerable,
     writable: true,
     configurable: true
-  })
-}
-
-/**
- * Define a reactive property.
- *
- * @param {Object} obj
- * @param {String} key
- * @param {*} val
- */
-
-exports.defineReactive = function (obj, key, val) {
-  var dep = new Dep()
-  Object.defineProperty(obj, key, {
-    enumerable: true,
-    get: function metaGetter () {
-      if (Dep.target) {
-        dep.depend()
-      }
-      return val
-    },
-    set: function metaSetter (newVal) {
-      if (val !== newVal) {
-        val = newVal
-        dep.notify()
-      }
-    }
   })
 }
 
