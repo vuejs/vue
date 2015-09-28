@@ -44,9 +44,11 @@ function Observer (value) {
  */
 
 Observer.create = function (value, vm) {
+  if (!value || typeof value !== 'object') {
+    return
+  }
   var ob
   if (
-    value &&
     value.hasOwnProperty('__ob__') &&
     value.__ob__ instanceof Observer
   ) {
@@ -83,18 +85,6 @@ Observer.prototype.walk = function (obj) {
 }
 
 /**
- * Try to carete an observer for a child value,
- * and if value is array, link dep to the array.
- *
- * @param {*} val
- * @return {Dep|undefined}
- */
-
-Observer.prototype.observe = function (val) {
-  return Observer.create(val)
-}
-
-/**
  * Observe a list of Array items.
  *
  * @param {Array} items
@@ -103,7 +93,7 @@ Observer.prototype.observe = function (val) {
 Observer.prototype.observeArray = function (items) {
   var i = items.length
   while (i--) {
-    var ob = this.observe(items[i])
+    var ob = Observer.create(items[i])
     if (ob) {
       (ob.parents || (ob.parents = [])).push(this)
     }
@@ -151,28 +141,7 @@ Observer.prototype.notify = function () {
  */
 
 Observer.prototype.convert = function (key, val) {
-  var ob = this
-  var childOb = ob.observe(val)
-  var dep = new Dep()
-  Object.defineProperty(ob.value, key, {
-    enumerable: true,
-    configurable: true,
-    get: function () {
-      if (Dep.target) {
-        dep.depend()
-        if (childOb) {
-          childOb.dep.depend()
-        }
-      }
-      return val
-    },
-    set: function (newVal) {
-      if (newVal === val) return
-      val = newVal
-      childOb = ob.observe(newVal)
-      dep.notify()
-    }
-  })
+  defineReactive(this.value, key, val)
 }
 
 /**
@@ -229,5 +198,40 @@ function copyAugment (target, src, keys) {
     _.define(target, key, src[key])
   }
 }
+
+/**
+ * Define a reactive property on an Object.
+ *
+ * @param {Object} obj
+ * @param {String} key
+ * @param {*} val
+ */
+
+function defineReactive (obj, key, val) {
+  var dep = new Dep()
+  var childOb = Observer.create(val)
+  Object.defineProperty(obj, key, {
+    enumerable: true,
+    configurable: true,
+    get: function metaGetter () {
+      if (Dep.target) {
+        dep.depend()
+        if (childOb) {
+          childOb.dep.depend()
+        }
+      }
+      return val
+    },
+    set: function metaSetter (newVal) {
+      if (newVal === val) return
+      val = newVal
+      childOb = Observer.create(newVal)
+      dep.notify()
+    }
+  })
+}
+
+// Attach to the util object so it can be used elsewhere.
+_.defineReactive = defineReactive
 
 module.exports = Observer
