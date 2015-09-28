@@ -36,7 +36,7 @@ var add = exports.add = function (obj, key, val) {
     return
   }
   var ob = obj.__ob__
-  if (!ob || _.isReserved(key)) {
+  if (!ob) {
     obj[key] = val
     return
   }
@@ -85,7 +85,7 @@ _.define(
     if (!this.hasOwnProperty(key)) return
     delete this[key]
     var ob = this.__ob__
-    if (!ob || _.isReserved(key)) {
+    if (!ob) {
       return
     }
     ob.notify()
