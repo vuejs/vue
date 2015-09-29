@@ -20,6 +20,13 @@ var modelProps = {
   'false-value': '_falseValue'
 }
 
+// regex to test for globally allowed attributes:
+// - class
+// - data-*
+// - aria-*
+// - role
+var globalAllowedAttrRE = /^class$|^role$|^data-|^aria-/
+
 module.exports = {
 
   priority: 850,
@@ -30,17 +37,13 @@ module.exports = {
     if (this.descriptor.interp) {
       // only allow binding on native attributes
       if (!(
-        // class is allowed globally
-        attr === 'class' ||
-        // data attributes are allowed globally
-        /^data-/.test(attr) ||
-        // aria attributes are allowed globally
-        /^aria-/.test(attr) ||
-        // role available
-        (attr === 'role') ||
-        // for available
+        // globally allowed attributes
+        globalAllowedAttrRE.test(attr) ||
+        // check if "for" is available on current element.
+        // the corresponding property is a special case.
         (attr === 'for' && 'htmlFor' in this.el) ||
-        // camelized prop available
+        // other attributes: check if a camelized property
+        // is available on the element
         _.camelize(attr) in this.el
       )) {
         process.env.NODE_ENV !== 'production' && _.warn(
