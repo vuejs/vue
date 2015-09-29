@@ -34,6 +34,10 @@ module.exports = {
         attr === 'class' ||
         // data attributes are allowed globally
         /^data-/.test(attr) ||
+        // aria attributes are allowed globally
+        /^aria-/.test(attr) ||
+        // role available
+        (attr === 'role') ||
         // for available
         (attr === 'for' && 'htmlFor' in this.el) ||
         // camelized prop available
