@@ -17,6 +17,7 @@ module.exports = {
     var prop = this._descriptor
     var childKey = prop.path
     var parentKey = prop.parentPath
+    var twoWay = prop.mode === bindingModes.TWO_WAY
 
     var parentWatcher = this.parentWatcher = new Watcher(
       parent,
@@ -26,6 +27,7 @@ module.exports = {
           child[childKey] = val
         }
       }, {
+        twoWay: twoWay,
         filters: prop.filters,
         // important: props need to be observed on the
         // repeat scope if present
@@ -42,7 +44,7 @@ module.exports = {
     }
 
     // setup two-way binding
-    if (prop.mode === bindingModes.TWO_WAY) {
+    if (twoWay) {
       // important: defer the child watcher creation until
       // the created hook (after data observation)
       var self = this
