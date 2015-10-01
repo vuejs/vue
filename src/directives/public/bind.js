@@ -20,12 +20,11 @@ var modelProps = {
   'false-value': '_falseValue'
 }
 
-// regex to test for globally allowed attributes:
-// - class
-// - data-*
-// - aria-*
-// - role
-var globalAllowedAttrRE = /^class$|^role$|^data-|^aria-/
+// regex to test for globally allowed attributes.
+// we only need to include ones that:
+// - do not have a corresponding property, e.g. role, dropzone;
+// - cannot be camelized into the corresponding property, .e.g class, accesskey, contenteditable;
+var globalAllowedAttrRE = /^(class|role|accesskey|contenteditable|contextmenu|dropzone|hidden|tabindex)$|^data-|^aria-/
 
 module.exports = {
 
