@@ -221,6 +221,50 @@ if (_.inBrowser) {
       })
     })
 
+    it('checkbox + array model', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          list: [1],
+          a: {}
+        },
+        template:
+          '<input type="checkbox" v-model="list" number value="1">' +
+          '<input type="checkbox" v-model="list" :value="a">'
+      })
+      expect(el.firstChild.checked).toBe(true)
+      expect(el.lastChild.checked).toBe(false)
+      el.firstChild.click()
+      expect(vm.list.length).toBe(0)
+      el.lastChild.click()
+      expect(vm.list.length).toBe(1)
+      expect(vm.list[0]).toBe(vm.a)
+      el.firstChild.click()
+      expect(vm.list.length).toBe(2)
+      expect(vm.list[1]).toBe(1)
+      vm.list = [vm.a]
+      _.nextTick(function () {
+        expect(el.firstChild.checked).toBe(false)
+        expect(el.lastChild.checked).toBe(true)
+        done()
+      })
+    })
+
+    it('checkbox + array model default value', function () {
+      var vm = new Vue({
+        el: el,
+        data: {
+          list: [],
+          a: {}
+        },
+        template:
+          '<input type="checkbox" v-model="list" number value="1">' +
+          '<input type="checkbox" checked v-model="list" :value="a">'
+      })
+      expect(vm.list.length).toBe(1)
+      expect(vm.list[0]).toBe(vm.a)
+    })
+
     it('select', function (done) {
       var vm = new Vue({
         el: el,
