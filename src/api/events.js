@@ -134,6 +134,7 @@ exports.$broadcast = function (event) {
  */
 
 exports.$dispatch = function () {
+  this.$emit.apply(this, arguments)
   var parent = this.$parent
   while (parent) {
     parent.$emit.apply(parent, arguments)

@@ -134,10 +134,11 @@ describe('Events API', function () {
   it('$dispatch', function () {
     var child = vm.$addChild()
     var child2 = child.$addChild()
+    child2.$on('test', spy)
     child.$on('test', spy)
     vm.$on('test', spy)
     child2.$dispatch('test')
-    expect(spy.calls.count()).toBe(1) // should not propagate by default
+    expect(spy.calls.count()).toBe(2) // should trigger on self, but not propagate to root
   })
 
   it('$dispatch with propagation', function () {
