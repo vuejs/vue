@@ -715,5 +715,33 @@ if (_.inBrowser) {
       }, 200)
     })
 
+    it('update on bind value change', function (done) {
+      var vm = new Vue({
+        el: el,
+        template:
+          '<input type="radio" v-model="a" checked :value="b">' +
+          '<input type="radio" v-model="a" :value="c">',
+        data: {
+          a: 0,
+          b: 1,
+          c: 2
+        }
+      })
+      // should sync inline-checked value to a
+      expect(vm.a).toBe(1)
+      vm.b = 3
+      _.nextTick(function () {
+        expect(vm.a).toBe(3)
+        expect(el.firstChild.checked).toBe(true)
+        expect(el.lastChild.checked).toBe(false)
+        vm.a = 2
+        _.nextTick(function () {
+          expect(el.firstChild.checked).toBe(false)
+          expect(el.lastChild.checked).toBe(true)
+          done()
+        })
+      })
+    })
+
   })
 }
