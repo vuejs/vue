@@ -27,7 +27,7 @@ module.exports = {
     this.multiple = el.hasAttribute('multiple')
 
     // attach listener
-    this.on('change', function () {
+    this.listener = function () {
       var value = getValue(el, self.multiple)
       value = self.number
         ? _.isArray(value)
@@ -35,7 +35,8 @@ module.exports = {
           : _.toNumber(value)
         : value
       self.set(value)
-    })
+    }
+    this.on('change', this.listener)
 
     // check initial value (inline selected attribute)
     checkInitialValue.call(this)

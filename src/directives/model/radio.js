@@ -27,9 +27,10 @@ module.exports = {
       return val
     }
 
-    this.on('change', function () {
+    this.listener = function () {
       self.set(self.getValue())
-    })
+    }
+    this.on('change', this.listener)
 
     if (el.checked) {
       this._initValue = this.getValue()
