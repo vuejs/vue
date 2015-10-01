@@ -14,21 +14,26 @@ module.exports = {
     }
 
     this.number = this.param('number') != null
-    this.multiple = el.hasAttribute('multiple')
+    var multiple = this.multiple = el.hasAttribute('multiple')
 
     // attach listener
-    this.on('change', function () {
-      var value = getValue(el, self.multiple)
+    this.listener = function () {
+      var value = getValue(el, multiple)
       value = self.number
         ? _.isArray(value)
           ? value.map(_.toNumber)
           : _.toNumber(value)
         : value
       self.set(value)
-    })
+    }
+    this.on('change', this.listener)
 
-    // check initial value (inline selected attribute)
-    checkInitialValue.call(this)
+    // if has initial value, set afterBind
+    var initValue = getValue(el, multiple, true)
+    if ((multiple && initValue.length) ||
+        (!multiple && initValue !== null)) {
+      this.afterBind = this.listener
+    }
 
     // All major browsers except Firefox resets
     // selectedIndex with value -1 to 0 when the element
@@ -64,43 +69,23 @@ module.exports = {
 }
 
 /**
- * Check the initial value for selected options.
- */
-
-function checkInitialValue () {
-  var initValue
-  var options = this.el.options
-  for (var i = 0, l = options.length; i < l; i++) {
-    if (options[i].hasAttribute('selected')) {
-      if (this.multiple) {
-        (initValue || (initValue = []))
-          .push(options[i].value)
-      } else {
-        initValue = options[i].value
-      }
-    }
-  }
-  if (typeof initValue !== 'undefined') {
-    this._initValue = this.number
-      ? _.toNumber(initValue)
-      : initValue
-  }
-}
-
-/**
  * Get select value
  *
  * @param {SelectElement} el
  * @param {Boolean} multi
+ * @param {Boolean} init
  * @return {Array|*}
  */
 
-function getValue (el, multi) {
+function getValue (el, multi, init) {
   var res = multi ? [] : null
-  var op, val
+  var op, val, selected
   for (var i = 0, l = el.options.length; i < l; i++) {
     op = el.options[i]
-    if (op.selected) {
+    selected = init
+      ? op.hasAttribute('selected')
+      : op.selected
+    if (selected) {
       val = op.hasOwnProperty('_value')
         ? op._value
         : op.value

@@ -116,8 +116,11 @@ Directive.prototype._bind = function () {
         scope: this._scope
       }
     )
-    if (this._initValue != null) {
-      watcher.set(this._initValue)
+    // v-model with inital inline value need to sync back to
+    // model instead of update to DOM on init. They would
+    // set the afterBind hook to indicate that.
+    if (this.afterBind) {
+      this.afterBind()
     } else if (this.update) {
       this.update(watcher.value)
     }

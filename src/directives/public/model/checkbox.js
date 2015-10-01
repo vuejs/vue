@@ -6,15 +6,7 @@ module.exports = {
     var self = this
     var el = this.el
 
-    this._matchValue = function (value) {
-      if (el.hasOwnProperty('_trueValue')) {
-        return _.looseEqual(value, el._trueValue)
-      } else {
-        return !!value
-      }
-    }
-
-    function getValue () {
+    function getBooleanValue () {
       var val = el.checked
       if (val && el.hasOwnProperty('_trueValue')) {
         return el._trueValue
@@ -25,16 +17,44 @@ module.exports = {
       return val
     }
 
-    this.on('change', function () {
-      self.set(getValue())
-    })
+    this.listener = function () {
+      var model = self._watcher.value
+      if (_.isArray(model)) {
+        var val = getValue(el)
+        if (el.checked) {
+          if (_.indexOf(model, val) < 0) {
+            model.push(val)
+          }
+        } else {
+          model.$remove(val)
+        }
+      } else {
+        self.set(getBooleanValue())
+      }
+    }
 
+    this.on('change', this.listener)
     if (el.checked) {
-      this._initValue = getValue()
+      this.afterBind = this.listener
     }
   },
 
   update: function (value) {
-    this.el.checked = this._matchValue(value)
+    var el = this.el
+    if (_.isArray(value)) {
+      el.checked = _.indexOf(value, getValue(el)) > -1
+    } else {
+      if (el.hasOwnProperty('_trueValue')) {
+        el.checked = _.looseEqual(value, el._trueValue)
+      } else {
+        el.checked = !!value
+      }
+    }
   }
+}
+
+function getValue (el) {
+  return el.hasOwnProperty('_value')
+    ? el._value
+    : el.value
 }
