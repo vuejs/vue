@@ -103,6 +103,11 @@ module.exports = {
     var modelProp = modelProps[attr]
     if (modelProp) {
       this.el[modelProp] = value
+      // update v-model if present
+      var model = this.el.__v_model
+      if (model) {
+        model.listener()
+      }
     }
   }
 }
