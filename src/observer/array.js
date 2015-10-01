@@ -83,12 +83,10 @@ _.define(
 _.define(
   arrayProto,
   '$remove',
-  function $remove (index) {
+  function $remove (item) {
     /* istanbul ignore if */
     if (!this.length) return
-    if (typeof index !== 'number') {
-      index = _.indexOf(this, index)
-    }
+    var index = _.indexOf(this, item)
     if (index > -1) {
       return this.splice(index, 1)
     }
