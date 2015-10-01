@@ -7,13 +7,22 @@ module.exports = {
     var el = this.el
     var trueExp = this.param('true-exp')
     var falseExp = this.param('false-exp')
+    var number = this.param('number') != null
     var scope = this._scope || this.vm
 
     if (process.env.NODE_ENV !== 'production' && (trueExp || falseExp)) {
       _.deprecation.MODEL_EXP(this.expression)
     }
 
-    this._matchValue = function (value) {
+    this.getValue = function () {
+      return el.hasOwnProperty('_value')
+        ? el._value
+        : number
+          ? _.toNumber(el.value)
+          : el.value
+    }
+
+    this.matchValue = function (value) {
       if (el.hasOwnProperty('_trueValue')) {
         return _.looseEqual(value, el._trueValue)
       } else if (trueExp !== null) {
@@ -43,7 +52,7 @@ module.exports = {
     this.listener = function () {
       var model = self._watcher.value
       if (_.isArray(model)) {
-        var val = getValue(el)
+        var val = self.getValue()
         if (el.checked) {
           if (_.indexOf(model, val) < 0) {
             model.push(val)
@@ -65,15 +74,9 @@ module.exports = {
   update: function (value) {
     var el = this.el
     if (_.isArray(value)) {
-      el.checked = _.indexOf(value, getValue(el)) > -1
+      el.checked = _.indexOf(value, this.getValue()) > -1
     } else {
-      el.checked = this._matchValue(value)
+      el.checked = this.matchValue(value)
     }
   }
-}
-
-function getValue (el) {
-  return el.hasOwnProperty('_value')
-    ? el._value
-    : el.value
 }
