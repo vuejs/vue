@@ -130,7 +130,9 @@ Directive.prototype._bind = function () {
         scope: this._scope
       }
     )
-    if (this._initValue != null) {
+    if (this.afterBind) {
+      this.afterBind()
+    } else if (this._initValue != null) {
       watcher.set(this._initValue)
     } else if (this.update) {
       this.update(watcher.value)
