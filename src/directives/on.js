@@ -1,20 +1,30 @@
 var _ = require('../util')
 var keyFilter = require('../filters').key
 
+// modifiers
+var stopRE = /\.stop\b/
+var preventRE = /\.prevent\b/
+
+function stopFilter (handler) {
+  return function (e) {
+    e.stopPropagation()
+    return handler.call(this, e)
+  }
+}
+
+function preventFilter (handler) {
+  return function (e) {
+    e.preventDefault()
+    return handler.call(this, e)
+  }
+}
+
 module.exports = {
 
   acceptStatement: true,
   priority: 700,
 
   bind: function () {
-    // 1.0.0 key filter
-    var rawArg = this.arg
-    var keyIndex = rawArg.indexOf('.')
-    if (keyIndex > -1) {
-      this.arg = rawArg.slice(0, keyIndex)
-      this.key = rawArg.slice(keyIndex + 1)
-    }
-
     // warn old usage
     if (process.env.NODE_ENV !== 'production') {
       if (this.filters) {
@@ -25,6 +35,29 @@ module.exports = {
           _.deprecation.KEY_FILTER()
         }
       }
+    }
+
+    var event = this.arg
+
+    // stop modifier
+    if (stopRE.test(event)) {
+      this.stop = true
+      event = event.replace(stopRE, '')
+    }
+
+    // prevent modifier
+    if (preventRE.test(event)) {
+      this.prevent = true
+      event = event.replace(preventRE, '')
+    }
+
+    // key modifier
+    var keyIndex = event.indexOf('.')
+    if (keyIndex > -1) {
+      this.arg = event.slice(0, keyIndex)
+      this.key = event.slice(keyIndex + 1)
+    } else {
+      this.arg = event
     }
 
     // deal with iframes
@@ -50,6 +83,13 @@ module.exports = {
       return
     }
 
+    // apply modifiers
+    if (this.stop) {
+      handler = stopFilter(handler)
+    }
+    if (this.prevent) {
+      handler = preventFilter(handler)
+    }
     if (this.key) {
       handler = keyFilter(handler, this.key)
     }
