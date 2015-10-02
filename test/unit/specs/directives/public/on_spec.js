@@ -127,30 +127,33 @@ if (_.inBrowser) {
     })
 
     it('prevent modifier', function () {
-      var event
+      var prevented
       new Vue({
         el: el,
         template: '<a href="#" @click.prevent="onClick">',
         methods: {
           onClick: function (e) {
-            event = e
+            // store the prevented state now:
+            // IE will reset the `defaultPrevented` flag
+            // once the event handler call stack is done!
+            prevented = e.defaultPrevented
           }
         }
       })
       trigger(el.firstChild, 'click')
-      expect(event.defaultPrevented).toBe(true)
+      expect(prevented).toBe(true)
     })
 
     it('multiple modifiers working together', function () {
       var outer = jasmine.createSpy('outer')
-      var event
+      var prevented
       new Vue({
         el: el,
         template: '<div @keyup="outer"><input class="inner" @keyup.enter.stop.prevent="inner"></div></div>',
         methods: {
           outer: outer,
           inner: function (e) {
-            event = e
+            prevented = e.defaultPrevented
           }
         }
       })
@@ -158,8 +161,7 @@ if (_.inBrowser) {
         e.keyCode = 13
       })
       expect(outer).not.toHaveBeenCalled()
-      expect(event).toBeTruthy()
-      expect(event.defaultPrevented).toBe(true)
+      expect(prevented).toBe(true)
     })
 
     it('warn non-function values', function () {
