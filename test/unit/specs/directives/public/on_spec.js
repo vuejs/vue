@@ -68,7 +68,7 @@ if (_.inBrowser) {
       })
     })
 
-    it('with key filter', function (done) {
+    it('with key modifier', function (done) {
       new Vue({
         el: el,
         template: '<a v-on:keyup.enter="test">{{a}}</a>',
@@ -89,7 +89,7 @@ if (_.inBrowser) {
       })
     })
 
-    it('with key filter (keycode)', function (done) {
+    it('with key modifier (keycode)', function (done) {
       new Vue({
         el: el,
         template: '<a v-on:keyup.13="test">{{a}}</a>',
@@ -110,7 +110,59 @@ if (_.inBrowser) {
       })
     })
 
-    it('warn nv-on:function values', function () {
+    it('stop modifier', function () {
+      var outer = jasmine.createSpy('outer')
+      var inner = jasmine.createSpy('inner')
+      new Vue({
+        el: el,
+        template: '<div @click="outer"><div class="inner" @click.stop="inner"></div></div>',
+        methods: {
+          outer: outer,
+          inner: inner
+        }
+      })
+      trigger(el.querySelector('.inner'), 'click')
+      expect(inner).toHaveBeenCalled()
+      expect(outer).not.toHaveBeenCalled()
+    })
+
+    it('prevent modifier', function () {
+      var event
+      new Vue({
+        el: el,
+        template: '<a href="#" @click.prevent="onClick">',
+        methods: {
+          onClick: function (e) {
+            event = e
+          }
+        }
+      })
+      trigger(el.firstChild, 'click')
+      expect(event.defaultPrevented).toBe(true)
+    })
+
+    it('multiple modifiers working together', function () {
+      var outer = jasmine.createSpy('outer')
+      var event
+      new Vue({
+        el: el,
+        template: '<div @keyup="outer"><input class="inner" @keyup.enter.stop.prevent="inner"></div></div>',
+        methods: {
+          outer: outer,
+          inner: function (e) {
+            event = e
+          }
+        }
+      })
+      trigger(el.querySelector('.inner'), 'keyup', function (e) {
+        e.keyCode = 13
+      })
+      expect(outer).not.toHaveBeenCalled()
+      expect(event).toBeTruthy()
+      expect(event.defaultPrevented).toBe(true)
+    })
+
+    it('warn non-function values', function () {
       new Vue({
         el: el,
         data: { test: 123 },

@@ -1,5 +1,10 @@
 var _ = require('../../util')
 
+// modifiers
+var stopRE = /\.stop\b/
+var preventRE = /\.prevent\b/
+
+// keyCode aliases
 var keyCodes = {
   esc: 27,
   tab: 9,
@@ -11,15 +16,6 @@ var keyCodes = {
   right: 39,
   down: 40
 }
-
-/**
- * Wrap a handler function so that it only gets triggered on
- * specified keypress events.
- *
- * @param {Function} handler
- * @param {String|Number} key
- * @return {Function}
- */
 
 function keyFilter (handler, key) {
   var code = keyCodes[key]
@@ -33,6 +29,20 @@ function keyFilter (handler, key) {
   }
 }
 
+function stopFilter (handler) {
+  return function (e) {
+    e.stopPropagation()
+    return handler.call(this, e)
+  }
+}
+
+function preventFilter (handler) {
+  return function (e) {
+    e.preventDefault()
+    return handler.call(this, e)
+  }
+}
+
 module.exports = {
 
   acceptStatement: true,
@@ -40,11 +50,27 @@ module.exports = {
 
   bind: function () {
     // 1.0.0 key filter
-    var rawEvent = this.event = this.arg
-    var keyIndex = rawEvent.indexOf('.')
+    var event = this.arg
+
+    // stop modifier
+    if (stopRE.test(event)) {
+      this.stop = true
+      event = event.replace(stopRE, '')
+    }
+
+    // prevent modifier
+    if (preventRE.test(event)) {
+      this.prevent = true
+      event = event.replace(preventRE, '')
+    }
+
+    // key modifier
+    var keyIndex = event.indexOf('.')
     if (keyIndex > -1) {
-      this.event = rawEvent.slice(0, keyIndex)
-      this.key = rawEvent.slice(keyIndex + 1)
+      this.event = event.slice(0, keyIndex)
+      this.key = event.slice(keyIndex + 1)
+    } else {
+      this.event = event
     }
 
     // deal with iframes
@@ -63,13 +89,20 @@ module.exports = {
   update: function (handler) {
     if (typeof handler !== 'function') {
       process.env.NODE_ENV !== 'production' && _.warn(
-        'on-"' + this.event + '="' +
+        'v-on:' + this.event + '="' +
         this.expression + '" expects a function value, ' +
         'got ' + handler
       )
       return
     }
 
+    // apply modifiers
+    if (this.stop) {
+      handler = stopFilter(handler)
+    }
+    if (this.prevent) {
+      handler = preventFilter(handler)
+    }
     if (this.key) {
       handler = keyFilter(handler, this.key)
     }
