@@ -68,19 +68,7 @@ module.exports = {
 
   setAttr: function (attr, value) {
     if (inputProps[attr] && attr in this.el) {
-      if (!this.valueRemoved) {
-        this.el.removeAttribute(attr)
-        this.valueRemoved = true
-      }
       this.el[attr] = value
-    } else if (value != null && value !== false) {
-      if (xlinkRE.test(attr)) {
-        this.el.setAttributeNS(xlinkNS, attr, value)
-      } else {
-        this.el.setAttribute(attr, value)
-      }
-    } else {
-      this.el.removeAttribute(attr)
     }
     // set model props
     var modelProp = modelProps[attr]
@@ -91,6 +79,21 @@ module.exports = {
       if (model) {
         model.listener()
       }
+    }
+    // do not set value attribute for textarea
+    if (attr === 'value' && this.el.tagName === 'TEXTAREA') {
+      this.el.removeAttribute(attr)
+      return
+    }
+    // update attribute
+    if (value != null && value !== false) {
+      if (xlinkRE.test(attr)) {
+        this.el.setAttributeNS(xlinkNS, attr, value)
+      } else {
+        this.el.setAttribute(attr, value)
+      }
+    } else {
+      this.el.removeAttribute(attr)
     }
   }
 }
