@@ -496,6 +496,12 @@ if (_.inBrowser) {
               prop: {
                 type: String,
                 default: 'hello'
+              },
+              prop2: {
+                type: Object,
+                default: function () {
+                  return { vm: this }
+                }
               }
             },
             data: function () {
@@ -508,6 +514,10 @@ if (_.inBrowser) {
         }
       })
       expect(vm.$el.textContent).toBe('hello world')
+      // object/array default value initializers should be
+      // called with the correct `this` context
+      var child = vm.$children[0]
+      expect(child.prop2.vm).toBe(child)
       vm.$children[0].prop = 'bye'
       _.nextTick(function () {
         expect(vm.$el.textContent).toBe('bye world')
