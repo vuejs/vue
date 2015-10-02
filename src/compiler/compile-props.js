@@ -181,7 +181,7 @@ function makePropsLinkFn (props) {
       options = prop.options
       if (prop.raw === null) {
         // initialize absent prop
-        _.initProp(vm, prop, getDefault(options))
+        _.initProp(vm, prop, getDefault(vm, options))
       } else if (prop.dynamic) {
         // dynamic prop
         if (vm._context) {
@@ -224,11 +224,12 @@ function makePropsLinkFn (props) {
 /**
  * Get the default value of a prop.
  *
+ * @param {Vue} vm
  * @param {Object} options
  * @return {*}
  */
 
-function getDefault (options) {
+function getDefault (vm, options) {
   // no default, return undefined
   if (!options.hasOwnProperty('default')) {
     // absent boolean value defaults to false
@@ -247,6 +248,6 @@ function getDefault (options) {
   }
   // call factory function for non-Function types
   return typeof def === 'function' && options.type !== Function
-    ? def()
+    ? def.call(vm)
     : def
 }
