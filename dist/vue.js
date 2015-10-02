@@ -1,5 +1,5 @@
 /*!
- * Vue.js v1.0.0-beta.2
+ * Vue.js v1.0.0-beta.3
  * (c) 2015 Evan You
  * Released under the MIT License.
  */
@@ -84,7 +84,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Mixin global API
 	 */
 
-	extend(Vue, __webpack_require__(13))
+	extend(Vue, __webpack_require__(12))
 
 	/**
 	 * Vue and every constructor that extends Vue has an
@@ -97,7 +97,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	Vue.options = {
 	  replace: true,
-	  directives: __webpack_require__(16),
+	  directives: __webpack_require__(15),
 	  elementDirectives: __webpack_require__(51),
 	  filters: __webpack_require__(54),
 	  transitions: {},
@@ -159,18 +159,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	var extend = lang.extend
 
 	extend(exports, lang)
+	extend(exports, __webpack_require__(3))
 	extend(exports, __webpack_require__(4))
-	extend(exports, __webpack_require__(5))
+	extend(exports, __webpack_require__(9))
 	extend(exports, __webpack_require__(10))
 	extend(exports, __webpack_require__(11))
-	extend(exports, __webpack_require__(12))
 
 
 /***/ },
 /* 2 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Dep = __webpack_require__(3)
+/***/ function(module, exports) {
 
 	/**
 	 * Check if an expression is a literal value.
@@ -410,32 +408,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
-	 * Define a reactive property.
-	 *
-	 * @param {Object} obj
-	 * @param {String} key
-	 * @param {*} val
-	 */
-
-	exports.defineReactive = function (obj, key, val) {
-	  var dep = new Dep()
-	  Object.defineProperty(obj, key, {
-	    get: function metaGetter () {
-	      if (Dep.target) {
-	        dep.depend()
-	      }
-	      return val
-	    },
-	    set: function metaSetter (newVal) {
-	      if (val !== newVal) {
-	        val = newVal
-	        dep.notify()
-	      }
-	    }
-	  })
-	}
-
-	/**
 	 * Debounce a function so it only gets called after the
 	 * input stops arriving after the given wait period.
 	 *
@@ -524,73 +496,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 3 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var _ = __webpack_require__(1)
-	var uid = 0
-
-	/**
-	 * A dep is an observable that can have multiple
-	 * directives subscribing to it.
-	 *
-	 * @constructor
-	 */
-
-	function Dep () {
-	  this.id = uid++
-	  this.subs = []
-	}
-
-	// the current target watcher being evaluated.
-	// this is globally unique because there could be only one
-	// watcher being evaluated at any time.
-	Dep.target = null
-
-	/**
-	 * Add a directive subscriber.
-	 *
-	 * @param {Directive} sub
-	 */
-
-	Dep.prototype.addSub = function (sub) {
-	  this.subs.push(sub)
-	}
-
-	/**
-	 * Remove a directive subscriber.
-	 *
-	 * @param {Directive} sub
-	 */
-
-	Dep.prototype.removeSub = function (sub) {
-	  this.subs.$remove(sub)
-	}
-
-	/**
-	 * Add self as a dependency to the target watcher.
-	 */
-
-	Dep.prototype.depend = function () {
-	  Dep.target.addDep(this)
-	}
-
-	/**
-	 * Notify all subscribers of a new value.
-	 */
-
-	Dep.prototype.notify = function () {
-	  // stablize the subscriber list first
-	  var subs = _.toArray(this.subs)
-	  for (var i = 0, l = subs.length; i < l; i++) {
-	    subs[i].update()
-	  }
-	}
-
-	module.exports = Dep
-
-
-/***/ },
-/* 4 */
 /***/ function(module, exports) {
 
 	// can we use __proto__?
@@ -681,11 +586,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 5 */
+/* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var config = __webpack_require__(6)
+	var config = __webpack_require__(5)
 
 	/**
 	 * Query an element selector if it's not an element already.
@@ -998,7 +903,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 6 */
+/* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = {
@@ -1093,7 +998,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var delimiters = ['{{', '}}']
 	var unsafeDelimiters = ['{{{', '}}}']
-	var textParser = __webpack_require__(7)
+	var textParser = __webpack_require__(6)
 
 	Object.defineProperty(module.exports, 'delimiters', {
 	  get: function () {
@@ -1117,12 +1022,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 7 */
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Cache = __webpack_require__(8)
-	var config = __webpack_require__(6)
-	var dirParser = __webpack_require__(9)
+	var Cache = __webpack_require__(7)
+	var config = __webpack_require__(5)
+	var dirParser = __webpack_require__(8)
 	var regexEscapeRE = /[-.*+?^${}()|[\]\/\\]/g
 	var cache, tagRE, htmlRE
 
@@ -1283,7 +1188,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 8 */
+/* 7 */
 /***/ function(module, exports) {
 
 	/**
@@ -1401,11 +1306,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 9 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var Cache = __webpack_require__(8)
+	var Cache = __webpack_require__(7)
 	var cache = new Cache(1000)
 	var filterTokenRE = /[^\s'"]+|'[^']*'|"[^"]*"/g
 	var reservedArgRE = /^in$|^-?\d+/
@@ -1541,11 +1446,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 10 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var config = __webpack_require__(6)
+	var config = __webpack_require__(5)
 	var extend = _.extend
 
 	/**
@@ -1894,7 +1799,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 11 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
@@ -2043,7 +1948,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 12 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -2052,7 +1957,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	if (true) {
 
-	  var config = __webpack_require__(6)
+	  var config = __webpack_require__(5)
 	  var hasConsole = typeof console !== 'undefined'
 
 	  /**
@@ -2096,11 +2001,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 13 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var config = __webpack_require__(6)
+	var config = __webpack_require__(5)
 
 	/**
 	 * Expose useful internals
@@ -2114,14 +2019,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * The following are exposed for advanced usage / plugins
 	 */
 
-	exports.compiler = __webpack_require__(14)
-	exports.FragmentFactory = __webpack_require__(21)
-	exports.internalDirectives = __webpack_require__(36)
+	exports.compiler = __webpack_require__(13)
+	exports.FragmentFactory = __webpack_require__(20)
+	exports.internalDirectives = __webpack_require__(35)
 	exports.parsers = {
 	  path: __webpack_require__(43),
-	  text: __webpack_require__(7),
-	  template: __webpack_require__(19),
-	  directive: __webpack_require__(9),
+	  text: __webpack_require__(6),
+	  template: __webpack_require__(18),
+	  directive: __webpack_require__(8),
 	  expression: __webpack_require__(42)
 	}
 
@@ -2243,26 +2148,26 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 14 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
 
-	_.extend(exports, __webpack_require__(15))
+	_.extend(exports, __webpack_require__(14))
 	_.extend(exports, __webpack_require__(50))
 
 
 /***/ },
-/* 15 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var publicDirectives = __webpack_require__(16)
-	var internalDirectives = __webpack_require__(36)
+	var publicDirectives = __webpack_require__(15)
+	var internalDirectives = __webpack_require__(35)
 	var compileProps = __webpack_require__(49)
-	var textParser = __webpack_require__(7)
-	var dirParser = __webpack_require__(9)
-	var templateParser = __webpack_require__(19)
+	var textParser = __webpack_require__(6)
+	var dirParser = __webpack_require__(8)
+	var templateParser = __webpack_require__(18)
 	var resolveAsset = _.resolveAsset
 
 	// special binding prefixes
@@ -2942,37 +2847,37 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 16 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// text & html
-	exports.text = __webpack_require__(17)
-	exports.html = __webpack_require__(18)
+	exports.text = __webpack_require__(16)
+	exports.html = __webpack_require__(17)
 
 	// logic control
-	exports['for'] = __webpack_require__(20)
-	exports['if'] = __webpack_require__(24)
-	exports.show = __webpack_require__(25)
+	exports['for'] = __webpack_require__(19)
+	exports['if'] = __webpack_require__(23)
+	exports.show = __webpack_require__(24)
 
 	// two-way binding
-	exports.model = __webpack_require__(26)
+	exports.model = __webpack_require__(25)
 
 	// event handling
-	exports.on = __webpack_require__(31)
+	exports.on = __webpack_require__(30)
 
 	// attributes
-	exports.bind = __webpack_require__(32)
+	exports.bind = __webpack_require__(31)
 
 	// ref & el
-	exports.el = __webpack_require__(33)
-	exports.ref = __webpack_require__(34)
+	exports.el = __webpack_require__(32)
+	exports.ref = __webpack_require__(33)
 
 	// cloak
-	exports.cloak = __webpack_require__(35)
+	exports.cloak = __webpack_require__(34)
 
 
 /***/ },
-/* 17 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
@@ -2992,11 +2897,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 18 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var templateParser = __webpack_require__(19)
+	var templateParser = __webpack_require__(18)
 
 	module.exports = {
 
@@ -3038,11 +2943,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 19 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var Cache = __webpack_require__(8)
+	var Cache = __webpack_require__(7)
 	var templateCache = new Cache(1000)
 	var idSelectorCache = new Cache(1000)
 
@@ -3332,11 +3237,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 20 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var FragmentFactory = __webpack_require__(21)
+	var FragmentFactory = __webpack_require__(20)
 	var isObject = _.isObject
 	var uid = 0
 
@@ -3913,14 +3818,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 21 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var compiler = __webpack_require__(14)
-	var templateParser = __webpack_require__(19)
-	var Fragment = __webpack_require__(22)
-	var Cache = __webpack_require__(8)
+	var compiler = __webpack_require__(13)
+	var templateParser = __webpack_require__(18)
+	var Fragment = __webpack_require__(21)
+	var Cache = __webpack_require__(7)
 	var linkerCache = new Cache(5000)
 
 	/**
@@ -3975,11 +3880,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 22 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var transition = __webpack_require__(23)
+	var transition = __webpack_require__(22)
 
 	/**
 	 * Abstraction for a partially-compiled fragment.
@@ -4155,7 +4060,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 23 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
@@ -4256,11 +4161,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 24 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var FragmentFactory = __webpack_require__(21)
+	var FragmentFactory = __webpack_require__(20)
 
 	module.exports = {
 
@@ -4330,11 +4235,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 25 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var transition = __webpack_require__(23)
+	var transition = __webpack_require__(22)
 
 	module.exports = {
 
@@ -4362,16 +4267,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 26 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
 
 	var handlers = {
-	  text: __webpack_require__(27),
-	  radio: __webpack_require__(28),
-	  select: __webpack_require__(29),
-	  checkbox: __webpack_require__(30)
+	  text: __webpack_require__(26),
+	  radio: __webpack_require__(27),
+	  select: __webpack_require__(28),
+	  checkbox: __webpack_require__(29)
 	}
 
 	module.exports = {
@@ -4449,7 +4354,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 27 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
@@ -4566,9 +4471,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      el.hasAttribute('value') ||
 	      (el.tagName === 'TEXTAREA' && el.value.trim())
 	    ) {
-	      this._initValue = number
-	        ? _.toNumber(el.value)
-	        : el.value
+	      this.afterBind = this.listener
 	    }
 	  },
 
@@ -4587,7 +4490,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 28 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
@@ -4611,12 +4514,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return val
 	    }
 
-	    this.on('change', function () {
+	    this.listener = function () {
 	      self.set(self.getValue())
-	    })
+	    }
+	    this.on('change', this.listener)
 
 	    if (el.checked) {
-	      this._initValue = this.getValue()
+	      this.afterBind = this.listener
 	    }
 	  },
 
@@ -4627,7 +4531,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 29 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
@@ -4646,21 +4550,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    this.number = this.param('number') != null
-	    this.multiple = el.hasAttribute('multiple')
+	    var multiple = this.multiple = el.hasAttribute('multiple')
 
 	    // attach listener
-	    this.on('change', function () {
-	      var value = getValue(el, self.multiple)
+	    this.listener = function () {
+	      var value = getValue(el, multiple)
 	      value = self.number
 	        ? _.isArray(value)
 	          ? value.map(_.toNumber)
 	          : _.toNumber(value)
 	        : value
 	      self.set(value)
-	    })
+	    }
+	    this.on('change', this.listener)
 
-	    // check initial value (inline selected attribute)
-	    checkInitialValue.call(this)
+	    // if has initial value, set afterBind
+	    var initValue = getValue(el, multiple, true)
+	    if ((multiple && initValue.length) ||
+	        (!multiple && initValue !== null)) {
+	      this.afterBind = this.listener
+	    }
 
 	    // All major browsers except Firefox resets
 	    // selectedIndex with value -1 to 0 when the element
@@ -4696,43 +4605,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
-	 * Check the initial value for selected options.
-	 */
-
-	function checkInitialValue () {
-	  var initValue
-	  var options = this.el.options
-	  for (var i = 0, l = options.length; i < l; i++) {
-	    if (options[i].hasAttribute('selected')) {
-	      if (this.multiple) {
-	        (initValue || (initValue = []))
-	          .push(options[i].value)
-	      } else {
-	        initValue = options[i].value
-	      }
-	    }
-	  }
-	  if (typeof initValue !== 'undefined') {
-	    this._initValue = this.number
-	      ? _.toNumber(initValue)
-	      : initValue
-	  }
-	}
-
-	/**
 	 * Get select value
 	 *
 	 * @param {SelectElement} el
 	 * @param {Boolean} multi
+	 * @param {Boolean} init
 	 * @return {Array|*}
 	 */
 
-	function getValue (el, multi) {
+	function getValue (el, multi, init) {
 	  var res = multi ? [] : null
-	  var op, val
+	  var op, val, selected
 	  for (var i = 0, l = el.options.length; i < l; i++) {
 	    op = el.options[i]
-	    if (op.selected) {
+	    selected = init
+	      ? op.hasAttribute('selected')
+	      : op.selected
+	    if (selected) {
 	      val = op.hasOwnProperty('_value')
 	        ? op._value
 	        : op.value
@@ -4766,7 +4655,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 30 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
@@ -4776,16 +4665,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	  bind: function () {
 	    var self = this
 	    var el = this.el
+	    var number = this.param('number') != null
 
-	    this._matchValue = function (value) {
-	      if (el.hasOwnProperty('_trueValue')) {
-	        return _.looseEqual(value, el._trueValue)
-	      } else {
-	        return !!value
-	      }
+	    this.getValue = function () {
+	      return el.hasOwnProperty('_value')
+	        ? el._value
+	        : number
+	          ? _.toNumber(el.value)
+	          : el.value
 	    }
 
-	    function getValue () {
+	    function getBooleanValue () {
 	      var val = el.checked
 	      if (val && el.hasOwnProperty('_trueValue')) {
 	        return el._trueValue
@@ -4796,27 +4686,54 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return val
 	    }
 
-	    this.on('change', function () {
-	      self.set(getValue())
-	    })
+	    this.listener = function () {
+	      var model = self._watcher.value
+	      if (_.isArray(model)) {
+	        var val = self.getValue()
+	        if (el.checked) {
+	          if (_.indexOf(model, val) < 0) {
+	            model.push(val)
+	          }
+	        } else {
+	          model.$remove(val)
+	        }
+	      } else {
+	        self.set(getBooleanValue())
+	      }
+	    }
 
+	    this.on('change', this.listener)
 	    if (el.checked) {
-	      this._initValue = getValue()
+	      this.afterBind = this.listener
 	    }
 	  },
 
 	  update: function (value) {
-	    this.el.checked = this._matchValue(value)
+	    var el = this.el
+	    if (_.isArray(value)) {
+	      el.checked = _.indexOf(value, this.getValue()) > -1
+	    } else {
+	      if (el.hasOwnProperty('_trueValue')) {
+	        el.checked = _.looseEqual(value, el._trueValue)
+	      } else {
+	        el.checked = !!value
+	      }
+	    }
 	  }
 	}
 
 
 /***/ },
-/* 31 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
 
+	// modifiers
+	var stopRE = /\.stop\b/
+	var preventRE = /\.prevent\b/
+
+	// keyCode aliases
 	var keyCodes = {
 	  esc: 27,
 	  tab: 9,
@@ -4828,15 +4745,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  right: 39,
 	  down: 40
 	}
-
-	/**
-	 * Wrap a handler function so that it only gets triggered on
-	 * specified keypress events.
-	 *
-	 * @param {Function} handler
-	 * @param {String|Number} key
-	 * @return {Function}
-	 */
 
 	function keyFilter (handler, key) {
 	  var code = keyCodes[key]
@@ -4850,6 +4758,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	}
 
+	function stopFilter (handler) {
+	  return function (e) {
+	    e.stopPropagation()
+	    return handler.call(this, e)
+	  }
+	}
+
+	function preventFilter (handler) {
+	  return function (e) {
+	    e.preventDefault()
+	    return handler.call(this, e)
+	  }
+	}
+
 	module.exports = {
 
 	  acceptStatement: true,
@@ -4857,11 +4779,27 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  bind: function () {
 	    // 1.0.0 key filter
-	    var rawEvent = this.event = this.arg
-	    var keyIndex = rawEvent.indexOf('.')
+	    var event = this.arg
+
+	    // stop modifier
+	    if (stopRE.test(event)) {
+	      this.stop = true
+	      event = event.replace(stopRE, '')
+	    }
+
+	    // prevent modifier
+	    if (preventRE.test(event)) {
+	      this.prevent = true
+	      event = event.replace(preventRE, '')
+	    }
+
+	    // key modifier
+	    var keyIndex = event.indexOf('.')
 	    if (keyIndex > -1) {
-	      this.event = rawEvent.slice(0, keyIndex)
-	      this.key = rawEvent.slice(keyIndex + 1)
+	      this.event = event.slice(0, keyIndex)
+	      this.key = event.slice(keyIndex + 1)
+	    } else {
+	      this.event = event
 	    }
 
 	    // deal with iframes
@@ -4880,13 +4818,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	  update: function (handler) {
 	    if (typeof handler !== 'function') {
 	      ("development") !== 'production' && _.warn(
-	        'on-"' + this.event + '="' +
+	        'v-on:' + this.event + '="' +
 	        this.expression + '" expects a function value, ' +
 	        'got ' + handler
 	      )
 	      return
 	    }
 
+	    // apply modifiers
+	    if (this.stop) {
+	      handler = stopFilter(handler)
+	    }
+	    if (this.prevent) {
+	      handler = preventFilter(handler)
+	    }
 	    if (this.key) {
 	      handler = keyFilter(handler, this.key)
 	    }
@@ -4922,7 +4867,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 32 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
@@ -4947,6 +4892,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  'false-value': '_falseValue'
 	}
 
+	// regex to test for globally allowed attributes.
+	// we only need to include ones that:
+	// - do not have a corresponding property, e.g. role, dropzone;
+	// - cannot be camelized into the corresponding property, .e.g class, accesskey, contenteditable;
+	var globalAllowedAttrRE = /^(class|role|accesskey|contenteditable|contextmenu|dropzone|hidden|tabindex)$|^data-|^aria-/
+
 	module.exports = {
 
 	  priority: 850,
@@ -4957,13 +4908,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (this.descriptor.interp) {
 	      // only allow binding on native attributes
 	      if (!(
-	        // class is allowed globally
-	        attr === 'class' ||
-	        // data attributes are allowed globally
-	        /^data-/.test(attr) ||
-	        // for available
+	        // globally allowed attributes
+	        globalAllowedAttrRE.test(attr) ||
+	        // check if "for" is available on current element.
+	        // the corresponding property is a special case.
 	        (attr === 'for' && 'htmlFor' in this.el) ||
-	        // camelized prop available
+	        // other attributes: check if a camelized property
+	        // is available on the element
 	        _.camelize(attr) in this.el
 	      )) {
 	        ("development") !== 'production' && _.warn(
@@ -5023,13 +4974,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var modelProp = modelProps[attr]
 	    if (modelProp) {
 	      this.el[modelProp] = value
+	      // update v-model if present
+	      var model = this.el.__v_model
+	      if (model) {
+	        model.listener()
+	      }
 	    }
 	  }
 	}
 
 
 /***/ },
-/* 33 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
@@ -5062,7 +5018,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 34 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 	if (true) {
@@ -5078,7 +5034,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 35 */
+/* 34 */
 /***/ function(module, exports) {
 
 	module.exports = {
@@ -5092,18 +5048,18 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 36 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports.style = __webpack_require__(37)
-	exports['class'] = __webpack_require__(38)
-	exports.component = __webpack_require__(39)
-	exports.prop = __webpack_require__(40)
+	exports.style = __webpack_require__(36)
+	exports['class'] = __webpack_require__(37)
+	exports.component = __webpack_require__(38)
+	exports.prop = __webpack_require__(39)
 	exports.transition = __webpack_require__(46)
 
 
 /***/ },
-/* 37 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
@@ -5217,7 +5173,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 38 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
@@ -5254,7 +5210,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  handleArray: function (value) {
 	    this.cleanup(value)
 	    for (var i = 0, l = value.length; i < l; i++) {
-	      addClass(this.el, value[i])
+	      if (value[i]) {
+	        addClass(this.el, value[i])
+	      }
 	    }
 	    this.prevKeys = value
 	  },
@@ -5290,11 +5248,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 39 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var templateParser = __webpack_require__(19)
+	var templateParser = __webpack_require__(18)
 
 	module.exports = {
 
@@ -5625,7 +5583,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 40 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// NOTE: the prop internal directive is compiled and linked
@@ -5634,8 +5592,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	// inside `created` hooks and `data` functions.
 
 	var _ = __webpack_require__(1)
-	var Watcher = __webpack_require__(41)
-	var bindingModes = __webpack_require__(6)._propBindingModes
+	var Watcher = __webpack_require__(40)
+	var bindingModes = __webpack_require__(5)._propBindingModes
 
 	module.exports = {
 
@@ -5647,6 +5605,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var prop = this.descriptor.prop
 	    var childKey = prop.path
 	    var parentKey = prop.parentPath
+	    var twoWay = prop.mode === bindingModes.TWO_WAY
 
 	    var parentWatcher = this.parentWatcher = new Watcher(
 	      parent,
@@ -5656,6 +5615,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          child[childKey] = val
 	        }
 	      }, {
+	        twoWay: twoWay,
 	        filters: prop.filters,
 	        // important: props need to be observed on the
 	        // v-for scope if present
@@ -5667,7 +5627,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _.initProp(child, prop, parentWatcher.value)
 
 	    // setup two-way binding
-	    if (prop.mode === bindingModes.TWO_WAY) {
+	    if (twoWay) {
 	      // important: defer the child watcher creation until
 	      // the created hook (after data observation)
 	      var self = this
@@ -5693,12 +5653,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 41 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var config = __webpack_require__(6)
-	var Dep = __webpack_require__(3)
+	var config = __webpack_require__(5)
+	var Dep = __webpack_require__(41)
 	var expParser = __webpack_require__(42)
 	var batcher = __webpack_require__(45)
 	var uid = 0
@@ -6030,12 +5990,79 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
+/* 41 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var _ = __webpack_require__(1)
+	var uid = 0
+
+	/**
+	 * A dep is an observable that can have multiple
+	 * directives subscribing to it.
+	 *
+	 * @constructor
+	 */
+
+	function Dep () {
+	  this.id = uid++
+	  this.subs = []
+	}
+
+	// the current target watcher being evaluated.
+	// this is globally unique because there could be only one
+	// watcher being evaluated at any time.
+	Dep.target = null
+
+	/**
+	 * Add a directive subscriber.
+	 *
+	 * @param {Directive} sub
+	 */
+
+	Dep.prototype.addSub = function (sub) {
+	  this.subs.push(sub)
+	}
+
+	/**
+	 * Remove a directive subscriber.
+	 *
+	 * @param {Directive} sub
+	 */
+
+	Dep.prototype.removeSub = function (sub) {
+	  this.subs.$remove(sub)
+	}
+
+	/**
+	 * Add self as a dependency to the target watcher.
+	 */
+
+	Dep.prototype.depend = function () {
+	  Dep.target.addDep(this)
+	}
+
+	/**
+	 * Notify all subscribers of a new value.
+	 */
+
+	Dep.prototype.notify = function () {
+	  // stablize the subscriber list first
+	  var subs = _.toArray(this.subs)
+	  for (var i = 0, l = subs.length; i < l; i++) {
+	    subs[i].update()
+	  }
+	}
+
+	module.exports = Dep
+
+
+/***/ },
 /* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
 	var Path = __webpack_require__(43)
-	var Cache = __webpack_require__(8)
+	var Cache = __webpack_require__(7)
 	var expressionCache = new Cache(1000)
 
 	var allowedKeywords =
@@ -6305,7 +6332,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _ = __webpack_require__(1)
 	var add = __webpack_require__(44).add
-	var Cache = __webpack_require__(8)
+	var Cache = __webpack_require__(7)
 	var pathCache = new Cache(1000)
 	var identRE = exports.identRE = /^[$_a-zA-Z]+[\w$]*$/
 
@@ -6761,7 +6788,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var config = __webpack_require__(6)
+	var config = __webpack_require__(5)
 
 	// we have two separate queues: one for directive updates
 	// and one for user watcher registered via $watch().
@@ -7293,9 +7320,9 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var dirParser = __webpack_require__(9)
-	var propDef = __webpack_require__(40)
-	var propBindingModes = __webpack_require__(6)._propBindingModes
+	var dirParser = __webpack_require__(8)
+	var propDef = __webpack_require__(39)
+	var propBindingModes = __webpack_require__(5)._propBindingModes
 
 	// regexes
 	var identRE = __webpack_require__(43).identRE
@@ -7425,7 +7452,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      vm._props[path] = prop
 	      if (raw === null) {
 	        // initialize absent prop
-	        _.initProp(vm, prop, getDefault(options))
+	        _.initProp(vm, prop, getDefault(vm, options))
 	      } else if (prop.dynamic) {
 	        // dynamic prop
 	        if (vm._context) {
@@ -7468,11 +7495,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * Get the default value of a prop.
 	 *
+	 * @param {Vue} vm
 	 * @param {Object} options
 	 * @return {*}
 	 */
 
-	function getDefault (options) {
+	function getDefault (vm, options) {
 	  // no default, return undefined
 	  if (!options.hasOwnProperty('default')) {
 	    // absent boolean value defaults to false
@@ -7491,7 +7519,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  // call factory function for non-Function types
 	  return typeof def === 'function' && options.type !== Function
-	    ? def()
+	    ? def.call(vm)
 	    : def
 	}
 
@@ -7501,7 +7529,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var templateParser = __webpack_require__(19)
+	var templateParser = __webpack_require__(18)
 	var specialCharRE = /[^a-zA-Z_\-:\.]/
 
 	/**
@@ -7663,7 +7691,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var templateParser = __webpack_require__(19)
+	var templateParser = __webpack_require__(18)
 
 	// This is the elementDirective that handles <content>
 	// transclusions. It relies on the raw content of an
@@ -7791,8 +7819,9 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var FragmentFactory = __webpack_require__(21)
-	var vIf = __webpack_require__(24)
+	var FragmentFactory = __webpack_require__(20)
+	var vIf = __webpack_require__(23)
+	var Watcher = __webpack_require__(40)
 
 	module.exports = {
 
@@ -7816,14 +7845,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  setupDynamic: function (exp) {
 	    var self = this
-	    this.unwatch = this.vm.$watch(exp, function (value) {
+	    var onNameChange = function (value) {
 	      vIf.remove.call(self)
-	      self.insert(value)
-	    }, {
-	      immediate: true,
-	      user: false,
+	      if (value) {
+	        self.insert(value)
+	      }
+	    }
+	    this.nameWatcher = new Watcher(this.vm, exp, onNameChange, {
 	      scope: this._scope
 	    })
+	    onNameChange(this.nameWatcher.value)
 	  },
 
 	  insert: function (id) {
@@ -7838,8 +7869,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 
 	  unbind: function () {
-	    if (this.frag) this.frag.destroy()
-	    if (this.unwatch) this.unwatch()
+	    if (this.frag) {
+	      this.frag.destroy()
+	    }
+	    if (this.nameWatcher) {
+	      this.nameWatcher.teardown()
+	    }
 	  }
 	}
 
@@ -8355,10 +8390,10 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var compiler = __webpack_require__(14)
+	var compiler = __webpack_require__(13)
 	var Observer = __webpack_require__(59)
-	var Dep = __webpack_require__(3)
-	var Watcher = __webpack_require__(41)
+	var Dep = __webpack_require__(41)
+	var Watcher = __webpack_require__(40)
 
 	/**
 	 * Setup the scope of an instance, which contains:
@@ -8599,8 +8634,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var config = __webpack_require__(6)
-	var Dep = __webpack_require__(3)
+	var config = __webpack_require__(5)
+	var Dep = __webpack_require__(41)
 	var arrayMethods = __webpack_require__(60)
 	var arrayKeys = Object.getOwnPropertyNames(arrayMethods)
 	__webpack_require__(44)
@@ -8644,9 +8679,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	Observer.create = function (value, vm) {
+	  if (!value || typeof value !== 'object') {
+	    return
+	  }
 	  var ob
 	  if (
-	    value &&
 	    value.hasOwnProperty('__ob__') &&
 	    value.__ob__ instanceof Observer
 	  ) {
@@ -8683,18 +8720,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
-	 * Try to carete an observer for a child value,
-	 * and if value is array, link dep to the array.
-	 *
-	 * @param {*} val
-	 * @return {Dep|undefined}
-	 */
-
-	Observer.prototype.observe = function (val) {
-	  return Observer.create(val)
-	}
-
-	/**
 	 * Observe a list of Array items.
 	 *
 	 * @param {Array} items
@@ -8703,7 +8728,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Observer.prototype.observeArray = function (items) {
 	  var i = items.length
 	  while (i--) {
-	    var ob = this.observe(items[i])
+	    var ob = Observer.create(items[i])
 	    if (ob) {
 	      (ob.parents || (ob.parents = [])).push(this)
 	    }
@@ -8751,28 +8776,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	Observer.prototype.convert = function (key, val) {
-	  var ob = this
-	  var childOb = ob.observe(val)
-	  var dep = new Dep()
-	  Object.defineProperty(ob.value, key, {
-	    enumerable: true,
-	    configurable: true,
-	    get: function () {
-	      if (Dep.target) {
-	        dep.depend()
-	        if (childOb) {
-	          childOb.dep.depend()
-	        }
-	      }
-	      return val
-	    },
-	    set: function (newVal) {
-	      if (newVal === val) return
-	      val = newVal
-	      childOb = ob.observe(newVal)
-	      dep.notify()
-	    }
-	  })
+	  defineReactive(this.value, key, val)
 	}
 
 	/**
@@ -8829,6 +8833,41 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _.define(target, key, src[key])
 	  }
 	}
+
+	/**
+	 * Define a reactive property on an Object.
+	 *
+	 * @param {Object} obj
+	 * @param {String} key
+	 * @param {*} val
+	 */
+
+	function defineReactive (obj, key, val) {
+	  var dep = new Dep()
+	  var childOb = Observer.create(val)
+	  Object.defineProperty(obj, key, {
+	    enumerable: true,
+	    configurable: true,
+	    get: function metaGetter () {
+	      if (Dep.target) {
+	        dep.depend()
+	        if (childOb) {
+	          childOb.dep.depend()
+	        }
+	      }
+	      return val
+	    },
+	    set: function metaSetter (newVal) {
+	      if (newVal === val) return
+	      val = newVal
+	      childOb = Observer.create(newVal)
+	      dep.notify()
+	    }
+	  })
+	}
+
+	// Attach to the util object so it can be used elsewhere.
+	_.defineReactive = defineReactive
 
 	module.exports = Observer
 
@@ -8922,12 +8961,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	_.define(
 	  arrayProto,
 	  '$remove',
-	  function $remove (index) {
+	  function $remove (item) {
 	    /* istanbul ignore if */
 	    if (!this.length) return
-	    if (typeof index !== 'number') {
-	      index = _.indexOf(this, index)
-	    }
+	    var index = _.indexOf(this, item)
 	    if (index > -1) {
 	      return this.splice(index, 1)
 	    }
@@ -8943,7 +8980,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _ = __webpack_require__(1)
 	var Directive = __webpack_require__(62)
-	var compiler = __webpack_require__(14)
+	var compiler = __webpack_require__(13)
 
 	/**
 	 * Transclude, compile and link element.
@@ -9160,7 +9197,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var Watcher = __webpack_require__(41)
+	var Watcher = __webpack_require__(40)
 	var expParser = __webpack_require__(42)
 	function noop () {}
 
@@ -9277,8 +9314,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        scope: this._scope
 	      }
 	    )
-	    if (this._initValue != null) {
-	      watcher.set(this._initValue)
+	    // v-model with inital inline value need to sync back to
+	    // model instead of update to DOM on init. They would
+	    // set the afterBind hook to indicate that.
+	    if (this.afterBind) {
+	      this.afterBind()
 	    } else if (this.update) {
 	      this.update(watcher.value)
 	    }
@@ -9524,10 +9564,10 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 64 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Watcher = __webpack_require__(41)
+	var Watcher = __webpack_require__(40)
 	var Path = __webpack_require__(43)
-	var textParser = __webpack_require__(7)
-	var dirParser = __webpack_require__(9)
+	var textParser = __webpack_require__(6)
+	var dirParser = __webpack_require__(8)
 	var expParser = __webpack_require__(42)
 	var filterRE = /[^|]\|[^|]/
 
@@ -9590,7 +9630,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Object} [options]
 	 *                 - {Boolean} deep
 	 *                 - {Boolean} immediate
-	 *                 - {Boolean} user
 	 * @return {Function} - unwatchFn
 	 */
 
@@ -9603,7 +9642,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  var watcher = new Watcher(vm, expOrFn, cb, {
 	    deep: options && options.deep,
-	    user: !options || options.user !== false,
 	    filters: parsed && parsed.filters
 	  })
 	  if (options && options.immediate) {
@@ -9706,7 +9744,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var transition = __webpack_require__(23)
+	var transition = __webpack_require__(22)
 
 	/**
 	 * Convenience on-instance nextTick. The callback is
@@ -10073,6 +10111,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	exports.$dispatch = function () {
+	  this.$emit.apply(this, arguments)
 	  var parent = this.$parent
 	  while (parent) {
 	    parent.$emit.apply(parent, arguments)
@@ -10138,7 +10177,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-	var compiler = __webpack_require__(14)
+	var compiler = __webpack_require__(13)
 
 	/**
 	 * Set instance target element and kick off the compilation
