@@ -1,5 +1,6 @@
 var _ = require('../util')
 var Path = require('../parsers/path')
+var toArray = require('../directives/for')._postProcess
 
 /**
  * Filter filter for v-repeat
@@ -10,6 +11,7 @@ var Path = require('../parsers/path')
  */
 
 exports.filterBy = function (arr, search, delimiter /* ...dataKeys */) {
+  arr = toArray(arr)
   if (search == null) {
     return arr
   }
@@ -25,15 +27,27 @@ exports.filterBy = function (arr, search, delimiter /* ...dataKeys */) {
   var keys = _.toArray(arguments, n).reduce(function (prev, cur) {
     return prev.concat(cur)
   }, [])
-  return arr.filter(function (item) {
-    if (keys.length) {
-      return keys.some(function (key) {
-        return contains(Path.get(item, key), search)
-      })
+  var res = []
+  var item, key, val, j
+  for (var i = 0, l = arr.length; i < l; i++) {
+    item = arr[i]
+    val = (item && item.$value) || item
+    j = keys.length
+    if (j) {
+      while (j--) {
+        key = keys[j]
+        if ((key === '$key' && contains(item.$key, search)) ||
+            contains(Path.get(val, key), search)) {
+          res.push(item)
+        }
+      }
     } else {
-      return contains(item, search)
+      if (contains(item, search)) {
+        res.push(item)
+      }
     }
-  })
+  }
+  return res
 }
 
 /**
@@ -44,6 +58,7 @@ exports.filterBy = function (arr, search, delimiter /* ...dataKeys */) {
  */
 
 exports.orderBy = function (arr, sortKey, reverse) {
+  arr = toArray(arr)
   if (!sortKey) {
     return arr
   }

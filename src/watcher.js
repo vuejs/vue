@@ -21,6 +21,7 @@ var uid = 0
  *                 - {Boolean} sync
  *                 - {Boolean} lazy
  *                 - {Function} [preProcess]
+ *                 - {Function} [postProcess]
  * @constructor
  */
 
@@ -109,6 +110,9 @@ Watcher.prototype.get = function () {
   }
   if (this.filters) {
     value = scope._applyFilters(value, null, this.filters, false)
+  }
+  if (this.postProcess) {
+    value = this.postProcess(value)
   }
   this.afterGet()
   return value

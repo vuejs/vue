@@ -88,6 +88,28 @@ if (_.inBrowser) {
       expect(el.innerHTML).toBe('<div>aaa</div>')
     })
 
+    it('filter converting array to object', function () {
+      new Vue({
+        el: el,
+        data: {
+          items: [
+            { msg: 'aaa' },
+            { msg: 'bbb' }
+          ]
+        },
+        template: '<div v-for="item in items | test">{{item.msg}} {{$key}}</div>',
+        filters: {
+          test: function (val) {
+            return {
+              a: val[0],
+              b: val[1]
+            }
+          }
+        }
+      })
+      expect(el.innerHTML).toBe('<div>aaa a</div><div>bbb b</div>')
+    })
+
     it('component', function (done) {
       var vm = new Vue({
         el: el,
@@ -658,22 +680,6 @@ if (_.inBrowser) {
       })
       trigger(vm.$el.querySelector('input'), 'input')
       expect(hasWarned(_, 'It seems you are using two-way binding')).toBe(true)
-    })
-
-    it('warn filters that return non-Array values', function () {
-      new Vue({
-        el: el,
-        template: '<div v-for="item in items | test"></div>',
-        data: {
-          items: []
-        },
-        filters: {
-          test: function (val) {
-            return {}
-          }
-        }
-      })
-      expect(hasWarned(_, 'should always return Arrays')).toBe(true)
     })
 
     it('nested track by', function (done) {
