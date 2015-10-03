@@ -1,5 +1,4 @@
 var _ = require('../util')
-var add = require('../observer/object').add
 var Cache = require('../cache')
 var pathCache = new Cache(1000)
 var identRE = exports.identRE = /^[$_a-zA-Z]+[\w$]*$/
@@ -340,7 +339,7 @@ exports.set = function (obj, path, val) {
         if (process.env.NODE_ENV !== 'production' && last._isVue) {
           warnNonExistent(path)
         }
-        add(last, key, obj)
+        _.set(last, key, obj)
       }
     } else {
       if (_.isArray(obj)) {
@@ -351,7 +350,7 @@ exports.set = function (obj, path, val) {
         if (process.env.NODE_ENV !== 'production' && obj._isVue) {
           warnNonExistent(path)
         }
-        add(obj, key, val)
+        _.set(obj, key, val)
       }
     }
   }

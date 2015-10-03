@@ -219,7 +219,7 @@ describe('Misc', function () {
     var test = []
     var obj2 = vm.obj2
     vm.$set('test', test)
-    obj2.$set('test', 123)
+    __.set(obj2, 'test', 123)
     Vue.nextTick(function () {
       expect(spy1).not.toHaveBeenCalled()
       expect(spy2).not.toHaveBeenCalled()
@@ -255,7 +255,7 @@ describe('Misc', function () {
       }
     })
     expect(vm.$el.textContent).toBe(JSON.stringify(vm.items, null, 2))
-    vm.items[0].$set('a', 123)
+    __.set(vm.items[0], 'a', 123)
     Vue.nextTick(function () {
       expect(vm.$el.textContent).toBe(JSON.stringify(vm.items, null, 2) + '123')
       done()

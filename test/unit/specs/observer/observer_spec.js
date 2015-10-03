@@ -83,32 +83,32 @@ describe('Observer', function () {
     expect(watcher.update.calls.count()).toBe(3)
   })
 
-  it('observing $set/$delete', function () {
+  it('observing set/delete', function () {
     var obj = { a: 1 }
     var ob = Observer.create(obj)
     var dep = ob.dep
     spyOn(dep, 'notify')
-    obj.$set('b', 2)
+    _.set(obj, 'b', 2)
     expect(obj.b).toBe(2)
     expect(dep.notify.calls.count()).toBe(1)
-    obj.$delete('a')
+    _.delete(obj, 'a')
     expect(obj.hasOwnProperty('a')).toBe(false)
     expect(dep.notify.calls.count()).toBe(2)
     // set existing key, should be a plain set and not
     // trigger own ob's notify
-    obj.$set('b', 3)
+    _.set(obj, 'b', 3)
     expect(obj.b).toBe(3)
     expect(dep.notify.calls.count()).toBe(2)
     // set non-existing key
-    obj.$set('c', 1)
+    _.set(obj, 'c', 1)
     expect(obj.c).toBe(1)
     expect(dep.notify.calls.count()).toBe(3)
     // should ignore deleting non-existing key
-    obj.$delete('a')
+    _.delete(obj, 'a')
     expect(dep.notify.calls.count()).toBe(3)
     // should work on non-observed objects
     var obj2 = { a: 1 }
-    obj2.$delete('a')
+    _.delete(obj2, 'a')
     expect(obj2.hasOwnProperty('a')).toBe(false)
   })
 
@@ -166,16 +166,6 @@ describe('Observer', function () {
 
   it('no proto', function () {
     config.proto = false
-    // object
-    var obj = {a: 1}
-    var ob = Observer.create(obj)
-    expect(obj.$set).toBeTruthy()
-    expect(obj.$delete).toBeTruthy()
-    var dep = ob.dep
-    spyOn(dep, 'notify')
-    obj.$set('b', 2)
-    expect(dep.notify).toHaveBeenCalled()
-    // array
     var arr = [1, 2, 3]
     var ob2 = Observer.create(arr)
     expect(arr.$set).toBeTruthy()

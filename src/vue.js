@@ -86,5 +86,5 @@ extend(p, require('./api/events'))
 extend(p, require('./api/child'))
 extend(p, require('./api/lifecycle'))
 
-Vue.version = '1.0.0-alpha'
+Vue.version = '1.0.0-beta.3'
 module.exports = _.Vue = Vue

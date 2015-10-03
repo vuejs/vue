@@ -7,6 +7,8 @@ var config = require('../config')
 
 exports.util = _
 exports.config = config
+exports.set = _.set
+exports.delete = _.delete
 exports.nextTick = _.nextTick
 
 /**

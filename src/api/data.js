@@ -1,3 +1,4 @@
+var _ = require('../util')
 var Watcher = require('../watcher')
 var Path = require('../parsers/path')
 var textParser = require('../parsers/text')
@@ -52,7 +53,7 @@ exports.$set = function (exp, val) {
  */
 
 exports.$delete = function (key) {
-  this._data.$delete(key)
+  _.delete(this._data, key)
 }
 
 /**

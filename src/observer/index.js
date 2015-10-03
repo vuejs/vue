@@ -3,7 +3,6 @@ var config = require('../config')
 var Dep = require('./dep')
 var arrayMethods = require('./array')
 var arrayKeys = Object.getOwnPropertyNames(arrayMethods)
-require('./object')
 
 /**
  * Observer class that are attached to each observed

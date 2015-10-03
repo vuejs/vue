@@ -62,7 +62,7 @@ exports._initData = function () {
       }
       if (this._props[prop].raw !== null ||
           !optionsData.hasOwnProperty(prop)) {
-        optionsData.$set(prop, propsData[prop])
+        _.set(optionsData, prop, propsData[prop])
       }
     }
   }
@@ -73,9 +73,7 @@ exports._initData = function () {
   i = keys.length
   while (i--) {
     key = keys[i]
-    if (!_.isReserved(key)) {
-      this._proxy(key)
-    }
+    this._proxy(key)
   }
   // observe data
   Observer.create(data, this)
@@ -97,7 +95,7 @@ exports._setData = function (newData) {
   i = keys.length
   while (i--) {
     key = keys[i]
-    if (!_.isReserved(key) && !(key in newData)) {
+    if (!(key in newData)) {
       this._unproxy(key)
     }
   }
@@ -107,7 +105,7 @@ exports._setData = function (newData) {
   i = keys.length
   while (i--) {
     key = keys[i]
-    if (!this.hasOwnProperty(key) && !_.isReserved(key)) {
+    if (!this.hasOwnProperty(key)) {
       // new property
       this._proxy(key)
     }
@@ -125,20 +123,23 @@ exports._setData = function (newData) {
  */
 
 exports._proxy = function (key) {
-  // need to store ref to self here
-  // because these getter/setters might
-  // be called by child instances!
-  var self = this
-  Object.defineProperty(self, key, {
-    configurable: true,
-    enumerable: true,
-    get: function proxyGetter () {
-      return self._data[key]
-    },
-    set: function proxySetter (val) {
-      self._data[key] = val
-    }
-  })
+  if (!_.isReserved(key)) {
+    // need to store ref to self here
+    // because these getter/setters might
+    // be called by child scopes via
+    // prototype inheritance.
+    var self = this
+    Object.defineProperty(self, key, {
+      configurable: true,
+      enumerable: true,
+      get: function proxyGetter () {
+        return self._data[key]
+      },
+      set: function proxySetter (val) {
+        self._data[key] = val
+      }
+    })
+  }
 }
 
 /**
@@ -148,7 +149,9 @@ exports._proxy = function (key) {
  */
 
 exports._unproxy = function (key) {
-  delete this[key]
+  if (!_.isReserved(key)) {
+    delete this[key]
+  }
 }
 
 /**
