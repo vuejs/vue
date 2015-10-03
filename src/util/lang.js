@@ -163,8 +163,10 @@ exports.toArray = function (list, start) {
  */
 
 exports.extend = function (to, from) {
-  for (var key in from) {
-    to[key] = from[key]
+  var keys = Object.keys(from)
+  var i = keys.length
+  while (i--) {
+    to[keys[i]] = from[keys[i]]
   }
   return to
 }
