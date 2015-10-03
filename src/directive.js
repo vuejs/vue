@@ -99,10 +99,11 @@ Directive.prototype._bind = function () {
     } else {
       this._update = noop
     }
-    // pre-process hook called before the value is piped
-    // through the filters. used in v-for.
     var preProcess = this._preProcess
       ? _.bind(this._preProcess, this)
+      : null
+    var postProcess = this._postProcess
+      ? _.bind(this._postProcess, this)
       : null
     var watcher = this._watcher = new Watcher(
       this.vm,
@@ -113,6 +114,7 @@ Directive.prototype._bind = function () {
         twoWay: this.twoWay,
         deep: this.deep,
         preProcess: preProcess,
+        postProcess: postProcess,
         scope: this._scope
       }
     )

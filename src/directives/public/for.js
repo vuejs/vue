@@ -61,12 +61,6 @@ module.exports = {
   },
 
   update: function (data) {
-    if (process.env.NODE_ENV !== 'production' && !_.isArray(data)) {
-      _.warn(
-        'v-for pre-converts Objects into Arrays, and ' +
-        'v-for filters should always return Arrays.'
-      )
-    }
     this.diff(data)
     this.updateRef()
     this.updateModel()
@@ -87,8 +81,14 @@ module.exports = {
    */
 
   diff: function (data) {
+    // check if the Array was converted from an Object
+    var item = data[0]
+    var convertedFromObject = this.fromObject =
+      isObject(item) &&
+      item.hasOwnProperty('$key') &&
+      item.hasOwnProperty('$value')
+
     var idKey = this.idKey
-    var converted = this.converted
     var oldFrags = this.frags
     var frags = this.frags = new Array(data.length)
     var alias = this.alias
@@ -96,7 +96,7 @@ module.exports = {
     var end = this.end
     var inDoc = _.inDoc(start)
     var init = !oldFrags
-    var i, l, frag, item, key, value, primitive
+    var i, l, frag, key, value, primitive
 
     // First pass, go through the new Array and fill up
     // the new frags array. If a piece of data has a cached
@@ -104,8 +104,8 @@ module.exports = {
     // instance.
     for (i = 0, l = data.length; i < l; i++) {
       item = data[i]
-      key = converted ? item.$key : null
-      value = converted ? item.$value : item
+      key = convertedFromObject ? item.$key : null
+      value = convertedFromObject ? item.$value : item
       primitive = !isObject(value)
       frag = !init && this.getCachedFrag(value, i, key)
       if (frag) { // reusable fragment
@@ -126,7 +126,7 @@ module.exports = {
         }
         // update data for track-by, object repeat &
         // primitive values.
-        if (idKey || converted || primitive) {
+        if (idKey || convertedFromObject || primitive) {
           frag.scope[alias] = value
         }
       } else { // new isntance
@@ -230,7 +230,7 @@ module.exports = {
     if (!ref) return
     var hash = (this._scope || this.vm).$refs
     var refs
-    if (!this.converted) {
+    if (!this.fromObject) {
       refs = this.frags.map(findVmFromFrag)
     } else {
       refs = {}
@@ -458,29 +458,28 @@ module.exports = {
 
   /**
    * Pre-process the value before piping it through the
-   * filters, and convert non-Array objects to arrays.
-   *
-   * This function will be bound to this directive instance
-   * and passed into the watcher.
-   *
-   * @param {*} value
-   * @return {Array}
-   * @private
+   * filters. This is passed to and called by the watcher.
    */
 
   _preProcess: function (value) {
     // regardless of type, store the un-filtered raw value.
     this.rawValue = value
-    var type = this.rawType = typeof value
-    if (!_.isPlainObject(value)) {
-      this.converted = false
-      if (type === 'number') {
-        value = range(value)
-      } else if (type === 'string') {
-        value = _.toArray(value)
-      }
-      return value || []
-    } else {
+    return value
+  },
+
+  /**
+   * Post-process the value after it has been piped through
+   * the filters. This is passed to and called by the watcher.
+   *
+   * It is necessary for this to be called during the
+   * wathcer's dependency collection phase because we want
+   * the v-for to update when the source Object is mutated.
+   */
+
+  _postProcess: function (value) {
+    if (_.isArray(value)) {
+      return value
+    } else if (_.isPlainObject(value)) {
       // convert plain object to array.
       var keys = Object.keys(value)
       var i = keys.length
@@ -493,8 +492,15 @@ module.exports = {
           $value: value[key]
         }
       }
-      this.converted = true
       return res
+    } else {
+      var type = typeof value
+      if (type === 'number') {
+        value = range(value)
+      } else if (type === 'string') {
+        value = _.toArray(value)
+      }
+      return value || []
     }
   },
 
