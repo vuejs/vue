@@ -20,6 +20,12 @@ module.exports = function (grunt) {
       grunt.file.write(file, json)
       console.log('updated ' + blue(file))
     })
+    // update main file verison
+    var main = 'src/vue.js'
+    var file = grunt.file.read(main)
+    file = file.replace(/Vue\.version = '(.*)'/, 'Vue.version = \'' + version + '\'')
+    grunt.file.write(main, file)
+    console.log('updated ' + blue(main))
   })
 
   /**
