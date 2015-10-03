@@ -23,6 +23,20 @@ if (process.env.NODE_ENV !== 'production') {
       )
     },
 
+    SET: function () {
+      warn(
+        '$set() on plain objects will be deperecated in 1.0.0. ' +
+        'Use `Vue.set(obj, key, value)` instead.'
+      )
+    },
+
+    DELETE: function () {
+      warn(
+        '$delete() on plain objects will be deperecated in 1.0.0. ' +
+        'Use `Vue.delete(obj, key)` instead.'
+      )
+    },
+
     WAIT_FOR: function () {
       warn(
         '"wait-for" will be deprecated in 1.0.0. Use `activate` hook instead. ' +

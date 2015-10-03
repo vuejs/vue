@@ -12,45 +12,11 @@ _.define(
     if (process.env.NODE_ENV !== 'production') {
       _.deprecation.ADD()
     }
-    add(this, key, val)
-  }
-)
-
-/**
- * Add a new property to an observed object
- * and emits corresponding event. This is internal and
- * no longer exposed as of 1.0.
- *
- * @param {Object} obj
- * @param {String} key
- * @param {*} val
- * @public
- */
-
-var add = exports.add = function (obj, key, val) {
-  if (obj.hasOwnProperty(key)) {
-    return
-  }
-  if (obj._isVue) {
-    add(obj._data, key, val)
-    return
-  }
-  var ob = obj.__ob__
-  if (!ob) {
-    obj[key] = val
-    return
-  }
-  ob.convert(key, val)
-  ob.notify()
-  if (ob.vms) {
-    var i = ob.vms.length
-    while (i--) {
-      var vm = ob.vms[i]
-      vm._proxy(key)
-      vm._digest()
+    if (!this.hasOwnProperty(key)) {
+      _.set(this, key, val)
     }
   }
-}
+)
 
 /**
  * Set a property on an observed object, calling add to
@@ -65,8 +31,10 @@ _.define(
   objProto,
   '$set',
   function $set (key, val) {
-    add(this, key, val)
-    this[key] = val
+    if (process.env.NODE_ENV !== 'production') {
+      _.deprecation.SET()
+    }
+    _.set(this, key, val)
   }
 )
 
@@ -82,20 +50,9 @@ _.define(
   objProto,
   '$delete',
   function $delete (key) {
-    if (!this.hasOwnProperty(key)) return
-    delete this[key]
-    var ob = this.__ob__
-    if (!ob) {
-      return
+    if (process.env.NODE_ENV !== 'production') {
+      _.deprecation.DELETE()
     }
-    ob.notify()
-    if (ob.vms) {
-      var i = ob.vms.length
-      while (i--) {
-        var vm = ob.vms[i]
-        vm._unproxy(key)
-        vm._digest()
-      }
-    }
+    _.delete(this, key)
   }
 )

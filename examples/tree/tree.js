@@ -54,7 +54,7 @@ Vue.component('item', {
     },
     changeType: function () {
       if (!this.isFolder) {
-        this.model.$set('children', [])
+        Vue.set(this.model, 'children', [])
         this.addChild()
         this.open = true
       }
