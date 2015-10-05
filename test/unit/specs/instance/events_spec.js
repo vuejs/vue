@@ -249,7 +249,8 @@ describe('Instance Events', function () {
           attached: spy,
           detached: spy2
         })
-        var childVm = parentVm.$addChild({
+        var childVm = new Vue({
+          parent: parentVm,
           el: childEl,
           attached: spy,
           detached: spy2
@@ -272,7 +273,8 @@ describe('Instance Events', function () {
           attached: spy,
           detached: spy2
         })
-        var childVm = parentVm.$addChild({
+        var childVm = new Vue({
+          parent: parentVm,
           el: childEl,
           attached: spy,
           detached: spy2
@@ -294,7 +296,8 @@ describe('Instance Events', function () {
           el: el,
           attached: spy
         })
-        var childVm = parentVm.$addChild({
+        var childVm = new Vue({
+          parent: parentVm,
           el: childEl,
           attached: spy
         })

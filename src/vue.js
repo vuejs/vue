@@ -83,7 +83,6 @@ extend(p, require('./instance/misc'))
 extend(p, require('./api/data'))
 extend(p, require('./api/dom'))
 extend(p, require('./api/events'))
-extend(p, require('./api/child'))
 extend(p, require('./api/lifecycle'))
 
 Vue.version = '1.0.0-beta.3'

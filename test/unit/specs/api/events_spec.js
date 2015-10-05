@@ -59,9 +59,9 @@ describe('Events API', function () {
   })
 
   it('$broadcast', function () {
-    var child1 = vm.$addChild()
-    var child2 = vm.$addChild()
-    var child3 = child1.$addChild()
+    var child1 = new Vue({ parent: vm })
+    var child2 = new Vue({ parent: vm })
+    var child3 = new Vue({ parent: child1 })
     child1.$on('test', spy)
     child2.$on('test', spy)
     child3.$on('test', spy)
@@ -70,9 +70,9 @@ describe('Events API', function () {
   })
 
   it('$broadcast with propagation', function () {
-    var child1 = vm.$addChild()
-    var child2 = vm.$addChild()
-    var child3 = child1.$addChild()
+    var child1 = new Vue({ parent: vm })
+    var child2 = new Vue({ parent: vm })
+    var child3 = new Vue({ parent: child1 })
     child1.$on('test', function () {
       spy()
       return true
@@ -84,8 +84,8 @@ describe('Events API', function () {
   })
 
   it('$broadcast optimization', function () {
-    var child = vm.$addChild()
-    var child2 = child.$addChild()
+    var child = new Vue({ parent: vm })
+    var child2 = new Vue({ parent: child })
     // hooks should not incurr the bookkeeping cost
     child.$on('hook:created', function () {})
     expect(vm._eventsCount['hook:created']).toBeUndefined()
@@ -121,8 +121,8 @@ describe('Events API', function () {
   })
 
   it('$broadcast cancel', function () {
-    var child = vm.$addChild()
-    var child2 = child.$addChild()
+    var child = new Vue({ parent: vm })
+    var child2 = new Vue({ parent: child })
     child.$on('test', function () {
       return false
     })
@@ -132,8 +132,8 @@ describe('Events API', function () {
   })
 
   it('$dispatch', function () {
-    var child = vm.$addChild()
-    var child2 = child.$addChild()
+    var child = new Vue({ parent: vm })
+    var child2 = new Vue({ parent: child })
     child2.$on('test', spy)
     child.$on('test', spy)
     vm.$on('test', spy)
@@ -142,9 +142,9 @@ describe('Events API', function () {
   })
 
   it('$dispatch with propagation', function () {
-    var child = vm.$addChild()
-    var child2 = child.$addChild()
-    var child3 = child2.$addChild()
+    var child = new Vue({ parent: vm })
+    var child2 = new Vue({ parent: child })
+    var child3 = new Vue({ parent: child2 })
     child.$on('test', function () {
       spy()
       return true
@@ -155,8 +155,8 @@ describe('Events API', function () {
   })
 
   it('$dispatch cancel', function () {
-    var child = vm.$addChild()
-    var child2 = child.$addChild()
+    var child = new Vue({ parent: vm })
+    var child2 = new Vue({ parent: child })
     child.$on('test', function () {
       return false
     })

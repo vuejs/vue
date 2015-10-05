@@ -107,8 +107,9 @@ if (_.inBrowser && !_.isIE9) {
 
       it('skip vm with parent still being compiled', function () {
         el.__v_trans = new Transition(el, 'test', null, vm)
-        var child = vm.$addChild({
-          el: el
+        var child = new Vue({
+          el: el,
+          parent: vm
         })
         expect(child._isCompiled).toBe(true)
         transition.apply(el, 1, op, child, cb)

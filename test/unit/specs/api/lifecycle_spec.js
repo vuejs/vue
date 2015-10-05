@@ -196,8 +196,8 @@ if (_.inBrowser) {
 
       it('parent', function () {
         var parent = new Vue()
-        var child = parent.$addChild()
-        var child2 = parent.$addChild()
+        var child = new Vue({ parent: parent })
+        var child2 = new Vue({ parent: parent })
         expect(parent.$children.length).toBe(2)
         child.$destroy()
         expect(parent.$children.length).toBe(1)
@@ -207,7 +207,7 @@ if (_.inBrowser) {
 
       it('children', function () {
         var parent = new Vue()
-        var child = parent.$addChild()
+        var child = new Vue({ parent: parent })
         parent.$destroy()
         expect(child._isDestroyed).toBe(true)
       })

@@ -214,11 +214,12 @@ if (_.inBrowser) {
           test: test
         }
       })
-      parent.$addChild({
+      var child = new Vue({
         el: el,
-        template: '<a v-on:click="$parent.test($event)"></a>'
+        template: '<a v-on:click="$parent.test($event)"></a>',
+        parent: parent
       })
-      var e = trigger(el.firstChild, 'click')
+      var e = trigger(child.$el.firstChild, 'click')
       expect(test).toHaveBeenCalledWith(e)
     })
 

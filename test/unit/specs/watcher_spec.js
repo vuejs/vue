@@ -129,7 +129,7 @@ describe('Watcher', function () {
     expect(watcher.value).toBeUndefined()
     expect(watcher2.value).toBeUndefined()
     // check $add should not affect isolated children
-    var child2 = vm.$addChild()
+    var child2 = new Vue({ parent: vm })
     var watcher3 = new Watcher(child2, 'd.e', spy)
     expect(watcher3.value).toBeUndefined()
     vm.$set('d', { e: 123 })

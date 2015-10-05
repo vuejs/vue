@@ -174,6 +174,10 @@ module.exports = {
       var options = {
         el: templateParser.clone(this.el),
         template: this.inlineTemplate,
+        // make sure to add the child with correct parent
+        // if this is a transcluded component, its parent
+        // should be the transclusion host.
+        parent: this._host || this.vm,
         // if no inline-template, then the compiled
         // linker can be cached for better performance.
         _linkerCachable: !this.inlineTemplate,
@@ -201,8 +205,7 @@ module.exports = {
       if (extraOptions) {
         _.extend(options, extraOptions)
       }
-      var parent = this._host || this.vm
-      var child = parent.$addChild(options, this.Component)
+      var child = new this.Component(options)
       if (this.keepAlive) {
         this.cache[this.Component.cid] = child
       }
