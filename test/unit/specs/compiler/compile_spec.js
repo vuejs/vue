@@ -514,5 +514,19 @@ if (_.inBrowser) {
       expect(hasWarned(_, 'attribute interpolation is allowed only in valid native attributes')).toBe(true)
     })
 
+    it('warn directives on fragment instances', function () {
+      new Vue({
+        el: el,
+        template: '<test v-show="ok"></test>',
+        components: {
+          test: {
+            replace: true,
+            template: '123'
+          }
+        }
+      })
+      expect(hasWarned(_, 'v-show is ignored on component <test>')).toBe(true)
+    })
+
   })
 }
