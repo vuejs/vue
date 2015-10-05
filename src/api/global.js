@@ -138,6 +138,7 @@ config._assetTypes.forEach(function (type) {
         definition = _.Vue.extend(definition)
       }
       this.options[type + 's'][id] = definition
+      return definition
     }
   }
 })
