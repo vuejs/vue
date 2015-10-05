@@ -357,10 +357,10 @@ exports.resolveAsset = function resolve (options, type, id) {
 
   while (
     !asset &&
-    options._parent &&
+    options.parent &&
     (!config.strict || options._repeat)
   ) {
-    options = (options._context || options._parent).$options
+    options = (options._context || options.parent).$options
     assets = options[type]
     asset = assets[id] || assets[camelizedId] || assets[pascalizedId]
   }

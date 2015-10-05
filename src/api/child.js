@@ -11,7 +11,14 @@ var _ = require('../util')
  * @public
  */
 
-exports.$addChild = function (opts, BaseCtor) {
+exports.$addChild = function () {
+  if (process.env.NODE_ENV !== 'production') {
+    _.deprecation.ADD_CHILD()
+  }
+  return this._addChild.apply(this, arguments)
+}
+
+exports._addChild = function (opts, BaseCtor) {
   BaseCtor = BaseCtor || _.Vue
   opts = opts || {}
   var ChildVue
@@ -42,8 +49,7 @@ exports.$addChild = function (opts, BaseCtor) {
   } else {
     ChildVue = BaseCtor
   }
-  opts._parent = parent
-  opts._root = parent.$root
+  opts.parent = parent
   var child = new ChildVue(opts)
   return child
 }

@@ -251,6 +251,13 @@ if (process.env.NODE_ENV !== 'production') {
         'v-component will be deprecated in 1.0.0. Use "is" attribute instead. ' +
         'See https://github.com/yyx990803/vue/issues/1278 for more details.'
       )
+    },
+
+    ADD_CHILD: function () {
+      warn(
+        'vm.$addChild() will be deprecated in 1.0.0. Use the `parent` option ' +
+        'instead. (Note the `parent` option does not work with `inherit: true`)'
+      )
     }
 
   }

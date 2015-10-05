@@ -16,8 +16,10 @@ exports._init = function (options) {
   options = options || {}
 
   this.$el = null
-  this.$parent = options._parent
-  this.$root = options._root || this
+  this.$parent = options.parent
+  this.$root = this.$parent
+    ? this.$parent.$root
+    : this
   this.$children = []
   this.$ = {}           // child vm references
   this.$$ = {}          // element references
@@ -50,7 +52,7 @@ exports._init = function (options) {
   // if this is a transcluded component, context
   // will be the common parent vm of this instance
   // and its host.
-  this._context = options._context || options._parent
+  this._context = options._context || this.$parent
 
   // scope:
   // if this is inside an inline v-repeat, the scope

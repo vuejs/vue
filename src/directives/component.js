@@ -249,7 +249,7 @@ module.exports = {
         _.extend(options, extraOptions)
       }
       var parent = this._host || this.vm
-      var child = parent.$addChild(options, this.Component)
+      var child = parent._addChild(options, this.Component)
       if (this.keepAlive) {
         this.cache[this.Component.cid] = child
       }

@@ -387,7 +387,7 @@ module.exports = {
     // resolve constructor
     var Component = this.Component || this.resolveDynamicComponent(data, meta)
     var parent = this._host || this.vm
-    var vm = parent.$addChild({
+    var vm = parent._addChild({
       el: templateParser.clone(this.template),
       data: data,
       inherit: this.inline,
