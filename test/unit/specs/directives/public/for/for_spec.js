@@ -25,7 +25,7 @@ if (_.inBrowser) {
       var vm = new Vue({
         el: el,
         data: {
-          items: [2, 1, 2]
+          items: [1, 2, 3]
         },
         template: '<div v-for="item in items">{{$index}} {{item}}</div>'
       })
@@ -169,7 +169,7 @@ if (_.inBrowser) {
       var vm = new Vue({
         el: el,
         data: {
-          items: [2, 1, 2]
+          items: [1, 2, 3]
         },
         template: '<test v-for="item in items" :index="$index" :value="item"></test>',
         components: {
@@ -536,6 +536,17 @@ if (_.inBrowser) {
       }
     })
 
+    it('primitive values track by $index', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          items: [1, 2, 3]
+        },
+        template: '<div v-for="item in items" track-by="$index">{{$index}} {{item}}</div>'
+      })
+      assertPrimitiveMutationsWithDuplicates(vm, el, done)
+    })
+
     it('warn missing alias', function () {
       new Vue({
         el: el,
@@ -553,7 +564,7 @@ if (_.inBrowser) {
           items: [obj, obj]
         }
       })
-      expect(hasWarned(_, 'Duplicate objects')).toBe(true)
+      expect(hasWarned(_, 'Duplicate value')).toBe(true)
     })
 
     it('warn duplicate objects on diff', function (done) {
@@ -568,7 +579,7 @@ if (_.inBrowser) {
       expect(_.warn).not.toHaveBeenCalled()
       vm.items.push(obj)
       _.nextTick(function () {
-        expect(hasWarned(_, 'Duplicate objects')).toBe(true)
+        expect(hasWarned(_, 'Duplicate value')).toBe(true)
         done()
       })
     })
@@ -581,7 +592,7 @@ if (_.inBrowser) {
           items: [{id: 1}, {id: 1}]
         }
       })
-      expect(hasWarned(_, 'Duplicate objects with the same track-by key')).toBe(true)
+      expect(hasWarned(_, 'Duplicate value')).toBe(true)
     })
 
     it('repeat number', function () {
@@ -873,7 +884,74 @@ function assertPrimitiveMutations (vm, el, done) {
   assertMarkup()
   go(
     function () {
-      // check duplicate
+      vm.items.push(4)
+    },
+    assertMarkup
+  )
+  .then(
+    function () {
+      vm.items.shift()
+    },
+    assertMarkup
+  )
+  .then(
+    function () {
+      vm.items.reverse()
+    },
+    assertMarkup
+  )
+  .then(
+    function () {
+      vm.items.pop()
+    },
+    assertMarkup
+  )
+  .then(
+    function () {
+      vm.items.unshift(1)
+    },
+    assertMarkup
+  )
+  .then(
+    function () {
+      vm.items.sort(function (a, b) {
+        return a > b ? 1 : -1
+      })
+    },
+    assertMarkup
+  )
+  .then(
+    function () {
+      vm.items.splice(1, 1, 5)
+    },
+    assertMarkup
+  )
+  // test swapping the array
+  .then(
+    function () {
+      vm.items = [1, 2, 3]
+    },
+    assertMarkup
+  )
+  .run(done)
+
+  function assertMarkup () {
+    var markup = vm.items.map(function (item, i) {
+      return '<div>' + i + ' ' + item + '</div>'
+    }).join('')
+    expect(el.innerHTML).toBe(markup)
+  }
+}
+
+/**
+ * Assert mutation and markup correctness for v-for on
+ * an Array of primitive values when using track-by="$index"
+ */
+
+function assertPrimitiveMutationsWithDuplicates (vm, el, done) {
+  assertMarkup()
+  go(
+    function () {
       vm.items.push(2, 2, 3)
     },
     assertMarkup

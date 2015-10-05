@@ -546,6 +546,7 @@ function makeTerminalNodeLinkFn (el, dirName, value, options, def) {
     name: dirName,
     expression: parsed.expression,
     filters: parsed.filters,
+    raw: value,
     // either an element directive, or if/for
     def: def || publicDirectives[dirName]
   }

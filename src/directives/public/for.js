@@ -109,14 +109,6 @@ module.exports = {
       primitive = !isObject(value)
       frag = !init && this.getCachedFrag(value, i, key)
       if (frag) { // reusable fragment
-
-        if (process.env.NODE_ENV !== 'production' && frag.reused) {
-          _.warn(
-            'Duplicate objects found in v-for="' + this.expression + '": ' +
-            JSON.stringify(value)
-          )
-        }
-
         frag.reused = true
         // update $index
         frag.scope.$index = i
@@ -131,6 +123,7 @@ module.exports = {
         }
       } else { // new isntance
         frag = this.create(value, alias, i, key)
+        frag.fresh = !init
       }
       frags[i] = frag
       if (init) {
@@ -180,7 +173,7 @@ module.exports = {
         // insert with updated stagger index.
         this.insert(frag, insertionIndex++, prevEl, inDoc)
       }
-      frag.reused = false
+      frag.reused = frag.fresh = false
     }
   },
 
@@ -359,13 +352,12 @@ module.exports = {
         ? idKey === '$index'
           ? index
           : value[idKey]
-        : (key || index)
+        : (key || value)
       if (!cache[id]) {
         cache[id] = frag
-      } else if (!primitive && idKey !== '$index') {
-        process.env.NODE_ENV !== 'production' && _.warn(
-          'Duplicate objects with the same track-by key in v-for: ' + id
-        )
+      } else if (idKey !== '$index') {
+        process.env.NODE_ENV !== 'production' &&
+        this.warnDuplicate(value)
       }
     } else {
       id = this.id
@@ -373,10 +365,8 @@ module.exports = {
         if (value[id] === null) {
           value[id] = frag
         } else {
-          process.env.NODE_ENV !== 'production' && _.warn(
-            'Duplicate objects found in v-for="' + this.expression + '": ' +
-            JSON.stringify(value)
-          )
+          process.env.NODE_ENV !== 'production' &&
+          this.warnDuplicate(value)
         }
       } else {
         _.define(value, id, frag)
@@ -397,16 +387,22 @@ module.exports = {
   getCachedFrag: function (value, index, key) {
     var idKey = this.idKey
     var primitive = !isObject(value)
+    var frag
     if (key || idKey || primitive) {
       var id = idKey
         ? idKey === '$index'
           ? index
           : value[idKey]
-        : (key || index)
-      return this.cache[id]
+        : (key || value)
+      frag = this.cache[id]
     } else {
-      return value[this.id]
+      frag = value[this.id]
     }
+    if (frag && (frag.reused || frag.fresh)) {
+      process.env.NODE_ENV !== 'production' &&
+      this.warnDuplicate(value)
+    }
+    return frag
   },
 
   /**
@@ -429,7 +425,7 @@ module.exports = {
         ? idKey === '$index'
           ? index
           : value[idKey]
-        : (key || index)
+        : (key || value)
       this.cache[id] = null
     } else {
       value[this.id] = null
@@ -578,4 +574,14 @@ function range (n) {
     ret[i] = i
   }
   return ret
+}
+
+if (process.env.NODE_ENV !== 'production') {
+  module.exports.warnDuplicate = function (value) {
+    _.warn(
+      'Duplicate value found in v-for="' + this.descriptor.raw + '": ' +
+      JSON.stringify(value) + '. Use track-by="$index" if ' +
+      'you are expecting duplicate values.'
+    )
+  }
 }
