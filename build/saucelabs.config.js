@@ -1,7 +1,7 @@
 var sauceConfig = {
   testName: 'Vue.js unit tests',
   recordScreenshots: false,
-  build: process.env.TRAVIS_JOB_ID || Date.now()
+  build: process.env.CIRCLE_BUILD_NUM || Date.now()
 }
 
 /**
