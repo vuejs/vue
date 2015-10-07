@@ -21,8 +21,15 @@ exports.checkComponent = function (el, options, hasAttrs) {
       /* istanbul ignore if */
       if (exp) return exp
       if (process.env.NODE_ENV !== 'production') {
-        if (tag.indexOf('-') > -1 ||
-            /HTMLUnknownElement/.test(Object.prototype.toString.call(el))) {
+        if (
+          tag.indexOf('-') > -1 ||
+          (
+            /HTMLUnknownElement/.test(el.toString()) &&
+            // Chrome returns unknown for several HTML5 elements.
+            // https://code.google.com/p/chromium/issues/detail?id=540526
+            !/^(data|time|rtc|rb)$/.test(tag)
+          )
+        ) {
           _.warn(
             'Unknown custom element: <' + tag + '> - did you ' +
             'register the component correctly?'
