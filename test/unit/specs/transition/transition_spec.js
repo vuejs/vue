@@ -191,7 +191,7 @@ if (_.inBrowser && !_.isIE9) {
           expect(hooks.afterEnter).toHaveBeenCalled()
           expect(el.classList.contains('test-no-trans-enter')).toBe(false)
           // wait until transition.justEntered flag is off
-          _.nextTick(function () {
+          setTimeout(function () {
             transition.apply(el, -1, op, vm, cb)
             expect(hooks.beforeLeave).toHaveBeenCalled()
             expect(hooks.leave).toHaveBeenCalled()
@@ -202,7 +202,7 @@ if (_.inBrowser && !_.isIE9) {
               expect(el.classList.contains('test-no-trans-leave')).toBe(false)
               done()
             })
-          })
+          }, 17)
         })
       })
 
