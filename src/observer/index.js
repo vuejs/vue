@@ -1,5 +1,4 @@
 var _ = require('../util')
-var config = require('../config')
 var Dep = require('./dep')
 var arrayMethods = require('./array')
 var arrayKeys = Object.getOwnPropertyNames(arrayMethods)
@@ -19,7 +18,7 @@ function Observer (value) {
   this.dep = new Dep()
   _.define(value, '__ob__', this)
   if (_.isArray(value)) {
-    var augment = config.proto && _.hasProto
+    var augment = _.hasProto
       ? protoAugment
       : copyAugment
     augment(value, arrayMethods, arrayKeys)

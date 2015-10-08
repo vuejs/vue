@@ -1,6 +1,5 @@
 var Observer = require('../../../../src/observer')
 var Dep = require('../../../../src/observer/dep')
-var config = require('../../../../src/config')
 var _ = require('../../../../src/util')
 
 describe('Observer', function () {
@@ -165,7 +164,7 @@ describe('Observer', function () {
   })
 
   it('no proto', function () {
-    config.proto = false
+    _.hasProto = false
     var arr = [1, 2, 3]
     var ob2 = Observer.create(arr)
     expect(arr.$set).toBeTruthy()
@@ -175,7 +174,7 @@ describe('Observer', function () {
     spyOn(dep2, 'notify')
     arr.push(1)
     expect(dep2.notify).toHaveBeenCalled()
-    config.proto = true
+    _.hasProto = true
   })
 
 })

@@ -18,15 +18,6 @@ module.exports = {
   silent: false,
 
   /**
-   * Whether allow observer to alter data objects'
-   * __proto__.
-   *
-   * @type {Boolean}
-   */
-
-  proto: true,
-
-  /**
    * Whether to use async rendering.
    */
 
