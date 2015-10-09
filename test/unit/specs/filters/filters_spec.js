@@ -193,13 +193,10 @@ describe('Filters', function () {
     res = filter(arr, 'a.b')
     assertArray(res, [arr[0], arr[2], arr[1]])
     // reverse key
-    res = filter(arr, 'a.b', true)
+    res = filter(arr, 'a.b', -1)
     assertArray(res, [arr[1], arr[2], arr[0]])
-    // literal args
-    res = filter(arr, 'c', '-1')
-    assertArray(res, [arr[1], arr[0], arr[2]])
-    // negate reverse
-    res = filter(arr, 'c', false)
+    // literal asc
+    res = filter(arr, 'c', 1)
     assertArray(res, [arr[2], arr[0], arr[1]])
     // no sort key
     res = filter(arr, null)
