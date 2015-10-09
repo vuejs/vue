@@ -8,19 +8,19 @@ Vue.component('demo-grid', {
     filterKey: String
   },
   data: function () {
-    var reversed = {}
+    var sortOrders = {}
     this.columns.forEach(function (key) {
-      reversed[key] = false
+      sortOrders[key] = 1
     })
     return {
       sortKey: '',
-      reversed: reversed
+      sortOrders: sortOrders
     }
   },
   methods: {
     sortBy: function (key) {
       this.sortKey = key
-      this.reversed[key] = !this.reversed[key]
+      this.sortOrders[key] = this.sortOrders[key] * -1
     }
   }
 })
