@@ -1,9 +1,5 @@
 var _ = require('../../util')
 
-// modifiers
-var stopRE = /\.stop\b/
-var preventRE = /\.prevent\b/
-
 // keyCode aliases
 var keyCodes = {
   esc: 27,
@@ -17,27 +13,30 @@ var keyCodes = {
   down: 40
 }
 
-function keyFilter (handler, key) {
-  var code = keyCodes[key]
-  if (!code) {
-    code = parseInt(key, 10)
-  }
-  return function (e) {
-    if (e.keyCode === code) {
+function keyFilter (handler, keys) {
+  var codes = keys.map(function (key) {
+    var code = keyCodes[key]
+    if (!code) {
+      code = parseInt(key, 10)
+    }
+    return code
+  })
+  return function keyHandler (e) {
+    if (codes.indexOf(e.keyCode) > -1) {
       return handler.call(this, e)
     }
   }
 }
 
 function stopFilter (handler) {
-  return function (e) {
+  return function stopHandler (e) {
     e.stopPropagation()
     return handler.call(this, e)
   }
 }
 
 function preventFilter (handler) {
-  return function (e) {
+  return function preventHandler (e) {
     e.preventDefault()
     return handler.call(this, e)
   }
@@ -49,38 +48,14 @@ module.exports = {
   priority: 700,
 
   bind: function () {
-    // 1.0.0 key filter
-    var event = this.arg
-
-    // stop modifier
-    if (stopRE.test(event)) {
-      this.stop = true
-      event = event.replace(stopRE, '')
-    }
-
-    // prevent modifier
-    if (preventRE.test(event)) {
-      this.prevent = true
-      event = event.replace(preventRE, '')
-    }
-
-    // key modifier
-    var keyIndex = event.indexOf('.')
-    if (keyIndex > -1) {
-      this.event = event.slice(0, keyIndex)
-      this.key = event.slice(keyIndex + 1)
-    } else {
-      this.event = event
-    }
-
     // deal with iframes
     if (
       this.el.tagName === 'IFRAME' &&
-      this.event !== 'load'
+      this.arg !== 'load'
     ) {
       var self = this
       this.iframeBind = function () {
-        _.on(self.el.contentWindow, self.event, self.handler)
+        _.on(self.el.contentWindow, self.arg, self.handler)
       }
       this.on('load', this.iframeBind)
     }
@@ -89,7 +64,7 @@ module.exports = {
   update: function (handler) {
     if (typeof handler !== 'function') {
       process.env.NODE_ENV !== 'production' && _.warn(
-        'v-on:' + this.event + '="' +
+        'v-on:' + this.arg + '="' +
         this.expression + '" expects a function value, ' +
         'got ' + handler
       )
@@ -97,14 +72,19 @@ module.exports = {
     }
 
     // apply modifiers
-    if (this.stop) {
+    if (this.modifiers.stop) {
       handler = stopFilter(handler)
     }
-    if (this.prevent) {
+    if (this.modifiers.prevent) {
       handler = preventFilter(handler)
     }
-    if (this.key) {
-      handler = keyFilter(handler, this.key)
+    // key filter
+    var keys = Object.keys(this.modifiers)
+      .filter(function (key) {
+        return key !== 'stop' && key !== 'prevent'
+      })
+    if (keys.length) {
+      handler = keyFilter(handler, keys)
     }
 
     this.reset()
@@ -118,7 +98,7 @@ module.exports = {
     if (this.iframeBind) {
       this.iframeBind()
     } else {
-      _.on(this.el, this.event, this.handler)
+      _.on(this.el, this.arg, this.handler)
     }
   },
 
@@ -127,7 +107,7 @@ module.exports = {
       ? this.el.contentWindow
       : this.el
     if (this.handler) {
-      _.off(el, this.event, this.handler)
+      _.off(el, this.arg, this.handler)
     }
   },
 
