@@ -62,6 +62,11 @@ exports.orderBy = function (arr, sortKey, reverse) {
   if (!sortKey) {
     return arr
   }
+  if (process.env.NODE_ENV !== 'production') {
+    if (arguments.length > 2 && typeof reverse !== 'number') {
+      _.deprecation.ORDER_BY_REVERSE()
+    }
+  }
   var order = (reverse && reverse < 0) ? -1 : 1
   // sort on a copy to avoid mutating original array
   return arr.slice().sort(function (a, b) {

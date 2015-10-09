@@ -258,6 +258,13 @@ if (process.env.NODE_ENV !== 'production') {
         'vm.$addChild() will be deprecated in 1.0.0. Use the `parent` option ' +
         'instead. (Note the `parent` option does not work with `inherit: true`)'
       )
+    },
+
+    ORDER_BY_REVERSE: function () {
+      warn(
+        'The "orderBy" filter\'s reverse argument is expected to be a number in 1.0.0. ' +
+        'A number smaller than 0 indicates the output should be in descending order.'
+      )
     }
 
   }
