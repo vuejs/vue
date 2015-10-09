@@ -10,8 +10,8 @@ var resolveAsset = _.resolveAsset
 // special binding prefixes
 var bindRE = /^v-bind:|^:/
 var onRE = /^v-on:|^@/
-var literalRE = /\.literal$/
 var argRE = /:(.*)$/
+var modifierRE = /\.[^\.]+/g
 var transitionRE = /^(v-bind:|:)?transition$/
 
 // terminal directives
@@ -480,8 +480,10 @@ function checkComponent (el, options) {
     var descriptor = {
       name: 'component',
       expression: component.id,
-      literal: !component.dynamic,
-      def: internalDirectives.component
+      def: internalDirectives.component,
+      modifiers: {
+        literal: !component.dynamic
+      }
     }
     var componentLinkFn = function (vm, el, host, scope, frag) {
       vm._bindDir(descriptor, el, host, scope, frag)
@@ -568,34 +570,35 @@ function makeTerminalNodeLinkFn (el, dirName, value, options, def) {
 function compileDirectives (attrs, options) {
   var i = attrs.length
   var dirs = []
-  var attr, name, raw, value, dirName, arg, dirDef, isLiteral, tokens
+  var attr, name, value, rawName, rawValue, dirName, arg, modifiers, dirDef, tokens
   while (i--) {
     attr = attrs[i]
-    name = attr.name
-    raw = value = attr.value
+    name = rawName = attr.name
+    value = rawValue = attr.value
     tokens = textParser.parse(value)
+    // reset arg
+    arg = null
+    // check modifiers
+    modifiers = parseModifiers(name)
+    name = name.replace(modifierRE, '')
 
     // attribute interpolations
     if (tokens) {
       value = textParser.tokensToExp(tokens)
-      pushDir('bind', publicDirectives.bind, {
-        arg: name,
-        interp: true
-      })
+      arg = name
+      pushDir('bind', publicDirectives.bind, true)
     } else
 
     // special attribute: transition
     if (transitionRE.test(name)) {
-      pushDir('transition', internalDirectives.transition, {
-        literal: !bindRE.test(name)
-      })
+      modifiers.literal = !bindRE.test(name)
+      pushDir('transition', internalDirectives.transition)
     } else
 
     // event handlers
     if (onRE.test(name)) {
-      pushDir('on', publicDirectives.on, {
-        arg: name.replace(onRE, '')
-      })
+      arg = name.replace(onRE, '')
+      pushDir('on', publicDirectives.on)
     } else
 
     // attribute bindings
@@ -604,19 +607,13 @@ function compileDirectives (attrs, options) {
       if (dirName === 'style' || dirName === 'class') {
         pushDir(dirName, internalDirectives[dirName])
       } else {
-        pushDir('bind', publicDirectives.bind, {
-          arg: dirName
-        })
+        arg = dirName
+        pushDir('bind', publicDirectives.bind)
       }
     } else
 
     // normal directives
     if (name.indexOf('v-') === 0) {
-      // check literal
-      isLiteral = literalRE.test(name)
-      if (isLiteral) {
-        name = name.replace(literalRE, '')
-      }
       // check arg
       arg = (arg = name.match(argRE)) && arg[1]
       if (arg) {
@@ -637,14 +634,11 @@ function compileDirectives (attrs, options) {
       }
 
       if (dirDef) {
-        if (!isLiteral && _.isLiteral(value)) {
+        if (_.isLiteral(value)) {
           value = _.stripQuotes(value)
-          isLiteral = true
+          modifiers.literal = true
         }
-        pushDir(dirName, dirDef, {
-          arg: arg,
-          literal: isLiteral
-        })
+        pushDir(dirName, dirDef)
       }
     }
   }
@@ -654,28 +648,46 @@ function compileDirectives (attrs, options) {
    *
    * @param {String} dirName
    * @param {Object|Function} def
-   * @param {Object} [opts]
+   * @param {Boolean} [interp]
    */
 
-  function pushDir (dirName, def, opts) {
+  function pushDir (dirName, def, interp) {
     var parsed = dirParser.parse(value)
-    var dir = {
+    dirs.push({
       name: dirName,
-      attr: name,
-      raw: raw,
+      attr: rawName,
+      raw: rawValue,
       def: def,
+      arg: arg,
+      modifiers: modifiers,
       expression: parsed.expression,
-      filters: parsed.filters
-    }
-    if (opts) {
-      _.extend(dir, opts)
-    }
-    dirs.push(dir)
+      filters: parsed.filters,
+      interp: interp
+    })
   }
 
   if (dirs.length) {
     return makeNodeLinkFn(dirs)
   }
+}
+
+/**
+ * Parse modifiers from directive attribute name.
+ *
+ * @param {String} name
+ * @return {Object}
+ */
+
+function parseModifiers (name) {
+  var res = Object.create(null)
+  var match = name.match(modifierRE)
+  if (match) {
+    var i = match.length
+    while (i--) {
+      res[match[i].slice(1)] = true
+    }
+  }
+  return res
 }
 
 /**

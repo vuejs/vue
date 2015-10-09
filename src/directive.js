@@ -35,8 +35,9 @@ function Directive (descriptor, vm, el, host, scope, frag) {
   this.name = descriptor.name
   this.expression = descriptor.expression
   this.arg = descriptor.arg
+  this.modifiers = descriptor.modifiers
   this.filters = descriptor.filters
-  this.literal = descriptor.literal
+  this.literal = this.modifiers && this.modifiers.literal
   // private
   this._locked = false
   this._bound = false

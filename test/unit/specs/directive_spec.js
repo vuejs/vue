@@ -34,7 +34,9 @@ describe('Directive', function () {
       name: 'test',
       def: def,
       expression: 'a',
-      literal: false,
+      modifiers: {
+        literal: false
+      },
       filters: [{ name: 'test' }]
     }, vm, el)
     d._bind()
@@ -66,7 +68,9 @@ describe('Directive', function () {
       expression: 'a',
       raw: 'a',
       def: def,
-      literal: true
+      modifiers: {
+        literal: true
+      }
     }, vm, el)
     d._bind()
     expect(d._watcher).toBeUndefined()

@@ -18,7 +18,9 @@ if (_.inBrowser) {
         name: 'transition',
         raw: 'test',
         def: def,
-        literal: true
+        modifiers: {
+          literal: true
+        }
       }, vm, el)
       dir._bind()
       var transition = dir.el.__v_trans
@@ -43,7 +45,9 @@ if (_.inBrowser) {
         name: 'transition',
         raw: 'test',
         def: def,
-        literal: true
+        modifiers: {
+          literal: true
+        }
       }, vm1, el)
       dir.el.__vue__ = vm2
       dir._bind()
