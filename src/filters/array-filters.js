@@ -62,14 +62,7 @@ exports.orderBy = function (arr, sortKey, reverse) {
   if (!sortKey) {
     return arr
   }
-  var order = 1
-  if (arguments.length > 2) {
-    if (reverse === '-1') {
-      order = -1
-    } else {
-      order = reverse ? -1 : 1
-    }
-  }
+  var order = (reverse && reverse < 0) ? -1 : 1
   // sort on a copy to avoid mutating original array
   return arr.slice().sort(function (a, b) {
     if (sortKey !== '$key') {
