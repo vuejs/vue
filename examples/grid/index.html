@@ -18,7 +18,7 @@
               v-bind:class="{active: sortKey == key}">
               {{key | capitalize}}
               <span class="arrow"
-                v-bind:class="reversed[key] ? 'dsc' : 'asc'">
+                :class="sortOrders[key] > 0 ? 'asc' : 'dsc'">
               </span>
             </th>
           </tr>
@@ -27,7 +27,7 @@
           <tr v-for="
             entry in data
             | filterBy filterKey
-            | orderBy sortKey reversed[sortKey]">
+            | orderBy sortKey sortOrders[sortKey]">
             <td v-for="key in columns">
               {{entry[key]}}
             </td>
