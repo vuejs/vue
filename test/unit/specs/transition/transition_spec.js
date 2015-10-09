@@ -87,6 +87,7 @@ if (_.inBrowser && !_.isIE9) {
       var el, vm, op, cb
       beforeEach(function () {
         el = document.createElement('div')
+        el.textContent = 'hello'
         op = jasmine.createSpy('transition skip op')
         cb = jasmine.createSpy('transition skip cb')
         vm = new Vue()
@@ -135,6 +136,7 @@ if (_.inBrowser && !_.isIE9) {
       var vm, el, op, cb, hooks
       beforeEach(function (done) {
         el = document.createElement('div')
+        el.textContent = 'hello'
         vm = new Vue({ el: el })
         op = jasmine.createSpy('css op')
         cb = jasmine.createSpy('css cb')
@@ -441,6 +443,7 @@ if (_.inBrowser && !_.isIE9) {
       beforeEach(function () {
         hooks = {}
         el = document.createElement('div')
+        el.textContent = 'hello'
         document.body.appendChild(el)
         op = jasmine.createSpy('js transition op')
         cb = jasmine.createSpy('js transition cb')

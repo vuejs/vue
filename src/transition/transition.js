@@ -357,9 +357,11 @@ p.setupCssCb = function (event, cb) {
  */
 
 function isHidden (el) {
-  return el.style.display === 'none' ||
-    el.style.visibility === 'hidden' ||
-    el.hidden
+  return !(
+    el.offsetWidth &&
+    el.offsetHeight &&
+    el.getClientRects().length
+  )
 }
 
 module.exports = Transition
