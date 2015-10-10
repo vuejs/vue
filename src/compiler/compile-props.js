@@ -85,23 +85,24 @@ module.exports = function compileProps (el, propOptions) {
           }
         }
         prop.parentPath = value
+
+        // warn required two-way
+        if (
+          process.env.NODE_ENV !== 'production' &&
+          options.twoWay &&
+          prop.mode !== propBindingModes.TWO_WAY
+        ) {
+          _.warn(
+            'Prop "' + name + '" expects a two-way binding type.'
+          )
+        }
+
       } else if (options.required) {
         // warn missing required
         process.env.NODE_ENV !== 'production' && _.warn(
           'Missing required prop: ' + name
         )
       }
-    }
-
-    // warn required two-way
-    if (
-      process.env.NODE_ENV !== 'production' &&
-      options.twoWay &&
-      prop.mode !== propBindingModes.TWO_WAY
-    ) {
-      _.warn(
-        'Prop "' + name + '" expects a two-way binding type.'
-      )
     }
 
     // push prop
