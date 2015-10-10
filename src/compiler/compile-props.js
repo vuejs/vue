@@ -140,6 +140,7 @@ module.exports = function compileProps (el, propOptions) {
     // warn required two-way
     if (
       process.env.NODE_ENV !== 'production' &&
+      value !== null &&
       options.twoWay &&
       prop.mode !== propBindingModes.TWO_WAY
     ) {
@@ -149,7 +150,7 @@ module.exports = function compileProps (el, propOptions) {
     }
 
     // warn missing required
-    if (value === null && options && options.required) {
+    if (value === null && options.required) {
       process.env.NODE_ENV !== 'production' && _.warn(
         'Missing required prop: ' + name
       )
