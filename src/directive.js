@@ -5,6 +5,8 @@ var textParser = require('./parsers/text')
 var expParser = require('./parsers/expression')
 function noop () {}
 
+var modifierRE = /\.[^\.]+/g
+
 /**
  * A directive links a DOM element with a piece of data,
  * which is the result of evaluating an expression.
@@ -35,6 +37,13 @@ function Directive (name, el, vm, descriptor, def, host, scope, frag, arg, liter
   // copy descriptor props
   this.expression = descriptor.expression
   this.arg = arg || descriptor.arg
+
+  // patch: modifiers
+  if (typeof this.arg === 'string') {
+    this.modifiers = parseModifiers(this.arg)
+    this.arg = this.arg.replace(modifierRE, '')
+  }
+
   this.filters = descriptor.filters
   // private
   this._def = def
@@ -316,6 +325,25 @@ function removeBindAttr (el, name) {
   if (el.hasAttribute(attr)) {
     el.removeAttribute(attr)
   }
+}
+
+/**
+ * Parse modifiers from directive attribute name.
+ *
+ * @param {String} name
+ * @return {Object}
+ */
+
+function parseModifiers (name) {
+  var res = Object.create(null)
+  var match = name.match(modifierRE)
+  if (match) {
+    var i = match.length
+    while (i--) {
+      res[match[i].slice(1)] = true
+    }
+  }
+  return res
 }
 
 module.exports = Directive
