@@ -155,3 +155,16 @@ Object.defineProperty(module.exports, 'unsafeDelimiters', {
     textParser.compileRegex()
   }
 })
+
+var proto = true
+Object.defineProperty(module.exports, 'proto', {
+  get: function () {
+    return proto
+  },
+  set: function (val) {
+    if (process.env.NODE_ENV !== 'production') {
+      require('./util').deprecation.PROTO()
+    }
+    proto = val
+  }
+})

@@ -265,6 +265,12 @@ if (process.env.NODE_ENV !== 'production') {
         'The "orderBy" filter\'s reverse argument is expected to be a number in 1.0.0. ' +
         'A number smaller than 0 indicates the output should be in descending order.'
       )
+    },
+
+    PROTO: function () {
+      warn(
+        'The "proto" global config will be deprecated in 1.0.0.'
+      )
     }
 
   }
