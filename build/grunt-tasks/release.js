@@ -69,14 +69,13 @@ module.exports = function (grunt) {
       if (!answer || answer.toLowerCase() === 'y') {
         console.log(blue('Releasing: ' + next))
         // set version in env
-        process.env.VUE_VERSION = next
         grunt.task.run([
           'eslint',
           'cover',
+          'version:' + next,
           'build',
           'casper',
           'sauce',
-          'version:' + next,
           'git:' + next
         ])
       }

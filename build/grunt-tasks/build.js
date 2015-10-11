@@ -13,9 +13,7 @@ module.exports = function (grunt) {
     var prodConfig = require('../webpack.build.prod.config')
 
     // handle version
-    var version =
-      process.env.VUE_VERSION ||
-      require('../../package.json').version
+    var version = require('../../package.json').version
 
     // add banner
     var banner = new webpack.BannerPlugin(
