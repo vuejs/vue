@@ -108,6 +108,7 @@ strats.el = function (parentVal, childVal, vm) {
  * Hooks and param attributes are merged as arrays.
  */
 
+strats.init =
 strats.created =
 strats.ready =
 strats.attached =
