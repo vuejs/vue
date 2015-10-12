@@ -95,6 +95,9 @@ exports._init = function (options) {
   // it will be filled up in _initScope().
   this._data = {}
 
+  // call init hook
+  this._callHook('init')
+
   // initialize data observation and scope inheritance.
   this._initState()
 
