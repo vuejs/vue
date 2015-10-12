@@ -508,13 +508,13 @@ if (_.inBrowser) {
     it('attribute interpolation: warn invalid', function () {
       new Vue({
         el: el,
-        template: '<div hello="{{a}}"></div>',
+        template: '<div v-text="{{a}}"></div>',
         data: {
           a: '123'
         }
       })
       expect(el.innerHTML).toBe('<div></div>')
-      expect(hasWarned(_, 'attribute interpolation is allowed only in valid native attributes')).toBe(true)
+      expect(hasWarned(_, 'attribute interpolation is not allowed in Vue.js directives')).toBe(true)
     })
 
     it('warn directives on fragment instances', function () {
