@@ -24,7 +24,7 @@ var demo = new Vue({
   el: '#demo',
 
   data: {
-    branches: ['master', 'dev', '1.0.0-alpha'],
+    branches: ['master', 'dev'],
     currentBranch: 'master',
     commits: null
   },
