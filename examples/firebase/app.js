@@ -59,8 +59,7 @@ var app = new Vue({
 
   // methods
   methods: {
-    addUser: function (e) {
-      e.preventDefault()
+    addUser: function () {
       if (this.isValid) {
         Users.push(this.newUser)
         this.newUser.name = ''
