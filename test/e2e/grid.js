@@ -11,7 +11,7 @@ casper.test.begin('grid', 73, function (test) {
     assertTable(test, ['name', 'power'], [
       { name: 'Chuck Norris', power: Infinity },
       { name: 'Bruce Lee', power: 9000 },
-      { name: 'Jacky Chang', power: 7000 },
+      { name: 'Jackie Chan', power: 7000 },
       { name: 'Jet Li', power: 8000 }
     ])
   })
@@ -23,7 +23,7 @@ casper.test.begin('grid', 73, function (test) {
     test.assertElementCount('th:nth-child(2) .arrow.dsc', 0)
     assertTable(test, ['name', 'power'], [
       { name: 'Jet Li', power: 8000 },
-      { name: 'Jacky Chang', power: 7000 },
+      { name: 'Jackie Chan', power: 7000 },
       { name: 'Chuck Norris', power: Infinity },
       { name: 'Bruce Lee', power: 9000 }
     ])
@@ -37,7 +37,7 @@ casper.test.begin('grid', 73, function (test) {
       { name: 'Chuck Norris', power: Infinity },
       { name: 'Bruce Lee', power: 9000 },
       { name: 'Jet Li', power: 8000 },
-      { name: 'Jacky Chang', power: 7000 }
+      { name: 'Jackie Chan', power: 7000 }
     ])
   })
   .thenClick('th:nth-child(2)', function () {
@@ -46,7 +46,7 @@ casper.test.begin('grid', 73, function (test) {
     test.assertElementCount('th:nth-child(1) .arrow.dsc', 1)
     test.assertElementCount('th:nth-child(2) .arrow.asc', 1)
     assertTable(test, ['name', 'power'], [
-      { name: 'Jacky Chang', power: 7000 },
+      { name: 'Jackie Chan', power: 7000 },
       { name: 'Jet Li', power: 8000 },
       { name: 'Bruce Lee', power: 9000 },
       { name: 'Chuck Norris', power: Infinity }
@@ -60,7 +60,7 @@ casper.test.begin('grid', 73, function (test) {
     assertTable(test, ['name', 'power'], [
       { name: 'Bruce Lee', power: 9000 },
       { name: 'Chuck Norris', power: Infinity },
-      { name: 'Jacky Chang', power: 7000 },
+      { name: 'Jackie Chan', power: 7000 },
       { name: 'Jet Li', power: 8000 }
     ])
   })
@@ -72,7 +72,7 @@ casper.test.begin('grid', 73, function (test) {
   })
   .then(function () {
     assertTable(test, ['name', 'power'], [
-      { name: 'Jacky Chang', power: 7000 },
+      { name: 'Jackie Chan', power: 7000 },
       { name: 'Jet Li', power: 8000 }
     ])
   })
