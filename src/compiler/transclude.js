@@ -1,6 +1,6 @@
 var _ = require('../util')
 var templateParser = require('../parsers/template')
-var specialCharRE = /[^a-zA-Z_\-:\.]/
+var specialCharRE = /[^\w\-:\.]/
 
 /**
  * Process an element or a DocumentFragment based on a
