@@ -27,7 +27,7 @@
       twoWay: true,
       bind: function () {
         var optionsData
-        var optionsExpression = this._checkParam('options')
+        var optionsExpression = this.param('options')
         if (optionsExpression) {
           optionsData = this.vm.$eval(optionsExpression)
         }
