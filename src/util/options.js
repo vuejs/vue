@@ -231,7 +231,7 @@ function guardComponents (options) {
       }
       def = components[key]
       if (_.isPlainObject(def)) {
-        def.id = def.id || key
+        def.name = def.name || key
         components[key] = def._Ctor || (def._Ctor = _.Vue.extend(def))
       }
     }
@@ -280,10 +280,10 @@ function guardArrayAssets (assets) {
     var asset
     while (i--) {
       asset = assets[i]
-      var id = asset.id || (asset.options && asset.options.id)
+      var id = asset.name || (asset.options && asset.options.name)
       if (!id) {
         process.env.NODE_ENV !== 'production' && _.warn(
-          'Array-syntax assets must provide an id field.'
+          'Array-syntax assets must provide a "name" field.'
         )
       } else {
         res[id] = asset
