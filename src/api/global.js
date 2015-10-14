@@ -39,6 +39,10 @@ var cid = 1
 exports.extend = function (extendOptions) {
   extendOptions = extendOptions || {}
   var Super = this
+  var isFirstExtend = Super.cid === 0
+  if (isFirstExtend && extendOptions._Ctor) {
+    return extendOptions._Ctor
+  }
   var name = extendOptions.name || Super.options.name
   var Sub = createClass(name || 'VueComponent')
   Sub.prototype = Object.create(Super.prototype)
@@ -59,6 +63,10 @@ exports.extend = function (extendOptions) {
   // enable recursive self-lookup
   if (name) {
     Sub.options.components[name] = Sub
+  }
+  // cache constructor
+  if (isFirstExtend) {
+    extendOptions._Ctor = Sub
   }
   return Sub
 }
