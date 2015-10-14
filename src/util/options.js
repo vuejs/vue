@@ -232,7 +232,7 @@ function guardComponents (options) {
       def = components[key]
       if (_.isPlainObject(def)) {
         def.name = def.name || key
-        components[key] = def._Ctor || (def._Ctor = _.Vue.extend(def))
+        components[key] = _.Vue.extend(def)
       }
     }
   }
