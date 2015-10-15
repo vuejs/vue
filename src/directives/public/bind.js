@@ -21,7 +21,7 @@ var modelProps = {
 }
 
 // check for attribtues that prohibit interpolations
-var disallowedInterpAttrRE = /^v-|^(is|transition|transition-mode|debounce|track-by|stagger|enter-stagger|leave-stagger)$/
+var disallowedInterpAttrRE = /^v-|^:|^@|^(is|transition|transition-mode|debounce|track-by|stagger|enter-stagger|leave-stagger)$/
 
 module.exports = {
 
