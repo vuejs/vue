@@ -119,7 +119,7 @@ module.exports = function compileProps (el, propOptions) {
         prop.filters = parsed.filters
         // check literal
         if (literalValueRE.test(value)) {
-          prop.mode = propBindingModes.ONE_TIME
+          prop.raw = _.stripQuotes(value) || value
         } else {
           prop.dynamic = true
           // check non-settable path for two-way bindings
