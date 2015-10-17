@@ -18,7 +18,7 @@ describe('Util - Option merging', function () {
     expect(res).toBe(false)
   })
 
-  it('hooks & props', function () {
+  it('hooks', function () {
     var fn1 = function () {}
     var fn2 = function () {}
     var res
@@ -38,12 +38,6 @@ describe('Util - Option merging', function () {
     expect(res.length).toBe(2)
     expect(res[0]).toBe(fn1)
     expect(res[1]).toBe(fn2)
-    // both arrays
-    res = merge({props: [1]}, {props: [2]}).props
-    expect(Array.isArray(res)).toBe(true)
-    expect(res.length).toBe(2)
-    expect(res[0]).toBe(1)
-    expect(res[1]).toBe(2)
   })
 
   it('events', function () {
@@ -112,6 +106,39 @@ describe('Util - Option merging', function () {
     ).directives
     expect(res.a).toBe(asset1)
     expect(res.b).toBe(asset2)
+  })
+
+  it('props', function () {
+    var res = merge({
+      props: {
+        a: null,
+        d: null
+      }
+    }, {
+      props: {
+        a: { required: true },
+        b: Boolean,
+        c: { type: Array }
+      }
+    })
+    expect(typeof res.props.a).toBe('object')
+    expect(res.props.a.required).toBe(true)
+    expect(typeof res.props.b).toBe('object')
+    expect(res.props.b.type).toBe(Boolean)
+    expect(typeof res.props.c).toBe('object')
+    expect(res.props.c.type).toBe(Array)
+    expect(res.props.d).toBe(null)
+
+    // check array syntax
+    res = merge({
+      props: {
+        b: null
+      }
+    }, {
+      props: ['a']
+    })
+    expect(res.props.a).toBe(null)
+    expect(res.props.b).toBe(null)
   })
 
   it('guard components', function () {

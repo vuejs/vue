@@ -2,6 +2,7 @@ var _ = require('../util')
 var dirParser = require('../parsers/directive')
 var propDef = require('../directives/internal/prop')
 var propBindingModes = require('../config')._propBindingModes
+var empty = {}
 
 // regexes
 var identRE = require('../parsers/path').identRE
@@ -18,11 +19,12 @@ var settablePathRE = /^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\[[^\[\]]+\])*$/
 
 module.exports = function compileProps (el, propOptions) {
   var props = []
-  var i = propOptions.length
+  var names = Object.keys(propOptions)
+  var i = names.length
   var options, name, attr, value, path, parsed, prop
   while (i--) {
-    options = propOptions[i]
-    name = options.name
+    name = names[i]
+    options = propOptions[name] || empty
 
     if (process.env.NODE_ENV !== 'production' && name === '$data') {
       _.warn('Do not use $data as prop.')
