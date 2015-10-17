@@ -595,6 +595,39 @@ if (_.inBrowser) {
       expect(hasWarned(_, 'Duplicate value')).toBe(true)
     })
 
+    it('key val syntax with object', function () {
+      new Vue({
+        el: el,
+        template: '<div v-for="(key,val) in items">{{key}} {{val}}</div>',
+        data: {
+          items: {'a': 'x'}
+        }
+      })
+      expect(el.innerHTML).toBe('<div>a x</div>')
+    })
+
+    it('key val syntax with array', function () {
+      new Vue({
+        el: el,
+        template: '<div v-for="(ind,val) in items">{{ind}} {{val}}</div>',
+        data: {
+          items: ['x', 'y']
+        }
+      })
+      expect(el.innerHTML).toBe('<div>0 x</div><div>1 y</div>')
+    })
+
+    it('key val syntax with nested v-for s', function () {
+      new Vue({
+        el: el,
+        template: '<div v-for="(key,val) in items"><div v-for="(subkey,subval) in val">{{key}} {{subkey}} {{subval}}</div></div>',
+        data: {
+          items: {'a': {'b': 'c'}}
+        }
+      })
+      expect(el.innerHTML).toBe('<div><div>a b c</div></div>')
+    })
+
     it('repeat number', function () {
       new Vue({
         el: el,
