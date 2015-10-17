@@ -14,7 +14,13 @@ module.exports = {
     // support "item in items" syntax
     var inMatch = this.expression.match(/(.*) in (.*)/)
     if (inMatch) {
-      this.alias = inMatch[1]
+      var itMatch = inMatch[1].match(/\((.*),(.*)\)/)
+      if (itMatch) {
+        this.iterator = itMatch[1]
+        this.alias = itMatch[2]
+      } else {
+        this.alias = inMatch[1]
+      }
       this._watcherExp = inMatch[2]
     }
 
@@ -214,6 +220,9 @@ module.exports = {
     } else if (scope.$key) {
       // avoid accidental fallback
       _.define(scope, '$key', null)
+    }
+    if (this.iterator) {
+      _.defineReactive(scope, this.iterator, key || index)
     }
     var frag = this.factory.create(host, scope, this._frag)
     frag.forId = this.id
