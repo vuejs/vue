@@ -5,21 +5,21 @@ if (process.env.NODE_ENV !== 'production') {
     _.warn('{DEPRECATION} ' + msg)
   }
 
-  var newBindingSyntaxLink = ' See https://github.com/yyx990803/vue/issues/1325 for details.'
+  var newBindingSyntaxLink = ' See https://github.com/vuejs/vue/issues/1325 for details.'
 
   _.deprecation = {
 
     REPEAT: function () {
       warn(
         'v-repeat will be deprecated in favor of v-for in 1.0.0. ' +
-        'See https://github.com/yyx990803/vue/issues/1200 for details.'
+        'See https://github.com/vuejs/vue/issues/1200 for details.'
       )
     },
 
     ADD: function () {
       warn(
         '$add() will be deprecated in 1.0.0. Use $set() instead. ' +
-        'See https://github.com/yyx990803/vue/issues/1171 for details.'
+        'See https://github.com/vuejs/vue/issues/1171 for details.'
       )
     },
 
@@ -40,7 +40,7 @@ if (process.env.NODE_ENV !== 'production') {
     WAIT_FOR: function () {
       warn(
         '"wait-for" will be deprecated in 1.0.0. Use `activate` hook instead. ' +
-        'See https://github.com/yyx990803/vue/issues/1169 for details.'
+        'See https://github.com/vuejs/vue/issues/1169 for details.'
       )
     },
 
@@ -48,28 +48,28 @@ if (process.env.NODE_ENV !== 'production') {
       warn(
         'Falling through to parent when resolving ' + type + ' with id "' + id +
         '". Strict mode will be the default in 1.0.0. ' +
-        'See https://github.com/yyx990803/vue/issues/1170 for details.'
+        'See https://github.com/vuejs/vue/issues/1170 for details.'
       )
     },
 
     CONTENT: function () {
       warn(
         '<content> insertion points will be deprecated in in 1.0.0. in favor of <slot>. ' +
-        'See https://github.com/yyx990803/vue/issues/1167 for details.'
+        'See https://github.com/vuejs/vue/issues/1167 for details.'
       )
     },
 
     DATA_AS_PROP: function () {
       warn(
         '$data will no longer be usable as a prop in 1.0.0. ' +
-        'See https://github.com/yyx990803/vue/issues/1198 for details.'
+        'See https://github.com/vuejs/vue/issues/1198 for details.'
       )
     },
 
     INHERIT: function () {
       warn(
         'The "inherit" option will be deprecated in 1.0.0. ' +
-        'See https://github.com/yyx990803/vue/issues/1198 for details.'
+        'See https://github.com/vuejs/vue/issues/1198 for details.'
       )
     },
 
@@ -98,7 +98,7 @@ if (process.env.NODE_ENV !== 'production') {
       warn(
         'v-ref will no longer take an attribute value in 1.0.0. Use "v-ref:id" syntax ' +
         'instead. Also, refs will be registered under vm.$refs instead of vm.$. ' +
-        'See https://github.com/yyx990803/vue/issues/1292 for more details.'
+        'See https://github.com/vuejs/vue/issues/1292 for more details.'
       )
     },
 
@@ -106,7 +106,7 @@ if (process.env.NODE_ENV !== 'production') {
       warn(
         'v-el will no longer take an attribute value in 1.0.0. Use "v-el:id" syntax ' +
         'instead. Also, nodes will be registered under vm.$els instead of vm.$$. ' +
-        'See https://github.com/yyx990803/vue/issues/1292 for more details.'
+        'See https://github.com/vuejs/vue/issues/1292 for more details.'
       )
     },
 
@@ -203,7 +203,7 @@ if (process.env.NODE_ENV !== 'production') {
       warn(
         'No need to return false in handler for event "' + event + '": events ' +
         'no longer propagate beyond the first triggered handler unless the ' +
-        'handler explicitly returns true. See https://github.com/yyx990803/vue/issues/1175 ' +
+        'handler explicitly returns true. See https://github.com/vuejs/vue/issues/1175 ' +
         'for more details.'
       )
     },
@@ -218,7 +218,7 @@ if (process.env.NODE_ENV !== 'production') {
     SELECT_OPTIONS: function () {
       warn(
         'The "options" param for <select v-model> will be deprecated in 1.0.0. ' +
-        'Use v-for to render the options. See https://github.com/yyx990803/vue/issues/1229 ' +
+        'Use v-for to render the options. See https://github.com/vuejs/vue/issues/1229 ' +
         'for more details.'
       )
     },
@@ -249,7 +249,7 @@ if (process.env.NODE_ENV !== 'production') {
     V_COMPONENT: function () {
       warn(
         'v-component will be deprecated in 1.0.0. Use "is" attribute instead. ' +
-        'See https://github.com/yyx990803/vue/issues/1278 for more details.'
+        'See https://github.com/vuejs/vue/issues/1278 for more details.'
       )
     },
 
