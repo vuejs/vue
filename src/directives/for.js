@@ -16,10 +16,10 @@ module.exports = {
     if (inMatch) {
       var itMatch = inMatch[1].match(/\((.*),(.*)\)/)
       if (itMatch) {
-        this.iterator = itMatch[1]
-        this.alias = itMatch[2]
+        this.iterator = itMatch[1].trim()
+        this.alias = itMatch[2].trim()
       } else {
-        this.alias = inMatch[1]
+        this.alias = inMatch[1].trim()
       }
       this._watcherExp = inMatch[2]
     }
@@ -107,6 +107,7 @@ module.exports = {
     var oldFrags = this.frags
     var frags = this.frags = new Array(data.length)
     var alias = this.alias
+    var iterator = this.iterator
     var start = this.start
     var end = this.end
     var inDoc = _.inDoc(start)
@@ -130,6 +131,9 @@ module.exports = {
         // update $key
         if (key) {
           frag.scope.$key = key
+          if (iterator) {
+            frag.scope[iterator] = key
+          }
         }
         // update data for track-by, object repeat &
         // primitive values.
