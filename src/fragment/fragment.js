@@ -83,33 +83,36 @@ function singleBefore (target, trans) {
 
 /**
  * Remove fragment, single node version
+ *
+ * @param {Boolean} [destroy]
  */
 
-function singleRemove () {
+function singleRemove (destroy) {
   var shouldCallRemove = _.inDoc(this.node)
-  transition.remove(this.node, this.vm)
-  this.inserted = false
-  if (shouldCallRemove) {
-    this.callHook(detach)
-  }
+  var self = this
+  transition.remove(this.node, this.vm, function () {
+    self.inserted = false
+    if (shouldCallRemove) {
+      self.callHook(detach)
+    }
+    if (destroy) {
+      self.destroy()
+    }
+  })
 }
 
 /**
  * Insert fragment before target, multi-nodes version
  *
  * @param {Node} target
- * @param {Boolean} trans
  */
 
-function multiBefore (target, trans) {
+function multiBefore (target) {
   _.before(this.node, target)
   var nodes = this.nodes
   var vm = this.vm
-  var method = trans !== false
-    ? transition.before
-    : _.before
   for (var i = 0, l = nodes.length; i < l; i++) {
-    method(nodes[i], target, vm)
+    _.before(nodes[i], target, vm)
   }
   _.before(this.end, target)
   this.inserted = true
@@ -120,9 +123,11 @@ function multiBefore (target, trans) {
 
 /**
  * Remove fragment, multi-nodes version
+ *
+ * @param {Boolean} [destroy]
  */
 
-function multiRemove () {
+function multiRemove (destroy) {
   var shouldCallRemove = _.inDoc(this.node)
   var parent = this.node.parentNode
   var node = this.node.nextSibling
@@ -132,7 +137,7 @@ function multiRemove () {
   while (node !== this.end) {
     nodes.push(node)
     next = node.nextSibling
-    transition.remove(node, vm)
+    parent.removeChild(node, vm)
     node = next
   }
   parent.removeChild(this.node)
@@ -140,6 +145,9 @@ function multiRemove () {
   this.inserted = false
   if (shouldCallRemove) {
     this.callHook(detach)
+  }
+  if (destroy) {
+    this.destroy()
   }
 }
 
