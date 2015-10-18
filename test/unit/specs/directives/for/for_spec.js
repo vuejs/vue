@@ -595,15 +595,18 @@ if (_.inBrowser) {
       expect(hasWarned(_, 'Duplicate value')).toBe(true)
     })
 
-    it('key val syntax with object', function () {
-      new Vue({
+    it('key val syntax with object', function (done) {
+      var vm = new Vue({
         el: el,
-        template: '<div v-for="(key,val) in items">{{key}} {{val}}</div>',
+        template: '<div v-for="(key,val) in items">{{$index}} {{key}} {{val.a}}</div>',
         data: {
-          items: {'a': 'x'}
+          items: {
+            a: {a: 1},
+            b: {a: 2}
+          }
         }
       })
-      expect(el.innerHTML).toBe('<div>a x</div>')
+      assertObjectMutations(vm, el, done)
     })
 
     it('key val syntax with array', function () {
