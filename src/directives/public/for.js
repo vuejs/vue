@@ -145,7 +145,6 @@ module.exports = {
       frag = oldFrags[i]
       if (!frag.reused) {
         this.deleteCachedFrag(frag)
-        frag.destroy()
         this.remove(frag, removalIndex++, totalRemoved, inDoc)
       }
     }
@@ -313,11 +312,11 @@ module.exports = {
     if (inDoc && staggerAmount) {
       var op = frag.staggerCb = _.cancellable(function () {
         frag.staggerCb = null
-        frag.remove()
+        frag.remove(true)
       })
       setTimeout(op, staggerAmount)
     } else {
-      frag.remove()
+      frag.remove(true)
     }
   },
 

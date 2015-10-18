@@ -774,6 +774,43 @@ if (_.inBrowser) {
       })
     })
 
+    it('call attach/detach for contained components', function (done) {
+      document.body.appendChild(el)
+      var attachSpy = jasmine.createSpy('attach')
+      var detachSpy = jasmine.createSpy('detach')
+      var vm = new Vue({
+        el: el,
+        template: '<test v-for="item in items"></test>',
+        data: {
+          items: [1, 2]
+        },
+        components: {
+          test: {
+            attached: attachSpy,
+            detached: detachSpy
+          }
+        }
+      })
+      expect(attachSpy.calls.count()).toBe(2)
+      expect(detachSpy.calls.count()).toBe(0)
+      vm.items.push(3)
+      _.nextTick(function () {
+        expect(attachSpy.calls.count()).toBe(3)
+        expect(detachSpy.calls.count()).toBe(0)
+        vm.items.pop()
+        _.nextTick(function () {
+          expect(attachSpy.calls.count()).toBe(3)
+          expect(detachSpy.calls.count()).toBe(1)
+          vm.items = []
+          _.nextTick(function () {
+            expect(attachSpy.calls.count()).toBe(3)
+            expect(detachSpy.calls.count()).toBe(3)
+            done()
+          })
+        })
+      })
+    })
+
   })
 }
 
