@@ -180,10 +180,11 @@ exports.compileAndLinkProps = function (vm, el, props, scope) {
  * @param {Vue} vm
  * @param {Element} el
  * @param {Object} options
+ * @param {Object} contextOptions
  * @return {Function}
  */
 
-exports.compileRoot = function (el, options) {
+exports.compileRoot = function (el, options, contextOptions) {
   var containerAttrs = options._containerAttrs
   var replacerAttrs = options._replacerAttrs
   var contextLinkFn, replacerLinkFn
@@ -195,8 +196,8 @@ exports.compileRoot = function (el, options) {
     // compiled separately and linked in different scopes.
     if (options._asComponent) {
       // 2. container attributes
-      if (containerAttrs) {
-        contextLinkFn = compileDirectives(containerAttrs, options)
+      if (containerAttrs && contextOptions) {
+        contextLinkFn = compileDirectives(containerAttrs, contextOptions)
       }
       if (replacerAttrs) {
         // 3. replacer attributes
