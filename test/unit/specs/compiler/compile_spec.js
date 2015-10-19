@@ -528,5 +528,22 @@ if (_.inBrowser) {
       expect(hasWarned(_, 'v-show is ignored on component <test>')).toBe(true)
     })
 
+    it('should compile component container directives using correct context', function () {
+      new Vue({
+        el: el,
+        directives: {
+          test: {
+            bind: function () {
+              this.el.textContent = 'worked!'
+            }
+          }
+        },
+        template: '<comp v-test></comp>',
+        components: { comp: { template: '<div></div>'}}
+      })
+      expect(el.textContent).toBe('worked!')
+      expect(_.warn).not.toHaveBeenCalled()
+    })
+
   })
 }

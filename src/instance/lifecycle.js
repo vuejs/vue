@@ -29,7 +29,8 @@ exports._compile = function (el) {
 
   // root is always compiled per-instance, because
   // container attrs and props can be different every time.
-  var rootLinker = compiler.compileRoot(el, options)
+  var contextOptions = this._context && this._context.$options
+  var rootLinker = compiler.compileRoot(el, options, contextOptions)
 
   // compile and link the rest
   var contentLinkFn
