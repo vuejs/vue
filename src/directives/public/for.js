@@ -473,6 +473,7 @@ module.exports = {
    */
 
   _postProcess: function (value) {
+    this.processedValue = value
     if (_.isArray(value)) {
       return value
     } else if (_.isPlainObject(value)) {

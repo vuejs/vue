@@ -146,20 +146,18 @@ Watcher.prototype.set = function (value) {
   // two-way sync for v-for alias
   var forContext = scope.$forContext
   if (forContext && forContext.alias === this.expression) {
-    if (forContext.filters) {
-      process.env.NODE_ENV !== 'production' && _.warn(
-        'It seems you are using two-way binding on ' +
-        'a v-for alias, and the v-for has filters. ' +
-        'This will not work properly. Either remove the ' +
-        'filters or use an array of objects and bind to ' +
-        'object properties instead.'
-      )
-      return
-    }
+    var subjectValue = forContext.filters ? forContext.processedValue
+      : forContext.rawValue
     if (scope.$key) { // original is an object
-      forContext.rawValue[scope.$key] = value
+      subjectValue[scope.$key] = value
     } else {
-      forContext.rawValue.$set(scope.$index, value)
+      subjectValue.$set(scope.$index, value)
+    }
+    if (forContext.filters) {
+      var vm = forContext._scope || forContext.vm
+      var reverseValue = vm._applyFilters(subjectValue,
+        subjectValue, forContext.filters, true)
+      vm.$set(forContext.expression, reverseValue)
     }
   }
 }
