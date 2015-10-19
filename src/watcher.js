@@ -143,23 +143,7 @@ Watcher.prototype.set = function (value) {
       )
     }
   }
-  // two-way sync for v-for alias
-  var forContext = scope.$forContext
-  if (forContext && forContext.alias === this.expression) {
-    var subjectValue = forContext.filters ? forContext.processedValue
-      : forContext.rawValue
-    if (scope.$key) { // original is an object
-      subjectValue[scope.$key] = value
-    } else {
-      subjectValue.$set(scope.$index, value)
-    }
-    if (forContext.filters) {
-      var vm = forContext._scope || forContext.vm
-      var reverseValue = vm._applyFilters(subjectValue,
-        subjectValue, forContext.filters, true)
-      vm.$set(forContext.expression, reverseValue)
-    }
-  }
+  scope._bubbleChanges(value, this.expression)
 }
 
 /**

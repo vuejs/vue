@@ -514,6 +514,23 @@ module.exports = {
         frag.destroy()
       }
     }
+  },
+
+  _bubbleChanges: function (scope, value) {
+    // two-way sync for v-for alias
+    var subjectValue = this.filters ? this.processedValue
+      : this.rawValue
+    if (scope.$key) { // original is an object
+      subjectValue[scope.$key] = value
+    } else {
+      subjectValue.$set(scope.$index, value)
+    }
+    if (this.filters) {
+      var vm = this._scope || this.vm
+      var reverseValue = vm._applyFilters(subjectValue,
+        subjectValue, this.filters, true)
+      vm.$set(this.expression, reverseValue)
+    }
   }
 }
 
