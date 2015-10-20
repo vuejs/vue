@@ -343,8 +343,11 @@ exports.mergeOptions = function merge (parent, child, vm) {
  */
 
 exports.resolveAsset = function resolve (options, type, id) {
-  var camelizedId = _.camelize(id)
-  var pascalizedId = camelizedId.charAt(0).toUpperCase() + camelizedId.slice(1)
   var assets = options[type]
-  return assets[id] || assets[camelizedId] || assets[pascalizedId]
+  var camelizedId
+  return assets[id] ||
+    // camelCase ID
+    assets[camelizedId = _.camelize(id)] ||
+    // Pascal Case ID
+    assets[camelizedId.charAt(0).toUpperCase() + camelizedId.slice(1)]
 }
