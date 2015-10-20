@@ -29,10 +29,14 @@ module.exports = {
 
   bind: function () {
     var attr = this.arg
+    var tag = this.el.tagName
     // handle interpolation bindings
     if (this.descriptor.interp) {
       // only allow binding on native attributes
-      if (disallowedInterpAttrRE.test(attr)) {
+      if (
+        disallowedInterpAttrRE.test(attr) ||
+        (attr === 'name' && (tag === 'PARTIAL' || tag === 'SLOT'))
+      ) {
         process.env.NODE_ENV !== 'production' && _.warn(
           attr + '="' + this.descriptor.raw + '": ' +
           'attribute interpolation is not allowed in Vue.js ' +

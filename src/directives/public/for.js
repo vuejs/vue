@@ -7,6 +7,13 @@ module.exports = {
 
   priority: 2000,
 
+  params: [
+    'track-by',
+    'stagger',
+    'enter-stagger',
+    'leave-stagger'
+  ],
+
   bind: function () {
     // support "item in items" syntax
     var inMatch = this.expression.match(/(.*) in (.*)/)
@@ -48,16 +55,8 @@ module.exports = {
     _.replace(this.el, this.end)
     _.before(this.start, this.end)
 
-    // check for trackby param
-    this.idKey = this.param('track-by')
-
     // check ref
     this.ref = _.findRef(this.el)
-
-    // check for transition stagger
-    var stagger = +this.param('stagger')
-    this.enterStagger = +this.param('enter-stagger') || stagger
-    this.leaveStagger = +this.param('leave-stagger') || stagger
 
     // cache
     this.cache = Object.create(null)
@@ -94,7 +93,7 @@ module.exports = {
       item.hasOwnProperty('$key') &&
       item.hasOwnProperty('$value')
 
-    var idKey = this.idKey
+    var trackByKey = this.params.trackBy
     var oldFrags = this.frags
     var frags = this.frags = new Array(data.length)
     var alias = this.alias
@@ -128,7 +127,7 @@ module.exports = {
         }
         // update data for track-by, object repeat &
         // primitive values.
-        if (idKey || convertedFromObject || primitive) {
+        if (trackByKey || convertedFromObject || primitive) {
           frag.scope[alias] = value
         }
       } else { // new isntance
@@ -355,19 +354,19 @@ module.exports = {
    */
 
   cacheFrag: function (value, frag, index, key) {
-    var idKey = this.idKey
+    var trackByKey = this.params.trackBy
     var cache = this.cache
     var primitive = !isObject(value)
     var id
-    if (key || idKey || primitive) {
-      id = idKey
-        ? idKey === '$index'
+    if (key || trackByKey || primitive) {
+      id = trackByKey
+        ? trackByKey === '$index'
           ? index
-          : value[idKey]
+          : value[trackByKey]
         : (key || value)
       if (!cache[id]) {
         cache[id] = frag
-      } else if (idKey !== '$index') {
+      } else if (trackByKey !== '$index') {
         process.env.NODE_ENV !== 'production' &&
         this.warnDuplicate(value)
       }
@@ -397,14 +396,14 @@ module.exports = {
    */
 
   getCachedFrag: function (value, index, key) {
-    var idKey = this.idKey
+    var trackByKey = this.params.trackBy
     var primitive = !isObject(value)
     var frag
-    if (key || idKey || primitive) {
-      var id = idKey
-        ? idKey === '$index'
+    if (key || trackByKey || primitive) {
+      var id = trackByKey
+        ? trackByKey === '$index'
           ? index
-          : value[idKey]
+          : value[trackByKey]
         : (key || value)
       frag = this.cache[id]
     } else {
@@ -425,18 +424,18 @@ module.exports = {
 
   deleteCachedFrag: function (frag) {
     var value = frag.raw
-    var idKey = this.idKey
+    var trackByKey = this.params.trackBy
     var scope = frag.scope
     var index = scope.$index
     // fix #948: avoid accidentally fall through to
     // a parent repeater which happens to have $key.
     var key = scope.hasOwnProperty('$key') && scope.$key
     var primitive = !isObject(value)
-    if (idKey || key || primitive) {
-      var id = idKey
-        ? idKey === '$index'
+    if (trackByKey || key || primitive) {
+      var id = trackByKey
+        ? trackByKey === '$index'
           ? index
-          : value[idKey]
+          : value[trackByKey]
         : (key || value)
       this.cache[id] = null
     } else {
@@ -461,7 +460,7 @@ module.exports = {
     var hook = hooks && (hooks[type] || hooks.stagger)
     return hook
       ? hook.call(frag, index, total)
-      : index * this[type]
+      : index * parseInt(this.params[type] || this.params.stagger, 10)
   },
 
   /**

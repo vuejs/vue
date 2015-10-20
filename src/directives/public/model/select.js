@@ -13,13 +13,13 @@ module.exports = {
       }
     }
 
-    this.number = this.param('number') != null
+    // check if this is a multiple select
     var multiple = this.multiple = el.hasAttribute('multiple')
 
     // attach listener
     this.listener = function () {
       var value = getValue(el, multiple)
-      value = self.number
+      value = self.params.number
         ? _.isArray(value)
           ? value.map(_.toNumber)
           : _.toNumber(value)

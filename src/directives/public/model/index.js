@@ -12,6 +12,7 @@ module.exports = {
   priority: 800,
   twoWay: true,
   handlers: handlers,
+  params: ['lazy', 'number', 'debounce'],
 
   /**
    * Possible elements:

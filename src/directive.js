@@ -77,6 +77,9 @@ Directive.prototype._bind = function () {
     _.extend(this, def)
   }
 
+  // setup directive params
+  this._setupParams()
+
   // initial bind
   if (this.bind) {
     this.bind()
@@ -132,6 +135,65 @@ Directive.prototype._bind = function () {
 }
 
 /**
+ * Setup all param attributes, e.g. track-by,
+ * transition-mode, etc...
+ */
+
+Directive.prototype._setupParams = function () {
+  if (!this.params) {
+    return
+  }
+  var params = this.params
+  // swap the params array with a fresh object.
+  this.params = Object.create(null)
+  var i = params.length
+  var key, val, mappedKey
+  while (i--) {
+    key = params[i]
+    mappedKey = _.camelize(key)
+    val = _.attr(this.el, key)
+    if (val != null) {
+      // static
+      this.params[mappedKey] = val === '' ? true : val
+    } else {
+      // dynamic
+      val = _.getBindAttr(this.el, key)
+      if (val != null) {
+        this._setupParamWatcher(mappedKey, val)
+      }
+    }
+  }
+}
+
+/**
+ * Setup a watcher for a dynamic param.
+ *
+ * @param {String} key
+ * @param {String} expression
+ */
+
+Directive.prototype._setupParamWatcher = function (key, expression) {
+  var self = this
+  var called = false
+  var unwatch = (this._scope || this.vm).$watch(expression, function (val, oldVal) {
+    self.params[key] = val
+    // since we are in immediate mode,
+    // only call the param change callbacks if this is not the first update.
+    if (called) {
+      var cb = self.paramWatchers && self.paramWatchers[key]
+      if (cb) {
+        cb.call(self, val, oldVal)
+      }
+    } else {
+      called = true
+    }
+  }, {
+    immediate: true
+  })
+  ;(this._paramUnwatchFns || (this._paramUnwatchFns = [])).push(unwatch)
+}
+
+/**
  * Check if the directive is a function caller
  * and if the expression is a callable one. If both true,
  * we wrap up the expression and use it as the event
@@ -159,30 +221,6 @@ Directive.prototype._checkStatement = function () {
     this.update(handler)
     return true
   }
-}
-
-/**
- * Check for an attribute directive param, e.g. lazy
- *
- * @param {String} name
- * @return {String}
- */
-
-Directive.prototype.param = function (name) {
-  var param = _.attr(this.el, name)
-  if (param != null) {
-    param = (this._scope || this.vm).$interpolate(param)
-  } else {
-    param = _.getBindAttr(this.el, name)
-    if (param != null) {
-      param = (this._scope || this.vm).$eval(param)
-      process.env.NODE_ENV !== 'production' && _.log(
-        'You are using bind- syntax on "' + name + '", which ' +
-        'is a directive param. It will be evaluated only once.'
-      )
-    }
-  }
-  return param
 }
 
 /**
@@ -253,13 +291,21 @@ Directive.prototype._teardown = function () {
       this._watcher.teardown()
     }
     var listeners = this._listeners
+    var i
     if (listeners) {
-      for (var i = 0; i < listeners.length; i++) {
+      i = listeners.length
+      while (i--) {
         _.off(this.el, listeners[i][0], listeners[i][1])
       }
     }
-    this.vm = this.el =
-    this._watcher = this._listeners = null
+    var unwatchFns = this._paramUnwatchFns
+    if (unwatchFns) {
+      i = unwatchFns.length
+      while (i--) {
+        unwatchFns[i]()
+      }
+    }
+    this.vm = this.el = this._watcher = this._listeners = null
   }
 }
 

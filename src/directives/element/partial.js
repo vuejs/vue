@@ -1,40 +1,27 @@
 var _ = require('../../util')
-var FragmentFactory = require('../../fragment/factory')
 var vIf = require('../public/if')
-var Watcher = require('../../watcher')
+var FragmentFactory = require('../../fragment/factory')
 
 module.exports = {
 
   priority: 1750,
 
-  bind: function () {
-    var el = this.el
-    this.anchor = _.createAnchor('v-partial')
-    _.replace(el, this.anchor)
-    var id = el.getAttribute('name')
-    if (id != null) {
-      // static partial
-      this.insert(id)
-    } else {
-      id = _.getBindAttr(el, 'name')
-      if (id) {
-        this.setupDynamic(id)
+  params: ['name'],
+
+  // watch changes to name for dynamic partials
+  paramWatchers: {
+    name: function (value) {
+      vIf.remove.call(this)
+      if (value) {
+        this.insert(value)
       }
     }
   },
 
-  setupDynamic: function (exp) {
-    var self = this
-    var onNameChange = function (value) {
-      vIf.remove.call(self)
-      if (value) {
-        self.insert(value)
-      }
-    }
-    this.nameWatcher = new Watcher(this.vm, exp, onNameChange, {
-      scope: this._scope
-    })
-    onNameChange(this.nameWatcher.value)
+  bind: function () {
+    this.anchor = _.createAnchor('v-partial')
+    _.replace(this.el, this.anchor)
+    this.insert(this.params.name)
   },
 
   insert: function (id) {
@@ -51,9 +38,6 @@ module.exports = {
   unbind: function () {
     if (this.frag) {
       this.frag.destroy()
-    }
-    if (this.nameWatcher) {
-      this.nameWatcher.teardown()
     }
   }
 }
