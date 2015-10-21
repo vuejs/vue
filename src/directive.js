@@ -88,7 +88,7 @@ Directive.prototype._bind = function () {
   if (this.literal) {
     this.update && this.update(descriptor.raw)
   } else if (
-    this.expression &&
+    (this.expression || this.modifiers) &&
     (this.update || this.twoWay) &&
     !this._checkStatement()
   ) {
