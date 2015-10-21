@@ -106,7 +106,7 @@ Directive.prototype._bind = function () {
   if (this._literal) {
     this.update && this.update(this.expression)
   } else if (
-    this._watcherExp &&
+    (this._watcherExp || this.modifiers) &&
     (this.update || this.twoWay) &&
     (!this.isLiteral || this._isDynamicLiteral) &&
     !this._checkStatement()

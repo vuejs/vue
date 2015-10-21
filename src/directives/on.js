@@ -74,6 +74,12 @@ module.exports = {
   },
 
   update: function (handler) {
+    // stub a noop for v-on with no value,
+    // e.g. @mousedown.prevent
+    if (!this._descriptor.raw) {
+      handler = function () {}
+    }
+
     if (typeof handler !== 'function') {
       process.env.NODE_ENV !== 'production' && _.warn(
         'v-on:' + this.arg + '="' +

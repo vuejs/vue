@@ -81,7 +81,7 @@ exports.parse = function (s) {
   inSingle = inDouble = false
   curly = square = paren = 0
   lastFilterIndex = 0
-  dir = {}
+  dir = { raw: s }
 
   for (i = 0, l = str.length; i < l; i++) {
     c = str.charCodeAt(i)

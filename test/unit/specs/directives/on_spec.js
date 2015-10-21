@@ -126,6 +126,16 @@ if (_.inBrowser) {
       expect(prevented).toBe(true)
     })
 
+    it('prevent modifier with no value', function () {
+      new Vue({
+        el: el,
+        template: '<a href="#123" @click.prevent>'
+      })
+      var hash = window.location.hash
+      trigger(el.firstChild, 'click')
+      expect(window.location.hash).toBe(hash)
+    })
+
     it('multiple modifiers working together', function () {
       var outer = jasmine.createSpy('outer')
       var prevented
