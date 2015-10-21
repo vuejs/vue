@@ -96,7 +96,7 @@ if (_.inBrowser) {
           data: { test: 'frag' }
         })
         vm.$mount(frag)
-        expect(vm._blockFragment).toBe(frag)
+        expect(vm._fragment).toBe(frag)
         expect(vm.$el.nextSibling.textContent).toBe('frag')
       })
 

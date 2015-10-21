@@ -65,6 +65,8 @@ exports._compile = function (el) {
     _.replace(original, el)
   }
 
+  this._isCompiled = true
+  this._callHook('compiled')
   return el
 }
 
@@ -84,7 +86,7 @@ exports._initElement = function (el) {
     if (this._fragmentStart.nodeType === 3) {
       this._fragmentStart.data = this._fragmentEnd.data = ''
     }
-    this._blockFragment = el
+    this._fragment = el
   } else {
     this.$el = el
   }

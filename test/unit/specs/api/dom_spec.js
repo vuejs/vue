@@ -20,7 +20,7 @@ if (_.inBrowser) {
       parent.appendChild(sibling)
       var el = document.createElement('div')
       vm = new Vue({ el: el })
-      // block instance
+      // fragment instance
       var frag = document.createDocumentFragment()
       frag.appendChild(document.createElement('p'))
       frag.appendChild(document.createElement('span'))
@@ -38,7 +38,7 @@ if (_.inBrowser) {
         expect(spy.calls.count()).toBe(1)
       })
 
-      it('block instance', function () {
+      it('fragment instance', function () {
         vm2.$appendTo(parent, spy)
         expect(parent.childNodes.length).toBe(6)
         expect(parent.childNodes[2]).toBe(vm2._fragmentStart)
@@ -64,7 +64,7 @@ if (_.inBrowser) {
         expect(spy.calls.count()).toBe(2)
       })
 
-      it('block instance', function () {
+      it('fragment instance', function () {
         vm2.$prependTo(parent, spy)
         expect(parent.childNodes.length).toBe(6)
         expect(parent.childNodes[0]).toBe(vm2._fragmentStart)
@@ -95,7 +95,7 @@ if (_.inBrowser) {
         expect(spy.calls.count()).toBe(1)
       })
 
-      it('block instance', function () {
+      it('fragment instance', function () {
         vm2.$before(sibling, spy)
         expect(parent.childNodes.length).toBe(6)
         expect(parent.childNodes[1]).toBe(vm2._fragmentStart)
@@ -124,7 +124,7 @@ if (_.inBrowser) {
         expect(spy.calls.count()).toBe(1)
       })
 
-      it('block instance', function () {
+      it('fragment instance', function () {
         vm2.$after(target, spy)
         expect(parent.childNodes.length).toBe(6)
         expect(parent.childNodes[1]).toBe(vm2._fragmentStart)
@@ -135,7 +135,7 @@ if (_.inBrowser) {
         expect(spy.calls.count()).toBe(1)
       })
 
-      it('block instance no next sibling', function () {
+      it('fragment instance no next sibling', function () {
         vm2.$after(sibling, spy)
         expect(parent.childNodes.length).toBe(6)
         expect(parent.childNodes[2]).toBe(vm2._fragmentStart)
@@ -161,7 +161,7 @@ if (_.inBrowser) {
         expect(spy.calls.count()).toBe(1)
       })
 
-      it('block instance', function () {
+      it('fragment instance', function () {
         vm2.$before(sibling)
         expect(parent.childNodes.length).toBe(6)
         expect(parent.childNodes[1]).toBe(vm2._fragmentStart)
