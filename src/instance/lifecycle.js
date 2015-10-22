@@ -135,6 +135,14 @@ exports._destroy = function (remove, deferCleanup) {
   var parent = this.$parent
   if (parent && !parent._isBeingDestroyed) {
     parent.$children.$remove(this)
+    // unregister ref
+    var ref = this.$options._ref
+    if (ref) {
+      var scope = this._scope || this._context
+      if (scope.$refs[ref] === this) {
+        scope.$refs[ref] = null
+      }
+    }
   }
   // remove self from owner fragment
   if (this._frag) {
@@ -157,14 +165,6 @@ exports._destroy = function (remove, deferCleanup) {
   i = this._watchers.length
   while (i--) {
     this._watchers[i].teardown()
-  }
-  // unregister ref
-  var ref = this.$options._ref
-  if (ref) {
-    var scope = this._scope || this._context
-    if (scope.$[ref] === this) {
-      scope.$[ref] = null
-    }
   }
   // remove reference to self on $el
   if (this.$el) {
