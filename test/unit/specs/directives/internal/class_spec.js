@@ -47,8 +47,14 @@ if (_.inBrowser) {
       expect(el.className).toBe('a c d')
       dir.update()
       expect(el.className).toBe('a')
-      dir.update(['e', ''])
+      // test mutating array
+      var arr = ['e', '']
+      dir.update(arr)
       expect(el.className).toBe('a e')
+      arr.length = 0
+      arr.push('f')
+      dir.update(arr)
+      expect(el.className).toBe('a f')
     })
 
   })
