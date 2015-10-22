@@ -77,11 +77,11 @@ Fragment.prototype.destroy = function () {
  */
 
 function singleBefore (target, withTransition) {
+  this.inserted = true
   var method = withTransition !== false
     ? transition.before
     : _.before
   method(this.node, target, this.vm)
-  this.inserted = true
   if (_.inDoc(this.node)) {
     this.callHook(attach)
   }
@@ -94,10 +94,10 @@ function singleBefore (target, withTransition) {
  */
 
 function singleRemove (destroy) {
+  this.inserted = false
   var shouldCallRemove = _.inDoc(this.node)
   var self = this
   transition.remove(this.node, this.vm, function () {
-    self.inserted = false
     if (shouldCallRemove) {
       self.callHook(detach)
     }
@@ -111,13 +111,18 @@ function singleRemove (destroy) {
  * Insert fragment before target, multi-nodes version
  *
  * @param {Node} target
+ * @param {Boolean} withTransition
  */
 
-function multiBefore (target) {
-  _.mapNodeRange(this.node, this.end, function (node) {
-    _.before(node, target)
-  })
+function multiBefore (target, withTransition) {
   this.inserted = true
+  var vm = this.vm
+  var method = withTransition !== false
+    ? transition.before
+    : _.before
+  _.mapNodeRange(this.node, this.end, function (node) {
+    method(node, target, vm)
+  })
   if (_.inDoc(this.node)) {
     this.callHook(attach)
   }
@@ -130,18 +135,17 @@ function multiBefore (target) {
  */
 
 function multiRemove (destroy) {
-  var frag = this.frag
-  var shouldCallRemove = _.inDoc(this.node)
-  _.mapNodeRange(this.node, this.end, function (node) {
-    frag.appendChild(node)
-  })
   this.inserted = false
-  if (shouldCallRemove) {
-    this.callHook(detach)
-  }
-  if (destroy) {
-    this.destroy()
-  }
+  var self = this
+  var shouldCallRemove = _.inDoc(this.node)
+  _.removeNodeRange(this.node, this.end, this.vm, this.frag, function () {
+    if (shouldCallRemove) {
+      self.callHook(detach)
+    }
+    if (destroy) {
+      self.destroy()
+    }
+  })
 }
 
 /**

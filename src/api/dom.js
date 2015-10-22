@@ -100,12 +100,11 @@ exports.$remove = function (cb, withTransition) {
     if (cb) cb()
   }
   if (this._isFragment) {
-    var frag = this._fragment
-    _.mapNodeRange(this._fragmentStart, this._fragmentEnd, function (node) {
-      // store nodes in the fragment
-      frag.appendChild(node)
-    })
-    realCb()
+    _.removeNodeRange(
+      this._fragmentStart,
+      this._fragmentEnd,
+      this, this._fragment, realCb
+    )
   } else {
     var op = withTransition === false
       ? remove
@@ -130,19 +129,19 @@ exports.$remove = function (cb, withTransition) {
 function insert (vm, target, cb, withTransition, op1, op2) {
   target = query(target)
   var targetIsDetached = !_.inDoc(target)
+  var op = withTransition === false || targetIsDetached
+      ? op1
+      : op2
   var shouldCallHook =
     !targetIsDetached &&
     !vm._isAttached &&
     !_.inDoc(vm.$el)
   if (vm._isFragment) {
     _.mapNodeRange(vm._fragmentStart, vm._fragmentEnd, function (node) {
-      op1(node, target)
+      op(node, target, vm)
     })
     cb && cb()
   } else {
-    var op = withTransition === false || targetIsDetached
-      ? op1
-      : op2
     op(vm.$el, target, vm, cb)
   }
   if (shouldCallHook) {
