@@ -57,7 +57,7 @@ module.exports = {
         addClass(this.el, value[i])
       }
     }
-    this.prevKeys = value
+    this.prevKeys = value.slice()
   },
 
   cleanup: function (value) {
@@ -65,7 +65,7 @@ module.exports = {
       var i = this.prevKeys.length
       while (i--) {
         var key = this.prevKeys[i]
-        if (!value || !contains(value, key)) {
+        if (key && (!value || !contains(value, key))) {
           removeClass(this.el, key)
         }
       }
