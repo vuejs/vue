@@ -20,7 +20,7 @@ var modelProps = {
   'false-value': '_falseValue'
 }
 
-// check for attribtues that prohibit interpolations
+// check for attributes that prohibit interpolations
 var disallowedInterpAttrRE = /^v-|^:|^@|^(is|transition|transition-mode|debounce|track-by|stagger|enter-stagger|leave-stagger)$/
 
 module.exports = {
@@ -60,8 +60,8 @@ module.exports = {
         // warn style
         if (attr === 'style') {
           _.warn(
-            raw + 'interpolation in "style" attribtue will cause ' +
-            'the attribtue to be discarded in Internet Explorer. ' +
+            raw + 'interpolation in "style" attribute will cause ' +
+            'the attribute to be discarded in Internet Explorer. ' +
             'Use v-bind:style instead.'
           )
         }
