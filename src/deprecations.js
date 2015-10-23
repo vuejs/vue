@@ -140,9 +140,9 @@ if (process.env.NODE_ENV !== 'production') {
 
     ATTR_INVALID: function (name) {
       warn(
-        'Mustache interpolation found in non-native attribute "' + name + '": ' +
+        'Mustache interpolation found in vue-specific attribute "' + name + '": ' +
         'attribute interpolation will be limited to native attributes only ' +
-        'in 1.0.0. Use v-bind for custom attributes and props.'
+        'in 1.0.0. Use v-bind for vue directives and props.'
       )
     },
 

@@ -20,25 +20,20 @@ var modelProps = {
   'false-value': '_falseValue'
 }
 
+// check for attribtues that prohibit interpolations
+var disallowedInterpAttrRE = /^v-|^:|^@|^(is|transition|transition-mode|debounce|track-by|stagger|enter-stagger|leave-stagger)$/
+
 module.exports = {
 
   priority: 850,
 
   update: function (value) {
     if (this.arg) {
-
       if (process.env.NODE_ENV !== 'production') {
-        var attr = this.arg
-        if (!(
-          attr === 'class' ||
-          /^data-/.test(attr) ||
-          (attr === 'for' && 'htmlFor' in this.el) ||
-          _.camelize(attr) in this.el
-        )) {
-          _.deprecation.ATTR_INVALID(attr)
+        if (disallowedInterpAttrRE.test(this.arg)) {
+          _.deprecation.ATTR_INVALID(this.arg)
         }
       }
-
       this.setAttr(this.arg, value)
     } else if (typeof value === 'object') {
       // TODO no longer need to support object in 1.0.0
