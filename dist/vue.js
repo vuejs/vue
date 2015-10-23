@@ -1,5 +1,5 @@
 /*!
- * Vue.js v1.0.0-alpha.8
+ * Vue.js v1.0.0-rc.2-migration
  * (c) 2015 Evan You
  * Released under the MIT License.
  */
@@ -163,7 +163,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	extend(p, __webpack_require__(69))
 	extend(p, __webpack_require__(70))
 
-	Vue.version = '1.0.0-beta.3'
+	Vue.version = '1.0.0-alpha.8'
 	module.exports = _.Vue = Vue
 
 
@@ -1748,6 +1748,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Hooks and param attributes are merged as arrays.
 	 */
 
+	strats.init =
 	strats.created =
 	strats.ready =
 	strats.attached =
@@ -1870,8 +1871,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	      def = components[key]
 	      if (_.isPlainObject(def)) {
-	        def.id = def.id || key
-	        components[key] = def._Ctor || (def._Ctor = _.Vue.extend(def))
+	        def.name = def.name || key
+	        components[key] = _.Vue.extend(def)
 	      }
 	    }
 	  }
@@ -1919,10 +1920,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var asset
 	    while (i--) {
 	      asset = assets[i]
-	      var id = asset.id || (asset.options && asset.options.id)
+	      var id = asset.name || (asset.options && asset.options.name)
 	      if (!id) {
 	        ("development") !== 'production' && _.warn(
-	          'Array-syntax assets must provide an id field.'
+	          'Array-syntax assets must provide a "name" field.'
 	        )
 	      } else {
 	        res[id] = asset
@@ -2264,21 +2265,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _.warn('{DEPRECATION} ' + msg)
 	  }
 
-	  var newBindingSyntaxLink = ' See https://github.com/yyx990803/vue/issues/1325 for details.'
+	  var newBindingSyntaxLink = ' See https://github.com/vuejs/vue/issues/1325 for details.'
 
 	  _.deprecation = {
 
 	    REPEAT: function () {
 	      warn(
 	        'v-repeat will be deprecated in favor of v-for in 1.0.0. ' +
-	        'See https://github.com/yyx990803/vue/issues/1200 for details.'
+	        'See https://github.com/vuejs/vue/issues/1200 for details.'
 	      )
 	    },
 
 	    ADD: function () {
 	      warn(
 	        '$add() will be deprecated in 1.0.0. Use $set() instead. ' +
-	        'See https://github.com/yyx990803/vue/issues/1171 for details.'
+	        'See https://github.com/vuejs/vue/issues/1171 for details.'
 	      )
 	    },
 
@@ -2299,7 +2300,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    WAIT_FOR: function () {
 	      warn(
 	        '"wait-for" will be deprecated in 1.0.0. Use `activate` hook instead. ' +
-	        'See https://github.com/yyx990803/vue/issues/1169 for details.'
+	        'See https://github.com/vuejs/vue/issues/1169 for details.'
 	      )
 	    },
 
@@ -2307,28 +2308,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	      warn(
 	        'Falling through to parent when resolving ' + type + ' with id "' + id +
 	        '". Strict mode will be the default in 1.0.0. ' +
-	        'See https://github.com/yyx990803/vue/issues/1170 for details.'
+	        'See https://github.com/vuejs/vue/issues/1170 for details.'
 	      )
 	    },
 
 	    CONTENT: function () {
 	      warn(
 	        '<content> insertion points will be deprecated in in 1.0.0. in favor of <slot>. ' +
-	        'See https://github.com/yyx990803/vue/issues/1167 for details.'
+	        'See https://github.com/vuejs/vue/issues/1167 for details.'
 	      )
 	    },
 
 	    DATA_AS_PROP: function () {
 	      warn(
 	        '$data will no longer be usable as a prop in 1.0.0. ' +
-	        'See https://github.com/yyx990803/vue/issues/1198 for details.'
+	        'See https://github.com/vuejs/vue/issues/1198 for details.'
 	      )
 	    },
 
 	    INHERIT: function () {
 	      warn(
 	        'The "inherit" option will be deprecated in 1.0.0. ' +
-	        'See https://github.com/yyx990803/vue/issues/1198 for details.'
+	        'See https://github.com/vuejs/vue/issues/1198 for details.'
 	      )
 	    },
 
@@ -2357,7 +2358,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      warn(
 	        'v-ref will no longer take an attribute value in 1.0.0. Use "v-ref:id" syntax ' +
 	        'instead. Also, refs will be registered under vm.$refs instead of vm.$. ' +
-	        'See https://github.com/yyx990803/vue/issues/1292 for more details.'
+	        'See https://github.com/vuejs/vue/issues/1292 for more details.'
 	      )
 	    },
 
@@ -2365,7 +2366,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      warn(
 	        'v-el will no longer take an attribute value in 1.0.0. Use "v-el:id" syntax ' +
 	        'instead. Also, nodes will be registered under vm.$els instead of vm.$$. ' +
-	        'See https://github.com/yyx990803/vue/issues/1292 for more details.'
+	        'See https://github.com/vuejs/vue/issues/1292 for more details.'
 	      )
 	    },
 
@@ -2399,9 +2400,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    ATTR_INVALID: function (name) {
 	      warn(
-	        'Mustache interpolation found in non-native attribute "' + name + '": ' +
+	        'Mustache interpolation found in vue-specific attribute "' + name + '": ' +
 	        'attribute interpolation will be limited to native attributes only ' +
-	        'in 1.0.0. Use v-bind for custom attributes and props.'
+	        'in 1.0.0. Use v-bind for vue directives and props.'
 	      )
 	    },
 
@@ -2462,7 +2463,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      warn(
 	        'No need to return false in handler for event "' + event + '": events ' +
 	        'no longer propagate beyond the first triggered handler unless the ' +
-	        'handler explicitly returns true. See https://github.com/yyx990803/vue/issues/1175 ' +
+	        'handler explicitly returns true. See https://github.com/vuejs/vue/issues/1175 ' +
 	        'for more details.'
 	      )
 	    },
@@ -2477,7 +2478,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    SELECT_OPTIONS: function () {
 	      warn(
 	        'The "options" param for <select v-model> will be deprecated in 1.0.0. ' +
-	        'Use v-for to render the options. See https://github.com/yyx990803/vue/issues/1229 ' +
+	        'Use v-for to render the options. See https://github.com/vuejs/vue/issues/1229 ' +
 	        'for more details.'
 	      )
 	    },
@@ -2508,7 +2509,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    V_COMPONENT: function () {
 	      warn(
 	        'v-component will be deprecated in 1.0.0. Use "is" attribute instead. ' +
-	        'See https://github.com/yyx990803/vue/issues/1278 for more details.'
+	        'See https://github.com/vuejs/vue/issues/1278 for more details.'
 	      )
 	    },
 
@@ -2593,6 +2594,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.extend = function (extendOptions) {
 	  extendOptions = extendOptions || {}
 	  var Super = this
+	  var isFirstExtend = Super.cid === 0
+	  if (isFirstExtend && extendOptions._Ctor) {
+	    return extendOptions._Ctor
+	  }
 	  var name = extendOptions.name || Super.options.name
 	  var Sub = createClass(name || 'VueComponent')
 	  Sub.prototype = Object.create(Super.prototype)
@@ -2613,6 +2618,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // enable recursive self-lookup
 	  if (name) {
 	    Sub.options.components[name] = Sub
+	  }
+	  // cache constructor
+	  if (isFirstExtend) {
+	    extendOptions._Ctor = Sub
 	  }
 	  return Sub
 	}
@@ -2889,10 +2898,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Vue} vm
 	 * @param {Element} el
 	 * @param {Object} options
+	 * @param {Object} contextOptions
 	 * @return {Function}
 	 */
 
-	exports.compileRoot = function (el, options) {
+	exports.compileRoot = function (el, options, contextOptions) {
 	  var containerAttrs = options._containerAttrs
 	  var replacerAttrs = options._replacerAttrs
 	  var contextLinkFn, replacerLinkFn
@@ -2904,8 +2914,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // compiled separately and linked in different scopes.
 	    if (options._asComponent) {
 	      // 2. container attributes
-	      if (containerAttrs) {
-	        contextLinkFn = compileDirectives(containerAttrs, options)
+	      if (containerAttrs && contextOptions) {
+	        contextLinkFn = compileDirectives(containerAttrs, contextOptions)
 	      }
 	      if (replacerAttrs) {
 	        // 3. replacer attributes
@@ -3599,7 +3609,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        prop.filters = parsed.filters
 	        // check literal
 	        if (literalValueRE.test(value)) {
-	          prop.mode = propBindingModes.ONE_TIME
+	          prop.raw = _.stripQuotes(value) || value
 	        } else {
 	          prop.dynamic = true
 	          // check non-settable path for two-way bindings
@@ -3821,7 +3831,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  inSingle = inDouble = false
 	  curly = square = paren = 0
 	  lastFilterIndex = 0
-	  dir = {}
+	  dir = { raw: s }
 
 	  for (i = 0, l = str.length; i < l; i++) {
 	    c = str.charCodeAt(i)
@@ -6090,33 +6100,36 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/**
 	 * Remove fragment, single node version
+	 *
+	 * @param {Boolean} [destroy]
 	 */
 
-	function singleRemove () {
+	function singleRemove (destroy) {
 	  var shouldCallRemove = _.inDoc(this.node)
-	  transition.remove(this.node, this.vm)
-	  this.inserted = false
-	  if (shouldCallRemove) {
-	    this.callHook(detach)
-	  }
+	  var self = this
+	  transition.remove(this.node, this.vm, function () {
+	    self.inserted = false
+	    if (shouldCallRemove) {
+	      self.callHook(detach)
+	    }
+	    if (destroy) {
+	      self.destroy()
+	    }
+	  })
 	}
 
 	/**
 	 * Insert fragment before target, multi-nodes version
 	 *
 	 * @param {Node} target
-	 * @param {Boolean} trans
 	 */
 
-	function multiBefore (target, trans) {
+	function multiBefore (target) {
 	  _.before(this.node, target)
 	  var nodes = this.nodes
 	  var vm = this.vm
-	  var method = trans !== false
-	    ? transition.before
-	    : _.before
 	  for (var i = 0, l = nodes.length; i < l; i++) {
-	    method(nodes[i], target, vm)
+	    _.before(nodes[i], target, vm)
 	  }
 	  _.before(this.end, target)
 	  this.inserted = true
@@ -6127,9 +6140,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/**
 	 * Remove fragment, multi-nodes version
+	 *
+	 * @param {Boolean} [destroy]
 	 */
 
-	function multiRemove () {
+	function multiRemove (destroy) {
 	  var shouldCallRemove = _.inDoc(this.node)
 	  var parent = this.node.parentNode
 	  var node = this.node.nextSibling
@@ -6139,7 +6154,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  while (node !== this.end) {
 	    nodes.push(node)
 	    next = node.nextSibling
-	    transition.remove(node, vm)
+	    parent.removeChild(node, vm)
 	    node = next
 	  }
 	  parent.removeChild(this.node)
@@ -6147,6 +6162,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this.inserted = false
 	  if (shouldCallRemove) {
 	    this.callHook(detach)
+	  }
+	  if (destroy) {
+	    this.destroy()
 	  }
 	}
 
@@ -6406,25 +6424,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	  'false-value': '_falseValue'
 	}
 
+	// check for attribtues that prohibit interpolations
+	var disallowedInterpAttrRE = /^v-|^:|^@|^(is|transition|transition-mode|debounce|track-by|stagger|enter-stagger|leave-stagger)$/
+
 	module.exports = {
 
 	  priority: 850,
 
 	  update: function (value) {
 	    if (this.arg) {
-
 	      if (true) {
-	        var attr = this.arg
-	        if (!(
-	          attr === 'class' ||
-	          /^data-/.test(attr) ||
-	          (attr === 'for' && 'htmlFor' in this.el) ||
-	          _.camelize(attr) in this.el
-	        )) {
-	          _.deprecation.ATTR_INVALID(attr)
+	        if (disallowedInterpAttrRE.test(this.arg)) {
+	          _.deprecation.ATTR_INVALID(this.arg)
 	        }
 	      }
-
 	      this.setAttr(this.arg, value)
 	    } else if (typeof value === 'object') {
 	      // TODO no longer need to support object in 1.0.0
@@ -6580,7 +6593,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        addClass(this.el, value[i])
 	      }
 	    }
-	    this.prevKeys = value
+	    this.prevKeys = value.slice()
 	  },
 
 	  cleanup: function (value) {
@@ -6588,7 +6601,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var i = this.prevKeys.length
 	      while (i--) {
 	        var key = this.prevKeys[i]
-	        if (!value || !contains(value, key)) {
+	        if (key && (!value || !contains(value, key))) {
 	          removeClass(this.el, key)
 	        }
 	      }
@@ -7363,6 +7376,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 
 	  update: function (handler) {
+	    // stub a noop for v-on with no value,
+	    // e.g. @mousedown.prevent
+	    if (!this._descriptor.raw) {
+	      handler = function () {}
+	    }
+
 	    if (typeof handler !== 'function') {
 	      ("development") !== 'production' && _.warn(
 	        'v-on:' + this.arg + '="' +
@@ -8835,7 +8854,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // support "item in items" syntax
 	    var inMatch = this.expression.match(/(.*) in (.*)/)
 	    if (inMatch) {
-	      this.alias = inMatch[1]
+	      var itMatch = inMatch[1].match(/\((.*),(.*)\)/)
+	      if (itMatch) {
+	        this.iterator = itMatch[1].trim()
+	        this.alias = itMatch[2].trim()
+	      } else {
+	        this.alias = inMatch[1].trim()
+	      }
 	      this._watcherExp = inMatch[2]
 	    }
 
@@ -8922,6 +8947,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var oldFrags = this.frags
 	    var frags = this.frags = new Array(data.length)
 	    var alias = this.alias
+	    var iterator = this.iterator
 	    var start = this.start
 	    var end = this.end
 	    var inDoc = _.inDoc(start)
@@ -8945,6 +8971,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        // update $key
 	        if (key) {
 	          frag.scope.$key = key
+	          if (iterator) {
+	            frag.scope[iterator] = key
+	          }
 	        }
 	        // update data for track-by, object repeat &
 	        // primitive values.
@@ -8975,7 +9004,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	      frag = oldFrags[i]
 	      if (!frag.reused) {
 	        this.deleteCachedFrag(frag)
-	        frag.destroy()
 	        this.remove(frag, removalIndex++, totalRemoved, inDoc)
 	      }
 	    }
@@ -9036,6 +9064,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    } else if (scope.$key) {
 	      // avoid accidental fallback
 	      _.define(scope, '$key', null)
+	    }
+	    if (this.iterator) {
+	      _.defineReactive(scope, this.iterator, key || index)
 	    }
 	    var frag = this.factory.create(host, scope, this._frag)
 	    frag.forId = this.id
@@ -9142,11 +9173,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (inDoc && staggerAmount) {
 	      var op = frag.staggerCb = _.cancellable(function () {
 	        frag.staggerCb = null
-	        frag.remove()
+	        frag.remove(true)
 	      })
 	      setTimeout(op, staggerAmount)
 	    } else {
-	      frag.remove()
+	      frag.remove(true)
 	    }
 	  },
 
@@ -9462,8 +9493,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  insert: function () {
 	    if (this.elseFrag) {
-	      this.elseFrag.remove()
-	      this.elseFrag.destroy()
+	      this.elseFrag.remove(true)
 	      this.elseFrag = null
 	    }
 	    this.frag = this.factory.create(this._host, this._scope, this._frag)
@@ -9472,8 +9502,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  remove: function () {
 	    if (this.frag) {
-	      this.frag.remove()
-	      this.frag.destroy()
+	      this.frag.remove(true)
 	      this.frag = null
 	    }
 	    if (this.elseFactory) {
@@ -10102,6 +10131,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // initialize data as empty object.
 	  // it will be filled up in _initScope().
 	  this._data = {}
+
+	  // call init hook
+	  this._callHook('init')
 
 	  // initialize data observation and scope inheritance.
 	  this._initState()
@@ -11005,7 +11037,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    // root is always compiled per-instance, because
 	    // container attrs and props can be different every time.
-	    var rootLinker = compiler.compileRoot(el, options)
+	    var contextOptions = this._context && this._context.$options
+	    var rootLinker = compiler.compileRoot(el, options, contextOptions)
 
 	    // compile and link the rest
 	    var contentLinkFn
@@ -11106,6 +11139,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var parent = this.$parent
 	  if (parent && !parent._isBeingDestroyed) {
 	    parent.$children.$remove(this)
+	    // unregister ref
+	    var ref = this.$options._ref
+	    if (ref) {
+	      var scope = this._scope || this._context
+	      if (scope.$refs[ref] === this) {
+	        scope.$refs[ref] = null
+	      }
+	    }
 	  }
 	  // remove self from owner fragment
 	  if (this._frag) {
@@ -11128,14 +11169,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  i = this._watchers.length
 	  while (i--) {
 	    this._watchers[i].teardown()
-	  }
-	  // unregister ref
-	  var ref = this.$options._ref
-	  if (ref) {
-	    var scope = this._scope || this._context
-	    if (scope.$[ref] === this) {
-	      scope.$[ref] = null
-	    }
 	  }
 	  // remove reference to self on $el
 	  if (this.$el) {
@@ -11300,7 +11333,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (this._literal) {
 	    this.update && this.update(this.expression)
 	  } else if (
-	    this._watcherExp &&
+	    (this._watcherExp || this.modifiers) &&
 	    (this.update || this.twoWay) &&
 	    (!this.isLiteral || this._isDynamicLiteral) &&
 	    !this._checkStatement()
