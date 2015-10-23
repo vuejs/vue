@@ -25,16 +25,14 @@
     <script>
     Vue.directive('select', {
       twoWay: true,
+
+      params: ['options'],
+
       bind: function () {
-        var optionsData
-        var optionsExpression = this.param('options')
-        if (optionsExpression) {
-          optionsData = this.vm.$eval(optionsExpression)
-        }
         var self = this
         $(this.el)
           .select2({
-            data: optionsData
+            data: this.params.options
           })
           .on('change', function () {
             self.set(this.value)
