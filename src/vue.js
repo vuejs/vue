@@ -87,3 +87,10 @@ extend(p, require('./api/lifecycle'))
 
 Vue.version = '1.0.0-rc.2'
 module.exports = _.Vue = Vue
+
+/* istanbul ignore if */
+if (process.env.NODE_ENV !== 'production') {
+  if (_.inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__) {
+    window.__VUE_DEVTOOLS_GLOBAL_HOOK__.emit('init', Vue)
+  }
+}

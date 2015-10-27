@@ -34,6 +34,13 @@ function flushBatcherQueue () {
   runBatcherQueue(queue)
   internalQueueDepleted = true
   runBatcherQueue(userQueue)
+  // dev tool hook
+  /* istanbul ignore if */
+  if (process.env.NODE_ENV !== 'production') {
+    if (_.inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__) {
+      window.__VUE_DEVTOOLS_GLOBAL_HOOK__.emit('flush')
+    }
+  }
   resetBatcherState()
 }
 

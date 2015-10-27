@@ -46,6 +46,11 @@ function Directive (descriptor, vm, el, host, scope, frag) {
   this._host = host
   this._scope = scope
   this._frag = frag
+  // store directives on node in dev mode
+  if (process.env.NODE_ENV !== 'production' && this.el) {
+    this.el._vue_directives = this.el._vue_directives || []
+    this.el._vue_directives.push(this)
+  }
 }
 
 /**
@@ -304,6 +309,9 @@ Directive.prototype._teardown = function () {
       while (i--) {
         unwatchFns[i]()
       }
+    }
+    if (process.env.NODE_ENV !== 'production' && this.el) {
+      this.el._vue_directives.$remove(this)
     }
     this.vm = this.el = this._watcher = this._listeners = null
   }

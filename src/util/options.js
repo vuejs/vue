@@ -232,7 +232,6 @@ function guardComponents (options) {
       }
       def = components[key]
       if (_.isPlainObject(def)) {
-        def.name = def.name || key
         components[key] = _.Vue.extend(def)
       }
     }
