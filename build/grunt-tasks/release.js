@@ -56,10 +56,10 @@ module.exports = function (grunt) {
     var next = semver.inc(current, version || 'patch') || version
 
     if (!semver.valid(next)) {
-      return grunt.fail.warn('Invalid version.')
+      grunt.fail.warn('Invalid version.')
     }
     if (semver.lt(next, current)) {
-      return grunt.fail.warn('Version is older than current.')
+      grunt.fail.warn('Version is older than current.')
     }
 
     readline.createInterface({
