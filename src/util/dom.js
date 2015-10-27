@@ -26,7 +26,7 @@ exports.query = function (el) {
  * Check if a node is in the document.
  * Note: document.documentElement.contains should work here
  * but always returns false for comment nodes in phantomjs,
- * making unit tests difficult. This is fixed byy doing the
+ * making unit tests difficult. This is fixed by doing the
  * contains() check on the node's parentNode instead of
  * the node itself.
  *
