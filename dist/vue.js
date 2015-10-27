@@ -1,5 +1,5 @@
 /*!
- * Vue.js v1.0.0
+ * Vue.js v1.0.1
  * (c) 2015 Evan You
  * Released under the MIT License.
  */
@@ -146,7 +146,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	extend(p, __webpack_require__(65))
 	extend(p, __webpack_require__(66))
 
-	Vue.version = '1.0.0'
+	Vue.version = '1.0.1'
 	module.exports = _.Vue = Vue
 
 	/* istanbul ignore if */
@@ -202,7 +202,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return
 	  }
 	  ob.convert(key, val)
-	  ob.notify()
+	  ob.dep.notify()
 	  if (ob.vms) {
 	    var i = ob.vms.length
 	    while (i--) {
@@ -229,7 +229,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (!ob) {
 	    return
 	  }
-	  ob.notify()
+	  ob.dep.notify()
 	  if (ob.vms) {
 	    var i = ob.vms.length
 	    while (i--) {
@@ -689,7 +689,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Check if a node is in the document.
 	 * Note: document.documentElement.contains should work here
 	 * but always returns false for comment nodes in phantomjs,
-	 * making unit tests difficult. This is fixed byy doing the
+	 * making unit tests difficult. This is fixed by doing the
 	 * contains() check on the node's parentNode instead of
 	 * the node itself.
 	 *
@@ -1931,10 +1931,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var asset
 	    while (i--) {
 	      asset = assets[i]
-	      var id = asset.name || (asset.options && asset.options.name)
+	      var id = typeof asset === 'function'
+	        ? ((asset.options && asset.options.name) || asset.id)
+	        : (asset.name || asset.id)
 	      if (!id) {
 	        ("development") !== 'production' && _.warn(
-	          'Array-syntax assets must provide a "name" field.'
+	          'Array-syntax assets must provide a "name" or "id" field.'
 	        )
 	      } else {
 	        res[id] = asset
@@ -3611,9 +3613,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        // update $key
 	        if (key) {
 	          frag.scope.$key = key
-	          if (iterator) {
-	            frag.scope[iterator] = key
-	          }
+	        }
+	        // update interator
+	        if (iterator) {
+	          frag.scope[iterator] = key || i
 	        }
 	        // update data for track-by, object repeat &
 	        // primitive values.
@@ -8829,42 +8832,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Observer.prototype.observeArray = function (items) {
 	  var i = items.length
 	  while (i--) {
-	    var ob = Observer.create(items[i])
-	    if (ob) {
-	      (ob.parents || (ob.parents = [])).push(this)
-	    }
-	  }
-	}
-
-	/**
-	 * Remove self from the parent list of removed objects.
-	 *
-	 * @param {Array} items
-	 */
-
-	Observer.prototype.unobserveArray = function (items) {
-	  var i = items.length
-	  while (i--) {
-	    var ob = items[i] && items[i].__ob__
-	    if (ob) {
-	      ob.parents.$remove(this)
-	    }
-	  }
-	}
-
-	/**
-	 * Notify self dependency, and also parent Array dependency
-	 * if any.
-	 */
-
-	Observer.prototype.notify = function () {
-	  this.dep.notify()
-	  var parents = this.parents
-	  if (parents) {
-	    var i = parents.length
-	    while (i--) {
-	      parents[i].notify()
-	    }
+	    Observer.create(items[i])
 	  }
 	}
 
@@ -8955,6 +8923,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (childOb) {
 	          childOb.dep.depend()
 	        }
+	        if (_.isArray(val)) {
+	          for (var e, i = 0, l = val.length; i < l; i++) {
+	            e = val[i]
+	            e && e.__ob__ && e.__ob__.dep.depend()
+	          }
+	        }
 	      }
 	      return val
 	    },
@@ -9007,7 +8981,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    var result = original.apply(this, args)
 	    var ob = this.__ob__
-	    var inserted, removed
+	    var inserted
 	    switch (method) {
 	      case 'push':
 	        inserted = args
@@ -9017,17 +8991,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        break
 	      case 'splice':
 	        inserted = args.slice(2)
-	        removed = result
-	        break
-	      case 'pop':
-	      case 'shift':
-	        removed = [result]
 	        break
 	    }
 	    if (inserted) ob.observeArray(inserted)
-	    if (removed) ob.unobserveArray(removed)
 	    // notify change
-	    ob.notify()
+	    ob.dep.notify()
 	    return result
 	  })
 	})
