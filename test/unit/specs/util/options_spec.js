@@ -327,7 +327,20 @@ describe('Util - Option merging', function () {
       components: [{}]
     }
     merge(a, b)
-    expect(hasWarned(_, 'must provide a "name" field')).toBe(true)
+    expect(hasWarned(_, 'must provide a "name" or "id" field')).toBe(true)
+  })
+
+  it('warn Array async component without id', function () {
+    var a = {
+      components: {
+        a: Vue.extend({})
+      }
+    }
+    var b = {
+      components: [function () {}]
+    }
+    merge(a, b)
+    expect(hasWarned(_, 'must provide a "name" or "id" field')).toBe(true)
   })
 
 })

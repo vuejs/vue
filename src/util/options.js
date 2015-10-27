@@ -281,10 +281,12 @@ function guardArrayAssets (assets) {
     var asset
     while (i--) {
       asset = assets[i]
-      var id = asset.name || (asset.options && asset.options.name)
+      var id = typeof asset === 'function'
+        ? ((asset.options && asset.options.name) || asset.id)
+        : (asset.name || asset.id)
       if (!id) {
         process.env.NODE_ENV !== 'production' && _.warn(
-          'Array-syntax assets must provide a "name" field.'
+          'Array-syntax assets must provide a "name" or "id" field.'
         )
       } else {
         res[id] = asset
