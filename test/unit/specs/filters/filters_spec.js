@@ -151,6 +151,8 @@ describe('Filters', function () {
     ]
     // multiple string keys
     var res
+    res = filter(arr, '', 'in', 'firstname', 'lastname')
+    assertArray(res, [arr[0], arr[1], arr[2]])
     res = filter(arr, 'A', 'in', 'firstname', 'lastname')
     assertArray(res, [arr[0], arr[2]])
     // array of keys
