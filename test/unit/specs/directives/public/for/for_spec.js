@@ -609,15 +609,15 @@ if (_.inBrowser) {
       assertObjectMutations(vm, el, done)
     })
 
-    it('key val syntax with array', function () {
-      new Vue({
+    it('key val syntax with array', function (done) {
+      var vm = new Vue({
         el: el,
-        template: '<div v-for="(ind,val) in items">{{ind}} {{val}}</div>',
+        template: '<div v-for="(i, item) in items">{{i}} {{item.a}}</div>',
         data: {
-          items: ['x', 'y']
+          items: [{a: 1}, {a: 2}]
         }
       })
-      expect(el.innerHTML).toBe('<div>0 x</div><div>1 y</div>')
+      assertMutations(vm, el, done)
     })
 
     it('key val syntax with nested v-for s', function () {
