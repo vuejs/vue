@@ -102,5 +102,5 @@ extend(p, require('./api/events'))
 extend(p, require('./api/child'))
 extend(p, require('./api/lifecycle'))
 
-Vue.version = '1.0.0-rc.2-migration'
+Vue.version = '1.0.0-migration'
 module.exports = _.Vue = Vue

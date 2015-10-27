@@ -1,5 +1,5 @@
 /*!
- * Vue.js v1.0.0-rc.2-migration
+ * Vue.js v1.0.0-migration
  * (c) 2015 Evan You
  * Released under the MIT License.
  */
@@ -163,7 +163,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	extend(p, __webpack_require__(69))
 	extend(p, __webpack_require__(70))
 
-	Vue.version = '1.0.0-alpha.8'
+	Vue.version = '1.0.0-migration'
 	module.exports = _.Vue = Vue
 
 
