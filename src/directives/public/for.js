@@ -121,9 +121,10 @@ module.exports = {
         // update $key
         if (key) {
           frag.scope.$key = key
-          if (iterator) {
-            frag.scope[iterator] = key
-          }
+        }
+        // update interator
+        if (iterator) {
+          frag.scope[iterator] = key || i
         }
         // update data for track-by, object repeat &
         // primitive values.
