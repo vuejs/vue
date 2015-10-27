@@ -108,7 +108,7 @@ module.exports = {
   resolveComponent: function (id, cb) {
     var self = this
     this.pendingComponentCb = _.cancellable(function (Component) {
-      self.ComponentName = id
+      self.ComponentName = Component.options.name || id
       self.Component = Component
       cb()
     })
