@@ -1,5 +1,5 @@
 /*!
- * Vue.js v1.0.0-rc.2
+ * Vue.js v1.0.0
  * (c) 2015 Evan You
  * Released under the MIT License.
  */
@@ -146,8 +146,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	extend(p, __webpack_require__(65))
 	extend(p, __webpack_require__(66))
 
-	Vue.version = '1.0.0-rc.2'
+	Vue.version = '1.0.0'
 	module.exports = _.Vue = Vue
+
+	/* istanbul ignore if */
+	if (true) {
+	  if (_.inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__) {
+	    window.__VUE_DEVTOOLS_GLOBAL_HOOK__.emit('init', Vue)
+	  }
+	}
 
 
 /***/ },
@@ -1875,7 +1882,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	      def = components[key]
 	      if (_.isPlainObject(def)) {
-	        def.name = def.name || key
 	        components[key] = _.Vue.extend(def)
 	      }
 	    }
@@ -5037,7 +5043,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  'false-value': '_falseValue'
 	}
 
-	// check for attribtues that prohibit interpolations
+	// check for attributes that prohibit interpolations
 	var disallowedInterpAttrRE = /^v-|^:|^@|^(is|transition|transition-mode|debounce|track-by|stagger|enter-stagger|leave-stagger)$/
 
 	module.exports = {
@@ -5077,8 +5083,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        // warn style
 	        if (attr === 'style') {
 	          _.warn(
-	            raw + 'interpolation in "style" attribtue will cause ' +
-	            'the attribtue to be discarded in Internet Explorer. ' +
+	            raw + 'interpolation in "style" attribute will cause ' +
+	            'the attribute to be discarded in Internet Explorer. ' +
 	            'Use v-bind:style instead.'
 	          )
 	        }
@@ -5500,6 +5506,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  resolveComponent: function (id, cb) {
 	    var self = this
 	    this.pendingComponentCb = _.cancellable(function (Component) {
+	      self.ComponentName = id
 	      self.Component = Component
 	      cb()
 	    })
@@ -5563,6 +5570,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (this.Component) {
 	      // default options
 	      var options = {
+	        name: this.ComponentName,
 	        el: templateParser.clone(this.el),
 	        template: this.inlineTemplate,
 	        // make sure to add the child with correct parent
@@ -5686,6 +5694,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  transition: function (target, cb) {
 	    var self = this
 	    var current = this.childVM
+	    // for devtool inspection
+	    if (true) {
+	      if (current) current._inactive = true
+	      target._inactive = false
+	    }
 	    this.childVM = target
 	    switch (self.params.transitionMode) {
 	      case 'in-out':
@@ -6884,6 +6897,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  runBatcherQueue(queue)
 	  internalQueueDepleted = true
 	  runBatcherQueue(userQueue)
+	  // dev tool hook
+	  /* istanbul ignore if */
+	  if (true) {
+	    if (_.inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__) {
+	      window.__VUE_DEVTOOLS_GLOBAL_HOOK__.emit('flush')
+	    }
+	  }
 	  resetBatcherState()
 	}
 
@@ -8181,6 +8201,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var mergeOptions = __webpack_require__(1).mergeOptions
+	var uid = 0
 
 	/**
 	 * The main init sequence. This is called for every
@@ -8207,6 +8228,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this.$els = {}        // element references
 	  this._watchers = []   // all watchers as an array
 	  this._directives = [] // all directives
+
+	  // a uid
+	  this._uid = uid++
 
 	  // a flag to avoid this being observed
 	  this._isVue = true
@@ -9324,6 +9348,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this._host = host
 	  this._scope = scope
 	  this._frag = frag
+	  // store directives on node in dev mode
+	  if (("development") !== 'production' && this.el) {
+	    this.el._vue_directives = this.el._vue_directives || []
+	    this.el._vue_directives.push(this)
+	  }
 	}
 
 	/**
@@ -9582,6 +9611,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      while (i--) {
 	        unwatchFns[i]()
 	      }
+	    }
+	    if (("development") !== 'production' && this.el) {
+	      this.el._vue_directives.$remove(this)
 	    }
 	    this.vm = this.el = this._watcher = this._listeners = null
 	  }
