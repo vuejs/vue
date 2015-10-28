@@ -5,7 +5,6 @@ module.exports = {
   bind: function () {
     var self = this
     var el = this.el
-    var number = this.param('number') != null
 
     this.getValue = function () {
       // value overwrite via v-bind:value
@@ -13,7 +12,7 @@ module.exports = {
         return el._value
       }
       var val = el.value
-      if (number) {
+      if (self.params.number) {
         val = _.toNumber(val)
       }
       return val

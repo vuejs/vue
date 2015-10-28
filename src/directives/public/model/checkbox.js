@@ -5,12 +5,11 @@ module.exports = {
   bind: function () {
     var self = this
     var el = this.el
-    var number = this.param('number') != null
 
     this.getValue = function () {
       return el.hasOwnProperty('_value')
         ? el._value
-        : number
+        : self.params.number
           ? _.toNumber(el.value)
           : el.value
     }

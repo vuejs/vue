@@ -10,6 +10,8 @@ module.exports = {
 
   priority: 1750,
 
+  params: ['name'],
+
   bind: function () {
     var host = this.vm
     var raw = host.$options._content
@@ -19,7 +21,7 @@ module.exports = {
       return
     }
     var context = host._context
-    var slotName = this.param('name')
+    var slotName = this.params.name
     if (!slotName) {
       // Default content
       var self = this

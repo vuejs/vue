@@ -1,6 +1,6 @@
 {
   "name": "vue",
-  "version": "1.0.0-beta.4",
+  "version": "1.0.1",
   "author": "Evan You <yyx990803@gmail.com>",
   "license": "MIT",
   "description": "Simple, Fast & Composable MVVM for building interative interfaces",
@@ -12,9 +12,9 @@
   "main": "src/vue.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yyx990803/vue.git"
+    "url": "https://github.com/vuejs/vue.git"
   },
-  "bugs": "https://github.com/yyx990803/vue/issues",
+  "bugs": "https://github.com/vuejs/vue/issues",
   "homepage": "http://vuejs.org",
   "scripts": {
     "test": "grunt ci",
@@ -45,7 +45,7 @@
     "karma-jasmine": "^0.3.6",
     "karma-phantomjs-launcher": "^0.2.1",
     "karma-safari-launcher": "^0.1.1",
-    "karma-sauce-launcher": "^0.2.14",
+    "karma-sauce-launcher": "^0.3.0",
     "phantomjs": "^1.9.17",
     "semver": "^5.0.1",
     "shell-task": "^1.0.0",

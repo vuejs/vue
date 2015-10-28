@@ -239,14 +239,14 @@ if (_.inBrowser) {
 
     it('props', function () {
       var bindingModes = Vue.config._propBindingModes
-      var props = [
-        { name: 'testNormal' },
-        { name: 'testLiteral' },
-        { name: 'testTwoWay' },
-        { name: 'twoWayWarn' },
-        { name: 'testOneTime' },
-        { name: 'optimizeLiteral' }
-      ]
+      var props = {
+        testNormal: null,
+        testLiteral: null,
+        testTwoWay: null,
+        twoWayWarn: null,
+        testOneTime: null,
+        optimizeLiteral: null
+      }
       el.innerHTML = '<div ' +
         'v-bind:test-normal="a" ' +
         'test-literal="1" ' +
@@ -288,10 +288,7 @@ if (_.inBrowser) {
       vm._context = null
       el.setAttribute('v-bind:a', '"hi"')
       el.setAttribute(':b', 'hi')
-      compiler.compileAndLinkProps(vm, el, [
-        { name: 'a' },
-        { name: 'b' }
-      ])
+      compiler.compileAndLinkProps(vm, el, { a: null, b: null })
       expect(vm._bindDir.calls.count()).toBe(0)
       expect(vm._data.a).toBe('hi')
       expect(hasWarned(_, 'Cannot bind dynamic prop on a root')).toBe(true)
@@ -529,6 +526,23 @@ if (_.inBrowser) {
         }
       })
       expect(hasWarned(_, 'v-show is ignored on component <test>')).toBe(true)
+    })
+
+    it('should compile component container directives using correct context', function () {
+      new Vue({
+        el: el,
+        directives: {
+          test: {
+            bind: function () {
+              this.el.textContent = 'worked!'
+            }
+          }
+        },
+        template: '<comp v-test></comp>',
+        components: { comp: { template: '<div></div>'}}
+      })
+      expect(el.textContent).toBe('worked!')
+      expect(_.warn).not.toHaveBeenCalled()
     })
 
   })

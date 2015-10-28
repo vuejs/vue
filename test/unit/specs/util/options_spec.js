@@ -18,7 +18,7 @@ describe('Util - Option merging', function () {
     expect(res).toBe(false)
   })
 
-  it('hooks & props', function () {
+  it('hooks', function () {
     var fn1 = function () {}
     var fn2 = function () {}
     var res
@@ -38,12 +38,6 @@ describe('Util - Option merging', function () {
     expect(res.length).toBe(2)
     expect(res[0]).toBe(fn1)
     expect(res[1]).toBe(fn2)
-    // both arrays
-    res = merge({props: [1]}, {props: [2]}).props
-    expect(Array.isArray(res)).toBe(true)
-    expect(res.length).toBe(2)
-    expect(res[0]).toBe(1)
-    expect(res[1]).toBe(2)
   })
 
   it('events', function () {
@@ -114,6 +108,39 @@ describe('Util - Option merging', function () {
     expect(res.b).toBe(asset2)
   })
 
+  it('props', function () {
+    var res = merge({
+      props: {
+        a: null,
+        d: null
+      }
+    }, {
+      props: {
+        a: { required: true },
+        b: Boolean,
+        c: { type: Array }
+      }
+    })
+    expect(typeof res.props.a).toBe('object')
+    expect(res.props.a.required).toBe(true)
+    expect(typeof res.props.b).toBe('object')
+    expect(res.props.b.type).toBe(Boolean)
+    expect(typeof res.props.c).toBe('object')
+    expect(res.props.c.type).toBe(Array)
+    expect(res.props.d).toBe(null)
+
+    // check array syntax
+    res = merge({
+      props: {
+        b: null
+      }
+    }, {
+      props: ['a']
+    })
+    expect(res.props.a).toBe(null)
+    expect(res.props.b).toBe(null)
+  })
+
   it('guard components', function () {
     var res = merge({
       components: null
@@ -123,7 +150,6 @@ describe('Util - Option merging', function () {
       }
     })
     expect(typeof res.components.test).toBe('function')
-    expect(res.components.test.options.name).toBe('test')
     expect(res.components.test.super).toBe(Vue)
   })
 
@@ -301,7 +327,20 @@ describe('Util - Option merging', function () {
       components: [{}]
     }
     merge(a, b)
-    expect(hasWarned(_, 'must provide a "name" field')).toBe(true)
+    expect(hasWarned(_, 'must provide a "name" or "id" field')).toBe(true)
+  })
+
+  it('warn Array async component without id', function () {
+    var a = {
+      components: {
+        a: Vue.extend({})
+      }
+    }
+    var b = {
+      components: [function () {}]
+    }
+    merge(a, b)
+    expect(hasWarned(_, 'must provide a "name" or "id" field')).toBe(true)
   })
 
 })

@@ -45,22 +45,6 @@ exports.remove = function (el, vm, cb) {
 }
 
 /**
- * Remove by appending to another parent with transition.
- * This is only used in block operations.
- *
- * @param {Element} el
- * @param {Element} target
- * @param {Vue} vm
- * @param {Function} [cb]
- */
-
-exports.removeThenAppend = function (el, target, vm, cb) {
-  apply(el, -1, function () {
-    target.appendChild(el)
-  }, vm, cb)
-}
-
-/**
  * Apply transitions with an operation callback.
  *
  * @param {Element} el

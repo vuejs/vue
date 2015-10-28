@@ -20,8 +20,8 @@ var modelProps = {
   'false-value': '_falseValue'
 }
 
-// check for attribtues that prohibit interpolations
-var disallowedInterpAttrRE = /^v-|^(is|transition|transition-mode|debounce|track-by|stagger|enter-stagger|leave-stagger)$/
+// check for attributes that prohibit interpolations
+var disallowedInterpAttrRE = /^v-|^:|^@|^(is|transition|transition-mode|debounce|track-by|stagger|enter-stagger|leave-stagger)$/
 
 module.exports = {
 
@@ -29,10 +29,14 @@ module.exports = {
 
   bind: function () {
     var attr = this.arg
+    var tag = this.el.tagName
     // handle interpolation bindings
     if (this.descriptor.interp) {
       // only allow binding on native attributes
-      if (disallowedInterpAttrRE.test(attr)) {
+      if (
+        disallowedInterpAttrRE.test(attr) ||
+        (attr === 'name' && (tag === 'PARTIAL' || tag === 'SLOT'))
+      ) {
         process.env.NODE_ENV !== 'production' && _.warn(
           attr + '="' + this.descriptor.raw + '": ' +
           'attribute interpolation is not allowed in Vue.js ' +
@@ -56,8 +60,8 @@ module.exports = {
         // warn style
         if (attr === 'style') {
           _.warn(
-            raw + 'interpolation in "style" attribtue will cause ' +
-            'the attribtue to be discarded in Internet Explorer. ' +
+            raw + 'interpolation in "style" attribute will cause ' +
+            'the attribute to be discarded in Internet Explorer. ' +
             'Use v-bind:style instead.'
           )
         }

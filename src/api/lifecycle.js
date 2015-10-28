@@ -23,8 +23,6 @@ exports.$mount = function (el) {
     el = document.createElement('div')
   }
   this._compile(el)
-  this._isCompiled = true
-  this._callHook('compiled')
   this._initDOMHooks()
   if (_.inDoc(this.$el)) {
     this._callHook('attached')

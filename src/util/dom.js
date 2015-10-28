@@ -1,5 +1,6 @@
 var _ = require('./index')
 var config = require('../config')
+var transition = require('../transition')
 
 /**
  * Query an element selector if it's not an element already.
@@ -25,7 +26,7 @@ exports.query = function (el) {
  * Check if a node is in the document.
  * Note: document.documentElement.contains should work here
  * but always returns false for comment nodes in phantomjs,
- * making unit tests difficult. This is fixed byy doing the
+ * making unit tests difficult. This is fixed by doing the
  * contains() check on the node's parentNode instead of
  * the node itself.
  *
@@ -306,6 +307,56 @@ exports.findRef = function (node) {
         node.removeAttribute(name)
         return _.camelize(name.replace(refRE, ''))
       }
+    }
+  }
+}
+
+/**
+ * Map a function to a range of nodes .
+ *
+ * @param {Node} node
+ * @param {Node} end
+ * @param {Function} op
+ */
+
+exports.mapNodeRange = function (node, end, op) {
+  var next
+  while (node !== end) {
+    next = node.nextSibling
+    op(node)
+    node = next
+  }
+  op(end)
+}
+
+/**
+ * Remove a range of nodes with transition, store
+ * the nodes in a fragment with correct ordering,
+ * and call callback when done.
+ *
+ * @param {Node} start
+ * @param {Node} end
+ * @param {Vue} vm
+ * @param {DocumentFragment} frag
+ * @param {Function} cb
+ */
+
+exports.removeNodeRange = function (start, end, vm, frag, cb) {
+  var done = false
+  var removed = 0
+  var nodes = []
+  exports.mapNodeRange(start, end, function (node) {
+    if (node === end) done = true
+    nodes.push(node)
+    transition.remove(node, vm, onRemoved)
+  })
+  function onRemoved () {
+    removed++
+    if (done && removed >= nodes.length) {
+      for (var i = 0; i < nodes.length; i++) {
+        frag.appendChild(nodes[i])
+      }
+      cb && cb()
     }
   }
 }

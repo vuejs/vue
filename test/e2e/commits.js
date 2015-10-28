@@ -14,7 +14,7 @@ casper.test.begin('commits', 18, function (test) {
     test.assertSelectorHasText('label[for="dev"]', 'dev')
     // initial fetched commits
     test.assertField('branch', 'master')
-    test.assertSelectorHasText('p', 'yyx990803/vue@master')
+    test.assertSelectorHasText('p', 'vuejs/vue@master')
     test.assertElementCount('li', 3)
     test.assertSelectorHasText('li:first-child a.commit', '1111111')
     test.assertSelectorHasText('li:first-child span.message', 'one')
@@ -23,7 +23,7 @@ casper.test.begin('commits', 18, function (test) {
   })
   .thenClick('input[value="dev"]', function () {
     test.assertField('branch', 'dev')
-    test.assertSelectorHasText('p', 'yyx990803/vue@dev')
+    test.assertSelectorHasText('p', 'vuejs/vue@dev')
     test.assertElementCount('li', 3)
     test.assertSelectorHasText('li:first-child a.commit', '2222222')
     test.assertSelectorHasText('li:first-child span.message', 'two')

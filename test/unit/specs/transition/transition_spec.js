@@ -73,13 +73,6 @@ if (_.inBrowser && !_.isIE9) {
         expect(spy).toHaveBeenCalled()
       })
 
-      it('removeThenAppend', function () {
-        transition.removeThenAppend(target, el, vm, spy)
-        expect(parent.childNodes.length).toBe(0)
-        expect(el.firstChild).toBe(target)
-        expect(spy).toHaveBeenCalled()
-      })
-
     })
 
     describe('Skipping', function () {

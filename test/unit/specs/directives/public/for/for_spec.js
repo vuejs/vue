@@ -595,6 +595,42 @@ if (_.inBrowser) {
       expect(hasWarned(_, 'Duplicate value')).toBe(true)
     })
 
+    it('key val syntax with object', function (done) {
+      var vm = new Vue({
+        el: el,
+        template: '<div v-for="(key,val) in items">{{$index}} {{key}} {{val.a}}</div>',
+        data: {
+          items: {
+            a: {a: 1},
+            b: {a: 2}
+          }
+        }
+      })
+      assertObjectMutations(vm, el, done)
+    })
+
+    it('key val syntax with array', function (done) {
+      var vm = new Vue({
+        el: el,
+        template: '<div v-for="(i, item) in items">{{i}} {{item.a}}</div>',
+        data: {
+          items: [{a: 1}, {a: 2}]
+        }
+      })
+      assertMutations(vm, el, done)
+    })
+
+    it('key val syntax with nested v-for s', function () {
+      new Vue({
+        el: el,
+        template: '<div v-for="(key,val) in items"><div v-for="(subkey,subval) in val">{{key}} {{subkey}} {{subval}}</div></div>',
+        data: {
+          items: {'a': {'b': 'c'}}
+        }
+      })
+      expect(el.innerHTML).toBe('<div><div>a b c</div></div>')
+    })
+
     it('repeat number', function () {
       new Vue({
         el: el,
@@ -771,6 +807,43 @@ if (_.inBrowser) {
         expect(vm._directives[0].cache.a).toBeNull()
         expect(vm._directives[0].cache.b).toBeNull()
         done()
+      })
+    })
+
+    it('call attach/detach for contained components', function (done) {
+      document.body.appendChild(el)
+      var attachSpy = jasmine.createSpy('attach')
+      var detachSpy = jasmine.createSpy('detach')
+      var vm = new Vue({
+        el: el,
+        template: '<test v-for="item in items"></test>',
+        data: {
+          items: [1, 2]
+        },
+        components: {
+          test: {
+            attached: attachSpy,
+            detached: detachSpy
+          }
+        }
+      })
+      expect(attachSpy.calls.count()).toBe(2)
+      expect(detachSpy.calls.count()).toBe(0)
+      vm.items.push(3)
+      _.nextTick(function () {
+        expect(attachSpy.calls.count()).toBe(3)
+        expect(detachSpy.calls.count()).toBe(0)
+        vm.items.pop()
+        _.nextTick(function () {
+          expect(attachSpy.calls.count()).toBe(3)
+          expect(detachSpy.calls.count()).toBe(1)
+          vm.items = []
+          _.nextTick(function () {
+            expect(attachSpy.calls.count()).toBe(3)
+            expect(detachSpy.calls.count()).toBe(3)
+            done()
+          })
+        })
       })
     })
 

@@ -1,4 +1,5 @@
 var mergeOptions = require('../util').mergeOptions
+var uid = 0
 
 /**
  * The main init sequence. This is called for every
@@ -26,6 +27,9 @@ exports._init = function (options) {
   this._watchers = []   // all watchers as an array
   this._directives = [] // all directives
 
+  // a uid
+  this._uid = uid++
+
   // a flag to avoid this being observed
   this._isVue = true
 
@@ -36,8 +40,9 @@ exports._init = function (options) {
 
   // fragment instance properties
   this._isFragment = false
-  this._fragmentStart =    // @type {CommentNode}
-  this._fragmentEnd = null // @type {CommentNode}
+  this._fragment =         // @type {DocumentFragment}
+  this._fragmentStart =    // @type {Text|Comment}
+  this._fragmentEnd = null // @type {Text|Comment}
 
   // lifecycle state
   this._isCompiled =

@@ -24,7 +24,7 @@ exports.set = function set (obj, key, val) {
     return
   }
   ob.convert(key, val)
-  ob.notify()
+  ob.dep.notify()
   if (ob.vms) {
     var i = ob.vms.length
     while (i--) {
@@ -51,7 +51,7 @@ exports.delete = function (obj, key) {
   if (!ob) {
     return
   }
-  ob.notify()
+  ob.dep.notify()
   if (ob.vms) {
     var i = ob.vms.length
     while (i--) {

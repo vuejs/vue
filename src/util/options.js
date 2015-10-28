@@ -116,8 +116,7 @@ strats.detached =
 strats.beforeCompile =
 strats.compiled =
 strats.beforeDestroy =
-strats.destroyed =
-strats.props = function (parentVal, childVal) {
+strats.destroyed = function (parentVal, childVal) {
   return childVal
     ? parentVal
       ? parentVal.concat(childVal)
@@ -188,11 +187,13 @@ strats.events = function (parentVal, childVal) {
  * Other object hashes.
  */
 
+strats.props =
 strats.methods =
 strats.computed = function (parentVal, childVal) {
   if (!childVal) return parentVal
   if (!parentVal) return childVal
-  var ret = Object.create(parentVal)
+  var ret = Object.create(null)
+  extend(ret, parentVal)
   extend(ret, childVal)
   return ret
 }
@@ -231,8 +232,7 @@ function guardComponents (options) {
       }
       def = components[key]
       if (_.isPlainObject(def)) {
-        def.name = def.name || key
-        components[key] = def._Ctor || (def._Ctor = _.Vue.extend(def))
+        components[key] = _.Vue.extend(def)
       }
     }
   }
@@ -247,21 +247,22 @@ function guardComponents (options) {
 
 function guardProps (options) {
   var props = options.props
-  if (_.isPlainObject(props)) {
-    options.props = Object.keys(props).map(function (key) {
-      var val = props[key]
-      if (!_.isPlainObject(val)) {
-        val = { type: val }
+  var i
+  if (_.isArray(props)) {
+    options.props = {}
+    i = props.length
+    while (i--) {
+      options.props[props[i]] = null
+    }
+  } else if (_.isPlainObject(props)) {
+    var keys = Object.keys(props)
+    i = keys.length
+    while (i--) {
+      var val = props[keys[i]]
+      if (typeof val === 'function') {
+        props[keys[i]] = { type: val }
       }
-      val.name = key
-      return val
-    })
-  } else if (_.isArray(props)) {
-    options.props = props.map(function (prop) {
-      return typeof prop === 'string'
-        ? { name: prop }
-        : prop
-    })
+    }
   }
 }
 
@@ -280,10 +281,12 @@ function guardArrayAssets (assets) {
     var asset
     while (i--) {
       asset = assets[i]
-      var id = asset.name || (asset.options && asset.options.name)
+      var id = typeof asset === 'function'
+        ? ((asset.options && asset.options.name) || asset.id)
+        : (asset.name || asset.id)
       if (!id) {
         process.env.NODE_ENV !== 'production' && _.warn(
-          'Array-syntax assets must provide a "name" field.'
+          'Array-syntax assets must provide a "name" or "id" field.'
         )
       } else {
         res[id] = asset
@@ -341,8 +344,11 @@ exports.mergeOptions = function merge (parent, child, vm) {
  */
 
 exports.resolveAsset = function resolve (options, type, id) {
-  var camelizedId = _.camelize(id)
-  var pascalizedId = camelizedId.charAt(0).toUpperCase() + camelizedId.slice(1)
   var assets = options[type]
-  return assets[id] || assets[camelizedId] || assets[pascalizedId]
+  var camelizedId
+  return assets[id] ||
+    // camelCase ID
+    assets[camelizedId = _.camelize(id)] ||
+    // Pascal Case ID
+    assets[camelizedId.charAt(0).toUpperCase() + camelizedId.slice(1)]
 }

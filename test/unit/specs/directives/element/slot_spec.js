@@ -124,7 +124,7 @@ describe('Slot Distribution', function () {
 
   it('should accept expressions in selectors', function () {
     el.innerHTML = '<p>one</p><p slot="two">two</p>'
-    options.template = '<slot name="{{theName}}"></slot>'
+    options.template = '<slot :name="theName"></slot>'
     options.data = {
       theName: 'two'
     }

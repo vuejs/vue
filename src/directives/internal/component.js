@@ -5,6 +5,12 @@ module.exports = {
 
   priority: 1500,
 
+  params: [
+    'keep-alive',
+    'transition-mode',
+    'inline-template'
+  ],
+
   /**
    * Setup. Two possible usages:
    *
@@ -17,25 +23,19 @@ module.exports = {
 
   bind: function () {
     if (!this.el.__vue__) {
-      // check keep-alive options.
-      // If yes, instead of destroying the active vm when
-      // hiding (v-if) or switching (dynamic literal) it,
-      // we simply remove it from the DOM and save it in a
-      // cache object, with its constructor id as the key.
-      this.keepAlive = this.param('keep-alive') != null
-
       // check ref
       this.ref = _.findRef(this.el)
       var refs = (this._scope || this.vm).$refs
       if (this.ref && !refs.hasOwnProperty(this.ref)) {
         _.defineReactive(refs, this.ref, null)
       }
-
+      // keep-alive cache
+      this.keepAlive = this.params.keepAlive
       if (this.keepAlive) {
         this.cache = {}
       }
       // check inline-template
-      if (this.param('inline-template') !== null) {
+      if (this.params.inlineTemplate) {
         // extract inline template as a DocumentFragment
         this.inlineTemplate = _.extractContent(this.el, true)
       }
@@ -49,7 +49,6 @@ module.exports = {
         // create a ref anchor
       this.anchor = _.createAnchor('v-component')
       _.replace(this.el, this.anchor)
-      this.transMode = this.param('transition-mode')
       // if static, build right now.
       if (this.literal) {
         this.setComponent(this.expression)
@@ -109,6 +108,7 @@ module.exports = {
   resolveComponent: function (id, cb) {
     var self = this
     this.pendingComponentCb = _.cancellable(function (Component) {
+      self.ComponentName = Component.options.name || id
       self.Component = Component
       cb()
     })
@@ -172,6 +172,7 @@ module.exports = {
     if (this.Component) {
       // default options
       var options = {
+        name: this.ComponentName,
         el: templateParser.clone(this.el),
         template: this.inlineTemplate,
         // make sure to add the child with correct parent
@@ -295,8 +296,13 @@ module.exports = {
   transition: function (target, cb) {
     var self = this
     var current = this.childVM
+    // for devtool inspection
+    if (process.env.NODE_ENV !== 'production') {
+      if (current) current._inactive = true
+      target._inactive = false
+    }
     this.childVM = target
-    switch (self.transMode) {
+    switch (self.params.transitionMode) {
       case 'in-out':
         target.$before(self.anchor, function () {
           self.remove(current, cb)

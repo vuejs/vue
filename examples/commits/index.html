@@ -31,7 +31,7 @@
           v-model="currentBranch">
         <label :for="branch">{{branch}}</label>
       </template>
-      <p>yyx990803/vue@{{currentBranch}}</p>
+      <p>vuejs/vue@{{currentBranch}}</p>
       <ul>
         <li v-for="record in commits">
           <a :href="record.html_url" target="_blank" class="commit">{{record.sha.slice(0, 7)}}</a>

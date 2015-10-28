@@ -306,13 +306,12 @@ if (_.inBrowser) {
           },
           components: {
             test: {
-              props: [
-                {
-                  name: 'test',
+              props: {
+                test: {
                   type: type,
                   validator: validator
                 }
-              ]
+              }
             }
           }
         })
@@ -400,12 +399,9 @@ if (_.inBrowser) {
           template: '<test></test>',
           components: {
             test: {
-              props: [
-                {
-                  name: 'prop',
-                  required: true
-                }
-              ]
+              props: {
+                prop: { required: true }
+              }
             }
           }
         })

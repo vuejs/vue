@@ -4,7 +4,7 @@ Hi! I’m really excited that you are interested in contributing to Vue.js. Befo
 
 ## Issue Reporting Guidelines
 
-- The issue list of this repo is **exclusively** for bug reports and feature requests. For simple questions, please use either [Gitter](https://gitter.im/yyx990803/vue) or [the official forum](http://forum.vuejs.org/).
+- The issue list of this repo is **exclusively** for bug reports and feature requests. For simple questions, please use either [Gitter](https://gitter.im/vuejs/vue) or [the official forum](http://forum.vuejs.org/).
 
 - Try to search for your issue, it may have already been answered or even fixed in the development branch.
 
@@ -94,4 +94,4 @@ The default task (by simply running `grunt`) will do the following: lint -> buil
 
 The unit tests are written with Jasmine and run with Karma. The e2e tests are written for and run with CasperJS.
 
-Note that the unit tests will automatically be run in Chrome, Firefox and Safari. If you are not on a Mac, or don't have one of the browsers installed on your system, you can modify the [karma config in gruntfile.js](https://github.com/yyx990803/vue/blob/dev/gruntfile.js#L38) to only run Karma tests in browsers that are available on your system. Just make sure don’t check in the gruntfile changes for the commit.
+Note that the unit tests will automatically be run in Chrome, Firefox and Safari. If you are not on a Mac, or don't have one of the browsers installed on your system, you can modify the [karma config in gruntfile.js](https://github.com/vuejs/vue/blob/dev/gruntfile.js#L38) to only run Karma tests in browsers that are available on your system. Just make sure don’t check in the gruntfile changes for the commit.

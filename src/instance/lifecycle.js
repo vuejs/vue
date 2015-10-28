@@ -29,7 +29,8 @@ exports._compile = function (el) {
 
   // root is always compiled per-instance, because
   // container attrs and props can be different every time.
-  var rootLinker = compiler.compileRoot(el, options)
+  var contextOptions = this._context && this._context.$options
+  var rootLinker = compiler.compileRoot(el, options, contextOptions)
 
   // compile and link the rest
   var contentLinkFn
@@ -64,6 +65,8 @@ exports._compile = function (el) {
     _.replace(original, el)
   }
 
+  this._isCompiled = true
+  this._callHook('compiled')
   return el
 }
 
@@ -83,7 +86,7 @@ exports._initElement = function (el) {
     if (this._fragmentStart.nodeType === 3) {
       this._fragmentStart.data = this._fragmentEnd.data = ''
     }
-    this._blockFragment = el
+    this._fragment = el
   } else {
     this.$el = el
   }
@@ -130,6 +133,14 @@ exports._destroy = function (remove, deferCleanup) {
   var parent = this.$parent
   if (parent && !parent._isBeingDestroyed) {
     parent.$children.$remove(this)
+    // unregister ref
+    var ref = this.$options._ref
+    if (ref) {
+      var scope = this._scope || this._context
+      if (scope.$refs[ref] === this) {
+        scope.$refs[ref] = null
+      }
+    }
   }
   // remove self from owner fragment
   if (this._frag) {
@@ -152,14 +163,6 @@ exports._destroy = function (remove, deferCleanup) {
   i = this._watchers.length
   while (i--) {
     this._watchers[i].teardown()
-  }
-  // unregister ref
-  var ref = this.$options._ref
-  if (ref) {
-    var scope = this._scope || this._context
-    if (scope.$refs[ref] === this) {
-      scope.$refs[ref] = null
-    }
   }
   // remove reference to self on $el
   if (this.$el) {
