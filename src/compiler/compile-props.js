@@ -21,7 +21,7 @@ module.exports = function compileProps (el, propOptions) {
   var props = []
   var names = Object.keys(propOptions)
   var i = names.length
-  var options, name, attr, value, path, parsed, prop
+  var options, name, attr, value, path, parsed, prop, isTitleBinding
   while (i--) {
     name = names[i]
     options = propOptions[name] || empty
@@ -50,10 +50,16 @@ module.exports = function compileProps (el, propOptions) {
       mode: propBindingModes.ONE_WAY
     }
 
+    // IE title issues
+    isTitleBinding = false
+    if (name === 'title' && (el.getAttribute(':title') || el.getAttribute('v-bind:title'))) {
+      isTitleBinding = true
+    }
+
     // first check literal version
     attr = _.hyphenate(name)
     value = prop.raw = _.attr(el, attr)
-    if (value === null) {
+    if (value === null || isTitleBinding) {
       // then check dynamic version
       if ((value = _.getBindAttr(el, attr)) === null) {
         if ((value = _.getBindAttr(el, attr + '.sync')) !== null) {
