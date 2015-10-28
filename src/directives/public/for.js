@@ -122,9 +122,9 @@ module.exports = {
         if (key) {
           frag.scope.$key = key
         }
-        // update interator
+        // update iterator
         if (iterator) {
-          frag.scope[iterator] = key || i
+          frag.scope[iterator] = key !== null ? key : i
         }
         // update data for track-by, object repeat &
         // primitive values.
@@ -218,7 +218,7 @@ module.exports = {
       _.define(scope, '$key', null)
     }
     if (this.iterator) {
-      _.defineReactive(scope, this.iterator, key || index)
+      _.defineReactive(scope, this.iterator, key !== null ? key : index)
     }
     var frag = this.factory.create(host, scope, this._frag)
     frag.forId = this.id
