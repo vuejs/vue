@@ -1,3 +1,7 @@
+# Announcement
+
+Issues are temporarily disabled due to spam bots - will re-enable once GitHub sort things out.
+
 <p align="center"><a href="http://vuejs.org" target="_blank"><img width="100"src="http://vuejs.org/images/logo.png"></a></p>
 
 <p align="center">
