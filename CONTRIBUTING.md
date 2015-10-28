@@ -39,14 +39,17 @@ Hi! I’m really excited that you are interested in contributing to Vue.js. Befo
 ## Code Style
 
 - [No semicolons unless necessary](http://inimino.org/~inimino/blog/javascript_semicolons).
+
 - Follow JSDoc.
+
 - 2 spaces indentation.
+
 - multiple var declarations.
-- align equal signs where appropriate.
-- Return early.
-- 1 space after `function`
+
+- 1 space after `function` and function names.
+
 - 1 space between arguments, but not between parentheses.
-- When in doubt, read the source code.
+
 - Break long ternary conditionals like this:
 
   ``` js
@@ -54,6 +57,8 @@ Hi! I’m really excited that you are interested in contributing to Vue.js. Befo
     ? 'yep'
     : 'nope'
   ```
+
+- When in doubt, read the source code.
 
 ## Development Setup
 
@@ -66,10 +71,16 @@ $ npm install
 $ npm run install-hook
 ```
 
-To watch and auto-build `dist/vue.js` during development:
+Dev mode: watch and auto-build `dist/vue.js` and unit tests during development:
 
 ``` bash
 $ npm run dev
+```
+
+The unit tests can be run in a browser by opening `test/unit/runner.html`. Make sure you are running dev mode first. There's a shortcut grunt task for opening the unit test page:
+
+``` bash
+$ grunt open
 ```
 
 To lint:
@@ -84,7 +95,7 @@ To build:
 $ grunt build
 ```
 
-To test:
+Run full test suite (see browser notes below):
 
 ``` bash
 $ grunt test
@@ -94,4 +105,6 @@ The default task (by simply running `grunt`) will do the following: lint -> buil
 
 The unit tests are written with Jasmine and run with Karma. The e2e tests are written for and run with CasperJS.
 
-Note that the unit tests will automatically be run in Chrome, Firefox and Safari. If you are not on a Mac, or don't have one of the browsers installed on your system, you can modify the [karma config in gruntfile.js](https://github.com/vuejs/vue/blob/dev/gruntfile.js#L38) to only run Karma tests in browsers that are available on your system. Just make sure don’t check in the gruntfile changes for the commit.
+### Test Browser Notes
+
+When running the default `grunt` task, the unit tests will automatically be run in Chrome, Firefox and Safari. If you are not on a Mac, or don't have one of the browsers installed on your system, you can modify the [karma config in gruntfile.js](https://github.com/vuejs/vue/blob/dev/gruntfile.js#L38) to only run Karma tests in browsers that are available on your system. Just make sure don’t check in the gruntfile changes for the commit.
