@@ -269,4 +269,48 @@ describe('Misc', function () {
     })
     expect(hasWarned(__, 'Unknown custom element')).toBe(true)
   })
+
+  it('prefer bound title over static title', function (done) {
+    var el = document.createElement('div')
+    var count = 0
+    var expected = [
+      'bound',
+      'bound',
+      'static',
+      'bound',
+      'bound'
+    ]
+    function check (title) {
+      expect(title).toBe(expected[count])
+      count++
+      if (count === 4) {
+        done()
+      }
+    }
+
+    document.body.appendChild(el)
+
+    new Vue({
+      el: el,
+      template:
+        '<div>\
+          <comp v-bind:title="title"></comp>\
+          <comp title="static" v-bind:title="title"></comp>\
+          <comp title="static"></comp>\
+          <comp :title="title"></comp>\
+          <comp title="static" :title="title"></comp>\
+        </div>',
+      data: {
+        title: 'bound'
+      },
+      components: {
+        comp: {
+          props: ['title'],
+          ready: function () {
+            check(this.title)
+          }
+        }
+      }
+    })
+  })
 })
