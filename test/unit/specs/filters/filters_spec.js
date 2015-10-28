@@ -105,6 +105,19 @@ describe('Filters', function () {
     }, 500)
   })
 
+  it('limitBy', function () {
+    var filter = filters.limitBy
+    var arr = [1, 2, 3]
+    var res = filter(arr, false)
+    expect(res).toBe(arr)
+    res = filter(arr, 1)
+    assertArray(res, [1])
+    res = filter(arr, 10)
+    assertArray(res, [1, 2, 3])
+    res = filter(arr, -1)
+    assertArray(res, [1, 2])
+  })
+
   it('filterBy', function () {
     var filter = filters.filterBy
     var arr = [

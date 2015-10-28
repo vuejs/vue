@@ -3,6 +3,18 @@ var Path = require('../parsers/path')
 var toArray = require('../directives/public/for')._postProcess
 
 /**
+ * Limit filter for arrays
+ *
+ * @param {Number} n
+ */
+
+exports.limitBy = function (arr, n) {
+  return typeof n === 'number'
+    ? arr.slice(0, n)
+    : arr
+}
+
+/**
  * Filter filter for arrays
  *
  * @param {String} searchKey
