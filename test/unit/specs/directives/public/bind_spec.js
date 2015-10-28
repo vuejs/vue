@@ -1,5 +1,6 @@
 var _ = require('../../../../../src/util')
 var def = require('../../../../../src/directives/public/bind')
+var xlinkNS = 'http://www.w3.org/1999/xlink'
 
 if (_.inBrowser) {
   describe('v-bind', function () {
@@ -39,7 +40,6 @@ if (_.inBrowser) {
     })
 
     it('xlink', function () {
-      var xlinkNS = 'http://www.w3.org/1999/xlink'
       dir.arg = 'xlink:special'
       dir.update('ok')
       expect(el.getAttributeNS(xlinkNS, 'special')).toBe('ok')
@@ -47,6 +47,24 @@ if (_.inBrowser) {
       expect(el.getAttributeNS(xlinkNS, 'special')).toBe('again')
       dir.update(null)
       expect(el.hasAttributeNS(xlinkNS, 'special')).toBe(false)
+    })
+
+    it('object format', function () {
+      dir.el = document.createElement('input')
+      dir.update({
+        'test': 'hi',
+        'value': 'what'
+      })
+      expect(dir.el.getAttribute('test')).toBe('hi')
+      expect(dir.el.value).toBe('what')
+      dir.update({
+        'xlink:special': 'ok'
+      })
+      expect(dir.el.hasAttribute('test')).toBe(false)
+      expect(dir.el.value).toBeFalsy()
+      expect(dir.el.getAttributeNS(xlinkNS, 'special')).toBe('ok')
+      dir.update(null)
+      expect(dir.el.hasAttributeNS(xlinkNS, 'special')).toBe(false)
     })
   })
 }

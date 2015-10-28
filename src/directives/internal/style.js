@@ -2,7 +2,6 @@ var _ = require('../../util')
 var prefixes = ['-webkit-', '-moz-', '-ms-']
 var camelPrefixes = ['Webkit', 'Moz', 'ms']
 var importantRE = /!important;?$/
-var camelRE = /([a-z])([A-Z])/g
 var testEl = null
 var propCache = {}
 
@@ -14,33 +13,33 @@ module.exports = {
     if (typeof value === 'string') {
       this.el.style.cssText = value
     } else if (_.isArray(value)) {
-      this.objectHandler(value.reduce(_.extend, {}))
+      this.handleObject(value.reduce(_.extend, {}))
     } else {
-      this.objectHandler(value)
+      this.handleObject(value || {})
     }
   },
 
-  objectHandler: function (value) {
+  handleObject: function (value) {
     // cache object styles so that only changed props
     // are actually updated.
     var cache = this.cache || (this.cache = {})
-    var prop, val
-    for (prop in cache) {
-      if (!(prop in value)) {
-        this.setProp(prop, null)
-        delete cache[prop]
+    var name, val
+    for (name in cache) {
+      if (!(name in value)) {
+        this.handleSingle(name, null)
+        delete cache[name]
       }
     }
-    for (prop in value) {
-      val = value[prop]
-      if (val !== cache[prop]) {
-        cache[prop] = val
-        this.setProp(prop, val)
+    for (name in value) {
+      val = value[name]
+      if (val !== cache[name]) {
+        cache[name] = val
+        this.handleSingle(name, val)
       }
     }
   },
 
-  setProp: function (prop, value) {
+  handleSingle: function (prop, value) {
     prop = normalize(prop)
     if (!prop) return // unsupported prop
     // cast possible numbers/booleans into strings
@@ -88,7 +87,7 @@ function normalize (prop) {
  */
 
 function prefix (prop) {
-  prop = prop.replace(camelRE, '$1-$2').toLowerCase()
+  prop = _.hyphenate(prop)
   var camel = _.camelize(prop)
   var upper = camel.charAt(0).toUpperCase() + camel.slice(1)
   if (!testEl) {

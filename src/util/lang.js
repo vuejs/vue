@@ -156,8 +156,9 @@ exports.stripQuotes = function (str) {
  * @return {String}
  */
 
+var camelizeRE = /-(\w)/g
 exports.camelize = function (str) {
-  return str.replace(/-(\w)/g, toUpper)
+  return str.replace(camelizeRE, toUpper)
 }
 
 function toUpper (_, c) {
@@ -171,9 +172,10 @@ function toUpper (_, c) {
  * @return {String}
  */
 
+var hyphenateRE = /([a-z\d])([A-Z])/g
 exports.hyphenate = function (str) {
   return str
-    .replace(/([a-z\d])([A-Z])/g, '$1-$2')
+    .replace(hyphenateRE, '$1-$2')
     .toLowerCase()
 }
 

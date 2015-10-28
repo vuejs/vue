@@ -74,6 +74,17 @@ module.exports = {
       return
     }
     var attr = this.arg
+    if (this.arg) {
+      this.handleSingle(attr, value)
+    } else {
+      this.handleObject(value || {})
+    }
+  },
+
+  // share object handler with v-bind:class
+  handleObject: require('../internal/style').handleObject,
+
+  handleSingle: function (attr, value) {
     if (inputProps[attr] && attr in this.el) {
       this.el[attr] = value
     }

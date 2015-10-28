@@ -88,6 +88,12 @@ if (_.inBrowser) {
       expect(el.style.getPropertyValue('color')).toBe('blue')
       expect(el.style.getPropertyValue('margin-right')).toBeFalsy()
       expect(el.style.getPropertyValue('padding')).toBeFalsy()
+
+      // handle falsy value
+      dir.update(null)
+      expect(el.style.getPropertyValue('color')).toBeFalsy()
+      expect(el.style.getPropertyValue('margin-right')).toBeFalsy()
+      expect(el.style.getPropertyValue('padding')).toBeFalsy()
     })
 
     it('array of objects', function () {
