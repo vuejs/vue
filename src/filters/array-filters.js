@@ -39,12 +39,11 @@ exports.filterBy = function (arr, search, delimiter /* ...dataKeys */) {
         if ((key === '$key' && contains(item.$key, search)) ||
             contains(Path.get(val, key), search)) {
           res.push(item)
+          break
         }
       }
-    } else {
-      if (contains(item, search)) {
-        res.push(item)
-      }
+    } else if (contains(item, search)) {
+      res.push(item)
     }
   }
   return res
