@@ -86,7 +86,9 @@ module.exports = {
 
   handleSingle: function (attr, value) {
     if (inputProps[attr] && attr in this.el) {
-      this.el[attr] = value
+      this.el[attr] = attr === 'value'
+        ? (value || '') // IE9 will set input.value to "null" for null...
+        : value
     }
     // set model props
     var modelProp = modelProps[attr]
