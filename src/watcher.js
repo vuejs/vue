@@ -325,19 +325,18 @@ Watcher.prototype.teardown = function () {
  * getters, so that every nested property inside the object
  * is collected as a "deep" dependency.
  *
- * @param {Object} obj
+ * @param {*} val
  */
 
-function traverse (obj) {
-  var key, val, i
-  for (key in obj) {
-    val = obj[key]
-    if (_.isArray(val)) {
-      i = val.length
-      while (i--) traverse(val[i])
-    } else if (_.isObject(val)) {
-      traverse(val)
-    }
+function traverse (val) {
+  var i, keys
+  if (_.isArray(val)) {
+    i = val.length
+    while (i--) traverse(val[i])
+  } else if (_.isObject(val)) {
+    keys = Object.keys(val)
+    i = keys.length
+    while (i--) traverse(val[keys[i]])
   }
 }
 

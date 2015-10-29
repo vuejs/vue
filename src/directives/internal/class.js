@@ -4,6 +4,8 @@ var removeClass = _.removeClass
 
 module.exports = {
 
+  deep: true,
+
   update: function (value) {
     if (value && typeof value === 'string') {
       this.handleObject(stringToObject(value))

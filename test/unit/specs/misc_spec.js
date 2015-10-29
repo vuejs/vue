@@ -313,4 +313,34 @@ describe('Misc', function () {
       }
     })
   })
+
+  it('deep watch for class, style and bind', function (done) {
+    var el = document.createElement('div')
+    var vm = new Vue({
+      el: el,
+      template: '<div :class="classes" :style="styles" v-bind="attrs"></div>',
+      data: {
+        classes: { a: true, b: false },
+        styles: { color: 'red', fontSize: '14px' },
+        attrs: { a: 1, b: 2 }
+      }
+    })
+    var div = el.firstChild
+    expect(div.className).toBe('a')
+    expect(div.style.color).toBe('red')
+    expect(div.style.fontSize).toBe('14px')
+    expect(div.getAttribute('a')).toBe('1')
+    expect(div.getAttribute('b')).toBe('2')
+    vm.classes.b = true
+    vm.styles.color = 'green'
+    vm.attrs.a = 3
+    Vue.nextTick(function () {
+      expect(div.className).toBe('a b')
+      expect(div.style.color).toBe('green')
+      expect(div.style.fontSize).toBe('14px')
+      expect(div.getAttribute('a')).toBe('3')
+      expect(div.getAttribute('b')).toBe('2')
+      done()
+    })
+  })
 })

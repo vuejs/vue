@@ -30,6 +30,10 @@ module.exports = {
   bind: function () {
     var attr = this.arg
     var tag = this.el.tagName
+    // should be deep watch on object mode
+    if (!attr) {
+      this.deep = true
+    }
     // handle interpolation bindings
     if (this.descriptor.interp) {
       // only allow binding on native attributes
