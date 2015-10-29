@@ -1,5 +1,5 @@
 /*!
- * Vue.js v1.0.2
+ * Vue.js v1.0.3
  * (c) 2015 Evan You
  * Released under the MIT License.
  */
@@ -146,7 +146,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	extend(p, __webpack_require__(65))
 	extend(p, __webpack_require__(66))
 
-	Vue.version = '1.0.2'
+	Vue.version = '1.0.3'
 	module.exports = _.Vue = Vue
 
 	/* istanbul ignore if */
@@ -1470,7 +1470,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	function processFilterArg (arg) {
 	  if (reservedArgRE.test(arg)) {
 	    return {
-	      value: arg,
+	      value: _.toNumber(arg),
 	      dynamic: false
 	    }
 	  } else {
