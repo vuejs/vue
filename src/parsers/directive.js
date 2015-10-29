@@ -43,7 +43,7 @@ function pushFilter () {
 function processFilterArg (arg) {
   if (reservedArgRE.test(arg)) {
     return {
-      value: arg,
+      value: _.toNumber(arg),
       dynamic: false
     }
   } else {
