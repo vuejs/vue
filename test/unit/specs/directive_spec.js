@@ -4,11 +4,14 @@ var nextTick = Vue.nextTick
 
 describe('Directive', function () {
 
-  var el = {} // simply a mock to be able to run in Node
-  var vm, def
-
+  var el, vm, def
   beforeEach(function () {
+    el = document.createElement('div')
     def = {
+      params: ['foo'],
+      paramWatchers: {
+        foo: jasmine.createSpy('foo')
+      },
       bind: jasmine.createSpy('bind'),
       update: jasmine.createSpy('update'),
       unbind: jasmine.createSpy('unbind')
@@ -153,5 +156,33 @@ describe('Directive', function () {
     d._bind()
     expect(d.update).toBe(def.update)
     expect(def.update).toHaveBeenCalled()
+  })
+
+  it('static params', function () {
+    el.setAttribute('foo', 'hello')
+    var d = new Directive({
+      name: 'test',
+      def: def,
+      expression: 'a'
+    }, vm, el)
+    d._bind()
+    expect(d.params.foo).toBe('hello')
+  })
+
+  it('dynamic params', function (done) {
+    el.setAttribute(':foo', 'a')
+    var d = new Directive({
+      name: 'test',
+      def: def,
+      expression: 'a'
+    }, vm, el)
+    d._bind()
+    expect(d.params.foo).toBe(vm.a)
+    vm.a = 2
+    nextTick(function () {
+      expect(def.paramWatchers.foo).toHaveBeenCalledWith(2, 1)
+      expect(d.params.foo).toBe(vm.a)
+      done()
+    })
   })
 })
