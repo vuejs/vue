@@ -156,15 +156,15 @@ Directive.prototype._setupParams = function () {
   while (i--) {
     key = params[i]
     mappedKey = _.camelize(key)
-    val = _.attr(this.el, key)
+    val = _.getBindAttr(this.el, key)
     if (val != null) {
-      // static
-      this.params[mappedKey] = val === '' ? true : val
-    } else {
       // dynamic
-      val = _.getBindAttr(this.el, key)
+      this._setupParamWatcher(mappedKey, val)
+    } else {
+      // static
+      val = _.attr(this.el, key)
       if (val != null) {
-        this._setupParamWatcher(mappedKey, val)
+        this.params[mappedKey] = val === '' ? true : val
       }
     }
   }
