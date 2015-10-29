@@ -372,7 +372,7 @@ if (_.inBrowser) {
     it('array filters', function (done) {
       var vm = new Vue({
         el: el,
-        template: '<div v-for="item in list | filterBy filterKey | orderBy sortKey -1">{{item.id}}</div>',
+        template: '<div v-for="item in list | filterBy filterKey | orderBy sortKey -1 | limitBy 2">{{item.id}}</div>',
         data: {
           filterKey: 'hi!',
           sortKey: 'id',
@@ -426,7 +426,9 @@ if (_.inBrowser) {
           })
           .map(function (item) {
             return '<div>' + item.id + '</div>'
-          }).join('')
+          })
+          .slice(0, 2)
+          .join('')
         expect(el.innerHTML).toBe(markup)
       }
     })
