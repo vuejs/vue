@@ -1,5 +1,5 @@
 /*!
- * Vue.js v1.0.1
+ * Vue.js v1.0.2
  * (c) 2015 Evan You
  * Released under the MIT License.
  */
@@ -146,7 +146,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	extend(p, __webpack_require__(65))
 	extend(p, __webpack_require__(66))
 
-	Vue.version = '1.0.1'
+	Vue.version = '1.0.2'
 	module.exports = _.Vue = Vue
 
 	/* istanbul ignore if */
@@ -334,8 +334,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @return {String}
 	 */
 
+	var camelizeRE = /-(\w)/g
 	exports.camelize = function (str) {
-	  return str.replace(/-(\w)/g, toUpper)
+	  return str.replace(camelizeRE, toUpper)
 	}
 
 	function toUpper (_, c) {
@@ -349,9 +350,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @return {String}
 	 */
 
+	var hyphenateRE = /([a-z\d])([A-Z])/g
 	exports.hyphenate = function (str) {
 	  return str
-	    .replace(/([a-z\d])([A-Z])/g, '$1-$2')
+	    .replace(hyphenateRE, '$1-$2')
 	    .toLowerCase()
 	}
 
@@ -2236,7 +2238,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	exports.compiler = __webpack_require__(14)
 	exports.FragmentFactory = __webpack_require__(21)
-	exports.internalDirectives = __webpack_require__(35)
+	exports.internalDirectives = __webpack_require__(36)
 	exports.parsers = {
 	  path: __webpack_require__(43),
 	  text: __webpack_require__(6),
@@ -2387,7 +2389,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _ = __webpack_require__(1)
 	var publicDirectives = __webpack_require__(16)
-	var internalDirectives = __webpack_require__(35)
+	var internalDirectives = __webpack_require__(36)
 	var compileProps = __webpack_require__(48)
 	var textParser = __webpack_require__(6)
 	var dirParser = __webpack_require__(8)
@@ -3119,11 +3121,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.bind = __webpack_require__(31)
 
 	// ref & el
-	exports.el = __webpack_require__(32)
-	exports.ref = __webpack_require__(33)
+	exports.el = __webpack_require__(33)
+	exports.ref = __webpack_require__(34)
 
 	// cloak
-	exports.cloak = __webpack_require__(34)
+	exports.cloak = __webpack_require__(35)
 
 
 /***/ },
@@ -3614,9 +3616,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (key) {
 	          frag.scope.$key = key
 	        }
-	        // update interator
+	        // update iterator
 	        if (iterator) {
-	          frag.scope[iterator] = key || i
+	          frag.scope[iterator] = key !== null ? key : i
 	        }
 	        // update data for track-by, object repeat &
 	        // primitive values.
@@ -3710,7 +3712,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      _.define(scope, '$key', null)
 	    }
 	    if (this.iterator) {
-	      _.defineReactive(scope, this.iterator, key || index)
+	      _.defineReactive(scope, this.iterator, key !== null ? key : index)
 	    }
 	    var frag = this.factory.create(host, scope, this._frag)
 	    frag.forId = this.id
@@ -5100,8 +5102,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return
 	    }
 	    var attr = this.arg
+	    if (this.arg) {
+	      this.handleSingle(attr, value)
+	    } else {
+	      this.handleObject(value || {})
+	    }
+	  },
+
+	  // share object handler with v-bind:class
+	  handleObject: __webpack_require__(32).handleObject,
+
+	  handleSingle: function (attr, value) {
 	    if (inputProps[attr] && attr in this.el) {
-	      this.el[attr] = value
+	      this.el[attr] = attr === 'value'
+	        ? (value || '') // IE9 will set input.value to "null" for null...
+	        : value
 	    }
 	    // set model props
 	    var modelProp = modelProps[attr]
@@ -5137,84 +5152,9 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
-
-	module.exports = {
-
-	  priority: 1500,
-
-	  bind: function () {
-	    /* istanbul ignore if */
-	    if (!this.arg) {
-	      return
-	    }
-	    var id = this.id = _.camelize(this.arg)
-	    var refs = (this._scope || this.vm).$els
-	    if (refs.hasOwnProperty(id)) {
-	      refs[id] = this.el
-	    } else {
-	      _.defineReactive(refs, id, this.el)
-	    }
-	  },
-
-	  unbind: function () {
-	    var refs = (this._scope || this.vm).$els
-	    if (refs[this.id] === this.el) {
-	      refs[this.id] = null
-	    }
-	  }
-	}
-
-
-/***/ },
-/* 33 */
-/***/ function(module, exports, __webpack_require__) {
-
-	if (true) {
-	  module.exports = {
-	    bind: function () {
-	      __webpack_require__(1).warn(
-	        'v-ref:' + this.arg + ' must be used on a child ' +
-	        'component. Found on <' + this.el.tagName.toLowerCase() + '>.'
-	      )
-	    }
-	  }
-	}
-
-
-/***/ },
-/* 34 */
-/***/ function(module, exports) {
-
-	module.exports = {
-	  bind: function () {
-	    var el = this.el
-	    this.vm.$once('hook:compiled', function () {
-	      el.removeAttribute('v-cloak')
-	    })
-	  }
-	}
-
-
-/***/ },
-/* 35 */
-/***/ function(module, exports, __webpack_require__) {
-
-	exports.style = __webpack_require__(36)
-	exports['class'] = __webpack_require__(37)
-	exports.component = __webpack_require__(38)
-	exports.prop = __webpack_require__(39)
-	exports.transition = __webpack_require__(45)
-
-
-/***/ },
-/* 36 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var _ = __webpack_require__(1)
 	var prefixes = ['-webkit-', '-moz-', '-ms-']
 	var camelPrefixes = ['Webkit', 'Moz', 'ms']
 	var importantRE = /!important;?$/
-	var camelRE = /([a-z])([A-Z])/g
 	var testEl = null
 	var propCache = {}
 
@@ -5226,33 +5166,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (typeof value === 'string') {
 	      this.el.style.cssText = value
 	    } else if (_.isArray(value)) {
-	      this.objectHandler(value.reduce(_.extend, {}))
+	      this.handleObject(value.reduce(_.extend, {}))
 	    } else {
-	      this.objectHandler(value)
+	      this.handleObject(value || {})
 	    }
 	  },
 
-	  objectHandler: function (value) {
+	  handleObject: function (value) {
 	    // cache object styles so that only changed props
 	    // are actually updated.
 	    var cache = this.cache || (this.cache = {})
-	    var prop, val
-	    for (prop in cache) {
-	      if (!(prop in value)) {
-	        this.setProp(prop, null)
-	        delete cache[prop]
+	    var name, val
+	    for (name in cache) {
+	      if (!(name in value)) {
+	        this.handleSingle(name, null)
+	        delete cache[name]
 	      }
 	    }
-	    for (prop in value) {
-	      val = value[prop]
-	      if (val !== cache[prop]) {
-	        cache[prop] = val
-	        this.setProp(prop, val)
+	    for (name in value) {
+	      val = value[name]
+	      if (val !== cache[name]) {
+	        cache[name] = val
+	        this.handleSingle(name, val)
 	      }
 	    }
 	  },
 
-	  setProp: function (prop, value) {
+	  handleSingle: function (prop, value) {
 	    prop = normalize(prop)
 	    if (!prop) return // unsupported prop
 	    // cast possible numbers/booleans into strings
@@ -5300,7 +5240,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	function prefix (prop) {
-	  prop = prop.replace(camelRE, '$1-$2').toLowerCase()
+	  prop = _.hyphenate(prop)
 	  var camel = _.camelize(prop)
 	  var upper = camel.charAt(0).toUpperCase() + camel.slice(1)
 	  if (!testEl) {
@@ -5318,6 +5258,80 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }
 	}
+
+
+/***/ },
+/* 33 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var _ = __webpack_require__(1)
+
+	module.exports = {
+
+	  priority: 1500,
+
+	  bind: function () {
+	    /* istanbul ignore if */
+	    if (!this.arg) {
+	      return
+	    }
+	    var id = this.id = _.camelize(this.arg)
+	    var refs = (this._scope || this.vm).$els
+	    if (refs.hasOwnProperty(id)) {
+	      refs[id] = this.el
+	    } else {
+	      _.defineReactive(refs, id, this.el)
+	    }
+	  },
+
+	  unbind: function () {
+	    var refs = (this._scope || this.vm).$els
+	    if (refs[this.id] === this.el) {
+	      refs[this.id] = null
+	    }
+	  }
+	}
+
+
+/***/ },
+/* 34 */
+/***/ function(module, exports, __webpack_require__) {
+
+	if (true) {
+	  module.exports = {
+	    bind: function () {
+	      __webpack_require__(1).warn(
+	        'v-ref:' + this.arg + ' must be used on a child ' +
+	        'component. Found on <' + this.el.tagName.toLowerCase() + '>.'
+	      )
+	    }
+	  }
+	}
+
+
+/***/ },
+/* 35 */
+/***/ function(module, exports) {
+
+	module.exports = {
+	  bind: function () {
+	    var el = this.el
+	    this.vm.$once('hook:compiled', function () {
+	      el.removeAttribute('v-cloak')
+	    })
+	  }
+	}
+
+
+/***/ },
+/* 36 */
+/***/ function(module, exports, __webpack_require__) {
+
+	exports.style = __webpack_require__(32)
+	exports['class'] = __webpack_require__(37)
+	exports.component = __webpack_require__(38)
+	exports.prop = __webpack_require__(39)
+	exports.transition = __webpack_require__(45)
 
 
 /***/ },
@@ -5509,7 +5523,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  resolveComponent: function (id, cb) {
 	    var self = this
 	    this.pendingComponentCb = _.cancellable(function (Component) {
-	      self.ComponentName = id
+	      self.ComponentName = Component.options.name || id
 	      self.Component = Component
 	      cb()
 	    })
@@ -7438,7 +7452,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var props = []
 	  var names = Object.keys(propOptions)
 	  var i = names.length
-	  var options, name, attr, value, path, parsed, prop
+	  var options, name, attr, value, path, parsed, prop, isTitleBinding
 	  while (i--) {
 	    name = names[i]
 	    options = propOptions[name] || empty
@@ -7467,10 +7481,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	      mode: propBindingModes.ONE_WAY
 	    }
 
+	    // IE title issues
+	    isTitleBinding = false
+	    if (name === 'title' && (el.getAttribute(':title') || el.getAttribute('v-bind:title'))) {
+	      isTitleBinding = true
+	    }
+
 	    // first check literal version
 	    attr = _.hyphenate(name)
 	    value = prop.raw = _.attr(el, attr)
-	    if (value === null) {
+	    if (value === null || isTitleBinding) {
 	      // then check dynamic version
 	      if ((value = _.getBindAttr(el, attr)) === null) {
 	        if ((value = _.getBindAttr(el, attr + '.sync')) !== null) {
@@ -8097,6 +8117,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	var toArray = __webpack_require__(20)._postProcess
 
 	/**
+	 * Limit filter for arrays
+	 *
+	 * @param {Number} n
+	 */
+
+	exports.limitBy = function (arr, n) {
+	  return typeof n === 'number'
+	    ? arr.slice(0, n)
+	    : arr
+	}
+
+	/**
 	 * Filter filter for arrays
 	 *
 	 * @param {String} searchKey
@@ -8133,12 +8165,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if ((key === '$key' && contains(item.$key, search)) ||
 	            contains(Path.get(val, key), search)) {
 	          res.push(item)
+	          break
 	        }
 	      }
-	    } else {
-	      if (contains(item, search)) {
-	        res.push(item)
-	      }
+	    } else if (contains(item, search)) {
+	      res.push(item)
 	    }
 	  }
 	  return res
