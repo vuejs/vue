@@ -849,6 +849,41 @@ if (_.inBrowser) {
       })
     })
 
+    it('access parent\'s $refs', function () {
+      var vm = new Vue({
+        el: document.createElement('div'),
+        template: '<c1 v-ref:c1><div v-for="n in 2">{{$refs.c1.d}}</div></c1>',
+        components: {
+          c1: {
+            template: '<div><slot></slot></div>',
+            data: function () {
+              return {
+                d: 1
+              }
+            }
+          }
+        }
+      })
+      expect(vm.$refs.c1 instanceof Vue).toBe(true)
+      expect(vm.$refs.c1.$el.innerHTML).toContain('<div>1</div><div>1</div>')
+    })
+
+    it('access parent scope\'s $els', function (done) {
+      var vm = new Vue({
+        el: document.createElement('div'),
+        template: '<div data-d=1 v-el:a><div v-for="n in 2">{{ready ? $els.a.dataset.d : 0}}</div></div>',
+        data: {
+          ready: false
+        }
+      })
+      expect(vm.$els.a instanceof Element).toBe(true)
+      expect(vm.$els.a.innerHTML).toContain('<div>0</div><div>0</div>')
+      vm.ready = true
+      vm.$nextTick(function () {
+        expect(vm.$els.a.innerHTML).toContain('<div>1</div><div>1</div>')
+        done()
+      })
+    })
   })
 }
 
