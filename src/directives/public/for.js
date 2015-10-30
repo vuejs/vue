@@ -202,8 +202,8 @@ module.exports = {
     var parentScope = this._scope || this.vm
     var scope = Object.create(parentScope)
     // ref holder for the scope
-    scope.$refs = {}
-    scope.$els = {}
+    scope.$refs = Object.create(parentScope.$refs)
+    scope.$els = Object.create(parentScope.$els)
     // make sure point $parent to parent scope
     scope.$parent = parentScope
     // for two-way binding on alias
