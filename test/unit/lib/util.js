@@ -2,7 +2,7 @@ var scope = typeof window === 'undefined'
   ? global
   : window
 
-scope.hasWarned = function (_, msg) {
+scope.hasWarned = function (_, msg, silent) {
   var count = _.warn.calls.count()
   while (count--) {
     var args = _.warn.calls.argsFor(count)
@@ -11,7 +11,9 @@ scope.hasWarned = function (_, msg) {
     }
   }
 
-  console.warn('[test] "' + msg + '" was never warned.')
+  if (!silent) {
+    console.warn('[test] "' + msg + '" was never warned.')
+  }
 
   function containsMsg (arg) {
     return arg.indexOf(msg) > -1

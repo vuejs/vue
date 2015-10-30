@@ -208,16 +208,17 @@ exports.compileRoot = function (el, options, contextOptions) {
     }
   } else if (process.env.NODE_ENV !== 'production' && containerAttrs) {
     // warn container directives for fragment instances
-    containerAttrs.forEach(function (attr) {
-      if (attr.name.indexOf('v-') === 0 || attr.name === 'transition') {
-        _.warn(
-          attr.name + ' is ignored on component ' +
-          '<' + options.el.tagName.toLowerCase() + '> because ' +
-          'the component is a fragment instance: ' +
-          'http://vuejs.org/guide/components.html#Fragment_Instance'
-        )
-      }
-    })
+    var names = containerAttrs.map(function (attr) {
+      return '"' + attr.name + '"'
+    }).join(', ')
+    var plural = containerAttrs.length > 1
+    _.warn(
+      'Attribute' + (plural ? 's ' : ' ') + names +
+      (plural ? ' are' : ' is') + ' ignored on component ' +
+      '<' + options.el.tagName.toLowerCase() + '> because ' +
+      'the component is a fragment instance: ' +
+      'http://vuejs.org/guide/components.html#Fragment_Instance'
+    )
   }
 
   return function rootLinkFn (vm, el, scope) {

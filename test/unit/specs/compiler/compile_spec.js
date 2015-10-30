@@ -517,15 +517,20 @@ if (_.inBrowser) {
     it('warn directives on fragment instances', function () {
       new Vue({
         el: el,
-        template: '<test v-show="ok"></test>',
+        template: '<test id="hi" class="ok" :prop="123"></test>',
         components: {
           test: {
             replace: true,
-            template: '123'
+            props: ['prop'],
+            template: '{{prop}}'
           }
         }
       })
-      expect(hasWarned(_, 'v-show is ignored on component <test>')).toBe(true)
+      expect(_.warn.calls.count()).toBe(1)
+      expect(
+        hasWarned(_, 'Attributes "id", "class" are ignored on component <test>', true) ||
+        hasWarned(_, 'Attributes "class", "id" are ignored on component <test>')
+      ).toBe(true)
     })
 
     it('should compile component container directives using correct context', function () {
