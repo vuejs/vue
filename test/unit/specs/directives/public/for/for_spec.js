@@ -871,7 +871,7 @@ if (_.inBrowser) {
     it('access parent scope\'s $els', function (done) {
       var vm = new Vue({
         el: document.createElement('div'),
-        template: '<div data-d=1 v-el:a><div v-for="n in 2">{{ready ? $els.a.dataset.d : 0}}</div></div>',
+        template: '<div data-d=1 v-el:a><div v-for="n in 2">{{ready ? $els.a.getAttribute("data-d") : 0}}</div></div>',
         data: {
           ready: false
         }
