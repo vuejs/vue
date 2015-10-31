@@ -20,6 +20,9 @@ var terminalDirectives = [
   'if'
 ]
 
+// default directive priority
+var DEFAULT_PRIORITY = 1000
+
 /**
  * Compile a template and return a reusable composite link
  * function, which recursively contains more link functions
@@ -102,8 +105,8 @@ function linkAndCapture (linker, vm) {
  */
 
 function directiveComparator (a, b) {
-  a = a.descriptor.def.priority || 0
-  b = b.descriptor.def.priority || 0
+  a = a.descriptor.def.priority || DEFAULT_PRIORITY
+  b = b.descriptor.def.priority || DEFAULT_PRIORITY
   return a > b ? -1 : a === b ? 0 : 1
 }
 
