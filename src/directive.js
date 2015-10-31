@@ -221,7 +221,7 @@ Directive.prototype._checkStatement = function () {
       fn.call(scope, scope)
     }
     if (this.filters) {
-      handler = this.vm._applyFilters(handler, null, this.filters)
+      handler = scope._applyFilters(handler, null, this.filters)
     }
     this.update(handler)
     return true
