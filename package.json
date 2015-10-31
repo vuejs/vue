@@ -3,7 +3,7 @@
   "version": "1.0.3",
   "author": "Evan You <yyx990803@gmail.com>",
   "license": "MIT",
-  "description": "Simple, Fast & Composable MVVM for building interative interfaces",
+  "description": "Simple, Fast & Composable MVVM for building interactive interfaces",
   "keywords": [
     "mvvm",
     "browser",
