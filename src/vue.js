@@ -85,7 +85,7 @@ extend(p, require('./api/dom'))
 extend(p, require('./api/events'))
 extend(p, require('./api/lifecycle'))
 
-Vue.version = '1.0.3'
+Vue.version = '1.0.4'
 module.exports = _.Vue = Vue
 
 /* istanbul ignore if */
