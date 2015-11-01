@@ -138,6 +138,15 @@ config._assetTypes.forEach(function (type) {
     if (!definition) {
       return this.options[type + 's'][id]
     } else {
+      /* istanbul ignore if */
+      if (process.env.NODE_ENV !== 'production') {
+        if (type === 'component' && _.commonTagRE.test(id)) {
+          _.warn(
+            'Do not use built-in HTML elements as component ' +
+            'id: ' + id
+          )
+        }
+      }
       if (
         type === 'component' &&
         _.isPlainObject(definition)
