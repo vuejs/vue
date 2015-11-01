@@ -123,6 +123,7 @@ exports._bindDir = function (descriptor, node, host, scope, frag) {
 
 exports._destroy = function (remove, deferCleanup) {
   if (this._isBeingDestroyed) {
+    this._cleanup()
     return
   }
   this._callHook('beforeDestroy')
@@ -141,10 +142,6 @@ exports._destroy = function (remove, deferCleanup) {
         scope.$refs[ref] = null
       }
     }
-  }
-  // remove self from owner fragment
-  if (this._frag) {
-    this._frag.children.$remove(this)
   }
   // destroy all children.
   i = this.$children.length
@@ -186,6 +183,15 @@ exports._destroy = function (remove, deferCleanup) {
  */
 
 exports._cleanup = function () {
+  if (this._isDestroyed) {
+    return
+  }
+  // remove self from owner fragment
+  // do it in cleanup so that we can call $destroy with
+  // defer right when a fragment is about to be removed.
+  if (this._frag) {
+    this._frag.children.$remove(this)
+  }
   // remove reference from data ob
   // frozen object may not have observer.
   if (this._data.__ob__) {

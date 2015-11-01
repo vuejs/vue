@@ -40,7 +40,7 @@ module.exports = {
 
   insert: function () {
     if (this.elseFrag) {
-      this.elseFrag.remove(true)
+      this.elseFrag.remove()
       this.elseFrag = null
     }
     this.frag = this.factory.create(this._host, this._scope, this._frag)
@@ -49,7 +49,7 @@ module.exports = {
 
   remove: function () {
     if (this.frag) {
-      this.frag.remove(true)
+      this.frag.remove()
       this.frag = null
     }
     if (this.elseFactory) {

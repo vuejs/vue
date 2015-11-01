@@ -89,21 +89,18 @@ function singleBefore (target, withTransition) {
 
 /**
  * Remove fragment, single node version
- *
- * @param {Boolean} [destroy]
  */
 
-function singleRemove (destroy) {
+function singleRemove () {
   this.inserted = false
   var shouldCallRemove = _.inDoc(this.node)
   var self = this
+  self.callHook(destroyChild)
   transition.remove(this.node, this.vm, function () {
     if (shouldCallRemove) {
       self.callHook(detach)
     }
-    if (destroy) {
-      self.destroy()
-    }
+    self.destroy()
   })
 }
 
@@ -130,21 +127,18 @@ function multiBefore (target, withTransition) {
 
 /**
  * Remove fragment, multi-nodes version
- *
- * @param {Boolean} [destroy]
  */
 
-function multiRemove (destroy) {
+function multiRemove () {
   this.inserted = false
   var self = this
   var shouldCallRemove = _.inDoc(this.node)
+  self.callHook(destroyChild)
   _.removeNodeRange(this.node, this.end, this.vm, this.frag, function () {
     if (shouldCallRemove) {
       self.callHook(detach)
     }
-    if (destroy) {
-      self.destroy()
-    }
+    self.destroy()
   })
 }
 
@@ -158,6 +152,20 @@ function attach (child) {
   if (!child._isAttached) {
     child._callHook('attached')
   }
+}
+
+/**
+ * Call destroy for all contained instances,
+ * with remove:false and defer:true.
+ * Defer is necessary because we need to
+ * keep the children to call detach hooks
+ * on them.
+ *
+ * @param {Vue} child
+ */
+
+function destroyChild (child) {
+  child.$destroy(false, true)
 }
 
 /**

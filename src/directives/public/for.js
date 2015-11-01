@@ -325,11 +325,11 @@ module.exports = {
     if (inDoc && staggerAmount) {
       var op = frag.staggerCb = _.cancellable(function () {
         frag.staggerCb = null
-        frag.remove(true)
+        frag.remove()
       })
       setTimeout(op, staggerAmount)
     } else {
-      frag.remove(true)
+      frag.remove()
     }
   },
 
