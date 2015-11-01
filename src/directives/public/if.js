@@ -52,7 +52,7 @@ module.exports = {
       this.frag.remove()
       this.frag = null
     }
-    if (this.elseFactory) {
+    if (this.elseFactory && !this.elseFrag) {
       this.elseFrag = this.elseFactory.create(this._host, this._scope, this._frag)
       this.elseFrag.before(this.anchor)
     }
