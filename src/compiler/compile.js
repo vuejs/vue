@@ -213,7 +213,12 @@ exports.compileRoot = function (el, options, contextOptions) {
     // warn container directives for fragment instances
     var names = containerAttrs
       .filter(function (attr) {
-        return attr.name.indexOf('_v-') < 0
+        // allow vue-loader/vueify scoped css attributes
+        return attr.name.indexOf('_v-') < 0 &&
+          // allow event listeners
+          !onRE.test(attr.name) &&
+          // allow slots
+          attr.name !== 'slot'
       })
       .map(function (attr) {
         return '"' + attr.name + '"'
@@ -221,7 +226,7 @@ exports.compileRoot = function (el, options, contextOptions) {
     if (names.length) {
       var plural = names.length > 1
       _.warn(
-        'Attribute' + (plural ? 's ' : ' ') + names.join(',') +
+        'Attribute' + (plural ? 's ' : ' ') + names.join(', ') +
         (plural ? ' are' : ' is') + ' ignored on component ' +
         '<' + options.el.tagName.toLowerCase() + '> because ' +
         'the component is a fragment instance: ' +
