@@ -493,8 +493,10 @@ function checkElementDirectives (el, options) {
 function checkComponent (el, options) {
   var component = _.checkComponent(el, options)
   if (component) {
+    var ref = _.findRef(el)
     var descriptor = {
       name: 'component',
+      ref: ref,
       expression: component.id,
       def: internalDirectives.component,
       modifiers: {
@@ -502,6 +504,9 @@ function checkComponent (el, options) {
       }
     }
     var componentLinkFn = function (vm, el, host, scope, frag) {
+      if (ref) {
+        _.defineReactive((scope || vm).$refs, ref, null)
+      }
       vm._bindDir(descriptor, el, host, scope, frag)
     }
     componentLinkFn.terminal = true
@@ -568,7 +573,14 @@ function makeTerminalNodeLinkFn (el, dirName, value, options, def) {
     // either an element directive, or if/for
     def: def || publicDirectives[dirName]
   }
+  // check ref for v-for
+  if (dirName === 'for') {
+    descriptor.ref = _.findRef(el)
+  }
   var fn = function terminalNodeLinkFn (vm, el, host, scope, frag) {
+    if (descriptor.ref) {
+      _.defineReactive((scope || vm).$refs, descriptor.ref, null)
+    }
     vm._bindDir(descriptor, el, host, scope, frag)
   }
   fn.terminal = true

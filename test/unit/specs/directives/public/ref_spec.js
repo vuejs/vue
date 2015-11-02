@@ -57,7 +57,10 @@ if (_.inBrowser) {
       var vm = new Vue({
         el: el,
         data: { view: 'one' },
-        template: '{{$refs.test.value}}<component :is="view" v-ref:test></component>',
+        template:
+          '{{$refs.test.value}}' +
+          '<component :is="view" v-ref:test></component>' +
+          '<div v-if="$refs.test.value > 1">ok</div>',
         components: {
           one: {
             id: 'one',
@@ -80,7 +83,7 @@ if (_.inBrowser) {
       vm.view = 'two'
       _.nextTick(function () {
         expect(vm.$refs.test.$options.id).toBe('two')
-        expect(el.textContent).toBe('2')
+        expect(el.textContent).toBe('2ok')
         vm.view = ''
         _.nextTick(function () {
           expect(vm.$refs.test).toBeNull()

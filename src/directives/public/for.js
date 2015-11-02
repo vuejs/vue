@@ -55,9 +55,6 @@ module.exports = {
     _.replace(this.el, this.end)
     _.before(this.start, this.end)
 
-    // check ref
-    this.ref = _.findRef(this.el)
-
     // cache
     this.cache = Object.create(null)
 
@@ -231,7 +228,7 @@ module.exports = {
    */
 
   updateRef: function () {
-    var ref = this.ref
+    var ref = this.descriptor.ref
     if (!ref) return
     var hash = (this._scope || this.vm).$refs
     var refs
@@ -243,11 +240,7 @@ module.exports = {
         refs[frag.scope.$key] = findVmFromFrag(frag)
       })
     }
-    if (!hash.hasOwnProperty(ref)) {
-      _.defineReactive(hash, ref, refs)
-    } else {
-      hash[ref] = refs
-    }
+    hash[ref] = refs
   },
 
   /**
@@ -513,8 +506,8 @@ module.exports = {
   },
 
   unbind: function () {
-    if (this.ref) {
-      (this._scope || this.vm).$refs[this.ref] = null
+    if (this.descriptor.ref) {
+      (this._scope || this.vm).$refs[this.descriptor.ref] = null
     }
     if (this.frags) {
       var i = this.frags.length

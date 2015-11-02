@@ -23,12 +23,6 @@ module.exports = {
 
   bind: function () {
     if (!this.el.__vue__) {
-      // check ref
-      this.ref = _.findRef(this.el)
-      var refs = (this._scope || this.vm).$refs
-      if (this.ref && !refs.hasOwnProperty(this.ref)) {
-        _.defineReactive(refs, this.ref, null)
-      }
       // keep-alive cache
       this.keepAlive = this.params.keepAlive
       if (this.keepAlive) {
@@ -182,7 +176,7 @@ module.exports = {
         // if no inline-template, then the compiled
         // linker can be cached for better performance.
         _linkerCachable: !this.inlineTemplate,
-        _ref: this.ref,
+        _ref: this.descriptor.ref,
         _asComponent: true,
         _isRouterView: this._isRouterView,
         // if this is a transcluded component, context
