@@ -123,7 +123,9 @@ exports._bindDir = function (descriptor, node, host, scope, frag) {
 
 exports._destroy = function (remove, deferCleanup) {
   if (this._isBeingDestroyed) {
-    this._cleanup()
+    if (!deferCleanup) {
+      this._cleanup()
+    }
     return
   }
   this._callHook('beforeDestroy')
