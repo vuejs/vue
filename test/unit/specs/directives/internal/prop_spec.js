@@ -550,5 +550,29 @@ if (_.inBrowser) {
       })
       expect(_.warn).not.toHaveBeenCalled()
     })
+
+    // #1683
+    it('should only trigger sync on reference change', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          items: [1, 2]
+        },
+        template: '<comp :items.sync="items"></comp>',
+        components: {
+          comp: {
+            props: ['items']
+          }
+        }
+      })
+      var child = vm.$children[0]
+      child.items.push(3) // this should not trigger parent to sync it down
+      var newArray = child.items = [4]
+      _.nextTick(function () {
+        expect(child.items).toBe(newArray)
+        expect(vm.items).toBe(newArray)
+        done()
+      })
+    })
   })
 }

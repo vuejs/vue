@@ -179,13 +179,15 @@ function defineReactive (obj, key, val) {
     get: function metaGetter () {
       if (Dep.target) {
         dep.depend()
-        if (childOb) {
-          childOb.dep.depend()
-        }
-        if (_.isArray(val)) {
-          for (var e, i = 0, l = val.length; i < l; i++) {
-            e = val[i]
-            e && e.__ob__ && e.__ob__.dep.depend()
+        if (!Dep.refOnly) {
+          if (childOb) {
+            childOb.dep.depend()
+          }
+          if (_.isArray(val)) {
+            for (var e, i = 0, l = val.length; i < l; i++) {
+              e = val[i]
+              e && e.__ob__ && e.__ob__.dep.depend()
+            }
           }
         }
       }

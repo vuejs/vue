@@ -31,7 +31,9 @@ module.exports = {
         filters: prop.filters,
         // important: props need to be observed on the
         // v-for scope if present
-        scope: this._scope
+        scope: this._scope,
+        // only fire callback when reference has changed
+        refOnly: true
       }
     )
 
@@ -49,6 +51,8 @@ module.exports = {
           childKey,
           function (val) {
             parentWatcher.set(val)
+          }, {
+            refOnly: true
           }
         )
       })
