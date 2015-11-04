@@ -132,6 +132,10 @@ module.exports = {
         self.transition(newComponent, cb)
       })
     } else {
+      // update ref for kept-alive component
+      if (cached) {
+        newComponent._updateRef()
+      }
       this.transition(newComponent, cb)
     }
   },
@@ -241,6 +245,10 @@ module.exports = {
     }
     var child = this.childVM
     if (!child || this.keepAlive) {
+      if (child) {
+        // remove ref
+        child._updateRef(true)
+      }
       return
     }
     // the sole purpose of `deferCleanup` is so that we can

@@ -6,6 +6,7 @@ describe('Instance Init', function () {
     constructor: {
       options: { a: 1, b: 2 }
     },
+    _updateRef: jasmine.createSpy(),
     _initEvents: jasmine.createSpy(),
     _callHook: jasmine.createSpy(),
     _initState: jasmine.createSpy(),
@@ -38,6 +39,7 @@ describe('Instance Init', function () {
   it('should call other init methods', function () {
     expect(stub._initEvents).toHaveBeenCalled()
     expect(stub._initState).toHaveBeenCalled()
+    expect(stub._updateRef).toHaveBeenCalled()
   })
 
   it('should call created hook', function () {

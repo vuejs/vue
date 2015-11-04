@@ -79,17 +79,15 @@ exports._init = function (options) {
     this.$parent.$children.push(this)
   }
 
-  // set ref
-  if (options._ref) {
-    (this._scope || this._context).$refs[options._ref] = this
-  }
-
   // merge options.
   options = this.$options = mergeOptions(
     this.constructor.options,
     options,
     this
   )
+
+  // set ref
+  this._updateRef()
 
   // initialize data as empty object.
   // it will be filled up in _initScope().
