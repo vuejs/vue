@@ -116,6 +116,13 @@ describe('Filters', function () {
     assertArray(res, [1, 2, 3])
     res = filter(arr, -1)
     assertArray(res, [1, 2])
+    // with offsets, note offsets are 0 bound (as expected)
+    res = filter(arr, 1, 1)
+    assertArray(res, [2])
+    res = filter(arr, 2, 1)
+    assertArray(res, [2, 3])
+    res = filter(arr, 1, 2)
+    assertArray(res, [3])
   })
 
   it('filterBy', function () {
