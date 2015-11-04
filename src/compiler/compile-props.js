@@ -165,8 +165,10 @@ function makePropsLinkFn (props) {
         }
       } else if (prop.optimizedLiteral) {
         // optimized literal, cast it and just set once
-        raw = _.stripQuotes(raw)
-        value = _.toBoolean(_.toNumber(raw))
+        var stripped = _.stripQuotes(raw)
+        value = stripped === raw
+          ? _.toBoolean(_.toNumber(raw))
+          : stripped
         _.initProp(vm, prop, value)
       } else {
         // string literal, but we need to cater for

@@ -662,10 +662,6 @@ function compileDirectives (attrs, options) {
       }
 
       if (dirDef) {
-        if (_.isLiteral(value)) {
-          value = _.stripQuotes(value)
-          modifiers.literal = true
-        }
         pushDir(dirName, dirDef)
       }
     }

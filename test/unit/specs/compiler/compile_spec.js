@@ -90,7 +90,6 @@ if (_.inBrowser) {
       expect(args[0].name).toBe('b')
       expect(args[0].expression).toBe('1')
       expect(args[0].def).toBe(defB)
-      expect(args[0].modifiers.literal).toBe(true)
       expect(args[1]).toBe(el.firstChild)
       // 4 (explicit literal)
       args = vm._bindDir.calls.argsFor(3)
@@ -245,12 +244,14 @@ if (_.inBrowser) {
         testTwoWay: null,
         twoWayWarn: null,
         testOneTime: null,
-        optimizeLiteral: null
+        optimizeLiteral: null,
+        optimizeLiteralStr: null
       }
       el.innerHTML = '<div ' +
         'v-bind:test-normal="a" ' +
         'test-literal="1" ' +
         ':optimize-literal="1" ' +
+        ':optimize-literal-str="\'true\'"' +
         ':test-two-way.sync="a" ' +
         ':two-way-warn.sync="a + 1" ' +
         ':test-one-time.once="a"></div>'
@@ -261,6 +262,8 @@ if (_.inBrowser) {
       expect(vm._data.testLiteral).toBe('1')
       expect(vm.optimizeLiteral).toBe(1)
       expect(vm._data.optimizeLiteral).toBe(1)
+      expect(vm.optimizeLiteralStr).toBe('true')
+      expect(vm._data.optimizeLiteralStr).toBe('true')
       // one time
       expect(vm.testOneTime).toBe('from parent: a')
       expect(vm._data.testOneTime).toBe('from parent: a')

@@ -495,11 +495,8 @@ module.exports = {
       }
       return res
     } else {
-      var type = typeof value
-      if (type === 'number') {
+      if (typeof value === 'number') {
         value = range(value)
-      } else if (type === 'string') {
-        value = _.toArray(value)
       }
       return value || []
     }
