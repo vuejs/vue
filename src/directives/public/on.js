@@ -95,8 +95,10 @@ module.exports = {
 
     this.reset()
     var scope = this._scope || this.vm
+    var self = this
     this.handler = function (e) {
       scope.$event = e
+      scope.$target = self.el
       var res = handler(e)
       scope.$event = null
       return res
