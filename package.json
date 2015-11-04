@@ -42,6 +42,7 @@
     "karma-commonjs": "^0.0.13",
     "karma-coverage": "^0.5.0",
     "karma-firefox-launcher": "^0.1.6",
+    "karma-ie-launcher": "^0.2.0",
     "karma-jasmine": "^0.3.6",
     "karma-phantomjs-launcher": "^0.2.1",
     "karma-safari-launcher": "^0.1.1",

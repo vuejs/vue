@@ -8,6 +8,15 @@ var empty = {}
 var identRE = require('../parsers/path').identRE
 var settablePathRE = /^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\[[^\[\]]+\])*$/
 
+// feature detect browsers (IE) that have trouble
+// with binding syntax on certain attributes
+var div, preferBinding
+if (_.inBrowser) {
+  div = document.createElement('div')
+  div.setAttribute(':title', '')
+  preferBinding = div.getAttribute('title') !== null
+}
+
 /**
  * Compile props on a root element and return
  * a props link function.
@@ -21,7 +30,7 @@ module.exports = function compileProps (el, propOptions) {
   var props = []
   var names = Object.keys(propOptions)
   var i = names.length
-  var options, name, attr, value, path, parsed, prop, isTitleBinding
+  var options, name, attr, value, path, parsed, prop, hasBinding
   while (i--) {
     name = names[i]
     options = propOptions[name] || empty
@@ -50,16 +59,12 @@ module.exports = function compileProps (el, propOptions) {
       mode: propBindingModes.ONE_WAY
     }
 
-    // IE title issues
-    isTitleBinding = false
-    if (name === 'title' && (el.getAttribute(':title') || el.getAttribute('v-bind:title'))) {
-      isTitleBinding = true
-    }
+    attr = _.hyphenate(name)
+    hasBinding = preferBinding && checkBindingAttr(el, attr) !== null
 
     // first check literal version
-    attr = _.hyphenate(name)
     value = prop.raw = _.attr(el, attr)
-    if (value === null || isTitleBinding) {
+    if (value === null || hasBinding) {
       // then check dynamic version
       if ((value = _.getBindAttr(el, attr)) === null) {
         if ((value = _.getBindAttr(el, attr + '.sync')) !== null) {
@@ -117,6 +122,28 @@ module.exports = function compileProps (el, propOptions) {
     props.push(prop)
   }
   return makePropsLinkFn(props)
+}
+
+/**
+ * Check existance of an attribute with binding syntax.
+ *
+ * @param {Element} el
+ * @return {String} attr
+ */
+
+function checkBindingAttr (el, attr) {
+  if (attr === 'class') {
+    return null
+  }
+
+  return (
+    el.getAttribute(':' + attr) ||
+    el.getAttribute(':' + attr + '.once') ||
+    el.getAttribute(':' + attr + '.sync') ||
+    el.getAttribute('v-bind:' + attr) ||
+    el.getAttribute('v-bind:' + attr + '.once') ||
+    el.getAttribute('v-bind:' + attr + '.sync')
+  )
 }
 
 /**
