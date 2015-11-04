@@ -6,11 +6,15 @@ var toArray = require('../directives/public/for')._postProcess
  * Limit filter for arrays
  *
  * @param {Number} n
+ * @param {Number} offset (Decimal expected)
  */
 
-exports.limitBy = function (arr, n) {
+exports.limitBy = function (arr, n, offset) {
+  var off = (!offset)
+    ? 0
+    : parseInt(offset, 10)
   return typeof n === 'number'
-    ? arr.slice(0, n)
+    ? arr.slice(off, off + n)
     : arr
 }
 
