@@ -270,7 +270,7 @@ describe('Misc', function () {
     expect(hasWarned(__, 'Unknown custom element')).toBe(true)
   })
 
-  it('prefer bound title over static title', function (done) {
+  it('prefer bound attributes over static attributes', function (done) {
     var el = document.createElement('div')
     var count = 0
     var expected = [
@@ -289,6 +289,13 @@ describe('Misc', function () {
     }
 
     document.body.appendChild(el)
+    
+    el.setAttribute(':title', '')
+    if(el.getAttribute('title') === null) {
+      // this browser does not need this test
+      done()
+      return
+    }
 
     new Vue({
       el: el,

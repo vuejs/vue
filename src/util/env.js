@@ -83,3 +83,14 @@ exports.nextTick = (function () {
     timerFunc(nextTickHandler, 0)
   }
 })()
+
+// feature detect browsers (IE) that have trouble
+// with binding syntax on certain attributes
+var div
+var preferBinding = false
+if (inBrowser) {
+  div = document.createElement('div')
+  div.setAttribute(':title', '')
+  preferBinding = div.getAttribute('title') !== null
+}
+exports.preferBinding = preferBinding

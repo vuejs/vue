@@ -21,7 +21,7 @@ module.exports = function compileProps (el, propOptions) {
   var props = []
   var names = Object.keys(propOptions)
   var i = names.length
-  var options, name, attr, value, path, parsed, prop, isTitleBinding
+  var options, name, attr, value, path, parsed, prop, hasBinding
   while (i--) {
     name = names[i]
     options = propOptions[name] || empty
@@ -50,16 +50,12 @@ module.exports = function compileProps (el, propOptions) {
       mode: propBindingModes.ONE_WAY
     }
 
-    // IE title issues
-    isTitleBinding = false
-    if (name === 'title' && (el.getAttribute(':title') || el.getAttribute('v-bind:title'))) {
-      isTitleBinding = true
-    }
+    attr = _.hyphenate(name)
+    hasBinding = _.preferBinding && hasBindingAttr(el, attr)
 
     // first check literal version
-    attr = _.hyphenate(name)
     value = prop.raw = _.attr(el, attr)
-    if (value === null || isTitleBinding) {
+    if (value === null || hasBinding) {
       // then check dynamic version
       if ((value = _.getBindAttr(el, attr)) === null) {
         if ((value = _.getBindAttr(el, attr + '.sync')) !== null) {
@@ -117,6 +113,24 @@ module.exports = function compileProps (el, propOptions) {
     props.push(prop)
   }
   return makePropsLinkFn(props)
+}
+
+/**
+ * Check existance of an attribute with binding syntax.
+ *
+ * @param {Element} el
+ * @return {String} attr
+ */
+
+function hasBindingAttr (el, attr) {
+  if (attr === 'class') {
+    return false
+  }
+
+  return (
+    el.hasAttribute(':' + attr) ||
+    el.hasAttribute('v-bind:' + attr)
+  )
 }
 
 /**
