@@ -8,3 +8,4 @@ node_modules
 .idea
 benchmarks/browser.js
 coverage
+perf
