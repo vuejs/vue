@@ -123,11 +123,8 @@ module.exports = function compileProps (el, propOptions) {
  */
 
 function hasBindingAttr (el, attr) {
-  if (attr === 'class') {
-    return false
-  }
-
-  return (
+  /* istanbul ignore next */
+  return attr !== 'class' && (
     el.hasAttribute(':' + attr) ||
     el.hasAttribute('v-bind:' + attr)
   )

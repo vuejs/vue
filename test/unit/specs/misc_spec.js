@@ -289,9 +289,8 @@ describe('Misc', function () {
     }
 
     document.body.appendChild(el)
-    
     el.setAttribute(':title', '')
-    if(el.getAttribute('title') === null) {
+    if (el.getAttribute('title') === null) {
       // this browser does not need this test
       done()
       return
