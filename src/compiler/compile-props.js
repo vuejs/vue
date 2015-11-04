@@ -8,15 +8,6 @@ var empty = {}
 var identRE = require('../parsers/path').identRE
 var settablePathRE = /^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\[[^\[\]]+\])*$/
 
-// feature detect browsers (IE) that have trouble
-// with binding syntax on certain attributes
-var div, preferBinding
-if (_.inBrowser) {
-  div = document.createElement('div')
-  div.setAttribute(':title', '')
-  preferBinding = div.getAttribute('title') !== null
-}
-
 /**
  * Compile props on a root element and return
  * a props link function.
@@ -60,7 +51,7 @@ module.exports = function compileProps (el, propOptions) {
     }
 
     attr = _.hyphenate(name)
-    hasBinding = preferBinding && checkBindingAttr(el, attr) !== null
+    hasBinding = _.preferBinding && hasBindingAttr(el, attr)
 
     // first check literal version
     value = prop.raw = _.attr(el, attr)
@@ -131,18 +122,14 @@ module.exports = function compileProps (el, propOptions) {
  * @return {String} attr
  */
 
-function checkBindingAttr (el, attr) {
+function hasBindingAttr (el, attr) {
   if (attr === 'class') {
-    return null
+    return false
   }
 
   return (
-    el.getAttribute(':' + attr) ||
-    el.getAttribute(':' + attr + '.once') ||
-    el.getAttribute(':' + attr + '.sync') ||
-    el.getAttribute('v-bind:' + attr) ||
-    el.getAttribute('v-bind:' + attr + '.once') ||
-    el.getAttribute('v-bind:' + attr + '.sync')
+    el.hasAttribute(':' + attr) ||
+    el.hasAttribute('v-bind:' + attr)
   )
 }
 
