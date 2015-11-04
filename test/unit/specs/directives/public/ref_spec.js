@@ -53,6 +53,25 @@ if (_.inBrowser) {
       })
     })
 
+    it('with dynamic component + keep-alive', function (done) {
+      var vm = new Vue({
+        el: el,
+        components: components,
+        data: { test: 'test' },
+        template: '<component :is="test" v-ref:test keep-alive></component>'
+      })
+      expect(vm.$refs.test.$options.id).toBe('test')
+      vm.test = 'test2'
+      _.nextTick(function () {
+        expect(vm.$refs.test.$options.id).toBe('test2')
+        vm.test = ''
+        _.nextTick(function () {
+          expect(vm.$refs.test).toBe(null)
+          done()
+        })
+      })
+    })
+
     it('should be reactive when bound by dynamic component and hoisted', function (done) {
       var vm = new Vue({
         el: el,

@@ -3,6 +3,26 @@ var Directive = require('../directive')
 var compiler = require('../compiler')
 
 /**
+ * Update v-ref for component.
+ *
+ * @param {Boolean} remove
+ */
+
+exports._updateRef = function (remove) {
+  var ref = this.$options._ref
+  if (ref) {
+    var refs = (this._scope || this._context).$refs
+    if (remove) {
+      if (refs[ref] === this) {
+        refs[ref] = null
+      }
+    } else {
+      refs[ref] = this
+    }
+  }
+}
+
+/**
  * Transclude, compile and link element.
  *
  * If a pre-compiled linker is available, that means the
@@ -136,14 +156,8 @@ exports._destroy = function (remove, deferCleanup) {
   var parent = this.$parent
   if (parent && !parent._isBeingDestroyed) {
     parent.$children.$remove(this)
-    // unregister ref
-    var ref = this.$options._ref
-    if (ref) {
-      var scope = this._scope || this._context
-      if (scope.$refs[ref] === this) {
-        scope.$refs[ref] = null
-      }
-    }
+    // unregister ref (remove: true)
+    this._updateRef(true)
   }
   // destroy all children.
   i = this.$children.length
