@@ -19,12 +19,12 @@ exports.limitBy = function (arr, n, offset) {
 /**
  * Filter filter for arrays
  *
- * @param {String} searchKey
+ * @param {String} search
  * @param {String} [delimiter]
- * @param {String} dataKey
+ * @param {String} ...dataKeys
  */
 
-exports.filterBy = function (arr, search, delimiter /* ...dataKeys */) {
+exports.filterBy = function (arr, search, delimiter) {
   arr = toArray(arr)
   if (search == null) {
     return arr
