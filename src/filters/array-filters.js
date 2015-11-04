@@ -9,10 +9,10 @@ var toArray = require('../directives/public/for')._postProcess
  * @param {Number} offset (Decimal expected)
  */
 
-exports.limitBy = function (arr, n, off) {
-  off = off ? parseInt(off, 10) : 0
+exports.limitBy = function (arr, n, offset) {
+  offset = offset ? parseInt(offset, 10) : 0
   return typeof n === 'number'
-    ? arr.slice(off, off + n)
+    ? arr.slice(offset, offset + n)
     : arr
 }
 
