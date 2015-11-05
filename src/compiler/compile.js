@@ -621,7 +621,7 @@ function compileDirectives (attrs, options) {
           return attr.name === ':class' || attr.name === 'v-bind:class'
         })) {
           _.warn(
-            name + '="' + rawValue + '": Do not mix mustache interpolation ' +
+            'class="' + rawValue + '": Do not mix mustache interpolation ' +
             'and v-bind for "class" on the same element. Use one or the other.'
           )
         }

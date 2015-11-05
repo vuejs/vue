@@ -517,6 +517,17 @@ if (_.inBrowser) {
       expect(hasWarned(_, 'attribute interpolation is not allowed in Vue.js directives')).toBe(true)
     })
 
+    it('attribute interpolation: warn mixed usage with v-bind', function () {
+      new Vue({
+        el: el,
+        template: '<div class="{{a}}" :class="bcd"></div>',
+        data: {
+          a: 'hi'
+        }
+      })
+      expect(hasWarned(_, 'Do not mix mustache interpolation and v-bind')).toBe(true)
+    })
+
     it('warn directives on fragment instances', function () {
       new Vue({
         el: el,
