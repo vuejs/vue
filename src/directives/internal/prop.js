@@ -31,9 +31,7 @@ module.exports = {
         filters: prop.filters,
         // important: props need to be observed on the
         // v-for scope if present
-        scope: this._scope,
-        // only fire callback when reference has changed
-        refOnly: true
+        scope: this._scope
       }
     )
 
@@ -52,7 +50,10 @@ module.exports = {
           function (val) {
             parentWatcher.set(val)
           }, {
-            refOnly: true
+            // ensure sync upward before parent sync down.
+            // this is necessary in cases e.g. the child
+            // mutates a prop array, then replaces it. (#1683)
+            sync: true
           }
         )
       })

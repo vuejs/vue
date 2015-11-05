@@ -552,7 +552,7 @@ if (_.inBrowser) {
     })
 
     // #1683
-    it('should only trigger sync on reference change', function (done) {
+    it('should properly sync back up when mutating then replace', function (done) {
       var vm = new Vue({
         el: el,
         data: {
@@ -566,7 +566,7 @@ if (_.inBrowser) {
         }
       })
       var child = vm.$children[0]
-      child.items.push(3) // this should not trigger parent to sync it down
+      child.items.push(3)
       var newArray = child.items = [4]
       _.nextTick(function () {
         expect(child.items).toBe(newArray)

@@ -20,7 +20,6 @@ var uid = 0
  *                 - {Boolean} user
  *                 - {Boolean} sync
  *                 - {Boolean} lazy
- *                 - {Boolean} refOnly
  *                 - {Function} [preProcess]
  *                 - {Function} [postProcess]
  * @constructor
@@ -180,7 +179,6 @@ Watcher.prototype.set = function (value) {
 
 Watcher.prototype.beforeGet = function () {
   Dep.target = this
-  Dep.refOnly = !!this.refOnly
   this.newDeps = Object.create(null)
 }
 
@@ -190,7 +188,6 @@ Watcher.prototype.beforeGet = function () {
 
 Watcher.prototype.afterGet = function () {
   Dep.target = null
-  Dep.refOnly = false
   var ids = Object.keys(this.deps)
   var i = ids.length
   while (i--) {
