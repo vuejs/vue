@@ -615,6 +615,17 @@ function compileDirectives (attrs, options) {
       value = textParser.tokensToExp(tokens)
       arg = name
       pushDir('bind', publicDirectives.bind, true)
+      // warn against mixing mustaches with v-bind
+      if (process.env.NODE_ENV !== 'production') {
+        if (name === 'class' && Array.prototype.some.call(attrs, function (attr) {
+          return attr.name === ':class' || attr.name === 'v-bind:class'
+        })) {
+          _.warn(
+            name + '="' + rawValue + '": Do not mix mustache interpolation ' +
+            'and v-bind for "class" on the same element. Use one or the other.'
+          )
+        }
+      }
     } else
 
     // special attribute: transition
