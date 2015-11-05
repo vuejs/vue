@@ -288,14 +288,6 @@ describe('Misc', function () {
       }
     }
 
-    document.body.appendChild(el)
-    el.setAttribute(':title', '')
-    if (el.getAttribute('title') === null) {
-      // this browser does not need this test
-      done()
-      return
-    }
-
     new Vue({
       el: el,
       template:
@@ -312,7 +304,7 @@ describe('Misc', function () {
       components: {
         comp: {
           props: ['title'],
-          ready: function () {
+          created: function () {
             check(this.title)
           }
         }

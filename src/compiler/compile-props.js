@@ -21,7 +21,7 @@ module.exports = function compileProps (el, propOptions) {
   var props = []
   var names = Object.keys(propOptions)
   var i = names.length
-  var options, name, attr, value, path, parsed, prop, hasBinding
+  var options, name, attr, value, path, parsed, prop
   while (i--) {
     name = names[i]
     options = propOptions[name] || empty
@@ -47,87 +47,71 @@ module.exports = function compileProps (el, propOptions) {
       name: name,
       path: path,
       options: options,
-      mode: propBindingModes.ONE_WAY
+      mode: propBindingModes.ONE_WAY,
+      raw: null
     }
 
     attr = _.hyphenate(name)
-    hasBinding = _.preferBinding && hasBindingAttr(el, attr)
-
-    // first check literal version
-    value = prop.raw = _.attr(el, attr)
-    if (value === null || hasBinding) {
-      // then check dynamic version
-      if ((value = _.getBindAttr(el, attr)) === null) {
-        if ((value = _.getBindAttr(el, attr + '.sync')) !== null) {
-          prop.mode = propBindingModes.TWO_WAY
-        } else if ((value = _.getBindAttr(el, attr + '.once')) !== null) {
-          prop.mode = propBindingModes.ONE_TIME
-        }
-      }
-      prop.raw = value
-      if (value !== null) {
-        parsed = dirParser.parse(value)
-        value = parsed.expression
-        prop.filters = parsed.filters
-        // check binding type
-        if (_.isLiteral(value)) {
-          // for expressions containing literal numbers and
-          // booleans, there's no need to setup a prop binding,
-          // so we can optimize them as a one-time set.
-          prop.optimizedLiteral = true
-        } else {
-          prop.dynamic = true
-          // check non-settable path for two-way bindings
-          if (process.env.NODE_ENV !== 'production' &&
-              prop.mode === propBindingModes.TWO_WAY &&
-              !settablePathRE.test(value)) {
-            prop.mode = propBindingModes.ONE_WAY
-            _.warn(
-              'Cannot bind two-way prop with non-settable ' +
-              'parent path: ' + value
-            )
-          }
-        }
-        prop.parentPath = value
-
-        // warn required two-way
-        if (
-          process.env.NODE_ENV !== 'production' &&
-          options.twoWay &&
-          prop.mode !== propBindingModes.TWO_WAY
-        ) {
-          _.warn(
-            'Prop "' + name + '" expects a two-way binding type.'
-          )
-        }
-
-      } else if (options.required) {
-        // warn missing required
-        process.env.NODE_ENV !== 'production' && _.warn(
-          'Missing required prop: ' + name
-        )
+    // first check dynamic version
+    if ((value = _.getBindAttr(el, attr)) === null) {
+      if ((value = _.getBindAttr(el, attr + '.sync')) !== null) {
+        prop.mode = propBindingModes.TWO_WAY
+      } else if ((value = _.getBindAttr(el, attr + '.once')) !== null) {
+        prop.mode = propBindingModes.ONE_TIME
       }
     }
+    if (value !== null) {
+      // has dynamic binding!
+      prop.raw = value
+      parsed = dirParser.parse(value)
+      value = parsed.expression
+      prop.filters = parsed.filters
+      // check binding type
+      if (_.isLiteral(value)) {
+        // for expressions containing literal numbers and
+        // booleans, there's no need to setup a prop binding,
+        // so we can optimize them as a one-time set.
+        prop.optimizedLiteral = true
+      } else {
+        prop.dynamic = true
+        // check non-settable path for two-way bindings
+        if (process.env.NODE_ENV !== 'production' &&
+            prop.mode === propBindingModes.TWO_WAY &&
+            !settablePathRE.test(value)) {
+          prop.mode = propBindingModes.ONE_WAY
+          _.warn(
+            'Cannot bind two-way prop with non-settable ' +
+            'parent path: ' + value
+          )
+        }
+      }
+      prop.parentPath = value
 
+      // warn required two-way
+      if (
+        process.env.NODE_ENV !== 'production' &&
+        options.twoWay &&
+        prop.mode !== propBindingModes.TWO_WAY
+      ) {
+        _.warn(
+          'Prop "' + name + '" expects a two-way binding type.'
+        )
+      }
+    /* eslint-disable no-cond-assign */
+    } else if (value = _.attr(el, attr)) {
+    /* eslint-enable no-cond-assign */
+      // has literal binding!
+      prop.raw = value
+    } else if (options.required) {
+      // warn missing required
+      process.env.NODE_ENV !== 'production' && _.warn(
+        'Missing required prop: ' + name
+      )
+    }
     // push prop
     props.push(prop)
   }
   return makePropsLinkFn(props)
-}
-
-/**
- * Check existance of an attribute with binding syntax.
- *
- * @param {Element} el
- * @return {String} attr
- */
-
-function hasBindingAttr (el, attr) {
-  /* istanbul ignore next */
-  return attr !== 'class' && (
-    el.hasAttribute(':' + attr) ||
-    el.hasAttribute('v-bind:' + attr)
-  )
 }
 
 /**
