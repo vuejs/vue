@@ -3,7 +3,7 @@ var Transition = require('../../transition/transition')
 
 module.exports = {
 
-  priority: 1000,
+  priority: 1100,
 
   update: function (id, oldId) {
     var el = this.el

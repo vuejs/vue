@@ -9,13 +9,19 @@ if (_.inBrowser) {
     var el
     beforeEach(function () {
       el = document.createElement('div')
+      document.body.appendChild(el)
       spyOn(transition, 'apply').and.callThrough()
+    })
+
+    afterEach(function () {
+      document.body.removeChild(el)
     })
 
     it('should work', function () {
       var dir = {
         el: el,
         update: def.update,
+        apply: def.apply,
         vm: new Vue()
       }
       dir.update(false)

@@ -12,15 +12,21 @@ module.exports = {
   },
 
   update: function (value) {
-    var el = this.el
-    transition.apply(el, value ? 1 : -1, function () {
+    this.apply(this.el, value)
+    if (this.elseEl) {
+      this.apply(this.elseEl, !value)
+    }
+  },
+
+  apply: function (el, value) {
+    function done () {
       el.style.display = value ? '' : 'none'
-    }, this.vm)
-    var elseEl = this.elseEl
-    if (elseEl) {
-      transition.apply(elseEl, value ? -1 : 1, function () {
-        elseEl.style.display = value ? 'none' : ''
-      }, this.vm)
+    }
+    // do not apply transition if not in doc
+    if (_.inDoc(el)) {
+      transition.apply(el, value ? 1 : -1, done, this.vm)
+    } else {
+      done()
     }
   }
 }
