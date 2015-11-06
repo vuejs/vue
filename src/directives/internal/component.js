@@ -39,10 +39,11 @@ module.exports = {
       // transition related state
       this.pendingRemovals = 0
       this.pendingRemovalCb = null
-      // check dynamic component params
-        // create a ref anchor
+      // create a ref anchor
       this.anchor = _.createAnchor('v-component')
       _.replace(this.el, this.anchor)
+      // remove is attribute
+      this.el.removeAttribute('is')
       // if static, build right now.
       if (this.literal) {
         this.setComponent(this.expression)
