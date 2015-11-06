@@ -1,5 +1,5 @@
 /*!
- * Vue.js v1.0.6
+ * Vue.js v1.0.7
  * (c) 2015 Evan You
  * Released under the MIT License.
  */
@@ -146,7 +146,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	extend(p, __webpack_require__(65))
 	extend(p, __webpack_require__(66))
 
-	Vue.version = '1.0.6'
+	Vue.version = '1.0.7'
 	module.exports = _.Vue = Vue
 
 	/* istanbul ignore if */
@@ -2971,8 +2971,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // either an element directive, or if/for
 	    def: def || publicDirectives[dirName]
 	  }
-	  // check ref for v-for
-	  if (dirName === 'for') {
+	  // check ref for v-for and router-view
+	  if (dirName === 'for' || dirName === 'router-view') {
 	    descriptor.ref = _.findRef(el)
 	  }
 	  var fn = function terminalNodeLinkFn (vm, el, host, scope, frag) {
@@ -5507,10 +5507,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      // transition related state
 	      this.pendingRemovals = 0
 	      this.pendingRemovalCb = null
-	      // check dynamic component params
-	        // create a ref anchor
+	      // create a ref anchor
 	      this.anchor = _.createAnchor('v-component')
 	      _.replace(this.el, this.anchor)
+	      // remove is attribute
+	      this.el.removeAttribute('is')
 	      // if static, build right now.
 	      if (this.literal) {
 	        this.setComponent(this.expression)
@@ -7587,9 +7588,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          'Prop "' + name + '" expects a two-way binding type.'
 	        )
 	      }
-	    /* eslint-disable no-cond-assign */
-	    } else if (value = _.attr(el, attr)) {
-	    /* eslint-enable no-cond-assign */
+	    } else if ((value = _.attr(el, attr)) !== null) {
 	      // has literal binding!
 	      prop.raw = value
 	    } else if (options.required) {
