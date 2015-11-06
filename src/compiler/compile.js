@@ -573,8 +573,8 @@ function makeTerminalNodeLinkFn (el, dirName, value, options, def) {
     // either an element directive, or if/for
     def: def || publicDirectives[dirName]
   }
-  // check ref for v-for
-  if (dirName === 'for') {
+  // check ref for v-for and router-view
+  if (dirName === 'for' || dirName === 'router-view') {
     descriptor.ref = _.findRef(el)
   }
   var fn = function terminalNodeLinkFn (vm, el, host, scope, frag) {
