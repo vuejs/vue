@@ -241,6 +241,7 @@ if (_.inBrowser) {
       var props = {
         testNormal: null,
         testLiteral: null,
+        testBoolean: { type: Boolean },
         testTwoWay: null,
         twoWayWarn: null,
         testOneTime: null,
@@ -250,6 +251,7 @@ if (_.inBrowser) {
       el.innerHTML = '<div ' +
         'v-bind:test-normal="a" ' +
         'test-literal="1" ' +
+        'test-boolean ' +
         ':optimize-literal="1" ' +
         ':optimize-literal-str="\'true\'"' +
         ':test-two-way.sync="a" ' +
@@ -260,6 +262,8 @@ if (_.inBrowser) {
       // literal
       expect(vm.testLiteral).toBe('1')
       expect(vm._data.testLiteral).toBe('1')
+      expect(vm.testBoolean).toBe(true)
+      expect(vm._data.testBoolean).toBe(true)
       expect(vm.optimizeLiteral).toBe(1)
       expect(vm._data.optimizeLiteral).toBe(1)
       expect(vm.optimizeLiteralStr).toBe('true')

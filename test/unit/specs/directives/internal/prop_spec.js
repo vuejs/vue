@@ -574,5 +574,22 @@ if (_.inBrowser) {
         done()
       })
     })
+
+    it('treat boolean props properly', function () {
+      var vm = new Vue({
+        el: el,
+        template: '<comp v-ref:child prop-a></comp>',
+        components: {
+          comp: {
+            props: {
+              propA: Boolean,
+              propB: Boolean
+            }
+          }
+        }
+      })
+      expect(vm.$refs.child.propA).toBe(true)
+      expect(vm.$refs.child.propB).toBe(false)
+    })
   })
 }

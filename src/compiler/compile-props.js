@@ -97,9 +97,7 @@ module.exports = function compileProps (el, propOptions) {
           'Prop "' + name + '" expects a two-way binding type.'
         )
       }
-    /* eslint-disable no-cond-assign */
-    } else if (value = _.attr(el, attr)) {
-    /* eslint-enable no-cond-assign */
+    } else if ((value = _.attr(el, attr)) !== null) {
       // has literal binding!
       prop.raw = value
     } else if (options.required) {
