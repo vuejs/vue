@@ -172,7 +172,11 @@ function copyAugment (target, src, keys) {
 
 function defineReactive (obj, key, val) {
   var dep = new Dep()
-  var childOb = Observer.create(val)
+
+  var property = Object.getOwnPropertyDescriptor(obj, key)
+  var getter = (property && property.get) || function () { return val }
+  var setter = (property && property.set) || function (v) { val = v }
+  var childOb = Observer.create(getter())
   Object.defineProperty(obj, key, {
     enumerable: true,
     configurable: true,
@@ -182,18 +186,18 @@ function defineReactive (obj, key, val) {
         if (childOb) {
           childOb.dep.depend()
         }
-        if (_.isArray(val)) {
-          for (var e, i = 0, l = val.length; i < l; i++) {
-            e = val[i]
+        if (_.isArray(getter())) {
+          for (var e, i = 0, l = getter().length; i < l; i++) {
+            e = getter()[i]
             e && e.__ob__ && e.__ob__.dep.depend()
           }
         }
       }
-      return val
+      return getter()
     },
     set: function metaSetter (newVal) {
-      if (newVal === val) return
-      val = newVal
+      if (newVal === getter()) return
+      setter(newVal)
       childOb = Observer.create(newVal)
       dep.notify()
     }

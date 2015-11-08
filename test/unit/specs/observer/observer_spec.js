@@ -38,6 +38,35 @@ describe('Observer', function () {
     expect(ob2).toBe(ob)
   })
 
+  it('create on already observed object', function () {
+    // on object
+    var obj = {}
+    var val = 0
+    Object.defineProperty(obj, 'a', {
+      configurable: true,
+      enumerable: true,
+      get: function () {
+        return val
+      },
+      set: function (v) {
+        val = v
+      }
+    })
+
+    var ob = Observer.create(obj)
+    expect(ob instanceof Observer).toBe(true)
+    expect(ob.value).toBe(obj)
+    expect(obj.__ob__).toBe(ob)
+
+    // should return existing ob on already observed objects
+    var ob2 = Observer.create(obj)
+    expect(ob2).toBe(ob)
+
+    // should call underlying setter
+    obj.a = 10
+    expect(val).toBe(10)
+  })
+
   it('create on array', function () {
     // on object
     var arr = [{}, {}]
@@ -52,6 +81,50 @@ describe('Observer', function () {
 
   it('observing object prop change', function () {
     var obj = { a: { b: 2 } }
+    Observer.create(obj)
+    // mock a watcher!
+    var watcher = {
+      deps: [],
+      addDep: function (dep) {
+        this.deps.push(dep)
+        dep.addSub(this)
+      },
+      update: jasmine.createSpy()
+    }
+    // collect dep
+    Dep.target = watcher
+    obj.a.b
+    Dep.target = null
+    expect(watcher.deps.length).toBe(3) // obj.a + a.b + b
+    obj.a.b = 3
+    expect(watcher.update.calls.count()).toBe(1)
+    // swap object
+    obj.a = { b: 4 }
+    expect(watcher.update.calls.count()).toBe(2)
+    watcher.deps = []
+    Dep.target = watcher
+    obj.a.b
+    Dep.target = null
+    expect(watcher.deps.length).toBe(3)
+    // set on the swapped object
+    obj.a.b = 5
+    expect(watcher.update.calls.count()).toBe(3)
+  })
+
+  it('observing object prop change on defined property', function () {
+    var obj = { }
+    var val = { b: 2 }
+    Object.defineProperty(obj, 'a', {
+      configurable: true,
+      enumerable: true,
+      get: function () {
+        return val
+      },
+      set: function (v) {
+        val = v
+      }
+    })
+
     Observer.create(obj)
     // mock a watcher!
     var watcher = {
