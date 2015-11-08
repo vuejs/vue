@@ -110,6 +110,27 @@ if (_.inBrowser) {
       })
     })
 
+    it('with key modifier (letter)', function (done) {
+      new Vue({
+        el: el,
+        template: '<a v-on:keyup.a="test">{{a}}</a>',
+        data: {a: 1},
+        methods: {
+          test: function () {
+            this.a++
+          }
+        }
+      })
+      var a = el.firstChild
+      trigger(a, 'keyup', function (e) {
+        e.keyCode = 65
+      })
+      _.nextTick(function () {
+        expect(a.textContent).toBe('2')
+        done()
+      })
+    })
+
     it('stop modifier', function () {
       var outer = jasmine.createSpy('outer')
       var inner = jasmine.createSpy('inner')
