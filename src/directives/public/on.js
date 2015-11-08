@@ -15,11 +15,17 @@ var keyCodes = {
 
 function keyFilter (handler, keys) {
   var codes = keys.map(function (key) {
-    var code = keyCodes[key]
-    if (!code) {
-      code = parseInt(key, 10)
+    var charCode = key.charCodeAt(0)
+    if (charCode > 47 && charCode < 58) {
+      return parseInt(key, 10)
     }
-    return code
+    if (key.length === 1) {
+      charCode = key.toUpperCase().charCodeAt(0)
+      if (charCode > 64 && charCode < 91) {
+        return charCode
+      }
+    }
+    return keyCodes[key]
   })
   return function keyHandler (e) {
     if (codes.indexOf(e.keyCode) > -1) {
