@@ -38,6 +38,23 @@ describe('Observer', function () {
     expect(ob2).toBe(ob)
   })
 
+  it('create on null', function () {
+    // on null
+    var obj = Object.create(null)
+    obj.a = {}
+    obj.b = {}
+    var ob = Observer.create(obj)
+    expect(ob instanceof Observer).toBe(true)
+    expect(ob.value).toBe(obj)
+    expect(obj.__ob__).toBe(ob)
+    // should've walked children
+    expect(obj.a.__ob__ instanceof Observer).toBe(true)
+    expect(obj.b.__ob__ instanceof Observer).toBe(true)
+    // should return existing ob on already observed objects
+    var ob2 = Observer.create(obj)
+    expect(ob2).toBe(ob)
+  })
+
   it('create on array', function () {
     // on object
     var arr = [{}, {}]

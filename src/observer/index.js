@@ -47,7 +47,7 @@ Observer.create = function (value, vm) {
   }
   var ob
   if (
-    value.hasOwnProperty('__ob__') &&
+    Object.prototype.hasOwnProperty.call(value, '__ob__') &&
     value.__ob__ instanceof Observer
   ) {
     ob = value.__ob__
