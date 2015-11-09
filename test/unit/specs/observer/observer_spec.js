@@ -1,6 +1,7 @@
 var Observer = require('../../../../src/observer')
 var Dep = require('../../../../src/observer/dep')
 var _ = require('../../../../src/util')
+var config = require('../../../../src/config')
 
 describe('Observer', function () {
 
@@ -39,6 +40,9 @@ describe('Observer', function () {
   })
 
   it('create on already observed object', function () {
+    var previousConvertAllProperties = config.convertAllProperties
+    config.convertAllProperties = true
+
     // on object
     var obj = {}
     var val = 0
@@ -65,6 +69,8 @@ describe('Observer', function () {
     // should call underlying setter
     obj.a = 10
     expect(val).toBe(10)
+
+    config.convertAllProperties = previousConvertAllProperties
   })
 
   it('create on array', function () {
@@ -112,6 +118,9 @@ describe('Observer', function () {
   })
 
   it('observing object prop change on defined property', function () {
+    var previousConvertAllProperties = config.convertAllProperties
+    config.convertAllProperties = true
+
     var obj = { val: 2 }
     Object.defineProperty(obj, 'a', {
       configurable: true,
@@ -143,6 +152,8 @@ describe('Observer', function () {
     expect(obj.val).toBe(3) // make sure 'setter' was called
     obj.val = 5
     expect(obj.a).toBe(5) // make sure 'getter' was called
+
+    config.convertAllProperties = previousConvertAllProperties
   })
 
   it('observing set/delete', function () {

@@ -36,7 +36,7 @@ module.exports = {
    * use case and environment, this might introduce non-neglible
    * performance penalties.
    */
-  convertAllProperties: true,
+  convertAllProperties: false,
 
   /**
    * Internal flag to indicate the delimiters have been
