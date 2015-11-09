@@ -112,16 +112,16 @@ describe('Observer', function () {
   })
 
   it('observing object prop change on defined property', function () {
-    var obj = { }
-    var val = { b: 2 }
+    var obj = { val: 2 }
     Object.defineProperty(obj, 'a', {
       configurable: true,
       enumerable: true,
       get: function () {
-        return val
+        return this.val
       },
       set: function (v) {
-        val = v
+        this.val = v
+        return this.val
       }
     })
 
@@ -137,22 +137,12 @@ describe('Observer', function () {
     }
     // collect dep
     Dep.target = watcher
-    obj.a.b
+    expect(obj.a).toBe(2) // Make sure 'this' is preserved
     Dep.target = null
-    expect(watcher.deps.length).toBe(3) // obj.a + a.b + b
-    obj.a.b = 3
-    expect(watcher.update.calls.count()).toBe(1)
-    // swap object
-    obj.a = { b: 4 }
-    expect(watcher.update.calls.count()).toBe(2)
-    watcher.deps = []
-    Dep.target = watcher
-    obj.a.b
-    Dep.target = null
-    expect(watcher.deps.length).toBe(3)
-    // set on the swapped object
-    obj.a.b = 5
-    expect(watcher.update.calls.count()).toBe(3)
+    obj.a = 3
+    expect(obj.val).toBe(3) // make sure 'setter' was called
+    obj.val = 5
+    expect(obj.a).toBe(5) // make sure 'getter' was called
   })
 
   it('observing set/delete', function () {
