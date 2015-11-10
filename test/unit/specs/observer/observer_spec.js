@@ -46,10 +46,12 @@ describe('Observer', function () {
     // on object
     var obj = {}
     var val = 0
+    var getCount = 0
     Object.defineProperty(obj, 'a', {
       configurable: true,
       enumerable: true,
       get: function () {
+        getCount++
         return val
       },
       set: function (v) {
@@ -62,6 +64,13 @@ describe('Observer', function () {
     expect(ob.value).toBe(obj)
     expect(obj.__ob__).toBe(ob)
 
+    getCount = 0
+    // Each read of 'a' should result in only one get underlying get call
+    obj.a
+    expect(getCount).toBe(1)
+    obj.a
+    expect(getCount).toBe(2)
+
     // should return existing ob on already observed objects
     var ob2 = Observer.create(obj)
     expect(ob2).toBe(ob)
@@ -69,6 +78,95 @@ describe('Observer', function () {
     // should call underlying setter
     obj.a = 10
     expect(val).toBe(10)
+
+    config.convertAllProperties = previousConvertAllProperties
+  })
+
+  it('create on property with only getter', function () {
+    var previousConvertAllProperties = config.convertAllProperties
+    config.convertAllProperties = true
+
+    // on object
+    var obj = {}
+    Object.defineProperty(obj, 'a', {
+      configurable: true,
+      enumerable: true,
+      get: function () {
+        return 123
+      }
+    })
+
+    var ob = Observer.create(obj)
+    expect(ob instanceof Observer).toBe(true)
+    expect(ob.value).toBe(obj)
+    expect(obj.__ob__).toBe(ob)
+
+    // should be able to read
+    expect(obj.a).toBe(123)
+
+    // should return existing ob on already observed objects
+    var ob2 = Observer.create(obj)
+    expect(ob2).toBe(ob)
+
+    // since there is no setter, you shouldn't be able to write to it
+    expect(function () {
+      obj.a = 101
+    }).toThrow()
+    expect(obj.a).toBe(123)
+
+    config.convertAllProperties = previousConvertAllProperties
+  })
+
+  it('create on property with only setter', function () {
+    var previousConvertAllProperties = config.convertAllProperties
+    config.convertAllProperties = true
+
+    // on object
+    var obj = {}
+    var val = 10
+    Object.defineProperty(obj, 'a', { // eslint-disable-line accessor-pairs
+      configurable: true,
+      enumerable: true,
+      set: function (v) {
+        val = v
+      }
+    })
+
+    var ob = Observer.create(obj)
+    expect(ob instanceof Observer).toBe(true)
+    expect(ob.value).toBe(obj)
+    expect(obj.__ob__).toBe(ob)
+
+    // reads should return undefined
+    expect(obj.a).toBe(undefined)
+
+    // should return existing ob on already observed objects
+    var ob2 = Observer.create(obj)
+    expect(ob2).toBe(ob)
+
+    // writes should call the set function
+    obj.a = 100
+    expect(val).toBe(100)
+
+    config.convertAllProperties = previousConvertAllProperties
+  })
+
+  it('create on property which is marked not configurable', function () {
+    var previousConvertAllProperties = config.convertAllProperties
+    config.convertAllProperties = true
+
+    // on object
+    var obj = {}
+    Object.defineProperty(obj, 'a', {
+      configurable: false,
+      enumerable: true,
+      val: 10
+    })
+
+    var ob = Observer.create(obj)
+    expect(ob instanceof Observer).toBe(true)
+    expect(ob.value).toBe(obj)
+    expect(obj.__ob__).toBe(ob)
 
     config.convertAllProperties = previousConvertAllProperties
   })

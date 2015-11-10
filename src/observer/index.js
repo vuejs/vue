@@ -173,6 +173,8 @@ function copyAugment (target, src, keys) {
 
 function defineReactive (obj, key, val) {
   var dep = new Dep()
+  var hasGetter = true
+  var hasSetter = true
 
   var target = {
     val: val
@@ -180,19 +182,27 @@ function defineReactive (obj, key, val) {
 
   if (config.convertAllProperties) {
     var property = Object.getOwnPropertyDescriptor(obj, key)
-    if (property && property.get && property.set) {
+    if (property && property.configurable === false) {
+      return
+    }
+    if (property && (property.get || property.set)) {
+      hasGetter = property.get !== undefined
+      hasSetter = property.set !== undefined
       Object.defineProperty(target, 'val', {
-        get: _.bind(property.get, obj),
-        set: _.bind(property.set, obj)
+        get: property.get && _.bind(property.get, obj),
+        set: property.set && _.bind(property.set, obj)
       })
     }
   }
 
   var childOb = Observer.create(target.val)
-  Object.defineProperty(obj, key, {
+  var propertyDefinition = {
     enumerable: true,
-    configurable: true,
-    get: function metaGetter () {
+    configurable: true
+  }
+
+  if (hasGetter) {
+    propertyDefinition.get = function metaGetter () {
       var val = target.val
       if (Dep.target) {
         dep.depend()
@@ -206,15 +216,20 @@ function defineReactive (obj, key, val) {
           }
         }
       }
-      return target.val
-    },
-    set: function metaSetter (newVal) {
+      return val
+    }
+  }
+
+  if (hasSetter) {
+    propertyDefinition.set = function metaSetter (newVal) {
       if (newVal === target.val) return
       target.val = newVal
       childOb = Observer.create(newVal)
       dep.notify()
     }
-  })
+  }
+
+  Object.defineProperty(obj, key, propertyDefinition)
 }
 
 // Attach to the util object so it can be used elsewhere.
