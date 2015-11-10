@@ -173,63 +173,52 @@ function copyAugment (target, src, keys) {
 
 function defineReactive (obj, key, val) {
   var dep = new Dep()
-  var hasGetter = true
-  var hasSetter = true
 
-  var target = {
-    val: val
-  }
-
+  // cater for pre-defined getter/setters
+  var getter, setter
   if (config.convertAllProperties) {
     var property = Object.getOwnPropertyDescriptor(obj, key)
     if (property && property.configurable === false) {
       return
     }
-    if (property && (property.get || property.set)) {
-      hasGetter = property.get !== undefined
-      hasSetter = property.set !== undefined
-      Object.defineProperty(target, 'val', {
-        get: property.get && _.bind(property.get, obj),
-        set: property.set && _.bind(property.set, obj)
-      })
-    }
+    getter = property.get
+    setter = property.set
   }
 
-  var childOb = Observer.create(target.val)
-  var propertyDefinition = {
+  var childOb = Observer.create(val)
+  Object.defineProperty(obj, key, {
     enumerable: true,
-    configurable: true
-  }
-
-  if (hasGetter) {
-    propertyDefinition.get = function metaGetter () {
-      var val = target.val
+    configurable: true,
+    get: function reactiveGetter () {
+      var value = getter ? getter.call(obj) : val
       if (Dep.target) {
         dep.depend()
         if (childOb) {
           childOb.dep.depend()
         }
-        if (_.isArray(val)) {
-          for (var e, i = 0, l = val.length; i < l; i++) {
-            e = val[i]
+        if (_.isArray(value)) {
+          for (var e, i = 0, l = value.length; i < l; i++) {
+            e = value[i]
             e && e.__ob__ && e.__ob__.dep.depend()
           }
         }
       }
-      return val
-    }
-  }
-
-  if (hasSetter) {
-    propertyDefinition.set = function metaSetter (newVal) {
-      if (newVal === target.val) return
-      target.val = newVal
+      return value
+    },
+    set: function reactiveSetter (newVal) {
+      var value = getter ? getter.call(obj) : val
+      if (newVal === value) {
+        return
+      }
+      if (setter) {
+        setter.call(obj, newVal)
+      } else {
+        val = newVal
+      }
       childOb = Observer.create(newVal)
       dep.notify()
     }
-  }
-
-  Object.defineProperty(obj, key, propertyDefinition)
+  })
 }
 
 // Attach to the util object so it can be used elsewhere.
