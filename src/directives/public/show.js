@@ -19,14 +19,8 @@ module.exports = {
   },
 
   apply: function (el, value) {
-    function done () {
+    transition.apply(el, value ? 1 : -1, function () {
       el.style.display = value ? '' : 'none'
-    }
-    // do not apply transition if not in doc
-    if (_.inDoc(el)) {
-      transition.apply(el, value ? 1 : -1, done, this.vm)
-    } else {
-      done()
-    }
+    }, this.vm)
   }
 }

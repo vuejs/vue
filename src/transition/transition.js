@@ -358,8 +358,8 @@ p.setupCssCb = function (event, cb) {
 
 function isHidden (el) {
   return !(
-    el.offsetWidth &&
-    el.offsetHeight &&
+    el.offsetWidth ||
+    el.offsetHeight ||
     el.getClientRects().length
   )
 }
