@@ -42,8 +42,15 @@ module.exports = {
       // create a ref anchor
       this.anchor = _.createAnchor('v-component')
       _.replace(this.el, this.anchor)
-      // remove is attribute
+      // remove is attribute.
+      // this is removed during compilation, but because compilation is
+      // cached, when the component is used elsewhere this attribute
+      // will remain at link time.
       this.el.removeAttribute('is')
+      // remove ref, same as above
+      if (this.descriptor.ref) {
+        this.el.removeAttribute('v-ref:' + _.hyphenate(this.descriptor.ref))
+      }
       // if static, build right now.
       if (this.literal) {
         this.setComponent(this.expression)
