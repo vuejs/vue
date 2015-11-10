@@ -182,8 +182,8 @@ function defineReactive (obj, key, val) {
     var property = Object.getOwnPropertyDescriptor(obj, key)
     if (property && property.get && property.set) {
       Object.defineProperty(target, 'val', {
-        get: property.get.bind(obj),
-        set: property.set.bind(obj)
+        get: _.bind(property.get, obj),
+        set: _.bind(property.set, obj)
       })
     }
   }
@@ -193,14 +193,15 @@ function defineReactive (obj, key, val) {
     enumerable: true,
     configurable: true,
     get: function metaGetter () {
+      var val = target.val
       if (Dep.target) {
         dep.depend()
         if (childOb) {
           childOb.dep.depend()
         }
-        if (_.isArray(target.val)) {
-          for (var e, i = 0, l = target.val.length; i < l; i++) {
-            e = target.val[i]
+        if (_.isArray(val)) {
+          for (var e, i = 0, l = val.length; i < l; i++) {
+            e = val[i]
             e && e.__ob__ && e.__ob__.dep.depend()
           }
         }
