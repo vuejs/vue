@@ -1,4 +1,5 @@
 var _ = require('../util')
+var config = require('../config')
 var Dep = require('./dep')
 var arrayMethods = require('./array')
 var arrayKeys = Object.getOwnPropertyNames(arrayMethods)
@@ -172,11 +173,37 @@ function copyAugment (target, src, keys) {
 
 function defineReactive (obj, key, val) {
   var dep = new Dep()
-  var childOb = Observer.create(val)
-  Object.defineProperty(obj, key, {
+  var hasGetter = true
+  var hasSetter = true
+
+  var target = {
+    val: val
+  }
+
+  if (config.convertAllProperties) {
+    var property = Object.getOwnPropertyDescriptor(obj, key)
+    if (property && property.configurable === false) {
+      return
+    }
+    if (property && (property.get || property.set)) {
+      hasGetter = property.get !== undefined
+      hasSetter = property.set !== undefined
+      Object.defineProperty(target, 'val', {
+        get: property.get && _.bind(property.get, obj),
+        set: property.set && _.bind(property.set, obj)
+      })
+    }
+  }
+
+  var childOb = Observer.create(target.val)
+  var propertyDefinition = {
     enumerable: true,
-    configurable: true,
-    get: function metaGetter () {
+    configurable: true
+  }
+
+  if (hasGetter) {
+    propertyDefinition.get = function metaGetter () {
+      var val = target.val
       if (Dep.target) {
         dep.depend()
         if (childOb) {
@@ -190,14 +217,19 @@ function defineReactive (obj, key, val) {
         }
       }
       return val
-    },
-    set: function metaSetter (newVal) {
-      if (newVal === val) return
-      val = newVal
+    }
+  }
+
+  if (hasSetter) {
+    propertyDefinition.set = function metaSetter (newVal) {
+      if (newVal === target.val) return
+      target.val = newVal
       childOb = Observer.create(newVal)
       dep.notify()
     }
-  })
+  }
+
+  Object.defineProperty(obj, key, propertyDefinition)
 }
 
 // Attach to the util object so it can be used elsewhere.

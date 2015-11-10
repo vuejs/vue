@@ -1,6 +1,7 @@
 var Observer = require('../../../../src/observer')
 var Dep = require('../../../../src/observer/dep')
 var _ = require('../../../../src/util')
+var config = require('../../../../src/config')
 
 describe('Observer', function () {
 
@@ -55,6 +56,140 @@ describe('Observer', function () {
     expect(ob2).toBe(ob)
   })
 
+  it('create on already observed object', function () {
+    var previousConvertAllProperties = config.convertAllProperties
+    config.convertAllProperties = true
+
+    // on object
+    var obj = {}
+    var val = 0
+    var getCount = 0
+    Object.defineProperty(obj, 'a', {
+      configurable: true,
+      enumerable: true,
+      get: function () {
+        getCount++
+        return val
+      },
+      set: function (v) {
+        val = v
+      }
+    })
+
+    var ob = Observer.create(obj)
+    expect(ob instanceof Observer).toBe(true)
+    expect(ob.value).toBe(obj)
+    expect(obj.__ob__).toBe(ob)
+
+    getCount = 0
+    // Each read of 'a' should result in only one get underlying get call
+    obj.a
+    expect(getCount).toBe(1)
+    obj.a
+    expect(getCount).toBe(2)
+
+    // should return existing ob on already observed objects
+    var ob2 = Observer.create(obj)
+    expect(ob2).toBe(ob)
+
+    // should call underlying setter
+    obj.a = 10
+    expect(val).toBe(10)
+
+    config.convertAllProperties = previousConvertAllProperties
+  })
+
+  it('create on property with only getter', function () {
+    var previousConvertAllProperties = config.convertAllProperties
+    config.convertAllProperties = true
+
+    // on object
+    var obj = {}
+    Object.defineProperty(obj, 'a', {
+      configurable: true,
+      enumerable: true,
+      get: function () {
+        return 123
+      }
+    })
+
+    var ob = Observer.create(obj)
+    expect(ob instanceof Observer).toBe(true)
+    expect(ob.value).toBe(obj)
+    expect(obj.__ob__).toBe(ob)
+
+    // should be able to read
+    expect(obj.a).toBe(123)
+
+    // should return existing ob on already observed objects
+    var ob2 = Observer.create(obj)
+    expect(ob2).toBe(ob)
+
+    // since there is no setter, you shouldn't be able to write to it
+    // PhantomJS throws when a property with no setter is set
+    // but other real browsers don't
+    try {
+      obj.a = 101
+    } catch (e) {}
+    expect(obj.a).toBe(123)
+
+    config.convertAllProperties = previousConvertAllProperties
+  })
+
+  it('create on property with only setter', function () {
+    var previousConvertAllProperties = config.convertAllProperties
+    config.convertAllProperties = true
+
+    // on object
+    var obj = {}
+    var val = 10
+    Object.defineProperty(obj, 'a', { // eslint-disable-line accessor-pairs
+      configurable: true,
+      enumerable: true,
+      set: function (v) {
+        val = v
+      }
+    })
+
+    var ob = Observer.create(obj)
+    expect(ob instanceof Observer).toBe(true)
+    expect(ob.value).toBe(obj)
+    expect(obj.__ob__).toBe(ob)
+
+    // reads should return undefined
+    expect(obj.a).toBe(undefined)
+
+    // should return existing ob on already observed objects
+    var ob2 = Observer.create(obj)
+    expect(ob2).toBe(ob)
+
+    // writes should call the set function
+    obj.a = 100
+    expect(val).toBe(100)
+
+    config.convertAllProperties = previousConvertAllProperties
+  })
+
+  it('create on property which is marked not configurable', function () {
+    var previousConvertAllProperties = config.convertAllProperties
+    config.convertAllProperties = true
+
+    // on object
+    var obj = {}
+    Object.defineProperty(obj, 'a', {
+      configurable: false,
+      enumerable: true,
+      val: 10
+    })
+
+    var ob = Observer.create(obj)
+    expect(ob instanceof Observer).toBe(true)
+    expect(ob.value).toBe(obj)
+    expect(obj.__ob__).toBe(ob)
+
+    config.convertAllProperties = previousConvertAllProperties
+  })
+
   it('create on array', function () {
     // on object
     var arr = [{}, {}]
@@ -97,6 +232,45 @@ describe('Observer', function () {
     // set on the swapped object
     obj.a.b = 5
     expect(watcher.update.calls.count()).toBe(3)
+  })
+
+  it('observing object prop change on defined property', function () {
+    var previousConvertAllProperties = config.convertAllProperties
+    config.convertAllProperties = true
+
+    var obj = { val: 2 }
+    Object.defineProperty(obj, 'a', {
+      configurable: true,
+      enumerable: true,
+      get: function () {
+        return this.val
+      },
+      set: function (v) {
+        this.val = v
+        return this.val
+      }
+    })
+
+    Observer.create(obj)
+    // mock a watcher!
+    var watcher = {
+      deps: [],
+      addDep: function (dep) {
+        this.deps.push(dep)
+        dep.addSub(this)
+      },
+      update: jasmine.createSpy()
+    }
+    // collect dep
+    Dep.target = watcher
+    expect(obj.a).toBe(2) // Make sure 'this' is preserved
+    Dep.target = null
+    obj.a = 3
+    expect(obj.val).toBe(3) // make sure 'setter' was called
+    obj.val = 5
+    expect(obj.a).toBe(5) // make sure 'getter' was called
+
+    config.convertAllProperties = previousConvertAllProperties
   })
 
   it('observing set/delete', function () {

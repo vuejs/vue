@@ -31,6 +31,14 @@ module.exports = {
   warnExpressionErrors: true,
 
   /**
+   * Whether or not to handle fully object properties which
+   * are already backed by getters and seters. Depending on
+   * use case and environment, this might introduce non-neglible
+   * performance penalties.
+   */
+  convertAllProperties: false,
+
+  /**
    * Internal flag to indicate the delimiters have been
    * changed.
    *
