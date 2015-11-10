@@ -23,7 +23,10 @@ function Fragment (linker, vm, frag, host, scope, parentFrag) {
     parentFrag.childFrags.push(this)
   }
   this.unlink = linker(vm, frag, host, scope, this)
-  var single = this.single = frag.childNodes.length === 1
+  var single = this.single =
+    frag.childNodes.length === 1 &&
+    // do not go single mode if the only node is an anchor
+    !(frag.childNodes[0].__vue_anchor)
   if (single) {
     this.node = frag.childNodes[0]
     this.before = singleBefore

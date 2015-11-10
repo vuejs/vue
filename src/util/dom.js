@@ -285,9 +285,11 @@ exports.isTemplate = function (el) {
  */
 
 exports.createAnchor = function (content, persist) {
-  return config.debug
+  var anchor = config.debug
     ? document.createComment(content)
     : document.createTextNode(persist ? ' ' : '')
+  anchor.__vue_anchor = true
+  return anchor
 }
 
 /**
