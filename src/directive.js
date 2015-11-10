@@ -217,8 +217,10 @@ Directive.prototype._checkStatement = function () {
   ) {
     var fn = expParser.parse(expression).get
     var scope = this._scope || this.vm
-    var handler = function () {
+    var handler = function (e) {
+      scope.$event = e
       fn.call(scope, scope)
+      scope.$event = null
     }
     if (this.filters) {
       handler = scope._applyFilters(handler, null, this.filters)

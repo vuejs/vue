@@ -100,13 +100,8 @@ module.exports = {
     }
 
     this.reset()
-    var scope = this._scope || this.vm
-    this.handler = function (e) {
-      scope.$event = e
-      var res = handler(e)
-      scope.$event = null
-      return res
-    }
+    this.handler = handler
+
     if (this.iframeBind) {
       this.iframeBind()
     } else {
