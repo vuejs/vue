@@ -156,11 +156,13 @@ Watcher.prototype.set = function (value) {
       )
       return
     }
-    if (scope.$key) { // original is an object
-      forContext.rawValue[scope.$key] = value
-    } else {
-      forContext.rawValue.$set(scope.$index, value)
-    }
+    forContext._withLock(function () {
+      if (scope.$key) { // original is an object
+        forContext.rawValue[scope.$key] = value
+      } else {
+        forContext.rawValue.$set(scope.$index, value)
+      }
+    })
   }
 }
 
