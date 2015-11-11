@@ -1,5 +1,6 @@
 var _ = require('../../../../../../src/util')
 var Vue = require('../../../../../../src/vue')
+var config = require('../../../../../../src/config')
 
 if (_.inBrowser) {
   describe('v-for', function () {
@@ -8,9 +9,22 @@ if (_.inBrowser) {
     beforeEach(function () {
       el = document.createElement('div')
       spyOn(_, 'warn')
+      config.convertAllProperties = false
     })
 
     it('objects', function (done) {
+      var vm = new Vue({
+        el: el,
+        data: {
+          items: [{a: 1}, {a: 2}]
+        },
+        template: '<div v-for="item in items">{{$index}} {{item.a}}</div>'
+      })
+      assertMutations(vm, el, done)
+    })
+
+    it('objects with convertAllProperties on', function (done) {
+      config.convertAllProperties = true
       var vm = new Vue({
         el: el,
         data: {
