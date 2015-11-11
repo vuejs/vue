@@ -181,8 +181,8 @@ function defineReactive (obj, key, val) {
     if (property && property.configurable === false) {
       return
     }
-    getter = property.get
-    setter = property.set
+    getter = property && property.get
+    setter = property && property.set
   }
 
   var childOb = Observer.create(val)
