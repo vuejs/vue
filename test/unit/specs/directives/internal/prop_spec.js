@@ -438,6 +438,36 @@ if (_.inBrowser) {
       expect(el.textContent).toBe('AAA')
     })
 
+    it('mixed syntax', function () {
+      new Vue({
+        el: el,
+        template: '<test :b="a" :c="d"></test>',
+        data: {
+          a: 'AAA',
+          d: 'DDD'
+        },
+        components: {
+          test: {
+            props: [
+              'b',
+              {
+                name: 'c',
+                type: Number
+              },
+              {
+                name: 'd',
+                required: true
+              }
+            ],
+            template: '<p>{{b}}</p><p>{{c}}</p>'
+          }
+        }
+      })
+      expect(hasWarned(_, 'Missing required prop')).toBe(true)
+      expect(hasWarned(_, 'Expected Number')).toBe(true)
+      expect(el.textContent).toBe('AAA')
+    })
+
     it('should not overwrite default value for an absent Boolean prop', function () {
       var vm = new Vue({
         el: el,

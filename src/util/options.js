@@ -247,18 +247,23 @@ function guardComponents (options) {
 
 function guardProps (options) {
   var props = options.props
-  var i
+  var i, val
   if (_.isArray(props)) {
     options.props = {}
     i = props.length
     while (i--) {
-      options.props[props[i]] = null
+      val = props[i]
+      if (typeof val === 'string') {
+        options.props[val] = null
+      } else if (val.name) {
+        options.props[val.name] = val
+      }
     }
   } else if (_.isPlainObject(props)) {
     var keys = Object.keys(props)
     i = keys.length
     while (i--) {
-      var val = props[keys[i]]
+      val = props[keys[i]]
       if (typeof val === 'function') {
         props[keys[i]] = { type: val }
       }
