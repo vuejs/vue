@@ -186,6 +186,37 @@ if (_.inBrowser) {
       expect(el.innerHTML).toBe('  and yeah')
     })
 
+    it('text interpolation, adjacent nodes', function () {
+      data.b = 'yeah'
+      el.appendChild(document.createTextNode('{{a'))
+      el.appendChild(document.createTextNode('}} and {{'))
+      el.appendChild(document.createTextNode('*b}}'))
+      var def = Vue.options.directives.text
+      var linker = compile(el, Vue.options)
+      linker(vm, el)
+      // expect 1 call because one-time bindings do not generate a directive.
+      expect(vm._bindDir.calls.count()).toBe(1)
+      var args = vm._bindDir.calls.argsFor(0)
+      expect(args[0].name).toBe('text')
+      expect(args[0].expression).toBe('a')
+      expect(args[0].def).toBe(def)
+      // skip the node because it's generated in the linker fn via cloneNode
+      // expect $eval to be called during onetime
+      expect(vm.$eval).toHaveBeenCalledWith('b')
+      // {{a}} is mocked so it's a space.
+      // but we want to make sure {{*b}} worked.
+      expect(el.innerHTML).toBe('  and yeah')
+    })
+
+    it('adjacent text nodes with no interpolation', function () {
+      el.appendChild(document.createTextNode('a'))
+      el.appendChild(document.createTextNode('b'))
+      el.appendChild(document.createTextNode('c'))
+      var linker = compile(el, Vue.options)
+      linker(vm, el)
+      expect(el.innerHTML).toBe('abc')
+    })
+
     it('inline html', function () {
       data.html = '<div>yoyoyo</div>'
       el.innerHTML = '{{{html}}} {{{*html}}}'
