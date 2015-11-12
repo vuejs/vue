@@ -1,5 +1,5 @@
 /*!
- * Vue.js v1.0.7
+ * Vue.js v1.0.8
  * (c) 2015 Evan You
  * Released under the MIT License.
  */
@@ -146,7 +146,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	extend(p, __webpack_require__(65))
 	extend(p, __webpack_require__(66))
 
-	Vue.version = '1.0.7'
+	Vue.version = '1.0.8'
 	module.exports = _.Vue = Vue
 
 	/* istanbul ignore if */
@@ -950,9 +950,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	exports.createAnchor = function (content, persist) {
-	  return config.debug
+	  var anchor = config.debug
 	    ? document.createComment(content)
 	    : document.createTextNode(persist ? ' ' : '')
+	  anchor.__vue_anchor = true
+	  return anchor
 	}
 
 	/**
@@ -969,7 +971,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    for (var i = 0, l = attrs.length; i < l; i++) {
 	      var name = attrs[i].name
 	      if (refRE.test(name)) {
-	        node.removeAttribute(name)
 	        return _.camelize(name.replace(refRE, ''))
 	      }
 	    }
@@ -1062,6 +1063,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 
 	  warnExpressionErrors: true,
+
+	  /**
+	   * Whether or not to handle fully object properties which
+	   * are already backed by getters and seters. Depending on
+	   * use case and environment, this might introduce non-neglible
+	   * performance penalties.
+	   */
+	  convertAllProperties: false,
 
 	  /**
 	   * Internal flag to indicate the delimiters have been
@@ -1899,18 +1908,23 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function guardProps (options) {
 	  var props = options.props
-	  var i
+	  var i, val
 	  if (_.isArray(props)) {
 	    options.props = {}
 	    i = props.length
 	    while (i--) {
-	      options.props[props[i]] = null
+	      val = props[i]
+	      if (typeof val === 'string') {
+	        options.props[val] = null
+	      } else if (val.name) {
+	        options.props[val.name] = val
+	      }
 	    }
 	  } else if (_.isPlainObject(props)) {
 	    var keys = Object.keys(props)
 	    i = keys.length
 	    while (i--) {
-	      var val = props[keys[i]]
+	      val = props[keys[i]]
 	      if (typeof val === 'function') {
 	        props[keys[i]] = { type: val }
 	      }
@@ -2723,10 +2737,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	function compileTextNode (node, options) {
-	  var tokens = textParser.parse(node.data)
+	  // skip marked text nodes
+	  if (node._skip) {
+	    return removeText
+	  }
+
+	  var tokens = textParser.parse(node.wholeText)
 	  if (!tokens) {
 	    return null
 	  }
+
+	  // mark adjacent text nodes as skipped,
+	  // because we are using node.wholeText to compile
+	  // all adjacent text nodes together. This fixes
+	  // issues in IE where sometimes it splits up a single
+	  // text node into multiple ones.
+	  var next = node.nextSibling
+	  while (next && next.nodeType === 3) {
+	    next._skip = true
+	    next = next.nextSibling
+	  }
+
 	  var frag = document.createDocumentFragment()
 	  var el, token
 	  for (var i = 0, l = tokens.length; i < l; i++) {
@@ -2737,6 +2768,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    frag.appendChild(el)
 	  }
 	  return makeTextNodeLinkFn(tokens, frag, options)
+	}
+
+	/**
+	 * Linker for an skipped text node.
+	 *
+	 * @param {Vue} vm
+	 * @param {Text} node
+	 */
+
+	function removeText (vm, node) {
+	  _.remove(node)
 	}
 
 	/**
@@ -4217,7 +4259,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    parentFrag.childFrags.push(this)
 	  }
 	  this.unlink = linker(vm, frag, host, scope, this)
-	  var single = this.single = frag.childNodes.length === 1
+	  var single = this.single =
+	    frag.childNodes.length === 1 &&
+	    // do not go single mode if the only node is an anchor
+	    !(frag.childNodes[0].__vue_anchor)
 	  if (single) {
 	    this.node = frag.childNodes[0]
 	    this.before = singleBefore
@@ -4474,15 +4519,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 
 	  apply: function (el, value) {
-	    function done () {
+	    transition.apply(el, value ? 1 : -1, function () {
 	      el.style.display = value ? '' : 'none'
-	    }
-	    // do not apply transition if not in doc
-	    if (_.inDoc(el)) {
-	      transition.apply(el, value ? 1 : -1, done, this.vm)
-	    } else {
-	      done()
-	    }
+	    }, this.vm)
 	  }
 	}
 
@@ -4961,11 +5000,17 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function keyFilter (handler, keys) {
 	  var codes = keys.map(function (key) {
-	    var code = keyCodes[key]
-	    if (!code) {
-	      code = parseInt(key, 10)
+	    var charCode = key.charCodeAt(0)
+	    if (charCode > 47 && charCode < 58) {
+	      return parseInt(key, 10)
 	    }
-	    return code
+	    if (key.length === 1) {
+	      charCode = key.toUpperCase().charCodeAt(0)
+	      if (charCode > 64 && charCode < 91) {
+	        return charCode
+	      }
+	    }
+	    return keyCodes[key]
 	  })
 	  return function keyHandler (e) {
 	    if (codes.indexOf(e.keyCode) > -1) {
@@ -5040,13 +5085,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    this.reset()
-	    var scope = this._scope || this.vm
-	    this.handler = function (e) {
-	      scope.$event = e
-	      var res = handler(e)
-	      scope.$event = null
-	      return res
-	    }
+	    this.handler = handler
+
 	    if (this.iframeBind) {
 	      this.iframeBind()
 	    } else {
@@ -5510,8 +5550,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	      // create a ref anchor
 	      this.anchor = _.createAnchor('v-component')
 	      _.replace(this.el, this.anchor)
-	      // remove is attribute
+	      // remove is attribute.
+	      // this is removed during compilation, but because compilation is
+	      // cached, when the component is used elsewhere this attribute
+	      // will remain at link time.
 	      this.el.removeAttribute('is')
+	      // remove ref, same as above
+	      if (this.descriptor.ref) {
+	        this.el.removeAttribute('v-ref:' + _.hyphenate(this.descriptor.ref))
+	      }
 	      // if static, build right now.
 	      if (this.literal) {
 	        this.setComponent(this.expression)
@@ -6035,31 +6082,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  // two-way sync for v-for alias
 	  var forContext = scope.$forContext
-	  if (true) {
-	    if (
-	      forContext &&
-	      forContext.filters &&
-	      (new RegExp(forContext.alias + '\\b')).test(this.expression)
-	    ) {
-	      _.warn(
+	  if (forContext && forContext.alias === this.expression) {
+	    if (forContext.filters) {
+	      ("development") !== 'production' && _.warn(
 	        'It seems you are using two-way binding on ' +
 	        'a v-for alias (' + this.expression + '), and the ' +
 	        'v-for has filters. This will not work properly. ' +
 	        'Either remove the filters or use an array of ' +
 	        'objects and bind to object properties instead.'
 	      )
+	      return
 	    }
-	  }
-	  if (
-	    forContext &&
-	    forContext.alias === this.expression &&
-	    !forContext.filters
-	  ) {
-	    if (scope.$key) { // original is an object
-	      forContext.rawValue[scope.$key] = value
-	    } else {
-	      forContext.rawValue.$set(scope.$index, value)
-	    }
+	    forContext._withLock(function () {
+	      if (scope.$key) { // original is an object
+	        forContext.rawValue[scope.$key] = value
+	      } else {
+	        forContext.rawValue.$set(scope.$index, value)
+	      }
+	    })
 	  }
 	}
 
@@ -7435,8 +7475,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function isHidden (el) {
 	  return !(
-	    el.offsetWidth &&
-	    el.offsetHeight &&
+	    el.offsetWidth ||
+	    el.offsetHeight ||
 	    el.getClientRects().length
 	  )
 	}
@@ -8660,7 +8700,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
-	 * Swap the isntance's $data. Called in $data's setter.
+	 * Swap the instance's $data. Called in $data's setter.
 	 *
 	 * @param {Object} newData
 	 */
@@ -8826,6 +8866,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var _ = __webpack_require__(1)
+	var config = __webpack_require__(5)
 	var Dep = __webpack_require__(41)
 	var arrayMethods = __webpack_require__(59)
 	var arrayKeys = Object.getOwnPropertyNames(arrayMethods)
@@ -8874,7 +8915,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  var ob
 	  if (
-	    value.hasOwnProperty('__ob__') &&
+	    Object.prototype.hasOwnProperty.call(value, '__ob__') &&
 	    value.__ob__ instanceof Observer
 	  ) {
 	    ob = value.__ob__
@@ -8999,28 +9040,48 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function defineReactive (obj, key, val) {
 	  var dep = new Dep()
+
+	  // cater for pre-defined getter/setters
+	  var getter, setter
+	  if (config.convertAllProperties) {
+	    var property = Object.getOwnPropertyDescriptor(obj, key)
+	    if (property && property.configurable === false) {
+	      return
+	    }
+	    getter = property && property.get
+	    setter = property && property.set
+	  }
+
 	  var childOb = Observer.create(val)
 	  Object.defineProperty(obj, key, {
 	    enumerable: true,
 	    configurable: true,
-	    get: function metaGetter () {
+	    get: function reactiveGetter () {
+	      var value = getter ? getter.call(obj) : val
 	      if (Dep.target) {
 	        dep.depend()
 	        if (childOb) {
 	          childOb.dep.depend()
 	        }
-	        if (_.isArray(val)) {
-	          for (var e, i = 0, l = val.length; i < l; i++) {
-	            e = val[i]
+	        if (_.isArray(value)) {
+	          for (var e, i = 0, l = value.length; i < l; i++) {
+	            e = value[i]
 	            e && e.__ob__ && e.__ob__.dep.depend()
 	          }
 	        }
 	      }
-	      return val
+	      return value
 	    },
-	    set: function metaSetter (newVal) {
-	      if (newVal === val) return
-	      val = newVal
+	    set: function reactiveSetter (newVal) {
+	      var value = getter ? getter.call(obj) : val
+	      if (newVal === value) {
+	        return
+	      }
+	      if (setter) {
+	        setter.call(obj, newVal)
+	      } else {
+	        val = newVal
+	      }
 	      childOb = Observer.create(newVal)
 	      dep.notify()
 	    }
@@ -9595,8 +9656,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  ) {
 	    var fn = expParser.parse(expression).get
 	    var scope = this._scope || this.vm
-	    var handler = function () {
+	    var handler = function (e) {
+	      scope.$event = e
 	      fn.call(scope, scope)
+	      scope.$event = null
 	    }
 	    if (this.filters) {
 	      handler = scope._applyFilters(handler, null, this.filters)
