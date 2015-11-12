@@ -306,7 +306,6 @@ exports.findRef = function (node) {
     for (var i = 0, l = attrs.length; i < l; i++) {
       var name = attrs[i].name
       if (refRE.test(name)) {
-        node.removeAttribute(name)
         return _.camelize(name.replace(refRE, ''))
       }
     }
