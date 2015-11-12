@@ -80,7 +80,7 @@ exports._initData = function () {
 }
 
 /**
- * Swap the isntance's $data. Called in $data's setter.
+ * Swap the instance's $data. Called in $data's setter.
  *
  * @param {Object} newData
  */
