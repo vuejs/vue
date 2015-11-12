@@ -6,3 +6,7 @@ general:
   branches:
     ignore:
       - dev
+
+dependencies:
+  pre:
+    - npm install -g grunt-cli
