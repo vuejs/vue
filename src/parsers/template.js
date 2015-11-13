@@ -78,10 +78,11 @@ var entityRE = /&\w+;|&#\d+;|&#x[\dA-F]+;/
  * strategy found in jQuery & component/domify.
  *
  * @param {String} templateString
+ * @param {Boolean} raw
  * @return {DocumentFragment}
  */
 
-function stringToFragment (templateString) {
+function stringToFragment (templateString, raw) {
   // try a cache hit first
   var hit = templateCache.get(templateString)
   if (hit) {
@@ -106,7 +107,10 @@ function stringToFragment (templateString) {
     var suffix = wrap[2]
     var node = document.createElement('div')
 
-    node.innerHTML = prefix + templateString.trim() + suffix
+    if (!raw) {
+      templateString = templateString.trim()
+    }
+    node.innerHTML = prefix + templateString + suffix
     while (depth--) {
       node = node.lastChild
     }
@@ -238,17 +242,19 @@ exports.clone = function (node) {
  * instance template.
  *
  * @param {*} template
- *    Possible values include:
- *    - DocumentFragment object
- *    - Node object of type Template
- *    - id selector: '#some-template-id'
- *    - template string: '<div><span>{{msg}}</span></div>'
+ *        Possible values include:
+ *        - DocumentFragment object
+ *        - Node object of type Template
+ *        - id selector: '#some-template-id'
+ *        - template string: '<div><span>{{msg}}</span></div>'
  * @param {Boolean} clone
- * @param {Boolean} noSelector
+ * @param {Boolean} raw
+ *        inline HTML interpolation. Do not check for id
+ *        selector and keep whitespace in the string.
  * @return {DocumentFragment|undefined}
  */
 
-exports.parse = function (template, clone, noSelector) {
+exports.parse = function (template, clone, raw) {
   var node, frag
 
   // if the template is already a document fragment,
@@ -262,7 +268,7 @@ exports.parse = function (template, clone, noSelector) {
 
   if (typeof template === 'string') {
     // id selector
-    if (!noSelector && template.charAt(0) === '#') {
+    if (!raw && template.charAt(0) === '#') {
       // id selector can be cached too
       frag = idSelectorCache.get(template)
       if (!frag) {
@@ -275,7 +281,7 @@ exports.parse = function (template, clone, noSelector) {
       }
     } else {
       // normal string template
-      frag = stringToFragment(template)
+      frag = stringToFragment(template, raw)
     }
   } else if (template.nodeType) {
     // a direct node

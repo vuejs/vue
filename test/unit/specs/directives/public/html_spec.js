@@ -39,5 +39,17 @@ if (_.inBrowser) {
       expect(el.innerHTML).toBe('')
     })
 
+    it('inline keep whitespace', function () {
+      var node = document.createComment('html-test')
+      el.appendChild(node)
+      var dir = {
+        el: node
+      }
+      _.extend(dir, def)
+      dir.bind()
+      dir.update('    <p>span</p>    ')
+      expect(el.innerHTML).toBe('    <p>span</p>    ')
+    })
+
   })
 }
