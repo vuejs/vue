@@ -112,13 +112,13 @@ if (_.inBrowser) {
     })
 
     it('replacer attr should overwrite container attr of same name, except class should be merged', function () {
-      el.setAttribute('class', 'test')
+      el.setAttribute('class', 'test other')
       el.setAttribute('title', 'parent')
-      options.template = '<div class="other" title="child"></div>'
+      options.template = '<div class="other ok" title="child"></div>'
       options.replace = true
       options._asComponent = true
       var res = transclude(el, options)
-      expect(res.getAttribute('class')).toBe('other test')
+      expect(res.getAttribute('class')).toBe('other ok test')
       expect(res.getAttribute('title')).toBe('child')
     })
 
