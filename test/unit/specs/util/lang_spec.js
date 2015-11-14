@@ -2,6 +2,14 @@ var _ = require('../../../../src/util')
 
 describe('Util - Language Enhancement', function () {
 
+  it('hasOwn', function () {
+    var obj1 = { a: 1 }
+    expect(_.hasOwn(obj1, 'a')).toBe(true)
+    var obj2 = Object.create(null)
+    obj2.a = 2
+    expect(_.hasOwn(obj2, 'a')).toBe(true)
+  })
+
   it('isLiteral', function () {
     expect(_.isLiteral('123')).toBe(true)
     expect(_.isLiteral('12.3')).toBe(true)

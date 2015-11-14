@@ -87,8 +87,8 @@ module.exports = {
     var item = data[0]
     var convertedFromObject = this.fromObject =
       isObject(item) &&
-      item.hasOwnProperty('$key') &&
-      item.hasOwnProperty('$value')
+      _.hasOwn(item, '$key') &&
+      _.hasOwn(item, '$value')
 
     var trackByKey = this.params.trackBy
     var oldFrags = this.frags
@@ -366,7 +366,7 @@ module.exports = {
       }
     } else {
       id = this.id
-      if (value.hasOwnProperty(id)) {
+      if (_.hasOwn(value, id)) {
         if (value[id] === null) {
           value[id] = frag
         } else {
@@ -423,7 +423,7 @@ module.exports = {
     var index = scope.$index
     // fix #948: avoid accidentally fall through to
     // a parent repeater which happens to have $key.
-    var key = scope.hasOwnProperty('$key') && scope.$key
+    var key = _.hasOwn(scope, '$key') && scope.$key
     var primitive = !isObject(value)
     if (trackByKey || key || primitive) {
       var id = trackByKey

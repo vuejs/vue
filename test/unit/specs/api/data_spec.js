@@ -72,8 +72,8 @@ describe('Data API', function () {
   it('$delete', function () {
     vm._digest = jasmine.createSpy()
     vm.$delete('a')
-    expect(vm.hasOwnProperty('a')).toBe(false)
-    expect(vm._data.hasOwnProperty('a')).toBe(false)
+    expect(_.hasOwn(vm, 'a')).toBe(false)
+    expect(_.hasOwn(vm._data, 'a')).toBe(false)
     expect(vm._digest).toHaveBeenCalled()
     // reserved key should not be deleted
     vm.$delete('_data')

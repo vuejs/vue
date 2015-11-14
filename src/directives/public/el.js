@@ -11,7 +11,7 @@ module.exports = {
     }
     var id = this.id = _.camelize(this.arg)
     var refs = (this._scope || this.vm).$els
-    if (refs.hasOwnProperty(id)) {
+    if (_.hasOwn(refs, id)) {
       refs[id] = this.el
     } else {
       _.defineReactive(refs, id, this.el)
