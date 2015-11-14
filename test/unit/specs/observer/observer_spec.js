@@ -300,6 +300,18 @@ describe('Observer', function () {
     var obj2 = { a: 1 }
     _.delete(obj2, 'a')
     expect(obj2.hasOwnProperty('a')).toBe(false)
+    // should work on Object.create(null)
+    var obj3 = Object.create(null)
+    obj3.a = 1
+    var ob3 = Observer.create(obj3)
+    var dep3 = ob3.dep
+    spyOn(dep3, 'notify')
+    _.set(obj3, 'b', 2)
+    expect(obj3.b).toBe(2)
+    expect(dep3.notify.calls.count()).toBe(1)
+    _.delete(obj3, 'a')
+    expect(Object.prototype.hasOwnProperty.call(obj3, 'a')).toBe(false)
+    expect(dep3.notify.calls.count()).toBe(2)
   })
 
   it('observing array mutation', function () {
