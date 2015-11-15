@@ -10,7 +10,7 @@
  */
 
 exports.set = function set (obj, key, val) {
-  if (Object.prototype.hasOwnProperty.call(obj, key)) {
+  if (exports.hasOwnProperty(obj, key)) {
     obj[key] = val
     return
   }
@@ -43,7 +43,7 @@ exports.set = function set (obj, key, val) {
  */
 
 exports.delete = function (obj, key) {
-  if (!Object.prototype.hasOwnProperty.call(obj, key)) {
+  if (!exports.hasOwnProperty(obj, key)) {
     return
   }
   delete obj[key]
