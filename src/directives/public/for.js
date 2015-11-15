@@ -171,7 +171,14 @@ module.exports = {
         : start
       if (frag.reused && !frag.staggerCb) {
         currentPrev = findPrevFrag(frag, start, this.id)
-        if (currentPrev !== targetPrev) {
+        if (
+          currentPrev !== targetPrev && (
+            !currentPrev ||
+            // optimization for moving a single item.
+            // thanks to suggestions by @livoras in #1807
+            findPrevFrag(currentPrev, start, this.id) !== targetPrev
+          )
+        ) {
           this.move(frag, prevEl)
         }
       } else {

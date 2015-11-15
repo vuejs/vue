@@ -944,7 +944,7 @@ function assertMutations (vm, el, done) {
   )
   .then(
     function () {
-      vm.items.shift()
+      vm.items.push(vm.items.shift())
     },
     assertMarkup
   )
