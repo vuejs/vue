@@ -254,7 +254,9 @@ describe('Watcher', function () {
   })
 
   it('set non-existent values', function (done) {
-    var watcher = new Watcher(vm, 'd.e.f', spy)
+    var watcher = new Watcher(vm, 'd.e.f', spy, {
+      twoWay: true
+    })
     expect(watcher.value).toBeUndefined()
     watcher.set(123)
     nextTick(function () {

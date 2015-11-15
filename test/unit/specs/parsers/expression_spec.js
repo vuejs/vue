@@ -279,13 +279,11 @@ describe('Expression Parser', function () {
       expect(hasWarned(_, 'Invalid expression')).toBe(true)
     })
 
-    if (leftHandThrows()) {
-      it('should warn on invalid left hand expression for setter', function () {
-        expect(_.warn).not.toHaveBeenCalled()
-        expParser.parse('a+b', true)
-        expect(hasWarned(_, 'Invalid setter function body')).toBe(true)
-      })
-    }
+    it('should warn on invalid setter expression', function () {
+      expect(_.warn).not.toHaveBeenCalled()
+      expParser.parse('a+b', true)
+      expect(hasWarned(_, 'Invalid setter expression')).toBe(true)
+    })
 
     it('should warn if expression contains improper reserved keywords', function () {
       expect(_.warn).not.toHaveBeenCalled()
@@ -294,16 +292,3 @@ describe('Expression Parser', function () {
     })
   })
 })
-
-/**
- * check if creating a new Function with invalid left-hand
- * assignment would throw
- */
-
-function leftHandThrows () {
-  try {
-    new Function('a + b = 1')
-  } catch (e) {
-    return true
-  }
-}

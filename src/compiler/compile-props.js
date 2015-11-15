@@ -5,7 +5,7 @@ var propBindingModes = require('../config')._propBindingModes
 var empty = {}
 
 // regexes
-var identRE = require('../parsers/path').identRE
+var identRE = /^[$_a-zA-Z]+[\w$]*$/
 var settablePathRE = /^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\[[^\[\]]+\])*$/
 
 /**

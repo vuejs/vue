@@ -50,23 +50,8 @@ describe('Data API', function () {
   })
 
   it('$set invalid', function () {
-    // invalid, should throw
-    if (leftHandThrows()) {
-      // if creating a function with invalid left hand
-      // expression throws, the exp parser will catch the
-      // error and warn.
-      vm.$set('c + d', 1)
-      expect(hasWarned(_, 'Invalid setter function body')).toBe(true)
-    } else {
-      // otherwise it will throw when calling the setter.
-      expect(function () {
-        try {
-          vm.$set('c + d', 1)
-        } catch (e) {
-          return true
-        }
-      }()).toBe(true)
-    }
+    vm.$set('c + d', 1)
+    expect(hasWarned(_, 'Invalid setter expression')).toBe(true)
   })
 
   it('$delete', function () {
@@ -180,18 +165,4 @@ describe('Data API', function () {
       console.log = oldLog
     })
   }
-
 })
-
-/**
- * check if creating a new Function with invalid left-hand
- * assignment would throw
- */
-
-function leftHandThrows () {
-  try {
-    new Function('a + b = 1')
-  } catch (e) {
-    return true
-  }
-}

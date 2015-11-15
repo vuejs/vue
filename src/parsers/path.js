@@ -1,40 +1,38 @@
 var _ = require('../util')
+var expParser = require('./expression')
 var Cache = require('../cache')
 var pathCache = new Cache(1000)
-var identRE = exports.identRE = /^[$_a-zA-Z]+[\w$]*$/
 
 // actions
 var APPEND = 0
 var PUSH = 1
+var INC_SUB_PATH_DEPTH = 2
+var PUSH_SUB_PATH = 3
 
 // states
 var BEFORE_PATH = 0
 var IN_PATH = 1
 var BEFORE_IDENT = 2
 var IN_IDENT = 3
-var BEFORE_ELEMENT = 4
-var AFTER_ZERO = 5
-var IN_INDEX = 6
-var IN_SINGLE_QUOTE = 7
-var IN_DOUBLE_QUOTE = 8
-var IN_SUB_PATH = 9
-var AFTER_ELEMENT = 10
-var AFTER_PATH = 11
-var ERROR = 12
+var IN_SUB_PATH = 4
+var IN_SINGLE_QUOTE = 5
+var IN_DOUBLE_QUOTE = 6
+var AFTER_PATH = 7
+var ERROR = 8
 
 var pathStateMachine = []
 
 pathStateMachine[BEFORE_PATH] = {
   'ws': [BEFORE_PATH],
   'ident': [IN_IDENT, APPEND],
-  '[': [BEFORE_ELEMENT],
+  '[': [IN_SUB_PATH],
   'eof': [AFTER_PATH]
 }
 
 pathStateMachine[IN_PATH] = {
   'ws': [IN_PATH],
   '.': [BEFORE_IDENT],
-  '[': [BEFORE_ELEMENT],
+  '[': [IN_SUB_PATH],
   'eof': [AFTER_PATH]
 }
 
@@ -49,54 +47,29 @@ pathStateMachine[IN_IDENT] = {
   'number': [IN_IDENT, APPEND],
   'ws': [IN_PATH, PUSH],
   '.': [BEFORE_IDENT, PUSH],
-  '[': [BEFORE_ELEMENT, PUSH],
+  '[': [IN_SUB_PATH, PUSH],
   'eof': [AFTER_PATH, PUSH]
 }
 
-pathStateMachine[BEFORE_ELEMENT] = {
-  'ws': [BEFORE_ELEMENT],
-  '0': [AFTER_ZERO, APPEND],
-  'number': [IN_INDEX, APPEND],
-  "'": [IN_SINGLE_QUOTE, APPEND, ''],
-  '"': [IN_DOUBLE_QUOTE, APPEND, ''],
-  'ident': [IN_SUB_PATH, APPEND, '*']
-}
-
-pathStateMachine[AFTER_ZERO] = {
-  'ws': [AFTER_ELEMENT, PUSH],
-  ']': [IN_PATH, PUSH]
-}
-
-pathStateMachine[IN_INDEX] = {
-  '0': [IN_INDEX, APPEND],
-  'number': [IN_INDEX, APPEND],
-  'ws': [AFTER_ELEMENT],
-  ']': [IN_PATH, PUSH]
+pathStateMachine[IN_SUB_PATH] = {
+  "'": [IN_SINGLE_QUOTE, APPEND],
+  '"': [IN_DOUBLE_QUOTE, APPEND],
+  '[': [IN_SUB_PATH, INC_SUB_PATH_DEPTH],
+  ']': [IN_PATH, PUSH_SUB_PATH],
+  'eof': ERROR,
+  'else': [IN_SUB_PATH, APPEND]
 }
 
 pathStateMachine[IN_SINGLE_QUOTE] = {
-  "'": [AFTER_ELEMENT],
+  "'": [IN_SUB_PATH, APPEND],
   'eof': ERROR,
   'else': [IN_SINGLE_QUOTE, APPEND]
 }
 
 pathStateMachine[IN_DOUBLE_QUOTE] = {
-  '"': [AFTER_ELEMENT],
+  '"': [IN_SUB_PATH, APPEND],
   'eof': ERROR,
   'else': [IN_DOUBLE_QUOTE, APPEND]
-}
-
-pathStateMachine[IN_SUB_PATH] = {
-  'ident': [IN_SUB_PATH, APPEND],
-  '0': [IN_SUB_PATH, APPEND],
-  'number': [IN_SUB_PATH, APPEND],
-  'ws': [AFTER_ELEMENT],
-  ']': [IN_PATH, PUSH]
-}
-
-pathStateMachine[AFTER_ELEMENT] = {
-  'ws': [AFTER_ELEMENT],
-  ']': [IN_PATH, PUSH]
 }
 
 /**
@@ -154,6 +127,26 @@ function getPathCharType (ch) {
 }
 
 /**
+ * Format a subPath, return its plain form if it is
+ * a literal string or number. Otherwise prepend the
+ * dynamic indicator (*).
+ *
+ * @param {String} path
+ * @return {String}
+ */
+
+function formatSubPath (path) {
+  var trimmed = path.trim()
+  // invalid leading 0
+  if (path.charAt(0) === '0' && isNaN(path)) {
+    return false
+  }
+  return _.isLiteral(trimmed)
+    ? _.stripQuotes(trimmed)
+    : '*' + trimmed
+}
+
+/**
  * Parse a string path into an array of segments
  *
  * @param {String} path
@@ -164,16 +157,18 @@ function parsePath (path) {
   var keys = []
   var index = -1
   var mode = BEFORE_PATH
+  var subPathDepth = 0
   var c, newChar, key, type, transition, action, typeMap
 
   var actions = []
+
   actions[PUSH] = function () {
-    if (key === undefined) {
-      return
+    if (key !== undefined) {
+      keys.push(key)
+      key = undefined
     }
-    keys.push(key)
-    key = undefined
   }
+
   actions[APPEND] = function () {
     if (key === undefined) {
       key = newChar
@@ -182,12 +177,33 @@ function parsePath (path) {
     }
   }
 
+  actions[INC_SUB_PATH_DEPTH] = function () {
+    actions[APPEND]()
+    subPathDepth++
+  }
+
+  actions[PUSH_SUB_PATH] = function () {
+    if (subPathDepth > 0) {
+      subPathDepth--
+      mode = IN_SUB_PATH
+      actions[APPEND]()
+    } else {
+      subPathDepth = 0
+      key = formatSubPath(key)
+      if (key === false) {
+        return false
+      } else {
+        actions[PUSH]()
+      }
+    }
+  }
+
   function maybeUnescapeQuote () {
     var nextChar = path[index + 1]
     if ((mode === IN_SINGLE_QUOTE && nextChar === "'") ||
         (mode === IN_DOUBLE_QUOTE && nextChar === '"')) {
       index++
-      newChar = nextChar
+      newChar = '\\' + nextChar
       actions[APPEND]()
       return true
     }
@@ -215,10 +231,10 @@ function parsePath (path) {
       newChar = transition[2]
       newChar = newChar === undefined
         ? c
-        : newChar === '*'
-          ? newChar + c
-          : newChar
-      action()
+        : newChar
+      if (action() === false) {
+        return
+      }
     }
 
     if (mode === AFTER_PATH) {
@@ -226,38 +242,6 @@ function parsePath (path) {
       return keys
     }
   }
-}
-
-/**
- * Format a accessor segment based on its type.
- *
- * @param {String} key
- * @return {Boolean}
- */
-
-function formatAccessor (key) {
-  if (identRE.test(key)) { // identifier
-    return '.' + key
-  } else if (+key === key >>> 0) { // bracket index
-    return '[' + key + ']'
-  } else if (key.charAt(0) === '*') {
-    return '[o' + formatAccessor(key.slice(1)) + ']'
-  } else { // bracket string
-    return '["' + key.replace(/"/g, '\\"') + '"]'
-  }
-}
-
-/**
- * Compiles a getter function with a fixed path.
- * The fixed path getter supresses errors.
- *
- * @param {Array} path
- * @return {Function}
- */
-
-exports.compileGetter = function (path) {
-  var body = 'return o' + path.map(formatAccessor).join('')
-  return new Function('o', body)
 }
 
 /**
@@ -272,7 +256,6 @@ exports.parse = function (path) {
   if (!hit) {
     hit = parsePath(path)
     if (hit) {
-      hit.get = exports.compileGetter(hit)
       pathCache.put(path, hit)
     }
   }
@@ -287,10 +270,7 @@ exports.parse = function (path) {
  */
 
 exports.get = function (obj, path) {
-  path = exports.parse(path)
-  if (path) {
-    return path.get(obj)
-  }
+  return expParser.parse(path).get(obj)
 }
 
 /**
@@ -330,7 +310,7 @@ exports.set = function (obj, path, val) {
     last = obj
     key = path[i]
     if (key.charAt(0) === '*') {
-      key = original[key.slice(1)]
+      key = expParser.parse(key.slice(1)).get.call(original, original)
     }
     if (i < l - 1) {
       obj = obj[key]

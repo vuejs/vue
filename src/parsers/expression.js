@@ -100,11 +100,10 @@ function restore (str, i) {
  * `scope.` and generate getter/setter functions.
  *
  * @param {String} exp
- * @param {Boolean} needSet
  * @return {Function}
  */
 
-function compileExpFns (exp, needSet) {
+function compileGetter (exp) {
   if (improperKeywordsRE.test(exp)) {
     process.env.NODE_ENV !== 'production' && _.warn(
       'Avoid using reserved keywords in expression: ' + exp
@@ -121,44 +120,7 @@ function compileExpFns (exp, needSet) {
   body = (' ' + body)
     .replace(pathReplaceRE, rewrite)
     .replace(restoreRE, restore)
-  var getter = makeGetter(body)
-  if (getter) {
-    return {
-      get: getter,
-      body: body,
-      set: needSet
-        ? makeSetter(body)
-        : null
-    }
-  }
-}
-
-/**
- * Compile getter setters for a simple path.
- *
- * @param {String} exp
- * @return {Function}
- */
-
-function compilePathFns (exp) {
-  var getter, path
-  if (exp.indexOf('[') < 0) {
-    // really simple path
-    path = exp.split('.')
-    path.raw = exp
-    getter = Path.compileGetter(path)
-  } else {
-    // do the real parsing
-    path = Path.parse(exp)
-    getter = path.get
-  }
-  return {
-    get: getter,
-    // always generate setter for simple paths
-    set: function (obj, val) {
-      Path.set(obj, path, val)
-    }
-  }
+  return makeGetterFn(body)
 }
 
 /**
@@ -171,7 +133,7 @@ function compilePathFns (exp) {
  * @return {Function|undefined}
  */
 
-function makeGetter (body) {
+function makeGetterFn (body) {
   try {
     return new Function('scope', 'return ' + body + ';')
   } catch (e) {
@@ -183,38 +145,22 @@ function makeGetter (body) {
 }
 
 /**
- * Build a setter function.
+ * Compile a setter function for the expression.
  *
- * This is only needed in rare situations like "a[b]" where
- * a settable path requires dynamic evaluation.
- *
- * This setter function may throw error when called if the
- * expression body is not a valid left-hand expression in
- * assignment.
- *
- * @param {String} body
+ * @param {String} exp
  * @return {Function|undefined}
  */
 
-function makeSetter (body) {
-  try {
-    return new Function('scope', 'value', body + '=value;')
-  } catch (e) {
+function compileSetter (exp) {
+  var path = Path.parse(exp)
+  if (path) {
+    return function (scope, val) {
+      Path.set(scope, path, val)
+    }
+  } else {
     process.env.NODE_ENV !== 'production' && _.warn(
-      'Invalid setter function body: ' + body
+      'Invalid setter expression: ' + exp
     )
-  }
-}
-
-/**
- * Check for setter existence on a cache hit.
- *
- * @param {Function} hit
- */
-
-function checkSetter (hit) {
-  if (!hit.set) {
-    hit.set = makeSetter(hit.body)
   }
 }
 
@@ -231,19 +177,20 @@ exports.parse = function (exp, needSet) {
   // try cache
   var hit = expressionCache.get(exp)
   if (hit) {
-    if (needSet) {
-      checkSetter(hit)
+    if (needSet && !hit.set) {
+      hit.set = compileSetter(hit.exp)
     }
     return hit
   }
-  // we do a simple path check to optimize for them.
-  // the check fails valid paths with unusal whitespaces,
-  // but that's too rare and we don't care.
-  // also skip boolean literals and paths that start with
-  // global "Math"
-  var res = exports.isSimplePath(exp)
-    ? compilePathFns(exp)
-    : compileExpFns(exp, needSet)
+  var res = { exp: exp }
+  res.get = exports.isSimplePath(exp) && exp.indexOf('[') < 0
+    // optimized super simple getter
+    ? makeGetterFn('scope.' + exp)
+    // dynamic getter
+    : compileGetter(exp)
+  if (needSet) {
+    res.set = compileSetter(exp)
+  }
   expressionCache.put(exp, res)
   return res
 }

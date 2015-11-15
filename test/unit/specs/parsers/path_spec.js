@@ -2,7 +2,11 @@ var Path = require('../../../../src/parsers/path')
 
 function assertPath (str, expected) {
   var path = Path.parse(str)
-  expect(pathMatch(path, expected)).toBe(true)
+  var res = pathMatch(path, expected)
+  expect(res).toBe(true)
+  if (!res) {
+    console.log('Path parse failed: ', str, path)
+  }
 }
 
 function assertInvalidPath (str) {
@@ -24,7 +28,7 @@ function pathMatch (a, b) {
 
 describe('Path Parser', function () {
 
-  it('parse', function () {
+  it('parse simple paths', function () {
     assertPath('', [])
     assertPath(' ', [])
     assertPath('a', ['a'])
@@ -42,10 +46,17 @@ describe('Path Parser', function () {
     assertPath('opt0', ['opt0'])
     assertPath('$foo.$bar._baz', ['$foo', '$bar', '_baz'])
     assertPath('foo["baz"]', ['foo', 'baz'])
-    assertPath('foo["b\\"az"]', ['foo', 'b"az'])
-    assertPath("foo['b\\'az']", ['foo', "b'az"])
+  })
+
+  it('parse dynamic paths', function () {
+    assertPath('foo["b\\"az"]', ['foo', '*"b\\"az"'])
+    assertPath("foo['b\\'az']", ['foo', "*'b\\'az'"])
     assertPath('a[b][c]', ['a', '*b', '*c'])
     assertPath('a[ b ][ c ]', ['a', '*b', '*c'])
+    assertPath('a[b.c]', ['a', '*b.c'])
+    assertPath('a[b + "c"]', ['a', '*b + "c"'])
+    assertPath('a[b[c]]', ['a', '*b[c]'])
+    assertPath('a["c" + b]', ['a', '*"c" + b'])
   })
 
   it('handle invalid paths', function () {
@@ -56,17 +67,12 @@ describe('Path Parser', function () {
     assertInvalidPath('a.b.')
     assertInvalidPath('a,b')
     assertInvalidPath('a["foo]')
-    assertInvalidPath('[0x04]')
     assertInvalidPath('[0foo]')
-    assertInvalidPath('[foo-bar]')
     assertInvalidPath('foo-bar')
     assertInvalidPath('42')
-    assertInvalidPath('a[04]')
-    assertInvalidPath(' a [ 04 ]')
     assertInvalidPath('  42   ')
     assertInvalidPath('foo["bar]')
     assertInvalidPath("foo['bar]")
-    assertInvalidPath('foo[bar + boo]')
     assertInvalidPath('a]')
   })
 
@@ -127,6 +133,10 @@ describe('Path Parser', function () {
     var res = Path.set(target, 'obj[key]', 123)
     expect(res).toBe(true)
     expect(target.obj.what).toBe(123)
+    // sub expressions
+    res = Path.set(target, 'obj["yo" + key]', 234)
+    expect(res).toBe(true)
+    expect(target.obj.yowhat).toBe(234)
   })
 
   it('set on prototype chain', function () {
