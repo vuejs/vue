@@ -7,7 +7,7 @@ module.exports = {
     var el = this.el
 
     this.getValue = function () {
-      return el.hasOwnProperty('_value')
+      return _.hasOwnProperty(el, '_value')
         ? el._value
         : self.params.number
           ? _.toNumber(el.value)
@@ -16,10 +16,10 @@ module.exports = {
 
     function getBooleanValue () {
       var val = el.checked
-      if (val && el.hasOwnProperty('_trueValue')) {
+      if (val && _.hasOwnProperty(el, '_trueValue')) {
         return el._trueValue
       }
-      if (!val && el.hasOwnProperty('_falseValue')) {
+      if (!val && _.hasOwnProperty(el, '_falseValue')) {
         return el._falseValue
       }
       return val
@@ -52,7 +52,7 @@ module.exports = {
     if (_.isArray(value)) {
       el.checked = _.indexOf(value, this.getValue()) > -1
     } else {
-      if (el.hasOwnProperty('_trueValue')) {
+      if (_.hasOwnProperty(el, '_trueValue')) {
         el.checked = _.looseEqual(value, el._trueValue)
       } else {
         el.checked = !!value

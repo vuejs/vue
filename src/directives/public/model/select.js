@@ -51,7 +51,7 @@ module.exports = {
     var op, val
     while (i--) {
       op = options[i]
-      val = op.hasOwnProperty('_value')
+      val = _.hasOwnProperty(op, '_value')
         ? op._value
         : op.value
       /* eslint-disable eqeqeq */
@@ -86,7 +86,7 @@ function getValue (el, multi, init) {
       ? op.hasAttribute('selected')
       : op.selected
     if (selected) {
-      val = op.hasOwnProperty('_value')
+      val = _.hasOwnProperty(op, '_value')
         ? op._value
         : op.value
       if (multi) {

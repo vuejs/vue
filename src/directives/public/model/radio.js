@@ -8,7 +8,7 @@ module.exports = {
 
     this.getValue = function () {
       // value overwrite via v-bind:value
-      if (el.hasOwnProperty('_value')) {
+      if (_.hasOwnProperty(el, '_value')) {
         return el._value
       }
       var val = el.value
