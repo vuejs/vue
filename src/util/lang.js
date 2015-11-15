@@ -63,6 +63,17 @@ exports.delete = function (obj, key) {
 }
 
 /**
+ * Check whether the object has the property.
+ *
+ * @param {Object} obj
+ * @param {String} key
+ * @return {Boolean}
+ */
+exports.hasOwnProperty = function (obj, key) {
+  return Object.prototype.hasOwnProperty.call(obj, key)
+}
+
+/**
  * Check if an expression is a literal value.
  *
  * @param {String} exp
