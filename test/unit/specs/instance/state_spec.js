@@ -1,4 +1,4 @@
-var Vue = require('../../../../src/vue')
+var Vue = require('../../../../src/index')
 var _ = require('../../../../src/util')
 
 describe('Instance state initialization', function () {

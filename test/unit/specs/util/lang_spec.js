@@ -22,10 +22,10 @@ describe('Util - Language Enhancement', function () {
   })
 
   it('toString', function () {
-    expect(_.toString('hi')).toBe('hi')
-    expect(_.toString(1.234)).toBe('1.234')
-    expect(_.toString(null)).toBe('')
-    expect(_.toString(undefined)).toBe('')
+    expect(_._toString('hi')).toBe('hi')
+    expect(_._toString(1.234)).toBe('1.234')
+    expect(_._toString(null)).toBe('')
+    expect(_._toString(undefined)).toBe('')
   })
 
   it('toNumber', function () {
@@ -117,9 +117,7 @@ describe('Util - Language Enhancement', function () {
     expect(_.isPlainObject('hi')).toBeFalsy()
     expect(_.isPlainObject(undefined)).toBeFalsy()
     expect(_.isPlainObject(function () {})).toBe(false)
-    if (_.inBrowser) {
-      expect(_.isPlainObject(window)).toBe(false)
-    }
+    expect(_.isPlainObject(window)).toBe(false)
   })
 
   it('isArray', function () {
@@ -130,12 +128,12 @@ describe('Util - Language Enhancement', function () {
 
   it('define', function () {
     var obj = {}
-    _.define(obj, 'test', 123)
+    _.def(obj, 'test', 123)
     expect(obj.test).toBe(123)
     var desc = Object.getOwnPropertyDescriptor(obj, 'test')
     expect(desc.enumerable).toBe(false)
 
-    _.define(obj, 'test2', 123, true)
+    _.def(obj, 'test2', 123, true)
     expect(obj.test2).toBe(123)
     desc = Object.getOwnPropertyDescriptor(obj, 'test2')
     expect(desc.enumerable).toBe(true)

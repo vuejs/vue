@@ -1,4 +1,4 @@
-var Vue = require('../../../src/vue')
+var Vue = require('../../../src/index')
 var nextTick = Vue.nextTick
 var Watcher = require('../../../src/watcher')
 var _ = Vue.util

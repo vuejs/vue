@@ -1,3 +1,4 @@
+var Vue = require('../../../../src')
 var Observer = require('../../../../src/observer')
 var Dep = require('../../../../src/observer/dep')
 var _ = require('../../../../src/util')
@@ -14,7 +15,7 @@ describe('Observer', function () {
     var ob = Observer.create(1)
     expect(ob).toBeUndefined()
     // avoid vue instance
-    ob = Observer.create(new _.Vue())
+    ob = Observer.create(new Vue())
     expect(ob).toBeUndefined()
     // avoid frozen objects
     ob = Observer.create(Object.freeze({}))
@@ -281,7 +282,7 @@ describe('Observer', function () {
     _.set(obj, 'b', 2)
     expect(obj.b).toBe(2)
     expect(dep.notify.calls.count()).toBe(1)
-    _.delete(obj, 'a')
+    _.del(obj, 'a')
     expect(_.hasOwn(obj, 'a')).toBe(false)
     expect(dep.notify.calls.count()).toBe(2)
     // set existing key, should be a plain set and not
@@ -294,11 +295,11 @@ describe('Observer', function () {
     expect(obj.c).toBe(1)
     expect(dep.notify.calls.count()).toBe(3)
     // should ignore deleting non-existing key
-    _.delete(obj, 'a')
+    _.del(obj, 'a')
     expect(dep.notify.calls.count()).toBe(3)
     // should work on non-observed objects
     var obj2 = { a: 1 }
-    _.delete(obj2, 'a')
+    _.del(obj2, 'a')
     expect(_.hasOwn(obj2, 'a')).toBe(false)
     // should work on Object.create(null)
     var obj3 = Object.create(null)
@@ -309,7 +310,7 @@ describe('Observer', function () {
     _.set(obj3, 'b', 2)
     expect(obj3.b).toBe(2)
     expect(dep3.notify.calls.count()).toBe(1)
-    _.delete(obj3, 'a')
+    _.del(obj3, 'a')
     expect(_.hasOwn(obj3, 'a')).toBe(false)
     expect(dep3.notify.calls.count()).toBe(2)
   })

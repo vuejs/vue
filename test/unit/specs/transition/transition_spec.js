@@ -1,9 +1,9 @@
-var Vue = require('../../../../src/vue')
+var Vue = require('../../../../src/index')
 var _ = require('../../../../src/util')
 var transition = require('../../../../src/transition')
 var Transition = require('../../../../src/transition/transition')
 
-if (_.inBrowser && !_.isIE9) {
+if (!_.isIE9) {
   describe('Transition', function () {
 
     // insert a test css

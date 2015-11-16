@@ -1,5 +1,5 @@
 // test cases for edge cases & bug fixes
-var Vue = require('../../../src/vue')
+var Vue = require('../../../src/index')
 // spies on different objects
 var _ = require('../../../src/util/debug')
 var __ = Vue.util
@@ -267,7 +267,7 @@ describe('Misc', function () {
       el: document.createElement('div'),
       template: '<custom-stuff></custom-stuff>'
     })
-    expect(hasWarned(__, 'Unknown custom element')).toBe(true)
+    expect(hasWarned(_, 'Unknown custom element')).toBe(true)
   })
 
   it('prefer bound attributes over static attributes', function (done) {

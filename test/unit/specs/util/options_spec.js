@@ -1,7 +1,8 @@
-var _ = require('../../../../src/util')
-var Vue = require('../../../../src/vue')
-var merge = _.mergeOptions
-var resolveAsset = _.resolveAsset
+var util = require('../../../../src/util')
+var _ = require('../../../../src/util/debug')
+var Vue = require('../../../../src/index')
+var merge = util.mergeOptions
+var resolveAsset = util.resolveAsset
 
 describe('Util - Option merging', function () {
 

@@ -1,3 +1,4 @@
+var webpack = require('webpack')
 var glob = require('grunt/node_modules/glob')
 var specs = glob.sync('test/unit/specs/**/*.js').map(function (f) {
   return './' + f
@@ -15,7 +16,14 @@ module.exports = {
     ]
   },
   babel: {
-    presets: ['es2015']
+    loose: 'all'
   },
+  plugins: [
+    new webpack.DefinePlugin({
+      'process.env': {
+        NODE_ENV: '"development"'
+      }
+    })
+  ],
   devtool: '#source-map'
 }

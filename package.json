@@ -19,7 +19,8 @@
   "scripts": {
     "test": "grunt ci",
     "install-hook": "ln -s ../../build/git-hooks/pre-commit .git/hooks/pre-commit",
-    "dev": "webpack --watch --config build/webpack.dev.config.js"
+    "dev": "webpack --watch --config build/webpack.dev.config.js",
+    "serve-test": "webpack --watch --config build/webpack.test.config.js"
   },
   "dependencies": {
     "envify": "^3.4.0"

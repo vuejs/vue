@@ -12,8 +12,8 @@ describe('Batcher', function () {
     spyOn(_, 'warn')
   })
 
-  it('push', function (done) {
-    batcher.push({
+  it('pushWatcher', function (done) {
+    batcher.pushWatcher({
       run: spy
     })
     nextTick(function () {
@@ -23,11 +23,11 @@ describe('Batcher', function () {
   })
 
   it('dedup', function (done) {
-    batcher.push({
+    batcher.pushWatcher({
       id: 1,
       run: spy
     })
-    batcher.push({
+    batcher.pushWatcher({
       id: 1,
       run: spy
     })
@@ -42,11 +42,11 @@ describe('Batcher', function () {
       id: 1,
       run: spy
     }
-    batcher.push(job)
-    batcher.push({
+    batcher.pushWatcher(job)
+    batcher.pushWatcher({
       id: 2,
       run: function () {
-        batcher.push(job)
+        batcher.pushWatcher(job)
       }
     })
     nextTick(function () {
@@ -60,19 +60,19 @@ describe('Batcher', function () {
     function run () {
       vals.push(this.id)
     }
-    batcher.push({
+    batcher.pushWatcher({
       id: 2,
       user: true,
       run: function () {
         run.call(this)
         // user watcher triggering another directive update!
-        batcher.push({
+        batcher.pushWatcher({
           id: 3,
           run: run
         })
       }
     })
-    batcher.push({
+    batcher.pushWatcher({
       id: 1,
       run: run
     })
@@ -90,10 +90,10 @@ describe('Batcher', function () {
       id: 1,
       run: function () {
         count++
-        batcher.push(job)
+        batcher.pushWatcher(job)
       }
     }
-    batcher.push(job)
+    batcher.pushWatcher(job)
     nextTick(function () {
       expect(count).toBe(config._maxUpdateCount + 1)
       expect(hasWarned(_, 'infinite update loop')).toBe(true)
