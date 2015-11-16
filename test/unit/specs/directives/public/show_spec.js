@@ -8,7 +8,7 @@ describe('v-show', function () {
   beforeEach(function () {
     el = document.createElement('div')
     document.body.appendChild(el)
-    spyOn(transition, 'apply').and.callThrough()
+    spyOn(transition, 'applyTransition').and.callThrough()
   })
 
   afterEach(function () {
@@ -26,7 +26,7 @@ describe('v-show', function () {
     expect(el.style.display).toBe('none')
     dir.update(true)
     expect(el.style.display).toBe('')
-    expect(transition.apply).toHaveBeenCalled()
+    expect(transition.applyTransition).toHaveBeenCalled()
   })
 
   it('should work with v-else', function (done) {
@@ -41,12 +41,12 @@ describe('v-show', function () {
     })
     expect(el.children[0].style.display).toBe('')
     expect(el.children[1].style.display).toBe('none')
-    expect(transition.apply.calls.count()).toBe(2)
+    expect(transition.applyTransition.calls.count()).toBe(2)
     vm.ok = false
     Vue.nextTick(function () {
       expect(el.children[0].style.display).toBe('none')
       expect(el.children[1].style.display).toBe('')
-      expect(transition.apply.calls.count()).toBe(4)
+      expect(transition.applyTransition.calls.count()).toBe(4)
       done()
     })
   })

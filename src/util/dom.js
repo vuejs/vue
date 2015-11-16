@@ -1,7 +1,7 @@
+import config from '../config'
 import { warn } from './debug'
 import { camelize } from './lang'
-import config from '../config'
-import transition from '../transition'
+import { removeWithTransition } from '../transition'
 
 /**
  * Query an element selector if it's not an element already.
@@ -350,7 +350,7 @@ export function removeNodeRange (start, end, vm, frag, cb) {
   mapNodeRange(start, end, function (node) {
     if (node === end) done = true
     nodes.push(node)
-    transition.remove(node, vm, onRemoved)
+    removeWithTransition(node, vm, onRemoved)
   })
   function onRemoved () {
     removed++

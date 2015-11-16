@@ -1,5 +1,10 @@
 var _ = require('../../util')
-var transition = require('../../transition')
+
+import {
+  beforeWithTransition,
+  appendWithTransition,
+  removeWithTransition
+} from '../../transition'
 
 export default function (Vue) {
 
@@ -26,7 +31,7 @@ export default function (Vue) {
   Vue.prototype.$appendTo = function (target, cb, withTransition) {
     return insert(
       this, target, cb, withTransition,
-      append, transition.append
+      append, appendWithTransition
     )
   }
 
@@ -59,7 +64,7 @@ export default function (Vue) {
   Vue.prototype.$before = function (target, cb, withTransition) {
     return insert(
       this, target, cb, withTransition,
-      before, transition.before
+      before, beforeWithTransition
     )
   }
 
@@ -110,7 +115,7 @@ export default function (Vue) {
     } else {
       var op = withTransition === false
         ? remove
-        : transition.remove
+        : removeWithTransition
       op(this.$el, this, realCb)
     }
     return this
