@@ -157,7 +157,7 @@ describe('Misc', function () {
       })
     })
     expect(vm.$el.textContent).toBe('hi!')
-    vm.msg = 'ho!'
+    try { vm.msg = 'ho!' } catch (e) {}
     Vue.nextTick(function () {
       expect(vm.$el.textContent).toBe('hi!')
       done()

@@ -9,5 +9,13 @@ module.exports = {
     path: './test/unit',
     filename: 'specs.js'
   },
+  module: {
+    loaders: [
+      { test: /\.js$/, loader: 'babel', exclude: /test\/unit/ }
+    ]
+  },
+  babel: {
+    presets: ['es2015']
+  },
   devtool: '#source-map'
 }

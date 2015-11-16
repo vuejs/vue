@@ -6,5 +6,13 @@ module.exports = {
     library: 'Vue',
     libraryTarget: 'umd'
   },
+  module: {
+    loaders: [
+      { test: /\.js$/, loader: 'babel' }
+    ]
+  },
+  babel: {
+    presets: ['es2015']
+  },
   devtool: '#source-map'
 }

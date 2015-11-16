@@ -30,6 +30,11 @@
     ]
   },
   "devDependencies": {
+    "babel-core": "^6.1.21",
+    "babel-loader": "^6.1.0",
+    "babel-plugin-transform-runtime": "^6.1.18",
+    "babel-preset-es2015": "^6.1.18",
+    "babel-runtime": "^6.1.18",
     "casperjs": "^1.1.0-beta3",
     "codecov.io": "^0.1.2",
     "eslint": "^1.3.1",
