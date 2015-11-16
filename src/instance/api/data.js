@@ -55,7 +55,7 @@ export default function (Vue) {
    */
 
   Vue.prototype.$delete = function (key) {
-    _.delete(this._data, key)
+    _.del(this._data, key)
   }
 
   /**

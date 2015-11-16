@@ -17,7 +17,7 @@ var arrayKeys = Object.getOwnPropertyNames(arrayMethods)
 function Observer (value) {
   this.value = value
   this.dep = new Dep()
-  _.define(value, '__ob__', this)
+  _.def(value, '__ob__', this)
   if (_.isArray(value)) {
     var augment = _.hasProto
       ? protoAugment
@@ -159,7 +159,7 @@ function copyAugment (target, src, keys) {
   var key
   while (i--) {
     key = keys[i]
-    _.define(target, key, src[key])
+    _.def(target, key, src[key])
   }
 }
 

@@ -10,7 +10,7 @@ export default function (Vue) {
   Vue.util = _
   Vue.config = config
   Vue.set = _.set
-  Vue.delete = _.delete
+  Vue.delete = _.del
   Vue.nextTick = _.nextTick
 
   /**

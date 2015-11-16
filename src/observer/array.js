@@ -18,7 +18,7 @@ var arrayMethods = Object.create(arrayProto)
 .forEach(function (method) {
   // cache original method
   var original = arrayProto[method]
-  _.define(arrayMethods, method, function mutator () {
+  _.def(arrayMethods, method, function mutator () {
     // avoid leaking arguments:
     // http://jsperf.com/closure-with-arguments
     var i = arguments.length
@@ -56,7 +56,7 @@ var arrayMethods = Object.create(arrayProto)
  * @return {*} - replaced element
  */
 
-_.define(
+_.def(
   arrayProto,
   '$set',
   function $set (index, val) {
@@ -74,7 +74,7 @@ _.define(
  * @param {*} val
  */
 
-_.define(
+_.def(
   arrayProto,
   '$remove',
   function $remove (item) {

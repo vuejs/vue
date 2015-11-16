@@ -219,7 +219,7 @@ module.exports = {
       _.defineReactive(scope, '$key', key)
     } else if (scope.$key) {
       // avoid accidental fallback
-      _.define(scope, '$key', null)
+      _.def(scope, '$key', null)
     }
     if (this.iterator) {
       _.defineReactive(scope, this.iterator, key !== null ? key : index)
@@ -381,7 +381,7 @@ module.exports = {
           this.warnDuplicate(value)
         }
       } else {
-        _.define(value, id, frag)
+        _.def(value, id, frag)
       }
     }
     frag.raw = value

@@ -42,7 +42,7 @@ exports.set = function set (obj, key, val) {
  * @param {String} key
  */
 
-exports.delete = function (obj, key) {
+exports.del = function (obj, key) {
   if (!exports.hasOwn(obj, key)) {
     return
   }
@@ -306,7 +306,7 @@ exports.isArray = Array.isArray
  * @param {Boolean} [enumerable]
  */
 
-exports.define = function (obj, key, val, enumerable) {
+exports.def = function (obj, key, val, enumerable) {
   Object.defineProperty(obj, key, {
     value: val,
     enumerable: !!enumerable,
