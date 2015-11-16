@@ -730,19 +730,32 @@ if (_.inBrowser) {
       }
     })
 
-    it('warn v-model on alias with filters', function () {
+    it('v-model on alias with filters', function (done) {
       var vm = new Vue({
         el: el,
         template:
-          '<div v-for="item in items | orderBy \'item\'">' +
-            '<input v-model="item">' +
+          '<div v-for="item in items | filter">' +
+            '<input v-model="item">{{item}}' +
           '</div>',
         data: {
-          items: ['a', 'b']
+          items: 'a, b'
+        },
+        filters: {
+          filter: {
+            read: function (value) { return value.split(', ') },
+            write: function (value) {
+              return value.join(', ')
+            }
+          }
         }
       })
-      trigger(vm.$el.querySelector('input'), 'input')
-      expect(hasWarned(_, 'It seems you are using two-way binding')).toBe(true)
+      var input = vm.$el.querySelector('input')
+      input.value = 'c'
+      trigger(input, 'input')
+      _.nextTick(function () {
+        expect(vm.items).toBe('c, b')
+        done()
+      })
     })
 
     it('nested track by', function (done) {
