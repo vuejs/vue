@@ -1,5 +1,6 @@
-var mergeOptions = require('../../util').mergeOptions
-var uid = 0
+import { mergeOptions } from '../../util'
+
+let uid = 0
 
 export default function (Vue) {
 

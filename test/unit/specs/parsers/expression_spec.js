@@ -1,5 +1,4 @@
 var expParser = require('../../../../src/parsers/expression')
-var _ = require('../../../../src/util')
 
 var testCases = [
   {
@@ -270,25 +269,25 @@ describe('Expression Parser', function () {
   describe('invalid expression', function () {
 
     beforeEach(function () {
-      spyOn(_, 'warn')
+      spyWarns()
     })
 
     it('should warn on invalid expression', function () {
-      expect(_.warn).not.toHaveBeenCalled()
+      expect(getWarnCount()).toBe(0)
       expParser.parse('a--b"ffff')
-      expect(hasWarned(_, 'Invalid expression')).toBe(true)
+      expect(hasWarned('Invalid expression')).toBe(true)
     })
 
     it('should warn on invalid setter expression', function () {
-      expect(_.warn).not.toHaveBeenCalled()
+      expect(getWarnCount()).toBe(0)
       expParser.parse('a+b', true)
-      expect(hasWarned(_, 'Invalid setter expression')).toBe(true)
+      expect(hasWarned('Invalid setter expression')).toBe(true)
     })
 
     it('should warn if expression contains improper reserved keywords', function () {
-      expect(_.warn).not.toHaveBeenCalled()
+      expect(getWarnCount()).toBe(0)
       expParser.parse('break + 1')
-      expect(hasWarned(_, 'Avoid using reserved keywords')).toBe(true)
+      expect(hasWarned('Avoid using reserved keywords')).toBe(true)
     })
   })
 })

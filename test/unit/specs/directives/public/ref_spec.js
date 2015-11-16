@@ -6,7 +6,7 @@ describe('ref', function () {
   var el
   beforeEach(function () {
     el = document.createElement('div')
-    spyOn(_, 'warn')
+    spyWarns()
   })
 
   var components = {
@@ -128,7 +128,7 @@ describe('ref', function () {
         }
       }
     })
-    expect(_.warn).not.toHaveBeenCalled()
+    expect(getWarnCount()).toBe(0)
     expect(vm.$el.textContent).toBe('hi')
     vm.$children[0].msg = 'ho'
     _.nextTick(function () {
@@ -142,6 +142,6 @@ describe('ref', function () {
       el: el,
       template: '<div v-ref:test></div>'
     })
-    expect(hasWarned(_, 'must be used on a child component')).toBe(true)
+    expect(hasWarned('must be used on a child component')).toBe(true)
   })
 })

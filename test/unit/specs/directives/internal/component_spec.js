@@ -7,7 +7,7 @@ describe('Component', function () {
   beforeEach(function () {
     el = document.createElement('div')
     document.body.appendChild(el)
-    spyOn(_, 'warn')
+    spyWarns()
   })
 
   afterEach(function () {
@@ -61,7 +61,7 @@ describe('Component', function () {
       }
     })
     expect(el.innerHTML).toBe(vm.$options.template.replace(/<tr.*\/tr>/, '<tr><td>123</td></tr>'))
-    expect(_.warn).not.toHaveBeenCalled()
+    expect(getWarnCount()).toBe(0)
   })
 
   it('inline-template', function () {
@@ -486,7 +486,7 @@ describe('Component', function () {
     new Vue({
       el: el
     })
-    expect(hasWarned(_, 'cannot mount component "test" on already mounted element')).toBe(true)
+    expect(hasWarned('cannot mount component "test" on already mounted element')).toBe(true)
   })
 
   it('not found component should not throw', function () {

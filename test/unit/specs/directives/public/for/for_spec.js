@@ -7,7 +7,7 @@ describe('v-for', function () {
   var el
   beforeEach(function () {
     el = document.createElement('div')
-    spyOn(_, 'warn')
+    spyWarns()
     config.convertAllProperties = false
   })
 
@@ -567,7 +567,7 @@ describe('v-for', function () {
       el: el,
       template: '<div v-for="items"></div>'
     })
-    expect(hasWarned(_, 'Alias is required in v-for')).toBe(true)
+    expect(hasWarned('Alias is required in v-for')).toBe(true)
   })
 
   it('warn duplicate objects', function () {
@@ -579,7 +579,7 @@ describe('v-for', function () {
         items: [obj, obj]
       }
     })
-    expect(hasWarned(_, 'Duplicate value')).toBe(true)
+    expect(hasWarned('Duplicate value')).toBe(true)
   })
 
   it('warn duplicate objects on diff', function (done) {
@@ -591,10 +591,10 @@ describe('v-for', function () {
         items: [obj]
       }
     })
-    expect(_.warn).not.toHaveBeenCalled()
+    expect(getWarnCount()).toBe(0)
     vm.items.push(obj)
     _.nextTick(function () {
-      expect(hasWarned(_, 'Duplicate value')).toBe(true)
+      expect(hasWarned('Duplicate value')).toBe(true)
       done()
     })
   })
@@ -607,7 +607,7 @@ describe('v-for', function () {
         items: [{id: 1}, {id: 1}]
       }
     })
-    expect(hasWarned(_, 'Duplicate value')).toBe(true)
+    expect(hasWarned('Duplicate value')).toBe(true)
   })
 
   it('key val syntax with object', function (done) {
@@ -741,7 +741,7 @@ describe('v-for', function () {
       }
     })
     trigger(vm.$el.querySelector('input'), 'input')
-    expect(hasWarned(_, 'It seems you are using two-way binding')).toBe(true)
+    expect(hasWarned('It seems you are using two-way binding')).toBe(true)
   })
 
   it('nested track by', function (done) {

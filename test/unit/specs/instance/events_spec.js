@@ -7,7 +7,7 @@ describe('Instance Events', function () {
   beforeEach(function () {
     spy = jasmine.createSpy()
     spy2 = jasmine.createSpy()
-    spyOn(_, 'warn')
+    spyWarns()
   })
 
   describe('option events', function () {
@@ -47,7 +47,7 @@ describe('Instance Events', function () {
       vm.$emit('test', 123)
       expect(spy).toHaveBeenCalledWith(123)
       vm.$emit('test2')
-      expect(hasWarned(_, 'Unknown method')).toBe(true)
+      expect(hasWarned('Unknown method')).toBe(true)
     })
 
   })

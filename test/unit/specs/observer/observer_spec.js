@@ -7,7 +7,7 @@ var config = require('../../../../src/config')
 describe('Observer', function () {
 
   beforeEach(function () {
-    spyOn(_, 'warn')
+    spyWarns()
   })
 
   it('create on non-observables', function () {

@@ -4,6 +4,8 @@ var specs = glob.sync('test/unit/specs/**/*.js').map(function (f) {
   return './' + f
 })
 
+specs.unshift('./test/unit/lib/util.js')
+
 module.exports = {
   entry: specs,
   output: {

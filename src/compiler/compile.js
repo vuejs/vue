@@ -5,7 +5,7 @@ var compileProps = require('./compile-props')
 var textParser = require('../parsers/text')
 var dirParser = require('../parsers/directive')
 var templateParser = require('../parsers/template')
-var resolveAsset = _.resolveAsset
+import { resolveAsset } from '../util'
 
 // special binding prefixes
 var bindRE = /^v-bind:|^:/

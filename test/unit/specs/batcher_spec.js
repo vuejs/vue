@@ -1,4 +1,3 @@
-var _ = require('../../../src/util')
 var config = require('../../../src/config')
 var batcher = require('../../../src/batcher')
 var nextTick = require('../../../src/util').nextTick
@@ -9,7 +8,7 @@ describe('Batcher', function () {
 
   beforeEach(function () {
     spy = jasmine.createSpy('batcher')
-    spyOn(_, 'warn')
+    spyWarns()
   })
 
   it('pushWatcher', function (done) {
@@ -96,7 +95,7 @@ describe('Batcher', function () {
     batcher.pushWatcher(job)
     nextTick(function () {
       expect(count).toBe(config._maxUpdateCount + 1)
-      expect(hasWarned(_, 'infinite update loop')).toBe(true)
+      expect(hasWarned('infinite update loop')).toBe(true)
       done()
     })
   })

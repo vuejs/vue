@@ -14,7 +14,7 @@ describe('v-on', function () {
   var el
   beforeEach(function () {
     el = document.createElement('div')
-    spyOn(_, 'warn')
+    spyWarns()
   })
 
   it('methods', function () {
@@ -200,7 +200,7 @@ describe('v-on', function () {
       data: { test: 123 },
       template: '<a v-on:keyup="test"></a>'
     })
-    expect(hasWarned(_, 'expects a function value')).toBe(true)
+    expect(hasWarned('expects a function value')).toBe(true)
   })
 
   it('iframe', function () {

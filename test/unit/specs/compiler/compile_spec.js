@@ -44,7 +44,7 @@ describe('Compile', function () {
     spyOn(vm, '_bindDir').and.callThrough()
     spyOn(vm, '$eval').and.callThrough()
     spyOn(vm, '$interpolate').and.callThrough()
-    spyOn(_, 'warn')
+    spyWarns()
   })
 
   it('normal directives', function () {
@@ -263,7 +263,7 @@ describe('Compile', function () {
     expect(args[0].expression).toBe('my-component')
     expect(args[0].modifiers.literal).toBe(true)
     expect(args[0].def).toBe(internalDirectives.component)
-    expect(_.warn).not.toHaveBeenCalled()
+    expect(getWarnCount()).toBe(0)
   })
 
   it('props', function () {
@@ -316,7 +316,7 @@ describe('Compile', function () {
     expect(prop.parentPath).toBe('a')
     expect(prop.mode).toBe(bindingModes.TWO_WAY)
     // two way warn
-    expect(hasWarned(_, 'non-settable parent path')).toBe(true)
+    expect(hasWarned('non-settable parent path')).toBe(true)
   })
 
   it('props on root instance', function () {
@@ -328,7 +328,7 @@ describe('Compile', function () {
     compiler.compileAndLinkProps(vm, el, { a: null, b: null })
     expect(vm._bindDir.calls.count()).toBe(0)
     expect(vm._data.a).toBe('hi')
-    expect(hasWarned(_, 'Cannot bind dynamic prop on a root')).toBe(true)
+    expect(hasWarned('Cannot bind dynamic prop on a root')).toBe(true)
     // restore parent mock
     vm._context = context
   })
@@ -548,7 +548,7 @@ describe('Compile', function () {
       }
     })
     expect(el.innerHTML).toBe('<div></div>')
-    expect(hasWarned(_, 'attribute interpolation is not allowed in Vue.js directives')).toBe(true)
+    expect(hasWarned('attribute interpolation is not allowed in Vue.js directives')).toBe(true)
   })
 
   it('attribute interpolation: warn mixed usage with v-bind', function () {
@@ -559,7 +559,7 @@ describe('Compile', function () {
         a: 'hi'
       }
     })
-    expect(hasWarned(_, 'Do not mix mustache interpolation and v-bind')).toBe(true)
+    expect(hasWarned('Do not mix mustache interpolation and v-bind')).toBe(true)
   })
 
   it('warn directives on fragment instances', function () {
@@ -574,10 +574,10 @@ describe('Compile', function () {
         }
       }
     })
-    expect(_.warn.calls.count()).toBe(1)
+    expect(getWarnCount()).toBe(1)
     expect(
-      hasWarned(_, 'Attributes "id", "class" are ignored on component <test>', true) ||
-      hasWarned(_, 'Attributes "class", "id" are ignored on component <test>')
+      hasWarned('Attributes "id", "class" are ignored on component <test>', true) ||
+      hasWarned('Attributes "class", "id" are ignored on component <test>')
     ).toBe(true)
   })
 
@@ -595,6 +595,6 @@ describe('Compile', function () {
       components: { comp: { template: '<div></div>'}}
     })
     expect(el.textContent).toBe('worked!')
-    expect(_.warn).not.toHaveBeenCalled()
+    expect(getWarnCount()).toBe(0)
   })
 })
