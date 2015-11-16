@@ -1,4 +1,5 @@
 var Path = require('../../../../src/parsers/path')
+var _ = require('../../../../src/util')
 
 function assertPath (str, expected) {
   var path = Path.parse(str)
@@ -144,7 +145,7 @@ describe('Path Parser', function () {
     var target = Object.create(parent)
     var res = Path.set(target, 'a.b.c', 123)
     expect(res).toBe(true)
-    expect(target.hasOwnProperty('a')).toBe(false)
+    expect(_.hasOwn(target, 'a')).toBe(false)
     expect(parent.a.b.c).toBe(123)
   })
 

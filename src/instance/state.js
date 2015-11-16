@@ -54,14 +54,14 @@ exports._initData = function () {
     this._data = optionsData
     for (var prop in propsData) {
       if (process.env.NODE_ENV !== 'production' &&
-          optionsData.hasOwnProperty(prop)) {
+          _.hasOwn(optionsData, prop)) {
         _.warn(
           'Data field "' + prop + '" is already defined ' +
           'as a prop. Use prop default value instead.'
         )
       }
       if (this._props[prop].raw !== null ||
-          !optionsData.hasOwnProperty(prop)) {
+          !_.hasOwn(optionsData, prop)) {
         _.set(optionsData, prop, propsData[prop])
       }
     }
@@ -105,7 +105,7 @@ exports._setData = function (newData) {
   i = keys.length
   while (i--) {
     key = keys[i]
-    if (!this.hasOwnProperty(key)) {
+    if (!_.hasOwn(this, key)) {
       // new property
       this._proxy(key)
     }
