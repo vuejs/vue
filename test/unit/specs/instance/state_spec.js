@@ -39,7 +39,7 @@ describe('Instance state initialization', function () {
         el: document.createElement('div'),
         props: ['c']
       })
-      expect(_.hasOwnProperty(vm, 'c')).toBe(true)
+      expect(_.hasOwn(vm, 'c')).toBe(true)
     })
 
     it('should use default prop value if prop not provided', function () {
@@ -99,7 +99,7 @@ describe('Instance state initialization', function () {
       // proxy new key
       expect(vm.b).toBe(2)
       // unproxy old key that's no longer present
-      expect(_.hasOwnProperty(vm, 'a')).toBe(false)
+      expect(_.hasOwn(vm, 'a')).toBe(false)
     })
   })
 

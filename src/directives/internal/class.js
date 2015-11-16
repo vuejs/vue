@@ -67,5 +67,5 @@ function stringToObject (value) {
 function contains (value, key) {
   return _.isArray(value)
     ? value.indexOf(key) > -1
-    : _.hasOwnProperty(value, key)
+    : _.hasOwn(value, key)
 }

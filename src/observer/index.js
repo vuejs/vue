@@ -48,7 +48,7 @@ Observer.create = function (value, vm) {
   }
   var ob
   if (
-    _.hasOwnProperty(value, '__ob__') &&
+    _.hasOwn(value, '__ob__') &&
     value.__ob__ instanceof Observer
   ) {
     ob = value.__ob__

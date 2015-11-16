@@ -185,7 +185,7 @@ function makePropsLinkFn (props) {
 
 function getDefault (vm, options) {
   // no default, return undefined
-  if (!_.hasOwnProperty(options, 'default')) {
+  if (!_.hasOwn(options, 'default')) {
     // absent boolean value defaults to false
     return options.type === Boolean
       ? false
