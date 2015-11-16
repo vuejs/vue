@@ -10,7 +10,7 @@
  */
 
 exports.set = function set (obj, key, val) {
-  if (obj.hasOwnProperty(key)) {
+  if (exports.hasOwn(obj, key)) {
     obj[key] = val
     return
   }
@@ -43,7 +43,7 @@ exports.set = function set (obj, key, val) {
  */
 
 exports.delete = function (obj, key) {
-  if (!obj.hasOwnProperty(key)) {
+  if (!exports.hasOwn(obj, key)) {
     return
   }
   delete obj[key]
@@ -60,6 +60,18 @@ exports.delete = function (obj, key) {
       vm._digest()
     }
   }
+}
+
+var hasOwn = Object.prototype.hasOwnProperty
+/**
+ * Check whether the object has the property.
+ *
+ * @param {Object} obj
+ * @param {String} key
+ * @return {Boolean}
+ */
+exports.hasOwn = function (obj, key) {
+  return hasOwn.call(obj, key)
 }
 
 /**

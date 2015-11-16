@@ -25,7 +25,7 @@ function mergeData (to, from) {
   for (key in from) {
     toVal = to[key]
     fromVal = from[key]
-    if (!to.hasOwnProperty(key)) {
+    if (!_.hasOwn(to, key)) {
       _.set(to, key, fromVal)
     } else if (_.isObject(toVal) && _.isObject(fromVal)) {
       mergeData(toVal, fromVal)
@@ -326,7 +326,7 @@ exports.mergeOptions = function merge (parent, child, vm) {
     mergeField(key)
   }
   for (key in child) {
-    if (!(parent.hasOwnProperty(key))) {
+    if (!(_.hasOwn(parent, key))) {
       mergeField(key)
     }
   }
