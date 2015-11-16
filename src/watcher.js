@@ -26,7 +26,7 @@ let uid = 0
  * @constructor
  */
 
-function Watcher (vm, expOrFn, cb, options) {
+export default function Watcher (vm, expOrFn, cb, options) {
   // mix in options
   if (options) {
     extend(this, options)
@@ -333,5 +333,3 @@ function traverse (val) {
     while (i--) traverse(val[keys[i]])
   }
 }
-
-module.exports = Watcher
