@@ -1,6 +1,14 @@
-var _ = require('../util')
-var expParser = require('./expression')
-var Cache = require('../cache')
+import expParser from './expression'
+import Cache from '../cache'
+import {
+  isLiteral,
+  stripQuotes,
+  isObject,
+  isArray,
+  warn,
+  set as _set
+} from '../util'
+
 var pathCache = new Cache(1000)
 
 // actions
@@ -141,8 +149,8 @@ function formatSubPath (path) {
   if (path.charAt(0) === '0' && isNaN(path)) {
     return false
   }
-  return _.isLiteral(trimmed)
-    ? _.stripQuotes(trimmed)
+  return isLiteral(trimmed)
+    ? stripQuotes(trimmed)
     : '*' + trimmed
 }
 
@@ -251,7 +259,7 @@ function parsePath (path) {
  * @return {Array|undefined}
  */
 
-exports.parse = function (path) {
+export function parse (path) {
   var hit = pathCache.get(path)
   if (!hit) {
     hit = parsePath(path)
@@ -269,7 +277,7 @@ exports.parse = function (path) {
  * @param {String} path
  */
 
-exports.get = function (obj, path) {
+export function get (obj, path) {
   return expParser.parse(path).get(obj)
 }
 
@@ -280,7 +288,7 @@ exports.get = function (obj, path) {
 var warnNonExistent
 if (process.env.NODE_ENV !== 'production') {
   warnNonExistent = function (path) {
-    _.warn(
+    warn(
       'You are setting a non-existent path "' + path.raw + '" ' +
       'on a vm instance. Consider pre-initializing the property ' +
       'with the "data" option for more reliable reactivity ' +
@@ -297,12 +305,12 @@ if (process.env.NODE_ENV !== 'production') {
  * @param {*} val
  */
 
-exports.set = function (obj, path, val) {
+export function set (obj, path, val) {
   var original = obj
   if (typeof path === 'string') {
-    path = exports.parse(path)
+    path = parse(path)
   }
-  if (!path || !_.isObject(obj)) {
+  if (!path || !isObject(obj)) {
     return false
   }
   var last, key
@@ -314,15 +322,15 @@ exports.set = function (obj, path, val) {
     }
     if (i < l - 1) {
       obj = obj[key]
-      if (!_.isObject(obj)) {
+      if (!isObject(obj)) {
         obj = {}
         if (process.env.NODE_ENV !== 'production' && last._isVue) {
           warnNonExistent(path)
         }
-        _.set(last, key, obj)
+        _set(last, key, obj)
       }
     } else {
-      if (_.isArray(obj)) {
+      if (isArray(obj)) {
         obj.$set(key, val)
       } else if (key in obj) {
         obj[key] = val
@@ -330,7 +338,7 @@ exports.set = function (obj, path, val) {
         if (process.env.NODE_ENV !== 'production' && obj._isVue) {
           warnNonExistent(path)
         }
-        _.set(obj, key, val)
+        _set(obj, key, val)
       }
     }
   }
