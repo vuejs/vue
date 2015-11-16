@@ -16,7 +16,7 @@ module.exports = {
   },
 
   update: function (value) {
-    value = _.toString(value)
+    value = _._toString(value)
     if (this.nodes) {
       this.swap(value)
     } else {

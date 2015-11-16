@@ -114,7 +114,7 @@ module.exports = {
   },
 
   update: function (value) {
-    this.el.value = _.toString(value)
+    this.el.value = _._toString(value)
   },
 
   unbind: function () {

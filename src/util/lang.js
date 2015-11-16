@@ -106,7 +106,7 @@ exports.isReserved = function (str) {
  * @return {String}
  */
 
-exports.toString = function (value) {
+exports._toString = function (value) {
   return value == null
     ? ''
     : value.toString()

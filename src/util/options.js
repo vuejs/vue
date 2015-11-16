@@ -1,3 +1,5 @@
+import Vue from '../instance/vue'
+
 var _ = require('./index')
 var config = require('../config')
 var extend = _.extend
@@ -232,7 +234,7 @@ function guardComponents (options) {
       }
       def = components[key]
       if (_.isPlainObject(def)) {
-        components[key] = _.Vue.extend(def)
+        components[key] = Vue.extend(def)
       }
     }
   }
