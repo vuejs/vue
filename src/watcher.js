@@ -1,9 +1,10 @@
-var _ = require('./util')
-var config = require('./config')
-var Dep = require('./observer/dep')
-var expParser = require('./parsers/expression')
-var batcher = require('./batcher')
-var uid = 0
+import { extend, warn, isArray, isObject, nextTick } from './util'
+import config from './config'
+import Dep from './observer/dep'
+import expParser from './parsers/expression'
+import batcher from './batcher'
+
+let uid = 0
 
 /**
  * A watcher parses an expression, collects dependencies,
@@ -28,7 +29,7 @@ var uid = 0
 function Watcher (vm, expOrFn, cb, options) {
   // mix in options
   if (options) {
-    _.extend(this, options)
+    extend(this, options)
   }
   var isFn = typeof expOrFn === 'function'
   this.vm = vm
@@ -90,7 +91,7 @@ Watcher.prototype.get = function () {
       process.env.NODE_ENV !== 'production' &&
       config.warnExpressionErrors
     ) {
-      _.warn(
+      warn(
         'Error when evaluating expression "' +
         this.expression + '". ' +
         (config.debug
@@ -137,7 +138,7 @@ Watcher.prototype.set = function (value) {
       process.env.NODE_ENV !== 'production' &&
       config.warnExpressionErrors
     ) {
-      _.warn(
+      warn(
         'Error when evaluating setter "' +
         this.expression + '"', e
       )
@@ -147,7 +148,7 @@ Watcher.prototype.set = function (value) {
   var forContext = scope.$forContext
   if (forContext && forContext.alias === this.expression) {
     if (forContext.filters) {
-      process.env.NODE_ENV !== 'production' && _.warn(
+      process.env.NODE_ENV !== 'production' && warn(
         'It seems you are using two-way binding on ' +
         'a v-for alias (' + this.expression + '), and the ' +
         'v-for has filters. This will not work properly. ' +
@@ -236,7 +237,7 @@ Watcher.prototype.run = function () {
       // when the value is the same, because the value may
       // have mutated; but only do so if this is a
       // non-shallow update (caused by a vm digest).
-      ((_.isArray(value) || this.deep) && !this.shallow)
+      ((isArray(value) || this.deep) && !this.shallow)
     ) {
       // set new value
       var oldValue = this.value
@@ -252,7 +253,7 @@ Watcher.prototype.run = function () {
         try {
           this.cb.call(this.vm, value, oldValue)
         } catch (e) {
-          _.nextTick(function () {
+          nextTick(function () {
             throw prevError
           }, 0)
           throw e
@@ -323,10 +324,10 @@ Watcher.prototype.teardown = function () {
 
 function traverse (val) {
   var i, keys
-  if (_.isArray(val)) {
+  if (isArray(val)) {
     i = val.length
     while (i--) traverse(val[i])
-  } else if (_.isObject(val)) {
+  } else if (isObject(val)) {
     keys = Object.keys(val)
     i = keys.length
     while (i--) traverse(val[keys[i]])
