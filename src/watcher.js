@@ -143,7 +143,27 @@ Watcher.prototype.set = function (value) {
       )
     }
   }
-  scope._syncChanges(value, this.expression)
+  // two-way sync for v-for alias
+  var forContext = scope.$forContext
+  if (forContext && forContext.alias === this.expression) {
+    if (forContext.filters) {
+      process.env.NODE_ENV !== 'production' && _.warn(
+        'It seems you are using two-way binding on ' +
+        'a v-for alias (' + this.expression + '), and the ' +
+        'v-for has filters. This will not work properly. ' +
+        'Either remove the filters or use an array of ' +
+        'objects and bind to object properties instead.'
+      )
+      return
+    }
+    forContext._withLock(function () {
+      if (scope.$key) { // original is an object
+        forContext.rawValue[scope.$key] = value
+      } else {
+        forContext.rawValue.$set(scope.$index, value)
+      }
+    })
+  }
 }
 
 /**
