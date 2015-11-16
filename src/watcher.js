@@ -2,7 +2,7 @@ import { extend, warn, isArray, isObject, nextTick } from './util'
 import config from './config'
 import Dep from './observer/dep'
 import expParser from './parsers/expression'
-import batcher from './batcher'
+import { pushWatcher } from './batcher'
 
 let uid = 0
 
@@ -219,7 +219,7 @@ Watcher.prototype.update = function (shallow) {
     if (process.env.NODE_ENV !== 'production' && config.debug) {
       this.prevError = new Error('[vue] async stack trace')
     }
-    batcher.push(this)
+    pushWatcher(this)
   }
 }
 
