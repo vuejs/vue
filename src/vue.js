@@ -5,7 +5,7 @@ var extend = _.extend
  * The exposed Vue constructor.
  *
  * API conventions:
- * - public API methods/properties are prefiexed with `$`
+ * - public API methods/properties are prefixed with `$`
  * - internal methods/properties are prefixed with `_`
  * - non-prefixed properties are assumed to be proxied user
  *   data.
