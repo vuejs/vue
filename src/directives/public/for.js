@@ -485,6 +485,7 @@ module.exports = {
    */
 
   _postProcess: function (value) {
+    this.processedValue = value
     if (_.isArray(value)) {
       return value
     } else if (_.isPlainObject(value)) {
@@ -522,9 +523,25 @@ module.exports = {
         frag.destroy()
       }
     }
+  },
+
+  _syncChanges: function (scope, value) {
+    // two-way sync for v-for alias
+    var subjectValue = this.filters ? this.processedValue
+      : this.rawValue
+    if (scope.$key) { // original is an object
+      subjectValue[scope.$key] = value
+    } else {
+      subjectValue.$set(scope.$index, value)
+    }
+    if (this.filters) {
+      var vm = this._scope || this.vm
+      var reverseValue = vm._applyFilters(subjectValue,
+        subjectValue, this.filters, true)
+      vm.$set(this.expression, reverseValue)
+    }
   }
 }
-
 /**
  * Helper to find the previous element that is a fragment
  * anchor. This is necessary because a destroyed frag's
