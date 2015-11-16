@@ -73,7 +73,7 @@ export default function (Vue) {
         var cbs = factory.pendingCallbacks = [cb]
         factory(function resolve (res) {
           if (_.isPlainObject(res)) {
-            res = _.Vue.extend(res)
+            res = Vue.extend(res)
           }
           // cache resolved
           factory.resolved = res

@@ -123,7 +123,6 @@ export default function (Vue) {
    */
 
   Vue.mixin = function (mixin) {
-    var Vue = _.Vue
     Vue.options = _.mergeOptions(Vue.options, mixin)
   }
 
@@ -154,7 +153,7 @@ export default function (Vue) {
           _.isPlainObject(definition)
         ) {
           definition.name = id
-          definition = _.Vue.extend(definition)
+          definition = Vue.extend(definition)
         }
         this.options[type + 's'][id] = definition
         return definition
