@@ -1,5 +1,5 @@
 var _ = require('../util')
-var config = require('../config')
+import config from '../config'
 var Dep = require('./dep')
 var arrayMethods = require('./array')
 var arrayKeys = Object.getOwnPropertyNames(arrayMethods)

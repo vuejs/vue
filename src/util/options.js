@@ -1,7 +1,7 @@
 import Vue from '../instance/vue'
 
 var _ = require('./index')
-var config = require('../config')
+import config from '../config'
 var extend = _.extend
 
 /**

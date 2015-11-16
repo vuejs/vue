@@ -1,5 +1,5 @@
 var _ = require('./index')
-var config = require('../config')
+import config from '../config'
 var transition = require('../transition')
 
 /**

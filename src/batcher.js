@@ -1,5 +1,5 @@
 var _ = require('./util')
-var config = require('./config')
+import config from './config'
 
 // we have two separate queues: one for directive updates
 // and one for user watcher registered via $watch().

@@ -1,5 +1,5 @@
 var Cache = require('../cache')
-var config = require('../config')
+import config from '../config'
 var dirParser = require('./directive')
 var regexEscapeRE = /[-.*+?^${}()|[\]\/\\]/g
 var cache, tagRE, htmlRE

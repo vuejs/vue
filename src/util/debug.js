@@ -4,7 +4,7 @@
 
 if (process.env.NODE_ENV !== 'production') {
 
-  var config = require('../config')
+  import config from '../config'
   var hasConsole = typeof console !== 'undefined'
 
   /**

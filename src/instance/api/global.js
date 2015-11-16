@@ -1,5 +1,5 @@
 var _ = require('../../util')
-var config = require('../../config')
+import config from '../../config'
 
 export default function (Vue) {
 
