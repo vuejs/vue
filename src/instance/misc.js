@@ -39,6 +39,14 @@ exports._applyFilters = function (value, oldValue, filters, write) {
   return value
 }
 
+exports._syncChanges = function (value, expression) {
+  // two-way sync for v-for alias
+  var forContext = this.$forContext
+  if (forContext && forContext.alias === expression) {
+    forContext._syncChanges(this, value)
+  }
+}
+
 /**
  * Resolve a component, depending on whether the component
  * is defined normally or using an async factory function.
