@@ -1,8 +1,8 @@
-var Cache = require('../cache')
+import Cache from '../cache'
 import config from '../config'
-var dirParser = require('./directive')
-var regexEscapeRE = /[-.*+?^${}()|[\]\/\\]/g
-var cache, tagRE, htmlRE
+import dirParser from './directive'
+const regexEscapeRE = /[-.*+?^${}()|[\]\/\\]/g
+let cache, tagRE, htmlRE
 
 /**
  * Escape a string so it can be used in a RegExp
@@ -15,7 +15,7 @@ function escapeRegex (str) {
   return str.replace(regexEscapeRE, '\\$&')
 }
 
-exports.compileRegex = function () {
+export function compileRegex () {
   var open = escapeRegex(config.delimiters[0])
   var close = escapeRegex(config.delimiters[1])
   var unsafeOpen = escapeRegex(config.unsafeDelimiters[0])
@@ -43,9 +43,9 @@ exports.compileRegex = function () {
  *               - {Boolean} [oneTime]
  */
 
-exports.parse = function (text) {
+export function parse (text) {
   if (!cache) {
-    exports.compileRegex()
+    compileRegex()
   }
   var hit = cache.get(text)
   if (hit) {
@@ -102,7 +102,7 @@ exports.parse = function (text) {
  * @return {String}
  */
 
-exports.tokensToExp = function (tokens) {
+export function tokensToExp (tokens) {
   if (tokens.length > 1) {
     return tokens.map(function (token) {
       return formatToken(token)

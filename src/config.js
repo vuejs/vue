@@ -1,4 +1,4 @@
-import textParser from './parsers/text'
+import { compileRegex } from './parsers/text'
 
 let delimiters = ['{{', '}}']
 let unsafeDelimiters = ['{{{', '}}}']
@@ -96,7 +96,7 @@ const config = {
 
   set delimiters (val) {
     delimiters = val
-    textParser.compileRegex()
+    compileRegex()
   },
 
   get unsafeDelimiters () {
@@ -105,7 +105,7 @@ const config = {
 
   set unsafeDelimiters (val) {
     unsafeDelimiters = val
-    textParser.compileRegex()
+    compileRegex()
   }
 }
 
