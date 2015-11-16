@@ -1,4 +1,4 @@
-import queue from './queue'
+import { pushJob } from './queue'
 import {
   on,
   off,
@@ -91,7 +91,7 @@ p.enter = function (op, cb) {
     return // user called done synchronously.
   }
   this.cancel = this.hooks && this.hooks.enterCancelled
-  queue.push(this.enterNextTick)
+  pushJob(this.enterNextTick)
 }
 
 /**
@@ -188,7 +188,7 @@ p.leave = function (op, cb) {
     if (this.justEntered) {
       this.leaveDone()
     } else {
-      queue.push(this.leaveNextTick)
+      pushJob(this.leaveNextTick)
     }
   }
 }
