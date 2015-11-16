@@ -39,11 +39,11 @@ exports._applyFilters = function (value, oldValue, filters, write) {
   return value
 }
 
-exports._bubbleChanges = function (value, expression) {
+exports._syncChanges = function (value, expression) {
   // two-way sync for v-for alias
   var forContext = this.$forContext
   if (forContext && forContext.alias === expression) {
-    forContext._bubbleChanges(this, value)
+    forContext._syncChanges(this, value)
   }
 }
 

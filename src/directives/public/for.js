@@ -516,7 +516,7 @@ module.exports = {
     }
   },
 
-  _bubbleChanges: function (scope, value) {
+  _syncChanges: function (scope, value) {
     // two-way sync for v-for alias
     var subjectValue = this.filters ? this.processedValue
       : this.rawValue

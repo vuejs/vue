@@ -143,7 +143,7 @@ Watcher.prototype.set = function (value) {
       )
     }
   }
-  scope._bubbleChanges(value, this.expression)
+  scope._syncChanges(value, this.expression)
 }
 
 /**
