@@ -19,7 +19,7 @@
   "scripts": {
     "test": "grunt ci",
     "install-hook": "ln -s ../../build/git-hooks/pre-commit .git/hooks/pre-commit",
-    "dev": "webpack --watch --config build/webpack.dev.config.js & webpack --watch --config build/webpack.test.config.js"
+    "dev": "webpack --watch --config build/webpack.dev.config.js"
   },
   "dependencies": {
     "envify": "^3.4.0"
@@ -30,9 +30,8 @@
     ]
   },
   "devDependencies": {
-    "babel-core": "^6.1.21",
-    "babel-loader": "^6.1.0",
-    "babel-preset-es2015": "^6.1.18",
+    "babel-core": "^5.0.0",
+    "babel-loader": "^5.0.0",
     "casperjs": "^1.1.0-beta3",
     "codecov.io": "^0.1.2",
     "eslint": "^1.3.1",
