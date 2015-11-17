@@ -1,7 +1,7 @@
 import Vue from './instance/vue'
 import directives from './directives/public'
 import elementDirectives from './directives/element'
-import * as filters from './filters'
+import filters from './filters'
 import { inBrowser } from './util'
 
 Vue.version = '1.0.8'

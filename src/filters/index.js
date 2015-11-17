@@ -1,5 +1,12 @@
 import { toArray, debounce as _debounce } from '../util'
-export * from './array-filters'
+import { orderBy, filterBy, limitBy } from './array-filters'
+
+// asset collections must be a plain object.
+const exports = {
+  orderBy,
+  filterBy,
+  limitBy
+}
 
 /**
  * Stringify value.
@@ -7,7 +14,7 @@ export * from './array-filters'
  * @param {Number} indent
  */
 
-export const json = {
+exports.json = {
   read: function (value, indent) {
     return typeof value === 'string'
       ? value
@@ -26,7 +33,7 @@ export const json = {
  * 'abc' => 'Abc'
  */
 
-export function capitalize (value) {
+exports.capitalize = function (value) {
   if (!value && value !== 0) return ''
   value = value.toString()
   return value.charAt(0).toUpperCase() + value.slice(1)
@@ -36,7 +43,7 @@ export function capitalize (value) {
  * 'abc' => 'ABC'
  */
 
-export function uppercase (value) {
+exports.uppercase = function (value) {
   return (value || value === 0)
     ? value.toString().toUpperCase()
     : ''
@@ -46,7 +53,7 @@ export function uppercase (value) {
  * 'AbC' => 'abc'
  */
 
-export function lowercase (value) {
+exports.lowercase = function (value) {
   return (value || value === 0)
     ? value.toString().toLowerCase()
     : ''
@@ -59,7 +66,7 @@ export function lowercase (value) {
  */
 
 var digitsRE = /(\d{3})(?=\d)/g
-export function currency (value, currency) {
+exports.currency = function (value, currency) {
   value = parseFloat(value)
   if (!isFinite(value) || (!value && value !== 0)) return ''
   currency = currency != null ? currency : '$'
@@ -89,7 +96,7 @@ export function currency (value, currency) {
  *  e.g. ['single', 'double', 'triple', 'multiple']
  */
 
-export function pluralize (value) {
+exports.pluralize = function (value) {
   var args = toArray(arguments, 1)
   return args.length > 1
     ? (args[value % 10 - 1] || args[args.length - 1])
@@ -104,10 +111,12 @@ export function pluralize (value) {
  * @return {Function}
  */
 
-export function debounce (handler, delay) {
+exports.debounce = function (handler, delay) {
   if (!handler) return
   if (!delay) {
     delay = 300
   }
   return _debounce(handler, delay)
 }
+
+export default exports
