@@ -1,6 +1,6 @@
 import FragmentFactory from '../../fragment/factory'
 import {
-  attr,
+  getAttr,
   remove,
   replace,
   createAnchor,
@@ -16,7 +16,7 @@ export default {
     if (!el.__vue__) {
       // check else block
       var next = el.nextElementSibling
-      if (next && attr(next, 'v-else') !== null) {
+      if (next && getAttr(next, 'v-else') !== null) {
         remove(next)
         this.elseFactory = new FragmentFactory(this.vm, next)
       }

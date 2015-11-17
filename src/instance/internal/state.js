@@ -1,5 +1,5 @@
 import Watcher from '../../watcher'
-var compiler = require('../../compiler')
+import { compileAndLinkProps } from '../../compiler'
 
 import {
   observe,
@@ -52,7 +52,7 @@ export default function (Vue) {
     el = options.el = query(el)
     this._propsUnlinkFn = el && el.nodeType === 1 && props
       // props must be linked in proper scope if inside v-for
-      ? compiler.compileAndLinkProps(this, el, props, this._scope)
+      ? compileAndLinkProps(this, el, props, this._scope)
       : null
   }
 

@@ -50,7 +50,7 @@ export function inDoc (node) {
  * @param {String} _attr
  */
 
-export function attr (node, _attr) {
+export function getAttr (node, _attr) {
   var val = node.getAttribute(_attr)
   if (val !== null) {
     node.removeAttribute(_attr)
@@ -67,9 +67,9 @@ export function attr (node, _attr) {
  */
 
 export function getBindAttr (node, name) {
-  var val = attr(node, ':' + name)
+  var val = getAttr(node, ':' + name)
   if (val === null) {
-    val = attr(node, 'v-bind:' + name)
+    val = getAttr(node, 'v-bind:' + name)
   }
   return val
 }

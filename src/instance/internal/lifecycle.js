@@ -1,6 +1,6 @@
 import { replace } from '../../util'
 import Directive from '../../directive'
-var compiler = require('../../compiler')
+import { compile, compileRoot, transclude } from '../../compiler'
 
 export default function (Vue) {
 
@@ -46,13 +46,13 @@ export default function (Vue) {
     // the template and caches the original attributes
     // on the container node and replacer node.
     var original = el
-    el = compiler.transclude(el, options)
+    el = transclude(el, options)
     this._initElement(el)
 
     // root is always compiled per-instance, because
     // container attrs and props can be different every time.
     var contextOptions = this._context && this._context.$options
-    var rootLinker = compiler.compileRoot(el, options, contextOptions)
+    var rootLinker = compileRoot(el, options, contextOptions)
 
     // compile and link the rest
     var contentLinkFn
@@ -62,7 +62,7 @@ export default function (Vue) {
     if (options._linkerCachable) {
       contentLinkFn = ctor.linker
       if (!contentLinkFn) {
-        contentLinkFn = ctor.linker = compiler.compile(el, options)
+        contentLinkFn = ctor.linker = compile(el, options)
       }
     }
 
@@ -71,7 +71,7 @@ export default function (Vue) {
     var rootUnlinkFn = rootLinker(this, el, this._scope)
     var contentUnlinkFn = contentLinkFn
       ? contentLinkFn(this, el)
-      : compiler.compile(el, options)(this, el)
+      : compile(el, options)(this, el)
 
     // register composite unlink function
     // to be called during instance destruction

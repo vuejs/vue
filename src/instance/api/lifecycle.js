@@ -1,5 +1,5 @@
 import { warn, query, inDoc } from '../../util'
-var compiler = require('../../compiler')
+import { compile } from '../../compiler'
 
 export default function (Vue) {
 
@@ -64,7 +64,7 @@ export default function (Vue) {
    */
 
   Vue.prototype.$compile = function (el, host, scope, frag) {
-    return compiler.compile(el, this.$options, true)(
+    return compile(el, this.$options, true)(
       this, el, host, scope, frag
     )
   }

@@ -1,4 +1,4 @@
-var compiler = require('../compiler')
+import { compile } from '../compiler'
 import { isTemplate } from '../util'
 import { parseTemplate, cloneNode } from '../parsers/template'
 import Fragment from './fragment'
@@ -32,11 +32,11 @@ export default function FragmentFactory (vm, el) {
     var cacheId = cid + (isString ? el : el.outerHTML)
     linker = linkerCache.get(cacheId)
     if (!linker) {
-      linker = compiler.compile(template, vm.$options, true)
+      linker = compile(template, vm.$options, true)
       linkerCache.put(cacheId, linker)
     }
   } else {
-    linker = compiler.compile(template, vm.$options, true)
+    linker = compile(template, vm.$options, true)
   }
   this.linker = linker
 }

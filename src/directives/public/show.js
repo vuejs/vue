@@ -1,4 +1,4 @@
-import { attr } from '../../util'
+import { getAttr } from '../../util'
 import { applyTransition } from '../../transition'
 
 export default {
@@ -6,7 +6,7 @@ export default {
   bind () {
     // check else block
     var next = this.el.nextElementSibling
-    if (next && attr(next, 'v-else') !== null) {
+    if (next && getAttr(next, 'v-else') !== null) {
       this.elseEl = next
     }
   },

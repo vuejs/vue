@@ -24,7 +24,7 @@ const specialCharRE = /[^\w\-:\.]/
  * @return {Element|DocumentFragment}
  */
 
-exports.transclude = function (el, options) {
+export function transclude (el, options) {
   // extract container attributes to pass them down
   // to compiler, because they need to be compiled in
   // parent scope. we are mutating the options object here

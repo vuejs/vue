@@ -23,9 +23,9 @@ describe('Util - DOM', function () {
     expect(_.inDoc(target)).toBe(false)
   })
 
-  it('attr', function () {
+  it('getAttr', function () {
     target.setAttribute('v-test', 'ok')
-    var val = _.attr(target, 'v-test')
+    var val = _.getAttr(target, 'v-test')
     expect(val).toBe('ok')
     expect(target.hasAttribute('v-test')).toBe(false)
   })

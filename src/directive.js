@@ -3,7 +3,7 @@ import {
   bind,
   on,
   off,
-  attr,
+  getAttr,
   getBindAttr,
   camelize,
   nextTick,
@@ -173,7 +173,7 @@ Directive.prototype._setupParams = function () {
       this._setupParamWatcher(mappedKey, val)
     } else {
       // static
-      val = attr(this.el, key)
+      val = getAttr(this.el, key)
       if (val != null) {
         this.params[mappedKey] = val === '' ? true : val
       }
