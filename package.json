@@ -21,9 +21,12 @@
     "install-hook": "ln -s ../../build/git-hooks/pre-commit .git/hooks/pre-commit",
     "dev": "webpack --watch --config build/webpack.dev.config.js & npm run serve-test",
     "serve-test": "webpack-dev-server --config build/webpack.test.config.js",
-    "cover": "./node_modules/karma/bin/karma start build/karma.coverage.config.js",
     "lint": "eslint src/** test/e2e/** test/unit/specs/** build/**",
-    "e2e": "casperjs test --concise ./test/e2e"
+    "e2e": "casperjs test --concise ./test/e2e",
+    "unit": "karma start build/karma.unit.config.js",
+    "cover": "karma start build/karma.cover.config.js",
+    "sauce": "karma start build/karma.sauce.config.js",
+    "sauce-all": "npm run sauce && npm run sauce -- 1 && npm run sauce -- 2"
   },
   "dependencies": {
     "envify": "^3.4.0"
@@ -36,6 +39,7 @@
   "devDependencies": {
     "babel-core": "^5.0.0",
     "babel-loader": "^5.0.0",
+    "babel-runtime": "^6.1.18",
     "casperjs": "^1.1.0-beta3",
     "codecov.io": "^0.1.2",
     "eslint": "^1.3.1",
@@ -55,10 +59,12 @@
     "karma-safari-launcher": "^0.1.1",
     "karma-sauce-launcher": "^0.3.0",
     "karma-webpack": "^1.7.0",
+    "object-assign": "^4.0.1",
     "phantomjs": "^1.9.17",
     "semver": "^5.0.1",
     "shell-task": "^1.0.0",
     "uglify-js": "^2.4.24",
-    "webpack": "^1.11.0"
+    "webpack": "^1.12.2",
+    "webpack-dev-server": "^1.12.1"
   }
 }
