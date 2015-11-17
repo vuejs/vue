@@ -75,10 +75,10 @@ function getIsBinding (el) {
  */
 
 export function initProp (vm, prop, value) {
-  if (assertProp(prop, value)) {
-    var key = prop.path
-    vm[key] = vm._data[key] = value
-  }
+  const key = prop.path
+  vm[key] = vm._data[key] = assertProp(prop, value)
+    ? value
+    : undefined
 }
 
 /**
