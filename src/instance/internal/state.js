@@ -1,7 +1,20 @@
-var _ = require('../../util')
-var compiler = require('../../compiler')
-import { observe, Dep } from '../../observer'
 import Watcher from '../../watcher'
+var compiler = require('../../compiler')
+
+import {
+  observe,
+  defineReactive,
+  Dep
+} from '../../observer'
+
+import {
+  warn,
+  query,
+  hasOwn,
+  set,
+  isReserved,
+  bind
+} from '../../util'
 
 export default function (Vue) {
 
@@ -30,13 +43,13 @@ export default function (Vue) {
     var el = options.el
     var props = options.props
     if (props && !el) {
-      process.env.NODE_ENV !== 'production' && _.warn(
+      process.env.NODE_ENV !== 'production' && warn(
         'Props will not be compiled if no `el` option is ' +
         'provided at instantiation.'
       )
     }
     // make sure to convert string selectors into element now
-    el = options.el = _.query(el)
+    el = options.el = query(el)
     this._propsUnlinkFn = el && el.nodeType === 1 && props
       // props must be linked in proper scope if inside v-for
       ? compiler.compileAndLinkProps(this, el, props, this._scope)
@@ -55,15 +68,15 @@ export default function (Vue) {
       this._data = optionsData
       for (var prop in propsData) {
         if (process.env.NODE_ENV !== 'production' &&
-            _.hasOwn(optionsData, prop)) {
-          _.warn(
+            hasOwn(optionsData, prop)) {
+          warn(
             'Data field "' + prop + '" is already defined ' +
             'as a prop. Use prop default value instead.'
           )
         }
         if (this._props[prop].raw !== null ||
-            !_.hasOwn(optionsData, prop)) {
-          _.set(optionsData, prop, propsData[prop])
+            !hasOwn(optionsData, prop)) {
+          set(optionsData, prop, propsData[prop])
         }
       }
     }
@@ -106,7 +119,7 @@ export default function (Vue) {
     i = keys.length
     while (i--) {
       key = keys[i]
-      if (!_.hasOwn(this, key)) {
+      if (!hasOwn(this, key)) {
         // new property
         this._proxy(key)
       }
@@ -124,7 +137,7 @@ export default function (Vue) {
    */
 
   Vue.prototype._proxy = function (key) {
-    if (!_.isReserved(key)) {
+    if (!isReserved(key)) {
       // need to store ref to self here
       // because these getter/setters might
       // be called by child scopes via
@@ -150,7 +163,7 @@ export default function (Vue) {
    */
 
   Vue.prototype._unproxy = function (key) {
-    if (!_.isReserved(key)) {
+    if (!isReserved(key)) {
       delete this[key]
     }
   }
@@ -187,10 +200,10 @@ export default function (Vue) {
           def.get = userDef.get
             ? userDef.cache !== false
               ? makeComputedGetter(userDef.get, this)
-              : _.bind(userDef.get, this)
+              : bind(userDef.get, this)
             : noop
           def.set = userDef.set
-            ? _.bind(userDef.set, this)
+            ? bind(userDef.set, this)
             : noop
         }
         Object.defineProperty(this, key, def)
@@ -223,7 +236,7 @@ export default function (Vue) {
     var methods = this.$options.methods
     if (methods) {
       for (var key in methods) {
-        this[key] = _.bind(methods[key], this)
+        this[key] = bind(methods[key], this)
       }
     }
   }
@@ -236,7 +249,7 @@ export default function (Vue) {
     var metas = this.$options._meta
     if (metas) {
       for (var key in metas) {
-        _.defineReactive(this, key, metas[key])
+        defineReactive(this, key, metas[key])
       }
     }
   }

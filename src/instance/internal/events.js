@@ -1,6 +1,10 @@
-var _ = require('../../util')
-var inDoc = _.inDoc
-var eventRE = /^v-on:|^@/
+import {
+  inDoc,
+  isArray,
+  warn
+} from '../../util'
+
+const eventRE = /^v-on:|^@/
 
 export default function (Vue) {
 
@@ -52,7 +56,7 @@ export default function (Vue) {
     var handlers, key, i, j
     for (key in hash) {
       handlers = hash[key]
-      if (_.isArray(handlers)) {
+      if (isArray(handlers)) {
         for (i = 0, j = handlers.length; i < j; i++) {
           register(vm, action, key, handlers[i])
         }
@@ -82,7 +86,7 @@ export default function (Vue) {
       if (method) {
         vm[action](key, method, options)
       } else {
-        process.env.NODE_ENV !== 'production' && _.warn(
+        process.env.NODE_ENV !== 'production' && warn(
           'Unknown method: "' + handler + '" when ' +
           'registering callback for ' + action +
           ': "' + key + '".'

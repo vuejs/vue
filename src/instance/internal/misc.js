@@ -1,4 +1,9 @@
-var _ = require('../../util')
+import {
+  resolveAsset,
+  assertAsset,
+  isPlainObject,
+  warn
+} from '../../util'
 
 export default function (Vue) {
 
@@ -19,9 +24,9 @@ export default function (Vue) {
     var filter, fn, args, arg, offset, i, l, j, k
     for (i = 0, l = filters.length; i < l; i++) {
       filter = filters[i]
-      fn = _.resolveAsset(this.$options, 'filters', filter.name)
+      fn = resolveAsset(this.$options, 'filters', filter.name)
       if (process.env.NODE_ENV !== 'production') {
-        _.assertAsset(fn, 'filter', filter.name)
+        assertAsset(fn, 'filter', filter.name)
       }
       if (!fn) continue
       fn = write ? fn.write : (fn.read || fn)
@@ -53,9 +58,9 @@ export default function (Vue) {
    */
 
   Vue.prototype._resolveComponent = function (id, cb) {
-    var factory = _.resolveAsset(this.$options, 'components', id)
+    var factory = resolveAsset(this.$options, 'components', id)
     if (process.env.NODE_ENV !== 'production') {
-      _.assertAsset(factory, 'component', id)
+      assertAsset(factory, 'component', id)
     }
     if (!factory) {
       return
@@ -72,7 +77,7 @@ export default function (Vue) {
         factory.requested = true
         var cbs = factory.pendingCallbacks = [cb]
         factory(function resolve (res) {
-          if (_.isPlainObject(res)) {
+          if (isPlainObject(res)) {
             res = Vue.extend(res)
           }
           // cache resolved
@@ -82,7 +87,7 @@ export default function (Vue) {
             cbs[i](res)
           }
         }, function reject (reason) {
-          process.env.NODE_ENV !== 'production' && _.warn(
+          process.env.NODE_ENV !== 'production' && warn(
             'Failed to resolve async component: ' + id + '. ' +
             (reason ? '\nReason: ' + reason : '')
           )

@@ -1,5 +1,5 @@
-var _ = require('../../util')
-var Directive = require('../../directive')
+import { replace } from '../../util'
+import Directive from '../../directive'
 var compiler = require('../../compiler')
 
 export default function (Vue) {
@@ -84,7 +84,7 @@ export default function (Vue) {
 
     // finally replace original
     if (options.replace) {
-      _.replace(original, el)
+      replace(original, el)
     }
 
     this._isCompiled = true
