@@ -1,7 +1,7 @@
 casper.test.begin('markdown', 5, function (test) {
 
   casper
-  .start('../../examples/markdown/index.html')
+  .start('examples/markdown/index.html')
   .then(function () {
     test.assertEval(function () {
       return document.querySelector('textarea').value === '# hello'

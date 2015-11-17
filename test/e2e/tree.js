@@ -1,7 +1,7 @@
 casper.test.begin('tree', 22, function (test) {
 
   casper
-  .start('../../examples/tree/index.html')
+  .start('examples/tree/index.html')
   .then(function () {
     test.assertElementCount('.item', 12)
     test.assertElementCount('.item > ul', 4)

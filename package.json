@@ -22,7 +22,8 @@
     "dev": "webpack --watch --config build/webpack.dev.config.js & npm run serve-test",
     "serve-test": "webpack-dev-server --config build/webpack.test.config.js",
     "cover": "./node_modules/karma/bin/karma start build/karma.coverage.config.js",
-    "lint": "eslint src/** test/e2e/** test/unit/specs/** build/**"
+    "lint": "eslint src/** test/e2e/** test/unit/specs/** build/**",
+    "e2e": "casperjs test --concise ./test/e2e"
   },
   "dependencies": {
     "envify": "^3.4.0"

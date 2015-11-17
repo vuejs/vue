@@ -3,7 +3,7 @@
 casper.test.begin('svg', 18, function (test) {
 
   casper
-  .start('../../examples/svg/index.html')
+  .start('examples/svg/index.html')
   .then(function () {
     test.assertElementCount('g', 1)
     test.assertElementCount('polygon', 1)
