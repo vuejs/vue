@@ -33,13 +33,3 @@ export function warn (msg, e) {
     }
   }
 }
-
-/**
- * Assert asset exists
- */
-
-export function assertAsset (val, type, id) {
-  if (!val) {
-    exports.warn('Failed to resolve ' + type + ': ' + id)
-  }
-}

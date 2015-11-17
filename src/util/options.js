@@ -367,3 +367,13 @@ export function resolveAsset (options, type, id) {
     // Pascal Case ID
     assets[camelizedId.charAt(0).toUpperCase() + camelizedId.slice(1)]
 }
+
+/**
+ * Assert asset exists
+ */
+
+export function assertAsset (val, type, id) {
+  if (!val) {
+    warn('Failed to resolve ' + type + ': ' + id)
+  }
+}

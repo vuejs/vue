@@ -1,5 +1,3 @@
-import config from '../../config'
-import * as util from '../../util'
 import {
   set,
   del,
@@ -11,6 +9,17 @@ import {
   warn,
   isPlainObject
 } from '../../util'
+
+import config from '../../config'
+import * as util from '../../util'
+import * as compiler from '../../compiler'
+import * as path from '../../parsers/path'
+import * as text from '../../parsers/text'
+import * as template from '../../parsers/template'
+import * as directive from '../../parsers/directive'
+import * as expression from '../../parsers/expression'
+import FragmentFactory from '../../fragment/factory'
+import internalDirectives from '../../directives/internal'
 
 export default function (Vue) {
 
@@ -28,15 +37,15 @@ export default function (Vue) {
    * The following are exposed for advanced usage / plugins
    */
 
-  Vue.compiler = require('../../compiler')
-  Vue.FragmentFactory = require('../../fragment/factory')
-  Vue.internalDirectives = require('../../directives/internal')
+  Vue.compiler = compiler
+  Vue.FragmentFactory = FragmentFactory
+  Vue.internalDirectives = internalDirectives
   Vue.parsers = {
-    path: require('../../parsers/path'),
-    text: require('../../parsers/text'),
-    template: require('../../parsers/template'),
-    directive: require('../../parsers/directive'),
-    expression: require('../../parsers/expression')
+    path,
+    text,
+    template,
+    directive,
+    expression
   }
 
   /**
