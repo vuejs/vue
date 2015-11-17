@@ -9,7 +9,7 @@
     "browser",
     "framework"
   ],
-  "main": "src/vue.js",
+  "main": "dist/vue.common.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/vuejs/vue.git"
