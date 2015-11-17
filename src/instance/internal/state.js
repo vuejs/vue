@@ -1,7 +1,6 @@
 var _ = require('../../util')
 var compiler = require('../../compiler')
-import { observe } from '../../observer'
-import Dep from '../../observer/dep'
+import { observe, Dep } from '../../observer'
 import Watcher from '../../watcher'
 
 export default function (Vue) {

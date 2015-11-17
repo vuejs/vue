@@ -21,7 +21,7 @@ const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
  * @constructor
  */
 
-export function Observer (value) {
+function Observer (value) {
   this.value = value
   this.dep = new Dep()
   def(value, '__ob__', this)
@@ -225,3 +225,5 @@ export function defineReactive (obj, key, val) {
     }
   })
 }
+
+export { Dep, Observer }
