@@ -1,9 +1,7 @@
-var _ = require('../../../src/util')
-var __ = require('../../../src/util/debug')
-
-var scope = typeof window === 'undefined'
-  ? global
-  : window
+// set some global Vue options
+var Vue = require('../../../src/index')
+Vue.options.replace = false
+Vue.config.silent = true
 
 /**
  * Because Vue's internal modules reference the warn function
@@ -11,6 +9,12 @@ var scope = typeof window === 'undefined'
  * we need to normalize the warn check into a few global
  * utility functions.
  */
+
+var _ = require('../../../src/util')
+var __ = require('../../../src/util/debug')
+var scope = typeof window === 'undefined'
+  ? global
+  : window
 
 scope.spyWarns = function () {
   spyOn(_, 'warn')
@@ -53,3 +57,7 @@ scope.process = {
     NODE_ENV: 'development'
   }
 }
+
+// require all test files
+var testsContext = require.context('.', true, /_spec$/)
+testsContext.keys().forEach(testsContext)

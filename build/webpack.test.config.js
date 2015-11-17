@@ -1,13 +1,7 @@
 var webpack = require('webpack')
-var glob = require('grunt/node_modules/glob')
-var specs = glob.sync('test/unit/specs/**/*.js').map(function (f) {
-  return './' + f
-})
-
-specs.unshift('./test/unit/lib/util.js')
 
 module.exports = {
-  entry: specs,
+  entry: './test/unit/specs/index.js',
   output: {
     path: './test/unit',
     filename: 'specs.js'
@@ -27,5 +21,8 @@ module.exports = {
       }
     })
   ],
+  devServer: {
+    contentBase: './test/unit'
+  },
   devtool: '#source-map'
 }
