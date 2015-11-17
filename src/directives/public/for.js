@@ -14,7 +14,7 @@ import {
   cancellable,
   isArray,
   isPlainObject
-} from '../../util'
+} from '../../util/index'
 
 let uid = 0
 

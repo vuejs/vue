@@ -1,4 +1,4 @@
-import { toArray } from '../util'
+import { toArray } from '../util/index'
 
 let uid = 0
 

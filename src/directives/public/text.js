@@ -1,4 +1,4 @@
-import { _toString } from '../../util'
+import { _toString } from '../../util/index'
 
 export default {
 

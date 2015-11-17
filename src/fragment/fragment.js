@@ -5,12 +5,12 @@ import {
   inDoc,
   mapNodeRange,
   removeNodeRange
-} from '../util'
+} from '../util/index'
 
 import {
   beforeWithTransition,
   removeWithTransition
-} from '../transition'
+} from '../transition/index'
 
 /**
  * Abstraction for a partially-compiled fragment.

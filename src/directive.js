@@ -8,7 +8,7 @@ import {
   camelize,
   nextTick,
   warn
-} from './util'
+} from './util/index'
 import Watcher from './watcher'
 import { parseExpression, isSimplePath } from './parsers/expression'
 

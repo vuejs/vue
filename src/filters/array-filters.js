@@ -1,5 +1,5 @@
 import { getPath } from '../parsers/path'
-import { toArray, isArray, isObject, isPlainObject } from '../util'
+import { toArray, isArray, isObject, isPlainObject } from '../util/index'
 import vFor from '../directives/public/for'
 const convertArray = vFor._postProcess
 

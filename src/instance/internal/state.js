@@ -1,11 +1,10 @@
 import Watcher from '../../watcher'
-import { compileAndLinkProps } from '../../compiler'
-
+import { compileAndLinkProps } from '../../compiler/index'
+import Dep from '../../observer/dep'
 import {
   observe,
-  defineReactive,
-  Dep
-} from '../../observer'
+  defineReactive
+} from '../../observer/index'
 
 import {
   warn,
@@ -14,7 +13,7 @@ import {
   set,
   isReserved,
   bind
-} from '../../util'
+} from '../../util/index'
 
 export default function (Vue) {
 

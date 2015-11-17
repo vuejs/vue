@@ -3,7 +3,7 @@ import {
   assertAsset,
   isPlainObject,
   warn
-} from '../../util'
+} from '../../util/index'
 
 export default function (Vue) {
 

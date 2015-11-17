@@ -6,7 +6,7 @@ import vFor from './for'
 import vIf from './if'
 import show from './show'
 // two-way binding
-import model from './model'
+import model from './model/index'
 // event handling
 import on from './on'
 // attributes

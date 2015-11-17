@@ -1,4 +1,4 @@
-import { toNumber, looseEqual } from '../../../util'
+import { toNumber, looseEqual } from '../../../util/index'
 
 export default {
 

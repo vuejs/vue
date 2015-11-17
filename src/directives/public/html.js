@@ -6,7 +6,7 @@ import {
   remove,
   _toString,
   toArray
-} from '../../util'
+} from '../../util/index'
 
 export default {
 

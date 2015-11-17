@@ -1,6 +1,6 @@
-import { extend, warn, isArray, isObject, nextTick } from './util'
+import { extend, warn, isArray, isObject, nextTick } from './util/index'
 import config from './config'
-import { Dep } from './observer'
+import Dep from './observer/dep'
 import { parseExpression } from './parsers/expression'
 import { pushWatcher } from './batcher'
 

@@ -5,7 +5,7 @@ import {
   replace,
   resolveAsset,
   assertAsset
-} from '../../util'
+} from '../../util/index'
 
 export default {
 

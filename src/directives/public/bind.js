@@ -1,4 +1,4 @@
-import { warn } from '../../util'
+import { warn } from '../../util/index'
 import vStyle from '../internal/style'
 
 // xlink

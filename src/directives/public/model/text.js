@@ -5,7 +5,7 @@ import {
   _toString,
   nextTick,
   debounce as _debounce
-} from '../../../util'
+} from '../../../util/index'
 
 export default {
 

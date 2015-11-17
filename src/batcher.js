@@ -1,4 +1,4 @@
-import { inBrowser, warn, nextTick } from './util'
+import { inBrowser, warn, nextTick } from './util/index'
 import config from './config'
 
 // we have two separate queues: one for directive updates

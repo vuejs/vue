@@ -5,13 +5,13 @@ import {
   mapNodeRange,
   before,
   remove
-} from '../../util'
+} from '../../util/index'
 
 import {
   beforeWithTransition,
   appendWithTransition,
   removeWithTransition
-} from '../../transition'
+} from '../../transition/index'
 
 export default function (Vue) {
 

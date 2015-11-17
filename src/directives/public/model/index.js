@@ -1,4 +1,4 @@
-import { warn, resolveAsset } from '../../../util'
+import { warn, resolveAsset } from '../../../util/index'
 import text from './text'
 import radio from './radio'
 import select from './select'

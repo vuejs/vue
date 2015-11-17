@@ -10,7 +10,7 @@ import {
   animationEndEvent,
   transitionProp,
   animationProp
-} from '../util'
+} from '../util/index'
 
 const TYPE_TRANSITION = 1
 const TYPE_ANIMATION = 2

@@ -2,7 +2,7 @@ import {
   inDoc,
   isArray,
   warn
-} from '../../util'
+} from '../../util/index'
 
 const eventRE = /^v-on:|^@/
 

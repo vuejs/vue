@@ -1,5 +1,5 @@
 import Watcher from '../../watcher'
-import { del } from '../../util'
+import { del } from '../../util/index'
 import { parseText } from '../../parsers/text'
 import { parseDirective } from '../../parsers/directive'
 import { getPath } from '../../parsers/path'

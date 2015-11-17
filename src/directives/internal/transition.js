@@ -1,4 +1,4 @@
-import { resolveAsset, addClass, removeClass } from '../../util'
+import { resolveAsset, addClass, removeClass } from '../../util/index'
 import Transition from '../../transition/transition'
 
 export default {

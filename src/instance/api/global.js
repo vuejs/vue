@@ -8,18 +8,18 @@ import {
   commonTagRE,
   warn,
   isPlainObject
-} from '../../util'
+} from '../../util/index'
 
 import config from '../../config'
-import * as util from '../../util'
-import * as compiler from '../../compiler'
+import * as util from '../../util/index'
+import * as compiler from '../../compiler/index'
 import * as path from '../../parsers/path'
 import * as text from '../../parsers/text'
 import * as template from '../../parsers/template'
 import * as directive from '../../parsers/directive'
 import * as expression from '../../parsers/expression'
 import FragmentFactory from '../../fragment/factory'
-import internalDirectives from '../../directives/internal'
+import internalDirectives from '../../directives/internal/index'
 
 export default function (Vue) {
 

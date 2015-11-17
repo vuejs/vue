@@ -4,7 +4,7 @@ import {
   isArray,
   isPlainObject,
   hasOwn
-} from '../../util'
+} from '../../util/index'
 
 export default {
 

@@ -1,4 +1,4 @@
-import { mergeOptions } from '../../util'
+import { mergeOptions } from '../../util/index'
 
 let uid = 0
 

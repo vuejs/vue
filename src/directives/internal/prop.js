@@ -5,7 +5,7 @@
 
 import Watcher from '../../watcher'
 import config from '../../config'
-import { assertProp, initProp } from '../../util'
+import { assertProp, initProp } from '../../util/index'
 
 const bindingModes = config._propBindingModes
 

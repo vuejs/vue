@@ -1,5 +1,5 @@
-import { compile } from '../compiler'
-import { isTemplate } from '../util'
+import { compile } from '../compiler/index'
+import { isTemplate } from '../util/index'
 import { parseTemplate, cloneNode } from '../parsers/template'
 import Fragment from './fragment'
 import Cache from '../cache'

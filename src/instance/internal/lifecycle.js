@@ -1,6 +1,6 @@
-import { replace } from '../../util'
+import { replace } from '../../util/index'
 import Directive from '../../directive'
-import { compile, compileRoot, transclude } from '../../compiler'
+import { compile, compileRoot, transclude } from '../../compiler/index'
 
 export default function (Vue) {
 

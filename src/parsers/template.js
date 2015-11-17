@@ -1,4 +1,4 @@
-import { inBrowser, trimNode, isTemplate } from '../util'
+import { inBrowser, trimNode, isTemplate } from '../util/index'
 import Cache from '../cache'
 
 const templateCache = new Cache(1000)

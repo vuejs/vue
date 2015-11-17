@@ -14,7 +14,7 @@ import {
   toNumber,
   stripQuotes,
   isObject
-} from '../util'
+} from '../util/index'
 
 const propBindingModes = config._propBindingModes
 const empty = {}

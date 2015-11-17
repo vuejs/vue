@@ -1,4 +1,4 @@
-import { isArray, toNumber, looseEqual } from '../../../util'
+import { isArray, toNumber, looseEqual } from '../../../util/index'
 
 export default {
 

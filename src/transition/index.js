@@ -2,7 +2,7 @@ import {
   before,
   remove,
   transitionEndEvent
-} from '../util'
+} from '../util/index'
 
 /**
  * Append with transition.

@@ -1,4 +1,4 @@
-import { warn } from '../../util'
+import { warn } from '../../util/index'
 
 export default {
   bind () {

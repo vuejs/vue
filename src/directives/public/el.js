@@ -1,4 +1,4 @@
-import { camelize, hasOwn, defineReactive } from '../../util'
+import { camelize, hasOwn, defineReactive } from '../../util/index'
 
 export default {
 

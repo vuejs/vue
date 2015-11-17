@@ -3,7 +3,7 @@ import {
   isArray,
   indexOf,
   looseEqual
-} from '../../../util'
+} from '../../../util/index'
 
 export default {
 

@@ -1,4 +1,4 @@
-import { on, off, warn } from '../../util'
+import { on, off, warn } from '../../util/index'
 
 // keyCode aliases
 const keyCodes = {

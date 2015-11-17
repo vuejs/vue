@@ -1,5 +1,5 @@
-import { getAttr } from '../../util'
-import { applyTransition } from '../../transition'
+import { getAttr } from '../../util/index'
+import { applyTransition } from '../../transition/index'
 
 export default {
 

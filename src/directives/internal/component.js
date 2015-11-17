@@ -7,7 +7,7 @@ import {
   warn,
   cancellable,
   extend
-} from '../../util'
+} from '../../util/index'
 
 export default {
 

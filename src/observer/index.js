@@ -7,7 +7,7 @@ import {
   isPlainObject,
   hasProto,
   hasOwn
-} from '../util'
+} from '../util/index'
 
 const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
 
@@ -21,7 +21,7 @@ const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
  * @constructor
  */
 
-function Observer (value) {
+export function Observer (value) {
   this.value = value
   this.dep = new Dep()
   def(value, '__ob__', this)
@@ -225,5 +225,3 @@ export function defineReactive (obj, key, val) {
     }
   })
 }
-
-export { Dep, Observer }

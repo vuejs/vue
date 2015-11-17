@@ -1,4 +1,4 @@
-import { toArray, debounce as _debounce } from '../util'
+import { toArray, debounce as _debounce } from '../util/index'
 import { orderBy, filterBy, limitBy } from './array-filters'
 const digitsRE = /(\d{3})(?=\d)/g
 

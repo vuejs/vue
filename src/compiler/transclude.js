@@ -8,7 +8,7 @@ import {
   resolveAsset,
   toArray,
   addClass
-} from '../util'
+} from '../util/index'
 
 const specialCharRE = /[^\w\-:\.]/
 

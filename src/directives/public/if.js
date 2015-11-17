@@ -5,7 +5,7 @@ import {
   replace,
   createAnchor,
   warn
-} from '../../util'
+} from '../../util/index'
 
 export default {
 

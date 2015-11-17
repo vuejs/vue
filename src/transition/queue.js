@@ -1,4 +1,4 @@
-import { nextTick } from '../util'
+import { nextTick } from '../util/index'
 
 let queue = []
 let queued = false

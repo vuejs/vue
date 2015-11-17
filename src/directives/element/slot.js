@@ -8,7 +8,7 @@ import {
   replace,
   remove,
   isTemplate
-} from '../../util'
+} from '../../util/index'
 
 // This is the elementDirective that handles <content>
 // transclusions. It relies on the raw content of an

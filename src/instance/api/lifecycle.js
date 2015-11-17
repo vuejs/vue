@@ -1,5 +1,5 @@
-import { warn, query, inDoc } from '../../util'
-import { compile } from '../../compiler'
+import { warn, query, inDoc } from '../../util/index'
+import { compile } from '../../compiler/index'
 
 export default function (Vue) {
 

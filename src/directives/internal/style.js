@@ -3,7 +3,7 @@ import {
   isArray,
   hyphenate,
   camelize
-} from '../../util'
+} from '../../util/index'
 
 const prefixes = ['-webkit-', '-moz-', '-ms-']
 const camelPrefixes = ['Webkit', 'Moz', 'ms']

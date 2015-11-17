@@ -1,4 +1,4 @@
-import { def, indexOf } from '../util'
+import { def, indexOf } from '../util/index'
 
 const arrayProto = Array.prototype
 export const arrayMethods = Object.create(arrayProto)

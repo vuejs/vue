@@ -6,7 +6,7 @@ import {
   isArray,
   warn,
   set
-} from '../util'
+} from '../util/index'
 import Cache from '../cache'
 
 var pathCache = new Cache(1000)
