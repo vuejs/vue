@@ -1,7 +1,3 @@
-import directives from '../directives/public'
-import elementDirectives from '../directives/element'
-import filters from '../filters'
-
 import initMixin from './internal/init'
 import stateMixin from './internal/state'
 import eventsMixin from './internal/events'
@@ -42,25 +38,6 @@ class Vue {
       this._setData(newData)
     }
   }
-}
-
-/**
- * Vue and every constructor that extends Vue has an
- * associated options object, which can be accessed during
- * compilation steps as `this.constructor.options`.
- *
- * These can be seen as the default options of every
- * Vue instance.
- */
-
-Vue.options = {
-  directives,
-  elementDirectives,
-  filters,
-  transitions: {},
-  components: {},
-  partials: {},
-  replace: true
 }
 
 // install internals

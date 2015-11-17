@@ -1,4 +1,5 @@
-var _ = require('../util')
+import { toArray, debounce as _debounce } from '../util'
+export * from './array-filters'
 
 /**
  * Stringify value.
@@ -6,7 +7,7 @@ var _ = require('../util')
  * @param {Number} indent
  */
 
-exports.json = {
+export const json = {
   read: function (value, indent) {
     return typeof value === 'string'
       ? value
@@ -25,7 +26,7 @@ exports.json = {
  * 'abc' => 'Abc'
  */
 
-exports.capitalize = function (value) {
+export function capitalize (value) {
   if (!value && value !== 0) return ''
   value = value.toString()
   return value.charAt(0).toUpperCase() + value.slice(1)
@@ -35,7 +36,7 @@ exports.capitalize = function (value) {
  * 'abc' => 'ABC'
  */
 
-exports.uppercase = function (value) {
+export function uppercase (value) {
   return (value || value === 0)
     ? value.toString().toUpperCase()
     : ''
@@ -45,7 +46,7 @@ exports.uppercase = function (value) {
  * 'AbC' => 'abc'
  */
 
-exports.lowercase = function (value) {
+export function lowercase (value) {
   return (value || value === 0)
     ? value.toString().toLowerCase()
     : ''
@@ -58,7 +59,7 @@ exports.lowercase = function (value) {
  */
 
 var digitsRE = /(\d{3})(?=\d)/g
-exports.currency = function (value, currency) {
+export function currency (value, currency) {
   value = parseFloat(value)
   if (!isFinite(value) || (!value && value !== 0)) return ''
   currency = currency != null ? currency : '$'
@@ -88,8 +89,8 @@ exports.currency = function (value, currency) {
  *  e.g. ['single', 'double', 'triple', 'multiple']
  */
 
-exports.pluralize = function (value) {
-  var args = _.toArray(arguments, 1)
+export function pluralize (value) {
+  var args = toArray(arguments, 1)
   return args.length > 1
     ? (args[value % 10 - 1] || args[args.length - 1])
     : (args[0] + (value === 1 ? '' : 's'))
@@ -103,16 +104,10 @@ exports.pluralize = function (value) {
  * @return {Function}
  */
 
-exports.debounce = function (handler, delay) {
+export function debounce (handler, delay) {
   if (!handler) return
   if (!delay) {
     delay = 300
   }
-  return _.debounce(handler, delay)
+  return _debounce(handler, delay)
 }
-
-/**
- * Install special array filters
- */
-
-_.extend(exports, require('./array-filters'))
