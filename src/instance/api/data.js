@@ -1,10 +1,11 @@
-var _ = require('../../util')
-var Watcher = require('../../watcher')
-var textParser = require('../../parsers/text')
-var dirParser = require('../../parsers/directive')
+import Watcher from '../../watcher'
+import { del } from '../../util'
+import { parseText } from '../../parsers/text'
+import { parseDirective } from '../../parsers/directive'
 import { getPath } from '../../parsers/path'
 import { isSimplePath, parseExpression } from '../../parsers/expression'
-var filterRE = /[^|]\|[^|]/
+
+const filterRE = /[^|]\|[^|]/
 
 export default function (Vue) {
 
@@ -55,7 +56,7 @@ export default function (Vue) {
    */
 
   Vue.prototype.$delete = function (key) {
-    _.del(this._data, key)
+    del(this._data, key)
   }
 
   /**
@@ -74,7 +75,7 @@ export default function (Vue) {
     var vm = this
     var parsed
     if (typeof expOrFn === 'string') {
-      parsed = dirParser.parse(expOrFn)
+      parsed = parseDirective(expOrFn)
       expOrFn = parsed.expression
     }
     var watcher = new Watcher(vm, expOrFn, cb, {
@@ -100,7 +101,7 @@ export default function (Vue) {
   Vue.prototype.$eval = function (text, asStatement) {
     // check for filters.
     if (filterRE.test(text)) {
-      var dir = dirParser.parse(text)
+      var dir = parseDirective(text)
       // the filter regex check might give false positive
       // for pipes inside strings, so it's possible that
       // we don't get any filters here
@@ -122,7 +123,7 @@ export default function (Vue) {
    */
 
   Vue.prototype.$interpolate = function (text) {
-    var tokens = textParser.parse(text)
+    var tokens = parseText(text)
     var vm = this
     if (tokens) {
       if (tokens.length === 1) {

@@ -1,6 +1,7 @@
 import Cache from '../cache'
 import config from '../config'
-import dirParser from './directive'
+import { parseDirective } from '../parsers/directive'
+
 const regexEscapeRE = /[-.*+?^${}()|[\]\/\\]/g
 let cache, tagRE, htmlRE
 
@@ -43,7 +44,7 @@ export function compileRegex () {
  *               - {Boolean} [oneTime]
  */
 
-export function parse (text) {
+export function parseText (text) {
   if (!cache) {
     compileRegex()
   }
@@ -146,7 +147,7 @@ function inlineFilters (exp, single) {
       ? exp
       : '(' + exp + ')'
   } else {
-    var dir = dirParser.parse(exp)
+    var dir = parseDirective(exp)
     if (!dir.filters) {
       return '(' + exp + ')'
     } else {

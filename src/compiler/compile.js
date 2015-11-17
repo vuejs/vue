@@ -2,8 +2,8 @@ var _ = require('../util')
 var publicDirectives = require('../directives/public')
 var internalDirectives = require('../directives/internal')
 var compileProps = require('./compile-props')
-var textParser = require('../parsers/text')
-var dirParser = require('../parsers/directive')
+import { parseText, tokensToExp } from '../parsers/text'
+import { parseDirective } from '../parsers/directive'
 var templateParser = require('../parsers/template')
 import { resolveAsset } from '../util'
 
@@ -289,9 +289,9 @@ function compileElement (el, options) {
   // textarea treats its text content as the initial value.
   // just bind it as an attr directive for value.
   if (el.tagName === 'TEXTAREA') {
-    var tokens = textParser.parse(el.value)
+    var tokens = parseText(el.value)
     if (tokens) {
-      el.setAttribute(':value', textParser.tokensToExp(tokens))
+      el.setAttribute(':value', tokensToExp(tokens))
       el.value = ''
     }
   }
@@ -330,7 +330,7 @@ function compileTextNode (node, options) {
     return removeText
   }
 
-  var tokens = textParser.parse(node.wholeText)
+  var tokens = parseText(node.wholeText)
   if (!tokens) {
     return null
   }
@@ -395,7 +395,7 @@ function processTextToken (token, options) {
   }
   function setTokenType (type) {
     if (token.descriptor) return
-    var parsed = dirParser.parse(token.value)
+    var parsed = parseDirective(token.value)
     token.descriptor = {
       name: type,
       def: publicDirectives[type],
@@ -592,7 +592,7 @@ skip.terminal = true
  */
 
 function makeTerminalNodeLinkFn (el, dirName, value, options, def) {
-  var parsed = dirParser.parse(value)
+  var parsed = parseDirective(value)
   var descriptor = {
     name: dirName,
     expression: parsed.expression,
@@ -631,7 +631,7 @@ function compileDirectives (attrs, options) {
     attr = attrs[i]
     name = rawName = attr.name
     value = rawValue = attr.value
-    tokens = textParser.parse(value)
+    tokens = parseText(value)
     // reset arg
     arg = null
     // check modifiers
@@ -640,7 +640,7 @@ function compileDirectives (attrs, options) {
 
     // attribute interpolations
     if (tokens) {
-      value = textParser.tokensToExp(tokens)
+      value = tokensToExp(tokens)
       arg = name
       pushDir('bind', publicDirectives.bind, true)
       // warn against mixing mustaches with v-bind
@@ -715,7 +715,7 @@ function compileDirectives (attrs, options) {
    */
 
   function pushDir (dirName, def, interp) {
-    var parsed = dirParser.parse(value)
+    var parsed = parseDirective(value)
     dirs.push({
       name: dirName,
       attr: rawName,

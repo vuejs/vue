@@ -1,5 +1,5 @@
 var _ = require('../util')
-var dirParser = require('../parsers/directive')
+import { parseDirective } from '../parsers/directive'
 var propDef = require('../directives/internal/prop')
 var propBindingModes = require('../config')._propBindingModes
 var empty = {}
@@ -63,7 +63,7 @@ module.exports = function compileProps (el, propOptions) {
     if (value !== null) {
       // has dynamic binding!
       prop.raw = value
-      parsed = dirParser.parse(value)
+      parsed = parseDirective(value)
       value = parsed.expression
       prop.filters = parsed.filters
       // check binding type
