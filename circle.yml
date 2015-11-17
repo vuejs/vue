@@ -7,6 +7,6 @@ general:
     ignore:
       - dev
 
-dependencies:
-  pre:
-    - npm install -g grunt-cli
+test:
+  override:
+    - bash ./build/ci.sh
