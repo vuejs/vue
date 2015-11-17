@@ -1,5 +1,5 @@
 var _ = require('../../util')
-var templateParser = require('../../parsers/template')
+import { parseTemplate, cloneNode } from '../../parsers/template'
 
 // This is the elementDirective that handles <content>
 // transclusions. It relies on the raw content of an
@@ -116,9 +116,9 @@ function extractFragment (nodes, parent, main) {
     if (_.isTemplate(node) &&
         !node.hasAttribute('v-if') &&
         !node.hasAttribute('v-for')) {
-      node = templateParser.parse(node)
+      node = parseTemplate(node)
     }
-    node = templateParser.clone(node)
+    node = cloneNode(node)
     frag.appendChild(node)
   }
 }

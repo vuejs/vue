@@ -4,7 +4,7 @@ var internalDirectives = require('../directives/internal')
 var compileProps = require('./compile-props')
 import { parseText, tokensToExp } from '../parsers/text'
 import { parseDirective } from '../parsers/directive'
-var templateParser = require('../parsers/template')
+import { parseTemplate } from '../parsers/template'
 import { resolveAsset } from '../util'
 
 // special binding prefixes
@@ -426,7 +426,7 @@ function makeTextNodeLinkFn (tokens, frag) {
         if (token.oneTime) {
           value = (scope || vm).$eval(value)
           if (token.html) {
-            _.replace(node, templateParser.parse(value, true))
+            _.replace(node, parseTemplate(value, true))
           } else {
             node.data = value
           }

@@ -1,6 +1,6 @@
 var _ = require('../util')
 var compiler = require('../compiler')
-var templateParser = require('../parsers/template')
+import { parseTemplate, cloneNode } from '../parsers/template'
 var Fragment = require('./fragment')
 var Cache = require('../cache')
 var linkerCache = new Cache(5000)
@@ -18,7 +18,7 @@ function FragmentFactory (vm, el) {
   var template
   var isString = typeof el === 'string'
   if (isString || _.isTemplate(el)) {
-    template = templateParser.parse(el, true)
+    template = parseTemplate(el, true)
   } else {
     template = document.createDocumentFragment()
     template.appendChild(el)
@@ -49,7 +49,7 @@ function FragmentFactory (vm, el) {
  */
 
 FragmentFactory.prototype.create = function (host, scope, parentFrag) {
-  var frag = templateParser.clone(this.template)
+  var frag = cloneNode(this.template)
   return new Fragment(this.linker, this.vm, frag, host, scope, parentFrag)
 }
 

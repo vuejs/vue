@@ -1,5 +1,5 @@
 var _ = require('../../util')
-var templateParser = require('../../parsers/template')
+import { cloneNode } from '../../parsers/template'
 
 module.exports = {
 
@@ -179,7 +179,7 @@ module.exports = {
       // default options
       var options = {
         name: this.ComponentName,
-        el: templateParser.clone(this.el),
+        el: cloneNode(this.el),
         template: this.inlineTemplate,
         // make sure to add the child with correct parent
         // if this is a transcluded component, its parent

@@ -147,7 +147,7 @@ function nodeToFragment (node) {
     return stringToFragment(node.textContent)
   }
   // normal node, clone it to avoid mutating the original
-  var clonedNode = clone(node)
+  var clonedNode = cloneNode(node)
   var frag = document.createDocumentFragment()
   var child
   /* eslint-disable no-cond-assign */
@@ -194,7 +194,7 @@ var hasTextareaCloneBug = (function () {
  * @return {Element|DocumentFragment}
  */
 
-export function clone (node) {
+export function cloneNode (node) {
   if (!node.querySelectorAll) {
     return node.cloneNode()
   }
@@ -213,7 +213,7 @@ export function clone (node) {
       i = cloned.length
       while (i--) {
         cloned[i].parentNode.replaceChild(
-          clone(original[i]),
+          cloneNode(original[i]),
           cloned[i]
         )
       }
@@ -255,7 +255,7 @@ export function clone (node) {
  * @return {DocumentFragment|undefined}
  */
 
-export function parse (template, shouldClone, raw) {
+export function parseTemplate (template, shouldClone, raw) {
   var node, frag
 
   // if the template is already a document fragment,
@@ -263,7 +263,7 @@ export function parse (template, shouldClone, raw) {
   if (template instanceof DocumentFragment) {
     trimNode(template)
     return shouldClone
-      ? clone(template)
+      ? cloneNode(template)
       : template
   }
 
@@ -290,6 +290,6 @@ export function parse (template, shouldClone, raw) {
   }
 
   return frag && shouldClone
-    ? clone(frag)
+    ? cloneNode(frag)
     : frag
 }

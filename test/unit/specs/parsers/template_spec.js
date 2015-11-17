@@ -1,5 +1,5 @@
 var templateParser = require('../../../../src/parsers/template')
-var parse = templateParser.parse
+var parse = templateParser.parseTemplate
 var testString = '<div>hello</div><p class="test">world</p>'
 
 describe('Template Parser', function () {
@@ -135,33 +135,33 @@ describe('Template Parser', function () {
   it('should deal with Safari template clone bug', function () {
     var a = document.createElement('div')
     a.innerHTML = '<template>1</template>'
-    var c = templateParser.clone(a)
+    var c = templateParser.cloneNode(a)
     expect(c.firstChild.innerHTML).toBe('1')
   })
 
   it('should deal with Safari template clone bug even when nested', function () {
     var a = document.createElement('div')
     a.innerHTML = '<template><div>1</div><template>2</template></template>'
-    var c = templateParser.clone(a)
+    var c = templateParser.cloneNode(a)
     expect(c.firstChild.innerHTML).toBe('<div>1</div><template>2</template>')
   })
 
   it('should deal with IE textarea clone bug', function () {
     var t = document.createElement('textarea')
     t.placeholder = 't'
-    var c = templateParser.clone(t)
+    var c = templateParser.cloneNode(t)
     expect(c.value).toBe('')
   })
 
   it('should trim empty text nodes', function () {
     // string
-    var res = templateParser.parse('    <p>test</p>    ')
+    var res = parse('    <p>test</p>    ')
     expect(res.childNodes.length).toBe(1)
     expect(res.firstChild.tagName).toBe('P')
     // nodes
     var el = document.createElement('div')
     el.innerHTML = '<template>    <p>test</p>    </template>'
-    res = templateParser.parse(el.children[0])
+    res = parse(el.children[0])
     expect(res.childNodes.length).toBe(1)
     expect(res.firstChild.tagName).toBe('P')
   })
