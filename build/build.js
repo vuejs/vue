@@ -23,73 +23,84 @@ rollup.rollup({
       loose: 'all'
     })
   ]
-}).then(function (bundle) {
-  write('dist/vue.common.js', bundle.generate({
+})
+.then(function (bundle) {
+  return write('dist/vue.common.js', bundle.generate({
     format: 'cjs'
   }).code)
-}).catch(logError)
-
+})
 // Standalone Dev Build
-rollup.rollup({
-  entry: 'src/index.js',
-  plugins: [
-    replace({
-      'process.env.NODE_ENV': "'development'"
-    }),
-    babel({
-      loose: 'all'
-    })
-  ]
-}).then(function (bundle) {
-  write('dist/vue.js', bundle.generate({
-    format: 'umd',
-    banner: banner,
-    moduleName: 'Vue'
-  }).code)
-}).catch(logError)
+.then(function () {
+  return rollup.rollup({
+    entry: 'src/index.js',
+    plugins: [
+      replace({
+        'process.env.NODE_ENV': "'development'"
+      }),
+      babel({
+        loose: 'all'
+      })
+    ]
+  })
+  .then(function (bundle) {
+    return write('dist/vue.js', bundle.generate({
+      format: 'umd',
+      banner: banner,
+      moduleName: 'Vue'
+    }).code)
+  })
+})
+.then(function () {
+  // Standalone Production Build
+  return rollup.rollup({
+    entry: 'src/index.js',
+    plugins: [
+      replace({
+        'process.env.NODE_ENV': "'production'"
+      }),
+      babel({
+        loose: 'all'
+      })
+    ]
+  })
+  .then(function (bundle) {
+    var code = bundle.generate({
+      format: 'umd',
+      moduleName: 'Vue'
+    }).code
+    var minified = banner + '\n' + uglify.minify(code, {
+      fromString: true
+    }).code
+    return write('dist/vue.min.js', minified)
+  })
+  .then(zip)
+})
+.catch(logError)
 
-// Standalone Production Build
-rollup.rollup({
-  entry: 'src/index.js',
-  plugins: [
-    replace({
-      'process.env.NODE_ENV': "'production'"
-    }),
-    babel({
-      loose: 'all'
+function write (dest, code) {
+  return new Promise(function (resolve, reject) {
+    fs.writeFile(dest, code, function (err) {
+      if (err) return reject(err)
+      console.log(blue(dest) + ' ' + getSize(code))
+      resolve()
     })
-  ]
-}).then(function (bundle) {
-  var code = bundle.generate({
-    format: 'umd',
-    moduleName: 'Vue'
-  }).code
-  var minified = banner + '\n' + uglify.minify(code, {
-    fromString: true
-  }).code
-  write('dist/vue.min.js', minified, zip)
-}).catch(logError)
-
-function write (dest, code, cb) {
-  fs.writeFile(dest, code, function (err) {
-    if (err) throw err
-    console.log(blue('built: ') + dest + ' ' + getSize(code))
-    cb && cb()
   })
 }
 
 function zip () {
-  fs.readFile('dist/vue.min.js', function (err, buf) {
-    if (err) throw err
-    zlib.gzip(buf, function (err, buf) {
-      if (err) throw err
-      write('dist/vue.min.js.gz', buf)
+  return new Promise(function (resolve, reject) {
+    fs.readFile('dist/vue.min.js', function (err, buf) {
+      if (err) return reject(err)
+      zlib.gzip(buf, function (err, buf) {
+        if (err) return reject(err)
+        write('dist/vue.min.js.gz', buf).then(resolve)
+      })
     })
   })
 }
 
 function getSize (code) {
-  return '(' + (code.length / 1024).toFixed(2) + 'kb)'
+  return (code.length / 1024).toFixed(2) + 'kb'
 }
 
 function logError (e) {
