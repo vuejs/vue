@@ -11,7 +11,9 @@
   ],
   "main": "dist/vue.common.js",
   "files": [
-    "dist",
+    "dist/vue.common.js",
+    "dist/vue.js",
+    "dist/vue.min.js",
     "src"
   ],
   "repository": {
