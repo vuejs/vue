@@ -1,7 +1,7 @@
 import { extend, warn, isArray, isObject, nextTick } from './util'
 import config from './config'
 import Dep from './observer/dep'
-import expParser from './parsers/expression'
+import { parseExpression } from './parsers/expression'
 import { pushWatcher } from './batcher'
 
 let uid = 0
@@ -47,7 +47,7 @@ export default function Watcher (vm, expOrFn, cb, options) {
     this.getter = expOrFn
     this.setter = undefined
   } else {
-    var res = expParser.parse(expOrFn, this.twoWay)
+    var res = parseExpression(expOrFn, this.twoWay)
     this.getter = res.get
     this.setter = res.set
   }

@@ -1,9 +1,9 @@
 var _ = require('../../util')
 var Watcher = require('../../watcher')
-var Path = require('../../parsers/path')
 var textParser = require('../../parsers/text')
 var dirParser = require('../../parsers/directive')
-var expParser = require('../../parsers/expression')
+import { getPath } from '../../parsers/path'
+import { isSimplePath, parseExpression } from '../../parsers/expression'
 var filterRE = /[^|]\|[^|]/
 
 export default function (Vue) {
@@ -17,9 +17,9 @@ export default function (Vue) {
    */
 
   Vue.prototype.$get = function (exp, asStatement) {
-    var res = expParser.parse(exp)
+    var res = parseExpression(exp)
     if (res) {
-      if (asStatement && !expParser.isSimplePath(exp)) {
+      if (asStatement && !isSimplePath(exp)) {
         var self = this
         return function statementHandler () {
           res.get.call(self, self)
@@ -42,7 +42,7 @@ export default function (Vue) {
    */
 
   Vue.prototype.$set = function (exp, val) {
-    var res = expParser.parse(exp, true)
+    var res = parseExpression(exp, true)
     if (res && res.set) {
       res.set.call(this, this, val)
     }
@@ -149,7 +149,7 @@ export default function (Vue) {
 
   Vue.prototype.$log = function (path) {
     var data = path
-      ? Path.get(this._data, path)
+      ? getPath(this._data, path)
       : this._data
     if (data) {
       data = clean(data)

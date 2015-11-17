@@ -10,7 +10,7 @@ import {
   warn
 } from './util'
 import Watcher from './watcher'
-import expParser from './parsers/expression'
+import { parseExpression, isSimplePath } from './parsers/expression'
 
 function noop () {}
 
@@ -224,9 +224,9 @@ Directive.prototype._checkStatement = function () {
   var expression = this.expression
   if (
     expression && this.acceptStatement &&
-    !expParser.isSimplePath(expression)
+    !isSimplePath(expression)
   ) {
-    var fn = expParser.parse(expression).get
+    var fn = parseExpression(expression).get
     var scope = this._scope || this.vm
     var handler = function (e) {
       scope.$event = e

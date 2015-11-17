@@ -1,13 +1,13 @@
-import expParser from './expression'
-import Cache from '../cache'
+import { parseExpression } from './expression'
 import {
   isLiteral,
   stripQuotes,
   isObject,
   isArray,
   warn,
-  set as _set
+  set
 } from '../util'
+import Cache from '../cache'
 
 var pathCache = new Cache(1000)
 
@@ -161,7 +161,7 @@ function formatSubPath (path) {
  * @return {Array|undefined}
  */
 
-function parsePath (path) {
+function parse (path) {
   var keys = []
   var index = -1
   var mode = BEFORE_PATH
@@ -259,10 +259,10 @@ function parsePath (path) {
  * @return {Array|undefined}
  */
 
-export function parse (path) {
+export function parsePath (path) {
   var hit = pathCache.get(path)
   if (!hit) {
-    hit = parsePath(path)
+    hit = parse(path)
     if (hit) {
       pathCache.put(path, hit)
     }
@@ -277,8 +277,8 @@ export function parse (path) {
  * @param {String} path
  */
 
-export function get (obj, path) {
-  return expParser.parse(path).get(obj)
+export function getPath (obj, path) {
+  return parseExpression(path).get(obj)
 }
 
 /**
@@ -305,7 +305,7 @@ if (process.env.NODE_ENV !== 'production') {
  * @param {*} val
  */
 
-export function set (obj, path, val) {
+export function setPath (obj, path, val) {
   var original = obj
   if (typeof path === 'string') {
     path = parse(path)
@@ -318,7 +318,7 @@ export function set (obj, path, val) {
     last = obj
     key = path[i]
     if (key.charAt(0) === '*') {
-      key = expParser.parse(key.slice(1)).get.call(original, original)
+      key = parseExpression(key.slice(1)).get.call(original, original)
     }
     if (i < l - 1) {
       obj = obj[key]
@@ -327,7 +327,7 @@ export function set (obj, path, val) {
         if (process.env.NODE_ENV !== 'production' && last._isVue) {
           warnNonExistent(path)
         }
-        _set(last, key, obj)
+        set(last, key, obj)
       }
     } else {
       if (isArray(obj)) {
@@ -338,7 +338,7 @@ export function set (obj, path, val) {
         if (process.env.NODE_ENV !== 'production' && obj._isVue) {
           warnNonExistent(path)
         }
-        _set(obj, key, val)
+        set(obj, key, val)
       }
     }
   }

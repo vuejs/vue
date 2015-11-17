@@ -1,5 +1,5 @@
 var _ = require('../util')
-var Path = require('../parsers/path')
+import { getPath } from '../parsers/path'
 var toArray = require('../directives/public/for')._postProcess
 
 /**
@@ -51,7 +51,7 @@ exports.filterBy = function (arr, search, delimiter) {
       while (j--) {
         key = keys[j]
         if ((key === '$key' && contains(item.$key, search)) ||
-            contains(Path.get(val, key), search)) {
+            contains(getPath(val, key), search)) {
           res.push(item)
           break
         }
@@ -82,8 +82,8 @@ exports.orderBy = function (arr, sortKey, reverse) {
       if (_.isObject(a) && '$value' in a) a = a.$value
       if (_.isObject(b) && '$value' in b) b = b.$value
     }
-    a = _.isObject(a) ? Path.get(a, sortKey) : a
-    b = _.isObject(b) ? Path.get(b, sortKey) : b
+    a = _.isObject(a) ? getPath(a, sortKey) : a
+    b = _.isObject(b) ? getPath(b, sortKey) : b
     return a === b ? 0 : a > b ? order : -order
   })
 }
