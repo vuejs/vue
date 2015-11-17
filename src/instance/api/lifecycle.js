@@ -1,4 +1,4 @@
-var _ = require('../../util')
+import { warn, query, inDoc } from '../../util'
 var compiler = require('../../compiler')
 
 export default function (Vue) {
@@ -15,18 +15,18 @@ export default function (Vue) {
 
   Vue.prototype.$mount = function (el) {
     if (this._isCompiled) {
-      process.env.NODE_ENV !== 'production' && _.warn(
+      process.env.NODE_ENV !== 'production' && warn(
         '$mount() should be called only once.'
       )
       return
     }
-    el = _.query(el)
+    el = query(el)
     if (!el) {
       el = document.createElement('div')
     }
     this._compile(el)
     this._initDOMHooks()
-    if (_.inDoc(this.$el)) {
+    if (inDoc(this.$el)) {
       this._callHook('attached')
       ready.call(this)
     } else {

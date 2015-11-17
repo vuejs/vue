@@ -1,4 +1,4 @@
-var _ = require('../../util')
+import { toArray } from '../../util'
 
 export default function (Vue) {
 
@@ -93,9 +93,9 @@ export default function (Vue) {
     this._shouldPropagate = !cbs
     if (cbs) {
       cbs = cbs.length > 1
-        ? _.toArray(cbs)
+        ? toArray(cbs)
         : cbs
-      var args = _.toArray(arguments, 1)
+      var args = toArray(arguments, 1)
       for (var i = 0, l = cbs.length; i < l; i++) {
         var res = cbs[i].apply(this, args)
         if (res === true) {

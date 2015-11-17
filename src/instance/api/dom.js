@@ -1,4 +1,11 @@
-var _ = require('../../util')
+import {
+  nextTick,
+  inDoc,
+  removeNodeRange,
+  mapNodeRange,
+  before,
+  remove
+} from '../../util'
 
 import {
   beforeWithTransition,
@@ -17,7 +24,7 @@ export default function (Vue) {
    */
 
   Vue.prototype.$nextTick = function (fn) {
-    _.nextTick(fn, this)
+    nextTick(fn, this)
   }
 
   /**
@@ -64,7 +71,7 @@ export default function (Vue) {
   Vue.prototype.$before = function (target, cb, withTransition) {
     return insert(
       this, target, cb, withTransition,
-      before, beforeWithTransition
+      beforeWithCb, beforeWithTransition
     )
   }
 
@@ -97,24 +104,24 @@ export default function (Vue) {
     if (!this.$el.parentNode) {
       return cb && cb()
     }
-    var inDoc = this._isAttached && _.inDoc(this.$el)
+    var inDocument = this._isAttached && inDoc(this.$el)
     // if we are not in document, no need to check
     // for transitions
-    if (!inDoc) withTransition = false
+    if (!inDocument) withTransition = false
     var self = this
     var realCb = function () {
-      if (inDoc) self._callHook('detached')
+      if (inDocument) self._callHook('detached')
       if (cb) cb()
     }
     if (this._isFragment) {
-      _.removeNodeRange(
+      removeNodeRange(
         this._fragmentStart,
         this._fragmentEnd,
         this, this._fragment, realCb
       )
     } else {
       var op = withTransition === false
-        ? remove
+        ? removeWithCb
         : removeWithTransition
       op(this.$el, this, realCb)
     }
@@ -135,16 +142,16 @@ export default function (Vue) {
 
   function insert (vm, target, cb, withTransition, op1, op2) {
     target = query(target)
-    var targetIsDetached = !_.inDoc(target)
+    var targetIsDetached = !inDoc(target)
     var op = withTransition === false || targetIsDetached
         ? op1
         : op2
     var shouldCallHook =
       !targetIsDetached &&
       !vm._isAttached &&
-      !_.inDoc(vm.$el)
+      !inDoc(vm.$el)
     if (vm._isFragment) {
-      _.mapNodeRange(vm._fragmentStart, vm._fragmentEnd, function (node) {
+      mapNodeRange(vm._fragmentStart, vm._fragmentEnd, function (node) {
         op(node, target, vm)
       })
       cb && cb()
@@ -192,8 +199,8 @@ export default function (Vue) {
    * @param {Function} [cb]
    */
 
-  function before (el, target, vm, cb) {
-    _.before(el, target)
+  function beforeWithCb (el, target, vm, cb) {
+    before(el, target)
     if (cb) cb()
   }
 
@@ -205,8 +212,8 @@ export default function (Vue) {
    * @param {Function} [cb]
    */
 
-  function remove (el, vm, cb) {
-    _.remove(el)
+  function removeWithCb (el, vm, cb) {
+    remove(el)
     if (cb) cb()
   }
 }

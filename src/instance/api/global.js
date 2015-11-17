@@ -1,5 +1,16 @@
-var _ = require('../../util')
 import config from '../../config'
+import * as util from '../../util'
+import {
+  set,
+  del,
+  nextTick,
+  mergeOptions,
+  classify,
+  toArray,
+  commonTagRE,
+  warn,
+  isPlainObject
+} from '../../util'
 
 export default function (Vue) {
 
@@ -7,11 +18,11 @@ export default function (Vue) {
    * Expose useful internals
    */
 
-  Vue.util = _
+  Vue.util = util
   Vue.config = config
-  Vue.set = _.set
-  Vue.delete = _.del
-  Vue.nextTick = _.nextTick
+  Vue.set = set
+  Vue.delete = del
+  Vue.nextTick = nextTick
 
   /**
    * The following are exposed for advanced usage / plugins
@@ -55,7 +66,7 @@ export default function (Vue) {
     Sub.prototype = Object.create(Super.prototype)
     Sub.prototype.constructor = Sub
     Sub.cid = cid++
-    Sub.options = _.mergeOptions(
+    Sub.options = mergeOptions(
       Super.options,
       extendOptions
     )
@@ -89,7 +100,7 @@ export default function (Vue) {
 
   function createClass (name) {
     return new Function(
-      'return function ' + _.classify(name) +
+      'return function ' + classify(name) +
       ' (options) { this._init(options) }'
     )()
   }
@@ -106,7 +117,7 @@ export default function (Vue) {
       return
     }
     // additional parameters
-    var args = _.toArray(arguments, 1)
+    var args = toArray(arguments, 1)
     args.unshift(this)
     if (typeof plugin.install === 'function') {
       plugin.install.apply(plugin, args)
@@ -123,7 +134,7 @@ export default function (Vue) {
    */
 
   Vue.mixin = function (mixin) {
-    Vue.options = _.mergeOptions(Vue.options, mixin)
+    Vue.options = mergeOptions(Vue.options, mixin)
   }
 
   /**
@@ -141,8 +152,8 @@ export default function (Vue) {
       } else {
         /* istanbul ignore if */
         if (process.env.NODE_ENV !== 'production') {
-          if (type === 'component' && _.commonTagRE.test(id)) {
-            _.warn(
+          if (type === 'component' && commonTagRE.test(id)) {
+            warn(
               'Do not use built-in HTML elements as component ' +
               'id: ' + id
             )
@@ -150,7 +161,7 @@ export default function (Vue) {
         }
         if (
           type === 'component' &&
-          _.isPlainObject(definition)
+          isPlainObject(definition)
         ) {
           definition.name = id
           definition = Vue.extend(definition)
