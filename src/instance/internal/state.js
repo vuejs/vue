@@ -1,8 +1,8 @@
 var _ = require('../../util')
 var compiler = require('../../compiler')
-var Observer = require('../../observer')
-var Dep = require('../../observer/dep')
-var Watcher = require('../../watcher')
+import { observe } from '../../observer'
+import Dep from '../../observer/dep'
+import Watcher from '../../watcher'
 
 export default function (Vue) {
 
@@ -78,7 +78,7 @@ export default function (Vue) {
       this._proxy(key)
     }
     // observe data
-    Observer.create(data, this)
+    observe(data, this)
   }
 
   /**
@@ -113,7 +113,7 @@ export default function (Vue) {
       }
     }
     oldData.__ob__.removeVm(this)
-    Observer.create(newData, this)
+    observe(newData, this)
     this._digest()
   }
 

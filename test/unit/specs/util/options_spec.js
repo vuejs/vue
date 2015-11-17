@@ -255,10 +255,10 @@ describe('Util - Option merging', function () {
   })
 
   it('already observed instance data merge with default data', function () {
-    var Observer = require('../../../../src/observer')
+    var observe = require('../../../../src/observer').observe
     var instanceData = { a: 123 }
     // observe it
-    Observer.create(instanceData)
+    observe(instanceData)
     var res = merge(
       {
         data: function () { return { b: 234} }

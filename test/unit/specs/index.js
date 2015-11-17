@@ -48,7 +48,8 @@ scope.hasWarned = function (msg, silent) {
   }
 
   function containsMsg (arg) {
-    return arg.indexOf(msg) > -1
+    if (arg instanceof Error) throw arg
+    return typeof arg === 'string' && arg.indexOf(msg) > -1
   }
 }
 
