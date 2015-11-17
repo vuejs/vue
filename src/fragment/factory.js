@@ -1,9 +1,10 @@
-var _ = require('../util')
 var compiler = require('../compiler')
+import { isTemplate } from '../util'
 import { parseTemplate, cloneNode } from '../parsers/template'
-var Fragment = require('./fragment')
-var Cache = require('../cache')
-var linkerCache = new Cache(5000)
+import Fragment from './fragment'
+import Cache from '../cache'
+
+const linkerCache = new Cache(5000)
 
 /**
  * A factory that can be used to create instances of a
@@ -13,11 +14,11 @@ var linkerCache = new Cache(5000)
  * @param {Element|String} el
  */
 
-function FragmentFactory (vm, el) {
+export default function FragmentFactory (vm, el) {
   this.vm = vm
   var template
   var isString = typeof el === 'string'
-  if (isString || _.isTemplate(el)) {
+  if (isString || isTemplate(el)) {
     template = parseTemplate(el, true)
   } else {
     template = document.createDocumentFragment()
@@ -52,5 +53,3 @@ FragmentFactory.prototype.create = function (host, scope, parentFrag) {
   var frag = cloneNode(this.template)
   return new Fragment(this.linker, this.vm, frag, host, scope, parentFrag)
 }
-
-module.exports = FragmentFactory

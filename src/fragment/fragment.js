@@ -23,7 +23,7 @@ import {
  * @param {Object} [scope]
  */
 
-function Fragment (linker, vm, frag, host, scope, parentFrag) {
+export default function Fragment (linker, vm, frag, host, scope, parentFrag) {
   this.children = []
   this.childFrags = []
   this.vm = vm
@@ -193,5 +193,3 @@ function detach (child) {
     child._callHook('detached')
   }
 }
-
-module.exports = Fragment
