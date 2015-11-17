@@ -8,8 +8,5 @@ then
   npm run e2e
   npm run sauce-all
 else
-  npm run lint
-  npm run cover
-  npm run build
-  npm run e2e
+  npm test
 fi

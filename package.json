@@ -23,7 +23,7 @@
   "bugs": "https://github.com/vuejs/vue/issues",
   "homepage": "http://vuejs.org",
   "scripts": {
-    "test": "npm run lint && npm run unit && npm run cover && npm run e2e",
+    "test": "npm run lint && npm run cover && npm run build && npm run e2e",
     "build": "node build/build.js",
     "install-hook": "ln -s ../../build/git-hooks/pre-commit .git/hooks/pre-commit",
     "dev": "webpack --watch --config build/webpack.dev.config.js & npm run serve-test",
