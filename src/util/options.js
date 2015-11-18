@@ -1,6 +1,16 @@
-var _ = require('./index')
-var config = require('../config')
-var extend = _.extend
+import Vue from '../instance/vue'
+import config from '../config'
+import {
+  extend,
+  set,
+  isObject,
+  isArray,
+  isPlainObject,
+  hasOwn,
+  camelize
+} from './lang'
+import { warn } from './debug'
+import { commonTagRE } from './component'
 
 /**
  * Option overwriting strategies are functions that handle
@@ -25,9 +35,9 @@ function mergeData (to, from) {
   for (key in from) {
     toVal = to[key]
     fromVal = from[key]
-    if (!_.hasOwn(to, key)) {
-      _.set(to, key, fromVal)
-    } else if (_.isObject(toVal) && _.isObject(fromVal)) {
+    if (!hasOwn(to, key)) {
+      set(to, key, fromVal)
+    } else if (isObject(toVal) && isObject(fromVal)) {
       mergeData(toVal, fromVal)
     }
   }
@@ -45,7 +55,7 @@ strats.data = function (parentVal, childVal, vm) {
       return parentVal
     }
     if (typeof childVal !== 'function') {
-      process.env.NODE_ENV !== 'production' && _.warn(
+      process.env.NODE_ENV !== 'production' && warn(
         'The "data" option should be a function ' +
         'that returns a per-instance value in component ' +
         'definitions.'
@@ -90,7 +100,7 @@ strats.data = function (parentVal, childVal, vm) {
 
 strats.el = function (parentVal, childVal, vm) {
   if (!vm && childVal && typeof childVal !== 'function') {
-    process.env.NODE_ENV !== 'production' && _.warn(
+    process.env.NODE_ENV !== 'production' && warn(
       'The "el" option should be a function ' +
       'that returns a per-instance value in component ' +
       'definitions.'
@@ -120,7 +130,7 @@ strats.destroyed = function (parentVal, childVal) {
   return childVal
     ? parentVal
       ? parentVal.concat(childVal)
-      : _.isArray(childVal)
+      : isArray(childVal)
         ? childVal
         : [childVal]
     : parentVal
@@ -132,7 +142,7 @@ strats.destroyed = function (parentVal, childVal) {
 
 strats.paramAttributes = function () {
   /* istanbul ignore next */
-  process.env.NODE_ENV !== 'production' && _.warn(
+  process.env.NODE_ENV !== 'production' && warn(
     '"paramAttributes" option has been deprecated in 0.12. ' +
     'Use "props" instead.'
   )
@@ -173,7 +183,7 @@ strats.events = function (parentVal, childVal) {
   for (var key in childVal) {
     var parent = ret[key]
     var child = childVal[key]
-    if (parent && !_.isArray(parent)) {
+    if (parent && !isArray(parent)) {
       parent = [parent]
     }
     ret[key] = parent
@@ -223,16 +233,16 @@ function guardComponents (options) {
     var ids = Object.keys(components)
     for (var i = 0, l = ids.length; i < l; i++) {
       var key = ids[i]
-      if (_.commonTagRE.test(key)) {
-        process.env.NODE_ENV !== 'production' && _.warn(
+      if (commonTagRE.test(key)) {
+        process.env.NODE_ENV !== 'production' && warn(
           'Do not use built-in HTML elements as component ' +
           'id: ' + key
         )
         continue
       }
       def = components[key]
-      if (_.isPlainObject(def)) {
-        components[key] = _.Vue.extend(def)
+      if (isPlainObject(def)) {
+        components[key] = Vue.extend(def)
       }
     }
   }
@@ -248,7 +258,7 @@ function guardComponents (options) {
 function guardProps (options) {
   var props = options.props
   var i, val
-  if (_.isArray(props)) {
+  if (isArray(props)) {
     options.props = {}
     i = props.length
     while (i--) {
@@ -259,7 +269,7 @@ function guardProps (options) {
         options.props[val.name] = val
       }
     }
-  } else if (_.isPlainObject(props)) {
+  } else if (isPlainObject(props)) {
     var keys = Object.keys(props)
     i = keys.length
     while (i--) {
@@ -280,7 +290,7 @@ function guardProps (options) {
  */
 
 function guardArrayAssets (assets) {
-  if (_.isArray(assets)) {
+  if (isArray(assets)) {
     var res = {}
     var i = assets.length
     var asset
@@ -290,7 +300,7 @@ function guardArrayAssets (assets) {
         ? ((asset.options && asset.options.name) || asset.id)
         : (asset.name || asset.id)
       if (!id) {
-        process.env.NODE_ENV !== 'production' && _.warn(
+        process.env.NODE_ENV !== 'production' && warn(
           'Array-syntax assets must provide a "name" or "id" field.'
         )
       } else {
@@ -312,21 +322,21 @@ function guardArrayAssets (assets) {
  *                     an instantiation merge.
  */
 
-exports.mergeOptions = function merge (parent, child, vm) {
+export function mergeOptions (parent, child, vm) {
   guardComponents(child)
   guardProps(child)
   var options = {}
   var key
   if (child.mixins) {
     for (var i = 0, l = child.mixins.length; i < l; i++) {
-      parent = merge(parent, child.mixins[i], vm)
+      parent = mergeOptions(parent, child.mixins[i], vm)
     }
   }
   for (key in parent) {
     mergeField(key)
   }
   for (key in child) {
-    if (!(_.hasOwn(parent, key))) {
+    if (!hasOwn(parent, key)) {
       mergeField(key)
     }
   }
@@ -348,12 +358,22 @@ exports.mergeOptions = function merge (parent, child, vm) {
  * @return {Object|Function}
  */
 
-exports.resolveAsset = function resolve (options, type, id) {
+export function resolveAsset (options, type, id) {
   var assets = options[type]
   var camelizedId
   return assets[id] ||
     // camelCase ID
-    assets[camelizedId = _.camelize(id)] ||
+    assets[camelizedId = camelize(id)] ||
     // Pascal Case ID
     assets[camelizedId.charAt(0).toUpperCase() + camelizedId.slice(1)]
+}
+
+/**
+ * Assert asset exists
+ */
+
+export function assertAsset (val, type, id) {
+  if (!val) {
+    warn('Failed to resolve ' + type + ': ' + id)
+  }
 }

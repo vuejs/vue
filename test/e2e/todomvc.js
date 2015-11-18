@@ -3,7 +3,7 @@
 casper.test.begin('todomvc', 63, function (test) {
 
   casper
-  .start('../../examples/todomvc/index.html')
+  .start('examples/todomvc/index.html')
   .then(function () {
 
     test.assertNotVisible('.main', '.main should be hidden')
@@ -153,14 +153,14 @@ casper.test.begin('todomvc', 63, function (test) {
   })
 
   // active filter on page load ---------------------------------------------
-  .thenOpen('../../examples/todomvc/index.html#/active', function () {
+  .thenOpen('examples/todomvc/index.html#/active', function () {
     test.assertElementCount('.todo', 2, 'filter active should have 2 items')
     test.assertElementCount('.todo.completed', 0, 'visible items should be incompleted')
     test.assertSelectorHasText('.todo-count strong', '2', 'remaining count should be 2')
   })
 
   // completed filter on page load ------------------------------------------
-  .thenOpen('../../examples/todomvc/index.html#/completed', function () {
+  .thenOpen('examples/todomvc/index.html#/completed', function () {
     test.assertElementCount('.todo', 2, 'filter completed should have 2 items')
     test.assertElementCount('.todo.completed', 2, 'visible items should be completed')
     test.assertSelectorHasText('.todo-count strong', '2', 'remaining count should be 2')

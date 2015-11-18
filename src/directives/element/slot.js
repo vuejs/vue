@@ -1,18 +1,27 @@
-var _ = require('../../util')
-var templateParser = require('../../parsers/template')
+import {
+  parseTemplate,
+  cloneNode
+} from '../../parsers/template'
+
+import {
+  extractContent,
+  replace,
+  remove,
+  isTemplate
+} from '../../util/index'
 
 // This is the elementDirective that handles <content>
 // transclusions. It relies on the raw content of an
 // instance being stored as `$options._content` during
 // the transclude phase.
 
-module.exports = {
+export default {
 
   priority: 1750,
 
   params: ['name'],
 
-  bind: function () {
+  bind () {
     var host = this.vm
     var raw = host.$options._content
     var content
@@ -57,11 +66,11 @@ module.exports = {
     }
   },
 
-  fallback: function () {
-    this.compile(_.extractContent(this.el, true), this.vm)
+  fallback () {
+    this.compile(extractContent(this.el, true), this.vm)
   },
 
-  compile: function (content, context, host) {
+  compile (content, context, host) {
     if (content && context) {
       var scope = host
         ? host._scope
@@ -71,13 +80,13 @@ module.exports = {
       )
     }
     if (content) {
-      _.replace(this.el, content)
+      replace(this.el, content)
     } else {
-      _.remove(this.el)
+      remove(this.el)
     }
   },
 
-  unbind: function () {
+  unbind () {
     if (this.unlink) {
       this.unlink()
     }
@@ -113,12 +122,12 @@ function extractFragment (nodes, parent, main) {
   return frag
 
   function append (node) {
-    if (_.isTemplate(node) &&
+    if (isTemplate(node) &&
         !node.hasAttribute('v-if') &&
         !node.hasAttribute('v-for')) {
-      node = templateParser.parse(node)
+      node = parseTemplate(node)
     }
-    node = templateParser.clone(node)
+    node = cloneNode(node)
     frag.appendChild(node)
   }
 }

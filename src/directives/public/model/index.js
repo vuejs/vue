@@ -1,13 +1,17 @@
-var _ = require('../../../util')
+import { warn, resolveAsset } from '../../../util/index'
+import text from './text'
+import radio from './radio'
+import select from './select'
+import checkbox from './checkbox'
 
-var handlers = {
-  text: require('./text'),
-  radio: require('./radio'),
-  select: require('./select'),
-  checkbox: require('./checkbox')
+const handlers = {
+  text,
+  radio,
+  select,
+  checkbox
 }
 
-module.exports = {
+export default {
 
   priority: 800,
   twoWay: true,
@@ -25,11 +29,11 @@ module.exports = {
    *     - number
    */
 
-  bind: function () {
+  bind () {
     // friendly warning...
     this.checkFilters()
     if (this.hasRead && !this.hasWrite) {
-      process.env.NODE_ENV !== 'production' && _.warn(
+      process.env.NODE_ENV !== 'production' && warn(
         'It seems you are using a read-only filter with ' +
         'v-model. You might want to use a two-way filter ' +
         'to ensure correct behavior.'
@@ -45,7 +49,7 @@ module.exports = {
     } else if (tag === 'TEXTAREA') {
       handler = handlers.text
     } else {
-      process.env.NODE_ENV !== 'production' && _.warn(
+      process.env.NODE_ENV !== 'production' && warn(
         'v-model does not support element type: ' + tag
       )
       return
@@ -60,12 +64,12 @@ module.exports = {
    * Check read/write filter stats.
    */
 
-  checkFilters: function () {
+  checkFilters () {
     var filters = this.filters
     if (!filters) return
     var i = filters.length
     while (i--) {
-      var filter = _.resolveAsset(this.vm.$options, 'filters', filters[i].name)
+      var filter = resolveAsset(this.vm.$options, 'filters', filters[i].name)
       if (typeof filter === 'function' || filter.read) {
         this.hasRead = true
       }
@@ -75,7 +79,7 @@ module.exports = {
     }
   },
 
-  unbind: function () {
+  unbind () {
     this.el.__v_model = null
     this._unbind && this._unbind()
   }

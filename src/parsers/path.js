@@ -1,6 +1,14 @@
-var _ = require('../util')
-var expParser = require('./expression')
-var Cache = require('../cache')
+import { parseExpression } from './expression'
+import {
+  isLiteral,
+  stripQuotes,
+  isObject,
+  isArray,
+  warn,
+  set
+} from '../util/index'
+import Cache from '../cache'
+
 var pathCache = new Cache(1000)
 
 // actions
@@ -141,8 +149,8 @@ function formatSubPath (path) {
   if (path.charAt(0) === '0' && isNaN(path)) {
     return false
   }
-  return _.isLiteral(trimmed)
-    ? _.stripQuotes(trimmed)
+  return isLiteral(trimmed)
+    ? stripQuotes(trimmed)
     : '*' + trimmed
 }
 
@@ -153,7 +161,7 @@ function formatSubPath (path) {
  * @return {Array|undefined}
  */
 
-function parsePath (path) {
+function parse (path) {
   var keys = []
   var index = -1
   var mode = BEFORE_PATH
@@ -251,10 +259,10 @@ function parsePath (path) {
  * @return {Array|undefined}
  */
 
-exports.parse = function (path) {
+export function parsePath (path) {
   var hit = pathCache.get(path)
   if (!hit) {
-    hit = parsePath(path)
+    hit = parse(path)
     if (hit) {
       pathCache.put(path, hit)
     }
@@ -269,8 +277,8 @@ exports.parse = function (path) {
  * @param {String} path
  */
 
-exports.get = function (obj, path) {
-  return expParser.parse(path).get(obj)
+export function getPath (obj, path) {
+  return parseExpression(path).get(obj)
 }
 
 /**
@@ -280,7 +288,7 @@ exports.get = function (obj, path) {
 var warnNonExistent
 if (process.env.NODE_ENV !== 'production') {
   warnNonExistent = function (path) {
-    _.warn(
+    warn(
       'You are setting a non-existent path "' + path.raw + '" ' +
       'on a vm instance. Consider pre-initializing the property ' +
       'with the "data" option for more reliable reactivity ' +
@@ -297,12 +305,12 @@ if (process.env.NODE_ENV !== 'production') {
  * @param {*} val
  */
 
-exports.set = function (obj, path, val) {
+export function setPath (obj, path, val) {
   var original = obj
   if (typeof path === 'string') {
-    path = exports.parse(path)
+    path = parse(path)
   }
-  if (!path || !_.isObject(obj)) {
+  if (!path || !isObject(obj)) {
     return false
   }
   var last, key
@@ -310,19 +318,19 @@ exports.set = function (obj, path, val) {
     last = obj
     key = path[i]
     if (key.charAt(0) === '*') {
-      key = expParser.parse(key.slice(1)).get.call(original, original)
+      key = parseExpression(key.slice(1)).get.call(original, original)
     }
     if (i < l - 1) {
       obj = obj[key]
-      if (!_.isObject(obj)) {
+      if (!isObject(obj)) {
         obj = {}
         if (process.env.NODE_ENV !== 'production' && last._isVue) {
           warnNonExistent(path)
         }
-        _.set(last, key, obj)
+        set(last, key, obj)
       }
     } else {
-      if (_.isArray(obj)) {
+      if (isArray(obj)) {
         obj.$set(key, val)
       } else if (key in obj) {
         obj[key] = val
@@ -330,7 +338,7 @@ exports.set = function (obj, path, val) {
         if (process.env.NODE_ENV !== 'production' && obj._isVue) {
           warnNonExistent(path)
         }
-        _.set(obj, key, val)
+        set(obj, key, val)
       }
     }
   }

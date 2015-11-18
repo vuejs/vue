@@ -1,5 +1,6 @@
-var _ = require('../util')
-var uid = 0
+import { toArray } from '../util/index'
+
+let uid = 0
 
 /**
  * A dep is an observable that can have multiple
@@ -8,7 +9,7 @@ var uid = 0
  * @constructor
  */
 
-function Dep () {
+export default function Dep () {
   this.id = uid++
   this.subs = []
 }
@@ -52,10 +53,8 @@ Dep.prototype.depend = function () {
 
 Dep.prototype.notify = function () {
   // stablize the subscriber list first
-  var subs = _.toArray(this.subs)
+  var subs = toArray(this.subs)
   for (var i = 0, l = subs.length; i < l; i++) {
     subs[i].update()
   }
 }
-
-module.exports = Dep

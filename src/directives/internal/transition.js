@@ -1,20 +1,20 @@
-var _ = require('../../util')
-var Transition = require('../../transition/transition')
+import { resolveAsset, addClass, removeClass } from '../../util/index'
+import Transition from '../../transition/transition'
 
-module.exports = {
+export default {
 
   priority: 1100,
 
-  update: function (id, oldId) {
+  update (id, oldId) {
     var el = this.el
     // resolve on owner vm
-    var hooks = _.resolveAsset(this.vm.$options, 'transitions', id)
+    var hooks = resolveAsset(this.vm.$options, 'transitions', id)
     id = id || 'v'
     // apply on closest vm
     el.__v_trans = new Transition(el, id, hooks, this.el.__vue__ || this.vm)
     if (oldId) {
-      _.removeClass(el, oldId + '-transition')
+      removeClass(el, oldId + '-transition')
     }
-    _.addClass(el, id + '-transition')
+    addClass(el, id + '-transition')
   }
 }

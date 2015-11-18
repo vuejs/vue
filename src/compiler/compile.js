@@ -1,27 +1,38 @@
-var _ = require('../util')
-var publicDirectives = require('../directives/public')
-var internalDirectives = require('../directives/internal')
-var compileProps = require('./compile-props')
-var textParser = require('../parsers/text')
-var dirParser = require('../parsers/directive')
-var templateParser = require('../parsers/template')
-var resolveAsset = _.resolveAsset
+import publicDirectives from '../directives/public/index'
+import internalDirectives from '../directives/internal/index'
+import { compileProps } from './compile-props'
+import { parseText, tokensToExp } from '../parsers/text'
+import { parseDirective } from '../parsers/directive'
+import { parseTemplate } from '../parsers/template'
+import { resolveAsset } from '../util/index'
+import {
+  toArray,
+  warn,
+  remove,
+  replace,
+  commonTagRE,
+  checkComponentAttr,
+  findRef,
+  defineReactive,
+  assertAsset,
+  getAttr
+} from '../util/index'
 
 // special binding prefixes
-var bindRE = /^v-bind:|^:/
-var onRE = /^v-on:|^@/
-var argRE = /:(.*)$/
-var modifierRE = /\.[^\.]+/g
-var transitionRE = /^(v-bind:|:)?transition$/
+const bindRE = /^v-bind:|^:/
+const onRE = /^v-on:|^@/
+const argRE = /:(.*)$/
+const modifierRE = /\.[^\.]+/g
+const transitionRE = /^(v-bind:|:)?transition$/
 
 // terminal directives
-var terminalDirectives = [
+const terminalDirectives = [
   'for',
   'if'
 ]
 
 // default directive priority
-var DEFAULT_PRIORITY = 1000
+const DEFAULT_PRIORITY = 1000
 
 /**
  * Compile a template and return a reusable composite link
@@ -40,7 +51,7 @@ var DEFAULT_PRIORITY = 1000
  * @return {Function}
  */
 
-exports.compile = function (el, options, partial) {
+export function compile (el, options, partial) {
   // link function for the node itself.
   var nodeLinkFn = partial || !options._asComponent
     ? compileNode(el, options)
@@ -68,7 +79,7 @@ exports.compile = function (el, options, partial) {
 
   return function compositeLinkFn (vm, el, host, scope, frag) {
     // cache childNodes before linking parent, fix #657
-    var childNodes = _.toArray(el.childNodes)
+    var childNodes = toArray(el.childNodes)
     // link
     var dirs = linkAndCapture(function compositeLinkCapturer () {
       if (nodeLinkFn) nodeLinkFn(vm, el, host, scope, frag)
@@ -162,7 +173,7 @@ function teardownDirs (vm, dirs, destroying) {
  * @return {Function}
  */
 
-exports.compileAndLinkProps = function (vm, el, props, scope) {
+export function compileAndLinkProps (vm, el, props, scope) {
   var propsLinkFn = compileProps(el, props)
   var propDirs = linkAndCapture(function () {
     propsLinkFn(vm, scope)
@@ -186,7 +197,7 @@ exports.compileAndLinkProps = function (vm, el, props, scope) {
  * @return {Function}
  */
 
-exports.compileRoot = function (el, options, contextOptions) {
+export function compileRoot (el, options, contextOptions) {
   var containerAttrs = options._containerAttrs
   var replacerAttrs = options._replacerAttrs
   var contextLinkFn, replacerLinkFn
@@ -225,7 +236,7 @@ exports.compileRoot = function (el, options, contextOptions) {
       })
     if (names.length) {
       var plural = names.length > 1
-      _.warn(
+      warn(
         'Attribute' + (plural ? 's ' : ' ') + names.join(', ') +
         (plural ? ' are' : ' is') + ' ignored on component ' +
         '<' + options.el.tagName.toLowerCase() + '> because ' +
@@ -289,9 +300,9 @@ function compileElement (el, options) {
   // textarea treats its text content as the initial value.
   // just bind it as an attr directive for value.
   if (el.tagName === 'TEXTAREA') {
-    var tokens = textParser.parse(el.value)
+    var tokens = parseText(el.value)
     if (tokens) {
-      el.setAttribute(':value', textParser.tokensToExp(tokens))
+      el.setAttribute(':value', tokensToExp(tokens))
       el.value = ''
     }
   }
@@ -330,7 +341,7 @@ function compileTextNode (node, options) {
     return removeText
   }
 
-  var tokens = textParser.parse(node.wholeText)
+  var tokens = parseText(node.wholeText)
   if (!tokens) {
     return null
   }
@@ -366,7 +377,7 @@ function compileTextNode (node, options) {
  */
 
 function removeText (vm, node) {
-  _.remove(node)
+  remove(node)
 }
 
 /**
@@ -395,7 +406,7 @@ function processTextToken (token, options) {
   }
   function setTokenType (type) {
     if (token.descriptor) return
-    var parsed = dirParser.parse(token.value)
+    var parsed = parseDirective(token.value)
     token.descriptor = {
       name: type,
       def: publicDirectives[type],
@@ -416,7 +427,7 @@ function processTextToken (token, options) {
 function makeTextNodeLinkFn (tokens, frag) {
   return function textNodeLinkFn (vm, el, host, scope) {
     var fragClone = frag.cloneNode(true)
-    var childNodes = _.toArray(fragClone.childNodes)
+    var childNodes = toArray(fragClone.childNodes)
     var token, value, node
     for (var i = 0, l = tokens.length; i < l; i++) {
       token = tokens[i]
@@ -426,7 +437,7 @@ function makeTextNodeLinkFn (tokens, frag) {
         if (token.oneTime) {
           value = (scope || vm).$eval(value)
           if (token.html) {
-            _.replace(node, templateParser.parse(value, true))
+            replace(node, parseTemplate(value, true))
           } else {
             node.data = value
           }
@@ -435,7 +446,7 @@ function makeTextNodeLinkFn (tokens, frag) {
         }
       }
     }
-    _.replace(el, fragClone)
+    replace(el, fragClone)
   }
 }
 
@@ -481,7 +492,7 @@ function makeChildLinkFn (linkFns) {
       nodeLinkFn = linkFns[i++]
       childrenLinkFn = linkFns[i++]
       // cache childNodes before linking parent, fix #657
-      var childNodes = _.toArray(node.childNodes)
+      var childNodes = toArray(node.childNodes)
       if (nodeLinkFn) {
         nodeLinkFn(vm, node, host, scope, frag)
       }
@@ -502,7 +513,7 @@ function makeChildLinkFn (linkFns) {
 
 function checkElementDirectives (el, options) {
   var tag = el.tagName.toLowerCase()
-  if (_.commonTagRE.test(tag)) return
+  if (commonTagRE.test(tag)) return
   var def = resolveAsset(options, 'elementDirectives', tag)
   if (def) {
     return makeTerminalNodeLinkFn(el, tag, '', options, def)
@@ -519,9 +530,9 @@ function checkElementDirectives (el, options) {
  */
 
 function checkComponent (el, options) {
-  var component = _.checkComponent(el, options)
+  var component = checkComponentAttr(el, options)
   if (component) {
-    var ref = _.findRef(el)
+    var ref = findRef(el)
     var descriptor = {
       name: 'component',
       ref: ref,
@@ -533,7 +544,7 @@ function checkComponent (el, options) {
     }
     var componentLinkFn = function (vm, el, host, scope, frag) {
       if (ref) {
-        _.defineReactive((scope || vm).$refs, ref, null)
+        defineReactive((scope || vm).$refs, ref, null)
       }
       vm._bindDir(descriptor, el, host, scope, frag)
     }
@@ -553,7 +564,7 @@ function checkComponent (el, options) {
 
 function checkTerminalDirectives (el, options) {
   // skip v-pre
-  if (_.attr(el, 'v-pre') !== null) {
+  if (getAttr(el, 'v-pre') !== null) {
     return skip
   }
   // skip v-else block, but only if following v-if
@@ -592,7 +603,7 @@ skip.terminal = true
  */
 
 function makeTerminalNodeLinkFn (el, dirName, value, options, def) {
-  var parsed = dirParser.parse(value)
+  var parsed = parseDirective(value)
   var descriptor = {
     name: dirName,
     expression: parsed.expression,
@@ -603,11 +614,11 @@ function makeTerminalNodeLinkFn (el, dirName, value, options, def) {
   }
   // check ref for v-for and router-view
   if (dirName === 'for' || dirName === 'router-view') {
-    descriptor.ref = _.findRef(el)
+    descriptor.ref = findRef(el)
   }
   var fn = function terminalNodeLinkFn (vm, el, host, scope, frag) {
     if (descriptor.ref) {
-      _.defineReactive((scope || vm).$refs, descriptor.ref, null)
+      defineReactive((scope || vm).$refs, descriptor.ref, null)
     }
     vm._bindDir(descriptor, el, host, scope, frag)
   }
@@ -631,7 +642,7 @@ function compileDirectives (attrs, options) {
     attr = attrs[i]
     name = rawName = attr.name
     value = rawValue = attr.value
-    tokens = textParser.parse(value)
+    tokens = parseText(value)
     // reset arg
     arg = null
     // check modifiers
@@ -640,7 +651,7 @@ function compileDirectives (attrs, options) {
 
     // attribute interpolations
     if (tokens) {
-      value = textParser.tokensToExp(tokens)
+      value = tokensToExp(tokens)
       arg = name
       pushDir('bind', publicDirectives.bind, true)
       // warn against mixing mustaches with v-bind
@@ -648,7 +659,7 @@ function compileDirectives (attrs, options) {
         if (name === 'class' && Array.prototype.some.call(attrs, function (attr) {
           return attr.name === ':class' || attr.name === 'v-bind:class'
         })) {
-          _.warn(
+          warn(
             'class="' + rawValue + '": Do not mix mustache interpolation ' +
             'and v-bind for "class" on the same element. Use one or the other.'
           )
@@ -697,7 +708,7 @@ function compileDirectives (attrs, options) {
       dirDef = resolveAsset(options, 'directives', dirName)
 
       if (process.env.NODE_ENV !== 'production') {
-        _.assertAsset(dirDef, 'directive', dirName)
+        assertAsset(dirDef, 'directive', dirName)
       }
 
       if (dirDef) {
@@ -715,7 +726,7 @@ function compileDirectives (attrs, options) {
    */
 
   function pushDir (dirName, def, interp) {
-    var parsed = dirParser.parse(value)
+    var parsed = parseDirective(value)
     dirs.push({
       name: dirName,
       attr: rawName,

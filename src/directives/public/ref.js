@@ -1,10 +1,10 @@
-if (process.env.NODE_ENV !== 'production') {
-  module.exports = {
-    bind: function () {
-      require('../../util').warn(
-        'v-ref:' + this.arg + ' must be used on a child ' +
-        'component. Found on <' + this.el.tagName.toLowerCase() + '>.'
-      )
-    }
+import { warn } from '../../util/index'
+
+export default {
+  bind () {
+    process.env.NODE_ENV !== 'production' && warn(
+      'v-ref:' + this.arg + ' must be used on a child ' +
+      'component. Found on <' + this.el.tagName.toLowerCase() + '>.'
+    )
   }
 }

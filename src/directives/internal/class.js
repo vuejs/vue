@@ -1,24 +1,28 @@
-var _ = require('../../util')
-var addClass = _.addClass
-var removeClass = _.removeClass
+import {
+  addClass,
+  removeClass,
+  isArray,
+  isPlainObject,
+  hasOwn
+} from '../../util/index'
 
-module.exports = {
+export default {
 
   deep: true,
 
-  update: function (value) {
+  update (value) {
     if (value && typeof value === 'string') {
       this.handleObject(stringToObject(value))
-    } else if (_.isPlainObject(value)) {
+    } else if (isPlainObject(value)) {
       this.handleObject(value)
-    } else if (_.isArray(value)) {
+    } else if (isArray(value)) {
       this.handleArray(value)
     } else {
       this.cleanup()
     }
   },
 
-  handleObject: function (value) {
+  handleObject (value) {
     this.cleanup(value)
     var keys = this.prevKeys = Object.keys(value)
     for (var i = 0, l = keys.length; i < l; i++) {
@@ -31,7 +35,7 @@ module.exports = {
     }
   },
 
-  handleArray: function (value) {
+  handleArray (value) {
     this.cleanup(value)
     for (var i = 0, l = value.length; i < l; i++) {
       if (value[i]) {
@@ -41,7 +45,7 @@ module.exports = {
     this.prevKeys = value.slice()
   },
 
-  cleanup: function (value) {
+  cleanup (value) {
     if (this.prevKeys) {
       var i = this.prevKeys.length
       while (i--) {
@@ -65,7 +69,7 @@ function stringToObject (value) {
 }
 
 function contains (value, key) {
-  return _.isArray(value)
+  return isArray(value)
     ? value.indexOf(key) > -1
-    : _.hasOwn(value, key)
+    : hasOwn(value, key)
 }

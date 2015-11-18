@@ -1,12 +1,12 @@
 var _ = require('../../../../src/util')
-var Vue = require('../../../../src/vue')
+var Vue = require('../../../../src/index')
 var merge = _.mergeOptions
 var resolveAsset = _.resolveAsset
 
 describe('Util - Option merging', function () {
 
   beforeEach(function () {
-    spyOn(_, 'warn')
+    spyWarns()
   })
 
   it('default strat', function () {
@@ -161,7 +161,7 @@ describe('Util - Option merging', function () {
         a: { template: 'hi' }
       }
     })
-    expect(hasWarned(_, 'Do not use built-in HTML elements')).toBe(true)
+    expect(hasWarned('Do not use built-in HTML elements')).toBe(true)
   })
 
   it('should ignore non-function el & data in class merge', function () {
@@ -255,10 +255,10 @@ describe('Util - Option merging', function () {
   })
 
   it('already observed instance data merge with default data', function () {
-    var Observer = require('../../../../src/observer')
+    var observe = require('../../../../src/observer').observe
     var instanceData = { a: 123 }
     // observe it
-    Observer.create(instanceData)
+    observe(instanceData)
     var res = merge(
       {
         data: function () { return { b: 234} }
@@ -327,7 +327,7 @@ describe('Util - Option merging', function () {
       components: [{}]
     }
     merge(a, b)
-    expect(hasWarned(_, 'must provide a "name" or "id" field')).toBe(true)
+    expect(hasWarned('must provide a "name" or "id" field')).toBe(true)
   })
 
   it('warn Array async component without id', function () {
@@ -340,7 +340,7 @@ describe('Util - Option merging', function () {
       components: [function () {}]
     }
     merge(a, b)
-    expect(hasWarned(_, 'must provide a "name" or "id" field')).toBe(true)
+    expect(hasWarned('must provide a "name" or "id" field')).toBe(true)
   })
 
 })

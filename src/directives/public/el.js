@@ -1,24 +1,24 @@
-var _ = require('../../util')
+import { camelize, hasOwn, defineReactive } from '../../util/index'
 
-module.exports = {
+export default {
 
   priority: 1500,
 
-  bind: function () {
+  bind () {
     /* istanbul ignore if */
     if (!this.arg) {
       return
     }
-    var id = this.id = _.camelize(this.arg)
+    var id = this.id = camelize(this.arg)
     var refs = (this._scope || this.vm).$els
-    if (_.hasOwn(refs, id)) {
+    if (hasOwn(refs, id)) {
       refs[id] = this.el
     } else {
-      _.defineReactive(refs, id, this.el)
+      defineReactive(refs, id, this.el)
     }
   },
 
-  unbind: function () {
+  unbind () {
     var refs = (this._scope || this.vm).$els
     if (refs[this.id] === this.el) {
       refs[this.id] = null

@@ -1,9 +1,24 @@
-var _ = require('../../util')
-var FragmentFactory = require('../../fragment/factory')
-var isObject = _.isObject
-var uid = 0
+import FragmentFactory from '../../fragment/factory'
+import {
+  isObject,
+  warn,
+  createAnchor,
+  replace,
+  before,
+  after,
+  remove,
+  hasOwn,
+  inDoc,
+  defineReactive,
+  def,
+  cancellable,
+  isArray,
+  isPlainObject
+} from '../../util/index'
 
-module.exports = {
+let uid = 0
+
+const vFor = {
 
   priority: 2000,
 
@@ -29,7 +44,7 @@ module.exports = {
     }
 
     if (!this.alias) {
-      process.env.NODE_ENV !== 'production' && _.warn(
+      process.env.NODE_ENV !== 'production' && warn(
         'Alias is required in v-for.'
       )
       return
@@ -50,10 +65,10 @@ module.exports = {
       this.el.parentNode.tagName === 'SELECT'
 
     // setup anchor nodes
-    this.start = _.createAnchor('v-for-start')
-    this.end = _.createAnchor('v-for-end')
-    _.replace(this.el, this.end)
-    _.before(this.start, this.end)
+    this.start = createAnchor('v-for-start')
+    this.end = createAnchor('v-for-end')
+    replace(this.el, this.end)
+    before(this.start, this.end)
 
     // cache
     this.cache = Object.create(null)
@@ -87,8 +102,8 @@ module.exports = {
     var item = data[0]
     var convertedFromObject = this.fromObject =
       isObject(item) &&
-      _.hasOwn(item, '$key') &&
-      _.hasOwn(item, '$value')
+      hasOwn(item, '$key') &&
+      hasOwn(item, '$value')
 
     var trackByKey = this.params.trackBy
     var oldFrags = this.frags
@@ -97,7 +112,7 @@ module.exports = {
     var iterator = this.iterator
     var start = this.start
     var end = this.end
-    var inDoc = _.inDoc(start)
+    var inDocument = inDoc(start)
     var init = !oldFrags
     var i, l, frag, key, value, primitive
 
@@ -152,7 +167,7 @@ module.exports = {
       frag = oldFrags[i]
       if (!frag.reused) {
         this.deleteCachedFrag(frag)
-        this.remove(frag, removalIndex++, totalRemoved, inDoc)
+        this.remove(frag, removalIndex++, totalRemoved, inDocument)
       }
     }
 
@@ -184,7 +199,7 @@ module.exports = {
       } else {
         // new instance, or still in stagger.
         // insert with updated stagger index.
-        this.insert(frag, insertionIndex++, prevEl, inDoc)
+        this.insert(frag, insertionIndex++, prevEl, inDocument)
       }
       frag.reused = frag.fresh = false
     }
@@ -213,16 +228,16 @@ module.exports = {
     // for two-way binding on alias
     scope.$forContext = this
     // define scope properties
-    _.defineReactive(scope, alias, value)
-    _.defineReactive(scope, '$index', index)
+    defineReactive(scope, alias, value)
+    defineReactive(scope, '$index', index)
     if (key) {
-      _.defineReactive(scope, '$key', key)
+      defineReactive(scope, '$key', key)
     } else if (scope.$key) {
       // avoid accidental fallback
-      _.define(scope, '$key', null)
+      def(scope, '$key', null)
     }
     if (this.iterator) {
-      _.defineReactive(scope, this.iterator, key !== null ? key : index)
+      defineReactive(scope, this.iterator, key !== null ? key : index)
     }
     var frag = this.factory.create(host, scope, this._frag)
     frag.forId = this.id
@@ -271,29 +286,29 @@ module.exports = {
    * @param {Fragment} frag
    * @param {Number} index
    * @param {Node} prevEl
-   * @param {Boolean} inDoc
+   * @param {Boolean} inDocument
    */
 
-  insert: function (frag, index, prevEl, inDoc) {
+  insert: function (frag, index, prevEl, inDocument) {
     if (frag.staggerCb) {
       frag.staggerCb.cancel()
       frag.staggerCb = null
     }
     var staggerAmount = this.getStagger(frag, index, null, 'enter')
-    if (inDoc && staggerAmount) {
+    if (inDocument && staggerAmount) {
       // create an anchor and insert it synchronously,
       // so that we can resolve the correct order without
       // worrying about some elements not inserted yet
       var anchor = frag.staggerAnchor
       if (!anchor) {
-        anchor = frag.staggerAnchor = _.createAnchor('stagger-anchor')
+        anchor = frag.staggerAnchor = createAnchor('stagger-anchor')
         anchor.__vfrag__ = frag
       }
-      _.after(anchor, prevEl)
-      var op = frag.staggerCb = _.cancellable(function () {
+      after(anchor, prevEl)
+      var op = frag.staggerCb = cancellable(function () {
         frag.staggerCb = null
         frag.before(anchor)
-        _.remove(anchor)
+        remove(anchor)
       })
       setTimeout(op, staggerAmount)
     } else {
@@ -307,10 +322,10 @@ module.exports = {
    * @param {Fragment} frag
    * @param {Number} index
    * @param {Number} total
-   * @param {Boolean} inDoc
+   * @param {Boolean} inDocument
    */
 
-  remove: function (frag, index, total, inDoc) {
+  remove: function (frag, index, total, inDocument) {
     if (frag.staggerCb) {
       frag.staggerCb.cancel()
       frag.staggerCb = null
@@ -322,8 +337,8 @@ module.exports = {
       return
     }
     var staggerAmount = this.getStagger(frag, index, total, 'leave')
-    if (inDoc && staggerAmount) {
-      var op = frag.staggerCb = _.cancellable(function () {
+    if (inDocument && staggerAmount) {
+      var op = frag.staggerCb = cancellable(function () {
         frag.staggerCb = null
         frag.remove()
       })
@@ -373,7 +388,7 @@ module.exports = {
       }
     } else {
       id = this.id
-      if (_.hasOwn(value, id)) {
+      if (hasOwn(value, id)) {
         if (value[id] === null) {
           value[id] = frag
         } else {
@@ -381,7 +396,7 @@ module.exports = {
           this.warnDuplicate(value)
         }
       } else {
-        _.define(value, id, frag)
+        def(value, id, frag)
       }
     }
     frag.raw = value
@@ -430,7 +445,7 @@ module.exports = {
     var index = scope.$index
     // fix #948: avoid accidentally fall through to
     // a parent repeater which happens to have $key.
-    var key = _.hasOwn(scope, '$key') && scope.$key
+    var key = hasOwn(scope, '$key') && scope.$key
     var primitive = !isObject(value)
     if (trackByKey || key || primitive) {
       var id = trackByKey
@@ -485,9 +500,9 @@ module.exports = {
    */
 
   _postProcess: function (value) {
-    if (_.isArray(value)) {
+    if (isArray(value)) {
       return value
-    } else if (_.isPlainObject(value)) {
+    } else if (isPlainObject(value)) {
       // convert plain object to array.
       var keys = Object.keys(value)
       var i = keys.length
@@ -586,11 +601,13 @@ function range (n) {
 }
 
 if (process.env.NODE_ENV !== 'production') {
-  module.exports.warnDuplicate = function (value) {
-    _.warn(
+  vFor.warnDuplicate = function (value) {
+    warn(
       'Duplicate value found in v-for="' + this.descriptor.raw + '": ' +
       JSON.stringify(value) + '. Use track-by="$index" if ' +
       'you are expecting duplicate values.'
     )
   }
 }
+
+export default vFor

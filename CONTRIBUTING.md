@@ -62,49 +62,38 @@ Hi! I’m really excited that you are interested in contributing to Vue.js. Befo
 
 ## Development Setup
 
-You will need [Node.js](http://nodejs.org) & [Grunt](http://gruntjs.com).
+You will need [Node.js](http://nodejs.org).
 
 ``` bash
-$ npm install -g grunt-cli
 $ npm install
 # install pre-commit lint hook
 $ npm run install-hook
 ```
 
-Dev mode: watch and auto-build `dist/vue.js` and unit tests during development:
+Dev mode: watch and auto-build `dist/vue.js` and serve unit tests at `http://localhost:8080` during development:
 
 ``` bash
 $ npm run dev
 ```
 
-The unit tests can be run in a browser by opening `test/unit/runner.html`. Make sure you are running dev mode first. There's a shortcut grunt task for opening the unit test page:
-
-``` bash
-$ grunt open
-```
-
 To lint:
 
 ``` bash
-$ grunt eslint
+$ npm run lint
 ```
 
 To build:
 
 ``` bash
-$ grunt build
+$ npm run build
 ```
 
-Run full test suite (see browser notes below):
+Run default test suite:
 
 ``` bash
-$ grunt test
+$ npm test
 ```
 
-The default task (by simply running `grunt`) will do the following: lint -> build -> unit tests -> e2e tests. It is required to have this pass successfully for a PR to be considered.
+The default test script will do the following: lint -> unit tests with coverage -> build -> e2e tests. **Please make sure to have this pass successfully before submitting a PR.**
 
-The unit tests are written with Jasmine and run with Karma. The e2e tests are written for and run with CasperJS.
-
-### Test Browser Notes
-
-When running the default `grunt` task, the unit tests will automatically be run in Chrome, Firefox and Safari. If you are not on a Mac, or don't have one of the browsers installed on your system, you can modify the [karma config in gruntfile.js](https://github.com/vuejs/vue/blob/dev/gruntfile.js#L38) to only run Karma tests in browsers that are available on your system. Just make sure don’t check in the gruntfile changes for the commit.
+The unit tests are written with [Jasmine](http://jasmine.github.io/2.3/introduction.html) and run with [Karma](http://karma-runner.github.io/0.13/index.html). The e2e tests are written for and run with [CasperJS](http://casperjs.org/).

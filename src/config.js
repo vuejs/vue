@@ -1,4 +1,9 @@
-module.exports = {
+import { compileRegex } from './parsers/text'
+
+let delimiters = ['{{', '}}']
+let unsafeDelimiters = ['{{{', '}}}']
+
+const config = {
 
   /**
    * Whether to print debug messages.
@@ -76,37 +81,32 @@ module.exports = {
    * Max circular updates allowed in a batcher flush cycle.
    */
 
-  _maxUpdateCount: 100
+  _maxUpdateCount: 100,
 
-}
+  /**
+   * Interpolation delimiters. Changing these would trigger
+   * the text parser to re-compile the regular expressions.
+   *
+   * @type {Array<String>}
+   */
 
-/**
- * Interpolation delimiters. Changing these would trigger
- * the text parser to re-compile the regular expressions.
- *
- * @type {Array<String>}
- */
-
-var delimiters = ['{{', '}}']
-var unsafeDelimiters = ['{{{', '}}}']
-var textParser = require('./parsers/text')
-
-Object.defineProperty(module.exports, 'delimiters', {
-  get: function () {
+  get delimiters () {
     return delimiters
   },
-  set: function (val) {
-    delimiters = val
-    textParser.compileRegex()
-  }
-})
 
-Object.defineProperty(module.exports, 'unsafeDelimiters', {
-  get: function () {
+  set delimiters (val) {
+    delimiters = val
+    compileRegex()
+  },
+
+  get unsafeDelimiters () {
     return unsafeDelimiters
   },
-  set: function (val) {
+
+  set unsafeDelimiters (val) {
     unsafeDelimiters = val
-    textParser.compileRegex()
+    compileRegex()
   }
-})
+}
+
+export default config

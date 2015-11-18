@@ -1,4 +1,7 @@
-var Observer = require('../../../../src/observer')
+var Vue = require('../../../../src')
+var ob = require('../../../../src/observer')
+var Observer = ob.Observer
+var observe = ob.observe
 var Dep = require('../../../../src/observer/dep')
 var _ = require('../../../../src/util')
 var config = require('../../../../src/config')
@@ -6,18 +9,18 @@ var config = require('../../../../src/config')
 describe('Observer', function () {
 
   beforeEach(function () {
-    spyOn(_, 'warn')
+    spyWarns()
   })
 
   it('create on non-observables', function () {
     // skip primitive value
-    var ob = Observer.create(1)
+    var ob = observe(1)
     expect(ob).toBeUndefined()
     // avoid vue instance
-    ob = Observer.create(new _.Vue())
+    ob = observe(new Vue())
     expect(ob).toBeUndefined()
     // avoid frozen objects
-    ob = Observer.create(Object.freeze({}))
+    ob = observe(Object.freeze({}))
     expect(ob).toBeUndefined()
   })
 
@@ -27,7 +30,7 @@ describe('Observer', function () {
       a: {},
       b: {}
     }
-    var ob = Observer.create(obj)
+    var ob = observe(obj)
     expect(ob instanceof Observer).toBe(true)
     expect(ob.value).toBe(obj)
     expect(obj.__ob__).toBe(ob)
@@ -35,7 +38,7 @@ describe('Observer', function () {
     expect(obj.a.__ob__ instanceof Observer).toBe(true)
     expect(obj.b.__ob__ instanceof Observer).toBe(true)
     // should return existing ob on already observed objects
-    var ob2 = Observer.create(obj)
+    var ob2 = observe(obj)
     expect(ob2).toBe(ob)
   })
 
@@ -44,7 +47,7 @@ describe('Observer', function () {
     var obj = Object.create(null)
     obj.a = {}
     obj.b = {}
-    var ob = Observer.create(obj)
+    var ob = observe(obj)
     expect(ob instanceof Observer).toBe(true)
     expect(ob.value).toBe(obj)
     expect(obj.__ob__).toBe(ob)
@@ -52,7 +55,7 @@ describe('Observer', function () {
     expect(obj.a.__ob__ instanceof Observer).toBe(true)
     expect(obj.b.__ob__ instanceof Observer).toBe(true)
     // should return existing ob on already observed objects
-    var ob2 = Observer.create(obj)
+    var ob2 = observe(obj)
     expect(ob2).toBe(ob)
   })
 
@@ -76,7 +79,7 @@ describe('Observer', function () {
       }
     })
 
-    var ob = Observer.create(obj)
+    var ob = observe(obj)
     expect(ob instanceof Observer).toBe(true)
     expect(ob.value).toBe(obj)
     expect(obj.__ob__).toBe(ob)
@@ -89,7 +92,7 @@ describe('Observer', function () {
     expect(getCount).toBe(2)
 
     // should return existing ob on already observed objects
-    var ob2 = Observer.create(obj)
+    var ob2 = observe(obj)
     expect(ob2).toBe(ob)
 
     // should call underlying setter
@@ -113,7 +116,7 @@ describe('Observer', function () {
       }
     })
 
-    var ob = Observer.create(obj)
+    var ob = observe(obj)
     expect(ob instanceof Observer).toBe(true)
     expect(ob.value).toBe(obj)
     expect(obj.__ob__).toBe(ob)
@@ -122,7 +125,7 @@ describe('Observer', function () {
     expect(obj.a).toBe(123)
 
     // should return existing ob on already observed objects
-    var ob2 = Observer.create(obj)
+    var ob2 = observe(obj)
     expect(ob2).toBe(ob)
 
     // since there is no setter, you shouldn't be able to write to it
@@ -151,7 +154,7 @@ describe('Observer', function () {
       }
     })
 
-    var ob = Observer.create(obj)
+    var ob = observe(obj)
     expect(ob instanceof Observer).toBe(true)
     expect(ob.value).toBe(obj)
     expect(obj.__ob__).toBe(ob)
@@ -160,7 +163,7 @@ describe('Observer', function () {
     expect(obj.a).toBe(undefined)
 
     // should return existing ob on already observed objects
-    var ob2 = Observer.create(obj)
+    var ob2 = observe(obj)
     expect(ob2).toBe(ob)
 
     // writes should call the set function
@@ -182,7 +185,7 @@ describe('Observer', function () {
       val: 10
     })
 
-    var ob = Observer.create(obj)
+    var ob = observe(obj)
     expect(ob instanceof Observer).toBe(true)
     expect(ob.value).toBe(obj)
     expect(obj.__ob__).toBe(ob)
@@ -193,7 +196,7 @@ describe('Observer', function () {
   it('create on array', function () {
     // on object
     var arr = [{}, {}]
-    var ob = Observer.create(arr)
+    var ob = observe(arr)
     expect(ob instanceof Observer).toBe(true)
     expect(ob.value).toBe(arr)
     expect(arr.__ob__).toBe(ob)
@@ -204,7 +207,7 @@ describe('Observer', function () {
 
   it('observing object prop change', function () {
     var obj = { a: { b: 2 } }
-    Observer.create(obj)
+    observe(obj)
     // mock a watcher!
     var watcher = {
       deps: [],
@@ -251,7 +254,7 @@ describe('Observer', function () {
       }
     })
 
-    Observer.create(obj)
+    observe(obj)
     // mock a watcher!
     var watcher = {
       deps: [],
@@ -275,13 +278,13 @@ describe('Observer', function () {
 
   it('observing set/delete', function () {
     var obj = { a: 1 }
-    var ob = Observer.create(obj)
+    var ob = observe(obj)
     var dep = ob.dep
     spyOn(dep, 'notify')
     _.set(obj, 'b', 2)
     expect(obj.b).toBe(2)
     expect(dep.notify.calls.count()).toBe(1)
-    _.delete(obj, 'a')
+    _.del(obj, 'a')
     expect(_.hasOwn(obj, 'a')).toBe(false)
     expect(dep.notify.calls.count()).toBe(2)
     // set existing key, should be a plain set and not
@@ -294,29 +297,29 @@ describe('Observer', function () {
     expect(obj.c).toBe(1)
     expect(dep.notify.calls.count()).toBe(3)
     // should ignore deleting non-existing key
-    _.delete(obj, 'a')
+    _.del(obj, 'a')
     expect(dep.notify.calls.count()).toBe(3)
     // should work on non-observed objects
     var obj2 = { a: 1 }
-    _.delete(obj2, 'a')
+    _.del(obj2, 'a')
     expect(_.hasOwn(obj2, 'a')).toBe(false)
     // should work on Object.create(null)
     var obj3 = Object.create(null)
     obj3.a = 1
-    var ob3 = Observer.create(obj3)
+    var ob3 = observe(obj3)
     var dep3 = ob3.dep
     spyOn(dep3, 'notify')
     _.set(obj3, 'b', 2)
     expect(obj3.b).toBe(2)
     expect(dep3.notify.calls.count()).toBe(1)
-    _.delete(obj3, 'a')
+    _.del(obj3, 'a')
     expect(_.hasOwn(obj3, 'a')).toBe(false)
     expect(dep3.notify.calls.count()).toBe(2)
   })
 
   it('observing array mutation', function () {
     var arr = []
-    var ob = Observer.create(arr)
+    var ob = observe(arr)
     var dep = ob.dep
     spyOn(dep, 'notify')
     var objs = [{}, {}, {}]
@@ -336,7 +339,7 @@ describe('Observer', function () {
 
   it('array $set', function () {
     var arr = [1]
-    var ob = Observer.create(arr)
+    var ob = observe(arr)
     var dep = ob.dep
     spyOn(dep, 'notify')
     arr.$set(0, 2)
@@ -352,7 +355,7 @@ describe('Observer', function () {
     var arr = [{}, {}]
     var obj1 = arr[0]
     var obj2 = arr[1]
-    var ob = Observer.create(arr)
+    var ob = observe(arr)
     var dep = ob.dep
     spyOn(dep, 'notify')
     // remove by identity, not in array
@@ -369,7 +372,7 @@ describe('Observer', function () {
   it('no proto', function () {
     _.hasProto = false
     var arr = [1, 2, 3]
-    var ob2 = Observer.create(arr)
+    var ob2 = observe(arr)
     expect(arr.$set).toBeTruthy()
     expect(arr.$remove).toBeTruthy()
     expect(arr.push).not.toBe([].push)

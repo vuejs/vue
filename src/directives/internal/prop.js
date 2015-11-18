@@ -3,13 +3,15 @@
 // The purpose is to make the initial prop values available
 // inside `created` hooks and `data` functions.
 
-var _ = require('../../util')
-var Watcher = require('../../watcher')
-var bindingModes = require('../../config')._propBindingModes
+import Watcher from '../../watcher'
+import config from '../../config'
+import { assertProp, initProp } from '../../util/index'
 
-module.exports = {
+const bindingModes = config._propBindingModes
 
-  bind: function () {
+export default {
+
+  bind () {
 
     var child = this.vm
     var parent = child._context
@@ -23,7 +25,7 @@ module.exports = {
       parent,
       parentKey,
       function (val) {
-        if (_.assertProp(prop, val)) {
+        if (assertProp(prop, val)) {
           child[childKey] = val
         }
       }, {
@@ -36,7 +38,7 @@ module.exports = {
     )
 
     // set the child initial value.
-    _.initProp(child, prop, parentWatcher.value)
+    initProp(child, prop, parentWatcher.value)
 
     // setup two-way binding
     if (twoWay) {
@@ -60,7 +62,7 @@ module.exports = {
     }
   },
 
-  unbind: function () {
+  unbind () {
     this.parentWatcher.teardown()
     if (this.childWatcher) {
       this.childWatcher.teardown()

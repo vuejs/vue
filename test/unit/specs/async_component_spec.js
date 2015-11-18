@@ -1,4 +1,4 @@
-var Vue = require('../../../src/vue')
+var Vue = require('../../../src/index')
 var _ = Vue.util
 
 describe('Async components', function () {
@@ -7,7 +7,7 @@ describe('Async components', function () {
   beforeEach(function () {
     el = document.createElement('div')
     document.body.appendChild(el)
-    spyOn(_, 'warn')
+    spyWarns()
   })
 
   afterEach(function () {
@@ -191,7 +191,7 @@ describe('Async components', function () {
         }
       }
     })
-    expect(hasWarned(_, 'Reason: nooooo')).toBe(true)
+    expect(hasWarned('Reason: nooooo')).toBe(true)
   })
 
   it('v-for', function (done) {

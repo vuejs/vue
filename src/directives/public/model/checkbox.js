@@ -1,8 +1,13 @@
-var _ = require('../../../util')
+import {
+  toNumber,
+  isArray,
+  indexOf,
+  looseEqual
+} from '../../../util/index'
 
-module.exports = {
+export default {
 
-  bind: function () {
+  bind () {
     var self = this
     var el = this.el
 
@@ -10,7 +15,7 @@ module.exports = {
       return el.hasOwnProperty('_value')
         ? el._value
         : self.params.number
-          ? _.toNumber(el.value)
+          ? toNumber(el.value)
           : el.value
     }
 
@@ -27,10 +32,10 @@ module.exports = {
 
     this.listener = function () {
       var model = self._watcher.value
-      if (_.isArray(model)) {
+      if (isArray(model)) {
         var val = self.getValue()
         if (el.checked) {
-          if (_.indexOf(model, val) < 0) {
+          if (indexOf(model, val) < 0) {
             model.push(val)
           }
         } else {
@@ -47,13 +52,13 @@ module.exports = {
     }
   },
 
-  update: function (value) {
+  update (value) {
     var el = this.el
-    if (_.isArray(value)) {
-      el.checked = _.indexOf(value, this.getValue()) > -1
+    if (isArray(value)) {
+      el.checked = indexOf(value, this.getValue()) > -1
     } else {
       if (el.hasOwnProperty('_trueValue')) {
-        el.checked = _.looseEqual(value, el._trueValue)
+        el.checked = looseEqual(value, el._trueValue)
       } else {
         el.checked = !!value
       }

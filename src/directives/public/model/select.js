@@ -1,8 +1,8 @@
-var _ = require('../../../util')
+import { isArray, toNumber, looseEqual } from '../../../util/index'
 
-module.exports = {
+export default {
 
-  bind: function () {
+  bind () {
     var self = this
     var el = this.el
 
@@ -20,9 +20,9 @@ module.exports = {
     this.listener = function () {
       var value = getValue(el, multiple)
       value = self.params.number
-        ? _.isArray(value)
-          ? value.map(_.toNumber)
-          : _.toNumber(value)
+        ? isArray(value)
+          ? value.map(toNumber)
+          : toNumber(value)
         : value
       self.set(value)
     }
@@ -42,10 +42,10 @@ module.exports = {
     this.vm.$on('hook:attached', this.forceUpdate)
   },
 
-  update: function (value) {
+  update (value) {
     var el = this.el
     el.selectedIndex = -1
-    var multi = this.multiple && _.isArray(value)
+    var multi = this.multiple && isArray(value)
     var options = el.options
     var i = options.length
     var op, val
@@ -57,12 +57,12 @@ module.exports = {
       /* eslint-disable eqeqeq */
       op.selected = multi
         ? indexOf(value, val) > -1
-        : _.looseEqual(value, val)
+        : looseEqual(value, val)
       /* eslint-enable eqeqeq */
     }
   },
 
-  unbind: function () {
+  unbind () {
     /* istanbul ignore next */
     this.vm.$off('hook:attached', this.forceUpdate)
   }
@@ -110,7 +110,7 @@ function getValue (el, multi, init) {
 function indexOf (arr, val) {
   var i = arr.length
   while (i--) {
-    if (_.looseEqual(arr[i], val)) {
+    if (looseEqual(arr[i], val)) {
       return i
     }
   }

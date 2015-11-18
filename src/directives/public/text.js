@@ -1,14 +1,14 @@
-var _ = require('../../util')
+import { _toString } from '../../util/index'
 
-module.exports = {
+export default {
 
-  bind: function () {
+  bind () {
     this.attr = this.el.nodeType === 3
       ? 'data'
       : 'textContent'
   },
 
-  update: function (value) {
-    this.el[this.attr] = _.toString(value)
+  update (value) {
+    this.el[this.attr] = _toString(value)
   }
 }

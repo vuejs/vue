@@ -1,10 +1,11 @@
-var _ = require('../util')
-var Cache = require('../cache')
-var templateCache = new Cache(1000)
-var idSelectorCache = new Cache(1000)
+import { inBrowser, trimNode, isTemplate } from '../util/index'
+import Cache from '../cache'
 
-var map = {
-  _default: [0, '', ''],
+const templateCache = new Cache(1000)
+const idSelectorCache = new Cache(1000)
+
+const map = {
+  efault: [0, '', ''],
   legend: [1, '<fieldset>', '</fieldset>'],
   tr: [2, '<table><tbody>', '</tbody></table>'],
   col: [
@@ -65,12 +66,12 @@ map.rect = [
  */
 
 function isRealTemplate (node) {
-  return _.isTemplate(node) &&
+  return isTemplate(node) &&
     node.content instanceof DocumentFragment
 }
 
-var tagRE = /<([\w:]+)/
-var entityRE = /&\w+;|&#\d+;|&#x[\dA-F]+;/
+const tagRE = /<([\w:]+)/
+const entityRE = /&\w+;|&#\d+;|&#x[\dA-F]+;/
 
 /**
  * Convert a string template to a DocumentFragment.
@@ -101,7 +102,7 @@ function stringToFragment (templateString, raw) {
   } else {
 
     var tag = tagMatch && tagMatch[1]
-    var wrap = map[tag] || map._default
+    var wrap = map[tag] || map.efault
     var depth = wrap[0]
     var prefix = wrap[1]
     var suffix = wrap[2]
@@ -138,7 +139,7 @@ function nodeToFragment (node) {
   // if its a template tag and the browser supports it,
   // its content is already a document fragment.
   if (isRealTemplate(node)) {
-    _.trimNode(node.content)
+    trimNode(node.content)
     return node.content
   }
   // script template
@@ -146,23 +147,23 @@ function nodeToFragment (node) {
     return stringToFragment(node.textContent)
   }
   // normal node, clone it to avoid mutating the original
-  var clone = exports.clone(node)
+  var clonedNode = cloneNode(node)
   var frag = document.createDocumentFragment()
   var child
   /* eslint-disable no-cond-assign */
-  while (child = clone.firstChild) {
+  while (child = clonedNode.firstChild) {
   /* eslint-enable no-cond-assign */
     frag.appendChild(child)
   }
-  _.trimNode(frag)
+  trimNode(frag)
   return frag
 }
 
 // Test for the presence of the Safari template cloning bug
-// https://bugs.webkit.org/show_bug.cgi?id=137755
+// https://bugs.webkit.org/showug.cgi?id=137755
 var hasBrokenTemplate = (function () {
   /* istanbul ignore else */
-  if (_.inBrowser) {
+  if (inBrowser) {
     var a = document.createElement('div')
     a.innerHTML = '<template>1</template>'
     return !a.cloneNode(true).firstChild.innerHTML
@@ -174,7 +175,7 @@ var hasBrokenTemplate = (function () {
 // Test for IE10/11 textarea placeholder clone bug
 var hasTextareaCloneBug = (function () {
   /* istanbul ignore else */
-  if (_.inBrowser) {
+  if (inBrowser) {
     var t = document.createElement('textarea')
     t.placeholder = 't'
     return t.cloneNode(true).value === 't'
@@ -193,7 +194,7 @@ var hasTextareaCloneBug = (function () {
  * @return {Element|DocumentFragment}
  */
 
-exports.clone = function (node) {
+export function cloneNode (node) {
   if (!node.querySelectorAll) {
     return node.cloneNode()
   }
@@ -201,18 +202,18 @@ exports.clone = function (node) {
   var i, original, cloned
   /* istanbul ignore if */
   if (hasBrokenTemplate) {
-    var clone = res
+    var tempClone = res
     if (isRealTemplate(node)) {
       node = node.content
-      clone = res.content
+      tempClone = res.content
     }
     original = node.querySelectorAll('template')
     if (original.length) {
-      cloned = clone.querySelectorAll('template')
+      cloned = tempClone.querySelectorAll('template')
       i = cloned.length
       while (i--) {
         cloned[i].parentNode.replaceChild(
-          exports.clone(original[i]),
+          cloneNode(original[i]),
           cloned[i]
         )
       }
@@ -247,22 +248,22 @@ exports.clone = function (node) {
  *        - Node object of type Template
  *        - id selector: '#some-template-id'
  *        - template string: '<div><span>{{msg}}</span></div>'
- * @param {Boolean} clone
+ * @param {Boolean} shouldClone
  * @param {Boolean} raw
  *        inline HTML interpolation. Do not check for id
  *        selector and keep whitespace in the string.
  * @return {DocumentFragment|undefined}
  */
 
-exports.parse = function (template, clone, raw) {
+export function parseTemplate (template, shouldClone, raw) {
   var node, frag
 
   // if the template is already a document fragment,
   // do nothing
   if (template instanceof DocumentFragment) {
-    _.trimNode(template)
-    return clone
-      ? exports.clone(template)
+    trimNode(template)
+    return shouldClone
+      ? cloneNode(template)
       : template
   }
 
@@ -288,7 +289,7 @@ exports.parse = function (template, clone, raw) {
     frag = nodeToFragment(template)
   }
 
-  return frag && clone
-    ? exports.clone(frag)
+  return frag && shouldClone
+    ? cloneNode(frag)
     : frag
 }

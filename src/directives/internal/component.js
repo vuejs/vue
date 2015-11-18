@@ -1,7 +1,15 @@
-var _ = require('../../util')
-var templateParser = require('../../parsers/template')
+import { cloneNode } from '../../parsers/template'
+import {
+  extractContent,
+  createAnchor,
+  replace,
+  hyphenate,
+  warn,
+  cancellable,
+  extend
+} from '../../util/index'
 
-module.exports = {
+export default {
 
   priority: 1500,
 
@@ -21,7 +29,7 @@ module.exports = {
    *   <component :is="view">
    */
 
-  bind: function () {
+  bind () {
     if (!this.el.__vue__) {
       // keep-alive cache
       this.keepAlive = this.params.keepAlive
@@ -31,7 +39,7 @@ module.exports = {
       // check inline-template
       if (this.params.inlineTemplate) {
         // extract inline template as a DocumentFragment
-        this.inlineTemplate = _.extractContent(this.el, true)
+        this.inlineTemplate = extractContent(this.el, true)
       }
       // component resolution related state
       this.pendingComponentCb =
@@ -40,8 +48,8 @@ module.exports = {
       this.pendingRemovals = 0
       this.pendingRemovalCb = null
       // create a ref anchor
-      this.anchor = _.createAnchor('v-component')
-      _.replace(this.el, this.anchor)
+      this.anchor = createAnchor('v-component')
+      replace(this.el, this.anchor)
       // remove is attribute.
       // this is removed during compilation, but because compilation is
       // cached, when the component is used elsewhere this attribute
@@ -49,14 +57,14 @@ module.exports = {
       this.el.removeAttribute('is')
       // remove ref, same as above
       if (this.descriptor.ref) {
-        this.el.removeAttribute('v-ref:' + _.hyphenate(this.descriptor.ref))
+        this.el.removeAttribute('v-ref:' + hyphenate(this.descriptor.ref))
       }
       // if static, build right now.
       if (this.literal) {
         this.setComponent(this.expression)
       }
     } else {
-      process.env.NODE_ENV !== 'production' && _.warn(
+      process.env.NODE_ENV !== 'production' && warn(
         'cannot mount component "' + this.expression + '" ' +
         'on already mounted element: ' + this.el
       )
@@ -68,7 +76,7 @@ module.exports = {
    * literal scenario, e.g. <component :is="view">
    */
 
-  update: function (value) {
+  update (value) {
     if (!this.literal) {
       this.setComponent(value)
     }
@@ -87,7 +95,7 @@ module.exports = {
    * @param {Function} [cb]
    */
 
-  setComponent: function (value, cb) {
+  setComponent (value, cb) {
     this.invalidatePending()
     if (!value) {
       // just remove current
@@ -107,9 +115,9 @@ module.exports = {
    * the child vm.
    */
 
-  resolveComponent: function (id, cb) {
+  resolveComponent (id, cb) {
     var self = this
-    this.pendingComponentCb = _.cancellable(function (Component) {
+    this.pendingComponentCb = cancellable(function (Component) {
       self.ComponentName = Component.options.name || id
       self.Component = Component
       cb()
@@ -126,7 +134,7 @@ module.exports = {
    * @param {Function} [cb]
    */
 
-  mountComponent: function (cb) {
+  mountComponent (cb) {
     // actual mount
     this.unbuild(true)
     var self = this
@@ -154,7 +162,7 @@ module.exports = {
    * pending callback.
    */
 
-  invalidatePending: function () {
+  invalidatePending () {
     if (this.pendingComponentCb) {
       this.pendingComponentCb.cancel()
       this.pendingComponentCb = null
@@ -170,7 +178,7 @@ module.exports = {
    * @return {Vue} - the created instance
    */
 
-  build: function (extraOptions) {
+  build (extraOptions) {
     var cached = this.getCached()
     if (cached) {
       return cached
@@ -179,7 +187,7 @@ module.exports = {
       // default options
       var options = {
         name: this.ComponentName,
-        el: templateParser.clone(this.el),
+        el: cloneNode(this.el),
         template: this.inlineTemplate,
         // make sure to add the child with correct parent
         // if this is a transcluded component, its parent
@@ -210,7 +218,7 @@ module.exports = {
       // in 1.0.0 this is used by vue-router only
       /* istanbul ignore if */
       if (extraOptions) {
-        _.extend(options, extraOptions)
+        extend(options, extraOptions)
       }
       var child = new this.Component(options)
       if (this.keepAlive) {
@@ -220,7 +228,7 @@ module.exports = {
       if (process.env.NODE_ENV !== 'production' &&
           this.el.hasAttribute('transition') &&
           child._isFragment) {
-        _.warn(
+        warn(
           'Transitions will not work on a fragment instance. ' +
           'Template: ' + child.$options.template
         )
@@ -235,7 +243,7 @@ module.exports = {
    * @return {Vue|undefined}
    */
 
-  getCached: function () {
+  getCached () {
     return this.keepAlive && this.cache[this.Component.cid]
   },
 
@@ -246,7 +254,7 @@ module.exports = {
    * @param {Boolean} defer
    */
 
-  unbuild: function (defer) {
+  unbuild (defer) {
     if (this.waitingFor) {
       this.waitingFor.$destroy()
       this.waitingFor = null
@@ -272,7 +280,7 @@ module.exports = {
    * @param {Function} cb
    */
 
-  remove: function (child, cb) {
+  remove (child, cb) {
     var keepAlive = this.keepAlive
     if (child) {
       // we may have a component switch when a previous
@@ -303,7 +311,7 @@ module.exports = {
    * @param {Function} [cb]
    */
 
-  transition: function (target, cb) {
+  transition (target, cb) {
     var self = this
     var current = this.childVM
     // for devtool inspection
@@ -333,7 +341,7 @@ module.exports = {
    * Unbind.
    */
 
-  unbind: function () {
+  unbind () {
     this.invalidatePending()
     // Do not defer cleanup when unbinding
     this.unbuild()

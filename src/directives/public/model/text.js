@@ -1,8 +1,15 @@
-var _ = require('../../../util')
+import {
+  isIE9,
+  isAndroid,
+  toNumber,
+  _toString,
+  nextTick,
+  debounce as _debounce
+} from '../../../util/index'
 
-module.exports = {
+export default {
 
-  bind: function () {
+  bind () {
     var self = this
     var el = this.el
     var isRange = el.type === 'range'
@@ -18,7 +25,7 @@ module.exports = {
     // Chinese, but instead triggers them for spelling
     // suggestions... (see Discussion/#162)
     var composing = false
-    if (!_.isAndroid && !isRange) {
+    if (!isAndroid && !isRange) {
       this.on('compositionstart', function () {
         composing = true
       })
@@ -52,12 +59,12 @@ module.exports = {
     this.listener = function () {
       if (composing) return
       var val = number || isRange
-        ? _.toNumber(el.value)
+        ? toNumber(el.value)
         : el.value
       self.set(val)
       // force update on next tick to avoid lock & same value
       // also only update when user is not typing
-      _.nextTick(function () {
+      nextTick(function () {
         if (self._bound && !self.focused) {
           self.update(self._watcher.value)
         }
@@ -66,7 +73,7 @@ module.exports = {
 
     // apply debounce
     if (debounce) {
-      this.listener = _.debounce(this.listener, debounce)
+      this.listener = _debounce(this.listener, debounce)
     }
 
     // Support jQuery events, since jQuery.trigger() doesn't
@@ -93,9 +100,9 @@ module.exports = {
     }
 
     // IE9 doesn't fire input event on backspace/del/cut
-    if (!lazy && _.isIE9) {
+    if (!lazy && isIE9) {
       this.on('cut', function () {
-        _.nextTick(self.listener)
+        nextTick(self.listener)
       })
       this.on('keyup', function (e) {
         if (e.keyCode === 46 || e.keyCode === 8) {
@@ -113,11 +120,11 @@ module.exports = {
     }
   },
 
-  update: function (value) {
-    this.el.value = _.toString(value)
+  update (value) {
+    this.el.value = _toString(value)
   },
 
-  unbind: function () {
+  unbind () {
     var el = this.el
     if (this.hasjQuery) {
       jQuery(el).off('change', this.listener)

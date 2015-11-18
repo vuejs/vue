@@ -5,7 +5,7 @@ casper.on('remote.message', function (e) {
 casper.test.begin('commits', 18, function (test) {
 
   casper
-  .start('../../examples/commits/index.html')
+  .start('examples/commits/index.html')
   .then(function () {
     // radio inputs & labels
     test.assertElementCount('input', 2)

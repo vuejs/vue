@@ -1,7 +1,7 @@
-var _ = require('../../util')
+import { on, off, warn } from '../../util/index'
 
 // keyCode aliases
-var keyCodes = {
+const keyCodes = {
   esc: 27,
   tab: 9,
   enter: 13,
@@ -48,12 +48,12 @@ function preventFilter (handler) {
   }
 }
 
-module.exports = {
+export default {
 
   acceptStatement: true,
   priority: 700,
 
-  bind: function () {
+  bind () {
     // deal with iframes
     if (
       this.el.tagName === 'IFRAME' &&
@@ -61,13 +61,13 @@ module.exports = {
     ) {
       var self = this
       this.iframeBind = function () {
-        _.on(self.el.contentWindow, self.arg, self.handler)
+        on(self.el.contentWindow, self.arg, self.handler)
       }
       this.on('load', this.iframeBind)
     }
   },
 
-  update: function (handler) {
+  update (handler) {
     // stub a noop for v-on with no value,
     // e.g. @mousedown.prevent
     if (!this.descriptor.raw) {
@@ -75,7 +75,7 @@ module.exports = {
     }
 
     if (typeof handler !== 'function') {
-      process.env.NODE_ENV !== 'production' && _.warn(
+      process.env.NODE_ENV !== 'production' && warn(
         'v-on:' + this.arg + '="' +
         this.expression + '" expects a function value, ' +
         'got ' + handler
@@ -105,20 +105,20 @@ module.exports = {
     if (this.iframeBind) {
       this.iframeBind()
     } else {
-      _.on(this.el, this.arg, this.handler)
+      on(this.el, this.arg, this.handler)
     }
   },
 
-  reset: function () {
+  reset () {
     var el = this.iframeBind
       ? this.el.contentWindow
       : this.el
     if (this.handler) {
-      _.off(el, this.arg, this.handler)
+      off(el, this.arg, this.handler)
     }
   },
 
-  unbind: function () {
+  unbind () {
     this.reset()
   }
 }

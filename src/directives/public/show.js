@@ -1,25 +1,25 @@
-var _ = require('../../util')
-var transition = require('../../transition')
+import { getAttr } from '../../util/index'
+import { applyTransition } from '../../transition/index'
 
-module.exports = {
+export default {
 
-  bind: function () {
+  bind () {
     // check else block
     var next = this.el.nextElementSibling
-    if (next && _.attr(next, 'v-else') !== null) {
+    if (next && getAttr(next, 'v-else') !== null) {
       this.elseEl = next
     }
   },
 
-  update: function (value) {
+  update (value) {
     this.apply(this.el, value)
     if (this.elseEl) {
       this.apply(this.elseEl, !value)
     }
   },
 
-  apply: function (el, value) {
-    transition.apply(el, value ? 1 : -1, function () {
+  apply (el, value) {
+    applyTransition(el, value ? 1 : -1, function () {
       el.style.display = value ? '' : 'none'
     }, this.vm)
   }

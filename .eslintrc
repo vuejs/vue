@@ -8,6 +8,21 @@
     "jQuery": true
   },
 
+  "ecmaFeatures": {
+    "arrowFunctions": true,
+    "destructuring": true,
+    "classes": true,
+    "defaultParams": true,
+    "blockBindings": true,
+    "modules": true,
+    "objectLiteralComputedProperties": true,
+    "objectLiteralShorthandMethods": true,
+    "objectLiteralShorthandProperties": true,
+    "restParams": true,
+    "spread": true,
+    "templateStrings": true
+  },
+
   "rules": {
     "accessor-pairs": 2,
     "array-bracket-spacing": 0,

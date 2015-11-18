@@ -1,25 +1,31 @@
-var _ = require('../../util')
-var FragmentFactory = require('../../fragment/factory')
+import FragmentFactory from '../../fragment/factory'
+import {
+  getAttr,
+  remove,
+  replace,
+  createAnchor,
+  warn
+} from '../../util/index'
 
-module.exports = {
+export default {
 
   priority: 2000,
 
-  bind: function () {
+  bind () {
     var el = this.el
     if (!el.__vue__) {
       // check else block
       var next = el.nextElementSibling
-      if (next && _.attr(next, 'v-else') !== null) {
-        _.remove(next)
+      if (next && getAttr(next, 'v-else') !== null) {
+        remove(next)
         this.elseFactory = new FragmentFactory(this.vm, next)
       }
       // check main block
-      this.anchor = _.createAnchor('v-if')
-      _.replace(el, this.anchor)
+      this.anchor = createAnchor('v-if')
+      replace(el, this.anchor)
       this.factory = new FragmentFactory(this.vm, el)
     } else {
-      process.env.NODE_ENV !== 'production' && _.warn(
+      process.env.NODE_ENV !== 'production' && warn(
         'v-if="' + this.expression + '" cannot be ' +
         'used on an instance root element.'
       )
@@ -27,7 +33,7 @@ module.exports = {
     }
   },
 
-  update: function (value) {
+  update (value) {
     if (this.invalid) return
     if (value) {
       if (!this.frag) {
@@ -38,7 +44,7 @@ module.exports = {
     }
   },
 
-  insert: function () {
+  insert () {
     if (this.elseFrag) {
       this.elseFrag.remove()
       this.elseFrag = null

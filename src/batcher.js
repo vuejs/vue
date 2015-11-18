@@ -1,5 +1,5 @@
-var _ = require('./util')
-var config = require('./config')
+import { inBrowser, warn, nextTick } from './util/index'
+import config from './config'
 
 // we have two separate queues: one for directive updates
 // and one for user watcher registered via $watch().
@@ -37,7 +37,7 @@ function flushBatcherQueue () {
   // dev tool hook
   /* istanbul ignore if */
   if (process.env.NODE_ENV !== 'production') {
-    if (_.inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__) {
+    if (inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__) {
       window.__VUE_DEVTOOLS_GLOBAL_HOOK__.emit('flush')
     }
   }
@@ -63,7 +63,7 @@ function runBatcherQueue (queue) {
       circular[id] = (circular[id] || 0) + 1
       if (circular[id] > config._maxUpdateCount) {
         queue.splice(has[id], 1)
-        _.warn(
+        warn(
           'You may have an infinite update loop for watcher ' +
           'with expression: ' + watcher.expression
         )
@@ -83,7 +83,7 @@ function runBatcherQueue (queue) {
  *   - {Function} run
  */
 
-exports.push = function (watcher) {
+export function pushWatcher (watcher) {
   var id = watcher.id
   if (has[id] == null) {
     // if an internal watcher is pushed, but the internal
@@ -99,7 +99,7 @@ exports.push = function (watcher) {
     // queue the flush
     if (!waiting) {
       waiting = true
-      _.nextTick(flushBatcherQueue)
+      nextTick(flushBatcherQueue)
     }
   }
 }

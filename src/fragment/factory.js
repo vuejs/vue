@@ -1,9 +1,10 @@
-var _ = require('../util')
-var compiler = require('../compiler')
-var templateParser = require('../parsers/template')
-var Fragment = require('./fragment')
-var Cache = require('../cache')
-var linkerCache = new Cache(5000)
+import { compile } from '../compiler/index'
+import { isTemplate } from '../util/index'
+import { parseTemplate, cloneNode } from '../parsers/template'
+import Fragment from './fragment'
+import Cache from '../cache'
+
+const linkerCache = new Cache(5000)
 
 /**
  * A factory that can be used to create instances of a
@@ -13,12 +14,12 @@ var linkerCache = new Cache(5000)
  * @param {Element|String} el
  */
 
-function FragmentFactory (vm, el) {
+export default function FragmentFactory (vm, el) {
   this.vm = vm
   var template
   var isString = typeof el === 'string'
-  if (isString || _.isTemplate(el)) {
-    template = templateParser.parse(el, true)
+  if (isString || isTemplate(el)) {
+    template = parseTemplate(el, true)
   } else {
     template = document.createDocumentFragment()
     template.appendChild(el)
@@ -31,11 +32,11 @@ function FragmentFactory (vm, el) {
     var cacheId = cid + (isString ? el : el.outerHTML)
     linker = linkerCache.get(cacheId)
     if (!linker) {
-      linker = compiler.compile(template, vm.$options, true)
+      linker = compile(template, vm.$options, true)
       linkerCache.put(cacheId, linker)
     }
   } else {
-    linker = compiler.compile(template, vm.$options, true)
+    linker = compile(template, vm.$options, true)
   }
   this.linker = linker
 }
@@ -49,8 +50,6 @@ function FragmentFactory (vm, el) {
  */
 
 FragmentFactory.prototype.create = function (host, scope, parentFrag) {
-  var frag = templateParser.clone(this.template)
+  var frag = cloneNode(this.template)
   return new Fragment(this.linker, this.vm, frag, host, scope, parentFrag)
 }
-
-module.exports = FragmentFactory

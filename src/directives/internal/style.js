@@ -1,25 +1,32 @@
-var _ = require('../../util')
-var prefixes = ['-webkit-', '-moz-', '-ms-']
-var camelPrefixes = ['Webkit', 'Moz', 'ms']
-var importantRE = /!important;?$/
-var testEl = null
-var propCache = {}
+import {
+  extend,
+  isArray,
+  hyphenate,
+  camelize
+} from '../../util/index'
 
-module.exports = {
+const prefixes = ['-webkit-', '-moz-', '-ms-']
+const camelPrefixes = ['Webkit', 'Moz', 'ms']
+const importantRE = /!important;?$/
+const propCache = Object.create(null)
+
+let testEl = null
+
+export default {
 
   deep: true,
 
-  update: function (value) {
+  update (value) {
     if (typeof value === 'string') {
       this.el.style.cssText = value
-    } else if (_.isArray(value)) {
-      this.handleObject(value.reduce(_.extend, {}))
+    } else if (isArray(value)) {
+      this.handleObject(value.reduce(extend, {}))
     } else {
       this.handleObject(value || {})
     }
   },
 
-  handleObject: function (value) {
+  handleObject (value) {
     // cache object styles so that only changed props
     // are actually updated.
     var cache = this.cache || (this.cache = {})
@@ -39,7 +46,7 @@ module.exports = {
     }
   },
 
-  handleSingle: function (prop, value) {
+  handleSingle (prop, value) {
     prop = normalize(prop)
     if (!prop) return // unsupported prop
     // cast possible numbers/booleans into strings
@@ -87,8 +94,8 @@ function normalize (prop) {
  */
 
 function prefix (prop) {
-  prop = _.hyphenate(prop)
-  var camel = _.camelize(prop)
+  prop = hyphenate(prop)
+  var camel = camelize(prop)
   var upper = camel.charAt(0).toUpperCase() + camel.slice(1)
   if (!testEl) {
     testEl = document.createElement('div')

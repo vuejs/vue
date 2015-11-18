@@ -1,8 +1,9 @@
-var _ = require('../util')
-var Cache = require('../cache')
-var cache = new Cache(1000)
-var filterTokenRE = /[^\s'"]+|'[^']*'|"[^"]*"/g
-var reservedArgRE = /^in$|^-?\d+/
+import { toNumber, stripQuotes } from '../util/index'
+import Cache from '../cache'
+
+const cache = new Cache(1000)
+const filterTokenRE = /[^\s'"]+|'[^']*'|"[^"]*"/g
+const reservedArgRE = /^in$|^-?\d+/
 
 /**
  * Parser state
@@ -43,11 +44,11 @@ function pushFilter () {
 function processFilterArg (arg) {
   if (reservedArgRE.test(arg)) {
     return {
-      value: _.toNumber(arg),
+      value: toNumber(arg),
       dynamic: false
     }
   } else {
-    var stripped = _.stripQuotes(arg)
+    var stripped = stripQuotes(arg)
     var dynamic = stripped === arg
     return {
       value: dynamic ? arg : stripped,
@@ -74,7 +75,7 @@ function processFilterArg (arg) {
  * @return {Object}
  */
 
-exports.parse = function (s) {
+export function parseDirective (s) {
 
   var hit = cache.get(s)
   if (hit) {

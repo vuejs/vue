@@ -1,2 +1,7 @@
-exports.slot = require('./slot')
-exports.partial = require('./partial')
+import slot from './slot'
+import partial from './partial'
+
+export default {
+  slot,
+  partial
+}

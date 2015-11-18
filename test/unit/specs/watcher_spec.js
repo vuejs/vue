@@ -1,4 +1,4 @@
-var Vue = require('../../../src/vue')
+var Vue = require('../../../src/index')
 var nextTick = Vue.nextTick
 var Watcher = require('../../../src/watcher')
 var _ = Vue.util
@@ -22,7 +22,7 @@ describe('Watcher', function () {
       }
     })
     spy = jasmine.createSpy('watcher')
-    spyOn(_, 'warn')
+    spyWarns()
   })
 
   it('simple path', function (done) {
@@ -352,13 +352,13 @@ describe('Watcher', function () {
 
   it('warn getter errors', function () {
     new Watcher(vm, 'd.e + c', spy)
-    expect(hasWarned(_, 'Error when evaluating expression')).toBe(true)
+    expect(hasWarned('Error when evaluating expression')).toBe(true)
   })
 
   it('warn setter errors', function () {
     var watcher = new Watcher(vm, 'a + b', spy)
     watcher.set(123)
-    expect(hasWarned(_, 'Error when evaluating setter')).toBe(true)
+    expect(hasWarned('Error when evaluating setter')).toBe(true)
   })
 
 })

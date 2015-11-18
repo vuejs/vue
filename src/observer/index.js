@@ -1,8 +1,15 @@
-var _ = require('../util')
-var config = require('../config')
-var Dep = require('./dep')
-var arrayMethods = require('./array')
-var arrayKeys = Object.getOwnPropertyNames(arrayMethods)
+import config from '../config'
+import Dep from './dep'
+import { arrayMethods } from './array'
+import {
+  def,
+  isArray,
+  isPlainObject,
+  hasProto,
+  hasOwn
+} from '../util/index'
+
+const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
 
 /**
  * Observer class that are attached to each observed
@@ -14,12 +21,12 @@ var arrayKeys = Object.getOwnPropertyNames(arrayMethods)
  * @constructor
  */
 
-function Observer (value) {
+export function Observer (value) {
   this.value = value
   this.dep = new Dep()
-  _.define(value, '__ob__', this)
-  if (_.isArray(value)) {
-    var augment = _.hasProto
+  def(value, '__ob__', this)
+  if (isArray(value)) {
+    var augment = hasProto
       ? protoAugment
       : copyAugment
     augment(value, arrayMethods, arrayKeys)
@@ -27,42 +34,6 @@ function Observer (value) {
   } else {
     this.walk(value)
   }
-}
-
-// Static methods
-
-/**
- * Attempt to create an observer instance for a value,
- * returns the new observer if successfully observed,
- * or the existing observer if the value already has one.
- *
- * @param {*} value
- * @param {Vue} [vm]
- * @return {Observer|undefined}
- * @static
- */
-
-Observer.create = function (value, vm) {
-  if (!value || typeof value !== 'object') {
-    return
-  }
-  var ob
-  if (
-    _.hasOwn(value, '__ob__') &&
-    value.__ob__ instanceof Observer
-  ) {
-    ob = value.__ob__
-  } else if (
-    (_.isArray(value) || _.isPlainObject(value)) &&
-    !Object.isFrozen(value) &&
-    !value._isVue
-  ) {
-    ob = new Observer(value)
-  }
-  if (ob && vm) {
-    ob.addVm(vm)
-  }
-  return ob
 }
 
 // Instance methods
@@ -92,7 +63,7 @@ Observer.prototype.walk = function (obj) {
 Observer.prototype.observeArray = function (items) {
   var i = items.length
   while (i--) {
-    Observer.create(items[i])
+    observe(items[i])
   }
 }
 
@@ -159,8 +130,42 @@ function copyAugment (target, src, keys) {
   var key
   while (i--) {
     key = keys[i]
-    _.define(target, key, src[key])
+    def(target, key, src[key])
   }
+}
+
+/**
+ * Attempt to create an observer instance for a value,
+ * returns the new observer if successfully observed,
+ * or the existing observer if the value already has one.
+ *
+ * @param {*} value
+ * @param {Vue} [vm]
+ * @return {Observer|undefined}
+ * @static
+ */
+
+export function observe (value, vm) {
+  if (!value || typeof value !== 'object') {
+    return
+  }
+  var ob
+  if (
+    hasOwn(value, '__ob__') &&
+    value.__ob__ instanceof Observer
+  ) {
+    ob = value.__ob__
+  } else if (
+    (isArray(value) || isPlainObject(value)) &&
+    !Object.isFrozen(value) &&
+    !value._isVue
+  ) {
+    ob = new Observer(value)
+  }
+  if (ob && vm) {
+    ob.addVm(vm)
+  }
+  return ob
 }
 
 /**
@@ -171,7 +176,7 @@ function copyAugment (target, src, keys) {
  * @param {*} val
  */
 
-function defineReactive (obj, key, val) {
+export function defineReactive (obj, key, val) {
   var dep = new Dep()
 
   // cater for pre-defined getter/setters
@@ -185,7 +190,7 @@ function defineReactive (obj, key, val) {
     setter = property && property.set
   }
 
-  var childOb = Observer.create(val)
+  var childOb = observe(val)
   Object.defineProperty(obj, key, {
     enumerable: true,
     configurable: true,
@@ -196,7 +201,7 @@ function defineReactive (obj, key, val) {
         if (childOb) {
           childOb.dep.depend()
         }
-        if (_.isArray(value)) {
+        if (isArray(value)) {
           for (var e, i = 0, l = value.length; i < l; i++) {
             e = value[i]
             e && e.__ob__ && e.__ob__.dep.depend()
@@ -215,13 +220,8 @@ function defineReactive (obj, key, val) {
       } else {
         val = newVal
       }
-      childOb = Observer.create(newVal)
+      childOb = observe(newVal)
       dep.notify()
     }
   })
 }
-
-// Attach to the util object so it can be used elsewhere.
-_.defineReactive = defineReactive
-
-module.exports = Observer

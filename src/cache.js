@@ -11,7 +11,7 @@
  * @constructor
  */
 
-function Cache (limit) {
+export default function Cache (limit) {
   this.size = 0
   this.limit = limit
   this.head = this.tail = undefined
@@ -108,5 +108,3 @@ p.get = function (key, returnEntry) {
     ? entry
     : entry.value
 }
-
-module.exports = Cache

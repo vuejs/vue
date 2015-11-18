@@ -1,6 +1,7 @@
-var _ = require('../util')
-var queue = []
-var queued = false
+import { nextTick } from '../util/index'
+
+let queue = []
+let queued = false
 
 /**
  * Push a job into the queue.
@@ -8,11 +9,11 @@ var queued = false
  * @param {Function} job
  */
 
-exports.push = function (job) {
+export function pushJob (job) {
   queue.push(job)
   if (!queued) {
     queued = true
-    _.nextTick(flush)
+    nextTick(flush)
   }
 }
 

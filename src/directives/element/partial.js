@@ -1,8 +1,13 @@
-var _ = require('../../util')
-var vIf = require('../public/if')
-var FragmentFactory = require('../../fragment/factory')
+import vIf from '../public/if'
+import FragmentFactory from '../../fragment/factory'
+import {
+  createAnchor,
+  replace,
+  resolveAsset,
+  assertAsset
+} from '../../util/index'
 
-module.exports = {
+export default {
 
   priority: 1750,
 
@@ -10,7 +15,7 @@ module.exports = {
 
   // watch changes to name for dynamic partials
   paramWatchers: {
-    name: function (value) {
+    name (value) {
       vIf.remove.call(this)
       if (value) {
         this.insert(value)
@@ -18,16 +23,16 @@ module.exports = {
     }
   },
 
-  bind: function () {
-    this.anchor = _.createAnchor('v-partial')
-    _.replace(this.el, this.anchor)
+  bind () {
+    this.anchor = createAnchor('v-partial')
+    replace(this.el, this.anchor)
     this.insert(this.params.name)
   },
 
-  insert: function (id) {
-    var partial = _.resolveAsset(this.vm.$options, 'partials', id)
+  insert (id) {
+    var partial = resolveAsset(this.vm.$options, 'partials', id)
     if (process.env.NODE_ENV !== 'production') {
-      _.assertAsset(partial, 'partial', id)
+      assertAsset(partial, 'partial', id)
     }
     if (partial) {
       this.factory = new FragmentFactory(this.vm, partial)
@@ -35,7 +40,7 @@ module.exports = {
     }
   },
 
-  unbind: function () {
+  unbind () {
     if (this.frag) {
       this.frag.destroy()
     }

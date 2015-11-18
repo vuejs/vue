@@ -1,32 +1,33 @@
-var _ = require('../util')
-var Path = require('./path')
-var Cache = require('../cache')
-var expressionCache = new Cache(1000)
+import { warn } from '../util/index'
+import { parsePath, setPath } from './path'
+import Cache from '../cache'
 
-var allowedKeywords =
+const expressionCache = new Cache(1000)
+
+const allowedKeywords =
   'Math,Date,this,true,false,null,undefined,Infinity,NaN,' +
   'isNaN,isFinite,decodeURI,decodeURIComponent,encodeURI,' +
   'encodeURIComponent,parseInt,parseFloat'
-var allowedKeywordsRE =
+const allowedKeywordsRE =
   new RegExp('^(' + allowedKeywords.replace(/,/g, '\\b|') + '\\b)')
 
 // keywords that don't make sense inside expressions
-var improperKeywords =
+const improperKeywords =
   'break,case,class,catch,const,continue,debugger,default,' +
   'delete,do,else,export,extends,finally,for,function,if,' +
   'import,in,instanceof,let,return,super,switch,throw,try,' +
   'var,while,with,yield,enum,await,implements,package,' +
   'proctected,static,interface,private,public'
-var improperKeywordsRE =
+const improperKeywordsRE =
   new RegExp('^(' + improperKeywords.replace(/,/g, '\\b|') + '\\b)')
 
-var wsRE = /\s/g
-var newlineRE = /\n/g
-var saveRE = /[\{,]\s*[\w\$_]+\s*:|('[^']*'|"[^"]*")|new |typeof |void /g
-var restoreRE = /"(\d+)"/g
-var pathTestRE = /^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\]|\[\d+\]|\[[A-Za-z_$][\w$]*\])*$/
-var pathReplaceRE = /[^\w$\.]([A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\])*)/g
-var booleanLiteralRE = /^(true|false)$/
+const wsRE = /\s/g
+const newlineRE = /\n/g
+const saveRE = /[\{,]\s*[\w\$_]+\s*:|('[^']*'|"[^"]*")|new |typeof |void /g
+const restoreRE = /"(\d+)"/g
+const pathTestRE = /^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\]|\[\d+\]|\[[A-Za-z_$][\w$]*\])*$/
+const pathReplaceRE = /[^\w$\.]([A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\])*)/g
+const booleanLiteralRE = /^(true|false)$/
 
 /**
  * Save / Rewrite / Restore
@@ -105,7 +106,7 @@ function restore (str, i) {
 
 function compileGetter (exp) {
   if (improperKeywordsRE.test(exp)) {
-    process.env.NODE_ENV !== 'production' && _.warn(
+    process.env.NODE_ENV !== 'production' && warn(
       'Avoid using reserved keywords in expression: ' + exp
     )
   }
@@ -137,7 +138,7 @@ function makeGetterFn (body) {
   try {
     return new Function('scope', 'return ' + body + ';')
   } catch (e) {
-    process.env.NODE_ENV !== 'production' && _.warn(
+    process.env.NODE_ENV !== 'production' && warn(
       'Invalid expression. ' +
       'Generated function body: ' + body
     )
@@ -152,13 +153,13 @@ function makeGetterFn (body) {
  */
 
 function compileSetter (exp) {
-  var path = Path.parse(exp)
+  var path = parsePath(exp)
   if (path) {
     return function (scope, val) {
-      Path.set(scope, path, val)
+      setPath(scope, path, val)
     }
   } else {
-    process.env.NODE_ENV !== 'production' && _.warn(
+    process.env.NODE_ENV !== 'production' && warn(
       'Invalid setter expression: ' + exp
     )
   }
@@ -172,7 +173,7 @@ function compileSetter (exp) {
  * @return {Function}
  */
 
-exports.parse = function (exp, needSet) {
+export function parseExpression (exp, needSet) {
   exp = exp.trim()
   // try cache
   var hit = expressionCache.get(exp)
@@ -183,7 +184,7 @@ exports.parse = function (exp, needSet) {
     return hit
   }
   var res = { exp: exp }
-  res.get = exports.isSimplePath(exp) && exp.indexOf('[') < 0
+  res.get = isSimplePath(exp) && exp.indexOf('[') < 0
     // optimized super simple getter
     ? makeGetterFn('scope.' + exp)
     // dynamic getter
@@ -202,7 +203,7 @@ exports.parse = function (exp, needSet) {
  * @return {Boolean}
  */
 
-exports.isSimplePath = function (exp) {
+export function isSimplePath (exp) {
   return pathTestRE.test(exp) &&
     // don't treat true/false as paths
     !booleanLiteralRE.test(exp) &&

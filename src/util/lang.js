@@ -9,8 +9,8 @@
  * @public
  */
 
-exports.set = function set (obj, key, val) {
-  if (exports.hasOwn(obj, key)) {
+export function set (obj, key, val) {
+  if (hasOwn(obj, key)) {
     obj[key] = val
     return
   }
@@ -42,8 +42,8 @@ exports.set = function set (obj, key, val) {
  * @param {String} key
  */
 
-exports.delete = function (obj, key) {
-  if (!exports.hasOwn(obj, key)) {
+export function del (obj, key) {
+  if (!hasOwn(obj, key)) {
     return
   }
   delete obj[key]
@@ -62,7 +62,7 @@ exports.delete = function (obj, key) {
   }
 }
 
-var hasOwn = Object.prototype.hasOwnProperty
+var hasOwnProperty = Object.prototype.hasOwnProperty
 /**
  * Check whether the object has the property.
  *
@@ -70,8 +70,8 @@ var hasOwn = Object.prototype.hasOwnProperty
  * @param {String} key
  * @return {Boolean}
  */
-exports.hasOwn = function (obj, key) {
-  return hasOwn.call(obj, key)
+export function hasOwn (obj, key) {
+  return hasOwnProperty.call(obj, key)
 }
 
 /**
@@ -82,7 +82,7 @@ exports.hasOwn = function (obj, key) {
  */
 
 var literalValueRE = /^\s?(true|false|[\d\.]+|'[^']*'|"[^"]*")\s?$/
-exports.isLiteral = function (exp) {
+export function isLiteral (exp) {
   return literalValueRE.test(exp)
 }
 
@@ -93,7 +93,7 @@ exports.isLiteral = function (exp) {
  * @return {Boolean}
  */
 
-exports.isReserved = function (str) {
+export function isReserved (str) {
   var c = (str + '').charCodeAt(0)
   return c === 0x24 || c === 0x5F
 }
@@ -106,7 +106,7 @@ exports.isReserved = function (str) {
  * @return {String}
  */
 
-exports.toString = function (value) {
+export function _toString (value) {
   return value == null
     ? ''
     : value.toString()
@@ -120,7 +120,7 @@ exports.toString = function (value) {
  * @return {*|Number}
  */
 
-exports.toNumber = function (value) {
+export function toNumber (value) {
   if (typeof value !== 'string') {
     return value
   } else {
@@ -138,7 +138,7 @@ exports.toNumber = function (value) {
  * @return {*|Boolean}
  */
 
-exports.toBoolean = function (value) {
+export function toBoolean (value) {
   return value === 'true'
     ? true
     : value === 'false'
@@ -153,7 +153,7 @@ exports.toBoolean = function (value) {
  * @return {String | false}
  */
 
-exports.stripQuotes = function (str) {
+export function stripQuotes (str) {
   var a = str.charCodeAt(0)
   var b = str.charCodeAt(str.length - 1)
   return a === b && (a === 0x22 || a === 0x27)
@@ -169,7 +169,7 @@ exports.stripQuotes = function (str) {
  */
 
 var camelizeRE = /-(\w)/g
-exports.camelize = function (str) {
+export function camelize (str) {
   return str.replace(camelizeRE, toUpper)
 }
 
@@ -185,7 +185,7 @@ function toUpper (_, c) {
  */
 
 var hyphenateRE = /([a-z\d])([A-Z])/g
-exports.hyphenate = function (str) {
+export function hyphenate (str) {
   return str
     .replace(hyphenateRE, '$1-$2')
     .toLowerCase()
@@ -204,7 +204,7 @@ exports.hyphenate = function (str) {
  */
 
 var classifyRE = /(?:^|[-_\/])(\w)/g
-exports.classify = function (str) {
+export function classify (str) {
   return str.replace(classifyRE, toUpper)
 }
 
@@ -216,7 +216,7 @@ exports.classify = function (str) {
  * @return {Function}
  */
 
-exports.bind = function (fn, ctx) {
+export function bind (fn, ctx) {
   return function (a) {
     var l = arguments.length
     return l
@@ -235,7 +235,7 @@ exports.bind = function (fn, ctx) {
  * @return {Array}
  */
 
-exports.toArray = function (list, start) {
+export function toArray (list, start) {
   start = start || 0
   var i = list.length - start
   var ret = new Array(i)
@@ -252,7 +252,7 @@ exports.toArray = function (list, start) {
  * @param {Object} from
  */
 
-exports.extend = function (to, from) {
+export function extend (to, from) {
   var keys = Object.keys(from)
   var i = keys.length
   while (i--) {
@@ -270,7 +270,7 @@ exports.extend = function (to, from) {
  * @return {Boolean}
  */
 
-exports.isObject = function (obj) {
+export function isObject (obj) {
   return obj !== null && typeof obj === 'object'
 }
 
@@ -284,7 +284,7 @@ exports.isObject = function (obj) {
 
 var toString = Object.prototype.toString
 var OBJECT_STRING = '[object Object]'
-exports.isPlainObject = function (obj) {
+export function isPlainObject (obj) {
   return toString.call(obj) === OBJECT_STRING
 }
 
@@ -295,7 +295,7 @@ exports.isPlainObject = function (obj) {
  * @return {Boolean}
  */
 
-exports.isArray = Array.isArray
+export const isArray = Array.isArray
 
 /**
  * Define a non-enumerable property
@@ -306,7 +306,7 @@ exports.isArray = Array.isArray
  * @param {Boolean} [enumerable]
  */
 
-exports.define = function (obj, key, val, enumerable) {
+export function def (obj, key, val, enumerable) {
   Object.defineProperty(obj, key, {
     value: val,
     enumerable: !!enumerable,
@@ -324,7 +324,7 @@ exports.define = function (obj, key, val, enumerable) {
  * @return {Function} - the debounced function
  */
 
-exports.debounce = function (func, wait) {
+export function debounce (func, wait) {
   var timeout, args, context, timestamp, result
   var later = function () {
     var last = Date.now() - timestamp
@@ -355,7 +355,7 @@ exports.debounce = function (func, wait) {
  * @param {*} obj
  */
 
-exports.indexOf = function (arr, obj) {
+export function indexOf (arr, obj) {
   var i = arr.length
   while (i--) {
     if (arr[i] === obj) return i
@@ -370,7 +370,7 @@ exports.indexOf = function (arr, obj) {
  * @return {Function}
  */
 
-exports.cancellable = function (fn) {
+export function cancellable (fn) {
   var cb = function () {
     if (!cb.cancelled) {
       return fn.apply(this, arguments)
@@ -391,10 +391,10 @@ exports.cancellable = function (fn) {
  * @return {Boolean}
  */
 
-exports.looseEqual = function (a, b) {
+export function looseEqual (a, b) {
   /* eslint-disable eqeqeq */
   return a == b || (
-    exports.isObject(a) && exports.isObject(b)
+    isObject(a) && isObject(b)
       ? JSON.stringify(a) === JSON.stringify(b)
       : false
   )

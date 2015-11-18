@@ -1,6 +1,7 @@
-var _ = require('../util')
-var Path = require('../parsers/path')
-var toArray = require('../directives/public/for')._postProcess
+import { getPath } from '../parsers/path'
+import { toArray, isArray, isObject, isPlainObject } from '../util/index'
+import vFor from '../directives/public/for'
+const convertArray = vFor._postProcess
 
 /**
  * Limit filter for arrays
@@ -9,7 +10,7 @@ var toArray = require('../directives/public/for')._postProcess
  * @param {Number} offset (Decimal expected)
  */
 
-exports.limitBy = function (arr, n, offset) {
+export function limitBy (arr, n, offset) {
   offset = offset ? parseInt(offset, 10) : 0
   return typeof n === 'number'
     ? arr.slice(offset, offset + n)
@@ -24,8 +25,8 @@ exports.limitBy = function (arr, n, offset) {
  * @param {String} ...dataKeys
  */
 
-exports.filterBy = function (arr, search, delimiter) {
-  arr = toArray(arr)
+export function filterBy (arr, search, delimiter) {
+  arr = convertArray(arr)
   if (search == null) {
     return arr
   }
@@ -38,7 +39,7 @@ exports.filterBy = function (arr, search, delimiter) {
   // because why not
   var n = delimiter === 'in' ? 3 : 2
   // extract and flatten keys
-  var keys = _.toArray(arguments, n).reduce(function (prev, cur) {
+  var keys = toArray(arguments, n).reduce(function (prev, cur) {
     return prev.concat(cur)
   }, [])
   var res = []
@@ -51,7 +52,7 @@ exports.filterBy = function (arr, search, delimiter) {
       while (j--) {
         key = keys[j]
         if ((key === '$key' && contains(item.$key, search)) ||
-            contains(Path.get(val, key), search)) {
+            contains(getPath(val, key), search)) {
           res.push(item)
           break
         }
@@ -70,8 +71,8 @@ exports.filterBy = function (arr, search, delimiter) {
  * @param {String} reverse
  */
 
-exports.orderBy = function (arr, sortKey, reverse) {
-  arr = toArray(arr)
+export function orderBy (arr, sortKey, reverse) {
+  arr = convertArray(arr)
   if (!sortKey) {
     return arr
   }
@@ -79,11 +80,11 @@ exports.orderBy = function (arr, sortKey, reverse) {
   // sort on a copy to avoid mutating original array
   return arr.slice().sort(function (a, b) {
     if (sortKey !== '$key') {
-      if (_.isObject(a) && '$value' in a) a = a.$value
-      if (_.isObject(b) && '$value' in b) b = b.$value
+      if (isObject(a) && '$value' in a) a = a.$value
+      if (isObject(b) && '$value' in b) b = b.$value
     }
-    a = _.isObject(a) ? Path.get(a, sortKey) : a
-    b = _.isObject(b) ? Path.get(b, sortKey) : b
+    a = isObject(a) ? getPath(a, sortKey) : a
+    b = isObject(b) ? getPath(b, sortKey) : b
     return a === b ? 0 : a > b ? order : -order
   })
 }
@@ -97,7 +98,7 @@ exports.orderBy = function (arr, sortKey, reverse) {
 
 function contains (val, search) {
   var i
-  if (_.isPlainObject(val)) {
+  if (isPlainObject(val)) {
     var keys = Object.keys(val)
     i = keys.length
     while (i--) {
@@ -105,7 +106,7 @@ function contains (val, search) {
         return true
       }
     }
-  } else if (_.isArray(val)) {
+  } else if (isArray(val)) {
     i = val.length
     while (i--) {
       if (contains(val[i], search)) {

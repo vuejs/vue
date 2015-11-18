@@ -1,24 +1,33 @@
 // text & html
-exports.text = require('./text')
-exports.html = require('./html')
-
+import text from './text'
+import html from './html'
 // logic control
-exports['for'] = require('./for')
-exports['if'] = require('./if')
-exports.show = require('./show')
-
+import vFor from './for'
+import vIf from './if'
+import show from './show'
 // two-way binding
-exports.model = require('./model')
-
+import model from './model/index'
 // event handling
-exports.on = require('./on')
-
+import on from './on'
 // attributes
-exports.bind = require('./bind')
-
+import bind from './bind'
 // ref & el
-exports.el = require('./el')
-exports.ref = require('./ref')
-
+import el from './el'
+import ref from './ref'
 // cloak
-exports.cloak = require('./cloak')
+import cloak from './cloak'
+
+// must export plain object
+export default {
+  text,
+  html,
+  'for': vFor,
+  'if': vIf,
+  show,
+  model,
+  on,
+  bind,
+  el,
+  ref,
+  cloak
+}

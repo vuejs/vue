@@ -1,4 +1,4 @@
-var Vue = require('../../../../src/vue')
+var Vue = require('../../../../src/index')
 
 describe('Events API', function () {
 

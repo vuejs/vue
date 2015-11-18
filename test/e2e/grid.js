@@ -1,7 +1,7 @@
 casper.test.begin('grid', 73, function (test) {
 
   casper
-  .start('../../examples/grid/index.html')
+  .start('examples/grid/index.html')
   .then(function () {
     // headers
     test.assertElementCount('th', 2)

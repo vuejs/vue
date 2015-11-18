@@ -1,8 +1,5 @@
-var sauceConfig = {
-  testName: 'Vue.js unit tests',
-  recordScreenshots: false,
-  build: process.env.CIRCLE_BUILD_NUM || Date.now()
-}
+var assign = require('object-assign')
+var base = require('./karma.base.config.js')
 
 /**
  * Having too many tests running concurrently on saucelabs
@@ -66,14 +63,21 @@ var batches = [
   }
 ]
 
-for (var i = 0; i < 3; i++) {
-  exports['batch' + (i + 1)] = {
-    sauceLabs: sauceConfig,
+module.exports = function (config) {
+
+  var batch = batches[process.argv[4] || 0]
+
+  config.set(assign(base, {
+    browsers: Object.keys(batch),
+    customLaunchers: batch,
+    reporters: ['progress', 'saucelabs'],
+    sauceLabs: {
+      testName: 'Vue.js unit tests',
+      recordScreenshots: false,
+      build: process.env.CIRCLE_BUILD_NUM || Date.now()
+    },
     // mobile emulators are really slow
     captureTimeout: 300000,
-    browserNoActivityTimeout: 300000,
-    customLaunchers: batches[i],
-    browsers: Object.keys(batches[i]),
-    reporters: ['progress', 'saucelabs']
-  }
+    browserNoActivityTimeout: 300000
+  }))
 }

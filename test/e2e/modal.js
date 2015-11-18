@@ -1,7 +1,7 @@
 casper.test.begin('modal', 8, function (test) {
 
   casper
-  .start('../../examples/modal/index.html')
+  .start('examples/modal/index.html')
   .then(function () {
     test.assertNotVisible('.modal-mask')
   })

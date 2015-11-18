@@ -1,4 +1,8 @@
-var _ = require('../util')
+import {
+  before,
+  remove,
+  transitionEndEvent
+} from '../util/index'
 
 /**
  * Append with transition.
@@ -9,8 +13,8 @@ var _ = require('../util')
  * @param {Function} [cb]
  */
 
-exports.append = function (el, target, vm, cb) {
-  apply(el, 1, function () {
+export function appendWithTransition (el, target, vm, cb) {
+  applyTransition(el, 1, function () {
     target.appendChild(el)
   }, vm, cb)
 }
@@ -24,9 +28,9 @@ exports.append = function (el, target, vm, cb) {
  * @param {Function} [cb]
  */
 
-exports.before = function (el, target, vm, cb) {
-  apply(el, 1, function () {
-    _.before(el, target)
+export function beforeWithTransition (el, target, vm, cb) {
+  applyTransition(el, 1, function () {
+    before(el, target)
   }, vm, cb)
 }
 
@@ -38,9 +42,9 @@ exports.before = function (el, target, vm, cb) {
  * @param {Function} [cb]
  */
 
-exports.remove = function (el, vm, cb) {
-  apply(el, -1, function () {
-    _.remove(el)
+export function removeWithTransition (el, vm, cb) {
+  applyTransition(el, -1, function () {
+    remove(el)
   }, vm, cb)
 }
 
@@ -56,13 +60,13 @@ exports.remove = function (el, vm, cb) {
  * @param {Function} [cb]
  */
 
-var apply = exports.apply = function (el, direction, op, vm, cb) {
+export function applyTransition (el, direction, op, vm, cb) {
   var transition = el.__v_trans
   if (
     !transition ||
     // skip if there are no js hooks and CSS transition is
     // not supported
-    (!transition.hooks && !_.transitionEndEvent) ||
+    (!transition.hooks && !transitionEndEvent) ||
     // skip transitions for initial compile
     !vm._isCompiled ||
     // if the vm is being manipulated by a parent directive

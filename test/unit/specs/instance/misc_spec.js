@@ -1,5 +1,4 @@
-var Vue = require('../../../../src/vue')
-var _ = require('../../../../src/util/debug')
+var Vue = require('../../../../src/index')
 
 describe('misc', function () {
 
@@ -27,7 +26,7 @@ describe('misc', function () {
     })
 
     beforeEach(function () {
-      spyOn(_, 'warn')
+      spyWarns()
     })
 
     it('read', function () {
@@ -49,7 +48,7 @@ describe('misc', function () {
 
     it('warn not found', function () {
       vm._applyFilters('what', null, [{name: 'wtf'}])
-      expect(hasWarned(_, 'Failed to resolve filter')).toBe(true)
+      expect(hasWarned('Failed to resolve filter')).toBe(true)
     })
   })
 })

@@ -1,6 +1,7 @@
-var _ = require('../util')
-var arrayProto = Array.prototype
-var arrayMethods = Object.create(arrayProto)
+import { def, indexOf } from '../util/index'
+
+const arrayProto = Array.prototype
+export const arrayMethods = Object.create(arrayProto)
 
 /**
  * Intercept mutating methods and emit events
@@ -18,7 +19,7 @@ var arrayMethods = Object.create(arrayProto)
 .forEach(function (method) {
   // cache original method
   var original = arrayProto[method]
-  _.define(arrayMethods, method, function mutator () {
+  def(arrayMethods, method, function mutator () {
     // avoid leaking arguments:
     // http://jsperf.com/closure-with-arguments
     var i = arguments.length
@@ -56,7 +57,7 @@ var arrayMethods = Object.create(arrayProto)
  * @return {*} - replaced element
  */
 
-_.define(
+def(
   arrayProto,
   '$set',
   function $set (index, val) {
@@ -74,17 +75,15 @@ _.define(
  * @param {*} val
  */
 
-_.define(
+def(
   arrayProto,
   '$remove',
   function $remove (item) {
     /* istanbul ignore if */
     if (!this.length) return
-    var index = _.indexOf(this, item)
+    var index = indexOf(this, item)
     if (index > -1) {
       return this.splice(index, 1)
     }
   }
 )
-
-module.exports = arrayMethods

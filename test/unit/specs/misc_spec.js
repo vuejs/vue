@@ -1,14 +1,11 @@
 // test cases for edge cases & bug fixes
-var Vue = require('../../../src/vue')
-// spies on different objects
-var _ = require('../../../src/util/debug')
-var __ = Vue.util
+var Vue = require('../../../src/index')
+var _ = Vue.util
 
 describe('Misc', function () {
 
   beforeEach(function () {
-    spyOn(_, 'warn')
-    spyOn(__, 'warn')
+    spyWarns()
   })
 
   it('should handle directive.bind() altering its childNode structure', function () {
@@ -157,7 +154,7 @@ describe('Misc', function () {
       })
     })
     expect(vm.$el.textContent).toBe('hi!')
-    vm.msg = 'ho!'
+    try { vm.msg = 'ho!' } catch (e) {}
     Vue.nextTick(function () {
       expect(vm.$el.textContent).toBe('hi!')
       done()
@@ -219,7 +216,7 @@ describe('Misc', function () {
     var test = []
     var obj2 = vm.obj2
     vm.$set('test', test)
-    __.set(obj2, 'test', 123)
+    _.set(obj2, 'test', 123)
     Vue.nextTick(function () {
       expect(spy1).not.toHaveBeenCalled()
       expect(spy2).not.toHaveBeenCalled()
@@ -255,7 +252,7 @@ describe('Misc', function () {
       }
     })
     expect(vm.$el.textContent).toBe(JSON.stringify(vm.items, null, 2))
-    __.set(vm.items[0], 'a', 123)
+    _.set(vm.items[0], 'a', 123)
     Vue.nextTick(function () {
       expect(vm.$el.textContent).toBe(JSON.stringify(vm.items, null, 2) + '123')
       done()
@@ -267,7 +264,7 @@ describe('Misc', function () {
       el: document.createElement('div'),
       template: '<custom-stuff></custom-stuff>'
     })
-    expect(hasWarned(__, 'Unknown custom element')).toBe(true)
+    expect(hasWarned('Unknown custom element')).toBe(true)
   })
 
   it('prefer bound attributes over static attributes', function (done) {
