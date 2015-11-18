@@ -77,7 +77,7 @@ export function orderBy (arr, sortKey, reverse) {
     return arr
   }
   if(sortKey.indexOf(",")>0){
-    return exports.orderByKeys(sortKey);
+    return exports.orderByKeys(arr, sortKey);
   }
   var order = (reverse && reverse < 0) ? -1 : 1
   // sort on a copy to avoid mutating original array
