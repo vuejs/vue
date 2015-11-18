@@ -93,7 +93,7 @@ export function orderBy (arr, sortKey, reverse) {
 }
 
 /**
- * Filter filter for arrays, sort by multi-keys like sql: "| orderBy keya desc,keyb asc,keyc asc"
+ * Filter filter for arrays, sort by multi-keys like sql: "| orderBy 'key1 desc,key2 asc,key3 asc' "
  *
  * @param {String} sortKeys
  */
