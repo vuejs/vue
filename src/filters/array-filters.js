@@ -76,6 +76,9 @@ export function orderBy (arr, sortKey, reverse) {
   if (!sortKey) {
     return arr
   }
+  if(sortKey.indexOf(",")>0){
+    return exports.orderByKeys(sortKey);
+  }
   var order = (reverse && reverse < 0) ? -1 : 1
   // sort on a copy to avoid mutating original array
   return arr.slice().sort(function (a, b) {
@@ -89,6 +92,54 @@ export function orderBy (arr, sortKey, reverse) {
   })
 }
 
+/**
+ * Filter filter for arrays, sort by multi-keys like sql: "| orderBy keya desc,keyb asc,keyc asc"
+ *
+ * @param {String} sortKeys
+ */
+exports.orderByKeys = function (arr, sortKeys) {
+  console.log("sortKeys="+sortKeys);
+  arr = toArray(arr)
+  if (!sortKeys) {
+	return arr
+  }
+  sortKeys=sortKeys.trim().split(",");
+  //console.log("sortKeys.length="+sortKeys.length);
+  // sort on a copy to avoid mutating original array
+  return arr.slice().sort(function (a, b) {
+	//console.log("a="+JSON.stringify(a));
+	//console.log("b="+JSON.stringify(b));
+	if(a===b)return 0;
+	var result=0;
+	for(var i in sortKeys){			
+		var sortKey=sortKeys[i].trim();
+		
+		var order = 1;
+		if(sortKey.indexOf(" ")>0){
+			sortKey=sortKeys[i].split(" ")[0].trim();
+			order=sortKeys[i].split(" ")[1].trim().toLowerCase();
+			if(order==="desc" || (order && order < 0)){
+				order=-1;
+			}else{
+				order=1;
+			}
+		}
+		var va=a,vb=b;
+		if (sortKey !== '$key') { 
+		  if (_.isObject(va) && '$value' in va) va = va.$value;
+		  if (_.isObject(vb) && '$value' in vb) vb = vb.$value;
+		}
+		va = _.isObject(va) ? Path.get(va, sortKey) : va;
+		vb = _.isObject(vb) ? Path.get(vb, sortKey) : vb;
+		
+		result = (va === vb ? 0 : va > vb ? order : -order);
+		//console.log("a="+va+",b="+vb+",sortKey="+sortKey+",order="+order+",result="+result);
+		if(result!==0) break;
+	}
+	//console.log("result="+result);
+	return result;
+  })
+}
 /**
  * String contain helper
  *
