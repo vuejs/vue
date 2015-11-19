@@ -24,20 +24,8 @@ import lifecycleAPI from './api/lifecycle'
  * @public
  */
 
-class Vue {
-  constructor (options) {
-    this._init(options)
-  }
-
-  get $data () {
-    return this._data
-  }
-
-  set $data (newData) {
-    if (newData !== this._data) {
-      this._setData(newData)
-    }
-  }
+function Vue (options) {
+  this._init(options)
 }
 
 // install internals

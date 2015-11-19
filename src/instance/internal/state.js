@@ -18,6 +18,23 @@ import {
 export default function (Vue) {
 
   /**
+   * Accessor for `$data` property, since setting $data
+   * requires observing the new object and updating
+   * proxied properties.
+   */
+
+  Object.defineProperty(Vue.prototype, '$data', {
+    get () {
+      return this._data
+    },
+    set (newData) {
+      if (newData !== this._data) {
+        this._setData(newData)
+      }
+    }
+  })
+
+  /**
    * Setup the scope of an instance, which contains:
    * - observed data
    * - computed properties
