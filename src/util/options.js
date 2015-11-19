@@ -374,6 +374,8 @@ export function resolveAsset (options, type, id) {
 
 export function assertAsset (val, type, id) {
   if (!val) {
-    warn('Failed to resolve ' + type + ': ' + id)
+    process.env.NODE_ENV !== 'production' && warn(
+      'Failed to resolve ' + type + ': ' + id
+    )
   }
 }
