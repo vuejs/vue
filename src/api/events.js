@@ -98,6 +98,8 @@ exports.$emit = function (event) {
       var res = cbs[i].apply(this, args)
       if (res === true) {
         this._shouldPropagate = true
+      } else {
+        this._shouldPropagate = false
       }
     }
   }
