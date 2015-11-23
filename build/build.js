@@ -13,6 +13,12 @@ var banner =
   ' * Released under the MIT License.\n' +
   ' */'
 
+// update main file
+var main = fs
+  .readFileSync('src/index.js', 'utf-8')
+  .replace(/Vue\.version = '[\d\.]+'/, "Vue.version = '" + version + "'")
+fs.writeFileSync('src/index.js', main)
+
 // CommonJS build.
 // this is used as the "main" field in package.json
 // and used by bundlers like Webpack and Browserify.

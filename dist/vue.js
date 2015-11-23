@@ -9274,7 +9274,7 @@
     partial: partial
   };
 
-  Vue.version = '1.0.8';
+  Vue.version = '1.0.9';
 
   /**
    * Vue and every constructor that extends Vue has an
