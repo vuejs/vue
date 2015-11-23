@@ -1,5 +1,5 @@
 /*!
- * Vue.js v1.0.9
+ * Vue.js v1.0.10
  * (c) 2015 Evan You
  * Released under the MIT License.
  */
@@ -9274,7 +9274,7 @@
     partial: partial
   };
 
-  Vue.version = '1.0.9';
+  Vue.version = '1.0.10';
 
   /**
    * Vue and every constructor that extends Vue has an
