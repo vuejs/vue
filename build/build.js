@@ -26,7 +26,8 @@ rollup.rollup({
 })
 .then(function (bundle) {
   return write('dist/vue.common.js', bundle.generate({
-    format: 'cjs'
+    format: 'cjs',
+    banner: banner
   }).code)
 })
 // Standalone Dev Build
