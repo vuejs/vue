@@ -4,6 +4,7 @@ var rollup = require('rollup')
 var uglify = require('uglify-js')
 var babel = require('rollup-plugin-babel')
 var replace = require('rollup-plugin-replace')
+var commonjs = require('rollup-plugin-commonjs')
 var version = process.env.VERSION || require('../package.json').version
 
 var banner =
@@ -27,8 +28,10 @@ rollup.rollup({
       'process.env.NODE_ENV': "'development'"
     }),
     babel({
-      loose: 'all'
-    })
+      loose: 'all',
+      exclude: 'lib/**'
+    }),
+    commonjs()
   ]
 })
 .then(function (bundle) {
@@ -47,8 +50,10 @@ rollup.rollup({
         'process.env.NODE_ENV': "'production'"
       }),
       babel({
-        loose: 'all'
-      })
+        loose: 'all',
+        exclude: 'lib/**'
+      }),
+      commonjs()
     ]
   })
   .then(function (bundle) {
