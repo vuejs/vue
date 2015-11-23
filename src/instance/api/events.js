@@ -86,11 +86,12 @@ export default function (Vue) {
    * Trigger an event on self.
    *
    * @param {String} event
+   * @return {Boolean} shouldPropagate
    */
 
   Vue.prototype.$emit = function (event) {
     var cbs = this._events[event]
-    this._shouldPropagate = !cbs
+    var shouldPropagate = !cbs
     if (cbs) {
       cbs = cbs.length > 1
         ? toArray(cbs)
@@ -99,11 +100,11 @@ export default function (Vue) {
       for (var i = 0, l = cbs.length; i < l; i++) {
         var res = cbs[i].apply(this, args)
         if (res === true) {
-          this._shouldPropagate = true
+          shouldPropagate = true
         }
       }
     }
-    return this
+    return shouldPropagate
   }
 
   /**
@@ -120,8 +121,8 @@ export default function (Vue) {
     var children = this.$children
     for (var i = 0, l = children.length; i < l; i++) {
       var child = children[i]
-      child.$emit.apply(child, arguments)
-      if (child._shouldPropagate) {
+      var shouldPropagate = child.$emit.apply(child, arguments)
+      if (shouldPropagate) {
         child.$broadcast.apply(child, arguments)
       }
     }
@@ -139,8 +140,8 @@ export default function (Vue) {
     this.$emit.apply(this, arguments)
     var parent = this.$parent
     while (parent) {
-      parent.$emit.apply(parent, arguments)
-      parent = parent._shouldPropagate
+      var shouldPropagate = parent.$emit.apply(parent, arguments)
+      parent = shouldPropagate
         ? parent.$parent
         : null
     }
