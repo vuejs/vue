@@ -1,3 +1,4 @@
+import notevil from '../../lib/notevil'
 import { warn } from '../util/index'
 import { parsePath, setPath } from './path'
 import Cache from '../cache'
@@ -136,7 +137,10 @@ function compileGetter (exp) {
 
 function makeGetterFn (body) {
   try {
-    return new Function('scope', 'return ' + body + ';')
+    var fn = notevil.Function('scope', 'Math', 'return ' + body)
+    return function (scope) {
+      return fn.call(this, scope, Math)
+    }
   } catch (e) {
     process.env.NODE_ENV !== 'production' && warn(
       'Invalid expression. ' +
