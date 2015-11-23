@@ -3,7 +3,6 @@ import {
   del,
   nextTick,
   mergeOptions,
-  classify,
   toArray,
   commonTagRE,
   warn,
@@ -77,7 +76,9 @@ export default function (Vue) {
         name = null
       }
     }
-    var Sub = createClass(name || 'VueComponent')
+    var Sub = function VueComponent (options) {
+      Vue.call(this, options)
+    }
     Sub.prototype = Object.create(Super.prototype)
     Sub.prototype.constructor = Sub
     Sub.cid = cid++
@@ -102,22 +103,6 @@ export default function (Vue) {
       extendOptions._Ctor = Sub
     }
     return Sub
-  }
-
-  /**
-   * A function that returns a sub-class constructor with the
-   * given name. This gives us much nicer output when
-   * logging instances in the console.
-   *
-   * @param {String} name
-   * @return {Function}
-   */
-
-  function createClass (name) {
-    return new Function(
-      'return function ' + classify(name) +
-      ' (options) { this._init(options) }'
-    )()
   }
 
   /**
