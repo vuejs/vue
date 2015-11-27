@@ -173,6 +173,15 @@ var testCases = [
     paths: ['$a', 'b', 'c', 'e']
   },
   {
+    // string with escaped quotes
+    exp: "'a\\'b' + c",
+    scope: {
+      c: '\'c'
+    },
+    expected: "a\'b\'c",
+    paths: ['c']
+  },
+  {
     // Math global, simple path
     exp: 'Math.PI',
     scope: {},

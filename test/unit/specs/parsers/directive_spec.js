@@ -78,6 +78,14 @@ describe('Directive Parser', function () {
     expect(res.filters[0].args).toBeUndefined()
   })
 
+  it('escape string', function () {
+    var res = parse("'a\\'b' | test")
+    expect(res.expression).toBe("'a\\'b'")
+    expect(res.filters.length).toBe(1)
+    expect(res.filters[0].name).toBe('test')
+    expect(res.filters[0].args).toBeUndefined()
+  })
+
   it('cache', function () {
     var res1 = parse('a || b | c')
     var res2 = parse('a || b | c')

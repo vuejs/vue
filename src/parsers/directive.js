@@ -10,7 +10,7 @@ const reservedArgRE = /^in$|^-?\d+/
  */
 
 var str, dir
-var c, i, l, lastFilterIndex
+var c, prev, i, l, lastFilterIndex
 var inSingle, inDouble, curly, square, paren
 
 /**
@@ -90,13 +90,14 @@ export function parseDirective (s) {
   dir = {}
 
   for (i = 0, l = str.length; i < l; i++) {
+    prev = c
     c = str.charCodeAt(i)
     if (inSingle) {
       // check single quote
-      if (c === 0x27) inSingle = !inSingle
+      if (c === 0x27 && prev !== 0x5C) inSingle = !inSingle
     } else if (inDouble) {
       // check double quote
-      if (c === 0x22) inDouble = !inDouble
+      if (c === 0x22 && prev !== 0x5C) inDouble = !inDouble
     } else if (
       c === 0x7C && // pipe
       str.charCodeAt(i + 1) !== 0x7C &&
