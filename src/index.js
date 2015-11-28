@@ -29,8 +29,13 @@ export default Vue
 
 // devtools global hook
 /* istanbul ignore if */
-if (process.env.NODE_ENV !== 'production') {
-  if (inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__) {
+if (process.env.NODE_ENV !== 'production' && inBrowser) {
+  if (window.__VUE_DEVTOOLS_GLOBAL_HOOK__) {
     window.__VUE_DEVTOOLS_GLOBAL_HOOK__.emit('init', Vue)
+  } else if (/Chrome\/\d+/.test(navigator.userAgent)) {
+    console.log(
+      'Download the Vue Devtools for a better development experience:\n' +
+      'https://github.com/vuejs/vue-devtools'
+    )
   }
 }
