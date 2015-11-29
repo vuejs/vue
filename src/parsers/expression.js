@@ -26,7 +26,7 @@ const newlineRE = /\n/g
 const saveRE = /[\{,]\s*[\w\$_]+\s*:|('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*")|new |typeof |void /g
 const restoreRE = /"(\d+)"/g
 const pathTestRE = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\]|\[\d+\]|\[[A-Za-z_$][\w$]*\])*$/
-const pathReplaceRE = /[^\w$\.](?:[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\])*)/g
+const identRE = /[^\w$\.](?:[A-Za-z_$][\w$]*)/g
 const booleanLiteralRE = /^(?:true|false)$/
 
 /**
@@ -119,7 +119,7 @@ function compileGetter (exp) {
   // rewrite all paths
   // pad 1 space here becaue the regex matches 1 extra char
   body = (' ' + body)
-    .replace(pathReplaceRE, rewrite)
+    .replace(identRE, rewrite)
     .replace(restoreRE, restore)
   return makeGetterFn(body)
 }
