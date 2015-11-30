@@ -182,6 +182,18 @@ var testCases = [
     paths: ['c']
   },
   {
+    // dynamic sub path
+    exp: "a['b' + i + 'c']",
+    scope: {
+      i: 0,
+      a: {
+        'b0c': 123
+      }
+    },
+    expected: 123,
+    paths: ['a', 'i']
+  },
+  {
     // Math global, simple path
     exp: 'Math.PI',
     scope: {},
