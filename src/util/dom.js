@@ -176,7 +176,7 @@ export function addClass (el, cls) {
   } else {
     var cur = ' ' + (el.getAttribute('class') || '') + ' '
     if (cur.indexOf(' ' + cls + ' ') < 0) {
-      el.setAttribute('class', (cur + cls).trim())
+      el.className = (cur + cls).trim()
     }
   }
 }
@@ -197,7 +197,7 @@ export function removeClass (el, cls) {
     while (cur.indexOf(tar) >= 0) {
       cur = cur.replace(tar, ' ')
     }
-    el.setAttribute('class', cur.trim())
+    el.className = cur.trim()
   }
   if (!el.className) {
     el.removeAttribute('class')
