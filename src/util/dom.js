@@ -1,4 +1,5 @@
 import config from '../config'
+import { isIE9 } from './env'
 import { warn } from './debug'
 import { camelize } from './lang'
 import { removeWithTransition } from '../transition/index'
@@ -164,6 +165,22 @@ export function off (el, event, cb) {
 }
 
 /**
+ * In IE9, setAttribute('class') will result in empty class
+ * if the element also has the :class attribute; However in
+ * PhantomJS, setting `className` does not work on SVG elements...
+ * So we have to do a conditional detection here.
+ */
+
+const setClass = isIE9
+  ? function (el, cls) {
+    /* istanbul ignore next */
+    el.className = cls
+  }
+  : function (el, cls) {
+    el.setAttribute('class', cls)
+  }
+
+/**
  * Add class with compatibility for IE & SVG
  *
  * @param {Element} el
@@ -176,7 +193,7 @@ export function addClass (el, cls) {
   } else {
     var cur = ' ' + (el.getAttribute('class') || '') + ' '
     if (cur.indexOf(' ' + cls + ' ') < 0) {
-      el.className = (cur + cls).trim()
+      setClass(el, (cur + cls).trim())
     }
   }
 }
@@ -197,7 +214,7 @@ export function removeClass (el, cls) {
     while (cur.indexOf(tar) >= 0) {
       cur = cur.replace(tar, ' ')
     }
-    el.className = cur.trim()
+    setClass(el, cur.trim())
   }
   if (!el.className) {
     el.removeAttribute('class')
