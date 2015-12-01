@@ -80,6 +80,7 @@ export default function (Vue) {
     }
     var watcher = new Watcher(vm, expOrFn, cb, {
       deep: options && options.deep,
+      sync: options && options.sync,
       filters: parsed && parsed.filters
     })
     if (options && options.immediate) {
