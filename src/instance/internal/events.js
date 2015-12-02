@@ -32,18 +32,13 @@ export default function (Vue) {
 
   function registerComponentEvents (vm, el) {
     var attrs = el.attributes
+    var name, handler
     for (var i = 0, l = attrs.length; i < l; i++) {
-      let name = attrs[i].name
+      name = attrs[i].name
       if (eventRE.test(name)) {
         name = name.replace(eventRE, '')
-        const scope = vm._scope || vm._context
-        const handler = scope.$eval(attrs[i].value, true)
-        vm.$on(name.replace(eventRE), function (...args) {
-          scope.$arguments = args
-          const result = handler.apply(this, args)
-          scope.$arguments = null
-          return result
-        })
+        handler = (vm._scope || vm._context).$eval(attrs[i].value, true)
+        vm.$on(name.replace(eventRE), handler)
       }
     }
   }
