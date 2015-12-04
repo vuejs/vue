@@ -168,17 +168,20 @@ export function off (el, event, cb) {
  * In IE9, setAttribute('class') will result in empty class
  * if the element also has the :class attribute; However in
  * PhantomJS, setting `className` does not work on SVG elements...
- * So we have to do a conditional detection here.
+ * So we have to do a conditional check here.
+ *
+ * @param {Element} el
+ * @param {String} cls
  */
 
-const setClass = isIE9
-  ? function (el, cls) {
-    /* istanbul ignore next */
+function setClass (el, cls) {
+  /* istanbul ignore if */
+  if (isIE9 && el.hasOwnProperty('className')) {
     el.className = cls
-  }
-  : function (el, cls) {
+  } else {
     el.setAttribute('class', cls)
   }
+}
 
 /**
  * Add class with compatibility for IE & SVG
