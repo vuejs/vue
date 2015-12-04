@@ -652,8 +652,12 @@ function compileDirectives (attrs, options) {
     // attribute interpolations
     if (tokens) {
       value = tokensToExp(tokens)
-      arg = name
-      pushDir('bind', publicDirectives.bind, true)
+      if (name === 'class') {
+        pushDir('class', internalDirectives['class'], true)
+      } else {
+        arg = name
+        pushDir('bind', publicDirectives.bind, true)
+      }
       // warn against mixing mustaches with v-bind
       if (process.env.NODE_ENV !== 'production') {
         if (name === 'class' && Array.prototype.some.call(attrs, function (attr) {

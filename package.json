@@ -27,7 +27,7 @@
     "build": "node build/build.js",
     "install-hook": "ln -s ../../build/git-hooks/pre-commit .git/hooks/pre-commit",
     "dev": "webpack --watch --config build/webpack.dev.config.js & npm run serve-test",
-    "serve-test": "webpack-dev-server --config build/webpack.test.config.js",
+    "serve-test": "webpack-dev-server --config build/webpack.test.config.js --host 0.0.0.0",
     "build-test": "webpack --config build/webpack.test.config.js",
     "lint": "eslint src/** test/e2e/** test/unit/specs/** build/**.js",
     "e2e": "casperjs test --concise ./test/e2e",

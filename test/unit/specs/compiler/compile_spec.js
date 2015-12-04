@@ -516,12 +516,12 @@ describe('Compile', function () {
       }
     })
     expect(el.firstChild.id).toBe('aaa')
-    expect(el.firstChild.className).toBe('b ccc d')
+    expect(el.firstChild.className).toBe('b d ccc')
     vm.a = 'aa'
     vm.c = 'cc'
     _.nextTick(function () {
       expect(el.firstChild.id).toBe('aa')
-      expect(el.firstChild.className).toBe('b cc d')
+      expect(el.firstChild.className).toBe('b d cc')
       done()
     })
   })
