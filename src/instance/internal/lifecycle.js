@@ -150,6 +150,30 @@ export default function (Vue) {
       }
       return
     }
+
+    var destroyReady
+    var pendingRemoval
+
+    var self = this
+    // Cleanup should be called either synchronously or asynchronoysly as
+    // callback of this.$remove(), or if remove and deferCleanup are false.
+    // In any case it should be called after all other removing, unbinding and
+    // turning of is done
+    var cleanupIfPossible = function () {
+      if (destroyReady && !pendingRemoval && !deferCleanup) {
+        self._cleanup()
+      }
+    }
+
+    // remove DOM element
+    if (remove && this.$el) {
+      pendingRemoval = true
+      this.$remove(function () {
+        pendingRemoval = false
+        cleanupIfPossible()
+      })
+    }
+
     this._callHook('beforeDestroy')
     this._isBeingDestroyed = true
     var i
@@ -183,15 +207,9 @@ export default function (Vue) {
     if (this.$el) {
       this.$el.__vue__ = null
     }
-    // remove DOM element
-    var self = this
-    if (remove && this.$el) {
-      this.$remove(function () {
-        self._cleanup()
-      })
-    } else if (!deferCleanup) {
-      this._cleanup()
-    }
+
+    destroyReady = true
+    cleanupIfPossible()
   }
 
   /**

@@ -192,6 +192,37 @@ describe('Lifecycle API', function () {
       expect(opts.detached).toHaveBeenCalled()
     })
 
+    // #1966
+    it('grandchild hooks', function () {
+      var grandChildBeforeDestroy = jasmine.createSpy()
+      var grandChildDestroyed = jasmine.createSpy()
+      var grandChildDetached = jasmine.createSpy()
+
+      var opts = {
+        template: '<div><test></test></div>',
+        components: {
+          test: {
+            template: '<div><test-inner></test-inner></div>',
+            components: {
+              'test-inner': {
+                beforeDestroy: grandChildBeforeDestroy,
+                destroyed: grandChildDestroyed,
+                detached: grandChildDetached
+              }
+            }
+          }
+        }
+      }
+      var el = opts.el = document.createElement('div')
+      document.body.appendChild(el)
+      var vm = new Vue(opts)
+      vm.$destroy(true)
+
+      expect(grandChildBeforeDestroy).toHaveBeenCalled()
+      expect(grandChildDestroyed).toHaveBeenCalled()
+      expect(grandChildDetached).toHaveBeenCalled()
+    })
+
     it('parent', function () {
       var parent = new Vue()
       var child = new Vue({ parent: parent })

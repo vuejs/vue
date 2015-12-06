@@ -119,7 +119,56 @@ describe('Misc', function () {
     expect(logs.join()).toBe('0,5,6,5,6,1')
     logs = []
     vm.$destroy(true)
-    expect(logs.join()).toBe('3,8,9,8,9,2,7,7,4')
+    expect(logs.join()).toBe('2,7,7,3,8,9,8,9,4')
+    Vue.options.replace = false
+  })
+
+  // #1966
+  it('call lifecycle hooks for child and grandchild components', function () {
+    Vue.options.replace = true
+    var el = document.createElement('div')
+    var logs = []
+    function log (n) {
+      return function () {
+        logs.push(n)
+      }
+    }
+    document.body.appendChild(el)
+    var vm = new Vue({
+      el: el,
+      attached: log(0),
+      ready: log(1),
+      detached: log(2),
+      beforeDestroy: log(3),
+      destroyed: log(4),
+      template: '<div><test></test></div>',
+      components: {
+        test: {
+          attached: log(5),
+          ready: log(6),
+          detached: log(7),
+          beforeDestroy: log(8),
+          destroyed: log(9),
+          template: '<div><test-inner></test-inner></div>',
+          components: {
+            'test-inner': {
+              attached: log(10),
+              ready: log(11),
+              detached: log(12),
+              beforeDestroy: log(13),
+              destroyed: log(14),
+              template: '<span>hi</span>'
+            }
+          }
+
+        }
+      }
+    })
+    expect(vm.$el.innerHTML).toBe('<div><span>hi</span></div>')
+    expect(logs.join()).toBe('0,5,10,11,6,1')
+    logs = []
+    vm.$destroy(true)
+    expect(logs.join()).toBe('2,7,12,3,8,13,14,9,4')
     Vue.options.replace = false
   })
 
