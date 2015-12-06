@@ -33,6 +33,7 @@ export function set (obj, key, val) {
       vm._digest()
     }
   }
+  return val
 }
 
 /**
