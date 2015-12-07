@@ -237,6 +237,24 @@ describe('Instance Events', function () {
       expect(vm.a).toBe(1)
     })
 
+    it('passing $arguments', function () {
+      new Vue({
+        el: document.createElement('div'),
+        template: '<comp @ready="onReady($arguments[1])"></comp>',
+        methods: {
+          onReady: spy
+        },
+        components: {
+          comp: {
+            compiled: function () {
+              this.$emit('ready', 123, 1234)
+            }
+          }
+        }
+      })
+      expect(spy).toHaveBeenCalledWith(1234)
+    })
+
     describe('attached/detached', function () {
 
       it('in DOM', function () {

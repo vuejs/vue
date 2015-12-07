@@ -10,6 +10,7 @@ import {
   warn
 } from './util/index'
 import Watcher from './watcher'
+import { removeTags } from './parsers/text'
 import { parseExpression, isSimplePath } from './parsers/expression'
 
 function noop () {}
@@ -82,7 +83,15 @@ Directive.prototype._bind = function () {
     this.el && this.el.removeAttribute
   ) {
     var attr = descriptor.attr || ('v-' + name)
-    this.el.removeAttribute(attr)
+    if (attr !== 'class') {
+      this.el.removeAttribute(attr)
+    } else {
+      // for class interpolations, only remove the parts that
+      // need to be interpolated.
+      this.el.className = removeTags(this.el.className)
+        .trim()
+        .replace(/\s+/g, ' ')
+    }
   }
 
   // copy def properties
