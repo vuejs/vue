@@ -22,10 +22,10 @@ let animationEndEvent
 // Transition property/event sniffing
 if (inBrowser && !isIE9) {
   const isWebkitTrans =
-    window.ontransitionend === undefined &&
+    window.ontransitionend !== undefined &&
     window.onwebkittransitionend !== undefined
   const isWebkitAnim =
-    window.onanimationend === undefined &&
+    window.onanimationend !== undefined &&
     window.onwebkitanimationend !== undefined
   transitionProp = isWebkitTrans
     ? 'WebkitTransition'
