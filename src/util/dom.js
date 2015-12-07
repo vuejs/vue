@@ -187,7 +187,7 @@ function setClass (el, cls) {
  * Add class with compatibility for IE & SVG
  *
  * @param {Element} el
- * @param {Strong} cls
+ * @param {String} cls
  */
 
 export function addClass (el, cls) {
@@ -205,7 +205,7 @@ export function addClass (el, cls) {
  * Remove class with compatibility for IE & SVG
  *
  * @param {Element} el
- * @param {Strong} cls
+ * @param {String} cls
  */
 
 export function removeClass (el, cls) {
