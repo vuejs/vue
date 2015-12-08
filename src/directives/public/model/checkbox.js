@@ -47,7 +47,7 @@ export default {
     }
 
     this.on('change', this.listener)
-    if (el.checked) {
+    if (el.hasAttribute('checked')) {
       this.afterBind = this.listener
     }
   },
