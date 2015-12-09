@@ -71,6 +71,12 @@ export default function (Vue) {
       return extendOptions._Ctor
     }
     var name = extendOptions.name || Super.options.name
+    if (process.env.NODE_ENV !== 'production') {
+      if (!/^[a-zA-Z][\w-]+$/.test(name)) {
+        warn('Invalid component name: ' + name)
+        name = null
+      }
+    }
     var Sub = createClass(name || 'VueComponent')
     Sub.prototype = Object.create(Super.prototype)
     Sub.prototype.constructor = Sub
