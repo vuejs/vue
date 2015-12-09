@@ -35,11 +35,12 @@ export default {
       // Default content
       var self = this
       var compileDefaultContent = function () {
-        self.compile(
-          extractFragment(raw.childNodes, raw, true),
-          context,
-          host
-        )
+        var content = extractFragment(raw.childNodes, raw, true)
+        if (content.hasChildNodes()) {
+          self.compile(content, context, host)
+        } else {
+          self.fallback()
+        }
       }
       if (!host._isCompiled) {
         // defer until the end of instance compilation,

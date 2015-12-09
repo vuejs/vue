@@ -59,6 +59,17 @@ describe('Slot Distribution', function () {
     expect(el.lastChild.textContent).toBe('slot b')
   })
 
+  it('fallback content with mixed named/unnamed slots', function () {
+    el.innerHTML = '<p slot="b">slot b</p>'
+    options.template =
+      '<slot><p>fallback a</p></slot>' +
+      '<slot name="b">fallback b</slot>'
+    mount()
+    expect(el.childNodes.length).toBe(2)
+    expect(el.firstChild.textContent).toBe('fallback a')
+    expect(el.lastChild.textContent).toBe('slot b')
+  })
+
   it('selector matching multiple elements', function () {
     el.innerHTML = '<p slot="t">1</p><div></div><p slot="t">2</p>'
     options.template = '<slot name="t"></slot>'
