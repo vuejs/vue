@@ -320,11 +320,16 @@ describe('Component', function () {
       // cleans up the component being waited on.
       // see #1152
       vm.view = 'view-a'
+      // store the ready callback for view-a
+      var callback = next
       _.nextTick(function () {
         vm.view = 'view-b'
         _.nextTick(function () {
           expect(vm.$children.length).toBe(1)
           expect(vm.$children[0].$el.textContent).toBe('BBB')
+          // calling view-a's ready callback here should not throw
+          // because it should've been cancelled (#1994)
+          expect(callback).not.toThrow()
           done()
         })
       })
