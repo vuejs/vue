@@ -157,7 +157,7 @@ export function observe (value, vm) {
     ob = value.__ob__
   } else if (
     (isArray(value) || isPlainObject(value)) &&
-    !Object.isFrozen(value) &&
+    Object.isExtensible(value) &&
     !value._isVue
   ) {
     ob = new Observer(value)
