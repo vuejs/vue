@@ -387,4 +387,18 @@ describe('Misc', function () {
       done()
     })
   })
+
+  it('IE9 class & :class merge during transclusion', function () {
+    var vm = new Vue({
+      el: document.createElement('div'),
+      template: '<test class="outer"></test>',
+      components: {
+        test: {
+          replace: true,
+          template: '<div :class="{\'inner\': true}"></div>'
+        }
+      }
+    })
+    expect(vm.$el.firstChild.className).toBe('outer inner')
+  })
 })

@@ -190,7 +190,7 @@ export function off (el, event, cb) {
 
 function setClass (el, cls) {
   /* istanbul ignore if */
-  if (isIE9 && el.hasOwnProperty('className')) {
+  if (isIE9 && !(el instanceof SVGElement)) {
     el.className = cls
   } else {
     el.setAttribute('class', cls)
