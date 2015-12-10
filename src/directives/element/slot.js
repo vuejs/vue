@@ -4,6 +4,7 @@ import {
 } from '../../parsers/template'
 
 import {
+  extend,
   extractContent,
   replace,
   remove,
@@ -15,60 +16,46 @@ import {
 // instance being stored as `$options._content` during
 // the transclude phase.
 
-export default {
+// We are exporting two versions, one for named and one
+// for unnamed, because the unnamed slots must be compiled
+// AFTER all named slots have selected their content. So
+// we need to give them different priorities in the compilation
+// process. (See #1965)
+
+export const slot = {
 
   priority: 1750,
-
-  params: ['name'],
 
   bind () {
     var host = this.vm
     var raw = host.$options._content
-    var content
     if (!raw) {
       this.fallback()
       return
     }
     var context = host._context
-    var slotName = this.params.name
+    var slotName = this.params && this.params.name
     if (!slotName) {
-      // Default content
-      var self = this
-      var compileDefaultContent = function () {
-        var content = extractFragment(raw.childNodes, raw, true)
-        if (content.hasChildNodes()) {
-          self.compile(content, context, host)
-        } else {
-          self.fallback()
-        }
-      }
-      if (!host._isCompiled) {
-        // defer until the end of instance compilation,
-        // because the default outlet must wait until all
-        // other possible outlets with selectors have picked
-        // out their contents.
-        host.$once('hook:compiled', compileDefaultContent)
-      } else {
-        compileDefaultContent()
-      }
+      // Default slot
+      this.tryCompile(extractFragment(raw.childNodes, raw, true), context, host)
     } else {
+      // Named slot
       var selector = '[slot="' + slotName + '"]'
       var nodes = raw.querySelectorAll(selector)
       if (nodes.length) {
-        content = extractFragment(nodes, raw)
-        if (content.hasChildNodes()) {
-          this.compile(content, context, host)
-        } else {
-          this.fallback()
-        }
+        this.tryCompile(extractFragment(nodes, raw), context, host)
       } else {
         this.fallback()
       }
     }
   },
 
-  fallback () {
-    this.compile(extractContent(this.el, true), this.vm)
+  tryCompile (content, context, host) {
+    if (content.hasChildNodes()) {
+      this.compile(content, context, host)
+    } else {
+      this.fallback()
+    }
   },
 
   compile (content, context, host) {
@@ -87,12 +74,21 @@ export default {
     }
   },
 
+  fallback () {
+    this.compile(extractContent(this.el, true), this.vm)
+  },
+
   unbind () {
     if (this.unlink) {
       this.unlink()
     }
   }
 }
+
+export const namedSlot = extend(extend({}, slot), {
+  priority: slot.priority + 1,
+  params: ['name']
+})
 
 /**
  * Extract qualified content nodes from a node list.

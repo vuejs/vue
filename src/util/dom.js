@@ -76,6 +76,20 @@ export function getBindAttr (node, name) {
 }
 
 /**
+ * Check the presence of a bind attribute.
+ *
+ * @param {Node} node
+ * @param {String} name
+ * @return {Boolean}
+ */
+
+export function hasBindAttr (node, name) {
+  return node.hasAttribute(name) ||
+    node.hasAttribute(':' + name) ||
+    node.hasAttribute('v-bind:' + name)
+}
+
+/**
  * Insert el before target
  *
  * @param {Element} el

@@ -169,27 +169,28 @@ describe('Slot Distribution', function () {
       el: el,
       data: {
         a: 1,
+        b: 2,
         show: true
       },
-      template: '<test :show="show">{{a}}</test>',
+      template: '<test :show="show"><p slot="b">{{b}}</a><p>{{a}}</p></test>',
       components: {
         test: {
           props: ['show'],
-          template: '<div v-if="show"><slot></cotent></div>'
+          template: '<div v-if="show"><slot></slot><slot name="b"></slot></div>'
         }
       }
     })
-    expect(el.textContent).toBe('1')
+    expect(el.textContent).toBe('12')
     vm.a = 2
     _.nextTick(function () {
-      expect(el.textContent).toBe('2')
+      expect(el.textContent).toBe('22')
       vm.show = false
       _.nextTick(function () {
         expect(el.textContent).toBe('')
         vm.show = true
         vm.a = 3
         _.nextTick(function () {
-          expect(el.textContent).toBe('3')
+          expect(el.textContent).toBe('32')
           done()
         })
       })

@@ -7,7 +7,8 @@ import {
   createAnchor,
   resolveAsset,
   toArray,
-  addClass
+  addClass,
+  hasBindAttr
 } from '../util/index'
 
 const specialCharRE = /[^\w\-:\.]/
@@ -92,9 +93,7 @@ function transcludeTemplate (el, options) {
         // single nested component
         tag === 'component' ||
         resolveAsset(options, 'components', tag) ||
-        replacer.hasAttribute('is') ||
-        replacer.hasAttribute(':is') ||
-        replacer.hasAttribute('v-bind:is') ||
+        hasBindAttr(replacer, 'is') ||
         // element directive
         resolveAsset(options, 'elementDirectives', tag) ||
         // for block
