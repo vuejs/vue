@@ -76,6 +76,7 @@ function getIsBinding (el) {
 
 export function initProp (vm, prop, value) {
   const key = prop.path
+  value = coerceProp(prop, value)
   vm[key] = vm._data[key] = assertProp(prop, value)
     ? value
     : undefined
@@ -141,6 +142,23 @@ export function assertProp (prop, value) {
     }
   }
   return true
+}
+
+/**
+ * Force parsing value with coerce option.
+ *
+ * @param {*} value
+ * @param {Object} options
+ * @return {*}
+ */
+
+export function coerceProp (prop, value) {
+  var coerce = prop.options.coerce
+  if (!coerce) {
+    return value
+  }
+  // coerce is a function
+  return coerce(value)
 }
 
 function formatType (val) {

@@ -295,7 +295,7 @@ describe('prop', function () {
 
   describe('assertions', function () {
 
-    function makeInstance (value, type, validator) {
+    function makeInstance (value, type, validator, coerce) {
       return new Vue({
         el: document.createElement('div'),
         template: '<test :test="val"></test>',
@@ -307,7 +307,8 @@ describe('prop', function () {
             props: {
               test: {
                 type: type,
-                validator: validator
+                validator: validator,
+                coerce: coerce
               }
             }
           }
@@ -389,6 +390,17 @@ describe('prop', function () {
         return v === 123
       })
       expect(hasWarned('Expected String')).toBe(true)
+    })
+
+    it('type check + coerce', function () {
+      makeInstance(123, String, null, String)
+      expect(getWarnCount()).toBe(0)
+      makeInstance('123', Number, null, Number)
+      expect(getWarnCount()).toBe(0)
+      makeInstance('123', Boolean, null, function (val) {
+        return val === '123'
+      })
+      expect(getWarnCount()).toBe(0)
     })
 
     it('required', function () {

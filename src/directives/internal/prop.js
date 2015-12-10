@@ -5,7 +5,7 @@
 
 import Watcher from '../../watcher'
 import config from '../../config'
-import { assertProp, initProp } from '../../util/index'
+import { assertProp, initProp, coerceProp } from '../../util/index'
 
 const bindingModes = config._propBindingModes
 
@@ -25,6 +25,7 @@ export default {
       parent,
       parentKey,
       function (val) {
+        val = coerceProp(prop, val)
         if (assertProp(prop, val)) {
           child[childKey] = val
         }
