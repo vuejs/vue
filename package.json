@@ -9,9 +9,8 @@
     "browser",
     "framework"
   ],
-  "main": "dist/vue.common.js",
+  "main": "dist/vue.js",
   "files": [
-    "dist/vue.common.js",
     "dist/vue.js",
     "dist/vue.min.js",
     "src"
