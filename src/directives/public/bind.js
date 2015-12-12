@@ -92,7 +92,9 @@ export default {
   handleSingle (attr, value) {
     if (inputProps[attr] && attr in this.el) {
       this.el[attr] = attr === 'value'
-        ? (value || '') // IE9 will set input.value to "null" for null...
+        ? value == null // IE9 will set input.value to "null" for null...
+          ? ''
+          : value
         : value
     }
     // set model props
