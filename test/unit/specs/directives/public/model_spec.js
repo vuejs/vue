@@ -741,4 +741,32 @@ describe('v-model', function () {
       })
     })
   })
+
+  it('should not sync value on blur when parent fragment is removed', function (done) {
+    el.style.display = ''
+    var vm = new Vue({
+      el: el,
+      replace: false,
+      template:
+        '<form v-if="ok" @submit.prevent="save">' +
+          '<input v-model="msg">' +
+        '</form>',
+      data: {
+        ok: true,
+        msg: 'hi'
+      },
+      methods: {
+        save: function () {
+          this.ok = false
+          this.msg = ''
+        }
+      }
+    })
+    el.querySelector('input').focus()
+    trigger(el.querySelector('form'), 'submit')
+    _.nextTick(function () {
+      expect(vm.msg).toBe('')
+      done()
+    })
+  })
 })
