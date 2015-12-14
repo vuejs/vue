@@ -60,7 +60,9 @@ export default {
 
     // Now attach the main listener
     this.listener = function () {
-      if (composing) return
+      if (composing || !self._bound) {
+        return
+      }
       var val = number || isRange
         ? toNumber(el.value)
         : el.value
