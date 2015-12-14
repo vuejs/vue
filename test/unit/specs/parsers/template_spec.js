@@ -44,6 +44,11 @@ describe('Template Parser', function () {
     expect(res instanceof DocumentFragment).toBeTruthy()
     expect(res.childNodes.length).toBe(1)
     expect(res.firstChild.nodeValue).toBe('hello / hello')
+    // #2021
+    res = parse('&#xe604;')
+    expect(res instanceof DocumentFragment).toBeTruthy()
+    expect(res.childNodes.length).toBe(1)
+    expect(res.firstChild.nodeValue).toBe('')
   })
 
   it('should parse textContent if argument is a script node', function () {
