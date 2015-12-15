@@ -709,8 +709,19 @@ describe('v-model', function () {
     }, 30)
     setTimeout(function () {
       expect(spy.calls.count()).toBe(1)
+      expect(spy).toHaveBeenCalledWith('d', 'a')
       expect(vm.test).toBe('d')
-      done()
+    }, 150)
+    setTimeout(function () {
+      el.firstChild.value = 'e'
+      // blur should trigger change instantly without debounce
+      trigger(el.firstChild, 'blur')
+      _.nextTick(function () {
+        expect(spy.calls.count()).toBe(2)
+        expect(spy).toHaveBeenCalledWith('e', 'd')
+        expect(vm.test).toBe('e')
+        done()
+      })
     }, 200)
   })
 

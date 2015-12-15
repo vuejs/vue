@@ -53,13 +53,13 @@ export default {
         self.focused = false
         // do not sync value after fragment removal (#2017)
         if (!self._frag || self._frag.inserted) {
-          self.listener()
+          self.rawListener()
         }
       })
     }
 
     // Now attach the main listener
-    this.listener = function () {
+    this.listener = this.rawListener = function () {
       if (composing || !self._bound) {
         return
       }

@@ -109,6 +109,7 @@ Directive.prototype._bind = function () {
   if (this.bind) {
     this.bind()
   }
+  this._bound = true
 
   if (this.literal) {
     this.update && this.update(descriptor.raw)
@@ -156,7 +157,6 @@ Directive.prototype._bind = function () {
       this.update(watcher.value)
     }
   }
-  this._bound = true
 }
 
 /**
