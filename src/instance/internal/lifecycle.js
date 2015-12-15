@@ -1,4 +1,4 @@
-import { replace } from '../../util/index'
+import { replace, getAttr } from '../../util/index'
 import Directive from '../../directive'
 import { compile, compileRoot, transclude } from '../../compiler/index'
 
@@ -48,6 +48,11 @@ export default function (Vue) {
     var original = el
     el = transclude(el, options)
     this._initElement(el)
+
+    // handle v-pre on root node (#2026)
+    if (el.nodeType === 1 && getAttr(el, 'v-pre') !== null) {
+      return
+    }
 
     // root is always compiled per-instance, because
     // container attrs and props can be different every time.
