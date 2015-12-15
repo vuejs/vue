@@ -1,4 +1,4 @@
-import { getAttr } from '../../util/index'
+import { getAttr, inDoc } from '../../util/index'
 import { applyTransition } from '../../transition/index'
 
 export default {
@@ -19,8 +19,13 @@ export default {
   },
 
   apply (el, value) {
-    applyTransition(el, value ? 1 : -1, function () {
+    if (inDoc(el)) {
+      applyTransition(el, value ? 1 : -1, toggle, this.vm)
+    } else {
+      toggle()
+    }
+    function toggle () {
       el.style.display = value ? '' : 'none'
-    }, this.vm)
+    }
   }
 }
