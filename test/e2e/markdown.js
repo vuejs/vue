@@ -16,12 +16,13 @@ casper.test.begin('markdown', 5, function (test) {
       'textarea',
       '## yo\n\n' +
       '- test\n' +
-      '- hi\n\n'
+      '- hi\n\n',
+      { keepFocus: true }
     )
     // keyUp(13)
   })
   .then(function () {
-    // assert the output is not updarted yet because of
+    // assert the output is not updated yet because of
     // debounce
     test.assertEval(function () {
       return document.querySelector('#editor div')
