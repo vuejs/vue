@@ -401,4 +401,19 @@ describe('Misc', function () {
     })
     expect(vm.$el.firstChild.className).toBe('outer inner')
   })
+
+  it('SVG class interpolation', function () {
+    var vm = new Vue({
+      el: document.createElement('div'),
+      template: '<icon class="abc" icon="def"></icon>',
+      components: {
+        icon: {
+          props: ['class', 'icon'],
+          replace: true,
+          template: '<svg class="si-icon {{icon}} {{class}}"><use xlink:href=""></use></svg>'
+        }
+      }
+    })
+    expect(vm.$el.firstChild.getAttribute('class')).toBe('si-icon abc def')
+  })
 })

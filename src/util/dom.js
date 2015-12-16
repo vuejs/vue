@@ -188,7 +188,7 @@ export function off (el, event, cb) {
  * @param {String} cls
  */
 
-function setClass (el, cls) {
+export function setClass (el, cls) {
   /* istanbul ignore if */
   if (isIE9 && !(el instanceof SVGElement)) {
     el.className = cls

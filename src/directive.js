@@ -7,7 +7,8 @@ import {
   getBindAttr,
   camelize,
   nextTick,
-  warn
+  warn,
+  setClass
 } from './util/index'
 import Watcher from './watcher'
 import { removeTags } from './parsers/text'
@@ -88,9 +89,10 @@ Directive.prototype._bind = function () {
     } else {
       // for class interpolations, only remove the parts that
       // need to be interpolated.
-      this.el.className = removeTags(this.el.className)
-        .trim()
-        .replace(/\s+/g, ' ')
+      setClass(
+        this.el,
+        removeTags(this.el.getAttribute('class')).trim().replace(/\s+/g, ' ')
+      )
     }
   }
 
