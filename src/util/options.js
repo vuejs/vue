@@ -10,7 +10,7 @@ import {
   camelize
 } from './lang'
 import { warn } from './debug'
-import { commonTagRE } from './component'
+import { commonTagRE, reservedTagRE } from './component'
 
 /**
  * Option overwriting strategies are functions that handle
@@ -233,9 +233,9 @@ function guardComponents (options) {
     var ids = Object.keys(components)
     for (var i = 0, l = ids.length; i < l; i++) {
       var key = ids[i]
-      if (commonTagRE.test(key)) {
+      if (commonTagRE.test(key) || reservedTagRE.test(key)) {
         process.env.NODE_ENV !== 'production' && warn(
-          'Do not use built-in HTML elements as component ' +
+          'Do not use built-in or reserved HTML elements as component ' +
           'id: ' + key
         )
         continue

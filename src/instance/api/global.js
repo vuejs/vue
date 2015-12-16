@@ -6,6 +6,7 @@ import {
   classify,
   toArray,
   commonTagRE,
+  reservedTagRE,
   warn,
   isPlainObject
 } from '../../util/index'
@@ -167,9 +168,12 @@ export default function (Vue) {
       } else {
         /* istanbul ignore if */
         if (process.env.NODE_ENV !== 'production') {
-          if (type === 'component' && commonTagRE.test(id)) {
+          if (
+            type === 'component' &&
+            (commonTagRE.test(id) || reservedTagRE.test(id))
+          ) {
             warn(
-              'Do not use built-in HTML elements as component ' +
+              'Do not use built-in or reserved HTML elements as component ' +
               'id: ' + id
             )
           }

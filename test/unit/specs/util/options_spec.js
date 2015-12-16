@@ -161,7 +161,15 @@ describe('Util - Option merging', function () {
         a: { template: 'hi' }
       }
     })
-    expect(hasWarned('Do not use built-in HTML elements')).toBe(true)
+    expect(hasWarned('Do not use built-in or reserved HTML elements as component id: a')).toBe(true)
+    merge({
+      components: null
+    }, {
+      components: {
+        slot: { template: 'hi' }
+      }
+    })
+    expect(hasWarned('Do not use built-in or reserved HTML elements as component id: slot')).toBe(true)
   })
 
   it('should ignore non-function el & data in class merge', function () {
