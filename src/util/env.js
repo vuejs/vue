@@ -2,15 +2,14 @@
 export const hasProto = '__proto__' in {}
 
 // can we use new Function?
-export const hasNewFunction = (function() {
-    try {
-        new Function('a', 'return a;')
-        return true
-    } catch (e) {
-        return false
-    }
+export const hasNewFunction = (function () {
+  try {
+    let fn = new Function('a', 'return a;')
+    return fn != null
+  } catch (e) {
+    return false
+  }
 })()
-
 
 // Browser environment sniffing
 export const inBrowser =
