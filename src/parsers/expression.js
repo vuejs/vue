@@ -1,4 +1,4 @@
-import { warn } from '../util/index'
+import { warn, Function } from '../util/index'
 import { parsePath, setPath } from './path'
 import Cache from '../cache'
 
