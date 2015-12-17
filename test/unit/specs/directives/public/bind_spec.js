@@ -7,7 +7,10 @@ describe('v-bind', function () {
   var el, dir
   beforeEach(function () {
     el = document.createElement('div')
-    dir = {el: el}
+    dir = {
+      el: el,
+      descriptor: {}
+    }
     _.extend(dir, def)
   })
 

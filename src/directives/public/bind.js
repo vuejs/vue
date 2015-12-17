@@ -5,13 +5,12 @@ import vStyle from '../internal/style'
 const xlinkNS = 'http://www.w3.org/1999/xlink'
 const xlinkRE = /^xlink:/
 
-// these input element attributes should also set their
-// corresponding properties
-const inputProps = {
-  value: 1,
-  checked: 1,
-  selected: 1
-}
+// check for attributes that prohibit interpolations
+const disallowedInterpAttrRE = /^v-|^:|^@|^(is|transition|transition-mode|debounce|track-by|stagger|enter-stagger|leave-stagger)$/
+
+// these attributes should also set their corresponding properties
+// because they only affect the initial state of the element
+const attrWithPropsRE = /^(value|checked|selected|muted)$/
 
 // these attributes should set a hidden property for
 // binding v-model to object values
@@ -20,9 +19,6 @@ const modelProps = {
   'true-value': '_trueValue',
   'false-value': '_falseValue'
 }
-
-// check for attributes that prohibit interpolations
-const disallowedInterpAttrRE = /^v-|^:|^@|^(is|transition|transition-mode|debounce|track-by|stagger|enter-stagger|leave-stagger)$/
 
 export default {
 
@@ -90,7 +86,11 @@ export default {
   handleObject: vStyle.handleObject,
 
   handleSingle (attr, value) {
-    if (inputProps[attr] && attr in this.el) {
+    if (
+      !this.descriptor.interp &&
+      attrWithPropsRE.test(attr) &&
+      attr in this.el
+    ) {
       this.el[attr] = attr === 'value'
         ? value == null // IE9 will set input.value to "null" for null...
           ? ''
