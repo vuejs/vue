@@ -1,5 +1,5 @@
 /*!
- * Vue.js v1.0.11
+ * Vue.js v1.0.12
  * (c) 2015 Evan You
  * Released under the MIT License.
  */
@@ -1253,7 +1253,7 @@
 
   function setClass(el, cls) {
     /* istanbul ignore if */
-    if (isIE9 && el.hasOwnProperty('className')) {
+    if (isIE9 && !(el instanceof SVGElement)) {
       el.className = cls;
     } else {
       el.setAttribute('class', cls);
@@ -1454,6 +1454,7 @@
   }
 
   var commonTagRE = /^(div|p|span|img|a|b|i|br|ul|ol|li|h1|h2|h3|h4|h5|h6|code|pre|table|th|td|tr|form|label|input|select|option|nav|article|section|header|footer)$/;
+  var reservedTagRE = /^(slot|partial|component)$/;
 
   /**
    * Check if an element is a component, if yes return its
@@ -1467,7 +1468,7 @@
   function checkComponentAttr(el, options) {
     var tag = el.tagName.toLowerCase();
     var hasAttrs = el.hasAttributes();
-    if (!commonTagRE.test(tag) && tag !== 'component') {
+    if (!commonTagRE.test(tag) && !reservedTagRE.test(tag)) {
       if (resolveAsset(options, 'components', tag)) {
         return { id: tag };
       } else {
@@ -1518,6 +1519,7 @@
 
   function initProp(vm, prop, value) {
     var key = prop.path;
+    value = coerceProp(prop, value);
     vm[key] = vm._data[key] = assertProp(prop, value) ? value : undefined;
   }
 
@@ -1573,6 +1575,23 @@
       }
     }
     return true;
+  }
+
+  /**
+   * Force parsing value with coerce option.
+   *
+   * @param {*} value
+   * @param {Object} options
+   * @return {*}
+   */
+
+  function coerceProp(prop, value) {
+    var coerce = prop.options.coerce;
+    if (!coerce) {
+      return value;
+    }
+    // coerce is a function
+    return coerce(value);
   }
 
   function formatType(val) {
@@ -1760,8 +1779,8 @@
       var ids = Object.keys(components);
       for (var i = 0, l = ids.length; i < l; i++) {
         var key = ids[i];
-        if (commonTagRE.test(key)) {
-          'development' !== 'production' && warn('Do not use built-in HTML elements as component ' + 'id: ' + key);
+        if (commonTagRE.test(key) || reservedTagRE.test(key)) {
+          'development' !== 'production' && warn('Do not use built-in or reserved HTML elements as component ' + 'id: ' + key);
           continue;
         }
         def = components[key];
@@ -2281,6 +2300,7 @@
   	replace: replace,
   	on: on$1,
   	off: off,
+  	setClass: setClass,
   	addClass: addClass,
   	removeClass: removeClass,
   	extractContent: extractContent,
@@ -2296,7 +2316,9 @@
   	checkComponentAttr: checkComponentAttr,
   	initProp: initProp,
   	assertProp: assertProp,
+  	coerceProp: coerceProp,
   	commonTagRE: commonTagRE,
+  	reservedTagRE: reservedTagRE,
   	get warn () { return warn; }
   });
 
@@ -3224,11 +3246,11 @@
     if (this.active) {
       var value = this.get();
       if (value !== this.value ||
-      // Deep watchers and Array watchers should fire even
+      // Deep watchers and watchers on Object/Arrays should fire even
       // when the value is the same, because the value may
       // have mutated; but only do so if this is a
       // non-shallow update (caused by a vm digest).
-      (isArray(value) || this.deep) && !this.shallow) {
+      (isObject(value) || this.deep) && !this.shallow) {
         // set new value
         var oldValue = this.value;
         this.value = value;
@@ -3474,13 +3496,12 @@
   var xlinkNS = 'http://www.w3.org/1999/xlink';
   var xlinkRE = /^xlink:/;
 
-  // these input element attributes should also set their
-  // corresponding properties
-  var inputProps = {
-    value: 1,
-    checked: 1,
-    selected: 1
-  };
+  // check for attributes that prohibit interpolations
+  var disallowedInterpAttrRE = /^v-|^:|^@|^(is|transition|transition-mode|debounce|track-by|stagger|enter-stagger|leave-stagger)$/;
+
+  // these attributes should also set their corresponding properties
+  // because they only affect the initial state of the element
+  var attrWithPropsRE = /^(value|checked|selected|muted)$/;
 
   // these attributes should set a hidden property for
   // binding v-model to object values
@@ -3489,9 +3510,6 @@
     'true-value': '_trueValue',
     'false-value': '_falseValue'
   };
-
-  // check for attributes that prohibit interpolations
-  var disallowedInterpAttrRE = /^v-|^:|^@|^(is|transition|transition-mode|debounce|track-by|stagger|enter-stagger|leave-stagger)$/;
 
   var bind = {
 
@@ -3545,9 +3563,9 @@
     handleObject: style.handleObject,
 
     handleSingle: function handleSingle(attr, value) {
-      if (inputProps[attr] && attr in this.el) {
-        this.el[attr] = attr === 'value' ? value || '' : // IE9 will set input.value to "null" for null...
-        value;
+      if (!this.descriptor.interp && attrWithPropsRE.test(attr) && attr in this.el) {
+        this.el[attr] = attr === 'value' ? value == null // IE9 will set input.value to "null" for null...
+        ? '' : value : value;
       }
       // set model props
       var modelProp = modelProps[attr];
@@ -3928,13 +3946,18 @@
         });
         this.on('blur', function () {
           self.focused = false;
-          self.listener();
+          // do not sync value after fragment removal (#2017)
+          if (!self._frag || self._frag.inserted) {
+            self.rawListener();
+          }
         });
       }
 
       // Now attach the main listener
-      this.listener = function () {
-        if (composing) return;
+      this.listener = this.rawListener = function () {
+        if (composing || !self._bound) {
+          return;
+        }
         var val = number || isRange ? toNumber(el.value) : el.value;
         self.set(val);
         // force update on next tick to avoid lock & same value
@@ -4098,9 +4121,14 @@
     },
 
     apply: function apply(el, value) {
-      applyTransition(el, value ? 1 : -1, function () {
+      if (inDoc(el)) {
+        applyTransition(el, value ? 1 : -1, toggle, this.vm);
+      } else {
+        toggle();
+      }
+      function toggle() {
         el.style.display = value ? '' : 'none';
-      }, this.vm);
+      }
     }
   };
 
@@ -4135,7 +4163,7 @@
   }
 
   var tagRE$1 = /<([\w:]+)/;
-  var entityRE = /&\w+;|&#\d+;|&#x[\dA-F]+;/;
+  var entityRE = /&#?\w+?;/;
 
   /**
    * Convert a string template to a DocumentFragment.
@@ -5670,6 +5698,7 @@
       var twoWay = prop.mode === bindingModes.TWO_WAY;
 
       var parentWatcher = this.parentWatcher = new Watcher(parent, parentKey, function (val) {
+        val = coerceProp(prop, val);
         if (assertProp(prop, val)) {
           child[childKey] = val;
         }
@@ -7652,7 +7681,7 @@
       } else {
         // for class interpolations, only remove the parts that
         // need to be interpolated.
-        this.el.className = removeTags(this.el.className).trim().replace(/\s+/g, ' ');
+        setClass(this.el, removeTags(this.el.getAttribute('class')).trim().replace(/\s+/g, ' '));
       }
     }
 
@@ -7671,6 +7700,7 @@
     if (this.bind) {
       this.bind();
     }
+    this._bound = true;
 
     if (this.literal) {
       this.update && this.update(descriptor.raw);
@@ -7706,7 +7736,6 @@
         this.update(watcher.value);
       }
     }
-    this._bound = true;
   };
 
   /**
@@ -7926,6 +7955,11 @@
       var original = el;
       el = transclude(el, options);
       this._initElement(el);
+
+      // handle v-pre on root node (#2026)
+      if (el.nodeType === 1 && getAttr(el, 'v-pre') !== null) {
+        return;
+      }
 
       // root is always compiled per-instance, because
       // container attrs and props can be different every time.
@@ -8354,8 +8388,8 @@
         } else {
           /* istanbul ignore if */
           if ('development' !== 'production') {
-            if (type === 'component' && commonTagRE.test(id)) {
-              warn('Do not use built-in HTML elements as component ' + 'id: ' + id);
+            if (type === 'component' && (commonTagRE.test(id) || reservedTagRE.test(id))) {
+              warn('Do not use built-in or reserved HTML elements as component ' + 'id: ' + id);
             }
           }
           if (type === 'component' && isPlainObject(definition)) {
@@ -9367,7 +9401,7 @@
     partial: partial
   };
 
-  Vue.version = '1.0.11';
+  Vue.version = '1.0.12';
 
   /**
    * Vue and every constructor that extends Vue has an
