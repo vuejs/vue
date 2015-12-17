@@ -8,7 +8,8 @@ import {
   commonTagRE,
   reservedTagRE,
   warn,
-  isPlainObject
+  isPlainObject,
+  Function
 } from '../../util/index'
 
 import config from '../../config'

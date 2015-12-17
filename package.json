@@ -38,12 +38,16 @@
     "release": "bash build/release.sh"
   },
   "dependencies": {
-    "envify": "^3.4.0"
+    "envify": "^3.4.0",
+    "loophole": "^1.1.0"
   },
   "browserify": {
     "transform": [
       "envify"
     ]
+  },
+  "browser": {
+    "loophole": false
   },
   "devDependencies": {
     "babel-core": "^5.8.0",
