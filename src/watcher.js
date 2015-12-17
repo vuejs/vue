@@ -233,11 +233,11 @@ Watcher.prototype.run = function () {
     var value = this.get()
     if (
       value !== this.value ||
-      // Deep watchers and Array watchers should fire even
+      // Deep watchers and watchers on Object/Arrays should fire even
       // when the value is the same, because the value may
       // have mutated; but only do so if this is a
       // non-shallow update (caused by a vm digest).
-      ((isArray(value) || this.deep) && !this.shallow)
+      ((isObject(value) || this.deep) && !this.shallow)
     ) {
       // set new value
       var oldValue = this.value

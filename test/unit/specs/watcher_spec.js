@@ -289,6 +289,20 @@ describe('Watcher', function () {
     })
   })
 
+  it('fire change for prop addition/deletion in non-deep mode', function (done) {
+    new Watcher(vm, 'b', spy)
+    Vue.set(vm.b, 'e', 123)
+    nextTick(function () {
+      expect(spy).toHaveBeenCalledWith(vm.b, vm.b)
+      expect(spy.calls.count()).toBe(1)
+      Vue.delete(vm.b, 'e')
+      nextTick(function () {
+        expect(spy.calls.count()).toBe(2)
+        done()
+      })
+    })
+  })
+
   it('watch function', function (done) {
     var watcher = new Watcher(vm, function () {
       return this.a + this.b.d
