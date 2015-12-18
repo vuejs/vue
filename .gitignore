@@ -1,6 +1,5 @@
 dist/vue.js.map
 dist/vue.min.js.gz
-dist/vue.common.js
 test/unit/specs.js
 test/unit/specs.js.map
 explorations
