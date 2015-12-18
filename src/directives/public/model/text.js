@@ -25,7 +25,7 @@ export default {
     // Chinese, but instead triggers them for spelling
     // suggestions... (see Discussion/#162)
     var composing = false
-    if (!isAndroid && !isRange) {
+    if (!isAndroid && isRange) {
       this.on('compositionstart', function () {
         composing = true
       })
@@ -45,7 +45,7 @@ export default {
     // prevent messing with the input when user is typing,
     // and force update on blur.
     this.focused = false
-    if (!isRange) {
+    if (isRange) {
       this.on('focus', function () {
         self.focused = true
       })
