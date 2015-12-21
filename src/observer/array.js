@@ -62,7 +62,7 @@ def(
   '$set',
   function $set (index, val) {
     if (index >= this.length) {
-      this.length = index + 1
+      this.length = Number(index) + 1
     }
     return this.splice(index, 1, val)[0]
   }
