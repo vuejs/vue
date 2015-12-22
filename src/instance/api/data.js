@@ -84,7 +84,7 @@ export default function (Vue) {
       deep: options && options.deep,
       sync: options && options.sync,
       filters: parsed && parsed.filters,
-      user: true
+      user: !options || options.user !== false
     })
     if (options && options.immediate) {
       cb.call(vm, watcher.value)

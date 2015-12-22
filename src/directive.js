@@ -215,7 +215,8 @@ Directive.prototype._setupParamWatcher = function (key, expression) {
       called = true
     }
   }, {
-    immediate: true
+    immediate: true,
+    user: false
   })
   ;(this._paramUnwatchFns || (this._paramUnwatchFns = [])).push(unwatch)
 }
