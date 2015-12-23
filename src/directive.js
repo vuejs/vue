@@ -7,11 +7,9 @@ import {
   getBindAttr,
   camelize,
   nextTick,
-  warn,
-  setClass
+  warn
 } from './util/index'
 import Watcher from './watcher'
-import { removeTags } from './parsers/text'
 import { parseExpression, isSimplePath } from './parsers/expression'
 
 function noop () {}
@@ -84,16 +82,7 @@ Directive.prototype._bind = function () {
     this.el && this.el.removeAttribute
   ) {
     var attr = descriptor.attr || ('v-' + name)
-    if (attr !== 'class') {
-      this.el.removeAttribute(attr)
-    } else {
-      // for class interpolations, only remove the parts that
-      // need to be interpolated.
-      setClass(
-        this.el,
-        removeTags(this.el.getAttribute('class')).trim().replace(/\s+/g, ' ')
-      )
-    }
+    this.el.removeAttribute(attr)
   }
 
   // copy def properties

@@ -159,14 +159,3 @@ function inlineFilters (exp, single) {
     }
   }
 }
-
-/**
- * Replace all interpolation tags in a piece of text.
- *
- * @param {String} text
- * @return {String}
- */
-
-export function removeTags (text) {
-  return text.replace(tagRE, '')
-}
