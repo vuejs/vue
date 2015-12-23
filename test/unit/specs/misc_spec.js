@@ -416,4 +416,16 @@ describe('Misc', function () {
     })
     expect(vm.$el.firstChild.getAttribute('class')).toBe('si-icon def abc')
   })
+
+  // #1960
+  it('class interpolation should preserve transition class', function () {
+    var vm = new Vue({
+      el: document.createElement('div'),
+      template: '<div class="{{test}}" transition="test"></div>',
+      data: {
+        test: 'hi'
+      }
+    })
+    expect(vm.$el.firstChild.className).toBe('hi test-transition')
+  })
 })
