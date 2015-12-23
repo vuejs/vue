@@ -1,4 +1,5 @@
 import { warn, resolveAsset } from '../../../util/index'
+import { MODEL } from '../../priorities'
 import text from './text'
 import radio from './radio'
 import select from './select'
@@ -13,7 +14,7 @@ const handlers = {
 
 export default {
 
-  priority: 800,
+  priority: MODEL,
   twoWay: true,
   handlers: handlers,
   params: ['lazy', 'number', 'debounce'],

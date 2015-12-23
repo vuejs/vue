@@ -1,4 +1,5 @@
 import { warn } from '../../util/index'
+import { BIND } from '../priorities'
 import vStyle from '../internal/style'
 
 // xlink
@@ -22,7 +23,7 @@ const modelProps = {
 
 export default {
 
-  priority: 850,
+  priority: BIND,
 
   bind () {
     var attr = this.arg

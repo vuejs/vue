@@ -1,4 +1,5 @@
 import FragmentFactory from '../../fragment/factory'
+import { IF } from '../priorities'
 import {
   getAttr,
   remove,
@@ -9,7 +10,7 @@ import {
 
 export default {
 
-  priority: 2000,
+  priority: IF,
 
   bind () {
     var el = this.el

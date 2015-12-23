@@ -1,4 +1,5 @@
 import { on, off, warn } from '../../util/index'
+import { ON } from '../priorities'
 
 // keyCode aliases
 const keyCodes = {
@@ -51,7 +52,7 @@ function preventFilter (handler) {
 export default {
 
   acceptStatement: true,
-  priority: 700,
+  priority: ON,
 
   bind () {
     // deal with iframes

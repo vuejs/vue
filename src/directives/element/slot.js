@@ -1,3 +1,5 @@
+import { SLOT } from '../priorities'
+
 import {
   parseTemplate,
   cloneNode
@@ -24,7 +26,7 @@ import {
 
 export const slot = {
 
-  priority: 1750,
+  priority: SLOT,
 
   bind () {
     var host = this.vm

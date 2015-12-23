@@ -1,4 +1,5 @@
 import { cloneNode } from '../../parsers/template'
+import { COMPONENT } from '../priorities'
 import {
   extractContent,
   createAnchor,
@@ -11,7 +12,7 @@ import {
 
 export default {
 
-  priority: 1500,
+  priority: COMPONENT,
 
   params: [
     'keep-alive',

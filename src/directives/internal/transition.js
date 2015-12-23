@@ -1,9 +1,10 @@
 import { resolveAsset, addClass, removeClass } from '../../util/index'
+import { TRANSITION } from '../priorities'
 import Transition from '../../transition/transition'
 
 export default {
 
-  priority: 1100,
+  priority: TRANSITION,
 
   update (id, oldId) {
     var el = this.el

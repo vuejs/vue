@@ -1,8 +1,9 @@
 import { camelize, hasOwn, defineReactive } from '../../util/index'
+import { EL } from '../priorities'
 
 export default {
 
-  priority: 1500,
+  priority: EL,
 
   bind () {
     /* istanbul ignore if */

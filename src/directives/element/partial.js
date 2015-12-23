@@ -1,5 +1,6 @@
 import vIf from '../public/if'
 import FragmentFactory from '../../fragment/factory'
+import { PARTIAL } from '../priorities'
 import {
   createAnchor,
   replace,
@@ -9,7 +10,7 @@ import {
 
 export default {
 
-  priority: 1750,
+  priority: PARTIAL,
 
   params: ['name'],
 

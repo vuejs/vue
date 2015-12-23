@@ -1,4 +1,5 @@
 import FragmentFactory from '../../fragment/factory'
+import { FOR } from '../priorities'
 import {
   isObject,
   warn,
@@ -20,7 +21,7 @@ let uid = 0
 
 const vFor = {
 
-  priority: 2000,
+  priority: FOR,
 
   params: [
     'track-by',
