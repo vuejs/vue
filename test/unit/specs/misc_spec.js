@@ -414,6 +414,6 @@ describe('Misc', function () {
         }
       }
     })
-    expect(vm.$el.firstChild.getAttribute('class')).toBe('si-icon abc def')
+    expect(vm.$el.firstChild.getAttribute('class')).toBe('si-icon def abc')
   })
 })
