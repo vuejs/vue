@@ -509,19 +509,19 @@ describe('Compile', function () {
   it('attribute interpolation', function (done) {
     var vm = new Vue({
       el: el,
-      template: '<div id="{{a}}" class="b {{c}} d"></div>',
+      template: '<div id="{{a}}" class="b bla-{{c}} d"></div>',
       data: {
         a: 'aaa',
         c: 'ccc'
       }
     })
     expect(el.firstChild.id).toBe('aaa')
-    expect(el.firstChild.className).toBe('b d ccc')
+    expect(el.firstChild.className).toBe('b bla-ccc d')
     vm.a = 'aa'
     vm.c = 'cc'
     _.nextTick(function () {
       expect(el.firstChild.id).toBe('aa')
-      expect(el.firstChild.className).toBe('b d cc')
+      expect(el.firstChild.className).toBe('b bla-cc d')
       done()
     })
   })
