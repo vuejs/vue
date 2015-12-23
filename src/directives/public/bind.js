@@ -88,8 +88,9 @@ export default {
 
   handleSingle (attr, value) {
     const el = this.el
+    const interp = this.descriptor.interp
     if (
-      !this.descriptor.interp &&
+      !interp &&
       attrWithPropsRE.test(attr) &&
       attr in el
     ) {
@@ -101,7 +102,7 @@ export default {
     }
     // set model props
     var modelProp = modelProps[attr]
-    if (modelProp) {
+    if (!interp && modelProp) {
       el[modelProp] = value
       // update v-model if present
       var model = el.__v_model
