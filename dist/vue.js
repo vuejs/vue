@@ -1,5 +1,5 @@
 /*!
- * Vue.js v1.0.12
+ * Vue.js v1.0.13
  * (c) 2015 Evan You
  * Released under the MIT License.
  */
@@ -851,22 +851,10 @@
     }
   }
 
-  /**
-   * Replace all interpolation tags in a piece of text.
-   *
-   * @param {String} text
-   * @return {String}
-   */
-
-  function removeTags(text) {
-    return text.replace(tagRE, '');
-  }
-
   var text$1 = Object.freeze({
     compileRegex: compileRegex,
     parseText: parseText,
-    tokensToExp: tokensToExp,
-    removeTags: removeTags
+    tokensToExp: tokensToExp
   });
 
   var delimiters = ['{{', '}}'];
@@ -1967,7 +1955,7 @@
 
   def(arrayProto, '$set', function $set(index, val) {
     if (index >= this.length) {
-      this.length = index + 1;
+      this.length = Number(index) + 1;
     }
     return this.splice(index, 1, val)[0];
   });
@@ -2083,8 +2071,7 @@
 
   Observer.prototype.walk = function (obj) {
     var keys = Object.keys(obj);
-    var i = keys.length;
-    while (i--) {
+    for (var i = 0, l = keys.length; i < l; i++) {
       this.convert(keys[i], obj[keys[i]]);
     }
   };
@@ -2096,8 +2083,7 @@
    */
 
   Observer.prototype.observeArray = function (items) {
-    var i = items.length;
-    while (i--) {
+    for (var i = 0, l = items.length; i < l; i++) {
       observe(items[i]);
     }
   };
@@ -2161,10 +2147,8 @@
    */
 
   function copyAugment(target, src, keys) {
-    var i = keys.length;
-    var key;
-    while (i--) {
-      key = keys[i];
+    for (var i = 0, l = keys.length; i < l; i++) {
+      var key = keys[i];
       def(target, key, src[key]);
     }
   }
@@ -3348,7 +3332,7 @@
   var cloak = {
     bind: function bind() {
       var el = this.el;
-      this.vm.$once('hook:compiled', function () {
+      this.vm.$once('pre-hook:compiled', function () {
         el.removeAttribute('v-cloak');
       });
     }
@@ -3360,9 +3344,20 @@
     }
   };
 
+  var ON = 700;
+  var MODEL = 800;
+  var BIND = 850;
+  var TRANSITION = 1100;
+  var EL = 1500;
+  var COMPONENT = 1500;
+  var PARTIAL = 1750;
+  var SLOT = 1750;
+  var FOR = 2000;
+  var IF = 2000;
+
   var el = {
 
-    priority: 1500,
+    priority: EL,
 
     bind: function bind() {
       /* istanbul ignore if */
@@ -3513,7 +3508,7 @@
 
   var bind = {
 
-    priority: 850,
+    priority: BIND,
 
     bind: function bind() {
       var attr = this.arg;
@@ -3563,34 +3558,43 @@
     handleObject: style.handleObject,
 
     handleSingle: function handleSingle(attr, value) {
-      if (!this.descriptor.interp && attrWithPropsRE.test(attr) && attr in this.el) {
-        this.el[attr] = attr === 'value' ? value == null // IE9 will set input.value to "null" for null...
+      var el = this.el;
+      var interp = this.descriptor.interp;
+      if (!interp && attrWithPropsRE.test(attr) && attr in el) {
+        el[attr] = attr === 'value' ? value == null // IE9 will set input.value to "null" for null...
         ? '' : value : value;
       }
       // set model props
       var modelProp = modelProps[attr];
-      if (modelProp) {
-        this.el[modelProp] = value;
+      if (!interp && modelProp) {
+        el[modelProp] = value;
         // update v-model if present
-        var model = this.el.__v_model;
+        var model = el.__v_model;
         if (model) {
           model.listener();
         }
       }
       // do not set value attribute for textarea
-      if (attr === 'value' && this.el.tagName === 'TEXTAREA') {
-        this.el.removeAttribute(attr);
+      if (attr === 'value' && el.tagName === 'TEXTAREA') {
+        el.removeAttribute(attr);
         return;
       }
       // update attribute
       if (value != null && value !== false) {
-        if (xlinkRE.test(attr)) {
-          this.el.setAttributeNS(xlinkNS, attr, value);
+        if (attr === 'class') {
+          // handle edge case #1960:
+          // class interpolation should not overwrite Vue transition class
+          if (el.__v_trans) {
+            value += ' ' + el.__v_trans.id + '-transition';
+          }
+          setClass(el, value);
+        } else if (xlinkRE.test(attr)) {
+          el.setAttributeNS(xlinkNS, attr, value);
         } else {
-          this.el.setAttribute(attr, value);
+          el.setAttribute(attr, value);
         }
       } else {
-        this.el.removeAttribute(attr);
+        el.removeAttribute(attr);
       }
     }
   };
@@ -3646,7 +3650,7 @@
   var on = {
 
     acceptStatement: true,
-    priority: 700,
+    priority: ON,
 
     bind: function bind() {
       // deal with iframes
@@ -4037,7 +4041,7 @@
 
   var model = {
 
-    priority: 800,
+    priority: MODEL,
     twoWay: true,
     handlers: handlers,
     params: ['lazy', 'number', 'debounce'],
@@ -4609,7 +4613,7 @@
 
   var vIf = {
 
-    priority: 2000,
+    priority: IF,
 
     bind: function bind() {
       var el = this.el;
@@ -4672,7 +4676,7 @@
 
   var vFor = {
 
-    priority: 2000,
+    priority: FOR,
 
     params: ['track-by', 'stagger', 'enter-stagger', 'leave-stagger'],
 
@@ -5667,7 +5671,7 @@
 
   var transition = {
 
-    priority: 1100,
+    priority: TRANSITION,
 
     update: function update(id, oldId) {
       var el = this.el;
@@ -5718,7 +5722,7 @@
         // important: defer the child watcher creation until
         // the created hook (after data observation)
         var self = this;
-        child.$once('hook:created', function () {
+        child.$once('pre-hook:created', function () {
           self.childWatcher = new Watcher(child, childKey, function (val) {
             parentWatcher.set(val);
           }, {
@@ -5741,7 +5745,7 @@
 
   var component = {
 
-    priority: 1500,
+    priority: COMPONENT,
 
     params: ['keep-alive', 'transition-mode', 'inline-template'],
 
@@ -6934,12 +6938,8 @@
       // attribute interpolations
       if (tokens) {
         value = tokensToExp(tokens);
-        if (name === 'class') {
-          pushDir('class', internalDirectives['class'], true);
-        } else {
-          arg = name;
-          pushDir('bind', publicDirectives.bind, true);
-        }
+        arg = name;
+        pushDir('bind', publicDirectives.bind, true);
         // warn against mixing mustaches with v-bind
         if ('development' !== 'production') {
           if (name === 'class' && Array.prototype.some.call(attrs, function (attr) {
@@ -7600,6 +7600,7 @@
      */
 
     Vue.prototype._callHook = function (hook) {
+      this.$emit('pre-hook:' + hook);
       var handlers = this.$options[hook];
       if (handlers) {
         for (var i = 0, j = handlers.length; i < j; i++) {
@@ -7676,13 +7677,7 @@
     // remove attribute
     if ((name !== 'cloak' || this.vm._isCompiled) && this.el && this.el.removeAttribute) {
       var attr = descriptor.attr || 'v-' + name;
-      if (attr !== 'class') {
-        this.el.removeAttribute(attr);
-      } else {
-        // for class interpolations, only remove the parts that
-        // need to be interpolated.
-        setClass(this.el, removeTags(this.el.getAttribute('class')).trim().replace(/\s+/g, ' '));
-      }
+      this.el.removeAttribute(attr);
     }
 
     // copy def properties
@@ -7792,7 +7787,8 @@
         called = true;
       }
     }, {
-      immediate: true
+      immediate: true,
+      user: false
     });(this._paramUnwatchFns || (this._paramUnwatchFns = [])).push(unwatch);
   };
 
@@ -8481,7 +8477,8 @@
       var watcher = new Watcher(vm, expOrFn, cb, {
         deep: options && options.deep,
         sync: options && options.sync,
-        filters: parsed && parsed.filters
+        filters: parsed && parsed.filters,
+        user: !options || options.user !== false
       });
       if (options && options.immediate) {
         cb.call(vm, watcher.value);
@@ -9245,7 +9242,7 @@
 
   var partial = {
 
-    priority: 1750,
+    priority: PARTIAL,
 
     params: ['name'],
 
@@ -9296,7 +9293,7 @@
 
   var slot = {
 
-    priority: 1750,
+    priority: SLOT,
 
     bind: function bind() {
       var host = this.vm;
@@ -9401,7 +9398,7 @@
     partial: partial
   };
 
-  Vue.version = '1.0.12';
+  Vue.version = '1.0.13';
 
   /**
    * Vue and every constructor that extends Vue has an
