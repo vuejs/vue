@@ -159,6 +159,7 @@ export default function (Vue) {
    */
 
   Vue.prototype._callHook = function (hook) {
+    this.$emit('pre-hook:' + hook)
     var handlers = this.$options[hook]
     if (handlers) {
       for (var i = 0, j = handlers.length; i < j; i++) {

@@ -46,7 +46,7 @@ export default {
       // important: defer the child watcher creation until
       // the created hook (after data observation)
       var self = this
-      child.$once('hook:created', function () {
+      child.$once('pre-hook:created', function () {
         self.childWatcher = new Watcher(
           child,
           childKey,
