@@ -48,8 +48,7 @@ export function Observer (value) {
 
 Observer.prototype.walk = function (obj) {
   var keys = Object.keys(obj)
-  var i = keys.length
-  while (i--) {
+  for (var i = 0, l = keys.length; i < l; i++) {
     this.convert(keys[i], obj[keys[i]])
   }
 }
@@ -61,8 +60,7 @@ Observer.prototype.walk = function (obj) {
  */
 
 Observer.prototype.observeArray = function (items) {
-  var i = items.length
-  while (i--) {
+  for (var i = 0, l = items.length; i < l; i++) {
     observe(items[i])
   }
 }
@@ -126,10 +124,8 @@ function protoAugment (target, src) {
  */
 
 function copyAugment (target, src, keys) {
-  var i = keys.length
-  var key
-  while (i--) {
-    key = keys[i]
+  for (var i = 0, l = keys.length; i < l; i++) {
+    var key = keys[i]
     def(target, key, src[key])
   }
 }
