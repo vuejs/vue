@@ -1,4 +1,5 @@
 import { parseTemplate } from '../parsers/template'
+import { parseText } from '../parsers/text'
 import {
   warn,
   isTemplate,
@@ -149,7 +150,7 @@ function mergeAttrs (from, to) {
     value = attrs[i].value
     if (!to.hasAttribute(name) && !specialCharRE.test(name)) {
       to.setAttribute(name, value)
-    } else if (name === 'class') {
+    } else if (name === 'class' && !parseText(value)) {
       value.split(/\s+/).forEach(function (cls) {
         addClass(to, cls)
       })

@@ -428,4 +428,21 @@ describe('Misc', function () {
     })
     expect(vm.$el.firstChild.className).toBe('hi test-transition')
   })
+
+  it('transclude class merging should skip interpolated class', function () {
+    var vm = new Vue({
+      el: document.createElement('div'),
+      template: '<test class="outer-{{test}}"></test>',
+      data: {
+        test: 'hi'
+      },
+      components: {
+        test: {
+          template: '<div class="inner"></div>',
+          replace: true
+        }
+      }
+    })
+    expect(vm.$el.firstChild.className).toBe('outer-hi')
+  })
 })
