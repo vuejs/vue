@@ -247,6 +247,7 @@ export function compileRoot (el, options, contextOptions) {
     }
   }
 
+  options._containerAttrs = options._replacerAttrs = null
   return function rootLinkFn (vm, el, scope) {
     // link context scope dirs
     var context = vm._context
