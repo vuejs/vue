@@ -45,7 +45,7 @@ export default {
     // prevent messing with the input when user is typing,
     // and force update on blur.
     this.focused = false
-    if (!isRange) {
+    if (!isRange && !lazy) {
       this.on('focus', function () {
         self.focused = true
       })
