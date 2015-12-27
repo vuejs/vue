@@ -1,5 +1,5 @@
-var Vue = require('../../../../src/index')
-var _ = require('../../../../src/util')
+var Vue = require('src')
+var _ = require('src/util')
 var nextTick = _.nextTick
 
 describe('Data API', function () {

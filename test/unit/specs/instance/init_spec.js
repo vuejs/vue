@@ -1,4 +1,4 @@
-var Vue = require('../../../../src/index')
+var Vue = require('src')
 var init = Vue.prototype._init
 
 describe('Instance Init', function () {

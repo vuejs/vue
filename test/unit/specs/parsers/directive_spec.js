@@ -1,4 +1,4 @@
-var parse = require('../../../../src/parsers/directive').parseDirective
+var parse = require('src/parsers/directive').parseDirective
 
 describe('Directive Parser', function () {
 

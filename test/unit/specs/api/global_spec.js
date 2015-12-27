@@ -1,6 +1,6 @@
-var Vue = require('../../../../src/index')
-var _ = require('../../../../src/util')
-var config = require('../../../../src/config')
+var Vue = require('src')
+var _ = require('src/util')
+var config = require('src/config')
 
 describe('Global API', function () {
 

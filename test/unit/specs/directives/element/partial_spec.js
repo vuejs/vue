@@ -1,6 +1,6 @@
-var Vue = require('../../../../../src/index')
-var _ = require('../../../../../src/util')
-var compiler = require('../../../../../src/compiler')
+var Vue = require('src')
+var _ = require('src/util')
+var compiler = require('src/compiler')
 
 describe('Partial', function () {
 

@@ -1,3 +1,7 @@
+var webpackConfig = require('./webpack.test.config')
+delete webpackConfig.entry
+delete webpackConfig.devtool
+
 // shared config for all unit tests
 module.exports = {
   frameworks: ['jasmine'],
@@ -8,17 +12,7 @@ module.exports = {
   preprocessors: {
     '../test/unit/specs/index.js': ['webpack']
   },
-  webpack: {
-    module: {
-      loaders: [
-        {
-          test: /\.js$/,
-          exclude: /test|node_modules/,
-          loader: 'babel?optional[]=runtime&loose=all'
-        }
-      ]
-    }
-  },
+  webpack: webpackConfig,
   webpackMiddleware: {
     noInfo: true
   },

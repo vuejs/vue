@@ -1,5 +1,5 @@
-var compile = require('../../../../../src/compiler').compile
-var Vue = require('../../../../../src/index')
+var compile = require('src/compiler').compile
+var Vue = require('src')
 
 describe('v-cloak', function () {
 

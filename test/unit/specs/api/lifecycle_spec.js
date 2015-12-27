@@ -1,5 +1,5 @@
-var Vue = require('../../../../src/index')
-var compiler = require('../../../../src/compiler')
+var Vue = require('src')
+var compiler = require('src/compiler')
 
 describe('Lifecycle API', function () {
 

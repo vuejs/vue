@@ -1,4 +1,4 @@
-var filters = require('../../../../src/filters')
+var filters = require('src/filters')
 
 describe('Filters', function () {
 

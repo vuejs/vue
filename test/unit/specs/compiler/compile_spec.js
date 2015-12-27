@@ -1,9 +1,9 @@
-var Vue = require('../../../../src/index')
-var _ = require('../../../../src/util')
-var compiler = require('../../../../src/compiler')
+var Vue = require('src')
+var _ = require('src/util')
+var compiler = require('src/compiler')
 var compile = compiler.compile
-var publicDirectives = require('../../../../src/directives/public')
-var internalDirectives = require('../../../../src/directives/internal')
+var publicDirectives = require('src/directives/public')
+var internalDirectives = require('src/directives/internal')
 
 describe('Compile', function () {
 

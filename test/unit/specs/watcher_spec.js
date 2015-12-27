@@ -1,6 +1,6 @@
-var Vue = require('../../../src/index')
+var Vue = require('src')
 var nextTick = Vue.nextTick
-var Watcher = require('../../../src/watcher')
+var Watcher = require('src/watcher')
 var _ = Vue.util
 var config = Vue.config
 

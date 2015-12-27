@@ -1,4 +1,4 @@
-var Vue = require('../../../../../../src/index')
+var Vue = require('src')
 var _ = Vue.util
 
 describe('v-for + ref', function () {

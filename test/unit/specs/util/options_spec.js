@@ -1,5 +1,5 @@
-var _ = require('../../../../src/util')
-var Vue = require('../../../../src/index')
+var _ = require('src/util')
+var Vue = require('src')
 var merge = _.mergeOptions
 var resolveAsset = _.resolveAsset
 
@@ -263,7 +263,7 @@ describe('Util - Option merging', function () {
   })
 
   it('already observed instance data merge with default data', function () {
-    var observe = require('../../../../src/observer').observe
+    var observe = require('src/observer').observe
     var instanceData = { a: 123 }
     // observe it
     observe(instanceData)

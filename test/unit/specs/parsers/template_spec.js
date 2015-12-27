@@ -1,4 +1,4 @@
-var templateParser = require('../../../../src/parsers/template')
+var templateParser = require('src/parsers/template')
 var parse = templateParser.parseTemplate
 var testString = '<div>hello</div><p class="test">world</p>'
 

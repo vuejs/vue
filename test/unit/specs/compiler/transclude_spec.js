@@ -1,6 +1,6 @@
-var transclude = require('../../../../src/compiler').transclude
-var Vue = require('../../../../src/index')
-var _ = require('../../../../src/util')
+var transclude = require('src/compiler').transclude
+var Vue = require('src')
+var _ = require('src/util')
 
 describe('Transclude', function () {
 

@@ -3,8 +3,8 @@
 * those are tested in transition_spec.js.
 */
 
-var Vue = require('../../../../src/index')
-var _ = require('../../../../src/util')
+var Vue = require('src')
+var _ = require('src/util')
 
 describe('DOM API', function () {
 

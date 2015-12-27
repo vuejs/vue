@@ -1,5 +1,5 @@
-var _ = require('../../../../../src/util')
-var def = require('../../../../../src/directives/public/bind')
+var _ = require('src/util')
+var def = require('src/directives/public/bind')
 var xlinkNS = 'http://www.w3.org/1999/xlink'
 
 describe('v-bind', function () {

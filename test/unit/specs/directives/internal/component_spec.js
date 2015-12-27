@@ -1,5 +1,5 @@
-var _ = require('../../../../../src/util')
-var Vue = require('../../../../../src/index')
+var _ = require('src/util')
+var Vue = require('src')
 
 describe('Component', function () {
 

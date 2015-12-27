@@ -1,5 +1,5 @@
-var _ = require('../../../../../src/util')
-var def = require('../../../../../src/directives/internal/class')
+var _ = require('src/util')
+var def = require('src/directives/internal/class')
 
 describe(':class', function () {
 

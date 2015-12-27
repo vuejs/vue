@@ -1,5 +1,5 @@
-var Vue = require('../../../src/index')
-var Directive = require('../../../src/directive')
+var Vue = require('src')
+var Directive = require('src/directive')
 var nextTick = Vue.nextTick
 
 describe('Directive', function () {

@@ -1,7 +1,7 @@
-var Vue = require('../../../../src/index')
-var _ = require('../../../../src/util')
-var transition = require('../../../../src/transition')
-var Transition = require('../../../../src/transition/transition')
+var Vue = require('src')
+var _ = require('src/util')
+var transition = require('src/transition')
+var Transition = require('src/transition/transition')
 
 if (!_.isIE9) {
   describe('Transition', function () {

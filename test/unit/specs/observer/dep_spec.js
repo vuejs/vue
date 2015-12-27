@@ -1,4 +1,4 @@
-var Dep = require('../../../../src/observer/dep')
+var Dep = require('src/observer/dep')
 
 describe('Dep', function () {
 

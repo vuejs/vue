@@ -1,6 +1,6 @@
-var _ = require('../../../../../../src/util')
-var Vue = require('../../../../../../src/index')
-var config = require('../../../../../../src/config')
+var _ = require('src/util')
+var Vue = require('src')
+var config = require('src/config')
 
 describe('v-for', function () {
 

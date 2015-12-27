@@ -1,6 +1,6 @@
-var textParser = require('../../../../src/parsers/text')
-var dirParser = require('../../../../src/parsers/directive')
-var config = require('../../../../src/config')
+var textParser = require('src/parsers/text')
+var dirParser = require('src/parsers/directive')
+var config = require('src/config')
 
 var testCases = [
   {

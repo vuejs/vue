@@ -1,10 +1,10 @@
-var Vue = require('../../../../src')
-var ob = require('../../../../src/observer')
+var Vue = require('src')
+var ob = require('src/observer')
 var Observer = ob.Observer
 var observe = ob.observe
-var Dep = require('../../../../src/observer/dep')
-var _ = require('../../../../src/util')
-var config = require('../../../../src/config')
+var Dep = require('src/observer/dep')
+var _ = require('src/util')
+var config = require('src/config')
 
 describe('Observer', function () {
 

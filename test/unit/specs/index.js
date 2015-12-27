@@ -1,5 +1,5 @@
 // set some global Vue options
-var Vue = require('../../../src/index')
+var Vue = require('src')
 Vue.options.replace = false
 Vue.config.silent = true
 
@@ -10,8 +10,8 @@ Vue.config.silent = true
  * utility functions.
  */
 
-var _ = require('../../../src/util')
-var __ = require('../../../src/util/debug')
+var _ = require('src/util')
+var __ = require('src/util/debug')
 var scope = typeof window === 'undefined'
   ? global
   : window

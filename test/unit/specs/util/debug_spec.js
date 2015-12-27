@@ -1,5 +1,5 @@
-var _ = require('../../../../src/util')
-var config = require('../../../../src/config')
+var _ = require('src/util')
+var config = require('src/config')
 var warnPrefix = '[Vue warn]: '
 
 if (typeof console !== 'undefined') {

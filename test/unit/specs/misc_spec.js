@@ -1,5 +1,5 @@
 // test cases for edge cases & bug fixes
-var Vue = require('../../../src/index')
+var Vue = require('src')
 var _ = Vue.util
 
 describe('Misc', function () {

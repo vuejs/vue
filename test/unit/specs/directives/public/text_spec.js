@@ -1,5 +1,5 @@
-var _ = require('../../../../../src/util')
-var def = require('../../../../../src/directives/public/text')
+var _ = require('src/util')
+var def = require('src/directives/public/text')
 
 describe('v-text', function () {
 

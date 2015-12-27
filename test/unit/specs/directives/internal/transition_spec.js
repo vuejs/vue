@@ -1,7 +1,7 @@
-var _ = require('../../../../../src/util')
-var Vue = require('../../../../../src/index')
-var Directive = require('../../../../../src/directive')
-var def = require('../../../../../src/directives/internal/transition')
+var _ = require('src/util')
+var Vue = require('src')
+var Directive = require('src/directive')
+var def = require('src/directives/internal/transition')
 
 describe('transition', function () {
 
