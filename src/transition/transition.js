@@ -31,8 +31,8 @@ const animDurationProp = animationProp + 'Duration'
 export default function Transition (el, id, hooks, vm) {
   this.id = id
   this.el = el
-  this.enterClass = id + '-enter'
-  this.leaveClass = id + '-leave'
+  this.enterClass = (hooks && hooks.enterClass) || id + '-enter'
+  this.leaveClass = (hooks && hooks.leaveClass) || id + '-leave'
   this.hooks = hooks
   this.vm = vm
   // async state
