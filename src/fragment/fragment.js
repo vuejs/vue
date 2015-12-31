@@ -73,17 +73,6 @@ Fragment.prototype.callHook = function (hook) {
 }
 
 /**
- * Destroy the fragment.
- */
-
-Fragment.prototype.destroy = function () {
-  if (this.parentFrag) {
-    this.parentFrag.childFrags.$remove(this)
-  }
-  this.unlink()
-}
-
-/**
  * Insert fragment before target, single node version
  *
  * @param {Node} target
@@ -109,7 +98,7 @@ function singleRemove () {
   this.inserted = false
   var shouldCallRemove = inDoc(this.node)
   var self = this
-  self.callHook(destroyChild)
+  this.beforeRemove()
   removeWithTransition(this.node, this.vm, function () {
     if (shouldCallRemove) {
       self.callHook(detach)
@@ -147,13 +136,40 @@ function multiRemove () {
   this.inserted = false
   var self = this
   var shouldCallRemove = inDoc(this.node)
-  self.callHook(destroyChild)
+  this.beforeRemove()
   removeNodeRange(this.node, this.end, this.vm, this.frag, function () {
     if (shouldCallRemove) {
       self.callHook(detach)
     }
     self.destroy()
   })
+}
+
+/**
+ * Prepare the fragment for removal.
+ * Most importantly, disable the watchers on all the
+ * directives so that the rendered content stays the same
+ * during removal.
+ */
+
+Fragment.prototype.beforeRemove = function () {
+  this.callHook(destroyChild)
+  var dirs = this.unlink.dirs
+  var i = dirs.length
+  while (i--) {
+    dirs[i]._watcher && dirs[i]._watcher.teardown()
+  }
+}
+
+/**
+ * Destroy the fragment.
+ */
+
+Fragment.prototype.destroy = function () {
+  if (this.parentFrag) {
+    this.parentFrag.childFrags.$remove(this)
+  }
+  this.unlink()
 }
 
 /**
