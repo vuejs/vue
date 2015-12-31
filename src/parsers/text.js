@@ -100,16 +100,17 @@ export function parseText (text) {
  * into one single expression as '"a " + b + " c"'.
  *
  * @param {Array} tokens
+ * @param {Vue} [vm]
  * @return {String}
  */
 
-export function tokensToExp (tokens) {
+export function tokensToExp (tokens, vm) {
   if (tokens.length > 1) {
     return tokens.map(function (token) {
-      return formatToken(token)
+      return formatToken(token, vm)
     }).join('+')
   } else {
-    return formatToken(tokens[0], true)
+    return formatToken(tokens[0], vm, true)
   }
 }
 
@@ -117,13 +118,16 @@ export function tokensToExp (tokens) {
  * Format a single token.
  *
  * @param {Object} token
- * @param {Boolean} single
+ * @param {Vue} [vm]
+ * @param {Boolean} [single]
  * @return {String}
  */
 
-function formatToken (token, single) {
+function formatToken (token, vm, single) {
   return token.tag
-    ? inlineFilters(token.value, single)
+    ? token.oneTime && vm
+      ? '"' + vm.$eval(token.value) + '"'
+      : inlineFilters(token.value, single)
     : '"' + token.value + '"'
 }
 

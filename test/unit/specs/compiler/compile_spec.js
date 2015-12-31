@@ -526,6 +526,24 @@ describe('Compile', function () {
     })
   })
 
+  it('attribute interpolation: one-time', function (done) {
+    var vm = new Vue({
+      el: el,
+      template: '<div id="{{a}} b {{*c}}"></div>',
+      data: {
+        a: 'aaa',
+        c: 'ccc'
+      }
+    })
+    expect(el.firstChild.id).toBe('aaa b ccc')
+    vm.a = 'aa'
+    vm.c = 'cc'
+    _.nextTick(function () {
+      expect(el.firstChild.id).toBe('aa b ccc')
+      done()
+    })
+  })
+
   it('attribute interpolation: special cases', function () {
     new Vue({
       el: el,
