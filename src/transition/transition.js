@@ -9,11 +9,12 @@ import {
   transitionEndEvent,
   animationEndEvent,
   transitionProp,
-  animationProp
+  animationProp,
+  warn
 } from '../util/index'
 
-const TYPE_TRANSITION = 1
-const TYPE_ANIMATION = 2
+const TYPE_TRANSITION = 'transition'
+const TYPE_ANIMATION = 'animation'
 const transDurationProp = transitionProp + 'Duration'
 const animDurationProp = animationProp + 'Duration'
 
@@ -44,6 +45,21 @@ export default function Transition (el, id, hooks, vm) {
   this.justEntered = false
   this.entered = this.left = false
   this.typeCache = {}
+  // check css transition type
+  this.type = hooks && hooks.type
+  /* istanbul ignore if */
+  if (process.env.NODE_ENV !== 'production') {
+    if (
+      this.type &&
+      this.type !== TYPE_TRANSITION &&
+      this.type !== TYPE_ANIMATION
+    ) {
+      warn(
+        'invalid CSS transition type for transition="' +
+        this.id + '": ' + this.type
+      )
+    }
+  }
   // bind
   var self = this
   ;['enterNextTick', 'enterDone', 'leaveNextTick', 'leaveDone']
@@ -309,7 +325,7 @@ p.getCssTransitionType = function (className) {
   ) {
     return
   }
-  var type = this.typeCache[className]
+  var type = this.type || this.typeCache[className]
   if (type) return type
   var inlineStyles = this.el.style
   var computedStyles = window.getComputedStyle(this.el)
