@@ -24,8 +24,9 @@ export default function (Vue) {
         var self = this
         return function statementHandler () {
           self.$arguments = toArray(arguments)
-          res.get.call(self, self)
+          var result = res.get.call(self, self)
           self.$arguments = null
+          return result
         }
       } else {
         try {
