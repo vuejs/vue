@@ -154,6 +154,56 @@ describe('Events API', function () {
     expect(spy.calls.count()).toBe(2)
   })
 
+  it('handle $dispatch by v-on inline-statement', function () {
+    var parent = new Vue({
+      el: document.createElement('div'),
+      template: '<child1 @test="onTest()" v-ref:child></child1>',
+      methods: {
+        onTest: function () {
+          spy()
+        }
+      },
+      components: {
+        child1: {
+          template: '<child2 @test="onTest()" v-ref:child></child2>',
+          methods: {
+            onTest: function () {
+              spy()
+            }
+          },
+          components: {
+            child2: {
+              template: '<child3 @test="onTest()" v-ref:child></child3>',
+              methods: {
+                onTest: function () {
+                  spy()
+                  return true
+                }
+              },
+              components: {
+                child3: {
+                  template: '<child4 v-ref:child></child4>',
+                  // `v-on` on component will be treat as its inner handler
+                  // so propagation cancelling is ignored on `<child4 @test="handler">`
+                  components: {
+                    child4: {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    })
+    parent
+      .$refs.child // child1
+      .$refs.child // child2
+      .$refs.child // child3
+      .$refs.child // child4
+      .$dispatch('test')
+    expect(spy.calls.count()).toBe(2)
+  })
+
   it('$dispatch cancel', function () {
     var child = new Vue({ parent: vm })
     var child2 = new Vue({ parent: child })
