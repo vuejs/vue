@@ -165,7 +165,7 @@ describe('Events API', function () {
       },
       components: {
         child1: {
-          template: '<child2 @test="onTest()" v-ref:child></child2>',
+          template: '<child2 @test="onTest" v-ref:child></child2>',
           methods: {
             onTest: function () {
               spy()
@@ -182,9 +182,13 @@ describe('Events API', function () {
               },
               components: {
                 child3: {
-                  template: '<child4 v-ref:child></child4>',
-                  // `v-on` on component will be treat as its inner handler
-                  // so propagation cancelling is ignored on `<child4 @test="handler">`
+                  template: '<child4 @test="onTest" v-ref:child></child4>',
+                  methods: {
+                    onTest: function () {
+                      spy()
+                      return true
+                    }
+                  },
                   components: {
                     child4: {}
                   }
@@ -201,18 +205,32 @@ describe('Events API', function () {
       .$refs.child // child3
       .$refs.child // child4
       .$dispatch('test')
-    expect(spy.calls.count()).toBe(2)
+    expect(spy.calls.count()).toBe(3)
   })
 
-  it('$dispatch cancel', function () {
-    var child = new Vue({ parent: vm })
-    var child2 = new Vue({ parent: child })
-    child.$on('test', function () {
-      return false
+  it('$dispatch forward on immediate inline component handler', function () {
+    var shouldPropagate = true
+    var parent = new Vue({
+      el: document.createElement('div'),
+      template: '<child @test="onTest" v-ref:child></child>',
+      events: {
+        test: spy
+      },
+      methods: {
+        onTest: function () {
+          spy()
+          return shouldPropagate
+        }
+      },
+      components: {
+        child: {}
+      }
     })
-    vm.$on('test', spy)
-    child2.$dispatch('test')
-    expect(spy).not.toHaveBeenCalled()
+    parent.$refs.child.$dispatch('test')
+    expect(spy.calls.count()).toBe(2)
+    shouldPropagate = false
+    parent.$refs.child.$dispatch('test')
+    expect(spy.calls.count()).toBe(3)
   })
 
 })
