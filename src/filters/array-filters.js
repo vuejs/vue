@@ -1,6 +1,12 @@
 import { getPath } from '../parsers/path'
-import { toArray, isArray, isObject, isPlainObject } from '../util/index'
 import vFor from '../directives/public/for'
+import {
+  toArray,
+  toNumber,
+  isArray,
+  isObject,
+  isPlainObject
+} from '../util/index'
 const convertArray = vFor._postProcess
 
 /**
@@ -12,6 +18,7 @@ const convertArray = vFor._postProcess
 
 export function limitBy (arr, n, offset) {
   offset = offset ? parseInt(offset, 10) : 0
+  n = toNumber(n)
   return typeof n === 'number'
     ? arr.slice(offset, offset + n)
     : arr
