@@ -82,7 +82,7 @@ export function compileProps (el, propOptions) {
       value = parsed.expression
       prop.filters = parsed.filters
       // check binding type
-      if (isLiteral(value)) {
+      if (isLiteral(value) && !parsed.filters) {
         // for expressions containing literal numbers and
         // booleans, there's no need to setup a prop binding,
         // so we can optimize them as a one-time set.

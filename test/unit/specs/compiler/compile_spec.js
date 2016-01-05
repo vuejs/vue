@@ -276,7 +276,8 @@ describe('Compile', function () {
       twoWayWarn: null,
       testOneTime: null,
       optimizeLiteral: null,
-      optimizeLiteralStr: null
+      optimizeLiteralStr: null,
+      literalWithFilter: null
     }
     el.innerHTML = '<div ' +
       'v-bind:test-normal="a" ' +
@@ -286,9 +287,13 @@ describe('Compile', function () {
       ':optimize-literal-str="\'true\'"' +
       ':test-two-way.sync="a" ' +
       ':two-way-warn.sync="a + 1" ' +
-      ':test-one-time.once="a"></div>'
+      ':test-one-time.once="a" ' +
+      ':literal-with-filter="\'HI\' | lowercase"' +
+      '></div>'
     compiler.compileAndLinkProps(vm, el.firstChild, props)
-    expect(vm._bindDir.calls.count()).toBe(3) // skip literal and one time
+    // check bindDir calls:
+    // skip literal and one time, but not literal with filter
+    expect(vm._bindDir.calls.count()).toBe(4)
     // literal
     expect(vm.testLiteral).toBe('1')
     expect(vm._data.testLiteral).toBe('1')
@@ -317,6 +322,14 @@ describe('Compile', function () {
     expect(prop.mode).toBe(bindingModes.TWO_WAY)
     // two way warn
     expect(hasWarned('non-settable parent path')).toBe(true)
+    // literal with filter
+    args = vm._bindDir.calls.argsFor(3)
+    prop = args[0].prop
+    expect(args[0].name).toBe('prop')
+    expect(prop.path).toBe('literalWithFilter')
+    expect(prop.parentPath).toBe("'HI'")
+    expect(prop.filters.length).toBe(1)
+    expect(prop.mode).toBe(bindingModes.ONE_WAY)
   })
 
   it('props on root instance', function () {
