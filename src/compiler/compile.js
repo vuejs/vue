@@ -27,7 +27,7 @@ const modifierRE = /\.[^\.]+/g
 const transitionRE = /^(v-bind:|:)?transition$/
 
 // terminal directives
-const terminalDirectives = [
+export const terminalDirectives = [
   'for',
   'if'
 ]
