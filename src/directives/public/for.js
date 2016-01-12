@@ -358,6 +358,13 @@ const vFor = {
    */
 
   move: function (frag, prevEl) {
+    // fix a common issue with Sortable:
+    // if prevEl doesn't have nextSibling, this means it's
+    // been dragged after the end anchor. Just re-position
+    // the end anchor to the end of the container.
+    if (!prevEl.nextSibling) {
+      this.end.parentNode.appendChild(this.end)
+    }
     frag.before(prevEl.nextSibling, false)
   },
 
