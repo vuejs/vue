@@ -26,7 +26,7 @@ Hi! I’m really excited that you are interested in contributing to Vue.js. Befo
 
 - Follow the [code style](#code-style).
 
-- Make sure the default grunt task passes. (see [development setup](#development-setup))
+- Make sure `npm test` passes. (see [development setup](#development-setup))
 
 - If adding new feature:
     - Add accompanying test case.
@@ -66,7 +66,7 @@ You will need [Node.js](http://nodejs.org).
 
 ``` bash
 $ npm install
-# install pre-commit lint hook
+# optional: install pre-commit lint hook
 $ npm run install-hook
 ```
 
