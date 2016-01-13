@@ -7,7 +7,7 @@ Vue.component('paginator', {
     size : Number,
     current : Number
   },
-  data: function () {
+  data: function(){
     return {
         current : this.current || 1,
         total : this.total,//
@@ -43,28 +43,28 @@ Vue.component('paginator', {
   },
 
   methods: {
-        next : function () {
+        next : function(){
             if (this.current < this.total) {
                 this.current++;
             }
         },
 
-        prev : function () {
+        prev : function(){
             if (this.current > 1) this.current--;
         },
 
-        go : function (number) {
+        go : function( number ){
             this.current = number;
         },
 
-        hasNext : function (){
+        hasNext : function(){
             if (!this.pages.length) return false;
 
             if (this.current >= this.total) return false;
             return true;
         },
 
-        hasPrev : function (){
+        hasPrev : function(){
             if (!this.pages.length) return false;
             if (this.current <= 1) return false;
             return true;
@@ -78,7 +78,6 @@ var demo = new Vue({
   el: '#app',
   data: {
         current : 2,
-        total : 20,
-        size : 6
+        total : 20
   }
 })

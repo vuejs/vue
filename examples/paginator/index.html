@@ -7,36 +7,36 @@
     <link rel="stylesheet" href="index.css">
   </head>
   <body>
-    <!-- template for the modal component -->
-    <script type="x/template" id="paginator-template">
-          <ul class="paginator">
-            <li class="first"@click="current=1">
-                <a>首页</a>
-            </li>
-            <li class="prev" :class="!hasPrev()&&'disabled'"@click="prev()">
-                <a>上一页</a>
-            </li>
-            <li v-for="number in pages" track-by='$index' :class="number == current && 'active'" @click="go(number)">
-                <a>{{number}}</a>
-            </li>
-            <li class="next" :class="!hasNext()&&'disabled'" @click="next()">
-                <a>下一页</a>
-            </li>
-            <li class="last" @click="current=total">
-                <a>尾页</a>
-            </li>
-        </ul>
+  <!-- template for the modal component -->
+  <script type="x/template" id="paginator-template">
+        <ul class="paginator">
+          <li class="first"@click="current=1">
+              <a>首页</a>
+          </li>
+          <li class="prev" :class="!hasPrev()&&'disabled'"@click="prev()">
+              <a>上一页</a>
+          </li>
+          <li v-for="number in pages" track-by='$index' :class="number == current && 'active'" @click="go(number)">
+              <a>{{number}}</a>
+          </li>
+          <li class="next" :class="!hasNext()&&'disabled'" @click="next()">
+              <a>下一页</a>
+          </li>
+          <li class="last" @click="current=total">
+              <a>尾页</a>
+          </li>
+      </ul>
 
-    </script>
+  </script>
 
-    <!-- app -->
-    <div id="app">
-       <paginator
-        :total = "total"
-        :current.sync = "current"
-        >
-      </paginator>
-    </div>
+  <!-- app -->
+  <div id="app">
+     <paginator
+      :total = "total"
+      :current.sync = "current"
+      >
+    </paginator>
+  </div>
 
   <script src="paginator.js"></script>
 
