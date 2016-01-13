@@ -31,7 +31,7 @@ Please make sure to read the [Issue Reporting Checklist](https://github.com/vuej
 
 ## Contribution
 
-Please make sure to read the [Contributing Guide](https://github.com/vuejs/vue/blob/dev/CONTRIBUTING.md) before making a pull request. If you have a Vue-related project/component/tool, add it to [this list](https://github.com/vuejs/vue/wiki/User-Contributed-Components-&-Tools)!
+Please make sure to read the [Contributing Guide](https://github.com/vuejs/vue/blob/dev/CONTRIBUTING.md) before making a pull request. If you have a Vue-related project/component/tool, add it with a pull-request to [this curated list](https://github.com/vuejs/awesome-vue)!
 
 ## Changelog
 
