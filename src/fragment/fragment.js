@@ -181,6 +181,9 @@ Fragment.prototype.destroy = function () {
   if (this.parentFrag) {
     this.parentFrag.childFrags.$remove(this)
   }
+  if (this.node) {
+    this.node.__vfrag__ = null
+  }
   this.unlink()
 }
 
