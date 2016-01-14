@@ -3,72 +3,73 @@ Vue.component('paginator', {
   template: '#paginator-template',
   replace: true,
   props: {
-    total : Number,
-    size : Number,
-    current : Number
+    total: Number,
+    size: Number,
+    current: Number
   },
-  data: function(){
+  data: function () {
     return {
-        current : this.current || 1,
-        total : this.total,//
-        size : this.size || 7//显示的页码数
+      current: this.current || 1,
+      total: this.total,
+      size: this.size || 7
     }
   },
 
-  computed : {
-    pages : function(){
-            var size = this.size;
-            var total = this.total;
-            var current = this.current;
-            var min=1,max=total;
-            var pages = [];
+  computed: {
+    // get pages to show
+    pages: function () {
+      var size = this.size
+      var total = this.total
+      var current = this.current
+      var pages = []
+      var min = 1
+      var max = total
 
-            //提取应该显示的页码数组
-            if (size > total) {
-                size = total;
-                min = 1;
-                max = size;
-            }
-            while(max>=min && max-min>=size){
-                    if(max-current>=current-min) max--;
-                    else if(max-current<=current-min) min++;
-            }
+      if (size > total) {
+        size = total
+        min = 1
+        max = size
+      }
+      while (max >= min && max - min >= size) {
+        if (max - current >= current - min) max--
+        else if (max - current <= current - min) min++
+      }
 
-            for(var i = min; i <= max; i++) {
-                pages.push(i)
-            }
+      for (var i = min; i <= max; i++) {
+        pages.push(i)
+      }
 
-            return pages;
+      return pages
     }
   },
 
   methods: {
-        next : function(){
-            if (this.current < this.total) {
-                this.current++;
-            }
-        },
+    next: function () {
+      if (this.current < this.total) {
+        this.current++
+      }
+    },
 
-        prev : function(){
-            if (this.current > 1) this.current--;
-        },
+    prev: function () {
+      if (this.current > 1) this.current--
+    },
 
-        go : function( number ){
-            this.current = number;
-        },
+    go: function (number) {
+      this.current = number
+    },
 
-        hasNext : function(){
-            if (!this.pages.length) return false;
+    hasNext: function () {
+      if (!this.pages.length) return false
 
-            if (this.current >= this.total) return false;
-            return true;
-        },
+      if (this.current >= this.total) return false
+      return true
+    },
 
-        hasPrev : function(){
-            if (!this.pages.length) return false;
-            if (this.current <= 1) return false;
-            return true;
-        }
+    hasPrev: function () {
+      if (!this.pages.length) return false
+      if (this.current <= 1) return false
+      return true
+    }
   }
 })
 
@@ -77,7 +78,7 @@ Vue.component('paginator', {
 var demo = new Vue({
   el: '#app',
   data: {
-        current : 2,
-        total : 20
+    current: 2,
+    total: 20
   }
 })
