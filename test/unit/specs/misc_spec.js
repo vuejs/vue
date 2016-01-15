@@ -223,7 +223,13 @@ describe('Misc', function () {
     })
     expect(vm.$el.textContent).toBe('hi frozen')
     vm.msg = 'ho'
-    vm.frozen.msg = 'changed'
+    try {
+      vm.frozen.msg = 'changed'
+    } catch (error) {
+      if (!(error instanceof TypeError)) {
+        throw error
+      }
+    }
     Vue.nextTick(function () {
       expect(vm.$el.textContent).toBe('ho frozen')
       done()
