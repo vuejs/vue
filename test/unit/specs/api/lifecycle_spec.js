@@ -146,6 +146,16 @@ describe('Lifecycle API', function () {
       expect(hasWarned('$mount() should be called only once')).toBe(true)
     })
 
+    it('warn when mounting to body', function () {
+      new Vue({
+        el: document.createElement('body')
+      })
+
+      expect(hasWarned(
+        'Mounting view model directly into document.body is discouraged.'
+      )).toBe(true)
+    })
+
   })
 
   describe('$destroy', function () {
