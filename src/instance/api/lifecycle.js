@@ -24,6 +24,14 @@ export default function (Vue) {
     if (!el) {
       el = document.createElement('div')
     }
+    if (process.env.NODE_ENV !== 'production') {
+      if (el.tagName && el.tagName.toUpperCase() === 'BODY') {
+        warn(
+          'Mounting view model directly into document.body ' +
+          'is discouraged.'
+        )
+      }
+    }
     this._compile(el)
     this._initDOMHooks()
     if (inDoc(this.$el)) {
