@@ -32,23 +32,29 @@ var p = Cache.prototype
  */
 
 p.put = function (key, value) {
-  var entry = {
-    key: key,
-    value: value
-  }
-  this._keymap[key] = entry
-  if (this.tail) {
-    this.tail.newer = entry
-    entry.older = this.tail
-  } else {
-    this.head = entry
-  }
-  this.tail = entry
+  var removed
   if (this.size === this.limit) {
-    return this.shift()
-  } else {
+    removed = this.shift()
+  }
+
+  var entry = this.get(key, true)
+  if (!entry) {
+    entry = {
+      key: key
+    }
+    this._keymap[key] = entry
+    if (this.tail) {
+      this.tail.newer = entry
+      entry.older = this.tail
+    } else {
+      this.head = entry
+    }
+    this.tail = entry
     this.size++
   }
+  entry.value = value
+
+  return removed
 }
 
 /**
@@ -64,6 +70,7 @@ p.shift = function () {
     this.head.older = undefined
     entry.newer = entry.older = undefined
     this._keymap[entry.key] = undefined
+    this.size--
   }
   return entry
 }
