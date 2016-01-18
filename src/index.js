@@ -4,7 +4,7 @@ import elementDirectives from './directives/element/index'
 import filters from './filters/index'
 import { inBrowser } from './util/index'
 
-Vue.version = '1.0.15'
+Vue.version = '1.0.15-csp'
 
 /**
  * Vue and every constructor that extends Vue has an
