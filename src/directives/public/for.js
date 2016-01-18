@@ -362,6 +362,7 @@ const vFor = {
     // if prevEl doesn't have nextSibling, this means it's
     // been dragged after the end anchor. Just re-position
     // the end anchor to the end of the container.
+    /* istanbul ignore if */
     if (!prevEl.nextSibling) {
       this.end.parentNode.appendChild(this.end)
     }
