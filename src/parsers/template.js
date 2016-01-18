@@ -108,10 +108,8 @@ function stringToFragment (templateString, raw) {
     var suffix = wrap[2]
     var node = document.createElement('div')
 
-    if (!raw) {
-      templateString = templateString.trim()
-    }
-    node.innerHTML = prefix + templateString + suffix
+    var templateStringToUse = raw ? templateString : templateString.trim()
+    node.innerHTML = prefix + templateStringToUse + suffix
     while (depth--) {
       node = node.lastChild
     }

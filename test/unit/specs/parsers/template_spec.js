@@ -170,4 +170,13 @@ describe('Template Parser', function () {
     expect(res.childNodes.length).toBe(1)
     expect(res.firstChild.tagName).toBe('P')
   })
+
+  it('should reuse fragment from cache for the same string template', function () {
+    var stringTemplate = '    <p>test</p>    '
+    // When parsing a template, adds the created fragment to a cache
+    var res = parse(stringTemplate)
+
+    var newRes = parse(stringTemplate)
+    expect(newRes).toBe(res)
+  })
 })
