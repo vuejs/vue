@@ -8,11 +8,10 @@ const xlinkNS = 'http://www.w3.org/1999/xlink'
 const xlinkRE = /^xlink:/
 
 // check for attributes that prohibit interpolations
-const disallowedInterpAttrRE = /^v-|^:|^@|^(is|transition|transition-mode|debounce|track-by|stagger|enter-stagger|leave-stagger)$/
-
+const disallowedInterpAttrRE = /^v-|^:|^@|^(?:is|transition|transition-mode|debounce|track-by|stagger|enter-stagger|leave-stagger)$/
 // these attributes should also set their corresponding properties
 // because they only affect the initial state of the element
-const attrWithPropsRE = /^(value|checked|selected|muted)$/
+const attrWithPropsRE = /^(?:value|checked|selected|muted)$/
 
 // these attributes should set a hidden property for
 // binding v-model to object values
