@@ -1,5 +1,5 @@
 /*!
- * Vue.js v1.0.14
+ * Vue.js v1.0.15
  * (c) 2016 Evan You
  * Released under the MIT License.
  */
@@ -481,23 +481,29 @@
    */
 
   p.put = function (key, value) {
-    var entry = {
-      key: key,
-      value: value
-    };
-    this._keymap[key] = entry;
-    if (this.tail) {
-      this.tail.newer = entry;
-      entry.older = this.tail;
-    } else {
-      this.head = entry;
-    }
-    this.tail = entry;
+    var removed;
     if (this.size === this.limit) {
-      return this.shift();
-    } else {
+      removed = this.shift();
+    }
+
+    var entry = this.get(key, true);
+    if (!entry) {
+      entry = {
+        key: key
+      };
+      this._keymap[key] = entry;
+      if (this.tail) {
+        this.tail.newer = entry;
+        entry.older = this.tail;
+      } else {
+        this.head = entry;
+      }
+      this.tail = entry;
       this.size++;
     }
+    entry.value = value;
+
+    return removed;
   };
 
   /**
@@ -513,6 +519,7 @@
       this.head.older = undefined;
       entry.newer = entry.older = undefined;
       this._keymap[entry.key] = undefined;
+      this.size--;
     }
     return entry;
   };
@@ -3353,9 +3360,9 @@
   var EL = 1500;
   var COMPONENT = 1500;
   var PARTIAL = 1750;
-  var SLOT = 1750;
   var FOR = 2000;
   var IF = 2000;
+  var SLOT = 2100;
 
   var el = {
 
@@ -3494,11 +3501,10 @@
   var xlinkRE = /^xlink:/;
 
   // check for attributes that prohibit interpolations
-  var disallowedInterpAttrRE = /^v-|^:|^@|^(is|transition|transition-mode|debounce|track-by|stagger|enter-stagger|leave-stagger)$/;
-
+  var disallowedInterpAttrRE = /^v-|^:|^@|^(?:is|transition|transition-mode|debounce|track-by|stagger|enter-stagger|leave-stagger)$/;
   // these attributes should also set their corresponding properties
   // because they only affect the initial state of the element
-  var attrWithPropsRE = /^(value|checked|selected|muted)$/;
+  var attrWithPropsRE = /^(?:value|checked|selected|muted)$/;
 
   // these attributes should set a hidden property for
   // binding v-model to object values
@@ -4211,10 +4217,8 @@
       var suffix = wrap[2];
       var node = document.createElement('div');
 
-      if (!raw) {
-        templateString = templateString.trim();
-      }
-      node.innerHTML = prefix + templateString + suffix;
+      var templateStringToUse = raw ? templateString : templateString.trim();
+      node.innerHTML = prefix + templateStringToUse + suffix;
       while (depth--) {
         node = node.lastChild;
       }
@@ -4558,6 +4562,7 @@
     if (this.parentFrag) {
       this.parentFrag.childFrags.$remove(this);
     }
+    this.node.__vfrag__ = null;
     this.unlink();
   };
 
@@ -5018,6 +5023,14 @@
      */
 
     move: function move(frag, prevEl) {
+      // fix a common issue with Sortable:
+      // if prevEl doesn't have nextSibling, this means it's
+      // been dragged after the end anchor. Just re-position
+      // the end anchor to the end of the container.
+      /* istanbul ignore if */
+      if (!prevEl.nextSibling) {
+        this.end.parentNode.appendChild(this.end);
+      }
       frag.before(prevEl.nextSibling, false);
     },
 
@@ -9481,7 +9494,7 @@
     partial: partial
   };
 
-  Vue.version = '1.0.14';
+  Vue.version = '1.0.15';
 
   /**
    * Vue and every constructor that extends Vue has an
