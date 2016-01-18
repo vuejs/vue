@@ -19,27 +19,46 @@ var main = fs
   .replace(/Vue\.version = '[\d\.]+'/, "Vue.version = '" + version + "'")
 fs.writeFileSync('src/index.js', main)
 
-// Dev build
+// CommonJS build.
+// this is used as the "main" field in package.json
+// and used by bundlers like Webpack and Browserify.
 rollup.rollup({
   entry: 'src/index.js',
   plugins: [
-    replace({
-      'process.env.NODE_ENV': "'development'"
-    }),
     babel({
       loose: 'all'
     })
   ]
 })
 .then(function (bundle) {
-  return write('dist/vue.js', bundle.generate({
-    format: 'umd',
-    banner: banner,
-    moduleName: 'Vue'
+  return write('dist/vue.common.js', bundle.generate({
+    format: 'cjs',
+    banner: banner
   }).code)
 })
+// Standalone Dev Build
 .then(function () {
-  // Production build
+  return rollup.rollup({
+    entry: 'src/index.js',
+    plugins: [
+      replace({
+        'process.env.NODE_ENV': "'development'"
+      }),
+      babel({
+        loose: 'all'
+      })
+    ]
+  })
+  .then(function (bundle) {
+    return write('dist/vue.js', bundle.generate({
+      format: 'umd',
+      banner: banner,
+      moduleName: 'Vue'
+    }).code)
+  })
+})
+.then(function () {
+  // Standalone Production Build
   return rollup.rollup({
     entry: 'src/index.js',
     plugins: [
