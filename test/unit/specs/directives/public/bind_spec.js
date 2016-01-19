@@ -24,6 +24,8 @@ describe('v-bind', function () {
     expect(el.hasAttribute('test')).toBe(false)
     dir.update(false)
     expect(el.hasAttribute('test')).toBe(false)
+    dir.update(true)
+    expect(el.getAttribute('test')).toBe('')
     dir.update(0)
     expect(el.getAttribute('test')).toBe('0')
   })
