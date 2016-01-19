@@ -132,9 +132,9 @@ export default {
         }
         setClass(el, value)
       } else if (xlinkRE.test(attr)) {
-        el.setAttributeNS(xlinkNS, attr, value)
+        el.setAttributeNS(xlinkNS, attr, value === true ? '' : value)
       } else {
-        el.setAttribute(attr, value)
+        el.setAttribute(attr, value === true ? '' : value)
       }
     } else {
       el.removeAttribute(attr)
