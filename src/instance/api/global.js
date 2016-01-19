@@ -73,8 +73,11 @@ export default function (Vue) {
     }
     var name = extendOptions.name || Super.options.name
     if (process.env.NODE_ENV !== 'production') {
-      if (!/^[a-zA-Z][\w-]+$/.test(name)) {
-        warn('Invalid component name: ' + name)
+      if (!/^[a-zA-Z][\w-]*$/.test(name)) {
+        warn(
+          'Invalid component name: "' + name + '". Component names ' +
+          'can only contain alphanumeric characaters and the hyphen.'
+        )
         name = null
       }
     }
