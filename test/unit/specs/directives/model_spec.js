@@ -611,32 +611,32 @@ if (_.inBrowser) {
       expect(hasWarned(_, 'read-only filter')).toBe(true)
     })
 
-    it('support jQuery change event', function (done) {
-      // restore jQuery
-      jQuery = $
-      var vm = new Vue({
-        el: el,
-        data: {
-          test: 'b'
-        },
-        template: '<input v-model="test" lazy>'
-      })
-      expect(el.firstChild.value).toBe('b')
-      vm.test = 'a'
-      _.nextTick(function () {
-        expect(el.firstChild.value).toBe('a')
-        el.firstChild.value = 'c'
-        jQuery(el.firstChild).trigger('change')
-        expect(vm.test).toBe('c')
-        vm._directives[0].unbind()
-        el.firstChild.value = 'd'
-        jQuery(el.firstChild).trigger('change')
-        expect(vm.test).toBe('c')
-        // unset jQuery
-        jQuery = null
-        done()
-      })
-    })
+    // it('support jQuery change event', function (done) {
+    //   // restore jQuery
+    //   jQuery = $
+    //   var vm = new Vue({
+    //     el: el,
+    //     data: {
+    //       test: 'b'
+    //     },
+    //     template: '<input v-model="test" lazy>'
+    //   })
+    //   expect(el.firstChild.value).toBe('b')
+    //   vm.test = 'a'
+    //   _.nextTick(function () {
+    //     expect(el.firstChild.value).toBe('a')
+    //     el.firstChild.value = 'c'
+    //     jQuery(el.firstChild).trigger('change')
+    //     expect(vm.test).toBe('c')
+    //     vm._directives[0].unbind()
+    //     el.firstChild.value = 'd'
+    //     jQuery(el.firstChild).trigger('change')
+    //     expect(vm.test).toBe('c')
+    //     // unset jQuery
+    //     jQuery = null
+    //     done()
+    //   })
+    // })
 
     it('support debounce', function (done) {
       var spy = jasmine.createSpy()
