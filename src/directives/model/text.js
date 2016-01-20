@@ -104,12 +104,16 @@ module.exports = {
     // store that check result on itself. This also allows
     // easier test coverage control by unsetting the global
     // jQuery variable in tests.
-    this.hasjQuery = typeof jQuery === 'function'
-    if (this.hasjQuery) {
-      jQuery(el).on(this.event, this.listener)
-    } else {
-      _.on(el, this.event, this.listener)
-    }
+
+    // // This is not necessary because jQuery is not used.
+    // this.hasjQuery = typeof jQuery === 'function'
+
+    // // always use _.on
+    // if (this.hasjQuery) {
+    //   jQuery(el).on(this.event, this.listener)
+    // } else {
+    _.on(el, this.event, this.listener)
+    // }
 
     // IE9 doesn't fire input event on backspace/del/cut
     if (!lazy && _.isIE9) {
@@ -142,11 +146,14 @@ module.exports = {
 
   unbind: function () {
     var el = this.el
-    if (this.hasjQuery) {
-      jQuery(el).off(this.event, this.listener)
-    } else {
-      _.off(el, this.event, this.listener)
-    }
+
+    // // always use _.off
+    // if (this.hasjQuery) {
+    //   jQuery(el).off(this.event, this.listener)
+    // } else {
+
+    _.off(el, this.event, this.listener)
+    // }
     if (this.onComposeStart) {
       _.off(el, 'compositionstart', this.onComposeStart)
       _.off(el, 'compositionend', this.onComposeEnd)
