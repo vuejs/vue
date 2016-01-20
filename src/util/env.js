@@ -70,8 +70,11 @@ export const nextTick = (function () {
       copies[i]()
     }
   }
+
   /* istanbul ignore if */
-  if (typeof MutationObserver !== 'undefined') {
+  if (typeof setImmediate === 'function') {
+    timerFunc = setImmediate
+  } else if (typeof MutationObserver !== 'undefined') {
     var counter = 1
     var observer = new MutationObserver(nextTickHandler)
     var textNode = document.createTextNode(counter)
