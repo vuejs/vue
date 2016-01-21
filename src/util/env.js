@@ -72,9 +72,7 @@ export const nextTick = (function () {
   }
 
   /* istanbul ignore if */
-  if (typeof setImmediate === 'function') {
-    timerFunc = setImmediate
-  } else if (typeof MutationObserver !== 'undefined') {
+  if (typeof MutationObserver !== 'undefined') {
     var counter = 1
     var observer = new MutationObserver(nextTickHandler)
     var textNode = document.createTextNode(counter)
@@ -85,6 +83,8 @@ export const nextTick = (function () {
       counter = (counter + 1) % 2
       textNode.data = counter
     }
+  } else if (typeof setImmediate === 'function') {
+    timerFunc = setImmediate
   } else {
     timerFunc = setTimeout
   }
