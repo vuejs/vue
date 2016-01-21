@@ -194,7 +194,6 @@ export function compileAndLinkProps (vm, el, props, scope) {
  *
  * If this is a fragment instance, we only need to compile 1.
  *
- * @param {Vue} vm
  * @param {Element} el
  * @param {Object} options
  * @param {Object} contextOptions
