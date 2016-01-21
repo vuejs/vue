@@ -37,7 +37,8 @@ export function checkComponentAttr (el, options) {
         ) {
           warn(
             'Unknown custom element: <' + tag + '> - did you ' +
-            'register the component correctly?'
+            'register the component correctly? For recursive components, ' +
+            'make sure to provide the "name" option.'
           )
         }
       }
