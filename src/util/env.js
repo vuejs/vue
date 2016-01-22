@@ -70,6 +70,7 @@ export const nextTick = (function () {
       copies[i]()
     }
   }
+
   /* istanbul ignore if */
   if (typeof MutationObserver !== 'undefined') {
     var counter = 1
@@ -82,6 +83,8 @@ export const nextTick = (function () {
       counter = (counter + 1) % 2
       textNode.data = counter
     }
+  } else if (typeof setImmediate === 'function') {
+    timerFunc = setImmediate
   } else {
     timerFunc = setTimeout
   }
