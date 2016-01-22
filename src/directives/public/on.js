@@ -7,7 +7,7 @@ const keyCodes = {
   tab: 9,
   enter: 13,
   space: 32,
-  'delete': 46,
+  'delete': [8, 46],
   up: 38,
   left: 37,
   right: 39,
@@ -28,6 +28,7 @@ function keyFilter (handler, keys) {
     }
     return keyCodes[key]
   })
+  codes = [].concat.apply([], codes)
   return function keyHandler (e) {
     if (codes.indexOf(e.keyCode) > -1) {
       return handler.call(this, e)
