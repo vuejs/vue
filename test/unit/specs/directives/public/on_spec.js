@@ -88,6 +88,48 @@ describe('v-on', function () {
     })
   })
 
+  it('with delete modifier capturing DEL', function (done) {
+    new Vue({
+      el: el,
+      template: '<a v-on:keyup.delete="test">{{a}}</a>',
+      data: {a: 1},
+      methods: {
+        test: function () {
+          this.a++
+        }
+      }
+    })
+    var a = el.firstChild
+    trigger(a, 'keyup', function (e) {
+      e.keyCode = 46
+    })
+    _.nextTick(function () {
+      expect(a.textContent).toBe('2')
+      done()
+    })
+  })
+
+  it('with delete modifier capturing backspace', function (done) {
+    new Vue({
+      el: el,
+      template: '<a v-on:keyup.delete="test">{{a}}</a>',
+      data: {a: 1},
+      methods: {
+        test: function () {
+          this.a++
+        }
+      }
+    })
+    var a = el.firstChild
+    trigger(a, 'keyup', function (e) {
+      e.keyCode = 8
+    })
+    _.nextTick(function () {
+      expect(a.textContent).toBe('2')
+      done()
+    })
+  })
+
   it('with key modifier (keycode)', function (done) {
     new Vue({
       el: el,
