@@ -94,7 +94,6 @@ export default function (Vue) {
 
     this._isCompiled = true
     this._callHook('compiled')
-    return el
   }
 
   /**
