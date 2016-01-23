@@ -255,7 +255,8 @@ describe('Instance state initialization', function () {
 
   })
 
-  describe('meta', function () {
+  // global method xdescribe() doesn't exist
+  this.env.xdescribe('meta', function () {
 
     var vm = new Vue({
       _meta: {

@@ -2,8 +2,7 @@ import Watcher from '../../watcher'
 import { compileAndLinkProps } from '../../compiler/index'
 import Dep from '../../observer/dep'
 import {
-  observe,
-  defineReactive
+  observe
 } from '../../observer/index'
 
 import {
@@ -44,7 +43,6 @@ export default function (Vue) {
 
   Vue.prototype._initState = function () {
     this._initProps()
-    this._initMeta()
     this._initMethods()
     this._initData()
     this._initComputed()
@@ -253,19 +251,6 @@ export default function (Vue) {
     if (methods) {
       for (var key in methods) {
         this[key] = bind(methods[key], this)
-      }
-    }
-  }
-
-  /**
-   * Initialize meta information like $index, $key & $value.
-   */
-
-  Vue.prototype._initMeta = function () {
-    var metas = this.$options._meta
-    if (metas) {
-      for (var key in metas) {
-        defineReactive(this, key, metas[key])
       }
     }
   }
