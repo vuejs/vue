@@ -255,23 +255,4 @@ describe('Instance state initialization', function () {
 
   })
 
-  // global method xdescribe() doesn't exist
-  this.env.xdescribe('meta', function () {
-
-    var vm = new Vue({
-      _meta: {
-        $index: 0,
-        $value: 'test'
-      }
-    })
-
-    it('should define metas only on vm', function () {
-      expect(vm.$index).toBe(0)
-      expect(vm.$value).toBe('test')
-      expect('$index' in vm.$data).toBe(false)
-      expect('$value' in vm.$data).toBe(false)
-    })
-
-  })
-
 })
