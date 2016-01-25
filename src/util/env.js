@@ -83,10 +83,14 @@ export const nextTick = (function () {
       counter = (counter + 1) % 2
       textNode.data = counter
     }
-  } else if (typeof setImmediate === 'function') {
-    timerFunc = setImmediate
   } else {
-    timerFunc = setTimeout
+    // webpack attempts to inject a shim for setImmediate
+    // if it is used as a global, so we have to work around that to
+    // avoid bundling unnecessary code.
+    const context = inBrowser
+      ? window
+      : typeof global !== 'undefined' ? global : {}
+    timerFunc = context.setImmediate || setTimeout
   }
   return function (cb, ctx) {
     var func = ctx
