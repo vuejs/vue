@@ -81,6 +81,13 @@ export default function (Vue) {
       this.$parent.$children.push(this)
     }
 
+    // save raw constructor data before merge
+    // so that we know which properties are provided at
+    // instantiation.
+    if (process.env.NODE_ENV !== 'production') {
+      this._runtimeData = options.data
+    }
+
     // merge options.
     options = this.$options = mergeOptions(
       this.constructor.options,

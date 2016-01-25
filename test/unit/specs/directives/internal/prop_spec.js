@@ -562,16 +562,36 @@ describe('prop', function () {
   })
 
   it('should warn data fields already defined as a prop', function () {
+    var Comp = Vue.extend({
+      data: function () {
+        return { a: 123 }
+      },
+      props: {
+        a: null
+      }
+    })
     new Vue({
+      el: el,
+      template: '<comp a="1"></comp>',
+      components: {
+        comp: Comp
+      }
+    })
+    expect(hasWarned('already defined as a prop')).toBe(true)
+  })
+
+  it('should not warn data fields already defined as a prop if it is from instantiation call', function () {
+    var vm = new Vue({
       el: el,
       props: {
         a: null
       },
       data: {
-        a: 1
+        a: 123
       }
     })
-    expect(hasWarned('already defined as a prop')).toBe(true)
+    expect(getWarnCount()).toBe(0)
+    expect(vm.a).toBe(123)
   })
 
   it('should not warn for non-required, absent prop', function () {

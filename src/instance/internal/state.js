@@ -80,11 +80,19 @@ export default function (Vue) {
     var propsData = this._data
     var optionsDataFn = this.$options.data
     var optionsData = optionsDataFn && optionsDataFn()
+    var runtimeData
+    if (process.env.NODE_ENV !== 'production') {
+      runtimeData = (typeof this._runtimeData === 'function'
+        ? this._runtimeData()
+        : this._runtimeData) || {}
+      this._runtimeData = null
+    }
     if (optionsData) {
       this._data = optionsData
       for (var prop in propsData) {
         if (process.env.NODE_ENV !== 'production' &&
-            hasOwn(optionsData, prop)) {
+            hasOwn(optionsData, prop) &&
+            !hasOwn(runtimeData, prop)) {
           warn(
             'Data field "' + prop + '" is already defined ' +
             'as a prop. Use prop default value instead.'
