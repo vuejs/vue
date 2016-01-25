@@ -100,9 +100,6 @@ function prefix (prop) {
   if (!testEl) {
     testEl = document.createElement('div')
   }
-  if (camel in testEl.style) {
-    return prop
-  }
   var i = prefixes.length
   var prefixed
   while (i--) {
@@ -110,5 +107,8 @@ function prefix (prop) {
     if (prefixed in testEl.style) {
       return prefixes[i] + prop
     }
+  }
+  if (camel in testEl.style) {
+    return prop
   }
 }
