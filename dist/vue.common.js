@@ -1,6 +1,6 @@
 /*!
  * Vue.js v1.0.13
- * (c) 2015 Evan You
+ * (c) 2016 Evan You
  * Released under the MIT License.
  */
 'use strict';
@@ -3984,7 +3984,7 @@ var text$2 = {
     // store that check result on itself. This also allows
     // easier test coverage control by unsetting the global
     // jQuery variable in tests.
-    this.hasjQuery = typeof jQuery === 'function';
+    this.hasjQuery = false;
     if (this.hasjQuery) {
       jQuery(el).on('change', this.listener);
       if (!lazy) {
