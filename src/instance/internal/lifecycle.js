@@ -34,7 +34,6 @@ export default function (Vue) {
    * Otherwise we need to call transclude/compile/link here.
    *
    * @param {Element} el
-   * @return {Element}
    */
 
   Vue.prototype._compile = function (el) {
