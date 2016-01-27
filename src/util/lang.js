@@ -82,7 +82,7 @@ export function hasOwn (obj, key) {
  * @return {Boolean}
  */
 
-var literalValueRE = /^\s?(true|false|[\d\.]+|'[^']*'|"[^"]*")\s?$/
+var literalValueRE = /^\s?(true|false|-?[\d\.]+|'[^']*'|"[^"]*")\s?$/
 export function isLiteral (exp) {
   return literalValueRE.test(exp)
 }

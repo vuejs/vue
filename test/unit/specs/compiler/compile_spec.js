@@ -277,6 +277,7 @@ describe('Compile', function () {
       testOneTime: null,
       optimizeLiteral: null,
       optimizeLiteralStr: null,
+      optimizeLiteralNegativeNumber: null,
       literalWithFilter: null
     }
     el.innerHTML = '<div ' +
@@ -285,6 +286,7 @@ describe('Compile', function () {
       'test-boolean ' +
       ':optimize-literal="1" ' +
       ':optimize-literal-str="\'true\'"' +
+      ':optimize-literal-negative-number="-1"' +
       ':test-two-way.sync="a" ' +
       ':two-way-warn.sync="a + 1" ' +
       ':test-one-time.once="a" ' +
@@ -303,6 +305,8 @@ describe('Compile', function () {
     expect(vm._data.optimizeLiteral).toBe(1)
     expect(vm.optimizeLiteralStr).toBe('true')
     expect(vm._data.optimizeLiteralStr).toBe('true')
+    expect(vm.optimizeLiteralNegativeNumber).toBe(-1)
+    expect(vm._data.optimizeLiteralNegativeNumber).toBe(-1)
     // one time
     expect(vm.testOneTime).toBe('from parent: a')
     expect(vm._data.testOneTime).toBe('from parent: a')
