@@ -359,6 +359,10 @@ export function mergeOptions (parent, child, vm) {
  */
 
 export function resolveAsset (options, type, id) {
+  /* istanbul ignore if */
+  if (typeof id !== 'string') {
+    return
+  }
   var assets = options[type]
   var camelizedId
   return assets[id] ||
