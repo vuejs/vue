@@ -157,11 +157,11 @@ Fragment.prototype.beforeRemove = function () {
     this.childFrags[i].beforeRemove(false)
   }
   for (i = 0, l = this.children.length; i < l; i++) {
-   // Call destroy for all contained instances,
-   // with remove:false and defer:true.
-   // Defer is necessary because we need to
-   // keep the children to call detach hooks
-   // on them.
+    // Call destroy for all contained instances,
+    // with remove:false and defer:true.
+    // Defer is necessary because we need to
+    // keep the children to call detach hooks
+    // on them.
     this.children[i].$destroy(false, true)
   }
   var dirs = this.unlink.dirs
