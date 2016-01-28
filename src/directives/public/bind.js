@@ -1,4 +1,4 @@
-import { warn, setClass } from '../../util/index'
+import { warn, setClass, camelize } from '../../util/index'
 import { BIND } from '../priorities'
 import vStyle from '../internal/style'
 import { tokensToExp } from '../../parsers/text'
@@ -96,6 +96,9 @@ export default {
   handleSingle (attr, value) {
     const el = this.el
     const interp = this.descriptor.interp
+    if (this.modifiers.camel) {
+      attr = camelize(attr)
+    }
     if (
       !interp &&
       attrWithPropsRE.test(attr) &&
