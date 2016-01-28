@@ -99,6 +99,15 @@ export function compile (el, options, partial) {
  */
 
 function linkAndCapture (linker, vm) {
+  /* istanbul ignore if */
+  if (process.env.NODE_ENV === 'production') {
+    // reset directives before every capture in production
+    // mode, so that when unlinking we don't need to splice
+    // them out (which turns out to be a perf hit).
+    // they are kept in development mode because they are
+    // useful for Vue's own tests.
+    vm._directives = []
+  }
   var originalDirCount = vm._directives.length
   linker()
   var dirs = vm._directives.slice(originalDirCount)
@@ -161,7 +170,7 @@ function teardownDirs (vm, dirs, destroying) {
   var i = dirs.length
   while (i--) {
     dirs[i]._teardown()
-    if (!destroying) {
+    if (process.env.NODE_ENV !== 'production' && !destroying) {
       vm._directives.$remove(dirs[i])
     }
   }
