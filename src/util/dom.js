@@ -272,20 +272,29 @@ export function extractContent (el, asFragment) {
 }
 
 /**
- * Trim possible empty head/tail textNodes inside a parent.
+ * Trim possible empty head/tail text and comment
+ * nodes inside a parent.
  *
  * @param {Node} node
  */
 
 export function trimNode (node) {
-  trim(node, node.firstChild)
-  trim(node, node.lastChild)
+  var child
+  /* eslint-disable no-sequences */
+  while (child = node.firstChild, isTrimmable(child)) {
+    node.removeChild(child)
+  }
+  while (child = node.lastChild, isTrimmable(child)) {
+    node.removeChild(child)
+  }
+  /* eslint-enable no-sequences */
 }
 
-function trim (parent, node) {
-  if (node && node.nodeType === 3 && !node.data.trim()) {
-    parent.removeChild(node)
-  }
+function isTrimmable (node) {
+  return node && (
+    (node.nodeType === 3 && !node.data.trim()) ||
+    node.nodeType === 8
+  )
 }
 
 /**

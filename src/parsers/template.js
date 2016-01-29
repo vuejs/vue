@@ -85,7 +85,10 @@ const entityRE = /&#?\w+?;/
 
 function stringToFragment (templateString, raw) {
   // try a cache hit first
-  var hit = templateCache.get(templateString)
+  var cacheKey = raw
+    ? templateString
+    : templateString.trim()
+  var hit = templateCache.get(cacheKey)
   if (hit) {
     return hit
   }
@@ -108,8 +111,7 @@ function stringToFragment (templateString, raw) {
     var suffix = wrap[2]
     var node = document.createElement('div')
 
-    var templateStringToUse = raw ? templateString : templateString.trim()
-    node.innerHTML = prefix + templateStringToUse + suffix
+    node.innerHTML = prefix + templateString + suffix
     while (depth--) {
       node = node.lastChild
     }
@@ -121,8 +123,10 @@ function stringToFragment (templateString, raw) {
       frag.appendChild(child)
     }
   }
-
-  templateCache.put(templateString, frag)
+  if (!raw) {
+    trimNode(frag)
+  }
+  templateCache.put(cacheKey, frag)
   return frag
 }
 

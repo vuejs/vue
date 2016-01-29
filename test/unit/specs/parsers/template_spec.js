@@ -158,7 +158,7 @@ describe('Template Parser', function () {
     expect(c.value).toBe('')
   })
 
-  it('should trim empty text nodes', function () {
+  it('should trim empty text nodes and comments', function () {
     // string
     var res = parse('    <p>test</p>    ')
     expect(res.childNodes.length).toBe(1)
@@ -167,6 +167,10 @@ describe('Template Parser', function () {
     var el = document.createElement('div')
     el.innerHTML = '<template>    <p>test</p>    </template>'
     res = parse(el.children[0])
+    expect(res.childNodes.length).toBe(1)
+    expect(res.firstChild.tagName).toBe('P')
+    // comments
+    res = parse('  <!-- yo -->  <p>test</p>  <!-- yo -->  ')
     expect(res.childNodes.length).toBe(1)
     expect(res.firstChild.tagName).toBe('P')
   })
