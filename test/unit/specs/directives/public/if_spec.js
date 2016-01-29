@@ -1,5 +1,5 @@
-var _ = require('src/util')
 var Vue = require('src')
+var nextTick = Vue.nextTick
 
 describe('v-if', function () {
 
@@ -25,15 +25,15 @@ describe('v-if', function () {
     expect(el.innerHTML).toBe('')
     expect(vm.$children.length).toBe(0)
     vm.test = true
-    _.nextTick(function () {
+    nextTick(function () {
       expect(el.innerHTML).toBe('<div><test>A</test></div>')
       expect(vm.$children.length).toBe(1)
       vm.test = false
-      _.nextTick(function () {
+      nextTick(function () {
         expect(el.innerHTML).toBe('')
         expect(vm.$children.length).toBe(0)
         vm.test = true
-        _.nextTick(function () {
+        nextTick(function () {
           expect(el.innerHTML).toBe('<div><test>A</test></div>')
           expect(vm.$children.length).toBe(1)
           var child = vm.$children[0]
@@ -54,10 +54,10 @@ describe('v-if', function () {
     // lazy instantitation
     expect(el.innerHTML).toBe('')
     vm.test = true
-    _.nextTick(function () {
+    nextTick(function () {
       expect(el.innerHTML).toBe('<p>A</p><p>B</p>')
       vm.test = false
-      _.nextTick(function () {
+      nextTick(function () {
         expect(el.innerHTML).toBe('')
         done()
       })
@@ -88,13 +88,13 @@ describe('v-if', function () {
     expect(el.innerHTML).toBe('')
     expect(vm.$children.length).toBe(0)
     vm.ok = true
-    _.nextTick(function () {
+    nextTick(function () {
       expect(el.innerHTML).toBe('<test>123</test>')
       expect(vm.$children.length).toBe(1)
       expect(attachSpy).toHaveBeenCalled()
       expect(readySpy).toHaveBeenCalled()
       vm.ok = false
-      _.nextTick(function () {
+      nextTick(function () {
         expect(detachSpy).toHaveBeenCalled()
         expect(el.innerHTML).toBe('')
         expect(vm.$children.length).toBe(0)
@@ -125,23 +125,23 @@ describe('v-if', function () {
     expect(vm.$children.length).toBe(0)
     // toggle if with lazy instantiation
     vm.ok = true
-    _.nextTick(function () {
+    nextTick(function () {
       expect(el.innerHTML).toBe('<component>AAA</component>')
       expect(vm.$children.length).toBe(1)
       // switch view when if=true
       vm.view = 'view-b'
-      _.nextTick(function () {
+      nextTick(function () {
         expect(el.innerHTML).toBe('<component>BBB</component>')
         expect(vm.$children.length).toBe(1)
         // toggle if when already instantiated
         vm.ok = false
-        _.nextTick(function () {
+        nextTick(function () {
           expect(el.innerHTML).toBe('')
           expect(vm.$children.length).toBe(0)
           // toggle if and switch view at the same time
           vm.view = 'view-a'
           vm.ok = true
-          _.nextTick(function () {
+          nextTick(function () {
             expect(el.innerHTML).toBe('<component>AAA</component>')
             expect(vm.$children.length).toBe(1)
             done()
@@ -161,7 +161,7 @@ describe('v-if', function () {
     })
     expect(el.innerHTML).toBe('<div>1</div>')
     vm.a = 2
-    _.nextTick(function () {
+    nextTick(function () {
       expect(el.innerHTML).toBe('<div>2</div>')
       done()
     })
@@ -196,7 +196,7 @@ describe('v-if', function () {
     })
     expect(attachSpy).toHaveBeenCalled()
     vm.show = false
-    _.nextTick(function () {
+    nextTick(function () {
       expect(detachSpy).toHaveBeenCalled()
       document.body.removeChild(el)
       done()
@@ -244,17 +244,17 @@ describe('v-if', function () {
     assertMarkup()
     expect(attachSpy.calls.count()).toBe(2)
     vm.show = false
-    _.nextTick(function () {
+    nextTick(function () {
       assertMarkup()
       expect(detachSpy.calls.count()).toBe(1)
       vm.list.push({a: 1})
       vm.show = true
-      _.nextTick(function () {
+      nextTick(function () {
         assertMarkup()
         expect(attachSpy.calls.count()).toBe(2 + 2)
         vm.list.push({a: 2})
         vm.show = false
-        _.nextTick(function () {
+        nextTick(function () {
           assertMarkup()
           expect(attachSpy.calls.count()).toBe(2 + 2 + 1)
           expect(detachSpy.calls.count()).toBe(1 + 3)
@@ -306,10 +306,10 @@ describe('v-if', function () {
     })
     expect(attachSpy).not.toHaveBeenCalled()
     vm.showInner = true
-    _.nextTick(function () {
+    nextTick(function () {
       expect(attachSpy.calls.count()).toBe(1)
       vm.showOuter = false
-      _.nextTick(function () {
+      nextTick(function () {
         expect(detachSpy.calls.count()).toBe(1)
         document.body.removeChild(el)
         done()
@@ -340,15 +340,15 @@ describe('v-if', function () {
     assertMarkup()
     assertCalls(1, 0)
     vm.show = false
-    _.nextTick(function () {
+    nextTick(function () {
       assertMarkup()
       assertCalls(1, 1)
       vm.show = true
-      _.nextTick(function () {
+      nextTick(function () {
         assertMarkup()
         assertCalls(2, 1)
         vm.show = false
-        _.nextTick(function () {
+        nextTick(function () {
           assertMarkup()
           assertCalls(2, 2)
           document.body.removeChild(el)
@@ -403,13 +403,35 @@ describe('v-if', function () {
     })
     expect(el.textContent).toBe('B')
     vm.test = true
-    _.nextTick(function () {
+    nextTick(function () {
       expect(el.textContent).toBe('A')
       vm.test = false
-      _.nextTick(function () {
+      nextTick(function () {
         expect(el.textContent).toBe('B')
         done()
       })
+    })
+  })
+
+  it('else block teardown', function (done) {
+    var created = jasmine.createSpy()
+    var destroyed = jasmine.createSpy()
+    var vm = new Vue({
+      el: el,
+      data: { ok: false },
+      template: '<div v-if="ok"></div><div v-else><test></test></div>',
+      components: {
+        test: {
+          created: created,
+          destroyed: destroyed
+        }
+      }
+    })
+    expect(created.calls.count()).toBe(1)
+    vm.$destroy()
+    nextTick(function () {
+      expect(destroyed.calls.count()).toBe(1)
+      done()
     })
   })
 })
