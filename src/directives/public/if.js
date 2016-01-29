@@ -69,5 +69,8 @@ export default {
     if (this.frag) {
       this.frag.destroy()
     }
+    if (this.elseFrag) {
+      this.elseFrag.destroy()
+    }
   }
 }
