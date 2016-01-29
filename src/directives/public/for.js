@@ -526,7 +526,7 @@ const vFor = {
       }
       return res
     } else {
-      if (typeof value === 'number') {
+      if (typeof value === 'number' && !isNaN(value)) {
         value = range(value)
       }
       return value || []
@@ -609,7 +609,7 @@ function findVmFromFrag (frag) {
 
 function range (n) {
   var i = -1
-  var ret = new Array(n)
+  var ret = new Array(Math.floor(n))
   while (++i < n) {
     ret[i] = i
   }
