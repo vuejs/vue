@@ -62,7 +62,20 @@ export const slot = {
 
   compile (content, context, host) {
     if (content && context) {
-      var scope = host
+      if (
+        this.el.hasChildNodes() &&
+        content.childNodes.length === 1 &&
+        content.childNodes[0].nodeType === 1 &&
+        content.childNodes[0].hasAttribute('v-if')
+      ) {
+        // if the inserted slot has v-if
+        // inject fallback content as the v-else
+        const elseBlock = document.createElement('template')
+        elseBlock.setAttribute('v-else', '')
+        elseBlock.innerHTML = this.el.innerHTML
+        content.appendChild(elseBlock)
+      }
+      const scope = host
         ? host._scope
         : this._scope
       this.unlink = context.$compile(

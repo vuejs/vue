@@ -1,5 +1,5 @@
 var Vue = require('src')
-var _ = require('src/util')
+var nextTick = Vue.nextTick
 
 describe('Slot Distribution', function () {
 
@@ -158,7 +158,7 @@ describe('Slot Distribution', function () {
     })
     expect(el.innerHTML).toBe('<test>hello</test>')
     vm.msg = 'what'
-    _.nextTick(function () {
+    nextTick(function () {
       expect(el.innerHTML).toBe('<test>what</test>')
       done()
     })
@@ -182,14 +182,14 @@ describe('Slot Distribution', function () {
     })
     expect(el.textContent).toBe('12')
     vm.a = 2
-    _.nextTick(function () {
+    nextTick(function () {
       expect(el.textContent).toBe('22')
       vm.show = false
-      _.nextTick(function () {
+      nextTick(function () {
         expect(el.textContent).toBe('')
         vm.show = true
         vm.a = 3
-        _.nextTick(function () {
+        nextTick(function () {
           expect(el.textContent).toBe('32')
           done()
         })
@@ -237,7 +237,7 @@ describe('Slot Distribution', function () {
     markup = vm.list.map(function (item) {
       return '<div class="child parent">' + item.a + ' ho</div>'
     }).join('')
-    _.nextTick(function () {
+    nextTick(function () {
       expect(el.innerHTML).toBe(markup)
       done()
     })
@@ -266,7 +266,7 @@ describe('Slot Distribution', function () {
       '</testb></testa>'
     )
     vm.list.push(3)
-    _.nextTick(function () {
+    nextTick(function () {
       expect(el.innerHTML).toBe(
         '<testa><testb>' +
           '<div>1</div><div>2</div><div>3</div>' +
@@ -297,7 +297,7 @@ describe('Slot Distribution', function () {
     })
     expect(el.innerHTML).toBe('<testa></testa>')
     vm.ok = true
-    _.nextTick(function () {
+    nextTick(function () {
       expect(el.innerHTML).toBe('<testa><testb>hello</testb></testa>')
       done()
     })
@@ -395,6 +395,27 @@ describe('Slot Distribution', function () {
       }
     })
     expect(el.textContent).toBe('hihihi')
+  })
+
+  it('fallback for slot with v-if', function (done) {
+    var vm = new Vue({
+      el: el,
+      data: {
+        ok: false
+      },
+      template: '<div><comp><div v-if="ok">inserted</div></comp></div>',
+      components: {
+        comp: {
+          template: '<div><slot>fallback</slot></div>'
+        }
+      }
+    })
+    expect(el.textContent).toBe('fallback')
+    vm.ok = true
+    nextTick(function () {
+      expect(el.textContent).toBe('inserted')
+      done()
+    })
   })
 
 })
