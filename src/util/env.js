@@ -6,6 +6,10 @@ export const inBrowser =
   typeof window !== 'undefined' &&
   Object.prototype.toString.call(window) !== '[object Object]'
 
+export const devtools =
+  inBrowser &&
+  window.__VUE_DEVTOOLS_GLOBAL_HOOK__
+
 export const isIE9 =
   inBrowser &&
   navigator.userAgent.toLowerCase().indexOf('msie 9.0') > 0

@@ -1,5 +1,9 @@
-import { inBrowser, warn, nextTick } from './util/index'
 import config from './config'
+import {
+  warn,
+  nextTick,
+  devtools
+} from './util/index'
 
 // we have two separate queues: one for directive updates
 // and one for user watcher registered via $watch().
@@ -36,10 +40,8 @@ function flushBatcherQueue () {
   runBatcherQueue(userQueue)
   // dev tool hook
   /* istanbul ignore if */
-  if (process.env.NODE_ENV !== 'production') {
-    if (inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__) {
-      window.__VUE_DEVTOOLS_GLOBAL_HOOK__.emit('flush')
-    }
+  if (devtools) {
+    devtools.emit('flush')
   }
   resetBatcherState()
 }
