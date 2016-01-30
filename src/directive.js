@@ -288,10 +288,11 @@ Directive.prototype._withLock = function (fn) {
  *
  * @param {String} event
  * @param {Function} handler
+ * @param {Boolean} [useCapture]
  */
 
-Directive.prototype.on = function (event, handler) {
-  on(this.el, event, handler)
+Directive.prototype.on = function (event, handler, useCapture) {
+  on(this.el, event, handler, useCapture)
   ;(this._listeners || (this._listeners = []))
     .push([event, handler])
 }

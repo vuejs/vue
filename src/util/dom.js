@@ -160,10 +160,11 @@ export function replace (target, el) {
  * @param {Element} el
  * @param {String} event
  * @param {Function} cb
+ * @param {Boolean} [useCapture]
  */
 
-export function on (el, event, cb) {
-  el.addEventListener(event, cb)
+export function on (el, event, cb, useCapture) {
+  el.addEventListener(event, cb, useCapture)
 }
 
 /**

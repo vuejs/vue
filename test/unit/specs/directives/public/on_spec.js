@@ -216,6 +216,39 @@ describe('v-on', function () {
     expect(window.location.hash).toBe(hash)
   })
 
+  it('capture modifier', function () {
+    document.body.appendChild(el)
+    var outer = jasmine.createSpy('outer')
+    var inner = jasmine.createSpy('inner')
+    new Vue({
+      el: el,
+      template: '<div @click.capture.stop="outer"><div class="inner" @click="inner"></div></div>',
+      methods: {
+        outer: outer,
+        inner: inner
+      }
+    })
+    trigger(el.querySelector('.inner'), 'click')
+    expect(outer).toHaveBeenCalled()
+    expect(inner).not.toHaveBeenCalled()
+    document.body.removeChild(el)
+  })
+
+  it('self modifier', function () {
+    var outer = jasmine.createSpy('outer')
+    new Vue({
+      el: el,
+      template: '<div class="outer" @click.self="outer"><div class="inner"></div></div>',
+      methods: {
+        outer: outer
+      }
+    })
+    trigger(el.querySelector('.inner'), 'click')
+    expect(outer).not.toHaveBeenCalled()
+    trigger(el.querySelector('.outer'), 'click')
+    expect(outer).toHaveBeenCalled()
+  })
+
   it('multiple modifiers working together', function () {
     var outer = jasmine.createSpy('outer')
     var prevented

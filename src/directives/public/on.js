@@ -50,6 +50,14 @@ function preventFilter (handler) {
   }
 }
 
+function selfFilter (handler) {
+  return function selfHandler (e) {
+    if (e.target === e.currentTarget) {
+      return handler.call(this, e)
+    }
+  }
+}
+
 export default {
 
   acceptStatement: true,
@@ -63,7 +71,12 @@ export default {
     ) {
       var self = this
       this.iframeBind = function () {
-        on(self.el.contentWindow, self.arg, self.handler)
+        on(
+          self.el.contentWindow,
+          self.arg,
+          self.handler,
+          self.modifiers.capture
+        )
       }
       this.on('load', this.iframeBind)
     }
@@ -92,6 +105,9 @@ export default {
     if (this.modifiers.prevent) {
       handler = preventFilter(handler)
     }
+    if (this.modifiers.self) {
+      handler = selfFilter(handler)
+    }
     // key filter
     var keys = Object.keys(this.modifiers)
       .filter(function (key) {
@@ -107,7 +123,12 @@ export default {
     if (this.iframeBind) {
       this.iframeBind()
     } else {
-      on(this.el, this.arg, this.handler)
+      on(
+        this.el,
+        this.arg,
+        this.handler,
+        this.modifiers.capture
+      )
     }
   },
 
