@@ -66,7 +66,7 @@
     "karma-webpack": "^1.7.0",
     "object-assign": "^4.0.1",
     "phantomjs": "^1.9.17",
-    "rollup": "^0.21.0",
+    "rollup": "^0.25.1",
     "rollup-plugin-babel": "^1.0.0",
     "rollup-plugin-replace": "^1.1.0",
     "uglify-js": "^2.4.24",
