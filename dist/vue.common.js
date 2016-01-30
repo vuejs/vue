@@ -1,5 +1,5 @@
 /*!
- * Vue.js v1.0.16
+ * Vue.js v1.0.16-csp
  * (c) 2016 Evan You
  * Released under the MIT License.
  */
@@ -14240,7 +14240,7 @@ var filters = {
   }
 };
 
-Vue.version = '1.0.16';
+Vue.version = '1.0.16-csp';
 
 /**
  * Vue and every constructor that extends Vue has an
