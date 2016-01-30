@@ -1,8 +1,14 @@
-import { extend, warn, isArray, isObject, nextTick } from './util/index'
 import config from './config'
 import Dep from './observer/dep'
 import { parseExpression } from './parsers/expression'
 import { pushWatcher } from './batcher'
+import {
+  extend,
+  warn,
+  isArray,
+  isObject,
+  nextTick
+} from './util/index'
 
 let uid = 0
 
@@ -299,9 +305,10 @@ Watcher.prototype.depend = function () {
 Watcher.prototype.teardown = function () {
   if (this.active) {
     // remove self from vm's watcher list
-    // we can skip this if the vm if being destroyed
-    // which can improve teardown performance.
-    if (!this.vm._isBeingDestroyed) {
+    // this is a somewhat expensive operation so we skip it
+    // if the vm is being destroyed or is performing a v-for
+    // re-render (the watcher list is then filtered by v-for).
+    if (!this.vm._isBeingDestroyed && !this.vm._vForRemoving) {
       this.vm._watchers.$remove(this)
     }
     var depIds = Object.keys(this.deps)

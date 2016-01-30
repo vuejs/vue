@@ -164,6 +164,10 @@ const vFor = {
     // from cache)
     var removalIndex = 0
     var totalRemoved = oldFrags.length - frags.length
+    // when removing a large number of fragments, watcher removal
+    // turns out to be a perf bottleneck, so we batch the watcher
+    // removals into a single filter call!
+    this.vm._vForRemoving = true
     for (i = 0, l = oldFrags.length; i < l; i++) {
       frag = oldFrags[i]
       if (!frag.reused) {
@@ -171,6 +175,8 @@ const vFor = {
         this.remove(frag, removalIndex++, totalRemoved, inDocument)
       }
     }
+    this.vm._vForRemoving = false
+    this.vm._watchers = this.vm._watchers.filter(w => w.active)
 
     // Final pass, move/insert new fragments into the
     // right place.

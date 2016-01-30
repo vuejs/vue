@@ -51,7 +51,8 @@ export default function (Vue) {
     this._isDestroyed =
     this._isReady =
     this._isAttached =
-    this._isBeingDestroyed = false
+    this._isBeingDestroyed =
+    this._vForRemoving = false
     this._unlinkFn = null
 
     // context:
