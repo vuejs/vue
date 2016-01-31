@@ -237,6 +237,19 @@ describe('Instance Events', function () {
       expect(vm.a).toBe(1)
     })
 
+    it('warn missing handler for child component v-on', function () {
+      new Vue({
+        el: document.createElement('div'),
+        template: '<comp @test="onThat"></comp>',
+        components: {
+          comp: {}
+        }
+      })
+      expect(hasWarned(
+        'v-on:test="onThat" on component <comp> expects a function value'
+      )).toBe(true)
+    })
+
     it('passing $arguments', function () {
       new Vue({
         el: document.createElement('div'),
