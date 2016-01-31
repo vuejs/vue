@@ -11,6 +11,7 @@ import {
 export default {
 
   priority: IF,
+  terminal: true,
 
   bind () {
     var el = this.el
