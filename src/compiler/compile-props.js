@@ -151,25 +151,22 @@ function makePropsLinkFn (props) {
         initProp(vm, prop, getDefault(vm, options))
       } else if (prop.dynamic) {
         // dynamic prop
-        if (vm._context) {
-          if (prop.mode === propBindingModes.ONE_TIME) {
-            // one time binding
-            value = (scope || vm._context).$get(prop.parentPath)
-            initProp(vm, prop, value)
-          } else {
+        if (prop.mode === propBindingModes.ONE_TIME) {
+          // one time binding
+          value = (scope || vm._context || vm).$get(prop.parentPath)
+          initProp(vm, prop, value)
+        } else {
+          if (vm._context) {
             // dynamic binding
             vm._bindDir({
               name: 'prop',
               def: propDef,
               prop: prop
             }, null, null, scope) // el, host, scope
+          } else {
+            // root instance
+            initProp(vm, prop, vm.$get(prop.parentPath))
           }
-        } else {
-          process.env.NODE_ENV !== 'production' && warn(
-            'Cannot bind dynamic prop on a root instance' +
-            ' with no parent: ' + prop.name + '="' +
-            raw + '"'
-          )
         }
       } else if (prop.optimizedLiteral) {
         // optimized literal, cast it and just set once

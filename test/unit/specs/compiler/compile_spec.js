@@ -28,6 +28,9 @@ describe('Compile', function () {
           _teardown: directiveTeardown
         })
       },
+      $get: function (exp) {
+        return (new Vue()).$get(exp)
+      },
       $eval: function (value) {
         return data[value]
       },
@@ -341,11 +344,11 @@ describe('Compile', function () {
     var context = vm._context
     vm._context = null
     el.setAttribute('v-bind:a', '"hi"')
-    el.setAttribute(':b', 'hi')
+    el.setAttribute(':b', '[1,2,3]')
     compiler.compileAndLinkProps(vm, el, { a: null, b: null })
     expect(vm._bindDir.calls.count()).toBe(0)
     expect(vm._data.a).toBe('hi')
-    expect(hasWarned('Cannot bind dynamic prop on a root')).toBe(true)
+    expect(vm._data.b.join(',')).toBe('1,2,3')
     // restore parent mock
     vm._context = context
   })
