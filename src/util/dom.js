@@ -122,7 +122,9 @@ export function after (el, target) {
  */
 
 export function remove (el) {
-  el.parentNode.removeChild(el)
+  if (el.parentNode) {
+    el.parentNode.removeChild(el)
+  }
 }
 
 /**
