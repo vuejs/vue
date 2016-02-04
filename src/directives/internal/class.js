@@ -1,9 +1,8 @@
 import {
-  addClass,
-  removeClass,
+  setClass,
   isArray,
-  isPlainObject,
-  hasOwn
+  hasOwn,
+  forEach
 } from '../../util/index'
 
 export default {
@@ -11,51 +10,68 @@ export default {
   deep: true,
 
   update (value) {
-    if (value && typeof value === 'string') {
-      this.handleObject(stringToObject(value))
-    } else if (isPlainObject(value)) {
-      this.handleObject(value)
-    } else if (isArray(value)) {
-      this.handleArray(value)
-    } else {
-      this.cleanup()
+    if (typeof value === 'string') {
+      value = stringToObject(value)
     }
+    this.processHandle(value)
   },
 
-  handleObject (value) {
-    this.cleanup(value)
-    var keys = this.prevKeys = Object.keys(value)
-    for (var i = 0, l = keys.length; i < l; i++) {
-      var key = keys[i]
-      if (value[key]) {
-        addClass(this.el, key)
+  processHandle (value) {
+    var prevKeys = this.prevKeys
+    var classes = ' ' + (this.el.getAttribute('class') || '') + ' '
+
+    // cleanup
+    if (prevKeys) {
+      prevKeys.forEach(function (clazz) {
+        if (clazz && (!value || !contains(value, clazz))) {
+          classes = removeClass(classes, clazz)
+        }
+      })
+    }
+
+    // init prevKeys
+    prevKeys = this.prevKeys = []
+
+    if (!value) {
+      setClass(this.el, classes.trim())
+      return
+    }
+
+    // array or like array
+    var isArray = 'length' in value
+
+    // enumerate value
+    forEach(value, function (value, key) {
+      if (isArray) {
+        classes = addClass(classes, value)
+        prevKeys.push(value)
       } else {
-        removeClass(this.el, key)
-      }
-    }
-  },
-
-  handleArray (value) {
-    this.cleanup(value)
-    for (var i = 0, l = value.length; i < l; i++) {
-      if (value[i]) {
-        addClass(this.el, value[i])
-      }
-    }
-    this.prevKeys = value.slice()
-  },
-
-  cleanup (value) {
-    if (this.prevKeys) {
-      var i = this.prevKeys.length
-      while (i--) {
-        var key = this.prevKeys[i]
-        if (key && (!value || !contains(value, key))) {
-          removeClass(this.el, key)
+        if (value) {
+          classes = addClass(classes, key)
+          prevKeys.push(key)
+        } else {
+          classes = removeClass(classes, key)
         }
       }
-    }
+    })
+
+    // apply
+    setClass(this.el, classes.trim())
   }
+}
+
+function addClass (classes, clazz) {
+  if (clazz && classes.indexOf(clazz) < 0) {
+    classes += clazz + ' '
+  }
+  return classes
+}
+
+function removeClass (classes, clazz) {
+  if (clazz && classes.indexOf(clazz) >= 0) {
+    classes = classes.replace(' ' + clazz + ' ', ' ')
+  }
+  return classes
 }
 
 function stringToObject (value) {

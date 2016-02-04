@@ -401,3 +401,34 @@ export function looseEqual (a, b) {
   )
   /* eslint-enable eqeqeq */
 }
+
+/**
+ * Iterative array or object
+ * @param {Object|Array} iterable
+ * @param {Function} fn
+ * @param {Object|Array} context
+ */
+var array_foreach = Array.prototype.forEach
+export function forEach (iterable, fn, context) {
+  var i, item
+
+  if (!iterable || !fn) {
+    return
+  }
+  context = context || iterable
+  // array and like array
+  if (
+    iterable.length &&
+    toString.call(iterable) !== '[object String]'
+  ) {
+    array_foreach.call(iterable, fn, context)
+  } else {
+    for (i in iterable) {
+      if (!hasOwn(iterable, i)) continue
+      item = iterable[i]
+      if (fn.call(context || item, item, i, iterable) === false) {
+        break
+      }
+    }
+  }
+}

@@ -163,4 +163,28 @@ describe('Util - Language Enhancement', function () {
     expect(_.looseEqual({a: 1}, {a: 2})).toBe(false)
     expect(_.looseEqual({}, [])).toBe(false)
   })
+
+  it('forEach', function () {
+    var iterable = ['a', 'b', 'c']
+    _.forEach(iterable, function (item, index) {
+      expect(item).toBe(iterable[index])
+    })
+    iterable = {
+      '0': 'a',
+      '1': 'b',
+      '2': 'c',
+      length: 3
+    }
+    _.forEach(iterable, function (item, index) {
+      expect(item).toBe(iterable[index])
+    })
+    iterable = {
+      'a': 0,
+      'b': 1,
+      'c': 2
+    }
+    _.forEach(iterable, function (item, key) {
+      expect(item).toBe(iterable[key])
+    })
+  })
 })
