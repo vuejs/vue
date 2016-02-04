@@ -22,9 +22,9 @@ Vue.js is a library for building interactive web interfaces. It provides data-re
 Note that Vue.js only supports [ES5-compliant browsers](http://kangax.github.io/compat-table/es5/) (IE8 and below are not supported). To check out live examples and docs, visit [vuejs.org](http://vuejs.org).
 
 
-#### Simply Put
+## Simply Put
 
-Typically on a web page, when you interact with something or the value of data changes, the changes happen under the hood and the program must be written to tell the browser to update the view layer (what you see and interact with) every time the data changes, and update the data when the user makes a change. **Vue** takes care of this by binding data or the values of what you see to the actual output. Think of being logged in to your favorite social media site: every time you get a new message, the number of messages in your notifications updates. Normally the browser would have to be told to update that number every time it changes, but with **Vue**, it knows to watch that element for changes and update when they occur. Changes made by the user (deleting a message, for example) are automatically updated on the data end (the deleted message is removed from your stored messages), and changes made on the data end (receiving a new message) are automatically updated on the user end (seeing the new message and notification).
+When you interact with a web page, your input causes data changes that normally only happen 'under the hood'. The web page must be programmed to display these changes in the view model (the part of the web page that you see and interact with) every time data changes. Vue.js automatically takes care of this by *binding data*, it connects the view model with the underlying data model. 
 
 
 
