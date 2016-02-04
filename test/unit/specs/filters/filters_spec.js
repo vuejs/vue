@@ -75,9 +75,9 @@ describe('Filters', function () {
     expect(filter(undefined)).toBe('')
     expect(filter(Infinity)).toBe('')
     // negative numbers
-    expect(filter(-50)).toBe('$-50.00')
-    expect(filter(-150.43)).toBe('$-150.43')
-    expect(filter(-1500.4343434)).toBe('$-1,500.43')
+    expect(filter(-50)).toBe('-$50.00')
+    expect(filter(-150.43)).toBe('-$150.43')
+    expect(filter(-1500.4343434)).toBe('-$1,500.43')
   })
 
   it('debounce', function (done) {

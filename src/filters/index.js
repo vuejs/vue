@@ -78,7 +78,7 @@ export default {
       : ''
     var _float = stringified.slice(-3)
     var sign = value < 0 ? '-' : ''
-    return currency + sign + head +
+    return sign + currency + head +
       _int.slice(i).replace(digitsRE, '$1,') +
       _float
   },
