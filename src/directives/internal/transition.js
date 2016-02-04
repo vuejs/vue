@@ -11,8 +11,7 @@ export default {
     // resolve on owner vm
     var hooks = resolveAsset(this.vm.$options, 'transitions', id)
     id = id || 'v'
-    // apply on closest vm
-    el.__v_trans = new Transition(el, id, hooks, this.el.__vue__ || this.vm)
+    el.__v_trans = new Transition(el, id, hooks, this.vm)
     if (oldId) {
       removeClass(el, oldId + '-transition')
     }

@@ -36,23 +36,6 @@ describe('transition', function () {
     expect(dir.el.className === 'lol-transition')
   })
 
-  it('should bind the transition to closest vm', function () {
-    var vm1 = new Vue()
-    var vm2 = new Vue()
-    var el = document.createElement('div')
-    var dir = new Directive({
-      name: 'transition',
-      raw: 'test',
-      def: def,
-      modifiers: {
-        literal: true
-      }
-    }, vm1, el)
-    dir.el.__vue__ = vm2
-    dir._bind()
-    expect(dir.el.__v_trans.vm).toBe(vm2)
-  })
-
   it('dynamic transitions', function (done) {
     var el = document.createElement('div')
     document.body.appendChild(el)
