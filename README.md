@@ -24,7 +24,7 @@ Note that Vue.js only supports [ES5-compliant browsers](http://kangax.github.io/
 
 ## Simply Put
 
-When you interact with a web page, your input causes data changes that normally only happen 'under the hood'. The web page must be programmed to display these changes in the view model (the part of the web page that you see and interact with) every time data changes. Vue.js automatically takes care of this by *binding data*, it connects the view model with the underlying data model. 
+When you interact with a web page, your input causes data changes that normally only happen 'under the hood'. The web page must be programmed to display these changes in the view model (what you see and interact with) every time data changes. Vue.js automatically takes care of this by *binding data*, it connects the view model with the underlying data model. 
 
 
 
