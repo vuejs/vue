@@ -3,6 +3,7 @@ import { parseText } from '../parsers/text'
 import {
   warn,
   isTemplate,
+  isFragment,
   prepend,
   extractContent,
   createAnchor,
@@ -49,7 +50,7 @@ export function transclude (el, options) {
       el = transcludeTemplate(el, options)
     }
   }
-  if (el instanceof DocumentFragment) {
+  if (isFragment(el)) {
     // anchors for fragment instance
     // passing in `persist: true` to avoid them being
     // discarded by IE during template cloning

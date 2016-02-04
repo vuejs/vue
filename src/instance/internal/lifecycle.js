@@ -1,5 +1,5 @@
-import { replace, getAttr } from '../../util/index'
 import Directive from '../../directive'
+import { replace, getAttr, isFragment } from '../../util/index'
 import { compile, compileRoot, transclude } from '../../compiler/index'
 
 export default function (Vue) {
@@ -103,7 +103,7 @@ export default function (Vue) {
    */
 
   Vue.prototype._initElement = function (el) {
-    if (el instanceof DocumentFragment) {
+    if (isFragment(el)) {
       this._isFragment = true
       this.$el = this._fragmentStart = el.firstChild
       this._fragmentEnd = el.lastChild

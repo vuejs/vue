@@ -191,7 +191,7 @@ export function off (el, event, cb) {
 
 export function setClass (el, cls) {
   /* istanbul ignore if */
-  if (isIE9 && !(el instanceof SVGElement)) {
+  if (isIE9 && !/svg$/.test(el.namespaceURI)) {
     el.className = cls
   } else {
     el.setAttribute('class', cls)
@@ -252,10 +252,7 @@ export function extractContent (el, asFragment) {
   var child
   var rawContent
   /* istanbul ignore if */
-  if (
-    isTemplate(el) &&
-    el.content instanceof DocumentFragment
-  ) {
+  if (isTemplate(el) && isFragment(el.content)) {
     el = el.content
   }
   if (el.hasChildNodes()) {
@@ -405,4 +402,15 @@ export function removeNodeRange (start, end, vm, frag, cb) {
       cb && cb()
     }
   }
+}
+
+/**
+ * Check if a node is a DocumentFragment.
+ *
+ * @param {Node} node
+ * @return {Boolean}
+ */
+
+export function isFragment (node) {
+  return node && node.nodeType === 11
 }

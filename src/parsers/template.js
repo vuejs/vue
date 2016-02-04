@@ -1,5 +1,10 @@
-import { inBrowser, trimNode, isTemplate } from '../util/index'
 import Cache from '../cache'
+import {
+  inBrowser,
+  trimNode,
+  isTemplate,
+  isFragment
+} from '../util/index'
 
 const templateCache = new Cache(1000)
 const idSelectorCache = new Cache(1000)
@@ -66,8 +71,7 @@ map.rect = [
  */
 
 function isRealTemplate (node) {
-  return isTemplate(node) &&
-    node.content instanceof DocumentFragment
+  return isTemplate(node) && isFragment(node.content)
 }
 
 const tagRE = /<([\w:]+)/
@@ -262,7 +266,7 @@ export function parseTemplate (template, shouldClone, raw) {
 
   // if the template is already a document fragment,
   // do nothing
-  if (template instanceof DocumentFragment) {
+  if (isFragment(template)) {
     trimNode(template)
     return shouldClone
       ? cloneNode(template)

@@ -33,7 +33,7 @@ if (devtools) {
   devtools.emit('init', Vue)
 } else if (
   process.env.NODE_ENV !== 'production' &&
-  inBrowser && /Chrome\/\d+/.test(navigator.userAgent)
+  inBrowser && /Chrome\/\d+/.test(window.navigator.userAgent)
 ) {
   console.log(
     'Download the Vue Devtools for a better development experience:\n' +
