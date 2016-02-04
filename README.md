@@ -19,15 +19,9 @@ Vue.js is a library for building interactive web interfaces. It provides data-re
 - Flexible transition effect system
 - Fast without the need for complex optimization
 
+Simply put, when you interact with a web page, your input causes data changes that normally only happen 'under the hood'. The web page must be programmed to update and display these changes in the view model (what you see and interact with) every time the data is changed. Vue.js automatically takes care of this by *binding data*. It connects the view model with the underlying data model so that whenever changes happen to one, the other is automatically brought up to date.
+
 Note that Vue.js only supports [ES5-compliant browsers](http://kangax.github.io/compat-table/es5/) (IE8 and below are not supported). To check out live examples and docs, visit [vuejs.org](http://vuejs.org).
-
-
-## Simply Put
-
-When you interact with a web page, your input causes data changes that normally only happen 'under the hood'. The web page must be programmed to display these changes in the view model (what you see and interact with) every time data changes. Vue.js automatically takes care of this by *binding data*, it connects the view model with the underlying data model. 
-
-
-
 
 ## Questions
 
