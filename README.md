@@ -23,7 +23,7 @@ Note that Vue.js only supports [ES5-compliant browsers](http://kangax.github.io/
 
 ## What to Use Vue.js for and When to Use It
 
-Vue.js is an ideal lightweight choice for heavy back-end applications that allow for flexible front-end solutions. Having a shorter learning curve than similar frameworks like Angular.js, Vue.js will get your team up and running in no time. Vue.js can be integrated with existing projects, as well as used to create large-scale Single Page Applications from scratch.
+Vue.js is an ideal lightweight choice for heavy back-end applications that allow for flexible front-end solutions. Having a shorter learning curve than similar frameworks, Vue.js will get your team up and running in no time. Vue.js can be integrated with existing projects, as well as used to create large-scale Single Page Applications from scratch.
 
 ## Questions
 
