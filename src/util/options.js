@@ -126,7 +126,8 @@ strats.detached =
 strats.beforeCompile =
 strats.compiled =
 strats.beforeDestroy =
-strats.destroyed = function (parentVal, childVal) {
+strats.destroyed =
+strats.activate = function (parentVal, childVal) {
   return childVal
     ? parentVal
       ? parentVal.concat(childVal)
