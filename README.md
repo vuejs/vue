@@ -21,7 +21,7 @@ Vue.js is a library for building interactive web interfaces. It provides data-re
 
 Reactive data binding is at the core of what Vue.js does. Simply put, when a user interacts with a web page, user input causes data changes that normally only happen 'under the hood'. Think of social media sites; normally the browser would have to be told to update the message count for notifications on the user interface each time the number of messages changes. With Vue.js, the user interface and the data are *bound*, which means any time the data is changed, the user interface is updated automatically.
 
-The other core feature of Vue.js is the ability to create reusable components. To use the social media example again, a *Count* component could be created, which provides the same functionality (updating the count) for both *Messages* and *Followers*, while allowing both to use their own unique data to provide the count. This helps keep the code base free of repetition and makes it easier to maintain.
+Another core feature of Vue.js is the ability to create customizable, reusable components for your web interfaces. Components help keep your code base easy to maintain, and keep it free of repetition. To use our social media example again, a *Count* component could be created to keep track of new messages and followers. This component would provide the same functionality for both *Messages* and *Followers*, while allowing both to use their own unique data to provide the actual count.
 
 Note that Vue.js only supports [ES5-compliant browsers](http://kangax.github.io/compat-table/es5/) (IE8 and below are not supported). To check out live examples and docs, visit [vuejs.org](http://vuejs.org).
 
