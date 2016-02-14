@@ -76,7 +76,7 @@ export default function (Vue) {
       } else {
         factory.requested = true
         var cbs = factory.pendingCallbacks = [cb]
-        factory(function resolve (res) {
+        factory.call(this, function resolve (res) {
           if (isPlainObject(res)) {
             res = Vue.extend(res)
           }
