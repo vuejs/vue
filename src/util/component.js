@@ -6,6 +6,23 @@ import { isArray, isPlainObject } from './lang'
 export const commonTagRE = /^(div|p|span|img|a|b|i|br|ul|ol|li|h1|h2|h3|h4|h5|h6|code|pre|table|th|td|tr|form|label|input|select|option|nav|article|section|header|footer)$/
 export const reservedTagRE = /^(slot|partial|component)$/
 
+let isUnknownElement
+if (process.env.NODE_ENV !== 'production') {
+  isUnknownElement = function (el, tag) {
+    if (tag.indexOf('-') > -1) {
+      // http://stackoverflow.com/a/28210364/1070244
+      return el.constructor === window.HTMLElement
+    } else {
+      return (
+        /HTMLUnknownElement/.test(el.toString()) &&
+        // Chrome returns unknown for several HTML5 elements.
+        // https://code.google.com/p/chromium/issues/detail?id=540526
+        !/^(data|time|rtc|rb)$/.test(tag)
+      )
+    }
+  }
+}
+
 /**
  * Check if an element is a component, if yes return its
  * component id.
@@ -26,15 +43,7 @@ export function checkComponentAttr (el, options) {
       if (is) {
         return is
       } else if (process.env.NODE_ENV !== 'production') {
-        if (
-          tag.indexOf('-') > -1 ||
-          (
-            /HTMLUnknownElement/.test(el.toString()) &&
-            // Chrome returns unknown for several HTML5 elements.
-            // https://code.google.com/p/chromium/issues/detail?id=540526
-            !/^(data|time|rtc|rb)$/.test(tag)
-          )
-        ) {
+        if (isUnknownElement(el, tag)) {
           warn(
             'Unknown custom element: <' + tag + '> - did you ' +
             'register the component correctly? For recursive components, ' +
