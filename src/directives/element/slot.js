@@ -73,6 +73,8 @@ export const slot = {
         const elseBlock = document.createElement('template')
         elseBlock.setAttribute('v-else', '')
         elseBlock.innerHTML = this.el.innerHTML
+        // the else block should be compiled in child scope
+        elseBlock._context = this.vm
         content.appendChild(elseBlock)
       }
       const scope = host

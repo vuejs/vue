@@ -19,7 +19,7 @@ export default {
       var next = el.nextElementSibling
       if (next && getAttr(next, 'v-else') !== null) {
         remove(next)
-        this.elseFactory = new FragmentFactory(this.vm, next)
+        this.elseFactory = new FragmentFactory(next._context || this.vm, next)
       }
       // check main block
       this.anchor = createAnchor('v-if')

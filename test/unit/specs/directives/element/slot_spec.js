@@ -401,12 +401,16 @@ describe('Slot Distribution', function () {
     var vm = new Vue({
       el: el,
       data: {
-        ok: false
+        ok: false,
+        msg: 'inserted'
       },
-      template: '<div><comp><div v-if="ok">inserted</div></comp></div>',
+      template: '<div><comp><div v-if="ok">{{ msg }}</div></comp></div>',
       components: {
         comp: {
-          template: '<div><slot>fallback</slot></div>'
+          data: function () {
+            return { msg: 'fallback' }
+          },
+          template: '<div><slot>{{ msg }}</slot></div>'
         }
       }
     })
