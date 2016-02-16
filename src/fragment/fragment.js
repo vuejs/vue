@@ -37,7 +37,7 @@ export default function Fragment (linker, vm, frag, host, scope, parentFrag) {
   var single = this.single =
     frag.childNodes.length === 1 &&
     // do not go single mode if the only node is an anchor
-    !(frag.childNodes[0].__vue_anchor)
+    !(frag.childNodes[0].__v_anchor)
   if (single) {
     this.node = frag.childNodes[0]
     this.before = singleBefore
@@ -51,7 +51,7 @@ export default function Fragment (linker, vm, frag, host, scope, parentFrag) {
     this.before = multiBefore
     this.remove = multiRemove
   }
-  this.node.__vfrag__ = this
+  this.node.__v_frag = this
 }
 
 /**
@@ -181,7 +181,7 @@ Fragment.prototype.destroy = function () {
   if (this.parentFrag) {
     this.parentFrag.childFrags.$remove(this)
   }
-  this.node.__vfrag__ = null
+  this.node.__v_frag = null
   this.unlink()
 }
 

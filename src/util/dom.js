@@ -330,7 +330,7 @@ export function createAnchor (content, persist) {
   var anchor = config.debug
     ? document.createComment(content)
     : document.createTextNode(persist ? ' ' : '')
-  anchor.__vue_anchor = true
+  anchor.__v_anchor = true
   return anchor
 }
 

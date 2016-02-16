@@ -309,7 +309,7 @@ const vFor = {
       var anchor = frag.staggerAnchor
       if (!anchor) {
         anchor = frag.staggerAnchor = createAnchor('stagger-anchor')
-        anchor.__vfrag__ = frag
+        anchor.__v_frag = frag
       }
       after(anchor, prevEl)
       var op = frag.staggerCb = cancellable(function () {
@@ -575,7 +575,7 @@ function findPrevFrag (frag, anchor, id) {
   var el = frag.node.previousSibling
   /* istanbul ignore if */
   if (!el) return
-  frag = el.__vfrag__
+  frag = el.__v_frag
   while (
     (!frag || frag.forId !== id || !frag.inserted) &&
     el !== anchor
@@ -583,7 +583,7 @@ function findPrevFrag (frag, anchor, id) {
     el = el.previousSibling
     /* istanbul ignore if */
     if (!el) return
-    frag = el.__vfrag__
+    frag = el.__v_frag
   }
   return frag
 }
