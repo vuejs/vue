@@ -31,8 +31,8 @@ const vFor = {
   ],
 
   bind: function () {
-    // support "item in items" syntax
-    var inMatch = this.expression.match(/(.*) in (.*)/)
+    // support "item in/of items" syntax
+    var inMatch = this.expression.match(/(.*) (?:in|of) (.*)/)
     if (inMatch) {
       var itMatch = inMatch[1].match(/\((.*),(.*)\)/)
       if (itMatch) {
