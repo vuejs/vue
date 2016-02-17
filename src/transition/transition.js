@@ -117,7 +117,6 @@ p.enter = function (op, cb) {
  */
 
 p.enterNextTick = function () {
-
   // Important hack:
   // in Chrome, if a just-entered element is applied the
   // leave class while its interpolated property still has

@@ -1,7 +1,6 @@
 var _ = require('src/util')
 
 describe('Util - Language Enhancement', function () {
-
   it('hasOwn', function () {
     var obj1 = { a: 1 }
     expect(_.hasOwn(obj1, 'a')).toBe(true)

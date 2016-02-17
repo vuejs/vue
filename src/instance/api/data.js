@@ -8,7 +8,6 @@ import { isSimplePath, parseExpression } from '../../parsers/expression'
 const filterRE = /[^|]\|[^|]/
 
 export default function (Vue) {
-
   /**
    * Get the value from an expression on this vm.
    *

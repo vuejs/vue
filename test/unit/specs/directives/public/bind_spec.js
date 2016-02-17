@@ -3,7 +3,6 @@ var def = require('src/directives/public/bind')
 var xlinkNS = 'http://www.w3.org/1999/xlink'
 
 describe('v-bind', function () {
-
   var el, dir
   beforeEach(function () {
     el = document.createElement('div')

@@ -34,7 +34,6 @@ function updateSelect (el, value) {
 }
 
 describe('v-model', function () {
-
   var el
   beforeEach(function () {
     el = document.createElement('div')

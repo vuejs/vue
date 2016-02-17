@@ -20,7 +20,6 @@ function toString (cache) {
 }
 
 describe('Cache', function () {
-
   var c = new Cache(4)
 
   it('put', function () {

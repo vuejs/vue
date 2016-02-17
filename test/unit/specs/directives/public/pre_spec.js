@@ -1,7 +1,6 @@
 var Vue = require('src')
 
 describe('v-pre', function () {
-
   beforeEach(function () {
     spyWarns()
   })

@@ -1,7 +1,6 @@
 import { toArray } from '../../util/index'
 
 export default function (Vue) {
-
   /**
    * Listen on the given `event` with `fn`.
    *

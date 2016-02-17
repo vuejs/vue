@@ -10,7 +10,6 @@ function trigger (target, event, process) {
 }
 
 describe('v-on', function () {
-
   var el
   beforeEach(function () {
     el = document.createElement('div')

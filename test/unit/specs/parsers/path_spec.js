@@ -28,7 +28,6 @@ function pathMatch (a, b) {
 }
 
 describe('Path Parser', function () {
-
   it('parse simple paths', function () {
     assertPath('', [])
     assertPath(' ', [])
@@ -163,5 +162,4 @@ describe('Path Parser', function () {
     var res = Path.setPath({}, 'ab[c]d', 123)
     expect(res).toBe(false)
   })
-
 })

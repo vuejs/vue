@@ -107,7 +107,6 @@ function stringToFragment (templateString, raw) {
       document.createTextNode(templateString)
     )
   } else {
-
     var tag = tagMatch && tagMatch[1]
     var wrap = map[tag] || map.efault
     var depth = wrap[0]

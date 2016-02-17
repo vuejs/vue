@@ -1,3 +1,5 @@
+/* global jQuery */
+
 import {
   isIE9,
   isAndroid,

@@ -1,7 +1,6 @@
 var Vue = require('src')
 
 describe('Events API', function () {
-
   var vm, spy
   beforeEach(function () {
     vm = new Vue()
@@ -232,5 +231,4 @@ describe('Events API', function () {
     parent.$refs.child.$dispatch('test')
     expect(spy.calls.count()).toBe(3)
   })
-
 })

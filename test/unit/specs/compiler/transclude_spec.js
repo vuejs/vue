@@ -3,7 +3,6 @@ var Vue = require('src')
 var _ = require('src/util')
 
 describe('Transclude', function () {
-
   var el, options
   beforeEach(function () {
     el = document.createElement('div')
@@ -48,44 +47,44 @@ describe('Transclude', function () {
     // multiple root
     options.template = '<div></div><div></div>'
     res = transclude(el, options)
-    expect(res instanceof DocumentFragment).toBe(true)
+    expect(res.nodeType).toBe(11)
 
     // non-element
     options.template = '{{hi}}'
     res = transclude(el, options)
-    expect(res instanceof DocumentFragment).toBe(true)
+    expect(res.nodeType).toBe(11)
 
     // single component: <component>
     options.template = '<component bind-is="hi"></component>'
     res = transclude(el, options)
-    expect(res instanceof DocumentFragment).toBe(true)
+    expect(res.nodeType).toBe(11)
 
     // single component: custom element
     options.template = '<test></test>'
     options.components = { test: {}}
     res = transclude(el, options)
-    expect(res instanceof DocumentFragment).toBe(true)
+    expect(res.nodeType).toBe(11)
 
     // single component: is
     options.template = '<div is="test"></div>'
     res = transclude(el, options)
-    expect(res instanceof DocumentFragment).toBe(true)
+    expect(res.nodeType).toBe(11)
 
     // element directive
     options.template = '<el-dir></el-dir>'
     options.elementDirectives = { 'el-dir': {}}
     res = transclude(el, options)
-    expect(res instanceof DocumentFragment).toBe(true)
+    expect(res.nodeType).toBe(11)
 
     // v-for
     options.template = '<div v-for="item in list"></div>'
     res = transclude(el, options)
-    expect(res instanceof DocumentFragment).toBe(true)
+    expect(res.nodeType).toBe(11)
 
     // v-if
     options.template = '<div v-if="ok"></div>'
     res = transclude(el, options)
-    expect(res instanceof DocumentFragment).toBe(true)
+    expect(res.nodeType).toBe(11)
   })
 
   it('direct fragment instance', function () {
@@ -103,7 +102,7 @@ describe('Transclude', function () {
     var tpl = document.createElement('template')
     tpl.innerHTML = '<div>123</div>'
     var res = transclude(tpl, options)
-    expect(res instanceof DocumentFragment).toBe(true)
+    expect(res.nodeType).toBe(11)
     expect(res.childNodes.length).toBe(3)
     expect(res.childNodes[0].nodeType).toBe(3)
     expect(res.childNodes[1].textContent).toBe('123')

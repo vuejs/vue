@@ -2,7 +2,6 @@ var _ = require('src/util')
 var def = require('src/directives/internal/class')
 
 describe(':class', function () {
-
   var el
   beforeEach(function () {
     el = document.createElement('div')

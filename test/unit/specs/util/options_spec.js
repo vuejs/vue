@@ -4,7 +4,6 @@ var merge = _.mergeOptions
 var resolveAsset = _.resolveAsset
 
 describe('Util - Option merging', function () {
-
   beforeEach(function () {
     spyWarns()
   })
@@ -41,7 +40,6 @@ describe('Util - Option merging', function () {
   })
 
   it('events', function () {
-
     // no parent
     res = merge({}, {events: 1})
     expect(res.events).toBe(1)
@@ -181,7 +179,7 @@ describe('Util - Option merging', function () {
   it('class el merge', function () {
     function fn1 () {}
     function fn2 () {}
-    var res = merge({el: fn1}, {el: fn2})
+    var res = merge({ el: fn1 }, { el: fn2 })
     expect(res.el).toBe(fn2)
   })
 
@@ -193,14 +191,14 @@ describe('Util - Option merging', function () {
       return { a: 2, b: 3, d: { f: 2 }}
     }
     // both present
-    var res = merge({data: fn1}, {data: fn2}).data()
+    var res = merge({ data: fn1 }, { data: fn2 }).data()
     expect(res.a).toBe(2)
     expect(res.b).toBe(3)
     expect(res.c).toBe(4)
     expect(res.d.e).toBe(1)
     expect(res.d.f).toBe(2)
     // only parent
-    res = merge({data: fn1}, {}).data()
+    res = merge({ data: fn1 }, {}).data()
     expect(res.a).toBe(1)
     expect(res.b).toBeUndefined()
     expect(res.c).toBe(4)
@@ -219,16 +217,16 @@ describe('Util - Option merging', function () {
       return 2
     }
     // both functions
-    var res = merge({el: fn1}, {el: fn2}, vm)
+    var res = merge({ el: fn1 }, { el: fn2 }, vm)
     expect(res.el).toBe(2)
     // direct instance el
-    res = merge({el: fn1}, {el: 2}, vm)
+    res = merge({ el: fn1 }, { el: 2 }, vm)
     expect(res.el).toBe(2)
     // no parent
-    res = merge({}, {el: 2}, vm)
+    res = merge({}, { el: 2 }, vm)
     expect(res.el).toBe(2)
     // no child
-    res = merge({el: fn1}, {}, vm)
+    res = merge({ el: fn1 }, {}, vm)
     expect(res.el).toBe(1)
   })
 
@@ -269,7 +267,9 @@ describe('Util - Option merging', function () {
     observe(instanceData)
     var res = merge(
       {
-        data: function () { return { b: 234} }
+        data: function () {
+          return { b: 234 }
+        }
       },
       {
         data: instanceData
@@ -350,11 +350,9 @@ describe('Util - Option merging', function () {
     merge(a, b)
     expect(hasWarned('must provide a "name" or "id" field')).toBe(true)
   })
-
 })
 
 describe('Util - Option resolveAsset', function () {
-
   var vm
   beforeEach(function () {
     vm = new Vue({
@@ -378,5 +376,4 @@ describe('Util - Option resolveAsset', function () {
     expect(resolveAsset(vm.$options, 'components', 'camel-cased-component')).toBeTruthy()
     expect(resolveAsset(vm.$options, 'components', 'pascal-cased-component')).toBeTruthy()
   })
-
 })

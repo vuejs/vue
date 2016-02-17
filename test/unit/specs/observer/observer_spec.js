@@ -7,7 +7,6 @@ var _ = require('src/util')
 var config = require('src/config')
 
 describe('Observer', function () {
-
   beforeEach(function () {
     spyWarns()
   })
@@ -382,5 +381,4 @@ describe('Observer', function () {
     expect(dep2.notify).toHaveBeenCalled()
     _.hasProto = true
   })
-
 })

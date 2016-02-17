@@ -16,7 +16,6 @@ import {
 } from '../../util/index'
 
 export default function (Vue) {
-
   /**
    * Accessor for `$data` property, since setting $data
    * requires observing the new object and updating

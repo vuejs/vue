@@ -2,7 +2,6 @@ var _ = require('src/util')
 var Vue = require('src')
 
 describe('ref', function () {
-
   var el
   beforeEach(function () {
     el = document.createElement('div')

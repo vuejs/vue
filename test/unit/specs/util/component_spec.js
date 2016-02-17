@@ -1,7 +1,6 @@
 var _ = require('src/util')
 
 describe('Util - component', function () {
-
   it('checkComponentAttr', function () {
     var el = document.createElement('component')
 

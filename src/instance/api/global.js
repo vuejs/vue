@@ -23,7 +23,6 @@ import FragmentFactory from '../../fragment/factory'
 import internalDirectives from '../../directives/internal/index'
 
 export default function (Vue) {
-
   /**
    * Expose useful internals
    */
@@ -118,10 +117,12 @@ export default function (Vue) {
    */
 
   function createClass (name) {
+    /* eslint-disable no-new-func */
     return new Function(
       'return function ' + classify(name) +
       ' (options) { this._init(options) }'
     )()
+    /* eslint-enable no-new-func */
   }
 
   /**

@@ -2,7 +2,6 @@ var Vue = require('src')
 var nextTick = Vue.nextTick
 
 describe('v-if', function () {
-
   var el
   beforeEach(function () {
     el = document.createElement('div')

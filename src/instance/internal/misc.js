@@ -6,7 +6,6 @@ import {
 } from '../../util/index'
 
 export default function (Vue) {
-
   /**
    * Apply a list of filter (descriptors) to a value.
    * Using plain for loops here because this will be called in

@@ -5,7 +5,7 @@ var testCases = [
     // simple path
     exp: 'a.b.d',
     scope: {
-      a: {b: {d: 123}}
+      a: { b: { d: 123 }}
     },
     expected: 123,
     paths: ['a']
@@ -14,7 +14,7 @@ var testCases = [
   {
     exp: 'a["b"].c',
     scope: {
-      a: {b: {c: 234}}
+      a: { b: { c: 234 }}
     },
     expected: 234,
     paths: ['a']
@@ -249,7 +249,6 @@ var testCases = [
 ]
 
 describe('Expression Parser', function () {
-
   testCases.forEach(function (testCase) {
     it('parse getter: ' + testCase.exp, function () {
       var res = expParser.parseExpression(testCase.exp, true)
@@ -288,7 +287,6 @@ describe('Expression Parser', function () {
   })
 
   describe('invalid expression', function () {
-
     beforeEach(function () {
       spyWarns()
     })

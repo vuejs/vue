@@ -3,9 +3,7 @@ var config = require('src/config')
 var warnPrefix = '[Vue warn]: '
 
 if (typeof console !== 'undefined') {
-
   describe('Util - Debug', function () {
-
     beforeEach(function () {
       spyOn(console, 'log')
       spyOn(console, 'warn')
@@ -25,6 +23,5 @@ if (typeof console !== 'undefined') {
       _.warn('oops')
       expect(console.warn).not.toHaveBeenCalled()
     })
-
   })
 }

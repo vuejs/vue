@@ -3,7 +3,6 @@ import { mergeOptions } from '../../util/index'
 let uid = 0
 
 export default function (Vue) {
-
   /**
    * The main init sequence. This is called for every
    * instance, including ones that are created from extended
@@ -16,7 +15,6 @@ export default function (Vue) {
    */
 
   Vue.prototype._init = function (options) {
-
     options = options || {}
 
     this.$el = null

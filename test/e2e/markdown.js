@@ -1,5 +1,4 @@
 casper.test.begin('markdown', 5, function (test) {
-
   casper
   .start('examples/markdown/index.html')
   .then(function () {
@@ -47,5 +46,4 @@ casper.test.begin('markdown', 5, function (test) {
   .run(function () {
     test.done()
   })
-
 })

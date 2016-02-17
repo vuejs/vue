@@ -2,7 +2,6 @@ var _ = require('src/util')
 var def = require('src/directives/public/html')
 
 describe('v-html', function () {
-
   var el
   beforeEach(function () {
     el = document.createElement('div')

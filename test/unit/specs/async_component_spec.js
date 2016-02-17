@@ -2,7 +2,6 @@ var Vue = require('src')
 var _ = Vue.util
 
 describe('Async components', function () {
-
   var el
   beforeEach(function () {
     el = document.createElement('div')

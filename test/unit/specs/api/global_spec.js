@@ -3,7 +3,6 @@ var _ = require('src/util')
 var config = require('src/config')
 
 describe('Global API', function () {
-
   beforeEach(function () {
     spyWarns()
   })
@@ -86,7 +85,6 @@ describe('Global API', function () {
   })
 
   describe('Asset registration', function () {
-
     var Test = Vue.extend()
 
     it('directive / elementDirective / filter / transition', function () {
@@ -116,7 +114,5 @@ describe('Global API', function () {
       // extended registration should not pollute global
       expect(Vue.options.components.test).toBeUndefined()
     })
-
   })
-
 })

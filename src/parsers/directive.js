@@ -76,7 +76,6 @@ function processFilterArg (arg) {
  */
 
 export function parseDirective (s) {
-
   var hit = cache.get(s)
   if (hit) {
     return hit

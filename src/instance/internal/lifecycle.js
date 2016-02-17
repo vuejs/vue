@@ -3,7 +3,6 @@ import { replace, getAttr, isFragment } from '../../util/index'
 import { compile, compileRoot, transclude } from '../../compiler/index'
 
 export default function (Vue) {
-
   /**
    * Update v-ref for component.
    *

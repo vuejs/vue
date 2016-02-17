@@ -3,7 +3,6 @@ var Directive = require('src/directive')
 var nextTick = Vue.nextTick
 
 describe('Directive', function () {
-
   var el, vm, def
   beforeEach(function () {
     el = document.createElement('div')

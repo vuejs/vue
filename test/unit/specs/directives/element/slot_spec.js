@@ -2,7 +2,6 @@ var Vue = require('src')
 var nextTick = Vue.nextTick
 
 describe('Slot Distribution', function () {
-
   var el, vm, options
   beforeEach(function () {
     el = document.createElement('div')
@@ -421,5 +420,4 @@ describe('Slot Distribution', function () {
       done()
     })
   })
-
 })

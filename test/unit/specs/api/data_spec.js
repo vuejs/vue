@@ -3,7 +3,6 @@ var _ = require('src/util')
 var nextTick = _.nextTick
 
 describe('Data API', function () {
-
   var vm
   beforeEach(function () {
     spyWarns()

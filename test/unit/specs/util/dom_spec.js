@@ -1,7 +1,6 @@
 var _ = require('src/util')
 
 describe('Util - DOM', function () {
-
   var parent, child, target
 
   function div () {

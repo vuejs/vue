@@ -7,7 +7,6 @@ import {
 const eventRE = /^v-on:|^@/
 
 export default function (Vue) {
-
   /**
    * Setup the instance's option events & watchers.
    * If the value is a string, we pull it from the

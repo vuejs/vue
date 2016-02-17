@@ -2,7 +2,6 @@ import { warn, query, inDoc } from '../../util/index'
 import { compile } from '../../compiler/index'
 
 export default function (Vue) {
-
   /**
    * Set instance target element and kick off the compilation
    * process. The passed in `el` can be a selector string, an

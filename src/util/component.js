@@ -144,7 +144,7 @@ export function assertProp (prop, value) {
   }
   var validator = options.validator
   if (validator) {
-    if (!validator.call(null, value)) {
+    if (!validator(value)) {
       process.env.NODE_ENV !== 'production' && warn(
         'Invalid prop: custom validator check failed for ' +
         prop.path + '="' + prop.raw + '"'

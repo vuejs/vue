@@ -3,7 +3,6 @@ var Vue = require('src')
 var config = require('src/config')
 
 describe('v-for', function () {
-
   var el
   beforeEach(function () {
     el = document.createElement('div')
@@ -479,7 +478,6 @@ describe('v-for', function () {
   })
 
   it('track by id', function (done) {
-
     var vm = new Vue({
       el: el,
       template: '<test v-for="item in list" :item="item" track-by="id"></test>',
@@ -889,7 +887,7 @@ describe('v-for', function () {
         ready: false
       }
     })
-    expect(vm.$els.a instanceof Element).toBe(true)
+    expect(vm.$els.a.nodeType).toBe(1)
     expect(vm.$els.a.innerHTML).toContain('<div>0</div><div>0</div>')
     vm.ready = true
     vm.$nextTick(function () {

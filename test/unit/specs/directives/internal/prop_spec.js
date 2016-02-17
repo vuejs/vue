@@ -1,7 +1,6 @@
 var Vue = require('src')
 
 describe('prop', function () {
-
   var el
   beforeEach(function () {
     el = document.createElement('div')
@@ -294,7 +293,6 @@ describe('prop', function () {
   })
 
   describe('assertions', function () {
-
     function makeInstance (value, type, validator, coerce) {
       return new Vue({
         el: document.createElement('div'),
@@ -417,7 +415,6 @@ describe('prop', function () {
       })
       expect(hasWarned('Missing required prop')).toBe(true)
     })
-
   })
 
   it('alternative syntax', function () {

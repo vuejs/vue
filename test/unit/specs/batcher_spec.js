@@ -3,9 +3,7 @@ var batcher = require('src/batcher')
 var nextTick = require('src/util').nextTick
 
 describe('Batcher', function () {
-
   var spy
-
   beforeEach(function () {
     spy = jasmine.createSpy('batcher')
     spyWarns()

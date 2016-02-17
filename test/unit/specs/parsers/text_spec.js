@@ -69,7 +69,6 @@ function assertParse (test) {
 }
 
 describe('Text Parser', function () {
-
   it('parse', function () {
     testCases.forEach(assertParse)
   })
@@ -118,5 +117,4 @@ describe('Text Parser', function () {
         JSON.stringify(filters) +
       ',false)+" e"')
   })
-
 })

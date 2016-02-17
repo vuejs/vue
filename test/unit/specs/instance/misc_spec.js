@@ -1,9 +1,7 @@
 var Vue = require('src')
 
 describe('misc', function () {
-
   describe('_applyFilters', function () {
-
     var vm = new Vue({
       data: {
         msg: 'BBB'

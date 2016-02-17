@@ -3,7 +3,6 @@ var _ = require('src/util')
 var compiler = require('src/compiler')
 
 describe('Partial', function () {
-
   var el
   beforeEach(function () {
     el = document.createElement('div')
@@ -118,5 +117,4 @@ describe('Partial', function () {
     expect(vm._directives[0].name).toBe('partial')
     expect(vm._watchers.length).toBe(0)
   })
-
 })

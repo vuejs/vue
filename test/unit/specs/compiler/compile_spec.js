@@ -6,7 +6,6 @@ var publicDirectives = require('src/directives/public')
 var internalDirectives = require('src/directives/internal')
 
 describe('Compile', function () {
-
   var vm, el, data, directiveBind, directiveTeardown
   beforeEach(function () {
     // We mock vms here so we can assert what the generated
@@ -630,7 +629,7 @@ describe('Compile', function () {
         }
       },
       template: '<comp v-test></comp>',
-      components: { comp: { template: '<div></div>'}}
+      components: { comp: { template: '<div></div>' }}
     })
     expect(el.textContent).toBe('worked!')
     expect(getWarnCount()).toBe(0)

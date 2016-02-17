@@ -3,7 +3,6 @@ var Vue = require('src')
 var _ = Vue.util
 
 describe('Misc', function () {
-
   beforeEach(function () {
     spyWarns()
   })
@@ -343,13 +342,13 @@ describe('Misc', function () {
     new Vue({
       el: el,
       template:
-        '<div>\
-          <comp v-bind:title="title"></comp>\
-          <comp title="static" v-bind:title="title"></comp>\
-          <comp title="static"></comp>\
-          <comp :title="title"></comp>\
-          <comp title="static" :title="title"></comp>\
-        </div>',
+        '<div>' +
+          '<comp v-bind:title="title"></comp>' +
+          '<comp title="static" v-bind:title="title"></comp>' +
+          '<comp title="static"></comp>' +
+          '<comp :title="title"></comp>' +
+          '<comp title="static" :title="title"></comp>' +
+        '</div>',
       data: {
         title: 'bound'
       },

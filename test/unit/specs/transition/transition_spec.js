@@ -5,7 +5,6 @@ var Transition = require('src/transition/transition')
 
 if (!_.isIE9) {
   describe('Transition', function () {
-
     // insert a test css
     function insertCSS (text) {
       var cssEl = document.createElement('style')
@@ -42,7 +41,6 @@ if (!_.isIE9) {
     )
 
     describe('Wrapper methods', function () {
-
       var spy, el, target, parent, vm
       beforeEach(function () {
         el = document.createElement('div')
@@ -72,11 +70,9 @@ if (!_.isIE9) {
         expect(parent.childNodes.length).toBe(0)
         expect(spy).toHaveBeenCalled()
       })
-
     })
 
     describe('Skipping', function () {
-
       var el, vm, op, cb
       beforeEach(function () {
         el = document.createElement('div')
@@ -121,11 +117,9 @@ if (!_.isIE9) {
         expect(cb).toHaveBeenCalled()
         _.transitionEndEvent = e
       })
-
     })
 
     describe('CSS transitions', function () {
-
       var vm, el, op, cb, hooks
       beforeEach(function (done) {
         el = document.createElement('div')
@@ -427,11 +421,9 @@ if (!_.isIE9) {
           })
         })
       })
-
     })
 
     describe('JavaScript only transitions', function () {
-
       var el, vm, op, cb, hooks
       beforeEach(function () {
         hooks = {}

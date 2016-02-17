@@ -2,7 +2,6 @@ var Vue = require('src')
 var _ = require('src/util')
 
 describe('Instance Events', function () {
-
   var spy, spy2
   beforeEach(function () {
     spy = jasmine.createSpy()
@@ -11,7 +10,6 @@ describe('Instance Events', function () {
   })
 
   describe('option events', function () {
-
     it('normal events', function () {
       var vm = new Vue({
         events: {
@@ -49,11 +47,9 @@ describe('Instance Events', function () {
       vm.$emit('test2')
       expect(hasWarned('Unknown method')).toBe(true)
     })
-
   })
 
   describe('option watchers', function () {
-
     it('normal', function (done) {
       var spyA = jasmine.createSpy()
       var spyB = jasmine.createSpy()
@@ -114,11 +110,9 @@ describe('Instance Events', function () {
         done()
       })
     })
-
   })
 
   describe('hooks', function () {
-
     it('created', function () {
       var ctx
       var vm = new Vue({
@@ -269,7 +263,6 @@ describe('Instance Events', function () {
     })
 
     describe('attached/detached', function () {
-
       it('in DOM', function () {
         var el = document.createElement('div')
         var childEl = document.createElement('div')

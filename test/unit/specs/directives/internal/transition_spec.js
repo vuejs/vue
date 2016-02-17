@@ -4,7 +4,6 @@ var Directive = require('src/directive')
 var def = require('src/directives/internal/transition')
 
 describe('transition', function () {
-
   it('should instantiate a transition object with correct args', function () {
     var fns = {}
     var el = document.createElement('div')

@@ -2,9 +2,7 @@ var Vue = require('src')
 var compiler = require('src/compiler')
 
 describe('Lifecycle API', function () {
-
   describe('$mount', function () {
-
     var el, frag
     beforeEach(function () {
       el = document.createElement('div')
@@ -145,11 +143,9 @@ describe('Lifecycle API', function () {
       vm.$mount(el)
       expect(hasWarned('$mount() should be called only once')).toBe(true)
     })
-
   })
 
   describe('$destroy', function () {
-
     it('normal', function () {
       var vm = new Vue()
       expect(vm._isDestroyed).toBe(false)
@@ -296,11 +292,9 @@ describe('Lifecycle API', function () {
         vm.$destroy()
       }).not.toThrow()
     })
-
   })
 
   describe('$compile', function () {
-
     it('should partial compile and teardown stuff', function (done) {
       var el = document.createElement('div')
       var vm = new Vue({
@@ -325,7 +319,5 @@ describe('Lifecycle API', function () {
         done()
       })
     })
-
   })
-
 })

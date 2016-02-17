@@ -12,7 +12,6 @@ const bindingModes = config._propBindingModes
 export default {
 
   bind () {
-
     var child = this.vm
     var parent = child._context
     // passed in from compiler directly

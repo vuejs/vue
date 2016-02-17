@@ -136,7 +136,9 @@ function compileGetter (exp) {
 
 function makeGetterFn (body) {
   try {
+    /* eslint-disable no-new-func */
     return new Function('scope', 'return ' + body + ';')
+    /* eslint-enable no-new-func */
   } catch (e) {
     process.env.NODE_ENV !== 'production' && warn(
       'Invalid expression. ' +
