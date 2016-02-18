@@ -11,7 +11,10 @@ if (process.env.NODE_ENV !== 'production') {
   isUnknownElement = function (el, tag) {
     if (tag.indexOf('-') > -1) {
       // http://stackoverflow.com/a/28210364/1070244
-      return el.constructor === window.HTMLElement
+      return (
+        el.constructor === window.HTMLUnknownElement ||
+        el.constructor === window.HTMLElement
+      )
     } else {
       return (
         /HTMLUnknownElement/.test(el.toString()) &&
