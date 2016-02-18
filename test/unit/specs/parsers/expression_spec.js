@@ -286,14 +286,16 @@ describe('Expression Parser', function () {
     expect(res1).toBe(res2)
   })
 
-  it('ES2015 template string handling', function () {
-    var res = expParser.parseExpression('a + `hi ${ b }` + c')
-    expect(res.get.toString().indexOf('scope.a+`hi ${scope.b}`+scope.c') > -1).toBe(true)
-    res = expParser.parseExpression('`hi ${ b + `${ d }` }`')
-    expect(res.get.toString().indexOf('`hi ${scope.b+`${scope.d}`}`') > -1).toBe(true)
-    res = expParser.parseExpression('{transform:`rotate(${x}deg)`}')
-    expect(res.get.toString().indexOf('{transform:`rotate(${scope.x}deg)`}') > -1).toBe(true)
-  })
+  if (canMakeTemplateStringFunction()) {
+    it('ES2015 template string handling', function () {
+      var res = expParser.parseExpression('a + `hi ${ b }` + c')
+      expect(res.get.toString().indexOf('scope.a+`hi ${scope.b}`+scope.c') > -1).toBe(true)
+      res = expParser.parseExpression('`hi ${ b + `${ d }` }`')
+      expect(res.get.toString().indexOf('`hi ${scope.b+`${scope.d}`}`') > -1).toBe(true)
+      res = expParser.parseExpression('{transform:`rotate(${x}deg)`}')
+      expect(res.get.toString().indexOf('{transform:`rotate(${scope.x}deg)`}') > -1).toBe(true)
+    })
+  }
 
   describe('invalid expression', function () {
     beforeEach(function () {
@@ -319,3 +321,13 @@ describe('Expression Parser', function () {
     })
   })
 })
+
+function canMakeTemplateStringFunction () {
+  try {
+    /* eslint-disable no-new-func */
+    new Function('a', 'return `${a}`')
+  } catch (e) {
+    return false
+  }
+  return true
+}
