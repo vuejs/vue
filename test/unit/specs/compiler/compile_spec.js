@@ -636,7 +636,7 @@ describe('Compile', function () {
   })
 
   it('allow custom terminal directive', function () {
-    Vue.mixin({})
+    Vue.mixin({}) // #2366 conflict with custom terminal directive
     Vue.compiler.terminalDirectives.push('foo')
     Vue.directive('foo', {})
 
