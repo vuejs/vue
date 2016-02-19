@@ -5,9 +5,8 @@
   <a href="https://codecov.io/github/vuejs/vue?branch=master"><img src="https://img.shields.io/codecov/c/github/vuejs/vue/dev.svg" alt="Coverage Status"></a>
   <a href="https://www.npmjs.com/package/vue"><img src="https://img.shields.io/npm/dt/vue.svg" alt="Downloads"></a>
   <br>
-  <a href="https://www.npmjs.com/package/vue"><img src="https://img.shields.io/npm/l/vue.svg" alt="Downloads"></a>
-  <a href="http://issuestats.com/github/vuejs/vue"><img src="http://issuestats.com/github/vuejs/vue/badge/issue?style=flat"></a>
-  <a href="https://gitter.im/vuejs/vue"><img src="https://badges.gitter.im/Join Chat.svg"></a>
+  <a href="https://www.npmjs.com/package/vue"><img src="https://img.shields.io/npm/v/vue.svg" alt="Version"></a>
+  <a href="https://www.npmjs.com/package/vue"><img src="https://img.shields.io/npm/l/vue.svg" alt="License"></a>
 </p>
 
 ## Intro
