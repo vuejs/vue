@@ -634,4 +634,17 @@ describe('Compile', function () {
     expect(el.textContent).toBe('worked!')
     expect(getWarnCount()).toBe(0)
   })
+
+  it('allow custom terminal directive', function () {
+    Vue.mixin({})
+    Vue.compiler.terminalDirectives.push('foo')
+    Vue.directive('foo', {})
+
+    new Vue({
+      el: el,
+      template: '<div v-foo></div>'
+    })
+
+    expect(getWarnCount()).toBe(0)
+  })
 })
