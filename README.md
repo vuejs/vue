@@ -1,9 +1,11 @@
 <p align="center"><a href="http://vuejs.org" target="_blank"><img width="100"src="http://vuejs.org/images/logo.png"></a></p>
 
 <p align="center">
-  <a href="https://circleci.com/gh/vuejs/vue/tree/master"><img src="https://circleci.com/gh/vuejs/vue/tree/master.svg?style=shield" alt="Build Status"></a>
-  <a href="https://codecov.io/github/vuejs/vue?branch=master"><img src="https://codecov.io/github/vuejs/vue/coverage.svg?branch=dev" alt="Coverage Status"></a>
+  <a href="https://circleci.com/gh/vuejs/vue/tree/master"><img src="https://img.shields.io/circleci/project/vuejs/vue/master.svg" alt="Build Status"></a>
+  <a href="https://codecov.io/github/vuejs/vue?branch=master"><img src="https://img.shields.io/codecov/c/github/vuejs/vue/dev.svg" alt="Coverage Status"></a>
+  <a href="https://www.npmjs.com/package/vue"><img src="https://img.shields.io/npm/dt/vue.svg" alt="Downloads"></a>
   <br>
+  <a href="https://www.npmjs.com/package/vue"><img src="https://img.shields.io/npm/l/vue.svg" alt="Downloads"></a>
   <a href="http://issuestats.com/github/vuejs/vue"><img src="http://issuestats.com/github/vuejs/vue/badge/issue?style=flat"></a>
   <a href="https://gitter.im/vuejs/vue"><img src="https://badges.gitter.im/Join Chat.svg"></a>
 </p>
