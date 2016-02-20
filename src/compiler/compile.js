@@ -627,7 +627,8 @@ function makeTerminalNodeLinkFn (el, dirName, value, options, def) {
     filters: parsed.filters,
     raw: value,
     // either an element directive, or if/for
-    def: def || publicDirectives[dirName]
+    // #2366 or custom terminal directive
+    def: def || resolveAsset(options, 'directives', dirName)
   }
   // check ref for v-for and router-view
   if (dirName === 'for' || dirName === 'router-view') {
