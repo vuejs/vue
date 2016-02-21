@@ -5,7 +5,7 @@ Got a question?
 ===============
 The issue list of this repo is **exclusively** for bug reports and feature requests. For simple questions, please use the following resources:
 
-- Read the docs: https://github.com/reactjs/react-router/tree/latest/docs
+- Read the docs: http://vuejs.org/guide/
 - Watch video tutorials: https://laracasts.com/series/learning-vue-step-by-step
 - Ask in the Gitter chat room: https://gitter.im/vuejs/vue
 - Ask on the forums: http://forum.vuejs.org/
