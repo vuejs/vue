@@ -10,21 +10,43 @@ import {
   warn,
   isPlainObject,
   extend
-} from '../../util/index'
+} from './util/index'
 
-import config from '../../config'
-import * as util from '../../util/index'
-import * as compiler from '../../compiler/index'
-import * as path from '../../parsers/path'
-import * as text from '../../parsers/text'
-import * as template from '../../parsers/template'
-import * as directive from '../../parsers/directive'
-import * as expression from '../../parsers/expression'
-import * as transition from '../../transition/index'
-import FragmentFactory from '../../fragment/factory'
-import internalDirectives from '../../directives/internal/index'
+import config from './config'
+import directives from './directives/public/index'
+import elementDirectives from './directives/element/index'
+import filters from './filters/index'
+import * as util from './util/index'
+import * as compiler from './compiler/index'
+import * as path from './parsers/path'
+import * as text from './parsers/text'
+import * as template from './parsers/template'
+import * as directive from './parsers/directive'
+import * as expression from './parsers/expression'
+import * as transition from './transition/index'
+import FragmentFactory from './fragment/factory'
+import internalDirectives from './directives/internal/index'
 
 export default function (Vue) {
+  /**
+   * Vue and every constructor that extends Vue has an
+   * associated options object, which can be accessed during
+   * compilation steps as `this.constructor.options`.
+   *
+   * These can be seen as the default options of every
+   * Vue instance.
+   */
+
+  Vue.options = {
+    directives,
+    elementDirectives,
+    filters,
+    transitions: {},
+    components: {},
+    partials: {},
+    replace: true
+  }
+
   /**
    * Expose useful internals
    */

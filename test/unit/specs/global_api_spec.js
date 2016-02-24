@@ -1,6 +1,7 @@
 var Vue = require('src')
 var _ = require('src/util')
 var config = require('src/config')
+var transition = require('src/transition')
 
 describe('Global API', function () {
   beforeEach(function () {
@@ -11,6 +12,7 @@ describe('Global API', function () {
     expect(Vue.util).toBe(_)
     expect(Vue.nextTick).toBe(_.nextTick)
     expect(Vue.config).toBe(config)
+    expect(Vue.transition.applyTransition).toBe(transition.applyTransition)
   })
 
   it('extend', function () {

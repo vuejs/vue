@@ -4,7 +4,6 @@ import eventsMixin from './internal/events'
 import lifecycleMixin from './internal/lifecycle'
 import miscMixin from './internal/misc'
 
-import globalAPI from './api/global'
 import dataAPI from './api/data'
 import domAPI from './api/dom'
 import eventsAPI from './api/events'
@@ -35,8 +34,7 @@ eventsMixin(Vue)
 lifecycleMixin(Vue)
 miscMixin(Vue)
 
-// install APIs
-globalAPI(Vue)
+// install instance APIs
 dataAPI(Vue)
 domAPI(Vue)
 eventsAPI(Vue)
