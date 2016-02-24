@@ -8,7 +8,8 @@ import {
   commonTagRE,
   reservedTagRE,
   warn,
-  isPlainObject
+  isPlainObject,
+  extend
 } from '../../util/index'
 
 import config from '../../config'
@@ -19,6 +20,7 @@ import * as text from '../../parsers/text'
 import * as template from '../../parsers/template'
 import * as directive from '../../parsers/directive'
 import * as expression from '../../parsers/expression'
+import * as transition from '../../transition/index'
 import FragmentFactory from '../../fragment/factory'
 import internalDirectives from '../../directives/internal/index'
 
@@ -194,4 +196,7 @@ export default function (Vue) {
       }
     }
   })
+
+  // expose internal transition API
+  extend(Vue.transition, transition)
 }
