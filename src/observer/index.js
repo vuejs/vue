@@ -177,13 +177,14 @@ export function observe (value, vm) {
 export function defineReactive (obj, key, val) {
   var dep = new Dep()
 
+  var property = Object.getOwnPropertyDescriptor(obj, key)
+  if (property && property.configurable === false) {
+    return
+  }
+
   // cater for pre-defined getter/setters
   var getter, setter
   if (config.convertAllProperties) {
-    var property = Object.getOwnPropertyDescriptor(obj, key)
-    if (property && property.configurable === false) {
-      return
-    }
     getter = property && property.get
     setter = property && property.set
   }
