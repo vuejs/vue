@@ -80,4 +80,14 @@ describe('v-bind', function () {
     dir.update('0 0 1500 1000')
     expect(dir.el.getAttribute('viewBox')).toBe('0 0 1500 1000')
   })
+
+  it('enumrated non-boolean attributes', function () {
+    ['draggable', 'contenteditable', 'spellcheck'].forEach(function (attr) {
+      dir.arg = attr
+      dir.update(true)
+      expect(el.getAttribute(attr)).toBe('true')
+      dir.update(false)
+      expect(el.getAttribute(attr)).toBe('false')
+    })
+  })
 })
