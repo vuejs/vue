@@ -176,7 +176,9 @@ const vFor = {
       }
     }
     this.vm._vForRemoving = false
-    this.vm._watchers = this.vm._watchers.filter(w => w.active)
+    if (removalIndex) {
+      this.vm._watchers = this.vm._watchers.filter(w => w.active)
+    }
 
     // Final pass, move/insert new fragments into the
     // right place.
