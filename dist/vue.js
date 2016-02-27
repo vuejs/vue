@@ -9457,7 +9457,8 @@
       var slotName = this.params && this.params.name;
       if (!slotName) {
         // Default slot
-        this.tryCompile(extractFragment(raw.childNodes, raw, true), context, host);
+        // Fixing for #2312
+        //this.tryCompile(extractFragment(raw.childNodes, raw, true), context, host);
       } else {
         // Named slot
         var selector = '[slot="' + slotName + '"]';
