@@ -1,4 +1,3 @@
-import config from '../config'
 import Dep from './dep'
 import { arrayMethods } from './array'
 import {
@@ -183,11 +182,8 @@ export function defineReactive (obj, key, val) {
   }
 
   // cater for pre-defined getter/setters
-  var getter, setter
-  if (config.convertAllProperties) {
-    getter = property && property.get
-    setter = property && property.set
-  }
+  var getter = property && property.get
+  var setter = property && property.set
 
   var childOb = observe(val)
   Object.defineProperty(obj, key, {

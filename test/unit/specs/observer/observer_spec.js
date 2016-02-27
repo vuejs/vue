@@ -4,7 +4,6 @@ var Observer = ob.Observer
 var observe = ob.observe
 var Dep = require('src/observer/dep')
 var _ = require('src/util')
-var config = require('src/config')
 
 describe('Observer', function () {
   beforeEach(function () {
@@ -59,9 +58,6 @@ describe('Observer', function () {
   })
 
   it('create on already observed object', function () {
-    var previousConvertAllProperties = config.convertAllProperties
-    config.convertAllProperties = true
-
     // on object
     var obj = {}
     var val = 0
@@ -97,14 +93,9 @@ describe('Observer', function () {
     // should call underlying setter
     obj.a = 10
     expect(val).toBe(10)
-
-    config.convertAllProperties = previousConvertAllProperties
   })
 
   it('create on property with only getter', function () {
-    var previousConvertAllProperties = config.convertAllProperties
-    config.convertAllProperties = true
-
     // on object
     var obj = {}
     Object.defineProperty(obj, 'a', {
@@ -134,14 +125,9 @@ describe('Observer', function () {
       obj.a = 101
     } catch (e) {}
     expect(obj.a).toBe(123)
-
-    config.convertAllProperties = previousConvertAllProperties
   })
 
   it('create on property with only setter', function () {
-    var previousConvertAllProperties = config.convertAllProperties
-    config.convertAllProperties = true
-
     // on object
     var obj = {}
     var val = 10
@@ -168,8 +154,6 @@ describe('Observer', function () {
     // writes should call the set function
     obj.a = 100
     expect(val).toBe(100)
-
-    config.convertAllProperties = previousConvertAllProperties
   })
 
   it('create on property which is marked not configurable', function () {
@@ -232,9 +216,6 @@ describe('Observer', function () {
   })
 
   it('observing object prop change on defined property', function () {
-    var previousConvertAllProperties = config.convertAllProperties
-    config.convertAllProperties = true
-
     var obj = { val: 2 }
     Object.defineProperty(obj, 'a', {
       configurable: true,
@@ -266,8 +247,6 @@ describe('Observer', function () {
     expect(obj.val).toBe(3) // make sure 'setter' was called
     obj.val = 5
     expect(obj.a).toBe(5) // make sure 'getter' was called
-
-    config.convertAllProperties = previousConvertAllProperties
   })
 
   it('observing set/delete', function () {
