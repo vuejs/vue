@@ -1,5 +1,5 @@
 import { compile } from '../compiler/index'
-import { isTemplate } from '../util/index'
+import { isTemplate, getOuterHTML } from '../util/index'
 import { parseTemplate, cloneNode } from '../parsers/template'
 import Fragment from './fragment'
 import Cache from '../cache'
@@ -29,7 +29,7 @@ export default function FragmentFactory (vm, el) {
   var linker
   var cid = vm.constructor.cid
   if (cid > 0) {
-    var cacheId = cid + (isString ? el : el.outerHTML)
+    var cacheId = cid + (isString ? el : getOuterHTML(el))
     linker = linkerCache.get(cacheId)
     if (!linker) {
       linker = compile(template, vm.$options, true)
