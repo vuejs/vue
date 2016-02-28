@@ -7,7 +7,8 @@ import {
   isArray,
   isPlainObject,
   hasOwn,
-  camelize
+  camelize,
+  hyphenate
 } from './lang'
 import { warn } from './debug'
 import { commonTagRE, reservedTagRE } from './component'
@@ -230,8 +231,11 @@ function guardComponents (options) {
   if (options.components) {
     var components = options.components =
       guardArrayAssets(options.components)
-    var def
     var ids = Object.keys(components)
+    var def
+    if (process.env.NODE_ENV !== 'production') {
+      var map = options._componentNameMap = {}
+    }
     for (var i = 0, l = ids.length; i < l; i++) {
       var key = ids[i]
       if (commonTagRE.test(key) || reservedTagRE.test(key)) {
@@ -240,6 +244,11 @@ function guardComponents (options) {
           'id: ' + key
         )
         continue
+      }
+      // record a all lowercase <-> kebab-case mapping for
+      // possible custom element case error warning
+      if (process.env.NODE_ENV !== 'production') {
+        map[key.replace(/-/g, '').toLowerCase()] = hyphenate(key)
       }
       def = components[key]
       if (isPlainObject(def)) {

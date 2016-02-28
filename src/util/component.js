@@ -46,7 +46,16 @@ export function checkComponentAttr (el, options) {
       if (is) {
         return is
       } else if (process.env.NODE_ENV !== 'production') {
-        if (isUnknownElement(el, tag)) {
+        var expectedTag =
+          options._componentNameMap &&
+          options._componentNameMap[tag]
+        if (expectedTag) {
+          warn(
+            'Unknown custom element: <' + tag + '> - ' +
+            'did you mean <' + expectedTag + '>? ' +
+            'HTML is case-insensitive, remember to use kebab-case in templates!'
+          )
+        } else if (isUnknownElement(el, tag)) {
           warn(
             'Unknown custom element: <' + tag + '> - did you ' +
             'register the component correctly? For recursive components, ' +
