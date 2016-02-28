@@ -4,6 +4,7 @@ var nextTick = Vue.nextTick
 describe('Slot Distribution', function () {
   var el, vm, options
   beforeEach(function () {
+    spyWarns()
     el = document.createElement('div')
     options = {
       el: el,
@@ -132,14 +133,14 @@ describe('Slot Distribution', function () {
     expect(el.lastChild.textContent).toBe('fallback c')
   })
 
-  it('should accept expressions in selectors', function () {
+  it('should warn expressions in slot names', function () {
     el.innerHTML = '<p>one</p><p slot="two">two</p>'
     options.template = '<slot :name="theName"></slot>'
     options.data = {
       theName: 'two'
     }
     mount()
-    expect(el.innerHTML).toBe('<p slot="two">two</p>')
+    expect(hasWarned('slot names cannot be dynamic')).toBe(true)
   })
 
   it('content should be dynamic and compiled in parent scope', function (done) {
@@ -194,21 +195,6 @@ describe('Slot Distribution', function () {
         })
       })
     })
-  })
-
-  it('inline v-for', function () {
-    el.innerHTML = '<p slot="1">1</p><p slot="2">2</p><p slot="3">3</p>'
-    new Vue({
-      el: el,
-      template: '<div v-for="n in list"><slot :name="$index + 1"></slot></div>',
-      data: {
-        list: 0
-      },
-      beforeCompile: function () {
-        this.list = this.$options._content.querySelectorAll('p').length
-      }
-    })
-    expect(el.innerHTML).toBe('<div><p slot="1">1</p></div><div><p slot="2">2</p></div><div><p slot="3">3</p></div>')
   })
 
   it('v-for + component + parent directive + transclusion', function (done) {

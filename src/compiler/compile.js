@@ -15,8 +15,7 @@ import {
   findRef,
   defineReactive,
   assertAsset,
-  getAttr,
-  hasBindAttr
+  getAttr
 } from '../util/index'
 
 // special binding prefixes
@@ -526,11 +525,8 @@ function makeChildLinkFn (linkFns) {
 
 function checkElementDirectives (el, options) {
   var tag = el.tagName.toLowerCase()
-  if (commonTagRE.test(tag)) return
-  // special case: give named slot a higher priority
-  // than unnamed slots
-  if (tag === 'slot' && hasBindAttr(el, 'name')) {
-    tag = '_namedSlot'
+  if (commonTagRE.test(tag)) {
+    return
   }
   var def = resolveAsset(options, 'elementDirectives', tag)
   if (def) {

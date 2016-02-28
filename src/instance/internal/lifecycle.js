@@ -1,6 +1,17 @@
 import Directive from '../../directive'
-import { replace, getAttr, isFragment } from '../../util/index'
-import { compile, compileRoot, transclude } from '../../compiler/index'
+
+import {
+  replace,
+  getAttr,
+  isFragment
+} from '../../util/index'
+
+import {
+  compile,
+  compileRoot,
+  transclude,
+  scanSlots
+} from '../../compiler/index'
 
 export default function (Vue) {
   /**
@@ -56,6 +67,10 @@ export default function (Vue) {
     // container attrs and props can be different every time.
     var contextOptions = this._context && this._context.$options
     var rootLinker = compileRoot(el, options, contextOptions)
+
+    // scan for slot distribution before compiling the content
+    // so that it's decoupeld from slot/directive compilation order
+    scanSlots(el, options._content, this)
 
     // compile and link the rest
     var contentLinkFn

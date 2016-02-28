@@ -245,7 +245,7 @@ export function removeClass (el, cls) {
  *
  * @param {Element} el
  * @param {Boolean} asFragment
- * @return {Element}
+ * @return {Element|DocumentFragment}
  */
 
 export function extractContent (el, asFragment) {

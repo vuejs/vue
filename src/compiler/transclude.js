@@ -1,5 +1,5 @@
-import { parseTemplate } from '../parsers/template'
 import { parseText } from '../parsers/text'
+import { parseTemplate } from '../parsers/template'
 import {
   warn,
   isTemplate,

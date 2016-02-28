@@ -26,6 +26,9 @@ scope.getWarnCount = function () {
 }
 
 scope.hasWarned = function (msg, silent) {
+  if (!_.warn.calls) {
+    console.warn('make sure to call spyWarns() before tests.')
+  }
   var count = _.warn.calls.count()
   var args
   while (count--) {
