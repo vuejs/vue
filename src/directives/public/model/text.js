@@ -53,10 +53,6 @@ export default {
       })
       this.on('blur', function () {
         self.focused = false
-        // do not sync value after fragment removal (#2017)
-        if (!self._frag || self._frag.inserted) {
-          self.rawListener()
-        }
       })
     }
 
@@ -96,12 +92,12 @@ export default {
     this.hasjQuery = typeof jQuery === 'function'
     if (this.hasjQuery) {
       const method = jQuery.fn.on ? 'on' : 'bind'
-      jQuery(el)[method]('change', this.listener)
+      jQuery(el)[method]('change', this.rawListener)
       if (!lazy) {
         jQuery(el)[method]('input', this.listener)
       }
     } else {
-      this.on('change', this.listener)
+      this.on('change', this.rawListener)
       if (!lazy) {
         this.on('input', this.listener)
       }

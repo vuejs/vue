@@ -499,6 +499,7 @@ describe('v-model', function () {
     _.nextTick(function () {
       expect(el.firstChild.value).toBe('cc')
       expect(vm.test).toBe('cc')
+      trigger(el.firstChild, 'change')
       trigger(el.firstChild, 'blur')
       _.nextTick(function () {
         expect(el.firstChild.value).toBe('CC')
@@ -529,6 +530,7 @@ describe('v-model', function () {
     _.nextTick(function () {
       expect(el.firstChild.value).toBe('cc')
       expect(vm.test).toBe('CC')
+      trigger(el.firstChild, 'change')
       trigger(el.firstChild, 'blur')
       _.nextTick(function () {
         expect(el.firstChild.value).toBe('CC')
@@ -712,7 +714,8 @@ describe('v-model', function () {
       expect(vm.test).toBe('d')
       setTimeout(function () {
         el.firstChild.value = 'e'
-        // blur should trigger change instantly without debounce
+        // change should trigger change instantly without debounce
+        trigger(el.firstChild, 'change')
         trigger(el.firstChild, 'blur')
         _.nextTick(function () {
           expect(spy.calls.count()).toBe(2)
