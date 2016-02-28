@@ -60,8 +60,9 @@ function selfFilter (handler) {
 
 export default {
 
-  acceptStatement: true,
   priority: ON,
+  acceptStatement: true,
+  keyCodes,
 
   bind () {
     // deal with iframes
