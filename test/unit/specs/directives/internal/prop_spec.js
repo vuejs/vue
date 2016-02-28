@@ -293,7 +293,7 @@ describe('prop', function () {
   })
 
   describe('assertions', function () {
-    function makeInstance (value, type, validator, coerce) {
+    function makeInstance (value, type, validator, coerce, required) {
       return new Vue({
         el: document.createElement('div'),
         template: '<test :test="val"></test>',
@@ -306,7 +306,8 @@ describe('prop', function () {
               test: {
                 type: type,
                 validator: validator,
-                coerce: coerce
+                coerce: coerce,
+                required: required
               }
             }
           }
@@ -414,6 +415,22 @@ describe('prop', function () {
         }
       })
       expect(hasWarned('Missing required prop')).toBe(true)
+    })
+
+    it('optional with type + null/undefined', function () {
+      makeInstance(undefined, String)
+      expect(getWarnCount()).toBe(0)
+      makeInstance(null, String)
+      expect(getWarnCount()).toBe(0)
+    })
+
+    it('required with type + null/undefined', function () {
+      makeInstance(undefined, String, null, null, true)
+      expect(getWarnCount()).toBe(1)
+      expect(hasWarned('Expected String')).toBe(true)
+      makeInstance(null, Boolean, null, null, true)
+      expect(getWarnCount()).toBe(2)
+      expect(hasWarned('Expected Boolean')).toBe(true)
     })
   })
 

@@ -104,9 +104,12 @@ export function initProp (vm, prop, value) {
  */
 
 export function assertProp (prop, value) {
-  // if a prop is not provided and is not required,
-  // skip the check.
-  if (prop.raw === null && !prop.required) {
+  if (
+    !prop.options.required && ( // non-required
+      prop.raw === null ||      // abscent
+      value == null             // null or undefined
+    )
+  ) {
     return true
   }
   var options = prop.options
