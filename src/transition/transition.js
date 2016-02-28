@@ -379,9 +379,16 @@ p.setupCssCb = function (event, cb) {
  */
 
 function isHidden (el) {
-  return !(
-    el.offsetWidth ||
-    el.offsetHeight ||
-    el.getClientRects().length
-  )
+  if (/svg$/.test(el.namespaceURI)) {
+    // SVG elements do not have offset(Width|Height)
+    // so we need to check the client rect
+    var rect = el.getBoundingClientRect()
+    return !(rect.width || rect.height)
+  } else {
+    return !(
+      el.offsetWidth ||
+      el.offsetHeight ||
+      el.getClientRects().length
+    )
+  }
 }
