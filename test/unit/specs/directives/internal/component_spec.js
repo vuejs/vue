@@ -530,4 +530,15 @@ describe('Component', function () {
       })
     }).not.toThrow()
   })
+
+  it('warn possible camelCase components', function () {
+    new Vue({
+      el: document.createElement('div'),
+      template: '<HelloWorld></HelloWorld>',
+      components: {
+        'hello-world': {}
+      }
+    })
+    expect(hasWarned('did you mean <hello-world>?')).toBe(true)
+  })
 })

@@ -473,15 +473,4 @@ describe('Misc', function () {
     })
     expect(vm.$el.textContent).toBe('default content slot1')
   })
-
-  it('warn possible camelCase components', function () {
-    new Vue({
-      el: document.createElement('div'),
-      template: '<HelloWorld></HelloWorld>',
-      components: {
-        'hello-world': {}
-      }
-    })
-    expect(hasWarned('did you mean <hello-world>?')).toBe(true)
-  })
 })

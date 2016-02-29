@@ -53,7 +53,7 @@ export function checkComponentAttr (el, options) {
           warn(
             'Unknown custom element: <' + tag + '> - ' +
             'did you mean <' + expectedTag + '>? ' +
-            'HTML is case-insensitive, remember to use kebab-case in templates!'
+            'HTML is case-insensitive, remember to use kebab-case in templates.'
           )
         } else if (isUnknownElement(el, tag)) {
           warn(

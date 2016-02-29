@@ -665,4 +665,20 @@ describe('prop', function () {
     expect(vm.$refs.child.propA).toBe(true)
     expect(vm.$refs.child.propB).toBe(false)
   })
+
+  it('detect possible camelCase prop usage', function () {
+    new Vue({
+      el: el,
+      template: '<comp propA="true" :propB="true" v-bind:propC.sync="true"></comp>',
+      components: {
+        comp: {
+          props: ['propA', 'propB', 'prop-c']
+        }
+      }
+    })
+    expect(getWarnCount()).toBe(3)
+    expect(hasWarned('did you mean `prop-a`')).toBe(true)
+    expect(hasWarned('did you mean `prop-b`')).toBe(true)
+    expect(hasWarned('did you mean `prop-c`')).toBe(true)
+  })
 })

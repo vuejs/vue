@@ -115,11 +115,28 @@ export function compileProps (el, propOptions) {
     } else if ((value = getAttr(el, attr)) !== null) {
       // has literal binding!
       prop.raw = value
-    } else if (options.required) {
-      // warn missing required
-      process.env.NODE_ENV !== 'production' && warn(
-        'Missing required prop: ' + name
+    } else if (process.env.NODE_ENV !== 'production') {
+      // check possible camelCase prop usage
+      var lowerCaseName = path.toLowerCase()
+      value = /[A-Z\-]/.test(name) && (
+        el.getAttribute(lowerCaseName) ||
+        el.getAttribute(':' + lowerCaseName) ||
+        el.getAttribute('v-bind:' + lowerCaseName) ||
+        el.getAttribute(':' + lowerCaseName + '.once') ||
+        el.getAttribute('v-bind:' + lowerCaseName + '.once') ||
+        el.getAttribute(':' + lowerCaseName + '.sync') ||
+        el.getAttribute('v-bind:' + lowerCaseName + '.sync')
       )
+      if (value) {
+        warn(
+          'Possible usage error for prop `' + lowerCaseName + '` - ' +
+          'did you mean `' + attr + '`? HTML is case-insensitive, remember to use ' +
+          'kebab-case for props in templates.'
+        )
+      } else if (options.required) {
+        // warn missing required
+        warn('Missing required prop: ' + name)
+      }
     }
     // push prop
     props.push(prop)
