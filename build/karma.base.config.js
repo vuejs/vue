@@ -1,6 +1,6 @@
 var webpackConfig = require('./webpack.test.config')
 delete webpackConfig.entry
-delete webpackConfig.devtool
+webpackConfig.devtool = 'inline-source-map'
 
 // shared config for all unit tests
 module.exports = {
@@ -10,7 +10,7 @@ module.exports = {
     '../test/unit/specs/index.js'
   ],
   preprocessors: {
-    '../test/unit/specs/index.js': ['webpack']
+    '../test/unit/specs/index.js': ['webpack', 'sourcemap']
   },
   webpack: webpackConfig,
   webpackMiddleware: {

@@ -36,5 +36,5 @@ module.exports = {
     contentBase: './test/unit',
     noInfo: true
   },
-  devtool: '#source-map'
+  devtool: 'source-map'
 }
