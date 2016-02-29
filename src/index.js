@@ -4,7 +4,7 @@ import { inBrowser, devtools } from './util/index'
 
 installGlobalAPI(Vue)
 
-Vue.version = '1.0.16'
+Vue.version = '1.0.17'
 
 export default Vue
 
