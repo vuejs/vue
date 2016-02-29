@@ -1,3 +1,4 @@
+import notevil from '../../lib/notevil'
 import { warn } from '../util/index'
 import { parsePath, setPath } from './path'
 import Cache from '../cache'
@@ -138,9 +139,10 @@ function compileGetter (exp) {
 
 function makeGetterFn (body) {
   try {
-    /* eslint-disable no-new-func */
-    return new Function('scope', 'return ' + body + ';')
-    /* eslint-enable no-new-func */
+    var fn = notevil.Function('scope', 'Math', 'return ' + body)
+    return function (scope) {
+      return fn.call(this, scope, Math)
+    }
   } catch (e) {
     if (process.env.NODE_ENV !== 'production') {
       /* istanbul ignore if */

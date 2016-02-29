@@ -17,7 +17,7 @@ module.exports = function (config) {
   options.webpack.module.postLoaders = [
     {
       test: /\.js$/,
-      exclude: /test|node_modules/,
+      exclude: /test|node_modules|lib\//,
       loader: 'istanbul-instrumenter'
     }
   ]
