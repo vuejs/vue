@@ -121,7 +121,7 @@ if (!_.isIE9) {
 
     describe('CSS transitions', function () {
       var vm, el, op, cb, hooks
-      beforeEach(function (done) {
+      beforeEach(function () {
         el = document.createElement('div')
         el.textContent = 'hello'
         vm = new Vue({ el: el })
@@ -138,7 +138,9 @@ if (!_.isIE9) {
         }
         // !IMPORTANT!
         // this ensures we force a layout for every test.
-        _.nextTick(done)
+        /* eslint-disable no-unused-vars */
+        var f = document.body.offsetHeight
+        /* eslint-enable no-unused-vars */
       })
 
       afterEach(function () {
@@ -221,12 +223,42 @@ if (!_.isIE9) {
         })
       })
 
+      it('transition enter for svg', function (done) {
+        el.innerHTML = '<svg><circle cx="0" cy="0" r="10"></circle></svg>'
+        var svg = el.querySelector('svg')
+        var circle = el.querySelector('circle')
+        svg.removeChild(circle)
+        circle.__v_trans = new Transition(circle, 'test', hooks, vm)
+        // inline style
+        circle.style.transition =
+        circle.style.WebkitTransition = 'opacity ' + duration + ' ease'
+        transition.applyTransition(circle, 1, function () {
+          svg.appendChild(circle)
+          op()
+        }, vm, cb)
+        expect(hooks.beforeEnter).toHaveBeenCalled()
+        expect(hooks.enter).toHaveBeenCalled()
+        expect(op).toHaveBeenCalled()
+        expect(cb).not.toHaveBeenCalled()
+        _.nextTick(function () {
+          expect(circle.getAttribute('class').indexOf('test-enter') > -1).toBe(false)
+          expect(hooks.afterEnter).not.toHaveBeenCalled()
+          _.on(circle, _.transitionEndEvent, function () {
+            expect(cb).toHaveBeenCalled()
+            expect(hooks.afterEnter).toHaveBeenCalled()
+            done()
+          })
+        })
+      })
+
       it('transition leave', function (done) {
         el.__v_trans = new Transition(el, 'test', hooks, vm)
         // cascaded class style
         el.classList.add('test')
         // force a layout here so the transition can be triggered
+        /* eslint-disable no-unused-vars */
         var f = el.offsetHeight
+        /* eslint-enable no-unused-vars */
         transition.applyTransition(el, -1, op, vm, cb)
         expect(hooks.beforeLeave).toHaveBeenCalled()
         expect(hooks.leave).toHaveBeenCalled()
@@ -243,7 +275,32 @@ if (!_.isIE9) {
             done()
           })
         })
-        return f
+      })
+
+      it('transition leave for svg', function (done) {
+        el.innerHTML = '<svg><circle cx="0" cy="0" r="10" class="test"></circle></svg>'
+        var circle = el.querySelector('circle')
+        circle.__v_trans = new Transition(circle, 'test', hooks, vm)
+        // force a layout here so the transition can be triggered
+        /* eslint-disable no-unused-vars */
+        var f = el.offsetHeight
+        /* eslint-enable no-unused-vars */
+        transition.applyTransition(circle, -1, op, vm, cb)
+        expect(hooks.beforeLeave).toHaveBeenCalled()
+        expect(hooks.leave).toHaveBeenCalled()
+        _.nextTick(function () {
+          expect(op).not.toHaveBeenCalled()
+          expect(cb).not.toHaveBeenCalled()
+          expect(hooks.afterLeave).not.toHaveBeenCalled()
+          expect(circle.getAttribute('class').indexOf('test-leave') > -1).toBe(true)
+          _.on(circle, _.transitionEndEvent, function () {
+            expect(op).toHaveBeenCalled()
+            expect(cb).toHaveBeenCalled()
+            expect(circle.getAttribute('class').indexOf('test-leave') > -1).toBe(false)
+            expect(hooks.afterLeave).toHaveBeenCalled()
+            done()
+          })
+        })
       })
 
       it('animation enter', function (done) {

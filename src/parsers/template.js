@@ -200,6 +200,7 @@ var hasTextareaCloneBug = (function () {
  */
 
 export function cloneNode (node) {
+  /* istanbul ignore if */
   if (!node.querySelectorAll) {
     return node.cloneNode()
   }
