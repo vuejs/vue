@@ -26,7 +26,8 @@ rollup.rollup({
   entry: 'src/index.js',
   plugins: [
     babel({
-      loose: 'all'
+      loose: 'all',
+      exclude: 'lib/**'
     })
   ]
 })
@@ -45,7 +46,8 @@ rollup.rollup({
         'process.env.NODE_ENV': "'development'"
       }),
       babel({
-        loose: 'all'
+        loose: 'all',
+        exclude: 'lib/**'
       })
     ]
   })
@@ -66,7 +68,8 @@ rollup.rollup({
         'process.env.NODE_ENV': "'production'"
       }),
       babel({
-        loose: 'all'
+        loose: 'all',
+        exclude: 'lib/**'
       })
     ]
   })
