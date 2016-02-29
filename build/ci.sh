@@ -6,7 +6,7 @@ then
   cat ./coverage/lcov.info | ./node_modules/.bin/codecov
   npm run build
   npm run e2e
-  npm run sauce-all
+  npm run sauce #csp only need Chrome/FF
 else
   npm test
 fi
