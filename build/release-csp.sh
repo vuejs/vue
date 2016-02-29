@@ -5,7 +5,7 @@ CSP_VERSION=$PLAIN_VERSION-csp
 # update package.json
 sed -i '' -e 's/\("version"\: "[0-9]*\.[0-9]*\.[0-9]*\)"/\1-csp"/' package.json
 
-# buid
+# build
 npm run build
 
 # push to csp branch on github
