@@ -14,7 +14,7 @@
       todos.filter (todo) ->
         todo.completed
 
-  exports.app = new Vue(
+  exports.app = new Vue
 
     # the root element that will be compiled
     el: '.todoapp'
@@ -92,5 +92,5 @@
         el = @el
         Vue.nextTick ->
           el.focus()
-  ) # new Vue
+
 ) window
