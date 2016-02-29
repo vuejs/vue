@@ -35,7 +35,7 @@
     "unit": "karma start build/karma.unit.config.js",
     "cover": "karma start build/karma.cover.config.js",
     "sauce": "karma start build/karma.sauce.config.js",
-    "sauce-all": "npm run sauce && npm run sauce -- 1 && npm run sauce -- 2",
+    "sauce-all": "npm run sauce",
     "release": "bash build/release.sh",
     "release-csp": "bash build/release-csp.sh"
   },
@@ -68,6 +68,7 @@
     "karma-sauce-launcher": "^0.3.0",
     "karma-sourcemap-loader": "^0.3.7",
     "karma-webpack": "^1.7.0",
+    "notevil": "^1.0.0",
     "object-assign": "^4.0.1",
     "phantomjs": "^1.9.17",
     "rollup": "^0.25.1",
