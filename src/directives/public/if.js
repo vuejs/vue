@@ -19,12 +19,11 @@ export default {
       var next = el.nextElementSibling
       if (next && getAttr(next, 'v-else') !== null) {
         remove(next)
-        this.elseFactory = new FragmentFactory(next._context || this.vm, next)
+        this.elseEl = next
       }
       // check main block
       this.anchor = createAnchor('v-if')
       replace(el, this.anchor)
-      this.factory = new FragmentFactory(this.vm, el)
     } else {
       process.env.NODE_ENV !== 'production' && warn(
         'v-if="' + this.expression + '" cannot be ' +
@@ -50,6 +49,10 @@ export default {
       this.elseFrag.remove()
       this.elseFrag = null
     }
+    // lazy init factory
+    if (!this.factory) {
+      this.factory = new FragmentFactory(this.vm, this.el)
+    }
     this.frag = this.factory.create(this._host, this._scope, this._frag)
     this.frag.before(this.anchor)
   },
@@ -59,7 +62,13 @@ export default {
       this.frag.remove()
       this.frag = null
     }
-    if (this.elseFactory && !this.elseFrag) {
+    if (this.elseEl && !this.elseFrag) {
+      if (!this.elseFactory) {
+        this.elseFactory = new FragmentFactory(
+          this.elseEl._context || this.vm,
+          this.elseEl
+        )
+      }
       this.elseFrag = this.elseFactory.create(this._host, this._scope, this._frag)
       this.elseFrag.before(this.anchor)
     }
