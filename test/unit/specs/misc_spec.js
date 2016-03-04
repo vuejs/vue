@@ -473,4 +473,20 @@ describe('Misc', function () {
     })
     expect(vm.$el.textContent).toBe('default content slot1')
   })
+
+  // #2426
+  it('class merge untrimmed', function () {
+    expect(function () {
+      new Vue({
+        el: document.createElement('div'),
+        template: '<test class="p1 p2 "></test>',
+        components: {
+          test: {
+            template: '<div class="hi"></div>',
+            replace: true
+          }
+        }
+      })
+    }).not.toThrow()
+  })
 })

@@ -152,7 +152,7 @@ function mergeAttrs (from, to) {
     if (!to.hasAttribute(name) && !specialCharRE.test(name)) {
       to.setAttribute(name, value)
     } else if (name === 'class' && !parseText(value)) {
-      value.split(/\s+/).forEach(function (cls) {
+      value.trim().split(/\s+/).forEach(function (cls) {
         addClass(to, cls)
       })
     }
