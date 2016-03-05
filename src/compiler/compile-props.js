@@ -9,11 +9,9 @@ import {
   getBindAttr,
   isLiteral,
   initProp,
-  hasOwn,
   toBoolean,
   toNumber,
-  stripQuotes,
-  isObject
+  stripQuotes
 } from '../util/index'
 
 const propBindingModes = config._propBindingModes
@@ -165,7 +163,7 @@ function makePropsLinkFn (props) {
       vm._props[path] = prop
       if (raw === null) {
         // initialize absent prop
-        initProp(vm, prop, getDefault(vm, options))
+        initProp(vm, prop, undefined)
       } else if (prop.dynamic) {
         // dynamic prop
         if (prop.mode === propBindingModes.ONE_TIME) {
@@ -202,35 +200,4 @@ function makePropsLinkFn (props) {
       }
     }
   }
-}
-
-/**
- * Get the default value of a prop.
- *
- * @param {Vue} vm
- * @param {Object} options
- * @return {*}
- */
-
-function getDefault (vm, options) {
-  // no default, return undefined
-  if (!hasOwn(options, 'default')) {
-    // absent boolean value defaults to false
-    return options.type === Boolean
-      ? false
-      : undefined
-  }
-  var def = options.default
-  // warn against non-factory defaults for Object & Array
-  if (isObject(def)) {
-    process.env.NODE_ENV !== 'production' && warn(
-      'Object/Array as default prop values will be shared ' +
-      'across multiple instances. Use a factory function ' +
-      'to return the default value instead.'
-    )
-  }
-  // call factory function for non-Function types
-  return typeof def === 'function' && options.type !== Function
-    ? def.call(vm)
-    : def
 }

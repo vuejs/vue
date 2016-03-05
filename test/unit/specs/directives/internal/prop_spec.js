@@ -681,4 +681,22 @@ describe('prop', function () {
     expect(hasWarned('did you mean `prop-b`')).toBe(true)
     expect(hasWarned('did you mean `prop-c`')).toBe(true)
   })
+
+  it('should use default for undefined values', function () {
+    var vm = new Vue({
+      el: el,
+      template: '<comp :a="a"></comp>',
+      components: {
+        comp: {
+          template: '{{a}}',
+          props: {
+            a: {
+              default: 1
+            }
+          }
+        }
+      }
+    })
+    expect(vm.$el.textContent).toBe('1')
+  })
 })
