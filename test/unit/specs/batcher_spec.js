@@ -97,4 +97,26 @@ describe('Batcher', function () {
       done()
     })
   })
+
+  it('should call newly pushed watcher after current watcher is done', function (done) {
+    var callOrder = []
+    batcher.pushWatcher({
+      id: 1,
+      user: true,
+      run: function () {
+        callOrder.push(1)
+        batcher.pushWatcher({
+          id: 2,
+          run: function () {
+            callOrder.push(3)
+          }
+        })
+        callOrder.push(2)
+      }
+    })
+    nextTick(function () {
+      expect(callOrder.join()).toBe('1,2,3')
+      done()
+    })
+  })
 })
