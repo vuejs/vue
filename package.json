@@ -49,7 +49,7 @@
     "babel-core": "^5.8.0",
     "babel-loader": "^5.4.0",
     "babel-runtime": "^5.8.0",
-    "casperjs": "^1.1.0-beta3",
+    "casperjs": "^1.1.0-beta5",
     "codecov.io": "^0.1.2",
     "eslint": "^2.1.0",
     "eslint-config-standard": "^5.1.0",
