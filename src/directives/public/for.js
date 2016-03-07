@@ -237,7 +237,7 @@ const vFor = {
     // for two-way binding on alias
     scope.$forContext = this
     // define scope properties
-    defineReactive(scope, alias, value)
+    defineReactive(scope, alias, value, true /* do not observe */)
     defineReactive(scope, '$index', index)
     if (key) {
       defineReactive(scope, '$key', key)

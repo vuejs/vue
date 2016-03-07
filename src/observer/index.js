@@ -171,9 +171,10 @@ export function observe (value, vm) {
  * @param {Object} obj
  * @param {String} key
  * @param {*} val
+ * @param {Boolean} doNotObserve
  */
 
-export function defineReactive (obj, key, val) {
+export function defineReactive (obj, key, val, doNotObserve) {
   var dep = new Dep()
 
   var property = Object.getOwnPropertyDescriptor(obj, key)
@@ -185,7 +186,13 @@ export function defineReactive (obj, key, val) {
   var getter = property && property.get
   var setter = property && property.set
 
-  var childOb = observe(val)
+  // if doNotObserve is true, only use the child value observer
+  // if it already exists, and do not attempt to create it.
+  // this allows freezing a large object from the root and
+  // avoid unnecessary observation inside v-for fragments.
+  var childOb = doNotObserve
+    ? typeof val === 'object' && val.__ob__
+    : observe(val)
   Object.defineProperty(obj, key, {
     enumerable: true,
     configurable: true,
@@ -215,7 +222,9 @@ export function defineReactive (obj, key, val) {
       } else {
         val = newVal
       }
-      childOb = observe(newVal)
+      childOb = doNotObserve
+        ? typeof newVal === 'object' && newVal.__ob__
+        : observe(newVal)
       dep.notify()
     }
   })
