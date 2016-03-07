@@ -267,6 +267,7 @@ export default {
     if (!child || this.keepAlive) {
       if (child) {
         // remove ref
+        child._inactive = true
         child._updateRef(true)
       }
       return
@@ -319,10 +320,8 @@ export default {
     var self = this
     var current = this.childVM
     // for devtool inspection
-    if (process.env.NODE_ENV !== 'production') {
-      if (current) current._inactive = true
-      target._inactive = false
-    }
+    if (current) current._inactive = true
+    target._inactive = false
     this.childVM = target
     switch (self.params.transitionMode) {
       case 'in-out':
