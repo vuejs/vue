@@ -4,10 +4,6 @@ var merge = _.mergeOptions
 var resolveAsset = _.resolveAsset
 
 describe('Util - Option merging', function () {
-  beforeEach(function () {
-    spyWarns()
-  })
-
   it('default strat', function () {
     // child undefined
     var res = merge({replace: true}, {}).replace
@@ -159,7 +155,7 @@ describe('Util - Option merging', function () {
         a: { template: 'hi' }
       }
     })
-    expect(hasWarned('Do not use built-in or reserved HTML elements as component id: a')).toBe(true)
+    expect('Do not use built-in or reserved HTML elements as component id: a').toHaveBeenWarned()
     merge({
       components: null
     }, {
@@ -167,7 +163,7 @@ describe('Util - Option merging', function () {
         slot: { template: 'hi' }
       }
     })
-    expect(hasWarned('Do not use built-in or reserved HTML elements as component id: slot')).toBe(true)
+    expect('Do not use built-in or reserved HTML elements as component id: slot').toHaveBeenWarned()
   })
 
   it('should ignore non-function el & data in class merge', function () {
@@ -335,7 +331,7 @@ describe('Util - Option merging', function () {
       components: [{}]
     }
     merge(a, b)
-    expect(hasWarned('must provide a "name" or "id" field')).toBe(true)
+    expect('must provide a "name" or "id" field').toHaveBeenWarned()
   })
 
   it('warn Array async component without id', function () {
@@ -348,7 +344,7 @@ describe('Util - Option merging', function () {
       components: [function () {}]
     }
     merge(a, b)
-    expect(hasWarned('must provide a "name" or "id" field')).toBe(true)
+    expect('must provide a "name" or "id" field').toHaveBeenWarned()
   })
 })
 

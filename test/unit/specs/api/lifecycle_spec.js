@@ -9,7 +9,6 @@ describe('Lifecycle API', function () {
       el.textContent = '{{test}}'
       frag = document.createDocumentFragment()
       frag.appendChild(el)
-      spyWarns()
     })
 
     it('normal', function () {
@@ -53,7 +52,7 @@ describe('Lifecycle API', function () {
     it('warn invalid selector', function () {
       var vm = new Vue()
       vm.$mount('#none-exist')
-      expect(hasWarned('Cannot find element')).toBe(true)
+      expect('Cannot find element').toHaveBeenWarned()
     })
 
     it('replace', function () {
@@ -141,7 +140,7 @@ describe('Lifecycle API', function () {
         el: el
       })
       vm.$mount(el)
-      expect(hasWarned('$mount() should be called only once')).toBe(true)
+      expect('$mount() should be called only once').toHaveBeenWarned()
     })
   })
 

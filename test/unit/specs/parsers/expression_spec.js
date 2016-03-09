@@ -298,26 +298,22 @@ describe('Expression Parser', function () {
   }
 
   describe('invalid expression', function () {
-    beforeEach(function () {
-      spyWarns()
-    })
-
     it('should warn on invalid expression', function () {
       expect(getWarnCount()).toBe(0)
       expParser.parseExpression('a--b"ffff')
-      expect(hasWarned('Invalid expression')).toBe(true)
+      expect('Invalid expression').toHaveBeenWarned()
     })
 
     it('should warn on invalid setter expression', function () {
       expect(getWarnCount()).toBe(0)
       expParser.parseExpression('a+b', true)
-      expect(hasWarned('Invalid setter expression')).toBe(true)
+      expect('Invalid setter expression').toHaveBeenWarned()
     })
 
     it('should warn if expression contains improper reserved keywords', function () {
       expect(getWarnCount()).toBe(0)
       expParser.parseExpression('break + 1')
-      expect(hasWarned('Avoid using reserved keywords')).toBe(true)
+      expect('Avoid using reserved keywords').toHaveBeenWarned()
     })
   })
 })

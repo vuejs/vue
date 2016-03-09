@@ -6,10 +6,6 @@ var Dep = require('src/observer/dep')
 var _ = require('src/util')
 
 describe('Observer', function () {
-  beforeEach(function () {
-    spyWarns()
-  })
-
   it('create on non-observables', function () {
     // skip primitive value
     var ob = observe(1)

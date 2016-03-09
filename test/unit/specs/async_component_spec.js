@@ -6,7 +6,6 @@ describe('Async components', function () {
   beforeEach(function () {
     el = document.createElement('div')
     document.body.appendChild(el)
-    spyWarns()
   })
 
   afterEach(function () {
@@ -199,7 +198,7 @@ describe('Async components', function () {
         }
       }
     })
-    expect(hasWarned('Reason: nooooo')).toBe(true)
+    expect('Reason: nooooo').toHaveBeenWarned()
   })
 
   it('v-for', function (done) {

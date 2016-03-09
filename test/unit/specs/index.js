@@ -16,18 +16,13 @@ var scope = typeof window === 'undefined'
   ? global
   : window
 
-scope.spyWarns = function () {
-  spyOn(_, 'warn')
-  spyOn(__, 'warn')
-}
-
 scope.getWarnCount = function () {
   return _.warn.calls.count() + __.warn.calls.count()
 }
 
-scope.hasWarned = function (msg, silent) {
+function hasWarned (msg) {
   if (!_.warn.calls) {
-    console.warn('make sure to call spyWarns() before tests.')
+    console.warn('make sure to call before tests.')
   }
   var count = _.warn.calls.count()
   var args
@@ -46,16 +41,43 @@ scope.hasWarned = function (msg, silent) {
     }
   }
 
-  if (!silent) {
-    console.warn('[test] "' + msg + '" was never warned.')
-  }
-
   function containsMsg (arg) {
     if (arg instanceof Error) throw arg
     return typeof arg === 'string' && arg.indexOf(msg) > -1
   }
 }
 
+// define custom matcher for warnings
+beforeEach(function () {
+  spyOn(_, 'warn')
+  spyOn(__, 'warn')
+  jasmine.addMatchers({
+    toHaveBeenWarned: function () {
+      return {
+        compare: function (msg) {
+          var warned = Array.isArray(msg)
+            ? msg.some(hasWarned)
+            : hasWarned(msg)
+          return {
+            pass: warned,
+            message: warned
+              ? 'Expected message "' + msg + '" not to have been warned'
+              : 'Expected message "' + msg + '" to have been warned'
+          }
+        }
+      }
+    }
+  })
+})
+
+describe('custom matcher', function () {
+  it('should work', function () {
+    _.warn('lol')
+    expect('lol').toHaveBeenWarned()
+  })
+})
+
+// shim process
 scope.process = {
   env: {
     NODE_ENV: 'development'

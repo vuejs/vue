@@ -46,7 +46,6 @@ describe('Compile', function () {
     spyOn(vm, '_bindDir').and.callThrough()
     spyOn(vm, '$eval').and.callThrough()
     spyOn(vm, '$interpolate').and.callThrough()
-    spyWarns()
   })
 
   it('normal directives', function () {
@@ -327,7 +326,7 @@ describe('Compile', function () {
     expect(prop.parentPath).toBe('a')
     expect(prop.mode).toBe(bindingModes.TWO_WAY)
     // two way warn
-    expect(hasWarned('non-settable parent path')).toBe(true)
+    expect('non-settable parent path').toHaveBeenWarned()
     // literal with filter
     args = vm._bindDir.calls.argsFor(3)
     prop = args[0].prop
@@ -585,7 +584,7 @@ describe('Compile', function () {
       }
     })
     expect(el.innerHTML).toBe('<div></div>')
-    expect(hasWarned('attribute interpolation is not allowed in Vue.js directives')).toBe(true)
+    expect('attribute interpolation is not allowed in Vue.js directives').toHaveBeenWarned()
   })
 
   it('attribute interpolation: warn mixed usage with v-bind', function () {
@@ -596,7 +595,7 @@ describe('Compile', function () {
         a: 'hi'
       }
     })
-    expect(hasWarned('Do not mix mustache interpolation and v-bind')).toBe(true)
+    expect('Do not mix mustache interpolation and v-bind').toHaveBeenWarned()
   })
 
   it('warn directives on fragment instances', function () {
@@ -612,10 +611,10 @@ describe('Compile', function () {
       }
     })
     expect(getWarnCount()).toBe(1)
-    expect(
-      hasWarned('Attributes "id", "class" are ignored on component <test>', true) ||
-      hasWarned('Attributes "class", "id" are ignored on component <test>')
-    ).toBe(true)
+    expect([
+      'Attributes "id", "class" are ignored on component <test>',
+      'Attributes "class", "id" are ignored on component <test>'
+    ]).toHaveBeenWarned()
   })
 
   it('should compile component container directives using correct context', function () {

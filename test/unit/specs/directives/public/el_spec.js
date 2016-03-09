@@ -5,7 +5,6 @@ describe('el', function () {
   var el
   beforeEach(function () {
     el = document.createElement('div')
-    spyWarns()
   })
 
   it('normal', function (done) {

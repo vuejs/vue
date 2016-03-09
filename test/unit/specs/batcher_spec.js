@@ -6,7 +6,6 @@ describe('Batcher', function () {
   var spy
   beforeEach(function () {
     spy = jasmine.createSpy('batcher')
-    spyWarns()
   })
 
   it('pushWatcher', function (done) {
@@ -93,7 +92,7 @@ describe('Batcher', function () {
     batcher.pushWatcher(job)
     nextTick(function () {
       expect(count).toBe(config._maxUpdateCount + 1)
-      expect(hasWarned('infinite update loop')).toBe(true)
+      expect('infinite update loop').toHaveBeenWarned()
       done()
     })
   })

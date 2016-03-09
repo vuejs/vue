@@ -20,7 +20,6 @@ describe('Watcher', function () {
       }
     })
     spy = jasmine.createSpy('watcher')
-    spyWarns()
   })
 
   it('simple path', function (done) {
@@ -364,12 +363,12 @@ describe('Watcher', function () {
 
   it('warn getter errors', function () {
     new Watcher(vm, 'd.e + c', spy)
-    expect(hasWarned('Error when evaluating expression')).toBe(true)
+    expect('Error when evaluating expression').toHaveBeenWarned()
   })
 
   it('warn setter errors', function () {
     var watcher = new Watcher(vm, 'a + b', spy)
     watcher.set(123)
-    expect(hasWarned('Error when evaluating setter')).toBe(true)
+    expect('Error when evaluating setter').toHaveBeenWarned()
   })
 })

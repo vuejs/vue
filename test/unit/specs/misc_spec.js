@@ -3,10 +3,6 @@ var Vue = require('src')
 var _ = Vue.util
 
 describe('Misc', function () {
-  beforeEach(function () {
-    spyWarns()
-  })
-
   it('should handle directive.bind() altering its childNode structure', function () {
     var vm = new Vue({
       el: document.createElement('div'),
@@ -318,7 +314,7 @@ describe('Misc', function () {
       el: document.createElement('div'),
       template: '<custom-stuff></custom-stuff>'
     })
-    expect(hasWarned('Unknown custom element')).toBe(true)
+    expect('Unknown custom element').toHaveBeenWarned()
   })
 
   it('prefer bound attributes over static attributes', function (done) {

@@ -6,7 +6,6 @@ describe('Instance Events', function () {
   beforeEach(function () {
     spy = jasmine.createSpy()
     spy2 = jasmine.createSpy()
-    spyWarns()
   })
 
   describe('option events', function () {
@@ -45,7 +44,7 @@ describe('Instance Events', function () {
       vm.$emit('test', 123)
       expect(spy).toHaveBeenCalledWith(123)
       vm.$emit('test2')
-      expect(hasWarned('Unknown method')).toBe(true)
+      expect('Unknown method').toHaveBeenWarned()
     })
   })
 
@@ -239,9 +238,7 @@ describe('Instance Events', function () {
           comp: {}
         }
       })
-      expect(hasWarned(
-        'v-on:test="onThat" on component <comp> expects a function value'
-      )).toBe(true)
+      expect('v-on:test="onThat" on component <comp> expects a function value').toHaveBeenWarned()
     })
 
     it('passing $arguments', function () {

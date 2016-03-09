@@ -7,7 +7,6 @@ describe('Transclude', function () {
   beforeEach(function () {
     el = document.createElement('div')
     options = _.extend({}, Vue.options)
-    spyWarns()
   })
 
   it('normal', function () {
@@ -26,7 +25,7 @@ describe('Transclude', function () {
     options.template = '#non-existent-stuff'
     var res = transclude(el, options)
     expect(res).toBeUndefined()
-    expect(hasWarned('Invalid template option')).toBe(true)
+    expect('Invalid template option').toHaveBeenWarned()
   })
 
   it('template replace', function () {

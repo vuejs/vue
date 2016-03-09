@@ -39,7 +39,6 @@ describe('v-model', function () {
     el = document.createElement('div')
     el.style.display = 'none'
     document.body.appendChild(el)
-    spyWarns()
   })
 
   it('radio buttons', function (done) {
@@ -639,7 +638,7 @@ describe('v-model', function () {
       el: el,
       template: '<div v-model="test"></div>'
     })
-    expect(hasWarned('does not support element type')).toBe(true)
+    expect('does not support element type').toHaveBeenWarned()
   })
 
   it('warn read-only filters', function () {
@@ -652,7 +651,7 @@ describe('v-model', function () {
         }
       }
     })
-    expect(hasWarned('read-only filter')).toBe(true)
+    expect('read-only filter').toHaveBeenWarned()
   })
 
   it('support jQuery change event', function (done) {

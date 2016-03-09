@@ -4,7 +4,6 @@ var nextTick = Vue.nextTick
 describe('Slot Distribution', function () {
   var el, vm, options
   beforeEach(function () {
-    spyWarns()
     el = document.createElement('div')
     options = {
       el: el,
@@ -140,7 +139,7 @@ describe('Slot Distribution', function () {
       theName: 'two'
     }
     mount()
-    expect(hasWarned('slot names cannot be dynamic')).toBe(true)
+    expect('slot names cannot be dynamic').toHaveBeenWarned()
   })
 
   it('content should be dynamic and compiled in parent scope', function (done) {

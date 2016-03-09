@@ -5,7 +5,6 @@ describe('v-if', function () {
   var el
   beforeEach(function () {
     el = document.createElement('div')
-    spyWarns()
   })
 
   it('normal', function (done) {
@@ -171,7 +170,7 @@ describe('v-if', function () {
     new Vue({
       el: el
     })
-    expect(hasWarned('cannot be used on an instance root element')).toBe(true)
+    expect('cannot be used on an instance root element').toHaveBeenWarned()
   })
 
   it('call attach/detach for transcluded components', function (done) {

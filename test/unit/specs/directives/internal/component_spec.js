@@ -6,7 +6,6 @@ describe('Component', function () {
   beforeEach(function () {
     el = document.createElement('div')
     document.body.appendChild(el)
-    spyWarns()
   })
 
   afterEach(function () {
@@ -519,7 +518,7 @@ describe('Component', function () {
     new Vue({
       el: el
     })
-    expect(hasWarned('cannot mount component "test" on already mounted element')).toBe(true)
+    expect('cannot mount component "test" on already mounted element').toHaveBeenWarned()
   })
 
   it('not found component should not throw', function () {
@@ -539,6 +538,6 @@ describe('Component', function () {
         'hello-world': {}
       }
     })
-    expect(hasWarned('did you mean <hello-world>?')).toBe(true)
+    expect('did you mean <hello-world>?').toHaveBeenWarned()
   })
 })

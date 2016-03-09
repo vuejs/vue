@@ -5,7 +5,6 @@ var nextTick = _.nextTick
 describe('Data API', function () {
   var vm
   beforeEach(function () {
-    spyWarns()
     vm = new Vue({
       data: {
         a: 1,
@@ -33,7 +32,7 @@ describe('Data API', function () {
     expect(vm.$get('c')).toBeUndefined()
     // invalid, should warn
     vm.$get('a(')
-    expect(hasWarned('Invalid expression')).toBe(true)
+    expect('Invalid expression').toHaveBeenWarned()
   })
 
   it('$set', function () {
@@ -45,12 +44,12 @@ describe('Data API', function () {
     vm.$set('c.d', 2)
     expect(vm.c.d).toBe(2)
     // warn against setting unexisting
-    expect(hasWarned('Consider pre-initializing')).toBe(true)
+    expect('Consider pre-initializing').toHaveBeenWarned()
   })
 
   it('$set invalid', function () {
     vm.$set('c + d', 1)
-    expect(hasWarned('Invalid setter expression')).toBe(true)
+    expect('Invalid setter expression').toHaveBeenWarned()
   })
 
   it('$delete', function () {
