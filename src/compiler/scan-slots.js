@@ -3,7 +3,8 @@ import {
   isTemplate,
   toArray,
   getBindAttr,
-  warn
+  warn,
+  hasNativeTemplate
 } from '../util/index'
 
 /**
@@ -22,7 +23,7 @@ export function scanSlots (template, content, vm) {
     return
   }
   var contents = vm._slotContents = {}
-  var slots = template.querySelectorAll('slot')
+  var slots = findSlots(template)
   if (slots.length) {
     var hasDefault, slot, name
     for (var i = 0, l = slots.length; i < l; i++) {
@@ -54,6 +55,27 @@ export function scanSlots (template, content, vm) {
       contents[name] = extractFragment(nodes, content)
     }
   }
+}
+
+/**
+ * Find all slots in a template, including those nested under
+ * a <template> element's content node.
+ *
+ * @param {Element} el
+ * @return {Array|NodeList}
+ */
+
+function findSlots (el) {
+  var slots = el.querySelectorAll('slot')
+  /* istanbul ignore if */
+  if (hasNativeTemplate) {
+    slots = toArray(slots)
+    var templates = el.querySelectorAll('template')
+    for (var i = 0; i < templates.length; i++) {
+      slots.push.apply(slots, findSlots(templates[i].content))
+    }
+  }
+  return slots
 }
 
 /**

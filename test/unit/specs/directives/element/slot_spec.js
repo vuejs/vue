@@ -406,4 +406,28 @@ describe('Slot Distribution', function () {
       done()
     })
   })
+
+  // #2435
+  it('slot inside template', function () {
+    var vm = new Vue({
+      el: el,
+      template: '<test>hi</test>',
+      components: {
+        test: {
+          data: function () {
+            return { ok: true }
+          },
+          template:
+            '<div>' +
+              '<template v-if="ok">' +
+                '<template v-if="ok">' +
+                  '<slot>{{ msg }}</slot>' +
+                '</template>' +
+              '</template>' +
+            '</div>'
+        }
+      }
+    })
+    expect(vm.$el.textContent).toBe('hi')
+  })
 })
