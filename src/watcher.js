@@ -45,8 +45,10 @@ export default function Watcher (vm, expOrFn, cb, options) {
   this.id = ++uid // uid for batching
   this.active = true
   this.dirty = this.lazy // for lazy watchers
-  this.deps = Object.create(null)
-  this.newDeps = null
+  this.deps = []
+  this.newDeps = []
+  this.depIds = Object.create(null)
+  this.newDepIds = null
   this.prevError = null // for async error stacks
   // parse expression for getter/setter
   if (isFn) {
@@ -63,23 +65,6 @@ export default function Watcher (vm, expOrFn, cb, options) {
   // state for avoiding false triggers for deep and Array
   // watchers during vm._digest()
   this.queued = this.shallow = false
-}
-
-/**
- * Add a dependency to this directive.
- *
- * @param {Dep} dep
- */
-
-Watcher.prototype.addDep = function (dep) {
-  var id = dep.id
-  if (!this.newDeps[id]) {
-    this.newDeps[id] = dep
-    if (!this.deps[id]) {
-      this.deps[id] = dep
-      dep.addSub(this)
-    }
-  }
 }
 
 /**
@@ -179,7 +164,25 @@ Watcher.prototype.set = function (value) {
 
 Watcher.prototype.beforeGet = function () {
   Dep.target = this
-  this.newDeps = Object.create(null)
+  this.newDepIds = Object.create(null)
+  this.newDeps.length = 0
+}
+
+/**
+ * Add a dependency to this directive.
+ *
+ * @param {Dep} dep
+ */
+
+Watcher.prototype.addDep = function (dep) {
+  var id = dep.id
+  if (!this.newDepIds[id]) {
+    this.newDepIds[id] = true
+    this.newDeps.push(dep)
+    if (!this.depIds[id]) {
+      dep.addSub(this)
+    }
+  }
 }
 
 /**
@@ -188,15 +191,17 @@ Watcher.prototype.beforeGet = function () {
 
 Watcher.prototype.afterGet = function () {
   Dep.target = null
-  var ids = Object.keys(this.deps)
-  var i = ids.length
+  var i = this.deps.length
   while (i--) {
-    var id = ids[i]
-    if (!this.newDeps[id]) {
-      this.deps[id].removeSub(this)
+    var dep = this.deps[i]
+    if (!this.newDepIds[dep.id]) {
+      dep.removeSub(this)
     }
   }
+  this.depIds = this.newDepIds
+  var tmp = this.deps
   this.deps = this.newDeps
+  this.newDepIds = tmp
 }
 
 /**
@@ -291,10 +296,9 @@ Watcher.prototype.evaluate = function () {
  */
 
 Watcher.prototype.depend = function () {
-  var depIds = Object.keys(this.deps)
-  var i = depIds.length
+  var i = this.deps.length
   while (i--) {
-    this.deps[depIds[i]].depend()
+    this.deps[i].depend()
   }
 }
 
@@ -311,10 +315,9 @@ Watcher.prototype.teardown = function () {
     if (!this.vm._isBeingDestroyed && !this.vm._vForRemoving) {
       this.vm._watchers.$remove(this)
     }
-    var depIds = Object.keys(this.deps)
-    var i = depIds.length
+    var i = this.deps.length
     while (i--) {
-      this.deps[depIds[i]].removeSub(this)
+      this.deps[i].removeSub(this)
     }
     this.active = false
     this.vm = this.cb = this.value = null
