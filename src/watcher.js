@@ -201,7 +201,7 @@ Watcher.prototype.afterGet = function () {
   this.depIds = this.newDepIds
   var tmp = this.deps
   this.deps = this.newDeps
-  this.newDepIds = tmp
+  this.newDeps = tmp
 }
 
 /**
