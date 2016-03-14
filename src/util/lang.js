@@ -299,7 +299,7 @@ export function isPlainObject (obj) {
 export const isArray = Array.isArray
 
 /**
- * Define a non-enumerable property
+ * Define a property.
  *
  * @param {Object} obj
  * @param {String} key
