@@ -42,7 +42,7 @@ function flushBatcherQueue () {
   runBatcherQueue(userQueue)
   // dev tool hook
   /* istanbul ignore if */
-  if (devtools) {
+  if (devtools && config.devtools) {
     devtools.emit('flush')
   }
   resetBatcherState()

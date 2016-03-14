@@ -36,6 +36,13 @@ const config = {
   warnExpressionErrors: true,
 
   /**
+   * Whether to allow devtools inspection.
+   * Disabled by default in production builds.
+   */
+
+  devtools: process.env.NODE_ENV !== 'production',
+
+  /**
    * Internal flag to indicate the delimiters have been
    * changed.
    *
