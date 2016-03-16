@@ -53,6 +53,10 @@ export default {
       })
       this.on('blur', function () {
         self.focused = false
+        // do not sync value after fragment removal (#2017)
+        if (!self._frag || self._frag.inserted) {
+          self.rawListener()
+        }
       })
     }
 
