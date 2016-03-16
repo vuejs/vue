@@ -3,8 +3,8 @@ import { resolveAsset } from './options'
 import { getAttr, getBindAttr } from './dom'
 import { isArray, isPlainObject, isObject, hasOwn } from './lang'
 
-export const commonTagRE = /^(div|p|span|img|a|b|i|br|ul|ol|li|h1|h2|h3|h4|h5|h6|code|pre|table|th|td|tr|form|label|input|select|option|nav|article|section|header|footer)$/
-export const reservedTagRE = /^(slot|partial|component)$/
+export const commonTagRE = /^(div|p|span|img|a|b|i|br|ul|ol|li|h1|h2|h3|h4|h5|h6|code|pre|table|th|td|tr|form|label|input|select|option|nav|article|section|header|footer)$/i
+export const reservedTagRE = /^(slot|partial|component)$/i
 
 let isUnknownElement
 if (process.env.NODE_ENV !== 'production') {
