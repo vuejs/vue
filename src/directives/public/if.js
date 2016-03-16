@@ -57,7 +57,7 @@ export default {
     this.frag.before(this.anchor)
   },
 
-  remove: function () {
+  remove () {
     if (this.frag) {
       this.frag.remove()
       this.frag = null
@@ -74,7 +74,7 @@ export default {
     }
   },
 
-  unbind: function () {
+  unbind () {
     if (this.frag) {
       this.frag.destroy()
     }

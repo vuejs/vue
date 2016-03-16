@@ -30,7 +30,7 @@ const vFor = {
     'leave-stagger'
   ],
 
-  bind: function () {
+  bind () {
     // support "item in/of items" syntax
     var inMatch = this.expression.match(/(.*) (?:in|of) (.*)/)
     if (inMatch) {
@@ -78,7 +78,7 @@ const vFor = {
     this.factory = new FragmentFactory(this.vm, this.el)
   },
 
-  update: function (data) {
+  update (data) {
     this.diff(data)
     this.updateRef()
     this.updateModel()
@@ -98,7 +98,7 @@ const vFor = {
    * @param {Array} data
    */
 
-  diff: function (data) {
+  diff (data) {
     // check if the Array was converted from an Object
     var item = data[0]
     var convertedFromObject = this.fromObject =
@@ -224,7 +224,7 @@ const vFor = {
    * @return {Fragment}
    */
 
-  create: function (value, alias, index, key) {
+  create (value, alias, index, key) {
     var host = this._host
     // create iteration scope
     var parentScope = this._scope || this.vm
@@ -258,7 +258,7 @@ const vFor = {
    * Update the v-ref on owner vm.
    */
 
-  updateRef: function () {
+  updateRef () {
     var ref = this.descriptor.ref
     if (!ref) return
     var hash = (this._scope || this.vm).$refs
@@ -279,7 +279,7 @@ const vFor = {
    * parent <select>.
    */
 
-  updateModel: function () {
+  updateModel () {
     if (this.isOption) {
       var parent = this.start.parentNode
       var model = parent && parent.__v_model
@@ -298,7 +298,7 @@ const vFor = {
    * @param {Boolean} inDocument
    */
 
-  insert: function (frag, index, prevEl, inDocument) {
+  insert (frag, index, prevEl, inDocument) {
     if (frag.staggerCb) {
       frag.staggerCb.cancel()
       frag.staggerCb = null
@@ -334,7 +334,7 @@ const vFor = {
    * @param {Boolean} inDocument
    */
 
-  remove: function (frag, index, total, inDocument) {
+  remove (frag, index, total, inDocument) {
     if (frag.staggerCb) {
       frag.staggerCb.cancel()
       frag.staggerCb = null
@@ -365,7 +365,7 @@ const vFor = {
    * @param {Node} prevEl
    */
 
-  move: function (frag, prevEl) {
+  move (frag, prevEl) {
     // fix a common issue with Sortable:
     // if prevEl doesn't have nextSibling, this means it's
     // been dragged after the end anchor. Just re-position
@@ -386,7 +386,7 @@ const vFor = {
    * @param {String} [key]
    */
 
-  cacheFrag: function (value, frag, index, key) {
+  cacheFrag (value, frag, index, key) {
     var trackByKey = this.params.trackBy
     var cache = this.cache
     var primitive = !isObject(value)
@@ -428,7 +428,7 @@ const vFor = {
    * @return {Fragment}
    */
 
-  getCachedFrag: function (value, index, key) {
+  getCachedFrag (value, index, key) {
     var trackByKey = this.params.trackBy
     var primitive = !isObject(value)
     var frag
@@ -455,7 +455,7 @@ const vFor = {
    * @param {Fragment} frag
    */
 
-  deleteCachedFrag: function (frag) {
+  deleteCachedFrag (frag) {
     var value = frag.raw
     var trackByKey = this.params.trackBy
     var scope = frag.scope
@@ -486,7 +486,7 @@ const vFor = {
    * @param {String} type
    */
 
-  getStagger: function (frag, index, total, type) {
+  getStagger (frag, index, total, type) {
     type = type + 'Stagger'
     var trans = frag.node.__v_trans
     var hooks = trans && trans.hooks
@@ -501,7 +501,7 @@ const vFor = {
    * filters. This is passed to and called by the watcher.
    */
 
-  _preProcess: function (value) {
+  _preProcess (value) {
     // regardless of type, store the un-filtered raw value.
     this.rawValue = value
     return value
@@ -516,7 +516,7 @@ const vFor = {
    * the v-for to update when the source Object is mutated.
    */
 
-  _postProcess: function (value) {
+  _postProcess (value) {
     if (isArray(value)) {
       return value
     } else if (isPlainObject(value)) {
@@ -541,7 +541,7 @@ const vFor = {
     }
   },
 
-  unbind: function () {
+  unbind () {
     if (this.descriptor.ref) {
       (this._scope || this.vm).$refs[this.descriptor.ref] = null
     }
