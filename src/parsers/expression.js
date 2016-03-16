@@ -17,7 +17,7 @@ const improperKeywords =
   'delete,do,else,export,extends,finally,for,function,if,' +
   'import,in,instanceof,let,return,super,switch,throw,try,' +
   'var,while,with,yield,enum,await,implements,package,' +
-  'proctected,static,interface,private,public'
+  'protected,static,interface,private,public'
 const improperKeywordsRE =
   new RegExp('^(' + improperKeywords.replace(/,/g, '\\b|') + '\\b)')
 
