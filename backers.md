@@ -19,12 +19,8 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
 </ul>
 
 - Sylvain Pollet-Villard
-- Paul Burdick
-- Nathaniel Blackburn
 - Luca Borghini
-- Jason Land
 - Kazuya Kawaguchi
-- Ryan McAllen
 - Keisuke Kita
 - Anirudh Sanjeev
 - Guido Bertolino
@@ -33,7 +29,8 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
 - Stephane Demoote
 - Paul R. Dillinger
 - Sean Washington
-- James Kyle
 - Alun Davey
 - Eduardo Kyvenko
-- Chris Cooper
+- Thijs de Maa
+- Joris Noordermeer
+- Niklas Lifors
