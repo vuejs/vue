@@ -1,5 +1,7 @@
 # Backers
 
+You can join them in supporting  Vue.js development by [pledging on Patreon](https://www.patreon.com/evanyou).
+
 <ul>
   <li>
     <a href="https://laravel.com">
