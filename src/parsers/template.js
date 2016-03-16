@@ -74,7 +74,7 @@ function isRealTemplate (node) {
   return isTemplate(node) && isFragment(node.content)
 }
 
-const tagRE = /<([\w:]+)/
+const tagRE = /<([\w:-]+)/
 const entityRE = /&#?\w+?;/
 
 /**

@@ -525,4 +525,16 @@ describe('Misc', function () {
       done()
     }
   })
+
+  // #2500
+  it('template parser tag match should include hyphen', function () {
+    var vm = new Vue({
+      el: document.createElement('div'),
+      template: '<div>{{{ test }}}</div>',
+      data: {
+        test: '<image-field></image-field>'
+      }
+    })
+    expect(vm.$el.querySelector('image-field').namespaceURI).not.toMatch(/svg/)
+  })
 })
