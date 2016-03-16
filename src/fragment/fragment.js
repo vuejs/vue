@@ -192,7 +192,7 @@ Fragment.prototype.destroy = function () {
  */
 
 function attach (child) {
-  if (!child._isAttached) {
+  if (!child._isAttached && inDoc(child.$el)) {
     child._callHook('attached')
   }
 }
@@ -204,7 +204,7 @@ function attach (child) {
  */
 
 function detach (child) {
-  if (child._isAttached) {
+  if (child._isAttached && !inDoc(child.$el)) {
     child._callHook('detached')
   }
 }

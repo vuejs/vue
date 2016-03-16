@@ -485,4 +485,44 @@ describe('Misc', function () {
       })
     }).not.toThrow()
   })
+
+  // #2445
+  it('fragment attach hook should check if child is inDoc', function (done) {
+    var el = document.createElement('div')
+    document.body.appendChild(el)
+    var spyParent = jasmine.createSpy('attached parent')
+    var spyChild = jasmine.createSpy('attached child')
+
+    new Vue({
+      el: el,
+      template: '<comp v-for="n in 1"></comp>',
+      components: {
+        comp: {
+          template: '<div><child></child></div>',
+          attached: function () {
+            expect(_.inDoc(this.$el)).toBe(true)
+            spyParent()
+          },
+          activate: function (next) {
+            setTimeout(function () {
+              next()
+              check()
+            }, 100)
+          },
+          components: {
+            child: {
+              template: 'yo',
+              attached: spyChild
+            }
+          }
+        }
+      }
+    })
+
+    function check () {
+      expect(spyParent).toHaveBeenCalled()
+      expect(spyChild).toHaveBeenCalled()
+      done()
+    }
+  })
 })
