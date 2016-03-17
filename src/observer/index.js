@@ -2,6 +2,7 @@ import Dep from './dep'
 import { arrayMethods } from './array'
 import {
   def,
+  isObject,
   isArray,
   isPlainObject,
   hasProto,
@@ -191,7 +192,7 @@ export function defineReactive (obj, key, val, doNotObserve) {
   // this allows freezing a large object from the root and
   // avoid unnecessary observation inside v-for fragments.
   var childOb = doNotObserve
-    ? typeof val === 'object' && val.__ob__
+    ? isObject(val) && val.__ob__
     : observe(val)
   Object.defineProperty(obj, key, {
     enumerable: true,
@@ -223,7 +224,7 @@ export function defineReactive (obj, key, val, doNotObserve) {
         val = newVal
       }
       childOb = doNotObserve
-        ? typeof newVal === 'object' && newVal.__ob__
+        ? isObject(newVal) && newVal.__ob__
         : observe(newVal)
       dep.notify()
     }
