@@ -673,4 +673,31 @@ describe('prop', function () {
     })
     expect(vm.$el.textContent).toBe('1')
   })
+
+  it('non reactive values passed down as prop should not be converted', function (done) {
+    var a = Object.freeze({
+      msg: 'hello'
+    })
+    var parent = new Vue({
+      el: el,
+      template: '<comp :a="a"></comp>',
+      data: {
+        a: a
+      },
+      components: {
+        comp: {
+          props: ['a']
+        }
+      }
+    })
+    var child = parent.$children[0]
+    expect(child.a.msg).toBe('hello')
+    expect(child.a.__ob__).toBeUndefined() // should not be converted
+    parent.a = Object.freeze({ msg: 'yo' })
+    Vue.nextTick(function () {
+      expect(child.a.msg).toBe('yo')
+      expect(child.a.__ob__).toBeUndefined()
+      done()
+    })
+  })
 })
