@@ -72,14 +72,12 @@ describe('Instance state initialization', function () {
         props: ['c'],
         data: function () {
           expect(this.c).toBe(2)
-          expect(this._data.c).toBe(2)
           return {
             d: this.c + 1
           }
         },
         created: function () {
           expect(this.c).toBe(2)
-          expect(this._data.c).toBe(2)
         }
       })
       expect(vm.d).toBe(3)

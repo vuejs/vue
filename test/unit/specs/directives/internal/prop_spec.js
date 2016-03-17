@@ -491,31 +491,6 @@ describe('prop', function () {
     expect(el.textContent).toBe('AAA')
   })
 
-  it('should not overwrite default value for an absent Boolean prop', function () {
-    var vm = new Vue({
-      el: el,
-      template: '<test></test>',
-      components: {
-        test: {
-          props: {
-            prop: Boolean
-          },
-          data: function () {
-            return {
-              prop: true
-            }
-          },
-          template: '{{prop}}'
-        }
-      }
-    })
-    expect(vm.$children[0].prop).toBe(true)
-    expect(vm.$el.textContent).toBe('true')
-    expect(JSON.stringify(vm.$children[0].$data)).toBe(JSON.stringify({
-      prop: true
-    }))
-  })
-
   it('should respect default value of a Boolean prop', function () {
     var vm = new Vue({
       el: el,

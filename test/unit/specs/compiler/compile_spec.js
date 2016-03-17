@@ -299,18 +299,12 @@ describe('Compile', function () {
     expect(vm._bindDir.calls.count()).toBe(4)
     // literal
     expect(vm.testLiteral).toBe('1')
-    expect(vm._data.testLiteral).toBe('1')
     expect(vm.testBoolean).toBe(true)
-    expect(vm._data.testBoolean).toBe(true)
     expect(vm.optimizeLiteral).toBe(1)
-    expect(vm._data.optimizeLiteral).toBe(1)
     expect(vm.optimizeLiteralStr).toBe('true')
-    expect(vm._data.optimizeLiteralStr).toBe('true')
     expect(vm.optimizeLiteralNegativeNumber).toBe(-1)
-    expect(vm._data.optimizeLiteralNegativeNumber).toBe(-1)
     // one time
     expect(vm.testOneTime).toBe('from parent: a')
-    expect(vm._data.testOneTime).toBe('from parent: a')
     // normal
     var args = vm._bindDir.calls.argsFor(0)
     var prop = args[0].prop
@@ -345,8 +339,8 @@ describe('Compile', function () {
     el.setAttribute(':b', '[1,2,3]')
     compiler.compileAndLinkProps(vm, el, { a: null, b: null })
     expect(vm._bindDir.calls.count()).toBe(0)
-    expect(vm._data.a).toBe('hi')
-    expect(vm._data.b.join(',')).toBe('1,2,3')
+    expect(vm.a).toBe('hi')
+    expect(vm.b.join(',')).toBe('1,2,3')
     // restore parent mock
     vm._context = context
   })
