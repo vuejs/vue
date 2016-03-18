@@ -1,6 +1,6 @@
 {
   "name": "vue",
-  "version": "1.0.17",
+  "version": "1.0.18",
   "author": "Evan You <yyx990803@gmail.com>",
   "license": "MIT",
   "description": "Simple, Fast & Composable MVVM for building interactive interfaces",
