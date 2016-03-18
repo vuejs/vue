@@ -10,7 +10,7 @@ import {
   compile,
   compileRoot,
   transclude,
-  scanSlots
+  resolveSlots
 } from '../../compiler/index'
 
 export default function (Vue) {
@@ -68,9 +68,8 @@ export default function (Vue) {
     var contextOptions = this._context && this._context.$options
     var rootLinker = compileRoot(el, options, contextOptions)
 
-    // scan for slot distribution before compiling the content
-    // so that it's decoupeld from slot/directive compilation order
-    scanSlots(el, options._content, this)
+    // resolve slot distribution
+    resolveSlots(this, options._content)
 
     // compile and link the rest
     var contentLinkFn
