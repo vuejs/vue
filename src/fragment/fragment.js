@@ -21,6 +21,7 @@ import {
  * @param {DocumentFragment} frag
  * @param {Vue} [host]
  * @param {Object} [scope]
+ * @param {Fragment} [parentFrag]
  */
 
 export default function Fragment (linker, vm, frag, host, scope, parentFrag) {

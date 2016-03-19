@@ -18,7 +18,7 @@ let uid = 0
  * This is used for both the $watch() api and directives.
  *
  * @param {Vue} vm
- * @param {String} expression
+ * @param {String|Function} expOrFn
  * @param {Function} cb
  * @param {Object} options
  *                 - {Array} filters

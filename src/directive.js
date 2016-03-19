@@ -20,18 +20,21 @@ function noop () {}
  * It registers a watcher with the expression and calls
  * the DOM update function when a change is triggered.
  *
- * @param {String} name
- * @param {Node} el
- * @param {Vue} vm
  * @param {Object} descriptor
  *                 - {String} name
  *                 - {Object} def
  *                 - {String} expression
  *                 - {Array<Object>} [filters]
+ *                 - {Object} [modifiers]
  *                 - {Boolean} literal
  *                 - {String} attr
+ *                 - {String} arg
  *                 - {String} raw
- * @param {Object} def - directive definition object
+ *                 - {String} [ref]
+ *                 - {Array<Object>} [interp]
+ *                 - {Boolean} [hasOneTime]
+ * @param {Vue} vm
+ * @param {Node} el
  * @param {Vue} [host] - transclusion host component
  * @param {Object} [scope] - v-for scope
  * @param {Fragment} [frag] - owner fragment
@@ -68,8 +71,6 @@ export default function Directive (descriptor, vm, el, host, scope, frag) {
  * Initialize the directive, mixin definition properties,
  * setup the watcher, call definition bind() and update()
  * if present.
- *
- * @param {Object} def
  */
 
 Directive.prototype._bind = function () {
