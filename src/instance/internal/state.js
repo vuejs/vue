@@ -76,7 +76,7 @@ export default function (Vue) {
 
   Vue.prototype._initData = function () {
     var dataFn = this.$options.data
-    var data = this._data = dataFn ? dataFn() : {}
+    var data = this._data = dataFn ? dataFn() || {} : {}
     var props = this._props
     var runtimeData = this._runtimeData
       ? typeof this._runtimeData === 'function'
