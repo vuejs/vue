@@ -108,6 +108,8 @@ export default function (Vue) {
     // for transitions
     if (!inDocument) withTransition = false
     var self = this
+    // if the Instance contains a beforeDetached event trigger it
+    self._callHook('beforeDetached')
     var realCb = function () {
       if (inDocument) self._callHook('detached')
       if (cb) cb()

@@ -113,6 +113,7 @@ export default function (Vue) {
 
   Vue.prototype._initDOMHooks = function () {
     this.$on('hook:attached', onAttached)
+    this.$on('hook:beforeDetached', onBeforeDetached)
     this.$on('hook:detached', onDetached)
   }
 
@@ -136,6 +137,29 @@ export default function (Vue) {
   function callAttach (child) {
     if (!child._isAttached && inDoc(child.$el)) {
       child._callHook('attached')
+    }
+  }
+
+  /**
+   * Callback to recursively call beforeDetached hook on children
+   */
+
+  function onBeforeDetached () {
+    if (this._isAttached) {
+      this.$options.beforeDetached()
+      this.$children.forEach(callBeforeDetach)
+    }
+  }
+
+    /**
+   * Iterator to call beforeDetached hook
+   *
+   * @param {Vue} child
+   */
+
+  function callBeforeDetach (child) {
+    if (child._isAttached && !inDoc(child.$el)) {
+      child.$options.beforeDetached()
     }
   }
 
