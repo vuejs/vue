@@ -22,6 +22,7 @@ let uid = 0
 const vFor = {
 
   priority: FOR,
+  terminal: true,
 
   params: [
     'track-by',

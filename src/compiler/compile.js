@@ -25,14 +25,9 @@ const dirAttrRE = /^v-([^:]+)(?:$|:(.*)$)/
 const modifierRE = /\.[^\.]+/g
 const transitionRE = /^(v-bind:|:)?transition$/
 
-// terminal directives
-export const terminalDirectives = [
-  'for',
-  'if'
-]
-
 // default directive priority
 const DEFAULT_PRIORITY = 1000
+const DEFAULT_TERMINAL_PRIORITY = 2000
 
 /**
  * Compile a template and return a reusable composite link
@@ -588,13 +583,27 @@ function checkTerminalDirectives (el, options) {
       return skip
     }
   }
-  var value, dirName
-  for (var i = 0, l = terminalDirectives.length; i < l; i++) {
-    dirName = terminalDirectives[i]
-    value = el.getAttribute('v-' + dirName)
-    if (value != null) {
-      return makeTerminalNodeLinkFn(el, dirName, value, options)
+
+  var attrs, attr, name, value, matched, dirName, arg, def, termDef
+  attrs = el.attributes
+  for (var i = 0, j = attrs.length; i < j; i++) {
+    attr = attrs[i]
+    if ((matched = attr.name.match(dirAttrRE))) {
+      def = resolveAsset(options, 'directives', matched[1])
+      if (def && def.terminal) {
+        if (!termDef || ((def.priority || DEFAULT_TERMINAL_PRIORITY) > termDef.priority)) {
+          termDef = def
+          name = attr.name
+          value = attr.value
+          dirName = matched[1]
+          arg = matched[2]
+        }
+      }
     }
+  }
+
+  if (termDef) {
+    return makeTerminalNodeLinkFn(el, dirName, value, options, termDef, name, arg)
   }
 }
 
@@ -611,20 +620,28 @@ skip.terminal = true
  * @param {String} dirName
  * @param {String} value
  * @param {Object} options
- * @param {Object} [def]
+ * @param {Object} def
+ * @param {String} [attrName]
+ * @param {String} [arg]
  * @return {Function} terminalLinkFn
  */
 
-function makeTerminalNodeLinkFn (el, dirName, value, options, def) {
+function makeTerminalNodeLinkFn (el, dirName, value, options, def, attrName, arg) {
   var parsed = parseDirective(value)
   var descriptor = {
     name: dirName,
     expression: parsed.expression,
     filters: parsed.filters,
     raw: value,
-    // either an element directive, or if/for
-    // #2366 or custom terminal directive
-    def: def || resolveAsset(options, 'directives', dirName)
+    rawName: attrName,
+    def: def
+  }
+  if (attrName) {
+    descriptor.rawName = attrName
+    descriptor.modifiers = parseModifiers(attrName)
+  }
+  if (arg) {
+    descriptor.arg = arg.replace(modifierRE, '')
   }
   // check ref for v-for and router-view
   if (dirName === 'for' || dirName === 'router-view') {

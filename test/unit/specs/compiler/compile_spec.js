@@ -249,6 +249,48 @@ describe('Compile', function () {
     expect(args[1]).toBe(el.firstChild)
   })
 
+  it('custom terminal directives', function () {
+    var defTerminal = {
+      terminal: true,
+      priority: Vue.options.directives.if.priority + 1
+    }
+    var options = _.mergeOptions(Vue.options, {
+      directives: { term: defTerminal }
+    })
+    el.innerHTML = '<div v-term:arg1.modifier1.modifier2="foo"></div>'
+    var linker = compile(el, options)
+    linker(vm, el)
+    expect(vm._bindDir.calls.count()).toBe(1)
+    var args = vm._bindDir.calls.argsFor(0)
+    expect(args[0].name).toBe('term')
+    expect(args[0].expression).toBe('foo')
+    expect(args[0].rawName).toBe('v-term:arg1.modifier1.modifier2')
+    expect(args[0].arg).toBe('arg1')
+    expect(args[0].modifiers.modifier1).toBe(true)
+    expect(args[0].modifiers.modifier2).toBe(true)
+    expect(args[0].def).toBe(defTerminal)
+  })
+
+  it('custom terminal directives priority', function () {
+    var defTerminal = {
+      terminal: true,
+      priority: Vue.options.directives.if.priority + 1
+    }
+    var options = _.mergeOptions(Vue.options, {
+      directives: { term: defTerminal }
+    })
+    el.innerHTML = '<div v-term:arg1 v-if="ok"></div>'
+    var linker = compile(el, options)
+    linker(vm, el)
+    expect(vm._bindDir.calls.count()).toBe(1)
+    var args = vm._bindDir.calls.argsFor(0)
+    expect(args[0].name).toBe('term')
+    expect(args[0].expression).toBe('')
+    expect(args[0].rawName).toBe('v-term:arg1')
+    expect(args[0].arg).toBe('arg1')
+    expect(args[0].def).toBe(defTerminal)
+  })
+
   it('custom element components', function () {
     var options = _.mergeOptions(Vue.options, {
       components: {
@@ -625,19 +667,6 @@ describe('Compile', function () {
       components: { comp: { template: '<div></div>' }}
     })
     expect(el.textContent).toBe('worked!')
-    expect(getWarnCount()).toBe(0)
-  })
-
-  it('allow custom terminal directive', function () {
-    Vue.mixin({}) // #2366 conflict with custom terminal directive
-    Vue.compiler.terminalDirectives.push('foo')
-    Vue.directive('foo', {})
-
-    new Vue({
-      el: el,
-      template: '<div v-foo></div>'
-    })
-
     expect(getWarnCount()).toBe(0)
   })
 })
