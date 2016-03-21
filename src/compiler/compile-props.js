@@ -1,5 +1,6 @@
 import config from '../config'
 import { parseDirective } from '../parsers/directive'
+import { isSimplePath } from '../parsers/expression'
 import { defineReactive } from '../observer/index'
 import propDef from '../directives/internal/prop'
 import {
@@ -221,7 +222,8 @@ export function initProp (vm, prop, value) {
     value = getPropDefaultValue(vm, prop.options)
   }
   if (assertProp(prop, value)) {
-    defineReactive(vm, key, value, true /* doNotObserve */)
+    var doNotObserve = !prop.dynamic || isSimplePath(prop.raw)
+    defineReactive(vm, key, value, doNotObserve)
   }
 }
 

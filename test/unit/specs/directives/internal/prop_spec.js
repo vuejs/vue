@@ -700,4 +700,23 @@ describe('prop', function () {
       done()
     })
   })
+
+  it('inline prop values should be converted', function (done) {
+    var vm = new Vue({
+      el: el,
+      template: '<comp :a="[1, 2, 3]"></comp>',
+      components: {
+        comp: {
+          props: ['a'],
+          template: '<div v-for="i in a">{{ i }}</div>'
+        }
+      }
+    })
+    expect(vm.$el.textContent).toBe('123')
+    vm.$children[0].a.pop()
+    Vue.nextTick(function () {
+      expect(vm.$el.textContent).toBe('12')
+      done()
+    })
+  })
 })
