@@ -74,18 +74,22 @@ export function filterBy (arr, search, delimiter) {
 /**
  * Filter filter for arrays
  *
- * @param {String} sortKey
+ * @param {String|Array<String>} sortKeys
  * @param {String} reverse
  */
 
-export function orderBy (arr, sortKey, reverse) {
+export function orderBy (arr, sortKeys, reverse) {
   arr = convertArray(arr)
-  if (!sortKey) {
+  let order = (reverse && reverse < 0) ? -1 : 1
+
+  if (typeof sortKeys === 'string') {
+    sortKeys = [sortKeys]
+  } else if (!sortKeys || !sortKeys.length) {
     return arr
   }
-  var order = (reverse && reverse < 0) ? -1 : 1
-  // sort on a copy to avoid mutating original array
-  return arr.slice().sort(function (a, b) {
+
+  function compare (a, b, sortKeyIndex) {
+    const sortKey = sortKeys[sortKeyIndex]
     if (sortKey !== '$key') {
       if (isObject(a) && '$value' in a) a = a.$value
       if (isObject(b) && '$value' in b) b = b.$value
@@ -93,7 +97,16 @@ export function orderBy (arr, sortKey, reverse) {
     a = isObject(a) ? getPath(a, sortKey) : a
     b = isObject(b) ? getPath(b, sortKey) : b
     return a === b ? 0 : a > b ? order : -order
-  })
+  }
+
+  function recursiveCompare (a, b, i) {
+    i = i || 0
+    if (i === sortKeys.length - 1) return compare(a, b, i)
+    return compare(a, b, i) || recursiveCompare(a, b, i + 1)
+  }
+
+  // sort on a copy to avoid mutating original array
+  return arr.slice().sort(recursiveCompare)
 }
 
 /**
