@@ -105,6 +105,7 @@ export function initProp (vm, prop, value) {
     value = getPropDefaultValue(vm, prop.options)
   }
   if (assertProp(prop, value)) {
+    vm._data[key] = value
     defineReactive(vm, key, value, true /* doNotObserve */)
   }
 }
