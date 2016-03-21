@@ -47,6 +47,9 @@ export default function (Vue) {
   /**
    * Teardown the instance, simply delegate to the internal
    * _destroy.
+   *
+   * @param {Boolean} remove
+   * @param {Boolean} deferCleanup
    */
 
   Vue.prototype.$destroy = function (remove, deferCleanup) {
@@ -59,6 +62,8 @@ export default function (Vue) {
    *
    * @param {Element|DocumentFragment} el
    * @param {Vue} [host]
+   * @param {Object} [scope]
+   * @param {Fragment} [frag]
    * @return {Function}
    */
 

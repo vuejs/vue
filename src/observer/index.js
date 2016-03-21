@@ -108,7 +108,7 @@ Observer.prototype.removeVm = function (vm) {
  * the prototype chain using __proto__
  *
  * @param {Object|Array} target
- * @param {Object} proto
+ * @param {Object} src
  */
 
 function protoAugment (target, src) {

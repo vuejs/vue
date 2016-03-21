@@ -135,10 +135,8 @@ export default function (Vue) {
   /**
    * Create and bind a directive to an element.
    *
-   * @param {String} name - directive name
+   * @param {Object} descriptor - parsed directive descriptor
    * @param {Node} node   - target node
-   * @param {Object} desc - parsed directive descriptor
-   * @param {Object} def  - directive definition object
    * @param {Vue} [host] - transclusion host component
    * @param {Object} [scope] - v-for scope
    * @param {Fragment} [frag] - owner fragment

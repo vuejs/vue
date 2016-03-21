@@ -71,7 +71,7 @@ function processFilterArg (arg) {
  *   ]
  * }
  *
- * @param {String} str
+ * @param {String} s
  * @return {Object}
  */
 
