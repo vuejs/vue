@@ -77,6 +77,11 @@ describe('Filters', function () {
     expect(filter(-50)).toBe('-$50.00')
     expect(filter(-150.43)).toBe('-$150.43')
     expect(filter(-1500.4343434)).toBe('-$1,500.43')
+    // places
+    expect(filter(123, '$', 2)).toBe('$123.00')
+    expect(filter(123.45, '$', 0)).toBe('$123')
+    expect(filter(123.456, '$', 2)).toBe('$123.46')
+    expect(filter(123.456, '$', 3)).toBe('$123.456')
   })
 
   it('debounce', function (done) {
