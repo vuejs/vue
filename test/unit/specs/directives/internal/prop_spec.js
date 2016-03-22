@@ -626,18 +626,20 @@ describe('prop', function () {
   it('treat boolean props properly', function () {
     var vm = new Vue({
       el: el,
-      template: '<comp v-ref:child prop-a></comp>',
+      template: '<comp v-ref:child prop-a prop-b="prop-b"></comp>',
       components: {
         comp: {
           props: {
             propA: Boolean,
-            propB: Boolean
+            propB: Boolean,
+            propC: Boolean
           }
         }
       }
     })
     expect(vm.$refs.child.propA).toBe(true)
-    expect(vm.$refs.child.propB).toBe(false)
+    expect(vm.$refs.child.propB).toBe(true)
+    expect(vm.$refs.child.propC).toBe(false)
   })
 
   it('detect possible camelCase prop usage', function () {

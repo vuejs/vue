@@ -197,9 +197,13 @@ function makePropsLinkFn (props) {
         initProp(vm, prop, value)
       } else {
         // string literal, but we need to cater for
-        // Boolean props with no value
-        value = options.type === Boolean && raw === ''
-          ? true
+        // Boolean props with no value, or with same
+        // literal value (e.g. disabled="disabled")
+        // see https://github.com/vuejs/vue-loader/issues/182
+        value = (
+          options.type === Boolean &&
+          (raw === '' || raw === hyphenate(prop.name))
+        ) ? true
           : raw
         initProp(vm, prop, value)
       }
