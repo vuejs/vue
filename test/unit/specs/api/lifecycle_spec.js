@@ -176,6 +176,7 @@ describe('Lifecycle API', function () {
       var opts = {
         beforeDestroy: jasmine.createSpy(),
         destroyed: jasmine.createSpy(),
+        beforeDetached: jasmine.createSpy(),
         detached: jasmine.createSpy()
       }
       var el = opts.el = document.createElement('div')
@@ -184,6 +185,7 @@ describe('Lifecycle API', function () {
       vm.$destroy(true)
       expect(opts.beforeDestroy).toHaveBeenCalled()
       expect(opts.destroyed).toHaveBeenCalled()
+      expect(opts.beforeDetached).toHaveBeenCalled()
       expect(opts.detached).toHaveBeenCalled()
     })
 
