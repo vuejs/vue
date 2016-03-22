@@ -19,6 +19,22 @@ describe('misc', function () {
           write: function (v, oldV) {
             return v + ' ' + oldV
           }
+        },
+        duplex1: {
+          read: function (v) {
+            return v.split('').reverse().join('')
+          },
+          write: function (v) {
+            return v.split('').reverse().join('')
+          }
+        },
+        duplex2: {
+          read: function (v) {
+            return v + 'hi'
+          },
+          write: function (v) {
+            return v.replace('hi', '')
+          }
         }
       }
     })
@@ -38,6 +54,17 @@ describe('misc', function () {
       ]
       var val = vm._applyFilters('test', 'oldTest', filters, true)
       expect(val).toBe('test oldTest')
+    })
+
+    it('chained read + write', function () {
+      var filters = [
+        { name: 'duplex1' },
+        { name: 'duplex2' }
+      ]
+      var val = vm._applyFilters('test', 'oldTest', filters)
+      expect(val).toBe('tsethi')
+      val = vm._applyFilters('tsethi', 'oldTest', filters, true)
+      expect(val).toBe('test')
     })
 
     it('warn not found', function () {

@@ -22,7 +22,7 @@ export default function (Vue) {
   Vue.prototype._applyFilters = function (value, oldValue, filters, write) {
     var filter, fn, args, arg, offset, i, l, j, k
     for (i = 0, l = filters.length; i < l; i++) {
-      filter = filters[i]
+      filter = filters[write ? l - i - 1 : i]
       fn = resolveAsset(this.$options, 'filters', filter.name)
       if (process.env.NODE_ENV !== 'production') {
         assertAsset(fn, 'filter', filter.name)
