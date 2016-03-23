@@ -13,7 +13,7 @@
 
 Vue.js is an MIT-licensed open source project. Its ongoing development is made possible thanks to the support by these awesome [backers](https://github.com/vuejs/vue/blob/dev/backers.md). If you'd like to join them, check out [Vue.js' Patreon campaign](https://www.patreon.com/evanyou).
 
-Special thanks to the generous sponsorship by:<span>
+**Special thanks to the generous sponsorship by:**
 
 <a href="https://strikingly.com">
   <img width="300px" src="http://res.cloudinary.com/hrscywv4p/image/upload/c_limit,f_auto,h_1440,q_90,w_720/strikingly-logo-01_mhnp2b.png">
