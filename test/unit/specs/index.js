@@ -70,13 +70,6 @@ beforeEach(function () {
   })
 })
 
-describe('custom matcher', function () {
-  it('should work', function () {
-    _.warn('lol')
-    expect('lol').toHaveBeenWarned()
-  })
-})
-
 // shim process
 scope.process = {
   env: {
