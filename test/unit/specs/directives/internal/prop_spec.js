@@ -721,4 +721,30 @@ describe('prop', function () {
       done()
     })
   })
+
+  // #2549
+  it('mutating child prop binding should be reactive if parent value was reactive', function (done) {
+    var vm = new Vue({
+      el: el,
+      template: '<comp :list="list"></comp>',
+      data: {
+        list: [1, 2, 3]
+      },
+      components: {
+        comp: {
+          props: ['list'],
+          template: '<div v-for="i in list">{{ i }}</div>',
+          created: function () {
+            this.list = [2, 3, 4]
+          }
+        }
+      }
+    })
+    expect(vm.$el.textContent).toBe('234')
+    vm.$children[0].list.push(5)
+    Vue.nextTick(function () {
+      expect(vm.$el.textContent).toBe('2345')
+      done()
+    })
+  })
 })

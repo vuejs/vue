@@ -226,7 +226,14 @@ export function initProp (vm, prop, value) {
     value = getPropDefaultValue(vm, prop.options)
   }
   if (assertProp(prop, value)) {
-    var doNotObserve = !prop.dynamic || isSimplePath(prop.raw)
+    var doNotObserve =
+      // if the passed down prop was already converted, then
+      // subsequent sets should also be converted, because the user
+      // may mutate the prop binding in the child component (#2549)
+      !(value && value.__ob__) &&
+      // otherwise we can skip observation for props that are either
+      // literal or points to a simple path (non-derived values)
+      (!prop.dynamic || isSimplePath(prop.raw))
     defineReactive(vm, key, value, doNotObserve)
   }
 }
