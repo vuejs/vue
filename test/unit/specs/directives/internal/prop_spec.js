@@ -364,6 +364,13 @@ describe('prop', function () {
       expect('Expected custom type').toHaveBeenWarned()
     })
 
+    it('multiple types', function () {
+      makeInstance([], [Array, Number, Boolean])
+      expect(getWarnCount()).toBe(0)
+      makeInstance({}, [Array, Number, Boolean])
+      expect('Expected Array, Number, Boolean').toHaveBeenWarned()
+    })
+
     it('custom validator', function () {
       makeInstance(123, null, function (v) {
         return v === 123
@@ -390,12 +397,38 @@ describe('prop', function () {
       expect('Expected String').toHaveBeenWarned()
     })
 
+    it('multiple types + custom validator', function () {
+      makeInstance(123, [Number, String, Boolean], function (v) {
+        return v === 123
+      })
+      expect(getWarnCount()).toBe(0)
+      makeInstance(123, [Number, String, Boolean], function (v) {
+        return v === 234
+      })
+      expect('custom validator check failed').toHaveBeenWarned()
+      makeInstance(123, [String, Boolean], function (v) {
+        return v === 123
+      })
+      expect('Expected String, Boolean').toHaveBeenWarned()
+    })
+
     it('type check + coerce', function () {
       makeInstance(123, String, null, String)
       expect(getWarnCount()).toBe(0)
       makeInstance('123', Number, null, Number)
       expect(getWarnCount()).toBe(0)
       makeInstance('123', Boolean, null, function (val) {
+        return val === '123'
+      })
+      expect(getWarnCount()).toBe(0)
+    })
+
+    it('multiple types + custom validator', function () {
+      makeInstance(123, [String, Boolean, Number], null, String)
+      expect(getWarnCount()).toBe(0)
+      makeInstance('123', [String, Boolean, Number], null, Number)
+      expect(getWarnCount()).toBe(0)
+      makeInstance('123', [String, Boolean, Function], null, function (val) {
         return val === '123'
       })
       expect(getWarnCount()).toBe(0)
