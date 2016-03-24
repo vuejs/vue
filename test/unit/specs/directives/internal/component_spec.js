@@ -137,14 +137,21 @@ describe('Component', function () {
   it(':is using raw component constructor', function () {
     new Vue({
       el: el,
-      template: '<component :is="$options.components.test">',
+      template:
+        '<component :is="$options.components.test"></component>' +
+        '<component :is="$options.components.async"></component>',
       components: {
         test: {
           template: 'hi'
+        },
+        async: function (resolve) {
+          resolve({
+            template: 'ho'
+          })
         }
       }
     })
-    expect(el.textContent).toBe('hi')
+    expect(el.textContent).toBe('hiho')
   })
 
   it('keep-alive', function (done) {

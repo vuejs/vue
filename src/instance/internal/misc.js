@@ -52,14 +52,19 @@ export default function (Vue) {
    * resolves asynchronously and caches the resolved
    * constructor on the factory.
    *
-   * @param {String} id
+   * @param {String|Function} value
    * @param {Function} cb
    */
 
-  Vue.prototype._resolveComponent = function (id, cb) {
-    var factory = resolveAsset(this.$options, 'components', id)
-    if (process.env.NODE_ENV !== 'production') {
-      assertAsset(factory, 'component', id)
+  Vue.prototype._resolveComponent = function (value, cb) {
+    var factory
+    if (typeof value === 'function') {
+      factory = value
+    } else {
+      factory = resolveAsset(this.$options, 'components', value)
+      if (process.env.NODE_ENV !== 'production') {
+        assertAsset(factory, 'component', value)
+      }
     }
     if (!factory) {
       return
@@ -87,7 +92,8 @@ export default function (Vue) {
           }
         }, function reject (reason) {
           process.env.NODE_ENV !== 'production' && warn(
-            'Failed to resolve async component: ' + id + '. ' +
+            'Failed to resolve async component' +
+            (typeof value === 'string' ? ': ' + value : '') + '. ' +
             (reason ? '\nReason: ' + reason : '')
           )
         })

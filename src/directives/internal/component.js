@@ -114,21 +114,21 @@ export default {
   /**
    * Resolve the component constructor to use when creating
    * the child vm.
+   *
+   * @param {String|Function} value
+   * @param {Function} cb
    */
 
-  resolveComponent (id, cb) {
+  resolveComponent (value, cb) {
     var self = this
-    var done = function (Component) {
-      self.ComponentName = Component.options.name || id
+    this.pendingComponentCb = cancellable(function (Component) {
+      self.ComponentName =
+        Component.options.name ||
+        (typeof value === 'string' ? value : null)
       self.Component = Component
       cb()
-    }
-    if (typeof id === 'function') {
-      done(id)
-    } else {
-      this.pendingComponentCb = cancellable(done)
-      this.vm._resolveComponent(id, this.pendingComponentCb)
-    }
+    })
+    this.vm._resolveComponent(value, this.pendingComponentCb)
   },
 
   /**
