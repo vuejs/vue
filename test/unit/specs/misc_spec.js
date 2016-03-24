@@ -396,11 +396,11 @@ describe('Misc', function () {
       components: {
         test: {
           replace: true,
-          template: '<div :class="{\'inner\': true}"></div>'
+          template: '<div class="static-inner" :class="{\'inner\': true}"></div>'
         }
       }
     })
-    expect(vm.$el.firstChild.className).toBe('outer inner')
+    expect(vm.$el.firstChild.className).toBe('static-inner outer inner')
   })
 
   it('SVG class interpolation', function () {

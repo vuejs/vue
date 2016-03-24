@@ -180,6 +180,22 @@ export function off (el, event, cb) {
 }
 
 /**
+ * For IE9 compat: when both class and :class are present
+ * getAttribute('class') returns wrong value...
+ *
+ * @param {Element} el
+ * @return {String}
+ */
+
+function getClass (el) {
+  var classname = el.className
+  if (typeof classname === 'object') {
+    classname = classname.baseVal || ''
+  }
+  return classname
+}
+
+/**
  * In IE9, setAttribute('class') will result in empty class
  * if the element also has the :class attribute; However in
  * PhantomJS, setting `className` does not work on SVG elements...
@@ -209,7 +225,7 @@ export function addClass (el, cls) {
   if (el.classList) {
     el.classList.add(cls)
   } else {
-    var cur = ' ' + (el.getAttribute('class') || '') + ' '
+    var cur = ' ' + getClass(el) + ' '
     if (cur.indexOf(' ' + cls + ' ') < 0) {
       setClass(el, (cur + cls).trim())
     }
@@ -227,7 +243,7 @@ export function removeClass (el, cls) {
   if (el.classList) {
     el.classList.remove(cls)
   } else {
-    var cur = ' ' + (el.getAttribute('class') || '') + ' '
+    var cur = ' ' + getClass(el) + ' '
     var tar = ' ' + cls + ' '
     while (cur.indexOf(tar) >= 0) {
       cur = cur.replace(tar, ' ')
