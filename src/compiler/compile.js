@@ -315,9 +315,10 @@ function compileElement (el, options) {
   }
   var linkFn
   var hasAttrs = el.hasAttributes()
+  var attrs = hasAttrs && toArray(el.attributes)
   // check terminal directives (for & if)
   if (hasAttrs) {
-    linkFn = checkTerminalDirectives(el, options)
+    linkFn = checkTerminalDirectives(el, attrs, options)
   }
   // check element directives
   if (!linkFn) {
@@ -329,7 +330,7 @@ function compileElement (el, options) {
   }
   // normal directives
   if (!linkFn && hasAttrs) {
-    linkFn = compileDirectives(el.attributes, options)
+    linkFn = compileDirectives(attrs, options)
   }
   return linkFn
 }
@@ -567,11 +568,12 @@ function checkComponent (el, options) {
  * If it finds one, return a terminal link function.
  *
  * @param {Element} el
+ * @param {Array} attrs
  * @param {Object} options
  * @return {Function} terminalLinkFn
  */
 
-function checkTerminalDirectives (el, options) {
+function checkTerminalDirectives (el, attrs, options) {
   // skip v-pre
   if (getAttr(el, 'v-pre') !== null) {
     return skip
@@ -584,8 +586,7 @@ function checkTerminalDirectives (el, options) {
     }
   }
 
-  var attrs, attr, name, value, matched, dirName, arg, def, termDef
-  attrs = el.attributes
+  var attr, name, value, matched, dirName, arg, def, termDef
   for (var i = 0, j = attrs.length; i < j; i++) {
     attr = attrs[i]
     if ((matched = attr.name.match(dirAttrRE))) {
