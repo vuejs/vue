@@ -4,7 +4,7 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
 
 ### $2000
 
-<a href="https://strikingly.com">
+<a href="https://strikingly.com/s/careers?utm_source=v">
   <img width="500px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/strikingly.png">
 </a>
 
