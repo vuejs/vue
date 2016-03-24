@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Vue.js tree-view demo</title>
+  <script src="../../dist/vue.js"></script>
+</head>
+<body>
+  <div id="demo">
+    <div>
+      <button @click="doIt">Do It</button>
+    </div>
+  </div>
+  <script type="text/javascript">
+    new Vue({
+      el: '#demo',
+      data: {
+        rootValue: 0,
+        item1: {
+          valid1: 0,
+          nestedObj1: {
+            nestedValid1: 0
+          },
+          nestedArray1: [
+            {
+              x: 0
+            }
+          ]
+        }
+      },
+      methods: {
+        doIt: function () {
+          // should not throw error
+          this.rootValue = 1;
+
+          // should show a warning
+          this.invalidValue = 1;
+
+          // no error
+          this.item1.valid1 = 1;
+
+          // error
+          this.item1.invalid1 = 1;
+
+          // no error
+          this.item1.nestedObj1.nestedValid1 = 1;
+
+          // error
+          this.item1.nestedObj1.nestedInValid1 = 1;
+
+          // no error
+          this.item1.nestedArray1[0].x = 1;
+
+          // error
+          this.item1.nestedArray1[0].y = 1;
+
+          // error
+          this.item1.nestedArray1[1] = {x:5}
+        }
+      }
+    })
+  </script>
+</body>
+</html>

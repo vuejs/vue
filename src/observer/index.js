@@ -22,8 +22,9 @@ const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
  */
 
 export function Observer (value) {
-  this.value = value
+  this.value = value;
   this.dep = new Dep()
+  this.watchedKeys = {}
   def(value, '__ob__', this)
   if (isArray(value)) {
     var augment = hasProto
@@ -74,6 +75,32 @@ Observer.prototype.observeArray = function (items) {
  */
 
 Observer.prototype.convert = function (key, val) {
+  this.watchedKeys[key] = true;
+
+  if (isObject(val)) {
+    val = new Proxy (val, {
+      set: function (target, propKey, value, receiver) {
+        if (propKey === "__proto__") {
+          for (var i = 0; i < target.length; i++) {
+            var item = target[i];
+            target[i] = new Proxy (item, {
+              set: function (_target, _propKey, _value, _receiver) {
+                if(_target.__ob__ && !_target.__ob__.watchedKeys.hasOwnProperty (_propKey)) {
+                  console.warn (_propKey, "is not reactive on the array object");
+                }
+                return Reflect.set(target, propKey, value, receiver);
+              }
+            })
+          }
+        }
+        if(target.__ob__ && !target.__ob__.watchedKeys.hasOwnProperty (propKey)) {
+          if (propKey !== "__proto__")
+            console.warn (propKey, "is not reactive on", key);
+        }
+        return Reflect.set(target, propKey, value, receiver);
+      }
+    })
+  }
   defineReactive(this.value, key, val)
 }
 
