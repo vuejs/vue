@@ -134,6 +134,19 @@ describe('Component', function () {
     })
   })
 
+  it(':is using raw component constructor', function () {
+    new Vue({
+      el: el,
+      template: '<component :is="$options.components.test">',
+      components: {
+        test: {
+          template: 'hi'
+        }
+      }
+    })
+    expect(el.textContent).toBe('hi')
+  })
+
   it('keep-alive', function (done) {
     var spyA = jasmine.createSpy()
     var spyB = jasmine.createSpy()

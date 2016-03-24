@@ -118,12 +118,17 @@ export default {
 
   resolveComponent (id, cb) {
     var self = this
-    this.pendingComponentCb = cancellable(function (Component) {
+    var done = function (Component) {
       self.ComponentName = Component.options.name || id
       self.Component = Component
       cb()
-    })
-    this.vm._resolveComponent(id, this.pendingComponentCb)
+    }
+    if (typeof id === 'function') {
+      done(id)
+    } else {
+      this.pendingComponentCb = cancellable(done)
+      this.vm._resolveComponent(id, this.pendingComponentCb)
+    }
   },
 
   /**
