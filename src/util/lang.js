@@ -228,6 +228,20 @@ export function bind (fn, ctx) {
   }
 }
 
+export function bindWithDebug (fn, ctx) {
+  ctx = new Proxy (ctx, {
+    set: function (target, propKey, value, receiver) {
+      if(target._data && target._data.__ob__ && !target._data.__ob__.watchedKeys.hasOwnProperty (propKey)) {
+        console.warn (propKey, "is not reactive on root object");
+      }
+
+      return Reflect.set(target, propKey, value, receiver);
+    }
+  });
+
+  return bind (fn, ctx);
+}
+
 /**
  * Convert an Array-like object to a real Array.
  *

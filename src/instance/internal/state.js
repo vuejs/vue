@@ -11,7 +11,8 @@ import {
   query,
   hasOwn,
   isReserved,
-  bind
+  bind,
+  bindWithDebug
 } from '../../util/index'
 
 export default function (Vue) {
@@ -252,7 +253,7 @@ export default function (Vue) {
     var methods = this.$options.methods
     if (methods) {
       for (var key in methods) {
-        this[key] = bind(methods[key], this)
+        this[key] = bindWithDebug(methods[key], this)
       }
     }
   }
