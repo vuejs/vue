@@ -1,5 +1,6 @@
 var Vue = require('src')
 var _ = require('src/util')
+var FragmentFactory = require('src/fragment/factory')
 var compiler = require('src/compiler')
 var compile = compiler.compile
 var publicDirectives = require('src/directives/public')
@@ -264,7 +265,7 @@ describe('Compile', function () {
     var args = vm._bindDir.calls.argsFor(0)
     expect(args[0].name).toBe('term')
     expect(args[0].expression).toBe('foo')
-    expect(args[0].rawName).toBe('v-term:arg1.modifier1.modifier2')
+    expect(args[0].attr).toBe('v-term:arg1.modifier1.modifier2')
     expect(args[0].arg).toBe('arg1')
     expect(args[0].modifiers.modifier1).toBe(true)
     expect(args[0].modifiers.modifier2).toBe(true)
@@ -286,7 +287,7 @@ describe('Compile', function () {
     var args = vm._bindDir.calls.argsFor(0)
     expect(args[0].name).toBe('term')
     expect(args[0].expression).toBe('')
-    expect(args[0].rawName).toBe('v-term:arg1')
+    expect(args[0].attr).toBe('v-term:arg1')
     expect(args[0].arg).toBe('arg1')
     expect(args[0].def).toBe(defTerminal)
   })
@@ -668,5 +669,49 @@ describe('Compile', function () {
     })
     expect(el.textContent).toBe('worked!')
     expect(getWarnCount()).toBe(0)
+  })
+
+  // #xxx
+  it('should compile build-in terminal directive wihtout loop', function (done) {
+    var vm = new Vue({
+      el: el,
+      data: { show: false },
+      template: '<p v-if:arg1.modifier1="show">hello world</p>'
+    })
+    vm.show = true
+    _.nextTick(function () {
+      expect(el.textContent).toBe('hello world')
+      done()
+    })
+  })
+
+  it('should compile custom terminal directive wihtout loop', function (done) {
+    var vm = new Vue({
+      el: el,
+      data: { show: false },
+      template: '<p v-if="show" v-inject:modal.modifier1="foo">hello world</p>',
+      directives: {
+        inject: {
+          terminal: true,
+          priority: Vue.options.directives.if.priority + 1,
+          bind: function () {
+            this.anchor = _.createAnchor('v-inject')
+            _.replace(this.el, this.anchor)
+            var factory = new FragmentFactory(this.vm, this.el)
+            this.frag = factory.create(this._host, this._scope, this._frag)
+            this.frag.before(this.anchor)
+          },
+          unbind: function () {
+            this.frag.remove()
+            _.replace(this.anchor, this.el)
+          }
+        }
+      }
+    })
+    vm.show = true
+    _.nextTick(function () {
+      expect(el.textContent).toBe('hello world')
+      done()
+    })
   })
 })
