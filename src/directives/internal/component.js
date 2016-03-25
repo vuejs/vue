@@ -265,7 +265,9 @@ export default {
 
   unbuild (defer) {
     if (this.waitingFor) {
-      this.waitingFor.$destroy()
+      if (!this.keepAlive) {
+        this.waitingFor.$destroy()
+      }
       this.waitingFor = null
     }
     var child = this.childVM
