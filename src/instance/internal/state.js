@@ -11,6 +11,7 @@ import {
   query,
   hasOwn,
   isReserved,
+  isPlainObject,
   bind
 } from '../../util/index'
 
@@ -76,7 +77,13 @@ export default function (Vue) {
 
   Vue.prototype._initData = function () {
     var dataFn = this.$options.data
-    var data = this._data = dataFn ? dataFn() || {} : {}
+    var data = this._data = dataFn ? dataFn() : {}
+    if (!isPlainObject(data)) {
+      data = {}
+      process.env.NODE_ENV !== 'production' && warn(
+        'data functions should return an object.'
+      )
+    }
     var props = this._props
     var runtimeData = this._runtimeData
       ? typeof this._runtimeData === 'function'

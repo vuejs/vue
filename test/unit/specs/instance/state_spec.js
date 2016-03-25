@@ -2,6 +2,13 @@ var Vue = require('src')
 var _ = require('src/util')
 
 describe('Instance state initialization', function () {
+  it('should warn data functions that do not return an object', function () {
+    new Vue({
+      data: function () {}
+    })
+    expect('should return an object').toHaveBeenWarned()
+  })
+
   describe('data proxy', function () {
     var data = {
       a: 0,
