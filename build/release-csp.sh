@@ -21,3 +21,4 @@ git push origin v$CSP_VERSION
 npm publish
 npm dist-tag add vue@$PLAIN_VERSION latest
 npm dist-tag add vue@$CSP_VERSION csp
+npm view vue version dist-tags
