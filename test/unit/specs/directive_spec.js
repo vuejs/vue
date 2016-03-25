@@ -7,7 +7,7 @@ describe('Directive', function () {
   beforeEach(function () {
     el = document.createElement('div')
     def = {
-      params: ['foo'],
+      params: ['foo', 'keBab'],
       paramWatchers: {
         foo: jasmine.createSpy('foo')
       },
@@ -159,6 +159,7 @@ describe('Directive', function () {
 
   it('static params', function () {
     el.setAttribute('foo', 'hello')
+    el.setAttribute('ke-bab', 'yo')
     var d = new Directive({
       name: 'test',
       def: def,
@@ -166,10 +167,12 @@ describe('Directive', function () {
     }, vm, el)
     d._bind()
     expect(d.params.foo).toBe('hello')
+    expect(d.params.keBab).toBe('yo')
   })
 
   it('dynamic params', function (done) {
     el.setAttribute(':foo', 'a')
+    el.setAttribute(':ke-bab', '123')
     var d = new Directive({
       name: 'test',
       def: def,
@@ -177,6 +180,7 @@ describe('Directive', function () {
     }, vm, el)
     d._bind()
     expect(d.params.foo).toBe(vm.a)
+    expect(d.params.keBab).toBe(123)
     vm.a = 2
     nextTick(function () {
       expect(def.paramWatchers.foo).toHaveBeenCalledWith(2, 1)

@@ -6,6 +6,7 @@ import {
   getAttr,
   getBindAttr,
   camelize,
+  hyphenate,
   nextTick,
   warn
 } from './util/index'
@@ -166,7 +167,7 @@ Directive.prototype._setupParams = function () {
   var i = params.length
   var key, val, mappedKey
   while (i--) {
-    key = params[i]
+    key = hyphenate(params[i])
     mappedKey = camelize(key)
     val = getBindAttr(this.el, key)
     if (val != null) {
