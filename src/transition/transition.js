@@ -10,13 +10,35 @@ import {
   animationEndEvent,
   transitionProp,
   animationProp,
-  warn
+  warn,
+  inBrowser
 } from '../util/index'
 
 const TYPE_TRANSITION = 'transition'
 const TYPE_ANIMATION = 'animation'
 const transDurationProp = transitionProp + 'Duration'
 const animDurationProp = animationProp + 'Duration'
+
+/**
+ * If a just-entered element is applied the
+ * leave class while its enter transition hasn't started yet,
+ * and the transitioned property has the same value for both
+ * enter/leave, then the leave transition will be skipped and
+ * the transitionend event never fires. This function ensures
+ * its callback to be called after a transition has started
+ * by waiting for double raf.
+ *
+ * It falls back to setTimeout on devices that support CSS
+ * transitions but not raf (e.g. Android 4.2 browser) - since
+ * these environments are usually slow, we are giving it a
+ * relatively large timeout.
+ */
+
+const raf = inBrowser && window.requestAnimationFrame
+const waitForTransitionStart = raf
+  /* istanbul ignore next */
+  ? function (fn) { raf(function () { raf(fn) }) }
+  : function (fn) { setTimeout(fn, 50) }
 
 /**
  * A Transition object that encapsulates the state and logic
@@ -117,19 +139,11 @@ p.enter = function (op, cb) {
  */
 
 p.enterNextTick = function () {
-  // Important hack:
-  // in Chrome, if a just-entered element is applied the
-  // leave class while its interpolated property still has
-  // a very small value (within one frame), Chrome will
-  // skip the leave transition entirely and not firing the
-  // transtionend event. Therefore we need to protected
-  // against such cases using a one-frame timeout.
+  // prevent transition skipping
   this.justEntered = true
-  var self = this
-  setTimeout(function () {
-    self.justEntered = false
-  }, 17)
-
+  waitForTransitionStart(() => {
+    this.justEntered = false
+  })
   var enterDone = this.enterDone
   var type = this.getCssTransitionType(this.enterClass)
   if (!this.pendingJsCb) {

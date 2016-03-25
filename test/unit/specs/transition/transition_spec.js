@@ -194,7 +194,7 @@ if (!_.isIE9) {
               expect(el.classList.contains('test-no-trans-leave')).toBe(false)
               done()
             })
-          }, 17)
+          }, 50)
         })
       })
 
