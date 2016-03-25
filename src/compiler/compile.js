@@ -586,15 +586,17 @@ function checkTerminalDirectives (el, attrs, options) {
     }
   }
 
-  var attr, name, value, matched, dirName, arg, def, termDef
+  var attr, name, value, modifiers, matched, dirName, rawName, arg, def, termDef
   for (var i = 0, j = attrs.length; i < j; i++) {
     attr = attrs[i]
-    if ((matched = attr.name.match(dirAttrRE))) {
+    modifiers = parseModifiers(attr.name)
+    name = attr.name.replace(modifierRE, '')
+    if ((matched = name.match(dirAttrRE))) {
       def = resolveAsset(options, 'directives', matched[1])
       if (def && def.terminal) {
         if (!termDef || ((def.priority || DEFAULT_TERMINAL_PRIORITY) > termDef.priority)) {
           termDef = def
-          name = attr.name
+          rawName = attr.name
           value = attr.value
           dirName = matched[1]
           arg = matched[2]
@@ -604,7 +606,7 @@ function checkTerminalDirectives (el, attrs, options) {
   }
 
   if (termDef) {
-    return makeTerminalNodeLinkFn(el, dirName, value, options, termDef, name, arg)
+    return makeTerminalNodeLinkFn(el, dirName, value, options, termDef, rawName, arg, modifiers)
   }
 }
 
@@ -622,27 +624,23 @@ skip.terminal = true
  * @param {String} value
  * @param {Object} options
  * @param {Object} def
- * @param {String} [attrName]
+ * @param {String} [rawName]
  * @param {String} [arg]
+ * @param {Object} [modifiers]
  * @return {Function} terminalLinkFn
  */
 
-function makeTerminalNodeLinkFn (el, dirName, value, options, def, attrName, arg) {
+function makeTerminalNodeLinkFn (el, dirName, value, options, def, rawName, arg, modifiers) {
   var parsed = parseDirective(value)
   var descriptor = {
     name: dirName,
+    arg: arg,
     expression: parsed.expression,
     filters: parsed.filters,
     raw: value,
-    rawName: attrName,
+    attr: rawName,
+    modifiers: modifiers,
     def: def
-  }
-  if (attrName) {
-    descriptor.rawName = attrName
-    descriptor.modifiers = parseModifiers(attrName)
-  }
-  if (arg) {
-    descriptor.arg = arg.replace(modifierRE, '')
   }
   // check ref for v-for and router-view
   if (dirName === 'for' || dirName === 'router-view') {
