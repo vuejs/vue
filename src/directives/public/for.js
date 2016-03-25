@@ -1,5 +1,6 @@
 import FragmentFactory from '../../fragment/factory'
 import { FOR } from '../priorities'
+import { withoutConversion } from '../../observer/index'
 import {
   isObject,
   warn,
@@ -143,7 +144,9 @@ const vFor = {
         // update data for track-by, object repeat &
         // primitive values.
         if (trackByKey || convertedFromObject || primitive) {
-          frag.scope[alias] = value
+          withoutConversion(() => {
+            frag.scope[alias] = value
+          })
         }
       } else { // new isntance
         frag = this.create(value, alias, i, key)
@@ -238,7 +241,11 @@ const vFor = {
     // for two-way binding on alias
     scope.$forContext = this
     // define scope properties
-    defineReactive(scope, alias, value, true /* do not observe */)
+    // important: define the scope alias without forced conversion
+    // so that frozen data structures remain non-reactive.
+    withoutConversion(() => {
+      defineReactive(scope, alias, value)
+    })
     defineReactive(scope, '$index', index)
     if (key) {
       defineReactive(scope, '$key', key)

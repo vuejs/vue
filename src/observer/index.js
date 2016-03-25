@@ -2,7 +2,6 @@ import Dep from './dep'
 import { arrayMethods } from './array'
 import {
   def,
-  isObject,
   isArray,
   isPlainObject,
   hasProto,
@@ -10,6 +9,23 @@ import {
 } from '../util/index'
 
 const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
+
+/**
+ * By default, when a reactive property is set, the new value is
+ * also converted to become reactive. However in certain cases, e.g.
+ * v-for scope alias and props, we don't want to force conversion
+ * because the value may be a nested value under a frozen data structure.
+ *
+ * So whenever we want to set a reactive property without forcing
+ * conversion on the new value, we wrap that call inside this function.
+ */
+
+let shouldConvert = true
+export function withoutConversion (fn) {
+  shouldConvert = false
+  fn()
+  shouldConvert = true
+}
 
 /**
  * Observer class that are attached to each observed
@@ -154,6 +170,7 @@ export function observe (value, vm) {
   ) {
     ob = value.__ob__
   } else if (
+    shouldConvert &&
     (isArray(value) || isPlainObject(value)) &&
     Object.isExtensible(value) &&
     !value._isVue
@@ -172,10 +189,9 @@ export function observe (value, vm) {
  * @param {Object} obj
  * @param {String} key
  * @param {*} val
- * @param {Boolean} doNotObserve
  */
 
-export function defineReactive (obj, key, val, doNotObserve) {
+export function defineReactive (obj, key, val) {
   var dep = new Dep()
 
   var property = Object.getOwnPropertyDescriptor(obj, key)
@@ -187,13 +203,7 @@ export function defineReactive (obj, key, val, doNotObserve) {
   var getter = property && property.get
   var setter = property && property.set
 
-  // if doNotObserve is true, only use the child value observer
-  // if it already exists, and do not attempt to create it.
-  // this allows freezing a large object from the root and
-  // avoid unnecessary observation inside v-for fragments.
-  var childOb = doNotObserve
-    ? isObject(val) && val.__ob__
-    : observe(val)
+  var childOb = observe(val)
   Object.defineProperty(obj, key, {
     enumerable: true,
     configurable: true,
@@ -223,9 +233,7 @@ export function defineReactive (obj, key, val, doNotObserve) {
       } else {
         val = newVal
       }
-      childOb = doNotObserve
-        ? isObject(newVal) && newVal.__ob__
-        : observe(newVal)
+      childOb = observe(newVal)
       dep.notify()
     }
   })

@@ -678,11 +678,13 @@ describe('prop', function () {
 
   it('non reactive values passed down as prop should not be converted', function (done) {
     var a = Object.freeze({
-      msg: 'hello'
+      nested: {
+        msg: 'hello'
+      }
     })
     var parent = new Vue({
       el: el,
-      template: '<comp :a="a"></comp>',
+      template: '<comp :a="a.nested"></comp>',
       data: {
         a: a
       },
@@ -695,7 +697,11 @@ describe('prop', function () {
     var child = parent.$children[0]
     expect(child.a.msg).toBe('hello')
     expect(child.a.__ob__).toBeUndefined() // should not be converted
-    parent.a = Object.freeze({ msg: 'yo' })
+    parent.a = Object.freeze({
+      nested: {
+        msg: 'yo'
+      }
+    })
     Vue.nextTick(function () {
       expect(child.a.msg).toBe('yo')
       expect(child.a.__ob__).toBeUndefined()
@@ -723,7 +729,7 @@ describe('prop', function () {
   })
 
   // #2549
-  it('mutating child prop binding should be reactive if parent value was reactive', function (done) {
+  it('mutating child prop binding should be reactive', function (done) {
     var vm = new Vue({
       el: el,
       template: '<comp :list="list"></comp>',
@@ -737,6 +743,34 @@ describe('prop', function () {
           created: function () {
             this.list = [2, 3, 4]
           }
+        }
+      }
+    })
+    expect(vm.$el.textContent).toBe('234')
+    vm.$children[0].list.push(5)
+    Vue.nextTick(function () {
+      expect(vm.$el.textContent).toBe('2345')
+      done()
+    })
+  })
+
+  it('prop default value should be reactive', function (done) {
+    var vm = new Vue({
+      el: el,
+      template: '<comp :list="list"></comp>',
+      data: {
+        list: undefined
+      },
+      components: {
+        comp: {
+          props: {
+            list: {
+              default: function () {
+                return [2, 3, 4]
+              }
+            }
+          },
+          template: '<div v-for="i in list">{{ i }}</div>'
         }
       }
     })
