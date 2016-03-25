@@ -102,7 +102,7 @@ function singleRemove () {
   this.inserted = false
   var shouldCallRemove = inDoc(this.node)
   var self = this
-  self.callHook(beforeDetach)
+  if (shouldCallRemove) self.callHook(beforeDetach)
   this.beforeRemove()
   removeWithTransition(this.node, this.vm, function () {
     if (shouldCallRemove) {
@@ -145,7 +145,7 @@ function multiRemove () {
   var self = this
   var shouldCallRemove = inDoc(this.node)
   this.beforeRemove()
-  self.callHook(beforeDetach)
+  if (shouldCallRemove) self.callHook(beforeDetach)
   removeNodeRange(this.node, this.end, this.vm, this.frag, function () {
     if (shouldCallRemove) {
       self.callHook(detach)
