@@ -1,7 +1,9 @@
 import { parseTemplate } from '../parsers/template'
 import {
   isTemplate,
-  toArray
+  toArray,
+  getBindAttr,
+  warn
 } from '../util/index'
 
 /**
@@ -28,6 +30,9 @@ export function resolveSlots (vm, content) {
       (contents[name] || (contents[name] = [])).push(el)
     }
     /* eslint-enable no-cond-assign */
+    if (process.env.NODE_ENV !== 'production' && getBindAttr(el, 'slot')) {
+      warn('The "slot" attribute must be static.')
+    }
   }
   for (name in contents) {
     contents[name] = extractFragment(contents[name], content)

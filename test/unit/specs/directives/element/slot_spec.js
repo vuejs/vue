@@ -444,4 +444,17 @@ describe('Slot Distribution', function () {
     })
     expect(vm.$el.textContent).toBe('hi')
   })
+
+  it('warn dynamic slot attribute', function () {
+    new Vue({
+      el: el,
+      template: '<test><div :slot="1"></div></test>',
+      components: {
+        test: {
+          template: '<div><slot></slot></div>'
+        }
+      }
+    })
+    expect('"slot" attribute must be static').toHaveBeenWarned()
+  })
 })
