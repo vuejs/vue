@@ -12,20 +12,20 @@ if (!_.isIE9) {
       document.head.appendChild(cssEl)
     }
 
-    var duration = '50ms'
+    var duration = 100
     insertCSS(
       '.test {\
-        transition: opacity ' + duration + ' ease;\
-        -webkit-transition: opacity ' + duration + ' ease;}'
+        transition: opacity ' + duration + 'ms ease;\
+        -webkit-transition: opacity ' + duration + 'ms ease;}'
     )
     insertCSS('.test-enter, .test-leave { opacity: 0; }')
     insertCSS(
       '.test-anim-enter {\
-        animation: test-enter ' + duration + ';\
-        -webkit-animation: test-enter ' + duration + ';}\
+        animation: test-enter ' + duration + 'ms;\
+        -webkit-animation: test-enter ' + duration + 'ms;}\
       .test-anim-leave {\
-        animation: test-leave ' + duration + ';\
-        -webkit-animation: test-leave ' + duration + ';}\
+        animation: test-leave ' + duration + 'ms;\
+        -webkit-animation: test-leave ' + duration + 'ms;}\
       @keyframes test-enter {\
         from { opacity: 0 }\
         to { opacity: 1 }}\
@@ -203,7 +203,7 @@ if (!_.isIE9) {
         el.__v_trans = new Transition(el, 'test', hooks, vm)
         // inline style
         el.style.transition =
-        el.style.WebkitTransition = 'opacity ' + duration + ' ease'
+        el.style.WebkitTransition = 'opacity ' + duration + 'ms ease'
         transition.applyTransition(el, 1, function () {
           document.body.appendChild(el)
           op()
@@ -231,7 +231,7 @@ if (!_.isIE9) {
         circle.__v_trans = new Transition(circle, 'test', hooks, vm)
         // inline style
         circle.style.transition =
-        circle.style.WebkitTransition = 'opacity ' + duration + ' ease'
+        circle.style.WebkitTransition = 'opacity ' + duration + 'ms ease'
         transition.applyTransition(circle, 1, function () {
           svg.appendChild(circle)
           op()
@@ -359,7 +359,7 @@ if (!_.isIE9) {
           setTimeout(function () {
             enterDone()
             testDone()
-          }, 100)
+          }, duration * 1.5)
         }
 
         el.__v_trans = new Transition(el, 'test', hooks, vm)
@@ -402,7 +402,7 @@ if (!_.isIE9) {
           setTimeout(function () {
             enterDone()
             testDone()
-          }, 20)
+          }, duration / 2)
         }
 
         el.__v_trans = new Transition(el, 'test', hooks, vm)
@@ -554,7 +554,7 @@ if (!_.isIE9) {
         var leaveSpy = jasmine.createSpy('js leave')
         var timeout
         hooks.enter = function (el, done) {
-          timeout = setTimeout(done, 30)
+          timeout = setTimeout(done, duration / 2)
         }
         hooks.enterCancelled = function () {
           clearTimeout(timeout)
@@ -573,8 +573,8 @@ if (!_.isIE9) {
           setTimeout(function () {
             expect(cb).not.toHaveBeenCalled()
             done()
-          }, 30)
-        }, 15)
+          }, duration / 2)
+        }, duration / 4)
       })
     })
   })
