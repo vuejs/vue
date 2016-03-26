@@ -1,18 +1,12 @@
 {
+  "env": {
+    "jasmine": true
+  },
   "globals": {
-    "jQuery": true,
     "$": true,
-    "jasmine": true,
-    "describe": true,
-    "expect": true,
-    "it": true,
-    "beforeEach": true,
-    "afterEach": true,
-    "spyOn": true,
-    "spyWarns": true,
-    "getWarnCount": true,
-    "hasWarned": true,
-    "casper": true
+    "jQuery": true,
+    "casper": true,
+    "getWarnCount": true
   },
   "rules": {
     "no-new": 0,
