@@ -107,6 +107,28 @@ describe('v-for', function () {
     expect(el.innerHTML).toBe('<div>aaa a</div><div>bbb b</div>')
   })
 
+  it('check priorities: v-if before v-for', function () {
+    new Vue({
+      el: el,
+      data: {
+        items: [1, 2, 3]
+      },
+      template: '<div v-if="item < 3" v-for="item in items">{{item}}</div>'
+    })
+    expect(el.textContent).toBe('12')
+  })
+
+  it('check priorities: v-if after v-for', function () {
+    new Vue({
+      el: el,
+      data: {
+        items: [1, 2, 3]
+      },
+      template: '<div v-for="item in items" v-if="item < 3">{{item}}</div>'
+    })
+    expect(el.textContent).toBe('12')
+  })
+
   it('component', function (done) {
     var vm = new Vue({
       el: el,
