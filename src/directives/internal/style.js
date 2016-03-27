@@ -2,7 +2,8 @@ import {
   extend,
   isArray,
   hyphenate,
-  camelize
+  camelize,
+  warn
 } from '../../util/index'
 
 const prefixes = ['-webkit-', '-moz-', '-ms-']
@@ -56,11 +57,20 @@ export default {
         ? 'important'
         : ''
       if (isImportant) {
+        /* istanbul ignore if */
+        if (process.env.NODE_ENV !== 'production') {
+          warn(
+            'It\'s probably a bad idea to use !important with inline rules. ' +
+            'This feature will be deprecated in a future version of Vue.'
+          )
+        }
         value = value.replace(importantRE, '').trim()
+        this.el.style.setProperty(prop.kebab, value, isImportant)
+      } else {
+        this.el.style[prop.camel] = value
       }
-      this.el.style.setProperty(prop, value, isImportant)
     } else {
-      this.el.style.removeProperty(prop)
+      this.el.style[prop.camel] = ''
     }
   }
 
@@ -105,10 +115,16 @@ function prefix (prop) {
   while (i--) {
     prefixed = camelPrefixes[i] + upper
     if (prefixed in testEl.style) {
-      return prefixes[i] + prop
+      return {
+        kebab: prefixes[i] + prop,
+        camel: prefixed
+      }
     }
   }
   if (camel in testEl.style) {
-    return prop
+    return {
+      kebab: prop,
+      camel: camel
+    }
   }
 }
