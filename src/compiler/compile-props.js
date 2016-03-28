@@ -287,36 +287,23 @@ export function assertProp (prop, value, vm) {
   }
   var options = prop.options
   var type = options.type
-  var valid = true
-  var expectedType
+  var valid = !type
+  var expectedTypes = []
   if (type) {
-    if (type === String) {
-      expectedType = 'string'
-      valid = typeof value === expectedType
-    } else if (type === Number) {
-      expectedType = 'number'
-      valid = typeof value === 'number'
-    } else if (type === Boolean) {
-      expectedType = 'boolean'
-      valid = typeof value === 'boolean'
-    } else if (type === Function) {
-      expectedType = 'function'
-      valid = typeof value === 'function'
-    } else if (type === Object) {
-      expectedType = 'object'
-      valid = isPlainObject(value)
-    } else if (type === Array) {
-      expectedType = 'array'
-      valid = isArray(value)
-    } else {
-      valid = value instanceof type
+    if (!isArray(type)) {
+      type = [ type ]
+    }
+    for (var i = 0; i < type.length && !valid; i++) {
+      var assertedType = assertType(value, type[i])
+      expectedTypes.push(assertedType.expectedType)
+      valid = assertedType.valid
     }
   }
   if (!valid) {
     if (process.env.NODE_ENV !== 'production') {
       warn(
         'Invalid prop: type check failed for prop "' + prop.name + '".' +
-        ' Expected ' + formatType(expectedType) +
+        ' Expected ' + formatTypes(expectedTypes) +
         ', got ' + formatValue(value) + '.',
         vm
       )
@@ -353,9 +340,46 @@ export function coerceProp (prop, value) {
   return coerce(value)
 }
 
-function formatType (val) {
-  return val
-    ? val.charAt(0).toUpperCase() + val.slice(1)
+function assertType (value, type) {
+  var valid
+  var expectedType
+  if (type === String) {
+    expectedType = 'string'
+    valid = typeof value === expectedType
+  } else if (type === Number) {
+    expectedType = 'number'
+    valid = typeof value === expectedType
+  } else if (type === Boolean) {
+    expectedType = 'boolean'
+    valid = typeof value === expectedType
+  } else if (type === Function) {
+    expectedType = 'function'
+    valid = typeof value === expectedType
+  } else if (type === Object) {
+    expectedType = 'object'
+    valid = isPlainObject(value)
+  } else if (type === Array) {
+    expectedType = 'array'
+    valid = isArray(value)
+  } else {
+    valid = value instanceof type
+  }
+  return {
+    valid,
+    expectedType
+  }
+}
+
+function formatTypes (types) {
+  return types.reduce(
+    (p, c, i) => { return i === 0 ? formatType(c) : `${p}, ${formatType(c)}` },
+    ''
+  )
+}
+
+function formatType (type) {
+  return type
+    ? type.charAt(0).toUpperCase() + type.slice(1)
     : 'custom type'
 }
 
