@@ -303,7 +303,7 @@ export function assertProp (prop, value, vm) {
     if (process.env.NODE_ENV !== 'production') {
       warn(
         'Invalid prop: type check failed for prop "' + prop.name + '".' +
-        ' Expected ' + formatTypes(expectedTypes) +
+        ' Expected ' + expectedTypes.map(formatType).join(', ') +
         ', got ' + formatValue(value) + '.',
         vm
       )
@@ -368,13 +368,6 @@ function assertType (value, type) {
     valid,
     expectedType
   }
-}
-
-function formatTypes (types) {
-  return types.reduce(
-    (p, c, i) => { return i === 0 ? formatType(c) : `${p}, ${formatType(c)}` },
-    ''
-  )
 }
 
 function formatType (type) {
