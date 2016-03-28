@@ -224,9 +224,10 @@ export function initProp (vm, prop, value) {
   if (value === undefined) {
     value = getPropDefaultValue(vm, prop.options)
   }
-  if (assertProp(prop, value)) {
-    defineReactive(vm, key, value)
+  if (!assertProp(prop, value, vm)) {
+    value = undefined
   }
+  defineReactive(vm, key, value)
 }
 
 /**
@@ -265,9 +266,10 @@ function getPropDefaultValue (vm, options) {
  *
  * @param {Object} prop
  * @param {*} value
+ * @param {Vue} vm
  */
 
-export function assertProp (prop, value) {
+export function assertProp (prop, value, vm) {
   if (
     !prop.options.required && ( // non-required
       prop.raw === null ||      // abscent
@@ -304,20 +306,22 @@ export function assertProp (prop, value) {
     }
   }
   if (!valid) {
-    process.env.NODE_ENV !== 'production' && warn(
-      'Invalid prop: type check failed for ' +
-      prop.path + '="' + prop.raw + '".' +
-      ' Expected ' + formatType(expectedType) +
-      ', got ' + formatValue(value) + '.'
-    )
+    if (process.env.NODE_ENV !== 'production') {
+      warn(
+        'Invalid prop: type check failed for prop "' + prop.name + '"' +
+        (vm.$options.name ? ' on component <' + hyphenate(vm.$options.name) + '>.' : '.') +
+        ' Expected ' + formatType(expectedType) +
+        ', got ' + formatValue(value) + '.'
+      )
+    }
     return false
   }
   var validator = options.validator
   if (validator) {
     if (!validator(value)) {
       process.env.NODE_ENV !== 'production' && warn(
-        'Invalid prop: custom validator check failed for ' +
-        prop.path + '="' + prop.raw + '"'
+        'Invalid prop: custom validator check failed for prop "' + prop.name + '"' +
+        (vm.$options.name ? ' on component <' + hyphenate(vm.$options.name) + '>.' : '.')
       )
       return false
     }

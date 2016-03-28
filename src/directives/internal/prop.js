@@ -28,7 +28,7 @@ export default {
       parentKey,
       function (val) {
         val = coerceProp(prop, val)
-        if (assertProp(prop, val)) {
+        if (assertProp(prop, val, child)) {
           if (isSimple) {
             withoutConversion(() => {
               child[childKey] = val
