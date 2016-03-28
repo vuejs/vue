@@ -31,10 +31,11 @@ const settablePathRE = /^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\[[^\[\]]+\])*$/
  *
  * @param {Element|DocumentFragment} el
  * @param {Array} propOptions
+ * @param {Vue} vm
  * @return {Function} propsLinkFn
  */
 
-export function compileProps (el, propOptions) {
+export function compileProps (el, propOptions, vm) {
   var props = []
   var names = Object.keys(propOptions)
   var i = names.length
@@ -44,7 +45,7 @@ export function compileProps (el, propOptions) {
     options = propOptions[name] || empty
 
     if (process.env.NODE_ENV !== 'production' && name === '$data') {
-      warn('Do not use $data as prop.')
+      warn('Do not use $data as prop.', vm)
       continue
     }
 
@@ -55,7 +56,8 @@ export function compileProps (el, propOptions) {
     if (!identRE.test(path)) {
       process.env.NODE_ENV !== 'production' && warn(
         'Invalid prop key: "' + name + '". Prop keys ' +
-        'must be valid identifiers.'
+        'must be valid identifiers.',
+        vm
       )
       continue
     }
@@ -98,7 +100,8 @@ export function compileProps (el, propOptions) {
           prop.mode = propBindingModes.ONE_WAY
           warn(
             'Cannot bind two-way prop with non-settable ' +
-            'parent path: ' + value
+            'parent path: ' + value,
+            vm
           )
         }
       }
@@ -111,7 +114,8 @@ export function compileProps (el, propOptions) {
         prop.mode !== propBindingModes.TWO_WAY
       ) {
         warn(
-          'Prop "' + name + '" expects a two-way binding type.'
+          'Prop "' + name + '" expects a two-way binding type.',
+          vm
         )
       }
     } else if ((value = getAttr(el, attr)) !== null) {
@@ -133,11 +137,12 @@ export function compileProps (el, propOptions) {
         warn(
           'Possible usage error for prop `' + lowerCaseName + '` - ' +
           'did you mean `' + attr + '`? HTML is case-insensitive, remember to use ' +
-          'kebab-case for props in templates.'
+          'kebab-case for props in templates.',
+          vm
         )
       } else if (options.required) {
         // warn missing required
-        warn('Missing required prop: ' + name)
+        warn('Missing required prop: ' + name, vm)
       }
     }
     // push prop
@@ -222,7 +227,7 @@ export function initProp (vm, prop, value) {
   const key = prop.path
   value = coerceProp(prop, value)
   if (value === undefined) {
-    value = getPropDefaultValue(vm, prop.options)
+    value = getPropDefaultValue(vm, prop)
   }
   if (!assertProp(prop, value, vm)) {
     value = undefined
@@ -234,12 +239,13 @@ export function initProp (vm, prop, value) {
  * Get the default value of a prop.
  *
  * @param {Vue} vm
- * @param {Object} options
+ * @param {Object} prop
  * @return {*}
  */
 
-function getPropDefaultValue (vm, options) {
+function getPropDefaultValue (vm, prop) {
   // no default, return undefined
+  const options = prop.options
   if (!hasOwn(options, 'default')) {
     // absent boolean value defaults to false
     return options.type === Boolean
@@ -250,9 +256,10 @@ function getPropDefaultValue (vm, options) {
   // warn against non-factory defaults for Object & Array
   if (isObject(def)) {
     process.env.NODE_ENV !== 'production' && warn(
-      'Object/Array as default prop values will be shared ' +
-      'across multiple instances. Use a factory function ' +
-      'to return the default value instead.'
+      'Invalid default value for prop "' + prop.name + '": ' +
+      'Props with type Object/Array must use a factory function ' +
+      'to return the default value.',
+      vm
     )
   }
   // call factory function for non-Function types
@@ -308,10 +315,10 @@ export function assertProp (prop, value, vm) {
   if (!valid) {
     if (process.env.NODE_ENV !== 'production') {
       warn(
-        'Invalid prop: type check failed for prop "' + prop.name + '"' +
-        (vm.$options.name ? ' on component <' + hyphenate(vm.$options.name) + '>.' : '.') +
+        'Invalid prop: type check failed for prop "' + prop.name + '".' +
         ' Expected ' + formatType(expectedType) +
-        ', got ' + formatValue(value) + '.'
+        ', got ' + formatValue(value) + '.',
+        vm
       )
     }
     return false
@@ -320,8 +327,8 @@ export function assertProp (prop, value, vm) {
   if (validator) {
     if (!validator(value)) {
       process.env.NODE_ENV !== 'production' && warn(
-        'Invalid prop: custom validator check failed for prop "' + prop.name + '"' +
-        (vm.$options.name ? ' on component <' + hyphenate(vm.$options.name) + '>.' : '.')
+        'Invalid prop: custom validator check failed for prop "' + prop.name + '".',
+        vm
       )
       return false
     }

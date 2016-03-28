@@ -78,7 +78,8 @@ export default function Transition (el, id, hooks, vm) {
     ) {
       warn(
         'invalid CSS transition type for transition="' +
-        this.id + '": ' + this.type
+        this.id + '": ' + this.type,
+        vm
       )
     }
   }

@@ -239,7 +239,8 @@ export default {
           child._isFragment) {
         warn(
           'Transitions will not work on a fragment instance. ' +
-          'Template: ' + child.$options.template
+          'Template: ' + child.$options.template,
+          child
         )
       }
       return child

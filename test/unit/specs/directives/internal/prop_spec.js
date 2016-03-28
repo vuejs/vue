@@ -233,7 +233,7 @@ describe('prop', function () {
         }
       }
     })
-    expect('Use a factory function to return the default value').toHaveBeenWarned()
+    expect('use a factory function to return the default value').toHaveBeenWarned()
     expect(getWarnCount()).toBe(2)
   })
 

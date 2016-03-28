@@ -94,7 +94,8 @@ export default {
       process.env.NODE_ENV !== 'production' && warn(
         'v-on:' + this.arg + '="' +
         this.expression + '" expects a function value, ' +
-        'got ' + handler
+        'got ' + handler,
+        this.vm
       )
       return
     }

@@ -31,7 +31,7 @@ export function resolveSlots (vm, content) {
     }
     /* eslint-enable no-cond-assign */
     if (process.env.NODE_ENV !== 'production' && getBindAttr(el, 'slot')) {
-      warn('The "slot" attribute must be static.')
+      warn('The "slot" attribute must be static.', vm.$parent)
     }
   }
   for (name in contents) {

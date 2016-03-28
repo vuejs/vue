@@ -59,7 +59,8 @@ strats.data = function (parentVal, childVal, vm) {
       process.env.NODE_ENV !== 'production' && warn(
         'The "data" option should be a function ' +
         'that returns a per-instance value in component ' +
-        'definitions.'
+        'definitions.',
+        vm
       )
       return parentVal
     }
@@ -104,7 +105,8 @@ strats.el = function (parentVal, childVal, vm) {
     process.env.NODE_ENV !== 'production' && warn(
       'The "el" option should be a function ' +
       'that returns a per-instance value in component ' +
-      'definitions.'
+      'definitions.',
+      vm
     )
     return
   }
@@ -136,18 +138,6 @@ strats.activate = function (parentVal, childVal) {
         ? childVal
         : [childVal]
     : parentVal
-}
-
-/**
- * 0.11 deprecation warning
- */
-
-strats.paramAttributes = function () {
-  /* istanbul ignore next */
-  process.env.NODE_ENV !== 'production' && warn(
-    '"paramAttributes" option has been deprecated in 0.12. ' +
-    'Use "props" instead.'
-  )
 }
 
 /**
@@ -365,31 +355,27 @@ export function mergeOptions (parent, child, vm) {
  * @param {Object} options
  * @param {String} type
  * @param {String} id
+ * @param {Boolean} warnMissing
  * @return {Object|Function}
  */
 
-export function resolveAsset (options, type, id) {
+export function resolveAsset (options, type, id, warnMissing) {
   /* istanbul ignore if */
   if (typeof id !== 'string') {
     return
   }
   var assets = options[type]
   var camelizedId
-  return assets[id] ||
+  var res = assets[id] ||
     // camelCase ID
     assets[camelizedId = camelize(id)] ||
     // Pascal Case ID
     assets[camelizedId.charAt(0).toUpperCase() + camelizedId.slice(1)]
-}
-
-/**
- * Assert asset exists
- */
-
-export function assertAsset (val, type, id) {
-  if (!val) {
-    process.env.NODE_ENV !== 'production' && warn(
-      'Failed to resolve ' + type + ': ' + id
+  if (process.env.NODE_ENV !== 'production' && warnMissing && !res) {
+    warn(
+      'Failed to resolve ' + type.slice(0, -1) + ': ' + id,
+      options
     )
   }
+  return res
 }

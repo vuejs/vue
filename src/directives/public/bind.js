@@ -52,7 +52,8 @@ export default {
         process.env.NODE_ENV !== 'production' && warn(
           attr + '="' + descriptor.raw + '": ' +
           'attribute interpolation is not allowed in Vue.js ' +
-          'directives and special attributes.'
+          'directives and special attributes.',
+          this.vm
         )
         this.el.removeAttribute(attr)
         this.invalid = true
@@ -65,7 +66,8 @@ export default {
         if (attr === 'src') {
           warn(
             raw + 'interpolation in "src" attribute will cause ' +
-            'a 404 request. Use v-bind:src instead.'
+            'a 404 request. Use v-bind:src instead.',
+            this.vm
           )
         }
 
@@ -74,7 +76,8 @@ export default {
           warn(
             raw + 'interpolation in "style" attribute will cause ' +
             'the attribute to be discarded in Internet Explorer. ' +
-            'Use v-bind:style instead.'
+            'Use v-bind:style instead.',
+            this.vm
           )
         }
       }

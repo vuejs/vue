@@ -4,8 +4,7 @@ import { PARTIAL } from '../priorities'
 import {
   createAnchor,
   replace,
-  resolveAsset,
-  assertAsset
+  resolveAsset
 } from '../../util/index'
 
 export default {
@@ -31,10 +30,7 @@ export default {
   },
 
   insert (id) {
-    var partial = resolveAsset(this.vm.$options, 'partials', id)
-    if (process.env.NODE_ENV !== 'production') {
-      assertAsset(partial, 'partial', id)
-    }
+    var partial = resolveAsset(this.vm.$options, 'partials', id, true)
     if (partial) {
       this.factory = new FragmentFactory(this.vm, partial)
       vIf.insert.call(this)

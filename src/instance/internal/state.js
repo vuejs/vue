@@ -60,7 +60,8 @@ export default function (Vue) {
     if (props && !el) {
       process.env.NODE_ENV !== 'production' && warn(
         'Props will not be compiled if no `el` option is ' +
-        'provided at instantiation.'
+        'provided at instantiation.',
+        this
       )
     }
     // make sure to convert string selectors into element now
@@ -81,7 +82,8 @@ export default function (Vue) {
     if (!isPlainObject(data)) {
       data = {}
       process.env.NODE_ENV !== 'production' && warn(
-        'data functions should return an object.'
+        'data functions should return an object.',
+        this
       )
     }
     var props = this._props
@@ -108,7 +110,8 @@ export default function (Vue) {
       } else if (process.env.NODE_ENV !== 'production') {
         warn(
           'Data field "' + key + '" is already defined ' +
-          'as a prop. Use prop default value instead.'
+          'as a prop. Use prop default value instead.',
+          this
         )
       }
     }

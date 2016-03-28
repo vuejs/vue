@@ -572,7 +572,7 @@ describe('v-for', function () {
       el: el,
       template: '<div v-for="items"></div>'
     })
-    expect('Alias is required in v-for').toHaveBeenWarned()
+    expect('alias is required').toHaveBeenWarned()
   })
 
   it('warn duplicate objects', function () {

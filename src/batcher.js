@@ -66,11 +66,12 @@ function runBatcherQueue (queue) {
     if (process.env.NODE_ENV !== 'production' && has[id] != null) {
       circular[id] = (circular[id] || 0) + 1
       if (circular[id] > config._maxUpdateCount) {
-        queue.splice(has[id], 1)
         warn(
           'You may have an infinite update loop for watcher ' +
-          'with expression: ' + watcher.expression
+          'with expression "' + watcher.expression + '"',
+          watcher.vm
         )
+        break
       }
     }
   }

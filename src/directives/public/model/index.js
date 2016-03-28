@@ -36,8 +36,9 @@ export default {
     if (this.hasRead && !this.hasWrite) {
       process.env.NODE_ENV !== 'production' && warn(
         'It seems you are using a read-only filter with ' +
-        'v-model. You might want to use a two-way filter ' +
-        'to ensure correct behavior.'
+        'v-model="' + this.descriptor.raw + '". ' +
+        'You might want to use a two-way filter to ensure correct behavior.',
+        this.vm
       )
     }
     var el = this.el
@@ -51,7 +52,8 @@ export default {
       handler = handlers.text
     } else {
       process.env.NODE_ENV !== 'production' && warn(
-        'v-model does not support element type: ' + tag
+        'v-model does not support element type: ' + tag,
+        this.vm
       )
       return
     }

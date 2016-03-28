@@ -42,11 +42,9 @@ export default function (Vue) {
           vm.$on(name.replace(eventRE), handler)
         } else if (process.env.NODE_ENV !== 'production') {
           warn(
-            'v-on:' + name + '="' + attrs[i].value + '"' + (
-              vm.$options.name
-                ? ' on component <' + vm.$options.name + '>'
-                : ''
-            ) + ' expects a function value, got ' + handler
+            'v-on:' + name + '="' + attrs[i].value + '" ' +
+            'expects a function value, got ' + handler,
+            vm
           )
         }
       }
@@ -99,7 +97,8 @@ export default function (Vue) {
         process.env.NODE_ENV !== 'production' && warn(
           'Unknown method: "' + handler + '" when ' +
           'registering callback for ' + action +
-          ': "' + key + '".'
+          ': "' + key + '".',
+          vm
         )
       }
     } else if (handler && type === 'object') {

@@ -1,6 +1,5 @@
 import {
   resolveAsset,
-  assertAsset,
   isPlainObject,
   warn
 } from '../../util/index'
@@ -23,10 +22,7 @@ export default function (Vue) {
     var filter, fn, args, arg, offset, i, l, j, k
     for (i = 0, l = filters.length; i < l; i++) {
       filter = filters[write ? l - i - 1 : i]
-      fn = resolveAsset(this.$options, 'filters', filter.name)
-      if (process.env.NODE_ENV !== 'production') {
-        assertAsset(fn, 'filter', filter.name)
-      }
+      fn = resolveAsset(this.$options, 'filters', filter.name, true)
       if (!fn) continue
       fn = write ? fn.write : (fn.read || fn)
       if (typeof fn !== 'function') continue
@@ -61,10 +57,7 @@ export default function (Vue) {
     if (typeof value === 'function') {
       factory = value
     } else {
-      factory = resolveAsset(this.$options, 'components', value)
-      if (process.env.NODE_ENV !== 'production') {
-        assertAsset(factory, 'component', value)
-      }
+      factory = resolveAsset(this.$options, 'components', value, true)
     }
     if (!factory) {
       return

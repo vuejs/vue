@@ -15,7 +15,8 @@ export default function (Vue) {
   Vue.prototype.$mount = function (el) {
     if (this._isCompiled) {
       process.env.NODE_ENV !== 'production' && warn(
-        '$mount() should be called only once.'
+        '$mount() should be called only once.',
+        this
       )
       return
     }

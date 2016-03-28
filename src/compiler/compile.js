@@ -14,7 +14,6 @@ import {
   checkComponentAttr,
   findRef,
   defineReactive,
-  assertAsset,
   getAttr
 } from '../util/index'
 
@@ -181,7 +180,7 @@ function teardownDirs (vm, dirs, destroying) {
  */
 
 export function compileAndLinkProps (vm, el, props, scope) {
-  var propsLinkFn = compileProps(el, props)
+  var propsLinkFn = compileProps(el, props, vm)
   var propDirs = linkAndCapture(function () {
     propsLinkFn(vm, scope)
   }, vm)
@@ -691,7 +690,8 @@ function compileDirectives (attrs, options) {
         })) {
           warn(
             'class="' + rawValue + '": Do not mix mustache interpolation ' +
-            'and v-bind for "class" on the same element. Use one or the other.'
+            'and v-bind for "class" on the same element. Use one or the other.',
+            options
           )
         }
       }
@@ -730,12 +730,7 @@ function compileDirectives (attrs, options) {
         continue
       }
 
-      dirDef = resolveAsset(options, 'directives', dirName)
-
-      if (process.env.NODE_ENV !== 'production') {
-        assertAsset(dirDef, 'directive', dirName)
-      }
-
+      dirDef = resolveAsset(options, 'directives', dirName, true)
       if (dirDef) {
         pushDir(dirName, dirDef)
       }

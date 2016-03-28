@@ -48,7 +48,9 @@ const vFor = {
 
     if (!this.alias) {
       process.env.NODE_ENV !== 'production' && warn(
-        'Alias is required in v-for.'
+        'Invalid v-for expression "' + this.descriptor.raw + '": ' +
+        'alias is required.',
+        this.vm
       )
       return
     }
@@ -637,7 +639,8 @@ if (process.env.NODE_ENV !== 'production') {
     warn(
       'Duplicate value found in v-for="' + this.descriptor.raw + '": ' +
       JSON.stringify(value) + '. Use track-by="$index" if ' +
-      'you are expecting duplicate values.'
+      'you are expecting duplicate values.',
+      this.vm
     )
   }
 }

@@ -238,7 +238,7 @@ describe('Instance Events', function () {
           comp: {}
         }
       })
-      expect('v-on:test="onThat" on component <comp> expects a function value').toHaveBeenWarned()
+      expect('v-on:test="onThat" expects a function value').toHaveBeenWarned()
     })
 
     it('passing $arguments', function () {
