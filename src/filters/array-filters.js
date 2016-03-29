@@ -74,16 +74,21 @@ export function filterBy (arr, search, delimiter) {
 /**
  * Filter filter for arrays
  *
- * @param {String|Array<String>} sortKeys
+ * @param {String|Array<String>|Function} sortKeys
  * @param {Number} [order]
  */
 
 export function orderBy (arr, sortKeys, order) {
   arr = convertArray(arr)
   order = (order && order < 0) ? -1 : 1
+  let recursiveCompare = null
 
   if (typeof sortKeys === 'string') {
     sortKeys = [sortKeys]
+  } else if (typeof sortKeys === 'function') {
+    recursiveCompare = function (a, b) {
+      return sortKeys(a, b) * order
+    }
   } else if (!sortKeys || (sortKeys !== true && !sortKeys.length)) {
     // we check if sortKeys === true because you can sort primitive values with
     // array | orderBy true: http://vuejs.org/api/#orderBy
@@ -101,7 +106,7 @@ export function orderBy (arr, sortKeys, order) {
     return a === b ? 0 : a > b ? order : -order
   }
 
-  function recursiveCompare (a, b, i) {
+  recursiveCompare = recursiveCompare || function (a, b, i) {
     i = i || 0
     if (sortKeys === true || i === sortKeys.length - 1) {
       return compare(a, b, i)

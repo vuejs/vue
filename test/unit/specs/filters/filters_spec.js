@@ -264,7 +264,26 @@ describe('Filters', function () {
     res = filter(arr, ['a', 'b'], -1)
     assertArray(res, [arr[2], arr[0], arr[3], arr[1], arr[5], arr[4]])
   })
+
+  it('orderBy using a compare function', function () {
+    var filter = filters.orderBy
+    var arr = [9, 11, 1, 2]
+    var res = filter(arr, evenBeforeOdd)
+    assertArray(res, [arr[3], arr[2], arr[0], arr[1]])
+    res = filter(arr, evenBeforeOdd, 1)
+    assertArray(res, [arr[3], arr[2], arr[0], arr[1]])
+    res = filter(arr, evenBeforeOdd, -1)
+    assertArray(res, [arr[1], arr[0], arr[2], arr[3]])
+  })
 })
+
+function evenBeforeOdd (a, b) {
+  if (a % 2 === 0) {
+    if (b % 2 === 0) return a - b
+    else return -1
+  } else if (b % 2 === 0) return 1
+    else return a - b
+}
 
 function assertArray (res, expectations) {
   expect(res.length).toBe(expectations.length)
