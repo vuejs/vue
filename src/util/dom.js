@@ -206,6 +206,19 @@ export function setClass (el, cls) {
  */
 
 export function addClass (el, cls) {
+  // Space " " is not a valid character for a DOM token.
+  // As such, if cls includes multiple class names (e.g.
+  // "a b c"), we split it into mutiple child-tokens and
+  // process them. This also satisfies the feature request
+  // #2571.
+  if (cls.indexOf(' ') !== -1) {
+    cls.split(/\s+/).forEach(function (cl) {
+      addClass(el, cl)
+    })
+
+    return
+  }
+
   if (el.classList) {
     el.classList.add(cls)
   } else {
