@@ -72,8 +72,7 @@ function setObjectClasses (el, obj) {
 function stringToObject (value) {
   var res = {}
   var keys = value.trim().split(/\s+/)
-  var i = keys.length
-  while (i--) {
+  for (var i = 0, l = keys.length; i < l; i++) {
     res[keys[i]] = true
   }
   return res
