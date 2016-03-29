@@ -204,6 +204,8 @@ describe('Filters', function () {
     // no sort key
     res = filter(arr, null)
     expect(res).toBe(arr)
+    res = filter(arr)
+    expect(res).toBe(arr)
   })
 
   it('orderBy on Object-converted array', function () {
@@ -226,6 +228,34 @@ describe('Filters', function () {
     ]
     res = filter(arr, 'v')
     assertArray(res, [arr[1], arr[2], arr[0]])
+  })
+
+  it('orderBy multiple fields', function () {
+    var filter = filters.orderBy
+    var arr = [
+      { a: 1, b: 1, c: 1 }, // 0
+      { a: 0, b: 1, c: 1 }, // 1
+      { a: 1, b: 2, c: 0 }, // 2
+      { a: 1, b: 0, c: 0 }, // 3
+      { a: 0, b: 0, c: 0 }, // 4
+      { a: 0, b: 1, c: 0 }  // 5
+    ]
+    var res
+    // sort two keys
+    res = filter(arr, ['a', 'b'])
+    assertArray(res, [arr[4], arr[1], arr[5], arr[3], arr[0], arr[2]])
+
+    // sort two keys with order
+    res = filter(arr, ['a', 'b'], 1)
+    assertArray(res, [arr[4], arr[1], arr[5], arr[3], arr[0], arr[2]])
+
+    // sort three keys
+    res = filter(arr, ['a', 'b', 'c'])
+    assertArray(res, [arr[4], arr[5], arr[1], arr[3], arr[0], arr[2]])
+
+    // reverse two key. Preserves order when equal: 1 then 5
+    res = filter(arr, ['a', 'b'], -1)
+    assertArray(res, [arr[2], arr[0], arr[3], arr[1], arr[5], arr[4]])
   })
 })
 
