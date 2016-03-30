@@ -75,12 +75,12 @@ export function filterBy (arr, search, delimiter) {
  * Filter filter for arrays
  *
  * @param {String|Array<String>} sortKeys
- * @param {String} reverse
+ * @param {Boolean} [order]
  */
 
-export function orderBy (arr, sortKeys, reverse) {
+export function orderBy (arr, sortKeys, order) {
   arr = convertArray(arr)
-  let order = (reverse && reverse < 0) ? -1 : 1
+  order = (order && order < 0) ? -1 : 1
 
   if (typeof sortKeys === 'string') {
     sortKeys = [sortKeys]
