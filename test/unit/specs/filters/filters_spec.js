@@ -230,6 +230,13 @@ describe('Filters', function () {
     assertArray(res, [arr[1], arr[2], arr[0]])
   })
 
+  it('orderBy primitive values', function () {
+    var filter = filters.orderBy
+    var arr = [9, 11, 1, 2]
+    var res = filter(arr, true)
+    assertArray(res, [arr[2], arr[3], arr[0], arr[1]])
+  })
+
   it('orderBy multiple fields', function () {
     var filter = filters.orderBy
     var arr = [

@@ -84,7 +84,9 @@ export function orderBy (arr, sortKeys, order) {
 
   if (typeof sortKeys === 'string') {
     sortKeys = [sortKeys]
-  } else if (!sortKeys || !sortKeys.length) {
+  } else if (!sortKeys || (sortKeys !== true && !sortKeys.length)) {
+    // we check if sortKeys === true because you can sort primitive values with
+    // array | orderBy true: http://vuejs.org/api/#orderBy
     return arr
   }
 
@@ -101,7 +103,9 @@ export function orderBy (arr, sortKeys, order) {
 
   function recursiveCompare (a, b, i) {
     i = i || 0
-    if (i === sortKeys.length - 1) return compare(a, b, i)
+    if (sortKeys === true || i === sortKeys.length - 1) {
+      return compare(a, b, i)
+    }
     return compare(a, b, i) || recursiveCompare(a, b, i + 1)
   }
 
