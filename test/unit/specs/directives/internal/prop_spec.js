@@ -691,10 +691,13 @@ describe('prop', function () {
     expect('did you mean `prop-c`').toHaveBeenWarned()
   })
 
-  it('should use default for undefined values', function () {
+  it('should use default for undefined values', function (done) {
     var vm = new Vue({
       el: el,
       template: '<comp :a="a"></comp>',
+      data: {
+        a: undefined
+      },
       components: {
         comp: {
           template: '{{a}}',
@@ -707,6 +710,15 @@ describe('prop', function () {
       }
     })
     expect(vm.$el.textContent).toBe('1')
+    vm.a = 2
+    Vue.nextTick(function () {
+      expect(vm.$el.textContent).toBe('2')
+      vm.a = undefined
+      Vue.nextTick(function () {
+        expect(vm.$el.textContent).toBe('1')
+        done()
+      })
+    })
   })
 
   it('non reactive values passed down as prop should not be converted', function (done) {
@@ -811,6 +823,34 @@ describe('prop', function () {
     vm.$children[0].list.push(5)
     Vue.nextTick(function () {
       expect(vm.$el.textContent).toBe('2345')
+      done()
+    })
+  })
+
+  it('prop coerced value should be reactive', function (done) {
+    var vm = new Vue({
+      el: el,
+      template: '<comp :obj="obj"></comp>',
+      data: {
+        obj: { ok: true }
+      },
+      components: {
+        comp: {
+          props: {
+            obj: {
+              coerce: function () {
+                return { ok: false }
+              }
+            }
+          },
+          template: '<div>{{ obj.ok }}</div>'
+        }
+      }
+    })
+    expect(vm.$el.textContent).toBe('false')
+    vm.$children[0].obj.ok = true
+    Vue.nextTick(function () {
+      expect(vm.$el.textContent).toBe('true')
       done()
     })
   })

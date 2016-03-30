@@ -5,9 +5,7 @@
 
 import Watcher from '../../watcher'
 import config from '../../config'
-import { isSimplePath } from '../../parsers/expression'
-import { withoutConversion } from '../../observer/index'
-import { assertProp, initProp, coerceProp } from '../../compiler/compile-props'
+import { initProp, updateProp } from '../../compiler/compile-props'
 
 const bindingModes = config._propBindingModes
 
@@ -21,22 +19,12 @@ export default {
     const childKey = prop.path
     const parentKey = prop.parentPath
     const twoWay = prop.mode === bindingModes.TWO_WAY
-    const isSimple = isSimplePath(parentKey)
 
     const parentWatcher = this.parentWatcher = new Watcher(
       parent,
       parentKey,
       function (val) {
-        val = coerceProp(prop, val)
-        if (assertProp(prop, val, child)) {
-          if (isSimple) {
-            withoutConversion(() => {
-              child[childKey] = val
-            })
-          } else {
-            child[childKey] = val
-          }
-        }
+        updateProp(child, prop, val)
       }, {
         twoWay: twoWay,
         filters: prop.filters,
@@ -47,14 +35,7 @@ export default {
     )
 
     // set the child initial value.
-    const value = parentWatcher.value
-    if (isSimple && value !== undefined) {
-      withoutConversion(() => {
-        initProp(child, prop, value)
-      })
-    } else {
-      initProp(child, prop, value)
-    }
+    initProp(child, prop, parentWatcher.value)
 
     // setup two-way binding
     if (twoWay) {
