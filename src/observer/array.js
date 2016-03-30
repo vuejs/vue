@@ -69,10 +69,9 @@ def(
 )
 
 /**
- * Convenience method to remove the element at given index.
+ * Convenience method to remove the element at given index or target element reference.
  *
- * @param {Number} index
- * @param {*} val
+ * @param {*} item
  */
 
 def(
