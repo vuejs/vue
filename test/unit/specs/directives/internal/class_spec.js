@@ -34,6 +34,16 @@ describe(':class', function () {
     expect(el.className).toBe('hoho b')
     dir.update(null)
     expect(el.className).toBe('hoho')
+
+    dir.update({
+      'a b': true,
+      c: false
+    })
+    expect(el.className).toBe('hoho a b')
+    dir.update({
+      c: true
+    })
+    expect(el.className).toBe('hoho c')
   })
 
   it('array value', function () {

@@ -41,19 +41,16 @@ export default {
   },
 
   cleanup (value) {
-    if (this.prevKeys) {
-      var i = this.prevKeys.length
-      while (i--) {
-        var key = this.prevKeys[i]
-        if (!key) continue
-        if (isPlainObject(key)) {
-          var keys = Object.keys(key)
-          for (var k = 0; k < keys.length; k++) {
-            removeClass(this.el, keys[k])
-          }
-        } else {
-          removeClass(this.el, key)
-        }
+    if (!this.prevKeys) return
+
+    var i = this.prevKeys.length
+    while (i--) {
+      var key = this.prevKeys[i]
+      if (!key) continue
+
+      var keys = isPlainObject(key) ? Object.keys(key) : [key]
+      for (var j = 0, l = keys.length; j < l; j++) {
+        toggleClasses(this.el, keys[j], removeClass)
       }
     }
   }
@@ -63,9 +60,8 @@ function setObjectClasses (el, obj) {
   var keys = Object.keys(obj)
   for (var i = 0, l = keys.length; i < l; i++) {
     var key = keys[i]
-    if (obj[key]) {
-      addClass(el, key)
-    }
+    if (!obj[key]) continue
+    toggleClasses(el, key, addClass)
   }
 }
 
@@ -76,4 +72,32 @@ function stringToObject (value) {
     res[keys[i]] = true
   }
   return res
+}
+
+/**
+ * Add or remove a class/classes on an element
+ *
+ * @param {Element} el
+ * @param {String} key The class name. This may or may not
+ *                     contain a space character, in such a
+ *                     case we'll deal with multiple class
+ *                     names at once.
+ * @param {Function} fn
+ */
+
+function toggleClasses (el, key, fn) {
+  key = key.trim()
+
+  if (key.indexOf(' ') === -1) {
+    fn(el, key)
+    return
+  }
+
+  // The key contains one or more space characters.
+  // Since a class name doesn't accept such characters, we
+  // treat it as multiple classes.
+  var keys = key.split(' ')
+  for (var i = 0, l = keys.length; i < l; i++) {
+    fn(el, keys[i])
+  }
 }
