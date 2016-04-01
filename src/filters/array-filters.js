@@ -46,9 +46,7 @@ export function filterBy (arr, search, delimiter) {
   // because why not
   var n = delimiter === 'in' ? 3 : 2
   // extract and flatten keys
-  var keys = toArray(arguments, n).reduce(function (prev, cur) {
-    return prev.concat(cur)
-  }, [])
+  var keys = Array.prototype.concat.apply([], toArray(arguments, n))
   var res = []
   var item, key, val, j
   for (var i = 0, l = arr.length; i < l; i++) {
