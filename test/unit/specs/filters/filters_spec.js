@@ -251,17 +251,25 @@ describe('Filters', function () {
     // sort two keys
     res = filter(arr, ['a', 'b'])
     assertArray(res, [arr[4], arr[1], arr[5], arr[3], arr[0], arr[2]])
+    res = filter(arr, 'a', 'b')
+    assertArray(res, [arr[4], arr[1], arr[5], arr[3], arr[0], arr[2]])
 
     // sort two keys with order
     res = filter(arr, ['a', 'b'], 1)
+    assertArray(res, [arr[4], arr[1], arr[5], arr[3], arr[0], arr[2]])
+    res = filter(arr, 'a', 'b', 1)
     assertArray(res, [arr[4], arr[1], arr[5], arr[3], arr[0], arr[2]])
 
     // sort three keys
     res = filter(arr, ['a', 'b', 'c'])
     assertArray(res, [arr[4], arr[5], arr[1], arr[3], arr[0], arr[2]])
+    res = filter(arr, 'a', 'b', 'c')
+    assertArray(res, [arr[4], arr[5], arr[1], arr[3], arr[0], arr[2]])
 
     // reverse two key. Preserves order when equal: 1 then 5
     res = filter(arr, ['a', 'b'], -1)
+    assertArray(res, [arr[2], arr[0], arr[3], arr[1], arr[5], arr[4]])
+    res = filter(arr, 'a', 'b', -1)
     assertArray(res, [arr[2], arr[0], arr[3], arr[1], arr[5], arr[4]])
   })
 

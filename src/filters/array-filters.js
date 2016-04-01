@@ -72,48 +72,60 @@ export function filterBy (arr, search, delimiter) {
 /**
  * Filter filter for arrays
  *
- * @param {String|Array<String>|Function} sortKeys
+ * @param {String|Array<String>|Function} ...sortKeys
  * @param {Number} [order]
  */
 
-export function orderBy (arr, sortKeys, order) {
+export function orderBy (arr) {
+  let comparator = null
+  let sortKeys
   arr = convertArray(arr)
-  order = (order && order < 0) ? -1 : 1
-  let recursiveCompare = null
 
-  if (typeof sortKeys === 'string') {
-    sortKeys = [sortKeys]
-  } else if (typeof sortKeys === 'function') {
-    recursiveCompare = function (a, b) {
-      return sortKeys(a, b) * order
-    }
-  } else if (!sortKeys || (sortKeys !== true && !sortKeys.length)) {
-    // we check if sortKeys === true because you can sort primitive values with
-    // array | orderBy true: http://vuejs.org/api/#orderBy
-    return arr
+  // determine order (last argument)
+  let args = toArray(arguments, 1)
+  let order = args[args.length - 1]
+  if (typeof order === 'number') {
+    order = order < 0 ? -1 : 1
+    args = args.length > 1 ? args.slice(0, -1) : args
+  } else {
+    order = 1
   }
 
-  function compare (a, b, sortKeyIndex) {
-    const sortKey = sortKeys[sortKeyIndex]
-    if (sortKey !== '$key') {
-      if (isObject(a) && '$value' in a) a = a.$value
-      if (isObject(b) && '$value' in b) b = b.$value
+  // determine sortKeys & comparator
+  let firstArg = args[0]
+  if (!firstArg) {
+    return arr
+  } else if (typeof firstArg === 'function') {
+    // custom comparator
+    comparator = function (a, b) {
+      return firstArg(a, b) * order
     }
-    a = isObject(a) ? getPath(a, sortKey) : a
-    b = isObject(b) ? getPath(b, sortKey) : b
+  } else {
+    // string keys. flatten first
+    sortKeys = Array.prototype.concat.apply([], args)
+    comparator = function (a, b, i) {
+      i = i || 0
+      return i >= sortKeys.length - 1
+        ? baseCompare(a, b, i)
+        : baseCompare(a, b, i) || comparator(a, b, i + 1)
+    }
+  }
+
+  function baseCompare (a, b, sortKeyIndex) {
+    const sortKey = sortKeys[sortKeyIndex]
+    if (sortKey) {
+      if (sortKey !== '$key') {
+        if (isObject(a) && '$value' in a) a = a.$value
+        if (isObject(b) && '$value' in b) b = b.$value
+      }
+      a = isObject(a) ? getPath(a, sortKey) : a
+      b = isObject(b) ? getPath(b, sortKey) : b
+    }
     return a === b ? 0 : a > b ? order : -order
   }
 
-  recursiveCompare = recursiveCompare || function (a, b, i) {
-    i = i || 0
-    if (sortKeys === true || i === sortKeys.length - 1) {
-      return compare(a, b, i)
-    }
-    return compare(a, b, i) || recursiveCompare(a, b, i + 1)
-  }
-
   // sort on a copy to avoid mutating original array
-  return arr.slice().sort(recursiveCompare)
+  return arr.slice().sort(comparator)
 }
 
 /**
