@@ -854,4 +854,26 @@ describe('prop', function () {
       done()
     })
   })
+
+  it('prop coercion should be applied after defaulting', function () {
+    var vm = new Vue({
+      el: el,
+      template: '<comp></comp>',
+      components: {
+        comp: {
+          props: {
+            color: {
+              type: String,
+              default: 'blue',
+              coerce: function (color) {
+                return 'color-' + color
+              }
+            }
+          },
+          template: '<div>{{ color }}</div>'
+        }
+      }
+    })
+    expect(vm.$el.textContent).toBe('color-blue')
+  })
 })
