@@ -229,10 +229,10 @@ function makePropsLinkFn (props) {
 
 function processPropValue (vm, prop, rawValue, fn) {
   const isSimple = prop.dynamic && isSimplePath(prop.parentPath)
-  let value = coerceProp(prop, rawValue)
-  if (value === undefined) {
-    value = getPropDefaultValue(vm, prop)
+  if (rawValue === undefined) {
+    rawValue = getPropDefaultValue(vm, prop)
   }
+  let value = coerceProp(prop, rawValue)
   const coerced = value !== rawValue
   if (!assertProp(prop, value, vm)) {
     value = undefined
