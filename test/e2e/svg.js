@@ -34,7 +34,7 @@ casper.test.begin('svg', 18, function (test) {
   })
   .then(function () {
     this.fill('#add', {
-      newlabel: 'hi'
+      newlabel: 'foo'
     })
   })
   .thenClick('#add > button', function () {

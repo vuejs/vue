@@ -121,16 +121,16 @@ describe('ref', function () {
         comp: {
           template: '<slot></slot>',
           data: function () {
-            return { msg: 'hi' }
+            return { msg: 'foo' }
           }
         }
       }
     })
     expect(getWarnCount()).toBe(0)
-    expect(vm.$el.textContent).toBe('hi')
-    vm.$children[0].msg = 'ho'
+    expect(vm.$el.textContent).toBe('foo')
+    vm.$children[0].msg = 'bar'
     _.nextTick(function () {
-      expect(vm.$el.textContent).toBe('ho')
+      expect(vm.$el.textContent).toBe('bar')
       done()
     })
   })

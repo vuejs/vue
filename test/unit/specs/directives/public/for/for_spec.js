@@ -278,17 +278,17 @@ describe('v-for', function () {
       },
       components: {
         'view-a': {
-          template: 'AAA'
+          template: 'foo'
         },
         'view-b': {
-          template: 'BBB'
+          template: 'bar'
         },
         'view-c': {
-          template: 'CCC'
+          template: 'baz'
         }
       }
     })
-    expect(el.innerHTML).toBe('<component>AAA</component><component>BBB</component><component>CCC</component>')
+    expect(el.innerHTML).toBe('<component>foo</component><component>bar</component><component>baz</component>')
     // primitive
     el = document.createElement('div')
     new Vue({
@@ -299,17 +299,17 @@ describe('v-for', function () {
       },
       components: {
         'view-a': {
-          template: 'AAA'
+          template: 'foo'
         },
         'view-b': {
-          template: 'BBB'
+          template: 'bar'
         },
         'view-c': {
-          template: 'CCC'
+          template: 'baz'
         }
       }
     })
-    expect(el.innerHTML).toBe('<component>AAA</component><component>BBB</component><component>CCC</component>')
+    expect(el.innerHTML).toBe('<component>foo</component><component>bar</component><component>baz</component>')
   })
 
   it('fragment loop', function (done) {
@@ -393,13 +393,13 @@ describe('v-for', function () {
       el: el,
       template: '<div v-for="item in list | filterBy filterKey | orderBy sortKey -1 | limitBy 2">{{item.id}}</div>',
       data: {
-        filterKey: 'hi!',
+        filterKey: 'foo',
         sortKey: 'id',
         list: [
-          { id: 1, id2: 4, msg: 'hi!' },
-          { id: 2, id2: 3, msg: 'na' },
-          { id: 3, id2: 2, msg: 'hi!' },
-          { id: 4, id2: 1, msg: 'na' }
+          { id: 1, id2: 4, msg: 'foo' },
+          { id: 2, id2: 3, msg: 'bar' },
+          { id: 3, id2: 2, msg: 'foo' },
+          { id: 4, id2: 1, msg: 'bar' }
         ]
       }
     })
@@ -407,7 +407,7 @@ describe('v-for', function () {
 
     go(
       function () {
-        vm.filterKey = 'na'
+        vm.filterKey = 'bar'
       }, assertMarkup
     )
     .then(
@@ -422,14 +422,14 @@ describe('v-for', function () {
     )
     .then(
       function () {
-        vm.list.push({ id: 0, id2: 4, msg: 'na' })
+        vm.list.push({ id: 0, id2: 4, msg: 'bar' })
       }, assertMarkup
     )
     .then(
       function () {
         vm.list = [
-          { id: 33, id2: 4, msg: 'hi!' },
-          { id: 44, id2: 3, msg: 'na' }
+          { id: 33, id2: 4, msg: 'foo' },
+          { id: 44, id2: 3, msg: 'bar' }
         ]
       }, assertMarkup
     )
@@ -490,9 +490,9 @@ describe('v-for', function () {
       template: '<test v-for="item in list" :item="item" track-by="id"></test>',
       data: {
         list: [
-          { id: 1, msg: 'hi' },
-          { id: 2, msg: 'ha' },
-          { id: 3, msg: 'ho' }
+          { id: 1, msg: 'foo' },
+          { id: 2, msg: 'bar' },
+          { id: 3, msg: 'baz' }
         ]
       },
       components: {
@@ -507,8 +507,8 @@ describe('v-for', function () {
     // swap the data with different objects, but with
     // the same ID!
     vm.list = [
-      { id: 1, msg: 'wa' },
-      { id: 2, msg: 'wo' }
+      { id: 1, msg: 'qux' },
+      { id: 2, msg: 'quux' }
     ]
     _.nextTick(function () {
       assertMarkup()
@@ -764,8 +764,8 @@ describe('v-for', function () {
           { id: 1, msg: 'hi', list: [
             { id: 1, msg: 'hi foo' }
           ] },
-          { id: 2, msg: 'ha', list: [] },
-          { id: 3, msg: 'ho', list: [] }
+          { id: 2, msg: 'bar', list: [] },
+          { id: 3, msg: 'baz', list: [] }
         ]
       }
     })
@@ -775,11 +775,11 @@ describe('v-for', function () {
     var oldInnerNodes = el.children[0].children
 
     vm.list = [
-      { id: 1, msg: 'wa', list: [
+      { id: 1, msg: 'baz', list: [
         { id: 1, msg: 'hi foo' },
         { id: 2, msg: 'hi bar' }
       ] },
-      { id: 2, msg: 'wo', list: [] }
+      { id: 2, msg: 'qux', list: [] }
     ]
 
     _.nextTick(function () {
@@ -806,8 +806,8 @@ describe('v-for', function () {
 
   it('switch between object-converted & array mode', function (done) {
     var obj = {
-      a: { msg: 'AA' },
-      b: { msg: 'BB' }
+      a: { msg: 'foo' },
+      b: { msg: 'bar' }
     }
     var arr = [obj.b, obj.a]
     var vm = new Vue({
@@ -822,7 +822,7 @@ describe('v-for', function () {
     }).join(''))
     vm.obj = arr
     _.nextTick(function () {
-      expect(el.innerHTML).toBe('<div>BB</div><div>AA</div>')
+      expect(el.innerHTML).toBe('<div>bar</div><div>foo</div>')
       // make sure it cleared the cache
       expect(vm._directives[0].cache.a).toBeNull()
       expect(vm._directives[0].cache.b).toBeNull()

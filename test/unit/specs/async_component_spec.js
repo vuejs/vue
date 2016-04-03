@@ -16,7 +16,7 @@ describe('Async components', function () {
     var go = jasmine.createSpy()
     new Vue({
       el: el,
-      template: '<test hi="ok" @ready="go"></test>',
+      template: '<test foo="bar" @ready="go"></test>',
       methods: {
         go: go
       },
@@ -24,8 +24,8 @@ describe('Async components', function () {
         test: function (resolve) {
           setTimeout(function () {
             resolve({
-              props: ['hi'],
-              template: '{{ hi }}',
+              props: ['foo'],
+              template: '{{ foo }}',
               ready: function () {
                 this.$emit('ready')
               }
@@ -36,7 +36,7 @@ describe('Async components', function () {
       }
     })
     function next () {
-      expect(el.textContent).toBe('ok')
+      expect(el.textContent).toBe('bar')
       expect(go).toHaveBeenCalled()
       done()
     }

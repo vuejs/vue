@@ -33,8 +33,8 @@ describe('v-bind', function () {
   it('should set property for input value', function () {
     dir.el = document.createElement('input')
     dir.arg = 'value'
-    dir.update('what')
-    expect(dir.el.value).toBe('what')
+    dir.update('foo')
+    expect(dir.el.value).toBe('foo')
     dir.el = document.createElement('input')
     dir.el.type = 'checkbox'
     dir.arg = 'checked'
@@ -56,11 +56,11 @@ describe('v-bind', function () {
   it('object format', function () {
     dir.el = document.createElement('input')
     dir.update({
-      'test': 'hi',
-      'value': 'what'
+      'test': 'foo',
+      'value': 'bar'
     })
-    expect(dir.el.getAttribute('test')).toBe('hi')
-    expect(dir.el.value).toBe('what')
+    expect(dir.el.getAttribute('test')).toBe('foo')
+    expect(dir.el.value).toBe('bar')
     dir.update({
       'xlink:special': 'ok'
     })

@@ -19,10 +19,10 @@ if (typeof console !== 'undefined') {
     it('format component name', function () {
       config.silent = false
       _.warn.and.callThrough()
-      _.warn('oops', new Vue({ name: 'hi' }))
-      expect(console.error).toHaveBeenCalledWith(warnPrefix + 'oops (found in component: <hi>)')
-      _.warn('oops', { name: 'ho' })
-      expect(console.error).toHaveBeenCalledWith(warnPrefix + 'oops (found in component: <ho>)')
+      _.warn('oops', new Vue({ name: 'foo' }))
+      expect(console.error).toHaveBeenCalledWith(warnPrefix + 'oops (found in component: <foo>)')
+      _.warn('oops', { name: 'bar' })
+      expect(console.error).toHaveBeenCalledWith(warnPrefix + 'oops (found in component: <bar>)')
     })
 
     it('not warn when silent is ture', function () {
