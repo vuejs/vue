@@ -458,8 +458,7 @@ describe('Slot Distribution', function () {
     expect('"slot" attribute must be static').toHaveBeenWarned()
   })
 
-  it('plugin directive', function () {
-    console.log("---------------------------------")
+  it('plugin directive - scoped data', function () {
     var vm = new Vue({
       el: el,
       template: '<comp1><comp2>{{text}}</comp2></comp1>',
@@ -486,5 +485,57 @@ describe('Slot Distribution', function () {
       }
     })
     expect(vm.$el.textContent).toBe('comp1main')
+  })
+
+  it('plugin directive - child relations', function () {
+    var vm = new Vue({
+      el: el,
+      template: '<comp1><comp2></comp2></comp1>',
+      data: {
+        text:'main'
+      },
+      components: {
+        comp1: {
+          template: '<div><comp11><slot></slot><comp11></div>',
+          components: {
+            comp11: {
+              template: '<div><slot plugin></slot></div>'
+            }
+          }
+        },
+        comp2: {
+          template: '<div><slot></slot></div>'
+        }
+      }
+    })
+    expect(vm.$children[0].$children.length).toBe(1)
+    expect(vm.$children[0].$children[0].$options.name).toBe("comp11")
+    expect(vm.$children[0].$children[0].$children[0].$options.name).toBe("comp2")
+  })
+
+  it('child relations', function () {
+    var vm = new Vue({
+      el: el,
+      template: '<comp1><comp2></comp2></comp1>',
+      data: {
+        text:'main'
+      },
+      components: {
+        comp1: {
+          template: '<div><comp11><slot></slot><comp11></div>',
+          components: {
+            comp11: {
+              template: '<div><slot></slot></div>'
+            }
+          }
+        },
+        comp2: {
+          template: '<div><slot></slot></div>'
+        }
+      }
+    })
+    expect(vm.$children[0].$children.length).toBe(2)
+    expect(vm.$children[0].$children[0].$children.length).toBe(0)
+    expect(vm.$children[0].$children[1].$children.length).toBe(0)
   })
 })
