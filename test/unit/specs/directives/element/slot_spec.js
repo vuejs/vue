@@ -457,4 +457,34 @@ describe('Slot Distribution', function () {
     })
     expect('"slot" attribute must be static').toHaveBeenWarned()
   })
+
+  it('plugin directive', function () {
+    console.log("---------------------------------")
+    var vm = new Vue({
+      el: el,
+      template: '<comp1><comp2>{{text}}</comp2></comp1>',
+      data: {
+        text:'main'
+      },
+      components: {
+        comp1: {
+          template: '<div><slot plugin :text="text"></slot></div>',
+          data: function(){
+            return {
+              text:'comp1'
+            }
+          }
+        },
+        comp2: {
+          props: {
+            text: {
+              type: String
+            }
+          },
+          template: '<div>{{text}}<slot></slot></div>'
+        }
+      }
+    })
+    expect(vm.$el.textContent).toBe('comp1main')
+  })
 })

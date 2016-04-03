@@ -2,13 +2,14 @@ import { SLOT } from '../priorities'
 import {
   extractContent,
   replace,
-  remove
+  remove,
+  defineReactive
 } from '../../util/index'
 
 export default {
 
   priority: SLOT,
-  params: ['name'],
+  params: ['name','plugin'],
 
   bind () {
     // this was resolved during component transclusion
@@ -38,9 +39,40 @@ export default {
         elseBlock._context = this.vm
         content.appendChild(elseBlock)
       }
-      const scope = host
+      let scope = host
         ? host._scope
         : this._scope
+
+      if (this.params.plugin) {
+        // copy all remaining attributes from slot to all direct children
+        let attrs = this.el.attributes
+        for(let i = attrs.length - 1; i >= 0; i--) {
+          let name = attrs[i].name,
+            value = attrs[i].value,
+            children = content.children
+          // prefix value
+          // TODO properly handle v-bind
+          if (name[0]===':') {
+            value = '__'+value
+          }
+          for(let j = 0, len = children.length;  j < len; j++) {
+            // TODO warn if child can't have attributes?
+            children[j].setAttribute(name,value)
+          }
+        }
+        if (!scope) {
+          scope = {}
+        }
+        // add all data from context to scope
+        for(let data in context._data) {
+          defineReactive(scope,data,context._data[data])
+        }
+        // add all data from host to scope with prefixed names
+        for(let data in host._data) {
+          defineReactive(scope,'__'+data,host._data[data])
+        }
+      }
+
       this.unlink = context.$compile(
         content, host, scope, this._frag
       )
