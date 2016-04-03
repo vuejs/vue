@@ -44,6 +44,7 @@ export default {
         : this._scope
 
       if (this.params.plugin) {
+        console.log(this)
         // copy all remaining attributes from slot to all direct children
         let attrs = this.el.attributes
         for(let i = attrs.length - 1; i >= 0; i--) {
@@ -55,6 +56,7 @@ export default {
           if (name[0]===':') {
             value = '__'+value
           }
+          // TODO properly handle v-on
           for(let j = 0, len = children.length;  j < len; j++) {
             // TODO warn if child can't have attributes?
             children[j].setAttribute(name,value)
@@ -70,6 +72,11 @@ export default {
         // add all data from host to scope with prefixed names
         for(let data in host._data) {
           defineReactive(scope,'__'+data,host._data[data])
+        }
+        // add all data from v-for
+        if (this._frag) {
+          // TODO how to get the data out of the v-for scope?
+          defineReactive(scope,'__item',this._frag.scope.item)
         }
       }
 

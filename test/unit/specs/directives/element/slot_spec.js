@@ -522,7 +522,7 @@ describe('Slot Distribution', function () {
       },
       components: {
         comp1: {
-          template: '<div><comp11><slot></slot><comp11></div>',
+          template: '<div><comp11><slot></slot></comp11></div>',
           components: {
             comp11: {
               template: '<div><slot></slot></div>'
@@ -537,5 +537,33 @@ describe('Slot Distribution', function () {
     expect(vm.$children[0].$children.length).toBe(2)
     expect(vm.$children[0].$children[0].$children.length).toBe(0)
     expect(vm.$children[0].$children[1].$children.length).toBe(0)
+  })
+
+  it('plugin directive - v-for', function () {
+    var vm = new Vue({
+      el: el,
+      template: '<comp1><comp2></comp2></comp1>',
+      data: {
+        text:'main'
+      },
+      components: {
+        comp1: {
+          template: '<div><slot plugin :item="item" v-for="item in data"></slot></div>',
+          data: function() {
+              return {data:[{name:"foo"},{name:"bar"}]}
+            }
+        },
+        comp2: {
+          props: {
+            item: {
+              type: Object
+            }
+          },
+          template: '<div>{{item.name}}</div>'
+        }
+      }
+    })
+    console.log(vm.$el)
+    expect(vm.$el.textContent).toBe('foobar')
   })
 })
