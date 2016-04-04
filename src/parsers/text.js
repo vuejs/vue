@@ -22,8 +22,8 @@ export function compileRegex () {
   var unsafeOpen = escapeRegex(config.unsafeDelimiters[0])
   var unsafeClose = escapeRegex(config.unsafeDelimiters[1])
   tagRE = new RegExp(
-    unsafeOpen + '(.+?)' + unsafeClose + '|' +
-    open + '(.+?)' + close,
+    unsafeOpen + '([^]+?)' + unsafeClose + '|' +
+    open + '([^]+?)' + close,
     'g'
   )
   htmlRE = new RegExp(
@@ -52,7 +52,6 @@ export function parseText (text) {
   if (hit) {
     return hit
   }
-  text = text.replace(/\n/g, '')
   if (!tagRE.test(text)) {
     return null
   }
