@@ -462,9 +462,6 @@ describe('Slot Distribution', function () {
     var vm = new Vue({
       el: el,
       template: '<comp1><comp2></comp2></comp1>',
-      data: {
-        text:'main'
-      },
       components: {
         comp1: {
           template: '<div><comp11><slot></slot></comp11></div>',
@@ -549,9 +546,6 @@ describe('Slot Distribution', function () {
       var vm = new Vue({
         el: el,
         template: '<comp1><comp2></comp2></comp1>',
-        data: {
-          text:'main'
-        },
         components: {
           comp1: {
             template: '<div><comp11><slot></slot></comp11></div>',
@@ -575,9 +569,6 @@ describe('Slot Distribution', function () {
       var vm = new Vue({
         el: el,
         template: '<comp1><comp2></comp2></comp1>',
-        data: {
-          text:'main'
-        },
         components: {
           comp1: {
             template: '<div><slot plugin :item="item" v-for="item in data"></slot></div>',
@@ -602,9 +593,6 @@ describe('Slot Distribution', function () {
       var vm = new Vue({
         el: el,
         template: '<comp1><comp2></comp2></comp1>',
-        data: {
-          text:'main'
-        },
         components: {
           comp1: {
             template: '<div><slot plugin="isValid"></slot></div>'
