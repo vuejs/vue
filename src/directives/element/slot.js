@@ -9,14 +9,14 @@ import {
 export default {
 
   priority: SLOT,
-  params: ['name','plugin'],
+  params: ['name','plugin',''],
 
   bind () {
     // this was resolved during component transclusion
     var name = this.params.name || 'default'
     var content = this.vm._slotContents && this.vm._slotContents[name]
     if (!content || !content.hasChildNodes()) {
-      this.fallback()
+      this.compile(extractContent(this.el, true), this.vm)
     } else {
       this.compile(content.cloneNode(true), this.vm._context, this.vm)
     }
@@ -44,55 +44,49 @@ export default {
         : this._scope
 
       if (this.params.plugin) {
-        console.log(this)
+        if (!host) {
+          // TODO warn to use plugin only within components
+        }
         // copy all remaining attributes from slot to all direct children
         let attrs = this.el.attributes
         for(let i = attrs.length - 1; i >= 0; i--) {
           let name = attrs[i].name,
             value = attrs[i].value,
             children = content.children
-          // prefix value
-          // TODO properly handle v-bind
-          if (name[0]===':') {
-            value = '__'+value
-          }
-          // TODO properly handle v-on
           for(let j = 0, len = children.length;  j < len; j++) {
             // TODO warn if child can't have attributes?
-            children[j].setAttribute(name,value)
+            if (!(children[j].hasAttribute(name) ||
+                (name[0]===':' && children[j].hasAttribute('v-bind'+name)) ||
+                (name[0]==='@' && children[j].hasAttribute('v-on:'+name.slice(1)))
+              )) {
+              children[j].setAttribute(name,value)
+            }
           }
         }
-        if (!scope) {
-          scope = {}
-        }
+        // use v-for scope when available
+        scope = this._frag ? this._frag.scope : scope || {}
+
         // add all data from context to scope
         for(let data in context._data) {
-          defineReactive(scope,data,context._data[data])
+          if (scope[data] == null) {
+            defineReactive(scope,data,context._data[data])
+          }
         }
         // add all data from host to scope with prefixed names
         for(let data in host._data) {
-          defineReactive(scope,'__'+data,host._data[data])
+          defineReactive(scope,'_'+data,host._data[data])
         }
-        // add all data from v-for
-        if (this._frag) {
-          // TODO how to get the data out of the v-for scope?
-          defineReactive(scope,'__item',this._frag.scope.item)
-        }
+        // child relations test: how to get the slot content to be comp11 child?
+        this.unlink = context.$compile(content, host, scope, this._frag)
+      } else {
+        this.unlink = context.$compile(content, host, scope, this._frag)
       }
-
-      this.unlink = context.$compile(
-        content, host, scope, this._frag
-      )
     }
     if (content) {
       replace(this.el, content)
     } else {
       remove(this.el)
     }
-  },
-
-  fallback () {
-    this.compile(extractContent(this.el, true), this.vm)
   },
 
   unbind () {

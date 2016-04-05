@@ -458,61 +458,6 @@ describe('Slot Distribution', function () {
     expect('"slot" attribute must be static').toHaveBeenWarned()
   })
 
-  it('plugin directive - scoped data', function () {
-    var vm = new Vue({
-      el: el,
-      template: '<comp1><comp2>{{text}}</comp2></comp1>',
-      data: {
-        text:'main'
-      },
-      components: {
-        comp1: {
-          template: '<div><slot plugin :text="text"></slot></div>',
-          data: function(){
-            return {
-              text:'comp1'
-            }
-          }
-        },
-        comp2: {
-          props: {
-            text: {
-              type: String
-            }
-          },
-          template: '<div>{{text}}<slot></slot></div>'
-        }
-      }
-    })
-    expect(vm.$el.textContent).toBe('comp1main')
-  })
-
-  it('plugin directive - child relations', function () {
-    var vm = new Vue({
-      el: el,
-      template: '<comp1><comp2></comp2></comp1>',
-      data: {
-        text:'main'
-      },
-      components: {
-        comp1: {
-          template: '<div><comp11><slot></slot><comp11></div>',
-          components: {
-            comp11: {
-              template: '<div><slot plugin></slot></div>'
-            }
-          }
-        },
-        comp2: {
-          template: '<div><slot></slot></div>'
-        }
-      }
-    })
-    expect(vm.$children[0].$children.length).toBe(1)
-    expect(vm.$children[0].$children[0].$options.name).toBe("comp11")
-    expect(vm.$children[0].$children[0].$children[0].$options.name).toBe("comp2")
-  })
-
   it('child relations', function () {
     var vm = new Vue({
       el: el,
@@ -539,31 +484,119 @@ describe('Slot Distribution', function () {
     expect(vm.$children[0].$children[1].$children.length).toBe(0)
   })
 
-  it('plugin directive - v-for', function () {
-    var vm = new Vue({
-      el: el,
-      template: '<comp1><comp2></comp2></comp1>',
-      data: {
-        text:'main'
-      },
-      components: {
-        comp1: {
-          template: '<div><slot plugin :item="item" v-for="item in data"></slot></div>',
-          data: function() {
-              return {data:[{name:"foo"},{name:"bar"}]}
-            }
+
+  describe('plugin directive', function() {
+
+    it('scoped data', function () {
+      var vm = new Vue({
+        el: el,
+        template: '<comp1><comp2>{{text}}</comp2></comp1>',
+        data: {
+          text:'main'
         },
-        comp2: {
-          props: {
-            item: {
-              type: Object
+        components: {
+          comp1: {
+            template: '<div><slot plugin :text="_text"></slot></div>',
+            data: function(){
+              return {
+                text:'comp1'
+              }
             }
           },
-          template: '<div>{{item.name}}</div>'
+          comp2: {
+            props: {
+              text: {
+                type: String
+              }
+            },
+            template: '<div>{{text}}<slot></slot></div>'
+          }
         }
-      }
+      })
+      expect(vm.$el.textContent).toBe('comp1main')
     })
-    console.log(vm.$el)
-    expect(vm.$el.textContent).toBe('foobar')
+
+    it('scoped data hierarchy', function () {
+      var vm = new Vue({
+        el: el,
+        template: '<comp1><comp2 :text="text">{{text}}</comp2></comp1>',
+        data: {
+          text:'main'
+        },
+        components: {
+          comp1: {
+            template: '<div><slot plugin :text="_text"></slot></div>',
+            data: function(){
+              return {
+                text:'comp1'
+              }
+            }
+          },
+          comp2: {
+            props: {
+              text: {
+                type: String
+              }
+            },
+            template: '<div>{{text}}<slot></slot></div>'
+          }
+        }
+      })
+      expect(vm.$el.textContent).toBe('mainmain')
+    })
+
+    it('child relations', function () {
+      var vm = new Vue({
+        el: el,
+        template: '<comp1><comp2></comp2></comp1>',
+        data: {
+          text:'main'
+        },
+        components: {
+          comp1: {
+            template: '<div><comp11><slot></slot></comp11></div>',
+            components: {
+              comp11: {
+                template: '<div><slot plugin></slot></div>'
+              }
+            }
+          },
+          comp2: {
+            template: '<div><slot></slot></div>'
+          }
+        }
+      })
+      expect(vm.$children[0].$children.length).toBe(1)
+      expect(vm.$children[0].$children[0].$options.name).toBe("comp11")
+      expect(vm.$children[0].$children[0].$children[0].$options.name).toBe("comp2")
+    })
+
+    it('v-for', function () {
+      var vm = new Vue({
+        el: el,
+        template: '<comp1><comp2></comp2></comp1>',
+        data: {
+          text:'main'
+        },
+        components: {
+          comp1: {
+            template: '<div><slot plugin :item="item" v-for="item in data"></slot></div>',
+            data: function() {
+                return {data:[{name:"foo"},{name:"bar"}]}
+              }
+          },
+          comp2: {
+            props: {
+              item: {
+                type: Object
+              }
+            },
+            template: '<div>{{item.name}}</div>'
+          }
+        }
+      })
+      expect(vm.$el.textContent).toBe('foobar')
+    })
   })
+
 })
