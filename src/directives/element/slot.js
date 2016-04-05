@@ -9,7 +9,7 @@ import {
 export default {
 
   priority: SLOT,
-  params: ['name','plugin',''],
+  params: ['name','plugin'],
 
   bind () {
     // this was resolved during component transclusion
@@ -78,6 +78,10 @@ export default {
         }
         // child relations test: how to get the slot content to be comp11 child?
         this.unlink = context.$compile(content, host, scope, this._frag)
+        if (this.params.plugin !== true) {
+          // should check on the newly created vm if it is valid
+        }
+
       } else {
         this.unlink = context.$compile(content, host, scope, this._frag)
       }

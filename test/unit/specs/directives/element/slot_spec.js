@@ -597,6 +597,25 @@ describe('Slot Distribution', function () {
       })
       expect(vm.$el.textContent).toBe('foobar')
     })
+
+    it('validate child', function () {
+      var vm = new Vue({
+        el: el,
+        template: '<comp1><comp2></comp2></comp1>',
+        data: {
+          text:'main'
+        },
+        components: {
+          comp1: {
+            template: '<div><slot plugin="isValid"></slot></div>'
+          },
+          comp2: {
+            template: '<div>foo</div>'
+          }
+        }
+      })
+      expect(vm.$el.textContent).toBe('')
+    })
   })
 
 })
