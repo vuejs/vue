@@ -1,9 +1,15 @@
 {
-  "private": true,
+  "private": false,
+  "scripts": {
+    "start": "ws"
+  },
   "dependencies": {
-    "director": "^1.2.0",
-    "vue": "^1.0.0",
-    "todomvc-common": "^1.0.1",
-    "todomvc-app-css": "^2.0.0"
+    "director": "^1.2.8",
+    "todomvc-app-css": "^2.0.4",
+    "todomvc-common": "^1.0.2",
+    "vue": "^1.0.20"
+  },
+  "devDependencies": {
+    "local-web-server": "^1.2.1"
   }
 }
