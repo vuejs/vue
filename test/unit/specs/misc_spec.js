@@ -8,18 +8,18 @@ describe('Misc', function () {
       el: document.createElement('div'),
       template: '<div v-test>{{test}}</div>',
       data: {
-        test: 'hi'
+        test: 'foo'
       },
       directives: {
         test: {
           bind: function () {
-            this.el.insertBefore(document.createTextNode('yo '),
+            this.el.insertBefore(document.createTextNode('bar '),
               this.el.firstChild)
           }
         }
       }
     })
-    expect(vm.$el.textContent).toBe('yo hi')
+    expect(vm.$el.textContent).toBe('bar foo')
   })
 
   it('attached/detached hooks for transcluded components', function () {
@@ -36,7 +36,7 @@ describe('Misc', function () {
           template: '<slot></slot>'
         },
         inner: {
-          template: 'hi',
+          template: 'foo',
           attached: spy1,
           detached: spy2
         }
@@ -194,13 +194,13 @@ describe('Misc', function () {
       el: document.createElement('div'),
       template: '{{msg}}',
       data: Object.freeze({
-        msg: 'hi!'
+        msg: 'foo'
       })
     })
-    expect(vm.$el.textContent).toBe('hi!')
-    try { vm.msg = 'ho!' } catch (e) {}
+    expect(vm.$el.textContent).toBe('foo')
+    try { vm.msg = 'bar' } catch (e) {}
     Vue.nextTick(function () {
-      expect(vm.$el.textContent).toBe('hi!')
+      expect(vm.$el.textContent).toBe('foo')
       done()
     })
   })
@@ -210,14 +210,14 @@ describe('Misc', function () {
       el: document.createElement('div'),
       template: '{{msg}} {{frozen.msg}}',
       data: {
-        msg: 'hi',
+        msg: 'foo',
         frozen: Object.freeze({
           msg: 'frozen'
         })
       }
     })
-    expect(vm.$el.textContent).toBe('hi frozen')
-    vm.msg = 'ho'
+    expect(vm.$el.textContent).toBe('foo frozen')
+    vm.msg = 'bar'
     try {
       vm.frozen.msg = 'changed'
     } catch (error) {
@@ -226,7 +226,7 @@ describe('Misc', function () {
       }
     }
     Vue.nextTick(function () {
-      expect(vm.$el.textContent).toBe('ho frozen')
+      expect(vm.$el.textContent).toBe('bar frozen')
       done()
     })
   })
@@ -424,10 +424,10 @@ describe('Misc', function () {
       el: document.createElement('div'),
       template: '<div class="{{test}}" transition="test"></div>',
       data: {
-        test: 'hi'
+        test: 'foo'
       }
     })
-    expect(vm.$el.firstChild.className).toBe('hi test-transition')
+    expect(vm.$el.firstChild.className).toBe('foo test-transition')
   })
 
   it('transclude class merging should skip interpolated class', function () {
@@ -435,7 +435,7 @@ describe('Misc', function () {
       el: document.createElement('div'),
       template: '<test class="outer-{{test}}"></test>',
       data: {
-        test: 'hi'
+        test: 'foo'
       },
       components: {
         test: {
@@ -444,7 +444,7 @@ describe('Misc', function () {
         }
       }
     })
-    expect(vm.$el.firstChild.className).toBe('outer-hi')
+    expect(vm.$el.firstChild.className).toBe('outer-foo')
   })
 
   // #2163
@@ -511,7 +511,7 @@ describe('Misc', function () {
           },
           components: {
             child: {
-              template: 'yo',
+              template: 'foo',
               attached: spyChild
             }
           }

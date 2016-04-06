@@ -5,7 +5,7 @@ var config = require('src/config')
 var testCases = [
   {
     // no tags
-    text: 'haha',
+    text: 'foo',
     expected: null
   },
   {

@@ -14,13 +14,13 @@ describe('Lifecycle API', function () {
     it('normal', function () {
       var vm = new Vue({
         data: {
-          test: 'hi!'
+          test: 'foo'
         }
       })
       vm.$mount(el)
       expect(vm.$el).toBe(el)
       expect(el.__vue__).toBe(vm)
-      expect(el.textContent).toBe('hi!')
+      expect(el.textContent).toBe('foo')
     })
 
     it('auto-create', function () {
@@ -40,12 +40,12 @@ describe('Lifecycle API', function () {
       el.id = 'mount-test'
       document.body.appendChild(el)
       var vm = new Vue({
-        data: { test: 'hi!' }
+        data: { test: 'foo' }
       })
       vm.$mount('#mount-test')
       expect(vm.$el).toBe(el)
       expect(el.__vue__).toBe(vm)
-      expect(el.textContent).toBe('hi!')
+      expect(el.textContent).toBe('foo')
       document.body.removeChild(el)
     })
 
@@ -60,12 +60,12 @@ describe('Lifecycle API', function () {
       document.body.appendChild(el)
       var vm = new Vue({
         replace: true,
-        data: { test: 'hi!' },
+        data: { test: 'foo' },
         template: '<div>{{test}}</div>'
       })
       vm.$mount(el)
       expect(vm.$el).not.toBe(el)
-      expect(vm.$el.textContent).toBe('hi!')
+      expect(vm.$el.textContent).toBe('foo')
       expect(document.body.contains(el)).toBe(false)
       expect(document.body.lastChild).toBe(vm.$el)
       expect(vm.$el.className).toBe('replace-test')
@@ -77,13 +77,13 @@ describe('Lifecycle API', function () {
       var vm = new Vue({
         _linker: linker,
         data: {
-          test: 'hi!'
+          test: 'foo'
         }
       })
       vm.$mount(el)
       expect(vm.$el).toBe(el)
       expect(el.__vue__).toBe(vm)
-      expect(el.textContent).toBe('hi!')
+      expect(el.textContent).toBe('foo')
     })
 
     it('mount to fragment', function () {
@@ -99,13 +99,13 @@ describe('Lifecycle API', function () {
       document.body.appendChild(el)
       var vm = new Vue({
         replace: true,
-        data: { test: 'hi!' },
-        template: '<div>{{test}}</div><div>{{test + "!"}}</div>'
+        data: { test: 'foo' },
+        template: '<div>{{test}}</div><div>{{test + "bar"}}</div>'
       })
       vm.$mount(el)
       expect(vm.$el).not.toBe(el)
-      expect(vm.$el.nextSibling.textContent).toBe('hi!')
-      expect(vm.$el.nextSibling.nextSibling.textContent).toBe('hi!!')
+      expect(vm.$el.nextSibling.textContent).toBe('foo')
+      expect(vm.$el.nextSibling.nextSibling.textContent).toBe('foobar')
       expect(document.body.contains(el)).toBe(false)
       expect(document.body.lastChild).toBe(vm._fragmentEnd)
       vm.$remove()
@@ -115,7 +115,7 @@ describe('Lifecycle API', function () {
       var hooks = ['created', 'beforeCompile', 'compiled', 'attached', 'ready']
       var options = {
         data: {
-          test: 'hihi'
+          test: 'foo'
         }
       }
       hooks.forEach(function (hook) {
@@ -300,21 +300,21 @@ describe('Lifecycle API', function () {
         el: el,
         template: '{{a}}',
         data: {
-          a: 'hi'
+          a: 'foo'
         }
       })
       expect(vm._directives.length).toBe(1)
       var partial = document.createElement('span')
       partial.textContent = '{{a}}'
       var decompile = vm.$compile(partial)
-      expect(partial.textContent).toBe('hi')
+      expect(partial.textContent).toBe('foo')
       expect(vm._directives.length).toBe(2)
       decompile()
       expect(vm._directives.length).toBe(1)
-      vm.a = 'ha'
+      vm.a = 'bar'
       Vue.nextTick(function () {
-        expect(el.textContent).toBe('ha')
-        expect(partial.textContent).toBe('hi')
+        expect(el.textContent).toBe('bar')
+        expect(partial.textContent).toBe('foo')
         done()
       })
     })

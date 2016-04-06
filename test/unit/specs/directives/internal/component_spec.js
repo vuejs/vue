@@ -107,14 +107,14 @@ describe('Component', function () {
       },
       components: {
         'view-a': {
-          template: '<div>AAA</div>',
+          template: '<div>foo</div>',
           replace: true,
           data: function () {
             return { view: 'a' }
           }
         },
         'view-b': {
-          template: '<div>BBB</div>',
+          template: '<div>bar</div>',
           replace: true,
           data: function () {
             return { view: 'b' }
@@ -122,10 +122,10 @@ describe('Component', function () {
         }
       }
     })
-    expect(el.innerHTML).toBe('<div view="view-a">AAA</div>')
+    expect(el.innerHTML).toBe('<div view="view-a">foo</div>')
     vm.view = 'view-b'
     _.nextTick(function () {
-      expect(el.innerHTML).toBe('<div view="view-b">BBB</div>')
+      expect(el.innerHTML).toBe('<div view="view-b">bar</div>')
       vm.view = ''
       _.nextTick(function () {
         expect(el.innerHTML).toBe('')
@@ -142,16 +142,16 @@ describe('Component', function () {
         '<component :is="$options.components.async"></component>',
       components: {
         test: {
-          template: 'hi'
+          template: 'foo'
         },
         async: function (resolve) {
           resolve({
-            template: 'ho'
+            template: 'bar'
           })
         }
       }
     })
-    expect(el.textContent).toBe('hiho')
+    expect(el.textContent).toBe('foobar')
   })
 
   it('keep-alive', function (done) {
@@ -166,32 +166,32 @@ describe('Component', function () {
       components: {
         'view-a': {
           created: spyA,
-          template: '<div>AAA</div>',
+          template: '<div>foo</div>',
           replace: true
         },
         'view-b': {
           created: spyB,
-          template: '<div>BBB</div>',
+          template: '<div>bar</div>',
           replace: true
         }
       }
     })
-    expect(el.innerHTML).toBe('<div>AAA</div>')
+    expect(el.innerHTML).toBe('<div>foo</div>')
     expect(spyA.calls.count()).toBe(1)
     expect(spyB.calls.count()).toBe(0)
     vm.view = 'view-b'
     _.nextTick(function () {
-      expect(el.innerHTML).toBe('<div>BBB</div>')
+      expect(el.innerHTML).toBe('<div>bar</div>')
       expect(spyA.calls.count()).toBe(1)
       expect(spyB.calls.count()).toBe(1)
       vm.view = 'view-a'
       _.nextTick(function () {
-        expect(el.innerHTML).toBe('<div>AAA</div>')
+        expect(el.innerHTML).toBe('<div>foo</div>')
         expect(spyA.calls.count()).toBe(1)
         expect(spyB.calls.count()).toBe(1)
         vm.view = 'view-b'
         _.nextTick(function () {
-          expect(el.innerHTML).toBe('<div>BBB</div>')
+          expect(el.innerHTML).toBe('<div>bar</div>')
           expect(spyA.calls.count()).toBe(1)
           expect(spyB.calls.count()).toBe(1)
           done()
@@ -286,12 +286,12 @@ describe('Component', function () {
       template: '<view-a></view-a>',
       components: {
         'view-a': {
-          template: 'AAA',
+          template: 'foo',
           activate: function (ready) {
             setTimeout(function () {
               expect(el.textContent).toBe('')
               ready()
-              expect(el.textContent).toBe('AAA')
+              expect(el.textContent).toBe('foo')
               done()
             }, 0)
           }
@@ -307,7 +307,7 @@ describe('Component', function () {
       template: '<view-a></view-a>',
       components: {
         'view-a': {
-          template: 'AAA',
+          template: 'foo',
           mixins: [{
             activate: function (done) {
               expect(el.textContent).toBe('')
@@ -320,7 +320,7 @@ describe('Component', function () {
               expect(mixinSpy).toHaveBeenCalled()
               expect(el.textContent).toBe('')
               ready()
-              expect(el.textContent).toBe('AAA')
+              expect(el.textContent).toBe('foo')
               done()
             }, 0)
           }
@@ -339,13 +339,13 @@ describe('Component', function () {
       template: '<component :is="view"></component>',
       components: {
         'view-a': {
-          template: 'AAA',
+          template: 'foo',
           activate: function (ready) {
             next = ready
           }
         },
         'view-b': {
-          template: 'BBB',
+          template: 'bar',
           activate: function (ready) {
             next = ready
           }
@@ -355,14 +355,14 @@ describe('Component', function () {
     expect(next).toBeTruthy()
     expect(el.textContent).toBe('')
     next()
-    expect(el.textContent).toBe('AAA')
+    expect(el.textContent).toBe('foo')
     vm.view = 'view-b'
     _.nextTick(function () {
-      expect(el.textContent).toBe('AAA')
+      expect(el.textContent).toBe('foo')
       // old vm is already removed, this is the new vm
       expect(vm.$children.length).toBe(1)
       next()
-      expect(el.textContent).toBe('BBB')
+      expect(el.textContent).toBe('bar')
       // ensure switching before ready event correctly
       // cleans up the component being waited on.
       // see #1152
@@ -373,7 +373,7 @@ describe('Component', function () {
         vm.view = 'view-b'
         _.nextTick(function () {
           expect(vm.$children.length).toBe(1)
-          expect(vm.$children[0].$el.textContent).toBe('BBB')
+          expect(vm.$children[0].$el.textContent).toBe('bar')
           // calling view-a's ready callback here should not throw
           // because it should've been cancelled (#1994)
           expect(callback).not.toThrow()
@@ -393,13 +393,13 @@ describe('Component', function () {
       template: '<component :is="view" keep-alive></component>',
       components: {
         'view-a': {
-          template: 'AAA',
+          template: 'foo',
           activate: function (ready) {
             next = ready
           }
         },
         'view-b': {
-          template: 'BBB',
+          template: 'bar',
           activate: function (ready) {
             next = ready
           }
@@ -407,17 +407,17 @@ describe('Component', function () {
       }
     })
     next()
-    expect(el.textContent).toBe('AAA')
+    expect(el.textContent).toBe('foo')
     vm.view = 'view-b'
     _.nextTick(function () {
       expect(vm.$children.length).toBe(2)
       next()
-      expect(el.textContent).toBe('BBB')
+      expect(el.textContent).toBe('bar')
       vm.view = 'view-a'
       _.nextTick(function () {
         // should switch without the need to emit
         // because of keep-alive
-        expect(el.textContent).toBe('AAA')
+        expect(el.textContent).toBe('foo')
         done()
       })
     })
@@ -434,8 +434,8 @@ describe('Component', function () {
       },
       template: '<component :is="view" transition="test" transition-mode="in-out"></component>',
       components: {
-        'view-a': { template: 'AAA' },
-        'view-b': { template: 'BBB' }
+        'view-a': { template: 'foo' },
+        'view-b': { template: 'bar' }
       },
       transitions: {
         test: {
@@ -450,17 +450,17 @@ describe('Component', function () {
         }
       }
     })
-    expect(el.textContent).toBe('AAA')
+    expect(el.textContent).toBe('foo')
     vm.view = 'view-b'
     _.nextTick(function () {
       expect(spy1).toHaveBeenCalled()
       expect(spy2).not.toHaveBeenCalled()
-      expect(el.textContent).toBe('AAABBB')
+      expect(el.textContent).toBe('foobar')
       next()
       _.nextTick(function () {
         expect(spy2).toHaveBeenCalled()
         _.nextTick(function () {
-          expect(el.textContent).toBe('BBB')
+          expect(el.textContent).toBe('bar')
           done()
         })
       })
@@ -478,8 +478,8 @@ describe('Component', function () {
       },
       template: '<component :is="view" transition="test" transition-mode="out-in"></component>',
       components: {
-        'view-a': { template: 'AAA' },
-        'view-b': { template: 'BBB' }
+        'view-a': { template: 'foo' },
+        'view-b': { template: 'bar' }
       },
       transitions: {
         test: {
@@ -494,15 +494,15 @@ describe('Component', function () {
         }
       }
     })
-    expect(el.textContent).toBe('AAA')
+    expect(el.textContent).toBe('foo')
     vm.view = 'view-b'
     _.nextTick(function () {
       expect(spy1).toHaveBeenCalled()
       expect(spy2).not.toHaveBeenCalled()
-      expect(el.textContent).toBe('AAA')
+      expect(el.textContent).toBe('foo')
       next()
       expect(spy2).toHaveBeenCalled()
-      expect(el.textContent).toBe('BBB')
+      expect(el.textContent).toBe('bar')
       done()
     })
   })

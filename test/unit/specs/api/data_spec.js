@@ -6,7 +6,7 @@ describe('Data API', function () {
   var vm
   beforeEach(function () {
     var el = document.createElement('div')
-    el.setAttribute('prop', 'hi')
+    el.setAttribute('prop', 'foo')
     vm = new Vue({
       el: el,
       props: ['prop'],
@@ -154,7 +154,7 @@ describe('Data API', function () {
         expect(val.a).toBe(1)
         expect(val.b.c).toBe(2)
         expect(val.d).toBe(2)
-        expect(val.prop).toBe('hi')
+        expect(val.prop).toBe('foo')
         spy()
       }
       vm.$log()

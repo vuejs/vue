@@ -140,7 +140,7 @@ describe('Util - Option merging', function () {
       components: null
     }, {
       components: {
-        test: { template: 'hi' }
+        test: { template: 'foo' }
       }
     })
     expect(typeof res.components.test).toBe('function')
@@ -152,7 +152,7 @@ describe('Util - Option merging', function () {
       components: null
     }, {
       components: {
-        a: { template: 'hi' }
+        a: { template: 'foo' }
       }
     })
     expect('Do not use built-in or reserved HTML elements as component id: a').toHaveBeenWarned()
@@ -160,7 +160,7 @@ describe('Util - Option merging', function () {
       components: null
     }, {
       components: {
-        slot: { template: 'hi' }
+        slot: { template: 'foo' }
       }
     })
     expect('Do not use built-in or reserved HTML elements as component id: slot').toHaveBeenWarned()
@@ -355,13 +355,13 @@ describe('Util - Option resolveAsset', function () {
       data: {},
       components: {
         'hyphenated-component': {
-          template: 'hi'
+          template: 'foo'
         },
         camelCasedComponent: {
-          template: 'yo'
+          template: 'bar'
         },
         PascalCasedComponent: {
-          template: 'ho'
+          template: 'baz'
         }
       }
     })

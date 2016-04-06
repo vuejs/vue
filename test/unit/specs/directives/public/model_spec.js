@@ -559,15 +559,15 @@ describe('v-model', function () {
     var vm = new Vue({
       el: el,
       data: {
-        test: 'aaa'
+        test: 'foo'
       },
       template: '<input v-model="test">'
     })
     var input = el.firstChild
-    input.value = 'aa'
+    input.value = 'bar'
     trigger(input, 'cut')
     _.nextTick(function () {
-      expect(vm.test).toBe('aa')
+      expect(vm.test).toBe('bar')
       input.value = 'a'
       trigger(input, 'keyup', function (e) {
         e.keyCode = 8
@@ -575,7 +575,7 @@ describe('v-model', function () {
       expect(vm.test).toBe('a')
       // teardown
       vm._directives[0]._teardown()
-      input.value = 'bbb'
+      input.value = 'bar'
       trigger(input, 'keyup', function (e) {
         e.keyCode = 8
       })
@@ -590,8 +590,8 @@ describe('v-model', function () {
       var vm = new Vue({
         el: el,
         data: {
-          test: 'aaa',
-          test2: 'bbb'
+          test: 'foo',
+          test2: 'bar'
         },
         template: '<input v-model="test"><input v-model="test2 | uppercase">'
       })
@@ -599,19 +599,19 @@ describe('v-model', function () {
       var input2 = el.childNodes[1]
       trigger(input, 'compositionstart')
       trigger(input2, 'compositionstart')
-      input.value = input2.value = 'ccc'
+      input.value = input2.value = 'baz'
       // input before composition unlock should not call set
       trigger(input, 'input')
       trigger(input2, 'input')
-      expect(vm.test).toBe('aaa')
-      expect(vm.test2).toBe('bbb')
+      expect(vm.test).toBe('foo')
+      expect(vm.test2).toBe('bar')
       // after composition unlock it should work
       trigger(input, 'compositionend')
       trigger(input2, 'compositionend')
       trigger(input, 'input')
       trigger(input2, 'input')
-      expect(vm.test).toBe('ccc')
-      expect(vm.test2).toBe('ccc')
+      expect(vm.test).toBe('baz')
+      expect(vm.test2).toBe('baz')
       // IE complains about "unspecified error" when calling
       // setSelectionRange() on an input element that's been
       // removed from the DOM, so we wait until the
@@ -624,13 +624,13 @@ describe('v-model', function () {
     var vm = new Vue({
       el: el,
       data: {
-        test: 'b',
-        b: 'BB'
+        test: 'foo',
+        b: 'bar'
       },
-      template: '<textarea v-model="test">a {{b}} c</textarea>'
+      template: '<textarea v-model="test">foo {{b}} baz</textarea>'
     })
-    expect(vm.test).toBe('a BB c')
-    expect(el.firstChild.value).toBe('a BB c')
+    expect(vm.test).toBe('foo bar baz')
+    expect(el.firstChild.value).toBe('foo bar baz')
   })
 
   it('warn invalid tag', function () {
@@ -765,7 +765,7 @@ describe('v-model', function () {
         '</form>',
       data: {
         ok: true,
-        msg: 'hi'
+        msg: 'foo'
       },
       methods: {
         save: function () {

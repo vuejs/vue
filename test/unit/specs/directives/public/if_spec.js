@@ -112,10 +112,10 @@ describe('v-if', function () {
       template: '<component :is="view" v-if="ok"></component>',
       components: {
         'view-a': {
-          template: 'AAA'
+          template: 'foo'
         },
         'view-b': {
-          template: 'BBB'
+          template: 'bar'
         }
       }
     })
@@ -124,12 +124,12 @@ describe('v-if', function () {
     // toggle if with lazy instantiation
     vm.ok = true
     nextTick(function () {
-      expect(el.innerHTML).toBe('<component>AAA</component>')
+      expect(el.innerHTML).toBe('<component>foo</component>')
       expect(vm.$children.length).toBe(1)
       // switch view when if=true
       vm.view = 'view-b'
       nextTick(function () {
-        expect(el.innerHTML).toBe('<component>BBB</component>')
+        expect(el.innerHTML).toBe('<component>bar</component>')
         expect(vm.$children.length).toBe(1)
         // toggle if when already instantiated
         vm.ok = false
@@ -140,7 +140,7 @@ describe('v-if', function () {
           vm.view = 'view-a'
           vm.ok = true
           nextTick(function () {
-            expect(el.innerHTML).toBe('<component>AAA</component>')
+            expect(el.innerHTML).toBe('<component>foo</component>')
             expect(vm.$children.length).toBe(1)
             done()
           })
@@ -328,7 +328,7 @@ describe('v-if', function () {
       template: '<template v-if="show"><test></test></template>',
       components: {
         test: {
-          template: 'hi',
+          template: 'foo',
           replace: true,
           attached: attachSpy,
           detached: detachSpy
@@ -356,7 +356,7 @@ describe('v-if', function () {
     })
 
     function assertMarkup () {
-      expect(el.innerHTML).toBe(vm.show ? 'hi' : '')
+      expect(el.innerHTML).toBe(vm.show ? 'foo' : '')
     }
 
     function assertCalls (attach, detach) {

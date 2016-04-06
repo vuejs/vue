@@ -10,7 +10,7 @@ describe('prop', function () {
     var vm = new Vue({
       el: el,
       data: {
-        b: 'B'
+        b: 'bar'
       },
       template: '<test v-bind:b="b" v-ref:child></test>',
       components: {
@@ -20,14 +20,14 @@ describe('prop', function () {
         }
       }
     })
-    expect(el.innerHTML).toBe('<test>B</test>')
-    vm.b = 'BB'
+    expect(el.innerHTML).toBe('<test>bar</test>')
+    vm.b = 'baz'
     Vue.nextTick(function () {
-      expect(el.innerHTML).toBe('<test>BB</test>')
-      vm.$refs.child.b = 'BBB'
-      expect(vm.b).toBe('BB')
+      expect(el.innerHTML).toBe('<test>baz</test>')
+      vm.$refs.child.b = 'qux'
+      expect(vm.b).toBe('baz')
       Vue.nextTick(function () {
-        expect(el.innerHTML).toBe('<test>BBB</test>')
+        expect(el.innerHTML).toBe('<test>qux</test>')
         done()
       })
     })
@@ -82,17 +82,17 @@ describe('prop', function () {
     vm.b = 'BB'
     Vue.nextTick(function () {
       expect(el.firstChild.textContent).toBe('AA BB AA')
-      vm.test = { a: 'AAA' }
+      vm.test = { a: 'foo' }
       Vue.nextTick(function () {
-        expect(el.firstChild.textContent).toBe('AAA BB AAA')
+        expect(el.firstChild.textContent).toBe('foo BB foo')
         vm.$data = {
-          b: 'BBB',
+          b: 'bar',
           test: {
-            a: 'AAAA'
+            a: 'fooA'
           }
         }
         Vue.nextTick(function () {
-          expect(el.firstChild.textContent).toBe('AAAA BBB AAAA')
+          expect(el.firstChild.textContent).toBe('fooA bar fooA')
           // test two-way
           vm.$refs.child.bb = 'B'
           vm.$refs.child.testt = { a: 'A' }
@@ -117,7 +117,7 @@ describe('prop', function () {
     var vm = new Vue({
       el: el,
       data: {
-        b: 'B'
+        b: 'foo'
       },
       template: '<test :b.once="b" v-ref:child></test>',
       components: {
@@ -127,10 +127,10 @@ describe('prop', function () {
         }
       }
     })
-    expect(el.innerHTML).toBe('<test>B</test>')
-    vm.b = 'BB'
+    expect(el.innerHTML).toBe('<test>foo</test>')
+    vm.b = 'bar'
     Vue.nextTick(function () {
-      expect(el.innerHTML).toBe('<test>B</test>')
+      expect(el.innerHTML).toBe('<test>foo</test>')
       done()
     })
   })
@@ -139,9 +139,9 @@ describe('prop', function () {
     var vm = new Vue({
       el: el,
       data: {
-        b: 'B'
+        b: 'foo'
       },
-      template: '<test :b.sync=" b + \'B\'" v-ref:child></test>',
+      template: '<test :b.sync=" b + \'bar\'" v-ref:child></test>',
       components: {
         test: {
           props: ['b'],
@@ -150,14 +150,14 @@ describe('prop', function () {
       }
     })
     expect('Cannot bind two-way prop with non-settable parent path').toHaveBeenWarned()
-    expect(el.innerHTML).toBe('<test>BB</test>')
-    vm.b = 'BB'
+    expect(el.innerHTML).toBe('<test>foobar</test>')
+    vm.b = 'baz'
     Vue.nextTick(function () {
-      expect(el.innerHTML).toBe('<test>BBB</test>')
-      vm.$refs.child.b = 'hahaha'
+      expect(el.innerHTML).toBe('<test>bazbar</test>')
+      vm.$refs.child.b = 'qux'
       Vue.nextTick(function () {
-        expect(vm.b).toBe('BB')
-        expect(el.innerHTML).toBe('<test>hahaha</test>')
+        expect(vm.b).toBe('baz')
+        expect(el.innerHTML).toBe('<test>qux</test>')
         done()
       })
     })
@@ -166,9 +166,9 @@ describe('prop', function () {
   it('warn expect two-way', function () {
     new Vue({
       el: el,
-      template: '<test :test="ok"></test>',
+      template: '<test :test="foo"></test>',
       data: {
-        ok: 'hi'
+        foo: 'bar'
       },
       components: {
         test: {
@@ -188,7 +188,7 @@ describe('prop', function () {
       el: el,
       template: '<test></test>',
       data: {
-        ok: 'hi'
+        foo: 'bar'
       },
       components: {
         test: {
@@ -262,10 +262,10 @@ describe('prop', function () {
       // unbind the two props
       child._directives[0].unbind()
       child._directives[1].unbind()
-      child.aa = 'AAA'
+      child.aa = 'foo'
       vm.b = 'BBB'
       Vue.nextTick(function () {
-        expect(el.firstChild.textContent).toBe('AAA BB')
+        expect(el.firstChild.textContent).toBe('foo BB')
         expect(vm.a).toBe('AA')
         done()
       })
@@ -277,8 +277,8 @@ describe('prop', function () {
       el: el,
       template: '<test :b="a" :c="d"></test>',
       data: {
-        a: 'AAA',
-        d: 'DDD'
+        a: 'foo',
+        d: 'bar'
       },
       components: {
         test: {
@@ -288,7 +288,7 @@ describe('prop', function () {
         }
       }
     })
-    expect(el.innerHTML).toBe('<p>AAA</p><p>DDD</p>')
+    expect(el.innerHTML).toBe('<p>foo</p><p>bar</p>')
   })
 
   describe('assertions', function () {
@@ -471,8 +471,8 @@ describe('prop', function () {
       el: el,
       template: '<test :b="a" :c="d"></test>',
       data: {
-        a: 'AAA',
-        d: 'DDD'
+        a: 'foo',
+        d: 'bar'
       },
       components: {
         test: {
@@ -491,7 +491,7 @@ describe('prop', function () {
     })
     expect('Missing required prop').toHaveBeenWarned()
     expect('Expected Number').toHaveBeenWarned()
-    expect(el.textContent).toBe('AAA')
+    expect(el.textContent).toBe('foo')
   })
 
   it('mixed syntax', function () {
@@ -499,8 +499,8 @@ describe('prop', function () {
       el: el,
       template: '<test :b="a" :c="d"></test>',
       data: {
-        a: 'AAA',
-        d: 'DDD'
+        a: 'foo',
+        d: 'bar'
       },
       components: {
         test: {
@@ -521,7 +521,7 @@ describe('prop', function () {
     })
     expect('Missing required prop').toHaveBeenWarned()
     expect('Expected Number').toHaveBeenWarned()
-    expect(el.textContent).toBe('AAA')
+    expect(el.textContent).toBe('foo')
   })
 
   it('should respect default value of a Boolean prop', function () {

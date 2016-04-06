@@ -4,7 +4,7 @@ describe('misc', function () {
   describe('_applyFilters', function () {
     var vm = new Vue({
       data: {
-        msg: 'BBB'
+        msg: 'bar'
       },
       filters: {
         read: function (v, arg) {
@@ -41,11 +41,11 @@ describe('misc', function () {
 
     it('read', function () {
       var filters = [
-        { name: 'read', args: [{dynamic: false, value: 'AAA'}] },
+        { name: 'read', args: [{dynamic: false, value: 'foo'}] },
         { name: 'read2', args: [{dynamic: true, value: 'msg'}] }
       ]
       var val = vm._applyFilters('test', null, filters, false)
-      expect(val).toBe('test read:AAA read2:BBB')
+      expect(val).toBe('test read:foo read2:bar')
     })
 
     it('write', function () {
@@ -68,7 +68,7 @@ describe('misc', function () {
     })
 
     it('warn not found', function () {
-      vm._applyFilters('what', null, [{name: 'wtf'}])
+      vm._applyFilters('waldo', null, [{name: 'nemo'}])
       expect('Failed to resolve filter').toHaveBeenWarned()
     })
   })

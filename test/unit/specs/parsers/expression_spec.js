@@ -108,15 +108,15 @@ var testCases = [
   },
   {
     // expressions with inline object literals
-    exp: "sortRows({ column: 'name', test: haha, durrr: 123 })",
+    exp: "sortRows({ column: 'name', test: foo, durrr: 123 })",
     scope: {
       sortRows: function (params) {
         return params.column + params.test + params.durrr
       },
-      haha: 'hoho'
+      foo: 'bar'
     },
-    expected: 'namehoho123',
-    paths: ['sortRows', 'haha']
+    expected: 'namebar123',
+    paths: ['sortRows', 'bar']
   },
   {
     // space between path segments

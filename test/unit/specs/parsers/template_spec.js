@@ -34,10 +34,10 @@ describe('Template Parser', function () {
   })
 
   it('should handle string that contains html entities', function () {
-    var res = parse('hi&lt;hi')
+    var res = parse('foo&lt;bar')
     expect(res.nodeType).toBe(11)
     expect(res.childNodes.length).toBe(1)
-    expect(res.firstChild.nodeValue).toBe('hi<hi')
+    expect(res.firstChild.nodeValue).toBe('foo<bar')
     // #1330
     res = parse('hello &#x2F; hello')
     expect(res.nodeType).toBe(11)
