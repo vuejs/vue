@@ -96,7 +96,7 @@ function toggleClasses (el, key, fn) {
   // The key contains one or more space characters.
   // Since a class name doesn't accept such characters, we
   // treat it as multiple classes.
-  var keys = key.split(' ')
+  var keys = key.split(/\s+/)
   for (var i = 0, l = keys.length; i < l; i++) {
     fn(el, keys[i])
   }
