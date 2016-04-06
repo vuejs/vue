@@ -23,6 +23,31 @@ Get help from other Vue.js users:
 
 _If you have other helpful links to share, or find any of the links above no longer work, please [let us know](https://github.com/tastejs/todomvc/issues)._
 
+## Installation
+
+```sh
+npm install
+```
+
+## Running
+
+Open
+
+```sh
+npm start
+```
+
+## Dependencies
+
+- [director](https://github.com/flatiron/director): A client Side/Server Side Router
+- [todomvc-app-css](https://github.com/tastejs/todomvc-app-css): CSS for TodoMVC apps
+- [todomvc-common](https://github.com/tastejs/todomvc-common): Common TodoMVC utilities used by our apps
+- [vue](https://github.com/vuejs/vue): Simple, Fast &amp; Composable MVVM for building interactive interfaces
+
+## Dev Dependencies
+
+- [local-web-server](https://github.com/75lb/local-web-server): A simple web-server for productive front-end development
+
 ## Credit
 
 This TodoMVC application was created by [Evan You](http://evanyou.me).
