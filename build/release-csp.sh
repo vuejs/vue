@@ -22,4 +22,5 @@ npm publish
 sleep 1
 npm dist-tag add vue@$CSP_VERSION csp
 npm dist-tag add vue@$PLAIN_VERSION latest
+sleep 1
 npm view vue version dist-tags
