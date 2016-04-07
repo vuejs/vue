@@ -528,6 +528,50 @@ describe('v-for', function () {
     }
   })
 
+  it('track by nested id path', function (done) {
+    var vm = new Vue({
+      el: el,
+      template: '<test v-for="item in list" :item="item" track-by="nested.id"></test>',
+      data: {
+        list: [
+          { nested: { id: 1 }, msg: 'foo' },
+          { nested: { id: 2 }, msg: 'bar' },
+          { nested: { id: 3 }, msg: 'baz' }
+        ]
+      },
+      components: {
+        test: {
+          props: ['item'],
+          template: '{{item.msg}}'
+        }
+      }
+    })
+    assertMarkup()
+    var oldVms = vm.$children.slice()
+    // swap the data with different objects, but with
+    // the same ID!
+    vm.list = [
+      { nested: { id: 1 }, msg: 'qux' },
+      { nested: { id: 2 }, msg: 'quux' }
+    ]
+    _.nextTick(function () {
+      assertMarkup()
+      // should reuse old vms!
+      var i = 2
+      while (i--) {
+        expect(vm.$children[i]).toBe(oldVms[i])
+      }
+      done()
+    })
+
+    function assertMarkup () {
+      var markup = vm.list.map(function (item) {
+        return '<test>' + item.msg + '</test>'
+      }).join('')
+      expect(el.innerHTML).toBe(markup)
+    }
+  })
+
   it('track by $index', function (done) {
     var vm = new Vue({
       el: el,

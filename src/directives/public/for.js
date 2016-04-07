@@ -1,6 +1,7 @@
 import FragmentFactory from '../../fragment/factory'
 import { FOR } from '../priorities'
 import { withoutConversion } from '../../observer/index'
+import { getPath } from '../../parsers/path'
 import {
   isObject,
   warn,
@@ -405,7 +406,7 @@ const vFor = {
       id = trackByKey
         ? trackByKey === '$index'
           ? index
-          : value[trackByKey]
+          : getPath(value, trackByKey)
         : (key || value)
       if (!cache[id]) {
         cache[id] = frag
@@ -446,7 +447,7 @@ const vFor = {
       var id = trackByKey
         ? trackByKey === '$index'
           ? index
-          : value[trackByKey]
+          : getPath(value, trackByKey)
         : (key || value)
       frag = this.cache[id]
     } else {
@@ -478,7 +479,7 @@ const vFor = {
       var id = trackByKey
         ? trackByKey === '$index'
           ? index
-          : value[trackByKey]
+          : getPath(value, trackByKey)
         : (key || value)
       this.cache[id] = null
     } else {
