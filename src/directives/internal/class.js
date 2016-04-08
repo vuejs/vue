@@ -36,8 +36,7 @@ export default {
     var i = prevKeys.length
     while (i--) {
       var key = prevKeys[i]
-      if (!key) continue
-      if (key && (!value || value.indexOf(key) < 0)) {
+      if (!value || value.indexOf(key) < 0) {
         apply(this.el, key, removeClass)
       }
     }
