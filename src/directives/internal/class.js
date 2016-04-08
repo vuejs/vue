@@ -2,7 +2,7 @@ import {
   addClass,
   removeClass,
   isArray,
-  isPlainObject
+  isObject
 } from '../../util/index'
 
 export default {
@@ -10,66 +10,67 @@ export default {
   deep: true,
 
   update (value) {
-    if (value && typeof value === 'string') {
-      this.handleObject(stringToObject(value))
-    } else if (isPlainObject(value)) {
-      this.handleObject(value)
-    } else if (isArray(value)) {
-      this.handleArray(value)
-    } else {
+    if (!value) {
       this.cleanup()
+    } else if (typeof value === 'string') {
+      this.setClass(value.trim().split(/\s+/))
+    } else {
+      this.setClass(normalize(value))
     }
   },
 
-  handleObject (value) {
-    this.cleanup(value)
-    this.prevKeys = Object.keys(value)
-    setObjectClasses(this.el, value)
-  },
-
-  handleArray (value) {
+  setClass (value) {
     this.cleanup(value)
     for (var i = 0, l = value.length; i < l; i++) {
       var val = value[i]
-      if (val && isPlainObject(val)) {
-        setObjectClasses(this.el, val)
-      } else if (val && typeof val === 'string') {
-        addClass(this.el, val)
+      if (val) {
+        apply(this.el, val, addClass)
       }
     }
-    this.prevKeys = value.slice()
+    this.prevKeys = value
   },
 
   cleanup (value) {
-    if (!this.prevKeys) return
-
-    var i = this.prevKeys.length
+    const prevKeys = this.prevKeys
+    if (!prevKeys) return
+    var i = prevKeys.length
     while (i--) {
-      var key = this.prevKeys[i]
+      var key = prevKeys[i]
       if (!key) continue
-
-      var keys = isPlainObject(key) ? Object.keys(key) : [key]
-      for (var j = 0, l = keys.length; j < l; j++) {
-        toggleClasses(this.el, keys[j], removeClass)
+      if (key && (!value || value.indexOf(key) < 0)) {
+        apply(this.el, key, removeClass)
       }
     }
   }
 }
 
-function setObjectClasses (el, obj) {
-  var keys = Object.keys(obj)
-  for (var i = 0, l = keys.length; i < l; i++) {
-    var key = keys[i]
-    if (!obj[key]) continue
-    toggleClasses(el, key, addClass)
-  }
-}
+/**
+ * Normalize objects and arrays (potentially containing objects)
+ * into array of strings.
+ *
+ * @param {Object|Array<String|Object>} value
+ * @return {Array<String>}
+ */
 
-function stringToObject (value) {
-  var res = {}
-  var keys = value.trim().split(/\s+/)
-  for (var i = 0, l = keys.length; i < l; i++) {
-    res[keys[i]] = true
+function normalize (value) {
+  const res = []
+  if (isArray(value)) {
+    for (var i = 0, l = value.length; i < l; i++) {
+      const key = value[i]
+      if (key) {
+        if (typeof key === 'string') {
+          res.push(key)
+        } else {
+          for (var k in key) {
+            if (key[k]) res.push(k)
+          }
+        }
+      }
+    }
+  } else if (isObject(value)) {
+    for (var key in value) {
+      if (value[key]) res.push(key)
+    }
   }
   return res
 }
@@ -85,14 +86,12 @@ function stringToObject (value) {
  * @param {Function} fn
  */
 
-function toggleClasses (el, key, fn) {
+function apply (el, key, fn) {
   key = key.trim()
-
   if (key.indexOf(' ') === -1) {
     fn(el, key)
     return
   }
-
   // The key contains one or more space characters.
   // Since a class name doesn't accept such characters, we
   // treat it as multiple classes.
