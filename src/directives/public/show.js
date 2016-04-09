@@ -5,16 +5,25 @@ export default {
 
   bind () {
     // check else block
-    var next = this.el.nextElementSibling
+    let next = this.el.nextElementSibling
     if (next && getAttr(next, 'v-else') !== null) {
       this.elseEl = next
     }
+    // we need a second check for components using this directive
+    this.checkCounter = 0
   },
 
   update (value) {
     this.apply(this.el, value)
     if (this.elseEl) {
       this.apply(this.elseEl, !value)
+    } else if (this.checkCounter < 2) {
+      this.checkCounter++
+      let next = this.el.nextElementSibling
+      if (next && getAttr(next, 'v-else') !== null) {
+        this.elseEl = next
+        this.apply(this.elseEl, !value)
+      }
     }
   },
 

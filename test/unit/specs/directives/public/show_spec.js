@@ -49,4 +49,43 @@ describe('v-show', function () {
       done()
     })
   })
+
+  it('show + else with component', function (done) {
+    var vm = new Vue({
+      el: el,
+      data: { ok: false },
+      template: '<test v-show="ok"></test><div v-else>B</div>' +
+        '<test v-show="ok"></test><test2 v-else></test2>' +
+        '<div v-show="ok">A</div><test2 v-else></test2>',
+      components: {
+        test: { template: 'A' },
+        test2: { template: 'B' }
+      }
+    })
+    expect(el.children[0].style.display).toBe('none')
+    expect(el.children[1].style.display).toBe('')
+    expect(el.children[2].style.display).toBe('none')
+    expect(el.children[3].style.display).toBe('')
+    expect(el.children[4].style.display).toBe('none')
+    expect(el.children[5].style.display).toBe('')
+    vm.ok = true
+    Vue.nextTick(function () {
+      expect(el.children[1].style.display).toBe('none')
+      expect(el.children[0].style.display).toBe('')
+      expect(el.children[3].style.display).toBe('none')
+      expect(el.children[2].style.display).toBe('')
+      expect(el.children[5].style.display).toBe('none')
+      expect(el.children[4].style.display).toBe('')
+      vm.ok = false
+      Vue.nextTick(function () {
+        expect(el.children[0].style.display).toBe('none')
+        expect(el.children[1].style.display).toBe('')
+        expect(el.children[2].style.display).toBe('none')
+        expect(el.children[3].style.display).toBe('')
+        expect(el.children[4].style.display).toBe('none')
+        expect(el.children[5].style.display).toBe('')
+        done()
+      })
+    })
+  })
 })

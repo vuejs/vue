@@ -411,6 +411,30 @@ describe('v-if', function () {
     })
   })
 
+  it('if + else with component', function (done) {
+    var vm = new Vue({
+      el: el,
+      data: { ok: false },
+      template: '<test v-if="ok"></test><div v-else>B</div>' +
+        '<test v-if="ok"></test><test2 v-else></test2>' +
+        '<div v-if="ok">A</div><test2 v-else></test2>',
+      components: {
+        test: { template: 'A' },
+        test2: { template: 'B' }
+      }
+    })
+    expect(el.textContent).toBe('BBB')
+    vm.ok = true
+    nextTick(function () {
+      expect(el.textContent).toBe('AAA')
+      vm.ok = false
+      nextTick(function () {
+        expect(el.textContent).toBe('BBB')
+        done()
+      })
+    })
+  })
+
   it('else block teardown', function (done) {
     var created = jasmine.createSpy()
     var destroyed = jasmine.createSpy()
