@@ -109,15 +109,11 @@ function genText (text) {
   } else {
     const exp = parseText(text)
     if (exp) {
-      return 'String(' + escapeNewlines(exp) + ')'
+      return 'String(' + exp + ')'
     } else {
-      return escapeNewlines(JSON.stringify(text))
+      return JSON.stringify(text)
     }
   }
-}
-
-function escapeNewlines (str) {
-  return str.replace(/\n/g, '\\n')
 }
 
 function getAttr (el, attr) {
