@@ -62,18 +62,6 @@ function makeAttrsMap (attrs) {
  * http://erik.eae.net/simplehtmlparser/simplehtmlparser.js
  */
 
-/*
- * // Use like so:
- * HTMLParser(htmlString, {
- *     start: function(tag, attrs, unary) {},
- *     end: function(tag) {},
- *     chars: function(text) {},
- *     comment: function(text) {}
- * });
- */
-
-/* global ActiveXObject, DOMDocument */
-
 function makeMap(values) {
   values = values.split(/,/)
   var map = {}
