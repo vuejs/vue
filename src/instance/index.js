@@ -32,17 +32,6 @@ export default class Component {
     this._tree = vtree
   }
 
-  _renderClass (dynamic, cls) {
-    dynamic = dynamic
-      ? typeof dynamic === 'string'
-        ? dynamic
-        : Object.keys(dynamic).filter(key => dynamic[key]).join(' ')
-      : ''
-    return cls
-      ? cls + (dynamic ? ' ' + dynamic : '')
-      : dynamic
-  }
-
   _proxy (key) {
     if (!isReserved(key)) {
       // need to store ref to self here

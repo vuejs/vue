@@ -41,9 +41,15 @@ function genData (el, key) {
   if (!el.attrs.length) {
     return '{}'
   }
-  let data = key ? `{key:${ key },` : `{`
-  if (el.attrsMap[':class'] || el.attrsMap['class']) {
-    data += `class: _renderClass(${ el.attrsMap[':class'] }, "${ el.attrsMap['class'] || '' }"),`
+  let data = '{'
+  if (key) {
+    data += `key:${ key },`
+  }
+  if (el.attrsMap[':class']) {
+    data += `class: ${ el.attrsMap[':class'] },`
+  }
+  if (el.attrsMap['class']) {
+    data += `staticClass: "${ el.attrsMap['class'] }"`
   }
   let attrs = `attrs:{`
   let props = `props:{`
