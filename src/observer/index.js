@@ -3,6 +3,7 @@ import { arrayMethods } from './array'
 import {
   def,
   isArray,
+  isObject,
   isPlainObject,
   hasProto,
   hasOwn
@@ -160,7 +161,7 @@ function copyAugment (target, src, keys) {
  */
 
 export function observe (value, vm) {
-  if (!value || typeof value !== 'object') {
+  if (!isObject(value)) {
     return
   }
   var ob

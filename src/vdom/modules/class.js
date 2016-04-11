@@ -1,10 +1,10 @@
-import { isArray, setClass } from '../../util/index'
+import { isArray, isObject, setClass } from '../../util/index'
 
 function genClass (data) {
   if (!data) {
     return ''
   }
-  if (typeof data === 'object') {
+  if (isObject(data)) {
     let res = ''
     for (var key in data) {
       if (data[key]) res += key + ' '
