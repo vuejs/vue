@@ -12,7 +12,7 @@ for (let i = 0, len = booleanAttrs.length; i < len; i++) {
   booleanAttrsDict[booleanAttrs[i]] = true
 }
 
-function updateAttr (oldVnode, vnode) {
+function updateAttrs (oldVnode, vnode) {
   let key, cur, old
   const elm = vnode.elm
   const oldAttrs = oldVnode.data.attrs || {}
