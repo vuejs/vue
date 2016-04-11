@@ -36,8 +36,13 @@ function genFor (el, exp) {
   }
   const alias = inMatch[1].trim()
   exp = inMatch[2].trim()
-  const key = el.attrsMap['track-by'] || 'undefined'
-  return `(${exp}).map(function (${alias}, $index) {return ${genElement(el, key) }})`
+  let key = getAttr(el, 'track-by')
+  if (!key) {
+    key ='undefined'
+  } else if (key !== '$index') {
+    key = alias + '["' + key + '"]'
+  }
+  return `(${exp}).map(function (${alias}, $index) {return ${genElement(el, key)}})`
 }
 
 function genData (el, key) {
@@ -48,11 +53,13 @@ function genData (el, key) {
   if (key) {
     data += `key:${key},`
   }
-  if (el.attrsMap[':class']) {
-    data += `class: ${el.attrsMap[':class']},`
+  const classBinding = getAttr(el, ':class') || getAttr(el, 'v-bind:class')
+  if (classBinding) {
+    data += `class: ${classBinding},`
   }
-  if (el.attrsMap['class']) {
-    data += `staticClass: "${el.attrsMap['class']}"`
+  const staticClass = getAttr(el, 'class')
+  if (staticClass) {
+    data += `staticClass: "${staticClass}",`
   }
   let attrs = `attrs:{`
   let props = `props:{`
@@ -66,9 +73,7 @@ function genData (el, key) {
     let value = attr.value
     if (bindRE.test(name)) {
       name = name.replace(bindRE, '')
-      if (name === 'class') {
-        continue
-      } else if (name === 'style') {
+      if (name === 'style') {
         data += `style: ${value},`
       } else if (mustUsePropsRE.test(name)) {
         hasProps = true
@@ -88,7 +93,7 @@ function genData (el, key) {
       addHandler(events, 'input', `${value}=$event.target.value`)
     } else if (dirRE.test(name)) {
       // TODO: normal directives
-    } else if (name !== 'class') {
+    } else {
       hasAttrs = true
       attrs += `"${name}": (${JSON.stringify(attr.value)}),`
     }

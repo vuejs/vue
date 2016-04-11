@@ -188,7 +188,7 @@ Watcher.prototype.afterGet = function () {
 Watcher.prototype.update = function (shallow) {
   if (this.lazy) {
     this.dirty = true
-  } else if (this.sync || !config.async) {
+  } else if (this.sync) {
     this.run()
   } else {
     // if queued, only overwrite shallow with non-shallow,
