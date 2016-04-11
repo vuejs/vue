@@ -1,0 +1,38 @@
+{
+  "name": "vue-lite",
+  "version": "1.0.0",
+  "description": "Lighter-weight Vue on virtual dom",
+  "main": "index.js",
+  "scripts": {
+    "dev": "webpack --watch",
+    "test": "mocha",
+    "build": "NODE_ENV=production node build/build.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vuejs/vue-lite.git"
+  },
+  "keywords": [
+    "vue"
+  ],
+  "author": "Evan You",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/vuejs/vue-lite/issues"
+  },
+  "homepage": "https://github.com/vuejs/vue-lite#readme",
+  "devDependencies": {
+    "babel-core": "^6.0.0",
+    "babel-loader": "^6.0.0",
+    "babel-preset-es2015": "^6.0.0",
+    "babel-preset-es2015-rollup": "^1.1.1",
+    "babel-preset-stage-2": "^6.0.0",
+    "rollup": "^0.25.8",
+    "rollup-plugin-babel": "^2.4.0",
+    "rollup-plugin-commonjs": "^2.2.1",
+    "rollup-plugin-node-resolve": "^1.5.0",
+    "rollup-plugin-replace": "^1.1.0",
+    "uglify-js": "^2.6.2",
+    "webpack": "^1.12.14"
+  }
+}
