@@ -1,7 +1,9 @@
 import { parseText } from './text-parser'
+import { isArray } from '../util/index'
 
 const bindRE = /^:|^v-bind:/
 const onRE = /^@|^v-on:/
+const dirRE = /^v-/
 const mustUsePropsRE = /^(value|selected|checked|muted)$/
 const simplePathRE = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\]|\[\d+\]|\[[A-Za-z_$][\w$]*\])*$/
 
@@ -53,7 +55,7 @@ function genData (el, key) {
   }
   let attrs = `attrs:{`
   let props = `props:{`
-  let events = `on:{`
+  let events = {}
   let hasAttrs = false
   let hasProps = false
   let hasEvents = false
@@ -77,7 +79,14 @@ function genData (el, key) {
     } else if (onRE.test(name)) {
       hasEvents = true
       name = name.replace(onRE, '')
-      events += genEvent(name, value)
+      addHandler(events, name, value)
+    } else if (name === 'v-model') {
+      // TODO: handle other input types
+      hasProps = hasEvents = true
+      props += `value:${value},`
+      addHandler(events, 'input', `${value}=$event.target.value`)
+    } else if (dirRE.test(name)) {
+      // TODO: normal directives
     } else if (name !== 'class') {
       hasAttrs = true
       attrs += `"${name}": (${JSON.stringify(attr.value)}),`
@@ -90,8 +99,9 @@ function genData (el, key) {
     data += props.slice(0, -1) + '},'
   }
   if (hasEvents) {
-    data += events.slice(0, -1) + '},'
+    data += genEvents(events)
   }
+  console.log(data)
   return data.replace(/,$/, '') + '}'
 }
 
@@ -123,14 +133,35 @@ function genText (text) {
   }
 }
 
-function genEvent (name, value) {
+function addHandler (events, name, value) {
+  const handlers = events[name]
+  if (isArray(handlers)) {
+    handlers.push(value)
+  } else if (handlers) {
+    events[name] = [handlers, value]
+  } else {
+    events[name] = value
+  }
+}
+
+function genEvents (events) {
+  let res = 'on:{'
+  for (var name in events) {
+    res += `"${name}":${genHandler(events[name])},`
+  }
+  return res.slice(0, -1) + '}'
+}
+
+function genHandler (value) {
   // TODO support modifiers
   if (!value) {
-    return `"${name}":function(){},`
-  } if (simplePathRE.test(value)) {
-    return `"${name}":${value},`
+    return `function(){}`
+  } else if (isArray(value)) {
+    return `[${value.map(genHandler).join(',')}]`
+  } else if (simplePathRE.test(value)) {
+    return value
   } else {
-    return `"${name}":function($event){${value}},`
+    return `function($event){${value}}`
   }
 }
 
