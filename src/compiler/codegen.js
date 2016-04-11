@@ -1,3 +1,4 @@
+import config from '../config'
 import { parseText } from './text-parser'
 import { isArray } from '../util/index'
 
@@ -25,7 +26,7 @@ function genElement (el, key) {
 }
 
 function genIf (el, exp) {
-  return `(${exp}) ? ${genElement(el)} : ''`
+  return `(${exp}) ? ${genElement(el)} : null`
 }
 
 function genFor (el, exp) {
@@ -101,7 +102,6 @@ function genData (el, key) {
   if (hasEvents) {
     data += genEvents(events)
   }
-  console.log(data)
   return data.replace(/,$/, '') + '}'
 }
 

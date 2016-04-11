@@ -1,13 +1,10 @@
 export default {
 
   /**
-   * Whether to print debug messages.
-   * Also enables stack trace for warnings.
-   *
-   * @type {Boolean}
+   * Preserve whitespaces between elements.
    */
 
-  debug: false,
+  preserveWhiteSpace: true,
 
   /**
    * Whether to suppress warnings.
@@ -18,33 +15,11 @@ export default {
   silent: false,
 
   /**
-   * Whether to use async rendering.
-   */
-
-  async: true,
-
-  /**
    * Whether to warn against errors caught when evaluating
    * expressions.
    */
 
   warnExpressionErrors: true,
-
-  /**
-   * Whether to allow devtools inspection.
-   * Disabled by default in production builds.
-   */
-
-  devtools: process.env.NODE_ENV !== 'production',
-
-  /**
-   * Internal flag to indicate the delimiters have been
-   * changed.
-   *
-   * @type {Boolean}
-   */
-
-  _delimitersChanged: true,
 
   /**
    * List of asset types that a component can own.
