@@ -86,7 +86,7 @@ function genChildren (el) {
   if (!el.children.length) {
     return 'undefined'
   }
-  return '__flatten__([' + el.children.map(genNode).join(',') + '])'
+  return '[' + el.children.map(genNode).join(',') + ']'
 }
 
 function genNode (node) {

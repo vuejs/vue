@@ -10,24 +10,29 @@ function addNS(data, children) {
   }
 }
 
-export default function h (tag, b, c) {
-  var data = {}, children, text, i
-  if (arguments.length === 3) {
-    data = b
-    if (isArray(c)) { children = c }
-    else if (isPrimitive(c)) { text = c }
-  } else if (arguments.length === 2) {
-    if (isArray(b)) { children = b }
-    else if (isPrimitive(b)) { text = b }
-    else { data = b }
-  }
+export default function h (tag, data, children) {
   if (isArray(children)) {
-    for (i = 0; i < children.length; ++i) {
-      if (isPrimitive(children[i])) children[i] = VNode(undefined, undefined, undefined, children[i])
+    let _children = children
+    children = []
+    for (let i = 0, l = _children.length; i < l; i++) {
+      let e = _children[i]
+      // flatten nested
+      if (isArray(e)) {
+        for (let j = 0, k = e.length; j < k; j++) {
+          if (e[j]) {
+            children.push(e[j])
+          }
+        }
+      } else if (isPrimitive(e)) {
+        // convert primitive to vnode
+        children.push(VNode(undefined, undefined, undefined, e))
+      } else if (e) {
+        children.push(e)
+      }
     }
   }
   if (tag === 'svg') {
     addNS(data, children)
   }
-  return VNode(tag, data, children, text, undefined)
+  return VNode(tag, data, children, undefined, undefined)
 }

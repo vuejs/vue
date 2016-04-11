@@ -43,23 +43,6 @@ export default class Component {
       : dynamic
   }
 
-  __flatten__ (arr) {
-    var res = []
-    for (var i = 0, l = arr.length; i < l; i++) {
-      var e = arr[i]
-      if (Array.isArray(e)) {
-        for (var j = 0, k = e.length; j < k; j++) {
-          if (e[j]) {
-            res.push(e[j])
-          }
-        }
-      } else if (e) {
-        res.push(e)
-      }
-    }
-    return res
-  }
-
   _proxy (key) {
     if (!isReserved(key)) {
       // need to store ref to self here
