@@ -534,9 +534,11 @@ describe('Component', function () {
   })
 
   it('already mounted warn', function () {
-    el.setAttribute('is', 'test')
     new Vue({
-      el: el
+      el: document.createElement('test'),
+      components: {
+        test: {}
+      }
     })
     expect('cannot mount component "test" on already mounted element').toHaveBeenWarned()
   })
