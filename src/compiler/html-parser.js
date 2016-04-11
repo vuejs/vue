@@ -39,9 +39,6 @@ export function parse (html) {
         ? text
         : text.trim() ? text : ' '
       currentParent.children.push(text)
-    },
-    comment () {
-      // noop
     }
   })
   return root
@@ -151,9 +148,6 @@ export default function HTMLParser(html, handler) {
           var commentEnd = html.indexOf('-->')
 
           if (commentEnd >= 0) {
-            if (handler.comment) {
-              handler.comment(html.substring(4, commentEnd))
-            }
             html = html.substring(commentEnd + 3)
             prevTag = ''
             continue
@@ -165,9 +159,6 @@ export default function HTMLParser(html, handler) {
           var conditionalEnd = html.indexOf(']>')
 
           if (conditionalEnd >= 0) {
-            if (handler.comment) {
-              handler.comment(html.substring(2, conditionalEnd + 1), true /* non-standard */)
-            }
             html = html.substring(conditionalEnd + 2)
             prevTag = ''
             continue
