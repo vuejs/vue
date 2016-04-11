@@ -1,6 +1,9 @@
 function updateProps(oldVnode, vnode) {
-  var key, cur, old, elm = vnode.elm,
-      oldProps = oldVnode.data.props || {}, props = vnode.data.props || {}
+  let key, cur, old
+  const elm = vnode.elm
+  const oldProps = oldVnode.data.props || {}
+  const props = vnode.data.props || {}
+
   for (key in oldProps) {
     if (!props[key]) {
       delete elm[key]

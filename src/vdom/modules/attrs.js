@@ -1,18 +1,22 @@
-var booleanAttrs = ["allowfullscreen", "async", "autofocus", "autoplay", "checked", "compact", "controls", "declare",
-                "default", "defaultchecked", "defaultmuted", "defaultselected", "defer", "disabled", "draggable",
-                "enabled", "formnovalidate", "hidden", "indeterminate", "inert", "ismap", "itemscope", "loop", "multiple",
-                "muted", "nohref", "noresize", "noshade", "novalidate", "nowrap", "open", "pauseonexit", "readonly",
-                "required", "reversed", "scoped", "seamless", "selected", "sortable", "spellcheck", "translate",
-                "truespeed", "typemustmatch", "visible"]
+const booleanAttrs = [
+  "allowfullscreen", "async", "autofocus", "autoplay", "checked", "compact", "controls", "declare",
+  "default", "defaultchecked", "defaultmuted", "defaultselected", "defer", "disabled", "draggable",
+  "enabled", "formnovalidate", "hidden", "indeterminate", "inert", "ismap", "itemscope", "loop", "multiple",
+  "muted", "nohref", "noresize", "noshade", "novalidate", "nowrap", "open", "pauseonexit", "readonly",
+  "required", "reversed", "scoped", "seamless", "selected", "sortable", "spellcheck", "translate",
+  "truespeed", "typemustmatch", "visible"
+]
 
-var booleanAttrsDict = {}
-for(var i=0, len = booleanAttrs.length; i < len; i++) {
+const booleanAttrsDict = {}
+for (let i = 0, len = booleanAttrs.length; i < len; i++) {
   booleanAttrsDict[booleanAttrs[i]] = true
 }
 
-function updateAttrs(oldVnode, vnode) {
-  var key, cur, old, elm = vnode.elm,
-      oldAttrs = oldVnode.data.attrs || {}, attrs = vnode.data.attrs || {}
+function updateAttr (oldVnode, vnode) {
+  let key, cur, old
+  const elm = vnode.elm
+  const oldAttrs = oldVnode.data.attrs || {}
+  const attrs = vnode.data.attrs || {}
 
   // update modified attributes, add new attributes
   for (key in attrs) {

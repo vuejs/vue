@@ -1,7 +1,9 @@
 function arrInvoker(arr) {
   return function() {
     // Special case when length is two, for performance
-    arr.length === 2 ? arr[0](arr[1]) : arr[0].apply(undefined, arr.slice(1))
+    arr.length === 2
+      ? arr[0](arr[1])
+      : arr[0].apply(undefined, arr.slice(1))
   }
 }
 
@@ -10,8 +12,10 @@ function fnInvoker(o) {
 }
 
 function updateEventListeners(oldVnode, vnode) {
-  var name, cur, old, elm = vnode.elm,
-      oldOn = oldVnode.data.on || {}, on = vnode.data.on
+  let name, cur, old
+  const elm = vnode.elm
+  const oldOn = oldVnode.data.on || {}
+  const on = vnode.data.on
   if (!on) return
   for (name in on) {
     cur = on[name]
