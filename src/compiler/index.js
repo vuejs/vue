@@ -1,5 +1,5 @@
 import { parse } from './html-parser'
-import { generate } from './codegen'
+import { generate } from './codegen/index'
 
 const cache = Object.create(null)
 

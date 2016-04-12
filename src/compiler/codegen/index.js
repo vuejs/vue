@@ -1,16 +1,18 @@
-import config from '../config'
-import { parseText } from './text-parser'
-import { isArray } from '../util/index'
+import config from '../../config'
+import { parseText } from '../text-parser'
+import { genEvents, addHandler } from './events'
+import { genModel } from './model'
+import { getAttr } from './helpers'
 
 const bindRE = /^:|^v-bind:/
 const onRE = /^@|^v-on:/
 const dirRE = /^v-/
 const mustUsePropsRE = /^(value|selected|checked|muted)$/
-const simplePathRE = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\]|\[\d+\]|\[[A-Za-z_$][\w$]*\])*$/
 
 export function generate (ast) {
   const code = genElement(ast)
-  return new Function (`with (this) { return ${code}}`)}
+  return new Function (`with (this) { return ${code}}`)
+}
 
 function genElement (el, key) {
   let exp
@@ -42,7 +44,7 @@ function genFor (el, exp) {
   } else if (key !== '$index') {
     key = alias + '["' + key + '"]'
   }
-  return `(${exp}).map(function (${alias}, $index) {return ${genElement(el, key)}})`
+  return `(${exp}) && (${exp}).map(function (${alias}, $index) {return ${genElement(el, key)}})`
 }
 
 function genData (el, key) {
@@ -89,8 +91,7 @@ function genData (el, key) {
     } else if (name === 'v-model') {
       // TODO: handle other input types
       hasProps = hasEvents = true
-      props += `value:${value},`
-      addHandler(events, 'input', `${value}=$event.target.value`)
+      props += genModel(el, events, value)
     } else if (dirRE.test(name)) {
       // TODO: normal directives
     } else {
@@ -136,50 +137,4 @@ function genText (text) {
       return JSON.stringify(text)
     }
   }
-}
-
-function addHandler (events, name, value) {
-  const handlers = events[name]
-  if (isArray(handlers)) {
-    handlers.push(value)
-  } else if (handlers) {
-    events[name] = [handlers, value]
-  } else {
-    events[name] = value
-  }
-}
-
-function genEvents (events) {
-  let res = 'on:{'
-  for (var name in events) {
-    res += `"${name}":${genHandler(events[name])},`
-  }
-  return res.slice(0, -1) + '}'
-}
-
-function genHandler (value) {
-  // TODO support modifiers
-  if (!value) {
-    return `function(){}`
-  } else if (isArray(value)) {
-    return `[${value.map(genHandler).join(',')}]`
-  } else if (simplePathRE.test(value)) {
-    return value
-  } else {
-    return `function($event){${value}}`
-  }
-}
-
-function getAttr (el, attr) {
-  let val
-  if (val = el.attrsMap[attr]) {
-    el.attrsMap[attr] = null
-    for (let i = 0, l = el.attrs.length; i < l; i++) {
-      if (el.attrs[i].name === attr) {
-        el.attrs.splice(i, 1)
-        break
-      }
-    }
-  }
-  return val
 }
