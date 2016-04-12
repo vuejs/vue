@@ -1,6 +1,20 @@
 import { isArray } from '../../util/index'
 
 const simplePathRE = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\]|\[\d+\]|\[[A-Za-z_$][\w$]*\])*$/
+
+// keyCode aliases
+const keyCodes = {
+  esc: 27,
+  tab: 9,
+  enter: 13,
+  space: 32,
+  up: 38,
+  left: 37,
+  right: 39,
+  down: 40,
+  'delete': [8, 46]
+}
+
 const modifierCode = {
   stop: '$event.stopPropagation();',
   prevent: '$event.preventDefault();',
@@ -57,5 +71,10 @@ function genHandler (handler) {
 }
 
 function genKeyFilter (key) {
-
+  const code = keyCodes[key]
+  if (isArray(code)) {
+    return `if(${code.map(c => `$event.keyCode!==${c}`).join('&&')})return;`
+  } else {
+    return `if($event.keyCode!==${code})return;`
+  }
 }
