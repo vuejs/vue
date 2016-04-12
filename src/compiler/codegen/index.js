@@ -2,7 +2,7 @@ import config from '../../config'
 import { parseText } from '../text-parser'
 import { genEvents, addHandler } from './events'
 import { genModel } from './model'
-import { getAttr } from './helpers'
+import { getAndRemoveAttr } from './helpers'
 
 const bindRE = /^:|^v-bind:/
 const onRE = /^@|^v-on:/
@@ -16,9 +16,9 @@ export function generate (ast) {
 
 function genElement (el, key) {
   let exp
-  if (exp = getAttr(el, 'v-for')) {
+  if (exp = getAndRemoveAttr(el, 'v-for')) {
     return genFor(el, exp)
-  } else if (exp = getAttr(el, 'v-if')) {
+  } else if (exp = getAndRemoveAttr(el, 'v-if')) {
     return genIf(el, exp)
   } else if (el.tag === 'template') {
     return genChildren(el)
@@ -38,7 +38,7 @@ function genFor (el, exp) {
   }
   const alias = inMatch[1].trim()
   exp = inMatch[2].trim()
-  let key = getAttr(el, 'track-by')
+  let key = getAndRemoveAttr(el, 'track-by')
   if (!key) {
     key ='undefined'
   } else if (key !== '$index') {
@@ -55,11 +55,11 @@ function genData (el, key) {
   if (key) {
     data += `key:${key},`
   }
-  const classBinding = getAttr(el, ':class') || getAttr(el, 'v-bind:class')
+  const classBinding = getAndRemoveAttr(el, ':class') || getAndRemoveAttr(el, 'v-bind:class')
   if (classBinding) {
     data += `class: ${classBinding},`
   }
-  const staticClass = getAttr(el, 'class')
+  const staticClass = getAndRemoveAttr(el, 'class')
   if (staticClass) {
     data += `staticClass: "${staticClass}",`
   }

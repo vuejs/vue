@@ -1,4 +1,4 @@
-export function getAttr (el, attr) {
+export function getAndRemoveAttr (el, attr) {
   let val
   if (val = el.attrsMap[attr]) {
     el.attrsMap[attr] = null
