@@ -113,7 +113,10 @@ export default {
     // key filter
     var keys = Object.keys(this.modifiers)
       .filter(function (key) {
-        return key !== 'stop' && key !== 'prevent' && key !== 'self' && key !== 'capture'
+        return key !== 'stop' &&
+          key !== 'prevent' &&
+          key !== 'self' &&
+          key !== 'capture'
       })
     if (keys.length) {
       handler = keyFilter(handler, keys)
