@@ -15,15 +15,10 @@ export function getAndRemoveAttr (el, attr) {
 const modifierRE = /\.[^\.]+/g
 
 export function parseModifiers (name) {
-  var res = Object.create(null)
-  var match = name.match(modifierRE)
+  const match = name.match(modifierRE)
   if (match) {
-    var i = match.length
-    while (i--) {
-      res[match[i].slice(1)] = true
-    }
+    return match.map(m => m.slice(1))
   }
-  return res
 }
 
 export function removeModifiers (name) {

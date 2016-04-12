@@ -8,9 +8,9 @@ import {
   getAndRemoveAttr
 } from './helpers'
 
+const dirRE = /^v-|^@|^:/
 const bindRE = /^:|^v-bind:/
 const onRE = /^@|^v-on:/
-const dirRE = /^v-/
 const mustUsePropsRE = /^(value|selected|checked|muted)$/
 
 export function generate (ast) {
@@ -90,26 +90,32 @@ function genData (el, key) {
     let attr = el.attrs[i]
     let name = attr.name
     let value = attr.value
-    if (bindRE.test(name)) {
-      name = name.replace(bindRE, '')
-      if (name === 'style') {
-        data += `style: ${value},`
-      } else if (mustUsePropsRE.test(name)) {
-        hasProps = true
-        props += `"${name}": (${value}),`
+
+    if (dirRE.test(name)) {
+      // modifiers
+      const modifiers = parseModifiers(name)
+      name = removeModifiers(name)
+      if (bindRE.test(name)) {
+        name = name.replace(bindRE, '')
+        if (name === 'style') {
+          data += `style: ${value},`
+        } else if (mustUsePropsRE.test(name)) {
+          hasProps = true
+          props += `"${name}": (${value}),`
+        } else {
+          hasAttrs = true
+          attrs += `"${name}": (${value}),`
+        }
+      } else if (onRE.test(name)) {
+        hasEvents = true
+        name = name.replace(onRE, '')
+        addHandler(events, name, value, modifiers)
+      } else if (name === 'v-model') {
+        hasProps = hasEvents = true
+        props += genModel(el, events, value) + ','
       } else {
-        hasAttrs = true
-        attrs += `"${name}": (${value}),`
+        // TODO: normal directives
       }
-    } else if (onRE.test(name)) {
-      hasEvents = true
-      name = name.replace(onRE, '')
-      addHandler(events, name, value)
-    } else if (name === 'v-model') {
-      hasProps = hasEvents = true
-      props += genModel(el, events, value) + ','
-    } else if (dirRE.test(name)) {
-      // TODO: normal directives
     } else {
       hasAttrs = true
       attrs += `"${name}": (${JSON.stringify(attr.value)}),`

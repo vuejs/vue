@@ -1,35 +1,61 @@
 import { isArray } from '../../util/index'
 
 const simplePathRE = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\]|\[\d+\]|\[[A-Za-z_$][\w$]*\])*$/
+const modifierCode = {
+  stop: '$event.stopPropagation();',
+  prevent: '$event.preventDefault();',
+  self: 'if($event.target !== $event.currentTarget)return;'
+}
 
-export function addHandler (events, name, value) {
+export function addHandler (events, name, value, modifiers) {
+  // check capture modifier
+  const captureIndex = modifiers && modifiers.indexOf('capture')
+  if (captureIndex > -1) {
+    modifiers.splice(captureIndex, 1)
+    name = '!' + name // mark the event as captured
+  }
+  const newHandler = { value, modifiers }
   const handlers = events[name]
   if (isArray(handlers)) {
-    handlers.push(value)
+    handlers.push(newHandler)
   } else if (handlers) {
-    events[name] = [handlers, value]
+    events[name] = [handlers, newHandler]
   } else {
-    events[name] = value
+    events[name] = newHandler
   }
 }
 
 export function genEvents (events) {
   let res = 'on:{'
-  for (var name in events) {
+  for (let name in events) {
     res += `"${name}":${genHandler(events[name])},`
   }
+  console.log(res)
   return res.slice(0, -1) + '}'
 }
 
-function genHandler (value) {
-  // TODO support modifiers
-  if (!value) {
+function genHandler (handler) {
+  if (!handler) {
     return `function(){}`
-  } else if (isArray(value)) {
-    return `[${value.map(genHandler).join(',')}]`
-  } else if (simplePathRE.test(value)) {
-    return value
+  } else if (isArray(handler)) {
+    return `[${handler.map(genHandler).join(',')}]`
+  } else if (!handler.modifiers || !handler.modifiers.length) {
+    return simplePathRE.test(handler.value)
+      ? handler.value
+      : `function($event){${handler.value}}`
   } else {
-    return `function($event){${value}}`
+    let code = 'function($event){'
+    for (let i = 0; i < handler.modifiers.length; i++) {
+      let modifier = handler.modifiers[i]
+      code += modifierCode[modifier] || genKeyFilter(modifier)
+    }
+    let handlerCode = simplePathRE.test(handler.value)
+      ? handler.value + '()'
+      : handler.value
+    return code + handlerCode + '}'
   }
+}
+
+function genKeyFilter (key) {
+
 }
