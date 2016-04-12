@@ -16,17 +16,17 @@ var banner =
 
 // update main file
 var main = fs
-  .readFileSync('src/index.js', 'utf-8')
+  .readFileSync('src/runtime/index.js', 'utf-8')
   .replace(/Vue\.version = '[\d\.]+'/, "Vue.version = '" + version + "'")
-fs.writeFileSync('src/index.js', main)
+fs.writeFileSync('src/runtime/index.js', main)
 
 // CommonJS build.
 // this is used as the "main" field in package.json
 // and used by bundlers like Webpack and Browserify.
-// doesn't come with the compiler because it's meant to be
+// runtime only, because it's meant to be
 // used with vue-loader which pre-compiles the template.
 rollup.rollup({
-  entry: 'src/index.js',
+  entry: 'src/runtime/index.js',
   plugins: [babel()]
 })
 .then(function (bundle) {
@@ -38,7 +38,7 @@ rollup.rollup({
 // Standalone Dev Build
 .then(function () {
   return rollup.rollup({
-    entry: 'src/with-compiler.js',
+    entry: 'src/runtime-with-compiler.js',
     plugins: [
       alias({
         entities: './entity-decoder'
@@ -60,7 +60,7 @@ rollup.rollup({
 .then(function () {
   // Standalone Production Build
   return rollup.rollup({
-    entry: 'src/with-compiler.js',
+    entry: 'src/runtime-with-compiler.js',
     plugins: [
       alias({
         entities: './entity-decoder'

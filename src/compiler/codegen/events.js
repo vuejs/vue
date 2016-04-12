@@ -1,5 +1,4 @@
-import { isArray } from '../../util/index'
-
+const isArray = Array.isArray
 const simplePathRE = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\]|\[\d+\]|\[[A-Za-z_$][\w$]*\])*$/
 
 // keyCode aliases
