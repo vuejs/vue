@@ -36,6 +36,6 @@ function updateClass (oldVnode, vnode) {
 }
 
 export default {
-  init: updateClass,
+  create: updateClass,
   update: updateClass
 }
