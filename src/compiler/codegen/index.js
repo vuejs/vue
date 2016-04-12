@@ -69,6 +69,13 @@ function genData (el, key) {
   let hasAttrs = false
   let hasProps = false
   let hasEvents = false
+
+  // parent elements my need to add props to children
+  if (el.props) {
+    hasProps = true
+    props += el.props + ','
+  }
+
   for (let i = 0, l = el.attrs.length; i < l; i++) {
     let attr = el.attrs[i]
     let name = attr.name
@@ -89,9 +96,8 @@ function genData (el, key) {
       name = name.replace(onRE, '')
       addHandler(events, name, value)
     } else if (name === 'v-model') {
-      // TODO: handle other input types
       hasProps = hasEvents = true
-      props += genModel(el, events, value)
+      props += genModel(el, events, value) + ','
     } else if (dirRE.test(name)) {
       // TODO: normal directives
     } else {

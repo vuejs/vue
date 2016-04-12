@@ -24,7 +24,7 @@ function updateAttrs (oldVnode, vnode) {
     old = oldAttrs[key]
     if (old !== cur) {
       // TODO: add support to namespaced attributes (setAttributeNS)
-      if(!cur && booleanAttrsDict[key])
+      if(booleanAttrsDict[key] && cur == null)
         elm.removeAttribute(key)
       else
         elm.setAttribute(key, cur)

@@ -49,13 +49,11 @@ export default function Watcher (vm, expOrFn, cb, options) {
   this.newDeps = []
   this.depIds = new Set()
   this.newDepIds = new Set()
-  this.prevError = null // for async error stacks
-  // parse expression for getter/setter
+  // parse expression for getter
   if (isFn) {
     this.getter = expOrFn
-    this.setter = undefined
   } else {
-    warn('vue-lite only supports watching functions.')
+    this.getter = new Function(`with(this){return ${expOrFn}}`)
   }
   this.value = this.lazy
     ? undefined
@@ -71,66 +69,14 @@ export default function Watcher (vm, expOrFn, cb, options) {
 
 Watcher.prototype.get = function () {
   this.beforeGet()
-  var scope = this.scope || this.vm
-  var value
-  try {
-    value = this.getter.call(scope, scope)
-  } catch (e) {
-    if (
-      process.env.NODE_ENV !== 'production' &&
-      config.warnExpressionErrors
-    ) {
-      warn(
-        'Error when evaluating expression ' +
-        '"' + this.expression + '": ' + e.toString(),
-        this.vm
-      )
-    }
-  }
+  const value = this.getter.call(this.vm, this.vm)
   // "touch" every property so they are all tracked as
   // dependencies for deep watching
   if (this.deep) {
     traverse(value)
   }
-  if (this.preProcess) {
-    value = this.preProcess(value)
-  }
-  if (this.filters) {
-    value = scope._applyFilters(value, null, this.filters, false)
-  }
-  if (this.postProcess) {
-    value = this.postProcess(value)
-  }
   this.afterGet()
   return value
-}
-
-/**
- * Set the corresponding value with the setter.
- *
- * @param {*} value
- */
-
-Watcher.prototype.set = function (value) {
-  var scope = this.scope || this.vm
-  if (this.filters) {
-    value = scope._applyFilters(
-      value, this.value, this.filters, true)
-  }
-  try {
-    this.setter.call(scope, scope, value)
-  } catch (e) {
-    if (
-      process.env.NODE_ENV !== 'production' &&
-      config.warnExpressionErrors
-    ) {
-      warn(
-        'Error when evaluating setter ' +
-        '"' + this.expression + '": ' + e.toString(),
-        this.vm
-      )
-    }
-  }
 }
 
 /**
@@ -230,25 +176,7 @@ Watcher.prototype.run = function () {
       // set new value
       var oldValue = this.value
       this.value = value
-      // in debug + async mode, when a watcher callbacks
-      // throws, we also throw the saved before-push error
-      // so the full cross-tick stack trace is available.
-      var prevError = this.prevError
-      /* istanbul ignore if */
-      if (process.env.NODE_ENV !== 'production' &&
-          config.debug && prevError) {
-        this.prevError = null
-        try {
-          this.cb.call(this.vm, value, oldValue)
-        } catch (e) {
-          nextTick(function () {
-            throw prevError
-          }, 0)
-          throw e
-        }
-      } else {
-        this.cb.call(this.vm, value, oldValue)
-      }
+      this.cb.call(this.vm, value, oldValue)
     }
     this.queued = this.shallow = false
   }

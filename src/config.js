@@ -15,13 +15,6 @@ export default {
   silent: false,
 
   /**
-   * Whether to warn against errors caught when evaluating
-   * expressions.
-   */
-
-  warnExpressionErrors: true,
-
-  /**
    * List of asset types that a component can own.
    *
    * @type {Array}
