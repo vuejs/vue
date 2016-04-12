@@ -44,7 +44,6 @@ export function genEvents (events) {
   for (let name in events) {
     res += `"${name}":${genHandler(events[name])},`
   }
-  console.log(res)
   return res.slice(0, -1) + '}'
 }
 
