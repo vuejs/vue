@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "webpack --watch",
     "test": "mocha",
-    "build": "NODE_ENV=production node build/build.js"
+    "build": "NODE_ENV=production node build/build.js",
+    "lint": "eslint src"
   },
   "repository": {
     "type": "git",
@@ -27,6 +28,11 @@
     "babel-preset-es2015": "^6.0.0",
     "babel-preset-es2015-rollup": "^1.1.1",
     "babel-preset-stage-2": "^6.0.0",
+    "eslint": "^2.7.0",
+    "eslint-config-standard": "^5.1.0",
+    "eslint-loader": "^1.3.0",
+    "eslint-plugin-promise": "^1.1.0",
+    "eslint-plugin-standard": "^1.3.2",
     "rollup": "^0.25.8",
     "rollup-plugin-alias": "^1.0.2",
     "rollup-plugin-babel": "^2.4.0",

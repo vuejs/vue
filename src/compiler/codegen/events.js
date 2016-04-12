@@ -49,7 +49,7 @@ export function genEvents (events) {
 
 function genHandler (handler) {
   if (!handler) {
-    return `function(){}`
+    return 'function(){}'
   } else if (isArray(handler)) {
     return `[${handler.map(genHandler).join(',')}]`
   } else if (!handler.modifiers || !handler.modifiers.length) {

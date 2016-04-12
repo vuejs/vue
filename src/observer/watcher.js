@@ -3,10 +3,8 @@ import Dep from './dep'
 import { pushWatcher } from './batcher'
 import {
   extend,
-  warn,
   isArray,
   isObject,
-  nextTick,
   _Set as Set
 } from '../util/index'
 

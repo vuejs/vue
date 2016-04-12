@@ -1,10 +1,10 @@
 const booleanAttrs = [
-  "allowfullscreen", "async", "autofocus", "autoplay", "checked", "compact", "controls", "declare",
-  "default", "defaultchecked", "defaultmuted", "defaultselected", "defer", "disabled", "draggable",
-  "enabled", "formnovalidate", "hidden", "indeterminate", "inert", "ismap", "itemscope", "loop", "multiple",
-  "muted", "nohref", "noresize", "noshade", "novalidate", "nowrap", "open", "pauseonexit", "readonly",
-  "required", "reversed", "scoped", "seamless", "selected", "sortable", "spellcheck", "translate",
-  "truespeed", "typemustmatch", "visible"
+  'allowfullscreen', 'async', 'autofocus', 'autoplay', 'checked', 'compact', 'controls', 'declare',
+  'default', 'defaultchecked', 'defaultmuted', 'defaultselected', 'defer', 'disabled', 'draggable',
+  'enabled', 'formnovalidate', 'hidden', 'indeterminate', 'inert', 'ismap', 'itemscope', 'loop', 'multiple',
+  'muted', 'nohref', 'noresize', 'noshade', 'novalidate', 'nowrap', 'open', 'pauseonexit', 'readonly',
+  'required', 'reversed', 'scoped', 'seamless', 'selected', 'sortable', 'spellcheck', 'translate',
+  'truespeed', 'typemustmatch', 'visible'
 ]
 
 const booleanAttrsDict = {}
@@ -24,13 +24,14 @@ function updateAttrs (oldVnode, vnode) {
     old = oldAttrs[key]
     if (old !== cur) {
       // TODO: add support to namespaced attributes (setAttributeNS)
-      if(booleanAttrsDict[key] && cur == null)
+      if (booleanAttrsDict[key] && cur == null) {
         elm.removeAttribute(key)
-      else
+      } else {
         elm.setAttribute(key, cur)
+      }
     }
   }
-  //remove removed attributes
+  // remove removed attributes
   // use `in` operator since the previous `for` iteration uses it (.i.e. add even attributes with undefined value)
   // the other option is to remove all attributes with value == undefined
   for (key in oldAttrs) {

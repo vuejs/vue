@@ -1,8 +1,7 @@
 import config from '../config'
 import {
   warn,
-  nextTick,
-  devtools
+  nextTick
 } from '../util/index'
 
 // we have two separate queues: one for directive updates

@@ -1,6 +1,6 @@
 export function getAndRemoveAttr (el, attr) {
   let val
-  if (val = el.attrsMap[attr]) {
+  if ((val = el.attrsMap[attr])) {
     el.attrsMap[attr] = null
     for (let i = 0, l = el.attrs.length; i < l; i++) {
       if (el.attrs[i].name === attr) {
@@ -32,17 +32,14 @@ export function parseText (text) {
   }
   var tokens = []
   var lastIndex = tagRE.lastIndex = 0
-  var match, index, value
-  /* eslint-disable no-cond-assign */
-  while (match = tagRE.exec(text)) {
-  /* eslint-enable no-cond-assign */
+  var match, index
+  while ((match = tagRE.exec(text))) {
     index = match.index
     // push text token
     if (index > lastIndex) {
       tokens.push(JSON.stringify(text.slice(lastIndex, index)))
     }
     // tag token
-    value = match[1]
     tokens.push('(' + match[1].trim() + ')')
     lastIndex = index + match[0].length
   }

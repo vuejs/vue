@@ -18,7 +18,8 @@ function sameVnode (vnode1, vnode2) {
 }
 
 function createKeyToOldIdx (children, beginIdx, endIdx) {
-  var i, map = {}, key
+  let i, key
+  const map = {}
   for (i = beginIdx; i <= endIdx; ++i) {
     key = children[i].key
     if (isDef(key)) map[key] = i
@@ -27,7 +28,8 @@ function createKeyToOldIdx (children, beginIdx, endIdx) {
 }
 
 export default function createPatchFunction (modules, api) {
-  var i, j, cbs = {}
+  let i, j
+  const cbs = {}
 
   if (isUndef(api)) api = dom
 
@@ -43,24 +45,26 @@ export default function createPatchFunction (modules, api) {
   }
 
   function createRmCb (childElm, listeners) {
-    return function() {
+    return function () {
       if (--listeners === 0) {
-        var parent = api.parentNode(childElm)
+        const parent = api.parentNode(childElm)
         api.removeChild(parent, childElm)
       }
     }
   }
 
   function createElm (vnode, insertedVnodeQueue) {
-    var i, thunk, data = vnode.data
+    let i, thunk, elm
+    const data = vnode.data
     if (isDef(data)) {
       if (isDef(i = data.hook) && isDef(i = i.init)) i(vnode)
       if (isDef(i = data.vnode)) {
-          thunk = vnode
-          vnode = i
+        thunk = vnode
+        vnode = i
       }
     }
-    var elm, children = vnode.children, tag = vnode.sel
+    const children = vnode.children
+    const tag = vnode.sel
     if (isDef(tag)) {
       elm = vnode.elm = isDef(data) && isDef(i = data.ns)
         ? api.createElementNS(i, tag)
@@ -92,7 +96,8 @@ export default function createPatchFunction (modules, api) {
   }
 
   function invokeDestroyHook (vnode) {
-    var i, j, data = vnode.data
+    let i, j
+    const data = vnode.data
     if (isDef(data)) {
       if (isDef(i = data.hook) && isDef(i = i.destroy)) i(vnode)
       for (i = 0; i < cbs.destroy.length; ++i) cbs.destroy[i](vnode)
@@ -107,7 +112,8 @@ export default function createPatchFunction (modules, api) {
 
   function removeVnodes (parentElm, vnodes, startIdx, endIdx) {
     for (; startIdx <= endIdx; ++startIdx) {
-      var i, listeners, rm, ch = vnodes[startIdx]
+      let i, listeners, rm
+      const ch = vnodes[startIdx]
       if (isDef(ch)) {
         if (isDef(ch.sel)) {
           invokeDestroyHook(ch)
@@ -127,14 +133,15 @@ export default function createPatchFunction (modules, api) {
   }
 
   function updateChildren (parentElm, oldCh, newCh, insertedVnodeQueue) {
-    var oldStartIdx = 0, newStartIdx = 0
-    var oldEndIdx = oldCh.length - 1
-    var oldStartVnode = oldCh[0]
-    var oldEndVnode = oldCh[oldEndIdx]
-    var newEndIdx = newCh.length - 1
-    var newStartVnode = newCh[0]
-    var newEndVnode = newCh[newEndIdx]
-    var oldKeyToIdx, idxInOld, elmToMove, before
+    let oldStartIdx = 0
+    let newStartIdx = 0
+    let oldEndIdx = oldCh.length - 1
+    let oldStartVnode = oldCh[0]
+    let oldEndVnode = oldCh[oldEndIdx]
+    let newEndIdx = newCh.length - 1
+    let newStartVnode = newCh[0]
+    let newEndVnode = newCh[newEndIdx]
+    let oldKeyToIdx, idxInOld, elmToMove, before
 
     while (oldStartIdx <= oldEndIdx && newStartIdx <= newEndIdx) {
       if (isUndef(oldStartVnode)) {
@@ -175,7 +182,7 @@ export default function createPatchFunction (modules, api) {
       }
     }
     if (oldStartIdx > oldEndIdx) {
-      before = isUndef(newCh[newEndIdx+1]) ? null : newCh[newEndIdx+1].elm
+      before = isUndef(newCh[newEndIdx + 1]) ? null : newCh[newEndIdx + 1].elm
       addVnodes(parentElm, before, newCh, newStartIdx, newEndIdx, insertedVnodeQueue)
     } else if (newStartIdx > newEndIdx) {
       removeVnodes(parentElm, oldCh, oldStartIdx, oldEndIdx)
@@ -183,7 +190,7 @@ export default function createPatchFunction (modules, api) {
   }
 
   function patchVnode (oldVnode, vnode, insertedVnodeQueue) {
-    var i, hook
+    let i, hook
     if (isDef(i = vnode.data) && isDef(hook = i.hook) && isDef(i = hook.prepatch)) {
       i(oldVnode, vnode)
     }
@@ -193,7 +200,9 @@ export default function createPatchFunction (modules, api) {
       vnode.elm = i.elm
       return
     }
-    var elm = vnode.elm = oldVnode.elm, oldCh = oldVnode.children, ch = vnode.children
+    let elm = vnode.elm = oldVnode.elm
+    const oldCh = oldVnode.children
+    const ch = vnode.children
     if (oldVnode === vnode) return
     if (!sameVnode(oldVnode, vnode)) {
       var parentElm = api.parentNode(oldVnode.elm)

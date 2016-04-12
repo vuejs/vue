@@ -1,4 +1,4 @@
-function updateProps(oldVnode, vnode) {
+function updateProps (oldVnode, vnode) {
   let key, cur, old
   const elm = vnode.elm
   const oldProps = oldVnode.data.props || {}

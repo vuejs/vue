@@ -1,7 +1,7 @@
 // TODO:
 // - include prefix sniffing of v-bind:style
 
-function updateStyle(oldVnode, vnode) {
+function updateStyle (oldVnode, vnode) {
   let cur, name
   const elm = vnode.elm
   const oldStyle = oldVnode.data.style || {}

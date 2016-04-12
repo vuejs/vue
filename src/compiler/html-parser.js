@@ -68,84 +68,82 @@ function makeAttrsMap (attrs) {
  * http://erik.eae.net/simplehtmlparser/simplehtmlparser.js
  */
 
-function makeMap(values) {
+function makeMap (values) {
   values = values.split(/,/)
   var map = {}
-  values.forEach(function(value) {
+  values.forEach(function (value) {
     map[value] = 1
   })
-  return function(value) {
+  return function (value) {
     return map[value.toLowerCase()] === 1
   }
 }
 
 // Regular Expressions for parsing tags and attributes
-var singleAttrIdentifier = /([^\s"'<>\/=]+)/,
-    singleAttrAssign = /=/,
-    singleAttrAssigns = [singleAttrAssign],
-    singleAttrValues = [
-      // attr value double quotes
-      /"([^"]*)"+/.source,
-      // attr value, single quotes
-      /'([^']*)'+/.source,
-      // attr value, no quotes
-      /([^\s"'=<>`]+)/.source
-    ],
-    qnameCapture = (function() {
-      // could use https://www.w3.org/TR/1999/REC-xml-names-19990114/#NT-QName
-      // but for Vue templates we can enforce a simple charset
-      var ncname = '[a-zA-Z_][\\w\\-\\.]*'
-      return '((?:' + ncname + '\\:)?' + ncname + ')'
-    })(),
-    startTagOpen = new RegExp('^<' + qnameCapture),
-    startTagClose = /^\s*(\/?)>/,
-    endTag = new RegExp('^<\\/' + qnameCapture + '[^>]*>'),
-    doctype = /^<!DOCTYPE [^>]+>/i
+const singleAttrIdentifier = /([^\s"'<>\/=]+)/
+const singleAttrAssign = /=/
+const singleAttrAssigns = [singleAttrAssign]
+const singleAttrValues = [
+  // attr value double quotes
+  /"([^"]*)"+/.source,
+  // attr value, single quotes
+  /'([^']*)'+/.source,
+  // attr value, no quotes
+  /([^\s"'=<>`]+)/.source
+]
+// could use https://www.w3.org/TR/1999/REC-xml-names-19990114/#NT-QName
+// but for Vue templates we can enforce a simple charset
+const ncname = '[a-zA-Z_][\\w\\-\\.]*'
+const qnameCapture = '((?:' + ncname + '\\:)?' + ncname + ')'
+const startTagOpen = new RegExp('^<' + qnameCapture)
+const startTagClose = /^\s*(\/?)>/
+const endTag = new RegExp('^<\\/' + qnameCapture + '[^>]*>')
+const doctype = /^<!DOCTYPE [^>]+>/i
 
-var IS_REGEX_CAPTURING_BROKEN = false
-'x'.replace(/x(.)?/g, function(m, g) {
+let IS_REGEX_CAPTURING_BROKEN = false
+'x'.replace(/x(.)?/g, function (m, g) {
   IS_REGEX_CAPTURING_BROKEN = g === ''
 })
 
 // Empty Elements
-var empty = makeMap('area,base,basefont,br,col,embed,frame,hr,img,input,isindex,keygen,link,meta,param,source,track,wbr')
+const empty = makeMap('area,base,basefont,br,col,embed,frame,hr,img,input,isindex,keygen,link,meta,param,source,track,wbr')
 
 // Inline Elements
-var inline = makeMap('a,abbr,acronym,applet,b,basefont,bdo,big,br,button,cite,code,del,dfn,em,font,i,iframe,img,input,ins,kbd,label,map,noscript,object,q,s,samp,script,select,small,span,strike,strong,sub,sup,svg,textarea,tt,u,var')
+const inline = makeMap('a,abbr,acronym,applet,b,basefont,bdo,big,br,button,cite,code,del,dfn,em,font,i,iframe,img,input,ins,kbd,label,map,noscript,object,q,s,samp,script,select,small,span,strike,strong,sub,sup,svg,textarea,tt,u,var')
 
 // Elements that you can, intentionally, leave open
 // (and which close themselves)
-var closeSelf = makeMap('colgroup,dd,dt,li,options,p,td,tfoot,th,thead,tr,source')
+const closeSelf = makeMap('colgroup,dd,dt,li,options,p,td,tfoot,th,thead,tr,source')
 
 // Attributes that have their values filled in disabled='disabled'
-var fillAttrs = makeMap('checked,compact,declare,defer,disabled,ismap,multiple,nohref,noresize,noshade,nowrap,readonly,selected')
+const fillAttrs = makeMap('checked,compact,declare,defer,disabled,ismap,multiple,nohref,noresize,noshade,nowrap,readonly,selected')
 
 // Special Elements (can contain anything)
-var special = makeMap('script,style')
+const special = makeMap('script,style')
 
 // HTML5 tags https://html.spec.whatwg.org/multipage/indices.html#elements-3
 // Phrasing Content https://html.spec.whatwg.org/multipage/dom.html#phrasing-content
-var nonPhrasing = makeMap('address,article,aside,base,blockquote,body,caption,col,colgroup,dd,details,dialog,div,dl,dt,fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,head,header,hgroup,hr,html,legend,li,menuitem,meta,optgroup,option,param,rp,rt,source,style,summary,tbody,td,tfoot,th,thead,title,tr,track')
+const nonPhrasing = makeMap('address,article,aside,base,blockquote,body,caption,col,colgroup,dd,details,dialog,div,dl,dt,fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,head,header,hgroup,hr,html,legend,li,menuitem,meta,optgroup,option,param,rp,rt,source,style,summary,tbody,td,tfoot,th,thead,title,tr,track')
 
-var reCache = {}
+const reCache = {}
 
-function attrForHandler(handler) {
-  var pattern = singleAttrIdentifier.source +
-                '(?:\\s*(' + joinSingleAttrAssigns(handler) + ')' +
-                '\\s*(?:' + singleAttrValues.join('|') + '))?'
+function attrForHandler (handler) {
+  const pattern = singleAttrIdentifier.source +
+    '(?:\\s*(' + joinSingleAttrAssigns(handler) + ')' +
+    '\\s*(?:' + singleAttrValues.join('|') + '))?'
   return new RegExp('^\\s*' + pattern)
 }
 
-function joinSingleAttrAssigns(handler) {
-  return singleAttrAssigns.map(function(assign) {
+function joinSingleAttrAssigns (handler) {
+  return singleAttrAssigns.map(function (assign) {
     return '(?:' + assign.source + ')'
   }).join('|')
 }
 
-export default function HTMLParser(html, handler) {
-  var stack = [], lastTag
-  var attribute = attrForHandler(handler)
-  var last, prevTag, nextTag
+export default function HTMLParser (html, handler) {
+  const stack = []
+  const attribute = attrForHandler(handler)
+  let last, prevTag, nextTag, lastTag
   while (html) {
     last = html
     // Make sure we're not in a script or style element
@@ -208,8 +206,7 @@ export default function HTMLParser(html, handler) {
       if (textEnd >= 0) {
         text = html.substring(0, textEnd)
         html = html.substring(textEnd)
-      }
-      else {
+      } else {
         text = html
         html = ''
       }
@@ -218,13 +215,11 @@ export default function HTMLParser(html, handler) {
       var nextTagMatch = parseStartTag(html)
       if (nextTagMatch) {
         nextTag = nextTagMatch.tagName
-      }
-      else {
+      } else {
         nextTagMatch = html.match(endTag)
         if (nextTagMatch) {
           nextTag = '/' + nextTagMatch[1]
-        }
-        else {
+        } else {
           nextTag = ''
         }
       }
@@ -233,23 +228,19 @@ export default function HTMLParser(html, handler) {
         handler.chars(text, prevTag, nextTag)
       }
       prevTag = ''
-
-    }
-    else {
+    } else {
       var stackedTag = lastTag.toLowerCase()
       var reStackedTag = reCache[stackedTag] || (reCache[stackedTag] = new RegExp('([\\s\\S]*?)</' + stackedTag + '[^>]*>', 'i'))
 
-      html = html.replace(reStackedTag, function(all, text) {
+      html = html.replace(reStackedTag, function (all, text) {
         if (stackedTag !== 'script' && stackedTag !== 'style' && stackedTag !== 'noscript') {
           text = text
             .replace(/<!--([\s\S]*?)-->/g, '$1')
             .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
         }
-
         if (handler.chars) {
           handler.chars(text)
         }
-
         return ''
       })
 
@@ -266,7 +257,7 @@ export default function HTMLParser(html, handler) {
     parseEndTag()
   }
 
-  function parseStartTag(input) {
+  function parseStartTag (input) {
     var start = input.match(startTagOpen)
     if (start) {
       var match = {
@@ -287,7 +278,7 @@ export default function HTMLParser(html, handler) {
     }
   }
 
-  function handleStartTag(match) {
+  function handleStartTag (match) {
     var tagName = match.tagName
     var unarySlash = match.unarySlash
 
@@ -307,7 +298,7 @@ export default function HTMLParser(html, handler) {
 
     var unary = empty(tagName) || tagName === 'html' && lastTag === 'head' || !!unarySlash
 
-    var attrs = match.attrs.map(function(args) {
+    var attrs = match.attrs.map(function (args) {
       // hackish work around FF bug https://bugzilla.mozilla.org/show_bug.cgi?id=369778
       if (IS_REGEX_CAPTURING_BROKEN && args[0].indexOf('""') === -1) {
         if (args[3] === '') { delete args[3] }
@@ -316,7 +307,7 @@ export default function HTMLParser(html, handler) {
       }
       return {
         name: args[1],
-        value: args[3] || args[4] || (args[5] && fillAttrs(args[5]) ? name : '')
+        value: args[3] || args[4] || (args[5] && fillAttrs(args[5]) ? args[1] : '')
       }
     })
 
@@ -331,7 +322,7 @@ export default function HTMLParser(html, handler) {
     }
   }
 
-  function parseEndTag(tag, tagName) {
+  function parseEndTag (tag, tagName) {
     var pos
 
     // Find the closest opened tag of the same type
@@ -342,9 +333,8 @@ export default function HTMLParser(html, handler) {
           break
         }
       }
-    }
-    // If no tag name is provided, clean shop
-    else {
+    } else {
+      // If no tag name is provided, clean shop
       pos = 0
     }
 
@@ -359,13 +349,11 @@ export default function HTMLParser(html, handler) {
       // Remove the open elements from the stack
       stack.length = pos
       lastTag = pos && stack[pos - 1].tag
-    }
-    else if (tagName.toLowerCase() === 'br') {
+    } else if (tagName.toLowerCase() === 'br') {
       if (handler.start) {
         handler.start(tagName, [], true, '')
       }
-    }
-    else if (tagName.toLowerCase() === 'p') {
+    } else if (tagName.toLowerCase() === 'p') {
       if (handler.start) {
         handler.start(tagName, [], false, '', true)
       }

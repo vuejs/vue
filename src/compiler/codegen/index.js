@@ -14,19 +14,19 @@ const mustUsePropsRE = /^(value|selected|checked|muted)$/
 
 export function generate (ast) {
   const code = genElement(ast)
-  return new Function (`with (this) { return ${code}}`)
+  return new Function(`with (this) { return ${code}}`)
 }
 
 function genElement (el, key) {
   let exp
-  if (exp = getAndRemoveAttr(el, 'v-for')) {
+  if ((exp = getAndRemoveAttr(el, 'v-for'))) {
     return genFor(el, exp)
-  } else if (exp = getAndRemoveAttr(el, 'v-if')) {
+  } else if ((exp = getAndRemoveAttr(el, 'v-if'))) {
     return genIf(el, exp)
   } else if (el.tag === 'template') {
     return genChildren(el)
   } else {
-    return `__h__('${el.tag}', ${genData(el, key) }, ${genChildren(el)})`
+    return `__h__('${el.tag}', ${genData(el, key)}, ${genChildren(el)})`
   }
 }
 
@@ -37,13 +37,13 @@ function genIf (el, exp) {
 function genFor (el, exp) {
   const inMatch = exp.match(/([a-zA-Z_][\w]*)\s+(?:in|of)\s+(.*)/)
   if (!inMatch) {
-    throw new Error('Invalid v-for expression: '+ exp)
+    throw new Error('Invalid v-for expression: ' + exp)
   }
   const alias = inMatch[1].trim()
   exp = inMatch[2].trim()
   let key = getAndRemoveAttr(el, 'track-by')
   if (!key) {
-    key ='undefined'
+    key = 'undefined'
   } else if (key !== '$index') {
     key = alias + '["' + key + '"]'
   }
@@ -56,8 +56,8 @@ function genData (el, key) {
   }
 
   let data = '{'
-  let attrs = `attrs:{`
-  let props = `props:{`
+  let attrs = 'attrs:{'
+  let props = 'props:{'
   let events = {}
   let hasAttrs = false
   let hasProps = false
