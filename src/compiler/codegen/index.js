@@ -1,8 +1,12 @@
 import config from '../../config'
-import { parseText } from '../text-parser'
 import { genEvents, addHandler } from './events'
 import { genModel } from './model'
-import { getAndRemoveAttr } from './helpers'
+import {
+  parseText,
+  parseModifiers,
+  removeModifiers,
+  getAndRemoveAttr
+} from './helpers'
 
 const bindRE = /^:|^v-bind:/
 const onRE = /^@|^v-on:/
@@ -51,10 +55,21 @@ function genData (el, key) {
   if (!el.attrs.length) {
     return '{}'
   }
+
   let data = '{'
+  let attrs = `attrs:{`
+  let props = `props:{`
+  let events = {}
+  let hasAttrs = false
+  let hasProps = false
+  let hasEvents = false
+
+  // key
   if (key) {
     data += `key:${key},`
   }
+
+  // class
   const classBinding = getAndRemoveAttr(el, ':class') || getAndRemoveAttr(el, 'v-bind:class')
   if (classBinding) {
     data += `class: ${classBinding},`
@@ -63,12 +78,6 @@ function genData (el, key) {
   if (staticClass) {
     data += `staticClass: "${staticClass}",`
   }
-  let attrs = `attrs:{`
-  let props = `props:{`
-  let events = {}
-  let hasAttrs = false
-  let hasProps = false
-  let hasEvents = false
 
   // parent elements my need to add props to children
   if (el.props) {
@@ -76,6 +85,7 @@ function genData (el, key) {
     props += el.props + ','
   }
 
+  // loop attributes
   for (let i = 0, l = el.attrs.length; i < l; i++) {
     let attr = el.attrs[i]
     let name = attr.name
