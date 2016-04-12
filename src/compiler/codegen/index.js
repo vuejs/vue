@@ -1,4 +1,3 @@
-import config from '../../config'
 import { genEvents, addHandler } from './events'
 import { genModel } from './model'
 import {

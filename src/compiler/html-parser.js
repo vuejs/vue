@@ -1,4 +1,3 @@
-import config from '../config'
 import { decodeHTML } from 'entities'
 
 /**
@@ -8,7 +7,7 @@ import { decodeHTML } from 'entities'
  * @return {Object}
  */
 
-export function parse (html) {
+export function parse (html, preserveWhiteSpace) {
   let root
   let currentParent
   let stack = []
@@ -43,7 +42,7 @@ export function parse (html) {
         ? text
         : text.trim()
           ? text
-          : config.preserveWhiteSpace
+          : preserveWhiteSpace
             ? ' '
             : null
       if (text) {
