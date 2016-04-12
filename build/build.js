@@ -3,9 +3,8 @@ var zlib = require('zlib')
 var rollup = require('rollup')
 var uglify = require('uglify-js')
 var babel = require('rollup-plugin-babel')
-var node = require('rollup-plugin-node-resolve')
-var commonjs = require('rollup-plugin-commonjs')
 var replace = require('rollup-plugin-replace')
+var alias = require('rollup-plugin-alias')
 var version = process.env.VERSION || require('../package.json').version
 
 var banner =
@@ -21,16 +20,6 @@ var main = fs
   .replace(/Vue\.version = '[\d\.]+'/, "Vue.version = '" + version + "'")
 fs.writeFileSync('src/index.js', main)
 
-var plugins = [
-  node(),
-  commonjs({
-    include: 'node_modules/**'
-  }),
-  babel({
-    exclude: 'node_modules/**'
-  })
-]
-
 // CommonJS build.
 // this is used as the "main" field in package.json
 // and used by bundlers like Webpack and Browserify.
@@ -38,7 +27,7 @@ var plugins = [
 // used with vue-loader which pre-compiles the template.
 rollup.rollup({
   entry: 'src/index.js',
-  plugins: plugins
+  plugins: [babel()]
 })
 .then(function (bundle) {
   return write('dist/vue.common.js', bundle.generate({
@@ -51,10 +40,14 @@ rollup.rollup({
   return rollup.rollup({
     entry: 'src/with-compiler.js',
     plugins: [
+      alias({
+        entities: './entity-decoder'
+      }),
       replace({
         'process.env.NODE_ENV': "'development'"
-      })
-    ].concat(plugins)
+      }),
+      babel()
+    ]
   })
   .then(function (bundle) {
     return write('dist/vue.js', bundle.generate({
@@ -69,10 +62,14 @@ rollup.rollup({
   return rollup.rollup({
     entry: 'src/with-compiler.js',
     plugins: [
+      alias({
+        entities: './entity-decoder'
+      }),
       replace({
         'process.env.NODE_ENV': "'production'"
-      })
-    ].concat(plugins)
+      }),
+      babel()
+    ]
   })
   .then(function (bundle) {
     var code = bundle.generate({

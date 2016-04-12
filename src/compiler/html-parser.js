@@ -1,4 +1,5 @@
 import config from '../config'
+import { decodeHTML } from 'entities'
 
 /**
  * Convert HTML string to AST
@@ -37,6 +38,7 @@ export function parse (html) {
       currentParent = stack[stack.length - 1]
     },
     chars (text) {
+      text = decodeHTML(text)
       text = currentParent.tag === 'pre'
         ? text
         : text.trim()

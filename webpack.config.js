@@ -8,6 +8,11 @@ module.exports = {
     library: 'Vue',
     libraryTarget: 'umd'
   },
+  resolve: {
+    alias: {
+      entities: './entity-decoder'
+    }
+  },
   module: {
     loaders: [
       { test: /\.js/, loader: 'babel', exclude: /node_modules/ }
