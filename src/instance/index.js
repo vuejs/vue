@@ -1,14 +1,12 @@
-import { compile } from '../compiler/index'
 import { observe } from '../observer/index'
 import Watcher from '../observer/watcher'
 import { h, patch } from '../vdom/index'
-import { nextTick, isReserved, getOuterHTML } from '../util/index'
+import { nextTick, isReserved } from '../util/index'
 
 export default function Component (options) {
   this.$options = options
   this._data = options.data
   const el = this._el = document.querySelector(options.el)
-  const render = compile(getOuterHTML(el))
   this._el.innerHTML = ''
   Object.keys(options.data).forEach(key => proxy(this, key))
   if (options.methods) {
@@ -18,7 +16,7 @@ export default function Component (options) {
   }
   this._ob = observe(options.data)
   this._watchers = []
-  this._watcher = new Watcher(this, render, this._update)
+  this._watcher = new Watcher(this, options.render, this._update)
   this._update(this._watcher.value)
 }
 

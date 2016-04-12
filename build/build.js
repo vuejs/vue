@@ -34,6 +34,8 @@ var plugins = [
 // CommonJS build.
 // this is used as the "main" field in package.json
 // and used by bundlers like Webpack and Browserify.
+// doesn't come with the compiler because it's meant to be
+// used with vue-loader which pre-compiles the template.
 rollup.rollup({
   entry: 'src/index.js',
   plugins: plugins
@@ -47,7 +49,7 @@ rollup.rollup({
 // Standalone Dev Build
 .then(function () {
   return rollup.rollup({
-    entry: 'src/index.js',
+    entry: 'src/with-compiler.js',
     plugins: [
       replace({
         'process.env.NODE_ENV': "'development'"
@@ -65,7 +67,7 @@ rollup.rollup({
 .then(function () {
   // Standalone Production Build
   return rollup.rollup({
-    entry: 'src/index.js',
+    entry: 'src/with-compiler.js',
     plugins: [
       replace({
         'process.env.NODE_ENV': "'production'"
