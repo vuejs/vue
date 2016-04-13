@@ -2,6 +2,7 @@ import config from '../config'
 import Dep from './dep'
 import { pushWatcher } from './batcher'
 import {
+  warn,
   extend,
   isArray,
   isObject,
@@ -51,7 +52,10 @@ export default function Watcher (vm, expOrFn, cb, options) {
   if (isFn) {
     this.getter = expOrFn
   } else {
-    this.getter = new Function(`with(this){return ${expOrFn}}`)
+    this.getter = function () {}
+    process.env.NODE_ENV !== 'production' && warn(
+      'Watcher only accpets function.'
+    )
   }
   this.value = this.lazy
     ? undefined

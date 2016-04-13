@@ -83,32 +83,11 @@ function makeComputedGetter (getter, owner) {
 }
 
 function initMethods (vm) {
-  var methods = vm.$options.methods
+  const methods = vm.$options.methods
   if (methods) {
-    for (var key in methods) {
+    for (let key in methods) {
       vm[key] = bind(methods[key], vm)
     }
-  }
-}
-
-function proxy (vm, key) {
-  if (!isReserved(key)) {
-    Object.defineProperty(vm, key, {
-      configurable: true,
-      enumerable: true,
-      get: function proxyGetter () {
-        return vm._data[key]
-      },
-      set: function proxySetter (val) {
-        vm._data[key] = val
-      }
-    })
-  }
-}
-
-function unproxy (vm, key) {
-  if (!isReserved(key)) {
-    delete vm[key]
   }
 }
 
@@ -123,6 +102,18 @@ export function stateMixin (Vue) {
       }
     }
   })
+
+  Vue.prototype.$watch = function (fn, cb, options) {
+    options = options || {}
+    options.user = true
+    const watcher = new Watcher(this, fn, cb, options)
+    if (options.immediate) {
+      cb.call(this, watcher.value)
+    }
+    return function unwatchFn () {
+      watcher.teardown()
+    }
+  }
 }
 
 function setData (vm, newData) {
@@ -153,4 +144,25 @@ function setData (vm, newData) {
   oldData.__ob__.removeVm(vm)
   observe(newData, vm)
   vm.$forceUpdate()
+}
+
+function proxy (vm, key) {
+  if (!isReserved(key)) {
+    Object.defineProperty(vm, key, {
+      configurable: true,
+      enumerable: true,
+      get: function proxyGetter () {
+        return vm._data[key]
+      },
+      set: function proxySetter (val) {
+        vm._data[key] = val
+      }
+    })
+  }
+}
+
+function unproxy (vm, key) {
+  if (!isReserved(key)) {
+    delete vm[key]
+  }
 }
