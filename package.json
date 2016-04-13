@@ -2,7 +2,13 @@
   "name": "vue-lite",
   "version": "2.0.0",
   "description": "Lighter-weight Vue on virtual dom",
-  "main": "index.js",
+  "main": "dist/vue.common.js",
+  "files": [
+    "dist/vue.common.js",
+    "dist/vue.js",
+    "dist/vue.min.js",
+    "src"
+  ],
   "scripts": {
     "dev": "webpack --watch",
     "test": "mocha",

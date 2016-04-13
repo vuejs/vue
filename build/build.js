@@ -46,6 +46,19 @@ rollup.rollup({
   ])
 })
 .then(zip('dist/vue.common.min.js'))
+// Compiler CommonJS build.
+// Used in Node loaders/transforms.
+.then(function () {
+  return rollup.rollup({
+    entry: 'src/compiler/index.js',
+    plugins: [babel()]
+  })
+  .then(function (bundle) {
+    write('dist/compiler/compiler.js', bundle.generate({
+      format: 'cjs'
+    }).code)
+  })
+})
 // Standalone Dev Build
 .then(function () {
   return rollup.rollup({
