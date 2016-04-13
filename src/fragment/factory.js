@@ -18,7 +18,7 @@ export default function FragmentFactory (vm, el) {
   this.vm = vm
   var template
   var isString = typeof el === 'string'
-  if (isString || isTemplate(el) && !hasDirectives(el)) {
+  if (isString || isTemplate(el) && !el.hasAttribute('v-if')) {
     template = parseTemplate(el, true)
   } else {
     template = document.createDocumentFragment()
@@ -39,15 +39,6 @@ export default function FragmentFactory (vm, el) {
     linker = compile(template, vm.$options, true)
   }
   this.linker = linker
-}
-
-function hasDirectives (el) {
-  if (!el.hasAttributes()) return false
-  var i = el.attributes.length
-  while (i--) {
-    if (el.attributes[i].name.substring(0, 2) === 'v-') return true
-  }
-  return false
 }
 
 /**
