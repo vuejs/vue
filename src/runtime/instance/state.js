@@ -112,7 +112,20 @@ function unproxy (vm, key) {
   }
 }
 
-export function setData (vm, newData) {
+export function stateMixin (Vue) {
+  Object.defineProperty(Vue.prototype, '$data', {
+    get () {
+      return this._data
+    },
+    set (newData) {
+      if (newData !== this._data) {
+        setData(this, newData)
+      }
+    }
+  })
+}
+
+function setData (vm, newData) {
   newData = newData || {}
   var oldData = vm._data
   vm._data = newData
