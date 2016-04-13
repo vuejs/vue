@@ -11,6 +11,7 @@ import {
 } from '../util/index'
 
 export function initState (vm) {
+  vm._watchers = []
   initData(vm)
   initComputed(vm)
   initMethods(vm)
