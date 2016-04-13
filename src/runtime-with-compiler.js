@@ -1,6 +1,6 @@
 import config from './runtime/config'
 import { compile } from './compiler/index'
-import { getOuterHTML, extend, query, warn } from './runtime/util/index'
+import { getOuterHTML, query, warn } from './runtime/util/index'
 import Vue from './runtime/index'
 
 const mount = Vue.prototype.$mount
