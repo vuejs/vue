@@ -30,11 +30,22 @@ rollup.rollup({
   plugins: [babel()]
 })
 .then(function (bundle) {
-  return write('dist/vue.common.js', bundle.generate({
+  var code = bundle.generate({
     format: 'cjs',
     banner: banner
-  }).code)
+  }).code
+  var minified = banner + '\n' + uglify.minify(code, {
+    fromString: true,
+    output: {
+      ascii_only: true
+    }
+  }).code
+  return Promise.all([
+    write('dist/vue.common.js', code),
+    write('dist/vue.common.min.js', minified)
+  ])
 })
+.then(zip('dist/vue.common.min.js'))
 // Standalone Dev Build
 .then(function () {
   return rollup.rollup({
@@ -84,7 +95,7 @@ rollup.rollup({
     }).code
     return write('dist/vue.min.js', minified)
   })
-  .then(zip)
+  .then(zip('dist/vue.min.js'))
 })
 .catch(logError)
 
@@ -98,16 +109,18 @@ function write (dest, code) {
   })
 }
 
-function zip () {
-  return new Promise(function (resolve, reject) {
-    fs.readFile('dist/vue.min.js', function (err, buf) {
-      if (err) return reject(err)
-      zlib.gzip(buf, function (err, buf) {
+function zip (file) {
+  return function () {
+    return new Promise(function (resolve, reject) {
+      fs.readFile(file, function (err, buf) {
         if (err) return reject(err)
-        write('dist/vue.min.js.gz', buf).then(resolve)
+        zlib.gzip(buf, function (err, buf) {
+          if (err) return reject(err)
+          write(file + '.gz', buf).then(resolve)
+        })
       })
     })
-  })
+  }
 }
 
 function getSize (code) {

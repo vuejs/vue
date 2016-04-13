@@ -157,7 +157,7 @@ function genText (text) {
   } else {
     const exp = parseText(text)
     if (exp) {
-      return 'String(' + exp + ')'
+      return `(exp==null?'':String(${exp}))`
     } else {
       return JSON.stringify(text)
     }

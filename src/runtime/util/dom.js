@@ -61,19 +61,6 @@ export function setClass (el, cls) {
 }
 
 /**
- * Check if an element is a template tag.
- * Note if the template appears inside an SVG its tagName
- * will be in lowercase.
- *
- * @param {Element} el
- */
-
-export function isTemplate (el) {
-  return el.tagName &&
-    el.tagName.toLowerCase() === 'template'
-}
-
-/**
  * Get outerHTML of elements, taking care
  * of SVG elements in IE as well.
  *

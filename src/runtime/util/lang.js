@@ -1,7 +1,3 @@
-export function isPrimitive (s) {
-  return typeof s === 'string' || typeof s === 'number'
-}
-
 /**
  * Set a property on an object. Adds the new property and
  * triggers change notification if the property doesn't
@@ -80,6 +76,17 @@ export function hasOwn (obj, key) {
 }
 
 /**
+ * Check if value is primitive
+ *
+ * @param {*} value
+ * @return {Boolean}
+ */
+
+export function isPrimitive (value) {
+  return typeof value === 'string' || typeof value === 'number'
+}
+
+/**
  * Check if an expression is a literal value.
  *
  * @param {String} exp
@@ -101,20 +108,6 @@ export function isLiteral (exp) {
 export function isReserved (str) {
   var c = (str + '').charCodeAt(0)
   return c === 0x24 || c === 0x5F
-}
-
-/**
- * Guard text output, make sure undefined outputs
- * empty string
- *
- * @param {*} value
- * @return {String}
- */
-
-export function _toString (value) {
-  return value == null
-    ? ''
-    : value.toString()
 }
 
 /**
@@ -318,90 +311,4 @@ export function def (obj, key, val, enumerable) {
     writable: true,
     configurable: true
   })
-}
-
-/**
- * Debounce a function so it only gets called after the
- * input stops arriving after the given wait period.
- *
- * @param {Function} func
- * @param {Number} wait
- * @return {Function} - the debounced function
- */
-
-export function debounce (func, wait) {
-  var timeout, args, context, timestamp, result
-  var later = function () {
-    var last = Date.now() - timestamp
-    if (last < wait && last >= 0) {
-      timeout = setTimeout(later, wait - last)
-    } else {
-      timeout = null
-      result = func.apply(context, args)
-      if (!timeout) context = args = null
-    }
-  }
-  return function () {
-    context = this
-    args = arguments
-    timestamp = Date.now()
-    if (!timeout) {
-      timeout = setTimeout(later, wait)
-    }
-    return result
-  }
-}
-
-/**
- * Manual indexOf because it's slightly faster than
- * native.
- *
- * @param {Array} arr
- * @param {*} obj
- */
-
-export function indexOf (arr, obj) {
-  var i = arr.length
-  while (i--) {
-    if (arr[i] === obj) return i
-  }
-  return -1
-}
-
-/**
- * Make a cancellable version of an async callback.
- *
- * @param {Function} fn
- * @return {Function}
- */
-
-export function cancellable (fn) {
-  var cb = function () {
-    if (!cb.cancelled) {
-      return fn.apply(this, arguments)
-    }
-  }
-  cb.cancel = function () {
-    cb.cancelled = true
-  }
-  return cb
-}
-
-/**
- * Check if two values are loosely equal - that is,
- * if they are plain objects, do they have the same shape?
- *
- * @param {*} a
- * @param {*} b
- * @return {Boolean}
- */
-
-export function looseEqual (a, b) {
-  /* eslint-disable eqeqeq */
-  return a == b || (
-    isObject(a) && isObject(b)
-      ? JSON.stringify(a) === JSON.stringify(b)
-      : false
-  )
-  /* eslint-enable eqeqeq */
 }

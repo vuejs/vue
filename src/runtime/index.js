@@ -1,14 +1,8 @@
 import Vue from './instance/index'
-import { nextTick } from './util/index'
+import { initGlobalAPI } from './global-api'
 
-Vue.options = {
-  directives: Object.create(null),
-  filters: Object.create(null),
-  components: Object.create(null),
-  transitions: Object.create(null)
-}
+initGlobalAPI(Vue)
 
-Vue.nextTick = nextTick
 Vue.version = '2.0.0'
 
 export default Vue
