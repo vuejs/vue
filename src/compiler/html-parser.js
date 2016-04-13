@@ -37,11 +37,10 @@ export function parse (html, preserveWhiteSpace) {
       currentParent = stack[stack.length - 1]
     },
     chars (text) {
-      text = decodeHTML(text)
       text = currentParent.tag === 'pre'
-        ? text
+        ? decodeHTML(text)
         : text.trim()
-          ? text
+          ? decodeHTML(text)
           : preserveWhiteSpace
             ? ' '
             : null
