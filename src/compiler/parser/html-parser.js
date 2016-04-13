@@ -5,17 +5,6 @@
  * http://erik.eae.net/simplehtmlparser/simplehtmlparser.js
  */
 
-function makeMap (values) {
-  values = values.split(/,/)
-  var map = {}
-  values.forEach(function (value) {
-    map[value] = 1
-  })
-  return function (value) {
-    return map[value.toLowerCase()] === 1
-  }
-}
-
 // Regular Expressions for parsing tags and attributes
 const singleAttrIdentifier = /([^\s"'<>\/=]+)/
 const singleAttrAssign = /=/
@@ -77,7 +66,7 @@ function joinSingleAttrAssigns (handler) {
   }).join('|')
 }
 
-export default function HTMLParser (html, handler) {
+export function parseHTML (html, handler) {
   const stack = []
   const attribute = attrForHandler(handler)
   let last, prevTag, nextTag, lastTag
@@ -298,5 +287,16 @@ export default function HTMLParser (html, handler) {
         handler.end(tagName, [])
       }
     }
+  }
+}
+
+function makeMap (values) {
+  values = values.split(/,/)
+  var map = {}
+  values.forEach(function (value) {
+    map[value] = 1
+  })
+  return function (value) {
+    return map[value.toLowerCase()] === 1
   }
 }

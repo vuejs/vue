@@ -1,4 +1,4 @@
-import { parse } from './template-parser'
+import { parse } from './parser/index'
 import { generate } from './codegen/index'
 
 const cache1 = Object.create(null)

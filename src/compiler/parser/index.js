@@ -1,18 +1,12 @@
 import { decodeHTML } from 'entities'
-import HTMLParser from './html-parser'
-import {
-  parseText,
-  parseModifiers,
-  removeModifiers,
-  makeAttrsMap,
-  getAndRemoveAttr,
-  addHandler
-} from './helpers'
+import { parseHTML } from './html-parser'
+import { parseText } from './text-parser'
+import { addHandler } from '../helpers'
 
 const dirRE = /^v-|^@|^:/
 const bindRE = /^:|^v-bind:/
 const onRE = /^@|^v-on:/
-
+const modifierRE = /\.[^\.]+/g
 const mustUsePropsRE = /^(value|selected|checked|muted)$/
 const forAliasRE = /([a-zA-Z_][\w]*)\s+(?:in|of)\s+(.*)/
 
@@ -49,7 +43,7 @@ export function parse (template, preserveWhitespace) {
   let inSvg = false
   let svgIndex = -1
   let warned = false
-  HTMLParser(template, {
+  parseHTML(template, {
     html5: true,
     start (tag, attrs, unary) {
       let element = {
@@ -200,7 +194,7 @@ function processAttributes (el) {
       // modifiers
       const modifiers = parseModifiers(name)
       if (modifiers) {
-        name = removeModifiers(name)
+        name = name.replace(modifierRE, '')
       }
       if (bindRE.test(name)) { // v-bind
         name = name.replace(bindRE, '')
@@ -228,4 +222,36 @@ function processAttributes (el) {
       })
     }
   }
+}
+
+function parseModifiers (name) {
+  const match = name.match(modifierRE)
+  if (match) {
+    const ret = {}
+    match.forEach(m => { ret[m.slice(1)] = true })
+    return ret
+  }
+}
+
+function makeAttrsMap (attrs) {
+  const map = {}
+  for (let i = 0, l = attrs.length; i < l; i++) {
+    map[attrs[i].name] = attrs[i].value
+  }
+  return map
+}
+
+function getAndRemoveAttr (el, attr) {
+  let val
+  if ((val = el.attrsMap[attr])) {
+    el.attrsMap[attr] = null
+    const list = el.attrsList
+    for (let i = 0, l = list.length; i < l; i++) {
+      if (list[i].name === attr) {
+        list.splice(i, 1)
+        break
+      }
+    }
+  }
+  return val
 }
