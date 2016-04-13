@@ -13,7 +13,7 @@ const onRE = /^@|^v-on:/
 const mustUsePropsRE = /^(value|selected|checked|muted)$/
 
 export function generate (ast) {
-  const code = genElement(ast)
+  const code = ast ? genElement(ast) : '__h__("div")'
   return new Function(`with (this) { return ${code}}`)
 }
 

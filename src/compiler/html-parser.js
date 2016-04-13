@@ -23,9 +23,9 @@ export function parse (html, preserveWhiteSpace) {
       }
       if (!root) {
         root = element
-      } else if (!stack.length) {
+      } else if (process.env.NODE_ENV !== 'production' && !stack.length) {
         console.error(
-          'Component template should contain ony one root element:\n\n' + html
+          'Component template should contain exactly one root element:\n\n' + html
         )
       }
       if (currentParent) {
@@ -41,7 +41,14 @@ export function parse (html, preserveWhiteSpace) {
       currentParent = stack[stack.length - 1]
     },
     chars (text) {
-      if (!currentParent) return
+      if (!currentParent) {
+        if (process.env.NODE_ENV !== 'production' && !root) {
+          console.error(
+            'Component template should contain exactly one root element:\n\n' + html
+          )
+        }
+        return
+      }
       text = currentParent.tag === 'pre'
         ? decodeHTML(text)
         : text.trim()
