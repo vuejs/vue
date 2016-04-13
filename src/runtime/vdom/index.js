@@ -15,8 +15,8 @@ import events from './modules/events'
 const patch = createPatchFunction([
   _class,
   props,
-  style,
   attrs,
+  style,
   events
 ])
 
