@@ -6,14 +6,14 @@
 
 import createPatchFunction from './patch'
 import h from './h'
-import _class from './modules/class'
+import classes from './modules/class'
 import style from './modules/style'
 import props from './modules/props'
 import attrs from './modules/attrs'
 import events from './modules/events'
 
 const patch = createPatchFunction([
-  _class,
+  classes,
   props,
   attrs,
   style,
