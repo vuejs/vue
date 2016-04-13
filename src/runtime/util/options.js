@@ -153,7 +153,7 @@ strats.activate = function (parentVal, childVal) {
 function mergeAssets (parentVal, childVal) {
   var res = Object.create(parentVal)
   return childVal
-    ? extend(res, guardArrayAssets(childVal))
+    ? extend(res, childVal)
     : res
 }
 
@@ -221,8 +221,7 @@ var defaultStrat = function (parentVal, childVal) {
 
 function guardComponents (options) {
   if (options.components) {
-    var components = options.components =
-      guardArrayAssets(options.components)
+    var components = options.components
     var ids = Object.keys(components)
     var def
     if (process.env.NODE_ENV !== 'production') {
@@ -281,37 +280,6 @@ function guardProps (options) {
       }
     }
   }
-}
-
-/**
- * Guard an Array-format assets option and converted it
- * into the key-value Object format.
- *
- * @param {Object|Array} assets
- * @return {Object}
- */
-
-function guardArrayAssets (assets) {
-  if (isArray(assets)) {
-    var res = {}
-    var i = assets.length
-    var asset
-    while (i--) {
-      asset = assets[i]
-      var id = typeof asset === 'function'
-        ? ((asset.options && asset.options.name) || asset.id)
-        : (asset.name || asset.id)
-      if (!id) {
-        process.env.NODE_ENV !== 'production' && warn(
-          'Array-syntax assets must provide a "name" or "id" field.'
-        )
-      } else {
-        res[id] = asset
-      }
-    }
-    return res
-  }
-  return assets
 }
 
 /**

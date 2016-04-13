@@ -3,11 +3,10 @@ import { query } from '../util/index'
 import { h, patch } from '../vdom/index'
 
 export function initRender (vm) {
-  const options = vm.$options
-  vm._el = query(options.el)
-  vm._el.innerHTML = ''
-  vm._watcher = new Watcher(vm, options.render, vm._update)
-  vm._update(vm._watcher.value)
+  const el = vm.$options.el
+  if (el) {
+    vm.$mount(el)
+  }
 }
 
 export function renderMixin (Vue) {
@@ -15,11 +14,18 @@ export function renderMixin (Vue) {
 
   Vue.prototype._update = function (vtree) {
     if (!this._tree) {
-      patch(this._el, vtree)
+      patch(this.$el, vtree)
     } else {
       patch(this._tree, vtree)
     }
     this._tree = vtree
+  }
+
+  Vue.prototype.$mount = function (el) {
+    this.$el = el ? query(el) : document.createElement('div')
+    this.$el.innerHTML = ''
+    this._watcher = new Watcher(this, this.$options.render, this._update)
+    this._update(this._watcher.value)
   }
 
   Vue.prototype.$forceUpdate = function () {
