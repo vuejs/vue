@@ -14,7 +14,7 @@ export function genModel (el, events, value, modifiers) {
       case 'radio':
         return genRadioModel(events, value, el)
       default:
-        return genDefaultModel(events, value)
+        return genDefaultModel(events, value, el.attrsMap.type, modifiers)
     }
   }
 }
@@ -29,8 +29,12 @@ function genRadioModel (events, value, el) {
   return `checked:(${value}==${getInputValue(el)})`
 }
 
-function genDefaultModel (events, value) {
-  addHandler(events, 'input', `${value}=$event.target.value`)
+function genDefaultModel (events, value, type, modifiers) {
+  const event = modifiers && modifiers.lazy ? 'change' : 'input'
+  const code = type === 'number' || (modifiers && modifiers.number)
+    ? `${value}=Number($event.target.value)`
+    : `${value}=$event.target.value`
+  addHandler(events, event, code)
   return `value:(${value})`
 }
 
