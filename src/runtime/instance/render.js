@@ -16,9 +16,9 @@ export function renderMixin (Vue) {
   Vue.prototype._update = function (vtree) {
     callHook(this, 'beforeUpdate')
     if (!this._tree) {
-      patch(this.$el, vtree)
+      this.$el = patch(this.$el, vtree)
     } else {
-      patch(this._tree, vtree)
+      this.$el = patch(this._tree, vtree)
     }
     this._tree = vtree
     callHook(this, 'updated')

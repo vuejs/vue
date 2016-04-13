@@ -4,6 +4,7 @@ import { isPrimitive } from '../util/index'
 
 const emptyNode = VNode('', {}, [], undefined, undefined)
 const hooks = ['create', 'update', 'remove', 'destroy', 'pre', 'post']
+const svgNS = 'http://www.w3.org/2000/svg'
 
 function isUndef (s) {
   return s === undefined
@@ -66,8 +67,8 @@ export default function createPatchFunction (modules, api) {
     const children = vnode.children
     const tag = vnode.sel
     if (isDef(tag)) {
-      elm = vnode.elm = isDef(data) && isDef(i = data.ns)
-        ? api.createElementNS(i, tag)
+      elm = vnode.elm = isDef(data) && data.svg
+        ? api.createElementNS(svgNS, tag)
         : api.createElement(tag)
       if (Array.isArray(children)) {
         for (i = 0; i < children.length; ++i) {
@@ -262,6 +263,6 @@ export default function createPatchFunction (modules, api) {
       insertedVnodeQueue[i].data.hook.insert(insertedVnodeQueue[i])
     }
     for (i = 0; i < cbs.post.length; ++i) cbs.post[i]()
-    return vnode
+    return vnode.elm
   }
 }

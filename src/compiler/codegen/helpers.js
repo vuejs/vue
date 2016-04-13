@@ -50,3 +50,39 @@ export function parseText (text) {
   }
   return tokens.join('+')
 }
+
+// this map covers SVG elements that can appear as template root nodes
+const svgMap = {
+  g: 1,
+  defs: 1,
+  symbol: 1,
+  use: 1,
+  image: 1,
+  text: 1,
+  circle: 1,
+  ellipse: 1,
+  line: 1,
+  path: 1,
+  polygon: 1,
+  polyline: 1,
+  rect: 1
+}
+
+export function checkSVG (el) {
+  if (el.tag === 'svg') {
+    // recursively mark all children as svg
+    markSVG(el)
+  }
+  return el.svg || svgMap[el.tag]
+}
+
+function markSVG (el) {
+  el.svg = true
+  if (el.children) {
+    for (var i = 0; i < el.children.length; i++) {
+      if (el.children[i].tag) {
+        markSVG(el.children[i])
+      }
+    }
+  }
+}

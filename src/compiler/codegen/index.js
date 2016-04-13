@@ -2,6 +2,7 @@ import { genHandlers, addHandler } from './on'
 import { genModel } from './model'
 import { genClass } from './class'
 import {
+  checkSVG,
   parseText,
   parseModifiers,
   removeModifiers,
@@ -67,6 +68,12 @@ function genData (el, key) {
   // key
   if (key) {
     data += `key:${key},`
+  }
+
+  // check SVG namespace.
+  // this has the side effect of marking all children if the tag itself is <svg>
+  if (checkSVG(el)) {
+    data += 'svg:true,'
   }
 
   // class
