@@ -1,5 +1,6 @@
 import config from './config'
 import * as util from './util/index'
+import h from './vdom/h'
 import {
   set,
   del,
@@ -14,6 +15,7 @@ import {
 } from './util/index'
 
 export function initGlobalAPI (Vue) {
+  Vue.h = h
   Vue.config = config
   Vue.util = util
   Vue.set = set
