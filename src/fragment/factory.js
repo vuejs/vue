@@ -18,7 +18,7 @@ export default function FragmentFactory (vm, el) {
   this.vm = vm
   var template
   var isString = typeof el === 'string'
-  if (isString || isTemplate(el)) {
+  if (isString || isTemplate(el) && !el.hasAttribute('v-if')) {
     template = parseTemplate(el, true)
   } else {
     template = document.createDocumentFragment()

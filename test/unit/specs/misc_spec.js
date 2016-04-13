@@ -537,4 +537,13 @@ describe('Misc', function () {
     })
     expect(vm.$el.querySelector('image-field').namespaceURI).not.toMatch(/svg/)
   })
+
+  // #2657
+  it('template v-for with v-if', function () {
+    var vm = new Vue({
+      el: document.createElement('div'),
+      template: '<div><template v-for="n in 6" v-if="n % 2">{{ n }}</template></div>'
+    })
+    expect(vm.$el.textContent).toBe('135')
+  })
 })
