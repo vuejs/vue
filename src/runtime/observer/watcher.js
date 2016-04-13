@@ -6,6 +6,7 @@ import {
   extend,
   isArray,
   isObject,
+  parsePath,
   _Set as Set
 } from '../util/index'
 
@@ -52,10 +53,14 @@ export default function Watcher (vm, expOrFn, cb, options) {
   if (isFn) {
     this.getter = expOrFn
   } else {
-    this.getter = function () {}
-    process.env.NODE_ENV !== 'production' && warn(
-      'Watcher only accpets function.'
-    )
+    this.getter = parsePath(expOrFn)
+    if (!this.getter) {
+      this.getter = function () {}
+      process.env.NODE_ENV !== 'production' && warn(
+        'Watcher only accepts simple dot-delimited paths. ' +
+        'For full control, use a function instead.'
+      )
+    }
   }
   this.value = this.lazy
     ? undefined

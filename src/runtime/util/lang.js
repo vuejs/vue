@@ -312,3 +312,23 @@ export function def (obj, key, val, enumerable) {
     configurable: true
   })
 }
+
+/**
+ * Parse simple path.
+ */
+
+const bailRE = /[^\w\.]/
+export function parsePath (path) {
+  if (bailRE.test(path)) {
+    return
+  } else {
+    path = path.split('.')
+    return function (obj) {
+      for (let i = 0; i < path.length; i++) {
+        if (!obj) return
+        obj = obj[path[i]]
+      }
+      return obj
+    }
+  }
+}

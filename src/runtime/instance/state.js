@@ -15,6 +15,7 @@ export function initState (vm) {
   initData(vm)
   initComputed(vm)
   initMethods(vm)
+  initWatch(vm)
 }
 
 function initData (vm) {
@@ -88,6 +89,21 @@ function initMethods (vm) {
   if (methods) {
     for (let key in methods) {
       vm[key] = bind(methods[key], vm)
+    }
+  }
+}
+
+function initWatch (vm) {
+  const watch = vm.$options.watch
+  if (watch) {
+    for (let key in watch) {
+      let handler = watch[key]
+      let options
+      if (typeof handler === 'object') {
+        handler = handler.handler
+        options = handler
+      }
+      vm.$watch(key, handler, options)
     }
   }
 }
