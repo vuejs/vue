@@ -1,53 +1,71 @@
 import { addHandler } from '../helpers'
 
 export function genModel (el, dir) {
-  const events = (el.events || (el.events = {}))
+  if (!el.events) el.events = {}
+  if (!el.props) el.props = []
   const value = dir.value
   const modifiers = dir.modifiers
   if (el.tag === 'select') {
     if (el.attrsMap.multiple != null) {
-      return genMultiSelect(events, value, el)
+      genMultiSelect(el, value)
     } else {
-      return genSelect(events, value)
+      genSelect(el, value)
     }
   } else {
     switch (el.attrsMap.type) {
       case 'checkbox':
-        return genCheckboxModel(events, value)
+        genCheckboxModel(el, value)
+        break
       case 'radio':
-        return genRadioModel(events, value, el)
+        genRadioModel(el, value)
+        break
       default:
-        return genDefaultModel(events, value, el.attrsMap.type, modifiers)
+        genDefaultModel(el, value, modifiers)
+        break
     }
   }
 }
 
-function genCheckboxModel (events, value) {
-  addHandler(events, 'change', `${value}=$event.target.checked`)
-  return `checked:!!(${value})`
+function genCheckboxModel (el, value) {
+  addHandler(el.events, 'change', `${value}=$event.target.checked`)
+  el.props.push({
+    name: 'checked',
+    value: `!!(${value})`
+  })
 }
 
-function genRadioModel (events, value, el) {
-  addHandler(events, 'change', `${value}=$event.target.value`)
-  return `checked:(${value}==${getInputValue(el)})`
+function genRadioModel (el, value) {
+  addHandler(el.events, 'change', `${value}=$event.target.value`)
+  el.props.push({
+    name: 'checked',
+    value: `(${value}==${getInputValue(el)})`
+  })
 }
 
-function genDefaultModel (events, value, type, modifiers) {
+function genDefaultModel (el, value, modifiers) {
+  const type = el.attrsMap.type
   const event = modifiers && modifiers.lazy ? 'change' : 'input'
   const code = type === 'number' || (modifiers && modifiers.number)
     ? `${value}=Number($event.target.value)`
     : `${value}=$event.target.value`
-  addHandler(events, event, code)
-  return `value:(${value})`
+  addHandler(el.events, event, code)
+  el.props.push({
+    name: 'value',
+    value: `(${value})`
+  })
 }
 
-function genSelect (events, value) {
-  addHandler(events, 'change', `${value}=$event.target.value`)
-  return `value:(${value})`
+function genSelect (el, value) {
+  addHandler(el.events, 'change', `${value}=$event.target.value`)
+  el.props.push({
+    name: 'value',
+    value: `(${value})`
+  })
 }
 
-function genMultiSelect (events, value, el) {
-  addHandler(events, 'change', `${value}=Array.prototype.filter
+function genMultiSelect (el, value) {
+  addHandler(el.events, 'change',
+    `${value}=Array.prototype.filter
     .call($event.target.options,function(o){return o.selected})
     .map(function(o){return o.value})`)
   // patch child options
@@ -60,7 +78,6 @@ function genMultiSelect (events, value, el) {
       })
     }
   }
-  return ''
 }
 
 function getInputValue (el) {

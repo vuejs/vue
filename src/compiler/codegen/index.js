@@ -77,7 +77,6 @@ function genData (el) {
   if (el.events) {
     data += genHandlers(el.events)
   }
-  console.log(data)
   return data.replace(/,$/, '') + '}'
 }
 

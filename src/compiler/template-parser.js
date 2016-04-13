@@ -48,6 +48,7 @@ export function parse (template, preserveWhitespace) {
   let stack = []
   let inSvg = false
   let svgIndex = -1
+  let warned = false
   HTMLParser(template, {
     html5: true,
     start (tag, attrs, unary) {
@@ -80,7 +81,8 @@ export function parse (template, preserveWhitespace) {
       // tree management
       if (!root) {
         root = element
-      } else if (process.env.NODE_ENV !== 'production' && !stack.length) {
+      } else if (process.env.NODE_ENV !== 'production' && !stack.length && !warned) {
+        warned = true
         console.error(
           'Component template should contain exactly one root element:\n\n' + template
         )
@@ -103,7 +105,8 @@ export function parse (template, preserveWhitespace) {
     },
     chars (text) {
       if (!currentParent) {
-        if (process.env.NODE_ENV !== 'production' && !root) {
+        if (process.env.NODE_ENV !== 'production' && !warned) {
+          warned = true
           console.error(
             'Component template should contain exactly one root element:\n\n' + template
           )
@@ -194,7 +197,6 @@ function processAttributes (el) {
     let name = list[i].name
     let value = list[i].value
     if (dirRE.test(name)) {
-      name = name.replace(dirRE, '')
       // modifiers
       const modifiers = parseModifiers(name)
       if (modifiers) {
@@ -211,7 +213,8 @@ function processAttributes (el) {
         name = name.replace(onRE, '')
         addHandler((el.events || (el.events = {})), name, value, modifiers)
       } else { // normal directives
-        (el.directives || (el.directives = [])).push({
+        name = name.replace(dirRE, '')
+        ;(el.directives || (el.directives = [])).push({
           name,
           value,
           modifiers
