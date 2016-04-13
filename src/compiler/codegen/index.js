@@ -111,7 +111,7 @@ function genData (el, key) {
         addHandler(events, name, value, modifiers)
       } else if (name === 'v-model') {
         hasProps = hasEvents = true
-        props += genModel(el, events, value) + ','
+        props += genModel(el, events, value, modifiers) + ','
       } else {
         // TODO: normal directives
       }

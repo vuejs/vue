@@ -1,6 +1,6 @@
 import { addHandler } from './events'
 
-export function genModel (el, events, value) {
+export function genModel (el, events, value, modifiers) {
   if (el.tag === 'select') {
     if (el.attrsMap.multiple != null) {
       return genMultiSelect(events, value, el)
