@@ -37,7 +37,7 @@ export function addHandler (events, name, value, modifiers) {
   }
 }
 
-export function genEvents (events) {
+export function genHandlers (events) {
   let res = 'on:{'
   for (let name in events) {
     res += `"${name}":${genHandler(events[name])},`

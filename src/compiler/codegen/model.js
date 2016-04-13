@@ -1,4 +1,4 @@
-import { addHandler } from './events'
+import { addHandler } from './on'
 
 export function genModel (el, events, value, modifiers) {
   if (el.tag === 'select') {

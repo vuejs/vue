@@ -1,5 +1,6 @@
-import { genEvents, addHandler } from './events'
+import { genHandlers, addHandler } from './on'
 import { genModel } from './model'
+import { genClass } from './class'
 import {
   parseText,
   parseModifiers,
@@ -69,16 +70,12 @@ function genData (el, key) {
   }
 
   // class
-  const classBinding = getAndRemoveAttr(el, ':class') || getAndRemoveAttr(el, 'v-bind:class')
-  if (classBinding) {
-    data += `class: ${classBinding},`
-  }
-  const staticClass = getAndRemoveAttr(el, 'class')
-  if (staticClass) {
-    data += `staticClass: "${staticClass}",`
-  }
+  // do it before other attributes becaues it removes static class
+  // and class bindings from the element
+  data += genClass(el)
 
   // parent elements my need to add props to children
+  // e.g. select
   if (el.props) {
     hasProps = true
     props += el.props + ','
@@ -127,7 +124,7 @@ function genData (el, key) {
     data += props.slice(0, -1) + '},'
   }
   if (hasEvents) {
-    data += genEvents(events)
+    data += genHandlers(events)
   }
   return data.replace(/,$/, '') + '}'
 }
