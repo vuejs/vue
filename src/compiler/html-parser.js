@@ -23,6 +23,10 @@ export function parse (html, preserveWhiteSpace) {
       }
       if (!root) {
         root = element
+      } else if (!stack.length) {
+        console.error(
+          'Component template should contain ony one root element:\n\n' + html
+        )
       }
       if (currentParent) {
         currentParent.children.push(element)
@@ -37,6 +41,7 @@ export function parse (html, preserveWhiteSpace) {
       currentParent = stack[stack.length - 1]
     },
     chars (text) {
+      if (!currentParent) return
       text = currentParent.tag === 'pre'
         ? decodeHTML(text)
         : text.trim()
