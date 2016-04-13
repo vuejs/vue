@@ -12,3 +12,5 @@ export default function Vue (options) {
 }
 
 extend(Vue, Instance)
+
+Vue.compile = compile
