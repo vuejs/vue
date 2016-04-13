@@ -1,6 +1,9 @@
-import { addHandler } from './on'
+import { addHandler } from '../helpers'
 
-export function genModel (el, events, value, modifiers) {
+export function genModel (el, dir) {
+  const events = (el.events || (el.events = {}))
+  const value = dir.value
+  const modifiers = dir.modifiers
   if (el.tag === 'select') {
     if (el.attrsMap.multiple != null) {
       return genMultiSelect(events, value, el)
@@ -51,7 +54,10 @@ function genMultiSelect (events, value, el) {
   for (let i = 0; i < el.children.length; i++) {
     let c = el.children[i]
     if (c.tag === 'option') {
-      c.props = `selected:(${value}).indexOf(${getInputValue(c)})>-1`
+      (c.props || (c.props = [])).push({
+        name: 'selected',
+        value: `(${value}).indexOf(${getInputValue(c)})>-1`
+      })
     }
   }
   return ''

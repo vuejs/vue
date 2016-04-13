@@ -31,7 +31,10 @@ function updateClass (oldVnode, vnode) {
     let cls = staticClass
       ? staticClass + (dynamicClass ? ' ' + dynamicClass : '')
       : dynamicClass
-    setClass(vnode.elm, cls)
+    if (cls !== oldVnode.class) {
+      setClass(vnode.elm, cls)
+    }
+    vnode.class = cls
   }
 }
 

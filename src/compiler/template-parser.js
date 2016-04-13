@@ -1,11 +1,20 @@
 import { decodeHTML } from 'entities'
 import HTMLParser from './html-parser'
+import {
+  parseText,
+  parseModifiers,
+  removeModifiers,
+  makeAttrsMap,
+  getAndRemoveAttr,
+  addHandler
+} from './helpers'
 
 const dirRE = /^v-|^@|^:/
 const bindRE = /^:|^v-bind:/
 const onRE = /^@|^v-on:/
-const modifierRE = /\.[^\.]+/g
+
 const mustUsePropsRE = /^(value|selected|checked|muted)$/
+const forAliasRE = /([a-zA-Z_][\w]*)\s+(?:in|of)\s+(.*)/
 
 // this map covers SVG elements that can appear as template root nodes
 const svgMap = {
@@ -44,7 +53,8 @@ export function parse (template, preserveWhitespace) {
     start (tag, attrs, unary) {
       let element = {
         tag,
-        attrs,
+        plain: !attrs.length,
+        attrsList: attrs,
         attrsMap: makeAttrsMap(attrs),
         parent: currentParent,
         children: []
@@ -59,7 +69,10 @@ export function parse (template, preserveWhitespace) {
         svgIndex = stack.length
       }
 
-      processControlFlow(element)
+      processFor(element)
+      processIf(element)
+      processRender(element)
+      processSlot(element)
       processClassBinding(element)
       processStyleBinding(element)
       processAttributes(element)
@@ -105,28 +118,65 @@ export function parse (template, preserveWhitespace) {
             ? ' '
             : null
       if (text) {
-        currentParent.children.push(text)
+        if (text !== ' ') {
+          let expression = parseText(text)
+          if (expression) {
+            currentParent.children.push({
+              expression
+            })
+          } else {
+            currentParent.children.push({ text })
+          }
+        } else {
+          currentParent.children.push({ text })
+        }
       }
     }
   })
   return root
 }
 
-function processControlFlow (el) {
+function processFor (el) {
   let exp
   if ((exp = getAndRemoveAttr(el, 'v-for'))) {
-    el['for'] = exp
+    const inMatch = exp.match(forAliasRE)
+    if (process.env.NODE_ENV !== 'production' && !inMatch) {
+      console.error(`Invalid v-for expression: ${exp}`)
+    }
+    el.alias = inMatch[1].trim()
+    el['for'] = inMatch[2].trim()
     if ((exp = getAndRemoveAttr(el, 'track-by'))) {
-      el.key = exp
+      el.key = exp === '$index'
+        ? exp
+        : el.alias + '["' + exp + '"]'
     }
   }
-  if ((exp = getAndRemoveAttr(el, 'v-if'))) {
+}
+
+function processIf (el) {
+  let exp = getAndRemoveAttr(el, 'v-if')
+  if (exp) {
     el['if'] = exp
   }
 }
 
+function processRender (el) {
+  if (el.tag === 'render') {
+    el.render = true
+    el.method = el.attrsMap.method
+    el.args = el.attrsMap.args
+    if (process.env.NODE_ENV !== 'production' && !el.method) {
+      console.error('method attribute is required on <render>.')
+    }
+  }
+}
+
+function processSlot () {
+  // todo
+}
+
 function processClassBinding (el) {
-  el['class'] = getAndRemoveAttr(el, 'class')
+  el.staticClass = getAndRemoveAttr(el, 'class')
   el.classBinding =
     getAndRemoveAttr(el, ':class') ||
     getAndRemoveAttr(el, 'v-bind:class')
@@ -139,22 +189,23 @@ function processStyleBinding (el) {
 }
 
 function processAttributes (el) {
-  for (let i = 0; i < el.attrs.length; i++) {
-    let name = el.attrs[i].name
-    let value = el.attrs[i].value
+  const list = el.attrsList
+  for (let i = 0; i < list.length; i++) {
+    let name = list[i].name
+    let value = list[i].value
     if (dirRE.test(name)) {
       name = name.replace(dirRE, '')
       // modifiers
       const modifiers = parseModifiers(name)
       if (modifiers) {
-        name = name.replace(modifierRE, '')
+        name = removeModifiers(name)
       }
       if (bindRE.test(name)) { // v-bind
         name = name.replace(bindRE, '')
         if (mustUsePropsRE.test(name)) {
           (el.props || (el.props = [])).push({ name, value })
         } else {
-          (el.attrBindings || (el.attrBindings = [])).push({ name, value })
+          (el.attrs || (el.attrs = [])).push({ name, value })
         }
       } else if (onRE.test(name)) { // v-on
         name = name.replace(onRE, '')
@@ -166,54 +217,12 @@ function processAttributes (el) {
           modifiers
         })
       }
+    } else {
+      // literal attribute
+      (el.attrs || (el.attrs = [])).push({
+        name,
+        value: JSON.stringify(value)
+      })
     }
-  }
-}
-
-function parseModifiers (name) {
-  const match = name.match(modifierRE)
-  if (match) {
-    const ret = {}
-    match.forEach(m => { ret[m.slice(1)] = true })
-    return ret
-  }
-}
-
-function makeAttrsMap (attrs) {
-  const map = {}
-  for (let i = 0, l = attrs.length; i < l; i++) {
-    map[attrs[i].name] = attrs[i].value
-  }
-  return map
-}
-
-function getAndRemoveAttr (el, attr) {
-  let val
-  if ((val = el.attrsMap[attr])) {
-    el.attrsMap[attr] = null
-    for (let i = 0, l = el.attrs.length; i < l; i++) {
-      if (el.attrs[i].name === attr) {
-        el.attrs.splice(i, 1)
-        break
-      }
-    }
-  }
-  return val
-}
-
-function addHandler (events, name, value, modifiers) {
-  // check capture modifier
-  if (modifiers && modifiers.capture) {
-    delete modifiers.capture
-    name = '!' + name // mark the event as captured
-  }
-  const newHandler = { value, modifiers }
-  const handlers = events[name]
-  if (Array.isArray(handlers)) {
-    handlers.push(newHandler)
-  } else if (handlers) {
-    events[name] = [handlers, newHandler]
-  } else {
-    events[name] = newHandler
   }
 }
