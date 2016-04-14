@@ -235,6 +235,9 @@ function parseModifiers (name) {
 function makeAttrsMap (attrs) {
   const map = {}
   for (let i = 0, l = attrs.length; i < l; i++) {
+    if (process.env.NODE_ENV !== 'production' && map[attrs[i].name]) {
+      console.error('duplicate attribute: ' + attrs[i].name)
+    }
     map[attrs[i].name] = attrs[i].value
   }
   return map

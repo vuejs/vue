@@ -99,6 +99,7 @@ export function renderMixin (Vue) {
       mergeParentData(this, data, parentData)
     }
     renderState.activeInstance = prev
+    console.log(vnode)
     return vnode
   }
 

@@ -1,7 +1,10 @@
 import Watcher from '../observer/watcher'
 import Dep from '../observer/dep'
-import { observe, defineReactive } from '../observer/index'
-
+import {
+  observe,
+  defineReactive,
+  withoutConversion
+} from '../observer/index'
 import {
   warn,
   hasOwn,
@@ -24,9 +27,11 @@ function initProps (vm) {
   const attrs = (data && data.attrs) || {}
   const props = vm.$options.props
   if (props) {
-    for (let key in props) {
-      defineReactive(vm, key, attrs[key])
-    }
+    withoutConversion(() => {
+      for (let key in props) {
+        defineReactive(vm, key, attrs[key])
+      }
+    })
   }
 }
 
