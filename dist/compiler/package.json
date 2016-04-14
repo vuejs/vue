@@ -4,5 +4,8 @@
   "description": "Compile Vue templates into virtual dom render functions",
   "main": "compiler.js",
   "author": "Evan You",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "entities": "^1.1.1"
+  }
 }
