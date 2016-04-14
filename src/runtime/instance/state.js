@@ -29,7 +29,7 @@ function initProps (vm) {
   if (props) {
     withoutConversion(() => {
       for (let key in props) {
-        defineReactive(vm, key, attrs[key])
+        defineReactive(vm, key, attrs[key], true /* immutable */)
       }
     })
   }

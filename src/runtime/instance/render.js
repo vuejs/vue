@@ -77,14 +77,16 @@ export function renderMixin (Vue) {
       this.$forceUpdate()
       return
     }
-    // set props. because props are reactive,
-    // if any of them has changed it will trigger an update.
+    // set props if they have changed.
     const attrs = data && data.attrs
     if (attrs) {
       for (let key in this.$options.props) {
-        this[key] = hasOwn(attrs, key)
+        let newVal = hasOwn(attrs, key)
           ? attrs[key]
           : attrs[hyphenate(key)]
+        if (this[key] !== newVal) {
+          this[key] = newVal
+        }
       }
     }
   }
@@ -99,7 +101,6 @@ export function renderMixin (Vue) {
       mergeParentData(this, data, parentData)
     }
     renderState.activeInstance = prev
-    console.log(vnode)
     return vnode
   }
 

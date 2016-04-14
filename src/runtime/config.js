@@ -4,7 +4,7 @@ export default {
    * Preserve whitespaces between elements.
    */
 
-  preserveWhiteSpace: true,
+  preserveWhitespace: true,
 
   /**
    * Whether to suppress warnings.
