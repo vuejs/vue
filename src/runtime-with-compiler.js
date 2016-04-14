@@ -23,7 +23,7 @@ Vue.prototype.$mount = function (el) {
     } else {
       template = getOuterHTML(query(el))
     }
-    options.render = compile(template, config.preserveWhiteSpace)
+    options.render = new Function(compile(template, config.preserveWhiteSpace))
   }
   mount.call(this, el)
 }

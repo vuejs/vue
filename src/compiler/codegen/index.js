@@ -3,7 +3,7 @@ import { genDirectives } from './directives/index'
 
 export function generate (ast) {
   const code = ast ? genElement(ast) : '__h__("div")'
-  return new Function(`with (this) { return ${code}}`)
+  return `with (this) { return ${code}}`
 }
 
 function genElement (el) {
