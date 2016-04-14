@@ -43,5 +43,5 @@ function prepatch (oldVnode, vnode) {
 }
 
 function destroy (vnode) {
-  vnode.data.childComponent.$destroy()
+  vnode.data.child.$destroy()
 }

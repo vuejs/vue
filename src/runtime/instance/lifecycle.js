@@ -19,7 +19,7 @@ export function lifecycleMixin (Vue) {
     if (this._isDestroyed) {
       return
     }
-    this._callHook('beforeDestroy')
+    callHook(this, 'beforeDestroy')
     this._isBeingDestroyed = true
     // teardown watchers
     let i = this._watchers.length
@@ -33,7 +33,7 @@ export function lifecycleMixin (Vue) {
     }
     // call the last hook...
     this._isDestroyed = true
-    this._callHook('destroyed')
+    callHook(this, 'destroyed')
     // turn off all instance listeners.
     this.$off()
   }
