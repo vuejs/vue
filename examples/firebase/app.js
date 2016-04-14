@@ -1,46 +1,24 @@
-var baseURL = 'https://vue-demo.firebaseIO.com/'
 var emailRE = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
 
-/**
- * Setup firebase sync
- */
+// Firebase ref
+var usersRef = new Firebase('https://vue-demo.firebaseIO.com/users')
 
-var Users = new Firebase(baseURL + 'users')
-
-Users.on('child_added', function (snapshot) {
-  var item = snapshot.val()
-  item.id = snapshot.key()
-  app.users.push(item)
-})
-
-Users.on('child_removed', function (snapshot) {
-  var id = snapshot.key()
-  app.users.some(function (user) {
-    if (user.id === id) {
-      app.users.$remove(user)
-      return true
-    }
-  })
-})
-
-/**
- * Create Vue app
- */
-
+// create Vue app
 var app = new Vue({
-
   // element to mount to
   el: '#app',
-
   // initial data
   data: {
-    users: [],
     newUser: {
       name: '',
       email: ''
     }
   },
-
+  // firebase binding
+  // https://github.com/vuejs/vuefire
+  firebase: {
+    users: usersRef
+  },
   // computed property for form validation state
   computed: {
     validation: function () {
@@ -56,18 +34,17 @@ var app = new Vue({
       })
     }
   },
-
   // methods
   methods: {
     addUser: function () {
       if (this.isValid) {
-        Users.push(this.newUser)
+        usersRef.push(this.newUser)
         this.newUser.name = ''
         this.newUser.email = ''
       }
     },
     removeUser: function (user) {
-      new Firebase(baseURL + 'users/' + user.id).remove()
+      usersRef.child(user['.key']).remove()
     }
   }
 })
