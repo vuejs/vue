@@ -134,7 +134,7 @@ function processFor (el) {
       console.error(`Invalid v-for expression: ${exp}`)
     }
     el.alias = inMatch[1].trim()
-    el['for'] = inMatch[2].trim()
+    el.for = inMatch[2].trim()
     if ((exp = getAndRemoveAttr(el, 'track-by'))) {
       el.key = exp === '$index'
         ? exp
@@ -146,7 +146,7 @@ function processFor (el) {
 function processIf (el) {
   let exp = getAndRemoveAttr(el, 'v-if')
   if (exp) {
-    el['if'] = exp
+    el.if = exp
   }
 }
 

@@ -1,6 +1,6 @@
 import config from './config'
 import * as util from './util/index'
-import h from './vdom/h'
+import { createElement } from './vdom/index'
 import {
   set,
   del,
@@ -15,7 +15,7 @@ import {
 } from './util/index'
 
 export function initGlobalAPI (Vue) {
-  Vue.h = h
+  Vue.h = Vue.createElement = createElement
   Vue.config = config
   Vue.util = util
   Vue.set = set
@@ -98,12 +98,9 @@ export function initGlobalAPI (Vue) {
    */
 
   function createClass (name) {
-    /* eslint-disable no-new-func */
     return new Function(
-      'return function ' + classify(name) +
-      ' (options) { this._init(options) }'
+      `return function ${classify(name)} (options) { this._init(options) }`
     )()
-    /* eslint-enable no-new-func */
   }
 
   /**

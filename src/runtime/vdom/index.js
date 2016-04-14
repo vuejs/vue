@@ -5,7 +5,7 @@
  */
 
 import createPatchFunction from './patch'
-import h from './h'
+import createElement from './create-element'
 import classes from './modules/class'
 import style from './modules/style'
 import props from './modules/props'
@@ -22,4 +22,4 @@ const patch = createPatchFunction([
   directives
 ])
 
-export { patch, h }
+export { patch, createElement }

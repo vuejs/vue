@@ -7,6 +7,10 @@ import { nextTick, mergeOptions } from '../util/index'
 let uid = 0
 
 export default function Vue (options) {
+  this._init(options)
+}
+
+Vue.prototype._init = function (options) {
   // a uid
   this._uid = uid++
   // a flag to avoid this being observed
@@ -32,11 +36,11 @@ export default function Vue (options) {
   initRender(this)
 }
 
+Vue.prototype.$nextTick = function (fn) {
+  nextTick(fn, this)
+}
+
 stateMixin(Vue)
 eventsMixin(Vue)
 lifecycleMixin(Vue)
 renderMixin(Vue)
-
-Vue.prototype.$nextTick = function (fn) {
-  nextTick(fn, this)
-}

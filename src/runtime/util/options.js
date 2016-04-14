@@ -257,29 +257,30 @@ function guardComponents (options) {
  */
 
 function guardProps (options) {
-  var props = options.props
-  var i, val
+  const res = {}
+  const props = options.props
+  let i, val
   if (isArray(props)) {
-    options.props = {}
     i = props.length
     while (i--) {
       val = props[i]
       if (typeof val === 'string') {
-        options.props[val] = null
+        res[camelize(val)] = null
       } else if (val.name) {
-        options.props[val.name] = val
+        res[camelize(val.name)] = val
       }
     }
   } else if (isPlainObject(props)) {
-    var keys = Object.keys(props)
+    const keys = Object.keys(props)
     i = keys.length
     while (i--) {
       val = props[keys[i]]
-      if (typeof val === 'function') {
-        props[keys[i]] = { type: val }
-      }
+      res[camelize(keys[i])] = typeof val === 'function'
+        ? { type: val }
+        : val
     }
   }
+  options.props = res
 }
 
 function guardDirectives (options) {

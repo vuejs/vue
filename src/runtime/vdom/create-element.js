@@ -1,7 +1,8 @@
 import VNode from './vnode'
+import Component from './component'
 import { isPrimitive, isArray } from '../util/index'
 
-export default function h (tag, data, children) {
+export default function createElement (tag, data, children) {
   if (isArray(children)) {
     let _children = children
     children = []
@@ -22,5 +23,9 @@ export default function h (tag, data, children) {
       }
     }
   }
-  return VNode(tag, data, children, undefined, undefined)
+  if (typeof tag === 'string') {
+    return VNode(tag, data, children)
+  } else {
+    return Component(tag, data, children)
+  }
 }

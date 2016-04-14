@@ -12,10 +12,15 @@ import {
 
 export function initState (vm) {
   vm._watchers = []
+  initProps(vm)
   initData(vm)
   initComputed(vm)
   initMethods(vm)
   initWatch(vm)
+}
+
+function initProps (vm) {
+  // TODO
 }
 
 function initData (vm) {

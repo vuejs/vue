@@ -2,7 +2,7 @@ import VNode from './vnode'
 import * as dom from './dom'
 import { isPrimitive } from '../util/index'
 
-const emptyNode = VNode('', {}, [], undefined, undefined)
+const emptyNode = VNode('', {}, [])
 const hooks = ['create', 'update', 'remove', 'destroy', 'pre', 'post']
 const svgNS = 'http://www.w3.org/2000/svg'
 
@@ -241,21 +241,25 @@ export default function createPatchFunction (modules, api) {
     var insertedVnodeQueue = []
     for (i = 0; i < cbs.pre.length; ++i) cbs.pre[i]()
 
-    if (isUndef(oldVnode.sel)) {
-      oldVnode = emptyNodeAt(oldVnode)
-    }
-
-    if (sameVnode(oldVnode, vnode)) {
-      patchVnode(oldVnode, vnode, insertedVnodeQueue)
-    } else {
-      elm = oldVnode.elm
-      parent = api.parentNode(elm)
-
+    if (!oldVnode) {
       createElm(vnode, insertedVnodeQueue)
+    } else {
+      if (isUndef(oldVnode.sel)) {
+        oldVnode = emptyNodeAt(oldVnode)
+      }
 
-      if (parent !== null) {
-        api.insertBefore(parent, vnode.elm, api.nextSibling(elm))
-        removeVnodes(parent, [oldVnode], 0, 0)
+      if (sameVnode(oldVnode, vnode)) {
+        patchVnode(oldVnode, vnode, insertedVnodeQueue)
+      } else {
+        elm = oldVnode.elm
+        parent = api.parentNode(elm)
+
+        createElm(vnode, insertedVnodeQueue)
+
+        if (parent !== null) {
+          api.insertBefore(parent, vnode.elm, api.nextSibling(elm))
+          removeVnodes(parent, [oldVnode], 0, 0)
+        }
       }
     }
 

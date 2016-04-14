@@ -7,9 +7,9 @@ export function generate (ast) {
 }
 
 function genElement (el) {
-  if (el['for']) {
+  if (el.for) {
     return genFor(el)
-  } else if (el['if']) {
+  } else if (el.if) {
     return genIf(el)
   } else if (el.tag === 'template') {
     return genChildren(el)
@@ -21,15 +21,15 @@ function genElement (el) {
 }
 
 function genIf (el) {
-  const exp = el['if']
-  el['if'] = false // avoid recursion
+  const exp = el.if
+  el.if = false // avoid recursion
   return `(${exp}) ? ${genElement(el)} : null`
 }
 
 function genFor (el) {
-  const exp = el['for']
+  const exp = el.for
   const alias = el.alias
-  el['for'] = false // avoid recursion
+  el.for = false // avoid recursion
   return `(${exp}) && (${exp}).map(function (${alias}, $index) {return ${genElement(el)}})`
 }
 
