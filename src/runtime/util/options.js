@@ -1,5 +1,7 @@
 import Vue from '../instance/index'
 import config from '../config'
+import { warn } from './debug'
+import { isReservedTag } from './dom'
 import {
   extend,
   set,
@@ -10,10 +12,6 @@ import {
   camelize,
   hyphenate
 } from './lang'
-import { warn } from './debug'
-
-export const commonTagRE = /^(div|p|span|img|a|b|i|br|ul|ol|li|h1|h2|h3|h4|h5|h6|code|pre|table|th|td|tr|form|label|input|select|option|nav|article|section|header|footer)$/i
-export const reservedTagRE = /^(slot|partial|component)$/i
 
 /**
  * Option overwriting strategies are functions that handle
@@ -230,7 +228,7 @@ function guardComponents (options) {
     }
     for (var i = 0, l = ids.length; i < l; i++) {
       var key = ids[i]
-      if (commonTagRE.test(key) || reservedTagRE.test(key)) {
+      if (isReservedTag(key)) {
         process.env.NODE_ENV !== 'production' && warn(
           'Do not use built-in or reserved HTML elements as component ' +
           'id: ' + key

@@ -7,11 +7,10 @@ import {
   nextTick,
   warn,
   mergeOptions,
-  commonTagRE,
-  reservedTagRE,
   classify,
   toArray,
-  isPlainObject
+  isPlainObject,
+  isReservedTag
 } from './util/index'
 
 export function initGlobalAPI (Vue) {
@@ -150,10 +149,7 @@ export function initGlobalAPI (Vue) {
       } else {
         /* istanbul ignore if */
         if (process.env.NODE_ENV !== 'production') {
-          if (
-            type === 'component' &&
-            (commonTagRE.test(id) || reservedTagRE.test(id))
-          ) {
+          if (type === 'component' && isReservedTag(id)) {
             warn(
               'Do not use built-in or reserved HTML elements as component ' +
               'id: ' + id

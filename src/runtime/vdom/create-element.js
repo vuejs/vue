@@ -1,7 +1,7 @@
 import VNode from './vnode'
 import Component from './component'
-import { isPrimitive, isArray } from '../util/index'
-import { target } from '../instance/render'
+import { renderState } from '../instance/render'
+import { isPrimitive, isArray, isReservedTag, resolveAsset } from '../util/index'
 
 export default function createElement (tag, data, children) {
   if (isArray(children)) {
@@ -24,10 +24,16 @@ export default function createElement (tag, data, children) {
       }
     }
   }
-  const parent = target._
+  const parent = renderState.activeInstance
   // TODO component sniffing
   if (typeof tag === 'string') {
-    return VNode(tag, data, children)
+    let Ctor
+    if (isReservedTag(tag) ||
+      !(Ctor = resolveAsset(parent.$options, 'components', tag))) {
+      return VNode(tag, data, children)
+    } else {
+      return Component(Ctor, data, parent, children)
+    }
   } else {
     return Component(tag, data, parent, children)
   }

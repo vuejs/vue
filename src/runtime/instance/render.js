@@ -3,7 +3,9 @@ import { query, resolveAsset, hyphenate } from '../util/index'
 import { createElement, patch } from '../vdom/index'
 import { callHook } from './lifecycle'
 
-export const target = { _: null }
+export const renderState = {
+  activeInstance: null
+}
 
 export function initRender (vm) {
   vm._vnode = null
@@ -59,10 +61,10 @@ export function renderMixin (Vue) {
     }
     const render = this.$options.render
     this._watcher = new Watcher(this, () => {
-      const prev = target._
-      target._ = this
+      const prev = renderState.activeInstance
+      renderState.activeInstance = this
       const vnode = render.call(this)
-      target._ = prev
+      renderState.activeInstance = prev
       return vnode
     }, this._update)
     this._update(this._watcher.value)

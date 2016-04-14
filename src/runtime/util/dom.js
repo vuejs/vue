@@ -1,6 +1,16 @@
 import { isIE9 } from './env'
 import { warn } from './debug'
 
+const reservedTags = 'slot|component|div|p|span|img|a|b|i|br|ul|ol|li|h1|h2|h3|h4|h5|h6|code|pre|table|th|td|tr|form|label|input|select|option|nav|article|section|header|footer'
+const reservedTagMap = Object.create(null)
+reservedTags.split('|').forEach(tag => {
+  reservedTagMap[tag] = true
+})
+
+export function isReservedTag (tag) {
+  return reservedTagMap[tag]
+}
+
 /**
  * Query an element selector if it's not an element already.
  *
