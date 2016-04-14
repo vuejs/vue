@@ -34,10 +34,11 @@ function prepatch (oldVnode, vnode) {
     old.child.$destroy()
     init(vnode)
   } else {
+    cur.child = old.child
+    cur.vnode = old.child._vnode
     // try re-render child. the child may optimize it
     // and just does nothing.
     old.child._tryUpdate(cur.data, cur.children)
-    cur.vnode = old.child._vnode
   }
 }
 

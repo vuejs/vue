@@ -39,7 +39,7 @@ export function renderMixin (Vue) {
     }
     // check props
     const props = this.$options.props
-    if (props && data.attrs) {
+    if (props && data && data.attrs) {
       for (let key in props) {
         let oldVal = this[key]
         let newVal = data.attrs[key] || data.attrs[hyphenate(key)]

@@ -128,8 +128,10 @@ strats.created =
 strats.ready =
 strats.attached =
 strats.detached =
-strats.beforeCompile =
-strats.compiled =
+strats.beforeMount =
+strats.mounted =
+strats.beforeUpdate =
+strats.updated =
 strats.beforeDestroy =
 strats.destroyed =
 strats.activate = function (parentVal, childVal) {
@@ -162,14 +164,13 @@ config._assetTypes.forEach(function (type) {
 })
 
 /**
- * Events & Watchers.
+ * Watchers.
  *
- * Events & watchers hashes should not overwrite one
+ * Watchers hashes should not overwrite one
  * another, so we merge them as arrays.
  */
 
-strats.watch =
-strats.events = function (parentVal, childVal) {
+strats.watch = function (parentVal, childVal) {
   if (!childVal) return parentVal
   if (!parentVal) return childVal
   var ret = {}
