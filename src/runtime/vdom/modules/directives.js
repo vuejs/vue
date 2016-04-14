@@ -4,6 +4,9 @@ export default {
   },
   update: function (oldVnode, vnode) {
     applyDirectives(oldVnode, vnode, 'update', true)
+  },
+  destroy: function (oldVnode, vnode) {
+    applyDirectives(oldVnode, vnode, 'unbind')
   }
 }
 
