@@ -6,8 +6,7 @@ import {
   isObject,
   isPlainObject,
   hasProto,
-  hasOwn,
-  warn
+  hasOwn
 } from '../util/index'
 
 const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
@@ -193,7 +192,7 @@ export function observe (value, vm) {
  * @param {*} val
  */
 
-export function defineReactive (obj, key, val, immutable) {
+export function defineReactive (obj, key, val) {
   var dep = new Dep()
 
   var property = Object.getOwnPropertyDescriptor(obj, key)
@@ -225,24 +224,18 @@ export function defineReactive (obj, key, val, immutable) {
       }
       return value
     },
-    set: immutable
-      ? function immutableSetter () {
-        if (process.env.NODE_ENV !== 'production') {
-          warn(`property "${key}" is immutable.`)
-        }
+    set: function reactiveSetter (newVal) {
+      var value = getter ? getter.call(obj) : val
+      if (newVal === value) {
+        return
       }
-      : function reactiveSetter (newVal) {
-        var value = getter ? getter.call(obj) : val
-        if (newVal === value) {
-          return
-        }
-        if (setter) {
-          setter.call(obj, newVal)
-        } else {
-          val = newVal
-        }
-        childOb = observe(newVal)
-        dep.notify()
+      if (setter) {
+        setter.call(obj, newVal)
+      } else {
+        val = newVal
       }
+      childOb = observe(newVal)
+      dep.notify()
+    }
   })
 }

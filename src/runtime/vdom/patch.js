@@ -46,7 +46,7 @@ export default function createPatchFunction (modules, api) {
   }
 
   function createRmCb (childElm, listeners) {
-    return function () {
+    return function remove () {
       if (--listeners === 0) {
         const parent = api.parentNode(childElm)
         api.removeChild(parent, childElm)
@@ -55,16 +55,12 @@ export default function createPatchFunction (modules, api) {
   }
 
   function createElm (vnode, insertedVnodeQueue) {
-    let i, thunk, elm
+    let i, elm
     const data = vnode.data
     if (isDef(data)) {
       if (isDef(i = data.hook) && isDef(i = i.init)) i(vnode)
-      if (isDef(i = data.vnode)) {
-        thunk = vnode
-        vnode = i
-        if (vnode.elm) {
-          return vnode.elm
-        }
+      if (isDef(i = data.child)) {
+        return i._vnode.elm
       }
     }
     const children = vnode.children
@@ -89,7 +85,6 @@ export default function createPatchFunction (modules, api) {
     } else {
       elm = vnode.elm = api.createTextNode(vnode.text)
     }
-    if (isDef(thunk)) thunk.elm = vnode.elm
     return vnode.elm
   }
 
@@ -110,7 +105,7 @@ export default function createPatchFunction (modules, api) {
           invokeDestroyHook(vnode.children[j])
         }
       }
-      if (isDef(i = data.vnode)) invokeDestroyHook(i)
+      if (isDef(i = data.child)) invokeDestroyHook(i._vnode)
     }
   }
 
@@ -122,7 +117,7 @@ export default function createPatchFunction (modules, api) {
         if (isDef(ch.sel)) {
           invokeDestroyHook(ch)
           listeners = cbs.remove.length + 1
-          rm = createRmCb(ch.elm, listeners)
+          rm = createRmCb(ch.elm || ch.data.child._vnode.elm, listeners)
           for (i = 0; i < cbs.remove.length; ++i) cbs.remove[i](ch, rm)
           if (isDef(i = ch.data) && isDef(i = i.hook) && isDef(i = i.remove)) {
             i(ch, rm)
@@ -194,14 +189,16 @@ export default function createPatchFunction (modules, api) {
   }
 
   function patchVnode (oldVnode, vnode, insertedVnodeQueue) {
-    let i, hook
+    let i, j, hook
     if (isDef(i = vnode.data) && isDef(hook = i.hook) && isDef(i = hook.prepatch)) {
       i(oldVnode, vnode)
     }
-    if (isDef(i = oldVnode.data) && isDef(i = i.vnode)) oldVnode = i
-    if (isDef(i = vnode.data) && isDef(i = i.vnode)) {
-      patchVnode(oldVnode, i, insertedVnodeQueue)
-      vnode.elm = i.elm
+    // child component. skip and let it do its own thing.
+    if (isDef(i = oldVnode.data) &&
+        isDef(j = vnode.data) &&
+        isDef(i = i.child) &&
+        isDef(j = j.child) &&
+        i === j) {
       return
     }
     let elm = vnode.elm = oldVnode.elm
