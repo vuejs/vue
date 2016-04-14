@@ -92,8 +92,14 @@ export function parse (template, preserveWhitespace) {
     },
 
     end () {
+      // remove trailing whitespace
+      const element = stack[stack.length - 1]
+      const lastNode = element.children[element.children.length - 1]
+      if (lastNode && lastNode.text === ' ') element.children.pop()
+      // pop stack
       stack.length -= 1
       currentParent = stack[stack.length - 1]
+      // check svg state
       if (inSvg && stack.length <= svgIndex) {
         inSvg = false
         svgIndex = -1
