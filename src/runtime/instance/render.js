@@ -77,19 +77,14 @@ export function renderMixin (Vue) {
       this.$forceUpdate()
       return
     }
-    // check props
-    if (data && data.attrs) {
-      let changed = false
+    // set props. because props are reactive,
+    // if any of them has changed it will trigger an update.
+    const attrs = data && data.attrs
+    if (attrs) {
       for (let key in this.$options.props) {
-        let oldVal = this[key]
-        let newVal = data.attrs[key] || data.attrs[hyphenate(key)]
-        if (oldVal !== newVal) {
-          this[key] = newVal
-          changed = true
-        }
-      }
-      if (changed) {
-        this.$forceUpdate()
+        this[key] = hasOwn(attrs, key)
+          ? attrs[key]
+          : attrs[hyphenate(key)]
       }
     }
   }

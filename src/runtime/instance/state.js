@@ -1,6 +1,6 @@
 import Watcher from '../observer/watcher'
 import Dep from '../observer/dep'
-import { observe } from '../observer/index'
+import { observe, defineReactive } from '../observer/index'
 
 import {
   warn,
@@ -25,7 +25,7 @@ function initProps (vm) {
   const props = vm.$options.props
   if (props) {
     for (let key in props) {
-      vm[key] = attrs[key]
+      defineReactive(vm, key, attrs[key])
     }
   }
 }
