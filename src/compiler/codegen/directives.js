@@ -17,7 +17,7 @@ export function genDirectives (el) {
     } else {
       // runtime directive
       hasRuntime = true
-      res += `{name:"${dir.name}"${
+      res += `{def:__d__("${dir.name}")${
         dir.value ? `,value:(${dir.value})` : ''
       }${
         dir.modifiers ? `,modifiers:${JSON.stringify(dir.modifiers)}` : ''

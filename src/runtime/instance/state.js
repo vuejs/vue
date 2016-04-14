@@ -100,8 +100,8 @@ function initWatch (vm) {
       let handler = watch[key]
       let options
       if (typeof handler === 'object') {
-        handler = handler.handler
         options = handler
+        handler = handler.handler
       }
       vm.$watch(key, handler, options)
     }

@@ -1,5 +1,5 @@
 import Watcher from '../observer/watcher'
-import { query } from '../util/index'
+import { query, resolveAsset } from '../util/index'
 import { h, patch } from '../vdom/index'
 import { callHook } from './lifecycle'
 
@@ -11,7 +11,11 @@ export function initRender (vm) {
 }
 
 export function renderMixin (Vue) {
+  // shorthands used in render functions
   Vue.prototype.__h__ = h
+  Vue.prototype.__d__ = function (id) {
+    return resolveAsset(this.$options, 'directives', id, true)
+  }
 
   Vue.prototype._update = function (vtree) {
     callHook(this, 'beforeUpdate')

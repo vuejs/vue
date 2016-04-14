@@ -282,6 +282,19 @@ function guardProps (options) {
   }
 }
 
+function guardDirectives (options) {
+  var dirs = options.directives
+  if (dirs) {
+    var keys = Object.keys(dirs)
+    var i = keys.length
+    while (i--) {
+      if (typeof dirs[keys[i]] === 'function') {
+        dirs[keys[i]] = { update: dirs[keys[i]] }
+      }
+    }
+  }
+}
+
 /**
  * Merge two option objects into a new one.
  * Core utility used in both instantiation and inheritance.
@@ -295,6 +308,7 @@ function guardProps (options) {
 export function mergeOptions (parent, child, vm) {
   guardComponents(child)
   guardProps(child)
+  guardDirectives(child)
   var options = {}
   var key
   if (child.mixins) {

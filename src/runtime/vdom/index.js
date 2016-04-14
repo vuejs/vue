@@ -11,13 +11,15 @@ import style from './modules/style'
 import props from './modules/props'
 import attrs from './modules/attrs'
 import events from './modules/events'
+import directives from './modules/directives'
 
 const patch = createPatchFunction([
   classes,
   props,
   attrs,
   style,
-  events
+  events,
+  directives
 ])
 
 export { patch, h }
