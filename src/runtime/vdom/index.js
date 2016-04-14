@@ -10,7 +10,7 @@ import classes from './modules/class'
 import style from './modules/style'
 import props from './modules/props'
 import attrs from './modules/attrs'
-import events from './modules/events'
+import events, { updateListeners } from './modules/events'
 import directives from './modules/directives'
 
 const patch = createPatchFunction([
@@ -22,4 +22,4 @@ const patch = createPatchFunction([
   directives
 ])
 
-export { patch, createElement }
+export { patch, createElement, updateListeners }

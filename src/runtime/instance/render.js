@@ -1,6 +1,6 @@
 import Watcher from '../observer/watcher'
 import { query, resolveAsset, hyphenate, hasOwn } from '../util/index'
-import { createElement, patch } from '../vdom/index'
+import { createElement, patch, updateListeners } from '../vdom/index'
 import { callHook } from './lifecycle'
 
 export const renderState = {
@@ -36,8 +36,7 @@ function resolveSlots (vm, children) {
   }
 }
 
-function mergeParentData (vm, data, parentData) {
-  // attrs
+function mergeParentAttrs (vm, data, parentData) {
   if (parentData.attrs) {
     const props = vm.$options.props
     for (let key in parentData.attrs) {
@@ -46,9 +45,19 @@ function mergeParentData (vm, data, parentData) {
       }
     }
   }
-  // directives
+}
+
+function mergeParentDirectives (vm, data, parentData) {
   if (parentData.directives) {
     data.directives = parentData.directives.conact(data.directives || [])
+  }
+}
+
+function updateParentCallbacks (vm, data, parentData) {
+  if (parentData.on) {
+    updateListeners(parentData.on, data.on || {}, (event, handler) => {
+      vm.$on(event, handler)
+    })
   }
 }
 
@@ -98,7 +107,9 @@ export function renderMixin (Vue) {
     const data = vnode.data
     const parentData = this._renderData
     if (parentData) {
-      mergeParentData(this, data, parentData)
+      mergeParentAttrs(this, data, parentData)
+      mergeParentDirectives(this, data, parentData)
+      updateParentCallbacks(this, data, parentData)
     }
     renderState.activeInstance = prev
     return vnode

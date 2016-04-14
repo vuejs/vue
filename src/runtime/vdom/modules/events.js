@@ -1,3 +1,5 @@
+import { isArray } from '../../util/index'
+
 function arrInvoker (arr) {
   return function (ev) {
     for (let i = 0; i < arr.length; i++) {
@@ -10,29 +12,24 @@ function fnInvoker (o) {
   return function (ev) { o.fn(ev) }
 }
 
-function updateEventListeners (oldVnode, vnode) {
+export function updateListeners (on, oldOn, add) {
   let name, cur, old, event, capture
-  const elm = vnode.elm
-  const oldOn = oldVnode.data.on || {}
-  const on = vnode.data.on
-  if (!on) return
   for (name in on) {
     cur = on[name]
     old = oldOn[name]
     if (old === undefined) {
       capture = name.charAt(0) === '!'
       event = capture ? name.slice(1) : name
-      if (Array.isArray(cur)) {
-        elm.addEventListener(event, arrInvoker(cur), capture)
+      if (isArray(cur)) {
+        add(event, arrInvoker(cur), capture)
       } else {
-        cur = {fn: cur}
+        cur = { fn: cur }
         on[name] = cur
-        elm.addEventListener(event, fnInvoker(cur), capture)
+        add(event, fnInvoker(cur), capture)
       }
-    } else if (Array.isArray(old)) {
-      // Deliberately modify old array since it's captured in closure created with `arrInvoker`
+    } else if (isArray(old)) {
       old.length = cur.length
-      for (var i = 0; i < old.length; ++i) old[i] = cur[i]
+      for (let i = 0; i < old.length; i++) old[i] = cur[i]
       on[name] = old
     } else {
       old.fn = cur
@@ -41,7 +38,15 @@ function updateEventListeners (oldVnode, vnode) {
   }
 }
 
+function updateDOMListeners (oldVnode, vnode) {
+  const on = vnode.data.on
+  const oldOn = oldVnode.data.on || {}
+  updateListeners(on, oldOn, (event, handler, capture) => {
+    vnode.elm.addEventListener(event, handler, capture)
+  })
+}
+
 export default {
-  create: updateEventListeners,
-  update: updateEventListeners
+  create: updateDOMListeners,
+  update: updateDOMListeners
 }
