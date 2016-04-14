@@ -6,6 +6,7 @@ general:
   branches:
     ignore:
       - dev
+      - csp
 
 test:
   override:
