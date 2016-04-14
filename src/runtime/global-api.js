@@ -1,5 +1,4 @@
 import config from './config'
-import * as directives from './directives/index'
 import * as util from './util/index'
 import h from './vdom/h'
 import {
@@ -24,7 +23,7 @@ export function initGlobalAPI (Vue) {
   Vue.nextTick = nextTick
 
   Vue.options = {
-    directives,
+    directives: Object.create(null),
     filters: Object.create(null),
     components: Object.create(null),
     transitions: Object.create(null)

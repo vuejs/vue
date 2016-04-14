@@ -1,5 +1,5 @@
 import { genHandlers } from './events'
-import { genDirectives } from './directives'
+import { genDirectives } from './directives/index'
 
 export function generate (ast) {
   const code = ast ? genElement(ast) : '__h__("div")'

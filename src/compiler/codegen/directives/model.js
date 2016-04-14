@@ -1,6 +1,6 @@
-import { addHandler } from '../helpers'
+import { addHandler } from '../../helpers'
 
-export function genModel (el, dir) {
+export function model (el, dir) {
   if (!el.events) el.events = {}
   if (!el.props) el.props = []
   const value = dir.value

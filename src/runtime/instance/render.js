@@ -4,6 +4,7 @@ import { h, patch } from '../vdom/index'
 import { callHook } from './lifecycle'
 
 export function initRender (vm) {
+  vm._mounted = false
   const el = vm.$options.el
   if (el) {
     vm.$mount(el)
@@ -35,6 +36,7 @@ export function renderMixin (Vue) {
     this._watcher = new Watcher(this, this.$options.render, this._update)
     this._update(this._watcher.value)
     callHook(this, 'mounted')
+    this._mounted = true
   }
 
   Vue.prototype.$forceUpdate = function () {

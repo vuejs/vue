@@ -1,7 +1,10 @@
-import { genModel } from './model'
+import { model } from './model'
+import { show } from './show'
 
 export const directives = {
-  model: genModel
+  model,
+  show,
+  cloak: function () {} // noop
 }
 
 export function genDirectives (el) {
