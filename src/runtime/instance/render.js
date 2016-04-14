@@ -1,5 +1,5 @@
 import Watcher from '../observer/watcher'
-import { query, resolveAsset, hyphenate } from '../util/index'
+import { query, resolveAsset, hyphenate, hasOwn } from '../util/index'
 import { createElement, patch } from '../vdom/index'
 import { callHook } from './lifecycle'
 
@@ -11,18 +11,28 @@ export function initRender (vm) {
   vm._vnode = null
   vm._mounted = false
   vm._renderData = vm.$options._renderData
-  vm.$slots = resolveSlots(vm.$options._renderChildren)
+  vm.$slots = {}
+  // props are set in initState
+  resolveSlots(vm, vm.$options._renderChildren)
   const el = vm.$options.el
   if (el) {
     vm.$mount(el)
   }
 }
 
-function resolveSlots (children) {
-  const slots = {
-    default: children
+export function setProps (vm, data) {
+  const attrs = (data && data.attrs) || {}
+  const props = vm.$options.props
+  if (props) {
+    for (let key in props) {
+      vm[key] = attrs[key]
+    }
   }
+}
+
+function resolveSlots (vm, children) {
   if (children) {
+    const slots = { default: children }
     let i = children.length
     let name, child
     while (i--) {
@@ -32,8 +42,24 @@ function resolveSlots (children) {
         children.splice(i, 1)
       }
     }
+    vm.$slots = slots
   }
-  return slots
+}
+
+function mergeParentData (vm, data, parentData) {
+  // attrs
+  if (parentData.attrs) {
+    const props = vm.$options.props
+    for (let key in parentData.attrs) {
+      if (!hasOwn(props, key)) {
+        data.attrs[key] = parentData.attrs[key]
+      }
+    }
+  }
+  // directives
+  if (parentData.directives) {
+    data.directives = parentData.directives.conact(data.directives || [])
+  }
 }
 
 export function renderMixin (Vue) {
@@ -56,13 +82,14 @@ export function renderMixin (Vue) {
 
   Vue.prototype._tryUpdate = function (data, children) {
     this._renderData = data
-    this.$slots = resolveSlots(children)
     if (children) {
+      resolveSlots(this, children)
       this.$forceUpdate()
       return
     }
     // check props
     if (data && data.attrs) {
+      setProps(this, data)
       for (let key in this.$options.props) {
         let oldVal = this[key]
         let newVal = data.attrs[key] || data.attrs[hyphenate(key)]
@@ -77,8 +104,11 @@ export function renderMixin (Vue) {
     const prev = renderState.activeInstance
     renderState.activeInstance = this
     const vnode = this.$options.render.call(this)
-    // merge parent data
-    // TODO
+    const data = vnode.data
+    const parentData = this._renderData
+    if (parentData) {
+      mergeParentData(this, data, parentData)
+    }
     renderState.activeInstance = prev
     return vnode
   }

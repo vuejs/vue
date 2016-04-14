@@ -103,7 +103,7 @@ function genNode (node) {
 
 function genText (text) {
   return text.expression
-    ? `(${text.expression}==null?'':String(${text.expression}))`
+    ? `(${text.expression})`
     : JSON.stringify(text.text)
 }
 

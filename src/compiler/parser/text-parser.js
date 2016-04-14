@@ -14,7 +14,8 @@ export function parseText (text) {
       tokens.push(JSON.stringify(text.slice(lastIndex, index)))
     }
     // tag token
-    tokens.push('(' + match[1].trim() + ')')
+    const exp = match[1].trim()
+    tokens.push(`((${exp})==null?'':${exp})`)
     lastIndex = index + match[0].length
   }
   if (lastIndex < text.length) {
