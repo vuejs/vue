@@ -62,6 +62,9 @@ export default function createPatchFunction (modules, api) {
       if (isDef(i = data.vnode)) {
         thunk = vnode
         vnode = i
+        if (vnode.elm) {
+          return vnode.elm
+        }
       }
     }
     const children = vnode.children

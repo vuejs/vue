@@ -9,7 +9,8 @@ export default function Component (Ctor, data, parent, children) {
     sel: 'component',
     data: {
       hook: { init, prepatch, destroy },
-      Ctor, data, parent, children
+      Ctor, data, parent, children,
+      key: data && data.key
     }
   }
 }

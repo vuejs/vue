@@ -21,7 +21,7 @@ export default function createElement (tag, data, children) {
       return Component(Ctor, data, parent, children)
     } else {
       if (process.env.NODE_ENV !== 'production') {
-        if (isUnknownElement(tag)) {
+        if (!data.svg && isUnknownElement(tag)) {
           warn(
             'Unknown custom element: <' + tag + '> - did you ' +
             'register the component correctly? For recursive components, ' +

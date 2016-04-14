@@ -37,7 +37,7 @@ function genFor (el) {
 
 function genData (el) {
   if (el.plain) {
-    return '{}'
+    return el.svg ? '{svg:true}' : '{}'
   }
 
   let data = '{'

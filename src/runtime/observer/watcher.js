@@ -11,6 +11,7 @@ import {
 } from '../util/index'
 
 let uid = 0
+let prevTarget
 
 /**
  * A watcher parses an expression, collects dependencies,
@@ -91,6 +92,7 @@ Watcher.prototype.get = function () {
  */
 
 Watcher.prototype.beforeGet = function () {
+  prevTarget = Dep.target
   Dep.target = this
 }
 
@@ -116,7 +118,7 @@ Watcher.prototype.addDep = function (dep) {
  */
 
 Watcher.prototype.afterGet = function () {
-  Dep.target = null
+  Dep.target = prevTarget
   var i = this.deps.length
   while (i--) {
     var dep = this.deps[i]

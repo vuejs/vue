@@ -17,5 +17,6 @@ module.exports = {
     loaders: [
       { test: /\.js/, loader: 'babel!eslint', exclude: /node_modules/ }
     ]
-  }
+  },
+  devtool: '#source-map'
 }
