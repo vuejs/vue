@@ -8,7 +8,7 @@ export default function Component (Ctor, data, children) {
   return {
     sel: 'component',
     data: {
-      hooks: { init, prepatch, destroy },
+      hook: { init, prepatch, destroy },
       Ctor, data, children
     }
   }
@@ -19,7 +19,8 @@ function init (vnode) {
   const child = new data.Ctor({
     _renderData: data.data,
     _renderChildren: data.children
-  }).$mount()
+  })
+  child.$mount()
   data.child = child
   data.vnode = child._vnode
 }
