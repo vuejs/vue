@@ -112,6 +112,12 @@ function prefix (prop) {
   }
   var i = prefixes.length
   var prefixed
+  if (camel !== 'filter' && (camel in testEl.style)) {
+    return {
+      kebab: prop,
+      camel: camel
+    }
+  }
   while (i--) {
     prefixed = camelPrefixes[i] + upper
     if (prefixed in testEl.style) {
@@ -119,12 +125,6 @@ function prefix (prop) {
         kebab: prefixes[i] + prop,
         camel: prefixed
       }
-    }
-  }
-  if (camel in testEl.style) {
-    return {
-      kebab: prop,
-      camel: camel
     }
   }
 }
