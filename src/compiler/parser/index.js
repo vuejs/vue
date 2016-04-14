@@ -112,7 +112,8 @@ export function parse (template, preserveWhitespace) {
       }
       text = currentParent.tag === 'pre' || text.trim()
         ? decodeHTML(text)
-        : preserveWhitespace ? ' ' : null
+        // only preserve whitespace if its not right after a starting tag
+        : preserveWhitespace && currentParent.children.length ? ' ' : null
       if (text) {
         let expression
         if (text !== ' ' && (expression = parseText(text))) {
