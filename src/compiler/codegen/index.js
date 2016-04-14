@@ -15,6 +15,8 @@ function genElement (el) {
     return genChildren(el)
   } else if (el.tag === 'render') {
     return genRender(el)
+  } else if (el.tag === 'slot') {
+    return genSlot(el)
   } else {
     return `__h__('${el.tag}', ${genData(el)}, ${genChildren(el)})`
   }
@@ -43,6 +45,10 @@ function genData (el) {
   // key
   if (el.key) {
     data += `key:${el.key},`
+  }
+  // slot names
+  if (el.attrsMap.slot) {
+    data += `slot:"${el.attrsMap.slot}",`
   }
   // svg
   if (el.svg) {
@@ -102,7 +108,14 @@ function genText (text) {
 }
 
 function genRender (el) {
-  return `${el.method}(${el.args || ''})`
+  return `${el.method}(${el.args || 'null'},${genChildren(el)})`
+}
+
+function genSlot (el) {
+  const name = el.name
+    ? `"${el.name}"`
+    : (el.dynamicName || '"default"')
+  return `$slots[${name}]`
 }
 
 function genProps (props) {

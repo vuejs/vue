@@ -161,8 +161,13 @@ function processRender (el) {
   }
 }
 
-function processSlot () {
-  // todo
+function processSlot (el) {
+  if (el.tag === 'slot') {
+    el.name = el.attrsMap.name
+    el.dynamicName =
+      el.attrsMap[':name'] ||
+      el.attrsMap['v-bind:name']
+  }
 }
 
 function processClassBinding (el) {
