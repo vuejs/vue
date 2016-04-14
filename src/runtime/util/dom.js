@@ -11,6 +11,33 @@ export function isReservedTag (tag) {
   return reservedTagMap[tag]
 }
 
+export let isUnknownElement
+if (process.env.NODE_ENV !== 'production') {
+  isUnknownElement = (function () {
+    const cache = {}
+    return function (tag) {
+      if (cache.hasOwnProperty(tag)) {
+        return cache[tag]
+      }
+      const el = document.createElement(tag)
+      if (tag.indexOf('-') > -1) {
+        // http://stackoverflow.com/a/28210364/1070244
+        return (
+          el.constructor === window.HTMLUnknownElement ||
+          el.constructor === window.HTMLElement
+        )
+      } else {
+        return (
+          /HTMLUnknownElement/.test(el.toString()) &&
+          // Chrome returns unknown for several HTML5 elements.
+          // https://code.google.com/p/chromium/issues/detail?id=540526
+          !/^(data|time|rtc|rb)$/.test(tag)
+        )
+      }
+    }
+  })()
+}
+
 /**
  * Query an element selector if it's not an element already.
  *

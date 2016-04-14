@@ -1,40 +1,62 @@
 import VNode from './vnode'
 import Component from './component'
 import { renderState } from '../instance/render'
-import { isPrimitive, isArray, isReservedTag, resolveAsset } from '../util/index'
+import {
+  warn,
+  isPrimitive,
+  isArray,
+  isReservedTag,
+  isUnknownElement,
+  resolveAsset
+} from '../util/index'
 
 export default function createElement (tag, data, children) {
+  children = flatten(children)
+  const parent = renderState.activeInstance
+  if (typeof tag === 'string') {
+    let Ctor
+    if (isReservedTag(tag)) {
+      return VNode(tag, data, children)
+    } else if ((Ctor = resolveAsset(parent.$options, 'components', tag))) {
+      return Component(Ctor, data, parent, children)
+    } else {
+      if (process.env.NODE_ENV !== 'production') {
+        if (isUnknownElement(tag)) {
+          warn(
+            'Unknown custom element: <' + tag + '> - did you ' +
+            'register the component correctly? For recursive components, ' +
+            'make sure to provide the "name" option.'
+          )
+        }
+      }
+      return VNode(tag, data, children)
+    }
+  } else {
+    return Component(tag, data, parent, children)
+  }
+}
+
+function flatten (children) {
   if (isArray(children)) {
-    let _children = children
-    children = []
-    for (let i = 0, l = _children.length; i < l; i++) {
-      let e = _children[i]
+    let res = []
+    for (let i = 0, l = children.length; i < l; i++) {
+      let e = children[i]
       // flatten nested
       if (isArray(e)) {
         for (let j = 0, k = e.length; j < k; j++) {
           if (e[j]) {
-            children.push(e[j])
+            res.push(e[j])
           }
         }
       } else if (isPrimitive(e)) {
         // convert primitive to vnode
-        children.push(VNode(undefined, undefined, undefined, e))
+        res.push(VNode(undefined, undefined, undefined, e))
       } else if (e) {
-        children.push(e)
+        res.push(e)
       }
     }
-  }
-  const parent = renderState.activeInstance
-  // TODO component sniffing
-  if (typeof tag === 'string') {
-    let Ctor
-    if (isReservedTag(tag) ||
-      !(Ctor = resolveAsset(parent.$options, 'components', tag))) {
-      return VNode(tag, data, children)
-    } else {
-      return Component(Ctor, data, parent, children)
-    }
+    return res
   } else {
-    return Component(tag, data, parent, children)
+    return children
   }
 }
