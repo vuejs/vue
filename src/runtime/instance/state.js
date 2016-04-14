@@ -1,7 +1,6 @@
 import Watcher from '../observer/watcher'
 import Dep from '../observer/dep'
 import { observe } from '../observer/index'
-import { setProps } from './render'
 
 import {
   warn,
@@ -13,11 +12,22 @@ import {
 
 export function initState (vm) {
   vm._watchers = []
-  setProps(vm, vm.$options._renderData)
+  initProps(vm)
   initData(vm)
   initComputed(vm)
   initMethods(vm)
   initWatch(vm)
+}
+
+function initProps (vm) {
+  const data = vm.$options._renderData
+  const attrs = (data && data.attrs) || {}
+  const props = vm.$options.props
+  if (props) {
+    for (let key in props) {
+      vm[key] = attrs[key]
+    }
+  }
 }
 
 function initData (vm) {

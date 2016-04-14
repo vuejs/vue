@@ -20,16 +20,6 @@ export function initRender (vm) {
   }
 }
 
-export function setProps (vm, data) {
-  const attrs = (data && data.attrs) || {}
-  const props = vm.$options.props
-  if (props) {
-    for (let key in props) {
-      vm[key] = attrs[key]
-    }
-  }
-}
-
 function resolveSlots (vm, children) {
   if (children) {
     const slots = { default: children }
@@ -89,13 +79,17 @@ export function renderMixin (Vue) {
     }
     // check props
     if (data && data.attrs) {
-      setProps(this, data)
+      let changed = false
       for (let key in this.$options.props) {
         let oldVal = this[key]
         let newVal = data.attrs[key] || data.attrs[hyphenate(key)]
         if (oldVal !== newVal) {
-          this.$forceUpdate()
+          this[key] = newVal
+          changed = true
         }
+      }
+      if (changed) {
+        this.$forceUpdate()
       }
     }
   }
