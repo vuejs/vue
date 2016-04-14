@@ -37,16 +37,17 @@ const svgMap = {
  */
 
 export function parse (template, preserveWhitespace) {
+  const stack = []
   let root
   let currentParent
-  let stack = []
   let inSvg = false
   let svgIndex = -1
   let warned = false
   parseHTML(template, {
     html5: true,
+
     start (tag, attrs, unary) {
-      let element = {
+      const element = {
         tag,
         plain: !attrs.length,
         attrsList: attrs,
@@ -89,6 +90,7 @@ export function parse (template, preserveWhitespace) {
         stack.push(element)
       }
     },
+
     end () {
       stack.length -= 1
       currentParent = stack[stack.length - 1]
@@ -97,6 +99,7 @@ export function parse (template, preserveWhitespace) {
         svgIndex = -1
       }
     },
+
     chars (text) {
       if (!currentParent) {
         if (process.env.NODE_ENV !== 'production' && !warned) {
@@ -107,23 +110,13 @@ export function parse (template, preserveWhitespace) {
         }
         return
       }
-      text = currentParent.tag === 'pre'
+      text = currentParent.tag === 'pre' || text.trim()
         ? decodeHTML(text)
-        : text.trim()
-          ? decodeHTML(text)
-          : preserveWhitespace
-            ? ' '
-            : null
+        : preserveWhitespace ? ' ' : null
       if (text) {
-        if (text !== ' ') {
-          let expression = parseText(text)
-          if (expression) {
-            currentParent.children.push({
-              expression
-            })
-          } else {
-            currentParent.children.push({ text })
-          }
+        let expression
+        if (text !== ' ' && (expression = parseText(text))) {
+          currentParent.children.push({ expression })
         } else {
           currentParent.children.push({ text })
         }
