@@ -1,6 +1,6 @@
 import Vue from '../instance/index'
 
-export default function Component (Ctor, data, children) {
+export default function Component (Ctor, data, parent, children) {
   if (typeof Ctor === 'object') {
     Ctor = Vue.extend(Ctor)
   }
@@ -9,7 +9,7 @@ export default function Component (Ctor, data, children) {
     sel: 'component',
     data: {
       hook: { init, prepatch, destroy },
-      Ctor, data, children
+      Ctor, data, parent, children
     }
   }
 }
@@ -17,6 +17,7 @@ export default function Component (Ctor, data, children) {
 function init (vnode) {
   const data = vnode.data
   const child = new data.Ctor({
+    parent: data.parent,
     _renderData: data.data,
     _renderChildren: data.children
   })

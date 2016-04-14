@@ -1,6 +1,7 @@
 import VNode from './vnode'
 import Component from './component'
 import { isPrimitive, isArray } from '../util/index'
+import { target } from '../instance/render'
 
 export default function createElement (tag, data, children) {
   if (isArray(children)) {
@@ -23,9 +24,11 @@ export default function createElement (tag, data, children) {
       }
     }
   }
+  const parent = target._
+  // TODO component sniffing
   if (typeof tag === 'string') {
     return VNode(tag, data, children)
   } else {
-    return Component(tag, data, children)
+    return Component(tag, data, parent, children)
   }
 }

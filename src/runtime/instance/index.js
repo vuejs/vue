@@ -15,19 +15,12 @@ Vue.prototype._init = function (options) {
   this._uid = uid++
   // a flag to avoid this being observed
   this._isVue = true
-
-  this.$parent = options && options.parent
-  this.$root = this.$parent ? this.$parent.$root : this
-  this.$refs = {}
-  this.$els = {}
-
   // merge options
   this.$options = mergeOptions(
     this.constructor.options,
     options || {},
     this
   )
-
   initLifecycle(this)
   initEvents(this)
   callHook(this, 'init')

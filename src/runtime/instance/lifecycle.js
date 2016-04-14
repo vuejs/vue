@@ -10,6 +10,16 @@ export function callHook (vm, hook) {
 }
 
 export function initLifecycle (vm) {
+  const options = vm.$options
+  vm.$parent = options.parent
+  vm.$root = vm.$parent ? vm.$parent.$root : vm
+  if (vm.$parent) {
+    vm.$parent.$children.push(vm)
+    // TODO: handle ref
+  }
+  vm.$children = []
+  vm.$refs = {}
+  vm.$els = {}
   vm._isDestroyed = false
   vm._isBeingDestroyed = false
 }
@@ -21,6 +31,12 @@ export function lifecycleMixin (Vue) {
     }
     callHook(this, 'beforeDestroy')
     this._isBeingDestroyed = true
+    // remove self from parent
+    const parent = this.$parent
+    if (parent && !parent._isBeingDestroyed) {
+      parent.$children.$remove(this)
+      // TODO: handle ref
+    }
     // teardown watchers
     let i = this._watchers.length
     while (i--) {
