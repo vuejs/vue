@@ -3,7 +3,7 @@ import { del, toArray } from '../../util/index'
 import { parseText } from '../../parsers/text'
 import { parseDirective } from '../../parsers/directive'
 import { getPath } from '../../parsers/path'
-import { isSimplePath, parseExpression } from '../../parsers/expression'
+import { parseExpression } from '../../parsers/expression'
 
 const filterRE = /[^|]\|[^|]/
 
@@ -19,7 +19,7 @@ export default function (Vue) {
   Vue.prototype.$get = function (exp, asStatement) {
     var res = parseExpression(exp)
     if (res) {
-      if (asStatement && !isSimplePath(exp)) {
+      if (asStatement) {
         var self = this
         return function statementHandler () {
           self.$arguments = toArray(arguments)

@@ -1,3 +1,4 @@
+import { isSimplePath } from '../../parsers/expression'
 import {
   inDoc,
   isArray,
@@ -31,22 +32,21 @@ export default function (Vue) {
 
   function registerComponentEvents (vm, el) {
     var attrs = el.attributes
-    var name, handler
+    var name, value, handler
     for (var i = 0, l = attrs.length; i < l; i++) {
       name = attrs[i].name
       if (eventRE.test(name)) {
         name = name.replace(eventRE, '')
-        handler = (vm._scope || vm._context).$eval(attrs[i].value, true)
-        if (typeof handler === 'function') {
-          handler._fromParent = true
-          vm.$on(name.replace(eventRE), handler)
-        } else if (process.env.NODE_ENV !== 'production') {
-          warn(
-            'v-on:' + name + '="' + attrs[i].value + '" ' +
-            'expects a function value, got ' + handler,
-            vm
-          )
+        // force the expression into a statement so that
+        // it always dynamically resolves the method to call (#2670)
+        // kinda ugly hack, but does the job.
+        value = attrs[i].value
+        if (isSimplePath(value)) {
+          value += '.apply(this, $arguments)'
         }
+        handler = (vm._scope || vm._context).$eval(value, true)
+        handler._fromParent = true
+        vm.$on(name.replace(eventRE), handler)
       }
     }
   }

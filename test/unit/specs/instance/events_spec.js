@@ -206,6 +206,7 @@ describe('Instance Events', function () {
     })
 
     it('compile v-on on child component', function () {
+      var spy2 = jasmine.createSpy()
       var vm = new Vue({
         el: document.createElement('div'),
         template: '<comp v-on:hook:created="onCreated" @ready="onReady" @ok="a++"></comp>',
@@ -221,12 +222,16 @@ describe('Instance Events', function () {
             compiled: function () {
               this.$emit('ready', 123)
               this.$emit('ok')
+              this.$parent.onReady = spy2
+              this.$emit('ready', 234)
             }
           }
         }
       })
       expect(spy.calls.count()).toBe(2)
       expect(spy).toHaveBeenCalledWith(123)
+      expect(spy2.calls.count()).toBe(1)
+      expect(spy2).toHaveBeenCalledWith(234)
       expect(vm.a).toBe(1)
     })
 
