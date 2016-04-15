@@ -15,7 +15,7 @@ function applyDirectives (oldVnode, vnode, hook, update) {
   if (dirs) {
     for (let i = 0; i < dirs.length; i++) {
       let dir = dirs[i]
-      let fn = dir.def[hook]
+      let fn = dir.def && dir.def[hook]
       if (fn) {
         // only call update if value has changed
         if (update) {

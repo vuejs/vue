@@ -1,9 +1,11 @@
 import { model } from './model'
 import { show } from './show'
+import { html } from './html'
 
 export const directives = {
   model,
   show,
+  html,
   cloak: function () {} // noop
 }
 

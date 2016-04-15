@@ -28,16 +28,6 @@ export default {
   ],
 
   /**
-   * prop binding modes
-   */
-
-  _propBindingModes: {
-    ONE_WAY: 0,
-    TWO_WAY: 1,
-    ONE_TIME: 2
-  },
-
-  /**
    * Max circular updates allowed in a batcher flush cycle.
    */
 
