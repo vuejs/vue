@@ -15,6 +15,8 @@ export const devtools = inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__
 const UA = inBrowser && window.navigator.userAgent.toLowerCase()
 export const isIE9 = UA && UA.indexOf('msie 9.0') > 0
 export const isAndroid = UA && UA.indexOf('android') > 0
+export const isIos = UA && /(iphone|ipad|ipod|ios)/i.test(UA)
+export const isWechat = UA && UA.indexOf('micromessenger') > 0
 
 let transitionProp
 let transitionEndEvent
@@ -74,7 +76,7 @@ export const nextTick = (function () {
   }
 
   /* istanbul ignore if */
-  if (typeof MutationObserver !== 'undefined') {
+  if (typeof MutationObserver !== 'undefined' && !(isWechat && isIos)) {
     var counter = 1
     var observer = new MutationObserver(nextTickHandler)
     var textNode = document.createTextNode(counter)
