@@ -40,14 +40,17 @@ function resolveSlots (vm, children) {
 }
 
 function mergeParentAttrs (vm, data, parentData) {
+  const props = vm.$options.props
   if (parentData.attrs) {
-    const props = vm.$options.props
     const attrs = data.attrs || (data.attrs = [])
     for (let key in parentData.attrs) {
       if (!hasOwn(props, key)) {
         attrs[key] = parentData.attrs[key]
       }
     }
+  }
+  if (parentData.props) {
+
   }
 }
 
@@ -63,6 +66,30 @@ function updateParentCallbacks (vm, data, parentData) {
       vm.$on(event, handler)
     })
   }
+}
+
+function updateProps (vm, data) {
+  const attrs = data.attrs
+  const props = data.props
+  if (attrs || props) {
+    for (let key in vm.$options.props) {
+      let altKey = hyphenate(key)
+      let newVal =
+        getPropValue(attrs, key, altKey) ||
+        getPropValue(props, key, altKey)
+      if (vm[key] !== newVal) {
+        vm[key] = newVal
+      }
+    }
+  }
+}
+
+function getPropValue (hash, key, altKey) {
+  return hash
+    ? hasOwn(hash, key)
+      ? hash[key]
+      : hash[altKey]
+    : undefined
 }
 
 export function renderMixin (Vue) {
@@ -92,16 +119,8 @@ export function renderMixin (Vue) {
       return
     }
     // set props - this will trigger update if any of them changed
-    const attrs = data && data.attrs
-    if (attrs) {
-      for (let key in this.$options.props) {
-        let newVal = hasOwn(attrs, key)
-          ? attrs[key]
-          : attrs[hyphenate(key)]
-        if (this[key] !== newVal) {
-          this[key] = newVal
-        }
-      }
+    if (data) {
+      updateProps(this, data)
     }
   }
 
