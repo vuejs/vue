@@ -35,22 +35,20 @@
     Vue.component('select2', {
       props: ['options', 'placeholder', 'value'],
       template: '#select2-template',
-      mounted: function () {
+      ready: function () {
         var vm = this
-        Vue.nextTick(function () {
-          $(vm.$el)
-            // init select2
-            .select2({
-              data: vm.options,
-              placeholder: vm.placeholder
-            })
-            // emit event on change.
-            .on('change', function () {
-              vm.$emit('input', mockEvent(this.value))
-            })
-            // set initial value
-            .select2('val', vm.value)
-        })
+        $(this.$el)
+          // init select2
+          .select2({
+            data: this.options,
+            placeholder: this.placeholder
+          })
+          // emit event on change.
+          .on('change', function () {
+            vm.$emit('input', mockEvent(this.value))
+          })
+          // set initial value
+          .select2('val', this.value)
       },
       watch: {
         value: function (value) {

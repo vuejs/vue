@@ -1,4 +1,5 @@
 import Vue from '../instance/index'
+import { callHook } from '../instance/lifecycle'
 
 export default function Component (Ctor, data, parent, children) {
   if (typeof Ctor === 'object') {
@@ -10,7 +11,7 @@ export default function Component (Ctor, data, parent, children) {
     tag: 'component',
     key,
     data: {
-      hook: { init, prepatch, destroy },
+      hook: { init, insert, prepatch, destroy },
       Ctor, data, parent, children
     }
   }
@@ -26,6 +27,10 @@ function init (vnode) {
   })
   child.$mount()
   data.child = child
+}
+
+function insert (vnode) {
+  callHook(vnode.child, 'ready')
 }
 
 function prepatch (oldVnode, vnode) {
