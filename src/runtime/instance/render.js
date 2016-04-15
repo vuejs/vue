@@ -42,9 +42,10 @@ function resolveSlots (vm, children) {
 function mergeParentAttrs (vm, data, parentData) {
   if (parentData.attrs) {
     const props = vm.$options.props
+    const attrs = data.attrs || (data.attrs = [])
     for (let key in parentData.attrs) {
       if (!hasOwn(props, key)) {
-        data.attrs[key] = parentData.attrs[key]
+        attrs[key] = parentData.attrs[key]
       }
     }
   }
