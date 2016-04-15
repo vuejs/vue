@@ -15,7 +15,7 @@ function isDef (s) {
 }
 
 function sameVnode (vnode1, vnode2) {
-  return vnode1.key === vnode2.key && vnode1.sel === vnode2.sel
+  return vnode1.key === vnode2.key && vnode1.tag === vnode2.tag
 }
 
 function getElm (vnode) {
@@ -68,7 +68,7 @@ export default function createPatchFunction (modules, api) {
       }
     }
     const children = vnode.children
-    const tag = vnode.sel
+    const tag = vnode.tag
     if (isDef(tag)) {
       elm = vnode.elm = isDef(data) && data.svg
         ? api.createElementNS(svgNS, tag)
@@ -118,7 +118,7 @@ export default function createPatchFunction (modules, api) {
       let i, listeners, rm
       const ch = vnodes[startIdx]
       if (isDef(ch)) {
-        if (isDef(ch.sel)) {
+        if (isDef(ch.tag)) {
           invokeDestroyHook(ch)
           listeners = cbs.remove.length + 1
           rm = createRmCb(getElm(ch), listeners)
@@ -245,7 +245,7 @@ export default function createPatchFunction (modules, api) {
     if (!oldVnode) {
       createElm(vnode, insertedVnodeQueue)
     } else {
-      if (isUndef(oldVnode.sel)) {
+      if (isUndef(oldVnode.tag)) {
         oldVnode = emptyNodeAt(oldVnode)
       }
 

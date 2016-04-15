@@ -7,7 +7,7 @@ export default function Component (Ctor, data, parent, children) {
   // return a placeholder vnode
   const key = data && data.key
   return {
-    sel: 'component',
+    tag: 'component',
     key,
     data: {
       hook: { init, prepatch, destroy },

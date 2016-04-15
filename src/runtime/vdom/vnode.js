@@ -1,3 +1,3 @@
-export default function VNode (sel, data, children, text, elm) {
-  return { sel, data, children, text, elm, key: data && data.key }
+export default function VNode (tag, data, children, text, elm) {
+  return { tag, data, children, text, elm, key: data && data.key }
 }

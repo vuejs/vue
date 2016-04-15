@@ -19,13 +19,19 @@ export function initRender (vm) {
 
 function resolveSlots (vm, children) {
   if (children) {
+    children = children.slice()
     const slots = { default: children }
     let i = children.length
     let name, child
     while (i--) {
       child = children[i]
       if ((name = child.data && child.data.slot)) {
-        (slots[name] || (slots[name] = [])).push(child)
+        let slot = (slots[name] || (slots[name] = []))
+        if (child.tag === 'template') {
+          slot.push.apply(slot, child.children)
+        } else {
+          slot.push(child)
+        }
         children.splice(i, 1)
       }
     }
@@ -123,7 +129,6 @@ export function renderMixin (Vue) {
       mergeParentDirectives(this, data, _renderData)
       updateParentCallbacks(this, data, _renderData)
     }
-    console.log(vnode)
     return vnode
   }
 

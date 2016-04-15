@@ -82,7 +82,7 @@ export function parse (template, preserveWhitespace) {
           'Component template should contain exactly one root element:\n\n' + template
         )
       }
-      if (currentParent) {
+      if (currentParent && tag !== 'script') {
         currentParent.children.push(element)
       }
       if (!unary) {
@@ -91,7 +91,7 @@ export function parse (template, preserveWhitespace) {
       }
     },
 
-    end () {
+    end (tag) {
       // remove trailing whitespace
       const element = stack[stack.length - 1]
       const lastNode = element.children[element.children.length - 1]
