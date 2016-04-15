@@ -25,7 +25,13 @@ function genElement (el) {
 function genIf (el) {
   const exp = el.if
   el.if = false // avoid recursion
-  return `(${exp}) ? ${genElement(el)} : null`
+  return `(${exp}) ? ${genElement(el)} : ${genElse(el)}`
+}
+
+function genElse (el) {
+  return el.elseBlock
+    ? genElement(el.elseBlock)
+    : 'null'
 }
 
 function genFor (el) {

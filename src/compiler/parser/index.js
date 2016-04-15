@@ -79,11 +79,15 @@ export function parse (template, preserveWhitespace) {
       } else if (process.env.NODE_ENV !== 'production' && !stack.length && !warned) {
         warned = true
         console.error(
-          'Component template should contain exactly one root element:\n\n' + template
+          `Component template should contain exactly one root element:\n\n${template}`
         )
       }
       if (currentParent && tag !== 'script') {
-        currentParent.children.push(element)
+        if (element.else) {
+          processElse(element, currentParent)
+        } else {
+          currentParent.children.push(element)
+        }
       }
       if (!unary) {
         currentParent = element
@@ -154,6 +158,23 @@ function processIf (el) {
   let exp = getAndRemoveAttr(el, 'v-if')
   if (exp) {
     el.if = exp
+  }
+  if (getAndRemoveAttr(el, 'v-else') != null) {
+    el.else = true
+  }
+}
+
+function processElse (el, parent) {
+  const prev = findPrevElement(parent.children)
+  if (prev && (prev.if || prev.attrsMap['v-show'])) {
+    prev.elseBlock = el
+    if (!prev.if) {
+      parent.children.push(el)
+    }
+  } else if (process.env.NODE_ENV !== 'production') {
+    console.error(
+      `v-else used on element <${el.tag}> without corresponding v-if/v-show.`
+    )
   }
 }
 
@@ -251,7 +272,7 @@ function makeAttrsMap (attrs) {
 
 function getAndRemoveAttr (el, attr) {
   let val
-  if ((val = el.attrsMap[attr])) {
+  if ((val = el.attrsMap[attr]) != null) {
     el.attrsMap[attr] = null
     const list = el.attrsList
     for (let i = 0, l = list.length; i < l; i++) {
@@ -262,4 +283,11 @@ function getAndRemoveAttr (el, attr) {
     }
   }
   return val
+}
+
+function findPrevElement (children) {
+  let i = children.length
+  while (i--) {
+    if (children[i].tag) return children[i]
+  }
 }
