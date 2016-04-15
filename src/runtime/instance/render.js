@@ -1,5 +1,5 @@
 import Watcher from '../observer/watcher'
-import { query, resolveAsset, hasOwn } from '../util/index'
+import { extend, query, resolveAsset, hasOwn } from '../util/index'
 import { createElement, patch, updateListeners } from '../vdom/index'
 import { callHook } from './lifecycle'
 import { getPropValue } from './state'
@@ -40,10 +40,10 @@ function resolveSlots (vm, children) {
   }
 }
 
-function mergeParentAttrs (vm, data, parentData) {
+function mergeParentData (vm, data, parentData) {
   const props = vm.$options.props
   if (parentData.attrs) {
-    const attrs = data.attrs || (data.attrs = [])
+    const attrs = data.attrs || (data.attrs = {})
     for (let key in parentData.attrs) {
       if (!hasOwn(props, key)) {
         attrs[key] = parentData.attrs[key]
@@ -51,17 +51,27 @@ function mergeParentAttrs (vm, data, parentData) {
     }
   }
   if (parentData.props) {
-
+    const props = data.props || (data.props = {})
+    for (let key in parentData.props) {
+      if (!hasOwn(props, key)) {
+        props[key] = parentData.props[key]
+      }
+    }
   }
-}
-
-function mergeParentDirectives (vm, data, parentData) {
+  if (parentData.staticClass) {
+    data.staticClass = data.staticClass
+      ? data.staticClass + ' ' + parentData.staticClass
+      : parentData.staticClass
+  }
+  if (parentData.class) {
+    extend((data.class || (data.class = {})), parentData.class)
+  }
+  if (parentData.style) {
+    extend((data.style || (data.style = {})), parentData.style)
+  }
   if (parentData.directives) {
     data.directives = parentData.directives.conact(data.directives || [])
   }
-}
-
-function updateParentCallbacks (vm, data, parentData) {
   if (parentData.on) {
     updateListeners(parentData.on, data.on || {}, (event, handler) => {
       vm.$on(event, handler)
@@ -140,10 +150,7 @@ export function renderMixin (Vue) {
     vnode.key = _renderKey
     // update parent data
     if (_renderData) {
-      const data = vnode.data
-      mergeParentAttrs(this, data, _renderData)
-      mergeParentDirectives(this, data, _renderData)
-      updateParentCallbacks(this, data, _renderData)
+      mergeParentData(this, vnode.data, _renderData)
     }
     return vnode
   }
