@@ -1,15 +1,12 @@
+import './patch-array'
 import Dep from './dep'
-import { arrayMethods } from './array'
 import {
   def,
   isArray,
   isObject,
   isPlainObject,
-  hasProto,
   hasOwn
 } from '../util/index'
-
-const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
 
 /**
  * By default, when a reactive property is set, the new value is
@@ -43,10 +40,6 @@ export function Observer (value) {
   this.dep = new Dep()
   def(value, '__ob__', this)
   if (isArray(value)) {
-    var augment = hasProto
-      ? protoAugment
-      : copyAugment
-    augment(value, arrayMethods, arrayKeys)
     this.observeArray(value)
   } else {
     this.walk(value)
@@ -116,37 +109,6 @@ Observer.prototype.addVm = function (vm) {
 
 Observer.prototype.removeVm = function (vm) {
   this.vms.$remove(vm)
-}
-
-// helpers
-
-/**
- * Augment an target Object or Array by intercepting
- * the prototype chain using __proto__
- *
- * @param {Object|Array} target
- * @param {Object} src
- */
-
-function protoAugment (target, src) {
-  /* eslint-disable no-proto */
-  target.__proto__ = src
-  /* eslint-enable no-proto */
-}
-
-/**
- * Augment an target Object or Array by defining
- * hidden properties.
- *
- * @param {Object|Array} target
- * @param {Object} proto
- */
-
-function copyAugment (target, src, keys) {
-  for (var i = 0, l = keys.length; i < l; i++) {
-    var key = keys[i]
-    def(target, key, src[key])
-  }
 }
 
 /**

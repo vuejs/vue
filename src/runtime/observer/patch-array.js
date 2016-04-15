@@ -1,32 +1,18 @@
-import { def } from '../util/index'
+import { def, toArray } from '../util/index'
 
 const arrayProto = Array.prototype
-export const arrayMethods = Object.create(arrayProto)
+const mutationMethods = ['push', 'pop', 'shift', 'unshift', 'splice', 'sort', 'reverse']
 
 /**
- * Intercept mutating methods and emit events
+ * Intercept mutating methods and notify change
  */
 
-;[
-  'push',
-  'pop',
-  'shift',
-  'unshift',
-  'splice',
-  'sort',
-  'reverse'
-]
-.forEach(function (method) {
+mutationMethods.forEach(function (method) {
   // cache original method
   var original = arrayProto[method]
-  def(arrayMethods, method, function mutator () {
-    // avoid leaking arguments:
-    // http://jsperf.com/closure-with-arguments
-    var i = arguments.length
-    var args = new Array(i)
-    while (i--) {
-      args[i] = arguments[i]
-    }
+
+  var interceptor = function arrayMutationInterceptor () {
+    var args = toArray(arguments)
     var result = original.apply(this, args)
     var ob = this.__ob__
     var inserted
@@ -45,7 +31,12 @@ export const arrayMethods = Object.create(arrayProto)
     // notify change
     ob.dep.notify()
     return result
-  })
+  }
+
+  arrayProto[method] = function () {
+    let fn = this && this.__ob__ ? interceptor : original
+    return fn.apply(this, arguments)
+  }
 })
 
 /**
