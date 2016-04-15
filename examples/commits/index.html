@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Vue.js commits example</title>
+    <style>
+      #demo {
+        font-family: 'Helvetica', Arial, sans-serif;
+      }
+      a {
+        text-decoration: none;
+        color: #f66;
+      }
+      li {
+        line-height: 1.5em;
+        margin-bottom: 20px;
+      }
+      .author, .date {
+        font-weight: bold;
+      }
+    </style>
+    <script src="../../dist/vue.js"></script>
+  </head>
+  <body>
+    <div id="demo">
+      <h1>Latest Vue.js Commits</h1>
+      <template v-for="branch in branches">
+        <input type="radio"
+          :id="branch"
+          :value="branch"
+          name="branch"
+          v-model="currentBranch">
+        <label :for="branch">{{branch}}</label>
+      </template>
+      <p>vuejs/vue@{{currentBranch}}</p>
+      <ul>
+        <li v-for="record in commits">
+          <a :href="record.html_url" target="_blank" class="commit">{{record.sha.slice(0, 7)}}</a>
+          - <span class="message">{{truncate(record.commit.message)}}</span><br>
+          by <span class="author">{{record.commit.author.name}}</span>
+          at <span class="date">{{formatDate(record.commit.author.date)}}</span>
+        </li>
+      </ul>
+    </div>
+    <script src="app.js"></script>
+  </body>
+</html>

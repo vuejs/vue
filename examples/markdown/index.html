@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Vue.js markdown editor example</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/marked/0.3.5/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/lodash/4.11.1/lodash.min.js"></script>
+    <script src="../../dist/vue.js"></script>
+  </head>
+  <body>
+
+    <div id="editor">
+      <textarea :value="input" @input="update"></textarea>
+      <div v-html="marked(input)"></div>
+    </div>
+
+    <script>
+      new Vue({
+        el: '#editor',
+        data: {
+          input: '# hello'
+        },
+        methods: {
+          marked: marked,
+          update: function (e) {
+            this.input = e.target.value
+          }
+        }
+      })
+    </script>
+
+  </body>
+</html>
