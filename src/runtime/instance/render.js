@@ -72,7 +72,7 @@ function updateParentCallbacks (vm, data, parentData) {
 function updateProps (vm, data) {
   if (data.attrs || data.props) {
     for (let key in vm.$options.props) {
-      let newVal = getPropValue(data)
+      let newVal = getPropValue(data, key)
       if (vm[key] !== newVal) {
         vm[key] = newVal
       }
