@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Vue.js custom directive integration example (select2)</title>
+    <script src="../../dist/vue.js"></script>
+    <script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <link href="http://cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css" rel="stylesheet">
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js"></script>
+    <style>
+      select {
+        min-width: 300px;
+      }
+    </style>
+  </head>
+  <body>
+
+    <div id="el">
+      <p>Selected: {{selected}}</p>
+      <select2
+        :options="options"
+        placeholder="select one"
+        v-model="selected">
+      </select2>
+    </div>
+
+    <script type="x/template" id="select2-template">
+      <select>
+        <option v-if="placeholder"></option>
+        <slot></slot>
+      </select>
+    </script>
+
+    <script>
+    Vue.component('select2', {
+      props: ['options', 'placeholder', 'value'],
+      template: '#select2-template',
+      mounted: function () {
+        var vm = this
+        Vue.nextTick(function () {
+          $(vm.$el)
+            // init select2
+            .select2({
+              data: vm.options,
+              placeholder: vm.placeholder
+            })
+            // emit event on change.
+            .on('change', function () {
+              vm.$emit('input', mockEvent(this.value))
+            })
+            // set initial value
+            .select2('val', vm.value)
+        })
+      },
+      watch: {
+        value: function (value) {
+          // update value
+          $(this.$el).select2('val', value)
+        },
+        options: function (options) {
+          // update options
+          $(this.$el).select2({ data: options })
+        }
+      },
+      destroyed: function () {
+        $(this.$el).off().select2('destroy')
+      }
+    })
+
+    // mock an event because the v-model binding expects
+    // event.target.value
+    function mockEvent (value) {
+      return {
+        target: {
+          value: value
+        }
+      }
+    }
+
+    var vm = new Vue({
+      el: '#el',
+      data: {
+        selected: 0,
+        options: [
+          { id: 1, text: 'Hello' },
+          { id: 2, text: 'World' }
+        ]
+      }
+    })
+    </script>
+  </body>
+</html>
