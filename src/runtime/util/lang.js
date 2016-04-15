@@ -160,6 +160,21 @@ export function stripQuotes (str) {
 }
 
 /**
+ * Create a cached version of a pure function.
+ *
+ * @param {Function} fn
+ * @return {Function}
+ */
+
+function cached (fn) {
+  const cache = Object.create(null)
+  return function cachedFn (str) {
+    const hit = cache[str]
+    return hit || (cache[str] = fn(str))
+  }
+}
+
+/**
  * Camelize a hyphen-delmited string.
  *
  * @param {String} str
@@ -167,9 +182,9 @@ export function stripQuotes (str) {
  */
 
 var camelizeRE = /-(\w)/g
-export function camelize (str) {
+export const camelize = cached(str => {
   return str.replace(camelizeRE, toUpper)
-}
+})
 
 function toUpper (_, c) {
   return c ? c.toUpperCase() : ''
@@ -183,11 +198,11 @@ function toUpper (_, c) {
  */
 
 var hyphenateRE = /([a-z\d])([A-Z])/g
-export function hyphenate (str) {
+export const hyphenate = cached(str => {
   return str
     .replace(hyphenateRE, '$1-$2')
     .toLowerCase()
-}
+})
 
 /**
  * Converts hyphen/underscore/slash delimitered names into

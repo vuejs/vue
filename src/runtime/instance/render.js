@@ -1,7 +1,8 @@
 import Watcher from '../observer/watcher'
-import { query, resolveAsset, hyphenate, hasOwn } from '../util/index'
+import { query, resolveAsset, hasOwn } from '../util/index'
 import { createElement, patch, updateListeners } from '../vdom/index'
 import { callHook } from './lifecycle'
+import { getPropValue } from './state'
 
 export const renderState = {
   activeInstance: null
@@ -69,27 +70,14 @@ function updateParentCallbacks (vm, data, parentData) {
 }
 
 function updateProps (vm, data) {
-  const attrs = data.attrs
-  const props = data.props
-  if (attrs || props) {
+  if (data.attrs || data.props) {
     for (let key in vm.$options.props) {
-      let altKey = hyphenate(key)
-      let newVal =
-        getPropValue(attrs, key, altKey) ||
-        getPropValue(props, key, altKey)
+      let newVal = getPropValue(data)
       if (vm[key] !== newVal) {
         vm[key] = newVal
       }
     }
   }
-}
-
-function getPropValue (hash, key, altKey) {
-  return hash
-    ? hasOwn(hash, key)
-      ? hash[key]
-      : hash[altKey]
-    : undefined
 }
 
 export function renderMixin (Vue) {
