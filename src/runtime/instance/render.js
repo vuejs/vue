@@ -106,13 +106,17 @@ export function renderMixin (Vue) {
     this.$options._renderKey = key
     this.$options._renderData = data
     this.$options._renderChildren = children
+    // set props - this will trigger update if any of them changed
+    // but not guaranteed
+    if (data) {
+      updateProps(this, data)
+    }
+    // for now, if the component has content it always updates
+    // because we don't know whether the children have changed.
+    // need to optimize in the future.
     if (children) {
       this.$forceUpdate()
       return
-    }
-    // set props - this will trigger update if any of them changed
-    if (data) {
-      updateProps(this, data)
     }
   }
 

@@ -121,7 +121,7 @@ function genSlot (el) {
   const name = el.name
     ? `"${el.name}"`
     : (el.dynamicName || '"default"')
-  return `$slots[${name}]`
+  return `($slots[${name}] || ${genChildren(el)})`
 }
 
 function genProps (props) {
