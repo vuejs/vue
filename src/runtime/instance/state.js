@@ -120,6 +120,9 @@ function initWatch (vm) {
         options = handler
         handler = handler.handler
       }
+      if (typeof handler === 'string') {
+        handler = vm[handler]
+      }
       vm.$watch(key, handler, options)
     }
   }
