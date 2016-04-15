@@ -193,11 +193,12 @@ export default function createPatchFunction (modules, api) {
   }
 
   function patchVnode (oldVnode, vnode, insertedVnodeQueue) {
-    let i, j, hook
+    let i, hook
     if (isDef(i = vnode.data) && isDef(hook = i.hook) && isDef(i = hook.prepatch)) {
       i(oldVnode, vnode)
     }
-    // child component. skip and let it do its own thing.
+    // child component. skip it since it already updated itself in the
+    // prepatch hook.
     if (isDef(i = vnode.data) && i.child) {
       return
     }
