@@ -10,7 +10,7 @@
     "src"
   ],
   "scripts": {
-    "dev": "webpack --watch",
+    "dev": "webpack --config build/webpack.config.js --watch",
     "test": "mocha",
     "build": "NODE_ENV=production node build/build.js",
     "lint": "eslint src"

@@ -1,9 +1,9 @@
 var path = require('path')
 
 module.exports = {
-  entry: path.resolve(__dirname, 'build/dev-entry.js'),
+  entry: path.resolve(__dirname, 'dev-entry.js'),
   output: {
-    path: path.resolve(__dirname, 'dist'),
+    path: path.resolve(__dirname, '../dist'),
     filename: 'vue.js',
     library: 'Vue',
     libraryTarget: 'umd'
