@@ -10,10 +10,7 @@ export const renderState = {
 export function initRender (vm) {
   vm._vnode = null
   vm._mounted = false
-  vm._renderData = vm.$options._renderData
   vm.$slots = {}
-  // props are set in initState
-  resolveSlots(vm, vm.$options._renderChildren)
   const el = vm.$options.el
   if (el) {
     vm.$mount(el)
@@ -79,14 +76,15 @@ export function renderMixin (Vue) {
     callHook(this, 'updated')
   }
 
-  Vue.prototype._tryUpdate = function (data, children) {
-    this._renderData = data
+  Vue.prototype._tryUpdate = function (data, children, key) {
+    this.$options._renderKey = key
+    this.$options._renderData = data
+    this.$options._renderChildren = children
     if (children) {
-      resolveSlots(this, children)
       this.$forceUpdate()
       return
     }
-    // set props if they have changed.
+    // set props - this will trigger update if any of them changed
     const attrs = data && data.attrs
     if (attrs) {
       for (let key in this.$options.props) {
@@ -101,17 +99,30 @@ export function renderMixin (Vue) {
   }
 
   Vue.prototype._render = function () {
+    const {
+      render,
+      _renderKey,
+      _renderData,
+      _renderChildren
+    } = this.$options
+    // resolve slots
+    if (_renderChildren) {
+      resolveSlots(this, _renderChildren)
+    }
+    // render
     const prev = renderState.activeInstance
     renderState.activeInstance = this
-    const vnode = this.$options.render.call(this)
-    const data = vnode.data
-    const parentData = this._renderData
-    if (parentData) {
-      mergeParentAttrs(this, data, parentData)
-      mergeParentDirectives(this, data, parentData)
-      updateParentCallbacks(this, data, parentData)
-    }
+    const vnode = render.call(this)
     renderState.activeInstance = prev
+    // set key
+    vnode.key = _renderKey
+    // update parent data
+    if (_renderData) {
+      const data = vnode.data
+      mergeParentAttrs(this, data, _renderData)
+      mergeParentDirectives(this, data, _renderData)
+      updateParentCallbacks(this, data, _renderData)
+    }
     return vnode
   }
 

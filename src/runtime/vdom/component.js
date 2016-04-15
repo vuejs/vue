@@ -5,12 +5,13 @@ export default function Component (Ctor, data, parent, children) {
     Ctor = Vue.extend(Ctor)
   }
   // return a placeholder vnode
+  const key = data && data.key
   return {
     sel: 'component',
+    key,
     data: {
       hook: { init, prepatch, destroy },
-      Ctor, data, parent, children,
-      key: data && data.key
+      Ctor, data, parent, children
     }
   }
 }
@@ -20,7 +21,8 @@ function init (vnode) {
   const child = new data.Ctor({
     parent: data.parent,
     _renderData: data.data,
-    _renderChildren: data.children
+    _renderChildren: data.children,
+    _renderKey: vnode.key
   })
   child.$mount()
   data.child = child
@@ -38,7 +40,7 @@ function prepatch (oldVnode, vnode) {
     cur.child = old.child
     // try re-render child. the child may optimize it
     // and just does nothing.
-    old.child._tryUpdate(cur.data, cur.children)
+    old.child._tryUpdate(cur.data, cur.children, vnode.key)
   }
 }
 

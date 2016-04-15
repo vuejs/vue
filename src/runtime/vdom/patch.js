@@ -18,6 +18,10 @@ function sameVnode (vnode1, vnode2) {
   return vnode1.key === vnode2.key && vnode1.sel === vnode2.sel
 }
 
+function getElm (vnode) {
+  return vnode.elm || vnode.data.child._vnode.elm
+}
+
 function createKeyToOldIdx (children, beginIdx, endIdx) {
   let i, key
   const map = {}
@@ -117,7 +121,7 @@ export default function createPatchFunction (modules, api) {
         if (isDef(ch.sel)) {
           invokeDestroyHook(ch)
           listeners = cbs.remove.length + 1
-          rm = createRmCb(ch.elm || ch.data.child._vnode.elm, listeners)
+          rm = createRmCb(getElm(ch), listeners)
           for (i = 0; i < cbs.remove.length; ++i) cbs.remove[i](ch, rm)
           if (isDef(i = ch.data) && isDef(i = i.hook) && isDef(i = i.remove)) {
             i(ch, rm)
@@ -157,31 +161,31 @@ export default function createPatchFunction (modules, api) {
         newEndVnode = newCh[--newEndIdx]
       } else if (sameVnode(oldStartVnode, newEndVnode)) { // Vnode moved right
         patchVnode(oldStartVnode, newEndVnode, insertedVnodeQueue)
-        api.insertBefore(parentElm, oldStartVnode.elm, api.nextSibling(oldEndVnode.elm))
+        api.insertBefore(parentElm, getElm(oldStartVnode), api.nextSibling(getElm(oldEndVnode)))
         oldStartVnode = oldCh[++oldStartIdx]
         newEndVnode = newCh[--newEndIdx]
       } else if (sameVnode(oldEndVnode, newStartVnode)) { // Vnode moved left
         patchVnode(oldEndVnode, newStartVnode, insertedVnodeQueue)
-        api.insertBefore(parentElm, oldEndVnode.elm, oldStartVnode.elm)
+        api.insertBefore(parentElm, getElm(oldEndVnode), getElm(oldStartVnode))
         oldEndVnode = oldCh[--oldEndIdx]
         newStartVnode = newCh[++newStartIdx]
       } else {
         if (isUndef(oldKeyToIdx)) oldKeyToIdx = createKeyToOldIdx(oldCh, oldStartIdx, oldEndIdx)
         idxInOld = oldKeyToIdx[newStartVnode.key]
         if (isUndef(idxInOld)) { // New element
-          api.insertBefore(parentElm, createElm(newStartVnode, insertedVnodeQueue), oldStartVnode.elm)
+          api.insertBefore(parentElm, createElm(newStartVnode, insertedVnodeQueue), getElm(oldStartVnode))
           newStartVnode = newCh[++newStartIdx]
         } else {
           elmToMove = oldCh[idxInOld]
           patchVnode(elmToMove, newStartVnode, insertedVnodeQueue)
           oldCh[idxInOld] = undefined
-          api.insertBefore(parentElm, elmToMove.elm, oldStartVnode.elm)
+          api.insertBefore(parentElm, getElm(elmToMove), getElm(oldStartVnode))
           newStartVnode = newCh[++newStartIdx]
         }
       }
     }
     if (oldStartIdx > oldEndIdx) {
-      before = isUndef(newCh[newEndIdx + 1]) ? null : newCh[newEndIdx + 1].elm
+      before = isUndef(newCh[newEndIdx + 1]) ? null : getElm(newCh[newEndIdx + 1])
       addVnodes(parentElm, before, newCh, newStartIdx, newEndIdx, insertedVnodeQueue)
     } else if (newStartIdx > newEndIdx) {
       removeVnodes(parentElm, oldCh, oldStartIdx, oldEndIdx)
@@ -194,11 +198,7 @@ export default function createPatchFunction (modules, api) {
       i(oldVnode, vnode)
     }
     // child component. skip and let it do its own thing.
-    if (isDef(i = oldVnode.data) &&
-        isDef(j = vnode.data) &&
-        isDef(i = i.child) &&
-        isDef(j = j.child) &&
-        i === j) {
+    if (isDef(i = vnode.data) && i.child) {
       return
     }
     let elm = vnode.elm = oldVnode.elm
@@ -257,7 +257,7 @@ export default function createPatchFunction (modules, api) {
         createElm(vnode, insertedVnodeQueue)
 
         if (parent !== null) {
-          api.insertBefore(parent, vnode.elm, api.nextSibling(elm))
+          api.insertBefore(parent, getElm(vnode), api.nextSibling(elm))
           removeVnodes(parent, [oldVnode], 0, 0)
         }
       }
