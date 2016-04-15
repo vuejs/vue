@@ -100,14 +100,18 @@ export function renderMixin (Vue) {
   }
 
   Vue.prototype._update = function (vnode) {
-    callHook(this, 'beforeUpdate')
+    if (this._mounted) {
+      callHook(this, 'beforeUpdate')
+    }
     if (!this._vnode) {
       this.$el = patch(this.$el, vnode)
     } else {
       this.$el = patch(this._vnode, vnode)
     }
     this._vnode = vnode
-    callHook(this, 'updated')
+    if (this._mounted) {
+      callHook(this, 'updated')
+    }
   }
 
   Vue.prototype._tryUpdate = function (data, children, key) {
