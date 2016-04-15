@@ -1,7 +1,7 @@
 {
   "name": "vue",
   "version": "2.0.0",
-  "description": "Lighter-weight Vue on virtual dom",
+  "description": "Simple, Fast & Composable MVVM for building interactive interfaces",
   "main": "dist/vue.common.js",
   "files": [
     "dist/vue.common.js",
