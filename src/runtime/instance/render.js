@@ -123,6 +123,7 @@ export function renderMixin (Vue) {
       mergeParentDirectives(this, data, _renderData)
       updateParentCallbacks(this, data, _renderData)
     }
+    console.log(vnode)
     return vnode
   }
 

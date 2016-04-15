@@ -3,6 +3,7 @@ import { genDirectives } from './directives/index'
 
 export function generate (ast) {
   const code = ast ? genElement(ast) : '__h__("div")'
+  console.log(code)
   return `with (this) { return ${code}}`
 }
 
@@ -32,7 +33,7 @@ function genFor (el) {
   const exp = el.for
   const alias = el.alias
   el.for = false // avoid recursion
-  return `(${exp}) && (${exp}).map(function (${alias}, $index) {return ${genElement(el)}})`
+  return `(${exp})&&(${exp}).map(function(${alias},$index) {return ${genElement(el)}})`
 }
 
 function genData (el) {

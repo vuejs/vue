@@ -40,19 +40,15 @@ function flatten (children) {
   if (isArray(children)) {
     let res = []
     for (let i = 0, l = children.length; i < l; i++) {
-      let e = children[i]
+      let c = children[i]
       // flatten nested
-      if (isArray(e)) {
-        for (let j = 0, k = e.length; j < k; j++) {
-          if (e[j]) {
-            res.push(e[j])
-          }
-        }
-      } else if (isPrimitive(e)) {
+      if (isArray(c)) {
+        res.push.apply(res, flatten(c))
+      } else if (isPrimitive(c)) {
         // convert primitive to vnode
-        res.push(VNode(undefined, undefined, undefined, e))
-      } else if (e) {
-        res.push(e)
+        res.push(VNode(undefined, undefined, undefined, c))
+      } else if (c) {
+        res.push(c)
       }
     }
     return res
