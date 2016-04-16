@@ -30,7 +30,7 @@ function init (vnode) {
 }
 
 function insert (vnode) {
-  callHook(vnode.child, 'ready')
+  callHook(vnode.data.child, 'ready')
 }
 
 function prepatch (oldVnode, vnode) {

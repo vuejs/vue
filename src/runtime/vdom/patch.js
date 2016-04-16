@@ -64,6 +64,7 @@ export default function createPatchFunction (modules, api) {
     if (isDef(data)) {
       if (isDef(i = data.hook) && isDef(i = i.init)) i(vnode)
       if (isDef(i = data.child)) {
+        insertedVnodeQueue.push(vnode)
         return i._vnode.elm
       }
     }
