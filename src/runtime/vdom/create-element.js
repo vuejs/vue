@@ -17,7 +17,7 @@ export default function createElement (tag, data, children) {
     if (isReservedTag(tag)) {
       return VNode(tag, data, flatten(children))
     } else if ((Ctor = resolveAsset(context.$options, 'components', tag))) {
-      return Component(Ctor, data, parent, children)
+      return Component(Ctor, data, parent, children, context)
     } else {
       if (process.env.NODE_ENV !== 'production' && !data.svg) {
         warn(
@@ -29,7 +29,7 @@ export default function createElement (tag, data, children) {
       return VNode(tag, data, flatten(children && children()))
     }
   } else {
-    return Component(tag, data, parent, children)
+    return Component(tag, data, parent, children, context)
   }
 }
 

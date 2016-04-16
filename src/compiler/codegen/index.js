@@ -52,23 +52,28 @@ function genData (el) {
 
   let data = '{'
 
-  // key
-  if (el.key) {
-    data += `key:${el.key},`
-  }
-  // slot names
-  if (el.attrsMap.slot) {
-    data += `slot:"${el.attrsMap.slot}",`
-  }
-  // svg
-  if (el.svg) {
-    data += 'svg:true,'
-  }
   // directives first.
   // directives may mutate the el's other properties before they are generated.
   if (el.directives) {
     let dirs = genDirectives(el)
     if (dirs) data += dirs + ','
+  }
+
+  // svg
+  if (el.svg) {
+    data += 'svg:true,'
+  }
+  // key
+  if (el.key) {
+    data += `key:${el.key},`
+  }
+  // ref
+  if (el.ref) {
+    data += `ref:"${el.ref}",`
+  }
+  // slot names
+  if (el.attrsMap.slot) {
+    data += `slot:"${el.attrsMap.slot}",`
   }
   // class
   if (el.staticClass) {

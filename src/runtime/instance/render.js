@@ -25,6 +25,11 @@ export function renderMixin (Vue) {
     return resolveAsset(this.$options, 'directives', id, true)
   }
 
+  Vue.prototype.__s__ = function (val) {
+    console.log(val)
+    return typeof val === 'string' ? val : JSON.stringify(val)
+  }
+
   Vue.prototype._update = function (vnode) {
     if (this._mounted) {
       callHook(this, 'beforeUpdate')
@@ -42,7 +47,6 @@ export function renderMixin (Vue) {
 
   Vue.prototype._updateFromParent = function (parentData, children, key) {
     const oldParentData = this.$options._renderData
-    this.$options._renderKey = key
     this.$options._renderData = parentData
     this.$options._renderChildren = children
     // update props and listeners
@@ -77,7 +81,7 @@ export function renderMixin (Vue) {
   Vue.prototype._render = function () {
     const prev = renderState.activeInstance
     renderState.activeInstance = this
-    const { render, _renderKey, _renderData, _renderChildren } = this.$options
+    const { render, _renderData, _renderChildren } = this.$options
     // resolve slots. becaues slots are rendered in parent scope,
     // we set the activeInstance to parent.
     if (_renderChildren) {
@@ -85,8 +89,6 @@ export function renderMixin (Vue) {
     }
     // render self
     const vnode = render.call(this)
-    // set key
-    vnode.key = _renderKey
     // update parent data
     if (_renderData) {
       mergeParentData(this, vnode.data, _renderData)

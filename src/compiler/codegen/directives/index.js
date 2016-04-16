@@ -1,11 +1,15 @@
 import { model } from './model'
 import { show } from './show'
 import { html } from './html'
+import { ref } from './ref'
+import { el } from './el'
 
 export const directives = {
   model,
   show,
   html,
+  ref,
+  el,
   cloak: function () {} // noop
 }
 
@@ -13,8 +17,9 @@ export function genDirectives (el) {
   const dirs = el.directives
   let res = 'directives:['
   let hasRuntime = false
-  for (let i = 0; i < dirs.length; i++) {
-    let dir = dirs[i]
+  let i, l, dir
+  for (i = 0, l = dirs.length; i < l; i++) {
+    dir = dirs[i]
     let gen = directives[dir.name]
     if (gen) {
       // compile-time directive that manipulates AST
@@ -24,6 +29,8 @@ export function genDirectives (el) {
       hasRuntime = true
       res += `{def:__d__("${dir.name}")${
         dir.value ? `,value:(${dir.value})` : ''
+      }${
+        dir.arg ? `,arg:"${dir.arg}"` : ''
       }${
         dir.modifiers ? `,modifiers:${JSON.stringify(dir.modifiers)}` : ''
       }},`

@@ -6,6 +6,7 @@ import { addHandler } from '../helpers'
 const dirRE = /^v-|^@|^:/
 const bindRE = /^:|^v-bind:/
 const onRE = /^@|^v-on:/
+const argRE = /:(.*)$/
 const modifierRE = /\.[^\.]+/g
 const mustUsePropsRE = /^(value|selected|checked|muted)$/
 const forAliasRE = /([a-zA-Z_][\w]*)\s+(?:in|of)\s+(.*)/
@@ -213,12 +214,13 @@ function processStyleBinding (el) {
 
 function processAttributes (el) {
   const list = el.attrsList
-  for (let i = 0; i < list.length; i++) {
-    let name = list[i].name
-    let value = list[i].value
+  let i, l, name, value, arg, modifiers
+  for (i = 0, l = list.length; i < l; i++) {
+    name = list[i].name
+    value = list[i].value
     if (dirRE.test(name)) {
       // modifiers
-      const modifiers = parseModifiers(name)
+      modifiers = parseModifiers(name)
       if (modifiers) {
         name = name.replace(modifierRE, '')
       }
@@ -234,9 +236,14 @@ function processAttributes (el) {
         addHandler((el.events || (el.events = {})), name, value, modifiers)
       } else { // normal directives
         name = name.replace(dirRE, '')
+        // parse arg
+        if ((arg = name.match(argRE)) && (arg = arg[1])) {
+          name = name.slice(0, -(arg.length + 1))
+        }
         ;(el.directives || (el.directives = [])).push({
           name,
           value,
+          arg,
           modifiers
         })
       }

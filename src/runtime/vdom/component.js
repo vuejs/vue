@@ -1,18 +1,17 @@
 import Vue from '../instance/index'
 import { callHook } from '../instance/lifecycle'
 
-export default function Component (Ctor, data, parent, children) {
+export default function Component (Ctor, data, parent, children, context) {
   if (typeof Ctor === 'object') {
     Ctor = Vue.extend(Ctor)
   }
   // return a placeholder vnode
-  const key = data && data.key
   return {
     tag: 'component',
-    key,
+    key: data && data.key,
     data: {
       hook: { init, insert, prepatch, destroy },
-      Ctor, data, parent, children
+      Ctor, data, parent, children, context
     }
   }
 }
@@ -21,9 +20,9 @@ function init (vnode) {
   const data = vnode.data
   const child = new data.Ctor({
     parent: data.parent,
+    _context: data.context,
     _renderData: data.data,
-    _renderChildren: data.children,
-    _renderKey: vnode.key
+    _renderChildren: data.children
   })
   child.$mount()
   data.child = child

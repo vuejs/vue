@@ -14,11 +14,17 @@ export function callHook (vm, hook) {
 
 export function initLifecycle (vm) {
   const options = vm.$options
+  // parent
   vm.$parent = options.parent
   vm.$root = vm.$parent ? vm.$parent.$root : vm
   if (vm.$parent) {
     vm.$parent.$children.push(vm)
-    // TODO: handle ref
+  }
+  // context & ref
+  vm._context = options._context
+  vm._ref = options._renderData && options._renderData.ref
+  if (vm._ref) {
+    vm._context.$refs[vm._ref] = vm
   }
   vm.$children = []
   vm.$refs = {}
@@ -58,7 +64,10 @@ export function lifecycleMixin (Vue) {
     const parent = this.$parent
     if (parent && !parent._isBeingDestroyed) {
       parent.$children.$remove(this)
-      // TODO: handle ref
+    }
+    // unregister ref
+    if (this._ref) {
+      this._context.$refs[this._ref] = undefined
     }
     // teardown watchers
     let i = this._watchers.length

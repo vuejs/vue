@@ -15,7 +15,7 @@ export function parseText (text) {
     }
     // tag token
     const exp = match[1].trim()
-    tokens.push(`((${exp})==null?'':${exp})`)
+    tokens.push(`((${exp})==null?'':__s__(${exp}))`)
     lastIndex = index + match[0].length
   }
   if (lastIndex < text.length) {
