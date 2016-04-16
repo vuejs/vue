@@ -21,13 +21,18 @@ export function renderMixin (Vue) {
   // shorthands used in render functions
   Vue.prototype.__h__ = createElement
 
+  // resolve directive
   Vue.prototype.__d__ = function (id) {
     return resolveAsset(this.$options, 'directives', id, true)
   }
 
+  // toString for mustaches
   Vue.prototype.__s__ = function (val) {
-    console.log(val)
-    return typeof val === 'string' ? val : JSON.stringify(val)
+    return val == null
+      ? ''
+      : typeof val === 'object'
+        ? JSON.stringify(val, null, 2)
+        : val
   }
 
   Vue.prototype._update = function (vnode) {
