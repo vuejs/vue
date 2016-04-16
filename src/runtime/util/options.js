@@ -121,18 +121,7 @@ strats.el = function (parentVal, childVal, vm) {
  * Hooks and param attributes are merged as arrays.
  */
 
-strats.init =
-strats.created =
-strats.ready =
-strats.attached =
-strats.detached =
-strats.beforeMount =
-strats.mounted =
-strats.beforeUpdate =
-strats.updated =
-strats.beforeDestroy =
-strats.destroyed =
-strats.activate = function (parentVal, childVal) {
+function mergeHook (parentVal, childVal) {
   return childVal
     ? parentVal
       ? parentVal.concat(childVal)
@@ -141,6 +130,10 @@ strats.activate = function (parentVal, childVal) {
         : [childVal]
     : parentVal
 }
+
+config._lifecycleHooks.forEach(hook => {
+  strats[hook] = mergeHook
+})
 
 /**
  * Assets

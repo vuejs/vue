@@ -28,6 +28,24 @@ export default {
   ],
 
   /**
+   * List of lifecycle hooks.
+   *
+   * @type {Array}
+   */
+
+  _lifecycleHooks: [
+    'init',
+    'created',
+    'beforeMount',
+    'mounted',
+    'ready',
+    'beforeUpdate',
+    'updated',
+    'beforeDestroy',
+    'destroyed'
+  ],
+
+  /**
    * Max circular updates allowed in a batcher flush cycle.
    */
 
