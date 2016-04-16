@@ -45,7 +45,7 @@ function prepatch (oldVnode, vnode) {
     cur.child = old.child
     // try re-render child. the child may optimize it
     // and just does nothing.
-    old.child._tryUpdate(cur.data, cur.children, vnode.key)
+    old.child._updateFromParent(cur.data, cur.children, vnode.key)
   }
 }
 

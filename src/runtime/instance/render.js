@@ -40,7 +40,7 @@ export function renderMixin (Vue) {
     }
   }
 
-  Vue.prototype._tryUpdate = function (parentData, children, key) {
+  Vue.prototype._updateFromParent = function (parentData, children, key) {
     const oldParentData = this.$options._renderData
     this.$options._renderKey = key
     this.$options._renderData = parentData
@@ -54,7 +54,7 @@ export function renderMixin (Vue) {
     }
     // diff parent data (attrs on the placeholder) and queue update
     // if anything changed
-    if (diffParentData(parentData, oldParentData)) {
+    if (parentDataChanged(parentData, oldParentData)) {
       this.$forceUpdate()
     }
   }
@@ -123,7 +123,7 @@ function resolveSlots (vm, children) {
   }
 }
 
-function diffParentData (data, oldData) {
+function parentDataChanged (data, oldData) {
   const keys = Object.keys(oldData)
   let key, old, cur, i, l, j, k
   for (i = 0, l = keys.length; i < l; i++) {
