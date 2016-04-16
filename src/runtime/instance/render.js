@@ -212,7 +212,6 @@ function updateProps (vm, data) {
 function updateEvents (vm, data, oldData) {
   if (data.on) {
     updateListeners(data.on, oldData.on || {}, (event, handler) => {
-      console.log(11)
       vm.$on(event, handler)
     })
   }
