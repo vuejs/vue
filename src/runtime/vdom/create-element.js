@@ -26,7 +26,7 @@ export default function createElement (tag, data, children) {
           'make sure to provide the "name" option.'
         )
       }
-      return VNode(tag, data, flatten(children()))
+      return VNode(tag, data, flatten(children && children()))
     }
   } else {
     return Component(tag, data, parent, children)

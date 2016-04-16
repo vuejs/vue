@@ -1,5 +1,4 @@
-import Watcher from '../observer/watcher'
-import { extend, query, resolveAsset, hasOwn, isArray, isObject } from '../util/index'
+import { extend, resolveAsset, hasOwn, isArray, isObject } from '../util/index'
 import { createElement, patch, updateListeners, flatten } from '../vdom/index'
 import { callHook } from './lifecycle'
 import { getPropValue } from './state'
@@ -95,26 +94,6 @@ export function renderMixin (Vue) {
     // restore render state
     renderState.activeInstance = prev
     return vnode
-  }
-
-  Vue.prototype.$mount = function (el) {
-    callHook(this, 'beforeMount')
-    el = this.$el = el && query(el)
-    if (el) {
-      // clean element
-      el.innerHTML = ''
-      if (el.hasAttributes()) {
-        const attrs = el.attributes
-        for (let i = 0, l = attrs.length; i < l; i++) {
-          el.removeAttribute(attrs[i].name)
-        }
-      }
-    }
-    this._watcher = new Watcher(this, this._render, this._update)
-    this._update(this._watcher.value)
-    callHook(this, 'mounted')
-    this._mounted = true
-    return this
   }
 
   Vue.prototype.$forceUpdate = function () {

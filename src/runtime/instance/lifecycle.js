@@ -1,3 +1,6 @@
+import Watcher from '../observer/watcher'
+import { query, toArray } from '../util/index'
+
 export function callHook (vm, hook) {
   vm.$emit('pre-hook:' + hook)
   var handlers = vm.$options[hook]
@@ -25,6 +28,26 @@ export function initLifecycle (vm) {
 }
 
 export function lifecycleMixin (Vue) {
+  Vue.prototype.$mount = function (el) {
+    callHook(this, 'beforeMount')
+    el = this.$el = el && query(el)
+    if (el) {
+      // clean element
+      el.innerHTML = ''
+      if (el.hasAttributes()) {
+        const attrs = toArray(el.attributes)
+        for (let i = 0; i < attrs.length; i++) {
+          el.removeAttribute(attrs[i].name)
+        }
+      }
+    }
+    this._watcher = new Watcher(this, this._render, this._update)
+    this._update(this._watcher.value)
+    callHook(this, 'mounted')
+    this._mounted = true
+    return this
+  }
+
   Vue.prototype.$destroy = function () {
     if (this._isDestroyed) {
       return
