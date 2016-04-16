@@ -1,6 +1,6 @@
 import VNode from './vnode'
 import * as dom from './dom'
-import { isPrimitive } from '../util/index'
+import { isPrimitive, warn } from '../util/index'
 
 const emptyNode = VNode('', {}, [])
 const hooks = ['create', 'update', 'remove', 'destroy', 'pre', 'post']
@@ -178,6 +178,12 @@ export default function createPatchFunction (modules, api) {
           newStartVnode = newCh[++newStartIdx]
         } else {
           elmToMove = oldCh[idxInOld]
+          if (process.env.NODE_ENV !== 'production' && !elmToMove) {
+            warn(
+              'Duplicate track-by key: ' + idxInOld + '. ' +
+              'Make sure each v-for item has a unique track-by key.'
+            )
+          }
           patchVnode(elmToMove, newStartVnode, insertedVnodeQueue)
           oldCh[idxInOld] = undefined
           api.insertBefore(parentElm, getElm(elmToMove), getElm(oldStartVnode))

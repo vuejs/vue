@@ -8,6 +8,7 @@
 
 <script type="text/x-template" id="t">
   <div>
+    <h1>{{ total }} Components</h1>
     <p>{{ action }} took {{time}}ms.</p>
     <button @click="shuffle">shuffle</button>
     <button @click="add">add</button>
@@ -34,13 +35,13 @@
   </tr>
 </script>
 
-<h1>1000 Components</h1>
 <div id="el">
 </div>
 
 <script>
+var total = 1000
 var items = []
-for (var i = 0; i < 1000; i++) {
+for (var i = 0; i < total; i++) {
   items.push({
     id: i,
     label: String(Math.random()).slice(0, 5)
@@ -52,6 +53,7 @@ var vm = new Vue({
   el: '#el',
   template: '#t',
   data: {
+    total: total,
     time: 0,
     action: 'Render',
     items: items,
@@ -63,7 +65,7 @@ var vm = new Vue({
     }),
     add: monitor('add', function () {
       this.items.push({
-        id: this.items.length,
+        id: total++,
         label: String(Math.random()).slice(0, 5)
       })
     }),
