@@ -1,5 +1,6 @@
 import { genHandlers } from './events'
 import { genDirectives } from './directives/index'
+import { isReservedTag } from '../../runtime/util/dom'
 
 export function generate (ast) {
   const code = ast ? genElement(ast) : '__h__("div")'
@@ -18,7 +19,10 @@ function genElement (el) {
   } else if (el.tag === 'slot') {
     return genSlot(el)
   } else {
-    return `__h__('${el.tag}', ${genData(el)}, ${genChildren(el)})`
+    // if the element is potentially a component,
+    // wrap its children as a thunk.
+    const children = genChildren(el, !isReservedTag(el.tag))
+    return `__h__('${el.tag}', ${genData(el)}, ${children})`
   }
 }
 
@@ -92,11 +96,14 @@ function genData (el) {
   return data.replace(/,$/, '') + '}'
 }
 
-function genChildren (el) {
+function genChildren (el, asThunk) {
   if (!el.children.length) {
     return 'undefined'
   }
-  return '[' + el.children.map(genNode).join(',') + ']'
+  const code = '[' + el.children.map(genNode).join(',') + ']'
+  return asThunk
+    ? `function(){return ${code}}`
+    : code
 }
 
 function genNode (node) {

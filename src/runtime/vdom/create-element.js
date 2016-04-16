@@ -10,12 +10,11 @@ import {
 } from '../util/index'
 
 export default function createElement (tag, data, children) {
-  children = flatten(children)
   const parent = renderState.activeInstance
   if (typeof tag === 'string') {
     let Ctor
     if (isReservedTag(tag)) {
-      return VNode(tag, data, children)
+      return VNode(tag, data, flatten(children))
     } else if ((Ctor = resolveAsset(parent.$options, 'components', tag))) {
       return Component(Ctor, data, parent, children)
     } else {
@@ -26,14 +25,14 @@ export default function createElement (tag, data, children) {
           'make sure to provide the "name" option.'
         )
       }
-      return VNode(tag, data, children)
+      return VNode(tag, data, flatten(children()))
     }
   } else {
     return Component(tag, data, parent, children)
   }
 }
 
-function flatten (children) {
+export function flatten (children) {
   if (isArray(children)) {
     let res = []
     for (let i = 0, l = children.length; i < l; i++) {

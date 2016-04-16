@@ -85,9 +85,16 @@ export function renderMixin (Vue) {
 
   Vue.prototype.$mount = function (el) {
     callHook(this, 'beforeMount')
-    this.$el = el && query(el)
-    if (this.$el) {
-      this.$el.innerHTML = ''
+    el = this.$el = el && query(el)
+    if (el) {
+      // clean element
+      el.innerHTML = ''
+      if (el.hasAttributes()) {
+        const attrs = el.attributes
+        for (let i = 0, l = attrs.length; i < l; i++) {
+          el.removeAttribute(attrs[i].name)
+        }
+      }
     }
     this._watcher = new Watcher(this, this._render, this._update)
     this._update(this._watcher.value)
@@ -103,7 +110,7 @@ export function renderMixin (Vue) {
 
 function resolveSlots (vm, children) {
   if (children) {
-    children = children.slice()
+    children = children().slice()
     const slots = { default: children }
     let i = children.length
     let name, child
