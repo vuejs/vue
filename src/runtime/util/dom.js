@@ -1,7 +1,20 @@
 import { isIE9 } from './env'
 import { warn } from './debug'
 
-const reservedTags = 'slot|component|div|p|span|img|a|b|i|br|ul|ol|li|h1|h2|h3|h4|h5|h6|code|pre|table|th|td|tr|form|label|input|select|option|nav|article|section|header|footer'
+const reservedTags =
+  'slot|component|' +
+  'html|base|head|link|meta|style|title|' +
+  'address|article|footer|header|h1|h2|h3|h4|h5|h6|hgroup|nav|section|' +
+  'div|dd|dl|dt|figcaption|figure|hr|li|main|ol|p|pre|ul|' +
+  'a|b|abbr|bdi|bdo|br|cite|code|data|dfn|em|i|kbd|mark|q|rp|rt|rtc|ruby|' +
+  's|samp|small|span|strong|sub|sup|time|u|var|wbr|area|audio|map|track|video|' +
+  'embed|object|param|source|canvas|script|noscript|del|ins|' +
+  'caption|col|colgroup|table|thead|tbody|td|th|tr|' +
+  'button|datalist|fieldset|form|input|label|legend|meter|optgroup|option|' +
+  'output|progress|select|textarea|' +
+  'details|dialog|menu|menuitem|summary|' +
+  'content|element|shadow|template'
+
 const reservedTagMap = Object.create(null)
 reservedTags.split('|').forEach(tag => {
   reservedTagMap[tag] = true
@@ -9,33 +22,6 @@ reservedTags.split('|').forEach(tag => {
 
 export function isReservedTag (tag) {
   return reservedTagMap[tag]
-}
-
-export let isUnknownElement
-if (process.env.NODE_ENV !== 'production') {
-  isUnknownElement = (function () {
-    const cache = {}
-    return function (tag) {
-      if (cache.hasOwnProperty(tag)) {
-        return cache[tag]
-      }
-      const el = document.createElement(tag)
-      if (tag.indexOf('-') > -1) {
-        // http://stackoverflow.com/a/28210364/1070244
-        return (
-          el.constructor === window.HTMLUnknownElement ||
-          el.constructor === window.HTMLElement
-        )
-      } else {
-        return (
-          /HTMLUnknownElement/.test(el.toString()) &&
-          // Chrome returns unknown for several HTML5 elements.
-          // https://code.google.com/p/chromium/issues/detail?id=540526
-          !/^(data|time|rtc|rb)$/.test(tag)
-        )
-      }
-    }
-  })()
 }
 
 /**

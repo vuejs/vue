@@ -6,7 +6,6 @@ import {
   isPrimitive,
   isArray,
   isReservedTag,
-  isUnknownElement,
   resolveAsset
 } from '../util/index'
 
@@ -20,14 +19,12 @@ export default function createElement (tag, data, children) {
     } else if ((Ctor = resolveAsset(parent.$options, 'components', tag))) {
       return Component(Ctor, data, parent, children)
     } else {
-      if (process.env.NODE_ENV !== 'production') {
-        if (!data.svg && isUnknownElement(tag)) {
-          warn(
-            'Unknown custom element: <' + tag + '> - did you ' +
-            'register the component correctly? For recursive components, ' +
-            'make sure to provide the "name" option.'
-          )
-        }
+      if (process.env.NODE_ENV !== 'production' && !data.svg) {
+        warn(
+          'Unknown custom element: <' + tag + '> - did you ' +
+          'register the component correctly? For recursive components, ' +
+          'make sure to provide the "name" option.'
+        )
       }
       return VNode(tag, data, children)
     }
