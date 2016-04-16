@@ -92,7 +92,7 @@ function genData (el) {
   }
   // attributes
   if (el.attrs) {
-    data += `attrs:{${genProps(el.attrs)}}`
+    data += `attrs:{${genProps(el.attrs)}},`
   }
   // hooks
   if (el.hooks) {
