@@ -68,8 +68,9 @@ export function renderMixin (Vue) {
     return () => {
       const prev = renderState.context
       renderState.context = this
-      return fn()
+      const children = fn()
       renderState.context = prev
+      return children
     }
   }
 

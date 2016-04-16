@@ -68,7 +68,6 @@ function runBatcherQueue (queue) {
     var watcher = queue[queueIndex]
     var id = watcher.id
     has[id] = null
-    console.log('running: ' + id)
     watcher.run()
     // in dev build, check and stop circular updates.
     if (process.env.NODE_ENV !== 'production' && has[id] != null) {
@@ -99,7 +98,6 @@ function runBatcherQueue (queue) {
 export function pushWatcher (watcher) {
   var id = watcher.id
   if (has[id] == null) {
-    console.log('push: ' + id)
     if (internalQueueDepleted && !watcher.user) {
       // an internal watcher triggered by a user watcher...
       // let's run it immediately after current user watcher is done.
