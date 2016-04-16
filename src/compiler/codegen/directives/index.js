@@ -3,6 +3,7 @@ import { show } from './show'
 import { html } from './html'
 import { ref } from './ref'
 import { el } from './el'
+export { genHandlers } from './on'
 
 export const directives = {
   model,

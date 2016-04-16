@@ -1,5 +1,4 @@
-import { genHandlers } from './events'
-import { genDirectives } from './directives/index'
+import { genDirectives, genHandlers } from './directives/index'
 import { isReservedTag } from '../../runtime/util/dom'
 
 export function generate (ast) {
