@@ -11,9 +11,9 @@
 
   <p>
     <button v-if="optimized" @click="loadBase">Base version</button>
-    <button v-else @click="loadOptimized">Optimized version</button>
+    <button v-else @click="loadOptimized">Optimized version (Object.freeze)</button>
     <button @click="unmount">Unmount</button>
-    <button @click="rerender">Rerender</button>
+    <button @click="rerender">Rerender with fresh data</button>
   </p>
 
   <form>
