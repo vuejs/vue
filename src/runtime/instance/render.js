@@ -1,6 +1,6 @@
 import Watcher from '../observer/watcher'
 import { extend, query, resolveAsset, hasOwn, isArray, isObject } from '../util/index'
-import { createElement, patch, updateListeners } from '../vdom/index'
+import { createElement, patch, updateListeners, flatten } from '../vdom/index'
 import { callHook } from './lifecycle'
 import { getPropValue } from './state'
 
@@ -48,13 +48,14 @@ export function renderMixin (Vue) {
     this.$options._renderChildren = children
     // update props and listeners
     if (parentData) {
+      // if any prop has changed it would trigger and queue an update,
+      // but if no props changed, nothing happens
       updateProps(this, parentData)
       updateEvents(this, parentData, oldParentData)
     }
-    // for now, if the component has content it always updates
-    // because we don't know whether the children have changed.
-    // need to optimize in the future.
-    if (children || diffParentData(parentData, oldParentData)) {
+    // diff parent data (attrs on the placeholder) and queue update
+    // if anything changed
+    if (diffParentData(parentData, oldParentData)) {
       this.$forceUpdate()
     }
   }
@@ -64,11 +65,11 @@ export function renderMixin (Vue) {
    * This is used to wrap all children thunks in codegen.
    */
 
-  Vue.prototype._withContext = function (fn) {
+  Vue.prototype._renderWithContext = function (fn) {
     return () => {
       const prev = renderState.context
       renderState.context = this
-      const children = fn()
+      const children = flatten(fn())
       renderState.context = prev
       return children
     }
