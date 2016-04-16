@@ -39,9 +39,6 @@ Vue.component('item', {
       open: false
     }
   },
-  updated: function () {
-    console.log(this._vnode)
-  },
   computed: {
     isFolder: function () {
       return this.model.children &&
