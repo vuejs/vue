@@ -102,7 +102,7 @@ function genChildren (el, asThunk) {
   }
   const code = '[' + el.children.map(genNode).join(',') + ']'
   return asThunk
-    ? `function(){return ${code}}`
+    ? `_withContext(function(){return ${code}})`
     : code
 }
 

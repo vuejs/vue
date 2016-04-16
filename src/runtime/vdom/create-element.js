@@ -11,11 +11,12 @@ import {
 
 export default function createElement (tag, data, children) {
   const parent = renderState.activeInstance
+  const context = renderState.context || parent
   if (typeof tag === 'string') {
     let Ctor
     if (isReservedTag(tag)) {
       return VNode(tag, data, flatten(children))
-    } else if ((Ctor = resolveAsset(parent.$options, 'components', tag))) {
+    } else if ((Ctor = resolveAsset(context.$options, 'components', tag))) {
       return Component(Ctor, data, parent, children)
     } else {
       if (process.env.NODE_ENV !== 'production' && !data.svg) {

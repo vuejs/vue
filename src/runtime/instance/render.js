@@ -5,7 +5,8 @@ import { callHook } from './lifecycle'
 import { getPropValue } from './state'
 
 export const renderState = {
-  activeInstance: null
+  activeInstance: null,
+  context: null
 }
 
 export function initRender (vm) {
@@ -58,28 +59,39 @@ export function renderMixin (Vue) {
     }
   }
 
+  /**
+   * Call a render function with this instance as the context.
+   * This is used to wrap all children thunks in codegen.
+   */
+
+  Vue.prototype._withContext = function (fn) {
+    return () => {
+      const prev = renderState.context
+      renderState.context = this
+      return fn()
+      renderState.context = prev
+    }
+  }
+
   Vue.prototype._render = function () {
-    const {
-      render,
-      _renderKey,
-      _renderData,
-      _renderChildren
-    } = this.$options
-    // resolve slots
+    const prev = renderState.activeInstance
+    renderState.activeInstance = this
+    const { render, _renderKey, _renderData, _renderChildren } = this.$options
+    // resolve slots. becaues slots are rendered in parent scope,
+    // we set the activeInstance to parent.
     if (_renderChildren) {
       resolveSlots(this, _renderChildren)
     }
-    // render
-    const prev = renderState.activeInstance
-    renderState.activeInstance = this
+    // render self
     const vnode = render.call(this)
-    renderState.activeInstance = prev
     // set key
     vnode.key = _renderKey
     // update parent data
     if (_renderData) {
       mergeParentData(this, vnode.data, _renderData)
     }
+    // restore render state
+    renderState.activeInstance = prev
     return vnode
   }
 
