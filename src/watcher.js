@@ -340,7 +340,7 @@ function traverse (val, walkedObjs) {
     while (i--) traverse(val[i], walkedObjs)
   } else if (isObject(val)) {
     if (val.__ob__) {
-      var depId = val.__ob__.dep.id;
+      var depId = val.__ob__.dep.id
       if (walkedObjs[depId]) {
         return
       } else {
