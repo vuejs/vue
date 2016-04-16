@@ -12,15 +12,15 @@ export function initRender (vm) {
   vm._vnode = null
   vm._mounted = false
   vm.$slots = {}
-  const el = vm.$options.el
-  if (el) {
-    vm.$mount(el)
+  if (vm.$options.el) {
+    vm.$mount(vm.$options.el)
   }
 }
 
 export function renderMixin (Vue) {
   // shorthands used in render functions
   Vue.prototype.__h__ = createElement
+
   Vue.prototype.__d__ = function (id) {
     return resolveAsset(this.$options, 'directives', id, true)
   }
