@@ -1,14 +1,12 @@
 import Watcher from '../observer/watcher'
-import { defineReactive } from '../observer/index'
-import { set, query, toArray } from '../util/index'
+import { query, toArray } from '../util/index'
 
 export function initLifecycle (vm) {
   vm.$children = []
   vm._isDestroyed = false
   vm._isBeingDestroyed = false
-
-  defineReactive(vm, '$refs', {})
-  defineReactive(vm, '$els', {})
+  vm.$refs = {}
+  vm.$els = {}
 
   const options = vm.$options
 
@@ -23,7 +21,7 @@ export function initLifecycle (vm) {
   vm._context = options._context
   vm._ref = options._renderData && options._renderData.ref
   if (vm._ref) {
-    set(vm._context.$refs, vm._ref, vm)
+    vm._context.$refs[vm._ref] = vm
   }
 }
 
@@ -45,6 +43,10 @@ export function lifecycleMixin (Vue) {
     this._update(this._watcher.value)
     callHook(this, 'mounted')
     this._mounted = true
+    // root instance, call ready on self
+    if (this.$root === this) {
+      callHook(this, 'ready')
+    }
     return this
   }
 
