@@ -3,9 +3,18 @@
 <link rel="stylesheet" href="demo.css">
 
 <div id="el">
-  <h1>
-    Rendering Large Datasets With Vue {{renderTime}}
-  </h1>
+  <h1>Rendering Large Datasets With Vue</h1>
+
+  <p>
+    <span>{{ rows }} x {{ cols }}, {{ optimized ? 'with' : 'without' }} optimization. {{ msg }}</span>
+  </p>
+
+  <p>
+    <button v-if="optimized" @click="loadBase">Base version</button>
+    <button v-else @click="loadOptimized">Optimized version</button>
+    <button @click="unmount">Unmount</button>
+    <button @click="rerender">Rerender</button>
+  </p>
 
   <form>
     <strong>Filter Data</strong>:
@@ -22,9 +31,6 @@
       {{ visibleCount() }} found.
     </span>
 
-    <!-- Provide tooling to unmount and remount the grid. -->
-    <!-- <a v-if="grid.length" v-on="click:unmountGrid">Unmount Grid</a> -->
-    <a @click="remountGrid">Remount Grid</a>
   </form>
 
   <table width="100%" cellspacing="2" :class="{ filtered: filter }">
@@ -40,37 +46,45 @@
 </div>
 
 <script>
+var ROWS = 1000
+var COLS = 10
+var OPTIMIZED = window.location.hash === '#optimized'
+
+window.onhashchange = function () {
+  window.location.reload()
+}
+
 function generateGrid( rowCount, columnCount ) {
   var valuePoints = [
     "Daenerys", "Jon", "Sansa", "Arya", "Stannis", "Gregor", "Tyrion",
     "Theon", "Joffrey", "Ramsay", "Cersei", "Bran", "Margaery",
     "Melisandre", "Daario", "Jamie", "Eddard", "Myrcella", "Robb",
     "Jorah", "Petyr", "Tommen", "Sandor", "Oberyn", "Drogo", "Ygritte"
-  ];
-  var valueIndex = 0;
-  var grid = [];
+  ]
+  var valueIndex = 0
+  var grid = []
 
   for ( var r = 0 ; r < rowCount ; r++ ) {
     var row = {
       id: r,
       items: []
-    };
+    }
     for ( var c = 0 ; c < columnCount ; c++ ) {
       row.items.push({
         id: ( r + "-" + c ),
         value: valuePoints[ valueIndex ]
-      });
+      })
       if ( ++valueIndex >= valuePoints.length ) {
-        valueIndex = 0;
+        valueIndex = 0
       }
     }
-    grid.push( row );
+    grid.push(row)
   }
 
-  return( grid );
+  return OPTIMIZED ? Object.freeze(grid) : grid
 }
 
-var grid = generateGrid(1000, 10)
+var grid = generateGrid(ROWS, COLS)
 var s = window.performance.now()
 console.profile('a')
 var vm = new Vue({
@@ -78,8 +92,11 @@ var vm = new Vue({
   el: '#el',
 
   data: {
-    renderTime: 0,
-    grid: Object.freeze(grid),
+    cols: COLS,
+    rows: ROWS,
+    optimized: OPTIMIZED,
+    msg: 'loading...',
+    grid: grid,
     dataPoints: grid.length * grid[0].items.length,
     filter: ''
   },
@@ -106,20 +123,35 @@ var vm = new Vue({
       }
       return count
     },
-    unmountGrid: function () {
-      this.grid = []
+    loadBase: function () {
+      window.location.hash = ''
     },
-    remountGrid: function () {
-      this.grid = generateGrid(1000, 10)
+    loadOptimized: function () {
+      window.location.hash = '#optimized'
+    },
+    unmount: function () {
       console.profile('unmount')
-      Vue.nextTick(function () {
+      var s = window.performance.now()
+      this.grid = []
+      setTimeout(function () {
+        vm.msg = 'umount took: ' + (window.performance.now() - s).toFixed(2) + 'ms'
         console.profileEnd('unmount')
-      })
+      }, 0)
+    },
+    rerender: function () {
+      var grid = generateGrid(1000, 10)
+      var s = window.performance.now()
+      console.profile('rerender')
+      this.grid = grid
+      setTimeout(function () {
+        vm.msg = 'rerender took: ' + (window.performance.now() - s).toFixed(2) + 'ms'
+        console.profileEnd('rerender')
+      }, 0)
     }
   }
 })
 console.profileEnd('a')
 setTimeout(function () {
-  vm.renderTime = window.performance.now() - s
+  vm.msg = 'initial render took: ' + (window.performance.now() - s).toFixed(2) + 'ms'
 }, 0)
 </script>
