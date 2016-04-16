@@ -6,32 +6,32 @@
 }
 </style>
 
-<script type="x/template" id="t">
-<div>
-  <p>Used {{time}}ms.</p>
-  <button @click="shuffle">shuffle</button>
-  <button @click="add">add</button>
-  <table class="table table-hover table-striped test-data">
-    <row v-for="item in items" track-by="id"
-      :class="{ danger: item.id === selected }"
-      :item="item"
-      @select="select(item)"
-      @remove="remove(item)">
-    </row>
-  </table>
-</div>
+<script type="text/x-template" id="t">
+  <div>
+    <p>{{ action }} took {{time}}ms.</p>
+    <button @click="shuffle">shuffle</button>
+    <button @click="add">add</button>
+    <table class="table table-hover table-striped test-data">
+      <row v-for="item in items" track-by="id"
+        :class="{ danger: item.id === selected }"
+        :item="item"
+        @select="select(item)"
+        @remove="remove(item)">
+      </row>
+    </table>
+  </div>
 </script>
 
-<script type="x/template" id="row">
-<tr>
-  <td class="col-md-1">{{item.id}}</td>
-  <td class="col-md-4">
-      <a @click="$emit('select')">{{item.label}}</a>
-  </td>
-  <td class="col-md-1">
-    <button @click="$emit('remove')">remove</button>
-  </td>
-</tr>
+<script type="text/x-template" id="row">
+  <tr>
+    <td class="col-md-1">{{item.id}}</td>
+    <td class="col-md-4">
+        <a @click="$emit('select')">{{item.label}}</a>
+    </td>
+    <td class="col-md-1">
+      <button @click="$emit('remove')">remove</button>
+    </td>
+  </tr>
 </script>
 
 <h1>1000 Components</h1>
@@ -53,23 +53,24 @@ var vm = new Vue({
   template: '#t',
   data: {
     time: 0,
+    action: 'Render',
     items: items,
     selected: null
   },
   methods: {
-    shuffle: wrap(function () {
+    shuffle: monitor('shuffle', function () {
       this.items = _.shuffle(this.items)
     }),
-    add: wrap(function () {
+    add: monitor('add', function () {
       this.items.push({
         id: this.items.length,
         label: String(Math.random()).slice(0, 5)
       })
     }),
-    select: wrap(function (item) {
+    select: monitor('select', function (item) {
       this.selected = item.id
     }),
-    remove: wrap(function (item) {
+    remove: monitor('remove', function (item) {
       this.items.$remove(item)
     })
   },
@@ -84,11 +85,12 @@ setTimeout(function () {
   vm.time = window.performance.now() - s
 }, 0)
 
-function wrap (fn) {
+function monitor (action, fn) {
   return function () {
     var s = window.performance.now()
     fn.apply(this, arguments)
     Vue.nextTick(function () {
+      vm.action = action
       vm.time = window.performance.now() - s
     })
   }
