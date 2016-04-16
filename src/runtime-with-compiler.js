@@ -4,6 +4,12 @@ import { getOuterHTML, query, warn } from './runtime/util/index'
 import Vue from './runtime/index'
 
 const mount = Vue.prototype.$mount
+const idTemplateCache = Object.create(null)
+
+function idToTemplate (id) {
+  const hit = idTemplateCache[id]
+  return hit || (idTemplateCache[id] = query(id).innerHTML)
+}
 
 Vue.prototype.$mount = function (el) {
   const options = this.$options
@@ -13,7 +19,7 @@ Vue.prototype.$mount = function (el) {
     if (template) {
       if (typeof template === 'string') {
         if (template.charAt(0) === '#') {
-          template = query(template).innerHTML
+          template = idToTemplate(template)
         }
       } else if (template.nodeType) {
         template = template.innerHTML

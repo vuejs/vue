@@ -1,36 +1,30 @@
 import Watcher from '../observer/watcher'
-import { query, toArray } from '../util/index'
-
-export function callHook (vm, hook) {
-  vm.$emit('pre-hook:' + hook)
-  var handlers = vm.$options[hook]
-  if (handlers) {
-    for (var i = 0, j = handlers.length; i < j; i++) {
-      handlers[i].call(vm)
-    }
-  }
-  vm.$emit('hook:' + hook)
-}
+import { defineReactive } from '../observer/index'
+import { set, query, toArray } from '../util/index'
 
 export function initLifecycle (vm) {
+  vm.$children = []
+  vm._isDestroyed = false
+  vm._isBeingDestroyed = false
+
+  defineReactive(vm, '$refs', {})
+  defineReactive(vm, '$els', {})
+
   const options = vm.$options
+
   // parent
   vm.$parent = options.parent
   vm.$root = vm.$parent ? vm.$parent.$root : vm
   if (vm.$parent) {
     vm.$parent.$children.push(vm)
   }
+
   // context & ref
   vm._context = options._context
   vm._ref = options._renderData && options._renderData.ref
   if (vm._ref) {
-    vm._context.$refs[vm._ref] = vm
+    set(vm._context.$refs, vm._ref, vm)
   }
-  vm.$children = []
-  vm.$refs = {}
-  vm.$els = {}
-  vm._isDestroyed = false
-  vm._isBeingDestroyed = false
 }
 
 export function lifecycleMixin (Vue) {
@@ -85,4 +79,15 @@ export function lifecycleMixin (Vue) {
     // turn off all instance listeners.
     this.$off()
   }
+}
+
+export function callHook (vm, hook) {
+  vm.$emit('pre-hook:' + hook)
+  var handlers = vm.$options[hook]
+  if (handlers) {
+    for (var i = 0, j = handlers.length; i < j; i++) {
+      handlers[i].call(vm)
+    }
+  }
+  vm.$emit('hook:' + hook)
 }

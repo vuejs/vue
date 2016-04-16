@@ -88,11 +88,15 @@ function genData (el) {
   }
   // props
   if (el.props) {
-    data += 'props:{' + genProps(el.props) + '},'
+    data += `props:{${genProps(el.props)}},`
   }
   // attributes
   if (el.attrs) {
-    data += 'attrs:{' + genProps(el.attrs) + '},'
+    data += `attrs:{${genProps(el.attrs)}}`
+  }
+  // hooks
+  if (el.hooks) {
+    data += `hook:{${genHooks(el.hooks)}},`
   }
   // event handlers
   if (el.events) {
@@ -138,9 +142,17 @@ function genSlot (el) {
 
 function genProps (props) {
   let res = ''
-  for (var i = 0; i < props.length; i++) {
+  for (let i = 0; i < props.length; i++) {
     let prop = props[i]
     res += `"${prop.name}":${prop.value},`
+  }
+  return res.slice(0, -1)
+}
+
+function genHooks (hooks) {
+  let res = ''
+  for (let key in hooks) {
+    res += `"${key}":${hooks[key]},`
   }
   return res.slice(0, -1)
 }
