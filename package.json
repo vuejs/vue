@@ -11,9 +11,10 @@
   ],
   "scripts": {
     "dev": "webpack --config build/webpack.config.js --watch",
-    "test": "mocha",
+    "test": "npm run e2e",
     "build": "NODE_ENV=production node build/build.js",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "e2e": "casperjs test --concise ./test/e2e"
   },
   "repository": {
     "type": "git",
@@ -34,6 +35,7 @@
     "babel-preset-es2015": "^6.0.0",
     "babel-preset-es2015-rollup": "^1.1.1",
     "babel-preset-stage-2": "^6.0.0",
+    "casperjs": "^1.1.0",
     "eslint": "^2.7.0",
     "eslint-config-standard": "^5.1.0",
     "eslint-loader": "^1.3.0",

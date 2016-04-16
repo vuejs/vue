@@ -38,8 +38,10 @@ function initProps (vm) {
 export function getPropValue (data, key) {
   if (!data) return
   const altKey = hyphenate(key)
-  return getPropValueFromHash(data.attrs, key, altKey) ||
-    getPropValueFromHash(data.props, key, altKey)
+  const attrVal = getPropValueFromHash(data.attrs, key, altKey)
+  return attrVal === undefined
+    ? getPropValueFromHash(data.props, key, altKey)
+    : attrVal
 }
 
 function getPropValueFromHash (hash, key, altKey) {

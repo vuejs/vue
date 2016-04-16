@@ -23,9 +23,9 @@
         },
         methods: {
           marked: marked,
-          update: function (e) {
+          update: _.debounce(function (e) {
             this.input = e.target.value
-          }
+          }, 300)
         }
       })
     </script>
