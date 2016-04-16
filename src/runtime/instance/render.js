@@ -48,7 +48,7 @@ export function renderMixin (Vue) {
     // update props and listeners
     if (parentData) {
       updateProps(this, parentData)
-      updateEvents(this, parentData)
+      updateEvents(this, parentData, oldParentData)
     }
     // for now, if the component has content it always updates
     // because we don't know whether the children have changed.
@@ -209,9 +209,10 @@ function updateProps (vm, data) {
   }
 }
 
-function updateEvents (vm, data) {
+function updateEvents (vm, data, oldData) {
   if (data.on) {
-    updateListeners(data.on, vm._vnode.data.on || {}, (event, handler) => {
+    updateListeners(data.on, oldData.on || {}, (event, handler) => {
+      console.log(11)
       vm.$on(event, handler)
     })
   }

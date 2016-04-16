@@ -1,7 +1,15 @@
 import { toArray } from '../util/index'
+import { updateListeners } from '../vdom/index'
 
 export function initEvents (vm) {
   vm._events = Object.create(null)
+  // init parent attached events
+  const parentData = vm.$options._renderData
+  if (parentData && parentData.on) {
+    updateListeners(parentData.on, {}, (event, handler) => {
+      vm.$on(event, handler)
+    })
+  }
 }
 
 export function eventsMixin (Vue) {
