@@ -16,39 +16,37 @@
   <body>
 
     <div id="el">
-      <p>Selected: {{selected}}</p>
-      <select2
-        :options="options"
-        placeholder="select one"
-        v-model="selected">
-      </select2>
     </div>
+
+    <script type="text/x-tempalte" id="demo-template">
+      <div>
+        <p>Selected: {{ selected }}</p>
+        <select2 :options="options" v-model="selected">
+          <option disabled value="0">Select one</option>
+        </select2>
+      </div>
+    </script>
 
     <script type="text/x-template" id="select2-template">
       <select>
-        <option v-if="placeholder"></option>
         <slot></slot>
       </select>
     </script>
 
     <script>
     Vue.component('select2', {
-      props: ['options', 'placeholder', 'value'],
+      props: ['options', 'value'],
       template: '#select2-template',
       ready: function () {
         var vm = this
         $(this.$el)
+          .val(this.value)
           // init select2
-          .select2({
-            data: this.options,
-            placeholder: this.placeholder
-          })
+          .select2({ data: this.options })
           // emit event on change.
           .on('change', function () {
             vm.$emit('input', mockEvent(this.value))
           })
-          // set initial value
-          .select2('val', this.value)
       },
       watch: {
         value: function (value) {
@@ -57,6 +55,7 @@
         },
         options: function (options) {
           // update options
+          console.log(options)
           $(this.$el).select2({ data: options })
         }
       },
@@ -77,6 +76,7 @@
 
     var vm = new Vue({
       el: '#el',
+      template: '#demo-template',
       data: {
         selected: 0,
         options: [

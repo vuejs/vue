@@ -130,8 +130,13 @@ function parentDataChanged (data, oldData) {
     key = keysToDiff[i]
     cur = data[key]
     old = oldData[key]
-    if (key === 'on') continue
-    if (!cur) return true
+    if (!old) {
+      if (!cur) {
+        continue
+      } else {
+        return true
+      }
+    }
     if (isArray(old)) {
       if (!isArray(cur)) return true
       if (cur.length !== old.length) return true
