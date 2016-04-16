@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="description" content="dbmon vue" />
+<link href="./lib/bootstrap.min.css" rel="stylesheet" type="text/css" />
+<link href="./lib/styles.css" rel="stylesheet" type="text/css" />
+<title>dbmon (Vue)</title>
+</head>
+<body>
+  <div id="app">
+    <table class="table table-striped lastest-data">
+      <tbody>
+        <tr v-for="db in databases" track-by="$index">
+          <td class="dbname">{{db.dbname}}</td>
+          <td class="query-count">
+            <span :class="db.lastSample.countClassName">{{db.lastSample.nbQueries}}</span>
+          </td>
+          <td v-for="q in db.lastSample.topFiveQueries" track-by="$index" :class="'Query ' + q.elapsedClassName">
+            {{q.formatElapsed}}
+            <div class="popover left">
+              <div class="popover-content">{{q.query}}</div>
+              <div class="arrow"></div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script src="./ENV.js"></script>
+  <script src="./lib/memory-stats.js"></script>
+  <script src="./lib/monitor.js"></script>
+  <script src="../../dist/vue.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
