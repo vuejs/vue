@@ -38,7 +38,7 @@
         <label>{{stat.label}}</label>
         <input type="range" v-model="stat.value" min="0" max="100">
         <span>{{stat.value}}</span>
-        <button @click="remove(stat)">X</button>
+        <button @click="remove(stat)" class="remove">X</button>
       </div>
       <form id="add">
         <input name="newlabel" v-model="newLabel">

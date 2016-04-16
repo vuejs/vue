@@ -123,11 +123,11 @@ function resolveSlots (vm, children) {
   }
 }
 
+const keysToDiff = ['class', 'style', 'attrs', 'props', 'directives']
 function parentDataChanged (data, oldData) {
-  const keys = Object.keys(oldData)
   let key, old, cur, i, l, j, k
-  for (i = 0, l = keys.length; i < l; i++) {
-    key = keys[i]
+  for (i = 0, l = keysToDiff.length; i < l; i++) {
+    key = keysToDiff[i]
     cur = data[key]
     old = oldData[key]
     if (key === 'on') continue
