@@ -124,8 +124,10 @@ function resolveSlots (vm, children) {
 }
 
 function diffParentData (data, oldData) {
-  let key, old, cur
-  for (key in oldData) {
+  const keys = Object.keys(oldData)
+  let key, old, cur, i, l, j, k
+  for (i = 0, l = keys.length; i < l; i++) {
+    key = keys[i]
     cur = data[key]
     old = oldData[key]
     if (key === 'on') continue
@@ -133,7 +135,7 @@ function diffParentData (data, oldData) {
     if (isArray(old)) {
       if (!isArray(cur)) return true
       if (cur.length !== old.length) return true
-      for (let i = 0; i < old.length; i++) {
+      for (j = 0, k = old.length; j < k; j++) {
         if (isObject(old[i])) {
           if (!isObject(cur[i])) return true
           if (diffObject(cur, old)) return true
@@ -145,10 +147,14 @@ function diffParentData (data, oldData) {
       return true
     }
   }
+  return false
 }
 
 function diffObject (cur, old) {
-  for (var key in old) {
+  const keys = Object.keys(old)
+  let i, l, key
+  for (i = 0, l = keys.length; i < l; i++) {
+    key = keys[i]
     if (cur[key] !== old[key]) return true
   }
 }
