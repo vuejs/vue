@@ -1,5 +1,5 @@
 import Watcher from '../observer/watcher'
-import { extend, query, resolveAsset, hasOwn } from '../util/index'
+import { extend, query, resolveAsset, hasOwn, isArray, isObject } from '../util/index'
 import { createElement, patch, updateListeners } from '../vdom/index'
 import { callHook } from './lifecycle'
 import { getPropValue } from './state'
@@ -15,78 +15,6 @@ export function initRender (vm) {
   const el = vm.$options.el
   if (el) {
     vm.$mount(el)
-  }
-}
-
-function resolveSlots (vm, children) {
-  if (children) {
-    children = children.slice()
-    const slots = { default: children }
-    let i = children.length
-    let name, child
-    while (i--) {
-      child = children[i]
-      if ((name = child.data && child.data.slot)) {
-        let slot = (slots[name] || (slots[name] = []))
-        if (child.tag === 'template') {
-          slot.push.apply(slot, child.children)
-        } else {
-          slot.push(child)
-        }
-        children.splice(i, 1)
-      }
-    }
-    vm.$slots = slots
-  }
-}
-
-function mergeParentData (vm, data, parentData) {
-  const props = vm.$options.props
-  if (parentData.attrs) {
-    const attrs = data.attrs || (data.attrs = {})
-    for (let key in parentData.attrs) {
-      if (!hasOwn(props, key)) {
-        attrs[key] = parentData.attrs[key]
-      }
-    }
-  }
-  if (parentData.props) {
-    const props = data.props || (data.props = {})
-    for (let key in parentData.props) {
-      if (!hasOwn(props, key)) {
-        props[key] = parentData.props[key]
-      }
-    }
-  }
-  if (parentData.staticClass) {
-    data.staticClass = data.staticClass
-      ? data.staticClass + ' ' + parentData.staticClass
-      : parentData.staticClass
-  }
-  if (parentData.class) {
-    extend((data.class || (data.class = {})), parentData.class)
-  }
-  if (parentData.style) {
-    extend((data.style || (data.style = {})), parentData.style)
-  }
-  if (parentData.directives) {
-    data.directives = parentData.directives.conact(data.directives || [])
-  }
-  if (parentData.on) {
-    updateListeners(parentData.on, data.on || {}, (event, handler) => {
-      vm.$on(event, handler)
-    })
-  }
-}
-
-function updateProps (vm, data) {
-  if (data.attrs || data.props) {
-    for (let key in vm.$options.props) {
-      let newVal = getPropValue(data, key)
-      if (vm[key] !== newVal) {
-        vm[key] = newVal
-      }
-    }
   }
 }
 
@@ -112,21 +40,21 @@ export function renderMixin (Vue) {
     }
   }
 
-  Vue.prototype._tryUpdate = function (data, children, key) {
+  Vue.prototype._tryUpdate = function (parentData, children, key) {
+    const oldParentData = this.$options._renderData
     this.$options._renderKey = key
-    this.$options._renderData = data
+    this.$options._renderData = parentData
     this.$options._renderChildren = children
-    // set props - this will trigger update if any of them changed
-    // but not guaranteed
-    if (data) {
-      updateProps(this, data)
+    // update props and listeners
+    if (parentData) {
+      updateProps(this, parentData)
+      updateEvents(this, parentData)
     }
     // for now, if the component has content it always updates
     // because we don't know whether the children have changed.
     // need to optimize in the future.
-    if (children) {
+    if (children || diffParentData(parentData, oldParentData)) {
       this.$forceUpdate()
-      return
     }
   }
 
@@ -170,5 +98,115 @@ export function renderMixin (Vue) {
 
   Vue.prototype.$forceUpdate = function () {
     this._watcher.update()
+  }
+}
+
+function resolveSlots (vm, children) {
+  if (children) {
+    children = children.slice()
+    const slots = { default: children }
+    let i = children.length
+    let name, child
+    while (i--) {
+      child = children[i]
+      if ((name = child.data && child.data.slot)) {
+        let slot = (slots[name] || (slots[name] = []))
+        if (child.tag === 'template') {
+          slot.push.apply(slot, child.children)
+        } else {
+          slot.push(child)
+        }
+        children.splice(i, 1)
+      }
+    }
+    vm.$slots = slots
+  }
+}
+
+function diffParentData (data, oldData) {
+  let key, old, cur
+  for (key in oldData) {
+    cur = data[key]
+    old = oldData[key]
+    if (key === 'on') continue
+    if (!cur) return true
+    if (isArray(old)) {
+      if (!isArray(cur)) return true
+      if (cur.length !== old.length) return true
+      for (let i = 0; i < old.length; i++) {
+        if (isObject(old[i])) {
+          if (!isObject(cur[i])) return true
+          if (diffObject(cur, old)) return true
+        } else if (old[i] !== cur[i]) {
+          return true
+        }
+      }
+    } else if (diffObject(cur, old)) {
+      return true
+    }
+  }
+}
+
+function diffObject (cur, old) {
+  for (var key in old) {
+    if (cur[key] !== old[key]) return true
+  }
+}
+
+function mergeParentData (vm, data, parentData) {
+  const props = vm.$options.props
+  if (parentData.attrs) {
+    const attrs = data.attrs || (data.attrs = {})
+    for (let key in parentData.attrs) {
+      if (!hasOwn(props, key)) {
+        attrs[key] = parentData.attrs[key]
+      }
+    }
+  }
+  if (parentData.props) {
+    const props = data.props || (data.props = {})
+    for (let key in parentData.props) {
+      if (!hasOwn(props, key)) {
+        props[key] = parentData.props[key]
+      }
+    }
+  }
+  if (parentData.staticClass) {
+    data.staticClass = data.staticClass
+      ? data.staticClass + ' ' + parentData.staticClass
+      : parentData.staticClass
+  }
+  if (parentData.class) {
+    if (!data.class) {
+      data.class = parentData.class
+    } else {
+      data.class = (isArray(data.class) ? data.class : []).concat(parentData.class)
+    }
+  }
+  if (parentData.style) {
+    if (!data.style) {
+      data.style = parentData.style
+    } else {
+      extend(data.style, parentData.style)
+    }
+  }
+  if (parentData.directives) {
+    data.directives = parentData.directives.conact(data.directives || [])
+  }
+}
+
+function updateProps (vm, data) {
+  if (data.attrs || data.props) {
+    for (let key in vm.$options.props) {
+      vm[key] = getPropValue(data, key)
+    }
+  }
+}
+
+function updateEvents (vm, data) {
+  if (data.on) {
+    updateListeners(data.on, vm._vnode.data.on || {}, (event, handler) => {
+      vm.$on(event, handler)
+    })
   }
 }
