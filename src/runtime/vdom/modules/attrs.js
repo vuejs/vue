@@ -27,7 +27,6 @@ function updateAttrs (oldVnode, vnode) {
       if (booleanAttrsDict[key] && cur == null) {
         elm.removeAttribute(key)
       } else {
-        if (!cur) debugger
         elm.setAttribute(key, cur)
       }
     }

@@ -5,6 +5,13 @@
  * http://erik.eae.net/simplehtmlparser/simplehtmlparser.js
  */
 
+import { decodeHTML } from 'entities'
+
+// PhantomJS encodes attribute values when retriving outerHTML.
+const inPhantomJS =
+  typeof navigator !== 'undefined' &&
+  navigator.userAgent.indexOf('PhantomJS') > -1
+
 // Regular Expressions for parsing tags and attributes
 const singleAttrIdentifier = /([^\s"'<>\/=]+)/
 const singleAttrAssign = /=/
@@ -231,9 +238,10 @@ export function parseHTML (html, handler) {
         if (args[4] === '') { delete args[4] }
         if (args[5] === '') { delete args[5] }
       }
+      var value = args[3] || args[4] || (args[5] && fillAttrs(args[5]) ? args[1] : '')
       return {
         name: args[1],
-        value: args[3] || args[4] || (args[5] && fillAttrs(args[5]) ? args[1] : '')
+        value: inPhantomJS ? decodeHTML(value) : value
       }
     })
 
