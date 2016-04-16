@@ -49,6 +49,7 @@ for (var i = 0; i < total; i++) {
 }
 
 var s = window.performance.now()
+console.profile('render')
 var vm = new Vue({
   el: '#el',
   template: '#t',
@@ -85,6 +86,7 @@ var vm = new Vue({
 })
 setTimeout(function () {
   vm.time = window.performance.now() - s
+  console.profileEnd('render')
 }, 0)
 
 function monitor (action, fn) {
