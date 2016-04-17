@@ -10,7 +10,7 @@ var version = process.env.VERSION || require('../package.json').version
 var banner =
   '/*!\n' +
   ' * Vue.js v' + version + '\n' +
-  ' * (c) ' + new Date().getFullYear() + ' Evan You\n' +
+  ' * (c) 2014-' + new Date().getFullYear() + ' Evan You\n' +
   ' * Released under the MIT License.\n' +
   ' */'
 
