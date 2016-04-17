@@ -334,14 +334,25 @@ Watcher.prototype.teardown = function () {
  * @param {*} val
  */
 
-function traverse (val) {
+function traverse (val, walkedObjs) {
   var i, keys
+
+  walkedObjs = walkedObjs || {}
   if (isArray(val)) {
     i = val.length
-    while (i--) traverse(val[i])
+    while (i--) traverse(val[i], walkedObjs)
   } else if (isObject(val)) {
+    if (val.__ob__) {
+      var depId = val.__ob__.dep.id
+      if (walkedObjs[depId]) {
+        return
+      } else {
+        walkedObjs[depId] = true
+      }
+    }
+
     keys = Object.keys(val)
     i = keys.length
-    while (i--) traverse(val[keys[i]])
+    while (i--) traverse(val[keys[i]], walkedObjs)
   }
 }
