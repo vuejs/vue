@@ -26,7 +26,7 @@ export function genDirectives (el) {
     } else {
       // runtime directive
       hasRuntime = true
-      res += `{def:__d__("${dir.name}")${
+      res += `{def:__resolveDirective__("${dir.name}")${
         dir.value ? `,value:(${dir.value})` : ''
       }${
         dir.arg ? `,arg:"${dir.arg}"` : ''

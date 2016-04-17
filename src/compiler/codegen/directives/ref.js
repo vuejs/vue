@@ -11,9 +11,8 @@ export function ref (el, dir) {
     }
     parent = parent.parent
   }
-  // register ref:
-  // __r__(name, ref, vFor?, remove?)
-  const code = `__r__("${dir.arg}", vnode.data.child || vnode.elm, ${isFor ? 'true' : 'false'}`
+  // __registerRef__(name, ref, vFor?, remove?)
+  const code = `__registerRef__("${dir.arg}", vnode.data.child || vnode.elm, ${isFor ? 'true' : 'false'}`
   patchHook(el.hooks, 'insert', `${code})`)
   patchHook(el.hooks, 'destroy', `${code}, true)`)
 }

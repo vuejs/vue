@@ -40,9 +40,12 @@ function genElse (el) {
 function genFor (el) {
   const exp = el.for
   const alias = el.alias
-  const iterator = el.iterator || '$index'
+  const iterator = el.iterator
   el.for = false // avoid recursion
-  return `(${exp})&&(${exp}).map(function(${alias},${iterator}) {return ${genElement(el)}})`
+  return `(${exp})&&__renderList__((${exp}), ` +
+    `function(${alias},$index${iterator ? `,${iterator}` : ''}){` +
+      `return ${genElement(el)}` +
+    '})'
 }
 
 function genData (el) {

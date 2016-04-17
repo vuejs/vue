@@ -36,12 +36,12 @@ export function renderMixin (Vue) {
   Vue.prototype.__h__ = createElement
 
   // resolve directive
-  Vue.prototype.__d__ = function (id) {
+  Vue.prototype.__resolveDirective__ = function (id) {
     return resolveAsset(this.$options, 'directives', id, true)
   }
 
   // toString for mustaches
-  Vue.prototype.__s__ = function (val) {
+  Vue.prototype.__toString__ = function (val) {
     return val == null
       ? ''
       : typeof val === 'object'
@@ -49,8 +49,32 @@ export function renderMixin (Vue) {
         : val
   }
 
+  // render v-for
+  Vue.prototype.__renderList__ = function (val, render) {
+    let ret, i, l, keys, key
+    if (isArray(val)) {
+      ret = new Array(val.length)
+      for (i = 0, l = val.length; i < l; i++) {
+        ret[i] = render(val[i], i, i)
+      }
+    } else if (typeof val === 'number') {
+      ret = new Array(val)
+      for (i = 0; i < val; i++) {
+        ret[i] = render(i + 1, i, i)
+      }
+    } else if (isObject(val)) {
+      keys = Object.keys(val)
+      ret = new Array(keys.length)
+      for (i = 0, l = keys.length; i < l; i++) {
+        key = keys[i]
+        ret[i] = render(val[key], i, key)
+      }
+    }
+    return ret
+  }
+
   // register ref
-  Vue.prototype.__r__ = function (key, ref, vFor, remove) {
+  Vue.prototype.__registerRef__ = function (key, ref, vFor, remove) {
     const refs = this.$refs
     if (remove) {
       if (vFor) {
