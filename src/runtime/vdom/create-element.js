@@ -10,6 +10,7 @@ import {
 } from '../util/index'
 
 export default function createElement (tag, data, children) {
+  data = data || {}
   const parent = renderState.activeInstance
   const context = renderState.context || parent
   if (typeof tag === 'string') {

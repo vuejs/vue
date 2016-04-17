@@ -1,6 +1,17 @@
-import { extend, resolveAsset, isArray, isObject, getPropValue } from '../util/index'
-import { createElement, patch, updateListeners, flatten } from '../vdom/index'
 import { callHook } from './lifecycle'
+import {
+  createElement,
+  patch,
+  updateListeners,
+  flatten
+} from '../vdom/index'
+import {
+  extend,
+  resolveAsset,
+  isArray,
+  isObject,
+  getPropValue
+} from '../util/index'
 
 export const renderState = {
   activeInstance: null,
@@ -110,7 +121,7 @@ export function renderMixin (Vue) {
 
 function resolveSlots (vm, children) {
   if (children) {
-    children = children().slice()
+    children = children()
     const slots = { default: children }
     let i = children.length
     let name, child
