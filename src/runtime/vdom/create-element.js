@@ -11,8 +11,8 @@ import {
 
 export default function createElement (tag, data, children) {
   data = data || {}
+  const context = this
   const parent = renderState.activeInstance
-  const context = renderState.context || parent
   if (typeof tag === 'string') {
     let Ctor
     if (isReservedTag(tag)) {

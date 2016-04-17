@@ -1,6 +1,5 @@
 import config from '../config'
 import * as util from '../util/index'
-import { createElement } from '../vdom/index'
 import { initUse } from './use'
 import { initMixin } from './mixin'
 import { initExtend } from './extend'
@@ -13,7 +12,6 @@ export function initGlobalAPI (Vue) {
   Vue.set = set
   Vue.delete = del
   Vue.nextTick = nextTick
-  Vue.h = Vue.createElement = createElement
 
   Vue.options = {
     directives: Object.create(null),

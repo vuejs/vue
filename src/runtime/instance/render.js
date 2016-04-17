@@ -6,6 +6,7 @@ import {
   flatten
 } from '../vdom/index'
 import {
+  bind,
   extend,
   resolveAsset,
   isArray,
@@ -14,14 +15,16 @@ import {
 } from '../util/index'
 
 export const renderState = {
-  activeInstance: null,
-  context: null
+  activeInstance: null
 }
 
 export function initRender (vm) {
   vm._vnode = null
   vm._mounted = false
   vm.$slots = {}
+  // bind the public createElement fn to this instance
+  // so that we get proper render context inside it.
+  vm.$createElement = bind(vm.__h__, vm)
   if (vm.$options.el) {
     vm.$mount(vm.$options.el)
   }
@@ -79,21 +82,6 @@ export function renderMixin (Vue) {
     }
   }
 
-  /**
-   * Call a render function with this instance as the context.
-   * This is used to wrap all children thunks in codegen.
-   */
-
-  Vue.prototype._renderWithContext = function (fn) {
-    return () => {
-      const prev = renderState.context
-      renderState.context = this
-      const children = flatten(fn())
-      renderState.context = prev
-      return children
-    }
-  }
-
   Vue.prototype._render = function () {
     const prev = renderState.activeInstance
     renderState.activeInstance = this
@@ -121,7 +109,7 @@ export function renderMixin (Vue) {
 
 function resolveSlots (vm, children) {
   if (children) {
-    children = children()
+    children = flatten(isArray(children) ? children : children())
     const slots = { default: children }
     let i = children.length
     let name, child
