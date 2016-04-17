@@ -13,19 +13,13 @@ const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
 
 /**
  * By default, when a reactive property is set, the new value is
- * also converted to become reactive. However in certain cases, e.g.
- * v-for scope alias and props, we don't want to force conversion
- * because the value may be a nested value under a frozen data structure.
- *
- * So whenever we want to set a reactive property without forcing
- * conversion on the new value, we wrap that call inside this function.
+ * also converted to become reactive. However when passing down props,
+ * we don't want to force conversion because the value may be a nested value
+ * under a frozen data structure. Converting it would defeat the optimization.
  */
 
-let shouldConvert = true
-export function withoutConversion (fn) {
-  shouldConvert = false
-  fn()
-  shouldConvert = true
+export const observerState = {
+  shouldConvert: true
 }
 
 /**
@@ -165,13 +159,10 @@ export function observe (value, vm) {
     return
   }
   var ob
-  if (
-    hasOwn(value, '__ob__') &&
-    value.__ob__ instanceof Observer
-  ) {
+  if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
     ob = value.__ob__
   } else if (
-    shouldConvert &&
+    observerState.shouldConvert &&
     (isArray(value) || isPlainObject(value)) &&
     Object.isExtensible(value) &&
     !value._isVue

@@ -1,30 +1,39 @@
 import { hyphenate, hasOwn, isArray, isObject, isPlainObject } from './lang'
+import { observe, observerState } from '../observer/index'
 import { warn } from './debug'
 
 export function getPropValue (data, key, vm) {
   if (!data) return
   const prop = vm.$options.props[key]
   const altKey = hyphenate(key)
-  const attrVal = getPropValueFromHash(data.attrs, key, altKey)
-  let value = attrVal === undefined
-    ? getPropValueFromHash(data.props, key, altKey)
-    : attrVal
+  const props = data.props
+  const attrs = data.attrs
+  let value
+  let absent = false
+  if (attrs && hasOwn(attrs, key)) {
+    value = attrs[key]
+  } else if (attrs && hasOwn(attrs, altKey)) {
+    value = attrs[altKey]
+  } else if (props && hasOwn(props, key)) {
+    value = props[key]
+  } else if (props && hasOwn(props, altKey)) {
+    value = props[altKey]
+  } else {
+    absent = true
+  }
   // check default value
   if (value === undefined) {
     value = getPropDefaultValue(vm, prop, key)
+    // since the default value is a fresh copy,
+    // make sure to observe it.
+    observerState.shouldConvert = true
+    observe(value)
+    observerState.shouldConvert = false
   }
   if (process.env.NODE_ENV !== 'production') {
-    assertProp(prop, key, value, vm)
+    assertProp(prop, key, value, vm, absent)
   }
   return value
-}
-
-function getPropValueFromHash (hash, key, altKey) {
-  return hash
-    ? hasOwn(hash, key)
-      ? hash[key]
-      : hash[altKey]
-    : undefined
 }
 
 /**
@@ -63,13 +72,22 @@ function getPropDefaultValue (vm, prop, name) {
  * Assert whether a prop is valid.
  *
  * @param {Object} prop
+ * @param {String} name
  * @param {*} value
  * @param {Vue} vm
+ * @param {Boolean} absent
  */
 
-function assertProp (prop, name, value, vm) {
-  if (prop.required && value == null) {
+function assertProp (prop, name, value, vm, absent) {
+  if (prop.required && absent) {
+    process.env.NODE_ENV !== 'production' && warn(
+      'Missing required prop: "' + name + '"',
+      vm
+    )
     return false
+  }
+  if (value == null) {
+    return true
   }
   var type = prop.type
   var valid = !type

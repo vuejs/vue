@@ -1,4 +1,5 @@
 import { callHook } from './lifecycle'
+import { observerState } from '../observer/index'
 import {
   createElement,
   patch,
@@ -197,7 +198,7 @@ function mergeParentData (vm, data, parentData) {
   if (parentData.attrs) {
     const attrs = data.attrs || (data.attrs = {})
     for (let key in parentData.attrs) {
-      if (!props[key]) {
+      if (!props || !props[key]) {
         attrs[key] = parentData.attrs[key]
       }
     }
@@ -205,7 +206,7 @@ function mergeParentData (vm, data, parentData) {
   if (parentData.props) {
     const props = data.props || (data.props = {})
     for (let key in parentData.props) {
-      if (!props[key]) {
+      if (!props || !props[key]) {
         props[key] = parentData.props[key]
       }
     }
@@ -239,6 +240,7 @@ function updateProps (vm, data) {
   if (data.attrs || data.props) {
     let keys = vm.$options.propKeys
     if (keys) {
+      observerState.shouldConvert = false
       for (let i = 0; i < keys.length; i++) {
         let key = keys[i]
         let oldVal = vm[key]
@@ -248,6 +250,7 @@ function updateProps (vm, data) {
           changed = true
         }
       }
+      observerState.shouldConvert = true
     }
   }
   return changed

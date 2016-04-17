@@ -1,5 +1,5 @@
 import Watcher from '../observer/watcher'
-import { query, toArray } from '../util/index'
+import { query, toArray, warn } from '../util/index'
 
 export function initLifecycle (vm) {
   const options = vm.$options
@@ -19,6 +19,14 @@ export function initLifecycle (vm) {
 
 export function lifecycleMixin (Vue) {
   Vue.prototype.$mount = function (el) {
+    if (!this.$options.render) {
+      this.$options.render = () => this.$createElement('div')
+      process.env.NODE_ENV !== 'production' && warn(
+        'Failed to mount component: ' +
+        'template or render function not defined.',
+        this
+      )
+    }
     callHook(this, 'beforeMount')
     el = this.$el = el && query(el)
     if (el) {

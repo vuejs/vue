@@ -26,12 +26,14 @@ Vue.prototype.$mount = function (el) {
       } else {
         warn('invalid template option:' + template, this)
       }
-    } else {
+    } else if (el) {
       template = getOuterHTML(query(el))
     }
-    options.render = new Function(compile(template, {
-      preserveWhitespace: config.preserveWhitespace
-    }))
+    if (template) {
+      options.render = new Function(compile(template, {
+        preserveWhitespace: config.preserveWhitespace
+      }))
+    }
   }
   mount.call(this, el)
 }
