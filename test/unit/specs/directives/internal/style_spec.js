@@ -125,6 +125,6 @@ describe(':style', function () {
   // #2654
   it('background size with only one value', function () {
     dir.update({ backgroundSize: '100%' })
-    expect(el.style.cssText.replace(/\s/g, '')).toBe('background-size:100%;')
+    expect(el.style.cssText.replace(/\s/g, '')).toMatch(/background-size:100%(auto)?;/)
   })
 })
