@@ -48,6 +48,28 @@ export function renderMixin (Vue) {
         : val
   }
 
+  // register ref
+  Vue.prototype.__r__ = function (key, ref, vFor, remove) {
+    const refs = this.$refs
+    if (remove) {
+      if (vFor) {
+        refs[key].$remove(ref)
+      } else {
+        refs[key] = undefined
+      }
+    } else {
+      if (vFor) {
+        if (refs[key]) {
+          refs[key].push(ref)
+        } else {
+          refs[key] = [ref]
+        }
+      } else {
+        refs[key] = ref
+      }
+    }
+  }
+
   Vue.prototype._update = function (vnode) {
     if (this._mounted) {
       callHook(this, 'beforeUpdate')

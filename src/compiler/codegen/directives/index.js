@@ -2,7 +2,6 @@ import { model } from './model'
 import { show } from './show'
 import { html } from './html'
 import { ref } from './ref'
-import { el } from './el'
 export { genHandlers } from './on'
 
 export const directives = {
@@ -10,7 +9,6 @@ export const directives = {
   show,
   html,
   ref,
-  el,
   cloak: function () {} // noop
 }
 

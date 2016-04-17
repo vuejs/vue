@@ -66,10 +66,6 @@ function genData (el) {
   if (el.key) {
     data += `key:${el.key},`
   }
-  // ref
-  if (el.ref) {
-    data += `ref:"${el.ref}",`
-  }
   // slot names
   if (el.attrsMap.slot) {
     data += `slot:"${el.attrsMap.slot}",`

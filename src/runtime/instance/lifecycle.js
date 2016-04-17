@@ -2,27 +2,19 @@ import Watcher from '../observer/watcher'
 import { query, toArray } from '../util/index'
 
 export function initLifecycle (vm) {
-  vm.$children = []
-  vm._isDestroyed = false
-  vm._isBeingDestroyed = false
-  vm.$refs = {}
-  vm.$els = {}
-
   const options = vm.$options
 
-  // parent
   vm.$parent = options.parent
   vm.$root = vm.$parent ? vm.$parent.$root : vm
   if (vm.$parent) {
     vm.$parent.$children.push(vm)
   }
 
-  // context & ref
-  vm._context = options._context
-  vm._ref = options._renderData && options._renderData.ref
-  if (vm._ref) {
-    vm._context.$refs[vm._ref] = vm
-  }
+  vm.$children = []
+  vm.$refs = {}
+
+  vm._isDestroyed = false
+  vm._isBeingDestroyed = false
 }
 
 export function lifecycleMixin (Vue) {
