@@ -34,16 +34,29 @@ rollup.rollup({
     format: 'cjs',
     banner: banner
   }).code
-  var minified = banner + '\n' + uglify.minify(code, {
+  return write('dist/vue.common.js', code)
+})
+// production CommonJS build, just for file size monitoring.
+.then(function () {
+  return rollup.rollup({
+    entry: 'src/runtime/index.js',
+    plugins: [
+      replace({
+        'process.env.NODE_ENV': "'production'"
+      }),
+      babel()
+    ]
+  })
+}).then(function (bundle) {
+  var code = bundle.generate({
+    format: 'cjs'
+  }).code
+  return write('dist/vue.common.min.js', uglify.minify(code, {
     fromString: true,
     output: {
       ascii_only: true
     }
-  }).code
-  return Promise.all([
-    write('dist/vue.common.js', code),
-    write('dist/vue.common.min.js', minified)
-  ])
+  }).code)
 })
 .then(zip('dist/vue.common.min.js'))
 // Compiler CommonJS build.
