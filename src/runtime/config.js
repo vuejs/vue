@@ -23,7 +23,6 @@ export default {
   _assetTypes: [
     'component',
     'directive',
-    'filter',
     'transition'
   ],
 
