@@ -266,7 +266,6 @@ function guardProps (options) {
         : { type: val }
     }
   }
-  console.log(res)
   options.props = res
 }
 

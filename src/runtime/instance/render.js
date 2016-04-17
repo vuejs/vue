@@ -55,13 +55,14 @@ export function renderMixin (Vue) {
     this.$options._renderChildren = children
     // update props and listeners
     if (parentData) {
+      updateEvents(this, parentData, oldParentData)
       // if any prop has changed it would trigger and queue an update,
       // but if no props changed, nothing happens
-      updateProps(this, parentData)
-      updateEvents(this, parentData, oldParentData)
+      const propsChanged = updateProps(this, parentData)
       // diff parent data (attrs on the placeholder) and queue update
-      // if anything changed
-      if (parentDataChanged(parentData, oldParentData)) {
+      // if anything changed. only do this if props didn't change, because
+      // if props changed then an update has already been queued.
+      if (!propsChanged && parentDataChanged(parentData, oldParentData)) {
         this.$forceUpdate()
       }
     }
@@ -213,15 +214,22 @@ function mergeParentData (vm, data, parentData) {
 }
 
 function updateProps (vm, data) {
+  let changed = false
   if (data.attrs || data.props) {
     let keys = vm.$options.propKeys
     if (keys) {
       for (let i = 0; i < keys.length; i++) {
         let key = keys[i]
-        vm[key] = getPropValue(data, key, vm)
+        let oldVal = vm[key]
+        let newVal = getPropValue(data, key, vm)
+        if (oldVal !== newVal) {
+          vm[key] = newVal
+          changed = true
+        }
       }
     }
   }
+  return changed
 }
 
 function updateEvents (vm, data, oldData) {
