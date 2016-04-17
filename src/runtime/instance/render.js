@@ -1,4 +1,4 @@
-import { extend, resolveAsset, hasOwn, isArray, isObject, getPropValue } from '../util/index'
+import { extend, resolveAsset, isArray, isObject, getPropValue } from '../util/index'
 import { createElement, patch, updateListeners, flatten } from '../vdom/index'
 import { callHook } from './lifecycle'
 

@@ -10,6 +10,7 @@ const argRE = /:(.*)$/
 const modifierRE = /\.[^\.]+/g
 const mustUsePropsRE = /^(value|selected|checked|muted)$/
 const forAliasRE = /([a-zA-Z_][\w]*)\s+(?:in|of)\s+(.*)/
+const camelRE = /[a-z\d][A-Z]/
 
 // this map covers SVG elements that can appear as template root nodes
 const svgMap = {
@@ -29,15 +30,21 @@ const svgMap = {
   rect: 1
 }
 
+// make warning customizable depending on environment.
+let warn
+const baseWarn = msg => console.error(`[Vue parser]: ${msg}`)
+
 /**
  * Convert HTML string to AST
  *
  * @param {String} template
- * @param {Boolean} preserveWhitespace
+ * @param {Object} options
  * @return {Object}
  */
 
-export function parse (template, preserveWhitespace) {
+export function parse (template, options) {
+  options = options || {}
+  warn = options.warn || baseWarn
   const stack = []
   let root
   let currentParent
@@ -48,6 +55,16 @@ export function parse (template, preserveWhitespace) {
     html5: true,
 
     start (tag, attrs, unary) {
+      // check camelCase tag
+      if (camelRE.test(tag)) {
+        process.env.NODE_ENV !== 'production' && warn(
+          `Found camelCase tag in template: <${tag}>. ` +
+          `I've converted it to <${hyphenate(tag)}> for you.`
+        )
+        tag = hyphenate(tag)
+      }
+
+      tag = tag.toLowerCase()
       const element = {
         tag,
         plain: !attrs.length,
@@ -79,7 +96,7 @@ export function parse (template, preserveWhitespace) {
         root = element
       } else if (process.env.NODE_ENV !== 'production' && !stack.length && !warned) {
         warned = true
-        console.error(
+        warn(
           `Component template should contain exactly one root element:\n\n${template}`
         )
       }
@@ -115,7 +132,7 @@ export function parse (template, preserveWhitespace) {
       if (!currentParent) {
         if (process.env.NODE_ENV !== 'production' && !warned) {
           warned = true
-          console.error(
+          warn(
             'Component template should contain exactly one root element:\n\n' + template
           )
         }
@@ -124,7 +141,9 @@ export function parse (template, preserveWhitespace) {
       text = currentParent.tag === 'pre' || text.trim()
         ? decodeHTML(text)
         // only preserve whitespace if its not right after a starting tag
-        : preserveWhitespace && currentParent.children.length ? ' ' : null
+        : options.preserveWhitespace && currentParent.children.length
+          ? ' '
+          : null
       if (text) {
         let expression
         if (text !== ' ' && (expression = parseText(text))) {
@@ -143,7 +162,7 @@ function processFor (el) {
   if ((exp = getAndRemoveAttr(el, 'v-for'))) {
     const inMatch = exp.match(forAliasRE)
     if (process.env.NODE_ENV !== 'production' && !inMatch) {
-      console.error(`Invalid v-for expression: ${exp}`)
+      warn(`Invalid v-for expression: ${exp}`)
     }
     el.alias = inMatch[1].trim()
     el.for = inMatch[2].trim()
@@ -173,7 +192,7 @@ function processElse (el, parent) {
       parent.children.push(el)
     }
   } else if (process.env.NODE_ENV !== 'production') {
-    console.error(
+    warn(
       `v-else used on element <${el.tag}> without corresponding v-if/v-show.`
     )
   }
@@ -185,7 +204,7 @@ function processRender (el) {
     el.method = el.attrsMap.method
     el.args = el.attrsMap.args
     if (process.env.NODE_ENV !== 'production' && !el.method) {
-      console.error('method attribute is required on <render>.')
+      warn('method attribute is required on <render>.')
     }
   }
 }
@@ -270,7 +289,7 @@ function makeAttrsMap (attrs) {
   const map = {}
   for (let i = 0, l = attrs.length; i < l; i++) {
     if (process.env.NODE_ENV !== 'production' && map[attrs[i].name]) {
-      console.error('duplicate attribute: ' + attrs[i].name)
+      warn('duplicate attribute: ' + attrs[i].name)
     }
     map[attrs[i].name] = attrs[i].value
   }
@@ -297,4 +316,11 @@ function findPrevElement (children) {
   while (i--) {
     if (children[i].tag) return children[i]
   }
+}
+
+const hyphenateReplaceRE = /([a-z\d])([A-Z])/g
+function hyphenate (str) {
+  return str
+    .replace(hyphenateReplaceRE, '$1-$2')
+    .toLowerCase()
 }

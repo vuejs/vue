@@ -5,11 +5,17 @@ import { directives } from './codegen/directives/index'
 const cache1 = Object.create(null)
 const cache2 = Object.create(null)
 
-export function compile (html, preserveWhitespace) {
+export function compile (html, options) {
   html = html.trim()
-  const cache = preserveWhitespace ? cache1 : cache2
+  options = options || {}
+  const cache = options.preserveWhitespace ? cache1 : cache2
   const hit = cache[html]
-  return hit || (cache[html] = generate(parse(html, preserveWhitespace)))
+  if (hit) {
+    return hit
+  } else {
+    const ast = parse(html, options)
+    return (cache[html] = generate(ast))
+  }
 }
 
 export function registerDirective (name, fn) {
