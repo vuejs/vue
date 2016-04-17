@@ -9,7 +9,8 @@ const onRE = /^@|^v-on:/
 const argRE = /:(.*)$/
 const modifierRE = /\.[^\.]+/g
 const mustUsePropsRE = /^(value|selected|checked|muted)$/
-const forAliasRE = /([a-zA-Z_][\w]*)\s+(?:in|of)\s+(.*)/
+const forAliasRE = /(.*)\s+(?:in|of)\s+(.*)/
+const forIteratorRE = /\((.*),(.*)\)/
 const camelRE = /[a-z\d][A-Z]/
 
 // this map covers SVG elements that can appear as template root nodes
@@ -161,11 +162,21 @@ function processFor (el) {
   let exp
   if ((exp = getAndRemoveAttr(el, 'v-for'))) {
     const inMatch = exp.match(forAliasRE)
-    if (process.env.NODE_ENV !== 'production' && !inMatch) {
-      warn(`Invalid v-for expression: ${exp}`)
+    if (!inMatch) {
+      process.env.NODE_ENV !== 'production' && warn(
+        `Invalid v-for expression: ${exp}`
+      )
+      return
     }
-    el.alias = inMatch[1].trim()
     el.for = inMatch[2].trim()
+    const alias = inMatch[1].trim()
+    const iteratorMatch = alias.match(forIteratorRE)
+    if (iteratorMatch) {
+      el.iterator = iteratorMatch[1].trim()
+      el.alias = iteratorMatch[2].trim()
+    } else {
+      el.alias = alias
+    }
     if ((exp = getAndRemoveAttr(el, 'track-by'))) {
       el.key = exp === '$index'
         ? exp
