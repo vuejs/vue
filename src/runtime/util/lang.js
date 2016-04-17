@@ -1,68 +1,3 @@
-/**
- * Set a property on an object. Adds the new property and
- * triggers change notification if the property doesn't
- * already exist.
- *
- * @param {Object} obj
- * @param {String} key
- * @param {*} val
- * @public
- */
-
-export function set (obj, key, val) {
-  if (hasOwn(obj, key)) {
-    obj[key] = val
-    return
-  }
-  if (obj._isVue) {
-    set(obj._data, key, val)
-    return
-  }
-  var ob = obj.__ob__
-  if (!ob) {
-    obj[key] = val
-    return
-  }
-  ob.convert(key, val)
-  ob.dep.notify()
-  if (ob.vms) {
-    var i = ob.vms.length
-    while (i--) {
-      var vm = ob.vms[i]
-      vm._proxy(key)
-      vm._digest()
-    }
-  }
-  return val
-}
-
-/**
- * Delete a property and trigger change if necessary.
- *
- * @param {Object} obj
- * @param {String} key
- */
-
-export function del (obj, key) {
-  if (!hasOwn(obj, key)) {
-    return
-  }
-  delete obj[key]
-  var ob = obj.__ob__
-  if (!ob) {
-    return
-  }
-  ob.dep.notify()
-  if (ob.vms) {
-    var i = ob.vms.length
-    while (i--) {
-      var vm = ob.vms[i]
-      vm._unproxy(key)
-      vm._digest()
-    }
-  }
-}
-
 var hasOwnProperty = Object.prototype.hasOwnProperty
 /**
  * Check whether the object has the property.
@@ -87,18 +22,6 @@ export function isPrimitive (value) {
 }
 
 /**
- * Check if an expression is a literal value.
- *
- * @param {String} exp
- * @return {Boolean}
- */
-
-var literalValueRE = /^\s?(true|false|-?[\d\.]+|'[^']*'|"[^"]*")\s?$/
-export function isLiteral (exp) {
-  return literalValueRE.test(exp)
-}
-
-/**
  * Check if a string starts with $ or _
  *
  * @param {String} str
@@ -108,55 +31,6 @@ export function isLiteral (exp) {
 export function isReserved (str) {
   var c = (str + '').charCodeAt(0)
   return c === 0x24 || c === 0x5F
-}
-
-/**
- * Check and convert possible numeric strings to numbers
- * before setting back to data
- *
- * @param {*} value
- * @return {*|Number}
- */
-
-export function toNumber (value) {
-  if (typeof value !== 'string') {
-    return value
-  } else {
-    var parsed = Number(value)
-    return isNaN(parsed)
-      ? value
-      : parsed
-  }
-}
-
-/**
- * Convert string boolean literals into real booleans.
- *
- * @param {*} value
- * @return {*|Boolean}
- */
-
-export function toBoolean (value) {
-  return value === 'true'
-    ? true
-    : value === 'false'
-      ? false
-      : value
-}
-
-/**
- * Strip quotes from a string
- *
- * @param {String} str
- * @return {String | false}
- */
-
-export function stripQuotes (str) {
-  var a = str.charCodeAt(0)
-  var b = str.charCodeAt(str.length - 1)
-  return a === b && (a === 0x22 || a === 0x27)
-    ? str.slice(1, -1)
-    : str
 }
 
 /**

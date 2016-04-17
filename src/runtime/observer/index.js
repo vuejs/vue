@@ -230,3 +230,68 @@ export function defineReactive (obj, key, val) {
     }
   })
 }
+
+/**
+ * Set a property on an object. Adds the new property and
+ * triggers change notification if the property doesn't
+ * already exist.
+ *
+ * @param {Object} obj
+ * @param {String} key
+ * @param {*} val
+ * @public
+ */
+
+export function set (obj, key, val) {
+  if (hasOwn(obj, key)) {
+    obj[key] = val
+    return
+  }
+  if (obj._isVue) {
+    set(obj._data, key, val)
+    return
+  }
+  var ob = obj.__ob__
+  if (!ob) {
+    obj[key] = val
+    return
+  }
+  ob.convert(key, val)
+  ob.dep.notify()
+  if (ob.vms) {
+    var i = ob.vms.length
+    while (i--) {
+      var vm = ob.vms[i]
+      vm._proxy(key)
+      vm.$forceUpdate()
+    }
+  }
+  return val
+}
+
+/**
+ * Delete a property and trigger change if necessary.
+ *
+ * @param {Object} obj
+ * @param {String} key
+ */
+
+export function del (obj, key) {
+  if (!hasOwn(obj, key)) {
+    return
+  }
+  delete obj[key]
+  var ob = obj.__ob__
+  if (!ob) {
+    return
+  }
+  ob.dep.notify()
+  if (ob.vms) {
+    var i = ob.vms.length
+    while (i--) {
+      var vm = ob.vms[i]
+      vm._unproxy(key)
+      vm.$forceUpdate()
+    }
+  }
+}

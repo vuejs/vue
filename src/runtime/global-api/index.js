@@ -4,7 +4,8 @@ import { initUse } from './use'
 import { initMixin } from './mixin'
 import { initExtend } from './extend'
 import { initAssetRegisters } from './assets'
-import { set, del, nextTick } from '../util/index'
+import { nextTick } from '../util/index'
+import { set, del } from '../observer/index'
 
 export function initGlobalAPI (Vue) {
   Vue.config = config
