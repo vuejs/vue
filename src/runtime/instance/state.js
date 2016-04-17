@@ -24,11 +24,15 @@ export function initState (vm) {
 }
 
 function initProps (vm) {
-  const data = vm.$options._renderData
   const props = vm.$options.props
   if (props) {
     const keys = vm.$options.propKeys = Object.keys(props)
-    observerState.shouldConvert = false
+    const isRoot = !vm.$parent
+    const data = isRoot
+      ? { props: vm.$options.propsData }
+      : vm.$options._renderData
+    // root instance props should be converted
+    observerState.shouldConvert = isRoot
     for (let i = 0; i < keys.length; i++) {
       let key = keys[i]
       defineReactive(vm, key, getPropValue(data, key, vm))
