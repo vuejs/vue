@@ -10,8 +10,8 @@ import {
   hasOwn,
   isReserved,
   isPlainObject,
-  hyphenate,
-  bind
+  bind,
+  getPropValue
 } from '../util/index'
 
 export function initState (vm) {
@@ -27,29 +27,14 @@ function initProps (vm) {
   const data = vm.$options._renderData
   const props = vm.$options.props
   if (props) {
+    const keys = vm.$options.propKeys = Object.keys(props)
     withoutConversion(() => {
-      for (let key in props) {
-        defineReactive(vm, key, getPropValue(data, key))
+      for (let i = 0; i < keys.length; i++) {
+        let key = keys[i]
+        defineReactive(vm, key, getPropValue(data, key, vm))
       }
     })
   }
-}
-
-export function getPropValue (data, key) {
-  if (!data) return
-  const altKey = hyphenate(key)
-  const attrVal = getPropValueFromHash(data.attrs, key, altKey)
-  return attrVal === undefined
-    ? getPropValueFromHash(data.props, key, altKey)
-    : attrVal
-}
-
-function getPropValueFromHash (hash, key, altKey) {
-  return hash
-    ? hasOwn(hash, key)
-      ? hash[key]
-      : hash[altKey]
-    : undefined
 }
 
 function initData (vm) {

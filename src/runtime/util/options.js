@@ -9,8 +9,7 @@ import {
   isArray,
   isPlainObject,
   hasOwn,
-  camelize,
-  hyphenate
+  camelize
 } from './lang'
 
 /**
@@ -216,9 +215,6 @@ function guardComponents (options) {
     var components = options.components
     var ids = Object.keys(components)
     var def
-    if (process.env.NODE_ENV !== 'production') {
-      var map = options._componentNameMap = {}
-    }
     for (var i = 0, l = ids.length; i < l; i++) {
       var key = ids[i]
       if (isReservedTag(key)) {
@@ -227,11 +223,6 @@ function guardComponents (options) {
           'id: ' + key
         )
         continue
-      }
-      // record a all lowercase <-> kebab-case mapping for
-      // possible custom element case error warning
-      if (process.env.NODE_ENV !== 'production') {
-        map[key.replace(/-/g, '').toLowerCase()] = hyphenate(key)
       }
       def = components[key]
       if (isPlainObject(def)) {
@@ -249,17 +240,19 @@ function guardComponents (options) {
  */
 
 function guardProps (options) {
-  const res = {}
   const props = options.props
-  let i, val
+  if (!props) return
+  const res = {}
+  let i, val, name
   if (isArray(props)) {
     i = props.length
     while (i--) {
       val = props[i]
       if (typeof val === 'string') {
-        res[camelize(val)] = null
-      } else if (val.name) {
-        res[camelize(val.name)] = val
+        name = camelize(val)
+        res[name] = { type: null }
+      } else if (process.env.NODE_ENV !== 'production') {
+        warn('props must be strings when using array syntax.')
       }
     }
   } else if (isPlainObject(props)) {
@@ -267,11 +260,13 @@ function guardProps (options) {
     i = keys.length
     while (i--) {
       val = props[keys[i]]
-      res[camelize(keys[i])] = typeof val === 'function'
-        ? { type: val }
-        : val
+      name = camelize(keys[i])
+      res[name] = isPlainObject(val)
+        ? val
+        : { type: val }
     }
   }
+  console.log(res)
   options.props = res
 }
 

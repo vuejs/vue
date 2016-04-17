@@ -1,7 +1,6 @@
-import { extend, resolveAsset, hasOwn, isArray, isObject } from '../util/index'
+import { extend, resolveAsset, hasOwn, isArray, isObject, getPropValue } from '../util/index'
 import { createElement, patch, updateListeners, flatten } from '../vdom/index'
 import { callHook } from './lifecycle'
-import { getPropValue } from './state'
 
 export const renderState = {
   activeInstance: null,
@@ -60,11 +59,11 @@ export function renderMixin (Vue) {
       // but if no props changed, nothing happens
       updateProps(this, parentData)
       updateEvents(this, parentData, oldParentData)
-    }
-    // diff parent data (attrs on the placeholder) and queue update
-    // if anything changed
-    if (parentDataChanged(parentData, oldParentData)) {
-      this.$forceUpdate()
+      // diff parent data (attrs on the placeholder) and queue update
+      // if anything changed
+      if (parentDataChanged(parentData, oldParentData)) {
+        this.$forceUpdate()
+      }
     }
   }
 
@@ -176,7 +175,7 @@ function mergeParentData (vm, data, parentData) {
   if (parentData.attrs) {
     const attrs = data.attrs || (data.attrs = {})
     for (let key in parentData.attrs) {
-      if (!hasOwn(props, key)) {
+      if (!props[key]) {
         attrs[key] = parentData.attrs[key]
       }
     }
@@ -184,7 +183,7 @@ function mergeParentData (vm, data, parentData) {
   if (parentData.props) {
     const props = data.props || (data.props = {})
     for (let key in parentData.props) {
-      if (!hasOwn(props, key)) {
+      if (!props[key]) {
         props[key] = parentData.props[key]
       }
     }
@@ -215,8 +214,12 @@ function mergeParentData (vm, data, parentData) {
 
 function updateProps (vm, data) {
   if (data.attrs || data.props) {
-    for (let key in vm.$options.props) {
-      vm[key] = getPropValue(data, key)
+    let keys = vm.$options.propKeys
+    if (keys) {
+      for (let i = 0; i < keys.length; i++) {
+        let key = keys[i]
+        vm[key] = getPropValue(data, key, vm)
+      }
     }
   }
 }
