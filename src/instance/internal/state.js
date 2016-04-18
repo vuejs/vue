@@ -87,11 +87,6 @@ export default function (Vue) {
       )
     }
     var props = this._props
-    var runtimeData = this._runtimeData
-      ? typeof this._runtimeData === 'function'
-        ? this._runtimeData()
-        : this._runtimeData
-      : null
     // proxy data on instance
     var keys = Object.keys(data)
     var i, key
@@ -104,7 +99,7 @@ export default function (Vue) {
       //    template prop present
       if (
         !props || !hasOwn(props, key) ||
-        (runtimeData && hasOwn(runtimeData, key) && props[key].raw === null)
+        (data && hasOwn(data, key) && props[key].raw === null)
       ) {
         this._proxy(key)
       } else if (process.env.NODE_ENV !== 'production') {
