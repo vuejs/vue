@@ -2,54 +2,70 @@
 <html lang="en">
 <head>
   <title>vue.js version</title>
-    <script src="https://cdn.jsdelivr.net/stats.js/r11/stats.min.js"></script>
-    <script src="../../dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/stats.js/r11/stats.min.js"></script>
+  <script src="../../dist/vue.js"></script>
   <style>
-html, body {
-  height: 100%;
-  width: 100%;
-  padding: 0;
-  margin: 0;
-}
-svg {
-  width: 800px;
-  height: 600px;
-}
+  html, body {
+    height: 100%;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+  }
+  svg {
+    width: 800px;
+    height: 600px;
+  }
   </style>
 </head>
 <body>
- <div id="app">
- <svg>
-    <circle  v-for='point in points' :cx='point.x' :cy='point.y' r='2px' fill='#FC309D'></circle>
- </svg>
-</div>
+  <h1>Animating 1000 SVG dots</h1>
+  <div id="app">
+    <p>
+      <button @click="toggleOptimization">
+        {{ optimized ? 'disable' : 'enable' }} optimization (Object.freeze)
+      </button>
+    </p>
+    <svg>
+      <circle  v-for='point in model.points' :cx='point.x' :cy='point.y' r='2px' fill='#FC309D'></circle>
+    </svg>
+  </div>
 <script type="text/javascript" charset="utf-8">
-var stats = new Stats();
-stats.setMode(0); // 0: fps, 1: ms, 2: mb
-
-// align top-left
-stats.domElement.style.position = 'absolute';
-stats.domElement.style.left = '0px';
-stats.domElement.style.top = '0px';
-
-document.body.appendChild( stats.domElement );
+var stats = new Stats()
+stats.setMode(0)
+stats.domElement.style.position = 'absolute'
+stats.domElement.style.right = '0px'
+stats.domElement.style.top = '0px'
+document.body.appendChild(stats.domElement)
 
 var WIDTH = 800
 var HEIGHT = 600
-var model = createModel(1000);
 
 new Vue({
   el: '#app',
-  data: model,
+  data: {
+    model: createModel(1000),
+    optimized: false
+  },
   created: function () {
     var self = this
-    self.raf = window.requestAnimationFrame(render)
+    requestAnimationFrame(render)
     stats.begin()
     function render () {
       stats.end()
       stats.begin()
-      self.raf = window.requestAnimationFrame(render)
-      self.step()
+      requestAnimationFrame(render)
+      self.model.step()
+      if (self.optimized) {
+        self.$forceUpdate()
+      }
+    }
+  },
+  methods: {
+    toggleOptimization: function () {
+      this.model = this.optimized
+        ? createModel(1000)
+        : Object.freeze(createModel(1000))
+      this.optimized = !this.optimized
     }
   }
 });
@@ -72,7 +88,6 @@ function createModel (count) {
 
   function step () {
     points.forEach(move)
-    // move(points[0])
   }
 
   function move (p) {
