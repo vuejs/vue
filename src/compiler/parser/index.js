@@ -145,7 +145,7 @@ export function parse (template, options) {
           `Component template should contain exactly one root element:\n\n${template}`
         )
       }
-      if (currentParent && tag !== 'script') {
+      if (currentParent) {
         if (element.else) {
           processElse(element, currentParent)
         } else {
