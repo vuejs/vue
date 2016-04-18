@@ -1,5 +1,15 @@
 import { isAndroid, isIE9 } from '../util/env'
 
+if (isIE9) {
+  // http://www.matts411.com/post/internet-explorer-9-oninput/
+  document.addEventListener('selectionchange', () => {
+    const el = document.activeElement
+    if (el && el.vmodel) {
+      trigger(el)
+    }
+  })
+}
+
 export default {
   bind (el, value) {
     if (!isAndroid) {
@@ -7,18 +17,13 @@ export default {
       el.addEventListener('compositionend', onCompositionEnd)
     }
     if (isIE9) {
-      el.addEventListener('cut', trigger)
-      el.addEventListener('keyup', triggerOnDelOrBackspace)
+      el.vmodel = true
     }
   },
   unbind (el) {
     if (!isAndroid) {
       el.removeEventListener('compositionstart', onCompositionStart)
       el.removeEventListener('compositionend', onCompositionEnd)
-    }
-    if (isIE9) {
-      el.removeEventListener('cut', trigger)
-      el.removeEventListener('keyup', triggerOnDelOrBackspace)
     }
   }
 }
@@ -29,17 +34,11 @@ function onCompositionStart (e) {
 
 function onCompositionEnd (e) {
   e.target.composing = false
-  trigger(e)
+  trigger(e.target)
 }
 
-function trigger (e) {
-  const ev = document.createEvent('HTMLEvents')
-  ev.initEvent('input', true, true)
-  e.target.dispatchEvent(ev)
-}
-
-function triggerOnDelOrBackspace (e) {
-  if (e.keyCode === 46 || e.keyCode === 8) {
-    trigger(e)
-  }
+function trigger (el) {
+  const e = document.createEvent('HTMLEvents')
+  e.initEvent('input', true, true)
+  el.dispatchEvent(e)
 }
