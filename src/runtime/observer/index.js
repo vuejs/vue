@@ -58,9 +58,8 @@ export function Observer (value) {
  */
 
 Observer.prototype.walk = function (obj) {
-  var keys = Object.keys(obj)
-  for (var i = 0, l = keys.length; i < l; i++) {
-    this.convert(keys[i], obj[keys[i]])
+  for (let key in obj) {
+    this.convert(key, obj[key])
   }
 }
 

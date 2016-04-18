@@ -213,10 +213,8 @@ var defaultStrat = function (parentVal, childVal) {
 function guardComponents (options) {
   if (options.components) {
     var components = options.components
-    var ids = Object.keys(components)
     var def
-    for (var i = 0, l = ids.length; i < l; i++) {
-      var key = ids[i]
+    for (var key in components) {
       if (isReservedTag(key)) {
         process.env.NODE_ENV !== 'production' && warn(
           'Do not use built-in or reserved HTML elements as component ' +
@@ -256,11 +254,9 @@ function guardProps (options) {
       }
     }
   } else if (isPlainObject(props)) {
-    const keys = Object.keys(props)
-    i = keys.length
-    while (i--) {
-      val = props[keys[i]]
-      name = camelize(keys[i])
+    for (let key in props) {
+      val = props[key]
+      name = camelize(key)
       res[name] = isPlainObject(val)
         ? val
         : { type: val }
@@ -270,13 +266,11 @@ function guardProps (options) {
 }
 
 function guardDirectives (options) {
-  var dirs = options.directives
+  const dirs = options.directives
   if (dirs) {
-    var keys = Object.keys(dirs)
-    var i = keys.length
-    while (i--) {
-      if (typeof dirs[keys[i]] === 'function') {
-        dirs[keys[i]] = { update: dirs[keys[i]] }
+    for (let key in dirs) {
+      if (typeof dirs[key] === 'function') {
+        dirs[key] = { update: dirs[key] }
       }
     }
   }

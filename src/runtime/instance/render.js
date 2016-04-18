@@ -209,10 +209,7 @@ function parentDataChanged (data, oldData) {
 }
 
 function diffObject (cur, old) {
-  const keys = Object.keys(old)
-  let i, l, key
-  for (i = 0, l = keys.length; i < l; i++) {
-    key = keys[i]
+  for (let key in old) {
     if (cur[key] !== old[key]) return true
   }
 }
