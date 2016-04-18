@@ -25,7 +25,7 @@ export default function Component (Ctor, data, parent, children) {
   }
   // return a placeholder vnode
   return {
-    tag: 'component',
+    tag: 'vue-component-' + Ctor.cid,
     key: data && data.key,
     data: { hook, Ctor, data, parent, children }
   }
