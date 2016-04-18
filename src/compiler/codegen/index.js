@@ -17,6 +17,8 @@ function genElement (el) {
     return genRender(el)
   } else if (el.tag === 'slot') {
     return genSlot(el)
+  } else if (el.tag === 'component') {
+    return genComponent(el)
   } else {
     // if the element is potentially a component,
     // wrap its children as a thunk.
@@ -139,6 +141,10 @@ function genRender (el) {
 function genSlot (el) {
   const name = el.slotName || '"default"'
   return `($slots[${name}] || ${genChildren(el)})`
+}
+
+function genComponent (el) {
+  return `__h__(${el.component}, ${genData(el)}, ${genChildren(el, true)})`
 }
 
 function genProps (props) {

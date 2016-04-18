@@ -131,6 +131,7 @@ export function parse (template, options) {
         processIf(element)
         processRender(element)
         processSlot(element)
+        processComponent(element)
         processClassBinding(element)
         processStyleBinding(element)
         processAttrs(element)
@@ -297,6 +298,15 @@ function processSlot (el) {
     el.slotName = el.attrsMap.name
       ? `"${el.attrsMap.name}"`
       : (el.attrsMap[':name'] || el.attrsMap['v-bind:name'])
+  }
+}
+
+function processComponent (el) {
+  if (el.tag === 'component') {
+    let staticName = getAndRemoveAttr(el, 'is')
+    el.component = staticName
+      ? JSON.stringify(staticName)
+      : (getAndRemoveAttr(el, ':is') || getAndRemoveAttr(el, 'v-bind:is'))
   }
 }
 

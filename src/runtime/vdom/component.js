@@ -3,6 +3,9 @@ import { callHook } from '../instance/lifecycle'
 import { warn } from '../util/index'
 
 export default function Component (Ctor, data, parent, children) {
+  if (!Ctor) {
+    return
+  }
   if (typeof Ctor === 'object') {
     Ctor = Vue.extend(Ctor)
   }
