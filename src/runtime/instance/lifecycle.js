@@ -21,11 +21,21 @@ export function lifecycleMixin (Vue) {
   Vue.prototype.$mount = function (el) {
     if (!this.$options.render) {
       this.$options.render = () => this.$createElement('div')
-      process.env.NODE_ENV !== 'production' && warn(
-        'Failed to mount component: ' +
-        'template or render function not defined.',
-        this
-      )
+      if (process.env.NODE_ENV !== 'production') {
+        if (this.$options.template) {
+          warn(
+            'You are using the runtime-only build of Vue where the template ' +
+            'option is not available. Either pre-compile the templates into ' +
+            'render functions, or use the compiler-included build.',
+            this
+          )
+        } else {
+          warn(
+            'Failed to mount component: template or render function not defined.',
+            this
+          )
+        }
+      }
     }
     callHook(this, 'beforeMount')
     el = this.$el = el && query(el)
