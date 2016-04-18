@@ -1,4 +1,4 @@
-import { hyphenate, hasOwn, isArray, isObject, isPlainObject } from './lang'
+import { hyphenate, hasOwn, isArray, isObject, isPlainObject } from '../../shared/util'
 import { observe, observerState } from '../observer/index'
 import { warn } from './debug'
 

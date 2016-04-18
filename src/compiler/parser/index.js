@@ -2,34 +2,22 @@ import { decodeHTML } from 'entities'
 import { parseHTML } from './html-parser'
 import { parseText } from './text-parser'
 import { addHandler } from '../helpers'
+import { hyphenate, makeMap } from '../../shared/util'
 
 const dirRE = /^v-|^@|^:/
 const bindRE = /^:|^v-bind:/
 const onRE = /^@|^v-on:/
 const argRE = /:(.*)$/
 const modifierRE = /\.[^\.]+/g
-const mustUsePropsRE = /^(value|selected|checked|muted)$/
 const forAliasRE = /(.*)\s+(?:in|of)\s+(.*)/
 const forIteratorRE = /\((.*),(.*)\)/
 const camelRE = /[a-z\d][A-Z]/
 
+// attributes that should be using props for binding
+const mustUseProp = makeMap('value,selected,checked,muted')
+
 // this map covers SVG elements that can appear as template root nodes
-const svgMap = {
-  svg: 1,
-  g: 1,
-  defs: 1,
-  symbol: 1,
-  use: 1,
-  image: 1,
-  text: 1,
-  circle: 1,
-  ellipse: 1,
-  line: 1,
-  path: 1,
-  polygon: 1,
-  polyline: 1,
-  rect: 1
-}
+const isSVG = makeMap('svg,g,defs,symbol,use,image,text,circle,ellipse,line,path,polygon,polyline,rect', true)
 
 // make warning customizable depending on environment.
 let warn
@@ -78,7 +66,7 @@ export function parse (template, options) {
       // check svg
       if (inSvg) {
         element.svg = true
-      } else if (svgMap[tag]) {
+      } else if (isSVG(tag)) {
         element.svg = true
         inSvg = true
         svgIndex = stack.length
@@ -256,7 +244,7 @@ function processAttributes (el) {
       }
       if (bindRE.test(name)) { // v-bind
         name = name.replace(bindRE, '')
-        if (mustUsePropsRE.test(name)) {
+        if (mustUseProp(name)) {
           (el.props || (el.props = [])).push({ name, value })
         } else {
           (el.attrs || (el.attrs = [])).push({ name, value })
@@ -327,11 +315,4 @@ function findPrevElement (children) {
   while (i--) {
     if (children[i].tag) return children[i]
   }
-}
-
-const hyphenateReplaceRE = /([a-z\d])([A-Z])/g
-function hyphenate (str) {
-  return str
-    .replace(hyphenateReplaceRE, '$1-$2')
-    .toLowerCase()
 }

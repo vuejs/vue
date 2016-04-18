@@ -1,16 +1,13 @@
-const booleanAttrs = [
-  'allowfullscreen', 'async', 'autofocus', 'autoplay', 'checked', 'compact', 'controls', 'declare',
-  'default', 'defaultchecked', 'defaultmuted', 'defaultselected', 'defer', 'disabled', 'draggable',
-  'enabled', 'formnovalidate', 'hidden', 'indeterminate', 'inert', 'ismap', 'itemscope', 'loop', 'multiple',
-  'muted', 'nohref', 'noresize', 'noshade', 'novalidate', 'nowrap', 'open', 'pauseonexit', 'readonly',
-  'required', 'reversed', 'scoped', 'seamless', 'selected', 'sortable', 'spellcheck', 'translate',
-  'truespeed', 'typemustmatch', 'visible'
-]
+import { makeMap } from '../../../shared/util'
 
-const booleanAttrsDict = {}
-for (let i = 0, len = booleanAttrs.length; i < len; i++) {
-  booleanAttrsDict[booleanAttrs[i]] = true
-}
+const isBooleanAttr = makeMap(
+  'allowfullscreen,async,autofocus,autoplay,checked,compact,controls,declare,' +
+  'default,defaultchecked,defaultmuted,defaultselected,defer,disabled,draggable,' +
+  'enabled,formnovalidate,hidden,indeterminate,inert,ismap,itemscope,loop,multiple,' +
+  'muted,nohref,noresize,noshade,novalidate,nowrap,open,pauseonexit,readonly,' +
+  'required,reversed,scoped,seamless,selected,sortable,spellcheck,translate,' +
+  'truespeed,typemustmatch,visible'
+)
 
 function updateAttrs (oldVnode, vnode) {
   let key, cur, old
@@ -24,8 +21,12 @@ function updateAttrs (oldVnode, vnode) {
     old = oldAttrs[key]
     if (old !== cur) {
       // TODO: add support to namespaced attributes (setAttributeNS)
-      if (booleanAttrsDict[key] && cur == null) {
-        elm.removeAttribute(key)
+      if (isBooleanAttr(key)) {
+        if (cur == null) {
+          elm.removeAttribute(key)
+        } else {
+          elm.setAttribute(key, key)
+        }
       } else {
         elm.setAttribute(key, cur)
       }

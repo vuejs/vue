@@ -1,3 +1,5 @@
+import { isArray } from '../shared/util'
+
 export function addHandler (events, name, value, modifiers) {
   // check capture modifier
   if (modifiers && modifiers.capture) {
@@ -6,7 +8,7 @@ export function addHandler (events, name, value, modifiers) {
   }
   const newHandler = { value, modifiers }
   const handlers = events[name]
-  if (Array.isArray(handlers)) {
+  if (isArray(handlers)) {
     handlers.push(newHandler)
   } else if (handlers) {
     events[name] = [handlers, newHandler]

@@ -6,6 +6,7 @@
  */
 
 import { decodeHTML } from 'entities'
+import { makeMap } from '../../shared/util'
 
 // PhantomJS encodes attribute values when retriving outerHTML.
 const inPhantomJS =
@@ -39,24 +40,24 @@ let IS_REGEX_CAPTURING_BROKEN = false
 })
 
 // Empty Elements
-const empty = makeMap('area,base,basefont,br,col,embed,frame,hr,img,input,isindex,keygen,link,meta,param,source,track,wbr')
+const empty = makeMap('area,base,basefont,br,col,embed,frame,hr,img,input,isindex,keygen,link,meta,param,source,track,wbr', true)
 
 // Inline Elements
-const inline = makeMap('a,abbr,acronym,applet,b,basefont,bdo,big,br,button,cite,code,del,dfn,em,font,i,iframe,img,input,ins,kbd,label,map,noscript,object,q,s,samp,script,select,small,span,strike,strong,sub,sup,svg,textarea,tt,u,var')
+const inline = makeMap('a,abbr,acronym,applet,b,basefont,bdo,big,br,button,cite,code,del,dfn,em,font,i,iframe,img,input,ins,kbd,label,map,noscript,object,q,s,samp,script,select,small,span,strike,strong,sub,sup,svg,textarea,tt,u,var', true)
 
 // Elements that you can, intentionally, leave open
 // (and which close themselves)
-const closeSelf = makeMap('colgroup,dd,dt,li,options,p,td,tfoot,th,thead,tr,source')
+const closeSelf = makeMap('colgroup,dd,dt,li,options,p,td,tfoot,th,thead,tr,source', true)
 
 // Attributes that have their values filled in disabled='disabled'
-const fillAttrs = makeMap('checked,compact,declare,defer,disabled,ismap,multiple,nohref,noresize,noshade,nowrap,readonly,selected')
+const fillAttrs = makeMap('checked,compact,declare,defer,disabled,ismap,multiple,nohref,noresize,noshade,nowrap,readonly,selected', true)
 
 // Special Elements (can contain anything)
-const special = makeMap('script,style')
+const special = makeMap('script,style', true)
 
 // HTML5 tags https://html.spec.whatwg.org/multipage/indices.html#elements-3
 // Phrasing Content https://html.spec.whatwg.org/multipage/dom.html#phrasing-content
-const nonPhrasing = makeMap('address,article,aside,base,blockquote,body,caption,col,colgroup,dd,details,dialog,div,dl,dt,fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,head,header,hgroup,hr,html,legend,li,menuitem,meta,optgroup,option,param,rp,rt,source,style,summary,tbody,td,tfoot,th,thead,title,tr,track')
+const nonPhrasing = makeMap('address,article,aside,base,blockquote,body,caption,col,colgroup,dd,details,dialog,div,dl,dt,fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,head,header,hgroup,hr,html,legend,li,menuitem,meta,optgroup,option,param,rp,rt,source,style,summary,tbody,td,tfoot,th,thead,title,tr,track', true)
 
 const reCache = {}
 
@@ -295,16 +296,5 @@ export function parseHTML (html, handler) {
         handler.end(tagName, [])
       }
     }
-  }
-}
-
-function makeMap (values) {
-  values = values.split(/,/)
-  var map = {}
-  values.forEach(function (value) {
-    map[value] = 1
-  })
-  return function (value) {
-    return map[value.toLowerCase()] === 1
   }
 }

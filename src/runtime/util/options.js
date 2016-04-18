@@ -2,15 +2,15 @@ import Vue from '../instance/index'
 import config from '../config'
 import { warn } from './debug'
 import { isReservedTag } from './dom'
+import { set } from '../observer/index'
 import {
   extend,
-  set,
   isObject,
   isArray,
   isPlainObject,
   hasOwn,
   camelize
-} from './lang'
+} from '../../shared/util'
 
 /**
  * Option overwriting strategies are functions that handle
