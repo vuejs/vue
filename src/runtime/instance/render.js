@@ -138,7 +138,7 @@ export function renderMixin (Vue) {
       resolveSlots(this, _renderChildren)
     }
     // render self
-    const vnode = render.call(this)
+    const vnode = render.call(this._renderProxy)
     // update parent data
     if (_renderData) {
       mergeParentData(this, vnode.data, _renderData)

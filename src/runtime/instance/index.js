@@ -1,3 +1,4 @@
+import { initProxy } from './proxy'
 import { initState, stateMixin } from './state'
 import { initRender, renderMixin } from './render'
 import { initEvents, eventsMixin } from './events'
@@ -21,6 +22,11 @@ Vue.prototype._init = function (options) {
     options || {},
     this
   )
+  if (process.env.NODE_ENV !== 'production') {
+    initProxy(this)
+  } else {
+    this._renderProxy = this
+  }
   initLifecycle(this)
   initEvents(this)
   callHook(this, 'init')
