@@ -102,11 +102,8 @@ var vm = new Vue({
   },
 
   methods: {
-    updateFilter (e) {
-      this.filter = e.target.value.toLowerCase()
-    },
     matches (item) {
-      return item.value.toLowerCase().indexOf(this.filter) > -1
+      return item.value.toLowerCase().indexOf(this.filter.toLowerCase()) > -1
     },
     visibleCount () {
       var count = 0
