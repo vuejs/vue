@@ -163,6 +163,7 @@ function makePropsLinkFn (props) {
   return function propsLinkFn (vm, scope) {
     // store resolved props info
     vm._props = {}
+    var inlineProps = vm.$options.propsData
     var i = props.length
     var prop, path, options, value, raw
     while (i--) {
@@ -171,7 +172,9 @@ function makePropsLinkFn (props) {
       path = prop.path
       options = prop.options
       vm._props[path] = prop
-      if (raw === null) {
+      if (inlineProps && hasOwn(inlineProps, path)) {
+        initProp(vm, prop, inlineProps[path])
+      } if (raw === null) {
         // initialize absent prop
         initProp(vm, prop, undefined)
       } else if (prop.dynamic) {

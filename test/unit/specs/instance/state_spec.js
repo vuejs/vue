@@ -66,17 +66,6 @@ describe('Instance state initialization', function () {
       expect(_.hasOwn(vm, 'c')).toBe(true)
     })
 
-    it('should use default prop value if prop not provided', function () {
-      var vm = new Vue({
-        el: document.createElement('div'),
-        props: ['c'],
-        data: {
-          c: 1
-        }
-      })
-      expect(vm.c).toBe(1)
-    })
-
     it('external prop should overwrite default value', function () {
       var el = document.createElement('div')
       el.setAttribute('v-bind:c', '2')

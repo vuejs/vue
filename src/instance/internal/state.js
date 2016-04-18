@@ -97,15 +97,14 @@ export default function (Vue) {
       // 1. it's not already defined as a prop
       // 2. it's provided via a instantiation option AND there are no
       //    template prop present
-      if (
-        !props || !hasOwn(props, key) ||
-        (data && hasOwn(data, key) && props[key].raw === null)
-      ) {
+      if (!props || !hasOwn(props, key)) {
         this._proxy(key)
       } else if (process.env.NODE_ENV !== 'production') {
         warn(
           'Data field "' + key + '" is already defined ' +
-          'as a prop. Use prop default value instead.',
+          'as a prop. To provide default value for a prop, use the "default" ' +
+          'prop option; if you want to pass prop values to an instantiation ' +
+          'call, use the "propsData" option.',
           this
         )
       }

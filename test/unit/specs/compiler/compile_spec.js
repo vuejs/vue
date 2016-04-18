@@ -16,6 +16,7 @@ describe('Compile', function () {
     directiveBind = jasmine.createSpy('bind')
     directiveTeardown = jasmine.createSpy('teardown')
     vm = {
+      $options: {},
       _data: {},
       _directives: [],
       _bindDir: function (descriptor, node) {

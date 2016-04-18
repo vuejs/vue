@@ -601,13 +601,13 @@ describe('prop', function () {
     expect('already defined as a prop').toHaveBeenWarned()
   })
 
-  it('should not warn data fields already defined as a prop if it is from instantiation call', function () {
+  it('propsData options', function () {
     var vm = new Vue({
       el: el,
       props: {
         a: null
       },
-      data: {
+      propsData: {
         a: 123
       }
     })
