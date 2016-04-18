@@ -53,7 +53,7 @@ function genDefaultModel (el, value, modifiers) {
     : `${value}=$event.target.value`
 
   if (needCompositionGuard) {
-    code = `if($event.target._composing)return;${code}`
+    code = `if($event.target.composing)return;${code}`
   }
   addHandler(el.events, event, code)
   el.props.push({

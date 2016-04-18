@@ -24,11 +24,11 @@ export default {
 }
 
 function onCompositionStart (e) {
-  e.target._composing = true
+  e.target.composing = true
 }
 
 function onCompositionEnd (e) {
-  e.target._composing = false
+  e.target.composing = false
   trigger(e)
 }
 
