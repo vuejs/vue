@@ -6,7 +6,8 @@ import {
   isObject,
   isPlainObject,
   hasProto,
-  hasOwn
+  hasOwn,
+  isReserved
 } from '../util/index'
 
 const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
@@ -261,7 +262,7 @@ export function set (obj, key, val) {
     var i = ob.vms.length
     while (i--) {
       var vm = ob.vms[i]
-      vm._proxy(key)
+      proxy(vm, key)
       vm.$forceUpdate()
     }
   }
@@ -289,8 +290,29 @@ export function del (obj, key) {
     var i = ob.vms.length
     while (i--) {
       var vm = ob.vms[i]
-      vm._unproxy(key)
+      unproxy(vm, key)
       vm.$forceUpdate()
     }
+  }
+}
+
+export function proxy (vm, key) {
+  if (!isReserved(key)) {
+    Object.defineProperty(vm, key, {
+      configurable: true,
+      enumerable: true,
+      get: function proxyGetter () {
+        return vm._data[key]
+      },
+      set: function proxySetter (val) {
+        vm._data[key] = val
+      }
+    })
+  }
+}
+
+export function unproxy (vm, key) {
+  if (!isReserved(key)) {
+    delete vm[key]
   }
 }

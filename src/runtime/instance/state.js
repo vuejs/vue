@@ -3,12 +3,13 @@ import Dep from '../observer/dep'
 import {
   observe,
   defineReactive,
-  observerState
+  observerState,
+  proxy,
+  unproxy
 } from '../observer/index'
 import {
   warn,
   hasOwn,
-  isReserved,
   isPlainObject,
   bind,
   getPropValue
@@ -187,25 +188,4 @@ function setData (vm, newData) {
   oldData.__ob__.removeVm(vm)
   observe(newData, vm)
   vm.$forceUpdate()
-}
-
-function proxy (vm, key) {
-  if (!isReserved(key)) {
-    Object.defineProperty(vm, key, {
-      configurable: true,
-      enumerable: true,
-      get: function proxyGetter () {
-        return vm._data[key]
-      },
-      set: function proxySetter (val) {
-        vm._data[key] = val
-      }
-    })
-  }
-}
-
-function unproxy (vm, key) {
-  if (!isReserved(key)) {
-    delete vm[key]
-  }
 }
