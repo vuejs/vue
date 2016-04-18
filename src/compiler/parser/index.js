@@ -218,7 +218,8 @@ function processSlot (el) {
 }
 
 function processClassBinding (el) {
-  el.staticClass = getAndRemoveAttr(el, 'class')
+  const staticClass = getAndRemoveAttr(el, 'class')
+  el.staticClass = parseText(staticClass) || JSON.stringify(staticClass)
   el.classBinding =
     getAndRemoveAttr(el, ':class') ||
     getAndRemoveAttr(el, 'v-bind:class')
@@ -269,7 +270,7 @@ function processAttributes (el) {
       // literal attribute
       (el.attrs || (el.attrs = [])).push({
         name,
-        value: JSON.stringify(value)
+        value: parseText(value) || JSON.stringify(value)
       })
     }
   }

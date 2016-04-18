@@ -76,7 +76,7 @@ function genData (el) {
   }
   // class
   if (el.staticClass) {
-    data += `staticClass:"${el.staticClass}",`
+    data += `staticClass:${el.staticClass},`
   }
   if (el.classBinding) {
     data += `class:${el.classBinding},`
