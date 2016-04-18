@@ -47,7 +47,7 @@ export function isPrimitive (value) {
  * @return {Function}
  */
 
-function cached (fn) {
+export function cached (fn) {
   const cache = Object.create(null)
   return function cachedFn (str) {
     const hit = cache[str]
