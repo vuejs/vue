@@ -24,7 +24,52 @@ let warn
 const baseWarn = msg => console.error(`[Vue parser]: ${msg}`)
 
 /**
- * Convert HTML string to AST
+ * Convert HTML string to AST.
+ *
+ * There are 3 types of nodes:
+ *
+ * - Element: {
+ *     // base info
+ *     tag: String,
+ *     plain: Boolean,
+ *     attrsList: Array,
+ *     attrsMap: Object,
+ *     parent: Element,
+ *     children: Array,
+ *
+ *     attrs: Array
+ *     props: Array
+ *     directives: Array
+ *
+ *     pre: Boolean
+ *
+ *     if: String (expression)
+ *     else: Boolean
+ *     elseBlock: Element
+ *
+ *     for: String
+ *     iterator: String
+ *     alias: String
+ *
+ *     staticClass: String
+ *     classBinding: String
+ *
+ *     styleBinding: String
+ *
+ *     render: Boolean
+ *     renderName: String
+ *     renderArgs: String
+ *
+ *     slotName: String
+ *   }
+ *
+ * - Expression: {
+ *     expression: String (expression)
+ *   }
+ *
+ * - Text: {
+ *     text: String
+ *   }
  *
  * @param {String} template
  * @param {Object} options
@@ -72,6 +117,7 @@ export function parse (template, options) {
         svgIndex = stack.length
       }
 
+      processPre(element)
       processFor(element)
       processIf(element)
       processRender(element)
@@ -146,6 +192,12 @@ export function parse (template, options) {
   return root
 }
 
+function processPre (el) {
+  if (el.attrsMap['v-pre']) {
+    el.pre = true
+  }
+}
+
 function processFor (el) {
   let exp
   if ((exp = getAndRemoveAttr(el, 'v-for'))) {
@@ -200,20 +252,24 @@ function processElse (el, parent) {
 function processRender (el) {
   if (el.tag === 'render') {
     el.render = true
-    el.method = el.attrsMap.method
-    el.args = el.attrsMap.args
-    if (process.env.NODE_ENV !== 'production' && !el.method) {
-      warn('method attribute is required on <render>.')
+    el.renderMethod = el.attrsMap.method
+    el.renderArgs = el.attrsMap[':args'] || el.attrsMap['v-bind:args']
+    if (process.env.NODE_ENV !== 'production') {
+      if (!el.renderMethod) {
+        warn('method attribute is required on <render>.')
+      }
+      if (el.attrsMap.args) {
+        warn('<render> args should use a dynamic binding, e.g. `:args="..."`.')
+      }
     }
   }
 }
 
 function processSlot (el) {
   if (el.tag === 'slot') {
-    el.name = el.attrsMap.name
-    el.dynamicName =
-      el.attrsMap[':name'] ||
-      el.attrsMap['v-bind:name']
+    el.slotName = el.attrsMap.name
+      ? `"${el.attrsMap.name}"`
+      : (el.attrsMap[':name'] || el.attrsMap['v-bind:name'])
   }
 }
 

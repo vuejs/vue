@@ -129,13 +129,11 @@ function genText (text) {
 }
 
 function genRender (el) {
-  return `${el.method}(${el.args || 'null'},${genChildren(el)})`
+  return `${el.renderMethod}(${el.renderArgs || 'null'},${genChildren(el)})`
 }
 
 function genSlot (el) {
-  const name = el.name
-    ? `"${el.name}"`
-    : (el.dynamicName || '"default"')
+  const name = el.slotName || '"default"'
   return `($slots[${name}] || ${genChildren(el)})`
 }
 
