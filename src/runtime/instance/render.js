@@ -8,7 +8,6 @@ import {
 } from '../vdom/index'
 import {
   bind,
-  extend,
   resolveAsset,
   isArray,
   isObject,
@@ -248,7 +247,7 @@ function mergeParentData (vm, data, parentData) {
     if (!data.style) {
       data.style = parentData.style
     } else {
-      extend(data.style, parentData.style)
+      data.style = (isArray(data.style) ? data.style : []).concat(parentData.style)
     }
   }
   if (parentData.directives) {
