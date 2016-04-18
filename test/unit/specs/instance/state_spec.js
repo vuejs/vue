@@ -9,6 +9,27 @@ describe('Instance state initialization', function () {
     expect('should return an object').toHaveBeenWarned()
   })
 
+  it('should initialize data once per strat', function () {
+    var spyOncePerStrat = jasmine.createSpy('called once per strat')
+    const VM = Vue.extend({
+      data: function () {
+        spyOncePerStrat()
+        return {
+          result: 'false'
+        }
+      }
+    })
+    new VM({
+      data: function () {
+        spyOncePerStrat()
+        return {
+          result: 'true'
+        }
+      }
+    })
+    expect(spyOncePerStrat.calls.count()).toBe(2)
+  })
+
   describe('data proxy', function () {
     var data = {
       a: 0,

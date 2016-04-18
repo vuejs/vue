@@ -94,11 +94,6 @@ export default function (Vue) {
     // it will be filled up in _initScope().
     this._data = {}
 
-    // save raw constructor data before merge
-    // so that we know which properties are provided at
-    // instantiation.
-    this._runtimeData = options.data
-
     // call init hook
     this._callHook('init')
 
