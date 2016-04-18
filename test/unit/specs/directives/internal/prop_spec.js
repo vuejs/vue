@@ -615,6 +615,15 @@ describe('prop', function () {
     expect(vm.a).toBe(123)
   })
 
+  it('should warn using propsData during extension', function () {
+    Vue.extend({
+      propsData: {
+        a: 123
+      }
+    })
+    expect('propsData can only be used as an instantiation option').toHaveBeenWarned()
+  })
+
   it('should not warn for non-required, absent prop', function () {
     new Vue({
       el: el,

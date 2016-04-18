@@ -325,6 +325,11 @@ function guardArrayAssets (assets) {
 export function mergeOptions (parent, child, vm) {
   guardComponents(child)
   guardProps(child)
+  if (process.env.NODE_ENV !== 'production') {
+    if (child.propsData && !vm) {
+      warn('propsData can only be used as an instantiation option.')
+    }
+  }
   var options = {}
   var key
   if (child.mixins) {
