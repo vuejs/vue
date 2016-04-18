@@ -251,7 +251,7 @@ function mergeParentData (vm, data, parentData) {
     }
   }
   if (parentData.directives) {
-    data.directives = parentData.directives.conact(data.directives || [])
+    data.directives = parentData.directives.concat(data.directives || [])
   }
 }
 
