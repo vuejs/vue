@@ -246,16 +246,34 @@ Watcher.prototype.teardown = function () {
  * is collected as a "deep" dependency.
  *
  * @param {*} val
+ * @param {Set} seen
  */
 
-function traverse (val) {
-  var i, keys
-  if (isArray(val)) {
-    i = val.length
-    while (i--) traverse(val[i])
-  } else if (isObject(val)) {
-    keys = Object.keys(val)
-    i = keys.length
-    while (i--) traverse(val[keys[i]])
+const seenObjects = new Set()
+function traverse (val, seen) {
+  let i, keys, isA, isO
+  if (!seen) {
+    seen = seenObjects
+    seen.clear()
+  }
+  isA = isArray(val)
+  isO = isObject(val)
+  if (isA || isO) {
+    if (val.__ob__) {
+      var depId = val.__ob__.dep.id
+      if (seen.has(depId)) {
+        return
+      } else {
+        seen.add(depId)
+      }
+    }
+    if (isA) {
+      i = val.length
+      while (i--) traverse(val[i], seen)
+    } else if (isO) {
+      keys = Object.keys(val)
+      i = keys.length
+      while (i--) traverse(val[keys[i]], seen)
+    }
   }
 }
