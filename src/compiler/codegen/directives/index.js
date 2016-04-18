@@ -18,13 +18,17 @@ export function genDirectives (el) {
   const dirs = el.directives
   let res = 'directives:['
   let hasRuntime = false
-  let i, l, dir
+  let i, l, dir, genRes
   for (i = 0, l = dirs.length; i < l; i++) {
     dir = dirs[i]
     let gen = directives[dir.name]
     if (gen) {
       // compile-time directive that manipulates AST
-      gen(el, dir)
+      genRes = gen(el, dir)
+      if (genRes) {
+        hasRuntime = true
+        res += genRes
+      }
     } else {
       // runtime directive
       hasRuntime = true

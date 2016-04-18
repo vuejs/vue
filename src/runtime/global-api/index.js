@@ -6,6 +6,7 @@ import { initExtend } from './extend'
 import { initAssetRegisters } from './assets'
 import { nextTick } from '../util/index'
 import { set, del } from '../observer/index'
+import directives from '../directives/index'
 
 export function initGlobalAPI (Vue) {
   Vue.config = config
@@ -15,7 +16,7 @@ export function initGlobalAPI (Vue) {
   Vue.nextTick = nextTick
 
   Vue.options = {
-    directives: Object.create(null),
+    directives,
     filters: Object.create(null),
     components: Object.create(null),
     transitions: Object.create(null)

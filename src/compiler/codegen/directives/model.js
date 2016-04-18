@@ -20,8 +20,7 @@ export function model (el, dir) {
         genRadioModel(el, value)
         break
       default:
-        genDefaultModel(el, value, modifiers)
-        break
+        return genDefaultModel(el, value, modifiers)
     }
   }
 }
@@ -44,15 +43,27 @@ function genRadioModel (el, value) {
 
 function genDefaultModel (el, value, modifiers) {
   const type = el.attrsMap.type
-  const event = modifiers && modifiers.lazy ? 'change' : 'input'
-  const code = type === 'number' || (modifiers && modifiers.number)
+  const lazy = modifiers && modifiers.lazy
+  const number = modifiers && modifiers.number
+  const event = lazy ? 'change' : 'input'
+  const needCompositionGuard = !lazy && type !== 'range'
+
+  let code = number || type === 'number'
     ? `${value}=Number($event.target.value)`
     : `${value}=$event.target.value`
+
+  if (needCompositionGuard) {
+    code = `if($event.target._composing)return;${code}`
+  }
   addHandler(el.events, event, code)
   el.props.push({
     name: 'value',
     value: `(${value})`
   })
+  if (needCompositionGuard) {
+    // return runtime directive code to help with composition events
+    return '{def:__resolveDirective__("model")},'
+  }
 }
 
 function genSelect (el, value) {
