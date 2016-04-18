@@ -66,6 +66,10 @@ function genData (el) {
   if (el.svg) {
     data += 'svg:true,'
   }
+  // pre
+  if (el.pre) {
+    data += 'pre:true,'
+  }
   // key
   if (el.key) {
     data += `key:${el.key},`

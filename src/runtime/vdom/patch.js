@@ -204,9 +204,9 @@ export default function createPatchFunction (modules, api) {
     if (isDef(i = vnode.data) && isDef(hook = i.hook) && isDef(i = hook.prepatch)) {
       i(oldVnode, vnode)
     }
-    // child component. skip it since it already updated itself in the
-    // prepatch hook.
-    if (isDef(i = vnode.data) && i.child) {
+    // skip child component, which handles its own updates
+    // and nodes with v-pre
+    if (isDef(i = vnode.data) && (i.child || i.pre)) {
       return
     }
     let elm = vnode.elm = oldVnode.elm

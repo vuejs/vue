@@ -84,6 +84,7 @@ export function parse (template, options) {
   let currentParent
   let inSvg = false
   let svgIndex = -1
+  let inPre = false
   let warned = false
   parseHTML(template, {
     html5: true,
@@ -117,14 +118,23 @@ export function parse (template, options) {
         svgIndex = stack.length
       }
 
-      processPre(element)
-      processFor(element)
-      processIf(element)
-      processRender(element)
-      processSlot(element)
-      processClassBinding(element)
-      processStyleBinding(element)
-      processAttributes(element)
+      if (!inPre) {
+        processPre(element)
+        if (element.pre) {
+          inPre = true
+        }
+      }
+      if (inPre) {
+        processRawAttrs(element)
+      } else {
+        processFor(element)
+        processIf(element)
+        processRender(element)
+        processSlot(element)
+        processClassBinding(element)
+        processStyleBinding(element)
+        processAttrs(element)
+      }
 
       // tree management
       if (!root) {
@@ -161,6 +171,10 @@ export function parse (template, options) {
         inSvg = false
         svgIndex = -1
       }
+      // check pre state
+      if (element.pre) {
+        inPre = false
+      }
     },
 
     chars (text) {
@@ -181,7 +195,7 @@ export function parse (template, options) {
           : null
       if (text) {
         let expression
-        if (text !== ' ' && (expression = parseText(text))) {
+        if (!inPre && text !== ' ' && (expression = parseText(text))) {
           currentParent.children.push({ expression })
         } else {
           currentParent.children.push({ text })
@@ -193,8 +207,21 @@ export function parse (template, options) {
 }
 
 function processPre (el) {
-  if (el.attrsMap['v-pre']) {
+  if (getAndRemoveAttr(el, 'v-pre') != null) {
     el.pre = true
+  }
+}
+
+function processRawAttrs (el) {
+  const l = el.attrsList.length
+  if (l) {
+    el.attrs = new Array(l)
+    for (let i = 0; i < l; i++) {
+      el.attrs[i] = {
+        name: el.attrsList[i].name,
+        value: JSON.stringify(el.attrsList[i].value)
+      }
+    }
   }
 }
 
@@ -287,7 +314,7 @@ function processStyleBinding (el) {
     getAndRemoveAttr(el, 'v-bind:style')
 }
 
-function processAttributes (el) {
+function processAttrs (el) {
   const list = el.attrsList
   let i, l, name, value, arg, modifiers
   for (i = 0, l = list.length; i < l; i++) {
