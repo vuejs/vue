@@ -48,8 +48,11 @@ rollup.rollup({
     ]
   })
 }).then(function (bundle) {
+  // use UMD to wrap the code so that variable names are mangled
+  // for proper minification size.
   var code = bundle.generate({
-    format: 'cjs'
+    format: 'umd',
+    moduleName: 'Vue'
   }).code
   return write('dist/vue.common.min.js', uglify.minify(code, {
     fromString: true,
