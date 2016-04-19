@@ -16,8 +16,7 @@ if (process.env.NODE_ENV !== 'production') {
   proxyHandlers = {
     has (target, key) {
       const has = key in target
-      const allowed = allowedGlobals(key)
-      if (!has && !allowed) {
+      if (!has && !allowedGlobals(key)) {
         warn(
           `Trying to access non-existent property "${key}" while rendering.`,
           target
