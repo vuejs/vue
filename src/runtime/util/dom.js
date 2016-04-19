@@ -1,4 +1,4 @@
-import { isIE9 } from './env'
+import { inBrowser, isIE9 } from './env'
 import { warn } from './debug'
 import { makeMap } from '../../shared/util'
 
@@ -16,6 +16,32 @@ export const isReservedTag = makeMap(
   'details,dialog,menu,menuitem,summary,' +
   'content,element,shadow,template'
 )
+
+const unknownElementCache = Object.create(null)
+export function isUnknownElement (tag) {
+  if (!inBrowser) {
+    return true
+  }
+  tag = tag.toLowerCase()
+  if (unknownElementCache[tag] != null) {
+    return unknownElementCache[tag]
+  }
+  const el = document.createElement(tag)
+  if (tag.indexOf('-') > -1) {
+    // http://stackoverflow.com/a/28210364/1070244
+    return (unknownElementCache[tag] = (
+      el.constructor === window.HTMLUnknownElement ||
+      el.constructor === window.HTMLElement
+    ))
+  } else {
+    return (unknownElementCache[tag] = (
+      /HTMLUnknownElement/.test(el.toString()) &&
+      // Chrome returns unknown for several HTML5 elements.
+      // https://code.google.com/p/chromium/issues/detail?id=540526
+      !/^(data|time|rtc|rb)$/.test(tag)
+    ))
+  }
+}
 
 /**
  * Query an element selector if it's not an element already.

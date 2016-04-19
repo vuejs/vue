@@ -6,6 +6,7 @@ import {
   isPrimitive,
   isArray,
   isReservedTag,
+  isUnknownElement,
   resolveAsset
 } from '../util/index'
 
@@ -54,29 +55,5 @@ export function flatten (children) {
     return res
   } else {
     return children
-  }
-}
-
-const unknownElementCache = Object.create(null)
-
-function isUnknownElement (tag) {
-  tag = tag.toLowerCase()
-  if (unknownElementCache[tag] != null) {
-    return unknownElementCache[tag]
-  }
-  const el = document.createElement(tag)
-  if (tag.indexOf('-') > -1) {
-    // http://stackoverflow.com/a/28210364/1070244
-    return (unknownElementCache[tag] = (
-      el.constructor === window.HTMLUnknownElement ||
-      el.constructor === window.HTMLElement
-    ))
-  } else {
-    return (unknownElementCache[tag] = (
-      /HTMLUnknownElement/.test(el.toString()) &&
-      // Chrome returns unknown for several HTML5 elements.
-      // https://code.google.com/p/chromium/issues/detail?id=540526
-      !/^(data|time|rtc|rb)$/.test(tag)
-    ))
   }
 }
