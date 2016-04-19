@@ -1,8 +1,6 @@
-import { addHandler } from '../../helpers'
+import { addHandler, addProp, getBindingAttr } from '../../helpers'
 
 export function model (el, dir) {
-  if (!el.events) el.events = {}
-  if (!el.props) el.props = []
   const value = dir.value
   const modifiers = dir.modifiers
   if (el.tag === 'select') {
@@ -26,19 +24,13 @@ export function model (el, dir) {
 }
 
 function genCheckboxModel (el, value) {
-  addHandler(el.events, 'change', `${value}=$event.target.checked`)
-  el.props.push({
-    name: 'checked',
-    value: `!!(${value})`
-  })
+  addProp(el, 'checked', `!!(${value})`)
+  addHandler(el, 'change', `${value}=$event.target.checked`)
 }
 
 function genRadioModel (el, value) {
-  addHandler(el.events, 'change', `${value}=$event.target.value`)
-  el.props.push({
-    name: 'checked',
-    value: `(${value}==${getInputValue(el)})`
-  })
+  addProp(el, 'checked', `(${value}==${getBindingAttr(el, 'value')})`)
+  addHandler(el, 'change', `${value}=$event.target.value`)
 }
 
 function genDefaultModel (el, value, modifiers) {
@@ -51,15 +43,11 @@ function genDefaultModel (el, value, modifiers) {
   let code = number || type === 'number'
     ? `${value}=Number($event.target.value)`
     : `${value}=$event.target.value`
-
   if (needCompositionGuard) {
     code = `if($event.target.composing)return;${code}`
   }
-  addHandler(el.events, event, code)
-  el.props.push({
-    name: 'value',
-    value: `(${value})`
-  })
+  addProp(el, 'value', `(${value})`)
+  addHandler(el, event, code)
   if (needCompositionGuard) {
     // return runtime directive code to help with composition events
     return '{def:__resolveDirective__("model")},'
@@ -67,15 +55,12 @@ function genDefaultModel (el, value, modifiers) {
 }
 
 function genSelect (el, value) {
-  addHandler(el.events, 'change', `${value}=$event.target.value`)
-  el.props.push({
-    name: 'value',
-    value: `(${value})`
-  })
+  addProp(el, 'value', `(${value})`)
+  addHandler(el, 'change', `${value}=$event.target.value`)
 }
 
 function genMultiSelect (el, value) {
-  addHandler(el.events, 'change',
+  addHandler(el, 'change',
     `${value}=Array.prototype.filter
     .call($event.target.options,function(o){return o.selected})
     .map(function(o){return o.value})`)
@@ -83,16 +68,7 @@ function genMultiSelect (el, value) {
   for (let i = 0; i < el.children.length; i++) {
     let c = el.children[i]
     if (c.tag === 'option') {
-      (c.props || (c.props = [])).push({
-        name: 'selected',
-        value: `(${value}).indexOf(${getInputValue(c)})>-1`
-      })
+      addProp(c, 'selected', `(${value}).indexOf(${getBindingAttr(c, 'value')})>-1`)
     }
   }
-}
-
-function getInputValue (el) {
-  return el.attrsMap.value
-    ? JSON.stringify(el.attrsMap.value)
-    : el.attrsMap['v-bind:value'] || el.attrsMap[':value']
 }

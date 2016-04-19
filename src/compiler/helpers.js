@@ -1,6 +1,29 @@
 import { isArray } from '../shared/util'
 
-export function addHandler (events, name, value, modifiers) {
+export function getBindingAttr (el, name, getStatic) {
+  const staticValue = getStatic !== false && getAndRemoveAttr(el, name)
+  return staticValue
+    ? JSON.stringify(staticValue)
+    : (getAndRemoveAttr(el, ':' + name) || getAndRemoveAttr(el, 'v-bind:' + name))
+}
+
+export function getAndRemoveAttr (el, name) {
+  let val
+  if ((val = el.attrsMap[name]) != null) {
+    el.attrsMap[name] = null
+    const list = el.attrsList
+    for (let i = 0, l = list.length; i < l; i++) {
+      if (list[i].name === name) {
+        list.splice(i, 1)
+        break
+      }
+    }
+  }
+  return val
+}
+
+export function addHandler (el, name, value, modifiers) {
+  const events = (el.events || (el.events = {}))
   // check capture modifier
   if (modifiers && modifiers.capture) {
     delete modifiers.capture
@@ -15,4 +38,20 @@ export function addHandler (events, name, value, modifiers) {
   } else {
     events[name] = newHandler
   }
+}
+
+export function addProp (el, name, value) {
+  (el.props || (el.props = [])).push({ name, value })
+}
+
+export function addAttr (el, name, value) {
+  (el.attrs || (el.attrs = [])).push({ name, value })
+}
+
+export function addDirective (el, name, value, arg, modifiers) {
+  (el.directives || (el.directives = [])).push({ name, value, arg, modifiers })
+}
+
+export function addStyle (el, name, value) {
+
 }

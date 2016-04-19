@@ -1,8 +1,15 @@
 import { decodeHTML } from 'entities'
 import { parseHTML } from './html-parser'
 import { parseText } from './text-parser'
-import { addHandler } from '../helpers'
 import { hyphenate, makeMap } from '../../shared/util'
+import {
+  getAndRemoveAttr,
+  addProp,
+  addAttr,
+  addHandler,
+  addDirective,
+  getBindingAttr
+} from '../helpers'
 
 const dirRE = /^v-|^@|^:/
 const bindRE = /^:|^v-bind:/
@@ -25,51 +32,6 @@ const baseWarn = msg => console.error(`[Vue parser]: ${msg}`)
 
 /**
  * Convert HTML string to AST.
- *
- * There are 3 types of nodes:
- *
- * - Element: {
- *     // base info
- *     tag: String,
- *     plain: Boolean,
- *     attrsList: Array,
- *     attrsMap: Object,
- *     parent: Element,
- *     children: Array,
- *
- *     attrs: Array
- *     props: Array
- *     directives: Array
- *
- *     pre: Boolean
- *
- *     if: String (expression)
- *     else: Boolean
- *     elseBlock: Element
- *
- *     for: String
- *     iterator: String
- *     alias: String
- *
- *     staticClass: String
- *     classBinding: String
- *
- *     styleBinding: String
- *
- *     render: Boolean
- *     renderName: String
- *     renderArgs: String
- *
- *     slotName: String
- *   }
- *
- * - Expression: {
- *     expression: String (expression)
- *   }
- *
- * - Text: {
- *     text: String
- *   }
  *
  * @param {String} template
  * @param {Object} options
@@ -295,33 +257,24 @@ function processRender (el) {
 
 function processSlot (el) {
   if (el.tag === 'slot') {
-    el.slotName = el.attrsMap.name
-      ? `"${el.attrsMap.name}"`
-      : (el.attrsMap[':name'] || el.attrsMap['v-bind:name'])
+    el.slotName = getBindingAttr(el, 'name')
   }
 }
 
 function processComponent (el) {
   if (el.tag === 'component') {
-    let staticName = getAndRemoveAttr(el, 'is')
-    el.component = staticName
-      ? JSON.stringify(staticName)
-      : (getAndRemoveAttr(el, ':is') || getAndRemoveAttr(el, 'v-bind:is'))
+    el.component = getBindingAttr(el, 'is')
   }
 }
 
 function processClassBinding (el) {
   const staticClass = getAndRemoveAttr(el, 'class')
   el.staticClass = parseText(staticClass) || JSON.stringify(staticClass)
-  el.classBinding =
-    getAndRemoveAttr(el, ':class') ||
-    getAndRemoveAttr(el, 'v-bind:class')
+  el.classBinding = getBindingAttr(el, 'class', false /* getStatic */)
 }
 
 function processStyleBinding (el) {
-  el.styleBinding =
-    getAndRemoveAttr(el, ':style') ||
-    getAndRemoveAttr(el, 'v-bind:style')
+  el.styleBinding = getBindingAttr(el, 'style', false /* getStatic */)
 }
 
 function processAttrs (el) {
@@ -339,32 +292,24 @@ function processAttrs (el) {
       if (bindRE.test(name)) { // v-bind
         name = name.replace(bindRE, '')
         if (mustUseProp(name)) {
-          (el.props || (el.props = [])).push({ name, value })
+          addProp(el, name, value)
         } else {
-          (el.attrs || (el.attrs = [])).push({ name, value })
+          addAttr(el, name, value)
         }
       } else if (onRE.test(name)) { // v-on
         name = name.replace(onRE, '')
-        addHandler((el.events || (el.events = {})), name, value, modifiers)
+        addHandler(el, name, value, modifiers)
       } else { // normal directives
         name = name.replace(dirRE, '')
         // parse arg
         if ((arg = name.match(argRE)) && (arg = arg[1])) {
           name = name.slice(0, -(arg.length + 1))
         }
-        ;(el.directives || (el.directives = [])).push({
-          name,
-          value,
-          arg,
-          modifiers
-        })
+        addDirective(el, name, value, arg, modifiers)
       }
     } else {
       // literal attribute
-      (el.attrs || (el.attrs = [])).push({
-        name,
-        value: parseText(value) || JSON.stringify(value)
-      })
+      addAttr(el, name, parseText(value) || JSON.stringify(value))
     }
   }
 }
@@ -387,21 +332,6 @@ function makeAttrsMap (attrs) {
     map[attrs[i].name] = attrs[i].value
   }
   return map
-}
-
-function getAndRemoveAttr (el, attr) {
-  let val
-  if ((val = el.attrsMap[attr]) != null) {
-    el.attrsMap[attr] = null
-    const list = el.attrsList
-    for (let i = 0, l = list.length; i < l; i++) {
-      if (list[i].name === attr) {
-        list.splice(i, 1)
-        break
-      }
-    }
-  }
-  return val
 }
 
 function findPrevElement (children) {

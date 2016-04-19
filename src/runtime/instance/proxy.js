@@ -1,8 +1,10 @@
-import { warn } from '../util/index'
+import { warn, inBrowser } from '../util/index'
 
 let hasProxy, proxyHandlers, initProxy
 
 if (process.env.NODE_ENV !== 'production') {
+  let context = inBrowser ? window : global
+
   hasProxy =
     typeof Proxy !== 'undefined' &&
     Proxy.toString().match(/native code/)
@@ -12,13 +14,14 @@ if (process.env.NODE_ENV !== 'production') {
       if (key === 'undefined') {
         return false
       }
-      if (!(key in target)) {
+      let has = key in target
+      if (!has && !(key in context)) {
         warn(
           `Trying to access non-existent property "${key}" while rendering.`,
           target
         )
       }
-      return true
+      return has
     }
   }
 
