@@ -34,7 +34,6 @@
     "babel-loader": "^6.0.0",
     "babel-preset-es2015": "^6.0.0",
     "babel-preset-es2015-rollup-vue": "^1.0.0",
-    "babel-preset-stage-2": "^6.0.0",
     "casperjs": "^1.1.0",
     "eslint": "^2.7.0",
     "eslint-config-standard": "^5.1.0",
