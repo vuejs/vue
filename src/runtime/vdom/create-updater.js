@@ -9,7 +9,6 @@ import { isPrimitive, warn } from '../util/index'
 
 const emptyNode = VNode('', {}, [])
 const hooks = ['create', 'update', 'remove', 'destroy', 'pre', 'post']
-const svgNS = 'http://www.w3.org/2000/svg'
 
 function isUndef (s) {
   return s === undefined
@@ -77,7 +76,7 @@ export default function createUpdater (backend) {
     const tag = vnode.tag
     if (isDef(tag)) {
       elm = vnode.elm = isDef(data) && data.svg
-        ? nodeOps.createElementNS(svgNS, tag)
+        ? nodeOps.createSVGElement(tag)
         : nodeOps.createElement(tag)
       if (Array.isArray(children)) {
         for (i = 0; i < children.length; ++i) {
