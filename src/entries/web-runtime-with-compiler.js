@@ -46,7 +46,7 @@ Vue.prototype.$mount = function (el) {
  * @return {String}
  */
 
-export function getOuterHTML (el) {
+function getOuterHTML (el) {
   if (el.outerHTML) {
     return el.outerHTML
   } else {
