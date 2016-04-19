@@ -22,11 +22,15 @@ export default function Component (Ctor, data, parent, children) {
     return
   }
   // async component
-  if (!Ctor.options) {
+  if (!Ctor.cid) {
     if (Ctor.resolved) {
       Ctor = Ctor.resolved
     } else {
-      resolveAsyncComponent(Ctor, () => parent.$forceUpdate())
+      resolveAsyncComponent(Ctor, () => {
+        // it's ok to queue this on every render because
+        // $forceUpdate is buffered.
+        parent.$forceUpdate()
+      })
       return
     }
   }
