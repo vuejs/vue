@@ -1,7 +1,7 @@
-import config from './runtime/config'
-import { compile } from './compiler/index'
-import { getOuterHTML, query, warn } from './runtime/util/index'
-import Vue from './runtime/index'
+import config from '../runtime/config'
+import { compile } from '../compiler/index'
+import { query, warn } from '../runtime/util/index'
+import Vue from './web-runtime'
 
 const mount = Vue.prototype.$mount
 const idTemplateCache = Object.create(null)
@@ -36,6 +36,24 @@ Vue.prototype.$mount = function (el) {
     }
   }
   mount.call(this, el)
+}
+
+/**
+ * Get outerHTML of elements, taking care
+ * of SVG elements in IE as well.
+ *
+ * @param {Element} el
+ * @return {String}
+ */
+
+export function getOuterHTML (el) {
+  if (el.outerHTML) {
+    return el.outerHTML
+  } else {
+    var container = document.createElement('div')
+    container.appendChild(el.cloneNode(true))
+    return container.innerHTML
+  }
 }
 
 Vue.compile = compile

@@ -1,5 +1,10 @@
+/**
+ * Virtual DOM implementation based on Snabbdom by
+ * Simon Friis Vindum (@paldepind)
+ * with custom modifications.
+ */
+
 import VNode from './vnode'
-import * as dom from './dom'
 import { isPrimitive, warn } from '../util/index'
 
 const emptyNode = VNode('', {}, [])
@@ -32,11 +37,11 @@ function createKeyToOldIdx (children, beginIdx, endIdx) {
   return map
 }
 
-export default function createPatchFunction (modules, api) {
+export default function createUpdater (backend) {
   let i, j
   const cbs = {}
 
-  if (isUndef(api)) api = dom
+  const { modules, nodeOps } = backend
 
   for (i = 0; i < hooks.length; ++i) {
     cbs[hooks[i]] = []
@@ -46,14 +51,14 @@ export default function createPatchFunction (modules, api) {
   }
 
   function emptyNodeAt (elm) {
-    return VNode(api.tagName(elm).toLowerCase(), {}, [], undefined, elm)
+    return VNode(nodeOps.tagName(elm).toLowerCase(), {}, [], undefined, elm)
   }
 
   function createRmCb (childElm, listeners) {
     return function remove () {
       if (--listeners === 0) {
-        const parent = api.parentNode(childElm)
-        api.removeChild(parent, childElm)
+        const parent = nodeOps.parentNode(childElm)
+        nodeOps.removeChild(parent, childElm)
       }
     }
   }
@@ -72,14 +77,14 @@ export default function createPatchFunction (modules, api) {
     const tag = vnode.tag
     if (isDef(tag)) {
       elm = vnode.elm = isDef(data) && data.svg
-        ? api.createElementNS(svgNS, tag)
-        : api.createElement(tag)
+        ? nodeOps.createElementNS(svgNS, tag)
+        : nodeOps.createElement(tag)
       if (Array.isArray(children)) {
         for (i = 0; i < children.length; ++i) {
-          api.appendChild(elm, createElm(children[i], insertedVnodeQueue))
+          nodeOps.appendChild(elm, createElm(children[i], insertedVnodeQueue))
         }
       } else if (isPrimitive(vnode.text)) {
-        api.appendChild(elm, api.createTextNode(vnode.text))
+        nodeOps.appendChild(elm, nodeOps.createTextNode(vnode.text))
       }
       for (i = 0; i < cbs.create.length; ++i) cbs.create[i](emptyNode, vnode)
       i = vnode.data.hook // Reuse variable
@@ -88,14 +93,14 @@ export default function createPatchFunction (modules, api) {
         if (i.insert) insertedVnodeQueue.push(vnode)
       }
     } else {
-      elm = vnode.elm = api.createTextNode(vnode.text)
+      elm = vnode.elm = nodeOps.createTextNode(vnode.text)
     }
     return vnode.elm
   }
 
   function addVnodes (parentElm, before, vnodes, startIdx, endIdx, insertedVnodeQueue) {
     for (; startIdx <= endIdx; ++startIdx) {
-      api.insertBefore(parentElm, createElm(vnodes[startIdx], insertedVnodeQueue), before)
+      nodeOps.insertBefore(parentElm, createElm(vnodes[startIdx], insertedVnodeQueue), before)
     }
   }
 
@@ -130,7 +135,7 @@ export default function createPatchFunction (modules, api) {
             rm()
           }
         } else { // Text node
-          api.removeChild(parentElm, ch.elm)
+          nodeOps.removeChild(parentElm, ch.elm)
         }
       }
     }
@@ -162,19 +167,19 @@ export default function createPatchFunction (modules, api) {
         newEndVnode = newCh[--newEndIdx]
       } else if (sameVnode(oldStartVnode, newEndVnode)) { // Vnode moved right
         patchVnode(oldStartVnode, newEndVnode, insertedVnodeQueue)
-        api.insertBefore(parentElm, getElm(oldStartVnode), api.nextSibling(getElm(oldEndVnode)))
+        nodeOps.insertBefore(parentElm, getElm(oldStartVnode), nodeOps.nextSibling(getElm(oldEndVnode)))
         oldStartVnode = oldCh[++oldStartIdx]
         newEndVnode = newCh[--newEndIdx]
       } else if (sameVnode(oldEndVnode, newStartVnode)) { // Vnode moved left
         patchVnode(oldEndVnode, newStartVnode, insertedVnodeQueue)
-        api.insertBefore(parentElm, getElm(oldEndVnode), getElm(oldStartVnode))
+        nodeOps.insertBefore(parentElm, getElm(oldEndVnode), getElm(oldStartVnode))
         oldEndVnode = oldCh[--oldEndIdx]
         newStartVnode = newCh[++newStartIdx]
       } else {
         if (isUndef(oldKeyToIdx)) oldKeyToIdx = createKeyToOldIdx(oldCh, oldStartIdx, oldEndIdx)
         idxInOld = oldKeyToIdx[newStartVnode.key]
         if (isUndef(idxInOld)) { // New element
-          api.insertBefore(parentElm, createElm(newStartVnode, insertedVnodeQueue), getElm(oldStartVnode))
+          nodeOps.insertBefore(parentElm, createElm(newStartVnode, insertedVnodeQueue), getElm(oldStartVnode))
           newStartVnode = newCh[++newStartIdx]
         } else {
           elmToMove = oldCh[idxInOld]
@@ -186,7 +191,7 @@ export default function createPatchFunction (modules, api) {
           }
           patchVnode(elmToMove, newStartVnode, insertedVnodeQueue)
           oldCh[idxInOld] = undefined
-          api.insertBefore(parentElm, getElm(elmToMove), getElm(oldStartVnode))
+          nodeOps.insertBefore(parentElm, getElm(elmToMove), getElm(oldStartVnode))
           newStartVnode = newCh[++newStartIdx]
         }
       }
@@ -214,9 +219,9 @@ export default function createPatchFunction (modules, api) {
     const ch = vnode.children
     if (oldVnode === vnode) return
     if (!sameVnode(oldVnode, vnode)) {
-      var parentElm = api.parentNode(oldVnode.elm)
+      var parentElm = nodeOps.parentNode(oldVnode.elm)
       elm = createElm(vnode, insertedVnodeQueue)
-      api.insertBefore(parentElm, elm, oldVnode.elm)
+      nodeOps.insertBefore(parentElm, elm, oldVnode.elm)
       removeVnodes(parentElm, [oldVnode], 0, 0)
       return
     }
@@ -229,22 +234,22 @@ export default function createPatchFunction (modules, api) {
       if (isDef(oldCh) && isDef(ch)) {
         if (oldCh !== ch) updateChildren(elm, oldCh, ch, insertedVnodeQueue)
       } else if (isDef(ch)) {
-        if (isDef(oldVnode.text)) api.setTextContent(elm, '')
+        if (isDef(oldVnode.text)) nodeOps.setTextContent(elm, '')
         addVnodes(elm, null, ch, 0, ch.length - 1, insertedVnodeQueue)
       } else if (isDef(oldCh)) {
         removeVnodes(elm, oldCh, 0, oldCh.length - 1)
       } else if (isDef(oldVnode.text)) {
-        api.setTextContent(elm, '')
+        nodeOps.setTextContent(elm, '')
       }
     } else if (oldVnode.text !== vnode.text) {
-      api.setTextContent(elm, vnode.text)
+      nodeOps.setTextContent(elm, vnode.text)
     }
     if (isDef(hook) && isDef(i = hook.postpatch)) {
       i(oldVnode, vnode)
     }
   }
 
-  return function patch (oldVnode, vnode) {
+  return function update (oldVnode, vnode) {
     var i, elm, parent
     var insertedVnodeQueue = []
     for (i = 0; i < cbs.pre.length; ++i) cbs.pre[i]()
@@ -260,12 +265,12 @@ export default function createPatchFunction (modules, api) {
         patchVnode(oldVnode, vnode, insertedVnodeQueue)
       } else {
         elm = oldVnode.elm
-        parent = api.parentNode(elm)
+        parent = nodeOps.parentNode(elm)
 
         createElm(vnode, insertedVnodeQueue)
 
         if (parent !== null) {
-          api.insertBefore(parent, getElm(vnode), api.nextSibling(elm))
+          nodeOps.insertBefore(parent, getElm(vnode), nodeOps.nextSibling(elm))
           removeVnodes(parent, [oldVnode], 0, 0)
         }
       }

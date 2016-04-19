@@ -1,5 +1,5 @@
 import { toArray } from '../util/index'
-import { updateListeners } from '../vdom/index'
+import { updateListeners } from '../vdom/helpers'
 
 export function initEvents (vm) {
   vm._events = Object.create(null)

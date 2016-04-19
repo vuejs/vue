@@ -1,11 +1,6 @@
-import { callHook } from './lifecycle'
 import { observerState } from '../observer/index'
-import {
-  createElement,
-  patch,
-  updateListeners,
-  flatten
-} from '../vdom/index'
+import createElement from '../vdom/create-element'
+import { flatten, updateListeners } from '../vdom/helpers'
 import {
   bind,
   resolveAsset,
@@ -24,7 +19,7 @@ export function initRender (vm) {
   vm.$slots = {}
   // bind the public createElement fn to this instance
   // so that we get proper render context inside it.
-  vm.$createElement = bind(vm.__h__, vm)
+  vm.$createElement = bind(createElement, vm)
   if (vm.$options.el) {
     vm.$mount(vm.$options.el)
   }
@@ -94,21 +89,6 @@ export function renderMixin (Vue) {
     }
   }
 
-  Vue.prototype._update = function (vnode) {
-    if (this._mounted) {
-      callHook(this, 'beforeUpdate')
-    }
-    if (!this._vnode) {
-      this.$el = patch(this.$el, vnode)
-    } else {
-      this.$el = patch(this._vnode, vnode)
-    }
-    this._vnode = vnode
-    if (this._mounted) {
-      callHook(this, 'updated')
-    }
-  }
-
   Vue.prototype._updateFromParent = function (parentData, children, key) {
     const oldParentData = this.$options._renderData
     this.$options._renderData = parentData
@@ -146,10 +126,6 @@ export function renderMixin (Vue) {
     // restore render state
     renderState.activeInstance = prev
     return vnode
-  }
-
-  Vue.prototype.$forceUpdate = function () {
-    this._watcher.update()
   }
 }
 

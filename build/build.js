@@ -26,7 +26,7 @@ fs.writeFileSync('src/runtime/index.js', main)
 // runtime only, because it's meant to be
 // used with vue-loader which pre-compiles the template.
 rollup.rollup({
-  entry: 'src/runtime/index.js',
+  entry: 'src/entries/web-runtime.js',
   plugins: [babel()]
 })
 .then(function (bundle) {
@@ -39,7 +39,7 @@ rollup.rollup({
 // production CommonJS build, just for file size monitoring.
 .then(function () {
   return rollup.rollup({
-    entry: 'src/runtime/index.js',
+    entry: 'src/entries/web-runtime',
     plugins: [
       replace({
         'process.env.NODE_ENV': "'production'"
@@ -75,7 +75,7 @@ rollup.rollup({
 // Standalone Dev Build
 .then(function () {
   return rollup.rollup({
-    entry: 'src/runtime-with-compiler.js',
+    entry: 'src/entries/web-runtime-with-compiler.js',
     plugins: [
       alias({
         entities: './entity-decoder'
@@ -97,7 +97,7 @@ rollup.rollup({
 .then(function () {
   // Standalone Production Build
   return rollup.rollup({
-    entry: 'src/runtime-with-compiler.js',
+    entry: 'src/entries/web-runtime-with-compiler.js',
     plugins: [
       alias({
         entities: './entity-decoder'

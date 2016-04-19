@@ -1,1 +1,1 @@
-module.exports = require('../src/runtime-with-compiler')['default']
+module.exports = require('../src/entries/web-runtime-with-compiler')['default']

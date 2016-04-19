@@ -40,14 +40,7 @@ export function lifecycleMixin (Vue) {
     callHook(this, 'beforeMount')
     el = this.$el = el && query(el)
     if (el) {
-      // clean element
-      el.innerHTML = ''
-      if (el.hasAttributes()) {
-        const attrs = toArray(el.attributes)
-        for (let i = 0; i < attrs.length; i++) {
-          el.removeAttribute(attrs[i].name)
-        }
-      }
+      cleanElement(el)
     }
     this._watcher = new Watcher(this, this._render, this._update)
     this._update(this._watcher.value)
@@ -58,6 +51,27 @@ export function lifecycleMixin (Vue) {
       callHook(this, 'ready')
     }
     return this
+  }
+
+  Vue.prototype._update = function (vnode) {
+    if (this._mounted) {
+      callHook(this, 'beforeUpdate')
+    }
+    if (!this._vnode) {
+      // Vue.prototype.__update__ is injected in entry points
+      // based on the rendering backend used.
+      this.$el = this.__update__(this.$el, vnode)
+    } else {
+      this.$el = this.__update__(this._vnode, vnode)
+    }
+    this._vnode = vnode
+    if (this._mounted) {
+      callHook(this, 'updated')
+    }
+  }
+
+  Vue.prototype.$forceUpdate = function () {
+    this._watcher.update()
   }
 
   Vue.prototype.$destroy = function () {
@@ -102,4 +116,14 @@ export function callHook (vm, hook) {
     }
   }
   vm.$emit('hook:' + hook)
+}
+
+function cleanElement (el) {
+  el.innerHTML = ''
+  if (el.hasAttributes()) {
+    const attrs = toArray(el.attributes)
+    for (let i = 0; i < attrs.length; i++) {
+      el.removeAttribute(attrs[i].name)
+    }
+  }
 }

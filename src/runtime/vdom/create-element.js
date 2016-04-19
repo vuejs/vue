@@ -1,14 +1,8 @@
 import VNode from './vnode'
 import Component from './component'
+import { flatten } from './helpers'
 import { renderState } from '../instance/render'
-import {
-  warn,
-  isPrimitive,
-  isArray,
-  isReservedTag,
-  isUnknownElement,
-  resolveAsset
-} from '../util/index'
+import { warn, isReservedTag, isUnknownElement, resolveAsset } from '../util/index'
 
 export default function createElement (tag, data, children) {
   data = data || {}
@@ -34,26 +28,5 @@ export default function createElement (tag, data, children) {
     }
   } else {
     return Component(tag, data, parent, children)
-  }
-}
-
-export function flatten (children) {
-  if (isArray(children)) {
-    let res = []
-    for (let i = 0, l = children.length; i < l; i++) {
-      let c = children[i]
-      // flatten nested
-      if (isArray(c)) {
-        res.push.apply(res, flatten(c))
-      } else if (isPrimitive(c)) {
-        // convert primitive to vnode
-        res.push(VNode(undefined, undefined, undefined, c))
-      } else if (c) {
-        res.push(c)
-      }
-    }
-    return res
-  } else {
-    return children
   }
 }
