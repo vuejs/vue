@@ -2,13 +2,14 @@ import { isArray, isObject } from '../../util/index'
 import { setClass } from '../class-util'
 
 function updateClass (oldVnode, vnode) {
+  const el = vnode.elm
   let dynamicClass = vnode.data.class
   let staticClass = vnode.data.staticClass
-  const el = vnode.elm
-  const activeClass = el._activeClass
-  if (staticClass || dynamicClass || activeClass) {
+  let transitionClass = el._transitionClasses
+  if (staticClass || dynamicClass || transitionClass) {
     dynamicClass = genClass(dynamicClass)
-    const cls = concatClass(concatClass(staticClass, dynamicClass), activeClass)
+    transitionClass = genClass(transitionClass)
+    const cls = concat(concat(staticClass, dynamicClass), transitionClass)
     if (cls !== oldVnode.class) {
       setClass(el, cls)
     }
@@ -16,7 +17,7 @@ function updateClass (oldVnode, vnode) {
   }
 }
 
-function concatClass (a, b) {
+function concat (a, b) {
   return a ? b ? (a + ' ' + b) : a : (b || '')
 }
 
@@ -24,12 +25,8 @@ function genClass (data) {
   if (!data) {
     return ''
   }
-  if (isObject(data)) {
-    let res = ''
-    for (var key in data) {
-      if (data[key]) res += key + ' '
-    }
-    return res.slice(0, -1)
+  if (typeof data === 'string') {
+    return data
   }
   if (isArray(data)) {
     let res = ''
@@ -38,8 +35,12 @@ function genClass (data) {
     }
     return res.slice(0, -1)
   }
-  if (typeof data === 'string') {
-    return data
+  if (isObject(data)) {
+    let res = ''
+    for (var key in data) {
+      if (data[key]) res += key + ' '
+    }
+    return res.slice(0, -1)
   }
 }
 

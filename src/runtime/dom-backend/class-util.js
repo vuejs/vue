@@ -29,7 +29,11 @@ export function setClass (el, cls) {
 
 export function addClass (el, cls) {
   if (el.classList) {
-    el.classList.add(cls)
+    if (cls.indexOf(' ') > -1) {
+      cls.split(/\s+/).forEach(c => el.classList.add(c))
+    } else {
+      el.classList.add(cls)
+    }
   } else {
     let cur = ' ' + getClass(el) + ' '
     if (cur.indexOf(' ' + cls + ' ') < 0) {
@@ -47,7 +51,11 @@ export function addClass (el, cls) {
 
 export function removeClass (el, cls) {
   if (el.classList) {
-    el.classList.remove(cls)
+    if (cls.indexOf(' ') > -1) {
+      cls.split(/\s+/).forEach(c => el.classList.remove(c))
+    } else {
+      el.classList.remove(cls)
+    }
   } else {
     let cur = ' ' + getClass(el) + ' '
     let tar = ' ' + cls + ' '

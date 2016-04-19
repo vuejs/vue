@@ -20,18 +20,16 @@ export default isIE9 ? {} : {
       // apply enter class
       const enterClass = data.enterClass
       if (enterClass) {
-        addClass(el, enterClass)
+        addTransitionClass(el, enterClass)
         nextFrame(() => {
-          removeClass(el, enterClass)
+          removeTransitionClass(el, enterClass)
         })
       }
       const enterActiveClass = data.enterActiveClass
       if (enterActiveClass) {
-        el._activeClass = enterActiveClass
-        addClass(el, enterActiveClass)
+        addTransitionClass(el, enterActiveClass)
         el.addEventListener(transitionEndEvent, () => {
-          el._activeClass = null
-          removeClass(el, enterActiveClass)
+          removeTransitionClass(el, enterActiveClass)
         })
       }
     }
@@ -40,6 +38,16 @@ export default isIE9 ? {} : {
   remove: function applyLeaveTransition (vnode, rm) {
 
   }
+}
+
+function addTransitionClass (el, cls) {
+  (el._transitionClasses || (el._transitionClasses = [])).push(cls)
+  addClass(el, cls)
+}
+
+function removeTransitionClass (el, cls) {
+  el._transitionClasses.$remove(cls)
+  removeClass(el, cls)
 }
 
 const raf = (inBrowser && window.requestAnimationFrame) || setTimeout
