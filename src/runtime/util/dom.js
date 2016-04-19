@@ -3,7 +3,7 @@ import { warn } from './debug'
 import { makeMap } from '../../shared/util'
 
 export const isReservedTag = makeMap(
-  'slot,component,' +
+  'slot,component,render,' +
   'html,base,head,link,meta,style,title,' +
   'address,article,footer,header,h1,h2,h3,h4,h5,h6,hgroup,nav,section,' +
   'div,dd,dl,dt,figcaption,figure,hr,li,main,ol,p,pre,ul,' +
