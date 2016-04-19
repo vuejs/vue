@@ -34,6 +34,13 @@ export function renderMixin (Vue) {
     return resolveAsset(this.$options, 'directives', id, true)
   }
 
+  // resolve transition
+  Vue.prototype.__resolveTransition__ = function (id) {
+    return id && typeof id === 'string'
+      ? resolveAsset(this.$options, 'transitions', id) || id
+      : id
+  }
+
   // toString for mustaches
   Vue.prototype.__toString__ = function (val) {
     return val == null

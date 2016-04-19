@@ -1,11 +1,11 @@
 export default {
-  create: function (oldVnode, vnode) {
+  create: function bindDirectives (oldVnode, vnode) {
     applyDirectives(oldVnode, vnode, 'bind')
   },
-  update: function (oldVnode, vnode) {
+  update: function updateDirectives (oldVnode, vnode) {
     applyDirectives(oldVnode, vnode, 'update', true)
   },
-  destroy: function (vnode) {
+  destroy: function unbindDirectives (vnode) {
     applyDirectives(null, vnode, 'unbind')
   }
 }

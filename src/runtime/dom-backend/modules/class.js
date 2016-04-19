@@ -1,18 +1,23 @@
-import { isIE9, isArray, isObject } from '../../util/index'
+import { isArray, isObject } from '../../util/index'
+import { setClass } from '../class-util'
 
 function updateClass (oldVnode, vnode) {
   let dynamicClass = vnode.data.class
   let staticClass = vnode.data.staticClass
-  if (staticClass || dynamicClass) {
+  const el = vnode.elm
+  const activeClass = el._activeClass
+  if (staticClass || dynamicClass || activeClass) {
     dynamicClass = genClass(dynamicClass)
-    let cls = staticClass
-      ? staticClass + (dynamicClass ? ' ' + dynamicClass : '')
-      : dynamicClass
+    const cls = concatClass(concatClass(staticClass, dynamicClass), activeClass)
     if (cls !== oldVnode.class) {
-      setClass(vnode.elm, cls)
+      setClass(el, cls)
     }
     vnode.class = cls
   }
+}
+
+function concatClass (a, b) {
+  return a ? b ? (a + ' ' + b) : a : (b || '')
 }
 
 function genClass (data) {
@@ -35,25 +40,6 @@ function genClass (data) {
   }
   if (typeof data === 'string') {
     return data
-  }
-}
-
-/**
- * In IE9, setAttribute('class') will result in empty class
- * if the element also has the :class attribute; However in
- * PhantomJS, setting `className` does not work on SVG elements...
- * So we have to do a conditional check here.
- *
- * @param {Element} el
- * @param {String} cls
- */
-
-export function setClass (el, cls) {
-  /* istanbul ignore if */
-  if (isIE9 && !/svg$/.test(el.namespaceURI)) {
-    el.className = cls
-  } else {
-    el.setAttribute('class', cls)
   }
 }
 

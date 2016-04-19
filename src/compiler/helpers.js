@@ -49,7 +49,7 @@ export function addHandler (el, name, value, modifiers) {
 
 export function getBindingAttr (el, name, getStatic) {
   const staticValue = getStatic !== false && getAndRemoveAttr(el, name)
-  return staticValue
+  return staticValue || staticValue === ''
     ? JSON.stringify(staticValue)
     : (getAndRemoveAttr(el, ':' + name) || getAndRemoveAttr(el, 'v-bind:' + name))
 }

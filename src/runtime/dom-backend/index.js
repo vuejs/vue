@@ -6,6 +6,7 @@ import props from './modules/props'
 import attrs from './modules/attrs'
 import events from './modules/events'
 import directives from './modules/directives'
+import transition from './modules/transition'
 
 export const patch = createPatchFunction({
   nodeOps,
@@ -15,6 +16,7 @@ export const patch = createPatchFunction({
     attrs,
     style,
     events,
-    directives
+    directives,
+    transition
   ]
 })

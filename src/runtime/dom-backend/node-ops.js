@@ -1,4 +1,4 @@
-const svgNS = 'http://www.w3.org/2000/svg'
+export const svgNS = 'http://www.w3.org/2000/svg'
 
 export function createElement (tagName) {
   return document.createElement(tagName)
