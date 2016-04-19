@@ -1,9 +1,14 @@
-import { warn, inBrowser } from '../util/index'
+import { warn, inBrowser, makeMap } from '../util/index'
 
 let hasProxy, proxyHandlers, initProxy
 
 if (process.env.NODE_ENV !== 'production') {
-  let context = inBrowser ? window : global
+  const context = inBrowser ? window : global
+  const allowedGlobals = makeMap(
+    'Infinity,undefined,NaN,isFinite,isNaN,' +
+    'parseFloat,parseInt,decodeURI,decodeURIComponent,encodeURI,encodeURIComponent,' +
+    'Math,Number,Date,Array,Object,Boolean,String,RegExp,Map,Set,JSON,Intl'
+  )
 
   hasProxy =
     typeof Proxy !== 'undefined' &&
@@ -11,11 +16,9 @@ if (process.env.NODE_ENV !== 'production') {
 
   proxyHandlers = {
     has (target, key) {
-      if (key === 'undefined') {
-        return false
-      }
-      let has = key in target
-      if (!has && !(key in context)) {
+      const has = key in target
+      const allowed = allowedGlobals(key)
+      if (!has && !allowed) {
         warn(
           `Trying to access non-existent property "${key}" while rendering.`,
           target
