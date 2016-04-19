@@ -1,7 +1,6 @@
+import { addHook } from '../../helpers'
+
 export function ref (el, dir) {
-  if (!el.hooks) {
-    el.hooks = {}
-  }
   // go up and check if this node is inside a v-for
   let isFor = false
   let parent = el
@@ -12,16 +11,7 @@ export function ref (el, dir) {
     parent = parent.parent
   }
   // __registerRef__(name, ref, vFor?, remove?)
-  const code = `__registerRef__("${dir.arg}", vnode.data.child || vnode.elm, ${isFor ? 'true' : 'false'}`
-  patchHook(el.hooks, 'insert', `${code})`)
-  patchHook(el.hooks, 'destroy', `${code}, true)`)
-}
-
-const replaceRE = /^function\(vnode\)\{(.*)\}$/
-function patchHook (hooks, name, code) {
-  if (hooks[name]) {
-    hooks[name] = hooks[name].replace(replaceRE, `function(vnode){$1;${code}}`)
-  } else {
-    hooks[name] = `function(vnode){${code}}`
-  }
+  const code = `__registerRef__("${dir.arg}", n1.data.child || n1.elm, ${isFor ? 'true' : 'false'}`
+  addHook(el, 'insert', `${code})`)
+  addHook(el, 'destroy', `${code}, true)`)
 }

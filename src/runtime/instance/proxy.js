@@ -1,9 +1,8 @@
-import { warn, inBrowser, makeMap } from '../util/index'
+import { warn, makeMap } from '../util/index'
 
 let hasProxy, proxyHandlers, initProxy
 
 if (process.env.NODE_ENV !== 'production') {
-  const context = inBrowser ? window : global
   const allowedGlobals = makeMap(
     'Infinity,undefined,NaN,isFinite,isNaN,' +
     'parseFloat,parseInt,decodeURI,decodeURIComponent,encodeURI,encodeURIComponent,' +

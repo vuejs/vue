@@ -23,7 +23,7 @@ export function getAndRemoveAttr (el, name) {
 }
 
 export function addHandler (el, name, value, modifiers) {
-  const events = (el.events || (el.events = {}))
+  const events = el.events || (el.events = {})
   // check capture modifier
   if (modifiers && modifiers.capture) {
     delete modifiers.capture
@@ -52,6 +52,19 @@ export function addDirective (el, name, value, arg, modifiers) {
   (el.directives || (el.directives = [])).push({ name, value, arg, modifiers })
 }
 
-export function addStyle (el, name, value) {
+export function addStyleBinding (el, name, value) {
+  const code = `"${name}":${value}`
+  el.styleBinding = el.styleBinding
+    ? el.styleBinding.replace(/}\s?$/, `${code},}`)
+    : `{${code}}`
+}
 
+export function addHook (el, name, code) {
+  const hooks = el.hooks || (el.hooks = {})
+  const hook = hooks[name]
+  if (hook) {
+    hook.push(code)
+  } else {
+    hooks[name] = [code]
+  }
 }

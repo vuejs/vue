@@ -159,7 +159,7 @@ function genProps (props) {
 function genHooks (hooks) {
   let res = ''
   for (let key in hooks) {
-    res += `"${key}":${hooks[key]},`
+    res += `"${key}":function(n1,n2){${hooks[key].join(';')}},`
   }
   return res.slice(0, -1)
 }
