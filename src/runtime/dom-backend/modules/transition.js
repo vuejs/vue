@@ -1,43 +1,73 @@
 import { addClass, removeClass } from '../class-util'
-import {
-  isIE9,
-  inBrowser,
-  transitionProp,
-  transitionEndEvent,
-  animationProp,
-  animationEndEvent
-} from '../../util/index'
+import { isIE9, inBrowser, cached } from '../../util/index'
 
-export default isIE9 ? {} : {
-  create: function applyEnterTransition (_, vnode) {
-    let data = vnode.data.transition
-    const el = vnode.elm
-    if (data != null) {
-      if (typeof data === 'string') {
-        // pure CSS
-        data = cssTransition(data)
-      }
-      // apply enter class
-      const enterClass = data.enterClass
-      if (enterClass) {
-        addTransitionClass(el, enterClass)
-        nextFrame(() => {
-          removeTransitionClass(el, enterClass)
-        })
-      }
-      const enterActiveClass = data.enterActiveClass
-      if (enterActiveClass) {
-        addTransitionClass(el, enterActiveClass)
-        el.addEventListener(transitionEndEvent, () => {
+const TRANSITION = 'transition'
+const ANIMATION = 'animation'
+
+// Transition property/event sniffing
+let transitionProp
+let transitionEndEvent
+let animationProp
+let animationEndEvent
+if (inBrowser && !isIE9) {
+  const isWebkitTrans =
+    window.ontransitionend === undefined &&
+    window.onwebkittransitionend !== undefined
+  const isWebkitAnim =
+    window.onanimationend === undefined &&
+    window.onwebkitanimationend !== undefined
+  transitionProp = isWebkitTrans ? 'WebkitTransition' : 'transition'
+  transitionEndEvent = isWebkitTrans ? 'webkitTransitionEnd' : 'transitionend'
+  animationProp = isWebkitAnim ? 'WebkitAnimation' : 'animation'
+  animationEndEvent = isWebkitAnim ? 'webkitAnimationEnd' : 'animationend'
+}
+
+const raf = (inBrowser && window.requestAnimationFrame) || setTimeout
+function nextFrame (fn) {
+  raf(() => {
+    raf(fn)
+  })
+}
+
+const autoCssTransition = cached(name => {
+  name = name || 'v'
+  return {
+    enterClass: `${name}-enter`,
+    leaveClass: `${name}-leave`,
+    enterActiveClass: `${name}-enter-active`,
+    leaveActiveClass: `${name}-leave-active`
+  }
+})
+
+function beforeEnter (_, vnode) {
+  const el = vnode.elm
+  let data = vnode.data.transition
+  if (data != null) {
+    if (typeof data === 'string') {
+      data = vnode.data.transition = autoCssTransition(data)
+    }
+    // apply enter class
+    const enterClass = data.enterClass
+    if (enterClass) {
+      addTransitionClass(el, enterClass)
+      nextFrame(() => {
+        removeTransitionClass(el, enterClass)
+      })
+    }
+    const enterActiveClass = data.enterActiveClass
+    if (enterActiveClass) {
+      addTransitionClass(el, enterActiveClass)
+      nextFrame(() => {
+        whenTransitionEnds(el, () => {
           removeTransitionClass(el, enterActiveClass)
         })
-      }
+      })
     }
-  },
-
-  remove: function applyLeaveTransition (vnode, rm) {
-
   }
+}
+
+function onLeave (vnode, rm) {
+  rm()
 }
 
 function addTransitionClass (el, cls) {
@@ -50,19 +80,66 @@ function removeTransitionClass (el, cls) {
   removeClass(el, cls)
 }
 
-const raf = (inBrowser && window.requestAnimationFrame) || setTimeout
-function nextFrame (fn) {
-  raf(() => {
-    raf(fn)
-  })
+function whenTransitionEnds (el, cb) {
+  const { type, timeout, propCount } = getTransitionInfo(el)
+  if (!type) return cb()
+  const event = type === TRANSITION ? transitionEndEvent : animationEndEvent
+  let ended = 0
+  const end = () => {
+    el.removeEventListener(event, onEnd)
+    cb()
+  }
+  const onEnd = () => {
+    if (++ended >= propCount) {
+      end()
+    }
+  }
+  setTimeout(() => {
+    if (ended < propCount) {
+      end()
+    }
+  }, timeout)
+  el.addEventListener(event, onEnd)
 }
 
-function cssTransition (name) {
-  name = name || 'v'
+function getTransitionInfo (el) {
+  const styles = window.getComputedStyle(el)
+  // 1. determine the maximum duration (timeout)
+  const transitioneDelays = styles[transitionProp + 'Delay'].split(', ')
+  const transitionDurations = styles[transitionProp + 'Duration'].split(', ')
+  const animationDelays = styles[animationProp + 'Delay'].split(', ')
+  const animationDurations = styles[animationProp + 'Duration'].split(', ')
+  const transitionTimeout = getTimeout(transitioneDelays, transitionDurations)
+  const animationTimeout = getTimeout(animationDelays, animationDurations)
+  const timeout = Math.max(transitionTimeout, animationTimeout)
+  const type = timeout > 0
+    ? transitionTimeout > animationTimeout
+      ? TRANSITION
+      : ANIMATION
+    : null
+  const propCount = type
+    ? type === TRANSITION
+      ? transitionDurations.length
+      : animationDurations.length
+    : 0
   return {
-    enterClass: `${name}-enter`,
-    leaveClass: `${name}-leave`,
-    enterActiveClass: `${name}-enter-active`,
-    leaveActiveClass: `${name}-leave-active`
+    type,
+    timeout,
+    propCount
   }
+}
+
+function getTimeout (delays, durations) {
+  return Math.max.apply(null, durations.map((d, i) => {
+    return toMs(d) + toMs(delays[i])
+  }))
+}
+
+function toMs (s) {
+  return Number(s.slice(0, -1)) * 1000
+}
+
+export default !transitionEndEvent ? {} : {
+  create: beforeEnter,
+  remove: onLeave
 }

@@ -11,6 +11,7 @@ function updateClass (oldVnode, vnode) {
     transitionClass = genClass(transitionClass)
     const cls = concat(concat(staticClass, dynamicClass), transitionClass)
     if (cls !== oldVnode.class) {
+      console.log(cls)
       setClass(el, cls)
     }
     vnode.class = cls

@@ -18,16 +18,6 @@ const normalize = cached(function (prop) {
   }
 })
 
-function toObject (arr) {
-  const res = arr[0] || {}
-  for (var i = 1; i < arr.length; i++) {
-    if (arr[i]) {
-      extend(res, arr[i])
-    }
-  }
-  return res
-}
-
 function updateStyle (oldVnode, vnode) {
   if (!oldVnode.data.style && !vnode.data.style) {
     return
@@ -53,6 +43,16 @@ function updateStyle (oldVnode, vnode) {
       elm.style[normalize(name)] = cur
     }
   }
+}
+
+function toObject (arr) {
+  const res = arr[0] || {}
+  for (var i = 1; i < arr.length; i++) {
+    if (arr[i]) {
+      extend(res, arr[i])
+    }
+  }
+  return res
 }
 
 export default {

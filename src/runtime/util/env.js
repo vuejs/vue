@@ -18,40 +18,6 @@ export const isAndroid = UA && UA.indexOf('android') > 0
 export const isIos = UA && /(iphone|ipad|ipod|ios)/i.test(UA)
 export const isWechat = UA && UA.indexOf('micromessenger') > 0
 
-let transitionProp
-let transitionEndEvent
-let animationProp
-let animationEndEvent
-
-// Transition property/event sniffing
-if (inBrowser && !isIE9) {
-  const isWebkitTrans =
-    window.ontransitionend === undefined &&
-    window.onwebkittransitionend !== undefined
-  const isWebkitAnim =
-    window.onanimationend === undefined &&
-    window.onwebkitanimationend !== undefined
-  transitionProp = isWebkitTrans
-    ? 'WebkitTransition'
-    : 'transition'
-  transitionEndEvent = isWebkitTrans
-    ? 'webkitTransitionEnd'
-    : 'transitionend'
-  animationProp = isWebkitAnim
-    ? 'WebkitAnimation'
-    : 'animation'
-  animationEndEvent = isWebkitAnim
-    ? 'webkitAnimationEnd'
-    : 'animationend'
-}
-
-export {
-  transitionProp,
-  transitionEndEvent,
-  animationProp,
-  animationEndEvent
-}
-
 /**
  * Defer a task to execute it asynchronously. Ideally this
  * should be executed as a microtask, so we leverage
