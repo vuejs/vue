@@ -1,4 +1,7 @@
 function updateProps (oldVnode, vnode) {
+  if (!oldVnode.data.props && !vnode.data.props) {
+    return
+  }
   let key, cur, old
   const elm = vnode.elm
   const oldProps = oldVnode.data.props || {}

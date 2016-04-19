@@ -1,6 +1,9 @@
 import { updateListeners } from '../../vdom/helpers'
 
 function updateDOMListeners (oldVnode, vnode) {
+  if (!oldVnode.data.on && !vnode.data.on) {
+    return
+  }
   const on = vnode.data.on
   const oldOn = oldVnode.data.on || {}
   updateListeners(on, oldOn, (event, handler, capture) => {

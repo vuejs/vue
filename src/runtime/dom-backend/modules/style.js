@@ -29,6 +29,9 @@ function toObject (arr) {
 }
 
 function updateStyle (oldVnode, vnode) {
+  if (!oldVnode.data.style && !vnode.data.style) {
+    return
+  }
   let cur, name
   const elm = vnode.elm
   const oldStyle = oldVnode.data.style || {}

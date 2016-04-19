@@ -14,6 +14,9 @@ const xlinkNS = 'http://www.w3.org/1999/xlink'
 const isXlink = name => name.slice(0, 6) === 'xlink:'
 
 function updateAttrs (oldVnode, vnode) {
+  if (!oldVnode.data.attrs && !vnode.data.attrs) {
+    return
+  }
   let key, cur, old
   const elm = vnode.elm
   const oldAttrs = oldVnode.data.attrs || {}
