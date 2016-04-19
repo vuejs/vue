@@ -96,6 +96,7 @@ export function parse (template, options) {
         processComponent(element)
         processClassBinding(element)
         processStyleBinding(element)
+        processTransition(element)
         processAttrs(element)
       }
 
@@ -275,6 +276,10 @@ function processClassBinding (el) {
 
 function processStyleBinding (el) {
   el.styleBinding = getBindingAttr(el, 'style', false /* getStatic */)
+}
+
+function processTransition (el) {
+  el.transition = getBindingAttr(el, 'transition')
 }
 
 function processAttrs (el) {

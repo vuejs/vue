@@ -91,6 +91,10 @@ function genData (el) {
   if (el.styleBinding) {
     data += `style:${el.styleBinding},`
   }
+  // transition
+  if (el.transition) {
+    data += `transition:${el.transition},`
+  }
   // props
   if (el.props) {
     data += `props:{${genProps(el.props)}},`
