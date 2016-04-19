@@ -1,14 +1,8 @@
 import Vue from '../instance/index'
 import { callHook } from '../instance/lifecycle'
-import { warn } from '../util/index'
+import { warn, isObject } from '../util/index'
 
 export default function Component (Ctor, data, parent, children) {
-  if (!Ctor) {
-    return
-  }
-  if (typeof Ctor === 'object') {
-    Ctor = Vue.extend(Ctor)
-  }
   if (process.env.NODE_ENV !== 'production' &&
     children && typeof children !== 'function') {
     warn(
@@ -16,6 +10,25 @@ export default function Component (Ctor, data, parent, children) {
       'children array. This allows the component to track the children ' +
       'dependencies and optimizes re-rendering.'
     )
+  }
+  if (!Ctor) {
+    return
+  }
+  if (isObject(Ctor)) {
+    Ctor = Vue.extend(Ctor)
+  }
+  if (process.env.NODE_ENV !== 'production' && typeof Ctor !== 'function') {
+    warn(`Invalid Component definition: ${Ctor}`, parent)
+    return
+  }
+  // async component
+  if (!Ctor.options) {
+    if (Ctor.resolved) {
+      Ctor = Ctor.resolved
+    } else {
+      resolveAsyncComponent(Ctor, () => parent.$forceUpdate())
+      return
+    }
   }
   // merge hooks on the placeholder node itself
   const hook = { init, insert, prepatch, destroy }
@@ -76,4 +89,33 @@ function prepatch (oldVnode, vnode) {
 
 function destroy (vnode) {
   vnode.data.child.$destroy()
+}
+
+function resolveAsyncComponent (factory, cb) {
+  if (factory.resolved) {
+    // cached
+    cb(factory.resolved)
+  } else if (factory.requested) {
+    // pool callbacks
+    factory.pendingCallbacks.push(cb)
+  } else {
+    factory.requested = true
+    const cbs = factory.pendingCallbacks = [cb]
+    factory(function resolve (res) {
+      if (isObject(res)) {
+        res = Vue.extend(res)
+      }
+      // cache resolved
+      factory.resolved = res
+      // invoke callbacks
+      for (var i = 0, l = cbs.length; i < l; i++) {
+        cbs[i](res)
+      }
+    }, function reject (reason) {
+      process.env.NODE_ENV !== 'production' && warn(
+        `Failed to resolve async component: ${factory}` +
+        (reason ? `\nReason: ${reason}` : '')
+      )
+    })
+  }
 }
