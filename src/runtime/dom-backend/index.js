@@ -1,4 +1,4 @@
-import createUpdater from '../vdom/create-updater'
+import createPatchFunction from '../vdom/patch'
 import * as nodeOps from './node-ops'
 import classes from './modules/class'
 import style from './modules/style'
@@ -7,7 +7,7 @@ import attrs from './modules/attrs'
 import events from './modules/events'
 import directives from './modules/directives'
 
-export const update = createUpdater({
+export const patch = createPatchFunction({
   nodeOps,
   modules: [
     classes,

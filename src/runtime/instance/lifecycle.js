@@ -58,11 +58,11 @@ export function lifecycleMixin (Vue) {
       callHook(this, 'beforeUpdate')
     }
     if (!this._vnode) {
-      // Vue.prototype.__update__ is injected in entry points
+      // Vue.prototype.__patch__ is injected in entry points
       // based on the rendering backend used.
-      this.$el = this.__update__(this.$el, vnode)
+      this.$el = this.__patch__(this.$el, vnode)
     } else {
-      this.$el = this.__update__(this._vnode, vnode)
+      this.$el = this.__patch__(this._vnode, vnode)
     }
     this._vnode = vnode
     if (this._mounted) {

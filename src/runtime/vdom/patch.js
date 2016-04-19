@@ -36,7 +36,7 @@ function createKeyToOldIdx (children, beginIdx, endIdx) {
   return map
 }
 
-export default function createUpdater (backend) {
+export default function createPatchFunction (backend) {
   let i, j
   const cbs = {}
 
