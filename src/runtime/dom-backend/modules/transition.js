@@ -67,13 +67,20 @@ function onLeave (vnode, rm) {
     data = detectAuto(data)
     // apply leave classes
     const leaveClass = data.leaveClass
-    if (leaveClass) {
-      // do it in next frame to be consistent
-      // with enter transition
-      nextFrame(() => {
+    const leaveActiveClass = data.leaveActiveClass
+    if (leaveClass || leaveActiveClass) {
+      if (leaveClass) {
         addTransitionClass(el, leaveClass)
-        whenTransitionEnds(el, rm)
-      })
+        nextFrame(() => {
+          removeTransitionClass(el, leaveClass)
+        })
+      }
+      if (leaveActiveClass) {
+        nextFrame(() => {
+          addTransitionClass(el, leaveActiveClass)
+          whenTransitionEnds(el, rm)
+        })
+      }
     } else {
       rm()
     }
@@ -93,7 +100,8 @@ const autoCssTransition = cached(name => {
   return {
     enterClass: `${name}-enter`,
     leaveClass: `${name}-leave`,
-    enterActiveClass: `${name}-enter-active`
+    enterActiveClass: `${name}-enter-active`,
+    leaveActiveClass: `${name}-leave-active`
   }
 })
 
