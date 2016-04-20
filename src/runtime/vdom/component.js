@@ -19,20 +19,19 @@ const hooks = {
   },
 
   prepatch (oldVnode, vnode) {
-    const old = oldVnode.componentOptions
-    const cur = vnode.componentOptions
-    if (cur.Ctor !== old.Ctor) {
+    const oldCtor = oldVnode.componentOptions.Ctor
+    const { Ctor, propsData, children } = vnode.componentOptions
+    if (Ctor !== oldCtor) {
       // component changed, teardown and create new
       // TODO: keep-alive?
       oldVnode.child.$destroy()
       hooks.init(vnode)
     } else {
       vnode.child = oldVnode.child
-      const propsData = extractProps(vnode.data)
       vnode.child._updateFromParent(
         propsData, // updated props
         vnode, // new parent vnode
-        cur.children // new children
+        children // new children
       )
     }
   },
