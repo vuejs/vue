@@ -32,101 +32,102 @@ function nextFrame (fn) {
 function beforeEnter (_, vnode) {
   const el = vnode.elm
   const data = vnode.data.transition
-  if (data != null) {
-    const {
-      enterClass,
-      enterActiveClass,
-      beforeEnter,
-      enter,
-      afterEnter,
-      enterCancelled
-    } = detectAuto(data)
+  if (data == null) {
+    return
+  }
 
-    const userWantsControl = enter && enter.length > 1
-    const cb = el._enterCb = () => {
-      // ensure only called once
-      if (cb.called) {
-        return
-      }
-      cb.called = true
-      if (enterActiveClass) {
-        removeTransitionClass(el, enterActiveClass)
-      }
-      if (cb.cancelled) {
-        enterCancelled && enterCancelled(el)
-      } else {
-        afterEnter && afterEnter(el)
-      }
-      el._enterCb = null
-    }
+  const {
+    enterClass,
+    enterActiveClass,
+    beforeEnter,
+    enter,
+    afterEnter,
+    enterCancelled
+  } = detectAuto(data)
 
-    beforeEnter && beforeEnter(el)
-    if (enterClass) {
-      addTransitionClass(el, enterClass)
-      nextFrame(() => {
-        removeTransitionClass(el, enterClass)
-      })
+  const userWantsControl = enter && enter.length > 1
+  const cb = el._enterCb = () => {
+    // ensure only called once
+    if (cb.called) {
+      return
     }
+    cb.called = true
     if (enterActiveClass) {
-      nextFrame(() => {
-        addTransitionClass(el, enterActiveClass)
-        if (!userWantsControl) {
-          whenTransitionEnds(el, cb)
-        }
-      })
+      removeTransitionClass(el, enterActiveClass)
     }
-    enter && enter(el, cb)
-    if (!enterActiveClass && !userWantsControl) {
-      cb()
+    if (cb.cancelled) {
+      enterCancelled && enterCancelled(el)
+    } else {
+      afterEnter && afterEnter(el)
     }
+    el._enterCb = null
+  }
+
+  beforeEnter && beforeEnter(el)
+  if (enterClass) {
+    addTransitionClass(el, enterClass)
+    nextFrame(() => {
+      removeTransitionClass(el, enterClass)
+    })
+  }
+  if (enterActiveClass) {
+    nextFrame(() => {
+      addTransitionClass(el, enterActiveClass)
+      if (!userWantsControl) {
+        whenTransitionEnds(el, cb)
+      }
+    })
+  }
+  enter && enter(el, cb)
+  if (!enterActiveClass && !userWantsControl) {
+    cb()
   }
 }
 
 function onLeave (vnode, rm) {
   const el = vnode.elm
-  if (!el) return
   // call enter callback now
   if (el._enterCb) {
     el._enterCb.cancelled = true
     el._enterCb()
   }
   const data = vnode.data.transition
-  if (data != null) {
-    const {
-      leaveClass,
-      leaveActiveClass,
-      beforeLeave,
-      leave,
-      afterLeave
-    } = detectAuto(data)
+  if (data == null) {
+    return rm()
+  }
 
-    const userWantsControl = leave && leave.length > 1
-    const cb = () => {
-      rm()
-      afterLeave && afterLeave(el)
-    }
+  const {
+    leaveClass,
+    leaveActiveClass,
+    beforeLeave,
+    leave,
+    afterLeave
+  } = detectAuto(data)
 
-    beforeLeave && beforeLeave(el)
-    if (leaveClass) {
-      addTransitionClass(el, leaveClass)
-      nextFrame(() => {
-        removeTransitionClass(el, leaveClass)
-      })
-    }
-    if (leaveActiveClass) {
-      nextFrame(() => {
-        addTransitionClass(el, leaveActiveClass)
-        if (!userWantsControl) {
-          whenTransitionEnds(el, cb)
-        }
-      })
-    }
-    leave && leave(el, cb)
-    if (!leaveActiveClass && !userWantsControl) {
-      cb()
-    }
-  } else {
+  const userWantsControl = leave && leave.length > 1
+  const cb = () => {
     rm()
+    afterLeave && afterLeave(el)
+  }
+
+  beforeLeave && beforeLeave(el)
+  if (leaveClass) {
+    addTransitionClass(el, leaveClass)
+    nextFrame(() => {
+      removeTransitionClass(el, leaveClass)
+    })
+  }
+  if (leaveActiveClass) {
+    nextFrame(() => {
+      addTransitionClass(el, leaveActiveClass)
+      if (!userWantsControl) {
+        whenTransitionEnds(el, cb)
+      }
+    })
+  }
+  leave && leave(el, cb)
+  if (!leaveActiveClass && !userWantsControl) {
+    cb()
   }
 }
 
