@@ -56,7 +56,6 @@ function beforeEnter (_, vnode) {
 }
 
 function onLeave (vnode, rm) {
-  console.log(vnode)
   const el = vnode.elm
   if (!el) return
   // call enter callback now
@@ -69,8 +68,12 @@ function onLeave (vnode, rm) {
     // apply leave classes
     const leaveClass = data.leaveClass
     if (leaveClass) {
-      addTransitionClass(el, leaveClass)
-      whenTransitionEnds(el, rm)
+      // do it in next frame to be consistent
+      // with enter transition
+      nextFrame(() => {
+        addTransitionClass(el, leaveClass)
+        whenTransitionEnds(el, rm)
+      })
     } else {
       rm()
     }
