@@ -188,17 +188,3 @@ export function isPlainObject (obj) {
  */
 
 export const isArray = Array.isArray
-
-/**
- * Ensure that a callback is called only once.
- */
-
-export function once (cb) {
-  let called = false
-  return function onceCb () {
-    if (!called) {
-      cb()
-      called = true
-    }
-  }
-}
