@@ -50,12 +50,14 @@ export default function createPatchFunction (backend) {
   }
 
   function createRmCb (childElm, listeners) {
-    return function remove () {
-      if (--listeners === 0) {
+    function remove () {
+      if (--remove.listeners === 0) {
         const parent = nodeOps.parentNode(childElm)
         nodeOps.removeChild(parent, childElm)
       }
     }
+    remove.listeners = listeners
+    return remove
   }
 
   function createElm (vnode, insertedVnodeQueue) {
@@ -68,7 +70,8 @@ export default function createPatchFunction (backend) {
       // component also has set the placeholder vnode's elm.
       // in that case we can just return the element and be done.
       if (isDef(i = vnode.child)) {
-        insertedVnodeQueue.push(vnode)
+        invokeCreateHooks(vnode, insertedVnodeQueue)
+        invokeCreateHooks(i._vnode, insertedVnodeQueue)
         return vnode.elm
       }
     }
@@ -85,16 +88,22 @@ export default function createPatchFunction (backend) {
       } else if (isPrimitive(vnode.text)) {
         nodeOps.appendChild(elm, nodeOps.createTextNode(vnode.text))
       }
-      for (i = 0; i < cbs.create.length; ++i) cbs.create[i](emptyNode, vnode)
-      i = vnode.data.hook // Reuse variable
-      if (isDef(i)) {
-        if (i.create) i.create(emptyNode, vnode)
-        if (i.insert) insertedVnodeQueue.push(vnode)
-      }
+      invokeCreateHooks(vnode, insertedVnodeQueue)
     } else {
       elm = vnode.elm = nodeOps.createTextNode(vnode.text)
     }
     return vnode.elm
+  }
+
+  function invokeCreateHooks (vnode, insertedVnodeQueue) {
+    for (let i = 0; i < cbs.create.length; ++i) {
+      cbs.create[i](emptyNode, vnode)
+    }
+    i = vnode.data.hook // Reuse variable
+    if (isDef(i)) {
+      if (i.create) i.create(emptyNode, vnode)
+      if (i.insert) insertedVnodeQueue.push(vnode)
+    }
   }
 
   function addVnodes (parentElm, before, vnodes, startIdx, endIdx, insertedVnodeQueue) {
@@ -114,34 +123,48 @@ export default function createPatchFunction (backend) {
           invokeDestroyHook(vnode.children[j])
         }
       }
-      if (isDef(i = vnode.child)) invokeDestroyHook(i._vnode)
+      if (isDef(i = vnode.child)) {
+        invokeDestroyHook(i._vnode)
+      }
     }
   }
 
   function removeVnodes (parentElm, vnodes, startIdx, endIdx) {
     for (; startIdx <= endIdx; ++startIdx) {
-      let i, listeners, rm
       let ch = vnodes[startIdx]
       if (isDef(ch)) {
         if (isDef(ch.tag)) {
-          // TODO: fix this hack
-          if (isDef(i = ch.child)) {
-            i.$destroy()
-            ch = i._vnode
-          }
           invokeDestroyHook(ch)
-          listeners = cbs.remove.length + 1
-          rm = createRmCb(ch.elm, listeners)
-          for (i = 0; i < cbs.remove.length; ++i) cbs.remove[i](ch, rm)
-          if (isDef(i = ch.data) && isDef(i = i.hook) && isDef(i = i.remove)) {
-            i(ch, rm)
-          } else {
-            rm()
-          }
+          invokeRemoveHook(ch)
         } else { // Text node
           nodeOps.removeChild(parentElm, ch.elm)
         }
       }
+    }
+  }
+
+  function invokeRemoveHook (vnode, rm) {
+    let i
+    let listeners = cbs.remove.length + 1
+    if (!rm) {
+      // directly removing
+      rm = createRmCb(vnode.elm, listeners)
+    } else {
+      // we have a recursively passed down rm callback
+      // increase the listeners count
+      rm.listeners += listeners
+    }
+    // recursively invoke hooks on child component nodes
+    if (i = vnode.child) {
+      invokeRemoveHook(i._vnode, rm)
+    }
+    for (i = 0; i < cbs.remove.length; ++i) {
+      cbs.remove[i](vnode, rm)
+    }
+    if (isDef(i = vnode.data) && isDef(i = i.hook) && isDef(i = i.remove)) {
+      i(vnode, rm)
+    } else {
+      rm()
     }
   }
 
@@ -213,9 +236,8 @@ export default function createPatchFunction (backend) {
     if (isDef(i = vnode.data) && isDef(hook = i.hook) && isDef(i = hook.prepatch)) {
       i(oldVnode, vnode)
     }
-    // skip child component, which handles its own updates
-    // and nodes with v-pre
-    if (vnode.child || (isDef(i = vnode.data) && i.pre)) {
+    // skip nodes with v-pre
+    if (isDef(i = vnode.data) && i.pre) {
       return
     }
     let elm = vnode.elm = oldVnode.elm

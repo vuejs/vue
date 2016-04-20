@@ -3,7 +3,7 @@ import VNode from './vnode'
 import { callHook } from '../instance/lifecycle'
 import { warn, isObject, hasOwn, hyphenate } from '../util/index'
 
-const hooks = { init, prepatch, insert }
+const hooks = { init, prepatch, insert, destroy }
 const hooksToMerge = Object.keys(hooks)
 
 export default function Component (Ctor, data, parent, children) {
@@ -95,6 +95,10 @@ function prepatch (oldVnode, vnode) {
 
 function insert (vnode) {
   callHook(vnode.child, 'ready')
+}
+
+function destroy (vnode) {
+  vnode.child.$destroy()
 }
 
 function resolveAsyncComponent (factory, cb) {

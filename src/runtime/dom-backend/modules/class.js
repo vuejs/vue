@@ -12,7 +12,8 @@ function updateClass (oldVnode, vnode) {
   // or a child component root node
   if (vnode.child) {
     data = mergeClassData(vnode.child._vnode.data, data)
-  } else if (vnode.parent) {
+  }
+  if (vnode.parent) {
     data = mergeClassData(data, vnode.parent.data)
   }
 
