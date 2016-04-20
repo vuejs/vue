@@ -64,9 +64,12 @@ function init (vnode) {
   const data = vnode.data
   const child = new data.Ctor({
     parent: data.parent,
+    _parentVnode: vnode,
     _renderData: data.data,
     _renderChildren: data.children
   })
+  // the child sets the parent vnode's elm when mounted
+  // and when updated.
   child.$mount()
   data.child = child
 }

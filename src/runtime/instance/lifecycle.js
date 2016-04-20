@@ -65,6 +65,10 @@ export function lifecycleMixin (Vue) {
       this.$el = this.__patch__(this._vnode, vnode)
     }
     this._vnode = vnode
+    // set parent vnode element
+    if (this.$options._parentVnode) {
+      this.$options._parentVnode.elm = this.$el
+    }
     if (this._mounted) {
       callHook(this, 'updated')
     }
