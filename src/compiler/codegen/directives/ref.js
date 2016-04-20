@@ -11,7 +11,7 @@ export function ref (el, dir) {
     parent = parent.parent
   }
   // __registerRef__(name, ref, vFor?, remove?)
-  const code = `__registerRef__("${dir.arg}", n1.data.child || n1.elm, ${isFor ? 'true' : 'false'}`
+  const code = `__registerRef__("${dir.arg}", n1.child || n1.elm, ${isFor ? 'true' : 'false'}`
   addHook(el, 'insert', `${code})`)
   addHook(el, 'destroy', `${code}, true)`)
 }
