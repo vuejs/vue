@@ -14,119 +14,104 @@ var banner =
   ' * Released under the MIT License.\n' +
   ' */'
 
-// update main file
+// Update main file
 var main = fs
   .readFileSync('src/runtime/index.js', 'utf-8')
   .replace(/Vue\.version = '[\d\.]+'/, "Vue.version = '" + version + "'")
 fs.writeFileSync('src/runtime/index.js', main)
 
-// CommonJS build.
-// this is used as the "main" field in package.json
-// and used by bundlers like Webpack and Browserify.
-// runtime only, because it's meant to be
-// used with vue-loader which pre-compiles the template.
-rollup.rollup({
-  entry: 'src/entries/web-runtime.js',
-  plugins: [babel()]
-})
-.then(function (bundle) {
-  var code = bundle.generate({
+build([
+  // Runtime only, CommonJS build. Used by bundlers e.g. Webpack & Browserify
+  {
+    entry: 'src/entries/web-runtime.js',
     format: 'cjs',
-    banner: banner
-  }).code
-  return write('dist/vue.common.js', code)
-})
-// production CommonJS build, just for file size monitoring.
-.then(function () {
-  return rollup.rollup({
-    entry: 'src/entries/web-runtime',
-    plugins: [
-      replace({
-        'process.env.NODE_ENV': "'production'"
-      }),
-      babel()
-    ]
-  })
-}).then(function (bundle) {
-  // use UMD to wrap the code so that variable names are mangled
-  // for proper minification size.
-  var code = bundle.generate({
+    out: 'dist/vue.common.js'
+  },
+  // Minified runtime, only for filze size monitoring
+  {
+    entry: 'src/entries/web-runtime.js',
     format: 'umd',
-    moduleName: 'Vue'
-  }).code
-  return write('dist/vue.common.min.js', uglify.minify(code, {
-    fromString: true,
-    output: {
-      ascii_only: true
+    env: 'production',
+    out: 'dist/vue.common.min.js'
+  },
+  // Runtime+compiler standalone developement build.
+  {
+    entry: 'src/entries/web-runtime-with-compiler.js',
+    format: 'umd',
+    env: 'development',
+    out: 'dist/vue.js',
+    banner: true,
+    alias: {
+      entities: './entity-decoder'
     }
-  }).code)
-})
-.then(zip('dist/vue.common.min.js'))
-// Compiler CommonJS build.
-// Used in Node loaders/transforms.
-.then(function () {
-  return rollup.rollup({
-    entry: 'src/compiler/index.js',
-    plugins: [babel()]
-  })
-  .then(function (bundle) {
-    write('dist/compiler/compiler.js', bundle.generate({
-      format: 'cjs'
-    }).code)
-  })
-})
-// Standalone Dev Build
-.then(function () {
-  return rollup.rollup({
+  },
+  // Runtime+compiler standalone production build.
+  {
     entry: 'src/entries/web-runtime-with-compiler.js',
-    plugins: [
-      alias({
-        entities: './entity-decoder'
-      }),
-      replace({
-        'process.env.NODE_ENV': "'development'"
-      }),
-      babel()
-    ]
-  })
-  .then(function (bundle) {
-    return write('dist/vue.js', bundle.generate({
-      format: 'umd',
-      banner: banner,
-      moduleName: 'Vue'
-    }).code)
-  })
-})
-.then(function () {
-  // Standalone Production Build
-  return rollup.rollup({
-    entry: 'src/entries/web-runtime-with-compiler.js',
-    plugins: [
-      alias({
-        entities: './entity-decoder'
-      }),
-      replace({
-        'process.env.NODE_ENV': "'production'"
-      }),
-      babel()
-    ]
-  })
-  .then(function (bundle) {
-    var code = bundle.generate({
-      format: 'umd',
-      moduleName: 'Vue'
-    }).code
-    var minified = banner + '\n' + uglify.minify(code, {
-      fromString: true,
-      output: {
-        ascii_only: true
+    format: 'umd',
+    env: 'production',
+    out: 'dist/vue.min.js',
+    banner: true,
+    alias: {
+      entities: './entity-decoder'
+    }
+  },
+  // Compiler standalone build, for npm distribution.
+  {
+    entry: 'src/compiler/index',
+    format: 'cjs',
+    external: ['entities'],
+    out: 'dist/compiler/compiler.js'
+  }
+])
+
+function build (builds) {
+  var built = 0
+  var total = builds.length
+  next()
+  function next () {
+    buildEntry(builds[built]).then(function () {
+      built++
+      if (built < total) {
+        next()
       }
+    }).catch(logError)
+  }
+}
+
+function buildEntry (opts) {
+  var plugins = [babel()]
+  if (opts.env) {
+    plugins.push(replace({
+      'process.env.NODE_ENV': JSON.stringify(opts.env)
+    }))
+  }
+  if (opts.alias) {
+    plugins.push(alias(opts.alias))
+  }
+  return rollup.rollup({
+    entry: opts.entry,
+    plugins: plugins,
+    external: opts.external
+  }).then(function (bundle) {
+    var code = bundle.generate({
+      format: opts.format,
+      moduleName: 'Vue',
+      banner: opts.banner ? banner : null
     }).code
-    return write('dist/vue.min.js', minified)
+    if (opts.env === 'production') {
+      var minified = (opts.banner ? banner + '\n' : '') + uglify.minify(code, {
+        fromString: true,
+        output: {
+          ascii_only: true
+        }
+      }).code
+      return write(opts.out, minified).then(zip(opts.out))
+    } else {
+      return write(opts.out, code)
+    }
   })
-  .then(zip('dist/vue.min.js'))
-})
-.catch(logError)
+}
 
 function write (dest, code) {
   return new Promise(function (resolve, reject) {
