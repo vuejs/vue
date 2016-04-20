@@ -1,5 +1,5 @@
 import { addClass, removeClass } from '../class-util'
-import { isIE9, inBrowser, cached } from '../../util/index'
+import { isIE9, inBrowser, cached, once } from '../../util/index'
 
 const TRANSITION = 'transition'
 const ANIMATION = 'animation'
@@ -29,46 +29,68 @@ function nextFrame (fn) {
   })
 }
 
-const autoCssTransition = cached(name => {
-  name = name || 'v'
-  return {
-    enterClass: `${name}-enter`,
-    leaveClass: `${name}-leave`,
-    enterActiveClass: `${name}-enter-active`,
-    leaveActiveClass: `${name}-leave-active`
-  }
-})
-
 function beforeEnter (_, vnode) {
   const el = vnode.elm
   let data = vnode.data.transition
   if (data != null) {
-    if (typeof data === 'string') {
-      data = vnode.data.transition = autoCssTransition(data)
-    }
-    // apply enter class
+    data = detectAuto(data)
+    // apply enter classes
     const enterClass = data.enterClass
+    const enterActiveClass = data.enterActiveClass
     if (enterClass) {
       addTransitionClass(el, enterClass)
       nextFrame(() => {
         removeTransitionClass(el, enterClass)
       })
     }
-    const enterActiveClass = data.enterActiveClass
     if (enterActiveClass) {
       addTransitionClass(el, enterActiveClass)
       nextFrame(() => {
-        whenTransitionEnds(el, () => {
+        whenTransitionEnds(el, el._enterCb = once(() => {
+          el._enterCb = null
           removeTransitionClass(el, enterActiveClass)
-        })
+        }))
       })
     }
   }
 }
 
 function onLeave (vnode, rm) {
-  rm()
+  const el = vnode.elm
+  // call enter callback now
+  if (el._enterCb) {
+    el._enterCb()
+  }
+  let data = vnode.data.transition
+  if (data != null) {
+    data = detectAuto(data)
+    // apply leave classes
+    const leaveClass = data.leaveClass
+    if (leaveClass) {
+      addTransitionClass(el, leaveClass)
+      whenTransitionEnds(el, rm)
+    } else {
+      rm()
+    }
+  } else {
+    rm()
+  }
 }
+
+function detectAuto (data) {
+  return typeof data === 'string'
+    ? autoCssTransition(data)
+    : data
+}
+
+const autoCssTransition = cached(name => {
+  name = name || 'v'
+  return {
+    enterClass: `${name}-enter`,
+    leaveClass: `${name}-leave`,
+    enterActiveClass: `${name}-enter-active`
+  }
+})
 
 function addTransitionClass (el, cls) {
   (el._transitionClasses || (el._transitionClasses = [])).push(cls)
