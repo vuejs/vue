@@ -1,6 +1,6 @@
 import { observerState } from '../observer/index'
 import createElement from '../vdom/create-element'
-import { flatten } from '../vdom/helpers'
+import { flatten, updateListeners } from '../vdom/helpers'
 import {
   bind,
   resolveAsset,
@@ -96,7 +96,7 @@ export function renderMixin (Vue) {
     }
   }
 
-  Vue.prototype._updateFromParent = function (propsData, parentVnode, children) {
+  Vue.prototype._updateFromParent = function (propsData, listeners, parentVnode, children) {
     this.$options._parentVnode = parentVnode
     this.$options._renderChildren = children
     // update props
@@ -108,6 +108,14 @@ export function renderMixin (Vue) {
         this[key] = validateProp(this, key, propsData)
       }
       observerState.shouldConvert = true
+    }
+    // update listeners
+    if (listeners) {
+      const oldListeners = this.$options._parentListeners
+      this.$options._parentListeners = listeners
+      updateListeners(listeners, oldListeners || {}, (event, handler) => {
+        this.$on(event, handler)
+      })
     }
   }
 

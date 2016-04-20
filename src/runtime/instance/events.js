@@ -4,9 +4,9 @@ import { updateListeners } from '../vdom/helpers'
 export function initEvents (vm) {
   vm._events = Object.create(null)
   // init parent attached events
-  const parentData = vm.$options._renderData
-  if (parentData && parentData.on) {
-    updateListeners(parentData.on, {}, (event, handler) => {
+  const listeners = vm.$options._parentListeners
+  if (listeners) {
+    updateListeners(listeners, {}, (event, handler) => {
       vm.$on(event, handler)
     })
   }

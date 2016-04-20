@@ -3,44 +3,7 @@ import VNode from './vnode'
 import { callHook } from '../instance/lifecycle'
 import { warn, isObject, hasOwn, hyphenate } from '../util/index'
 
-const hooks = {
-  init (vnode) {
-    const { Ctor, propsData, parent, children } = vnode.componentOptions
-    const child = new Ctor({
-      parent,
-      propsData,
-      _parentVnode: vnode,
-      _renderChildren: children
-    })
-    // the child sets the parent vnode's elm when mounted
-    // and when updated.
-    child.$mount()
-    vnode.child = child
-  },
-
-  prepatch (oldVnode, vnode) {
-    const oldCtor = oldVnode.componentOptions.Ctor
-    const { Ctor, propsData, children } = vnode.componentOptions
-    if (Ctor !== oldCtor) {
-      // component changed, teardown and create new
-      // TODO: keep-alive?
-      oldVnode.child.$destroy()
-      hooks.init(vnode)
-    } else {
-      vnode.child = oldVnode.child
-      vnode.child._updateFromParent(
-        propsData, // updated props
-        vnode, // new parent vnode
-        children // new children
-      )
-    }
-  },
-
-  insert (vnode) {
-    callHook(vnode.child, 'ready')
-  }
-}
-
+const hooks = { init, prepatch, insert }
 const hooksToMerge = Object.keys(hooks)
 
 export default function Component (Ctor, data, parent, children) {
@@ -83,10 +46,55 @@ export default function Component (Ctor, data, parent, children) {
   // extract props
   const propsData = extractProps(data, Ctor)
 
+  // extract listeners, since these needs to be treated as
+  // child component listeners instead of DOM listeners
+  const listeners = data.on
+  if (listeners) {
+    data.on = null
+  }
+
   // return a placeholder vnode
   const vnode = VNode('vue-component-' + Ctor.cid, data)
-  vnode.componentOptions = { Ctor, propsData, parent, children }
+  vnode.componentOptions = { Ctor, propsData, listeners, parent, children }
   return vnode
+}
+
+function init (vnode) {
+  const { Ctor, propsData, listeners, parent, children } = vnode.componentOptions
+  const child = new Ctor({
+    parent,
+    propsData,
+    _parentVnode: vnode,
+    _parentListeners: listeners,
+    _renderChildren: children
+  })
+  // the child sets the parent vnode's elm when mounted
+  // and when updated.
+  child.$mount()
+  vnode.child = child
+}
+
+function prepatch (oldVnode, vnode) {
+  const oldCtor = oldVnode.componentOptions.Ctor
+  const { Ctor, listeners, propsData, children } = vnode.componentOptions
+  if (Ctor !== oldCtor) {
+    // component changed, teardown and create new
+    // TODO: keep-alive?
+    oldVnode.child.$destroy()
+    hooks.init(vnode)
+  } else {
+    vnode.child = oldVnode.child
+    vnode.child._updateFromParent(
+      propsData, // updated props
+      listeners, // updated listeners
+      vnode, // new parent vnode
+      children // new children
+    )
+  }
+}
+
+function insert (vnode) {
+  callHook(vnode.child, 'ready')
 }
 
 function resolveAsyncComponent (factory, cb) {
