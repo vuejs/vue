@@ -63,9 +63,13 @@ export default function createPatchFunction (backend) {
     const data = vnode.data
     if (isDef(data)) {
       if (isDef(i = data.hook) && isDef(i = i.init)) i(vnode)
-      if (isDef(i = data.child)) {
+      // after calling the init hook, if the vnode is a child component
+      // it should've created a child instance and mounted it. the child
+      // component also has set the placeholder vnode's elm.
+      // in that case we can just return the element and be done.
+      if (isDef(i = vnode.child)) {
         insertedVnodeQueue.push(vnode)
-        return i._vnode.elm
+        return vnode.elm
       }
     }
     const children = vnode.children
@@ -110,7 +114,7 @@ export default function createPatchFunction (backend) {
           invokeDestroyHook(vnode.children[j])
         }
       }
-      if (isDef(i = data.child)) invokeDestroyHook(i._vnode)
+      if (isDef(i = vnode.child)) invokeDestroyHook(i._vnode)
     }
   }
 
@@ -120,7 +124,8 @@ export default function createPatchFunction (backend) {
       let ch = vnodes[startIdx]
       if (isDef(ch)) {
         if (isDef(ch.tag)) {
-          if (isDef(i = ch.data) && isDef(i = i.child)) {
+          // TODO: fix this hack
+          if (isDef(i = ch.child)) {
             i.$destroy()
             ch = i._vnode
           }
@@ -210,7 +215,7 @@ export default function createPatchFunction (backend) {
     }
     // skip child component, which handles its own updates
     // and nodes with v-pre
-    if (isDef(i = vnode.data) && (i.child || i.pre)) {
+    if (vnode.child || (isDef(i = vnode.data) && i.pre)) {
       return
     }
     let elm = vnode.elm = oldVnode.elm

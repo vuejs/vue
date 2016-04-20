@@ -71,11 +71,11 @@ function init (vnode) {
   // the child sets the parent vnode's elm when mounted
   // and when updated.
   child.$mount()
-  data.child = child
+  vnode.child = child
 }
 
 function insert (vnode) {
-  callHook(vnode.data.child, 'ready')
+  callHook(vnode.child, 'ready')
 }
 
 function prepatch (oldVnode, vnode) {
@@ -84,13 +84,13 @@ function prepatch (oldVnode, vnode) {
   if (cur.Ctor !== old.Ctor) {
     // component changed, teardown and create new
     // TODO: keep-alive?
-    old.child.$destroy()
+    oldVnode.child.$destroy()
     init(vnode)
   } else {
-    cur.child = old.child
+    vnode.child = oldVnode.child
     // try re-render child. the child may optimize it
     // and just does nothing.
-    old.child._updateFromParent(cur.data, cur.children, vnode.key)
+    vnode.child._updateFromParent(cur.data, cur.children, vnode.key)
   }
 }
 
