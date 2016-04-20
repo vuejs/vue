@@ -61,7 +61,6 @@ function beforeEnter (_, vnode) {
     }
 
     beforeEnter && beforeEnter(el)
-    // apply enter classes
     if (enterClass) {
       addTransitionClass(el, enterClass)
       nextFrame(() => {
@@ -69,16 +68,17 @@ function beforeEnter (_, vnode) {
       })
     }
     if (enterActiveClass) {
-      addTransitionClass(el, enterActiveClass)
-      if (!userWantsControl) {
-        nextFrame(() => {
+      nextFrame(() => {
+        addTransitionClass(el, enterActiveClass)
+        if (!userWantsControl) {
           whenTransitionEnds(el, cb)
-        })
-      }
-    } else if (!userWantsControl) {
-      cb()
+        }
+      })
     }
     enter && enter(el, cb)
+    if (!enterActiveClass && !userWantsControl) {
+      cb()
+    }
   }
 }
 
@@ -120,10 +120,11 @@ function onLeave (vnode, rm) {
           whenTransitionEnds(el, cb)
         }
       })
-    } else if (!userWantsControl) {
-      cb()
     }
     leave && leave(el, cb)
+    if (!leaveActiveClass && !userWantsControl) {
+      cb()
+    }
   } else {
     rm()
   }
