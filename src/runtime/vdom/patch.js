@@ -155,7 +155,7 @@ export default function createPatchFunction (backend) {
       rm.listeners += listeners
     }
     // recursively invoke hooks on child component nodes
-    if (i = vnode.child) {
+    if (isDef(i = vnode.child)) {
       invokeRemoveHook(i._vnode, rm)
     }
     for (i = 0; i < cbs.remove.length; ++i) {
