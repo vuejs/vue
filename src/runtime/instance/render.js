@@ -1,12 +1,12 @@
 import { observerState } from '../observer/index'
 import createElement from '../vdom/create-element'
-import { flatten, updateListeners } from '../vdom/helpers'
+import { flatten } from '../vdom/helpers'
 import {
   bind,
   resolveAsset,
   isArray,
   isObject,
-  getPropValue
+  validateProp
 } from '../util/index'
 
 export const renderState = {
@@ -96,29 +96,25 @@ export function renderMixin (Vue) {
     }
   }
 
-  Vue.prototype._updateFromParent = function (parentData, children, key) {
-    const oldParentData = this.$options._renderData
-    this.$options._renderData = parentData
+  Vue.prototype._updateFromParent = function (propsData, parentVnode, children) {
+    this.$options._parentVnode = parentVnode
     this.$options._renderChildren = children
-    // update props and listeners
-    if (parentData) {
-      updateEvents(this, parentData, oldParentData)
-      // if any prop has changed it would trigger and queue an update,
-      // but if no props changed, nothing happens
-      const propsChanged = updateProps(this, parentData)
-      // diff parent data (attrs on the placeholder) and queue update
-      // if anything changed. only do this if props didn't change, because
-      // if props changed then an update has already been queued.
-      if (!propsChanged && parentDataChanged(parentData, oldParentData)) {
-        this.$forceUpdate()
+    // update props
+    if (propsData && this.$options.props) {
+      observerState.shouldConvert = false
+      const propKeys = this.$options.propKeys
+      for (let i = 0; i < propKeys.length; i++) {
+        let key = propKeys[i]
+        this[key] = validateProp(this, key, propsData)
       }
+      observerState.shouldConvert = true
     }
   }
 
   Vue.prototype._render = function () {
     const prev = renderState.activeInstance
     renderState.activeInstance = this
-    const { render, _renderData, _renderChildren } = this.$options
+    const { render, _renderChildren } = this.$options
     // resolve slots. becaues slots are rendered in parent scope,
     // we set the activeInstance to parent.
     if (_renderChildren) {
@@ -126,10 +122,6 @@ export function renderMixin (Vue) {
     }
     // render self
     const vnode = render.call(this._renderProxy)
-    // update parent data
-    if (_renderData) {
-      mergeParentData(this, vnode.data, _renderData)
-    }
     // restore render state
     renderState.activeInstance = prev
     return vnode
@@ -155,117 +147,5 @@ function resolveSlots (vm, children) {
       }
     }
     vm.$slots = slots
-  }
-}
-
-const keysToDiff = ['class', 'style', 'attrs', 'props', 'directives', 'transition']
-function parentDataChanged (data, oldData) {
-  let key, old, cur, i, l, j, k
-  for (i = 0, l = keysToDiff.length; i < l; i++) {
-    key = keysToDiff[i]
-    cur = data[key]
-    old = oldData[key]
-    if (!old) {
-      if (!cur) {
-        continue
-      } else {
-        return true
-      }
-    }
-    if (isArray(old)) {
-      if (!isArray(cur)) return true
-      if (cur.length !== old.length) return true
-      for (j = 0, k = old.length; j < k; j++) {
-        if (isObject(old[i])) {
-          if (!isObject(cur[i])) return true
-          if (diffObject(cur, old)) return true
-        } else if (old[i] !== cur[i]) {
-          return true
-        }
-      }
-    } else if (diffObject(cur, old)) {
-      return true
-    }
-  }
-  return false
-}
-
-function diffObject (cur, old) {
-  for (let key in old) {
-    if (cur[key] !== old[key]) return true
-  }
-}
-
-function mergeParentData (vm, data, parentData) {
-  const props = vm.$options.props
-  if (parentData.attrs) {
-    const attrs = data.attrs || (data.attrs = {})
-    for (let key in parentData.attrs) {
-      if (!props || !props[key]) {
-        attrs[key] = parentData.attrs[key]
-      }
-    }
-  }
-  if (parentData.props) {
-    const props = data.props || (data.props = {})
-    for (let key in parentData.props) {
-      if (!props || !props[key]) {
-        props[key] = parentData.props[key]
-      }
-    }
-  }
-  if (parentData.staticClass) {
-    data.staticClass = data.staticClass
-      ? data.staticClass + ' ' + parentData.staticClass
-      : parentData.staticClass
-  }
-  if (parentData.class) {
-    if (!data.class) {
-      data.class = parentData.class
-    } else {
-      data.class = (isArray(data.class) ? data.class : []).concat(parentData.class)
-    }
-  }
-  if (parentData.style) {
-    if (!data.style) {
-      data.style = parentData.style
-    } else {
-      data.style = (isArray(data.style) ? data.style : []).concat(parentData.style)
-    }
-  }
-  if (parentData.directives) {
-    data.directives = parentData.directives.concat(data.directives || [])
-  }
-  if (parentData.transition != null) {
-    data.transition = parentData.transition
-  }
-}
-
-function updateProps (vm, data) {
-  let changed = false
-  if (data.attrs || data.props) {
-    let keys = vm.$options.propKeys
-    if (keys) {
-      observerState.shouldConvert = false
-      for (let i = 0; i < keys.length; i++) {
-        let key = keys[i]
-        let oldVal = vm[key]
-        let newVal = getPropValue(data, key, vm)
-        if (oldVal !== newVal) {
-          vm[key] = newVal
-          changed = true
-        }
-      }
-      observerState.shouldConvert = true
-    }
-  }
-  return changed
-}
-
-function updateEvents (vm, data, oldData) {
-  if (data.on) {
-    updateListeners(data.on, oldData.on || {}, (event, handler) => {
-      vm.$on(event, handler)
-    })
   }
 }

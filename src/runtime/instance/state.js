@@ -12,7 +12,7 @@ import {
   hasOwn,
   isPlainObject,
   bind,
-  getPropValue
+  validateProp
 } from '../util/index'
 
 export function initState (vm) {
@@ -26,17 +26,15 @@ export function initState (vm) {
 
 function initProps (vm) {
   const props = vm.$options.props
+  const propsData = vm.$options.propsData
   if (props) {
     const keys = vm.$options.propKeys = Object.keys(props)
     const isRoot = !vm.$parent
-    const data = isRoot
-      ? { props: vm.$options.propsData }
-      : vm.$options._renderData
     // root instance props should be converted
     observerState.shouldConvert = isRoot
     for (let i = 0; i < keys.length; i++) {
       let key = keys[i]
-      defineReactive(vm, key, getPropValue(data, key, vm))
+      defineReactive(vm, key, validateProp(vm, key, propsData))
     }
     observerState.shouldConvert = true
   }

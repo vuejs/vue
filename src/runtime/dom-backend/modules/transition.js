@@ -30,6 +30,12 @@ function nextFrame (fn) {
 }
 
 function beforeEnter (_, vnode) {
+  // if this is a component root node and the compoennt's
+  // parent container node also has transition, skip.
+  if (vnode.parent && vnode.parent.data.transition) {
+    return
+  }
+
   const el = vnode.elm
   const data = vnode.data.transition
   if (data == null) {
@@ -85,6 +91,12 @@ function beforeEnter (_, vnode) {
 }
 
 function onLeave (vnode, rm) {
+  // if this is a component root node and the compoennt's
+  // parent container node also has transition, skip.
+  if (vnode.parent && vnode.parent.data.transition) {
+    return
+  }
+
   const el = vnode.elm
   // call enter callback now
   if (el._enterCb) {

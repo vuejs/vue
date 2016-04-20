@@ -1,19 +1,48 @@
-import { isArray, isObject } from '../../util/index'
+import { extend, isArray, isObject } from '../../util/index'
 import { setClass } from '../class-util'
 
 function updateClass (oldVnode, vnode) {
   const el = vnode.elm
-  let dynamicClass = vnode.data.class
-  let staticClass = vnode.data.staticClass
-  let transitionClass = el._transitionClasses
-  if (staticClass || dynamicClass || transitionClass) {
-    dynamicClass = genClass(dynamicClass)
-    transitionClass = genClass(transitionClass)
-    const cls = concat(concat(staticClass, dynamicClass), transitionClass)
-    if (cls !== oldVnode.class) {
-      setClass(el, cls)
-    }
-    vnode.class = cls
+  let data = vnode.data
+  if (!data.staticClass && !data.class) {
+    return
+  }
+
+  // check if this is a component container node
+  // or a child component root node
+  if (vnode.child) {
+    data = mergeClassData(vnode.child._vnode.data, data)
+  } else if (vnode.parent) {
+    data = mergeClassData(data, vnode.parent.data)
+  }
+
+  let cls = genClass(data)
+
+  // handle transition classes
+  const transitionClass = el._transitionClasses
+  if (transitionClass) {
+    cls = concat(cls, stringifyClass(transitionClass))
+  }
+
+  // set the class
+  if (cls !== el._prevClass) {
+    setClass(el, cls)
+    el._prevClass = cls
+  }
+}
+
+function mergeClassData (child, parent) {
+  return {
+    staticClass: concat(child.staticClass, parent.staticClass),
+    class: extend(child.class || {}, parent.class)
+  }
+}
+
+function genClass (data) {
+  const dynamicClass = data.class
+  const staticClass = data.staticClass
+  if (staticClass || dynamicClass) {
+    return concat(staticClass, stringifyClass(dynamicClass))
   }
 }
 
@@ -21,7 +50,7 @@ function concat (a, b) {
   return a ? b ? (a + ' ' + b) : a : (b || '')
 }
 
-function genClass (data) {
+function stringifyClass (data) {
   if (!data) {
     return ''
   }
@@ -31,7 +60,7 @@ function genClass (data) {
   if (isArray(data)) {
     let res = ''
     for (let i = 0, l = data.length; i < l; i++) {
-      if (data[i]) res += genClass(data[i]) + ' '
+      if (data[i]) res += stringifyClass(data[i]) + ' '
     }
     return res.slice(0, -1)
   }

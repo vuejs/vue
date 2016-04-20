@@ -1,26 +1,12 @@
-import { hyphenate, hasOwn, isArray, isObject, isPlainObject } from '../../shared/util'
+import { hasOwn, isArray, isObject, isPlainObject } from '../../shared/util'
 import { observe, observerState } from '../observer/index'
 import { warn } from './debug'
 
-export function getPropValue (data, key, vm) {
-  if (!data) return
+export function validateProp (vm, key, propsData) {
+  if (!propsData) return
   const prop = vm.$options.props[key]
-  const altKey = hyphenate(key)
-  const props = data.props
-  const attrs = data.attrs
-  let value
-  let absent = false
-  if (attrs && hasOwn(attrs, key)) {
-    value = attrs[key]
-  } else if (attrs && hasOwn(attrs, altKey)) {
-    value = attrs[altKey]
-  } else if (props && hasOwn(props, key)) {
-    value = props[key]
-  } else if (props && hasOwn(props, altKey)) {
-    value = props[altKey]
-  } else {
-    absent = true
-  }
+  const absent = hasOwn(propsData, key)
+  let value = propsData[key]
   // check default value
   if (value === undefined) {
     value = getPropDefaultValue(vm, prop, key)

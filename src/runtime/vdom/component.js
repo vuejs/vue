@@ -1,6 +1,48 @@
 import Vue from '../instance/index'
+import VNode from './vnode'
 import { callHook } from '../instance/lifecycle'
-import { warn, isObject } from '../util/index'
+import { warn, isObject, hasOwn, hyphenate } from '../util/index'
+
+const hooks = {
+  init (vnode) {
+    const { Ctor, propsData, parent, children } = vnode.componentOptions
+    const child = new Ctor({
+      parent,
+      propsData,
+      _parentVnode: vnode,
+      _renderChildren: children
+    })
+    // the child sets the parent vnode's elm when mounted
+    // and when updated.
+    child.$mount()
+    vnode.child = child
+  },
+
+  prepatch (oldVnode, vnode) {
+    const old = oldVnode.componentOptions
+    const cur = vnode.componentOptions
+    if (cur.Ctor !== old.Ctor) {
+      // component changed, teardown and create new
+      // TODO: keep-alive?
+      oldVnode.child.$destroy()
+      hooks.init(vnode)
+    } else {
+      vnode.child = oldVnode.child
+      const propsData = extractProps(vnode.data)
+      vnode.child._updateFromParent(
+        propsData, // updated props
+        vnode, // new parent vnode
+        cur.children // new children
+      )
+    }
+  },
+
+  insert (vnode) {
+    callHook(vnode.child, 'ready')
+  }
+}
+
+const hooksToMerge = Object.keys(hooks)
 
 export default function Component (Ctor, data, parent, children) {
   if (process.env.NODE_ENV !== 'production' &&
@@ -21,6 +63,7 @@ export default function Component (Ctor, data, parent, children) {
     warn(`Invalid Component definition: ${Ctor}`, parent)
     return
   }
+
   // async component
   if (!Ctor.cid) {
     if (Ctor.resolved) {
@@ -34,64 +77,17 @@ export default function Component (Ctor, data, parent, children) {
       return
     }
   }
-  // merge hooks on the placeholder node itself
-  const hook = { init, insert, prepatch }
-  if (data.hook) {
-    for (let key in data.hook) {
-      let existing = hook[key]
-      let fromParent = data.hook[key]
-      hook[key] = existing ? mergeHook(existing, fromParent) : fromParent
-    }
-  }
+
+  // merge component management hooks onto the placeholder node
+  mergeHooks(data)
+
+  // extract props
+  const propsData = extractProps(data, Ctor)
+
   // return a placeholder vnode
-  return {
-    tag: 'vue-component-' + Ctor.cid,
-    key: data && data.key,
-    data: { hook, Ctor, data, parent, children }
-  }
-}
-
-function mergeHook (a, b) {
-  // since all hooks have at most two args, use fixed args
-  // to avoid having to use fn.apply().
-  return (_, __) => {
-    a(_, __)
-    b(_, __)
-  }
-}
-
-function init (vnode) {
-  const data = vnode.data
-  const child = new data.Ctor({
-    parent: data.parent,
-    _parentVnode: vnode,
-    _renderData: data.data,
-    _renderChildren: data.children
-  })
-  // the child sets the parent vnode's elm when mounted
-  // and when updated.
-  child.$mount()
-  vnode.child = child
-}
-
-function insert (vnode) {
-  callHook(vnode.child, 'ready')
-}
-
-function prepatch (oldVnode, vnode) {
-  const old = oldVnode.data
-  const cur = vnode.data
-  if (cur.Ctor !== old.Ctor) {
-    // component changed, teardown and create new
-    // TODO: keep-alive?
-    oldVnode.child.$destroy()
-    init(vnode)
-  } else {
-    vnode.child = oldVnode.child
-    // try re-render child. the child may optimize it
-    // and just does nothing.
-    vnode.child._updateFromParent(cur.data, cur.children, vnode.key)
-  }
+  const vnode = VNode('vue-component-' + Ctor.cid, data)
+  vnode.componentOptions = { Ctor, propsData, parent, children }
+  return vnode
 }
 
 function resolveAsyncComponent (factory, cb) {
@@ -120,5 +116,60 @@ function resolveAsyncComponent (factory, cb) {
         (reason ? `\nReason: ${reason}` : '')
       )
     })
+  }
+}
+
+function extractProps (data, Ctor) {
+  // we are only extrating raw values here.
+  // validation and default values are handled in the child
+  // component itself.
+  const propOptions = Ctor.options.props
+  if (!propOptions) {
+    return
+  }
+  const res = {}
+  const attrs = data.attrs
+  const props = data.props
+  if (!attrs && !props) {
+    return res
+  }
+  for (let key in propOptions) {
+    let altKey = hyphenate(key)
+    if (attrs && hasOwn(attrs, key)) {
+      res[key] = attrs[key]
+      delete attrs[key]
+    } else if (attrs && hasOwn(attrs, altKey)) {
+      res[key] = attrs[altKey]
+      delete attrs[altKey]
+    } else if (props && hasOwn(props, key)) {
+      res[key] = props[key]
+      delete props[key]
+    } else if (props && hasOwn(props, altKey)) {
+      res[key] = props[altKey]
+      delete props[altKey]
+    }
+  }
+  return res
+}
+
+function mergeHooks (data) {
+  if (data.hook) {
+    for (let i = 0; i < hooksToMerge.length; i++) {
+      let key = hooksToMerge[i]
+      let fromParent = data.hook[key]
+      let ours = hooks[key]
+      data.hook[key] = fromParent ? mergeHook(ours, fromParent) : ours
+    }
+  } else {
+    data.hook = hooks
+  }
+}
+
+function mergeHook (a, b) {
+  // since all hooks have at most two args, use fixed args
+  // to avoid having to use fn.apply().
+  return (_, __) => {
+    a(_, __)
+    b(_, __)
   }
 }
