@@ -121,9 +121,13 @@ export default function createPatchFunction (backend) {
   function removeVnodes (parentElm, vnodes, startIdx, endIdx) {
     for (; startIdx <= endIdx; ++startIdx) {
       let i, listeners, rm
-      const ch = vnodes[startIdx]
+      let ch = vnodes[startIdx]
       if (isDef(ch)) {
         if (isDef(ch.tag)) {
+          if (isDef(i = ch.data) && isDef(i = i.child)) {
+            i.$destroy()
+            ch = i._vnode
+          }
           invokeDestroyHook(ch)
           listeners = cbs.remove.length + 1
           rm = createRmCb(getElm(ch), listeners)

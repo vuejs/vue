@@ -158,7 +158,7 @@ function resolveSlots (vm, children) {
   }
 }
 
-const keysToDiff = ['class', 'style', 'attrs', 'props', 'directives']
+const keysToDiff = ['class', 'style', 'attrs', 'props', 'directives', 'transition']
 function parentDataChanged (data, oldData) {
   let key, old, cur, i, l, j, k
   for (i = 0, l = keysToDiff.length; i < l; i++) {
@@ -235,6 +235,9 @@ function mergeParentData (vm, data, parentData) {
   }
   if (parentData.directives) {
     data.directives = parentData.directives.concat(data.directives || [])
+  }
+  if (parentData.transition != null) {
+    data.transition = parentData.transition
   }
 }
 

@@ -35,7 +35,7 @@ export default function Component (Ctor, data, parent, children) {
     }
   }
   // merge hooks on the placeholder node itself
-  const hook = { init, insert, prepatch, destroy }
+  const hook = { init, insert, prepatch }
   if (data.hook) {
     for (let key in data.hook) {
       let existing = hook[key]
@@ -89,10 +89,6 @@ function prepatch (oldVnode, vnode) {
     // and just does nothing.
     old.child._updateFromParent(cur.data, cur.children, vnode.key)
   }
-}
-
-function destroy (vnode) {
-  vnode.data.child.$destroy()
 }
 
 function resolveAsyncComponent (factory, cb) {

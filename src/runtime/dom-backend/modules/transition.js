@@ -56,7 +56,9 @@ function beforeEnter (_, vnode) {
 }
 
 function onLeave (vnode, rm) {
+  console.log(vnode)
   const el = vnode.elm
+  if (!el) return
   // call enter callback now
   if (el._enterCb) {
     el._enterCb()
