@@ -1,5 +1,7 @@
 import Watcher from '../observer/watcher'
-import { query, toArray, warn } from '../util/index'
+import { query, toArray, warn, validateProp } from '../util/index'
+import { observerState } from '../observer/index'
+import { updateListeners } from '../vdom/helpers'
 
 export function initLifecycle (vm) {
   const options = vm.$options
@@ -73,6 +75,29 @@ export function lifecycleMixin (Vue) {
     }
     if (this._mounted) {
       callHook(this, 'updated')
+    }
+  }
+
+  Vue.prototype._updateFromParent = function (propsData, listeners, parentVnode, children) {
+    this.$options._parentVnode = parentVnode
+    this.$options._renderChildren = children
+    // update props
+    if (propsData && this.$options.props) {
+      observerState.shouldConvert = false
+      const propKeys = this.$options.propKeys
+      for (let i = 0; i < propKeys.length; i++) {
+        let key = propKeys[i]
+        this[key] = validateProp(this, key, propsData)
+      }
+      observerState.shouldConvert = true
+    }
+    // update listeners
+    if (listeners) {
+      const oldListeners = this.$options._parentListeners
+      this.$options._parentListeners = listeners
+      updateListeners(listeners, oldListeners || {}, (event, handler) => {
+        this.$on(event, handler)
+      })
     }
   }
 

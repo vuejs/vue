@@ -1,13 +1,6 @@
-import { observerState } from '../observer/index'
 import createElement from '../vdom/create-element'
-import { flatten, updateListeners } from '../vdom/helpers'
-import {
-  bind,
-  resolveAsset,
-  isArray,
-  isObject,
-  validateProp
-} from '../util/index'
+import { flatten } from '../vdom/helpers'
+import { bind, resolveAsset, isArray, isObject } from '../util/index'
 
 export const renderState = {
   activeInstance: null
@@ -26,6 +19,22 @@ export function initRender (vm) {
 }
 
 export function renderMixin (Vue) {
+  Vue.prototype._render = function () {
+    const prev = renderState.activeInstance
+    renderState.activeInstance = this
+    const { render, _renderChildren } = this.$options
+    // resolve slots. becaues slots are rendered in parent scope,
+    // we set the activeInstance to parent.
+    if (_renderChildren) {
+      resolveSlots(this, _renderChildren)
+    }
+    // render self
+    const vnode = render.call(this._renderProxy)
+    // restore render state
+    renderState.activeInstance = prev
+    return vnode
+  }
+
   // shorthands used in render functions
   Vue.prototype.__h__ = createElement
 
@@ -94,45 +103,6 @@ export function renderMixin (Vue) {
         refs[key] = ref
       }
     }
-  }
-
-  Vue.prototype._updateFromParent = function (propsData, listeners, parentVnode, children) {
-    this.$options._parentVnode = parentVnode
-    this.$options._renderChildren = children
-    // update props
-    if (propsData && this.$options.props) {
-      observerState.shouldConvert = false
-      const propKeys = this.$options.propKeys
-      for (let i = 0; i < propKeys.length; i++) {
-        let key = propKeys[i]
-        this[key] = validateProp(this, key, propsData)
-      }
-      observerState.shouldConvert = true
-    }
-    // update listeners
-    if (listeners) {
-      const oldListeners = this.$options._parentListeners
-      this.$options._parentListeners = listeners
-      updateListeners(listeners, oldListeners || {}, (event, handler) => {
-        this.$on(event, handler)
-      })
-    }
-  }
-
-  Vue.prototype._render = function () {
-    const prev = renderState.activeInstance
-    renderState.activeInstance = this
-    const { render, _renderChildren } = this.$options
-    // resolve slots. becaues slots are rendered in parent scope,
-    // we set the activeInstance to parent.
-    if (_renderChildren) {
-      resolveSlots(this, _renderChildren)
-    }
-    // render self
-    const vnode = render.call(this._renderProxy)
-    // restore render state
-    renderState.activeInstance = prev
-    return vnode
   }
 }
 
