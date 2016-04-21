@@ -121,7 +121,7 @@ function initWatch (vm) {
     for (let key in watch) {
       let handler = watch[key]
       let options
-      if (typeof handler === 'object') {
+      if (isPlainObject(handler)) {
         options = handler
         handler = handler.handler
       }

@@ -306,7 +306,7 @@ export function mergeOptions (parent, child, vm) {
     mergeField(key)
   }
   for (key in child) {
-    if (!hasOwn(parent, key)) {
+    if (!(key in parent)) {
       mergeField(key)
     }
   }
