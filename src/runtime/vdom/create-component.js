@@ -6,7 +6,7 @@ import { warn, isObject, hasOwn, hyphenate } from '../util/index'
 const hooks = { init, prepatch, insert, destroy }
 const hooksToMerge = Object.keys(hooks)
 
-export default function Component (Ctor, data, parent, children) {
+export function createComponent (Ctor, data, parent, children) {
   if (process.env.NODE_ENV !== 'production' &&
     children && typeof children !== 'function') {
     warn(

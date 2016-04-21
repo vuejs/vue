@@ -274,7 +274,7 @@ export default function createPatchFunction (backend) {
     }
   }
 
-  return function update (oldVnode, vnode) {
+  return function patch (oldVnode, vnode) {
     var i, elm, parent
     var insertedVnodeQueue = []
     for (i = 0; i < cbs.pre.length; ++i) cbs.pre[i]()

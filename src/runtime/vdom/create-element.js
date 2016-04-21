@@ -1,5 +1,5 @@
 import VNode from './vnode'
-import Component from './component'
+import { createComponent } from './create-component'
 import { flatten } from './helpers'
 import { renderState } from '../instance/render'
 import { warn, isReservedTag, isUnknownElement, resolveAsset } from '../util/index'
@@ -13,7 +13,7 @@ export default function createElement (tag, data, children) {
     if (isReservedTag(tag)) {
       return VNode(tag, data, flatten(children))
     } else if ((Ctor = resolveAsset(context.$options, 'components', tag))) {
-      return Component(Ctor, data, parent, children)
+      return createComponent(Ctor, data, parent, children)
     } else {
       if (process.env.NODE_ENV !== 'production') {
         if (!data.svg && isUnknownElement(tag)) {
@@ -27,6 +27,6 @@ export default function createElement (tag, data, children) {
       return VNode(tag, data, flatten(children && children()))
     }
   } else {
-    return Component(tag, data, parent, children)
+    return createComponent(tag, data, parent, children)
   }
 }
