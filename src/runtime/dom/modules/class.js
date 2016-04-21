@@ -10,11 +10,12 @@ function updateClass (oldVnode, vnode) {
 
   // check if this is a component container node
   // or a child component root node
-  if (vnode.child) {
-    data = mergeClassData(vnode.child._vnode.data, data)
+  let i
+  if ((i = vnode.child) && (i = i._vnode.data)) {
+    data = mergeClassData(i, data)
   }
-  if (vnode.parent) {
-    data = mergeClassData(data, vnode.parent.data)
+  if ((i = vnode.parent) && (i = i.data)) {
+    data = mergeClassData(data, i)
   }
 
   let cls = genClass(data)

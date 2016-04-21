@@ -40,6 +40,8 @@ export function createComponent (Ctor, data, parent, children) {
     }
   }
 
+  data = data || {}
+
   // merge component management hooks onto the placeholder node
   mergeHooks(data)
 

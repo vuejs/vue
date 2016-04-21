@@ -23,7 +23,7 @@ function genElement (el) {
     // if the element is potentially a component,
     // wrap its children as a thunk.
     const children = genChildren(el, !isReservedTag(el.tag))
-    return `__h__('${el.tag}', ${genData(el)}, ${children})`
+    return `__h__('${el.tag}', ${genData(el)}, ${children}, ${el.svg})`
   }
 }
 
@@ -52,7 +52,7 @@ function genFor (el) {
 
 function genData (el) {
   if (el.plain) {
-    return el.svg ? '{svg:true}' : '{}'
+    return 'undefined'
   }
 
   let data = '{'
@@ -62,11 +62,6 @@ function genData (el) {
   if (el.directives) {
     let dirs = genDirectives(el)
     if (dirs) data += dirs + ','
-  }
-
-  // svg
-  if (el.svg) {
-    data += 'svg:true,'
   }
   // pre
   if (el.pre) {

@@ -52,12 +52,16 @@ export default function createPatchFunction (backend) {
   function createRmCb (childElm, listeners) {
     function remove () {
       if (--remove.listeners === 0) {
-        const parent = nodeOps.parentNode(childElm)
-        nodeOps.removeChild(parent, childElm)
+        removeElement(childElm)
       }
     }
     remove.listeners = listeners
     return remove
+  }
+
+  function removeElement (el) {
+    const parent = nodeOps.parentNode(el)
+    nodeOps.removeChild(parent, el)
   }
 
   function createElm (vnode, insertedVnodeQueue) {
@@ -77,7 +81,7 @@ export default function createPatchFunction (backend) {
     const children = vnode.children
     const tag = vnode.tag
     if (isDef(tag)) {
-      elm = vnode.elm = isDef(data) && data.svg
+      elm = vnode.elm = vnode.svg
         ? nodeOps.createSVGElement(tag)
         : nodeOps.createElement(tag)
       if (Array.isArray(children)) {
@@ -87,7 +91,9 @@ export default function createPatchFunction (backend) {
       } else if (isPrimitive(vnode.text)) {
         nodeOps.appendChild(elm, nodeOps.createTextNode(vnode.text))
       }
-      invokeCreateHooks(vnode, insertedVnodeQueue)
+      if (isDef(data)) {
+        invokeCreateHooks(vnode, insertedVnodeQueue)
+      }
     } else {
       elm = vnode.elm = nodeOps.createTextNode(vnode.text)
     }
@@ -134,7 +140,7 @@ export default function createPatchFunction (backend) {
       if (isDef(ch)) {
         if (isDef(ch.tag)) {
           invokeDestroyHook(ch)
-          invokeRemoveHook(ch)
+          removeAndInvokeRemoveHook(ch)
         } else { // Text node
           nodeOps.removeChild(parentElm, ch.elm)
         }
@@ -142,28 +148,31 @@ export default function createPatchFunction (backend) {
     }
   }
 
-  function invokeRemoveHook (vnode, rm) {
-    let i
-    let listeners = cbs.remove.length + 1
-    if (!rm) {
-      // directly removing
-      rm = createRmCb(vnode.elm, listeners)
+  function removeAndInvokeRemoveHook (vnode, rm) {
+    if (rm || isDef(vnode.data)) {
+      let listeners = cbs.remove.length + 1
+      if (!rm) {
+        // directly removing
+        rm = createRmCb(vnode.elm, listeners)
+      } else {
+        // we have a recursively passed down rm callback
+        // increase the listeners count
+        rm.listeners += listeners
+      }
+      // recursively invoke hooks on child component root node
+      if (isDef(i = vnode.child) && isDef(i = i._vnode) && isDef(i.data)) {
+        removeAndInvokeRemoveHook(i, rm)
+      }
+      for (i = 0; i < cbs.remove.length; ++i) {
+        cbs.remove[i](vnode, rm)
+      }
+      if (isDef(i = vnode.data.hook) && isDef(i = i.remove)) {
+        i(vnode, rm)
+      } else {
+        rm()
+      }
     } else {
-      // we have a recursively passed down rm callback
-      // increase the listeners count
-      rm.listeners += listeners
-    }
-    // recursively invoke hooks on child component nodes
-    if (isDef(i = vnode.child)) {
-      invokeRemoveHook(i._vnode, rm)
-    }
-    for (i = 0; i < cbs.remove.length; ++i) {
-      cbs.remove[i](vnode, rm)
-    }
-    if (isDef(i = vnode.data) && isDef(i = i.hook) && isDef(i = i.remove)) {
-      i(vnode, rm)
-    } else {
-      rm()
+      removeElement(vnode.elm)
     }
   }
 

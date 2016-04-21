@@ -64,7 +64,6 @@ export function parse (template, options) {
       tag = tag.toLowerCase()
       const element = {
         tag,
-        plain: !attrs.length,
         attrsList: attrs,
         attrsMap: makeAttrsMap(attrs),
         parent: currentParent,
@@ -91,6 +90,9 @@ export function parse (template, options) {
       } else {
         processFor(element)
         processIf(element)
+        // determine whether this is a plain element after
+        // removing if/for attributes
+        element.plain = !attrs.length
         processRender(element)
         processSlot(element)
         processComponent(element)
