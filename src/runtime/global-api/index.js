@@ -4,7 +4,7 @@ import { initUse } from './use'
 import { initMixin } from './mixin'
 import { initExtend } from './extend'
 import { initAssetRegisters } from './assets'
-import { remove, nextTick } from '../util/index'
+import { nextTick } from '../util/index'
 import { set, del } from '../observer/index'
 import directives from '../directives/index'
 
@@ -13,7 +13,6 @@ export function initGlobalAPI (Vue) {
   Vue.util = util
   Vue.set = set
   Vue.delete = del
-  Vue.remove = remove
   Vue.nextTick = nextTick
 
   Vue.options = {

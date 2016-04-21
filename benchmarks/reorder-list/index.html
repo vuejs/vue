@@ -74,7 +74,7 @@ var vm = new Vue({
       this.selected = item.id
     }),
     remove: monitor('remove', function (item) {
-      this.items.$remove(item)
+      this.items.splice(this.items.indexOf(item), 1)
     })
   },
   components: {
