@@ -59,6 +59,9 @@ export function lifecycleMixin (Vue) {
     if (this._mounted) {
       callHook(this, 'beforeUpdate')
     }
+    const parentNode = this.$options._parentVnode
+    // set vnode parent before patch
+    vnode.parent = parentNode
     if (!this._vnode) {
       // Vue.prototype.__patch__ is injected in entry points
       // based on the rendering backend used.
@@ -67,11 +70,9 @@ export function lifecycleMixin (Vue) {
       this.$el = this.__patch__(this._vnode, vnode)
     }
     this._vnode = vnode
-    // set parent vnode element
-    const parentNode = this.$options._parentVnode
+    // set parent vnode element after patch
     if (parentNode) {
       parentNode.elm = this.$el
-      vnode.parent = parentNode
     }
     if (this._mounted) {
       callHook(this, 'updated')

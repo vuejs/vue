@@ -8,6 +8,8 @@ function updateClass (oldVnode, vnode) {
     return
   }
 
+  console.log('updating class on ' + vnode.tag)
+
   // check if this is a component container node
   // or a child component root node
   if (vnode.child) {
