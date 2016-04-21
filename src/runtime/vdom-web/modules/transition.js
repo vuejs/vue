@@ -29,17 +29,7 @@ function nextFrame (fn) {
   })
 }
 
-function beforeEnter (_, vnode, force) {
-  // if this is a component root node and the compoennt's
-  // parent container node also has transition, skip.
-  if (vnode.parent && vnode.parent.data.transition) {
-    return
-  }
-  // let v-show handle this
-  if (vnode.data.show && !force) {
-    return
-  }
-
+export function beforeEnter (_, vnode) {
   const el = vnode.elm
   // call leave callback now
   if (el._leaveCb) {
@@ -94,17 +84,7 @@ function beforeEnter (_, vnode, force) {
   }
 }
 
-function onLeave (vnode, rm, force) {
-  // if this is a component root node and the compoennt's
-  // parent container node also has transition, skip.
-  if (vnode.parent && vnode.parent.data.transition) {
-    return
-  }
-  // let v-show handle this
-  if (vnode.data.show && !force) {
-    return
-  }
-
+export function onLeave (vnode, rm) {
   const el = vnode.elm
   // call enter callback now
   if (el._enterCb) {
@@ -255,7 +235,24 @@ function once (fn) {
   }
 }
 
+function guardHook (hook, getVnode) {
+  return function guardedTransitionHook (_, __) {
+    const vnode = getVnode(_, __)
+    // if this is a component root node and the compoennt's
+    // parent container node also has transition, skip.
+    if (vnode.parent && vnode.parent.data.transition) {
+      return
+    }
+    // if the element has v-show, let the runtime directive
+    // call the hooks instead
+    if (vnode.data.show) {
+      return
+    }
+    hook(_, __)
+  }
+}
+
 export default !transitionEndEvent ? {} : {
-  create: beforeEnter,
-  remove: onLeave
+  create: guardHook(beforeEnter, (_, vnode) => vnode),
+  remove: guardHook(onLeave, vnode => vnode)
 }
