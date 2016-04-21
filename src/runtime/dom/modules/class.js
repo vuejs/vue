@@ -8,8 +8,6 @@ function updateClass (oldVnode, vnode) {
     return
   }
 
-  console.log('updating class on ' + vnode.tag)
-
   // check if this is a component container node
   // or a child component root node
   if (vnode.child) {
@@ -37,7 +35,7 @@ function updateClass (oldVnode, vnode) {
 function mergeClassData (child, parent) {
   return {
     staticClass: concat(child.staticClass, parent.staticClass),
-    class: extend(child.class || {}, parent.class)
+    class: child.class ? extend(child.class, parent.class) : parent.class
   }
 }
 
