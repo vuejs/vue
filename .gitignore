@@ -6,3 +6,5 @@ TODOs.md
 dist/*.gz
 dist/*.map
 dist/vue.common.min.js
+selenium-debug.log
+test/e2e/reports

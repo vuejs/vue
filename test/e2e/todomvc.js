@@ -3,6 +3,10 @@ casper.on("page.error", function(msg, trace) {
   console.log(JSON.stringify(trace, null, 2))
 })
 
+casper.on("remote.message", function(msg) {
+  console.log(msg)
+})
+
 casper.test.begin('todomvc', 63, function (test) {
   casper
   .start('examples/todomvc/index.html')
@@ -16,12 +20,7 @@ casper.test.begin('todomvc', 63, function (test) {
   // let's add a new item -----------------------------------------------
 
   .then(function () {
-    casper.sendKeys('.new-todo', 'test')
-  })
-  .then(function () {
-    // wait before hitting enter
-    // so v-model unlocks
-    createNewItem()
+    enter('.new-todo', 'test')
   })
   .then(function () {
     test.assertElementCount('.todo', 1, 'new item should be created')
@@ -251,9 +250,9 @@ casper.test.begin('todomvc', 63, function (test) {
 
   function createNewItem (text) {
     if (text) {
-      casper.sendKeys('.new-todo', text)
+      casper.sendKeys('.new-todo', text, { keepFocus: true })
     }
-    casper.evaluate(function () {
+    casper.thenEvaluate(function () {
       // casper.mouseEvent can't set keyCode
       var field = document.querySelector('.new-todo')
       var e = document.createEvent('HTMLEvents')
@@ -261,6 +260,11 @@ casper.test.begin('todomvc', 63, function (test) {
       e.keyCode = 13
       field.dispatchEvent(e)
     })
+  }
+
+  function enter (sel, text) {
+    casper.sendKeys(sel, text, { keepFocus: true })
+    casper.sendKeys(sel, casper.page.event.key.Enter)
   }
 
   function doubleClick (selector) {
@@ -273,7 +277,7 @@ casper.test.begin('todomvc', 63, function (test) {
   }
 
   function keyUp (code) {
-    casper.evaluate(function (code) {
+    casper.thenEvaluate(function (code) {
       var input = document.querySelector('.todo:nth-child(1) .edit')
       var e = document.createEvent('HTMLEvents')
       e.initEvent('keyup', true, true)
