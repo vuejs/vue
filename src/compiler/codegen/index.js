@@ -93,7 +93,11 @@ function genData (el) {
   }
   // transition
   if (el.transition) {
-    data += `transition:__resolveTransition__(${el.transition}),`
+    data += `transition:__resolveTransition__(${
+      el.transition
+    }, ${
+      el.transitionOnAppear
+    }),`
   }
   // v-show, used to avoid transition being applied
   // since v-show takes it over

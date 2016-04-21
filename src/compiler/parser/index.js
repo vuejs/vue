@@ -289,6 +289,9 @@ function processStyleBinding (el) {
 function processTransition (el) {
   const transition = getBindingAttr(el, 'transition')
   el.transition = transition === '""' ? true : transition
+  if (el.transition) {
+    el.transitionOnAppear = getBindingAttr(el, 'transition-on-appear') != null
+  }
 }
 
 function processAttrs (el) {

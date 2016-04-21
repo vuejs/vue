@@ -40,6 +40,9 @@ export function enter (vnode) {
   if (!data) {
     return
   }
+  if (!data.context._mounted && !data.appear) {
+    return
+  }
 
   const {
     enterClass,
@@ -48,7 +51,7 @@ export function enter (vnode) {
     enter,
     afterEnter,
     enterCancelled
-  } = detectAuto(data)
+  } = detectAuto(data.definition)
 
   const userWantsControl = enter && enter.length > 1
   const cb = el._enterCb = once(() => {
@@ -103,7 +106,7 @@ export function leave (vnode, rm) {
     leave,
     afterLeave,
     leaveCancelled
-  } = detectAuto(data)
+  } = detectAuto(data.definition)
 
   const userWantsControl = leave && leave.length > 1
   const cb = el._leaveCb = once(() => {
