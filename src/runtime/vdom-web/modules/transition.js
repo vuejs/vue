@@ -37,7 +37,7 @@ export function beforeEnter (_, vnode) {
     el._leaveCb()
   }
   const data = vnode.data.transition
-  if (data == null) {
+  if (!data) {
     return
   }
 
@@ -92,7 +92,7 @@ export function onLeave (vnode, rm) {
     el._enterCb()
   }
   const data = vnode.data.transition
-  if (data == null) {
+  if (!data) {
     return rm()
   }
 
@@ -141,13 +141,13 @@ export function onLeave (vnode, rm) {
 }
 
 function detectAuto (data) {
+  if (data === true) data = 'v'
   return typeof data === 'string'
     ? autoCssTransition(data)
     : data
 }
 
 const autoCssTransition = cached(name => {
-  name = name || 'v'
   return {
     enterClass: `${name}-enter`,
     leaveClass: `${name}-leave`,

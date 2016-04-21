@@ -92,7 +92,7 @@ function genData (el) {
     data += `style:${el.styleBinding},`
   }
   // transition
-  if (el.transition != null) {
+  if (el.transition) {
     data += `transition:__resolveTransition__(${el.transition}),`
   }
   // v-show, used to avoid transition being applied
