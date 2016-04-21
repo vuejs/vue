@@ -40,7 +40,7 @@ export function enter (vnode) {
   if (!data) {
     return
   }
-  if (!data.context._mounted && !data.appear) {
+  if (!data.context.$root._mounted && !data.appear) {
     return
   }
 
