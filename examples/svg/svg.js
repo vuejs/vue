@@ -81,7 +81,7 @@ new Vue({
     },
     remove: function (stat) {
       if (this.stats.length > 3) {
-        this.stats.$remove(stat)
+        this.stats.splice(this.stats.indexOf(stat), 1)
       } else {
         alert('Can\'t delete more!')
       }

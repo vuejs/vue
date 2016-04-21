@@ -1,5 +1,5 @@
 import Watcher from '../observer/watcher'
-import { query, toArray, warn, validateProp } from '../util/index'
+import { query, toArray, warn, validateProp, remove } from '../util/index'
 import { observerState } from '../observer/index'
 import { updateListeners } from '../vdom/helpers'
 
@@ -115,7 +115,7 @@ export function lifecycleMixin (Vue) {
     // remove self from parent
     const parent = this.$parent
     if (parent && !parent._isBeingDestroyed) {
-      parent.$children.$remove(this)
+      remove(parent.$children, this)
     }
     // unregister ref
     if (this._ref) {

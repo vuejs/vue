@@ -1,5 +1,5 @@
 import { addClass, removeClass } from '../class-util'
-import { isIE9, inBrowser, cached } from '../../util/index'
+import { isIE9, inBrowser, cached, remove } from '../../util/index'
 
 const TRANSITION = 'transition'
 const ANIMATION = 'animation'
@@ -165,7 +165,7 @@ function addTransitionClass (el, cls) {
 }
 
 function removeTransitionClass (el, cls) {
-  el._transitionClasses.$remove(cls)
+  remove(el._transitionClasses, cls)
   removeClass(el, cls)
 }
 

@@ -81,7 +81,7 @@
 			},
 
 			removeTodo: function (todo) {
-				this.todos.$remove(todo);
+				this.todos.splice(this.todos.indexOf(todo), 1);
 			},
 
 			editTodo: function (todo) {

@@ -2,6 +2,7 @@ import Dep from './dep'
 import { arrayMethods } from './array'
 import {
   def,
+  remove,
   isArray,
   isObject,
   isPlainObject,
@@ -109,7 +110,7 @@ Observer.prototype.addVm = function (vm) {
  */
 
 Observer.prototype.removeVm = function (vm) {
-  this.vms.$remove(vm)
+  remove(this.vms, vm)
 }
 
 // helpers

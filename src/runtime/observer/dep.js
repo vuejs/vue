@@ -1,3 +1,5 @@
+import { remove } from '../util/index'
+
 let uid = 0
 
 /**
@@ -34,7 +36,7 @@ Dep.prototype.addSub = function (sub) {
  */
 
 Dep.prototype.removeSub = function (sub) {
-  this.subs.$remove(sub)
+  remove(this.subs, sub)
 }
 
 /**

@@ -47,22 +47,3 @@ export const arrayMethods = Object.create(arrayProto)
     return result
   })
 })
-
-/**
- * Convenience method to remove the element at given index or target element reference.
- *
- * @param {*} item
- */
-
-def(
-  arrayProto,
-  '$remove',
-  function $remove (item) {
-    /* istanbul ignore if */
-    if (!this.length) return
-    var index = this.indexOf(item)
-    if (index > -1) {
-      return this.splice(index, 1)
-    }
-  }
-)

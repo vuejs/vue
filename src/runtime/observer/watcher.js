@@ -3,6 +3,7 @@ import Dep from './dep'
 import { pushWatcher } from './batcher'
 import {
   warn,
+  remove,
   extend,
   isArray,
   isObject,
@@ -229,7 +230,7 @@ Watcher.prototype.teardown = function () {
     // if the vm is being destroyed or is performing a v-for
     // re-render (the watcher list is then filtered by v-for).
     if (!this.vm._isBeingDestroyed && !this.vm._vForRemoving) {
-      this.vm._watchers.$remove(this)
+      remove(this.vm._watchers, this)
     }
     var i = this.deps.length
     while (i--) {

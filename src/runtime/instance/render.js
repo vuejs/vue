@@ -89,7 +89,7 @@ export function renderMixin (Vue) {
     const refs = this.$refs
     if (remove) {
       if (vFor) {
-        refs[key].$remove(ref)
+        remove(refs[key], ref)
       } else {
         refs[key] = undefined
       }
