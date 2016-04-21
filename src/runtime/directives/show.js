@@ -1,5 +1,5 @@
 import { isIE9 } from '../util/index'
-import { beforeEnter, onLeave } from '../vdom-web/modules/transition'
+import { enter, leave } from '../vdom-web/modules/transition'
 
 export default {
   bind (el, value) {
@@ -12,10 +12,10 @@ export default {
       : vnode.data.transition
     if (!isIE9 && transition != null) {
       if (value) {
-        beforeEnter(null, vnode)
+        enter(vnode)
         el.style.display = ''
       } else {
-        onLeave(vnode, () => {
+        leave(vnode, () => {
           el.style.display = 'none'
         })
       }
