@@ -11,7 +11,7 @@ if (isIE9) {
 }
 
 export default {
-  bind (el, value) {
+  bind (el) {
     if (!isAndroid) {
       el.addEventListener('compositionstart', onCompositionStart)
       el.addEventListener('compositionend', onCompositionEnd)

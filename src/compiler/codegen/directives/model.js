@@ -49,8 +49,8 @@ function genDefaultModel (el, value, modifiers) {
   addProp(el, 'value', `(${value})`)
   addHandler(el, event, code)
   if (needCompositionGuard) {
-    // return runtime directive code to help with composition events
-    return '{def:__resolveDirective__("model")},'
+    // need runtime directive code to help with composition events
+    return true
   }
 }
 
