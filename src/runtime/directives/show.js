@@ -2,15 +2,16 @@ import { isIE9 } from '../util/index'
 import { enter, leave } from '../vdom-web/modules/transition'
 
 export default {
-  bind (el, value) {
+  bind (el, value, _, vnode) {
+    const transition = getTransition(vnode)
+    if (value && !isIE9 && transition.appear) {
+      enter(vnode)
+    }
     el.style.display = value ? '' : 'none'
   },
   update (el, value, _, vnode) {
-    const parent = vnode.parent
-    const transition = parent && parent.data.transition != null
-      ? parent.data.transition
-      : vnode.data.transition
-    if (!isIE9 && transition != null) {
+    const transition = getTransition(vnode)
+    if (!isIE9) {
       if (value) {
         enter(vnode)
         el.style.display = ''
@@ -23,4 +24,11 @@ export default {
       el.style.display = value ? '' : 'none'
     }
   }
+}
+
+function getTransition (vnode) {
+  const parent = vnode.parent
+  return parent && parent.data.transition != null
+    ? parent.data.transition
+    : vnode.data.transition
 }
