@@ -26,19 +26,7 @@ function updateAttrs (oldVnode, vnode) {
     cur = attrs[key]
     old = oldAttrs[key]
     if (old !== cur) {
-      if (isBooleanAttr(key)) {
-        if (cur == null) {
-          elm.removeAttribute(key)
-        } else {
-          elm.setAttribute(key, key)
-        }
-      } else if (isEnumeratedAttr(key)) {
-        elm.setAttribute(key, cur == null ? 'false' : 'true')
-      } else if (isXlink(key)) {
-        elm.setAttributeNS(xlinkNS, key, cur)
-      } else {
-        elm.setAttribute(key, cur)
-      }
+      setAttr(elm, key, cur)
     }
   }
   for (key in oldAttrs) {
@@ -52,7 +40,32 @@ function updateAttrs (oldVnode, vnode) {
   }
 }
 
+function setAttr (el, key, value) {
+  if (isBooleanAttr(key)) {
+    if (value == null) {
+      el.removeAttribute(key)
+    } else {
+      el.setAttribute(key, key)
+    }
+  } else if (isEnumeratedAttr(key)) {
+    el.setAttribute(key, value == null ? 'false' : 'true')
+  } else if (isXlink(key)) {
+    el.setAttributeNS(xlinkNS, key, value)
+  } else {
+    el.setAttribute(key, value)
+  }
+}
+
 export default {
-  create: updateAttrs,
+  create: function (_, vnode) {
+    const attrs = vnode.data.staticAttrs
+    if (attrs) {
+      for (let key in attrs) {
+        if (!vnode.elm) debugger
+        setAttr(vnode.elm, key, attrs[key])
+      }
+    }
+    updateAttrs(_, vnode)
+  },
   update: updateAttrs
 }

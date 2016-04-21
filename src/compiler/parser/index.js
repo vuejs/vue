@@ -6,6 +6,7 @@ import {
   getAndRemoveAttr,
   addProp,
   addAttr,
+  addStaticAttr,
   addHandler,
   addDirective,
   getBindingAttr
@@ -328,7 +329,12 @@ function processAttrs (el) {
       }
     } else {
       // literal attribute
-      addAttr(el, name, parseText(value) || JSON.stringify(value))
+      let expression = parseText(value)
+      if (expression) {
+        addAttr(el, name, expression)
+      } else {
+        addStaticAttr(el, name, JSON.stringify(value))
+      }
     }
   }
 }

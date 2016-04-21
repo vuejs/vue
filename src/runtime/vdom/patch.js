@@ -289,12 +289,18 @@ export default function createPatchFunction (backend) {
     for (i = 0; i < cbs.pre.length; ++i) cbs.pre[i]()
 
     if (!oldVnode) {
+      // empty mount, create new root element
       createElm(vnode, insertedVnodeQueue)
     } else {
       if (isUndef(oldVnode.tag)) {
+        // mounting to existing element
+        vnode.elm = oldVnode
         oldVnode = emptyNodeAt(oldVnode)
+        if (isDef(vnode.data)) {
+          invokeCreateHooks(vnode, insertedVnodeQueue)
+        }
       }
-
+      // actually patching two vtrees
       if (sameVnode(oldVnode, vnode)) {
         patchVnode(oldVnode, vnode, insertedVnodeQueue)
       } else {

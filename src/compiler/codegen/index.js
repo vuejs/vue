@@ -107,6 +107,10 @@ function genData (el) {
   if (el.attrs) {
     data += `attrs:{${genProps(el.attrs)}},`
   }
+  // static attributes
+  if (el.staticAttrs) {
+    data += `staticAttrs:{${genProps(el.staticAttrs)}},`
+  }
   // hooks
   if (el.hooks) {
     data += `hook:{${genHooks(el.hooks)}},`

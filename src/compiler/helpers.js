@@ -8,6 +8,10 @@ export function addAttr (el, name, value) {
   (el.attrs || (el.attrs = [])).push({ name, value })
 }
 
+export function addStaticAttr (el, name, value) {
+  (el.staticAttrs || (el.staticAttrs = [])).push({ name, value })
+}
+
 export function addDirective (el, name, value, arg, modifiers) {
   (el.directives || (el.directives = [])).push({ name, value, arg, modifiers })
 }

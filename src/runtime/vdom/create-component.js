@@ -146,26 +146,31 @@ function extractProps (data, Ctor) {
   const res = {}
   const attrs = data.attrs
   const props = data.props
+  const staticAttrs = data.staticAttrs
   if (!attrs && !props) {
     return res
   }
   for (let key in propOptions) {
     let altKey = hyphenate(key)
-    if (attrs && hasOwn(attrs, key)) {
-      res[key] = attrs[key]
-      delete attrs[key]
-    } else if (attrs && hasOwn(attrs, altKey)) {
-      res[key] = attrs[altKey]
-      delete attrs[altKey]
-    } else if (props && hasOwn(props, key)) {
-      res[key] = props[key]
-      delete props[key]
-    } else if (props && hasOwn(props, altKey)) {
-      res[key] = props[altKey]
-      delete props[altKey]
-    }
+    checkProp(res, attrs, key, altKey) ||
+    checkProp(res, props, key, altKey) ||
+    checkProp(res, staticAttrs, key, altKey)
   }
   return res
+}
+
+function checkProp (res, hash, key, altKey) {
+  if (hash) {
+    if (hasOwn(hash, key)) {
+      res[key] = hash[key]
+      delete hash[key]
+      return true
+    } else if (hasOwn(hash, altKey)) {
+      res[key] = hash[altKey]
+      delete hash[altKey]
+      return true
+    }
+  }
 }
 
 function mergeHooks (data) {

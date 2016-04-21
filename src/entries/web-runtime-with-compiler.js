@@ -12,6 +12,7 @@ function idToTemplate (id) {
 }
 
 Vue.prototype.$mount = function (el) {
+  el = this.$el = el && query(el)
   const options = this.$options
   // resolve template/el and convert to render function
   if (!options.render) {
@@ -27,7 +28,7 @@ Vue.prototype.$mount = function (el) {
         warn('invalid template option:' + template, this)
       }
     } else if (el) {
-      template = getOuterHTML(query(el))
+      template = getOuterHTML(el)
     }
     if (template) {
       options.render = new Function(compile(template, {
@@ -35,7 +36,7 @@ Vue.prototype.$mount = function (el) {
       }))
     }
   }
-  mount.call(this, el)
+  mount.call(this)
 }
 
 /**
