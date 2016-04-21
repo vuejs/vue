@@ -71,7 +71,6 @@ export default function createPatchFunction (backend) {
       // in that case we can just return the element and be done.
       if (isDef(i = vnode.child)) {
         invokeCreateHooks(vnode, insertedVnodeQueue)
-        invokeCreateHooks(i._vnode, insertedVnodeQueue)
         return vnode.elm
       }
     }

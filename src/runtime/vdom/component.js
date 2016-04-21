@@ -54,7 +54,10 @@ export default function Component (Ctor, data, parent, children) {
   }
 
   // return a placeholder vnode
-  const vnode = VNode('vue-component-' + Ctor.cid, data)
+  const id = `vue-component-${Ctor.cid}${
+    Ctor.options.name ? `-${Ctor.options.name}` : ''
+  }`
+  const vnode = VNode(id, data)
   vnode.componentOptions = { Ctor, propsData, listeners, parent, children }
   return vnode
 }
