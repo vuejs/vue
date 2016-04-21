@@ -1,5 +1,5 @@
 import { isIE9 } from '../util/index'
-import { enter, leave } from '../vdom-web/modules/transition'
+import { enter, leave } from '../dom/modules/transition'
 
 export default {
   bind (el, value, _, vnode) {
