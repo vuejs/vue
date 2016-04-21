@@ -10,6 +10,7 @@ import {
 import {
   warn,
   hasOwn,
+  isArray,
   isPlainObject,
   bind,
   validateProp
@@ -120,17 +121,27 @@ function initWatch (vm) {
   if (watch) {
     for (let key in watch) {
       let handler = watch[key]
-      let options
-      if (isPlainObject(handler)) {
-        options = handler
-        handler = handler.handler
+      if (isArray(handler)) {
+        for (let i = 0; i < handler.length; i++) {
+          createWatcher(vm, key, handler[i])
+        }
+      } else {
+        createWatcher(vm, key, handler)
       }
-      if (typeof handler === 'string') {
-        handler = vm[handler]
-      }
-      vm.$watch(key, handler, options)
     }
   }
+}
+
+function createWatcher (vm, key, handler) {
+  let options
+  if (isPlainObject(handler)) {
+    options = handler
+    handler = handler.handler
+  }
+  if (typeof handler === 'string') {
+    handler = vm[handler]
+  }
+  vm.$watch(key, handler, options)
 }
 
 export function stateMixin (Vue) {
