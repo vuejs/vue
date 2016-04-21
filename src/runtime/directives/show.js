@@ -4,14 +4,14 @@ import { enter, leave } from '../vdom-web/modules/transition'
 export default {
   bind (el, value, _, vnode) {
     const transition = getTransition(vnode)
-    if (value && !isIE9 && transition.appear) {
+    if (value && transition && transition.appea && !isIE9) {
       enter(vnode)
     }
     el.style.display = value ? '' : 'none'
   },
   update (el, value, _, vnode) {
     const transition = getTransition(vnode)
-    if (!isIE9) {
+    if (transition && !isIE9) {
       if (value) {
         enter(vnode)
         el.style.display = ''
