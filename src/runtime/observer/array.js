@@ -49,26 +49,6 @@ export const arrayMethods = Object.create(arrayProto)
 })
 
 /**
- * Swap the element at the given index with a new value
- * and emits corresponding event.
- *
- * @param {Number} index
- * @param {*} val
- * @return {*} - replaced element
- */
-
-def(
-  arrayProto,
-  '$set',
-  function $set (index, val) {
-    if (index >= this.length) {
-      this.length = Number(index) + 1
-    }
-    return this.splice(index, 1, val)[0]
-  }
-)
-
-/**
  * Convenience method to remove the element at given index or target element reference.
  *
  * @param {*} item

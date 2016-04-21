@@ -243,6 +243,9 @@ export function defineReactive (obj, key, val) {
  */
 
 export function set (obj, key, val) {
+  if (isArray(obj)) {
+    return obj.splice(key, 1, val)
+  }
   if (hasOwn(obj, key)) {
     obj[key] = val
     return
