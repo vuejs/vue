@@ -1,7 +1,7 @@
 {
   "name": "vue",
   "version": "2.0.0",
-  "description": "Simple, Fast & Composable MVVM for building interactive interfaces",
+  "description": "Reactive, component-oriented view layer for modern web interfaces.",
   "main": "dist/vue.common.js",
   "files": [
     "dist/vue.common.js",
