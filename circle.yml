@@ -4,9 +4,8 @@ machine:
 
 general:
   branches:
-    ignore:
-      - dev
-      - csp
+    only:
+      - master
 
 test:
   override:
