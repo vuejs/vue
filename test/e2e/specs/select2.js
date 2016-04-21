@@ -8,14 +8,14 @@ module.exports = {
       .assert.containsText('span.select2', 'Select one')
 
       .click('span.select2')
-      .assert.elementCount('.select2-results__option', 3)
+      .assert.count('.select2-results__option', 3)
       .assert.containsText('.select2-results__option:nth-child(1)', 'Select one')
       .assert.containsText('.select2-results__option:nth-child(2)', 'Hello')
       .assert.containsText('.select2-results__option:nth-child(3)', 'World')
       .assert.attributePresent('.select2-results__option:nth-child(1)', 'aria-disabled')
 
       .click('.select2-results__option:nth-child(2)')
-      .assert.elementCount('.select2-results__option', 0)
+      .assert.count('.select2-results__option', 0)
       .assert.containsText('p', 'Selected: 1')
       .assert.containsText('span.select2', 'Hello')
 
@@ -24,14 +24,14 @@ module.exports = {
         vm.options.push({ id: 3, text: 'Vue' })
       })
       .click('span.select2')
-      .assert.elementCount('.select2-results__option', 4)
+      .assert.count('.select2-results__option', 4)
       .assert.containsText('.select2-results__option:nth-child(1)', 'Select one')
       .assert.containsText('.select2-results__option:nth-child(2)', 'Hello')
       .assert.containsText('.select2-results__option:nth-child(3)', 'World')
       .assert.containsText('.select2-results__option:nth-child(4)', 'Vue')
 
       .click('.select2-results__option:nth-child(4)')
-      .assert.elementCount('.select2-results__option', 0)
+      .assert.count('.select2-results__option', 0)
       .assert.containsText('p', 'Selected: 3')
       .assert.containsText('span.select2', 'Vue')
 
