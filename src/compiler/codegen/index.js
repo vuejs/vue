@@ -95,6 +95,11 @@ function genData (el) {
   if (el.transition != null) {
     data += `transition:__resolveTransition__(${el.transition}),`
   }
+  // v-show, used to avoid transition being applied
+  // since v-show takes it over
+  if (el.attrsMap['v-show'] || el.show) {
+    data += 'show:true,'
+  }
   // props
   if (el.props) {
     data += `props:{${genProps(el.props)}},`

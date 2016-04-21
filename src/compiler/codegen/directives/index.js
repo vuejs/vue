@@ -1,5 +1,4 @@
 import { model } from './model'
-import { show } from './show'
 import { text } from './text'
 import { html } from './html'
 import { ref } from './ref'
@@ -7,7 +6,6 @@ export { genHandlers } from './on'
 
 export const directives = {
   model,
-  show,
   text,
   html,
   ref,

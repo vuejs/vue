@@ -29,14 +29,23 @@ function nextFrame (fn) {
   })
 }
 
-function beforeEnter (_, vnode) {
+function beforeEnter (_, vnode, force) {
   // if this is a component root node and the compoennt's
   // parent container node also has transition, skip.
   if (vnode.parent && vnode.parent.data.transition) {
     return
   }
+  // let v-show handle this
+  if (vnode.data.show && !force) {
+    return
+  }
 
   const el = vnode.elm
+  // call leave callback now
+  if (el._leaveCb) {
+    el._leaveCb.cancelled = true
+    el._leaveCb()
+  }
   const data = vnode.data.transition
   if (data == null) {
     return
@@ -52,12 +61,7 @@ function beforeEnter (_, vnode) {
   } = detectAuto(data)
 
   const userWantsControl = enter && enter.length > 1
-  const cb = el._enterCb = () => {
-    // ensure only called once
-    if (cb.called) {
-      return
-    }
-    cb.called = true
+  const cb = el._enterCb = once(() => {
     if (enterActiveClass) {
       removeTransitionClass(el, enterActiveClass)
     }
@@ -67,7 +71,7 @@ function beforeEnter (_, vnode) {
       afterEnter && afterEnter(el)
     }
     el._enterCb = null
-  }
+  })
 
   beforeEnter && beforeEnter(el)
   if (enterClass) {
@@ -90,10 +94,14 @@ function beforeEnter (_, vnode) {
   }
 }
 
-function onLeave (vnode, rm) {
+function onLeave (vnode, rm, force) {
   // if this is a component root node and the compoennt's
   // parent container node also has transition, skip.
   if (vnode.parent && vnode.parent.data.transition) {
+    return
+  }
+  // let v-show handle this
+  if (vnode.data.show && !force) {
     return
   }
 
@@ -113,14 +121,23 @@ function onLeave (vnode, rm) {
     leaveActiveClass,
     beforeLeave,
     leave,
-    afterLeave
+    afterLeave,
+    leaveCancelled
   } = detectAuto(data)
 
   const userWantsControl = leave && leave.length > 1
-  const cb = () => {
-    rm()
-    afterLeave && afterLeave(el)
-  }
+  const cb = el._leaveCb = once(() => {
+    if (leaveActiveClass) {
+      removeTransitionClass(el, leaveActiveClass)
+    }
+    if (cb.cancelled) {
+      leaveCancelled && leaveCancelled(el)
+    } else {
+      rm()
+      afterLeave && afterLeave(el)
+    }
+    el._leaveCb = null
+  })
 
   beforeLeave && beforeLeave(el)
   if (leaveClass) {
@@ -226,6 +243,16 @@ function getTimeout (delays, durations) {
 
 function toMs (s) {
   return Number(s.slice(0, -1)) * 1000
+}
+
+function once (fn) {
+  let called = false
+  return () => {
+    if (!called) {
+      called = true
+      fn()
+    }
+  }
 }
 
 export default !transitionEndEvent ? {} : {
