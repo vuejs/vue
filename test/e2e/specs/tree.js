@@ -5,7 +5,7 @@ module.exports = {
       .waitForElementVisible('li', 1000)
       .assert.count('.item', 12)
       .assert.count('.item > ul', 4)
-      .assert.cssProperty('#demo li ul', 'display', 'none')
+      .assert.notVisible('#demo li ul')
       .assert.containsText('#demo li div span', '[+]')
 
       .click('.bold')
@@ -27,7 +27,7 @@ module.exports = {
       })
 
       .click('.bold')
-      .assert.cssProperty('#demo ul', 'display', 'none')
+      .assert.notVisible('#demo ul')
       .assert.containsText('#demo li div span', '[+]')
       .click('.bold')
       .assert.visible('#demo ul')

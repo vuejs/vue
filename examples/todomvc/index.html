@@ -58,7 +58,7 @@
 
 		<!-- testing/benchmark only -->
 		<script>
-		if (navigator.userAgent.indexOf('PhantomJS') > -1) {
+		if (window.location.hash === '#test') {
 			localStorage.clear()
 		}
 		var now = window.performance && window.performance.now
