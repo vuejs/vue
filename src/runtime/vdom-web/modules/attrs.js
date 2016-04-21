@@ -11,7 +11,7 @@ const isBooleanAttr = makeMap(
 )
 
 const xlinkNS = 'http://www.w3.org/1999/xlink'
-const isXlink = name => name.slice(0, 6) === 'xlink:'
+const isXlink = name => name.charAt(5) === ':' && name.slice(0, 5) === 'xlink'
 
 function updateAttrs (oldVnode, vnode) {
   if (!oldVnode.data.attrs && !vnode.data.attrs) {
