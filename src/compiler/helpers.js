@@ -15,7 +15,7 @@ export function addDirective (el, name, value, arg, modifiers) {
 export function addStyleBinding (el, name, value) {
   const code = `"${name}":${value}`
   el.styleBinding = el.styleBinding
-    ? el.styleBinding.replace(/}\s?$/, `${code},}`)
+    ? el.styleBinding.replace(/}\s?$/, `,${code}}`)
     : `{${code}}`
 }
 
