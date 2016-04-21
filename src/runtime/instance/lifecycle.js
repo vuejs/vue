@@ -1,5 +1,5 @@
 import Watcher from '../observer/watcher'
-import { warn, validateProp, remove, toArray } from '../util/index'
+import { warn, validateProp, remove } from '../util/index'
 import { observerState } from '../observer/index'
 import { updateListeners } from '../vdom/helpers'
 
@@ -40,9 +40,6 @@ export function lifecycleMixin (Vue) {
       }
     }
     callHook(this, 'beforeMount')
-    if (this.$el) {
-      cleanElement(this.$el)
-    }
     this._watcher = new Watcher(this, this._render, this._update)
     this._update(this._watcher.value)
     callHook(this, 'mounted')
@@ -147,14 +144,4 @@ export function callHook (vm, hook) {
     }
   }
   vm.$emit('hook:' + hook)
-}
-
-function cleanElement (el) {
-  el.innerHTML = ''
-  if (el.hasAttributes()) {
-    const attrs = toArray(el.attributes)
-    for (let i = 0; i < attrs.length; i++) {
-      el.removeAttribute(attrs[i].name)
-    }
-  }
 }
