@@ -34,7 +34,7 @@ function markStatic (node) {
 }
 
 function markStaticRoots (node) {
-  if (node.tag && node.static) {
+  if (node.tag && (node.once || node.static)) {
     node.staticRoot = true
     return
   }
@@ -51,7 +51,7 @@ const isStaticKey = makeMap(
 )
 
 function isStatic (node) {
-  return !!(node.pre || node.text || (
+  return !!(node.text || node.pre || (
     !node.expression && // not text with interpolation
     (!node.tag || isReservedTag(node.tag)) && // not a component
     !isBuiltInTag(node.tag) && // not a built-in

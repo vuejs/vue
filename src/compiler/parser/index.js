@@ -93,8 +93,9 @@ export function parse (template, options) {
       } else {
         processFor(element)
         processIf(element)
+        processOnce(element)
         // determine whether this is a plain element after
-        // removing if/for attributes
+        // removing if/for/once attributes
         element.plain = !attrs.length
         processRender(element)
         processSlot(element)
@@ -250,6 +251,13 @@ function processElse (el, parent) {
     warn(
       `v-else used on element <${el.tag}> without corresponding v-if/v-show.`
     )
+  }
+}
+
+function processOnce (el) {
+  const once = getAndRemoveAttr(el, 'v-once')
+  if (once != null) {
+    el.once = true
   }
 }
 
