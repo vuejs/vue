@@ -1,9 +1,15 @@
 import { genDirectives, genHandlers } from './directives/index'
 import { isReservedTag } from '../../runtime/util/dom'
 
+let staticRenderFns
+
 export function generate (ast) {
+  staticRenderFns = []
   const code = ast ? genElement(ast) : '__h__("div")'
-  return `with (this) { return ${code}}`
+  return {
+    render: `with (this) { return ${code}}`,
+    staticRenderFns
+  }
 }
 
 function genElement (el) {
@@ -23,7 +29,13 @@ function genElement (el) {
     // if the element is potentially a component,
     // wrap its children as a thunk.
     const children = genChildren(el, !isReservedTag(el.tag))
-    return `__h__('${el.tag}', ${genData(el)}, ${children}, ${el.svg})`
+    const code = `__h__('${el.tag}', ${genData(el)}, ${children}, ${el.svg})`
+    if (el.staticRoot) {
+      staticRenderFns.push(`with(this){return ${code}}`)
+      return `__static__(${staticRenderFns.length - 1})`
+    } else {
+      return code
+    }
   }
 }
 

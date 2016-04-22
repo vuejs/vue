@@ -31,11 +31,18 @@ Vue.prototype.$mount = function (el) {
       template = getOuterHTML(el)
     }
     if (template) {
-      options.render = new Function(compile(template, {
+      const res = compile(template, {
         preserveWhitespace: config.preserveWhitespace
-      }))
+      })
+      options.render = new Function(res.render)
+      if (res.staticRenderFns.length) {
+        this._staticTrees = res.staticRenderFns.map(code => {
+          return (new Function(code)).call(this._renderProxy)
+        })
+      }
     }
   }
+  console.log(this)
   mount.call(this)
 }
 

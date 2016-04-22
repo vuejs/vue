@@ -9,6 +9,7 @@ export const renderState = {
 export function initRender (vm) {
   vm._vnode = null
   vm._mounted = false
+  vm._staticTrees = null
   vm.$slots = {}
   // bind the public createElement fn to this instance
   // so that we get proper render context inside it.
@@ -37,6 +38,10 @@ export function renderMixin (Vue) {
 
   // shorthands used in render functions
   Vue.prototype.__h__ = createElement
+
+  Vue.prototype.__static__ = function (id) {
+    return this._staticTrees[id]
+  }
 
   // resolve directive
   Vue.prototype.__resolveDirective__ = function (id) {

@@ -13,33 +13,33 @@ import { makeMap } from '../../shared/util'
  */
 
 export function optimize (root) {
-  // first pass: mark all dynamic nodes
-  mark(root)
-  // second pass: mark static roots
-  sweep(root)
+  // first pass: mark all non-static nodes.
+  markStatic(root)
+  // second pass: mark static roots.
+  markStaticRoots(root)
 }
 
-function mark (node) {
-  node.dynamic = !isStatic(node)
+function markStatic (node) {
+  node.static = isStatic(node)
   if (node.children) {
     for (let i = 0, l = node.children.length; i < l; i++) {
       let child = node.children[i]
-      mark(child)
-      if (child.dynamic) {
-        node.dynamic = true
+      markStatic(child)
+      if (!child.static) {
+        node.static = false
       }
     }
   }
 }
 
-function sweep (node) {
-  if (node.tag && !node.dynamic) {
+function markStaticRoots (node) {
+  if (node.tag && node.static) {
     node.staticRoot = true
     return
   }
   if (node.children) {
     for (let i = 0, l = node.children.length; i < l; i++) {
-      sweep(node.children[i])
+      markStaticRoots(node.children[i])
     }
   }
 }
