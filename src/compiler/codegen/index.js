@@ -17,7 +17,7 @@ function genElement (el) {
     return genFor(el)
   } else if (el.if) {
     return genIf(el)
-  } else if (el.tag === 'template' && !el.attrsMap.slot) {
+  } else if (el.tag === 'template' && !el.slotTarget) {
     return genChildren(el)
   } else if (el.tag === 'render') {
     return genRender(el)
