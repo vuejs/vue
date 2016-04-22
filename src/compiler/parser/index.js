@@ -270,6 +270,8 @@ function processRender (el) {
 function processSlot (el) {
   if (el.tag === 'slot') {
     el.slotName = getBindingAttr(el, 'name')
+  } else {
+    el.slotTarget = getBindingAttr(el, 'slot')
   }
 }
 

@@ -71,9 +71,9 @@ function genData (el) {
   if (el.key) {
     data += `key:${el.key},`
   }
-  // slot names
-  if (el.attrsMap.slot) {
-    data += `slot:"${el.attrsMap.slot}",`
+  // slot target
+  if (el.slotTarget) {
+    data += `slot:${el.slotTarget},`
   }
   // class
   if (el.staticClass) {
