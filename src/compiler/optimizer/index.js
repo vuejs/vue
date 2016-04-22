@@ -15,11 +15,8 @@ import { makeMap } from '../../shared/util'
 export function optimize (root) {
   // first pass: mark all dynamic nodes
   mark(root)
-  debugger
-  // second pass: collect static roots
-  const staticRoots = []
-  sweep(root, staticRoots)
-  return staticRoots
+  // second pass: mark static roots
+  sweep(root)
 }
 
 function mark (node) {
@@ -35,14 +32,14 @@ function mark (node) {
   }
 }
 
-function sweep (node, staticRoots) {
+function sweep (node) {
   if (node.tag && !node.dynamic) {
     node.staticRoot = true
     return
   }
   if (node.children) {
     for (let i = 0, l = node.children.length; i < l; i++) {
-      sweep(node.children[i], staticRoots)
+      sweep(node.children[i])
     }
   }
 }
