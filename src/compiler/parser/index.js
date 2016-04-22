@@ -1,7 +1,7 @@
 import { decodeHTML } from 'entities'
 import { parseHTML } from './html-parser'
 import { parseText } from './text-parser'
-import { hyphenate, makeMap } from '../../shared/util'
+import { hyphenate, makeMap, cached } from '../../shared/util'
 import {
   getAndRemoveAttr,
   addProp,
@@ -20,6 +20,8 @@ const modifierRE = /\.[^\.]+/g
 const forAliasRE = /(.*)\s+(?:in|of)\s+(.*)/
 const forIteratorRE = /\((.*),(.*)\)/
 const camelRE = /[a-z\d][A-Z]/
+
+const decodeHTMLCached = cached(decodeHTML)
 
 // attributes that should be using props for binding
 const mustUseProp = makeMap('value,selected,checked,muted')
@@ -155,7 +157,7 @@ export function parse (template, options) {
         return
       }
       text = currentParent.tag === 'pre' || text.trim()
-        ? decodeHTML(text)
+        ? decodeHTMLCached(text)
         // only preserve whitespace if its not right after a starting tag
         : options.preserveWhitespace && currentParent.children.length
           ? ' '
