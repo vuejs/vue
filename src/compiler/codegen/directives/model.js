@@ -35,14 +35,14 @@ function genRadioModel (el, value) {
 
 function genDefaultModel (el, value, modifiers) {
   const type = el.attrsMap.type
-  const lazy = modifiers && modifiers.lazy
-  const number = modifiers && modifiers.number
+  const { lazy, number, trim } = modifiers || {}
   const event = lazy ? 'change' : 'input'
   const needCompositionGuard = !lazy && type !== 'range'
 
+  const valueExpression = `$event.target.value${trim ? '.trim()' : ''}`
   let code = number || type === 'number'
-    ? `${value}=Number($event.target.value)`
-    : `${value}=$event.target.value`
+    ? `${value}=Number(${valueExpression})`
+    : `${value}=${valueExpression}`
   if (needCompositionGuard) {
     code = `if($event.target.composing)return;${code}`
   }
