@@ -1,4 +1,5 @@
 import { makeMap } from '../../shared/util'
+import { isReservedTag, isBuiltInTag } from '../../runtime/util/dom'
 
 /**
  * Goal of the optimizier: walk the generated template AST tree
@@ -50,12 +51,10 @@ const isStaticKey = makeMap(
 )
 
 function isStatic (node) {
-  return node.pre || node.text || (
-    !node.render &&
-    !node.slotName &&
-    !node.component &&
-    !node.expression && (
-      node.plain || Object.keys(node).every(isStaticKey)
-    )
-  )
+  return !!(node.pre || node.text || (
+    !node.expression && // not text with interpolation
+    (!node.tag || isReservedTag(node.tag)) && // not a component
+    !isBuiltInTag(node.tag) && // not a built-in
+    (node.plain || Object.keys(node).every(isStaticKey)) // no dynamic bindings
+  ))
 }

@@ -2,8 +2,12 @@ import { inBrowser } from './env'
 import { warn } from './debug'
 import { makeMap } from '../../shared/util'
 
+const builtInTags = 'slot,component,render'
+
+export const isBuiltInTag = makeMap(builtInTags)
+
 export const isReservedTag = makeMap(
-  'slot,component,render,' +
+  builtInTags +
   'html,base,head,link,meta,style,title,' +
   'address,article,footer,header,h1,h2,h3,h4,h5,h6,hgroup,nav,section,' +
   'div,dd,dl,dt,figcaption,figure,hr,li,main,ol,p,pre,ul,' +

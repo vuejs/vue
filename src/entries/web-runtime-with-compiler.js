@@ -42,7 +42,6 @@ Vue.prototype.$mount = function (el) {
       }
     }
   }
-  console.log(this)
   mount.call(this)
 }
 
