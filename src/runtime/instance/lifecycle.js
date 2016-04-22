@@ -39,6 +39,14 @@ export function lifecycleMixin (Vue) {
         }
       }
     }
+    // render static sub-trees for once on mount
+    const staticRenderFns = this.$options.staticRenderFns
+    if (staticRenderFns) {
+      this._staticTrees = new Array(staticRenderFns.length)
+      for (let i = 0; i < staticRenderFns.length; i++) {
+        this._staticTrees[i] = staticRenderFns[i].call(this._renderProxy)
+      }
+    }
     callHook(this, 'beforeMount')
     this._watcher = new Watcher(this, this._render, this._update)
     this._update(this._watcher.value)
