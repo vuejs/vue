@@ -271,7 +271,10 @@ function processSlot (el) {
   if (el.tag === 'slot') {
     el.slotName = getBindingAttr(el, 'name')
   } else {
-    el.slotTarget = getBindingAttr(el, 'slot')
+    const slotTarget = getBindingAttr(el, 'slot')
+    if (slotTarget) {
+      el.slotTarget = slotTarget
+    }
   }
 }
 
@@ -284,17 +287,26 @@ function processComponent (el) {
 function processClassBinding (el) {
   const staticClass = getAndRemoveAttr(el, 'class')
   el.staticClass = parseText(staticClass) || JSON.stringify(staticClass)
-  el.classBinding = getBindingAttr(el, 'class', false /* getStatic */)
+  const classBinding = getBindingAttr(el, 'class', false /* getStatic */)
+  if (classBinding) {
+    el.classBinding = classBinding
+  }
 }
 
 function processStyleBinding (el) {
-  el.styleBinding = getBindingAttr(el, 'style', false /* getStatic */)
+  const styleBinding = getBindingAttr(el, 'style', false /* getStatic */)
+  if (styleBinding) {
+    el.styleBinding = styleBinding
+  }
 }
 
 function processTransition (el) {
-  const transition = getBindingAttr(el, 'transition')
-  el.transition = transition === '""' ? true : transition
-  if (el.transition) {
+  let transition = getBindingAttr(el, 'transition')
+  if (transition === '""') {
+    transition = true
+  }
+  if (transition) {
+    el.transition = transition
     el.transitionOnAppear = getBindingAttr(el, 'transition-on-appear') != null
   }
 }

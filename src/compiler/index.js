@@ -1,4 +1,5 @@
 import { parse } from './parser/index'
+import { optimize } from './optimizer/index'
 import { generate } from './codegen/index'
 import { directives } from './codegen/directives/index'
 
@@ -14,6 +15,7 @@ export function compile (html, options) {
     return hit
   } else {
     const ast = parse(html, options)
+    optimize(ast)
     return (cache[html] = generate(ast))
   }
 }
