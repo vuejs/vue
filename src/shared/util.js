@@ -7,10 +7,10 @@
  * @return {Function}
  */
 
-export function makeMap (str, expectsLowerCase, defaultValue = true) {
+export function makeMap (str, expectsLowerCase) {
   const map = Object.create(null)
   str.split(',').forEach(key => {
-    map[key] = defaultValue
+    map[key] = true
   })
   return expectsLowerCase
     ? val => map[val.toLowerCase()]

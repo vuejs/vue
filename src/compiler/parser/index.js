@@ -27,7 +27,13 @@ const decodeHTMLCached = cached(decodeHTML)
 const mustUseProp = makeMap('value,selected,checked,muted')
 
 // this map covers namespace elements that can appear as template root nodes
-const tagNamespace = makeMap('svg,g,defs,symbol,use,image,text,circle,ellipse,line,path,polygon,polyline,rect', true, 'svg')
+const isSVG = makeMap('svg,g,defs,symbol,use,image,text,circle,ellipse,line,path,polygon,polyline,rect', true)
+
+function getTagNamespace (tag) {
+  if (isSVG(tag)) {
+    return 'svg'
+  }
+}
 
 // make warning customizable depending on environment.
 let warn
@@ -75,11 +81,11 @@ export function parse (template, options) {
       }
 
       // check namespace
-      const namespace = tagNamespace(tag)
+      const namespace = getTagNamespace(tag)
       if (inNamespace) {
-        element.namespace = currentNamespace
+        element.ns = currentNamespace
       } else if (namespace) {
-        element.namespace = namespace
+        element.ns = namespace
         inNamespace = true
         currentNamespace = namespace
         namespaceIndex = stack.length

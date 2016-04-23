@@ -1,11 +1,11 @@
-export default function VNode (tag, data, children, text, elm, namespace) {
+export default function VNode (tag, data, children, text, elm, ns) {
   return {
     tag,
     data,
     children,
     text,
     elm,
-    namespace,
+    ns,
     key: data && data.key
   }
 }
