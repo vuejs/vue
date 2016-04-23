@@ -13,6 +13,11 @@ module.exports = {
       .assert.count('li', 3)
       .assert.count('li .commit', 3)
       .assert.count('li .message', 3)
+      .click('#dev')
+      .assert.containsText('p', 'vuejs/vue@dev')
+      .assert.count('li', 3)
+      .assert.count('li .commit', 3)
+      .assert.count('li .message', 3)
       .end()
   }
 }
