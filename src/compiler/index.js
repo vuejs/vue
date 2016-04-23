@@ -3,21 +3,10 @@ import { optimize } from './optimizer/index'
 import { generate } from './codegen/index'
 import { directives } from './codegen/directives/index'
 
-const cache1 = Object.create(null)
-const cache2 = Object.create(null)
-
 export function compile (html, options) {
-  html = html.trim()
-  options = options || {}
-  const cache = options.preserveWhitespace ? cache1 : cache2
-  const hit = cache[html]
-  if (hit) {
-    return hit
-  } else {
-    const ast = parse(html, options)
-    optimize(ast)
-    return (cache[html] = generate(ast))
-  }
+  const ast = parse(html.trim(), options)
+  optimize(ast)
+  return generate(ast)
 }
 
 export function registerDirective (name, fn) {

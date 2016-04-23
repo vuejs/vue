@@ -1,21 +1,33 @@
 import config from '../runtime/config'
 import { compile } from '../compiler/index'
-import { query, warn } from '../runtime/util/index'
+import { query, warn, cached } from '../runtime/util/index'
 import Vue from './web-runtime'
 
+const idToTemplate = cached(id => query(id).innerHTML)
+
+const cache1 = Object.create(null)
+const cache2 = Object.create(null)
+
+function createRenderFns (template) {
+  const preserveWhitespace = config.preserveWhitespace
+  const cache = preserveWhitespace ? cache1 : cache2
+  if (cache[template]) {
+    return cache[template]
+  }
+  const res = {}
+  const compiled = compile(template, { preserveWhitespace })
+  res.render = new Function(compiled.render)
+  const l = compiled.staticRenderFns.length
+  if (l) {
+    res.staticRenderFns = new Array(l)
+    for (let i = 0; i < l; i++) {
+      res.staticRenderFns[i] = new Function(compiled.staticRenderFns[i])
+    }
+  }
+  return (cache[template] = res)
+}
+
 const mount = Vue.prototype.$mount
-const idTemplateCache = Object.create(null)
-const renderFunctionCache = Object.create(null)
-
-function idToTemplate (id) {
-  const hit = idTemplateCache[id]
-  return hit || (idTemplateCache[id] = query(id).innerHTML)
-}
-
-function createRenderFn (code) {
-  const hit = renderFunctionCache[code]
-  return hit || (renderFunctionCache[code] = new Function(code))
-}
 
 Vue.prototype.$mount = function (el) {
   el = el && query(el)
@@ -37,17 +49,9 @@ Vue.prototype.$mount = function (el) {
       template = getOuterHTML(el)
     }
     if (template) {
-      const res = compile(template, {
-        preserveWhitespace: config.preserveWhitespace
-      })
-      options.render = createRenderFn(res.render)
-      const l = res.staticRenderFns.length
-      if (l) {
-        options.staticRenderFns = new Array(l)
-        for (let i = 0; i < l; i++) {
-          options.staticRenderFns[i] = createRenderFn(res.staticRenderFns[i])
-        }
-      }
+      const { render, staticRenderFns } = createRenderFns(template)
+      options.render = render
+      options.staticRenderFns = staticRenderFns
     }
   }
   mount.call(this, el)
