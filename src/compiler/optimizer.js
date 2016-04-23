@@ -1,4 +1,4 @@
-import { makeMap, isBuiltInTag } from '../shared/util'
+import { makeMap, isBuiltInTag } from 'shared/util'
 
 let isPlatformReservedTag
 

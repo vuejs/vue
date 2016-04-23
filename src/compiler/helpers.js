@@ -1,4 +1,4 @@
-import { isArray } from '../shared/util'
+import { isArray } from 'shared/util'
 
 export function addProp (el, name, value) {
   (el.props || (el.props = [])).push({ name, value })

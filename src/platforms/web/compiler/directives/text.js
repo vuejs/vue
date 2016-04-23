@@ -1,4 +1,4 @@
-import { addProp } from '../../../../compiler/helpers'
+import { addProp } from 'compiler/helpers'
 
 export default function text (el, dir) {
   if (!dir.value) return

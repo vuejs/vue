@@ -1,6 +1,6 @@
-import { inBrowser } from '../../core/util/env'
-import { warn } from '../../core/util/debug'
-import { makeMap } from '../../shared/util'
+import { inBrowser } from 'core/util/env'
+import { warn } from 'core/util/debug'
+import { makeMap } from 'shared/util'
 
 const UA = inBrowser && window.navigator.userAgent.toLowerCase()
 export const isIE9 = UA && UA.indexOf('msie 9.0') > 0

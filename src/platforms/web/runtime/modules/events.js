@@ -1,4 +1,4 @@
-import { updateListeners } from '../../../../core/vdom/helpers'
+import { updateListeners } from 'core/vdom/helpers'
 
 function updateDOMListeners (oldVnode, vnode) {
   if (!oldVnode.data.on && !vnode.data.on) {

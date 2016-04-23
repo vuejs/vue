@@ -10,7 +10,7 @@ import {
   hasOwn,
   camelize,
   isBuiltInTag
-} from '../../shared/util'
+} from 'shared/util'
 
 /**
  * Option overwriting strategies are functions that handle

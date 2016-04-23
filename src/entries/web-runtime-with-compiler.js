@@ -1,6 +1,6 @@
-import config from '../core/config'
-import { warn, cached } from '../core/util/index'
-import { query } from '../platforms/web/util'
+import config from 'core/config'
+import { warn, cached } from 'core/util/index'
+import { query } from 'web/util'
 import Vue from './web-runtime'
 import { compile } from './web-compiler'
 

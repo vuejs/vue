@@ -1,4 +1,5 @@
 var path = require('path')
+var alias = require('./alias')
 
 module.exports = {
   entry: path.resolve(__dirname, 'dev-entry.js'),
@@ -9,9 +10,9 @@ module.exports = {
     libraryTarget: 'umd'
   },
   resolve: {
-    alias: {
+    alias: Object.assign({}, alias, {
       entities: './entity-decoder'
-    }
+    })
   },
   module: {
     loaders: [

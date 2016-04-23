@@ -1,6 +1,6 @@
 import { addClass, removeClass } from '../class-util'
-import { inBrowser } from '../../../../core/util/index'
-import { cached, remove } from '../../../../shared/util'
+import { inBrowser } from 'core/util/index'
+import { cached, remove } from 'shared/util'
 import { isIE9 } from '../../util'
 
 const TRANSITION = 'transition'

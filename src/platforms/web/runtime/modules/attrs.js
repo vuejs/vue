@@ -1,4 +1,4 @@
-import { makeMap } from '../../../../shared/util'
+import { makeMap } from 'shared/util'
 
 const isEnumeratedAttr = makeMap('contenteditable,draggable,spellcheck')
 const isBooleanAttr = makeMap(

@@ -1,5 +1,5 @@
 import config from '../config'
-import { hyphenate } from '../../shared/util'
+import { hyphenate } from 'shared/util'
 
 let warn
 let formatComponentName

@@ -1,4 +1,4 @@
-import { extend, isArray, isObject } from '../../../../shared/util'
+import { extend, isArray, isObject } from 'shared/util'
 import { setClass } from '../class-util'
 
 function updateClass (oldVnode, vnode) {

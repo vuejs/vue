@@ -1,10 +1,10 @@
-import Vue from '../core/index'
-import { createPatchFunction } from '../core/vdom/patch'
-import * as nodeOps from '../platforms/web/runtime/node-ops'
-import platformDirectives from '../platforms/web/runtime/directives/index'
-import baseModules from '../core/vdom/modules/index'
-import platformModules from '../platforms/web/runtime/modules/index'
-import { query, isUnknownElement, isReservedTag } from '../platforms/web/util'
+import Vue from 'core/index'
+import { createPatchFunction } from 'core/vdom/patch'
+import * as nodeOps from 'web/runtime/node-ops'
+import platformDirectives from 'web/runtime/directives/index'
+import baseModules from 'core/vdom/modules/index'
+import platformModules from 'web/runtime/modules/index'
+import { query, isUnknownElement, isReservedTag } from 'web/util'
 
 // install platform specific utils
 Vue.config.isUnknownElement = isUnknownElement

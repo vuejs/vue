@@ -6,7 +6,7 @@
  */
 
 import { decodeHTML } from 'entities'
-import { makeMap } from '../../shared/util'
+import { makeMap } from 'shared/util'
 
 // Regular Expressions for parsing tags and attributes
 const singleAttrIdentifier = /([^\s"'<>\/=]+)/

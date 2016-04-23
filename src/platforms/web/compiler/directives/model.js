@@ -1,4 +1,4 @@
-import { addHandler, addProp, getBindingAttr } from '../../../../compiler/helpers'
+import { addHandler, addProp, getBindingAttr } from 'compiler/helpers'
 
 export default function model (el, dir) {
   const value = dir.value

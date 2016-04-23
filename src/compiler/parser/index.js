@@ -1,7 +1,7 @@
 import { decodeHTML } from 'entities'
 import { parseHTML } from './html-parser'
 import { parseText } from './text-parser'
-import { hyphenate, cached } from '../../shared/util'
+import { hyphenate, cached } from 'shared/util'
 import {
   getAndRemoveAttr,
   addProp,

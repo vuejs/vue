@@ -4,7 +4,8 @@ var rollup = require('rollup')
 var uglify = require('uglify-js')
 var babel = require('rollup-plugin-babel')
 var replace = require('rollup-plugin-replace')
-var alias = require('rollup-plugin-alias')
+var aliasPlugin = require('rollup-plugin-alias')
+var baseAlias = require('./alias')
 var version = process.env.VERSION || require('../package.json').version
 
 var banner =
@@ -86,9 +87,11 @@ function buildEntry (opts) {
       'process.env.NODE_ENV': JSON.stringify(opts.env)
     }))
   }
+  var alias = baseAlias
   if (opts.alias) {
-    plugins.push(alias(opts.alias))
+    alias = Object.assign({}, baseAlias, opts.alias)
   }
+  plugins.push(aliasPlugin(alias))
   return rollup.rollup({
     entry: opts.entry,
     plugins: plugins,

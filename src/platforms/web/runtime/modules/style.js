@@ -1,5 +1,5 @@
-import { extend, isArray, cached, camelize } from '../../../../shared/util'
-import { inBrowser } from '../../../../core/util/env'
+import { extend, isArray, cached, camelize } from 'shared/util'
+import { inBrowser } from 'core/util/env'
 
 const prefixes = ['Webkit', 'Moz', 'ms']
 const testEl = inBrowser && document.createElement('div')
