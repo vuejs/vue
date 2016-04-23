@@ -56,10 +56,8 @@ export function createComponent (Ctor, data, parent, children) {
   }
 
   // return a placeholder vnode
-  const id = `vue-component-${Ctor.cid}${
-    Ctor.options.name ? `-${Ctor.options.name}` : ''
-  }`
-  const vnode = VNode(id, data)
+  const name = Ctor.options.name ? '-' + Ctor.options.name : ''
+  const vnode = VNode(`vue-component-${Ctor.cid}-${name}`, data)
   vnode.componentOptions = { Ctor, propsData, listeners, parent, children }
   return vnode
 }
@@ -80,22 +78,14 @@ function init (vnode) {
 }
 
 function prepatch (oldVnode, vnode) {
-  const oldCtor = oldVnode.componentOptions.Ctor
-  const { Ctor, listeners, propsData, children } = vnode.componentOptions
-  if (Ctor !== oldCtor) {
-    // component changed, teardown and create new
-    // TODO: keep-alive?
-    oldVnode.child.$destroy()
-    hooks.init(vnode)
-  } else {
-    vnode.child = oldVnode.child
-    vnode.child._updateFromParent(
-      propsData, // updated props
-      listeners, // updated listeners
-      vnode, // new parent vnode
-      children // new children
-    )
-  }
+  const { listeners, propsData, children } = vnode.componentOptions
+  vnode.child = oldVnode.child
+  vnode.child._updateFromParent(
+    propsData, // updated props
+    listeners, // updated listeners
+    vnode, // new parent vnode
+    children // new children
+  )
 }
 
 function insert (vnode) {
