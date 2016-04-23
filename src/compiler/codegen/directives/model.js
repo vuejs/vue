@@ -24,13 +24,29 @@ export function model (el, dir) {
 }
 
 function genCheckboxModel (el, value) {
-  addProp(el, 'checked', `!!(${value})`)
-  addHandler(el, 'change', `${value}=$event.target.checked`)
+  const valueBinding = getBindingAttr(el, 'value')
+  addProp(el, 'checked',
+    `Array.isArray(${value})` +
+      `?(${value}).indexOf(${valueBinding})>-1` +
+      `:!!(${value})`
+  )
+  addHandler(el, 'change',
+    `var $$a=${value},` +
+        '$$el=$event.target,' +
+        '$$c=$$el.checked;' +
+    'if(Array.isArray($$a)){' +
+      `var $$v=${valueBinding},` +
+          '$$i=$$a.indexOf($$v);' +
+      'if($$c){$$i<0&&$$a.push($$v)}' +
+      'else{$$i>-1&&$$a.splice($$i,1)}' +
+    `}else{${value}=$$c}`
+  )
 }
 
 function genRadioModel (el, value) {
-  addProp(el, 'checked', `(${value}==${getBindingAttr(el, 'value')})`)
-  addHandler(el, 'change', `${value}=$event.target.value`)
+  const valueBinding = getBindingAttr(el, 'value')
+  addProp(el, 'checked', `(${value}==${valueBinding})`)
+  addHandler(el, 'change', `${value}=${valueBinding}`)
 }
 
 function genDefaultModel (el, value, modifiers) {
@@ -54,21 +70,26 @@ function genDefaultModel (el, value, modifiers) {
   }
 }
 
-function genSelect (el, value) {
-  addProp(el, 'value', `(${value})`)
-  addHandler(el, 'change', `${value}=$event.target.value`)
-}
+const getSelectedValueCode =
+  'Array.prototype.filter' +
+  '.call($event.target.options,function(o){return o.selected})' +
+  '.map(function(o){return "_value" in o ? o._value : o.value})'
 
-function genMultiSelect (el, value) {
-  addHandler(el, 'change',
-    `${value}=Array.prototype.filter
-    .call($event.target.options,function(o){return o.selected})
-    .map(function(o){return o.value})`)
-  // patch child options
+function patchChildOptions (el, fn) {
   for (let i = 0; i < el.children.length; i++) {
     let c = el.children[i]
     if (c.tag === 'option') {
-      addProp(c, 'selected', `(${value}).indexOf(${getBindingAttr(c, 'value')})>-1`)
+      addProp(c, 'selected', fn(getBindingAttr(c, 'value')))
     }
   }
+}
+
+function genSelect (el, value) {
+  addHandler(el, 'change', `${value}=${getSelectedValueCode}[0]`)
+  patchChildOptions(el, valueBinding => `$(${value})===(${valueBinding})`)
+}
+
+function genMultiSelect (el, value) {
+  addHandler(el, 'change', `${value}=${getSelectedValueCode}`)
+  patchChildOptions(el, valueBinding => `$(${value}).indexOf(${valueBinding})>-1`)
 }
