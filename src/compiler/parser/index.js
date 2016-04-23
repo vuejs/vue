@@ -26,8 +26,8 @@ const decodeHTMLCached = cached(decodeHTML)
 // attributes that should be using props for binding
 const mustUseProp = makeMap('value,selected,checked,muted')
 
-// this map covers SVG elements that can appear as template root nodes
-const isSVG = makeMap('svg,g,defs,symbol,use,image,text,circle,ellipse,line,path,polygon,polyline,rect', true)
+// this map covers namespace elements that can appear as template root nodes
+const tagNamespace = makeMap('svg,g,defs,symbol,use,image,text,circle,ellipse,line,path,polygon,polyline,rect', true, 'svg')
 
 // make warning customizable depending on environment.
 let warn
@@ -47,8 +47,9 @@ export function parse (template, options) {
   const stack = []
   let root
   let currentParent
-  let inSvg = false
-  let svgIndex = -1
+  let inNamespace = false
+  let namespaceIndex = -1
+  let currentNamespace = ''
   let inPre = false
   let warned = false
   parseHTML(template, {
@@ -73,13 +74,15 @@ export function parse (template, options) {
         children: []
       }
 
-      // check svg
-      if (inSvg) {
-        element.svg = true
-      } else if (isSVG(tag)) {
-        element.svg = true
-        inSvg = true
-        svgIndex = stack.length
+      // check namespace
+      const namespace = tagNamespace(tag)
+      if (inNamespace) {
+        element.namespace = currentNamespace
+      } else if (namespace) {
+        element.namespace = namespace
+        inNamespace = true
+        currentNamespace = namespace
+        namespaceIndex = stack.length
       }
 
       if (!inPre) {
@@ -136,10 +139,11 @@ export function parse (template, options) {
       // pop stack
       stack.length -= 1
       currentParent = stack[stack.length - 1]
-      // check svg state
-      if (inSvg && stack.length <= svgIndex) {
-        inSvg = false
-        svgIndex = -1
+      // check namespace state
+      if (inNamespace && stack.length <= namespaceIndex) {
+        inNamespace = false
+        currentNamespace = ''
+        namespaceIndex = -1
       }
       // check pre state
       if (element.pre) {

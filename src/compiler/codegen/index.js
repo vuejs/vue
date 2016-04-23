@@ -29,7 +29,7 @@ function genElement (el) {
     // if the element is potentially a component,
     // wrap its children as a thunk.
     const children = genChildren(el, !isReservedTag(el.tag) /* asThunk */)
-    const code = `__h__('${el.tag}', ${genData(el)}, ${children}, ${el.svg})`
+    const code = `__h__('${el.tag}', ${genData(el)}, ${children}, '${el.namespace || ''}')`
     if (el.staticRoot) {
       // hoist static sub-trees out
       staticRenderFns.push(`with(this){return ${code}}`)

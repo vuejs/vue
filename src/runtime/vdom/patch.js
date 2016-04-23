@@ -81,8 +81,8 @@ export default function createPatchFunction (backend) {
     const children = vnode.children
     const tag = vnode.tag
     if (isDef(tag)) {
-      elm = vnode.elm = vnode.svg
-        ? nodeOps.createSVGElement(tag)
+      elm = vnode.elm = vnode.namespace
+        ? nodeOps.createElementNS(vnode.namespace, tag)
         : nodeOps.createElement(tag)
       if (Array.isArray(children)) {
         for (i = 0; i < children.length; ++i) {

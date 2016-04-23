@@ -1,5 +1,7 @@
 import { isIE9 } from '../util/index'
-import { svgNS } from './node-ops'
+import { namespaceMap } from './node-ops'
+
+const svgNS = namespaceMap.svg
 
 /**
  * In IE9, setAttribute('class') will result in empty class
