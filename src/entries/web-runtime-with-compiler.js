@@ -5,10 +5,16 @@ import Vue from './web-runtime'
 
 const mount = Vue.prototype.$mount
 const idTemplateCache = Object.create(null)
+const renderFunctionCache = Object.create(null)
 
 function idToTemplate (id) {
   const hit = idTemplateCache[id]
   return hit || (idTemplateCache[id] = query(id).innerHTML)
+}
+
+function createRenderFn (code) {
+  const hit = renderFunctionCache[code]
+  return hit || (renderFunctionCache[code] = new Function(code))
 }
 
 Vue.prototype.$mount = function (el) {
@@ -34,11 +40,13 @@ Vue.prototype.$mount = function (el) {
       const res = compile(template, {
         preserveWhitespace: config.preserveWhitespace
       })
-      options.render = new Function(res.render)
-      if (res.staticRenderFns.length) {
-        options.staticRenderFns = res.staticRenderFns.map(code => {
-          return new Function(code)
-        })
+      options.render = createRenderFn(res.render)
+      const l = res.staticRenderFns.length
+      if (l) {
+        options.staticRenderFns = new Array(l)
+        for (let i = 0; i < l; i++) {
+          options.staticRenderFns[i] = createRenderFn(res.staticRenderFns[i])
+        }
       }
     }
   }
