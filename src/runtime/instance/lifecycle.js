@@ -1,5 +1,5 @@
 import Watcher from '../observer/watcher'
-import { warn, validateProp, remove } from '../util/index'
+import { warn, validateProp, remove, query } from '../util/index'
 import { observerState } from '../observer/index'
 import { updateListeners } from '../vdom/helpers'
 
@@ -20,7 +20,8 @@ export function initLifecycle (vm) {
 }
 
 export function lifecycleMixin (Vue) {
-  Vue.prototype.$mount = function () {
+  Vue.prototype.$mount = function (el) {
+    this.$el = el && query(el)
     if (!this.$options.render) {
       this.$options.render = () => this.$createElement('div')
       if (process.env.NODE_ENV !== 'production') {

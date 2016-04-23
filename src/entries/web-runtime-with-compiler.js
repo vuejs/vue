@@ -12,7 +12,7 @@ function idToTemplate (id) {
 }
 
 Vue.prototype.$mount = function (el) {
-  el = this.$el = el && query(el)
+  el = el && query(el)
   const options = this.$options
   // resolve template/el and convert to render function
   if (!options.render) {
@@ -42,7 +42,7 @@ Vue.prototype.$mount = function (el) {
       }
     }
   }
-  mount.call(this)
+  mount.call(this, el)
 }
 
 /**
