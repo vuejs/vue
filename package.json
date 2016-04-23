@@ -34,7 +34,6 @@
     "babel-loader": "^6.0.0",
     "babel-preset-es2015": "^6.0.0",
     "babel-preset-es2015-rollup-vue": "^1.0.0",
-    "casperjs": "^1.1.0",
     "chromedriver": "^2.21.2",
     "cross-spawn": "^2.1.5",
     "eslint": "^2.7.0",
