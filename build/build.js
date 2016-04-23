@@ -16,9 +16,9 @@ var banner =
 
 // Update main file
 var main = fs
-  .readFileSync('src/runtime/index.js', 'utf-8')
+  .readFileSync('src/core/index.js', 'utf-8')
   .replace(/Vue\.version = '[\d\.]+'/, "Vue.version = '" + version + "'")
-fs.writeFileSync('src/runtime/index.js', main)
+fs.writeFileSync('src/core/index.js', main)
 
 build([
   // Runtime only, CommonJS build. Used by bundlers e.g. Webpack & Browserify
@@ -56,9 +56,9 @@ build([
       entities: './entity-decoder'
     }
   },
-  // Compiler standalone build, for npm distribution.
+  // Web compiler standalone build, for npm distribution.
   {
-    entry: 'src/compiler/index',
+    entry: 'src/entries/web-compiler.js',
     format: 'cjs',
     external: ['entities'],
     out: 'dist/compiler/compiler.js'

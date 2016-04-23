@@ -1,14 +1,21 @@
 import { parse } from './parser/index'
-import { optimize } from './optimizer/index'
-import { generate } from './codegen/index'
-import { directives } from './codegen/directives/index'
+import { optimize } from './optimizer'
+import { generate } from './codegen'
 
-export function compile (html, options) {
-  const ast = parse(html.trim(), options)
-  optimize(ast)
-  return generate(ast)
-}
+/**
+ * Compile a template.
+ *
+ * @param {String} template
+ * @param {Object} options
+ *                 - warn
+ *                 - directives
+ *                 - isReservedTag
+ *                 - mustUseProp
+ *                 - getTagNamespace
+ */
 
-export function registerDirective (name, fn) {
-  directives[name] = fn
+export function compile (template, options) {
+  const ast = parse(template.trim(), options)
+  optimize(ast, options)
+  return generate(ast, options)
 }

@@ -1,7 +1,7 @@
 import { decodeHTML } from 'entities'
 import { parseHTML } from './html-parser'
 import { parseText } from './text-parser'
-import { hyphenate, makeMap, cached } from '../../shared/util'
+import { hyphenate, cached } from '../../shared/util'
 import {
   getAndRemoveAttr,
   addProp,
@@ -23,21 +23,13 @@ const camelRE = /[a-z\d][A-Z]/
 
 const decodeHTMLCached = cached(decodeHTML)
 
-// attributes that should be using props for binding
-const mustUseProp = makeMap('value,selected,checked,muted')
-
-// this map covers namespace elements that can appear as template root nodes
-const isSVG = makeMap('svg,g,defs,symbol,use,image,text,circle,ellipse,line,path,polygon,polyline,rect', true)
-
-function getTagNamespace (tag) {
-  if (isSVG(tag)) {
-    return 'svg'
-  }
-}
-
 // make warning customizable depending on environment.
 let warn
 const baseWarn = msg => console.error(`[Vue parser]: ${msg}`)
+
+// platform-injected util functions
+let platformGetTagNamespace
+let platformMustUseProp
 
 /**
  * Convert HTML string to AST.
@@ -48,8 +40,9 @@ const baseWarn = msg => console.error(`[Vue parser]: ${msg}`)
  */
 
 export function parse (template, options) {
-  options = options || {}
   warn = options.warn || baseWarn
+  platformGetTagNamespace = options.getTagNamespace || (() => null)
+  platformMustUseProp = options.mustUseProp || (() => false)
   const stack = []
   let root
   let currentParent
@@ -81,7 +74,7 @@ export function parse (template, options) {
       }
 
       // check namespace
-      const namespace = getTagNamespace(tag)
+      const namespace = platformGetTagNamespace(tag)
       if (inNamespace) {
         element.ns = currentNamespace
       } else if (namespace) {
@@ -345,7 +338,7 @@ function processAttrs (el) {
       }
       if (bindRE.test(name)) { // v-bind
         name = name.replace(bindRE, '')
-        if (mustUseProp(name)) {
+        if (platformMustUseProp(name)) {
           addProp(el, name, value)
         } else {
           addAttr(el, name, value)

@@ -1,7 +1,8 @@
-import config from '../runtime/config'
-import { compile } from '../compiler/index'
-import { query, warn, cached } from '../runtime/util/index'
+import config from '../core/config'
+import { warn, cached } from '../core/util/index'
+import { query } from '../platforms/web/util'
 import Vue from './web-runtime'
+import { compile } from './web-compiler'
 
 const idToTemplate = cached(id => query(id).innerHTML)
 

@@ -18,6 +18,28 @@ export function makeMap (str, expectsLowerCase) {
 }
 
 /**
+ * Check if a tag is a built-in tag.
+ */
+
+export const isBuiltInTag = makeMap('slot,component,render,transition', true)
+
+/**
+ * Remove an item from an array
+ *
+ * @param {Array} arr
+ * @param {*} item
+ */
+
+export function remove (arr, item) {
+  if (arr.length) {
+    const index = arr.indexOf(item)
+    if (index > -1) {
+      return arr.splice(index, 1)
+    }
+  }
+}
+
+/**
  * Check whether the object has the property.
  *
  * @param {Object} obj
