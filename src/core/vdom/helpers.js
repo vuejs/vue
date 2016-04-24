@@ -17,8 +17,8 @@ export function flatten (children) {
       }
     }
     return res
-  } else {
-    return children
+  } else if (children) {
+    return [children]
   }
 }
 

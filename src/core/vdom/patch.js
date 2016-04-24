@@ -296,6 +296,7 @@ export function createPatchFunction (backend) {
         patchVnode(oldVnode, vnode, insertedVnodeQueue)
       } else {
         // mounting to a real element, just replace it
+        // TODO: pick up and reuse existing elements (hydration)
         if (isUndef(oldVnode.tag)) {
           oldVnode = emptyNodeAt(oldVnode)
         }
