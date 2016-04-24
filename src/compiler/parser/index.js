@@ -46,9 +46,6 @@ export function parse (template, options) {
   const stack = []
   let root
   let currentParent
-  let inNamespace = false
-  let namespaceIndex = -1
-  let currentNamespace = ''
   let inPre = false
   let warned = false
   parseHTML(template, {
@@ -73,15 +70,12 @@ export function parse (template, options) {
         children: []
       }
 
-      // check namespace
-      const namespace = platformGetTagNamespace(tag)
-      if (inNamespace) {
-        element.ns = currentNamespace
-      } else if (namespace) {
-        element.ns = namespace
-        inNamespace = true
-        currentNamespace = namespace
-        namespaceIndex = stack.length
+      // check namespace.
+      // inherit parent ns if there is one
+      let ns
+      if ((ns = currentParent && currentParent.ns) ||
+          (ns = platformGetTagNamespace(tag))) {
+        element.ns = ns
       }
 
       if (!inPre) {
@@ -122,6 +116,7 @@ export function parse (template, options) {
           processElse(element, currentParent)
         } else {
           currentParent.children.push(element)
+          element.parent = currentParent
         }
       }
       if (!unary) {
@@ -138,12 +133,6 @@ export function parse (template, options) {
       // pop stack
       stack.length -= 1
       currentParent = stack[stack.length - 1]
-      // check namespace state
-      if (inNamespace && stack.length <= namespaceIndex) {
-        inNamespace = false
-        currentNamespace = ''
-        namespaceIndex = -1
-      }
       // check pre state
       if (element.pre) {
         inPre = false
