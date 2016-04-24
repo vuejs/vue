@@ -10,9 +10,9 @@
     "src"
   ],
   "scripts": {
-    "dev": "webpack --watch --config build/webpack.dev.config.js",
+    "dev": "webpack --watch --config build/webpack.dist.dev.config.js",
     "dev-test": "karma start build/karma.dev.config.js",
-    "dev-all": "npm run dev-dist & npm run dev-test",
+    "dev-ssr": "webpack --watch --config build/webpack.ssr.dev.config.js",
     "test": "npm run unit && npm run e2e",
     "build": "NODE_ENV=production node build/build.js",
     "lint": "eslint src build",
@@ -40,6 +40,7 @@
     "babel-preset-es2015-rollup-vue": "^1.0.0",
     "chromedriver": "^2.21.2",
     "cross-spawn": "^2.1.5",
+    "entities": "^1.1.1",
     "eslint": "^2.7.0",
     "eslint-config-standard": "^5.1.0",
     "eslint-loader": "^1.3.0",

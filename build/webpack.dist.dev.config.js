@@ -3,7 +3,7 @@ var alias = require('./alias')
 var webpack = require('webpack')
 
 module.exports = {
-  entry: path.resolve(__dirname, 'dev-entry.js'),
+  entry: path.resolve(__dirname, 'dist.dev.entry.js'),
   output: {
     path: path.resolve(__dirname, '../dist'),
     filename: 'vue.js',

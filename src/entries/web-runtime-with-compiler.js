@@ -2,32 +2,9 @@ import config from 'core/config'
 import { warn, cached } from 'core/util/index'
 import { query } from 'web/util/index'
 import Vue from './web-runtime'
-import { compile } from './web-compiler'
+import { compileToFunctions } from './web-compiler'
 
 const idToTemplate = cached(id => query(id).innerHTML)
-
-const cache1 = Object.create(null)
-const cache2 = Object.create(null)
-
-function createRenderFns (template) {
-  const preserveWhitespace = config.preserveWhitespace
-  const cache = preserveWhitespace ? cache1 : cache2
-  if (cache[template]) {
-    return cache[template]
-  }
-  const res = {}
-  const compiled = compile(template, { preserveWhitespace })
-  res.render = new Function(compiled.render)
-  const l = compiled.staticRenderFns.length
-  if (l) {
-    res.staticRenderFns = new Array(l)
-    for (let i = 0; i < l; i++) {
-      res.staticRenderFns[i] = new Function(compiled.staticRenderFns[i])
-    }
-  }
-  return (cache[template] = res)
-}
-
 const mount = Vue.prototype.$mount
 
 Vue.prototype.$mount = function (el) {
@@ -50,7 +27,9 @@ Vue.prototype.$mount = function (el) {
       template = getOuterHTML(el)
     }
     if (template) {
-      const { render, staticRenderFns } = createRenderFns(template)
+      const { render, staticRenderFns } = compileToFunctions(template, {
+        preserveWhitespace: config.preserveWhitespace
+      })
       options.render = render
       options.staticRenderFns = staticRenderFns
     }
@@ -76,6 +55,6 @@ function getOuterHTML (el) {
   }
 }
 
-Vue.compile = createRenderFns
+Vue.compile = compileToFunctions
 
 export default Vue

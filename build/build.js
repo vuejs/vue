@@ -57,12 +57,12 @@ build([
       entities: './entity-decoder'
     }
   },
-  // Web compiler standalone build, for npm distribution.
+  // Web compiler CommonJS build, for npm distribution.
   {
     entry: 'src/entries/web-compiler.js',
     format: 'cjs',
     external: ['entities'],
-    out: 'dist/compiler.js'
+    out: 'dist/compiler.common.js'
   }
 ])
 

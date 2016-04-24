@@ -2,8 +2,10 @@ import attrs from './modules/attrs'
 import klass from './modules/class'
 import style from './modules/style'
 import show from './directives/show'
+import { renderToString } from './render-to-string'
+import { renderToStream } from './render-to-stream'
 
-export function createRenderer (options) {
+export function createComponentRenderer (options = {}) {
   const modules = Object.assign({
     attrs,
     style,
@@ -15,11 +17,7 @@ export function createRenderer (options) {
   }, options.directives)
 
   return {
-    renderToString () {
-
-    },
-    renderToStream () {
-
-    }
+    renderToString: component => renderToString(component, modules, directives),
+    renderToStream: component => renderToStream(component, modules, directives)
   }
 }
