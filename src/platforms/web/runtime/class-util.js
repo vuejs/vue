@@ -1,5 +1,4 @@
-import { isIE9 } from 'web/util/index'
-import { namespaceMap } from './node-ops'
+import { isIE9, namespaceMap } from 'web/util/index'
 
 const svgNS = namespaceMap.svg
 
