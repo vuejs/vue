@@ -62,7 +62,7 @@ build([
     entry: 'src/entries/web-compiler.js',
     format: 'cjs',
     external: ['entities'],
-    out: 'dist/compiler/compiler.js'
+    out: 'dist/compiler.js'
   }
 ])
 
