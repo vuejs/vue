@@ -1,4 +1,4 @@
-import { isAndroid, isIE9 } from '../../util'
+import { isAndroid, isIE9 } from 'web/util/index'
 
 if (isIE9) {
   // http://www.matts411.com/post/internet-explorer-9-oninput/

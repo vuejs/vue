@@ -4,7 +4,7 @@ import * as nodeOps from 'web/runtime/node-ops'
 import platformDirectives from 'web/runtime/directives/index'
 import baseModules from 'core/vdom/modules/index'
 import platformModules from 'web/runtime/modules/index'
-import { query, isUnknownElement, isReservedTag } from 'web/util'
+import { query, isUnknownElement, isReservedTag } from 'web/util/index'
 
 // install platform specific utils
 Vue.config.isUnknownElement = isUnknownElement

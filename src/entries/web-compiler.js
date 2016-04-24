@@ -1,7 +1,7 @@
 import { extend } from 'shared/util'
 import { compile as baseCompile } from 'compiler/index'
 import directives from 'web/compiler/directives/index'
-import { isReservedTag, mustUseProp, getTagNamespace } from 'web/util'
+import { isReservedTag, mustUseProp, getTagNamespace } from 'web/util/index'
 
 const baseOptions = {
   directives,

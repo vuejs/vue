@@ -1,10 +1,5 @@
 import { inBrowser } from 'core/util/env'
-import { warn } from 'core/util/debug'
 import { makeMap } from 'shared/util'
-
-const UA = inBrowser && window.navigator.userAgent.toLowerCase()
-export const isIE9 = UA && UA.indexOf('msie 9.0') > 0
-export const isAndroid = UA && UA.indexOf('android') > 0
 
 export const isReservedTag = makeMap(
   'html,base,head,link,meta,style,title,' +
@@ -65,24 +60,4 @@ export function isUnknownElement (tag) {
       !/^(data|time|rtc|rb)$/.test(tag)
     ))
   }
-}
-
-/**
- * Query an element selector if it's not an element already.
- *
- * @param {String|Element} el
- * @return {Element}
- */
-
-export function query (el) {
-  if (typeof el === 'string') {
-    var selector = el
-    el = document.querySelector(el)
-    if (!el) {
-      process.env.NODE_ENV !== 'production' && warn(
-        'Cannot find element: ' + selector
-      )
-    }
-  }
-  return el
 }

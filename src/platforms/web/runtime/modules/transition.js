@@ -1,7 +1,7 @@
 import { addClass, removeClass } from '../class-util'
 import { inBrowser } from 'core/util/index'
 import { cached, remove } from 'shared/util'
-import { isIE9 } from '../../util'
+import { isIE9 } from 'web/util/index'
 
 const TRANSITION = 'transition'
 const ANIMATION = 'animation'
