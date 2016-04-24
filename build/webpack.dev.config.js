@@ -1,5 +1,6 @@
 var path = require('path')
 var alias = require('./alias')
+var webpack = require('webpack')
 
 module.exports = {
   entry: path.resolve(__dirname, 'dev-entry.js'),
@@ -19,5 +20,12 @@ module.exports = {
       { test: /\.js/, loader: 'babel!eslint', exclude: /node_modules/ }
     ]
   },
+  plugins: [
+    new webpack.DefinePlugin({
+      'process.env': {
+        NODE_ENV: '"development"'
+      }
+    })
+  ],
   devtool: '#source-map'
 }
