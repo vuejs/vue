@@ -588,7 +588,6 @@ function checkTerminalDirectives (el, attrs, options) {
   var attr, name, value, modifiers, matched, dirName, rawName, arg, def, termDef
   for (var i = 0, j = attrs.length; i < j; i++) {
     attr = attrs[i]
-    modifiers = parseModifiers(attr.name)
     name = attr.name.replace(modifierRE, '')
     if ((matched = name.match(dirAttrRE))) {
       def = resolveAsset(options, 'directives', matched[1])
@@ -596,6 +595,7 @@ function checkTerminalDirectives (el, attrs, options) {
         if (!termDef || ((def.priority || DEFAULT_TERMINAL_PRIORITY) > termDef.priority)) {
           termDef = def
           rawName = attr.name
+          modifiers = parseModifiers(attr.name)
           value = attr.value
           dirName = matched[1]
           arg = matched[2]
