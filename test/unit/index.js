@@ -43,5 +43,5 @@ beforeEach(function () {
 })
 
 // require all test files
-var testsContext = require.context('./specs', true, /\.spec$/)
+var testsContext = require.context('./', true, /\.spec$/)
 testsContext.keys().forEach(testsContext)

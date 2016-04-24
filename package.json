@@ -11,7 +11,8 @@
   ],
   "scripts": {
     "dev": "webpack --watch --config build/webpack.dev.config.js",
-    "dev-with-test": "npm run dev & karma start build/karma.dev.config.js",
+    "dev-test": "karma start build/karma.dev.config.js",
+    "dev-all": "npm run dev-dist & npm run dev-test",
     "test": "npm run unit && npm run e2e",
     "build": "NODE_ENV=production node build/build.js",
     "lint": "eslint src build",
