@@ -1,4 +1,3 @@
-import config from '../config'
 import Dep from './dep'
 import { pushWatcher } from './batcher'
 import {
@@ -160,11 +159,6 @@ Watcher.prototype.update = function (shallow) {
         : false
       : !!shallow
     this.queued = true
-    // record before-push error stack in debug mode
-    /* istanbul ignore if */
-    if (process.env.NODE_ENV !== 'production' && config.debug) {
-      this.prevError = new Error('[vue] async stack trace')
-    }
     pushWatcher(this)
   }
 }
