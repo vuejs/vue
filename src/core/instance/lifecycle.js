@@ -47,10 +47,8 @@ export function lifecycleMixin (Vue) {
         this._staticTrees[i] = staticRenderFns[i].call(this._renderProxy)
       }
     }
-    callHook(this, 'beforeMount')
     this._watcher = new Watcher(this, this._render, this._update)
     this._update(this._watcher.value)
-    callHook(this, 'mounted')
     this._mounted = true
     // root instance, call ready on self
     if (this.$root === this) {
