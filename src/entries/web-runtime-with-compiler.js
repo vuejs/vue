@@ -76,6 +76,6 @@ function getOuterHTML (el) {
   }
 }
 
-Vue.compile = compile
+Vue.compile = createRenderFns
 
 export default Vue
