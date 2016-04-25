@@ -1,5 +1,7 @@
 import stream from 'stream'
 
+const MAX_STACK_DEPTH = 500
+
 /**
  * Original RenderStream implmentation by Sasha Aickin (@aickin)
  * Licensed under the Apache License, Version 2.0
@@ -11,8 +13,6 @@ export default class RenderStream extends stream.Readable {
     super()
     this.buffer = ''
     this.render = render
-    this.maxStackDepth = 500
-    this.nextTickCalls = 0
   }
 
   _read (n) {
@@ -45,7 +45,7 @@ export default class RenderStream extends stream.Readable {
           } else {
             // continue rendering until we have enough text to call this.push().
             // sometimes do this as process.nextTick to get out of stack overflows.
-            if (this.stackDepth >= this.maxStackDepth) {
+            if (this.stackDepth >= MAX_STACK_DEPTH) {
               process.nextTick(next)
             } else {
               this.stackDepth++
