@@ -46,6 +46,57 @@ beforeEach(function () {
   })
 })
 
+// helper for async assertions.
+// Use like this:
+//
+// vm.a = 123
+// waitForUpdate(() => {
+//   expect(vm.$el.textContent).toBe('123')
+//   vm.a = 234
+// })
+// .then(() => {
+//   // more assertions...
+//   done()
+// })
+// .catch(done)
+window.waitForUpdate = initialCb => {
+  let onError
+  const queue = [initialCb]
+
+  function shift () {
+    const job = queue.shift()
+    let hasError = false
+    try {
+      job()
+    } catch (e) {
+      hasError = true
+      if (onError) {
+        onError(e)
+      }
+    }
+    if (!hasError) {
+      if (queue.length) {
+        Vue.nextTick(shift)
+      }
+    }
+  }
+
+  Vue.nextTick(shift)
+
+  const chainer = {
+    then: nextCb => {
+      queue.push(nextCb)
+      return chainer
+    },
+    catch: errorCb => {
+      onError = errorCb
+      return chainer
+    }
+  }
+
+  return chainer
+}
+
 // require all test files
-var testsContext = require.context('./', true, /\.spec$/)
+const testsContext = require.context('./', true, /\.spec$/)
 testsContext.keys().forEach(testsContext)
