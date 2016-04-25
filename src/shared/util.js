@@ -109,23 +109,6 @@ export const hyphenate = cached(str => {
 })
 
 /**
- * Converts hyphen/underscore/slash delimitered names into
- * camelized classNames.
- *
- * e.g. my-component => MyComponent
- *      some_else    => SomeElse
- *      some/comp    => SomeComp
- *
- * @param {String} str
- * @return {String}
- */
-
-var classifyRE = /(?:^|[-_\/])(\w)/g
-export function classify (str) {
-  return str.replace(classifyRE, toUpper)
-}
-
-/**
  * Simple bind, faster than native
  *
  * @param {Function} fn
