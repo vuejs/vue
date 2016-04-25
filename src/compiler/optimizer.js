@@ -55,6 +55,7 @@ const isStaticKey = makeMap(
 function isStatic (node) {
   return !!(node.text || node.pre || (
     !node.expression && // not text with interpolation
+    !node.if && !node.for && // not v-if or v-for or v-else
     (!node.tag || isPlatformReservedTag(node.tag)) && // not a component
     !isBuiltInTag(node.tag) && // not a built-in
     (node.plain || Object.keys(node).every(isStaticKey)) // no dynamic bindings
