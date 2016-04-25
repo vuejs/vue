@@ -1,20 +1,8 @@
-import renderAttrs from './modules/attrs'
-import renderClass from './modules/class'
-import renderStyle from './modules/style'
-import show from './directives/show'
-import { isUnaryTag } from 'web/util/index'
-
-export function createComponentRenderer (options = {}) {
-  const modules = Object.assign({
-    attrs: renderAttrs,
-    style: renderStyle,
-    class: renderClass
-  }, options.modules)
-
-  const directives = Object.assign({
-    show
-  }, options.directives)
-
+export function createRenderer ({
+  modules = {},
+  directives = {},
+  isUnaryTag = (() => false)
+} = {}) {
   function renderComponent (component) {
     component.$mount()
     return renderElement(component._vnode)

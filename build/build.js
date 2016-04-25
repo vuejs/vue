@@ -63,6 +63,12 @@ build([
     format: 'cjs',
     external: ['entities'],
     out: 'dist/compiler.common.js'
+  },
+  // Web server renderer
+  {
+    entry: 'src/entries/web-server-renderer.js',
+    format: 'cjs',
+    out: 'dist/server-renderer.js'
   }
 ])
 

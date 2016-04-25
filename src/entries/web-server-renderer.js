@@ -1,3 +1,18 @@
-import { createComponentRenderer } from 'web/server/create-renderer'
+import { createRenderer } from 'server/create-renderer'
+import attrs from 'web/server/modules/attrs'
+import klass from 'web/server/modules/class'
+import style from 'web/server/modules/style'
+import show from 'web/server/directives/show'
+import { isUnaryTag } from 'web/util/index'
 
-export default createComponentRenderer()
+export default createRenderer({
+  isUnaryTag,
+  modules: {
+    attrs,
+    style,
+    class: klass
+  },
+  directives: {
+    show
+  }
+})
