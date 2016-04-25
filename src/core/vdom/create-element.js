@@ -11,9 +11,12 @@ export default function createElement (tag, data, children, namespace) {
   if (typeof tag === 'string') {
     let Ctor
     if (config.isReservedTag(tag)) {
-      return VNode(tag, data, flatten(children), undefined, undefined, namespace)
+      return VNode(
+        tag, data, flatten(children),
+        undefined, undefined, namespace, context
+      )
     } else if ((Ctor = resolveAsset(context.$options, 'components', tag))) {
-      return createComponent(Ctor, data, parent, children)
+      return createComponent(Ctor, data, parent, children, context)
     } else {
       if (process.env.NODE_ENV !== 'production') {
         if (!namespace && config.isUnknownElement(tag)) {
@@ -24,9 +27,12 @@ export default function createElement (tag, data, children, namespace) {
           )
         }
       }
-      return VNode(tag, data, flatten(children && children()), undefined, undefined, namespace)
+      return VNode(
+        tag, data, flatten(children && children()),
+        undefined, undefined, namespace, context
+      )
     }
   } else {
-    return createComponent(tag, data, parent, children)
+    return createComponent(tag, data, parent, children, context)
   }
 }

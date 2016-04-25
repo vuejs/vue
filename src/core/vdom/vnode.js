@@ -1,4 +1,4 @@
-export default function VNode (tag, data, children, text, elm, ns) {
+export default function VNode (tag, data, children, text, elm, ns, context) {
   return {
     tag,
     data,
@@ -6,6 +6,7 @@ export default function VNode (tag, data, children, text, elm, ns) {
     text,
     elm,
     ns,
+    context,
     key: data && data.key
   }
 }

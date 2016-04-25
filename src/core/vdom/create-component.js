@@ -6,7 +6,7 @@ import { warn, isObject, hasOwn, hyphenate } from '../util/index'
 const hooks = { init, prepatch, insert, destroy }
 const hooksToMerge = Object.keys(hooks)
 
-export function createComponent (Ctor, data, parent, children) {
+export function createComponent (Ctor, data, parent, children, context) {
   if (process.env.NODE_ENV !== 'production' &&
     children && typeof children !== 'function') {
     warn(
@@ -56,8 +56,11 @@ export function createComponent (Ctor, data, parent, children) {
   }
 
   // return a placeholder vnode
-  const name = Ctor.options.name ? '-' + Ctor.options.name : ''
-  const vnode = VNode(`vue-component-${Ctor.cid}-${name}`, data)
+  const name = Ctor.options.name ? ('-' + Ctor.options.name) : ''
+  const vnode = VNode(
+    `vue-component-${Ctor.cid}${name}`, data,
+    undefined, undefined, undefined, undefined, context
+  )
   vnode.componentOptions = { Ctor, propsData, listeners, parent, children }
   return vnode
 }

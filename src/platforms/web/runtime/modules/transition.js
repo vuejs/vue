@@ -1,5 +1,5 @@
 import { addClass, removeClass } from '../class-util'
-import { inBrowser } from 'core/util/index'
+import { inBrowser, resolveAsset } from 'core/util/index'
 import { cached, remove } from 'shared/util'
 import { isIE9 } from 'web/util/index'
 
@@ -42,7 +42,7 @@ export function enter (vnode) {
   if (!data) {
     return
   }
-  if (!data.context.$root._mounted && !data.appear) {
+  if (!vnode.context.$root._mounted && !data.appear) {
     return
   }
 
@@ -53,7 +53,7 @@ export function enter (vnode) {
     enter,
     afterEnter,
     enterCancelled
-  } = detectAuto(data.definition)
+  } = resolveTransition(data.definition, vnode.context)
 
   const userWantsControl = enter && enter.length > 1
   const cb = el._enterCb = once(() => {
@@ -108,7 +108,7 @@ export function leave (vnode, rm) {
     leave,
     afterLeave,
     leaveCancelled
-  } = detectAuto(data.definition)
+  } = resolveTransition(data.definition, vnode.context)
 
   const userWantsControl = leave && leave.length > 1
   const cb = el._leaveCb = once(() => {
@@ -145,11 +145,14 @@ export function leave (vnode, rm) {
   }
 }
 
-function detectAuto (data) {
-  if (data === true) data = 'v'
-  return typeof data === 'string'
-    ? autoCssTransition(data)
-    : data
+function resolveTransition (id, context) {
+  let definition = id && typeof id === 'string'
+    ? resolveAsset(context.$options, 'transitions', id) || id
+    : id
+  if (definition === true) definition = 'v'
+  return typeof definition === 'string'
+    ? autoCssTransition(definition)
+    : definition
 }
 
 const autoCssTransition = cached(name => {

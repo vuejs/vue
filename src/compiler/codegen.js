@@ -45,7 +45,7 @@ function genElement (el) {
     if (el.staticRoot) {
       // hoist static sub-trees out
       staticRenderFns.push(`with(this){return ${code}}`)
-      return `__static__(${staticRenderFns.length - 1})`
+      return `_staticTrees[${staticRenderFns.length - 1}]`
     } else {
       return code
     }
@@ -113,11 +113,7 @@ function genData (el) {
   }
   // transition
   if (el.transition) {
-    data += `transition:__resolveTransition__(${
-      el.transition
-    }, ${
-      el.transitionOnAppear
-    }),`
+    data += `transition:{definition:(${el.transition}),appear:${el.transitionOnAppear}},`
   }
   // v-show, used to avoid transition being applied
   // since v-show takes it over
@@ -163,7 +159,7 @@ function genDirectives (el) {
     }
     if (needRuntime) {
       hasRuntime = true
-      res += `{name:"${dir.name}",def:__resolveDirective__("${dir.name}")${
+      res += `{name:"${dir.name}"${
         dir.value ? `,value:(${dir.value})` : ''
       }${
         dir.arg ? `,arg:"${dir.arg}"` : ''

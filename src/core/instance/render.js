@@ -1,6 +1,6 @@
 import createElement from '../vdom/create-element'
 import { flatten } from '../vdom/helpers'
-import { bind, resolveAsset, isArray, isObject } from '../util/index'
+import { bind, isArray, isObject } from '../util/index'
 
 export const renderState = {
   activeInstance: null
@@ -38,23 +38,6 @@ export function renderMixin (Vue) {
 
   // shorthands used in render functions
   Vue.prototype.__h__ = createElement
-
-  Vue.prototype.__static__ = function (id) {
-    return this._staticTrees[id]
-  }
-
-  // resolve directive
-  Vue.prototype.__resolveDirective__ = function (id) {
-    return resolveAsset(this.$options, 'directives', id, true)
-  }
-
-  // resolve transition
-  Vue.prototype.__resolveTransition__ = function (id, appear) {
-    const definition = id && typeof id === 'string'
-      ? resolveAsset(this.$options, 'transitions', id) || id
-      : id
-    return { definition, appear, context: this }
-  }
 
   // toString for mustaches
   Vue.prototype.__toString__ = function (val) {
