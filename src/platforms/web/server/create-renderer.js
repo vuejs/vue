@@ -44,12 +44,12 @@ export function createComponentRenderer (options = {}) {
       // check directives
       const dirs = node.data.directives
       if (dirs) {
-        for (let key in dirs) {
-          let dir = directives[key]
-          if (dir) {
+        for (let i = 0; i < dirs.length; i++) {
+          let dirRenderer = directives[dirs[i].name]
+          if (dirRenderer) {
             // directives mutate the node's data
             // which then gets rendered by modules
-            dir(node)
+            dirRenderer(node, dirs[i])
           }
         }
       }

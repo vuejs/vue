@@ -163,7 +163,7 @@ function genDirectives (el) {
     }
     if (needRuntime) {
       hasRuntime = true
-      res += `{def:__resolveDirective__("${dir.name}")${
+      res += `{name:"${dir.name}",def:__resolveDirective__("${dir.name}")${
         dir.value ? `,value:(${dir.value})` : ''
       }${
         dir.arg ? `,arg:"${dir.arg}"` : ''
