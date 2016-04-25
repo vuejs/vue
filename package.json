@@ -13,7 +13,7 @@
     "dev": "webpack --watch --config build/webpack.dist.dev.config.js",
     "dev-test": "karma start build/karma.dev.config.js",
     "dev-ssr": "webpack --watch --config build/webpack.ssr.dev.config.js",
-    "test": "npm run unit && npm run e2e",
+    "test": "npm run lint && npm run unit && npm run e2e",
     "build": "NODE_ENV=production node build/build.js",
     "lint": "eslint src build test",
     "unit": "karma start build/karma.unit.config.js",

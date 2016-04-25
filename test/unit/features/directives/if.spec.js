@@ -5,7 +5,7 @@ describe('Directive v-if', () => {
     const vm = new Vue({
       el: '#app',
       template: '<div><span v-if="foo">hello</span></div>',
-      data: {foo: true}
+      data: { foo: true }
     })
     expect(vm.$el.innerHTML).toBe('<span>hello</span>')
   })
@@ -14,16 +14,16 @@ describe('Directive v-if', () => {
     const vm = new Vue({
       el: '#app',
       template: '<div><span v-if="foo">hello</span></div>',
-      data: {foo: false}
+      data: { foo: false }
     })
     expect(vm.$el.innerHTML).toBe('')
   })
 
-  it('should update if value changed', (done) => {
+  it('should update if value changed', done => {
     const vm = new Vue({
       el: '#app',
       template: '<div><span v-if="foo">hello</span></div>',
-      data: {foo: true}
+      data: { foo: true }
     })
     expect(vm.$el.innerHTML).toBe('<span>hello</span>')
     vm.foo = false
@@ -57,11 +57,16 @@ describe('Directive v-if', () => {
     })
   })
 
-  it('should work well with v-else', (done) => {
+  it('should work well with v-else', done => {
     const vm = new Vue({
       el: '#app',
-      template: '<div><span v-if="foo">hello</span><span v-else>bye</span></div>',
-      data: {foo: true}
+      template: `
+        <div>
+          <span v-if="foo">hello</span>
+          <span v-else>bye</span>
+        </div>
+      `,
+      data: { foo: true }
     })
     expect(vm.$el.innerHTML).toBe('<span>hello</span>')
     vm.foo = false
@@ -95,18 +100,28 @@ describe('Directive v-if', () => {
     })
   })
 
-  it('should work well with v-for', (done) => {
+  it('should work well with v-for', done => {
     const vm = new Vue({
       el: '#app',
-      template: '<div><span v-for="item,i in list" v-if="item.value">{{i}}</span></div>',
-      data: {list: [{value: true}, {value: false}, {value: true}]}
+      template: `
+        <div>
+          <span v-for="item,i in list" v-if="item.value">{{i}}</span>
+        </div>
+      `,
+      data: {
+        list: [
+          { value: true },
+          { value: false },
+          { value: true }
+        ]
+      }
     })
     expect(vm.$el.innerHTML).toBe('<span>0</span><span>2</span>')
     vm.list[0].value = false
     setTimeout(() => {
       new Promise((res, rej) => {
         expect(vm.$el.innerHTML).toBe('<span>2</span>')
-        vm.list.push({value: true})
+        vm.list.push({ value: true })
         res()
       }).then(() => {
         expect(vm.$el.innerHTML).toBe('<span>2</span><span>3</span>')
@@ -118,18 +133,29 @@ describe('Directive v-if', () => {
     })
   })
 
-  it('should work well with v-for and v-else', (done) => {
+  it('should work well with v-for and v-else', done => {
     const vm = new Vue({
       el: '#app',
-      template: '<div><span v-for="item,i in list" v-if="item.value">hello</span><span v-else>bye</span></div>',
-      data: {list: [{value: true}, {value: false}, {value: true}]}
+      template: `
+        <div>
+          <span v-for="item,i in list" v-if="item.value">hello</span>
+          <span v-else>bye</span>
+        </div>
+      `,
+      data: {
+        list: [
+          { value: true },
+          { value: false },
+          { value: true }
+        ]
+      }
     })
     expect(vm.$el.innerHTML).toBe('<span>hello</span><span>bye</span><span>hello</span>')
     vm.list[0].value = false
     setTimeout(() => {
       new Promise((res, rej) => {
         expect(vm.$el.innerHTML).toBe('<span>bye</span><span>bye</span><span>hello</span>')
-        vm.list.push({value: true})
+        vm.list.push({ value: true })
         res()
       }).then(() => {
         expect(vm.$el.innerHTML).toBe('<span>bye</span><span>bye</span><span>hello</span><span>hello</span>')

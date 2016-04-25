@@ -1,3 +1,7 @@
+import Vue from 'vue'
+
+Vue.config.preserveWhitespace = false
+
 if (typeof console === 'undefined') {
   window.console = {
     error: function () {}
