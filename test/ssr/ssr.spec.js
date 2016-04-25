@@ -53,19 +53,31 @@ describe('Server side rendering', () => {
   })
 
   it('text interpolation', () => {
-
+    expect(renderVmWithOptions({
+      template: '<div>{{ foo }} side {{ bar }}</div>',
+      data: {
+        foo: 'server',
+        bar: 'rendering'
+      }
+    })).toContain('<div>server side rendering</div>')
   })
 
-  it('v-if', () => {
-
-  })
-
-  it('v-for', () => {
-
-  })
-
-  it('child component', () => {
-
+  it('child component (hoc)', () => {
+    expect(renderVmWithOptions({
+      template: '<child class="foo" :msg="msg"></child>',
+      data: {
+        msg: 'hello'
+      },
+      components: {
+        child: {
+          props: ['msg'],
+          render () {
+            const h = this.$createElement
+            return h('div', { class: ['bar'] }, [this.msg])
+          }
+        }
+      }
+    })).toContain('<div class="foo bar">hello</div>')
   })
 
   it('everything together', () => {
