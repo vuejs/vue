@@ -347,7 +347,10 @@ function processAttrs (el) {
       // literal attribute
       let expression = parseText(value)
       if (expression) {
-        addAttr(el, name, expression)
+        warn(
+          'Interpolation inside attributes has been deprecated. ' +
+          'Use v-bind or the colon shorthand instead.'
+        )
       } else {
         addStaticAttr(el, name, JSON.stringify(value))
       }

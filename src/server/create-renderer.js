@@ -1,5 +1,5 @@
 export function createRenderer ({
-  modules = {},
+  modules = [],
   directives = {},
   isUnaryTag = (() => false)
 } = {}) {
@@ -47,10 +47,10 @@ export function createRenderer ({
         }
       }
       // apply other modules
-      for (let key in node.data) {
-        let renderer = modules[key]
-        if (renderer) {
-          markup += renderer(node)
+      for (let i = 0; i < modules.length; i++) {
+        let res = modules[i](node)
+        if (res) {
+          markup += res
         }
       }
     }

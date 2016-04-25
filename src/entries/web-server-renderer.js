@@ -7,11 +7,11 @@ import { isUnaryTag } from 'web/util/index'
 
 export default createRenderer({
   isUnaryTag,
-  modules: {
+  modules: [
     attrs,
-    style,
-    class: klass
-  },
+    klass,
+    style
+  ],
   directives: {
     show
   }

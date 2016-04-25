@@ -21,7 +21,7 @@ var main = fs
   .replace(/Vue\.version = '[\d\.]+'/, "Vue.version = '" + version + "'")
 fs.writeFileSync('src/core/index.js', main)
 
-build([
+var builds = [
   // Runtime only, CommonJS build. Used by bundlers e.g. Webpack & Browserify
   {
     entry: 'src/entries/web-runtime.js',
@@ -70,7 +70,17 @@ build([
     format: 'cjs',
     out: 'dist/server-renderer.js'
   }
-])
+]
+
+// filter builds via command line arg
+if (process.argv[2]) {
+  var filters = process.argv[2].split(',')
+  builds = builds.filter(b => {
+    return filters.some(f => b.out.indexOf(f) > -1)
+  })
+}
+
+build(builds)
 
 function build (builds) {
   var built = 0
