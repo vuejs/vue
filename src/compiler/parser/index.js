@@ -49,8 +49,8 @@ export function parse (template, options) {
   let inPre = false
   let warned = false
   parseHTML(template, {
-    html5: true,
-
+    expectHTML: options.expectHTML,
+    isUnaryTag: options.isUnaryTag,
     start (tag, attrs, unary) {
       // check camelCase tag
       if (camelRE.test(tag)) {

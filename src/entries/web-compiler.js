@@ -1,14 +1,16 @@
 import { extend } from 'shared/util'
 import { compile as baseCompile } from 'compiler/index'
 import directives from 'web/compiler/directives/index'
-import { isReservedTag, mustUseProp, getTagNamespace } from 'web/util/index'
+import { isReservedTag, isUnaryTag, mustUseProp, getTagNamespace } from 'web/util/index'
 
 const cache1 = Object.create(null)
 const cache2 = Object.create(null)
 
 const baseOptions = {
+  expectHTML: true,
   directives,
   isReservedTag,
+  isUnaryTag,
   mustUseProp,
   getTagNamespace
 }

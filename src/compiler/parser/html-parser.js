@@ -7,6 +7,7 @@
 
 import { decodeHTML } from 'entities'
 import { makeMap } from 'shared/util'
+import { isNonPhrasingTag, canBeLeftOpenTag } from 'web/util/index'
 
 // Regular Expressions for parsing tags and attributes
 const singleAttrIdentifier = /([^\s"'<>\/=]+)/
@@ -34,25 +35,8 @@ let IS_REGEX_CAPTURING_BROKEN = false
   IS_REGEX_CAPTURING_BROKEN = g === ''
 })
 
-// Empty Elements
-const empty = makeMap('area,base,basefont,br,col,embed,frame,hr,img,input,isindex,keygen,link,meta,param,source,track,wbr', true)
-
-// Inline Elements
-const inline = makeMap('a,abbr,acronym,applet,b,basefont,bdo,big,br,button,cite,code,del,dfn,em,font,i,iframe,img,input,ins,kbd,label,map,noscript,object,q,s,samp,script,select,small,span,strike,strong,sub,sup,svg,textarea,tt,u,var', true)
-
-// Elements that you can, intentionally, leave open
-// (and which close themselves)
-const closeSelf = makeMap('colgroup,dd,dt,li,options,p,td,tfoot,th,thead,tr,source', true)
-
-// Attributes that have their values filled in disabled='disabled'
-const fillAttrs = makeMap('checked,compact,declare,defer,disabled,ismap,multiple,nohref,noresize,noshade,nowrap,readonly,selected', true)
-
 // Special Elements (can contain anything)
 const special = makeMap('script,style', true)
-
-// HTML5 tags https://html.spec.whatwg.org/multipage/indices.html#elements-3
-// Phrasing Content https://html.spec.whatwg.org/multipage/dom.html#phrasing-content
-const nonPhrasing = makeMap('address,article,aside,base,blockquote,body,caption,col,colgroup,dd,details,dialog,div,dl,dt,fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,head,header,hgroup,hr,html,legend,li,menuitem,meta,optgroup,option,param,rp,rt,source,style,summary,tbody,td,tfoot,th,thead,title,tr,track', true)
 
 const reCache = {}
 
@@ -72,6 +56,8 @@ function joinSingleAttrAssigns (handler) {
 export function parseHTML (html, handler) {
   const stack = []
   const attribute = attrForHandler(handler)
+  const expectHTML = handler.expectHTML
+  const isUnaryTag = handler.isUnaryTag || (() => false)
   let last, prevTag, nextTag, lastTag
   while (html) {
     last = html
@@ -211,21 +197,16 @@ export function parseHTML (html, handler) {
     var tagName = match.tagName
     var unarySlash = match.unarySlash
 
-    if (handler.html5 && lastTag === 'p' && nonPhrasing(tagName)) {
-      parseEndTag('', lastTag)
-    }
-
-    if (!handler.html5) {
-      while (lastTag && inline(lastTag)) {
+    if (expectHTML) {
+      if (lastTag === 'p' && isNonPhrasingTag(tagName)) {
         parseEndTag('', lastTag)
+      }
+      if (canBeLeftOpenTag(tagName) && lastTag === tagName) {
+        parseEndTag('', tagName)
       }
     }
 
-    if (closeSelf(tagName) && lastTag === tagName) {
-      parseEndTag('', tagName)
-    }
-
-    var unary = empty(tagName) || tagName === 'html' && lastTag === 'head' || !!unarySlash
+    var unary = isUnaryTag(tagName) || tagName === 'html' && lastTag === 'head' || !!unarySlash
 
     var attrs = match.attrs.map(function (args) {
       // hackish work around FF bug https://bugzilla.mozilla.org/show_bug.cgi?id=369778
@@ -234,10 +215,9 @@ export function parseHTML (html, handler) {
         if (args[4] === '') { delete args[4] }
         if (args[5] === '') { delete args[5] }
       }
-      var value = args[3] || args[4] || (args[5] && fillAttrs(args[5]) ? args[1] : '')
       return {
         name: args[1],
-        value: decodeHTML(value)
+        value: decodeHTML(args[3] || args[4] || args[5] || '')
       }
     })
 

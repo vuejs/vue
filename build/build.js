@@ -107,6 +107,9 @@ function buildEntry (opts) {
         fromString: true,
         output: {
           ascii_only: true
+        },
+        compress: {
+          pure_funcs: ['makeMap']
         }
       }).code
       return write(opts.out, minified).then(zip(opts.out))

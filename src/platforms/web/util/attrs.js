@@ -1,6 +1,10 @@
 import { makeMap } from 'shared/util'
 
+// attributes that should be using props for binding
+export const mustUseProp = makeMap('value,selected,checked,muted')
+
 export const isEnumeratedAttr = makeMap('contenteditable,draggable,spellcheck')
+
 export const isBooleanAttr = makeMap(
   'allowfullscreen,async,autofocus,autoplay,checked,compact,controls,declare,' +
   'default,defaultchecked,defaultmuted,defaultselected,defer,disabled,' +
