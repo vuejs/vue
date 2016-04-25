@@ -5,7 +5,7 @@ export function createRenderer ({
 } = {}) {
   function renderComponent (component) {
     component.$mount()
-    return renderElement(component._vnode)
+    return renderNode(component._vnode)
   }
 
   function renderNode (node) {
