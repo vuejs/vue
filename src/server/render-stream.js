@@ -7,8 +7,8 @@ import stream from 'stream'
  */
 
 export default class RenderStream extends stream.Readable {
-  constructor (render, options) {
-    super(options)
+  constructor (render) {
+    super()
     this.buffer = ''
     this.render = render
     this.maxStackDepth = 500

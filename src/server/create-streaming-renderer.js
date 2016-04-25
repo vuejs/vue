@@ -22,10 +22,11 @@ export function createStreamingRenderer (modules, directives, isUnaryTag) {
 
   function renderElement (el, write, next) {
     const startTag = renderStartingTag(el, modules, directives)
+    const endTag = `</${el.tag}>`
     if (isUnaryTag(el.tag)) {
       write(startTag, next)
     } else if (!el.children || !el.children.length) {
-      write(startTag + `</${el.tag}>`, next)
+      write(startTag + endTag, next)
     } else {
       write(startTag, () => {
         const total = el.children.length
@@ -37,7 +38,7 @@ export function createStreamingRenderer (modules, directives, isUnaryTag) {
             if (rendered < total) {
               renderChild(el.children[rendered])
             } else {
-              write(`</${el.tag}>`, next)
+              write(endTag, next)
             }
           })
         }
