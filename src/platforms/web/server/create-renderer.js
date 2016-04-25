@@ -33,7 +33,9 @@ export function createComponentRenderer (options = {}) {
     if (isUnaryTag(el.tag)) {
       return startTag
     } else {
-      const children = el.children.map(renderNode).join('')
+      const children = el.children
+        ? el.children.map(renderNode).join('')
+        : ''
       return startTag + children + `</${el.tag}>`
     }
   }
@@ -57,7 +59,7 @@ export function createComponentRenderer (options = {}) {
       for (let key in node.data) {
         let renderer = modules[key]
         if (renderer) {
-          markup += ' ' + renderer(node.data[key])
+          markup += renderer(node)
         }
       }
     }
