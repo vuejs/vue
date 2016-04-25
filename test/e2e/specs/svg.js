@@ -1,3 +1,4 @@
+/* globals stats, valueToPoint */
 module.exports = {
   'svg': function (browser) {
     browser

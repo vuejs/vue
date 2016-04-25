@@ -49,7 +49,7 @@ describe('Global API', () => {
     const vm = new Vue({
       el: document.createElement('div'),
       template: '<div><foo></foo><bar></bar></div>',
-      components: {foo, bar}
+      components: { foo, bar }
     })
     expect(vm.$el.innerHTML).toBe('<span>foo</span><span>bar</span>')
   })

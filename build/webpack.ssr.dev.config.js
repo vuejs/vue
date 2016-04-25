@@ -1,6 +1,5 @@
 var path = require('path')
 var alias = require('./alias')
-var webpack = require('webpack')
 
 module.exports = {
   entry: path.resolve(__dirname, 'ssr.dev.entry.js'),

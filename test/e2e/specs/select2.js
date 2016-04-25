@@ -1,3 +1,4 @@
+/* globals vm */
 module.exports = {
   'select2': function (browser) {
     browser

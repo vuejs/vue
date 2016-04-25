@@ -15,7 +15,7 @@
     "dev-ssr": "webpack --watch --config build/webpack.ssr.dev.config.js",
     "test": "npm run unit && npm run e2e",
     "build": "NODE_ENV=production node build/build.js",
-    "lint": "eslint src build",
+    "lint": "eslint src build test",
     "unit": "karma start build/karma.unit.config.js",
     "cover": "karma start build/karma.cover.config.js",
     "e2e": "npm run build && node test/e2e/runner.js"
