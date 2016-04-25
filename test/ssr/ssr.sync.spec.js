@@ -2,7 +2,7 @@ import Vue from '../../dist/vue.common.js'
 import { compileToFunctions } from '../../dist/compiler.common.js'
 import { renderToString } from '../../dist/server-renderer.js'
 
-describe('Server side rendering', () => {
+describe('SSR: renderToString', () => {
   it('static attributes', () => {
     expect(renderVmWithOptions({
       template: '<div id="foo" bar="123"></div>'

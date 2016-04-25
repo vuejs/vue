@@ -68,6 +68,7 @@ var builds = [
   {
     entry: 'src/entries/web-server-renderer.js',
     format: 'cjs',
+    external: ['stream'],
     out: 'dist/server-renderer.js'
   }
 ]
