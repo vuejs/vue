@@ -2,6 +2,9 @@ import { isArray, isPrimitive } from '../util/index'
 import VNode from './vnode'
 
 export function flatten (children) {
+  if (typeof children === 'string') {
+    return [VNode(undefined, undefined, undefined, children)]
+  }
   if (isArray(children)) {
     let res = []
     for (let i = 0, l = children.length; i < l; i++) {
@@ -17,8 +20,6 @@ export function flatten (children) {
       }
     }
     return res
-  } else if (children) {
-    return [children]
   }
 }
 
