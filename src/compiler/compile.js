@@ -246,7 +246,7 @@ export function compileRoot (el, options, contextOptions) {
         (plural ? ' are' : ' is') + ' ignored on component ' +
         '<' + options.el.tagName.toLowerCase() + '> because ' +
         'the component is a fragment instance: ' +
-        'http://vuejs.org/guide/components.html#Fragment_Instance'
+        'http://vuejs.org/guide/components.html#Fragment-Instance'
       )
     }
   }
