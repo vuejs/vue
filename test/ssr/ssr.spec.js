@@ -71,13 +71,20 @@ describe('Server side rendering', () => {
       components: {
         child: {
           props: ['msg'],
+          data () {
+            return { name: 'foo' }
+          },
+          created () {
+            // checking setting state in created hook works in ssr
+            this.name = 'bar'
+          },
           render () {
             const h = this.$createElement
-            return h('div', { class: ['bar'] }, [this.msg])
+            return h('div', { class: ['bar'] }, [`${this.msg} ${this.name}`])
           }
         }
       }
-    })).toContain('<div class="foo bar">hello</div>')
+    })).toContain('<div class="foo bar">hello bar</div>')
   })
 
   it('everything together', () => {
