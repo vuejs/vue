@@ -30,7 +30,6 @@ describe('Directive v-if', () => {
     waitForUpdate(() => {
       expect(vm.$el.innerHTML).toBe('')
       vm.foo = {}
-      res()
     }).then(() => {
       expect(vm.$el.innerHTML).toBe('<span>hello</span>')
       vm.foo = 0
@@ -72,7 +71,6 @@ describe('Directive v-if', () => {
     waitForUpdate(() => {
       expect(vm.$el.innerHTML).toBe('<span>bye</span>')
       vm.foo = {}
-      res()
     }).then(() => {
       expect(vm.$el.innerHTML).toBe('<span>hello</span>')
       vm.foo = 0
@@ -118,7 +116,6 @@ describe('Directive v-if', () => {
     waitForUpdate(() => {
       expect(vm.$el.innerHTML).toBe('<span>2</span>')
       vm.list.push({ value: true })
-      res()
     }).then(() => {
       expect(vm.$el.innerHTML).toBe('<span>2</span><span>3</span>')
       vm.list.splice(1, 2)
@@ -150,7 +147,6 @@ describe('Directive v-if', () => {
     waitForUpdate(() => {
       expect(vm.$el.innerHTML).toBe('<span>bye</span><span>bye</span><span>hello</span>')
       vm.list.push({ value: true })
-      res()
     }).then(() => {
       expect(vm.$el.innerHTML).toBe('<span>bye</span><span>bye</span><span>hello</span><span>hello</span>')
       vm.list.splice(1, 2)

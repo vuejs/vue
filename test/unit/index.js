@@ -60,7 +60,7 @@ beforeEach(function () {
 // })
 // .catch(done)
 window.waitForUpdate = initialCb => {
-  let onError
+  let done
   const queue = [initialCb]
 
   function shift () {
@@ -70,8 +70,8 @@ window.waitForUpdate = initialCb => {
       job()
     } catch (e) {
       hasError = true
-      if (onError) {
-        onError(e)
+      if (done) {
+        done.fail(e)
       }
     }
     if (!hasError) {
@@ -88,8 +88,8 @@ window.waitForUpdate = initialCb => {
       queue.push(nextCb)
       return chainer
     },
-    catch: errorCb => {
-      onError = errorCb
+    catch: doneCb => {
+      done = doneCb
       return chainer
     }
   }
