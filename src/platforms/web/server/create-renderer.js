@@ -21,11 +21,14 @@ export function createComponentRenderer (options = {}) {
   }
 
   function renderNode (node) {
-    return node.child
-      ? renderComponent(node)
-      : node.tag
+    if (node.componentOptions) {
+      node.data.hook.init(node)
+      return renderComponent(node.child)
+    } else {
+      return node.tag
         ? renderElement(node)
         : node.text
+    }
   }
 
   function renderElement (el) {
