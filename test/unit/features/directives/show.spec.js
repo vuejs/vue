@@ -7,7 +7,7 @@ describe('Directive v-show', () => {
       template: '<div><span v-show="foo">hello</span></div>',
       data: { foo: true }
     })
-    expect(vm.$el.innerHTML).toMatch(/<span( style="")?>hello<\/span>/)
+    expect(vm.$el.firstChild.style.display).toBe('')
   })
 
   it('should check show value is falsy', () => {
@@ -16,7 +16,7 @@ describe('Directive v-show', () => {
       template: '<div><span v-show="foo">hello</span></div>',
       data: { foo: false }
     })
-    expect(vm.$el.innerHTML).toBe('<span style="display: none;">hello</span>')
+    expect(vm.$el.firstChild.style.display).toBe('none')
   })
 
   it('should update show value changed', done => {
@@ -25,31 +25,31 @@ describe('Directive v-show', () => {
       template: '<div><span v-show="foo">hello</span></div>',
       data: { foo: true }
     })
-    expect(vm.$el.innerHTML).toMatch(/<span( style="")?>hello<\/span>/)
+    expect(vm.$el.firstChild.style.display).toBe('')
     vm.foo = false
     waitForUpdate(() => {
-      expect(vm.$el.innerHTML).toBe('<span style="display: none;">hello</span>')
+      expect(vm.$el.firstChild.style.display).toBe('none')
       vm.foo = {}
     }).then(() => {
-      expect(vm.$el.innerHTML).toMatch(/<span( style="")?>hello<\/span>/)
+      expect(vm.$el.firstChild.style.display).toBe('')
       vm.foo = 0
     }).then(() => {
-      expect(vm.$el.innerHTML).toBe('<span style="display: none;">hello</span>')
+      expect(vm.$el.firstChild.style.display).toBe('none')
       vm.foo = []
     }).then(() => {
-      expect(vm.$el.innerHTML).toMatch(/<span( style="")?>hello<\/span>/)
+      expect(vm.$el.firstChild.style.display).toBe('')
       vm.foo = null
     }).then(() => {
-      expect(vm.$el.innerHTML).toBe('<span style="display: none;">hello</span>')
+      expect(vm.$el.firstChild.style.display).toBe('none')
       vm.foo = '0'
     }).then(() => {
-      expect(vm.$el.innerHTML).toMatch(/<span( style="")?>hello<\/span>/)
+      expect(vm.$el.firstChild.style.display).toBe('')
       vm.foo = undefined
     }).then(() => {
-      expect(vm.$el.innerHTML).toBe('<span style="display: none;">hello</span>')
+      expect(vm.$el.firstChild.style.display).toBe('none')
       vm.foo = 1
     }).then(() => {
-      expect(vm.$el.innerHTML).toMatch(/<span( style="")?>hello<\/span>/)
+      expect(vm.$el.firstChild.style.display).toBe('')
       done()
     }).catch(done)
   })
