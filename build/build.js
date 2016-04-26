@@ -1,4 +1,5 @@
 var fs = require('fs')
+var path = require('path')
 var zlib = require('zlib')
 var rollup = require('rollup')
 var uglify = require('uglify-js')
@@ -7,6 +8,10 @@ var replace = require('rollup-plugin-replace')
 var aliasPlugin = require('rollup-plugin-alias')
 var baseAlias = require('./alias')
 var version = process.env.VERSION || require('../package.json').version
+
+if (!fs.existsSync('dist')) {
+  fs.mkdirSync('dist')
+}
 
 var banner =
   '/*!\n' +
