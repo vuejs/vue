@@ -10,14 +10,15 @@
   <body>
     <div id="el">
       <h1>Rendering Dynamic Big Table</h1>
+      <p>Reference: <a href="http://insin.github.io/ui-lib-samples/large-datasets/index.html">insin/ui-lib-samples/large-datasets</a></p>
 
       <p>
         <span>{{ rows }} x {{ cols }}, {{ optimized ? 'with' : 'without' }} optimization. {{ msg }}</span>
       </p>
 
       <p>
-        <button v-if="optimized" @click="loadBase">Base version</button>
-        <button v-else @click="loadOptimized">Optimized version (Object.freeze)</button>
+        <button v-if="optimized" @click="loadBase">Disable optimization</button>
+        <button v-else @click="loadOptimized">Enable optimization (Object.freeze)</button>
         <button @click="unmount">Unmount</button>
         <button @click="rerender">Rerender with fresh data</button>
       </p>
