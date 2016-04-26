@@ -18,7 +18,7 @@ export const propsToAttrMap = {
   acceptCharset: 'accept-charset',
   className: 'class',
   htmlFor: 'for',
-  httpEquiv: 'http-equiv',
+  httpEquiv: 'http-equiv'
 }
 
 export const xlinkNS = 'http://www.w3.org/1999/xlink'

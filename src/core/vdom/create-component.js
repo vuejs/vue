@@ -74,9 +74,11 @@ function init (vnode) {
     _parentListeners: listeners,
     _renderChildren: children
   })
-  // the child sets the parent vnode's elm when mounted
+  // if this is a server-rendered mount,
+  // the vnode would already have an element.
+  // otherwise the child sets the parent vnode's elm when mounted
   // and when updated.
-  child.$mount()
+  child.$mount(vnode.elm)
   vnode.child = child
 }
 

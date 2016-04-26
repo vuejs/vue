@@ -8,7 +8,7 @@ import VNode from './vnode'
 import { isPrimitive, warn } from '../util/index'
 
 const emptyNode = VNode('', {}, [])
-const hooks = ['create', 'update', 'remove', 'destroy', 'pre', 'post']
+const hooks = ['create', 'update', 'remove', 'destroy']
 
 function isUndef (s) {
   return s === undefined
@@ -283,10 +283,64 @@ export function createPatchFunction (backend) {
     }
   }
 
+  function invokeInsertHook (queue) {
+    for (i = 0; i < queue.length; ++i) {
+      queue[i].data.hook.insert(queue[i])
+    }
+  }
+
+  function hydrate (elm, vnode, insertedVnodeQueue) {
+    if (process.env.NODE_ENV !== 'production') {
+      if (!assertNodeMatch(elm, vnode)) {
+        return false
+      }
+    }
+    vnode.elm = elm
+    const { tag, data, children } = vnode
+    if (isDef(data)) {
+      if (isDef(i = data.hook) && isDef(i = i.init)) i(vnode)
+      if (isDef(i = vnode.child)) {
+        // child component. it should have hydrated its own tree.
+        invokeCreateHooks(vnode, insertedVnodeQueue)
+        return true
+      }
+    }
+    if (isDef(tag)) {
+      if (isDef(children)) {
+        const childNodes = elm.childNodes
+        for (let i = 0; i < children.length; i++) {
+          let success = hydrate(childNodes[i], children[i], insertedVnodeQueue)
+          if (!success) {
+            return false
+          }
+        }
+      }
+      if (isDef(data)) {
+        invokeCreateHooks(vnode, insertedVnodeQueue)
+      }
+    }
+    return true
+  }
+
+  function assertNodeMatch (node, vnode) {
+    if (vnode.tag) {
+      if (vnode.tag.indexOf('vue-component' === 0)) {
+        return true
+      } else {
+        return vnode.tag === node.tagName.toLowerCase() && (
+          vnode.children
+            ? vnode.children.length === node.childNodes.length
+            : node.childNodes.length === 0
+        )
+      }
+    } else {
+      return vnode.text === node.textContent
+    }
+  }
+
   return function patch (oldVnode, vnode) {
-    var i, elm, parent
+    var elm, parent
     var insertedVnodeQueue = []
-    for (i = 0; i < cbs.pre.length; ++i) cbs.pre[i]()
 
     if (!oldVnode) {
       // empty mount, create new root element
@@ -295,9 +349,25 @@ export function createPatchFunction (backend) {
       if (sameVnode(oldVnode, vnode)) {
         patchVnode(oldVnode, vnode, insertedVnodeQueue)
       } else {
-        // mounting to a real element, just replace it
-        // TODO: pick up and reuse existing elements (hydration)
         if (isUndef(oldVnode.tag)) {
+          // mounting to a real element
+          // check if this is server-rendered content and if we can perform
+          // a successful hydration.
+          if (oldVnode.hasAttribute('server-rendered')) {
+            oldVnode.removeAttribute('server-rendered')
+            if (hydrate(oldVnode, vnode, insertedVnodeQueue)) {
+              invokeInsertHook(insertedVnodeQueue)
+              return oldVnode
+            } else if (process.env.NODE_ENV !== 'production') {
+              warn(
+                'The client-side rendered virtual DOM tree is not matching ' +
+                'server-rendered content. Bailing hydration and performing ' +
+                'full client-side render.'
+              )
+            }
+          }
+          // either not server-rendered, or hydration failed.
+          // create an empty node and replace it
           oldVnode = emptyNodeAt(oldVnode)
         }
         elm = oldVnode.elm
@@ -312,10 +382,7 @@ export function createPatchFunction (backend) {
       }
     }
 
-    for (i = 0; i < insertedVnodeQueue.length; ++i) {
-      insertedVnodeQueue[i].data.hook.insert(insertedVnodeQueue[i])
-    }
-    for (i = 0; i < cbs.post.length; ++i) cbs.post[i]()
+    invokeInsertHook(insertedVnodeQueue)
     return vnode.elm
   }
 }
