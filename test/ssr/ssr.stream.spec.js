@@ -1,6 +1,7 @@
 import Vue from '../../dist/vue.common.js'
 import { compileToFunctions } from '../../dist/compiler.common.js'
-import { renderToStream } from '../../dist/server-renderer.js'
+import createRenderer from '../../dist/server-renderer.js'
+const { renderToStream } = createRenderer()
 
 describe('SSR: renderToStream', () => {
   it('should render to a stream', done => {

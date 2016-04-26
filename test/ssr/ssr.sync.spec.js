@@ -1,6 +1,9 @@
 import Vue from '../../dist/vue.common.js'
 import { compileToFunctions } from '../../dist/compiler.common.js'
-import { renderToString } from '../../dist/server-renderer.js'
+import createRenderer from '../../dist/server-renderer.js'
+const { renderToString } = createRenderer()
+
+// TODO: test custom server-side directives
 
 describe('SSR: renderToString', () => {
   it('static attributes', () => {

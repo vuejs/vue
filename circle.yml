@@ -9,4 +9,6 @@ general:
 
 test:
   override:
-    - npm run test:cover # only run unit tets for now before we setup SauceLabs
+    - npm run lint
+    - npm run test:cover # only run unit tests in Phantom for now before we setup SauceLabs
+    - npm run test:ssr
