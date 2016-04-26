@@ -1,6 +1,6 @@
 import createElement from '../vdom/create-element'
 import { flatten } from '../vdom/helpers'
-import { bind, isArray, isObject } from '../util/index'
+import { bind, isArray, isObject, renderString } from 'shared/util'
 
 export const renderState = {
   activeInstance: null
@@ -40,13 +40,7 @@ export function renderMixin (Vue) {
   Vue.prototype.__h__ = createElement
 
   // toString for mustaches
-  Vue.prototype.__toString__ = function (val) {
-    return val == null
-      ? ''
-      : typeof val === 'object'
-        ? JSON.stringify(val, null, 2)
-        : val
-  }
+  Vue.prototype.__toString__ = renderString
 
   // render v-for
   Vue.prototype.__renderList__ = function (val, render) {

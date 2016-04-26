@@ -1,4 +1,19 @@
 /**
+ * Convert a value to a string that is actually rendered.
+ *
+ * @param {*} val
+ * @return {String}
+ */
+
+export function renderString (val) {
+  return val == null
+    ? ''
+    : typeof val === 'object'
+      ? JSON.stringify(val, null, 2)
+      : String(val)
+}
+
+/**
  * Make a map and return a function for checking if a key
  * is in that map.
  *

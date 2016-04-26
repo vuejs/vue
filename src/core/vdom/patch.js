@@ -5,7 +5,7 @@
  */
 
 import VNode from './vnode'
-import { isPrimitive, warn } from '../util/index'
+import { isPrimitive, renderString, warn } from '../util/index'
 
 const emptyNode = VNode('', {}, [])
 const hooks = ['create', 'update', 'remove', 'destroy']
@@ -324,7 +324,7 @@ export function createPatchFunction (backend) {
 
   function assertNodeMatch (node, vnode) {
     if (vnode.tag) {
-      if (vnode.tag.indexOf('vue-component' === 0)) {
+      if (vnode.tag.indexOf('vue-component') === 0) {
         return true
       } else {
         return vnode.tag === node.tagName.toLowerCase() && (
@@ -334,7 +334,7 @@ export function createPatchFunction (backend) {
         )
       }
     } else {
-      return vnode.text === node.textContent
+      return renderString(vnode.text) === node.data
     }
   }
 
