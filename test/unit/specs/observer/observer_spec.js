@@ -286,6 +286,25 @@ describe('Observer', function () {
     expect(dep3.notify.calls.count()).toBe(2)
   })
 
+  it('observing set/delete in Vm object', function (done) {
+    var el = document.createElement('div')
+    var vm = new Vue({
+      el: el,
+      template: '<div>{{a}}</div>',
+      data: { a: 1 }
+    })
+    expect(el.innerHTML).toBe('<div>1</div>')
+    Vue.set(vm, 'a', 2)
+    Vue.nextTick(function () {
+      expect(el.innerHTML).toBe('<div>2</div>')
+      Vue.delete(vm, 'a')
+      Vue.nextTick(function () {
+        expect(el.innerHTML).toBe('<div></div>')
+        done()
+      })
+    })
+  })
+
   it('observing array mutation', function () {
     var arr = []
     var ob = observe(arr)
