@@ -295,10 +295,10 @@ describe('Observer', function () {
     })
     expect(el.innerHTML).toBe('<div>1</div>')
     Vue.set(vm, 'a', 2)
-    Vue.nextTick(() => {
+    Vue.nextTick(function () {
       expect(el.innerHTML).toBe('<div>2</div>')
       Vue.delete(vm, 'a')
-      Vue.nextTick(() => {
+      Vue.nextTick(function () {
         expect(el.innerHTML).toBe('<div></div>')
         done()
       })
