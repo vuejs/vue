@@ -10,7 +10,7 @@ describe('Directive v-for', () => {
         </div>
       `,
       data: {
-        list: [ 'a', 'b', 'c' ]
+        list: ['a', 'b', 'c']
       }
     })
     expect(vm.$el.innerHTML).toBe('<span>0-a</span><span>1-b</span><span>2-c</span>')
@@ -23,7 +23,7 @@ describe('Directive v-for', () => {
       vm.list.splice(1, 2)
     }).then(() => {
       expect(vm.$el.innerHTML).toBe('<span>0-d</span><span>1-d</span>')
-      vm.list = [ 'x', 'y' ]
+      vm.list = ['x', 'y']
     }).then(() => {
       expect(vm.$el.innerHTML).toBe('<span>0-x</span><span>1-y</span>')
       done()

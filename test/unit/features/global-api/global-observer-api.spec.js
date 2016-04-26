@@ -66,17 +66,17 @@ describe('Global Data Observer API', () => {
     it('should delete a key', done => {
       const vm = new Vue({
         el: document.createElement('div'),
-        template: '<div>{{x}}</div>',
-        data: { x: 1 }
+        template: '<div>{{obj.x}}</div>',
+        data: { obj: { x: 1 }}
       })
       expect(vm.$el.innerHTML).toBe('1')
-      vm.x = 2
+      vm.obj.x = 2
       waitForUpdate(() => {
         expect(vm.$el.innerHTML).toBe('2')
-        Vue.delete(vm, 'x')
+        Vue.delete(vm.obj, 'x')
       }).then(() => {
         expect(vm.$el.innerHTML).toBe('')
-        vm.x = 3
+        vm.obj.x = 3
       }).then(() => {
         expect(vm.$el.innerHTML).toBe('')
         done()
