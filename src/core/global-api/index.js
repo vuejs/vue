@@ -4,7 +4,6 @@ import { initUse } from './use'
 import { initMixin } from './mixin'
 import { initExtend } from './extend'
 import { initAssetRegisters } from './assets'
-import { nextTick } from '../util/index'
 import { set, del } from '../observer/index'
 
 export function initGlobalAPI (Vue) {
@@ -12,7 +11,7 @@ export function initGlobalAPI (Vue) {
   Vue.util = util
   Vue.set = set
   Vue.delete = del
-  Vue.nextTick = nextTick
+  Vue.nextTick = util.nextTick
 
   Vue.options = {
     directives: Object.create(null),
