@@ -10,10 +10,10 @@ describe('Global Data Observer API', () => {
       })
       expect(vm.$el.innerHTML).toBe('1')
       Vue.set(vm, 'x', 2)
-      Vue.nextTick(() => {
+      waitForUpdate(() => {
         expect(vm.$el.innerHTML).toBe('2')
         done()
-      })
+      }).catch(done)
     })
 
     it('should update a observing object', done => {
@@ -24,10 +24,10 @@ describe('Global Data Observer API', () => {
       })
       expect(vm.$el.innerHTML).toBe('1')
       Vue.set(vm.foo, 'x', 2)
-      Vue.nextTick(() => {
+      waitForUpdate(() => {
         expect(vm.$el.innerHTML).toBe('2')
         done()
-      })
+      }).catch(done)
     })
 
     it('should update a observing array', done => {
@@ -38,10 +38,10 @@ describe('Global Data Observer API', () => {
       })
       expect(vm.$el.innerHTML).toBe('<div>0-a</div><div>1-b</div><div>2-c</div>')
       Vue.set(vm.list, 1, 'd')
-      Vue.nextTick(() => {
+      waitForUpdate(() => {
         expect(vm.$el.innerHTML).toBe('<div>0-a</div><div>1-d</div><div>2-c</div>')
         done()
-      })
+      }).catch(done)
     })
 
     it('should update a vue object with nothing', done => {
@@ -52,14 +52,13 @@ describe('Global Data Observer API', () => {
       })
       expect(vm.$el.innerHTML).toBe('1')
       Vue.set(vm, 'x', null)
-      Vue.nextTick(() => {
+      waitForUpdate(() => {
         expect(vm.$el.innerHTML).toBe('')
         Vue.set(vm, 'x')
-        Vue.nextTick(() => {
-          expect(vm.$el.innerHTML).toBe('')
-          done()
-        })
-      })
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe('')
+        done()
+      }).catch(done)
     })
   })
 
@@ -72,15 +71,16 @@ describe('Global Data Observer API', () => {
       })
       expect(vm.$el.innerHTML).toBe('1')
       vm.x = 2
-      Vue.nextTick(() => {
+      waitForUpdate(() => {
         expect(vm.$el.innerHTML).toBe('2')
         Vue.delete(vm, 'x')
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe('')
         vm.x = 3
-        Vue.nextTick(() => {
-          expect(vm.$el.innerHTML).toBe('2')
-          done()
-        })
-      })
+      }).then(() => {
+        expect(vm.$el.innerHTML).toBe('')
+        done()
+      }).catch(done)
     })
   })
 })
