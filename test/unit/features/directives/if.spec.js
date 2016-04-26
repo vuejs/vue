@@ -10,7 +10,7 @@ describe('Directive v-if', () => {
     expect(vm.$el.innerHTML).toBe('<span>hello</span>')
   })
 
-  it('should check if value is falthy', () => {
+  it('should check if value is falsy', () => {
     const vm = new Vue({
       el: '#app',
       template: '<div><span v-if="foo">hello</span></div>',

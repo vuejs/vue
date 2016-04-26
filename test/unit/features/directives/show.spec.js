@@ -10,7 +10,7 @@ describe('Directive v-show', () => {
     expect(vm.$el.innerHTML).toMatch(/<span( style="")?>hello<\/span>/)
   })
 
-  it('should check show value is falthy', () => {
+  it('should check show value is falsy', () => {
     const vm = new Vue({
       el: '#app',
       template: '<div><span v-show="foo">hello</span></div>',
