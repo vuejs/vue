@@ -1,5 +1,4 @@
 var fs = require('fs')
-var path = require('path')
 var zlib = require('zlib')
 var rollup = require('rollup')
 var uglify = require('uglify-js')
