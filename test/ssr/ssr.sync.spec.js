@@ -6,13 +6,13 @@ describe('SSR: renderToString', () => {
   it('static attributes', () => {
     expect(renderVmWithOptions({
       template: '<div id="foo" bar="123"></div>'
-    })).toContain('<div id="foo" bar="123"></div>')
+    })).toContain('<div id="foo" bar="123" server-rendered="true"></div>')
   })
 
   it('unary tags', () => {
     expect(renderVmWithOptions({
       template: '<input value="123">'
-    })).toContain('<input value="123">')
+    })).toContain('<input value="123" server-rendered="true">')
   })
 
   it('dynamic attributes', () => {
@@ -22,13 +22,13 @@ describe('SSR: renderToString', () => {
         foo: 'hi',
         baz: 123
       }
-    })).toContain('<div qux="quux" id="hi" bar="123"></div>')
+    })).toContain('<div qux="quux" id="hi" bar="123" server-rendered="true"></div>')
   })
 
   it('static class', () => {
     expect(renderVmWithOptions({
       template: '<div class="foo bar"></div>'
-    })).toContain('<div class="foo bar"></div>')
+    })).toContain('<div server-rendered="true" class="foo bar"></div>')
   })
 
   it('dynamic class', () => {
@@ -39,7 +39,7 @@ describe('SSR: renderToString', () => {
         hasQux: true,
         hasQuux: false
       }
-    })).toContain('<div class="foo bar baz qux"></div>')
+    })).toContain('<div server-rendered="true" class="foo bar baz qux"></div>')
   })
 
   it('dynamic style', () => {
@@ -49,7 +49,7 @@ describe('SSR: renderToString', () => {
         fontSize: 14,
         color: 'red'
       }
-    })).toContain('<div style="font-size:14px;color:red;background-color:black"></div>')
+    })).toContain('<div server-rendered="true" style="font-size:14px;color:red;background-color:black"></div>')
   })
 
   it('text interpolation', () => {
@@ -59,7 +59,7 @@ describe('SSR: renderToString', () => {
         foo: 'server',
         bar: 'rendering'
       }
-    })).toContain('<div>server side rendering</div>')
+    })).toContain('<div server-rendered="true">server side rendering</div>')
   })
 
   it('child component (hoc)', () => {
@@ -84,7 +84,7 @@ describe('SSR: renderToString', () => {
           }
         }
       }
-    })).toContain('<div class="foo bar">hello bar</div>')
+    })).toContain('<div server-rendered="true" class="foo bar">hello bar</div>')
   })
 
   it('everything together', () => {
@@ -94,6 +94,7 @@ describe('SSR: renderToString', () => {
           <p class="hi">yoyo</p>
           <div id="ho" :class="{ red: isRed }"></div>
           <span>{{ test }}</span>
+          <input :value="test">
           <test></test>
         </div>
       `,
@@ -108,7 +109,15 @@ describe('SSR: renderToString', () => {
           }
         }
       }
-    })).toContain('<div><p class="hi">yoyo</p><div id="ho" class="red"></div><span>hi</span><div class="a">hahahaha</div></div>')
+    })).toContain(
+      '<div server-rendered="true">' +
+        '<p class="hi">yoyo</p>' +
+        '<div id="ho" class="red"></div>' +
+        '<span>hi</span>' +
+        '<input value="hi">' +
+        '<div class="a">hahahaha</div>' +
+      '</div>'
+    )
   })
 })
 

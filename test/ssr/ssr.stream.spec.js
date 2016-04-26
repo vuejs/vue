@@ -10,6 +10,7 @@ describe('SSR: renderToStream', () => {
           <p class="hi">yoyo</p>
           <div id="ho" :class="{ red: isRed }"></div>
           <span>{{ test }}</span>
+          <input :value="test">
           <test></test>
         </div>
       `,
@@ -31,7 +32,15 @@ describe('SSR: renderToStream', () => {
       res += chunk
     })
     stream.on('end', () => {
-      expect(res).toContain('<div><p class="hi">yoyo</p><div id="ho" class="red"></div><span>hi</span><div class="a">hahahaha</div></div>')
+      expect(res).toContain(
+        '<div server-rendered="true">' +
+          '<p class="hi">yoyo</p>' +
+          '<div id="ho" class="red"></div>' +
+          '<span>hi</span>' +
+          '<input value="hi">' +
+          '<div class="a">hahahaha</div>' +
+        '</div>'
+      )
       done()
     })
   })

@@ -2,25 +2,30 @@ import RenderStream from './render-stream'
 import { renderStartingTag } from './render-starting-tag'
 
 export function createStreamingRenderer (modules, directives, isUnaryTag) {
-  function renderComponent (component, write, next) {
+  function renderComponent (component, write, next, isRoot) {
     component.$mount()
-    renderNode(component._vnode, write, next)
+    renderNode(component._vnode, write, next, isRoot)
   }
 
-  function renderNode (node, write, next) {
+  function renderNode (node, write, next, isRoot) {
     if (node.componentOptions) {
       node.data.hook.init(node)
-      renderComponent(node.child, write, next)
+      renderComponent(node.child, write, next, isRoot)
     } else {
       if (node.tag) {
-        renderElement(node, write, next)
+        renderElement(node, write, next, isRoot)
       } else {
         write(node.text, next)
       }
     }
   }
 
-  function renderElement (el, write, next) {
+  function renderElement (el, write, next, isRoot) {
+    if (isRoot) {
+      if (!el.data) el.data = {}
+      if (!el.data.attrs) el.data.attrs = {}
+      el.data.attrs['server-rendered'] = true
+    }
     const startTag = renderStartingTag(el, modules, directives)
     const endTag = `</${el.tag}>`
     if (isUnaryTag(el.tag)) {
@@ -50,7 +55,7 @@ export function createStreamingRenderer (modules, directives, isUnaryTag) {
 
   return function renderToStream (component) {
     return new RenderStream((write, done) => {
-      renderComponent(component, write, done)
+      renderComponent(component, write, done, true)
     })
   }
 }

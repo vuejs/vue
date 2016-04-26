@@ -14,5 +14,12 @@ export const isBooleanAttr = makeMap(
   'truespeed,typemustmatch,visible'
 )
 
+export const propsToAttrMap = {
+  acceptCharset: 'accept-charset',
+  className: 'class',
+  htmlFor: 'for',
+  httpEquiv: 'http-equiv',
+}
+
 export const xlinkNS = 'http://www.w3.org/1999/xlink'
 export const isXlink = name => name.charAt(5) === ':' && name.slice(0, 5) === 'xlink'

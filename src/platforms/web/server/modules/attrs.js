@@ -1,12 +1,16 @@
-import { isBooleanAttr, isEnumeratedAttr } from 'web/util/index'
+import { isBooleanAttr, isEnumeratedAttr, propsToAttrMap } from 'web/util/index'
 
 export default function renderAttrs (node) {
-  if (node.data.attrs || node.data.staticAttrs) {
-    return serialize(node.data.staticAttrs) + serialize(node.data.attrs)
+  if (node.data.attrs || node.data.props || node.data.staticAttrs) {
+    return (
+      serialize(node.data.staticAttrs) +
+      serialize(node.data.attrs) +
+      serialize(node.data.props, true)
+    )
   }
 }
 
-function serialize (attrs) {
+function serialize (attrs, asProps) {
   let res = ''
   if (!attrs) {
     return res
@@ -15,6 +19,9 @@ function serialize (attrs) {
     if (key === 'style') {
       // leave it to the style module
       continue
+    }
+    if (asProps) {
+      key = propsToAttrMap[key] || key.toLowerCase()
     }
     if (attrs[key] != null) {
       if (isBooleanAttr(key)) {
