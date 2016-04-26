@@ -178,7 +178,7 @@ var testCases = [
     scope: {
       c: '\'c'
     },
-    expected: "a\'b\'c",
+    expected: "a'b'c",
     paths: ['c']
   },
   {
