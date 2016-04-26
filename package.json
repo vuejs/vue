@@ -23,7 +23,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vuejs/vue-lite.git"
+    "url": "git+https://github.com/vuejs/vue.git"
   },
   "keywords": [
     "vue"
@@ -31,9 +31,9 @@
   "author": "Evan You",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/vuejs/vue-lite/issues"
+    "url": "https://github.com/vuejs/vue/issues"
   },
-  "homepage": "https://github.com/vuejs/vue-lite#readme",
+  "homepage": "https://github.com/vuejs/vue#readme",
   "devDependencies": {
     "babel-core": "^6.0.0",
     "babel-loader": "^6.0.0",
