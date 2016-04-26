@@ -1,0 +1,12 @@
+machine:
+  node:
+    version: 5
+
+general:
+  branches:
+    only:
+      - master
+
+test:
+  override:
+    - npm run test:cover # only run unit tets for now before we setup SauceLabs
