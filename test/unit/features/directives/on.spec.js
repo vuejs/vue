@@ -117,17 +117,16 @@ describe('Directive v-on', () => {
     expect(callOrder.toString()).toBe('1,2')
   })
 
-  xit('should bind to a child component', () => {
+  it('should bind to a child component', () => {
     Vue.component('bar', {
       template: '<span>Hello</span>'
     })
     vm = new Vue({
       el: '#app',
-      template: '<bar @click="foo"></bar>',
+      template: '<bar @custom="foo"></bar>',
       methods: { foo: spy }
     })
-    const el = vm.$el
-    trigger(el, 'click')
-    expect(spy.calls.count()).toBe(1)
+    vm.$children[0].$emit('custom', 'foo', 'bar')
+    expect(spy).toHaveBeenCalledWith('foo', 'bar')
   })
 })

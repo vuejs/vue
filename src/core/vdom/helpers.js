@@ -51,12 +51,16 @@ export function updateListeners (on, oldOn, add) {
 
 function arrInvoker (arr) {
   return function (ev) {
+    const single = arguments.length === 1
     for (let i = 0; i < arr.length; i++) {
-      arr[i](ev)
+      single ? arr[i](ev) : arr[i].apply(null, arguments)
     }
   }
 }
 
 function fnInvoker (o) {
-  return function (ev) { o.fn(ev) }
+  return function (ev) {
+    const single = arguments.length === 1
+    single ? o.fn(ev) : o.fn.apply(null, arguments)
+  }
 }
