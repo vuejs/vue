@@ -70,6 +70,15 @@ export function parse (template, options) {
         children: []
       }
 
+      if (isForbiddenTag(element)) {
+        element.forbidden = true
+        process.env.NODE_ENV !== 'production' && warn(
+          'Templates should only be responsbile for mapping the state to the ' +
+          'UI. Avoid placing tags with side-effects in your templates, such as ' +
+          `<${tag}>.`
+        )
+      }
+
       // check namespace.
       // inherit parent ns if there is one
       let ns
@@ -111,7 +120,7 @@ export function parse (template, options) {
           `Component template should contain exactly one root element:\n\n${template}`
         )
       }
-      if (currentParent) {
+      if (currentParent && !element.forbidden) {
         if (element.else) {
           processElse(element, currentParent)
         } else {
@@ -383,4 +392,14 @@ function findPrevElement (children) {
   while (i--) {
     if (children[i].tag) return children[i]
   }
+}
+
+function isForbiddenTag (el) {
+  return (
+    el.tag === 'style' ||
+    (el.tag === 'script' && (
+      !el.attrsMap.type ||
+      el.attrsMap.type === 'text/javascript'
+    ))
+  )
 }
