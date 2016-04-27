@@ -282,7 +282,8 @@ describe('Util - Option merging', function () {
     var f1 = function () {}
     var f2 = function () {}
     var f3 = function () {}
-    var componentA = { template: 'foo', methods: { f1: f1, f2: function () {} } }
+    var componentA = function () {}
+    componentA.options = { template: 'foo', methods: { f1: f1, f2: function () {} } }
     var componentB = { extends: componentA, methods: { f2: f2 } }
     var componentC = { extends: componentB, template: 'bar', methods: { f3: f3 } }
     var res = merge({}, componentC)
