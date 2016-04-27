@@ -278,6 +278,20 @@ describe('Util - Option merging', function () {
     expect(Object.getOwnPropertyDescriptor(data, 'b').get).toBeTruthy()
   })
 
+  it('extends', function () {
+    var f1 = function () {}
+    var f2 = function () {}
+    var f3 = function () {}
+    var componentA = { template: 'foo', methods: { f1: f1, f2: function () {} } }
+    var componentB = { extends: componentA, methods: { f2: f2 } }
+    var componentC = { extends: componentB, template: 'bar', methods: { f3: f3 } }
+    var res = merge({}, componentC)
+    expect(res.template).toBe('bar')
+    expect(res.methods.f1).toBe(f1)
+    expect(res.methods.f2).toBe(f2)
+    expect(res.methods.f3).toBe(f3)
+  })
+
   it('mixins', function () {
     var a = {}
     var b = {}
