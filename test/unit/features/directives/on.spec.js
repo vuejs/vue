@@ -9,15 +9,22 @@ function trigger (target, event, process) {
 }
 
 describe('Directive v-on', () => {
-  let spy, spy2
+  let vm, spy, spy2
 
   beforeEach(() => {
     spy = jasmine.createSpy()
     spy2 = jasmine.createSpy()
+    const el = document.createElement('div')
+    el.id = 'app'
+    document.body.appendChild(el)
+  })
+
+  afterEach(() => {
+    document.body.removeChild(vm.$el)
   })
 
   it('should bind event to a method', () => {
-    const vm = new Vue({
+    vm = new Vue({
       el: '#app',
       template: '<div v-on:click="foo"></div>',
       methods: { foo: spy }
@@ -32,7 +39,7 @@ describe('Directive v-on', () => {
   })
 
   it('should bind event to a inline method', () => {
-    const vm = new Vue({
+    vm = new Vue({
       el: '#app',
       template: '<div v-on:click="foo(1,2,3,$event)"></div>',
       methods: { foo: spy }
@@ -51,7 +58,7 @@ describe('Directive v-on', () => {
   })
 
   it('should support shorthand', () => {
-    const vm = new Vue({
+    vm = new Vue({
       el: '#app',
       template: '<a href="#test" @click.prevent="foo"></a>',
       methods: { foo: spy }
@@ -62,7 +69,7 @@ describe('Directive v-on', () => {
   })
 
   it('should support stop propagation', () => {
-    const vm = new Vue({
+    vm = new Vue({
       el: '#app',
       template: `
         <div @click.stop="foo"></div>
@@ -76,7 +83,7 @@ describe('Directive v-on', () => {
   })
 
   it('should support prevent default', () => {
-    const vm = new Vue({
+    vm = new Vue({
       el: '#app',
       template: `
         <div @click="bar">
@@ -92,26 +99,29 @@ describe('Directive v-on', () => {
   })
 
   it('should support capture', () => {
-    const vm = new Vue({
+    const callOrder = []
+    vm = new Vue({
       el: '#app',
       template: `
-        <div @click.capture.stop="foo">
+        <div @click.capture="foo">
           <div @click="bar"></div>
         </div>
       `,
-      methods: { foo: spy, bar: spy2 }
+      methods: {
+        foo () { callOrder.push(1) },
+        bar () { callOrder.push(2) }
+      }
     })
     const el = vm.$el
     trigger(el.firstChild, 'click')
-    expect(spy).toHaveBeenCalled()
-    expect(spy2).not.toHaveBeenCalled()
+    expect(callOrder.toString()).toBe('1,2')
   })
 
   xit('should bind to a child component', () => {
     Vue.component('bar', {
       template: '<span>Hello</span>'
     })
-    const vm = new Vue({
+    vm = new Vue({
       el: '#app',
       template: '<bar @click="foo"></bar>',
       methods: { foo: spy }
