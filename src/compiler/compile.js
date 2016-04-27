@@ -4,8 +4,8 @@ import { compileProps } from './compile-props'
 import { parseText, tokensToExp } from '../parsers/text'
 import { parseDirective } from '../parsers/directive'
 import { parseTemplate } from '../parsers/template'
-import { resolveAsset } from '../util/index'
 import {
+  resolveAsset,
   toArray,
   warn,
   remove,
