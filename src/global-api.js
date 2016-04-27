@@ -13,7 +13,7 @@ import * as transition from './transition/index'
 import FragmentFactory from './fragment/factory'
 import internalDirectives from './directives/internal/index'
 
-const {
+import {
   set,
   del,
   nextTick,
@@ -25,7 +25,7 @@ const {
   warn,
   isPlainObject,
   extend
-} = util
+} from './util/index'
 
 export default function (Vue) {
   /**

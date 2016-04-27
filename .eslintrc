@@ -1,6 +1,7 @@
 {
   "extends": "standard",
   "rules": {
-    "arrow-parens": [2, "as-needed"]
+    "arrow-parens": [2, "as-needed"],
+    "no-duplicate-imports": 0
   }
 }
