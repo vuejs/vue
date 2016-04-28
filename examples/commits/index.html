@@ -36,7 +36,7 @@
         <li v-for="record in commits">
           <a :href="record.html_url" target="_blank" class="commit">{{record.sha.slice(0, 7)}}</a>
           - <span class="message">{{truncate(record.commit.message)}}</span><br>
-          by <span class="author">{{record.commit.author.name}}</span>
+          by <span class="author"><a :href="record.author.html_url" target="_blank">{{record.commit.author.name}}</a></span>
           at <span class="date">{{formatDate(record.commit.author.date)}}</span>
         </li>
       </ul>
