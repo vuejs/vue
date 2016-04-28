@@ -52,7 +52,7 @@ describe('SSR: renderToString', () => {
         fontSize: 14,
         color: 'red'
       }
-    })).toContain('<div server-rendered="true" style="font-size:14px;color:red;background-color:black"></div>')
+    })).toContain('<div server-rendered="true" style="background-color:black;font-size:14px;color:red;"></div>')
   })
 
   it('text interpolation', () => {
