@@ -14,7 +14,7 @@ if (process.env.NODE_ENV !== 'production') {
   }
 
   formatComponentName = vm => {
-    var name = vm._isVue ? vm.$options.name : vm.name
+    const name = vm._isVue ? vm.$options.name : vm.name
     return name
       ? ' (found in component: <' + hyphenate(name) + '>)'
       : ''

@@ -11,13 +11,13 @@ import {
 // triggered, the DOM would have already been in updated
 // state.
 
-var queueIndex
-var queue = []
-var userQueue = []
-var has = {}
-var circular = {}
-var waiting = false
-var internalQueueDepleted = false
+let queueIndex
+let queue = []
+let userQueue = []
+let has = {}
+let circular = {}
+let waiting = false
+let internalQueueDepleted = false
 
 /**
  * Reset the batcher's state.
@@ -65,8 +65,8 @@ function runBatcherQueue (queue) {
   // do not cache length because more watchers might be pushed
   // as we run existing watchers
   for (queueIndex = 0; queueIndex < queue.length; queueIndex++) {
-    var watcher = queue[queueIndex]
-    var id = watcher.id
+    const watcher = queue[queueIndex]
+    const id = watcher.id
     has[id] = null
     watcher.run()
     // in dev build, check and stop circular updates.
@@ -96,7 +96,7 @@ function runBatcherQueue (queue) {
  */
 
 export function pushWatcher (watcher) {
-  var id = watcher.id
+  const id = watcher.id
   if (has[id] == null) {
     if (internalQueueDepleted && !watcher.user) {
       // an internal watcher triggered by a user watcher...
@@ -104,7 +104,7 @@ export function pushWatcher (watcher) {
       userQueue.splice(queueIndex + 1, 0, watcher)
     } else {
       // push watcher into appropriate queue
-      var q = watcher.user
+      const q = watcher.user
         ? userQueue
         : queue
       has[id] = q.length

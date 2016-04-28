@@ -16,7 +16,7 @@ export default class RenderStream extends stream.Readable {
   }
 
   _read (n) {
-    var bufferToPush
+    let bufferToPush
     // it's possible that the last chunk added bumped the buffer up to > 2 * n,
     // which means we will need to go through multiple read calls to drain it
     // down to < n.

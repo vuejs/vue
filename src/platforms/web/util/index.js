@@ -17,7 +17,7 @@ export const isAndroid = UA && UA.indexOf('android') > 0
 
 export function query (el) {
   if (typeof el === 'string') {
-    var selector = el
+    const selector = el
     el = document.querySelector(el)
     if (!el) {
       process.env.NODE_ENV !== 'production' && warn(

@@ -4,9 +4,9 @@ export function parseText (text) {
   if (!tagRE.test(text)) {
     return null
   }
-  var tokens = []
-  var lastIndex = tagRE.lastIndex = 0
-  var match, index
+  const tokens = []
+  let lastIndex = tagRE.lastIndex = 0
+  let match, index
   while ((match = tagRE.exec(text))) {
     index = match.index
     // push text token

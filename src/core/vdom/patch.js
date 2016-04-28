@@ -253,7 +253,7 @@ export function createPatchFunction (backend) {
     const ch = vnode.children
     if (oldVnode === vnode) return
     if (!sameVnode(oldVnode, vnode)) {
-      var parentElm = nodeOps.parentNode(oldVnode.elm)
+      const parentElm = nodeOps.parentNode(oldVnode.elm)
       elm = createElm(vnode, insertedVnodeQueue)
       nodeOps.insertBefore(parentElm, elm, oldVnode.elm)
       removeVnodes(parentElm, [oldVnode], 0, 0)
@@ -284,7 +284,7 @@ export function createPatchFunction (backend) {
   }
 
   function invokeInsertHook (queue) {
-    for (i = 0; i < queue.length; ++i) {
+    for (let i = 0; i < queue.length; ++i) {
       queue[i].data.hook.insert(queue[i])
     }
   }
@@ -339,8 +339,8 @@ export function createPatchFunction (backend) {
   }
 
   return function patch (oldVnode, vnode) {
-    var elm, parent
-    var insertedVnodeQueue = []
+    let elm, parent
+    const insertedVnodeQueue = []
 
     if (!oldVnode) {
       // empty mount, create new root element

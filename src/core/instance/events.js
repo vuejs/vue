@@ -28,7 +28,7 @@ export function eventsMixin (Vue) {
    */
 
   Vue.prototype.$once = function (event, fn) {
-    var self = this
+    const self = this
     function on () {
       self.$off(event, on)
       fn.apply(this, arguments)
@@ -47,7 +47,7 @@ export function eventsMixin (Vue) {
    */
 
   Vue.prototype.$off = function (event, fn) {
-    var cbs
+    let cbs
     // all
     if (!arguments.length) {
       this._events = Object.create(null)
@@ -63,8 +63,8 @@ export function eventsMixin (Vue) {
       return this
     }
     // specific handler
-    var cb
-    var i = cbs.length
+    let cb
+    let i = cbs.length
     while (i--) {
       cb = cbs[i]
       if (cb === fn || cb.fn === fn) {
@@ -82,11 +82,11 @@ export function eventsMixin (Vue) {
    */
 
   Vue.prototype.$emit = function (event) {
-    var cbs = this._events[event]
+    let cbs = this._events[event]
     if (cbs) {
       cbs = cbs.length > 1 ? toArray(cbs) : cbs
-      var args = toArray(arguments, 1)
-      for (var i = 0, l = cbs.length; i < l; i++) {
+      const args = toArray(arguments, 1)
+      for (let i = 0, l = cbs.length; i < l; i++) {
         cbs[i].apply(this, args)
       }
     }

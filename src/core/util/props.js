@@ -38,7 +38,7 @@ function getPropDefaultValue (vm, prop, name) {
       ? false
       : undefined
   }
-  var def = prop.default
+  const def = prop.default
   // warn against non-factory defaults for Object & Array
   if (isObject(def)) {
     process.env.NODE_ENV !== 'production' && warn(
@@ -75,15 +75,15 @@ function assertProp (prop, name, value, vm, absent) {
   if (value == null) {
     return true
   }
-  var type = prop.type
-  var valid = !type
-  var expectedTypes = []
+  let type = prop.type
+  let valid = !type
+  const expectedTypes = []
   if (type) {
     if (!isArray(type)) {
       type = [type]
     }
-    for (var i = 0; i < type.length && !valid; i++) {
-      var assertedType = assertType(value, type[i])
+    for (let i = 0; i < type.length && !valid; i++) {
+      const assertedType = assertType(value, type[i])
       expectedTypes.push(assertedType.expectedType)
       valid = assertedType.valid
     }
@@ -99,7 +99,7 @@ function assertProp (prop, name, value, vm, absent) {
     }
     return false
   }
-  var validator = prop.validator
+  const validator = prop.validator
   if (validator) {
     if (!validator(value)) {
       process.env.NODE_ENV !== 'production' && warn(
@@ -121,8 +121,8 @@ function assertProp (prop, name, value, vm, absent) {
  */
 
 function assertType (value, type) {
-  var valid
-  var expectedType
+  let valid
+  let expectedType
   if (type === String) {
     expectedType = 'string'
     valid = typeof value === expectedType

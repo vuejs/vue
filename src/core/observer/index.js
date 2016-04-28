@@ -39,7 +39,7 @@ export function Observer (value) {
   this.dep = new Dep()
   def(value, '__ob__', this)
   if (isArray(value)) {
-    var augment = hasProto
+    const augment = hasProto
       ? protoAugment
       : copyAugment
     augment(value, arrayMethods, arrayKeys)
@@ -72,7 +72,7 @@ Observer.prototype.walk = function (obj) {
  */
 
 Observer.prototype.observeArray = function (items) {
-  for (var i = 0, l = items.length; i < l; i++) {
+  for (let i = 0, l = items.length; i < l; i++) {
     observe(items[i])
   }
 }
@@ -138,8 +138,8 @@ function protoAugment (target, src) {
  */
 
 function copyAugment (target, src, keys) {
-  for (var i = 0, l = keys.length; i < l; i++) {
-    var key = keys[i]
+  for (let i = 0, l = keys.length; i < l; i++) {
+    const key = keys[i]
     def(target, key, src[key])
   }
 }
@@ -159,7 +159,7 @@ export function observe (value, vm) {
   if (!isObject(value)) {
     return
   }
-  var ob
+  let ob
   if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
     ob = value.__ob__
   } else if (
@@ -185,30 +185,30 @@ export function observe (value, vm) {
  */
 
 export function defineReactive (obj, key, val) {
-  var dep = new Dep()
+  const dep = new Dep()
 
-  var property = Object.getOwnPropertyDescriptor(obj, key)
+  const property = Object.getOwnPropertyDescriptor(obj, key)
   if (property && property.configurable === false) {
     return
   }
 
   // cater for pre-defined getter/setters
-  var getter = property && property.get
-  var setter = property && property.set
+  const getter = property && property.get
+  const setter = property && property.set
 
-  var childOb = observe(val)
+  let childOb = observe(val)
   Object.defineProperty(obj, key, {
     enumerable: true,
     configurable: true,
     get: function reactiveGetter () {
-      var value = getter ? getter.call(obj) : val
+      const value = getter ? getter.call(obj) : val
       if (Dep.target) {
         dep.depend()
         if (childOb) {
           childOb.dep.depend()
         }
         if (isArray(value)) {
-          for (var e, i = 0, l = value.length; i < l; i++) {
+          for (let e, i = 0, l = value.length; i < l; i++) {
             e = value[i]
             e && e.__ob__ && e.__ob__.dep.depend()
           }
@@ -217,7 +217,7 @@ export function defineReactive (obj, key, val) {
       return value
     },
     set: function reactiveSetter (newVal) {
-      var value = getter ? getter.call(obj) : val
+      const value = getter ? getter.call(obj) : val
       if (newVal === value) {
         return
       }
@@ -255,7 +255,7 @@ export function set (obj, key, val) {
     set(obj._data, key, val)
     return
   }
-  var ob = obj.__ob__
+  const ob = obj.__ob__
   if (!ob) {
     obj[key] = val
     return
@@ -263,9 +263,9 @@ export function set (obj, key, val) {
   ob.convert(key, val)
   ob.dep.notify()
   if (ob.vms) {
-    var i = ob.vms.length
+    let i = ob.vms.length
     while (i--) {
-      var vm = ob.vms[i]
+      const vm = ob.vms[i]
       proxy(vm, key)
       vm.$forceUpdate()
     }
@@ -285,7 +285,7 @@ export function del (obj, key) {
     return
   }
   delete obj[key]
-  var ob = obj.__ob__
+  const ob = obj.__ob__
 
   if (!ob) {
     if (obj._isVue) {
@@ -296,9 +296,9 @@ export function del (obj, key) {
   }
   ob.dep.notify()
   if (ob.vms) {
-    var i = ob.vms.length
+    let i = ob.vms.length
     while (i--) {
-      var vm = ob.vms[i]
+      const vm = ob.vms[i]
       unproxy(vm, key)
       vm.$forceUpdate()
     }

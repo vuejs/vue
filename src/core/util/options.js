@@ -24,14 +24,14 @@ import {
  * @param {Vue} [vm]
  */
 
-var strats = config.optionMergeStrategies = Object.create(null)
+const strats = config.optionMergeStrategies = Object.create(null)
 
 /**
  * Helper that recursively merges two data objects together.
  */
 
 function mergeData (to, from) {
-  var key, toVal, fromVal
+  let key, toVal, fromVal
   for (key in from) {
     toVal = to[key]
     fromVal = from[key]
@@ -80,10 +80,10 @@ strats.data = function (parentVal, childVal, vm) {
   } else if (parentVal || childVal) {
     return function mergedInstanceDataFn () {
       // instance merge
-      var instanceData = typeof childVal === 'function'
+      const instanceData = typeof childVal === 'function'
         ? childVal.call(vm)
         : childVal
-      var defaultData = typeof parentVal === 'function'
+      const defaultData = typeof parentVal === 'function'
         ? parentVal.call(vm)
         : undefined
       if (instanceData) {
@@ -109,7 +109,7 @@ strats.el = function (parentVal, childVal, vm) {
     )
     return
   }
-  var ret = childVal || parentVal
+  const ret = childVal || parentVal
   // invoke the element factory if this is instance merge
   return vm && typeof ret === 'function'
     ? ret.call(vm)
@@ -143,7 +143,7 @@ config._lifecycleHooks.forEach(hook => {
  */
 
 function mergeAssets (parentVal, childVal) {
-  var res = Object.create(parentVal)
+  const res = Object.create(parentVal)
   return childVal
     ? extend(res, childVal)
     : res
@@ -163,11 +163,11 @@ config._assetTypes.forEach(function (type) {
 strats.watch = function (parentVal, childVal) {
   if (!childVal) return parentVal
   if (!parentVal) return childVal
-  var ret = {}
+  const ret = {}
   extend(ret, parentVal)
-  for (var key in childVal) {
-    var parent = ret[key]
-    var child = childVal[key]
+  for (let key in childVal) {
+    let parent = ret[key]
+    let child = childVal[key]
     if (parent && !isArray(parent)) {
       parent = [parent]
     }
@@ -187,7 +187,7 @@ strats.methods =
 strats.computed = function (parentVal, childVal) {
   if (!childVal) return parentVal
   if (!parentVal) return childVal
-  var ret = Object.create(null)
+  const ret = Object.create(null)
   extend(ret, parentVal)
   extend(ret, childVal)
   return ret
@@ -197,7 +197,7 @@ strats.computed = function (parentVal, childVal) {
  * Default strategy.
  */
 
-var defaultStrat = function (parentVal, childVal) {
+const defaultStrat = function (parentVal, childVal) {
   return childVal === undefined
     ? parentVal
     : childVal
@@ -212,9 +212,9 @@ var defaultStrat = function (parentVal, childVal) {
 
 function guardComponents (options) {
   if (options.components) {
-    var components = options.components
-    var def
-    for (var key in components) {
+    const components = options.components
+    let def
+    for (let key in components) {
       if (isBuiltInTag(key) || config.isReservedTag(key)) {
         process.env.NODE_ENV !== 'production' && warn(
           'Do not use built-in or reserved HTML elements as component ' +
@@ -295,10 +295,10 @@ export function mergeOptions (parent, child, vm) {
       warn('propsData can only be used as an instantiation option.')
     }
   }
-  var options = {}
-  var key
+  const options = {}
+  let key
   if (child.mixins) {
-    for (var i = 0, l = child.mixins.length; i < l; i++) {
+    for (let i = 0, l = child.mixins.length; i < l; i++) {
       parent = mergeOptions(parent, child.mixins[i], vm)
     }
   }
@@ -311,7 +311,7 @@ export function mergeOptions (parent, child, vm) {
     }
   }
   function mergeField (key) {
-    var strat = strats[key] || defaultStrat
+    const strat = strats[key] || defaultStrat
     options[key] = strat(parent[key], child[key], vm, key)
   }
   return options
@@ -334,9 +334,9 @@ export function resolveAsset (options, type, id, warnMissing) {
   if (typeof id !== 'string') {
     return
   }
-  var assets = options[type]
-  var camelizedId
-  var res = assets[id] ||
+  const assets = options[type]
+  let camelizedId
+  const res = assets[id] ||
     // camelCase ID
     assets[camelizedId = camelize(id)] ||
     // Pascal Case ID

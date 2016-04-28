@@ -118,7 +118,7 @@ function resolveAsyncComponent (factory, cb) {
       // cache resolved
       factory.resolved = res
       // invoke callbacks
-      for (var i = 0, l = cbs.length; i < l; i++) {
+      for (let i = 0, l = cbs.length; i < l; i++) {
         cbs[i](res)
       }
     }, function reject (reason) {

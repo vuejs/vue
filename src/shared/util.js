@@ -62,7 +62,7 @@ export function remove (arr, item) {
  * @param {String} key
  * @return {Boolean}
  */
-var hasOwnProperty = Object.prototype.hasOwnProperty
+const hasOwnProperty = Object.prototype.hasOwnProperty
 export function hasOwn (obj, key) {
   return hasOwnProperty.call(obj, key)
 }
@@ -100,7 +100,7 @@ export function cached (fn) {
  * @return {String}
  */
 
-var camelizeRE = /-(\w)/g
+const camelizeRE = /-(\w)/g
 export const camelize = cached(str => {
   return str.replace(camelizeRE, toUpper)
 })
@@ -116,7 +116,7 @@ function toUpper (_, c) {
  * @return {String}
  */
 
-var hyphenateRE = /([a-z\d])([A-Z])/g
+const hyphenateRE = /([a-z\d])([A-Z])/g
 export const hyphenate = cached(str => {
   return str
     .replace(hyphenateRE, '$1-$2')
@@ -133,7 +133,7 @@ export const hyphenate = cached(str => {
 
 export function bind (fn, ctx) {
   return function (a) {
-    var l = arguments.length
+    const l = arguments.length
     return l
       ? l > 1
         ? fn.apply(ctx, arguments)
@@ -152,8 +152,8 @@ export function bind (fn, ctx) {
 
 export function toArray (list, start) {
   start = start || 0
-  var i = list.length - start
-  var ret = new Array(i)
+  let i = list.length - start
+  const ret = new Array(i)
   while (i--) {
     ret[i] = list[i + start]
   }
@@ -195,8 +195,8 @@ export function isObject (obj) {
  * @return {Boolean}
  */
 
-var toString = Object.prototype.toString
-var OBJECT_STRING = '[object Object]'
+const toString = Object.prototype.toString
+const OBJECT_STRING = '[object Object]'
 export function isPlainObject (obj) {
   return toString.call(obj) === OBJECT_STRING
 }

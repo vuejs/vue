@@ -27,23 +27,23 @@ const isWechat = UA && UA.indexOf('micromessenger') > 0
  */
 
 export const nextTick = (function () {
-  var callbacks = []
-  var pending = false
-  var timerFunc
+  let callbacks = []
+  let pending = false
+  let timerFunc
   function nextTickHandler () {
     pending = false
-    var copies = callbacks.slice(0)
+    const copies = callbacks.slice(0)
     callbacks = []
-    for (var i = 0; i < copies.length; i++) {
+    for (let i = 0; i < copies.length; i++) {
       copies[i]()
     }
   }
 
   /* istanbul ignore if */
   if (typeof MutationObserver !== 'undefined' && !(isWechat && isIos)) {
-    var counter = 1
-    var observer = new MutationObserver(nextTickHandler)
-    var textNode = document.createTextNode(counter)
+    let counter = 1
+    const observer = new MutationObserver(nextTickHandler)
+    const textNode = document.createTextNode(counter)
     observer.observe(textNode, {
       characterData: true
     })
@@ -61,7 +61,7 @@ export const nextTick = (function () {
     timerFunc = context.setImmediate || setTimeout
   }
   return function (cb, ctx) {
-    var func = ctx
+    const func = ctx
       ? function () { cb.call(ctx) }
       : cb
     callbacks.push(func)

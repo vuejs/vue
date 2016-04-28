@@ -13,7 +13,7 @@ export function initUse (Vue) {
       return
     }
     // additional parameters
-    var args = toArray(arguments, 1)
+    const args = toArray(arguments, 1)
     args.unshift(this)
     if (typeof plugin.install === 'function') {
       plugin.install.apply(plugin, args)
