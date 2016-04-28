@@ -38,13 +38,6 @@
       </div>
     </script>
 
-    <script>
-      // register modal component
-      Vue.component('modal', {
-        template: '#modal-template'
-      })
-    </script>
-
     <!-- app -->
     <div id="app">
       <button id="show-modal" @click="showModal = true">Show Modal</button>
@@ -59,6 +52,11 @@
     </div>
 
     <script>
+      // register modal component
+      Vue.component('modal', {
+        template: '#modal-template'
+      })
+
       // start app
       new Vue({
         el: '#app',
