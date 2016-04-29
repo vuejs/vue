@@ -1,6 +1,8 @@
 import { isArray, isPrimitive } from '../util/index'
 import VNode from './vnode'
 
+const whitespace = VNode(undefined, undefined, undefined, ' ')
+
 export function flatten (children) {
   if (typeof children === 'string') {
     return [VNode(undefined, undefined, undefined, children)]
@@ -13,8 +15,13 @@ export function flatten (children) {
       if (isArray(c)) {
         res.push.apply(res, flatten(c))
       } else if (isPrimitive(c)) {
-        // convert primitive to vnode
-        res.push(VNode(undefined, undefined, undefined, c))
+        // optimize whitespace
+        if (c === ' ') {
+          res.push(whitespace)
+        } else {
+          // convert primitive to vnode
+          res.push(VNode(undefined, undefined, undefined, c))
+        }
       } else if (c) {
         res.push(c)
       }
