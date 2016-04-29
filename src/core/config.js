@@ -38,7 +38,7 @@ export default {
     'component',
     'directive',
     'transition',
-    'filters'
+    'filter'
   ],
 
   /**

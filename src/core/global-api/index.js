@@ -13,12 +13,10 @@ export function initGlobalAPI (Vue) {
   Vue.delete = del
   Vue.nextTick = util.nextTick
 
-  Vue.options = {
-    directives: Object.create(null),
-    filters: Object.create(null),
-    components: Object.create(null),
-    transitions: Object.create(null)
-  }
+  Vue.options = Object.create(null)
+  config._assetTypes.forEach(type => {
+    Vue.options[type + 's'] = Object.create(null)
+  })
 
   initUse(Vue)
   initMixin(Vue)

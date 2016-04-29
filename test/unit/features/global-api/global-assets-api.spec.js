@@ -3,8 +3,8 @@ import Vue from 'vue'
 describe('Global Assets API', () => {
   const Test = Vue.extend()
 
-  it('directive / transition', () => {
-    const assets = ['directive', 'transition']
+  it('directive / transition / filters', () => {
+    const assets = ['directive', 'transition', 'filter']
     assets.forEach(function (type) {
       const def = {}
       Test[type]('test', def)
