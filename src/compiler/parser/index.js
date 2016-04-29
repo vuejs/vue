@@ -27,9 +27,10 @@ const decodeHTMLCached = cached(decodeHTML)
 let warn
 const baseWarn = msg => console.error(`[Vue parser]: ${msg}`)
 
-// platform-injected util functions
+// other configurable options
 let platformGetTagNamespace
 let platformMustUseProp
+let delimiters
 
 /**
  * Convert HTML string to AST.
@@ -43,6 +44,7 @@ export function parse (template, options) {
   warn = options.warn || baseWarn
   platformGetTagNamespace = options.getTagNamespace || (() => null)
   platformMustUseProp = options.mustUseProp || (() => false)
+  delimiters = options.delimiters
   const stack = []
   let root
   let currentParent
@@ -166,7 +168,7 @@ export function parse (template, options) {
           : null
       if (text) {
         let expression
-        if (!inPre && text !== ' ' && (expression = parseText(text))) {
+        if (!inPre && text !== ' ' && (expression = parseText(text, delimiters))) {
           currentParent.children.push({ expression })
         } else {
           currentParent.children.push({ text })
@@ -297,7 +299,7 @@ function processComponent (el) {
 
 function processClassBinding (el) {
   const staticClass = getAndRemoveAttr(el, 'class')
-  el.staticClass = parseText(staticClass) || JSON.stringify(staticClass)
+  el.staticClass = parseText(staticClass, delimiters) || JSON.stringify(staticClass)
   const classBinding = getBindingAttr(el, 'class', false /* getStatic */)
   if (classBinding) {
     el.classBinding = classBinding
@@ -354,7 +356,7 @@ function processAttrs (el) {
       }
     } else {
       // literal attribute
-      let expression = parseText(value)
+      let expression = parseText(value, delimiters)
       if (expression) {
         warn(
           'Interpolation inside attributes has been deprecated. ' +

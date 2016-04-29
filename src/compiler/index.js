@@ -12,6 +12,7 @@ import { generate } from './codegen'
  *                 - isReservedTag
  *                 - mustUseProp
  *                 - getTagNamespace
+ *                 - delimiters
  */
 
 export function compile (template, options) {

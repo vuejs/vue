@@ -23,13 +23,13 @@ export function compile (template, options) {
 }
 
 export function compileToFunctions (template, options = {}) {
-  const preserveWhitespace = options.preserveWhitespace !== false
-  const cache = preserveWhitespace ? cache1 : cache2
+  options.preserveWhitespace = options.preserveWhitespace !== false
+  const cache = options.preserveWhitespace ? cache1 : cache2
   if (cache[template]) {
     return cache[template]
   }
   const res = {}
-  const compiled = compile(template, { preserveWhitespace })
+  const compiled = compile(template, options)
   res.render = new Function(compiled.render)
   const l = compiled.staticRenderFns.length
   if (l) {

@@ -1,6 +1,16 @@
-const tagRE = /\{\{((?:.|\\n)+?)\}\}/g
+import { cached } from 'shared/util'
 
-export function parseText (text) {
+const defaultTagRE = /\{\{((?:.|\\n)+?)\}\}/g
+const regexEscapeRE = /[-.*+?^${}()|[\]\/\\]/g
+
+const buildRegex = cached(delimiters => {
+  const open = delimiters[0].replace(regexEscapeRE, '\\$&')
+  const close = delimiters[1].replace(regexEscapeRE, '\\$&')
+  return new RegExp(open + '((?:.|\\n)+?)' + close, 'g')
+})
+
+export function parseText (text, delimiters) {
+  const tagRE = delimiters ? buildRegex(delimiters) : defaultTagRE
   if (!tagRE.test(text)) {
     return null
   }
