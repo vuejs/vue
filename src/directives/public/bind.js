@@ -110,11 +110,15 @@ export default {
       attrWithPropsRE.test(attr) &&
       attr in el
     ) {
-      el[attr] = attr === 'value'
+      var attrValue = attr === 'value'
         ? value == null // IE9 will set input.value to "null" for null...
           ? ''
           : value
         : value
+
+      if (el[attr] !== attrValue) {
+        el[attr] = attrValue
+      }
     }
     // set model props
     var modelProp = modelProps[attr]
