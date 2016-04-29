@@ -9,7 +9,8 @@ import {
   addStaticAttr,
   addHandler,
   addDirective,
-  getBindingAttr
+  getBindingAttr,
+  baseWarn
 } from '../helpers'
 
 const dirRE = /^v-|^@|^:/
@@ -23,11 +24,8 @@ const camelRE = /[a-z\d][A-Z]/
 
 const decodeHTMLCached = cached(decodeHTML)
 
-// make warning customizable depending on environment.
+// configurable state
 let warn
-const baseWarn = msg => console.error(`[Vue parser]: ${msg}`)
-
-// other configurable options
 let platformGetTagNamespace
 let platformMustUseProp
 let delimiters
@@ -294,6 +292,9 @@ function processSlot (el) {
 function processComponent (el) {
   if (el.tag === 'component') {
     el.component = getBindingAttr(el, 'is')
+  }
+  if (getAndRemoveAttr(el, 'inline-template') != null) {
+    el.inlineTemplate = true
   }
 }
 

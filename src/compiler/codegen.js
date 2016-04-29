@@ -1,26 +1,32 @@
 import { genHandlers } from './events'
 import { ref } from './directives/ref'
+import { baseWarn } from './helpers'
 
 const baseDirectives = {
   ref,
   cloak: function () {} // noop
 }
 
-// platform-injected utils
+// configurable state
+let warn
 let platformDirectives
 let isPlatformReservedTag
-
-// reset on each call
 let staticRenderFns
+let currentOptions
 
 export function generate (ast, options) {
-  staticRenderFns = []
+  // save previous staticRenderFns so generate calls can be nested
+  const prevStaticRenderFns = staticRenderFns
+  const currentStaticRenderFns = staticRenderFns = []
+  currentOptions = options
+  warn = options.warn || baseWarn
   platformDirectives = options.directives || {}
   isPlatformReservedTag = options.isReservedTag || (() => false)
   const code = ast ? genElement(ast) : '__h__("div")'
+  staticRenderFns = prevStaticRenderFns
   return {
     render: `with (this) { return ${code}}`,
-    staticRenderFns
+    staticRenderFns: currentStaticRenderFns
   }
 }
 
@@ -40,8 +46,11 @@ function genElement (el) {
   } else {
     // if the element is potentially a component,
     // wrap its children as a thunk.
-    const children = genChildren(el, !isPlatformReservedTag(el.tag) /* asThunk */)
-    const code = `__h__('${el.tag}', ${genData(el)}, ${children}, '${el.ns || ''}')`
+    const children = el.inlineTemplate
+      ? 'undefined'
+      : genChildren(el, !isPlatformReservedTag(el.tag) /* asThunk */)
+    const namespace = el.ns ? `,'${el.ns}'` : ''
+    const code = `__h__('${el.tag}', ${genData(el)}, ${children}${namespace})`
     if (el.staticRoot) {
       // hoist static sub-trees out
       staticRenderFns.push(`with(this){return ${code}}`)
@@ -138,7 +147,21 @@ function genData (el) {
   }
   // event handlers
   if (el.events) {
-    data += genHandlers(el.events)
+    data += `${genHandlers(el.events)},`
+  }
+  // inline-template
+  if (el.inlineTemplate) {
+    if (process.env.NODE_ENV !== 'production' && (
+      el.children.length > 1 || !el.children[0].tag
+    )) {
+      warn('Inline-template components must have exactly one child element.')
+    }
+    const inlineRenderFns = generate(el.children[0], currentOptions)
+    data += `inlineTemplate:{render:function(){${
+      inlineRenderFns.render
+    }},staticRenderFns:[${
+      inlineRenderFns.staticRenderFns.map(code => `function(){${code}}`).join(',')
+    }]}`
   }
   return data.replace(/,$/, '') + '}'
 }

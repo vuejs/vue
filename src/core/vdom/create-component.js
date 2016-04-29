@@ -67,13 +67,20 @@ export function createComponent (Ctor, data, parent, children, context) {
 
 function init (vnode) {
   const { Ctor, propsData, listeners, parent, children } = vnode.componentOptions
-  const child = new Ctor({
+  const options = {
     parent,
     propsData,
     _parentVnode: vnode,
     _parentListeners: listeners,
     _renderChildren: children
-  })
+  }
+  // check inline-template render functions
+  const inlineTemplate = vnode.data.inlineTemplate
+  if (inlineTemplate) {
+    options.render = inlineTemplate.render
+    options.staticRenderFns = inlineTemplate.staticRenderFns
+  }
+  const child = new Ctor(options)
   // if this is a server-rendered mount,
   // the vnode would already have an element.
   // otherwise the child sets the parent vnode's elm when mounted

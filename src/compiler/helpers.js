@@ -1,5 +1,9 @@
 import { isArray } from 'shared/util'
 
+export function baseWarn (msg) {
+  console.error(`[Vue parser]: ${msg}`)
+}
+
 export function addProp (el, name, value) {
   (el.props || (el.props = [])).push({ name, value })
 }
