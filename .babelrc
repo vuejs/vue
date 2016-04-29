@@ -6,5 +6,8 @@
     "production": {
       "presets": ["es2015-rollup-vue"]
     }
-  }
+  },
+  "ignore": [
+    "dist/*.js"
+  ]
 }
