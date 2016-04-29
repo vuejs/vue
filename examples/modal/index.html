@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <title>Vue.js Modal Example</title>
     <script src="../../dist/vue.js"></script>
-    <link rel="stylesheet" href="modal.css">
+    <link rel="stylesheet" href="style.css">
   </head>
   <body>
     <!-- template for the modal component -->
@@ -38,13 +38,6 @@
       </div>
     </script>
 
-    <script>
-      // register modal component
-      Vue.component('modal', {
-        template: '#modal-template'
-      })
-    </script>
-
     <!-- app -->
     <div id="app">
       <button id="show-modal" @click="showModal = true">Show Modal</button>
@@ -59,6 +52,11 @@
     </div>
 
     <script>
+      // register modal component
+      Vue.component('modal', {
+        template: '#modal-template'
+      })
+
       // start app
       new Vue({
         el: '#app',
