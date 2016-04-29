@@ -79,7 +79,7 @@ function genFor (el) {
   const iterator = el.iterator
   el.for = false // avoid recursion
   return `(${exp})&&__renderList__((${exp}), ` +
-    `function(${alias},$index${iterator ? `,${iterator}` : ''}){` +
+    `function(${alias},$index,${iterator || '$key'}){` +
       `return ${genElement(el)}` +
     '})'
 }

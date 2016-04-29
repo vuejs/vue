@@ -101,7 +101,7 @@ export function parse (template, options) {
         processOnce(element)
         // determine whether this is a plain element after
         // removing if/for/once attributes
-        element.plain = !attrs.length
+        element.plain = !element.key && !attrs.length
         processRender(element)
         processSlot(element)
         processComponent(element)
