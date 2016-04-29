@@ -40,10 +40,12 @@ Vue.component('demo-grid', {
       return data
     }
   },
-  methods: {
+  filters: {
     capitalize: function (str) {
       return str.charAt(0).toUpperCase() + str.slice(1)
-    },
+    }
+  },
+  methods: {
     sortBy: function (key) {
       this.sortKey = key
       this.sortOrders[key] = this.sortOrders[key] * -1

@@ -22,14 +22,17 @@ var demo = new Vue({
     currentBranch: 'fetchData'
   },
 
-  methods: {
+  filters: {
     truncate: function (v) {
       var newline = v.indexOf('\n')
       return newline > 0 ? v.slice(0, newline) : v
     },
     formatDate: function (v) {
       return v.replace(/T|Z/g, ' ')
-    },
+    }
+  },
+
+  methods: {
     fetchData: function () {
       var xhr = new XMLHttpRequest()
       var self = this

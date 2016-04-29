@@ -12,7 +12,7 @@
 
     <div id="editor">
       <textarea :value="input" @input="update"></textarea>
-      <div v-html="marked(input)"></div>
+      <div v-html="compileMarkdown(input)"></div>
     </div>
 
     <script>
@@ -22,7 +22,7 @@
           input: '# hello'
         },
         methods: {
-          marked: marked,
+          compileMarkdown: marked,
           update: _.debounce(function (e) {
             this.input = e.target.value
           }, 300)

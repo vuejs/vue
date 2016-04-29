@@ -67,9 +67,6 @@ new Vue({
     stats: stats
   },
   methods: {
-    json: function (val) {
-      return JSON.stringify(val, null, 2)
-    },
     add: function (e) {
       e.preventDefault()
       if (!this.newLabel) return

@@ -38,7 +38,7 @@
 			</section>
 			<footer class="footer" v-show="todos.length" v-cloak>
 				<span class="todo-count">
-					<strong>{{ remaining }}</strong> {{ pluralize(remaining) }} left
+					<strong>{{ remaining }}</strong> {{ remaining | pluralize }} left
 				</span>
 				<ul class="filters">
 					<li><a href="#/all" :class="{selected: visibility == 'all'}">All</a></li>

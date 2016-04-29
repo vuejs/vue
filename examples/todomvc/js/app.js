@@ -64,13 +64,15 @@
 			}
 		},
 
+		filters: {
+			pluralize: function (n) {
+			  return n === 1 ? 'item' : 'items'
+			}
+		},
+
 		// methods that implement data logic.
 		// note there's no DOM manipulation here at all.
 		methods: {
-			pluralize: function (n) {
-			  return n === 1 ? 'item' : 'items'
-			},
-
 			addTodo: function () {
 				var value = this.newTodo && this.newTodo.trim();
 				if (!value) {
