@@ -83,13 +83,12 @@ function init (vnode) {
 }
 
 function prepatch (oldVnode, vnode) {
-  const { listeners, propsData, children } = vnode.componentOptions
+  const { listeners, propsData } = vnode.componentOptions
   vnode.child = oldVnode.child
   vnode.child._updateFromParent(
     propsData, // updated props
     listeners, // updated listeners
-    vnode, // new parent vnode
-    children // new children
+    vnode // new parent vnode
   )
 }
 

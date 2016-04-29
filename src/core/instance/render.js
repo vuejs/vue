@@ -89,9 +89,9 @@ export function renderMixin (Vue) {
   }
 }
 
-function resolveSlots (vm, children) {
-  if (children) {
-    children = flatten(isArray(children) ? children : children())
+function resolveSlots (vm, renderChildren) {
+  if (renderChildren) {
+    const children = flatten(renderChildren())
     const slots = { default: children }
     let i = children.length
     let name, child

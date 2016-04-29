@@ -81,9 +81,8 @@ export function lifecycleMixin (Vue) {
     }
   }
 
-  Vue.prototype._updateFromParent = function (propsData, listeners, parentVnode, children) {
+  Vue.prototype._updateFromParent = function (propsData, listeners, parentVnode) {
     this.$options._parentVnode = parentVnode
-    this.$options._renderChildren = children
     // update props
     if (propsData && this.$options.props) {
       observerState.shouldConvert = false
