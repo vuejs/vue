@@ -84,4 +84,17 @@ describe('Global API', () => {
     expect(Vue.options.directives['plugin-test']).toBe(def)
     delete Vue.options.directives['plugin-test']
   })
+
+  it('compile', () => {
+    const res = Vue.compile('<div><span>{{ msg }}</span></div>')
+    const vm = new Vue({
+      data: {
+        msg: 'hello'
+      },
+      render: res.render,
+      staticRenderFns: res.staticRenderFns
+    })
+    vm.$mount()
+    expect(vm.$el.innerHTML).toContain('<span>hello</span>')
+  })
 })
