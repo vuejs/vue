@@ -314,8 +314,8 @@ describe('Directive v-for', () => {
     const vm = new Vue({
       data: {
         items: [
-          { items: [{a: 1}, {a: 2}], a: 1 },
-          { items: [{a: 3}, {a: 4}], a: 2 }
+          { items: [{ a: 1 }, { a: 2 }], a: 1 },
+          { items: [{ a: 3 }, { a: 4 }], a: 2 }
         ]
       },
       template:
