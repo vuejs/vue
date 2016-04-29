@@ -19,12 +19,12 @@ export function initExtend (Vue) {
 
   Vue.extend = function (extendOptions) {
     extendOptions = extendOptions || {}
-    var Super = this
-    var isFirstExtend = Super.cid === 0
+    const Super = this
+    const isFirstExtend = Super.cid === 0
     if (isFirstExtend && extendOptions._Ctor) {
       return extendOptions._Ctor
     }
-    var name = extendOptions.name || Super.options.name
+    let name = extendOptions.name || Super.options.name
     if (process.env.NODE_ENV !== 'production') {
       if (!/^[a-zA-Z][\w-]*$/.test(name)) {
         warn(
@@ -34,7 +34,7 @@ export function initExtend (Vue) {
         name = null
       }
     }
-    var Sub = function VueComponent (options) {
+    const Sub = function VueComponent (options) {
       this._init(options)
     }
     Sub.prototype = Object.create(Super.prototype)

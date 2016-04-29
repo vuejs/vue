@@ -63,11 +63,11 @@ export function parseHTML (html, handler) {
     last = html
     // Make sure we're not in a script or style element
     if (!lastTag || !special(lastTag)) {
-      var textEnd = html.indexOf('<')
+      const textEnd = html.indexOf('<')
       if (textEnd === 0) {
         // Comment:
         if (/^<!--/.test(html)) {
-          var commentEnd = html.indexOf('-->')
+          const commentEnd = html.indexOf('-->')
 
           if (commentEnd >= 0) {
             html = html.substring(commentEnd + 3)
@@ -78,7 +78,7 @@ export function parseHTML (html, handler) {
 
         // http://en.wikipedia.org/wiki/Conditional_comment#Downlevel-revealed_conditional_comment
         if (/^<!\[/.test(html)) {
-          var conditionalEnd = html.indexOf(']>')
+          const conditionalEnd = html.indexOf(']>')
 
           if (conditionalEnd >= 0) {
             html = html.substring(conditionalEnd + 2)
@@ -88,7 +88,7 @@ export function parseHTML (html, handler) {
         }
 
         // Doctype:
-        var doctypeMatch = html.match(doctype)
+        const doctypeMatch = html.match(doctype)
         if (doctypeMatch) {
           if (handler.doctype) {
             handler.doctype(doctypeMatch[0])
@@ -99,7 +99,7 @@ export function parseHTML (html, handler) {
         }
 
         // End tag:
-        var endTagMatch = html.match(endTag)
+        const endTagMatch = html.match(endTag)
         if (endTagMatch) {
           html = html.substring(endTagMatch[0].length)
           endTagMatch[0].replace(endTag, parseEndTag)
@@ -108,7 +108,7 @@ export function parseHTML (html, handler) {
         }
 
         // Start tag:
-        var startTagMatch = parseStartTag(html)
+        const startTagMatch = parseStartTag(html)
         if (startTagMatch) {
           html = startTagMatch.rest
           handleStartTag(startTagMatch)
@@ -117,7 +117,7 @@ export function parseHTML (html, handler) {
         }
       }
 
-      var text
+      let text
       if (textEnd >= 0) {
         text = html.substring(0, textEnd)
         html = html.substring(textEnd)
@@ -127,7 +127,7 @@ export function parseHTML (html, handler) {
       }
 
       // next tag
-      var nextTagMatch = parseStartTag(html)
+      let nextTagMatch = parseStartTag(html)
       if (nextTagMatch) {
         nextTag = nextTagMatch.tagName
       } else {
@@ -144,8 +144,8 @@ export function parseHTML (html, handler) {
       }
       prevTag = ''
     } else {
-      var stackedTag = lastTag.toLowerCase()
-      var reStackedTag = reCache[stackedTag] || (reCache[stackedTag] = new RegExp('([\\s\\S]*?)</' + stackedTag + '[^>]*>', 'i'))
+      const stackedTag = lastTag.toLowerCase()
+      const reStackedTag = reCache[stackedTag] || (reCache[stackedTag] = new RegExp('([\\s\\S]*?)</' + stackedTag + '[^>]*>', 'i'))
 
       html = html.replace(reStackedTag, function (all, text) {
         if (stackedTag !== 'script' && stackedTag !== 'style' && stackedTag !== 'noscript') {
@@ -173,14 +173,14 @@ export function parseHTML (html, handler) {
   }
 
   function parseStartTag (input) {
-    var start = input.match(startTagOpen)
+    const start = input.match(startTagOpen)
     if (start) {
-      var match = {
+      const match = {
         tagName: start[1],
         attrs: []
       }
       input = input.slice(start[0].length)
-      var end, attr
+      let end, attr
       while (!(end = input.match(startTagClose)) && (attr = input.match(attribute))) {
         input = input.slice(attr[0].length)
         match.attrs.push(attr)
@@ -194,8 +194,8 @@ export function parseHTML (html, handler) {
   }
 
   function handleStartTag (match) {
-    var tagName = match.tagName
-    var unarySlash = match.unarySlash
+    const tagName = match.tagName
+    let unarySlash = match.unarySlash
 
     if (expectHTML) {
       if (lastTag === 'p' && isNonPhrasingTag(tagName)) {
@@ -206,9 +206,9 @@ export function parseHTML (html, handler) {
       }
     }
 
-    var unary = isUnaryTag(tagName) || tagName === 'html' && lastTag === 'head' || !!unarySlash
+    const unary = isUnaryTag(tagName) || tagName === 'html' && lastTag === 'head' || !!unarySlash
 
-    var attrs = match.attrs.map(function (args) {
+    const attrs = match.attrs.map(function (args) {
       // hackish work around FF bug https://bugzilla.mozilla.org/show_bug.cgi?id=369778
       if (IS_REGEX_CAPTURING_BROKEN && args[0].indexOf('""') === -1) {
         if (args[3] === '') { delete args[3] }
@@ -233,11 +233,11 @@ export function parseHTML (html, handler) {
   }
 
   function parseEndTag (tag, tagName) {
-    var pos
+    let pos
 
     // Find the closest opened tag of the same type
     if (tagName) {
-      var needle = tagName.toLowerCase()
+      const needle = tagName.toLowerCase()
       for (pos = stack.length - 1; pos >= 0; pos--) {
         if (stack[pos].tag.toLowerCase() === needle) {
           break
@@ -250,7 +250,7 @@ export function parseHTML (html, handler) {
 
     if (pos >= 0) {
       // Close all the open elements, up the stack
-      for (var i = stack.length - 1; i >= pos; i--) {
+      for (let i = stack.length - 1; i >= pos; i--) {
         if (handler.end) {
           handler.end(stack[i].tag, stack[i].attrs, i > pos || !tag)
         }

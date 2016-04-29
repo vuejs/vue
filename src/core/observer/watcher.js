@@ -38,7 +38,7 @@ export default function Watcher (vm, expOrFn, cb, options) {
   if (options) {
     extend(this, options)
   }
-  var isFn = typeof expOrFn === 'function'
+  const isFn = typeof expOrFn === 'function'
   this.vm = vm
   vm._watchers.push(this)
   this.expression = expOrFn
@@ -105,7 +105,7 @@ Watcher.prototype.beforeGet = function () {
  */
 
 Watcher.prototype.addDep = function (dep) {
-  var id = dep.id
+  const id = dep.id
   if (!this.newDepIds.has(id)) {
     this.newDepIds.add(id)
     this.newDeps.push(dep)
@@ -121,14 +121,14 @@ Watcher.prototype.addDep = function (dep) {
 
 Watcher.prototype.afterGet = function () {
   Dep.target = prevTarget
-  var i = this.deps.length
+  let i = this.deps.length
   while (i--) {
-    var dep = this.deps[i]
+    const dep = this.deps[i]
     if (!this.newDepIds.has(dep.id)) {
       dep.removeSub(this)
     }
   }
-  var tmp = this.depIds
+  let tmp = this.depIds
   this.depIds = this.newDepIds
   this.newDepIds = tmp
   this.newDepIds.clear()
@@ -170,7 +170,7 @@ Watcher.prototype.update = function (shallow) {
 
 Watcher.prototype.run = function () {
   if (this.active) {
-    var value = this.get()
+    const value = this.get()
     if (
       value !== this.value ||
       // Deep watchers and watchers on Object/Arrays should fire even
@@ -180,7 +180,7 @@ Watcher.prototype.run = function () {
       ((isObject(value) || this.deep) && !this.shallow)
     ) {
       // set new value
-      var oldValue = this.value
+      const oldValue = this.value
       this.value = value
       this.cb.call(this.vm, value, oldValue)
     }
@@ -196,7 +196,7 @@ Watcher.prototype.run = function () {
 Watcher.prototype.evaluate = function () {
   // avoid overwriting another watcher that is being
   // collected.
-  var current = Dep.target
+  const current = Dep.target
   this.value = this.get()
   this.dirty = false
   Dep.target = current
@@ -207,7 +207,7 @@ Watcher.prototype.evaluate = function () {
  */
 
 Watcher.prototype.depend = function () {
-  var i = this.deps.length
+  let i = this.deps.length
   while (i--) {
     this.deps[i].depend()
   }
@@ -226,7 +226,7 @@ Watcher.prototype.teardown = function () {
     if (!this.vm._isBeingDestroyed && !this.vm._vForRemoving) {
       remove(this.vm._watchers, this)
     }
-    var i = this.deps.length
+    let i = this.deps.length
     while (i--) {
       this.deps[i].removeSub(this)
     }
@@ -255,7 +255,7 @@ function traverse (val, seen) {
   isO = isObject(val)
   if (isA || isO) {
     if (val.__ob__) {
-      var depId = val.__ob__.dep.id
+      const depId = val.__ob__.dep.id
       if (seen.has(depId)) {
         return
       } else {

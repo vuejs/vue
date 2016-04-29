@@ -42,7 +42,7 @@ function initProps (vm) {
 }
 
 function initData (vm) {
-  var data = vm.$options.data
+  let data = vm.$options.data
   data = vm._data = typeof data === 'function'
     ? data()
     : data || {}
@@ -54,8 +54,8 @@ function initData (vm) {
     )
   }
   // proxy data on instance
-  var keys = Object.keys(data)
-  var i = keys.length
+  const keys = Object.keys(data)
+  let i = keys.length
   while (i--) {
     proxy(vm, keys[i])
   }
@@ -66,11 +66,11 @@ function initData (vm) {
 function noop () {}
 
 function initComputed (vm) {
-  var computed = vm.$options.computed
+  const computed = vm.$options.computed
   if (computed) {
-    for (var key in computed) {
-      var userDef = computed[key]
-      var def = {
+    for (let key in computed) {
+      const userDef = computed[key]
+      const def = {
         enumerable: true,
         configurable: true
       }
@@ -93,7 +93,7 @@ function initComputed (vm) {
 }
 
 function makeComputedGetter (getter, owner) {
-  var watcher = new Watcher(owner, getter, null, {
+  const watcher = new Watcher(owner, getter, null, {
     lazy: true
   })
   return function computedGetter () {
@@ -171,9 +171,9 @@ export function stateMixin (Vue) {
 
 function setData (vm, newData) {
   newData = newData || {}
-  var oldData = vm._data
+  const oldData = vm._data
   vm._data = newData
-  var keys, key, i
+  let keys, key, i
   // unproxy keys not present in new data
   keys = Object.keys(oldData)
   i = keys.length

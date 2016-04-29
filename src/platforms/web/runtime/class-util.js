@@ -80,7 +80,7 @@ export function removeClass (el, cls) {
  */
 
 function getClass (el) {
-  var classname = el.className
+  let classname = el.className
   if (typeof classname === 'object') {
     classname = classname.baseVal || ''
   }
