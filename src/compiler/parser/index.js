@@ -300,7 +300,17 @@ function processComponent (el) {
 
 function processClassBinding (el) {
   const staticClass = getAndRemoveAttr(el, 'class')
-  el.staticClass = parseText(staticClass, delimiters) || JSON.stringify(staticClass)
+  if (process.env.NODE_ENV !== 'production') {
+    const expression = parseText(staticClass, delimiters)
+    if (expression) {
+      warn(
+        `class="${staticClass}": ` +
+        'Interpolation inside attributes has been deprecated. ' +
+        'Use v-bind or the colon shorthand instead.'
+      )
+    }
+  }
+  el.staticClass = JSON.stringify(staticClass)
   const classBinding = getBindingAttr(el, 'class', false /* getStatic */)
   if (classBinding) {
     el.classBinding = classBinding
@@ -357,15 +367,17 @@ function processAttrs (el) {
       }
     } else {
       // literal attribute
-      let expression = parseText(value, delimiters)
-      if (expression) {
-        warn(
-          'Interpolation inside attributes has been deprecated. ' +
-          'Use v-bind or the colon shorthand instead.'
-        )
-      } else {
-        addStaticAttr(el, name, JSON.stringify(value))
+      if (process.env.NODE_ENV !== 'production') {
+        const expression = parseText(value, delimiters)
+        if (expression) {
+          warn(
+            `${name}="${value}": ` +
+            'Interpolation inside attributes has been deprecated. ' +
+            'Use v-bind or the colon shorthand instead.'
+          )
+        }
       }
+      addStaticAttr(el, name, JSON.stringify(value))
     }
   }
 }

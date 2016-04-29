@@ -37,7 +37,8 @@ export default {
   _assetTypes: [
     'component',
     'directive',
-    'transition'
+    'transition',
+    'filters'
   ],
 
   /**

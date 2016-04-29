@@ -1,6 +1,7 @@
 import createElement from '../vdom/create-element'
 import { flatten } from '../vdom/helpers'
 import { bind, isArray, isObject, renderString } from 'shared/util'
+import { resolveAsset } from '../util/options'
 
 export const renderState = {
   activeInstance: null
@@ -41,6 +42,12 @@ export function renderMixin (Vue) {
 
   // toString for mustaches
   Vue.prototype.__toString__ = renderString
+
+  // filter resolution helper
+  const identity = _ => _
+  Vue.prototype.__resolveFilter__ = function (id) {
+    return resolveAsset(this.$options, 'filters', id, true) || identity
+  }
 
   // render v-for
   Vue.prototype.__renderList__ = function (val, render) {

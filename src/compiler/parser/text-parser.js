@@ -1,4 +1,5 @@
 import { cached } from 'shared/util'
+import { parseFilters } from './filter-parser'
 
 const defaultTagRE = /\{\{((?:.|\\n)+?)\}\}/g
 const regexEscapeRE = /[-.*+?^${}()|[\]\/\\]/g
@@ -24,7 +25,7 @@ export function parseText (text, delimiters) {
       tokens.push(JSON.stringify(text.slice(lastIndex, index)))
     }
     // tag token
-    const exp = match[1].trim()
+    const exp = parseFilters(match[1].trim())
     tokens.push(`__toString__(${exp})`)
     lastIndex = index + match[0].length
   }
