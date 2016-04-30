@@ -2,7 +2,7 @@ var base = require('./karma.base.config.js')
 
 module.exports = function (config) {
   // enable linting during dev
-  base.webpack.module.preLoaders =  [
+  base.webpack.module.preLoaders = [
     {
       test: /\.js$/,
       loader: 'eslint',
