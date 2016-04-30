@@ -19,7 +19,7 @@ function updateProps (oldVnode, vnode) {
       if (key === 'value') {
         // store value as _value as well since
         // non-string values will be stringified
-        if (elm._value !== cur) {
+        if (elm._value !== cur && elm.value !== cur) {
           elm.value = elm._value = cur
         }
       } else {
