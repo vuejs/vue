@@ -60,7 +60,7 @@ export function Observer (value) {
  */
 
 Observer.prototype.walk = function (obj) {
-  for (let key in obj) {
+  for (const key in obj) {
     this.convert(key, obj[key])
   }
 }

@@ -167,9 +167,9 @@ export function toArray (list, start) {
  * @param {Object} from
  */
 
-export function extend (to, from) {
-  for (let key in from) {
-    to[key] = from[key]
+export function extend (to, _from) {
+  for (const key in _from) {
+    to[key] = _from[key]
   }
   return to
 }

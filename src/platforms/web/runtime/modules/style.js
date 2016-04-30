@@ -11,7 +11,7 @@ const normalize = cached(function (prop) {
   }
   const upper = prop.charAt(0).toUpperCase() + prop.slice(1)
   for (let i = 0; i < prefixes.length; i++) {
-    let prefixed = prefixes[i] + upper
+    const prefixed = prefixes[i] + upper
     if (prefixed in testEl.style) {
       return prefixed
     }

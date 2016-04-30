@@ -105,7 +105,7 @@ function resolveSlots (vm, renderChildren) {
     while (i--) {
       child = children[i]
       if ((name = child.data && child.data.slot)) {
-        let slot = (slots[name] || (slots[name] = []))
+        const slot = (slots[name] || (slots[name] = []))
         if (child.tag === 'template') {
           slot.push.apply(slot, child.children)
         } else {

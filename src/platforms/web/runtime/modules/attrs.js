@@ -47,7 +47,7 @@ export default {
   create: function (_, vnode) {
     const attrs = vnode.data.staticAttrs
     if (attrs) {
-      for (let key in attrs) {
+      for (const key in attrs) {
         if (!vnode.elm) debugger
         setAttr(vnode.elm, key, attrs[key])
       }

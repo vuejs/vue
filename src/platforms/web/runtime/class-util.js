@@ -36,7 +36,7 @@ export function addClass (el, cls) {
       el.classList.add(cls)
     }
   } else {
-    let cur = ' ' + getClass(el) + ' '
+    const cur = ' ' + getClass(el) + ' '
     if (cur.indexOf(' ' + cls + ' ') < 0) {
       setClass(el, (cur + cls).trim())
     }
@@ -59,7 +59,7 @@ export function removeClass (el, cls) {
     }
   } else {
     let cur = ' ' + getClass(el) + ' '
-    let tar = ' ' + cls + ' '
+    const tar = ' ' + cls + ' '
     while (cur.indexOf(tar) >= 0) {
       cur = cur.replace(tar, ' ')
     }

@@ -94,7 +94,7 @@ function genData (el) {
   // directives first.
   // directives may mutate the el's other properties before they are generated.
   if (el.directives) {
-    let dirs = genDirectives(el)
+    const dirs = genDirectives(el)
     if (dirs) data += dirs + ','
   }
   // pre
@@ -174,7 +174,7 @@ function genDirectives (el) {
   for (i = 0, l = dirs.length; i < l; i++) {
     dir = dirs[i]
     needRuntime = true
-    let gen = platformDirectives[dir.name] || baseDirectives[dir.name]
+    const gen = platformDirectives[dir.name] || baseDirectives[dir.name]
     if (gen) {
       // compile-time directive that manipulates AST.
       // returns true if it also needs a runtime counterpart.
@@ -236,7 +236,7 @@ function genComponent (el) {
 function genProps (props) {
   let res = ''
   for (let i = 0; i < props.length; i++) {
-    let prop = props[i]
+    const prop = props[i]
     res += `"${prop.name}":${prop.value},`
   }
   return res.slice(0, -1)
@@ -244,7 +244,7 @@ function genProps (props) {
 
 function genHooks (hooks) {
   let res = ''
-  for (let key in hooks) {
+  for (const key in hooks) {
     res += `"${key}":function(n1,n2){${hooks[key].join(';')}},`
   }
   return res.slice(0, -1)

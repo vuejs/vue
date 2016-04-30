@@ -34,7 +34,7 @@ function initProps (vm) {
     // root instance props should be converted
     observerState.shouldConvert = isRoot
     for (let i = 0; i < keys.length; i++) {
-      let key = keys[i]
+      const key = keys[i]
       defineReactive(vm, key, validateProp(vm, key, propsData))
     }
     observerState.shouldConvert = true
@@ -68,7 +68,7 @@ function noop () {}
 function initComputed (vm) {
   const computed = vm.$options.computed
   if (computed) {
-    for (let key in computed) {
+    for (const key in computed) {
       const userDef = computed[key]
       const def = {
         enumerable: true,
@@ -110,7 +110,7 @@ function makeComputedGetter (getter, owner) {
 function initMethods (vm) {
   const methods = vm.$options.methods
   if (methods) {
-    for (let key in methods) {
+    for (const key in methods) {
       vm[key] = bind(methods[key], vm)
     }
   }
@@ -119,8 +119,8 @@ function initMethods (vm) {
 function initWatch (vm) {
   const watch = vm.$options.watch
   if (watch) {
-    for (let key in watch) {
-      let handler = watch[key]
+    for (const key in watch) {
+      const handler = watch[key]
       if (isArray(handler)) {
         for (let i = 0; i < handler.length; i++) {
           createWatcher(vm, key, handler[i])

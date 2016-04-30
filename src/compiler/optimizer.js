@@ -26,7 +26,7 @@ function markStatic (node) {
   node.static = isStatic(node)
   if (node.children) {
     for (let i = 0, l = node.children.length; i < l; i++) {
-      let child = node.children[i]
+      const child = node.children[i]
       markStatic(child)
       if (!child.static) {
         node.static = false

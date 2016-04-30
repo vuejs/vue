@@ -5,7 +5,7 @@ export function renderStartingTag (node, modules, directives) {
     const dirs = node.data.directives
     if (dirs) {
       for (let i = 0; i < dirs.length; i++) {
-        let dirRenderer = directives[dirs[i].name]
+        const dirRenderer = directives[dirs[i].name]
         if (dirRenderer) {
           // directives mutate the node's data
           // which then gets rendered by modules
@@ -15,7 +15,7 @@ export function renderStartingTag (node, modules, directives) {
     }
     // apply other modules
     for (let i = 0; i < modules.length; i++) {
-      let res = modules[i](node)
+      const res = modules[i](node)
       if (res) {
         markup += res
       }

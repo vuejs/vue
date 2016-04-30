@@ -49,7 +49,7 @@ export function stringifyClass (value) {
   }
   if (isObject(value)) {
     let res = ''
-    for (let key in value) {
+    for (const key in value) {
       if (value[key]) res += key + ' '
     }
     return res.slice(0, -1)

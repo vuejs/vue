@@ -47,14 +47,13 @@ export function eventsMixin (Vue) {
    */
 
   Vue.prototype.$off = function (event, fn) {
-    let cbs
     // all
     if (!arguments.length) {
       this._events = Object.create(null)
       return this
     }
     // specific event
-    cbs = this._events[event]
+    const cbs = this._events[event]
     if (!cbs) {
       return this
     }

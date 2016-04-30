@@ -8,9 +8,9 @@ export function flatten (children) {
     return [VNode(undefined, undefined, undefined, children)]
   }
   if (isArray(children)) {
-    let res = []
+    const res = []
     for (let i = 0, l = children.length; i < l; i++) {
-      let c = children[i]
+      const c = children[i]
       // flatten nested
       if (isArray(c)) {
         res.push.apply(res, flatten(c))

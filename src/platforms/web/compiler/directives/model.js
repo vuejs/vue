@@ -77,7 +77,7 @@ const getSelectedValueCode =
 
 function patchChildOptions (el, fn) {
   for (let i = 0; i < el.children.length; i++) {
-    let c = el.children[i]
+    const c = el.children[i]
     if (c.tag === 'option') {
       addProp(c, 'selected', fn(getBindingAttr(c, 'value')))
     }

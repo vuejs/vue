@@ -2,6 +2,7 @@ module.exports = {
   root: true,
   extends: 'standard',
   'rules': {
+    'prefer-const': 2,
     'arrow-parens': [2, 'as-needed'],
     'no-new-func': 0,
     'no-new': 0,

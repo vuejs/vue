@@ -165,9 +165,9 @@ strats.watch = function (parentVal, childVal) {
   if (!parentVal) return childVal
   const ret = {}
   extend(ret, parentVal)
-  for (let key in childVal) {
+  for (const key in childVal) {
     let parent = ret[key]
-    let child = childVal[key]
+    const child = childVal[key]
     if (parent && !isArray(parent)) {
       parent = [parent]
     }
@@ -214,7 +214,7 @@ function guardComponents (options) {
   if (options.components) {
     const components = options.components
     let def
-    for (let key in components) {
+    for (const key in components) {
       if (isBuiltInTag(key) || config.isReservedTag(key)) {
         process.env.NODE_ENV !== 'production' && warn(
           'Do not use built-in or reserved HTML elements as component ' +
@@ -254,7 +254,7 @@ function guardProps (options) {
       }
     }
   } else if (isPlainObject(props)) {
-    for (let key in props) {
+    for (const key in props) {
       val = props[key]
       name = camelize(key)
       res[name] = isPlainObject(val)
@@ -268,7 +268,7 @@ function guardProps (options) {
 function guardDirectives (options) {
   const dirs = options.directives
   if (dirs) {
-    for (let key in dirs) {
+    for (const key in dirs) {
       if (typeof dirs[key] === 'function') {
         dirs[key] = { update: dirs[key] }
       }

@@ -224,7 +224,7 @@ function processFor (el) {
 }
 
 function processIf (el) {
-  let exp = getAndRemoveAttr(el, 'v-if')
+  const exp = getAndRemoveAttr(el, 'v-if')
   if (exp) {
     el.if = exp
   }

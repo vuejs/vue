@@ -152,8 +152,8 @@ function extractProps (data, Ctor) {
   if (!attrs && !props) {
     return res
   }
-  for (let key in propOptions) {
-    let altKey = hyphenate(key)
+  for (const key in propOptions) {
+    const altKey = hyphenate(key)
     checkProp(res, attrs, key, altKey) ||
     checkProp(res, props, key, altKey) ||
     checkProp(res, staticAttrs, key, altKey)
@@ -178,9 +178,9 @@ function checkProp (res, hash, key, altKey) {
 function mergeHooks (data) {
   if (data.hook) {
     for (let i = 0; i < hooksToMerge.length; i++) {
-      let key = hooksToMerge[i]
-      let fromParent = data.hook[key]
-      let ours = hooks[key]
+      const key = hooksToMerge[i]
+      const fromParent = data.hook[key]
+      const ours = hooks[key]
       data.hook[key] = fromParent ? mergeHook(ours, fromParent) : ours
     }
   } else {

@@ -136,7 +136,7 @@ export function createPatchFunction (backend) {
 
   function removeVnodes (parentElm, vnodes, startIdx, endIdx) {
     for (; startIdx <= endIdx; ++startIdx) {
-      let ch = vnodes[startIdx]
+      const ch = vnodes[startIdx]
       if (isDef(ch)) {
         if (isDef(ch.tag)) {
           invokeDestroyHook(ch)
@@ -150,7 +150,7 @@ export function createPatchFunction (backend) {
 
   function removeAndInvokeRemoveHook (vnode, rm) {
     if (rm || isDef(vnode.data)) {
-      let listeners = cbs.remove.length + 1
+      const listeners = cbs.remove.length + 1
       if (!rm) {
         // directly removing
         rm = createRmCb(vnode.elm, listeners)
@@ -309,7 +309,7 @@ export function createPatchFunction (backend) {
       if (isDef(children)) {
         const childNodes = elm.childNodes
         for (let i = 0; i < children.length; i++) {
-          let success = hydrate(childNodes[i], children[i], insertedVnodeQueue)
+          const success = hydrate(childNodes[i], children[i], insertedVnodeQueue)
           if (!success) {
             return false
           }

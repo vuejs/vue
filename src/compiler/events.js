@@ -22,7 +22,7 @@ const modifierCode = {
 
 export function genHandlers (events) {
   let res = 'on:{'
-  for (let name in events) {
+  for (const name in events) {
     res += `"${name}":${genHandler(events[name])},`
   }
   return res.slice(0, -1) + '}'
@@ -39,10 +39,10 @@ function genHandler (handler) {
       : `function($event){${handler.value}}`
   } else {
     let code = 'function($event){'
-    for (let key in handler.modifiers) {
+    for (const key in handler.modifiers) {
       code += modifierCode[key] || genKeyFilter(key)
     }
-    let handlerCode = simplePathRE.test(handler.value)
+    const handlerCode = simplePathRE.test(handler.value)
       ? handler.value + '($event)'
       : handler.value
     return code + handlerCode + '}'

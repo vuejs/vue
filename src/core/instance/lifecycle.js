@@ -89,7 +89,7 @@ export function lifecycleMixin (Vue) {
       observerState.shouldConvert = false
       const propKeys = this.$options.propKeys
       for (let i = 0; i < propKeys.length; i++) {
-        let key = propKeys[i]
+        const key = propKeys[i]
         this[key] = validateProp(this, key, propsData)
       }
       observerState.shouldConvert = true
