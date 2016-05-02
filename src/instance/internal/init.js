@@ -91,7 +91,7 @@ export default function (Vue) {
     this._updateRef()
 
     // initialize data as empty object.
-    // it will be filled up in _initScope().
+    // it will be filled up in _initData().
     this._data = {}
 
     // call init hook
