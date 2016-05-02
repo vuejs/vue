@@ -1,5 +1,5 @@
 // NOTE: the prop internal directive is compiled and linked
-// during _initScope(), before the created hook is called.
+// during _initProps(), before the created hook is called.
 // The purpose is to make the initial prop values available
 // inside `created` hooks and `data` functions.
 
