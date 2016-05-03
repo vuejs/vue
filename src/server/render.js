@@ -1,7 +1,6 @@
-import RenderStream from './render-stream'
 import { renderStartingTag } from './render-starting-tag'
 
-export function createStreamingRenderer (modules, directives, isUnaryTag) {
+export function render (modules, directives, isUnaryTag) {
   function renderComponent (component, write, next, isRoot) {
     component.$mount()
     renderNode(component._vnode, write, next, isRoot)
@@ -53,9 +52,7 @@ export function createStreamingRenderer (modules, directives, isUnaryTag) {
     }
   }
 
-  return function renderToStream (component) {
-    return new RenderStream((write, done) => {
-      renderComponent(component, write, done, true)
-    })
+  return function render (component, write, done) {
+    renderComponent(component, write, done, true)
   }
 }

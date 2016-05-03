@@ -105,7 +105,7 @@ export function lifecycleMixin (Vue) {
   }
 
   Vue.prototype.$forceUpdate = function () {
-    this._watcher.update()
+    this._update(this._render())
   }
 
   Vue.prototype.$destroy = function () {

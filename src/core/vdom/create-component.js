@@ -31,12 +31,15 @@ export function createComponent (Ctor, data, parent, children, context) {
     if (Ctor.resolved) {
       Ctor = Ctor.resolved
     } else {
-      resolveAsyncComponent(Ctor, () => {
+      const resolved = resolveAsyncComponent(Ctor, () => {
         // it's ok to queue this on every render because
         // $forceUpdate is buffered.
         parent.$forceUpdate()
       })
-      return
+      if (!resolved || !resolved.cid) {
+        return
+      }
+      Ctor = resolved
     }
   }
 
@@ -118,7 +121,7 @@ function resolveAsyncComponent (factory, cb) {
   } else {
     factory.requested = true
     const cbs = factory.pendingCallbacks = [cb]
-    factory(function resolve (res) {
+    return factory(function resolve (res) {
       if (isObject(res)) {
         res = Vue.extend(res)
       }
@@ -128,6 +131,7 @@ function resolveAsyncComponent (factory, cb) {
       for (let i = 0, l = cbs.length; i < l; i++) {
         cbs[i](res)
       }
+      return res
     }, function reject (reason) {
       process.env.NODE_ENV !== 'production' && warn(
         `Failed to resolve async component: ${factory}` +
