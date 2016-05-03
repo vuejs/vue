@@ -20,6 +20,12 @@ Vue.js is an MIT-licensed open source project. Its ongoing development is made p
   <img width="300px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/strikingly.png">
 </a>
 
+and
+
+<a href="http://www.itunescn.com/">
+  <img width="200px" src="http://i.imgur.com/9LE0Scf.png">
+</a>
+
 ## Intro
 
 Vue.js is a library for building interactive web interfaces. It provides data-reactive components with a simple and flexible API. Core features include:
