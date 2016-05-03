@@ -1,11 +1,19 @@
 # Backers
 
-You can join them in supporting  Vue.js development by [pledging on Patreon](https://www.patreon.com/evanyou).
+You can join them in supporting  Vue.js development by [pledging on Patreon](https://www.patreon.com/evanyou)! Backers in the same pledge level appear in the order of pledge date.
 
 ### $2000
 
 <a href="https://strikingly.com/s/careers?utm_source=v">
   <img width="500px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/strikingly.png">
+</a>
+
+---
+
+### $500
+
+<a href="http://www.itunescn.com/">
+  <img width="360px" src="http://www.itunescn.com/images/chaoqichaoluo-logo.png"> Itunescn.com
 </a>
 
 ---
@@ -28,18 +36,24 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
   <img width="200px" src="http://assets.invoicemachine.com/images/flat_logo.png">
 </a>
 
+<a href="https://statamic.com/"></a>
+  <img width="240px" src="http://i.imgur.com/MRIkKgp.png">
+</a>
+
 ---
 
-### $50
+### $50+
 
 - James Kyle
 - Blake Newman
 - Lee Smith
 - Adam Dorsey
+- Greg McCarvell
+- Yoshiya Hinosawa
 
 ---
 
-### $10
+### $10+
 
 - Sylvain Pollet-Villard
 - Luca Borghini
@@ -67,3 +81,24 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
 - Hayden Bickerton
 - Henry Zhu
 - John Smith
+- Benjamin Listwon
+- Rainer Morgan
+- Brian Jorden
+- Christopher Dosin
+- Lars Andreas Ness
+- Drew Lustro
+- Victor Tolbert
+- Jon Pokrzyk
+- Frank Dungan III
+- Lanes.io
+- Anders
+- Dexter Miguel
+- Stephen Michael Hartley
+- TJ Fogarty
+- Wen-Tien Chang
+- Ole Støvern
+- Valerian Cure
+- Dani Ilops
+- louisbl
+- Yegor Sytnyk
+- Guido H.
