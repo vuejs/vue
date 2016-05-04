@@ -99,11 +99,13 @@ describe('SSR: renderToString', () => {
           <span>{{ test }}</span>
           <input :value="test">
           <test></test>
+          <img :src="imageUrl">
         </div>
       `,
       data: {
         test: 'hi',
-        isRed: true
+        isRed: true,
+        imageUrl: 'https://vuejs.org/images/logo.png'
       },
       components: {
         test: {
@@ -119,6 +121,7 @@ describe('SSR: renderToString', () => {
         '<span>hi</span>' +
         '<input value="hi">' +
         '<div class="a">hahahaha</div>' +
+        '<img src="https://vuejs.org/images/logo.png">' +
       '</div>'
     )
   })
