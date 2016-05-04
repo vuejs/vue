@@ -90,7 +90,8 @@ export function createComponentInstanceForVnode (vnode) {
 
 function init (vnode) {
   const child = vnode.child = createComponentInstanceForVnode(vnode)
-  child.$mount()
+  child._currentVNode = parent._currentVNode
+  child.$mount(vnode.elm)
 }
 
 function prepatch (oldVnode, vnode) {

@@ -47,11 +47,16 @@ export function createElement (tag, data, children, namespace) {
 
 export function renderElement (vnode, children) {
   if (vnode.component) {
-    return createComponent(vnode.Ctor, vnode.data, vnode.parent, vnode.children, vnode.context)
+    const component = createComponent(vnode.Ctor, vnode.data, vnode.parent, vnode.children, vnode.context)
+    if (this._firstRendering) {
+      this.__first_patch__(component)
+    }
+    return component
   }
   vnode.setChildren(flatten(children))
   if (this._firstRendering) {
-    this._lastParent = vnode
+    this._currentVNode = this._lastVNode
+    this._lastVNode = undefined
   }
   return vnode
 }
@@ -68,7 +73,8 @@ export function renderSelf (tag, data, namespace) {
       )
       if (this._firstRendering) {
         this.__first_patch__(vnode)
-        this._lastParent = vnode
+        this._lastVNode = this._currentVNode
+        this._currentVNode = vnode
       }
       return vnode
     } else if ((Ctor = resolveAsset(context.$options, 'components', tag))) {
@@ -89,11 +95,35 @@ export function renderSelf (tag, data, namespace) {
       )
       if (this._firstRendering) {
         this.__first_patch__(vnode)
-        this._lastParent = vnode
+        this._currentVNode = vnode
       }
       return vnode
     }
   } else {
     return { tag, data, parent, context, component: true }
   }
+}
+
+export function renderText (str) {
+  const context = this
+  const vnode = VNode(
+    undefined, undefined, undefined,
+    str, undefined, undefined, context
+  )
+  if (context._firstRendering) {
+    context.__first_patch__(vnode)
+    this._lastVNode = this._currentVNode
+    this._currentVNode = vnode
+  }
+  return str
+}
+
+export function renderStatic (index) {
+  const vnode = this._staticTrees[index]
+  if (this._firstRendering) {
+    this.__first_patch__(vnode)
+    this._lastVNode = this._currentVNode
+    this._currentVNode = vnode
+  }
+  return vnode
 }

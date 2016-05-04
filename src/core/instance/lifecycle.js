@@ -41,11 +41,17 @@ export function lifecycleMixin (Vue) {
       }
     }
     callHook(this, 'beforeMount')
-    this._firstRendering = true
-    this._lastParent = { elm: this.$el.parentNode }
+    const isStream = this.$options.stream
+    this._firstRendering = isStream
+    this._currentVNode = this._currentVNode || { elm: this.$el.parentNode }
     this._watcher = new Watcher(this, this._render, this._update)
-    this._updateFirst(this._watcher.value)
+    if (isStream) {
+      this._updateFirst(this._watcher.value)
+    } else {
+      this._update(this._watcher.value)
+    }
     this._firstRendering = false
+    this.$options.stream = false
     this._mounted = true
     // root instance, call mounted on self
     if (this.$root === this) {

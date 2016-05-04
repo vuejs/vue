@@ -387,10 +387,12 @@ export function createPatchFunction (backend) {
 
   function firstPatch (vnode) {
     var insertedVnodeQueue = []
-    var lastParent = this._lastParent
+    var currentVNode = this._currentVNode
     createElm(vnode, insertedVnodeQueue)
     invokeInsertHook(insertedVnodeQueue)
-    nodeOps.appendChild(lastParent.elm, vnode.elm)
+    if (vnode.elm) {
+      nodeOps.appendChild(currentVNode.elm, vnode.elm)
+    }
     return vnode.elm
   }
 
