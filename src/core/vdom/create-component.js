@@ -31,11 +31,7 @@ export function createComponent (Ctor, data, parent, children, context) {
     if (Ctor.resolved) {
       Ctor = Ctor.resolved
     } else {
-      resolveAsyncComponent(Ctor, () => {
-        // it's ok to queue this on every render because
-        // $forceUpdate is buffered.
-        parent.$forceUpdate()
-      })
+      resolveAsyncComponent(Ctor, parent)
       return
     }
   }
@@ -108,25 +104,26 @@ function destroy (vnode) {
   vnode.child.$destroy()
 }
 
-function resolveAsyncComponent (factory, cb) {
+function resolveAsyncComponent (factory, parent) {
   if (factory.resolved) {
-    // cached
-    cb(factory.resolved)
+    parent.$forceUpdate()
   } else if (factory.requested) {
     // pool callbacks
-    factory.pendingCallbacks.push(cb)
+    factory.requested++
   } else {
-    factory.requested = true
-    const cbs = factory.pendingCallbacks = [cb]
+    factory.requested = 1
     factory(function resolve (res) {
       if (isObject(res)) {
         res = Vue.extend(res)
       }
       // cache resolved
       factory.resolved = res
-      // invoke callbacks
-      for (let i = 0, l = cbs.length; i < l; i++) {
-        cbs[i](res)
+      // invoke forceUpdate
+      while (factory.requested) {
+        // it's ok to queue this on every render because
+        // $forceUpdate is buffered.
+        parent.$forceUpdate()
+        factory.requested--
       }
     }, function reject (reason) {
       process.env.NODE_ENV !== 'production' && warn(
