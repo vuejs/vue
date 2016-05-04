@@ -236,7 +236,7 @@ Watcher.prototype.teardown = function () {
 }
 
 /**
- * Recrusively traverse an object to evoke all converted
+ * Recursively traverse an object to evoke all converted
  * getters, so that every nested property inside the object
  * is collected as a "deep" dependency.
  *
