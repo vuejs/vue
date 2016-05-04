@@ -13,7 +13,7 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
 ### $500
 
 <a href="http://www.itunescn.com/">
-  <img width="360px" src="http://i.imgur.com/9LE0Scf.png">
+  <img width="360px" src="https://www.zymmm.com/content/images/2016/05/itunescn-logo-4.png">
 </a>
 
 ---
