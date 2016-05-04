@@ -119,6 +119,16 @@ describe('Transclude', function () {
     expect(res.getAttribute('title')).toBe('child')
   })
 
+  // #2789
+  it('empty class merge', () => {
+    el.setAttribute('class', '')
+    options.template = '<div class="test"></div>'
+    options.replace = true
+    options._asComponent = true
+    var res = transclude(el, options)
+    expect(res.getAttribute('class')).toBe('test')
+  })
+
   it('class merge for svg elements', function () {
     el.setAttribute('class', 'test')
     options.template = '<circle class="other"></circle>'
