@@ -216,9 +216,7 @@ function processFor (el) {
       el.alias = alias
     }
     if ((exp = getAndRemoveAttr(el, 'track-by'))) {
-      el.key = exp === '$index'
-        ? exp
-        : el.alias + '["' + exp + '"]'
+      el.key = exp
     }
   }
 }

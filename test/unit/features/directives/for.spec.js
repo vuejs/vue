@@ -295,7 +295,7 @@ describe('Directive v-for', () => {
           { id: 3, msg: 'c' }
         ]
       },
-      template: '<div><div v-for="item in items" track-by="id">{{ item.msg }}</div></div>'
+      template: '<div><div v-for="item in items" track-by="item.id">{{ item.msg }}</div></div>'
     })
     vm.$mount()
     expect(vm.$el.textContent).toBe('abc')
