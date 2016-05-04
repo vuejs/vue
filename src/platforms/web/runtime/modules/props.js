@@ -15,16 +15,16 @@ function updateProps (oldVnode, vnode) {
   for (key in props) {
     cur = props[key]
     old = oldProps[key]
-    if (old !== cur) {
-      if (key === 'value') {
-        // store value as _value as well since
-        // non-string values will be stringified
-        if (elm._value !== cur) {
-          elm.value = elm._value = cur
-        }
-      } else {
-        elm[key] = cur
+    if (key === 'value') {
+      // store value as _value as well since
+      // non-string values will be stringified
+      elm._value = cur
+      // avoid resetting cursor position when value is the same
+      if (elm.value != cur) { // eslint-disable-line
+        elm.value = cur
       }
+    } else if (old !== cur) {
+      elm[key] = cur
     }
   }
 }
