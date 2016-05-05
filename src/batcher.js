@@ -17,18 +17,17 @@ var userQueue = []
 var has = {}
 var circular = {}
 var waiting = false
-var internalQueueDepleted = false
 
 /**
  * Reset the batcher's state.
  */
 
 function resetBatcherState () {
-  queue = []
-  userQueue = []
+  queue.length = 0
+  userQueue.length = 0
   has = {}
   circular = {}
-  waiting = internalQueueDepleted = false
+  waiting = false
 }
 
 /**
@@ -37,8 +36,12 @@ function resetBatcherState () {
 
 function flushBatcherQueue () {
   runBatcherQueue(queue)
-  internalQueueDepleted = true
+  queue.length = 0
   runBatcherQueue(userQueue)
+  // user watchers triggered more internal watchers
+  if (queue.length) {
+    runBatcherQueue(queue)
+  }
   // dev tool hook
   /* istanbul ignore if */
   if (devtools && config.devtools) {
@@ -88,13 +91,13 @@ function runBatcherQueue (queue) {
  */
 
 export function pushWatcher (watcher) {
-  var id = watcher.id
+  const id = watcher.id
   if (has[id] == null) {
     // push watcher into appropriate queue
-    var q = internalQueueDepleted || watcher.user
+    const q = watcher.user
       ? userQueue
       : queue
-    has[id] = true
+    has[id] = q.length
     q.push(watcher)
     // queue the flush
     if (!waiting) {
