@@ -426,8 +426,13 @@ const vFor = {
           process.env.NODE_ENV !== 'production' &&
           this.warnDuplicate(value)
         }
-      } else {
+      } else if (Object.isExtensible(value)) {
         def(value, id, frag)
+      } else if (process.env.NODE_ENV !== 'production') {
+        warn(
+          'Frozen v-for objects cannot be automatically tracked, make sure to ' +
+          'provide a track-by key.'
+        )
       }
     }
     frag.raw = value
