@@ -457,4 +457,23 @@ describe('Slot Distribution', function () {
     })
     expect('"slot" attribute must be static').toHaveBeenWarned()
   })
+
+  it('default slot should use fallback content if has only whitespace', () => {
+    new Vue({
+      el: el,
+      template: '<test><div slot="first">1</div> <div slot="second">2</div></test>',
+      components: {
+        test: {
+          replace: true,
+          template:
+            '<div class="wrapper">' +
+              '<slot name="first"><p>first slot</p></slot>' +
+              '<slot><p>this is the default slot</p></slot>' +
+              '<slot name="second"><p>second named slot</p></slot>' +
+            '</div>'
+        }
+      }
+    })
+    expect(el.children[0].innerHTML).toBe('<div slot="first">1</div><p>this is the default slot</p><div slot="second">2</div>')
+  })
 })

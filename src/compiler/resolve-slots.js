@@ -38,6 +38,14 @@ export function resolveSlots (vm, content) {
     contents[name] = extractFragment(contents[name], content)
   }
   if (content.hasChildNodes()) {
+    const nodes = content.childNodes
+    if (
+      nodes.length === 1 &&
+      nodes[0].nodeType === 3 &&
+      !nodes[0].data.trim()
+    ) {
+      return
+    }
     contents['default'] = extractFragment(content.childNodes, content)
   }
 }
