@@ -333,6 +333,7 @@ const vFor = {
       setTimeout(op, staggerAmount)
     } else {
       var target = prevEl.nextSibling
+      /* istanbul ignore if */
       if (!target) {
         // reset end anchor position in case the position was messed up
         // by an external drag-n-drop library.

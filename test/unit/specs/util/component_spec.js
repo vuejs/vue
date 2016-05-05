@@ -23,6 +23,20 @@ describe('Util - component', function () {
     expect(res.id).toBe('foo')
     expect(res.dynamic).toBe(true)
 
+    // <test is="...">
+    el = document.createElement('test')
+    el.setAttribute('is', 'foo')
+    res = _.checkComponentAttr(el, mockOptions)
+    expect(res.id).toBe('foo')
+    expect(res.dynamic).toBeUndefined()
+
+    // <test :is="...">
+    el = document.createElement('test')
+    el.setAttribute(':is', 'foo')
+    res = _.checkComponentAttr(el, mockOptions)
+    expect(res.id).toBe('foo')
+    expect(res.dynamic).toBe(true)
+
     // custom element, not defined
     el = document.createElement('test')
     res = _.checkComponentAttr(el, mockOptions)
