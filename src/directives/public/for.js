@@ -332,7 +332,14 @@ const vFor = {
       })
       setTimeout(op, staggerAmount)
     } else {
-      frag.before(prevEl.nextSibling)
+      var target = prevEl.nextSibling
+      if (!target) {
+        // reset end anchor position in case the position was messed up
+        // by an external drag-n-drop library.
+        after(this.end, prevEl)
+        target = this.end
+      }
+      frag.before(target)
     }
   },
 
