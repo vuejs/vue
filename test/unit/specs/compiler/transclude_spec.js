@@ -120,7 +120,7 @@ describe('Transclude', function () {
   })
 
   // #2789
-  it('empty class merge', () => {
+  it('empty class merge', function () {
     el.setAttribute('class', '')
     options.template = '<div class="test"></div>'
     options.replace = true
