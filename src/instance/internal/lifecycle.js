@@ -244,7 +244,7 @@ export default function (Vue) {
     }
     // remove reference from data ob
     // frozen object may not have observer.
-    if (this._data.__ob__) {
+    if (this._data && this._data.__ob__) {
       this._data.__ob__.removeVm(this)
     }
     // Clean up references to private properties and other
