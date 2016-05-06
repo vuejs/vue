@@ -142,10 +142,12 @@ function stringToFragment (templateString, raw) {
 
 function nodeToFragment (node) {
   // if its a template tag and the browser supports it,
-  // its content is already a document fragment.
+  // its content is already a document fragment. However, iOS Safari has
+  // bug when using directly cloned template content with touch
+  // events and can cause crashes the nodes are removed from DOM, so we have
+  // to treat template elements as string templates. (#2805)
   if (isRealTemplate(node)) {
-    trimNode(node.content)
-    return node.content
+    return stringToFragment(node.innerHTML)
   }
   // script template
   if (node.tagName === 'SCRIPT') {
