@@ -996,7 +996,7 @@ describe('v-for', function () {
       el: document.createElement('div'),
       template: '<div v-for="item in items">{{item.name}}</div>',
       data: {
-        items: [Object.freeze({ name:'hi' })]
+        items: [Object.freeze({ name: 'hi' })]
       }
     })
     expect('Frozen v-for objects cannot be automatically tracked').toHaveBeenWarned()

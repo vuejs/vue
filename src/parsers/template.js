@@ -146,6 +146,7 @@ function nodeToFragment (node) {
   // bug when using directly cloned template content with touch
   // events and can cause crashes when the nodes are removed from DOM, so we
   // have to treat template elements as string templates. (#2805)
+  /* istanbul ignore if */
   if (isRealTemplate(node)) {
     return stringToFragment(node.innerHTML)
   }
