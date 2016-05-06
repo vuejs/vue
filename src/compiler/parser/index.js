@@ -233,22 +233,11 @@ function processIf (el) {
 
 function processElse (el, parent) {
   const prev = findPrevElement(parent.children)
-  if (prev && (prev.if || prev.attrsMap['v-show'])) {
-    if (prev.if) {
-      // v-if
-      prev.elseBlock = el
-    } else {
-      // v-show: simply add a v-show with reversed value
-      addDirective(el, 'show', `!(${prev.attrsMap['v-show']})`)
-      // also copy its transition
-      el.transition = prev.transition
-      // als set show to true
-      el.show = true
-      parent.children.push(el)
-    }
+  if (prev && prev.if) {
+    prev.elseBlock = el
   } else if (process.env.NODE_ENV !== 'production') {
     warn(
-      `v-else used on element <${el.tag}> without corresponding v-if/v-show.`
+      `v-else used on element <${el.tag}> without corresponding v-if.`
     )
   }
 }

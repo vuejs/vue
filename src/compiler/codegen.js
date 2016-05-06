@@ -126,7 +126,7 @@ function genData (el) {
   }
   // v-show, used to avoid transition being applied
   // since v-show takes it over
-  if (el.attrsMap['v-show'] || el.show) {
+  if (el.attrsMap['v-show']) {
     data += 'show:true,'
   }
   // props
