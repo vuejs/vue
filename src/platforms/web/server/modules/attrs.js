@@ -23,14 +23,16 @@ function serialize (attrs, asProps) {
     if (asProps) {
       key = propsToAttrMap[key] || key.toLowerCase()
     }
-    if (attrs[key] != null) {
-      if (isBooleanAttr(key)) {
+    if (isBooleanAttr(key)) {
+      if (attrs[key]) {
         res += ` ${key}="${key}"`
-      } else if (isEnumeratedAttr(key)) {
-        res += ` ${key}="true"`
-      } else {
-        res += ` ${key}="${attrs[key]}"`
       }
+    } else if (isEnumeratedAttr(key)) {
+      if (attrs[key]) {
+        res += ` ${key}="true"`
+      }
+    } else {
+      res += ` ${key}="${attrs[key]}"`
     }
   }
   return res
