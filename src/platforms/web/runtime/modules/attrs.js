@@ -1,4 +1,4 @@
-import { isBooleanAttr, isEnumeratedAttr, isXlink, xlinkNS } from 'web/util/index'
+import { isBooleanAttr, isEnumeratedAttr, isXlink, xlinkNS, getXlinkProp } from 'web/util/index'
 
 function updateAttrs (oldVnode, vnode) {
   if (!oldVnode.data.attrs && !vnode.data.attrs) {
@@ -19,8 +19,8 @@ function updateAttrs (oldVnode, vnode) {
   for (key in oldAttrs) {
     if (attrs[key] == null) {
       if (isXlink(key)) {
-        elm.removeAttributeNS(xlinkNS, key)
-      } else {
+        elm.removeAttributeNS(xlinkNS, getXlinkProp(key))
+      } else if (!isEnumeratedAttr(key)) {
         elm.removeAttribute(key)
       }
     }
@@ -29,17 +29,27 @@ function updateAttrs (oldVnode, vnode) {
 
 function setAttr (el, key, value) {
   if (isBooleanAttr(key)) {
-    if (value == null) {
+    // set attribute for blank value
+    // e.g. <option disabled>Select one</option>
+    if (value == null || value === false) {
       el.removeAttribute(key)
     } else {
       el.setAttribute(key, key)
     }
   } else if (isEnumeratedAttr(key)) {
-    el.setAttribute(key, value == null ? 'false' : 'true')
+    el.setAttribute(key, value ? 'true' : 'false')
   } else if (isXlink(key)) {
-    el.setAttributeNS(xlinkNS, key, value)
+    if (value == null || value === false) {
+      el.removeAttributeNS(xlinkNS, getXlinkProp(key))
+    } else {
+      el.setAttributeNS(xlinkNS, key, value === true ? '' : value)
+    }
   } else {
-    el.setAttribute(key, value)
+    if (value == null || value === false) {
+      el.removeAttribute(key)
+    } else {
+      el.setAttribute(key, value === true ? '' : value)
+    }
   }
 }
 

@@ -125,6 +125,68 @@ describe('SSR: renderToString', () => {
       '</div>'
     )
   })
+
+  it('normal attr', () => {
+    expect(renderVmWithOptions({
+      template: `
+        <div>
+          <span :test="'ok'">hello</span>
+          <span :test="null">hello</span>
+          <span :test="false">hello</span>
+          <span :test="true">hello</span>
+          <span :test="0">hello</span>
+        </div>
+      `
+    })).toContain(
+      '<div server-rendered="true">' +
+        '<span test="ok">hello</span>' +
+        '<span>hello</span>' +
+        '<span>hello</span>' +
+        '<span test="">hello</span>' +
+        '<span test="0">hello</span>' +
+      '</div>'
+    )
+  })
+
+  it('enumrated attr', () => {
+    expect(renderVmWithOptions({
+      template: `
+        <div>
+          <span :draggable="true">hello</span>
+          <span :draggable="'ok'">hello</span>
+          <span :draggable="null">hello</span>
+          <span :draggable="''">hello</span>
+        </div>
+      `
+    })).toContain(
+      '<div server-rendered="true">' +
+        '<span draggable="true">hello</span>' +
+        '<span draggable="true">hello</span>' +
+        '<span draggable="false">hello</span>' +
+        '<span draggable="true">hello</span>' +
+      '</div>'
+    )
+  })
+
+  it('boolean attr', () => {
+    expect(renderVmWithOptions({
+      template: `
+        <div>
+          <span :disabled="true">hello</span>
+          <span :disabled="'ok'">hello</span>
+          <span :disabled="null">hello</span>
+          <span :disabled="''">hello</span>
+        </div>
+      `
+    })).toContain(
+      '<div server-rendered="true">' +
+        '<span disabled="disabled">hello</span>' +
+        '<span disabled="disabled">hello</span>' +
+        '<span>hello</span>' +
+        '<span disabled="disabled">hello</span>' +
+      '</div>'
+    )
+  })
 })
 
 function renderVmWithOptions (options) {
