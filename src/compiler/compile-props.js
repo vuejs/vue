@@ -334,7 +334,7 @@ function assertProp (prop, value, vm) {
   var expectedTypes = []
   if (type) {
     if (!isArray(type)) {
-      type = [ type ]
+      type = [type]
     }
     for (var i = 0; i < type.length && !valid; i++) {
       var assertedType = assertType(value, type[i])
