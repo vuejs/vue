@@ -27,6 +27,32 @@ import {
 const strats = config.optionMergeStrategies = Object.create(null)
 
 /**
+ * Options with restrictions
+ */
+
+if (process.env.NODE_ENV !== 'production') {
+  strats.el = strats.propsData = function (parent, child, vm, key) {
+    if (!vm) {
+      warn(
+        `option "${key}" can only be used during instance ` +
+        'creation with the `new` keyword.'
+      )
+    }
+    return defaultStrat(parent, child)
+  }
+
+  strats.name = function (parent, child, vm) {
+    if (vm) {
+      warn(
+        'options "name" can only be used as a component definition option, ' +
+        'not during instance creation.'
+      )
+    }
+    return defaultStrat(parent, child)
+  }
+}
+
+/**
  * Helper that recursively merges two data objects together.
  */
 
@@ -93,27 +119,6 @@ strats.data = function (parentVal, childVal, vm) {
       }
     }
   }
-}
-
-/**
- * El
- */
-
-strats.el = function (parentVal, childVal, vm) {
-  if (!vm && childVal && typeof childVal !== 'function') {
-    process.env.NODE_ENV !== 'production' && warn(
-      'The "el" option should be a function ' +
-      'that returns a per-instance value in component ' +
-      'definitions.',
-      vm
-    )
-    return
-  }
-  const ret = childVal || parentVal
-  // invoke the element factory if this is instance merge
-  return vm && typeof ret === 'function'
-    ? ret.call(vm)
-    : ret
 }
 
 /**
