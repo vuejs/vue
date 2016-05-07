@@ -143,7 +143,7 @@ config._lifecycleHooks.forEach(hook => {
  */
 
 function mergeAssets (parentVal, childVal) {
-  const res = Object.create(parentVal)
+  const res = Object.create(parentVal || null)
   return childVal
     ? extend(res, childVal)
     : res
@@ -295,13 +295,19 @@ export function mergeOptions (parent, child, vm) {
       warn('propsData can only be used as an instantiation option.')
     }
   }
-  const options = {}
-  let key
+  const extendsFrom = child.extends
+  if (extendsFrom) {
+    parent = typeof extendsFrom === 'function'
+      ? mergeOptions(parent, extendsFrom.options, vm)
+      : mergeOptions(parent, extendsFrom, vm)
+  }
   if (child.mixins) {
     for (let i = 0, l = child.mixins.length; i < l; i++) {
       parent = mergeOptions(parent, child.mixins[i], vm)
     }
   }
+  const options = {}
+  let key
   for (key in parent) {
     mergeField(key)
   }
