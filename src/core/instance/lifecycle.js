@@ -39,6 +39,18 @@ export function lifecycleMixin (Vue) {
         }
       }
     }
+    this.renderStaticTrees()
+    this._watcher = new Watcher(this, this._render, this._update)
+    this._update(this._watcher.value)
+    this._mounted = true
+    // root instance, call ready on self
+    if (this.$root === this) {
+      callHook(this, 'ready')
+    }
+    return this
+  }
+
+  Vue.prototype._renderStaticTrees = function () {
     // render static sub-trees for once on mount
     const staticRenderFns = this.$options.staticRenderFns
     if (staticRenderFns) {
@@ -46,13 +58,6 @@ export function lifecycleMixin (Vue) {
       for (let i = 0; i < staticRenderFns.length; i++) {
         this._staticTrees[i] = staticRenderFns[i].call(this._renderProxy)
       }
-    }
-    this._watcher = new Watcher(this, this._render, this._update)
-    this._update(this._watcher.value)
-    this._mounted = true
-    // root instance, call ready on self
-    if (this.$root === this) {
-      callHook(this, 'ready')
     }
     return this
   }
