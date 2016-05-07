@@ -113,24 +113,27 @@ function destroy (vnode) {
 
 function resolveAsyncComponent (factory, cb) {
   if (factory.resolved) {
-    // cached
-    cb(factory.resolved)
+    return factory.resolved
   } else if (factory.requested) {
     // pool callbacks
     factory.pendingCallbacks.push(cb)
   } else {
     factory.requested = true
     const cbs = factory.pendingCallbacks = [cb]
-    return factory(function resolve (res) {
+    factory.resolved = factory(function resolve (res) {
       if (isObject(res)) {
         res = Vue.extend(res)
       }
       // cache resolved
       factory.resolved = res
+
       // invoke callbacks
       for (let i = 0, l = cbs.length; i < l; i++) {
         cbs[i](res)
+        // Reset pending callbacks
+        factory.pendingCallbacks = []
       }
+
       return res
     }, function reject (reason) {
       process.env.NODE_ENV !== 'production' && warn(
@@ -138,7 +141,9 @@ function resolveAsyncComponent (factory, cb) {
         (reason ? `\nReason: ${reason}` : '')
       )
     })
+    return factory.resolved
   }
+
 }
 
 function extractProps (data, Ctor) {
