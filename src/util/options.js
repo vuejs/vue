@@ -333,7 +333,9 @@ export function mergeOptions (parent, child, vm) {
   var options = {}
   var key
   if (child.extends) {
-    parent = mergeOptions(parent, child.extends, vm)
+    parent = typeof child.extends === 'function'
+      ? mergeOptions(parent, child.extends.options, vm)
+      : mergeOptions(parent, child.extends, vm)
   }
   if (child.mixins) {
     for (var i = 0, l = child.mixins.length; i < l; i++) {
