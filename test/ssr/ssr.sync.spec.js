@@ -142,7 +142,7 @@ describe('SSR: renderToString', () => {
         '<span test="ok">hello</span>' +
         '<span>hello</span>' +
         '<span>hello</span>' +
-        '<span test="">hello</span>' +
+        '<span test="true">hello</span>' +
         '<span test="0">hello</span>' +
       '</div>'
     )
@@ -155,7 +155,9 @@ describe('SSR: renderToString', () => {
           <span :draggable="true">hello</span>
           <span :draggable="'ok'">hello</span>
           <span :draggable="null">hello</span>
+          <span :draggable="false">hello</span>
           <span :draggable="''">hello</span>
+          <span :draggable="'false'">hello</span>
         </div>
       `
     })).toContain(
@@ -163,7 +165,9 @@ describe('SSR: renderToString', () => {
         '<span draggable="true">hello</span>' +
         '<span draggable="true">hello</span>' +
         '<span draggable="false">hello</span>' +
+        '<span draggable="false">hello</span>' +
         '<span draggable="true">hello</span>' +
+        '<span draggable="false">hello</span>' +
       '</div>'
     )
   })

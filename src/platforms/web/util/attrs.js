@@ -24,3 +24,4 @@ export const propsToAttrMap = {
 export const xlinkNS = 'http://www.w3.org/1999/xlink'
 export const isXlink = name => name.charAt(5) === ':' && name.slice(0, 5) === 'xlink'
 export const getXlinkProp = name => isXlink(name) ? name.slice(6, name.length) : ''
+export const isFalsyAttrValue = val => val == null || val === false

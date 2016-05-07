@@ -19,7 +19,7 @@ describe('Directive v-bind', () => {
       expect(vm.$el.firstChild.hasAttribute('test')).toBe(false)
       vm.foo = true
     }).then(() => {
-      expect(vm.$el.firstChild.getAttribute('test')).toBe('')
+      expect(vm.$el.firstChild.getAttribute('test')).toBe('true')
       vm.foo = 0
     }).then(() => {
       expect(vm.$el.firstChild.getAttribute('test')).toBe('0')
@@ -68,7 +68,7 @@ describe('Directive v-bind', () => {
       expect(vm.$el.firstChild.hasAttributeNS(xlinkNS, 'special')).toBe(false)
       vm.foo = true
     }).then(() => {
-      expect(vm.$el.firstChild.getAttributeNS(xlinkNS, 'special')).toBe('')
+      expect(vm.$el.firstChild.getAttributeNS(xlinkNS, 'special')).toBe('true')
       done()
     }).catch(done)
   })
@@ -87,6 +87,12 @@ describe('Directive v-bind', () => {
     }).then(() => {
       expect(vm.$el.firstChild.getAttribute('draggable')).toBe('false')
       vm.foo = ''
+    }).then(() => {
+      expect(vm.$el.firstChild.getAttribute('draggable')).toBe('true')
+      vm.foo = false
+    }).then(() => {
+      expect(vm.$el.firstChild.getAttribute('draggable')).toBe('false')
+      vm.foo = 'false'
     }).then(() => {
       expect(vm.$el.firstChild.getAttribute('draggable')).toBe('false')
       done()

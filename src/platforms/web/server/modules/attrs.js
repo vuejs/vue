@@ -1,4 +1,9 @@
-import { isBooleanAttr, isEnumeratedAttr, propsToAttrMap } from 'web/util/index'
+import {
+  isBooleanAttr,
+  isEnumeratedAttr,
+  isFalsyAttrValue,
+  propsToAttrMap
+} from 'web/util/index'
 
 export default function renderAttrs (node) {
   if (node.data.attrs || node.data.props || node.data.staticAttrs) {
@@ -25,15 +30,13 @@ function serialize (attrs, asProps) {
     }
     const value = attrs[key]
     if (isBooleanAttr(key)) {
-      if (!(value == null || value === false)) {
+      if (!isFalsyAttrValue(value)) {
         res += ` ${key}="${key}"`
       }
     } else if (isEnumeratedAttr(key)) {
-      res += ` ${key}="${value ? 'true' : 'false'}"`
-    } else {
-      if (!(value == null || value === false)) {
-        res += ` ${key}="${value === true ? '' : value}"`
-      }
+      res += ` ${key}="${isFalsyAttrValue(value) || value === 'false' ? 'false' : 'true'}"`
+    } else if (!isFalsyAttrValue(value)) {
+      res += ` ${key}="${value}"`
     }
   }
   return res
