@@ -1,5 +1,5 @@
 /*!
- * Vue.js v1.0.21
+ * Vue.js v1.0.22
  * (c) 2016 Evan You
  * Released under the MIT License.
  */
@@ -50,6 +50,10 @@
     delete obj[key];
     var ob = obj.__ob__;
     if (!ob) {
+      if (obj._isVue) {
+        delete obj._data[key];
+        obj._digest();
+      }
       return;
     }
     ob.dep.notify();
@@ -400,6 +404,8 @@
   var UA = inBrowser && window.navigator.userAgent.toLowerCase();
   var isIE9 = UA && UA.indexOf('msie 9.0') > 0;
   var isAndroid = UA && UA.indexOf('android') > 0;
+  var isIos = UA && /(iphone|ipad|ipod|ios)/i.test(UA);
+  var isWechat = UA && UA.indexOf('micromessenger') > 0;
 
   var transitionProp = undefined;
   var transitionEndEvent = undefined;
@@ -440,7 +446,7 @@
     }
 
     /* istanbul ignore if */
-    if (typeof MutationObserver !== 'undefined') {
+    if (typeof MutationObserver !== 'undefined' && !(isWechat && isIos)) {
       var counter = 1;
       var observer = new MutationObserver(nextTickHandler);
       var textNode = document.createTextNode(counter);
@@ -468,6 +474,27 @@
       timerFunc(nextTickHandler, 0);
     };
   })();
+
+  var _Set = undefined;
+  /* istanbul ignore if */
+  if (typeof Set !== 'undefined' && Set.toString().match(/native code/)) {
+    // use native Set when available.
+    _Set = Set;
+  } else {
+    // a non-standard Set polyfill that only works with primitive keys.
+    _Set = function () {
+      this.set = Object.create(null);
+    };
+    _Set.prototype.has = function (key) {
+      return this.set[key] !== undefined;
+    };
+    _Set.prototype.add = function (key) {
+      this.set[key] = 1;
+    };
+    _Set.prototype.clear = function () {
+      this.set = Object.create(null);
+    };
+  }
 
   function Cache(limit) {
     this.size = 0;
@@ -1549,7 +1576,7 @@ var transition = Object.freeze({
       if (resolveAsset(options, 'components', tag)) {
         return { id: tag };
       } else {
-        var is = hasAttrs && getIsBinding(el);
+        var is = hasAttrs && getIsBinding(el, options);
         if (is) {
           return is;
         } else if ('development' !== 'production') {
@@ -1562,7 +1589,7 @@ var transition = Object.freeze({
         }
       }
     } else if (hasAttrs) {
-      return getIsBinding(el);
+      return getIsBinding(el, options);
     }
   }
 
@@ -1570,14 +1597,18 @@ var transition = Object.freeze({
    * Get "is" binding from an element.
    *
    * @param {Element} el
+   * @param {Object} options
    * @return {Object|undefined}
    */
 
-  function getIsBinding(el) {
+  function getIsBinding(el, options) {
     // dynamic syntax
-    var exp = getAttr(el, 'is');
+    var exp = el.getAttribute('is');
     if (exp != null) {
-      return { id: exp };
+      if (resolveAsset(options, 'components', exp)) {
+        el.removeAttribute('is');
+        return { id: exp };
+      }
     } else {
       exp = getBindAttr(el, 'is');
       if (exp != null) {
@@ -1688,7 +1719,7 @@ var transition = Object.freeze({
    */
 
   function mergeAssets(parentVal, childVal) {
-    var res = Object.create(parentVal);
+    var res = Object.create(parentVal || null);
     return childVal ? extend(res, guardArrayAssets(childVal)) : res;
   }
 
@@ -1847,8 +1878,16 @@ var transition = Object.freeze({
   function mergeOptions(parent, child, vm) {
     guardComponents(child);
     guardProps(child);
+    if ('development' !== 'production') {
+      if (child.propsData && !vm) {
+        warn('propsData can only be used as an instantiation option.');
+      }
+    }
     var options = {};
     var key;
+    if (child['extends']) {
+      parent = typeof child['extends'] === 'function' ? mergeOptions(parent, child['extends'].options, vm) : mergeOptions(parent, child['extends'], vm);
+    }
     if (child.mixins) {
       for (var i = 0, l = child.mixins.length; i < l; i++) {
         parent = mergeOptions(parent, child.mixins[i], vm);
@@ -2281,11 +2320,14 @@ var transition = Object.freeze({
   	devtools: devtools,
   	isIE9: isIE9,
   	isAndroid: isAndroid,
+  	isIos: isIos,
+  	isWechat: isWechat,
   	get transitionProp () { return transitionProp; },
   	get transitionEndEvent () { return transitionEndEvent; },
   	get animationProp () { return animationProp; },
   	get animationEndEvent () { return animationEndEvent; },
   	nextTick: nextTick,
+  	get _Set () { return _Set; },
   	query: query,
   	inDoc: inDoc,
   	getAttr: getAttr,
@@ -2398,13 +2440,8 @@ var transition = Object.freeze({
       this._updateRef();
 
       // initialize data as empty object.
-      // it will be filled up in _initScope().
+      // it will be filled up in _initData().
       this._data = {};
-
-      // save raw constructor data before merge
-      // so that we know which properties are provided at
-      // instantiation.
-      this._runtimeData = options.data;
 
       // call init hook
       this._callHook('init');
@@ -2955,24 +2992,22 @@ var expression = Object.freeze({
   // triggered, the DOM would have already been in updated
   // state.
 
-  var queueIndex;
   var queue = [];
   var userQueue = [];
   var has = {};
   var circular = {};
   var waiting = false;
-  var internalQueueDepleted = false;
 
   /**
    * Reset the batcher's state.
    */
 
   function resetBatcherState() {
-    queue = [];
-    userQueue = [];
+    queue.length = 0;
+    userQueue.length = 0;
     has = {};
     circular = {};
-    waiting = internalQueueDepleted = false;
+    waiting = false;
   }
 
   /**
@@ -2981,8 +3016,12 @@ var expression = Object.freeze({
 
   function flushBatcherQueue() {
     runBatcherQueue(queue);
-    internalQueueDepleted = true;
+    queue.length = 0;
     runBatcherQueue(userQueue);
+    // user watchers triggered more internal watchers
+    if (queue.length) {
+      runBatcherQueue(queue);
+    }
     // dev tool hook
     /* istanbul ignore if */
     if (devtools && config.devtools) {
@@ -3000,8 +3039,8 @@ var expression = Object.freeze({
   function runBatcherQueue(queue) {
     // do not cache length because more watchers might be pushed
     // as we run existing watchers
-    for (queueIndex = 0; queueIndex < queue.length; queueIndex++) {
-      var watcher = queue[queueIndex];
+    for (var i = 0; i < queue.length; i++) {
+      var watcher = queue[i];
       var id = watcher.id;
       has[id] = null;
       watcher.run();
@@ -3030,20 +3069,14 @@ var expression = Object.freeze({
   function pushWatcher(watcher) {
     var id = watcher.id;
     if (has[id] == null) {
-      if (internalQueueDepleted && !watcher.user) {
-        // an internal watcher triggered by a user watcher...
-        // let's run it immediately after current user watcher is done.
-        userQueue.splice(queueIndex + 1, 0, watcher);
-      } else {
-        // push watcher into appropriate queue
-        var q = watcher.user ? userQueue : queue;
-        has[id] = q.length;
-        q.push(watcher);
-        // queue the flush
-        if (!waiting) {
-          waiting = true;
-          nextTick(flushBatcherQueue);
-        }
+      // push watcher into appropriate queue
+      var q = watcher.user ? userQueue : queue;
+      has[id] = q.length;
+      q.push(watcher);
+      // queue the flush
+      if (!waiting) {
+        waiting = true;
+        nextTick(flushBatcherQueue);
       }
     }
   }
@@ -3084,8 +3117,8 @@ var expression = Object.freeze({
     this.dirty = this.lazy; // for lazy watchers
     this.deps = [];
     this.newDeps = [];
-    this.depIds = Object.create(null);
-    this.newDepIds = null;
+    this.depIds = new _Set();
+    this.newDepIds = new _Set();
     this.prevError = null; // for async error stacks
     // parse expression for getter/setter
     if (isFn) {
@@ -3177,8 +3210,6 @@ var expression = Object.freeze({
 
   Watcher.prototype.beforeGet = function () {
     Dep.target = this;
-    this.newDepIds = Object.create(null);
-    this.newDeps.length = 0;
   };
 
   /**
@@ -3189,10 +3220,10 @@ var expression = Object.freeze({
 
   Watcher.prototype.addDep = function (dep) {
     var id = dep.id;
-    if (!this.newDepIds[id]) {
-      this.newDepIds[id] = true;
+    if (!this.newDepIds.has(id)) {
+      this.newDepIds.add(id);
       this.newDeps.push(dep);
-      if (!this.depIds[id]) {
+      if (!this.depIds.has(id)) {
         dep.addSub(this);
       }
     }
@@ -3207,14 +3238,18 @@ var expression = Object.freeze({
     var i = this.deps.length;
     while (i--) {
       var dep = this.deps[i];
-      if (!this.newDepIds[dep.id]) {
+      if (!this.newDepIds.has(dep.id)) {
         dep.removeSub(this);
       }
     }
+    var tmp = this.depIds;
     this.depIds = this.newDepIds;
-    var tmp = this.deps;
+    this.newDepIds = tmp;
+    this.newDepIds.clear();
+    tmp = this.deps;
     this.deps = this.newDeps;
     this.newDeps = tmp;
+    this.newDeps.length = 0;
   };
 
   /**
@@ -3338,15 +3373,33 @@ var expression = Object.freeze({
    * @param {*} val
    */
 
-  function traverse(val) {
-    var i, keys;
-    if (isArray(val)) {
-      i = val.length;
-      while (i--) traverse(val[i]);
-    } else if (isObject(val)) {
-      keys = Object.keys(val);
-      i = keys.length;
-      while (i--) traverse(val[keys[i]]);
+  var seenObjects = new _Set();
+  function traverse(val, seen) {
+    var i = undefined,
+        keys = undefined;
+    if (!seen) {
+      seen = seenObjects;
+      seen.clear();
+    }
+    var isA = isArray(val);
+    var isO = isObject(val);
+    if (isA || isO) {
+      if (val.__ob__) {
+        var depId = val.__ob__.dep.id;
+        if (seen.has(depId)) {
+          return;
+        } else {
+          seen.add(depId);
+        }
+      }
+      if (isA) {
+        i = val.length;
+        while (i--) traverse(val[i], seen);
+      } else if (isO) {
+        keys = Object.keys(val);
+        i = keys.length;
+        while (i--) traverse(val[keys[i]], seen);
+      }
     }
   }
 
@@ -3455,10 +3508,13 @@ var expression = Object.freeze({
 
   function nodeToFragment(node) {
     // if its a template tag and the browser supports it,
-    // its content is already a document fragment.
+    // its content is already a document fragment. However, iOS Safari has
+    // bug when using directly cloned template content with touch
+    // events and can cause crashes when the nodes are removed from DOM, so we
+    // have to treat template elements as string templates. (#2805)
+    /* istanbul ignore if */
     if (isRealTemplate(node)) {
-      trimNode(node.content);
-      return node.content;
+      return stringToFragment(node.innerHTML);
     }
     // script template
     if (node.tagName === 'SCRIPT') {
@@ -3854,7 +3910,7 @@ var template = Object.freeze({
     this.vm = vm;
     var template;
     var isString = typeof el === 'string';
-    if (isString || isTemplate(el)) {
+    if (isString || isTemplate(el) && !el.hasAttribute('v-if')) {
       template = parseTemplate(el, true);
     } else {
       template = document.createDocumentFragment();
@@ -4196,7 +4252,15 @@ var template = Object.freeze({
         });
         setTimeout(op, staggerAmount);
       } else {
-        frag.before(prevEl.nextSibling);
+        var target = prevEl.nextSibling;
+        /* istanbul ignore if */
+        if (!target) {
+          // reset end anchor position in case the position was messed up
+          // by an external drag-n-drop library.
+          after(this.end, prevEl);
+          target = this.end;
+        }
+        frag.before(target);
       }
     },
 
@@ -4267,7 +4331,7 @@ var template = Object.freeze({
       var primitive = !isObject(value);
       var id;
       if (key || trackByKey || primitive) {
-        id = trackByKey ? trackByKey === '$index' ? index : getPath(value, trackByKey) : key || value;
+        id = getTrackByKey(index, key, value, trackByKey);
         if (!cache[id]) {
           cache[id] = frag;
         } else if (trackByKey !== '$index') {
@@ -4281,8 +4345,10 @@ var template = Object.freeze({
           } else {
             'development' !== 'production' && this.warnDuplicate(value);
           }
-        } else {
+        } else if (Object.isExtensible(value)) {
           def(value, id, frag);
+        } else if ('development' !== 'production') {
+          warn('Frozen v-for objects cannot be automatically tracked, make sure to ' + 'provide a track-by key.');
         }
       }
       frag.raw = value;
@@ -4302,7 +4368,7 @@ var template = Object.freeze({
       var primitive = !isObject(value);
       var frag;
       if (key || trackByKey || primitive) {
-        var id = trackByKey ? trackByKey === '$index' ? index : getPath(value, trackByKey) : key || value;
+        var id = getTrackByKey(index, key, value, trackByKey);
         frag = this.cache[id];
       } else {
         frag = value[this.id];
@@ -4329,7 +4395,7 @@ var template = Object.freeze({
       var key = hasOwn(scope, '$key') && scope.$key;
       var primitive = !isObject(value);
       if (trackByKey || key || primitive) {
-        var id = trackByKey ? trackByKey === '$index' ? index : getPath(value, trackByKey) : key || value;
+        var id = getTrackByKey(index, key, value, trackByKey);
         this.cache[id] = null;
       } else {
         value[this.id] = null;
@@ -4477,6 +4543,19 @@ var template = Object.freeze({
       ret[i] = i;
     }
     return ret;
+  }
+
+  /**
+   * Get the track by key for an item.
+   *
+   * @param {Number} index
+   * @param {String} key
+   * @param {*} value
+   * @param {String} [trackByKey]
+   */
+
+  function getTrackByKey(index, key, value, trackByKey) {
+    return trackByKey ? trackByKey === '$index' ? index : trackByKey.charAt(0).match(/\w/) ? getPath(value, trackByKey) : value[trackByKey] : key || value;
   }
 
   if ('development' !== 'production') {
@@ -5080,7 +5159,7 @@ var template = Object.freeze({
       }
       // key filter
       var keys = Object.keys(this.modifiers).filter(function (key) {
-        return key !== 'stop' && key !== 'prevent' && key !== 'self';
+        return key !== 'stop' && key !== 'prevent' && key !== 'self' && key !== 'capture';
       });
       if (keys.length) {
         handler = keyFilter(handler, keys);
@@ -5209,6 +5288,12 @@ var template = Object.freeze({
     }
     var i = prefixes.length;
     var prefixed;
+    if (camel !== 'filter' && camel in testEl.style) {
+      return {
+        kebab: prop,
+        camel: camel
+      };
+    }
     while (i--) {
       prefixed = camelPrefixes[i] + upper;
       if (prefixed in testEl.style) {
@@ -5217,12 +5302,6 @@ var template = Object.freeze({
           camel: prefixed
         };
       }
-    }
-    if (camel in testEl.style) {
-      return {
-        kebab: prop,
-        camel: camel
-      };
     }
   }
 
@@ -5312,8 +5391,12 @@ var template = Object.freeze({
         attr = camelize(attr);
       }
       if (!interp && attrWithPropsRE.test(attr) && attr in el) {
-        el[attr] = attr === 'value' ? value == null // IE9 will set input.value to "null" for null...
+        var attrValue = attr === 'value' ? value == null // IE9 will set input.value to "null" for null...
         ? '' : value : value;
+
+        if (el[attr] !== attrValue) {
+          el[attr] = attrValue;
+        }
       }
       // set model props
       var modelProp = modelProps[attr];
@@ -5413,66 +5496,66 @@ var template = Object.freeze({
     deep: true,
 
     update: function update(value) {
-      if (value && typeof value === 'string') {
-        this.handleObject(stringToObject(value));
-      } else if (isPlainObject(value)) {
-        this.handleObject(value);
-      } else if (isArray(value)) {
-        this.handleArray(value);
-      } else {
+      if (!value) {
         this.cleanup();
+      } else if (typeof value === 'string') {
+        this.setClass(value.trim().split(/\s+/));
+      } else {
+        this.setClass(normalize$1(value));
       }
     },
 
-    handleObject: function handleObject(value) {
-      this.cleanup(value);
-      this.prevKeys = Object.keys(value);
-      setObjectClasses(this.el, value);
-    },
-
-    handleArray: function handleArray(value) {
+    setClass: function setClass(value) {
       this.cleanup(value);
       for (var i = 0, l = value.length; i < l; i++) {
         var val = value[i];
-        if (val && isPlainObject(val)) {
-          setObjectClasses(this.el, val);
-        } else if (val && typeof val === 'string') {
-          addClass(this.el, val);
+        if (val) {
+          apply(this.el, val, addClass);
         }
       }
-      this.prevKeys = value.slice();
+      this.prevKeys = value;
     },
 
     cleanup: function cleanup(value) {
-      if (!this.prevKeys) return;
-
-      var i = this.prevKeys.length;
+      var prevKeys = this.prevKeys;
+      if (!prevKeys) return;
+      var i = prevKeys.length;
       while (i--) {
-        var key = this.prevKeys[i];
-        if (!key) continue;
-
-        var keys = isPlainObject(key) ? Object.keys(key) : [key];
-        for (var j = 0, l = keys.length; j < l; j++) {
-          toggleClasses(this.el, keys[j], removeClass);
+        var key = prevKeys[i];
+        if (!value || value.indexOf(key) < 0) {
+          apply(this.el, key, removeClass);
         }
       }
     }
   };
 
-  function setObjectClasses(el, obj) {
-    var keys = Object.keys(obj);
-    for (var i = 0, l = keys.length; i < l; i++) {
-      var key = keys[i];
-      if (!obj[key]) continue;
-      toggleClasses(el, key, addClass);
-    }
-  }
+  /**
+   * Normalize objects and arrays (potentially containing objects)
+   * into array of strings.
+   *
+   * @param {Object|Array<String|Object>} value
+   * @return {Array<String>}
+   */
 
-  function stringToObject(value) {
-    var res = {};
-    var keys = value.trim().split(/\s+/);
-    for (var i = 0, l = keys.length; i < l; i++) {
-      res[keys[i]] = true;
+  function normalize$1(value) {
+    var res = [];
+    if (isArray(value)) {
+      for (var i = 0, l = value.length; i < l; i++) {
+        var _key = value[i];
+        if (_key) {
+          if (typeof _key === 'string') {
+            res.push(_key);
+          } else {
+            for (var k in _key) {
+              if (_key[k]) res.push(k);
+            }
+          }
+        }
+      }
+    } else if (isObject(value)) {
+      for (var key in value) {
+        if (value[key]) res.push(key);
+      }
     }
     return res;
   }
@@ -5488,14 +5571,12 @@ var template = Object.freeze({
    * @param {Function} fn
    */
 
-  function toggleClasses(el, key, fn) {
+  function apply(el, key, fn) {
     key = key.trim();
-
     if (key.indexOf(' ') === -1) {
       fn(el, key);
       return;
     }
-
     // The key contains one or more space characters.
     // Since a class name doesn't accept such characters, we
     // treat it as multiple classes.
@@ -5546,6 +5627,7 @@ var template = Object.freeze({
         // cached, when the component is used elsewhere this attribute
         // will remain at link time.
         this.el.removeAttribute('is');
+        this.el.removeAttribute(':is');
         // remove ref, same as above
         if (this.descriptor.ref) {
           this.el.removeAttribute('v-ref:' + hyphenate(this.descriptor.ref));
@@ -5980,6 +6062,7 @@ var template = Object.freeze({
     return function propsLinkFn(vm, scope) {
       // store resolved props info
       vm._props = {};
+      var inlineProps = vm.$options.propsData;
       var i = props.length;
       var prop, path, options, value, raw;
       while (i--) {
@@ -5988,7 +6071,9 @@ var template = Object.freeze({
         path = prop.path;
         options = prop.options;
         vm._props[path] = prop;
-        if (raw === null) {
+        if (inlineProps && hasOwn(inlineProps, path)) {
+          initProp(vm, prop, inlineProps[path]);
+        }if (raw === null) {
           // initialize absent prop
           initProp(vm, prop, undefined);
         } else if (prop.dynamic) {
@@ -6749,7 +6834,7 @@ var template = Object.freeze({
     // link function for the node itself.
     var nodeLinkFn = partial || !options._asComponent ? compileNode(el, options) : null;
     // link function for the childNodes
-    var childLinkFn = !(nodeLinkFn && nodeLinkFn.terminal) && el.tagName !== 'SCRIPT' && el.hasChildNodes() ? compileNodeList(el.childNodes, options) : null;
+    var childLinkFn = !(nodeLinkFn && nodeLinkFn.terminal) && !isScript(el) && el.hasChildNodes() ? compileNodeList(el.childNodes, options) : null;
 
     /**
      * A composite linker function to be called on a already
@@ -6925,7 +7010,7 @@ var template = Object.freeze({
       });
       if (names.length) {
         var plural = names.length > 1;
-        warn('Attribute' + (plural ? 's ' : ' ') + names.join(', ') + (plural ? ' are' : ' is') + ' ignored on component ' + '<' + options.el.tagName.toLowerCase() + '> because ' + 'the component is a fragment instance: ' + 'http://vuejs.org/guide/components.html#Fragment_Instance');
+        warn('Attribute' + (plural ? 's ' : ' ') + names.join(', ') + (plural ? ' are' : ' is') + ' ignored on component ' + '<' + options.el.tagName.toLowerCase() + '> because ' + 'the component is a fragment instance: ' + 'http://vuejs.org/guide/components.html#Fragment-Instance');
       }
     }
 
@@ -6962,7 +7047,7 @@ var template = Object.freeze({
 
   function compileNode(node, options) {
     var type = node.nodeType;
-    if (type === 1 && node.tagName !== 'SCRIPT') {
+    if (type === 1 && !isScript(node)) {
       return compileElement(node, options);
     } else if (type === 3 && node.data.trim()) {
       return compileTextNode(node, options);
@@ -7257,7 +7342,6 @@ var template = Object.freeze({
     var attr, name, value, modifiers, matched, dirName, rawName, arg, def, termDef;
     for (var i = 0, j = attrs.length; i < j; i++) {
       attr = attrs[i];
-      modifiers = parseModifiers(attr.name);
       name = attr.name.replace(modifierRE, '');
       if (matched = name.match(dirAttrRE)) {
         def = resolveAsset(options, 'directives', matched[1]);
@@ -7265,6 +7349,7 @@ var template = Object.freeze({
           if (!termDef || (def.priority || DEFAULT_TERMINAL_PRIORITY) > termDef.priority) {
             termDef = def;
             rawName = attr.name;
+            modifiers = parseModifiers(attr.name);
             value = attr.value;
             dirName = matched[1];
             arg = matched[2];
@@ -7485,6 +7570,10 @@ var template = Object.freeze({
     }
   }
 
+  function isScript(el) {
+    return el.tagName === 'SCRIPT' && (!el.hasAttribute('type') || el.getAttribute('type') === 'text/javascript');
+  }
+
   var specialCharRE = /[^\w\-:\.]/;
 
   /**
@@ -7614,8 +7703,8 @@ var template = Object.freeze({
       value = attrs[i].value;
       if (!to.hasAttribute(name) && !specialCharRE.test(name)) {
         to.setAttribute(name, value);
-      } else if (name === 'class' && !parseText(value)) {
-        value.trim().split(/\s+/).forEach(function (cls) {
+      } else if (name === 'class' && !parseText(value) && (value = value.trim())) {
+        value.split(/\s+/).forEach(function (cls) {
           addClass(to, cls);
         });
       }
@@ -7654,6 +7743,10 @@ var template = Object.freeze({
       contents[name] = extractFragment(contents[name], content);
     }
     if (content.hasChildNodes()) {
+      var nodes = content.childNodes;
+      if (nodes.length === 1 && nodes[0].nodeType === 3 && !nodes[0].data.trim()) {
+        return;
+      }
       contents['default'] = extractFragment(content.childNodes, content);
     }
   }
@@ -7753,7 +7846,6 @@ var template = Object.freeze({
         'development' !== 'production' && warn('data functions should return an object.', this);
       }
       var props = this._props;
-      var runtimeData = this._runtimeData ? typeof this._runtimeData === 'function' ? this._runtimeData() : this._runtimeData : null;
       // proxy data on instance
       var keys = Object.keys(data);
       var i, key;
@@ -7764,10 +7856,10 @@ var template = Object.freeze({
         // 1. it's not already defined as a prop
         // 2. it's provided via a instantiation option AND there are no
         //    template prop present
-        if (!props || !hasOwn(props, key) || runtimeData && hasOwn(runtimeData, key) && props[key].raw === null) {
+        if (!props || !hasOwn(props, key)) {
           this._proxy(key);
         } else if ('development' !== 'production') {
-          warn('Data field "' + key + '" is already defined ' + 'as a prop. Use prop default value instead.', this);
+          warn('Data field "' + key + '" is already defined ' + 'as a prop. To provide default value for a prop, use the "default" ' + 'prop option; if you want to pass prop values to an instantiation ' + 'call, use the "propsData" option.', this);
         }
       }
       // observe data
@@ -7957,18 +8049,21 @@ var template = Object.freeze({
 
     function registerComponentEvents(vm, el) {
       var attrs = el.attributes;
-      var name, handler;
+      var name, value, handler;
       for (var i = 0, l = attrs.length; i < l; i++) {
         name = attrs[i].name;
         if (eventRE.test(name)) {
           name = name.replace(eventRE, '');
-          handler = (vm._scope || vm._context).$eval(attrs[i].value, true);
-          if (typeof handler === 'function') {
-            handler._fromParent = true;
-            vm.$on(name.replace(eventRE), handler);
-          } else if ('development' !== 'production') {
-            warn('v-on:' + name + '="' + attrs[i].value + '" ' + 'expects a function value, got ' + handler, vm);
+          // force the expression into a statement so that
+          // it always dynamically resolves the method to call (#2670)
+          // kinda ugly hack, but does the job.
+          value = attrs[i].value;
+          if (isSimplePath(value)) {
+            value += '.apply(this, $arguments)';
           }
+          handler = (vm._scope || vm._context).$eval(value, true);
+          handler._fromParent = true;
+          vm.$on(name.replace(eventRE), handler);
         }
       }
     }
@@ -8619,7 +8714,7 @@ var template = Object.freeze({
       }
       // remove reference from data ob
       // frozen object may not have observer.
-      if (this._data.__ob__) {
+      if (this._data && this._data.__ob__) {
         this._data.__ob__.removeVm(this);
       }
       // Clean up references to private properties and other
@@ -8692,6 +8787,7 @@ var template = Object.freeze({
       } else {
         factory = resolveAsset(this.$options, 'components', value, true);
       }
+      /* istanbul ignore if */
       if (!factory) {
         return;
       }
@@ -8741,7 +8837,7 @@ var template = Object.freeze({
     Vue.prototype.$get = function (exp, asStatement) {
       var res = parseExpression(exp);
       if (res) {
-        if (asStatement && !isSimplePath(exp)) {
+        if (asStatement) {
           var self = this;
           return function statementHandler() {
             self.$arguments = toArray(arguments);
@@ -9673,17 +9769,19 @@ var template = Object.freeze({
      * 12345 => $12,345.00
      *
      * @param {String} sign
+     * @param {Number} decimals Decimal places
      */
 
-    currency: function currency(value, _currency) {
+    currency: function currency(value, _currency, decimals) {
       value = parseFloat(value);
       if (!isFinite(value) || !value && value !== 0) return '';
       _currency = _currency != null ? _currency : '$';
-      var stringified = Math.abs(value).toFixed(2);
-      var _int = stringified.slice(0, -3);
+      decimals = decimals != null ? decimals : 2;
+      var stringified = Math.abs(value).toFixed(decimals);
+      var _int = decimals ? stringified.slice(0, -1 - decimals) : stringified;
       var i = _int.length % 3;
       var head = i > 0 ? _int.slice(0, i) + (_int.length > 3 ? ',' : '') : '';
-      var _float = stringified.slice(-3);
+      var _float = decimals ? stringified.slice(-1 - decimals) : '';
       var sign = value < 0 ? '-' : '';
       return sign + _currency + head + _int.slice(i).replace(digitsRE, '$1,') + _float;
     },
@@ -9903,7 +10001,7 @@ var template = Object.freeze({
 
   installGlobalAPI(Vue);
 
-  Vue.version = '1.0.21';
+  Vue.version = '1.0.22';
 
   // devtools global hook
   /* istanbul ignore next */
