@@ -24,7 +24,7 @@ export function createStreamingRenderer (modules, directives, isUnaryTag) {
     if (isRoot) {
       if (!el.data) el.data = {}
       if (!el.data.attrs) el.data.attrs = {}
-      el.data.attrs['server-rendered'] = true
+      el.data.attrs['server-rendered'] = 'true'
     }
     const startTag = renderStartingTag(el, modules, directives)
     const endTag = `</${el.tag}>`
