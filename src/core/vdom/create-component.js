@@ -31,15 +31,17 @@ export function createComponent (Ctor, data, parent, children, context) {
     if (Ctor.resolved) {
       Ctor = Ctor.resolved
     } else {
-      const resolved = resolveAsyncComponent(Ctor, () => {
+      Ctor = resolveAsyncComponent(Ctor, () => {
         // it's ok to queue this on every render because
-        // $forceUpdate is buffered.
+        // $forceUpdate is buffered. this is only called
+        // if the
         parent.$forceUpdate()
       })
-      if (!resolved || !resolved.cid) {
+      if (!Ctor) {
+        // return nothing if this is indeed an async component
+        // wait for the callback to trigger parent update.
         return
       }
-      Ctor = resolved
     }
   }
 
@@ -120,27 +122,33 @@ function resolveAsyncComponent (factory, cb) {
   } else {
     factory.requested = true
     const cbs = factory.pendingCallbacks = [cb]
-    factory.resolved = factory(function resolve (res) {
-      if (isObject(res)) {
-        res = Vue.extend(res)
+    let sync = true
+    factory(
+      // resolve
+      res => {
+        if (isObject(res)) {
+          res = Vue.extend(res)
+        }
+        // cache resolved
+        factory.resolved = res
+        // invoke callbacks only if this is not a synchronous resolve
+        // (async resolves are shimmed as synchronous during SSR)
+        if (!sync) {
+          for (let i = 0, l = cbs.length; i < l; i++) {
+            cbs[i](res)
+          }
+        }
+      },
+      // reject
+      reason => {
+        process.env.NODE_ENV !== 'production' && warn(
+          `Failed to resolve async component: ${factory}` +
+          (reason ? `\nReason: ${reason}` : '')
+        )
       }
-      // cache resolved
-      factory.resolved = res
-
-      // invoke callbacks
-      for (let i = 0, l = cbs.length; i < l; i++) {
-        cbs[i](res)
-        // Reset pending callbacks
-        factory.pendingCallbacks = []
-      }
-
-      return res
-    }, function reject (reason) {
-      process.env.NODE_ENV !== 'production' && warn(
-        `Failed to resolve async component: ${factory}` +
-        (reason ? `\nReason: ${reason}` : '')
-      )
-    })
+    )
+    sync = false
+    // return in case resolved synchronously
     return factory.resolved
   }
 }

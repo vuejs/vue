@@ -134,7 +134,7 @@ describe('SSR: renderToString', () => {
       `,
       components: {
         testAsync (resolve) {
-          return resolve({
+          resolve({
             render () {
               return this.$createElement('span', { class: ['b'] }, 'testAsync')
             }
@@ -149,7 +149,7 @@ describe('SSR: renderToString', () => {
       template: '<test-async></test-async>',
       components: {
         testAsync (resolve) {
-          return resolve({
+          resolve({
             render () {
               return this.$createElement('span', { class: ['b'] }, 'testAsync')
             }
@@ -176,14 +176,14 @@ describe('SSR: renderToString', () => {
 
           options.components = {
             testSubAsync (resolve) {
-              return resolve({
+              resolve({
                 render () {
                   return this.$createElement('div', { class: ['c'] }, 'testSubAsync')
                 }
               })
             }
           }
-          return resolve(options)
+          resolve(options)
         }
       }
     })).toContain(
@@ -216,7 +216,7 @@ describe('SSR: renderToString', () => {
           }
         },
         testAsync (resolve) {
-          return resolve({
+          resolve({
             render () {
               return this.$createElement('span', { class: ['b'] }, 'testAsync')
             }

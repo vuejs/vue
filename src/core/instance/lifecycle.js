@@ -39,7 +39,7 @@ export function lifecycleMixin (Vue) {
         }
       }
     }
-    this.renderStaticTrees()
+    this._renderStaticTrees()
     this._watcher = new Watcher(this, this._render, this._update)
     this._update(this._watcher.value)
     this._mounted = true
@@ -110,7 +110,7 @@ export function lifecycleMixin (Vue) {
   }
 
   Vue.prototype.$forceUpdate = function () {
-    this._update(this._render())
+    this._watcher.update()
   }
 
   Vue.prototype.$destroy = function () {
