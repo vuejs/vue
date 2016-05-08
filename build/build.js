@@ -26,7 +26,7 @@ var main = fs
 fs.writeFileSync('src/core/index.js', main)
 
 var builds = [
-  // Runtime only, CommonJS build. Used by bundlers e.g. Webpack & Browserify
+  // Runtime only (CommonJS). Used by bundlers e.g. Webpack & Browserify
   {
     entry: 'src/entries/web-runtime.js',
     format: 'cjs',
@@ -61,14 +61,14 @@ var builds = [
       entities: './entity-decoder'
     }
   },
-  // Web compiler CommonJS build, for npm distribution.
+  // Web compiler (CommonJS).
   {
     entry: 'src/entries/web-compiler.js',
     format: 'cjs',
     external: ['entities'],
-    out: 'dist/compiler.common.js'
+    out: 'dist/compiler.js'
   },
-  // Web server renderer
+  // Web server renderer (CommonJS).
   {
     entry: 'src/entries/web-server-renderer.js',
     format: 'cjs',
