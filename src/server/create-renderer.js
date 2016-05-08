@@ -1,19 +1,16 @@
 import RenderStream from './render-stream'
-import { render } from './render'
+import { createRenderFunction } from './render'
 
 export function createRenderer ({
   modules = [],
   directives = {},
   isUnaryTag = (() => false)
 } = {}) {
-  function _render (component, write, done) {
-    render(modules, directives, isUnaryTag)(component, write, done)
-  }
-
+  const render = createRenderFunction(modules, directives, isUnaryTag)
   return {
     renderToString (component) {
       let result = ''
-      _render(component, (str, next) => {
+      render(component, (str, next) => {
         result += str
         next && next()
       })
@@ -21,9 +18,8 @@ export function createRenderer ({
     },
     renderToStream (component) {
       return new RenderStream((write, done) => {
-        _render(component, write, done)
+        render(component, write, done)
       })
-    },
-    render: _render
+    }
   }
 }

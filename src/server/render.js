@@ -1,6 +1,6 @@
 import { renderStartingTag } from './render-starting-tag'
 
-export function render (modules, directives, isUnaryTag) {
+export function createRenderFunction (modules, directives, isUnaryTag) {
   function renderNode (node, write, next, isRoot) {
     if (node.componentOptions) {
       const { Ctor, propsData, listeners, parent, children } = node.componentOptions
