@@ -52,7 +52,9 @@ describe('SSR: renderToString', () => {
         fontSize: 14,
         color: 'red'
       }
-    })).toContain('<div server-rendered="true" style="font-size:14px;color:red;background-color:black"></div>')
+    })).toContain(
+        '<div server-rendered="true" style="font-size:14px;color:red;background-color:black"></div>'
+      )
   })
 
   it('text interpolation', () => {
@@ -75,11 +77,7 @@ describe('SSR: renderToString', () => {
         child: {
           props: ['msg'],
           data () {
-            return { name: 'foo' }
-          },
-          created () {
-            // checking setting state in created hook works in ssr
-            this.name = 'bar'
+            return { name: 'bar' }
           },
           render () {
             const h = this.$createElement
@@ -90,6 +88,109 @@ describe('SSR: renderToString', () => {
     })).toContain('<div server-rendered="true" class="foo bar">hello bar</div>')
   })
 
+  it('has correct lifecycle during render', () => {
+    let lifecycleCount = 1
+    expect(renderVmWithOptions({
+      template: '<div><span>{{ val }}</span><test></test></div>',
+      data: {
+        val: 'hi'
+      },
+      init () {
+        expect(lifecycleCount++).toBe(1)
+      },
+      created () {
+        this.val = 'hello'
+        expect(this.val).toBe('hello')
+        expect(lifecycleCount++).toBe(2)
+      },
+      components: {
+        test: {
+          init () {
+            expect(lifecycleCount++).toBe(3)
+          },
+          created () {
+            expect(lifecycleCount++).toBe(4)
+          },
+          render () {
+            expect(lifecycleCount++).toBeGreaterThan(4)
+            return this.$createElement('span', { class: ['b'] }, 'testAsync')
+          }
+        }
+      }
+    })).toContain(
+      '<div server-rendered="true">' +
+        '<span>hello</span>' +
+        '<span class="b">testAsync</span>' +
+      '</div>'
+    )
+  })
+
+  it('renders asynchronous component', () => {
+    expect(renderVmWithOptions({
+      template: `
+        <div>
+          <test-async></test-async>
+        </div>
+      `,
+      components: {
+        testAsync (resolve) {
+          return resolve({
+            render () {
+              return this.$createElement('span', { class: ['b'] }, 'testAsync')
+            }
+          })
+        }
+      }
+    })).toContain('<div server-rendered="true"><span class="b">testAsync</span></div>')
+  })
+
+  it('renders asynchronous component (hoc)', () => {
+    expect(renderVmWithOptions({
+      template: '<test-async></test-async>',
+      components: {
+        testAsync (resolve) {
+          return resolve({
+            render () {
+              return this.$createElement('span', { class: ['b'] }, 'testAsync')
+            }
+          })
+        }
+      }
+    })).toContain('<span server-rendered="true" class="b">testAsync</span>')
+  })
+
+  it('renders nested asynchronous component', () => {
+    expect(renderVmWithOptions({
+      template: `
+        <div>
+          <test-async></test-async>
+        </div>
+      `,
+      components: {
+        testAsync (resolve) {
+          const options = compileToFunctions(`
+            <span class="b">
+              <test-sub-async></test-sub-async>
+            </span>
+          `, { preserveWhitespace: false })
+
+          options.components = {
+            testSubAsync (resolve) {
+              return resolve({
+                render () {
+                  return this.$createElement('div', { class: ['c'] }, 'testSubAsync')
+                }
+              })
+            }
+          }
+          return resolve(options)
+        }
+      }
+    })).toContain(
+      '<div server-rendered="true"><span class="b"><div class="c">testSubAsync</div></span></div>'
+    )
+  })
+
   it('everything together', () => {
     expect(renderVmWithOptions({
       template: `
@@ -98,8 +199,9 @@ describe('SSR: renderToString', () => {
           <div id="ho" :class="{ red: isRed }"></div>
           <span>{{ test }}</span>
           <input :value="test">
-          <test></test>
           <img :src="imageUrl">
+          <test></test>
+          <test-async></test-async>
         </div>
       `,
       data: {
@@ -109,9 +211,16 @@ describe('SSR: renderToString', () => {
       },
       components: {
         test: {
-          render: function () {
-            return this.$createElement('div', { class: ['a'] }, 'hahahaha')
+          render () {
+            return this.$createElement('div', { class: ['a'] }, 'test')
           }
+        },
+        testAsync (resolve) {
+          return resolve({
+            render () {
+              return this.$createElement('span', { class: ['b'] }, 'testAsync')
+            }
+          })
         }
       }
     })).toContain(
@@ -120,8 +229,9 @@ describe('SSR: renderToString', () => {
         '<div id="ho" class="red"></div>' +
         '<span>hi</span>' +
         '<input value="hi">' +
-        '<div class="a">hahahaha</div>' +
         '<img src="https://vuejs.org/images/logo.png">' +
+        '<div class="a">test</div>' +
+        '<span class="b">testAsync</span>' +
       '</div>'
     )
   })
