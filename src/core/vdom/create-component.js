@@ -70,7 +70,7 @@ export function createComponent (Ctor, data, parent, children, context) {
   return vnode
 }
 
-function init (vnode) {
+export function createComponentInstanceForVnode (vnode) {
   const { Ctor, propsData, listeners, parent, children } = vnode.componentOptions
   const options = {
     parent,
@@ -85,13 +85,12 @@ function init (vnode) {
     options.render = inlineTemplate.render
     options.staticRenderFns = inlineTemplate.staticRenderFns
   }
-  const child = new Ctor(options)
-  // if this is a server-rendered mount,
-  // the vnode would already have an element.
-  // otherwise the child sets the parent vnode's elm when mounted
-  // and when updated.
-  child.$mount(vnode.elm)
-  vnode.child = child
+  return new Ctor(options)
+}
+
+function init (vnode) {
+  const child = vnode.child = createComponentInstanceForVnode(vnode)
+  child.$mount()
 }
 
 function prepatch (oldVnode, vnode) {

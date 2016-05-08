@@ -1,25 +1,10 @@
+import { createComponentInstanceForVnode } from 'core/vdom/create-component'
+
 export function createRenderFunction (modules, directives, isUnaryTag) {
   function renderNode (node, write, next, isRoot) {
     if (node.componentOptions) {
-      const { Ctor, propsData, listeners, parent, children } = node.componentOptions
-      const options = {
-        parent,
-        propsData,
-        _parentVnode: node,
-        _parentListeners: listeners,
-        _renderChildren: children
-      }
-      // check inline-template render functions
-      const inlineTemplate = node.data.inlineTemplate
-      if (inlineTemplate) {
-        options.render = inlineTemplate.render
-        options.staticRenderFns = inlineTemplate.staticRenderFns
-      }
-      const child = new Ctor(options)
-      child._renderStaticTrees()
-      const childRoot = child._render()
-      childRoot.parent = node
-      renderNode(childRoot, write, next, isRoot)
+      const child = createComponentInstanceForVnode(node)
+      renderNode(child._render(), write, next, isRoot)
     } else {
       if (node.tag) {
         renderElement(node, write, next, isRoot)

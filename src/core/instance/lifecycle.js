@@ -15,6 +15,7 @@ export function initLifecycle (vm) {
   vm.$children = []
   vm.$refs = {}
 
+  vm._mounted = false
   vm._isDestroyed = false
   vm._isBeingDestroyed = false
 }
@@ -39,7 +40,6 @@ export function lifecycleMixin (Vue) {
         }
       }
     }
-    this._renderStaticTrees()
     this._watcher = new Watcher(this, this._render, this._update)
     this._update(this._watcher.value)
     this._mounted = true
@@ -50,25 +50,10 @@ export function lifecycleMixin (Vue) {
     return this
   }
 
-  Vue.prototype._renderStaticTrees = function () {
-    // render static sub-trees for once on mount
-    const staticRenderFns = this.$options.staticRenderFns
-    if (staticRenderFns) {
-      this._staticTrees = new Array(staticRenderFns.length)
-      for (let i = 0; i < staticRenderFns.length; i++) {
-        this._staticTrees[i] = staticRenderFns[i].call(this._renderProxy)
-      }
-    }
-    return this
-  }
-
   Vue.prototype._update = function (vnode) {
     if (this._mounted) {
       callHook(this, 'beforeUpdate')
     }
-    const parentNode = this.$options._parentVnode
-    // set vnode parent before patch
-    vnode.parent = parentNode
     if (!this._vnode) {
       // Vue.prototype.__patch__ is injected in entry points
       // based on the rendering backend used.
@@ -77,7 +62,8 @@ export function lifecycleMixin (Vue) {
       this.$el = this.__patch__(this._vnode, vnode)
     }
     this._vnode = vnode
-    // set parent vnode element after patch
+    // update parent vnode element after patch
+    const parentNode = this.$options._parentVnode
     if (parentNode) {
       parentNode.elm = this.$el
     }
