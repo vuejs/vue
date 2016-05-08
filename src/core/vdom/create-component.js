@@ -143,7 +143,6 @@ function resolveAsyncComponent (factory, cb) {
     })
     return factory.resolved
   }
-
 }
 
 function extractProps (data, Ctor) {
