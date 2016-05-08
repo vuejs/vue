@@ -1,5 +1,5 @@
 import Vue from '../../dist/vue.common.js'
-import { compileToFunctions } from '../../dist/compiler.common.js'
+import { compileToFunctions } from '../../dist/compiler.js'
 import createRenderer from '../../dist/server-renderer.js'
 const { renderToString } = createRenderer()
 
