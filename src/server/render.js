@@ -74,7 +74,6 @@ export function createRenderFunction (modules, directives, isUnaryTag) {
   }
 
   return function render (component, write, done) {
-    component._renderStaticTrees()
     renderNode(component._render(), write, done, true)
   }
 }
