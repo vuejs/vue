@@ -26,7 +26,6 @@ export function eventsMixin (Vue) {
    * @param {String} event
    * @param {Function} fn
    */
-
   Vue.prototype.$once = function (event, fn) {
     const self = this
     function on () {
@@ -45,7 +44,6 @@ export function eventsMixin (Vue) {
    * @param {String} event
    * @param {Function} fn
    */
-
   Vue.prototype.$off = function (event, fn) {
     // all
     if (!arguments.length) {
@@ -79,7 +77,6 @@ export function eventsMixin (Vue) {
    *
    * @param {String} event
    */
-
   Vue.prototype.$emit = function (event) {
     let cbs = this._events[event]
     if (cbs) {

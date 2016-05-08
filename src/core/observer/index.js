@@ -19,7 +19,6 @@ const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
  * we don't want to force conversion because the value may be a nested value
  * under a frozen data structure. Converting it would defeat the optimization.
  */
-
 export const observerState = {
   shouldConvert: true
 }
@@ -33,84 +32,69 @@ export const observerState = {
  * @param {Array|Object} value
  * @constructor
  */
-
-export function Observer (value) {
-  this.value = value
-  this.dep = new Dep()
-  def(value, '__ob__', this)
-  if (isArray(value)) {
-    const augment = hasProto
-      ? protoAugment
-      : copyAugment
-    augment(value, arrayMethods, arrayKeys)
-    this.observeArray(value)
-  } else {
-    this.walk(value)
+export class Observer {
+  constructor (value) {
+    this.value = value
+    this.dep = new Dep()
+    this.vms = null
+    def(value, '__ob__', this)
+    if (isArray(value)) {
+      const augment = hasProto
+        ? protoAugment
+        : copyAugment
+      augment(value, arrayMethods, arrayKeys)
+      this.observeArray(value)
+    } else {
+      this.walk(value)
+    }
   }
-}
 
-// Instance methods
-
-/**
- * Walk through each property and convert them into
- * getter/setters. This method should only be called when
- * value type is Object.
- *
- * @param {Object} obj
- */
-
-Observer.prototype.walk = function (obj) {
-  for (const key in obj) {
-    this.convert(key, obj[key])
+  /**
+   * Walk through each property and convert them into
+   * getter/setters. This method should only be called when
+   * value type is Object.
+   *
+   * @param {Object} obj
+   */
+  walk (obj) {
+    const val = this.value
+    for (const key in obj) {
+      defineReactive(val, key, obj[key])
+    }
   }
-}
 
-/**
- * Observe a list of Array items.
- *
- * @param {Array} items
- */
-
-Observer.prototype.observeArray = function (items) {
-  for (let i = 0, l = items.length; i < l; i++) {
-    observe(items[i])
+  /**
+   * Observe a list of Array items.
+   *
+   * @param {Array} items
+   */
+  observeArray (items) {
+    for (let i = 0, l = items.length; i < l; i++) {
+      observe(items[i])
+    }
   }
-}
 
-/**
- * Convert a property into getter/setter so we can emit
- * the events when the property is accessed/changed.
- *
- * @param {String} key
- * @param {*} val
- */
+  /**
+   * Add an owner vm, so that when $set/$delete mutations
+   * happen we can notify owner vms to proxy the keys and
+   * digest the watchers. This is only called when the object
+   * is observed as an instance's root $data.
+   *
+   * @param {Vue} vm
+   */
+  addVm (vm) {
+    (this.vms || (this.vms = [])).push(vm)
+  }
 
-Observer.prototype.convert = function (key, val) {
-  defineReactive(this.value, key, val)
-}
-
-/**
- * Add an owner vm, so that when $set/$delete mutations
- * happen we can notify owner vms to proxy the keys and
- * digest the watchers. This is only called when the object
- * is observed as an instance's root $data.
- *
- * @param {Vue} vm
- */
-
-Observer.prototype.addVm = function (vm) {
-  (this.vms || (this.vms = [])).push(vm)
-}
-
-/**
- * Remove an owner vm. This is called when the object is
- * swapped out as an instance's $data object.
- *
- * @param {Vue} vm
- */
-
-Observer.prototype.removeVm = function (vm) {
-  remove(this.vms, vm)
+  /**
+   * Remove an owner vm. This is called when the object is
+   * swapped out as an instance's $data object.
+   *
+   * @param {Vue} vm
+   */
+  removeVm (vm) {
+    remove(this.vms, vm)
+  }
 }
 
 // helpers
@@ -122,7 +106,6 @@ Observer.prototype.removeVm = function (vm) {
  * @param {Object|Array} target
  * @param {Object} src
  */
-
 function protoAugment (target, src) {
   /* eslint-disable no-proto */
   target.__proto__ = src
@@ -136,7 +119,6 @@ function protoAugment (target, src) {
  * @param {Object|Array} target
  * @param {Object} proto
  */
-
 function copyAugment (target, src, keys) {
   for (let i = 0, l = keys.length; i < l; i++) {
     const key = keys[i]
@@ -154,7 +136,6 @@ function copyAugment (target, src, keys) {
  * @return {Observer|undefined}
  * @static
  */
-
 export function observe (value, vm) {
   if (!isObject(value)) {
     return
@@ -183,7 +164,6 @@ export function observe (value, vm) {
  * @param {String} key
  * @param {*} val
  */
-
 export function defineReactive (obj, key, val) {
   const dep = new Dep()
 
@@ -242,7 +222,6 @@ export function defineReactive (obj, key, val) {
  * @param {*} val
  * @public
  */
-
 export function set (obj, key, val) {
   if (isArray(obj)) {
     return obj.splice(key, 1, val)
@@ -260,7 +239,7 @@ export function set (obj, key, val) {
     obj[key] = val
     return
   }
-  ob.convert(key, val)
+  defineReactive(ob.value, key, val)
   ob.dep.notify()
   if (ob.vms) {
     let i = ob.vms.length
@@ -279,7 +258,6 @@ export function set (obj, key, val) {
  * @param {Object} obj
  * @param {String} key
  */
-
 export function del (obj, key) {
   if (!hasOwn(obj, key)) {
     return

@@ -4,7 +4,6 @@
  * @param {*} val
  * @return {String}
  */
-
 export function renderString (val) {
   return val == null
     ? ''
@@ -21,7 +20,6 @@ export function renderString (val) {
  * @param {Boolean} expectsLowerCase
  * @return {Function}
  */
-
 export function makeMap (str, expectsLowerCase) {
   const map = Object.create(null)
   const list = str.split(',')
@@ -36,7 +34,6 @@ export function makeMap (str, expectsLowerCase) {
 /**
  * Check if a tag is a built-in tag.
  */
-
 export const isBuiltInTag = makeMap('slot,component,render,transition', true)
 
 /**
@@ -45,7 +42,6 @@ export const isBuiltInTag = makeMap('slot,component,render,transition', true)
  * @param {Array} arr
  * @param {*} item
  */
-
 export function remove (arr, item) {
   if (arr.length) {
     const index = arr.indexOf(item)
@@ -73,7 +69,6 @@ export function hasOwn (obj, key) {
  * @param {*} value
  * @return {Boolean}
  */
-
 export function isPrimitive (value) {
   return typeof value === 'string' || typeof value === 'number'
 }
@@ -84,7 +79,6 @@ export function isPrimitive (value) {
  * @param {Function} fn
  * @return {Function}
  */
-
 export function cached (fn) {
   const cache = Object.create(null)
   return function cachedFn (str) {
@@ -99,7 +93,6 @@ export function cached (fn) {
  * @param {String} str
  * @return {String}
  */
-
 const camelizeRE = /-(\w)/g
 export const camelize = cached(str => {
   return str.replace(camelizeRE, toUpper)
@@ -115,7 +108,6 @@ function toUpper (_, c) {
  * @param {String} str
  * @return {String}
  */
-
 const hyphenateRE = /([a-z\d])([A-Z])/g
 export const hyphenate = cached(str => {
   return str
@@ -130,7 +122,6 @@ export const hyphenate = cached(str => {
  * @param {Object} ctx
  * @return {Function}
  */
-
 export function bind (fn, ctx) {
   return function (a) {
     const l = arguments.length
@@ -149,7 +140,6 @@ export function bind (fn, ctx) {
  * @param {Number} [start] - start index
  * @return {Array}
  */
-
 export function toArray (list, start) {
   start = start || 0
   let i = list.length - start
@@ -166,7 +156,6 @@ export function toArray (list, start) {
  * @param {Object} to
  * @param {Object} from
  */
-
 export function extend (to, _from) {
   for (const key in _from) {
     to[key] = _from[key]
@@ -182,7 +171,6 @@ export function extend (to, _from) {
  * @param {*} obj
  * @return {Boolean}
  */
-
 export function isObject (obj) {
   return obj !== null && typeof obj === 'object'
 }
@@ -194,7 +182,6 @@ export function isObject (obj) {
  * @param {*} obj
  * @return {Boolean}
  */
-
 const toString = Object.prototype.toString
 const OBJECT_STRING = '[object Object]'
 export function isPlainObject (obj) {
@@ -207,5 +194,4 @@ export function isPlainObject (obj) {
  * @param {*} obj
  * @return {Boolean}
  */
-
 export const isArray = Array.isArray

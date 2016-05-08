@@ -37,7 +37,6 @@ let delimiters
  * @param {Object} options
  * @return {Object}
  */
-
 export function parse (template, options) {
   warn = options.warn || baseWarn
   platformGetTagNamespace = options.getTagNamespace || (() => null)

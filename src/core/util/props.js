@@ -29,7 +29,6 @@ export function validateProp (vm, key, propsData) {
  * @param {Object} prop
  * @return {*}
  */
-
 function getPropDefaultValue (vm, prop, name) {
   // no default, return undefined
   if (!hasOwn(prop, 'default')) {
@@ -63,7 +62,6 @@ function getPropDefaultValue (vm, prop, name) {
  * @param {Vue} vm
  * @param {Boolean} absent
  */
-
 function assertProp (prop, name, value, vm, absent) {
   if (prop.required && absent) {
     process.env.NODE_ENV !== 'production' && warn(
@@ -119,7 +117,6 @@ function assertProp (prop, name, value, vm, absent) {
  * @param {Function} type
  * @return {Object}
  */
-
 function assertType (value, type) {
   let valid
   let expectedType
@@ -156,7 +153,6 @@ function assertType (value, type) {
  * @param {String} type
  * @return {String}
  */
-
 function formatType (type) {
   return type
     ? type.charAt(0).toUpperCase() + type.slice(1)
@@ -169,7 +165,6 @@ function formatType (type) {
  * @param {*} value
  * @return {String}
  */
-
 function formatValue (val) {
   return Object.prototype.toString.call(val).slice(8, -1)
 }

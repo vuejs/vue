@@ -45,7 +45,6 @@ Vue.prototype.$mount = function (el) {
  * @param {Element} el
  * @return {String}
  */
-
 function getOuterHTML (el) {
   if (el.outerHTML) {
     return el.outerHTML

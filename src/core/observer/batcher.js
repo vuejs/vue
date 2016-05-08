@@ -20,7 +20,6 @@ let waiting = false
 /**
  * Reset the batcher's state.
  */
-
 function resetBatcherState () {
   queue.length = 0
   userQueue.length = 0
@@ -34,7 +33,6 @@ function resetBatcherState () {
 /**
  * Flush both queues and run the watchers.
  */
-
 function flushBatcherQueue () {
   runBatcherQueue(queue.sort(queueSorter))
   queue.length = 0
@@ -53,7 +51,6 @@ function flushBatcherQueue () {
  * pushed into the queue first and then its parent's props
  * changed.
  */
-
 function queueSorter (a, b) {
   return a.id - b.id
 }
@@ -63,7 +60,6 @@ function queueSorter (a, b) {
  *
  * @param {Array} queue
  */
-
 function runBatcherQueue (queue) {
   // do not cache length because more watchers might be pushed
   // as we run existing watchers
@@ -97,7 +93,6 @@ function runBatcherQueue (queue) {
  *   - {Number} id
  *   - {Function} run
  */
-
 export function pushWatcher (watcher) {
   const id = watcher.id
   if (has[id] == null) {

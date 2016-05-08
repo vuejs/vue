@@ -14,7 +14,6 @@ import { generate } from './codegen'
  *                 - getTagNamespace
  *                 - delimiters
  */
-
 export function compile (template, options) {
   const ast = parse(template.trim(), options)
   optimize(ast, options)

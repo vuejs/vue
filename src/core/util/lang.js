@@ -4,7 +4,6 @@
  * @param {String} str
  * @return {Boolean}
  */
-
 export function isReserved (str) {
   const c = (str + '').charCodeAt(0)
   return c === 0x24 || c === 0x5F
@@ -18,7 +17,6 @@ export function isReserved (str) {
  * @param {*} val
  * @param {Boolean} [enumerable]
  */
-
 export function def (obj, key, val, enumerable) {
   Object.defineProperty(obj, key, {
     value: val,
@@ -31,7 +29,6 @@ export function def (obj, key, val, enumerable) {
 /**
  * Parse simple path.
  */
-
 const bailRE = /[^\w\.]/
 export function parsePath (path) {
   if (bailRE.test(path)) {

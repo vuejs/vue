@@ -1,7 +1,7 @@
 import createElement from '../vdom/create-element'
 import { flatten } from '../vdom/helpers'
 import { bind, isArray, isObject, renderString } from 'shared/util'
-import { resolveAsset } from '../util/options'
+import { resolveAsset, nextTick } from '../util/index'
 
 export const renderState = {
   activeInstance: null
@@ -21,6 +21,10 @@ export function initRender (vm) {
 }
 
 export function renderMixin (Vue) {
+  Vue.prototype.$nextTick = function (fn) {
+    nextTick(fn, this)
+  }
+
   Vue.prototype._render = function () {
     const prev = renderState.activeInstance
     renderState.activeInstance = this

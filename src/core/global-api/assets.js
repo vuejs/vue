@@ -3,13 +3,12 @@ import { warn, isPlainObject } from '../util/index'
 
 export function initAssetRegisters (Vue) {
   /**
-     * Create asset registration methods with the following
-     * signature:
-     *
-     * @param {String} id
-     * @param {*} definition
-     */
-
+   * Create asset registration methods with the following
+   * signature:
+   *
+   * @param {String} id
+   * @param {*} definition
+   */
   config._assetTypes.forEach(function (type) {
     Vue[type] = function (id, definition) {
       if (!definition) {

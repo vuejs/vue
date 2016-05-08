@@ -23,13 +23,11 @@ import {
  * @param {*} childVal
  * @param {Vue} [vm]
  */
-
 const strats = config.optionMergeStrategies = Object.create(null)
 
 /**
  * Options with restrictions
  */
-
 if (process.env.NODE_ENV !== 'production') {
   strats.el = strats.propsData = function (parent, child, vm, key) {
     if (!vm) {
@@ -55,7 +53,6 @@ if (process.env.NODE_ENV !== 'production') {
 /**
  * Helper that recursively merges two data objects together.
  */
-
 function mergeData (to, from) {
   let key, toVal, fromVal
   for (key in from) {
@@ -73,7 +70,6 @@ function mergeData (to, from) {
 /**
  * Data
  */
-
 strats.data = function (parentVal, childVal, vm) {
   if (!vm) {
     // in a Vue.extend merge, both should be functions
@@ -124,7 +120,6 @@ strats.data = function (parentVal, childVal, vm) {
 /**
  * Hooks and param attributes are merged as arrays.
  */
-
 function mergeHook (parentVal, childVal) {
   return childVal
     ? parentVal
@@ -146,7 +141,6 @@ config._lifecycleHooks.forEach(hook => {
  * a three-way merge between constructor options, instance
  * options and parent options.
  */
-
 function mergeAssets (parentVal, childVal) {
   const res = Object.create(parentVal || null)
   return childVal
@@ -164,7 +158,6 @@ config._assetTypes.forEach(function (type) {
  * Watchers hashes should not overwrite one
  * another, so we merge them as arrays.
  */
-
 strats.watch = function (parentVal, childVal) {
   if (!childVal) return parentVal
   if (!parentVal) return childVal
@@ -186,7 +179,6 @@ strats.watch = function (parentVal, childVal) {
 /**
  * Other object hashes.
  */
-
 strats.props =
 strats.methods =
 strats.computed = function (parentVal, childVal) {
@@ -201,7 +193,6 @@ strats.computed = function (parentVal, childVal) {
 /**
  * Default strategy.
  */
-
 const defaultStrat = function (parentVal, childVal) {
   return childVal === undefined
     ? parentVal
@@ -214,7 +205,6 @@ const defaultStrat = function (parentVal, childVal) {
  *
  * @param {Object} options
  */
-
 function guardComponents (options) {
   if (options.components) {
     const components = options.components
@@ -241,7 +231,6 @@ function guardComponents (options) {
  *
  * @param {Object} options
  */
-
 function guardProps (options) {
   const props = options.props
   if (!props) return
@@ -290,7 +279,6 @@ function guardDirectives (options) {
  * @param {Vue} [vm] - if vm is present, indicates this is
  *                     an instantiation merge.
  */
-
 export function mergeOptions (parent, child, vm) {
   guardComponents(child)
   guardProps(child)
@@ -339,7 +327,6 @@ export function mergeOptions (parent, child, vm) {
  * @param {Boolean} warnMissing
  * @return {Object|Function}
  */
-
 export function resolveAsset (options, type, id, warnMissing) {
   /* istanbul ignore if */
   if (typeof id !== 'string') {

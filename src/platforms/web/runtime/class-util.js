@@ -11,7 +11,6 @@ const svgNS = namespaceMap.svg
  * @param {Element} el
  * @param {String} cls
  */
-
 export function setClass (el, cls) {
   /* istanbul ignore else */
   if (!isIE9 || el.namespaceURI === svgNS) {
@@ -27,7 +26,6 @@ export function setClass (el, cls) {
  * @param {Element} el
  * @param {String} cls
  */
-
 export function addClass (el, cls) {
   if (el.classList) {
     if (cls.indexOf(' ') > -1) {
@@ -49,7 +47,6 @@ export function addClass (el, cls) {
  * @param {Element} el
  * @param {String} cls
  */
-
 export function removeClass (el, cls) {
   if (el.classList) {
     if (cls.indexOf(' ') > -1) {
@@ -78,7 +75,6 @@ export function removeClass (el, cls) {
  * @param {Element} el
  * @return {String}
  */
-
 function getClass (el) {
   let classname = el.className
   if (typeof classname === 'object') {

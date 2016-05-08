@@ -1,5 +1,4 @@
 /* global MutationObserver */
-
 // can we use __proto__?
 export const hasProto = '__proto__' in {}
 
@@ -25,7 +24,6 @@ const isWechat = UA && UA.indexOf('micromessenger') > 0
  * @param {Function} cb
  * @param {Object} ctx
  */
-
 export const nextTick = (function () {
   let callbacks = []
   let pending = false
@@ -78,17 +76,19 @@ if (typeof Set !== 'undefined' && Set.toString().match(/native code/)) {
   _Set = Set
 } else {
   // a non-standard Set polyfill that only works with primitive keys.
-  _Set = function () {
-    this.set = Object.create(null)
-  }
-  _Set.prototype.has = function (key) {
-    return this.set[key] !== undefined
-  }
-  _Set.prototype.add = function (key) {
-    this.set[key] = 1
-  }
-  _Set.prototype.clear = function () {
-    this.set = Object.create(null)
+  _Set = class Set {
+    constructor () {
+      this.set = Object.create(null)
+    }
+    has (key) {
+      return this.set[key] !== undefined
+    }
+    add (key) {
+      this.set[key] = 1
+    }
+    clear () {
+      this.set = Object.create(null)
+    }
   }
 }
 

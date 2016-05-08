@@ -3,7 +3,6 @@
  * Simon Friis Vindum (@paldepind)
  * with custom modifications.
  */
-
 import VNode from './vnode'
 import { isPrimitive, renderString, warn } from '../util/index'
 

@@ -6,7 +6,6 @@ export function initUse (Vue) {
    *
    * @param {Object} plugin
    */
-
   Vue.use = function (plugin) {
     /* istanbul ignore if */
     if (plugin.installed) {

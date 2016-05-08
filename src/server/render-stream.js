@@ -7,7 +7,6 @@ const MAX_STACK_DEPTH = 500
  * Licensed under the Apache License, Version 2.0
  * Modified by Evan You (@yyx990803)
  */
-
 export default class RenderStream extends stream.Readable {
   constructor (render) {
     super()

@@ -6,7 +6,6 @@ export const arrayMethods = Object.create(arrayProto)
 /**
  * Intercept mutating methods and emit events
  */
-
 ;[
   'push',
   'pop',

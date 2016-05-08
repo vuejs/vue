@@ -13,7 +13,6 @@ let isPlatformReservedTag
  *    create fresh nodes for them on each re-render;
  * 2. Completely skip them in the patching process.
  */
-
 export function optimize (root, options) {
   isPlatformReservedTag = options.isReservedTag || (() => false)
   // first pass: mark all non-static nodes.

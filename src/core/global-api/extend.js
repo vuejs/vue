@@ -7,7 +7,6 @@ export function initExtend (Vue) {
    * cid. This enables us to create wrapped "child
    * constructors" for prototypal inheritance and cache them.
    */
-
   Vue.cid = 0
   let cid = 1
 
@@ -16,7 +15,6 @@ export function initExtend (Vue) {
    *
    * @param {Object} extendOptions
    */
-
   Vue.extend = function (extendOptions) {
     extendOptions = extendOptions || {}
     const Super = this

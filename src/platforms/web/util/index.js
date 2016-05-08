@@ -14,7 +14,6 @@ export const isAndroid = UA && UA.indexOf('android') > 0
  * @param {String|Element} el
  * @return {Element}
  */
-
 export function query (el) {
   if (typeof el === 'string') {
     const selector = el
