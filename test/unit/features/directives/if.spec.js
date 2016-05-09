@@ -3,28 +3,28 @@ import Vue from 'vue'
 describe('Directive v-if', () => {
   it('should check if value is truthy', () => {
     const vm = new Vue({
-      el: '#app',
       template: '<div><span v-if="foo">hello</span></div>',
       data: { foo: true }
     })
+    vm.$mount()
     expect(vm.$el.innerHTML).toBe('<span>hello</span>')
   })
 
   it('should check if value is falsy', () => {
     const vm = new Vue({
-      el: '#app',
       template: '<div><span v-if="foo">hello</span></div>',
       data: { foo: false }
     })
+    vm.$mount()
     expect(vm.$el.innerHTML).toBe('')
   })
 
   it('should update if value changed', done => {
     const vm = new Vue({
-      el: '#app',
       template: '<div><span v-if="foo">hello</span></div>',
       data: { foo: true }
     })
+    vm.$mount()
     expect(vm.$el.innerHTML).toBe('<span>hello</span>')
     vm.foo = false
     waitForUpdate(() => {
@@ -57,7 +57,6 @@ describe('Directive v-if', () => {
 
   it('should work well with v-else', done => {
     const vm = new Vue({
-      el: '#app',
       template: `
         <div>
           <span v-if="foo">hello</span>
@@ -66,6 +65,7 @@ describe('Directive v-if', () => {
       `,
       data: { foo: true }
     })
+    vm.$mount()
     expect(vm.$el.innerHTML).toBe('<span>hello</span>')
     vm.foo = false
     waitForUpdate(() => {
@@ -97,7 +97,6 @@ describe('Directive v-if', () => {
 
   it('should work well with v-for', done => {
     const vm = new Vue({
-      el: '#app',
       template: `
         <div>
           <span v-for="item,i in list" v-if="item.value">{{i}}</span>
@@ -111,6 +110,7 @@ describe('Directive v-if', () => {
         ]
       }
     })
+    vm.$mount()
     expect(vm.$el.innerHTML).toBe('<span>0</span><span>2</span>')
     vm.list[0].value = false
     waitForUpdate(() => {
@@ -127,7 +127,6 @@ describe('Directive v-if', () => {
 
   it('should work well with v-for and v-else', done => {
     const vm = new Vue({
-      el: '#app',
       template: `
         <div>
           <span v-for="item,i in list" v-if="item.value">hello</span>
@@ -142,6 +141,7 @@ describe('Directive v-if', () => {
         ]
       }
     })
+    vm.$mount()
     expect(vm.$el.innerHTML).toBe('<span>hello</span><span>bye</span><span>hello</span>')
     vm.list[0].value = false
     waitForUpdate(() => {

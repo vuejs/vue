@@ -278,8 +278,9 @@ function processSlot (el) {
 }
 
 function processComponent (el) {
-  if (el.tag === 'component') {
-    el.component = getBindingAttr(el, 'is')
+  const isBinding = getBindingAttr(el, 'is')
+  if (isBinding) {
+    el.component = isBinding
   }
   if (getAndRemoveAttr(el, 'inline-template') != null) {
     el.inlineTemplate = true

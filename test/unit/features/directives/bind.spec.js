@@ -3,10 +3,10 @@ import Vue from 'vue'
 describe('Directive v-bind', () => {
   it('normal attr', done => {
     const vm = new Vue({
-      el: '#app',
       template: '<div><span :test="foo">hello</span></div>',
       data: { foo: 'ok' }
     })
+    vm.$mount()
     expect(vm.$el.firstChild.getAttribute('test')).toBe('ok')
     vm.foo = 'again'
     waitForUpdate(() => {
@@ -29,7 +29,6 @@ describe('Directive v-bind', () => {
 
   it('should set property for input value', done => {
     const vm = new Vue({
-      el: '#app',
       template: `
         <div>
           <input type="text" :value="foo">
@@ -41,6 +40,7 @@ describe('Directive v-bind', () => {
         bar: false
       }
     })
+    vm.$mount()
     expect(vm.$el.firstChild.value).toBe('ok')
     expect(vm.$el.lastChild.checked).toBe(false)
     vm.bar = true
@@ -52,12 +52,12 @@ describe('Directive v-bind', () => {
 
   it('xlink', done => {
     const vm = new Vue({
-      el: '#app',
       template: '<svg><a :xlink:special="foo"></a></svg>',
       data: {
         foo: 'ok'
       }
     })
+    vm.$mount()
     const xlinkNS = 'http://www.w3.org/1999/xlink'
     expect(vm.$el.firstChild.getAttributeNS(xlinkNS, 'special')).toBe('ok')
     vm.foo = 'again'
@@ -75,10 +75,10 @@ describe('Directive v-bind', () => {
 
   it('enumrated attr', done => {
     const vm = new Vue({
-      el: '#app',
       template: '<div><span :draggable="foo">hello</span></div>',
       data: { foo: true }
     })
+    vm.$mount()
     expect(vm.$el.firstChild.getAttribute('draggable')).toBe('true')
     vm.foo = 'again'
     waitForUpdate(() => {
@@ -101,10 +101,10 @@ describe('Directive v-bind', () => {
 
   it('boolean attr', done => {
     const vm = new Vue({
-      el: '#app',
       template: '<div><span :disabled="foo">hello</span></div>',
       data: { foo: true }
     })
+    vm.$mount()
     expect(vm.$el.firstChild.getAttribute('disabled')).toBe('disabled')
     vm.foo = 'again'
     waitForUpdate(() => {

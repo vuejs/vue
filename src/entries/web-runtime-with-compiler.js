@@ -29,7 +29,8 @@ Vue.prototype.$mount = function (el) {
     if (template) {
       const { render, staticRenderFns } = compileToFunctions(template, {
         preserveWhitespace: config.preserveWhitespace,
-        delimiters: options.delimiters
+        delimiters: options.delimiters,
+        warn
       })
       options.render = render
       options.staticRenderFns = staticRenderFns

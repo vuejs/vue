@@ -41,7 +41,7 @@ function genElement (el) {
     return genRender(el)
   } else if (el.tag === 'slot') {
     return genSlot(el)
-  } else if (el.tag === 'component') {
+  } else if (el.component) {
     return genComponent(el)
   } else {
     // if the element is potentially a component,

@@ -348,7 +348,7 @@ export function createPatchFunction (backend) {
       if (sameVnode(oldVnode, vnode)) {
         patchVnode(oldVnode, vnode, insertedVnodeQueue)
       } else {
-        if (isUndef(oldVnode.tag)) {
+        if (isDef(oldVnode.nodeType)) {
           // mounting to a real element
           // check if this is server-rendered content and if we can perform
           // a successful hydration.

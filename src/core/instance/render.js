@@ -1,4 +1,5 @@
 import createElement from '../vdom/create-element'
+import { emptyVNode } from '../vdom/vnode'
 import { flatten } from '../vdom/helpers'
 import { bind, isArray, isObject, renderString } from 'shared/util'
 import { resolveAsset, nextTick } from '../util/index'
@@ -38,7 +39,7 @@ export function renderMixin (Vue) {
       resolveSlots(this, _renderChildren)
     }
     // render self
-    const vnode = render.call(this._renderProxy)
+    const vnode = render.call(this._renderProxy) || emptyVNode
     // set parent
     vnode.parent = _parentVnode
     // restore render state

@@ -1,4 +1,4 @@
-import VNode from './vnode'
+import VNode, { emptyVNode } from './vnode'
 import config from '../config'
 import { createComponent } from './create-component'
 import { flatten } from './helpers'
@@ -8,6 +8,10 @@ import { warn, resolveAsset } from '../util/index'
 export default function createElement (tag, data, children, namespace) {
   const context = this
   const parent = renderState.activeInstance
+  if (!tag) {
+    // in case of component :is set to falsy value
+    return emptyVNode
+  }
   if (typeof tag === 'string') {
     let Ctor
     if (config.isReservedTag(tag)) {
