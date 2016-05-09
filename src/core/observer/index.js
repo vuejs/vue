@@ -180,7 +180,7 @@ export function defineReactive (obj, key, val) {
   Object.defineProperty(obj, key, {
     enumerable: true,
     configurable: true,
-    get: function reactiveGetter () {
+    get () {
       const value = getter ? getter.call(obj) : val
       if (Dep.target) {
         dep.depend()
@@ -196,7 +196,7 @@ export function defineReactive (obj, key, val) {
       }
       return value
     },
-    set: function reactiveSetter (newVal) {
+    set (newVal) {
       const value = getter ? getter.call(obj) : val
       if (newVal === value) {
         return
@@ -288,10 +288,10 @@ export function proxy (vm, key) {
     Object.defineProperty(vm, key, {
       configurable: true,
       enumerable: true,
-      get: function proxyGetter () {
+      get () {
         return vm._data[key]
       },
-      set: function proxySetter (val) {
+      set (val) {
         vm._data[key] = val
       }
     })
