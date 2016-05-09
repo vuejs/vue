@@ -385,7 +385,7 @@ export function createPatchFunction (backend) {
     return vnode.elm
   }
 
-  function firstPatch (vnode) {
+  function streamPatch (vnode) {
     var insertedVnodeQueue = []
     var currentVNode = this._currentVNode
     createElm(vnode, insertedVnodeQueue)
@@ -396,5 +396,5 @@ export function createPatchFunction (backend) {
     return vnode.elm
   }
 
-  return { patch, firstPatch }
+  return { patch, streamPatch }
 }

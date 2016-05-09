@@ -48,13 +48,13 @@ export function createElement (tag, data, children, namespace) {
 export function renderElement (vnode, children) {
   if (vnode.component) {
     const component = createComponent(vnode.Ctor, vnode.data, vnode.parent, vnode.children, vnode.context)
-    if (this._firstRendering) {
-      this.__first_patch__(component)
+    if (this._isStream) {
+      this.__stream_patch__(component)
     }
     return component
   }
   vnode.setChildren(flatten(children))
-  if (this._firstRendering) {
+  if (this._isStream) {
     this._currentVNode = this._lastVNode
     this._lastVNode = undefined
   }
@@ -62,23 +62,13 @@ export function renderElement (vnode, children) {
 }
 
 export function renderSelf (tag, data, namespace) {
-  const context = this
   const parent = renderState.activeInstance
   if (typeof tag === 'string') {
     let Ctor
     if (config.isReservedTag(tag)) {
-      const vnode = VNode(
-        tag, data, null,
-        undefined, undefined, namespace, context
-      )
-      if (this._firstRendering) {
-        this.__first_patch__(vnode)
-        this._lastVNode = this._currentVNode
-        this._currentVNode = vnode
-      }
-      return vnode
-    } else if ((Ctor = resolveAsset(context.$options, 'components', tag))) {
-      return { Ctor, data, parent, context, component: true }
+      return createSelfVNode(tag, data, undefined, namespace, this)
+    } else if ((Ctor = resolveAsset(this.$options, 'components', tag))) {
+      return { Ctor, data, parent, context: this, component: true }
     } else {
       if (process.env.NODE_ENV !== 'production') {
         if (!namespace && config.isUnknownElement(tag)) {
@@ -89,41 +79,34 @@ export function renderSelf (tag, data, namespace) {
           )
         }
       }
-      const vnode = VNode(
-        tag, data, null,
-        undefined, undefined, namespace, context
-      )
-      if (this._firstRendering) {
-        this.__first_patch__(vnode)
-        this._currentVNode = vnode
-      }
-      return vnode
+      return createSelfVNode(tag, data, undefined, namespace, this)
     }
   } else {
-    return { tag, data, parent, context, component: true }
+    return { tag, data, parent, context: this, component: true }
   }
 }
 
 export function renderText (str) {
-  const context = this
-  const vnode = VNode(
-    undefined, undefined, undefined,
-    str, undefined, undefined, context
-  )
-  if (context._firstRendering) {
-    context.__first_patch__(vnode)
-    this._lastVNode = this._currentVNode
-    this._currentVNode = vnode
-  }
+  createSelfVNode(undefined, undefined, str, undefined, this)
   return str
 }
 
 export function renderStatic (index) {
   const vnode = this._staticTrees[index]
-  if (this._firstRendering) {
-    this.__first_patch__(vnode)
-    this._lastVNode = this._currentVNode
-    this._currentVNode = vnode
-  }
+  setCurrentVNode(vnode, this)
   return vnode
+}
+
+function createSelfVNode (tag, data, text, namespace, context) {
+  const vnode = VNode(tag, data, null, text, undefined, namespace, context)
+  setCurrentVNode(vnode, context)
+  return vnode
+}
+
+function setCurrentVNode (vnode, context) {
+  if (context._isStream) {
+    context.__stream_patch__(vnode)
+    context._lastVNode = context._currentVNode
+    context._currentVNode = vnode
+  }
 }
