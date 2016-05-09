@@ -54,7 +54,7 @@ export default {
   ],
 
   /**
-   * Max circular updates allowed in a batcher flush cycle.
+   * Max circular updates allowed in a scheduler flush cycle.
    */
   _maxUpdateCount: 100
 }

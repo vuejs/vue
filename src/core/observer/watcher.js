@@ -1,5 +1,5 @@
 import Dep from './dep'
-import { pushWatcher } from './batcher'
+import { queueWatcher } from './scheduler'
 import {
   warn,
   remove,
@@ -141,13 +141,13 @@ export default class Watcher {
     } else if (this.sync) {
       this.run()
     } else {
-      pushWatcher(this)
+      queueWatcher(this)
     }
   }
 
   /**
-   * Batcher job interface.
-   * Will be called by the batcher.
+   * Scheduler job interface.
+   * Will be called by the scheduler.
    */
   run () {
     if (this.active) {

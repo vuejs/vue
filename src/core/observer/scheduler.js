@@ -18,9 +18,9 @@ let circular = {}
 let waiting = false
 
 /**
- * Reset the batcher's state.
+ * Reset the scheduler's state.
  */
-function resetBatcherState () {
+function resetSchedulerState () {
   queue.length = 0
   userQueue.length = 0
   has = {}
@@ -33,15 +33,15 @@ function resetBatcherState () {
 /**
  * Flush both queues and run the watchers.
  */
-function flushBatcherQueue () {
-  runBatcherQueue(queue.sort(queueSorter))
+function flushSchedulerQueue () {
+  runSchedulerQueue(queue.sort(queueSorter))
   queue.length = 0
-  runBatcherQueue(userQueue)
+  runSchedulerQueue(userQueue)
   // user watchers triggered more internal watchers
   if (queue.length) {
-    runBatcherQueue(queue.sort(queueSorter))
+    runSchedulerQueue(queue.sort(queueSorter))
   }
-  resetBatcherState()
+  resetSchedulerState()
 }
 
 /**
@@ -60,7 +60,7 @@ function queueSorter (a, b) {
  *
  * @param {Array} queue
  */
-function runBatcherQueue (queue) {
+function runSchedulerQueue (queue) {
   // do not cache length because more watchers might be pushed
   // as we run existing watchers
   for (let i = 0; i < queue.length; i++) {
@@ -93,7 +93,7 @@ function runBatcherQueue (queue) {
  *   - {Number} id
  *   - {Function} run
  */
-export function pushWatcher (watcher) {
+export function queueWatcher (watcher) {
   const id = watcher.id
   if (has[id] == null) {
     // push watcher into appropriate queue
@@ -105,7 +105,7 @@ export function pushWatcher (watcher) {
     // queue the flush
     if (!waiting) {
       waiting = true
-      nextTick(flushBatcherQueue)
+      nextTick(flushSchedulerQueue)
     }
   }
 }
