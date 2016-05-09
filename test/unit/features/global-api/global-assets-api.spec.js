@@ -15,23 +15,7 @@ describe('Global Assets API', () => {
     })
   })
 
-  it('component', () => {
-    const def = { a: 1 }
-    Test.component('test', def)
-    const component = Test.options.components.test
-    expect(typeof component).toBe('function')
-    expect(component.super).toBe(Vue)
-    expect(component.options.a).toBe(1)
-    expect(component.options.name).toBe('test')
-    expect(Test.component('test')).toBe(component)
-    // already extended
-    Test.component('test2', component)
-    expect(Test.component('test2')).toBe(component)
-    // extended registration should not pollute global
-    expect(Vue.options.components.test).toBeUndefined()
-  })
-
-  describe('Vue.component works', () => {
+  describe('Vue.component', () => {
     it('should register a component', () => {
       Vue.component('foo', {
         template: '<span>foo</span>'
@@ -45,5 +29,21 @@ describe('Global Assets API', () => {
       })
       expect(vm.$el.innerHTML).toBe('<span>foo</span><span>bar</span>')
     })
+  })
+
+  it('component on extended constructor', () => {
+    const def = { a: 1 }
+    Test.component('test', def)
+    const component = Test.options.components.test
+    expect(typeof component).toBe('function')
+    expect(component.super).toBe(Vue)
+    expect(component.options.a).toBe(1)
+    expect(component.options.name).toBe('test')
+    expect(Test.component('test')).toBe(component)
+    // already extended
+    Test.component('test2', component)
+    expect(Test.component('test2')).toBe(component)
+    // extended registration should not pollute global
+    expect(Vue.options.components.test).toBeUndefined()
   })
 })
