@@ -251,10 +251,12 @@ function processOnce (el) {
 function processRender (el) {
   if (el.tag === 'render') {
     el.render = true
-    el.renderMethod = el.attrsMap.method
+    el.renderMethod = el.attrsMap[':method'] || el.attrsMap['v-bind:method']
     el.renderArgs = el.attrsMap[':args'] || el.attrsMap['v-bind:args']
     if (process.env.NODE_ENV !== 'production') {
-      if (!el.renderMethod) {
+      if (el.attrsMap.method) {
+        warn('<render> method should use a dynamic binding, e.g. `:method="..."`.')
+      } else if (!el.renderMethod) {
         warn('method attribute is required on <render>.')
       }
       if (el.attrsMap.args) {
