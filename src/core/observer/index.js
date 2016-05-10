@@ -10,6 +10,7 @@ import {
   hasOwn,
   isReserved
 } from '../util/index'
+import Vue from '../instance/index'
 
 const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
 
@@ -145,6 +146,7 @@ export function observe (value, vm) {
     ob = value.__ob__
   } else if (
     observerState.shouldConvert &&
+    !Vue.prototype.$isServerRenderer &&
     (isArray(value) || isPlainObject(value)) &&
     Object.isExtensible(value) &&
     !value._isVue
