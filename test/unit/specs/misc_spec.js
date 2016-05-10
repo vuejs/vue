@@ -546,4 +546,35 @@ describe('Misc', function () {
     })
     expect(vm.$el.textContent).toBe('135')
   })
+
+  // #2821
+  it('batcher should keep flushing until all queues are depleted', done => {
+    var spy = jasmine.createSpy()
+    var vm = new Vue({
+      el: document.createElement('div'),
+      template: '<test :prop="model"></test>',
+      data: {
+        model: 0,
+        count: 0
+      },
+      watch: {
+        count: function () {
+          this.model++
+        }
+      },
+      components: {
+        test: {
+          props: ['prop'],
+          watch: {
+            prop: spy
+          }
+        }
+      }
+    })
+    vm.count++
+    Vue.nextTick(function () {
+      expect(spy).toHaveBeenCalled()
+      done()
+    })
+  })
 })
