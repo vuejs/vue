@@ -105,7 +105,8 @@ function buildEntry (opts) {
   var plugins = [babel()]
   if (opts.env) {
     plugins.push(replace({
-      'process.env.NODE_ENV': JSON.stringify(opts.env)
+      'process.env.NODE_ENV': JSON.stringify(opts.env),
+      'process.env.VUE_ENV': JSON.stringify('client')
     }))
   }
   var alias = baseAlias

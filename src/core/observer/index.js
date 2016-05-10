@@ -1,3 +1,4 @@
+import config from '../config'
 import Dep from './dep'
 import { arrayMethods } from './array'
 import {
@@ -145,6 +146,7 @@ export function observe (value, vm) {
     ob = value.__ob__
   } else if (
     observerState.shouldConvert &&
+    !config._isServer &&
     (isArray(value) || isPlainObject(value)) &&
     Object.isExtensible(value) &&
     !value._isVue

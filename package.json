@@ -21,7 +21,7 @@
     "test:unit": "NODE_ENV=development karma start build/karma.unit.config.js",
     "test:cover": "NODE_ENV=development karma start build/karma.cover.config.js",
     "test:e2e": "npm run build -- vue.js && node test/e2e/runner.js",
-    "test:ssr": "npm run build -- vue.common.js,compiler.js,server-renderer.js && NODE_ENV=development jasmine JASMINE_CONFIG_PATH=test/ssr/jasmine.json"
+    "test:ssr": "npm run build -- vue.common.js,compiler.js,server-renderer.js && NODE_ENV=development VUE_ENV=server jasmine JASMINE_CONFIG_PATH=test/ssr/jasmine.json"
   },
   "repository": {
     "type": "git",

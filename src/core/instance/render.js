@@ -1,3 +1,4 @@
+import config from '../config'
 import createElement from '../vdom/create-element'
 import { emptyVNode } from '../vdom/vnode'
 import { flatten } from '../vdom/helpers'
@@ -24,6 +25,12 @@ export function renderMixin (Vue) {
   Vue.prototype.$nextTick = function (fn) {
     nextTick(fn, this)
   }
+
+  Object.defineProperty(Vue.prototype, '$isServer', {
+    get () {
+      return config._isServer
+    }
+  })
 
   Vue.prototype._render = function () {
     if (!this._mounted) {
