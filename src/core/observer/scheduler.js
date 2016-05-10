@@ -35,11 +35,11 @@ function resetSchedulerState () {
  */
 function flushSchedulerQueue () {
   runSchedulerQueue(queue.sort(queueSorter))
-  queue.length = 0
   runSchedulerQueue(userQueue)
-  // user watchers triggered more internal watchers
+  // user watchers triggered more watchers,
+  // keep flushing until it depletes
   if (queue.length) {
-    runSchedulerQueue(queue.sort(queueSorter))
+    return flushSchedulerQueue()
   }
   resetSchedulerState()
 }
@@ -81,6 +81,7 @@ function runSchedulerQueue (queue) {
       }
     }
   }
+  queue.length = 0
 }
 
 /**
