@@ -1,6 +1,8 @@
 import RenderStream from './render-stream'
 import { createRenderFunction } from './render'
 
+export const MAX_STACK_DEPTH = 1000
+
 export function createRenderer ({
   modules = [],
   directives = {},
@@ -10,9 +12,18 @@ export function createRenderer ({
   return {
     renderToString (component) {
       let result = ''
+      let stackDepth = 0
       render(component, (str, next) => {
         result += str
-        next && next()
+        if (next) {
+          if (stackDepth >= MAX_STACK_DEPTH) {
+            process.nextTick(next)
+          } else {
+            stackDepth++
+            next()
+            stackDepth--
+          }
+        }
       })
       return result
     },
