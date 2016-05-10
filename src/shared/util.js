@@ -195,3 +195,8 @@ export function isPlainObject (obj) {
  * @return {Boolean}
  */
 export const isArray = Array.isArray
+
+/**
+ * Perform no operation.
+ */
+export function noop () {}

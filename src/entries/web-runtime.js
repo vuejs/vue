@@ -6,6 +6,7 @@ import baseModules from 'core/vdom/modules/index'
 import platformModules from 'web/runtime/modules/index'
 import { query, isUnknownElement, isReservedTag } from 'web/util/index'
 import { inBrowser } from 'core/util/env'
+import { noop } from 'core/util/index'
 
 // install platform specific utils
 Vue.config.isUnknownElement = isUnknownElement
@@ -18,7 +19,7 @@ Vue.options.directives = platformDirectives
 const modules = baseModules.concat(platformModules)
 Vue.prototype.__patch__ = inBrowser
   ? createPatchFunction({ nodeOps, modules })
-  : function noop () {}
+  : noop
 
 // wrap mount
 Vue.prototype.$mount = function (el) {
