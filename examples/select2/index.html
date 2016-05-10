@@ -40,7 +40,7 @@
     Vue.component('select2', {
       props: ['options', 'value'],
       template: '#select2-template',
-      ready: function () {
+      mounted: function () {
         var vm = this
         $(this.$el)
           .val(this.value)

@@ -40,12 +40,13 @@ export function lifecycleMixin (Vue) {
         }
       }
     }
+    callHook(this, 'beforeMount')
     this._watcher = new Watcher(this, this._render, this._update)
     this._update(this._watcher.value)
     this._mounted = true
-    // root instance, call ready on self
+    // root instance, call mounted on self
     if (this.$root === this) {
-      callHook(this, 'ready')
+      callHook(this, 'mounted')
     }
     return this
   }

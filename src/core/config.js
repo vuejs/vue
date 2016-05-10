@@ -46,7 +46,6 @@ export default {
     'created',
     'beforeMount',
     'mounted',
-    'ready',
     'beforeUpdate',
     'updated',
     'beforeDestroy',

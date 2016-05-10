@@ -105,7 +105,7 @@ function prepatch (oldVnode, vnode) {
 }
 
 function insert (vnode) {
-  callHook(vnode.child, 'ready')
+  callHook(vnode.child, 'mounted')
 }
 
 function destroy (vnode) {
