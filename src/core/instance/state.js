@@ -13,7 +13,8 @@ import {
   isArray,
   isPlainObject,
   bind,
-  validateProp
+  validateProp,
+  noop
 } from '../util/index'
 
 export function initState (vm) {
@@ -62,8 +63,6 @@ function initData (vm) {
   // observe data
   observe(data, vm)
 }
-
-function noop () {}
 
 function initComputed (vm) {
   const computed = vm.$options.computed

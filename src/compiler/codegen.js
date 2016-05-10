@@ -1,10 +1,11 @@
 import { genHandlers } from './events'
 import { ref } from './directives/ref'
 import { baseWarn } from './helpers'
+import { noop } from 'shared/util'
 
 const baseDirectives = {
   ref,
-  cloak: function () {} // noop
+  cloak: noop
 }
 
 // configurable state
