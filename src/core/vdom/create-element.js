@@ -54,10 +54,7 @@ export function renderElement (vnode, children) {
     return component
   }
   vnode.setChildren(flatten(children))
-  if (this._isStream) {
-    this._currentVNode = this._lastVNode
-    this._lastVNode = undefined
-  }
+  revertCurrentVNode(this)
   return vnode
 }
 
@@ -88,6 +85,7 @@ export function renderSelf (tag, data, namespace) {
 
 export function renderText (str) {
   createSelfVNode(undefined, undefined, str, undefined, this)
+  revertCurrentVNode(this)
   return str
 }
 
@@ -108,5 +106,12 @@ function setCurrentVNode (vnode, context) {
     context.__stream_patch__(vnode)
     context._lastVNode = context._currentVNode
     context._currentVNode = vnode
+  }
+}
+
+function revertCurrentVNode(context) {
+  if (context._isStream) {
+    context._currentVNode = context._lastVNode
+    context._lastVNode = undefined
   }
 }
