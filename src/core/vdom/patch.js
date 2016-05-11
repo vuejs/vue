@@ -337,7 +337,7 @@ export function createPatchFunction (backend) {
     }
   }
 
-  return function patch (oldVnode, vnode) {
+  function patch (oldVnode, vnode) {
     let elm, parent
     const insertedVnodeQueue = []
 
@@ -384,4 +384,15 @@ export function createPatchFunction (backend) {
     invokeInsertHook(insertedVnodeQueue)
     return vnode.elm
   }
+
+  function firstPatch (vnode) {
+    var insertedVnodeQueue = []
+    var lastParent = this._lastParent
+    createElm(vnode, insertedVnodeQueue)
+    invokeInsertHook(insertedVnodeQueue)
+    nodeOps.appendChild(lastParent.elm, vnode.elm)
+    return vnode.elm
+  }
+
+  return { patch, firstPatch }
 }
