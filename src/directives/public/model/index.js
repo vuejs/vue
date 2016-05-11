@@ -1,4 +1,4 @@
-import { warn, resolveAsset } from '../../../util/index'
+import { warn, resolveAsset, toBoolean } from '../../../util/index'
 import { MODEL } from '../../priorities'
 import text from './text'
 import radio from './radio'
@@ -80,6 +80,11 @@ export default {
         this.hasWrite = true
       }
     }
+  },
+
+  isSync () {
+    return this.el.hasOwnProperty('_sync')
+      ? toBoolean(this.el._sync) : true
   },
 
   unbind () {
