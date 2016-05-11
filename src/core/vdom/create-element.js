@@ -47,7 +47,7 @@ export function createElement (tag, data, children, namespace) {
 
 export function renderElement (vnode, children) {
   if (vnode.component) {
-    const component = createComponent(vnode.Ctor, vnode.data, vnode.parent, vnode.children, vnode.context)
+    const component = createComponent(vnode.Ctor, vnode.data, vnode.parent, children, vnode.context)
     if (this._isStream) {
       this.__stream_patch__(component)
     }
