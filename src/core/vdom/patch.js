@@ -390,11 +390,23 @@ export function createPatchFunction (backend) {
     var currentVNode = this._currentVNode
     createElm(vnode, insertedVnodeQueue)
     invokeInsertHook(insertedVnodeQueue)
+    if (!this._currentVNodeHistory.length && this._append) {
+      vnode.data = vnode.data || {}
+      vnode.data.append = true
+    }
+    if (!vnode.data || !vnode.data.append && vnode.elm) {
+      nodeOps.appendChild(currentVNode.elm, vnode.elm)
+    }
+    return vnode.elm
+  }
+
+  function treePatch (vnode) {
+    var currentVNode = this._currentVNode
     if (vnode.elm) {
       nodeOps.appendChild(currentVNode.elm, vnode.elm)
     }
     return vnode.elm
   }
 
-  return { patch, streamPatch }
+  return { patch, streamPatch, treePatch }
 }

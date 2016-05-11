@@ -43,6 +43,7 @@ export function lifecycleMixin (Vue) {
     callHook(this, 'beforeMount')
     this._isStream = this.$options.stream
     this._currentVNode = this._currentVNode || { elm: this.$el.parentNode }
+    this._currentVNodeHistory = []
     this._watcher = new Watcher(this, this._render, this._update)
     if (this._isStream) {
       this._updateFirst(this._watcher.value)

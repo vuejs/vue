@@ -55,6 +55,11 @@ export function renderElement (vnode, children) {
   }
   vnode.setChildren(flatten(children))
   revertCurrentVNode(this)
+  if (this._isStream) {
+    if (vnode.data && vnode.data.append) {
+      this.__tree_patch__(vnode)
+    }
+  }
   return vnode
 }
 
@@ -104,14 +109,14 @@ function createSelfVNode (tag, data, text, namespace, context) {
 function setCurrentVNode (vnode, context) {
   if (context._isStream) {
     context.__stream_patch__(vnode)
-    context._lastVNode = context._currentVNode
+    context._currentVNodeHistory.push(context._currentVNode)
     context._currentVNode = vnode
   }
 }
 
 function revertCurrentVNode(context) {
   if (context._isStream) {
-    context._currentVNode = context._lastVNode
-    context._lastVNode = undefined
+    const temp = context._currentVNode
+    context._currentVNode = context._currentVNodeHistory.pop()
   }
 }

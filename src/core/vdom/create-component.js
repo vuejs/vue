@@ -91,6 +91,7 @@ export function createComponentInstanceForVnode (vnode) {
 function init (vnode) {
   const child = vnode.child = createComponentInstanceForVnode(vnode)
   child._currentVNode = parent._currentVNode
+  child._append = vnode.data && vnode.data.append
   child.$mount(vnode.elm)
 }
 
