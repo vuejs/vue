@@ -19,7 +19,7 @@ export default {
     }
 
     this.listener = function () {
-      self.set(self.getValue())
+      self.isSync() && self.set(self.getValue())
     }
     this.on('change', this.listener)
 

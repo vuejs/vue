@@ -781,4 +781,239 @@ describe('v-model', function () {
       done()
     })
   })
+
+  it('should control two-way binding for text', function (done) {
+    var vm = new Vue({
+      el: el,
+      data: {
+        msg: '',
+        valid: false
+      },
+      template: '<input type="text" v-model="msg" :sync="valid">'
+    })
+    _.nextTick(function () {
+      expect(vm.msg).toBe('')
+      el.firstChild.value = 'hello'
+      trigger(el.firstChild, 'input')
+      _.nextTick(function () {
+        expect(vm.msg).toBe('')
+        vm.valid = true // two-way on
+        el.firstChild.value = 'world'
+        trigger(el.firstChild, 'input')
+        _.nextTick(function () {
+          expect(vm.msg).toBe('world')
+          vm.valid = true // two-way off
+          el.firstChild.value = 'hello'
+          _.nextTick(function () {
+            expect(vm.msg).toBe('world')
+            done()
+          })
+        })
+      })
+    })
+  })
+
+  it('should control two-way binding for checkbox', function (done) {
+    var vm = new Vue({
+      el: el,
+      data: {
+        ok: false,
+        valid: false
+      },
+      template: '<input type="checkbox" v-model="ok" :sync="valid">'
+    })
+    _.nextTick(function () {
+      expect(vm.ok).toBe(false)
+      el.firstChild.click()
+      _.nextTick(function () {
+        expect(vm.ok).toBe(false)
+        vm.valid = true // two-way on
+        _.nextTick(function () {
+          expect(vm.ok).toBe(true)
+          el.firstChild.click()
+          _.nextTick(function () {
+            expect(vm.ok).toBe(false)
+            vm.valid = false // two-way off
+            _.nextTick(function () {
+              el.firstChild.click()
+              _.nextTick(function () {
+                expect(vm.ok).toBe(false)
+                done()
+              })
+            })
+          })
+        })
+      })
+    })
+  })
+
+  it('should control two-way binding for checkbox multiple', function (done) {
+    var vm = new Vue({
+      el: el,
+      data: {
+        colors: [],
+        valid: false
+      },
+      template:
+        '<input type="checkbox" value="red" v-model="colors" :sync="valid">' +
+        '<input type="checkbox" value="blue" v-model="colors" :sync="valid">' +
+        '<input type="checkbox" value="green" v-model="colors" :sync="valid">'
+    })
+    _.nextTick(function () {
+      expect(vm.colors.length).toBe(0)
+      el.childNodes[0].click()
+      _.nextTick(function () {
+        expect(vm.colors.length).toBe(0)
+        vm.valid = true // two-way on
+        _.nextTick(function () {
+          el.childNodes[1].click()
+          el.childNodes[2].click()
+          _.nextTick(function () {
+            expect(vm.colors.length).toBe(3)
+            expect(vm.colors[0]).toBe('red')
+            expect(vm.colors[1]).toBe('blue')
+            expect(vm.colors[2]).toBe('green')
+            vm.valid = false // two-way off
+            _.nextTick(function () {
+              el.childNodes[0].click()
+              _.nextTick(function () {
+                expect(vm.colors.length).toBe(3)
+                expect(vm.colors[0]).toBe('red')
+                expect(vm.colors[1]).toBe('blue')
+                expect(vm.colors[2]).toBe('green')
+                done()
+              })
+            })
+          })
+        })
+      })
+    })
+  })
+
+  it('should control two-way binding for radio', function (done) {
+    var vm = new Vue({
+      el: el,
+      data: {
+        test: '',
+        valid: false
+      },
+      template:
+        '<input type="radio" value="one" v-model="test" :sync="valid">' +
+        '<input type="radio" value="two" v-model="test" :sync="valid">'
+    })
+    _.nextTick(function () {
+      expect(vm.test).toBe('')
+      el.childNodes[0].click()
+      _.nextTick(function () {
+        expect(vm.test).toBe('')
+        vm.valid = true // two-way on
+        _.nextTick(function () {
+          el.childNodes[1].click()
+          _.nextTick(function () {
+            expect(vm.test).toBe('two')
+            vm.valid = false // two-way off
+            _.nextTick(function () {
+              el.childNodes[0].click()
+              _.nextTick(function () {
+                expect(vm.test).toBe('two')
+                done()
+              })
+            })
+          })
+        })
+      })
+    })
+  })
+
+  it('should control two-way binding for select', function (done) {
+    var vm = new Vue({
+      el: el,
+      data: {
+        test: '',
+        valid: false
+      },
+      template:
+        '<select v-model="test" :sync="valid">' +
+          '<option>a</option>' +
+          '<option>b</option>' +
+          '<option>c</option>' +
+        '</select>'
+    })
+    _.nextTick(function () {
+      expect(vm.test).toBe('')
+      updateSelect(el.firstChild, 'a')
+      trigger(el.firstChild, 'change')
+      _.nextTick(function () {
+        expect(vm.test).toBe('')
+        vm.valid = true // two-way on
+        _.nextTick(function () {
+          updateSelect(el.firstChild, 'c')
+          trigger(el.firstChild, 'change')
+          _.nextTick(function () {
+            expect(vm.test).toBe('c')
+            vm.valid = false // two-way off
+            _.nextTick(function () {
+              updateSelect(el.firstChild, 'b')
+              trigger(el.firstChild, 'change')
+              _.nextTick(function () {
+                expect(vm.test).toBe('c')
+                done()
+              })
+            })
+          })
+        })
+      })
+    })
+  })
+
+  it('should control two-way binding for select multiple', function (done) {
+    var vm = new Vue({
+      el: el,
+      data: {
+        test: ['b'],
+        valid: false
+      },
+      template:
+        '<select multiple v-model="test" :sync="valid">' +
+          '<option>a</option>' +
+          '<option>b</option>' +
+          '<option>c</option>' +
+        '</select>'
+    })
+    var opts = el.firstChild.options
+    _.nextTick(function () {
+      expect(vm.test.length).toBe(1)
+      expect(vm.test[0]).toBe('b')
+      opts[0].selected = true
+      trigger(el.firstChild, 'change')
+      _.nextTick(function () {
+        expect(vm.test.length).toBe(1)
+        expect(vm.test[0]).toBe('b')
+        vm.valid = true // two-way on
+        _.nextTick(function () {
+          opts[2].selected = true
+          trigger(el.firstChild, 'change')
+          _.nextTick(function () {
+            expect(vm.test.length).toBe(3)
+            expect(vm.test[0]).toBe('a')
+            expect(vm.test[1]).toBe('b')
+            expect(vm.test[2]).toBe('c')
+            vm.valid = false // two-way off
+            _.nextTick(function () {
+              opts[1].selected = false
+              opts[2].selected = false
+              trigger(el.firstChild, 'change')
+              _.nextTick(function () {
+                expect(vm.test.length).toBe(3)
+                expect(vm.test[0]).toBe('a')
+                expect(vm.test[1]).toBe('b')
+                expect(vm.test[2]).toBe('c')
+                done()
+              })
+            })
+          })
+        })
+      })
+    })
+  })
 })

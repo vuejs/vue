@@ -31,6 +31,9 @@ export default {
     }
 
     this.listener = function () {
+      if (!self.isSync()) {
+        return
+      }
       var model = self._watcher.value
       if (isArray(model)) {
         var val = self.getValue()

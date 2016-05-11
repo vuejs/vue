@@ -20,6 +20,7 @@ const enumeratedAttrRE = /^(?:draggable|contenteditable|spellcheck)$/
 // binding v-model to object values
 const modelProps = {
   value: '_value',
+  sync: '_sync',
   'true-value': '_trueValue',
   'false-value': '_falseValue'
 }

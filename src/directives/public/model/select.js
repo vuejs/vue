@@ -18,6 +18,9 @@ export default {
 
     // attach listener
     this.listener = function () {
+      if (!self.isSync()) {
+        return
+      }
       var value = getValue(el, multiple)
       value = self.params.number
         ? isArray(value)

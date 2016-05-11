@@ -62,6 +62,9 @@ export default {
 
     // Now attach the main listener
     this.listener = this.rawListener = function () {
+      if (!self.isSync()) {
+        return
+      }
       if (composing || !self._bound) {
         return
       }
