@@ -1,0 +1,13 @@
+[ignore]
+.*/node_modules/.*
+
+[include]
+
+[libs]
+
+[options]
+module.name_mapper='^compiler/\(.*\)$' -> '<PROJECT_ROOT>/src/compiler/\1'
+module.name_mapper='^core/\(.*\)$' -> '<PROJECT_ROOT>/src/core/\1'
+module.name_mapper='^shared/\(.*\)$' -> '<PROJECT_ROOT>/src/shared/\1'
+module.name_mapper='^web/\(.*\)$' -> '<PROJECT_ROOT>/src/platforms/web/\1'
+module.name_mapper='^server/\(.*\)$' -> '<PROJECT_ROOT>/src/server/\1'
