@@ -10,7 +10,7 @@ export function createRenderer ({
 } = {}) {
   const render = createRenderFunction(modules, directives, isUnaryTag)
   return {
-    renderToString (component) {
+    renderToString (component, done) {
       let result = ''
       let stackDepth = 0
       render(component, (str, next) => {
@@ -23,9 +23,10 @@ export function createRenderer ({
             next()
             stackDepth--
           }
+        } else {
+          done(result)
         }
       })
-      return result
     },
     renderToStream (component) {
       return new RenderStream((write, done) => {
