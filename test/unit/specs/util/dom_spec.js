@@ -31,7 +31,7 @@ describe('Util - DOM', function () {
       done()
     }
     document.body.appendChild(f)
-    f.src = "about:blank"
+    f.src = 'about:blank'
   })
 
   it('getAttr', function () {
