@@ -25,33 +25,33 @@ function genClassFromData (data) {
   const dynamicClass = data.class
   const staticClass = data.staticClass
   if (staticClass || dynamicClass) {
-    return concat(staticClass, stringifyClass(dynamicClass))
+    return concat(staticClass, resolveClass(dynamicClass))
   }
 }
 
 export function concat (a, b) {
-  return a ? b ? (a + ' ' + b) : a : (b || '')
+  return a ? b ? a.concat(b) : a : (b || [])
 }
 
-export function stringifyClass (value) {
+export function resolveClass (value) {
   if (!value) {
-    return ''
+    return []
   }
   if (typeof value === 'string') {
-    return value
+    return value.split(' ')
   }
   if (isArray(value)) {
-    let res = ''
+    let res = []
     for (let i = 0, l = value.length; i < l; i++) {
-      if (value[i]) res += stringifyClass(value[i]) + ' '
+      if (value[i]) res.concat(resolveClass(value[i]))
     }
-    return res.slice(0, -1)
+    return res
   }
   if (isObject(value)) {
-    let res = ''
+    let res = []
     for (const key in value) {
-      if (value[key]) res += key + ' '
+      if (value[key]) res.push(key)
     }
-    return res.slice(0, -1)
+    return res
   }
 }

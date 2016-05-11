@@ -18,6 +18,18 @@ const normalize = cached(function (prop) {
   }
 })
 
+function createStyle (oldVnode, vnode) {
+  if (!vnode.data.style) {
+    return
+  }
+  const elm = vnode.elm
+  const staticStyle = vnode.data.staticStyle
+  for (const name in staticStyle) {
+    elm.style[normalize(name)] = staticStyle[name]
+  }
+  updateStyle(oldVnode, vnode)
+}
+
 function updateStyle (oldVnode, vnode) {
   if (!oldVnode.data.style && !vnode.data.style) {
     return
@@ -56,6 +68,6 @@ function toObject (arr) {
 }
 
 export default {
-  create: updateStyle,
+  create: createStyle,
   update: updateStyle
 }
