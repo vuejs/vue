@@ -41,14 +41,14 @@ export function resolveClass (value) {
     return value.split(' ')
   }
   if (isArray(value)) {
-    let res = []
+    const res = []
     for (let i = 0, l = value.length; i < l; i++) {
       if (value[i]) res.concat(resolveClass(value[i]))
     }
     return res
   }
   if (isObject(value)) {
-    let res = []
+    const res = []
     for (const key in value) {
       if (value[key]) res.push(key)
     }
