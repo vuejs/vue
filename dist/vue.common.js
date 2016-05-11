@@ -1,5 +1,5 @@
 /*!
- * Vue.js v1.0.22
+ * Vue.js v1.0.23
  * (c) 2016 Evan You
  * Released under the MIT License.
  */
@@ -1135,10 +1135,22 @@ function query(el) {
  * @return {Boolean}
  */
 
-function inDoc(node) {
-  var doc = document.documentElement;
+function inDoc(node, win) {
+  win = win || window;
+  var doc = win.document.documentElement;
   var parent = node && node.parentNode;
-  return doc === node || doc === parent || !!(parent && parent.nodeType === 1 && doc.contains(parent));
+  var isInDoc = doc === node || doc === parent || !!(parent && parent.nodeType === 1 && doc.contains(parent));
+  if (!isInDoc) {
+    var frames = win.frames;
+    if (frames) {
+      for (var i = 0; i < frames.length; i++) {
+        if (inDoc(node, frames[i])) {
+          return true;
+        }
+      }
+    }
+  }
+  return isInDoc;
 }
 
 /**
@@ -3011,19 +3023,26 @@ function resetBatcherState() {
  */
 
 function flushBatcherQueue() {
-  runBatcherQueue(queue);
-  queue.length = 0;
-  runBatcherQueue(userQueue);
-  // user watchers triggered more internal watchers
-  if (queue.length) {
+  var _again = true;
+
+  _function: while (_again) {
+    _again = false;
+
     runBatcherQueue(queue);
+    runBatcherQueue(userQueue);
+    // user watchers triggered more watchers,
+    // keep flushing until it depletes
+    if (queue.length) {
+      _again = true;
+      continue _function;
+    }
+    // dev tool hook
+    /* istanbul ignore if */
+    if (devtools && config.devtools) {
+      devtools.emit('flush');
+    }
+    resetBatcherState();
   }
-  // dev tool hook
-  /* istanbul ignore if */
-  if (devtools && config.devtools) {
-    devtools.emit('flush');
-  }
-  resetBatcherState();
 }
 
 /**
@@ -3049,6 +3068,7 @@ function runBatcherQueue(queue) {
       }
     }
   }
+  queue.length = 0;
 }
 
 /**
@@ -7768,7 +7788,7 @@ function extractFragment(nodes, parent) {
     var node = nodes[i];
     if (isTemplate(node) && !node.hasAttribute('v-if') && !node.hasAttribute('v-for')) {
       parent.removeChild(node);
-      node = parseTemplate(node);
+      node = parseTemplate(node, true);
     }
     frag.appendChild(node);
   }
@@ -10004,7 +10024,7 @@ function installGlobalAPI (Vue) {
 
 installGlobalAPI(Vue);
 
-Vue.version = '1.0.22';
+Vue.version = '1.0.23';
 
 // devtools global hook
 /* istanbul ignore next */
