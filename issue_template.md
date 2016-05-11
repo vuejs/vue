@@ -1,6 +1,8 @@
 <!--
 Thank you for contributing! Please carefully read the following before opening your issue.
 
+中文用户：请尽量用英文描述你的 issue，这样能够让尽可能多的人帮到你。
+
 Got a question?
 ===============
 The issue list of this repo is **exclusively** for bug reports and feature requests. For simple questions, please use the following resources:
@@ -32,7 +34,7 @@ Remove the template from below and provide thoughtful commentary *and code sampl
 
 <!-- BUG REPORT TEMPLATE -->
 ### Vue.js version
-1.0.16
+1.0.23
 
 ### Reproduction Link
 <!-- A minimal JSBin, JSFiddle, Codepen, or a GitHub reprository that can reproduce the bug. -->
