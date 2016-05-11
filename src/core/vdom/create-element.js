@@ -65,6 +65,10 @@ export function renderElement (vnode, children) {
 
 export function renderSelf (tag, data, namespace) {
   const parent = renderState.activeInstance
+  if (!tag) {
+    // in case of component :is set to falsy value
+    return emptyVNode
+  }
   if (typeof tag === 'string') {
     let Ctor
     if (config.isReservedTag(tag)) {
@@ -84,7 +88,7 @@ export function renderSelf (tag, data, namespace) {
       return createSelfVNode(tag, data, undefined, namespace, this)
     }
   } else {
-    return { tag, data, parent, context: this, component: true }
+    return { Ctor: tag, data, parent, context: this, component: true }
   }
 }
 
