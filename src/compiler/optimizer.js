@@ -48,7 +48,7 @@ function markStaticRoots (node) {
 
 const isStaticKey = makeMap(
   'tag,attrsList,attrsMap,plain,parent,children,' +
-  'staticAttrs,staticClass'
+  'staticAttrs,staticStyle,staticClass'
 )
 
 function isStatic (node) {
