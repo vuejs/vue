@@ -114,9 +114,8 @@ function setCurrentVNode (vnode, context) {
   }
 }
 
-function revertCurrentVNode(context) {
+function revertCurrentVNode (context) {
   if (context._isStream) {
-    const temp = context._currentVNode
     context._currentVNode = context._currentVNodeHistory.pop()
   }
 }
