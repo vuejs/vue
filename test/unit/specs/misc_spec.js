@@ -548,7 +548,7 @@ describe('Misc', function () {
   })
 
   // #2821
-  it('batcher should keep flushing until all queues are depleted', done => {
+  it('batcher should keep flushing until all queues are depleted', function (done) {
     var spy = jasmine.createSpy()
     var vm = new Vue({
       el: document.createElement('div'),
