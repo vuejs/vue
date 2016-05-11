@@ -1,5 +1,5 @@
 import { setClass } from '../class-util'
-import { genClassForVnode, concat, stringifyClass } from 'web/util/index'
+import { genClassForVnode, concat } from 'web/util/index'
 
 function updateClass (oldVnode, vnode) {
   const el = vnode.elm
@@ -13,7 +13,7 @@ function updateClass (oldVnode, vnode) {
   // handle transition classes
   const transitionClass = el._transitionClasses
   if (transitionClass) {
-    cls = concat(cls, stringifyClass(transitionClass))
+    cls = concat(cls, transitionClass)
   }
 
   // set the class
