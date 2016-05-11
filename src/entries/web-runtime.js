@@ -24,7 +24,7 @@ Vue.prototype.__patch__ = config._isServer
 // wrap mount
 Vue.prototype.$mount = function (el) {
   this.$el = el && query(el)
-  this._mount()
+  return this._mount()
 }
 
 export default Vue

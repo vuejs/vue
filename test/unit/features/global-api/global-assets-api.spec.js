@@ -24,10 +24,12 @@ describe('Global Assets API', () => {
         template: '<span>bar</span>'
       })
       const vm = new Vue({
-        el: document.createElement('div'),
         template: '<div><foo></foo><bar></bar></div>'
-      })
+      }).$mount()
       expect(vm.$el.innerHTML).toBe('<span>foo</span><span>bar</span>')
+      // unregister them
+      delete Vue.options.components.foo
+      delete Vue.options.components.bar
     })
   })
 

@@ -45,10 +45,9 @@ describe('Global API', () => {
       template: '<span>bar</span>'
     })
     const vm = new Vue({
-      el: document.createElement('div'),
       template: '<div><foo></foo><bar></bar></div>',
       components: { foo, bar }
-    })
+    }).$mount()
     expect(vm.$el.innerHTML).toBe('<span>foo</span><span>bar</span>')
   })
 
@@ -93,8 +92,7 @@ describe('Global API', () => {
       },
       render: res.render,
       staticRenderFns: res.staticRenderFns
-    })
-    vm.$mount()
+    }).$mount()
     expect(vm.$el.innerHTML).toContain('<span>hello</span>')
   })
 })

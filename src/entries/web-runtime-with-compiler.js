@@ -36,7 +36,7 @@ Vue.prototype.$mount = function (el) {
       options.staticRenderFns = staticRenderFns
     }
   }
-  mount.call(this, el)
+  return mount.call(this, el)
 }
 
 /**

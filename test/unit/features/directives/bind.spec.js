@@ -5,8 +5,7 @@ describe('Directive v-bind', () => {
     const vm = new Vue({
       template: '<div><span :test="foo">hello</span></div>',
       data: { foo: 'ok' }
-    })
-    vm.$mount()
+    }).$mount()
     expect(vm.$el.firstChild.getAttribute('test')).toBe('ok')
     vm.foo = 'again'
     waitForUpdate(() => {
@@ -39,8 +38,7 @@ describe('Directive v-bind', () => {
         foo: 'ok',
         bar: false
       }
-    })
-    vm.$mount()
+    }).$mount()
     expect(vm.$el.firstChild.value).toBe('ok')
     expect(vm.$el.lastChild.checked).toBe(false)
     vm.bar = true
@@ -56,8 +54,7 @@ describe('Directive v-bind', () => {
       data: {
         foo: 'ok'
       }
-    })
-    vm.$mount()
+    }).$mount()
     const xlinkNS = 'http://www.w3.org/1999/xlink'
     expect(vm.$el.firstChild.getAttributeNS(xlinkNS, 'special')).toBe('ok')
     vm.foo = 'again'
@@ -77,8 +74,7 @@ describe('Directive v-bind', () => {
     const vm = new Vue({
       template: '<div><span :draggable="foo">hello</span></div>',
       data: { foo: true }
-    })
-    vm.$mount()
+    }).$mount()
     expect(vm.$el.firstChild.getAttribute('draggable')).toBe('true')
     vm.foo = 'again'
     waitForUpdate(() => {
@@ -103,8 +99,7 @@ describe('Directive v-bind', () => {
     const vm = new Vue({
       template: '<div><span :disabled="foo">hello</span></div>',
       data: { foo: true }
-    })
-    vm.$mount()
+    }).$mount()
     expect(vm.$el.firstChild.getAttribute('disabled')).toBe('disabled')
     vm.foo = 'again'
     waitForUpdate(() => {

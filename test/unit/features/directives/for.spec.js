@@ -11,8 +11,7 @@ describe('Directive v-for', () => {
       data: {
         list: ['a', 'b', 'c']
       }
-    })
-    vm.$mount()
+    }).$mount()
     expect(vm.$el.innerHTML).toBe('<span>0-a</span><span>1-b</span><span>2-c</span>')
     Vue.set(vm.list, 0, 'd')
     waitForUpdate(() => {
@@ -44,8 +43,7 @@ describe('Directive v-for', () => {
           { value: 'c' }
         ]
       }
-    })
-    vm.$mount()
+    }).$mount()
     expect(vm.$el.innerHTML).toBe('<span>0-a</span><span>1-b</span><span>2-c</span>')
     Vue.set(vm.list, 0, { value: 'd' })
     waitForUpdate(() => {
@@ -76,8 +74,7 @@ describe('Directive v-for', () => {
       data: {
         obj: { a: 0, b: 1, c: 2 }
       }
-    })
-    vm.$mount()
+    }).$mount()
     expect(vm.$el.innerHTML).toBe('<span>0-a</span><span>1-b</span><span>2-c</span>')
     vm.obj.a = 3
     waitForUpdate(() => {
@@ -100,8 +97,7 @@ describe('Directive v-for', () => {
         </div>
       `,
       data: { a: 0, b: 1, c: 2 }
-    })
-    vm.$mount()
+    }).$mount()
     expect(vm.$el.innerHTML).toBe('<span>0-a</span><span>1-b</span><span>2-c</span>')
     vm.a = 3
     waitForUpdate(() => {
@@ -127,8 +123,7 @@ describe('Directive v-for', () => {
         data: {
           list: ['a', 'b', 'c']
         }
-      })
-      vm.$mount()
+      }).$mount()
       expect(vm.$el.innerHTML).toBe('<span>0-a</span><span>1-b</span><span>2-c</span>')
       Vue.set(vm.list, 0, 'd')
       waitForUpdate(() => {
@@ -160,8 +155,7 @@ describe('Directive v-for', () => {
             { value: 'c' }
           ]
         }
-      })
-      vm.$mount()
+      }).$mount()
       expect(vm.$el.innerHTML).toBe('<span>0-a</span><span>1-b</span><span>2-c</span>')
       Vue.set(vm.list, 0, { value: 'd' })
       waitForUpdate(() => {
@@ -192,8 +186,7 @@ describe('Directive v-for', () => {
         data: {
           obj: { a: 0, b: 1, c: 2 }
         }
-      })
-      vm.$mount()
+      }).$mount()
       expect(vm.$el.innerHTML).toBe('<span>0-a</span><span>1-b</span><span>2-c</span>')
       vm.obj.a = 3
       waitForUpdate(() => {
@@ -216,8 +209,7 @@ describe('Directive v-for', () => {
           </div>
         `,
         data: { a: 0, b: 1, c: 2 }
-      })
-      vm.$mount()
+      }).$mount()
       expect(vm.$el.innerHTML).toBe('<span>0-a</span><span>1-b</span><span>2-c</span>')
       vm.a = 3
       waitForUpdate(() => {
@@ -239,8 +231,7 @@ describe('Directive v-for', () => {
         items: [1, 2, 3]
       },
       template: '<div><div v-if="item < 3" v-for="item in items">{{item}}</div></div>'
-    })
-    vm.$mount()
+    }).$mount()
     expect(vm.$el.textContent).toBe('12')
   })
 
@@ -250,16 +241,14 @@ describe('Directive v-for', () => {
         items: [1, 2, 3]
       },
       template: '<div><div v-for="item in items" v-if="item < 3">{{item}}</div></div>'
-    })
-    vm.$mount()
+    }).$mount()
     expect(vm.$el.textContent).toBe('12')
   })
 
   it('range v-for', () => {
     const vm = new Vue({
       template: '<div><div v-for="n in 3">{{n}}</div></div>'
-    })
-    vm.$mount()
+    }).$mount()
     expect(vm.$el.textContent).toBe('123')
   })
 
@@ -273,8 +262,7 @@ describe('Directive v-for', () => {
         ]
       },
       template: '<div><div v-for="item in items">{{ item.msg }}</div></div>'
-    })
-    vm.$mount()
+    }).$mount()
     expect(vm.$el.textContent).toBe('abc')
     const first = vm.$el.children[0]
     vm.items.reverse()
@@ -296,8 +284,7 @@ describe('Directive v-for', () => {
         ]
       },
       template: '<div><div v-for="item in items" track-by="item.id">{{ item.msg }}</div></div>'
-    })
-    vm.$mount()
+    }).$mount()
     expect(vm.$el.textContent).toBe('abc')
     const first = vm.$el.children[0]
     vm.items.reverse()
@@ -324,8 +311,7 @@ describe('Directive v-for', () => {
             '<p v-for="subItem in item.items">{{$index}} {{subItem.a}} {{i}} {{item.a}}</p>' +
           '</div>' +
         '</div>'
-    })
-    vm.$mount()
+    }).$mount()
     expect(vm.$el.innerHTML).toBe(
       '<div><p>0 1 0 1</p><p>1 2 0 1</p></div>' +
       '<div><p>0 3 1 2</p><p>1 4 1 2</p></div>'
@@ -348,8 +334,7 @@ describe('Directive v-for', () => {
             '<p>{{item.a + 1}}</p>' +
           '</template>' +
         '</div>'
-    })
-    vm.$mount()
+    }).$mount()
     assertMarkup()
     vm.list.reverse()
     waitForUpdate(() => {
@@ -390,8 +375,7 @@ describe('Directive v-for', () => {
           template: '<p>{{msg}}<slot></slot></p>'
         }
       }
-    })
-    vm.$mount()
+    }).$mount()
     assertMarkup()
     vm.list.reverse()
     waitForUpdate(() => {
@@ -431,8 +415,7 @@ describe('Directive v-for', () => {
           template: '<div>Two!</div>'
         }
       }
-    })
-    vm.$mount()
+    }).$mount()
     expect(vm.$el.innerHTML).toContain('<p>One!</p><div>Two!</div>')
     vm.list.reverse()
     waitForUpdate(() => {
