@@ -36,24 +36,12 @@ export function query (el) {
  * @return {Boolean}
  */
 
-export function inDoc (node, win) {
-  win = win || window
-  var doc = win.document.documentElement
+export function inDoc (node) {
+  var doc = node.ownerDocument.documentElement
   var parent = node && node.parentNode
-  var isInDoc = doc === node ||
+  return doc === node ||
     doc === parent ||
     !!(parent && parent.nodeType === 1 && (doc.contains(parent)))
-  if (!isInDoc) {
-    var frames = win.frames
-    if (frames) {
-      for (var i = 0; i < frames.length; i++) {
-        if (inDoc(node, frames[i])) {
-          return true
-        }
-      }
-    }
-  }
-  return isInDoc
 }
 
 /**
