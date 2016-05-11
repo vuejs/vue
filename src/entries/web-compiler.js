@@ -1,3 +1,5 @@
+/* @flow */
+
 import { extend } from 'shared/util'
 import { compile as baseCompile } from 'compiler/index'
 import directives from 'web/compiler/directives/index'
@@ -15,14 +17,14 @@ const baseOptions = {
   getTagNamespace
 }
 
-export function compile (template, options) {
+export function compile (template: string, options: Object): Object {
   options = options
     ? extend(extend({}, baseOptions), options)
     : baseOptions
   return baseCompile(template, options)
 }
 
-export function compileToFunctions (template, options = {}) {
+export function compileToFunctions (template: string, options: Object = {}): Object {
   options.preserveWhitespace = options.preserveWhitespace !== false
   const cache = options.preserveWhitespace ? cache1 : cache2
   if (cache[template]) {
@@ -31,7 +33,7 @@ export function compileToFunctions (template, options = {}) {
   const res = {}
   const compiled = compile(template, options)
   res.render = new Function(compiled.render)
-  const l = compiled.staticRenderFns.length
+  const l: number = compiled.staticRenderFns.length
   if (l) {
     res.staticRenderFns = new Array(l)
     for (let i = 0; i < l; i++) {

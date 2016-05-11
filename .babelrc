@@ -7,6 +7,10 @@
       "presets": ["es2015-rollup-vue"]
     }
   },
+  "plugins": [
+    "syntax-flow",
+    "transform-flow-strip-types"
+  ],
   "ignore": [
     "dist/*.js"
   ]
