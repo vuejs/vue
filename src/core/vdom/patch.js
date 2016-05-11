@@ -397,6 +397,9 @@ export function createPatchFunction (backend) {
     if (!vnode.data || !vnode.data.append && vnode.elm) {
       nodeOps.appendChild(currentVNode.elm, vnode.elm)
     }
+    if (!this.$el) {
+      this.$el = vnode.elm
+    }
     return vnode.elm
   }
 
