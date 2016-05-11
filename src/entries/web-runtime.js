@@ -17,9 +17,10 @@ Vue.options.directives = platformDirectives
 
 // install platform patch function
 const modules = baseModules.concat(platformModules)
-Vue.prototype.__patch__ = config._isServer
-  ? noop
-  : createPatchFunction({ nodeOps, modules })
+const patch = createPatchFunction({ nodeOps, modules })
+Vue.prototype.__patch__ = config._isServer ? noop : patch.patch
+Vue.prototype.__stream_patch__ = config._isServer ? noop : patch.streamPatch
+Vue.prototype.__tree_patch__ = config._isServer ? noop : patch.treePatch
 
 // wrap mount
 Vue.prototype.$mount = function (el) {
