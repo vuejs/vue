@@ -15,7 +15,7 @@ export default function createElement (tag, data, children, namespace) {
   if (typeof tag === 'string') {
     let Ctor
     if (config.isReservedTag(tag)) {
-      return VNode(
+      return new VNode(
         tag, data, flatten(children),
         undefined, undefined, namespace, context
       )
@@ -31,7 +31,7 @@ export default function createElement (tag, data, children, namespace) {
           )
         }
       }
-      return VNode(
+      return new VNode(
         tag, data, flatten(children && children()),
         undefined, undefined, namespace, context
       )

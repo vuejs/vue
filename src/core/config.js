@@ -1,15 +1,17 @@
 /* @flow */
 
-const config: {
-    preserveWhitespace: boolean,
-    silent: boolean,
-    isReservedTag: (x: string) => boolean,
-    isUnknownElement: (x: string) => boolean,
-    _assetTypes: Array<string>,
-    _lifecycleHooks: Array<string>,
-    _maxUpdateCount: number,
-    _isServer: boolean
-} = {
+export type Config = {
+  preserveWhitespace: boolean,
+  silent: boolean,
+  isReservedTag: (x: string) => boolean,
+  isUnknownElement: (x: string) => boolean,
+  _assetTypes: Array<string>,
+  _lifecycleHooks: Array<string>,
+  _maxUpdateCount: number,
+  _isServer: boolean
+}
+
+const config: Config = {
 
   /**
    * Preserve whitespaces between elements.
@@ -25,13 +27,13 @@ const config: {
    * Check if a tag is reserved so that it cannot be registered as a
    * component. This is platform-dependent and may be overwritten.
    */
-  isReservedTag: () => false,
+  isReservedTag: _ => false,
 
   /**
    * Check if a tag is an unknown element.
    * Platform-dependent.
    */
-  isUnknownElement: () => false,
+  isUnknownElement: _ => false,
 
   /**
    * List of asset types that a component can own.

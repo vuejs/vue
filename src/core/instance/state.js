@@ -1,3 +1,5 @@
+/* Not type checking this file because flow doesn't play well with Object.defineProperty */
+
 import Watcher from '../observer/watcher'
 import Dep from '../observer/dep'
 import {
@@ -155,10 +157,10 @@ export function stateMixin (Vue) {
     }
   })
 
-  Vue.prototype.$watch = function (fn, cb, options) {
+  Vue.prototype.$watch = function (expOrFn, cb, options) {
     options = options || {}
     options.user = true
-    const watcher = new Watcher(this, fn, cb, options)
+    const watcher = new Watcher(this, expOrFn, cb, options)
     if (options.immediate) {
       cb.call(this, watcher.value)
     }

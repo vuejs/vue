@@ -1,7 +1,10 @@
+/* @flow */
+
+import type Vue from './index'
 import { toArray } from '../util/index'
 import { updateListeners } from '../vdom/helpers'
 
-export function initEvents (vm) {
+export function initEvents (vm: Vue) {
   vm._events = Object.create(null)
   // init parent attached events
   const listeners = vm.$options._parentListeners
@@ -12,21 +15,13 @@ export function initEvents (vm) {
   }
 }
 
-export function eventsMixin (Vue) {
-  Vue.prototype.$on = function (event, fn) {
-    (this._events[event] || (this._events[event] = []))
-      .push(fn)
+export function eventsMixin (Vue: Class<Vue>) {
+  Vue.prototype.$on = function (event: string, fn: Function): Vue {
+    (this._events[event] || (this._events[event] = [])).push(fn)
     return this
   }
 
-  /**
-   * Adds an `event` listener that will be invoked a single
-   * time then automatically removed.
-   *
-   * @param {String} event
-   * @param {Function} fn
-   */
-  Vue.prototype.$once = function (event, fn) {
+  Vue.prototype.$once = function (event: string, fn: Function): Vue {
     const self = this
     function on () {
       self.$off(event, on)
@@ -37,14 +32,7 @@ export function eventsMixin (Vue) {
     return this
   }
 
-  /**
-   * Remove the given callback for `event` or all
-   * registered callbacks.
-   *
-   * @param {String} event
-   * @param {Function} fn
-   */
-  Vue.prototype.$off = function (event, fn) {
+  Vue.prototype.$off = function (event?: string, fn?: Function): Vue {
     // all
     if (!arguments.length) {
       this._events = Object.create(null)
@@ -72,12 +60,7 @@ export function eventsMixin (Vue) {
     return this
   }
 
-  /**
-   * Trigger an event on self.
-   *
-   * @param {String} event
-   */
-  Vue.prototype.$emit = function (event) {
+  Vue.prototype.$emit = function (event: string): Vue {
     let cbs = this._events[event]
     if (cbs) {
       cbs = cbs.length > 1 ? toArray(cbs) : cbs
@@ -86,5 +69,6 @@ export function eventsMixin (Vue) {
         cbs[i].apply(this, args)
       }
     }
+    return this
   }
 }

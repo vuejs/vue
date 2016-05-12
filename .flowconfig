@@ -8,7 +8,6 @@
 [include]
 
 [libs]
-flow
 
 [options]
 module.name_mapper='^compiler/\(.*\)$' -> '<PROJECT_ROOT>/src/compiler/\1'

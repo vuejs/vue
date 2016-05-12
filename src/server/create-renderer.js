@@ -1,10 +1,11 @@
 /* @flow */
 
+import type Vue from 'core/instance/index'
 import RenderStream from './render-stream'
 import { createRenderFunction } from './render'
 import { warn } from 'core/util/debug'
 
-export const MAX_STACK_DEPTH = 10
+export const MAX_STACK_DEPTH = 1000
 
 export function createRenderer ({
   modules = [],
