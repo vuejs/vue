@@ -1,10 +1,12 @@
 import { genHandlers } from './events'
 import { ref } from './directives/ref'
+import { atom } from './directives/atom'
 import { baseWarn } from './helpers'
 import { noop } from 'shared/util'
 
 const baseDirectives = {
   ref,
+  atom,
   cloak: noop
 }
 
@@ -97,6 +99,10 @@ function genData (el) {
   if (el.directives) {
     const dirs = genDirectives(el)
     if (dirs) data += dirs + ','
+  }
+  // atom
+  if (el.atom) {
+    data += 'atom:true,'
   }
   // pre
   if (el.pre) {
