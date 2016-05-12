@@ -102,12 +102,6 @@ describe('Directive v-for', () => {
     vm.a = 3
     waitForUpdate(() => {
       expect(vm.$el.innerHTML).toBe('<span>3-a</span><span>1-b</span><span>2-c</span>')
-      Vue.set(vm, 'd', 4)
-    }).then(() => {
-      expect(vm.$el.innerHTML).toBe('<span>3-a</span><span>1-b</span><span>2-c</span><span>4-d</span>')
-      Vue.delete(vm, 'a')
-    }).then(() => {
-      expect(vm.$el.innerHTML).toBe('<span>1-b</span><span>2-c</span><span>4-d</span>')
       done()
     }).catch(done)
   })
@@ -214,12 +208,6 @@ describe('Directive v-for', () => {
       vm.a = 3
       waitForUpdate(() => {
         expect(vm.$el.innerHTML).toBe('<span>3-a</span><span>1-b</span><span>2-c</span>')
-        Vue.set(vm, 'd', 4)
-      }).then(() => {
-        expect(vm.$el.innerHTML).toBe('<span>3-a</span><span>1-b</span><span>2-c</span><span>4-d</span>')
-        Vue.delete(vm, 'a')
-      }).then(() => {
-        expect(vm.$el.innerHTML).toBe('<span>1-b</span><span>2-c</span><span>4-d</span>')
         done()
       }).catch(done)
     })

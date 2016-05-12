@@ -281,19 +281,22 @@ describe('Observer', () => {
     expect(dep3.notify.calls.count()).toBe(2)
   })
 
-  it('observing set/delete in Vm object', done => {
+  it('warning set/delete on a Vue instance', done => {
     const vm = new Vue({
       template: '<div>{{a}}</div>',
       data: { a: 1 }
-    })
-    vm.$mount()
+    }).$mount()
     expect(vm.$el.outerHTML).toBe('<div>1</div>')
     Vue.set(vm, 'a', 2)
     waitForUpdate(() => {
       expect(vm.$el.outerHTML).toBe('<div>2</div>')
+      expect('Do not add reactive properties to a Vue instance').not.toHaveBeenWarned()
       Vue.delete(vm, 'a')
     }).then(() => {
-      expect(vm.$el.outerHTML).toBe('<div></div>')
+      expect('Do not delete properties on a Vue instance').toHaveBeenWarned()
+      expect(vm.$el.outerHTML).toBe('<div>2</div>')
+      Vue.set(vm, 'b', 123)
+      expect('Do not add reactive properties to a Vue instance').toHaveBeenWarned()
       done()
     }).catch(done)
   })

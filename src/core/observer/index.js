@@ -9,7 +9,8 @@ import {
   isPlainObject,
   hasProto,
   hasOwn,
-  isReserved
+  isReserved,
+  warn
 } from '../util/index'
 
 const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
@@ -233,7 +234,10 @@ export function set (obj, key, val) {
     return
   }
   if (obj._isVue) {
-    set(obj._data, key, val)
+    process.env.NODE_ENV !== 'production' && warn(
+      'Do not add reactive properties to a Vue instance at runtime - ' +
+      'delcare it upfront in the data option.'
+    )
     return
   }
   const ob = obj.__ob__
@@ -261,17 +265,18 @@ export function set (obj, key, val) {
  * @param {String} key
  */
 export function del (obj, key) {
+  if (obj._isVue) {
+    process.env.NODE_ENV !== 'production' && warn(
+      'Do not delete properties on a Vue instance - just set it to null.'
+    )
+    return
+  }
   if (!hasOwn(obj, key)) {
     return
   }
   delete obj[key]
   const ob = obj.__ob__
-
   if (!ob) {
-    if (obj._isVue) {
-      delete obj._data[key]
-      obj.$forceUpdate()
-    }
     return
   }
   ob.dep.notify()
