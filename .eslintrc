@@ -1,5 +1,10 @@
 {
   "root": true,
   "parser": "babel-eslint",
-  "extends": "vue"
+  "extends": "vue",
+  "plugins": ["flow-vars"],
+  "rules": {
+    "flow-vars/define-flow-type": 1,
+    "flow-vars/use-flow-type": 1
+  }
 }

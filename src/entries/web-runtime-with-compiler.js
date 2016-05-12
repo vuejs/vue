@@ -1,3 +1,5 @@
+/* @flow */
+
 import config from 'core/config'
 import { warn, cached } from 'core/util/index'
 import { query } from 'web/util/index'
@@ -7,7 +9,7 @@ import { compileToFunctions } from './web-compiler'
 const idToTemplate = cached(id => query(id).innerHTML)
 const mount = Vue.prototype.$mount
 
-Vue.prototype.$mount = function (el) {
+Vue.prototype.$mount = function (el?: string | Element): Vue {
   el = el && query(el)
   const options = this.$options
   // resolve template/el and convert to render function
@@ -42,11 +44,8 @@ Vue.prototype.$mount = function (el) {
 /**
  * Get outerHTML of elements, taking care
  * of SVG elements in IE as well.
- *
- * @param {Element} el
- * @return {String}
  */
-function getOuterHTML (el) {
+function getOuterHTML (el: Element): string {
   if (el.outerHTML) {
     return el.outerHTML
   } else {

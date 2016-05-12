@@ -49,6 +49,7 @@
     "entities": "1.1.x",
     "eslint": "2.9.x",
     "eslint-config-vue": "1.0.x",
+    "eslint-plugin-flow-vars": "^0.4.0",
     "flow-bin": "^0.24.2",
     "http-server": "0.9.x",
     "isparta-loader": "2.0.x",
