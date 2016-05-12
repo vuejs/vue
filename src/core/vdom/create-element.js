@@ -5,8 +5,21 @@ import { flatten } from './helpers'
 import { renderState } from '../instance/render'
 import { warn, resolveAsset } from '../util/index'
 
-export default function createElement (tag, data, children, namespace) {
-  const context = this
+export function renderElement (vnode, children) {
+  if (vnode.component) {
+    return createComponent(
+      vnode.Ctor, vnode.data, vnode.parent,
+      children, vnode.context
+    )
+  }
+  if (typeof children === 'function') {
+    children = children()
+  }
+  vnode.setChildren(flatten(children))
+  return vnode
+}
+
+export function renderSelf (tag, data, namespace) {
   const parent = renderState.activeInstance
   if (!tag) {
     // in case of component :is set to falsy value
@@ -16,11 +29,11 @@ export default function createElement (tag, data, children, namespace) {
     let Ctor
     if (config.isReservedTag(tag)) {
       return VNode(
-        tag, data, flatten(children),
-        undefined, undefined, namespace, context
+        tag, data, undefined,
+        undefined, undefined, namespace, this
       )
-    } else if ((Ctor = resolveAsset(context.$options, 'components', tag))) {
-      return createComponent(Ctor, data, parent, children, context)
+    } else if ((Ctor = resolveAsset(this.$options, 'components', tag))) {
+      return { Ctor, data, parent, context: this, component: true }
     } else {
       if (process.env.NODE_ENV !== 'production') {
         if (!namespace && config.isUnknownElement(tag)) {
@@ -32,11 +45,19 @@ export default function createElement (tag, data, children, namespace) {
         }
       }
       return VNode(
-        tag, data, flatten(children && children()),
-        undefined, undefined, namespace, context
+        tag, data, undefined,
+        undefined, undefined, namespace, this
       )
     }
   } else {
-    return createComponent(tag, data, parent, children, context)
+    return { Ctor: tag, data, parent, context: this, component: true }
   }
+}
+
+export function renderText (str) {
+  return str
+}
+
+export function renderStatic (index) {
+  return this._staticTrees[index]
 }
