@@ -174,8 +174,9 @@ export function stripQuotes (str) {
  */
 
 var camelizeRE = /-(\w)/g
-export function camelize (str) {
-  return str.replace(camelizeRE, toUpper)
+var camelizeCleanupRE = /\W+(\w)?/
+export function camelize (str, cleanup) {
+  return str.replace(cleanup ? camelizeCleanupRE : camelizeRE, toUpper)
 }
 
 function toUpper (_, c) {
