@@ -6,69 +6,90 @@ const { renderToString } = createRenderer()
 // TODO: test custom server-side directives
 
 describe('SSR: renderToString', () => {
-  it('static attributes', () => {
-    expect(renderVmWithOptions({
+  it('static attributes', done => {
+    renderVmWithOptions({
       template: '<div id="foo" bar="123"></div>'
-    })).toContain('<div id="foo" bar="123" server-rendered="true"></div>')
+    }, result => {
+      expect(result).toContain('<div id="foo" bar="123" server-rendered="true"></div>')
+      done()
+    })
   })
 
-  it('unary tags', () => {
-    expect(renderVmWithOptions({
+  it('unary tags', done => {
+    renderVmWithOptions({
       template: '<input value="123">'
-    })).toContain('<input value="123" server-rendered="true">')
+    }, result => {
+      expect(result).toContain('<input value="123" server-rendered="true">')
+      done()
+    })
   })
 
-  it('dynamic attributes', () => {
-    expect(renderVmWithOptions({
+  it('dynamic attributes', done => {
+    renderVmWithOptions({
       template: '<div qux="quux" :id="foo" :bar="baz"></div>',
       data: {
         foo: 'hi',
         baz: 123
       }
-    })).toContain('<div qux="quux" id="hi" bar="123" server-rendered="true"></div>')
+    }, result => {
+      expect(result).toContain('<div qux="quux" id="hi" bar="123" server-rendered="true"></div>')
+      done()
+    })
   })
 
-  it('static class', () => {
-    expect(renderVmWithOptions({
+  it('static class', done => {
+    renderVmWithOptions({
       template: '<div class="foo bar"></div>'
-    })).toContain('<div server-rendered="true" class="foo bar"></div>')
+    }, result => {
+      expect(result).toContain('<div server-rendered="true" class="foo bar"></div>')
+      done()
+    })
   })
 
-  it('dynamic class', () => {
-    expect(renderVmWithOptions({
+  it('dynamic class', done => {
+    renderVmWithOptions({
       template: '<div class="foo bar" :class="[a, { qux: hasQux, quux: hasQuux }]"></div>',
       data: {
         a: 'baz',
         hasQux: true,
         hasQuux: false
       }
-    })).toContain('<div server-rendered="true" class="foo bar baz qux"></div>')
+    }, result => {
+      expect(result).toContain('<div server-rendered="true" class="foo bar baz qux"></div>')
+      done()
+    })
   })
 
-  it('dynamic style', () => {
-    expect(renderVmWithOptions({
+  it('dynamic style', done => {
+    renderVmWithOptions({
       template: '<div style="background-color:black" :style="{ fontSize: fontSize + \'px\', color: color }"></div>',
       data: {
         fontSize: 14,
         color: 'red'
       }
-    })).toContain(
+    }, result => {
+      expect(result).toContain(
         '<div server-rendered="true" style="font-size:14px;color:red;background-color:black"></div>'
       )
+      done()
+    })
   })
 
-  it('text interpolation', () => {
-    expect(renderVmWithOptions({
+  it('text interpolation', done => {
+    renderVmWithOptions({
       template: '<div>{{ foo }} side {{ bar }}</div>',
       data: {
         foo: 'server',
         bar: 'rendering'
       }
-    })).toContain('<div server-rendered="true">server side rendering</div>')
+    }, result => {
+      expect(result).toContain('<div server-rendered="true">server side rendering</div>')
+      done()
+    })
   })
 
-  it('child component (hoc)', () => {
-    expect(renderVmWithOptions({
+  it('child component (hoc)', done => {
+    renderVmWithOptions({
       template: '<child class="foo" :msg="msg"></child>',
       data: {
         msg: 'hello'
@@ -85,12 +106,15 @@ describe('SSR: renderToString', () => {
           }
         }
       }
-    })).toContain('<div server-rendered="true" class="foo bar">hello bar</div>')
+    }, result => {
+      expect(result).toContain('<div server-rendered="true" class="foo bar">hello bar</div>')
+      done()
+    })
   })
 
-  it('has correct lifecycle during render', () => {
+  it('has correct lifecycle during render', done => {
     let lifecycleCount = 1
-    expect(renderVmWithOptions({
+    renderVmWithOptions({
       template: '<div><span>{{ val }}</span><test></test></div>',
       data: {
         val: 'hi'
@@ -117,16 +141,19 @@ describe('SSR: renderToString', () => {
           }
         }
       }
-    })).toContain(
-      '<div server-rendered="true">' +
-        '<span>hello</span>' +
-        '<span class="b">testAsync</span>' +
-      '</div>'
-    )
+    }, result => {
+      expect(result).toContain(
+        '<div server-rendered="true">' +
+          '<span>hello</span>' +
+          '<span class="b">testAsync</span>' +
+        '</div>'
+      )
+      done()
+    })
   })
 
-  it('renders asynchronous component', () => {
-    expect(renderVmWithOptions({
+  it('renders asynchronous component', done => {
+    renderVmWithOptions({
       template: `
         <div>
           <test-async></test-async>
@@ -141,11 +168,14 @@ describe('SSR: renderToString', () => {
           })
         }
       }
-    })).toContain('<div server-rendered="true"><span class="b">testAsync</span></div>')
+    }, result => {
+      expect(result).toContain('<div server-rendered="true"><span class="b">testAsync</span></div>')
+      done()
+    })
   })
 
-  it('renders asynchronous component (hoc)', () => {
-    expect(renderVmWithOptions({
+  it('renders asynchronous component (hoc)', done => {
+    renderVmWithOptions({
       template: '<test-async></test-async>',
       components: {
         testAsync (resolve) {
@@ -156,11 +186,14 @@ describe('SSR: renderToString', () => {
           })
         }
       }
-    })).toContain('<span server-rendered="true" class="b">testAsync</span>')
+    }, result => {
+      expect(result).toContain('<span server-rendered="true" class="b">testAsync</span>')
+      done()
+    })
   })
 
-  it('renders nested asynchronous component', () => {
-    expect(renderVmWithOptions({
+  it('renders nested asynchronous component', done => {
+    renderVmWithOptions({
       template: `
         <div>
           <test-async></test-async>
@@ -186,13 +219,14 @@ describe('SSR: renderToString', () => {
           resolve(options)
         }
       }
-    })).toContain(
-      '<div server-rendered="true"><span class="b"><div class="c">testSubAsync</div></span></div>'
-    )
+    }, result => {
+      expect(result).toContain('<div server-rendered="true"><span class="b"><div class="c">testSubAsync</div></span></div>')
+      done()
+    })
   })
 
-  it('everything together', () => {
-    expect(renderVmWithOptions({
+  it('everything together', done => {
+    renderVmWithOptions({
       template: `
         <div>
           <p class="hi">yoyo</p>
@@ -223,21 +257,24 @@ describe('SSR: renderToString', () => {
           })
         }
       }
-    })).toContain(
-      '<div server-rendered="true">' +
-        '<p class="hi">yoyo</p>' +
-        '<div id="ho" class="red"></div>' +
-        '<span>hi</span>' +
-        '<input value="hi">' +
-        '<img src="https://vuejs.org/images/logo.png">' +
-        '<div class="a">test</div>' +
-        '<span class="b">testAsync</span>' +
-      '</div>'
-    )
+    }, result => {
+      expect(result).toContain(
+        '<div server-rendered="true">' +
+          '<p class="hi">yoyo</p>' +
+          '<div id="ho" class="red"></div>' +
+          '<span>hi</span>' +
+          '<input value="hi">' +
+          '<img src="https://vuejs.org/images/logo.png">' +
+          '<div class="a">test</div>' +
+          '<span class="b">testAsync</span>' +
+        '</div>'
+      )
+      done()
+    })
   })
 
-  it('normal attr', () => {
-    expect(renderVmWithOptions({
+  it('normal attr', done => {
+    renderVmWithOptions({
       template: `
         <div>
           <span :test="'ok'">hello</span>
@@ -247,19 +284,22 @@ describe('SSR: renderToString', () => {
           <span :test="0">hello</span>
         </div>
       `
-    })).toContain(
-      '<div server-rendered="true">' +
-        '<span test="ok">hello</span>' +
-        '<span>hello</span>' +
-        '<span>hello</span>' +
-        '<span test="true">hello</span>' +
-        '<span test="0">hello</span>' +
-      '</div>'
-    )
+    }, result => {
+      expect(result).toContain(
+        '<div server-rendered="true">' +
+          '<span test="ok">hello</span>' +
+          '<span>hello</span>' +
+          '<span>hello</span>' +
+          '<span test="true">hello</span>' +
+          '<span test="0">hello</span>' +
+        '</div>'
+      )
+      done()
+    })
   })
 
-  it('enumrated attr', () => {
-    expect(renderVmWithOptions({
+  it('enumrated attr', done => {
+    renderVmWithOptions({
       template: `
         <div>
           <span :draggable="true">hello</span>
@@ -270,20 +310,23 @@ describe('SSR: renderToString', () => {
           <span :draggable="'false'">hello</span>
         </div>
       `
-    })).toContain(
-      '<div server-rendered="true">' +
-        '<span draggable="true">hello</span>' +
-        '<span draggable="true">hello</span>' +
-        '<span draggable="false">hello</span>' +
-        '<span draggable="false">hello</span>' +
-        '<span draggable="true">hello</span>' +
-        '<span draggable="false">hello</span>' +
-      '</div>'
-    )
+    }, result => {
+      expect(result).toContain(
+        '<div server-rendered="true">' +
+          '<span draggable="true">hello</span>' +
+          '<span draggable="true">hello</span>' +
+          '<span draggable="false">hello</span>' +
+          '<span draggable="false">hello</span>' +
+          '<span draggable="true">hello</span>' +
+          '<span draggable="false">hello</span>' +
+        '</div>'
+      )
+      done()
+    })
   })
 
-  it('boolean attr', () => {
-    expect(renderVmWithOptions({
+  it('boolean attr', done => {
+    renderVmWithOptions({
       template: `
         <div>
           <span :disabled="true">hello</span>
@@ -292,22 +335,25 @@ describe('SSR: renderToString', () => {
           <span :disabled="''">hello</span>
         </div>
       `
-    })).toContain(
-      '<div server-rendered="true">' +
-        '<span disabled="disabled">hello</span>' +
-        '<span disabled="disabled">hello</span>' +
-        '<span>hello</span>' +
-        '<span disabled="disabled">hello</span>' +
-      '</div>'
-    )
+    }, result => {
+      expect(result).toContain(
+        '<div server-rendered="true">' +
+          '<span disabled="disabled">hello</span>' +
+          '<span disabled="disabled">hello</span>' +
+          '<span>hello</span>' +
+          '<span disabled="disabled">hello</span>' +
+        '</div>'
+      )
+      done()
+    })
   })
 })
 
-function renderVmWithOptions (options) {
+function renderVmWithOptions (options, cb) {
   const res = compileToFunctions(options.template, {
     preserveWhitespace: false
   })
   Object.assign(options, res)
   delete options.template
-  return renderToString(new Vue(options))
+  renderToString(new Vue(options), cb)
 }

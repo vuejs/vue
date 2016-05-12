@@ -1,6 +1,5 @@
 import stream from 'stream'
-
-const MAX_STACK_DEPTH = 1000
+import { MAX_STACK_DEPTH } from './create-renderer'
 
 /**
  * Original RenderStream implmentation by Sasha Aickin (@aickin)
