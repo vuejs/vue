@@ -1,5 +1,9 @@
 [ignore]
 .*/node_modules/.*
+.*/test/.*
+.*/build/.*
+.*/examples/.*
+.*/benchmarks/.*
 
 [include]
 
