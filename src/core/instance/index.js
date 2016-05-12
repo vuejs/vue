@@ -26,12 +26,12 @@ export default class Vue {
   static nextTick: (fn: Function, context?: Object) => void;
   static use: (plugin: Function | Object) => void;
   static mixin: (mixin: Object) => void;
-  static extend: (options: Object) => Class<Vue>;
+  static extend: (options: Object) => Class<any>;
   static compile: (template: string) => { render: Function, staticRenderFns: Array<Function> };
 
   // assets
   static directive: (id: string, def?: Function | Object) => Function | Object | void;
-  static component: (id: string, def?: Class<Vue> | Object) => Class<Vue>;
+  static component: (id: string, def?: Class<any> | Object) => Class<any>;
   static transition: (id: string, def?: Object) => Object | void;
   static filter: (id: string, def?: Function) => Function | void;
 
