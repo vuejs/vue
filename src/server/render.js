@@ -1,7 +1,13 @@
+/* @flow */
+
 import { createComponentInstanceForVnode } from 'core/vdom/create-component'
 
-export function createRenderFunction (modules, directives, isUnaryTag) {
-  function renderNode (node, write, next, isRoot) {
+export function createRenderFunction (
+  modules: Array<Function>,
+  directives: Object,
+  isUnaryTag: Function
+) {
+  function renderNode (node: VNode, write: Function, next: Function, isRoot: boolean) {
     if (node.componentOptions) {
       const child = createComponentInstanceForVnode(node)
       renderNode(child._render(), write, next, isRoot)
@@ -14,7 +20,7 @@ export function createRenderFunction (modules, directives, isUnaryTag) {
     }
   }
 
-  function renderElement (el, write, next, isRoot) {
+  function renderElement (el: VNode, write: Function, next: Function, isRoot: boolean) {
     if (isRoot) {
       if (!el.data) el.data = {}
       if (!el.data.attrs) el.data.attrs = {}
@@ -27,27 +33,28 @@ export function createRenderFunction (modules, directives, isUnaryTag) {
     } else if (!el.children || !el.children.length) {
       write(startTag + endTag, next)
     } else {
+      const children: Array<VNode> = el.children || []
       write(startTag, () => {
-        const total = el.children.length
+        const total = children.length
         let rendered = 0
 
-        function renderChild (child) {
+        function renderChild (child: VNode) {
           renderNode(child, write, () => {
             rendered++
             if (rendered < total) {
-              renderChild(el.children[rendered])
+              renderChild(children[rendered])
             } else {
               write(endTag, next)
             }
-          })
+          }, false)
         }
 
-        renderChild(el.children[0])
+        renderChild(children[0])
       })
     }
   }
 
-  function renderStartingTag (node) {
+  function renderStartingTag (node: VNode) {
     let markup = `<${node.tag}`
     if (node.data) {
       // check directives
@@ -73,7 +80,7 @@ export function createRenderFunction (modules, directives, isUnaryTag) {
     return markup + '>'
   }
 
-  return function render (component, write, done) {
+  return function render (component: Vue, write: Function, done: Function) {
     renderNode(component._render(), write, done, true)
   }
 }

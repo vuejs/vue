@@ -1,3 +1,5 @@
+/* @flow */
+
 import stream from 'stream'
 import { MAX_STACK_DEPTH } from './create-renderer'
 
@@ -7,13 +9,23 @@ import { MAX_STACK_DEPTH } from './create-renderer'
  * Modified by Evan You (@yyx990803)
  */
 export default class RenderStream extends stream.Readable {
-  constructor (render) {
+  buffer: string;
+  render: Function;
+  expectedSize: number;
+  stackDepth: number;
+  write: Function;
+  next: Function;
+  end: Function;
+  done: boolean;
+
+  constructor (render: Function) {
     super()
     this.buffer = ''
     this.render = render
     this.expectedSize = 0
+    this.stackDepth = 0
 
-    this.write = (text, next) => {
+    this.write = (text: string, next: Function) => {
       const n = this.expectedSize
       this.buffer += text
       if (this.buffer.length >= n) {
@@ -43,7 +55,7 @@ export default class RenderStream extends stream.Readable {
     }
   }
 
-  pushBySize (n) {
+  pushBySize (n: number) {
     const bufferToPush = this.buffer.substring(0, n)
     this.buffer = this.buffer.substring(n)
     this.push(bufferToPush)
@@ -65,7 +77,7 @@ export default class RenderStream extends stream.Readable {
     }
   }
 
-  _read (n) {
+  _read (n: number) {
     this.expectedSize = n
     // it's possible that the last chunk added bumped the buffer up to > 2 * n,
     // which means we will need to go through multiple read calls to drain it
@@ -79,7 +91,6 @@ export default class RenderStream extends stream.Readable {
       return
     }
     if (!this.next) {
-      this.stackDepth = 0
       // start the rendering chain.
       this.tryRender()
     } else {
