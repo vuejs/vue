@@ -53,6 +53,9 @@ export function renderElement (vnode, children) {
     }
     return component
   }
+  if (typeof children === 'function') {
+    children = children() // why children is a function for unknown element?
+  }
   vnode.setChildren(flatten(children))
   revertCurrentVNode(this)
   if (this._isStream) {
