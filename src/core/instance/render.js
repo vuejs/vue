@@ -1,5 +1,5 @@
 import config from '../config'
-import createElement from '../vdom/create-element'
+import { renderElement, renderSelf, renderText, renderStatic } from '../vdom/create-element'
 import { emptyVNode } from '../vdom/vnode'
 import { flatten } from '../vdom/helpers'
 import { bind, isArray, isObject, renderString } from 'shared/util'
@@ -15,7 +15,11 @@ export function initRender (vm) {
   vm.$slots = {}
   // bind the public createElement fn to this instance
   // so that we get proper render context inside it.
-  vm.$createElement = bind(createElement, vm)
+  vm.$createElement = function (tag) {
+    const __r__ = bind(renderElement, vm)
+    const __s__ = bind(renderSelf, vm)
+    return __r__(__s__(tag))
+  }
   if (vm.$options.el) {
     vm.$mount(vm.$options.el)
   }
@@ -55,7 +59,10 @@ export function renderMixin (Vue) {
   }
 
   // shorthands used in render functions
-  Vue.prototype.__h__ = createElement
+  Vue.prototype.__r__ = renderElement
+  Vue.prototype.__s__ = renderSelf
+  Vue.prototype.__t__ = renderText
+  Vue.prototype.__m__ = renderStatic
 
   // toString for mustaches
   Vue.prototype.__toString__ = renderString
