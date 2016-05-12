@@ -1,6 +1,7 @@
 {
   "spec_dir": "test/ssr",
   "spec_files": [
+    "ssr-env.spec.js",
     "ssr-string.spec.js",
     "ssr-stream.spec.js"
   ],
