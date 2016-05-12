@@ -28,7 +28,10 @@ export function createRenderer ({
   const render = createRenderFunction(modules, directives, isUnaryTag)
 
   return {
-    renderToString (component: Vue, done: Function): void {
+    renderToString (
+      component: Vue,
+      done: (err: ?Error, res: ?string) => any
+    ): void {
       let result = ''
       let stackDepth = 0
       const write = (str: string, next: Function) => {
