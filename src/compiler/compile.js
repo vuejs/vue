@@ -14,7 +14,8 @@ import {
   checkComponentAttr,
   findRef,
   defineReactive,
-  getAttr
+  getAttr,
+  camelize
 } from '../util/index'
 
 // special binding prefixes
@@ -716,6 +717,11 @@ function compileDirectives (attrs, options) {
         pushDir(dirName, internalDirectives[dirName])
       } else {
         arg = dirName
+        // support for shorthand expression (#2843)
+        // <div v-bind:content> => <div v-bind:content="content">
+        if (!value) {
+          value = camelize(dirName)
+        }
         pushDir('bind', publicDirectives.bind)
       }
     } else
