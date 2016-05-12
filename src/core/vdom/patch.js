@@ -390,11 +390,11 @@ export function createPatchFunction (backend) {
     var currentVNode = this._currentVNode
     createElm(vnode, insertedVnodeQueue)
     invokeInsertHook(insertedVnodeQueue)
-    if (!this._currentVNodeHistory.length && this._append) {
+    if (!this._currentVNodeHistory.length && this._atom) {
       vnode.data = vnode.data || {}
-      vnode.data.append = true
+      vnode.data.atom = true
     }
-    if (!vnode.data || !vnode.data.append && vnode.elm) {
+    if (!vnode.data || !vnode.data.atom && vnode.elm) {
       nodeOps.appendChild(currentVNode.elm, vnode.elm)
     }
     if (!this.$el) {

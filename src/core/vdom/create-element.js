@@ -59,7 +59,7 @@ export function renderElement (vnode, children) {
   vnode.setChildren(flatten(children))
   revertCurrentVNode(this)
   if (this._isStream) {
-    if (vnode.data && vnode.data.append) {
+    if (vnode.data && vnode.data.atom) {
       this.__tree_patch__(vnode)
     }
   }

@@ -92,7 +92,7 @@ function init (vnode) {
   const parent = vnode.componentOptions.parent
   const child = vnode.child = createComponentInstanceForVnode(vnode)
   child._currentVNode = parent && parent._currentVNode
-  child._append = vnode.data && vnode.data.append
+  child._atom = vnode.data && vnode.data.atom
   child.$mount(vnode.elm)
 }
 
