@@ -1,10 +1,9 @@
+/* @flow */
+
 /**
  * Convert a value to a string that is actually rendered.
- *
- * @param {*} val
- * @return {String}
  */
-export function renderString (val) {
+export function renderString (val: any): string {
   return val == null
     ? ''
     : typeof val === 'object'
@@ -15,14 +14,13 @@ export function renderString (val) {
 /**
  * Make a map and return a function for checking if a key
  * is in that map.
- *
- * @param {String} str
- * @param {Boolean} expectsLowerCase
- * @return {Function}
  */
-export function makeMap (str, expectsLowerCase) {
+export function makeMap (
+  str: string,
+  expectsLowerCase?: boolean
+): (key: string) => true | void {
   const map = Object.create(null)
-  const list = str.split(',')
+  const list: Array<string> = str.split(',')
   for (let i = 0; i < list.length; i++) {
     map[list[i]] = true
   }
@@ -38,11 +36,8 @@ export const isBuiltInTag = makeMap('slot,component,render,transition', true)
 
 /**
  * Remove an item from an array
- *
- * @param {Array} arr
- * @param {*} item
  */
-export function remove (arr, item) {
+export function remove (arr: Array<any>, item: any): Array<any> | void {
   if (arr.length) {
     const index = arr.indexOf(item)
     if (index > -1) {
@@ -53,35 +48,25 @@ export function remove (arr, item) {
 
 /**
  * Check whether the object has the property.
- *
- * @param {Object} obj
- * @param {String} key
- * @return {Boolean}
  */
 const hasOwnProperty = Object.prototype.hasOwnProperty
-export function hasOwn (obj, key) {
+export function hasOwn (obj: Object, key: string): boolean {
   return hasOwnProperty.call(obj, key)
 }
 
 /**
  * Check if value is primitive
- *
- * @param {*} value
- * @return {Boolean}
  */
-export function isPrimitive (value) {
+export function isPrimitive (value: any): boolean {
   return typeof value === 'string' || typeof value === 'number'
 }
 
 /**
  * Create a cached version of a pure function.
- *
- * @param {Function} fn
- * @return {Function}
  */
-export function cached (fn) {
+export function cached (fn: Function): Function {
   const cache = Object.create(null)
-  return function cachedFn (str) {
+  return function cachedFn (str: string): any {
     const hit = cache[str]
     return hit || (cache[str] = fn(str))
   }
@@ -89,27 +74,17 @@ export function cached (fn) {
 
 /**
  * Camelize a hyphen-delmited string.
- *
- * @param {String} str
- * @return {String}
  */
 const camelizeRE = /-(\w)/g
-export const camelize = cached(str => {
-  return str.replace(camelizeRE, toUpper)
+export const camelize = cached((str: string): string => {
+  return str.replace(camelizeRE, (_, c) => c ? c.toUpperCase() : '')
 })
-
-function toUpper (_, c) {
-  return c ? c.toUpperCase() : ''
-}
 
 /**
  * Hyphenate a camelCase string.
- *
- * @param {String} str
- * @return {String}
  */
 const hyphenateRE = /([a-z\d])([A-Z])/g
-export const hyphenate = cached(str => {
+export const hyphenate = cached((str: string): string => {
   return str
     .replace(hyphenateRE, '$1-$2')
     .toLowerCase()
@@ -117,14 +92,10 @@ export const hyphenate = cached(str => {
 
 /**
  * Simple bind, faster than native
- *
- * @param {Function} fn
- * @param {Object} ctx
- * @return {Function}
  */
-export function bind (fn, ctx) {
+export function bind (fn: Function, ctx: Object): Function {
   return function (a) {
-    const l = arguments.length
+    const l: number = arguments.length
     return l
       ? l > 1
         ? fn.apply(ctx, arguments)
@@ -135,15 +106,11 @@ export function bind (fn, ctx) {
 
 /**
  * Convert an Array-like object to a real Array.
- *
- * @param {Array-like} list
- * @param {Number} [start] - start index
- * @return {Array}
  */
-export function toArray (list, start) {
+export function toArray (list: any, start?: number): Array<any> {
   start = start || 0
   let i = list.length - start
-  const ret = new Array(i)
+  const ret: Array<any> = new Array(i)
   while (i--) {
     ret[i] = list[i + start]
   }
@@ -152,11 +119,8 @@ export function toArray (list, start) {
 
 /**
  * Mix properties into target object.
- *
- * @param {Object} to
- * @param {Object} from
  */
-export function extend (to, _from) {
+export function extend (to: Object, _from: Object): Object {
   for (const key in _from) {
     to[key] = _from[key]
   }
@@ -167,32 +131,23 @@ export function extend (to, _from) {
  * Quick object check - this is primarily used to tell
  * Objects from primitive values when we know the value
  * is a JSON-compliant type.
- *
- * @param {*} obj
- * @return {Boolean}
  */
-export function isObject (obj) {
+export function isObject (obj: any): boolean {
   return obj !== null && typeof obj === 'object'
 }
 
 /**
  * Strict object type check. Only returns true
  * for plain JavaScript objects.
- *
- * @param {*} obj
- * @return {Boolean}
  */
 const toString = Object.prototype.toString
 const OBJECT_STRING = '[object Object]'
-export function isPlainObject (obj) {
+export function isPlainObject (obj: any): boolean {
   return toString.call(obj) === OBJECT_STRING
 }
 
 /**
  * Array type check.
- *
- * @param {*} obj
- * @return {Boolean}
  */
 export const isArray = Array.isArray
 
