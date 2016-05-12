@@ -1,4 +1,15 @@
-export default {
+/* @flow */
+
+const config: {
+    preserveWhitespace: boolean,
+    silent: boolean,
+    isReservedTag: (x: string) => boolean,
+    isUnknownElement: (x: string) => boolean,
+    _assetTypes: Array<string>,
+    _lifecycleHooks: Array<string>,
+    _maxUpdateCount: number,
+    _isServer: boolean
+} = {
 
   /**
    * Preserve whitespaces between elements.
@@ -7,8 +18,6 @@ export default {
 
   /**
    * Whether to suppress warnings.
-   *
-   * @type {Boolean}
    */
   silent: false,
 
@@ -26,8 +35,6 @@ export default {
 
   /**
    * List of asset types that a component can own.
-   *
-   * @type {Array}
    */
   _assetTypes: [
     'component',
@@ -38,8 +45,6 @@ export default {
 
   /**
    * List of lifecycle hooks.
-   *
-   * @type {Array}
    */
   _lifecycleHooks: [
     'init',
@@ -62,3 +67,5 @@ export default {
    */
   _isServer: process.env.VUE_ENV === 'server'
 }
+
+export default config
