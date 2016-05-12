@@ -4,9 +4,9 @@ import {
   observe,
   set as setProp,
   del as delProp
-} from '../../../../src/core/observer/index'
-import Dep from '../../../../src/core/observer/dep'
-import { hasOwn } from '../../../../src/core/util/index'
+} from 'core/observer/index'
+import Dep from 'core/observer/dep'
+import { hasOwn } from 'core/util/index'
 
 describe('Observer', () => {
   it('create on non-observables', () => {
@@ -39,7 +39,7 @@ describe('Observer', () => {
     expect(ob2).toBe(ob1)
   })
 
-  it('create on null', function () {
+  it('create on null', () => {
     // on null
     const obj = Object.create(null)
     obj.a = {}
