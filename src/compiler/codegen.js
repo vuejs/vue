@@ -1,10 +1,12 @@
 import { genHandlers } from './events'
 import { ref } from './directives/ref'
+import { atom } from './directives/atom'
 import { baseWarn } from './helpers'
 import { noop } from 'shared/util'
 
 const baseDirectives = {
   ref,
+  atom,
   cloak: noop
 }
 
@@ -23,7 +25,7 @@ export function generate (ast, options) {
   warn = options.warn || baseWarn
   platformDirectives = options.directives || {}
   isPlatformReservedTag = options.isReservedTag || (() => false)
-  const code = ast ? genElement(ast) : '__h__("div")'
+  const code = ast ? genElement(ast) : '__r__(__s__("div"))'
   staticRenderFns = prevStaticRenderFns
   return {
     render: `with (this) { return ${code}}`,
@@ -51,11 +53,11 @@ function genElement (el) {
       ? 'undefined'
       : genChildren(el, !isPlatformReservedTag(el.tag) /* asThunk */)
     const namespace = el.ns ? `,'${el.ns}'` : ''
-    const code = `__h__('${el.tag}', ${genData(el)}, ${children}${namespace})`
+    const code = `__r__(__s__('${el.tag}', ${genData(el)}${namespace}), ${children})`
     if (el.staticRoot) {
       // hoist static sub-trees out
       staticRenderFns.push(`with(this){return ${code}}`)
-      return `_staticTrees[${staticRenderFns.length - 1}]`
+      return `__m__(${staticRenderFns.length - 1})`
     } else {
       return code
     }
@@ -98,6 +100,10 @@ function genData (el) {
     const dirs = genDirectives(el)
     if (dirs) data += dirs + ','
   }
+  // atom
+  if (el.atom) {
+    data += 'atom:true,'
+  }
   // pre
   if (el.pre) {
     data += 'pre:true,'
@@ -118,6 +124,9 @@ function genData (el) {
     data += `class:${el.classBinding},`
   }
   // style
+  if (el.staticStyle) {
+    data += `staticStyle:${el.staticStyle},`
+  }
   if (el.styleBinding) {
     data += `style:${el.styleBinding},`
   }
@@ -218,7 +227,7 @@ function genNode (node) {
 function genText (text) {
   return text.expression
     ? `(${text.expression})`
-    : JSON.stringify(text.text)
+    : '__t__(' + JSON.stringify(text.text) + ')'
 }
 
 function genRender (el) {
@@ -231,7 +240,7 @@ function genSlot (el) {
 }
 
 function genComponent (el) {
-  return `__h__(${el.component}, ${genData(el)}, ${genChildren(el, true)})`
+  return `__r__(__s__(${el.component}, ${genData(el)}), ${genChildren(el, true)})`
 }
 
 function genProps (props) {

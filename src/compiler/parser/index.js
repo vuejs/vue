@@ -289,9 +289,9 @@ function processComponent (el) {
 
 function processClassBinding (el) {
   const staticClass = getAndRemoveAttr(el, 'class')
-  if (process.env.NODE_ENV !== 'production') {
-    const expression = parseText(staticClass, delimiters)
-    if (expression) {
+  const { dynamic, classResult } = parseStaticClass(staticClass)
+  if (dynamic) {
+    if (process.env.NODE_ENV !== 'production') {
       warn(
         `class="${staticClass}": ` +
         'Interpolation inside attributes has been deprecated. ' +
@@ -299,17 +299,28 @@ function processClassBinding (el) {
       )
     }
   }
-  el.staticClass = JSON.stringify(staticClass)
+  if (!dynamic && classResult) {
+    el.staticClass = classResult
+  }
   const classBinding = getBindingAttr(el, 'class', false /* getStatic */)
   if (classBinding) {
     el.classBinding = classBinding
+  } else if (dynamic) {
+    el.classBinding = classResult
   }
 }
 
 function processStyleBinding (el) {
+  const staticStyle = getAndRemoveAttr(el, 'style')
+  const { dynamic, styleResult } = parseStaticStyle(staticStyle)
+  if (!dynamic && styleResult) {
+    el.staticStyle = styleResult
+  }
   const styleBinding = getBindingAttr(el, 'style', false /* getStatic */)
   if (styleBinding) {
     el.styleBinding = styleBinding
+  } else if (dynamic) {
+    el.styleBinding = styleResult
   }
 }
 
@@ -406,4 +417,53 @@ function isForbiddenTag (el) {
       el.attrsMap.type === 'text/javascript'
     ))
   )
+}
+
+function parseStaticClass (staticClass) {
+  // "a b c" -> ["a", "b", "c"] => staticClass: ["a", "b", "c"]
+  // "a {{x}} c" -> ["a", x, "c"] => classBinding: '["a", x, "c"]'
+  let dynamic = false
+  let classResult = ''
+  if (staticClass) {
+    const classList = staticClass.trim().split(' ').map(name => {
+      const result = parseText(name)
+      if (result) {
+        dynamic = true
+        return result
+      }
+      return JSON.stringify(name)
+    })
+    if (classList.length) {
+      classResult = '[' + classList.join(',') + ']'
+    }
+  }
+  return { dynamic, classResult }
+}
+
+function parseStaticStyle (staticStyle) {
+  // "width: 200px; height: 200px;" -> {width: 200, height: 200}
+  // "width: 200px; height: {{y}}" -> {width: 200, height: y}
+  let dynamic = false
+  let styleResult = ''
+  if (staticStyle) {
+    console.log(staticStyle)
+    const styleList = staticStyle.trim().split(';').map(style => {
+      const result = style.trim().split(':')
+      if (result.length !== 2) {
+        return
+      }
+      const key = result[0].trim()
+      const value = result[1].trim()
+      const dynamicValue = parseText(value)
+      if (dynamicValue) {
+        dynamic = true
+        return key + ':' + dynamicValue
+      }
+      return key + ':' + JSON.stringify(value)
+    }).filter(result => result)
+    if (styleList.length) {
+      styleResult = '{' + styleList.join(',') + '}'
+    }
+  }
+  return { dynamic, styleResult }
 }

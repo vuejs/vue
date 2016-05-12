@@ -337,7 +337,7 @@ export function createPatchFunction (backend) {
     }
   }
 
-  return function patch (oldVnode, vnode) {
+  function patch (oldVnode, vnode) {
     let elm, parent
     const insertedVnodeQueue = []
 
@@ -384,4 +384,32 @@ export function createPatchFunction (backend) {
     invokeInsertHook(insertedVnodeQueue)
     return vnode.elm
   }
+
+  function streamPatch (vnode) {
+    var insertedVnodeQueue = []
+    var currentVNode = this._currentVNode
+    createElm(vnode, insertedVnodeQueue)
+    invokeInsertHook(insertedVnodeQueue)
+    if (!this._currentVNodeHistory.length && this._atom) {
+      vnode.data = vnode.data || {}
+      vnode.data.atom = true
+    }
+    if (!vnode.data || !vnode.data.atom && vnode.elm) {
+      nodeOps.appendChild(currentVNode.elm, vnode.elm)
+    }
+    if (!this.$el) {
+      this.$el = vnode.elm
+    }
+    return vnode.elm
+  }
+
+  function treePatch (vnode) {
+    var currentVNode = this._currentVNode
+    if (vnode.elm) {
+      nodeOps.appendChild(currentVNode.elm, vnode.elm)
+    }
+    return vnode.elm
+  }
+
+  return { patch, streamPatch, treePatch }
 }

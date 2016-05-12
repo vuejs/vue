@@ -41,14 +41,41 @@ export function lifecycleMixin (Vue) {
       }
     }
     callHook(this, 'beforeMount')
+    this._isStream = this.$options.stream
+    this._currentVNode = this._currentVNode
+    if (!this._currentVNode && this.$el && this.$el.parentNode) {
+      this._currentVNode = { elm: this.$el.parentNode }
+    }
+    this._currentVNodeHistory = []
     this._watcher = new Watcher(this, this._render, this._update)
-    this._update(this._watcher.value)
+    if (this._isStream) {
+      this._updateFirst(this._watcher.value)
+    } else {
+      this._update(this._watcher.value)
+    }
+    this._isStream = false
     this._mounted = true
     // root instance, call mounted on self
     if (this.$root === this) {
       callHook(this, 'mounted')
     }
     return this
+  }
+
+  Vue.prototype._updateFirst = function (vnode) {
+    if (this._mounted) {
+      callHook(this, 'beforeUpdate')
+    }
+    const parentNode = this.$options._parentVnode
+    vnode.parent = parentNode
+    this._vnode = vnode
+    // set parent vnode element after patch
+    if (parentNode) {
+      parentNode.elm = this.$el
+    }
+    if (this._mounted) {
+      callHook(this, 'updated')
+    }
   }
 
   Vue.prototype._update = function (vnode) {

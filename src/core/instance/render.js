@@ -1,5 +1,5 @@
 import config from '../config'
-import createElement from '../vdom/create-element'
+import { createElement, renderElement, renderSelf, renderText, renderStatic } from '../vdom/create-element'
 import { emptyVNode } from '../vdom/vnode'
 import { flatten } from '../vdom/helpers'
 import { bind, isArray, isObject, renderString } from 'shared/util'
@@ -56,6 +56,10 @@ export function renderMixin (Vue) {
 
   // shorthands used in render functions
   Vue.prototype.__h__ = createElement
+  Vue.prototype.__r__ = renderElement
+  Vue.prototype.__s__ = renderSelf
+  Vue.prototype.__t__ = renderText
+  Vue.prototype.__m__ = renderStatic
 
   // toString for mustaches
   Vue.prototype.__toString__ = renderString
