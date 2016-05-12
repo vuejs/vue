@@ -23,7 +23,11 @@ export default class RenderStream extends stream.Readable {
         // continue rendering until we have enough text to call this.push().
         // sometimes do this as process.nextTick to get out of stack overflows.
         if (this.stackDepth >= MAX_STACK_DEPTH) {
-          process.nextTick(next)
+          process.nextTick(() => {
+            try { next() } catch (e) {
+              this.emit('error', e)
+            }
+          })
         } else {
           this.stackDepth++
           next()
@@ -45,6 +49,22 @@ export default class RenderStream extends stream.Readable {
     this.push(bufferToPush)
   }
 
+  tryRender () {
+    try {
+      this.render(this.write, this.end)
+    } catch (e) {
+      this.emit('error', e)
+    }
+  }
+
+  tryNext () {
+    try {
+      this.next()
+    } catch (e) {
+      this.emit('error', e)
+    }
+  }
+
   _read (n) {
     this.expectedSize = n
     // it's possible that the last chunk added bumped the buffer up to > 2 * n,
@@ -61,10 +81,10 @@ export default class RenderStream extends stream.Readable {
     if (!this.next) {
       this.stackDepth = 0
       // start the rendering chain.
-      this.render(this.write, this.end)
+      this.tryRender()
     } else {
       // continue with the rendering.
-      this.next()
+      this.tryNext()
     }
   }
 }

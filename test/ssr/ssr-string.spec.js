@@ -347,6 +347,17 @@ describe('SSR: renderToString', () => {
       done()
     })
   })
+
+  it('should catch error', done => {
+    renderToString(new Vue({
+      render () {
+        throw new Error('oops')
+      }
+    }), err => {
+      expect(err instanceof Error).toBe(true)
+      done()
+    })
+  })
 })
 
 function renderVmWithOptions (options, cb) {
@@ -355,5 +366,8 @@ function renderVmWithOptions (options, cb) {
   })
   Object.assign(options, res)
   delete options.template
-  renderToString(new Vue(options), cb)
+  renderToString(new Vue(options), (err, res) => {
+    expect(err).toBeNull()
+    cb(res)
+  })
 }

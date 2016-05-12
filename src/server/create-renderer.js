@@ -21,20 +21,29 @@ export function createRenderer ({
     renderToString (component, done) {
       let result = ''
       let stackDepth = 0
-      render(component, (str, next) => {
+      const write = (str, next) => {
         result += str
         if (next) {
           if (stackDepth >= MAX_STACK_DEPTH) {
-            process.nextTick(next)
+            process.nextTick(() => {
+              try { next() } catch (e) {
+                done(e)
+              }
+            })
           } else {
             stackDepth++
             next()
             stackDepth--
           }
         } else {
-          done(result)
+          done(null, result)
         }
-      })
+      }
+      try {
+        render(component, write)
+      } catch (e) {
+        done(e)
+      }
     },
     renderToStream (component) {
       return new RenderStream((write, done) => {
