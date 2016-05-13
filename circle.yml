@@ -2,11 +2,6 @@ machine:
   node:
     version: 5
 
-general:
-  branches:
-    only:
-      - next
-
 test:
   override:
     - npm run lint
