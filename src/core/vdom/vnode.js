@@ -1,13 +1,13 @@
 import type Vue from 'core/instance/index'
 
 export default class VNode {
-  tag: string | void;
-  data: Object | void;
-  children: Array<VNode> | void;
-  text: string | void;
-  elm: Element | void;
-  ns: string | void;
-  context: Vue | void;
+  tag: ?string;
+  data: ?Object;
+  children: ?Array<VNode>;
+  text: ?string;
+  elm: ?Element;
+  ns: ?string;
+  context: ?Vue;
   key: string | number | void;
 
   constructor (tag, data, children, text, elm, ns, context) {
