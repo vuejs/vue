@@ -18,6 +18,7 @@
     "test": "npm run lint && flow check && npm run test:unit && npm run test:e2e && npm run test:ssr",
     "build": "NODE_ENV=production node build/build.js",
     "lint": "eslint src build test",
+    "flow": "flow check",
     "test:unit": "NODE_ENV=development karma start build/karma.unit.config.js",
     "test:cover": "NODE_ENV=development karma start build/karma.cover.config.js",
     "test:e2e": "npm run build -- vue.js && node test/e2e/runner.js",
