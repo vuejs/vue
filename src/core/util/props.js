@@ -1,4 +1,4 @@
-import { hasOwn, isArray, isObject, isPlainObject } from 'shared/util'
+import { hasOwn, isObject, isPlainObject } from 'shared/util'
 import { observe, observerState } from '../observer/index'
 import { warn } from './debug'
 
@@ -77,7 +77,7 @@ function assertProp (prop, name, value, vm, absent) {
   let valid = !type
   const expectedTypes = []
   if (type) {
-    if (!isArray(type)) {
+    if (!Array.isArray(type)) {
       type = [type]
     }
     for (let i = 0; i < type.length && !valid; i++) {
@@ -137,7 +137,7 @@ function assertType (value, type) {
     valid = isPlainObject(value)
   } else if (type === Array) {
     expectedType = 'array'
-    valid = isArray(value)
+    valid = Array.isArray(value)
   } else {
     valid = value instanceof type
   }

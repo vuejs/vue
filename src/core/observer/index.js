@@ -1,10 +1,12 @@
+/* @flow */
+
+import type Vue from '../instance/index'
 import config from '../config'
 import Dep from './dep'
 import { arrayMethods } from './array'
 import {
   def,
   remove,
-  isArray,
   isObject,
   isPlainObject,
   hasProto,
@@ -30,17 +32,18 @@ export const observerState = {
  * object. Once attached, the observer converts target
  * object's property keys into getter/setters that
  * collect dependencies and dispatches updates.
- *
- * @param {Array|Object} value
- * @constructor
  */
 export class Observer {
-  constructor (value) {
+  value: any;
+  dep: Dep;
+  vms: ?Array<Vue>;
+
+  constructor (value: any) {
     this.value = value
     this.dep = new Dep()
     this.vms = null
     def(value, '__ob__', this)
-    if (isArray(value)) {
+    if (Array.isArray(value)) {
       const augment = hasProto
         ? protoAugment
         : copyAugment
@@ -55,10 +58,8 @@ export class Observer {
    * Walk through each property and convert them into
    * getter/setters. This method should only be called when
    * value type is Object.
-   *
-   * @param {Object} obj
    */
-  walk (obj) {
+  walk (obj: Object) {
     const val = this.value
     for (const key in obj) {
       defineReactive(val, key, obj[key])
@@ -67,10 +68,8 @@ export class Observer {
 
   /**
    * Observe a list of Array items.
-   *
-   * @param {Array} items
    */
-  observeArray (items) {
+  observeArray (items: Array<any>) {
     for (let i = 0, l = items.length; i < l; i++) {
       observe(items[i])
     }
@@ -81,20 +80,16 @@ export class Observer {
    * happen we can notify owner vms to proxy the keys and
    * digest the watchers. This is only called when the object
    * is observed as an instance's root $data.
-   *
-   * @param {Vue} vm
    */
-  addVm (vm) {
+  addVm (vm: Vue) {
     (this.vms || (this.vms = [])).push(vm)
   }
 
   /**
    * Remove an owner vm. This is called when the object is
    * swapped out as an instance's $data object.
-   *
-   * @param {Vue} vm
    */
-  removeVm (vm) {
+  removeVm (vm: Vue) {
     remove(this.vms, vm)
   }
 }
@@ -104,11 +99,8 @@ export class Observer {
 /**
  * Augment an target Object or Array by intercepting
  * the prototype chain using __proto__
- *
- * @param {Object|Array} target
- * @param {Object} src
  */
-function protoAugment (target, src) {
+function protoAugment (target, src: Object) {
   /* eslint-disable no-proto */
   target.__proto__ = src
   /* eslint-enable no-proto */
@@ -132,23 +124,18 @@ function copyAugment (target, src, keys) {
  * Attempt to create an observer instance for a value,
  * returns the new observer if successfully observed,
  * or the existing observer if the value already has one.
- *
- * @param {*} value
- * @param {Vue} [vm]
- * @return {Observer|undefined}
- * @static
  */
-export function observe (value, vm) {
+export function observe (value: any, vm?: Vue): Observer | void {
   if (!isObject(value)) {
     return
   }
-  let ob
+  let ob: Observer | void
   if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
     ob = value.__ob__
   } else if (
     observerState.shouldConvert &&
     !config._isServer &&
-    (isArray(value) || isPlainObject(value)) &&
+    (Array.isArray(value) || isPlainObject(value)) &&
     Object.isExtensible(value) &&
     !value._isVue
   ) {
@@ -162,12 +149,8 @@ export function observe (value, vm) {
 
 /**
  * Define a reactive property on an Object.
- *
- * @param {Object} obj
- * @param {String} key
- * @param {*} val
  */
-export function defineReactive (obj, key, val) {
+export function defineReactive (obj: Object, key: string, val: any) {
   const dep = new Dep()
 
   const property = Object.getOwnPropertyDescriptor(obj, key)
@@ -190,7 +173,7 @@ export function defineReactive (obj, key, val) {
         if (childOb) {
           childOb.dep.depend()
         }
-        if (isArray(value)) {
+        if (Array.isArray(value)) {
           for (let e, i = 0, l = value.length; i < l; i++) {
             e = value[i]
             e && e.__ob__ && e.__ob__.dep.depend()
@@ -219,15 +202,11 @@ export function defineReactive (obj, key, val) {
  * Set a property on an object. Adds the new property and
  * triggers change notification if the property doesn't
  * already exist.
- *
- * @param {Object} obj
- * @param {String} key
- * @param {*} val
- * @public
  */
-export function set (obj, key, val) {
-  if (isArray(obj)) {
-    return obj.splice(key, 1, val)
+export function set (obj: Array<any> | Object, key: any, val: any) {
+  if (Array.isArray(obj)) {
+    obj.splice(key, 1, val)
+    return val
   }
   if (hasOwn(obj, key)) {
     obj[key] = val
@@ -260,11 +239,8 @@ export function set (obj, key, val) {
 
 /**
  * Delete a property and trigger change if necessary.
- *
- * @param {Object} obj
- * @param {String} key
  */
-export function del (obj, key) {
+export function del (obj: Object, key: string) {
   if (obj._isVue) {
     process.env.NODE_ENV !== 'production' && warn(
       'Do not delete properties on a Vue instance - just set it to null.'
@@ -290,7 +266,7 @@ export function del (obj, key) {
   }
 }
 
-export function proxy (vm, key) {
+export function proxy (vm: Vue, key: string) {
   if (!isReserved(key)) {
     Object.defineProperty(vm, key, {
       configurable: true,
@@ -305,7 +281,8 @@ export function proxy (vm, key) {
   }
 }
 
-export function unproxy (vm, key) {
+// using Object type to avoid flow complaining
+export function unproxy (vm: Object, key: string) {
   if (!isReserved(key)) {
     delete vm[key]
   }

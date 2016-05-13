@@ -1,4 +1,4 @@
-import { isArray, isPrimitive } from '../util/index'
+import { isPrimitive } from '../util/index'
 import VNode from './vnode'
 
 const whitespace = new VNode(undefined, undefined, undefined, ' ')
@@ -7,12 +7,12 @@ export function flatten (children) {
   if (typeof children === 'string') {
     return [new VNode(undefined, undefined, undefined, children)]
   }
-  if (isArray(children)) {
+  if (Array.isArray(children)) {
     const res = []
     for (let i = 0, l = children.length; i < l; i++) {
       const c = children[i]
       // flatten nested
-      if (isArray(c)) {
+      if (Array.isArray(c)) {
         res.push.apply(res, flatten(c))
       } else if (isPrimitive(c)) {
         // optimize whitespace
@@ -38,14 +38,14 @@ export function updateListeners (on, oldOn, add) {
     if (old === undefined) {
       capture = name.charAt(0) === '!'
       event = capture ? name.slice(1) : name
-      if (isArray(cur)) {
+      if (Array.isArray(cur)) {
         add(event, arrInvoker(cur), capture)
       } else {
         cur = { fn: cur }
         on[name] = cur
         add(event, fnInvoker(cur), capture)
       }
-    } else if (isArray(old)) {
+    } else if (Array.isArray(old)) {
       old.length = cur.length
       for (let i = 0; i < old.length; i++) old[i] = cur[i]
       on[name] = old

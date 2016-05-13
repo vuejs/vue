@@ -147,11 +147,6 @@ export function isPlainObject (obj: any): boolean {
 }
 
 /**
- * Array type check.
- */
-export const isArray = Array.isArray
-
-/**
  * Perform no operation.
  */
 export function noop () {}

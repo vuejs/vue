@@ -5,7 +5,6 @@ import { set } from '../observer/index'
 import {
   extend,
   isObject,
-  isArray,
   isPlainObject,
   hasOwn,
   camelize,
@@ -124,7 +123,7 @@ function mergeHook (parentVal, childVal) {
   return childVal
     ? parentVal
       ? parentVal.concat(childVal)
-      : isArray(childVal)
+      : Array.isArray(childVal)
         ? childVal
         : [childVal]
     : parentVal
@@ -166,7 +165,7 @@ strats.watch = function (parentVal, childVal) {
   for (const key in childVal) {
     let parent = ret[key]
     const child = childVal[key]
-    if (parent && !isArray(parent)) {
+    if (parent && !Array.isArray(parent)) {
       parent = [parent]
     }
     ret[key] = parent
@@ -236,7 +235,7 @@ function guardProps (options) {
   if (!props) return
   const res = {}
   let i, val, name
-  if (isArray(props)) {
+  if (Array.isArray(props)) {
     i = props.length
     while (i--) {
       val = props[i]

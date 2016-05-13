@@ -5,7 +5,7 @@ import type VNode from '../vdom/vnode'
 import createElement from '../vdom/create-element'
 import { emptyVNode } from '../vdom/vnode'
 import { flatten } from '../vdom/helpers'
-import { bind, remove, isArray, isObject, renderString } from 'shared/util'
+import { bind, remove, isObject, renderString } from 'shared/util'
 import { resolveAsset, nextTick } from '../util/index'
 
 export const renderState = {
@@ -69,7 +69,7 @@ export function renderMixin (Vue: Class<Vue>) {
     render: () => VNode
   ): ?Array<VNode> {
     let ret: ?Array<VNode>, i, l, keys, key
-    if (isArray(val)) {
+    if (Array.isArray(val)) {
       ret = new Array(val.length)
       for (i = 0, l = val.length; i < l; i++) {
         ret[i] = render(val[i], i, i)

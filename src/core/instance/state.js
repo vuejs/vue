@@ -12,7 +12,6 @@ import {
 import {
   warn,
   hasOwn,
-  isArray,
   isPlainObject,
   bind,
   validateProp,
@@ -122,7 +121,7 @@ function initWatch (vm) {
   if (watch) {
     for (const key in watch) {
       const handler = watch[key]
-      if (isArray(handler)) {
+      if (Array.isArray(handler)) {
         for (let i = 0; i < handler.length; i++) {
           createWatcher(vm, key, handler[i])
         }

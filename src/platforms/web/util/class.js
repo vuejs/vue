@@ -1,4 +1,4 @@
-import { extend, isArray, isObject } from 'shared/util'
+import { extend, isObject } from 'shared/util'
 
 export function genClassForVnode (vnode) {
   let data = vnode.data
@@ -40,7 +40,7 @@ export function stringifyClass (value) {
   if (typeof value === 'string') {
     return value
   }
-  if (isArray(value)) {
+  if (Array.isArray(value)) {
     let res = ''
     for (let i = 0, l = value.length; i < l; i++) {
       if (value[i]) res += stringifyClass(value[i]) + ' '
