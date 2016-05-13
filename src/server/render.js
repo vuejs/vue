@@ -1,6 +1,5 @@
 /* @flow */
 
-import type Vue from 'core/instance/index'
 import type VNode from 'core/vdom/vnode'
 import { createComponentInstanceForVnode } from 'core/vdom/create-component'
 
@@ -82,7 +81,7 @@ export function createRenderFunction (
     return markup + '>'
   }
 
-  return function render (component: Vue, write: Function, done: Function) {
+  return function render (component: Component, write: Function, done: Function) {
     renderNode(component._render(), write, done, true)
   }
 }

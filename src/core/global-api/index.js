@@ -1,6 +1,5 @@
 /* @flow */
 
-import type Vue from '../instance/index'
 import config from '../config'
 import * as util from '../util/index'
 import { initUse } from './use'
@@ -9,7 +8,7 @@ import { initExtend } from './extend'
 import { initAssetRegisters } from './assets'
 import { set, del } from '../observer/index'
 
-export function initGlobalAPI (Vue: Class<Vue>) {
+export function initGlobalAPI (Vue: GlobalAPI) {
   Vue.config = config
   Vue.util = util
   Vue.set = set

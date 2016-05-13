@@ -1,4 +1,4 @@
-/* Not type checking this file because flow doesn't play well with Object.defineProperty */
+/* @flow */
 
 import Watcher from '../observer/watcher'
 import Dep from '../observer/dep'
@@ -18,7 +18,7 @@ import {
   noop
 } from '../util/index'
 
-export function initState (vm) {
+export function initState (vm: Component) {
   vm._watchers = []
   initProps(vm)
   initData(vm)
@@ -27,7 +27,7 @@ export function initState (vm) {
   initWatch(vm)
 }
 
-function initProps (vm) {
+function initProps (vm: Component) {
   const props = vm.$options.props
   const propsData = vm.$options.propsData
   if (props) {
@@ -43,7 +43,7 @@ function initProps (vm) {
   }
 }
 
-function initData (vm) {
+function initData (vm: Component) {
   let data = vm.$options.data
   data = vm._data = typeof data === 'function'
     ? data()
@@ -65,35 +65,38 @@ function initData (vm) {
   observe(data, vm)
 }
 
-function initComputed (vm) {
+const computedSharedDefinition = {
+  enumerable: true,
+  configurable: true,
+  get: noop,
+  set: noop
+}
+
+function initComputed (vm: Component) {
   const computed = vm.$options.computed
   if (computed) {
     for (const key in computed) {
       const userDef = computed[key]
-      const def = {
-        enumerable: true,
-        configurable: true
-      }
       if (typeof userDef === 'function') {
-        def.get = makeComputedGetter(userDef, vm)
-        def.set = noop
+        computedSharedDefinition.get = makeComputedGetter(userDef, vm)
+        computedSharedDefinition.set = noop
       } else {
-        def.get = userDef.get
+        computedSharedDefinition.get = userDef.get
           ? userDef.cache !== false
             ? makeComputedGetter(userDef.get, vm)
             : bind(userDef.get, vm)
           : noop
-        def.set = userDef.set
+        computedSharedDefinition.set = userDef.set
           ? bind(userDef.set, vm)
           : noop
       }
-      Object.defineProperty(vm, key, def)
+      Object.defineProperty(vm, key, computedSharedDefinition)
     }
   }
 }
 
-function makeComputedGetter (getter, owner) {
-  const watcher = new Watcher(owner, getter, null, {
+function makeComputedGetter (getter: Function, owner: Component): Function {
+  const watcher = new Watcher(owner, getter, noop, {
     lazy: true
   })
   return function computedGetter () {
@@ -107,7 +110,7 @@ function makeComputedGetter (getter, owner) {
   }
 }
 
-function initMethods (vm) {
+function initMethods (vm: Component) {
   const methods = vm.$options.methods
   if (methods) {
     for (const key in methods) {
@@ -116,7 +119,7 @@ function initMethods (vm) {
   }
 }
 
-function initWatch (vm) {
+function initWatch (vm: Component) {
   const watch = vm.$options.watch
   if (watch) {
     for (const key in watch) {
@@ -132,7 +135,7 @@ function initWatch (vm) {
   }
 }
 
-function createWatcher (vm, key, handler) {
+function createWatcher (vm: Component, key: string, handler: any) {
   let options
   if (isPlainObject(handler)) {
     options = handler
@@ -144,24 +147,32 @@ function createWatcher (vm, key, handler) {
   vm.$watch(key, handler, options)
 }
 
-export function stateMixin (Vue) {
-  Object.defineProperty(Vue.prototype, '$data', {
-    get () {
-      return this._data
-    },
-    set (newData) {
-      if (newData !== this._data) {
-        setData(this, newData)
-      }
+export function stateMixin (Vue: Class<Component>) {
+  // flow somehow has problems with directly declared definition object
+  // when using Object.defineProperty, so we have to procedurally build up
+  // the object here.
+  const dataDef = {}
+  dataDef.get = function () {
+    return this._data
+  }
+  dataDef.set = function (newData: Object) {
+    if (newData !== this._data) {
+      setData(this, newData)
     }
-  })
+  }
+  Object.defineProperty(Vue.prototype, '$data', dataDef)
 
-  Vue.prototype.$watch = function (expOrFn, cb, options) {
+  Vue.prototype.$watch = function (
+    expOrFn: string | Function,
+    cb: Function,
+    options?: Object
+  ): Function {
+    const vm: Component = this
     options = options || {}
     options.user = true
-    const watcher = new Watcher(this, expOrFn, cb, options)
+    const watcher = new Watcher(vm, expOrFn, cb, options)
     if (options.immediate) {
-      cb.call(this, watcher.value)
+      cb.call(vm, watcher.value)
     }
     return function unwatchFn () {
       watcher.teardown()
@@ -169,7 +180,7 @@ export function stateMixin (Vue) {
   }
 }
 
-function setData (vm, newData) {
+function setData (vm: Component, newData: Object) {
   newData = newData || {}
   const oldData = vm._data
   vm._data = newData

@@ -1,10 +1,10 @@
 /* @flow */
 
-import type Vue from '../instance/index'
 import config from '../config'
+import { init } from '../instance/init'
 import { warn, mergeOptions } from '../util/index'
 
-export function initExtend (Vue: Class<Vue>) {
+export function initExtend (Vue: GlobalAPI) {
   /**
    * Each instance constructor, including Vue, has a unique
    * cid. This enables us to create wrapped "child
@@ -16,7 +16,7 @@ export function initExtend (Vue: Class<Vue>) {
   /**
    * Class inheritance
    */
-  Vue.extend = function (extendOptions: Object): Class<any> {
+  Vue.extend = function (extendOptions: Object): Function {
     extendOptions = extendOptions || {}
     const Super = this
     const isFirstExtend = Super.cid === 0
@@ -34,7 +34,7 @@ export function initExtend (Vue: Class<Vue>) {
       }
     }
     const Sub = function VueComponent (options) {
-      this._init(options)
+      init(this, options)
     }
     Sub.prototype = Object.create(Super.prototype)
     Sub.prototype.constructor = Sub

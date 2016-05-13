@@ -1,9 +1,9 @@
 /* @flow */
 
+import Vue from './web-runtime'
 import config from 'core/config'
 import { warn, cached } from 'core/util/index'
 import { query } from 'web/util/index'
-import Vue from './web-runtime'
 import { compileToFunctions } from './web-compiler'
 
 const idToTemplate = cached(id => query(id).innerHTML)

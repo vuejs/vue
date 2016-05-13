@@ -1,6 +1,5 @@
 /* @flow */
 
-import type Vue from '../instance/index'
 import Dep from './dep'
 import { queueWatcher } from './scheduler'
 import {
@@ -20,7 +19,7 @@ let prevTarget
  * This is used for both the $watch() api and directives.
  */
 export default class Watcher {
-  vm: Vue;
+  vm: Component;
   expression: string;
   cb: Function;
   id: number;
@@ -37,7 +36,7 @@ export default class Watcher {
   value: any;
 
   constructor (
-    vm: Vue,
+    vm: Component,
     expOrFn: string | Function,
     cb: Function,
     options?: Object = {}

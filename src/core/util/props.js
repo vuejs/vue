@@ -1,6 +1,5 @@
 /* @flow */
 
-import type Vue from '../instance/index'
 import { hasOwn, isObject, isPlainObject } from 'shared/util'
 import { observe, observerState } from '../observer/index'
 import { warn } from './debug'
@@ -12,7 +11,7 @@ type PropOptions = {
   validator: ?Function
 }
 
-export function validateProp (vm: Vue, key: string, propsData: ?Object): any {
+export function validateProp (vm: Component, key: string, propsData: ?Object): any {
   if (!propsData) return
   const prop = vm.$options.props[key]
   const absent = hasOwn(propsData, key)
@@ -35,7 +34,7 @@ export function validateProp (vm: Vue, key: string, propsData: ?Object): any {
 /**
  * Get the default value of a prop.
  */
-function getPropDefaultValue (vm: Vue, prop: PropOptions, name: string): any {
+function getPropDefaultValue (vm: Component, prop: PropOptions, name: string): any {
   // no default, return undefined
   if (!hasOwn(prop, 'default')) {
     // absent boolean value defaults to false
@@ -66,7 +65,7 @@ function assertProp (
   prop: PropOptions,
   name: string,
   value: any,
-  vm: Vue,
+  vm: Component,
   absent: boolean
 ) {
   if (prop.required && absent) {
