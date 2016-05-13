@@ -2,6 +2,7 @@
 
 export type Config = {
   preserveWhitespace: boolean,
+  optionMergeStrategies: { [key: string]: Function },
   silent: boolean,
   isReservedTag: (x: string) => boolean,
   isUnknownElement: (x: string) => boolean,
@@ -17,6 +18,11 @@ const config: Config = {
    * Preserve whitespaces between elements.
    */
   preserveWhitespace: true,
+
+  /**
+   * Option merge strategies (used in core/util/options)
+   */
+  optionMergeStrategies: Object.create(null),
 
   /**
    * Whether to suppress warnings.

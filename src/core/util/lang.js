@@ -1,23 +1,17 @@
+/* @flow */
+
 /**
  * Check if a string starts with $ or _
- *
- * @param {String} str
- * @return {Boolean}
  */
-export function isReserved (str) {
+export function isReserved (str: string): boolean {
   const c = (str + '').charCodeAt(0)
   return c === 0x24 || c === 0x5F
 }
 
 /**
  * Define a property.
- *
- * @param {Object} obj
- * @param {String} key
- * @param {*} val
- * @param {Boolean} [enumerable]
  */
-export function def (obj, key, val, enumerable) {
+export function def (obj: Object, key: string, val: any, enumerable?: boolean) {
   Object.defineProperty(obj, key, {
     value: val,
     enumerable: !!enumerable,
@@ -30,15 +24,15 @@ export function def (obj, key, val, enumerable) {
  * Parse simple path.
  */
 const bailRE = /[^\w\.]/
-export function parsePath (path) {
+export function parsePath (path: string): any {
   if (bailRE.test(path)) {
     return
   } else {
-    path = path.split('.')
+    const segments = path.split('.')
     return function (obj) {
-      for (let i = 0; i < path.length; i++) {
+      for (let i = 0; i < segments.length; i++) {
         if (!obj) return
-        obj = obj[path[i]]
+        obj = obj[segments[i]]
       }
       return obj
     }
