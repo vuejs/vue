@@ -1,6 +1,7 @@
-import stream from 'stream'
+/* @flow */
 
-const MAX_STACK_DEPTH = 1000
+import stream from 'stream'
+import { MAX_STACK_DEPTH } from './create-renderer'
 
 /**
  * Original RenderStream implmentation by Sasha Aickin (@aickin)
@@ -8,13 +9,23 @@ const MAX_STACK_DEPTH = 1000
  * Modified by Evan You (@yyx990803)
  */
 export default class RenderStream extends stream.Readable {
-  constructor (render) {
+  buffer: string;
+  render: Function;
+  expectedSize: number;
+  stackDepth: number;
+  write: Function;
+  next: Function;
+  end: Function;
+  done: boolean;
+
+  constructor (render: Function) {
     super()
     this.buffer = ''
     this.render = render
     this.expectedSize = 0
+    this.stackDepth = 0
 
-    this.write = (text, next) => {
+    this.write = (text: string, next: Function) => {
       const n = this.expectedSize
       this.buffer += text
       if (this.buffer.length >= n) {
@@ -24,7 +35,11 @@ export default class RenderStream extends stream.Readable {
         // continue rendering until we have enough text to call this.push().
         // sometimes do this as process.nextTick to get out of stack overflows.
         if (this.stackDepth >= MAX_STACK_DEPTH) {
-          process.nextTick(next)
+          process.nextTick(() => {
+            try { next() } catch (e) {
+              this.emit('error', e)
+            }
+          })
         } else {
           this.stackDepth++
           next()
@@ -40,13 +55,29 @@ export default class RenderStream extends stream.Readable {
     }
   }
 
-  pushBySize (n) {
+  pushBySize (n: number) {
     const bufferToPush = this.buffer.substring(0, n)
     this.buffer = this.buffer.substring(n)
     this.push(bufferToPush)
   }
 
-  _read (n) {
+  tryRender () {
+    try {
+      this.render(this.write, this.end)
+    } catch (e) {
+      this.emit('error', e)
+    }
+  }
+
+  tryNext () {
+    try {
+      this.next()
+    } catch (e) {
+      this.emit('error', e)
+    }
+  }
+
+  _read (n: number) {
     this.expectedSize = n
     // it's possible that the last chunk added bumped the buffer up to > 2 * n,
     // which means we will need to go through multiple read calls to drain it
@@ -60,12 +91,11 @@ export default class RenderStream extends stream.Readable {
       return
     }
     if (!this.next) {
-      this.stackDepth = 0
       // start the rendering chain.
-      this.render(this.write, this.end)
+      this.tryRender()
     } else {
       // continue with the rendering.
-      this.next()
+      this.tryNext()
     }
   }
 }

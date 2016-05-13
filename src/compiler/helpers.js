@@ -1,5 +1,3 @@
-import { isArray } from 'shared/util'
-
 export function baseWarn (msg) {
   console.error(`[Vue parser]: ${msg}`)
 }
@@ -46,7 +44,7 @@ export function addHandler (el, name, value, modifiers) {
   }
   const newHandler = { value, modifiers }
   const handlers = events[name]
-  if (isArray(handlers)) {
+  if (Array.isArray(handlers)) {
     handlers.push(newHandler)
   } else if (handlers) {
     events[name] = [handlers, newHandler]

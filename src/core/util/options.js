@@ -1,3 +1,5 @@
+/* @flow */
+
 import Vue from '../instance/index'
 import config from '../config'
 import { warn } from './debug'
@@ -5,10 +7,10 @@ import { set } from '../observer/index'
 import {
   extend,
   isObject,
-  isArray,
   isPlainObject,
   hasOwn,
   camelize,
+  capitalize,
   isBuiltInTag
 } from 'shared/util'
 
@@ -16,14 +18,8 @@ import {
  * Option overwriting strategies are functions that handle
  * how to merge a parent option value and a child option
  * value into the final value.
- *
- * All strategy functions follow the same signature:
- *
- * @param {*} parentVal
- * @param {*} childVal
- * @param {Vue} [vm]
  */
-const strats = config.optionMergeStrategies = Object.create(null)
+const strats = config.optionMergeStrategies
 
 /**
  * Options with restrictions
@@ -53,7 +49,7 @@ if (process.env.NODE_ENV !== 'production') {
 /**
  * Helper that recursively merges two data objects together.
  */
-function mergeData (to, from) {
+function mergeData (to: Object, from: ?Object): Object {
   let key, toVal, fromVal
   for (key in from) {
     toVal = to[key]
@@ -70,7 +66,11 @@ function mergeData (to, from) {
 /**
  * Data
  */
-strats.data = function (parentVal, childVal, vm) {
+strats.data = function (
+  parentVal: any,
+  childVal: any,
+  vm?: Vue
+): ?Function {
   if (!vm) {
     // in a Vue.extend merge, both should be functions
     if (!childVal) {
@@ -120,11 +120,14 @@ strats.data = function (parentVal, childVal, vm) {
 /**
  * Hooks and param attributes are merged as arrays.
  */
-function mergeHook (parentVal, childVal) {
+function mergeHook (
+  parentVal: ?Array<Function>,
+  childVal: ?Function | ?Array<Function>
+): ?Array<Function> {
   return childVal
     ? parentVal
       ? parentVal.concat(childVal)
-      : isArray(childVal)
+      : Array.isArray(childVal)
         ? childVal
         : [childVal]
     : parentVal
@@ -141,7 +144,7 @@ config._lifecycleHooks.forEach(hook => {
  * a three-way merge between constructor options, instance
  * options and parent options.
  */
-function mergeAssets (parentVal, childVal) {
+function mergeAssets (parentVal: ?Object, childVal: ?Object): Object {
   const res = Object.create(parentVal || null)
   return childVal
     ? extend(res, childVal)
@@ -158,7 +161,7 @@ config._assetTypes.forEach(function (type) {
  * Watchers hashes should not overwrite one
  * another, so we merge them as arrays.
  */
-strats.watch = function (parentVal, childVal) {
+strats.watch = function (parentVal: ?Object, childVal: ?Object): ?Object {
   if (!childVal) return parentVal
   if (!parentVal) return childVal
   const ret = {}
@@ -166,7 +169,7 @@ strats.watch = function (parentVal, childVal) {
   for (const key in childVal) {
     let parent = ret[key]
     const child = childVal[key]
-    if (parent && !isArray(parent)) {
+    if (parent && !Array.isArray(parent)) {
       parent = [parent]
     }
     ret[key] = parent
@@ -181,7 +184,7 @@ strats.watch = function (parentVal, childVal) {
  */
 strats.props =
 strats.methods =
-strats.computed = function (parentVal, childVal) {
+strats.computed = function (parentVal: ?Object, childVal: ?Object): ?Object {
   if (!childVal) return parentVal
   if (!parentVal) return childVal
   const ret = Object.create(null)
@@ -193,7 +196,7 @@ strats.computed = function (parentVal, childVal) {
 /**
  * Default strategy.
  */
-const defaultStrat = function (parentVal, childVal) {
+const defaultStrat = function (parentVal: any, childVal: any): any {
   return childVal === undefined
     ? parentVal
     : childVal
@@ -202,10 +205,8 @@ const defaultStrat = function (parentVal, childVal) {
 /**
  * Make sure component options get converted to actual
  * constructors.
- *
- * @param {Object} options
  */
-function guardComponents (options) {
+function guardComponents (options: Object) {
   if (options.components) {
     const components = options.components
     let def
@@ -228,15 +229,13 @@ function guardComponents (options) {
 /**
  * Ensure all props option syntax are normalized into the
  * Object-based format.
- *
- * @param {Object} options
  */
-function guardProps (options) {
+function guardProps (options: Object) {
   const props = options.props
   if (!props) return
   const res = {}
   let i, val, name
-  if (isArray(props)) {
+  if (Array.isArray(props)) {
     i = props.length
     while (i--) {
       val = props[i]
@@ -259,7 +258,10 @@ function guardProps (options) {
   options.props = res
 }
 
-function guardDirectives (options) {
+/**
+ * Normalize raw function directives into object format.
+ */
+function guardDirectives (options: Object) {
   const dirs = options.directives
   if (dirs) {
     for (const key in dirs) {
@@ -273,13 +275,8 @@ function guardDirectives (options) {
 /**
  * Merge two option objects into a new one.
  * Core utility used in both instantiation and inheritance.
- *
- * @param {Object} parent
- * @param {Object} child
- * @param {Vue} [vm] - if vm is present, indicates this is
- *                     an instantiation merge.
  */
-export function mergeOptions (parent, child, vm) {
+export function mergeOptions (parent: Object, child: Object, vm?: Vue) {
   guardComponents(child)
   guardProps(child)
   guardDirectives(child)
@@ -320,25 +317,23 @@ export function mergeOptions (parent, child, vm) {
  * Resolve an asset.
  * This function is used because child instances need access
  * to assets defined in its ancestor chain.
- *
- * @param {Object} options
- * @param {String} type
- * @param {String} id
- * @param {Boolean} warnMissing
- * @return {Object|Function}
  */
-export function resolveAsset (options, type, id, warnMissing) {
+export function resolveAsset (
+  options: Object,
+  type: string,
+  id: string,
+  warnMissing?: boolean
+): any {
   /* istanbul ignore if */
   if (typeof id !== 'string') {
     return
   }
   const assets = options[type]
-  let camelizedId
   const res = assets[id] ||
     // camelCase ID
-    assets[camelizedId = camelize(id)] ||
+    assets[camelize(id)] ||
     // Pascal Case ID
-    assets[camelizedId.charAt(0).toUpperCase() + camelizedId.slice(1)]
+    assets[capitalize(camelize(id))]
   if (process.env.NODE_ENV !== 'production' && warnMissing && !res) {
     warn(
       'Failed to resolve ' + type.slice(0, -1) + ': ' + id,

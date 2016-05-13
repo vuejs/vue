@@ -3,17 +3,18 @@ var alias = require('./alias')
 
 module.exports = {
   entry: path.resolve(__dirname, 'ssr.dev.entry.js'),
+  target: 'node',
   output: {
     path: path.resolve(__dirname, '../dist'),
     filename: 'server-renderer.js',
-    libraryTarget: 'commonjs'
+    libraryTarget: 'commonjs2'
   },
   resolve: {
     alias: alias
   },
   module: {
     loaders: [
-      { test: /\.js/, loader: 'babel!eslint', exclude: /node_modules/ }
+      { test: /\.js/, loader: 'babel', exclude: /node_modules/ }
     ]
   }
 }

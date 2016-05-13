@@ -5,8 +5,7 @@ describe('Directive v-html', () => {
     const vm = new Vue({
       template: '<div v-html="a"></div>',
       data: { a: 'hello' }
-    })
-    vm.$mount()
+    }).$mount()
     expect(vm.$el.innerHTML).toBe('hello')
   })
 
@@ -14,8 +13,7 @@ describe('Directive v-html', () => {
     const vm = new Vue({
       template: '<div v-html="a"></div>',
       data: { a: '<span></span>' }
-    })
-    vm.$mount()
+    }).$mount()
     expect(vm.$el.innerHTML).toBe('<span></span>')
   })
 
@@ -23,8 +21,7 @@ describe('Directive v-html', () => {
     const vm = new Vue({
       template: '<div v-html="a"></div>',
       data: { a: false }
-    })
-    vm.$mount()
+    }).$mount()
     waitForUpdate(() => {
       expect(vm.$el.innerHTML).toBe('false')
       vm.a = []

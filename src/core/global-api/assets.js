@@ -1,15 +1,16 @@
+/*
+ * not type checking this file because flow doesn't like dynamically setting
+ * fields on a class
+ */
+
 import config from '../config'
 import { warn, isPlainObject } from '../util/index'
 
 export function initAssetRegisters (Vue) {
   /**
-   * Create asset registration methods with the following
-   * signature:
-   *
-   * @param {String} id
-   * @param {*} definition
+   * Create asset registration methods.
    */
-  config._assetTypes.forEach(function (type) {
+  config._assetTypes.forEach(type => {
     Vue[type] = function (id, definition) {
       if (!definition) {
         return this.options[type + 's'][id]

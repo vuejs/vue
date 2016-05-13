@@ -1,10 +1,10 @@
 {
   "env": {
     "development": {
-      "presets": ["es2015"]
+      "presets": ["es2015", "flow-vue"]
     },
     "production": {
-      "presets": ["es2015-rollup-vue"]
+      "presets": ["es2015-rollup-vue", "flow-vue"]
     }
   },
   "ignore": [

@@ -1,4 +1,18 @@
-export default {
+/* @flow */
+
+export type Config = {
+  preserveWhitespace: boolean,
+  optionMergeStrategies: { [key: string]: Function },
+  silent: boolean,
+  isReservedTag: (x: string) => boolean,
+  isUnknownElement: (x: string) => boolean,
+  _assetTypes: Array<string>,
+  _lifecycleHooks: Array<string>,
+  _maxUpdateCount: number,
+  _isServer: boolean
+}
+
+const config: Config = {
 
   /**
    * Preserve whitespaces between elements.
@@ -6,9 +20,12 @@ export default {
   preserveWhitespace: true,
 
   /**
+   * Option merge strategies (used in core/util/options)
+   */
+  optionMergeStrategies: Object.create(null),
+
+  /**
    * Whether to suppress warnings.
-   *
-   * @type {Boolean}
    */
   silent: false,
 
@@ -16,18 +33,16 @@ export default {
    * Check if a tag is reserved so that it cannot be registered as a
    * component. This is platform-dependent and may be overwritten.
    */
-  isReservedTag: () => false,
+  isReservedTag: _ => false,
 
   /**
    * Check if a tag is an unknown element.
    * Platform-dependent.
    */
-  isUnknownElement: () => false,
+  isUnknownElement: _ => false,
 
   /**
    * List of asset types that a component can own.
-   *
-   * @type {Array}
    */
   _assetTypes: [
     'component',
@@ -38,8 +53,6 @@ export default {
 
   /**
    * List of lifecycle hooks.
-   *
-   * @type {Array}
    */
   _lifecycleHooks: [
     'init',
@@ -62,3 +75,5 @@ export default {
    */
   _isServer: process.env.VUE_ENV === 'server'
 }
+
+export default config

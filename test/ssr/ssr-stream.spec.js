@@ -64,6 +64,19 @@ describe('SSR: renderToStream', () => {
       done()
     })
   })
+
+  it('should catch error', done => {
+    const stream = renderToStream(new Vue({
+      render () {
+        throw new Error('oops')
+      }
+    }))
+    stream.on('error', err => {
+      expect(err.toString()).toMatch(/oops/)
+      done()
+    })
+    stream.on('data', _ => _)
+  })
 })
 
 function renderVmWithOptions (options) {

@@ -6,7 +6,7 @@
 import VNode from './vnode'
 import { isPrimitive, renderString, warn } from '../util/index'
 
-const emptyNode = VNode('', {}, [])
+const emptyNode = new VNode('', {}, [])
 const hooks = ['create', 'update', 'remove', 'destroy']
 
 function isUndef (s) {
@@ -45,7 +45,7 @@ export function createPatchFunction (backend) {
   }
 
   function emptyNodeAt (elm) {
-    return VNode(nodeOps.tagName(elm).toLowerCase(), {}, [], undefined, elm)
+    return new VNode(nodeOps.tagName(elm).toLowerCase(), {}, [], undefined, elm)
   }
 
   function createRmCb (childElm, listeners) {

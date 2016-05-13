@@ -5,8 +5,7 @@ describe('Directive v-once', () => {
     const vm = new Vue({
       template: '<div v-once>{{ a }}</div>',
       data: { a: 'hello' }
-    })
-    vm.$mount()
+    }).$mount()
     expect(vm.$el.innerHTML).toBe('hello')
     vm.a = 'world'
     waitForUpdate(() => {
@@ -28,8 +27,7 @@ describe('Directive v-once', () => {
           props: ['b']
         }
       }
-    })
-    vm.$mount()
+    }).$mount()
     expect(vm.$children.length).toBe(0)
     expect(vm.$el.innerHTML)
       .toBe('<span>hello</span><div>hello</div>')
@@ -54,8 +52,7 @@ describe('Directive v-once', () => {
           props: ['b']
         }
       }
-    })
-    vm.$mount()
+    }).$mount()
     expect(vm.$children.length).toBe(0)
     expect(vm.$el.innerHTML)
       .toBe('<span>hello</span><div>hello</div>')
@@ -84,8 +81,7 @@ describe('Directive v-once', () => {
           props: ['b']
         }
       }
-    })
-    vm.$mount()
+    }).$mount()
     expect(vm.$el.innerHTML)
       .toBe('<span>hello</span><div>hello</div><span>?</span>')
     vm.a = 'world'

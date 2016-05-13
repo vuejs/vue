@@ -62,7 +62,7 @@ export function createComponent (Ctor, data, parent, children, context) {
 
   // return a placeholder vnode
   const name = Ctor.options.name ? ('-' + Ctor.options.name) : ''
-  const vnode = VNode(
+  const vnode = new VNode(
     `vue-component-${Ctor.cid}${name}`, data,
     undefined, undefined, undefined, undefined, context
   )

@@ -1,3 +1,5 @@
+/* @flow */
+
 import Vue from 'core/index'
 import config from 'core/config'
 import { createPatchFunction } from 'core/vdom/patch'
@@ -22,9 +24,9 @@ Vue.prototype.__patch__ = config._isServer
   : createPatchFunction({ nodeOps, modules })
 
 // wrap mount
-Vue.prototype.$mount = function (el) {
+Vue.prototype.$mount = function (el?: string | Element): Vue {
   this.$el = el && query(el)
-  this._mount()
+  return this._mount()
 }
 
 export default Vue

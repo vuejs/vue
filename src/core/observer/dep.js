@@ -1,3 +1,6 @@
+/* @flow */
+
+import type Watcher from './watcher'
 import { remove } from '../util/index'
 
 let uid = 0
@@ -5,25 +8,29 @@ let uid = 0
 /**
  * A dep is an observable that can have multiple
  * directives subscribing to it.
- *
- * @constructor
  */
 export default class Dep {
+  static target: ?Watcher;
+  id: number;
+  subs: Array<Watcher>;
+
   constructor () {
     this.id = uid++
     this.subs = []
   }
 
-  addSub (sub) {
+  addSub (sub: Watcher) {
     this.subs.push(sub)
   }
 
-  removeSub (sub) {
+  removeSub (sub: Watcher) {
     remove(this.subs, sub)
   }
 
   depend () {
-    Dep.target.addDep(this)
+    if (Dep.target) {
+      Dep.target.addDep(this)
+    }
   }
 
   notify () {

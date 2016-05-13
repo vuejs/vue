@@ -1,3 +1,5 @@
+/* @flow */
+
 import { extend } from 'shared/util'
 import { compile as baseCompile } from 'compiler/index'
 import directives from 'web/compiler/directives/index'
@@ -8,6 +10,7 @@ const cache2 = Object.create(null)
 
 const baseOptions = {
   expectHTML: true,
+  preserveWhitespace: true,
   directives,
   isReservedTag,
   isUnaryTag,
@@ -15,16 +18,21 @@ const baseOptions = {
   getTagNamespace
 }
 
-export function compile (template, options) {
+export function compile (
+  template: string,
+  options: ?Object
+): { render: string, staticRenderFns: Array<string> } {
   options = options
     ? extend(extend({}, baseOptions), options)
     : baseOptions
   return baseCompile(template, options)
 }
 
-export function compileToFunctions (template, options = {}) {
-  options.preserveWhitespace = options.preserveWhitespace !== false
-  const cache = options.preserveWhitespace ? cache1 : cache2
+export function compileToFunctions (
+  template: string,
+  options: Object = {}
+): { render: Function, staticRenderFns: Array<Function> } {
+  const cache = options.preserveWhitespace !== false ? cache1 : cache2
   if (cache[template]) {
     return cache[template]
   }
@@ -32,11 +40,9 @@ export function compileToFunctions (template, options = {}) {
   const compiled = compile(template, options)
   res.render = new Function(compiled.render)
   const l = compiled.staticRenderFns.length
-  if (l) {
-    res.staticRenderFns = new Array(l)
-    for (let i = 0; i < l; i++) {
-      res.staticRenderFns[i] = new Function(compiled.staticRenderFns[i])
-    }
+  res.staticRenderFns = new Array(l)
+  for (let i = 0; i < l; i++) {
+    res.staticRenderFns[i] = new Function(compiled.staticRenderFns[i])
   }
   return (cache[template] = res)
 }

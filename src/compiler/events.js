@@ -1,4 +1,3 @@
-import { isArray } from 'shared/util'
 const simplePathRE = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\]|\[\d+\]|\[[A-Za-z_$][\w$]*\])*$/
 
 // keyCode aliases
@@ -31,7 +30,7 @@ export function genHandlers (events) {
 function genHandler (handler) {
   if (!handler) {
     return 'function(){}'
-  } else if (isArray(handler)) {
+  } else if (Array.isArray(handler)) {
     return `[${handler.map(genHandler).join(',')}]`
   } else if (!handler.modifiers) {
     return simplePathRE.test(handler.value)
@@ -51,7 +50,7 @@ function genHandler (handler) {
 
 function genKeyFilter (key) {
   const code = keyCodes[key]
-  if (isArray(code)) {
+  if (Array.isArray(code)) {
     return `if(${code.map(c => `$event.keyCode!==${c}`).join('&&')})return;`
   } else {
     return `if($event.keyCode!==${code})return;`

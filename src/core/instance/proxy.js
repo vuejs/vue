@@ -1,3 +1,5 @@
+/* not type checking this file because flow doesn't play well with Proxy */
+
 import { warn, makeMap } from '../util/index'
 
 let hasProxy, proxyHandlers, initProxy

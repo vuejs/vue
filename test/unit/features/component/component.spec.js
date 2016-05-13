@@ -12,8 +12,7 @@ describe('Component', () => {
           template: '<span>{{a}}</span>'
         }
       }
-    })
-    vm.$mount()
+    }).$mount()
     expect(vm.$el.tagName).toBe('SPAN')
     expect(vm.$el.innerHTML).toBe('123')
   })
@@ -29,8 +28,7 @@ describe('Component', () => {
           template: '<tr><td>{{a}}</td></tr>'
         }
       }
-    })
-    vm.$mount()
+    }).$mount()
     expect(vm.$el.innerHTML).toBe('<table><tbody><tr><td>123</td></tr></tbody></table>')
   })
 
@@ -45,8 +43,7 @@ describe('Component', () => {
           template: '<tr><td>{{a}}</td></tr>'
         }
       }
-    })
-    vm.$mount()
+    }).$mount()
     expect(vm.$el.innerHTML).toBe('<table><tbody><tr><td>123</td></tr></tbody></table>')
   })
 
@@ -63,13 +60,12 @@ describe('Component', () => {
           }
         }
       }
-    })
-    vm.$mount()
+    }).$mount()
     expect(vm.$el.innerHTML).toBe('<span>child</span>')
   })
 
   it('fragment instance warning', () => {
-    const vm = new Vue({
+    new Vue({
       template: '<test></test>',
       components: {
         test: {
@@ -79,8 +75,7 @@ describe('Component', () => {
           template: '<p>{{a}}</p><p>{{b}}</p>'
         }
       }
-    })
-    vm.$mount()
+    }).$mount()
     expect('Component template should contain exactly one root element').toHaveBeenWarned()
   })
 
@@ -104,8 +99,7 @@ describe('Component', () => {
           }
         }
       }
-    })
-    vm.$mount()
+    }).$mount()
     expect(vm.$el.outerHTML).toBe('<div view="view-a">foo</div>')
     vm.view = 'view-b'
     waitForUpdate(() => {
@@ -137,9 +131,34 @@ describe('Component', () => {
           })
         }
       }
-    })
-    vm.$mount()
+    }).$mount()
     expect(vm.$el.innerHTML).toBe('<span>foo</span><span>bar</span>')
+  })
+
+  it('dynamic combined with v-for', done => {
+    const vm = new Vue({
+      template:
+        '<div>' +
+          '<component v-for="c in comps" :is="c.type"></component>' +
+        '</div>',
+      data: {
+        comps: [{ type: 'one' }, { type: 'two' }]
+      },
+      components: {
+        one: {
+          template: '<span>one</span>'
+        },
+        two: {
+          template: '<span>two</span>'
+        }
+      }
+    }).$mount()
+    expect(vm.$el.innerHTML).toBe('<span>one</span><span>two</span>')
+    vm.comps[1].type = 'one'
+    waitForUpdate(() => {
+      expect(vm.$el.innerHTML).toBe('<span>one</span><span>one</span>')
+      done()
+    }).catch(done)
   })
 
   it('should compile parent template directives & content in parent scope', done => {
@@ -159,8 +178,7 @@ describe('Component', () => {
           }
         }
       }
-    })
-    vm.$mount()
+    }).$mount()
     expect(vm.$el.style.display).toBe('none')
     expect(vm.$el.textContent).toBe('hello world')
     vm.ok = true
@@ -189,8 +207,7 @@ describe('Component', () => {
           }
         }
       }
-    })
-    vm.$mount()
+    }).$mount()
     expect(vm.$el.textContent).toBe('')
     expect(vm.$children.length).toBe(0)
     vm.ok = true
@@ -214,8 +231,7 @@ describe('Component', () => {
           props: ['collection']
         }
       }
-    })
-    vm.$mount()
+    }).$mount()
     expect(vm.$el.outerHTML).toBe('<ul><li>1</li><li>2</li></ul>')
   })
 

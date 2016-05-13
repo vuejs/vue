@@ -3,28 +3,25 @@ import Vue from 'vue'
 describe('Directive v-text', () => {
   it('should render text', () => {
     const vm = new Vue({
-      el: '#app',
       template: '<div v-text="a"></div>',
       data: { a: 'hello' }
-    })
+    }).$mount()
     expect(vm.$el.innerHTML).toBe('hello')
   })
 
   it('should encode html entities', () => {
     const vm = new Vue({
-      el: '#app',
       template: '<div v-text="a"></div>',
       data: { a: '<foo>' }
-    })
+    }).$mount()
     expect(vm.$el.innerHTML).toBe('&lt;foo&gt;')
   })
 
   it('should support all value types', done => {
     const vm = new Vue({
-      el: '#app',
       template: '<div v-text="a"></div>',
       data: { a: false }
-    })
+    }).$mount()
     waitForUpdate(() => {
       expect(vm.$el.innerHTML).toBe('false')
       vm.a = []

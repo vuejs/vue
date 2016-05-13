@@ -20,6 +20,7 @@ export function renderElement (vnode, children) {
 }
 
 export function renderSelf (tag, data, namespace) {
+  const context = this
   const parent = renderState.activeInstance
   if (!tag) {
     // in case of component :is set to falsy value
@@ -28,12 +29,12 @@ export function renderSelf (tag, data, namespace) {
   if (typeof tag === 'string') {
     let Ctor
     if (config.isReservedTag(tag)) {
-      return VNode(
+      return new VNode(
         tag, data, undefined,
-        undefined, undefined, namespace, this
+        undefined, undefined, namespace, context
       )
     } else if ((Ctor = resolveAsset(this.$options, 'components', tag))) {
-      return { Ctor, data, parent, context: this, component: true }
+      return { Ctor, data, parent, context, component: true }
     } else {
       if (process.env.NODE_ENV !== 'production') {
         if (!namespace && config.isUnknownElement(tag)) {
@@ -44,13 +45,13 @@ export function renderSelf (tag, data, namespace) {
           )
         }
       }
-      return VNode(
+      return new VNode(
         tag, data, undefined,
-        undefined, undefined, namespace, this
+        undefined, undefined, namespace, context
       )
     }
   } else {
-    return { Ctor: tag, data, parent, context: this, component: true }
+    return { Ctor: tag, data, parent, context, component: true }
   }
 }
 

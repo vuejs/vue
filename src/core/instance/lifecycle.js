@@ -1,9 +1,13 @@
+/* @flow */
+
+import type Vue from './index'
+import type VNode from '../vdom/vnode'
 import Watcher from '../observer/watcher'
 import { warn, validateProp, remove } from '../util/index'
 import { observerState } from '../observer/index'
 import { updateListeners } from '../vdom/helpers'
 
-export function initLifecycle (vm) {
+export function initLifecycle (vm: Vue) {
   const options = vm.$options
 
   vm.$parent = options.parent
@@ -15,13 +19,13 @@ export function initLifecycle (vm) {
   vm.$children = []
   vm.$refs = {}
 
-  vm._mounted = false
+  vm._isMounted = false
   vm._isDestroyed = false
   vm._isBeingDestroyed = false
 }
 
-export function lifecycleMixin (Vue) {
-  Vue.prototype._mount = function () {
+export function lifecycleMixin (Vue: Class<Vue>) {
+  Vue.prototype._mount = function (): Vue {
     if (!this.$options.render) {
       this.$options.render = () => this.$createElement('div')
       if (process.env.NODE_ENV !== 'production') {
@@ -43,7 +47,7 @@ export function lifecycleMixin (Vue) {
     callHook(this, 'beforeMount')
     this._watcher = new Watcher(this, this._render, this._update)
     this._update(this._watcher.value)
-    this._mounted = true
+    this._isMounted = true
     // root instance, call mounted on self
     if (this.$root === this) {
       callHook(this, 'mounted')
@@ -51,8 +55,8 @@ export function lifecycleMixin (Vue) {
     return this
   }
 
-  Vue.prototype._update = function (vnode) {
-    if (this._mounted) {
+  Vue.prototype._update = function (vnode: VNode) {
+    if (this._isMounted) {
       callHook(this, 'beforeUpdate')
     }
     if (!this._vnode) {
@@ -68,12 +72,17 @@ export function lifecycleMixin (Vue) {
     if (parentNode) {
       parentNode.elm = this.$el
     }
-    if (this._mounted) {
+    if (this._isMounted) {
       callHook(this, 'updated')
     }
   }
 
-  Vue.prototype._updateFromParent = function (propsData, listeners, parentVnode, renderChildren) {
+  Vue.prototype._updateFromParent = function (
+    propsData?: Object,
+    listeners?: Object,
+    parentVnode: VNode,
+    renderChildren: Array<VNode> | () => Array<VNode>
+  ) {
     this.$options._parentVnode = parentVnode
     this.$options._renderChildren = renderChildren
     // update props
@@ -133,7 +142,7 @@ export function lifecycleMixin (Vue) {
   }
 }
 
-export function callHook (vm, hook) {
+export function callHook (vm: Vue, hook: string) {
   vm.$emit('pre-hook:' + hook)
   const handlers = vm.$options[hook]
   if (handlers) {
