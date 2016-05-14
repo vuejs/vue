@@ -7,27 +7,33 @@ import { normalizeChildren } from './helpers'
 import { renderState } from '../instance/render'
 import { warn, resolveAsset } from '../util/index'
 
-export function renderElement (
-  vnode?: VNode | ComponentDef,
-  children?: VNodeChildren
+export function renderElementWithChildren (
+  vnode: VNode | void,
+  children: VNodeChildren | void
 ): VNode | void {
-  if (vnode instanceof ComponentDef) {
-    return createComponent(
-      vnode.Ctor, vnode.data, vnode.parent,
-      vnode.context, children
-    )
-  }
-  if (vnode instanceof VNode) {
-    vnode.setChildren(normalizeChildren(children))
+  if (vnode) {
+    if (vnode.componentOptions) {
+      if (process.env.NODE_ENV !== 'production' &&
+        children && typeof children !== 'function') {
+        warn(
+          'A component\'s children should be a function that returns the ' +
+          'children array. This allows the component to track the children ' +
+          'dependencies and optimizes re-rendering.'
+        )
+      }
+      vnode.componentOptions.children = children
+    } else {
+      vnode.setChildren(normalizeChildren(children))
+    }
   }
   return vnode
 }
 
-export function renderSelf (
+export function renderElement (
   tag?: string | Class<Component> | Function | Object,
   data?: VNodeData,
   namespace?: string
-): VNode | ComponentDef | void {
+): VNode | void {
   const context: Component = this
   const parent: Component | null = renderState.activeInstance
   if (!parent) {
@@ -49,7 +55,7 @@ export function renderSelf (
         undefined, undefined, namespace, context
       )
     } else if ((Ctor = resolveAsset(context.$options, 'components', tag))) {
-      return new ComponentDef(Ctor, data, parent, context)
+      return createComponent(Ctor, data, parent, context)
     } else {
       if (process.env.NODE_ENV !== 'production') {
         if (!namespace && config.isUnknownElement(tag)) {
@@ -66,7 +72,7 @@ export function renderSelf (
       )
     }
   } else {
-    return new ComponentDef(tag, data, parent, context)
+    return createComponent(tag, data, parent, context)
   }
 }
 
@@ -76,23 +82,4 @@ export function renderText (str?: string): string {
 
 export function renderStatic (index?: number): Object | void {
   return this._staticTrees[index]
-}
-
-export class ComponentDef {
-  Ctor: Class<Component> | Function | Object | void;
-  data: VNodeData | void;
-  parent: Component;
-  context: Component;
-
-  constructor (
-    Ctor?: Class<Component> | Function | Object,
-    data?: VNodeData,
-    parent: Component,
-    context: Component
-  ) {
-    this.Ctor = Ctor
-    this.data = data
-    this.parent = parent
-    this.context = context
-  }
 }
