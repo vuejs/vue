@@ -1,6 +1,5 @@
 /* @flow */
 
-import type VNode from '../vdom/vnode'
 import Watcher from '../observer/watcher'
 import { warn, validateProp, remove } from '../util/index'
 import { observerState } from '../observer/index'
