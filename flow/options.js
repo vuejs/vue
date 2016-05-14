@@ -1,8 +1,19 @@
+declare type InternalComponentOptions = {
+  _isComponent: true,
+  parent: Component,
+  propsData: ?Object,
+  _parentVnode: VNode,
+  _parentListeners: ?Object,
+  _renderChildren: ?VNodeChildren,
+  render?: Function,
+  staticRenderFns?: Array<Function>
+}
+
 declare type ComponentOptions = {
   // data
   data: Object | Function | void,
   props?: { [key: string]: PropOptions },
-  propsData?: Object,
+  propsData?: ?Object,
   computed?: {
     [key: string]: Function | {
       get?: Function,
@@ -41,6 +52,7 @@ declare type ComponentOptions = {
   delimiters?: [string, string],
 
   // private
+  _isComponent?: true,
   _propKeys?: Array<string>,
   _parentVnode?: VNode,
   _parentListeners?: ?{ [key: string]: Function | Array<Function> },

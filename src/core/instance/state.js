@@ -46,7 +46,7 @@ function initProps (vm: Component) {
 function initData (vm: Component) {
   let data = vm.$options.data
   data = vm._data = typeof data === 'function'
-    ? data()
+    ? data.call(vm)
     : data || {}
   if (!isPlainObject(data)) {
     data = {}
