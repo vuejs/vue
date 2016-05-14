@@ -1,6 +1,7 @@
 declare type CompilerOptions = {
   warn?: Function,
   expectHTML?: boolean,
+  preserveWhitespace?: boolean,
   directives?: { [key: string]: Function },
   isUnaryTag?: (tag: string) => ?boolean,
   isReservedTag?: (tag: string) => ?boolean,
