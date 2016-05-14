@@ -17,7 +17,7 @@ declare interface Component {
   // public properties
   $el: Element | void;
   $data: Object;
-  $options: Object;
+  $options: ComponentOptions;
   $parent: Component | void;
   $root: Component;
   $children: Array<Component>;

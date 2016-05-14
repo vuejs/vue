@@ -9,7 +9,7 @@ import { mergeOptions } from '../util/index'
 
 let uid = 0
 
-export function init (vm: Component, options?: Object) {
+export function init (vm: Component, options?: ComponentOptions) {
   // a uid
   vm._uid = uid++
   // a flag to avoid this being observed
