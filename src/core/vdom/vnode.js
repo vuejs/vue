@@ -1,16 +1,27 @@
-import type Vue from 'core/instance/index'
+/* @flow */
 
 export default class VNode {
   tag: string | void;
-  data: Object | void;
+  data: VNodeData | void;
   children: Array<VNode> | void;
   text: string | void;
-  elm: Element | void;
+  elm: Node | void;
   ns: string | void;
-  context: Vue | void;
+  context: Component | void;
   key: string | number | void;
+  componentOptions: VNodeComponentOptions | void;
+  child: Component | void;
 
-  constructor (tag, data, children, text, elm, ns, context) {
+  constructor (
+    tag?: string,
+    data?: VNodeData,
+    children?: Array<VNode>,
+    text?: string,
+    elm?: Node,
+    ns?: string,
+    context?: Component,
+    componentOptions?: VNodeComponentOptions
+  ) {
     this.tag = tag
     this.data = data
     this.children = children
@@ -19,6 +30,8 @@ export default class VNode {
     this.ns = ns
     this.context = context
     this.key = data && data.key
+    this.componentOptions = componentOptions
+    this.child = undefined
   }
 }
 

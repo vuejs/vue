@@ -8,7 +8,12 @@ export function createRenderFunction (
   directives: Object,
   isUnaryTag: Function
 ) {
-  function renderNode (node: VNode, write: Function, next: Function, isRoot: boolean) {
+  function renderNode (
+    node: VNode,
+    write: Function,
+    next: Function,
+    isRoot: boolean
+  ) {
     if (node.componentOptions) {
       const child = createComponentInstanceForVnode(node)
       renderNode(child._render(), write, next, isRoot)
@@ -21,7 +26,12 @@ export function createRenderFunction (
     }
   }
 
-  function renderElement (el: VNode, write: Function, next: Function, isRoot: boolean) {
+  function renderElement (
+    el: VNode,
+    write: Function,
+    next: Function,
+    isRoot: boolean
+  ) {
     if (isRoot) {
       if (!el.data) el.data = {}
       if (!el.data.attrs) el.data.attrs = {}
@@ -81,7 +91,11 @@ export function createRenderFunction (
     return markup + '>'
   }
 
-  return function render (component: Component, write: Function, done: Function) {
+  return function render (
+    component: Component,
+    write: (text: string, next: Function) => void,
+    done: Function
+  ) {
     renderNode(component._render(), write, done, true)
   }
 }

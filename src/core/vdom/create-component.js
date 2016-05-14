@@ -1,3 +1,5 @@
+/* @flow */
+
 import Vue from '../instance/index'
 import VNode from './vnode'
 import { callHook } from '../instance/lifecycle'
@@ -6,7 +8,13 @@ import { warn, isObject, hasOwn, hyphenate } from '../util/index'
 const hooks = { init, prepatch, insert, destroy }
 const hooksToMerge = Object.keys(hooks)
 
-export function createComponent (Ctor, data, parent, children, context) {
+export function createComponent (
+  Ctor: Class<Component> | Function | Object | void,
+  data: VNodeData | void,
+  parent: Component,
+  context: Component,
+  children: ?VNodeChildren
+): VNode | void {
   if (process.env.NODE_ENV !== 'production' &&
     children && typeof children !== 'function') {
     warn(
@@ -21,8 +29,10 @@ export function createComponent (Ctor, data, parent, children, context) {
   if (isObject(Ctor)) {
     Ctor = Vue.extend(Ctor)
   }
-  if (process.env.NODE_ENV !== 'production' && typeof Ctor !== 'function') {
-    warn(`Invalid Component definition: ${Ctor}`, parent)
+  if (typeof Ctor !== 'function') {
+    if (process.env.NODE_ENV !== 'production') {
+      warn(`Invalid Component definition: ${Ctor}`, parent)
+    }
     return
   }
 
@@ -57,22 +67,30 @@ export function createComponent (Ctor, data, parent, children, context) {
   // child component listeners instead of DOM listeners
   const listeners = data.on
   if (listeners) {
-    data.on = null
+    delete data.on
   }
 
   // return a placeholder vnode
   const name = Ctor.options.name ? ('-' + Ctor.options.name) : ''
   const vnode = new VNode(
-    `vue-component-${Ctor.cid}${name}`, data,
-    undefined, undefined, undefined, undefined, context
+    `vue-component-${Ctor.cid}${name}`,
+    data, undefined, undefined, undefined, undefined, context,
+    { Ctor, propsData, listeners, parent, children }
   )
-  vnode.componentOptions = { Ctor, propsData, listeners, parent, children }
   return vnode
 }
 
-export function createComponentInstanceForVnode (vnode) {
-  const { Ctor, propsData, listeners, parent, children } = vnode.componentOptions
-  const options = {
+export function createComponentInstanceForVnode (vnode: VNode): Component {
+  const { Ctor, propsData, listeners, parent, children } = vnode.componentOptions || {}
+  const options: {
+    parent: Component,
+    propsData: ?Object,
+    _parentVnode: VNode,
+    _parentListeners: ?Object,
+    _renderChildren: ?VNodeChildren,
+    render?: Function,
+    staticRenderFns?: Array<Function>
+  } = {
     parent,
     propsData,
     _parentVnode: vnode,
@@ -80,7 +98,7 @@ export function createComponentInstanceForVnode (vnode) {
     _renderChildren: children
   }
   // check inline-template render functions
-  const inlineTemplate = vnode.data.inlineTemplate
+  const inlineTemplate = vnode.data && vnode.data.inlineTemplate
   if (inlineTemplate) {
     options.render = inlineTemplate.render
     options.staticRenderFns = inlineTemplate.staticRenderFns
@@ -88,12 +106,15 @@ export function createComponentInstanceForVnode (vnode) {
   return new Ctor(options)
 }
 
-function init (vnode) {
+function init (vnode: VNode) {
   const child = vnode.child = createComponentInstanceForVnode(vnode)
   child.$mount()
 }
 
-function prepatch (oldVnode, vnode) {
+function prepatch (
+  oldVnode: MountedComponentVNode,
+  vnode: MountedComponentVNode
+) {
   const { listeners, propsData, children } = vnode.componentOptions
   vnode.child = oldVnode.child
   vnode.child._updateFromParent(
@@ -104,15 +125,18 @@ function prepatch (oldVnode, vnode) {
   )
 }
 
-function insert (vnode) {
+function insert (vnode: MountedComponentVNode) {
   callHook(vnode.child, 'mounted')
 }
 
-function destroy (vnode) {
+function destroy (vnode: MountedComponentVNode) {
   vnode.child.$destroy()
 }
 
-function resolveAsyncComponent (factory, cb) {
+function resolveAsyncComponent (
+  factory: Function,
+  cb: Function
+): Class<Component> | void {
   if (factory.resolved) {
     return factory.resolved
   } else if (factory.requested) {
@@ -124,7 +148,7 @@ function resolveAsyncComponent (factory, cb) {
     let sync = true
     factory(
       // resolve
-      res => {
+      (res: Object | Class<Component>) => {
         if (isObject(res)) {
           res = Vue.extend(res)
         }
@@ -152,7 +176,7 @@ function resolveAsyncComponent (factory, cb) {
   }
 }
 
-function extractProps (data, Ctor) {
+function extractProps (data: VNodeData, Ctor: Class<Component>): ?Object {
   // we are only extrating raw values here.
   // validation and default values are handled in the child
   // component itself.
@@ -176,7 +200,12 @@ function extractProps (data, Ctor) {
   return res
 }
 
-function checkProp (res, hash, key, altKey) {
+function checkProp (
+  res: Object,
+  hash: ?Object,
+  key: string,
+  altKey: string
+): boolean {
   if (hash) {
     if (hasOwn(hash, key)) {
       res[key] = hash[key]
@@ -188,9 +217,10 @@ function checkProp (res, hash, key, altKey) {
       return true
     }
   }
+  return false
 }
 
-function mergeHooks (data) {
+function mergeHooks (data: VNodeData) {
   if (data.hook) {
     for (let i = 0; i < hooksToMerge.length; i++) {
       const key = hooksToMerge[i]
@@ -203,7 +233,7 @@ function mergeHooks (data) {
   }
 }
 
-function mergeHook (a, b) {
+function mergeHook (a: Function, b: Function): Function {
   // since all hooks have at most two args, use fixed args
   // to avoid having to use fn.apply().
   return (_, __) => {
