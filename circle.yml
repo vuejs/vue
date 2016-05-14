@@ -4,4 +4,7 @@ machine:
 
 test:
   override:
-    - npm run ci
+    - npm run lint
+    - npm run flow
+    - npm run test:cover
+    - npm run test:ssr
