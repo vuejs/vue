@@ -1,6 +1,5 @@
 /* @flow */
 
-import type VNode from 'core/vdom/vnode'
 import { createComponentInstanceForVnode } from 'core/vdom/create-component'
 
 export function createRenderFunction (

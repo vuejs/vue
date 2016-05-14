@@ -1,6 +1,5 @@
 /* @flow */
 
-import type VNode from '../vdom/vnode'
 import createElement from '../vdom/create-element'
 import { emptyVNode } from '../vdom/vnode'
 import { normalizeChildren } from '../vdom/helpers'
