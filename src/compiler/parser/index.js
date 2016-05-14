@@ -290,7 +290,7 @@ function processComponent (el) {
 
 function processClassBinding (el) {
   const staticClass = getAndRemoveAttr(el, 'class')
-  if (process.env.NODE_ENV !== 'production') {
+  if (process.env.NODE_ENV !== 'production' && staticClass) {
     const expression = parseText(staticClass, delimiters)
     if (expression) {
       warn(
@@ -350,7 +350,8 @@ function processAttrs (el) {
       } else { // normal directives
         name = name.replace(dirRE, '')
         // parse arg
-        if ((arg = name.match(argRE)) && (arg = arg[1])) {
+        const argMatch = name.match(argRE)
+        if (argMatch && (arg = argMatch[1])) {
           name = name.slice(0, -(arg.length + 1))
         }
         addDirective(el, name, value, arg, modifiers)
@@ -381,7 +382,7 @@ function parseModifiers (name: string): Object | void {
   }
 }
 
-function makeAttrsMap (attrs: Array<Object>): { [key: string]: string } {
+function makeAttrsMap (attrs: Array<Object>): Object {
   const map = {}
   for (let i = 0, l = attrs.length; i < l; i++) {
     if (process.env.NODE_ENV !== 'production' && map[attrs[i].name]) {
