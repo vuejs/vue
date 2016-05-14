@@ -1,3 +1,5 @@
+/* @flow */
+
 import { isIE9, namespaceMap } from 'web/util/index'
 
 const svgNS = namespaceMap.svg
@@ -7,11 +9,8 @@ const svgNS = namespaceMap.svg
  * if the element also has the :class attribute; However in
  * PhantomJS, setting `className` does not work on SVG elements...
  * So we have to do a conditional check here.
- *
- * @param {Element} el
- * @param {String} cls
  */
-export function setClass (el, cls) {
+export function setClass (el: Element, cls: string) {
   /* istanbul ignore else */
   if (!isIE9 || el.namespaceURI === svgNS) {
     el.setAttribute('class', cls)
@@ -22,11 +21,8 @@ export function setClass (el, cls) {
 
 /**
  * Add class with compatibility for IE & SVG
- *
- * @param {Element} el
- * @param {String} cls
  */
-export function addClass (el, cls) {
+export function addClass (el: Element, cls: string) {
   if (el.classList) {
     if (cls.indexOf(' ') > -1) {
       cls.split(/\s+/).forEach(c => el.classList.add(c))
@@ -43,11 +39,8 @@ export function addClass (el, cls) {
 
 /**
  * Remove class with compatibility for IE & SVG
- *
- * @param {Element} el
- * @param {String} cls
  */
-export function removeClass (el, cls) {
+export function removeClass (el: Element, cls: string) {
   if (el.classList) {
     if (cls.indexOf(' ') > -1) {
       cls.split(/\s+/).forEach(c => el.classList.remove(c))
@@ -71,11 +64,8 @@ export function removeClass (el, cls) {
  * For IE9 compat: when both class and :class are present
  * getAttribute('class') returns wrong value... but className
  * on SVG elements returns an object.
- *
- * @param {Element} el
- * @return {String}
  */
-function getClass (el) {
+function getClass (el: Element): string {
   let classname = el.className
   if (typeof classname === 'object') {
     classname = classname.baseVal || ''

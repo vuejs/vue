@@ -1,27 +1,30 @@
+/* @flow */
+
 import { addClass, removeClass } from '../class-util'
 import { inBrowser, resolveAsset } from 'core/util/index'
 import { cached, remove } from 'shared/util'
 import { isIE9 } from 'web/util/index'
 
+const hasTransition = inBrowser && !isIE9
 const TRANSITION = 'transition'
 const ANIMATION = 'animation'
 
 // Transition property/event sniffing
-let transitionProp
-let transitionEndEvent
-let animationProp
-let animationEndEvent
-if (inBrowser && !isIE9) {
-  const isWebkitTrans =
-    window.ontransitionend === undefined &&
-    window.onwebkittransitionend !== undefined
-  const isWebkitAnim =
-    window.onanimationend === undefined &&
-    window.onwebkitanimationend !== undefined
-  transitionProp = isWebkitTrans ? 'WebkitTransition' : 'transition'
-  transitionEndEvent = isWebkitTrans ? 'webkitTransitionEnd' : 'transitionend'
-  animationProp = isWebkitAnim ? 'WebkitAnimation' : 'animation'
-  animationEndEvent = isWebkitAnim ? 'webkitAnimationEnd' : 'animationend'
+let transitionProp = 'transition'
+let transitionEndEvent = 'transitionend'
+let animationProp = 'animation'
+let animationEndEvent = 'animationend'
+if (hasTransition) {
+  if (window.ontransitionend === undefined &&
+    window.onwebkittransitionend !== undefined) {
+    transitionProp = 'WebkitTransition'
+    transitionEndEvent = 'webkitTransitionEnd'
+  }
+  if (window.onanimationend === undefined &&
+    window.onwebkitanimationend !== undefined) {
+    animationProp = 'WebkitAnimation'
+    animationEndEvent = 'webkitAnimationEnd'
+  }
 }
 
 const raf = (inBrowser && window.requestAnimationFrame) || setTimeout
@@ -31,8 +34,8 @@ function nextFrame (fn) {
   })
 }
 
-export function enter (vnode) {
-  const el = vnode.elm
+export function enter (vnode: VNodeWithData) {
+  const el: any = vnode.elm
   // call leave callback now
   if (el._leaveCb) {
     el._leaveCb.cancelled = true
@@ -89,8 +92,8 @@ export function enter (vnode) {
   }
 }
 
-export function leave (vnode, rm) {
-  const el = vnode.elm
+export function leave (vnode: VNodeWithData, rm: Function) {
+  const el: any = vnode.elm
   // call enter callback now
   if (el._enterCb) {
     el._enterCb.cancelled = true
@@ -145,7 +148,7 @@ export function leave (vnode, rm) {
   }
 }
 
-function resolveTransition (id, context) {
+function resolveTransition (id: string | Object, context: Component): Object {
   let definition = id && typeof id === 'string'
     ? resolveAsset(context.$options, 'transitions', id) || id
     : id
@@ -155,7 +158,7 @@ function resolveTransition (id, context) {
     : definition
 }
 
-const autoCssTransition = cached(name => {
+const autoCssTransition: (name: string) => Object = cached(name => {
   return {
     enterClass: `${name}-enter`,
     leaveClass: `${name}-leave`,
@@ -164,17 +167,17 @@ const autoCssTransition = cached(name => {
   }
 })
 
-function addTransitionClass (el, cls) {
+function addTransitionClass (el: any, cls: string) {
   (el._transitionClasses || (el._transitionClasses = [])).push(cls)
   addClass(el, cls)
 }
 
-function removeTransitionClass (el, cls) {
+function removeTransitionClass (el: any, cls: string) {
   remove(el._transitionClasses, cls)
   removeClass(el, cls)
 }
 
-function whenTransitionEnds (el, cb) {
+function whenTransitionEnds (el: Element, cb: Function) {
   const { type, timeout, propCount } = getTransitionInfo(el)
   if (!type) return cb()
   const event = type === TRANSITION ? transitionEndEvent : animationEndEvent
@@ -196,7 +199,11 @@ function whenTransitionEnds (el, cb) {
   el.addEventListener(event, onEnd)
 }
 
-function getTransitionInfo (el) {
+function getTransitionInfo (el: Element): {
+  type: ?string,
+  propCount: number,
+  timeout: number
+} {
   const styles = window.getComputedStyle(el)
   // 1. determine the maximum duration (timeout)
   const transitioneDelays = styles[transitionProp + 'Delay'].split(', ')
@@ -223,17 +230,17 @@ function getTransitionInfo (el) {
   }
 }
 
-function getTimeout (delays, durations) {
+function getTimeout (delays: Array<string>, durations: Array<string>): number {
   return Math.max.apply(null, durations.map((d, i) => {
     return toMs(d) + toMs(delays[i])
   }))
 }
 
-function toMs (s) {
+function toMs (s: string): number {
   return Number(s.slice(0, -1)) * 1000
 }
 
-function once (fn) {
+function once (fn: Function): Function {
   let called = false
   return () => {
     if (!called) {
@@ -243,8 +250,8 @@ function once (fn) {
   }
 }
 
-function shouldSkipTransition (vnode) {
-  return (
+function shouldSkipTransition (vnode: VNodeWithData): boolean {
+  return !!(
     // if this is a component root node and the compoennt's
     // parent container node also has transition, skip.
     (vnode.parent && vnode.parent.data.transition) ||
@@ -254,17 +261,17 @@ function shouldSkipTransition (vnode) {
   )
 }
 
-export default !transitionEndEvent ? {} : {
-  create: function (_, vnode) {
+export default hasTransition ? {
+  create: function (_: any, vnode: VNodeWithData) {
     if (!shouldSkipTransition(vnode)) {
       enter(vnode)
     }
   },
-  remove: function (vnode, rm) {
+  remove: function (vnode: VNode, rm: Function) {
     if (!shouldSkipTransition(vnode)) {
       leave(vnode, rm)
     } else {
       rm()
     }
   }
-}
+} : {}

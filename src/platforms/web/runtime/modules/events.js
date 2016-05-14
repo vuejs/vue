@@ -1,6 +1,8 @@
+/* @flow */
+
 import { updateListeners } from 'core/vdom/helpers'
 
-function updateDOMListeners (oldVnode, vnode) {
+function updateDOMListeners (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   if (!oldVnode.data.on && !vnode.data.on) {
     return
   }

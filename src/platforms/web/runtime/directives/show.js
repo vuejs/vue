@@ -1,15 +1,17 @@
+/* @flow */
+
 import { isIE9 } from 'web/util/index'
 import { enter, leave } from '../modules/transition'
 
 export default {
-  bind (el, value, _, vnode) {
+  bind (el: HTMLElement, value: any, _: any, vnode: VNodeWithData) {
     const transition = getTransition(vnode)
     if (value && transition && transition.appea && !isIE9) {
       enter(vnode)
     }
     el.style.display = value ? '' : 'none'
   },
-  update (el, value, _, vnode) {
+  update (el: HTMLElement, value: any, _: any, vnode: VNodeWithData) {
     const transition = getTransition(vnode)
     if (transition && !isIE9) {
       if (value) {
@@ -26,7 +28,7 @@ export default {
   }
 }
 
-function getTransition (vnode) {
+function getTransition (vnode: VNodeWithData): Object | string | void {
   const parent = vnode.parent
   return parent && parent.data.transition != null
     ? parent.data.transition

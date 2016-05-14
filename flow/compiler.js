@@ -20,6 +20,13 @@ declare type ASTElementHandlers = {
 
 declare type ASTElementHooks = { [key: string]: Array<string> }
 
+declare type ASTDirective = {
+  name: string,
+  value: ?string,
+  arg: ?string,
+  modifiers: ?{ [key: string]: true }
+}
+
 declare type ASTText = {
   text?: string,
   expression?: string
@@ -70,12 +77,7 @@ declare type ASTElement = {
   transition?: string | true,
   transitionOnAppear?: boolean,
 
-  directives?: Array<{
-    name: string,
-    value: ?string,
-    arg: ?string,
-    modifiers: ?{ [key: string]: true }
-  }>,
+  directives?: Array<ASTDirective>,
 
   forbidden?: true,
   once?: true

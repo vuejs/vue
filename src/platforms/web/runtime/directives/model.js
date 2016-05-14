@@ -1,3 +1,8 @@
+/**
+ * Not type checking this file because flow doesn't like attaching
+ * properties to Elements.
+ */
+
 import { isAndroid, isIE9 } from 'web/util/index'
 
 if (isIE9) {

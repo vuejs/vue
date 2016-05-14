@@ -11,6 +11,7 @@ declare type VNodeComponentOptions = {
 declare interface MountedComponentVNode {
   componentOptions: VNodeComponentOptions;
   child: Component;
+  parent: VNode;
 }
 
 // interface for vnodes in update modules
@@ -19,10 +20,11 @@ declare interface VNodeWithData {
   data: VNodeData;
   children: Array<VNode> | void;
   text: void;
-  elm: Node;
+  elm: HTMLElement;
   ns: string | void;
   context: Component;
   key: string | number | void;
+  parent?: VNodeWithData;
 }
 
 declare interface VNodeData {
@@ -46,10 +48,12 @@ declare interface VNodeData {
     render: Function,
     staticRenderFns: Array<Function>
   };
-  directives?: Array<{
-    name: string,
-    value?: any,
-    arg?: string,
-    modifiers?: { [key: string]: boolean }
-  }>;
+  directives?: Array<VNodeDirective>;
+}
+
+declare type VNodeDirective = {
+  name: string,
+  value?: any,
+  arg?: string,
+  modifiers?: { [key: string]: boolean }
 }

@@ -6,10 +6,13 @@ import { warn, cached } from 'core/util/index'
 import { query } from 'web/util/index'
 import { compileToFunctions } from './web-compiler'
 
-const idToTemplate = cached(id => query(id).innerHTML)
-const mount = Vue.prototype.$mount
+const idToTemplate = cached(id => {
+  const el = query(id)
+  return el && el.innerHTML
+})
 
-Vue.prototype.$mount = function (el?: string | Element): Vue {
+const mount = Vue.prototype.$mount
+Vue.prototype.$mount = function (el: string | Element): Component {
   el = el && query(el)
   const options = this.$options
   // resolve template/el and convert to render function
