@@ -310,7 +310,7 @@ export function createPatchFunction (backend) {
     }
     if (isDef(tag)) {
       if (isDef(children)) {
-        const childNodes = elm.childNodes
+        const childNodes = nodeOps.childNodes(elm)
         for (let i = 0; i < children.length; i++) {
           const success = hydrate(childNodes[i], children[i], insertedVnodeQueue)
           if (!success) {
@@ -330,10 +330,11 @@ export function createPatchFunction (backend) {
       if (vnode.tag.indexOf('vue-component') === 0) {
         return true
       } else {
-        return vnode.tag === node.tagName.toLowerCase() && (
+        const childNodes = nodeOps.childNodes(node)
+        return vnode.tag === nodeOps.tagName(node).toLowerCase() && (
           vnode.children
-            ? vnode.children.length === node.childNodes.length
-            : node.childNodes.length === 0
+            ? vnode.children.length === childNodes.length
+            : childNodes.length === 0
         )
       }
     } else {

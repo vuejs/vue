@@ -1,5 +1,8 @@
-export default function show (node, dir) {
+/* @flow */
+
+export default function show (node: VNodeWithData, dir: VNodeDirective) {
   if (!dir.value) {
-    (node.data.style || (node.data.style = {})).display = 'none'
+    const style: any = node.data.style || (node.data.style = {})
+    style.display = 'none'
   }
 }

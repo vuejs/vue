@@ -127,7 +127,7 @@ export function toArray (list: any, start?: number): Array<any> {
 /**
  * Mix properties into target object.
  */
-export function extend (to: Object, _from: Object): Object {
+export function extend (to: Object, _from: ?Object): Object {
   for (const key in _from) {
     to[key] = _from[key]
   }
@@ -151,6 +151,19 @@ const toString = Object.prototype.toString
 const OBJECT_STRING = '[object Object]'
 export function isPlainObject (obj: any): boolean {
   return toString.call(obj) === OBJECT_STRING
+}
+
+/**
+ * Merge an Array of Objects into a single Object.
+ */
+export function toObject (arr: Array<any>): Object {
+  const res = arr[0] || {}
+  for (let i = 1; i < arr.length; i++) {
+    if (arr[i]) {
+      extend(res, arr[i])
+    }
+  }
+  return res
 }
 
 /**

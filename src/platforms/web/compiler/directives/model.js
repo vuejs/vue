@@ -1,6 +1,8 @@
+/* @flow */
+
 import { addHandler, addProp, getBindingAttr } from 'compiler/helpers'
 
-export default function model (el, dir) {
+export default function model (el: ASTElement, dir: ASTDirective) {
   const value = dir.value
   const modifiers = dir.modifiers
   if (el.tag === 'select') {
