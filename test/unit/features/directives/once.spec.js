@@ -28,7 +28,7 @@ describe('Directive v-once', () => {
         }
       }
     }).$mount()
-    expect(vm.$children.length).toBe(0)
+    expect(vm.$children.length).toBe(1)
     expect(vm.$el.innerHTML)
       .toBe('<span>hello</span><div>hello</div>')
     vm.a = 'world'
@@ -53,7 +53,7 @@ describe('Directive v-once', () => {
         }
       }
     }).$mount()
-    expect(vm.$children.length).toBe(0)
+    expect(vm.$children.length).toBe(1)
     expect(vm.$el.innerHTML)
       .toBe('<span>hello</span><div>hello</div>')
     vm.a = 'world'

@@ -1,6 +1,5 @@
 /* @flow */
 
-import type Vue from 'core/instance/index'
 import RenderStream from './render-stream'
 import { createRenderFunction } from './render'
 import { warn } from 'core/util/debug'
@@ -30,7 +29,7 @@ export function createRenderer ({
 
   return {
     renderToString (
-      component: Vue,
+      component: Component,
       done: (err: ?Error, res: ?string) => any
     ): void {
       let result = ''
@@ -58,7 +57,7 @@ export function createRenderer ({
       }
     },
 
-    renderToStream (component: Vue): RenderStream {
+    renderToStream (component: Component): RenderStream {
       return new RenderStream((write, done) => {
         render(component, write, done)
       })

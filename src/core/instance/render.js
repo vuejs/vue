@@ -1,18 +1,18 @@
 /* @flow */
 
-import type Vue from './index'
-import type VNode from '../vdom/vnode'
 import { renderElement, renderSelf, renderText, renderStatic } from '../vdom/create-element'
 import { emptyVNode } from '../vdom/vnode'
-import { flatten } from '../vdom/helpers'
+import { normalizeChildren } from '../vdom/helpers'
 import { bind, remove, isObject, renderString } from 'shared/util'
 import { resolveAsset, nextTick } from '../util/index'
 
-export const renderState = {
+export const renderState: {
+  activeInstance: Component | null
+} = {
   activeInstance: null
 }
 
-export function initRender (vm: Vue) {
+export function initRender (vm: Component) {
   vm._vnode = null
   vm._staticTrees = null
   vm.$slots = {}
@@ -28,26 +28,27 @@ export function initRender (vm: Vue) {
   }
 }
 
-export function renderMixin (Vue: Class<Vue>) {
-  Vue.prototype.$nextTick = function (fn) {
+export function renderMixin (Vue: Class<Component>) {
+  Vue.prototype.$nextTick = function (fn: Function) {
     nextTick(fn, this)
   }
 
   Vue.prototype._render = function (): VNode {
-    if (!this._isMounted) {
-      // render static sub-trees for once on initial render
-      renderStaticTrees(this)
-    }
+    const vm: Component = this
     const prev = renderState.activeInstance
-    renderState.activeInstance = this
-    const { render, _renderChildren, _parentVnode } = this.$options
+    renderState.activeInstance = vm
+    if (!vm._isMounted) {
+      // render static sub-trees for once on initial render
+      renderStaticTrees(vm)
+    }
+    const { render, _renderChildren, _parentVnode } = vm.$options
     // resolve slots. becaues slots are rendered in parent scope,
     // we set the activeInstance to parent.
     if (_renderChildren) {
-      resolveSlots(this, _renderChildren)
+      resolveSlots(vm, _renderChildren)
     }
     // render self
-    const vnode = render.call(this._renderProxy) || emptyVNode
+    const vnode = render.call(vm._renderProxy) || emptyVNode
     // set parent
     vnode.parent = _parentVnode
     // restore render state
@@ -104,16 +105,17 @@ export function renderMixin (Vue: Class<Vue>) {
     vFor: boolean,
     isRemoval: boolean
   ) {
-    const refs = this.$refs
+    const vm: Component = this
+    const refs = vm.$refs
     if (isRemoval) {
-      if (vFor) {
+      if (Array.isArray(refs[key])) {
         remove(refs[key], ref)
       } else {
         refs[key] = undefined
       }
     } else {
       if (vFor) {
-        if (refs[key]) {
+        if (Array.isArray(refs[key])) {
           refs[key].push(ref)
         } else {
           refs[key] = [ref]
@@ -125,7 +127,7 @@ export function renderMixin (Vue: Class<Vue>) {
   }
 }
 
-function renderStaticTrees (vm: Vue) {
+function renderStaticTrees (vm: Component) {
   const staticRenderFns = vm.$options.staticRenderFns
   if (staticRenderFns) {
     const trees = vm._staticTrees = new Array(staticRenderFns.length)
@@ -135,9 +137,12 @@ function renderStaticTrees (vm: Vue) {
   }
 }
 
-function resolveSlots (vm: Vue, renderChildren: () => Array<?VNode> | void) {
+function resolveSlots (
+  vm: Component,
+  renderChildren: Array<any> | () => Array<any> | string
+) {
   if (renderChildren) {
-    const children = flatten(renderChildren())
+    const children = normalizeChildren(renderChildren)
     const slots = {}
     const defaultSlot = []
     let i = children.length

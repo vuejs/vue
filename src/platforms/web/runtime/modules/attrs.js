@@ -1,3 +1,5 @@
+/* @flow */
+
 import {
   isBooleanAttr,
   isEnumeratedAttr,
@@ -7,7 +9,7 @@ import {
   isFalsyAttrValue
 } from 'web/util/index'
 
-function updateAttrs (oldVnode, vnode) {
+function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   if (!oldVnode.data.attrs && !vnode.data.attrs) {
     return
   }
@@ -34,7 +36,7 @@ function updateAttrs (oldVnode, vnode) {
   }
 }
 
-function setAttr (el, key, value) {
+function setAttr (el: Element, key: string, value: any) {
   if (isBooleanAttr(key)) {
     // set attribute for blank value
     // e.g. <option disabled>Select one</option>
@@ -61,11 +63,10 @@ function setAttr (el, key, value) {
 }
 
 export default {
-  create: function (_, vnode) {
+  create: function (_: any, vnode: VNodeWithData) {
     const attrs = vnode.data.staticAttrs
     if (attrs) {
       for (const key in attrs) {
-        if (!vnode.elm) debugger
         setAttr(vnode.elm, key, attrs[key])
       }
     }

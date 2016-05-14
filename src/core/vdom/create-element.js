@@ -1,27 +1,43 @@
+/* @flow */
+
 import VNode, { emptyVNode } from './vnode'
 import config from '../config'
 import { createComponent } from './create-component'
-import { flatten } from './helpers'
+import { normalizeChildren } from './helpers'
 import { renderState } from '../instance/render'
 import { warn, resolveAsset } from '../util/index'
 
-export function renderElement (vnode, children) {
+export function renderElement (
+  vnode: VNode | Object | void,
+  children?: VNodeChildren
+): VNode | void {
   if (vnode.component) {
     return createComponent(
       vnode.Ctor, vnode.data, vnode.parent,
-      children, vnode.context
+      vnode.context, children
     )
   }
   if (typeof children === 'function') {
     children = children()
   }
-  vnode.setChildren(flatten(children))
+  vnode.setChildren(normalizeChildren(children))
   return vnode
 }
 
-export function renderSelf (tag, data, namespace) {
-  const context = this
-  const parent = renderState.activeInstance
+export function renderSelf (
+  tag?: string | Class<Component> | Function | Object,
+  data?: VNodeData,
+  namespace?: string
+): VNode | Object | void {
+  const context: Component = this
+  const parent: Component | null = renderState.activeInstance
+  if (!parent) {
+    process.env.NODE_ENV !== 'production' && warn(
+      'createElement cannot be called outside of component ' +
+      'render functions.'
+    )
+    return
+  }
   if (!tag) {
     // in case of component :is set to falsy value
     return emptyVNode
@@ -33,7 +49,7 @@ export function renderSelf (tag, data, namespace) {
         tag, data, undefined,
         undefined, undefined, namespace, context
       )
-    } else if ((Ctor = resolveAsset(this.$options, 'components', tag))) {
+    } else if ((Ctor = resolveAsset(context.$options, 'components', tag))) {
       return { Ctor, data, parent, context, component: true }
     } else {
       if (process.env.NODE_ENV !== 'production') {

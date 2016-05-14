@@ -1,12 +1,19 @@
-import { hyphenate } from 'shared/util'
+/* @flow */
 
-export default function renderStyle (node) {
+import { hyphenate, toObject } from 'shared/util'
+
+export default function renderStyle (node: VNodeWithData): ?string {
   const staticStyle = node.data.staticAttrs && node.data.staticAttrs.style
   if (node.data.style || staticStyle) {
-    const styles = node.data.style
+    let styles = node.data.style
     let res = ' style="'
-    for (const key in styles) {
-      res += `${hyphenate(key)}:${styles[key]};`
+    if (styles) {
+      if (Array.isArray(styles)) {
+        styles = toObject(styles)
+      }
+      for (const key in styles) {
+        res += `${hyphenate(key)}:${styles[key]};`
+      }
     }
     return res + (staticStyle || '') + '"'
   }

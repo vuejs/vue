@@ -69,7 +69,7 @@ function mergeData (to: Object, from: ?Object): Object {
 strats.data = function (
   parentVal: any,
   childVal: any,
-  vm?: Vue
+  vm?: Component
 ): ?Function {
   if (!vm) {
     // in a Vue.extend merge, both should be functions
@@ -276,7 +276,7 @@ function guardDirectives (options: Object) {
  * Merge two option objects into a new one.
  * Core utility used in both instantiation and inheritance.
  */
-export function mergeOptions (parent: Object, child: Object, vm?: Vue) {
+export function mergeOptions (parent: Object, child: Object, vm?: Component) {
   guardComponents(child)
   guardProps(child)
   guardDirectives(child)

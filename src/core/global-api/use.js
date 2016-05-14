@@ -1,9 +1,8 @@
 /* @flow */
 
-import type Vue from '../instance/index'
 import { toArray } from '../util/index'
 
-export function initUse (Vue: Class<Vue>) {
+export function initUse (Vue: GlobalAPI) {
   Vue.use = function (plugin: Function | Object) {
     /* istanbul ignore if */
     if (plugin.installed) {

@@ -1,6 +1,5 @@
 /* @flow */
 
-import type Vue from '../instance/index'
 import config from '../config'
 import Dep from './dep'
 import { arrayMethods } from './array'
@@ -36,7 +35,7 @@ export const observerState = {
 export class Observer {
   value: any;
   dep: Dep;
-  vms: ?Array<Vue>;
+  vms: ?Array<Component>;
 
   constructor (value: any) {
     this.value = value
@@ -81,7 +80,7 @@ export class Observer {
    * digest the watchers. This is only called when the object
    * is observed as an instance's root $data.
    */
-  addVm (vm: Vue) {
+  addVm (vm: Component) {
     (this.vms || (this.vms = [])).push(vm)
   }
 
@@ -89,7 +88,7 @@ export class Observer {
    * Remove an owner vm. This is called when the object is
    * swapped out as an instance's $data object.
    */
-  removeVm (vm: Vue) {
+  removeVm (vm: Component) {
     remove(this.vms, vm)
   }
 }
@@ -109,11 +108,8 @@ function protoAugment (target, src: Object) {
 /**
  * Augment an target Object or Array by defining
  * hidden properties.
- *
- * @param {Object|Array} target
- * @param {Object} proto
  */
-function copyAugment (target, src, keys) {
+function copyAugment (target: Object, src: Object, keys: Array<string>) {
   for (let i = 0, l = keys.length; i < l; i++) {
     const key = keys[i]
     def(target, key, src[key])
@@ -125,7 +121,7 @@ function copyAugment (target, src, keys) {
  * returns the new observer if successfully observed,
  * or the existing observer if the value already has one.
  */
-export function observe (value: any, vm?: Vue): Observer | void {
+export function observe (value: any, vm?: Component): Observer | void {
   if (!isObject(value)) {
     return
   }
@@ -266,7 +262,7 @@ export function del (obj: Object, key: string) {
   }
 }
 
-export function proxy (vm: Vue, key: string) {
+export function proxy (vm: Component, key: string) {
   if (!isReserved(key)) {
     Object.defineProperty(vm, key, {
       configurable: true,
@@ -282,7 +278,7 @@ export function proxy (vm: Vue, key: string) {
 }
 
 // using Object type to avoid flow complaining
-export function unproxy (vm: Object, key: string) {
+export function unproxy (vm: Component, key: string) {
   if (!isReserved(key)) {
     delete vm[key]
   }

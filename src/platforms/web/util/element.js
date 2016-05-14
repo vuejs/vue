@@ -1,3 +1,5 @@
+/* @flow */
+
 import { inBrowser } from 'core/util/env'
 import { makeMap } from 'shared/util'
 
@@ -51,7 +53,7 @@ const isSVG = makeMap(
   true
 )
 
-export function getTagNamespace (tag) {
+export function getTagNamespace (tag: string): ?string {
   if (isSVG(tag)) {
     return 'svg'
   }
@@ -63,7 +65,7 @@ export function getTagNamespace (tag) {
 }
 
 const unknownElementCache = Object.create(null)
-export function isUnknownElement (tag) {
+export function isUnknownElement (tag: string): boolean {
   if (!inBrowser) {
     return true
   }
