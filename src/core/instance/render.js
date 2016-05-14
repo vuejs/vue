@@ -18,8 +18,13 @@ export function initRender (vm: Component) {
   vm.$slots = {}
   // bind the public createElement fn to this instance
   // so that we get proper render context inside it.
-  vm.$createElement = bind(function (tag: string | Component) {
-    return this.__r__(this.__s__(tag))
+  vm.$createElement = bind(function (
+    tag?: string | Class<Component> | Function | Object,
+    data?: VNodeData,
+    children?: VNodeChildren,
+    namespace?: string
+  ) {
+    return this.__r__(this.__s__(tag, data, namespace), children)
   }, vm)
   if (vm.$options.el) {
     vm.$mount(vm.$options.el)

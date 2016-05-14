@@ -37,7 +37,10 @@ declare interface Component {
   $emit: (event: string, ...args: Array<any>) => Component;
   $nextTick: (fn: Function) => void;
   $createElement: (
-    tag?: string | Component
+    tag?: string | Component,
+    data?: Object,
+    children?: VNodeChildren,
+    namespace?: string
   ) => VNode;
 
   // private properties
