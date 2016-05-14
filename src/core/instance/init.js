@@ -9,17 +9,24 @@ import { mergeOptions } from '../util/index'
 
 let uid = 0
 
-export function init (vm: Component, options?: ComponentOptions) {
+export function init (vm: Component, options?: Object) {
   // a uid
   vm._uid = uid++
   // a flag to avoid this being observed
   vm._isVue = true
   // merge options
-  vm.$options = mergeOptions(
-    vm.constructor.options,
-    options || {},
-    vm
-  )
+  if (options && options._isComponent) {
+    // optimize internal component instantiation
+    // since dynamic options merging is pretty slow, and none of the
+    // internal component options needs special treatment.
+    initInternalComponent(vm, options)
+  } else {
+    vm.$options = mergeOptions(
+      vm.constructor.options,
+      options || {},
+      vm
+    )
+  }
   if (process.env.NODE_ENV !== 'production') {
     initProxy(vm)
   } else {
@@ -31,4 +38,17 @@ export function init (vm: Component, options?: ComponentOptions) {
   initState(vm)
   callHook(vm, 'created')
   initRender(vm)
+}
+
+function initInternalComponent (vm: Component, options: InternalComponentOptions) {
+  const opts = vm.$options = Object.create(vm.constructor.options)
+  opts.parent = options.parent
+  opts.propsData = options.propsData
+  opts._parentVnode = options._parentVnode
+  opts._parentListeners = options._parentListeners
+  opts._renderChildren = options._renderChildren
+  if (options.render) {
+    opts.render = options.render
+    opts.staticRenderFns = opts.staticRenderFns
+  }
 }

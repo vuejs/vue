@@ -77,15 +77,8 @@ export function createComponentInstanceForVnode (
   vnode: any // we know it's MountedComponentVNode but flow doesn't
 ): Component {
   const { Ctor, propsData, listeners, parent, children } = vnode.componentOptions
-  const options: {
-    parent: Component,
-    propsData: ?Object,
-    _parentVnode: VNode,
-    _parentListeners: ?Object,
-    _renderChildren: ?VNodeChildren,
-    render?: Function,
-    staticRenderFns?: Array<Function>
-  } = {
+  const options: InternalComponentOptions = {
+    _isComponent: true,
     parent,
     propsData,
     _parentVnode: vnode,
