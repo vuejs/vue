@@ -1,5 +1,6 @@
 import type { Config } from '../src/core/config'
 import type VNode from '../src/core/vdom/vnode'
+import type { ComponentDef } from '../src/core/vdom/create-element'
 import type Watcher from '../src/core/observer/watcher'
 
 declare interface Component {
@@ -69,12 +70,21 @@ declare interface Component {
   // rendering
   _render: () => VNode;
   __patch__: (a: Element | VNode | void, b: VNode) => Element;
-  __h__: (
+  __r__: (
+    vnode?: VNode | ComponentDef,
+    children?: VNodeChildren
+  ) => VNode;
+  __s__: (
     tag?: string | Component | Object,
     data?: Object,
-    children?: VNodeChildren,
     namespace?: string
-  ) => VNode;
+  ) => VNode | ComponentDef | void;
+  __t__: (
+    str?: string
+  ) => string;
+  __m__: (
+    index?: number
+  ) => Object | void;
   __toString__: (value: any) => string;
   __resolveFilter__: (id: string) => Function;
   __renderList__: (

@@ -7,12 +7,27 @@ import { normalizeChildren } from './helpers'
 import { renderState } from '../instance/render'
 import { warn, resolveAsset } from '../util/index'
 
-export default function createElement (
+export function renderElement (
+  vnode?: VNode | ComponentDef,
+  children?: VNodeChildren
+): VNode | void {
+  if (vnode instanceof ComponentDef) {
+    return createComponent(
+      vnode.Ctor, vnode.data, vnode.parent,
+      vnode.context, children
+    )
+  }
+  if (vnode instanceof VNode) {
+    vnode.setChildren(normalizeChildren(children))
+  }
+  return vnode
+}
+
+export function renderSelf (
   tag?: string | Class<Component> | Function | Object,
   data?: VNodeData,
-  children?: VNodeChildren,
   namespace?: string
-): VNode | void {
+): VNode | ComponentDef | void {
   const context: Component = this
   const parent: Component | null = renderState.activeInstance
   if (!parent) {
@@ -30,11 +45,11 @@ export default function createElement (
     let Ctor
     if (config.isReservedTag(tag)) {
       return new VNode(
-        tag, data, normalizeChildren(children),
+        tag, data, undefined,
         undefined, undefined, namespace, context
       )
     } else if ((Ctor = resolveAsset(context.$options, 'components', tag))) {
-      return createComponent(Ctor, data, parent, context, children)
+      return new ComponentDef(Ctor, data, parent, context)
     } else {
       if (process.env.NODE_ENV !== 'production') {
         if (!namespace && config.isUnknownElement(tag)) {
@@ -46,11 +61,38 @@ export default function createElement (
         }
       }
       return new VNode(
-        tag, data, normalizeChildren(children),
+        tag, data, undefined,
         undefined, undefined, namespace, context
       )
     }
   } else {
-    return createComponent(tag, data, parent, context, children)
+    return new ComponentDef(tag, data, parent, context)
+  }
+}
+
+export function renderText (str?: string): string {
+  return str || ''
+}
+
+export function renderStatic (index?: number): Object | void {
+  return this._staticTrees[index]
+}
+
+export class ComponentDef {
+  Ctor: Class<Component> | Function | Object | void;
+  data: VNodeData | void;
+  parent: Component;
+  context: Component;
+
+  constructor (
+    Ctor?: Class<Component> | Function | Object,
+    data?: VNodeData,
+    parent: Component,
+    context: Component
+  ) {
+    this.Ctor = Ctor
+    this.data = data
+    this.parent = parent
+    this.context = context
   }
 }

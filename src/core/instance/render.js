@@ -1,6 +1,6 @@
 /* @flow */
 
-import createElement from '../vdom/create-element'
+import { renderElement, renderSelf, renderText, renderStatic } from '../vdom/create-element'
 import { emptyVNode } from '../vdom/vnode'
 import { normalizeChildren } from '../vdom/helpers'
 import { bind, remove, isObject, renderString } from 'shared/util'
@@ -18,7 +18,14 @@ export function initRender (vm: Component) {
   vm.$slots = {}
   // bind the public createElement fn to this instance
   // so that we get proper render context inside it.
-  vm.$createElement = bind(createElement, vm)
+  vm.$createElement = bind(function (
+    tag?: string | Class<Component> | Function | Object,
+    data?: VNodeData,
+    children?: VNodeChildren,
+    namespace?: string
+  ) {
+    return this.__r__(this.__s__(tag, data, namespace), children)
+  }, vm)
   if (vm.$options.el) {
     vm.$mount(vm.$options.el)
   }
@@ -53,7 +60,10 @@ export function renderMixin (Vue: Class<Component>) {
   }
 
   // shorthands used in render functions
-  Vue.prototype.__h__ = createElement
+  Vue.prototype.__r__ = renderElement
+  Vue.prototype.__s__ = renderSelf
+  Vue.prototype.__t__ = renderText
+  Vue.prototype.__m__ = renderStatic
 
   // toString for mustaches
   Vue.prototype.__toString__ = renderString

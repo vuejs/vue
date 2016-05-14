@@ -33,6 +33,10 @@ export default class VNode {
     this.componentOptions = componentOptions
     this.child = undefined
   }
+
+  setChildren (children?: Array<VNode>) {
+    this.children = children
+  }
 }
 
 export const emptyVNode = new VNode(undefined, undefined, undefined, '')
