@@ -1,13 +1,27 @@
+/* @flow */
+
 import VNode, { emptyVNode } from './vnode'
 import config from '../config'
 import { createComponent } from './create-component'
-import { flatten } from './helpers'
+import { normalizeChildren } from './helpers'
 import { renderState } from '../instance/render'
 import { warn, resolveAsset } from '../util/index'
 
-export default function createElement (tag, data, children, namespace) {
-  const context = this
-  const parent = renderState.activeInstance
+export default function createElement (
+  tag?: string | Class<Component> | Function | Object,
+  data?: VNodeData,
+  children?: VNodeChildren,
+  namespace?: string
+): VNode | void {
+  const context: Component = this
+  const parent: Component | null = renderState.activeInstance
+  if (!parent) {
+    process.env.NODE_ENV !== 'production' && warn(
+      'createElement cannot be called outside of component ' +
+      'render functions.'
+    )
+    return
+  }
   if (!tag) {
     // in case of component :is set to falsy value
     return emptyVNode
@@ -16,11 +30,11 @@ export default function createElement (tag, data, children, namespace) {
     let Ctor
     if (config.isReservedTag(tag)) {
       return new VNode(
-        tag, data, flatten(children),
+        tag, data, normalizeChildren(children),
         undefined, undefined, namespace, context
       )
     } else if ((Ctor = resolveAsset(context.$options, 'components', tag))) {
-      return createComponent(Ctor, data, parent, children, context)
+      return createComponent(Ctor, data, parent, context, children)
     } else {
       if (process.env.NODE_ENV !== 'production') {
         if (!namespace && config.isUnknownElement(tag)) {
@@ -32,11 +46,11 @@ export default function createElement (tag, data, children, namespace) {
         }
       }
       return new VNode(
-        tag, data, flatten(children && children()),
+        tag, data, normalizeChildren(children),
         undefined, undefined, namespace, context
       )
     }
   } else {
-    return createComponent(tag, data, parent, children, context)
+    return createComponent(tag, data, parent, context, children)
   }
 }

@@ -3,7 +3,7 @@
 import type VNode from '../vdom/vnode'
 import createElement from '../vdom/create-element'
 import { emptyVNode } from '../vdom/vnode'
-import { flatten } from '../vdom/helpers'
+import { normalizeChildren } from '../vdom/helpers'
 import { bind, remove, isObject, renderString } from 'shared/util'
 import { resolveAsset, nextTick } from '../util/index'
 
@@ -32,12 +32,12 @@ export function renderMixin (Vue: Class<Component>) {
 
   Vue.prototype._render = function (): VNode {
     const vm: Component = this
+    const prev = renderState.activeInstance
+    renderState.activeInstance = vm
     if (!vm._isMounted) {
       // render static sub-trees for once on initial render
       renderStaticTrees(vm)
     }
-    const prev = renderState.activeInstance
-    renderState.activeInstance = vm
     const { render, _renderChildren, _parentVnode } = vm.$options
     // resolve slots. becaues slots are rendered in parent scope,
     // we set the activeInstance to parent.
@@ -131,9 +131,12 @@ function renderStaticTrees (vm: Component) {
   }
 }
 
-function resolveSlots (vm: Component, renderChildren: () => Array<?VNode> | void) {
+function resolveSlots (
+  vm: Component,
+  renderChildren: Array<any> | () => Array<any> | string
+) {
   if (renderChildren) {
-    const children = flatten(renderChildren())
+    const children = normalizeChildren(renderChildren)
     const slots = {}
     const defaultSlot = []
     let i = children.length
