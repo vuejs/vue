@@ -1,4 +1,6 @@
-export function parseFilters (exp) {
+/* @flow */
+
+export function parseFilters (exp: string): string {
   let inSingle = false
   let inDouble = false
   let curly = 0
@@ -63,7 +65,7 @@ export function parseFilters (exp) {
   return expression
 }
 
-function wrapFilter (exp, filter) {
+function wrapFilter (exp: string, filter: string): string {
   const i = filter.indexOf('(')
   if (i < 0) {
     return `__resolveFilter__("${filter}")(${exp})`

@@ -1,3 +1,5 @@
+/* @flow */
+
 import { decodeHTML } from 'entities'
 import { parseHTML } from './html-parser'
 import { parseText } from './text-parser'
@@ -32,15 +34,14 @@ let delimiters
 
 /**
  * Convert HTML string to AST.
- *
- * @param {String} template
- * @param {Object} options
- * @return {Object}
  */
-export function parse (template, options) {
+export function parse (
+  template: string,
+  options: CompilerOptions
+): ASTElement | void {
   warn = options.warn || baseWarn
-  platformGetTagNamespace = options.getTagNamespace || (() => null)
-  platformMustUseProp = options.mustUseProp || (() => false)
+  platformGetTagNamespace = options.getTagNamespace || (_ => null)
+  platformMustUseProp = options.mustUseProp || (_ => false)
   delimiters = options.delimiters
   const stack = []
   let root
@@ -61,7 +62,7 @@ export function parse (template, options) {
       }
 
       tag = tag.toLowerCase()
-      const element = {
+      const element: ASTElement = {
         tag,
         attrsList: attrs,
         attrsMap: makeAttrsMap(attrs),
@@ -133,7 +134,7 @@ export function parse (template, options) {
       }
     },
 
-    end (tag) {
+    end () {
       // remove trailing whitespace
       const element = stack[stack.length - 1]
       const lastNode = element.children[element.children.length - 1]
@@ -147,7 +148,7 @@ export function parse (template, options) {
       }
     },
 
-    chars (text) {
+    chars (text: string) {
       if (!currentParent) {
         if (process.env.NODE_ENV !== 'production' && !warned) {
           warned = true
@@ -162,7 +163,7 @@ export function parse (template, options) {
         // only preserve whitespace if its not right after a starting tag
         : options.preserveWhitespace && currentParent.children.length
           ? ' '
-          : null
+          : ''
       if (text) {
         let expression
         if (!inPre && text !== ' ' && (expression = parseText(text, delimiters))) {
@@ -185,9 +186,9 @@ function processPre (el) {
 function processRawAttrs (el) {
   const l = el.attrsList.length
   if (l) {
-    el.attrs = new Array(l)
+    const attrs = el.attrs = new Array(l)
     for (let i = 0; i < l; i++) {
-      el.attrs[i] = {
+      attrs[i] = {
         name: el.attrsList[i].name,
         value: JSON.stringify(el.attrsList[i].value)
       }
@@ -371,7 +372,7 @@ function processAttrs (el) {
   }
 }
 
-function parseModifiers (name) {
+function parseModifiers (name: string): Object | void {
   const match = name.match(modifierRE)
   if (match) {
     const ret = {}
@@ -380,7 +381,7 @@ function parseModifiers (name) {
   }
 }
 
-function makeAttrsMap (attrs) {
+function makeAttrsMap (attrs: Array<Object>): { [key: string]: string } {
   const map = {}
   for (let i = 0, l = attrs.length; i < l; i++) {
     if (process.env.NODE_ENV !== 'production' && map[attrs[i].name]) {
@@ -391,14 +392,14 @@ function makeAttrsMap (attrs) {
   return map
 }
 
-function findPrevElement (children) {
+function findPrevElement (children: Array<any>): ASTElement | void {
   let i = children.length
   while (i--) {
     if (children[i].tag) return children[i]
   }
 }
 
-function isForbiddenTag (el) {
+function isForbiddenTag (el): boolean {
   return (
     el.tag === 'style' ||
     (el.tag === 'script' && (
