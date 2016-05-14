@@ -12,7 +12,7 @@ type PropOptions = {
 }
 
 export function validateProp (vm: Component, key: string, propsData: ?Object): any {
-  if (!propsData) return
+  if (!vm.$options.props || !propsData) return
   const prop = vm.$options.props[key]
   const absent = hasOwn(propsData, key)
   let value = propsData[key]
