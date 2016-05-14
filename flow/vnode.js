@@ -13,6 +13,18 @@ declare interface MountedComponentVNode {
   child: Component;
 }
 
+// interface for vnodes in update modules
+declare interface VNodeWithData {
+  tag: string;
+  data: VNodeData;
+  children: Array<VNode> | void;
+  text: void;
+  elm: Node;
+  ns: string | void;
+  context: Component;
+  key: string | number | void;
+}
+
 declare interface VNodeData {
   pre?: true;
   key?: string | number;

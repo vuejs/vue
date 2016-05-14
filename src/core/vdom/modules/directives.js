@@ -1,19 +1,27 @@
+/* @flow */
+
 import { resolveAsset } from 'core/util/options'
 
 export default {
-  create: function bindDirectives (oldVnode, vnode) {
+  create: function bindDirectives (oldVnode: VNodeWithData, vnode: VNodeWithData) {
     applyDirectives(oldVnode, vnode, 'bind')
   },
-  update: function updateDirectives (oldVnode, vnode) {
-    applyDirectives(oldVnode, vnode, 'update', true)
+  update: function updateDirectives (oldVnode: VNodeWithData, vnode: VNodeWithData) {
+    applyDirectives(oldVnode, vnode, 'update')
   },
-  destroy: function unbindDirectives (vnode) {
-    applyDirectives(null, vnode, 'unbind')
+  destroy: function unbindDirectives (vnode: VNodeWithData) {
+    applyDirectives(vnode, vnode, 'unbind')
   }
 }
 
-function applyDirectives (oldVnode, vnode, hook, update) {
+function applyDirectives (
+  oldVnode: VNodeWithData,
+  vnode: VNodeWithData,
+  hook: string
+) {
   const dirs = vnode.data.directives
+  const oldDirs = oldVnode.data.directives
+  const isUpdate = hook === 'update'
   if (dirs) {
     for (let i = 0; i < dirs.length; i++) {
       const dir = dirs[i]
@@ -21,8 +29,8 @@ function applyDirectives (oldVnode, vnode, hook, update) {
       const fn = def && def[hook]
       if (fn) {
         // only call update if value has changed
-        if (update) {
-          const oldValue = oldVnode.data.directives[i].value
+        if (isUpdate && oldDirs) {
+          const oldValue = oldDirs[i].value
           if (oldValue === dir.value) {
             continue
           }

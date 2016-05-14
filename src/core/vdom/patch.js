@@ -2,7 +2,11 @@
  * Virtual DOM implementation based on Snabbdom by
  * Simon Friis Vindum (@paldepind)
  * with custom modifications.
+ *
+ * Not type-checking this because this file is perf-critical and the cost
+ * of making flow understand it is not worth it.
  */
+
 import VNode from './vnode'
 import { isPrimitive, renderString, warn } from '../util/index'
 
