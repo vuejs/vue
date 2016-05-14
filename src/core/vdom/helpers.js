@@ -6,11 +6,14 @@ import VNode from './vnode'
 const whitespace = new VNode(undefined, undefined, undefined, ' ')
 
 export function normalizeChildren (children: any): Array<VNode> {
-  if (typeof children === 'string') {
-    return [new VNode(undefined, undefined, undefined, children)]
-  }
+  // invoke children thunks.
+  // components always receive their children as thunks so that they
+  // can perform the actual render inside their own dependency collection cycle.
   if (typeof children === 'function') {
     children = children()
+  }
+  if (typeof children === 'string') {
+    return [new VNode(undefined, undefined, undefined, children)]
   }
   if (Array.isArray(children)) {
     const res = []

@@ -1,10 +1,16 @@
 /* @flow */
 
-import { renderElement, renderSelf, renderText, renderStatic } from '../vdom/create-element'
 import { emptyVNode } from '../vdom/vnode'
 import { normalizeChildren } from '../vdom/helpers'
 import { bind, remove, isObject, renderString } from 'shared/util'
 import { resolveAsset, nextTick } from '../util/index'
+
+import {
+  renderElement,
+  renderElementWithChildren,
+  renderText,
+  renderStatic
+} from '../vdom/create-element'
 
 export const renderState: {
   activeInstance: Component | null
@@ -60,8 +66,8 @@ export function renderMixin (Vue: Class<Component>) {
   }
 
   // shorthands used in render functions
-  Vue.prototype.__r__ = renderElement
-  Vue.prototype.__s__ = renderSelf
+  Vue.prototype.__r__ = renderElementWithChildren
+  Vue.prototype.__s__ = renderElement
   Vue.prototype.__t__ = renderText
   Vue.prototype.__m__ = renderStatic
 

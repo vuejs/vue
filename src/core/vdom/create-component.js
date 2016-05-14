@@ -10,19 +10,10 @@ const hooksToMerge = Object.keys(hooks)
 
 export function createComponent (
   Ctor: Class<Component> | Function | Object | void,
-  data: VNodeData | void,
+  data?: VNodeData,
   parent: Component,
-  context: Component,
-  children: ?VNodeChildren
+  context: Component
 ): VNode | void {
-  if (process.env.NODE_ENV !== 'production' &&
-    children && typeof children !== 'function') {
-    warn(
-      'A component\'s children should be a function that returns the ' +
-      'children array. This allows the component to track the children ' +
-      'dependencies and optimizes re-rendering.'
-    )
-  }
   if (!Ctor) {
     return
   }
@@ -75,7 +66,9 @@ export function createComponent (
   const vnode = new VNode(
     `vue-component-${Ctor.cid}${name}`,
     data, undefined, undefined, undefined, undefined, context,
-    { Ctor, propsData, listeners, parent, children }
+    { Ctor, propsData, listeners, parent, children: undefined }
+    // children to be set later by renderElementWithChildren,
+    // but before the init hook
   )
   return vnode
 }
