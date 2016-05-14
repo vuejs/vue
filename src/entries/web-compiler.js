@@ -5,10 +5,15 @@ import { compile as baseCompile } from 'compiler/index'
 import directives from 'web/compiler/directives/index'
 import { isReservedTag, isUnaryTag, mustUseProp, getTagNamespace } from 'web/util/index'
 
-const cache1 = Object.create(null)
-const cache2 = Object.create(null)
+type CompiledFunctions = {
+  render: Function,
+  staticRenderFns: Array<Function>
+}
 
-const baseOptions = {
+const cache1: { [key: string]: CompiledFunctions } = Object.create(null)
+const cache2: { [key: string]: CompiledFunctions } = Object.create(null)
+
+const baseOptions: CompilerOptions = {
   expectHTML: true,
   preserveWhitespace: true,
   directives,
@@ -20,7 +25,7 @@ const baseOptions = {
 
 export function compile (
   template: string,
-  options: ?Object
+  options?: CompilerOptions
 ): { render: string, staticRenderFns: Array<string> } {
   options = options
     ? extend(extend({}, baseOptions), options)
@@ -30,9 +35,9 @@ export function compile (
 
 export function compileToFunctions (
   template: string,
-  options: Object = {}
-): { render: Function, staticRenderFns: Array<Function> } {
-  const cache = options.preserveWhitespace !== false ? cache1 : cache2
+  options?: CompilerOptions
+): CompiledFunctions {
+  const cache = options && options.preserveWhitespace === false ? cache1 : cache2
   if (cache[template]) {
     return cache[template]
   }
