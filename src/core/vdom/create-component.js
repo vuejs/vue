@@ -80,8 +80,10 @@ export function createComponent (
   return vnode
 }
 
-export function createComponentInstanceForVnode (vnode: VNode): Component {
-  const { Ctor, propsData, listeners, parent, children } = vnode.componentOptions || {}
+export function createComponentInstanceForVnode (
+  vnode: any // we know it's MountedComponentVNode but flow doesn't
+): Component {
+  const { Ctor, propsData, listeners, parent, children } = vnode.componentOptions
   const options: {
     parent: Component,
     propsData: ?Object,
@@ -98,7 +100,7 @@ export function createComponentInstanceForVnode (vnode: VNode): Component {
     _renderChildren: children
   }
   // check inline-template render functions
-  const inlineTemplate = vnode.data && vnode.data.inlineTemplate
+  const inlineTemplate = vnode.data.inlineTemplate
   if (inlineTemplate) {
     options.render = inlineTemplate.render
     options.staticRenderFns = inlineTemplate.staticRenderFns
