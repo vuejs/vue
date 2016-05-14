@@ -34,7 +34,7 @@ export default class VNode {
     this.child = undefined
   }
 
-  setChildren (children) {
+  setChildren (children?: Array<VNode>) {
     this.children = children
   }
 }

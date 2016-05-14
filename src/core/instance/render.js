@@ -18,7 +18,7 @@ export function initRender (vm: Component) {
   vm.$slots = {}
   // bind the public createElement fn to this instance
   // so that we get proper render context inside it.
-  vm.$createElement = bind(function (tag) {
+  vm.$createElement = bind(function (tag: string | Component) {
     return this.__r__(this.__s__(tag))
   }, vm)
   if (vm.$options.el) {

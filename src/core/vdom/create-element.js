@@ -8,19 +8,18 @@ import { renderState } from '../instance/render'
 import { warn, resolveAsset } from '../util/index'
 
 export function renderElement (
-  vnode: VNode | Object | void,
+  vnode?: VNode | ComponentDef,
   children?: VNodeChildren
 ): VNode | void {
-  if (vnode.component) {
+  if (vnode instanceof ComponentDef) {
     return createComponent(
       vnode.Ctor, vnode.data, vnode.parent,
       vnode.context, children
     )
   }
-  if (typeof children === 'function') {
-    children = children()
+  if (vnode instanceof VNode) {
+    vnode.setChildren(normalizeChildren(children))
   }
-  vnode.setChildren(normalizeChildren(children))
   return vnode
 }
 
@@ -28,7 +27,7 @@ export function renderSelf (
   tag?: string | Class<Component> | Function | Object,
   data?: VNodeData,
   namespace?: string
-): VNode | Object | void {
+): VNode | ComponentDef | void {
   const context: Component = this
   const parent: Component | null = renderState.activeInstance
   if (!parent) {
@@ -50,7 +49,7 @@ export function renderSelf (
         undefined, undefined, namespace, context
       )
     } else if ((Ctor = resolveAsset(context.$options, 'components', tag))) {
-      return { Ctor, data, parent, context, component: true }
+      return new ComponentDef(Ctor, data, parent, context)
     } else {
       if (process.env.NODE_ENV !== 'production') {
         if (!namespace && config.isUnknownElement(tag)) {
@@ -67,14 +66,33 @@ export function renderSelf (
       )
     }
   } else {
-    return { Ctor: tag, data, parent, context, component: true }
+    return new ComponentDef(tag, data, parent, context)
   }
 }
 
-export function renderText (str) {
-  return str
+export function renderText (str?: string): string {
+  return str || ''
 }
 
-export function renderStatic (index) {
+export function renderStatic (index?: number): Object | void {
   return this._staticTrees[index]
+}
+
+export class ComponentDef {
+  Ctor: Class<Component> | Function | Object | void;
+  data: VNodeData | void;
+  parent: Component;
+  context: Component;
+
+  constructor (
+    Ctor?: Class<Component> | Function | Object,
+    data?: VNodeData,
+    parent: Component,
+    context: Component
+  ) {
+    this.Ctor = Ctor
+    this.data = data
+    this.parent = parent
+    this.context = context
+  }
 }
