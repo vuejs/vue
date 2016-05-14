@@ -1,3 +1,5 @@
+/* @flow */
+
 import { makeMap, isBuiltInTag } from 'shared/util'
 
 let isPlatformReservedTag
@@ -13,7 +15,8 @@ let isPlatformReservedTag
  *    create fresh nodes for them on each re-render;
  * 2. Completely skip them in the patching process.
  */
-export function optimize (root, options) {
+export function optimize (root: ?ASTElement, options: CompilerOptions) {
+  if (!root) return
   isPlatformReservedTag = options.isReservedTag || (() => false)
   // first pass: mark all non-static nodes.
   markStatic(root)
@@ -56,7 +59,7 @@ function isStatic (node) {
     !node.expression && // not text with interpolation
     !node.if && !node.for && // not v-if or v-for or v-else
     (!node.tag || isPlatformReservedTag(node.tag)) && // not a component
-    !isBuiltInTag(node.tag) && // not a built-in
+    !(node.tag && isBuiltInTag(node.tag)) && // not a built-in
     (node.plain || Object.keys(node).every(isStaticKey)) // no dynamic bindings
   ))
 }

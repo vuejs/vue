@@ -1,7 +1,7 @@
 declare type CompilerOptions = {
   warn?: Function,
   expectHTML?: boolean,
-  directives?: Array<Function>,
+  directives?: { [key: string]: Function },
   isUnaryTag?: (tag: string) => ?boolean,
   isReservedTag?: (tag: string) => ?boolean,
   mustUseProp?: (attr: string) => ?boolean,
@@ -10,12 +10,8 @@ declare type CompilerOptions = {
 }
 
 declare type ASTText = {
-  text: string
-}
-
-declare type ASTExpression = {
-  expression: string,
-  text?: string
+  text?: string,
+  expression?: string
 }
 
 declare type ASTElement = {
@@ -23,7 +19,10 @@ declare type ASTElement = {
   attrsList: Array<{ name: string, value: string }>,
   attrsMap: { [key: string]: string },
   parent: ASTElement | void,
-  children: Array<ASTElement | ASTText | ASTExpression>,
+  children: Array<any>,
+
+  static?: boolean,
+  staticRoot?: true,
 
   text?: string,
   attrs?: Array<{ name: string, value: string }>,
@@ -40,11 +39,11 @@ declare type ASTElement = {
   renderMethod?: string,
   renderArgs?: string,
 
-  if?: string,
+  if?: string | null,
   else?: true,
   elseBlock?: ASTElement,
 
-  for?: string,
+  for?: string | null,
   key?: string,
   alias?: string,
   iterator?: string,
@@ -55,6 +54,13 @@ declare type ASTElement = {
 
   transition?: string | true,
   transitionOnAppear?: boolean,
+
+  directives?: Array<{
+    name: string,
+    value?: string,
+    arg?: string,
+    modifiers?: { [key: string]: true }
+  }>,
 
   forbidden?: true,
   once?: true

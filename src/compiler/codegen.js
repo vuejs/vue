@@ -1,3 +1,5 @@
+/* @flow */
+
 import { genHandlers } from './events'
 import { ref } from './directives/ref'
 import { baseWarn } from './helpers'
@@ -15,10 +17,16 @@ let isPlatformReservedTag
 let staticRenderFns
 let currentOptions
 
-export function generate (ast, options) {
+export function generate (
+  ast: ASTElement | void,
+  options: CompilerOptions
+): {
+  render: string,
+  staticRenderFns: Array<string>
+} {
   // save previous staticRenderFns so generate calls can be nested
-  const prevStaticRenderFns = staticRenderFns
-  const currentStaticRenderFns = staticRenderFns = []
+  const prevStaticRenderFns: Array<string> = staticRenderFns
+  const currentStaticRenderFns: Array<string> = staticRenderFns = []
   currentOptions = options
   warn = options.warn || baseWarn
   platformDirectives = options.directives || {}
@@ -31,7 +39,7 @@ export function generate (ast, options) {
   }
 }
 
-function genElement (el) {
+function genElement (el: ASTElement): string {
   if (el.for) {
     return genFor(el)
   } else if (el.if) {
@@ -62,30 +70,30 @@ function genElement (el) {
   }
 }
 
-function genIf (el) {
+function genIf (el: ASTElement): string {
   const exp = el.if
-  el.if = false // avoid recursion
+  el.if = null // avoid recursion
   return `(${exp}) ? ${genElement(el)} : ${genElse(el)}`
 }
 
-function genElse (el) {
+function genElse (el: ASTElement): string {
   return el.elseBlock
     ? genElement(el.elseBlock)
     : 'null'
 }
 
-function genFor (el) {
+function genFor (el: ASTElement): string {
   const exp = el.for
   const alias = el.alias
   const iterator = el.iterator
-  el.for = false // avoid recursion
+  el.for = null // avoid recursion
   return `(${exp})&&__renderList__((${exp}), ` +
     `function(${alias},$index,${iterator || '$key'}){` +
       `return ${genElement(el)}` +
     '})'
 }
 
-function genData (el) {
+function genData (el: ASTElement): string {
   if (el.plain) {
     return 'undefined'
   }
@@ -94,10 +102,9 @@ function genData (el) {
 
   // directives first.
   // directives may mutate the el's other properties before they are generated.
-  if (el.directives) {
-    const dirs = genDirectives(el)
-    if (dirs) data += dirs + ','
-  }
+  const dirs = genDirectives(el)
+  if (dirs) data += dirs + ','
+
   // pre
   if (el.pre) {
     data += 'pre:true,'
@@ -157,7 +164,8 @@ function genData (el) {
     )) {
       warn('Inline-template components must have exactly one child element.')
     }
-    const inlineRenderFns = generate(el.children[0], currentOptions)
+    const ast: ASTElement = el.children[0]
+    const inlineRenderFns = generate(ast, currentOptions)
     data += `inlineTemplate:{render:function(){${
       inlineRenderFns.render
     }},staticRenderFns:[${
@@ -167,8 +175,9 @@ function genData (el) {
   return data.replace(/,$/, '') + '}'
 }
 
-function genDirectives (el) {
+function genDirectives (el: ASTElement): string | void {
   const dirs = el.directives
+  if (!dirs) return
   let res = 'directives:['
   let hasRuntime = false
   let i, l, dir, needRuntime
@@ -197,7 +206,7 @@ function genDirectives (el) {
   }
 }
 
-function genChildren (el, asThunk) {
+function genChildren (el: ASTElement, asThunk?: boolean): string {
   if (!el.children.length) {
     return 'undefined'
   }
@@ -215,26 +224,26 @@ function genNode (node) {
   }
 }
 
-function genText (text) {
+function genText (text: ASTText): string {
   return text.expression
     ? `(${text.expression})`
     : JSON.stringify(text.text)
 }
 
-function genRender (el) {
+function genRender (el: ASTElement): string {
   return `${el.renderMethod}(${el.renderArgs || 'null'},${genChildren(el)})`
 }
 
-function genSlot (el) {
+function genSlot (el: ASTElement): string {
   const name = el.slotName || '"default"'
   return `($slots[${name}] || ${genChildren(el)})`
 }
 
-function genComponent (el) {
+function genComponent (el: ASTElement): string {
   return `__h__(${el.component}, ${genData(el)}, ${genChildren(el, true)})`
 }
 
-function genProps (props) {
+function genProps (props: Array<{ name: string, value: string }>): string {
   let res = ''
   for (let i = 0; i < props.length; i++) {
     const prop = props[i]
@@ -243,7 +252,7 @@ function genProps (props) {
   return res.slice(0, -1)
 }
 
-function genHooks (hooks) {
+function genHooks (hooks: { [key: string]: Array<string> }): string {
   let res = ''
   for (const key in hooks) {
     res += `"${key}":function(n1,n2){${hooks[key].join(';')}},`
