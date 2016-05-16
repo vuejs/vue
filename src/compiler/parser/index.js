@@ -63,6 +63,7 @@ export function parse (
 
       tag = tag.toLowerCase()
       const element: ASTElement = {
+        type: 1,
         tag,
         attrsList: attrs,
         attrsMap: makeAttrsMap(attrs),
@@ -138,7 +139,9 @@ export function parse (
       // remove trailing whitespace
       const element = stack[stack.length - 1]
       const lastNode = element.children[element.children.length - 1]
-      if (lastNode && lastNode.text === ' ') element.children.pop()
+      if (lastNode && lastNode.type === 3 && lastNode.text === ' ') {
+        element.children.pop()
+      }
       // pop stack
       stack.length -= 1
       currentParent = stack[stack.length - 1]
@@ -167,9 +170,9 @@ export function parse (
       if (text) {
         let expression
         if (!inPre && text !== ' ' && (expression = parseText(text, delimiters))) {
-          currentParent.children.push({ expression })
+          currentParent.children.push({ type: 2, expression })
         } else {
-          currentParent.children.push({ text })
+          currentParent.children.push({ type: 3, text })
         }
       }
     }

@@ -28,17 +28,15 @@ declare type ASTDirective = {
   modifiers: ?{ [key: string]: true }
 }
 
-declare type ASTText = {
-  text?: string,
-  expression?: string
-}
+declare type ASTNode = ASTElement | ASTText | ASTExpression
 
 declare type ASTElement = {
+  type: 1,
   tag: string,
   attrsList: Array<{ name: string, value: string }>,
   attrsMap: { [key: string]: string | null },
   parent: ASTElement | void,
-  children: Array<any>, // for flexibility
+  children: Array<ASTNode>,
 
   static?: boolean,
   staticRoot?: true,
@@ -82,4 +80,16 @@ declare type ASTElement = {
 
   forbidden?: true,
   once?: true
+}
+
+declare type ASTExpression = {
+  type: 2,
+  expression: string,
+  static?: boolean
+}
+
+declare type ASTText = {
+  type: 3,
+  text: string,
+  static?: boolean
 }

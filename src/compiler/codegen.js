@@ -159,18 +159,20 @@ function genData (el: ASTElement): string {
   }
   // inline-template
   if (el.inlineTemplate) {
+    const ast = el.children[0]
     if (process.env.NODE_ENV !== 'production' && (
-      el.children.length > 1 || !el.children[0].tag
+      el.children.length > 1 || ast.type !== 1
     )) {
       warn('Inline-template components must have exactly one child element.')
     }
-    const ast: ASTElement = el.children[0]
-    const inlineRenderFns = generate(ast, currentOptions)
-    data += `inlineTemplate:{render:function(){${
-      inlineRenderFns.render
-    }},staticRenderFns:[${
-      inlineRenderFns.staticRenderFns.map(code => `function(){${code}}`).join(',')
-    }]}`
+    if (ast.type === 1) {
+      const inlineRenderFns = generate(ast, currentOptions)
+      data += `inlineTemplate:{render:function(){${
+        inlineRenderFns.render
+      }},staticRenderFns:[${
+        inlineRenderFns.staticRenderFns.map(code => `function(){${code}}`).join(',')
+      }]}`
+    }
   }
   return data.replace(/,$/, '') + '}'
 }
@@ -216,16 +218,16 @@ function genChildren (el: ASTElement, asThunk?: boolean): string {
     : code
 }
 
-function genNode (node) {
-  if (node.tag) {
+function genNode (node: ASTNode) {
+  if (node.type === 1) {
     return genElement(node)
   } else {
     return genText(node)
   }
 }
 
-function genText (text: ASTText): string {
-  return text.expression
+function genText (text: ASTText | ASTExpression): string {
+  return text.type === 2
     ? `(${text.expression})`
     : '__t__(' + JSON.stringify(text.text) + ')'
 }
