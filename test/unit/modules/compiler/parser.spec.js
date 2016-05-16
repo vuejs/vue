@@ -112,11 +112,11 @@ describe('parser', () => {
   })
 
   it('v-for directive track-by', () => {
-    const ast = parse('<ul><li v-for="item in items" track-by="uid"></li><ul>', baseOptions)
+    const ast = parse('<ul><li v-for="item in items" track-by="item.uid"></li><ul>', baseOptions)
     const liAst = ast.children[0]
     expect(liAst.for).toBe('items')
     expect(liAst.alias).toBe('item')
-    expect(liAst.key).toBe('uid')
+    expect(liAst.key).toBe('item.uid')
   })
 
   it('v-for directive invalid syntax', () => {
