@@ -26,20 +26,8 @@ function generateGrid (rowCount, columnCount) {
 
 const gridData = generateGrid(1000, 10)
 
-var perfMixin = {
-  computed: {
-    performance: {
-      cached: false,
-      get: function () {
-        return (self.performance.now() - self.s).toFixed(2)
-      }
-    }
-  }
-}
-
 var gridComponent = {
-  template: '<div><h1>{{ performance }}ms</h1><my-table></my-table></div>',
-  mixins: [perfMixin],
+  template: '<div><h1>{{ Math.random() }}</h1><my-table></my-table></div>',
   components: {
     myTable: {
       data: function () {
@@ -47,16 +35,22 @@ var gridComponent = {
           grid: gridData
         }
       },
+      // template: '<table><tr v-for="row in grid"><th>123</th><td v-for="item in row.items">{{ item.id }}</td></tr></table>',
       template: '<table width="100%" cellspacing="2"><row v-for="row in grid" :row="row"></row></table>',
       components: {
         row: {
           props: ['row'],
-          mixins: [perfMixin],
-          template: '<tr><th>{{ performance }}ms</th><column v-for="item in row.items"></column></tr>',
+          template: '<tr><th>{{ Math.random() }}</th><column v-for="item in row.items"></column></tr>',
           components: {
             column: {
-              mixins: [perfMixin],
-              template: '<td class="item">{{ performance }}ms</td>'
+              template: '<td class="item">' +
+                // 25 plain elements for each cell
+                '<ul class="yoyo">' +
+                  '<li class="hihi" v-for="i in 5">' +
+                    '<span v-for="i in 5">fsefs</span>' +
+                    '</li>' +
+                '</ul>' +
+              '</td>'
             }
           }
         }
