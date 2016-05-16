@@ -1,4 +1,3 @@
-var path = require('path')
 var base = require('./karma.base.config.js')
 
 module.exports = function (config) {
@@ -14,14 +13,16 @@ module.exports = function (config) {
     singleRun: true
   })
 
-  // add coverage loader
-  options.webpack.module.preLoaders = [
-    {
-      test: /\.js$/,
-      include: path.resolve(__dirname, '../src'),
-      loader: 'isparta'
-    }
-  ]
+  // add babel-plugin-__coverage__ for code intrumentation
+  options.webpack.babel = {
+    plugins: [['__coverage__', {
+      ignore: [
+        'test/',
+        'src/compiler/parser/html-parser.js',
+        'src/core/instance/proxy.js'
+      ]
+    }]]
+  }
 
   config.set(options)
 }
