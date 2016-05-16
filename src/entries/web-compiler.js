@@ -2,6 +2,7 @@
 
 import { extend } from 'shared/util'
 import { compile as baseCompile } from 'compiler/index'
+import modules from 'web/compiler/modules/index'
 import directives from 'web/compiler/directives/index'
 import { isReservedTag, isUnaryTag, mustUseProp, getTagNamespace } from 'web/util/index'
 
@@ -16,6 +17,7 @@ const cache2: { [key: string]: CompiledFunctions } = Object.create(null)
 const baseOptions: CompilerOptions = {
   expectHTML: true,
   preserveWhitespace: true,
+  modules,
   directives,
   isReservedTag,
   isUnaryTag,

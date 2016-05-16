@@ -2,6 +2,7 @@
 
 import { makeMap, isBuiltInTag } from 'shared/util'
 
+let isStaticKey
 let isPlatformReservedTag
 
 /**
@@ -17,11 +18,25 @@ let isPlatformReservedTag
  */
 export function optimize (root: ?ASTElement, options: CompilerOptions) {
   if (!root) return
+  isStaticKey = genStaticKeys(options.modules)
   isPlatformReservedTag = options.isReservedTag || (() => false)
   // first pass: mark all non-static nodes.
   markStatic(root)
   // second pass: mark static roots.
   markStaticRoots(root)
+}
+
+function genStaticKeys (modules) {
+  let keys = 'type,tag,attrsList,attrsMap,plain,parent,children,staticAttrs'
+  if (modules) {
+    modules.forEach(module => {
+      const staticKeys = module.staticKeys
+      if (staticKeys && staticKeys.length) {
+        keys += ',' + staticKeys.join(',')
+      }
+    })
+  }
+  return makeMap(keys)
 }
 
 function markStatic (node: ASTNode) {
@@ -48,11 +63,6 @@ function markStaticRoots (node: ASTNode) {
     }
   }
 }
-
-const isStaticKey = makeMap(
-  'type,tag,attrsList,attrsMap,plain,parent,children,' +
-  'staticAttrs,staticClass'
-)
 
 function isStatic (node: ASTNode): boolean {
   if (node.type === 2) { // expression
