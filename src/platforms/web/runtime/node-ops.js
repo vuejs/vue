@@ -30,7 +30,7 @@ export function parentNode (node: Node): ?Element {
   return node.parentElement
 }
 
-export function nextSibling (node: Node): Node {
+export function nextSibling (node: Node): ?Node {
   return node.nextSibling
 }
 
