@@ -24,7 +24,7 @@ export function optimize (root: ?ASTElement, options: CompilerOptions) {
   markStaticRoots(root)
 }
 
-function markStatic (node) {
+function markStatic (node: ASTNode) {
   node.static = isStatic(node)
   if (node.type === 1) {
     for (let i = 0, l = node.children.length; i < l; i++) {
@@ -37,7 +37,7 @@ function markStatic (node) {
   }
 }
 
-function markStaticRoots (node) {
+function markStaticRoots (node: ASTNode) {
   if (node.type === 1 && (node.once || node.static)) {
     node.staticRoot = true
     return
@@ -50,7 +50,7 @@ function markStaticRoots (node) {
 }
 
 const isStaticKey = makeMap(
-  'tag,attrsList,attrsMap,plain,parent,children,' +
+  'type,tag,attrsList,attrsMap,plain,parent,children,' +
   'staticAttrs,staticClass'
 )
 
@@ -63,8 +63,8 @@ function isStatic (node: ASTNode): boolean {
   }
   return !!(node.pre || (
     !node.if && !node.for && // not v-if or v-for or v-else
-    isPlatformReservedTag(node.tag) && // not a component
     !isBuiltInTag(node.tag) && // not a built-in
+    isPlatformReservedTag(node.tag) && // not a component
     (node.plain || Object.keys(node).every(isStaticKey)) // no dynamic bindings
   ))
 }
