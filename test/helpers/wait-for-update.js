@@ -15,7 +15,7 @@ import Vue from 'vue'
 // .catch(done)
 window.waitForUpdate = initialCb => {
   let done
-  const queue = [initialCb]
+  const queue = initialCb ? [initialCb] : []
 
   function shift () {
     const job = queue.shift()

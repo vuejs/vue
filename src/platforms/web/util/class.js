@@ -1,6 +1,6 @@
 /* @flow */
 
-import { extend, isObject } from 'shared/util'
+import { isObject } from 'shared/util'
 
 export function genClassForVnode (vnode: VNode): string {
   let data = vnode.data
@@ -18,12 +18,12 @@ export function genClassForVnode (vnode: VNode): string {
 
 function mergeClassData (child: VNodeData, parent: VNodeData): {
   staticClass: string,
-  class: ?Object
+  class: any
 } {
   return {
     staticClass: concat(child.staticClass, parent.staticClass),
     class: child.class
-      ? extend(child.class, parent.class)
+      ? [child.class, parent.class]
       : parent.class
   }
 }
@@ -50,8 +50,13 @@ export function stringifyClass (value: any): string {
     return value
   }
   if (Array.isArray(value)) {
+    let stringified
     for (let i = 0, l = value.length; i < l; i++) {
-      if (value[i]) res += stringifyClass(value[i]) + ' '
+      if (value[i]) {
+        if ((stringified = stringifyClass(value[i]))) {
+          res += stringified + ' '
+        }
+      }
     }
     return res.slice(0, -1)
   }
