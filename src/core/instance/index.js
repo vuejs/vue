@@ -1,13 +1,14 @@
-import { init } from './init'
+import { initMixin } from './init'
 import { stateMixin } from './state'
 import { renderMixin } from './render'
 import { eventsMixin } from './events'
 import { lifecycleMixin } from './lifecycle'
 
 function Vue (options) {
-  init(this, options)
+  this._init(options)
 }
 
+initMixin(Vue)
 stateMixin(Vue)
 eventsMixin(Vue)
 lifecycleMixin(Vue)
