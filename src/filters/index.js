@@ -19,7 +19,7 @@ export default {
     read: function (value, indent) {
       return typeof value === 'string'
         ? value
-        : JSON.stringify(value, null, Number(indent) || 2)
+        : JSON.stringify(value, null, arguments.length > 1 ? indent : 2)
     },
     write: function (value) {
       try {

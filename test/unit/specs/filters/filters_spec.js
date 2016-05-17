@@ -6,6 +6,7 @@ describe('Filters', function () {
     var obj = {a: {b: 2}}
     expect(filter(obj)).toBe(JSON.stringify(obj, null, 2))
     expect(filter(obj, 4)).toBe(JSON.stringify(obj, null, 4))
+    expect(filter(obj, 0)).toBe(JSON.stringify(obj, null, 0))
     // plain string
     expect(filter('1234')).toBe('1234')
   })
