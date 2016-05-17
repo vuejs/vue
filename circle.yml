@@ -4,7 +4,7 @@ machine:
 
 general:
   branches:
-    ignore: dev
+    only: master
 
 test:
   override:
