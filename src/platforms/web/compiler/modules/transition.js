@@ -13,11 +13,11 @@ function parse (el, options) {
   }
 }
 
-function genData (el, data) {
+function genData (el) {
   if (el.transition) {
-    data += `transition:{definition:(${el.transition}),appear:${el.transitionOnAppear}},`
+    return `transition:{definition:(${el.transition}),appear:${el.transitionOnAppear}},`
   }
-  return data
+  return ''
 }
 
 export default {

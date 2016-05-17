@@ -9,11 +9,11 @@ function parse (el, options) {
   }
 }
 
-function genData (el, data) {
+function genData (el) {
   if (el.styleBinding) {
-    data += `style:${el.styleBinding},`
+    return `style:${el.styleBinding},`
   }
-  return data
+  return ''
 }
 
 export default {

@@ -121,7 +121,7 @@ function genData (el: ASTElement): string {
   }
   // platform modules
   platformModules.forEach(module => {
-    data = module.genData(el, data)
+    data += module.genData(el) || ''
   })
   // v-show, used to avoid transition being applied
   // since v-show takes it over

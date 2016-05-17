@@ -25,7 +25,8 @@ function parse (el, options) {
   }
 }
 
-function genData (el, data) {
+function genData (el) {
+  let data = ''
   if (el.staticClass) {
     data += `staticClass:${el.staticClass},`
   }
