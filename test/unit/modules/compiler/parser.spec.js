@@ -1,4 +1,5 @@
 import { parse } from 'compiler/parser/index'
+import modules from 'web/compiler/modules/index'
 import directives from 'web/compiler/directives/index'
 import { extend } from 'shared/util'
 import { isReservedTag, isUnaryTag, mustUseProp, getTagNamespace } from 'web/util/index'
@@ -7,6 +8,7 @@ describe('parser', () => {
   const baseOptions = {
     expectHTML: true,
     preserveWhitespace: true,
+    modules,
     directives,
     isReservedTag,
     isUnaryTag,

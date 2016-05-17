@@ -30,6 +30,7 @@ const decodeHTMLCached = cached(decodeHTML)
 let warn
 let platformGetTagNamespace
 let platformMustUseProp
+let platformModules
 let delimiters
 
 /**
@@ -42,6 +43,7 @@ export function parse (
   warn = options.warn || baseWarn
   platformGetTagNamespace = options.getTagNamespace || (_ => null)
   platformMustUseProp = options.mustUseProp || (_ => false)
+  platformModules = options.modules || []
   delimiters = options.delimiters
   const stack = []
   let root
@@ -106,9 +108,9 @@ export function parse (
         processRender(element)
         processSlot(element)
         processComponent(element)
-        processClassBinding(element)
-        processStyleBinding(element)
-        processTransition(element)
+        platformModules.forEach(module => {
+          module.parse(element, options)
+        })
         processAttrs(element)
       }
 
@@ -288,43 +290,6 @@ function processComponent (el) {
   }
   if (getAndRemoveAttr(el, 'inline-template') != null) {
     el.inlineTemplate = true
-  }
-}
-
-function processClassBinding (el) {
-  const staticClass = getAndRemoveAttr(el, 'class')
-  if (process.env.NODE_ENV !== 'production' && staticClass) {
-    const expression = parseText(staticClass, delimiters)
-    if (expression) {
-      warn(
-        `class="${staticClass}": ` +
-        'Interpolation inside attributes has been deprecated. ' +
-        'Use v-bind or the colon shorthand instead.'
-      )
-    }
-  }
-  el.staticClass = JSON.stringify(staticClass)
-  const classBinding = getBindingAttr(el, 'class', false /* getStatic */)
-  if (classBinding) {
-    el.classBinding = classBinding
-  }
-}
-
-function processStyleBinding (el) {
-  const styleBinding = getBindingAttr(el, 'style', false /* getStatic */)
-  if (styleBinding) {
-    el.styleBinding = styleBinding
-  }
-}
-
-function processTransition (el) {
-  let transition = getBindingAttr(el, 'transition')
-  if (transition === '""') {
-    transition = true
-  }
-  if (transition) {
-    el.transition = transition
-    el.transitionOnAppear = getBindingAttr(el, 'transition-on-appear') != null
   }
 }
 
