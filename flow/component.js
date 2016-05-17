@@ -58,6 +58,7 @@ declare interface Component {
 
   // private methods
   // lifecycle
+  _init: Function;
   _mount: () => Component;
   _update: (vnode: VNode) => void;
   _updateFromParent: (
