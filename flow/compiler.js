@@ -12,7 +12,7 @@ declare type CompilerOptions = {
 }
 
 declare type ModuleOptions = {
-  staticKeys: Array<string>,
+  staticKeys?: Array<string>,
   parse: Function,
   genData: Function
 }
