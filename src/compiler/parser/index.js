@@ -108,9 +108,9 @@ export function parse (
         processRender(element)
         processSlot(element)
         processComponent(element)
-        platformModules.forEach(module => {
-          module.parse(element, options)
-        })
+        for (let i = 0; i < platformModules.length; i++) {
+          platformModules[i].parse(element, options)
+        }
         processAttrs(element)
       }
 

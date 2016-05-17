@@ -1,3 +1,5 @@
+/* @flow */
+
 import { parseText } from 'compiler/parser/text-parser'
 import {
   getAndRemoveAttr,
@@ -5,7 +7,7 @@ import {
   baseWarn
 } from 'compiler/helpers'
 
-function parse (el, options) {
+function parse (el: ASTElement, options: CompilerOptions) {
   const warn = options.warn || baseWarn
   const staticClass = getAndRemoveAttr(el, 'class')
   if (process.env.NODE_ENV !== 'production' && staticClass) {
@@ -25,7 +27,7 @@ function parse (el, options) {
   }
 }
 
-function genData (el) {
+function genData (el: ASTElement): string {
   let data = ''
   if (el.staticClass) {
     data += `staticClass:${el.staticClass},`

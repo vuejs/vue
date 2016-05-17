@@ -120,9 +120,9 @@ function genData (el: ASTElement): string {
     data += `slot:${el.slotTarget},`
   }
   // platform modules
-  platformModules.forEach(module => {
-    data += module.genData(el) || ''
-  })
+  for (let i = 0; i < platformModules.length; i++) {
+    data += platformModules[i].genData(el)
+  }
   // v-show, used to avoid transition being applied
   // since v-show takes it over
   if (el.attrsMap['v-show']) {
