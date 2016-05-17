@@ -1,7 +1,6 @@
 /* @flow */
 
 import config from '../config'
-import { init } from '../instance/init'
 import { warn, mergeOptions } from '../util/index'
 
 export function initExtend (Vue: GlobalAPI) {
@@ -34,7 +33,7 @@ export function initExtend (Vue: GlobalAPI) {
       }
     }
     const Sub = function VueComponent (options) {
-      init(this, options)
+      this._init(options)
     }
     Sub.prototype = Object.create(Super.prototype)
     Sub.prototype.constructor = Sub
