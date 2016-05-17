@@ -3,6 +3,7 @@ declare type CompilerOptions = {
   expectHTML?: boolean,
   preserveWhitespace?: boolean,
   modules?: Array<ModuleOptions>,
+  staticKeys?: string,
   directives?: { [key: string]: Function },
   isUnaryTag?: (tag: string) => ?boolean,
   isReservedTag?: (tag: string) => ?boolean,

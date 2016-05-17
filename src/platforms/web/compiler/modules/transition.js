@@ -1,8 +1,10 @@
+/* @flow */
+
 import {
   getBindingAttr
 } from 'compiler/helpers'
 
-function parse (el, options) {
+function parse (el: ASTElement) {
   let transition = getBindingAttr(el, 'transition')
   if (transition === '""') {
     transition = true
@@ -13,15 +15,13 @@ function parse (el, options) {
   }
 }
 
-function genData (el) {
-  if (el.transition) {
-    return `transition:{definition:(${el.transition}),appear:${el.transitionOnAppear}},`
-  }
-  return ''
+function genData (el: ASTElement): string {
+  return el.transition
+    ? `transition:{definition:(${el.transition}),appear:${el.transitionOnAppear}},`
+    : ''
 }
 
 export default {
-  staticKeys: [],
   parse,
   genData
 }

@@ -56,14 +56,7 @@ export function compileToFunctions (
 }
 
 function genStaticKeys (modules: Array<ModuleOptions>): string {
-  let keys = []
-  if (modules) {
-    modules.forEach(module => {
-      const staticKeys = module.staticKeys
-      if (staticKeys && staticKeys.length) {
-        keys = keys.concat(staticKeys)
-      }
-    })
-  }
-  return keys.join(',')
+  return modules.reduce((keys, m) => {
+    return keys.concat(m.staticKeys || [])
+  }, []).join(',')
 }
