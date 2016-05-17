@@ -2,12 +2,19 @@ declare type CompilerOptions = {
   warn?: Function,
   expectHTML?: boolean,
   preserveWhitespace?: boolean,
+  modules?: Array<ModuleOptions>,
   directives?: { [key: string]: Function },
   isUnaryTag?: (tag: string) => ?boolean,
   isReservedTag?: (tag: string) => ?boolean,
   mustUseProp?: (attr: string) => ?boolean,
   getTagNamespace?: (tag: string) => ?string,
   delimiters?: [string, string]
+}
+
+declare type ModuleOptions = {
+  staticKeys?: Array<string>,
+  parse: Function,
+  genData: Function
 }
 
 declare type ASTElementHandler = {

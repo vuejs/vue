@@ -1,8 +1,11 @@
 /* @flow */
 
-import { makeMap, isBuiltInTag } from 'shared/util'
+import { makeMap, isBuiltInTag, cached } from 'shared/util'
 
+let isStaticKey
 let isPlatformReservedTag
+
+const genStaticKeysCached = cached(genStaticKeys)
 
 /**
  * Goal of the optimizier: walk the generated template AST tree
@@ -17,11 +20,19 @@ let isPlatformReservedTag
  */
 export function optimize (root: ?ASTElement, options: CompilerOptions) {
   if (!root) return
+  isStaticKey = genStaticKeysCached(options.staticKeys || '')
   isPlatformReservedTag = options.isReservedTag || (() => false)
   // first pass: mark all non-static nodes.
   markStatic(root)
   // second pass: mark static roots.
   markStaticRoots(root)
+}
+
+function genStaticKeys (keys: string): Function {
+  return makeMap(
+    'type,tag,attrsList,attrsMap,plain,parent,children,staticAttrs' +
+    (keys ? ',' + keys : '')
+  )
 }
 
 function markStatic (node: ASTNode) {
@@ -48,11 +59,6 @@ function markStaticRoots (node: ASTNode) {
     }
   }
 }
-
-const isStaticKey = makeMap(
-  'type,tag,attrsList,attrsMap,plain,parent,children,' +
-  'staticAttrs,staticClass'
-)
 
 function isStatic (node: ASTNode): boolean {
   if (node.type === 2) { // expression

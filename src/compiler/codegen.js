@@ -12,6 +12,7 @@ const baseDirectives = {
 
 // configurable state
 let warn
+let platformModules
 let platformDirectives
 let isPlatformReservedTag
 let staticRenderFns
@@ -29,6 +30,7 @@ export function generate (
   const currentStaticRenderFns: Array<string> = staticRenderFns = []
   currentOptions = options
   warn = options.warn || baseWarn
+  platformModules = options.modules || []
   platformDirectives = options.directives || {}
   isPlatformReservedTag = options.isReservedTag || (() => false)
   const code = ast ? genElement(ast) : '__r__(__s__("div"))'
@@ -117,21 +119,10 @@ function genData (el: ASTElement): string {
   if (el.slotTarget) {
     data += `slot:${el.slotTarget},`
   }
-  // class
-  if (el.staticClass) {
-    data += `staticClass:${el.staticClass},`
-  }
-  if (el.classBinding) {
-    data += `class:${el.classBinding},`
-  }
-  // style
-  if (el.styleBinding) {
-    data += `style:${el.styleBinding},`
-  }
-  // transition
-  if (el.transition) {
-    data += `transition:{definition:(${el.transition}),appear:${el.transitionOnAppear}},`
-  }
+  // platform modules
+  platformModules.forEach(module => {
+    data += module.genData(el) || ''
+  })
   // v-show, used to avoid transition being applied
   // since v-show takes it over
   if (el.attrsMap['v-show']) {

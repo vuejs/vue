@@ -2,6 +2,7 @@
 
 import { extend } from 'shared/util'
 import { compile as baseCompile } from 'compiler/index'
+import modules from 'web/compiler/modules/index'
 import directives from 'web/compiler/directives/index'
 import { isReservedTag, isUnaryTag, mustUseProp, getTagNamespace } from 'web/util/index'
 
@@ -16,6 +17,8 @@ const cache2: { [key: string]: CompiledFunctions } = Object.create(null)
 const baseOptions: CompilerOptions = {
   expectHTML: true,
   preserveWhitespace: true,
+  modules,
+  staticKeys: genStaticKeys(modules),
   directives,
   isReservedTag,
   isUnaryTag,
@@ -50,4 +53,17 @@ export function compileToFunctions (
     res.staticRenderFns[i] = new Function(compiled.staticRenderFns[i])
   }
   return (cache[template] = res)
+}
+
+function genStaticKeys (modules: Array<ModuleOptions>): string {
+  let keys = []
+  if (modules) {
+    modules.forEach(module => {
+      const staticKeys = module.staticKeys
+      if (staticKeys && staticKeys.length) {
+        keys = keys.concat(staticKeys)
+      }
+    })
+  }
+  return keys.join(',')
 }
