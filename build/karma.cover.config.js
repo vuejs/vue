@@ -13,9 +13,9 @@ module.exports = function (config) {
     singleRun: true
   })
 
-  // add babel-plugin-__coverage__ for code intrumentation
+  // add babel-plugin-coverage for code intrumentation
   options.webpack.babel = {
-    plugins: [['__coverage__', {
+    plugins: [['coverage', {
       ignore: [
         'test/',
         'src/compiler/parser/html-parser.js',
