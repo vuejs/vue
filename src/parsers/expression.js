@@ -29,6 +29,8 @@ const pathTestRE = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\]|\
 const identRE = /[^\w$\.](?:[A-Za-z_$][\w$]*)/g
 const booleanLiteralRE = /^(?:true|false)$/
 
+function noop () {}
+
 /**
  * Save / Rewrite / Restore
  *
@@ -140,10 +142,23 @@ function makeGetterFn (body) {
     return new Function('scope', 'return ' + body + ';')
     /* eslint-enable no-new-func */
   } catch (e) {
-    process.env.NODE_ENV !== 'production' && warn(
-      'Invalid expression. ' +
-      'Generated function body: ' + body
-    )
+    if (process.env.NODE_ENV !== 'production') {
+      /* istanbul ignore if */
+      if (e.toString().match(/unsafe-eval/)) {
+        warn(
+          'It seems you are using the default build of Vue.js in an environment ' +
+          'with Content Security Policy that prohibits unsafe-eval. ' +
+          'Use the CSP-compliant build instead: ' +
+          'http://vuejs.org/guide/installation.html#CSP-compliant-build'
+        )
+      } else {
+        warn(
+          'Invalid expression. ' +
+          'Generated function body: ' + body
+        )
+      }
+    }
+    return noop
   }
 }
 
