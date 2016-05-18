@@ -1,10 +1,29 @@
 /* @flow */
 
 import { extend } from 'shared/util'
+import { warn } from 'core/util/debug'
 import { compile as baseCompile } from 'compiler/index'
 import modules from 'web/compiler/modules/index'
 import directives from 'web/compiler/directives/index'
 import { isReservedTag, isUnaryTag, mustUseProp, getTagNamespace } from 'web/util/index'
+
+// detect possible CSP restriction
+/* istanbul ignore if */
+if (process.env.NODE_ENV !== 'production') {
+  try {
+    new Function('return 1')
+  } catch (e) {
+    if (e.toString().match(/unsafe-eval|CSP/)) {
+      warn(
+        'It seems you are using the standalone build of Vue.js in an ' +
+        'environment with Content Security Policy that prohibits unsafe-eval. ' +
+        'The template compiler cannot work in this environment. Consider ' +
+        'relaxing the policy to allow unsafe-eval or pre-compiling your ' +
+        'templates into render functions.'
+      )
+    }
+  }
+}
 
 type CompiledFunctions = {
   render: Function,
