@@ -4,7 +4,7 @@
     <meta http-equiv=Content-Type content="text/html;charset=UTF-8">
     <title>Vue.js commits server-side rendering example</title>
     <style>
-      #demo {
+      body {
         font-family: 'Helvetica', Arial, sans-serif;
       }
       a {
@@ -19,10 +19,10 @@
         font-weight: bold;
       }
     </style>
-    <script src="vue.js"></script>
   </head>
   <body>
-    {{ body }}
+    <div id="app">{{ app }}</div>
+    <script>window.__INITIAL_STATE__ = {{ initialState }};</script>
     <script src="app.js"></script>
   </body>
 </html>
