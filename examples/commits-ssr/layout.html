@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv=Content-Type content="text/html;charset=UTF-8">
+    <title>Vue.js commits server-side rendering example</title>
+    <style>
+      body {
+        font-family: 'Helvetica', Arial, sans-serif;
+      }
+      a {
+        text-decoration: none;
+        color: #f66;
+      }
+      .commit {
+        line-height: 1.5em;
+        margin-bottom: 20px;
+      }
+      .author, .date {
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      {{ app }}
+    </div>
+    <script>window.__INITIAL_STATE__ = {{ initialState }};</script>
+    <script src="app.js"></script>
+  </body>
+</html>
