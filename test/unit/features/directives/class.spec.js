@@ -5,7 +5,7 @@ function assertClass (assertions, done) {
     template: '<div class="foo" :class="value"></div>',
     data: { value: '' }
   }).$mount()
-  var chain = waitForUpdate().catch(done)
+  var chain = waitForUpdate()
   assertions.forEach(([value, expected], i) => {
     chain.then(() => {
       if (typeof value === 'function') {
@@ -20,6 +20,7 @@ function assertClass (assertions, done) {
       }
     })
   })
+  chain.then(done)
 }
 
 describe('Directive v-bind:class', () => {
@@ -89,7 +90,6 @@ describe('Directive v-bind:class', () => {
       child.value = ['bar', 'baz']
     }).then(() => {
       expect(vm.$el.className).toBe('c a bar baz foo')
-      done()
-    }).catch(done)
+    }).then(done)
   })
 })

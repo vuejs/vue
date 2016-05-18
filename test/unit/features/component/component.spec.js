@@ -109,9 +109,7 @@ describe('Component', () => {
     .then(() => {
       expect(vm.$el.nodeType).toBe(3)
       expect(vm.$el.data).toBe('')
-      done()
-    })
-    .catch(done)
+    }).then(done)
   })
 
   it(':is using raw component constructor', () => {
@@ -157,8 +155,7 @@ describe('Component', () => {
     vm.comps[1].type = 'one'
     waitForUpdate(() => {
       expect(vm.$el.innerHTML).toBe('<span>one</span><span>one</span>')
-      done()
-    }).catch(done)
+    }).then(done)
   })
 
   it('should compile parent template directives & content in parent scope', done => {
@@ -186,8 +183,7 @@ describe('Component', () => {
     waitForUpdate(() => {
       expect(vm.$el.style.display).toBe('')
       expect(vm.$el.textContent).toBe('bye world')
-      done()
-    }).catch(done)
+    }).then(done)
   })
 
   it('parent content + v-if', done => {
@@ -214,9 +210,7 @@ describe('Component', () => {
     waitForUpdate(() => {
       expect(vm.$children.length).toBe(1)
       expect(vm.$el.textContent).toBe('hello world')
-      done()
-    })
-    .catch(done)
+    }).then(done)
   })
 
   it('props', () => {

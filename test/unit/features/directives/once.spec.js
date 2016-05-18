@@ -10,8 +10,7 @@ describe('Directive v-once', () => {
     vm.a = 'world'
     waitForUpdate(() => {
       expect(vm.$el.innerHTML).toBe('hello')
-      done()
-    }).catch(done)
+    }).then(done)
   })
 
   it('should not rerender self and child component', done => {
@@ -35,8 +34,7 @@ describe('Directive v-once', () => {
     waitForUpdate(() => {
       expect(vm.$el.innerHTML)
         .toBe('<span>hello</span><div>hello</div>')
-      done()
-    }).catch(done)
+    }).then(done)
   })
 
   it('should rerender parent but not self', done => {
@@ -60,8 +58,7 @@ describe('Directive v-once', () => {
     waitForUpdate(() => {
       expect(vm.$el.innerHTML)
         .toBe('<span>world</span><div>hello</div>')
-      done()
-    }).catch(done)
+    }).then(done)
   })
 
   it('should not rerender static sub nodes', done => {
@@ -92,7 +89,6 @@ describe('Directive v-once', () => {
     }).then(() => {
       expect(vm.$el.innerHTML)
         .toBe('<span>hello</span><div>world</div><span>!</span>')
-      done()
-    }).catch(done)
+    }).then(done)
   })
 })

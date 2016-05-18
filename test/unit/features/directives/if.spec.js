@@ -47,9 +47,7 @@ describe('Directive v-if', () => {
       vm.foo = 1
     }).then(() => {
       expect(vm.$el.innerHTML).toBe('<span>hello</span>')
-      done()
-    })
-    .catch(done)
+    }).then(done)
   })
 
   it('should work well with v-else', done => {
@@ -87,8 +85,7 @@ describe('Directive v-if', () => {
       vm.foo = 1
     }).then(() => {
       expect(vm.$el.innerHTML).toBe('<span>hello</span>')
-      done()
-    }).catch(done)
+    }).then(done)
   })
 
   it('should work well with v-for', done => {
@@ -116,8 +113,7 @@ describe('Directive v-if', () => {
       vm.list.splice(1, 2)
     }).then(() => {
       expect(vm.$el.innerHTML).toBe('<span>1</span>')
-      done()
-    }).catch(done)
+    }).then(done)
   })
 
   it('should work well with v-for and v-else', done => {
@@ -146,7 +142,6 @@ describe('Directive v-if', () => {
       vm.list.splice(1, 2)
     }).then(() => {
       expect(vm.$el.innerHTML).toBe('<span>bye</span><span>hello</span>')
-      done()
-    }).catch(done)
+    }).then(done)
   })
 })

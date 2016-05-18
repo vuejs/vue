@@ -13,8 +13,7 @@ describe('Scheduler', () => {
     })
     waitForUpdate(() => {
       expect(spy.calls.count()).toBe(1)
-      done()
-    }).catch(done)
+    }).then(done)
   })
 
   it('dedup', done => {
@@ -28,8 +27,7 @@ describe('Scheduler', () => {
     })
     waitForUpdate(() => {
       expect(spy.calls.count()).toBe(1)
-      done()
-    }).catch(done)
+    }).then(done)
   })
 
   it('allow diplicate when flushing', done => {
@@ -44,8 +42,7 @@ describe('Scheduler', () => {
     })
     waitForUpdate(() => {
       expect(spy.calls.count()).toBe(2)
-      done()
-    }).catch(done)
+    }).then(done)
   })
 
   it('calls user watchers after directive updates', done => {
@@ -73,8 +70,7 @@ describe('Scheduler', () => {
       expect(vals[0]).toBe(1)
       expect(vals[1]).toBe(2)
       expect(vals[2]).toBe(3)
-      done()
-    }).catch(done)
+    }).then(done)
   })
 
   it('warn against infinite update loops', function (done) {
@@ -90,8 +86,7 @@ describe('Scheduler', () => {
     waitForUpdate(() => {
       expect(count).toBe(config._maxUpdateCount + 1)
       expect('infinite update loop').toHaveBeenWarned()
-      done()
-    }).catch(done)
+    }).then(done)
   })
 
   it('should call newly pushed watcher after current watcher is done', done => {
@@ -112,7 +107,6 @@ describe('Scheduler', () => {
     })
     waitForUpdate(() => {
       expect(callOrder.join()).toBe('1,2,3')
-      done()
-    }).catch(done)
+    }).then(done)
   })
 })

@@ -25,8 +25,7 @@ describe('Directive v-for', () => {
       vm.list = ['x', 'y']
     }).then(() => {
       expect(vm.$el.innerHTML).toBe('<span>0-x</span><span>1-y</span>')
-      done()
-    }).catch(done)
+    }).then(done)
   })
 
   it('should render array of object values', done => {
@@ -60,8 +59,7 @@ describe('Directive v-for', () => {
       vm.list = [{ value: 'x' }, { value: 'y' }]
     }).then(() => {
       expect(vm.$el.innerHTML).toBe('<span>0-x</span><span>1-y</span>')
-      done()
-    }).catch(done)
+    }).then(done)
   })
 
   it('should render an Object', done => {
@@ -85,8 +83,7 @@ describe('Directive v-for', () => {
       Vue.delete(vm.obj, 'a')
     }).then(() => {
       expect(vm.$el.innerHTML).toBe('<span>1-b</span><span>2-c</span><span>4-d</span>')
-      done()
-    }).catch(done)
+    }).then(done)
   })
 
   it('should render each key of data', done => {
@@ -102,8 +99,7 @@ describe('Directive v-for', () => {
     vm.a = 3
     waitForUpdate(() => {
       expect(vm.$el.innerHTML).toBe('<span>3-a</span><span>1-b</span><span>2-c</span>')
-      done()
-    }).catch(done)
+    }).then(done)
   })
 
   describe('alternative syntax', () => {
@@ -131,8 +127,7 @@ describe('Directive v-for', () => {
         vm.list = ['x', 'y']
       }).then(() => {
         expect(vm.$el.innerHTML).toBe('<span>0-x</span><span>1-y</span>')
-        done()
-      }).catch(done)
+      }).then(done)
     })
 
     it('should render array of object values', done => {
@@ -166,8 +161,7 @@ describe('Directive v-for', () => {
         vm.list = [{ value: 'x' }, { value: 'y' }]
       }).then(() => {
         expect(vm.$el.innerHTML).toBe('<span>0-x</span><span>1-y</span>')
-        done()
-      }).catch(done)
+      }).then(done)
     })
 
     it('should render an Object', done => {
@@ -191,8 +185,7 @@ describe('Directive v-for', () => {
         Vue.delete(vm.obj, 'a')
       }).then(() => {
         expect(vm.$el.innerHTML).toBe('<span>1-b</span><span>2-c</span><span>4-d</span>')
-        done()
-      }).catch(done)
+      }).then(done)
     })
 
     it('should render each key of data', done => {
@@ -208,8 +201,7 @@ describe('Directive v-for', () => {
       vm.a = 3
       waitForUpdate(() => {
         expect(vm.$el.innerHTML).toBe('<span>3-a</span><span>1-b</span><span>2-c</span>')
-        done()
-      }).catch(done)
+      }).then(done)
     })
   })
 
@@ -258,8 +250,7 @@ describe('Directive v-for', () => {
       expect(vm.$el.textContent).toBe('cba')
       // assert reusing DOM element in place
       expect(vm.$el.children[0]).toBe(first)
-      done()
-    })
+    }).then(done)
   })
 
   it('with track-by', done => {
@@ -281,8 +272,7 @@ describe('Directive v-for', () => {
       // assert moving DOM element
       expect(vm.$el.children[0]).not.toBe(first)
       expect(vm.$el.children[2]).toBe(first)
-      done()
-    })
+    }).then(done)
   })
 
   it('nested loops', () => {
@@ -331,8 +321,7 @@ describe('Directive v-for', () => {
     }).then(() => {
       assertMarkup()
       vm.list.splice(1, 0, { a: 2 })
-      done()
-    }).catch(done)
+    }).then(done)
 
     function assertMarkup () {
       var markup = vm.list.map(function (item) {
@@ -372,8 +361,7 @@ describe('Directive v-for', () => {
     }).then(() => {
       assertMarkup()
       vm.list.splice(1, 0, { a: 2 })
-      done()
-    }).catch(done)
+    }).then(done)
 
     function assertMarkup () {
       var markup = vm.list.map(function (item) {
@@ -408,7 +396,6 @@ describe('Directive v-for', () => {
     vm.list.reverse()
     waitForUpdate(() => {
       expect(vm.$el.innerHTML).toContain('<div>Two!</div><p>One!</p>')
-      done()
-    }).catch(done)
+    }).then(done)
   })
 })

@@ -48,7 +48,6 @@ describe('Directive v-text', () => {
       vm.a = undefined
     }).then(() => {
       expect(vm.$el.innerHTML).toBe('')
-      done()
-    }).catch(done)
+    }).then(done)
   })
 })

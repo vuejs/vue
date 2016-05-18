@@ -297,8 +297,7 @@ describe('Observer', () => {
       expect(vm.$el.outerHTML).toBe('<div>2</div>')
       Vue.set(vm, 'b', 123)
       expect('Do not add reactive properties to a Vue instance').toHaveBeenWarned()
-      done()
-    }).catch(done)
+    }).then(done)
   })
 
   it('observing array mutation', () => {

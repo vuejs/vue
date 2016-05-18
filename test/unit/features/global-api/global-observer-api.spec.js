@@ -11,8 +11,7 @@ describe('Global Data Observer API', () => {
       Vue.set(vm, 'x', 2)
       waitForUpdate(() => {
         expect(vm.$el.innerHTML).toBe('2')
-        done()
-      }).catch(done)
+      }).then(done)
     })
 
     it('should update a observing object', done => {
@@ -24,8 +23,7 @@ describe('Global Data Observer API', () => {
       Vue.set(vm.foo, 'x', 2)
       waitForUpdate(() => {
         expect(vm.$el.innerHTML).toBe('2')
-        done()
-      }).catch(done)
+      }).then(done)
     })
 
     it('should update a observing array', done => {
@@ -37,8 +35,7 @@ describe('Global Data Observer API', () => {
       Vue.set(vm.list, 1, 'd')
       waitForUpdate(() => {
         expect(vm.$el.innerHTML).toBe('<div>0-a</div><div>1-d</div><div>2-c</div>')
-        done()
-      }).catch(done)
+      }).then(done)
     })
 
     it('should update a vue object with nothing', done => {
@@ -53,8 +50,7 @@ describe('Global Data Observer API', () => {
         Vue.set(vm, 'x')
       }).then(() => {
         expect(vm.$el.innerHTML).toBe('')
-        done()
-      }).catch(done)
+      }).then(done)
     })
   })
 
@@ -74,8 +70,7 @@ describe('Global Data Observer API', () => {
         vm.obj.x = 3
       }).then(() => {
         expect(vm.$el.innerHTML).toBe('')
-        done()
-      }).catch(done)
+      }).then(done)
     })
   })
 })

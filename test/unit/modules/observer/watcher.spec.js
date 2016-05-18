@@ -30,8 +30,7 @@ describe('Watcher', () => {
     }).then(() => {
       expect(watcher.value).toBe(4)
       expect(spy).toHaveBeenCalledWith(4, 3)
-      done()
-    }).catch(done)
+    }).then(done)
   })
 
   it('non-existent path, set later', done => {
@@ -47,8 +46,7 @@ describe('Watcher', () => {
       expect(watcher2.value).toBeUndefined()
       expect(spy.calls.count()).toBe(1)
       expect(spy).toHaveBeenCalledWith(123, undefined)
-      done()
-    }).catch(done)
+    }).then(done)
   })
 
   it('delete', done => {
@@ -58,8 +56,7 @@ describe('Watcher', () => {
     waitForUpdate(() => {
       expect(watcher.value).toBeUndefined()
       expect(spy).toHaveBeenCalledWith(undefined, 2)
-      done()
-    }).catch(done)
+    }).then(done)
   })
 
   it('swapping $data', done => {
@@ -76,8 +73,7 @@ describe('Watcher', () => {
       expect(watcher2.value).toBeUndefined()
       expect(spy).not.toHaveBeenCalledWith(3, 2)
       expect(spy2).not.toHaveBeenCalledWith(4, undefined)
-      done()
-    }).catch(done)
+    }).then(done)
   })
 
   it('path containing $data', done => {
@@ -91,8 +87,7 @@ describe('Watcher', () => {
     }).then(() => {
       expect(watcher.value).toBeUndefined()
       expect(spy).not.toHaveBeenCalledWith(4, 3)
-      done()
-    }).catch(done)
+    }).then(done)
   })
 
   it('not watching $data', done => {
@@ -104,8 +99,7 @@ describe('Watcher', () => {
     waitForUpdate(() => {
       expect(spy).not.toHaveBeenCalledWith(newData, oldData)
       expect(watcher.value).toBeUndefined()
-      done()
-    }).catch(done)
+    }).then(done)
   })
 
   it('deep watch', done => {
@@ -125,8 +119,7 @@ describe('Watcher', () => {
     }).then(() => {
       expect(spy).toHaveBeenCalledWith(vm.b, vm.b)
       expect(spy.calls.count()).toBe(3)
-      done()
-    }).catch(done)
+    }).then(done)
   })
 
   it('deep watch with circular references', done => {
@@ -141,8 +134,7 @@ describe('Watcher', () => {
     }).then(() => {
       expect(spy).toHaveBeenCalledWith(vm.b, vm.b)
       expect(spy.calls.count()).toBe(2)
-      done()
-    }).catch(done)
+    }).then(done)
   })
 
   it('fire change for prop addition/deletion in non-deep mode', done => {
@@ -154,8 +146,7 @@ describe('Watcher', () => {
       Vue.delete(vm.b, 'e')
     }).then(() => {
       expect(spy.calls.count()).toBe(2)
-      done()
-    }).catch(done)
+    }).then(done)
   })
 
   it('watch function', done => {
@@ -169,8 +160,7 @@ describe('Watcher', () => {
       vm.b = { d: 2 }
     }).then(() => {
       expect(spy).toHaveBeenCalledWith(4, 6)
-      done()
-    }).catch(done)
+    }).then(done)
   })
 
   it('lazy mode', done => {
@@ -190,8 +180,7 @@ describe('Watcher', () => {
       watcher.evaluate()
       expect(watcher.value).toBe(6)
       expect(watcher.dirty).toBe(false)
-      done()
-    }).catch(done)
+    }).then(done)
   })
 
   it('teardown', done => {
@@ -201,8 +190,7 @@ describe('Watcher', () => {
     waitForUpdate(() => {
       expect(watcher.active).toBe(false)
       expect(spy).not.toHaveBeenCalled()
-      done()
-    }).catch(done)
+    }).then(done)
   })
 
   it('warn not support path', () => {
