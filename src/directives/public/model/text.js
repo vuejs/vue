@@ -119,7 +119,7 @@ export default {
     // set initial value if present
     if (
       el.hasAttribute('value') ||
-      (el.tagName === 'TEXTAREA' && el.value.trim())
+      (el.tagName.toUpperCase() === 'TEXTAREA' && el.value.trim())
     ) {
       this.afterBind = this.listener
     }

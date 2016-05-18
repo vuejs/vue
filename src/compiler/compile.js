@@ -60,7 +60,7 @@ export function compile (el, options, partial) {
   // link function for the childNodes
   var childLinkFn =
     !(nodeLinkFn && nodeLinkFn.terminal) &&
-    el.tagName !== 'SCRIPT' &&
+    el.tagName.toUpperCase() !== 'SCRIPT' &&
     el.hasChildNodes()
       ? compileNodeList(el.childNodes, options)
       : null
@@ -279,7 +279,7 @@ export function compileRoot (el, options, contextOptions) {
 
 function compileNode (node, options) {
   var type = node.nodeType
-  if (type === 1 && node.tagName !== 'SCRIPT') {
+  if (type === 1 && node.tagName.toUpperCase() !== 'SCRIPT') {
     return compileElement(node, options)
   } else if (type === 3 && node.data.trim()) {
     return compileTextNode(node, options)
@@ -300,7 +300,7 @@ function compileElement (el, options) {
   // preprocess textareas.
   // textarea treats its text content as the initial value.
   // just bind it as an attr directive for value.
-  if (el.tagName === 'TEXTAREA') {
+  if (el.tagName.toUpperCase() === 'TEXTAREA') {
     var tokens = parseText(el.value)
     if (tokens) {
       el.setAttribute(':value', tokensToExp(tokens))
@@ -467,7 +467,7 @@ function compileNodeList (nodeList, options) {
     nodeLinkFn = compileNode(node, options)
     childLinkFn =
       !(nodeLinkFn && nodeLinkFn.terminal) &&
-      node.tagName !== 'SCRIPT' &&
+      node.tagName.toUpperCase() !== 'SCRIPT' &&
       node.hasChildNodes()
         ? compileNodeList(node.childNodes, options)
         : null
