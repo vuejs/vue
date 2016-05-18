@@ -144,7 +144,7 @@ function makeGetterFn (body) {
   } catch (e) {
     if (process.env.NODE_ENV !== 'production') {
       /* istanbul ignore if */
-      if (e.toString().match(/unsafe-eval/)) {
+      if (e.toString().match(/unsafe-eval|CSP/)) {
         warn(
           'It seems you are using the default build of Vue.js in an environment ' +
           'with Content Security Policy that prohibits unsafe-eval. ' +
