@@ -68,9 +68,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _commits2 = _interopRequireDefault(_commits);
 
+	var _commit = __webpack_require__(6);
+
+	var _commit2 = _interopRequireDefault(_commit);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	_vue2.default.component('commits', _commits2.default.options);
+	_vue2.default.component('commit', _commit2.default.options);
 
 	new _vue2.default(Object.assign(_app2.default, {
 	  el: '#app',
@@ -5439,7 +5444,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  value: true
 	});
 	exports.default = {
-	  template: "\n    <commits\n      :current-branch=\"currentBranch\"\n      :branches=\"branches\"\n      :apiUrl=\"apiUrl\"\n      :commits=\"commits\">\n    </commits>"
+	  template: "\n    <div>\n      <h1>Latest Vue.js Commits</h1>\n      <template v-for=\"branch in branches\">\n        <input type=\"radio\"\n          :id=\"branch\"\n          :value=\"branch\"\n          name=\"branch\"\n          v-model=\"currentBranch\">\n        <label :for=\"branch\">{{ branch }}</label>\n      </template>\n      <p>vuejs/vue@{{ currentBranch }}</p>\n      <div v-if=\"errorMessage\">{{ errorMessage }}</div>\n      <commits\n        :current-branch=\"currentBranch\"\n        :apiUrl=\"apiUrl\"\n        :commits=\"commits\">\n      </commits>\n    </div>"
 	};
 
 /***/ },
@@ -5459,22 +5464,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	exports.default = _vueCommon2.default.extend({
-	  props: ['currentBranch', 'branches', 'apiUrl', 'commits'],
+	  props: ['currentBranch', 'apiUrl', 'commits'],
 
-	  template: '\n    <div>\n      <h1>Latest Vue.js Commits</h1>\n      <template v-for="branch in branches">\n        <input type="radio"\n          :id="branch"\n          :value="branch"\n          name="branch"\n          v-model="currentBranch">\n        <label :for="branch">{{ branch }}</label>\n      </template>\n      <p>vuejs/vue@{{ currentBranch }}</p>\n      <ul>\n        <li v-for="record in commits">\n          <a :href="record.html_url" target="_blank" class="commit">{{ record.sha.slice(0, 7) }}</a>\n          - <span class="message">{{ record.commit.message | truncate }}</span><br>\n          by <span class="author"><a :href="record.author.html_url" target="_blank">{{ record.commit.author.name }}</a></span>\n          at <span class="date">{{ record.commit.author.date | formatDate }}</span>\n        </li>\n      </ul>\n    </div>\n  ',
+	  template: '\n    <ul>\n      <commit v-for="commit in commits" :commit="commit"></commit>\n    </ul>\n  ',
 
 	  watch: {
 	    currentBranch: 'fetchData'
-	  },
-
-	  filters: {
-	    truncate: function truncate(v) {
-	      var newline = v.indexOf('\n');
-	      return newline > 0 ? v.slice(0, newline) : v;
-	    },
-	    formatDate: function formatDate(v) {
-	      return v.replace(/T|Z/g, ' ');
-	    }
 	  },
 
 	  methods: {
@@ -5485,7 +5480,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      xhr.open('GET', '' + this.apiUrl + this.currentBranch);
 	      window.history.pushState(null, null, '/' + this.currentBranch);
 	      xhr.onload = function () {
-	        return _this.commits = JSON.parse(xhr.responseText);
+	        var response = JSON.parse(xhr.responseText);
+	        var errorMessage = response.message;
+	        var commits = errorMessage ? [] : response;
+	        _this.commits = commits;
+	        _this.errorMessage = errorMessage;
 	      };
 	      xhr.send();
 	    }
@@ -9451,6 +9450,38 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 	process.umask = function() { return 0; };
 
+
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _vueCommon = __webpack_require__(4);
+
+	var _vueCommon2 = _interopRequireDefault(_vueCommon);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	exports.default = _vueCommon2.default.extend({
+	  props: ['commit'],
+
+	  template: '\n    <li class="commit">\n      <a :href="commit.html_url" target="_blank" class="commit">{{ commit.sha.slice(0, 7) }}</a>\n      - <span class="message">{{ commit.commit.message | truncate }}</span><br>\n      by <span class="author"><a :href="commit.author.html_url" target="_blank">{{ commit.commit.author.name }}</a></span>\n      at <span class="date">{{ commit.commit.author.date | formatDate }}</span>\n    </li>\n  ',
+
+	  filters: {
+	    truncate: function truncate(v) {
+	      var newline = v.indexOf('\n');
+	      return newline > 0 ? v.slice(0, newline) : v;
+	    },
+	    formatDate: function formatDate(v) {
+	      return v.replace(/T|Z/g, ' ');
+	    }
+	  }
+	});
 
 /***/ }
 /******/ ])

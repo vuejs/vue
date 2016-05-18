@@ -11,7 +11,7 @@
         text-decoration: none;
         color: #f66;
       }
-      li {
+      .commit {
         line-height: 1.5em;
         margin-bottom: 20px;
       }
@@ -21,7 +21,9 @@
     </style>
   </head>
   <body>
-    <div id="app">{{ app }}</div>
+    <div id="app">
+      {{ app }}
+    </div>
     <script>window.__INITIAL_STATE__ = {{ initialState }};</script>
     <script src="app.js"></script>
   </body>

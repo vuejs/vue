@@ -25,8 +25,10 @@ import https from 'https';
 // import and register component
 import AppOptions from './common/app';
 import Commits from './common/commits';
+import Commit from './common/commit';
 
 const commits = Vue.component('commits', compileTemplateWithOptions(Commits.options));
+const commit = Vue.component('commit', compileTemplateWithOptions(Commit.options));
 
 const apiUrl = 'https://api.github.com/repos/vuejs/vue/commits?per_page=3&sha=';
 const branches = ['master', 'dev', 'next'];
@@ -64,12 +66,16 @@ const handleRequest = (req, res) => {
         requestedBranch :
         branches[0];
 
-      loadCommits(branch, (commits) => {
+      loadCommits(branch, (response) => {
+        // handle api errors
+        const errorMessage = response.message;
+        const commits = errorMessage ? [] : response;
         const data = {
+          apiUrl: apiUrl,
           branches: branches,
           currentBranch: branch,
           commits: commits,
-          apiUrl: apiUrl
+          errorMessage: errorMessage
         };
         Object.assign(AppOptions, { data: data });
         renderVmWithOptions(AppOptions, (err, result) => {
