@@ -7,6 +7,7 @@ import {
   remove,
   isObject,
   parsePath,
+  nextTick,
   _Set as Set
 } from '../util/index'
 
@@ -81,7 +82,28 @@ export default class Watcher {
    */
   get () {
     this.beforeGet()
-    const value = this.getter.call(this.vm, this.vm)
+    let value: any
+    try {
+      value = this.getter.call(this.vm, this.vm)
+    } catch (e) {
+      if (process.env.NODE_ENV !== 'production') {
+        if (this.user) {
+          warn(
+            'Error when evaluating watcher with getter: ' + this.expression,
+            this.vm
+          )
+        } else {
+          warn(
+            'Error during component render',
+            this.vm
+          )
+        }
+        // throw the error on next tick so that it doesn't break the whole app
+        nextTick(() => { throw e })
+      }
+      // return old value when evaluation fails so the current UI is preserved
+      value = this.value
+    }
     // "touch" every property so they are all tracked as
     // dependencies for deep watching
     if (this.deep) {
