@@ -73,15 +73,26 @@ rollup.rollup({
   .then(function (bundle) {
     var code = bundle.generate({
       format: 'umd',
-      moduleName: 'Vue'
+      moduleName: 'Vue',
+      banner: banner
     }).code
-    var minified = banner + '\n' + uglify.minify(code, {
+    var res = uglify.minify(code, {
       fromString: true,
+      outSourceMap: 'vue.min.js.map',
       output: {
+        preamble: banner,
         ascii_only: true
       }
-    }).code
-    return write('dist/vue.min.js', minified)
+    })
+    // fix uglifyjs sourcemap
+    var map = JSON.parse(res.map)
+    map.sources = ['vue.js']
+    map.sourcesContent = [code]
+    map.file = 'vue.min.js'
+    return [
+      write('dist/vue.min.js', res.code),
+      write('dist/vue.min.js.map', JSON.stringify(map))
+    ]
   })
   .then(zip)
 })

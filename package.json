@@ -13,6 +13,7 @@
   "files": [
     "dist/vue.js",
     "dist/vue.min.js",
+    "dist/vue.min.js.map",
     "dist/vue.common.js",
     "src"
   ],
