@@ -128,6 +128,7 @@ function buildEntry (opts) {
       var minified = (opts.banner ? banner + '\n' : '') + uglify.minify(code, {
         fromString: true,
         output: {
+          screw_ie8: true,
           ascii_only: true
         },
         compress: {
