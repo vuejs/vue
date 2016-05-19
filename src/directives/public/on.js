@@ -56,8 +56,9 @@ export default {
 
   bind () {
     // deal with iframes
+    var _tagName = (this.el.tagName !== undefined) ? this.el.tagName.toUpperCase() : ''
     if (
-      this.el.tagName === 'IFRAME' &&
+      _tagName === 'IFRAME' &&
       this.arg !== 'load'
     ) {
       var self = this

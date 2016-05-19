@@ -41,7 +41,7 @@ export default {
       )
     }
     var el = this.el
-    var tag = el.tagName
+    var tag = (el.tagName !== undefined) ? el.tagName.toUpperCase() : ''
     var handler
     if (tag === 'INPUT') {
       handler = handlers[el.type] || handlers.text
