@@ -423,6 +423,12 @@ describe('prop', function () {
       expect(getWarnCount()).toBe(0)
     })
 
+    it('warn if coerce is not a function', function () {
+      var coerce = 1
+      makeInstance('123', String, null, coerce)
+      expect(getWarnCount()).toBe(1)
+    })
+
     it('multiple types + custom validator', function () {
       makeInstance(123, [String, Boolean, Number], null, String)
       expect(getWarnCount()).toBe(0)

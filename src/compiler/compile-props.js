@@ -236,7 +236,7 @@ function processPropValue (vm, prop, rawValue, fn) {
   if (value === undefined) {
     value = getPropDefaultValue(vm, prop)
   }
-  value = coerceProp(prop, value)
+  value = coerceProp(prop, value, vm)
   const coerced = value !== rawValue
   if (!assertProp(prop, value, vm)) {
     value = undefined
@@ -374,13 +374,20 @@ function assertProp (prop, value, vm) {
  * @return {*}
  */
 
-function coerceProp (prop, value) {
+function coerceProp (prop, value, vm) {
   var coerce = prop.options.coerce
   if (!coerce) {
     return value
   }
-  // coerce is a function
-  return coerce(value)
+  if (typeof coerce === 'function') {
+    return coerce(value)
+  } else {
+    process.env.NODE_ENV !== 'production' && warn(
+      'Invalid coerce for prop "' + prop.name + '": expected function, got ' + typeof coerce + '.',
+      vm
+    )
+    return value
+  }
 }
 
 /**
