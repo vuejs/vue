@@ -58,7 +58,7 @@ export function compile (el, options, partial) {
     ? compileNode(el, options)
     : null
   // link function for the childNodes
-  var _tagName = (el.tagName !== undefined) ? el.tagName : '';
+  var _tagName = (el.tagName !== undefined) ? el.tagName : ''
   var childLinkFn =
     !(nodeLinkFn && nodeLinkFn.terminal) &&
     _tagName.toUpperCase() !== 'SCRIPT' &&
