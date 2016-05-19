@@ -170,3 +170,12 @@ export function toObject (arr: Array<any>): Object {
  * Perform no operation.
  */
 export function noop () {}
+
+/**
+ * Generate a static keys string from compiler modules.
+ */
+export function genStaticKeys (modules: Array<ModuleOptions>): string {
+  return modules.reduce((keys, m) => {
+    return keys.concat(m.staticKeys || [])
+  }, []).join(',')
+}

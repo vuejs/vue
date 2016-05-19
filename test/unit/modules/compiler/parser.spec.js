@@ -27,7 +27,7 @@ describe('parser', () => {
     const ast = parse('<h1>{{msg}}</h1>', baseOptions)
     expect(ast.tag).toBe('h1')
     expect(ast.plain).toBe(true)
-    expect(ast.children[0].expression).toBe('__toString__(msg)')
+    expect(ast.children[0].expression).toBe('_s(msg)')
   })
 
   it('child elements', () => {
@@ -298,7 +298,7 @@ describe('parser', () => {
 
   it('custom delimiter', () => {
     const ast = parse('<p>{msg}</p>', extend({ delimiters: ['{', '}'] }, baseOptions))
-    expect(ast.children[0].expression).toBe('__toString__(msg)')
+    expect(ast.children[0].expression).toBe('_s(msg)')
   })
 
   it('not specified getTagNamespace option', () => {

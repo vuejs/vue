@@ -1,6 +1,6 @@
 /* @flow */
 
-import { extend } from 'shared/util'
+import { extend, genStaticKeys } from 'shared/util'
 import { warn } from 'core/util/debug'
 import { compile as baseCompile } from 'compiler/index'
 import modules from 'web/compiler/modules/index'
@@ -33,7 +33,7 @@ type CompiledFunctions = {
 const cache1: { [key: string]: CompiledFunctions } = Object.create(null)
 const cache2: { [key: string]: CompiledFunctions } = Object.create(null)
 
-const baseOptions: CompilerOptions = {
+export const baseOptions: CompilerOptions = {
   expectHTML: true,
   preserveWhitespace: true,
   modules,
@@ -72,10 +72,4 @@ export function compileToFunctions (
     res.staticRenderFns[i] = new Function(compiled.staticRenderFns[i])
   }
   return (cache[template] = res)
-}
-
-function genStaticKeys (modules: Array<ModuleOptions>): string {
-  return modules.reduce((keys, m) => {
-    return keys.concat(m.staticKeys || [])
-  }, []).join(',')
 }

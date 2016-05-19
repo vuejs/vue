@@ -31,7 +31,7 @@ export function parseText (
     }
     // tag token
     const exp = parseFilters(match[1].trim())
-    tokens.push(`__toString__(${exp})`)
+    tokens.push(`_s(${exp})`)
     lastIndex = index + match[0].length
   }
   if (lastIndex < text.length) {

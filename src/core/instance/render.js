@@ -30,7 +30,7 @@ export function initRender (vm: Component) {
     children?: VNodeChildren,
     namespace?: string
   ) {
-    return this.__r__(this.__s__(tag, data, namespace), children)
+    return this._h(this._e(tag, data, namespace), children)
   }, vm)
   if (vm.$options.el) {
     vm.$mount(vm.$options.el)
@@ -66,22 +66,22 @@ export function renderMixin (Vue: Class<Component>) {
   }
 
   // shorthands used in render functions
-  Vue.prototype.__r__ = renderElementWithChildren
-  Vue.prototype.__s__ = renderElement
-  Vue.prototype.__t__ = renderText
-  Vue.prototype.__m__ = renderStatic
+  Vue.prototype._h = renderElementWithChildren
+  Vue.prototype._e = renderElement
+  Vue.prototype._t = renderText
+  Vue.prototype._m = renderStatic
 
   // toString for mustaches
-  Vue.prototype.__toString__ = renderString
+  Vue.prototype._s = renderString
 
   // filter resolution helper
   const identity = _ => _
-  Vue.prototype.__resolveFilter__ = function (id) {
+  Vue.prototype._f = function (id) {
     return resolveAsset(this.$options, 'filters', id, true) || identity
   }
 
   // render v-for
-  Vue.prototype.__renderList__ = function (
+  Vue.prototype._l = function (
     val: any,
     render: () => VNode
   ): ?Array<VNode> {
@@ -108,7 +108,7 @@ export function renderMixin (Vue: Class<Component>) {
   }
 
   // register ref
-  Vue.prototype.__registerRef__ = function (
+  Vue.prototype._r = function (
     key: string,
     ref: Vue | Element,
     vFor: boolean,

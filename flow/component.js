@@ -70,28 +70,36 @@ declare interface Component {
   // rendering
   _render: () => VNode;
   __patch__: (a: Element | VNode | void, b: VNode) => Element;
-  __r__: (
+  // renderElementWithChildren
+  _h: (
     vnode?: VNode,
     children?: VNodeChildren
   ) => VNode | void;
-  __s__: (
+  // renderElement
+  _e: (
     tag?: string | Component | Object,
     data?: Object,
     namespace?: string
   ) => VNode | void;
-  __t__: (
+  // renderText
+  _t: (
     str?: string
   ) => string;
-  __m__: (
+  // renderStaticTree
+  _m: (
     index?: number
   ) => Object | void;
-  __toString__: (value: any) => string;
-  __resolveFilter__: (id: string) => Function;
-  __renderList__: (
+  // toString
+  _s: (value: any) => string;
+  // resolveFilter
+  _f: (id: string) => Function;
+  // renderList
+  _l: (
     val: any,
     render: Function
   ) => ?Array<VNode>;
-  __registerRef__: (
+  // registerRef
+  _r: (
     key: string,
     ref: Component | Element,
     vFor: boolean,

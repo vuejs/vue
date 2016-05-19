@@ -33,10 +33,10 @@ export function generate (
   platformModules = options.modules || []
   platformDirectives = options.directives || {}
   isPlatformReservedTag = options.isReservedTag || (() => false)
-  const code = ast ? genElement(ast) : '__r__(__s__("div"))'
+  const code = ast ? genElement(ast) : '_h(_e("div"))'
   staticRenderFns = prevStaticRenderFns
   return {
-    render: `with (this) { return ${code}}`,
+    render: `with(this){return ${code}}`,
     staticRenderFns: currentStaticRenderFns
   }
 }
@@ -47,7 +47,7 @@ function genElement (el: ASTElement): string {
   } else if (el.if) {
     return genIf(el)
   } else if (el.tag === 'template' && !el.slotTarget) {
-    return genChildren(el)
+    return genChildren(el) || 'void 0'
   } else if (el.tag === 'render') {
     return genRender(el)
   } else if (el.tag === 'slot') {
@@ -55,17 +55,23 @@ function genElement (el: ASTElement): string {
   } else if (el.component) {
     return genComponent(el)
   } else {
+    const data = genData(el)
     // if the element is potentially a component,
     // wrap its children as a thunk.
-    const children = el.inlineTemplate
-      ? 'undefined'
-      : genChildren(el, !isPlatformReservedTag(el.tag) /* asThunk */)
-    const namespace = el.ns ? `,'${el.ns}'` : ''
-    const code = `__r__(__s__('${el.tag}', ${genData(el)}${namespace}), ${children})`
+    const children = !el.inlineTemplate
+      ? genChildren(el, !el.ns && !isPlatformReservedTag(el.tag) /* asThunk */)
+      : null
+    const code = `_h(_e('${el.tag}'${
+      data ? `,${data}` : el.ns ? ',void 0' : '' // data
+    }${
+      el.ns ? `,'${el.ns}'` : '' // namespace
+    })${
+      children ? `,${children}` : '' // children
+    })`
     if (el.staticRoot) {
       // hoist static sub-trees out
       staticRenderFns.push(`with(this){return ${code}}`)
-      return `__m__(${staticRenderFns.length - 1})`
+      return `_m(${staticRenderFns.length - 1})`
     } else {
       return code
     }
@@ -75,13 +81,13 @@ function genElement (el: ASTElement): string {
 function genIf (el: ASTElement): string {
   const exp = el.if
   el.if = null // avoid recursion
-  return `(${exp}) ? ${genElement(el)} : ${genElse(el)}`
+  return `(${exp})?${genElement(el)}:${genElse(el)}`
 }
 
 function genElse (el: ASTElement): string {
   return el.elseBlock
     ? genElement(el.elseBlock)
-    : 'null'
+    : 'void 0'
 }
 
 function genFor (el: ASTElement): string {
@@ -89,15 +95,15 @@ function genFor (el: ASTElement): string {
   const alias = el.alias
   const iterator = el.iterator
   el.for = null // avoid recursion
-  return `(${exp})&&__renderList__((${exp}), ` +
+  return `(${exp})&&_l((${exp}),` +
     `function(${alias},$index,${iterator || '$key'}){` +
       `return ${genElement(el)}` +
     '})'
 }
 
-function genData (el: ASTElement): string {
+function genData (el: ASTElement): string | void {
   if (el.plain) {
-    return 'undefined'
+    return
   }
 
   let data = '{'
@@ -199,9 +205,9 @@ function genDirectives (el: ASTElement): string | void {
   }
 }
 
-function genChildren (el: ASTElement, asThunk?: boolean): string {
+function genChildren (el: ASTElement, asThunk?: boolean): string | void {
   if (!el.children.length) {
-    return 'undefined'
+    return
   }
   const code = '[' + el.children.map(genNode).join(',') + ']'
   return asThunk
@@ -220,20 +226,31 @@ function genNode (node: ASTNode) {
 function genText (text: ASTText | ASTExpression): string {
   return text.type === 2
     ? `(${text.expression})`
-    : '__t__(' + JSON.stringify(text.text) + ')'
+    : '_t(' + JSON.stringify(text.text) + ')'
 }
 
 function genRender (el: ASTElement): string {
-  return `${el.renderMethod}(${el.renderArgs || 'null'},${genChildren(el)})`
+  const children = genChildren(el)
+  return `${el.renderMethod}(${
+    el.renderArgs || ''
+  }${
+    children ? (el.renderArgs ? ',' : '') + children : ''
+  })`
 }
 
 function genSlot (el: ASTElement): string {
-  const name = el.slotName || '"default"'
-  return `($slots[${name}] || ${genChildren(el)})`
+  const slot = `$slots[${el.slotName || '"default"'}]`
+  const children = genChildren(el)
+  return children
+    ? `(${slot}||${children})`
+    : slot
 }
 
 function genComponent (el: ASTElement): string {
-  return `__r__(__s__(${el.component}, ${genData(el)}), ${genChildren(el, true)})`
+  const children = genChildren(el, true)
+  return `_h(_e(${el.component},${genData(el)})${
+    children ? `,${children}` : ''
+  })`
 }
 
 function genProps (props: Array<{ name: string, value: string }>): string {

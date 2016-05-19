@@ -198,6 +198,9 @@ function processRawAttrs (el) {
         value: JSON.stringify(el.attrsList[i].value)
       }
     }
+  } else if (!el.pre) {
+    // non root node in pre blocks with no attributes
+    el.plain = true
   }
 }
 
