@@ -5,7 +5,8 @@ declare type VNodeComponentOptions = {
   propsData: ?Object,
   listeners: ?Object,
   parent: Component,
-  children: ?VNodeChildren
+  children: ?VNodeChildren,
+  tag?: string
 }
 
 declare interface MountedComponentVNode {

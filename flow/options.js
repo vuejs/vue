@@ -5,6 +5,7 @@ declare type InternalComponentOptions = {
   _parentVnode: VNode,
   _parentListeners: ?Object,
   _renderChildren: ?VNodeChildren,
+  _componentTag: ?string,
   render?: Function,
   staticRenderFns?: Array<Function>
 }

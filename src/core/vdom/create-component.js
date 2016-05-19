@@ -12,7 +12,8 @@ export function createComponent (
   Ctor: Class<Component> | Function | Object | void,
   data?: VNodeData,
   parent: Component,
-  context: Component
+  context: Component,
+  tag?: string
 ): VNode | void {
   if (!Ctor) {
     return
@@ -62,11 +63,11 @@ export function createComponent (
   }
 
   // return a placeholder vnode
-  const name = Ctor.options.name ? ('-' + Ctor.options.name) : ''
+  const name = Ctor.options.name || tag
   const vnode = new VNode(
-    `vue-component-${Ctor.cid}${name}`,
+    `vue-component-${Ctor.cid}${name ? `-${name}` : ''}`,
     data, undefined, undefined, undefined, undefined, context,
-    { Ctor, propsData, listeners, parent, children: undefined }
+    { Ctor, propsData, listeners, parent, tag, children: undefined }
     // children to be set later by renderElementWithChildren,
     // but before the init hook
   )
@@ -76,14 +77,15 @@ export function createComponent (
 export function createComponentInstanceForVnode (
   vnode: any // we know it's MountedComponentVNode but flow doesn't
 ): Component {
-  const { Ctor, propsData, listeners, parent, children } = vnode.componentOptions
+  const vnodeComponentOptions = vnode.componentOptions
   const options: InternalComponentOptions = {
     _isComponent: true,
-    parent,
-    propsData,
+    parent: vnodeComponentOptions.parent,
+    propsData: vnodeComponentOptions.propsData,
+    _componentTag: vnodeComponentOptions.tag,
     _parentVnode: vnode,
-    _parentListeners: listeners,
-    _renderChildren: children
+    _parentListeners: vnodeComponentOptions.listeners,
+    _renderChildren: vnodeComponentOptions.children
   }
   // check inline-template render functions
   const inlineTemplate = vnode.data.inlineTemplate
@@ -91,7 +93,7 @@ export function createComponentInstanceForVnode (
     options.render = inlineTemplate.render
     options.staticRenderFns = inlineTemplate.staticRenderFns
   }
-  return new Ctor(options)
+  return new vnodeComponentOptions.Ctor(options)
 }
 
 function init (vnode: VNode) {

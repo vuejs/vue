@@ -14,10 +14,15 @@ if (process.env.NODE_ENV !== 'production') {
   }
 
   formatComponentName = vm => {
-    const name = vm._isVue ? vm.$options.name : vm.name
+    if (vm.$root === vm) {
+      return ' (found in root instnace)'
+    }
+    const name = vm._isVue
+      ? vm.$options.name || vm.$options._componentTag
+      : vm.name
     return name
       ? ' (found in component: <' + hyphenate(name) + '>)'
-      : ''
+      : ' (found in anonymous component. Use the "name" option for better debugging messages)'
   }
 }
 

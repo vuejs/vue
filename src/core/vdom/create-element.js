@@ -55,7 +55,7 @@ export function renderElement (
         undefined, undefined, namespace, context
       )
     } else if ((Ctor = resolveAsset(context.$options, 'components', tag))) {
-      return createComponent(Ctor, data, parent, context)
+      return createComponent(Ctor, data, parent, context, tag)
     } else {
       if (process.env.NODE_ENV !== 'production') {
         if (!namespace && config.isUnknownElement(tag)) {
