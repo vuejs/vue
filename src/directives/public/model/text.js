@@ -117,9 +117,10 @@ export default {
     }
 
     // set initial value if present
+    var _tagName = (el.tagName !== undefined) ? el.tagName.toUpperCase() : ''
     if (
       el.hasAttribute('value') ||
-      (el.tagName.toUpperCase() === 'TEXTAREA' && el.value.trim())
+      (_tagName === 'TEXTAREA' && el.value.trim())
     ) {
       this.afterBind = this.listener
     }

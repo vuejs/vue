@@ -60,10 +60,11 @@ const vFor = {
     // because v-model has a lower priority than v-for,
     // the v-model is not bound here yet, so we have to
     // retrive it in the actual updateModel() function.
-    var tag = this.el.tagName.toUpperCase()
+    var tag = (this.el.tagName !== undefined) ? this.el.tagName.toUpperCase() : ''
+    var parentTag = (this.el.parentNode.tagName !== undefined) ? this.el.parentNode.tagName.toUpperCase() : ''
     this.isOption =
       (tag === 'OPTION' || tag === 'OPTGROUP') &&
-      this.el.parentNode.tagName.toUpperCase() === 'SELECT'
+      parentTag === 'SELECT'
 
     // setup anchor nodes
     this.start = createAnchor('v-for-start')

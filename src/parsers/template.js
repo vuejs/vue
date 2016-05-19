@@ -221,7 +221,8 @@ export function cloneNode (node) {
   }
   /* istanbul ignore if */
   if (hasTextareaCloneBug) {
-    if (node.tagName.toUpperCase() === 'TEXTAREA') {
+    var _tagName = (node.tagName !== undefined) ? node.tagName.toUpperCase() : ''
+    if (_tagName === 'TEXTAREA') {
       res.value = node.value
     } else {
       original = node.querySelectorAll('textarea')

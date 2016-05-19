@@ -27,7 +27,7 @@ export default {
 
   bind () {
     var attr = this.arg
-    var tag = this.el.tagName.toUpperCase()
+    var tag = (this.el.tagName !== undefined) ? this.el.tagName.toUpperCase() : ''
     // should be deep watch on object mode
     if (!attr) {
       this.deep = true
@@ -111,7 +111,8 @@ export default {
       }
     }
     // do not set value attribute for textarea
-    if (attr === 'value' && el.tagName.toUpperCase() === 'TEXTAREA') {
+    var _tagName = (el.tagName !== undefined) ? el.tagName.toUpperCase() : ''
+    if (attr === 'value' && _tagName === 'TEXTAREA') {
       el.removeAttribute(attr)
       return
     }
