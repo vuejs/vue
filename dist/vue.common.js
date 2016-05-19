@@ -3508,7 +3508,7 @@ var bind = {
 
   bind: function bind() {
     var attr = this.arg;
-    var tag = this.el.tagName;
+    var tag = this.el.tagName !== undefined ? this.el.tagName.toUpperCase() : '';
     // should be deep watch on object mode
     if (!attr) {
       this.deep = true;
@@ -3571,7 +3571,8 @@ var bind = {
       }
     }
     // do not set value attribute for textarea
-    if (attr === 'value' && el.tagName === 'TEXTAREA') {
+    var _tagName = el.tagName !== undefined ? el.tagName.toUpperCase() : '';
+    if (attr === 'value' && _tagName === 'TEXTAREA') {
       el.removeAttribute(attr);
       return;
     }
@@ -3650,7 +3651,8 @@ var on = {
 
   bind: function bind() {
     // deal with iframes
-    if (this.el.tagName === 'IFRAME' && this.arg !== 'load') {
+    var _tagName = this.el.tagName !== undefined ? this.el.tagName.toUpperCase() : '';
+    if (_tagName === 'IFRAME' && this.arg !== 'load') {
       var self = this;
       this.iframeBind = function () {
         on$1(self.el.contentWindow, self.arg, self.handler);
@@ -4010,7 +4012,8 @@ var text$2 = {
     }
 
     // set initial value if present
-    if (el.hasAttribute('value') || el.tagName === 'TEXTAREA' && el.value.trim()) {
+    var _tagName = el.tagName !== undefined ? el.tagName.toUpperCase() : '';
+    if (el.hasAttribute('value') || _tagName === 'TEXTAREA' && el.value.trim()) {
       this.afterBind = this.listener;
     }
   },
@@ -4060,7 +4063,7 @@ var model = {
       process.env.NODE_ENV !== 'production' && warn('It seems you are using a read-only filter with ' + 'v-model. You might want to use a two-way filter ' + 'to ensure correct behavior.');
     }
     var el = this.el;
-    var tag = el.tagName;
+    var tag = el.tagName !== undefined ? el.tagName.toUpperCase() : '';
     var handler;
     if (tag === 'INPUT') {
       handler = handlers[el.type] || handlers.text;
@@ -4308,7 +4311,8 @@ function cloneNode(node) {
   }
   /* istanbul ignore if */
   if (hasTextareaCloneBug) {
-    if (node.tagName === 'TEXTAREA') {
+    var _tagName = node.tagName !== undefined ? node.tagName.toUpperCase() : '';
+    if (_tagName === 'TEXTAREA') {
       res.value = node.value;
     } else {
       original = node.querySelectorAll('textarea');
@@ -4704,8 +4708,9 @@ var vFor = {
     // because v-model has a lower priority than v-for,
     // the v-model is not bound here yet, so we have to
     // retrive it in the actual updateModel() function.
-    var tag = this.el.tagName;
-    this.isOption = (tag === 'OPTION' || tag === 'OPTGROUP') && this.el.parentNode.tagName === 'SELECT';
+    var tag = this.el.tagName !== undefined ? this.el.tagName.toUpperCase() : '';
+    var parentTag = this.el.parentNode.tagName !== undefined ? this.el.parentNode.tagName.toUpperCase() : '';
+    this.isOption = (tag === 'OPTION' || tag === 'OPTGROUP') && parentTag === 'SELECT';
 
     // setup anchor nodes
     this.start = createAnchor('v-for-start');
@@ -6356,7 +6361,8 @@ function compile(el, options, partial) {
   // link function for the node itself.
   var nodeLinkFn = partial || !options._asComponent ? compileNode(el, options) : null;
   // link function for the childNodes
-  var childLinkFn = !(nodeLinkFn && nodeLinkFn.terminal) && el.tagName !== 'SCRIPT' && el.hasChildNodes() ? compileNodeList(el.childNodes, options) : null;
+  var _tagName = el.tagName !== undefined ? el.tagName.toUpperCase() : '';
+  var childLinkFn = !(nodeLinkFn && nodeLinkFn.terminal) && _tagName !== 'SCRIPT' && el.hasChildNodes() ? compileNodeList(el.childNodes, options) : null;
 
   /**
    * A composite linker function to be called on a already
@@ -6564,7 +6570,8 @@ function compileRoot(el, options, contextOptions) {
 
 function compileNode(node, options) {
   var type = node.nodeType;
-  if (type === 1 && node.tagName !== 'SCRIPT') {
+  var _tagName = node.tagName !== undefined ? node.tagName.toUpperCase() : '';
+  if (type === 1 && _tagName !== 'SCRIPT') {
     return compileElement(node, options);
   } else if (type === 3 && node.data.trim()) {
     return compileTextNode(node, options);
@@ -6585,7 +6592,8 @@ function compileElement(el, options) {
   // preprocess textareas.
   // textarea treats its text content as the initial value.
   // just bind it as an attr directive for value.
-  if (el.tagName === 'TEXTAREA') {
+  var _tagName = el.tagName !== undefined ? el.tagName.toUpperCase() : '';
+  if (_tagName === 'TEXTAREA') {
     var tokens = parseText(el.value);
     if (tokens) {
       el.setAttribute(':value', tokensToExp(tokens));
@@ -6748,7 +6756,8 @@ function compileNodeList(nodeList, options) {
   for (var i = 0, l = nodeList.length; i < l; i++) {
     node = nodeList[i];
     nodeLinkFn = compileNode(node, options);
-    childLinkFn = !(nodeLinkFn && nodeLinkFn.terminal) && node.tagName !== 'SCRIPT' && node.hasChildNodes() ? compileNodeList(node.childNodes, options) : null;
+    var _tagName = node.tagName !== undefined ? node.tagName.toUpperCase() : '';
+    childLinkFn = !(nodeLinkFn && nodeLinkFn.terminal) && _tagName !== 'SCRIPT' && node.hasChildNodes() ? compileNodeList(node.childNodes, options) : null;
     linkFns.push(nodeLinkFn, childLinkFn);
   }
   return linkFns.length ? makeChildLinkFn(linkFns) : null;
