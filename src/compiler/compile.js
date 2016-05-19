@@ -58,10 +58,10 @@ export function compile (el, options, partial) {
     ? compileNode(el, options)
     : null
   // link function for the childNodes
-  var _tagName = (el.tagName !== undefined) ? el.tagName : ''
+  var _tagName = (el.tagName !== undefined) ? el.tagName.toUpperCase() : ''
   var childLinkFn =
     !(nodeLinkFn && nodeLinkFn.terminal) &&
-    _tagName.toUpperCase() !== 'SCRIPT' &&
+    _tagName !== 'SCRIPT' &&
     el.hasChildNodes()
       ? compileNodeList(el.childNodes, options)
       : null
@@ -280,8 +280,8 @@ export function compileRoot (el, options, contextOptions) {
 
 function compileNode (node, options) {
   var type = node.nodeType
-  var _tagName = (node.tagName !== undefined) ? node.tagName : ''
-  if (type === 1 && _tagName.toUpperCase() !== 'SCRIPT') {
+  var _tagName = (node.tagName !== undefined) ? node.tagName.toUpperCase() : ''
+  if (type === 1 && _tagName !== 'SCRIPT') {
     return compileElement(node, options)
   } else if (type === 3 && node.data.trim()) {
     return compileTextNode(node, options)
@@ -302,8 +302,8 @@ function compileElement (el, options) {
   // preprocess textareas.
   // textarea treats its text content as the initial value.
   // just bind it as an attr directive for value.
-  var _tagName = (el.tagName !== undefined) ? el.tagName : ''
-  if (_tagName.toUpperCase() === 'TEXTAREA') {
+  var _tagName = (el.tagName !== undefined) ? el.tagName.toUpperCase() : ''
+  if (_tagName === 'TEXTAREA') {
     var tokens = parseText(el.value)
     if (tokens) {
       el.setAttribute(':value', tokensToExp(tokens))
@@ -468,10 +468,10 @@ function compileNodeList (nodeList, options) {
   for (var i = 0, l = nodeList.length; i < l; i++) {
     node = nodeList[i]
     nodeLinkFn = compileNode(node, options)
-    var _tagName = (node.tagName !== undefined) ? node.tagName : ''
+    var _tagName = (node.tagName !== undefined) ? node.tagName.toUpperCase() : ''
     childLinkFn =
       !(nodeLinkFn && nodeLinkFn.terminal) &&
-      _tagName.toUpperCase() !== 'SCRIPT' &&
+      _tagName !== 'SCRIPT' &&
       node.hasChildNodes()
         ? compileNodeList(node.childNodes, options)
         : null
