@@ -70,14 +70,14 @@ describe('codegen', () => {
   it('generate v-ref directive', () => {
     assertCodegen(
       '<p v-ref:component1></p>',
-      `with(this){return _h(_e('p',{hook:{"insert":function(n1,n2){_r("component1",n1.child||n1.elm,false,false},"destroy":function(n1,n2){_r("component1",n1.child||n1.elm,false,true)}}}))}`
+      `with(this){return _h(_e('p',{hook:{"insert":function(n1,n2){_r("component1",n1.child||n1.elm,false,false)},"destroy":function(n1,n2){_r("component1",n1.child||n1.elm,false,true)}}}))}`
     )
   })
 
   it('generate v-ref directive on v-for', () => {
     assertCodegen(
       '<ul><li v-for="item in items" v-ref:component1></li></ul>',
-      `with(this){return _h(_e('ul'),[(items)&&_l((items),function(item,$index,$key){return _h(_e('li',{hook:{"insert":function(n1,n2){_r("component1",n1.child||n1.elm,true,false},"destroy":function(n1,n2){_r("component1",n1.child||n1.elm,true,true)}}}))})])}`
+      `with(this){return _h(_e('ul'),[(items)&&_l((items),function(item,$index,$key){return _h(_e('li',{hook:{"insert":function(n1,n2){_r("component1",n1.child||n1.elm,true,false)},"destroy":function(n1,n2){_r("component1",n1.child||n1.elm,true,true)}}}))})])}`
     )
   })
 

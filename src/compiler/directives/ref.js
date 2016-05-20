@@ -14,6 +14,6 @@ export function ref (el: ASTElement, dir: ASTDirective) {
   }
   // registerRef: _r(name, ref, vFor?, remove?)
   const code = `_r("${dir.arg}",n1.child||n1.elm,${isFor ? 'true' : 'false'}`
-  addHook(el, 'insert', `${code},false`)
+  addHook(el, 'insert', `${code},false)`)
   addHook(el, 'destroy', `${code},true)`)
 }
