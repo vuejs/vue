@@ -1,6 +1,4 @@
 import { parse } from 'compiler/parser/index'
-import modules from 'web/compiler/modules/index'
-import directives from 'web/compiler/directives/index'
 import { extend } from 'shared/util'
 import { baseOptions } from 'entries/web-compiler'
 

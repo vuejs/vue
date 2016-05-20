@@ -41,7 +41,7 @@ describe('Component async', () => {
       }
     }).$mount()
     expect(vm.$el.nodeType).toBe(3)
-  expect(vm.$children.length).toBe(0)
+    expect(vm.$children.length).toBe(0)
     function next () {
       expect(vm.$el.nodeType).toBe(1)
       expect(vm.$el.outerHTML).toBe('<div>hi</div>')
