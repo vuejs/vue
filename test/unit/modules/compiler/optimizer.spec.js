@@ -1,19 +1,9 @@
 import { parse } from 'compiler/parser/index'
 import { optimize } from 'compiler/optimizer'
 import directives from 'web/compiler/directives/index'
-import { isReservedTag, isUnaryTag, mustUseProp, getTagNamespace } from 'web/util/index'
+import { baseOptions } from 'entries/web-compiler'
 
 describe('optimizer', () => {
-  const baseOptions = {
-    expectHTML: true,
-    preserveWhitespace: true,
-    directives,
-    isReservedTag,
-    isUnaryTag,
-    mustUseProp,
-    getTagNamespace
-  }
-
   it('simple', () => {
     const ast = parse('<h1 id="section1">hello world</h1>', baseOptions)
     optimize(ast, baseOptions)

@@ -2,20 +2,9 @@ import { parse } from 'compiler/parser/index'
 import modules from 'web/compiler/modules/index'
 import directives from 'web/compiler/directives/index'
 import { extend } from 'shared/util'
-import { isReservedTag, isUnaryTag, mustUseProp, getTagNamespace } from 'web/util/index'
+import { baseOptions } from 'entries/web-compiler'
 
 describe('parser', () => {
-  const baseOptions = {
-    expectHTML: true,
-    preserveWhitespace: true,
-    modules,
-    directives,
-    isReservedTag,
-    isUnaryTag,
-    mustUseProp,
-    getTagNamespace
-  }
-
   it('simple element', () => {
     const ast = parse('<h1>hello world</h1>', baseOptions)
     expect(ast.tag).toBe('h1')
@@ -302,27 +291,17 @@ describe('parser', () => {
   })
 
   it('not specified getTagNamespace option', () => {
-    const ast = parse('<svg><text>hello world</text></svg>', {
-      expectHTML: true,
-      preserveWhitespace: true,
-      directives,
-      isReservedTag,
-      isUnaryTag,
-      mustUseProp
-    })
+    const options = Object.assign({}, baseOptions)
+    delete options.getTagNamespace
+    const ast = parse('<svg><text>hello world</text></svg>', options)
     expect(ast.tag).toBe('svg')
     expect(ast.ns).toBeUndefined()
   })
 
   it('not specified mustUseProp', () => {
-    const ast = parse('<input type="text" name="field1" :value="msg">', {
-      expectHTML: true,
-      preserveWhitespace: true,
-      directives,
-      isReservedTag,
-      isUnaryTag,
-      getTagNamespace
-    })
+    const options = Object.assign({}, baseOptions)
+    delete options.mustUseProp
+    const ast = parse('<input type="text" name="field1" :value="msg">', options)
     expect(ast.props).toBeUndefined()
   })
 })
