@@ -350,10 +350,11 @@ export function createPatchFunction (backend) {
       // empty mount, create new root element
       createElm(vnode, insertedVnodeQueue)
     } else {
-      if (sameVnode(oldVnode, vnode)) {
+      const isRealElement = isDef(oldVnode.nodeType)
+      if (!isRealElement && sameVnode(oldVnode, vnode)) {
         patchVnode(oldVnode, vnode, insertedVnodeQueue)
       } else {
-        if (isDef(oldVnode.nodeType)) {
+        if (isRealElement) {
           // mounting to a real element
           // check if this is server-rendered content and if we can perform
           // a successful hydration.
