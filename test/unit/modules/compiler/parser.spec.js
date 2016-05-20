@@ -289,7 +289,7 @@ describe('parser', () => {
   })
 
   it('not specified getTagNamespace option', () => {
-    const options = Object.assign({}, baseOptions)
+    const options = extend({}, baseOptions)
     delete options.getTagNamespace
     const ast = parse('<svg><text>hello world</text></svg>', options)
     expect(ast.tag).toBe('svg')
@@ -297,7 +297,7 @@ describe('parser', () => {
   })
 
   it('not specified mustUseProp', () => {
-    const options = Object.assign({}, baseOptions)
+    const options = extend({}, baseOptions)
     delete options.mustUseProp
     const ast = parse('<input type="text" name="field1" :value="msg">', options)
     expect(ast.props).toBeUndefined()
