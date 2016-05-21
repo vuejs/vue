@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import { extend } from 'shared/util'
 
 function checkPrefixedProp (prop) {
   var el = document.createElement('div')
@@ -23,7 +24,8 @@ describe('Directive v-bind:style', () => {
       template: '<div :style="styles"></div>',
       data () {
         return {
-          styles: {}
+          styles: {},
+          fontSize: 16
         }
       }
     }).$mount()
@@ -130,9 +132,26 @@ describe('Directive v-bind:style', () => {
           divStyling: { display: 'none' }
         }
       }
-    }).$mount(el)
+    })
     waitForUpdate(() => {
-      expect(el.style.display).toBe('none')
+      expect(vm.$el.style.display).toBe('none')
+      vm.divStyling = extend({}, { display: 'block' })
+    }).then(() => {
+      expect(vm.$el.style.display).toBe('block')
+    }).then(done)
+  })
+
+  it('background size with only one value', done => {
+    vm.styles = { backgroundSize: '100%' }
+    waitForUpdate(() => {
+      expect(vm.$el.style.cssText.replace(/\s/g, '')).toMatch(/background-size:100%(auto)?;/)
+    }).then(done)
+  })
+
+  it('should work with interpolation', done => {
+    vm.styles = { fontSize: `${vm.fontSize}px` }
+    waitForUpdate(() => {
+      expect(vm.$el.style.fontSize).toBe('16px')
     }).then(done)
   })
 })
