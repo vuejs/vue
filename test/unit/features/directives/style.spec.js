@@ -38,13 +38,6 @@ describe('Directive v-bind:style', () => {
     }).then(done)
   })
 
-  it('should not work with inline !important', done => {
-    vm.styles = { color: 'red !important' }
-    waitForUpdate(() => {
-      expect(vm.$el.style.getPropertyPriority('color')).toBe('')
-    }).then(done)
-  })
-
   it('camelCase', done => {
     vm.styles = { marginRight: '10px' }
     waitForUpdate(() => {
