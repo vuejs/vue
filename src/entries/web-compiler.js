@@ -60,8 +60,11 @@ export function compileToFunctions (
   options?: CompilerOptions
 ): CompiledFunctions {
   const cache = options && options.preserveWhitespace === false ? cache1 : cache2
-  if (cache[template]) {
-    return cache[template]
+  const key = options && options.delimiters
+    ? String(options.delimiters) + template
+    : template
+  if (cache[key]) {
+    return cache[key]
   }
   const res = {}
   const compiled = compile(template, options)
@@ -71,5 +74,5 @@ export function compileToFunctions (
   for (let i = 0; i < l; i++) {
     res.staticRenderFns[i] = new Function(compiled.staticRenderFns[i])
   }
-  return (cache[template] = res)
+  return (cache[key] = res)
 }
