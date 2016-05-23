@@ -117,6 +117,21 @@ export function parse (
       // tree management
       if (!root) {
         root = element
+        // check root element constraints
+        if (process.env.NODE_ENV !== 'production') {
+          if (tag === 'slot' || tag === 'template') {
+            warn(
+              `Cannot use <${tag}> as component root element because it may ` +
+              'contain multiple nodes:\n' + template
+            )
+          }
+          if (element.attrsMap.hasOwnProperty('v-for')) {
+            warn(
+              'Cannot use v-for on component root element because it renders ' +
+              'multiple elements:\n' + template
+            )
+          }
+        }
       } else if (process.env.NODE_ENV !== 'production' && !stack.length && !warned) {
         warned = true
         warn(

@@ -77,6 +77,21 @@ describe('parser', () => {
     expect('Component template should contain exactly one root element').toHaveBeenWarned()
   })
 
+  it('warn <template> as root element', () => {
+    parse('<template></template>', baseOptions)
+    expect('Cannot use <template> as component root element').toHaveBeenWarned()
+  })
+
+  it('warn <slot> as root element', () => {
+    parse('<slot></slot>', baseOptions)
+    expect('Cannot use <slot> as component root element').toHaveBeenWarned()
+  })
+
+  it('warn v-for on root element', () => {
+    parse('<div v-for="item in items"></div>', baseOptions)
+    expect('Cannot use v-for on component root element').toHaveBeenWarned()
+  })
+
   it('v-pre directive', () => {
     const ast = parse('<div v-pre id="message1"><p>{{msg}}</p></div>', baseOptions)
     expect(ast.pre).toBe(true)

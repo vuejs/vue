@@ -1,6 +1,6 @@
 /* @flow */
 
-import { emptyVNode } from '../vdom/vnode'
+import VNode, { emptyVNode } from '../vdom/vnode'
 import { normalizeChildren } from '../vdom/helpers'
 import { bind, remove, isObject, renderString } from 'shared/util'
 import { resolveAsset, nextTick } from '../util/index'
@@ -57,7 +57,11 @@ export function renderMixin (Vue: Class<Component>) {
       resolveSlots(vm, _renderChildren)
     }
     // render self
-    const vnode = render.call(vm._renderProxy) || emptyVNode
+    let vnode = render.call(vm._renderProxy)
+    // return empty vnode in case the render function errored out
+    if (!(vnode instanceof VNode)) {
+      vnode = emptyVNode
+    }
     // set parent
     vnode.parent = _parentVnode
     // restore render state
