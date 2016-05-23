@@ -25,6 +25,20 @@ function assertStyle (expr, assertions, done) {
   chain.then(done)
 }
 
+function checkPrefixedProp (prop) {
+  const el = document.createElement('div')
+  const upper = prop.charAt(0).toUpperCase() + prop.slice(1)
+  if (!(prop in el.style)) {
+    const prefixes = ['webkit', 'moz', 'ms']
+    let i = prefixes.length
+    while (i--) {
+      if ((prefixes[i] + upper) in el.style) {
+        return prefixes[i] + upper
+      }
+    }
+  }
+}
+
 describe('Directive v-bind:style', () => {
   it('object syntax', done => {
     const style = '{ color: value.color, fontSize: value.size + \'px\' }'
@@ -65,5 +79,18 @@ describe('Directive v-bind:style', () => {
         { color: 'blue', fontSize: '10px' }
       ]
     ], done)
+  })
+
+  it('auto prefixing', done => {
+    // http://peter.sh/experiments/vendor-prefixed-css-property-overview/
+    // Chrome 50 works well
+    const style = 'value'
+    const propName = checkPrefixedProp('userSelect')
+    if (propName) {
+      assertStyle(style, [
+        [{}, { [propName]: '' }],
+        [{ userSelect: 'auto' }, { [propName]: 'auto' }]
+      ], done)
+    }
   })
 })
