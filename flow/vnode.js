@@ -55,6 +55,7 @@ declare interface VNodeData {
 declare type VNodeDirective = {
   name: string,
   value?: any,
+  oldValue?: any,
   arg?: string,
   modifiers?: { [key: string]: boolean }
 }

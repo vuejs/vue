@@ -30,7 +30,7 @@ function applyDirectives (
       if (fn) {
         // only call update if value has changed
         if (isUpdate && oldDirs) {
-          const oldValue = oldDirs[i].value
+          const oldValue = dir.oldValue = oldDirs[i].value
           if (oldValue === dir.value) {
             continue
           }
