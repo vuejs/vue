@@ -35,7 +35,7 @@ function applyDirectives (
             continue
           }
         }
-        fn(vnode.elm, dir.value, dir.modifiers, vnode, oldVnode)
+        fn(vnode.elm, dir, vnode, oldVnode)
       }
     }
   }

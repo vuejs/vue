@@ -4,14 +4,14 @@ import { isIE9 } from 'web/util/index'
 import { enter, leave } from '../modules/transition'
 
 export default {
-  bind (el: HTMLElement, value: any, _: any, vnode: VNodeWithData) {
+  bind (el: HTMLElement, { value }: VNodeDirective, vnode: VNodeWithData) {
     const transition = getTransition(vnode)
     if (value && transition && transition.appea && !isIE9) {
       enter(vnode)
     }
     el.style.display = value ? '' : 'none'
   },
-  update (el: HTMLElement, value: any, _: any, vnode: VNodeWithData) {
+  update (el: HTMLElement, { value }: VNodeDirective, vnode: VNodeWithData) {
     const transition = getTransition(vnode)
     if (transition && !isIE9) {
       if (value) {
