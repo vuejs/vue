@@ -116,19 +116,10 @@ describe('Directive v-bind:style', () => {
   })
 
   it('updates objects deeply', done => {
-    const el = document.createElement('div')
-    el.setAttribute(':style', 'divStyling')
-    vm = new Vue({
-      el,
-      data () {
-        return {
-          divStyling: { display: 'none' }
-        }
-      }
-    })
+    vm.styles = { display: 'none' }
     waitForUpdate(() => {
       expect(vm.$el.style.display).toBe('none')
-      vm.divStyling = extend({}, { display: 'block' })
+      vm.styles.display = 'block'
     }).then(() => {
       expect(vm.$el.style.display).toBe('block')
     }).then(done)

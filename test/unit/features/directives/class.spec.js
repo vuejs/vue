@@ -92,4 +92,18 @@ describe('Directive v-bind:class', () => {
       expect(vm.$el.className).toBe('c a bar baz foo')
     }).then(done)
   })
+
+  it('deep update', done => {
+    const vm = new Vue({
+      template: '<div :class="test"></div>',
+      data: {
+        test: { a: true, b: false }
+      }
+    }).$mount()
+    expect(vm.$el.className).toBe('a')
+    vm.test.b = true
+    waitForUpdate(() => {
+      expect(vm.$el.className).toBe('a b')
+    }).then(done)
+  })
 })

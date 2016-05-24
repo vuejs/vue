@@ -13,7 +13,7 @@ function parse (el: ASTElement) {
 
 function genData (el: ASTElement): string {
   return el.styleBinding
-    ? `style:${el.styleBinding},`
+    ? `style:(${el.styleBinding}),`
     : ''
 }
 

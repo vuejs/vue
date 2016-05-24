@@ -1,6 +1,6 @@
 /* @flow */
 
-import { cached, camelize, toObject } from 'shared/util'
+import { cached, camelize, toObject, extend } from 'shared/util'
 
 const prefixes = ['Webkit', 'Moz', 'ms']
 
@@ -45,6 +45,9 @@ function updateStyle (oldVnode: VNodeWithData, vnode: VNodeWithData) {
       elm.style[normalize(name)] = cur
     }
   }
+  // clone the style for future updates,
+  // in case the user mutates the style object in-place.
+  vnode.data.style = extend({}, style)
 }
 
 export default {

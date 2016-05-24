@@ -2,8 +2,8 @@
 
 import VNode, { emptyVNode } from '../vdom/vnode'
 import { normalizeChildren } from '../vdom/helpers'
-import { bind, remove, isObject, renderString } from 'shared/util'
 import { resolveAsset, nextTick } from '../util/index'
+import { bind, remove, extend, isObject, renderString } from 'shared/util'
 
 import {
   renderElement,

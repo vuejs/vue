@@ -1,7 +1,7 @@
 /* @flow */
 
 import Watcher from '../observer/watcher'
-import { warn, validateProp, remove } from '../util/index'
+import { warn, validateProp, remove, noop } from '../util/index'
 import { observerState } from '../observer/index'
 import { updateListeners } from '../vdom/helpers'
 
@@ -44,8 +44,9 @@ export function lifecycleMixin (Vue: Class<Component>) {
       }
     }
     callHook(vm, 'beforeMount')
-    vm._watcher = new Watcher(vm, vm._render, vm._update)
-    vm._update(vm._watcher.value)
+    vm._watcher = new Watcher(vm, () => {
+      vm._update(vm._render())
+    }, noop)
     vm._isMounted = true
     // root instance, call mounted on self
     if (vm.$root === vm) {

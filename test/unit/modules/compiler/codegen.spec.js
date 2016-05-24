@@ -156,7 +156,7 @@ describe('codegen', () => {
   it('generate style binding', () => {
     assertCodegen(
       '<p :style="error">hello world</p>',
-      `with(this){return _h(_e('p',{style:error}),[_t("hello world")])}`
+      `with(this){return _h(_e('p',{style:(error)}),[_t("hello world")])}`
     )
   })
 
