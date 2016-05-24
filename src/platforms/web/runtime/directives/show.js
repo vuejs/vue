@@ -6,7 +6,7 @@ import { enter, leave } from '../modules/transition'
 export default {
   bind (el: HTMLElement, { value }: VNodeDirective, vnode: VNodeWithData) {
     const transition = getTransition(vnode)
-    if (value && transition && transition.appea && !isIE9) {
+    if (value && transition && transition.appear && !isIE9) {
       enter(vnode)
     }
     el.style.display = value ? '' : 'none'
