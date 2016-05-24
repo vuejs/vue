@@ -11,6 +11,7 @@ export default class VNode {
   key: string | number | void;
   componentOptions: VNodeComponentOptions | void;
   child: Component | void;
+  parent: VNode | void;
 
   constructor (
     tag?: string,
@@ -32,6 +33,7 @@ export default class VNode {
     this.key = data && data.key
     this.componentOptions = componentOptions
     this.child = undefined
+    this.parent = undefined
   }
 
   setChildren (children?: Array<VNode>) {
