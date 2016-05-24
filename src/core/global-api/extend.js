@@ -1,7 +1,7 @@
 /* @flow */
 
 import config from '../config'
-import { warn, mergeOptions } from '../util/index'
+import { warn, remove, mergeOptions } from '../util/index'
 
 export function initExtend (Vue: GlobalAPI) {
   /**
@@ -53,6 +53,12 @@ export function initExtend (Vue: GlobalAPI) {
     // enable recursive self-lookup
     if (name) {
       Sub.options.components[name] = Sub
+    }
+    // book-keeping for global mixin edge cases. also expose a way to remove it
+    Sub.extendOptions = extendOptions
+    config._ctors.push(Sub)
+    Sub.release = () => {
+      remove(config._ctors, Sub)
     }
     // cache constructor
     if (isFirstExtend) {

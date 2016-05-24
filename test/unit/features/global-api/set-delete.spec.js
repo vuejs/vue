@@ -1,6 +1,6 @@
 import Vue from 'vue'
 
-describe('Global Data Observer API', () => {
+describe('Global API: set/delete', () => {
   describe('Vue.set', () => {
     it('should update a vue object', done => {
       const vm = new Vue({

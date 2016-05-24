@@ -1,6 +1,6 @@
 import Vue from 'vue'
 
-describe('Global Assets API', () => {
+describe('Global API: assets', () => {
   const Test = Vue.extend()
 
   it('directive / transition / filters', () => {
