@@ -60,8 +60,6 @@ describe('Delimiters', () => {
   })
 
   it('delimiters defined globally should work on all vms', () => {
-    // save it and restore later so we don't pollute global
-    const options = Object.assign({}, Vue.options)
     Vue.options.delimiters = ['[[', ']]']
 
     const Component = Vue.extend({
@@ -84,14 +82,11 @@ describe('Delimiters', () => {
     }).$mount()
 
     expect(vm.$el.textContent).toEqual('1 - 2')
-    console.log(options)
       // restore default options
-    Vue.options = options
+    delete Vue.options.delimiters
   })
 
   it('component specific delimiters should override global delimiters', () => {
-    // save it and restore later so we don't pollute global
-    const options = Object.assign({}, Vue.options)
     Vue.options.delimiters = ['[[', ']]']
 
     const Component = Vue.extend({
@@ -116,6 +111,6 @@ describe('Delimiters', () => {
 
     expect(vm.$el.textContent).toEqual('1 - 2')
       // restore default options
-    Vue.options = options
+    delete Vue.options.delimiters
   })
 })
