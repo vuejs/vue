@@ -3,7 +3,7 @@
 import { decodeHTML } from 'entities'
 import { parseHTML } from './html-parser'
 import { parseText } from './text-parser'
-import { hyphenate, cached } from 'shared/util'
+import { hyphenate, cached, no } from 'shared/util'
 import {
   getAndRemoveAttr,
   addProp,
@@ -41,8 +41,8 @@ export function parse (
   options: CompilerOptions
 ): ASTElement | void {
   warn = options.warn || baseWarn
-  platformGetTagNamespace = options.getTagNamespace || (_ => null)
-  platformMustUseProp = options.mustUseProp || (_ => false)
+  platformGetTagNamespace = options.getTagNamespace || no
+  platformMustUseProp = options.mustUseProp || no
   platformModules = options.modules || []
   delimiters = options.delimiters
   const stack = []

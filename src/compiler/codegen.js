@@ -1,14 +1,9 @@
 /* @flow */
 
 import { genHandlers } from './events'
-import { ref } from './directives/ref'
 import { baseWarn } from './helpers'
-import { noop } from 'shared/util'
-
-const baseDirectives = {
-  ref,
-  cloak: noop
-}
+import baseDirectives from './directives/index'
+import { no } from 'shared/util'
 
 // configurable state
 let warn
@@ -32,7 +27,7 @@ export function generate (
   warn = options.warn || baseWarn
   platformModules = options.modules || []
   platformDirectives = options.directives || {}
-  isPlatformReservedTag = options.isReservedTag || (() => false)
+  isPlatformReservedTag = options.isReservedTag || no
   const code = ast ? genElement(ast) : '_h(_e("div"))'
   staticRenderFns = prevStaticRenderFns
   return {

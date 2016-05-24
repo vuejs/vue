@@ -172,6 +172,11 @@ export function toObject (arr: Array<any>): Object {
 export function noop () {}
 
 /**
+ * Always return false.
+ */
+export const no = () => false
+
+/**
  * Generate a static keys string from compiler modules.
  */
 export function genStaticKeys (modules: Array<ModuleOptions>): string {
