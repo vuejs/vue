@@ -348,6 +348,18 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  it('v-bind object', done => {
+    renderVmWithOptions({
+      data: {
+        test: { id: 'a', class: 'b', value: 'c' }
+      },
+      template: '<input v-bind="test">'
+    }, result => {
+      expect(result).toContain('<input id="a" class="b" server-rendered="true" value="c">')
+      done()
+    })
+  })
+
   it('should catch error', done => {
     renderToString(new Vue({
       render () {
