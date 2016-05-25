@@ -107,6 +107,9 @@ export default {
     if (this.modifiers.prevent) {
       handler = preventFilter(handler)
     }
+    if (this.modifiers.halt) {
+      handler = stopFilter(preventFilter(handler))
+    }
     if (this.modifiers.self) {
       handler = selfFilter(handler)
     }
