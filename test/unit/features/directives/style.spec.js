@@ -1,5 +1,4 @@
 import Vue from 'vue'
-import { extend } from 'shared/util'
 
 function checkPrefixedProp (prop) {
   var el = document.createElement('div')

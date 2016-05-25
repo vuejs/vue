@@ -4,7 +4,7 @@ import config from '../config'
 import VNode, { emptyVNode } from '../vdom/vnode'
 import { normalizeChildren } from '../vdom/helpers'
 import {
-  warn, bind, remove, extend, isObject, toObject,
+  warn, bind, remove, isObject, toObject,
   nextTick, resolveAsset, renderString
 } from '../util/index'
 

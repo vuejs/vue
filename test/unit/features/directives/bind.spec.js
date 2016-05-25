@@ -155,7 +155,7 @@ describe('Directive v-bind', () => {
   })
 
   it('warn expect object', () => {
-    const vm = new Vue({
+    new Vue({
       template: '<input v-bind="test">',
       data: {
         test: 1
