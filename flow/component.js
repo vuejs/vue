@@ -105,6 +105,8 @@ declare interface Component {
     vFor: boolean,
     isRemoval: boolean
   ) => void;
+  // apply v-bind object
+  _b: (vnode: VNodeWithData, value: any) => void;
 
   // allow dynamic method registration
   [key: string]: any

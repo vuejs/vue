@@ -1,9 +1,12 @@
 /* @flow */
 
+import config from '../config'
 import VNode, { emptyVNode } from '../vdom/vnode'
 import { normalizeChildren } from '../vdom/helpers'
-import { resolveAsset, nextTick } from '../util/index'
-import { bind, remove, extend, isObject, renderString } from 'shared/util'
+import {
+  warn, bind, remove, extend, isObject, toObject,
+  nextTick, resolveAsset, renderString
+} from '../util/index'
 
 import {
   renderElement,
@@ -135,6 +138,29 @@ export function renderMixin (Vue: Class<Component>) {
         }
       } else {
         refs[key] = ref
+      }
+    }
+  }
+
+  // apply v-bind object
+  Vue.prototype._b = function (vnode: VNodeWithData, value: any) {
+    if (value) {
+      if (!isObject(value)) {
+        process.env.NODE_ENV !== 'production' && warn(
+          'v-bind without argument expects an Object or Array value',
+          this
+        )
+      } else {
+        if (Array.isArray(value)) {
+          value = toObject(value)
+        }
+        const data = vnode.data
+        for (const key in value) {
+          const hash = config.mustUseProp(key)
+            ? data.props || (data.props = {})
+            : data.attrs || (data.attrs = {})
+          hash[key] = value[key]
+        }
       }
     }
   }
