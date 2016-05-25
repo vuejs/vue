@@ -54,6 +54,7 @@
     "entities": "1.1.x",
     "eslint": "2.9.x",
     "eslint-config-vue": "1.0.x",
+    "eslint-loader": "^1.3.0",
     "eslint-plugin-flow-vars": "0.4.x",
     "flow-bin": "0.24.x",
     "http-server": "0.9.x",
