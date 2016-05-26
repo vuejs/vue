@@ -1,21 +1,9 @@
 import Vue from 'vue'
 
 describe('Render', () => {
-  let vm, el
-
-  beforeEach(() => {
-    el = document.createElement('div')
-    document.body.appendChild(el)
-  })
-
-  afterEach(() => {
-    document.body.removeChild(vm.$el)
-  })
-
   it('render with basic usage', () => {
-    el.innerHTML = `<render :method="onRender" :args="'hello'"></render>`
-    vm = new Vue({
-      el,
+    const vm = new Vue({
+      template: `<div><render :method="onRender" :args="'hello'"></render></div>`,
       methods: {
         onRender (args) { return args }
       }
@@ -25,14 +13,14 @@ describe('Render', () => {
   })
 
   it('should render with $createElement', () => {
-    el.innerHTML = `<render :method="onRender" :args="message"></render>`
-    vm = new Vue({
-      el,
+    const vm = new Vue({
+      template: `<div><render :method="onRender" :args="message"></render></div>`,
       data: { message: 'hello world' },
       methods: {
         onRender (args) {
-          return this.$createElement('div', { class: 'message' }, [
-            this.$createElement('p', {}, [args])
+          const h = this.$createElement
+          return h('div', { class: 'message' }, [
+            h('p', {}, [args])
           ])
         }
       }
@@ -44,27 +32,26 @@ describe('Render', () => {
   })
 
   it('should render with inline elements', () => {
-    el.innerHTML = `
-      <render :method="onRender" :args="message">
-        <ul>
-          <li v-for="n in 5"></li>
-        </ul>
-      </render>
-    `
-    vm = new Vue({
-      el,
+    const vm = new Vue({
+      template: `
+        <render :method="onRender" :args="message">
+          <ul>
+            <li v-for="n in 5"></li>
+          </ul>
+        </render>
+      `,
       data: { message: 'hello world' },
       methods: {
-        onRender (args, vnode) {
-          const ul = vnode[0]
+        onRender (args, children) {
+          const ul = children[0]
           ul.children.forEach((li, i) => {
             li.data = { staticClass: `class${i}` }
           })
-          return vnode
+          return ul
         }
       }
     }).$mount()
-    const ul = vm.$el.children[0]
+    const ul = vm.$el
     expect(ul.tagName).toBe('UL')
     for (let i = 0; i < ul.children.length; i++) {
       const li = ul.children[i]
@@ -94,9 +81,8 @@ describe('Render', () => {
         }
       }
     }
-    el.innerHTML = `<render :method="onRenderModal" :args="title"></render>`
-    vm = new Vue({
-      el,
+    const vm = new Vue({
+      template: `<div><render :method="onRenderModal" :args="title"></render></div>`,
       data: {
         shown: true,
         title: 'hello modal'
@@ -120,5 +106,29 @@ describe('Render', () => {
     }).then(() => {
       expect(vm.$el.querySelector('.modal-container').style.display).toBe('none')
     }).then(done)
+  })
+
+  it('should warn no method', () => {
+    new Vue({
+      template: '<render></render>'
+    }).$mount()
+    expect('method attribute is required on <render>').toHaveBeenWarned()
+  })
+
+  it('should warn method/arg usage without v-bind', () => {
+    new Vue({
+      template: '<render method="a"></render>'
+    }).$mount()
+    expect('<render> method should use a dynamic binding').toHaveBeenWarned()
+  })
+
+  it('should warn non dynamic args', () => {
+    new Vue({
+      template: '<render :method="a" args="b"></render>',
+      methods: {
+        a: () => {}
+      }
+    }).$mount()
+    expect('<render> args should use a dynamic binding').toHaveBeenWarned()
   })
 })
