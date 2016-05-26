@@ -1,6 +1,6 @@
 import Vue from 'vue'
 
-describe('Name', () => {
+describe('Options name', () => {
   it('should warn when giving instance a name', () => {
     new Vue({
       name: 'SuperVue'

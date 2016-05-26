@@ -1,7 +1,7 @@
 import Vue from 'vue'
 const mergeOptions = Vue.util.mergeOptions
 
-describe('Mixins', () => {
+describe('Options mixins', () => {
   it('vm should have options from mixin', () => {
     const mixin = {
       directives: {
@@ -24,7 +24,7 @@ describe('Mixins', () => {
     expect(vm.$options.directives.c).toBeDefined()
   })
 
-  it('should call hooks from mixins first, mixin methods should not override defined method', () => {
+  it('should call hooks from mixins first', () => {
     const a = {}
     const b = {}
     const c = {}
@@ -37,20 +37,14 @@ describe('Mixins', () => {
       directives: {
         a: a
       },
-      created: f1,
-      methods: {
-        xyz: f1
-      }
+      created: f1
     }
     const mixinB = {
       b: 1,
       directives: {
         b: b
       },
-      created: f2,
-      methods: {
-        xyz: f2
-      }
+      created: f2
     }
     const result = mergeOptions({}, {
       directives: {
@@ -58,10 +52,7 @@ describe('Mixins', () => {
       },
       template: 'bar',
       mixins: [mixinA, mixinB],
-      created: f3,
-      methods: {
-        xyz: f3
-      }
+      created: f3
     })
     expect(result.a).toBe(1)
     expect(result.b).toBe(1)
@@ -71,7 +62,29 @@ describe('Mixins', () => {
     expect(result.created[0]).toBe(f1)
     expect(result.created[1]).toBe(f2)
     expect(result.created[2]).toBe(f3)
-    expect(result.methods.xyz).toBe(f3)
     expect(result.template).toBe('bar')
+  })
+
+  it('mixin methods should not override defined method', () => {
+    const f1 = function () {}
+    const f2 = function () {}
+    const f3 = function () {}
+    const mixinA = {
+      methods: {
+        xyz: f1
+      }
+    }
+    const mixinB = {
+      methods: {
+        xyz: f2
+      }
+    }
+    const result = mergeOptions({}, {
+      mixins: [mixinA, mixinB],
+      methods: {
+        xyz: f3
+      }
+    })
+    expect(result.methods.xyz).toBe(f3)
   })
 })

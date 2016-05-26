@@ -1,6 +1,6 @@
 import Vue from 'vue'
 
-describe('Parent', () => {
+describe('Options parent', () => {
   it('should work', () => {
     const parent = new Vue({}).$mount()
 
