@@ -129,6 +129,9 @@ describe('Directive v-model text', () => {
 
   it('warn invalid tag', () => {
     new Vue({
+      data: {
+        test: 'foo'
+      },
       template: '<div v-model="test"></div>'
     }).$mount()
     expect('v-model is not supported on element type: <div>').toHaveBeenWarned()
