@@ -182,7 +182,7 @@ function genDirectives (el: ASTElement): string | void {
     if (gen) {
       // compile-time directive that manipulates AST.
       // returns true if it also needs a runtime counterpart.
-      needRuntime = !!gen(el, dir)
+      needRuntime = !!gen(el, dir, warn)
     }
     if (needRuntime) {
       hasRuntime = true
