@@ -225,6 +225,9 @@ function genText (text: ASTText | ASTExpression): string {
 }
 
 function genRender (el: ASTElement): string {
+  if (!el.renderMethod) {
+    return 'void 0'
+  }
   const children = genChildren(el)
   return `${el.renderMethod}(${
     el.renderArgs || ''

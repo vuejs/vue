@@ -117,6 +117,13 @@ describe('codegen', () => {
     )
   })
 
+  it('generate render tag with `method` is not dynamic binding', () => {
+    assertCodegen(
+      '<render method="onRender"></render>',
+      `with(this){return void 0}`
+    )
+  })
+
   it('generate single slot', () => {
     assertCodegen(
       '<slot></slot>',
