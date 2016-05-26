@@ -2,6 +2,7 @@ import Vue from 'vue'
 import '../helpers/to-have-been-warned.js'
 import '../helpers/wait-for-update.js'
 import '../helpers/trigger-event.js'
+import '../helpers/vdom.js'
 
 Vue.config.preserveWhitespace = false
 

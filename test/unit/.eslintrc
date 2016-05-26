@@ -4,6 +4,7 @@
   },
   "globals": {
     "waitForUpdate": true,
-    "triggerEvent": true
+    "triggerEvent": true,
+    "createTextVNode": true
   }
 }
