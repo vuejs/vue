@@ -26,8 +26,8 @@ export function appendChild (node: Node, child: Node) {
   node.appendChild(child)
 }
 
-export function parentNode (node: Node): ?Element {
-  return node.parentElement
+export function parentNode (node: Node): ?Node {
+  return node.parentNode
 }
 
 export function nextSibling (node: Node): ?Node {

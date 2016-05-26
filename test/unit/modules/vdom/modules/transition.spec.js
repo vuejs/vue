@@ -1,9 +1,9 @@
 import Vue from 'vue'
 import { patch } from 'web/runtime/patch'
 import VNode from 'core/vdom/vnode'
-import { inBrowser } from 'core/util/index'
+import { isIE9 } from 'web/util/index'
 
-if (inBrowser) {
+if (!isIE9) {
   describe('trasition module', () => {
     it('should transit with basic transition', () => {
       const vm = new Vue()

@@ -62,7 +62,7 @@ describe('Directive v-model text', () => {
   })
 
   if (isIE9) {
-    it('cut and delete', done => {
+    it('IE9 selectionchange', done => {
       const vm = new Vue({
         data: {
           test: 'foo'
@@ -71,11 +71,13 @@ describe('Directive v-model text', () => {
       }).$mount()
       const input = vm.$el
       input.value = 'bar'
-      triggerEvent(input, 'cut')
+      document.body.appendChild(input)
+      input.focus()
+      triggerEvent(input, 'selectionchange')
       waitForUpdate(() => {
         expect(vm.test).toBe('bar')
         input.value = 'a'
-        triggerEvent(input, 'keyup', (e) => { e.keyCode = 8 })
+        triggerEvent(input, 'selectionchange')
         expect(vm.test).toBe('a')
       }).then(done)
     })

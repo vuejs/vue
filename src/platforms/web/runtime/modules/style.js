@@ -42,7 +42,8 @@ function updateStyle (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   for (name in style) {
     cur = style[name]
     if (cur !== oldStyle[name]) {
-      elm.style[normalize(name)] = cur
+      // ie9 setting to null has no effect, must use empty string
+      elm.style[normalize(name)] = cur || ''
     }
   }
   // clone the style for future updates,

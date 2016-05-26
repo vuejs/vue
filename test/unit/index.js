@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import 'classlist-polyfill' // for IE9
 import '../helpers/to-have-been-warned.js'
 import '../helpers/wait-for-update.js'
 import '../helpers/trigger-event.js'
