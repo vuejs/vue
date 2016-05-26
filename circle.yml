@@ -2,10 +2,6 @@ machine:
   node:
     version: 5
 
-general:
-  branches:
-    only: master
-
 test:
   override:
     - bash ./build/ci.sh
