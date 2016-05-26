@@ -303,12 +303,14 @@ describe('Util - Option merging', function () {
     var f4 = function () {}
     var mixinA = { a: 1, directives: { a: a }, created: f2 }
     var mixinB = { b: 1, directives: { b: b }, created: f3 }
+    var mixinC = Vue.extend({ c: 1 })
     var res = merge(
       { a: 2, directives: { c: c }, created: [f1] },
-      { directives: { d: d }, mixins: [mixinA, mixinB], created: f4 }
+      { directives: { d: d }, mixins: [mixinA, mixinB, mixinC], created: f4 }
     )
     expect(res.a).toBe(1)
     expect(res.b).toBe(1)
+    expect(res.c).toBe(1)
     expect(res.directives.a).toBe(a)
     expect(res.directives.b).toBe(b)
     expect(res.directives.c).toBe(c)
