@@ -34,7 +34,8 @@ export function renderElement (
   data?: VNodeData,
   namespace?: string
 ): VNode | void {
-  const context: Component = this
+  // make sure to expose real self instead of proxy
+  const context: Component = this._self
   const parent: Component | null = renderState.activeInstance
   if (!parent) {
     process.env.NODE_ENV !== 'production' && warn(

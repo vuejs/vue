@@ -45,6 +45,7 @@ declare interface Component {
   // private properties
   _uid: number;
   _isVue: true;
+  _self: Component;
   _renderProxy: Component;
   _watcher: Watcher;
   _watchers: Array<Watcher>;
