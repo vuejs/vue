@@ -35,6 +35,29 @@ describe('hydration', () => {
     ])
     patch(node0, vnode1)
     expect(result.length).toBe(1)
+
+    function traverseAndAssert (vnode, element) {
+      expect(vnode.elm).toBe(element)
+      if (vnode.children) {
+        vnode.children.forEach((node, i) => {
+          traverseAndAssert(node, element.childNodes[i])
+        })
+      }
+    }
+    // ensure vnodes are correctly associated with actual DOM
+    traverseAndAssert(vnode1, node0)
+
+    // check update
+    const vnode2 = new VNode('div', { props: { id: 'foo' }}, [
+      new VNode('span', { props: { id: 'bar' }}),
+      new VNode('div', { hook: { init }}, [
+        new VNode('span', {}),
+        new VNode('span', {})
+      ])
+    ])
+    patch(vnode1, vnode2)
+    expect(node0.id).toBe('foo')
+    expect(node0.children[0].id).toBe('bar')
   })
 
   it('should hydrate components when server-rendered DOM tree is same as virtual DOM tree', () => {
