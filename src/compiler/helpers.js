@@ -70,14 +70,21 @@ export function getBindingAttr (
   el: ASTElement,
   name: string,
   getStatic?: boolean
-) {
-  const staticValue = getStatic !== false && getAndRemoveAttr(el, name)
-  return staticValue || staticValue === ''
-    ? JSON.stringify(staticValue)
-    : (getAndRemoveAttr(el, ':' + name) || getAndRemoveAttr(el, 'v-bind:' + name))
+): ?string {
+  const dynamicValue =
+    getAndRemoveAttr(el, ':' + name) ||
+    getAndRemoveAttr(el, 'v-bind:' + name)
+  if (dynamicValue != null) {
+    return dynamicValue
+  } else if (getStatic !== false) {
+    const staticValue = getAndRemoveAttr(el, name)
+    if (staticValue != null) {
+      return JSON.stringify(staticValue)
+    }
+  }
 }
 
-export function getAndRemoveAttr (el: ASTElement, name: string) {
+export function getAndRemoveAttr (el: ASTElement, name: string): ?string {
   let val
   if ((val = el.attrsMap[name]) != null) {
     el.attrsMap[name] = null
