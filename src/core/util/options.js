@@ -297,7 +297,11 @@ export function mergeOptions (
   }
   if (child.mixins) {
     for (let i = 0, l = child.mixins.length; i < l; i++) {
-      parent = mergeOptions(parent, child.mixins[i], vm)
+      let mixin = child.mixins[i]
+      if (mixin.prototype instanceof Vue) {
+        mixin = mixin.options
+      }
+      parent = mergeOptions(parent, mixin, vm)
     }
   }
   const options = {}
