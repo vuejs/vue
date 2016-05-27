@@ -18,7 +18,7 @@ export default function model (
   } else {
     switch (el.attrsMap.type) {
       case 'checkbox':
-        genCheckboxModel(el, value)
+        genCheckboxModel(el, value, warn)
         break
       case 'radio':
         genRadioModel(el, value, warn)
@@ -29,17 +29,27 @@ export default function model (
   }
 }
 
-function genCheckboxModel (el: ASTElement, value: ?string) {
+function genCheckboxModel (el: ASTElement, value: ?string, warn: Function) {
+  if (process.env.NODE_ENV !== 'production' &&
+    el.attrsMap.checked != null) {
+    warn(
+      `<${el.tag} v-model="${value}" checked>:\n` +
+      `inline checked attributes will be ignored when using v-model. ` +
+      'Declare initial values in the component\'s data option instead.'
+    )
+  }
   const valueBinding = getBindingAttr(el, 'value')
+  const trueValueBinding = getBindingAttr(el, 'true-value') || 'true'
+  const falseValueBinding = getBindingAttr(el, 'false-value') || 'false'
   addProp(el, 'checked',
     `Array.isArray(${value})` +
       `?(${value}).indexOf(${valueBinding})>-1` +
-      `:!!(${value})`
+      `:(${value})==(${trueValueBinding})`
   )
   addHandler(el, 'change',
     `var $$a=${value},` +
         '$$el=$event.target,' +
-        '$$c=$$el.checked;' +
+        `$$c=$$el.checked?(${trueValueBinding}):(${falseValueBinding});` +
     'if(Array.isArray($$a)){' +
       `var $$v=${valueBinding},` +
           '$$i=$$a.indexOf($$v);' +
@@ -50,17 +60,16 @@ function genCheckboxModel (el: ASTElement, value: ?string) {
 }
 
 function genRadioModel (el: ASTElement, value: ?string, warn: Function) {
-  if (process.env.NODE_ENV !== 'production') {
-    if (el.attrsMap.checked != null) {
-      warn(
-        `<${el.tag} v-model="${value}" checked>:\n` +
-        `inline checked attributes will be ignored when using v-model. ` +
-        'Declare initial values in the component\'s data option instead.'
-      )
-    }
+  if (process.env.NODE_ENV !== 'production' &&
+    el.attrsMap.checked != null) {
+    warn(
+      `<${el.tag} v-model="${value}" checked>:\n` +
+      `inline checked attributes will be ignored when using v-model. ` +
+      'Declare initial values in the component\'s data option instead.'
+    )
   }
   const valueBinding = getBindingAttr(el, 'value')
-  addProp(el, 'checked', `(${value}==${valueBinding})`)
+  addProp(el, 'checked', `(${value})==(${valueBinding})`)
   addHandler(el, 'change', `${value}=${valueBinding}`)
 }
 
