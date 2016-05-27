@@ -21,7 +21,7 @@ export default function model (
         genCheckboxModel(el, value)
         break
       case 'radio':
-        genRadioModel(el, value)
+        genRadioModel(el, value, warn)
         break
       default:
         return genDefaultModel(el, value, modifiers, warn)
@@ -49,7 +49,16 @@ function genCheckboxModel (el: ASTElement, value: ?string) {
   )
 }
 
-function genRadioModel (el: ASTElement, value: ?string) {
+function genRadioModel (el: ASTElement, value: ?string, warn: Function) {
+  if (process.env.NODE_ENV !== 'production') {
+    if (el.attrsMap.checked != null) {
+      warn(
+        `<${el.tag} v-model="${value}" checked>:\n` +
+        `inline checked attributes will be ignored when using v-model. ` +
+        'Declare initial values in the component\'s data option instead.'
+      )
+    }
+  }
   const valueBinding = getBindingAttr(el, 'value')
   addProp(el, 'checked', `(${value}==${valueBinding})`)
   addHandler(el, 'change', `${value}=${valueBinding}`)
