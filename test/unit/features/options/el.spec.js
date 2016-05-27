@@ -42,8 +42,14 @@ describe('Options el', () => {
   })
 
   it('svg element', () => {
-    const el = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
-    el.innerHTML = '<text :x="x" :y="y" :fill="color">{{text}}</text>'
+    const ns = 'http://www.w3.org/2000/svg'
+    const el = document.createElementNS(ns, 'svg')
+    const text = document.createElementNS(ns, 'text')
+    text.setAttribute(':x', 'x')
+    text.setAttribute(':y', 'y')
+    text.setAttribute(':fill', 'color')
+    text.textContent = '{{text}}'
+    el.appendChild(text)
     const vm = new Vue({
       el,
       data: {
