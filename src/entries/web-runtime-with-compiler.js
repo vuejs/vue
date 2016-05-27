@@ -29,7 +29,7 @@ Vue.prototype.$mount = function (el: string | Element): Component {
         if (process.env.NODE_ENV !== 'production') {
           warn('invalid template option:' + template, this)
         }
-        return mount.call(this, el)
+        return this
       }
     } else if (el) {
       template = getOuterHTML(el)
