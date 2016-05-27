@@ -184,9 +184,8 @@ function resolveSlots (
     const children = normalizeChildren(renderChildren)
     const slots = {}
     const defaultSlot = []
-    let i = children.length
     let name, child
-    while (i--) {
+    for (let i = 0, l = children.length; i < l; i++) {
       child = children[i]
       if ((name = child.data && child.data.slot)) {
         const slot = (slots[name] || (slots[name] = []))
