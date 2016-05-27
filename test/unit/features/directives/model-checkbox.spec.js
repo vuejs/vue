@@ -39,9 +39,8 @@ describe('Directive v-model checkbox', () => {
     vm.$el.click()
     expect(vm.$el.checked).toBe(true)
     expect(vm.test).toBe(1)
+    vm.test = 2
     waitForUpdate(() => {
-      vm.test = 2
-    }).then(() => {
       expect(vm.$el.checked).toBe(false)
       vm.test = 1
     }).then(() => {
@@ -71,9 +70,8 @@ describe('Directive v-model checkbox', () => {
     expect(vm.test).toEqual(['2'])
     vm.$el.children[0].click()
     expect(vm.test).toEqual(['2', '1'])
+    vm.test = ['1']
     waitForUpdate(() => {
-      vm.test = ['1']
-    }).then(() => {
       expect(vm.$el.children[0].checked).toBe(true)
       expect(vm.$el.children[1].checked).toBe(false)
     }).then(done)
@@ -100,9 +98,8 @@ describe('Directive v-model checkbox', () => {
     expect(vm.test).toEqual([2])
     vm.$el.children[0].click()
     expect(vm.test).toEqual([2, 1])
+    vm.test = [1]
     waitForUpdate(() => {
-      vm.test = [1]
-    }).then(() => {
       expect(vm.$el.children[0].checked).toBe(true)
       expect(vm.$el.children[1].checked).toBe(false)
     }).then(done)
