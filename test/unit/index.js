@@ -1,11 +1,12 @@
 import Vue from 'vue'
 import 'classlist-polyfill' // for IE9
-import '../helpers/to-have-been-warned.js'
-import '../helpers/wait-for-update.js'
-import '../helpers/trigger-event.js'
-import '../helpers/vdom.js'
 
+// ignore whitespace in tests
 Vue.config.preserveWhitespace = false
+
+// import all helpers
+const helpersContext = require.context('../helpers', true)
+helpersContext.keys().forEach(helpersContext)
 
 // require all test files
 const testsContext = require.context('./', true, /\.spec$/)
