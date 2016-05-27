@@ -1,6 +1,7 @@
 /* @flow */
 
 import Watcher from '../observer/watcher'
+import { emptyVNode } from '../vdom/vnode'
 import { warn, validateProp, remove, noop } from '../util/index'
 import { observerState } from '../observer/index'
 import { updateListeners } from '../vdom/helpers'
@@ -26,7 +27,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
   Vue.prototype._mount = function (): Component {
     const vm: Component = this
     if (!vm.$options.render) {
-      vm.$options.render = () => vm.$createElement('div')
+      vm.$options.render = () => emptyVNode
       if (process.env.NODE_ENV !== 'production') {
         if (vm.$options.template) {
           warn(
