@@ -47,7 +47,7 @@ declare type ASTElement = {
   children: Array<ASTNode>,
 
   static?: boolean,
-  staticRoot?: true,
+  staticRoot?: boolean,
 
   text?: string,
   attrs?: Array<{ name: string, value: string }>,

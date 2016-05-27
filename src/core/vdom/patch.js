@@ -11,7 +11,7 @@ import VNode from './vnode'
 import { isPrimitive, renderString, warn } from '../util/index'
 
 const emptyNode = new VNode('', {}, [])
-const hooks = ['create', 'update', 'remove', 'destroy']
+const hooks = ['create', 'update', 'postpatch', 'remove', 'destroy']
 
 function isUndef (s) {
   return s === undefined
@@ -264,8 +264,7 @@ export function createPatchFunction (backend) {
     }
     if (isDef(vnode.data)) {
       for (i = 0; i < cbs.update.length; ++i) cbs.update[i](oldVnode, vnode)
-      i = vnode.data.hook
-      if (isDef(i) && isDef(i = i.update)) i(oldVnode, vnode)
+      if (isDef(hook) && isDef(i = hook.update)) i(oldVnode, vnode)
     }
     if (isUndef(vnode.text)) {
       if (isDef(oldCh) && isDef(ch)) {
@@ -281,8 +280,9 @@ export function createPatchFunction (backend) {
     } else if (oldVnode.text !== vnode.text) {
       nodeOps.setTextContent(elm, vnode.text)
     }
-    if (isDef(hook) && isDef(i = hook.postpatch)) {
-      i(oldVnode, vnode)
+    if (isDef(vnode.data)) {
+      for (i = 0; i < cbs.postpatch.length; ++i) cbs.postpatch[i](oldVnode, vnode)
+      if (isDef(hook) && isDef(i = hook.postpatch)) i(oldVnode, vnode)
     }
   }
 
