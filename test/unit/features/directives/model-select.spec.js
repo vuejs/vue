@@ -189,27 +189,6 @@ describe('Directive v-model select', () => {
     }).then(done)
   })
 
-  it('select persist non-selected on append', function () {
-    const vm = new Vue({
-      data: {
-        test: null
-      },
-      template:
-        '<select v-model="test">' +
-          '<option>a</option>' +
-          '<option>b</option>' +
-          '<option>c</option>' +
-        '</select>'
-    }).$mount()
-    document.body.appendChild(vm.$el)
-    expect(vm.$el.value).toBe('')
-    expect(vm.$el.selectedIndex).toBe(-1)
-    document.body.removeChild(vm.$el)
-    document.body.appendChild(vm.$el)
-    expect(vm.$el.value).toBe('')
-    expect(vm.$el.selectedIndex).toBe(-1)
-  })
-
   it('should warn inline selected', () => {
     const vm = new Vue({
       data: {
