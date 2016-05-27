@@ -26,7 +26,10 @@ Vue.prototype.$mount = function (el: string | Element): Component {
       } else if (template.nodeType) {
         template = template.innerHTML
       } else {
-        warn('invalid template option:' + template, this)
+        if (process.env.NODE_ENV !== 'production') {
+          warn('invalid template option:' + template, this)
+        }
+        return this
       }
     } else if (el) {
       template = getOuterHTML(el)
