@@ -29,6 +29,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     if (!vm.$options.render) {
       vm.$options.render = () => emptyVNode
       if (process.env.NODE_ENV !== 'production') {
+        /* istanbul ignore if */
         if (vm.$options.template) {
           warn(
             'You are using the runtime-only build of Vue where the template ' +
@@ -120,7 +121,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
 
   Vue.prototype.$destroy = function () {
     const vm: Component = this
-    if (vm._isDestroyed) {
+    if (vm._isBeingDestroyed) {
       return
     }
     callHook(vm, 'beforeDestroy')
@@ -131,6 +132,9 @@ export function lifecycleMixin (Vue: Class<Component>) {
       remove(parent.$children, vm)
     }
     // teardown watchers
+    if (vm._watcher) {
+      vm._watcher.teardown()
+    }
     let i = vm._watchers.length
     while (i--) {
       vm._watchers[i].teardown()
