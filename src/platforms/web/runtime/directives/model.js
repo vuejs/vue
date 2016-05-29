@@ -57,12 +57,6 @@ export default {
         trigger(el, 'change')
       }
     }
-  },
-  unbind (el, binding, vnode) {
-    if (vnode.tag !== 'select' && !isAndroid) {
-      el.removeEventListener('compositionstart', onCompositionStart)
-      el.removeEventListener('compositionend', onCompositionEnd)
-    }
   }
 }
 
