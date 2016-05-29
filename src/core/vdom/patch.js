@@ -383,6 +383,8 @@ export function createPatchFunction (backend) {
         if (parent !== null) {
           nodeOps.insertBefore(parent, vnode.elm, nodeOps.nextSibling(elm))
           removeVnodes(parent, [oldVnode], 0, 0)
+        } else if (isDef(oldVnode.tag)) {
+          invokeDestroyHook(oldVnode)
         }
       }
     }

@@ -244,9 +244,10 @@ describe('hooks', () => {
     ])
     const vnode2 = new VNode('div')
     patch1(vnode0, vnode1)
+    expect(destroyed).toBe(1) // should invoke for replaced root nodes too
     patch1(vnode1, vnode2)
     expect(created).toBe(5)
-    expect(destroyed).toBe(4)
+    expect(destroyed).toBe(5)
   })
 
   it('should not invoke `create` and `remove` module hook for text nodes', () => {
@@ -293,9 +294,10 @@ describe('hooks', () => {
     ])
     const vnode2 = new VNode('div')
     patch1(vnode0, vnode1)
+    expect(destroyed).toBe(1) // should invoke for replaced root nodes too
     patch1(vnode1, vnode2)
     expect(created).toBe(5)
-    expect(destroyed).toBe(4)
+    expect(destroyed).toBe(5)
   })
 
   it('should call `create` listener before inserted into parent but after children', () => {
