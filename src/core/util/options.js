@@ -285,11 +285,6 @@ export function mergeOptions (
   normalizeComponents(child)
   normalizeProps(child)
   normalizeDirectives(child)
-  if (process.env.NODE_ENV !== 'production') {
-    if (child.propsData && !vm) {
-      warn('propsData can only be used as an instantiation option.')
-    }
-  }
   const extendsFrom = child.extends
   if (extendsFrom) {
     parent = typeof extendsFrom === 'function'
