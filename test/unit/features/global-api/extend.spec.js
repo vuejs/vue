@@ -50,4 +50,67 @@ describe('Global API: extend', () => {
     }).$mount()
     expect(vm.$el.innerHTML).toBe('<span>foo</span><span>bar</span>')
   })
+
+  it('should merge lifecycle hooks', () => {
+    const calls = []
+    const A = Vue.extend({
+      created () {
+        calls.push(1)
+      }
+    })
+    const B = A.extend({
+      created () {
+        calls.push(2)
+      }
+    })
+    new B({
+      created () {
+        calls.push(3)
+      }
+    })
+    expect(calls).toEqual([1, 2, 3])
+  })
+
+  it('should merge methods', () => {
+    const A = Vue.extend({
+      methods: {
+        a () { return this.n }
+      }
+    })
+    const B = A.extend({
+      methods: {
+        b () { return this.n + 1 }
+      }
+    })
+    const b = new B({
+      data: { n: 0 },
+      methods: {
+        c () { return this.n + 2 }
+      }
+    })
+    expect(b.a()).toBe(0)
+    expect(b.b()).toBe(1)
+    expect(b.c()).toBe(2)
+  })
+
+  it('should merge assets', () => {
+    const A = Vue.extend({
+      components: {
+        aa: {
+          template: '<div>A</div>'
+        }
+      }
+    })
+    const B = A.extend({
+      components: {
+        bb: {
+          template: '<div>B</div>'
+        }
+      }
+    })
+    const b = new B({
+      template: '<div><aa></aa><bb></bb></div>'
+    }).$mount()
+    expect(b.$el.innerHTML).toBe('<div>A</div><div>B</div>')
+  })
 })
