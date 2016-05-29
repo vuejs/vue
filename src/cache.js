@@ -33,12 +33,12 @@ var p = Cache.prototype
 
 p.put = function (key, value) {
   var removed
-  if (this.size === this.limit) {
-    removed = this.shift()
-  }
 
   var entry = this.get(key, true)
   if (!entry) {
+    if (this.size === this.limit) {
+      removed = this.shift()
+    }
     entry = {
       key: key
     }
