@@ -34,6 +34,7 @@ function genClassFromData (data: Object): string {
   if (staticClass || dynamicClass) {
     return concat(staticClass, stringifyClass(dynamicClass))
   }
+  /* istanbul ignore next */
   return ''
 }
 
@@ -66,5 +67,6 @@ export function stringifyClass (value: any): string {
     }
     return res.slice(0, -1)
   }
+  /* istanbul ignore next */
   return res
 }

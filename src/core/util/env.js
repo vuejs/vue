@@ -39,7 +39,7 @@ export const nextTick = (function () {
     }
   }
 
-  /* istanbul ignore if */
+  /* istanbul ignore else */
   if (typeof MutationObserver !== 'undefined' && !(isWechat && isIos)) {
     let counter = 1
     const observer = new MutationObserver(nextTickHandler)

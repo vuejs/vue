@@ -62,4 +62,9 @@ describe('Options el', () => {
     expect(vm.$el.childNodes[0].getAttribute('fill')).toBe(vm.color)
     expect(vm.$el.childNodes[0].textContent).toBe(vm.text)
   })
+
+  it('warn cannot find element', () => {
+    new Vue({ el: '#non-existent' })
+    expect('Cannot find element: #non-existent').toHaveBeenWarned()
+  })
 })

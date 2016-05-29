@@ -36,6 +36,7 @@ export default {
         el.addEventListener('compositionstart', onCompositionStart)
         el.addEventListener('compositionend', onCompositionEnd)
       }
+      /* istanbul ignore if */
       if (isIE9) {
         el.vmodel = true
       }

@@ -26,13 +26,6 @@ export function addDirective (
   (el.directives || (el.directives = [])).push({ name, value, arg, modifiers })
 }
 
-export function addStyleBinding (el: ASTElement, name: string, value: string) {
-  const code = `"${name}":${value}`
-  el.styleBinding = el.styleBinding
-    ? el.styleBinding.replace(/}\s?$/, `,${code}}`)
-    : `{${code}}`
-}
-
 export function addHook (el: ASTElement, name: string, code: string) {
   const hooks = el.hooks || (el.hooks = {})
   const hook = hooks[name]
