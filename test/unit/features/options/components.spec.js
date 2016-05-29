@@ -73,4 +73,11 @@ describe('Options components', () => {
     })
     expect('Do not use built-in or reserved HTML elements as component').toHaveBeenWarned()
   })
+
+  it('warn non-existent', () => {
+    new Vue({
+      template: '<test></test>'
+    }).$mount()
+    expect('Unknown custom element: <test>').toHaveBeenWarned()
+  })
 })

@@ -88,4 +88,12 @@ describe('Filters', () => {
     }).$mount()
     expect(vm.$el.textContent).toBe('3,2,1')
   })
+
+  it('warn non-existent', () => {
+    new Vue({
+      template: '<div>{{ msg | upper }}</div>',
+      data: { msg: 'foo' }
+    }).$mount()
+    expect('Failed to resolve filter: upper').toHaveBeenWarned()
+  })
 })

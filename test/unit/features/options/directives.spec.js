@@ -89,4 +89,11 @@ describe('Options directives', () => {
       expect(spy).toHaveBeenCalledWith('bar', 'foo')
     }).then(done)
   })
+
+  it('warn non-existent', () => {
+    new Vue({
+      template: '<div v-test="a"></div>'
+    }).$mount()
+    expect('Failed to resolve directive: test').toHaveBeenWarned()
+  })
 })
