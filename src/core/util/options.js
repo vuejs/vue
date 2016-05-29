@@ -206,7 +206,7 @@ const defaultStrat = function (parentVal: any, childVal: any): any {
  * Make sure component options get converted to actual
  * constructors.
  */
-function guardComponents (options: Object) {
+function normalizeComponents (options: Object) {
   if (options.components) {
     const components = options.components
     let def
@@ -230,7 +230,7 @@ function guardComponents (options: Object) {
  * Ensure all props option syntax are normalized into the
  * Object-based format.
  */
-function guardProps (options: Object) {
+function normalizeProps (options: Object) {
   const props = options.props
   if (!props) return
   const res = {}
@@ -261,12 +261,13 @@ function guardProps (options: Object) {
 /**
  * Normalize raw function directives into object format.
  */
-function guardDirectives (options: Object) {
+function normalizeDirectives (options: Object) {
   const dirs = options.directives
   if (dirs) {
     for (const key in dirs) {
-      if (typeof dirs[key] === 'function') {
-        dirs[key] = { update: dirs[key] }
+      const def = dirs[key]
+      if (typeof def === 'function') {
+        dirs[key] = { bind: def, update: def }
       }
     }
   }
@@ -281,9 +282,9 @@ export function mergeOptions (
   child: Object,
   vm?: Component
 ): Object {
-  guardComponents(child)
-  guardProps(child)
-  guardDirectives(child)
+  normalizeComponents(child)
+  normalizeProps(child)
+  normalizeDirectives(child)
   if (process.env.NODE_ENV !== 'production') {
     if (child.propsData && !vm) {
       warn('propsData can only be used as an instantiation option.')
