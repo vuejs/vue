@@ -15,13 +15,6 @@ describe('Options data', () => {
     }).then(done)
   })
 
-  it('should warn non-function during extend', () => {
-    Vue.extend({
-      data: { msg: 'foo' }
-    })
-    expect('The "data" option should be a function').toHaveBeenWarned()
-  })
-
   it('should merge data properly', () => {
     const Test = Vue.extend({
       data () {
@@ -59,5 +52,19 @@ describe('Options data', () => {
     })
     expect(vm.obj.a).toBe(1)
     expect(vm.obj.b).toBe(2)
+  })
+
+  it('should warn non-function during extend', () => {
+    Vue.extend({
+      data: { msg: 'foo' }
+    })
+    expect('The "data" option should be a function').toHaveBeenWarned()
+  })
+
+  it('should warn non object return', () => {
+    new Vue({
+      data () {}
+    })
+    expect('data functions should return an object').toHaveBeenWarned()
   })
 })
