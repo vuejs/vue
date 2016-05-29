@@ -87,4 +87,26 @@ describe('Options mixins', () => {
     })
     expect(result.methods.xyz).toBe(f3)
   })
+
+  it('should accept constructors as mixins', () => {
+    const mixin = Vue.extend({
+      directives: {
+        c: {}
+      },
+      methods: {
+        a: function () {}
+      }
+    })
+
+    const vm = new Vue({
+      mixins: [mixin],
+      methods: {
+        b: function () {}
+      }
+    }).$mount()
+
+    expect(vm.a).toBeDefined()
+    expect(vm.b).toBeDefined()
+    expect(vm.$options.directives.c).toBeDefined()
+  })
 })
