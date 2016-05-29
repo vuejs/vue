@@ -92,7 +92,7 @@ describe('Options directives', () => {
 
   it('warn non-existent', () => {
     new Vue({
-      template: '<div v-test="a"></div>'
+      template: '<div v-test></div>'
     }).$mount()
     expect('Failed to resolve directive: test').toHaveBeenWarned()
   })
