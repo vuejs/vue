@@ -268,4 +268,48 @@ describe('Component slot', () => {
     )
     Vue.config.preserveWhitespace = false
   })
+
+  it('programmatic access to $slots', () => {
+    const vm = new Vue({
+      template: '<test><p slot="a">A</p><div>C</div><p slot="b">B</div></p></test>',
+      components: {
+        test: {
+          render () {
+            expect(this.$slots.a.length).toBe(1)
+            expect(this.$slots.a[0].tag).toBe('p')
+            expect(this.$slots.a[0].children.length).toBe(1)
+            expect(this.$slots.a[0].children[0].text).toBe('A')
+
+            expect(this.$slots.b.length).toBe(1)
+            expect(this.$slots.b[0].tag).toBe('p')
+            expect(this.$slots.b[0].children.length).toBe(1)
+            expect(this.$slots.b[0].children[0].text).toBe('B')
+
+            expect(this.$slots.default.length).toBe(1)
+            expect(this.$slots.default[0].tag).toBe('div')
+            expect(this.$slots.default[0].children.length).toBe(1)
+            expect(this.$slots.default[0].children[0].text).toBe('C')
+
+            return this.$slots.default[0]
+          }
+        }
+      }
+    }).$mount()
+    expect(vm.$el.tagName).toBe('DIV')
+    expect(vm.$el.textContent).toBe('C')
+  })
+
+  it('warn if user directly returns array', () => {
+    new Vue({
+      template: '<test><div></div></test>',
+      components: {
+        test: {
+          render () {
+            return this.$slots.default
+          }
+        }
+      }
+    }).$mount()
+    expect('Render function should return a single root node').toHaveBeenWarned()
+  })
 })
