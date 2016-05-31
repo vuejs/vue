@@ -57,9 +57,18 @@ function initData (vm: Component) {
   }
   // proxy data on instance
   const keys = Object.keys(data)
+  const props = vm.$options.props
   let i = keys.length
   while (i--) {
-    proxy(vm, keys[i])
+    if (props && hasOwn(props, keys[i])) {
+      process.env.NODE_ENV !== 'production' && warn(
+        `The data property "${keys[i]}" is already declared as a prop. ` +
+        `Use prop default value instead.`,
+        vm
+      )
+    } else {
+      proxy(vm, keys[i])
+    }
   }
   // observe data
   observe(data)

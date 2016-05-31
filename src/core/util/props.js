@@ -1,6 +1,6 @@
 /* @flow */
 
-import { hasOwn, isObject, isPlainObject } from 'shared/util'
+import { hasOwn, isObject, isPlainObject, capitalize, hyphenate } from 'shared/util'
 import { observe, observerState } from '../observer/index'
 import { warn } from './debug'
 
@@ -14,8 +14,16 @@ type PropOptions = {
 export function validateProp (vm: Component, key: string, propsData: ?Object): any {
   if (!vm.$options.props || !propsData) return
   const prop = vm.$options.props[key]
-  const absent = hasOwn(propsData, key)
+  const absent = !hasOwn(propsData, key)
   let value = propsData[key]
+  // handle boolean props
+  if (prop.type === Boolean) {
+    if (absent && !hasOwn(prop, 'default')) {
+      value = false
+    } else if (value === '' || value === hyphenate(key)) {
+      value = true
+    }
+  }
   // check default value
   if (value === undefined) {
     value = getPropDefaultValue(vm, prop, key)
@@ -37,10 +45,7 @@ export function validateProp (vm: Component, key: string, propsData: ?Object): a
 function getPropDefaultValue (vm: Component, prop: PropOptions, name: string): any {
   // no default, return undefined
   if (!hasOwn(prop, 'default')) {
-    // absent boolean value defaults to false
-    return prop.type === Boolean
-      ? false
-      : undefined
+    return undefined
   }
   const def = prop.default
   // warn against non-factory defaults for Object & Array
@@ -75,7 +80,7 @@ function assertProp (
     )
     return
   }
-  if (value == null) {
+  if (value == null && !prop.required) {
     return
   }
   let type = prop.type
@@ -94,7 +99,7 @@ function assertProp (
   if (!valid) {
     warn(
       'Invalid prop: type check failed for prop "' + name + '".' +
-      ' Expected ' + expectedTypes.join(', ') +
+      ' Expected ' + expectedTypes.map(capitalize).join(', ') +
       ', got ' + Object.prototype.toString.call(value).slice(8, -1) + '.',
       vm
     )

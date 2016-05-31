@@ -176,7 +176,7 @@ function extractProps (data: VNodeData, Ctor: Class<Component>): ?Object {
   const attrs = data.attrs
   const props = data.props
   const staticAttrs = data.staticAttrs
-  if (!attrs && !props) {
+  if (!attrs && !props && !staticAttrs) {
     return res
   }
   for (const key in propOptions) {
