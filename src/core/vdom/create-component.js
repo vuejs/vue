@@ -127,9 +127,7 @@ function resolveAsyncComponent (
   factory: Function,
   cb: Function
 ): Class<Component> | void {
-  if (factory.resolved) {
-    return factory.resolved
-  } else if (factory.requested) {
+  if (factory.requested) {
     // pool callbacks
     factory.pendingCallbacks.push(cb)
   } else {

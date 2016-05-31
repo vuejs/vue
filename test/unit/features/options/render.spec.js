@@ -7,7 +7,7 @@ describe('Options render', () => {
         const h = this.$createElement
         const children = []
         for (let i = 0; i < this.items.length; i++) {
-          children.push(h('li', { staticClass: 'task' }, [this.items[i].name]))
+          children.push(h('li', { staticClass: 'task' }, this.items[i].name /* string as children*/))
         }
         return h('ul', { staticClass: 'tasks' }, children)
       },
