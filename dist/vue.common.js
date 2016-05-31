@@ -2234,73 +2234,86 @@ function defineReactive(obj, key, val) {
   });
 }
 
-var util = Object.freeze({
-	defineReactive: defineReactive,
-	set: set,
-	del: del,
-	hasOwn: hasOwn,
-	isLiteral: isLiteral,
-	isReserved: isReserved,
-	_toString: _toString,
-	toNumber: toNumber,
-	toBoolean: toBoolean,
-	stripQuotes: stripQuotes,
-	camelize: camelize,
-	hyphenate: hyphenate,
-	classify: classify,
-	bind: bind$1,
-	toArray: toArray,
-	extend: extend,
-	isObject: isObject,
-	isPlainObject: isPlainObject,
-	def: def,
-	debounce: _debounce,
-	indexOf: indexOf,
-	cancellable: cancellable,
-	looseEqual: looseEqual,
-	isArray: isArray,
-	hasProto: hasProto,
-	inBrowser: inBrowser,
-	isIE9: isIE9,
-	isAndroid: isAndroid,
-	get transitionProp () { return transitionProp; },
-	get transitionEndEvent () { return transitionEndEvent; },
-	get animationProp () { return animationProp; },
-	get animationEndEvent () { return animationEndEvent; },
-	nextTick: nextTick,
-	query: query,
-	inDoc: inDoc,
-	getAttr: getAttr,
-	getBindAttr: getBindAttr,
-	hasBindAttr: hasBindAttr,
-	before: before,
-	after: after,
-	remove: remove,
-	prepend: prepend,
-	replace: replace,
-	on: on$1,
-	off: off,
-	setClass: setClass,
-	addClass: addClass,
-	removeClass: removeClass,
-	extractContent: extractContent,
-	trimNode: trimNode,
-	isTemplate: isTemplate,
-	createAnchor: createAnchor,
-	findRef: findRef,
-	mapNodeRange: mapNodeRange,
-	removeNodeRange: removeNodeRange,
-	mergeOptions: mergeOptions,
-	resolveAsset: resolveAsset,
-	assertAsset: assertAsset,
-	checkComponentAttr: checkComponentAttr,
-	initProp: initProp,
-	assertProp: assertProp,
-	coerceProp: coerceProp,
-	commonTagRE: commonTagRE,
-	reservedTagRE: reservedTagRE,
-	get warn () { return warn; }
-});
+var __util__ = {
+  defineReactive: defineReactive,
+  set: set,
+  del: del,
+  hasOwn: hasOwn,
+  isLiteral: isLiteral,
+  isReserved: isReserved,
+  _toString: _toString,
+  toNumber: toNumber,
+  toBoolean: toBoolean,
+  stripQuotes: stripQuotes,
+  camelize: camelize,
+  hyphenate: hyphenate,
+  classify: classify,
+  bind: bind$1,
+  toArray: toArray,
+  extend: extend,
+  isObject: isObject,
+  isPlainObject: isPlainObject,
+  def: def,
+  debounce: _debounce,
+  indexOf: indexOf,
+  cancellable: cancellable,
+  looseEqual: looseEqual,
+  isArray: isArray,
+  hasProto: hasProto,
+  inBrowser: inBrowser,
+  isIE9: isIE9,
+  isAndroid: isAndroid,
+  nextTick: nextTick,
+  query: query,
+  inDoc: inDoc,
+  getAttr: getAttr,
+  getBindAttr: getBindAttr,
+  hasBindAttr: hasBindAttr,
+  before: before,
+  after: after,
+  remove: remove,
+  prepend: prepend,
+  replace: replace,
+  on: on$1,
+  off: off,
+  setClass: setClass,
+  addClass: addClass,
+  removeClass: removeClass,
+  extractContent: extractContent,
+  trimNode: trimNode,
+  isTemplate: isTemplate,
+  createAnchor: createAnchor,
+  findRef: findRef,
+  mapNodeRange: mapNodeRange,
+  removeNodeRange: removeNodeRange,
+  mergeOptions: mergeOptions,
+  resolveAsset: resolveAsset,
+  assertAsset: assertAsset,
+  checkComponentAttr: checkComponentAttr,
+  initProp: initProp,
+  assertProp: assertProp,
+  coerceProp: coerceProp,
+  commonTagRE: commonTagRE,
+  reservedTagRE: reservedTagRE
+}
+
+Object.defineProperty(__util__, 'transitionProp', {
+    get: function() { return transitionProp; }
+})
+Object.defineProperty(__util__, 'transitionEndEvent', {
+    get: function() { return transitionEndEvent; }
+})
+Object.defineProperty(__util__, 'animationProp', {
+    get: function() { return animationProp; }
+})
+Object.defineProperty(__util__, 'animationEndEvent', {
+    get: function() { return animationEndEvent; }
+})
+Object.defineProperty(__util__, 'warn', {
+    get: function() { return warn; }
+})
+
+var util = Object.freeze(__util__);
 
 var uid = 0;
 
