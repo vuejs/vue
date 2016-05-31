@@ -290,13 +290,33 @@ describe('Observer', () => {
     Vue.set(vm, 'a', 2)
     waitForUpdate(() => {
       expect(vm.$el.outerHTML).toBe('<div>2</div>')
-      expect('Do not add reactive properties to a Vue instance').not.toHaveBeenWarned()
+      expect('Avoid adding reactive properties to a Vue instance').not.toHaveBeenWarned()
       Vue.delete(vm, 'a')
     }).then(() => {
-      expect('Do not delete properties on a Vue instance').toHaveBeenWarned()
+      expect('Avoid deleting properties on a Vue instance').toHaveBeenWarned()
       expect(vm.$el.outerHTML).toBe('<div>2</div>')
       Vue.set(vm, 'b', 123)
-      expect('Do not add reactive properties to a Vue instance').toHaveBeenWarned()
+      expect('Avoid adding reactive properties to a Vue instance').toHaveBeenWarned()
+    }).then(done)
+  })
+
+  it('warning set/delete on Vue instance root $data', done => {
+    const data = { a: 1 }
+    const vm = new Vue({
+      template: '<div>{{a}}</div>',
+      data
+    }).$mount()
+    expect(vm.$el.outerHTML).toBe('<div>1</div>')
+    Vue.set(data, 'a', 2)
+    waitForUpdate(() => {
+      expect(vm.$el.outerHTML).toBe('<div>2</div>')
+      expect('Avoid adding reactive properties to a Vue instance').not.toHaveBeenWarned()
+      Vue.delete(data, 'a')
+    }).then(() => {
+      expect('Avoid deleting properties on a Vue instance').toHaveBeenWarned()
+      expect(vm.$el.outerHTML).toBe('<div>2</div>')
+      Vue.set(data, 'b', 123)
+      expect('Avoid adding reactive properties to a Vue instance').toHaveBeenWarned()
     }).then(done)
   })
 

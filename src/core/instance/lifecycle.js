@@ -122,7 +122,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     }
     if (vm._watchers.length) {
       for (let i = 0; i < vm._watchers.length; i++) {
-        vm._watchers[i].update()
+        vm._watchers[i].update(true /* shallow */)
       }
     }
   }
@@ -150,7 +150,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     // remove reference from data ob
     // frozen object may not have observer.
     if (vm._data.__ob__) {
-      vm._data.__ob__.removeVm(vm)
+      vm._data.__ob__.vmCount--
     }
     // call the last hook...
     vm._isDestroyed = true
