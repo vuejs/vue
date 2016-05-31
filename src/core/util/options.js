@@ -162,6 +162,7 @@ config._assetTypes.forEach(function (type) {
  * another, so we merge them as arrays.
  */
 strats.watch = function (parentVal: ?Object, childVal: ?Object): ?Object {
+  /* istanbul ignore if */
   if (!childVal) return parentVal
   if (!parentVal) return childVal
   const ret = {}

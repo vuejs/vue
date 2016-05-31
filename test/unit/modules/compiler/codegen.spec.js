@@ -102,6 +102,16 @@ describe('codegen', () => {
     )
   })
 
+  it('generate MathML tag', () => {
+    assertCodegen(
+      `<math>
+        <matrix>
+        </matrix>
+      </math>`,
+      `with(this){return _h(_e('math',void 0,'math'),[_h(_e('matrix',void 0,'math'))])}`
+    )
+  })
+
   it('generate render tag', () => {
     assertCodegen(
       '<render :method="onRender" :args="params"></render>',
