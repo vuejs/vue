@@ -117,7 +117,14 @@ export function lifecycleMixin (Vue: Class<Component>) {
 
   Vue.prototype.$forceUpdate = function () {
     const vm: Component = this
-    vm._watcher.update()
+    if (vm._watcher) {
+      vm._watcher.update()
+    }
+    if (vm._watchers.length) {
+      for (let i = 0; i < vm._watchers.length; i++) {
+        vm._watchers[i].update()
+      }
+    }
   }
 
   Vue.prototype.$destroy = function () {

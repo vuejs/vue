@@ -69,10 +69,10 @@ describe('Watcher', () => {
     expect(watcher2.value).toBeUndefined()
     vm.$data = { b: { c: 3 }, e: 4 }
     waitForUpdate(() => {
-      expect(watcher1.value).toBe(2)
-      expect(watcher2.value).toBeUndefined()
-      expect(spy).not.toHaveBeenCalledWith(3, 2)
-      expect(spy2).not.toHaveBeenCalledWith(4, undefined)
+      expect(watcher1.value).toBe(3)
+      expect(watcher2.value).toBe(4)
+      expect(spy).toHaveBeenCalledWith(3, 2)
+      expect(spy2).toHaveBeenCalledWith(4, undefined)
     }).then(done)
   })
 
