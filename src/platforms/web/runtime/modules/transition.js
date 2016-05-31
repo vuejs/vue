@@ -10,11 +10,12 @@ const TRANSITION = 'transition'
 const ANIMATION = 'animation'
 
 // Transition property/event sniffing
-let transitionProp = 'transition'
-let transitionEndEvent = 'transitionend'
-let animationProp = 'animation'
-let animationEndEvent = 'animationend'
+export let transitionProp = 'transition'
+export let transitionEndEvent = 'transitionend'
+export let animationProp = 'animation'
+export let animationEndEvent = 'animationend'
 if (hasTransition) {
+  /* istanbul ignore if */
   if (window.ontransitionend === undefined &&
     window.onwebkittransitionend !== undefined) {
     transitionProp = 'WebkitTransition'
@@ -28,7 +29,7 @@ if (hasTransition) {
 }
 
 const raf = (inBrowser && window.requestAnimationFrame) || setTimeout
-function nextFrame (fn) {
+export function nextFrame (fn: Function) {
   raf(() => {
     raf(fn)
   })

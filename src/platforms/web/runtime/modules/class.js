@@ -1,6 +1,5 @@
 /* @flow */
 
-import { setClass } from '../class-util'
 import { genClassForVnode, concat, stringifyClass } from 'web/util/index'
 
 function updateClass (oldVnode: any, vnode: any) {
@@ -20,7 +19,7 @@ function updateClass (oldVnode: any, vnode: any) {
 
   // set the class
   if (cls !== el._prevClass) {
-    setClass(el, cls)
+    el.setAttribute('class', cls)
     el._prevClass = cls
   }
 }

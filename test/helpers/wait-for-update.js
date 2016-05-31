@@ -20,7 +20,7 @@ window.waitForUpdate = initialCb => {
     if (queue.length) {
       let hasError = false
       try {
-        job()
+        job.wait ? job(shift) : job()
       } catch (e) {
         hasError = true
         const done = queue[queue.length - 1]
@@ -28,7 +28,7 @@ window.waitForUpdate = initialCb => {
           done.fail(e)
         }
       }
-      if (!hasError) {
+      if (!hasError && !job.wait) {
         if (queue.length) {
           Vue.nextTick(shift)
         }
@@ -48,6 +48,11 @@ window.waitForUpdate = initialCb => {
   const chainer = {
     then: nextCb => {
       queue.push(nextCb)
+      return chainer
+    },
+    thenWaitFor: (wait) => {
+      wait.wait = true
+      queue.push(wait)
       return chainer
     }
   }
