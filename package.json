@@ -7,7 +7,7 @@
     "dist/vue.common.js",
     "dist/vue.js",
     "dist/vue.min.js",
-    "dist/compiler.js",
+    "dist/compiler.common.js",
     "dist/server-renderer.js",
     "src"
   ],
