@@ -63,7 +63,7 @@ function initData (vm: Component) {
   }
   // observe data
   observe(data)
-  data.__ob__.vmCount++
+  data.__ob__ && data.__ob__.vmCount++
 }
 
 const computedSharedDefinition = {
@@ -206,8 +206,8 @@ function setData (vm: Component, newData: Object) {
       proxy(vm, key)
     }
   }
-  oldData.__ob__.vmCount--
+  oldData.__ob__ && oldData.__ob__.vmCount--
   observe(newData)
-  newData.__ob__.vmCount++
+  newData.__ob__ && newData.__ob__.vmCount++
   vm.$forceUpdate()
 }
