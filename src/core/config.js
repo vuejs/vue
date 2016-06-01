@@ -36,7 +36,7 @@ const config: Config = {
   /**
    * Error handler for watcher errors
    */
-  watcherErrorHandler: null,
+  errorHandler: null,
 
   /**
    * Check if a tag is reserved so that it cannot be registered as a

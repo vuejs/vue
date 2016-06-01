@@ -103,7 +103,7 @@ export default class Watcher {
           )
         }
         // throw the error on next tick so that it doesn't break the whole app
-        ;(config.watcherErrorHandler || defaultErrorHandler)(e, this.vm)
+        ;(config.errorHandler || defaultErrorHandler)(e, this.vm)
       }
       // return old value when evaluation fails so the current UI is preserved
       value = this.value

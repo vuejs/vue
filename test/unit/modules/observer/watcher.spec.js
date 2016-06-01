@@ -199,17 +199,18 @@ describe('Watcher', () => {
   })
 
   it('catch getter error', () => {
-    Vue.config.watcherErrorHandler = spy
+    Vue.config.errorHandler = spy
     const err = new Error()
     const vm = new Vue({
       render () { throw err }
     }).$mount()
     expect('Error during component render').toHaveBeenWarned()
     expect(spy).toHaveBeenCalledWith(err, vm)
+    Vue.config.errorHandler = null
   })
 
   it('catch user watcher error', () => {
-    Vue.config.watcherErrorHandler = spy
+    Vue.config.errorHandler = spy
     new Watcher(vm, function () {
       return this.a.b.c
     }, () => {}, { user: true })
@@ -217,5 +218,6 @@ describe('Watcher', () => {
     expect(spy).toHaveBeenCalled()
     expect(spy.calls.argsFor(0)[0] instanceof TypeError).toBe(true)
     expect(spy.calls.argsFor(0)[1]).toBe(vm)
+    Vue.config.errorHandler = null
   })
 })
