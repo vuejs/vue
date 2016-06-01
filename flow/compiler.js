@@ -63,6 +63,9 @@ declare type ASTElement = {
   slotName?: ?string,
   slotTarget?: ?string,
 
+  ref?: string,
+  refInFor?: boolean,
+
   render?: true,
   renderMethod?: ?string,
   renderArgs?: ?string,

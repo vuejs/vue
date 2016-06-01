@@ -4,7 +4,7 @@ import config from '../config'
 import VNode, { emptyVNode } from '../vdom/vnode'
 import { normalizeChildren } from '../vdom/helpers'
 import {
-  warn, bind, remove, isObject, toObject,
+  warn, bind, isObject, toObject,
   nextTick, resolveAsset, renderString
 } from '../util/index'
 
@@ -118,34 +118,6 @@ export function renderMixin (Vue: Class<Component>) {
       }
     }
     return ret
-  }
-
-  // register ref
-  Vue.prototype._r = function (
-    key: string,
-    ref: Vue | Element,
-    vFor: boolean,
-    isRemoval: boolean
-  ) {
-    const vm: Component = this
-    const refs = vm.$refs
-    if (isRemoval) {
-      if (Array.isArray(refs[key])) {
-        remove(refs[key], ref)
-      } else {
-        refs[key] = undefined
-      }
-    } else {
-      if (vFor) {
-        if (Array.isArray(refs[key])) {
-          refs[key].push(ref)
-        } else {
-          refs[key] = [ref]
-        }
-      } else {
-        refs[key] = ref
-      }
-    }
   }
 
   // apply v-bind object

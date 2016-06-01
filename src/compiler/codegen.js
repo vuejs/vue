@@ -112,6 +112,13 @@ function genData (el: ASTElement): string | void {
   if (el.key) {
     data += `key:${el.key},`
   }
+  // ref
+  if (el.ref) {
+    data += `ref:"${el.ref}",`
+  }
+  if (el.refInFor) {
+    data += `refInFor:true,`
+  }
   // slot target
   if (el.slotTarget) {
     data += `slot:${el.slotTarget},`

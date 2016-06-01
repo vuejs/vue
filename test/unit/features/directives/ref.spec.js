@@ -25,6 +25,21 @@ describe('Directive v-ref', () => {
     expect(vm.$refs['test-hyphen'].$options.id).toBe('test2')
   })
 
+  it('should work as a hyperscript prop', () => {
+    const vm = new Vue({
+      components,
+      render () {
+        const h = this.$createElement
+        return h('div', null, [
+          h('test', { ref: 'test' })
+        ])
+      }
+    })
+    vm.$mount()
+    expect(vm.$refs.test).toBeTruthy()
+    expect(vm.$refs.test.$options.id).toBe('test')
+  })
+
   it('should accept camelCase refs', () => {
     const vm = new Vue({
       template:

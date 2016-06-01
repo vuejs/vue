@@ -100,13 +100,6 @@ declare interface Component {
     val: any,
     render: Function
   ) => ?Array<VNode>;
-  // registerRef
-  _r: (
-    key: string,
-    ref: Component | Element,
-    vFor: boolean,
-    isRemoval: boolean
-  ) => void;
   // apply v-bind object
   _b: (vnode: VNodeWithData, value: any) => void;
 
