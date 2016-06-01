@@ -446,7 +446,7 @@ function makeTextNodeLinkFn (tokens, frag) {
           if (token.html) {
             replace(node, parseTemplate(value, true))
           } else {
-            node.data = value
+           node.data = value === undefined ? '' : value
           }
         } else {
           vm._bindDir(token.descriptor, node, host, scope)
