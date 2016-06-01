@@ -42,18 +42,15 @@ describe('Options el', () => {
   })
 
   it('svg element', () => {
-    const ns = 'http://www.w3.org/2000/svg'
-    const el = document.createElementNS(ns, 'svg')
-    const text = document.createElementNS(ns, 'text')
-    text.setAttribute(':x', 'x')
-    text.setAttribute(':y', 'y')
-    text.setAttribute(':fill', 'color')
-    text.textContent = '{{text}}'
-    el.appendChild(text)
+    const parent = document.createElement('div')
+    parent.innerHTML = '<svg><text :x="x" :y="y" :fill="color">{{ text }}</text></svg>'
     const vm = new Vue({
-      el,
+      el: parent.childNodes[0],
       data: {
-        x: 64, y: 128, color: 'red', text: 'svg text'
+        x: 64,
+        y: 128,
+        color: 'red',
+        text: 'svg text'
       }
     })
     expect(vm.$el.tagName).toBe('svg')

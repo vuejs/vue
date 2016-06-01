@@ -5,7 +5,7 @@ import { warn } from 'core/util/debug'
 import { compile as baseCompile } from 'compiler/index'
 import modules from 'web/compiler/modules/index'
 import directives from 'web/compiler/directives/index'
-import { isReservedTag, isUnaryTag, mustUseProp, getTagNamespace } from 'web/util/index'
+import { isIE, isReservedTag, isUnaryTag, mustUseProp, getTagNamespace } from 'web/util/index'
 
 // detect possible CSP restriction
 /* istanbul ignore if */
@@ -34,6 +34,7 @@ const cache1: { [key: string]: CompiledFunctions } = Object.create(null)
 const cache2: { [key: string]: CompiledFunctions } = Object.create(null)
 
 export const baseOptions: CompilerOptions = {
+  isIE,
   expectHTML: true,
   preserveWhitespace: true,
   modules,

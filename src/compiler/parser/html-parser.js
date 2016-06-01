@@ -212,18 +212,21 @@ export function parseHTML (html, handler) {
 
     const unary = isUnaryTag(tagName) || tagName === 'html' && lastTag === 'head' || !!unarySlash
 
-    const attrs = match.attrs.map(function (args) {
+    const l = match.attrs.length
+    const attrs = new Array(l)
+    for (let i = 0; i < l; i++) {
+      const args = match.attrs[i]
       // hackish work around FF bug https://bugzilla.mozilla.org/show_bug.cgi?id=369778
       if (IS_REGEX_CAPTURING_BROKEN && args[0].indexOf('""') === -1) {
         if (args[3] === '') { delete args[3] }
         if (args[4] === '') { delete args[4] }
         if (args[5] === '') { delete args[5] }
       }
-      return {
+      attrs[i] = {
         name: args[1],
         value: decodeHTML(args[3] || args[4] || args[5] || '')
       }
-    })
+    }
 
     if (!unary) {
       stack.push({ tag: tagName, attrs: attrs })

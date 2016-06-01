@@ -64,6 +64,15 @@ export function parse (
       }
 
       tag = tag.toLowerCase()
+
+      // check namespace.
+      // inherit parent ns if there is one
+      const ns = (currentParent && currentParent.ns) || platformGetTagNamespace(tag)
+      // handle IE svg bug
+      if (options.isIE && ns === 'svg') {
+        attrs = guardIESVGBug(attrs)
+      }
+
       const element: ASTElement = {
         type: 1,
         tag,
@@ -71,6 +80,9 @@ export function parse (
         attrsMap: makeAttrsMap(attrs),
         parent: currentParent,
         children: []
+      }
+      if (ns) {
+        element.ns = ns
       }
 
       if (isForbiddenTag(element)) {
@@ -80,14 +92,6 @@ export function parse (
           'UI. Avoid placing tags with side-effects in your templates, such as ' +
           `<${tag}>.`
         )
-      }
-
-      // check namespace.
-      // inherit parent ns if there is one
-      let ns
-      if ((ns = currentParent && currentParent.ns) ||
-          (ns = platformGetTagNamespace(tag))) {
-        element.ns = ns
       }
 
       if (!inPre) {
@@ -394,4 +398,18 @@ function isForbiddenTag (el): boolean {
       el.attrsMap.type === 'text/javascript'
     ))
   )
+}
+
+const ieNSBug = /^xmlns:NS\d+/
+const ieNSPrefix = /^NS\d+:/
+function guardIESVGBug (attrs) {
+  const res = []
+  for (let i = 0; i < attrs.length; i++) {
+    const attr = attrs[i]
+    if (!ieNSBug.test(attr.name)) {
+      attr.name = attr.name.replace(ieNSPrefix, '')
+      res.push(attr)
+    }
+  }
+  return res
 }

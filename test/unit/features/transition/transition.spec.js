@@ -4,7 +4,7 @@ import { nextFrame } from 'web/runtime/modules/transition'
 
 if (!isIE9) {
   describe('Transition system', () => {
-    const duration = 20
+    const duration = 50
     insertCSS(`
       .test {
         -webkit-transition: opacity ${duration}ms ease;

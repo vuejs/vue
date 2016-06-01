@@ -1,5 +1,6 @@
 declare type CompilerOptions = {
   warn?: Function,
+  isIE?: boolean,
   expectHTML?: boolean,
   preserveWhitespace?: boolean,
   modules?: Array<ModuleOptions>,
