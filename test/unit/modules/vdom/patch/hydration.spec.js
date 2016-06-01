@@ -131,7 +131,7 @@ describe('hydration', () => {
     dom.innerHTML = '<div><span>foo</span></div>'
 
     const vm = new Vue({
-      template: '<div><test :msg="msg"></test></div>',
+      template: '<div><test></test></div>',
       components: {
         test: {
           data () {
