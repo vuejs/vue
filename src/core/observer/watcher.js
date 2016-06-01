@@ -8,15 +8,11 @@ import {
   remove,
   isObject,
   parsePath,
-  nextTick,
   _Set as Set
 } from '../util/index'
 
 let uid = 0
 let prevTarget
-
-/* istanbul ignore next */
-const defaultErrorHandler = e => nextTick(() => { throw e })
 
 /**
  * A watcher parses an expression, collects dependencies,
@@ -102,8 +98,12 @@ export default class Watcher {
             this.vm
           )
         }
-        // throw the error on next tick so that it doesn't break the whole app
-        ;(config.errorHandler || defaultErrorHandler)(e, this.vm)
+        /* istanbul ignore else */
+        if (config.errorHandler) {
+          config.errorHandler.call(null, e, this.vm)
+        } else {
+          warn(e.stack)
+        }
       }
       // return old value when evaluation fails so the current UI is preserved
       value = this.value
