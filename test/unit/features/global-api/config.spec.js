@@ -33,4 +33,14 @@ describe('Global config', () => {
       Vue.config.silent = false
     })
   })
+
+  describe('errorHandler', () => {
+    Vue.config.errorHandler = spy
+    const err = new Error()
+    const vm = new Vue({
+      render () { throw err }
+    }).$mount()
+    expect(spy).toHaveBeenCalledWith(err, vm)
+    Vue.config.errorHandler = null
+  })
 })
