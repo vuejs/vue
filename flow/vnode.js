@@ -29,7 +29,6 @@ declare interface VNodeWithData {
 }
 
 declare interface VNodeData {
-  pre?: true;
   key?: string | number;
   slot?: string;
   staticClass?: string;

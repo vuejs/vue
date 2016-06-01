@@ -247,10 +247,6 @@ export function createPatchFunction (backend) {
     if (isDef(i = vnode.data) && isDef(hook = i.hook) && isDef(i = hook.prepatch)) {
       i(oldVnode, vnode)
     }
-    // skip nodes with v-pre
-    if (isDef(i = vnode.data) && i.pre) {
-      return
-    }
     let elm = vnode.elm = oldVnode.elm
     const oldCh = oldVnode.children
     const ch = vnode.children

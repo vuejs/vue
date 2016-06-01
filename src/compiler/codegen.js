@@ -108,10 +108,6 @@ function genData (el: ASTElement): string | void {
   const dirs = genDirectives(el)
   if (dirs) data += dirs + ','
 
-  // pre
-  if (el.pre) {
-    data += 'pre:true,'
-  }
   // key
   if (el.key) {
     data += `key:${el.key},`

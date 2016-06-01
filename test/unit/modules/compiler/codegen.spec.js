@@ -38,14 +38,6 @@ describe('codegen', () => {
     )
   })
 
-  it('generate v-pre', () => {
-    assertCodegen(
-      '<div v-pre><p>hello world</p></div>',
-      'with(this){return _m(0)}',
-      [`with(this){return _h(_e('div',{pre:true}),[_h(_e('p'),[_t("hello world")])])}`]
-    )
-  })
-
   it('generate v-for directive', () => {
     assertCodegen(
       '<li v-for="item in items" track-by="item.uid"></li>',
