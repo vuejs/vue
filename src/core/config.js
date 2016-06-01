@@ -34,6 +34,11 @@ const config: Config = {
   silent: false,
 
   /**
+   * Error handler for watcher errors
+   */
+  watcherErrorHandler: null,
+
+  /**
    * Check if a tag is reserved so that it cannot be registered as a
    * component. This is platform-dependent and may be overwritten.
    */

@@ -68,7 +68,9 @@ export function parse (
       // check namespace.
       // inherit parent ns if there is one
       const ns = (currentParent && currentParent.ns) || platformGetTagNamespace(tag)
+
       // handle IE svg bug
+      /* istanbul ignore if */
       if (options.isIE && ns === 'svg') {
         attrs = guardIESVGBug(attrs)
       }
@@ -402,6 +404,8 @@ function isForbiddenTag (el): boolean {
 
 const ieNSBug = /^xmlns:NS\d+/
 const ieNSPrefix = /^NS\d+:/
+
+/* istanbul ignore next */
 function guardIESVGBug (attrs) {
   const res = []
   for (let i = 0; i < attrs.length; i++) {

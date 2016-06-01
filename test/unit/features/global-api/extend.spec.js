@@ -113,4 +113,13 @@ describe('Global API: extend', () => {
     }).$mount()
     expect(b.$el.innerHTML).toBe('<div>A</div><div>B</div>')
   })
+
+  it('caching', () => {
+    const options = {
+      template: '<div></div>'
+    }
+    const A = Vue.extend(options)
+    const B = Vue.extend(options)
+    expect(A).toBe(B)
+  })
 })

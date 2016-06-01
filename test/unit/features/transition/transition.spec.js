@@ -436,6 +436,21 @@ if (!isIE9) {
       }).then(done)
     })
 
+    it('transition on appear with v-show', done => {
+      const vm = new Vue({
+        template: '<div><div v-show="ok" class="test" transition="test" transition-on-appear>foo</div></div>',
+        data: { ok: true }
+      }).$mount(el)
+
+      waitForUpdate(() => {
+        expect(vm.$el.children[0].className).toBe('test test-enter')
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.children[0].className).toBe('test test-enter-active')
+      }).thenWaitFor(timeout(duration + 10)).then(() => {
+        expect(vm.$el.children[0].className).toBe('test')
+      }).then(done)
+    })
+
     it('transition on SVG elements', done => {
       const vm = new Vue({
         template: '<svg><circle cx="0" cy="0" r="10" v-if="ok" class="test" transition></circle></svg>',

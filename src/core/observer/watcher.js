@@ -1,5 +1,6 @@
 /* @flow */
 
+import config from '../config'
 import Dep from './dep'
 import { queueWatcher } from './scheduler'
 import {
@@ -13,6 +14,9 @@ import {
 
 let uid = 0
 let prevTarget
+
+/* istanbul ignore next */
+const defaultErrorHandler = e => nextTick(() => { throw e })
 
 /**
  * A watcher parses an expression, collects dependencies,
@@ -99,7 +103,7 @@ export default class Watcher {
           )
         }
         // throw the error on next tick so that it doesn't break the whole app
-        nextTick(() => { throw e })
+        ;(config.watcherErrorHandler || defaultErrorHandler)(e, this.vm)
       }
       // return old value when evaluation fails so the current UI is preserved
       value = this.value
