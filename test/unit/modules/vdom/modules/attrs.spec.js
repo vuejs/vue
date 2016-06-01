@@ -7,14 +7,14 @@ describe('attrs module', () => {
     const vnode = new VNode('p', { staticAttrs: { id: 1, class: 'class1' }})
     const elm = patch(null, vnode)
     expect(elm.id).toBe('1')
-    expect(elm.classList.contains('class1')).toBe(true)
+    expect(elm).toHaveClass('class1')
   })
 
   it('should create an element with attrs', () => {
     const vnode = new VNode('p', { attrs: { id: 1, class: 'class1' }})
     const elm = patch(null, vnode)
     expect(elm.id).toBe('1')
-    expect(elm.classList.contains('class1')).toBe(true)
+    expect(elm).toHaveClass('class1')
   })
 
   it('should change the elements attrs', () => {
@@ -23,9 +23,9 @@ describe('attrs module', () => {
     patch(null, vnode1)
     const elm = patch(vnode1, vnode2)
     expect(elm.id).toBe('2')
-    expect(elm.classList.contains('i')).toBe(true)
-    expect(elm.classList.contains('am')).toBe(true)
-    expect(elm.classList.contains('vdom')).toBe(false)
+    expect(elm).toHaveClass('i')
+    expect(elm).toHaveClass('am')
+    expect(elm).not.toHaveClass('vdom')
   })
 
   it('should remove the elements attrs', () => {
@@ -34,7 +34,7 @@ describe('attrs module', () => {
     patch(null, vnode1)
     const elm = patch(vnode1, vnode2)
     expect(elm.id).toBe('1')
-    expect(elm.classList.length).toBe(0)
+    expect(elm.className).toBe('')
   })
 
   it('should remove the falsy value from boolean attr', () => {

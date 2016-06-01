@@ -49,7 +49,6 @@
     "babel-preset-es2015-rollup-vue": "^1.1.0",
     "babel-preset-flow-vue": "^1.0.0",
     "chromedriver": "^2.21.2",
-    "classlist-polyfill": "^1.0.0",
     "codecov.io": "^0.1.6",
     "cross-spawn": "^4.0.0",
     "entities": "^1.1.1",

@@ -1,5 +1,4 @@
 import Vue from 'vue'
-import 'classlist-polyfill' // for IE9
 
 // ignore whitespace in tests
 Vue.config.preserveWhitespace = false

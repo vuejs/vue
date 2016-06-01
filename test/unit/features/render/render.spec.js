@@ -26,7 +26,7 @@ describe('Render', () => {
       }
     }).$mount()
     expect(vm.$el.childNodes[0].tagName).toBe('DIV')
-    expect(vm.$el.childNodes[0].classList.contains('message')).toBe(true)
+    expect(vm.$el.childNodes[0]).toHaveClass('message')
     expect(vm.$el.childNodes[0].childNodes[0].tagName).toBe('P')
     expect(vm.$el.childNodes[0].childNodes[0].textContent).toBe('hello world')
   })
@@ -56,7 +56,7 @@ describe('Render', () => {
     for (let i = 0; i < ul.children.length; i++) {
       const li = ul.children[i]
       expect(li.tagName).toBe('LI')
-      expect(li.classList.contains(`class${i}`)).toBe(true)
+      expect(li).toHaveClass(`class${i}`)
     }
   })
 

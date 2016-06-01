@@ -5,6 +5,7 @@
  * SVG elements in IE
  */
 export function addClass (el: Element, cls: string) {
+  /* istanbul ignore else */
   if (el.classList) {
     if (cls.indexOf(' ') > -1) {
       cls.split(/\s+/).forEach(c => el.classList.add(c))
@@ -24,6 +25,7 @@ export function addClass (el: Element, cls: string) {
  * SVG elements in IE
  */
 export function removeClass (el: Element, cls: string) {
+  /* istanbul ignore else */
   if (el.classList) {
     if (cls.indexOf(' ') > -1) {
       cls.split(/\s+/).forEach(c => el.classList.remove(c))
