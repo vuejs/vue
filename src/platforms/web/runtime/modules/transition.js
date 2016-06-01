@@ -2,7 +2,7 @@
 
 import { addClass, removeClass } from '../class-util'
 import { inBrowser, resolveAsset } from 'core/util/index'
-import { cached, remove } from 'shared/util'
+import { cached, remove, extend } from 'shared/util'
 import { isIE9 } from 'web/util/index'
 
 const hasTransition = inBrowser && !isIE9
@@ -65,6 +65,9 @@ export function enter (vnode: VNodeWithData) {
       removeTransitionClass(el, enterActiveClass)
     }
     if (cb.cancelled) {
+      if (enterClass) {
+        removeTransitionClass(el, enterClass)
+      }
       enterCancelled && enterCancelled(el)
     } else {
       afterEnter && afterEnter(el)
@@ -81,9 +84,11 @@ export function enter (vnode: VNodeWithData) {
   }
   if (enterActiveClass) {
     nextFrame(() => {
-      addTransitionClass(el, enterActiveClass)
-      if (!userWantsControl) {
-        whenTransitionEnds(el, cb)
+      if (!cb.cancelled) {
+        addTransitionClass(el, enterActiveClass)
+        if (!userWantsControl) {
+          whenTransitionEnds(el, cb)
+        }
       }
     })
   }
@@ -120,6 +125,9 @@ export function leave (vnode: VNodeWithData, rm: Function) {
       removeTransitionClass(el, leaveActiveClass)
     }
     if (cb.cancelled) {
+      if (leaveClass) {
+        removeTransitionClass(el, leaveClass)
+      }
       leaveCancelled && leaveCancelled(el)
     } else {
       rm()
@@ -137,9 +145,11 @@ export function leave (vnode: VNodeWithData, rm: Function) {
   }
   if (leaveActiveClass) {
     nextFrame(() => {
-      addTransitionClass(el, leaveActiveClass)
-      if (!userWantsControl) {
-        whenTransitionEnds(el, cb)
+      if (!cb.cancelled) {
+        addTransitionClass(el, leaveActiveClass)
+        if (!userWantsControl) {
+          whenTransitionEnds(el, cb)
+        }
       }
     })
   }
@@ -150,13 +160,28 @@ export function leave (vnode: VNodeWithData, rm: Function) {
 }
 
 function resolveTransition (id: string | Object, context: Component): Object {
-  let definition = id && typeof id === 'string'
-    ? resolveAsset(context.$options, 'transitions', id) || id
-    : id
-  if (definition === true) definition = 'v'
-  return typeof definition === 'string'
-    ? autoCssTransition(definition)
-    : definition
+  if (id && typeof id === 'string') {
+    const def = resolveAsset(context.$options, 'transitions', id)
+    if (def) {
+      return ensureTransitionClasses(id, def)
+    } else {
+      return autoCssTransition(id)
+    }
+  } else if (typeof id === 'object') { // inline transition object
+    return ensureTransitionClasses('v', id)
+  } else {
+    return autoCssTransition('v')
+  }
+}
+
+function ensureTransitionClasses (id: string, def: Object): Object {
+  if (def.css === false) return def
+  const key = `_cache_${id}`
+  if (def[key]) return def[key]
+  const res = def[key] = {}
+  extend(res, autoCssTransition(id))
+  extend(res, def)
+  return res
 }
 
 const autoCssTransition: (name: string) => Object = cached(name => {
@@ -196,7 +221,7 @@ function whenTransitionEnds (el: Element, cb: Function) {
     if (ended < propCount) {
       end()
     }
-  }, timeout)
+  }, timeout + 1)
   el.addEventListener(event, onEnd)
 }
 
