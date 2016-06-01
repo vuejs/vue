@@ -23,9 +23,9 @@ function applyDirectives (
   hook: string
 ) {
   const dirs = vnode.data.directives
-  const oldDirs = oldVnode.data.directives
-  const isUpdate = hook === 'update'
   if (dirs) {
+    const oldDirs = oldVnode.data.directives
+    const isUpdate = hook === 'update'
     for (let i = 0; i < dirs.length; i++) {
       const dir = dirs[i]
       const def = resolveAsset(vnode.context.$options, 'directives', dir.name, true)
