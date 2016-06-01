@@ -40,6 +40,7 @@ function shuffle (array) {
 }
 
 const inner = prop('innerHTML')
+const tag = prop('tagName')
 
 describe('children', () => {
   let vnode0
@@ -427,5 +428,26 @@ describe('children', () => {
     expect(map(inner, elm.children)).toEqual(['one', 'two', 'three'])
     elm = patch(vnode1, vnode2)
     expect(map(inner, elm.children)).toEqual(['three', 'two', 'one'])
+  })
+
+  it('should handle children with the same key but with different tag', () => {
+    const vnode1 = new VNode('div', {}, [
+      new VNode('div', { key: 1 }, undefined, 'one'),
+      new VNode('div', { key: 2 }, undefined, 'two'),
+      new VNode('div', { key: 3 }, undefined, 'three'),
+      new VNode('div', { key: 4 }, undefined, 'four')
+    ])
+    const vnode2 = new VNode('div', {}, [
+      new VNode('div', { key: 4 }, undefined, 'four'),
+      new VNode('span', { key: 3 }, undefined, 'three'),
+      new VNode('span', { key: 2 }, undefined, 'two'),
+      new VNode('div', { key: 1 }, undefined, 'one')
+    ])
+    let elm = patch(vnode0, vnode1)
+    expect(map(tag, elm.children)).toEqual(['DIV', 'DIV', 'DIV', 'DIV'])
+    expect(map(inner, elm.children)).toEqual(['one', 'two', 'three', 'four'])
+    elm = patch(vnode1, vnode2)
+    expect(map(tag, elm.children)).toEqual(['DIV', 'SPAN', 'SPAN', 'DIV'])
+    expect(map(inner, elm.children)).toEqual(['four', 'three', 'two', 'one'])
   })
 })

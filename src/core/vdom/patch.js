@@ -14,11 +14,11 @@ const emptyNode = new VNode('', {}, [])
 const hooks = ['create', 'update', 'postpatch', 'remove', 'destroy']
 
 function isUndef (s) {
-  return s === undefined
+  return s == null
 }
 
 function isDef (s) {
-  return s !== undefined
+  return s != null
 }
 
 function sameVnode (vnode1, vnode2) {
@@ -229,8 +229,18 @@ export function createPatchFunction (backend) {
             )
           }
           patchVnode(elmToMove, newStartVnode, insertedVnodeQueue)
+          // possible edge case: if elmToMove and newStartVnode are not the
+          // same vnode (e.g. same key, different tag), the elmToMove is replaced
+          // by the newStartVnode. If elmToMove happens to be the oldStartVnode,
+          // the oldStartVnode will be holding on to an element that has been
+          // removed from the DOM. This causes later moving operations to
+          // fail. This can be fixed by replacing the oldStartVnode with the
+          // newStartVnode.
+          if (elmToMove === oldStartVnode) {
+            oldStartVnode = newStartVnode
+          }
           oldCh[idxInOld] = undefined
-          nodeOps.insertBefore(parentElm, elmToMove.elm, oldStartVnode.elm)
+          nodeOps.insertBefore(parentElm, newStartVnode.elm, oldStartVnode.elm)
           newStartVnode = newCh[++newStartIdx]
         }
       }

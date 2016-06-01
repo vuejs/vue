@@ -7,7 +7,7 @@ describe('Options render', () => {
         const h = this.$createElement
         const children = []
         for (let i = 0; i < this.items.length; i++) {
-          children.push(h('li', { staticClass: 'task' }, this.items[i].name /* string as children*/))
+          children.push(h('li', { staticClass: 'task' }, [this.items[i].name]))
         }
         return h('ul', { staticClass: 'tasks' }, children)
       },
@@ -21,6 +21,17 @@ describe('Options render', () => {
       expect(li.tagName).toBe('LI')
       expect(li.textContent).toBe(vm.items[i].name)
     }
+  })
+
+  it('allow null data', () => {
+    const vm = new Vue({
+      render () {
+        const h = this.$createElement
+        return h('div', null, 'hello' /* string as children*/)
+      }
+    }).$mount()
+    expect(vm.$el.tagName).toBe('DIV')
+    expect(vm.$el.textContent).toBe('hello')
   })
 
   it('should warn non `render` option and non `template` option', () => {

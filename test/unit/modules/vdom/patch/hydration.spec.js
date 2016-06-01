@@ -20,6 +20,8 @@ describe('hydration', () => {
       const div = nodeOps.createElement('div')
       const child1 = nodeOps.createElement('span')
       const child2 = nodeOps.createElement('span')
+      child1.textContent = 'hi'
+      child2.textContent = 'ho'
       div.appendChild(child1)
       div.appendChild(child2)
       root.appendChild(div)
@@ -29,8 +31,8 @@ describe('hydration', () => {
     const vnode1 = new VNode('div', {}, [
       new VNode('span', {}),
       new VNode('div', { hook: { init }}, [
-        new VNode('span', {}),
-        new VNode('span', {})
+        new VNode('span', {}, [new VNode(undefined, undefined, undefined, 'hi')]),
+        new VNode('span', {}, [new VNode(undefined, undefined, undefined, 'ho')])
       ])
     ])
     patch(node0, vnode1)
