@@ -221,9 +221,10 @@ export function createPatchFunction (backend) {
           newStartVnode = newCh[++newStartIdx]
         } else {
           elmToMove = oldCh[idxInOld]
+          /* istanbul ignore if */
           if (process.env.NODE_ENV !== 'production' && !elmToMove) {
             warn(
-              'Duplicate track-by key: ' + idxInOld + '. ' +
+              'It seems there are duplicate track-by keys that is causing an update error. ' +
               'Make sure each v-for item has a unique track-by key.'
             )
           }
