@@ -19,9 +19,11 @@ Vue.options.directives = platformDirectives
 Vue.prototype.__patch__ = config._isServer ? noop : patch
 
 // wrap mount
-Vue.prototype.$mount = function (el?: string | Element): Vue {
-  this.$el = el && query(el)
-  return this._mount()
+Vue.prototype.$mount = function (
+  el?: string | Element,
+  hydrating?: boolean
+): Component {
+  return this._mount(el && query(el), hydrating)
 }
 
 export default Vue

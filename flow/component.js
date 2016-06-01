@@ -26,7 +26,7 @@ declare interface Component {
   $isServer: boolean;
 
   // public methods
-  $mount: (el?: Element | string) => Component;
+  $mount: (el?: Element | string, hydrating?: boolean) => Component;
   $forceUpdate: () => void;
   $destroy: () => void;
   $watch: (expOrFn: string | Function, cb: Function, options?: Object) => Function;
@@ -60,8 +60,8 @@ declare interface Component {
   // private methods
   // lifecycle
   _init: Function;
-  _mount: () => Component;
-  _update: (vnode: VNode) => void;
+  _mount: (el?: Element | void, hydrating?: boolean) => Component;
+  _update: (vnode: VNode, hydrating?: boolean) => void;
   _updateListeners: (listeners: Object, oldListeners: ?Object) => void;
   _updateFromParent: (
     propsData: ?Object,

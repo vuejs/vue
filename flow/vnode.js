@@ -26,6 +26,7 @@ declare interface VNodeWithData {
   context: Component;
   key: string | number | void;
   parent?: VNodeWithData;
+  child?: Component;
 }
 
 declare interface VNodeData {

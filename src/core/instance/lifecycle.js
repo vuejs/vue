@@ -24,8 +24,12 @@ export function initLifecycle (vm: Component) {
 }
 
 export function lifecycleMixin (Vue: Class<Component>) {
-  Vue.prototype._mount = function (): Component {
+  Vue.prototype._mount = function (
+    el?: Element | void,
+    hydrating?: boolean
+  ): Component {
     const vm: Component = this
+    vm.$el = el
     if (!vm.$options.render) {
       vm.$options.render = () => emptyVNode
       if (process.env.NODE_ENV !== 'production') {
@@ -47,8 +51,9 @@ export function lifecycleMixin (Vue: Class<Component>) {
     }
     callHook(vm, 'beforeMount')
     vm._watcher = new Watcher(vm, () => {
-      vm._update(vm._render())
+      vm._update(vm._render(), hydrating)
     }, noop)
+    hydrating = false
     vm._isMounted = true
     // root instance, call mounted on self
     if (vm.$root === vm) {
@@ -57,7 +62,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     return vm
   }
 
-  Vue.prototype._update = function (vnode: VNode) {
+  Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
     const vm: Component = this
     if (vm._isMounted) {
       callHook(vm, 'beforeUpdate')
@@ -65,7 +70,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     if (!vm._vnode) {
       // Vue.prototype.__patch__ is injected in entry points
       // based on the rendering backend used.
-      vm.$el = vm.__patch__(vm.$el, vnode)
+      vm.$el = vm.__patch__(vm.$el, vnode, hydrating)
     } else {
       vm.$el = vm.__patch__(vm._vnode, vnode)
     }

@@ -308,7 +308,7 @@ export function createPatchFunction (backend) {
     vnode.elm = elm
     const { tag, data, children } = vnode
     if (isDef(data)) {
-      if (isDef(i = data.hook) && isDef(i = i.init)) i(vnode)
+      if (isDef(i = data.hook) && isDef(i = i.init)) i(vnode, true /* hydrating */)
       if (isDef(i = vnode.child)) {
         // child component. it should have hydrated its own tree.
         invokeCreateHooks(vnode, insertedVnodeQueue)
@@ -349,7 +349,7 @@ export function createPatchFunction (backend) {
     }
   }
 
-  return function patch (oldVnode, vnode) {
+  return function patch (oldVnode, vnode, hydrating) {
     let elm, parent
     const insertedVnodeQueue = []
 
@@ -367,6 +367,9 @@ export function createPatchFunction (backend) {
           // a successful hydration.
           if (oldVnode.hasAttribute('server-rendered')) {
             oldVnode.removeAttribute('server-rendered')
+            hydrating = true
+          }
+          if (hydrating) {
             if (hydrate(oldVnode, vnode, insertedVnodeQueue)) {
               invokeInsertHook(insertedVnodeQueue)
               return oldVnode

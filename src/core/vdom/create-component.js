@@ -96,9 +96,9 @@ export function createComponentInstanceForVnode (
   return new vnodeComponentOptions.Ctor(options)
 }
 
-function init (vnode: VNode) {
+function init (vnode: VNodeWithData, hydrating: boolean) {
   const child = vnode.child = createComponentInstanceForVnode(vnode)
-  child.$mount()
+  child.$mount(vnode.elm, hydrating)
 }
 
 function prepatch (
