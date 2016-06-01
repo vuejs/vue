@@ -76,6 +76,7 @@ function isRealTemplate (node) {
 
 const tagRE = /<([\w:-]+)/
 const entityRE = /&#?\w+?;/
+const commentRE = /<!--/
 
 /**
  * Convert a string template to a DocumentFragment.
@@ -100,8 +101,9 @@ function stringToFragment (templateString, raw) {
   var frag = document.createDocumentFragment()
   var tagMatch = templateString.match(tagRE)
   var entityMatch = entityRE.test(templateString)
+  var commentMatch = commentRE.test(templateString)
 
-  if (!tagMatch && !entityMatch) {
+  if (!tagMatch && !entityMatch && !commentMatch) {
     // text only, return a single text node.
     frag.appendChild(
       document.createTextNode(templateString)

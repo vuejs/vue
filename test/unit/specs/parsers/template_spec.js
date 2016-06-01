@@ -23,6 +23,13 @@ describe('Template Parser', function () {
     expect(res.firstChild.nodeType).toBe(3) // Text node
   })
 
+  it('should work if the template string doesn\'t contain tags but contains comments', function () {
+    var res = parse('<!-- yo -->hello<!-- yo -->')
+    expect(res.childNodes.length).toBe(1)
+    expect(res.firstChild.nodeType).toBe(3) // text node
+    expect(res.firstChild.nodeValue).toBe('hello')
+  })
+
   it('should handle string that contains html entities', function () {
     var res = parse('foo&lt;bar')
     expect(res.nodeType).toBe(11)
