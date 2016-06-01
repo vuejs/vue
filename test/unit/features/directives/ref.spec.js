@@ -69,4 +69,62 @@ describe('Directive v-ref', () => {
       expect(vm.$refs.test).toBeUndefined()
     }).then(done)
   })
+
+  it('should register as Array when used with v-for', done => {
+    const vm = new Vue({
+      data: {
+        items: [1, 2, 3]
+      },
+      template: `
+        <div>
+          <div v-for="n in items" v-ref:list>{{n}}</div>
+        </div>
+      `
+    }).$mount()
+    assertRefs()
+    // updating
+    vm.items.push(4)
+    waitForUpdate(assertRefs)
+      .then(() => { vm.items = [] })
+      .then(assertRefs)
+      .then(done)
+
+    function assertRefs () {
+      expect(Array.isArray(vm.$refs.list)).toBe(true)
+      expect(vm.$refs.list.length).toBe(vm.items.length)
+      expect(vm.$refs.list.every((item, i) => item.textContent === String(i + 1))).toBe(true)
+    }
+  })
+
+  it('should register as Array when used with v-for (components)', done => {
+    const vm = new Vue({
+      data: {
+        items: [1, 2, 3]
+      },
+      template: `
+        <div>
+          <test v-for="n in items" v-ref:list :n="n"></test>
+        </div>
+      `,
+      components: {
+        test: {
+          props: ['n'],
+          template: '<div>{{ n }}</div>'
+        }
+      }
+    }).$mount()
+    assertRefs()
+    // updating
+    vm.items.push(4)
+    waitForUpdate(assertRefs)
+      .then(() => { vm.items = [] })
+      .then(assertRefs)
+      .then(done)
+
+    function assertRefs () {
+      expect(Array.isArray(vm.$refs.list)).toBe(true)
+      expect(vm.$refs.list.length).toBe(vm.items.length)
+      expect(vm.$refs.list.every((comp, i) => comp.$el.textContent === String(i + 1))).toBe(true)
+    }
+  })
 })
