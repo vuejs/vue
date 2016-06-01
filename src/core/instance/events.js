@@ -1,16 +1,19 @@
 /* @flow */
 
-import { toArray } from '../util/index'
+import { bind, toArray } from '../util/index'
 import { updateListeners } from '../vdom/helpers'
 
 export function initEvents (vm: Component) {
   vm._events = Object.create(null)
   // init parent attached events
   const listeners = vm.$options._parentListeners
+  const on = bind(vm.$on, vm)
+  const off = bind(vm.$off, vm)
+  vm._updateListeners = (listeners, oldListeners) => {
+    updateListeners(listeners, oldListeners || {}, on, off)
+  }
   if (listeners) {
-    updateListeners(listeners, {}, (event, handler) => {
-      vm.$on(event, handler)
-    })
+    vm._updateListeners(listeners)
   }
 }
 

@@ -62,6 +62,7 @@ declare interface Component {
   _init: Function;
   _mount: () => Component;
   _update: (vnode: VNode) => void;
+  _updateListeners: (listeners: Object, oldListeners: ?Object) => void;
   _updateFromParent: (
     propsData: ?Object,
     listeners: ?{ [key: string]: Function | Array<Function> },

@@ -39,20 +39,26 @@ export function normalizeChildren (children: any): Array<VNode> {
   return []
 }
 
-export function updateListeners (on: Object, oldOn: Object, add: Function) {
-  let name, cur, old, event, capture
+export function updateListeners (
+  on: Object,
+  oldOn: Object,
+  add: Function,
+  remove: Function
+) {
+  let name, cur, old, fn, event, capture
   for (name in on) {
     cur = on[name]
     old = oldOn[name]
-    if (old === undefined) {
+    if (!old) {
       capture = name.charAt(0) === '!'
       event = capture ? name.slice(1) : name
       if (Array.isArray(cur)) {
-        add(event, arrInvoker(cur), capture)
+        add(event, (cur.invoker = arrInvoker(cur)), capture)
       } else {
-        cur = { fn: cur }
-        on[name] = cur
-        add(event, fnInvoker(cur), capture)
+        fn = cur
+        cur = on[name] = {}
+        cur.fn = fn
+        add(event, (cur.invoker = fnInvoker(cur)), capture)
       }
     } else if (Array.isArray(old)) {
       old.length = cur.length
@@ -61,6 +67,12 @@ export function updateListeners (on: Object, oldOn: Object, add: Function) {
     } else {
       old.fn = cur
       on[name] = old
+    }
+  }
+  for (name in oldOn) {
+    if (!on[name]) {
+      event = name.charAt(0) === '!' ? name.slice(1) : name
+      remove(event, oldOn[name].invoker)
     }
   }
 }

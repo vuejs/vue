@@ -2,9 +2,8 @@
 
 import Watcher from '../observer/watcher'
 import { emptyVNode } from '../vdom/vnode'
-import { warn, validateProp, remove, noop } from '../util/index'
 import { observerState } from '../observer/index'
-import { updateListeners } from '../vdom/helpers'
+import { warn, validateProp, remove, noop } from '../util/index'
 
 export function initLifecycle (vm: Component) {
   const options = vm.$options
@@ -109,9 +108,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     if (listeners) {
       const oldListeners = vm.$options._parentListeners
       vm.$options._parentListeners = listeners
-      updateListeners(listeners, oldListeners || {}, (event, handler) => {
-        vm.$on(event, handler)
-      })
+      vm._updateListeners(listeners, oldListeners)
     }
   }
 
