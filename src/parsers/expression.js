@@ -119,7 +119,7 @@ function compileGetter (exp) {
     .replace(saveRE, save)
     .replace(wsRE, '')
   // rewrite all paths
-  // pad 1 space here becaue the regex matches 1 extra char
+  // pad 1 space here because the regex matches 1 extra char
   body = (' ' + body)
     .replace(identRE, rewrite)
     .replace(restoreRE, restore)
