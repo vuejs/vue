@@ -66,7 +66,8 @@ export function renderMixin (Vue: Class<Component>) {
       if (process.env.NODE_ENV !== 'production' && Array.isArray(vnode)) {
         warn(
           'Multiple root nodes returned from render function. Render function ' +
-          'should return a single root node.'
+          'should return a single root node.',
+          vm
         )
       }
       vnode = emptyVNode
