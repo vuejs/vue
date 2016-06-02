@@ -21,6 +21,7 @@ describe('Options props', () => {
       vm.$refs.child.b = 'qux'
     }).then(() => {
       expect(vm.$el.innerHTML).toBe('qux')
+      expect('Avoid mutating a prop directly').toHaveBeenWarned()
     }).then(done)
   })
 
@@ -44,6 +45,7 @@ describe('Options props', () => {
       vm.$refs.child.b = 'qux'
     }).then(() => {
       expect(vm.$el.innerHTML).toBe('qux')
+      expect('Avoid mutating a prop directly').toHaveBeenWarned()
     }).then(done)
   })
 

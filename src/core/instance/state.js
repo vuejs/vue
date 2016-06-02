@@ -37,7 +37,22 @@ function initProps (vm: Component) {
     observerState.shouldConvert = isRoot
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i]
-      defineReactive(vm, key, validateProp(vm, key, propsData))
+      /* istanbul ignore else */
+      if (process.env.NODE_ENV !== 'production') {
+        defineReactive(vm, key, validateProp(vm, key, propsData), () => {
+          if (vm.$parent && !observerState.isSettingProps) {
+            warn(
+              `Avoid mutating a prop directly since the value will be ` +
+              `overwritten whenever the parent component re-renders. ` +
+              `Instead, use a data or computed property based on the prop's ` +
+              `value. Prop being mutated: "${key}"`,
+              vm
+            )
+          }
+        })
+      } else {
+        defineReactive(vm, key, validateProp(vm, key, propsData))
+      }
     }
     observerState.shouldConvert = true
   }

@@ -22,7 +22,8 @@ const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
  * under a frozen data structure. Converting it would defeat the optimization.
  */
 export const observerState = {
-  shouldConvert: true
+  shouldConvert: true,
+  isSettingProps: false
 }
 
 /**
@@ -126,7 +127,12 @@ export function observe (value: any): Observer | void {
 /**
  * Define a reactive property on an Object.
  */
-export function defineReactive (obj: Object, key: string, val: any) {
+export function defineReactive (
+  obj: Object,
+  key: string,
+  val: any,
+  customSetter?: Function
+) {
   const dep = new Dep()
 
   const property = Object.getOwnPropertyDescriptor(obj, key)
@@ -162,6 +168,9 @@ export function defineReactive (obj: Object, key: string, val: any) {
       const value = getter ? getter.call(obj) : val
       if (newVal === value) {
         return
+      }
+      if (process.env.NODE_ENV !== 'production' && customSetter) {
+        customSetter()
       }
       if (setter) {
         setter.call(obj, newVal)
