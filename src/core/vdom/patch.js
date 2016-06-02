@@ -228,20 +228,16 @@ export function createPatchFunction (backend) {
               'Make sure each v-for item has a unique key.'
             )
           }
-          patchVnode(elmToMove, newStartVnode, insertedVnodeQueue)
-          // possible edge case: if elmToMove and newStartVnode are not the
-          // same vnode (e.g. same key, different tag), the elmToMove is replaced
-          // by the newStartVnode. If elmToMove happens to be the oldStartVnode,
-          // the oldStartVnode will be holding on to an element that has been
-          // removed from the DOM. This causes later moving operations to
-          // fail. This can be fixed by replacing the oldStartVnode with the
-          // newStartVnode.
-          if (elmToMove === oldStartVnode) {
-            oldStartVnode = newStartVnode
+          if (elmToMove.tag !== newStartVnode.tag) {
+            // same key but different element. treat as new element
+            nodeOps.insertBefore(parentElm, createElm(newStartVnode, insertedVnodeQueue), oldStartVnode.elm)
+            newStartVnode = newCh[++newStartIdx]
+          } else {
+            patchVnode(elmToMove, newStartVnode, insertedVnodeQueue)
+            oldCh[idxInOld] = undefined
+            nodeOps.insertBefore(parentElm, newStartVnode.elm, oldStartVnode.elm)
+            newStartVnode = newCh[++newStartIdx]
           }
-          oldCh[idxInOld] = undefined
-          nodeOps.insertBefore(parentElm, newStartVnode.elm, oldStartVnode.elm)
-          newStartVnode = newCh[++newStartIdx]
         }
       }
     }
@@ -258,17 +254,10 @@ export function createPatchFunction (backend) {
     if (isDef(i = vnode.data) && isDef(hook = i.hook) && isDef(i = hook.prepatch)) {
       i(oldVnode, vnode)
     }
-    let elm = vnode.elm = oldVnode.elm
+    const elm = vnode.elm = oldVnode.elm
     const oldCh = oldVnode.children
     const ch = vnode.children
     if (oldVnode === vnode) return
-    if (!sameVnode(oldVnode, vnode)) {
-      const parentElm = nodeOps.parentNode(oldVnode.elm)
-      elm = createElm(vnode, insertedVnodeQueue)
-      nodeOps.insertBefore(parentElm, elm, oldVnode.elm)
-      removeVnodes(parentElm, [oldVnode], 0, 0)
-      return
-    }
     if (isDef(vnode.data)) {
       for (i = 0; i < cbs.update.length; ++i) cbs.update[i](oldVnode, vnode)
       if (isDef(hook) && isDef(i = hook.update)) i(oldVnode, vnode)

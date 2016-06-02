@@ -105,13 +105,13 @@ function prepatch (
   oldVnode: MountedComponentVNode,
   vnode: MountedComponentVNode
 ) {
-  const { listeners, propsData, children } = vnode.componentOptions
+  const options = vnode.componentOptions
   vnode.child = oldVnode.child
   vnode.child._updateFromParent(
-    propsData, // updated props
-    listeners, // updated listeners
+    options.propsData, // updated props
+    options.listeners, // updated listeners
     vnode, // new parent vnode
-    children // new children
+    options.children // new children
   )
 }
 
