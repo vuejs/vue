@@ -105,6 +105,7 @@ export function parse (
       if (inPre) {
         processRawAttrs(element)
       } else {
+        processKey(element)
         processFor(element)
         processIf(element)
         processOnce(element)
@@ -225,6 +226,13 @@ function processRawAttrs (el) {
   }
 }
 
+function processKey (el) {
+  const exp = getBindingAttr(el, 'key')
+  if (exp) {
+    el.key = exp
+  }
+}
+
 function processFor (el) {
   let exp
   if ((exp = getAndRemoveAttr(el, 'v-for'))) {
@@ -243,9 +251,6 @@ function processFor (el) {
       el.alias = iteratorMatch[2].trim()
     } else {
       el.alias = alias
-    }
-    if ((exp = getBindingAttr(el, 'key'))) {
-      el.key = exp
     }
   }
 }
