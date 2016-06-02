@@ -5,6 +5,7 @@ import { parseText, tokensToExp } from '../parsers/text'
 import { parseDirective } from '../parsers/directive'
 import { parseTemplate } from '../parsers/template'
 import {
+  _toString,
   resolveAsset,
   toArray,
   warn,
@@ -446,7 +447,7 @@ function makeTextNodeLinkFn (tokens, frag) {
           if (token.html) {
             replace(node, parseTemplate(value, true))
           } else {
-            node.data = value
+            node.data = _toString(value)
           }
         } else {
           vm._bindDir(token.descriptor, node, host, scope)
