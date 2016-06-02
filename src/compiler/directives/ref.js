@@ -8,6 +8,7 @@ export default function ref (el: ASTElement, dir: ASTDirective) {
     while (parent) {
       if (parent.for !== undefined) {
         el.refInFor = true
+        break
       }
       parent = parent.parent
     }
