@@ -302,11 +302,11 @@ describe('codegen', () => {
   it('generate is attribute', () => {
     assertCodegen(
       '<div is="component1"></div>',
-      `with(this){return _h(_e("component1",{}))}`
+      `with(this){return _h(_e("component1",{tag:"div"}))}`
     )
     assertCodegen(
       '<div :is="component1"></div>',
-      `with(this){return _h(_e(component1,{}))}`
+      `with(this){return _h(_e(component1,{tag:"div"}))}`
     )
   })
 

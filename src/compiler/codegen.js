@@ -119,6 +119,10 @@ function genData (el: ASTElement): string | void {
   if (el.refInFor) {
     data += `refInFor:true,`
   }
+  // record original tag name for components using "is" attribute
+  if (el.component) {
+    data += `tag:"${el.tag}",`
+  }
   // slot target
   if (el.slotTarget) {
     data += `slot:${el.slotTarget},`

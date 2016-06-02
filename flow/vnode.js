@@ -32,6 +32,8 @@ declare interface VNodeWithData {
 declare interface VNodeData {
   key?: string | number;
   slot?: string;
+  ref?: string;
+  tag?: string;
   staticClass?: string;
   class?: any;
   style?: Array<Object> | Object;
