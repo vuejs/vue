@@ -51,6 +51,7 @@ export function enter (vnode: VNodeWithData) {
   }
 
   const {
+    css,
     enterClass,
     enterActiveClass,
     beforeEnter,
@@ -59,6 +60,7 @@ export function enter (vnode: VNodeWithData) {
     enterCancelled
   } = resolveTransition(data.definition, vnode.context)
 
+  const expectsCSS = css !== false
   const userWantsControl = enter && enter.length > 1
   const cb = el._enterCb = once(() => {
     if (enterActiveClass) {
@@ -76,13 +78,13 @@ export function enter (vnode: VNodeWithData) {
   })
 
   beforeEnter && beforeEnter(el)
-  if (enterClass) {
+  if (enterClass && expectsCSS) {
     addTransitionClass(el, enterClass)
     nextFrame(() => {
       removeTransitionClass(el, enterClass)
     })
   }
-  if (enterActiveClass) {
+  if (enterActiveClass && expectsCSS) {
     nextFrame(() => {
       if (!cb.cancelled) {
         addTransitionClass(el, enterActiveClass)
@@ -93,7 +95,7 @@ export function enter (vnode: VNodeWithData) {
     })
   }
   enter && enter(el, cb)
-  if (!enterActiveClass && !userWantsControl) {
+  if ((!expectsCSS || !enterActiveClass) && !userWantsControl) {
     cb()
   }
 }
@@ -111,6 +113,7 @@ export function leave (vnode: VNodeWithData, rm: Function) {
   }
 
   const {
+    css,
     leaveClass,
     leaveActiveClass,
     beforeLeave,
@@ -119,6 +122,7 @@ export function leave (vnode: VNodeWithData, rm: Function) {
     leaveCancelled
   } = resolveTransition(data.definition, vnode.context)
 
+  const expectsCSS = css !== false
   const userWantsControl = leave && leave.length > 1
   const cb = el._leaveCb = once(() => {
     if (leaveActiveClass) {
@@ -137,13 +141,13 @@ export function leave (vnode: VNodeWithData, rm: Function) {
   })
 
   beforeLeave && beforeLeave(el)
-  if (leaveClass) {
+  if (leaveClass && expectsCSS) {
     addTransitionClass(el, leaveClass)
     nextFrame(() => {
       removeTransitionClass(el, leaveClass)
     })
   }
-  if (leaveActiveClass) {
+  if (leaveActiveClass && expectsCSS) {
     nextFrame(() => {
       if (!cb.cancelled) {
         addTransitionClass(el, leaveActiveClass)
@@ -154,7 +158,7 @@ export function leave (vnode: VNodeWithData, rm: Function) {
     })
   }
   leave && leave(el, cb)
-  if (!leaveActiveClass && !userWantsControl) {
+  if ((!expectsCSS || !leaveActiveClass) && !userWantsControl) {
     cb()
   }
 }
