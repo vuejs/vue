@@ -46,7 +46,8 @@ export function enter (vnode: VNodeWithData) {
   if (!data) {
     return
   }
-  if (!vnode.context.$root._isMounted && !data.appear) {
+  const isAppear = !vnode.context.$root._isMounted
+  if (isAppear && !data.appear) {
     return
   }
 
@@ -54,21 +55,25 @@ export function enter (vnode: VNodeWithData) {
     css,
     enterClass,
     enterActiveClass,
+    appearClass,
+    appearActiveClass,
     beforeEnter,
     enter,
     afterEnter,
     enterCancelled
   } = resolveTransition(data.definition, vnode.context)
 
+  const startClass = isAppear ? appearClass : enterClass
+  const activeClass = isAppear ? appearActiveClass : enterActiveClass
   const expectsCSS = css !== false
   const userWantsControl = enter && enter.length > 1
   const cb = el._enterCb = once(() => {
-    if (enterActiveClass) {
-      removeTransitionClass(el, enterActiveClass)
+    if (activeClass) {
+      removeTransitionClass(el, activeClass)
     }
     if (cb.cancelled) {
-      if (enterClass) {
-        removeTransitionClass(el, enterClass)
+      if (startClass) {
+        removeTransitionClass(el, startClass)
       }
       enterCancelled && enterCancelled(el)
     } else {
@@ -78,16 +83,16 @@ export function enter (vnode: VNodeWithData) {
   })
 
   beforeEnter && beforeEnter(el)
-  if (enterClass && expectsCSS) {
-    addTransitionClass(el, enterClass)
+  if (startClass && expectsCSS) {
+    addTransitionClass(el, startClass)
     nextFrame(() => {
-      removeTransitionClass(el, enterClass)
+      removeTransitionClass(el, startClass)
     })
   }
-  if (enterActiveClass && expectsCSS) {
+  if (activeClass && expectsCSS) {
     nextFrame(() => {
       if (!cb.cancelled) {
-        addTransitionClass(el, enterActiveClass)
+        addTransitionClass(el, activeClass)
         if (!userWantsControl) {
           whenTransitionEnds(el, cb)
         }
@@ -95,7 +100,7 @@ export function enter (vnode: VNodeWithData) {
     })
   }
   enter && enter(el, cb)
-  if ((!expectsCSS || !enterActiveClass) && !userWantsControl) {
+  if ((!expectsCSS || !activeClass) && !userWantsControl) {
     cb()
   }
 }
@@ -192,8 +197,10 @@ const autoCssTransition: (name: string) => Object = cached(name => {
   return {
     enterClass: `${name}-enter`,
     leaveClass: `${name}-leave`,
+    appearClass: `${name}-appear`,
     enterActiveClass: `${name}-enter-active`,
-    leaveActiveClass: `${name}-leave-active`
+    leaveActiveClass: `${name}-leave-active`,
+    appearActiveClass: `${name}-appear-active`
   }
 })
 

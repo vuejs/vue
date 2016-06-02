@@ -457,9 +457,9 @@ if (!isIE9) {
       }).$mount(el)
 
       waitForUpdate(() => {
-        expect(vm.$el.children[0].className).toBe('test test-enter')
+        expect(vm.$el.children[0].className).toBe('test test-appear')
       }).thenWaitFor(nextFrame).then(() => {
-        expect(vm.$el.children[0].className).toBe('test test-enter-active')
+        expect(vm.$el.children[0].className).toBe('test test-appear-active')
       }).thenWaitFor(timeout(duration + 10)).then(() => {
         expect(vm.$el.children[0].className).toBe('test')
       }).then(done)
@@ -472,9 +472,9 @@ if (!isIE9) {
       }).$mount(el)
 
       waitForUpdate(() => {
-        expect(vm.$el.children[0].className).toBe('test test-enter')
+        expect(vm.$el.children[0].className).toBe('test test-appear')
       }).thenWaitFor(nextFrame).then(() => {
-        expect(vm.$el.children[0].className).toBe('test test-enter-active')
+        expect(vm.$el.children[0].className).toBe('test test-appear-active')
       }).thenWaitFor(timeout(duration + 10)).then(() => {
         expect(vm.$el.children[0].className).toBe('test')
       }).then(done)
