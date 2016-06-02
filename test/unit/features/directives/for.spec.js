@@ -232,7 +232,7 @@ describe('Directive v-for', () => {
     expect(vm.$el.textContent).toBe('123')
   })
 
-  it('without track-by', done => {
+  it('without key', done => {
     const vm = new Vue({
       data: {
         items: [
@@ -253,7 +253,7 @@ describe('Directive v-for', () => {
     }).then(done)
   })
 
-  it('with track-by', done => {
+  it('with key', done => {
     const vm = new Vue({
       data: {
         items: [
@@ -262,7 +262,7 @@ describe('Directive v-for', () => {
           { id: 3, msg: 'c' }
         ]
       },
-      template: '<div><div v-for="item in items" track-by="item.id">{{ item.msg }}</div></div>'
+      template: '<div><div v-for="item in items" :key="item.id">{{ item.msg }}</div></div>'
     }).$mount()
     expect(vm.$el.textContent).toBe('abc')
     const first = vm.$el.children[0]

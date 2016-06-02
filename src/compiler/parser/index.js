@@ -244,7 +244,7 @@ function processFor (el) {
     } else {
       el.alias = alias
     }
-    if ((exp = getAndRemoveAttr(el, 'track-by'))) {
+    if ((exp = getBindingAttr(el, 'key'))) {
       el.key = exp
     }
   }

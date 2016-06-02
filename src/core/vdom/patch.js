@@ -224,8 +224,8 @@ export function createPatchFunction (backend) {
           /* istanbul ignore if */
           if (process.env.NODE_ENV !== 'production' && !elmToMove) {
             warn(
-              'It seems there are duplicate track-by keys that is causing an update error. ' +
-              'Make sure each v-for item has a unique track-by key.'
+              'It seems there are duplicate keys that is causing an update error. ' +
+              'Make sure each v-for item has a unique key.'
             )
           }
           patchVnode(elmToMove, newStartVnode, insertedVnodeQueue)

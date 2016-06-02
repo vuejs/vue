@@ -40,7 +40,7 @@ describe('codegen', () => {
 
   it('generate v-for directive', () => {
     assertCodegen(
-      '<li v-for="item in items" track-by="item.uid"></li>',
+      '<li v-for="item in items" :key="item.uid"></li>',
       `with(this){return (items)&&_l((items),function(item,$index,$key){return _h(_e('li',{key:item.uid}))})}`
     )
   })
