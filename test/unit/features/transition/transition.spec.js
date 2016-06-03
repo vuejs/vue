@@ -10,8 +10,8 @@ if (!isIE9) {
         -webkit-transition: opacity ${duration}ms ease;
         transition: opacity ${duration}ms ease;
       }
-      .v-enter, .v-leave-active,
-      .test-enter, .test-leave-active,
+      .v-appear, .v-enter, .v-leave-active,
+      .test-appear, .test-enter, .test-leave-active,
       .hello, .bye.active,
       .changed-enter {
         opacity: 0;
@@ -199,14 +199,14 @@ if (!isIE9) {
           expect(el.className).toBe('test')
           beforeLeaveSpy()
         },
-        leave: jasmine.createSpy('leave'),
+        onLeave: jasmine.createSpy('leave'),
         afterLeave: jasmine.createSpy('afterLeave'),
         beforeEnter: el => {
           expect(vm.$el.contains(el)).toBe(false)
           expect(el.className).toBe('test')
           beforeEnterSpy()
         },
-        enter: jasmine.createSpy('enter'),
+        onEnter: jasmine.createSpy('enter'),
         afterEnter: jasmine.createSpy('afterEnter')
       }
 
@@ -223,7 +223,7 @@ if (!isIE9) {
       vm.ok = false
       waitForUpdate(() => {
         expect(beforeLeaveSpy).toHaveBeenCalled()
-        expect(hooks.leave).toHaveBeenCalled()
+        expect(hooks.onLeave).toHaveBeenCalled()
         expect(vm.$el.children[0].className).toBe('test test-leave')
       }).thenWaitFor(nextFrame).then(() => {
         expect(hooks.afterLeave).not.toHaveBeenCalled()
@@ -234,7 +234,7 @@ if (!isIE9) {
         vm.ok = true
       }).then(() => {
         expect(beforeEnterSpy).toHaveBeenCalled()
-        expect(hooks.enter).toHaveBeenCalled()
+        expect(hooks.onEnter).toHaveBeenCalled()
         expect(vm.$el.children[0].className).toBe('test test-enter')
       }).thenWaitFor(nextFrame).then(() => {
         expect(hooks.afterEnter).not.toHaveBeenCalled()
@@ -252,10 +252,10 @@ if (!isIE9) {
         data: { ok: true },
         transitions: {
           test: {
-            enter: (el, cb) => {
+            onEnter: (el, cb) => {
               next = cb
             },
-            leave: (el, cb) => {
+            onLeave: (el, cb) => {
               next = cb
             }
           }
@@ -294,8 +294,8 @@ if (!isIE9) {
         transitions: {
           test: {
             css: false,
-            enter: enterSpy,
-            leave: leaveSpy
+            onEnter: enterSpy,
+            onLeave: leaveSpy
           }
         }
       }).$mount(el)
@@ -319,8 +319,8 @@ if (!isIE9) {
         data: { ok: true },
         transitions: {
           nope: {
-            enter: enterSpy,
-            leave: leaveSpy
+            onEnter: enterSpy,
+            onLeave: leaveSpy
           }
         }
       }).$mount(el)
@@ -452,7 +452,18 @@ if (!isIE9) {
 
     it('transition on appear', done => {
       const vm = new Vue({
-        template: '<div><div v-if="ok" class="test" transition="test" transition-on-appear>foo</div></div>',
+        template: `
+          <div>
+            <div v-if="ok"
+              class="test"
+              :transition="{
+                name:'test',
+                appear:true,
+                appearClass: 'test-appear',
+                appearActiveClass: 'test-appear-active'
+              }">foo</div>
+          </div>
+        `,
         data: { ok: true }
       }).$mount(el)
 
@@ -467,14 +478,20 @@ if (!isIE9) {
 
     it('transition on appear with v-show', done => {
       const vm = new Vue({
-        template: '<div><div v-show="ok" class="test" transition="test" transition-on-appear>foo</div></div>',
+        template: `
+          <div>
+            <div v-show="ok"
+              class="test"
+              :transition="{name:'test',appear:true}">foo</div>
+          </div>
+        `,
         data: { ok: true }
       }).$mount(el)
 
       waitForUpdate(() => {
-        expect(vm.$el.children[0].className).toBe('test test-appear')
+        expect(vm.$el.children[0].className).toBe('test test-enter')
       }).thenWaitFor(nextFrame).then(() => {
-        expect(vm.$el.children[0].className).toBe('test test-appear-active')
+        expect(vm.$el.children[0].className).toBe('test test-enter-active')
       }).thenWaitFor(timeout(duration + 10)).then(() => {
         expect(vm.$el.children[0].className).toBe('test')
       }).then(done)

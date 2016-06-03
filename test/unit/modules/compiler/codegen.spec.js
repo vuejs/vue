@@ -179,14 +179,14 @@ describe('codegen', () => {
   it('generate transition', () => {
     assertCodegen(
       '<p transition="expand">hello world</p>',
-      `with(this){return _h(_e('p',{transition:{definition:("expand"),appear:false}}),[_t("hello world")])}`
+      `with(this){return _h(_e('p',{transition:"expand"}),[_t("hello world")])}`
     )
   })
 
   it('generate dynamic transition with transition on appear', () => {
     assertCodegen(
-      '<p :transition="expand" transition-on-appear>hello world</p>',
-      `with(this){return _h(_e('p',{transition:{definition:(expand),appear:true}}),[_t("hello world")])}`
+      `<p :transition="{name:'expand',appear:true}">hello world</p>`,
+      `with(this){return _h(_e('p',{transition:{name:'expand',appear:true}}),[_t("hello world")])}`
     )
   })
 

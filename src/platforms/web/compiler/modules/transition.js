@@ -11,13 +11,12 @@ function parse (el: ASTElement) {
   }
   if (transition) {
     el.transition = transition
-    el.transitionOnAppear = getBindingAttr(el, 'transition-on-appear') != null
   }
 }
 
 function genData (el: ASTElement): string {
   return el.transition
-    ? `transition:{definition:(${el.transition}),appear:${el.transitionOnAppear}},`
+    ? `transition:${el.transition},`
     : ''
 }
 

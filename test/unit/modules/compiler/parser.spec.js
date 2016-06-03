@@ -227,13 +227,11 @@ describe('parser', () => {
   it('transition', () => {
     const ast = parse('<p v-if="show" transition="expand">hello world</p>', baseOptions)
     expect(ast.transition).toBe('"expand"')
-    expect(ast.transitionOnAppear).toBe(false)
   })
 
   it('transition with empty', () => {
     const ast = parse('<p v-if="show" transition="">hello world</p>', baseOptions)
     expect(ast.transition).toBe(true)
-    expect(ast.transitionOnAppear).toBe(false)
   })
 
   it('attribute with v-bind', () => {
