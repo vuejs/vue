@@ -161,14 +161,23 @@ if (!isIE9) {
     })
 
     it('inline transition object', done => {
+      const onEnter = jasmine.createSpy('enter')
+      const onLeave = jasmine.createSpy('leave')
       const vm = new Vue({
         template: `<div><div v-if="ok" class="test" :transition="{
+          name: 'inline',
           enterClass: 'hello',
           enterActiveClass: 'hello-active',
           leaveClass: 'bye',
           leaveActiveClass: 'bye active'
         }">foo</div></div>`,
-        data: { ok: true }
+        data: { ok: true },
+        transitions: {
+          inline: {
+            onEnter,
+            onLeave
+          }
+        }
       }).$mount(el)
 
       // should not apply transition on initial render by default
@@ -176,6 +185,7 @@ if (!isIE9) {
       vm.ok = false
       waitForUpdate(() => {
         expect(vm.$el.children[0].className).toBe('test bye')
+        expect(onLeave).toHaveBeenCalled()
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test bye active')
       }).thenWaitFor(timeout(duration + 10)).then(() => {
@@ -183,6 +193,7 @@ if (!isIE9) {
         vm.ok = true
       }).then(() => {
         expect(vm.$el.children[0].className).toBe('test hello')
+        expect(onEnter).toHaveBeenCalled()
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test hello-active')
       }).thenWaitFor(timeout(duration + 10)).then(() => {
