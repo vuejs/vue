@@ -17,7 +17,10 @@ export default {
   render () {
     const oldChild = this._vnode
     const newChild = this.$slots.default[0]
-    if (oldChild && oldChild.data && oldChild.tag !== newChild.tag) {
+    if (oldChild && oldChild.data && (
+      oldChild.tag !== newChild.tag ||
+      oldChild.key !== newChild.key
+    )) {
       if (this.mode === 'out-in') {
         // return empty node
         // and queue an update when the leave finishes
