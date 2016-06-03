@@ -74,6 +74,25 @@ describe('Options lifecyce hooks', () => {
       vm.$mount()
       expect(spy).toHaveBeenCalled()
     })
+
+    it('should mount child parent in correct order', () => {
+      const calls = []
+      new Vue({
+        template: '<test></test>',
+        mounted () {
+          calls.push('parent')
+        },
+        components: {
+          test: {
+            template: '<div></div>',
+            mounted () {
+              calls.push('child')
+            }
+          }
+        }
+      }).$mount()
+      expect(calls).toEqual(['child', 'parent'])
+    })
   })
 
   describe('beforeUpdate', () => {
