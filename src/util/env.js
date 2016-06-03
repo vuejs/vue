@@ -11,11 +11,13 @@ export const inBrowser =
 // detect devtools
 export const devtools = inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__
 
-// UA sniffing for working around browser-specific quirks
+// UA sniffing for working around browser-specific quirks, distinguish UIWebView from WKWebView by indexedDB
 const UA = inBrowser && window.navigator.userAgent.toLowerCase()
 export const isIE9 = UA && UA.indexOf('msie 9.0') > 0
 export const isAndroid = UA && UA.indexOf('android') > 0
 export const isIos = UA && /(iphone|ipad|ipod|ios)/i.test(UA)
+export const isIos93 = isIos && UA.indexOf('OS 9_3') > 0
+export const isIndexedDB = window.indexedDB || window.webkitIndexedDB || window.mozIndexedDB || false
 export const isWechat = UA && UA.indexOf('micromessenger') > 0
 
 let transitionProp
@@ -76,7 +78,7 @@ export const nextTick = (function () {
   }
 
   /* istanbul ignore if */
-  if (typeof MutationObserver !== 'undefined' && !(isWechat && isIos)) {
+  if (typeof MutationObserver !== 'undefined' && (isIndexedDB || !isIos93)) {
     var counter = 1
     var observer = new MutationObserver(nextTickHandler)
     var textNode = document.createTextNode(counter)
