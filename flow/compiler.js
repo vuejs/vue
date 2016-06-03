@@ -15,8 +15,9 @@ declare type CompilerOptions = {
 
 declare type ModuleOptions = {
   staticKeys?: Array<string>,
-  parse: Function,
-  genData: Function
+  parse: (el: ASTElement) => void,
+  genData: (el: ASTElement) => string,
+  transformElement?: (el: ASTElement, code: string) => string
 }
 
 declare type ASTElementHandler = {
@@ -59,7 +60,9 @@ declare type ASTElement = {
   ns?: string,
 
   component?: string,
+  keepAlive?: boolean,
   inlineTemplate?: true,
+  transitionMode?: string | null,
   slotName?: ?string,
   slotTarget?: ?string,
 

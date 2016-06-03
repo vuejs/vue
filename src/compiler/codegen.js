@@ -47,29 +47,39 @@ function genElement (el: ASTElement): string {
     return genRender(el)
   } else if (el.tag === 'slot') {
     return genSlot(el)
-  } else if (el.component) {
-    return genComponent(el)
   } else {
-    const data = genData(el)
-    // if the element is potentially a component,
-    // wrap its children as a thunk.
-    const children = !el.inlineTemplate
-      ? genChildren(el, !el.ns && !isPlatformReservedTag(el.tag) /* asThunk */)
-      : null
-    const code = `_h(_e('${el.tag}'${
-      data ? `,${data}` : el.ns ? ',void 0' : '' // data
-    }${
-      el.ns ? `,'${el.ns}'` : '' // namespace
-    })${
-      children ? `,${children}` : '' // children
-    })`
-    if (el.staticRoot) {
-      // hoist static sub-trees out
-      staticRenderFns.push(`with(this){return ${code}}`)
-      return `_m(${staticRenderFns.length - 1})`
+    // component or element
+    let code
+    if (el.component) {
+      code = genComponent(el)
     } else {
-      return code
+      const data = genData(el)
+      // if the element is potentially a component,
+      // wrap its children as a thunk.
+      const children = !el.inlineTemplate
+        ? genChildren(el, !el.ns && !isPlatformReservedTag(el.tag) /* asThunk */)
+        : null
+      code = `_h(_e('${el.tag}'${
+        data ? `,${data}` : el.ns ? ',void 0' : '' // data
+      }${
+        el.ns ? `,'${el.ns}'` : '' // namespace
+      })${
+        children ? `,${children}` : '' // children
+      })`
+      if (el.staticRoot) {
+        // hoist static sub-trees out
+        staticRenderFns.push(`with(this){return ${code}}`)
+        code = `_m(${staticRenderFns.length - 1})`
+      }
     }
+    // platform modules
+    for (let i = 0; i < platformModules.length; i++) {
+      const transform = platformModules[i].transformElement
+      if (transform) {
+        code = transform(el, code)
+      }
+    }
+    return code
   }
 }
 

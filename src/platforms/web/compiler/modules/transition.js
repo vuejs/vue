@@ -12,6 +12,10 @@ function parse (el: ASTElement) {
   if (transition) {
     el.transition = transition
   }
+  const mode = getBindingAttr(el, 'transition-mode')
+  if (mode) {
+    el.transitionMode = mode
+  }
 }
 
 function genData (el: ASTElement): string {
@@ -20,7 +24,16 @@ function genData (el: ASTElement): string {
     : ''
 }
 
+function transformElement (el: ASTElement, code: string): string {
+  return el.transitionMode
+    ? `_h(_e('transition-control',{props:{mode:${
+        el.transitionMode
+      }}}),function(){return [${code}]})`
+    : code
+}
+
 export default {
   parse,
-  genData
+  genData,
+  transformElement
 }

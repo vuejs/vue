@@ -129,7 +129,8 @@ export function leave (vnode: VNodeWithData, rm: Function) {
     beforeLeave,
     onLeave,
     afterLeave,
-    leaveCancelled
+    leaveCancelled,
+    delayLeave
   } = resolveTransition(data, vnode.context)
 
   const expectsCSS = css !== false
@@ -150,22 +151,30 @@ export function leave (vnode: VNodeWithData, rm: Function) {
     el._leaveCb = null
   })
 
-  beforeLeave && beforeLeave(el)
-  if (expectsCSS) {
-    addTransitionClass(el, leaveClass)
-    nextFrame(() => {
-      removeTransitionClass(el, leaveClass)
-      if (!cb.cancelled) {
-        addTransitionClass(el, leaveActiveClass)
-        if (!userWantsControl) {
-          whenTransitionEnds(el, cb)
-        }
-      }
-    })
+  if (delayLeave) {
+    delayLeave(performLeave)
+  } else {
+    performLeave()
   }
-  onLeave && onLeave(el, cb)
-  if (!expectsCSS && !userWantsControl) {
-    cb()
+
+  function performLeave () {
+    beforeLeave && beforeLeave(el)
+    if (expectsCSS) {
+      addTransitionClass(el, leaveClass)
+      nextFrame(() => {
+        removeTransitionClass(el, leaveClass)
+        if (!cb.cancelled) {
+          addTransitionClass(el, leaveActiveClass)
+          if (!userWantsControl) {
+            whenTransitionEnds(el, cb)
+          }
+        }
+      })
+    }
+    onLeave && onLeave(el, cb)
+    if (!expectsCSS && !userWantsControl) {
+      cb()
+    }
   }
 }
 

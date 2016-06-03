@@ -313,9 +313,12 @@ function processSlot (el) {
 }
 
 function processComponent (el) {
-  const isBinding = getBindingAttr(el, 'is')
-  if (isBinding) {
-    el.component = isBinding
+  let binding
+  if ((binding = getBindingAttr(el, 'is'))) {
+    el.component = binding
+  }
+  if (getAndRemoveAttr(el, 'keep-alive') != null) {
+    el.keepAlive = true
   }
   if (getAndRemoveAttr(el, 'inline-template') != null) {
     el.inlineTemplate = true
