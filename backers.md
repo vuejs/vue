@@ -16,13 +16,19 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
   <img width="360px" src="https://www.zymmm.com/content/images/2016/05/itunescn-logo-4.png">
 </a>
 
+<a href="https://jsfiddle.net/">
+  <img width="360px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/jsfiddle.png">
+</a>
+
+<a href="https://laravel.com">
+  <img width="360px" src="http://blog.legacyteam.info/wp-content/uploads/2014/10/laravel-logo-white.png">
+</a>
+
 ---
 
 ### $250
 
-<a href="https://laravel.com">
-  <img width="300px" src="http://blog.legacyteam.info/wp-content/uploads/2014/10/laravel-logo-white.png">
-</a>
+It could be you!
 
 ---
 
@@ -102,3 +108,12 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
 - louisbl
 - Yegor Sytnyk
 - Guido H.
+- Joan Cejudo
+- Walter
+- Nokola Trifunovic
+- Nicolas Mutis Mesa
+- Fahed Toumi
+- James
+- Spenser
+- Takuya Nishio
+- Daniel Diekmeier
