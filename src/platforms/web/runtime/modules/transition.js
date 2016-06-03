@@ -170,15 +170,19 @@ export function leave (vnode: VNodeWithData, rm: Function) {
 }
 
 function resolveTransition (id: string | Object, context: Component): Object {
+  let def
   if (id && typeof id === 'string') {
-    const def = resolveAsset(context.$options, 'transitions', id)
-    if (def) {
-      return ensureTransitionClasses(def.name || id, def)
-    } else {
-      return autoCssTransition(id)
-    }
+    def = resolveAsset(context.$options, 'transitions', id)
+    return def
+      ? ensureTransitionClasses(def.name || id, def)
+      : autoCssTransition(id)
   } else if (typeof id === 'object') { // inline transition object
-    return ensureTransitionClasses(id.name, id)
+    if (id.name) {
+      def = resolveAsset(context.$options, 'transitions', id.name)
+    }
+    return def
+      ? extend(ensureTransitionClasses(id.name, def), id)
+      : ensureTransitionClasses(id.name, id)
   } else {
     return autoCssTransition('v')
   }
