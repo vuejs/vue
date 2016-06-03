@@ -21,7 +21,7 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
 </a>
 
 <a href="https://laravel.com">
-  <img width="360px" src="http://blog.legacyteam.info/wp-content/uploads/2014/10/laravel-logo-white.png">
+  <img width="360px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/laravel.png">
 </a>
 
 ---
