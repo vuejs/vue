@@ -272,7 +272,7 @@ function genComponent (el: ASTElement): string {
 
 function checkKeepAlive (el: ASTElement, code: string): string {
   return el.keepAlive
-    ? `_h(_e("vKeepAlive"),function(){return [${code}]})`
+    ? `_h(_e("KeepAlive"),function(){return [${code}]})`
     : code
 }
 

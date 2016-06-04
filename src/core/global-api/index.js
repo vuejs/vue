@@ -7,6 +7,7 @@ import { initMixin } from './mixin'
 import { initExtend } from './extend'
 import { initAssetRegisters } from './assets'
 import { set, del } from '../observer/index'
+import builtInComponents from '../components/index'
 
 export function initGlobalAPI (Vue: GlobalAPI) {
   Vue.config = config
@@ -19,6 +20,8 @@ export function initGlobalAPI (Vue: GlobalAPI) {
   config._assetTypes.forEach(type => {
     Vue.options[type + 's'] = Object.create(null)
   })
+
+  util.extend(Vue.options.components, builtInComponents)
 
   initUse(Vue)
   initMixin(Vue)

@@ -1,7 +1,5 @@
-import vKeepAlive from './keep-alive'
-import vTransitionControl from './transition-control'
+import TransitionControl from './transition-control'
 
 export default {
-  vKeepAlive,
-  vTransitionControl
+  TransitionControl
 }
