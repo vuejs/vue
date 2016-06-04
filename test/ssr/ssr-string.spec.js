@@ -3,8 +3,6 @@ import { compileToFunctions } from '../../dist/compiler.js'
 import createRenderer from '../../dist/server-renderer.js'
 const { renderToString } = createRenderer()
 
-// TODO: test custom server-side directives
-
 describe('SSR: renderToString', () => {
   it('static attributes', done => {
     renderVmWithOptions({
@@ -356,6 +354,38 @@ describe('SSR: renderToString', () => {
       template: '<input v-bind="test">'
     }, result => {
       expect(result).toContain('<input id="a" class="b" server-rendered="true" value="c">')
+      done()
+    })
+  })
+
+  it('custom directives', done => {
+    const renderer = createRenderer({
+      directives: {
+        'class-prefixer': (node, dir) => {
+          if (node.data.class) {
+            node.data.class = `${dir.value}-${node.data.class}`
+          }
+          if (node.data.staticClass) {
+            node.data.staticClass = `${dir.value}-${node.data.staticClass}`
+          }
+        }
+      }
+    })
+    renderer.renderToString(new Vue({
+      render () {
+        const h = this.$createElement
+        return h('p', {
+          class: 'class1',
+          staticClass: 'class2',
+          directives: [{
+            name: 'class-prefixer',
+            value: 'my'
+          }]
+        }, ['hello world'])
+      }
+    }), (err, result) => {
+      expect(err).toBeNull()
+      expect(result).toContain('<p server-rendered="true" class="my-class2 my-class1">hello world</p>')
       done()
     })
   })
