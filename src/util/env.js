@@ -18,8 +18,9 @@ export const isAndroid = UA && UA.indexOf('android') > 0
 export const isIos = UA && /(iphone|ipad|ipod|ios)/i.test(UA)
 export const iosVersionMatch = isIos && UA.match(/os ([\d_]+)/)
 export const iosVersion = iosVersionMatch && iosVersionMatch[1].split('_')
-export const hasMutationObserverBug = iosVersion && Number(iosVersion[0]) >= 9 && Number(iosVersion[1]) >= 3 && !window.indexedDB
 
+// detecting iOS UIWebView by indexedDB
+export const hasMutationObserverBug = iosVersion && Number(iosVersion[0]) >= 9 && Number(iosVersion[1]) >= 3 && !window.indexedDB
 
 let transitionProp
 let transitionEndEvent
