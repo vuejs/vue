@@ -15,7 +15,17 @@ export const devtools = inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__
 // UA sniffing for working around browser-specific quirks
 const UA = inBrowser && window.navigator.userAgent.toLowerCase()
 const isIos = UA && /(iphone|ipad|ipod|ios)/i.test(UA)
-const isWechat = UA && UA.indexOf('micromessenger') > 0
+const iosVersionMatch = isIos && UA.match(/os ([\d_]+)/)
+const iosVersion = iosVersionMatch && iosVersionMatch[1].split('_')
+
+// MutationObserver is unreliable in iOS 9.3 UIWebView
+// detecting it by checking presence of IndexedDB
+// ref #3027
+const hasMutationObserverBug =
+  iosVersion &&
+  Number(iosVersion[0]) >= 9 &&
+  Number(iosVersion[1]) >= 3 &&
+  !window.indexedDB
 
 /**
  * Defer a task to execute it asynchronously. Ideally this
@@ -40,7 +50,7 @@ export const nextTick = (function () {
   }
 
   /* istanbul ignore else */
-  if (typeof MutationObserver !== 'undefined' && !(isWechat && isIos)) {
+  if (typeof MutationObserver !== 'undefined' && !hasMutationObserverBug) {
     let counter = 1
     const observer = new MutationObserver(nextTickHandler)
     const textNode = document.createTextNode(String(counter))
