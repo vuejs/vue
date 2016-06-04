@@ -72,6 +72,8 @@ function genElement (el: ASTElement): string {
         code = `_m(${staticRenderFns.length - 1})`
       }
     }
+    // check keep-alive
+    code = checkKeepAlive(el, code)
     // platform modules
     for (let i = 0; i < platformModules.length; i++) {
       const transform = platformModules[i].transformElement
@@ -266,6 +268,12 @@ function genComponent (el: ASTElement): string {
   return `_h(_e(${el.component},${genData(el)})${
     children ? `,${children}` : ''
   })`
+}
+
+function checkKeepAlive (el: ASTElement, code: string): string {
+  return el.keepAlive
+    ? `_h(_e("vKeepAlive"),function(){return [${code}]})`
+    : code
 }
 
 function genProps (props: Array<{ name: string, value: string }>): string {

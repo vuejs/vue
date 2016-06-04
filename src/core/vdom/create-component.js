@@ -97,8 +97,10 @@ export function createComponentInstanceForVnode (
 }
 
 function init (vnode: VNodeWithData, hydrating: boolean) {
-  const child = vnode.child = createComponentInstanceForVnode(vnode)
-  child.$mount(hydrating ? vnode.elm : undefined, hydrating)
+  if (!vnode.child) {
+    const child = vnode.child = createComponentInstanceForVnode(vnode)
+    child.$mount(hydrating ? vnode.elm : undefined, hydrating)
+  }
 }
 
 function prepatch (
@@ -116,11 +118,21 @@ function prepatch (
 }
 
 function insert (vnode: MountedComponentVNode) {
-  callHook(vnode.child, 'mounted')
+  if (!vnode.child._isMounted) {
+    vnode.child._isMounted = true
+    callHook(vnode.child, 'mounted')
+  }
+  if (vnode.data.keepAlive) {
+    callHook(vnode.child, 'activated')
+  }
 }
 
 function destroy (vnode: MountedComponentVNode) {
-  vnode.child.$destroy()
+  if (!vnode.data.keepAlive) {
+    vnode.child.$destroy()
+  } else {
+    callHook(vnode.child, 'deactivated')
+  }
 }
 
 function resolveAsyncComponent (

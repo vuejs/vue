@@ -54,10 +54,10 @@ export function lifecycleMixin (Vue: Class<Component>) {
       vm._update(vm._render(), hydrating)
     }, noop)
     hydrating = false
-    vm._isMounted = true
     // root instance, call mounted on self
     // mounted is called for child components in its inserted hook
     if (vm.$root === vm) {
+      vm._isMounted = true
       callHook(vm, 'mounted')
     }
     return vm

@@ -77,7 +77,9 @@ const config: Config = {
     'beforeUpdate',
     'updated',
     'beforeDestroy',
-    'destroyed'
+    'destroyed',
+    'activated',
+    'deactivated'
   ],
 
   /**

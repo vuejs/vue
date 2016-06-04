@@ -13,6 +13,7 @@ declare interface MountedComponentVNode {
   componentOptions: VNodeComponentOptions;
   child: Component;
   parent: VNode;
+  data: VNodeData;
 }
 
 // interface for vnodes in update modules
@@ -52,6 +53,7 @@ declare interface VNodeData {
     staticRenderFns: Array<Function>
   };
   directives?: Array<VNodeDirective>;
+  keepAlive?: boolean;
 }
 
 declare type VNodeDirective = {
