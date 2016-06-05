@@ -51,6 +51,9 @@ window.waitForUpdate = initialCb => {
       return chainer
     },
     thenWaitFor: (wait) => {
+      if (typeof wait === 'number') {
+        wait = timeout(wait)
+      }
       wait.wait = true
       queue.push(wait)
       return chainer
@@ -58,4 +61,8 @@ window.waitForUpdate = initialCb => {
   }
 
   return chainer
+}
+
+function timeout (n) {
+  return next => setTimeout(next, n)
 }

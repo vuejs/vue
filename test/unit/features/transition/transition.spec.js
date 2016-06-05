@@ -1,46 +1,11 @@
 import Vue from 'vue'
+import injectStyles from './inject-styles'
 import { isIE9 } from 'web/util/index'
 import { nextFrame } from 'web/runtime/modules/transition'
 
 if (!isIE9) {
   describe('Transition system', () => {
-    const duration = 50
-    insertCSS(`
-      .test {
-        -webkit-transition: opacity ${duration}ms ease;
-        transition: opacity ${duration}ms ease;
-      }
-      .v-appear, .v-enter, .v-leave-active,
-      .test-appear, .test-enter, .test-leave-active,
-      .hello, .bye.active,
-      .changed-enter {
-        opacity: 0;
-      }
-      .test-anim-enter-active {
-        animation: test-enter ${duration}ms;
-        -webkit-animation: test-enter ${duration}ms;
-      }
-      .test-anim-leave-active {
-        animation: test-leave ${duration}ms;
-        -webkit-animation: test-leave ${duration}ms;
-      }
-      @keyframes test-enter {
-        from { opacity: 0 }
-        to { opacity: 1 }
-      }
-      @-webkit-keyframes test-enter {
-        from { opacity: 0 }
-        to { opacity: 1 }
-      }
-      @keyframes test-leave {
-        from { opacity: 1 }
-        to { opacity: 0 }
-      }
-      @-webkit-keyframes test-leave {
-        from { opacity: 1 }
-        to { opacity: 0 }
-      }
-    `)
+    const duration = injectStyles()
 
     let el
     beforeEach(() => {
@@ -61,14 +26,14 @@ if (!isIE9) {
         expect(vm.$el.children[0].className).toBe('test v-leave')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test v-leave-active')
-      }).thenWaitFor(timeout(duration + 10)).then(() => {
+      }).thenWaitFor(duration + 10).then(() => {
         expect(vm.$el.children.length).toBe(0)
         vm.ok = true
       }).then(() => {
         expect(vm.$el.children[0].className).toBe('test v-enter')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test v-enter-active')
-      }).thenWaitFor(timeout(duration + 10)).then(() => {
+      }).thenWaitFor(duration + 10).then(() => {
         expect(vm.$el.children[0].className).toBe('test')
       }).then(done)
     })
@@ -86,14 +51,14 @@ if (!isIE9) {
         expect(vm.$el.children[0].className).toBe('test test-leave')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test test-leave-active')
-      }).thenWaitFor(timeout(duration + 10)).then(() => {
+      }).thenWaitFor(duration + 10).then(() => {
         expect(vm.$el.children.length).toBe(0)
         vm.ok = true
       }).then(() => {
         expect(vm.$el.children[0].className).toBe('test test-enter')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test test-enter-active')
-      }).thenWaitFor(timeout(duration + 10)).then(() => {
+      }).thenWaitFor(duration + 10).then(() => {
         expect(vm.$el.children[0].className).toBe('test')
       }).then(done)
     })
@@ -119,14 +84,14 @@ if (!isIE9) {
         expect(vm.$el.children[0].className).toBe('test bye')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test bye active')
-      }).thenWaitFor(timeout(duration + 10)).then(() => {
+      }).thenWaitFor(duration + 10).then(() => {
         expect(vm.$el.children.length).toBe(0)
         vm.ok = true
       }).then(() => {
         expect(vm.$el.children[0].className).toBe('test hello')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test hello-active')
-      }).thenWaitFor(timeout(duration + 10)).then(() => {
+      }).thenWaitFor(duration + 10).then(() => {
         expect(vm.$el.children[0].className).toBe('test')
       }).then(done)
     })
@@ -147,7 +112,7 @@ if (!isIE9) {
         expect(vm.$el.children[0].className).toBe('test test-leave')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test test-leave-active')
-      }).thenWaitFor(timeout(duration + 10)).then(() => {
+      }).thenWaitFor(duration + 10).then(() => {
         expect(vm.$el.children.length).toBe(0)
         vm.ok = true
         vm.trans = 'changed'
@@ -155,7 +120,7 @@ if (!isIE9) {
         expect(vm.$el.children[0].className).toBe('test changed-enter')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test changed-enter-active')
-      }).thenWaitFor(timeout(duration + 10)).then(() => {
+      }).thenWaitFor(duration + 10).then(() => {
         expect(vm.$el.children[0].className).toBe('test')
       }).then(done)
     })
@@ -188,7 +153,7 @@ if (!isIE9) {
         expect(onLeave).toHaveBeenCalled()
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test bye active')
-      }).thenWaitFor(timeout(duration + 10)).then(() => {
+      }).thenWaitFor(duration + 10).then(() => {
         expect(vm.$el.children.length).toBe(0)
         vm.ok = true
       }).then(() => {
@@ -196,7 +161,7 @@ if (!isIE9) {
         expect(onEnter).toHaveBeenCalled()
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test hello-active')
-      }).thenWaitFor(timeout(duration + 10)).then(() => {
+      }).thenWaitFor(duration + 10).then(() => {
         expect(vm.$el.children[0].className).toBe('test')
       }).then(done)
     })
@@ -239,7 +204,7 @@ if (!isIE9) {
       }).thenWaitFor(nextFrame).then(() => {
         expect(hooks.afterLeave).not.toHaveBeenCalled()
         expect(vm.$el.children[0].className).toBe('test test-leave-active')
-      }).thenWaitFor(timeout(duration + 10)).then(() => {
+      }).thenWaitFor(duration + 10).then(() => {
         expect(hooks.afterLeave).toHaveBeenCalled()
         expect(vm.$el.children.length).toBe(0)
         vm.ok = true
@@ -250,7 +215,7 @@ if (!isIE9) {
       }).thenWaitFor(nextFrame).then(() => {
         expect(hooks.afterEnter).not.toHaveBeenCalled()
         expect(vm.$el.children[0].className).toBe('test test-enter-active')
-      }).thenWaitFor(timeout(duration + 10)).then(() => {
+      }).thenWaitFor(duration + 10).then(() => {
         expect(hooks.afterEnter).toHaveBeenCalled()
         expect(vm.$el.children[0].className).toBe('test')
       }).then(done)
@@ -277,7 +242,7 @@ if (!isIE9) {
         expect(vm.$el.children[0].className).toBe('test test-leave')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test test-leave-active')
-      }).thenWaitFor(timeout(duration + 10)).then(() => {
+      }).thenWaitFor(duration + 10).then(() => {
         expect(vm.$el.children[0].className).toBe('test test-leave-active')
         expect(next).toBeTruthy()
         next()
@@ -288,7 +253,7 @@ if (!isIE9) {
         expect(vm.$el.children[0].className).toBe('test test-enter')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test test-enter-active')
-      }).thenWaitFor(timeout(duration + 10)).then(() => {
+      }).thenWaitFor(duration + 10).then(() => {
         expect(vm.$el.children[0].className).toBe('test test-enter-active')
         expect(next).toBeTruthy()
         next()
@@ -367,14 +332,14 @@ if (!isIE9) {
       vm.ok = true
       waitForUpdate(() => {
         expect(vm.$el.children[0].className).toBe('test test-enter')
-      }).thenWaitFor(timeout(duration / 2)).then(() => {
+      }).thenWaitFor(duration / 2).then(() => {
         vm.ok = false
       }).then(() => {
         expect(spy).toHaveBeenCalled()
         expect(vm.$el.children[0].className).toBe('test test-leave')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test test-leave-active')
-      }).thenWaitFor(timeout(duration + 10)).then(() => {
+      }).thenWaitFor(duration + 10).then(() => {
         expect(vm.$el.children.length).toBe(0)
       }).then(done)
     })
@@ -393,7 +358,7 @@ if (!isIE9) {
         expect(vm.$el.children[0].className).toBe('test test-leave')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test test-leave-active')
-      }).thenWaitFor(timeout(duration + 10)).then(() => {
+      }).thenWaitFor(duration + 10).then(() => {
         expect(vm.$el.children[0].style.display).toBe('none')
         vm.ok = true
       }).then(() => {
@@ -401,7 +366,7 @@ if (!isIE9) {
         expect(vm.$el.children[0].className).toBe('test test-enter')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test test-enter-active')
-      }).thenWaitFor(timeout(duration + 10)).then(() => {
+      }).thenWaitFor(duration + 10).then(() => {
         expect(vm.$el.children[0].className).toBe('test')
       }).then(done)
     })
@@ -424,14 +389,14 @@ if (!isIE9) {
         expect(vm.$el.children[0].className).toBe('test test-leave')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test test-leave-active')
-      }).thenWaitFor(timeout(duration / 2)).then(() => {
+      }).thenWaitFor(duration / 2).then(() => {
         vm.ok = true
       }).then(() => {
         expect(spy).toHaveBeenCalled()
         expect(vm.$el.children[0].className).toBe('test test-enter')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test test-enter-active')
-      }).thenWaitFor(timeout(duration + 10)).then(() => {
+      }).thenWaitFor(duration + 10).then(() => {
         expect(vm.$el.children[0].style.display).toBe('')
       }).then(done)
     })
@@ -449,14 +414,14 @@ if (!isIE9) {
         expect(vm.$el.children[0].className).toBe('test test-anim-leave')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test test-anim-leave-active')
-      }).thenWaitFor(timeout(duration + 10)).then(() => {
+      }).thenWaitFor(duration + 10).then(() => {
         expect(vm.$el.children.length).toBe(0)
         vm.ok = true
       }).then(() => {
         expect(vm.$el.children[0].className).toBe('test test-anim-enter')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test test-anim-enter-active')
-      }).thenWaitFor(timeout(duration + 10)).then(() => {
+      }).thenWaitFor(duration + 10).then(() => {
         expect(vm.$el.children[0].className).toBe('test')
       }).then(done)
     })
@@ -482,7 +447,7 @@ if (!isIE9) {
         expect(vm.$el.children[0].className).toBe('test test-appear')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test test-appear-active')
-      }).thenWaitFor(timeout(duration + 10)).then(() => {
+      }).thenWaitFor(duration + 10).then(() => {
         expect(vm.$el.children[0].className).toBe('test')
       }).then(done)
     })
@@ -503,7 +468,7 @@ if (!isIE9) {
         expect(vm.$el.children[0].className).toBe('test test-enter')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test test-enter-active')
-      }).thenWaitFor(timeout(duration + 10)).then(() => {
+      }).thenWaitFor(duration + 10).then(() => {
         expect(vm.$el.children[0].className).toBe('test')
       }).then(done)
     })
@@ -521,14 +486,14 @@ if (!isIE9) {
         expect(vm.$el.childNodes[0].getAttribute('class')).toBe('test v-leave')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.childNodes[0].getAttribute('class')).toBe('test v-leave-active')
-      }).thenWaitFor(timeout(duration + 10)).then(() => {
+      }).thenWaitFor(duration + 10).then(() => {
         expect(vm.$el.childNodes.length).toBe(0)
         vm.ok = true
       }).then(() => {
         expect(vm.$el.childNodes[0].getAttribute('class')).toBe('test v-enter')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.childNodes[0].getAttribute('class')).toBe('test v-enter-active')
-      }).thenWaitFor(timeout(duration + 10)).then(() => {
+      }).thenWaitFor(duration + 10).then(() => {
         expect(vm.$el.childNodes[0].getAttribute('class')).toBe('test')
       }).then(done)
     })
@@ -551,26 +516,16 @@ if (!isIE9) {
         expect(vm.$el.children[0].className).toBe('test v-leave')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test v-leave-active')
-      }).thenWaitFor(timeout(duration + 10)).then(() => {
+      }).thenWaitFor(duration + 10).then(() => {
         expect(vm.$el.children.length).toBe(0)
         vm.ok = true
       }).then(() => {
         expect(vm.$el.children[0].className).toBe('test v-enter')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test v-enter-active')
-      }).thenWaitFor(timeout(duration + 10)).then(() => {
+      }).thenWaitFor(duration + 10).then(() => {
         expect(vm.$el.children[0].className).toBe('test')
       }).then(done)
     })
   })
-}
-
-function insertCSS (text) {
-  var cssEl = document.createElement('style')
-  cssEl.textContent = text.trim()
-  document.head.appendChild(cssEl)
-}
-
-function timeout (n) {
-  return next => setTimeout(next, n)
 }
