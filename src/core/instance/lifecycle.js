@@ -10,7 +10,7 @@ export function initLifecycle (vm: Component) {
 
   vm.$parent = options.parent
   vm.$root = vm.$parent ? vm.$parent.$root : vm
-  if (vm.$parent) {
+  if (vm.$parent && !options._abstract) {
     vm.$parent.$children.push(vm)
   }
 
@@ -145,7 +145,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     vm._isBeingDestroyed = true
     // remove self from parent
     const parent = vm.$parent
-    if (parent && !parent._isBeingDestroyed) {
+    if (parent && !parent._isBeingDestroyed && !vm.$options._abstract) {
       remove(parent.$children, vm)
     }
     // teardown watchers

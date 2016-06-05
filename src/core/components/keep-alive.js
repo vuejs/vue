@@ -1,4 +1,6 @@
 export default {
+  name: 'keep-alive',
+  _abstract: true,
   created () {
     this.cache = Object.create(null)
   },

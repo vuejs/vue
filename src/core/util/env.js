@@ -15,7 +15,7 @@ export const devtools = inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__
 // UA sniffing for working around browser-specific quirks
 const UA = inBrowser && window.navigator.userAgent.toLowerCase()
 const isIos = UA && /(iphone|ipad|ipod|ios)/i.test(UA)
-const iosVersionMatch = isIos && UA.match(/os ([\d_]+)/)
+const iosVersionMatch = UA && isIos && UA.match(/os ([\d_]+)/)
 const iosVersion = iosVersionMatch && iosVersionMatch[1].split('_')
 
 // MutationObserver is unreliable in iOS 9.3 UIWebView

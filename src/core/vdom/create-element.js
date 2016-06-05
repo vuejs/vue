@@ -36,7 +36,7 @@ export function renderElement (
 ): VNode | void {
   // make sure to expose real self instead of proxy
   const context: Component = this._self
-  const parent: Component | null = renderState.activeInstance
+  const parent: ?Component = renderState.activeInstance
   if (!parent) {
     process.env.NODE_ENV !== 'production' && warn(
       'createElement cannot be called outside of component ' +

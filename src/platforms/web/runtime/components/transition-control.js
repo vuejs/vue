@@ -3,6 +3,8 @@
 import { warn } from 'core/util/index'
 
 export default {
+  name: 'transition-control',
+  _abstract: true,
   props: {
     mode: {
       validator (val) {
