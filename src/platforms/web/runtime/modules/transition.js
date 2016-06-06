@@ -206,12 +206,11 @@ function resolveTransition (id: string | Object, context: Component): Object {
 }
 
 function ensureTransitionClasses (name: ?string, def: Object): Object {
-  if (def.css === false) return def
   name = name || 'v'
-  const key = `_cache_${name}`
-  if (def[key]) return def[key]
-  const res = def[key] = {}
-  extend(res, autoCssTransition(name))
+  const res = {}
+  if (def.css !== false) {
+    extend(res, autoCssTransition(name))
+  }
   extend(res, def)
   return res
 }
@@ -227,7 +226,7 @@ const autoCssTransition: (name: string) => Object = cached(name => {
   }
 })
 
-function mergeHook (def, key, hook) {
+function mergeHook (def: Object, key: string, hook: Function) {
   const oldHook = def[key]
   if (oldHook) {
     def[key] = function () {
