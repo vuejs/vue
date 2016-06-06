@@ -128,10 +128,12 @@ function insert (vnode: MountedComponentVNode) {
 }
 
 function destroy (vnode: MountedComponentVNode) {
-  if (!vnode.data.keepAlive) {
-    vnode.child.$destroy()
-  } else {
-    callHook(vnode.child, 'deactivated')
+  if (!vnode.child._isDestroyed) {
+    if (!vnode.data.keepAlive) {
+      vnode.child.$destroy()
+    } else {
+      callHook(vnode.child, 'deactivated')
+    }
   }
 }
 

@@ -1,3 +1,5 @@
+import { callHook } from 'core/instance/lifecycle'
+
 export default {
   name: 'keep-alive',
   _abstract: true,
@@ -20,9 +22,11 @@ export default {
     realChild.data.keepAlive = true
     return rawChild
   },
-  beforeDestroy () {
+  destroyed () {
     for (const key in this.cache) {
-      this.cache[key].child.$destroy()
+      const vnode = this.cache[key]
+      callHook(vnode.child, 'deactivated')
+      vnode.child.$destroy()
     }
   }
 }

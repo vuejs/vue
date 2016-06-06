@@ -12,14 +12,16 @@ describe('Component keep-alive', () => {
       created: jasmine.createSpy('one created'),
       mounted: jasmine.createSpy('one mounted'),
       activated: jasmine.createSpy('one activated'),
-      deactivated: jasmine.createSpy('one deactivated')
+      deactivated: jasmine.createSpy('one deactivated'),
+      destroyed: jasmine.createSpy('one destroyed')
     }
     two = {
       template: '<div>two</div>',
       created: jasmine.createSpy('two created'),
       mounted: jasmine.createSpy('two mounted'),
       activated: jasmine.createSpy('two activated'),
-      deactivated: jasmine.createSpy('two deactivated')
+      deactivated: jasmine.createSpy('two deactivated'),
+      destroyed: jasmine.createSpy('two destroyed')
     }
     components = {
       one,
@@ -34,36 +36,43 @@ describe('Component keep-alive', () => {
       component.created.calls.count(),
       component.mounted.calls.count(),
       component.activated.calls.count(),
-      component.deactivated.calls.count()
+      component.deactivated.calls.count(),
+      component.destroyed.calls.count()
     ]).toEqual(callCounts)
   }
 
   it('should work', done => {
     const vm = new Vue({
-      template: '<div><component :is="view" keep-alive></component></div>',
+      template: '<div v-if="ok"><component :is="view" keep-alive></component></div>',
       data: {
-        view: 'one'
+        view: 'one',
+        ok: true
       },
       components
     }).$mount()
     expect(vm.$el.textContent).toBe('one')
-    assertHookCalls(one, [1, 1, 1, 0])
-    assertHookCalls(two, [0, 0, 0, 0])
+    assertHookCalls(one, [1, 1, 1, 0, 0])
+    assertHookCalls(two, [0, 0, 0, 0, 0])
     vm.view = 'two'
     waitForUpdate(() => {
       expect(vm.$el.textContent).toBe('two')
-      assertHookCalls(one, [1, 1, 1, 1])
-      assertHookCalls(two, [1, 1, 1, 0])
+      assertHookCalls(one, [1, 1, 1, 1, 0])
+      assertHookCalls(two, [1, 1, 1, 0, 0])
       vm.view = 'one'
     }).then(() => {
       expect(vm.$el.textContent).toBe('one')
-      assertHookCalls(one, [1, 1, 2, 1])
-      assertHookCalls(two, [1, 1, 1, 1])
+      assertHookCalls(one, [1, 1, 2, 1, 0])
+      assertHookCalls(two, [1, 1, 1, 1, 0])
       vm.view = 'two'
     }).then(() => {
       expect(vm.$el.textContent).toBe('two')
-      assertHookCalls(one, [1, 1, 2, 2])
-      assertHookCalls(two, [1, 1, 2, 1])
+      assertHookCalls(one, [1, 1, 2, 2, 0])
+      assertHookCalls(two, [1, 1, 2, 1, 0])
+      vm.ok = false // teardown
+    }).then(() => {
+      expect(vm.$el.textContent).toBe('')
+      assertHookCalls(one, [1, 1, 2, 3, 1])
+      assertHookCalls(two, [1, 1, 2, 2, 1])
     }).then(done)
   })
 
@@ -93,15 +102,15 @@ describe('Component keep-alive', () => {
         }
       }).$mount(el)
       expect(vm.$el.textContent).toBe('one')
-      assertHookCalls(one, [1, 1, 1, 0])
-      assertHookCalls(two, [0, 0, 0, 0])
+      assertHookCalls(one, [1, 1, 1, 0, 0])
+      assertHookCalls(two, [0, 0, 0, 0, 0])
       vm.view = 'two'
       waitForUpdate(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test test-leave">one</div>'
         )
-        assertHookCalls(one, [1, 1, 1, 1])
-        assertHookCalls(two, [0, 0, 0, 0])
+        assertHookCalls(one, [1, 1, 1, 1, 0])
+        assertHookCalls(two, [0, 0, 0, 0, 0])
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test test-leave-active">one</div>'
@@ -112,8 +121,8 @@ describe('Component keep-alive', () => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test test-enter">two</div>'
         )
-        assertHookCalls(one, [1, 1, 1, 1])
-        assertHookCalls(two, [1, 1, 1, 0])
+        assertHookCalls(one, [1, 1, 1, 1, 0])
+        assertHookCalls(two, [1, 1, 1, 0, 0])
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test test-enter-active">two</div>'
@@ -122,16 +131,16 @@ describe('Component keep-alive', () => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">two</div>'
         )
-        assertHookCalls(one, [1, 1, 1, 1])
-        assertHookCalls(two, [1, 1, 1, 0])
+        assertHookCalls(one, [1, 1, 1, 1, 0])
+        assertHookCalls(two, [1, 1, 1, 0, 0])
       }).then(() => {
         vm.view = 'one'
       }).then(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test test-leave">two</div>'
         )
-        assertHookCalls(one, [1, 1, 1, 1])
-        assertHookCalls(two, [1, 1, 1, 1])
+        assertHookCalls(one, [1, 1, 1, 1, 0])
+        assertHookCalls(two, [1, 1, 1, 1, 0])
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test test-leave-active">two</div>'
@@ -142,8 +151,8 @@ describe('Component keep-alive', () => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test test-enter">one</div>'
         )
-        assertHookCalls(one, [1, 1, 2, 1])
-        assertHookCalls(two, [1, 1, 1, 1])
+        assertHookCalls(one, [1, 1, 2, 1, 0])
+        assertHookCalls(two, [1, 1, 1, 1, 0])
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test test-enter-active">one</div>'
@@ -152,8 +161,8 @@ describe('Component keep-alive', () => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">one</div>'
         )
-        assertHookCalls(one, [1, 1, 2, 1])
-        assertHookCalls(two, [1, 1, 1, 1])
+        assertHookCalls(one, [1, 1, 2, 1, 0])
+        assertHookCalls(two, [1, 1, 1, 1, 0])
       }).then(done)
     })
 
@@ -182,16 +191,16 @@ describe('Component keep-alive', () => {
         }
       }).$mount(el)
       expect(vm.$el.textContent).toBe('one')
-      assertHookCalls(one, [1, 1, 1, 0])
-      assertHookCalls(two, [0, 0, 0, 0])
+      assertHookCalls(one, [1, 1, 1, 0, 0])
+      assertHookCalls(two, [0, 0, 0, 0, 0])
       vm.view = 'two'
       waitForUpdate(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">one</div>' +
           '<div class="test test-enter">two</div>'
         )
-        assertHookCalls(one, [1, 1, 1, 1])
-        assertHookCalls(two, [1, 1, 1, 0])
+        assertHookCalls(one, [1, 1, 1, 1, 0])
+        assertHookCalls(two, [1, 1, 1, 0, 0])
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">one</div>' +
@@ -216,8 +225,8 @@ describe('Component keep-alive', () => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">two</div>'
         )
-        assertHookCalls(one, [1, 1, 1, 1])
-        assertHookCalls(two, [1, 1, 1, 0])
+        assertHookCalls(one, [1, 1, 1, 1, 0])
+        assertHookCalls(two, [1, 1, 1, 0, 0])
       }).then(() => {
         vm.view = 'one'
       }).then(() => {
@@ -225,8 +234,8 @@ describe('Component keep-alive', () => {
           '<div class="test">two</div>' +
           '<div class="test test-enter">one</div>'
         )
-        assertHookCalls(one, [1, 1, 2, 1])
-        assertHookCalls(two, [1, 1, 1, 1])
+        assertHookCalls(one, [1, 1, 2, 1, 0])
+        assertHookCalls(two, [1, 1, 1, 1, 0])
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">two</div>' +
@@ -251,8 +260,8 @@ describe('Component keep-alive', () => {
         expect(vm.$el.innerHTML).toBe(
           '<div class="test">one</div>'
         )
-        assertHookCalls(one, [1, 1, 2, 1])
-        assertHookCalls(two, [1, 1, 1, 1])
+        assertHookCalls(one, [1, 1, 2, 1, 0])
+        assertHookCalls(two, [1, 1, 1, 1, 0])
       }).then(done)
     })
   }

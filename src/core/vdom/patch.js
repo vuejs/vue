@@ -126,13 +126,13 @@ export function createPatchFunction (backend) {
     if (isDef(data)) {
       if (isDef(i = data.hook) && isDef(i = i.destroy)) i(vnode)
       for (i = 0; i < cbs.destroy.length; ++i) cbs.destroy[i](vnode)
-      if (isDef(i = vnode.children)) {
-        for (j = 0; j < vnode.children.length; ++j) {
-          invokeDestroyHook(vnode.children[j])
-        }
-      }
-      if (isDef(i = vnode.child)) {
-        invokeDestroyHook(i._vnode)
+    }
+    if (isDef(i = vnode.child)) {
+      invokeDestroyHook(i._vnode)
+    }
+    if (isDef(i = vnode.children)) {
+      for (j = 0; j < vnode.children.length; ++j) {
+        invokeDestroyHook(vnode.children[j])
       }
     }
   }
