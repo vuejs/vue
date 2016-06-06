@@ -35,20 +35,6 @@ export function initRender (vm: Component) {
   ) {
     return this._h(this._e(tag, data, namespace), children)
   }, vm)
-  // for abstract components, determine first non-abstract parent
-  // so that the children of abstract components are considered children
-  // of the first non-abstract parent.
-  // this is used by internal abstract components like <keep-alive>.
-  if (vm.$options._abstract) {
-    let parent = vm.$parent
-    /* istanbul ignore next */
-    while (parent && parent.$options._abstract) {
-      parent = parent.$parent
-    }
-    vm._renderParent = parent
-  } else {
-    vm._renderParent = vm
-  }
   if (vm.$options.el) {
     vm.$mount(vm.$options.el)
   }
@@ -62,7 +48,7 @@ export function renderMixin (Vue: Class<Component>) {
   Vue.prototype._render = function (): VNode {
     const vm: Component = this
     const prev = renderState.activeInstance
-    renderState.activeInstance = vm._renderParent
+    renderState.activeInstance = vm
     if (!vm._isMounted) {
       // render static sub-trees for once on initial render
       renderStaticTrees(vm)
