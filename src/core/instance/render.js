@@ -41,6 +41,7 @@ export function initRender (vm: Component) {
   // this is used by internal abstract components like <keep-alive>.
   if (vm.$options._abstract) {
     let parent = vm.$parent
+    /* istanbul ignore next */
     while (parent && parent.$options._abstract) {
       parent = parent.$parent
     }

@@ -9,6 +9,7 @@ export default {
     child: Object,
     mode: {
       validator (val) {
+        /* istanbul ignore if */
         if (val && val !== 'out-in' && val !== 'in-out') {
           warn('transition-mode must be either "out-in" or "in-out".')
           return false
@@ -51,10 +52,12 @@ export default {
 }
 
 function addHook (vnode: VNode, hooks: Object) {
+  /* istanbul ignore if */
   if (!vnode.data || !vnode.data.transition) {
     return
   }
   let trans = vnode.data.transition
+  /* istanbul ignore else */
   if (typeof trans === 'string') {
     trans = vnode.data.transition = { name: trans }
   } else if (typeof trans !== 'object') {
