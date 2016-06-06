@@ -6,6 +6,7 @@ export default {
   name: 'transition-control',
   _abstract: true,
   props: {
+    child: Object,
     mode: {
       validator (val) {
         if (val && val !== 'out-in' && val !== 'in-out') {
@@ -18,7 +19,7 @@ export default {
   },
   render () {
     const oldChild = this._vnode
-    const newChild = this.$slots.default[0]
+    const newChild = this.child
     if (oldChild && oldChild.data && (
       oldChild.tag !== newChild.tag ||
       oldChild.key !== newChild.key
@@ -26,25 +27,20 @@ export default {
       if (this.mode === 'out-in') {
         // return empty node
         // and queue an update when the leave finishes
-        addHook(oldChild, 'afterLeave', () => {
+        return addHook(oldChild, 'afterLeave', () => {
           this.$forceUpdate()
         })
-        return
-      } else {
-        if (this.mode === 'in-out') {
-          let delayedLeave
-          const performLeave = () => { delayedLeave() }
-          addHook(newChild, 'afterEnter', performLeave)
-          addHook(newChild, 'enterCancelled', performLeave)
-          addHook(oldChild, 'delayLeave', leave => {
-            delayedLeave = leave
-          })
-        }
-        return newChild
+      } else if (this.mode === 'in-out') {
+        let delayedLeave
+        const performLeave = () => { delayedLeave() }
+        addHook(newChild, 'afterEnter', performLeave)
+        addHook(newChild, 'enterCancelled', performLeave)
+        addHook(oldChild, 'delayLeave', leave => {
+          delayedLeave = leave
+        })
       }
-    } else {
-      return newChild
     }
+    return newChild
   }
 }
 

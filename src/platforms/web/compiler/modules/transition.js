@@ -28,7 +28,7 @@ function transformElement (el: ASTElement, code: string): string {
   return el.transitionMode
     ? `_h(_e('TransitionControl',{props:{mode:${
         el.transitionMode
-      }}}),function(){return [${code}]})`
+      },child:${code}}}))`
     : code
 }
 
