@@ -11,10 +11,16 @@ export function compile (
   template: string,
   options: CompilerOptions
 ): {
+  ast: ?ASTElement,
   render: string,
   staticRenderFns: Array<string>
 } {
   const ast = parse(template.trim(), options)
   optimize(ast, options)
-  return generate(ast, options)
+  const code = generate(ast, options)
+  return {
+    ast,
+    render: code.render,
+    staticRenderFns: code.staticRenderFns
+  }
 }

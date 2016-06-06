@@ -42,7 +42,7 @@ Vue.prototype.$mount = function (
         preserveWhitespace: config.preserveWhitespace,
         delimiters: options.delimiters,
         warn
-      })
+      }, this)
       options.render = render
       options.staticRenderFns = staticRenderFns
     }

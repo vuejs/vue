@@ -100,6 +100,7 @@ declare type ASTElement = {
 declare type ASTExpression = {
   type: 2,
   expression: string,
+  text: string,
   static?: boolean
 }
 

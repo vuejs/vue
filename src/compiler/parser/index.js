@@ -15,7 +15,7 @@ import {
   baseWarn
 } from '../helpers'
 
-const dirRE = /^v-|^@|^:/
+export const dirRE = /^v-|^@|^:/
 const bindRE = /^:|^v-bind:/
 const onRE = /^@|^v-on:/
 const argRE = /:(.*)$/
@@ -194,9 +194,16 @@ export function parse (
       if (text) {
         let expression
         if (!inPre && text !== ' ' && (expression = parseText(text, delimiters))) {
-          currentParent.children.push({ type: 2, expression })
+          currentParent.children.push({
+            type: 2,
+            expression,
+            text
+          })
         } else {
-          currentParent.children.push({ type: 3, text })
+          currentParent.children.push({
+            type: 3,
+            text
+          })
         }
       }
     }

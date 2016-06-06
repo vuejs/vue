@@ -50,4 +50,13 @@ describe('Options template', () => {
     }).$mount()
     expect('invalid template option').toHaveBeenWarned()
   })
+
+  it('warn error in generated function', () => {
+    new Vue({
+      template: '<div v-if="!@">{{ a"" }}</div>'
+    }).$mount()
+    expect('failed to compile template').toHaveBeenWarned()
+    expect('invalid expression: v-if="!@"').toHaveBeenWarned()
+    expect('invalid expression: {{ a"" }}').toHaveBeenWarned()
+  })
 })

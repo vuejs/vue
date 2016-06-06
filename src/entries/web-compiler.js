@@ -1,8 +1,9 @@
 /* @flow */
 
-import { extend, genStaticKeys } from 'shared/util'
+import { extend, genStaticKeys, noop } from 'shared/util'
 import { warn } from 'core/util/debug'
 import { compile as baseCompile } from 'compiler/index'
+import { detectErrors } from 'compiler/error-detector'
 import modules from 'web/compiler/modules/index'
 import directives from 'web/compiler/directives/index'
 import { isIE, isReservedTag, isUnaryTag, mustUseProp, getTagNamespace } from 'web/util/index'
@@ -49,7 +50,11 @@ export const baseOptions: CompilerOptions = {
 export function compile (
   template: string,
   options?: CompilerOptions
-): { render: string, staticRenderFns: Array<string> } {
+): {
+  ast: ?ASTElement,
+  render: string,
+  staticRenderFns: Array<string>
+} {
   options = options
     ? extend(extend({}, baseOptions), options)
     : baseOptions
@@ -58,7 +63,8 @@ export function compile (
 
 export function compileToFunctions (
   template: string,
-  options?: CompilerOptions
+  options?: CompilerOptions,
+  vm: Component
 ): CompiledFunctions {
   const cache = options && options.preserveWhitespace === false ? cache1 : cache2
   const key = options && options.delimiters
@@ -69,11 +75,30 @@ export function compileToFunctions (
   }
   const res = {}
   const compiled = compile(template, options)
-  res.render = new Function(compiled.render)
+  res.render = makeFunction(compiled.render)
   const l = compiled.staticRenderFns.length
   res.staticRenderFns = new Array(l)
   for (let i = 0; i < l; i++) {
-    res.staticRenderFns[i] = new Function(compiled.staticRenderFns[i])
+    res.staticRenderFns[i] = makeFunction(compiled.staticRenderFns[i])
+  }
+  if (process.env.NODE_ENV !== 'production') {
+    if (res.render === noop || res.staticRenderFns.some(fn => fn === noop)) {
+      const errors = compiled.ast ? detectErrors(compiled.ast, warn) : []
+      warn(
+        `failed to compile template:\n\n${template}\n\n` +
+        errors.join('\n') +
+        '\n\n',
+        vm
+      )
+    }
   }
   return (cache[key] = res)
+}
+
+function makeFunction (code) {
+  try {
+    return new Function(code)
+  } catch (e) {
+    return noop
+  }
 }
