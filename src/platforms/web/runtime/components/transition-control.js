@@ -27,16 +27,22 @@ export default {
       if (this.mode === 'out-in') {
         // return empty node
         // and queue an update when the leave finishes
-        return addHook(oldChild, 'afterLeave', () => {
-          this.$forceUpdate()
+        return addHook(oldChild, {
+          afterLeave: () => {
+            this.$forceUpdate()
+          }
         })
       } else if (this.mode === 'in-out') {
         let delayedLeave
         const performLeave = () => { delayedLeave() }
-        addHook(newChild, 'afterEnter', performLeave)
-        addHook(newChild, 'enterCancelled', performLeave)
-        addHook(oldChild, 'delayLeave', leave => {
-          delayedLeave = leave
+        addHook(newChild, {
+          afterEnter: performLeave,
+          enterCancelled: performLeave
+        })
+        addHook(oldChild, {
+          delayLeave: leave => {
+            delayedLeave = leave
+          }
         })
       }
     }
@@ -44,7 +50,7 @@ export default {
   }
 }
 
-function addHook (vnode: VNode, name: string, hook: Function) {
+function addHook (vnode: VNode, hooks: Object) {
   if (!vnode.data || !vnode.data.transition) {
     return
   }
@@ -54,14 +60,5 @@ function addHook (vnode: VNode, name: string, hook: Function) {
   } else if (typeof trans !== 'object') {
     trans = vnode.data.transition = { name: 'v' }
   }
-  if (trans[name]) {
-    const oldHook = trans[name]
-    trans[name] = function (el) {
-      const res = oldHook.apply(this, arguments)
-      hook()
-      return res
-    }
-  } else {
-    trans[name] = hook
-  }
+  trans.hooks = hooks
 }
