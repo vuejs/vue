@@ -210,7 +210,9 @@ export default function (Vue) {
           type === 'component' &&
           isPlainObject(definition)
         ) {
-          definition.name = id
+          if (!definition.name) {
+            definition.name = id
+          }
           definition = Vue.extend(definition)
         }
         this.options[type + 's'][id] = definition

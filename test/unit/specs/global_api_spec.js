@@ -112,5 +112,14 @@ describe('Global API', function () {
       // extended registration should not pollute global
       expect(Vue.options.components.test).toBeUndefined()
     })
+
+    // GitHub issue #3039
+    it('component with `name` option', function () {
+      var def = { name: 'Component1' }
+      Test.component('ns-tree', def)
+      var component = Test.options.components['ns-tree']
+      expect(typeof component).toBe('function')
+      expect(component.name).toBe('Component1')
+    })
   })
 })
