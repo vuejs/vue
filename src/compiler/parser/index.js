@@ -116,7 +116,7 @@ export function parse (
         processSlot(element)
         processComponent(element)
         for (let i = 0; i < platformModules.length; i++) {
-          platformModules[i].parse(element, options)
+          platformModules[i].transformNode(element, options)
         }
         processAttrs(element)
       }

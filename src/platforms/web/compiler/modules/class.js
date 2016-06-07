@@ -7,7 +7,7 @@ import {
   baseWarn
 } from 'compiler/helpers'
 
-function parse (el: ASTElement, options: CompilerOptions) {
+function transformNode (el: ASTElement, options: CompilerOptions) {
   const warn = options.warn || baseWarn
   const staticClass = getAndRemoveAttr(el, 'class')
   if (process.env.NODE_ENV !== 'production' && staticClass) {
@@ -40,6 +40,6 @@ function genData (el: ASTElement): string {
 
 export default {
   staticKeys: ['staticClass'],
-  parse,
+  transformNode,
   genData
 }

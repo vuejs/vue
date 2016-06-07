@@ -74,7 +74,7 @@ function genElement (el: ASTElement): string {
     }
     // platform modules
     for (let i = 0; i < platformModules.length; i++) {
-      const transform = platformModules[i].transformElement
+      const transform = platformModules[i].transformCode
       if (transform) {
         code = transform(el, code)
       }
