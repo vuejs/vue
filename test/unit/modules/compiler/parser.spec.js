@@ -95,8 +95,8 @@ describe('parser', () => {
   it('v-pre directive', () => {
     const ast = parse('<div v-pre id="message1"><p>{{msg}}</p></div>', baseOptions)
     expect(ast.pre).toBe(true)
-    expect(ast.attrs[0].name).toBe('id')
-    expect(ast.attrs[0].value).toBe('"message1"')
+    expect(ast.staticAttrs[0].name).toBe('id')
+    expect(ast.staticAttrs[0].value).toBe('"message1"')
     expect(ast.children[0].children[0].text).toBe('{{msg}}')
   })
 

@@ -221,7 +221,7 @@ function processPre (el) {
 function processRawAttrs (el) {
   const l = el.attrsList.length
   if (l) {
-    const attrs = el.attrs = new Array(l)
+    const attrs = el.staticAttrs = new Array(l)
     for (let i = 0; i < l; i++) {
       attrs[i] = {
         name: el.attrsList[i].name,
