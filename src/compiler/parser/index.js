@@ -33,6 +33,7 @@ let platformGetTagNamespace
 let platformMustUseProp
 let preTransforms
 let transforms
+let postTransforms
 let delimiters
 
 /**
@@ -47,6 +48,7 @@ export function parse (
   platformMustUseProp = options.mustUseProp || no
   preTransforms = pluckModuleFunction(options.modules, 'preTransformNode')
   transforms = pluckModuleFunction(options.modules, 'transformNode')
+  postTransforms = pluckModuleFunction(options.modules, 'postTransformNode')
   delimiters = options.delimiters
   const stack = []
   let root
@@ -164,6 +166,10 @@ export function parse (
       if (!unary) {
         currentParent = element
         stack.push(element)
+      }
+      // apply post-transforms
+      for (let i = 0; i < postTransforms.length; i++) {
+        postTransforms[i](element, options)
       }
     },
 

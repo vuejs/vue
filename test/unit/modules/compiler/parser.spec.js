@@ -316,15 +316,21 @@ describe('parser', () => {
     expect(ast.props).toBeUndefined()
   })
 
-  it('preTransforms', () => {
+  it('pre/post transforms', () => {
     const options = extend({}, baseOptions)
-    const spy = jasmine.createSpy('preTransform')
+    const spy1 = jasmine.createSpy('preTransform')
+    const spy2 = jasmine.createSpy('postTransform')
     options.modules = options.modules.concat([{
       preTransformNode (el) {
-        spy(el.tag)
+        spy1(el.tag)
+      },
+      postTransformNode (el) {
+        expect(el.staticAttrs.length).toBe(1)
+        spy2(el.tag)
       }
     }])
     parse('<img v-pre src="hi">', options)
-    expect(spy).toHaveBeenCalledWith('img')
+    expect(spy1).toHaveBeenCalledWith('img')
+    expect(spy2).toHaveBeenCalledWith('img')
   })
 })
