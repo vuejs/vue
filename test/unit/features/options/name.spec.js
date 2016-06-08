@@ -39,13 +39,12 @@ describe('Options name', () => {
     expect(vm.options.components['Hyper*Vue']).toBeUndefined()
   })
 
-  it('id should override given name when using Vue.component', () => {
+  it('id should not override given name when using Vue.component', () => {
     const SuperComponent = Vue.component('super-component', {
       name: 'SuperVue'
     })
 
-    expect(SuperComponent.options.components['SuperVue']).toBeUndefined()
-    expect(SuperComponent.options.components['super-component']).toBeDefined()
+    expect(SuperComponent.options.components['SuperVue']).toEqual(SuperComponent)
     expect(SuperComponent.options.components['super-component']).toEqual(SuperComponent)
   })
 })
