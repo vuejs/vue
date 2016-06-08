@@ -45,3 +45,7 @@ export function setTextContent (node: Node, text: string) {
 export function childNodes (node: Node): NodeList {
   return node.childNodes
 }
+
+export function setAttribute (node: Element, key: string, val: string) {
+  node.setAttribute(key, val)
+}

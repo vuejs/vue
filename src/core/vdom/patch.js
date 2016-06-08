@@ -78,6 +78,7 @@ export function createPatchFunction (backend) {
       // in that case we can just return the element and be done.
       if (isDef(i = vnode.child)) {
         invokeCreateHooks(vnode, insertedVnodeQueue)
+        setScope(vnode)
         return vnode.elm
       }
     }
@@ -87,6 +88,7 @@ export function createPatchFunction (backend) {
       elm = vnode.elm = vnode.ns
         ? nodeOps.createElementNS(vnode.ns, tag)
         : nodeOps.createElement(tag)
+      setScope(vnode)
       if (Array.isArray(children)) {
         for (i = 0; i < children.length; ++i) {
           nodeOps.appendChild(elm, createElm(children[i], insertedVnodeQueue))
@@ -111,6 +113,16 @@ export function createPatchFunction (backend) {
     if (isDef(i)) {
       if (i.create) i.create(emptyNode, vnode)
       if (i.insert) insertedVnodeQueue.push(vnode)
+    }
+  }
+
+  // set scope id attribute for scoped CSS.
+  // this is implemented as a special case to avoid the overhead
+  // of going through the normal attribute patching process.
+  function setScope (vnode) {
+    let i
+    if (isDef(i = vnode.context) && isDef(i = i.$options._scopeId)) {
+      nodeOps.setAttribute(vnode.elm, i, '')
     }
   }
 

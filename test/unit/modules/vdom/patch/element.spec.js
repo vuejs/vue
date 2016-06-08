@@ -1,3 +1,4 @@
+import Vue from 'vue'
 import { patch } from 'web/runtime/patch'
 import VNode from 'core/vdom/vnode'
 
@@ -29,5 +30,12 @@ describe('element', () => {
     const elm = patch(null, vnode)
     expect(elm.childNodes[0].tagName).toBe('SPAN')
     expect(elm.childNodes[1].textContent).toBe('hello world')
+  })
+
+  it('should create element with scope attribute', () => {
+    const vnode = new VNode('div')
+    vnode.context = new Vue({ _scopeId: 'foo' })
+    const elm = patch(null, vnode)
+    expect(elm.hasAttribute('foo')).toBe(true)
   })
 })
