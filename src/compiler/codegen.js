@@ -1,13 +1,14 @@
 /* @flow */
 
 import { genHandlers } from './events'
-import { baseWarn } from './helpers'
+import { baseWarn, pluckModuleFunction } from './helpers'
 import baseDirectives from './directives/index'
 import { no } from 'shared/util'
 
 // configurable state
 let warn
-let platformModules
+let transforms
+let dataGenFns
 let platformDirectives
 let isPlatformReservedTag
 let staticRenderFns
@@ -25,7 +26,8 @@ export function generate (
   const currentStaticRenderFns: Array<string> = staticRenderFns = []
   currentOptions = options
   warn = options.warn || baseWarn
-  platformModules = options.modules || []
+  transforms = pluckModuleFunction(options.modules, 'transformCode')
+  dataGenFns = pluckModuleFunction(options.modules, 'genData')
   platformDirectives = options.directives || {}
   isPlatformReservedTag = options.isReservedTag || no
   const code = ast ? genElement(ast) : '_h(_e("div"))'
@@ -72,12 +74,9 @@ function genElement (el: ASTElement): string {
         code = `_m(${staticRenderFns.length - 1})`
       }
     }
-    // platform modules
-    for (let i = 0; i < platformModules.length; i++) {
-      const transform = platformModules[i].transformCode
-      if (transform) {
-        code = transform(el, code)
-      }
+    // module transforms
+    for (let i = 0; i < transforms.length; i++) {
+      code = transforms[i](el, code)
     }
     // check keep-alive
     if (el.component && el.keepAlive) {
@@ -141,9 +140,9 @@ function genData (el: ASTElement): string | void {
   if (el.slotTarget) {
     data += `slot:${el.slotTarget},`
   }
-  // platform modules
-  for (let i = 0; i < platformModules.length; i++) {
-    data += platformModules[i].genData(el)
+  // module data generation functions
+  for (let i = 0; i < dataGenFns.length; i++) {
+    data += dataGenFns[i](el)
   }
   // v-show, used to avoid transition being applied
   // since v-show takes it over

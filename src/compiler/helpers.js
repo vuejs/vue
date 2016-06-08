@@ -4,6 +4,15 @@ export function baseWarn (msg: string) {
   console.error(`[Vue parser]: ${msg}`)
 }
 
+export function pluckModuleFunction (
+  modules: ?Array<Object>,
+  key: string
+): Array<Function> {
+  return modules
+    ? modules.map(m => m[key]).filter(_ => _)
+    : []
+}
+
 export function addProp (el: ASTElement, name: string, value: string) {
   (el.props || (el.props = [])).push({ name, value })
 }

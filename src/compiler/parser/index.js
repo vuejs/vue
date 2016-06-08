@@ -5,6 +5,7 @@ import { parseHTML } from './html-parser'
 import { parseText } from './text-parser'
 import { hyphenate, cached, no } from 'shared/util'
 import {
+  pluckModuleFunction,
   getAndRemoveAttr,
   addProp,
   addAttr,
@@ -30,7 +31,7 @@ const decodeHTMLCached = cached(decodeHTML)
 let warn
 let platformGetTagNamespace
 let platformMustUseProp
-let platformModules
+let transforms
 let delimiters
 
 /**
@@ -43,7 +44,7 @@ export function parse (
   warn = options.warn || baseWarn
   platformGetTagNamespace = options.getTagNamespace || no
   platformMustUseProp = options.mustUseProp || no
-  platformModules = options.modules || []
+  transforms = pluckModuleFunction(options.modules, 'transformNode')
   delimiters = options.delimiters
   const stack = []
   let root
@@ -115,8 +116,8 @@ export function parse (
         processRender(element)
         processSlot(element)
         processComponent(element)
-        for (let i = 0; i < platformModules.length; i++) {
-          platformModules[i].transformNode(element, options)
+        for (let i = 0; i < transforms.length; i++) {
+          transforms[i](element, options)
         }
         processAttrs(element)
       }
