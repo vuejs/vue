@@ -16,6 +16,18 @@ declare type CompilerOptions = {
   delimiters?: [string, string] // template delimiters
 }
 
+declare type CompiledResult = {
+  ast: ?ASTElement,
+  render: string,
+  staticRenderFns: Array<string>,
+  errors?: Array<string>
+}
+
+declare type CompiledFunctionResult = {
+  render: Function,
+  staticRenderFns: Array<Function>
+}
+
 declare type ModuleOptions = {
   transformNode: (el: ASTElement) => void, // transform an element's AST node
   genData: (el: ASTElement) => string, // generate extra data string for an element
@@ -111,4 +123,28 @@ declare type ASTText = {
   type: 3,
   text: string,
   static?: boolean
+}
+
+// SFC-parser related declarations
+
+declare module 'de-indent' {
+  declare var exports: {
+    (str: string): string;
+  }
+}
+
+// an object format describing a single-file component.
+declare type SFCDescriptor = {
+  template: ?SFCBlock,
+  script: ?SFCBlock,
+  styles: Array<SFCBlock>
+}
+
+declare type SFCBlock = {
+  type: "template" | "script" | "style",
+  content: string,
+  lang?: string,
+  scoped?: boolean,
+  src?: boolean,
+  map?: Object
 }

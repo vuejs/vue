@@ -1,6 +1,6 @@
 import { parse } from 'compiler/parser/index'
 import { extend } from 'shared/util'
-import { baseOptions } from 'entries/web-compiler'
+import { baseOptions } from 'web/compiler/index'
 
 describe('parser', () => {
   it('simple element', () => {

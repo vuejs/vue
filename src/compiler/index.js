@@ -10,11 +10,7 @@ import { generate } from './codegen'
 export function compile (
   template: string,
   options: CompilerOptions
-): {
-  ast: ?ASTElement,
-  render: string,
-  staticRenderFns: Array<string>
-} {
+): CompiledResult {
   const ast = parse(template.trim(), options)
   optimize(ast, options)
   const code = generate(ast, options)

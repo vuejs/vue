@@ -3,9 +3,11 @@
 import { dirRE } from './parser/index'
 
 // detect problematic expressions in a template
-export function detectErrors (ast: ASTNode): Array<string> {
+export function detectErrors (ast: ?ASTNode): Array<string> {
   const errors: Array<string> = []
-  checkNode(ast, errors)
+  if (ast) {
+    checkNode(ast, errors)
+  }
   return errors
 }
 

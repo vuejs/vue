@@ -65,7 +65,7 @@ var builds = [
   {
     entry: 'src/entries/web-compiler.js',
     format: 'cjs',
-    external: ['entities'],
+    external: ['entities', 'de-indent'],
     out: 'dist/compiler.js'
   },
   // Web server renderer (CommonJS).

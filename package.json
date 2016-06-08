@@ -51,6 +51,7 @@
     "chromedriver": "^2.21.2",
     "codecov.io": "^0.1.6",
     "cross-spawn": "^4.0.0",
+    "de-indent": "^1.0.2",
     "entities": "^1.1.1",
     "eslint": "^2.11.0",
     "eslint-config-vue": "^1.0.3",

@@ -4,7 +4,7 @@ import { generate } from 'compiler/codegen'
 import { isObject } from 'shared/util'
 import directives from 'web/compiler/directives/index'
 import { isReservedTag } from 'web/util/index'
-import { baseOptions } from 'entries/web-compiler'
+import { baseOptions } from 'web/compiler/index'
 
 function assertCodegen (template, generatedCode, ...args) {
   let staticRenderFnCodes = []

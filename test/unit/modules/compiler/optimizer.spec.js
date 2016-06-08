@@ -1,6 +1,6 @@
 import { parse } from 'compiler/parser/index'
 import { optimize } from 'compiler/optimizer'
-import { baseOptions } from 'entries/web-compiler'
+import { baseOptions } from 'web/compiler/index'
 
 describe('optimizer', () => {
   it('simple', () => {

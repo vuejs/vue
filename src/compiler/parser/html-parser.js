@@ -10,7 +10,7 @@
  */
 
 import { decodeHTML } from 'entities'
-import { makeMap } from 'shared/util'
+import { makeMap, no } from 'shared/util'
 import { isNonPhrasingTag, canBeLeftOpenTag } from 'web/util/index'
 
 // Regular Expressions for parsing tags and attributes
@@ -61,12 +61,13 @@ export function parseHTML (html, handler) {
   const stack = []
   const attribute = attrForHandler(handler)
   const expectHTML = handler.expectHTML
-  const isUnaryTag = handler.isUnaryTag || (() => false)
+  const isUnaryTag = handler.isUnaryTag || no
+  const isSpecialTag = handler.isSpecialTag || special
   let last, prevTag, nextTag, lastTag
   while (html) {
     last = html
     // Make sure we're not in a script or style element
-    if (!lastTag || !special(lastTag)) {
+    if (!lastTag || !isSpecialTag(lastTag)) {
       const textEnd = html.indexOf('<')
       if (textEnd === 0) {
         // Comment:
