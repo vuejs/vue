@@ -315,4 +315,16 @@ describe('parser', () => {
     const ast = parse('<input type="text" name="field1" :value="msg">', options)
     expect(ast.props).toBeUndefined()
   })
+
+  it('preTransforms', () => {
+    const options = extend({}, baseOptions)
+    const spy = jasmine.createSpy('preTransform')
+    options.modules = options.modules.concat([{
+      preTransformNode (el) {
+        spy(el.tag)
+      }
+    }])
+    parse('<img v-pre src="hi">', options)
+    expect(spy).toHaveBeenCalledWith('img')
+  })
 })
