@@ -16,6 +16,9 @@ describe('SFC parser', () => {
       <script>
         export default {}
       </script>
+      <div>
+        <style>nested should be ignored</style>
+      </div>
     `)
     expect(res.template.content.trim()).toBe('<div>hi</div>')
     expect(res.styles.length).toBe(2)
