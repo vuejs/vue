@@ -31,7 +31,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     const vm: Component = this
     vm.$el = el
     if (!vm.$options.render) {
-      vm.$options.render = () => emptyVNode
+      vm.$options.render = emptyVNode
       if (process.env.NODE_ENV !== 'production') {
         /* istanbul ignore if */
         if (vm.$options.template) {

@@ -70,7 +70,7 @@ export function renderMixin (Vue: Class<Component>) {
           vm
         )
       }
-      vnode = emptyVNode
+      vnode = emptyVNode()
     }
     // set parent
     vnode.parent = _parentVnode

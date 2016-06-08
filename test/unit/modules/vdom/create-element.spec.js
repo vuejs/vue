@@ -77,7 +77,7 @@ describe('create-element', () => {
     const _e = bind(renderElement, vm)
     renderState.activeInstance = vm
     const vnode = _e(null, {})
-    expect(vnode).toEqual(emptyVNode)
+    expect(vnode).toEqual(emptyVNode())
   })
 
   it('render vnode with not string tag using renderElement', () => {

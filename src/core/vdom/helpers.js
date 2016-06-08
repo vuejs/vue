@@ -3,8 +3,6 @@
 import { isPrimitive } from '../util/index'
 import VNode from './vnode'
 
-const whitespace = new VNode(undefined, undefined, undefined, ' ')
-
 export function normalizeChildren (children: any): Array<VNode> {
   // invoke children thunks.
   // components always receive their children as thunks so that they
@@ -23,13 +21,8 @@ export function normalizeChildren (children: any): Array<VNode> {
       if (Array.isArray(c)) {
         res.push.apply(res, normalizeChildren(c))
       } else if (isPrimitive(c)) {
-        // optimize whitespace
-        if (c === ' ') {
-          res.push(whitespace)
-        } else {
-          // convert primitive to vnode
-          res.push(new VNode(undefined, undefined, undefined, c))
-        }
+        // convert primitive to vnode
+        res.push(new VNode(undefined, undefined, undefined, c))
       } else if (c instanceof VNode) {
         res.push(c)
       }

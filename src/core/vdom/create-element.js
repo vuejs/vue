@@ -46,7 +46,7 @@ export function renderElement (
   }
   if (!tag) {
     // in case of component :is set to falsy value
-    return emptyVNode
+    return emptyVNode()
   }
   if (typeof tag === 'string') {
     let Ctor

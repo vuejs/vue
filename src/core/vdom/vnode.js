@@ -48,4 +48,4 @@ export default class VNode {
   }
 }
 
-export const emptyVNode = new VNode(undefined, undefined, undefined, '')
+export const emptyVNode = () => new VNode(undefined, undefined, undefined, '')
