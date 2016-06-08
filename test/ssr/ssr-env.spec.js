@@ -1,5 +1,5 @@
 import Vue from '../../dist/vue.common.js'
-import createRenderer from '../../dist/server-renderer.js'
+import createRenderer from '../../packages/vue-server-renderer'
 import '../helpers/to-have-been-warned.js'
 
 describe('SSR: VUE_ENV=server', () => {

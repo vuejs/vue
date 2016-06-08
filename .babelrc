@@ -8,6 +8,7 @@
     }
   },
   "ignore": [
-    "dist/*.js"
+    "dist/*.js",
+    "packages/**/*.js"
   ]
 }

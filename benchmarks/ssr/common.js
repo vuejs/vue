@@ -1,6 +1,6 @@
 'use strict'
 
-const compiler = require('../../dist/compiler.js')
+const compiler = require('../../packages/vue-template-compiler')
 const self = (global || root)
 
 self.performance = {
