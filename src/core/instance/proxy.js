@@ -9,7 +9,7 @@ if (process.env.NODE_ENV !== 'production') {
     'Infinity,undefined,NaN,isFinite,isNaN,' +
     'parseFloat,parseInt,decodeURI,decodeURIComponent,encodeURI,encodeURIComponent,' +
     'Math,Number,Date,Array,Object,Boolean,String,RegExp,Map,Set,JSON,Intl,' +
-    'require' // for Webpack/Browserify
+    'require,__webpack_require__' // for Webpack/Browserify
   )
 
   hasProxy =

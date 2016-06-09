@@ -47,13 +47,22 @@ export function renderMixin (Vue: Class<Component>) {
 
   Vue.prototype._render = function (): VNode {
     const vm: Component = this
+
+    // set current active instance
     const prev = renderState.activeInstance
     renderState.activeInstance = vm
-    if (!vm._isMounted) {
+
+    const {
+      render,
+      staticRenderFns,
+      _renderChildren,
+      _parentVnode
+    } = vm.$options
+
+    if (staticRenderFns && !vm._staticTrees) {
       // render static sub-trees for once on initial render
-      renderStaticTrees(vm)
+      renderStaticTrees(vm, staticRenderFns)
     }
-    const { render, _renderChildren, _parentVnode } = vm.$options
     // resolve slots. becaues slots are rendered in parent scope,
     // we set the activeInstance to parent.
     if (_renderChildren) {
@@ -145,13 +154,10 @@ export function renderMixin (Vue: Class<Component>) {
   }
 }
 
-function renderStaticTrees (vm: Component) {
-  const staticRenderFns = vm.$options.staticRenderFns
-  if (staticRenderFns) {
-    const trees = vm._staticTrees = new Array(staticRenderFns.length)
-    for (let i = 0; i < staticRenderFns.length; i++) {
-      trees[i] = staticRenderFns[i].call(vm._renderProxy)
-    }
+function renderStaticTrees (vm: Component, fns: Array<Function>) {
+  const trees = vm._staticTrees = new Array(fns.length)
+  for (let i = 0; i < fns.length; i++) {
+    trees[i] = fns[i].call(vm._renderProxy)
   }
 }
 
