@@ -53,12 +53,12 @@ describe('SSR: renderToStream', () => {
     stream.on('end', () => {
       expect(res).toContain(
         '<div server-rendered="true">' +
-        '<p class="hi">yoyo</p>' +
-        '<div id="ho" class="a red"></div>' +
-        '<span>hi</span>' +
-        '<input value="hi">' +
-        '<div class="b">test</div>' +
-        '<div class="b">test</div>' +
+          '<p class="hi">yoyo</p> ' +
+          '<div id="ho" class="a red"></div> ' +
+          '<span>hi</span> ' +
+          '<input value="hi"> ' +
+          '<div class="b">test</div> ' +
+          '<div class="b">test</div>' +
         '</div>'
       )
       done()
@@ -80,9 +80,7 @@ describe('SSR: renderToStream', () => {
 })
 
 function renderVmWithOptions (options) {
-  const res = compileToFunctions(options.template, {
-    preserveWhitespace: false
-  })
+  const res = compileToFunctions(options.template)
   Object.assign(options, res)
   delete options.template
   return renderToStream(new Vue(options))

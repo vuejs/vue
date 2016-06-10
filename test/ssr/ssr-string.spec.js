@@ -258,12 +258,12 @@ describe('SSR: renderToString', () => {
     }, result => {
       expect(result).toContain(
         '<div server-rendered="true">' +
-          '<p class="hi">yoyo</p>' +
-          '<div id="ho" class="red"></div>' +
-          '<span>hi</span>' +
-          '<input value="hi">' +
-          '<img src="https://vuejs.org/images/logo.png">' +
-          '<div class="a">test</div>' +
+          '<p class="hi">yoyo</p> ' +
+          '<div id="ho" class="red"></div> ' +
+          '<span>hi</span> ' +
+          '<input value="hi"> ' +
+          '<img src="https://vuejs.org/images/logo.png"> ' +
+          '<div class="a">test</div> ' +
           '<span class="b">testAsync</span>' +
         '</div>'
       )
@@ -285,10 +285,10 @@ describe('SSR: renderToString', () => {
     }, result => {
       expect(result).toContain(
         '<div server-rendered="true">' +
-          '<span test="ok">hello</span>' +
-          '<span>hello</span>' +
-          '<span>hello</span>' +
-          '<span test="true">hello</span>' +
+          '<span test="ok">hello</span> ' +
+          '<span>hello</span> ' +
+          '<span>hello</span> ' +
+          '<span test="true">hello</span> ' +
           '<span test="0">hello</span>' +
         '</div>'
       )
@@ -311,11 +311,11 @@ describe('SSR: renderToString', () => {
     }, result => {
       expect(result).toContain(
         '<div server-rendered="true">' +
-          '<span draggable="true">hello</span>' +
-          '<span draggable="true">hello</span>' +
-          '<span draggable="false">hello</span>' +
-          '<span draggable="false">hello</span>' +
-          '<span draggable="true">hello</span>' +
+          '<span draggable="true">hello</span> ' +
+          '<span draggable="true">hello</span> ' +
+          '<span draggable="false">hello</span> ' +
+          '<span draggable="false">hello</span> ' +
+          '<span draggable="true">hello</span> ' +
           '<span draggable="false">hello</span>' +
         '</div>'
       )
@@ -336,9 +336,9 @@ describe('SSR: renderToString', () => {
     }, result => {
       expect(result).toContain(
         '<div server-rendered="true">' +
-          '<span disabled="disabled">hello</span>' +
-          '<span disabled="disabled">hello</span>' +
-          '<span>hello</span>' +
+          '<span disabled="disabled">hello</span> ' +
+          '<span disabled="disabled">hello</span> ' +
+          '<span>hello</span> ' +
           '<span disabled="disabled">hello</span>' +
         '</div>'
       )
@@ -403,9 +403,7 @@ describe('SSR: renderToString', () => {
 })
 
 function renderVmWithOptions (options, cb) {
-  const res = compileToFunctions(options.template, {
-    preserveWhitespace: false
-  })
+  const res = compileToFunctions(options.template)
   Object.assign(options, res)
   delete options.template
   renderToString(new Vue(options), (err, res) => {
