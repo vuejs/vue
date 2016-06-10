@@ -102,10 +102,11 @@ export default class Watcher {
         if (config.errorHandler) {
           config.errorHandler.call(null, e, this.vm)
         } else {
-          warn(e.stack)
+          throw e
         }
       }
       // return old value when evaluation fails so the current UI is preserved
+      // if the error was somehow handled by user
       value = this.value
     }
     // "touch" every property so they are all tracked as
