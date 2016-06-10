@@ -15,6 +15,7 @@
     "dev:ssr": "webpack --watch --config build/webpack.ssr.dev.config.js",
     "dev:compiler": "webpack --watch --config build/webpack.compiler.dev.config.js",
     "test": "npm run lint && flow check && npm run test:cover && npm run test:unit && npm run test:e2e && npm run test:ssr",
+    "ci": "npm run lint && flow check && npm run test:cover && npm run test:ssr",
     "build": "NODE_ENV=production node build/build.js",
     "lint": "eslint src build test",
     "flow": "flow check",
