@@ -188,12 +188,6 @@
   }
 
   var config = {
-
-    /**
-     * Preserve whitespaces between elements.
-     */
-    preserveWhitespace: true,
-
     /**
      * Option merge strategies (used in core/util/options)
      */
@@ -408,7 +402,8 @@
   var initProxy = void 0;
   if ("development" !== 'production') {
     (function () {
-      var allowedGlobals = makeMap('Infinity,undefined,NaN,isFinite,isNaN,' + 'parseFloat,parseInt,decodeURI,decodeURIComponent,encodeURI,encodeURIComponent,' + 'Math,Number,Date,Array,Object,Boolean,String,RegExp,Map,Set,JSON,Intl');
+      var allowedGlobals = makeMap('Infinity,undefined,NaN,isFinite,isNaN,' + 'parseFloat,parseInt,decodeURI,decodeURIComponent,encodeURI,encodeURIComponent,' + 'Math,Number,Date,Array,Object,Boolean,String,RegExp,Map,Set,JSON,Intl,' + 'require,__webpack_require__' // for Webpack/Browserify
+      );
 
       hasProxy = typeof Proxy !== 'undefined' && Proxy.toString().match(/native code/);
 
@@ -629,10 +624,11 @@
           if (config.errorHandler) {
             config.errorHandler.call(null, e, this.vm);
           } else {
-            warn(e.stack);
+            throw e;
           }
         }
         // return old value when evaluation fails so the current UI is preserved
+        // if the error was somehow handled by user
         value = this.value;
       }
       // "touch" every property so they are all tracked as
@@ -1311,9 +1307,9 @@
     return VNode;
   }();
 
-  var emptyVNode = new VNode(undefined, undefined, undefined, '');
-
-  var whitespace = new VNode(undefined, undefined, undefined, ' ');
+  var emptyVNode = function emptyVNode() {
+    return new VNode(undefined, undefined, undefined, '');
+  };
 
   function normalizeChildren(children) {
     // invoke children thunks.
@@ -1333,13 +1329,8 @@
         if (Array.isArray(c)) {
           res.push.apply(res, normalizeChildren(c));
         } else if (isPrimitive(c)) {
-          // optimize whitespace
-          if (c === ' ') {
-            res.push(whitespace);
-          } else {
-            // convert primitive to vnode
-            res.push(new VNode(undefined, undefined, undefined, c));
-          }
+          // convert primitive to vnode
+          res.push(new VNode(undefined, undefined, undefined, c));
         } else if (c instanceof VNode) {
           res.push(c);
         }
@@ -1427,9 +1418,7 @@
       var vm = this;
       vm.$el = el;
       if (!vm.$options.render) {
-        vm.$options.render = function () {
-          return emptyVNode;
-        };
+        vm.$options.render = emptyVNode;
         if ("development" !== 'production') {
           /* istanbul ignore if */
           if (vm.$options.template) {
@@ -1806,7 +1795,7 @@
     }
     if (!tag) {
       // in case of component :is set to falsy value
-      return emptyVNode;
+      return emptyVNode();
     }
     if (typeof tag === 'string') {
       var Ctor = void 0;
@@ -1860,19 +1849,24 @@
 
     Vue.prototype._render = function () {
       var vm = this;
+
+      // set current active instance
       var prev = renderState.activeInstance;
       renderState.activeInstance = vm;
-      if (!vm._isMounted) {
-        // render static sub-trees for once on initial render
-        renderStaticTrees(vm);
-      }
+
       var _vm$$options = vm.$options;
       var render = _vm$$options.render;
+      var staticRenderFns = _vm$$options.staticRenderFns;
       var _renderChildren = _vm$$options._renderChildren;
       var _parentVnode = _vm$$options._parentVnode;
+
+
+      if (staticRenderFns && !vm._staticTrees) {
+        // render static sub-trees for once on initial render
+        renderStaticTrees(vm, staticRenderFns);
+      }
       // resolve slots. becaues slots are rendered in parent scope,
       // we set the activeInstance to parent.
-
       if (_renderChildren) {
         resolveSlots(vm, _renderChildren);
       }
@@ -1883,7 +1877,7 @@
         if ("development" !== 'production' && Array.isArray(vnode)) {
           warn('Multiple root nodes returned from render function. Render function ' + 'should return a single root node.', vm);
         }
-        vnode = emptyVNode;
+        vnode = emptyVNode();
       }
       // set parent
       vnode.parent = _parentVnode;
@@ -1956,13 +1950,10 @@
     };
   }
 
-  function renderStaticTrees(vm) {
-    var staticRenderFns = vm.$options.staticRenderFns;
-    if (staticRenderFns) {
-      var trees = vm._staticTrees = new Array(staticRenderFns.length);
-      for (var i = 0; i < staticRenderFns.length; i++) {
-        trees[i] = staticRenderFns[i].call(vm._renderProxy);
-      }
+  function renderStaticTrees(vm, fns) {
+    var trees = vm._staticTrees = new Array(fns.length);
+    for (var i = 0; i < fns.length; i++) {
+      trees[i] = fns[i].call(vm._renderProxy);
     }
   }
 
@@ -2685,7 +2676,7 @@
             }
           }
           if (type === 'component' && isPlainObject(definition)) {
-            definition.name = id;
+            definition.name = definition.name || id;
             definition = Vue.extend(definition);
           }
           this.options[type + 's'][id] = definition;
@@ -2769,7 +2760,7 @@
     }
   });
 
-  Vue.version = '2.0.0-alpha.0';
+  Vue.version = '2.0.0-alpha.1';
 
   // attributes that should be using props for binding
   var mustUseProp = makeMap('value,selected,checked,muted');
@@ -2974,6 +2965,10 @@
     return node.childNodes;
   }
 
+  function setAttribute(node, key, val) {
+    node.setAttribute(key, val);
+  }
+
 var nodeOps = Object.freeze({
     createElement: createElement,
     createElementNS: createElementNS,
@@ -2985,7 +2980,8 @@ var nodeOps = Object.freeze({
     nextSibling: nextSibling,
     tagName: tagName,
     setTextContent: setTextContent,
-    childNodes: childNodes
+    childNodes: childNodes,
+    setAttribute: setAttribute
   });
 
   var emptyNode = new VNode('', {}, []);
@@ -3061,6 +3057,7 @@ var nodeOps = Object.freeze({
         // in that case we can just return the element and be done.
         if (isDef(i = vnode.child)) {
           invokeCreateHooks(vnode, insertedVnodeQueue);
+          setScope(vnode);
           return vnode.elm;
         }
       }
@@ -3068,6 +3065,7 @@ var nodeOps = Object.freeze({
       var tag = vnode.tag;
       if (isDef(tag)) {
         elm = vnode.elm = vnode.ns ? nodeOps.createElementNS(vnode.ns, tag) : nodeOps.createElement(tag);
+        setScope(vnode);
         if (Array.isArray(children)) {
           for (i = 0; i < children.length; ++i) {
             nodeOps.appendChild(elm, createElm(children[i], insertedVnodeQueue));
@@ -3092,6 +3090,16 @@ var nodeOps = Object.freeze({
       if (isDef(i)) {
         if (i.create) i.create(emptyNode, vnode);
         if (i.insert) insertedVnodeQueue.push(vnode);
+      }
+    }
+
+    // set scope id attribute for scoped CSS.
+    // this is implemented as a special case to avoid the overhead
+    // of going through the normal attribute patching process.
+    function setScope(vnode) {
+      var i = void 0;
+      if (isDef(i = vnode.context) && isDef(i = i.$options._scopeId)) {
+        nodeOps.setAttribute(vnode.elm, i, '');
       }
     }
 
@@ -3238,6 +3246,7 @@ var nodeOps = Object.freeze({
     }
 
     function patchVnode(oldVnode, vnode, insertedVnodeQueue) {
+      if (oldVnode === vnode) return;
       var i = void 0,
           hook = void 0;
       if (isDef(i = vnode.data) && isDef(hook = i.hook) && isDef(i = hook.prepatch)) {
@@ -3246,7 +3255,6 @@ var nodeOps = Object.freeze({
       var elm = vnode.elm = oldVnode.elm;
       var oldCh = oldVnode.children;
       var ch = vnode.children;
-      if (oldVnode === vnode) return;
       if (isDef(vnode.data)) {
         for (i = 0; i < cbs.update.length; ++i) {
           cbs.update[i](oldVnode, vnode);
@@ -4676,6 +4684,14 @@ var nodeOps = Object.freeze({
     console.error('[Vue parser]: ' + msg);
   }
 
+  function pluckModuleFunction(modules, key) {
+    return modules ? modules.map(function (m) {
+      return m[key];
+    }).filter(function (_) {
+      return _;
+    }) : [];
+  }
+
   function addProp(el, name, value) {
     (el.props || (el.props = [])).push({ name: name, value: value });
   }
@@ -4763,7 +4779,9 @@ var nodeOps = Object.freeze({
   var warn$1 = void 0;
   var platformGetTagNamespace = void 0;
   var platformMustUseProp = void 0;
-  var platformModules$1 = void 0;
+  var preTransforms = void 0;
+  var transforms = void 0;
+  var postTransforms = void 0;
   var delimiters = void 0;
 
   /**
@@ -4773,7 +4791,9 @@ var nodeOps = Object.freeze({
     warn$1 = options.warn || baseWarn;
     platformGetTagNamespace = options.getTagNamespace || no;
     platformMustUseProp = options.mustUseProp || no;
-    platformModules$1 = options.modules || [];
+    preTransforms = pluckModuleFunction(options.modules, 'preTransformNode');
+    transforms = pluckModuleFunction(options.modules, 'transformNode');
+    postTransforms = pluckModuleFunction(options.modules, 'postTransformNode');
     delimiters = options.delimiters;
     var stack = [];
     var root = void 0;
@@ -4819,6 +4839,11 @@ var nodeOps = Object.freeze({
           "development" !== 'production' && warn$1('Templates should only be responsbile for mapping the state to the ' + 'UI. Avoid placing tags with side-effects in your templates, such as ' + ('<' + tag + '>.'));
         }
 
+        // apply pre-transforms
+        for (var i = 0; i < preTransforms.length; i++) {
+          preTransforms[i](element, options);
+        }
+
         if (!inPre) {
           processPre(element);
           if (element.pre) {
@@ -4838,8 +4863,8 @@ var nodeOps = Object.freeze({
           processRender(element);
           processSlot(element);
           processComponent(element);
-          for (var i = 0; i < platformModules$1.length; i++) {
-            platformModules$1[i].transformNode(element, options);
+          for (var _i = 0; _i < transforms.length; _i++) {
+            transforms[_i](element, options);
           }
           processAttrs(element);
         }
@@ -4872,6 +4897,10 @@ var nodeOps = Object.freeze({
           currentParent = element;
           stack.push(element);
         }
+        // apply post-transforms
+        for (var _i2 = 0; _i2 < postTransforms.length; _i2++) {
+          postTransforms[_i2](element, options);
+        }
       },
       end: function end() {
         // remove trailing whitespace
@@ -4898,7 +4927,7 @@ var nodeOps = Object.freeze({
         }
         text = currentParent.tag === 'pre' || text.trim() ? decodeHTMLCached(text)
         // only preserve whitespace if its not right after a starting tag
-        : options.preserveWhitespace && currentParent.children.length ? ' ' : '';
+        : currentParent.children.length ? ' ' : '';
         if (text) {
           var expression = void 0;
           if (!inPre && text !== ' ' && (expression = parseText(text, delimiters))) {
@@ -4928,7 +4957,7 @@ var nodeOps = Object.freeze({
   function processRawAttrs(el) {
     var l = el.attrsList.length;
     if (l) {
-      var attrs = el.attrs = new Array(l);
+      var attrs = el.staticAttrs = new Array(l);
       for (var i = 0; i < l; i++) {
         attrs[i] = {
           name: el.attrsList[i].name,
@@ -5300,7 +5329,8 @@ var nodeOps = Object.freeze({
 
   // configurable state
   var warn$2 = void 0;
-  var platformModules$2 = void 0;
+  var transforms$1 = void 0;
+  var dataGenFns = void 0;
   var platformDirectives$1 = void 0;
   var isPlatformReservedTag$1 = void 0;
   var staticRenderFns = void 0;
@@ -5312,7 +5342,8 @@ var nodeOps = Object.freeze({
     var currentStaticRenderFns = staticRenderFns = [];
     currentOptions = options;
     warn$2 = options.warn || baseWarn;
-    platformModules$2 = options.modules || [];
+    transforms$1 = pluckModuleFunction(options.modules, 'transformCode');
+    dataGenFns = pluckModuleFunction(options.modules, 'genData');
     platformDirectives$1 = options.directives || {};
     isPlatformReservedTag$1 = options.isReservedTag || no;
     var code = ast ? genElement(ast) : '_h(_e("div"))';
@@ -5354,12 +5385,9 @@ var nodeOps = Object.freeze({
           code = '_m(' + (staticRenderFns.length - 1) + ')';
         }
       }
-      // platform modules
-      for (var i = 0; i < platformModules$2.length; i++) {
-        var transform = platformModules$2[i].transformCode;
-        if (transform) {
-          code = transform(el, code);
-        }
+      // module transforms
+      for (var i = 0; i < transforms$1.length; i++) {
+        code = transforms$1[i](el, code);
       }
       // check keep-alive
       if (el.component && el.keepAlive) {
@@ -5418,9 +5446,9 @@ var nodeOps = Object.freeze({
     if (el.slotTarget) {
       data += 'slot:' + el.slotTarget + ',';
     }
-    // platform modules
-    for (var i = 0; i < platformModules$2.length; i++) {
-      data += platformModules$2[i].genData(el);
+    // module data generation functions
+    for (var i = 0; i < dataGenFns.length; i++) {
+      data += dataGenFns[i](el);
     }
     // v-show, used to avoid transition being applied
     // since v-show takes it over
@@ -5561,6 +5589,8 @@ var nodeOps = Object.freeze({
     };
   }
 
+  var keywordRE = new RegExp('\\b' + ('do,if,in,for,let,new,try,var,case,else,with,await,break,catch,class,const,' + 'super,throw,while,yield,delete,export,import,return,switch,typeof,default,' + 'extends,finally,continue,debugger,function,arguments,instanceof').split(',').join('\\b|\\b') + '\\b');
+
   // detect problematic expressions in a template
   function detectErrors(ast) {
     var errors = [];
@@ -5591,11 +5621,21 @@ var nodeOps = Object.freeze({
   }
 
   function checkExpression(exp, text, errors) {
-    try {
-      new Function(exp);
-    } catch (e) {
-      errors.push('- invalid expression: ' + text);
+    exp = stripToString(exp);
+    var keywordMatch = exp.match(keywordRE);
+    if (keywordMatch) {
+      errors.push('- avoid using JavaScript keyword as property name: ' + ('"' + keywordMatch[0] + '" in expression ' + text));
+    } else {
+      try {
+        new Function(exp);
+      } catch (e) {
+        errors.push('- invalid expression: ' + text);
+      }
     }
+  }
+
+  function stripToString(exp) {
+    return exp.replace(/^_s\((.*)\)$/, '$1');
   }
 
   function transformNode(el, options) {
@@ -5789,13 +5829,11 @@ var nodeOps = Object.freeze({
     html: html
   };
 
-  var cache1 = Object.create(null);
-  var cache2 = Object.create(null);
+  var cache = Object.create(null);
 
   var baseOptions = {
     isIE: isIE,
     expectHTML: true,
-    preserveWhitespace: true,
     modules: modules$1,
     staticKeys: genStaticKeys(modules$1),
     directives: directives$1,
@@ -5823,7 +5861,6 @@ var nodeOps = Object.freeze({
         }
       }
     }
-    var cache = options && options.preserveWhitespace === false ? cache1 : cache2;
     var key = options && options.delimiters ? String(options.delimiters) + template : template;
     if (cache[key]) {
       return cache[key];
@@ -5884,7 +5921,6 @@ var nodeOps = Object.freeze({
       }
       if (template) {
         var _compileToFunctions = compileToFunctions(template, {
-          preserveWhitespace: config.preserveWhitespace,
           delimiters: options.delimiters,
           warn: warn
         }, this);

@@ -444,12 +444,6 @@ if (typeof Set !== 'undefined' && Set.toString().match(/native code/)) {
 }
 
 var config = {
-
-  /**
-   * Preserve whitespaces between elements.
-   */
-  preserveWhitespace: true,
-
   /**
    * Option merge strategies (used in core/util/options)
    */
@@ -1224,7 +1218,8 @@ var proxyHandlers = void 0;
 var initProxy = void 0;
 if (process.env.NODE_ENV !== 'production') {
   (function () {
-    var allowedGlobals = makeMap('Infinity,undefined,NaN,isFinite,isNaN,' + 'parseFloat,parseInt,decodeURI,decodeURIComponent,encodeURI,encodeURIComponent,' + 'Math,Number,Date,Array,Object,Boolean,String,RegExp,Map,Set,JSON,Intl');
+    var allowedGlobals = makeMap('Infinity,undefined,NaN,isFinite,isNaN,' + 'parseFloat,parseInt,decodeURI,decodeURIComponent,encodeURI,encodeURIComponent,' + 'Math,Number,Date,Array,Object,Boolean,String,RegExp,Map,Set,JSON,Intl,' + 'require,__webpack_require__' // for Webpack/Browserify
+    );
 
     hasProxy = typeof Proxy !== 'undefined' && Proxy.toString().match(/native code/);
 
@@ -1405,10 +1400,11 @@ var Watcher = function () {
         if (config.errorHandler) {
           config.errorHandler.call(null, e, this.vm);
         } else {
-          warn(e.stack);
+          throw e;
         }
       }
       // return old value when evaluation fails so the current UI is preserved
+      // if the error was somehow handled by user
       value = this.value;
     }
     // "touch" every property so they are all tracked as
@@ -1821,9 +1817,9 @@ var VNode = function () {
   return VNode;
 }();
 
-var emptyVNode = new VNode(undefined, undefined, undefined, '');
-
-var whitespace = new VNode(undefined, undefined, undefined, ' ');
+var emptyVNode = function emptyVNode() {
+  return new VNode(undefined, undefined, undefined, '');
+};
 
 function normalizeChildren(children) {
   // invoke children thunks.
@@ -1843,13 +1839,8 @@ function normalizeChildren(children) {
       if (Array.isArray(c)) {
         res.push.apply(res, normalizeChildren(c));
       } else if (isPrimitive(c)) {
-        // optimize whitespace
-        if (c === ' ') {
-          res.push(whitespace);
-        } else {
-          // convert primitive to vnode
-          res.push(new VNode(undefined, undefined, undefined, c));
-        }
+        // convert primitive to vnode
+        res.push(new VNode(undefined, undefined, undefined, c));
       } else if (c instanceof VNode) {
         res.push(c);
       }
@@ -1938,7 +1929,7 @@ function renderElement(tag, data, namespace) {
   }
   if (!tag) {
     // in case of component :is set to falsy value
-    return emptyVNode;
+    return emptyVNode();
   }
   if (typeof tag === 'string') {
     var Ctor = void 0;
@@ -1992,19 +1983,24 @@ function renderMixin(Vue) {
 
   Vue.prototype._render = function () {
     var vm = this;
+
+    // set current active instance
     var prev = renderState.activeInstance;
     renderState.activeInstance = vm;
-    if (!vm._isMounted) {
-      // render static sub-trees for once on initial render
-      renderStaticTrees(vm);
-    }
+
     var _vm$$options = vm.$options;
     var render = _vm$$options.render;
+    var staticRenderFns = _vm$$options.staticRenderFns;
     var _renderChildren = _vm$$options._renderChildren;
     var _parentVnode = _vm$$options._parentVnode;
+
+
+    if (staticRenderFns && !vm._staticTrees) {
+      // render static sub-trees for once on initial render
+      renderStaticTrees(vm, staticRenderFns);
+    }
     // resolve slots. becaues slots are rendered in parent scope,
     // we set the activeInstance to parent.
-
     if (_renderChildren) {
       resolveSlots(vm, _renderChildren);
     }
@@ -2015,7 +2011,7 @@ function renderMixin(Vue) {
       if (process.env.NODE_ENV !== 'production' && Array.isArray(vnode)) {
         warn('Multiple root nodes returned from render function. Render function ' + 'should return a single root node.', vm);
       }
-      vnode = emptyVNode;
+      vnode = emptyVNode();
     }
     // set parent
     vnode.parent = _parentVnode;
@@ -2088,13 +2084,10 @@ function renderMixin(Vue) {
   };
 }
 
-function renderStaticTrees(vm) {
-  var staticRenderFns = vm.$options.staticRenderFns;
-  if (staticRenderFns) {
-    var trees = vm._staticTrees = new Array(staticRenderFns.length);
-    for (var i = 0; i < staticRenderFns.length; i++) {
-      trees[i] = staticRenderFns[i].call(vm._renderProxy);
-    }
+function renderStaticTrees(vm, fns) {
+  var trees = vm._staticTrees = new Array(fns.length);
+  for (var i = 0; i < fns.length; i++) {
+    trees[i] = fns[i].call(vm._renderProxy);
   }
 }
 
@@ -2222,9 +2215,7 @@ function lifecycleMixin(Vue) {
     var vm = this;
     vm.$el = el;
     if (!vm.$options.render) {
-      vm.$options.render = function () {
-        return emptyVNode;
-      };
+      vm.$options.render = emptyVNode;
       if (process.env.NODE_ENV !== 'production') {
         /* istanbul ignore if */
         if (vm.$options.template) {

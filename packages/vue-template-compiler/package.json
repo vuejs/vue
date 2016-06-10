@@ -1,6 +1,6 @@
 {
   "name": "vue-template-compiler",
-  "version": "0.1.0",
+  "version": "2.0.0-alpha.1",
   "description": "template compiler for Vue 2.0",
   "main": "index.js",
   "repository": {

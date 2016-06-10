@@ -4,6 +4,7 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 
 var entities = require('entities');
 var deindent = _interopDefault(require('de-indent'));
+var sourceMap = require('source-map');
 
 /**
  * Convert a value to a string that is actually rendered.
@@ -184,12 +185,6 @@ function genStaticKeys(modules) {
 }
 
 var config = {
-
-  /**
-   * Preserve whitespaces between elements.
-   */
-  preserveWhitespace: true,
-
   /**
    * Option merge strategies (used in core/util/options)
    */
@@ -424,7 +419,8 @@ var proxyHandlers = void 0;
 var initProxy = void 0;
 if (process.env.NODE_ENV !== 'production') {
   (function () {
-    var allowedGlobals = makeMap('Infinity,undefined,NaN,isFinite,isNaN,' + 'parseFloat,parseInt,decodeURI,decodeURIComponent,encodeURI,encodeURIComponent,' + 'Math,Number,Date,Array,Object,Boolean,String,RegExp,Map,Set,JSON,Intl');
+    var allowedGlobals = makeMap('Infinity,undefined,NaN,isFinite,isNaN,' + 'parseFloat,parseInt,decodeURI,decodeURIComponent,encodeURI,encodeURIComponent,' + 'Math,Number,Date,Array,Object,Boolean,String,RegExp,Map,Set,JSON,Intl,' + 'require,__webpack_require__' // for Webpack/Browserify
+    );
 
     hasProxy = typeof Proxy !== 'undefined' && Proxy.toString().match(/native code/);
 
@@ -645,10 +641,11 @@ var Watcher = function () {
         if (config.errorHandler) {
           config.errorHandler.call(null, e, this.vm);
         } else {
-          warn(e.stack);
+          throw e;
         }
       }
       // return old value when evaluation fails so the current UI is preserved
+      // if the error was somehow handled by user
       value = this.value;
     }
     // "touch" every property so they are all tracked as
@@ -1310,9 +1307,9 @@ var VNode = function () {
   return VNode;
 }();
 
-var emptyVNode = new VNode(undefined, undefined, undefined, '');
-
-var whitespace = new VNode(undefined, undefined, undefined, ' ');
+var emptyVNode = function emptyVNode() {
+  return new VNode(undefined, undefined, undefined, '');
+};
 
 function normalizeChildren(children) {
   // invoke children thunks.
@@ -1332,13 +1329,8 @@ function normalizeChildren(children) {
       if (Array.isArray(c)) {
         res.push.apply(res, normalizeChildren(c));
       } else if (isPrimitive(c)) {
-        // optimize whitespace
-        if (c === ' ') {
-          res.push(whitespace);
-        } else {
-          // convert primitive to vnode
-          res.push(new VNode(undefined, undefined, undefined, c));
-        }
+        // convert primitive to vnode
+        res.push(new VNode(undefined, undefined, undefined, c));
       } else if (c instanceof VNode) {
         res.push(c);
       }
@@ -1426,9 +1418,7 @@ function lifecycleMixin(Vue) {
     var vm = this;
     vm.$el = el;
     if (!vm.$options.render) {
-      vm.$options.render = function () {
-        return emptyVNode;
-      };
+      vm.$options.render = emptyVNode;
       if (process.env.NODE_ENV !== 'production') {
         /* istanbul ignore if */
         if (vm.$options.template) {
@@ -1805,7 +1795,7 @@ function renderElement(tag, data, namespace) {
   }
   if (!tag) {
     // in case of component :is set to falsy value
-    return emptyVNode;
+    return emptyVNode();
   }
   if (typeof tag === 'string') {
     var Ctor = void 0;
@@ -1859,19 +1849,24 @@ function renderMixin(Vue) {
 
   Vue.prototype._render = function () {
     var vm = this;
+
+    // set current active instance
     var prev = renderState.activeInstance;
     renderState.activeInstance = vm;
-    if (!vm._isMounted) {
-      // render static sub-trees for once on initial render
-      renderStaticTrees(vm);
-    }
+
     var _vm$$options = vm.$options;
     var render = _vm$$options.render;
+    var staticRenderFns = _vm$$options.staticRenderFns;
     var _renderChildren = _vm$$options._renderChildren;
     var _parentVnode = _vm$$options._parentVnode;
+
+
+    if (staticRenderFns && !vm._staticTrees) {
+      // render static sub-trees for once on initial render
+      renderStaticTrees(vm, staticRenderFns);
+    }
     // resolve slots. becaues slots are rendered in parent scope,
     // we set the activeInstance to parent.
-
     if (_renderChildren) {
       resolveSlots(vm, _renderChildren);
     }
@@ -1882,7 +1877,7 @@ function renderMixin(Vue) {
       if (process.env.NODE_ENV !== 'production' && Array.isArray(vnode)) {
         warn('Multiple root nodes returned from render function. Render function ' + 'should return a single root node.', vm);
       }
-      vnode = emptyVNode;
+      vnode = emptyVNode();
     }
     // set parent
     vnode.parent = _parentVnode;
@@ -1955,13 +1950,10 @@ function renderMixin(Vue) {
   };
 }
 
-function renderStaticTrees(vm) {
-  var staticRenderFns = vm.$options.staticRenderFns;
-  if (staticRenderFns) {
-    var trees = vm._staticTrees = new Array(staticRenderFns.length);
-    for (var i = 0; i < staticRenderFns.length; i++) {
-      trees[i] = staticRenderFns[i].call(vm._renderProxy);
-    }
+function renderStaticTrees(vm, fns) {
+  var trees = vm._staticTrees = new Array(fns.length);
+  for (var i = 0; i < fns.length; i++) {
+    trees[i] = fns[i].call(vm._renderProxy);
   }
 }
 
@@ -2960,6 +2952,14 @@ function baseWarn(msg) {
   console.error('[Vue parser]: ' + msg);
 }
 
+function pluckModuleFunction(modules, key) {
+  return modules ? modules.map(function (m) {
+    return m[key];
+  }).filter(function (_) {
+    return _;
+  }) : [];
+}
+
 function addProp(el, name, value) {
   (el.props || (el.props = [])).push({ name: name, value: value });
 }
@@ -3047,7 +3047,9 @@ var decodeHTMLCached = cached(entities.decodeHTML);
 var warn$1 = void 0;
 var platformGetTagNamespace = void 0;
 var platformMustUseProp = void 0;
-var platformModules = void 0;
+var preTransforms = void 0;
+var transforms = void 0;
+var postTransforms = void 0;
 var delimiters = void 0;
 
 /**
@@ -3057,7 +3059,9 @@ function parse(template, options) {
   warn$1 = options.warn || baseWarn;
   platformGetTagNamespace = options.getTagNamespace || no;
   platformMustUseProp = options.mustUseProp || no;
-  platformModules = options.modules || [];
+  preTransforms = pluckModuleFunction(options.modules, 'preTransformNode');
+  transforms = pluckModuleFunction(options.modules, 'transformNode');
+  postTransforms = pluckModuleFunction(options.modules, 'postTransformNode');
   delimiters = options.delimiters;
   var stack = [];
   var root = void 0;
@@ -3103,6 +3107,11 @@ function parse(template, options) {
         process.env.NODE_ENV !== 'production' && warn$1('Templates should only be responsbile for mapping the state to the ' + 'UI. Avoid placing tags with side-effects in your templates, such as ' + ('<' + tag + '>.'));
       }
 
+      // apply pre-transforms
+      for (var i = 0; i < preTransforms.length; i++) {
+        preTransforms[i](element, options);
+      }
+
       if (!inPre) {
         processPre(element);
         if (element.pre) {
@@ -3122,8 +3131,8 @@ function parse(template, options) {
         processRender(element);
         processSlot(element);
         processComponent(element);
-        for (var i = 0; i < platformModules.length; i++) {
-          platformModules[i].transformNode(element, options);
+        for (var _i = 0; _i < transforms.length; _i++) {
+          transforms[_i](element, options);
         }
         processAttrs(element);
       }
@@ -3156,6 +3165,10 @@ function parse(template, options) {
         currentParent = element;
         stack.push(element);
       }
+      // apply post-transforms
+      for (var _i2 = 0; _i2 < postTransforms.length; _i2++) {
+        postTransforms[_i2](element, options);
+      }
     },
     end: function end() {
       // remove trailing whitespace
@@ -3182,7 +3195,7 @@ function parse(template, options) {
       }
       text = currentParent.tag === 'pre' || text.trim() ? decodeHTMLCached(text)
       // only preserve whitespace if its not right after a starting tag
-      : options.preserveWhitespace && currentParent.children.length ? ' ' : '';
+      : currentParent.children.length ? ' ' : '';
       if (text) {
         var expression = void 0;
         if (!inPre && text !== ' ' && (expression = parseText(text, delimiters))) {
@@ -3212,7 +3225,7 @@ function processPre(el) {
 function processRawAttrs(el) {
   var l = el.attrsList.length;
   if (l) {
-    var attrs = el.attrs = new Array(l);
+    var attrs = el.staticAttrs = new Array(l);
     for (var i = 0; i < l; i++) {
       attrs[i] = {
         name: el.attrsList[i].name,
@@ -3584,7 +3597,8 @@ var baseDirectives = {
 
 // configurable state
 var warn$2 = void 0;
-var platformModules$1 = void 0;
+var transforms$1 = void 0;
+var dataGenFns = void 0;
 var platformDirectives = void 0;
 var isPlatformReservedTag$1 = void 0;
 var staticRenderFns = void 0;
@@ -3596,7 +3610,8 @@ function generate(ast, options) {
   var currentStaticRenderFns = staticRenderFns = [];
   currentOptions = options;
   warn$2 = options.warn || baseWarn;
-  platformModules$1 = options.modules || [];
+  transforms$1 = pluckModuleFunction(options.modules, 'transformCode');
+  dataGenFns = pluckModuleFunction(options.modules, 'genData');
   platformDirectives = options.directives || {};
   isPlatformReservedTag$1 = options.isReservedTag || no;
   var code = ast ? genElement(ast) : '_h(_e("div"))';
@@ -3638,12 +3653,9 @@ function genElement(el) {
         code = '_m(' + (staticRenderFns.length - 1) + ')';
       }
     }
-    // platform modules
-    for (var i = 0; i < platformModules$1.length; i++) {
-      var transform = platformModules$1[i].transformCode;
-      if (transform) {
-        code = transform(el, code);
-      }
+    // module transforms
+    for (var i = 0; i < transforms$1.length; i++) {
+      code = transforms$1[i](el, code);
     }
     // check keep-alive
     if (el.component && el.keepAlive) {
@@ -3702,9 +3714,9 @@ function genData(el) {
   if (el.slotTarget) {
     data += 'slot:' + el.slotTarget + ',';
   }
-  // platform modules
-  for (var i = 0; i < platformModules$1.length; i++) {
-    data += platformModules$1[i].genData(el);
+  // module data generation functions
+  for (var i = 0; i < dataGenFns.length; i++) {
+    data += dataGenFns[i](el);
   }
   // v-show, used to avoid transition being applied
   // since v-show takes it over
@@ -3845,6 +3857,8 @@ function compile$2(template, options) {
   };
 }
 
+var keywordRE = new RegExp('\\b' + ('do,if,in,for,let,new,try,var,case,else,with,await,break,catch,class,const,' + 'super,throw,while,yield,delete,export,import,return,switch,typeof,default,' + 'extends,finally,continue,debugger,function,arguments,instanceof').split(',').join('\\b|\\b') + '\\b');
+
 // detect problematic expressions in a template
 function detectErrors(ast) {
   var errors = [];
@@ -3875,11 +3889,21 @@ function checkNode(node, errors) {
 }
 
 function checkExpression(exp, text, errors) {
-  try {
-    new Function(exp);
-  } catch (e) {
-    errors.push('- invalid expression: ' + text);
+  exp = stripToString(exp);
+  var keywordMatch = exp.match(keywordRE);
+  if (keywordMatch) {
+    errors.push('- avoid using JavaScript keyword as property name: ' + ('"' + keywordMatch[0] + '" in expression ' + text));
+  } else {
+    try {
+      new Function(exp);
+    } catch (e) {
+      errors.push('- invalid expression: ' + text);
+    }
   }
+}
+
+function stripToString(exp) {
+  return exp.replace(/^_s\((.*)\)$/, '$1');
 }
 
 function transformNode(el, options) {
@@ -4073,13 +4097,11 @@ var directives = {
   html: html
 };
 
-var cache1 = Object.create(null);
-var cache2 = Object.create(null);
+var cache = Object.create(null);
 
 var baseOptions = {
   isIE: isIE,
   expectHTML: true,
-  preserveWhitespace: true,
   modules: modules,
   staticKeys: genStaticKeys(modules),
   directives: directives,
@@ -4107,7 +4129,6 @@ function compileToFunctions(template, options, vm) {
       }
     }
   }
-  var cache = options && options.preserveWhitespace === false ? cache1 : cache2;
   var key = options && options.delimiters ? String(options.delimiters) + template : template;
   if (cache[key]) {
     return cache[key];
@@ -4138,19 +4159,23 @@ function makeFunction(code) {
   }
 }
 
+var splitRE = /\r?\n/g;
+var emptyRE = /^(?:\/\/)?\s*$/;
 var isSpecialTag = makeMap('script,style,template', true);
 
 /**
  * Parse a single-file component (*.vue) file into an SFC Descriptor Object.
  */
-function parseSFC(content) {
+function parseComponent(content) {
+  var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
   var sfc = {
     template: null,
     script: null,
     styles: []
   };
   var depth = 0;
-  var currentBlock = void 0;
+  var currentBlock = null;
 
   function start(tag, attrs) {
     depth++;
@@ -4158,39 +4183,90 @@ function parseSFC(content) {
       return;
     }
     if (isSpecialTag(tag)) {
-      var block = currentBlock = {
+      currentBlock = {
         type: tag,
         content: ''
       };
-      for (var i = 0; i < attrs.length; i++) {
-        var attr = attrs[i];
-        if (attr.name === 'lang') {
-          block.lang = attr.value;
-        }
-        if (attr.name === 'scoped') {
-          block.scoped = true;
-        }
-        if (attr.name === 'src') {
-          block.src = attr.value;
-        }
-      }
+      checkAttrs(currentBlock, attrs);
       if (tag === 'style') {
-        sfc.styles.push(block);
+        sfc.styles.push(currentBlock);
       } else {
-        sfc[tag] = block;
+        sfc[tag] = currentBlock;
+      }
+    }
+  }
+
+  function checkAttrs(block, attrs) {
+    for (var i = 0; i < attrs.length; i++) {
+      var attr = attrs[i];
+      if (attr.name === 'lang') {
+        block.lang = attr.value;
+      }
+      if (attr.name === 'scoped') {
+        block.scoped = true;
+      }
+      if (attr.name === 'src') {
+        block.src = attr.value;
       }
     }
   }
 
   function end() {
     depth--;
+    if (options.map && currentBlock && !currentBlock.src) {
+      addSourceMap(currentBlock);
+    }
     currentBlock = null;
   }
 
   function chars(text) {
     if (currentBlock) {
-      currentBlock.content = deindent(text);
+      currentBlock.start = content.indexOf(text);
+      currentBlock.end = currentBlock.start + text.length;
+      text = deindent(text);
+      // pad content so that linters and pre-processors can output correct
+      // line numbers in errors and warnings
+      if (currentBlock.type !== 'template' && options.pad) {
+        text = padContent(currentBlock) + text;
+      }
+      currentBlock.content = text;
     }
+  }
+
+  function padContent(block) {
+    var padChar = block.type === 'script' && !block.lang ? '//\n' : '\n';
+    return Array(getPaddingOffset(block) + 1).join(padChar);
+  }
+
+  function getPaddingOffset(block) {
+    return content.slice(0, block.start).split(splitRE).length - 1;
+  }
+
+  function addSourceMap(block) {
+    var filename = options.map.filename;
+    /* istanbul ignore if */
+    if (!filename) {
+      throw new Error('Should provide original filename in the map option.');
+    }
+    var offset = options.pad ? 0 : getPaddingOffset(block);
+    var map = new sourceMap.SourceMapGenerator();
+    map.setSourceContent(filename, content);
+    block.content.split(splitRE).forEach(function (line, index) {
+      if (!emptyRE.test(line)) {
+        map.addMapping({
+          source: filename,
+          original: {
+            line: index + 1 + offset,
+            column: 0
+          },
+          generated: {
+            line: index + 1,
+            column: 0
+          }
+        });
+      }
+    });
+    block.map = JSON.parse(map.toString());
   }
 
   parseHTML(content, {
@@ -4204,8 +4280,14 @@ function parseSFC(content) {
 }
 
 function compile(template, options) {
+  options = options || {};
   var errors = [];
+  // allow injecting modules/directives
+  var modules = options.modules ? baseOptions.modules.concat(options.modules) : baseOptions.modules;
+  var directives = options.directives ? extend(extend({}, baseOptions.directives), options.directives) : baseOptions.directives;
   var compiled = compile$1(template, {
+    modules: modules,
+    directives: directives,
     warn: function warn(msg) {
       errors.push(msg);
     }
@@ -4215,5 +4297,5 @@ function compile(template, options) {
 }
 
 exports.compile = compile;
-exports.parseComponent = parseSFC;
+exports.parseComponent = parseComponent;
 exports.compileToFunctions = compileToFunctions;
