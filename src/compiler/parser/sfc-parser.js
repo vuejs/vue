@@ -9,6 +9,7 @@ import { parseHTML } from './html-parser'
 import { makeMap } from 'shared/util'
 
 const splitRE = /\r?\n/g
+const emptyRE = /^(?:\/\/)?\s*$/
 const isSpecialTag = makeMap('script,style,template', true)
 
 type Attribute = {
@@ -68,7 +69,7 @@ export function parseComponent (
   function end () {
     depth--
     if (currentBlock && options && options.map) {
-      addSourceMap(currentBlock)
+      addSourceMap(currentBlock, options.map)
     }
     currentBlock = null
   }
@@ -95,8 +96,29 @@ export function parseComponent (
     return Array(leadingContent.split(splitRE).length).join(padChar)
   }
 
-  function addSourceMap (block: SFCBlock) {
-
+  function addSourceMap (block: SFCBlock, options: Object) {
+    const filename = options.filename
+    if (!filename) {
+      throw new Error('Should provide original filename in the map option.')
+    }
+    const map = new SourceMapGenerator()
+    map.setSourceContent(filename, content)
+    block.content.split(splitRE).forEach((line, index) => {
+      if (!emptyRE.test(line)) {
+        map.addMapping({
+          source: filename,
+          original: {
+            line: index + 1,
+            column: 0
+          },
+          generated: {
+            line: index + 1,
+            column: 0
+          }
+        })
+      }
+    })
+    block.map = JSON.parse(map.toString())
   }
 
   parseHTML(content, {
