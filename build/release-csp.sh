@@ -17,10 +17,5 @@ git push -f
 git tag v$CSP_VERSION
 git push origin v$CSP_VERSION
 
-# publish to npm and update dist tags
-npm publish
-sleep 1
-npm dist-tag add vue@$CSP_VERSION csp
-npm dist-tag add vue@$PLAIN_VERSION latest
-sleep 1
-npm view vue version dist-tags
+# publish to npm
+npm publish --tag csp
