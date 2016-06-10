@@ -3,9 +3,9 @@
 import { no } from 'shared/util'
 
 export type Config = {
-  preserveWhitespace: boolean,
   optionMergeStrategies: { [key: string]: Function },
   silent: boolean,
+  errorHandler: ?Function,
   isReservedTag: (x?: string) => boolean,
   isUnknownElement: (x?: string) => boolean,
   mustUseProp: (x?: string) => boolean,
@@ -17,12 +17,6 @@ export type Config = {
 }
 
 const config: Config = {
-
-  /**
-   * Preserve whitespaces between elements.
-   */
-  preserveWhitespace: true,
-
   /**
    * Option merge strategies (used in core/util/options)
    */

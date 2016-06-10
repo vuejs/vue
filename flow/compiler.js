@@ -12,7 +12,6 @@ declare type CompilerOptions = {
   transforms?: Array<Function>, // a list of transforms on parsed AST before codegen
 
   // runtime user-configurable
-  preserveWhitespace?: boolean, // whether to keep whitespaces between elements
   delimiters?: [string, string] // template delimiters
 }
 

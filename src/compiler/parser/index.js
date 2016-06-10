@@ -202,9 +202,7 @@ export function parse (
       text = currentParent.tag === 'pre' || text.trim()
         ? decodeHTMLCached(text)
         // only preserve whitespace if its not right after a starting tag
-        : options.preserveWhitespace && currentParent.children.length
-          ? ' '
-          : ''
+        : currentParent.children.length ? ' ' : ''
       if (text) {
         let expression
         if (!inPre && text !== ' ' && (expression = parseText(text, delimiters))) {

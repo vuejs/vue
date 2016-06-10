@@ -8,13 +8,11 @@ import modules from './modules/index'
 import directives from './directives/index'
 import { isIE, isReservedTag, isUnaryTag, mustUseProp, getTagNamespace } from '../util/index'
 
-const cache1: { [key: string]: CompiledFunctionResult } = Object.create(null)
-const cache2: { [key: string]: CompiledFunctionResult } = Object.create(null)
+const cache: { [key: string]: CompiledFunctionResult } = Object.create(null)
 
 export const baseOptions: CompilerOptions = {
   isIE,
   expectHTML: true,
-  preserveWhitespace: true,
   modules,
   staticKeys: genStaticKeys(modules),
   directives,
@@ -57,7 +55,6 @@ export function compileToFunctions (
       }
     }
   }
-  const cache = options && options.preserveWhitespace === false ? cache1 : cache2
   const key = options && options.delimiters
     ? String(options.delimiters) + template
     : template

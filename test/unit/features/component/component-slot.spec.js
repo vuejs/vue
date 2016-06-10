@@ -61,9 +61,9 @@ describe('Component slot', () => {
       `,
       parentContent: '<p slot="b">slot b</p>'
     })
-    expect(child.$el.childNodes.length).toBe(2)
-    expect(child.$el.firstChild.textContent).toBe('fallback a')
-    expect(child.$el.lastChild.textContent).toBe('slot b')
+    expect(child.$el.children.length).toBe(2)
+    expect(child.$el.children[0].textContent).toBe('fallback a')
+    expect(child.$el.children[1].textContent).toBe('slot b')
   })
 
   it('fallback content with mixed named/unamed slots', () => {
@@ -76,9 +76,9 @@ describe('Component slot', () => {
       `,
       parentContent: '<p slot="b">slot b</p>'
     })
-    expect(child.$el.childNodes.length).toBe(2)
-    expect(child.$el.firstChild.textContent).toBe('fallback a')
-    expect(child.$el.lastChild.textContent).toBe('slot b')
+    expect(child.$el.children.length).toBe(2)
+    expect(child.$el.children[0].textContent).toBe('fallback a')
+    expect(child.$el.children[1].textContent).toBe('slot b')
   })
 
   it('selector matching multiple elements', () => {
@@ -100,7 +100,7 @@ describe('Component slot', () => {
       `,
       parentContent: '<div>foo</div><p slot="a">1</p><p slot="b">2</p>'
     })
-    expect(child.$el.innerHTML).toBe('<p>1</p><div>foo</div><p>2</p>')
+    expect(child.$el.innerHTML).toBe('<p>1</p> <div>foo</div> <p>2</p>')
   })
 
   it('name should only match children', function () {
@@ -108,8 +108,8 @@ describe('Component slot', () => {
       childTemplate: `
         <div>
           <slot name="a"><p>fallback a</p></slot>
-          <slot name="b">fallback b</slot>
-          <slot name="c">fallback c</slot>
+          <slot name="b"><p>fallback b</p></slot>
+          <slot name="c"><p>fallback c</p></slot>
         </div>
       `,
       parentContent: `
@@ -118,10 +118,10 @@ describe('Component slot', () => {
         '<span><p slot="c">nested c</p></span>
       `
     })
-    expect(child.$el.childNodes.length).toBe(3)
-    expect(child.$el.firstChild.textContent).toBe('fallback a')
-    expect(child.$el.childNodes[1].textContent).toBe('select b')
-    expect(child.$el.lastChild.textContent).toBe('fallback c')
+    expect(child.$el.children.length).toBe(3)
+    expect(child.$el.children[0].textContent).toBe('fallback a')
+    expect(child.$el.children[1].textContent).toBe('select b')
+    expect(child.$el.children[2].textContent).toBe('fallback c')
   })
 
   it('should accept expressions in slot attribute and slot names', () => {

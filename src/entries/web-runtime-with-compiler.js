@@ -1,7 +1,6 @@
 /* @flow */
 
 import Vue from './web-runtime'
-import config from 'core/config'
 import { warn, cached } from 'core/util/index'
 import { query } from 'web/util/index'
 import { compileToFunctions } from 'web/compiler/index'
@@ -39,7 +38,6 @@ Vue.prototype.$mount = function (
     }
     if (template) {
       const { render, staticRenderFns } = compileToFunctions(template, {
-        preserveWhitespace: config.preserveWhitespace,
         delimiters: options.delimiters,
         warn
       }, this)

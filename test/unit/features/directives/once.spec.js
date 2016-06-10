@@ -29,11 +29,11 @@ describe('Directive v-once', () => {
     }).$mount()
     expect(vm.$children.length).toBe(1)
     expect(vm.$el.innerHTML)
-      .toBe('<span>hello</span><div>hello</div>')
+      .toBe('<span>hello</span> <div>hello</div>')
     vm.a = 'world'
     waitForUpdate(() => {
       expect(vm.$el.innerHTML)
-        .toBe('<span>hello</span><div>hello</div>')
+        .toBe('<span>hello</span> <div>hello</div>')
     }).then(done)
   })
 
@@ -53,11 +53,11 @@ describe('Directive v-once', () => {
     }).$mount()
     expect(vm.$children.length).toBe(1)
     expect(vm.$el.innerHTML)
-      .toBe('<span>hello</span><div>hello</div>')
+      .toBe('<span>hello</span> <div>hello</div>')
     vm.a = 'world'
     waitForUpdate(() => {
       expect(vm.$el.innerHTML)
-        .toBe('<span>world</span><div>hello</div>')
+        .toBe('<span>world</span> <div>hello</div>')
     }).then(done)
   })
 
@@ -80,15 +80,15 @@ describe('Directive v-once', () => {
       }
     }).$mount()
     expect(vm.$el.innerHTML)
-      .toBe('<span>hello</span><div>hello</div><span>?</span>')
+      .toBe('<span>hello</span> <div>hello</div> <span>?</span>')
     vm.a = 'world'
     waitForUpdate(() => {
       expect(vm.$el.innerHTML)
-        .toBe('<span>hello</span><div>world</div><span>?</span>')
+        .toBe('<span>hello</span> <div>world</div> <span>?</span>')
       vm.suffix = '!'
     }).then(() => {
       expect(vm.$el.innerHTML)
-        .toBe('<span>hello</span><div>world</div><span>!</span>')
+        .toBe('<span>hello</span> <div>world</div> <span>!</span>')
     }).then(done)
   })
 })
