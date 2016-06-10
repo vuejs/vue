@@ -133,6 +133,14 @@ declare module 'de-indent' {
   }
 }
 
+declare module 'source-map' {
+  declare class SourceMapGenerator {
+    setSourceContent(filename: string, content: string): void;
+    addMapping(mapping: Object): void;
+    toString(): string;
+  }
+}
+
 // an object format describing a single-file component.
 declare type SFCDescriptor = {
   template: ?SFCBlock,
@@ -141,10 +149,12 @@ declare type SFCDescriptor = {
 }
 
 declare type SFCBlock = {
-  type: "template" | "script" | "style",
+  type: string,
   content: string,
+  start?: number,
+  end?: number,
   lang?: string,
+  src?: string,
   scoped?: boolean,
-  src?: boolean,
   map?: Object
 }
