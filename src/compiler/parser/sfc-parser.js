@@ -22,7 +22,7 @@ type Attribute = {
  */
 export function parseComponent (
   content: string,
-  options?: Object
+  options?: Object = {}
  ): SFCDescriptor {
   const sfc: SFCDescriptor = {
     template: null,
@@ -68,8 +68,8 @@ export function parseComponent (
 
   function end () {
     depth--
-    if (currentBlock && options && options.map) {
-      addSourceMap(currentBlock, options.map)
+    if (options.map && currentBlock && !currentBlock.src) {
+      addSourceMap(currentBlock)
     }
     currentBlock = null
   }
@@ -81,7 +81,7 @@ export function parseComponent (
       text = deindent(text)
       // pad content so that linters and pre-processors can output correct
       // line numbers in errors and warnings
-      if (currentBlock.type !== 'template' && options && options.pad) {
+      if (currentBlock.type !== 'template' && options.pad) {
         text = padContent(currentBlock) + text
       }
       currentBlock.content = text
@@ -89,18 +89,22 @@ export function parseComponent (
   }
 
   function padContent (block: SFCBlock) {
-    const leadingContent = content.slice(0, block.start)
     const padChar = block.type === 'script' && !block.lang
       ? '//\n'
       : '\n'
-    return Array(leadingContent.split(splitRE).length).join(padChar)
+    return Array(getPaddingOffset(block) + 1).join(padChar)
   }
 
-  function addSourceMap (block: SFCBlock, options: Object) {
-    const filename = options.filename
+  function getPaddingOffset (block: SFCBlock) {
+    return content.slice(0, block.start).split(splitRE).length - 1
+  }
+
+  function addSourceMap (block: SFCBlock) {
+    const filename = options.map.filename
     if (!filename) {
       throw new Error('Should provide original filename in the map option.')
     }
+    const offset = options.pad ? 0 : getPaddingOffset(block)
     const map = new SourceMapGenerator()
     map.setSourceContent(filename, content)
     block.content.split(splitRE).forEach((line, index) => {
@@ -108,7 +112,7 @@ export function parseComponent (
         map.addMapping({
           source: filename,
           original: {
-            line: index + 1,
+            line: index + 1 + offset,
             column: 0
           },
           generated: {
