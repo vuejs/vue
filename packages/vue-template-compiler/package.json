@@ -16,5 +16,9 @@
   "bugs": {
     "url": "https://github.com/vuejs/vue/issues"
   },
-  "homepage": "https://github.com/vuejs/vue#readme"
+  "homepage": "https://github.com/vuejs/vue#readme",
+  "dependencies": {
+    "de-indent": "^1.0.2",
+    "entities": "^1.1.1"
+  }
 }
