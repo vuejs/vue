@@ -153,7 +153,6 @@ declare type SFCBlock = {
   content: string,
   start?: number,
   end?: number,
-  offset?: number,
   lang?: string,
   src?: string,
   scoped?: boolean,

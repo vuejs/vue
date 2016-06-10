@@ -101,6 +101,7 @@ export function parseComponent (
 
   function addSourceMap (block: SFCBlock) {
     const filename = options.map.filename
+    /* istanbul ignore if */
     if (!filename) {
       throw new Error('Should provide original filename in the map option.')
     }
