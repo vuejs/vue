@@ -22,7 +22,7 @@ var banner =
 // Update main file
 var main = fs
   .readFileSync('src/core/index.js', 'utf-8')
-  .replace(/Vue\.version = '[\d\.]+'/, "Vue.version = '" + version + "'")
+  .replace(/Vue\.version = '[^']+'/, "Vue.version = '" + version + "'")
 fs.writeFileSync('src/core/index.js', main)
 
 var builds = [
