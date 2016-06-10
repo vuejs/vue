@@ -2,7 +2,7 @@ import { extend } from 'shared/util'
 import { compile as baseCompile, baseOptions } from 'web/compiler/index'
 import { detectErrors } from 'compiler/error-detector'
 
-export { parseSFC as parseComponent } from 'compiler/parser/sfc-parser'
+export { parseComponent } from 'compiler/parser/sfc-parser'
 export { compileToFunctions } from 'web/compiler/index'
 
 export function compile (
