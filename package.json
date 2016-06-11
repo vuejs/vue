@@ -30,7 +30,7 @@
     "dev": "webpack --watch --config build/webpack.dev.config.js & npm run serve-test",
     "serve-test": "webpack-dev-server --config build/webpack.test.config.js --host 0.0.0.0",
     "build-test": "webpack --config build/webpack.test.config.js",
-    "lint": "eslint src/** test/e2e/** test/unit/specs/** build/**.js",
+    "lint": "eslint src test/e2e test/unit/specs build",
     "e2e": "casperjs test --concise ./test/e2e",
     "unit": "karma start build/karma.unit.config.js",
     "cover": "karma start build/karma.cover.config.js",
