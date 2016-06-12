@@ -57,6 +57,6 @@ function initInternalComponent (vm: Component, options: InternalComponentOptions
   opts._componentTag = options._componentTag
   if (options.render) {
     opts.render = options.render
-    opts.staticRenderFns = opts.staticRenderFns
+    opts.staticRenderFns = options.staticRenderFns
   }
 }
