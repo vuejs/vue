@@ -119,7 +119,7 @@ describe('Global API', function () {
       Test.component('ns-tree', def)
       var component = Test.options.components['ns-tree']
       expect(typeof component).toBe('function')
-      expect(component.name).toBe('Component1')
+      expect(component.options.name).toBe('Component1')
     })
   })
 })
