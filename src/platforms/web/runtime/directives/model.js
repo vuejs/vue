@@ -20,7 +20,7 @@ if (isIE9) {
 export default {
   bind (el, binding, vnode) {
     if (process.env.NODE_ENV !== 'production') {
-      if (!vnode.tag.match(/input|select|textarea/)) {
+      if (!/input|select|textarea/.test(vnode.tag)) {
         warn(
           `v-model is not supported on element type: <${vnode.tag}>. ` +
           'If you are working with contenteditable, it\'s recommended to ' +
