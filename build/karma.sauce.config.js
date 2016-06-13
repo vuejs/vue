@@ -74,7 +74,9 @@ module.exports = function (config) {
     singleRun: true,
     browsers: Object.keys(batch),
     customLaunchers: batch,
-    reporters: ['progress', 'saucelabs'],
+    reporters: process.env.CI
+      ? ['dots', 'saucelabs'] // avoid spamming CI output
+      : ['progress', 'saucelabs'],
     sauceLabs: {
       testName: 'Vue.js unit tests',
       recordScreenshots: false,
