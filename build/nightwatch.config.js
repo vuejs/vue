@@ -19,7 +19,13 @@ module.exports = {
     'default': {
       'selenium_port': 4444,
       'selenium_host': 'localhost',
-      'silent': true
+      'silent': true,
+      'screenshots': {
+        'enabled': true,
+        'on_failure': true,
+        'on_error': false,
+        'path': 'test/e2e/screenshots'
+      }
     },
 
     'chrome': {
