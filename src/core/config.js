@@ -1,33 +1,57 @@
-export default {
+/* @flow */
 
+import { no } from 'shared/util'
+
+export type Config = {
+  optionMergeStrategies: { [key: string]: Function },
+  silent: boolean,
+  errorHandler: ?Function,
+  isReservedTag: (x?: string) => boolean,
+  isUnknownElement: (x?: string) => boolean,
+  mustUseProp: (x?: string) => boolean,
+  _assetTypes: Array<string>,
+  _lifecycleHooks: Array<string>,
+  _maxUpdateCount: number,
+  _isServer: boolean,
+  _ctors: Array<Function>
+}
+
+const config: Config = {
   /**
-   * Preserve whitespaces between elements.
+   * Option merge strategies (used in core/util/options)
    */
-  preserveWhitespace: true,
+  optionMergeStrategies: Object.create(null),
 
   /**
    * Whether to suppress warnings.
-   *
-   * @type {Boolean}
    */
   silent: false,
+
+  /**
+   * Error handler for watcher errors
+   */
+  errorHandler: null,
 
   /**
    * Check if a tag is reserved so that it cannot be registered as a
    * component. This is platform-dependent and may be overwritten.
    */
-  isReservedTag: () => false,
+  isReservedTag: no,
 
   /**
    * Check if a tag is an unknown element.
    * Platform-dependent.
    */
-  isUnknownElement: () => false,
+  isUnknownElement: no,
+
+  /**
+   * Check if an attribute must be bound using property, e.g. value
+   * Platform-dependent.
+   */
+  mustUseProp: no,
 
   /**
    * List of asset types that a component can own.
-   *
-   * @type {Array}
    */
   _assetTypes: [
     'component',
@@ -38,8 +62,6 @@ export default {
 
   /**
    * List of lifecycle hooks.
-   *
-   * @type {Array}
    */
   _lifecycleHooks: [
     'init',
@@ -49,7 +71,9 @@ export default {
     'beforeUpdate',
     'updated',
     'beforeDestroy',
-    'destroyed'
+    'destroyed',
+    'activated',
+    'deactivated'
   ],
 
   /**
@@ -60,5 +84,14 @@ export default {
   /**
    * Server rendering?
    */
-  _isServer: process.env.VUE_ENV === 'server'
+  _isServer: process.env.VUE_ENV === 'server',
+
+  /**
+   * Keeping track of all extended Component constructors
+   * so that we can update them in the case of global mixins being applied
+   * after their creation.
+   */
+  _ctors: []
 }
+
+export default config

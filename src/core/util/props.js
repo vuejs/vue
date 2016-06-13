@@ -1,12 +1,30 @@
-import { hasOwn, isArray, isObject, isPlainObject } from 'shared/util'
+/* @flow */
+
+import { hasOwn, isObject, isPlainObject, capitalize, hyphenate } from 'shared/util'
 import { observe, observerState } from '../observer/index'
 import { warn } from './debug'
 
-export function validateProp (vm, key, propsData) {
-  if (!propsData) return
+type PropOptions = {
+  type: Function | Array<Function> | null,
+  default: any,
+  required: ?boolean,
+  validator: ?Function
+}
+
+export function validateProp (vm: Component, key: string, propsData: ?Object): any {
+  /* istanbul ignore if */
+  if (!vm.$options.props || !propsData) return
   const prop = vm.$options.props[key]
-  const absent = hasOwn(propsData, key)
+  const absent = !hasOwn(propsData, key)
   let value = propsData[key]
+  // handle boolean props
+  if (prop.type === Boolean) {
+    if (absent && !hasOwn(prop, 'default')) {
+      value = false
+    } else if (value === '' || value === hyphenate(key)) {
+      value = true
+    }
+  }
   // check default value
   if (value === undefined) {
     value = getPropDefaultValue(vm, prop, key)
@@ -24,18 +42,11 @@ export function validateProp (vm, key, propsData) {
 
 /**
  * Get the default value of a prop.
- *
- * @param {Vue} vm
- * @param {Object} prop
- * @return {*}
  */
-function getPropDefaultValue (vm, prop, name) {
+function getPropDefaultValue (vm: Component, prop: PropOptions, name: string): any {
   // no default, return undefined
   if (!hasOwn(prop, 'default')) {
-    // absent boolean value defaults to false
-    return prop.type === Boolean
-      ? false
-      : undefined
+    return undefined
   }
   const def = prop.default
   // warn against non-factory defaults for Object & Array
@@ -55,29 +66,29 @@ function getPropDefaultValue (vm, prop, name) {
 
 /**
  * Assert whether a prop is valid.
- *
- * @param {Object} prop
- * @param {String} name
- * @param {*} value
- * @param {Vue} vm
- * @param {Boolean} absent
  */
-function assertProp (prop, name, value, vm, absent) {
+function assertProp (
+  prop: PropOptions,
+  name: string,
+  value: any,
+  vm: Component,
+  absent: boolean
+) {
   if (prop.required && absent) {
-    process.env.NODE_ENV !== 'production' && warn(
+    warn(
       'Missing required prop: "' + name + '"',
       vm
     )
-    return false
+    return
   }
-  if (value == null) {
-    return true
+  if (value == null && !prop.required) {
+    return
   }
   let type = prop.type
   let valid = !type
   const expectedTypes = []
   if (type) {
-    if (!isArray(type)) {
+    if (!Array.isArray(type)) {
       type = [type]
     }
     for (let i = 0; i < type.length && !valid; i++) {
@@ -87,37 +98,32 @@ function assertProp (prop, name, value, vm, absent) {
     }
   }
   if (!valid) {
-    if (process.env.NODE_ENV !== 'production') {
-      warn(
-        'Invalid prop: type check failed for prop "' + name + '".' +
-        ' Expected ' + expectedTypes.map(formatType).join(', ') +
-        ', got ' + formatValue(value) + '.',
-        vm
-      )
-    }
-    return false
+    warn(
+      'Invalid prop: type check failed for prop "' + name + '".' +
+      ' Expected ' + expectedTypes.map(capitalize).join(', ') +
+      ', got ' + Object.prototype.toString.call(value).slice(8, -1) + '.',
+      vm
+    )
+    return
   }
   const validator = prop.validator
   if (validator) {
     if (!validator(value)) {
-      process.env.NODE_ENV !== 'production' && warn(
+      warn(
         'Invalid prop: custom validator check failed for prop "' + name + '".',
         vm
       )
-      return false
     }
   }
-  return true
 }
 
 /**
  * Assert the type of a value
- *
- * @param {*} value
- * @param {Function} type
- * @return {Object}
  */
-function assertType (value, type) {
+function assertType (value: any, type: Function): {
+  valid: boolean,
+  expectedType: string
+} {
   let valid
   let expectedType
   if (type === String) {
@@ -133,38 +139,17 @@ function assertType (value, type) {
     expectedType = 'function'
     valid = typeof value === expectedType
   } else if (type === Object) {
-    expectedType = 'object'
+    expectedType = 'Object'
     valid = isPlainObject(value)
   } else if (type === Array) {
-    expectedType = 'array'
-    valid = isArray(value)
+    expectedType = 'Array'
+    valid = Array.isArray(value)
   } else {
+    expectedType = type.name || type.toString()
     valid = value instanceof type
   }
   return {
     valid,
     expectedType
   }
-}
-
-/**
- * Format type for output
- *
- * @param {String} type
- * @return {String}
- */
-function formatType (type) {
-  return type
-    ? type.charAt(0).toUpperCase() + type.slice(1)
-    : 'custom type'
-}
-
-/**
- * Format value
- *
- * @param {*} value
- * @return {String}
- */
-function formatValue (val) {
-  return Object.prototype.toString.call(val).slice(8, -1)
 }

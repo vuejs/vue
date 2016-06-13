@@ -2,19 +2,23 @@
  * Virtual DOM implementation based on Snabbdom by
  * Simon Friis Vindum (@paldepind)
  * with custom modifications.
+ *
+ * Not type-checking this because this file is perf-critical and the cost
+ * of making flow understand it is not worth it.
  */
+
 import VNode from './vnode'
 import { isPrimitive, renderString, warn } from '../util/index'
 
-const emptyNode = VNode('', {}, [])
-const hooks = ['create', 'update', 'remove', 'destroy']
+const emptyNode = new VNode('', {}, [])
+const hooks = ['create', 'update', 'postpatch', 'remove', 'destroy']
 
 function isUndef (s) {
-  return s === undefined
+  return s == null
 }
 
 function isDef (s) {
-  return s !== undefined
+  return s != null
 }
 
 function sameVnode (vnode1, vnode2) {
@@ -45,7 +49,7 @@ export function createPatchFunction (backend) {
   }
 
   function emptyNodeAt (elm) {
-    return VNode(nodeOps.tagName(elm).toLowerCase(), {}, [], undefined, elm)
+    return new VNode(nodeOps.tagName(elm).toLowerCase(), {}, [], undefined, elm)
   }
 
   function createRmCb (childElm, listeners) {
@@ -74,6 +78,7 @@ export function createPatchFunction (backend) {
       // in that case we can just return the element and be done.
       if (isDef(i = vnode.child)) {
         invokeCreateHooks(vnode, insertedVnodeQueue)
+        setScope(vnode)
         return vnode.elm
       }
     }
@@ -83,6 +88,7 @@ export function createPatchFunction (backend) {
       elm = vnode.elm = vnode.ns
         ? nodeOps.createElementNS(vnode.ns, tag)
         : nodeOps.createElement(tag)
+      setScope(vnode)
       if (Array.isArray(children)) {
         for (i = 0; i < children.length; ++i) {
           nodeOps.appendChild(elm, createElm(children[i], insertedVnodeQueue))
@@ -110,6 +116,16 @@ export function createPatchFunction (backend) {
     }
   }
 
+  // set scope id attribute for scoped CSS.
+  // this is implemented as a special case to avoid the overhead
+  // of going through the normal attribute patching process.
+  function setScope (vnode) {
+    let i
+    if (isDef(i = vnode.context) && isDef(i = i.$options._scopeId)) {
+      nodeOps.setAttribute(vnode.elm, i, '')
+    }
+  }
+
   function addVnodes (parentElm, before, vnodes, startIdx, endIdx, insertedVnodeQueue) {
     for (; startIdx <= endIdx; ++startIdx) {
       nodeOps.insertBefore(parentElm, createElm(vnodes[startIdx], insertedVnodeQueue), before)
@@ -122,13 +138,13 @@ export function createPatchFunction (backend) {
     if (isDef(data)) {
       if (isDef(i = data.hook) && isDef(i = i.destroy)) i(vnode)
       for (i = 0; i < cbs.destroy.length; ++i) cbs.destroy[i](vnode)
-      if (isDef(i = vnode.children)) {
-        for (j = 0; j < vnode.children.length; ++j) {
-          invokeDestroyHook(vnode.children[j])
-        }
-      }
-      if (isDef(i = vnode.child)) {
-        invokeDestroyHook(i._vnode)
+    }
+    if (isDef(i = vnode.child)) {
+      invokeDestroyHook(i._vnode)
+    }
+    if (isDef(i = vnode.children)) {
+      for (j = 0; j < vnode.children.length; ++j) {
+        invokeDestroyHook(vnode.children[j])
       }
     }
   }
@@ -217,16 +233,23 @@ export function createPatchFunction (backend) {
           newStartVnode = newCh[++newStartIdx]
         } else {
           elmToMove = oldCh[idxInOld]
+          /* istanbul ignore if */
           if (process.env.NODE_ENV !== 'production' && !elmToMove) {
             warn(
-              'Duplicate track-by key: ' + idxInOld + '. ' +
-              'Make sure each v-for item has a unique track-by key.'
+              'It seems there are duplicate keys that is causing an update error. ' +
+              'Make sure each v-for item has a unique key.'
             )
           }
-          patchVnode(elmToMove, newStartVnode, insertedVnodeQueue)
-          oldCh[idxInOld] = undefined
-          nodeOps.insertBefore(parentElm, elmToMove.elm, oldStartVnode.elm)
-          newStartVnode = newCh[++newStartIdx]
+          if (elmToMove.tag !== newStartVnode.tag) {
+            // same key but different element. treat as new element
+            nodeOps.insertBefore(parentElm, createElm(newStartVnode, insertedVnodeQueue), oldStartVnode.elm)
+            newStartVnode = newCh[++newStartIdx]
+          } else {
+            patchVnode(elmToMove, newStartVnode, insertedVnodeQueue)
+            oldCh[idxInOld] = undefined
+            nodeOps.insertBefore(parentElm, newStartVnode.elm, oldStartVnode.elm)
+            newStartVnode = newCh[++newStartIdx]
+          }
         }
       }
     }
@@ -239,29 +262,17 @@ export function createPatchFunction (backend) {
   }
 
   function patchVnode (oldVnode, vnode, insertedVnodeQueue) {
+    if (oldVnode === vnode) return
     let i, hook
     if (isDef(i = vnode.data) && isDef(hook = i.hook) && isDef(i = hook.prepatch)) {
       i(oldVnode, vnode)
     }
-    // skip nodes with v-pre
-    if (isDef(i = vnode.data) && i.pre) {
-      return
-    }
-    let elm = vnode.elm = oldVnode.elm
+    const elm = vnode.elm = oldVnode.elm
     const oldCh = oldVnode.children
     const ch = vnode.children
-    if (oldVnode === vnode) return
-    if (!sameVnode(oldVnode, vnode)) {
-      const parentElm = nodeOps.parentNode(oldVnode.elm)
-      elm = createElm(vnode, insertedVnodeQueue)
-      nodeOps.insertBefore(parentElm, elm, oldVnode.elm)
-      removeVnodes(parentElm, [oldVnode], 0, 0)
-      return
-    }
     if (isDef(vnode.data)) {
       for (i = 0; i < cbs.update.length; ++i) cbs.update[i](oldVnode, vnode)
-      i = vnode.data.hook
-      if (isDef(i) && isDef(i = i.update)) i(oldVnode, vnode)
+      if (isDef(hook) && isDef(i = hook.update)) i(oldVnode, vnode)
     }
     if (isUndef(vnode.text)) {
       if (isDef(oldCh) && isDef(ch)) {
@@ -277,8 +288,9 @@ export function createPatchFunction (backend) {
     } else if (oldVnode.text !== vnode.text) {
       nodeOps.setTextContent(elm, vnode.text)
     }
-    if (isDef(hook) && isDef(i = hook.postpatch)) {
-      i(oldVnode, vnode)
+    if (isDef(vnode.data)) {
+      for (i = 0; i < cbs.postpatch.length; ++i) cbs.postpatch[i](oldVnode, vnode)
+      if (isDef(hook) && isDef(i = hook.postpatch)) i(oldVnode, vnode)
     }
   }
 
@@ -297,7 +309,7 @@ export function createPatchFunction (backend) {
     vnode.elm = elm
     const { tag, data, children } = vnode
     if (isDef(data)) {
-      if (isDef(i = data.hook) && isDef(i = i.init)) i(vnode)
+      if (isDef(i = data.hook) && isDef(i = i.init)) i(vnode, true /* hydrating */)
       if (isDef(i = vnode.child)) {
         // child component. it should have hydrated its own tree.
         invokeCreateHooks(vnode, insertedVnodeQueue)
@@ -306,7 +318,7 @@ export function createPatchFunction (backend) {
     }
     if (isDef(tag)) {
       if (isDef(children)) {
-        const childNodes = elm.childNodes
+        const childNodes = nodeOps.childNodes(elm)
         for (let i = 0; i < children.length; i++) {
           const success = hydrate(childNodes[i], children[i], insertedVnodeQueue)
           if (!success) {
@@ -326,10 +338,11 @@ export function createPatchFunction (backend) {
       if (vnode.tag.indexOf('vue-component') === 0) {
         return true
       } else {
-        return vnode.tag === node.tagName.toLowerCase() && (
+        const childNodes = nodeOps.childNodes(node)
+        return vnode.tag === nodeOps.tagName(node).toLowerCase() && (
           vnode.children
-            ? vnode.children.length === node.childNodes.length
-            : node.childNodes.length === 0
+            ? vnode.children.length === childNodes.length
+            : childNodes.length === 0
         )
       }
     } else {
@@ -337,7 +350,7 @@ export function createPatchFunction (backend) {
     }
   }
 
-  return function patch (oldVnode, vnode) {
+  return function patch (oldVnode, vnode, hydrating) {
     let elm, parent
     const insertedVnodeQueue = []
 
@@ -345,15 +358,19 @@ export function createPatchFunction (backend) {
       // empty mount, create new root element
       createElm(vnode, insertedVnodeQueue)
     } else {
-      if (sameVnode(oldVnode, vnode)) {
+      const isRealElement = isDef(oldVnode.nodeType)
+      if (!isRealElement && sameVnode(oldVnode, vnode)) {
         patchVnode(oldVnode, vnode, insertedVnodeQueue)
       } else {
-        if (isDef(oldVnode.nodeType)) {
+        if (isRealElement) {
           // mounting to a real element
           // check if this is server-rendered content and if we can perform
           // a successful hydration.
           if (oldVnode.hasAttribute('server-rendered')) {
             oldVnode.removeAttribute('server-rendered')
+            hydrating = true
+          }
+          if (hydrating) {
             if (hydrate(oldVnode, vnode, insertedVnodeQueue)) {
               invokeInsertHook(insertedVnodeQueue)
               return oldVnode
@@ -377,6 +394,8 @@ export function createPatchFunction (backend) {
         if (parent !== null) {
           nodeOps.insertBefore(parent, vnode.elm, nodeOps.nextSibling(elm))
           removeVnodes(parent, [oldVnode], 0, 0)
+        } else if (isDef(oldVnode.tag)) {
+          invokeDestroyHook(oldVnode)
         }
       }
     }

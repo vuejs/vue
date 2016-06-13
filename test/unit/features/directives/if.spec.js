@@ -47,9 +47,7 @@ describe('Directive v-if', () => {
       vm.foo = 1
     }).then(() => {
       expect(vm.$el.innerHTML).toBe('<span>hello</span>')
-      done()
-    })
-    .catch(done)
+    }).then(done)
   })
 
   it('should work well with v-else', done => {
@@ -62,33 +60,32 @@ describe('Directive v-if', () => {
       `,
       data: { foo: true }
     }).$mount()
-    expect(vm.$el.innerHTML).toBe('<span>hello</span>')
+    expect(vm.$el.innerHTML.trim()).toBe('<span>hello</span>')
     vm.foo = false
     waitForUpdate(() => {
-      expect(vm.$el.innerHTML).toBe('<span>bye</span>')
+      expect(vm.$el.innerHTML.trim()).toBe('<span>bye</span>')
       vm.foo = {}
     }).then(() => {
-      expect(vm.$el.innerHTML).toBe('<span>hello</span>')
+      expect(vm.$el.innerHTML.trim()).toBe('<span>hello</span>')
       vm.foo = 0
     }).then(() => {
-      expect(vm.$el.innerHTML).toBe('<span>bye</span>')
+      expect(vm.$el.innerHTML.trim()).toBe('<span>bye</span>')
       vm.foo = []
     }).then(() => {
-      expect(vm.$el.innerHTML).toBe('<span>hello</span>')
+      expect(vm.$el.innerHTML.trim()).toBe('<span>hello</span>')
       vm.foo = null
     }).then(() => {
-      expect(vm.$el.innerHTML).toBe('<span>bye</span>')
+      expect(vm.$el.innerHTML.trim()).toBe('<span>bye</span>')
       vm.foo = '0'
     }).then(() => {
-      expect(vm.$el.innerHTML).toBe('<span>hello</span>')
+      expect(vm.$el.innerHTML.trim()).toBe('<span>hello</span>')
       vm.foo = undefined
     }).then(() => {
-      expect(vm.$el.innerHTML).toBe('<span>bye</span>')
+      expect(vm.$el.innerHTML.trim()).toBe('<span>bye</span>')
       vm.foo = 1
     }).then(() => {
-      expect(vm.$el.innerHTML).toBe('<span>hello</span>')
-      done()
-    }).catch(done)
+      expect(vm.$el.innerHTML.trim()).toBe('<span>hello</span>')
+    }).then(done)
   })
 
   it('should work well with v-for', done => {
@@ -116,8 +113,7 @@ describe('Directive v-if', () => {
       vm.list.splice(1, 2)
     }).then(() => {
       expect(vm.$el.innerHTML).toBe('<span>1</span>')
-      done()
-    }).catch(done)
+    }).then(done)
   })
 
   it('should work well with v-for and v-else', done => {
@@ -136,17 +132,16 @@ describe('Directive v-if', () => {
         ]
       }
     }).$mount()
-    expect(vm.$el.innerHTML).toBe('<span>hello</span><span>bye</span><span>hello</span>')
+    expect(vm.$el.innerHTML.trim()).toBe('<span>hello</span><span>bye</span><span>hello</span>')
     vm.list[0].value = false
     waitForUpdate(() => {
-      expect(vm.$el.innerHTML).toBe('<span>bye</span><span>bye</span><span>hello</span>')
+      expect(vm.$el.innerHTML.trim()).toBe('<span>bye</span><span>bye</span><span>hello</span>')
       vm.list.push({ value: true })
     }).then(() => {
-      expect(vm.$el.innerHTML).toBe('<span>bye</span><span>bye</span><span>hello</span><span>hello</span>')
+      expect(vm.$el.innerHTML.trim()).toBe('<span>bye</span><span>bye</span><span>hello</span><span>hello</span>')
       vm.list.splice(1, 2)
     }).then(() => {
-      expect(vm.$el.innerHTML).toBe('<span>bye</span><span>hello</span>')
-      done()
-    }).catch(done)
+      expect(vm.$el.innerHTML.trim()).toBe('<span>bye</span><span>hello</span>')
+    }).then(done)
   })
 })

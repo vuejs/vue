@@ -1,3 +1,5 @@
+/* @flow */
+
 import { inBrowser } from 'core/util/env'
 import { makeMap } from 'shared/util'
 
@@ -51,7 +53,7 @@ const isSVG = makeMap(
   true
 )
 
-export function getTagNamespace (tag) {
+export function getTagNamespace (tag: string): ?string {
   if (isSVG(tag)) {
     return 'svg'
   }
@@ -63,11 +65,13 @@ export function getTagNamespace (tag) {
 }
 
 const unknownElementCache = Object.create(null)
-export function isUnknownElement (tag) {
+export function isUnknownElement (tag: string): boolean {
+  /* istanbul ignore if */
   if (!inBrowser) {
     return true
   }
   tag = tag.toLowerCase()
+  /* istanbul ignore if */
   if (unknownElementCache[tag] != null) {
     return unknownElementCache[tag]
   }

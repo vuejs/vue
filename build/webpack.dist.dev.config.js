@@ -3,7 +3,7 @@ var alias = require('./alias')
 var webpack = require('webpack')
 
 module.exports = {
-  entry: path.resolve(__dirname, 'dist.dev.entry.js'),
+  entry: path.resolve(__dirname, 'webpack.dist.dev.entry.js'),
   output: {
     path: path.resolve(__dirname, '../dist'),
     filename: 'vue.js',
@@ -17,7 +17,11 @@ module.exports = {
   },
   module: {
     loaders: [
-      { test: /\.js/, loader: 'babel', exclude: /node_modules/ }
+      {
+        test: /\.js/,
+        loader: 'babel!eslint',
+        exclude: /node_modules/
+      }
     ]
   },
   plugins: [

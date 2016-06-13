@@ -1,10 +1,12 @@
-import { extend, isArray, cached, camelize } from 'shared/util'
-import { inBrowser } from 'core/util/env'
+/* @flow */
+
+import { cached, camelize, toObject, extend } from 'shared/util'
 
 const prefixes = ['Webkit', 'Moz', 'ms']
-const testEl = inBrowser && document.createElement('div')
 
+let testEl
 const normalize = cached(function (prop) {
+  testEl = testEl || document.createElement('div')
   prop = camelize(prop)
   if (prop !== 'filter' && (prop in testEl.style)) {
     return prop
@@ -18,17 +20,17 @@ const normalize = cached(function (prop) {
   }
 })
 
-function updateStyle (oldVnode, vnode) {
+function updateStyle (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   if (!oldVnode.data.style && !vnode.data.style) {
     return
   }
   let cur, name
-  const elm = vnode.elm
-  const oldStyle = oldVnode.data.style || {}
+  const elm: any = vnode.elm
+  const oldStyle: any = oldVnode.data.style || {}
   let style = vnode.data.style || {}
 
   // handle array syntax
-  if (isArray(style)) {
+  if (Array.isArray(style)) {
     style = vnode.data.style = toObject(style)
   }
 
@@ -40,19 +42,13 @@ function updateStyle (oldVnode, vnode) {
   for (name in style) {
     cur = style[name]
     if (cur !== oldStyle[name]) {
-      elm.style[normalize(name)] = cur
+      // ie9 setting to null has no effect, must use empty string
+      elm.style[normalize(name)] = cur || ''
     }
   }
-}
-
-function toObject (arr) {
-  const res = arr[0] || {}
-  for (let i = 1; i < arr.length; i++) {
-    if (arr[i]) {
-      extend(res, arr[i])
-    }
-  }
-  return res
+  // clone the style for future updates,
+  // in case the user mutates the style object in-place.
+  vnode.data.style = extend({}, style)
 }
 
 export default {

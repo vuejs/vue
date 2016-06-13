@@ -1,63 +1,55 @@
-import { toArray } from '../util/index'
+/* @flow */
+
+import { bind, toArray } from '../util/index'
 import { updateListeners } from '../vdom/helpers'
 
-export function initEvents (vm) {
+export function initEvents (vm: Component) {
   vm._events = Object.create(null)
   // init parent attached events
   const listeners = vm.$options._parentListeners
+  const on = bind(vm.$on, vm)
+  const off = bind(vm.$off, vm)
+  vm._updateListeners = (listeners, oldListeners) => {
+    updateListeners(listeners, oldListeners || {}, on, off)
+  }
   if (listeners) {
-    updateListeners(listeners, {}, (event, handler) => {
-      vm.$on(event, handler)
-    })
+    vm._updateListeners(listeners)
   }
 }
 
-export function eventsMixin (Vue) {
-  Vue.prototype.$on = function (event, fn) {
-    (this._events[event] || (this._events[event] = []))
-      .push(fn)
-    return this
+export function eventsMixin (Vue: Class<Component>) {
+  Vue.prototype.$on = function (event: string, fn: Function): Component {
+    const vm: Component = this
+    ;(vm._events[event] || (vm._events[event] = [])).push(fn)
+    return vm
   }
 
-  /**
-   * Adds an `event` listener that will be invoked a single
-   * time then automatically removed.
-   *
-   * @param {String} event
-   * @param {Function} fn
-   */
-  Vue.prototype.$once = function (event, fn) {
-    const self = this
+  Vue.prototype.$once = function (event: string, fn: Function): Component {
+    const vm: Component = this
     function on () {
-      self.$off(event, on)
-      fn.apply(this, arguments)
+      vm.$off(event, on)
+      fn.apply(vm, arguments)
     }
     on.fn = fn
-    this.$on(event, on)
-    return this
+    vm.$on(event, on)
+    return vm
   }
 
-  /**
-   * Remove the given callback for `event` or all
-   * registered callbacks.
-   *
-   * @param {String} event
-   * @param {Function} fn
-   */
-  Vue.prototype.$off = function (event, fn) {
+  Vue.prototype.$off = function (event?: string, fn?: Function): Component {
+    const vm: Component = this
     // all
     if (!arguments.length) {
-      this._events = Object.create(null)
-      return this
+      vm._events = Object.create(null)
+      return vm
     }
     // specific event
-    const cbs = this._events[event]
+    const cbs = vm._events[event]
     if (!cbs) {
-      return this
+      return vm
     }
     if (arguments.length === 1) {
-      this._events[event] = null
-      return this
+      vm._events[event] = null
+      return vm
     }
     // specific handler
     let cb
@@ -69,22 +61,19 @@ export function eventsMixin (Vue) {
         break
       }
     }
-    return this
+    return vm
   }
 
-  /**
-   * Trigger an event on self.
-   *
-   * @param {String} event
-   */
-  Vue.prototype.$emit = function (event) {
-    let cbs = this._events[event]
+  Vue.prototype.$emit = function (event: string): Component {
+    const vm: Component = this
+    let cbs = vm._events[event]
     if (cbs) {
       cbs = cbs.length > 1 ? toArray(cbs) : cbs
       const args = toArray(arguments, 1)
       for (let i = 0, l = cbs.length; i < l; i++) {
-        cbs[i].apply(this, args)
+        cbs[i].apply(vm, args)
       }
     }
+    return vm
   }
 }

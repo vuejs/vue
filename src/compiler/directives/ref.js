@@ -1,17 +1,16 @@
-import { addHook } from '../helpers'
+/* @flow */
 
-export function ref (el, dir) {
-  // go up and check if this node is inside a v-for
-  let isFor = false
-  let parent = el
-  while (parent) {
-    if (parent.for !== undefined) {
-      isFor = true
+export default function ref (el: ASTElement, dir: ASTDirective) {
+  if (dir.arg) {
+    el.ref = dir.arg
+    // go up and check if this node is inside a v-for
+    let parent = el
+    while (parent) {
+      if (parent.for !== undefined) {
+        el.refInFor = true
+        break
+      }
+      parent = parent.parent
     }
-    parent = parent.parent
   }
-  // __registerRef__(name, ref, vFor?, remove?)
-  const code = `__registerRef__("${dir.arg}", n1.child || n1.elm, ${isFor ? 'true' : 'false'}`
-  addHook(el, 'insert', `${code})`)
-  addHook(el, 'destroy', `${code}, true)`)
 }

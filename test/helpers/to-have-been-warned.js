@@ -21,12 +21,12 @@ function hasWarned (msg) {
 }
 
 // define custom matcher for warnings
-beforeEach(function () {
+beforeEach(() => {
   spyOn(console, 'error')
   jasmine.addMatchers({
-    toHaveBeenWarned: function () {
+    toHaveBeenWarned: () => {
       return {
-        compare: function (msg) {
+        compare: msg => {
           var warned = Array.isArray(msg)
             ? msg.some(hasWarned)
             : hasWarned(msg)

@@ -10,43 +10,59 @@ import Vue from 'vue'
 // })
 // .then(() => {
 //   // more assertions...
-//   done()
 // })
-// .catch(done)
+// .then(done)
 window.waitForUpdate = initialCb => {
-  let done
-  const queue = [initialCb]
+  const queue = initialCb ? [initialCb] : []
 
   function shift () {
     const job = queue.shift()
-    let hasError = false
-    try {
-      job()
-    } catch (e) {
-      hasError = true
-      if (done) {
-        done.fail(e)
+    if (queue.length) {
+      let hasError = false
+      try {
+        job.wait ? job(shift) : job()
+      } catch (e) {
+        hasError = true
+        const done = queue[queue.length - 1]
+        if (done && done.fail) {
+          done.fail(e)
+        }
       }
-    }
-    if (!hasError) {
-      if (queue.length) {
-        Vue.nextTick(shift)
+      if (!hasError && !job.wait) {
+        if (queue.length) {
+          Vue.nextTick(shift)
+        }
       }
+    } else if (job && job.fail) {
+      job() // done
     }
   }
 
-  Vue.nextTick(shift)
+  Vue.nextTick(() => {
+    if (!queue.length || !queue[queue.length - 1].fail) {
+      console.warn('waitForUpdate chain is missing .then(done)')
+    }
+    shift()
+  })
 
   const chainer = {
     then: nextCb => {
       queue.push(nextCb)
       return chainer
     },
-    catch: doneCb => {
-      done = doneCb
+    thenWaitFor: (wait) => {
+      if (typeof wait === 'number') {
+        wait = timeout(wait)
+      }
+      wait.wait = true
+      queue.push(wait)
       return chainer
     }
   }
 
   return chainer
+}
+
+function timeout (n) {
+  return next => setTimeout(next, n)
 }

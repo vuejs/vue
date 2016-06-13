@@ -1,8 +1,13 @@
-import Vue from './instance/index'
+import config from './config'
 import { initGlobalAPI } from './global-api/index'
+import Vue from './instance/index'
 
 initGlobalAPI(Vue)
 
-Vue.version = '2.0.0-alpha.0'
+Object.defineProperty(Vue.prototype, '$isServer', {
+  get: () => config._isServer
+})
+
+Vue.version = '2.0.0-alpha.1'
 
 export default Vue

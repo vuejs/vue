@@ -13,12 +13,12 @@
   <div id="app">
     <table class="table table-striped lastest-data">
       <tbody>
-        <tr v-for="db in databases" track-by="$index">
+        <tr v-for="db in databases">
           <td class="dbname">{{db.dbname}}</td>
           <td class="query-count">
             <span :class="db.lastSample.countClassName">{{db.lastSample.nbQueries}}</span>
           </td>
-          <td v-for="q in db.lastSample.topFiveQueries" track-by="$index" :class="'Query ' + q.elapsedClassName">
+          <td v-for="q in db.lastSample.topFiveQueries" :class="'Query ' + q.elapsedClassName">
             {{q.formatElapsed}}
             <div class="popover left">
               <div class="popover-content">{{q.query}}</div>

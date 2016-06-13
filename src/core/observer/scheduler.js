@@ -1,3 +1,6 @@
+/* @flow */
+
+import type Watcher from './watcher'
 import config from '../config'
 import {
   warn,
@@ -11,10 +14,10 @@ import {
 // triggered, the DOM would have already been in updated
 // state.
 
-const queue = []
-const userQueue = []
-let has = {}
-let circular = {}
+const queue: Array<Watcher> = []
+const userQueue: Array<Watcher> = []
+let has: { [key: number]: ?true } = {}
+let circular: { [key: number]: number } = {}
 let waiting = false
 
 /**
@@ -51,16 +54,14 @@ function flushSchedulerQueue () {
  * pushed into the queue first and then its parent's props
  * changed.
  */
-function queueSorter (a, b) {
+function queueSorter (a: Watcher, b: Watcher) {
   return a.id - b.id
 }
 
 /**
  * Run the watchers in a single queue.
- *
- * @param {Array} queue
  */
-function runSchedulerQueue (queue) {
+function runSchedulerQueue (queue: Array<Watcher>) {
   // do not cache length because more watchers might be pushed
   // as we run existing watchers
   for (let i = 0; i < queue.length; i++) {
@@ -88,20 +89,15 @@ function runSchedulerQueue (queue) {
  * Push a watcher into the watcher queue.
  * Jobs with duplicate IDs will be skipped unless it's
  * pushed when the queue is being flushed.
- *
- * @param {Watcher} watcher
- *   properties:
- *   - {Number} id
- *   - {Function} run
  */
-export function queueWatcher (watcher) {
+export function queueWatcher (watcher: Watcher) {
   const id = watcher.id
   if (has[id] == null) {
     // push watcher into appropriate queue
     const q = watcher.user
       ? userQueue
       : queue
-    has[id] = q.length
+    has[id] = true
     q.push(watcher)
     // queue the flush
     if (!waiting) {

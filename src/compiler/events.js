@@ -1,4 +1,5 @@
-import { isArray } from 'shared/util'
+/* @flow */
+
 const simplePathRE = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\]|\[\d+\]|\[[A-Za-z_$][\w$]*\])*$/
 
 // keyCode aliases
@@ -20,7 +21,7 @@ const modifierCode = {
   self: 'if($event.target !== $event.currentTarget)return;'
 }
 
-export function genHandlers (events) {
+export function genHandlers (events: ASTElementHandlers): string {
   let res = 'on:{'
   for (const name in events) {
     res += `"${name}":${genHandler(events[name])},`
@@ -28,10 +29,12 @@ export function genHandlers (events) {
   return res.slice(0, -1) + '}'
 }
 
-function genHandler (handler) {
+function genHandler (
+  handler: ASTElementHandler | Array<ASTElementHandler>
+): string {
   if (!handler) {
     return 'function(){}'
-  } else if (isArray(handler)) {
+  } else if (Array.isArray(handler)) {
     return `[${handler.map(genHandler).join(',')}]`
   } else if (!handler.modifiers) {
     return simplePathRE.test(handler.value)
@@ -49,9 +52,9 @@ function genHandler (handler) {
   }
 }
 
-function genKeyFilter (key) {
+function genKeyFilter (key: string): string {
   const code = keyCodes[key]
-  if (isArray(code)) {
+  if (Array.isArray(code)) {
     return `if(${code.map(c => `$event.keyCode!==${c}`).join('&&')})return;`
   } else {
     return `if($event.keyCode!==${code})return;`

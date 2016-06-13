@@ -1,3 +1,5 @@
+/* @flow */
+
 import Watcher from '../observer/watcher'
 import Dep from '../observer/dep'
 import {
@@ -10,14 +12,13 @@ import {
 import {
   warn,
   hasOwn,
-  isArray,
   isPlainObject,
   bind,
   validateProp,
   noop
 } from '../util/index'
 
-export function initState (vm) {
+export function initState (vm: Component) {
   vm._watchers = []
   initProps(vm)
   initData(vm)
@@ -26,26 +27,41 @@ export function initState (vm) {
   initWatch(vm)
 }
 
-function initProps (vm) {
+function initProps (vm: Component) {
   const props = vm.$options.props
   const propsData = vm.$options.propsData
   if (props) {
-    const keys = vm.$options.propKeys = Object.keys(props)
+    const keys = vm.$options._propKeys = Object.keys(props)
     const isRoot = !vm.$parent
     // root instance props should be converted
     observerState.shouldConvert = isRoot
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i]
-      defineReactive(vm, key, validateProp(vm, key, propsData))
+      /* istanbul ignore else */
+      if (process.env.NODE_ENV !== 'production') {
+        defineReactive(vm, key, validateProp(vm, key, propsData), () => {
+          if (vm.$parent && !observerState.isSettingProps) {
+            warn(
+              `Avoid mutating a prop directly since the value will be ` +
+              `overwritten whenever the parent component re-renders. ` +
+              `Instead, use a data or computed property based on the prop's ` +
+              `value. Prop being mutated: "${key}"`,
+              vm
+            )
+          }
+        })
+      } else {
+        defineReactive(vm, key, validateProp(vm, key, propsData))
+      }
     }
     observerState.shouldConvert = true
   }
 }
 
-function initData (vm) {
+function initData (vm: Component) {
   let data = vm.$options.data
   data = vm._data = typeof data === 'function'
-    ? data()
+    ? data.call(vm)
     : data || {}
   if (!isPlainObject(data)) {
     data = {}
@@ -56,43 +72,56 @@ function initData (vm) {
   }
   // proxy data on instance
   const keys = Object.keys(data)
+  const props = vm.$options.props
   let i = keys.length
   while (i--) {
-    proxy(vm, keys[i])
+    if (props && hasOwn(props, keys[i])) {
+      process.env.NODE_ENV !== 'production' && warn(
+        `The data property "${keys[i]}" is already declared as a prop. ` +
+        `Use prop default value instead.`,
+        vm
+      )
+    } else {
+      proxy(vm, keys[i])
+    }
   }
   // observe data
-  observe(data, vm)
+  observe(data)
+  data.__ob__ && data.__ob__.vmCount++
 }
 
-function initComputed (vm) {
+const computedSharedDefinition = {
+  enumerable: true,
+  configurable: true,
+  get: noop,
+  set: noop
+}
+
+function initComputed (vm: Component) {
   const computed = vm.$options.computed
   if (computed) {
     for (const key in computed) {
       const userDef = computed[key]
-      const def = {
-        enumerable: true,
-        configurable: true
-      }
       if (typeof userDef === 'function') {
-        def.get = makeComputedGetter(userDef, vm)
-        def.set = noop
+        computedSharedDefinition.get = makeComputedGetter(userDef, vm)
+        computedSharedDefinition.set = noop
       } else {
-        def.get = userDef.get
+        computedSharedDefinition.get = userDef.get
           ? userDef.cache !== false
             ? makeComputedGetter(userDef.get, vm)
             : bind(userDef.get, vm)
           : noop
-        def.set = userDef.set
+        computedSharedDefinition.set = userDef.set
           ? bind(userDef.set, vm)
           : noop
       }
-      Object.defineProperty(vm, key, def)
+      Object.defineProperty(vm, key, computedSharedDefinition)
     }
   }
 }
 
-function makeComputedGetter (getter, owner) {
-  const watcher = new Watcher(owner, getter, null, {
+function makeComputedGetter (getter: Function, owner: Component): Function {
+  const watcher = new Watcher(owner, getter, noop, {
     lazy: true
   })
   return function computedGetter () {
@@ -106,7 +135,7 @@ function makeComputedGetter (getter, owner) {
   }
 }
 
-function initMethods (vm) {
+function initMethods (vm: Component) {
   const methods = vm.$options.methods
   if (methods) {
     for (const key in methods) {
@@ -115,12 +144,12 @@ function initMethods (vm) {
   }
 }
 
-function initWatch (vm) {
+function initWatch (vm: Component) {
   const watch = vm.$options.watch
   if (watch) {
     for (const key in watch) {
       const handler = watch[key]
-      if (isArray(handler)) {
+      if (Array.isArray(handler)) {
         for (let i = 0; i < handler.length; i++) {
           createWatcher(vm, key, handler[i])
         }
@@ -131,7 +160,7 @@ function initWatch (vm) {
   }
 }
 
-function createWatcher (vm, key, handler) {
+function createWatcher (vm: Component, key: string, handler: any) {
   let options
   if (isPlainObject(handler)) {
     options = handler
@@ -143,24 +172,32 @@ function createWatcher (vm, key, handler) {
   vm.$watch(key, handler, options)
 }
 
-export function stateMixin (Vue) {
-  Object.defineProperty(Vue.prototype, '$data', {
-    get () {
-      return this._data
-    },
-    set (newData) {
-      if (newData !== this._data) {
-        setData(this, newData)
-      }
+export function stateMixin (Vue: Class<Component>) {
+  // flow somehow has problems with directly declared definition object
+  // when using Object.defineProperty, so we have to procedurally build up
+  // the object here.
+  const dataDef = {}
+  dataDef.get = function () {
+    return this._data
+  }
+  dataDef.set = function (newData: Object) {
+    if (newData !== this._data) {
+      setData(this, newData)
     }
-  })
+  }
+  Object.defineProperty(Vue.prototype, '$data', dataDef)
 
-  Vue.prototype.$watch = function (fn, cb, options) {
+  Vue.prototype.$watch = function (
+    expOrFn: string | Function,
+    cb: Function,
+    options?: Object
+  ): Function {
+    const vm: Component = this
     options = options || {}
     options.user = true
-    const watcher = new Watcher(this, fn, cb, options)
+    const watcher = new Watcher(vm, expOrFn, cb, options)
     if (options.immediate) {
-      cb.call(this, watcher.value)
+      cb.call(vm, watcher.value)
     }
     return function unwatchFn () {
       watcher.teardown()
@@ -168,7 +205,7 @@ export function stateMixin (Vue) {
   }
 }
 
-function setData (vm, newData) {
+function setData (vm: Component, newData: Object) {
   newData = newData || {}
   const oldData = vm._data
   vm._data = newData
@@ -193,7 +230,8 @@ function setData (vm, newData) {
       proxy(vm, key)
     }
   }
-  oldData.__ob__.removeVm(vm)
-  observe(newData, vm)
+  oldData.__ob__ && oldData.__ob__.vmCount--
+  observe(newData)
+  newData.__ob__ && newData.__ob__.vmCount++
   vm.$forceUpdate()
 }

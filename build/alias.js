@@ -6,5 +6,6 @@ module.exports = {
   core: path.resolve(__dirname, '../src/core'),
   shared: path.resolve(__dirname, '../src/shared'),
   web: path.resolve(__dirname, '../src/platforms/web'),
-  server: path.resolve(__dirname, '../src/server')
+  server: path.resolve(__dirname, '../src/server'),
+  entries: path.resolve(__dirname, '../src/entries')
 }

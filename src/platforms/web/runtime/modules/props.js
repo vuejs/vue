@@ -1,9 +1,11 @@
-function updateProps (oldVnode, vnode) {
+/* @flow */
+
+function updateProps (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   if (!oldVnode.data.props && !vnode.data.props) {
     return
   }
-  let key, cur, old
-  const elm = vnode.elm
+  let key, cur
+  const elm: any = vnode.elm
   const oldProps = oldVnode.data.props || {}
   const props = vnode.data.props || {}
 
@@ -14,7 +16,6 @@ function updateProps (oldVnode, vnode) {
   }
   for (key in props) {
     cur = props[key]
-    old = oldProps[key]
     if (key === 'value') {
       // store value as _value as well since
       // non-string values will be stringified
@@ -23,7 +24,7 @@ function updateProps (oldVnode, vnode) {
       if (elm.value != cur) { // eslint-disable-line
         elm.value = cur
       }
-    } else if (old !== cur) {
+    } else {
       elm[key] = cur
     }
   }

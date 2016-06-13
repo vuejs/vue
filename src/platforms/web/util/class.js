@@ -1,6 +1,8 @@
-import { extend, isArray, isObject } from 'shared/util'
+/* @flow */
 
-export function genClassForVnode (vnode) {
+import { isObject } from 'shared/util'
+
+export function genClassForVnode (vnode: VNode): string {
   let data = vnode.data
   // Important: check if this is a component container node
   // or a child component root node
@@ -14,44 +16,57 @@ export function genClassForVnode (vnode) {
   return genClassFromData(data)
 }
 
-function mergeClassData (child, parent) {
+function mergeClassData (child: VNodeData, parent: VNodeData): {
+  staticClass: string,
+  class: any
+} {
   return {
     staticClass: concat(child.staticClass, parent.staticClass),
-    class: child.class ? extend(child.class, parent.class) : parent.class
+    class: child.class
+      ? [child.class, parent.class]
+      : parent.class
   }
 }
 
-function genClassFromData (data) {
+function genClassFromData (data: Object): string {
   const dynamicClass = data.class
   const staticClass = data.staticClass
   if (staticClass || dynamicClass) {
     return concat(staticClass, stringifyClass(dynamicClass))
   }
+  /* istanbul ignore next */
+  return ''
 }
 
-export function concat (a, b) {
+export function concat (a: ?string, b: ?string): string {
   return a ? b ? (a + ' ' + b) : a : (b || '')
 }
 
-export function stringifyClass (value) {
+export function stringifyClass (value: any): string {
+  let res = ''
   if (!value) {
-    return ''
+    return res
   }
   if (typeof value === 'string') {
     return value
   }
-  if (isArray(value)) {
-    let res = ''
+  if (Array.isArray(value)) {
+    let stringified
     for (let i = 0, l = value.length; i < l; i++) {
-      if (value[i]) res += stringifyClass(value[i]) + ' '
+      if (value[i]) {
+        if ((stringified = stringifyClass(value[i]))) {
+          res += stringified + ' '
+        }
+      }
     }
     return res.slice(0, -1)
   }
   if (isObject(value)) {
-    let res = ''
     for (const key in value) {
       if (value[key]) res += key + ' '
     }
     return res.slice(0, -1)
   }
+  /* istanbul ignore next */
+  return res
 }

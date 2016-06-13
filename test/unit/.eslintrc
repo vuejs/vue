@@ -3,6 +3,8 @@
     "jasmine": true
   },
   "globals": {
-    "waitForUpdate": true
+    "waitForUpdate": true,
+    "triggerEvent": true,
+    "createTextVNode": true
   }
 }

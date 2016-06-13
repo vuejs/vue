@@ -1,10 +1,11 @@
+/* @flow */
+
+import config from '../config'
 import Dep from './dep'
 import { queueWatcher } from './scheduler'
 import {
   warn,
   remove,
-  extend,
-  isArray,
   isObject,
   parsePath,
   _Set as Set
@@ -17,31 +18,37 @@ let prevTarget
  * A watcher parses an expression, collects dependencies,
  * and fires callback when the expression value changes.
  * This is used for both the $watch() api and directives.
- *
- * @param {Vue} vm
- * @param {String|Function} expOrFn
- * @param {Function} cb
- * @param {Object} options
- *                 - {Array} filters
- *                 - {Boolean} twoWay
- *                 - {Boolean} deep
- *                 - {Boolean} user
- *                 - {Boolean} sync
- *                 - {Boolean} lazy
- *                 - {Function} [preProcess]
- *                 - {Function} [postProcess]
- * @constructor
  */
 export default class Watcher {
-  constructor (vm, expOrFn, cb, options) {
-    // mix in options
-    if (options) {
-      extend(this, options)
-    }
-    const isFn = typeof expOrFn === 'function'
+  vm: Component;
+  expression: string;
+  cb: Function;
+  id: number;
+  deep: boolean;
+  user: boolean;
+  lazy: boolean;
+  dirty: boolean;
+  active: boolean;
+  deps: Array<Dep>;
+  newDeps: Array<Dep>;
+  depIds: Set;
+  newDepIds: Set;
+  getter: Function;
+  value: any;
+
+  constructor (
+    vm: Component,
+    expOrFn: string | Function,
+    cb: Function,
+    options?: Object = {}
+  ) {
     this.vm = vm
     vm._watchers.push(this)
-    this.expression = expOrFn
+    // options
+    this.deep = !!options.deep
+    this.user = !!options.user
+    this.lazy = !!options.lazy
+    this.expression = expOrFn.toString()
     this.cb = cb
     this.id = ++uid // uid for batching
     this.active = true
@@ -51,7 +58,7 @@ export default class Watcher {
     this.depIds = new Set()
     this.newDepIds = new Set()
     // parse expression for getter
-    if (isFn) {
+    if (typeof expOrFn === 'function') {
       this.getter = expOrFn
     } else {
       this.getter = parsePath(expOrFn)
@@ -75,7 +82,33 @@ export default class Watcher {
    */
   get () {
     this.beforeGet()
-    const value = this.getter.call(this.vm, this.vm)
+    let value: any
+    try {
+      value = this.getter.call(this.vm, this.vm)
+    } catch (e) {
+      if (process.env.NODE_ENV !== 'production') {
+        if (this.user) {
+          warn(
+            'Error when evaluating watcher with getter: ' + this.expression,
+            this.vm
+          )
+        } else {
+          warn(
+            'Error during component render',
+            this.vm
+          )
+        }
+        /* istanbul ignore else */
+        if (config.errorHandler) {
+          config.errorHandler.call(null, e, this.vm)
+        } else {
+          throw e
+        }
+      }
+      // return old value when evaluation fails so the current UI is preserved
+      // if the error was somehow handled by user
+      value = this.value
+    }
     // "touch" every property so they are all tracked as
     // dependencies for deep watching
     if (this.deep) {
@@ -95,10 +128,8 @@ export default class Watcher {
 
   /**
    * Add a dependency to this directive.
-   *
-   * @param {Dep} dep
    */
-  addDep (dep) {
+  addDep (dep: Dep) {
     const id = dep.id
     if (!this.newDepIds.has(id)) {
       this.newDepIds.add(id)
@@ -138,8 +169,6 @@ export default class Watcher {
   update () {
     if (this.lazy) {
       this.dirty = true
-    } else if (this.sync) {
-      this.run()
     } else {
       queueWatcher(this)
     }
@@ -208,7 +237,6 @@ export default class Watcher {
         this.deps[i].removeSub(this)
       }
       this.active = false
-      this.vm = this.cb = this.value = null
     }
   }
 }
@@ -217,18 +245,15 @@ export default class Watcher {
  * Recursively traverse an object to evoke all converted
  * getters, so that every nested property inside the object
  * is collected as a "deep" dependency.
- *
- * @param {*} val
- * @param {Set} seen
  */
 const seenObjects = new Set()
-function traverse (val, seen) {
+function traverse (val: any, seen?: Set) {
   let i, keys
   if (!seen) {
     seen = seenObjects
     seen.clear()
   }
-  const isA = isArray(val)
+  const isA = Array.isArray(val)
   const isO = isObject(val)
   if (isA || isO) {
     if (val.__ob__) {

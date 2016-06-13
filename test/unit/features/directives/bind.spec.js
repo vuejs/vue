@@ -22,8 +22,7 @@ describe('Directive v-bind', () => {
       vm.foo = 0
     }).then(() => {
       expect(vm.$el.firstChild.getAttribute('test')).toBe('0')
-      done()
-    }).catch(done)
+    }).then(done)
   })
 
   it('should set property for input value', done => {
@@ -44,8 +43,7 @@ describe('Directive v-bind', () => {
     vm.bar = true
     waitForUpdate(() => {
       expect(vm.$el.lastChild.checked).toBe(true)
-      done()
-    }).catch(done)
+    }).then(done)
   })
 
   it('xlink', done => {
@@ -66,8 +64,7 @@ describe('Directive v-bind', () => {
       vm.foo = true
     }).then(() => {
       expect(vm.$el.firstChild.getAttributeNS(xlinkNS, 'special')).toBe('true')
-      done()
-    }).catch(done)
+    }).then(done)
   })
 
   it('enumrated attr', done => {
@@ -91,8 +88,7 @@ describe('Directive v-bind', () => {
       vm.foo = 'false'
     }).then(() => {
       expect(vm.$el.firstChild.getAttribute('draggable')).toBe('false')
-      done()
-    }).catch(done)
+    }).then(done)
   })
 
   it('boolean attr', done => {
@@ -110,7 +106,61 @@ describe('Directive v-bind', () => {
       vm.foo = ''
     }).then(() => {
       expect(vm.$el.firstChild.hasAttribute('disabled')).toBe(true)
-      done()
-    }).catch(done)
+    }).then(done)
+  })
+
+  it('bind object', done => {
+    const vm = new Vue({
+      template: '<input v-bind="test">',
+      data: {
+        test: {
+          id: 'test',
+          class: 'ok',
+          value: 'hello'
+        }
+      }
+    }).$mount()
+    expect(vm.$el.getAttribute('id')).toBe('test')
+    expect(vm.$el.getAttribute('class')).toBe('ok')
+    expect(vm.$el.value).toBe('hello')
+    vm.test.id = 'hi'
+    vm.test.value = 'bye'
+    waitForUpdate(() => {
+      expect(vm.$el.getAttribute('id')).toBe('hi')
+      expect(vm.$el.getAttribute('class')).toBe('ok')
+      expect(vm.$el.value).toBe('bye')
+    }).then(done)
+  })
+
+  it('bind array', done => {
+    const vm = new Vue({
+      template: '<input v-bind="test">',
+      data: {
+        test: [
+          { id: 'test', class: 'ok' },
+          { value: 'hello' }
+        ]
+      }
+    }).$mount()
+    expect(vm.$el.getAttribute('id')).toBe('test')
+    expect(vm.$el.getAttribute('class')).toBe('ok')
+    expect(vm.$el.value).toBe('hello')
+    vm.test[0].id = 'hi'
+    vm.test[1].value = 'bye'
+    waitForUpdate(() => {
+      expect(vm.$el.getAttribute('id')).toBe('hi')
+      expect(vm.$el.getAttribute('class')).toBe('ok')
+      expect(vm.$el.value).toBe('bye')
+    }).then(done)
+  })
+
+  it('warn expect object', () => {
+    new Vue({
+      template: '<input v-bind="test">',
+      data: {
+        test: 1
+      }
+    }).$mount()
+    expect('v-bind without argument expects an Object or Array value').toHaveBeenWarned()
   })
 })

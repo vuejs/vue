@@ -1,139 +1,175 @@
-import Watcher from '../observer/watcher'
-import { warn, validateProp, remove } from '../util/index'
-import { observerState } from '../observer/index'
-import { updateListeners } from '../vdom/helpers'
+/* @flow */
 
-export function initLifecycle (vm) {
+import Watcher from '../observer/watcher'
+import { emptyVNode } from '../vdom/vnode'
+import { observerState } from '../observer/index'
+import { warn, validateProp, remove, noop } from '../util/index'
+
+export function initLifecycle (vm: Component) {
   const options = vm.$options
 
   vm.$parent = options.parent
   vm.$root = vm.$parent ? vm.$parent.$root : vm
-  if (vm.$parent) {
+  if (vm.$parent && !options._abstract) {
     vm.$parent.$children.push(vm)
   }
 
   vm.$children = []
   vm.$refs = {}
 
-  vm._mounted = false
+  vm._watcher = null
+  vm._isMounted = false
   vm._isDestroyed = false
   vm._isBeingDestroyed = false
 }
 
-export function lifecycleMixin (Vue) {
-  Vue.prototype._mount = function () {
-    if (!this.$options.render) {
-      this.$options.render = () => this.$createElement('div')
+export function lifecycleMixin (Vue: Class<Component>) {
+  Vue.prototype._mount = function (
+    el?: Element | void,
+    hydrating?: boolean
+  ): Component {
+    const vm: Component = this
+    vm.$el = el
+    if (!vm.$options.render) {
+      vm.$options.render = emptyVNode
       if (process.env.NODE_ENV !== 'production') {
-        if (this.$options.template) {
+        /* istanbul ignore if */
+        if (vm.$options.template) {
           warn(
             'You are using the runtime-only build of Vue where the template ' +
             'option is not available. Either pre-compile the templates into ' +
             'render functions, or use the compiler-included build.',
-            this
+            vm
           )
         } else {
           warn(
             'Failed to mount component: template or render function not defined.',
-            this
+            vm
           )
         }
       }
     }
-    callHook(this, 'beforeMount')
-    this._watcher = new Watcher(this, this._render, this._update)
-    this._update(this._watcher.value)
-    this._mounted = true
+    callHook(vm, 'beforeMount')
+    vm._watcher = new Watcher(vm, () => {
+      vm._update(vm._render(), hydrating)
+    }, noop)
+    hydrating = false
     // root instance, call mounted on self
-    if (this.$root === this) {
-      callHook(this, 'mounted')
+    // mounted is called for child components in its inserted hook
+    if (vm.$root === vm) {
+      vm._isMounted = true
+      callHook(vm, 'mounted')
     }
-    return this
+    return vm
   }
 
-  Vue.prototype._update = function (vnode) {
-    if (this._mounted) {
-      callHook(this, 'beforeUpdate')
+  Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
+    const vm: Component = this
+    if (vm._isMounted) {
+      callHook(vm, 'beforeUpdate')
     }
-    if (!this._vnode) {
+    if (!vm._vnode) {
       // Vue.prototype.__patch__ is injected in entry points
       // based on the rendering backend used.
-      this.$el = this.__patch__(this.$el, vnode)
+      vm.$el = vm.__patch__(vm.$el, vnode, hydrating)
     } else {
-      this.$el = this.__patch__(this._vnode, vnode)
+      vm.$el = vm.__patch__(vm._vnode, vnode)
     }
-    this._vnode = vnode
+    vm._vnode = vnode
     // update parent vnode element after patch
-    const parentNode = this.$options._parentVnode
+    const parentNode = vm.$options._parentVnode
     if (parentNode) {
-      parentNode.elm = this.$el
+      parentNode.elm = vm.$el
+      // update parent $el if the parent is HOC
+      // this is necessary because child is updated after parent
+      if (vm.$parent && parentNode === vm.$parent._vnode) {
+        vm.$parent.$el = vm.$el
+      }
     }
-    if (this._mounted) {
-      callHook(this, 'updated')
+    if (vm._isMounted) {
+      callHook(vm, 'updated')
     }
   }
 
-  Vue.prototype._updateFromParent = function (propsData, listeners, parentVnode, renderChildren) {
-    this.$options._parentVnode = parentVnode
-    this.$options._renderChildren = renderChildren
+  Vue.prototype._updateFromParent = function (
+    propsData: ?Object,
+    listeners: ?Object,
+    parentVnode: VNode,
+    renderChildren: ?VNodeChildren
+  ) {
+    const vm: Component = this
+    vm.$options._parentVnode = parentVnode
+    vm.$options._renderChildren = renderChildren
     // update props
-    if (propsData && this.$options.props) {
+    if (propsData && vm.$options.props) {
       observerState.shouldConvert = false
-      const propKeys = this.$options.propKeys
+      if (process.env.NODE_ENV !== 'production') {
+        observerState.isSettingProps = true
+      }
+      const propKeys = vm.$options._propKeys || []
       for (let i = 0; i < propKeys.length; i++) {
         const key = propKeys[i]
-        this[key] = validateProp(this, key, propsData)
+        vm[key] = validateProp(vm, key, propsData)
       }
       observerState.shouldConvert = true
+      if (process.env.NODE_ENV !== 'production') {
+        observerState.isSettingProps = false
+      }
     }
     // update listeners
     if (listeners) {
-      const oldListeners = this.$options._parentListeners
-      this.$options._parentListeners = listeners
-      updateListeners(listeners, oldListeners || {}, (event, handler) => {
-        this.$on(event, handler)
-      })
+      const oldListeners = vm.$options._parentListeners
+      vm.$options._parentListeners = listeners
+      vm._updateListeners(listeners, oldListeners)
     }
   }
 
   Vue.prototype.$forceUpdate = function () {
-    this._watcher.update()
+    const vm: Component = this
+    if (vm._watcher) {
+      vm._watcher.update()
+    }
+    if (vm._watchers.length) {
+      for (let i = 0; i < vm._watchers.length; i++) {
+        vm._watchers[i].update(true /* shallow */)
+      }
+    }
   }
 
   Vue.prototype.$destroy = function () {
-    if (this._isDestroyed) {
+    const vm: Component = this
+    if (vm._isBeingDestroyed) {
       return
     }
-    callHook(this, 'beforeDestroy')
-    this._isBeingDestroyed = true
+    callHook(vm, 'beforeDestroy')
+    vm._isBeingDestroyed = true
     // remove self from parent
-    const parent = this.$parent
-    if (parent && !parent._isBeingDestroyed) {
-      remove(parent.$children, this)
-    }
-    // unregister ref
-    if (this._ref) {
-      this._context.$refs[this._ref] = undefined
+    const parent = vm.$parent
+    if (parent && !parent._isBeingDestroyed && !vm.$options._abstract) {
+      remove(parent.$children, vm)
     }
     // teardown watchers
-    let i = this._watchers.length
+    if (vm._watcher) {
+      vm._watcher.teardown()
+    }
+    let i = vm._watchers.length
     while (i--) {
-      this._watchers[i].teardown()
+      vm._watchers[i].teardown()
     }
     // remove reference from data ob
     // frozen object may not have observer.
-    if (this._data.__ob__) {
-      this._data.__ob__.removeVm(this)
+    if (vm._data.__ob__) {
+      vm._data.__ob__.vmCount--
     }
     // call the last hook...
-    this._isDestroyed = true
-    callHook(this, 'destroyed')
+    vm._isDestroyed = true
+    callHook(vm, 'destroyed')
     // turn off all instance listeners.
-    this.$off()
+    vm.$off()
   }
 }
 
-export function callHook (vm, hook) {
+export function callHook (vm: Component, hook: string) {
   vm.$emit('pre-hook:' + hook)
   const handlers = vm.$options[hook]
   if (handlers) {

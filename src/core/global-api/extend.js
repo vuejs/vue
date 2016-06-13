@@ -1,7 +1,9 @@
-import config from '../config'
-import { warn, mergeOptions } from '../util/index'
+/* @flow */
 
-export function initExtend (Vue) {
+import config from '../config'
+import { warn, remove, mergeOptions } from '../util/index'
+
+export function initExtend (Vue: GlobalAPI) {
   /**
    * Each instance constructor, including Vue, has a unique
    * cid. This enables us to create wrapped "child
@@ -12,10 +14,8 @@ export function initExtend (Vue) {
 
   /**
    * Class inheritance
-   *
-   * @param {Object} extendOptions
    */
-  Vue.extend = function (extendOptions) {
+  Vue.extend = function (extendOptions: Object): Function {
     extendOptions = extendOptions || {}
     const Super = this
     const isFirstExtend = Super.cid === 0
@@ -53,6 +53,12 @@ export function initExtend (Vue) {
     // enable recursive self-lookup
     if (name) {
       Sub.options.components[name] = Sub
+    }
+    // book-keeping for global mixin edge cases. also expose a way to remove it
+    Sub.extendOptions = extendOptions
+    config._ctors.push(Sub)
+    Sub.release = () => {
+      remove(config._ctors, Sub)
     }
     // cache constructor
     if (isFirstExtend) {

@@ -1,9 +1,10 @@
-import { setClass } from '../class-util'
+/* @flow */
+
 import { genClassForVnode, concat, stringifyClass } from 'web/util/index'
 
-function updateClass (oldVnode, vnode) {
+function updateClass (oldVnode: any, vnode: any) {
   const el = vnode.elm
-  const data = vnode.data
+  const data: VNodeData = vnode.data
   if (!data.staticClass && !data.class) {
     return
   }
@@ -18,7 +19,7 @@ function updateClass (oldVnode, vnode) {
 
   // set the class
   if (cls !== el._prevClass) {
-    setClass(el, cls)
+    el.setAttribute('class', cls)
     el._prevClass = cls
   }
 }

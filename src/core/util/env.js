@@ -1,3 +1,5 @@
+/* @flow */
+
 /* global MutationObserver */
 // can we use __proto__?
 export const hasProto = '__proto__' in {}
@@ -13,7 +15,17 @@ export const devtools = inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__
 // UA sniffing for working around browser-specific quirks
 const UA = inBrowser && window.navigator.userAgent.toLowerCase()
 const isIos = UA && /(iphone|ipad|ipod|ios)/i.test(UA)
-const isWechat = UA && UA.indexOf('micromessenger') > 0
+const iosVersionMatch = UA && isIos && UA.match(/os ([\d_]+)/)
+const iosVersion = iosVersionMatch && iosVersionMatch[1].split('_')
+
+// MutationObserver is unreliable in iOS 9.3 UIWebView
+// detecting it by checking presence of IndexedDB
+// ref #3027
+const hasMutationObserverBug =
+  iosVersion &&
+  Number(iosVersion[0]) >= 9 &&
+  Number(iosVersion[1]) >= 3 &&
+  !window.indexedDB
 
 /**
  * Defer a task to execute it asynchronously. Ideally this
@@ -37,17 +49,17 @@ export const nextTick = (function () {
     }
   }
 
-  /* istanbul ignore if */
-  if (typeof MutationObserver !== 'undefined' && !(isWechat && isIos)) {
+  /* istanbul ignore else */
+  if (typeof MutationObserver !== 'undefined' && !hasMutationObserverBug) {
     let counter = 1
     const observer = new MutationObserver(nextTickHandler)
-    const textNode = document.createTextNode(counter)
+    const textNode = document.createTextNode(String(counter))
     observer.observe(textNode, {
       characterData: true
     })
     timerFunc = function () {
       counter = (counter + 1) % 2
-      textNode.data = counter
+      textNode.data = String(counter)
     }
   } else {
     // webpack attempts to inject a shim for setImmediate
@@ -58,7 +70,7 @@ export const nextTick = (function () {
       : typeof global !== 'undefined' ? global : {}
     timerFunc = context.setImmediate || setTimeout
   }
-  return function (cb, ctx) {
+  return function (cb: Function, ctx?: Object) {
     const func = ctx
       ? function () { cb.call(ctx) }
       : cb
@@ -77,13 +89,14 @@ if (typeof Set !== 'undefined' && Set.toString().match(/native code/)) {
 } else {
   // a non-standard Set polyfill that only works with primitive keys.
   _Set = class Set {
+    set: Object;
     constructor () {
       this.set = Object.create(null)
     }
-    has (key) {
+    has (key: string | number) {
       return this.set[key] !== undefined
     }
-    add (key) {
+    add (key: string | number) {
       this.set[key] = 1
     }
     clear () {

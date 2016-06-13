@@ -48,7 +48,6 @@ describe('Directive v-html', () => {
       vm.a = undefined
     }).then(() => {
       expect(vm.$el.innerHTML).toBe('')
-      done()
-    }).catch(done)
+    }).then(done)
   })
 })

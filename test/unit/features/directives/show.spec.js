@@ -47,7 +47,6 @@ describe('Directive v-show', () => {
       vm.foo = 1
     }).then(() => {
       expect(vm.$el.firstChild.style.display).toBe('')
-      done()
-    }).catch(done)
+    }).then(done)
   })
 })

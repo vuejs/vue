@@ -1,129 +1,148 @@
-import { genHandlers } from './events'
-import { ref } from './directives/ref'
-import { baseWarn } from './helpers'
-import { noop } from 'shared/util'
+/* @flow */
 
-const baseDirectives = {
-  ref,
-  cloak: noop
-}
+import { genHandlers } from './events'
+import { baseWarn, pluckModuleFunction } from './helpers'
+import baseDirectives from './directives/index'
+import { no } from 'shared/util'
 
 // configurable state
 let warn
+let transforms
+let dataGenFns
 let platformDirectives
 let isPlatformReservedTag
 let staticRenderFns
 let currentOptions
 
-export function generate (ast, options) {
+export function generate (
+  ast: ASTElement | void,
+  options: CompilerOptions
+): {
+  render: string,
+  staticRenderFns: Array<string>
+} {
   // save previous staticRenderFns so generate calls can be nested
-  const prevStaticRenderFns = staticRenderFns
-  const currentStaticRenderFns = staticRenderFns = []
+  const prevStaticRenderFns: Array<string> = staticRenderFns
+  const currentStaticRenderFns: Array<string> = staticRenderFns = []
   currentOptions = options
   warn = options.warn || baseWarn
+  transforms = pluckModuleFunction(options.modules, 'transformCode')
+  dataGenFns = pluckModuleFunction(options.modules, 'genData')
   platformDirectives = options.directives || {}
-  isPlatformReservedTag = options.isReservedTag || (() => false)
-  const code = ast ? genElement(ast) : '__h__("div")'
+  isPlatformReservedTag = options.isReservedTag || no
+  const code = ast ? genElement(ast) : '_h(_e("div"))'
   staticRenderFns = prevStaticRenderFns
   return {
-    render: `with (this) { return ${code}}`,
+    render: `with(this){return ${code}}`,
     staticRenderFns: currentStaticRenderFns
   }
 }
 
-function genElement (el) {
+function genElement (el: ASTElement): string {
   if (el.for) {
     return genFor(el)
   } else if (el.if) {
     return genIf(el)
   } else if (el.tag === 'template' && !el.slotTarget) {
-    return genChildren(el)
+    return genChildren(el) || 'void 0'
   } else if (el.tag === 'render') {
     return genRender(el)
   } else if (el.tag === 'slot') {
     return genSlot(el)
-  } else if (el.component) {
-    return genComponent(el)
   } else {
-    // if the element is potentially a component,
-    // wrap its children as a thunk.
-    const children = el.inlineTemplate
-      ? 'undefined'
-      : genChildren(el, !isPlatformReservedTag(el.tag) /* asThunk */)
-    const namespace = el.ns ? `,'${el.ns}'` : ''
-    const code = `__h__('${el.tag}', ${genData(el)}, ${children}${namespace})`
-    if (el.staticRoot) {
-      // hoist static sub-trees out
-      staticRenderFns.push(`with(this){return ${code}}`)
-      return `_staticTrees[${staticRenderFns.length - 1}]`
+    // component or element
+    let code
+    if (el.component) {
+      code = genComponent(el)
     } else {
-      return code
+      const data = genData(el)
+      // if the element is potentially a component,
+      // wrap its children as a thunk.
+      const children = !el.inlineTemplate
+        ? genChildren(el, !el.ns && !isPlatformReservedTag(el.tag) /* asThunk */)
+        : null
+      code = `_h(_e('${el.tag}'${
+        data ? `,${data}` : el.ns ? ',void 0' : '' // data
+      }${
+        el.ns ? `,'${el.ns}'` : '' // namespace
+      })${
+        children ? `,${children}` : '' // children
+      })`
+      if (el.staticRoot) {
+        // hoist static sub-trees out
+        staticRenderFns.push(`with(this){return ${code}}`)
+        code = `_m(${staticRenderFns.length - 1})`
+      }
     }
+    // module transforms
+    for (let i = 0; i < transforms.length; i++) {
+      code = transforms[i](el, code)
+    }
+    // check keep-alive
+    if (el.component && el.keepAlive) {
+      code = `_h(_e("KeepAlive",{props:{child:${code}}}))`
+    }
+    return code
   }
 }
 
-function genIf (el) {
+function genIf (el: ASTElement): string {
   const exp = el.if
-  el.if = false // avoid recursion
-  return `(${exp}) ? ${genElement(el)} : ${genElse(el)}`
+  el.if = null // avoid recursion
+  return `(${exp})?${genElement(el)}:${genElse(el)}`
 }
 
-function genElse (el) {
+function genElse (el: ASTElement): string {
   return el.elseBlock
     ? genElement(el.elseBlock)
-    : 'null'
+    : 'void 0'
 }
 
-function genFor (el) {
+function genFor (el: ASTElement): string {
   const exp = el.for
   const alias = el.alias
   const iterator = el.iterator
-  el.for = false // avoid recursion
-  return `(${exp})&&__renderList__((${exp}), ` +
+  el.for = null // avoid recursion
+  return `(${exp})&&_l((${exp}),` +
     `function(${alias},$index,${iterator || '$key'}){` +
       `return ${genElement(el)}` +
     '})'
 }
 
-function genData (el) {
+function genData (el: ASTElement): string | void {
   if (el.plain) {
-    return 'undefined'
+    return
   }
 
   let data = '{'
 
   // directives first.
   // directives may mutate the el's other properties before they are generated.
-  if (el.directives) {
-    const dirs = genDirectives(el)
-    if (dirs) data += dirs + ','
-  }
-  // pre
-  if (el.pre) {
-    data += 'pre:true,'
-  }
+  const dirs = genDirectives(el)
+  if (dirs) data += dirs + ','
+
   // key
   if (el.key) {
     data += `key:${el.key},`
+  }
+  // ref
+  if (el.ref) {
+    data += `ref:"${el.ref}",`
+  }
+  if (el.refInFor) {
+    data += `refInFor:true,`
+  }
+  // record original tag name for components using "is" attribute
+  if (el.component) {
+    data += `tag:"${el.tag}",`
   }
   // slot target
   if (el.slotTarget) {
     data += `slot:${el.slotTarget},`
   }
-  // class
-  if (el.staticClass) {
-    data += `staticClass:${el.staticClass},`
-  }
-  if (el.classBinding) {
-    data += `class:${el.classBinding},`
-  }
-  // style
-  if (el.styleBinding) {
-    data += `style:${el.styleBinding},`
-  }
-  // transition
-  if (el.transition) {
-    data += `transition:{definition:(${el.transition}),appear:${el.transitionOnAppear}},`
+  // module data generation functions
+  for (let i = 0; i < dataGenFns.length; i++) {
+    data += dataGenFns[i](el)
   }
   // v-show, used to avoid transition being applied
   // since v-show takes it over
@@ -152,23 +171,27 @@ function genData (el) {
   }
   // inline-template
   if (el.inlineTemplate) {
+    const ast = el.children[0]
     if (process.env.NODE_ENV !== 'production' && (
-      el.children.length > 1 || !el.children[0].tag
+      el.children.length > 1 || ast.type !== 1
     )) {
       warn('Inline-template components must have exactly one child element.')
     }
-    const inlineRenderFns = generate(el.children[0], currentOptions)
-    data += `inlineTemplate:{render:function(){${
-      inlineRenderFns.render
-    }},staticRenderFns:[${
-      inlineRenderFns.staticRenderFns.map(code => `function(){${code}}`).join(',')
-    }]}`
+    if (ast.type === 1) {
+      const inlineRenderFns = generate(ast, currentOptions)
+      data += `inlineTemplate:{render:function(){${
+        inlineRenderFns.render
+      }},staticRenderFns:[${
+        inlineRenderFns.staticRenderFns.map(code => `function(){${code}}`).join(',')
+      }]}`
+    }
   }
   return data.replace(/,$/, '') + '}'
 }
 
-function genDirectives (el) {
+function genDirectives (el: ASTElement): string | void {
   const dirs = el.directives
+  if (!dirs) return
   let res = 'directives:['
   let hasRuntime = false
   let i, l, dir, needRuntime
@@ -179,7 +202,7 @@ function genDirectives (el) {
     if (gen) {
       // compile-time directive that manipulates AST.
       // returns true if it also needs a runtime counterpart.
-      needRuntime = !!gen(el, dir)
+      needRuntime = !!gen(el, dir, warn)
     }
     if (needRuntime) {
       hasRuntime = true
@@ -197,9 +220,9 @@ function genDirectives (el) {
   }
 }
 
-function genChildren (el, asThunk) {
+function genChildren (el: ASTElement, asThunk?: boolean): string | void {
   if (!el.children.length) {
-    return 'undefined'
+    return
   }
   const code = '[' + el.children.map(genNode).join(',') + ']'
   return asThunk
@@ -207,34 +230,48 @@ function genChildren (el, asThunk) {
     : code
 }
 
-function genNode (node) {
-  if (node.tag) {
+function genNode (node: ASTNode) {
+  if (node.type === 1) {
     return genElement(node)
   } else {
     return genText(node)
   }
 }
 
-function genText (text) {
-  return text.expression
+function genText (text: ASTText | ASTExpression): string {
+  return text.type === 2
     ? `(${text.expression})`
-    : JSON.stringify(text.text)
+    : '_t(' + JSON.stringify(text.text) + ')'
 }
 
-function genRender (el) {
-  return `${el.renderMethod}(${el.renderArgs || 'null'},${genChildren(el)})`
+function genRender (el: ASTElement): string {
+  if (!el.renderMethod) {
+    return 'void 0'
+  }
+  const children = genChildren(el)
+  return `${el.renderMethod}(${
+    el.renderArgs || ''
+  }${
+    children ? (el.renderArgs ? ',' : '') + children : ''
+  })`
 }
 
-function genSlot (el) {
-  const name = el.slotName || '"default"'
-  return `($slots[${name}] || ${genChildren(el)})`
+function genSlot (el: ASTElement): string {
+  const slot = `$slots[${el.slotName || '"default"'}]`
+  const children = genChildren(el)
+  return children
+    ? `(${slot}||${children})`
+    : slot
 }
 
-function genComponent (el) {
-  return `__h__(${el.component}, ${genData(el)}, ${genChildren(el, true)})`
+function genComponent (el: ASTElement): string {
+  const children = genChildren(el, true)
+  return `_h(_e(${el.component},${genData(el)})${
+    children ? `,${children}` : ''
+  })`
 }
 
-function genProps (props) {
+function genProps (props: Array<{ name: string, value: string }>): string {
   let res = ''
   for (let i = 0; i < props.length; i++) {
     const prop = props[i]
@@ -243,7 +280,7 @@ function genProps (props) {
   return res.slice(0, -1)
 }
 
-function genHooks (hooks) {
+function genHooks (hooks: { [key: string]: Array<string> }): string {
   let res = ''
   for (const key in hooks) {
     res += `"${key}":function(n1,n2){${hooks[key].join(';')}},`

@@ -1,9 +1,7 @@
 import Vue from '../../dist/vue.common.js'
-import { compileToFunctions } from '../../dist/compiler.js'
-import createRenderer from '../../dist/server-renderer.js'
+import { compileToFunctions } from '../../packages/vue-template-compiler'
+import createRenderer from '../../packages/vue-server-renderer'
 const { renderToString } = createRenderer()
-
-// TODO: test custom server-side directives
 
 describe('SSR: renderToString', () => {
   it('static attributes', done => {
@@ -260,12 +258,12 @@ describe('SSR: renderToString', () => {
     }, result => {
       expect(result).toContain(
         '<div server-rendered="true">' +
-          '<p class="hi">yoyo</p>' +
-          '<div id="ho" class="red"></div>' +
-          '<span>hi</span>' +
-          '<input value="hi">' +
-          '<img src="https://vuejs.org/images/logo.png">' +
-          '<div class="a">test</div>' +
+          '<p class="hi">yoyo</p> ' +
+          '<div id="ho" class="red"></div> ' +
+          '<span>hi</span> ' +
+          '<input value="hi"> ' +
+          '<img src="https://vuejs.org/images/logo.png"> ' +
+          '<div class="a">test</div> ' +
           '<span class="b">testAsync</span>' +
         '</div>'
       )
@@ -287,10 +285,10 @@ describe('SSR: renderToString', () => {
     }, result => {
       expect(result).toContain(
         '<div server-rendered="true">' +
-          '<span test="ok">hello</span>' +
-          '<span>hello</span>' +
-          '<span>hello</span>' +
-          '<span test="true">hello</span>' +
+          '<span test="ok">hello</span> ' +
+          '<span>hello</span> ' +
+          '<span>hello</span> ' +
+          '<span test="true">hello</span> ' +
           '<span test="0">hello</span>' +
         '</div>'
       )
@@ -313,11 +311,11 @@ describe('SSR: renderToString', () => {
     }, result => {
       expect(result).toContain(
         '<div server-rendered="true">' +
-          '<span draggable="true">hello</span>' +
-          '<span draggable="true">hello</span>' +
-          '<span draggable="false">hello</span>' +
-          '<span draggable="false">hello</span>' +
-          '<span draggable="true">hello</span>' +
+          '<span draggable="true">hello</span> ' +
+          '<span draggable="true">hello</span> ' +
+          '<span draggable="false">hello</span> ' +
+          '<span draggable="false">hello</span> ' +
+          '<span draggable="true">hello</span> ' +
           '<span draggable="false">hello</span>' +
         '</div>'
       )
@@ -338,12 +336,56 @@ describe('SSR: renderToString', () => {
     }, result => {
       expect(result).toContain(
         '<div server-rendered="true">' +
-          '<span disabled="disabled">hello</span>' +
-          '<span disabled="disabled">hello</span>' +
-          '<span>hello</span>' +
+          '<span disabled="disabled">hello</span> ' +
+          '<span disabled="disabled">hello</span> ' +
+          '<span>hello</span> ' +
           '<span disabled="disabled">hello</span>' +
         '</div>'
       )
+      done()
+    })
+  })
+
+  it('v-bind object', done => {
+    renderVmWithOptions({
+      data: {
+        test: { id: 'a', class: 'b', value: 'c' }
+      },
+      template: '<input v-bind="test">'
+    }, result => {
+      expect(result).toContain('<input id="a" class="b" server-rendered="true" value="c">')
+      done()
+    })
+  })
+
+  it('custom directives', done => {
+    const renderer = createRenderer({
+      directives: {
+        'class-prefixer': (node, dir) => {
+          if (node.data.class) {
+            node.data.class = `${dir.value}-${node.data.class}`
+          }
+          if (node.data.staticClass) {
+            node.data.staticClass = `${dir.value}-${node.data.staticClass}`
+          }
+        }
+      }
+    })
+    renderer.renderToString(new Vue({
+      render () {
+        const h = this.$createElement
+        return h('p', {
+          class: 'class1',
+          staticClass: 'class2',
+          directives: [{
+            name: 'class-prefixer',
+            value: 'my'
+          }]
+        }, ['hello world'])
+      }
+    }), (err, result) => {
+      expect(err).toBeNull()
+      expect(result).toContain('<p server-rendered="true" class="my-class2 my-class1">hello world</p>')
       done()
     })
   })
@@ -361,9 +403,7 @@ describe('SSR: renderToString', () => {
 })
 
 function renderVmWithOptions (options, cb) {
-  const res = compileToFunctions(options.template, {
-    preserveWhitespace: false
-  })
+  const res = compileToFunctions(options.template)
   Object.assign(options, res)
   delete options.template
   renderToString(new Vue(options), (err, res) => {

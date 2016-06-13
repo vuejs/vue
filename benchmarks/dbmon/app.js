@@ -1,5 +1,3 @@
-Vue.config.preserveWhitespace = false
-
 var app = new Vue({
   el: '#app',
   data: {

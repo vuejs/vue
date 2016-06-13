@@ -22,7 +22,7 @@ var banner =
 // Update main file
 var main = fs
   .readFileSync('src/core/index.js', 'utf-8')
-  .replace(/Vue\.version = '[\d\.]+'/, "Vue.version = '" + version + "'")
+  .replace(/Vue\.version = '[^']+'/, "Vue.version = '" + version + "'")
 fs.writeFileSync('src/core/index.js', main)
 
 var builds = [
@@ -65,15 +65,15 @@ var builds = [
   {
     entry: 'src/entries/web-compiler.js',
     format: 'cjs',
-    external: ['entities'],
-    out: 'dist/compiler.js'
+    external: ['entities', 'de-indent', 'source-map'],
+    out: 'packages/vue-template-compiler/index.js'
   },
   // Web server renderer (CommonJS).
   {
     entry: 'src/entries/web-server-renderer.js',
     format: 'cjs',
     external: ['stream'],
-    out: 'dist/server-renderer.js'
+    out: 'packages/vue-server-renderer/index.js'
   }
 ]
 
@@ -128,6 +128,7 @@ function buildEntry (opts) {
       var minified = (opts.banner ? banner + '\n' : '') + uglify.minify(code, {
         fromString: true,
         output: {
+          screw_ie8: true,
           ascii_only: true
         },
         compress: {

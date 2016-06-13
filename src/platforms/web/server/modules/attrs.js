@@ -1,3 +1,5 @@
+/* @flow */
+
 import {
   isBooleanAttr,
   isEnumeratedAttr,
@@ -5,7 +7,7 @@ import {
   propsToAttrMap
 } from 'web/util/index'
 
-export default function renderAttrs (node) {
+export default function renderAttrs (node: VNodeWithData): ?string {
   if (node.data.attrs || node.data.props || node.data.staticAttrs) {
     return (
       serialize(node.data.staticAttrs) +
@@ -15,7 +17,7 @@ export default function renderAttrs (node) {
   }
 }
 
-function serialize (attrs, asProps) {
+function serialize (attrs: ?{ [key: string]: any }, asProps?: boolean): string {
   let res = ''
   if (!attrs) {
     return res

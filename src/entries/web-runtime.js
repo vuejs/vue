@@ -1,30 +1,31 @@
+/* @flow */
+
 import Vue from 'core/index'
 import config from 'core/config'
-import { createPatchFunction } from 'core/vdom/patch'
-import * as nodeOps from 'web/runtime/node-ops'
+import { extend, noop } from 'shared/util'
+import { patch } from 'web/runtime/patch'
 import platformDirectives from 'web/runtime/directives/index'
-import baseModules from 'core/vdom/modules/index'
-import platformModules from 'web/runtime/modules/index'
-import { query, isUnknownElement, isReservedTag } from 'web/util/index'
-import { noop } from 'core/util/index'
+import platformComponents from 'web/runtime/components/index'
+import { query, isUnknownElement, isReservedTag, mustUseProp } from 'web/util/index'
 
 // install platform specific utils
 Vue.config.isUnknownElement = isUnknownElement
 Vue.config.isReservedTag = isReservedTag
+Vue.config.mustUseProp = mustUseProp
 
-// install platform runtime directives
-Vue.options.directives = platformDirectives
+// install platform runtime directives & components
+extend(Vue.options.directives, platformDirectives)
+extend(Vue.options.components, platformComponents)
 
 // install platform patch function
-const modules = baseModules.concat(platformModules)
-Vue.prototype.__patch__ = config._isServer
-  ? noop
-  : createPatchFunction({ nodeOps, modules })
+Vue.prototype.__patch__ = config._isServer ? noop : patch
 
 // wrap mount
-Vue.prototype.$mount = function (el) {
-  this.$el = el && query(el)
-  return this._mount()
+Vue.prototype.$mount = function (
+  el?: string | Element,
+  hydrating?: boolean
+): Component {
+  return this._mount(el && query(el), hydrating)
 }
 
 export default Vue

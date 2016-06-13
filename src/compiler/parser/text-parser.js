@@ -1,3 +1,5 @@
+/* @flow */
+
 import { cached } from 'shared/util'
 import { parseFilters } from './filter-parser'
 
@@ -10,10 +12,13 @@ const buildRegex = cached(delimiters => {
   return new RegExp(open + '((?:.|\\n)+?)' + close, 'g')
 })
 
-export function parseText (text, delimiters) {
+export function parseText (
+  text: string,
+  delimiters?: [string, string]
+): string | void {
   const tagRE = delimiters ? buildRegex(delimiters) : defaultTagRE
   if (!tagRE.test(text)) {
-    return null
+    return
   }
   const tokens = []
   let lastIndex = tagRE.lastIndex = 0
@@ -26,7 +31,7 @@ export function parseText (text, delimiters) {
     }
     // tag token
     const exp = parseFilters(match[1].trim())
-    tokens.push(`__toString__(${exp})`)
+    tokens.push(`_s(${exp})`)
     lastIndex = index + match[0].length
   }
   if (lastIndex < text.length) {

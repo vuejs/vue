@@ -1,3 +1,5 @@
+/* not type checking this file because flow doesn't play well with Proxy */
+
 import { warn, makeMap } from '../util/index'
 
 let hasProxy, proxyHandlers, initProxy
@@ -6,7 +8,8 @@ if (process.env.NODE_ENV !== 'production') {
   const allowedGlobals = makeMap(
     'Infinity,undefined,NaN,isFinite,isNaN,' +
     'parseFloat,parseInt,decodeURI,decodeURIComponent,encodeURI,encodeURIComponent,' +
-    'Math,Number,Date,Array,Object,Boolean,String,RegExp,Map,Set,JSON,Intl'
+    'Math,Number,Date,Array,Object,Boolean,String,RegExp,Map,Set,JSON,Intl,' +
+    'require,__webpack_require__' // for Webpack/Browserify
   )
 
   hasProxy =
@@ -19,7 +22,8 @@ if (process.env.NODE_ENV !== 'production') {
       const isAllowedGlobal = allowedGlobals(key)
       if (!has && !isAllowedGlobal) {
         warn(
-          `Trying to access non-existent property "${key}" while rendering.`,
+          `Trying to access non-existent property "${key}" while rendering. ` +
+          `Make sure to declare reactive data properties in the data option.`,
           target
         )
       }

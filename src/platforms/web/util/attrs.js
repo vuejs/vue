@@ -1,3 +1,5 @@
+/* @flow */
+
 import { makeMap } from 'shared/util'
 
 // attributes that should be using props for binding
@@ -22,6 +24,15 @@ export const propsToAttrMap = {
 }
 
 export const xlinkNS = 'http://www.w3.org/1999/xlink'
-export const isXlink = name => name.charAt(5) === ':' && name.slice(0, 5) === 'xlink'
-export const getXlinkProp = name => isXlink(name) ? name.slice(6, name.length) : ''
-export const isFalsyAttrValue = val => val == null || val === false
+
+export const isXlink = (name: string): boolean => {
+  return name.charAt(5) === ':' && name.slice(0, 5) === 'xlink'
+}
+
+export const getXlinkProp = (name: string): string => {
+  return isXlink(name) ? name.slice(6, name.length) : ''
+}
+
+export const isFalsyAttrValue = (val: any): boolean => {
+  return val == null || val === false
+}

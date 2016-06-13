@@ -1,35 +1,44 @@
-import { isArray } from 'shared/util'
+/* @flow */
 
-export function baseWarn (msg) {
+export function baseWarn (msg: string) {
   console.error(`[Vue parser]: ${msg}`)
 }
 
-export function addProp (el, name, value) {
+export function pluckModuleFunction (
+  modules: ?Array<Object>,
+  key: string
+): Array<Function> {
+  return modules
+    ? modules.map(m => m[key]).filter(_ => _)
+    : []
+}
+
+export function addProp (el: ASTElement, name: string, value: string) {
   (el.props || (el.props = [])).push({ name, value })
 }
 
-export function addAttr (el, name, value) {
+export function addAttr (el: ASTElement, name: string, value: string) {
   (el.attrs || (el.attrs = [])).push({ name, value })
 }
 
-export function addStaticAttr (el, name, value) {
+export function addStaticAttr (el: ASTElement, name: string, value: string) {
   (el.staticAttrs || (el.staticAttrs = [])).push({ name, value })
 }
 
-export function addDirective (el, name, value, arg, modifiers) {
+export function addDirective (
+  el: ASTElement,
+  name: string,
+  value: string,
+  arg: ?string,
+  modifiers: ?{ [key: string]: true }
+) {
   (el.directives || (el.directives = [])).push({ name, value, arg, modifiers })
 }
 
-export function addStyleBinding (el, name, value) {
-  const code = `"${name}":${value}`
-  el.styleBinding = el.styleBinding
-    ? el.styleBinding.replace(/}\s?$/, `,${code}}`)
-    : `{${code}}`
-}
-
-export function addHook (el, name, code) {
+export function addHook (el: ASTElement, name: string, code: string) {
   const hooks = el.hooks || (el.hooks = {})
   const hook = hooks[name]
+  /* istanbul ignore if */
   if (hook) {
     hook.push(code)
   } else {
@@ -37,7 +46,12 @@ export function addHook (el, name, code) {
   }
 }
 
-export function addHandler (el, name, value, modifiers) {
+export function addHandler (
+  el: ASTElement,
+  name: string,
+  value: string,
+  modifiers: ?{ [key: string]: true }
+) {
   const events = el.events || (el.events = {})
   // check capture modifier
   if (modifiers && modifiers.capture) {
@@ -46,7 +60,8 @@ export function addHandler (el, name, value, modifiers) {
   }
   const newHandler = { value, modifiers }
   const handlers = events[name]
-  if (isArray(handlers)) {
+  /* istanbul ignore if */
+  if (Array.isArray(handlers)) {
     handlers.push(newHandler)
   } else if (handlers) {
     events[name] = [handlers, newHandler]
@@ -55,17 +70,27 @@ export function addHandler (el, name, value, modifiers) {
   }
 }
 
-export function getBindingAttr (el, name, getStatic) {
-  const staticValue = getStatic !== false && getAndRemoveAttr(el, name)
-  return staticValue || staticValue === ''
-    ? JSON.stringify(staticValue)
-    : (getAndRemoveAttr(el, ':' + name) || getAndRemoveAttr(el, 'v-bind:' + name))
+export function getBindingAttr (
+  el: ASTElement,
+  name: string,
+  getStatic?: boolean
+): ?string {
+  const dynamicValue =
+    getAndRemoveAttr(el, ':' + name) ||
+    getAndRemoveAttr(el, 'v-bind:' + name)
+  if (dynamicValue != null) {
+    return dynamicValue
+  } else if (getStatic !== false) {
+    const staticValue = getAndRemoveAttr(el, name)
+    if (staticValue != null) {
+      return JSON.stringify(staticValue)
+    }
+  }
 }
 
-export function getAndRemoveAttr (el, name) {
+export function getAndRemoveAttr (el: ASTElement, name: string): ?string {
   let val
   if ((val = el.attrsMap[name]) != null) {
-    el.attrsMap[name] = null
     const list = el.attrsList
     for (let i = 0, l = list.length; i < l; i++) {
       if (list[i].name === name) {
