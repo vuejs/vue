@@ -36,6 +36,14 @@ module.exports = {
         'javascriptEnabled': true,
         'acceptSslCerts': true
       }
+    },
+
+    'phantomjs': {
+      'desiredCapabilities': {
+        'browserName': 'phantomjs',
+        'javascriptEnabled': true,
+        'acceptSslCerts': true
+      }
     }
   }
 }
