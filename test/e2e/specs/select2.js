@@ -8,7 +8,7 @@ module.exports = {
       .assert.containsText('p', 'Selected: 0')
       .assert.containsText('span.select2', 'Select one')
 
-      .click('span.select2')
+      .moveToElement('span.select2', 5, 5).mouseButtonClick()
       .assert.count('.select2-results__option', 3)
       .assert.containsText('.select2-results__option:nth-child(1)', 'Select one')
       .assert.containsText('.select2-results__option:nth-child(2)', 'Hello')
@@ -24,7 +24,7 @@ module.exports = {
       .execute(function () {
         vm.options.push({ id: 3, text: 'Vue' })
       })
-      .click('span.select2')
+      .moveToElement('span.select2', 5, 5).mouseButtonClick()
       .assert.count('.select2-results__option', 4)
       .assert.containsText('.select2-results__option:nth-child(1)', 'Select one')
       .assert.containsText('.select2-results__option:nth-child(2)', 'Hello')
