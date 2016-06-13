@@ -83,11 +83,6 @@ export function isUnknownElement (tag: string): boolean {
       el.constructor === window.HTMLElement
     ))
   } else {
-    return (unknownElementCache[tag] = (
-      /HTMLUnknownElement/.test(el.toString()) &&
-      // Chrome returns unknown for several HTML5 elements.
-      // https://code.google.com/p/chromium/issues/detail?id=540526
-      !/^(data|time|rtc|rb)$/.test(tag)
-    ))
+    return (unknownElementCache[tag] = /HTMLUnknownElement/.test(el.toString()))
   }
 }

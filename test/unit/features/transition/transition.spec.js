@@ -389,7 +389,7 @@ if (!isIE9) {
         expect(vm.$el.children[0].className).toBe('test test-leave')
       }).thenWaitFor(nextFrame).then(() => {
         expect(vm.$el.children[0].className).toBe('test test-leave-active')
-      }).thenWaitFor(duration / 2).then(() => {
+      }).thenWaitFor(10).then(() => {
         vm.ok = true
       }).then(() => {
         expect(spy).toHaveBeenCalled()
