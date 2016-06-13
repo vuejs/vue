@@ -4,9 +4,7 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 
 var stream = _interopDefault(require('stream'));
 
-var babelHelpers = {};
-
-babelHelpers.inherits = function (subClass, superClass) {
+var inherits = function (subClass, superClass) {
   if (typeof superClass !== "function" && superClass !== null) {
     throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
   }
@@ -22,15 +20,13 @@ babelHelpers.inherits = function (subClass, superClass) {
   if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
 };
 
-babelHelpers.possibleConstructorReturn = function (self, call) {
+var possibleConstructorReturn = function (self, call) {
   if (!self) {
     throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
   }
 
   return call && (typeof call === "object" || typeof call === "function") ? call : self;
 };
-
-babelHelpers;
 
 /**
  * Original RenderStream implmentation by Sasha Aickin (@aickin)
@@ -39,10 +35,10 @@ babelHelpers;
  */
 
 var RenderStream = function (_stream$Readable) {
-  babelHelpers.inherits(RenderStream, _stream$Readable);
+  inherits(RenderStream, _stream$Readable);
 
   function RenderStream(render) {
-    var _this = babelHelpers.possibleConstructorReturn(this, _stream$Readable.call(this));
+    var _this = possibleConstructorReturn(this, _stream$Readable.call(this));
 
     _this.buffer = '';
     _this.render = render;
@@ -234,7 +230,7 @@ function bind(fn, ctx) {
 /**
  * Convert an Array-like object to a real Array.
  */
-function toArray(list, start) {
+function toArray$1(list, start) {
   start = start || 0;
   var i = list.length - start;
   var ret = new Array(i);
@@ -353,7 +349,7 @@ var inBrowser = typeof window !== 'undefined' && Object.prototype.toString.call(
 // UA sniffing for working around browser-specific quirks
 var UA = inBrowser && window.navigator.userAgent.toLowerCase();
 var isIos = UA && /(iphone|ipad|ipod|ios)/i.test(UA);
-var iosVersionMatch = UA && isIos && UA.match(/os ([\d_]+)/);
+var iosVersionMatch = UA && isIos && /os ([\d_]+)/.test(UA);
 var iosVersion = iosVersionMatch && iosVersionMatch[1].split('_');
 
 // MutationObserver is unreliable in iOS 9.3 UIWebView
@@ -417,7 +413,7 @@ var nextTick = function () {
 
 var Set$1 = void 0;
 /* istanbul ignore if */
-if (typeof Set !== 'undefined' && Set.toString().match(/native code/)) {
+if (typeof Set !== 'undefined' && /native code/.test(Set.toString())) {
   // use native Set when available.
   Set$1 = Set;
 } else {
@@ -772,7 +768,7 @@ function defineReactive(obj, key, val, customSetter) {
  * triggers change notification if the property doesn't
  * already exist.
  */
-function set(obj, key, val) {
+function set$1(obj, key, val) {
   if (Array.isArray(obj)) {
     obj.splice(key, 1, val);
     return val;
@@ -854,7 +850,7 @@ function mergeData(to, from) {
     toVal = to[key];
     fromVal = from[key];
     if (!hasOwn(to, key)) {
-      set(to, key, fromVal);
+      set$1(to, key, fromVal);
     } else if (isObject(toVal) && isObject(fromVal)) {
       mergeData(toVal, fromVal);
     }
@@ -2182,8 +2178,8 @@ function eventsMixin(Vue) {
     var vm = this;
     var cbs = vm._events[event];
     if (cbs) {
-      cbs = cbs.length > 1 ? toArray(cbs) : cbs;
-      var args = toArray(arguments, 1);
+      cbs = cbs.length > 1 ? toArray$1(cbs) : cbs;
+      var args = toArray$1(arguments, 1);
       for (var i = 0, l = cbs.length; i < l; i++) {
         cbs[i].apply(vm, args);
       }
@@ -2397,7 +2393,7 @@ function initInternalComponent(vm, options) {
   opts._componentTag = options._componentTag;
   if (options.render) {
     opts.render = options.render;
-    opts.staticRenderFns = opts.staticRenderFns;
+    opts.staticRenderFns = options.staticRenderFns;
   }
 }
 
