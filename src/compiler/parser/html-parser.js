@@ -40,7 +40,7 @@ let IS_REGEX_CAPTURING_BROKEN = false
 })
 
 // Special Elements (can contain anything)
-const special = makeMap('script,style', true)
+const isSpecialTag = makeMap('script,style', true)
 
 const reCache = {}
 
@@ -62,7 +62,6 @@ export function parseHTML (html, handler) {
   const attribute = attrForHandler(handler)
   const expectHTML = handler.expectHTML
   const isUnaryTag = handler.isUnaryTag || no
-  const isSpecialTag = handler.isSpecialTag || special
   let index = 0
   let last, lastTag
   while (html) {

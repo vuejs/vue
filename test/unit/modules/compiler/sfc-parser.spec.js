@@ -30,6 +30,15 @@ describe('Single File Component parser', () => {
     expect(res.script.content.trim()).toBe('export default {}')
   })
 
+  it('should handle nested template', () => {
+    const res = parseComponent(`
+      <template>
+        <div><template v-if="ok">hi</template></div>
+      </template>
+    `)
+    expect(res.template.content.trim()).toBe('<div><template v-if="ok">hi</template></div>')
+  })
+
   it('pad content', () => {
     const res = parseComponent(`
       <template>

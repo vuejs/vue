@@ -32,15 +32,18 @@ export function parseComponent (
   let depth = 0
   let currentBlock: ?SFCBlock = null
 
-  function start (tag: string, attrs: Array<Attribute>) {
-    depth++
-    if (depth > 1) {
-      return
-    }
-    if (isSpecialTag(tag)) {
+  function start (
+    tag: string,
+    attrs: Array<Attribute>,
+    unary: boolean,
+    start: number,
+    end: number
+  ) {
+    if (isSpecialTag(tag) && depth === 0) {
       currentBlock = {
         type: tag,
-        content: ''
+        content: '',
+        start: end
       }
       checkAttrs(currentBlock, attrs)
       if (tag === 'style') {
@@ -49,6 +52,7 @@ export function parseComponent (
         sfc[tag] = currentBlock
       }
     }
+    depth++
   }
 
   function checkAttrs (block: SFCBlock, attrs: Array<Attribute>) {
@@ -66,26 +70,22 @@ export function parseComponent (
     }
   }
 
-  function end () {
-    depth--
-    if (options.map && currentBlock && !currentBlock.src) {
-      addSourceMap(currentBlock)
-    }
-    currentBlock = null
-  }
-
-  function chars (text: string) {
-    if (currentBlock) {
-      currentBlock.start = content.indexOf(text)
-      currentBlock.end = currentBlock.start + text.length
-      text = deindent(text)
+  function end (tag: string, start: number, end: number) {
+    if (isSpecialTag(tag) && depth === 1 && currentBlock) {
+      currentBlock.end = start
+      let text = deindent(content.slice(currentBlock.start, currentBlock.end))
       // pad content so that linters and pre-processors can output correct
       // line numbers in errors and warnings
       if (currentBlock.type !== 'template' && options.pad) {
         text = padContent(currentBlock) + text
       }
       currentBlock.content = text
+      if (options.map && !currentBlock.src) {
+        addSourceMap(currentBlock)
+      }
+      currentBlock = null
     }
+    depth--
   }
 
   function padContent (block: SFCBlock) {
@@ -127,10 +127,8 @@ export function parseComponent (
   }
 
   parseHTML(content, {
-    isSpecialTag,
     start,
-    end,
-    chars
+    end
   })
 
   return sfc
