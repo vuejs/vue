@@ -417,7 +417,7 @@ var nextTick = function () {
 
 var Set$1 = void 0;
 /* istanbul ignore if */
-if (typeof Set !== 'undefined' && Set.toString().match(/native code/)) {
+if (typeof Set !== 'undefined' && /native code/.test(Set.toString())) {
   // use native Set when available.
   Set$1 = Set;
 } else {
@@ -2047,19 +2047,19 @@ function renderMixin(Vue) {
     if (Array.isArray(val)) {
       ret = new Array(val.length);
       for (i = 0, l = val.length; i < l; i++) {
-        ret[i] = render(val[i], i, i);
+        ret[i] = render(val[i], i);
       }
     } else if (typeof val === 'number') {
       ret = new Array(val);
       for (i = 0; i < val; i++) {
-        ret[i] = render(i + 1, i, i);
+        ret[i] = render(i + 1, i);
       }
     } else if (isObject(val)) {
       keys = Object.keys(val);
       ret = new Array(keys.length);
       for (i = 0, l = keys.length; i < l; i++) {
         key = keys[i];
-        ret[i] = render(val[key], i, key);
+        ret[i] = render(val[key], key, i);
       }
     }
     return ret;
@@ -2397,7 +2397,7 @@ function initInternalComponent(vm, options) {
   opts._componentTag = options._componentTag;
   if (options.render) {
     opts.render = options.render;
-    opts.staticRenderFns = opts.staticRenderFns;
+    opts.staticRenderFns = options.staticRenderFns;
   }
 }
 

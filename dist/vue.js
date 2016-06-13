@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.0.0-alpha.1
+ * Vue.js v2.0.0-alpha.2
  * (c) 2014-2016 Evan You
  * Released under the MIT License.
  */
@@ -371,7 +371,7 @@
 
   var Set$1 = void 0;
   /* istanbul ignore if */
-  if (typeof Set !== 'undefined' && Set.toString().match(/native code/)) {
+  if (typeof Set !== 'undefined' && /native code/.test(Set.toString())) {
     // use native Set when available.
     Set$1 = Set;
   } else {
@@ -1913,19 +1913,19 @@
       if (Array.isArray(val)) {
         ret = new Array(val.length);
         for (i = 0, l = val.length; i < l; i++) {
-          ret[i] = render(val[i], i, i);
+          ret[i] = render(val[i], i);
         }
       } else if (typeof val === 'number') {
         ret = new Array(val);
         for (i = 0; i < val; i++) {
-          ret[i] = render(i + 1, i, i);
+          ret[i] = render(i + 1, i);
         }
       } else if (isObject(val)) {
         keys = Object.keys(val);
         ret = new Array(keys.length);
         for (i = 0, l = keys.length; i < l; i++) {
           key = keys[i];
-          ret[i] = render(val[key], i, key);
+          ret[i] = render(val[key], key, i);
         }
       }
       return ret;
@@ -2102,7 +2102,7 @@
     opts._componentTag = options._componentTag;
     if (options.render) {
       opts.render = options.render;
-      opts.staticRenderFns = opts.staticRenderFns;
+      opts.staticRenderFns = options.staticRenderFns;
     }
   }
 
@@ -2564,6 +2564,7 @@
   	hasProto: hasProto,
   	inBrowser: inBrowser,
   	devtools: devtools,
+  	UA: UA,
   	nextTick: nextTick,
   	get _Set () { return Set$1; },
   	mergeOptions: mergeOptions,
@@ -2760,7 +2761,7 @@
     }
   });
 
-  Vue.version = '2.0.0-alpha.1';
+  Vue.version = '2.0.0-alpha.2';
 
   // attributes that should be using props for binding
   var mustUseProp = makeMap('value,selected,checked,muted');
@@ -2894,10 +2895,7 @@
       // http://stackoverflow.com/a/28210364/1070244
       return unknownElementCache[tag] = el.constructor === window.HTMLUnknownElement || el.constructor === window.HTMLElement;
     } else {
-      return unknownElementCache[tag] = /HTMLUnknownElement/.test(el.toString()) &&
-      // Chrome returns unknown for several HTML5 elements.
-      // https://code.google.com/p/chromium/issues/detail?id=540526
-      !/^(data|time|rtc|rb)$/.test(tag);
+      return unknownElementCache[tag] = /HTMLUnknownElement/.test(el.toString());
     }
   }
 
@@ -4069,7 +4067,7 @@ var nodeOps = Object.freeze({
   var model = {
     bind: function bind(el, binding, vnode) {
       if ("development" !== 'production') {
-        if (!vnode.tag.match(/input|select|textarea/)) {
+        if (!/input|select|textarea/.test(vnode.tag)) {
           warn('v-model is not supported on element type: <' + vnode.tag + '>. ' + 'If you are working with contenteditable, it\'s recommended to ' + 'wrap a library dedicated for that purpose inside a custom component.', vnode.context);
         }
       }
@@ -4310,7 +4308,7 @@ var nodeOps = Object.freeze({
   });
 
   // Special Elements (can contain anything)
-  var special = makeMap('script,style', true);
+  var isSpecialTag = makeMap('script,style', true);
 
   var reCache = {};
 
@@ -4330,10 +4328,8 @@ var nodeOps = Object.freeze({
     var attribute = attrForHandler(handler);
     var expectHTML = handler.expectHTML;
     var isUnaryTag = handler.isUnaryTag || no;
-    var isSpecialTag = handler.isSpecialTag || special;
+    var index = 0;
     var last = void 0,
-        prevTag = void 0,
-        nextTag = void 0,
         lastTag = void 0;
     while (html) {
       last = html;
@@ -4346,8 +4342,7 @@ var nodeOps = Object.freeze({
             var commentEnd = html.indexOf('-->');
 
             if (commentEnd >= 0) {
-              html = html.substring(commentEnd + 3);
-              prevTag = '';
+              advance(commentEnd + 3);
               continue;
             }
           }
@@ -4357,8 +4352,7 @@ var nodeOps = Object.freeze({
             var conditionalEnd = html.indexOf(']>');
 
             if (conditionalEnd >= 0) {
-              html = html.substring(conditionalEnd + 2);
-              prevTag = '';
+              advance(conditionalEnd + 2);
               continue;
             }
           }
@@ -4369,26 +4363,23 @@ var nodeOps = Object.freeze({
             if (handler.doctype) {
               handler.doctype(doctypeMatch[0]);
             }
-            html = html.substring(doctypeMatch[0].length);
-            prevTag = '';
+            advance(doctypeMatch[0].length);
             continue;
           }
 
           // End tag:
           var endTagMatch = html.match(endTag);
           if (endTagMatch) {
-            html = html.substring(endTagMatch[0].length);
-            endTagMatch[0].replace(endTag, parseEndTag);
-            prevTag = '/' + endTagMatch[1].toLowerCase();
+            var curIndex = index;
+            advance(endTagMatch[0].length);
+            parseEndTag(endTagMatch[0], endTagMatch[1], curIndex, index);
             continue;
           }
 
           // Start tag:
-          var startTagMatch = parseStartTag(html);
+          var startTagMatch = parseStartTag();
           if (startTagMatch) {
-            html = startTagMatch.rest;
             handleStartTag(startTagMatch);
-            prevTag = startTagMatch.tagName.toLowerCase();
             continue;
           }
         }
@@ -4396,35 +4387,22 @@ var nodeOps = Object.freeze({
         var text = void 0;
         if (textEnd >= 0) {
           text = html.substring(0, textEnd);
-          html = html.substring(textEnd);
+          advance(textEnd);
         } else {
           text = html;
           html = '';
         }
 
-        // next tag
-        var nextTagMatch = parseStartTag(html);
-        if (nextTagMatch) {
-          nextTag = nextTagMatch.tagName;
-        } else {
-          nextTagMatch = html.match(endTag);
-          if (nextTagMatch) {
-            nextTag = '/' + nextTagMatch[1];
-          } else {
-            nextTag = '';
-          }
-        }
-
         if (handler.chars) {
-          handler.chars(text, prevTag, nextTag);
+          handler.chars(text);
         }
-        prevTag = '';
       } else {
         (function () {
           var stackedTag = lastTag.toLowerCase();
-          var reStackedTag = reCache[stackedTag] || (reCache[stackedTag] = new RegExp('([\\s\\S]*?)</' + stackedTag + '[^>]*>', 'i'));
-
-          html = html.replace(reStackedTag, function (all, text) {
+          var reStackedTag = reCache[stackedTag] || (reCache[stackedTag] = new RegExp('([\\s\\S]*?)(</' + stackedTag + '[^>]*>)', 'i'));
+          var endTagLength = 0;
+          var rest = html.replace(reStackedTag, function (all, text, endTag) {
+            endTagLength = endTag.length;
             if (stackedTag !== 'script' && stackedTag !== 'style' && stackedTag !== 'noscript') {
               text = text.replace(/<!--([\s\S]*?)-->/g, '$1').replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1');
             }
@@ -4433,8 +4411,9 @@ var nodeOps = Object.freeze({
             }
             return '';
           });
-
-          parseEndTag('</' + stackedTag + '>', stackedTag);
+          index += html.length - rest.length;
+          html = rest;
+          parseEndTag('</' + stackedTag + '>', stackedTag, index - endTagLength, index);
         })();
       }
 
@@ -4443,28 +4422,33 @@ var nodeOps = Object.freeze({
       }
     }
 
-    if (!handler.partialMarkup) {
-      // Clean up any remaining tags
-      parseEndTag();
+    // Clean up any remaining tags
+    parseEndTag();
+
+    function advance(n) {
+      index += n;
+      html = html.substring(n);
     }
 
-    function parseStartTag(input) {
-      var start = input.match(startTagOpen);
+    function parseStartTag() {
+      var start = html.match(startTagOpen);
       if (start) {
         var match = {
           tagName: start[1],
-          attrs: []
+          attrs: [],
+          start: index
         };
-        input = input.slice(start[0].length);
+        advance(start[0].length);
         var end = void 0,
             attr = void 0;
-        while (!(end = input.match(startTagClose)) && (attr = input.match(attribute))) {
-          input = input.slice(attr[0].length);
+        while (!(end = html.match(startTagClose)) && (attr = html.match(attribute))) {
+          advance(attr[0].length);
           match.attrs.push(attr);
         }
         if (end) {
           match.unarySlash = end[1];
-          match.rest = input.slice(end[0].length);
+          advance(end[0].length);
+          match.end = index;
           return match;
         }
       }
@@ -4514,12 +4498,14 @@ var nodeOps = Object.freeze({
       }
 
       if (handler.start) {
-        handler.start(tagName, attrs, unary, unarySlash);
+        handler.start(tagName, attrs, unary, match.start, match.end);
       }
     }
 
-    function parseEndTag(tag, tagName) {
+    function parseEndTag(tag, tagName, start, end) {
       var pos = void 0;
+      if (start == null) start = index;
+      if (end == null) end = index;
 
       // Find the closest opened tag of the same type
       if (tagName) {
@@ -4538,7 +4524,7 @@ var nodeOps = Object.freeze({
         // Close all the open elements, up the stack
         for (var i = stack.length - 1; i >= pos; i--) {
           if (handler.end) {
-            handler.end(stack[i].tag, stack[i].attrs, i > pos || !tag);
+            handler.end(stack[i].tag, start, end);
           }
         }
 
@@ -4547,14 +4533,14 @@ var nodeOps = Object.freeze({
         lastTag = pos && stack[pos - 1].tag;
       } else if (tagName.toLowerCase() === 'br') {
         if (handler.start) {
-          handler.start(tagName, [], true, '');
+          handler.start(tagName, [], true, start, end);
         }
       } else if (tagName.toLowerCase() === 'p') {
         if (handler.start) {
-          handler.start(tagName, [], false, '', true);
+          handler.start(tagName, [], false, start, end);
         }
         if (handler.end) {
-          handler.end(tagName, []);
+          handler.end(tagName, start, end);
         }
       }
     }
@@ -4770,7 +4756,7 @@ var nodeOps = Object.freeze({
   var argRE = /:(.*)$/;
   var modifierRE = /\.[^\.]+/g;
   var forAliasRE = /(.*)\s+(?:in|of)\s+(.*)/;
-  var forIteratorRE = /\((.*),(.*)\)/;
+  var forIteratorRE = /\(([^,]*),([^,]*)(?:,([^,]*))?\)/;
   var camelRE = /[a-z\d][A-Z]/;
 
   var decodeHTMLCached = cached(decodeHTML);
@@ -4989,8 +4975,11 @@ var nodeOps = Object.freeze({
       var alias = inMatch[1].trim();
       var iteratorMatch = alias.match(forIteratorRE);
       if (iteratorMatch) {
-        el.iterator = iteratorMatch[1].trim();
-        el.alias = iteratorMatch[2].trim();
+        el.alias = iteratorMatch[1].trim();
+        el.iterator1 = iteratorMatch[2].trim();
+        if (iteratorMatch[3]) {
+          el.iterator2 = iteratorMatch[3].trim();
+        }
       } else {
         el.alias = alias;
       }
@@ -5410,9 +5399,10 @@ var nodeOps = Object.freeze({
   function genFor(el) {
     var exp = el.for;
     var alias = el.alias;
-    var iterator = el.iterator;
+    var iterator1 = el.iterator1 ? ',' + el.iterator1 : '';
+    var iterator2 = el.iterator2 ? ',' + el.iterator2 : '';
     el.for = null; // avoid recursion
-    return '(' + exp + ')&&_l((' + exp + '),' + ('function(' + alias + ',$index,' + (iterator || '$key') + '){') + ('return ' + genElement(el)) + '})';
+    return '(' + exp + ')&&_l((' + exp + '),' + ('function(' + alias + iterator1 + iterator2 + '){') + ('return ' + genElement(el)) + '})';
   }
 
   function genData(el) {
