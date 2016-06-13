@@ -1,7 +1,5 @@
 'use strict';
 
-Object.defineProperty(exports, '__esModule', { value: true });
-
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
 var entities = require('entities');
@@ -326,7 +324,7 @@ var inBrowser = typeof window !== 'undefined' && Object.prototype.toString.call(
 // UA sniffing for working around browser-specific quirks
 var UA$1 = inBrowser && window.navigator.userAgent.toLowerCase();
 var isIos = UA$1 && /(iphone|ipad|ipod|ios)/i.test(UA$1);
-var iosVersionMatch = UA$1 && isIos && /os ([\d_]+)/.test(UA$1);
+var iosVersionMatch = UA$1 && isIos && UA$1.match(/os ([\d_]+)/);
 var iosVersion = iosVersionMatch && iosVersionMatch[1].split('_');
 
 // MutationObserver is unreliable in iOS 9.3 UIWebView
@@ -390,7 +388,7 @@ var nextTick = function () {
 
 var Set$1 = void 0;
 /* istanbul ignore if */
-if (typeof Set !== 'undefined' && /native code/.test(Set.toString())) {
+if (typeof Set !== 'undefined' && Set.toString().match(/native code/)) {
   // use native Set when available.
   Set$1 = Set;
 } else {
@@ -2106,7 +2104,7 @@ function initInternalComponent(vm, options) {
   opts._componentTag = options._componentTag;
   if (options.render) {
     opts.render = options.render;
-    opts.staticRenderFns = options.staticRenderFns;
+    opts.staticRenderFns = opts.staticRenderFns;
   }
 }
 
