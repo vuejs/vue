@@ -63,7 +63,7 @@ export function parseHTML (html, handler) {
   const expectHTML = handler.expectHTML
   const isUnaryTag = handler.isUnaryTag || no
   const isSpecialTag = handler.isSpecialTag || special
-  let last, prevTag, nextTag, lastTag
+  let last, lastTag
   while (html) {
     last = html
     // Make sure we're not in a script or style element
@@ -76,7 +76,6 @@ export function parseHTML (html, handler) {
 
           if (commentEnd >= 0) {
             html = html.substring(commentEnd + 3)
-            prevTag = ''
             continue
           }
         }
@@ -87,7 +86,6 @@ export function parseHTML (html, handler) {
 
           if (conditionalEnd >= 0) {
             html = html.substring(conditionalEnd + 2)
-            prevTag = ''
             continue
           }
         }
@@ -99,7 +97,6 @@ export function parseHTML (html, handler) {
             handler.doctype(doctypeMatch[0])
           }
           html = html.substring(doctypeMatch[0].length)
-          prevTag = ''
           continue
         }
 
@@ -108,7 +105,6 @@ export function parseHTML (html, handler) {
         if (endTagMatch) {
           html = html.substring(endTagMatch[0].length)
           endTagMatch[0].replace(endTag, parseEndTag)
-          prevTag = '/' + endTagMatch[1].toLowerCase()
           continue
         }
 
@@ -117,7 +113,6 @@ export function parseHTML (html, handler) {
         if (startTagMatch) {
           html = startTagMatch.rest
           handleStartTag(startTagMatch)
-          prevTag = startTagMatch.tagName.toLowerCase()
           continue
         }
       }
@@ -131,23 +126,9 @@ export function parseHTML (html, handler) {
         html = ''
       }
 
-      // next tag
-      let nextTagMatch = parseStartTag(html)
-      if (nextTagMatch) {
-        nextTag = nextTagMatch.tagName
-      } else {
-        nextTagMatch = html.match(endTag)
-        if (nextTagMatch) {
-          nextTag = '/' + nextTagMatch[1]
-        } else {
-          nextTag = ''
-        }
-      }
-
       if (handler.chars) {
-        handler.chars(text, prevTag, nextTag)
+        handler.chars(text)
       }
-      prevTag = ''
     } else {
       const stackedTag = lastTag.toLowerCase()
       const reStackedTag = reCache[stackedTag] || (reCache[stackedTag] = new RegExp('([\\s\\S]*?)</' + stackedTag + '[^>]*>', 'i'))
