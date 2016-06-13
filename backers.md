@@ -109,7 +109,7 @@ It could be you!
 - Yegor Sytnyk
 - Guido H.
 - Joan Cejudo
-- Walter
+- Ian Walter
 - Nokola Trifunovic
 - Nicolas Mutis Mesa
 - Fahed Toumi
