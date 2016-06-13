@@ -16,7 +16,6 @@
     "dev:compiler": "webpack --watch --config build/webpack.compiler.dev.config.js",
     "build": "NODE_ENV=production node build/build.js",
     "build:ssr": "npm run build -- vue.common.js,vue-template-compiler,vue-server-renderer",
-    "ci": "npm run lint && flow check && npm run test:cover && npm run test:ssr",
     "test": "npm run lint && flow check && npm run test:cover && npm run test:unit && npm run test:e2e && npm run test:ssr",
     "test:unit": "NODE_ENV=development karma start build/karma.unit.config.js",
     "test:cover": "NODE_ENV=development karma start build/karma.cover.config.js",
