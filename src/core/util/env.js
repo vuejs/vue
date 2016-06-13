@@ -83,7 +83,7 @@ export const nextTick = (function () {
 
 let _Set
 /* istanbul ignore if */
-if (typeof Set !== 'undefined' && Set.toString().match(/native code/)) {
+if (typeof Set !== 'undefined' && /native code/.test(Set.toString())) {
   // use native Set when available.
   _Set = Set
 } else {
