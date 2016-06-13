@@ -22,7 +22,7 @@ const onRE = /^@|^v-on:/
 const argRE = /:(.*)$/
 const modifierRE = /\.[^\.]+/g
 const forAliasRE = /(.*)\s+(?:in|of)\s+(.*)/
-const forIteratorRE = /\((.*),(.*)\)/
+const forIteratorRE = /\(([^,]*),([^,]*)(?:,([^,]*))?\)/
 const camelRE = /[a-z\d][A-Z]/
 
 const decodeHTMLCached = cached(decodeHTML)
@@ -266,8 +266,11 @@ function processFor (el) {
     const alias = inMatch[1].trim()
     const iteratorMatch = alias.match(forIteratorRE)
     if (iteratorMatch) {
-      el.iterator = iteratorMatch[1].trim()
-      el.alias = iteratorMatch[2].trim()
+      el.alias = iteratorMatch[1].trim()
+      el.iterator1 = iteratorMatch[2].trim()
+      if (iteratorMatch[3]) {
+        el.iterator2 = iteratorMatch[3].trim()
+      }
     } else {
       el.alias = alias
     }

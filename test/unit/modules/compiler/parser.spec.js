@@ -108,11 +108,21 @@ describe('parser', () => {
   })
 
   it('v-for directive iteration syntax', () => {
-    const ast = parse('<ul><li v-for="(index, item) in items"></li><ul>', baseOptions)
+    const ast = parse('<ul><li v-for="(item, index) in items"></li><ul>', baseOptions)
     const liAst = ast.children[0]
     expect(liAst.for).toBe('items')
     expect(liAst.alias).toBe('item')
-    expect(liAst.iterator).toBe('index')
+    expect(liAst.iterator1).toBe('index')
+    expect(liAst.iterator2).toBeUndefined()
+  })
+
+  it('v-for directive iteration syntax (multiple)', () => {
+    const ast = parse('<ul><li v-for="(item, key, index) in items"></li><ul>', baseOptions)
+    const liAst = ast.children[0]
+    expect(liAst.for).toBe('items')
+    expect(liAst.alias).toBe('item')
+    expect(liAst.iterator1).toBe('key')
+    expect(liAst.iterator2).toBe('index')
   })
 
   it('v-for directive key', () => {

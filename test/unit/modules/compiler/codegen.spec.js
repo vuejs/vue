@@ -41,7 +41,16 @@ describe('codegen', () => {
   it('generate v-for directive', () => {
     assertCodegen(
       '<li v-for="item in items" :key="item.uid"></li>',
-      `with(this){return (items)&&_l((items),function(item,$index,$key){return _h(_e('li',{key:item.uid}))})}`
+      `with(this){return (items)&&_l((items),function(item){return _h(_e('li',{key:item.uid}))})}`
+    )
+    // iterator syntax
+    assertCodegen(
+      '<li v-for="(item, i) in items"></li>',
+      `with(this){return (items)&&_l((items),function(item,i){return _h(_e('li'))})}`
+    )
+    assertCodegen(
+      '<li v-for="(item, key, index) in items"></li>',
+      `with(this){return (items)&&_l((items),function(item,key,index){return _h(_e('li'))})}`
     )
   })
 
@@ -69,7 +78,7 @@ describe('codegen', () => {
   it('generate v-ref directive on v-for', () => {
     assertCodegen(
       '<ul><li v-for="item in items" v-ref:component1></li></ul>',
-      `with(this){return _h(_e('ul'),[(items)&&_l((items),function(item,$index,$key){return _h(_e('li',{ref:"component1",refInFor:true}))})])}`
+      `with(this){return _h(_e('ul'),[(items)&&_l((items),function(item){return _h(_e('li',{ref:"component1",refInFor:true}))})])}`
     )
   })
 

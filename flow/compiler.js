@@ -94,7 +94,8 @@ declare type ASTElement = {
   for?: string | null,
   key?: string,
   alias?: string,
-  iterator?: string,
+  iterator1?: string,
+  iterator2?: string,
 
   staticClass?: string,
   classBinding?: string,

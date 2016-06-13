@@ -14,9 +14,9 @@
         <polygon :points="points"></polygon>
         <circle cx="100" cy="100" r="80"></circle>
         <axis-label
-          v-for="stat in stats"
+          v-for="(stat, index) in stats"
           :stat="stat"
-          :index="$index"
+          :index="index"
           :total="stats.length">
         </axis-label>
       </g>

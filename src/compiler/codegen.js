@@ -101,10 +101,11 @@ function genElse (el: ASTElement): string {
 function genFor (el: ASTElement): string {
   const exp = el.for
   const alias = el.alias
-  const iterator = el.iterator
+  const iterator1 = el.iterator1 ? `,${el.iterator1}` : ''
+  const iterator2 = el.iterator2 ? `,${el.iterator2}` : ''
   el.for = null // avoid recursion
   return `(${exp})&&_l((${exp}),` +
-    `function(${alias},$index,${iterator || '$key'}){` +
+    `function(${alias}${iterator1}${iterator2}){` +
       `return ${genElement(el)}` +
     '})'
 }
