@@ -6,20 +6,19 @@ import {
   isFalsyAttrValue
 } from 'web/util/attrs'
 
-export default function renderAttrs (node: VNodeWithData): ?string {
-  if (node.data.attrs || node.data.staticAttrs) {
-    return (
-      render(node.data.staticAttrs) +
-      render(node.data.attrs)
-    )
+export default function renderAttrs (node: VNodeWithData): string {
+  let res = ''
+  if (node.data.staticAttrs) {
+    res += render(node.data.staticAttrs)
   }
+  if (node.data.attrs) {
+    res += render(node.data.attrs)
+  }
+  return res
 }
 
-function render (attrs: ?{ [key: string]: any }): string {
+function render (attrs: { [key: string]: any }): string {
   let res = ''
-  if (!attrs) {
-    return res
-  }
   for (const key in attrs) {
     if (key === 'style') {
       // leave it to the style module

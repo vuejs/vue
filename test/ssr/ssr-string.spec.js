@@ -414,6 +414,31 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  it('_scopeId', done => {
+    renderVmWithOptions({
+      _scopeId: '_v-parent',
+      template: '<div id="foo"><p><child></child></p></div>',
+      components: {
+        child: {
+          _scopeId: '_v-child',
+          render () {
+            const h = this.$createElement
+            return h('div', null, [h('span', null, ['foo'])])
+          }
+        }
+      }
+    }, result => {
+      expect(result).toContain(
+        '<div id="foo" server-rendered="true" _v-parent>' +
+          '<p _v-parent>' +
+            '<div _v-child _v-parent><span _v-child>foo</span></div>' +
+          '</p>' +
+        '</div>'
+      )
+      done()
+    })
+  })
+
   it('should catch error', done => {
     renderToString(new Vue({
       render () {

@@ -18,8 +18,9 @@ export function createRenderFunction (
     isRoot: boolean
   ) {
     if (node.componentOptions) {
-      const child = createComponentInstanceForVnode(node)
-      renderNode(child._render(), write, next, isRoot)
+      const child = createComponentInstanceForVnode(node)._render()
+      child.parent = node
+      renderNode(child, write, next, isRoot)
     } else {
       if (node.tag) {
         renderElement(node, write, next, isRoot)
@@ -90,6 +91,14 @@ export function createRenderFunction (
           markup += res
         }
       }
+    }
+    // attach scoped CSS ID
+    while (node) {
+      const scopeId = node.context.$options._scopeId
+      if (scopeId) {
+        markup += ` ${scopeId}`
+      }
+      node = node.parent
     }
     return markup + '>'
   }
