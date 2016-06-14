@@ -12,6 +12,7 @@ export default class VNode {
   componentOptions: VNodeComponentOptions | void;
   child: Component | void;
   parent: VNode | void;
+  raw: ?boolean;
 
   constructor (
     tag?: string,

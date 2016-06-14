@@ -78,10 +78,34 @@ describe('SSR: renderToString', () => {
       template: '<div>{{ foo }} side {{ bar }}</div>',
       data: {
         foo: 'server',
-        bar: 'rendering'
+        bar: '<span>rendering</span>'
       }
     }, result => {
-      expect(result).toContain('<div server-rendered="true">server side rendering</div>')
+      expect(result).toContain('<div server-rendered="true">server side &lt;span&gt;rendering&lt;&sol;span&gt;</div>')
+      done()
+    })
+  })
+
+  it('v-html', done => {
+    renderVmWithOptions({
+      template: '<div v-html="text"></div>',
+      data: {
+        text: '<span>foo</span>'
+      }
+    }, result => {
+      expect(result).toContain('<div server-rendered="true"><span>foo</span></div>')
+      done()
+    })
+  })
+
+  it('v-text', done => {
+    renderVmWithOptions({
+      template: '<div v-text="text"></div>',
+      data: {
+        text: '<span>foo</span>'
+      }
+    }, result => {
+      expect(result).toContain('<div server-rendered="true">&lt;span&gt;foo&lt;&sol;span&gt;</div>')
       done()
     })
   })

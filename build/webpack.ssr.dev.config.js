@@ -12,6 +12,9 @@ module.exports = {
   resolve: {
     alias: alias
   },
+  externals: {
+    'entities': true
+  },
   module: {
     loaders: [
       {

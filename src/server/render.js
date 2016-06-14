@@ -1,6 +1,10 @@
 /* @flow */
 
+import { cached } from 'shared/util'
+import { encodeHTML } from 'entities'
 import { createComponentInstanceForVnode } from 'core/vdom/create-component'
+
+const encodeHTMLCached = cached(encodeHTML)
 
 export function createRenderFunction (
   modules: Array<Function>,
@@ -20,7 +24,7 @@ export function createRenderFunction (
       if (node.tag) {
         renderElement(node, write, next, isRoot)
       } else {
-        write(node.text, next)
+        write(node.raw ? node.text : encodeHTMLCached(node.text), next)
       }
     }
   }

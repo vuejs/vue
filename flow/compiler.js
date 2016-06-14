@@ -127,20 +127,6 @@ declare type ASTText = {
 
 // SFC-parser related declarations
 
-declare module 'de-indent' {
-  declare var exports: {
-    (str: string): string;
-  }
-}
-
-declare module 'source-map' {
-  declare class SourceMapGenerator {
-    setSourceContent(filename: string, content: string): void;
-    addMapping(mapping: Object): void;
-    toString(): string;
-  }
-}
-
 // an object format describing a single-file component.
 declare type SFCDescriptor = {
   template: ?SFCBlock,
