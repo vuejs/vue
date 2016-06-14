@@ -24,6 +24,10 @@ You can join them in supporting  Vue.js development by [pledging on Patreon](htt
   <img width="360px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/laravel.png">
 </a>
 
+<a href="https://chaitin.cn">
+  <img width="360px" src="https://raw.githubusercontent.com/vuejs/vuejs.org/master/themes/vue/source/images/chaitin.png">
+</a>
+
 ---
 
 ### $250
