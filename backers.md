@@ -114,7 +114,7 @@ It could be you!
 - Guido H.
 - Joan Cejudo
 - Ian Walter
-- Nokola Trifunovic
+- Nikola Trifunovic
 - Nicolas Mutis Mesa
 - Fahed Toumi
 - James
