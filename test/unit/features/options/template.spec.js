@@ -60,4 +60,14 @@ describe('Options template', () => {
     expect('invalid expression: {{ a"" }}').toHaveBeenWarned()
     expect('avoid using JavaScript keyword as property name: "do" in expression {{ do + 1 }}').toHaveBeenWarned()
   })
+
+  it('warn error in generated function (v-for)', () => {
+    new Vue({
+      template: '<div><div v-for="(1, 2) in a----"></div></div>'
+    }).$mount()
+    expect('failed to compile template').toHaveBeenWarned()
+    expect('invalid v-for alias "1"').toHaveBeenWarned()
+    expect('invalid v-for iterator "2"').toHaveBeenWarned()
+    expect('invalid expression: v-for="(1, 2) in a----"').toHaveBeenWarned()
+  })
 })

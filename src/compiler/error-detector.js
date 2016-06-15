@@ -2,11 +2,14 @@
 
 import { dirRE } from './parser/index'
 
-const keywordRE = new RegExp('\\b' + (
-  'do,if,in,for,let,new,try,var,case,else,with,await,break,catch,class,const,' +
-  'super,throw,while,yield,delete,export,import,return,switch,typeof,default,' +
-  'extends,finally,continue,debugger,function,arguments,instanceof'
+// operators like typeof, instanceof and in are allowed
+const prohibitedKeywordRE = new RegExp('\\b' + (
+  'do,if,for,let,new,try,var,case,else,with,await,break,catch,class,const,' +
+  'super,throw,while,yield,delete,export,import,return,switch,default,' +
+  'extends,finally,continue,debugger,function,arguments'
 ).split(',').join('\\b|\\b') + '\\b')
+// check valid identifier for v-for
+const identRE = /[^\w$\.](?:[A-Za-z_$][\w$]*)/
 
 // detect problematic expressions in a template
 export function detectErrors (ast: ?ASTNode): Array<string> {
@@ -23,7 +26,11 @@ function checkNode (node: ASTNode, errors: Array<string>) {
       if (dirRE.test(name)) {
         const value = node.attrsMap[name]
         if (value) {
-          checkExpression(value, `${name}="${value}"`, errors)
+          if (name === 'v-for') {
+            checkFor(node, `v-for="${value}"`, errors)
+          } else {
+            checkExpression(value, `${name}="${value}"`, errors)
+          }
         }
       }
     }
@@ -37,9 +44,22 @@ function checkNode (node: ASTNode, errors: Array<string>) {
   }
 }
 
+function checkFor (node: ASTElement, text: string, errors: Array<string>) {
+  checkExpression(node.for || '', text, errors)
+  checkIdentifier(node.alias, 'v-for alias', text, errors)
+  checkIdentifier(node.iterator1, 'v-for iterator', text, errors)
+  checkIdentifier(node.iterator2, 'v-for iterator', text, errors)
+}
+
+function checkIdentifier (ident: ?string, type: string, text: string, errors: Array<string>) {
+  if (typeof ident === 'string' && !identRE.test(ident)) {
+    errors.push(`- invalid ${type} "${ident}" in expression: ${text}`)
+  }
+}
+
 function checkExpression (exp: string, text: string, errors: Array<string>) {
   exp = stripToString(exp)
-  const keywordMatch = exp.match(keywordRE)
+  const keywordMatch = exp.match(prohibitedKeywordRE)
   if (keywordMatch) {
     errors.push(
       `- avoid using JavaScript keyword as property name: ` +
@@ -47,7 +67,7 @@ function checkExpression (exp: string, text: string, errors: Array<string>) {
     )
   } else {
     try {
-      new Function(exp)
+      new Function(`return ${exp}`)
     } catch (e) {
       errors.push(`- invalid expression: ${text}`)
     }

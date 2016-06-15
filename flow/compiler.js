@@ -88,11 +88,13 @@ declare type ASTElement = {
   renderMethod?: ?string,
   renderArgs?: ?string,
 
-  if?: string | null,
+  if?: string,
+  ifProcessed?: boolean,
   else?: true,
   elseBlock?: ASTElement,
 
-  for?: string | null,
+  for?: string,
+  forProcessed?: boolean,
   key?: string,
   alias?: string,
   iterator1?: string,

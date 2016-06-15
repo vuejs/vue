@@ -39,9 +39,9 @@ export function generate (
 }
 
 function genElement (el: ASTElement): string {
-  if (el.for) {
+  if (el.for && !el.forProcessed) {
     return genFor(el)
-  } else if (el.if) {
+  } else if (el.if && !el.ifProcessed) {
     return genIf(el)
   } else if (el.tag === 'template' && !el.slotTarget) {
     return genChildren(el) || 'void 0'
@@ -88,7 +88,7 @@ function genElement (el: ASTElement): string {
 
 function genIf (el: ASTElement): string {
   const exp = el.if
-  el.if = null // avoid recursion
+  el.ifProcessed = true // avoid recursion
   return `(${exp})?${genElement(el)}:${genElse(el)}`
 }
 
@@ -103,7 +103,7 @@ function genFor (el: ASTElement): string {
   const alias = el.alias
   const iterator1 = el.iterator1 ? `,${el.iterator1}` : ''
   const iterator2 = el.iterator2 ? `,${el.iterator2}` : ''
-  el.for = null // avoid recursion
+  el.forProcessed = true // avoid recursion
   return `(${exp})&&_l((${exp}),` +
     `function(${alias}${iterator1}${iterator2}){` +
       `return ${genElement(el)}` +
