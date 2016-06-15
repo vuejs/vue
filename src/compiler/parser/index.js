@@ -51,6 +51,7 @@ export function parse (
   postTransforms = pluckModuleFunction(options.modules, 'postTransformNode')
   delimiters = options.delimiters
   const stack = []
+  const preserveWhitespace = options.preserveWhitespace !== false
   let root
   let currentParent
   let inPre = false
@@ -202,7 +203,7 @@ export function parse (
       text = currentParent.tag === 'pre' || text.trim()
         ? decodeHTMLCached(text)
         // only preserve whitespace if its not right after a starting tag
-        : currentParent.children.length ? ' ' : ''
+        : preserveWhitespace && currentParent.children.length ? ' ' : ''
       if (text) {
         let expression
         if (!inPre && text !== ' ' && (expression = parseText(text, delimiters))) {

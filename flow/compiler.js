@@ -10,6 +10,7 @@ declare type CompilerOptions = {
   mustUseProp?: (attr: string) => ?boolean, // check if an attribute should be bound as a property
   getTagNamespace?: (tag: string) => ?string, // check the namespace for a tag
   transforms?: Array<Function>, // a list of transforms on parsed AST before codegen
+  preserveWhitespace?: boolean,
 
   // runtime user-configurable
   delimiters?: [string, string] // template delimiters
