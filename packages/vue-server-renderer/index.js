@@ -3,6 +3,7 @@
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
 var stream = _interopDefault(require('stream'));
+var entities = require('entities');
 
 var babelHelpers = {};
 
@@ -1789,7 +1790,7 @@ function setData(vm, newData) {
 }
 
 var VNode = function () {
-  function VNode(tag, data, children, text, elm, ns, context, componentOptions) {
+  function VNode(tag, data, children, text, elm, ns, context, host, componentOptions) {
     this.tag = tag;
     this.data = data;
     this.children = children;
@@ -1797,10 +1798,12 @@ var VNode = function () {
     this.elm = elm;
     this.ns = ns;
     this.context = context;
+    this.host = host;
     this.key = data && data.key;
     this.componentOptions = componentOptions;
     this.child = undefined;
     this.parent = undefined;
+    this.raw = false;
     // apply construct hook.
     // this is applied during render, before patch happens.
     // unlike other hooks, this is applied on both client and server.
@@ -1923,6 +1926,7 @@ function renderElement(tag, data, namespace) {
   // make sure to expose real self instead of proxy
   var context = this._self;
   var parent = renderState.activeInstance;
+  var host = context !== parent ? parent : undefined;
   if (!parent) {
     process.env.NODE_ENV !== 'production' && warn('createElement cannot be called outside of component ' + 'render functions.');
     return;
@@ -1934,19 +1938,19 @@ function renderElement(tag, data, namespace) {
   if (typeof tag === 'string') {
     var Ctor = void 0;
     if (config.isReservedTag(tag)) {
-      return new VNode(tag, data, undefined, undefined, undefined, namespace, context);
+      return new VNode(tag, data, undefined, undefined, undefined, namespace, context, host);
     } else if (Ctor = resolveAsset(context.$options, 'components', tag)) {
-      return createComponent(Ctor, data, parent, context, tag);
+      return createComponent(Ctor, data, parent, context, host, tag);
     } else {
       if (process.env.NODE_ENV !== 'production') {
         if (!namespace && config.isUnknownElement(tag)) {
           warn('Unknown custom element: <' + tag + '> - did you ' + 'register the component correctly? For recursive components, ' + 'make sure to provide the "name" option.');
         }
       }
-      return new VNode(tag, data, undefined, undefined, undefined, namespace, context);
+      return new VNode(tag, data, undefined, undefined, undefined, namespace, context, host);
     }
   } else {
-    return createComponent(tag, data, parent, context);
+    return createComponent(tag, data, parent, context, host);
   }
 }
 
@@ -1955,7 +1959,7 @@ function renderText(str) {
 }
 
 function renderStatic(index) {
-  return this._staticTrees[index];
+  return this._staticTrees[index] || (this._staticTrees[index] = this.$options.staticRenderFns[index].call(this._renderProxy));
 }
 
 var renderState = {
@@ -1995,10 +1999,10 @@ function renderMixin(Vue) {
     var _parentVnode = _vm$$options._parentVnode;
 
 
-    if (staticRenderFns && !vm._staticTrees) {
-      // render static sub-trees for once on initial render
-      renderStaticTrees(vm, staticRenderFns);
+    if (staticRenderFns && !this._staticTrees) {
+      this._staticTrees = [];
     }
+
     // resolve slots. becaues slots are rendered in parent scope,
     // we set the activeInstance to parent.
     if (_renderChildren) {
@@ -2082,13 +2086,6 @@ function renderMixin(Vue) {
       }
     }
   };
-}
-
-function renderStaticTrees(vm, fns) {
-  var trees = vm._staticTrees = new Array(fns.length);
-  for (var i = 0; i < fns.length; i++) {
-    trees[i] = fns[i].call(vm._renderProxy);
-  }
 }
 
 function resolveSlots(vm, renderChildren) {
@@ -2414,7 +2411,7 @@ renderMixin(Vue);
 var hooks = { init: init, prepatch: prepatch, insert: insert, destroy: destroy };
 var hooksToMerge = Object.keys(hooks);
 
-function createComponent(Ctor, data, parent, context, tag) {
+function createComponent(Ctor, data, parent, context, host, tag) {
   if (!Ctor) {
     return;
   }
@@ -2464,7 +2461,7 @@ function createComponent(Ctor, data, parent, context, tag) {
 
   // return a placeholder vnode
   var name = Ctor.options.name || tag;
-  var vnode = new VNode('vue-component-' + Ctor.cid + (name ? '-' + name : ''), data, undefined, undefined, undefined, undefined, context, { Ctor: Ctor, propsData: propsData, listeners: listeners, parent: parent, tag: tag, children: undefined }
+  var vnode = new VNode('vue-component-' + Ctor.cid + (name ? '-' + name : ''), data, undefined, undefined, undefined, undefined, context, host, { Ctor: Ctor, propsData: propsData, listeners: listeners, parent: parent, tag: tag, children: undefined }
   // children to be set later by renderElementWithChildren,
   // but before the init hook
   );
@@ -2628,16 +2625,19 @@ function mergeHook(a, b) {
   };
 }
 
+var encodeHTMLCached = cached(entities.encodeHTML);
+
 function createRenderFunction(modules, directives, isUnaryTag) {
   function renderNode(node, write, next, isRoot) {
     if (node.componentOptions) {
-      var child = createComponentInstanceForVnode(node);
-      renderNode(child._render(), write, next, isRoot);
+      var child = createComponentInstanceForVnode(node)._render();
+      child.parent = node;
+      renderNode(child, write, next, isRoot);
     } else {
       if (node.tag) {
         renderElement(node, write, next, isRoot);
       } else {
-        write(node.text, next);
+        write(node.raw ? node.text : encodeHTMLCached(node.text), next);
       }
     }
   }
@@ -2700,6 +2700,17 @@ function createRenderFunction(modules, directives, isUnaryTag) {
           markup += res;
         }
       }
+    }
+    // attach scoped CSS ID
+    var scopeId = void 0;
+    if (node.host && (scopeId = node.host.$options._scopeId)) {
+      markup += ' ' + scopeId;
+    }
+    while (node) {
+      if (scopeId = node.context.$options._scopeId) {
+        markup += ' ' + scopeId;
+      }
+      node = node.parent;
     }
     return markup + '>';
   }
@@ -2771,6 +2782,12 @@ var isEnumeratedAttr = makeMap('contenteditable,draggable,spellcheck');
 
 var isBooleanAttr = makeMap('allowfullscreen,async,autofocus,autoplay,checked,compact,controls,declare,' + 'default,defaultchecked,defaultmuted,defaultselected,defer,disabled,' + 'enabled,formnovalidate,hidden,indeterminate,inert,ismap,itemscope,loop,multiple,' + 'muted,nohref,noresize,noshade,novalidate,nowrap,open,pauseonexit,readonly,' + 'required,reversed,scoped,seamless,selected,sortable,translate,' + 'truespeed,typemustmatch,visible');
 
+var isAttr = makeMap('accept,accept-charset,accesskey,action,align,alt,async,autocomplete,' + 'autofocus,autoplay,autosave,bgcolor,border,buffered,challenge,charset,' + 'checked,cite,class,code,codebase,color,cols,colspan,content,http-equiv,' + 'name,contenteditable,contextmenu,controls,coords,data,datetime,default,' + 'defer,dir,dirname,disabled,download,draggable,dropzone,enctype,method,for,' + 'form,formaction,headers,<th>,height,hidden,high,href,hreflang,http-equiv,' + 'icon,id,ismap,itemprop,keytype,kind,label,lang,language,list,loop,low,' + 'manifest,max,maxlength,media,method,GET,POST,min,multiple,email,file,' + 'muted,name,novalidate,open,optimum,pattern,ping,placeholder,poster,' + 'preload,radiogroup,readonly,rel,required,reversed,rows,rowspan,sandbox,' + 'scope,scoped,seamless,selected,shape,size,type,text,password,sizes,span,' + 'spellcheck,src,srcdoc,srclang,srcset,start,step,style,summary,tabindex,' + 'target,title,type,usemap,value,width,wrap');
+
+/* istanbul ignore next */
+var isRenderableAttr = function isRenderableAttr(name) {
+  return isAttr(name) || name.indexOf('data-') === 0 || name.indexOf('aria-') === 0;
+};
 var propsToAttrMap = {
   acceptCharset: 'accept-charset',
   className: 'class',
@@ -2867,36 +2884,65 @@ var isIE9 = UA$1 && UA$1.indexOf('msie 9.0') > 0;
 var isAndroid = UA$1 && UA$1.indexOf('android') > 0;
 
 function renderAttrs(node) {
-  if (node.data.attrs || node.data.props || node.data.staticAttrs) {
-    return serialize(node.data.staticAttrs) + serialize(node.data.attrs) + serialize(node.data.props, true);
+  var res = '';
+  if (node.data.staticAttrs) {
+    res += render(node.data.staticAttrs);
   }
+  if (node.data.attrs) {
+    res += render(node.data.attrs);
+  }
+  return res;
 }
 
-function serialize(attrs, asProps) {
+function render(attrs) {
   var res = '';
-  if (!attrs) {
-    return res;
-  }
   for (var _key in attrs) {
     if (_key === 'style') {
       // leave it to the style module
       continue;
     }
-    if (asProps) {
-      _key = propsToAttrMap[_key] || _key.toLowerCase();
+    res += renderAttr(_key, attrs[_key]);
+  }
+  return res;
+}
+
+function renderAttr(key, value) {
+  if (isBooleanAttr(key)) {
+    if (!isFalsyAttrValue(value)) {
+      return ' ' + key + '="' + key + '"';
     }
-    var value = attrs[_key];
-    if (isBooleanAttr(_key)) {
-      if (!isFalsyAttrValue(value)) {
-        res += ' ' + _key + '="' + _key + '"';
+  } else if (isEnumeratedAttr(key)) {
+    return ' ' + key + '="' + (isFalsyAttrValue(value) || value === 'false' ? 'false' : 'true') + '"';
+  } else if (!isFalsyAttrValue(value)) {
+    return ' ' + key + '="' + value + '"';
+  }
+  return '';
+}
+
+function props (node) {
+  var props = node.data.props;
+  var res = '';
+  if (props) {
+    for (var key in props) {
+      if (key === 'innerHTML') {
+        setText(node, props[key], true);
+      } else if (key === 'textContent') {
+        setText(node, props[key]);
+      } else {
+        var attr = propsToAttrMap[key] || key.toLowerCase();
+        if (isRenderableAttr(attr)) {
+          res += renderAttr(attr, props[key]);
+        }
       }
-    } else if (isEnumeratedAttr(_key)) {
-      res += ' ' + _key + '="' + (isFalsyAttrValue(value) || value === 'false' ? 'false' : 'true') + '"';
-    } else if (!isFalsyAttrValue(value)) {
-      res += ' ' + _key + '="' + value + '"';
     }
   }
   return res;
+}
+
+function setText(node, text, raw) {
+  var child = new VNode(undefined, undefined, undefined, text);
+  child.raw = raw;
+  node.children = [child];
 }
 
 function renderClass(node) {
@@ -2922,7 +2968,7 @@ function renderStyle(node) {
   }
 }
 
-var modules = [renderAttrs, renderClass, renderStyle];
+var modules = [renderAttrs, props, renderClass, renderStyle];
 
 function show(node, dir) {
   if (!dir.value) {

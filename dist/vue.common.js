@@ -1272,7 +1272,7 @@ function setData(vm, newData) {
 }
 
 var VNode = function () {
-  function VNode(tag, data, children, text, elm, ns, context, componentOptions) {
+  function VNode(tag, data, children, text, elm, ns, context, host, componentOptions) {
     this.tag = tag;
     this.data = data;
     this.children = children;
@@ -1280,10 +1280,12 @@ var VNode = function () {
     this.elm = elm;
     this.ns = ns;
     this.context = context;
+    this.host = host;
     this.key = data && data.key;
     this.componentOptions = componentOptions;
     this.child = undefined;
     this.parent = undefined;
+    this.raw = false;
     // apply construct hook.
     // this is applied during render, before patch happens.
     // unlike other hooks, this is applied on both client and server.
@@ -1550,7 +1552,7 @@ function callHook(vm, hook) {
 var hooks = { init: init, prepatch: prepatch, insert: insert, destroy: destroy };
 var hooksToMerge = Object.keys(hooks);
 
-function createComponent(Ctor, data, parent, context, tag) {
+function createComponent(Ctor, data, parent, context, host, tag) {
   if (!Ctor) {
     return;
   }
@@ -1600,7 +1602,7 @@ function createComponent(Ctor, data, parent, context, tag) {
 
   // return a placeholder vnode
   var name = Ctor.options.name || tag;
-  var vnode = new VNode('vue-component-' + Ctor.cid + (name ? '-' + name : ''), data, undefined, undefined, undefined, undefined, context, { Ctor: Ctor, propsData: propsData, listeners: listeners, parent: parent, tag: tag, children: undefined }
+  var vnode = new VNode('vue-component-' + Ctor.cid + (name ? '-' + name : ''), data, undefined, undefined, undefined, undefined, context, host, { Ctor: Ctor, propsData: propsData, listeners: listeners, parent: parent, tag: tag, children: undefined }
   // children to be set later by renderElementWithChildren,
   // but before the init hook
   );
@@ -1782,6 +1784,7 @@ function renderElement(tag, data, namespace) {
   // make sure to expose real self instead of proxy
   var context = this._self;
   var parent = renderState.activeInstance;
+  var host = context !== parent ? parent : undefined;
   if (!parent) {
     process.env.NODE_ENV !== 'production' && warn('createElement cannot be called outside of component ' + 'render functions.');
     return;
@@ -1793,19 +1796,19 @@ function renderElement(tag, data, namespace) {
   if (typeof tag === 'string') {
     var Ctor = void 0;
     if (config.isReservedTag(tag)) {
-      return new VNode(tag, data, undefined, undefined, undefined, namespace, context);
+      return new VNode(tag, data, undefined, undefined, undefined, namespace, context, host);
     } else if (Ctor = resolveAsset(context.$options, 'components', tag)) {
-      return createComponent(Ctor, data, parent, context, tag);
+      return createComponent(Ctor, data, parent, context, host, tag);
     } else {
       if (process.env.NODE_ENV !== 'production') {
         if (!namespace && config.isUnknownElement(tag)) {
           warn('Unknown custom element: <' + tag + '> - did you ' + 'register the component correctly? For recursive components, ' + 'make sure to provide the "name" option.');
         }
       }
-      return new VNode(tag, data, undefined, undefined, undefined, namespace, context);
+      return new VNode(tag, data, undefined, undefined, undefined, namespace, context, host);
     }
   } else {
-    return createComponent(tag, data, parent, context);
+    return createComponent(tag, data, parent, context, host);
   }
 }
 
@@ -1814,7 +1817,7 @@ function renderText(str) {
 }
 
 function renderStatic(index) {
-  return this._staticTrees[index];
+  return this._staticTrees[index] || (this._staticTrees[index] = this.$options.staticRenderFns[index].call(this._renderProxy));
 }
 
 var renderState = {
@@ -1854,10 +1857,10 @@ function renderMixin(Vue) {
     var _parentVnode = _vm$$options._parentVnode;
 
 
-    if (staticRenderFns && !vm._staticTrees) {
-      // render static sub-trees for once on initial render
-      renderStaticTrees(vm, staticRenderFns);
+    if (staticRenderFns && !this._staticTrees) {
+      this._staticTrees = [];
     }
+
     // resolve slots. becaues slots are rendered in parent scope,
     // we set the activeInstance to parent.
     if (_renderChildren) {
@@ -1941,13 +1944,6 @@ function renderMixin(Vue) {
       }
     }
   };
-}
-
-function renderStaticTrees(vm, fns) {
-  var trees = vm._staticTrees = new Array(fns.length);
-  for (var i = 0; i < fns.length; i++) {
-    trees[i] = fns[i].call(vm._renderProxy);
-  }
 }
 
 function resolveSlots(vm, renderChildren) {
@@ -2756,7 +2752,7 @@ Object.defineProperty(Vue.prototype, '$isServer', {
   }
 });
 
-Vue.version = '2.0.0-alpha.2';
+Vue.version = '2.0.0-alpha.3';
 
 // attributes that should be using props for binding
 var mustUseProp = makeMap('value,selected,checked,muted');
@@ -2764,6 +2760,8 @@ var mustUseProp = makeMap('value,selected,checked,muted');
 var isEnumeratedAttr = makeMap('contenteditable,draggable,spellcheck');
 
 var isBooleanAttr = makeMap('allowfullscreen,async,autofocus,autoplay,checked,compact,controls,declare,' + 'default,defaultchecked,defaultmuted,defaultselected,defer,disabled,' + 'enabled,formnovalidate,hidden,indeterminate,inert,ismap,itemscope,loop,multiple,' + 'muted,nohref,noresize,noshade,novalidate,nowrap,open,pauseonexit,readonly,' + 'required,reversed,scoped,seamless,selected,sortable,translate,' + 'truespeed,typemustmatch,visible');
+
+var isAttr = makeMap('accept,accept-charset,accesskey,action,align,alt,async,autocomplete,' + 'autofocus,autoplay,autosave,bgcolor,border,buffered,challenge,charset,' + 'checked,cite,class,code,codebase,color,cols,colspan,content,http-equiv,' + 'name,contenteditable,contextmenu,controls,coords,data,datetime,default,' + 'defer,dir,dirname,disabled,download,draggable,dropzone,enctype,method,for,' + 'form,formaction,headers,<th>,height,hidden,high,href,hreflang,http-equiv,' + 'icon,id,ismap,itemprop,keytype,kind,label,lang,language,list,loop,low,' + 'manifest,max,maxlength,media,method,GET,POST,min,multiple,email,file,' + 'muted,name,novalidate,open,optimum,pattern,ping,placeholder,poster,' + 'preload,radiogroup,readonly,rel,required,reversed,rows,rowspan,sandbox,' + 'scope,scoped,seamless,selected,shape,size,type,text,password,sizes,span,' + 'spellcheck,src,srcdoc,srclang,srcset,start,step,style,summary,tabindex,' + 'target,title,type,usemap,value,width,wrap');
 
 var xlinkNS = 'http://www.w3.org/1999/xlink';
 
@@ -3080,6 +3078,9 @@ function createPatchFunction(backend) {
   // of going through the normal attribute patching process.
   function setScope(vnode) {
     var i = void 0;
+    if (isDef(i = vnode.host) && isDef(i = i.$options._scopeId)) {
+      nodeOps.setAttribute(vnode.elm, i, '');
+    }
     if (isDef(i = vnode.context) && isDef(i = i.$options._scopeId)) {
       nodeOps.setAttribute(vnode.elm, i, '');
     }

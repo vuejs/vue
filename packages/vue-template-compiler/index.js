@@ -1279,7 +1279,7 @@ function setData(vm, newData) {
 }
 
 var VNode = function () {
-  function VNode(tag, data, children, text, elm, ns, context, componentOptions) {
+  function VNode(tag, data, children, text, elm, ns, context, host, componentOptions) {
     this.tag = tag;
     this.data = data;
     this.children = children;
@@ -1287,10 +1287,12 @@ var VNode = function () {
     this.elm = elm;
     this.ns = ns;
     this.context = context;
+    this.host = host;
     this.key = data && data.key;
     this.componentOptions = componentOptions;
     this.child = undefined;
     this.parent = undefined;
+    this.raw = false;
     // apply construct hook.
     // this is applied during render, before patch happens.
     // unlike other hooks, this is applied on both client and server.
@@ -1557,7 +1559,7 @@ function callHook(vm, hook) {
 var hooks = { init: init, prepatch: prepatch, insert: insert, destroy: destroy };
 var hooksToMerge = Object.keys(hooks);
 
-function createComponent(Ctor, data, parent, context, tag) {
+function createComponent(Ctor, data, parent, context, host, tag) {
   if (!Ctor) {
     return;
   }
@@ -1607,7 +1609,7 @@ function createComponent(Ctor, data, parent, context, tag) {
 
   // return a placeholder vnode
   var name = Ctor.options.name || tag;
-  var vnode = new VNode('vue-component-' + Ctor.cid + (name ? '-' + name : ''), data, undefined, undefined, undefined, undefined, context, { Ctor: Ctor, propsData: propsData, listeners: listeners, parent: parent, tag: tag, children: undefined }
+  var vnode = new VNode('vue-component-' + Ctor.cid + (name ? '-' + name : ''), data, undefined, undefined, undefined, undefined, context, host, { Ctor: Ctor, propsData: propsData, listeners: listeners, parent: parent, tag: tag, children: undefined }
   // children to be set later by renderElementWithChildren,
   // but before the init hook
   );
@@ -1789,6 +1791,7 @@ function renderElement(tag, data, namespace) {
   // make sure to expose real self instead of proxy
   var context = this._self;
   var parent = renderState.activeInstance;
+  var host = context !== parent ? parent : undefined;
   if (!parent) {
     process.env.NODE_ENV !== 'production' && warn('createElement cannot be called outside of component ' + 'render functions.');
     return;
@@ -1800,19 +1803,19 @@ function renderElement(tag, data, namespace) {
   if (typeof tag === 'string') {
     var Ctor = void 0;
     if (config.isReservedTag(tag)) {
-      return new VNode(tag, data, undefined, undefined, undefined, namespace, context);
+      return new VNode(tag, data, undefined, undefined, undefined, namespace, context, host);
     } else if (Ctor = resolveAsset(context.$options, 'components', tag)) {
-      return createComponent(Ctor, data, parent, context, tag);
+      return createComponent(Ctor, data, parent, context, host, tag);
     } else {
       if (process.env.NODE_ENV !== 'production') {
         if (!namespace && config.isUnknownElement(tag)) {
           warn('Unknown custom element: <' + tag + '> - did you ' + 'register the component correctly? For recursive components, ' + 'make sure to provide the "name" option.');
         }
       }
-      return new VNode(tag, data, undefined, undefined, undefined, namespace, context);
+      return new VNode(tag, data, undefined, undefined, undefined, namespace, context, host);
     }
   } else {
-    return createComponent(tag, data, parent, context);
+    return createComponent(tag, data, parent, context, host);
   }
 }
 
@@ -1821,7 +1824,7 @@ function renderText(str) {
 }
 
 function renderStatic(index) {
-  return this._staticTrees[index];
+  return this._staticTrees[index] || (this._staticTrees[index] = this.$options.staticRenderFns[index].call(this._renderProxy));
 }
 
 var renderState = {
@@ -1861,10 +1864,10 @@ function renderMixin(Vue) {
     var _parentVnode = _vm$$options._parentVnode;
 
 
-    if (staticRenderFns && !vm._staticTrees) {
-      // render static sub-trees for once on initial render
-      renderStaticTrees(vm, staticRenderFns);
+    if (staticRenderFns && !this._staticTrees) {
+      this._staticTrees = [];
     }
+
     // resolve slots. becaues slots are rendered in parent scope,
     // we set the activeInstance to parent.
     if (_renderChildren) {
@@ -1948,13 +1951,6 @@ function renderMixin(Vue) {
       }
     }
   };
-}
-
-function renderStaticTrees(vm, fns) {
-  var trees = vm._staticTrees = new Array(fns.length);
-  for (var i = 0; i < fns.length; i++) {
-    trees[i] = fns[i].call(vm._renderProxy);
-  }
 }
 
 function resolveSlots(vm, renderChildren) {
@@ -2521,6 +2517,8 @@ var isEnumeratedAttr = makeMap('contenteditable,draggable,spellcheck');
 
 var isBooleanAttr = makeMap('allowfullscreen,async,autofocus,autoplay,checked,compact,controls,declare,' + 'default,defaultchecked,defaultmuted,defaultselected,defer,disabled,' + 'enabled,formnovalidate,hidden,indeterminate,inert,ismap,itemscope,loop,multiple,' + 'muted,nohref,noresize,noshade,novalidate,nowrap,open,pauseonexit,readonly,' + 'required,reversed,scoped,seamless,selected,sortable,translate,' + 'truespeed,typemustmatch,visible');
 
+var isAttr = makeMap('accept,accept-charset,accesskey,action,align,alt,async,autocomplete,' + 'autofocus,autoplay,autosave,bgcolor,border,buffered,challenge,charset,' + 'checked,cite,class,code,codebase,color,cols,colspan,content,http-equiv,' + 'name,contenteditable,contextmenu,controls,coords,data,datetime,default,' + 'defer,dir,dirname,disabled,download,draggable,dropzone,enctype,method,for,' + 'form,formaction,headers,<th>,height,hidden,high,href,hreflang,http-equiv,' + 'icon,id,ismap,itemprop,keytype,kind,label,lang,language,list,loop,low,' + 'manifest,max,maxlength,media,method,GET,POST,min,multiple,email,file,' + 'muted,name,novalidate,open,optimum,pattern,ping,placeholder,poster,' + 'preload,radiogroup,readonly,rel,required,reversed,rows,rowspan,sandbox,' + 'scope,scoped,seamless,selected,shape,size,type,text,password,sizes,span,' + 'spellcheck,src,srcdoc,srclang,srcset,start,step,style,summary,tabindex,' + 'target,title,type,usemap,value,width,wrap');
+
 var isReservedTag = makeMap('html,base,head,link,meta,style,title,' + 'address,article,footer,header,h1,h2,h3,h4,h5,h6,hgroup,nav,section,' + 'div,dd,dl,dt,figcaption,figure,hr,img,li,main,ol,p,pre,ul,' + 'a,b,abbr,bdi,bdo,br,cite,code,data,dfn,em,i,kbd,mark,q,rp,rt,rtc,ruby,' + 's,samp,small,span,strong,sub,sup,time,u,var,wbr,area,audio,map,track,video,' + 'embed,object,param,source,canvas,script,noscript,del,ins,' + 'caption,col,colgroup,table,thead,tbody,td,th,tr,' + 'button,datalist,fieldset,form,input,label,legend,meter,optgroup,option,' + 'output,progress,select,textarea,' + 'details,dialog,menu,menuitem,summary,' + 'content,element,shadow,template');
 
 var isUnaryTag = makeMap('area,base,br,col,embed,frame,hr,img,input,isindex,keygen,' + 'link,meta,param,source,track,wbr', true);
@@ -3021,12 +3019,12 @@ function getAndRemoveAttr(el, name) {
 }
 
 var dirRE = /^v-|^@|^:/;
+var forAliasRE = /(.*)\s+(?:in|of)\s+(.*)/;
+var forIteratorRE = /\(([^,]*),([^,]*)(?:,([^,]*))?\)/;
 var bindRE = /^:|^v-bind:/;
 var onRE = /^@|^v-on:/;
 var argRE = /:(.*)$/;
 var modifierRE = /\.[^\.]+/g;
-var forAliasRE = /(.*)\s+(?:in|of)\s+(.*)/;
-var forIteratorRE = /\(([^,]*),([^,]*)(?:,([^,]*))?\)/;
 var camelRE = /[a-z\d][A-Z]/;
 
 var decodeHTMLCached = cached(entities.decodeHTML);
@@ -3052,6 +3050,7 @@ function parse(template, options) {
   postTransforms = pluckModuleFunction(options.modules, 'postTransformNode');
   delimiters = options.delimiters;
   var stack = [];
+  var preserveWhitespace = options.preserveWhitespace !== false;
   var root = void 0;
   var currentParent = void 0;
   var inPre = false;
@@ -3183,7 +3182,7 @@ function parse(template, options) {
       }
       text = currentParent.tag === 'pre' || text.trim() ? decodeHTMLCached(text)
       // only preserve whitespace if its not right after a starting tag
-      : currentParent.children.length ? ' ' : '';
+      : preserveWhitespace && currentParent.children.length ? ' ' : '';
       if (text) {
         var expression = void 0;
         if (!inPre && text !== ' ' && (expression = parseText(text, delimiters))) {
@@ -3614,9 +3613,9 @@ function generate(ast, options) {
 }
 
 function genElement(el) {
-  if (el.for) {
+  if (el.for && !el.forProcessed) {
     return genFor(el);
-  } else if (el.if) {
+  } else if (el.if && !el.ifProcessed) {
     return genIf(el);
   } else if (el.tag === 'template' && !el.slotTarget) {
     return genChildren(el) || 'void 0';
@@ -3658,7 +3657,7 @@ function genElement(el) {
 
 function genIf(el) {
   var exp = el.if;
-  el.if = null; // avoid recursion
+  el.ifProcessed = true; // avoid recursion
   return '(' + exp + ')?' + genElement(el) + ':' + genElse(el);
 }
 
@@ -3671,7 +3670,7 @@ function genFor(el) {
   var alias = el.alias;
   var iterator1 = el.iterator1 ? ',' + el.iterator1 : '';
   var iterator2 = el.iterator2 ? ',' + el.iterator2 : '';
-  el.for = null; // avoid recursion
+  el.forProcessed = true; // avoid recursion
   return '(' + exp + ')&&_l((' + exp + '),' + ('function(' + alias + iterator1 + iterator2 + '){') + ('return ' + genElement(el)) + '})';
 }
 
@@ -3849,7 +3848,10 @@ function compile$2(template, options) {
   };
 }
 
-var keywordRE = new RegExp('\\b' + ('do,if,in,for,let,new,try,var,case,else,with,await,break,catch,class,const,' + 'super,throw,while,yield,delete,export,import,return,switch,typeof,default,' + 'extends,finally,continue,debugger,function,arguments,instanceof').split(',').join('\\b|\\b') + '\\b');
+// operators like typeof, instanceof and in are allowed
+var prohibitedKeywordRE = new RegExp('\\b' + ('do,if,for,let,new,try,var,case,else,with,await,break,catch,class,const,' + 'super,throw,while,yield,delete,export,import,return,switch,default,' + 'extends,finally,continue,debugger,function,arguments').split(',').join('\\b|\\b') + '\\b');
+// check valid identifier for v-for
+var identRE = /[^\w$\.](?:[A-Za-z_$][\w$]*)/;
 
 // detect problematic expressions in a template
 function detectErrors(ast) {
@@ -3866,7 +3868,11 @@ function checkNode(node, errors) {
       if (dirRE.test(name)) {
         var value = node.attrsMap[name];
         if (value) {
-          checkExpression(value, name + '="' + value + '"', errors);
+          if (name === 'v-for') {
+            checkFor(node, 'v-for="' + value + '"', errors);
+          } else {
+            checkExpression(value, name + '="' + value + '"', errors);
+          }
         }
       }
     }
@@ -3880,14 +3886,27 @@ function checkNode(node, errors) {
   }
 }
 
+function checkFor(node, text, errors) {
+  checkExpression(node.for || '', text, errors);
+  checkIdentifier(node.alias, 'v-for alias', text, errors);
+  checkIdentifier(node.iterator1, 'v-for iterator', text, errors);
+  checkIdentifier(node.iterator2, 'v-for iterator', text, errors);
+}
+
+function checkIdentifier(ident, type, text, errors) {
+  if (typeof ident === 'string' && !identRE.test(ident)) {
+    errors.push('- invalid ' + type + ' "' + ident + '" in expression: ' + text);
+  }
+}
+
 function checkExpression(exp, text, errors) {
   exp = stripToString(exp);
-  var keywordMatch = exp.match(keywordRE);
+  var keywordMatch = exp.match(prohibitedKeywordRE);
   if (keywordMatch) {
     errors.push('- avoid using JavaScript keyword as property name: ' + ('"' + keywordMatch[0] + '" in expression ' + text));
   } else {
     try {
-      new Function(exp);
+      new Function('return ' + exp);
     } catch (e) {
       errors.push('- invalid expression: ' + text);
     }
