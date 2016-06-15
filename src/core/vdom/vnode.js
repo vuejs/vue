@@ -8,6 +8,7 @@ export default class VNode {
   elm: Node | void;
   ns: string | void;
   context: Component | void;
+  host: ?Component;
   key: string | number | void;
   componentOptions: VNodeComponentOptions | void;
   child: Component | void;
@@ -22,6 +23,7 @@ export default class VNode {
     elm?: Node,
     ns?: string,
     context?: Component,
+    host?: ?Component,
     componentOptions?: VNodeComponentOptions
   ) {
     this.tag = tag
@@ -31,10 +33,12 @@ export default class VNode {
     this.elm = elm
     this.ns = ns
     this.context = context
+    this.host = host
     this.key = data && data.key
     this.componentOptions = componentOptions
     this.child = undefined
     this.parent = undefined
+    this.raw = false
     // apply construct hook.
     // this is applied during render, before patch happens.
     // unlike other hooks, this is applied on both client and server.

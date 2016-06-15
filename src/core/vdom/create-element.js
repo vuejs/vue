@@ -37,6 +37,7 @@ export function renderElement (
   // make sure to expose real self instead of proxy
   const context: Component = this._self
   const parent: ?Component = renderState.activeInstance
+  const host = context !== parent ? parent : undefined
   if (!parent) {
     process.env.NODE_ENV !== 'production' && warn(
       'createElement cannot be called outside of component ' +
@@ -53,10 +54,10 @@ export function renderElement (
     if (config.isReservedTag(tag)) {
       return new VNode(
         tag, data, undefined,
-        undefined, undefined, namespace, context
+        undefined, undefined, namespace, context, host
       )
     } else if ((Ctor = resolveAsset(context.$options, 'components', tag))) {
-      return createComponent(Ctor, data, parent, context, tag)
+      return createComponent(Ctor, data, parent, context, host, tag)
     } else {
       if (process.env.NODE_ENV !== 'production') {
         if (!namespace && config.isUnknownElement(tag)) {
@@ -69,11 +70,11 @@ export function renderElement (
       }
       return new VNode(
         tag, data, undefined,
-        undefined, undefined, namespace, context
+        undefined, undefined, namespace, context, host
       )
     }
   } else {
-    return createComponent(tag, data, parent, context)
+    return createComponent(tag, data, parent, context, host)
   }
 }
 
@@ -82,5 +83,9 @@ export function renderText (str?: string): string {
 }
 
 export function renderStatic (index?: number): Object | void {
-  return this._staticTrees[index]
+  return this._staticTrees[index] || (
+    this._staticTrees[index] = this.$options.staticRenderFns[index].call(
+      this._renderProxy
+    )
+  )
 }

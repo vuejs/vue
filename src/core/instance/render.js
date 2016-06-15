@@ -59,10 +59,10 @@ export function renderMixin (Vue: Class<Component>) {
       _parentVnode
     } = vm.$options
 
-    if (staticRenderFns && !vm._staticTrees) {
-      // render static sub-trees for once on initial render
-      renderStaticTrees(vm, staticRenderFns)
+    if (staticRenderFns && !this._staticTrees) {
+      this._staticTrees = []
     }
+
     // resolve slots. becaues slots are rendered in parent scope,
     // we set the activeInstance to parent.
     if (_renderChildren) {
@@ -151,13 +151,6 @@ export function renderMixin (Vue: Class<Component>) {
         }
       }
     }
-  }
-}
-
-function renderStaticTrees (vm: Component, fns: Array<Function>) {
-  const trees = vm._staticTrees = new Array(fns.length)
-  for (let i = 0; i < fns.length; i++) {
-    trees[i] = fns[i].call(vm._renderProxy)
   }
 }
 

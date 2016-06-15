@@ -439,6 +439,29 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  it('_scopeId on slot content', done => {
+    renderVmWithOptions({
+      _scopeId: '_v-parent',
+      template: '<div><child><p>foo</p></child></div>',
+      components: {
+        child: {
+          _scopeId: '_v-child',
+          render () {
+            const h = this.$createElement
+            return h('div', null, this.$slots.default)
+          }
+        }
+      }
+    }, result => {
+      expect(result).toContain(
+        '<div server-rendered="true" _v-parent>' +
+          '<div _v-child _v-parent><p _v-child _v-parent>foo</p></div>' +
+        '</div>'
+      )
+      done()
+    })
+  })
+
   it('should catch error', done => {
     renderToString(new Vue({
       render () {

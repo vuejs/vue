@@ -13,6 +13,7 @@ export function createComponent (
   data?: VNodeData,
   parent: Component,
   context: Component,
+  host: ?Component,
   tag?: string
 ): VNode | void {
   if (!Ctor) {
@@ -66,7 +67,7 @@ export function createComponent (
   const name = Ctor.options.name || tag
   const vnode = new VNode(
     `vue-component-${Ctor.cid}${name ? `-${name}` : ''}`,
-    data, undefined, undefined, undefined, undefined, context,
+    data, undefined, undefined, undefined, undefined, context, host,
     { Ctor, propsData, listeners, parent, tag, children: undefined }
     // children to be set later by renderElementWithChildren,
     // but before the init hook

@@ -35,7 +35,9 @@ describe('element', () => {
   it('should create element with scope attribute', () => {
     const vnode = new VNode('div')
     vnode.context = new Vue({ _scopeId: 'foo' })
+    vnode.host = new Vue({ _scopeId: 'bar' })
     const elm = patch(null, vnode)
     expect(elm.hasAttribute('foo')).toBe(true)
+    expect(elm.hasAttribute('bar')).toBe(true)
   })
 })

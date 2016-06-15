@@ -93,9 +93,12 @@ export function createRenderFunction (
       }
     }
     // attach scoped CSS ID
+    let scopeId
+    if (node.host && (scopeId = node.host.$options._scopeId)) {
+      markup += ` ${scopeId}`
+    }
     while (node) {
-      const scopeId = node.context.$options._scopeId
-      if (scopeId) {
+      if ((scopeId = node.context.$options._scopeId)) {
         markup += ` ${scopeId}`
       }
       node = node.parent
