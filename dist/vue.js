@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.0.0-alpha.3
+ * Vue.js v2.0.0-alpha.4
  * (c) 2014-2016 Evan You
  * Released under the MIT License.
  */
@@ -202,6 +202,11 @@
      * Error handler for watcher errors
      */
     errorHandler: null,
+
+    /**
+     * Ignore certain custom elements
+     */
+    ignoredElements: null,
 
     /**
      * Check if a tag is reserved so that it cannot be registered as a
@@ -1808,7 +1813,7 @@
         return createComponent(Ctor, data, parent, context, host, tag);
       } else {
         if ("development" !== 'production') {
-          if (!namespace && config.isUnknownElement(tag)) {
+          if (!namespace && !(config.ignoredElements && config.ignoredElements.indexOf(tag) > -1) && config.isUnknownElement(tag)) {
             warn('Unknown custom element: <' + tag + '> - did you ' + 'register the component correctly? For recursive components, ' + 'make sure to provide the "name" option.');
           }
         }
@@ -2757,7 +2762,7 @@
     }
   });
 
-  Vue.version = '2.0.0-alpha.3';
+  Vue.version = '2.0.0-alpha.4';
 
   // attributes that should be using props for binding
   var mustUseProp = makeMap('value,selected,checked,muted');
@@ -5584,7 +5589,7 @@ var nodeOps = Object.freeze({
   // operators like typeof, instanceof and in are allowed
   var prohibitedKeywordRE = new RegExp('\\b' + ('do,if,for,let,new,try,var,case,else,with,await,break,catch,class,const,' + 'super,throw,while,yield,delete,export,import,return,switch,default,' + 'extends,finally,continue,debugger,function,arguments').split(',').join('\\b|\\b') + '\\b');
   // check valid identifier for v-for
-  var identRE = /[^\w$\.](?:[A-Za-z_$][\w$]*)/;
+  var identRE = /[A-Za-z_$][\w$]*/;
 
   // detect problematic expressions in a template
   function detectErrors(ast) {

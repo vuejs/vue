@@ -461,6 +461,11 @@ var config = {
   errorHandler: null,
 
   /**
+   * Ignore certain custom elements
+   */
+  ignoredElements: null,
+
+  /**
    * Check if a tag is reserved so that it cannot be registered as a
    * component. This is platform-dependent and may be overwritten.
    */
@@ -1943,7 +1948,7 @@ function renderElement(tag, data, namespace) {
       return createComponent(Ctor, data, parent, context, host, tag);
     } else {
       if (process.env.NODE_ENV !== 'production') {
-        if (!namespace && config.isUnknownElement(tag)) {
+        if (!namespace && !(config.ignoredElements && config.ignoredElements.indexOf(tag) > -1) && config.isUnknownElement(tag)) {
           warn('Unknown custom element: <' + tag + '> - did you ' + 'register the component correctly? For recursive components, ' + 'make sure to provide the "name" option.');
         }
       }
