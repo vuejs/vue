@@ -6,6 +6,7 @@ export type Config = {
   optionMergeStrategies: { [key: string]: Function },
   silent: boolean,
   errorHandler: ?Function,
+  ignoredElements: ?Array<string>,
   isReservedTag: (x?: string) => boolean,
   isUnknownElement: (x?: string) => boolean,
   mustUseProp: (x?: string) => boolean,
@@ -31,6 +32,11 @@ const config: Config = {
    * Error handler for watcher errors
    */
   errorHandler: null,
+
+  /**
+   * Ignore certain custom elements
+   */
+  ignoredElements: null,
 
   /**
    * Check if a tag is reserved so that it cannot be registered as a
