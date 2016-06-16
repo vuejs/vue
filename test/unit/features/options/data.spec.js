@@ -67,4 +67,12 @@ describe('Options data', () => {
     })
     expect('data functions should return an object').toHaveBeenWarned()
   })
+
+  it('should warn replacing root $data', () => {
+    const vm = new Vue({
+      data: {}
+    })
+    vm.$data = {}
+    expect('Avoid replacing instance root $data').toHaveBeenWarned()
+  })
 })

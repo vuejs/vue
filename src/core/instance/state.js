@@ -2,16 +2,17 @@
 
 import Watcher from '../observer/watcher'
 import Dep from '../observer/dep'
+
 import {
   observe,
   defineReactive,
-  observerState,
-  proxy,
-  unproxy
+  observerState
 } from '../observer/index'
+
 import {
   warn,
   hasOwn,
+  isReserved,
   isPlainObject,
   bind,
   validateProp,
@@ -180,9 +181,13 @@ export function stateMixin (Vue: Class<Component>) {
   dataDef.get = function () {
     return this._data
   }
-  dataDef.set = function (newData: Object) {
-    if (newData !== this._data) {
-      setData(this, newData)
+  if (process.env.NODE_ENV !== 'production') {
+    dataDef.set = function (newData: Object) {
+      warn(
+        'Avoid replacing instance root $data. ' +
+        'Use nested data properties instead.',
+        this
+      )
     }
   }
   Object.defineProperty(Vue.prototype, '$data', dataDef)
@@ -205,33 +210,17 @@ export function stateMixin (Vue: Class<Component>) {
   }
 }
 
-function setData (vm: Component, newData: Object) {
-  newData = newData || {}
-  const oldData = vm._data
-  vm._data = newData
-  let keys, key, i
-  // unproxy keys not present in new data
-  keys = Object.keys(oldData)
-  i = keys.length
-  while (i--) {
-    key = keys[i]
-    if (!(key in newData)) {
-      unproxy(vm, key)
-    }
+function proxy (vm: Component, key: string) {
+  if (!isReserved(key)) {
+    Object.defineProperty(vm, key, {
+      configurable: true,
+      enumerable: true,
+      get: function proxyGetter () {
+        return vm._data[key]
+      },
+      set: function proxySetter (val) {
+        vm._data[key] = val
+      }
+    })
   }
-  // proxy keys not already proxied,
-  // and trigger change for changed values
-  keys = Object.keys(newData)
-  i = keys.length
-  while (i--) {
-    key = keys[i]
-    if (!hasOwn(vm, key)) {
-      // new property
-      proxy(vm, key)
-    }
-  }
-  oldData.__ob__ && oldData.__ob__.vmCount--
-  observe(newData)
-  newData.__ob__ && newData.__ob__.vmCount++
-  vm.$forceUpdate()
 }

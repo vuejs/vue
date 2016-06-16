@@ -9,7 +9,6 @@ import {
   isPlainObject,
   hasProto,
   hasOwn,
-  isReserved,
   warn
 } from '../util/index'
 
@@ -234,26 +233,4 @@ export function del (obj: Object, key: string) {
     return
   }
   ob.dep.notify()
-}
-
-export function proxy (vm: Component, key: string) {
-  if (!isReserved(key)) {
-    Object.defineProperty(vm, key, {
-      configurable: true,
-      enumerable: true,
-      get: function proxyGetter () {
-        return vm._data[key]
-      },
-      set: function proxySetter (val) {
-        vm._data[key] = val
-      }
-    })
-  }
-}
-
-// using Object type to avoid flow complaining
-export function unproxy (vm: Component, key: string) {
-  if (!isReserved(key)) {
-    delete vm[key]
-  }
 }

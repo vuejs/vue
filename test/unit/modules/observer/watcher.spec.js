@@ -59,23 +59,6 @@ describe('Watcher', () => {
     }).then(done)
   })
 
-  it('swapping $data', done => {
-    // existing path
-    const watcher1 = new Watcher(vm, 'b.c', spy)
-    // non-existing path
-    const spy2 = jasmine.createSpy()
-    const watcher2 = new Watcher(vm, 'e', spy2)
-    expect(watcher1.value).toBe(2)
-    expect(watcher2.value).toBeUndefined()
-    vm.$data = { b: { c: 3 }, e: 4 }
-    waitForUpdate(() => {
-      expect(watcher1.value).toBe(3)
-      expect(watcher2.value).toBe(4)
-      expect(spy).toHaveBeenCalledWith(3, 2)
-      expect(spy2).toHaveBeenCalledWith(4, undefined)
-    }).then(done)
-  })
-
   it('path containing $data', done => {
     const watcher = new Watcher(vm, '$data.b.c', spy)
     expect(watcher.value).toBeUndefined()
