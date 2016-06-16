@@ -1,4 +1,10 @@
-import { isArray, toNumber, looseEqual } from '../../../util/index'
+import {
+  inDoc,
+  isArray,
+  toNumber,
+  looseEqual,
+  nextTick
+} from '../../../util/index'
 
 export default {
 
@@ -39,11 +45,16 @@ export default {
     // selectedIndex with value -1 to 0 when the element
     // is appended to a new parent, therefore we have to
     // force a DOM update whenever that happens...
-    this.vm.$on('hook:attached', this.forceUpdate)
+    this.vm.$on('hook:attached', () => {
+      nextTick(this.forceUpdate)
+    })
   },
 
   update (value) {
     var el = this.el
+    if (!inDoc(el)) {
+      return nextTick(this.forceUpdate)
+    }
     el.selectedIndex = -1
     var multi = this.multiple && isArray(value)
     var options = el.options
