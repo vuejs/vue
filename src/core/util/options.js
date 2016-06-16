@@ -212,7 +212,8 @@ function normalizeComponents (options: Object) {
     const components = options.components
     let def
     for (const key in components) {
-      if (isBuiltInTag(key) || config.isReservedTag(key)) {
+      const lower = key.toLowerCase()
+      if (isBuiltInTag(lower) || config.isReservedTag(lower)) {
         process.env.NODE_ENV !== 'production' && warn(
           'Do not use built-in or reserved HTML elements as component ' +
           'id: ' + key
