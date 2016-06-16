@@ -27,7 +27,7 @@ const saveRE = /[\{,]\s*[\w\$_]+\s*:|('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|`(?:[^
 const restoreRE = /"(\d+)"/g
 const pathTestRE = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\]|\[\d+\]|\[[A-Za-z_$][\w$]*\])*$/
 const identRE = /[^\w$\.](?:[A-Za-z_$][\w$]*)/g
-const booleanLiteralRE = /^(?:true|false)$/
+const literalValueRE = /^(?:true|false|null|undefined|Infinity|NaN)$/
 
 function noop () {}
 
@@ -222,8 +222,8 @@ export function parseExpression (exp, needSet) {
 
 export function isSimplePath (exp) {
   return pathTestRE.test(exp) &&
-    // don't treat true/false as paths
-    !booleanLiteralRE.test(exp) &&
+    // don't treat literal values as paths
+    !literalValueRE.test(exp) &&
     // Math constants e.g. Math.PI, Math.E etc.
     exp.slice(0, 5) !== 'Math.'
 }
