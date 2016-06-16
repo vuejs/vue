@@ -9,7 +9,7 @@ const prohibitedKeywordRE = new RegExp('\\b' + (
   'extends,finally,continue,debugger,function,arguments'
 ).split(',').join('\\b|\\b') + '\\b')
 // check valid identifier for v-for
-const identRE = /[^\w$\.](?:[A-Za-z_$][\w$]*)/
+const identRE = /[A-Za-z_$][\w$]*/
 
 // detect problematic expressions in a template
 export function detectErrors (ast: ?ASTNode): Array<string> {
