@@ -50,6 +50,13 @@ var testCases = [
       { tag: true, value: 'value', html: false, oneTime: false }
     ]
   },
+  // multiline HTML
+  {
+    text: '{{{\n code \n}}}',
+    expected: [
+      { tag: true, value: 'code', html: true, oneTime: false }
+    ]
+  },
   // new lines preserved outside of tags
   {
     text: 'hello\n{{value}}\nworld',
