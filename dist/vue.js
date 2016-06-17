@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.0.0-alpha.4
+ * Vue.js v2.0.0-alpha.5
  * (c) 2014-2016 Evan You
  * Released under the MIT License.
  */
@@ -1063,28 +1063,6 @@
     ob.dep.notify();
   }
 
-  function proxy(vm, key) {
-    if (!isReserved(key)) {
-      Object.defineProperty(vm, key, {
-        configurable: true,
-        enumerable: true,
-        get: function proxyGetter() {
-          return vm._data[key];
-        },
-        set: function proxySetter(val) {
-          vm._data[key] = val;
-        }
-      });
-    }
-  }
-
-  // using Object type to avoid flow complaining
-  function unproxy(vm, key) {
-    if (!isReserved(key)) {
-      delete vm[key];
-    }
-  }
-
   function initState(vm) {
     vm._watchers = [];
     initProps(vm);
@@ -1229,11 +1207,11 @@
     dataDef.get = function () {
       return this._data;
     };
-    dataDef.set = function (newData) {
-      if (newData !== this._data) {
-        setData(this, newData);
-      }
-    };
+    if ("development" !== 'production') {
+      dataDef.set = function (newData) {
+        warn('Avoid replacing instance root $data. ' + 'Use nested data properties instead.', this);
+      };
+    }
     Object.defineProperty(Vue.prototype, '$data', dataDef);
 
     Vue.prototype.$watch = function (expOrFn, cb, options) {
@@ -1250,37 +1228,19 @@
     };
   }
 
-  function setData(vm, newData) {
-    newData = newData || {};
-    var oldData = vm._data;
-    vm._data = newData;
-    var keys = void 0,
-        key = void 0,
-        i = void 0;
-    // unproxy keys not present in new data
-    keys = Object.keys(oldData);
-    i = keys.length;
-    while (i--) {
-      key = keys[i];
-      if (!(key in newData)) {
-        unproxy(vm, key);
-      }
+  function proxy(vm, key) {
+    if (!isReserved(key)) {
+      Object.defineProperty(vm, key, {
+        configurable: true,
+        enumerable: true,
+        get: function proxyGetter() {
+          return vm._data[key];
+        },
+        set: function proxySetter(val) {
+          vm._data[key] = val;
+        }
+      });
     }
-    // proxy keys not already proxied,
-    // and trigger change for changed values
-    keys = Object.keys(newData);
-    i = keys.length;
-    while (i--) {
-      key = keys[i];
-      if (!hasOwn(vm, key)) {
-        // new property
-        proxy(vm, key);
-      }
-    }
-    oldData.__ob__ && oldData.__ob__.vmCount--;
-    observe(newData);
-    newData.__ob__ && newData.__ob__.vmCount++;
-    vm.$forceUpdate();
   }
 
   var VNode = function () {
@@ -1600,7 +1560,10 @@
     data = data || {};
 
     // merge component management hooks onto the placeholder node
-    mergeHooks(data);
+    // only need to do this if this is not a functional component
+    if (!Ctor.options.functional) {
+      mergeHooks(data);
+    }
 
     // extract props
     var propsData = extractProps(data, Ctor);
@@ -1780,12 +1743,24 @@
 
   function renderElementWithChildren(vnode, children) {
     if (vnode) {
-      if (vnode.componentOptions) {
+      var componentOptions = vnode.componentOptions;
+      if (componentOptions) {
         if ("development" !== 'production' && children && typeof children !== 'function') {
           warn('A component\'s children should be a function that returns the ' + 'children array. This allows the component to track the children ' + 'dependencies and optimizes re-rendering.');
         }
-        vnode.componentOptions.children = children;
+        var CtorOptions = componentOptions.Ctor.options;
+        // functional component
+        if (CtorOptions.functional) {
+          return CtorOptions.render.call(null, componentOptions.parent.$createElement, // h
+          componentOptions.propsData || {}, // props
+          normalizeChildren(children) // children
+          );
+        } else {
+            // normal component
+            componentOptions.children = children;
+          }
       } else {
+        // normal element
         vnode.setChildren(normalizeChildren(children));
       }
     }
@@ -1879,7 +1854,7 @@
         resolveSlots(vm, _renderChildren);
       }
       // render self
-      var vnode = render.call(vm._renderProxy);
+      var vnode = render.call(vm._renderProxy, vm.$createElement);
       // return empty vnode in case the render function errored out
       if (!(vnode instanceof VNode)) {
         if ("development" !== 'production' && Array.isArray(vnode)) {
@@ -2301,7 +2276,8 @@
       var components = options.components;
       var def = void 0;
       for (var key in components) {
-        if (isBuiltInTag(key) || config.isReservedTag(key)) {
+        var lower = key.toLowerCase();
+        if (isBuiltInTag(lower) || config.isReservedTag(lower)) {
           "development" !== 'production' && warn('Do not use built-in or reserved HTML elements as component ' + 'id: ' + key);
           continue;
         }
@@ -2762,7 +2738,7 @@
     }
   });
 
-  Vue.version = '2.0.0-alpha.4';
+  Vue.version = '2.0.0-alpha.5';
 
   // attributes that should be using props for binding
   var mustUseProp = makeMap('value,selected,checked,muted');
@@ -3432,7 +3408,13 @@ var nodeOps = Object.freeze({
 
   var ref = {
     create: function create(_, vnode) {
-      registerRef(vnode, false);
+      registerRef(vnode);
+    },
+    update: function update(oldVnode, vnode) {
+      if (oldVnode.data.ref !== vnode.data.ref) {
+        registerRef(oldVnode, true);
+        registerRef(vnode);
+      }
     },
     destroy: function destroy(vnode) {
       registerRef(vnode, true);
@@ -4846,14 +4828,16 @@ var nodeOps = Object.freeze({
         if (inPre) {
           processRawAttrs(element);
         } else {
-          processKey(element);
           processFor(element);
           processIf(element);
           processOnce(element);
+
           // determine whether this is a plain element after
-          // removing if/for/once attributes
+          // removing structural attributes
           element.plain = !element.key && !attrs.length;
-          processRender(element);
+
+          processKey(element);
+          processRef(element);
           processSlot(element);
           processComponent(element);
           for (var _i = 0; _i < transforms.length; _i++) {
@@ -4871,7 +4855,7 @@ var nodeOps = Object.freeze({
               warn$1('Cannot use <' + tag + '> as component root element because it may ' + 'contain multiple nodes:\n' + template);
             }
             if (element.attrsMap.hasOwnProperty('v-for')) {
-              warn$1('Cannot use v-for on component root element because it renders ' + 'multiple elements:\n' + template);
+              warn$1('Cannot use v-for on stateful component root element because ' + 'it renders multiple elements:\n' + template);
             }
           }
         } else if ("development" !== 'production' && !stack.length && !warned) {
@@ -4970,6 +4954,21 @@ var nodeOps = Object.freeze({
     }
   }
 
+  function processRef(el) {
+    var ref = getBindingAttr(el, 'ref');
+    if (ref) {
+      el.ref = ref;
+      var parent = el;
+      while (parent) {
+        if (parent.for !== undefined) {
+          el.refInFor = true;
+          break;
+        }
+        parent = parent.parent;
+      }
+    }
+  }
+
   function processFor(el) {
     var exp = void 0;
     if (exp = getAndRemoveAttr(el, 'v-for')) {
@@ -5016,24 +5015,6 @@ var nodeOps = Object.freeze({
     var once = getAndRemoveAttr(el, 'v-once');
     if (once != null) {
       el.once = true;
-    }
-  }
-
-  function processRender(el) {
-    if (el.tag === 'render') {
-      el.render = true;
-      el.renderMethod = el.attrsMap[':method'] || el.attrsMap['v-bind:method'];
-      el.renderArgs = el.attrsMap[':args'] || el.attrsMap['v-bind:args'];
-      if ("development" !== 'production') {
-        if (el.attrsMap.method) {
-          warn$1('<render> method should use a dynamic binding, e.g. `:method="..."`.');
-        } else if (!el.renderMethod) {
-          warn$1('method attribute is required on <render>.');
-        }
-        if (el.attrsMap.args) {
-          warn$1('<render> args should use a dynamic binding, e.g. `:args="..."`.');
-        }
-      }
     }
   }
 
@@ -5298,27 +5279,11 @@ var nodeOps = Object.freeze({
     }
   }
 
-  function ref$1(el, dir) {
-    if (dir.arg) {
-      el.ref = dir.arg;
-      // go up and check if this node is inside a v-for
-      var parent = el;
-      while (parent) {
-        if (parent.for !== undefined) {
-          el.refInFor = true;
-          break;
-        }
-        parent = parent.parent;
-      }
-    }
-  }
-
   function bind$1(el, dir) {
     addHook$1(el, 'construct', '_b(n1,' + dir.value + ')');
   }
 
   var baseDirectives = {
-    ref: ref$1,
     bind: bind$1,
     cloak: noop
   };
@@ -5357,8 +5322,6 @@ var nodeOps = Object.freeze({
       return genIf(el);
     } else if (el.tag === 'template' && !el.slotTarget) {
       return genChildren(el) || 'void 0';
-    } else if (el.tag === 'render') {
-      return genRender(el);
     } else if (el.tag === 'slot') {
       return genSlot(el);
     } else {
@@ -5430,7 +5393,7 @@ var nodeOps = Object.freeze({
     }
     // ref
     if (el.ref) {
-      data += 'ref:"' + el.ref + '",';
+      data += 'ref:' + el.ref + ',';
     }
     if (el.refInFor) {
       data += 'refInFor:true,';
@@ -5534,14 +5497,6 @@ var nodeOps = Object.freeze({
 
   function genText(text) {
     return text.type === 2 ? '(' + text.expression + ')' : '_t(' + JSON.stringify(text.text) + ')';
-  }
-
-  function genRender(el) {
-    if (!el.renderMethod) {
-      return 'void 0';
-    }
-    var children = genChildren(el);
-    return el.renderMethod + '(' + (el.renderArgs || '') + (children ? (el.renderArgs ? ',' : '') + children : '') + ')';
   }
 
   function genSlot(el) {

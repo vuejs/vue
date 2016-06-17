@@ -1054,28 +1054,6 @@ function del(obj, key) {
   ob.dep.notify();
 }
 
-function proxy(vm, key) {
-  if (!isReserved(key)) {
-    Object.defineProperty(vm, key, {
-      configurable: true,
-      enumerable: true,
-      get: function proxyGetter() {
-        return vm._data[key];
-      },
-      set: function proxySetter(val) {
-        vm._data[key] = val;
-      }
-    });
-  }
-}
-
-// using Object type to avoid flow complaining
-function unproxy(vm, key) {
-  if (!isReserved(key)) {
-    delete vm[key];
-  }
-}
-
 function initState(vm) {
   vm._watchers = [];
   initProps(vm);
@@ -1222,11 +1200,11 @@ function stateMixin(Vue) {
   dataDef.get = function () {
     return this._data;
   };
-  dataDef.set = function (newData) {
-    if (newData !== this._data) {
-      setData(this, newData);
-    }
-  };
+  if (process.env.NODE_ENV !== 'production') {
+    dataDef.set = function (newData) {
+      warn('Avoid replacing instance root $data. ' + 'Use nested data properties instead.', this);
+    };
+  }
   Object.defineProperty(Vue.prototype, '$data', dataDef);
 
   Vue.prototype.$watch = function (expOrFn, cb, options) {
@@ -1243,37 +1221,19 @@ function stateMixin(Vue) {
   };
 }
 
-function setData(vm, newData) {
-  newData = newData || {};
-  var oldData = vm._data;
-  vm._data = newData;
-  var keys = void 0,
-      key = void 0,
-      i = void 0;
-  // unproxy keys not present in new data
-  keys = Object.keys(oldData);
-  i = keys.length;
-  while (i--) {
-    key = keys[i];
-    if (!(key in newData)) {
-      unproxy(vm, key);
-    }
+function proxy(vm, key) {
+  if (!isReserved(key)) {
+    Object.defineProperty(vm, key, {
+      configurable: true,
+      enumerable: true,
+      get: function proxyGetter() {
+        return vm._data[key];
+      },
+      set: function proxySetter(val) {
+        vm._data[key] = val;
+      }
+    });
   }
-  // proxy keys not already proxied,
-  // and trigger change for changed values
-  keys = Object.keys(newData);
-  i = keys.length;
-  while (i--) {
-    key = keys[i];
-    if (!hasOwn(vm, key)) {
-      // new property
-      proxy(vm, key);
-    }
-  }
-  oldData.__ob__ && oldData.__ob__.vmCount--;
-  observe(newData);
-  newData.__ob__ && newData.__ob__.vmCount++;
-  vm.$forceUpdate();
 }
 
 var VNode = function () {
@@ -1593,7 +1553,10 @@ function createComponent(Ctor, data, parent, context, host, tag) {
   data = data || {};
 
   // merge component management hooks onto the placeholder node
-  mergeHooks(data);
+  // only need to do this if this is not a functional component
+  if (!Ctor.options.functional) {
+    mergeHooks(data);
+  }
 
   // extract props
   var propsData = extractProps(data, Ctor);
@@ -1773,12 +1736,24 @@ function mergeHook$1(a, b) {
 
 function renderElementWithChildren(vnode, children) {
   if (vnode) {
-    if (vnode.componentOptions) {
+    var componentOptions = vnode.componentOptions;
+    if (componentOptions) {
       if (process.env.NODE_ENV !== 'production' && children && typeof children !== 'function') {
         warn('A component\'s children should be a function that returns the ' + 'children array. This allows the component to track the children ' + 'dependencies and optimizes re-rendering.');
       }
-      vnode.componentOptions.children = children;
+      var CtorOptions = componentOptions.Ctor.options;
+      // functional component
+      if (CtorOptions.functional) {
+        return CtorOptions.render.call(null, componentOptions.parent.$createElement, // h
+        componentOptions.propsData || {}, // props
+        normalizeChildren(children) // children
+        );
+      } else {
+          // normal component
+          componentOptions.children = children;
+        }
     } else {
+      // normal element
       vnode.setChildren(normalizeChildren(children));
     }
   }
@@ -1872,7 +1847,7 @@ function renderMixin(Vue) {
       resolveSlots(vm, _renderChildren);
     }
     // render self
-    var vnode = render.call(vm._renderProxy);
+    var vnode = render.call(vm._renderProxy, vm.$createElement);
     // return empty vnode in case the render function errored out
     if (!(vnode instanceof VNode)) {
       if (process.env.NODE_ENV !== 'production' && Array.isArray(vnode)) {
@@ -2296,7 +2271,8 @@ function normalizeComponents(options) {
     var components = options.components;
     var def = void 0;
     for (var key in components) {
-      if (isBuiltInTag(key) || config.isReservedTag(key)) {
+      var lower = key.toLowerCase();
+      if (isBuiltInTag(lower) || config.isReservedTag(lower)) {
         process.env.NODE_ENV !== 'production' && warn('Do not use built-in or reserved HTML elements as component ' + 'id: ' + key);
         continue;
       }
@@ -2757,7 +2733,7 @@ Object.defineProperty(Vue.prototype, '$isServer', {
   }
 });
 
-Vue.version = '2.0.0-alpha.4';
+Vue.version = '2.0.0-alpha.5';
 
 // attributes that should be using props for binding
 var mustUseProp = makeMap('value,selected,checked,muted');
@@ -3416,7 +3392,13 @@ function applyDirectives(oldVnode, vnode, hook) {
 
 var ref = {
   create: function create(_, vnode) {
-    registerRef(vnode, false);
+    registerRef(vnode);
+  },
+  update: function update(oldVnode, vnode) {
+    if (oldVnode.data.ref !== vnode.data.ref) {
+      registerRef(oldVnode, true);
+      registerRef(vnode);
+    }
   },
   destroy: function destroy(vnode) {
     registerRef(vnode, true);
