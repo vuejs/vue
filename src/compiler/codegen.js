@@ -45,8 +45,6 @@ function genElement (el: ASTElement): string {
     return genIf(el)
   } else if (el.tag === 'template' && !el.slotTarget) {
     return genChildren(el) || 'void 0'
-  } else if (el.tag === 'render') {
-    return genRender(el)
   } else if (el.tag === 'slot') {
     return genSlot(el)
   } else {
@@ -243,18 +241,6 @@ function genText (text: ASTText | ASTExpression): string {
   return text.type === 2
     ? `(${text.expression})`
     : '_t(' + JSON.stringify(text.text) + ')'
-}
-
-function genRender (el: ASTElement): string {
-  if (!el.renderMethod) {
-    return 'void 0'
-  }
-  const children = genChildren(el)
-  return `${el.renderMethod}(${
-    el.renderArgs || ''
-  }${
-    children ? (el.renderArgs ? ',' : '') + children : ''
-  })`
 }
 
 function genSlot (el: ASTElement): string {

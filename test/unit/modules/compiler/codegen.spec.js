@@ -113,28 +113,6 @@ describe('codegen', () => {
     )
   })
 
-  it('generate render tag', () => {
-    assertCodegen(
-      '<render :method="onRender" :args="params"></render>',
-      `with(this){return onRender(params)}`
-    )
-  })
-
-  it('generate render tag that have children', () => {
-    assertCodegen(
-      '<render :method="onRender"><p>hello</p></render>',
-      `with(this){return onRender([_m(0)])}`,
-      [`with(this){return _h(_e('p'),[_t("hello")])}`]
-    )
-  })
-
-  it('generate render tag with `method` is not dynamic binding', () => {
-    assertCodegen(
-      '<render method="onRender"></render>',
-      `with(this){return void 0}`
-    )
-  })
-
   it('generate single slot', () => {
     assertCodegen(
       '<slot></slot>',

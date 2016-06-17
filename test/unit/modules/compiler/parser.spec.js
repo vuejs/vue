@@ -89,7 +89,7 @@ describe('parser', () => {
 
   it('warn v-for on root element', () => {
     parse('<div v-for="item in items"></div>', baseOptions)
-    expect('Cannot use v-for on component root element').toHaveBeenWarned()
+    expect('Cannot use v-for on stateful component root element').toHaveBeenWarned()
   })
 
   it('v-pre directive', () => {
@@ -160,28 +160,6 @@ describe('parser', () => {
   it('v-once directive syntax', () => {
     const ast = parse('<p v-once>world</p>', baseOptions)
     expect(ast.once).toBe(true)
-  })
-
-  it('render tag syntax', () => {
-    const ast = parse('<render :method="onRender", :args="params"></render>', baseOptions)
-    expect(ast.render).toBe(true)
-    expect(ast.renderMethod).toBe('onRender')
-    expect(ast.renderArgs).toBe('params')
-  })
-
-  it('render tag invalid syntax', () => {
-    // method nothing
-    const invalidAst1 = parse('<render></render>', baseOptions)
-    expect('method attribute is required on <render>.').toHaveBeenWarned()
-    expect(invalidAst1.render).toBe(true)
-    expect(invalidAst1.renderMethod).toBeUndefined()
-    expect(invalidAst1.renderArgs).toBeUndefined()
-    // method no dynamic binding
-    parse('<render method="onRender"></render>', baseOptions)
-    expect('<render> method should use a dynamic binding').toHaveBeenWarned()
-    // args no dynamic binding
-    parse('<render :method="onRender" args="params"></render>', baseOptions)
-    expect('<render> args should use a dynamic binding').toHaveBeenWarned()
   })
 
   it('slot tag single syntax', () => {

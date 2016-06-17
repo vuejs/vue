@@ -123,7 +123,6 @@ export function parse (
         // determine whether this is a plain element after
         // removing if/for/once attributes
         element.plain = !element.key && !attrs.length
-        processRender(element)
         processSlot(element)
         processComponent(element)
         for (let i = 0; i < transforms.length; i++) {
@@ -145,8 +144,8 @@ export function parse (
           }
           if (element.attrsMap.hasOwnProperty('v-for')) {
             warn(
-              'Cannot use v-for on component root element because it renders ' +
-              'multiple elements:\n' + template
+              'Cannot use v-for on stateful component root element because ' +
+              'it renders multiple elements:\n' + template
             )
           }
         }
@@ -303,24 +302,6 @@ function processOnce (el) {
   const once = getAndRemoveAttr(el, 'v-once')
   if (once != null) {
     el.once = true
-  }
-}
-
-function processRender (el) {
-  if (el.tag === 'render') {
-    el.render = true
-    el.renderMethod = el.attrsMap[':method'] || el.attrsMap['v-bind:method']
-    el.renderArgs = el.attrsMap[':args'] || el.attrsMap['v-bind:args']
-    if (process.env.NODE_ENV !== 'production') {
-      if (el.attrsMap.method) {
-        warn('<render> method should use a dynamic binding, e.g. `:method="..."`.')
-      } else if (!el.renderMethod) {
-        warn('method attribute is required on <render>.')
-      }
-      if (el.attrsMap.args) {
-        warn('<render> args should use a dynamic binding, e.g. `:args="..."`.')
-      }
-    }
   }
 }
 

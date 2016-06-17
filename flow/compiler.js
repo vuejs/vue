@@ -84,10 +84,6 @@ declare type ASTElement = {
   ref?: string,
   refInFor?: boolean,
 
-  render?: true,
-  renderMethod?: ?string,
-  renderArgs?: ?string,
-
   if?: string,
   ifProcessed?: boolean,
   else?: true,
