@@ -51,7 +51,10 @@ export function createComponent (
   data = data || {}
 
   // merge component management hooks onto the placeholder node
-  mergeHooks(data)
+  // only need to do this if this is not a functional component
+  if (!Ctor.options.functional) {
+    mergeHooks(data)
+  }
 
   // extract props
   const propsData = extractProps(data, Ctor)
