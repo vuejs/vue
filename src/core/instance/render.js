@@ -69,7 +69,7 @@ export function renderMixin (Vue: Class<Component>) {
       resolveSlots(vm, _renderChildren)
     }
     // render self
-    let vnode = render.call(vm._renderProxy)
+    let vnode = render.call(vm._renderProxy, vm.$createElement)
     // return empty vnode in case the render function errored out
     if (!(vnode instanceof VNode)) {
       if (process.env.NODE_ENV !== 'production' && Array.isArray(vnode)) {

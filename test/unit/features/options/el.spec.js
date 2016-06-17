@@ -29,8 +29,7 @@ describe('Options el', () => {
     el.innerHTML = '<span>{{message}}</span>'
     const vm = new Vue({
       el,
-      render () {
-        const h = this.$createElement
+      render (h) {
         return h('p', { staticAttrs: { id: 'app' }}, [
           h('span', {}, [this.message])
         ])

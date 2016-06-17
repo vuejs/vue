@@ -123,8 +123,7 @@ describe('Directive v-on', () => {
       data: {
         ok: true
       },
-      render () {
-        const h = this.$createElement
+      render (h) {
         return this.ok
           ? h('input', { on: { click: this.foo }})
           : h('input', { on: { input: this.bar }})
@@ -155,8 +154,7 @@ describe('Directive v-on', () => {
           template: '<div></div>'
         }
       },
-      render () {
-        const h = this.$createElement
+      render (h) {
         return this.ok
           ? h('test', { on: { foo: this.foo }})
           : h('test', { on: { bar: this.bar }})

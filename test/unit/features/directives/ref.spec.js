@@ -28,8 +28,7 @@ describe('Directive v-ref', () => {
   it('should work as a hyperscript prop', () => {
     const vm = new Vue({
       components,
-      render () {
-        const h = this.$createElement
+      render (h) {
         return h('div', null, [
           h('test', { ref: 'test' })
         ])
