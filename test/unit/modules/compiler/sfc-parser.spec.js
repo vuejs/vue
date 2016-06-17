@@ -30,14 +30,14 @@ describe('Single File Component parser', () => {
     expect(res.script.content.trim()).toBe('export default {}')
   })
 
-  fit('should parse template with closed input', () => {
+  it('should parse template with closed input', () => {
     const res = parseComponent(`
       <template>
         <input type="text"/>
       </template>
     `)
 
-    expect(res.template.content.trim()).toBe('<input type="text">')
+    expect(res.template.content.trim()).toBe('<input type="text"/>')
   })
 
   it('should handle nested template', () => {

@@ -52,7 +52,9 @@ export function parseComponent (
         sfc[tag] = currentBlock
       }
     }
-    depth++
+    if (!unary) {
+      depth++
+    }
   }
 
   function checkAttrs (block: SFCBlock, attrs: Array<Attribute>) {
