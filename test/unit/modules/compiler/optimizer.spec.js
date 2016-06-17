@@ -152,6 +152,20 @@ describe('optimizer', () => {
     expect(ast.children[0].static).toBe(false)
   })
 
+  it('key', () => {
+    const ast = parse('<p key="foo">hello world</p>', baseOptions)
+    optimize(ast, baseOptions)
+    expect(ast.static).toBe(false)
+    expect(ast.children[0].static).toBe(true)
+  })
+
+  it('ref', () => {
+    const ast = parse('<p ref="foo">hello world</p>', baseOptions)
+    optimize(ast, baseOptions)
+    expect(ast.static).toBe(false)
+    expect(ast.children[0].static).toBe(true)
+  })
+
   it('transition', () => {
     const ast = parse('<p v-if="show" transition="expand">hello world</p>', baseOptions)
     optimize(ast, baseOptions)
@@ -163,13 +177,6 @@ describe('optimizer', () => {
     const ast = parse('<input type="text" name="field1" :value="msg">', baseOptions)
     optimize(ast, baseOptions)
     expect(ast.static).toBe(false)
-  })
-
-  it('v-ref directive', () => {
-    const ast = parse('<p v-ref:foo>hello world</p>', baseOptions)
-    optimize(ast, baseOptions)
-    expect(ast.static).toBe(false)
-    expect(ast.children[0].static).toBe(true)
   })
 
   it('v-on directive', () => {

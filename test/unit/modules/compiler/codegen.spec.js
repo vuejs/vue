@@ -68,16 +68,16 @@ describe('codegen', () => {
     )
   })
 
-  it('generate v-ref directive', () => {
+  it('generate ref', () => {
     assertCodegen(
-      '<p v-ref:component1></p>',
+      '<p ref="component1"></p>',
       `with(this){return _h(_e('p',{ref:"component1"}))}`
     )
   })
 
-  it('generate v-ref directive on v-for', () => {
+  it('generate ref on v-for', () => {
     assertCodegen(
-      '<ul><li v-for="item in items" v-ref:component1></li></ul>',
+      '<ul><li v-for="item in items" ref="component1"></li></ul>',
       `with(this){return _h(_e('ul'),[(items)&&_l((items),function(item){return _h(_e('li',{ref:"component1",refInFor:true}))})])}`
     )
   })

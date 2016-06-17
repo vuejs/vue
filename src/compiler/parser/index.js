@@ -116,13 +116,16 @@ export function parse (
       if (inPre) {
         processRawAttrs(element)
       } else {
-        processKey(element)
         processFor(element)
         processIf(element)
         processOnce(element)
+
         // determine whether this is a plain element after
-        // removing if/for/once attributes
+        // removing structural attributes
         element.plain = !element.key && !attrs.length
+
+        processKey(element)
+        processRef(element)
         processSlot(element)
         processComponent(element)
         for (let i = 0; i < transforms.length; i++) {
@@ -249,6 +252,21 @@ function processKey (el) {
   const exp = getBindingAttr(el, 'key')
   if (exp) {
     el.key = exp
+  }
+}
+
+function processRef (el) {
+  const ref = getBindingAttr(el, 'ref')
+  if (ref) {
+    el.ref = ref
+    let parent = el
+    while (parent) {
+      if (parent.for !== undefined) {
+        el.refInFor = true
+        break
+      }
+      parent = parent.parent
+    }
   }
 }
 

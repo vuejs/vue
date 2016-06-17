@@ -126,7 +126,7 @@ function genData (el: ASTElement): string | void {
   }
   // ref
   if (el.ref) {
-    data += `ref:"${el.ref}",`
+    data += `ref:${el.ref},`
   }
   if (el.refInFor) {
     data += `refInFor:true,`
