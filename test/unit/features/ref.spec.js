@@ -28,6 +28,21 @@ describe('ref', () => {
     expect(vm.$refs.bar.$options.id).toBe('test2')
   })
 
+  it('should dynamically update refs', done => {
+    const vm = new Vue({
+      data: {
+        value: 'foo'
+      },
+      template: '<div :ref="value"></div>'
+    }).$mount()
+    expect(vm.$refs.foo).toBe(vm.$el)
+    vm.value = 'bar'
+    waitForUpdate(() => {
+      expect(vm.$refs.foo).toBeUndefined()
+      expect(vm.$refs.bar).toBe(vm.$el)
+    }).then(done)
+  })
+
   it('should work as a hyperscript prop', () => {
     const vm = new Vue({
       components,

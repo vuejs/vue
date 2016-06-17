@@ -4,14 +4,20 @@ import { remove } from 'shared/util'
 
 export default {
   create (_, vnode) {
-    registerRef(vnode, false)
+    registerRef(vnode)
+  },
+  update (oldVnode, vnode) {
+    if (oldVnode.data.ref !== vnode.data.ref) {
+      registerRef(oldVnode, true)
+      registerRef(vnode)
+    }
   },
   destroy (vnode) {
     registerRef(vnode, true)
   }
 }
 
-function registerRef (vnode: VNodeWithData, isRemoval: boolean) {
+function registerRef (vnode: VNodeWithData, isRemoval: ?boolean) {
   const key = vnode.data.ref
   if (!key) return
 
