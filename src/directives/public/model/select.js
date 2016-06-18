@@ -48,13 +48,13 @@ export default {
     this.vm.$on('hook:attached', () => {
       nextTick(this.forceUpdate)
     })
+    if (!inDoc(el)) {
+      nextTick(this.forceUpdate)
+    }
   },
 
   update (value) {
     var el = this.el
-    if (!inDoc(el)) {
-      return nextTick(this.forceUpdate)
-    }
     el.selectedIndex = -1
     var multi = this.multiple && isArray(value)
     var options = el.options
