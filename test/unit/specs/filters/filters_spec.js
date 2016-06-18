@@ -53,6 +53,8 @@ describe('Filters', function () {
     expect(filter(2, 'st', 'nd', 'rd', 'th')).toBe('nd')
     expect(filter(3, 'st', 'nd', 'rd', 'th')).toBe('rd')
     expect(filter(4, 'st', 'nd', 'rd', 'th')).toBe('th')
+    // multi args where selected argument is empty string
+    expect(filter(1, '', 'nd', 'rd', 'th')).toBe('')
   })
 
   it('currency', function () {
