@@ -6,6 +6,8 @@
 import { warn } from 'core/util/index'
 import { isAndroid, isIE9 } from 'web/util/index'
 
+const modelableTagRE = /^input|select|textarea|vue-component-[0-9]+(-[0-9a-zA-Z_\-]*)?$/
+
 /* istanbul ignore if */
 if (isIE9) {
   // http://www.matts411.com/post/internet-explorer-9-oninput/
@@ -20,7 +22,7 @@ if (isIE9) {
 export default {
   bind (el, binding, vnode) {
     if (process.env.NODE_ENV !== 'production') {
-      if (!/input|select|textarea/.test(vnode.tag)) {
+      if (!modelableTagRE.test(vnode.tag)) {
         warn(
           `v-model is not supported on element type: <${vnode.tag}>. ` +
           'If you are working with contenteditable, it\'s recommended to ' +
