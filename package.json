@@ -52,7 +52,6 @@
     "chromedriver": "^2.21.2",
     "codecov.io": "^0.1.6",
     "cross-spawn": "^4.0.0",
-    "de-indent": "^1.0.2",
     "entities": "^1.1.1",
     "eslint": "^2.11.0",
     "eslint-config-vue": "^1.0.3",
@@ -81,7 +80,6 @@
     "rollup-plugin-babel": "^2.4.0",
     "rollup-plugin-replace": "^1.1.0",
     "selenium-server": "2.53.0",
-    "source-map": "^0.5.6",
     "uglify-js": "^2.6.2",
     "webpack": "^1.13.1"
   }

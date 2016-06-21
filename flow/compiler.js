@@ -140,6 +140,5 @@ declare type SFCBlock = {
   end?: number,
   lang?: string,
   src?: string,
-  scoped?: boolean,
-  map?: Object
+  scoped?: boolean
 }

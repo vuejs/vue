@@ -1,5 +1,4 @@
-import { parseComponent } from 'compiler/parser/sfc-parser'
-import { SourceMapConsumer } from 'source-map'
+import { parseComponent } from 'sfc/parser'
 
 describe('Single File Component parser', () => {
   it('should parse', () => {
@@ -63,62 +62,5 @@ describe('Single File Component parser', () => {
     `.trim(), { pad: true })
     expect(res.script.content).toBe(Array(3 + 1).join('//\n') + '\nexport default {}\n')
     expect(res.styles[0].content).toBe(Array(6 + 1).join('\n') + '\nh1 { color: red }\n')
-  })
-
-  it('source map (without pad)', () => {
-    const res = parseComponent(`
-      <script>
-        export default {}
-      </script>
-      <style>
-        h1 { color: red }
-      </style>
-    `.trim(), {
-      map: {
-        filename: 'test.vue'
-      }
-    })
-    const scriptConsumer = new SourceMapConsumer(res.script.map)
-    const scriptPos = scriptConsumer.originalPositionFor({
-      line: 2,
-      column: 1
-    })
-    expect(scriptPos.line).toBe(2)
-
-    const styleConsumer = new SourceMapConsumer(res.styles[0].map)
-    const stylePos = styleConsumer.originalPositionFor({
-      line: 2,
-      column: 1
-    })
-    expect(stylePos.line).toBe(5)
-  })
-
-  it('source map (with pad)', () => {
-    const res = parseComponent(`
-      <script>
-        export default {}
-      </script>
-      <style>
-        h1 { color: red }
-      </style>
-    `.trim(), {
-      pad: true,
-      map: {
-        filename: 'test.vue'
-      }
-    })
-    const scriptConsumer = new SourceMapConsumer(res.script.map)
-    const scriptPos = scriptConsumer.originalPositionFor({
-      line: 2,
-      column: 1
-    })
-    expect(scriptPos.line).toBe(2)
-
-    const styleConsumer = new SourceMapConsumer(res.styles[0].map)
-    const stylePos = styleConsumer.originalPositionFor({
-      line: 5,
-      column: 1
-    })
-    expect(stylePos.line).toBe(5)
   })
 })

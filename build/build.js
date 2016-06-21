@@ -65,7 +65,7 @@ var builds = [
   {
     entry: 'src/entries/web-compiler.js',
     format: 'cjs',
-    external: ['entities', 'de-indent', 'source-map'],
+    external: ['entities'],
     out: 'packages/vue-template-compiler/index.js'
   },
   // Web server renderer (CommonJS).
