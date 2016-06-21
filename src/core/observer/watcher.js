@@ -27,6 +27,7 @@ export default class Watcher {
   deep: boolean;
   user: boolean;
   lazy: boolean;
+  sync: boolean;
   dirty: boolean;
   active: boolean;
   deps: Array<Dep>;
@@ -48,6 +49,7 @@ export default class Watcher {
     this.deep = !!options.deep
     this.user = !!options.user
     this.lazy = !!options.lazy
+    this.sync = !!options.sync
     this.expression = expOrFn.toString()
     this.cb = cb
     this.id = ++uid // uid for batching
@@ -167,8 +169,11 @@ export default class Watcher {
    * Will be called when a dependency changes.
    */
   update () {
+    /* istanbul ignore else */
     if (this.lazy) {
       this.dirty = true
+    } else if (this.sync) {
+      this.run()
     } else {
       queueWatcher(this)
     }

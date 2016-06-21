@@ -19,7 +19,8 @@ module.exports = function (config) {
       ignore: [
         'test/',
         'src/compiler/parser/html-parser.js',
-        'src/core/instance/proxy.js'
+        'src/core/instance/proxy.js',
+        'src/sfc/deindent.js'
       ]
     }]]
   }
