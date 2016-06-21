@@ -26,6 +26,7 @@ describe('Options directives', () => {
             bindSpy()
             assertContext(el, binding, vnode)
             expect(binding.value).toBe('foo')
+            expect(binding.expression).toBe('a')
             expect(binding.oldValue).toBeUndefined()
           },
           update (el, binding, vnode, oldVnode) {
@@ -36,6 +37,7 @@ describe('Options directives', () => {
             expect(oldVnode).not.toBe(vnode)
             expect(binding.value).toBe('bar')
             expect(binding.oldValue).toBe('foo')
+            expect(binding.expression).toBe('a')
           },
           postupdate (el, binding, vnode) {
             postupdateSpy()
