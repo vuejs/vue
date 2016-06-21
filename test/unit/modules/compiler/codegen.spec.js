@@ -34,7 +34,7 @@ describe('codegen', () => {
   it('generate directive', () => {
     assertCodegen(
       '<p v-custom1:arg1.modifire="value1" v-custom2><p>',
-      `with(this){return _h(_e('p',{directives:[{name:"custom1",value:(value1),arg:"arg1",modifiers:{"modifire":true}},{name:"custom2",arg:"arg1"}]}))}`
+      `with(this){return _h(_e('p',{directives:[{name:"custom1",value:(value1),expression:"value1",arg:"arg1",modifiers:{"modifire":true}},{name:"custom2",arg:"arg1"}]}))}`
     )
   })
 
@@ -180,7 +180,7 @@ describe('codegen', () => {
   it('generate v-show directive', () => {
     assertCodegen(
       '<p v-show="shown">hello world</p>',
-      `with(this){return _h(_e('p',{directives:[{name:"show",value:(shown)}],show:true}),[_t("hello world")])}`
+      `with(this){return _h(_e('p',{directives:[{name:"show",value:(shown),expression:"shown"}],show:true}),[_t("hello world")])}`
     )
   })
 

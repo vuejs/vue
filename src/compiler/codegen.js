@@ -206,7 +206,7 @@ function genDirectives (el: ASTElement): string | void {
     if (needRuntime) {
       hasRuntime = true
       res += `{name:"${dir.name}"${
-        dir.value ? `,value:(${dir.value})` : ''
+        dir.value ? `,value:(${dir.value}),expression:${JSON.stringify(dir.value)}` : ''
       }${
         dir.arg ? `,arg:"${dir.arg}"` : ''
       }${
