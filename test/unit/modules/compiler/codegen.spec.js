@@ -216,12 +216,17 @@ describe('codegen', () => {
   it('generate events with keycode', () => {
     assertCodegen(
       '<input @input.enter="onInput">',
-      `with(this){return _h(_e('input',{on:{"input":function($event){if($event.keyCode!==13)return;onInput($event)}}}))}`
+      `with(this){return _h(_e('input',{on:{"input":function($event){if($event.keyCode!=13)return;onInput($event)}}}))}`
     )
     // multiple keycodes (delete)
     assertCodegen(
       '<input @input.delete="onInput">',
-      `with(this){return _h(_e('input',{on:{"input":function($event){if($event.keyCode!==8&&$event.keyCode!==46)return;onInput($event)}}}))}`
+      `with(this){return _h(_e('input',{on:{"input":function($event){if($event.keyCode!=8&&$event.keyCode!=46)return;onInput($event)}}}))}`
+    )
+    // number keycode
+    assertCodegen(
+      '<input @input.13="onInput">',
+      `with(this){return _h(_e('input',{on:{"input":function($event){if($event.keyCode!="13")return;onInput($event)}}}))}`
     )
   })
 

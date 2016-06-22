@@ -53,10 +53,10 @@ function genHandler (
 }
 
 function genKeyFilter (key: string): string {
-  const code = keyCodes[key]
+  const code = keyCodes[key] || JSON.stringify(key)
   if (Array.isArray(code)) {
-    return `if(${code.map(c => `$event.keyCode!==${c}`).join('&&')})return;`
+    return `if(${code.map(c => `$event.keyCode!=${c}`).join('&&')})return;`
   } else {
-    return `if($event.keyCode!==${code})return;`
+    return `if($event.keyCode!=${code})return;`
   }
 }
