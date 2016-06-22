@@ -3,13 +3,17 @@
 import { no } from 'shared/util'
 
 export type Config = {
+  // user
   optionMergeStrategies: { [key: string]: Function },
   silent: boolean,
   errorHandler: ?Function,
   ignoredElements: ?Array<string>,
+  keyCodes: { [key: string]: number },
+  // platform
   isReservedTag: (x?: string) => boolean,
   isUnknownElement: (x?: string) => boolean,
   mustUseProp: (x?: string) => boolean,
+  // internal
   _assetTypes: Array<string>,
   _lifecycleHooks: Array<string>,
   _maxUpdateCount: number,
@@ -37,6 +41,11 @@ const config: Config = {
    * Ignore certain custom elements
    */
   ignoredElements: null,
+
+  /**
+   * Custom user key aliases for v-on
+   */
+  keyCodes: Object.create(null),
 
   /**
    * Check if a tag is reserved so that it cannot be registered as a

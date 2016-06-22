@@ -126,6 +126,19 @@ describe('Directive v-on', () => {
     expect(spy).toHaveBeenCalled()
   })
 
+  it('should support custom keyCode', () => {
+    Vue.config.keyCodes.test = 1
+    vm = new Vue({
+      el,
+      template: `<input @keyup.test="foo">`,
+      methods: { foo: spy }
+    })
+    triggerEvent(vm.$el, 'keyup', e => {
+      e.keyCode = 1
+    })
+    expect(spy).toHaveBeenCalled()
+  })
+
   it('should bind to a child component', () => {
     Vue.component('bar', {
       template: '<span>Hello</span>'

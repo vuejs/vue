@@ -10,7 +10,17 @@ import { set, del } from '../observer/index'
 import builtInComponents from '../components/index'
 
 export function initGlobalAPI (Vue: GlobalAPI) {
-  Vue.config = config
+  // config
+  const configDef = {}
+  configDef.get = () => config
+  if (process.env.NODE_ENV !== 'production') {
+    configDef.set = () => {
+      util.warn(
+        'Do not replace the Vue.config object, set individual fields instead.'
+      )
+    }
+  }
+  Object.defineProperty(Vue, 'config', configDef)
   Vue.util = util
   Vue.set = set
   Vue.delete = del

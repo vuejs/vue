@@ -57,6 +57,7 @@ declare interface Component {
   _isBeingDestroyed: boolean;
   _vnode: ?VNode;
   _staticTrees: ?Array<VNode>;
+  _keyCode: (key: string) => ?number;
 
   // private methods
   // lifecycle

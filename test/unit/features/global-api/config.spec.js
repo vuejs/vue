@@ -1,6 +1,13 @@
 import Vue from 'vue'
 
 describe('Global config', () => {
+  it('should warn replacing config object', () => {
+    const originalConfig = Vue.config
+    Vue.config = {}
+    expect(Vue.config).toBe(originalConfig)
+    expect('Do not replace the Vue.config object').toHaveBeenWarned()
+  })
+
   describe('silent', () => {
     it('should be false by default', () => {
       Vue.util.warn('foo')
