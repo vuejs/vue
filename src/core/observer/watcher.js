@@ -12,7 +12,6 @@ import {
 } from '../util/index'
 
 let uid = 0
-const targetStack = []
 
 /**
  * A watcher parses an expression, collects dependencies,
