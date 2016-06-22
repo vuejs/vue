@@ -204,10 +204,12 @@ export default class Watcher {
   evaluate () {
     // avoid overwriting another watcher that is being
     // collected.
-    const current = Dep.target
+    const currentPrevTarget = prevTarget
+    prevTarget = Dep.target
     this.value = this.get()
     this.dirty = false
-    Dep.target = current
+    Dep.target = prevTarget
+    prevTarget = currentPrevTarget
   }
 
   /**
