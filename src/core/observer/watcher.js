@@ -1,7 +1,7 @@
 /* @flow */
 
 import config from '../config'
-import Dep from './dep'
+import Dep, { pushTarget, popTarget } from './dep'
 import { queueWatcher } from './scheduler'
 import {
   warn,
@@ -83,7 +83,7 @@ export default class Watcher {
    * Evaluate the getter, and re-collect dependencies.
    */
   get () {
-    this.pushTarget()
+    pushTarget(this)
     let value: any
     try {
       value = this.getter.call(this.vm, this.vm)
@@ -116,24 +116,9 @@ export default class Watcher {
     if (this.deep) {
       traverse(value)
     }
-    this.popTarget()
+    popTarget()
     this.cleanupDeps()
     return value
-  }
-
-  /**
-   * Set this watcher as the active dep target
-   */
-  pushTarget () {
-    if (Dep.target) targetStack.push(Dep.target)
-    Dep.target = this
-  }
-
-  /**
-   * Restore previous dep target
-   */
-  popTarget () {
-    Dep.target = targetStack.pop()
   }
 
   /**
