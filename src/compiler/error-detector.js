@@ -10,6 +10,8 @@ const prohibitedKeywordRE = new RegExp('\\b' + (
 ).split(',').join('\\b|\\b') + '\\b')
 // check valid identifier for v-for
 const identRE = /[A-Za-z_$][\w$]*/
+// strip strings in expressions
+const stripStringRE = /'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|`(?:[^`\\]|\\.)*\$\{|\}(?:[^`\\]|\\.)*`|`(?:[^`\\]|\\.)*`/g
 
 // detect problematic expressions in a template
 export function detectErrors (ast: ?ASTNode): Array<string> {
@@ -58,22 +60,17 @@ function checkIdentifier (ident: ?string, type: string, text: string, errors: Ar
 }
 
 function checkExpression (exp: string, text: string, errors: Array<string>) {
-  exp = stripToString(exp)
-  const keywordMatch = exp.match(prohibitedKeywordRE)
-  if (keywordMatch) {
-    errors.push(
-      `- avoid using JavaScript keyword as property name: ` +
-      `"${keywordMatch[0]}" in expression ${text}`
-    )
-  } else {
-    try {
-      new Function(`return ${exp}`)
-    } catch (e) {
+  try {
+    new Function(`return ${exp}`)
+  } catch (e) {
+    const keywordMatch = exp.replace(stripStringRE, '').match(prohibitedKeywordRE)
+    if (keywordMatch) {
+      errors.push(
+        `- avoid using JavaScript keyword as property name: ` +
+        `"${keywordMatch[0]}" in expression ${text}`
+      )
+    } else {
       errors.push(`- invalid expression: ${text}`)
     }
   }
-}
-
-function stripToString (exp) {
-  return exp.replace(/^_s\((.*)\)$/, '$1')
 }
