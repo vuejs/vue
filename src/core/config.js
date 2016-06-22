@@ -6,6 +6,7 @@ export type Config = {
   // user
   optionMergeStrategies: { [key: string]: Function },
   silent: boolean,
+  devtools: boolean,
   errorHandler: ?Function,
   ignoredElements: ?Array<string>,
   keyCodes: { [key: string]: number },
@@ -31,6 +32,11 @@ const config: Config = {
    * Whether to suppress warnings.
    */
   silent: false,
+
+  /**
+   * Whether to enable devtools
+   */
+  devtools: process.env.NODE_ENV !== 'production',
 
   /**
    * Error handler for watcher errors

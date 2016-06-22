@@ -3,6 +3,7 @@
 import Vue from 'core/index'
 import config from 'core/config'
 import { extend, noop } from 'shared/util'
+import { devtools, inBrowser } from 'core/util/index'
 import { patch } from 'web/runtime/patch'
 import platformDirectives from 'web/runtime/directives/index'
 import platformComponents from 'web/runtime/components/index'
@@ -27,5 +28,23 @@ Vue.prototype.$mount = function (
 ): Component {
   return this._mount(el && query(el), hydrating)
 }
+
+// devtools global hook
+/* istanbul ignore next */
+setTimeout(() => {
+  if (config.devtools) {
+    if (devtools) {
+      devtools.emit('init', Vue)
+    } else if (
+      process.env.NODE_ENV !== 'production' &&
+      inBrowser && /Chrome\/\d+/.test(window.navigator.userAgent)
+    ) {
+      console.log(
+        'Download the Vue Devtools for a better development experience:\n' +
+        'https://github.com/vuejs/vue-devtools'
+      )
+    }
+  }
+}, 0)
 
 export default Vue

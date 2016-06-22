@@ -4,15 +4,14 @@ import type Watcher from './watcher'
 import config from '../config'
 import {
   warn,
-  nextTick
+  nextTick,
+  devtools
 } from '../util/index'
 
-// we have two separate queues: one for directive updates
-// and one for user watcher registered via $watch().
-// we want to guarantee directive updates to be called
-// before user watchers so that when user watchers are
-// triggered, the DOM would have already been in updated
-// state.
+// We have two separate queues: one for internal component re-render updates
+// and one for user watcher registered via $watch(). We want to guarantee
+// re-render updates to be called before user watchers so that when user
+// watchers are triggered, the DOM would already be in updated state.
 
 const queue: Array<Watcher> = []
 const userQueue: Array<Watcher> = []
@@ -43,6 +42,11 @@ function flushSchedulerQueue () {
   // keep flushing until it depletes
   if (queue.length) {
     return flushSchedulerQueue()
+  }
+  // devtool hook
+  /* istanbul ignore if */
+  if (devtools && config.devtools) {
+    devtools.emit('flush')
   }
   resetSchedulerState()
 }
