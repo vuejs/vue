@@ -68,6 +68,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     if (vm._isMounted) {
       callHook(vm, 'beforeUpdate')
     }
+    const prevEl = vm.$el
     if (!vm._vnode) {
       // Vue.prototype.__patch__ is injected in entry points
       // based on the rendering backend used.
@@ -76,6 +77,13 @@ export function lifecycleMixin (Vue: Class<Component>) {
       vm.$el = vm.__patch__(vm._vnode, vnode)
     }
     vm._vnode = vnode
+    // update __vue__ reference
+    if (prevEl) {
+      prevEl.__vue__ = null
+    }
+    if (vm.$el) {
+      vm.$el.__vue__ = vm
+    }
     // update parent vnode element after patch
     const parentNode = vm.$options._parentVnode
     if (parentNode) {
@@ -166,6 +174,8 @@ export function lifecycleMixin (Vue: Class<Component>) {
     callHook(vm, 'destroyed')
     // turn off all instance listeners.
     vm.$off()
+    // remove __vue__ reference
+    vm.$el.__vue__ = null
   }
 }
 

@@ -15,7 +15,7 @@ declare interface Component {
   static filter: (id: string, def?: Function) => Function | void;
 
   // public properties
-  $el: Element | void;
+  $el: any; // so that we can attach __vue__ to it
   $data: Object;
   $options: ComponentOptions;
   $parent: Component | void;
@@ -72,7 +72,7 @@ declare interface Component {
   ) => void;
   // rendering
   _render: () => VNode;
-  __patch__: (a: Element | VNode | void, b: VNode) => Element;
+  __patch__: (a: Element | VNode | void, b: VNode) => any;
   // renderElementWithChildren
   _h: (
     vnode?: VNode,
