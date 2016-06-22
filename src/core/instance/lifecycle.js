@@ -175,7 +175,9 @@ export function lifecycleMixin (Vue: Class<Component>) {
     // turn off all instance listeners.
     vm.$off()
     // remove __vue__ reference
-    vm.$el.__vue__ = null
+    if (vm.$el) {
+      vm.$el.__vue__ = null
+    }
   }
 }
 
