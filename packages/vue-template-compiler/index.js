@@ -1,10 +1,6 @@
 'use strict';
 
-function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
-
 var entities = require('entities');
-var deindent = _interopDefault(require('de-indent'));
-var sourceMap = require('source-map');
 
 /**
  * Convert a value to a string that is actually rendered.
@@ -196,6 +192,11 @@ var config = {
   silent: false,
 
   /**
+   * Whether to enable devtools
+   */
+  devtools: process.env.NODE_ENV !== 'production',
+
+  /**
    * Error handler for watcher errors
    */
   errorHandler: null,
@@ -204,6 +205,11 @@ var config = {
    * Ignore certain custom elements
    */
   ignoredElements: null,
+
+  /**
+   * Custom user key aliases for v-on
+   */
+  keyCodes: Object.create(null),
 
   /**
    * Check if a tag is reserved so that it cannot be registered as a
@@ -325,6 +331,9 @@ var hasProto = '__proto__' in {};
 
 // Browser environment sniffing
 var inBrowser = typeof window !== 'undefined' && Object.prototype.toString.call(window) !== '[object Object]';
+
+// detect devtools
+var devtools = inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__;
 
 // UA sniffing for working around browser-specific quirks
 var UA$1 = inBrowser && window.navigator.userAgent.toLowerCase();
@@ -489,13 +498,21 @@ var Dep = function () {
 }();
 
 Dep.target = null;
+var targetStack = [];
 
-// we have two separate queues: one for directive updates
-// and one for user watcher registered via $watch().
-// we want to guarantee directive updates to be called
-// before user watchers so that when user watchers are
-// triggered, the DOM would have already been in updated
-// state.
+function pushTarget(_target) {
+  if (Dep.target) targetStack.push(Dep.target);
+  Dep.target = _target;
+}
+
+function popTarget() {
+  Dep.target = targetStack.pop();
+}
+
+// We have two separate queues: one for internal component re-render updates
+// and one for user watcher registered via $watch(). We want to guarantee
+// re-render updates to be called before user watchers so that when user
+// watchers are triggered, the DOM would already be in updated state.
 
 var queue = [];
 var userQueue = [];
@@ -526,6 +543,11 @@ function flushSchedulerQueue() {
   // keep flushing until it depletes
   if (queue.length) {
     return flushSchedulerQueue();
+  }
+  // devtool hook
+  /* istanbul ignore if */
+  if (devtools && config.devtools) {
+    devtools.emit('flush');
   }
   resetSchedulerState();
 }
@@ -585,7 +607,6 @@ function queueWatcher(watcher) {
 }
 
 var uid$1 = 0;
-var prevTarget = void 0;
 
 /**
  * A watcher parses an expression, collects dependencies,
@@ -603,6 +624,7 @@ var Watcher = function () {
     this.deep = !!options.deep;
     this.user = !!options.user;
     this.lazy = !!options.lazy;
+    this.sync = !!options.sync;
     this.expression = expOrFn.toString();
     this.cb = cb;
     this.id = ++uid$1; // uid for batching
@@ -631,7 +653,7 @@ var Watcher = function () {
 
 
   Watcher.prototype.get = function get() {
-    this.beforeGet();
+    pushTarget(this);
     var value = void 0;
     try {
       value = this.getter.call(this.vm, this.vm);
@@ -658,18 +680,9 @@ var Watcher = function () {
     if (this.deep) {
       traverse(value);
     }
-    this.afterGet();
+    popTarget();
+    this.cleanupDeps();
     return value;
-  };
-
-  /**
-   * Prepare for dependency collection.
-   */
-
-
-  Watcher.prototype.beforeGet = function beforeGet() {
-    prevTarget = Dep.target;
-    Dep.target = this;
   };
 
   /**
@@ -693,8 +706,7 @@ var Watcher = function () {
    */
 
 
-  Watcher.prototype.afterGet = function afterGet() {
-    Dep.target = prevTarget;
+  Watcher.prototype.cleanupDeps = function cleanupDeps() {
     var i = this.deps.length;
     while (i--) {
       var dep = this.deps[i];
@@ -719,8 +731,11 @@ var Watcher = function () {
 
 
   Watcher.prototype.update = function update() {
+    /* istanbul ignore else */
     if (this.lazy) {
       this.dirty = true;
+    } else if (this.sync) {
+      this.run();
     } else {
       queueWatcher(this);
     }
@@ -755,12 +770,8 @@ var Watcher = function () {
 
 
   Watcher.prototype.evaluate = function evaluate() {
-    // avoid overwriting another watcher that is being
-    // collected.
-    var current = Dep.target;
     this.value = this.get();
     this.dirty = false;
-    Dep.target = current;
   };
 
   /**
@@ -1414,6 +1425,7 @@ function lifecycleMixin(Vue) {
     if (vm._isMounted) {
       callHook(vm, 'beforeUpdate');
     }
+    var prevEl = vm.$el;
     if (!vm._vnode) {
       // Vue.prototype.__patch__ is injected in entry points
       // based on the rendering backend used.
@@ -1422,6 +1434,13 @@ function lifecycleMixin(Vue) {
       vm.$el = vm.__patch__(vm._vnode, vnode);
     }
     vm._vnode = vnode;
+    // update __vue__ reference
+    if (prevEl) {
+      prevEl.__vue__ = null;
+    }
+    if (vm.$el) {
+      vm.$el.__vue__ = vm;
+    }
     // update parent vnode element after patch
     var parentNode = vm.$options._parentVnode;
     if (parentNode) {
@@ -1507,6 +1526,10 @@ function lifecycleMixin(Vue) {
     callHook(vm, 'destroyed');
     // turn off all instance listeners.
     vm.$off();
+    // remove __vue__ reference
+    if (vm.$el) {
+      vm.$el.__vue__ = null;
+    }
   };
 }
 
@@ -1930,6 +1953,11 @@ function renderMixin(Vue) {
         }
       }
     }
+  };
+
+  // expose v-on keyCodes
+  Vue.prototype._k = function (key) {
+    return config.keyCodes[key];
   };
 }
 
@@ -3530,7 +3558,9 @@ function genHandler(handler) {
 }
 
 function genKeyFilter(key) {
-  var code = keyCodes[key];
+  var code = parseInt(key, 10) || // number keyCode
+  keyCodes[key] || // built-in alias
+  '_k(' + JSON.stringify(key) + ')'; // custom alias
   if (Array.isArray(code)) {
     return 'if(' + code.map(function (c) {
       return '$event.keyCode!==' + c;
@@ -3732,7 +3762,7 @@ function genDirectives(el) {
     }
     if (needRuntime) {
       hasRuntime = true;
-      res += '{name:"' + dir.name + '"' + (dir.value ? ',value:(' + dir.value + ')' : '') + (dir.arg ? ',arg:"' + dir.arg + '"' : '') + (dir.modifiers ? ',modifiers:' + JSON.stringify(dir.modifiers) : '') + '},';
+      res += '{name:"' + dir.name + '"' + (dir.value ? ',value:(' + dir.value + '),expression:' + JSON.stringify(dir.value) : '') + (dir.arg ? ',arg:"' + dir.arg + '"' : '') + (dir.modifiers ? ',modifiers:' + JSON.stringify(dir.modifiers) : '') + '},';
     }
   }
   if (hasRuntime) {
@@ -3806,6 +3836,8 @@ function compile$2(template, options) {
 var prohibitedKeywordRE = new RegExp('\\b' + ('do,if,for,let,new,try,var,case,else,with,await,break,catch,class,const,' + 'super,throw,while,yield,delete,export,import,return,switch,default,' + 'extends,finally,continue,debugger,function,arguments').split(',').join('\\b|\\b') + '\\b');
 // check valid identifier for v-for
 var identRE = /[A-Za-z_$][\w$]*/;
+// strip strings in expressions
+var stripStringRE = /'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|`(?:[^`\\]|\\.)*\$\{|\}(?:[^`\\]|\\.)*`|`(?:[^`\\]|\\.)*`/g;
 
 // detect problematic expressions in a template
 function detectErrors(ast) {
@@ -3854,21 +3886,16 @@ function checkIdentifier(ident, type, text, errors) {
 }
 
 function checkExpression(exp, text, errors) {
-  exp = stripToString(exp);
-  var keywordMatch = exp.match(prohibitedKeywordRE);
-  if (keywordMatch) {
-    errors.push('- avoid using JavaScript keyword as property name: ' + ('"' + keywordMatch[0] + '" in expression ' + text));
-  } else {
-    try {
-      new Function('return ' + exp);
-    } catch (e) {
+  try {
+    new Function('return ' + exp);
+  } catch (e) {
+    var keywordMatch = exp.replace(stripStringRE, '').match(prohibitedKeywordRE);
+    if (keywordMatch) {
+      errors.push('- avoid using JavaScript keyword as property name: ' + ('"' + keywordMatch[0] + '" in expression ' + text));
+    } else {
       errors.push('- invalid expression: ' + text);
     }
   }
-}
-
-function stripToString(exp) {
-  return exp.replace(/^_s\((.*)\)$/, '$1');
 }
 
 function transformNode(el, options) {
@@ -4018,7 +4045,7 @@ function genDefaultModel(el, value, modifiers) {
   if (needCompositionGuard) {
     code = 'if($event.target.composing)return;' + code;
   }
-  addProp(el, 'value', '(' + value + ')');
+  addProp(el, 'value', '_s(' + value + ')');
   addHandler(el, event, code);
   if (needCompositionGuard) {
     // need runtime directive code to help with composition events
@@ -4124,8 +4151,55 @@ function makeFunction(code) {
   }
 }
 
+var splitRE$1 = /\r?\n/g;
+var emptyRE = /^\s*$/;
+var needFixRE = /^(\r?\n)*[\t\s]/;
+
+function deindent(str) {
+  if (!needFixRE.test(str)) {
+    return str;
+  }
+  var lines = str.split(splitRE$1);
+  var min = Infinity;
+  var type = void 0,
+      cur = void 0,
+      c = void 0;
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i];
+    if (!emptyRE.test(line)) {
+      if (!type) {
+        c = line.charAt(0);
+        if (c === ' ' || c === '\t') {
+          type = c;
+          cur = count(line, type);
+          if (cur < min) {
+            min = cur;
+          }
+        } else {
+          return str;
+        }
+      } else {
+        cur = count(line, type);
+        if (cur < min) {
+          min = cur;
+        }
+      }
+    }
+  }
+  return lines.map(function (line) {
+    return line.slice(min);
+  }).join('\n');
+}
+
+function count(line, type) {
+  var i = 0;
+  while (line.charAt(i) === type) {
+    i++;
+  }
+  return i;
+}
+
 var splitRE = /\r?\n/g;
-var emptyRE = /^(?:\/\/)?\s*$/;
 var isSpecialTag$1 = makeMap('script,style,template', true);
 
 /**
@@ -4156,7 +4230,9 @@ function parseComponent(content) {
         sfc[tag] = currentBlock;
       }
     }
-    depth++;
+    if (!unary) {
+      depth++;
+    }
   }
 
   function checkAttrs(block, attrs) {
@@ -4184,48 +4260,15 @@ function parseComponent(content) {
         text = padContent(currentBlock) + text;
       }
       currentBlock.content = text;
-      if (options.map && !currentBlock.src) {
-        addSourceMap(currentBlock);
-      }
       currentBlock = null;
     }
     depth--;
   }
 
   function padContent(block) {
+    var offset = content.slice(0, block.start).split(splitRE).length;
     var padChar = block.type === 'script' && !block.lang ? '//\n' : '\n';
-    return Array(getPaddingOffset(block) + 1).join(padChar);
-  }
-
-  function getPaddingOffset(block) {
-    return content.slice(0, block.start).split(splitRE).length - 1;
-  }
-
-  function addSourceMap(block) {
-    var filename = options.map.filename;
-    /* istanbul ignore if */
-    if (!filename) {
-      throw new Error('Should provide original filename in the map option.');
-    }
-    var offset = options.pad ? 0 : getPaddingOffset(block);
-    var map = new sourceMap.SourceMapGenerator();
-    map.setSourceContent(filename, content);
-    block.content.split(splitRE).forEach(function (line, index) {
-      if (!emptyRE.test(line)) {
-        map.addMapping({
-          source: filename,
-          original: {
-            line: index + 1 + offset,
-            column: 0
-          },
-          generated: {
-            line: index + 1,
-            column: 0
-          }
-        });
-      }
-    });
-    block.map = JSON.parse(map.toString());
+    return Array(offset).join(padChar);
   }
 
   parseHTML(content, {

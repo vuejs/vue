@@ -190,6 +190,11 @@ var config = {
   silent: false,
 
   /**
+   * Whether to enable devtools
+   */
+  devtools: process.env.NODE_ENV !== 'production',
+
+  /**
    * Error handler for watcher errors
    */
   errorHandler: null,
@@ -198,6 +203,11 @@ var config = {
    * Ignore certain custom elements
    */
   ignoredElements: null,
+
+  /**
+   * Custom user key aliases for v-on
+   */
+  keyCodes: Object.create(null),
 
   /**
    * Check if a tag is reserved so that it cannot be registered as a
@@ -463,13 +473,21 @@ var Dep = function () {
 }();
 
 Dep.target = null;
+var targetStack = [];
 
-// we have two separate queues: one for directive updates
-// and one for user watcher registered via $watch().
-// we want to guarantee directive updates to be called
-// before user watchers so that when user watchers are
-// triggered, the DOM would have already been in updated
-// state.
+function pushTarget(_target) {
+  if (Dep.target) targetStack.push(Dep.target);
+  Dep.target = _target;
+}
+
+function popTarget() {
+  Dep.target = targetStack.pop();
+}
+
+// We have two separate queues: one for internal component re-render updates
+// and one for user watcher registered via $watch(). We want to guarantee
+// re-render updates to be called before user watchers so that when user
+// watchers are triggered, the DOM would already be in updated state.
 
 var queue = [];
 var userQueue = [];
@@ -500,6 +518,11 @@ function flushSchedulerQueue() {
   // keep flushing until it depletes
   if (queue.length) {
     return flushSchedulerQueue();
+  }
+  // devtool hook
+  /* istanbul ignore if */
+  if (devtools && config.devtools) {
+    devtools.emit('flush');
   }
   resetSchedulerState();
 }
@@ -559,7 +582,6 @@ function queueWatcher(watcher) {
 }
 
 var uid$1 = 0;
-var prevTarget = void 0;
 
 /**
  * A watcher parses an expression, collects dependencies,
@@ -577,6 +599,7 @@ var Watcher = function () {
     this.deep = !!options.deep;
     this.user = !!options.user;
     this.lazy = !!options.lazy;
+    this.sync = !!options.sync;
     this.expression = expOrFn.toString();
     this.cb = cb;
     this.id = ++uid$1; // uid for batching
@@ -605,7 +628,7 @@ var Watcher = function () {
 
 
   Watcher.prototype.get = function get() {
-    this.beforeGet();
+    pushTarget(this);
     var value = void 0;
     try {
       value = this.getter.call(this.vm, this.vm);
@@ -632,18 +655,9 @@ var Watcher = function () {
     if (this.deep) {
       traverse(value);
     }
-    this.afterGet();
+    popTarget();
+    this.cleanupDeps();
     return value;
-  };
-
-  /**
-   * Prepare for dependency collection.
-   */
-
-
-  Watcher.prototype.beforeGet = function beforeGet() {
-    prevTarget = Dep.target;
-    Dep.target = this;
   };
 
   /**
@@ -667,8 +681,7 @@ var Watcher = function () {
    */
 
 
-  Watcher.prototype.afterGet = function afterGet() {
-    Dep.target = prevTarget;
+  Watcher.prototype.cleanupDeps = function cleanupDeps() {
     var i = this.deps.length;
     while (i--) {
       var dep = this.deps[i];
@@ -693,8 +706,11 @@ var Watcher = function () {
 
 
   Watcher.prototype.update = function update() {
+    /* istanbul ignore else */
     if (this.lazy) {
       this.dirty = true;
+    } else if (this.sync) {
+      this.run();
     } else {
       queueWatcher(this);
     }
@@ -729,12 +745,8 @@ var Watcher = function () {
 
 
   Watcher.prototype.evaluate = function evaluate() {
-    // avoid overwriting another watcher that is being
-    // collected.
-    var current = Dep.target;
     this.value = this.get();
     this.dirty = false;
-    Dep.target = current;
   };
 
   /**
@@ -1407,6 +1419,7 @@ function lifecycleMixin(Vue) {
     if (vm._isMounted) {
       callHook(vm, 'beforeUpdate');
     }
+    var prevEl = vm.$el;
     if (!vm._vnode) {
       // Vue.prototype.__patch__ is injected in entry points
       // based on the rendering backend used.
@@ -1415,6 +1428,13 @@ function lifecycleMixin(Vue) {
       vm.$el = vm.__patch__(vm._vnode, vnode);
     }
     vm._vnode = vnode;
+    // update __vue__ reference
+    if (prevEl) {
+      prevEl.__vue__ = null;
+    }
+    if (vm.$el) {
+      vm.$el.__vue__ = vm;
+    }
     // update parent vnode element after patch
     var parentNode = vm.$options._parentVnode;
     if (parentNode) {
@@ -1500,6 +1520,10 @@ function lifecycleMixin(Vue) {
     callHook(vm, 'destroyed');
     // turn off all instance listeners.
     vm.$off();
+    // remove __vue__ reference
+    if (vm.$el) {
+      vm.$el.__vue__ = null;
+    }
   };
 }
 
@@ -1923,6 +1947,11 @@ function renderMixin(Vue) {
         }
       }
     }
+  };
+
+  // expose v-on keyCodes
+  Vue.prototype._k = function (key) {
+    return config.keyCodes[key];
   };
 }
 
@@ -2706,7 +2735,17 @@ var builtInComponents = {
 };
 
 function initGlobalAPI(Vue) {
-  Vue.config = config;
+  // config
+  var configDef = {};
+  configDef.get = function () {
+    return config;
+  };
+  if (process.env.NODE_ENV !== 'production') {
+    configDef.set = function () {
+      warn('Do not replace the Vue.config object, set individual fields instead.');
+    };
+  }
+  Object.defineProperty(Vue, 'config', configDef);
   Vue.util = util;
   Vue.set = set;
   Vue.delete = del;
@@ -2733,7 +2772,7 @@ Object.defineProperty(Vue.prototype, '$isServer', {
   }
 });
 
-Vue.version = '2.0.0-alpha.5';
+Vue.version = '2.0.0-alpha.6';
 
 // attributes that should be using props for binding
 var mustUseProp = makeMap('value,selected,checked,muted');
@@ -4025,6 +4064,8 @@ var modules = platformModules.concat(baseModules);
 
 var patch = createPatchFunction({ nodeOps: nodeOps, modules: modules });
 
+var modelableTagRE = /^input|select|textarea|vue-component-[0-9]+(-[0-9a-zA-Z_\-]*)?$/;
+
 /* istanbul ignore if */
 if (isIE9) {
   // http://www.matts411.com/post/internet-explorer-9-oninput/
@@ -4039,7 +4080,7 @@ if (isIE9) {
 var model = {
   bind: function bind(el, binding, vnode) {
     if (process.env.NODE_ENV !== 'production') {
-      if (!/input|select|textarea/.test(vnode.tag)) {
+      if (!modelableTagRE.test(vnode.tag)) {
         warn('v-model is not supported on element type: <' + vnode.tag + '>. ' + 'If you are working with contenteditable, it\'s recommended to ' + 'wrap a library dedicated for that purpose inside a custom component.', vnode.context);
       }
     }
@@ -4246,5 +4287,17 @@ Vue.prototype.__patch__ = config._isServer ? noop : patch;
 Vue.prototype.$mount = function (el, hydrating) {
   return this._mount(el && query(el), hydrating);
 };
+
+// devtools global hook
+/* istanbul ignore next */
+setTimeout(function () {
+  if (config.devtools) {
+    if (devtools) {
+      devtools.emit('init', Vue);
+    } else if (process.env.NODE_ENV !== 'production' && inBrowser && /Chrome\/\d+/.test(window.navigator.userAgent)) {
+      console.log('Download the Vue Devtools for a better development experience:\n' + 'https://github.com/vuejs/vue-devtools');
+    }
+  }
+}, 0);
 
 module.exports = Vue;

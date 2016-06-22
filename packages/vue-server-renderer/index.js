@@ -351,6 +351,9 @@ var hasProto = '__proto__' in {};
 // Browser environment sniffing
 var inBrowser = typeof window !== 'undefined' && Object.prototype.toString.call(window) !== '[object Object]';
 
+// detect devtools
+var devtools = inBrowser && window.__VUE_DEVTOOLS_GLOBAL_HOOK__;
+
 // UA sniffing for working around browser-specific quirks
 var UA = inBrowser && window.navigator.userAgent.toLowerCase();
 var isIos = UA && /(iphone|ipad|ipod|ios)/i.test(UA);
@@ -456,6 +459,11 @@ var config = {
   silent: false,
 
   /**
+   * Whether to enable devtools
+   */
+  devtools: process.env.NODE_ENV !== 'production',
+
+  /**
    * Error handler for watcher errors
    */
   errorHandler: null,
@@ -464,6 +472,11 @@ var config = {
    * Ignore certain custom elements
    */
   ignoredElements: null,
+
+  /**
+   * Custom user key aliases for v-on
+   */
+  keyCodes: Object.create(null),
 
   /**
    * Check if a tag is reserved so that it cannot be registered as a
@@ -573,6 +586,16 @@ var Dep = function () {
 }();
 
 Dep.target = null;
+var targetStack = [];
+
+function pushTarget(_target) {
+  if (Dep.target) targetStack.push(Dep.target);
+  Dep.target = _target;
+}
+
+function popTarget() {
+  Dep.target = targetStack.pop();
+}
 
 var arrayProto = Array.prototype;
 var arrayMethods = Object.create(arrayProto)
@@ -1229,12 +1252,10 @@ if (process.env.NODE_ENV !== 'production') {
   })();
 }
 
-// we have two separate queues: one for directive updates
-// and one for user watcher registered via $watch().
-// we want to guarantee directive updates to be called
-// before user watchers so that when user watchers are
-// triggered, the DOM would have already been in updated
-// state.
+// We have two separate queues: one for internal component re-render updates
+// and one for user watcher registered via $watch(). We want to guarantee
+// re-render updates to be called before user watchers so that when user
+// watchers are triggered, the DOM would already be in updated state.
 
 var queue = [];
 var userQueue = [];
@@ -1265,6 +1286,11 @@ function flushSchedulerQueue() {
   // keep flushing until it depletes
   if (queue.length) {
     return flushSchedulerQueue();
+  }
+  // devtool hook
+  /* istanbul ignore if */
+  if (devtools && config.devtools) {
+    devtools.emit('flush');
   }
   resetSchedulerState();
 }
@@ -1324,7 +1350,6 @@ function queueWatcher(watcher) {
 }
 
 var uid$2 = 0;
-var prevTarget = void 0;
 
 /**
  * A watcher parses an expression, collects dependencies,
@@ -1342,6 +1367,7 @@ var Watcher = function () {
     this.deep = !!options.deep;
     this.user = !!options.user;
     this.lazy = !!options.lazy;
+    this.sync = !!options.sync;
     this.expression = expOrFn.toString();
     this.cb = cb;
     this.id = ++uid$2; // uid for batching
@@ -1370,7 +1396,7 @@ var Watcher = function () {
 
 
   Watcher.prototype.get = function get() {
-    this.beforeGet();
+    pushTarget(this);
     var value = void 0;
     try {
       value = this.getter.call(this.vm, this.vm);
@@ -1397,18 +1423,9 @@ var Watcher = function () {
     if (this.deep) {
       traverse(value);
     }
-    this.afterGet();
+    popTarget();
+    this.cleanupDeps();
     return value;
-  };
-
-  /**
-   * Prepare for dependency collection.
-   */
-
-
-  Watcher.prototype.beforeGet = function beforeGet() {
-    prevTarget = Dep.target;
-    Dep.target = this;
   };
 
   /**
@@ -1432,8 +1449,7 @@ var Watcher = function () {
    */
 
 
-  Watcher.prototype.afterGet = function afterGet() {
-    Dep.target = prevTarget;
+  Watcher.prototype.cleanupDeps = function cleanupDeps() {
     var i = this.deps.length;
     while (i--) {
       var dep = this.deps[i];
@@ -1458,8 +1474,11 @@ var Watcher = function () {
 
 
   Watcher.prototype.update = function update() {
+    /* istanbul ignore else */
     if (this.lazy) {
       this.dirty = true;
+    } else if (this.sync) {
+      this.run();
     } else {
       queueWatcher(this);
     }
@@ -1494,12 +1513,8 @@ var Watcher = function () {
 
 
   Watcher.prototype.evaluate = function evaluate() {
-    // avoid overwriting another watcher that is being
-    // collected.
-    var current = Dep.target;
     this.value = this.get();
     this.dirty = false;
-    Dep.target = current;
   };
 
   /**
@@ -2064,6 +2079,11 @@ function renderMixin(Vue) {
       }
     }
   };
+
+  // expose v-on keyCodes
+  Vue.prototype._k = function (key) {
+    return config.keyCodes[key];
+  };
 }
 
 function resolveSlots(vm, renderChildren) {
@@ -2219,6 +2239,7 @@ function lifecycleMixin(Vue) {
     if (vm._isMounted) {
       callHook(vm, 'beforeUpdate');
     }
+    var prevEl = vm.$el;
     if (!vm._vnode) {
       // Vue.prototype.__patch__ is injected in entry points
       // based on the rendering backend used.
@@ -2227,6 +2248,13 @@ function lifecycleMixin(Vue) {
       vm.$el = vm.__patch__(vm._vnode, vnode);
     }
     vm._vnode = vnode;
+    // update __vue__ reference
+    if (prevEl) {
+      prevEl.__vue__ = null;
+    }
+    if (vm.$el) {
+      vm.$el.__vue__ = vm;
+    }
     // update parent vnode element after patch
     var parentNode = vm.$options._parentVnode;
     if (parentNode) {
@@ -2312,6 +2340,10 @@ function lifecycleMixin(Vue) {
     callHook(vm, 'destroyed');
     // turn off all instance listeners.
     vm.$off();
+    // remove __vue__ reference
+    if (vm.$el) {
+      vm.$el.__vue__ = null;
+    }
   };
 }
 

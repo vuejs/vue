@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.0.0-alpha.5
+ * Vue.js v2.0.0-alpha.6
  * (c) 2014-2016 Evan You
  * Released under the MIT License.
  */
@@ -199,6 +199,11 @@
     silent: false,
 
     /**
+     * Whether to enable devtools
+     */
+    devtools: "development" !== 'production',
+
+    /**
      * Error handler for watcher errors
      */
     errorHandler: null,
@@ -207,6 +212,11 @@
      * Ignore certain custom elements
      */
     ignoredElements: null,
+
+    /**
+     * Custom user key aliases for v-on
+     */
+    keyCodes: Object.create(null),
 
     /**
      * Check if a tag is reserved so that it cannot be registered as a
@@ -472,13 +482,21 @@
   }();
 
   Dep.target = null;
+  var targetStack = [];
 
-  // we have two separate queues: one for directive updates
-  // and one for user watcher registered via $watch().
-  // we want to guarantee directive updates to be called
-  // before user watchers so that when user watchers are
-  // triggered, the DOM would have already been in updated
-  // state.
+  function pushTarget(_target) {
+    if (Dep.target) targetStack.push(Dep.target);
+    Dep.target = _target;
+  }
+
+  function popTarget() {
+    Dep.target = targetStack.pop();
+  }
+
+  // We have two separate queues: one for internal component re-render updates
+  // and one for user watcher registered via $watch(). We want to guarantee
+  // re-render updates to be called before user watchers so that when user
+  // watchers are triggered, the DOM would already be in updated state.
 
   var queue = [];
   var userQueue = [];
@@ -509,6 +527,11 @@
     // keep flushing until it depletes
     if (queue.length) {
       return flushSchedulerQueue();
+    }
+    // devtool hook
+    /* istanbul ignore if */
+    if (devtools && config.devtools) {
+      devtools.emit('flush');
     }
     resetSchedulerState();
   }
@@ -568,7 +591,6 @@
   }
 
   var uid$1 = 0;
-  var prevTarget = void 0;
 
   /**
    * A watcher parses an expression, collects dependencies,
@@ -586,6 +608,7 @@
       this.deep = !!options.deep;
       this.user = !!options.user;
       this.lazy = !!options.lazy;
+      this.sync = !!options.sync;
       this.expression = expOrFn.toString();
       this.cb = cb;
       this.id = ++uid$1; // uid for batching
@@ -614,7 +637,7 @@
 
 
     Watcher.prototype.get = function get() {
-      this.beforeGet();
+      pushTarget(this);
       var value = void 0;
       try {
         value = this.getter.call(this.vm, this.vm);
@@ -641,18 +664,9 @@
       if (this.deep) {
         traverse(value);
       }
-      this.afterGet();
+      popTarget();
+      this.cleanupDeps();
       return value;
-    };
-
-    /**
-     * Prepare for dependency collection.
-     */
-
-
-    Watcher.prototype.beforeGet = function beforeGet() {
-      prevTarget = Dep.target;
-      Dep.target = this;
     };
 
     /**
@@ -676,8 +690,7 @@
      */
 
 
-    Watcher.prototype.afterGet = function afterGet() {
-      Dep.target = prevTarget;
+    Watcher.prototype.cleanupDeps = function cleanupDeps() {
       var i = this.deps.length;
       while (i--) {
         var dep = this.deps[i];
@@ -702,8 +715,11 @@
 
 
     Watcher.prototype.update = function update() {
+      /* istanbul ignore else */
       if (this.lazy) {
         this.dirty = true;
+      } else if (this.sync) {
+        this.run();
       } else {
         queueWatcher(this);
       }
@@ -738,12 +754,8 @@
 
 
     Watcher.prototype.evaluate = function evaluate() {
-      // avoid overwriting another watcher that is being
-      // collected.
-      var current = Dep.target;
       this.value = this.get();
       this.dirty = false;
-      Dep.target = current;
     };
 
     /**
@@ -1414,6 +1426,7 @@
       if (vm._isMounted) {
         callHook(vm, 'beforeUpdate');
       }
+      var prevEl = vm.$el;
       if (!vm._vnode) {
         // Vue.prototype.__patch__ is injected in entry points
         // based on the rendering backend used.
@@ -1422,6 +1435,13 @@
         vm.$el = vm.__patch__(vm._vnode, vnode);
       }
       vm._vnode = vnode;
+      // update __vue__ reference
+      if (prevEl) {
+        prevEl.__vue__ = null;
+      }
+      if (vm.$el) {
+        vm.$el.__vue__ = vm;
+      }
       // update parent vnode element after patch
       var parentNode = vm.$options._parentVnode;
       if (parentNode) {
@@ -1507,6 +1527,10 @@
       callHook(vm, 'destroyed');
       // turn off all instance listeners.
       vm.$off();
+      // remove __vue__ reference
+      if (vm.$el) {
+        vm.$el.__vue__ = null;
+      }
     };
   }
 
@@ -1930,6 +1954,11 @@
           }
         }
       }
+    };
+
+    // expose v-on keyCodes
+    Vue.prototype._k = function (key) {
+      return config.keyCodes[key];
     };
   }
 
@@ -2711,7 +2740,17 @@
   };
 
   function initGlobalAPI(Vue) {
-    Vue.config = config;
+    // config
+    var configDef = {};
+    configDef.get = function () {
+      return config;
+    };
+    if ("development" !== 'production') {
+      configDef.set = function () {
+        warn('Do not replace the Vue.config object, set individual fields instead.');
+      };
+    }
+    Object.defineProperty(Vue, 'config', configDef);
     Vue.util = util;
     Vue.set = set;
     Vue.delete = del;
@@ -2738,7 +2777,7 @@
     }
   });
 
-  Vue.version = '2.0.0-alpha.5';
+  Vue.version = '2.0.0-alpha.6';
 
   // attributes that should be using props for binding
   var mustUseProp = makeMap('value,selected,checked,muted');
@@ -4041,6 +4080,8 @@ var nodeOps = Object.freeze({
 
   var patch = createPatchFunction({ nodeOps: nodeOps, modules: modules });
 
+  var modelableTagRE = /^input|select|textarea|vue-component-[0-9]+(-[0-9a-zA-Z_\-]*)?$/;
+
   /* istanbul ignore if */
   if (isIE9) {
     // http://www.matts411.com/post/internet-explorer-9-oninput/
@@ -4055,7 +4096,7 @@ var nodeOps = Object.freeze({
   var model = {
     bind: function bind(el, binding, vnode) {
       if ("development" !== 'production') {
-        if (!/input|select|textarea/.test(vnode.tag)) {
+        if (!modelableTagRE.test(vnode.tag)) {
           warn('v-model is not supported on element type: <' + vnode.tag + '>. ' + 'If you are working with contenteditable, it\'s recommended to ' + 'wrap a library dedicated for that purpose inside a custom component.', vnode.context);
         }
       }
@@ -4262,6 +4303,18 @@ var nodeOps = Object.freeze({
   Vue.prototype.$mount = function (el, hydrating) {
     return this._mount(el && query(el), hydrating);
   };
+
+  // devtools global hook
+  /* istanbul ignore next */
+  setTimeout(function () {
+    if (config.devtools) {
+      if (devtools) {
+        devtools.emit('init', Vue);
+      } else if ("development" !== 'production' && inBrowser && /Chrome\/\d+/.test(window.navigator.userAgent)) {
+        console.log('Download the Vue Devtools for a better development experience:\n' + 'https://github.com/vuejs/vue-devtools');
+      }
+    }
+  }, 0);
 
   var decoder = document.createElement('div');
 
@@ -5269,7 +5322,9 @@ var nodeOps = Object.freeze({
   }
 
   function genKeyFilter(key) {
-    var code = keyCodes[key];
+    var code = parseInt(key, 10) || // number keyCode
+    keyCodes[key] || // built-in alias
+    '_k(' + JSON.stringify(key) + ')'; // custom alias
     if (Array.isArray(code)) {
       return 'if(' + code.map(function (c) {
         return '$event.keyCode!==' + c;
@@ -5471,7 +5526,7 @@ var nodeOps = Object.freeze({
       }
       if (needRuntime) {
         hasRuntime = true;
-        res += '{name:"' + dir.name + '"' + (dir.value ? ',value:(' + dir.value + ')' : '') + (dir.arg ? ',arg:"' + dir.arg + '"' : '') + (dir.modifiers ? ',modifiers:' + JSON.stringify(dir.modifiers) : '') + '},';
+        res += '{name:"' + dir.name + '"' + (dir.value ? ',value:(' + dir.value + '),expression:' + JSON.stringify(dir.value) : '') + (dir.arg ? ',arg:"' + dir.arg + '"' : '') + (dir.modifiers ? ',modifiers:' + JSON.stringify(dir.modifiers) : '') + '},';
       }
     }
     if (hasRuntime) {
@@ -5545,6 +5600,8 @@ var nodeOps = Object.freeze({
   var prohibitedKeywordRE = new RegExp('\\b' + ('do,if,for,let,new,try,var,case,else,with,await,break,catch,class,const,' + 'super,throw,while,yield,delete,export,import,return,switch,default,' + 'extends,finally,continue,debugger,function,arguments').split(',').join('\\b|\\b') + '\\b');
   // check valid identifier for v-for
   var identRE = /[A-Za-z_$][\w$]*/;
+  // strip strings in expressions
+  var stripStringRE = /'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|`(?:[^`\\]|\\.)*\$\{|\}(?:[^`\\]|\\.)*`|`(?:[^`\\]|\\.)*`/g;
 
   // detect problematic expressions in a template
   function detectErrors(ast) {
@@ -5593,21 +5650,16 @@ var nodeOps = Object.freeze({
   }
 
   function checkExpression(exp, text, errors) {
-    exp = stripToString(exp);
-    var keywordMatch = exp.match(prohibitedKeywordRE);
-    if (keywordMatch) {
-      errors.push('- avoid using JavaScript keyword as property name: ' + ('"' + keywordMatch[0] + '" in expression ' + text));
-    } else {
-      try {
-        new Function('return ' + exp);
-      } catch (e) {
+    try {
+      new Function('return ' + exp);
+    } catch (e) {
+      var keywordMatch = exp.replace(stripStringRE, '').match(prohibitedKeywordRE);
+      if (keywordMatch) {
+        errors.push('- avoid using JavaScript keyword as property name: ' + ('"' + keywordMatch[0] + '" in expression ' + text));
+      } else {
         errors.push('- invalid expression: ' + text);
       }
     }
-  }
-
-  function stripToString(exp) {
-    return exp.replace(/^_s\((.*)\)$/, '$1');
   }
 
   function transformNode(el, options) {
@@ -5757,7 +5809,7 @@ var nodeOps = Object.freeze({
     if (needCompositionGuard) {
       code = 'if($event.target.composing)return;' + code;
     }
-    addProp(el, 'value', '(' + value + ')');
+    addProp(el, 'value', '_s(' + value + ')');
     addHandler(el, event, code);
     if (needCompositionGuard) {
       // need runtime directive code to help with composition events
