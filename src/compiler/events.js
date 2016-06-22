@@ -56,7 +56,7 @@ function genKeyFilter (key: string): string {
   const code =
     parseInt(key, 10) || // number keyCode
     keyCodes[key] || // built-in alias
-    `_keyCode(${JSON.stringify(key)})` // custom alias
+    `_k(${JSON.stringify(key)})` // custom alias
   if (Array.isArray(code)) {
     return `if(${code.map(c => `$event.keyCode!==${c}`).join('&&')})return;`
   } else {

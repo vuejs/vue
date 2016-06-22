@@ -231,7 +231,7 @@ describe('codegen', () => {
     // custom keycode
     assertCodegen(
       '<input @input.custom="onInput">',
-      `with(this){return _h(_e('input',{on:{"input":function($event){if($event.keyCode!==_keyCode("custom"))return;onInput($event)}}}))}`
+      `with(this){return _h(_e('input',{on:{"input":function($event){if($event.keyCode!==_k("custom"))return;onInput($event)}}}))}`
     )
   })
 

@@ -154,7 +154,7 @@ export function renderMixin (Vue: Class<Component>) {
   }
 
   // expose v-on keyCodes
-  Vue.prototype._keyCode = key => config.keyCodes[key]
+  Vue.prototype._k = key => config.keyCodes[key]
 }
 
 function resolveSlots (
