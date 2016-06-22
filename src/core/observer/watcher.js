@@ -12,7 +12,7 @@ import {
 } from '../util/index'
 
 let uid = 0
-let prevTarget
+const targetStack = []
 
 /**
  * A watcher parses an expression, collects dependencies,
@@ -83,7 +83,7 @@ export default class Watcher {
    * Evaluate the getter, and re-collect dependencies.
    */
   get () {
-    this.beforeGet()
+    this.pushTarget()
     let value: any
     try {
       value = this.getter.call(this.vm, this.vm)
@@ -116,16 +116,24 @@ export default class Watcher {
     if (this.deep) {
       traverse(value)
     }
-    this.afterGet()
+    this.popTarget()
+    this.cleanupDeps()
     return value
   }
 
   /**
-   * Prepare for dependency collection.
+   * Set this watcher as the active dep target
    */
-  beforeGet () {
-    prevTarget = Dep.target
+  pushTarget () {
+    if (Dep.target) targetStack.push(Dep.target)
     Dep.target = this
+  }
+
+  /**
+   * Restore previous dep target
+   */
+  popTarget () {
+    Dep.target = targetStack.pop()
   }
 
   /**
@@ -145,8 +153,7 @@ export default class Watcher {
   /**
    * Clean up for dependency collection.
    */
-  afterGet () {
-    Dep.target = prevTarget
+  cleanupDeps () {
     let i = this.deps.length
     while (i--) {
       const dep = this.deps[i]
@@ -207,12 +214,8 @@ export default class Watcher {
    * This only gets called for lazy watchers.
    */
   evaluate () {
-    // avoid overwriting another watcher that is being
-    // collected.
-    const current = Dep.target
     this.value = this.get()
     this.dirty = false
-    Dep.target = current
   }
 
   /**
