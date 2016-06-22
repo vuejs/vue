@@ -57,7 +57,6 @@ declare interface Component {
   _isBeingDestroyed: boolean;
   _vnode: ?VNode;
   _staticTrees: ?Array<VNode>;
-  _keyCode: (key: string) => ?number;
 
   // private methods
   // lifecycle
@@ -104,6 +103,8 @@ declare interface Component {
   ) => ?Array<VNode>;
   // apply v-bind object
   _b: (vnode: VNodeWithData, value: any) => void;
+  // retrive custom keyCode
+  _k: (key: string) => ?number;
 
   // allow dynamic method registration
   [key: string]: any
