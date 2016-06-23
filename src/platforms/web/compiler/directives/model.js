@@ -101,7 +101,7 @@ function genDefaultModel (
 
   const valueExpression = `$event.target.value${trim ? '.trim()' : ''}`
   let code = number || type === 'number'
-    ? `${value}=Number(${valueExpression})`
+    ? `${value}=_n(${valueExpression})`
     : `${value}=${valueExpression}`
   if (needCompositionGuard) {
     code = `if($event.target.composing)return;${code}`

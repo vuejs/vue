@@ -94,6 +94,8 @@ declare interface Component {
   ) => Object | void;
   // toString
   _s: (value: any) => string;
+  // toNumber
+  _n: (value: string) => number | string;
   // resolveFilter
   _f: (id: string) => Function;
   // renderList

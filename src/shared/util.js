@@ -12,6 +12,15 @@ export function renderString (val: any): string {
 }
 
 /**
+ * Convert a input value to a number for persistence.
+ * If the conversion fails, return original string.
+ */
+export function toNumber (val: string): number | string {
+  const n = parseFloat(val, 10)
+  return (n || n === 0) ? n : val
+}
+
+/**
  * Make a map and return a function for checking if a key
  * is in that map.
  */

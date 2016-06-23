@@ -5,7 +5,7 @@ import VNode, { emptyVNode } from '../vdom/vnode'
 import { normalizeChildren } from '../vdom/helpers'
 import {
   warn, bind, isObject, toObject,
-  nextTick, resolveAsset, renderString
+  nextTick, resolveAsset, renderString, toNumber
 } from '../util/index'
 
 import {
@@ -96,6 +96,8 @@ export function renderMixin (Vue: Class<Component>) {
 
   // toString for mustaches
   Vue.prototype._s = renderString
+  // number conversion
+  Vue.prototype._n = toNumber
 
   // filter resolution helper
   const identity = _ => _
