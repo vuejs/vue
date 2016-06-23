@@ -188,7 +188,24 @@ export default class Watcher {
         // set new value
         const oldValue = this.value
         this.value = value
-        this.cb.call(this.vm, value, oldValue)
+        if (this.user) {
+          try {
+            this.cb.call(this.vm, value, oldValue)
+          } catch (e) {
+            process.env.NODE_ENV !== 'production' && warn(
+              `Error in watcher "${this.expression}"`,
+              this.vm
+            )
+            /* istanbul ignore else */
+            if (config.errorHandler) {
+              config.errorHandler.call(null, e, this.vm)
+            } else {
+              throw e
+            }
+          }
+        } else {
+          this.cb.call(this.vm, value, oldValue)
+        }
       }
     }
   }
