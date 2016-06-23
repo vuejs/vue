@@ -94,13 +94,11 @@ export function enter (vnode: VNodeWithData) {
   beforeEnterHook && beforeEnterHook(el)
   if (expectsCSS) {
     addTransitionClass(el, startClass)
+    addTransitionClass(el, activeClass)
     nextFrame(() => {
       removeTransitionClass(el, startClass)
-      if (!cb.cancelled) {
-        addTransitionClass(el, activeClass)
-        if (!userWantsControl) {
-          whenTransitionEnds(el, cb)
-        }
+      if (!cb.cancelled && !userWantsControl) {
+        whenTransitionEnds(el, cb)
       }
     })
   }
@@ -161,13 +159,11 @@ export function leave (vnode: VNodeWithData, rm: Function) {
     beforeLeave && beforeLeave(el)
     if (expectsCSS) {
       addTransitionClass(el, leaveClass)
+      addTransitionClass(el, leaveActiveClass)
       nextFrame(() => {
         removeTransitionClass(el, leaveClass)
-        if (!cb.cancelled) {
-          addTransitionClass(el, leaveActiveClass)
-          if (!userWantsControl) {
-            whenTransitionEnds(el, cb)
-          }
+        if (!cb.cancelled && !userWantsControl) {
+          whenTransitionEnds(el, cb)
         }
       })
     }
