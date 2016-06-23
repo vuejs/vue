@@ -236,7 +236,7 @@ if (!isIE9) {
             :key="view"
             class="test"
             transition="test"
-            transition-mode="in-out">{{view}}</component>
+            transition-mode="in-out">{{view}}</div>
         </div>`,
         data: { view: 'one' },
         components,
