@@ -105,7 +105,7 @@ function linkAndCapture (linker, vm) {
   var originalDirCount = vm._directives.length
   linker()
   var dirs = vm._directives.slice(originalDirCount)
-  dirs.sort(directiveComparator)
+  sortDirectives(dirs)
   for (var i = 0, l = dirs.length; i < l; i++) {
     dirs[i]._bind()
   }
@@ -113,16 +113,32 @@ function linkAndCapture (linker, vm) {
 }
 
 /**
- * Directive priority sort comparator
+ * sort directives by priority (stable sort)
  *
- * @param {Object} a
- * @param {Object} b
+ * @param {Array} dirs
  */
+function sortDirectives (dirs) {
+  if (dirs.length === 0) return
 
-function directiveComparator (a, b) {
-  a = a.descriptor.def.priority || DEFAULT_PRIORITY
-  b = b.descriptor.def.priority || DEFAULT_PRIORITY
-  return a > b ? -1 : a === b ? 0 : 1
+  var groupedMap = {}
+  for (var i = 0, j = dirs.length; i < j; i++) {
+    var dir = dirs[i]
+    var priority = dir.descriptor.def.priority || DEFAULT_PRIORITY
+    var array = groupedMap[priority]
+    if (!array) {
+      array = groupedMap[priority] = []
+    }
+    array.push(dir)
+  }
+
+  var index = 0
+  Object.keys(groupedMap).sort(function (a, b) {
+    return a > b ? -1 : a === b ? 0 : 1
+  }).forEach(function (priority) {
+    groupedMap[priority].forEach(function (item) {
+      dirs[index++] = item
+    })
+  })
 }
 
 /**
