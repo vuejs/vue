@@ -9,6 +9,9 @@ export function initMixin (Vue: GlobalAPI) {
     // update constructors that are already created
     config._ctors.forEach(Ctor => {
       Ctor.options = mergeOptions(Ctor['super'].options, Ctor.extendOptions)
+      if (Ctor.options.name) {
+        Ctor.options.components[Ctor.options.name] = Ctor
+      }
     })
   }
 }
