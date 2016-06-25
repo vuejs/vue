@@ -8,6 +8,9 @@ declare interface Component {
   static options: Object;
   // extend
   static extend: (options: Object) => Function;
+  static superOptions: Object;
+  static extendOptions: Object;
+  static super: Class<Component>;
   // assets
   static directive: (id: string, def?: Function | Object) => Function | Object | void;
   static component: (id: string, def?: Class<Component> | Object) => Class<Component>;

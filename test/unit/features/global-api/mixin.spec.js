@@ -35,11 +35,4 @@ describe('Global API: mixin', () => {
     })
     expect(calls).toEqual(['hello global', 'hello local'])
   })
-
-  it('should allow releasing constructors', () => {
-    const Test = Vue.extend({})
-    expect(Vue.config._ctors.indexOf(Test) > -1).toBe(true)
-    Test.release()
-    expect(Vue.config._ctors.indexOf(Test) > -1).toBe(false)
-  })
 })

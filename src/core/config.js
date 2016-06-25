@@ -18,8 +18,7 @@ export type Config = {
   _assetTypes: Array<string>,
   _lifecycleHooks: Array<string>,
   _maxUpdateCount: number,
-  _isServer: boolean,
-  _ctors: Array<Function>
+  _isServer: boolean
 }
 
 const config: Config = {
@@ -105,14 +104,7 @@ const config: Config = {
   /**
    * Server rendering?
    */
-  _isServer: process.env.VUE_ENV === 'server',
-
-  /**
-   * Keeping track of all extended Component constructors
-   * so that we can update them in the case of global mixins being applied
-   * after their creation.
-   */
-  _ctors: []
+  _isServer: process.env.VUE_ENV === 'server'
 }
 
 export default config
